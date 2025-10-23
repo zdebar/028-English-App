@@ -1,73 +1,94 @@
-# React + TypeScript + Vite
+# Zdeněk Barth's English Learning App v0.9.0
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Description
 
-Currently, two official plugins are available:
+A personal English learning app designed with simplicity similar to ANKI, but with a prebuilt English learning data. This project is clean continuation of project 020-flash-card-app-typescript.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+I believe many features in existing English learning apps can hinder progress. When learners are presented with options, they often choose what feels easiest, like games or reading. However, the most critical aspects of learning any language are **listening** and **speaking**. This app focuses exclusively on fast listening and speaking drill via flashcards.
 
-## React Compiler
+### Goals of the App:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. **Maximize Practice Density**  
+   Drill as many practice attempts as possible within a given time. This is best achieved with flashcards and a continuous sequence of items without interruptions.
 
-## Expanding the ESLint configuration
+2. **Alternating Practice in Both Directions**  
+   Listening and speaking are the most important parts of language learning. Flashcards alternate between two directions:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+   - Listening to English and translating to Czech.
+   - Reading Czech and translating to English.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+3. **Spaced Repetition System (SRS)**  
+   With dense practice repetition, each item is repeated at least five times on the first day.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+4. **User Feedback**
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+   - **Daily Practice Count:** Encourages users to start practicing. The recommended minimum is 400 items or approximately 20 minutes.
+   - **Progression Levels:** Items are organized into levels of 100 items to provide granular progress feedback.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+5. **Flexible Practice Duration**  
+   While there is a recommended minimum, the practice sequence is continuous. Users can practice for as long as they want, even for 10 hours straight.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+6. **Contextual Learning**  
+   Vocabulary is first learned independently and then reinforced in sentence contexts.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
+
+## App Structure
+
+### Frontend
+
+Vite + React + Tailwind CSS
+WASM SQLite database
+Audio files in IndexedDB
+
+### Synchronization
+
+Supabase / Authentication, Storage for Audio Files, PostgresSQL for user data
+
+## Database
+
+### Database Structure
+
+The app uses an SQLite database to store user progress, vocabulary, and grammar data. Below is a high-level overview of the database structure:
+
+- **users**: Stores user information.
+- **items**: Stores practice items (vocabulary and grammar sentences).
+- **blocks**: Groups items into vocabulary or grammar group. Recommended size is 10 items.
+- **grammar**: Stores grammar explanations.
+- **user_items**: Tracks user progress for individual items.
+- **user_score**: Tracks daily practice scores for users.
+
+For detailed table definitions and column explanations, see the `database-sqlite.sql` file.
+
+### Data Structure
+
+Each item represents a single vocabulary word or a sentence for practicing grammar. Items are sequenced starting from 1, with 1 being the learning start point.
+
+---
+
+## Git Guidelines
+
+### Branching Strategies
+
+- **master**: Deployment branch  
+  ├── **0.1.0**: Development branch
+
+### Commit Message Standard
+
+Format: `<type>: <description>`
+
+#### Commit Types:
+
+- **feat**: New feature
+- **fix**: Bug fix
+- **docs**: Documentation updates
+- **style**: UI or design changes
+- **refactor**: Code refactoring
+- **chore**: Dependency or installation updates
+- **test**: Adding or updating tests
+- **perf**: Performance optimizations
+- **ios**: iOS-specific changes
+- **android**: Android-specific changes
+
+package.json
+react-native-get-random-values // necessary for uuid on android
