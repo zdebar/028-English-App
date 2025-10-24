@@ -1,44 +1,105 @@
+@import url("https://fonts.googleapis.com/css2?family=Mansalva:wght@400;700&display=swap");
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+@theme {
+  --font-body: sans-serif;
+  --font-headings: "Mansalva", sans-serif;
+  --color-dark: white;
+  --color-light: black;
+  --color-notice-light: black;
+  --color-notice-dark: #87d5e8;
+  --color-button-normal: #1c6676;
+  --color-button-hover: #2e9ab0;
+  --color-background-dark: #111827;
+  --color-background-light: #f7b740;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+@layer base {
+  html {
+    font-size: 15px;
+    @apply font-body;
   }
-  to {
-    transform: rotate(360deg);
+
+  button,
+  link {
+    @apply active:shadow-none;
+  }
+
+  button {
+    @apply flex items-center justify-center;
+  }
+
+  h2,
+  p,
+  label,
+  option,
+  select {
+    @apply text-light dark:text-dark;
+  }
+
+  h1 {
+    @apply font-headings pb-8 text-3xl font-bold text-light dark:text-dark;
+  }
+
+  select,
+  input {
+    @apply focus:outline-none active:outline-none;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+@layer utilities {
+  /* BACKGROUND COLORS */
+  .color-background {
+    @apply bg-background-light text-light dark:bg-background-dark dark:text-dark;
+  }
+
+  .color-button {
+    @apply bg-button-normal text-light shadow-[2px_2px_2px_rgba(0,0,0,0.35)] hover:bg-button-hover active:shadow-none;
+  }
+
+  .color-disabled {
+    @apply bg-white text-light shadow-none;
+    @apply dark:bg-gray-800 dark:text-dark dark:hover:bg-gray-800;
+  }
+
+  .color-selected {
+    @apply bg-white text-light shadow-none;
+  }
+
+  .color-header {
+    @apply text-light hover:bg-white disabled:text-gray-600 dark:text-dark dark:hover:text-black;
+  }
+
+  /* TEXT STYLES */
+  .text-notice {
+    @apply font-headings text-center text-notice-light dark:text-notice-dark;
+  }
+
+  /** DIMENSIONS **/
+  .centered {
+    @apply flex items-center justify-center;
   }
 }
 
-.card {
-  padding: 2em;
+@layer components {
+  .avatar {
+    @apply h-11 w-11 rounded-full;
+  }
+
+  /** BUTTON STYLES **/
+  .button-rectangular {
+    @apply h-13 w-full font-body font-bold tracking-wide;
+  }
+
+  .button-header {
+    @apply h-13 w-13 rounded-full;
+  }
 }
 
-.read-the-docs {
-  color: #888;
+@media (max-height: 460px) and (max-width: 640px) {
+  .sideheader {
+    flex-direction: column;
+    height: 150px;
+  }
 }
