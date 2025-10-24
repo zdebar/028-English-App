@@ -1,9 +1,10 @@
 import { Route, Routes, useLocation } from "react-router-dom";
 import { useThemeStore } from "./hooks/use-theme";
 import { useEffect } from "react";
-import Footer from "./components/Footer";
-import Header from "./components/Header";
+import Footer from "./components/footer";
+import Header from "./components/header";
 import "./App.css";
+import Profile from "./pages/profile";
 
 export default function App() {
   const { theme, chooseTheme } = useThemeStore();
@@ -35,6 +36,7 @@ export default function App() {
                 </div>
               }
             />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
         </div>
         {showFooterRoutes.includes(location.pathname) && <Footer />}

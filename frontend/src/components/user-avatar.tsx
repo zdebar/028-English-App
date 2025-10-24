@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useUserStore } from "../hooks/use-user";
-import { UserIcon } from "./Icons";
+import { UserIcon } from "./icons";
 
 export default function UserAvatar() {
   const { userInfo } = useUserStore();

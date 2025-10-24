@@ -76,9 +76,22 @@
     @apply font-headings text-center text-notice-light dark:text-notice-dark;
   }
 
-  /** DIMENSIONS **/
+  /* UTILITY */
   .centered {
     @apply flex items-center justify-center;
+  }
+
+  .list {
+    @apply flex flex-col gap-1;
+  }
+
+  /* LAYOUT */
+  .card-width {
+    @apply w-full max-w-[360px] min-w-[320px];
+  }
+
+  .row {
+    @apply h-11;
   }
 }
 

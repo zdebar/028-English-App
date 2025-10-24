@@ -1,7 +1,7 @@
-import { HomeIcon, AcademicCapIcon } from "./Icons.js";
-import ButtonLink from "./ButtonLink.js";
+import { HomeIcon, AcademicCapIcon } from "./icons.js";
+import ButtonLink from "./button-link.js";
 import { useLocation } from "react-router-dom";
-import UserAvatar from "./UserAvatar.js";
+import UserAvatar from "./user-avatar.js";
 
 export default function Header() {
   const location = useLocation();
@@ -43,12 +43,9 @@ export default function Header() {
           <AcademicCapIcon />
         </ButtonLink>
         <ButtonLink
-          to="/userSettings"
+          to="/profile"
           buttonType="button-header"
-          buttonColor={` ${getSelectedClass(
-            location.pathname,
-            "/userSettings"
-          )}`}
+          buttonColor={` ${getSelectedClass(location.pathname, "/profile")}`}
           aria-label="Nastavení uživatele"
         >
           <UserAvatar />

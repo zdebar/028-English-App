@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { UserTheme } from "../types/data.types"; // Use type-only import
+import type { UserTheme } from "../types/data.types";
 
 interface ThemeState {
   theme: UserTheme;
