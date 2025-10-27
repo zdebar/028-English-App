@@ -2,6 +2,8 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
+/** A-13, B-10, C-8, D-11 */
+
 @theme {
   --font-body: sans-serif;
   --font-headings: "Mansalva", sans-serif;

@@ -27,7 +27,7 @@ export default function Header() {
         </ButtonLink>
       </nav>
       <nav
-        className="sideheader m-4 flex gap-4"
+        className="sideheader m-4 flex gap-2"
         role="navigation"
         aria-label="Uživatelská navigace"
       >
