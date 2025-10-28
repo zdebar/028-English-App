@@ -15,24 +15,45 @@ interface UserState {
 export const useUserStore = create<UserState>()(
   persist(
     (set) => ({
-      userInfo: {
-        id: null,
-        uid: uuidv4(),
-        username: null,
-        picture: null,
-      },
+      userInfo: null,
       userScore: null,
       loading: true,
-      setUserInfo: (user) => set({ userInfo: user }),
-      setUserScore: (score) => set({ userScore: score }),
-      setLoading: (loading) => set({ loading }),
+      setUserInfo: (user) => {
+        set({ userInfo: user });
+      },
+      setUserScore: (score) => {
+        set({ userScore: score });
+      },
+      setLoading: (loading) => {
+        set({ loading });
+      },
     }),
     {
       name: "user-store",
-      partialize: (state) => ({
-        userInfo: state.userInfo,
-        userScore: state.userScore,
-      }),
+      onRehydrateStorage: () => (state) => {
+        if (!state) return;
+
+        if (!state.userInfo) {
+          state.setUserInfo({
+            id: 0,
+            uid: uuidv4(),
+            username: null,
+            picture: null,
+          });
+        }
+
+        if (!state.userScore) {
+          state.setUserScore([
+            {
+              learnedCountToday: 0,
+              learnedCountNotToday: 0,
+              practiceCountToday: 0,
+            },
+          ]);
+        }
+
+        state.setLoading(false);
+      },
     }
   )
 );

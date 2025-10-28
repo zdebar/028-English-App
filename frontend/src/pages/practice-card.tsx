@@ -21,7 +21,7 @@ import { useItemArray } from "../hooks/useItemArray";
 import ButtonWithHelp from "./common/ButtonWithHelp";
 
 export default function PracticeCard() {
-  const { userScor } = useUser();
+  const { userScore } = useUser();
   const apiPath = `/api/items/practice`;
 
   const {

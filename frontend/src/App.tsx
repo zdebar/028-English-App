@@ -6,9 +6,11 @@ import Header from "./components/header";
 import "./App.css";
 import Profile from "./pages/profile";
 import { useDataSync } from "./hooks/use-data-sync";
+import { useUserStore } from "./hooks/use-user";
 
 export default function App() {
   const { theme, chooseTheme } = useThemeStore();
+  const { userInfo } = useUserStore();
   const location = useLocation();
   const showFooterRoutes = ["/", "/login"];
 
@@ -34,7 +36,7 @@ export default function App() {
                     dosáhněte základní znalosti jazyka za zlomek běžného
                     učebního času.
                   </p>
-                  {/* <p className="notice">uid {userInfo?.uid}</p> */}
+                  <p className="notice">{userInfo?.uid}</p>
                   <p className="text-notice">aplikace v testovacím režimu</p>
                 </div>
               }
