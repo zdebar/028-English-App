@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { supabase } from "../utils/supabase";
+import { supabase } from "../utils/supabase.utils";
 import type {
   Metadata,
   AudioRecord,
