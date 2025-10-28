@@ -7,6 +7,7 @@ import "./App.css";
 import Profile from "./pages/profile";
 import { useDataSync } from "./hooks/use-data-sync";
 import { useUserStore } from "./hooks/use-user";
+import PracticeCard from "./pages/practice-card";
 
 export default function App() {
   const { theme, chooseTheme } = useThemeStore();
@@ -41,7 +42,9 @@ export default function App() {
                 </div>
               }
             />
+            <Route path="/practice" element={<PracticeCard />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="*" element={<div>Page not found</div>} />
           </Routes>
         </div>
         {showFooterRoutes.includes(location.pathname) && <Footer />}

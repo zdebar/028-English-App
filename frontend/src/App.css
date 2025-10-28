@@ -15,6 +15,18 @@
   --color-button-hover: #2e9ab0;
   --color-background-dark: #111827;
   --color-background-light: #f7b740;
+  --color-overlay-light: rgba(
+    255,
+    255,
+    255,
+    0.4
+  ); /* overlay behind guide tips */
+  --color-overlay-dark: rgba(
+    17,
+    24,
+    39,
+    0.6
+  ); /* overlay behind guide tips dark */
 }
 
 @layer base {
@@ -73,6 +85,10 @@
     @apply text-light hover:bg-white disabled:text-gray-600 dark:text-dark dark:hover:text-black;
   }
 
+  .color-overlay {
+    @apply bg-overlay-light dark:bg-overlay-dark;
+  }
+
   /* TEXT STYLES */
   .text-notice {
     @apply font-headings text-center text-notice-light dark:text-notice-dark;
@@ -89,7 +105,11 @@
 
   /* LAYOUT */
   .card-width {
-    @apply w-full max-w-[360px] min-w-[320px];
+    @apply w-full max-w-100 min-w-80;
+  }
+
+  .card {
+    @apply flex h-full max-h-100 min-h-80 w-full max-w-100 min-w-80 flex-col justify-start gap-1;
   }
 
   .row {

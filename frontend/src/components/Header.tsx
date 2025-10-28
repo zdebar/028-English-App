@@ -33,11 +33,8 @@ export default function Header() {
       >
         <ButtonLink
           buttonType="button-header"
-          buttonColor={`${getSelectedClass(
-            location.pathname,
-            "/userDashboard"
-          )}`}
-          to="/userDashboard"
+          buttonColor={`${getSelectedClass(location.pathname, "/practice")}`}
+          to="/practice"
           aria-label="Uživatelský dashboard"
         >
           <AcademicCapIcon />
