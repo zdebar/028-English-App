@@ -10,7 +10,8 @@ import {
 import { useState } from "react";
 
 export default function PracticeCard() {
-  const [revealed] = useState(false);
+  const [revealed, setRevealed] = useState(false);
+  const [hintIndex, setHintIndex] = useState(0);
 
   return (
     <div className="card">
@@ -52,10 +53,15 @@ export default function PracticeCard() {
       <div className="flex gap-1">
         {!revealed ? (
           <>
-            <Button>
+            <Button onClick={() => setHintIndex((prevIndex) => prevIndex + 1)}>
               <HintIcon />
             </Button>
-            <Button>
+            <Button
+              onClick={() => {
+                setRevealed(true);
+                setHintIndex(0);
+              }}
+            >
               <EyeIcon />
             </Button>
           </>

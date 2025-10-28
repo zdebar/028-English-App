@@ -1,14 +1,12 @@
 import { useEffect } from "react";
 import { setupIndexedDB } from "../utils/indexedDB.utils";
 import { checkAndSync, checkAndSyncAudio } from "../utils/sync.utils";
+import config from "../config/config";
 
 export function useDataSync() {
   useEffect(() => {
     async function checkAndSyncData() {
-      const dbName = "AppDatabase";
-      const dbVersion = 1;
-
-      const request = setupIndexedDB(dbName, dbVersion);
+      const request = setupIndexedDB(config.dbName, config.dbVersion);
 
       request.onsuccess = async () => {
         const db = request.result;

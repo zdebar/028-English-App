@@ -11,10 +11,10 @@ import PracticeCard from "./pages/practice-card";
 
 export default function App() {
   const { theme, chooseTheme } = useThemeStore();
-  const { userInfo } = useUserStore();
   const location = useLocation();
-  const showFooterRoutes = ["/", "/login"];
+  const showFooterRoutes = ["/"];
 
+  useUserStore();
   useDataSync();
 
   useEffect(() => {
@@ -37,7 +37,6 @@ export default function App() {
                     dosáhněte základní znalosti jazyka za zlomek běžného
                     učebního času.
                   </p>
-                  <p className="notice">{userInfo?.uid}</p>
                   <p className="text-notice">aplikace v testovacím režimu</p>
                 </div>
               }

@@ -8,7 +8,17 @@ export function setupIndexedDB(
     const db = request.result;
 
     if (!db.objectStoreNames.contains("user-items")) {
-      db.createObjectStore("user-items", { keyPath: ["id", "user_id"] });
+      const userItemsStore = db.createObjectStore("user-items", {
+        keyPath: ["id", "user_id"],
+      });
+
+      userItemsStore.createIndex(
+        "user_id_master_at_next_at",
+        ["user_id", "mastered_at", "next_at"],
+        {
+          unique: false,
+        }
+      );
     }
     if (!db.objectStoreNames.contains("grammar")) {
       db.createObjectStore("grammar", { keyPath: "grammar_id" });
