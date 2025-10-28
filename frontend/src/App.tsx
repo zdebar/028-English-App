@@ -5,11 +5,14 @@ import Footer from "./components/footer";
 import Header from "./components/header";
 import "./App.css";
 import Profile from "./pages/profile";
+import { useDataSync } from "./hooks/use-data-sync";
 
 export default function App() {
   const { theme, chooseTheme } = useThemeStore();
   const location = useLocation();
   const showFooterRoutes = ["/", "/login"];
+
+  useDataSync();
 
   useEffect(() => {
     chooseTheme(theme);

@@ -13,6 +13,7 @@
     "@sqlite.org/sqlite-wasm": "^3.50.4-build1",
     "@supabase/supabase-js": "^2.76.1",
     "@tailwindcss/vite": "^4.1.16",
+    "jszip": "^3.10.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.4",

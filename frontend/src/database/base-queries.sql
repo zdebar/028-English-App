@@ -8,15 +8,15 @@ ORDER BY id ASC;
 
 -- get all audio items
 SELECT 
-  id,
   audio AS filename
 FROM items
-ORDER BY id ASC;
+GROUP BY audio
+ORDER BY audio ASC;
 
 -- get user_items for anonymous user (user_id IS NULL)
 SELECT 
   i.id,
-  ui.user_id,
+  COALESCE(ui.user_id, 0) AS user_id,
   i.czech,
   i.english,
   i.pronunciation,

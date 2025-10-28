@@ -57,7 +57,6 @@ export const user_daily_score: UserDailyScore = {
 };
 
 export interface Audio {
-  id: number; // Unique identifier for the audio entry
   filename: string; // Unique name with extension
   blob: Blob; // The actual audio file as a Blob
 }
