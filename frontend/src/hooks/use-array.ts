@@ -36,8 +36,6 @@ export function useArray() {
   }
 
   return {
-    array,
-    setArray,
     index,
     nextIndex,
     prevIndex,

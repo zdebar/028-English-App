@@ -25,7 +25,7 @@ export default function PracticeCard() {
           className="relative flex w-full items-center justify-between"
         >
           <p className="text-sm">volume</p>
-          <p className="text-sm">daily count</p>
+          <p className="text-sm">error</p>
         </div>
         <div id="item">
           <p className="text-center font-bold">czech</p>
@@ -37,7 +37,7 @@ export default function PracticeCard() {
           id="bottom-bar"
         >
           <p className="text-sm">progress</p>
-          <p className="text-sm">nic</p>
+          <p className="text-sm">daily count</p>
         </div>
       </div>
 
