@@ -2,6 +2,7 @@ import { HomeIcon, AcademicCapIcon } from "./icons.js";
 import ButtonLink from "./button-link.js";
 import { useLocation } from "react-router-dom";
 import UserAvatar from "./user-avatar.js";
+import ThemeSwitch from "./theme-switch.js";
 
 export default function Header() {
   const location = useLocation();
@@ -11,9 +12,9 @@ export default function Header() {
   }
 
   return (
-    <header className="relative z-20 flex w-full flex-none justify-between">
+    <header className="header relative z-20 flex w-full flex-none justify-between">
       <nav
-        className="sideheader m-4 flex gap-4"
+        className="sideheader "
         role="navigation"
         aria-label="Hlavní navigace"
       >
@@ -25,12 +26,6 @@ export default function Header() {
         >
           <HomeIcon />
         </ButtonLink>
-      </nav>
-      <nav
-        className="sideheader m-4 flex gap-2"
-        role="navigation"
-        aria-label="Uživatelská navigace"
-      >
         <ButtonLink
           buttonType="button-header"
           buttonColor={`${getSelectedClass(location.pathname, "/practice")}`}
@@ -39,6 +34,13 @@ export default function Header() {
         >
           <AcademicCapIcon />
         </ButtonLink>
+      </nav>
+      <nav
+        className="sideheader rightheader "
+        role="navigation"
+        aria-label="Uživatelská navigace"
+      >
+        <ThemeSwitch />
         <ButtonLink
           to="/profile"
           buttonType="button-header"

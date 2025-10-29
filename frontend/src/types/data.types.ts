@@ -14,8 +14,6 @@ export interface Grammar {
   note: string;
 }
 
-export type UserTheme = "light" | "dark" | "system";
-
 export interface UserInfo {
   id: number | null;
   uid: string;

@@ -53,7 +53,7 @@
   }
 
   h1 {
-    @apply font-headings pb-8 text-3xl font-bold text-light dark:text-dark;
+    @apply font-headings pb-6 pt-12 text-3xl font-bold text-light dark:text-dark;
   }
 
   select,
@@ -131,11 +131,35 @@
   .card {
     @apply flex h-full max-h-100 min-h-80 w-full max-w-100 min-w-80 flex-col justify-start gap-1;
   }
+
+  .sideheader {
+    @apply m-4 flex gap-2;
+  }
 }
 
 @media (max-height: 460px) and (max-width: 640px) {
   .sideheader {
     flex-direction: column;
     height: 150px;
+  }
+  .rightheader {
+    flex-direction: column-reverse;
+    justify-content: start;
+    height: 150px;
+  }
+}
+
+@media (max-height: 460px) {
+  .header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 0;
+  }
+}
+
+@media (min-height: 640px) {
+  .header {
+    margin-bottom: 80px;
   }
 }
