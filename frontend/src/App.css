@@ -1,11 +1,12 @@
 @import url("https://fonts.googleapis.com/css2?family=Mansalva:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Mansalva:wght@400;700&family=Roboto:wght@400;700&display=swap");
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
 /** A-13, B-10, C-8, D-11 */
 
 @theme {
-  --font-body: sans-serif;
+  --font-body: "Roboto", serif;
   --font-headings: "Mansalva", sans-serif;
   --color-dark: white;
   --color-light: black;
@@ -53,7 +54,7 @@
   }
 
   h1 {
-    @apply font-headings pb-6 pt-12 text-3xl font-bold text-light dark:text-dark;
+    @apply font-headings pb-2 pt-12 text-4xl font-bold text-light dark:text-dark;
   }
 
   select,
@@ -91,7 +92,7 @@
 
   /* TEXT STYLES */
   .text-notice {
-    @apply font-headings text-center text-notice-light dark:text-notice-dark;
+    @apply font-headings text-center text-xl text-notice-light dark:text-notice-dark;
   }
 
   /* UTILITY */
