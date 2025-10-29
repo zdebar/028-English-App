@@ -1,8 +1,8 @@
-import { HomeIcon, AcademicCapIcon } from "./icons.js";
-import ButtonLink from "./button-link.js";
 import { useLocation } from "react-router-dom";
-import UserAvatar from "./user-avatar.js";
-import ThemeSwitch from "./theme-switch.js";
+import { HomeIcon, AcademicCapIcon } from "@components/icons";
+import ButtonLink from "@components/button-link";
+import UserAvatar from "@components/user-avatar";
+import ThemeSwitch from "@components/theme-switch";
 
 export default function Header() {
   const location = useLocation();
