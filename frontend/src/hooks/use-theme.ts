@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
-type UserTheme = "light" | "dark";
+export type UserTheme = "light" | "dark";
+
 interface ThemeState {
   theme: UserTheme;
   chooseTheme: (newTheme: UserTheme) => void;

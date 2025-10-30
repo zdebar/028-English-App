@@ -1,23 +1,22 @@
-import { SunIcon, MoonIcon } from "./icons.js";
-import Button from "./button.js";
-import { useThemeStore } from "../hooks/use-theme";
+import { SunIcon, MoonIcon } from "@/components/icons.js";
+import { useThemeStore, type UserTheme } from "@/hooks/use-theme";
 
 export default function ThemeSwitch() {
   const { theme, chooseTheme } = useThemeStore();
 
   const handleChange = () => {
-    const nextTheme = theme === "light" ? "dark" : "light";
+    const nextTheme: UserTheme = theme === "light" ? "dark" : "light";
     chooseTheme(nextTheme);
   };
+
   return (
-    <Button
-      buttonType="button-header"
+    <button
       aria-label="Nastavení pozadí"
-      buttonColor="color-header"
       onClick={handleChange}
-      title={theme}
+      className="button-header"
+      title={theme as UserTheme}
     >
       {theme === "light" ? <SunIcon /> : <MoonIcon />}
-    </Button>
+    </button>
   );
 }

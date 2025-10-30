@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { setupIndexedDB } from "../utils/indexedDB.utils";
-import { checkAndSync, checkAndSyncAudio } from "../utils/sync.utils";
-import config from "../config/config";
+import { setupIndexedDB } from "@/utils/indexedDB.utils";
+import { checkAndSync, checkAndSyncAudio } from "@/utils/sync.utils";
+import config from "@/config/config";
 
 export function useDataSync() {
   useEffect(() => {

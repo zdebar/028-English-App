@@ -1,5 +1,3 @@
-import Label from "./label";
-
 interface SettingPropertyProps {
   label: string;
   value: string | null | undefined;
@@ -12,8 +10,9 @@ export default function SettingProperty({
   className = "",
 }: SettingPropertyProps) {
   return (
-    <div className={`row flex items-center ${className}`}>
-      <Label text={label} /> <p>{value}</p>
+    <div className={`h-input flex items-center ${className}`}>
+      <p className={`inline-block w-25 shrink-0 pl-2`}>{label}</p>
+      <p>{value}</p>
     </div>
   );
 }

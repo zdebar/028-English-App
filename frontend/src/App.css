@@ -1,39 +1,42 @@
-@import url("https://fonts.googleapis.com/css2?family=Mansalva:wght@400;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Mansalva:wght@400;700&family=Roboto:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Mansalva:wght@400;700&family=Roboto:wght@300;400;700&display=swap");
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
 /** A-13, B-10, C-8, D-11 */
 
 @theme {
+  /** font families **/
   --font-body: "Roboto", serif;
   --font-headings: "Mansalva", sans-serif;
+
+  /** colors **/
   --color-dark: white;
   --color-light: black;
   --color-notice-light: black;
   --color-notice-dark: #87d5e8;
-  --color-button-normal: #1c6676;
-  --color-button-hover: #2e9ab0;
+  --color-button-normal: #f7b740;
+  --color-button-hover: white;
   --color-background-dark: #111827;
   --color-background-light: #f7b740;
-  --color-overlay-light: rgba(
-    255,
-    255,
-    255,
-    0.4
-  ); /* overlay behind guide tips */
-  --color-overlay-dark: rgba(
-    17,
-    24,
-    39,
-    0.6
-  ); /* overlay behind guide tips dark */
+
+  /** layout dimensions **/
+  --max-width-container: 900px;
+  --max-width-hero: 450px;
+  --min-width-card: 320px;
+  --max-width-card: 400px;
+  --min-height-card: 320px;
+  --max-height-card: 400px;
+
+  /** button sizes **/
+  --size-button: 3.25rem;
+  --height-button: 3.25rem;
+  --height-input: 2.5rem;
 }
 
 @layer base {
   html {
     font-size: 15px;
-    @apply font-body;
+    @apply font-body text-light dark:text-dark bg-background-light dark:bg-background-dark;
   }
 
   button,
@@ -45,16 +48,8 @@
     @apply flex items-center justify-center;
   }
 
-  h2,
-  p,
-  label,
-  option,
-  select {
-    @apply text-light dark:text-dark;
-  }
-
   h1 {
-    @apply font-headings pb-2 pt-12 text-4xl font-bold text-light dark:text-dark;
+    @apply font-headings pb-2 pt-12 text-4xl font-thin;
   }
 
   select,
@@ -65,74 +60,44 @@
 
 @layer utilities {
   /* BACKGROUND COLORS */
-  .color-background {
-    @apply bg-background-light text-light dark:bg-background-dark dark:text-dark;
-  }
-
   .color-button {
-    @apply bg-button-normal text-light shadow-[2px_2px_2px_rgba(0,0,0,0.35)] hover:bg-button-hover active:shadow-none;
+    @apply hover:bg-button-hover hover:text-light active:shadow-none border;
+    @apply disabled:shadow-none disabled:border-dashed disabled:hover:text-inherit disabled:bg-inherit;
+    @apply bg-background-light text-light shadow-[2px_2px_2px_rgba(0,0,0,0.35)];
+    @apply dark:bg-background-dark dark:text-dark;
   }
 
   .color-disabled {
-    @apply bg-white text-light shadow-none;
-    @apply dark:bg-gray-800 dark:text-dark dark:hover:bg-gray-800;
-  }
-
-  .color-selected {
-    @apply bg-white text-light shadow-none;
-  }
-
-  .color-header {
-    @apply text-light hover:bg-white disabled:text-gray-600 dark:text-dark dark:hover:text-black;
-  }
-
-  .color-overlay {
-    @apply bg-overlay-light dark:bg-overlay-dark;
+    @apply bg-white;
+    @apply dark:bg-gray-800 dark:hover:bg-gray-800;
   }
 
   /* TEXT STYLES */
   .text-notice {
     @apply font-headings text-center text-xl text-notice-light dark:text-notice-dark;
   }
-
-  /* UTILITY */
-  .centered {
-    @apply flex items-center justify-center;
-  }
-
-  .list {
-    @apply flex flex-col gap-1;
-  }
-
-  /* LAYOUT */
-  .row {
-    @apply h-11;
-  }
 }
 
 @layer components {
-  .avatar {
-    @apply h-11 w-11 rounded-full;
-  }
-
   /** BUTTON STYLES **/
   .button-rectangular {
-    @apply h-13 w-full font-body font-bold tracking-wide;
+    @apply h-button w-full font-body font-bold tracking-wide;
   }
 
   .button-header {
-    @apply h-13 w-13 rounded-full;
+    @apply size-button rounded-full hover:bg-white dark:hover:text-light;
   }
 
   /** CARD STYLES **/
   .card-width {
-    @apply w-full max-w-100 min-w-80;
+    @apply w-full max-w-card min-w-card flex flex-col gap-1 justify-start;
   }
 
-  .card {
-    @apply flex h-full max-h-100 min-h-80 w-full max-w-100 min-w-80 flex-col justify-start gap-1;
+  .card-height {
+    @apply h-full max-h-card min-h-card;
   }
 
+  /** HEADER STYLES **/
   .sideheader {
     @apply m-4 flex gap-2;
   }
@@ -151,7 +116,7 @@
 }
 
 @media (max-height: 460px) {
-  .header {
+  .header-fixed {
     position: fixed;
     top: 0;
     left: 0;
@@ -160,7 +125,7 @@
 }
 
 @media (min-height: 640px) {
-  .header {
+  .header-fixed {
     margin-bottom: 80px;
   }
 }

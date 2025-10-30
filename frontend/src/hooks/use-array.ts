@@ -1,8 +1,8 @@
 import { useState } from "react";
-import type { UserItem } from "../types/data.types";
-import { useUserStore } from "./use-user";
-import { alternateDirection } from "../utils/practice.utils";
-import { getPracticeDeck } from "../services/practice.sevice";
+import type { UserItem } from "@/types/data.types";
+import { useUserStore } from "@/hooks/use-user";
+import { alternateDirection } from "@/utils/practice.utils";
+import { getPracticeDeck } from "@/services/practice.sevice";
 import { useEffect } from "react";
 
 export function useArray() {

@@ -1,4 +1,4 @@
-import Button from "../components/button";
+import ButtonRectangular from "@/components/button-rectangular";
 import {
   SkipIcon,
   InfoIcon,
@@ -6,26 +6,28 @@ import {
   EyeIcon,
   MinusIcon,
   PlusIcon,
-} from "../components/icons";
+} from "@/components/icons";
 import { useState } from "react";
 
 export default function PracticeCard() {
   const [revealed, setRevealed] = useState(false);
   const [hintIndex, setHintIndex] = useState(0);
 
+  console.log("Hint index:", hintIndex);
+
   return (
-    <div className="card">
+    <div className="card-height card-width ">
       {/* Card content with item details */}
       <div
-        className={`color-disabled relative flex h-full flex-col items-center justify-between px-4 pt-3 pb-2  `}
+        className="border border-dashed relative flex h-full flex-col items-center justify-between p-4"
         aria-label="Přehrát audio"
       >
         <div
           id="top-bar"
           className="relative flex w-full items-center justify-between"
         >
-          <p className="text-sm">volume</p>
-          <p className="text-sm">error</p>
+          <p className="font-light">volume</p>
+          <p className="font-light">error</p>
         </div>
         <div id="item">
           <p className="text-center font-bold">czech</p>
@@ -36,43 +38,45 @@ export default function PracticeCard() {
           className="relative flex w-full items-center justify-between"
           id="bottom-bar"
         >
-          <p className="text-sm">progress</p>
-          <p className="text-sm">daily count</p>
+          <p className="font-light">progress</p>
+          <p className="font-light">daily count</p>
         </div>
       </div>
 
       {/* Practice Controls */}
       <div id="practice-controls" className="flex gap-1">
-        <Button>
+        <ButtonRectangular disabled>
           <InfoIcon />
-        </Button>
-        <Button>
+        </ButtonRectangular>
+        <ButtonRectangular>
           <SkipIcon />
-        </Button>
+        </ButtonRectangular>
       </div>
       <div className="flex gap-1">
         {!revealed ? (
           <>
-            <Button onClick={() => setHintIndex((prevIndex) => prevIndex + 1)}>
+            <ButtonRectangular
+              onClick={() => setHintIndex((prevIndex) => prevIndex + 1)}
+            >
               <HintIcon />
-            </Button>
-            <Button
+            </ButtonRectangular>
+            <ButtonRectangular
               onClick={() => {
                 setRevealed(true);
                 setHintIndex(0);
               }}
             >
               <EyeIcon />
-            </Button>
+            </ButtonRectangular>
           </>
         ) : (
           <>
-            <Button>
+            <ButtonRectangular>
               <MinusIcon />
-            </Button>
-            <Button>
+            </ButtonRectangular>
+            <ButtonRectangular>
               <PlusIcon />
-            </Button>
+            </ButtonRectangular>
           </>
         )}
       </div>

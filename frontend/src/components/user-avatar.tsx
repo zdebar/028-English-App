@@ -1,12 +1,19 @@
 import { useState, useEffect } from "react";
-import { useUserStore } from "../hooks/use-user";
-import { UserIcon } from "./icons";
+import { useUserStore } from "@/hooks/use-user";
+import { UserIcon } from "@/components/icons";
 
 export default function UserAvatar() {
   const { userInfo } = useUserStore();
 
   const finalImageUrl = userInfo?.picture;
-  const initials = userInfo?.username?.[0] ?? null;
+  const initials = userInfo?.username
+    ? userInfo.username
+        .split(" ")
+        .map((name) => name[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : null;
   const [isImageLoaded, setIsImageLoaded] = useState(false);
 
   useEffect(() => {
@@ -22,14 +29,14 @@ export default function UserAvatar() {
     <img
       src={finalImageUrl ?? undefined}
       alt="User Avatar"
-      className="avatar"
+      className="button-header"
     />
   ) : initials ? (
     <div
-      className="avatar flex items-center justify-center bg-green-700"
+      className="button-header flex items-center justify-center"
       style={{ paddingBottom: "1.5px" }}
     >
-      <span className="text-2xl text-white">{initials}</span>
+      <span className="text-2xl">{initials}</span>
     </div>
   ) : (
     <UserIcon />

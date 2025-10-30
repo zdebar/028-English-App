@@ -26,11 +26,12 @@
 
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@components/*": ["./src/components/*"],
-      "@utils/*": ["./src/utils/*"],
-      "@assets/*": ["./src/assets/*"]
+      "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "../archive/theme/theme-dropdown.tsx"]
+  "include": [
+    "src",
+    "../archive/theme/theme-dropdown.tsx",
+    "../archive/practice-card-backup.tsx"
+  ]
 }

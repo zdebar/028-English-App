@@ -1,11 +1,11 @@
-import SettingProperty from "../components/setting-property";
-import { useUserStore } from "../hooks/use-user";
+import SettingProperty from "@/components/setting-property";
+import { useUserStore } from "@/hooks/use-user";
 
 export default function Profile() {
   const { userInfo } = useUserStore();
 
   return (
-    <div className="card-width list">
+    <div className="card-width">
       <SettingProperty label="Uživatel:" value={userInfo?.username} />
     </div>
   );
