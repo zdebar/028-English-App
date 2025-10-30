@@ -63,7 +63,7 @@
   .color-button {
     @apply hover:bg-button-hover hover:text-light active:shadow-none border;
     @apply disabled:shadow-none disabled:border-dashed disabled:hover:text-inherit disabled:bg-inherit;
-    @apply bg-background-light text-light shadow-[2px_2px_2px_rgba(0,0,0,0.35)];
+    @apply bg-background-light text-light;
     @apply dark:bg-background-dark dark:text-dark;
   }
 
