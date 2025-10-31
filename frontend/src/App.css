@@ -61,7 +61,7 @@
 @layer utilities {
   /* BACKGROUND COLORS */
   .color-button {
-    @apply hover:bg-button-hover hover:text-light active:shadow-none border;
+    @apply hover:bg-button-hover hover:text-light active:shadow-none border hover:border-none;
     @apply disabled:shadow-none disabled:border-dashed disabled:hover:text-inherit disabled:bg-inherit;
     @apply bg-background-light text-light;
     @apply dark:bg-background-dark dark:text-dark;

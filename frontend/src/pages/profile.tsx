@@ -1,12 +1,17 @@
 import SettingProperty from "@/components/setting-property";
-import { useUserStore } from "@/hooks/use-user";
+import ButtonSignout from "@/components/button-signout";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Profile() {
-  const { userInfo } = useUserStore();
+  const { session } = useAuth();
 
   return (
     <div className="card-width">
-      <SettingProperty label="Uživatel:" value={userInfo?.username} />
+      <SettingProperty
+        label="Uživatel:"
+        value={session?.user.user_metadata.email}
+      />
+      <ButtonSignout />
     </div>
   );
 }
