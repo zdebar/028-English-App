@@ -8,17 +8,19 @@ export default function LoginScreen() {
 
   return (
     <div className="flex flex-col items-center h-screen w-full">
-      <h1 className="text-2xl font-bold mb-4 ">Login or Register</h1>
       <Auth
         supabaseClient={supabase}
         appearance={{
           theme: ThemeSupa,
+          style: { button: { width: 320 } },
+
           variables: {
             default: {
               colors:
                 theme === "dark"
                   ? {
                       messageText: "white",
+                      defaultButtonText: "black",
                       anchorTextColor: "white",
                       messageTextDanger: "red",
                       inputLabelText: "white",
@@ -28,6 +30,7 @@ export default function LoginScreen() {
                     }
                   : {
                       messageText: "black",
+                      defaultButtonText: "black",
                       anchorTextColor: "black",
                       messageTextDanger: "red",
                       inputLabelText: "black",
@@ -38,7 +41,7 @@ export default function LoginScreen() {
             },
           },
         }}
-        providers={[]}
+        providers={["google"]}
       />
     </div>
   );

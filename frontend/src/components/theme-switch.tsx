@@ -13,7 +13,7 @@ export default function ThemeSwitch() {
     <button
       aria-label="Nastavení pozadí"
       onClick={handleChange}
-      className="button-header"
+      className="button-header hover:bg-inherit hover:text-inherit"
       title={theme as UserTheme}
     >
       {theme === "light" ? <SunIcon /> : <MoonIcon />}
