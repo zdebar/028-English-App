@@ -1,8 +1,8 @@
 -- get all grammars
 SELECT 
-  id AS grammar_id, 
-  name AS grammar_name, 
-  note AS grammar_note
+  id, 
+  name, 
+  note
 FROM grammar
 ORDER BY id ASC;
 
@@ -26,9 +26,9 @@ SELECT
   COALESCE(ui.progress, 0) AS progress,
   ui.started_at,
   ui.updated_at,
-  ui.next_at,
-  ui.learned_at,
-  ui.mastered_at
+  COALESCE(ui.next_at, '9999-12-31T23:59:59Z') AS next_at, 
+  ui.learned_at, 
+  COALESCE(ui.mastered_at, '9999-12-31T23:59:59Z') AS mastered_at
 FROM items i
 LEFT JOIN user_items ui 
   ON i.id = ui.item_id
