@@ -22,14 +22,19 @@ export interface GrammarLocal {
 }
 
 export interface UserScoreLocal {
-  user_id: number; // Foreign key referencing the user
+  user_id: string; // Foreign key referencing the user
   date: string; // Date of the score in ISO format (e.g., "YYYY-MM-DD")
   item_count: number; // Number of items learned or completed on this date
 }
 
 export interface AudioRecordLocal {
   filename: string; // Unique name with extension
-  blob: Blob; // The actual audio file as a Blob
+  audioBlob: Blob; // The actual audio file as a Blob
+}
+
+export interface AudioMetadataLocal {
+  archive_name: string; // Name of the audio archive (e.g., "audio_part1.zip")
+  fetched_at: string; // Timestamp when the archive was fetched
 }
 
 export interface UserScore {

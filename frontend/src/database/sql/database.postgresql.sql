@@ -33,9 +33,9 @@ CREATE TABLE IF NOT EXISTS user_items (
   progress INTEGER DEFAULT 0 CHECK (progress >= 0),
   started_at TIMESTAMP, 
   updated_at TIMESTAMP, 
-  next_at TIMESTAMP, 
+  next_at TIMESTAMP NOT NULL DEFAULT '9999-12-31T23:59:59Z', -- placeholder for null, Indexed DB does not support nulls in indexed fields
   learned_at TIMESTAMP, 
-  mastered_at TIMESTAMP,
+  mastered_at TIMESTAMP NOT NULL DEFAULT '9999-12-31T23:59:59Z', -- placeholder for null, Indexed DB does not support nulls in indexed fields
   FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE,
   PRIMARY KEY (user_id, item_id)
 );

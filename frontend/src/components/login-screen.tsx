@@ -1,5 +1,5 @@
 import { Auth } from "@supabase/auth-ui-react";
-import { supabase } from "@/config/supabase.config";
+import { supabaseInstance } from "@/config/supabase.config";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { useThemeStore } from "@/hooks/use-theme";
 
@@ -9,7 +9,7 @@ export default function LoginScreen() {
   return (
     <div className="flex flex-col items-center h-screen w-full">
       <Auth
-        supabaseClient={supabase}
+        supabaseClient={supabaseInstance}
         appearance={{
           theme: ThemeSupa,
           style: { button: { width: 320 } },

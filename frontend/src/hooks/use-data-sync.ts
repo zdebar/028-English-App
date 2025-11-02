@@ -1,49 +1,33 @@
 import { useEffect } from "react";
-import { checkAndSync, checkAndSyncAudio } from "@/utils/sync.utils";
-import AppDB from "@/database/AppDB";
+import { useAuth } from "@/hooks/use-auth";
+import { db } from "@/database/models/db";
+import Grammar from "@/database/models/grammar";
+import UserScore from "@/database/models/user-scores";
+import UserItem from "@/database/models/user-items";
+import AudioRecord from "@/database/models/audio-records";
 
 export function useDataSync() {
+  const { session } = useAuth();
+
   useEffect(() => {
     async function checkAndSyncData() {
-      /** Check data */
+      if (!session?.user?.user_metadata?.id) {
+        console.error("No valid session or user ID found.");
+        return;
+      }
+      db.userId = session.user.user_metadata.id;
+      console.log("Set db.userId to", db.userId);
 
-      request.onsuccess = async () => {
-        const db = request.result;
-        const bucketName = "anon-data";
-
-        // Sync Grammar Store
-        await checkAndSync(
-          db,
-          "grammar",
-          bucketName,
-          "/grammar.json",
-          "/grammar-metadata.json"
-        );
-
-        // Sync User Items Store
-        await checkAndSync(
-          db,
-          "user-items",
-          bucketName,
-          "/user-items.json",
-          "/user-items-metadata.json"
-        );
-
-        // Sync Audio Store
-        await checkAndSyncAudio(
-          db,
-          "audio",
-          bucketName,
-          "/audio.zip",
-          "/audio-metadata.json"
-        );
-      };
-
-      request.onerror = () => {
-        console.error("Failed to open IndexedDB");
-      };
+      try {
+        await UserItem.syncUserItemsData();
+        await Grammar.syncGrammarData();
+        await UserScore.syncUserScoreData();
+        await AudioRecord.syncAudioData();
+      } catch (error) {
+        console.error("Error syncing data:", error);
+      }
     }
 
     checkAndSyncData();
-  }, []);
+  }, [session?.user?.user_metadata?.id]);
 }
