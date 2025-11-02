@@ -1,8 +1,8 @@
 import { Entity } from "dexie";
-import type AppDB from "@/database/app-db";
+import type AppDB from "@/database/models/app-db";
 import type { AudioRecordLocal } from "@/types/local.types";
-import AudioMetadata from "@/database/audio-metadata";
-import { db } from "@/database/db";
+import AudioMetadata from "@/database/models/audio-metadata";
+import { db } from "@/database/models/db";
 import config from "@/config/config";
 import { fetchStorage } from "@/utils/helper.utils";
 
