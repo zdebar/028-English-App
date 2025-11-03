@@ -107,7 +107,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
       // Step 3: Fetch updated scores from Supabase with SQL logic
       const { data: updatedUserItems, error: fetchError } =
-        await supabaseInstance.rpc("get_user_items");
+        await supabaseInstance.rpc("get_user_items", {
+          user_id_input: db.userId,
+        });
 
       if (fetchError) {
         console.error(
@@ -124,7 +126,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       );
 
       // Step 4: Update local IndexedDB with the fetched data
-      await db.user_scores.bulkPut(updatedUserItems);
+      await db.user_items.bulkPut(updatedUserItems);
       console.log("User_items synced successfully!");
     } catch (error) {
       console.error("Unexpected error during user_items sync:", error);

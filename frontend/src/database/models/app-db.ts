@@ -7,7 +7,7 @@ import UserScore from "@/database/models/user-scores";
 import AudioMetadata from "@/database/models/audio-metadata";
 
 export default class AppDB extends Dexie {
-  user_items!: EntityTable<UserItem, "user_id">;
+  user_items!: EntityTable<UserItem, "id">;
   grammars!: EntityTable<Grammar, "id">;
   user_scores!: EntityTable<UserScore, "user_id">;
   audio_records!: EntityTable<AudioRecord, "filename">;
@@ -20,7 +20,7 @@ export default class AppDB extends Dexie {
 
     // Define the database schema
     this.version(1).stores({
-      user_items: "[user_id+mastered_at+next_at]",
+      user_items: "id, [user_id+mastered_at+next_at]",
       grammars: "id",
       user_scores: "[user_id+date]",
       audio_records: "filename",
