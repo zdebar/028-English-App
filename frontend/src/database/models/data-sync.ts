@@ -1,8 +1,8 @@
 import { db } from "@/database/models/db";
 import Grammar from "@/database/models/grammar";
-// import UserScore from "@/database/models/user-scores";
+import UserScore from "@/database/models/user-scores";
 import UserItem from "@/database/models/user-items";
-// import AudioRecord from "@/database/models/audio-records";
+import AudioRecord from "@/database/models/audio-records";
 
 export async function dataSync(userId: string): Promise<void> {
   if (!userId) {
@@ -11,16 +11,13 @@ export async function dataSync(userId: string): Promise<void> {
   }
 
   db.userId = userId;
-  console.log("Set db.userId to", db.userId);
 
   try {
     await db.open();
-    console.log("Database opened successfully for user ID:", userId);
     await UserItem.syncUserItemsData();
     await Grammar.syncGrammarData();
-    // await UserScore.syncUserScoreData();
-    // await AudioRecord.syncAudioData();
-    console.log("Data sync completed successfully.");
+    await UserScore.syncUserScoreData();
+    await AudioRecord.syncAudioData();
   } catch (error) {
     console.error("Error syncing data:", error);
   }

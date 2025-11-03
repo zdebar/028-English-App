@@ -86,10 +86,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         .and((item: UserItemLocal) => item.started_at !== null)
         .toArray();
 
-      console.log(
-        `Syncing ${localUserItems.length} user items for user ID: ${db.userId}`
-      );
-
       const filteredUserItems = localUserItems.filter(
         (item) => item.started_at !== null
       );
@@ -119,15 +115,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         return;
       }
 
-      console.log(
-        `Fetched ${
-          updatedUserItems?.length || 0
-        } updated user items from Supabase.`
-      );
-
       // Step 4: Update local IndexedDB with the fetched data
       await db.user_items.bulkPut(updatedUserItems);
-      console.log("User_items synced successfully!");
     } catch (error) {
       console.error("Unexpected error during user_items sync:", error);
     }

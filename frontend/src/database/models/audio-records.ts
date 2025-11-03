@@ -44,16 +44,13 @@ export default class AudioRecord
 
   static async syncAudioData(): Promise<void> {
     try {
-      // Step 1: Compare config.audioArchives with metadata
       for (const archiveName of config.audioArchives) {
+        // Step 1: Compare config.audioArchives with metadata
         const isFetched = await AudioMetadata.isFetched(archiveName);
 
         if (isFetched) {
-          console.log(`Archive ${archiveName} already fetched. Skipping.`);
           continue;
         }
-
-        console.log(`Fetching archive: ${archiveName}`);
 
         // Step 2: Fetch the archive from storage
         const zipBlob: Blob | null = await fetchStorage(
@@ -72,7 +69,6 @@ export default class AudioRecord
 
         // Step 5: Save archive metadata immediately
         await AudioMetadata.markAsFetched(archiveName);
-        console.log(`Marked ${archiveName} as fetched in metadata.`);
       }
     } catch (error) {
       console.error("Error during audio sync:", error);

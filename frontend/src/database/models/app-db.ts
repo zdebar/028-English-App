@@ -9,7 +9,7 @@ import AudioMetadata from "@/database/models/audio-metadata";
 export default class AppDB extends Dexie {
   user_items!: EntityTable<UserItem, "id">;
   grammars!: EntityTable<Grammar, "id">;
-  user_scores!: EntityTable<UserScore, "user_id">;
+  user_scores!: EntityTable<UserScore, "id">;
   audio_records!: EntityTable<AudioRecord, "filename">;
   audio_metadata!: EntityTable<AudioMetadata, "archive_name">;
 
@@ -22,13 +22,12 @@ export default class AppDB extends Dexie {
     this.version(1).stores({
       user_items: "id, [user_id+mastered_at+next_at]",
       grammars: "id",
-      user_scores: "[user_id+date]",
+      user_scores: "id, user_id",
       audio_records: "filename",
       audio_metadata: "archive_name",
     });
     // Initialize tables and map them to classes
     this.on("ready", () => {
-      console.log("Dexie is ready. Mapping tables to classes...");
       this.user_items.mapToClass(UserItem);
       this.grammars.mapToClass(Grammar);
       this.user_scores.mapToClass(UserScore);

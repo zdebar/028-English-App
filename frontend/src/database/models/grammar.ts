@@ -16,7 +16,6 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   }
 
   static async syncGrammarData(): Promise<void> {
-    console.log("Syncing grammar data from Supabase...");
     const {
       data: grammars,
       error,

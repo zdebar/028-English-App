@@ -5,6 +5,7 @@ import { supabaseInstance } from "@/config/supabase.config";
 import { db } from "@/database/models/db";
 
 export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
+  id!: string;
   user_id!: string;
   date!: string;
   item_count!: number;
@@ -33,6 +34,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     const existingRecord = await db.user_scores.get([db.userId, today]);
     const newItemCount = (existingRecord?.item_count || 0) + addCount;
     const newRecord: UserScoreLocal = {
+      id: `${db.userId}-${today}`,
       user_id: db.userId,
       date: today,
       item_count: newItemCount,
@@ -53,10 +55,15 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
         .equals(db.userId)
         .toArray();
 
+      const scoresToSend = localScores.map(({ id, ...rest }) => {
+        void id;
+        return rest;
+      });
+
       // Step 2: Send local scores to Supabase for updates
       const { error: upsertError } = await supabaseInstance
         .from("user_score")
-        .upsert(localScores, { onConflict: "user_id, date" });
+        .upsert(scoresToSend, { onConflict: "user_id, date" });
 
       if (upsertError) {
         console.error("Error updating user scores on Supabase:", upsertError);
@@ -79,8 +86,11 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
       // Step 4: Rewrite local database with updated scores
       if (updatedScores) {
-        await db.user_scores.bulkPut(updatedScores);
-        console.log("User scores synced successfully!");
+        const scoresWithId = updatedScores.map((score) => ({
+          ...score,
+          id: `${score.user_id}-${score.date}`,
+        }));
+        await db.user_scores.bulkPut(scoresWithId);
       }
     } catch (error) {
       console.error("Unexpected error during user score sync:", error);
