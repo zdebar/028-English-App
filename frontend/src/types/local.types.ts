@@ -38,7 +38,7 @@ export interface AudioMetadataLocal {
   fetched_at: string; // Timestamp when the archive was fetched
 }
 
-export interface UserScore {
+export interface UserStatsLocal {
   learnedCountToday: number;
   learnedCountNotToday: number;
   practiceCountToday: number;

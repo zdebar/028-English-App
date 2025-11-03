@@ -1,26 +1,21 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { v4 as uuidv4 } from "uuid";
-import type { UserInfo, UserScore } from "@/types/data.types";
+import type { UserStatsLocal } from "../types/local.types";
 
 interface UserState {
-  userInfo: UserInfo | null;
-  userScore: UserScore[] | null;
+  userScore: UserStatsLocal[] | null;
   loading: boolean;
-  setUserInfo: (user: UserInfo | null) => void;
-  setUserScore: (score: UserScore[] | null) => void;
+
+  setUserScore: (score: UserStatsLocal[] | null) => void;
   setLoading: (loading: boolean) => void;
 }
 
 export const useUserStore = create<UserState>()(
   persist(
     (set) => ({
-      userInfo: null,
       userScore: null,
       loading: true,
-      setUserInfo: (user) => {
-        set({ userInfo: user });
-      },
+
       setUserScore: (score) => {
         set({ userScore: score });
       },
@@ -32,15 +27,6 @@ export const useUserStore = create<UserState>()(
       name: "user-store",
       onRehydrateStorage: () => (state) => {
         if (!state) return;
-
-        if (!state.userInfo) {
-          state.setUserInfo({
-            id: 0,
-            uid: uuidv4(),
-            username: null,
-            picture: null,
-          });
-        }
 
         if (!state.userScore) {
           state.setUserScore([

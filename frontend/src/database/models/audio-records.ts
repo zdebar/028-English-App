@@ -46,9 +46,7 @@ export default class AudioRecord
     try {
       for (const archiveName of config.audioArchives) {
         // Step 1: Compare config.audioArchives with metadata
-        const isFetched = await AudioMetadata.isFetched(archiveName);
-
-        if (isFetched) {
+        if (await AudioMetadata.isFetched(archiveName)) {
           continue;
         }
 
