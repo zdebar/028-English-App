@@ -7,7 +7,7 @@ import "./App.css";
 import Profile from "@/pages/profile";
 import PracticeCard from "@/pages/practice-card";
 import Home from "@/pages/home";
-
+import { dataSync } from "@/database/models/data-sync";
 import LoginScreen from "@/components/login-screen";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -16,6 +16,12 @@ export default function App() {
   const { session } = useAuth();
   const location = useLocation();
   const showFooterRoutes = ["/"];
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      dataSync(session?.user?.id);
+    }
+  }, [session?.user?.id]);
 
   useEffect(() => {
     chooseTheme(theme);

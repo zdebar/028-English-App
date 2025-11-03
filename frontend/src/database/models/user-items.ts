@@ -6,6 +6,7 @@ import { getNextAt } from "@/utils/practice.utils";
 import { sortOddEvenByProgress } from "@/utils/practice.utils";
 import { db } from "@/database/models/db";
 import { supabaseInstance } from "@/config/supabase.config";
+import { convertLocalToSQL } from "@/utils/database.utils";
 
 export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   id!: number;
@@ -85,13 +86,22 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         .and((item: UserItemLocal) => item.started_at !== null)
         .toArray();
 
+      console.log(
+        `Syncing ${localUserItems.length} user items for user ID: ${db.userId}`
+      );
+
+      const filteredUserItems = localUserItems.filter(
+        (item) => item.started_at !== null
+      );
+      const sqlUserItems = filteredUserItems.map(convertLocalToSQL);
+
       // Step 2: Send local scores to Supabase for updates
       const { error: upsertError } = await supabaseInstance
         .from("user_items")
-        .upsert(localUserItems, { onConflict: "user_id, id" });
+        .upsert(sqlUserItems, { onConflict: "user_id, item_id" });
 
       if (upsertError) {
-        console.error("Error updating user scores on Supabase:", upsertError);
+        console.error("Error updating user_items on Supabase:", upsertError);
         return;
       }
 
@@ -101,17 +111,23 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
       if (fetchError) {
         console.error(
-          "Error fetching updated user scores from Supabase:",
+          "Error fetching updated user_items from Supabase:",
           fetchError
         );
         return;
       }
 
+      console.log(
+        `Fetched ${
+          updatedUserItems?.length || 0
+        } updated user items from Supabase.`
+      );
+
       // Step 4: Update local IndexedDB with the fetched data
       await db.user_scores.bulkPut(updatedUserItems);
-      console.log("User scores synced successfully!");
+      console.log("User_items synced successfully!");
     } catch (error) {
-      console.error("Unexpected error during user score sync:", error);
+      console.error("Unexpected error during user_items sync:", error);
     }
   }
 }

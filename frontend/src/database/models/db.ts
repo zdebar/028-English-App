@@ -1,3 +1,3 @@
-import AppDB from "@/database/app-db";
+import AppDB from "@/database/models/app-db";
 
 export const db = new AppDB();

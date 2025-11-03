@@ -17,17 +17,23 @@ export default class AppDB extends Dexie {
 
   constructor() {
     super(config.dbName);
+
+    // Define the database schema
     this.version(1).stores({
-      userItems: "[user_id+mastered_at+next_at]",
+      user_items: "[user_id+mastered_at+next_at]",
       grammars: "id",
-      userDailyScores: "[user_id+date]",
-      audio: "filename",
-      audio_metadatas: "archive_name",
+      user_scores: "[user_id+date]",
+      audio_records: "filename",
+      audio_metadata: "archive_name",
     });
-    this.user_items.mapToClass(UserItem);
-    this.grammars.mapToClass(Grammar);
-    this.user_scores.mapToClass(UserScore);
-    this.audio_records.mapToClass(AudioRecord);
-    this.audio_metadata.mapToClass(AudioMetadata);
+    // Initialize tables and map them to classes
+    this.on("ready", () => {
+      console.log("Dexie is ready. Mapping tables to classes...");
+      this.user_items.mapToClass(UserItem);
+      this.grammars.mapToClass(Grammar);
+      this.user_scores.mapToClass(UserScore);
+      this.audio_records.mapToClass(AudioRecord);
+      this.audio_metadata.mapToClass(AudioMetadata);
+    });
   }
 }

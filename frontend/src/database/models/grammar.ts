@@ -1,8 +1,8 @@
 import { Entity } from "dexie";
-import type AppDB from "@/database/app-db";
+import type AppDB from "@/database/models/app-db";
 import type { GrammarLocal } from "@/types/local.types";
 import { supabaseInstance } from "@/config/supabase.config";
-import { db } from "@/database/db";
+import { db } from "@/database/models/db";
 
 export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   id!: number;
@@ -16,6 +16,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   }
 
   static async syncGrammarData(): Promise<void> {
+    console.log("Syncing grammar data from Supabase...");
     const {
       data: grammars,
       error,

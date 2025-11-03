@@ -1,8 +1,8 @@
 import { Entity } from "dexie";
-import type AppDB from "@/database/app-db";
+import type AppDB from "@/database/models/app-db";
 import type { UserScoreLocal } from "@/types/local.types";
 import { supabaseInstance } from "@/config/supabase.config";
-import { db } from "@/database/db";
+import { db } from "@/database/models/db";
 
 export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   user_id!: string;

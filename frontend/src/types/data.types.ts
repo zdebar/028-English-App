@@ -29,11 +29,11 @@ export interface UserItemSQL {
   user_id: string;
   item_id: number;
   progress: number;
-  started_at: string;
-  updated_at: string;
-  next_at: string | null;
+  started_at: string | null;
+  updated_at: string | null;
+  next_at: string;
   learned_at: string | null;
-  mastered_at: string | null;
+  mastered_at: string;
 }
 
 // User score table
