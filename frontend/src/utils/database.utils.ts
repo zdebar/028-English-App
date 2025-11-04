@@ -9,14 +9,25 @@ export function ensureUserLoggedIn() {
 }
 
 export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
+  const {
+    user_id,
+    id: item_id,
+    progress,
+    started_at,
+    updated_at,
+    next_at,
+    learned_at,
+    mastered_at,
+  } = localItem;
+
   return {
-    user_id: localItem.user_id,
-    item_id: localItem.id,
-    progress: localItem.progress,
-    started_at: localItem.started_at,
-    updated_at: localItem.updated_at,
-    next_at: localItem.next_at,
-    learned_at: localItem.learned_at,
-    mastered_at: localItem.mastered_at,
+    user_id,
+    item_id,
+    progress,
+    started_at,
+    updated_at,
+    next_at,
+    learned_at,
+    mastered_at,
   };
 }

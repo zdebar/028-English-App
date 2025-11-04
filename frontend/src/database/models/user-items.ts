@@ -24,7 +24,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   learned_at!: string | null;
   mastered_at!: string;
 
-  static async getPracticeDeck(limit: number = config.deckSize) {
+  static async getPracticeDeck(deckSize: number = config.deckSize) {
     if (!db.userId) {
       throw new Error("No user is logged in.");
     }
@@ -45,7 +45,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         items.sort((a, b) => a.sequence - b.sequence)
       );
 
-    return sortOddEvenByProgress(items.slice(0, limit));
+    return sortOddEvenByProgress(items.slice(0, deckSize));
   }
 
   static async savePracticeDeck(items: UserItemLocal[]) {
