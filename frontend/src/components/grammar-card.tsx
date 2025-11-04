@@ -31,20 +31,16 @@ export default function GrammarCard({ grammar_id, onClose }: GrammarCardProps) {
   }, [grammar_id]);
 
   return (
-    <div className="card-height card-width">
-      <div className="w-full h-full flex flex-col gap-1">
-        <div className="h-button border border-dashed flex flex-col justify-center p-4">
-          {error ? (
-            <p>{error}</p>
-          ) : (
-            <p>{grammarContent?.name || "Loading..."}</p>
-          )}
-        </div>
-        <p className=" border border-dashed flex w-full h-full flex-col p-4">
-          {grammarContent?.note}
-        </p>
+    <div className="card-height card-width flex flex-col gap-1 justify-start">
+      <div className="h-button border border-dashed flex flex-col justify-center p-4">
+        {error ? <p>{error}</p> : <p>{grammarContent?.name || "Loading..."}</p>}
       </div>
-      <ButtonRectangular onClick={onClose}>Zpět</ButtonRectangular>
+      <p className=" border border-dashed w-full grow">
+        {grammarContent?.note}
+      </p>
+      <ButtonRectangular className="" onClick={onClose}>
+        Zpět
+      </ButtonRectangular>
     </div>
   );
 }
