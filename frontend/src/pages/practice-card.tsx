@@ -7,26 +7,139 @@ import {
   MinusIcon,
   PlusIcon,
 } from "@/components/icons";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useItemArray } from "@/hooks/use-item-array";
+import { useUserStore } from "@/hooks/use-user";
+import { useAudioManager } from "@/hooks/use-audio-manager";
+import Loading from "@/components/loading";
+import VolumeSlider from "@/components/volume-slider";
 
 export default function PracticeCard() {
   const [revealed, setRevealed] = useState(false);
   const [hintIndex, setHintIndex] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const { userScore } = useUserStore();
+  const {
+    array,
+    setArray,
+    index,
+    setIndex,
+    nextIndex,
+    prevIndex,
+    currentItem,
+    arrayLength,
+    direction,
+    hasGrammar,
+    userProgress,
+    itemCountToday,
+    setUserProgress,
+    patchItems,
+    setReload,
+  } = useItemArray();
+  const {
+    playAudio,
+    stopAudio,
+    muteAudio,
+    unmuteAudio,
+    setVolume,
+    isPlaying,
+    audioError,
+    setAudioError,
+    tryAudio,
+    audioReload,
+    setAudioReload,
+  } = useAudioManager(array);
+  const isAudioDisabled = (direction && !revealed) || !currentItem?.audio;
 
-  console.log("Hint index:", hintIndex);
+  // Reset audio error for new item
+  useEffect(() => {
+    setAudioError(false);
+  }, [setAudioError, currentItem]);
+
+  // Update userProgress, if end of array reached, patch items
+  const updateItemArray = useCallback(
+    async (progressIncrement: number = 0) => {
+      setRevealed(false);
+      stopAudio();
+
+      const newProgress = Math.max(
+        array[index].progress + progressIncrement,
+        0
+      );
+      const updatedProgress = userProgress.concat(newProgress);
+
+      if (arrayLength > 0) {
+        if (index + 1 >= arrayLength) {
+          await patchItems(updatedProgress);
+          setAudioReload(true);
+          setReload(true);
+        } else {
+          setUserProgress(updatedProgress);
+          nextIndex();
+        }
+      }
+    },
+    [
+      array,
+      index,
+      arrayLength,
+      userProgress,
+      patchItems,
+      setReload,
+      setUserProgress,
+      nextIndex,
+      stopAudio,
+      setAudioReload,
+    ]
+  );
+
+  useEffect(() => {
+    if (!direction && currentItem?.audio && !audioReload) {
+      setTimeout(() => playAudio(currentItem.audio!), 100);
+    }
+  }, [currentItem, direction, playAudio, audioReload]);
+
+  useEffect(() => {
+    if ((currentItem && !currentItem?.audio) || audioError) {
+      setError("bez audia");
+    } else {
+      setError(null);
+    }
+
+    if (audioError) {
+      let attempts = 0;
+      const interval = setInterval(() => {
+        if (attempts >= 3) {
+          clearInterval(interval);
+          return;
+        }
+        playAudio(currentItem.audio);
+        attempts++;
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [currentItem, audioError, playAudio]);
+
+  if (!arrayLength)
+    return <Loading text="Nic k procvičování. Zkuste to znovu později." />;
 
   return (
     <div className="card-height card-width ">
       {/* Card content with item details */}
       <div
-        className="border border-dashed relative flex h-full flex-col items-center justify-between p-4"
+        className={`border border-dashed relative flex h-full flex-col items-center justify-between p-4 ${
+          !isAudioDisabled && "color-audio"
+        }`}
+        onClick={() => {
+          if (!isAudioDisabled) playAudio(currentItem.audio);
+        }}
         aria-label="Přehrát audio"
       >
         <div
           id="top-bar"
           className="relative flex w-full items-center justify-between"
         >
-          <p className="font-light">volume</p>
+          <VolumeSlider setVolume={setVolume} />
           <p className="font-light">error</p>
         </div>
         <div id="item">

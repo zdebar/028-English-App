@@ -7,6 +7,7 @@ import { sortOddEvenByProgress } from "@/utils/practice.utils";
 import { db } from "@/database/models/db";
 import { supabaseInstance } from "@/config/supabase.config";
 import { convertLocalToSQL } from "@/utils/database.utils";
+import { getTodayDate } from "@/utils/database.utils";
 
 export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   id!: number;
@@ -24,7 +25,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   learned_at!: string | null;
   mastered_at!: string;
 
-  static async getPracticeDeck(deckSize: number = config.deckSize) {
+  static async getPracticeDeck(
+    deckSize: number = config.deckSize
+  ): Promise<UserItemLocal[]> {
     if (!db.userId) {
       throw new Error("No user is logged in.");
     }
@@ -48,7 +51,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return sortOddEvenByProgress(items.slice(0, deckSize));
   }
 
-  static async savePracticeDeck(items: UserItemLocal[]) {
+  static async savePracticeDeck(items: UserItemLocal[]): Promise<void> {
     const currentDateTime = new Date(Date.now()).toISOString();
     const updatedItems = items.map((item) => {
       return {
@@ -70,6 +73,40 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     });
 
     await db.user_items.bulkPut(updatedItems);
+  }
+
+  /**
+   *
+   * @returns
+   */
+  static async getLearnedCounts(): Promise<{
+    learnedToday: number;
+    learned: number;
+  }> {
+    if (!db.userId) {
+      throw new Error("No user is logged in.");
+    }
+
+    const today = getTodayDate();
+
+    // Count items where learned_at is null
+    const learned = await db.user_items
+      .where("user_id")
+      .equals(db.userId!)
+      .and((item: UserItemLocal) => item.learned_at !== null)
+      .count();
+
+    // Count items where learned_at is today
+    const learnedToday = await db.user_items
+      .where("user_id")
+      .equals(db.userId!)
+      .and(
+        (item: UserItemLocal) =>
+          item.learned_at !== null && item.learned_at.startsWith(today)
+      )
+      .count();
+
+    return { learnedToday, learned };
   }
 
   // Sync authenticated user scores with Supabase

@@ -17,11 +17,13 @@ export default function App() {
   const location = useLocation();
   const showFooterRoutes = ["/"];
 
+  const userId = session?.user?.id;
+
   useEffect(() => {
-    if (session?.user?.id) {
-      dataSync(session?.user?.id);
+    if (userId) {
+      dataSync(userId);
     }
-  }, [session?.user?.id]);
+  }, [userId]);
 
   useEffect(() => {
     chooseTheme(theme);

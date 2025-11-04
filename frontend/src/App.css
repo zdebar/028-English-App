@@ -72,6 +72,11 @@
     @apply dark:bg-gray-800 dark:hover:bg-gray-800;
   }
 
+  .color-audio {
+    @apply bg-white shadow-[2px_2px_2px_rgba(0,0,0,0.3)] hover:bg-gray-100 active:shadow-none;
+    @apply dark:bg-gray-700 hover:dark:bg-gray-600;
+  }
+
   /* TEXT STYLES */
   .text-notice {
     @apply font-headings text-center text-xl text-notice-light dark:text-notice-dark;

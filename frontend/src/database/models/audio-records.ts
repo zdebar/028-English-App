@@ -14,10 +14,14 @@ export default class AudioRecord
   audioBlob!: Blob;
 
   // Fetch a single record by ID
-  static async getAudio(
-    filename: string
-  ): Promise<AudioRecordLocal | undefined> {
+  static async get(filename: string): Promise<AudioRecordLocal | undefined> {
     return await db.audio_records.get(filename);
+  }
+
+  static async bulkGet(
+    keys: string[]
+  ): Promise<(AudioRecordLocal | undefined)[]> {
+    return await db.audio_records.bulkGet(keys);
   }
 
   // Save or update multiple Grammar records

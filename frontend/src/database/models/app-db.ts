@@ -22,7 +22,7 @@ export default class AppDB extends Dexie {
     this.version(1).stores({
       user_items: "id, [user_id+mastered_at+next_at]",
       grammars: "id",
-      user_scores: "id, user_id",
+      user_scores: "id, [user_id+date]",
       audio_records: "filename",
       audio_metadata: "archive_name",
     });

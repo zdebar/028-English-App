@@ -31,3 +31,21 @@ export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
     mastered_at,
   };
 }
+
+/**
+ * Generates a composite ID from user_id and date.
+ * @param userId - The user ID.
+ * @param date - The date in YYYY-MM-DD format.
+ * @returns The composite ID.
+ */
+export function generateUserScoreId(userId: string, date: string): string {
+  return `${userId}-${date}`;
+}
+
+/**
+ * Returns today's date in YYYY-MM-DD format.
+ * @returns {string} The current date in YYYY-MM-DD format.
+ */
+export function getTodayDate(): string {
+  return new Date().toISOString().split("T")[0];
+}

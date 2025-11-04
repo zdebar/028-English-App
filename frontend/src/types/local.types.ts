@@ -40,6 +40,6 @@ export interface AudioMetadataLocal {
 
 export interface UserStatsLocal {
   learnedCountToday: number;
-  learnedCountNotToday: number;
+  learnedCount: number;
   practiceCountToday: number;
 }
