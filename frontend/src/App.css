@@ -18,6 +18,8 @@
   --color-button-hover: white;
   --color-background-dark: #111827;
   --color-background-light: #f7b740;
+  --color-audio-dark: #1a2333;
+  --color-audio-light: #f8c04a;
 
   /** layout dimensions **/
   --max-width-container: 900px;
@@ -73,8 +75,9 @@
   }
 
   .color-audio {
-    @apply bg-white shadow-[2px_2px_2px_rgba(0,0,0,0.3)] hover:bg-gray-100 active:shadow-none;
-    @apply dark:bg-gray-700 hover:dark:bg-gray-600;
+    @apply border border-solid;
+    @apply hover:bg-audio-light;
+    @apply hover:dark:bg-audio-dark;
   }
 
   /* TEXT STYLES */

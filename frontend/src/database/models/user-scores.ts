@@ -37,7 +37,6 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
       // Fetch the existing record for the user and today's date
       const key = generateUserScoreId(db.userId, today);
       const existingRecord = await db.user_scores.get(key);
-      console.log("Existing record:", existingRecord);
 
       // Calculate the new item count
       const newItemCount = (existingRecord?.item_count || 0) + addCount;
@@ -51,7 +50,6 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
       };
 
       // Save the new record to IndexedDB
-      console.log("Saving new record:", newRecord);
       await db.user_scores.put(newRecord);
 
       // Return the updated record

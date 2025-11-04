@@ -5,7 +5,6 @@ import type { UserItemLocal } from "@/types/local.types";
 
 export function useUserProgress(
   array: UserItemLocal[],
-  index: number,
   reloadUserScore: () => void
 ) {
   const updateUserItemsInDB = useCallback(
@@ -20,10 +19,10 @@ export function useUserProgress(
 
       if (updatedArray.length === 0) return;
       await UserItem.savePracticeDeck(updatedArray);
-      await UserScore.addItemCount(index + 1);
+      await UserScore.addItemCount(updatedArray.length);
       reloadUserScore();
     },
-    [array, reloadUserScore, index]
+    [array, reloadUserScore]
   );
 
   return { updateUserItemsInDB };

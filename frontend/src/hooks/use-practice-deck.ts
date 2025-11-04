@@ -20,18 +20,16 @@ export function usePracticeDeck(
   }
 
   useEffect(() => {
-    if (!reload) return;
+    if (!reload || !db.userId) return;
 
-    const interval = setInterval(async () => {
-      if (db.userId) {
-        const practiceItems = await UserItem.getPracticeDeck();
-        setArray(practiceItems);
-        clearInterval(interval);
-      }
+    const fetchPracticeDeck = async () => {
+      const practiceItems = await UserItem.getPracticeDeck();
+      console.log("Fetched practice deck:", practiceItems);
+      setArray(practiceItems);
       setReload(false);
-    }, 100);
+    };
 
-    return () => clearInterval(interval);
+    fetchPracticeDeck();
   }, [reload, setReload]);
 
   return { array, index, setIndex, nextIndex };
