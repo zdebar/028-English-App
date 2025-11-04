@@ -98,18 +98,6 @@ export function useAudioManager(itemArray: UserItemLocal[]) {
     }
   }, []);
 
-  const muteAudio = useCallback(() => {
-    if (currentAudioRef.current) {
-      currentAudioRef.current.muted = true;
-    }
-  }, []);
-
-  const unmuteAudio = useCallback(() => {
-    if (currentAudioRef.current) {
-      currentAudioRef.current.muted = false;
-    }
-  }, []);
-
   const setVolume = useCallback((volume: number) => {
     volumeRef.current = Math.min(Math.max(volume, 0), 1);
   }, []);
@@ -126,8 +114,6 @@ export function useAudioManager(itemArray: UserItemLocal[]) {
   return {
     playAudio,
     stopAudio,
-    muteAudio,
-    unmuteAudio,
     setVolume,
     isPlaying,
     audioError,

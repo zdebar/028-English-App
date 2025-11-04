@@ -14,11 +14,12 @@ import { useAudioManager } from "@/hooks/use-audio-manager";
 import Loading from "@/components/loading";
 import VolumeSlider from "@/components/volume-slider";
 import config from "@/config/config";
+import GrammarCard from "@/components/grammar-card";
 
 export default function PracticeCard() {
   const [revealed, setRevealed] = useState(false);
   const [hintIndex, setHintIndex] = useState(0);
-  // const [grammarVisible, setGrammarVisible] = useState(false);
+  const [grammarVisible, setGrammarVisible] = useState(false);
   const [error, setError] = useState<string | null>(null); //
   const { userScore } = useUserStore();
   const {
@@ -43,7 +44,8 @@ export default function PracticeCard() {
     audioReload,
     setAudioReload,
   } = useAudioManager(array);
-  const isAudioDisabled = (direction && !revealed) || !currentItem?.audio;
+  const isAudioDisabled =
+    (direction && !revealed) || !currentItem?.audio || error;
 
   // Reset audio error for new item
   useEffect(() => {
@@ -117,8 +119,13 @@ export default function PracticeCard() {
   if (!arrayLength)
     return <Loading text="Nic k procvičování. Zkuste to znovu později." />;
 
-  return (
-    <div className="card-height card-width ">
+  return grammarVisible ? (
+    <GrammarCard
+      grammar_id={currentItem?.grammar_id}
+      onClose={() => setGrammarVisible(false)}
+    />
+  ) : (
+    <div className="card-height card-width">
       {/* Card content with item details */}
       <div
         className={`border border-dashed relative flex h-full flex-col items-center justify-between p-4 ${
@@ -164,7 +171,7 @@ export default function PracticeCard() {
       {/* Practice Controls */}
       <div id="practice-controls" className="flex gap-1">
         <ButtonRectangular
-          // onClick={() => setGrammarVisible(true)}
+          onClick={() => setGrammarVisible(true)}
           disabled={!hasGrammar || !revealed}
         >
           <InfoIcon />
