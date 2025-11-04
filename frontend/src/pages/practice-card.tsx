@@ -13,25 +13,23 @@ import { useUserStore } from "@/hooks/use-user";
 import { useAudioManager } from "@/hooks/use-audio-manager";
 import Loading from "@/components/loading";
 import VolumeSlider from "@/components/volume-slider";
+import config from "@/config/config";
 
 export default function PracticeCard() {
   const [revealed, setRevealed] = useState(false);
   const [hintIndex, setHintIndex] = useState(0);
-  const [error, setError] = useState<string | null>(null);
+  // const [grammarVisible, setGrammarVisible] = useState(false);
+  const [error, setError] = useState<string | null>(null); //
   const { userScore } = useUserStore();
   const {
     array,
-    setArray,
     index,
-    setIndex,
     nextIndex,
-    prevIndex,
     currentItem,
     arrayLength,
     direction,
     hasGrammar,
     userProgress,
-    itemCountToday,
     setUserProgress,
     patchItems,
     setReload,
@@ -39,13 +37,9 @@ export default function PracticeCard() {
   const {
     playAudio,
     stopAudio,
-    muteAudio,
-    unmuteAudio,
     setVolume,
-    isPlaying,
     audioError,
     setAudioError,
-    tryAudio,
     audioReload,
     setAudioReload,
   } = useAudioManager(array);
@@ -140,28 +134,47 @@ export default function PracticeCard() {
           className="relative flex w-full items-center justify-between"
         >
           <VolumeSlider setVolume={setVolume} />
-          <p className="font-light">error</p>
+          <p className="font-light">{error}</p>
         </div>
         <div id="item">
-          <p className="text-center font-bold">czech</p>
-          <p className="text-center">english</p>
-          <p className="text-center">pronunciation</p>
+          <p className="text-center font-bold">
+            {direction || revealed ? currentItem?.czech : "\u00A0"}
+          </p>
+          <p className="text-center">
+            {" "}
+            {revealed || (audioError && !direction)
+              ? currentItem?.english
+              : currentItem?.english
+                  .slice(0, hintIndex ?? currentItem?.english.length)
+                  .padEnd(currentItem?.english.length, "\u00A0")}
+          </p>
+          <p className="text-center">
+            {revealed ? currentItem?.pronunciation || "\u00A0" : "\u00A0"}
+          </p>
         </div>
         <div
           className="relative flex w-full items-center justify-between"
           id="bottom-bar"
         >
-          <p className="font-light">progress</p>
-          <p className="font-light">daily count</p>
+          <p className="font-light">{currentItem?.progress}</p>
+          <p className="font-light">{userScore?.practiceCountToday}</p>
         </div>
       </div>
 
       {/* Practice Controls */}
       <div id="practice-controls" className="flex gap-1">
-        <ButtonRectangular disabled>
+        <ButtonRectangular
+          // onClick={() => setGrammarVisible(true)}
+          disabled={!hasGrammar || !revealed}
+        >
           <InfoIcon />
         </ButtonRectangular>
-        <ButtonRectangular>
+        <ButtonRectangular
+          onClick={() => {
+            updateItemArray(config.skipProgress);
+          }}
+          disabled={!revealed}
+        >
           <SkipIcon />
         </ButtonRectangular>
       </div>
@@ -176,6 +189,8 @@ export default function PracticeCard() {
             <ButtonRectangular
               onClick={() => {
                 setRevealed(true);
+                if (direction && currentItem?.audio)
+                  playAudio(currentItem.audio);
                 setHintIndex(0);
               }}
             >
@@ -184,10 +199,14 @@ export default function PracticeCard() {
           </>
         ) : (
           <>
-            <ButtonRectangular>
+            <ButtonRectangular
+              onClick={() => updateItemArray(config.minusProgress)}
+            >
               <MinusIcon />
             </ButtonRectangular>
-            <ButtonRectangular>
+            <ButtonRectangular
+              onClick={() => updateItemArray(config.plusProgress)}
+            >
               <PlusIcon />
             </ButtonRectangular>
           </>

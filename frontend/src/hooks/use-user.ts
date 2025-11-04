@@ -5,8 +5,8 @@ import UserScore from "@/database/models/user-scores";
 import UserItem from "@/database/models/user-items";
 
 interface UserState {
-  userScore: UserStatsLocal[] | null;
-  setUserScore: (score: UserStatsLocal[] | null) => void;
+  userScore: UserStatsLocal | null;
+  setUserScore: (score: UserStatsLocal | null) => void;
   reloadUserScore: () => Promise<void>;
 }
 
@@ -22,15 +22,17 @@ export const useUserStore = create<UserState>()(
       reloadUserScore: async () => {
         const todayScore = await UserScore.getUserScoreForToday();
         const learnedCounts = await UserItem.getLearnedCounts();
+        console.log("Reloaded user score:", {
+          todayScore,
+          learnedCounts,
+        });
 
         set({
-          userScore: [
-            {
-              learnedCountToday: learnedCounts?.learnedToday || 0,
-              learnedCount: learnedCounts?.learned || 0,
-              practiceCountToday: todayScore?.item_count || 0,
-            },
-          ],
+          userScore: {
+            learnedCountToday: learnedCounts?.learnedToday || 0,
+            learnedCount: learnedCounts?.learned || 0,
+            practiceCountToday: todayScore?.item_count || 0,
+          },
         });
       },
     }),
@@ -38,17 +40,14 @@ export const useUserStore = create<UserState>()(
       name: "user-store",
       onRehydrateStorage: () => async (state) => {
         if (!state) return;
-
         if (!state.userScore) {
           const todayScore = await UserScore.getUserScoreForToday();
           const learnedCounts = await UserItem.getLearnedCounts();
-          state.setUserScore([
-            {
-              learnedCountToday: learnedCounts?.learnedToday || 0,
-              learnedCount: learnedCounts?.learned || 0,
-              practiceCountToday: todayScore?.item_count || 0,
-            },
-          ]);
+          state.setUserScore({
+            learnedCountToday: learnedCounts?.learnedToday || 0,
+            learnedCount: learnedCounts?.learned || 0,
+            practiceCountToday: todayScore?.item_count || 0,
+          });
         }
       },
     }

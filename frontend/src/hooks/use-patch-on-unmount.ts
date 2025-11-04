@@ -17,7 +17,10 @@ export function useSaveOnUnmount(
 
   useEffect(() => {
     return () => {
-      patchRef.current(updateArrayRef.current);
+      console.log("Unmounting, saving progress:", updateArrayRef.current);
+      if (updateArrayRef.current.length > 0) {
+        patchRef.current(updateArrayRef.current);
+      }
     };
   }, []);
 }

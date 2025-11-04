@@ -7,7 +7,7 @@ import type { UserItemLocal } from "@/types/local.types";
  * @returns True if direction is CZ -> EN, false otherwise.
  */
 export function alternateDirection(progress: number): boolean {
-  if (!progress) return false;
+  if (progress == null) return true;
   return progress % 2 === 0;
 }
 

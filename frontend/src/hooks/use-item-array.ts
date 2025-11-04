@@ -9,7 +9,7 @@ import { db } from "@/database/models/db";
 
 export function useItemArray() {
   const [userProgress, setUserProgress] = useState<number[]>([]);
-  const { userScore, reloadUserScore } = useUserStore();
+  const { reloadUserScore } = useUserStore();
   const [array, setArray] = useState<UserItemLocal[]>([]);
   const [index, setIndex] = useState(0);
   const [reload, setReload] = useState(true);
@@ -27,10 +27,6 @@ export function useItemArray() {
     setIndex((prev) => wrapIndex(prev + 1));
   }
 
-  function prevIndex() {
-    setIndex((prev) => wrapIndex(prev - 1));
-  }
-
   useEffect(() => {
     if (!reload) return;
 
@@ -38,7 +34,6 @@ export function useItemArray() {
       if (db.userId) {
         const practiceItems = await UserItem.getPracticeDeck();
         setArray(practiceItems);
-        console.log("Practice deck fetched:", practiceItems);
         clearInterval(interval);
       }
       setReload(false);
@@ -56,9 +51,11 @@ export function useItemArray() {
           ...item,
           progress: updatedProgress[idx],
         }));
+
+      if (updatedArray.length === 0) return;
+      await UserItem.savePracticeDeck(updatedArray);
+      await UserScore.addItemCount(index + 1);
       setUserProgress([]);
-      UserItem.savePracticeDeck(updatedArray);
-      UserScore.addItemCount(index + 1); // TDOO: test
       reloadUserScore();
     },
     [array, reloadUserScore, index]
@@ -68,17 +65,14 @@ export function useItemArray() {
 
   return {
     array,
-    setArray,
     index,
     setIndex,
     nextIndex,
-    prevIndex,
     currentItem,
     arrayLength: array.length,
     direction,
     hasGrammar,
     userProgress,
-    itemCountToday: userScore?.[0]?.practiceCountToday || 0,
     setUserProgress,
     patchItems: updateUserItemsInDB,
     reload,

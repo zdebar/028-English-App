@@ -35,7 +35,9 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
     try {
       // Fetch the existing record for the user and today's date
-      const existingRecord = await db.user_scores.get([db.userId, today]);
+      const key = generateUserScoreId(db.userId, today);
+      const existingRecord = await db.user_scores.get(key);
+      console.log("Existing record:", existingRecord);
 
       // Calculate the new item count
       const newItemCount = (existingRecord?.item_count || 0) + addCount;
@@ -49,6 +51,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
       };
 
       // Save the new record to IndexedDB
+      console.log("Saving new record:", newRecord);
       await db.user_scores.put(newRecord);
 
       // Return the updated record
@@ -63,7 +66,9 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     if (!db.userId) {
       throw new Error("No user is logged in.");
     }
-    return await db.user_scores.get([db.userId, getTodayDate()]);
+    const today = getTodayDate();
+    const key = generateUserScoreId(db.userId, today);
+    return await db.user_scores.get(key);
   }
 
   // Sync authenticated user scores with Supabase
