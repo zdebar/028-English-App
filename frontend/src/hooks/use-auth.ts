@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { supabaseInstance } from "@/config/supabase.config";
 import type { Session } from "@supabase/supabase-js";
+import { supabaseInstance } from "@/config/supabase.config";
 
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
@@ -29,5 +29,8 @@ export function useAuth() {
     }
   };
 
-  return { session, handleLogout };
+  const userId = session?.user?.id || null;
+  const userEmail = session?.user?.email || null;
+
+  return { userId, userEmail, handleLogout };
 }

@@ -28,6 +28,13 @@ export interface UserScoreLocal {
   item_count: number; // Number of items learned or completed on this date
 }
 
+export interface UserInfoLocal {
+  id: string; // Unique identifier for the user
+  name: string | null; // User's full name
+  email: string | null; // User's email address
+  picture_url: string | null; // URL to the user's profile picture
+}
+
 export interface AudioRecordLocal {
   filename: string; // Unique name with extension
   audioBlob: Blob; // The actual audio file as a Blob

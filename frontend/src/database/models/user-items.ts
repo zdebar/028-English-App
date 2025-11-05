@@ -8,6 +8,7 @@ import { db } from "@/database/models/db";
 import { supabaseInstance } from "@/config/supabase.config";
 import { convertLocalToSQL } from "@/utils/database.utils";
 import { getTodayDate } from "@/utils/database.utils";
+import { getUserId } from "@/utils/database.utils";
 
 export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   id!: number;
@@ -28,13 +29,14 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   static async getPracticeDeck(
     deckSize: number = config.deckSize
   ): Promise<UserItemLocal[]> {
-    if (!db.userId) {
-      throw new Error("No user is logged in.");
+    const userId = await getUserId();
+    if (!userId) {
+      throw new Error("User is not logged in.");
     }
 
     const items: UserItemLocal[] = await db.user_items
       .where("user_id")
-      .equals(db.userId!)
+      .equals(userId)
       .and(
         (item: UserItemLocal) => item.mastered_at === config.nullReplacementDate
       )
@@ -83,23 +85,23 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     learnedToday: number;
     learned: number;
   }> {
-    if (!db.userId) {
-      throw new Error("No user is logged in.");
+    const userId = await getUserId();
+    if (!userId) {
+      throw new Error("User is not logged in.");
     }
-
     const today = getTodayDate();
 
     // Count items where learned_at is null
     const learned = await db.user_items
       .where("user_id")
-      .equals(db.userId!)
+      .equals(userId)
       .and((item: UserItemLocal) => item.learned_at !== null)
       .count();
 
     // Count items where learned_at is today
     const learnedToday = await db.user_items
       .where("user_id")
-      .equals(db.userId!)
+      .equals(userId)
       .and(
         (item: UserItemLocal) =>
           item.learned_at !== null && item.learned_at.startsWith(today)
@@ -111,14 +113,15 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
   //
   static async clearUserItems(): Promise<void> {
-    console.log("Clearing user items for user:", db.userId);
-    if (!db.userId) {
-      throw new Error("No user is logged in.");
+    const userId = await getUserId();
+    if (!userId) {
+      throw new Error("User is not logged in.");
     }
+    console.log("Clearing user items for user:", userId);
 
     await db.user_items
       .where("user_id")
-      .equals(db.userId!)
+      .equals(userId)
       .modify((item: UserItemLocal) => {
         item.next_at = config.nullReplacementDate;
         item.mastered_at = config.nullReplacementDate;
@@ -132,14 +135,15 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   // Sync authenticated user scores with Supabase
   static async syncUserItemsData(): Promise<void> {
     try {
-      if (!db.userId) {
-        throw new Error("No user is logged in.");
+      const userId = await getUserId();
+      if (!userId) {
+        throw new Error("User is not logged in.");
       }
 
       // Step 1: Fetch all local user scores from IndexedDB
       const localUserItems = await db.user_items
         .where("user_id")
-        .equals(db.userId)
+        .equals(userId)
         .and((item: UserItemLocal) => item.started_at !== null)
         .toArray();
 
@@ -161,7 +165,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       // Step 3: Fetch updated scores from Supabase with SQL logic
       const { data: updatedUserItems, error: fetchError } =
         await supabaseInstance.rpc("get_user_items", {
-          user_id_input: db.userId,
+          user_id_input: userId,
         });
 
       if (fetchError) {

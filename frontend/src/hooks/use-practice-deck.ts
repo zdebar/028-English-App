@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import UserItem from "@/database/models/user-items";
-import { db } from "@/database/models/db";
 import type { UserItemLocal } from "@/types/local.types";
 
 export function usePracticeDeck(
@@ -20,11 +19,10 @@ export function usePracticeDeck(
   }
 
   useEffect(() => {
-    if (!reload || !db.userId) return;
+    if (!reload) return;
 
     const fetchPracticeDeck = async () => {
       const practiceItems = await UserItem.getPracticeDeck();
-      console.log("Fetched practice deck:", practiceItems);
       setArray(practiceItems);
       setReload(false);
     };

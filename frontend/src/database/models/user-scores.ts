@@ -5,6 +5,7 @@ import { supabaseInstance } from "@/config/supabase.config";
 import { db } from "@/database/models/db";
 import { generateUserScoreId } from "@/utils/database.utils";
 import { getTodayDate } from "@/utils/database.utils";
+import { getUserId } from "@/utils/database.utils";
 
 export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   id!: string;
@@ -14,13 +15,14 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
   // Fetch the latest records for the user
   static async getLatest(limit: number = 4): Promise<UserScoreLocal[]> {
-    if (!db.userId) {
-      throw new Error("No user is logged in.");
+    const userId = await getUserId();
+    if (!userId) {
+      throw new Error("User is not logged in.");
     }
 
     return await db.user_scores
       .where("user_id")
-      .equals(db.userId)
+      .equals(userId)
       .reverse()
       .limit(limit)
       .toArray();
@@ -28,14 +30,15 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
   // Increase item count for today by a specified number
   static async addItemCount(addCount: number): Promise<UserScoreLocal> {
-    if (!db.userId) {
-      throw new Error("No user is logged in.");
+    const userId = await getUserId();
+    if (!userId) {
+      throw new Error("User is not logged in.");
     }
     const today = getTodayDate();
 
     try {
       // Fetch the existing record for the user and today's date
-      const key = generateUserScoreId(db.userId, today);
+      const key = generateUserScoreId(userId, today);
       const existingRecord = await db.user_scores.get(key);
 
       // Calculate the new item count
@@ -43,8 +46,8 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
       // Create a new record or update the existing one
       const newRecord: UserScoreLocal = {
-        id: existingRecord?.id || generateUserScoreId(db.userId, today),
-        user_id: existingRecord?.user_id || db.userId,
+        id: existingRecord?.id || generateUserScoreId(userId, today),
+        user_id: existingRecord?.user_id || userId,
         date: today,
         item_count: newItemCount,
       };
@@ -61,25 +64,28 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   }
 
   static async getUserScoreForToday(): Promise<UserScoreLocal | undefined> {
-    if (!db.userId) {
-      throw new Error("No user is logged in.");
+    const userId = await getUserId();
+    if (!userId) {
+      throw new Error("User is not logged in.");
     }
     const today = getTodayDate();
-    const key = generateUserScoreId(db.userId, today);
+    const key = generateUserScoreId(userId, today);
+
     return await db.user_scores.get(key);
   }
 
   // Sync authenticated user scores with Supabase
   static async syncUserScoreData(): Promise<void> {
     try {
-      if (!db.userId) {
-        throw new Error("No user is logged in.");
+      const userId = await getUserId();
+      if (!userId) {
+        throw new Error("User is not logged in.");
       }
 
       // Step 1: Fetch all local user scores
       const localScores = await db.user_scores
         .where("user_id")
-        .equals(db.userId)
+        .equals(userId)
         .toArray();
 
       const scoresToSend = localScores.map(({ id, ...rest }) => {
@@ -101,7 +107,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
       const { data: updatedScores, error: fetchError } = await supabaseInstance
         .from("user_score")
         .select("user_id, date, item_count")
-        .eq("user_id", db.userId);
+        .eq("user_id", userId);
 
       if (fetchError) {
         console.error(

@@ -3,14 +3,10 @@ import Grammar from "@/database/models/grammar";
 import UserScore from "@/database/models/user-scores";
 import UserItem from "@/database/models/user-items";
 import AudioRecord from "@/database/models/audio-records";
+import { useUserStore } from "@/hooks/use-user";
 
-export async function dataSync(userId: string): Promise<void> {
-  if (!userId) {
-    console.warn("No valid user ID found. Skipping data sync.");
-    return;
-  }
-
-  db.userId = userId;
+export async function dataSync(): Promise<void> {
+  const reloadUserScore = useUserStore.getState().reloadUserScore;
 
   try {
     await db.open();
@@ -18,6 +14,7 @@ export async function dataSync(userId: string): Promise<void> {
     await Grammar.syncGrammarData();
     await UserScore.syncUserScoreData();
     await AudioRecord.syncAudioData();
+    await reloadUserScore();
   } catch (error) {
     console.error("Error syncing data:", error);
   }

@@ -1,10 +1,28 @@
-import { db } from "@/database/models/db";
 import type { UserItemLocal } from "@/types/local.types";
 import type { UserItemSQL } from "@/types/data.types";
+import { supabaseInstance } from "@/config/supabase.config";
 
-export function ensureUserLoggedIn() {
-  if (!db.userId) {
-    throw new Error("No user is logged in.");
+export async function getUserId(): Promise<string | null> {
+  try {
+    const {
+      data: { session },
+    } = await supabaseInstance.auth.getSession();
+    return session?.user?.id || null;
+  } catch (error) {
+    console.error("Error fetching user session:", error);
+    return null;
+  }
+}
+
+export async function getUserEmail(): Promise<string | null> {
+  try {
+    const {
+      data: { session },
+    } = await supabaseInstance.auth.getSession();
+    return session?.user?.email || null;
+  } catch (error) {
+    console.error("Error fetching user session:", error);
+    return null;
   }
 }
 

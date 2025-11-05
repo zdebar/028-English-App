@@ -21,7 +21,7 @@ export default function PracticeCard() {
   const [hintIndex, setHintIndex] = useState(0);
   const [grammarVisible, setGrammarVisible] = useState(false);
   const [error, setError] = useState<string | null>(null); //
-  const { userScore } = useUserStore();
+  const { userStats: userScore } = useUserStore();
   const {
     array,
     index,

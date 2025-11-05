@@ -13,8 +13,6 @@ export default class AppDB extends Dexie {
   audio_records!: EntityTable<AudioRecord, "filename">;
   audio_metadata!: EntityTable<AudioMetadata, "archive_name">;
 
-  userId: string | null = null;
-
   constructor() {
     super(config.dbName);
 

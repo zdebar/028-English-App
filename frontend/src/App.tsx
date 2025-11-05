@@ -1,4 +1,4 @@
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { useThemeStore } from "@/hooks/use-theme";
 import { useEffect } from "react";
 import Footer from "@/components/footer";
@@ -13,17 +13,12 @@ import { useAuth } from "@/hooks/use-auth";
 
 export default function App() {
   const { theme, chooseTheme } = useThemeStore();
-  const { session } = useAuth();
-  const location = useLocation();
   const showFooterRoutes = ["/"];
-
-  const userId = session?.user?.id;
+  const { userId } = useAuth();
 
   useEffect(() => {
-    if (userId) {
-      dataSync(userId);
-    }
-  }, [userId]);
+    dataSync();
+  }, []);
 
   useEffect(() => {
     chooseTheme(theme);
@@ -32,7 +27,7 @@ export default function App() {
   return (
     <div className="mx-auto flex h-screen max-w-container w-full flex-col justify-between">
       <Header />
-      {!session ? (
+      {!userId ? (
         <LoginScreen />
       ) : (
         <div className="relative flex h-full grow flex-col items-center overflow-y-auto">
