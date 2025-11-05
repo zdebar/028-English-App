@@ -10,6 +10,7 @@ import Home from "@/pages/home";
 import { dataSync } from "@/database/models/data-sync";
 import LoginScreen from "@/components/login-screen";
 import { useAuth } from "@/hooks/use-auth";
+import GrammarOverview from "./pages/grammar-overview";
 
 export default function App() {
   const { theme, chooseTheme } = useThemeStore();
@@ -35,6 +36,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/practice" element={<PracticeCard />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/grammar-overview" element={<GrammarOverview />} />
             <Route
               path="*"
               element={<div className="text-notice pt-8">Page not found</div>}

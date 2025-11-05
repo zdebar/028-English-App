@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import ButtonRectangular from "./button-rectangular";
 import Grammar from "@/database/models/grammar";
 import type { GrammarLocal } from "@/types/local.types";
+import { CloseIcon } from "./icons";
 
 interface GrammarCardProps {
   grammar_id: number | null;
@@ -32,15 +33,17 @@ export default function GrammarCard({ grammar_id, onClose }: GrammarCardProps) {
 
   return (
     <div className="card-height card-width flex flex-col gap-1 justify-start">
-      <div className="h-button border border-dashed flex flex-col justify-center p-4">
-        {error ? <p>{error}</p> : <p>{grammarContent?.name || "Loading..."}</p>}
+      <div className="h-button flex items-center justify-between gap-1">
+        <p className="border h-button grow border-dashed flex items-center justify-between gap-1 px-4">
+          {error ? error : grammarContent?.name || "Loading..."}
+        </p>
+        <ButtonRectangular className="w-button" onClick={onClose}>
+          <CloseIcon />
+        </ButtonRectangular>
       </div>
-      <p className=" border border-dashed w-full grow">
+      <p className=" border border-dashed w-full grow p-4">
         {grammarContent?.note}
       </p>
-      <ButtonRectangular className="" onClick={onClose}>
-        Zpět
-      </ButtonRectangular>
     </div>
   );
 }

@@ -132,6 +132,29 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       });
   }
 
+  static async clearGrammarUserItems(grammarId: number): Promise<void> {
+    const userId = await getUserId();
+    if (!userId) {
+      throw new Error("User is not logged in.");
+    }
+    console.log(
+      `Clearing user items for user: ${userId} and grammar: ${grammarId}`
+    );
+
+    await db.user_items
+      .where("user_id")
+      .equals(userId)
+      .and((item: UserItemLocal) => item.grammar_id === grammarId)
+      .modify((item: UserItemLocal) => {
+        item.next_at = config.nullReplacementDate;
+        item.mastered_at = config.nullReplacementDate;
+        item.updated_at = null;
+        item.learned_at = null;
+        item.progress = 0;
+        item.started_at = null;
+      });
+  }
+
   // Sync authenticated user scores with Supabase
   static async syncUserItemsData(): Promise<void> {
     try {

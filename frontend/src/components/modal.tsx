@@ -17,7 +17,7 @@ export function Modal({
   return (
     <div className=" fixed inset-0 bg-overlay z-1000 flex justify-center items-center">
       <div className="bg-background-light dark:bg-background-dark card-width z-1001 flex flex-col justify-between min-h-40">
-        <div className="flex flex-col justify-center items-center p-4 grow">
+        <div className="flex flex-col text-center items-center p-4 gap-2 grow">
           {children}
         </div>
         <div className="flex gap-1">
