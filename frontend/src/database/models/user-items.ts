@@ -109,6 +109,26 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return { learnedToday, learned };
   }
 
+  //
+  static async clearUserItems(): Promise<void> {
+    console.log("Clearing user items for user:", db.userId);
+    if (!db.userId) {
+      throw new Error("No user is logged in.");
+    }
+
+    await db.user_items
+      .where("user_id")
+      .equals(db.userId!)
+      .modify((item: UserItemLocal) => {
+        item.next_at = config.nullReplacementDate;
+        item.mastered_at = config.nullReplacementDate;
+        item.updated_at = null;
+        item.learned_at = null;
+        item.progress = 0;
+        item.started_at = null;
+      });
+  }
+
   // Sync authenticated user scores with Supabase
   static async syncUserItemsData(): Promise<void> {
     try {
