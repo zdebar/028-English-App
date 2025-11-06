@@ -37,7 +37,7 @@ export default function GrammarCard({ grammar_id, onClose }: GrammarCardProps) {
         <p className="border h-button grow border-dashed flex items-center justify-between gap-1 px-4">
           {error ? error : grammarContent?.name || "Loading..."}
         </p>
-        <ButtonRectangular className="w-button" onClick={onClose}>
+        <ButtonRectangular className="w-button grow-0" onClick={onClose}>
           <CloseIcon />
         </ButtonRectangular>
       </div>

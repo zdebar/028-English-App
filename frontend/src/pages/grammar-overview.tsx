@@ -1,25 +1,25 @@
 import { useState, useEffect } from "react";
-import { Modal } from "@/components/modal";
 import ButtonRectangular from "../components/button-rectangular";
 import Grammar from "@/database/models/grammar";
 import UserItem from "@/database/models/user-items";
 import type { GrammarLocal } from "@/types/local.types";
-import { CloseIcon, NextIcon, PreviousIcon } from "../components/icons";
+import { CloseIcon } from "../components/icons";
 import { useNavigate } from "react-router-dom";
+import OverviewCardArray from "@/components/overview-card";
 
 export default function GrammarOverview() {
   const [grammarArray, setGrammarArray] = useState<GrammarLocal[] | null>(null);
-  const [index, setIndex] = useState<number>(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCardOpen, setIsCardOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchGrammarArray() {
       try {
         const fetchedContent = await Grammar.getStartedGrammarList();
-        console.log(fetchedContent);
         setGrammarArray(fetchedContent);
+        console.log("Fetched grammar content:", fetchedContent);
       } catch (error) {
         setError("Chyba při načítání gramatiky.");
         console.error("Failed to fetch grammar content.", error);
@@ -29,8 +29,20 @@ export default function GrammarOverview() {
     fetchGrammarArray();
   }, []);
 
+  const handleNext = () => {
+    if (grammarArray && currentIndex < grammarArray.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
   const handleClearGrammarUserItems = () => {
-    const id = grammarArray?.[index]?.id;
+    const id = grammarArray?.[currentIndex]?.id;
     if (typeof id === "number") {
       UserItem.clearGrammarUserItems(id);
     }
@@ -38,50 +50,52 @@ export default function GrammarOverview() {
 
   return (
     <>
-      <div className="card-height card-width flex flex-col gap-1 justify-start">
-        <div className="h-button flex items-center justify-between gap-1">
-          <ButtonRectangular
-            onClick={() => setIsModalOpen(true)}
-            className="flex justify-start p-4"
-          >
-            {error ? error : grammarArray?.[index]?.name || "Loading..."}
-          </ButtonRectangular>
-          <ButtonRectangular
-            className="w-button grow-0"
-            onClick={() => navigate("/profile")}
-          >
-            <CloseIcon />
-          </ButtonRectangular>
+      {!isCardOpen ? (
+        <div className="card-width flex flex-col gap-1 justify-start">
+          <div className="h-button flex items-center justify-between gap-1">
+            <div className="flex h-button grow justify-start p-4 border border-dashed">
+              {error || "Přehled gramatiky"}
+            </div>
+            <ButtonRectangular
+              className="w-button grow-0"
+              onClick={() => navigate(-1) || navigate("/profile")}
+            >
+              <CloseIcon />
+            </ButtonRectangular>
+          </div>
+          {grammarArray?.map((grammar, index) => (
+            <ButtonRectangular
+              key={grammar.id}
+              className="text-left h-input flex justify-start p-4"
+              onClick={() => {
+                setCurrentIndex(index);
+                setIsCardOpen(true);
+              }}
+            >
+              {`${index + 1} : ${grammar.name} `}
+            </ButtonRectangular>
+          )) || (
+            <p className="text-left h-input flex justify-start p-4">
+              Žádná započatá gramatika
+            </p>
+          )}
         </div>
-        <p className=" border border-dashed w-full grow p-4">
-          {grammarArray?.[index]?.note}
-        </p>
-        <div className="flex gap-1 ">
-          <ButtonRectangular
-            disabled={index === 0}
-            onClick={() => setIndex(index - 1)}
-          >
-            <PreviousIcon />
-          </ButtonRectangular>
-          <ButtonRectangular
-            disabled={!grammarArray || index >= grammarArray.length - 1}
-            onClick={() => setIndex(index + 1)}
-          >
-            <NextIcon />
-          </ButtonRectangular>
-        </div>
-      </div>
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onConfirm={handleClearGrammarUserItems}
-      >
-        <p>
-          Opravdu chcete vymazat veškerý progress položek pro gramatiku "
-          {grammarArray?.[index].name}"?
-        </p>
-        <p>Změna již nepůjde vrátit.</p>
-      </Modal>
+      ) : (
+        <OverviewCardArray
+          inputGrammar={
+            grammarArray ? grammarArray[currentIndex] : ({} as GrammarLocal)
+          }
+          onNext={handleNext}
+          nextDisabled={
+            !grammarArray || currentIndex >= grammarArray.length - 1
+          }
+          onPrevious={handlePrevious}
+          previousDisabled={currentIndex === 0}
+          onClose={() => setIsCardOpen(false)}
+          onClearProgress={handleClearGrammarUserItems}
+          singleItem={grammarArray?.length === 1}
+        />
+      )}
     </>
   );
 }
