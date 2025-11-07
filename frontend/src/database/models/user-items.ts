@@ -36,14 +36,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       }
 
       const items: UserItemLocal[] = await db.user_items
-        .where("[user_id+next_at+mastered_at]")
-        .between(
-          [userId, "0000-00-00T00:00:00.000Z", config.nullReplacementDate],
-          [
-            userId,
-            new Date(Date.now()).toISOString(),
-            config.nullReplacementDate,
-          ]
+        .where("[user_id+mastered_at]")
+        .equals([userId, config.nullReplacementDate])
+        .filter(
+          (item) =>
+            item.next_at === config.nullReplacementDate ||
+            item.next_at <= new Date(Date.now()).toISOString()
         )
         .sortBy("sequence");
 
@@ -127,11 +125,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         throw new Error("User is not logged in.");
       }
 
-      return await db.user_items
+      const result = await db.user_items
         .where("user_id")
         .equals(userId)
-        .and((item: UserItemLocal) => item.grammar_id === null)
+        // .and((item: UserItemLocal) => item.grammar_id === null)
         .sortBy("czech");
+      return result.slice(0, 30);
     } catch (error) {
       console.error("Error fetching started vocabulary:", error);
       return [];

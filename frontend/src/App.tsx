@@ -30,12 +30,12 @@ export default function App() {
   }, [theme, chooseTheme]);
 
   return (
-    <div className="mx-auto flex h-screen max-w-container w-full flex-col justify-between">
+    <div className="mx-auto flex h-screen max-w-container w-full overflow-y-hidden flex-col justify-between">
       <Header />
       {!userId ? (
         <LoginScreen />
       ) : (
-        <div className="relative flex h-full grow flex-col items-center overflow-y-auto">
+        <div className="relative flex h-full grow flex-col items-center ">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/practice" element={<PracticeCard />} />

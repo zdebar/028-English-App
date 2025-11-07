@@ -18,7 +18,6 @@ export default function VocabularyOverview() {
     try {
       const fetchedContent = await UserItem.getUserStartedVocabulary();
       setWords(fetchedContent);
-      console.log("Fetched grammar content:", fetchedContent);
     } catch (error) {
       setError("Chyba při načítání slovíček.");
       console.error("Failed to fetch grammar content.", error);
@@ -40,8 +39,8 @@ export default function VocabularyOverview() {
   return (
     <>
       {!cardVisible ? (
-        <div className="card-width flex flex-col gap-1 justify-start">
-          <div className="h-button flex items-center justify-between gap-1">
+        <div className="card-width relative h-full overflow-y-scroll flex flex-col gap-1 justify-start">
+          <div className="h-button flex items-center justify-between gap-1 sticky top-0 bg-background-light dark:bg-background-dark ">
             <div className="flex h-button grow justify-start p-4 border border-dashed">
               {error || "Přehled gramatiky"}
             </div>
@@ -52,6 +51,7 @@ export default function VocabularyOverview() {
               <CloseIcon />
             </ButtonRectangular>
           </div>
+
           {words?.map((item, index) => (
             <ButtonRectangular
               key={item.item_id}

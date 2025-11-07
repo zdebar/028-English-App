@@ -38,7 +38,7 @@ export function useItemArray() {
 
   const currentItem = array[index];
   const direction = alternateDirection(currentItem?.progress);
-  const hasGrammar = currentItem?.grammar_id;
+  const hasGrammar = !!currentItem?.grammar_id;
 
   return {
     array,

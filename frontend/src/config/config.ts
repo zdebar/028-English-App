@@ -5,7 +5,7 @@ const config = {
   skipProgress: 100,
   dailyPracticeItems: 400,
   deckSize: 10,
-  nullReplacementDate: "9999-12-31T23:59:59", // IndexedDB does not support null values in indexes
+  nullReplacementDate: "9999-12-31T23:59:59+00:00", // IndexedDB does not support null values in indexes
   learnedAtThreshold: 5,
   masteredAtThreshold: 10,
   SRS: [
