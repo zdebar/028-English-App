@@ -21,7 +21,7 @@ export default function ButtonHeader({
     <Link
       to={to}
       className={`button-header flex items-center justify-center ${
-        isSelected && "bg-white text-light"
+        isSelected && "color-selected"
       } ${className}`}
       {...props}
     >

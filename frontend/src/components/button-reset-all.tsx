@@ -7,14 +7,18 @@ export default function ButtonResetAll() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleReset = async () => {
-    await UserItem.clearAllUserItems();
-    setIsModalOpen(false);
+    try {
+      await UserItem.clearAllUserItems();
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error clearing all user items:", error);
+    }
   };
 
   return (
     <>
       <ButtonRectangular onClick={() => setIsModalOpen(true)}>
-        Restarovat
+        Restartovat
       </ButtonRectangular>
       <Modal
         isOpen={isModalOpen}

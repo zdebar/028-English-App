@@ -82,6 +82,10 @@
     @apply hover:dark:bg-audio-dark;
   }
 
+  .color-selected {
+    @apply bg-white text-light;
+  }
+
   /* TEXT STYLES */
   .text-notice {
     @apply font-headings text-center text-xl text-notice-light dark:text-notice-dark;
