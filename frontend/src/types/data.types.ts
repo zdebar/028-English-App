@@ -31,9 +31,9 @@ export interface UserItemSQL {
   progress: number;
   started_at: string | null;
   updated_at: string | null;
-  next_at: string;
+  next_at: string | null;
   learned_at: string | null;
-  mastered_at: string;
+  mastered_at: string | null;
 }
 
 // User score table

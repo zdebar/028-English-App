@@ -1,6 +1,7 @@
 import type { UserItemLocal } from "@/types/local.types";
 import type { UserItemSQL } from "@/types/data.types";
 import { supabaseInstance } from "@/config/supabase.config";
+import config from "@/config/config";
 
 export async function getUserId(): Promise<string | null> {
   try {
@@ -29,7 +30,7 @@ export async function getUserEmail(): Promise<string | null> {
 export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
   const {
     user_id,
-    id: item_id,
+    item_id,
     progress,
     started_at,
     updated_at,
@@ -42,11 +43,12 @@ export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
     user_id,
     item_id,
     progress,
-    started_at,
-    updated_at,
-    next_at,
-    learned_at,
-    mastered_at,
+    started_at: started_at === config.nullReplacementDate ? null : started_at,
+    updated_at: updated_at === config.nullReplacementDate ? null : updated_at,
+    next_at: next_at === config.nullReplacementDate ? null : next_at,
+    learned_at: learned_at === config.nullReplacementDate ? null : learned_at,
+    mastered_at:
+      mastered_at === config.nullReplacementDate ? null : mastered_at,
   };
 }
 

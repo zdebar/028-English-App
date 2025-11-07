@@ -19,8 +19,11 @@ export default function App() {
   const { userId } = useAuth();
 
   useEffect(() => {
-    dataSync();
-  }, []);
+    if (userId) {
+      console.log("User ID detected, starting data sync.");
+      dataSync();
+    }
+  }, [userId]);
 
   useEffect(() => {
     chooseTheme(theme);

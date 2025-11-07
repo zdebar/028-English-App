@@ -1,5 +1,5 @@
 export interface UserItemLocal {
-  id: number;
+  item_id: number;
   user_id: string;
   czech: string;
   english: string;
@@ -8,10 +8,10 @@ export interface UserItemLocal {
   sequence: number;
   grammar_id: number | null;
   progress: number;
-  started_at: string | null; // ISO 8601: "2025-10-24T12:00:00Z"
-  updated_at: string | null; // ISO 8601: "2025-10-25T12:00:00Z"
+  started_at: string; // ISO 8601: "2025-10-24T12:00:00Z"
+  updated_at: string; // ISO 8601: "2025-10-25T12:00:00Z"
   next_at: string; // ISO 8601: "2025-10-26T12:00:00Z"
-  learned_at: string | null; // ISO 8601: "2025-10-27T12:00:00Z"
+  learned_at: string; // ISO 8601: "2025-10-27T12:00:00Z"
   mastered_at: string; // ISO 8601: "2025-10-28T12:00:00Z"
 }
 
@@ -46,7 +46,7 @@ export interface AudioMetadataLocal {
 }
 
 export interface UserStatsLocal {
-  learnedCountToday: number;
-  learnedCount: number;
-  practiceCountToday: number;
+  learnedCountToday: number | null;
+  learnedCount: number | null;
+  practiceCountToday: number | null;
 }

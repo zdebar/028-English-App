@@ -30,9 +30,9 @@ export default function VocabularyOverview() {
   }, []);
 
   const handleClearUserItem = async () => {
-    const id = words?.[currentIndex]?.id;
-    if (typeof id === "number") {
-      UserItem.clearUserItem(id);
+    const itemId = words?.[currentIndex]?.item_id;
+    if (typeof itemId === "number") {
+      UserItem.clearUserItem(itemId);
       await fetchVocabularyArray();
     }
   };
@@ -52,16 +52,16 @@ export default function VocabularyOverview() {
               <CloseIcon />
             </ButtonRectangular>
           </div>
-          {words?.map((grammar, index) => (
+          {words?.map((item, index) => (
             <ButtonRectangular
-              key={grammar.id}
+              key={item.item_id}
               className="text-left h-input flex justify-start p-4"
               onClick={() => {
                 setCurrentIndex(index);
                 setCardVisible(true);
               }}
             >
-              {`${index + 1} : ${grammar.czech} / ${grammar.english} `}
+              {`${index + 1} : ${item.czech} / ${item.english} `}
             </ButtonRectangular>
           )) || (
             <p className="text-left h-input flex justify-start p-4">

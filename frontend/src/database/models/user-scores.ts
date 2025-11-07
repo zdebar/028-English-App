@@ -15,28 +15,33 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
   // Fetch the latest records for the user
   static async getLatest(limit: number = 4): Promise<UserScoreLocal[]> {
-    const userId = await getUserId();
-    if (!userId) {
-      throw new Error("User is not logged in.");
-    }
+    try {
+      const userId = await getUserId();
+      if (!userId) {
+        throw new Error("User is not logged in.");
+      }
 
-    return await db.user_scores
-      .where("user_id")
-      .equals(userId)
-      .reverse()
-      .limit(limit)
-      .toArray();
+      return await db.user_scores
+        .where("user_id")
+        .equals(userId)
+        .reverse()
+        .limit(limit)
+        .toArray();
+    } catch (error) {
+      console.error("Error fetching latest user scores:", error);
+      return [];
+    }
   }
 
   // Increase item count for today by a specified number
-  static async addItemCount(addCount: number): Promise<UserScoreLocal> {
-    const userId = await getUserId();
-    if (!userId) {
-      throw new Error("User is not logged in.");
-    }
-    const today = getTodayDate();
-
+  static async addItemCount(addCount: number): Promise<void> {
     try {
+      const userId = await getUserId();
+      if (!userId) {
+        throw new Error("User is not logged in.");
+      }
+      const today = getTodayDate();
+
       // Fetch the existing record for the user and today's date
       const key = generateUserScoreId(userId, today);
       const existingRecord = await db.user_scores.get(key);
@@ -54,24 +59,25 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
       // Save the new record to IndexedDB
       await db.user_scores.put(newRecord);
-
-      // Return the updated record
-      return newRecord;
     } catch (error) {
       console.error("Error updating item count:", error);
-      throw error;
     }
   }
 
   static async getUserScoreForToday(): Promise<UserScoreLocal | undefined> {
-    const userId = await getUserId();
-    if (!userId) {
-      throw new Error("User is not logged in.");
-    }
-    const today = getTodayDate();
-    const key = generateUserScoreId(userId, today);
+    try {
+      const userId = await getUserId();
+      if (!userId) {
+        throw new Error("User is not logged in.");
+      }
+      const today = getTodayDate();
+      const key = generateUserScoreId(userId, today);
 
-    return await db.user_scores.get(key);
+      return await db.user_scores.get(key);
+    } catch (error) {
+      console.error("Error fetching user score for today:", error);
+      return undefined;
+    }
   }
 
   // Sync authenticated user scores with Supabase
