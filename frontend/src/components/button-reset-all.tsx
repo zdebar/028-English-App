@@ -7,7 +7,7 @@ export default function ButtonResetAll() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleReset = async () => {
-    await UserItem.clearUserItems();
+    await UserItem.clearAllUserItems();
     setIsModalOpen(false);
   };
 

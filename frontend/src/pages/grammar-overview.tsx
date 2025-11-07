@@ -32,7 +32,7 @@ export default function GrammarOverview() {
   const handleClearGrammarUserItems = async () => {
     const id = grammarArray?.[currentIndex]?.id;
     if (typeof id === "number") {
-      UserItem.clearGrammarUserItems(id);
+      UserItem.clearGrammarItems(id);
       await fetchGrammarArray();
     }
   };

@@ -25,7 +25,9 @@ export default function Profile() {
       <ButtonRectangular onClick={() => navigate("/grammar-overview")}>
         Přehled gramatiky
       </ButtonRectangular>
-      <ButtonRectangular>Přehled slovíček</ButtonRectangular>
+      <ButtonRectangular onClick={() => navigate("/vocabulary-overview")}>
+        Přehled slovíček
+      </ButtonRectangular>
       <ButtonSignout />
     </div>
   );

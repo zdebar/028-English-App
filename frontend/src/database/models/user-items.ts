@@ -77,10 +77,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     await db.user_items.bulkPut(updatedItems);
   }
 
-  /**
-   *
-   * @returns
-   */
   static async getLearnedCounts(): Promise<{
     learnedToday: number;
     learned: number;
@@ -111,8 +107,20 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return { learnedToday, learned };
   }
 
-  //
-  static async clearUserItems(): Promise<void> {
+  static async getUserStartedVocabulary(): Promise<UserItemLocal[]> {
+    const userId = await getUserId();
+    if (!userId) {
+      throw new Error("User is not logged in.");
+    }
+
+    return await db.user_items
+      .where("user_id")
+      .equals(userId)
+      .and((item: UserItemLocal) => item.grammar_id === null)
+      .sortBy("czech");
+  }
+
+  static async clearAllUserItems(): Promise<void> {
     const userId = await getUserId();
     if (!userId) {
       throw new Error("User is not logged in.");
@@ -132,7 +140,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       });
   }
 
-  static async clearGrammarUserItems(grammarId: number): Promise<void> {
+  static async clearGrammarItems(grammarId: number): Promise<void> {
     const userId = await getUserId();
     if (!userId) {
       throw new Error("User is not logged in.");
@@ -153,6 +161,31 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         item.progress = 0;
         item.started_at = null;
       });
+  }
+
+  static async clearUserItem(itemId: number): Promise<void> {
+    const userId = await getUserId();
+    if (!userId) {
+      throw new Error("User is not logged in.");
+    }
+    console.log(`Clearing user item for user: ${userId} and itemId: ${itemId}`);
+
+    const modifiedCount = await db.user_items
+      .where("id")
+      .equals(itemId)
+      .and((item: UserItemLocal) => item.user_id === userId)
+      .modify((item: UserItemLocal) => {
+        item.next_at = config.nullReplacementDate;
+        item.mastered_at = config.nullReplacementDate;
+        item.updated_at = null;
+        item.learned_at = null;
+        item.progress = 0;
+        item.started_at = null;
+      });
+
+    if (modifiedCount === 0) {
+      console.warn(`No user item found for id: ${itemId} and user: ${userId}`);
+    }
   }
 
   // Sync authenticated user scores with Supabase
