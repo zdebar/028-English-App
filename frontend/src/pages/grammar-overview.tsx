@@ -9,48 +9,37 @@ import OverviewCardArray from "@/components/overview-card";
 
 export default function GrammarOverview() {
   const [grammarArray, setGrammarArray] = useState<GrammarLocal[] | null>(null);
+  const [cardVisible, setCardVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [isCardOpen, setIsCardOpen] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    async function fetchGrammarArray() {
-      try {
-        const fetchedContent = await Grammar.getStartedGrammarList();
-        setGrammarArray(fetchedContent);
-        console.log("Fetched grammar content:", fetchedContent);
-      } catch (error) {
-        setError("Chyba při načítání gramatiky.");
-        console.error("Failed to fetch grammar content.", error);
-      }
+  const fetchGrammarArray = async () => {
+    try {
+      const fetchedContent = await Grammar.getStartedGrammarList();
+      setGrammarArray(fetchedContent);
+      console.log("Fetched grammar content:", fetchedContent);
+    } catch (error) {
+      setError("Chyba při načítání gramatiky.");
+      console.error("Failed to fetch grammar content.", error);
     }
+  };
 
+  useEffect(() => {
     fetchGrammarArray();
   }, []);
 
-  const handleNext = () => {
-    if (grammarArray && currentIndex < grammarArray.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-    }
-  };
-
-  const handleClearGrammarUserItems = () => {
+  const handleClearGrammarUserItems = async () => {
     const id = grammarArray?.[currentIndex]?.id;
     if (typeof id === "number") {
       UserItem.clearGrammarUserItems(id);
+      await fetchGrammarArray();
     }
   };
 
   return (
     <>
-      {!isCardOpen ? (
+      {!cardVisible ? (
         <div className="card-width flex flex-col gap-1 justify-start">
           <div className="h-button flex items-center justify-between gap-1">
             <div className="flex h-button grow justify-start p-4 border border-dashed">
@@ -58,7 +47,7 @@ export default function GrammarOverview() {
             </div>
             <ButtonRectangular
               className="w-button grow-0"
-              onClick={() => navigate(-1) || navigate("/profile")}
+              onClick={() => navigate("/profile")}
             >
               <CloseIcon />
             </ButtonRectangular>
@@ -69,7 +58,7 @@ export default function GrammarOverview() {
               className="text-left h-input flex justify-start p-4"
               onClick={() => {
                 setCurrentIndex(index);
-                setIsCardOpen(true);
+                setCardVisible(true);
               }}
             >
               {`${index + 1} : ${grammar.name} `}
@@ -82,18 +71,10 @@ export default function GrammarOverview() {
         </div>
       ) : (
         <OverviewCardArray
-          inputGrammar={
-            grammarArray ? grammarArray[currentIndex] : ({} as GrammarLocal)
-          }
-          onNext={handleNext}
-          nextDisabled={
-            !grammarArray || currentIndex >= grammarArray.length - 1
-          }
-          onPrevious={handlePrevious}
-          previousDisabled={currentIndex === 0}
-          onClose={() => setIsCardOpen(false)}
-          onClearProgress={handleClearGrammarUserItems}
-          singleItem={grammarArray?.length === 1}
+          titleText={grammarArray?.[currentIndex].name}
+          bodyText={grammarArray?.[currentIndex].note}
+          onClose={() => setCardVisible(false)}
+          handleReset={handleClearGrammarUserItems}
         />
       )}
     </>

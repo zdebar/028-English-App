@@ -4,16 +4,16 @@ import { CloseIcon } from "@/components/icons";
 import { Modal } from "@/components/modal";
 
 interface OverviewCardArrayProps {
-  titleText: string;
-  bodyText: string;
+  titleText?: string;
+  bodyText?: string;
   handleReset?: () => void;
   onClose: () => void;
 }
 
 export default function OverviewCardArray({
-  titleText,
-  bodyText,
-  handleReset = () => {},
+  titleText = "bez názvu",
+  bodyText = "bez obsahu",
+  handleReset,
   onClose,
 }: OverviewCardArrayProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,9 +38,16 @@ export default function OverviewCardArray({
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onConfirm={handleReset}
+        onConfirm={() => {
+          if (handleReset) {
+            handleReset();
+          }
+          console.log("Reset confirmed");
+          setIsModalOpen(false);
+          onClose();
+        }}
       >
-        <p>Opravdu chcete vymazat veškerý progress pro:</p>
+        <p>Opravdu chcete vymazat veškerý progress</p>
         <p>"{titleText}" ?</p>
         <p>Změna již nepůjde vrátit.</p>
       </Modal>

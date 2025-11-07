@@ -22,7 +22,7 @@ export function Modal({
         </div>
         <div className="flex gap-1">
           <ButtonRectangular onClick={onClose}>Ne</ButtonRectangular>
-          <ButtonRectangular onAbort={onConfirm}>Ano</ButtonRectangular>
+          <ButtonRectangular onClick={onConfirm}>Ano</ButtonRectangular>
         </div>
       </div>
     </div>

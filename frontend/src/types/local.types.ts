@@ -22,14 +22,14 @@ export interface GrammarLocal {
 }
 
 export interface UserScoreLocal {
-  id: string;
+  id: string; // uuid for the user
   user_id: string; // Foreign key referencing the user
   date: string; // Date of the score in ISO format (e.g., "YYYY-MM-DD")
   item_count: number; // Number of items learned or completed on this date
 }
 
 export interface UserInfoLocal {
-  id: string; // Unique identifier for the user
+  id: string; // uuid for the user
   name: string | null; // User's full name
   email: string | null; // User's email address
   picture_url: string | null; // URL to the user's profile picture
