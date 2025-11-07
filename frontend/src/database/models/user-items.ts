@@ -170,9 +170,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       if (!userId) {
         throw new Error("User is not logged in.");
       }
-      console.log(
-        `Clearing user items for user: ${userId} and grammar: ${grammarId}`
-      );
 
       await db.user_items
         .where("user_id")

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import ButtonRectangular from "../components/button-rectangular";
+import ButtonRectangular from "@/components/button-rectangular";
 import UserItem from "@/database/models/user-items";
 import type { UserItemLocal } from "@/types/local.types";
-import { CloseIcon } from "../components/icons";
+import { CloseIcon } from "@/components/icons";
 import { useNavigate } from "react-router-dom";
 import OverviewCard from "@/components/overview-card";
 import DirectionDropdown from "@/components/direction-dropdown";
@@ -22,7 +22,7 @@ export default function VocabularyOverview() {
     "czech"
   );
   const navigate = useNavigate();
-  const currentWord = words ? words[currentIndex] : null;
+  const selectedWord = filteredWords ? filteredWords[currentIndex] : null;
 
   const fetchVocabularyArray = async () => {
     try {
@@ -55,7 +55,7 @@ export default function VocabularyOverview() {
   }, [words, searchTerm, displayField]);
 
   const handleClearUserItem = async () => {
-    const itemId = currentWord?.item_id;
+    const itemId = selectedWord?.item_id;
     if (typeof itemId === "number") {
       UserItem.clearUserItem(itemId);
       await fetchVocabularyArray();
@@ -128,7 +128,7 @@ export default function VocabularyOverview() {
         </div>
       ) : (
         <OverviewCard
-          titleText={words?.[currentIndex].czech}
+          titleText={selectedWord?.czech}
           onClose={() => setCardVisible(false)}
           handleReset={handleClearUserItem}
         >
@@ -137,50 +137,50 @@ export default function VocabularyOverview() {
               <SettingProperty
                 label="item_id"
                 className="h-attribute"
-                value={currentWord?.item_id}
+                value={selectedWord?.item_id}
               />
               <SettingProperty
                 label="česky"
                 className="h-attribute"
-                value={currentWord?.czech}
+                value={selectedWord?.czech}
               />
-              <SettingProperty label="anglicky" value={currentWord?.english} />
+              <SettingProperty label="anglicky" value={selectedWord?.english} />
               <SettingProperty
                 label="výslovnost"
                 className="h-attribute"
-                value={currentWord?.pronunciation}
+                value={selectedWord?.pronunciation}
               />
               <SettingProperty
                 label="pokrok"
                 className="h-attribute"
-                value={currentWord?.progress}
+                value={selectedWord?.progress}
               />
             </div>
             <div>
               <SettingProperty
                 label="start"
                 className="h-attribute"
-                value={shortenDate(currentWord?.started_at)}
+                value={shortenDate(selectedWord?.started_at)}
               />
               <SettingProperty
                 label="změněno"
                 className="h-attribute"
-                value={shortenDate(currentWord?.updated_at)}
+                value={shortenDate(selectedWord?.updated_at)}
               />
               <SettingProperty
                 label="další"
                 className="h-attribute"
-                value={shortenDate(currentWord?.next_at)}
+                value={shortenDate(selectedWord?.next_at)}
               />
               <SettingProperty
                 label="naučeno"
                 className="h-attribute"
-                value={shortenDate(currentWord?.learned_at)}
+                value={shortenDate(selectedWord?.learned_at)}
               />
               <SettingProperty
                 label="ukončeno"
                 className="h-attribute"
-                value={shortenDate(currentWord?.mastered_at)}
+                value={shortenDate(selectedWord?.mastered_at)}
               />
             </div>
           </div>

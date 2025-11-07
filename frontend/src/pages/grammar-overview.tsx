@@ -18,7 +18,6 @@ export default function GrammarOverview() {
     try {
       const fetchedContent = await Grammar.getStartedGrammarList();
       setGrammarArray(fetchedContent);
-      console.log("Fetched grammar content:", fetchedContent);
     } catch (error) {
       setError("Chyba při načítání gramatiky.");
       console.error("Failed to fetch grammar content.", error);
