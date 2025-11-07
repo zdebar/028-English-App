@@ -35,6 +35,7 @@
   --width-button: 3.25rem;
   --height-button: 3.25rem;
   --height-input: 2.5rem;
+  --height-attribute: 1.5rem;
 }
 
 @layer base {

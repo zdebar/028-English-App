@@ -29,10 +29,8 @@ export default function GrammarCard({ grammar_id, onClose }: GrammarCardProps) {
   }, [grammar_id]);
 
   return (
-    <OverviewCard
-      titleText={error ? error : grammar?.name}
-      bodyText={grammar?.note}
-      onClose={onClose}
-    />
+    <OverviewCard titleText={error ? error : grammar?.name} onClose={onClose}>
+      {grammar?.note}
+    </OverviewCard>
   );
 }

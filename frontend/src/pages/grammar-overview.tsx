@@ -72,10 +72,11 @@ export default function GrammarOverview() {
       ) : (
         <OverviewCard
           titleText={grammarArray?.[currentIndex].name}
-          bodyText={grammarArray?.[currentIndex].note}
           onClose={() => setCardVisible(false)}
           handleReset={handleClearGrammarUserItems}
-        />
+        >
+          {grammarArray?.[currentIndex].note}
+        </OverviewCard>
       )}
     </>
   );

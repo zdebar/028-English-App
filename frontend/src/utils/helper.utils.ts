@@ -1,4 +1,5 @@
 import { supabaseInstance } from "@/config/supabase.config";
+import config from "@/config/config";
 
 export async function fetchStorage(
   bucketName: string,
@@ -18,3 +19,9 @@ export async function fetchStorage(
 
   return data;
 }
+
+export const shortenDate = (isoDate: string | undefined): string => {
+  if (!isoDate || isoDate === config.nullReplacementDate)
+    return "není k dispozici";
+  return isoDate.split("T")[0];
+};

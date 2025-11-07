@@ -1,6 +1,6 @@
 interface SettingPropertyProps {
   label: string;
-  value: string | null | undefined;
+  value: string | number | null | undefined;
   className?: string;
 }
 
@@ -10,8 +10,8 @@ export default function SettingProperty({
   className = "",
 }: SettingPropertyProps) {
   return (
-    <div className={`h-input flex items-center ${className}`}>
-      <p className={`inline-block w-25 shrink-0 pl-2`}>{label}</p>
+    <div className={`flex items-center ${className}`}>
+      <p className={`inline-block w-35 font-bold shrink-0 `}>{label}</p>
       <p>{value}</p>
     </div>
   );

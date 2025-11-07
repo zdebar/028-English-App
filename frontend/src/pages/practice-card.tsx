@@ -69,6 +69,7 @@ export default function PracticeCard() {
           await patchItems(updatedProgress);
           setAudioReload(true);
           setReload(true);
+          setUserProgress([]);
         } else {
           setUserProgress(updatedProgress);
           nextIndex();
@@ -164,7 +165,9 @@ export default function PracticeCard() {
           id="bottom-bar"
         >
           <p className="font-light">{currentItem?.progress}</p>
-          <p className="font-light">{userScore?.practiceCountToday}</p>
+          <p className="font-light">
+            {(userScore?.practiceCountToday || 0) + index}
+          </p>
         </div>
       </div>
 

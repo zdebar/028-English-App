@@ -9,6 +9,7 @@ export function useUserProgress(
 ) {
   const updateUserItemsInDB = useCallback(
     async (updatedProgress: number[]) => {
+      console.log("Updating user items in DB with progress:", updatedProgress);
       if (array.length === 0) return;
       const updatedArray = array
         .filter((_, idx) => idx < updatedProgress.length)

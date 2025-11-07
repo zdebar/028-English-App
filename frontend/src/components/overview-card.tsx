@@ -5,14 +5,16 @@ import { Modal } from "@/components/modal";
 
 interface OverviewCardProps {
   titleText?: string;
-  bodyText?: string;
+  children?: React.ReactNode;
+  className?: string;
   handleReset?: () => void;
   onClose: () => void;
 }
 
 export default function OverviewCard({
   titleText = "bez názvu",
-  bodyText = "bez obsahu",
+  children,
+  className = "",
   handleReset,
   onClose,
 }: OverviewCardProps) {
@@ -20,7 +22,9 @@ export default function OverviewCard({
 
   return (
     <>
-      <div className="card-height card-width flex flex-col gap-1 justify-start">
+      <div
+        className={`card-height card-width flex flex-col gap-1 justify-start ${className}`}
+      >
         <div className="h-button flex items-center justify-between gap-1">
           <ButtonRectangular
             disabled={!handleReset}
@@ -33,7 +37,7 @@ export default function OverviewCard({
             <CloseIcon />
           </ButtonRectangular>
         </div>
-        <p className=" border border-dashed w-full grow p-4">{bodyText}</p>
+        <p className=" border border-dashed w-full grow p-4">{children}</p>
       </div>
       <Modal
         isOpen={isModalOpen}

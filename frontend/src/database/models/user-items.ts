@@ -60,7 +60,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
           ...item,
           progress: item.progress,
           next_at: getNextAt(item.progress),
-          started_at: item.started_at || currentDateTime,
+          started_at:
+            item.started_at === config.nullReplacementDate
+              ? currentDateTime
+              : item.started_at,
           updated_at: currentDateTime,
           learned_at:
             item.learned_at === config.nullReplacementDate &&
@@ -128,7 +131,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       const result = await db.user_items
         .where("user_id")
         .equals(userId)
-        // .and((item: UserItemLocal) => item.grammar_id === null)
+        .and((item: UserItemLocal) => item.grammar_id === null)
         .sortBy("czech");
       return result.slice(0, 30);
     } catch (error) {

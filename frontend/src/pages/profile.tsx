@@ -20,7 +20,11 @@ export default function Profile() {
 
   return (
     <div className="card-width">
-      <SettingProperty label="Uživatel:" value={userEmail} />
+      <SettingProperty
+        label="Uživatel:"
+        className="h-input"
+        value={userEmail}
+      />
       <ButtonResetAll />
       <ButtonRectangular onClick={() => navigate("/grammar-overview")}>
         Přehled gramatiky
