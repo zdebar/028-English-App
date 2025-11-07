@@ -5,7 +5,7 @@ import UserItem from "@/database/models/user-items";
 import type { GrammarLocal } from "@/types/local.types";
 import { CloseIcon } from "../components/icons";
 import { useNavigate } from "react-router-dom";
-import OverviewCardArray from "@/components/overview-card";
+import OverviewCard from "@/components/overview-card";
 
 export default function GrammarOverview() {
   const [grammarArray, setGrammarArray] = useState<GrammarLocal[] | null>(null);
@@ -70,7 +70,7 @@ export default function GrammarOverview() {
           )}
         </div>
       ) : (
-        <OverviewCardArray
+        <OverviewCard
           titleText={grammarArray?.[currentIndex].name}
           bodyText={grammarArray?.[currentIndex].note}
           onClose={() => setCardVisible(false)}

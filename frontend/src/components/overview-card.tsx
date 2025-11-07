@@ -3,19 +3,19 @@ import ButtonRectangular from "@/components/button-rectangular";
 import { CloseIcon } from "@/components/icons";
 import { Modal } from "@/components/modal";
 
-interface OverviewCardArrayProps {
+interface OverviewCardProps {
   titleText?: string;
   bodyText?: string;
   handleReset?: () => void;
   onClose: () => void;
 }
 
-export default function OverviewCardArray({
+export default function OverviewCard({
   titleText = "bez názvu",
   bodyText = "bez obsahu",
   handleReset,
   onClose,
-}: OverviewCardArrayProps) {
+}: OverviewCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
