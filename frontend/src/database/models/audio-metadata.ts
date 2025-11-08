@@ -10,8 +10,17 @@ export default class AudioMetadata
   archive_name!: string;
   fetched_at!: string;
 
-  // Static method to check if an archive has already been fetched
+  /**
+   * Checks if an audio archive has already been fetched.
+   * @param archiveName the name of the checked audio archive
+   * @returns true if the archive has been fetched, otherwise false
+   */
   static async isFetched(archiveName: string): Promise<boolean> {
+    if (!archiveName) {
+      console.error("Invalid archive name provided.");
+      return false;
+    }
+
     try {
       const metadata = await db.audio_metadata.get(archiveName);
       return !!metadata;
@@ -24,8 +33,17 @@ export default class AudioMetadata
     }
   }
 
-  // Static method to mark an archive as fetched
+  /**
+   * Marks an audio archive as fetched by storing its metadata.
+   * @param archiveName the name of the fetched audio archive
+   * @returns void
+   */
   static async markAsFetched(archiveName: string): Promise<void> {
+    if (!archiveName) {
+      console.error("Invalid archive name provided.");
+      return;
+    }
+
     try {
       const fetchedAt = new Date().toISOString();
       await db.audio_metadata.put({
