@@ -33,7 +33,7 @@ export default function App() {
   }, [theme, chooseTheme]);
 
   return (
-    <div className="mx-auto flex h-screen max-w-container w-full overflow-y-hidden flex-col justify-between">
+    <div className="mx-auto flex h-screen max-w-container w-full flex-col justify-between">
       <ToastContainer position="top-right" autoClose={5000} />
       <Header />
       <div className="relative flex h-full grow flex-col  gap-4 items-center ">
