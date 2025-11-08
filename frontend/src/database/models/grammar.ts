@@ -11,9 +11,19 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   name!: string;
   note!: string;
 
+  /**
+   * Returns a grammar record by its ID.
+   * @param grammarId fetch grammar by ID
+   * @returns A promise that resolves to the grammar record or `undefined` if not found.
+   */
   static async getGrammarById(
     grammarId: number
   ): Promise<GrammarLocal | undefined> {
+    if (!grammarId || grammarId <= 0) {
+      console.error("Invalid grammar ID provided.");
+      return undefined;
+    }
+
     try {
       return await db.grammars.get(grammarId);
     } catch (error) {
@@ -22,6 +32,10 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
     }
   }
 
+  /**
+   * Fetches the list of grammars that the user has started.
+   * @returns Array of started GrammarLocal records
+   */
   static async getStartedGrammarList(): Promise<GrammarLocal[]> {
     try {
       const userId = await getUserId();
@@ -55,6 +69,10 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
     }
   }
 
+  /**
+   * Synchronizes grammar data from Supabase to the local IndexedDB.
+   * @returns void
+   */
   static async syncGrammarData(): Promise<void> {
     try {
       const {
