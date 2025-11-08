@@ -1,13 +1,29 @@
 import config from "@/config/config";
 
+/**
+ * Calculates the items count in last started lesson before today.
+ * @param countNotToday Learned items count excluding today's items.
+ * @returns Returns the items count in last started lesson before today.
+ */
 export function getPreviousCount(countNotToday: number): number {
   return countNotToday % config.lessonSize;
 }
 
+/**
+ * Calculates the last started lesson number before today.
+ * @param countNotToday Learned items count excluding today's items.
+ * @returns Returns last started lesson number before today.
+ */
 export function getLessonStarted(countNotToday: number): number {
   return Math.floor(countNotToday / config.lessonSize);
 }
 
+/**
+ * Calculates today's lessons items counts.
+ * @param previousCount Items count in last started lesson before today
+ * @param todayCount Today's learned items count
+ * @returns Array of items counts in today's lessons
+ */
 export function getTodayLessonItems(
   previousCount: number,
   todayCount: number
@@ -34,6 +50,12 @@ export function getTodayLessonItems(
   return lessonCounts;
 }
 
+/**
+ * Calculates lesson progress data.
+ * @param all Lerned items count including today's items
+ * @param today Learned items count for today
+ * @returns Array of tuples [lessonNumber, previousCount, todayCount]
+ */
 export function getLessonProgress(
   all: number,
   today: number

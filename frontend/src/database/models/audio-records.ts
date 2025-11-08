@@ -4,7 +4,7 @@ import type { AudioRecordLocal } from "@/types/local.types";
 import AudioMetadata from "@/database/models/audio-metadata";
 import { db } from "@/database/models/db";
 import config from "@/config/config";
-import { fetchStorage } from "@/utils/helper.utils";
+import { fetchStorage } from "@/utils/database.utils";
 
 export default class AudioRecord
   extends Entity<AppDB>

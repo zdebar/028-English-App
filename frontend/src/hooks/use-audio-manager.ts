@@ -2,6 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { UserItemLocal } from "@/types/local.types";
 import AudioRecord from "@/database/models/audio-records";
 
+/**
+ * Manages audio playback and caching for a list of user items.
+ * @param itemArray Practice deck items containing audio references.
+ */
 export function useAudioManager(itemArray: UserItemLocal[]) {
   const audioCacheRef = useRef<Map<string, HTMLAudioElement>>(new Map());
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);

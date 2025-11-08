@@ -4,6 +4,9 @@ import { useUserStore } from "@/hooks/use-user";
 import { usePracticeDeck } from "@/hooks/use-practice-deck";
 import { useUserProgress } from "@/hooks/use-user-progress";
 
+/**
+ * Manages the Practice Deck and User Progress.
+ */
 export function useItemArray() {
   const [reload, setReload] = useState(true);
   const { reloadUserScore } = useUserStore();
@@ -17,12 +20,10 @@ export function useItemArray() {
   const patchRef = useRef(updateUserItemsInDB);
   const updateArrayRef = useRef(userProgress);
 
-  // Keep patchRef updated with the latest `updateUserItemsInDB`
   useEffect(() => {
     patchRef.current = updateUserItemsInDB;
   }, [updateUserItemsInDB]);
 
-  // Keep updateArrayRef updated with the latest `userProgress`
   useEffect(() => {
     updateArrayRef.current = userProgress;
   }, [userProgress]);

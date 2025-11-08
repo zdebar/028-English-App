@@ -12,7 +12,9 @@ export function alternateDirection(progress: number): boolean {
 }
 
 /**
- * Returns the next review date based on the progress and SRS intervals.
+ * Returns the next review date based on the user's progress with randomness.
+ * @param progress Item's progress.
+ * @returns Date string in ISO format for the next review.
  */
 export function getNextAt(progress: number): string {
   const interval = config.SRS[progress];
@@ -26,6 +28,8 @@ export function getNextAt(progress: number): string {
 
 /**
  * Sorts practice items by odd progress first.
+ * @param items Array of UserItemLocal to be sorted.
+ * @returns Sorted array of UserItemLocal.
  */
 export function sortOddEvenByProgress(items: UserItemLocal[]): UserItemLocal[] {
   return items.sort((a, b) => {

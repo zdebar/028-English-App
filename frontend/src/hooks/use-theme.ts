@@ -7,6 +7,9 @@ interface ThemeState {
   chooseTheme: (newTheme: UserTheme) => void;
 }
 
+/**
+ * Zustand store to manage user theme preferences.
+ */
 export const useThemeStore = create<ThemeState>((set) => {
   const applyTheme = (theme: UserTheme) => {
     // Apply the theme to the document

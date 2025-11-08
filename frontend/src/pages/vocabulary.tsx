@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import OverviewCard from "@/components/overview-card";
 import DirectionDropdown from "@/components/direction-dropdown";
 import SettingProperty from "@/components/setting-property";
-import { shortenDate } from "@/utils/helper.utils";
+import { shortenDate } from "@/utils/database.utils";
 
 export default function VocabularyOverview() {
   const [words, setWords] = useState<UserItemLocal[] | null>(null);

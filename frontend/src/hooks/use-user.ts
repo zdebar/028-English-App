@@ -9,6 +9,9 @@ interface UserState {
   reloadUserScore: () => Promise<void>;
 }
 
+/**
+ * Zustand store to manage user statistics and score reloading.
+ */
 export const useUserStore = create<UserState>()(
   devtools(
     persist(
@@ -21,9 +24,9 @@ export const useUserStore = create<UserState>()(
           const learnedCounts = await UserItem.getLearnedCounts();
           set({
             userStats: {
-              learnedCountToday: learnedCounts?.learnedToday || 0,
-              learnedCount: learnedCounts?.learned || 0,
-              practiceCountToday: todayScore?.item_count || 0,
+              learnedCountToday: learnedCounts?.learnedToday || null,
+              learnedCount: learnedCounts?.learned || null,
+              practiceCountToday: todayScore?.item_count || null,
             },
           });
         },

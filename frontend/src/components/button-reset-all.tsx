@@ -5,6 +5,7 @@ import ButtonRectangular from "@/components/button-rectangular";
 
 export default function ButtonResetAll() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleReset = async () => {
     try {
@@ -12,21 +13,27 @@ export default function ButtonResetAll() {
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error clearing all user items:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <>
       <ButtonRectangular onClick={() => setIsModalOpen(true)}>
-        Restartovat
+        {isLoading ? "Načítání..." : "Restartovat"}
       </ButtonRectangular>
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleReset}
+        aria-labelledby="reset-modal-title"
+        aria-describedby="reset-modal-description"
       >
-        <p>Opravdu chcete vymazat veškerý progress?</p>
-        <p>Změna již nepůjde vrátit.</p>
+        <h2 id="reset-modal-title">Potvrzení resetu</h2>
+        <p id="reset-modal-description">
+          Opravdu chcete vymazat veškerý progress? Změna již nepůjde vrátit.
+        </p>
       </Modal>
     </>
   );

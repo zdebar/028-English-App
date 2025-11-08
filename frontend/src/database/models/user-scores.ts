@@ -4,7 +4,7 @@ import type { UserScoreLocal } from "@/types/local.types";
 import { supabaseInstance } from "@/config/supabase.config";
 import { db } from "@/database/models/db";
 import { generateUserScoreId } from "@/utils/database.utils";
-import { getTodayDate } from "@/utils/database.utils";
+import { getTodayShortDate } from "@/utils/database.utils";
 import { getUserId } from "@/utils/database.utils";
 
 export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
@@ -40,7 +40,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
       if (!userId) {
         throw new Error("User is not logged in.");
       }
-      const today = getTodayDate();
+      const today = getTodayShortDate();
 
       // Fetch the existing record for the user and today's date
       const key = generateUserScoreId(userId, today);
@@ -70,7 +70,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
       if (!userId) {
         throw new Error("User is not logged in.");
       }
-      const today = getTodayDate();
+      const today = getTodayShortDate();
       const key = generateUserScoreId(userId, today);
 
       return await db.user_scores.get(key);

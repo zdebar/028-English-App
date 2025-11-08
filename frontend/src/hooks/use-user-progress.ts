@@ -3,6 +3,12 @@ import UserItem from "@/database/models/user-items";
 import UserScore from "@/database/models/user-scores";
 import type { UserItemLocal } from "@/types/local.types";
 
+/**
+ * Hook to manage user progress updates in the database.
+ * @param array Practice deck array of user items.
+ * @param reloadUserScore Function to reload user score after updates.
+ * @returns Function to update user items in the database.
+ */
 export function useUserProgress(
   array: UserItemLocal[],
   reloadUserScore: () => void

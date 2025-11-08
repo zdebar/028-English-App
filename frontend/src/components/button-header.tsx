@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
-import { Link, type LinkProps } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import { Link, useMatch, type LinkProps } from "react-router-dom";
 
 interface ButtonHeaderProps extends LinkProps {
   children: ReactNode;
@@ -16,16 +15,21 @@ export default function ButtonHeader({
   to,
   ...props
 }: ButtonHeaderProps) {
-  const location = useLocation();
-  const isSelected = location.pathname === to;
+  const isSelected = useMatch(to);
 
-  return (
+  return disabled ? (
+    <span
+      className={`button-header flex items-center justify-center color-disabled ${className}`}
+      aria-disabled="true"
+    >
+      {children}
+    </span>
+  ) : (
     <Link
-      to={disabled ? "#" : to}
-      onClick={(e) => disabled && e.preventDefault()}
+      to={to}
       className={`button-header flex items-center justify-center ${
         isSelected && "color-selected"
-      } ${disabled && "color-disabled"} ${className}`}
+      } ${className}`}
       {...props}
     >
       {children}

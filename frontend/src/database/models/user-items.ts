@@ -7,7 +7,7 @@ import { sortOddEvenByProgress } from "@/utils/practice.utils";
 import { db } from "@/database/models/db";
 import { supabaseInstance } from "@/config/supabase.config";
 import { convertLocalToSQL } from "@/utils/database.utils";
-import { getTodayDate } from "@/utils/database.utils";
+import { getTodayShortDate } from "@/utils/database.utils";
 import { getUserId } from "@/utils/database.utils";
 
 export default class UserItem extends Entity<AppDB> implements UserItemLocal {
@@ -93,7 +93,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       if (!userId) {
         throw new Error("User is not logged in.");
       }
-      const today = getTodayDate();
+      const today = getTodayShortDate();
 
       const learned = await db.user_items
         .where("user_id")
