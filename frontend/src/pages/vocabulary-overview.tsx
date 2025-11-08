@@ -65,9 +65,9 @@ export default function VocabularyOverview() {
   return (
     <>
       {!cardVisible ? (
-        <div className="card-width relative h-full overflow-y-scroll flex flex-col gap-1 justify-start">
+        <div className="card-width relative h-full flex flex-col gap-1 justify-start">
           {/* Sticky header */}
-          <div className=" flex flex-col gap-1 sticky top-0 bg-background-light dark:bg-background-dark z-10">
+          <div className=" flex flex-col gap-1  bg-background-light dark:bg-background-dark">
             <div className="flex items-center justify-between gap-1">
               {error ? (
                 <div className="flex h-button grow justify-start items-center border border-dashed">
@@ -83,11 +83,11 @@ export default function VocabularyOverview() {
                   onChange={(value) =>
                     setDisplayField(value as "czech" | "english")
                   }
-                  className="w-full p-2 flex items-center border border-dashed h-button"
+                  className="grow p-2 flex items-center border border-dashed h-button"
                 />
               )}
               <ButtonRectangular
-                className="w-button grow-0 "
+                className="w-button grow-0"
                 onClick={() => navigate("/profile")}
               >
                 <CloseIcon />
@@ -102,29 +102,29 @@ export default function VocabularyOverview() {
             />
           </div>
 
-          {/* Vyhledávací pole */}
-
           {/* Filtrovaná slova */}
-          {filteredWords && filteredWords.length > 0 ? (
-            filteredWords.map((item, index) => (
-              <ButtonRectangular
-                key={item.item_id}
-                className="text-left grow-0 h-input flex justify-start p-4"
-                onClick={() => {
-                  setCurrentIndex(index);
-                  setCardVisible(true);
-                }}
-              >
-                {displayField === "czech"
-                  ? ` ${item.czech} `
-                  : ` ${item.english} `}
-              </ButtonRectangular>
-            ))
-          ) : (
-            <p className="text-left h-input flex justify-start pl-4">
-              Žádná započatá slovíčka
-            </p>
-          )}
+          <div className="overflow-y-auto flex flex-col gap-1">
+            {filteredWords && filteredWords.length > 0 ? (
+              filteredWords.map((item, index) => (
+                <ButtonRectangular
+                  key={item.item_id}
+                  className="text-left grow-0 h-input flex justify-start p-4"
+                  onClick={() => {
+                    setCurrentIndex(index);
+                    setCardVisible(true);
+                  }}
+                >
+                  {displayField === "czech"
+                    ? ` ${item.czech} `
+                    : ` ${item.english} `}
+                </ButtonRectangular>
+              ))
+            ) : (
+              <p className="text-left h-input flex justify-start pl-4">
+                Žádná započatá slovíčka
+              </p>
+            )}
+          </div>
         </div>
       ) : (
         <OverviewCard

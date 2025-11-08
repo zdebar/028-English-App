@@ -9,7 +9,7 @@ import Practice from "@/pages/practice";
 import Home from "@/pages/home";
 import { dataSync } from "@/database/models/data-sync";
 import { useAuth } from "@/hooks/use-auth";
-import VocabularyOverview from "@/pages/vocabulary";
+import VocabularyOverview from "@/pages/vocabulary-overview";
 import ProtectedLayout from "@/components/protected-layout";
 import PublicLayout from "@/components/public-layout";
 import { ToastContainer } from "react-toastify";
