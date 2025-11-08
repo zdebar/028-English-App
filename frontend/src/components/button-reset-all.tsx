@@ -3,6 +3,9 @@ import { Modal } from "@/components/modal";
 import UserItem from "@/database/models/user-items";
 import ButtonRectangular from "@/components/button-rectangular";
 
+/**
+ * Button for resetting all user progress.
+ */
 export default function ButtonResetAll() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
