@@ -1,6 +1,10 @@
 import { SunIcon, MoonIcon } from "@/components/icons.js";
 import { useThemeStore, type UserTheme } from "@/hooks/use-theme";
 
+/**
+ * ThemeSwitch Component
+ * A button that toggles between light and dark themes. Default is system preference.
+ */
 export default function ThemeSwitch() {
   const { theme, chooseTheme } = useThemeStore();
 
@@ -9,12 +13,17 @@ export default function ThemeSwitch() {
     chooseTheme(nextTheme);
   };
 
+  const keys = {
+    dark: "Přepnout na světlý režim",
+    light: "Přepnout na tmavý režim",
+  };
+
   return (
     <button
-      aria-label="Nastavení pozadí"
+      aria-label={theme === "light" ? keys.dark : keys.light}
       onClick={handleChange}
       className="button-header hover:bg-inherit hover:text-inherit"
-      title={theme as UserTheme}
+      title={theme === "light" ? keys.light : keys.dark}
     >
       {theme === "light" ? <SunIcon /> : <MoonIcon />}
     </button>

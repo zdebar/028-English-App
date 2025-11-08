@@ -10,9 +10,9 @@ export default function SettingProperty({
   className = "",
 }: SettingPropertyProps) {
   return (
-    <div className={`flex items-center ${className}`}>
-      <p className={`inline-block w-35 font-bold shrink-0 `}>{label}</p>
-      <p>{value}</p>
-    </div>
+    <dl className={`flex items-center ${className}`}>
+      <dt className="inline-block w-35 font-bold shrink-0">{label}</dt>
+      <dd>{value ?? "Není k dispozici"}</dd>
+    </dl>
   );
 }

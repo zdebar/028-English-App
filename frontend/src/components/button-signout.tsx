@@ -33,9 +33,9 @@ export default function ButtonSignout() {
         onConfirm={handleSignout}
         aria-labelledby="signout-modal-title"
         aria-describedby="signout-modal-description"
-      >
-        <p>Opravdu se chcete odhlásit?</p>
-      </Modal>
+        title="Potvrzení odhlášení"
+        description="Opravdu se chcete odhlásit?"
+      ></Modal>
     </>
   );
 }

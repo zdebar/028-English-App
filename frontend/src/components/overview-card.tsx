@@ -50,11 +50,9 @@ export default function OverviewCard({
           setIsModalOpen(false);
           onClose();
         }}
-      >
-        <p>Opravdu chcete vymazat veškerý progress</p>
-        <p>"{titleText}" ?</p>
-        <p>Změna již nepůjde vrátit.</p>
-      </Modal>
+        title="Potvrzení resetu"
+        description="Opravdu chcete vymazat veškerý progress? Změna již nepůjde vrátit."
+      />
     </>
   );
 }

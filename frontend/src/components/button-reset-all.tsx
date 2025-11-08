@@ -38,14 +38,9 @@ export default function ButtonResetAll() {
         onConfirm={handleReset}
         aria-labelledby="reset-modal-title"
         aria-describedby="reset-modal-description"
-      >
-        <h2 id="reset-modal-title" className="font-bold">
-          Potvrzení resetu
-        </h2>
-        <p id="reset-modal-description">
-          Opravdu chcete vymazat veškerý progress? Změna již nepůjde vrátit.
-        </p>
-      </Modal>
+        title="Potvrzení resetu"
+        description="Opravdu chcete vymazat veškerý progress? Změna již nepůjde vrátit."
+      />
     </>
   );
 }

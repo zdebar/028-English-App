@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { VolumeIcon } from "@/components/icons";
 
 type VolumeSliderProps = {
@@ -13,7 +13,24 @@ export default function VolumeSlider({
 }: VolumeSliderProps) {
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [volume, setLocalVolume] = useState(0.5);
+  const sliderRef = useRef<HTMLDivElement>(null);
   const noAudio = false;
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        sliderRef.current &&
+        !sliderRef.current.contains(event.target as Node)
+      ) {
+        setShowVolumeSlider(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseFloat(event.target.value);
@@ -23,6 +40,7 @@ export default function VolumeSlider({
 
   return (
     <div
+      ref={sliderRef}
       className={`flex pt-1 ${className}`}
       onClick={(event) => event.stopPropagation()}
       {...props}
@@ -47,6 +65,7 @@ export default function VolumeSlider({
           aria-valuenow={volume}
           aria-valuemin={0}
           aria-valuemax={1}
+          aria-label={`Hlasitost: ${Math.round(volume * 100)}%`}
           disabled={noAudio}
         />
       )}
