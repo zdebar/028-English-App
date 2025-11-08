@@ -32,7 +32,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
       const startedUserItems: UserItemLocal[] = await db.user_items
         .where("user_id")
         .equals(userId)
-        .and((item) => item.started_at !== config.nullReplacementDate)
+        .and((item) => item.started_at !== config.database.nullReplacementDate)
         .toArray();
 
       const grammarIds = [

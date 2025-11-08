@@ -49,7 +49,7 @@ export default class AudioRecord
 
   static async syncAudioData(): Promise<void> {
     try {
-      for (const archiveName of config.audioArchives) {
+      for (const archiveName of config.audio.archives) {
         // Step 1: Compare config.audioArchives with metadata
         if (await AudioMetadata.isFetched(archiveName)) {
           continue;
@@ -57,7 +57,7 @@ export default class AudioRecord
 
         // Step 2: Fetch the archive from storage
         const zipBlob: Blob | null = await fetchStorage(
-          config.audioBucketName,
+          config.audio.bucketName,
           archiveName
         );
         if (!zipBlob) return;

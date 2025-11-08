@@ -14,7 +14,7 @@ export default class AppDB extends Dexie {
   audio_metadata!: EntityTable<AudioMetadata, "archive_name">;
 
   constructor() {
-    super(config.dbName);
+    super(config.database.dbName);
 
     // Define the database schema
     this.version(1).stores({

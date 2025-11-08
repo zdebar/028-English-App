@@ -17,10 +17,10 @@ export function alternateDirection(progress: number): boolean {
  * @returns Date string in ISO format for the next review.
  */
 export function getNextAt(progress: number): string {
-  const interval = config.SRS[progress];
-  if (interval === undefined) return config.nullReplacementDate;
+  const interval = config.srs.intervals[progress];
+  if (interval === undefined) return config.database.nullReplacementDate;
 
-  const randomFactor = 1 + config.srsRandomness * (Math.random() * 2 - 1);
+  const randomFactor = 1 + config.srs.randomness * (Math.random() * 2 - 1);
   const randomizedInterval = Math.round(interval * randomFactor);
   const nextDate = new Date(Date.now() + randomizedInterval * 1000);
   return nextDate.toISOString();

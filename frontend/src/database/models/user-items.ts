@@ -26,8 +26,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   learned_at!: string;
   mastered_at!: string;
 
+  static readonly nullReplacementDate: string =
+    config.database.nullReplacementDate;
+
   static async getPracticeDeck(
-    deckSize: number = config.deckSize
+    deckSize: number = config.lesson.deckSize
   ): Promise<UserItemLocal[]> {
     try {
       const userId = await getUserId();
@@ -37,10 +40,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
       const items: UserItemLocal[] = await db.user_items
         .where("[user_id+mastered_at]")
-        .equals([userId, config.nullReplacementDate])
+        .equals([userId, UserItem.nullReplacementDate])
         .filter(
           (item) =>
-            item.next_at === config.nullReplacementDate ||
+            item.next_at === this.nullReplacementDate ||
             item.next_at <= new Date(Date.now()).toISOString()
         )
         .sortBy("sequence");
@@ -61,18 +64,18 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
           progress: item.progress,
           next_at: getNextAt(item.progress),
           started_at:
-            item.started_at === config.nullReplacementDate
+            item.started_at === this.nullReplacementDate
               ? currentDateTime
               : item.started_at,
           updated_at: currentDateTime,
           learned_at:
-            item.learned_at === config.nullReplacementDate &&
-            item.progress > config.learnedAtThreshold
+            item.learned_at === this.nullReplacementDate &&
+            item.progress > config.progress.learnedAtThreshold
               ? currentDateTime
               : item.learned_at,
           mastered_at:
-            item.mastered_at === config.nullReplacementDate &&
-            item.progress > config.masteredAtThreshold
+            item.mastered_at === this.nullReplacementDate &&
+            item.progress > config.progress.masteredAtThreshold
               ? currentDateTime
               : item.mastered_at,
         };
@@ -99,8 +102,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         .where("user_id")
         .equals(userId)
         .and(
-          (item: UserItemLocal) =>
-            item.learned_at !== config.nullReplacementDate
+          (item: UserItemLocal) => item.learned_at !== this.nullReplacementDate
         )
         .count();
 
@@ -109,7 +111,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         .equals(userId)
         .and(
           (item: UserItemLocal) =>
-            item.learned_at !== config.nullReplacementDate &&
+            item.learned_at !== this.nullReplacementDate &&
             item.learned_at.startsWith(today)
         )
         .count();
@@ -152,12 +154,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         .where("user_id")
         .equals(userId)
         .modify((item: UserItemLocal) => {
-          item.next_at = config.nullReplacementDate;
-          item.mastered_at = config.nullReplacementDate;
-          item.updated_at = config.nullReplacementDate;
-          item.learned_at = config.nullReplacementDate;
+          item.next_at = this.nullReplacementDate;
+          item.mastered_at = this.nullReplacementDate;
+          item.updated_at = this.nullReplacementDate;
+          item.learned_at = this.nullReplacementDate;
           item.progress = 0;
-          item.started_at = config.nullReplacementDate;
+          item.started_at = this.nullReplacementDate;
         });
     } catch (error) {
       console.error("Error clearing all user items:", error);
@@ -176,12 +178,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         .equals(userId)
         .and((item: UserItemLocal) => item.grammar_id === grammarId)
         .modify((item: UserItemLocal) => {
-          item.next_at = config.nullReplacementDate;
-          item.mastered_at = config.nullReplacementDate;
-          item.updated_at = config.nullReplacementDate;
-          item.learned_at = config.nullReplacementDate;
+          item.next_at = this.nullReplacementDate;
+          item.mastered_at = this.nullReplacementDate;
+          item.updated_at = this.nullReplacementDate;
+          item.learned_at = this.nullReplacementDate;
           item.progress = 0;
-          item.started_at = config.nullReplacementDate;
+          item.started_at = this.nullReplacementDate;
         });
     } catch (error) {
       console.error("Error clearing grammar items:", error);
@@ -203,12 +205,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         .equals(itemId)
         .and((item: UserItemLocal) => item.user_id === userId)
         .modify((item: UserItemLocal) => {
-          item.next_at = config.nullReplacementDate;
-          item.mastered_at = config.nullReplacementDate;
-          item.updated_at = config.nullReplacementDate;
-          item.learned_at = config.nullReplacementDate;
+          item.next_at = this.nullReplacementDate;
+          item.mastered_at = this.nullReplacementDate;
+          item.updated_at = this.nullReplacementDate;
+          item.learned_at = this.nullReplacementDate;
           item.progress = 0;
-          item.started_at = config.nullReplacementDate;
+          item.started_at = this.nullReplacementDate;
         });
 
       if (modifiedCount === 0) {
@@ -234,13 +236,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         .where("user_id")
         .equals(userId)
         .and(
-          (item: UserItemLocal) =>
-            item.started_at !== config.nullReplacementDate
+          (item: UserItemLocal) => item.started_at !== this.nullReplacementDate
         )
         .toArray();
 
       const filteredUserItems = localUserItems.filter(
-        (item) => item.started_at !== config.nullReplacementDate
+        (item) => item.started_at !== this.nullReplacementDate
       );
       const sqlUserItems = filteredUserItems.map(convertLocalToSQL);
 

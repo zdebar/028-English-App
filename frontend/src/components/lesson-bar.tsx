@@ -13,7 +13,7 @@ export default function ProgressBar({
   lessonNumber,
   divisions = 20,
 }: LessonBarProps) {
-  const lessonSize = config.lessonSize;
+  const lessonSize = config.lesson.lessonSize;
   const totalWidth = 100;
   const previousWidth = (previousCount / lessonSize) * totalWidth;
   const todayWidth = (todayCount / lessonSize) * totalWidth;
@@ -29,13 +29,13 @@ export default function ProgressBar({
       <div className="relative h-attribute bg-white overflow-hidden">
         <div
           className="absolute top-0 left-0 h-full bg-notice-dark"
-          // style={{ width: `${previousWidth + todayWidth}%` }}
-          style={{ width: `80%` }}
+          style={{ width: `${previousWidth + todayWidth}%` }}
+          // style={{ width: `80%` }}
         ></div>
         <div
           className="absolute top-0 left-0 h-full bg-background-dark"
-          style={{ width: `20%` }}
-          // style={{ width: `${previousWidth}%` }}
+          // style={{ width: `20%` }}
+          style={{ width: `${previousWidth}%` }}
         ></div>
         {[...Array(divisions)].map((_, index) => {
           const position = (index / divisions) * 100;

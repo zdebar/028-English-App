@@ -184,7 +184,7 @@ export default function Practice() {
         </ButtonRectangular>
         <ButtonRectangular
           onClick={() => {
-            updateItemArray(config.skipProgress);
+            updateItemArray(config.progress.skipProgress);
           }}
           disabled={!revealed}
         >
@@ -213,12 +213,12 @@ export default function Practice() {
         ) : (
           <>
             <ButtonRectangular
-              onClick={() => updateItemArray(config.minusProgress)}
+              onClick={() => updateItemArray(config.progress.minusProgress)}
             >
               <MinusIcon />
             </ButtonRectangular>
             <ButtonRectangular
-              onClick={() => updateItemArray(config.plusProgress)}
+              onClick={() => updateItemArray(config.progress.plusProgress)}
             >
               <PlusIcon />
             </ButtonRectangular>

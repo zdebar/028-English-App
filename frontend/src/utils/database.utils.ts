@@ -51,17 +51,17 @@ export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
     learned_at,
     mastered_at,
   } = localItem;
+  const nullReplacementDate = config.database.nullReplacementDate;
 
   return {
     user_id,
     item_id,
     progress,
-    started_at: started_at === config.nullReplacementDate ? null : started_at,
-    updated_at: updated_at === config.nullReplacementDate ? null : updated_at,
-    next_at: next_at === config.nullReplacementDate ? null : next_at,
-    learned_at: learned_at === config.nullReplacementDate ? null : learned_at,
-    mastered_at:
-      mastered_at === config.nullReplacementDate ? null : mastered_at,
+    started_at: started_at === nullReplacementDate ? null : started_at,
+    updated_at: updated_at === nullReplacementDate ? null : updated_at,
+    next_at: next_at === nullReplacementDate ? null : next_at,
+    learned_at: learned_at === nullReplacementDate ? null : learned_at,
+    mastered_at: mastered_at === nullReplacementDate ? null : mastered_at,
   };
 }
 
@@ -115,7 +115,7 @@ export async function fetchStorage(
  * @returns Shortened date string or "není k dispozici" if date is undefined or null replacement date.
  */
 export function shortenDate(isoDate: string | undefined): string {
-  if (!isoDate || isoDate === config.nullReplacementDate)
+  if (!isoDate || isoDate === config.database.nullReplacementDate)
     return "není k dispozici";
   return isoDate.split("T")[0];
 }
