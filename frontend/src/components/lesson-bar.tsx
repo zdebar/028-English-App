@@ -13,31 +13,46 @@ export default function ProgressBar({
   lessonNumber,
   divisions = 20,
 }: LessonBarProps) {
-  const lessonSize = config.lesson.lessonSize;
+  const lessonSize = config.lesson.lessonSize || 100;
   const totalWidth = 100;
-  const previousWidth = (previousCount / lessonSize) * totalWidth;
-  const todayWidth = (todayCount / lessonSize) * totalWidth;
+
+  // Validace vstupních hodnot
+  const validPreviousCount = Math.max(0, previousCount);
+  const validTodayCount = Math.max(0, todayCount);
+
+  // Výpočet šířek
+  const previousWidth = (validPreviousCount / lessonSize) * totalWidth;
+  const todayWidth = (validTodayCount / lessonSize) * totalWidth;
 
   return (
     <div className="relative mx-auto max-w-card w-full">
+      {/* Popisky */}
       <div className="absolute top-0 left-0 w-full flex justify-between z-10 pt-1 px-2">
-        <span className="text-bar">lekce: {lessonNumber}</span>
-        <span className="text-bar">+ {todayCount}</span>
+        <span className="text-bar">Lekce: {lessonNumber}</span>
+        <span className="text-bar">+ {validTodayCount}</span>
       </div>
 
       {/* Progress bar */}
-      <div className="relative h-attribute bg-white overflow-hidden">
+      <div
+        className="relative h-attribute bg-white overflow-hidden"
+        role="progressbar"
+        aria-valuenow={validPreviousCount + validTodayCount}
+        aria-valuemin={0}
+        aria-valuemax={lessonSize}
+        aria-label={`Pokrok pro lekci ${lessonNumber}`}
+      >
+        {/* Celkový pokrok */}
         <div
           className="absolute top-0 left-0 h-full bg-notice-dark"
           style={{ width: `${previousWidth + todayWidth}%` }}
-          // style={{ width: `80%` }}
         ></div>
+        {/* Předchozí pokrok */}
         <div
           className="absolute top-0 left-0 h-full bg-background-dark"
-          // style={{ width: `20%` }}
           style={{ width: `${previousWidth}%` }}
         ></div>
-        {[...Array(divisions)].map((_, index) => {
+        {/* Dělení */}
+        {Array.from({ length: divisions }, (_, index) => {
           const position = (index / divisions) * 100;
           return (
             <div
