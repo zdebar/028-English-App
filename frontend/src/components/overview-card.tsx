@@ -37,7 +37,7 @@ export default function OverviewCard({
             <CloseIcon />
           </ButtonRectangular>
         </div>
-        <p className=" border border-dashed w-full grow p-4">{children}</p>
+        <div className=" border border-dashed w-full grow p-4">{children}</div>
       </div>
       <Modal
         isOpen={isModalOpen}
