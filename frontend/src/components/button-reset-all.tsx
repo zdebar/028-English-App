@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Modal } from "@/components/modal";
 import UserItem from "@/database/models/user-items";
 import ButtonRectangular from "@/components/button-rectangular";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 /**
  * Button for resetting all user progress.
@@ -13,9 +15,13 @@ export default function ButtonResetAll() {
   const handleReset = async () => {
     try {
       await UserItem.clearAllUserItems();
+      toast.success("Váš pokrok byl úspěšně resetován.");
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error clearing all user items:", error);
+      toast.error(
+        "Nastala chyba při resetování pokroku. Zkuste to prosím později."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -33,7 +39,9 @@ export default function ButtonResetAll() {
         aria-labelledby="reset-modal-title"
         aria-describedby="reset-modal-description"
       >
-        <h2 id="reset-modal-title">Potvrzení resetu</h2>
+        <h2 id="reset-modal-title" className="font-bold">
+          Potvrzení resetu
+        </h2>
         <p id="reset-modal-description">
           Opravdu chcete vymazat veškerý progress? Změna již nepůjde vrátit.
         </p>

@@ -8,7 +8,7 @@ interface DashboardProps {
 
 export default function Dashboard({ allCount, todayCount }: DashboardProps) {
   const lessonProgress = getLessonProgress(allCount, todayCount);
-
+  console.log("Lesson Progress:", lessonProgress);
   return (
     <div className="flex h-input w-full flex-col gap-1">
       {lessonProgress.map(

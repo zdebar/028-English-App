@@ -6,7 +6,7 @@ import config from "@/config/config";
  * @returns Returns the items count in last started lesson before today.
  */
 export function getPreviousCount(countNotToday: number): number {
-  return countNotToday % config.lessonSize;
+  return countNotToday % config.lesson.lessonSize;
 }
 
 /**
@@ -15,7 +15,7 @@ export function getPreviousCount(countNotToday: number): number {
  * @returns Returns last started lesson number before today.
  */
 export function getLessonStarted(countNotToday: number): number {
-  return Math.floor(countNotToday / config.lessonSize);
+  return Math.floor(countNotToday / config.lesson.lessonSize);
 }
 
 /**
@@ -29,7 +29,7 @@ export function getTodayLessonItems(
   todayCount: number
 ): number[] {
   const lessonCounts: number[] = [];
-  const lessonSize = config.lessonSize;
+  const lessonSize = config.lesson.lessonSize;
 
   const firstLesson = Math.min(todayCount, lessonSize - previousCount);
   if (firstLesson > 0) {

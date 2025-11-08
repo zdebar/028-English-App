@@ -12,7 +12,7 @@ import { useAuth } from "@/hooks/use-auth";
 import VocabularyOverview from "@/pages/vocabulary";
 import ProtectedLayout from "@/components/protected-layout";
 import PublicLayout from "@/components/public-layout";
-
+import { ToastContainer } from "react-toastify";
 import Login from "@/pages/login";
 import GrammarOverview from "@/pages/grammar-overview";
 
@@ -34,6 +34,7 @@ export default function App() {
 
   return (
     <div className="mx-auto flex h-screen max-w-container w-full overflow-y-hidden flex-col justify-between">
+      <ToastContainer position="top-right" autoClose={5000} />
       <Header />
       <div className="relative flex h-full grow flex-col  gap-4 items-center ">
         <Routes>
