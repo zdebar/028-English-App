@@ -27,6 +27,7 @@ const config = {
   finishedProgress: 0, // Progress value for a word to be considered finished
   audioBucketName: "audio-archive",
   audioArchives: ["audio_part_1.zip"],
+  lessonSize: 100, // Number of items per lesson
 };
 
 export default config;

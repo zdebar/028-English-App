@@ -73,8 +73,8 @@
   }
 
   .color-disabled {
-    @apply bg-white;
-    @apply dark:bg-gray-800 dark:hover:bg-gray-800;
+    @apply bg-inherit cursor-default hover:bg-inherit text-gray-100;
+    @apply dark:bg-inherit dark:hover:bg-inherit dark:text-gray-500;
   }
 
   .color-audio {
@@ -90,6 +90,10 @@
   /* TEXT STYLES */
   .text-notice {
     @apply font-headings text-center text-xl text-notice-light dark:text-notice-dark;
+  }
+
+  .text-bar {
+    @apply font-body font-bold text-sm text-center text-light;
   }
 }
 

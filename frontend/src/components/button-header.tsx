@@ -4,12 +4,14 @@ import { useLocation } from "react-router-dom";
 
 interface ButtonHeaderProps extends LinkProps {
   children: ReactNode;
+  disabled?: boolean;
   className?: string;
   to: string;
 }
 
 export default function ButtonHeader({
   children,
+  disabled = false,
   className = "",
   to,
   ...props
@@ -19,10 +21,11 @@ export default function ButtonHeader({
 
   return (
     <Link
-      to={to}
+      to={disabled ? "#" : to}
+      onClick={(e) => disabled && e.preventDefault()}
       className={`button-header flex items-center justify-center ${
         isSelected && "color-selected"
-      } ${className}`}
+      } ${disabled && "color-disabled"} ${className}`}
       {...props}
     >
       {children}

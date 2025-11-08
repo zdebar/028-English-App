@@ -3,7 +3,7 @@ import { supabaseInstance } from "@/config/supabase.config";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { useThemeStore } from "@/hooks/use-theme";
 
-export default function LoginScreen() {
+export default function Login() {
   const { theme } = useThemeStore();
 
   return (

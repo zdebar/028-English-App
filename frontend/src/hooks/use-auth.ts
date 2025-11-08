@@ -4,16 +4,19 @@ import { supabaseInstance } from "@/config/supabase.config";
 
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     supabaseInstance.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      setLoading(false);
     });
 
     const {
       data: { subscription },
     } = supabaseInstance.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -32,5 +35,5 @@ export function useAuth() {
   const userId = session?.user?.id || null;
   const userEmail = session?.user?.email || null;
 
-  return { userId, userEmail, handleLogout };
+  return { userId, userEmail, handleLogout, loading };
 }

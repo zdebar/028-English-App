@@ -11,7 +11,7 @@ export function usePracticeDeck(
 
   function wrapIndex(newIndex: number) {
     if (array.length === 0) return 0;
-    return (newIndex + array.length) % array.length;
+    return newIndex % array.length;
   }
 
   function nextIndex() {

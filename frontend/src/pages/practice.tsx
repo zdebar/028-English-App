@@ -16,12 +16,12 @@ import VolumeSlider from "@/components/volume-slider";
 import config from "@/config/config";
 import GrammarCard from "@/components/grammar-card";
 
-export default function PracticeCard() {
+export default function Practice() {
   const [revealed, setRevealed] = useState(false);
   const [hintIndex, setHintIndex] = useState(0);
   const [grammarVisible, setGrammarVisible] = useState(false);
   const [error, setError] = useState<string | null>(null); //
-  const { userStats: userScore } = useUserStore();
+  const { userStats } = useUserStore();
   const {
     array,
     index,
@@ -64,16 +64,19 @@ export default function PracticeCard() {
       );
       const updatedProgress = userProgress.concat(newProgress);
 
+      console.log("Updating item progress to:", updatedProgress);
+
       if (arrayLength > 0) {
         if (index + 1 >= arrayLength) {
+          console.log("New deck cycle starting, patching items...");
           await patchItems(updatedProgress);
           setAudioReload(true);
           setReload(true);
           setUserProgress([]);
         } else {
           setUserProgress(updatedProgress);
-          nextIndex();
         }
+        nextIndex();
       }
     },
     [
@@ -166,7 +169,7 @@ export default function PracticeCard() {
         >
           <p className="font-light">{currentItem?.progress}</p>
           <p className="font-light">
-            {(userScore?.practiceCountToday || 0) + index}
+            {(userStats?.practiceCountToday || 0) + index}
           </p>
         </div>
       </div>

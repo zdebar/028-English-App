@@ -2,8 +2,11 @@ import { HomeIcon, AcademicCapIcon } from "@/components/icons";
 import ButtonHeader from "@/components/button-header";
 import UserAvatar from "@/components/user-avatar";
 import ThemeSwitch from "@/components/theme-switch";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Header() {
+  const { userId } = useAuth();
+
   return (
     <header className="header-fixed relative z-20 flex w-full flex-none justify-between">
       <nav
@@ -14,7 +17,11 @@ export default function Header() {
         <ButtonHeader to="/" aria-label="Domů">
           <HomeIcon />
         </ButtonHeader>
-        <ButtonHeader to="/practice" aria-label="Uživatelský dashboard">
+        <ButtonHeader
+          to="/practice"
+          aria-label="Uživatelský dashboard"
+          disabled={!userId}
+        >
           <AcademicCapIcon />
         </ButtonHeader>
       </nav>
@@ -24,7 +31,11 @@ export default function Header() {
         aria-label="Uživatelská navigace"
       >
         <ThemeSwitch />
-        <ButtonHeader to="/profile" aria-label="Nastavení uživatele">
+        <ButtonHeader
+          to="/profile"
+          aria-label="Nastavení uživatele"
+          disabled={!userId}
+        >
           <UserAvatar />
         </ButtonHeader>
       </nav>
