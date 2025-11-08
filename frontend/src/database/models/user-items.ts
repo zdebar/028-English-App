@@ -29,6 +29,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   static readonly nullReplacementDate: string =
     config.database.nullReplacementDate;
 
+  /**
+   * Gets a practice deck of user items for the logged-in user.
+   * @param deckSize number of items to include in the practice deck.
+   * @returns array of UserItemLocal objects.
+   */
   static async getPracticeDeck(
     deckSize: number = config.lesson.deckSize
   ): Promise<UserItemLocal[]> {
@@ -41,11 +46,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       const items: UserItemLocal[] = await db.user_items
         .where("[user_id+mastered_at]")
         .equals([userId, UserItem.nullReplacementDate])
-        .filter(
+        .and(
           (item) =>
             item.next_at === this.nullReplacementDate ||
-            item.next_at <= new Date(Date.now()).toISOString()
+            item.next_at <= new Date().toISOString()
         )
+        .limit(deckSize)
         .sortBy("sequence");
 
       return sortOddEvenByProgress(items.slice(0, deckSize));
@@ -55,6 +61,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     }
   }
 
+  /**
+   * Saves the practiced deck items to the database.
+   * @param items array of already practiced UserItemLocal objects.
+   */
   static async savePracticeDeck(items: UserItemLocal[]): Promise<void> {
     try {
       const currentDateTime = new Date(Date.now()).toISOString();
@@ -87,45 +97,49 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     }
   }
 
+  /**
+   * Fetches learned counts for the logged-in user.
+   * @returns object containing learnedToday and learned counts.
+   */
   static async getLearnedCounts(): Promise<{
-    learnedToday: number | null;
-    learned: number | null;
+    learnedToday: number;
+    learned: number;
   }> {
     try {
       const userId = await getUserId();
       if (!userId) {
         throw new Error("User is not logged in.");
       }
-      const today = getTodayShortDate();
 
-      const learned = await db.user_items
+      const today = getTodayShortDate();
+      const items = await db.user_items
         .where("user_id")
         .equals(userId)
         .and(
           (item: UserItemLocal) => item.learned_at !== this.nullReplacementDate
         )
-        .count();
+        .toArray();
 
-      const learnedToday = await db.user_items
-        .where("user_id")
-        .equals(userId)
-        .and(
-          (item: UserItemLocal) =>
-            item.learned_at !== this.nullReplacementDate &&
-            item.learned_at.startsWith(today)
-        )
-        .count();
+      const learned = items.length;
+      const learnedToday = items.filter((item) =>
+        item.learned_at.startsWith(today)
+      ).length;
 
       return { learnedToday, learned };
     } catch (error) {
       console.error("Error fetching learned counts:", error);
-      return { learnedToday: null, learned: null };
+      return { learnedToday: 0, learned: 0 };
     }
   }
 
+  /**
+   * Fetches all started vocabulary items for the logged-in user.
+   * @returns array of UserItemLocal objects.
+   */
   static async getUserStartedVocabulary(): Promise<UserItemLocal[]> {
     try {
       const userId = await getUserId();
+
       if (!userId) {
         throw new Error("User is not logged in.");
       }
@@ -135,20 +149,24 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         .equals(userId)
         .and((item: UserItemLocal) => item.grammar_id === null)
         .sortBy("czech");
-      return result.slice(0, 30);
+
+      return result;
     } catch (error) {
       console.error("Error fetching started vocabulary:", error);
       return [];
     }
   }
 
-  static async clearAllUserItems(): Promise<void> {
+  /**
+   * Resets all user items for the logged-in user.
+   */
+  static async resetsAllUserItems(): Promise<void> {
     try {
       const userId = await getUserId();
+
       if (!userId) {
         throw new Error("User is not logged in.");
       }
-      console.log("Clearing user items for user:", userId);
 
       await db.user_items
         .where("user_id")
@@ -166,7 +184,17 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     }
   }
 
-  static async clearGrammarItems(grammarId: number): Promise<void> {
+  /**
+   * Resets user items associated with a specific grammar ID.
+   * @param grammarId - The grammar ID whose items should be cleared.
+   * @returns void
+   */
+  static async resetGrammarItems(grammarId: number): Promise<void> {
+    if (!grammarId || grammarId <= 0) {
+      console.error("Invalid grammar ID provided.");
+      return;
+    }
+
     try {
       const userId = await getUserId();
       if (!userId) {
@@ -190,7 +218,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     }
   }
 
-  static async clearUserItem(itemId: number): Promise<void> {
+  /**
+   * Resets a specific user item by its ID.
+   * @param itemId  - The ID of the user item to reset.
+   */
+  static async resetUserItemById(itemId: number): Promise<void> {
     try {
       const userId = await getUserId();
       if (!userId) {
@@ -223,7 +255,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     }
   }
 
-  // Sync authenticated user scores with Supabase
+  /**
+   * Synchronizes user items data between local IndexedDB and Supabase.
+   * @returns void
+   */
   static async syncUserItemsData(): Promise<void> {
     try {
       const userId = await getUserId();
@@ -240,10 +275,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         )
         .toArray();
 
-      const filteredUserItems = localUserItems.filter(
-        (item) => item.started_at !== this.nullReplacementDate
-      );
-      const sqlUserItems = filteredUserItems.map(convertLocalToSQL);
+      const sqlUserItems = localUserItems.map(convertLocalToSQL);
 
       // Step 2: Send local scores to Supabase for updates
       const { error: upsertError } = await supabaseInstance

@@ -14,7 +14,7 @@ export default function ButtonResetAll() {
 
   const handleReset = async () => {
     try {
-      await UserItem.clearAllUserItems();
+      await UserItem.resetsAllUserItems();
       toast.success("Váš pokrok byl úspěšně resetován.");
       setIsModalOpen(false);
     } catch (error) {

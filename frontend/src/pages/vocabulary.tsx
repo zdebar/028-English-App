@@ -57,7 +57,7 @@ export default function VocabularyOverview() {
   const handleClearUserItem = async () => {
     const itemId = selectedWord?.item_id;
     if (typeof itemId === "number") {
-      UserItem.clearUserItem(itemId);
+      UserItem.resetUserItemById(itemId);
       await fetchVocabularyArray();
     }
   };
