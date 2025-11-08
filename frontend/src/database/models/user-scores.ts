@@ -13,7 +13,11 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   date!: string;
   item_count!: number;
 
-  // Fetch the latest records for the user
+  /**
+   * Fetches the latest user scores for the logged-in user.
+   * @param limit
+   * @returns
+   */
   static async getLatest(limit: number = 4): Promise<UserScoreLocal[]> {
     try {
       const userId = await getUserId();
@@ -33,8 +37,17 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     }
   }
 
-  // Increase item count for today by a specified number
+  /**
+   * Increases the item count for today's date by the specified amount.
+   * @param addCount
+   * @returns
+   */
   static async addItemCount(addCount: number): Promise<void> {
+    if (!Number.isInteger(addCount) || addCount <= 0) {
+      console.error("Invalid addCount value provided.");
+      return;
+    }
+
     try {
       const userId = await getUserId();
       if (!userId) {
@@ -64,6 +77,10 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     }
   }
 
+  /**
+   * Fetches the user score record for today's date.
+   * @returns
+   */
   static async getUserScoreForToday(): Promise<UserScoreLocal | undefined> {
     try {
       const userId = await getUserId();
@@ -80,7 +97,10 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     }
   }
 
-  // Sync authenticated user scores with Supabase
+  /**
+   * Synchronizes user score data between the local IndexedDB and Supabase.
+   * @returns
+   */
   static async syncUserScoreData(): Promise<void> {
     try {
       const userId = await getUserId();
@@ -125,6 +145,19 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
       // Step 4: Rewrite local database with updated scores
       if (updatedScores) {
+        const validScores = updatedScores.filter(
+          (score) =>
+            score.user_id && score.date && Number.isInteger(score.item_count)
+        );
+
+        if (validScores.length !== updatedScores.length) {
+          console.warn(
+            `Filtered out ${
+              updatedScores.length - validScores.length
+            } invalid user scores.`
+          );
+        }
+
         const scoresWithId = updatedScores.map((score) => ({
           ...score,
           id: generateUserScoreId(score.user_id, score.date),
