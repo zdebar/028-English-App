@@ -50,3 +50,5 @@ export interface UserStatsLocal {
   learnedCount: number | null;
   practiceCountToday: number | null;
 }
+
+export type LessonProgress = [number, number, number]; // [lessonNumber, previousCount, todayCount]

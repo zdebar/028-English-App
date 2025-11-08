@@ -1,5 +1,6 @@
 import LessonBar from "@/components/lesson-bar";
 import { getLessonProgress } from "@/utils/dashboard.utils";
+import type { LessonProgress } from "@/types/local.types";
 
 interface DashboardProps {
   allCount: number;
@@ -7,19 +8,24 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ allCount, todayCount }: DashboardProps) {
-  const lessonProgress = getLessonProgress(allCount, todayCount);
-  console.log("Lesson Progress:", lessonProgress);
+  const lessonProgress: LessonProgress[] = getLessonProgress(
+    allCount,
+    todayCount
+  );
+
   return (
     <div className="flex h-input w-full flex-col gap-1">
-      {lessonProgress.map(
-        ([lessonNumber, previousCount, todayCount], index) => (
+      {lessonProgress.length > 0 ? (
+        lessonProgress.map(([lessonNumber, previousCount, todayCount]) => (
           <LessonBar
-            key={index}
+            key={lessonNumber}
             lessonNumber={lessonNumber}
             previousCount={previousCount}
             todayCount={todayCount}
           />
-        )
+        ))
+      ) : (
+        <p className="text-center text-gray-500">Žádný pokrok k zobrazení.</p>
       )}
     </div>
   );
