@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import ButtonRectangular from "@/components/button-rectangular";
+import ButtonRectangular from "@/components/UI/button-rectangular";
 import UserItem from "@/database/models/user-items";
 import type { UserItemLocal } from "@/types/local.types";
 import { CloseIcon } from "@/components/icons";

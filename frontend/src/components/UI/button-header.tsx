@@ -30,6 +30,7 @@ export default function ButtonHeader({
     <span
       className={`button-header flex items-center justify-center color-disabled ${className}`}
       aria-disabled="true"
+      {...props}
     >
       {children}
     </span>

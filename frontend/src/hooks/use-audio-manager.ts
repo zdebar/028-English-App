@@ -7,50 +7,44 @@ import AudioRecord from "@/database/models/audio-records";
  * @param itemArray Practice deck items containing audio references.
  */
 export function useAudioManager(itemArray: UserItemLocal[]) {
-  const audioCacheRef = useRef<Map<string, HTMLAudioElement>>(new Map());
-  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
-  const volumeRef = useRef(0.5);
+  const audioCacheRef = useRef<Map<string, HTMLAudioElement>>(new Map()); // Cache for audio elements
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null); // Currently playing audio WHY?
+  const volumeRef = useRef(0.5); // Volume settings
   const [isPlaying, setIsPlaying] = useState(false);
-  const [audioError, setAudioError] = useState(false);
-  const [audioReload, setAudioReload] = useState(false);
+  const [audioError, setAudioError] = useState(false); // Audio error state while playing
 
   useEffect(() => {
     const cacheAudio = async () => {
-      if (itemArray.length === 0 || audioReload) return;
+      if (itemArray.length === 0) return;
 
       try {
-        if (itemArray.length > 0) {
-          const audioKeys = itemArray
-            .map((item) => item.audio)
-            .filter(
-              (audio): audio is string =>
-                audio !== null && !audioCacheRef.current.has(audio)
-            );
-          if (audioKeys.length > 0) {
-            const fetchedAudios = await AudioRecord.bulkGet(audioKeys);
+        const audioKeys = itemArray
+          .map((item) => item.audio)
+          .filter(
+            (audio): audio is string =>
+              audio !== null && !audioCacheRef.current.has(audio)
+          );
+        if (audioKeys.length > 0) {
+          const fetchedAudios = await AudioRecord.bulkGet(audioKeys);
 
-            fetchedAudios.forEach((audioRecord) => {
-              if (audioRecord) {
-                const { filename, audioBlob } = audioRecord;
-                if (filename && audioBlob) {
-                  const audioUrl = URL.createObjectURL(audioBlob);
-                  const audioElement = new Audio(audioUrl);
-                  audioCacheRef.current.set(filename, audioElement);
-                } else {
-                  console.warn(`Audio not found for: ${filename}`);
-                }
-              }
-            });
-          }
+          fetchedAudios.forEach((audioRecord) => {
+            const { filename, audioBlob } = audioRecord;
+            if (filename && audioBlob) {
+              const audioUrl = URL.createObjectURL(audioBlob);
+              const audioElement = new Audio(audioUrl);
+              audioCacheRef.current.set(filename, audioElement);
+            } else {
+              console.warn(`Audio not found for: ${filename}`);
+            }
+          });
         }
-        setAudioReload(false);
       } catch (error) {
         console.error("Error caching audio files:", error);
       }
     };
 
     cacheAudio();
-  }, [itemArray, audioReload]);
+  }, [itemArray]);
 
   // Function to play audio
   const playAudio = useCallback((audioPath: string | null) => {
@@ -123,7 +117,5 @@ export function useAudioManager(itemArray: UserItemLocal[]) {
     audioError,
     setAudioError,
     tryAudio,
-    audioReload,
-    setAudioReload,
   };
 }

@@ -1,4 +1,4 @@
-import ButtonRectangular from "@/components/button-rectangular";
+import ButtonRectangular from "@/components/UI/button-rectangular";
 import {
   SkipIcon,
   InfoIcon,
@@ -35,22 +35,11 @@ export default function Practice() {
     patchItems,
     setReload,
   } = useItemArray();
-  const {
-    playAudio,
-    stopAudio,
-    setVolume,
-    audioError,
-    setAudioError,
-    audioReload,
-    setAudioReload,
-  } = useAudioManager(array);
-  const isAudioDisabled =
-    (direction && !revealed) || !currentItem?.audio || error;
+  const { playAudio, stopAudio, setVolume, audioError, setAudioError } =
+    useAudioManager(array);
 
-  // Reset audio error for new item
-  useEffect(() => {
-    setAudioError(false);
-  }, [setAudioError, currentItem]);
+  const isAudioDisabled =
+    (direction && !revealed) || !currentItem?.audio || audioError;
 
   // Update userProgress, if end of array reached, patch items
   const updateItemArray = useCallback(
@@ -62,15 +51,12 @@ export default function Practice() {
         array[index].progress + progressIncrement,
         0
       );
-      const updatedProgress = userProgress.concat(newProgress);
 
-      console.log("Updating item progress to:", updatedProgress);
+      const updatedProgress = userProgress.concat(newProgress);
 
       if (arrayLength > 0) {
         if (index + 1 >= arrayLength) {
-          console.log("New deck cycle starting, patching items...");
           await patchItems(updatedProgress);
-          setAudioReload(true);
           setReload(true);
           setUserProgress([]);
         } else {
@@ -89,16 +75,22 @@ export default function Practice() {
       setUserProgress,
       nextIndex,
       stopAudio,
-      setAudioReload,
     ]
   );
 
+  // Auto-play audio on new item if not in reading direction
   useEffect(() => {
-    if (!direction && currentItem?.audio && !audioReload) {
+    if (!direction && currentItem?.audio) {
       setTimeout(() => playAudio(currentItem.audio!), 100);
     }
-  }, [currentItem, direction, playAudio, audioReload]);
+  }, [currentItem, direction, playAudio]);
 
+  // Reset audio error for new item
+  useEffect(() => {
+    setAudioError(false);
+  }, [setAudioError, currentItem]);
+
+  // Handle audio errors and retries
   useEffect(() => {
     if ((currentItem && !currentItem?.audio) || audioError) {
       setError("bez audia");

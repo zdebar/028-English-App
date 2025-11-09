@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import ButtonRectangular from "../components/button-rectangular";
+import ButtonRectangular from "../components/UI/button-rectangular";
 import Grammar from "@/database/models/grammar";
 import UserItem from "@/database/models/user-items";
 import type { GrammarLocal } from "@/types/local.types";

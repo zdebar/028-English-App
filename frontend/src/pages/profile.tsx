@@ -1,6 +1,6 @@
 import ButtonSignout from "@/components/button-signout";
 import { useNavigate } from "react-router-dom";
-import ButtonRectangular from "@/components/button-rectangular";
+import ButtonRectangular from "@/components/UI/button-rectangular";
 import ButtonResetAll from "@/components/button-reset-all";
 
 export default function Profile() {

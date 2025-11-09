@@ -1,4 +1,4 @@
-import ButtonRectangular from "./button-rectangular";
+import ButtonRectangular from "./UI/button-rectangular";
 
 export function Modal({
   isOpen,

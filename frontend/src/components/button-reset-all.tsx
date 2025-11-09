@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Modal } from "@/components/modal";
 import UserItem from "@/database/models/user-items";
-import ButtonRectangular from "@/components/button-rectangular";
+import ButtonRectangular from "@/components/UI/button-rectangular";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 

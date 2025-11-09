@@ -1,4 +1,4 @@
-import ButtonRectangular from "./button-rectangular";
+import ButtonRectangular from "./UI/button-rectangular";
 import { useAuth } from "@/hooks/use-auth";
 import { useState } from "react";
 import { Modal } from "@/components/modal";
