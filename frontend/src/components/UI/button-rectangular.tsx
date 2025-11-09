@@ -25,7 +25,9 @@ function ButtonRectangular({
 }: ButtonRectangularProps) {
   return (
     <button
-      className={` button-rectangular color-button
+      className={` button-rectangular ${
+        disabled ? "color-disabled" : "color-button"
+      } 
        ${className}`}
       disabled={disabled}
       aria-disabled={disabled}

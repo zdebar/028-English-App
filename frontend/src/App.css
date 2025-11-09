@@ -97,7 +97,7 @@
   }
 
   .text-button {
-    @apply w-60 text-left;
+    @apply w-45 text-left;
   }
 }
 

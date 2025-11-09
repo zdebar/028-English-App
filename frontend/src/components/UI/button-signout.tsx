@@ -1,0 +1,37 @@
+import { useAuth } from "@/hooks/use-auth";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import ButtonAsync from "@/components/UI/button-async";
+
+/**
+ * Button for signing out the user.
+ */
+export default function ButtonSignout() {
+  const { handleLogout } = useAuth();
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSignout = async () => {
+    setIsLoading(true);
+    try {
+      await handleLogout();
+      toast.success("Úspěšně jste se odhlásili.");
+    } catch (error) {
+      console.error("Error on user logout:", error);
+      toast.error("Nastala chyba při odhlašování. Zkuste to prosím později.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <ButtonAsync
+      isLoading={isLoading}
+      message="Odhlásit se"
+      disabledMessage="Probíhá odhlašování..."
+      modalTitle="Potvrzení odhlášení"
+      modalDescription="Opravdu se chcete odhlásit?"
+      onConfirm={handleSignout}
+    />
+  );
+}
