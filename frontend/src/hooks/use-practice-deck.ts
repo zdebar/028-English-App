@@ -8,6 +8,7 @@ import type { UserItemLocal } from "@/types/local.types";
  * @param setReload Function to set the reload state.
  */
 export function usePracticeDeck(
+  userId: string,
   reload: boolean,
   setReload: (value: boolean) => void
 ) {
@@ -27,13 +28,13 @@ export function usePracticeDeck(
     if (!reload) return;
 
     const fetchPracticeDeck = async () => {
-      const practiceItems = await UserItem.getPracticeDeck();
+      const practiceItems = await UserItem.getPracticeDeck(userId);
       setArray(practiceItems);
       setReload(false);
     };
 
     fetchPracticeDeck();
-  }, [reload, setReload]);
+  }, [userId, reload, setReload]);
 
   return { array, index, setIndex, nextIndex };
 }

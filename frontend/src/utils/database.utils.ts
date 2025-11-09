@@ -2,28 +2,10 @@ import type { UserItemLocal } from "@/types/local.types";
 import type { UserItemSQL } from "@/types/data.types";
 import { supabaseInstance } from "@/config/supabase.config";
 import config from "@/config/config";
-
-/**
- * Check supabase session and return user ID if logged in.
- * @returns user UUID or null if not logged in.
- */
-export async function getUserId(): Promise<string | null> {
-  const {
-    data: { session },
-  } = await supabaseInstance.auth.getSession();
-  return session?.user?.id || null;
-}
-
-/**
- * Check supabase session and return user email if logged in.
- * @returns user email or null if not logged in.
- */
-export async function getUserEmail(): Promise<string | null> {
-  const {
-    data: { session },
-  } = await supabaseInstance.auth.getSession();
-  return session?.user?.email || null;
-}
+import {
+  validateNonEmptyString,
+  validateISODateString,
+} from "@/utils/validation.utils";
 
 /**
  * Converts a local user item to SQL format, replacing null replacement dates with null.
@@ -31,6 +13,10 @@ export async function getUserEmail(): Promise<string | null> {
  * @returns Item in format suitable or PostgreSQL.
  */
 export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
+  if (!localItem || typeof localItem !== "object") {
+    throw new Error("localItem must be a valid UserItemLocal object.");
+  }
+
   const {
     user_id,
     item_id,
@@ -60,8 +46,12 @@ export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
  * @param userId - The user ID.
  * @param date - The date in YYYY-MM-DD format.
  * @returns The composite ID from userId and date.
+ * @throws Error if inputs are invalid.
  */
 export function generateUserScoreId(userId: string, date: string): string {
+  validateNonEmptyString(userId, "userId");
+  validateISODateString(date, "date");
+
   return `${userId}-${date}`;
 }
 
@@ -78,12 +68,15 @@ export function getTodayShortDate(): string {
  * @param bucketName name of the storage bucket
  * @param dataFile name of the file to fetch
  * @returns blob data or null
- * @throws error if fetching fails
+ * @throws error if fetching fails, if inputs are invalid
  */
 export async function fetchStorage(
   bucketName: string,
   dataFile: string
 ): Promise<Blob | null> {
+  validateNonEmptyString(bucketName, "bucketName");
+  validateNonEmptyString(dataFile, "dataFile");
+
   const cacheBuster = `?t=${Date.now()}`;
   const filePath = dataFile.replace(/^\//, "") + cacheBuster;
 
@@ -107,5 +100,7 @@ export async function fetchStorage(
 export function shortenDate(isoDate: string | undefined): string {
   if (!isoDate || isoDate === config.database.nullReplacementDate)
     return "není k dispozici";
+
+  validateISODateString(isoDate, "isoDate");
   return isoDate.split("T")[0];
 }

@@ -1,12 +1,19 @@
 import config from "@/config/config";
+import {
+  validateLessonSize,
+  validatePositiveInteger,
+} from "@/utils/validation.utils";
 
 /**
  * Calculates the items count in last started lesson before today.
  * @param countNotToday Learned items count excluding today's items.
  * @returns Returns the items count in last started lesson before today.
- * @throws Error if lesson size is not a positive integer.
+ * @throws Error if countNotToday or lessonSize is invalid.
  */
 export function getPreviousCount(countNotToday: number): number {
+  validatePositiveInteger(countNotToday, "countNotToday");
+  validateLessonSize();
+
   return countNotToday % config.lesson.lessonSize;
 }
 
@@ -16,6 +23,9 @@ export function getPreviousCount(countNotToday: number): number {
  * @returns Returns last started lesson number before today.
  */
 export function getLessonStarted(countNotToday: number): number {
+  validatePositiveInteger(countNotToday, "countNotToday");
+  validateLessonSize();
+
   return Math.floor(countNotToday / config.lesson.lessonSize);
 }
 
@@ -29,6 +39,10 @@ export function getTodayLessonItems(
   previousCount: number,
   todayCount: number
 ): number[] {
+  validatePositiveInteger(previousCount, "previousCount");
+  validatePositiveInteger(todayCount, "todayCount");
+  validateLessonSize();
+
   const lessonCounts: number[] = [];
   const lessonSize = config.lesson.lessonSize;
 
@@ -61,6 +75,10 @@ export function getLessonProgress(
   all: number,
   today: number
 ): [number, number, number][] {
+  validatePositiveInteger(all, "all");
+  validatePositiveInteger(today, "today");
+  validateLessonSize();
+
   const previousCount = getPreviousCount(all - today);
   const lessonNumber = getLessonStarted(all - today);
   const todayCounts = getTodayLessonItems(previousCount, today);

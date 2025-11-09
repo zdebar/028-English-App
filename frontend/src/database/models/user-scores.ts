@@ -19,7 +19,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @returns - True if the operation was successful, false otherwise.
    */
   static async addItemCount(
-    userId: string,
+    userId: string | null,
     addCount: number
   ): Promise<boolean> {
     if (!Number.isInteger(addCount) || addCount <= 0) {
@@ -57,10 +57,14 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @param userId - The user ID.
    * @returns The user score record for today, or a new record with item_count 0 if none exists.
    */
-  static async getUserScoreForToday(userId: string): Promise<UserScoreLocal> {
+  static async getUserScoreForToday(
+    userId: string | null
+  ): Promise<UserScoreLocal | undefined> {
     if (!userId) {
-      throw new Error("User is not logged in.");
+      console.warn("User is not logged in.");
+      return;
     }
+
     const today = getTodayShortDate();
     const key = generateUserScoreId(userId, today);
 

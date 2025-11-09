@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import UserItem from "@/database/models/user-items";
 import UserScore from "@/database/models/user-scores";
 import type { UserItemLocal } from "@/types/local.types";
+import { useAuth } from "@/hooks/use-auth";
 
 /**
  * Hook to manage user progress updates in the database.
@@ -13,6 +14,7 @@ export function useUserProgress(
   array: UserItemLocal[],
   reloadUserScore: () => void
 ) {
+  const { userId } = useAuth();
   const updateUserItemsInDB = useCallback(
     async (updatedProgress: number[]) => {
       if (array.length === 0) return;
@@ -25,10 +27,10 @@ export function useUserProgress(
 
       if (updatedArray.length === 0) return;
       await UserItem.savePracticeDeck(updatedArray);
-      await UserScore.addItemCount(updatedArray.length);
+      await UserScore.addItemCount(userId, updatedArray.length);
       reloadUserScore();
     },
-    [array, reloadUserScore]
+    [array, reloadUserScore, userId]
   );
 
   return { updateUserItemsInDB };

@@ -7,14 +7,19 @@ import { useUserProgress } from "@/hooks/use-user-progress";
 /**
  * Manages the Practice Deck and User Progress.
  */
-export function useItemArray() {
+export function useItemArray(userId: string) {
   const [reload, setReload] = useState(true);
   const { reloadUserScore } = useUserStore();
   const { array, index, setIndex, nextIndex } = usePracticeDeck(
+    userId,
     reload,
     setReload
   );
-  const { updateUserItemsInDB } = useUserProgress(array, reloadUserScore);
+  const { updateUserItemsInDB } = useUserProgress(
+    userId,
+    array,
+    reloadUserScore
+  );
   const [userProgress, setUserProgress] = useState<number[]>([]);
 
   const patchRef = useRef(updateUserItemsInDB);

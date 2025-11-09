@@ -6,7 +6,7 @@ import UserItem from "@/database/models/user-items";
 
 interface UserState {
   userStats: UserStatsLocal | null;
-  reloadUserScore: () => Promise<void>;
+  reloadUserScore: (userId: string) => Promise<void>;
 }
 
 /**
@@ -18,10 +18,14 @@ export const useUserStore = create<UserState>()(
       (set) => ({
         userStats: null,
 
-        reloadUserScore: async () => {
-          console.log("Reloading user stats...");
-          const todayScore = await UserScore.getUserScoreForToday();
-          const learnedCounts = await UserItem.getLearnedCounts();
+        reloadUserScore: async (userId: string) => {
+          if (!userId) {
+            console.error("User is not logged in.");
+            return;
+          }
+
+          const todayScore = await UserScore.getUserScoreForToday(userId);
+          const learnedCounts = await UserItem.getLearnedCounts(userId);
           set({
             userStats: {
               learnedCountToday: learnedCounts?.learnedCountToday || null,
