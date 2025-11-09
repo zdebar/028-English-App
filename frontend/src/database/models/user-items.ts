@@ -8,7 +8,7 @@ import { db } from "@/database/models/db";
 import { supabaseInstance } from "@/config/supabase.config";
 import { convertLocalToSQL } from "@/utils/database.utils";
 import { getTodayShortDate } from "@/utils/database.utils";
-import { getUserId } from "@/utils/database.utils";
+import Dexie from "dexie";
 
 export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   item_id!: number;
@@ -18,7 +18,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   pronunciation!: string;
   audio!: string | null;
   sequence!: number;
-  grammar_id!: number | null;
+  grammar_id!: number;
   progress!: number;
   started_at!: string;
   updated_at!: string;
@@ -31,181 +31,164 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
   /**
    * Gets a practice deck of user items for the logged-in user.
+   * @param userId the ID of the logged-in user.
    * @param deckSize number of items to include in the practice deck.
    * @returns array of UserItemLocal objects.
    */
   static async getPracticeDeck(
+    userId: string,
     deckSize: number = config.lesson.deckSize
   ): Promise<UserItemLocal[]> {
-    try {
-      const userId = await getUserId();
-      if (!userId) {
-        throw new Error("User is not logged in.");
-      }
+    if (!userId) {
+      throw new Error("User is not logged in.");
+    }
 
-      const now = new Date().toISOString();
+    const now = new Date().toISOString();
 
-      // Query 1: Fetch items with next_at older than now, sorted by next_at
-      const itemsWithNextAt: UserItemLocal[] = await db.user_items
-        .where("[user_id+mastered_at+next_at]")
-        .between(
-          [userId, UserItem.nullReplacementDate, "0000-01-01T00:00:00.000Z"],
-          [userId, UserItem.nullReplacementDate, now]
-        )
-        .limit(deckSize)
-        .toArray();
+    // Query 1: Fetch items with next_at older than now, sorted by next_at
+    const itemsWithNextAt: UserItemLocal[] = await db.user_items
+      .where("[user_id+mastered_at+next_at]")
+      .between(
+        [userId, UserItem.nullReplacementDate, "0000-01-01T00:00:00.000Z"],
+        [userId, UserItem.nullReplacementDate, now]
+      )
+      .limit(deckSize)
+      .toArray();
 
-      // If we already have enough items, return them
-      if (itemsWithNextAt.length >= deckSize) {
-        return itemsWithNextAt;
-      }
+    // If we already have enough items, return them
+    if (itemsWithNextAt.length >= deckSize) {
+      return sortOddEvenByProgress(itemsWithNextAt);
+    }
 
-      // Query 2: Fetch remaining items with next_at === nullReplacementDate, sorted by sequence
-      const remainingItems: UserItemLocal[] = await db.user_items
-        .where("[user_id+mastered_at+next_at]")
-        .equals([
-          userId,
-          UserItem.nullReplacementDate,
-          this.nullReplacementDate,
-        ])
-        .limit(deckSize - itemsWithNextAt.length)
-        .sortBy("sequence");
+    // Query 2: Fetch remaining items with next_at === nullReplacementDate, sorted by sequence
+    const remainingItems: UserItemLocal[] = await db.user_items
+      .where("[user_id+mastered_at+next_at]")
+      .equals([
+        userId,
+        UserItem.nullReplacementDate,
+        UserItem.nullReplacementDate,
+      ])
+      .limit(deckSize - itemsWithNextAt.length)
+      .sortBy("sequence");
 
-      // Combine the results
-      const combinedItems = [...itemsWithNextAt, ...remainingItems];
+    // Combine the results
+    const combinedItems = [...itemsWithNextAt, ...remainingItems];
 
-      if (combinedItems.length < deckSize) {
-        return [];
-      }
-
-      return sortOddEvenByProgress(combinedItems);
-    } catch (error) {
-      console.error("Error fetching practice deck:", error);
+    if (combinedItems.length < deckSize) {
       return [];
     }
+
+    return sortOddEvenByProgress(combinedItems);
   }
 
   /**
    * Saves the practiced deck items to the database.
    * @param items array of already practiced UserItemLocal objects.
+   * @returns boolean indicating success.
    */
-  static async savePracticeDeck(items: UserItemLocal[]): Promise<void> {
-    try {
-      const currentDateTime = new Date(Date.now()).toISOString();
-      const updatedItems = items.map((item) => {
-        return {
-          ...item,
-          progress: item.progress,
-          next_at: getNextAt(item.progress),
-          started_at:
-            item.started_at === this.nullReplacementDate
-              ? currentDateTime
-              : item.started_at,
-          updated_at: currentDateTime,
-          learned_at:
-            item.learned_at === this.nullReplacementDate &&
-            item.progress > config.progress.learnedAtThreshold
-              ? currentDateTime
-              : item.learned_at,
-          mastered_at:
-            item.mastered_at === this.nullReplacementDate &&
-            item.progress > config.progress.masteredAtThreshold
-              ? currentDateTime
-              : item.mastered_at,
-        };
-      });
+  static async savePracticeDeck(items: UserItemLocal[]): Promise<boolean> {
+    const currentDateTime = new Date(Date.now()).toISOString();
+    const updatedItems = items.map((item) => {
+      return {
+        ...item,
+        progress: item.progress,
+        next_at: getNextAt(item.progress),
+        started_at:
+          item.started_at === UserItem.nullReplacementDate
+            ? currentDateTime
+            : item.started_at,
+        updated_at: currentDateTime,
+        learned_at:
+          item.learned_at === UserItem.nullReplacementDate &&
+          item.progress > config.progress.learnedAtThreshold
+            ? currentDateTime
+            : item.learned_at,
+        mastered_at:
+          item.mastered_at === UserItem.nullReplacementDate &&
+          item.progress > config.progress.masteredAtThreshold
+            ? currentDateTime
+            : item.mastered_at,
+      };
+    });
 
-      await db.user_items.bulkPut(updatedItems);
-    } catch (error) {
-      console.error("Error saving practice deck:", error);
-    }
+    await db.user_items.bulkPut(updatedItems);
+    return true;
   }
 
   /**
    * Fetches learned counts for the logged-in user.
-   * @returns object containing learnedToday and learned counts.
+   * @param userId - The ID of the logged-in user.
+   * @returns object containing learnedCountToday and learnedCount.
    */
-  static async getLearnedCounts(): Promise<{
-    learnedToday: number;
-    learned: number;
+  static async getLearnedCounts(userId: string): Promise<{
+    learnedCountToday: number;
+    learnedCount: number;
   }> {
-    try {
-      const userId = await getUserId();
-      if (!userId) {
-        throw new Error("User is not logged in.");
-      }
-
-      const today = getTodayShortDate();
-      const items = await db.user_items
-        .where("user_id")
-        .equals(userId)
-        .and(
-          (item: UserItemLocal) => item.learned_at !== this.nullReplacementDate
-        )
-        .toArray();
-
-      const learned = items.length;
-      const learnedToday = items.filter((item) =>
-        item.learned_at.startsWith(today)
-      ).length;
-
-      return { learnedToday, learned };
-    } catch (error) {
-      console.error("Error fetching learned counts:", error);
-      return { learnedToday: 0, learned: 0 };
+    if (!userId) {
+      throw new Error("User is not logged in.");
     }
+
+    const today = getTodayShortDate();
+    const learnedItems = await db.user_items
+      .where("[user_id+learned_at]")
+      .between(
+        [userId, Dexie.minKey],
+        [userId, UserItem.nullReplacementDate],
+        true,
+        false
+      )
+      .toArray();
+
+    const learnedCount = learnedItems.length;
+    const learnedCountToday = learnedItems.filter((item) =>
+      item.learned_at.startsWith(today)
+    ).length;
+
+    return { learnedCountToday, learnedCount };
   }
 
   /**
    * Fetches all started vocabulary items for the logged-in user.
+   * @param userId - The ID of the logged-in user.
    * @returns array of UserItemLocal objects.
    */
-  static async getUserStartedVocabulary(): Promise<UserItemLocal[]> {
-    try {
-      const userId = await getUserId();
-
-      if (!userId) {
-        throw new Error("User is not logged in.");
-      }
-
-      const result = await db.user_items
-        .where("user_id")
-        .equals(userId)
-        .and((item: UserItemLocal) => item.grammar_id === null)
-        .sortBy("czech");
-
-      return result;
-    } catch (error) {
-      console.error("Error fetching started vocabulary:", error);
-      return [];
+  static async getUserStartedVocabulary(
+    userId: string
+  ): Promise<UserItemLocal[]> {
+    if (!userId) {
+      throw new Error("User is not logged in.");
     }
+
+    const result = await db.user_items
+      .where("[user_id+grammar_id]")
+      .equals([userId, config.database.nullReplacementNumber])
+      .sortBy("czech");
+
+    return result;
   }
 
   /**
    * Resets all user items for the logged-in user.
+   * @param userId - The ID of the logged-in user.
+   * @returns boolean indicating success.
    */
-  static async resetsAllUserItems(): Promise<void> {
-    try {
-      const userId = await getUserId();
-
-      if (!userId) {
-        throw new Error("User is not logged in.");
-      }
-
-      await db.user_items
-        .where("user_id")
-        .equals(userId)
-        .modify((item: UserItemLocal) => {
-          item.next_at = this.nullReplacementDate;
-          item.mastered_at = this.nullReplacementDate;
-          item.updated_at = this.nullReplacementDate;
-          item.learned_at = this.nullReplacementDate;
-          item.progress = 0;
-          item.started_at = this.nullReplacementDate;
-        });
-    } catch (error) {
-      console.error("Error clearing all user items:", error);
+  static async resetsAllUserItems(userId: string): Promise<boolean> {
+    if (!userId) {
+      throw new Error("User is not logged in.");
     }
+
+    await db.user_items
+      .where("user_id")
+      .equals(userId)
+      .modify((item: UserItemLocal) => {
+        item.next_at = this.nullReplacementDate;
+        item.mastered_at = this.nullReplacementDate;
+        item.updated_at = this.nullReplacementDate;
+        item.learned_at = this.nullReplacementDate;
+        item.progress = 0;
+        item.started_at = this.nullReplacementDate;
+      });
+    return true;
   }
 
   /**
@@ -213,122 +196,105 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param grammarId - The grammar ID whose items should be cleared.
    * @returns void
    */
-  static async resetGrammarItems(grammarId: number): Promise<void> {
-    if (!grammarId || grammarId <= 0) {
-      console.error("Invalid grammar ID provided.");
-      return;
+  static async resetGrammarItems(
+    userId: string,
+    grammarId: number
+  ): Promise<void> {
+    if (!userId) {
+      throw new Error("User is not logged in.");
     }
 
-    try {
-      const userId = await getUserId();
-      if (!userId) {
-        throw new Error("User is not logged in.");
-      }
-
-      await db.user_items
-        .where("user_id")
-        .equals(userId)
-        .and((item: UserItemLocal) => item.grammar_id === grammarId)
-        .modify((item: UserItemLocal) => {
-          item.next_at = this.nullReplacementDate;
-          item.mastered_at = this.nullReplacementDate;
-          item.updated_at = this.nullReplacementDate;
-          item.learned_at = this.nullReplacementDate;
-          item.progress = 0;
-          item.started_at = this.nullReplacementDate;
-        });
-    } catch (error) {
-      console.error("Error clearing grammar items:", error);
-    }
+    await db.user_items
+      .where("[user_id+grammar_id]")
+      .equals([userId, grammarId])
+      .modify((item: UserItemLocal) => {
+        item.next_at = this.nullReplacementDate;
+        item.mastered_at = this.nullReplacementDate;
+        item.updated_at = this.nullReplacementDate;
+        item.learned_at = this.nullReplacementDate;
+        item.progress = 0;
+        item.started_at = this.nullReplacementDate;
+      });
   }
 
   /**
    * Resets a specific user item by its ID.
-   * @param itemId  - The ID of the user item to reset.
+   * @param userId - The ID of the logged-in user.
+   * @param itemId  - The ID of the item to reset.
+   * @returns boolean indicating success.
    */
-  static async resetUserItemById(itemId: number): Promise<void> {
-    try {
-      const userId = await getUserId();
-      if (!userId) {
-        throw new Error("User is not logged in.");
-      }
-      console.log(
-        `Clearing user item for user: ${userId} and itemId: ${itemId}`
-      );
-
-      const modifiedCount = await db.user_items
-        .where("id")
-        .equals(itemId)
-        .and((item: UserItemLocal) => item.user_id === userId)
-        .modify((item: UserItemLocal) => {
-          item.next_at = this.nullReplacementDate;
-          item.mastered_at = this.nullReplacementDate;
-          item.updated_at = this.nullReplacementDate;
-          item.learned_at = this.nullReplacementDate;
-          item.progress = 0;
-          item.started_at = this.nullReplacementDate;
-        });
-
-      if (modifiedCount === 0) {
-        console.warn(
-          `No user item found for id: ${itemId} and user: ${userId}`
-        );
-      }
-    } catch (error) {
-      console.error("Error clearing user item:", error);
+  static async resetUserItemById(
+    userId: string,
+    itemId: number
+  ): Promise<boolean> {
+    if (!userId) {
+      throw new Error("User is not logged in.");
     }
+
+    await db.user_items
+      .where("[user_id+item_id]")
+      .equals([userId, itemId])
+      .modify((item: UserItemLocal) => {
+        item.next_at = this.nullReplacementDate;
+        item.mastered_at = this.nullReplacementDate;
+        item.updated_at = this.nullReplacementDate;
+        item.learned_at = this.nullReplacementDate;
+        item.progress = 0;
+        item.started_at = this.nullReplacementDate;
+      });
+
+    return true;
   }
 
   /**
    * Synchronizes user items data between local IndexedDB and Supabase.
-   * @returns void
+   * @param userId - The ID of the logged-in user.
+   * @returns boolean indicating success.
    */
-  static async syncUserItemsData(): Promise<void> {
-    try {
-      const userId = await getUserId();
-      if (!userId) {
-        throw new Error("User is not logged in.");
-      }
-
-      // Step 1: Fetch all local user scores from IndexedDB
-      const localUserItems = await db.user_items
-        .where("user_id")
-        .equals(userId)
-        .and(
-          (item: UserItemLocal) => item.started_at !== this.nullReplacementDate
-        )
-        .toArray();
-
-      const sqlUserItems = localUserItems.map(convertLocalToSQL);
-
-      // Step 2: Send local scores to Supabase for updates
-      const { error: upsertError } = await supabaseInstance
-        .from("user_items")
-        .upsert(sqlUserItems, { onConflict: "user_id, item_id" });
-
-      if (upsertError) {
-        console.error("Error updating user_items on Supabase:", upsertError);
-        return;
-      }
-
-      // Step 3: Fetch updated scores from Supabase with SQL logic
-      const { data: updatedUserItems, error: fetchError } =
-        await supabaseInstance.rpc("get_user_items", {
-          user_id_input: userId,
-        });
-
-      if (fetchError) {
-        console.error(
-          "Error fetching updated user_items from Supabase:",
-          fetchError
-        );
-        return;
-      }
-
-      // Step 4: Update local IndexedDB with the fetched data
-      await db.user_items.bulkPut(updatedUserItems);
-    } catch (error) {
-      console.error("Unexpected error during user_items sync:", error);
+  static async syncUserItemsData(userId: string): Promise<boolean> {
+    if (!userId) {
+      throw new Error("User is not logged in.");
     }
+
+    // Step 1: Fetch all local user items from IndexedDB
+    const localUserItems = await db.user_items
+      .where("[user_id+started_at]")
+      .between(
+        [userId, Dexie.minKey],
+        [userId, this.nullReplacementDate],
+        true,
+        false
+      )
+      .toArray();
+
+    const sqlUserItems = localUserItems.map(convertLocalToSQL);
+
+    // Step 2: Send local items to Supabase for updates
+    const { error: upsertError } = await supabaseInstance
+      .from("user_items")
+      .upsert(sqlUserItems, { onConflict: "user_id, item_id" });
+
+    if (upsertError) {
+      console.error("Error updating user_items on Supabase:", upsertError);
+      return false;
+    }
+
+    // Step 3: Fetch updated items from Supabase with SQL logic
+    const { data: updatedUserItems, error: fetchError } =
+      await supabaseInstance.rpc("get_user_items", {
+        user_id_input: userId,
+      });
+
+    if (fetchError) {
+      console.error(
+        "Error fetching updated user_items from Supabase:",
+        fetchError
+      );
+      return false;
+    }
+
+    // Step 4: Update local IndexedDB with the fetched data
+    await db.user_items.bulkPut(updatedUserItems);
+    return true;
   }
 }

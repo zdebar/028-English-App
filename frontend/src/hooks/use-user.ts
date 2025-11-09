@@ -24,8 +24,8 @@ export const useUserStore = create<UserState>()(
           const learnedCounts = await UserItem.getLearnedCounts();
           set({
             userStats: {
-              learnedCountToday: learnedCounts?.learnedToday || null,
-              learnedCount: learnedCounts?.learned || null,
+              learnedCountToday: learnedCounts?.learnedCountToday || null,
+              learnedCount: learnedCounts?.learnedCount || null,
               practiceCountToday: todayScore?.item_count || null,
             },
           });

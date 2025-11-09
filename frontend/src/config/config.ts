@@ -2,6 +2,7 @@ const config = {
   database: {
     dbName: "AppDatabase",
     nullReplacementDate: "9999-12-31T23:59:59+00:00", // IndexedDB does not support null values in indexes
+    nullReplacementNumber: -1,
   },
 
   progress: {

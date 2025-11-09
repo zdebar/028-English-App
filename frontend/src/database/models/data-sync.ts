@@ -5,17 +5,14 @@ import UserItem from "@/database/models/user-items";
 import AudioRecord from "@/database/models/audio-records";
 import { useUserStore } from "@/hooks/use-user";
 
-export async function dataSync(): Promise<void> {
+export async function dataSync(userId: string): Promise<boolean> {
   const reloadUserScore = useUserStore.getState().reloadUserScore;
 
-  try {
-    await db.open();
-    await UserItem.syncUserItemsData();
-    await Grammar.syncGrammarData();
-    await UserScore.syncUserScoreData();
-    await AudioRecord.syncAudioData();
-    await reloadUserScore();
-  } catch (error) {
-    console.error("Error syncing data:", error);
-  }
+  await db.open();
+  await UserItem.syncUserItemsData(userId);
+  await Grammar.syncGrammarData();
+  await UserScore.syncUserScoreData(userId);
+  await AudioRecord.syncAudioData();
+  await reloadUserScore();
+  return true;
 }

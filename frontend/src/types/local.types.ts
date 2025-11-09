@@ -6,7 +6,7 @@ export interface UserItemLocal {
   pronunciation: string;
   audio: string | null;
   sequence: number;
-  grammar_id: number | null;
+  grammar_id: number;
   progress: number;
   started_at: string; // ISO 8601: "2025-10-24T12:00:00Z"
   updated_at: string; // ISO 8601: "2025-10-25T12:00:00Z"
