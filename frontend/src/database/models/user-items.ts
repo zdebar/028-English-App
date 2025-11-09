@@ -43,18 +43,42 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         throw new Error("User is not logged in.");
       }
 
-      const items: UserItemLocal[] = await db.user_items
-        .where("[user_id+mastered_at]")
-        .equals([userId, UserItem.nullReplacementDate])
-        .and(
-          (item) =>
-            item.next_at === this.nullReplacementDate ||
-            item.next_at <= new Date().toISOString()
+      const now = new Date().toISOString();
+
+      // Query 1: Fetch items with next_at older than now, sorted by next_at
+      const itemsWithNextAt: UserItemLocal[] = await db.user_items
+        .where("[user_id+mastered_at+next_at]")
+        .between(
+          [userId, UserItem.nullReplacementDate, "0000-01-01T00:00:00.000Z"],
+          [userId, UserItem.nullReplacementDate, now]
         )
         .limit(deckSize)
+        .toArray();
+
+      // If we already have enough items, return them
+      if (itemsWithNextAt.length >= deckSize) {
+        return itemsWithNextAt;
+      }
+
+      // Query 2: Fetch remaining items with next_at === nullReplacementDate, sorted by sequence
+      const remainingItems: UserItemLocal[] = await db.user_items
+        .where("[user_id+mastered_at+next_at]")
+        .equals([
+          userId,
+          UserItem.nullReplacementDate,
+          this.nullReplacementDate,
+        ])
+        .limit(deckSize - itemsWithNextAt.length)
         .sortBy("sequence");
 
-      return sortOddEvenByProgress(items.slice(0, deckSize));
+      // Combine the results
+      const combinedItems = [...itemsWithNextAt, ...remainingItems];
+
+      if (combinedItems.length < deckSize) {
+        return [];
+      }
+
+      return sortOddEvenByProgress(combinedItems);
     } catch (error) {
       console.error("Error fetching practice deck:", error);
       return [];
