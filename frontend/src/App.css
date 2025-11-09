@@ -95,6 +95,10 @@
   .text-bar {
     @apply font-body font-bold text-sm text-center text-light;
   }
+
+  .text-button {
+    @apply w-60 text-left;
+  }
 }
 
 @layer components {

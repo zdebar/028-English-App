@@ -13,6 +13,7 @@ export default function ButtonResetAll() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleReset = async () => {
+    setIsLoading(true);
     try {
       await UserItem.resetsAllUserItems();
       toast.success("Váš pokrok byl úspěšně resetován.");
@@ -29,8 +30,13 @@ export default function ButtonResetAll() {
 
   return (
     <>
-      <ButtonRectangular onClick={() => setIsModalOpen(true)}>
-        {isLoading ? "Načítání..." : "Restartovat"}
+      <ButtonRectangular
+        onClick={() => setIsModalOpen(true)}
+        disabled={isLoading}
+      >
+        <p className="text-button">
+          {isLoading ? "Resetování..." : "Resetovat vše"}
+        </p>
       </ButtonRectangular>
       <Modal
         isOpen={isModalOpen}
