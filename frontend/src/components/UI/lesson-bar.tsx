@@ -8,9 +8,9 @@ interface LessonBarProps {
 }
 
 export default function ProgressBar({
-  previousCount,
-  todayCount,
-  lessonNumber,
+  previousCount = 0,
+  todayCount = 0,
+  lessonNumber = 1,
   divisions = 20,
 }: LessonBarProps) {
   const lessonSize = config.lesson.lessonSize || 100;

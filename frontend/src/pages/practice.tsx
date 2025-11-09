@@ -12,7 +12,7 @@ import { useItemArray } from "@/hooks/use-item-array";
 import { useUserStore } from "@/hooks/use-user";
 import { useAudioManager } from "@/hooks/use-audio-manager";
 import Loading from "@/components/UI/loading";
-import VolumeSlider from "@/components/volume-slider";
+import VolumeSlider from "@/components/UI/volume-slider";
 import config from "@/config/config";
 import GrammarCard from "@/components/grammar-card";
 

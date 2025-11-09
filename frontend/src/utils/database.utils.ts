@@ -8,15 +8,10 @@ import config from "@/config/config";
  * @returns user UUID or null if not logged in.
  */
 export async function getUserId(): Promise<string | null> {
-  try {
-    const {
-      data: { session },
-    } = await supabaseInstance.auth.getSession();
-    return session?.user?.id || null;
-  } catch (error) {
-    console.error("Error fetching user session:", error);
-    return null;
-  }
+  const {
+    data: { session },
+  } = await supabaseInstance.auth.getSession();
+  return session?.user?.id || null;
 }
 
 /**
@@ -24,15 +19,10 @@ export async function getUserId(): Promise<string | null> {
  * @returns user email or null if not logged in.
  */
 export async function getUserEmail(): Promise<string | null> {
-  try {
-    const {
-      data: { session },
-    } = await supabaseInstance.auth.getSession();
-    return session?.user?.email || null;
-  } catch (error) {
-    console.error("Error fetching user session:", error);
-    return null;
-  }
+  const {
+    data: { session },
+  } = await supabaseInstance.auth.getSession();
+  return session?.user?.email || null;
 }
 
 /**

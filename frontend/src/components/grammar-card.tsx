@@ -1,15 +1,22 @@
 import { useState, useEffect } from "react";
 import Grammar from "@/database/models/grammar";
 import type { GrammarLocal } from "@/types/local.types";
-import OverviewCard from "./overview-card";
+import OverviewCard from "./UI/overview-card";
 import "react-toastify/dist/ReactToastify.css";
 
-interface GrammarCardProps {
+/**
+ * Fetches and display individual grammar content by grammar_id in a card.
+ * @param grammar_id - The ID of the grammar to display.
+ * @param onClose - Callback function to close the grammar card.
+ * @returns
+ */
+export default function GrammarCard({
+  grammar_id,
+  onClose,
+}: {
   grammar_id: number | null;
   onClose: () => void;
-}
-
-export default function GrammarCard({ grammar_id, onClose }: GrammarCardProps) {
+}) {
   const [grammar, setGrammar] = useState<GrammarLocal | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);

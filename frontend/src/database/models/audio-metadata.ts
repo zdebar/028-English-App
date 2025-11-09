@@ -16,32 +16,19 @@ export default class AudioMetadata
    * @returns true if the archive has been fetched, otherwise false
    */
   static async isFetched(archiveName: string): Promise<boolean> {
-    if (!archiveName) {
-      console.error("Invalid archive name provided.");
-      return false;
-    }
-
-    try {
-      const metadata = await db.audio_metadata.get(archiveName);
-      return !!metadata;
-    } catch (error) {
-      console.error(
-        "Error checking if audio archive is already fetched:",
-        error
-      );
-      return false;
-    }
+    const metadata = await db.audio_metadata.get(archiveName);
+    return !!metadata;
   }
 
   /**
    * Marks an audio archive as fetched by storing its metadata.
    * @param archiveName the name of the fetched audio archive
-   * @returns void
+   * @returns true if the operation was successful, otherwise false
    */
-  static async markAsFetched(archiveName: string): Promise<void> {
+  static async markAsFetched(archiveName: string): Promise<boolean> {
     if (!archiveName) {
       console.error("Invalid archive name provided.");
-      return;
+      return false;
     }
 
     try {
@@ -50,8 +37,10 @@ export default class AudioMetadata
         archive_name: archiveName,
         fetched_at: fetchedAt,
       });
+      return !!fetchedAt;
     } catch (error) {
       console.error("Error marking archive as fetched:", error);
+      return false;
     }
   }
 }

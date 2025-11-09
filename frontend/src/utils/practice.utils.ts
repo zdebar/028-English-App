@@ -7,7 +7,6 @@ import type { UserItemLocal } from "@/types/local.types";
  * @returns True if direction is CZ -> EN, false otherwise.
  */
 export function alternateDirection(progress: number): boolean {
-  if (progress == null) return true;
   return progress % 2 === 0;
 }
 
@@ -18,7 +17,7 @@ export function alternateDirection(progress: number): boolean {
  */
 export function getNextAt(progress: number): string {
   const interval = config.srs.intervals[progress];
-  if (interval === undefined) return config.database.nullReplacementDate;
+  if (!interval) return config.database.nullReplacementDate;
 
   const randomFactor = 1 + config.srs.randomness * (Math.random() * 2 - 1);
   const randomizedInterval = Math.round(interval * randomFactor);

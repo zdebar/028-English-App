@@ -4,6 +4,7 @@ import config from "@/config/config";
  * Calculates the items count in last started lesson before today.
  * @param countNotToday Learned items count excluding today's items.
  * @returns Returns the items count in last started lesson before today.
+ * @throws Error if lesson size is not a positive integer.
  */
 export function getPreviousCount(countNotToday: number): number {
   return countNotToday % config.lesson.lessonSize;

@@ -10,6 +10,7 @@ interface ButtonAsyncProps {
   modalTitle?: string;
   modalDescription?: string;
   onConfirm: () => void;
+  textStyle?: string;
   disabled?: boolean;
 }
 
@@ -20,6 +21,7 @@ export default function ButtonAsync({
   modalTitle = "Potvrzení akce",
   modalDescription = "Opravdu chcete pokračovat?",
   onConfirm,
+  textStyle = "text-button",
   disabled = false,
 }: ButtonAsyncProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,7 +32,9 @@ export default function ButtonAsync({
         onClick={() => setIsModalOpen(true)}
         disabled={isLoading || disabled}
       >
-        <p className="text-button">{isLoading ? disabledMessage : message}</p>
+        <p className={`overlay-hidden ${textStyle}`}>
+          {isLoading ? disabledMessage : message}
+        </p>
       </ButtonRectangular>
       <Modal
         isOpen={isModalOpen}

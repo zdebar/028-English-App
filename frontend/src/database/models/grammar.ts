@@ -16,20 +16,16 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * @param grammarId fetch grammar by ID
    * @returns A promise that resolves to the grammar record or `undefined` if not found.
    */
-  static async getGrammarById(
-    grammarId: number
-  ): Promise<GrammarLocal | undefined> {
+  static async getGrammarById(grammarId: number): Promise<GrammarLocal> {
     if (!grammarId || grammarId <= 0) {
-      console.error("Invalid grammar ID provided.");
-      return undefined;
+      throw new Error("Invalid grammar ID provided.");
     }
 
-    try {
-      return await db.grammars.get(grammarId);
-    } catch (error) {
-      console.error("Error fetching grammar by ID:", error);
-      return undefined;
+    const grammar = await db.grammars.get(grammarId);
+    if (!grammar) {
+      throw new Error(`Grammar with ID ${grammarId} not found.`);
     }
+    return grammar;
   }
 
   /**

@@ -1,4 +1,4 @@
-import LessonBar from "@/components/lesson-bar";
+import LessonBar from "@/components/UI/lesson-bar";
 import { getLessonProgress } from "@/utils/dashboard.utils";
 import type { LessonProgress } from "@/types/local.types";
 
@@ -25,7 +25,7 @@ export default function Dashboard({ allCount, todayCount }: DashboardProps) {
           />
         ))
       ) : (
-        <p className="text-center text-gray-500">Žádný pokrok k zobrazení.</p>
+        <p className="text-center">Žádný pokrok k zobrazení.</p>
       )}
     </div>
   );

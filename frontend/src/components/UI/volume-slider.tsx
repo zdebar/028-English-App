@@ -1,16 +1,22 @@
 import { useState, useRef, useEffect } from "react";
 import { VolumeIcon } from "@/components/UI/icons";
 
-type VolumeSliderProps = {
-  setVolume: (volume: number) => void;
-  className?: string;
-} & React.HTMLAttributes<HTMLDivElement>;
-
+/**
+ * A component for controlling volume with a slider.
+ *
+ * @param setVolume - Function to update the volume.
+ * @param className - Optional additional CSS classes.
+ * @param props - Additional HTML attributes for the container.
+ * @returns A JSX element for the volume slider.
+ */
 export default function VolumeSlider({
   setVolume,
   className = "",
   ...props
-}: VolumeSliderProps) {
+}: {
+  setVolume: (volume: number) => void;
+  className?: string;
+} & React.HTMLAttributes<HTMLDivElement>) {
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [volume, setLocalVolume] = useState(0.5);
   const sliderRef = useRef<HTMLDivElement>(null);

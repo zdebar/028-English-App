@@ -2,7 +2,7 @@ import ButtonRectangular from "@/components/UI/button-rectangular";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { useUserStore } from "@/hooks/use-user";
-import Dashboard from "@/components/dashboard";
+import Dashboard from "@/components/Layout/dashboard";
 import SettingProperty from "@/components/UI/setting-property";
 
 export default function Home() {
