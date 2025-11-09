@@ -12,12 +12,13 @@ import { useAuth } from "@/hooks/use-auth";
  */
 export function useUserProgress(
   array: UserItemLocal[],
-  reloadUserScore: () => void
+  reloadUserScore: (userId: string) => void
 ) {
   const { userId } = useAuth();
+
   const updateUserItemsInDB = useCallback(
     async (updatedProgress: number[]) => {
-      if (array.length === 0) return;
+      if (array.length === 0 || !userId) return;
       const updatedArray = array
         .filter((_, idx) => idx < updatedProgress.length)
         .map((item, idx) => ({
@@ -28,7 +29,7 @@ export function useUserProgress(
       if (updatedArray.length === 0) return;
       await UserItem.savePracticeDeck(updatedArray);
       await UserScore.addItemCount(userId, updatedArray.length);
-      reloadUserScore();
+      reloadUserScore(userId);
     },
     [array, reloadUserScore, userId]
   );

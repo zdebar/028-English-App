@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import UserItem from "@/database/models/user-items";
 import type { UserItemLocal } from "@/types/local.types";
+import { useAuth } from "@/hooks/use-auth";
 
 /**
  * Manages the practice deck state and index.
@@ -8,12 +9,12 @@ import type { UserItemLocal } from "@/types/local.types";
  * @param setReload Function to set the reload state.
  */
 export function usePracticeDeck(
-  userId: string,
   reload: boolean,
   setReload: (value: boolean) => void
 ) {
   const [array, setArray] = useState<UserItemLocal[]>([]);
   const [index, setIndex] = useState(0);
+  const { userId } = useAuth();
 
   function wrapIndex(newIndex: number) {
     if (array.length === 0) return 0;
@@ -28,6 +29,7 @@ export function usePracticeDeck(
     if (!reload) return;
 
     const fetchPracticeDeck = async () => {
+      if (!userId) return;
       const practiceItems = await UserItem.getPracticeDeck(userId);
       setArray(practiceItems);
       setReload(false);

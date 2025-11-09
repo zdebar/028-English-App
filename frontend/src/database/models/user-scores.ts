@@ -5,7 +5,10 @@ import { supabaseInstance } from "@/config/supabase.config";
 import { db } from "@/database/models/db";
 import { generateUserScoreId } from "@/utils/database.utils";
 import { getTodayShortDate } from "@/utils/database.utils";
-import { validatePositiveInteger } from "@/utils/validation.utils";
+import {
+  validatePositiveInteger,
+  validateUUID,
+} from "@/utils/validation.utils";
 
 export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   id!: string;
@@ -15,20 +18,16 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
   /**
    * Increases the item count for today's date by the specified amount.
-   * @param userId - The user ID.
+   * @param userId - The user ID. Must be a valid UUID.
    * @param addCount - The number to add to today's item count.
    * @returns - True if the operation was successful, false otherwise.
    */
   static async addItemCount(
-    userId: string | null,
+    userId: string,
     addCount: number
   ): Promise<boolean> {
-    if (!userId) {
-      console.warn("User is not logged in.");
-      return false;
-    }
-
     validatePositiveInteger(addCount, "addCount");
+    validateUUID(userId, "userId");
 
     const today = getTodayShortDate();
 
@@ -54,16 +53,13 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
   /**
    * Fetches the user score record for today's date.
-   * @param userId - The user ID.
+   * @param userId - The user ID. Must be a valid UUID.
    * @returns The user score record for today, or a new record with item_count 0 if none exists.
    */
   static async getUserScoreForToday(
-    userId: string | null
+    userId: string
   ): Promise<UserScoreLocal | undefined> {
-    if (!userId) {
-      console.warn("User is not logged in.");
-      return;
-    }
+    validateUUID(userId, "userId");
 
     const today = getTodayShortDate();
     const key = generateUserScoreId(userId, today);
@@ -80,13 +76,11 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
   /**
    * Synchronizes user score data between the local IndexedDB and Supabase.
-   * @param userId - The user ID.
+   * @param userId - The user ID. Must be a valid UUID.
    * @returns
    */
   static async syncUserScoreData(userId: string): Promise<void> {
-    if (!userId) {
-      throw new Error("User is not logged in.");
-    }
+    validateUUID(userId, "userId");
 
     // Step 1: Fetch all local user scores
     const localScores = await db.user_scores

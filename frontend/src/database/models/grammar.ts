@@ -5,7 +5,10 @@ import { supabaseInstance } from "@/config/supabase.config";
 import { db } from "@/database/models/db";
 import config from "@/config/config";
 import Dexie from "dexie";
-import { validatePositiveInteger } from "@/utils/validation.utils";
+import {
+  validatePositiveInteger,
+  validateUUID,
+} from "@/utils/validation.utils";
 
 export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   id!: number;
@@ -33,10 +36,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * @returns Array of started GrammarLocal records
    */
   static async getStartedGrammarList(userId: string): Promise<GrammarLocal[]> {
-    if (!userId) {
-      console.warn("User is not logged in.");
-      return [];
-    }
+    validateUUID(userId, "userId");
 
     const startedUserItems: UserItemLocal[] = await db.user_items
       .where("[user_id + started_at]")

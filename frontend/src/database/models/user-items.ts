@@ -12,6 +12,7 @@ import Dexie from "dexie";
 import {
   validatePositiveInteger,
   validateUserItemArray,
+  validateUUID,
 } from "@/utils/validation.utils";
 
 export default class UserItem extends Entity<AppDB> implements UserItemLocal {
@@ -43,10 +44,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     userId: string,
     deckSize: number = config.lesson.deckSize
   ): Promise<UserItemLocal[]> {
-    if (!userId) {
-      throw new Error("User is not logged in.");
-    }
     validatePositiveInteger(deckSize, "deckSize");
+    validateUUID(userId, "userId");
 
     const now = new Date().toISOString();
 
@@ -131,9 +130,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     learnedCountToday: number;
     learnedCount: number;
   }> {
-    if (!userId) {
-      throw new Error("User is not logged in.");
-    }
+    validateUUID(userId, "userId");
 
     const today = getTodayShortDate();
     const learnedItems = await db.user_items
@@ -162,9 +159,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   static async getUserStartedVocabulary(
     userId: string
   ): Promise<UserItemLocal[]> {
-    if (!userId) {
-      throw new Error("User is not logged in.");
-    }
+    validateUUID(userId, "userId");
 
     const result = await db.user_items
       .where("[user_id+grammar_id]")
@@ -180,9 +175,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns boolean indicating success.
    */
   static async resetsAllUserItems(userId: string): Promise<boolean> {
-    if (!userId) {
-      throw new Error("User is not logged in.");
-    }
+    validateUUID(userId, "userId");
 
     await db.user_items
       .where("user_id")
@@ -207,10 +200,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     userId: string,
     grammarId: number
   ): Promise<void> {
-    if (!userId) {
-      throw new Error("User is not logged in.");
-    }
     validatePositiveInteger(grammarId, "grammarId");
+    validateUUID(userId, "userId");
 
     await db.user_items
       .where("[user_id+grammar_id]")
@@ -235,10 +226,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     userId: string,
     itemId: number
   ): Promise<boolean> {
-    if (!userId) {
-      throw new Error("User is not logged in.");
-    }
     validatePositiveInteger(itemId, "itemId");
+    validateUUID(userId, "userId");
 
     await db.user_items
       .where("[user_id+item_id]")
@@ -261,9 +250,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns boolean indicating success.
    */
   static async syncUserItemsData(userId: string): Promise<boolean> {
-    if (!userId) {
-      throw new Error("User is not logged in.");
-    }
+    validateUUID(userId, "userId");
 
     // Step 1: Fetch all local user items from IndexedDB
     const localUserItems = await db.user_items
