@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import ButtonRectangular from "@/components/UI/button-rectangular";
 import UserItem from "@/database/models/user-items";
 import type { UserItemLocal } from "@/types/local.types";
-import { CloseIcon } from "@/components/icons";
+import { CloseIcon } from "@/components/UI/icons";
 import { useNavigate } from "react-router-dom";
 import OverviewCard from "@/components/overview-card";
-import DirectionDropdown from "@/components/direction-dropdown";
+import DirectionDropdown from "@/components/UI/direction-dropdown";
 import SettingProperty from "@/components/setting-property";
 import { shortenDate } from "@/utils/database.utils";
 

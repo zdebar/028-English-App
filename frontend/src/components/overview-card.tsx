@@ -1,6 +1,6 @@
 import { useState } from "react";
 import ButtonRectangular from "@/components/UI/button-rectangular";
-import { CloseIcon } from "@/components/icons";
+import { CloseIcon } from "@/components/UI/icons";
 import { Modal } from "@/components/UI/modal";
 
 interface OverviewCardProps {

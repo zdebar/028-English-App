@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App.tsx";
-import ErrorBoundary from "@/components/error-boundary.tsx";
+import ErrorBoundary from "@/components/utils/error-boundary.tsx";
 import { I18nextProvider } from "react-i18next";
 import i18n from "@/locates/i18n";
 

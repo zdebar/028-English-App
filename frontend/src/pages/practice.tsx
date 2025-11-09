@@ -6,12 +6,12 @@ import {
   EyeIcon,
   MinusIcon,
   PlusIcon,
-} from "@/components/icons";
+} from "@/components/UI/icons";
 import { useState, useEffect, useCallback } from "react";
 import { useItemArray } from "@/hooks/use-item-array";
 import { useUserStore } from "@/hooks/use-user";
 import { useAudioManager } from "@/hooks/use-audio-manager";
-import Loading from "@/components/loading";
+import Loading from "@/components/UI/loading";
 import VolumeSlider from "@/components/volume-slider";
 import config from "@/config/config";
 import GrammarCard from "@/components/grammar-card";

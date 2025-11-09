@@ -3,7 +3,7 @@ import ButtonRectangular from "../components/UI/button-rectangular";
 import Grammar from "@/database/models/grammar";
 import UserItem from "@/database/models/user-items";
 import type { GrammarLocal } from "@/types/local.types";
-import { CloseIcon } from "../components/icons";
+import { CloseIcon } from "../components/UI/icons";
 import { useNavigate } from "react-router-dom";
 import OverviewCard from "@/components/overview-card";
 

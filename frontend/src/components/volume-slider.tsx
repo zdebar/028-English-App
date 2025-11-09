@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { VolumeIcon } from "@/components/icons";
+import { VolumeIcon } from "@/components/UI/icons";
 
 type VolumeSliderProps = {
   setVolume: (volume: number) => void;

@@ -1,4 +1,4 @@
-import { HomeIcon, AcademicCapIcon } from "@/components/icons";
+import { HomeIcon, AcademicCapIcon } from "@/components/UI/icons";
 import ButtonHeader from "@/components/UI/button-header";
 import UserAvatar from "@/components/user-avatar";
 import ThemeSwitch from "@/components/theme-switch";
