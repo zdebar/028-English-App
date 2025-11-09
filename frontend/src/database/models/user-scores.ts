@@ -5,6 +5,7 @@ import { supabaseInstance } from "@/config/supabase.config";
 import { db } from "@/database/models/db";
 import { generateUserScoreId } from "@/utils/database.utils";
 import { getTodayShortDate } from "@/utils/database.utils";
+import { validatePositiveInteger } from "@/utils/validation.utils";
 
 export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   id!: string;
@@ -22,14 +23,13 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     userId: string | null,
     addCount: number
   ): Promise<boolean> {
-    if (!Number.isInteger(addCount) || addCount <= 0) {
-      console.error("Invalid addCount value provided.");
+    if (!userId) {
+      console.warn("User is not logged in.");
       return false;
     }
 
-    if (!userId) {
-      throw new Error("User is not logged in.");
-    }
+    validatePositiveInteger(addCount, "addCount");
+
     const today = getTodayShortDate();
 
     // Fetch the existing record for the user and today's date

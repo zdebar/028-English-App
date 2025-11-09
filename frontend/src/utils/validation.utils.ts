@@ -66,3 +66,31 @@ export function validateISODateString(value: string, name: string): void {
     throw new Error(`${name} must be a valid ISO date string.`);
   }
 }
+
+/**
+ * Validates that a value is an array of non-empty strings.
+ * @param value The array to validate.
+ * @param name The name of the parameter (used in error messages).
+ * @throws Error if the value is not an array of non-empty strings.
+ */
+export function validateStringArray(value: string[], name: string): void {
+  if (!Array.isArray(value)) {
+    throw new Error(`${name} must be an array.`);
+  }
+
+  value.forEach((item, index) => {
+    validateNonEmptyString(item, `${name}[${index}]`);
+  });
+}
+
+/**
+ * Validates that a value is a Blob.
+ * @param value The value to validate.
+ * @param name The name of the parameter (used in error messages).
+ * @throws Error if the value is not a Blob.
+ */
+export function validateBlob(value: Blob, name: string): void {
+  if (!(value instanceof Blob)) {
+    throw new Error(`${name} must be a Blob.`);
+  }
+}

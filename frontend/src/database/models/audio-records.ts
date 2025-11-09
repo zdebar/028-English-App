@@ -5,6 +5,11 @@ import AudioMetadata from "@/database/models/audio-metadata";
 import { db } from "@/database/models/db";
 import config from "@/config/config";
 import { fetchStorage } from "@/utils/database.utils";
+import {
+  validateStringArray,
+  validateBlob,
+  validateNonEmptyString,
+} from "@/utils/validation.utils";
 
 export default class AudioRecord
   extends Entity<AppDB>
@@ -19,7 +24,9 @@ export default class AudioRecord
    * @returns An array of AudioRecordLocal
    */
   static async bulkGet(keys: string[]): Promise<AudioRecordLocal[]> {
-    if (!keys || keys.length === 0) return [];
+    validateStringArray(keys, "keys");
+
+    if (keys.length === 0) return [];
 
     const results: (AudioRecordLocal | undefined)[] =
       await db.audio_records.bulkGet(keys);
@@ -33,6 +40,8 @@ export default class AudioRecord
    * @returns A map where keys are filenames and values are Blobs.
    */
   static async extractZip(zipBlob: Blob): Promise<Map<string, Blob>> {
+    validateBlob(zipBlob, "zipBlob");
+
     const extractedFiles = new Map<string, Blob>();
     const JSZip = await import("jszip");
     const zip = await JSZip.loadAsync(zipBlob);
@@ -52,6 +61,9 @@ export default class AudioRecord
    * Synchronizes audio data by fetching and storing audio archives defined in the config.
    */
   static async syncAudioData(): Promise<void> {
+    validateStringArray(config.audio.archives, "config.audio.archives");
+    validateNonEmptyString(config.audio.bucketName, "config.audio.bucketName");
+
     await Promise.all(
       config.audio.archives.map(async (archiveName) => {
         if (await AudioMetadata.isFetched(archiveName)) {

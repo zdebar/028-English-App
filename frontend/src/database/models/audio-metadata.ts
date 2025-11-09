@@ -2,6 +2,7 @@ import { Entity } from "dexie";
 import type AppDB from "@/database/models/app-db";
 import type { AudioMetadataLocal } from "@/types/local.types";
 import { db } from "@/database/models/db";
+import { validateNonEmptyString } from "@/utils/validation.utils";
 
 export default class AudioMetadata
   extends Entity<AppDB>
@@ -16,6 +17,8 @@ export default class AudioMetadata
    * @returns true if the archive has been fetched, otherwise false
    */
   static async isFetched(archiveName: string): Promise<boolean> {
+    validateNonEmptyString(archiveName, "archiveName");
+
     const metadata = await db.audio_metadata.get(archiveName);
     return !!metadata;
   }
@@ -26,6 +29,8 @@ export default class AudioMetadata
    * @returns true if the operation was successful, otherwise false
    */
   static async markAsFetched(archiveName: string): Promise<boolean> {
+    validateNonEmptyString(archiveName, "archiveName");
+
     const fetchedAt = new Date().toISOString();
     await db.audio_metadata.put({
       archive_name: archiveName,

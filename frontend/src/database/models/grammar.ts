@@ -5,6 +5,7 @@ import { supabaseInstance } from "@/config/supabase.config";
 import { db } from "@/database/models/db";
 import config from "@/config/config";
 import Dexie from "dexie";
+import { validatePositiveInteger } from "@/utils/validation.utils";
 
 export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   id!: number;
@@ -15,11 +16,10 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * Returns a grammar record by its ID.
    * @param grammarId fetch grammar by ID
    * @returns A promise that resolves to the grammar record or `undefined` if not found.
+   * @throws Error if grammarId is not a positive integer or if grammar is not found.
    */
   static async getGrammarById(grammarId: number): Promise<GrammarLocal> {
-    if (!grammarId || grammarId <= 0) {
-      throw new Error("Invalid grammar ID provided.");
-    }
+    validatePositiveInteger(grammarId, "grammarId");
 
     const grammar = await db.grammars.get(grammarId);
     if (!grammar) {
@@ -34,7 +34,8 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    */
   static async getStartedGrammarList(userId: string): Promise<GrammarLocal[]> {
     if (!userId) {
-      throw new Error("User is not logged in.");
+      console.warn("User is not logged in.");
+      return [];
     }
 
     const startedUserItems: UserItemLocal[] = await db.user_items
@@ -67,6 +68,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
 
   /**
    * Synchronizes grammar data from Supabase to the local IndexedDB.
+   * In case of an error during fetching, it logs the error to the console, but does not throw.
    * @returns void
    */
   static async syncGrammarData(): Promise<void> {
@@ -79,7 +81,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
     } = await supabaseInstance.from("grammar").select("id, name, note");
 
     if (error) {
-      console.error("Error fetching grammar data from Supabase:", error);
+      throw new Error(`Failed to sync grammar data: ${error.message}`);
       return;
     }
 

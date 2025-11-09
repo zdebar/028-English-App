@@ -9,6 +9,10 @@ import { supabaseInstance } from "@/config/supabase.config";
 import { convertLocalToSQL } from "@/utils/database.utils";
 import { getTodayShortDate } from "@/utils/database.utils";
 import Dexie from "dexie";
+import {
+  validatePositiveInteger,
+  validateUserItemArray,
+} from "@/utils/validation.utils";
 
 export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   item_id!: number;
@@ -42,6 +46,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     if (!userId) {
       throw new Error("User is not logged in.");
     }
+    validatePositiveInteger(deckSize, "deckSize");
 
     const now = new Date().toISOString();
 
@@ -87,6 +92,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns boolean indicating success.
    */
   static async savePracticeDeck(items: UserItemLocal[]): Promise<boolean> {
+    validateUserItemArray(items);
+
     const currentDateTime = new Date(Date.now()).toISOString();
     const updatedItems = items.map((item) => {
       return {
@@ -203,6 +210,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     if (!userId) {
       throw new Error("User is not logged in.");
     }
+    validatePositiveInteger(grammarId, "grammarId");
 
     await db.user_items
       .where("[user_id+grammar_id]")
@@ -230,6 +238,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     if (!userId) {
       throw new Error("User is not logged in.");
     }
+    validatePositiveInteger(itemId, "itemId");
 
     await db.user_items
       .where("[user_id+item_id]")

@@ -8,11 +8,16 @@ import { useUserStore } from "@/hooks/use-user";
 export async function dataSync(userId: string): Promise<boolean> {
   const reloadUserScore = useUserStore.getState().reloadUserScore;
 
-  await db.open();
-  await UserItem.syncUserItemsData(userId);
-  await Grammar.syncGrammarData();
-  await UserScore.syncUserScoreData(userId);
-  await AudioRecord.syncAudioData();
-  await reloadUserScore();
-  return true;
+  try {
+    await db.open();
+    await UserItem.syncUserItemsData(userId);
+    await Grammar.syncGrammarData();
+    await UserScore.syncUserScoreData(userId);
+    await AudioRecord.syncAudioData();
+    await reloadUserScore(userId);
+    return true;
+  } catch (error) {
+    console.error("Error during data synchronization:", error);
+    return false;
+  }
 }
