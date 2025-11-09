@@ -1,6 +1,6 @@
 import { HomeIcon, AcademicCapIcon } from "@/components/UI/icons";
 import ButtonHeader from "@/components/UI/button-header";
-import UserAvatar from "@/components/user-avatar";
+import UserAvatar from "@/components/UI/user-avatar";
 import ThemeSwitch from "@/components/theme-switch";
 import { useAuth } from "@/hooks/use-auth";
 

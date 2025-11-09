@@ -6,7 +6,7 @@ import { CloseIcon } from "@/components/UI/icons";
 import { useNavigate } from "react-router-dom";
 import OverviewCard from "@/components/overview-card";
 import DirectionDropdown from "@/components/UI/direction-dropdown";
-import SettingProperty from "@/components/setting-property";
+import SettingProperty from "@/components/UI/setting-property";
 import { shortenDate } from "@/utils/database.utils";
 
 export default function VocabularyOverview() {

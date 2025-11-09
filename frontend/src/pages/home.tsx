@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { useUserStore } from "@/hooks/use-user";
 import Dashboard from "@/components/dashboard";
-import SettingProperty from "@/components/setting-property";
+import SettingProperty from "@/components/UI/setting-property";
 
 export default function Home() {
   const navigate = useNavigate();
