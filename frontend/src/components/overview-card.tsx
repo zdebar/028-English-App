@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ButtonRectangular from "@/components/UI/button-rectangular";
 import { CloseIcon } from "@/components/icons";
-import { Modal } from "@/components/modal";
+import { Modal } from "@/components/UI/modal";
 
 interface OverviewCardProps {
   titleText?: string;

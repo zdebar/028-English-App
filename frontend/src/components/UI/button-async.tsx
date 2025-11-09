@@ -1,5 +1,5 @@
 import ButtonRectangular from "@/components/UI/button-rectangular";
-import { Modal } from "@/components/modal";
+import { Modal } from "@/components/UI/modal";
 
 import { useState } from "react";
 
