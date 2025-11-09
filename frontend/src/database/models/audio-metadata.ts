@@ -26,21 +26,11 @@ export default class AudioMetadata
    * @returns true if the operation was successful, otherwise false
    */
   static async markAsFetched(archiveName: string): Promise<boolean> {
-    if (!archiveName) {
-      console.error("Invalid archive name provided.");
-      return false;
-    }
-
-    try {
-      const fetchedAt = new Date().toISOString();
-      await db.audio_metadata.put({
-        archive_name: archiveName,
-        fetched_at: fetchedAt,
-      });
-      return !!fetchedAt;
-    } catch (error) {
-      console.error("Error marking archive as fetched:", error);
-      return false;
-    }
+    const fetchedAt = new Date().toISOString();
+    await db.audio_metadata.put({
+      archive_name: archiveName,
+      fetched_at: fetchedAt,
+    });
+    return !!fetchedAt;
   }
 }

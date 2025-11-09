@@ -16,22 +16,15 @@ export default class AudioRecord
   /**
    * Gets multiple audio records by their filenames.
    * @param keys Array of filenames to fetch.
-   * @returns An array of AudioRecordLocal or undefined
+   * @returns An array of AudioRecordLocal
    */
   static async bulkGet(keys: string[]): Promise<AudioRecordLocal[]> {
-    if (!Array.isArray(keys) || keys.length === 0) {
-      console.error("Invalid keys array provided.");
-      return [];
-    }
+    if (!keys || keys.length === 0) return [];
 
-    try {
-      const results: (AudioRecordLocal | undefined)[] =
-        await db.audio_records.bulkGet(keys);
-      return results.filter((record) => record !== undefined);
-    } catch (error) {
-      console.error("Error fetching bulk audio records:", error);
-      return [];
-    }
+    const results: (AudioRecordLocal | undefined)[] =
+      await db.audio_records.bulkGet(keys);
+
+    return results.filter((record) => record !== undefined);
   }
 
   /**
@@ -40,59 +33,45 @@ export default class AudioRecord
    * @returns A map where keys are filenames and values are Blobs.
    */
   static async extractZip(zipBlob: Blob): Promise<Map<string, Blob>> {
-    if (!(zipBlob instanceof Blob)) {
-      console.error("Invalid zipBlob provided.");
-      return new Map();
-    }
+    const extractedFiles = new Map<string, Blob>();
+    const JSZip = await import("jszip");
+    const zip = await JSZip.loadAsync(zipBlob);
 
-    try {
-      const extractedFiles = new Map<string, Blob>();
-      const JSZip = await import("jszip");
-      const zip = await JSZip.loadAsync(zipBlob);
-
-      for (const filename of Object.keys(zip.files)) {
-        const file = zip.files[filename];
-        if (!file.dir) {
-          const fileBlob = await file.async("blob");
-          extractedFiles.set(filename, fileBlob);
-        }
+    for (const filename of Object.keys(zip.files)) {
+      const file = zip.files[filename];
+      if (!file.dir) {
+        const fileBlob = await file.async("blob");
+        extractedFiles.set(filename, fileBlob);
       }
-
-      return extractedFiles;
-    } catch (error) {
-      console.error("Error extracting zip file:", error);
-      return new Map();
     }
+
+    return extractedFiles;
   }
 
   /**
-   * Synchronizes audio data by fetching archives, extracting files, and saving them to the database.
+   * Synchronizes audio data by fetching and storing audio archives defined in the config.
    */
   static async syncAudioData(): Promise<void> {
-    try {
-      await Promise.all(
-        config.audio.archives.map(async (archiveName) => {
-          if (await AudioMetadata.isFetched(archiveName)) {
-            return;
-          }
+    await Promise.all(
+      config.audio.archives.map(async (archiveName) => {
+        if (await AudioMetadata.isFetched(archiveName)) {
+          return;
+        }
 
-          const zipBlob: Blob | null = await fetchStorage(
-            config.audio.bucketName,
-            archiveName
-          );
-          if (!zipBlob) return;
+        const zipBlob: Blob | null = await fetchStorage(
+          config.audio.bucketName,
+          archiveName
+        );
+        if (!zipBlob) return;
 
-          const extractedFiles = await this.extractZip(zipBlob);
+        const extractedFiles = await this.extractZip(zipBlob);
 
-          for (const [filename, audioBlob] of extractedFiles) {
-            await db.audio_records.put({ filename, audioBlob });
-          }
+        for (const [filename, audioBlob] of extractedFiles) {
+          await db.audio_records.put({ filename, audioBlob });
+        }
 
-          await AudioMetadata.markAsFetched(archiveName);
-        })
-      );
-    } catch (error) {
-      console.error("Error during audio sync:", error);
-    }
+        await AudioMetadata.markAsFetched(archiveName);
+      })
+    );
   }
 }
