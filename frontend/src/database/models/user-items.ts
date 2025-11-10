@@ -143,8 +143,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       )
       .toArray();
 
-    console.log("Learned items:", learnedItems);
-
     const learnedCount = learnedItems.length;
     const learnedCountToday = learnedItems.filter((item) =>
       item.learned_at.startsWith(today)

@@ -97,11 +97,7 @@ export default function Practice() {
 
   // Handle audio errors and retries
   useEffect(() => {
-    if (
-      (currentItem && !currentItem?.audio) ||
-      audioError ||
-      !isAudioReady(currentItem?.audio)
-    ) {
+    if ((currentItem && !currentItem?.audio) || audioError) {
       setError("bez audia");
     } else {
       setError(null);
