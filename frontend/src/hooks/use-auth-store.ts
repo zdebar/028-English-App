@@ -29,7 +29,6 @@ export const useAuthStore = create<AuthState>((set) => ({
       console.error("Error logging out:", error.message);
     } else {
       set({ userId: null, userEmail: null });
-      console.log("User logged out successfully.");
     }
   },
 }));

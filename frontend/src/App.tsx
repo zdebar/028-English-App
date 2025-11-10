@@ -15,18 +15,38 @@ import PublicLayout from "@/components/utils/public-layout";
 import { ToastContainer } from "react-toastify";
 import Login from "@/pages/login";
 import GrammarOverview from "@/pages/grammar-overview";
+// import { useAuthStore } from "@/hooks/use-auth-store";
+// import type { Session } from "@supabase/supabase-js";
+// import { supabaseInstance } from "@/config/supabase.config";
 
 export default function App() {
   const { theme, chooseTheme } = useThemeStore();
+  // const setSession = useAuthStore((state) => state.setSession);
   const showFooterRoutes = ["/"];
   const { userId } = useAuth();
 
   useEffect(() => {
     if (userId) {
       console.log("User ID detected, starting data sync.");
-      dataSync();
+      dataSync(userId);
     }
   }, [userId]);
+
+  // useEffect(() => {
+  //   supabaseInstance.auth
+  //     .getSession()
+  //     .then(({ data: { session } }: { data: { session: Session | null } }) => {
+  //       setSession(session);
+  //     });
+
+  //   const {
+  //     data: { subscription },
+  //   } = supabaseInstance.auth.onAuthStateChange((_event, session) => {
+  //     setSession(session);
+  //   });
+
+  //   return () => subscription.unsubscribe();
+  // }, [setSession]);
 
   useEffect(() => {
     chooseTheme(theme);
