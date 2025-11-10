@@ -19,20 +19,26 @@ export const useUserStore = create<UserState>()(
         userStats: null,
 
         reloadUserScore: async (userId: string) => {
-          if (!userId) {
-            console.error("User is not logged in.");
+          if (!userId) return;
+
+          try {
+            const todayScore = await UserScore.getUserScoreForToday(userId);
+            const learnedCounts = await UserItem.getLearnedCounts(userId);
+
+            set({
+              userStats: {
+                learnedCountToday: learnedCounts?.learnedCountToday || 0,
+                learnedCount: learnedCounts?.learnedCount || 0,
+                practiceCountToday: todayScore?.item_count || 0,
+              },
+            });
+          } catch (error) {
+            console.error(
+              `Error reloading user score for userId: ${userId}`,
+              error
+            );
             return;
           }
-
-          const todayScore = await UserScore.getUserScoreForToday(userId);
-          const learnedCounts = await UserItem.getLearnedCounts(userId);
-          set({
-            userStats: {
-              learnedCountToday: learnedCounts?.learnedCountToday || null,
-              learnedCount: learnedCounts?.learnedCount || null,
-              practiceCountToday: todayScore?.item_count || null,
-            },
-          });
         },
       }),
       {

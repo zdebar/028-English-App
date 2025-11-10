@@ -14,6 +14,8 @@ export function usePracticeDeck(
 ) {
   const [array, setArray] = useState<UserItemLocal[]>([]);
   const [index, setIndex] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { userId } = useAuth();
 
   function wrapIndex(newIndex: number) {
@@ -30,13 +32,23 @@ export function usePracticeDeck(
 
     const fetchPracticeDeck = async () => {
       if (!userId) return;
-      const practiceItems = await UserItem.getPracticeDeck(userId);
-      setArray(practiceItems);
-      setReload(false);
+
+      setLoading(true);
+      try {
+        const practiceItems = await UserItem.getPracticeDeck(userId);
+        setArray(practiceItems);
+      } catch (error) {
+        console.error("Error fetching practice deck:", error);
+        setArray([]);
+        setError("Chyba při načítání cvičební sady.");
+      } finally {
+        setLoading(false);
+        setReload(false);
+      }
     };
 
     fetchPracticeDeck();
   }, [userId, reload, setReload]);
 
-  return { array, index, setIndex, nextIndex };
+  return { array, index, setIndex, nextIndex, loading, error };
 }

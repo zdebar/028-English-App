@@ -14,7 +14,7 @@ import { useAudioManager } from "@/hooks/use-audio-manager";
 import Loading from "@/components/UI/loading";
 import VolumeSlider from "@/components/UI/volume-slider";
 import config from "@/config/config";
-import GrammarCard from "@/components/grammar-card";
+import GrammarCard from "@/components/Layout/grammar-card";
 
 export default function Practice() {
   const [revealed, setRevealed] = useState(false);

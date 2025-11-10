@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Grammar from "@/database/models/grammar";
 import type { GrammarLocal } from "@/types/local.types";
-import OverviewCard from "./UI/overview-card";
+import OverviewCard from "@/components/UI/overview-card";
 import "react-toastify/dist/ReactToastify.css";
 
 /**
