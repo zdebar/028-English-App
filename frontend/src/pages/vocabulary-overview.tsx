@@ -109,7 +109,7 @@ export default function VocabularyOverview() {
           <div className="overflow-y-auto flex flex-col gap-1">
             {filteredWords && filteredWords.length > 0 ? (
               <>
-                {filteredWords.slice(0, 10).map((item, index) => (
+                {filteredWords.slice(0, 8).map((item, index) => (
                   <ButtonRectangular
                     key={item.item_id}
                     className="text-left grow-0 h-input flex justify-start p-4"
@@ -123,8 +123,8 @@ export default function VocabularyOverview() {
                       : ` ${item.english} `}
                   </ButtonRectangular>
                 ))}
-                {filteredWords.length > 10 && (
-                  <p className="text-left h-input flex justify-start pl-4 text-blue-500">
+                {filteredWords.length > 8 && (
+                  <p className="text-left h-input flex justify-start pl-4">
                     ...a další
                   </p>
                 )}

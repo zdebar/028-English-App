@@ -21,7 +21,6 @@ export default function Practice() {
   const [revealed, setRevealed] = useState(false);
   const [hintIndex, setHintIndex] = useState(0);
   const [grammarVisible, setGrammarVisible] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const { userId } = useAuthStore();
   const { userStats } = useUserStore();
   const {
@@ -37,14 +36,8 @@ export default function Practice() {
     patchItems,
     setReload,
   } = useItemArray(userId!);
-  const {
-    playAudio,
-    stopAudio,
-    setVolume,
-    audioError,
-    setAudioError,
-    isAudioReady,
-  } = useAudioManager(array);
+  const { playAudio, stopAudio, setVolume, audioError, setAudioError } =
+    useAudioManager(array);
 
   const isAudioDisabled =
     (direction && !revealed) || !currentItem?.audio || audioError;
@@ -93,19 +86,14 @@ export default function Practice() {
     }
   }, [currentItem, direction, playAudio]);
 
-  // Reset audio error for new item
-  useEffect(() => {
-    setAudioError(false);
-  }, [setAudioError, currentItem]);
-
   // Handle audio errors and retries
   useEffect(() => {
-    if ((currentItem && !currentItem?.audio) || audioError) {
-      setError("bez audia");
+    if (currentItem && !currentItem?.audio) {
+      setAudioError(true);
     } else {
-      setError(null);
+      setAudioError(false);
     }
-  }, [audioError, currentItem, isAudioReady]);
+  }, [audioError, currentItem, setAudioError]);
 
   if (!arrayLength)
     return <Loading text="Nic k procvičování. Zkuste to znovu později." />;
@@ -132,7 +120,7 @@ export default function Practice() {
           className="relative flex w-full items-center justify-between"
         >
           <VolumeSlider setVolume={setVolume} />
-          <p className="font-light">{error}</p>
+          <p className="font-light">{audioError && "bez audia"}</p>
         </div>
         <div id="item">
           <p className="text-center font-bold">
