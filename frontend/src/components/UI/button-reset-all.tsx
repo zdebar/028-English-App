@@ -3,17 +3,20 @@ import UserItem from "@/database/models/user-items";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ButtonAsync from "./button-async";
+import { useAuth } from "@/hooks/use-auth";
 
 /**
  * Button for resetting all user progress.
  */
 export default function ButtonResetAll() {
   const [isLoading, setIsLoading] = useState(false);
+  const { userId } = useAuth();
 
   const handleReset = async () => {
     setIsLoading(true);
     try {
-      await UserItem.resetsAllUserItems();
+      if (!userId) return;
+      await UserItem.resetsAllUserItems(userId);
       toast.success("Váš pokrok byl úspěšně resetován.");
     } catch (error) {
       console.error("Error clearing all user items:", error);

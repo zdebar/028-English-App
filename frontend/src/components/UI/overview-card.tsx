@@ -5,7 +5,7 @@ import ButtonAsync from "./button-async";
 
 interface OverviewCardProps {
   titleText?: string;
-  disabledMessage?: string;
+  disabledText?: string;
   children?: React.ReactNode;
   className?: string;
   handleReset?: () => void;
@@ -17,15 +17,17 @@ interface OverviewCardProps {
 /**
  * Displays an overview card with a title, content area, and optional reset functionality.
  * @param titleText - The title text to display on the card.
+ * @param disabledText - The text to display when content is disabled.
  * @param children - The content to display inside the card.
  * @param className - Additional CSS classes for styling the card.
  * @param handleReset - Optional function to handle reset action. When no function provided, reset button is disabled.
  * @param onClose - Function to handle closing the card.
+ * @param isLoading - Indicates if the content is loading.
  * @returns
  */
 export default function OverviewCard({
   titleText = "bez názvu",
-  disabledMessage = "bez obsahu",
+  disabledText = "bez obsahu",
   children,
   className = "",
   handleReset,
@@ -41,7 +43,7 @@ export default function OverviewCard({
         <ButtonAsync
           isLoading={isLoading}
           message={titleText}
-          disabledMessage={titleText}
+          disabledMessage={disabledText}
           modalTitle="Potvrzení resetu"
           modalDescription="Opravdu chcete vymazat veškerý progress? Změna již nepůjde vrátit."
           onConfirm={() => {
@@ -50,7 +52,7 @@ export default function OverviewCard({
             }
             onClose();
           }}
-          textStyle="p-4"
+          buttonTextStyle="p-4"
           disabled={!handleReset}
         />
         <ButtonRectangular className="w-button grow-0" onClick={onClose}>
