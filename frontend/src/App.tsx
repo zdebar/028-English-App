@@ -55,7 +55,7 @@ export default function App() {
       <Header />
       <div className="relative flex h-full grow flex-col  gap-4 items-center ">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/*" element={<Home />} />
 
           <Route element={<PublicLayout />}>
             <Route path="/login" element={<Login />} />
@@ -71,7 +71,7 @@ export default function App() {
             />
           </Route>
           <Route
-            path="*"
+            path="/*"
             element={<div className="text-notice pt-8">Page not found</div>}
           />
         </Routes>
