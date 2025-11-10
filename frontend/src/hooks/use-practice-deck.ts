@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import UserItem from "@/database/models/user-items";
 import type { UserItemLocal } from "@/types/local.types";
 import { useAuth } from "@/hooks/use-auth";
+import { useFetch } from "@/hooks/user-fetch";
 
 /**
  * Manages the practice deck state and index.
@@ -12,14 +13,22 @@ export function usePracticeDeck(
   reload: boolean,
   setReload: (value: boolean) => void
 ) {
-  const [array, setArray] = useState<UserItemLocal[]>([]);
   const [index, setIndex] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const { userId } = useAuth();
 
+  const {
+    data: array,
+    error,
+    isLoading,
+  } = useFetch<UserItemLocal[]>(async () => {
+    if (!userId) {
+      throw new Error("User ID is required to fetch the practice deck.");
+    }
+    return await UserItem.getPracticeDeck(userId);
+  });
+
   function wrapIndex(newIndex: number) {
-    if (array.length === 0) return 0;
+    if (!array || array.length === 0) return 0;
     return newIndex % array.length;
   }
 
@@ -28,27 +37,17 @@ export function usePracticeDeck(
   }
 
   useEffect(() => {
-    if (!reload) return;
+    if (reload) {
+      setReload(false);
+    }
+  }, [reload, setReload]);
 
-    const fetchPracticeDeck = async () => {
-      if (!userId) return;
-
-      setLoading(true);
-      try {
-        const practiceItems = await UserItem.getPracticeDeck(userId);
-        setArray(practiceItems);
-      } catch (error) {
-        console.error("Error fetching practice deck:", error);
-        setArray([]);
-        setError("Chyba při načítání cvičební sady.");
-      } finally {
-        setLoading(false);
-        setReload(false);
-      }
-    };
-
-    fetchPracticeDeck();
-  }, [userId, reload, setReload]);
-
-  return { array, index, setIndex, nextIndex, loading, error };
+  return {
+    array: array || [],
+    index,
+    setIndex,
+    nextIndex,
+    loading: isLoading,
+    error,
+  };
 }

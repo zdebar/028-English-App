@@ -6,6 +6,7 @@ import ButtonAsync from "./button-async";
 interface OverviewCardProps {
   titleText?: string;
   disabledText?: string;
+  bodyText?: string;
   children?: React.ReactNode;
   className?: string;
   handleReset?: () => void;

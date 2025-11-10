@@ -1,13 +1,12 @@
 import ButtonRectangular from "@/components/UI/button-rectangular";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
-import { useUserStore } from "@/hooks/use-user";
 import Dashboard from "@/components/Layout/dashboard";
 import SettingProperty from "@/components/UI/setting-property";
 
 export default function Home() {
   const navigate = useNavigate();
-  const { userStats } = useUserStore();
+
   const { userId, userEmail } = useAuth();
 
   return (
@@ -32,10 +31,7 @@ export default function Home() {
             className="h-input"
             value={userEmail}
           />
-          <Dashboard
-            allCount={userStats?.learnedCount || 0}
-            todayCount={userStats?.learnedCountToday || 0}
-          />
+          <Dashboard />
         </div>
       )}
     </div>

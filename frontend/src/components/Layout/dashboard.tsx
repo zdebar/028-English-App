@@ -1,16 +1,13 @@
 import LessonBar from "@/components/UI/lesson-bar";
 import { getLessonProgress } from "@/utils/dashboard.utils";
 import type { LessonProgress } from "@/types/local.types";
+import { useUserStore } from "@/hooks/use-user";
 
-interface DashboardProps {
-  allCount: number;
-  todayCount: number;
-}
-
-export default function Dashboard({ allCount, todayCount }: DashboardProps) {
+export default function Dashboard() {
+  const { userStats } = useUserStore();
   const lessonProgress: LessonProgress[] = getLessonProgress(
-    allCount,
-    todayCount
+    userStats?.learnedCount || 0,
+    userStats?.learnedCountToday || 0
   );
 
   return (
