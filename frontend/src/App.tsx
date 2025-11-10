@@ -27,7 +27,6 @@ export default function App() {
 
   useEffect(() => {
     if (userId) {
-      console.log("User ID detected, starting data sync.");
       dataSync(userId);
     }
   }, [userId]);

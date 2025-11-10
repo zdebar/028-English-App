@@ -12,6 +12,7 @@ import {
  * @throws Error if progress is not a positive integer.
  */
 export function alternateDirection(progress: number): boolean {
+  if (progress == null) return true;
   validatePositiveInteger(progress, "progress");
   return progress % 2 === 0;
 }

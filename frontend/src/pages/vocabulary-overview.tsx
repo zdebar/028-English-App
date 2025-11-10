@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import ButtonRectangular from "@/components/UI/button-rectangular";
 import UserItem from "@/database/models/user-items";
 import type { UserItemLocal } from "@/types/local.types";
@@ -8,36 +8,36 @@ import OverviewCard from "@/components/UI/overview-card";
 import DirectionDropdown from "@/components/UI/direction-dropdown";
 import SettingProperty from "@/components/UI/setting-property";
 import { shortenDate } from "@/utils/database.utils";
+import { useFetch } from "@/hooks/user-fetch";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function VocabularyOverview() {
-  const [words, setWords] = useState<UserItemLocal[] | null>(null);
+  const { userId } = useAuth();
+
+  const fetchVocabulary = useCallback(async () => {
+    if (userId) {
+      return await UserItem.getUserStartedVocabulary(userId);
+    }
+    return [];
+  }, [userId]);
+
+  const {
+    data: words,
+    error,
+    isLoading,
+  } = useFetch<UserItemLocal[]>(fetchVocabulary);
+
   const [filteredWords, setFilteredWords] = useState<UserItemLocal[] | null>(
     null
   );
   const [cardVisible, setCardVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [displayField, setDisplayField] = useState<"czech" | "english">(
     "czech"
   );
   const navigate = useNavigate();
   const selectedWord = filteredWords ? filteredWords[currentIndex] : null;
-
-  const fetchVocabularyArray = async () => {
-    try {
-      const fetchedContent = await UserItem.getUserStartedVocabulary();
-      setWords(fetchedContent);
-      setFilteredWords(fetchedContent); // Inicializace filtrování
-    } catch (error) {
-      setError("Chyba při načítání slovíček.");
-      console.error("Failed to fetch grammar content.", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchVocabularyArray();
-  }, []);
 
   // Filtrování slov na základě vyhledávání
   useEffect(() => {
@@ -56,9 +56,8 @@ export default function VocabularyOverview() {
 
   const handleClearUserItem = async () => {
     const itemId = selectedWord?.item_id;
-    if (typeof itemId === "number") {
-      UserItem.resetUserItemById(itemId);
-      await fetchVocabularyArray();
+    if (typeof itemId === "number" && userId) {
+      await UserItem.resetUserItemById(userId, itemId);
     }
   };
 
@@ -66,12 +65,11 @@ export default function VocabularyOverview() {
     <>
       {!cardVisible ? (
         <div className="card-width relative h-full flex flex-col gap-1 justify-start">
-          {/* Sticky header */}
           <div className=" flex flex-col gap-1  bg-background-light dark:bg-background-dark">
             <div className="flex items-center justify-between gap-1">
               {error ? (
                 <div className="flex h-button grow justify-start items-center border border-dashed">
-                  error
+                  {error}
                 </div>
               ) : (
                 <DirectionDropdown
@@ -104,7 +102,11 @@ export default function VocabularyOverview() {
 
           {/* Filtrovaná slova */}
           <div className="overflow-y-auto flex flex-col gap-1">
-            {filteredWords && filteredWords.length > 0 ? (
+            {isLoading ? (
+              <p className="text-left h-input flex justify-start pl-4">
+                Načítání...
+              </p>
+            ) : filteredWords && filteredWords.length > 0 ? (
               filteredWords.map((item, index) => (
                 <ButtonRectangular
                   key={item.item_id}

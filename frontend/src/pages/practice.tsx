@@ -47,10 +47,9 @@ export default function Practice() {
       setRevealed(false);
       stopAudio();
 
-      const newProgress = Math.max(
-        array[index].progress + progressIncrement,
-        0
-      );
+      const newProgress = array[index]
+        ? Math.max(array[index].progress + progressIncrement, 0)
+        : 0;
 
       const updatedProgress = userProgress.concat(newProgress);
 
@@ -80,7 +79,7 @@ export default function Practice() {
 
   // Auto-play audio on new item if not in reading direction
   useEffect(() => {
-    if (!direction && currentItem?.audio) {
+    if (!direction && currentItem && currentItem?.audio) {
       setTimeout(() => playAudio(currentItem.audio!), 100);
     }
   }, [currentItem, direction, playAudio]);
@@ -97,20 +96,7 @@ export default function Practice() {
     } else {
       setError(null);
     }
-
-    if (audioError) {
-      let attempts = 0;
-      const interval = setInterval(() => {
-        if (attempts >= 3) {
-          clearInterval(interval);
-          return;
-        }
-        playAudio(currentItem.audio);
-        attempts++;
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [currentItem, audioError, playAudio]);
+  }, [audioError, currentItem]);
 
   if (!arrayLength)
     return <Loading text="Nic k procvičování. Zkuste to znovu později." />;

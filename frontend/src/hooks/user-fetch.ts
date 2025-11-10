@@ -17,7 +17,7 @@ export function useFetch<T>(fetchFunction: () => Promise<T>) {
         const result = await fetchFunction();
         setData(result);
       } catch (error) {
-        setError("Failed to fetch data.");
+        setError("Chyba při načítání.");
         console.error(error);
       } finally {
         setIsLoading(false);

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import ButtonRectangular from "../components/UI/button-rectangular";
 import Grammar from "@/database/models/grammar";
 import UserItem from "@/database/models/user-items";
@@ -6,33 +6,32 @@ import type { GrammarLocal } from "@/types/local.types";
 import { CloseIcon } from "../components/UI/icons";
 import { useNavigate } from "react-router-dom";
 import OverviewCard from "@/components/UI/overview-card";
+import { useFetch } from "@/hooks/user-fetch";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function GrammarOverview() {
-  const [grammarArray, setGrammarArray] = useState<GrammarLocal[] | null>(null);
+  const { userId } = useAuth();
+
+  const fetchGrammarList = useCallback(async () => {
+    if (userId) {
+      return await Grammar.getStartedGrammarList(userId);
+    }
+    return [];
+  }, [userId]);
+
+  const {
+    data: grammarArray,
+    error,
+    isLoading,
+  } = useFetch<GrammarLocal[]>(fetchGrammarList);
   const [cardVisible, setCardVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const fetchGrammarArray = async () => {
-    try {
-      const fetchedContent = await Grammar.getStartedGrammarList();
-      setGrammarArray(fetchedContent);
-    } catch (error) {
-      setError("Chyba při načítání gramatiky.");
-      console.error("Failed to fetch grammar content.", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchGrammarArray();
-  }, []);
-
   const handleClearGrammarUserItems = async () => {
-    const id = grammarArray?.[currentIndex]?.id;
-    if (typeof id === "number") {
-      UserItem.resetGrammarItems(id);
-      await fetchGrammarArray();
+    const grammar_id = grammarArray?.[currentIndex]?.id;
+    if (typeof grammar_id === "number" && userId) {
+      await UserItem.resetGrammarItems(userId, grammar_id);
     }
   };
 
@@ -42,7 +41,7 @@ export default function GrammarOverview() {
         <div className="card-width flex flex-col gap-1 justify-start">
           <div className="h-button flex items-center justify-between gap-1">
             <div className="flex h-button grow justify-start p-4 border border-dashed">
-              {error || "Přehled gramatiky"}
+              {isLoading ? "Načítání..." : error || "Přehled gramatiky"}
             </div>
             <ButtonRectangular
               className="w-button grow-0"

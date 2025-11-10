@@ -34,7 +34,7 @@ export function useItemArray() {
     };
   }, []);
 
-  const currentItem = array[index];
+  const currentItem = array[index] || null;
   const direction = alternateDirection(currentItem?.progress);
   const hasGrammar = !!currentItem?.grammar_id;
 

@@ -1,6 +1,6 @@
 import Grammar from "@/database/models/grammar";
 import OverviewCard from "@/components/UI/overview-card";
-import "react-toastify/dist/ReactToastify.css";
+import { useCallback } from "react";
 import { useFetch } from "@/hooks/user-fetch";
 
 /**
@@ -15,11 +15,14 @@ export default function GrammarCard({
   grammar_id: number | null;
   onClose: () => void;
 }) {
-  const {
-    data: grammar,
-    error,
-    isLoading,
-  } = useFetch(() => Grammar.getGrammarById(grammar_id!));
+  const fetchGrammar = useCallback(() => {
+    if (grammar_id !== null) {
+      return Grammar.getGrammarById(grammar_id);
+    }
+    return Promise.reject("Invalid grammar ID");
+  }, [grammar_id]);
+
+  const { data: grammar, error, isLoading } = useFetch(fetchGrammar);
 
   return (
     <OverviewCard

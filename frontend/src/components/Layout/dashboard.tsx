@@ -12,18 +12,14 @@ export default function Dashboard() {
 
   return (
     <div className="flex h-input w-full flex-col gap-1">
-      {lessonProgress.length > 0 ? (
-        lessonProgress.map(([lessonNumber, previousCount, todayCount]) => (
-          <LessonBar
-            key={lessonNumber}
-            lessonNumber={lessonNumber}
-            previousCount={previousCount}
-            todayCount={todayCount}
-          />
-        ))
-      ) : (
-        <p className="text-center">Žádný pokrok k zobrazení.</p>
-      )}
+      {lessonProgress.map(([lessonNumber, previousCount, todayCount]) => (
+        <LessonBar
+          key={lessonNumber}
+          lessonNumber={lessonNumber}
+          previousCount={previousCount}
+          todayCount={todayCount}
+        />
+      ))}
     </div>
   );
 }

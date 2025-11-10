@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import UserItem from "@/database/models/user-items";
 import type { UserItemLocal } from "@/types/local.types";
 import { useAuth } from "@/hooks/use-auth";
@@ -16,16 +16,18 @@ export function usePracticeDeck(
   const [index, setIndex] = useState(0);
   const { userId } = useAuth();
 
+  const fetchPracticeDeck = useCallback(async () => {
+    if (!userId) {
+      return [];
+    }
+    return await UserItem.getPracticeDeck(userId);
+  }, [userId]);
+
   const {
     data: array,
     error,
     isLoading,
-  } = useFetch<UserItemLocal[]>(async () => {
-    if (!userId) {
-      throw new Error("User ID is required to fetch the practice deck.");
-    }
-    return await UserItem.getPracticeDeck(userId);
-  });
+  } = useFetch<UserItemLocal[]>(fetchPracticeDeck);
 
   function wrapIndex(newIndex: number) {
     if (!array || array.length === 0) return 0;

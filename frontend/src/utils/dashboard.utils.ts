@@ -26,7 +26,7 @@ export function getLessonStarted(countNotToday: number): number {
   validatePositiveInteger(countNotToday, "countNotToday");
   validateLessonSize();
 
-  return Math.floor(countNotToday / config.lesson.lessonSize);
+  return Math.floor(countNotToday / config.lesson.lessonSize) + 1;
 }
 
 /**
@@ -47,10 +47,8 @@ export function getTodayLessonItems(
   const lessonSize = config.lesson.lessonSize;
 
   const firstLesson = Math.min(todayCount, lessonSize - previousCount);
-  if (firstLesson > 0) {
-    lessonCounts.push(firstLesson);
-    todayCount -= firstLesson;
-  }
+  lessonCounts.push(firstLesson);
+  todayCount -= firstLesson;
 
   const fullLessons = Math.floor(todayCount / lessonSize);
   for (let i = 0; i < fullLessons; i++) {

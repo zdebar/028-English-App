@@ -39,7 +39,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
     validateUUID(userId, "userId");
 
     const startedUserItems: UserItemLocal[] = await db.user_items
-      .where("[user_id + started_at]")
+      .where("[user_id+started_at]")
       .between(
         [userId, Dexie.minKey],
         [userId, config.database.nullReplacementDate],

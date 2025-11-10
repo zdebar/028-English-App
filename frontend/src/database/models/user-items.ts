@@ -193,6 +193,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
   /**
    * Resets user items associated with a specific grammar ID.
+   * @param userId - The ID of the logged-in user.
    * @param grammarId - The grammar ID whose items should be cleared.
    * @returns void
    */
