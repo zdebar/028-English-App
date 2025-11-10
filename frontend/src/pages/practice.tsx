@@ -89,7 +89,7 @@ export default function Practice() {
   // Auto-play audio on new item if not in reading direction
   useEffect(() => {
     if (!direction && currentItem && currentItem?.audio) {
-      setTimeout(() => playAudio(currentItem.audio!), 100);
+      setTimeout(() => playAudio(currentItem.audio!), 500);
     }
   }, [currentItem, direction, playAudio]);
 
