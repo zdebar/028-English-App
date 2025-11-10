@@ -81,7 +81,6 @@ export function useAudioManager(itemArray: UserItemLocal[]) {
         setAudioError(false);
       }
     } else {
-      console.warn(`Audio file not found in cache: ${audioPath}`);
       setIsPlaying(false);
       setAudioError(true);
     }
@@ -100,11 +99,10 @@ export function useAudioManager(itemArray: UserItemLocal[]) {
     volumeRef.current = Math.min(Math.max(volume, 0), 1);
   }, []);
 
-  const tryAudio = useCallback((audioPath: string | null): boolean => {
+  const isAudioReady = useCallback((audioPath: string | null): boolean => {
     if (audioPath && audioCacheRef.current.has(audioPath)) {
       return true;
     } else {
-      console.warn(`Audio file not found in cache: ${audioPath}`);
       return false;
     }
   }, []);
@@ -116,6 +114,6 @@ export function useAudioManager(itemArray: UserItemLocal[]) {
     isPlaying,
     audioError,
     setAudioError,
-    tryAudio,
+    isAudioReady,
   };
 }

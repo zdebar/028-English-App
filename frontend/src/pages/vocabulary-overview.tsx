@@ -39,7 +39,6 @@ export default function VocabularyOverview() {
   const navigate = useNavigate();
   const selectedWord = filteredWords ? filteredWords[currentIndex] : null;
 
-  // Filtrování slov na základě vyhledávání
   useEffect(() => {
     if (!words) return;
     const filtered = words

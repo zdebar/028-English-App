@@ -143,6 +143,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       )
       .toArray();
 
+    console.log("Learned items:", learnedItems);
+
     const learnedCount = learnedItems.length;
     const learnedCountToday = learnedItems.filter((item) =>
       item.learned_at.startsWith(today)
@@ -160,13 +162,34 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     userId: string
   ): Promise<UserItemLocal[]> {
     validateUUID(userId, "userId");
+    const nullReplacementNumber = config.database.nullReplacementNumber;
 
     const result = await db.user_items
-      .where("[user_id+grammar_id]")
-      .equals([userId, config.database.nullReplacementNumber])
+      .where("[user_id+started_at+grammar_id]")
+      .between(
+        [userId, Dexie.minKey, nullReplacementNumber],
+        [userId, UserItem.nullReplacementDate, nullReplacementNumber],
+        true,
+        false
+      )
       .sortBy("czech");
 
     return result;
+  }
+
+  static async getStartedCount(userId: string): Promise<number> {
+    validateUUID(userId, "userId");
+
+    const count = await db.user_items
+      .where("[user_id+started_at]")
+      .between(
+        [userId, Dexie.minKey],
+        [userId, UserItem.nullReplacementDate],
+        true,
+        false
+      )
+      .count();
+    return count;
   }
 
   /**
@@ -177,18 +200,18 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   static async resetsAllUserItems(userId: string): Promise<boolean> {
     validateUUID(userId, "userId");
 
-    await db.user_items
+    const count = await db.user_items
       .where("user_id")
       .equals(userId)
       .modify((item: UserItemLocal) => {
-        item.next_at = this.nullReplacementDate;
-        item.mastered_at = this.nullReplacementDate;
-        item.updated_at = this.nullReplacementDate;
-        item.learned_at = this.nullReplacementDate;
+        item.next_at = UserItem.nullReplacementDate;
+        item.mastered_at = UserItem.nullReplacementDate;
+        item.updated_at = UserItem.nullReplacementDate;
+        item.learned_at = UserItem.nullReplacementDate;
         item.progress = 0;
-        item.started_at = this.nullReplacementDate;
+        item.started_at = UserItem.nullReplacementDate;
       });
-    return true;
+    return count > 0;
   }
 
   /**

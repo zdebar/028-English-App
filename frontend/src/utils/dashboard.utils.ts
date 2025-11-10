@@ -84,7 +84,7 @@ export function getLessonProgress(
   const result: [number, number, number][] = todayCounts.map(
     (todayCount, index) => {
       const prevCount = index === 0 ? previousCount : 0;
-      return [lessonNumber + index + 1, prevCount, todayCount];
+      return [lessonNumber + index, prevCount, todayCount];
     }
   );
 

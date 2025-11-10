@@ -16,8 +16,11 @@ export default function ButtonResetAll() {
     setIsLoading(true);
     try {
       if (!userId) return;
-      await UserItem.resetsAllUserItems(userId);
-      toast.success("Váš pokrok byl úspěšně resetován.");
+      if (await UserItem.resetsAllUserItems(userId)) {
+        toast.success("Váš pokrok byl úspěšně resetován.");
+      } else {
+        toast.info("Žádný pokrok k resetování.");
+      }
     } catch (error) {
       console.error("Error clearing all user items:", error);
       toast.error(

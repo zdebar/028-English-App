@@ -2,6 +2,7 @@ import ButtonSignout from "@/components/UI/button-signout";
 import { useNavigate } from "react-router-dom";
 import ButtonRectangular from "@/components/UI/button-rectangular";
 import ButtonResetAll from "@/components/UI/button-reset-all";
+import ButtonStarted from "@/components/UI/button-started";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ export default function Profile() {
         <p className="text-button">Přehled slovíček</p>
       </ButtonRectangular>
       <ButtonSignout />
+      <ButtonStarted />
     </div>
   );
 }

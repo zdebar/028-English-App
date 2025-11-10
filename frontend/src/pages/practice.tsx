@@ -35,8 +35,14 @@ export default function Practice() {
     patchItems,
     setReload,
   } = useItemArray();
-  const { playAudio, stopAudio, setVolume, audioError, setAudioError } =
-    useAudioManager(array);
+  const {
+    playAudio,
+    stopAudio,
+    setVolume,
+    audioError,
+    setAudioError,
+    isAudioReady,
+  } = useAudioManager(array);
 
   const isAudioDisabled =
     (direction && !revealed) || !currentItem?.audio || audioError;
@@ -91,12 +97,16 @@ export default function Practice() {
 
   // Handle audio errors and retries
   useEffect(() => {
-    if ((currentItem && !currentItem?.audio) || audioError) {
+    if (
+      (currentItem && !currentItem?.audio) ||
+      audioError ||
+      !isAudioReady(currentItem?.audio)
+    ) {
       setError("bez audia");
     } else {
       setError(null);
     }
-  }, [audioError, currentItem]);
+  }, [audioError, currentItem, isAudioReady]);
 
   if (!arrayLength)
     return <Loading text="Nic k procvičování. Zkuste to znovu později." />;
