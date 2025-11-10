@@ -15,14 +15,14 @@ import Loading from "@/components/UI/loading";
 import VolumeSlider from "@/components/UI/volume-slider";
 import config from "@/config/config";
 import GrammarCard from "@/components/Layout/grammar-card";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuthStore } from "@/hooks/use-auth-store";
 
 export default function Practice() {
   const [revealed, setRevealed] = useState(false);
   const [hintIndex, setHintIndex] = useState(0);
   const [grammarVisible, setGrammarVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { userId } = useAuth();
+  const { userId } = useAuthStore();
   const { userStats } = useUserStore();
   const {
     array,

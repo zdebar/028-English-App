@@ -2,10 +2,10 @@ import { HomeIcon, AcademicCapIcon } from "@/components/UI/icons";
 import ButtonHeader from "@/components/UI/button-header";
 import UserAvatar from "@/components/UI/user-avatar";
 import ThemeSwitch from "@/components/UI/theme-switch";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuthStore } from "@/hooks/use-auth-store";
 
 export default function Header() {
-  const { userId } = useAuth();
+  const { userId } = useAuthStore();
 
   return (
     <header className="header-fixed relative z-20 flex w-full flex-none justify-between">

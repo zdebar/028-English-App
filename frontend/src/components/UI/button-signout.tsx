@@ -1,13 +1,13 @@
-import { useAuth } from "@/hooks/use-auth";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import ButtonAsync from "@/components/UI/button-async";
+import { useAuthStore } from "@/hooks/use-auth-store";
 
 /**
  * Button for signing out the user.
  */
 export default function ButtonSignout() {
-  const { handleLogout } = useAuth();
+  const { handleLogout } = useAuthStore();
 
   const [isLoading, setIsLoading] = useState(false);
 

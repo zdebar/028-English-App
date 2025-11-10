@@ -1,8 +1,8 @@
-import { useAuth } from "@/hooks/use-auth";
+import { useAuthStore } from "@/hooks/use-auth-store";
 import { Navigate, Outlet } from "react-router-dom";
 
 export default function PublicLayout() {
-  const { userId } = useAuth();
+  const { userId } = useAuthStore();
 
   if (userId) {
     return <Navigate to="/" replace />;

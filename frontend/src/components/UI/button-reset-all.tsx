@@ -3,7 +3,7 @@ import UserItem from "@/database/models/user-items";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ButtonAsync from "./button-async";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuthStore } from "@/hooks/use-auth-store";
 import { useUserStore } from "@/hooks/use-user";
 
 /**
@@ -12,7 +12,7 @@ import { useUserStore } from "@/hooks/use-user";
 export default function ButtonResetAll() {
   const [isLoading, setIsLoading] = useState(false);
   const reloadUserScore = useUserStore.getState().reloadUserScore;
-  const { userId } = useAuth();
+  const { userId } = useAuthStore();
 
   const handleReset = async () => {
     setIsLoading(true);

@@ -7,10 +7,10 @@ import { CloseIcon } from "../components/UI/icons";
 import { useNavigate } from "react-router-dom";
 import OverviewCard from "@/components/UI/overview-card";
 import { useFetch } from "@/hooks/use-fetch";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuthStore } from "@/hooks/use-auth-store";
 
 export default function GrammarOverview() {
-  const { userId } = useAuth();
+  const { userId } = useAuthStore();
 
   const fetchGrammarList = useCallback(async () => {
     if (userId) {
@@ -52,18 +52,20 @@ export default function GrammarOverview() {
               <CloseIcon />
             </ButtonRectangular>
           </div>
-          {grammarArray?.map((grammar, index) => (
-            <ButtonRectangular
-              key={grammar.id}
-              className="text-left h-input flex justify-start p-4"
-              onClick={() => {
-                setCurrentIndex(index);
-                setCardVisible(true);
-              }}
-            >
-              {`${index + 1} : ${grammar.name} `}
-            </ButtonRectangular>
-          )) || (
+          {grammarArray && grammarArray.length > 0 ? (
+            grammarArray.map((grammar, index) => (
+              <ButtonRectangular
+                key={grammar.id}
+                className="text-left h-input flex justify-start p-4"
+                onClick={() => {
+                  setCurrentIndex(index);
+                  setCardVisible(true);
+                }}
+              >
+                {`${index + 1} : ${grammar.name} `}
+              </ButtonRectangular>
+            ))
+          ) : (
             <p className="text-left h-input flex justify-start p-4">
               Žádná započatá gramatika
             </p>

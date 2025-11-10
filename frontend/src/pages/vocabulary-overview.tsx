@@ -9,10 +9,10 @@ import DirectionDropdown from "@/components/UI/direction-dropdown";
 import SettingProperty from "@/components/UI/setting-property";
 import { shortenDate } from "@/utils/database.utils";
 import { useFetch } from "@/hooks/use-fetch";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuthStore } from "@/hooks/use-auth-store";
 
 export default function VocabularyOverview() {
-  const { userId } = useAuth();
+  const { userId } = useAuthStore();
 
   const fetchVocabulary = useCallback(async () => {
     if (userId) {
@@ -60,6 +60,12 @@ export default function VocabularyOverview() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <p className="text-left h-input flex justify-start pl-4">Načítání...</p>
+    );
+  }
+
   return (
     <>
       {!cardVisible ? (
@@ -101,11 +107,7 @@ export default function VocabularyOverview() {
 
           {/* Filtrovaná slova */}
           <div className="overflow-y-auto flex flex-col gap-1">
-            {isLoading ? (
-              <p className="text-left h-input flex justify-start pl-4">
-                Načítání...
-              </p>
-            ) : filteredWords && filteredWords.length > 0 ? (
+            {filteredWords && filteredWords.length > 0 ? (
               <>
                 {filteredWords.slice(0, 10).map((item, index) => (
                   <ButtonRectangular

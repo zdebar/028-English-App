@@ -1,9 +1,9 @@
 import ButtonRectangular from "./button-rectangular";
 import UserItem from "@/database/models/user-items";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuthStore } from "@/hooks/use-auth-store";
 
 export default function ButtonStarted() {
-  const { userId } = useAuth();
+  const { userId } = useAuthStore();
 
   const handleClick = async () => {
     try {

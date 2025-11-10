@@ -1,8 +1,8 @@
-import { useAuth } from "@/hooks/use-auth";
+import { useAuthStore } from "@/hooks/use-auth-store";
 import { Navigate, Outlet } from "react-router-dom";
 
 export default function ProtectedLayout() {
-  const { userId, loading } = useAuth();
+  const { userId, loading } = useAuthStore();
 
   if (loading) {
     return <div>Načítání...</div>;

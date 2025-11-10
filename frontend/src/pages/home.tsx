@@ -1,13 +1,13 @@
 import ButtonRectangular from "@/components/UI/button-rectangular";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuthStore } from "@/hooks/use-auth-store";
 import Dashboard from "@/components/Layout/dashboard";
 import SettingProperty from "@/components/UI/setting-property";
 
 export default function Home() {
   const navigate = useNavigate();
 
-  const { userId, userEmail } = useAuth();
+  const { userId, userEmail } = useAuthStore();
 
   return (
     <div className="flex w-full max-w-hero flex-col items-center justify-start gap-4  text-center">
