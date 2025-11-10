@@ -107,6 +107,18 @@ export function useAudioManager(itemArray: UserItemLocal[]) {
     }
   }, []);
 
+  // Stop audio on unmount
+  useEffect(() => {
+    return () => {
+      if (currentAudioRef.current) {
+        currentAudioRef.current.pause();
+        currentAudioRef.current.currentTime = 0;
+        currentAudioRef.current = null;
+        setIsPlaying(false);
+      }
+    };
+  }, []);
+
   return {
     playAudio,
     stopAudio,

@@ -19,7 +19,6 @@ export function useFetch<T>(fetchFunction: () => Promise<T>) {
       try {
         setReload(false);
         const result = await fetchFunction();
-        console.log("Fetched data:", result);
         setData(result);
         setError(null);
       } catch (error) {

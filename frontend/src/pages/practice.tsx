@@ -59,7 +59,6 @@ export default function Practice() {
           await patchItems(updatedProgress);
           setUserProgress([]);
           setReload(true);
-          console.log("Patched items and reloading array.");
         } else {
           setUserProgress(updatedProgress);
         }
