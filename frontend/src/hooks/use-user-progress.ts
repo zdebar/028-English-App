@@ -2,7 +2,6 @@ import { useCallback } from "react";
 import UserItem from "@/database/models/user-items";
 import UserScore from "@/database/models/user-scores";
 import type { UserItemLocal } from "@/types/local.types";
-import { useAuth } from "@/hooks/use-auth";
 import { useUserStore } from "@/hooks/use-user";
 
 /**
@@ -11,8 +10,7 @@ import { useUserStore } from "@/hooks/use-user";
  * @param reloadUserScore Function to reload user score after updates.
  * @returns Function to update user items in the database.
  */
-export function useUserProgress(array: UserItemLocal[]) {
-  const { userId } = useAuth();
+export function useUserProgress(userId: string, array: UserItemLocal[]) {
   const { reloadUserScore } = useUserStore();
 
   const updateUserItemsInDB = useCallback(

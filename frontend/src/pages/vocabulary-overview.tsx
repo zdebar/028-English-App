@@ -8,7 +8,7 @@ import OverviewCard from "@/components/UI/overview-card";
 import DirectionDropdown from "@/components/UI/direction-dropdown";
 import SettingProperty from "@/components/UI/setting-property";
 import { shortenDate } from "@/utils/database.utils";
-import { useFetch } from "@/hooks/user-fetch";
+import { useFetch } from "@/hooks/use-fetch";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function VocabularyOverview() {

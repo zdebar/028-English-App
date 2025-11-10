@@ -8,48 +8,46 @@ import Profile from "@/pages/profile";
 import Practice from "@/pages/practice";
 import Home from "@/pages/home";
 import { dataSync } from "@/database/models/data-sync";
-import { useAuth } from "@/hooks/use-auth";
 import VocabularyOverview from "@/pages/vocabulary-overview";
 import ProtectedLayout from "@/components/utils/protected-layout";
 import PublicLayout from "@/components/utils/public-layout";
 import { ToastContainer } from "react-toastify";
 import Login from "@/pages/login";
 import GrammarOverview from "@/pages/grammar-overview";
-// import { useAuthStore } from "@/hooks/use-auth-store";
-// import type { Session } from "@supabase/supabase-js";
-// import { supabaseInstance } from "@/config/supabase.config";
+import { useAuthStore } from "@/hooks/use-auth-store";
+import type { Session } from "@supabase/supabase-js";
+import { supabaseInstance } from "@/config/supabase.config";
 
 export default function App() {
   const { theme, chooseTheme } = useThemeStore();
-  // const setSession = useAuthStore((state) => state.setSession);
+  const { userId, setSession } = useAuthStore();
   const showFooterRoutes = ["/"];
-  const { userId } = useAuth();
+
+  useEffect(() => {
+    supabaseInstance.auth
+      .getSession()
+      .then(({ data: { session } }: { data: { session: Session | null } }) => {
+        setSession(session);
+      });
+
+    const {
+      data: { subscription },
+    } = supabaseInstance.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [setSession]);
+
+  useEffect(() => {
+    chooseTheme(theme);
+  }, [theme, chooseTheme]);
 
   useEffect(() => {
     if (userId) {
       dataSync(userId);
     }
   }, [userId]);
-
-  // useEffect(() => {
-  //   supabaseInstance.auth
-  //     .getSession()
-  //     .then(({ data: { session } }: { data: { session: Session | null } }) => {
-  //       setSession(session);
-  //     });
-
-  //   const {
-  //     data: { subscription },
-  //   } = supabaseInstance.auth.onAuthStateChange((_event, session) => {
-  //     setSession(session);
-  //   });
-
-  //   return () => subscription.unsubscribe();
-  // }, [setSession]);
-
-  useEffect(() => {
-    chooseTheme(theme);
-  }, [theme, chooseTheme]);
 
   return (
     <div className="mx-auto flex h-screen max-w-container w-full flex-col justify-between">

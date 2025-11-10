@@ -15,12 +15,14 @@ import Loading from "@/components/UI/loading";
 import VolumeSlider from "@/components/UI/volume-slider";
 import config from "@/config/config";
 import GrammarCard from "@/components/Layout/grammar-card";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Practice() {
   const [revealed, setRevealed] = useState(false);
   const [hintIndex, setHintIndex] = useState(0);
   const [grammarVisible, setGrammarVisible] = useState(false);
-  const [error, setError] = useState<string | null>(null); //
+  const [error, setError] = useState<string | null>(null);
+  const { userId } = useAuth();
   const { userStats } = useUserStore();
   const {
     array,
@@ -34,7 +36,7 @@ export default function Practice() {
     setUserProgress,
     patchItems,
     setReload,
-  } = useItemArray();
+  } = useItemArray(userId!);
   const {
     playAudio,
     stopAudio,
@@ -62,8 +64,9 @@ export default function Practice() {
       if (arrayLength > 0) {
         if (index + 1 >= arrayLength) {
           await patchItems(updatedProgress);
-          setReload(true);
           setUserProgress([]);
+          setReload(true);
+          console.log("Patched items and reloading array.");
         } else {
           setUserProgress(updatedProgress);
         }

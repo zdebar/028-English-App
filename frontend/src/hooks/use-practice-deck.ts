@@ -1,25 +1,17 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import UserItem from "@/database/models/user-items";
 import type { UserItemLocal } from "@/types/local.types";
-import { useAuth } from "@/hooks/use-auth";
-import { useFetch } from "@/hooks/user-fetch";
+import { useFetch } from "@/hooks/use-fetch";
 
 /**
  * Manages the practice deck state and index.
  * @param reload Indicates whether to reload the practice deck.
  * @param setReload Function to set the reload state.
  */
-export function usePracticeDeck(
-  reload: boolean,
-  setReload: (value: boolean) => void
-) {
+export function usePracticeDeck(userId: string) {
   const [index, setIndex] = useState(0);
-  const { userId } = useAuth();
 
   const fetchPracticeDeck = useCallback(async () => {
-    if (!userId) {
-      return [];
-    }
     return await UserItem.getPracticeDeck(userId);
   }, [userId]);
 
@@ -27,22 +19,18 @@ export function usePracticeDeck(
     data: array,
     error,
     isLoading,
+    setReload,
   } = useFetch<UserItemLocal[]>(fetchPracticeDeck);
 
   function wrapIndex(newIndex: number) {
-    if (!array || array.length === 0) return 0;
-    return newIndex % array.length;
+    const safeArray = array || [];
+    if (safeArray.length === 0) return 0;
+    return newIndex % safeArray.length;
   }
 
   function nextIndex() {
     setIndex((prev) => wrapIndex(prev + 1));
   }
-
-  useEffect(() => {
-    if (reload) {
-      setReload(false);
-    }
-  }, [reload, setReload]);
 
   return {
     array: array || [],
@@ -51,5 +39,6 @@ export function usePracticeDeck(
     nextIndex,
     loading: isLoading,
     error,
+    setReload,
   };
 }

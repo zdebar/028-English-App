@@ -204,10 +204,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .modify((item: UserItemLocal) => {
         item.next_at = UserItem.nullReplacementDate;
         item.mastered_at = UserItem.nullReplacementDate;
-        item.updated_at = UserItem.nullReplacementDate;
+        item.updated_at = new Date().toISOString();
         item.learned_at = UserItem.nullReplacementDate;
         item.progress = 0;
-        item.started_at = UserItem.nullReplacementDate;
       });
     return count > 0;
   }
@@ -231,10 +230,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .modify((item: UserItemLocal) => {
         item.next_at = this.nullReplacementDate;
         item.mastered_at = this.nullReplacementDate;
-        item.updated_at = this.nullReplacementDate;
+        item.updated_at = new Date().toISOString();
         item.learned_at = this.nullReplacementDate;
         item.progress = 0;
-        item.started_at = this.nullReplacementDate;
       });
   }
 
@@ -257,10 +255,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .modify((item: UserItemLocal) => {
         item.next_at = this.nullReplacementDate;
         item.mastered_at = this.nullReplacementDate;
-        item.updated_at = this.nullReplacementDate;
+        item.updated_at = new Date().toISOString();
         item.learned_at = this.nullReplacementDate;
         item.progress = 0;
-        item.started_at = this.nullReplacementDate;
       });
 
     return true;

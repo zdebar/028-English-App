@@ -6,13 +6,10 @@ import { useUserProgress } from "@/hooks/use-user-progress";
 /**
  * Manages the Practice Deck and User Progress.
  */
-export function useItemArray() {
-  const [reload, setReload] = useState(true);
-  const { array, index, setIndex, nextIndex } = usePracticeDeck(
-    reload,
-    setReload
-  );
-  const { updateUserItemsInDB } = useUserProgress(array);
+export function useItemArray(userId: string) {
+  const { array, index, setIndex, nextIndex, setReload } =
+    usePracticeDeck(userId);
+  const { updateUserItemsInDB } = useUserProgress(userId, array);
   const [userProgress, setUserProgress] = useState<number[]>([]);
   const patchRef = useRef(updateUserItemsInDB);
   const updateArrayRef = useRef(userProgress);
@@ -50,7 +47,6 @@ export function useItemArray() {
     userProgress,
     setUserProgress,
     patchItems: updateUserItemsInDB,
-    reload,
     setReload,
   };
 }

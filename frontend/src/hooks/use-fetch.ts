@@ -7,25 +7,32 @@ import { useState, useEffect } from "react";
  */
 export function useFetch<T>(fetchFunction: () => Promise<T>) {
   const [data, setData] = useState<T | null>(null);
+  const [reload, setReload] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
+      if (!reload) return;
       setIsLoading(true);
+
       try {
+        setReload(false);
         const result = await fetchFunction();
+        console.log("Fetched data:", result);
         setData(result);
+        setError(null);
       } catch (error) {
         setError("Chyba při načítání.");
         console.error(error);
       } finally {
         setIsLoading(false);
+        setReload(false);
       }
     }
 
     fetchData();
-  }, [fetchFunction]);
+  }, [fetchFunction, reload]);
 
-  return { data, error, isLoading };
+  return { data, error, isLoading, reload, setReload };
 }

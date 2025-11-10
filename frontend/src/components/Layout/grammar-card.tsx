@@ -1,7 +1,7 @@
 import Grammar from "@/database/models/grammar";
 import OverviewCard from "@/components/UI/overview-card";
 import { useCallback } from "react";
-import { useFetch } from "@/hooks/user-fetch";
+import { useFetch } from "@/hooks/use-fetch";
 
 /**
  * Fetches and display individual grammar content by grammar_id in a card.

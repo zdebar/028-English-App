@@ -6,7 +6,7 @@ import type { GrammarLocal } from "@/types/local.types";
 import { CloseIcon } from "../components/UI/icons";
 import { useNavigate } from "react-router-dom";
 import OverviewCard from "@/components/UI/overview-card";
-import { useFetch } from "@/hooks/user-fetch";
+import { useFetch } from "@/hooks/use-fetch";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function GrammarOverview() {
@@ -23,6 +23,7 @@ export default function GrammarOverview() {
     data: grammarArray,
     error,
     isLoading,
+    setReload,
   } = useFetch<GrammarLocal[]>(fetchGrammarList);
   const [cardVisible, setCardVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -33,6 +34,7 @@ export default function GrammarOverview() {
     if (typeof grammar_id === "number" && userId) {
       await UserItem.resetGrammarItems(userId, grammar_id);
     }
+    setReload(true);
   };
 
   return (
