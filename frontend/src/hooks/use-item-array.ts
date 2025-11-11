@@ -7,8 +7,7 @@ import { useUserProgress } from "@/hooks/use-user-progress";
  * Manages the Practice Deck and User Progress.
  */
 export function useItemArray(userId: string) {
-  const { array, index, setIndex, nextIndex, setReload } =
-    usePracticeDeck(userId);
+  const { array, index, nextIndex, setReload } = usePracticeDeck(userId);
   const { updateUserItemsInDB } = useUserProgress(userId, array);
   const [userProgress, setUserProgress] = useState<number[]>([]);
   const patchRef = useRef(updateUserItemsInDB);
@@ -32,13 +31,12 @@ export function useItemArray(userId: string) {
   }, []);
 
   const currentItem = array[index] || null;
-  const direction = alternateDirection(currentItem?.progress);
+  const direction = alternateDirection(currentItem?.progress || 0);
   const hasGrammar = !!currentItem?.grammar_id;
 
   return {
     array,
     index,
-    setIndex,
     nextIndex,
     currentItem,
     arrayLength: array.length,

@@ -5,6 +5,7 @@ import config from "@/config/config";
 import {
   validateNonEmptyString,
   validateISODateString,
+  validateShortDateString,
   validateUserItemLocal,
   validateUUID,
 } from "@/utils/validation.utils";
@@ -51,7 +52,7 @@ export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
  */
 export function generateUserScoreId(userId: string, date: string): string {
   validateUUID(userId, "userId");
-  validateISODateString(date, "date");
+  validateShortDateString(date, "date");
 
   return `${userId}-${date}`;
 }

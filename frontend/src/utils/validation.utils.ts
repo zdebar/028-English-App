@@ -9,7 +9,7 @@ import type { UserItemLocal } from "@/types/local.types";
  */
 export function validateNonNegativeInteger(value: number, name: string): void {
   if (value == null || !Number.isInteger(value) || value < 0) {
-    throw new Error(`${name} must be a non-negative integer.`);
+    throw new Error(`${name} : ${value} must be a non-negative integer.`);
   }
 }
 
@@ -74,15 +74,18 @@ export function validateNonEmptyString(value: string, name: string): void {
  * @throws Error if the value is not a valid ISO date string.
  */
 export function validateISODateString(value: string, name: string): void {
-  const isoDateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/;
+  const isoDateRegex =
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?(Z|[+-]\d{2}:\d{2})$/;
 
   if (!value || !isoDateRegex.test(value)) {
-    throw new Error(`${name} must be a valid ISO 8601 date string.`);
+    throw new Error(
+      `${name}: "${value}"  must be a valid ISO 8601 date string.`
+    );
   }
 
   const date = new Date(value);
   if (isNaN(date.getTime())) {
-    throw new Error(`${name} must be a valid calendar date.`);
+    throw new Error(`${name}: "${value}"  must be a valid calendar date.`);
   }
 }
 

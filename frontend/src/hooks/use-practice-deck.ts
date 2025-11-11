@@ -35,7 +35,6 @@ export function usePracticeDeck(userId: string) {
   return {
     array: array || [],
     index,
-    setIndex,
     nextIndex,
     loading: isLoading,
     error,
