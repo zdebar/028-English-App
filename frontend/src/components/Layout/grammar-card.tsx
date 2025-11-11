@@ -2,6 +2,7 @@ import Grammar from "@/database/models/grammar";
 import OverviewCard from "@/components/UI/overview-card";
 import { useCallback } from "react";
 import { useFetch } from "@/hooks/use-fetch";
+import DOMPurify from "dompurify";
 
 /**
  * Fetches and display individual grammar content by grammar_id in a card.
@@ -22,16 +23,24 @@ export default function GrammarCard({
     return Promise.reject("Invalid grammar ID");
   }, [grammar_id]);
 
-  const { data: grammar, error, isLoading } = useFetch(fetchGrammar);
+  const { data: grammar, error, loading } = useFetch(fetchGrammar);
 
   return (
     <OverviewCard
       titleText={grammar?.name}
       onClose={onClose}
-      isLoading={isLoading}
+      isLoading={loading}
       error={error}
     >
-      {grammar?.note || "Žádné poznámky k zobrazení."}
+      {grammar?.note ? (
+        <div
+          dangerouslySetInnerHTML={{
+            __html: DOMPurify.sanitize(grammar.note),
+          }}
+        />
+      ) : (
+        "Žádné poznámky k zobrazení."
+      )}
     </OverviewCard>
   );
 }

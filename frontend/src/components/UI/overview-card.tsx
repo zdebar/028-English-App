@@ -1,6 +1,5 @@
 import ButtonRectangular from "@/components/UI/button-rectangular";
 import { CloseIcon } from "@/components/UI/icons";
-
 import ButtonAsync from "./button-async";
 
 interface OverviewCardProps {

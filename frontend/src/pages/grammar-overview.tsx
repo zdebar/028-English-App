@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import OverviewCard from "@/components/UI/overview-card";
 import { useFetch } from "@/hooks/use-fetch";
 import { useAuthStore } from "@/hooks/use-auth-store";
+import DOMPurify from "dompurify";
 
 export default function GrammarOverview() {
   const { userId } = useAuthStore();
@@ -22,7 +23,7 @@ export default function GrammarOverview() {
   const {
     data: grammarArray,
     error,
-    isLoading,
+    loading,
     setReload,
   } = useFetch<GrammarLocal[]>(fetchGrammarList);
   const [cardVisible, setCardVisible] = useState(false);
@@ -43,7 +44,7 @@ export default function GrammarOverview() {
         <div className="card-width flex flex-col gap-1 justify-start">
           <div className="h-button flex items-center justify-between gap-1">
             <div className="flex h-button grow justify-start p-4 border border-dashed">
-              {isLoading ? "Načítání..." : error || "Přehled gramatiky"}
+              {loading ? "Načítání..." : error || "Přehled gramatiky"}
             </div>
             <ButtonRectangular
               className="w-button grow-0"
@@ -77,7 +78,15 @@ export default function GrammarOverview() {
           onClose={() => setCardVisible(false)}
           handleReset={handleClearGrammarUserItems}
         >
-          {grammarArray?.[currentIndex].note}
+          {grammarArray?.[currentIndex].note ? (
+            <div
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(grammarArray[currentIndex].note),
+              }}
+            />
+          ) : (
+            "Žádné poznámky k zobrazení."
+          )}
         </OverviewCard>
       )}
     </>
