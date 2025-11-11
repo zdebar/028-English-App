@@ -9,12 +9,12 @@ export function useFetch<T>(fetchFunction: () => Promise<T>) {
   const [data, setData] = useState<T | null>(null);
   const [reload, setReload] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoadin] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
       if (!reload) return;
-      setIsLoading(true);
+      setLoadin(true);
 
       try {
         setReload(false);
@@ -25,7 +25,7 @@ export function useFetch<T>(fetchFunction: () => Promise<T>) {
         setError("Chyba při načítání.");
         console.error(error);
       } finally {
-        setIsLoading(false);
+        setLoadin(false);
         setReload(false);
       }
     }
@@ -33,5 +33,5 @@ export function useFetch<T>(fetchFunction: () => Promise<T>) {
     fetchData();
   }, [fetchFunction, reload]);
 
-  return { data, error, isLoading, reload, setReload };
+  return { data, error, loading, reload, setReload };
 }

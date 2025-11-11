@@ -1,43 +1,70 @@
-import { useState, useCallback } from "react";
-import UserItem from "@/database/models/user-items";
-import type { UserItemLocal } from "@/types/local.types";
-import { useFetch } from "@/hooks/use-fetch";
+import { useEffect, useRef, useCallback } from "react";
+import { alternateDirection } from "@/utils/practice.utils";
+import { useArray } from "@/hooks/use-array";
+import { useUserProgress } from "@/hooks/use-user-progress";
 
 /**
- * Manages the practice deck state and index.
- * @param reload Indicates whether to reload the practice deck.
- * @param setReload Function to set the reload state.
+ * Manages the Practice Deck and User Progress.
  */
 export function usePracticeDeck(userId: string) {
-  const [index, setIndex] = useState(0);
+  const { array, currentItem, index, nextIndex, setReload } = useArray(userId);
+  const { updateUserItemsInDB } = useUserProgress(userId, array);
 
-  const fetchPracticeDeck = useCallback(async () => {
-    return await UserItem.getPracticeDeck(userId);
-  }, [userId]);
+  const userProgressRef = useRef<number[]>([]);
 
-  const {
-    data: array,
-    error,
-    isLoading,
-    setReload,
-  } = useFetch<UserItemLocal[]>(fetchPracticeDeck);
+  const direction = alternateDirection(currentItem?.progress || 0);
+  const hasGrammar = !!currentItem?.grammar_id;
 
-  function wrapIndex(newIndex: number) {
-    const safeArray = array || [];
-    if (safeArray.length === 0) return 0;
-    return newIndex % safeArray.length;
-  }
+  // Clear progress updates when the array changes
+  useEffect(() => {
+    userProgressRef.current = [];
+  }, [array]);
 
-  function nextIndex() {
-    setIndex((prev) => wrapIndex(prev + 1));
-  }
+  // Save progress on unmount
+  useEffect(() => {
+    return () => {
+      const userProgress = [...userProgressRef.current];
+      if (userProgress.length > 0) {
+        updateUserItemsInDB(userProgress).catch((error) => {
+          console.error("Failed to save progress on unmount:", error);
+        });
+      }
+    };
+  }, [updateUserItemsInDB]);
+
+  // Advance to next item and record progress change
+  const nextItem = useCallback(
+    async (progressChange: number = 0) => {
+      if (!currentItem) {
+        console.warn("No current item to update progress for.");
+        return;
+      }
+
+      userProgressRef.current.push(
+        Math.max(currentItem.progress + progressChange, 0)
+      );
+
+      if (userProgressRef.current.length >= array.length) {
+        try {
+          await updateUserItemsInDB(userProgressRef.current);
+          userProgressRef.current = [];
+          setReload(true);
+        } catch (error) {
+          console.error("Failed to update user progress:", error);
+        }
+      }
+
+      nextIndex();
+    },
+    [currentItem, nextIndex, array.length, setReload, updateUserItemsInDB]
+  );
 
   return {
-    array: array || [],
     index,
-    nextIndex,
-    loading: isLoading,
-    error,
-    setReload,
+    array,
+    nextItem,
+    currentItem,
+    direction,
+    hasGrammar,
   };
 }
