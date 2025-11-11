@@ -5,6 +5,8 @@ import config from "@/config/config";
 import {
   validateNonEmptyString,
   validateISODateString,
+  validateUserItemLocal,
+  validateUUID,
 } from "@/utils/validation.utils";
 
 /**
@@ -13,9 +15,7 @@ import {
  * @returns Item in format suitable or PostgreSQL.
  */
 export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
-  if (!localItem || typeof localItem !== "object") {
-    throw new Error("localItem must be a valid UserItemLocal object.");
-  }
+  validateUserItemLocal(localItem);
 
   const {
     user_id,
@@ -27,6 +27,7 @@ export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
     learned_at,
     mastered_at,
   } = localItem;
+
   const nullReplacementDate = config.database.nullReplacementDate;
 
   return {
@@ -49,7 +50,7 @@ export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
  * @throws Error if inputs are invalid.
  */
 export function generateUserScoreId(userId: string, date: string): string {
-  validateNonEmptyString(userId, "userId");
+  validateUUID(userId, "userId");
   validateISODateString(date, "date");
 
   return `${userId}-${date}`;
@@ -97,7 +98,7 @@ export async function fetchStorage(
  * @param isoDate ISO date string
  * @returns Shortened date string or "není k dispozici" if date is undefined or null replacement date.
  */
-export function shortenDate(isoDate: string | undefined): string {
+export function shortenDate(isoDate: string): string {
   if (!isoDate || isoDate === config.database.nullReplacementDate)
     return "není k dispozici";
 

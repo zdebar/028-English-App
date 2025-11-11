@@ -1,8 +1,9 @@
 import config from "@/config/config";
 import {
   validateLessonSize,
-  validatePositiveInteger,
+  validateNonNegativeInteger,
 } from "@/utils/validation.utils";
+import type { LessonsLocal } from "@/types/local.types";
 
 /**
  * Calculates the items count in last started lesson before today.
@@ -11,7 +12,7 @@ import {
  * @throws Error if countNotToday or lessonSize is invalid.
  */
 export function getPreviousCount(countNotToday: number): number {
-  validatePositiveInteger(countNotToday, "countNotToday");
+  validateNonNegativeInteger(countNotToday, "countNotToday");
   validateLessonSize();
 
   return countNotToday % config.lesson.lessonSize;
@@ -23,7 +24,7 @@ export function getPreviousCount(countNotToday: number): number {
  * @returns Returns last started lesson number before today.
  */
 export function getLessonStarted(countNotToday: number): number {
-  validatePositiveInteger(countNotToday, "countNotToday");
+  validateNonNegativeInteger(countNotToday, "countNotToday");
   validateLessonSize();
 
   return Math.floor(countNotToday / config.lesson.lessonSize) + 1;
@@ -39,12 +40,16 @@ export function getTodayLessonItems(
   previousCount: number,
   todayCount: number
 ): number[] {
-  validatePositiveInteger(previousCount, "previousCount");
-  validatePositiveInteger(todayCount, "todayCount");
+  validateNonNegativeInteger(previousCount, "previousCount");
+  validateNonNegativeInteger(todayCount, "todayCount");
   validateLessonSize();
 
   const lessonCounts: number[] = [];
   const lessonSize = config.lesson.lessonSize;
+
+  if (previousCount >= lessonSize) {
+    throw new Error("'previousCount' must be less than the lesson size.");
+  }
 
   const firstLesson = Math.min(todayCount, lessonSize - previousCount);
   lessonCounts.push(firstLesson);
@@ -65,28 +70,31 @@ export function getTodayLessonItems(
 
 /**
  * Calculates lesson progress data.
- * @param all Lerned items count including today's items
- * @param today Learned items count for today
- * @returns Array of tuples [lessonNumber, previousCount, todayCount]
+ * @param all Learned items count including today's items.
+ * @param today Learned items count for today.
+ * @returns Array of LessonsLocal objects.
  */
-export function getLessonProgress(
-  all: number,
-  today: number
-): [number, number, number][] {
-  validatePositiveInteger(all, "all");
-  validatePositiveInteger(today, "today");
+export function getLessonProgress(all: number, today: number): LessonsLocal[] {
+  validateNonNegativeInteger(all, "all");
+  validateNonNegativeInteger(today, "today");
   validateLessonSize();
+
+  if (all < today) {
+    throw new Error("'all' must be greater than or equal to 'today'.");
+  }
 
   const previousCount = getPreviousCount(all - today);
   const lessonNumber = getLessonStarted(all - today);
   const todayCounts = getTodayLessonItems(previousCount, today);
 
-  const result: [number, number, number][] = todayCounts.map(
-    (todayCount, index) => {
-      const prevCount = index === 0 ? previousCount : 0;
-      return [lessonNumber + index, prevCount, todayCount];
-    }
-  );
+  const result: LessonsLocal[] = todayCounts.map((todayCount, index) => {
+    const prevCount = index === 0 ? previousCount : 0;
+    return {
+      lessonId: lessonNumber + index,
+      previousCount: prevCount,
+      todayCount,
+    };
+  });
 
   return result;
 }

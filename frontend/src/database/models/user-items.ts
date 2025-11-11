@@ -10,7 +10,7 @@ import { convertLocalToSQL } from "@/utils/database.utils";
 import { getTodayShortDate } from "@/utils/database.utils";
 import Dexie from "dexie";
 import {
-  validatePositiveInteger,
+  validateNonNegativeInteger,
   validateUserItemArray,
   validateUUID,
 } from "@/utils/validation.utils";
@@ -44,7 +44,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     userId: string,
     deckSize: number = config.lesson.deckSize
   ): Promise<UserItemLocal[]> {
-    validatePositiveInteger(deckSize, "deckSize");
+    validateNonNegativeInteger(deckSize, "deckSize");
     validateUUID(userId, "userId");
 
     const now = new Date().toISOString();
@@ -221,7 +221,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     userId: string,
     grammarId: number
   ): Promise<void> {
-    validatePositiveInteger(grammarId, "grammarId");
+    validateNonNegativeInteger(grammarId, "grammarId");
     validateUUID(userId, "userId");
 
     await db.user_items
@@ -246,7 +246,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     userId: string,
     itemId: number
   ): Promise<boolean> {
-    validatePositiveInteger(itemId, "itemId");
+    validateNonNegativeInteger(itemId, "itemId");
     validateUUID(userId, "userId");
 
     await db.user_items

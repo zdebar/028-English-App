@@ -6,7 +6,7 @@ import { db } from "@/database/models/db";
 import config from "@/config/config";
 import Dexie from "dexie";
 import {
-  validatePositiveInteger,
+  validateNonNegativeInteger,
   validateUUID,
 } from "@/utils/validation.utils";
 
@@ -22,7 +22,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * @throws Error if grammarId is not a positive integer or if grammar is not found.
    */
   static async getGrammarById(grammarId: number): Promise<GrammarLocal> {
-    validatePositiveInteger(grammarId, "grammarId");
+    validateNonNegativeInteger(grammarId, "grammarId");
 
     const grammar = await db.grammars.get(grammarId);
     if (!grammar) {

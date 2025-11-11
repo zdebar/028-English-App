@@ -46,9 +46,13 @@ export interface AudioMetadataLocal {
 }
 
 export interface UserStatsLocal {
-  learnedCountToday: number | null;
-  learnedCount: number | null;
-  practiceCountToday: number | null;
+  learnedCountToday?: number;
+  learnedCount?: number;
+  practiceCountToday?: number;
 }
 
-export type LessonProgress = [number, number, number]; // [lessonNumber, previousCount, todayCount]
+export interface LessonsLocal {
+  lessonId: number;
+  previousCount: number;
+  todayCount: number;
+}

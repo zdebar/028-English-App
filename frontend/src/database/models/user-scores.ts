@@ -6,7 +6,7 @@ import { db } from "@/database/models/db";
 import { generateUserScoreId } from "@/utils/database.utils";
 import { getTodayShortDate } from "@/utils/database.utils";
 import {
-  validatePositiveInteger,
+  validateNonNegativeInteger,
   validateUUID,
 } from "@/utils/validation.utils";
 
@@ -26,7 +26,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     userId: string,
     addCount: number
   ): Promise<boolean> {
-    validatePositiveInteger(addCount, "addCount");
+    validateNonNegativeInteger(addCount, "addCount");
     validateUUID(userId, "userId");
 
     const today = getTodayShortDate();

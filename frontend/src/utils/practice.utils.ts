@@ -1,7 +1,7 @@
 import config from "@/config/config";
 import type { UserItemLocal } from "@/types/local.types";
 import {
-  validatePositiveInteger,
+  validateNonNegativeInteger,
   validateUserItemArray,
 } from "@/utils/validation.utils";
 
@@ -12,8 +12,7 @@ import {
  * @throws Error if progress is not a positive integer.
  */
 export function alternateDirection(progress: number): boolean {
-  if (progress == null) return true;
-  validatePositiveInteger(progress, "progress");
+  validateNonNegativeInteger(progress, "progress");
   return progress % 2 === 0;
 }
 
@@ -24,7 +23,7 @@ export function alternateDirection(progress: number): boolean {
  * @throws Error if progress is not a positive integer.
  */
 export function getNextAt(progress: number): string {
-  validatePositiveInteger(progress, "progress");
+  validateNonNegativeInteger(progress, "progress");
 
   const interval = config.srs.intervals[progress];
   if (!interval) return config.database.nullReplacementDate;
