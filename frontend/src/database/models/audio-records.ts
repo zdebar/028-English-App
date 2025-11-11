@@ -66,23 +66,37 @@ export default class AudioRecord
 
     await Promise.all(
       config.audio.archives.map(async (archiveName) => {
-        if (await AudioMetadata.isFetched(archiveName)) {
-          return;
+        try {
+          // Check if the archive has already been fetched
+          if (await AudioMetadata.isFetched(archiveName)) {
+            console.log(`Archive ${archiveName} already fetched.`);
+            return;
+          }
+
+          // Fetch the archive from storage
+          const zipBlob: Blob | null = await fetchStorage(
+            config.audio.bucketName,
+            archiveName
+          );
+          if (!zipBlob) {
+            console.error(`Failed to fetch archive: ${archiveName}`);
+            return;
+          }
+
+          // Extract files from the zip archive
+          const extractedFiles = await this.extractZip(zipBlob);
+
+          // Store extracted files in IndexedDB
+          for (const [filename, audioBlob] of extractedFiles) {
+            await db.audio_records.put({ filename, audioBlob });
+          }
+
+          // Mark the archive as fetched
+          await AudioMetadata.markAsFetched(archiveName);
+          console.log(`Successfully synced archive: ${archiveName}`);
+        } catch (error) {
+          console.error(`Error syncing archive ${archiveName}:`, error);
         }
-
-        const zipBlob: Blob | null = await fetchStorage(
-          config.audio.bucketName,
-          archiveName
-        );
-        if (!zipBlob) return;
-
-        const extractedFiles = await this.extractZip(zipBlob);
-
-        for (const [filename, audioBlob] of extractedFiles) {
-          await db.audio_records.put({ filename, audioBlob });
-        }
-
-        await AudioMetadata.markAsFetched(archiveName);
       })
     );
   }

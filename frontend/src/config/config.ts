@@ -35,7 +35,7 @@ const config = {
 
   audio: {
     bucketName: "audio-archive",
-    archives: ["audio_part_1.zip"],
+    archives: ["audio_part_1.zip", "audio_part_2.zip"],
   },
 
   lesson: {
