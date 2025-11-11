@@ -105,6 +105,7 @@ export function useAudioManager(itemArray: UserItemLocal[]) {
         audio.onpause = () => {
           setIsPlaying(false);
         };
+
         setAudioError(false);
       }
     } else {

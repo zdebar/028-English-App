@@ -16,7 +16,7 @@ interface CardComponentProps {
 
 export function ItemCard({
   currentItem,
-  direction,
+  direction = false,
   revealed,
   hintIndex,
   isAudioDisabled,
@@ -48,7 +48,7 @@ export function ItemCard({
           {direction || revealed ? currentItem?.czech : "\u00A0"}
         </p>
         <p className="text-center">
-          {revealed || (audioError && !direction)
+          {revealed || (!direction && audioError)
             ? currentItem?.english
             : currentItem?.english
                 .slice(0, hintIndex ?? currentItem?.english.length)

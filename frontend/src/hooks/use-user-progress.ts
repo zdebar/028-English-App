@@ -10,23 +10,16 @@ import { useUserStore } from "@/hooks/use-user";
  * @param reloadUserScore Function to reload user score after updates.
  * @returns Function to update user items in the database.
  */
-export function useUserProgress(userId: string, array: UserItemLocal[]) {
+export function useUserProgress(userId: string) {
   const { reloadUserScore } = useUserStore();
 
   const updateUserItemsInDB = useCallback(
-    async (updatedProgress: number[]): Promise<boolean> => {
-      if (array.length === 0 || updatedProgress.length === 0 || !userId)
-        return false;
-      try {
-        const updatedArray = array
-          .filter((_, idx) => idx < updatedProgress.length)
-          .map((item, idx) => ({
-            ...item,
-            progress: updatedProgress[idx],
-          }));
+    async (updatedItems: UserItemLocal[]): Promise<boolean> => {
+      if (updatedItems.length === 0 || !userId) return false;
 
-        await UserItem.savePracticeDeck(updatedArray);
-        await UserScore.addItemCount(userId, updatedArray.length);
+      try {
+        await UserItem.savePracticeDeck(updatedItems);
+        await UserScore.addItemCount(userId, updatedItems.length);
         reloadUserScore(userId);
         return true;
       } catch (error) {
@@ -34,7 +27,7 @@ export function useUserProgress(userId: string, array: UserItemLocal[]) {
         return false;
       }
     },
-    [array, reloadUserScore, userId]
+    [reloadUserScore, userId]
   );
 
   return { updateUserItemsInDB };

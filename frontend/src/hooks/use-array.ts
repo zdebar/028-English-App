@@ -23,7 +23,7 @@ export function useArray(userId: string) {
     setReload,
   } = useFetch<UserItemLocal[]>(fetchPracticeDeck);
 
-  const currentItem = array?.[index] || null;
+  const currentItem = array?.[index];
 
   function wrapIndex(newIndex: number) {
     const safeArray = array || [];

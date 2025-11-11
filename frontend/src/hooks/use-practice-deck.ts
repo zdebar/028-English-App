@@ -2,23 +2,18 @@ import { useEffect, useRef, useCallback } from "react";
 import { alternateDirection } from "@/utils/practice.utils";
 import { useArray } from "@/hooks/use-array";
 import { useUserProgress } from "@/hooks/use-user-progress";
+import type { UserItemLocal } from "@/types/local.types";
 
 /**
  * Manages the Practice Deck and User Progress.
  */
 export function usePracticeDeck(userId: string) {
   const { array, currentItem, index, nextIndex, setReload } = useArray(userId);
-  const { updateUserItemsInDB } = useUserProgress(userId, array);
+  const { updateUserItemsInDB } = useUserProgress(userId);
 
-  const userProgressRef = useRef<number[]>([]);
-
-  const direction = alternateDirection(currentItem?.progress || 0);
+  const userProgressRef = useRef<UserItemLocal[]>([]);
+  const direction = alternateDirection(array[index]?.progress);
   const hasGrammar = !!currentItem?.grammar_id;
-
-  // Clear progress updates when the array changes
-  useEffect(() => {
-    userProgressRef.current = [];
-  }, [array]);
 
   // Save progress on unmount
   useEffect(() => {
@@ -40,9 +35,12 @@ export function usePracticeDeck(userId: string) {
         return;
       }
 
-      userProgressRef.current.push(
-        Math.max(currentItem.progress + progressChange, 0)
-      );
+      const updatedItem = {
+        ...currentItem,
+        progress: Math.max(currentItem.progress + progressChange, 0),
+      };
+
+      userProgressRef.current.push(updatedItem);
 
       if (userProgressRef.current.length >= array.length) {
         try {

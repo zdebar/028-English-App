@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { usePracticeDeck } from "@/hooks/use-practice-deck";
 import { useAudioManager } from "@/hooks/use-audio-manager";
 import { useAuthStore } from "@/hooks/use-auth-store";
@@ -14,9 +14,6 @@ export function usePracticeLogic() {
     usePracticeDeck(userId!);
   const { playAudio, stopAudio, setVolume, audioError, setAudioError } =
     useAudioManager(array);
-
-  const isAudioDisabled =
-    (direction && !revealed) || !currentItem?.audio || audioError;
 
   const handleNext = useCallback(
     async (progressIncrement: number = 0) => {
@@ -43,7 +40,7 @@ export function usePracticeLogic() {
 
   // Handle audio errors and retries
   useEffect(() => {
-    if (!currentItem || !currentItem?.audio || audioError) {
+    if (!currentItem?.audio || audioError) {
       setAudioError(true);
     } else {
       setAudioError(false);
@@ -51,6 +48,7 @@ export function usePracticeLogic() {
   }, [audioError, currentItem, setAudioError]);
 
   return {
+    loading: useMemo(() => array.length === 0, [array]),
     revealed,
     setRevealed,
     hintIndex,
@@ -59,7 +57,8 @@ export function usePracticeLogic() {
     setGrammarVisible,
     handleNext,
     playAudioForItem,
-    isAudioDisabled,
+    isAudioDisabled:
+      (direction && !revealed) || !currentItem?.audio || audioError,
     currentItem,
     direction,
     hasGrammar,
