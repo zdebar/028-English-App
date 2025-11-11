@@ -13,6 +13,31 @@ export function useAudioManager(itemArray: UserItemLocal[]) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioError, setAudioError] = useState(false); // Audio error state while playing
 
+  const MAX_CACHE_SIZE = 500; // Maximum number of audio files to keep in the cache
+
+  // Function to clean the audio cache
+  const cleanCache = useCallback(() => {
+    if (audioCacheRef.current.size > MAX_CACHE_SIZE) {
+      const keysToRemove = Array.from(audioCacheRef.current.keys()).slice(
+        0,
+        audioCacheRef.current.size - MAX_CACHE_SIZE
+      );
+
+      keysToRemove.forEach((key) => {
+        const audio = audioCacheRef.current.get(key);
+        if (audio) {
+          audio.pause();
+          URL.revokeObjectURL(audio.src); // Revoke the object URL to free memory
+        }
+        audioCacheRef.current.delete(key);
+      });
+
+      console.log(
+        `Audio cache cleaned. Removed ${keysToRemove.length} items. Current cache size: ${audioCacheRef.current.size}`
+      );
+    }
+  }, []);
+
   useEffect(() => {
     const cacheAudio = async () => {
       if (itemArray.length === 0) return;
@@ -37,6 +62,8 @@ export function useAudioManager(itemArray: UserItemLocal[]) {
               console.warn(`Audio not found for: ${filename}`);
             }
           });
+
+          cleanCache();
         }
       } catch (error) {
         console.error("Error caching audio files:", error);
@@ -44,7 +71,7 @@ export function useAudioManager(itemArray: UserItemLocal[]) {
     };
 
     cacheAudio();
-  }, [itemArray]);
+  }, [itemArray, cleanCache]);
 
   // Function to play audio
   const playAudio = useCallback((audioPath: string | null) => {

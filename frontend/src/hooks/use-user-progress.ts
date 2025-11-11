@@ -27,7 +27,6 @@ export function useUserProgress(userId: string, array: UserItemLocal[]) {
 
         await UserItem.savePracticeDeck(updatedArray);
         await UserScore.addItemCount(userId, updatedArray.length);
-        console.log("User items updated in DB successfully.", updatedArray);
         reloadUserScore(userId);
         return true;
       } catch (error) {
