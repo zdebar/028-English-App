@@ -12,8 +12,10 @@ export function usePracticeDeck(userId: string) {
   const { updateUserItemsInDB } = useUserProgress(userId);
 
   const userProgressRef = useRef<UserItemLocal[]>([]);
-  const direction = alternateDirection(array[index]?.progress);
-  const hasGrammar = !!currentItem?.grammar_id;
+  const direction = currentItem
+    ? alternateDirection(currentItem?.progress)
+    : false;
+  const grammar_id = currentItem?.grammar_id;
 
   // Save progress on unmount
   useEffect(() => {
@@ -63,6 +65,6 @@ export function usePracticeDeck(userId: string) {
     nextItem,
     currentItem,
     direction,
-    hasGrammar,
+    grammar_id,
   };
 }

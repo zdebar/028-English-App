@@ -23,12 +23,9 @@ export function useArray(userId: string) {
     setReload,
   } = useFetch<UserItemLocal[]>(fetchPracticeDeck);
 
-  const currentItem = array?.[index];
-
   function wrapIndex(newIndex: number) {
-    const safeArray = array || [];
-    if (safeArray.length === 0) return 0;
-    return newIndex % safeArray.length;
+    if (!array || array.length === 0) return 0;
+    return newIndex % array.length;
   }
 
   function nextIndex() {
@@ -37,7 +34,7 @@ export function useArray(userId: string) {
 
   return {
     array: array || [],
-    currentItem,
+    currentItem: array?.[index] || null,
     index,
     nextIndex,
     loading,
