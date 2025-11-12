@@ -5,6 +5,7 @@ import AudioRecord from "@/database/models/audio-records";
 import UserItem from "@/database/models/user-items";
 import UserScore from "@/database/models/user-scores";
 import AudioMetadata from "@/database/models/audio-metadata";
+import "dexie-observable";
 
 export default class AppDB extends Dexie {
   user_items!: EntityTable<UserItem, "item_id">;

@@ -106,3 +106,25 @@ export function shortenDate(isoDate: string | null | undefined): string {
   validateISODateString(isoDate, "isoDate");
   return isoDate.split("T")[0];
 }
+
+/**
+ * Triggers a custom named event.
+ * @param userId
+ * @param eventName
+ * @returns
+ */
+export function triggerNamedEvent(eventName: string, userId: string) {
+  if (!userId) return;
+  const event = new CustomEvent(eventName, { detail: { userId } });
+  window.dispatchEvent(event);
+}
+
+/**
+ * Triggers a custom event indicating that user items have been updated.
+ * @param userId
+ * @param eventName
+ * @returns
+ */
+export function triggerUserItemsUpdatedEvent(userId: string) {
+  triggerNamedEvent("userItemsUpdated", userId);
+}

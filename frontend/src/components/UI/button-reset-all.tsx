@@ -4,14 +4,12 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ButtonAsync from "./button-async";
 import { useAuthStore } from "@/hooks/use-auth-store";
-import { useUserStore } from "@/hooks/use-user";
 
 /**
  * Button for resetting all user progress.
  */
 export default function ButtonResetAll() {
   const [isLoading, setIsLoading] = useState(false);
-  const reloadUserScore = useUserStore.getState().reloadUserScore;
   const { userId } = useAuthStore();
 
   const handleReset = async () => {
@@ -20,7 +18,6 @@ export default function ButtonResetAll() {
       if (!userId) return;
       if (await UserItem.resetsAllUserItems(userId)) {
         toast.success("Váš pokrok byl úspěšně resetován.");
-        await reloadUserScore(userId);
       } else {
         toast.info("Žádný pokrok k resetování.");
       }

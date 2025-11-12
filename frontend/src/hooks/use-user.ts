@@ -9,16 +9,20 @@ interface UserState {
   reloadUserScore: (userId: string) => Promise<void>;
 }
 
+declare global {
+  interface WindowEventMap {
+    userItemsUpdated: CustomEvent<{ userId: string }>;
+  }
+}
+
 /**
  * Zustand store to manage user statistics and score reloading.
  */
 export const useUserStore = create<UserState>()(
   devtools(
     persist(
-      (set) => ({
-        userStats: null,
-
-        reloadUserScore: async (userId: string) => {
+      (set) => {
+        const reloadUserScore = async (userId: string) => {
           if (!userId) return;
 
           try {
@@ -37,10 +41,22 @@ export const useUserStore = create<UserState>()(
               `Error reloading user score for userId: ${userId}`,
               error
             );
-            return;
           }
-        },
-      }),
+        };
+
+        // Add event listener for `userItemsUpdated` event
+        window.addEventListener("userItemsUpdated", (event) => {
+          const { userId } = event.detail;
+          if (userId) {
+            reloadUserScore(userId);
+          }
+        });
+
+        return {
+          userStats: null,
+          reloadUserScore,
+        };
+      },
       {
         name: "user-store",
       }
@@ -49,6 +65,13 @@ export const useUserStore = create<UserState>()(
   )
 );
 
+/**
+ * Hook to access user statistics.
+ */
 export const useUserStats = () => useUserStore((state) => state.userStats);
+
+/**
+ * Hook to manually trigger the reloadUserScore function.
+ */
 export const useReloadUserScore = () =>
   useUserStore((state) => state.reloadUserScore);

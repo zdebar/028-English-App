@@ -14,6 +14,8 @@ import {
   validateUserItemArray,
   validateUUID,
 } from "@/utils/validation.utils";
+import { triggerUserItemsUpdatedEvent } from "@/utils/database.utils";
+import UserScore from "./user-scores";
 
 export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   item_id!: number;
@@ -117,7 +119,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       };
     });
 
+    const userId = items[0]?.user_id;
     await db.user_items.bulkPut(updatedItems);
+    await UserScore.addItemCount(userId, updatedItems.length);
+
+    triggerUserItemsUpdatedEvent(userId);
     return true;
   }
 
@@ -208,6 +214,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         item.learned_at = UserItem.nullReplacementDate;
         item.progress = 0;
       });
+
+    triggerUserItemsUpdatedEvent(userId);
     return count > 0;
   }
 
@@ -234,6 +242,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         item.learned_at = this.nullReplacementDate;
         item.progress = 0;
       });
+
+    triggerUserItemsUpdatedEvent(userId);
   }
 
   /**
@@ -260,6 +270,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         item.progress = 0;
       });
 
+    triggerUserItemsUpdatedEvent(userId);
     return true;
   }
 
@@ -310,6 +321,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
     // Step 4: Update local IndexedDB with the fetched data
     await db.user_items.bulkPut(updatedUserItems);
+    triggerUserItemsUpdatedEvent(userId);
     return true;
   }
 }
