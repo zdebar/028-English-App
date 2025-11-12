@@ -34,8 +34,8 @@ export default function GrammarOverview() {
     const grammar_id = grammarArray?.[currentIndex]?.id;
     if (typeof grammar_id === "number" && userId) {
       await UserItem.resetGrammarItems(userId, grammar_id);
+      setReload(true);
     }
-    setReload(true);
   };
 
   return (

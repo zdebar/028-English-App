@@ -33,9 +33,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   learned_at!: string;
   mastered_at!: string;
 
-  static readonly nullReplacementDate: string =
-    config.database.nullReplacementDate;
-
   /**
    * Gets a practice deck of user items for the logged-in user.
    * @param userId the ID of the logged-in user.
@@ -55,8 +52,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const itemsWithNextAt: UserItemLocal[] = await db.user_items
       .where("[user_id+mastered_at+next_at]")
       .between(
-        [userId, UserItem.nullReplacementDate, "0000-01-01T00:00:00.000Z"],
-        [userId, UserItem.nullReplacementDate, now]
+        [
+          userId,
+          config.database.nullReplacementDate,
+          "0000-01-01T00:00:00.000Z",
+        ],
+        [userId, config.database.nullReplacementDate, now]
       )
       .limit(deckSize)
       .toArray();
@@ -71,8 +72,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .where("[user_id+mastered_at+next_at]")
       .equals([
         userId,
-        UserItem.nullReplacementDate,
-        UserItem.nullReplacementDate,
+        config.database.nullReplacementDate,
+        config.database.nullReplacementDate,
       ])
       .limit(deckSize - itemsWithNextAt.length)
       .sortBy("sequence");
@@ -102,17 +103,17 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         progress: item.progress,
         next_at: getNextAt(item.progress),
         started_at:
-          item.started_at === UserItem.nullReplacementDate
+          item.started_at === config.database.nullReplacementDate
             ? currentDateTime
             : item.started_at,
         updated_at: currentDateTime,
         learned_at:
-          item.learned_at === UserItem.nullReplacementDate &&
+          item.learned_at === config.database.nullReplacementDate &&
           item.progress > config.progress.learnedAtThreshold
             ? currentDateTime
             : item.learned_at,
         mastered_at:
-          item.mastered_at === UserItem.nullReplacementDate &&
+          item.mastered_at === config.database.nullReplacementDate &&
           item.progress > config.progress.masteredAtThreshold
             ? currentDateTime
             : item.mastered_at,
@@ -143,7 +144,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .where("[user_id+learned_at]")
       .between(
         [userId, Dexie.minKey],
-        [userId, UserItem.nullReplacementDate],
+        [userId, config.database.nullReplacementDate],
         true,
         false
       )
@@ -172,7 +173,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .where("[user_id+started_at+grammar_id]")
       .between(
         [userId, Dexie.minKey, nullReplacementNumber],
-        [userId, UserItem.nullReplacementDate, nullReplacementNumber],
+        [userId, config.database.nullReplacementDate, nullReplacementNumber],
         true,
         false
       )
@@ -188,7 +189,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .where("[user_id+started_at]")
       .between(
         [userId, Dexie.minKey],
-        [userId, UserItem.nullReplacementDate],
+        [userId, config.database.nullReplacementDate],
         true,
         false
       )
@@ -208,11 +209,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .where("user_id")
       .equals(userId)
       .modify((item: UserItemLocal) => {
-        item.started_at = UserItem.nullReplacementDate;
-        item.next_at = UserItem.nullReplacementDate;
-        item.mastered_at = UserItem.nullReplacementDate;
+        item.started_at = config.database.nullReplacementDate;
+        item.next_at = config.database.nullReplacementDate;
+        item.mastered_at = config.database.nullReplacementDate;
         item.updated_at = new Date().toISOString();
-        item.learned_at = UserItem.nullReplacementDate;
+        item.learned_at = config.database.nullReplacementDate;
         item.progress = 0;
       });
 
@@ -237,11 +238,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .where("[user_id+grammar_id]")
       .equals([userId, grammarId])
       .modify((item: UserItemLocal) => {
-        item.started_at = this.nullReplacementDate;
-        item.next_at = this.nullReplacementDate;
-        item.mastered_at = this.nullReplacementDate;
+        item.started_at = config.database.nullReplacementDate;
+        item.next_at = config.database.nullReplacementDate;
+        item.mastered_at = config.database.nullReplacementDate;
         item.updated_at = new Date().toISOString();
-        item.learned_at = this.nullReplacementDate;
+        item.learned_at = config.database.nullReplacementDate;
         item.progress = 0;
       });
 
@@ -265,11 +266,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .where("[user_id+item_id]")
       .equals([userId, itemId])
       .modify((item: UserItemLocal) => {
-        item.started_at = this.nullReplacementDate;
-        item.next_at = this.nullReplacementDate;
-        item.mastered_at = this.nullReplacementDate;
+        item.started_at = config.database.nullReplacementDate;
+        item.next_at = config.database.nullReplacementDate;
+        item.mastered_at = config.database.nullReplacementDate;
         item.updated_at = new Date().toISOString();
-        item.learned_at = this.nullReplacementDate;
+        item.learned_at = config.database.nullReplacementDate;
         item.progress = 0;
       });
 
@@ -290,7 +291,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .where("[user_id+updated_at]")
       .between(
         [userId, Dexie.minKey],
-        [userId, this.nullReplacementDate],
+        [userId, config.database.nullReplacementDate],
         true,
         false
       )
