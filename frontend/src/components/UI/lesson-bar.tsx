@@ -27,14 +27,14 @@ export default function ProgressBar({
   return (
     <div className="relative mx-auto max-w-card w-full">
       {/* Popisky */}
-      <div className="absolute top-0 left-0 w-full flex justify-between z-10 pt-1 px-2 font-body font-bold text-sm text-center text-light dark:text-dark">
+      <div className="absolute top-0 left-0 w-full flex  justify-between z-10 pt-1 px-2 font-body font-bold text-sm text-center text-light">
         <span>Lekce: {lessonNumber}</span>
         <span>+ {validTodayCount}</span>
       </div>
 
       {/* Progress bar */}
       <div
-        className="relative h-attribute overflow-hidden "
+        className="relative h-attribute overflow-hidden bg-white"
         role="progressbar"
         aria-valuenow={validPreviousCount + validTodayCount}
         aria-valuemin={0}
@@ -43,12 +43,12 @@ export default function ProgressBar({
       >
         {/* Celkový pokrok */}
         <div
-          className="absolute top-0 left-0 h-full bg-[#F7D565] dark:bg-[#213563]"
+          className="absolute top-0 left-0 h-full bg-notice-dark dark:bg-[#F7D565]"
           style={{ width: `${previousWidth + todayWidth}%` }}
         ></div>
         {/* Předchozí pokrok */}
         <div
-          className="absolute top-0 left-0 h-full dark:bg-background-dark bg-background-light"
+          className="absolute top-0 left-0 h-full bg-[#42BDDB] dark:bg-[#F7AE25]"
           style={{ width: `${previousWidth}%` }}
         ></div>
         {/* Dělení */}
