@@ -10,9 +10,11 @@ import SettingProperty from "@/components/UI/setting-property";
 import { shortenDate } from "@/utils/database.utils";
 import { useFetch } from "@/hooks/use-fetch";
 import { useAuthStore } from "@/hooks/use-auth-store";
+import { useUserStore } from "@/hooks/use-user";
 
 export default function VocabularyOverview() {
   const { userId } = useAuthStore();
+  const reloadUserScore = useUserStore.getState().reloadUserScore;
 
   const fetchVocabulary = useCallback(async () => {
     if (userId) {
@@ -24,7 +26,7 @@ export default function VocabularyOverview() {
   const {
     data: words,
     error,
-    isLoading,
+    loading,
   } = useFetch<UserItemLocal[]>(fetchVocabulary);
 
   const [filteredWords, setFilteredWords] = useState<UserItemLocal[] | null>(
@@ -57,10 +59,11 @@ export default function VocabularyOverview() {
     const itemId = selectedWord?.item_id;
     if (typeof itemId === "number" && userId) {
       await UserItem.resetUserItemById(userId, itemId);
+      await reloadUserScore(userId);
     }
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
       <p className="text-left h-input flex justify-start pl-4">Načítání...</p>
     );

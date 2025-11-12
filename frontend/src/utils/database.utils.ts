@@ -99,7 +99,7 @@ export async function fetchStorage(
  * @param isoDate ISO date string
  * @returns Shortened date string or "není k dispozici" if date is undefined or null replacement date.
  */
-export function shortenDate(isoDate: string): string {
+export function shortenDate(isoDate: string | null | undefined): string {
   if (!isoDate || isoDate === config.database.nullReplacementDate)
     return "není k dispozici";
 

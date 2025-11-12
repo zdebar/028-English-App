@@ -21,7 +21,6 @@ import { supabaseInstance } from "@/config/supabase.config";
 export default function App() {
   const { theme, chooseTheme } = useThemeStore();
   const { userId, setSession } = useAuthStore();
-  const showFooterRoutes = ["/"];
 
   useEffect(() => {
     supabaseInstance.auth
@@ -76,7 +75,7 @@ export default function App() {
           />
         </Routes>
       </div>
-      {showFooterRoutes.includes(location.pathname) && <Footer />}
+      <Footer />
     </div>
   );
 }

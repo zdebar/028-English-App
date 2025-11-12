@@ -69,7 +69,6 @@ export default class AudioRecord
         try {
           // Check if the archive has already been fetched
           if (await AudioMetadata.isFetched(archiveName)) {
-            console.log(`Archive ${archiveName} already fetched.`);
             return;
           }
 

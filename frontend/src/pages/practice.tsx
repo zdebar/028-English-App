@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import VolumeSlider from "@/components/UI/volume-slider";
 import ButtonRectangular from "@/components/UI/button-rectangular";
 import {
@@ -30,6 +30,9 @@ export default function Practice() {
   const { playAudio, stopAudio, setVolume, audioError, setAudioError } =
     useAudioManager(array);
 
+  const isAudioDisabled =
+    (direction && !revealed) || !currentItem?.audio || audioError;
+
   // Handle advancing to next item
   const handleNext = useCallback(
     async (progressIncrement: number = 0) => {
@@ -43,32 +46,21 @@ export default function Practice() {
 
   // Play audio for the current item
   const playAudioForItem = useCallback(() => {
-    // TODO ISNT THIS OVERKILL
     if (currentItem?.audio) {
       playAudio(currentItem.audio);
     }
   }, [currentItem, playAudio]);
 
-  // Derived state for audio
-  const isAudioDisabled = useMemo(
-    () => (direction && !revealed) || !currentItem?.audio || audioError,
-    [direction, revealed, currentItem, audioError]
-  );
-
   // Auto-play audio on new item if not in reading direction
   useEffect(() => {
-    if (!direction && currentItem && currentItem?.audio) {
+    if (!direction && currentItem?.audio) {
       setTimeout(() => playAudio(currentItem.audio!), 500);
     }
   }, [currentItem, direction, playAudio]);
 
   // Handle audio errors and retries
   useEffect(() => {
-    if ((currentItem && !currentItem?.audio) || audioError) {
-      setAudioError(true);
-    } else {
-      setAudioError(false);
-    }
+    setAudioError((currentItem && !currentItem?.audio) || audioError);
   }, [audioError, currentItem, setAudioError]);
 
   if (!array || !currentItem) {
@@ -126,7 +118,7 @@ export default function Practice() {
       </div>
 
       {/* Practice Controls */}
-      <div id="practice-controls" className="flex flex-col gap-2">
+      <div id="practice-controls" className="flex flex-col gap-1">
         <div className="flex gap-1">
           <ButtonRectangular
             onClick={() => setGrammarVisible(true)}

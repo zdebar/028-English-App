@@ -9,9 +9,11 @@ import OverviewCard from "@/components/UI/overview-card";
 import { useFetch } from "@/hooks/use-fetch";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import DOMPurify from "dompurify";
+import { useUserStore } from "@/hooks/use-user";
 
 export default function GrammarOverview() {
   const { userId } = useAuthStore();
+  const reloadUserScore = useUserStore.getState().reloadUserScore;
 
   const fetchGrammarList = useCallback(async () => {
     if (userId) {
@@ -34,6 +36,7 @@ export default function GrammarOverview() {
     const grammar_id = grammarArray?.[currentIndex]?.id;
     if (typeof grammar_id === "number" && userId) {
       await UserItem.resetGrammarItems(userId, grammar_id);
+      await reloadUserScore(userId);
     }
     setReload(true);
   };
