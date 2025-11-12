@@ -28,7 +28,7 @@ export default function Practice() {
   const { index, array, nextItem, currentItem, direction, grammar_id } =
     usePracticeDeck(userId!);
   const { playAudio, stopAudio, setVolume, audioError, setAudioError } =
-    useAudioManager(array);
+    useAudioManager(array || []);
 
   const isAudioDisabled =
     (direction && !revealed) || !currentItem?.audio || audioError;
