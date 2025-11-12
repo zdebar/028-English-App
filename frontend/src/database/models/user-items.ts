@@ -208,6 +208,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .where("user_id")
       .equals(userId)
       .modify((item: UserItemLocal) => {
+        item.started_at = UserItem.nullReplacementDate;
         item.next_at = UserItem.nullReplacementDate;
         item.mastered_at = UserItem.nullReplacementDate;
         item.updated_at = new Date().toISOString();
@@ -236,6 +237,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .where("[user_id+grammar_id]")
       .equals([userId, grammarId])
       .modify((item: UserItemLocal) => {
+        item.started_at = this.nullReplacementDate;
         item.next_at = this.nullReplacementDate;
         item.mastered_at = this.nullReplacementDate;
         item.updated_at = new Date().toISOString();
@@ -263,6 +265,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .where("[user_id+item_id]")
       .equals([userId, itemId])
       .modify((item: UserItemLocal) => {
+        item.started_at = this.nullReplacementDate;
         item.next_at = this.nullReplacementDate;
         item.mastered_at = this.nullReplacementDate;
         item.updated_at = new Date().toISOString();
@@ -284,7 +287,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
     // Step 1: Fetch all local user items from IndexedDB
     const localUserItems = await db.user_items
-      .where("[user_id+started_at]")
+      .where("[user_id+updated_at]")
       .between(
         [userId, Dexie.minKey],
         [userId, this.nullReplacementDate],

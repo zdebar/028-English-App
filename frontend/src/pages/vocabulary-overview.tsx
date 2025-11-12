@@ -25,6 +25,7 @@ export default function VocabularyOverview() {
     data: words,
     error,
     loading,
+    setReload,
   } = useFetch<UserItemLocal[]>(fetchVocabulary);
 
   const [filteredWords, setFilteredWords] = useState<UserItemLocal[] | null>(
@@ -57,6 +58,7 @@ export default function VocabularyOverview() {
     const itemId = selectedWord?.item_id;
     if (typeof itemId === "number" && userId) {
       await UserItem.resetUserItemById(userId, itemId);
+      setReload(true);
     }
   };
 
