@@ -4,19 +4,12 @@
 
 A personal English learning app designed with simplicity similar to ANKI, but with a prebuilt English learning data. This project is clean continuation of project 020-flash-card-app-typescript.
 
-I believe many features in existing English learning apps can hinder progress. When learners are presented with options, they often choose what feels easiest, like games or reading. However, the most critical aspects of learning any language are **listening** and **speaking**. This app focuses exclusively on fast listening and speaking drill via flashcards.
+I believe many features in existing English learning apps can hinder progress. When learners are presented with options, they often choose what feels easiest, not what is most efficient. However, the most critical aspects of learning any language are **listening** and **speaking**. This app focuses exclusively on fast listening and speaking drill via flashcards.
 
 ### Goals of the App:
 
-1. **Maximize Practice Density**  
-   Drill as many practice attempts as possible within a given time. This is best achieved with flashcards and a continuous sequence of items without interruptions.
-
-2. **Alternating Practice in Both Directions**  
-   Listening and speaking are the most important parts of language learning. Flashcards alternate between two directions:
-
-   - Listening to English and translating to Czech.
-   - Reading Czech and translating to English.
-
+1. **Maximize Practice Density**
+2. **Exclusive listening and speaking from beginning**
 3. **Spaced Repetition System (SRS)**  
    With dense practice repetition, each item is repeated at least five times on the first day.
 

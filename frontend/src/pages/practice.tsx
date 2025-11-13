@@ -76,7 +76,7 @@ export default function Practice() {
     <div className="card-height card-width">
       {/* Item Card */}
       <div
-        className={`border border-dashed relative flex h-full flex-col items-center justify-between p-4 ${
+        className={`border border-dashed relative flex grow flex-col items-center justify-between p-4 ${
           !isAudioDisabled && "color-audio"
         }`}
         onClick={() => {

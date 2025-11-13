@@ -49,10 +49,10 @@ export default function App() {
   }, [userId]);
 
   return (
-    <div className="mx-auto flex h-screen max-w-container w-full flex-col justify-between">
+    <div className="mx-auto min-h-screen max-w-container flex flex-col">
       <ToastContainer position="top-right" autoClose={5000} />
       <Header />
-      <div className="relative flex h-full grow flex-col  gap-4 items-center ">
+      <div className="relative grow flex flex-col items-center gap-4">
         <Routes>
           <Route path="/*" element={<Home />} />
 
