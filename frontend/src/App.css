@@ -118,11 +118,11 @@
 
   /** CARD STYLES **/
   .card-width {
-    @apply w-full max-w-card min-w-card flex  flex-col gap-1 justify-start;
+    @apply w-full max-w-card min-w-card flex grow flex-col gap-1 justify-start;
   }
 
   .card-height {
-    @apply h-full max-h-card min-h-card;
+    @apply h-full max-h-card min-h-card grow;
   }
 
   /** HEADER STYLES **/
