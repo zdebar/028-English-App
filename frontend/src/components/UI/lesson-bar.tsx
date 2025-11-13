@@ -57,7 +57,7 @@ export default function ProgressBar({
           return (
             <div
               key={index}
-              className="absolute top-0 h-full border-l dark:border-gray-300 border-gray-700"
+              className="absolute top-0 h-full border-l  border-gray-700"
               style={{ left: `${position}%` }}
             ></div>
           );
