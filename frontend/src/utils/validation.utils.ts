@@ -83,9 +83,18 @@ export function validateISODateString(value: string, name: string): void {
     );
   }
 
+  // Parse the date components
+  const [datePart] = value.split("T");
+  const [year, month, day] = datePart.split("-").map(Number);
+
+  // Create a Date object and validate the components
   const date = new Date(value);
-  if (isNaN(date.getTime())) {
-    throw new Error(`${name}: "${value}"  must be a valid calendar date.`);
+  if (
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() + 1 !== month || // getUTCMonth() is zero-based
+    date.getUTCDate() !== day
+  ) {
+    throw new Error(`${name}: "${value}" must be a valid calendar date.`);
   }
 }
 
