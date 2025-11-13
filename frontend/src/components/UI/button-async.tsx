@@ -30,6 +30,7 @@ export default function ButtonAsync({
       <ButtonRectangular
         onClick={() => setIsModalOpen(true)}
         disabled={isLoading || disabled}
+        className="grow-0"
       >
         <p className={`overlay-hidden ${buttonTextStyle}`}>
           {isLoading ? disabledMessage : message}

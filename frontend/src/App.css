@@ -109,7 +109,10 @@
 @layer components {
   /** BUTTON STYLES **/
   .button-rectangular {
-    @apply h-button grow font-body font-bold tracking-wide;
+    @apply h-button font-body font-bold  tracking-wide;
+    flex-grow: 1;
+    flex-basis: auto;
+    flex-shrink: 0;
   }
 
   .button-header {

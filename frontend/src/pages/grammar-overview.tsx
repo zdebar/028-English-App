@@ -57,7 +57,7 @@ export default function GrammarOverview() {
             grammarArray.map((grammar, index) => (
               <ButtonRectangular
                 key={grammar.id}
-                className="text-left h-input flex justify-start p-4"
+                className="text-left h-input flex justify-start p-4 grow-0"
                 onClick={() => {
                   setCurrentIndex(index);
                   setCardVisible(true);

@@ -9,10 +9,16 @@ export default function Profile() {
   return (
     <div className="card-width">
       <ButtonResetAll />
-      <ButtonRectangular onClick={() => navigate("/grammar-overview")}>
+      <ButtonRectangular
+        onClick={() => navigate("/grammar-overview")}
+        className="grow-0"
+      >
         <p className="text-button">Přehled gramatiky</p>
       </ButtonRectangular>
-      <ButtonRectangular onClick={() => navigate("/vocabulary-overview")}>
+      <ButtonRectangular
+        onClick={() => navigate("/vocabulary-overview")}
+        className="grow-0"
+      >
         <p className="text-button">Přehled slovíček</p>
       </ButtonRectangular>
       <ButtonSignout />
