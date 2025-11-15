@@ -2,13 +2,6 @@ import type { UserItemLocal } from "@/types/local.types";
 import type { UserItemSQL } from "@/types/data.types";
 import { supabaseInstance } from "@/config/supabase.config";
 import config from "@/config/config";
-import {
-  validateNonEmptyString,
-  validateISODateString,
-  validateShortDateString,
-  validateUserItemLocal,
-  validateUUID,
-} from "@/utils/validation.utils";
 
 /**
  * Converts a local user item to SQL format, replacing null replacement dates with null.
@@ -16,14 +9,13 @@ import {
  * @returns Item in format suitable or PostgreSQL.
  */
 export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
-  validateUserItemLocal(localItem);
-
   const {
     user_id,
     item_id,
     progress,
     started_at,
     updated_at,
+    deleted_at,
     next_at,
     learned_at,
     mastered_at,
@@ -35,8 +27,9 @@ export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
     user_id,
     item_id,
     progress,
-    started_at: started_at === nullReplacementDate ? null : started_at,
-    updated_at: updated_at === nullReplacementDate ? null : updated_at,
+    started_at,
+    updated_at,
+    deleted_at,
     next_at: next_at === nullReplacementDate ? null : next_at,
     learned_at: learned_at === nullReplacementDate ? null : learned_at,
     mastered_at: mastered_at === nullReplacementDate ? null : mastered_at,
@@ -51,9 +44,6 @@ export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
  * @throws Error if inputs are invalid.
  */
 export function generateUserScoreId(userId: string, date: string): string {
-  validateUUID(userId, "userId");
-  validateShortDateString(date, "date");
-
   return `${userId}-${date}`;
 }
 
@@ -62,7 +52,18 @@ export function generateUserScoreId(userId: string, date: string): string {
  * @returns {string} The current date in YYYY-MM-DD format.
  */
 export function getTodayShortDate(): string {
-  return new Date().toISOString().split("T")[0];
+  const today = new Date();
+  return today.toLocaleDateString("en-CA");
+}
+
+/**
+ * Returns a date string converted to local time string.
+ * @param date
+ * @returns
+ */
+export function getLocalDateFromUTC(date: string): string {
+  const localDate = new Date(date);
+  return localDate.toLocaleString();
 }
 
 /**
@@ -76,9 +77,6 @@ export async function fetchStorage(
   bucketName: string,
   dataFile: string
 ): Promise<Blob | null> {
-  validateNonEmptyString(bucketName, "bucketName");
-  validateNonEmptyString(dataFile, "dataFile");
-
   const cacheBuster = `?t=${Date.now()}`;
   const filePath = dataFile.replace(/^\//, "") + cacheBuster;
 
@@ -103,7 +101,6 @@ export function shortenDate(isoDate: string | null | undefined): string {
   if (!isoDate || isoDate === config.database.nullReplacementDate)
     return "není k dispozici";
 
-  validateISODateString(isoDate, "isoDate");
   return isoDate.split("T")[0];
 }
 
@@ -127,4 +124,17 @@ export function triggerNamedEvent(eventName: string, userId: string) {
  */
 export function triggerUserItemsUpdatedEvent(userId: string) {
   triggerNamedEvent("userItemsUpdated", userId);
+}
+
+/**
+ * Resets a user item to its initial state.
+ * @param item
+ */
+export function resetUserItem(item: UserItemLocal): void {
+  item.started_at = config.database.nullReplacementDate;
+  item.next_at = config.database.nullReplacementDate;
+  item.mastered_at = config.database.nullReplacementDate;
+  item.updated_at = new Date().toISOString();
+  item.learned_at = config.database.nullReplacementDate;
+  item.progress = 0;
 }

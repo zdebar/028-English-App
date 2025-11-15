@@ -26,8 +26,8 @@ CREATE TABLE IF NOT EXISTS items (
   audio TEXT, -- audio file name, without extension
   sequence INTEGER NOT NULL CHECK (sequence >= 0),
   grammar_id INTEGER, 
-  deleted_at TIMESTAMP DEFAULT NULL,
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  deleted_at TIMESTAMP DEFAULT NULL,
   FOREIGN KEY (grammar_id) REFERENCES grammar(id) ON DELETE SET NULL
 );
 
@@ -38,10 +38,10 @@ CREATE TABLE IF NOT EXISTS user_items (
   progress INTEGER DEFAULT 0 CHECK (progress >= 0),
   started_at TIMESTAMP NOT NULL DEFAULT NOW(), 
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(), 
+  deleted_at TIMESTAMP,
   next_at TIMESTAMP, 
   learned_at TIMESTAMP,
   mastered_at TIMESTAMP,
-  deleted_at TIMESTAMP,
   PRIMARY KEY (user_id, item_id),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE

@@ -28,14 +28,12 @@ export default class AudioMetadata
    * @param archiveName the name of the fetched audio archive
    * @returns true if the operation was successful, otherwise false
    */
-  static async markAsFetched(archiveName: string): Promise<boolean> {
+  static async markAsFetched(archiveName: string): Promise<void> {
     validateNonEmptyString(archiveName, "archiveName");
 
-    const fetchedAt = new Date().toISOString();
     await db.audio_metadata.put({
       archive_name: archiveName,
-      fetched_at: fetchedAt,
+      fetched_at: new Date().toISOString(),
     });
-    return !!fetchedAt;
   }
 }

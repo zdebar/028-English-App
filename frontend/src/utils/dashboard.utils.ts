@@ -1,8 +1,4 @@
 import config from "@/config/config";
-import {
-  validateLessonSize,
-  validateNonNegativeInteger,
-} from "@/utils/validation.utils";
 import type { LessonsLocal } from "@/types/local.types";
 
 /**
@@ -12,9 +8,6 @@ import type { LessonsLocal } from "@/types/local.types";
  * @throws Error if countNotToday or lessonSize is invalid.
  */
 export function getPreviousCount(countNotToday: number): number {
-  validateNonNegativeInteger(countNotToday, "countNotToday");
-  validateLessonSize();
-
   return countNotToday % config.lesson.lessonSize;
 }
 
@@ -24,9 +17,6 @@ export function getPreviousCount(countNotToday: number): number {
  * @returns Returns last started lesson number before today.
  */
 export function getLessonStarted(countNotToday: number): number {
-  validateNonNegativeInteger(countNotToday, "countNotToday");
-  validateLessonSize();
-
   return Math.floor(countNotToday / config.lesson.lessonSize) + 1;
 }
 
@@ -40,10 +30,6 @@ export function getTodayLessonItems(
   previousCount: number,
   todayCount: number
 ): number[] {
-  validateNonNegativeInteger(previousCount, "previousCount");
-  validateNonNegativeInteger(todayCount, "todayCount");
-  validateLessonSize();
-
   const lessonCounts: number[] = [];
   const lessonSize = config.lesson.lessonSize;
 
@@ -75,10 +61,6 @@ export function getTodayLessonItems(
  * @returns Array of LessonsLocal objects.
  */
 export function getLessonProgress(all: number, today: number): LessonsLocal[] {
-  validateNonNegativeInteger(all, "all");
-  validateNonNegativeInteger(today, "today");
-  validateLessonSize();
-
   if (all < today) {
     throw new Error("'all' must be greater than or equal to 'today'.");
   }

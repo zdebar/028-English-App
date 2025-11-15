@@ -1,31 +1,39 @@
+import type { UUID } from "crypto";
+
 export interface UserItemLocal {
   item_id: number;
-  user_id: string;
+  user_id: UUID;
   czech: string;
   english: string;
   pronunciation: string;
   audio: string | null;
   sequence: number;
-  grammar_id: number;
+  grammar_id: number; // null replaced with config.database.nullReplacementNumber
   progress: number;
-  started_at: string; // ISO 8601: "2025-10-24T12:00:00Z"
-  updated_at: string; // ISO 8601: "2025-10-25T12:00:00Z"
-  next_at: string; // ISO 8601: "2025-10-26T12:00:00Z"
-  learned_at: string; // ISO 8601: "2025-10-27T12:00:00Z"
-  mastered_at: string; // ISO 8601: "2025-10-28T12:00:00Z"
+  started_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  next_at: string; // nulls replaced with config.database.nullReplacementDate
+  learned_at: string; // nulls replaced with config.database.nullReplacementDate
+  mastered_at: string; // nulls replaced with config.database.nullReplacementDate
 }
 
 export interface GrammarLocal {
-  id: number; // Unique identifier for the grammar entry
-  name: string; // Name of the grammar topic
-  note: string; // Description or note about the grammar topic
+  id: number;
+  name: string;
+  note: string;
+  updated_at: string;
+  deleted_at: string | null;
 }
 
 export interface UserScoreLocal {
-  id: string; // uuid for the user
-  user_id: string; // Foreign key referencing the user
-  date: string; // Date of the score in ISO format (e.g., "YYYY-MM-DD")
-  item_count: number; // Number of items learned or completed on this date
+  id: string;
+  user_id: UUID;
+  date: string;
+  item_count: number;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
 }
 
 export interface UserInfoLocal {
@@ -45,6 +53,12 @@ export interface AudioMetadataLocal {
   fetched_at: string; // Timestamp when the archive was fetched
 }
 
+export interface MetadataLocal {
+  table_name: string; // Name of the table (e.g., "user_items", "grammar")
+  user_id: UUID; // UUID of the user associated with the data
+  synced_at: string; // Timestamp of the last synchronization
+}
+
 export interface UserStatsLocal {
   learnedCountToday?: number;
   learnedCount?: number;
@@ -56,3 +70,11 @@ export interface LessonsLocal {
   previousCount: number;
   todayCount: number;
 }
+
+export const TableName = {
+  Grammar: "grammar",
+  UserScores: "user_scores",
+  UserItems: "user_items",
+} as const;
+
+export type TableName = (typeof TableName)[keyof typeof TableName];

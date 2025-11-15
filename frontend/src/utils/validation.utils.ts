@@ -37,25 +37,6 @@ export function validateLessonSize(): void {
 }
 
 /**
- * Validates that an array contains valid UserItemLocal objects.
- * @param items The array to validate.
- * @throws Error if the array or its elements are invalid.
- */
-export function validateUserItemArray(items: UserItemLocal[]): void {
-  if (!Array.isArray(items)) {
-    throw new Error("items must be an array.");
-  }
-
-  items.forEach((item, index) => {
-    if (item == null || typeof item !== "object") {
-      throw new Error(`Item at index ${index} must be a valid object.`);
-    }
-    validateNonNegativeInteger(item.progress, `items[${index}].progress`);
-    validateNonNegativeInteger(item.sequence, `items[${index}].sequence`);
-  });
-}
-
-/**
  * Validates that a value is a non-empty string.
  * @param value The value to validate.
  * @param name The name of the parameter (used in error messages).
@@ -166,23 +147,20 @@ export function validateUserItemLocal(localItem: UserItemLocal): void {
     throw new Error("localItem must be a valid UserItemLocal object.");
   }
 
-  validateNonEmptyString(localItem.user_id, "localItem.user_id");
+  // Additional validations for specific fields
+  validateUUID(localItem.user_id, "localItem.user_id");
   validatePositiveInteger(localItem.item_id, "localItem.item_id");
   validateNonNegativeInteger(localItem.progress, "localItem.progress");
 
-  if (localItem.started_at) {
-    validateISODateString(localItem.started_at, "localItem.started_at");
-  }
-  if (localItem.updated_at) {
-    validateISODateString(localItem.updated_at, "localItem.updated_at");
-  }
-  if (localItem.next_at) {
-    validateISODateString(localItem.next_at, "localItem.next_at");
-  }
-  if (localItem.learned_at) {
-    validateISODateString(localItem.learned_at, "localItem.learned_at");
-  }
-  if (localItem.mastered_at) {
-    validateISODateString(localItem.mastered_at, "localItem.mastered_at");
+  // Validate date fields
+  validateISODateString(localItem.started_at, "localItem.started_at");
+  validateISODateString(localItem.updated_at, "localItem.updated_at");
+  validateISODateString(localItem.next_at, "localItem.next_at");
+  validateISODateString(localItem.learned_at, "localItem.learned_at");
+  validateISODateString(localItem.mastered_at, "localItem.mastered_at");
+
+  // Special case: Validate `deleted_at` only if it exists
+  if (localItem.deleted_at) {
+    validateISODateString(localItem.deleted_at, "localItem.deleted_at");
   }
 }
