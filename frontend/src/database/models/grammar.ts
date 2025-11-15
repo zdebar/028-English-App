@@ -36,7 +36,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * Fetches the list of grammar that the user has started.
    * @param userId - The user ID.
    * @returns Array of started GrammarLocal records, empty array in case of none found.
-   * @throws Error
+   * @throws Error if operation fails.
    */
   static async getStartedGrammarList(userId: UUID): Promise<GrammarLocal[]> {
     const startedUserItems: UserItemLocal[] = await db.user_items
@@ -65,61 +65,55 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * Synchronizes grammar data from Supabase to the local IndexedDB.
    * In case of an error during fetching, it logs the error to the console, but does not throw.
    * @returns The number of grammar records synced.
+   * @throws Error if any step of the synchronization process fails.
    */
   static async syncGrammarData(): Promise<number> {
-    try {
-      // Step 1: Get the last synced date for the grammar table
-      const lastSyncedAt = await Metadata.getSyncedDate(TableName.Grammar);
+    // Step 1: Get the last synced date for the grammar table
+    const lastSyncedAt = await Metadata.getSyncedDate(TableName.Grammar);
 
-      // Step 2: Fetch synced server time
-      const { data: serverTimeResponse, error: serverTimeError } =
-        await supabaseInstance.rpc("server_time");
-      if (serverTimeError) {
-        throw new Error(
-          `Failed to fetch server time: ${serverTimeError.message}`
-        );
-      }
-      const serverTime = serverTimeResponse || new Date().toISOString();
-
-      // Step 3: Fetch grammar records from Supabase newer than the last synced date
-      const { data: grammar, error } = await supabaseInstance
-        .from("grammar")
-        .select("id, name, note, updated_at, deleted_at")
-        .gt("updated_at", lastSyncedAt);
-
-      if (error) {
-        throw new Error(`Failed to fetch data from supabase: ${error.message}`);
-      }
-
-      // Step 4: Split the fetched grammar records by deleted_at
-
-      if (grammar && grammar.length > 0) {
-        const toDelete: number[] = [];
-        const toUpsert: GrammarLocal[] = [];
-        grammar.forEach((item) => {
-          if (item.deleted_at === null) {
-            toUpsert.push(item);
-          } else {
-            toDelete.push(item.id);
-          }
-        });
-
-        if (toDelete.length > 0) {
-          await db.grammar.bulkDelete(toDelete);
-        }
-
-        if (toUpsert.length > 0) {
-          await db.grammar.bulkPut(toUpsert);
-        }
-      }
-
-      // Step 5: Update the metadata table with the new sync time
-      await Metadata.markAsSynced(TableName.Grammar, serverTime);
-
-      return grammar.length;
-    } catch (error) {
-      console.error("Error syncing grammar data:", error);
-      throw error;
+    // Step 2: Fetch synced server time
+    const { data: serverTimeResponse, error: serverTimeError } =
+      await supabaseInstance.rpc("server_time");
+    if (serverTimeError) {
+      console.error(`Failed to fetch server time: ${serverTimeError.message}`);
     }
+    const serverTime = serverTimeResponse || new Date().toISOString();
+
+    // Step 3: Fetch grammar records from Supabase newer than the last synced date
+    const { data: grammar, error } = await supabaseInstance
+      .from("grammar")
+      .select("id, name, note, updated_at, deleted_at")
+      .gt("updated_at", lastSyncedAt);
+
+    if (error) {
+      throw new Error(`Failed to fetch data from supabase: ${error.message}`);
+    }
+
+    // Step 4: Split the fetched grammar records by deleted_at
+
+    if (grammar && grammar.length > 0) {
+      const toDelete: number[] = [];
+      const toUpsert: GrammarLocal[] = [];
+      grammar.forEach((item) => {
+        if (item.deleted_at === null) {
+          toUpsert.push(item);
+        } else {
+          toDelete.push(item.id);
+        }
+      });
+
+      if (toDelete.length > 0) {
+        await db.grammar.bulkDelete(toDelete);
+      }
+
+      if (toUpsert.length > 0) {
+        await db.grammar.bulkPut(toUpsert);
+      }
+    }
+
+    // Step 5: Update the metadata table with the new sync time
+    await Metadata.markAsSynced(TableName.Grammar, serverTime);
+
+    return grammar.length;
   }
 }

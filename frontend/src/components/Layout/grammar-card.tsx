@@ -13,14 +13,11 @@ export default function GrammarCard({
   grammar_id,
   onClose,
 }: {
-  grammar_id: number | null;
+  grammar_id: number;
   onClose: () => void;
 }) {
   const fetchGrammar = useCallback(() => {
-    if (grammar_id !== null) {
-      return Grammar.getGrammarById(grammar_id);
-    }
-    return Promise.reject("Invalid grammar ID");
+    return Grammar.getGrammarById(grammar_id);
   }, [grammar_id]);
 
   const { data: grammar, error, loading } = useFetch(fetchGrammar);

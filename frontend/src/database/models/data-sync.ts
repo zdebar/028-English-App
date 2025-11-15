@@ -8,10 +8,10 @@ import type { UUID } from "crypto";
 export async function dataSync(userId: UUID): Promise<boolean> {
   try {
     await db.open();
-    // await UserItem.syncUserItemsData(userId);
+    await UserItem.syncUserItemsData(userId);
     await Grammar.syncGrammarData();
     await UserScore.syncUserScoreData(userId);
-    // await AudioRecord.syncAudioData();
+    await AudioRecord.syncAudioData();
     return true;
   } catch (error) {
     console.error("Error during data synchronization:", error);

@@ -3,15 +3,16 @@ import { persist, devtools } from "zustand/middleware";
 import type { UserStatsLocal } from "@/types/local.types";
 import UserScore from "@/database/models/user-scores";
 import UserItem from "@/database/models/user-items";
+import type { UUID } from "crypto";
 
 interface UserState {
   userStats: UserStatsLocal | null;
-  reloadUserScore: (userId: string) => Promise<void>;
+  reloadUserScore: (userId: UUID) => Promise<void>;
 }
 
 declare global {
   interface WindowEventMap {
-    userItemsUpdated: CustomEvent<{ userId: string }>;
+    userItemsUpdated: CustomEvent<{ userId: UUID }>;
   }
 }
 
@@ -22,7 +23,7 @@ export const useUserStore = create<UserState>()(
   devtools(
     persist(
       (set) => {
-        const reloadUserScore = async (userId: string) => {
+        const reloadUserScore = async (userId: UUID) => {
           if (!userId) return;
 
           try {

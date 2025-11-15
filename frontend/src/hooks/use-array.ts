@@ -2,13 +2,14 @@ import { useState, useCallback } from "react";
 import UserItem from "@/database/models/user-items";
 import type { UserItemLocal } from "@/types/local.types";
 import { useFetch } from "@/hooks/use-fetch";
+import type { UUID } from "crypto";
 
 /**
  * Manages the practice deck state and index.
  * @param reload Indicates whether to reload the practice deck.
  * @param setReload Function to set the reload state.
  */
-export function useArray(userId: string) {
+export function useArray(userId: UUID) {
   const [index, setIndex] = useState(0);
 
   const fetchPracticeDeck = useCallback(async () => {

@@ -4,11 +4,12 @@ import { useUserProgress } from "@/hooks/use-user-progress";
 import type { UserItemLocal } from "@/types/local.types";
 import UserItem from "@/database/models/user-items";
 import { useFetch } from "@/hooks/use-fetch";
+import type { UUID } from "crypto";
 
 /**
  * Manages the Practice Deck and User Progress.
  */
-export function usePracticeDeck(userId: string) {
+export function usePracticeDeck(userId: UUID) {
   const { updateUserItemsInDB } = useUserProgress(userId);
   const [index, setIndex] = useState(0);
 

@@ -14,7 +14,6 @@ export default class Metadata extends Entity<AppDB> {
    * @param tableName the name of the table
    * @param userId the ID of the user (optional)
    * @returns the synced_at date or first epoch date if not found
-   * @throws Error if there is an issue fetching the metadata
    */
   static async getSyncedDate(
     tableName: TableName,
@@ -33,7 +32,6 @@ export default class Metadata extends Entity<AppDB> {
    * @param syncTime optional sync time (e.g., from the server). Defaults to now.
    * @param userId the ID of the user (optional), will store undefined if not provided
    * @returns true if the operation was successful, otherwise false
-   * @throws Error if there is an issue saving the metadata
    */
   static async markAsSynced(
     tableName: TableName,

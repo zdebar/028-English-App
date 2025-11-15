@@ -1,9 +1,10 @@
 import { create } from "zustand";
 import type { Session } from "@supabase/supabase-js";
 import { supabaseInstance } from "@/config/supabase.config";
+import type { UUID } from "crypto";
 
 interface AuthState {
-  userId: string | null;
+  userId: UUID | null;
   userEmail: string | null;
   loading: boolean;
   setSession: (session: Session | null) => void;
@@ -17,7 +18,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setSession: (session) => {
     set({
-      userId: session?.user?.id || null,
+      userId: (session?.user?.id as UUID) || null,
       userEmail: session?.user?.email || null,
       loading: false,
     });
