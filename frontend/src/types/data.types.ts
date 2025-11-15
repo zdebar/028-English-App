@@ -39,7 +39,6 @@ export interface UserItemSQL {
   progress: number;
   started_at: string;
   updated_at: string;
-  deleted_at: string | null;
   next_at: string | null;
   learned_at: string | null;
   mastered_at: string | null;
@@ -51,7 +50,6 @@ export interface UserScoreSQL {
   date: string;
   item_count: number;
   updated_at: string;
-  deleted_at: string | null;
 }
 
 export class UserError extends Error {

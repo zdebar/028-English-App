@@ -1,13 +1,3 @@
--- Users table
-CREATE TABLE IF NOT EXISTS users (
-  id UUID PRIMARY KEY, -- Matches the id from Supabase auth.users
-  username TEXT UNIQUE, -- Optional: Custom username for your app
-  settings JSONB DEFAULT '{}', -- Store user settings as JSON
-  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMP DEFAULT NULL -- Soft delete column
-);
-
 -- Grammar table
 CREATE TABLE IF NOT EXISTS grammar (
   id SERIAL PRIMARY KEY,
@@ -38,24 +28,20 @@ CREATE TABLE IF NOT EXISTS user_items (
   progress INTEGER DEFAULT 0 CHECK (progress >= 0),
   started_at TIMESTAMP NOT NULL DEFAULT NOW(), 
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(), 
-  deleted_at TIMESTAMP,
   next_at TIMESTAMP, 
   learned_at TIMESTAMP,
   mastered_at TIMESTAMP,
   PRIMARY KEY (user_id, item_id),
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
 );
 
 -- User score table
-CREATE TABLE IF NOT EXISTS user_score (
+CREATE TABLE IF NOT EXISTS user_scores (
   user_id UUID NOT NULL,
   date DATE NOT NULL,
   item_count INTEGER NOT NULL DEFAULT 0,
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMP,
   PRIMARY KEY (user_id, date),
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Function to update updated_at column

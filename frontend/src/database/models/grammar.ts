@@ -71,13 +71,8 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
     // Step 1: Get the last synced date for the grammar table
     const lastSyncedAt = await Metadata.getSyncedDate(TableName.Grammar);
 
-    // Step 2: Fetch synced server time
-    const { data: serverTimeResponse, error: serverTimeError } =
-      await supabaseInstance.rpc("server_time");
-    if (serverTimeError) {
-      console.error(`Failed to fetch server time: ${serverTimeError.message}`);
-    }
-    const serverTime = serverTimeResponse || new Date().toISOString();
+    // Step 2: Fetch synced time
+    const newSyncTime = new Date().toISOString();
 
     // Step 3: Fetch grammar records from Supabase newer than the last synced date
     const { data: grammar, error } = await supabaseInstance
@@ -90,7 +85,6 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
     }
 
     // Step 4: Split the fetched grammar records by deleted_at
-
     if (grammar && grammar.length > 0) {
       const toDelete: number[] = [];
       const toUpsert: GrammarLocal[] = [];
@@ -112,7 +106,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
     }
 
     // Step 5: Update the metadata table with the new sync time
-    await Metadata.markAsSynced(TableName.Grammar, serverTime);
+    await Metadata.markAsSynced(TableName.Grammar, newSyncTime);
 
     return grammar.length;
   }

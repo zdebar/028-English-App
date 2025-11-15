@@ -20,14 +20,14 @@ export default class AppDB extends Dexie {
     super(config.database.dbName);
 
     // Define the database schema
-    this.version(1).stores({
+    this.version(4).stores({
       user_items:
-        "item_id, user_id, [user_id+item_id],  [user_id+learned_at], [user_id+next_at], [user_id+started_at+grammar_id], [user_id+updated_at]",
+        "item_id, user_id, [user_id+item_id], [user_id+learned_at], [user_id+next_at], [user_id+mastered_at+next_at+sequence], [user_id+started_at+grammar_id], [user_id+updated_at]",
       grammar: "id",
       user_scores: "id, user_id, [user_id+updated_at]",
       audio_records: "filename",
       audio_metadata: "archive_name",
-      metadata: "table_name",
+      metadata: "table_name, [table_name+user_id]",
     });
     // Initialize tables and map them to classes
     this.on("ready", () => {

@@ -8,16 +8,13 @@ import { getTodayShortDate } from "@/utils/database.utils";
 import type { UUID } from "crypto";
 import Metadata from "./metadata";
 import Dexie from "dexie";
-import config from "@/config/config";
 
 export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   id!: string;
   user_id!: UUID;
   date!: string;
   item_count!: number;
-  created_at!: string;
   updated_at!: string;
-  deleted_at!: string | null;
 
   /**
    * Increases the item count for today's date by the specified amount.
@@ -43,9 +40,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
         user_id: existingRecord?.user_id || userId,
         date: today,
         item_count: newItemCount,
-        created_at: existingRecord?.created_at || new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        deleted_at: null,
       };
 
       // Save the new record to IndexedDB
@@ -73,9 +68,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
         user_id: userId,
         date: today,
         item_count: 0,
-        created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        deleted_at: config.database.nullReplacementDate,
       }
     );
   }
@@ -94,12 +87,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     );
 
     // Step 2: Get the current server time from Supabase
-    const { data: serverTimeResponse, error: serverTimeError } =
-      await supabaseInstance.rpc("server_time");
-    if (serverTimeError) {
-      console.error(`Failed to fetch server time: ${serverTimeError.message}`);
-    }
-    const serverTime = serverTimeResponse || new Date().toISOString();
+    const newSyncTime = new Date().toISOString();
 
     // Step 3: Gather local changes since the last sync
     const localScores = await db.user_scores
@@ -107,33 +95,43 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
       .between([userId, lastSyncedAt], [userId, Dexie.maxKey], true, true)
       .toArray();
 
-    // Step 3: Send local scores to Supabase for updates, fetch back updated records
-    const { data: updatedScores, error } = await supabaseInstance.rpc(
-      "upsert_and_return_user_scores",
+    // Step 3: Send local scores to Supabase for updates
+    const { error: errorInsert } = await supabaseInstance.rpc(
+      "upsert_user_scores",
       {
-        user_id_input: userId,
-        scores: JSON.stringify(localScores),
-        last_synced_at: lastSyncedAt,
+        scores: localScores,
       }
     );
 
-    if (error) {
-      throw new Error("Error syncing user scores with Supabase:", error);
+    if (errorInsert) {
+      throw new Error(
+        "Error inserting user scores with Supabase:",
+        errorInsert
+      );
     }
 
-    // Step 4: Rewrite local database with updated scores
+    // Step 4: Fetch updated records from supabase
+    const { data: updatedScores, error: errorFetch } =
+      await supabaseInstance.rpc("fetch_user_scores", {
+        user_id_input: userId,
+        last_synced_at: lastSyncedAt,
+      });
+
+    if (errorFetch) {
+      throw new Error("Error fetching user scores from Supabase:", errorFetch);
+    }
+
+    // Step 5: Rewrite local database with updated scores
     if (updatedScores && updatedScores.length > 0) {
       const scoresWithId = updatedScores.map((score: UserScore) => ({
         ...score,
         id: generateUserScoreId(score.user_id, score.date),
-        item_count: score.deleted_at ? 0 : score.item_count,
-        deleted_at: null,
       }));
       await db.user_scores.bulkPut(scoresWithId);
     }
 
-    // Step 5: Update the metadata table with the new sync time
-    await Metadata.markAsSynced(TableName.UserScores, serverTime, userId);
+    // Step 6: Update the metadata table with the new sync time
+    await Metadata.markAsSynced(TableName.UserScores, newSyncTime, userId);
     return updatedScores.length;
   }
 }

@@ -31,9 +31,7 @@ export interface UserScoreLocal {
   user_id: UUID;
   date: string;
   item_count: number;
-  created_at: string;
   updated_at: string;
-  deleted_at: string | null;
 }
 
 export interface UserInfoLocal {

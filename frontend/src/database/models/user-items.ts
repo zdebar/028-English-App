@@ -1,13 +1,10 @@
 import Dexie, { Entity } from "dexie";
 import type AppDB from "@/database/models/app-db";
 import { db } from "@/database/models/db";
-
 import { TableName, type UserItemLocal } from "@/types/local.types";
 import type { UUID } from "crypto";
-
 import config from "@/config/config";
 import { supabaseInstance } from "@/config/supabase.config";
-
 import { getNextAt, sortOddEvenByProgress } from "@/utils/practice.utils";
 import {
   convertLocalToSQL,
@@ -64,10 +61,25 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
     // Query 2: Fetch remaining items with next_at === nullReplacementDate, sorted by sequence
     const remainingItems: UserItemLocal[] = await db.user_items
-      .where("[user_id+next_at]")
-      .equals([userId, config.database.nullReplacementDate])
+      .where("[user_id+mastered_at+next_at+sequence]")
+      .between(
+        [
+          userId,
+          Dexie.minKey,
+          config.database.nullReplacementDate,
+          Dexie.minKey,
+        ],
+        [
+          userId,
+          config.database.nullReplacementDate,
+          config.database.nullReplacementDate,
+          Dexie.maxKey,
+        ],
+        true,
+        false
+      )
       .limit(deckSize - itemsWithNextAt.length)
-      .sortBy("sequence");
+      .toArray();
 
     // Combine the results
     const combinedItems = [...itemsWithNextAt, ...remainingItems];
@@ -273,31 +285,44 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     );
 
     // Step 2: Fetch synced server time
-    const { data: serverTimeResponse, error: serverTimeError } =
-      await supabaseInstance.rpc("server_time");
-    if (serverTimeError) {
-      console.error(`Failed to fetch server time: ${serverTimeError.message}`);
-    }
-    const serverTime = serverTimeResponse || new Date().toISOString();
+    const newSyncTime = new Date().toISOString();
 
     // Step 3: Fetch all local user items from IndexedDB newer than last synced date
     const localUserItems: UserItemLocal[] = await db.user_items
       .where("[user_id+updated_at]")
-      .between([userId, lastSyncedAt || Dexie.minKey], [userId, Dexie.maxKey])
+      .between([userId, lastSyncedAt], [userId, Dexie.maxKey])
       .toArray();
 
     const sqlUserItems = localUserItems.map(convertLocalToSQL);
 
-    // Step 4: Call the RPC function to sync user items
-    const { data: updatedUserItems, error: rpcError } =
-      await supabaseInstance.rpc("sync_user_items", {
+    // Step 4: Call the RPC function to insert updated user items
+    const { error: rpcInsertError } = await supabaseInstance.rpc(
+      "insert_user_items",
+      {
         user_id_input: userId,
         items: sqlUserItems,
+      }
+    );
+
+    if (rpcInsertError) {
+      throw new Error(
+        "Error inserting user_items with Supabase:",
+        rpcInsertError
+      );
+    }
+
+    // Step 5: Call the RPC function to fetch updated user item IDs
+    const { data: updatedUserItems, error: rpcFetchError } =
+      await supabaseInstance.rpc("fetch_user_items", {
+        user_id_input: userId,
         last_synced_at: lastSyncedAt,
       });
 
-    if (rpcError) {
-      throw new Error("Error syncing user_items with Supabase:", rpcError);
+    if (rpcFetchError) {
+      throw new Error(
+        "Error fetching user_items with Supabase:",
+        rpcFetchError
+      );
     }
 
     // Step 5: Separate items into those to delete and those to upsert
@@ -321,10 +346,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     }
 
     // Step 7: Trigger event and update metadata
-    if (toDelete.length > 0 || toUpsert.length > 0) {
+    if (updatedUserItems.length > 0) {
       triggerUserItemsUpdatedEvent(userId);
     }
-    await Metadata.markAsSynced(TableName.UserItems, serverTime, userId);
+    await Metadata.markAsSynced(TableName.UserItems, newSyncTime, userId);
 
     return updatedUserItems.length;
   }

@@ -14,6 +14,7 @@ export default class Metadata extends Entity<AppDB> {
    * @param tableName the name of the table
    * @param userId the ID of the user (optional)
    * @returns the synced_at date or first epoch date if not found
+   * @throws Error
    */
   static async getSyncedDate(
     tableName: TableName,
@@ -31,19 +32,19 @@ export default class Metadata extends Entity<AppDB> {
    * @param tableName the name of the synced table
    * @param syncTime optional sync time (e.g., from the server). Defaults to now.
    * @param userId the ID of the user (optional), will store undefined if not provided
-   * @returns true if the operation was successful, otherwise false
+   * @returns true if the operation was successful
+   * @throws Error
    */
   static async markAsSynced(
     tableName: TableName,
-    userId?: UUID,
-    syncTime?: string
+    syncTime: string,
+    userId?: UUID
   ): Promise<boolean> {
-    const syncedAt = syncTime || new Date().toISOString();
     await db.metadata.put({
       table_name: tableName,
-      synced_at: syncedAt,
+      synced_at: syncTime,
       ...(userId && { user_id: userId }),
     });
-    return !!syncedAt;
+    return true;
   }
 }
