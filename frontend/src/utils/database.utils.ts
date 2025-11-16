@@ -26,7 +26,7 @@ export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
     user_id,
     item_id,
     progress,
-    started_at,
+    started_at: started_at === nullReplacementDate ? null : started_at,
     updated_at,
     next_at: next_at === nullReplacementDate ? null : next_at,
     learned_at: learned_at === nullReplacementDate ? null : learned_at,
@@ -61,7 +61,7 @@ export function getTodayShortDate(): string {
  */
 export function getLocalDateFromUTC(date: string): string {
   const localDate = new Date(date);
-  return localDate.toLocaleString();
+  return localDate.toLocaleDateString("en-CA");
 }
 
 /**

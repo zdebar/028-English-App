@@ -82,7 +82,7 @@ BEGIN
     i.pronunciation,
     i.audio,
     i.sequence,
-    COALESCE(i.grammar_id, -1) AS grammar_id,
+    COALESCE(i.grammar_id, 0) AS grammar_id,
     COALESCE(ui.progress, 0) AS progress,
     COALESCE(ui.started_at, '9999-12-31T23:59:59Z')::TIMESTAMPTZ AS started_at, 
     ui.updated_at::TIMESTAMPTZ AS updated_at,

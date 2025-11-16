@@ -96,7 +96,7 @@ export default function Practice() {
             {direction || revealed ? currentItem?.czech : "\u00A0"}
           </p>
           <p className="text-center">
-            {revealed || direction || audioError
+            {revealed || (!direction && audioError)
               ? currentItem?.english
               : currentItem?.english
                   .slice(0, hintIndex ?? currentItem?.english.length)
@@ -122,7 +122,7 @@ export default function Practice() {
         <div className="flex gap-1">
           <ButtonRectangular
             onClick={() => setGrammarVisible(true)}
-            disabled={!!grammar_id || !revealed}
+            disabled={!grammar_id || !revealed}
           >
             <InfoIcon />
           </ButtonRectangular>

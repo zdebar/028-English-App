@@ -10,7 +10,7 @@ export interface UserItemLocal {
   sequence: number;
   grammar_id: number; // null replaced with config.database.nullReplacementNumber
   progress: number;
-  started_at: string;
+  started_at: string; // nulls replaced with config.database.nullReplacementDate
   updated_at: string;
   deleted_at: string | null;
   next_at: string; // nulls replaced with config.database.nullReplacementDate

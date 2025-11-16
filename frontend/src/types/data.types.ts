@@ -37,7 +37,7 @@ export interface UserItemSQL {
   user_id: UUID;
   item_id: number;
   progress: number;
-  started_at: string;
+  started_at: string | null;
   updated_at: string;
   next_at: string | null;
   learned_at: string | null;

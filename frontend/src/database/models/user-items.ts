@@ -46,10 +46,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   ): Promise<UserItemLocal[]> {
     // Step 1: Fetch items with next_at older than now, sorted by next_at
     const itemsWithNextAt: UserItemLocal[] = await db.user_items
-      .where("[user_id+next_at]")
+      .where("[user_id+next_at+mastered_at+sequence]")
       .between(
-        [userId, "0000-01-01T00:00:00.000Z"],
-        [userId, new Date().toISOString()]
+        [userId, "0000-01-01T00:00:00.000Z", Dexie.minKey, Dexie.minKey],
+        [userId, new Date().toISOString(), Dexie.maxKey, Dexie.maxKey]
       )
       .limit(deckSize)
       .toArray();
@@ -61,11 +61,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
     // Query 2: Fetch remaining items with next_at === nullReplacementDate, sorted by sequence
     const remainingItems: UserItemLocal[] = await db.user_items
-      .where("[user_id+mastered_at+next_at+sequence]")
+      .where("[user_id+next_at+mastered_at+sequence]")
       .between(
         [
           userId,
-          Dexie.minKey,
+          config.database.nullReplacementDate,
           config.database.nullReplacementDate,
           Dexie.minKey,
         ],
@@ -178,18 +178,20 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     userId: UUID
   ): Promise<UserItemLocal[]> {
     const result = await db.user_items
-      .where("[user_id+started_at+grammar_id]")
+      .where("[user_id+grammar_id+started_at]")
       .between(
-        [userId, Dexie.minKey, config.database.nullReplacementNumber],
+        [userId, config.database.nullReplacementNumber, Dexie.minKey],
         [
           userId,
-          config.database.nullReplacementDate,
           config.database.nullReplacementNumber,
+          config.database.nullReplacementDate,
         ],
         true,
         false
       )
       .sortBy("czech");
+
+    console.log("Result with between:", result.length);
 
     return result;
   }
@@ -202,12 +204,18 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    */
   static async resetsAllUserItems(userId: UUID): Promise<number> {
     const count = await db.user_items
-      .where("user_id")
-      .equals(userId)
+      .where("[user_id+started_at]")
+      .between(
+        [userId, Dexie.minKey],
+        [userId, config.database.nullReplacementDate],
+        true,
+        false
+      )
       .modify((item: UserItemLocal) => {
         resetUserItem(item);
       });
 
+    console.log(`Reset ${count} user items for userId: ${userId}`);
     if (count !== 0) {
       triggerUserItemsUpdatedEvent(userId);
     }
@@ -225,11 +233,18 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     userId: UUID,
     grammarId: number
   ): Promise<number> {
+    console.log(
+      `Resetting user items for userId: ${userId}, grammarId: ${grammarId}`
+    );
     const count = await db.user_items
-      .where("[user_id+started_at+grammar_id]")
+      .where("[user_id+grammar_id+started_at]")
       .between(
-        [userId, Dexie.minKey, grammarId],
-        [userId, config.database.nullReplacementDate, grammarId],
+        [userId, config.database.nullReplacementNumber, Dexie.minKey],
+        [
+          userId,
+          config.database.nullReplacementNumber,
+          config.database.nullReplacementDate,
+        ],
         true,
         false
       )
@@ -260,6 +275,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .where("[user_id+item_id]")
       .equals([userId, itemId])
       .modify((item: UserItemLocal) => {
+        console.log("Resetting item:", item);
         resetUserItem(item);
       });
 

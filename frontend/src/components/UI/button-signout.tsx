@@ -32,6 +32,7 @@ export default function ButtonSignout() {
       modalTitle="Potvrzení odhlášení"
       modalDescription="Opravdu se chcete odhlásit?"
       onConfirm={handleSignout}
+      className="grow-0"
     />
   );
 }

@@ -40,6 +40,7 @@ export default function ButtonResetAll() {
       modalDescription="Opravdu chcete vymazat veškerý progress? Změna již nepůjde vrátit."
       onConfirm={handleReset}
       disabled={false}
+      className="grow-0"
     />
   );
 }

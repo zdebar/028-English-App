@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS user_items (
   user_id UUID NOT NULL,
   item_id INTEGER NOT NULL,
   progress INTEGER DEFAULT 0 CHECK (progress >= 0),
-  started_at TIMESTAMP NOT NULL DEFAULT NOW(), 
+  started_at TIMESTAMP DEFAULT NOW(), 
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(), 
   next_at TIMESTAMP, 
   learned_at TIMESTAMP,

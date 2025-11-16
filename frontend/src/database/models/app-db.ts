@@ -6,7 +6,6 @@ import UserItem from "@/database/models/user-items";
 import UserScore from "@/database/models/user-scores";
 import AudioMetadata from "@/database/models/audio-metadata";
 import Metadata from "@/database/models/metadata";
-import "dexie-observable";
 
 export default class AppDB extends Dexie {
   user_items!: EntityTable<UserItem, "item_id">;
@@ -20,11 +19,11 @@ export default class AppDB extends Dexie {
     super(config.database.dbName);
 
     // Define the database schema
-    this.version(4).stores({
+    this.version(1).stores({
       user_items:
-        "item_id, user_id, [user_id+item_id], [user_id+learned_at], [user_id+next_at], [user_id+mastered_at+next_at+sequence], [user_id+started_at+grammar_id], [user_id+updated_at]",
+        "[user_id+item_id], [user_id+started_at], [user_id+grammar_id+started_at], [user_id+updated_at], [user_id+learned_at], [user_id+next_at+mastered_at+sequence] ",
       grammar: "id",
-      user_scores: "id, user_id, [user_id+updated_at]",
+      user_scores: "id, [user_id+updated_at]",
       audio_records: "filename",
       audio_metadata: "archive_name",
       metadata: "table_name, [table_name+user_id]",

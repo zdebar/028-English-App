@@ -11,7 +11,7 @@ export async function dataSync(userId: UUID): Promise<boolean> {
     await UserItem.syncUserItemsData(userId);
     await Grammar.syncGrammarData();
     await UserScore.syncUserScoreData(userId);
-    await AudioRecord.syncAudioData();
+    // await AudioRecord.syncAudioData();
     return true;
   } catch (error) {
     console.error("Error during data synchronization:", error);

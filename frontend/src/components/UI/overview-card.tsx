@@ -1,6 +1,7 @@
 import ButtonRectangular from "@/components/UI/button-rectangular";
 import { CloseIcon } from "@/components/UI/icons";
 import ButtonAsync from "./button-async";
+import Loading from "./loading";
 
 interface OverviewCardProps {
   titleText?: string;
@@ -60,7 +61,7 @@ export default function OverviewCard({
         </ButtonRectangular>
       </div>
       <div className=" border border-dashed w-full grow p-4">
-        {isLoading ? <p>Načítání...</p> : error ? <p>{error}</p> : children}
+        {isLoading ? <Loading /> : error ? <p>{error}</p> : children}
       </div>
     </div>
   );
