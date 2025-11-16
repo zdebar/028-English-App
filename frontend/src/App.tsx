@@ -17,7 +17,6 @@ import GrammarOverview from "@/pages/grammar-overview";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import type { Session } from "@supabase/supabase-js";
 import { supabaseInstance } from "@/config/supabase.config";
-import { db } from "@/database/models/db";
 
 export default function App() {
   const { theme, chooseTheme } = useThemeStore();
@@ -48,12 +47,6 @@ export default function App() {
       dataSync(userId);
     }
   }, [userId]);
-
-  useEffect(() => {
-    return () => {
-      db.close();
-    };
-  }, []);
 
   return (
     <div className="mx-auto min-h-screen max-w-container flex flex-col">

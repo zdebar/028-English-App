@@ -19,7 +19,7 @@ export function alternateDirection(progress: number): boolean {
  */
 export function getNextAt(progress: number): string {
   const interval = config.srs.intervals[progress];
-  if (!interval) return config.database.nullReplacementDate;
+  if (interval == null) return config.database.nullReplacementDate;
 
   const randomFactor = 1 + config.srs.randomness * (Math.random() * 2 - 1);
   const randomizedInterval = Math.round(interval * randomFactor);
