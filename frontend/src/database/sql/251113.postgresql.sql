@@ -51,7 +51,8 @@ BEGIN
   NEW.updated_at = CURRENT_TIMESTAMP;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql
+SET search_path TO public;
 
 -- Trigger for grammar table
 CREATE TRIGGER set_updated_at_grammar
@@ -79,6 +80,13 @@ EXECUTE FUNCTION update_updated_at_column();
 
 -- Indexes on updated_at columns
 CREATE INDEX idx_items_updated_at ON items(updated_at);
-CREATE INDEX idx_user_items_updated_at ON user_items(updated_at);
+CREATE INDEX idx_user_items_updated_at ON user_items(updated_at); 
 CREATE INDEX idx_user_score_updated_at ON user_score(updated_at);
+
+CREATE INDEX idx_user_scores_user_id_updated_at ON user_scores (user_id, updated_at);
+CREATE INDEX idx_items_sequence ON public.items (sequence);
+CREATE INDEX idx_user_items_user_updated ON public.user_items (user_id, updated_at) 
+INCLUDE (item_id, progress, started_at, updated_at, next_at, learned_at, mastered_at);
+CREATE INDEX idx_items_updated_sequence ON public.items (updated_at, sequence) 
+INCLUDE (id, czech, english, pronunciation, audio, grammar_id, deleted_at);
 

@@ -48,7 +48,8 @@ BEGIN
       ELSE user_items.mastered_at
     END;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql
+SET search_path TO public;
 
 -- SELECT
 CREATE OR REPLACE FUNCTION fetch_user_items(
@@ -85,7 +86,7 @@ BEGIN
     COALESCE(i.grammar_id, 0) AS grammar_id,
     COALESCE(ui.progress, 0) AS progress,
     COALESCE(ui.started_at, '9999-12-31T23:59:59Z')::TIMESTAMPTZ AS started_at, 
-    ui.updated_at::TIMESTAMPTZ AS updated_at,
+    COALESCE(ui.updated_at, i.updated_at)::TIMESTAMPTZ AS updated_at,
     i.deleted_at::TIMESTAMPTZ AS deleted_at,
     COALESCE(ui.next_at, '9999-12-31T23:59:59Z')::TIMESTAMPTZ AS next_at, 
     COALESCE(ui.learned_at, '9999-12-31T23:59:59Z')::TIMESTAMPTZ AS learned_at,
@@ -96,4 +97,5 @@ BEGIN
   WHERE ui.updated_at > last_synced_at OR ui.updated_at IS NULL OR i.updated_at > last_synced_at
   ORDER BY i.sequence ASC;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql
+SET search_path TO public;

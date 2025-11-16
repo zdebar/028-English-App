@@ -18,7 +18,8 @@ BEGIN
       updated_at = GREATEST(user_scores.updated_at, EXCLUDED.updated_at);
   END IF;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql
+SET search_path TO public;
 
 -- SELECT
 CREATE OR REPLACE FUNCTION fetch_user_scores(
@@ -38,4 +39,5 @@ BEGIN
   WHERE us.updated_at > last_synced_at
     AND us.user_id = user_id_input;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql
+SET search_path TO public;
