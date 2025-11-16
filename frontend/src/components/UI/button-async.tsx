@@ -6,7 +6,6 @@ import Loading from "./loading";
 interface ButtonAsyncProps {
   isLoading: boolean;
   message: string;
-  disabledMessage: string;
   buttonTextStyle?: string;
   modalTitle?: string;
   modalDescription?: string;
@@ -18,7 +17,6 @@ interface ButtonAsyncProps {
 export default function ButtonAsync({
   isLoading,
   message,
-  disabledMessage,
   modalTitle = "Potvrzení akce",
   modalDescription = "Opravdu chcete pokračovat?",
   onConfirm,
@@ -36,7 +34,7 @@ export default function ButtonAsync({
         className={className}
       >
         <p className={`overlay-hidden ${buttonTextStyle}`}>
-          {disabled ? disabledMessage : isLoading ? <Loading /> : message}
+          {isLoading ? <Loading /> : message}
         </p>
       </ButtonRectangular>
       <Modal

@@ -10,6 +10,8 @@ import SettingProperty from "@/components/UI/setting-property";
 import { shortenDate } from "@/utils/database.utils";
 import { useFetch } from "@/hooks/use-fetch";
 import { useAuthStore } from "@/hooks/use-auth-store";
+import Loading from "@/components/UI/loading";
+import { getMoreText } from "@/utils/practice.utils";
 
 export default function VocabularyOverview() {
   const { userId } = useAuthStore();
@@ -28,9 +30,8 @@ export default function VocabularyOverview() {
     setReload,
   } = useFetch<UserItemLocal[]>(fetchVocabulary);
 
-  const [filteredWords, setFilteredWords] = useState<UserItemLocal[] | null>(
-    null
-  );
+  const [filteredWords, setFilteredWords] = useState<UserItemLocal[]>([]);
+  const [visibleCount, setVisibleCount] = useState(8);
   const [cardVisible, setCardVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
@@ -54,6 +55,9 @@ export default function VocabularyOverview() {
     setFilteredWords(filtered);
   }, [words, searchTerm, displayField]);
 
+  const visibleItems = filteredWords.slice(0, visibleCount);
+  const remainingCount = filteredWords.length - visibleCount;
+
   const handleClearUserItem = async () => {
     const itemId = selectedWord?.item_id;
     if (typeof itemId === "number" && userId) {
@@ -63,9 +67,7 @@ export default function VocabularyOverview() {
   };
 
   if (loading) {
-    return (
-      <p className="text-left h-input flex justify-start pl-4">Načítání...</p>
-    );
+    return <Loading />;
   }
 
   return (
@@ -111,7 +113,7 @@ export default function VocabularyOverview() {
           <div className="overflow-y-auto flex flex-col gap-1">
             {filteredWords && filteredWords.length > 0 ? (
               <>
-                {filteredWords.slice(0, 8).map((item, index) => (
+                {visibleItems.map((item, index) => (
                   <ButtonRectangular
                     key={item.item_id}
                     className="text-left grow-0 h-input flex justify-start p-4"
@@ -125,10 +127,13 @@ export default function VocabularyOverview() {
                       : ` ${item.english} `}
                   </ButtonRectangular>
                 ))}
-                {filteredWords.length > 8 && (
-                  <p className="text-left h-input flex justify-start pl-4">
-                    ...a další
-                  </p>
+                {remainingCount > 0 && (
+                  <button
+                    onClick={() => setVisibleCount((prev) => prev + 8)}
+                    className="mt-2 w-full text-center hover:underline text-blue-900"
+                  >
+                    ... a {remainingCount + " " + getMoreText(remainingCount)}
+                  </button>
                 )}
               </>
             ) : (

@@ -28,7 +28,6 @@ interface OverviewCardProps {
  */
 export default function OverviewCard({
   titleText = "bez názvu",
-  disabledText = "bez obsahu",
   children,
   className = "",
   handleReset,
@@ -44,7 +43,6 @@ export default function OverviewCard({
         <ButtonAsync
           isLoading={isLoading}
           message={titleText}
-          disabledMessage={disabledText}
           modalTitle="Potvrzení resetu"
           modalDescription="Opravdu chcete vymazat veškerý progress? Změna již nepůjde vrátit."
           onConfirm={() => {
