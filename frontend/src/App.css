@@ -20,7 +20,9 @@
   --color-background-light: #f7b740;
   --color-audio-dark: #1a2333;
   --color-audio-light: #f8c04a;
-  --color-overlay: rgba(0, 0, 0, 0.1);
+  --color-audio-hover-dark: #1e283b;
+  --color-audio-hover-light: #ffc64d;
+  --color-overlay: rgba(0, 0, 0, 0.2);
 
   /** layout dimensions **/
   --max-width-container: 900px;
@@ -84,8 +86,8 @@
 
   .color-audio {
     @apply border border-solid;
-    @apply hover:bg-audio-light;
-    @apply hover:dark:bg-audio-dark;
+    @apply bg-audio-light hover:bg-audio-hover-light;
+    @apply dark:bg-audio-dark dark:hover:bg-audio-hover-dark;
   }
 
   .color-selected {

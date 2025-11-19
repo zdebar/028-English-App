@@ -29,7 +29,7 @@ export default function Login() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-4 h-screen w-full ">
+    <div className="flex flex-col items-center gap-4 h-screen w-card">
       <button
         onClick={handleAnonymousSignIn}
         className="px-4 h-12 bg-green-600 w-full  text-white rounded cursor-pointer"

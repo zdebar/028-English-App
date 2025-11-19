@@ -128,10 +128,16 @@ export default function Practice() {
                 pokrok
               </Hint>
               <p className="font-light">
-                {(userStats?.practiceCountToday || 0) + index}
+                {(userStats?.practiceCountToday || 0) + index} /{" "}
+                {config.practice.dailyGoal}
               </p>
-              <Hint visibility={isOpen} style={{ bottom: "30px", right: "0" }}>
-                denní počet procvičení
+              <Hint
+                visibility={isOpen}
+                style={{ bottom: "30px", right: "0" }}
+                className="flex flex-col items-end"
+              >
+                <p>počet procvičení</p>
+                <p>/ denní cíl</p>
               </Hint>
             </div>
           </div>

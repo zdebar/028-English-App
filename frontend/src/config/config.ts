@@ -42,6 +42,10 @@ const config = {
     deckSize: 10,
     lessonSize: 100, // Number of items per lesson
   },
+
+  practice: {
+    dailyGoal: 400,
+  },
 };
 
 export default config;
