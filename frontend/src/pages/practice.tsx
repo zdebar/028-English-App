@@ -16,12 +16,16 @@ import { useAuthStore } from "@/hooks/use-auth-store";
 import { useUserStore } from "@/hooks/use-user";
 import GrammarCard from "@/components/Layout/grammar-card";
 import Loading from "@/components/UI/loading";
+import HelpButton from "@/components/UI/help-button";
+import Hint from "@/components/UI/hint";
+import { useOverlayStore } from "@/hooks/use-overlay-store";
 
 export default function Practice() {
   // State and logic for practice
   const [revealed, setRevealed] = useState(false);
   const [hintIndex, setHintIndex] = useState(0);
   const [grammarVisible, setGrammarVisible] = useState(false);
+  const { isOpen } = useOverlayStore();
 
   const { userId } = useAuthStore();
   const { userStats } = useUserStore();
@@ -67,110 +71,158 @@ export default function Practice() {
     return <Loading text="Načítání ..." />;
   }
 
-  return grammarVisible ? (
-    <GrammarCard
-      grammar_id={currentItem?.grammar_id}
-      onClose={() => setGrammarVisible(false)}
-    />
-  ) : (
-    <div className="card-height card-width">
-      {/* Item Card */}
-      <div
-        className={`border border-dashed relative flex grow flex-col items-center justify-between p-4 ${
-          !isAudioDisabled && "color-audio"
-        }`}
-        onClick={() => {
-          if (!isAudioDisabled) playAudio(currentItem.audio);
-        }}
-        aria-label="Přehrát audio"
-      >
-        <div
-          id="top-bar"
-          className="relative flex w-full items-center justify-between"
-        >
-          <VolumeSlider setVolume={setVolume} />
-          <p className="font-light">{audioError && "bez audia"}</p>
-        </div>
-        <div id="item">
-          <p className="text-center font-bold">
-            {direction || revealed ? currentItem?.czech : "\u00A0"}
-          </p>
-          <p className="text-center">
-            {revealed || (!direction && audioError)
-              ? currentItem?.english
-              : currentItem?.english
-                  .slice(0, hintIndex ?? currentItem?.english.length)
-                  .padEnd(currentItem?.english.length, "\u00A0")}
-          </p>
-          <p className="text-center">
-            {revealed ? currentItem?.pronunciation || "\u00A0" : "\u00A0"}
-          </p>
-        </div>
-        <div
-          className="relative flex w-full items-center justify-between"
-          id="bottom-bar"
-        >
-          <p className="font-light">{currentItem?.progress}</p>
-          <p className="font-light">
-            {(userStats?.practiceCountToday || 0) + index}
-          </p>
-        </div>
-      </div>
-
-      {/* Practice Controls */}
-      <div id="practice-controls" className="flex flex-col gap-1">
-        <div className="flex gap-1">
-          <ButtonRectangular
-            onClick={() => setGrammarVisible(true)}
-            disabled={!grammar_id || !revealed}
-          >
-            <InfoIcon />
-          </ButtonRectangular>
-          <ButtonRectangular
+  return (
+    <div className="relative flex flex-col w-full grow items-center justify-start">
+      {grammarVisible ? (
+        <GrammarCard
+          grammar_id={currentItem?.grammar_id}
+          onClose={() => setGrammarVisible(false)}
+        />
+      ) : (
+        <div className="card-height card-width">
+          {/* Item Card */}
+          <div
+            className={`border border-dashed relative flex grow flex-col items-center justify-between p-4 ${
+              !isAudioDisabled && "color-audio"
+            }`}
             onClick={() => {
-              handleNext(config.progress.skipProgress);
+              if (!isAudioDisabled) playAudio(currentItem.audio);
             }}
-            disabled={!revealed}
+            aria-label="Přehrát audio"
           >
-            <SkipIcon />
-          </ButtonRectangular>
-        </div>
-        <div className="flex gap-1">
-          {!revealed ? (
-            <>
+            <div
+              id="top-bar"
+              className="relative flex w-full items-center justify-between"
+            >
+              <VolumeSlider setVolume={setVolume} />
+              <Hint visibility={isOpen} style={{ top: "30px" }}>
+                hlasitost
+              </Hint>
+              <p className="font-light">{audioError && "bez audia"}</p>
+              <Hint visibility={isOpen} style={{ top: "30px", right: "0" }}>
+                chybová hlášení
+              </Hint>
+            </div>
+
+            <div id="item">
+              <p className="text-center font-bold">
+                {direction || revealed ? currentItem?.czech : "\u00A0"}
+              </p>
+              <p className="text-center">
+                {revealed || (!direction && audioError)
+                  ? currentItem?.english
+                  : currentItem?.english
+                      .slice(0, hintIndex ?? currentItem?.english.length)
+                      .padEnd(currentItem?.english.length, "\u00A0")}
+              </p>
+              <p className="text-center">
+                {revealed ? currentItem?.pronunciation || "\u00A0" : "\u00A0"}
+              </p>
+            </div>
+            <div
+              className="relative flex w-full items-center justify-between"
+              id="bottom-bar"
+            >
+              <p className="font-light">{currentItem?.progress}</p>
+              <Hint visibility={isOpen} style={{ bottom: "30px" }}>
+                pokrok
+              </Hint>
+              <p className="font-light">
+                {(userStats?.practiceCountToday || 0) + index}
+              </p>
+              <Hint visibility={isOpen} style={{ bottom: "30px", right: "0" }}>
+                denní počet procvičení
+              </Hint>
+            </div>
+          </div>
+
+          {/* Practice Controls */}
+          <div id="practice-controls" className="flex relative flex-col gap-1">
+            <div className="flex gap-1">
               <ButtonRectangular
-                onClick={() => setHintIndex((prevIndex) => prevIndex + 1)}
+                onClick={() => setGrammarVisible(true)}
+                disabled={!grammar_id || !revealed}
               >
-                <HintIcon />
+                <InfoIcon />
               </ButtonRectangular>
+              <Hint visibility={isOpen} style={{ top: "0px", left: "14px" }}>
+                gramatika
+              </Hint>
               <ButtonRectangular
                 onClick={() => {
-                  setRevealed(true);
-                  if (direction) {
-                    playAudioForItem();
-                  }
-                  setHintIndex(() => 0);
+                  handleNext(config.progress.skipProgress);
                 }}
+                disabled={!revealed}
               >
-                <EyeIcon />
+                <SkipIcon />
               </ButtonRectangular>
-            </>
-          ) : (
-            <>
-              <ButtonRectangular
-                onClick={() => handleNext(config.progress.minusProgress)}
-              >
-                <MinusIcon />
-              </ButtonRectangular>
-              <ButtonRectangular
-                onClick={() => handleNext(config.progress.plusProgress)}
-              >
-                <PlusIcon />
-              </ButtonRectangular>
-            </>
-          )}
+              <Hint visibility={isOpen} style={{ top: "0px", right: "14px" }}>
+                dokončit
+              </Hint>
+            </div>
+            <div className="flex gap-1 relative">
+              {!revealed ? (
+                <>
+                  <ButtonRectangular
+                    onClick={() => setHintIndex((prevIndex) => prevIndex + 1)}
+                  >
+                    <HintIcon />
+                  </ButtonRectangular>
+                  <Hint
+                    visibility={isOpen}
+                    style={{ top: "0px", left: "14px" }}
+                  >
+                    nápověda
+                  </Hint>
+                  <ButtonRectangular
+                    onClick={() => {
+                      setRevealed(true);
+                      if (direction) {
+                        playAudioForItem();
+                      }
+                      setHintIndex(() => 0);
+                    }}
+                  >
+                    <EyeIcon />
+                  </ButtonRectangular>
+                  <Hint
+                    visibility={isOpen}
+                    style={{ top: "0px", right: "14px" }}
+                  >
+                    odhalit
+                  </Hint>
+                </>
+              ) : (
+                <>
+                  <ButtonRectangular
+                    onClick={() => handleNext(config.progress.minusProgress)}
+                  >
+                    <MinusIcon />
+                  </ButtonRectangular>
+                  <Hint
+                    visibility={isOpen}
+                    style={{ top: "0px", left: "14px" }}
+                  >
+                    neznám
+                  </Hint>
+                  <ButtonRectangular
+                    onClick={() => handleNext(config.progress.plusProgress)}
+                  >
+                    <PlusIcon />
+                  </ButtonRectangular>
+                  <Hint
+                    visibility={isOpen}
+                    style={{ top: "0px", right: "14px" }}
+                  >
+                    znám
+                  </Hint>
+                </>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
+      <HelpButton className="self-end" />
     </div>
   );
 }

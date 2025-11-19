@@ -3,10 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import Dashboard from "@/components/Layout/dashboard";
 import SettingProperty from "@/components/UI/setting-property";
+import HelpButton from "@/components/UI/help-button";
+import Hint from "@/components/UI/hint";
+import { useOverlayStore } from "@/hooks/use-overlay-store";
 
 export default function Home() {
   const navigate = useNavigate();
-
+  const { isOpen } = useOverlayStore();
   const { userId, userEmail } = useAuthStore();
 
   return (
@@ -25,13 +28,17 @@ export default function Home() {
           Sign in / Sign up
         </ButtonRectangular>
       ) : (
-        <div className="flex gap-1 flex-col w-full">
+        <div className="flex gap-1 flex-col w-full relative">
           <SettingProperty
             label="Uživatel:"
             className="h-input"
             value={userEmail}
           />
           <Dashboard />
+          <Hint visibility={isOpen} style={{ bottom: "4px", right: "8px" }}>
+            dnes naučeno
+          </Hint>
+          <HelpButton />
         </div>
       )}
     </div>

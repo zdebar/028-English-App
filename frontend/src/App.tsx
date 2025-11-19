@@ -17,10 +17,13 @@ import GrammarOverview from "@/pages/grammar-overview";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import type { Session } from "@supabase/supabase-js";
 import { supabaseInstance } from "@/config/supabase.config";
+import Overlay from "./components/UI/overlay";
+import { useOverlayStore } from "@/hooks/use-overlay-store";
 
 export default function App() {
   const { theme, chooseTheme } = useThemeStore();
   const { userId, setSession } = useAuthStore();
+  const { isOpen, close } = useOverlayStore();
 
   useEffect(() => {
     supabaseInstance.auth
@@ -49,33 +52,34 @@ export default function App() {
   }, [userId]);
 
   return (
-    <div className="mx-auto min-h-screen max-w-container flex flex-col">
-      <ToastContainer position="top-right" autoClose={5000} />
-      <Header />
-      <div className="relative grow flex flex-col items-center gap-4">
-        <Routes>
-          <Route path="/*" element={<Home />} />
-
-          <Route element={<PublicLayout />}>
-            <Route path="/login" element={<Login />} />
-          </Route>
-
-          <Route element={<ProtectedLayout />}>
-            <Route path="/practice" element={<Practice />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/grammar-overview" element={<GrammarOverview />} />
+    <>
+      {isOpen && <Overlay onClose={close} />}
+      <div className="mx-auto min-h-screen max-w-container flex flex-col">
+        <ToastContainer position="top-right" autoClose={5000} />
+        <Header />
+        <div className="relative grow flex flex-col items-center gap-4">
+          <Routes>
+            <Route path="/*" element={<Home />} />
+            <Route element={<PublicLayout />}>
+              <Route path="/login" element={<Login />} />
+            </Route>
+            <Route element={<ProtectedLayout />}>
+              <Route path="/practice" element={<Practice />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/grammar-overview" element={<GrammarOverview />} />
+              <Route
+                path="/vocabulary-overview"
+                element={<VocabularyOverview />}
+              />
+            </Route>
             <Route
-              path="/vocabulary-overview"
-              element={<VocabularyOverview />}
+              path="/*"
+              element={<div className="text-notice pt-8">Page not found</div>}
             />
-          </Route>
-          <Route
-            path="/*"
-            element={<div className="text-notice pt-8">Page not found</div>}
-          />
-        </Routes>
+          </Routes>
+        </div>
+        <Footer />
       </div>
-      <Footer />
-    </div>
+    </>
   );
 }
