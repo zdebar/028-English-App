@@ -25,7 +25,7 @@ export default function ProgressBar({
   const todayWidth = (validTodayCount / lessonSize) * totalWidth;
 
   return (
-    <div className="relative mx-auto max-w-card w-full">
+    <div className="relative mx-auto w-full">
       {/* Popisky */}
       <div className="absolute top-0 left-0 w-full flex  justify-between z-10 pt-1 px-2 font-body font-bold text-sm text-center text-light">
         <span>Lekce: {lessonNumber}</span>

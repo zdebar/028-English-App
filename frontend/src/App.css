@@ -1,5 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Mansalva:wght@400;700&family=Roboto:wght@300;400;700&display=swap");
+
 @import "tailwindcss";
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 /** A-13, B-10, C-8, D-11 */
@@ -106,6 +108,10 @@
   .text-button {
     @apply w-45 text-left;
   }
+
+  .text-link {
+    @apply hover:underline text-blue-600;
+  }
 }
 
 @layer components {
@@ -127,7 +133,7 @@
   }
 
   .card-height {
-    @apply h-full max-h-card min-h-card grow;
+    @apply h-full max-h-card min-h-card flex grow flex-col gap-1 justify-start;
   }
 
   /** HEADER STYLES **/
