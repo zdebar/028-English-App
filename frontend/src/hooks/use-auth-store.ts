@@ -19,7 +19,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   setSession: (session) => {
     set({
       userId: (session?.user?.id as UUID) || null,
-      userEmail: session?.user?.email || null,
+      userEmail: session?.user?.email || "Anonymní uživatel",
       loading: false,
     });
   },

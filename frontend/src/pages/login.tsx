@@ -1,14 +1,50 @@
-import { Auth } from "@supabase/auth-ui-react";
+// import { Auth } from "@supabase/auth-ui-react";
+// import { ThemeSupa } from "@supabase/auth-ui-shared";
+// import { useThemeStore } from "@/hooks/use-theme";
 import { supabaseInstance } from "@/config/supabase.config";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
-import { useThemeStore } from "@/hooks/use-theme";
+import { useNavigate } from "react-router-dom";
+import HCaptcha from "@hcaptcha/react-hcaptcha";
+import { useState, useRef } from "react";
 
 export default function Login() {
-  const { theme } = useThemeStore();
+  const [captchaToken, setCaptchaToken] = useState<string | undefined>(
+    undefined
+  );
+  const captcha = useRef<HCaptcha>(null);
+  // const { theme } = useThemeStore();
+  const navigate = useNavigate();
+
+  const handleAnonymousSignIn = async () => {
+    if (!captchaToken) return;
+    const { error } = await supabaseInstance.auth.signInAnonymously({
+      options: { captchaToken },
+    });
+    captcha.current?.resetCaptcha();
+    setCaptchaToken(undefined);
+    if (error) {
+      console.error("Anonymous sign-in error:", error);
+    } else {
+      navigate("/");
+    }
+  };
 
   return (
-    <div className="flex flex-col items-center h-screen w-full">
-      <Auth
+    <div className="flex flex-col items-center gap-4 h-screen w-full ">
+      <button
+        onClick={handleAnonymousSignIn}
+        className="px-4 h-12 bg-green-600 w-full  text-white rounded cursor-pointer"
+        disabled={!captchaToken}
+      >
+        Try as Guest
+      </button>
+      <HCaptcha
+        ref={captcha}
+        sitekey="42dc9b5a-022a-4494-a002-aa1af0fe5d92"
+        onVerify={(token) => {
+          setCaptchaToken(token);
+        }}
+      />
+      {/* <Auth
         supabaseClient={supabaseInstance}
         appearance={{
           theme: ThemeSupa,
@@ -42,7 +78,7 @@ export default function Login() {
           },
         }}
         providers={["google"]}
-      />
+      /> */}
     </div>
   );
 }
