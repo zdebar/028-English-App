@@ -228,7 +228,13 @@ export default function Practice() {
           </div>
         </div>
       )}
-      <HelpButton className="self-end" />
+      <HelpButton
+        className="self-end"
+        style={{
+          bottom: "5px",
+          right: "5px",
+        }}
+      />
     </div>
   );
 }
