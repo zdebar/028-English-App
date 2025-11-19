@@ -20,7 +20,7 @@
   --color-background-light: #f7b740;
   --color-audio-dark: #1a2333;
   --color-audio-light: #f8c04a;
-  --color-overlay: rgba(0, 0, 0, 0.2);
+  --color-overlay: rgba(0, 0, 0, 0.1);
 
   /** layout dimensions **/
   --max-width-container: 900px;
@@ -94,7 +94,7 @@
 
   /* TEXT STYLES */
   .text-notice {
-    @apply font-headings text-center text-xl text-white dark:text-notice-dark;
+    @apply font-headings text-center text-xl;
   }
 
   .text-bar {

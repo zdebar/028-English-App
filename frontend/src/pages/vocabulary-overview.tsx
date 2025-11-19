@@ -12,6 +12,7 @@ import { useFetch } from "@/hooks/use-fetch";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import Loading from "@/components/UI/loading";
 import { getMoreText } from "@/utils/practice.utils";
+import HelpButton from "@/components/UI/help-button";
 
 export default function VocabularyOverview() {
   const { userId } = useAuthStore();
@@ -144,64 +145,70 @@ export default function VocabularyOverview() {
           </div>
         </div>
       ) : (
-        <OverviewCard
-          titleText={selectedWord?.czech}
-          onClose={() => setCardVisible(false)}
-          handleReset={handleClearUserItem}
-        >
-          <div className="flex flex-col gap-4">
-            <div>
-              <SettingProperty
-                label="item_id"
-                className="h-attribute"
-                value={selectedWord?.item_id}
-              />
-              <SettingProperty
-                label="česky"
-                className="h-attribute"
-                value={selectedWord?.czech}
-              />
-              <SettingProperty label="anglicky" value={selectedWord?.english} />
-              <SettingProperty
-                label="výslovnost"
-                className="h-attribute"
-                value={selectedWord?.pronunciation}
-              />
-              <SettingProperty
-                label="pokrok"
-                className="h-attribute"
-                value={selectedWord?.progress}
-              />
+        <div className="relative flex flex-col w-full grow items-center justify-start">
+          <OverviewCard
+            titleText={selectedWord?.czech}
+            onClose={() => setCardVisible(false)}
+            handleReset={handleClearUserItem}
+          >
+            <div className="flex flex-col gap-4">
+              <div>
+                <SettingProperty
+                  label="item_id"
+                  className="h-attribute"
+                  value={selectedWord?.item_id}
+                />
+                <SettingProperty
+                  label="česky"
+                  className="h-attribute"
+                  value={selectedWord?.czech}
+                />
+                <SettingProperty
+                  label="anglicky"
+                  value={selectedWord?.english}
+                />
+                <SettingProperty
+                  label="výslovnost"
+                  className="h-attribute"
+                  value={selectedWord?.pronunciation}
+                />
+                <SettingProperty
+                  label="pokrok"
+                  className="h-attribute"
+                  value={selectedWord?.progress}
+                />
+              </div>
+              <div>
+                <SettingProperty
+                  label="start"
+                  className="h-attribute"
+                  value={shortenDate(selectedWord?.started_at)}
+                />
+                <SettingProperty
+                  label="změněno"
+                  className="h-attribute"
+                  value={shortenDate(selectedWord?.updated_at)}
+                />
+                <SettingProperty
+                  label="další"
+                  className="h-attribute"
+                  value={shortenDate(selectedWord?.next_at)}
+                />
+                <SettingProperty
+                  label="naučeno"
+                  className="h-attribute"
+                  value={shortenDate(selectedWord?.learned_at)}
+                />
+                <SettingProperty
+                  label="ukončeno"
+                  className="h-attribute"
+                  value={shortenDate(selectedWord?.mastered_at)}
+                />
+              </div>
             </div>
-            <div>
-              <SettingProperty
-                label="start"
-                className="h-attribute"
-                value={shortenDate(selectedWord?.started_at)}
-              />
-              <SettingProperty
-                label="změněno"
-                className="h-attribute"
-                value={shortenDate(selectedWord?.updated_at)}
-              />
-              <SettingProperty
-                label="další"
-                className="h-attribute"
-                value={shortenDate(selectedWord?.next_at)}
-              />
-              <SettingProperty
-                label="naučeno"
-                className="h-attribute"
-                value={shortenDate(selectedWord?.learned_at)}
-              />
-              <SettingProperty
-                label="ukončeno"
-                className="h-attribute"
-                value={shortenDate(selectedWord?.mastered_at)}
-              />
-            </div>
-          </div>
-        </OverviewCard>
+          </OverviewCard>
+          <HelpButton className="self-end" />
+        </div>
       )}
     </>
   );

@@ -9,6 +9,7 @@ import OverviewCard from "@/components/UI/overview-card";
 import { useFetch } from "@/hooks/use-fetch";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import DOMPurify from "dompurify";
+import HelpButton from "@/components/UI/help-button";
 
 export default function GrammarOverview() {
   const { userId } = useAuthStore();
@@ -73,21 +74,24 @@ export default function GrammarOverview() {
           )}
         </div>
       ) : (
-        <OverviewCard
-          titleText={grammarArray?.[currentIndex].name}
-          onClose={() => setCardVisible(false)}
-          handleReset={handleClearGrammarUserItems}
-        >
-          {grammarArray?.[currentIndex].note ? (
-            <div
-              dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(grammarArray[currentIndex].note),
-              }}
-            />
-          ) : (
-            "Žádné poznámky k zobrazení."
-          )}
-        </OverviewCard>
+        <div className="relative flex flex-col w-full grow items-center justify-start">
+          <OverviewCard
+            titleText={grammarArray?.[currentIndex].name}
+            onClose={() => setCardVisible(false)}
+            handleReset={handleClearGrammarUserItems}
+          >
+            {grammarArray?.[currentIndex].note ? (
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(grammarArray[currentIndex].note),
+                }}
+              />
+            ) : (
+              "Žádné poznámky k zobrazení."
+            )}
+          </OverviewCard>
+          <HelpButton className="self-end" />
+        </div>
       )}
     </>
   );

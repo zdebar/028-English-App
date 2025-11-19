@@ -19,7 +19,9 @@ export default function Home() {
         Trénujte 400 slovíček či 200 vět za 20 minut denně, a dosáhněte základní
         znalosti jazyka za zlomek běžného učebního času.
       </p>
-      <p className="text-notice pb-12">aplikace v testovacím režimu</p>
+      <p className="text-notice dark:text-notice-dark pb-12">
+        aplikace v testovacím režimu
+      </p>
       {!userId ? (
         <ButtonRectangular
           className="grow-0 max-w-card w-full mt-8"

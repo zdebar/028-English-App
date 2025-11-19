@@ -2,6 +2,8 @@ import ButtonRectangular from "@/components/UI/button-rectangular";
 import { CloseIcon } from "@/components/UI/icons";
 import ButtonAsync from "./button-async";
 import Loading from "./loading";
+import Hint from "@/components/UI/hint";
+import { useOverlayStore } from "@/hooks/use-overlay-store";
 
 interface OverviewCardProps {
   titleText?: string;
@@ -35,6 +37,8 @@ export default function OverviewCard({
   isLoading = false,
   error = null,
 }: OverviewCardProps) {
+  const { isOpen } = useOverlayStore();
+
   return (
     <div
       className={`card-height card-width flex flex-col gap-1 justify-start ${className}`}
@@ -54,6 +58,9 @@ export default function OverviewCard({
           buttonTextStyle="p-4"
           disabled={!handleReset}
         />
+        <Hint visibility={isOpen} style={{ top: "0px", left: "14px" }}>
+          reset pokroku
+        </Hint>
         <ButtonRectangular className="w-button grow-0" onClick={onClose}>
           <CloseIcon />
         </ButtonRectangular>
