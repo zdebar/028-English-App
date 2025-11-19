@@ -321,7 +321,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     );
 
     if (rpcInsertError) {
-      throw new Error("Synchronization disallowed for annonymous users.");
+      console.error("Synchronization disallowed for annonymous users.");
     }
 
     // Step 5: Call the RPC function to fetch updated user item IDs

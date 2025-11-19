@@ -104,10 +104,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     );
 
     if (errorInsert) {
-      throw new Error(
-        "Error inserting user scores with Supabase:",
-        errorInsert
-      );
+      console.error("Synchronization disallowed for annonymous users.");
     }
 
     // Step 4: Fetch updated records from supabase
