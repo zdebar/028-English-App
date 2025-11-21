@@ -5,6 +5,7 @@ interface LessonBarProps {
   todayCount: number;
   lessonNumber: number;
   divisions?: number;
+  className?: string;
 }
 
 export default function ProgressBar({
@@ -12,6 +13,7 @@ export default function ProgressBar({
   todayCount = 0,
   lessonNumber = 1,
   divisions = 20,
+  className = "",
 }: LessonBarProps) {
   const lessonSize = config.lesson.lessonSize || 100;
   const totalWidth = 100;
@@ -25,10 +27,10 @@ export default function ProgressBar({
   const todayWidth = (validTodayCount / lessonSize) * totalWidth;
 
   return (
-    <div className="relative mx-auto w-full">
+    <div className={`relative mx-auto w-full ${className}`}>
       {/* Popisky */}
       <div className="absolute top-0 left-0 w-full flex  justify-between z-10 pt-1 px-2 font-body font-bold text-sm text-center text-light">
-        <span>Lekce: {lessonNumber}</span>
+        <span>Blok: {lessonNumber}</span>
         <span>+ {validTodayCount}</span>
       </div>
 

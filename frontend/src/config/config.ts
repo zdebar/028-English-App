@@ -11,7 +11,6 @@ const config = {
     skipProgress: 100,
     learnedProgress: 5, // Progress value for a word to be considered learned
     finishedProgress: 0, // Progress value for a word to be considered finished
-    learnedAtThreshold: 5, // Bigger or equal than progress threshold to set learned_at date
   },
 
   srs: {

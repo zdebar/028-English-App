@@ -3,11 +3,11 @@ import VolumeSlider from "@/components/UI/volume-slider";
 import ButtonRectangular from "@/components/UI/button-rectangular";
 import {
   SkipIcon,
-  InfoIcon,
   HintIcon,
   EyeIcon,
   MinusIcon,
   PlusIcon,
+  BookIcon,
 } from "@/components/UI/icons";
 import config from "@/config/config";
 import { usePracticeDeck } from "@/hooks/use-practice-deck";
@@ -19,14 +19,21 @@ import Loading from "@/components/UI/loading";
 import HelpButton from "@/components/UI/help-button";
 import Hint from "@/components/UI/hint";
 import { useOverlayStore } from "@/hooks/use-overlay-store";
+import Joyride from "react-joyride";
+import { useLocation } from "react-router-dom";
+import { stepsPractice as steps } from "@/config/joyride.config";
+import { useNavigate } from "react-router-dom";
 
 export default function Practice() {
-  // State and logic for practice
   const [revealed, setRevealed] = useState(false);
   const [hintIndex, setHintIndex] = useState(0);
+  const [showPlayHint, setShowPlayHint] = useState(true);
+  const [run, setRun] = useState(false); // For Joyride
+  const [stepIndex, setStepIndex] = useState(0); // For Joyride
   const [grammarVisible, setGrammarVisible] = useState(false);
   const { isOpen } = useOverlayStore();
-
+  const location = useLocation();
+  const navigate = useNavigate();
   const { userId } = useAuthStore();
   const { userStats } = useUserStore();
   const { index, array, nextItem, currentItem, direction, grammar_id } =
@@ -36,6 +43,20 @@ export default function Practice() {
 
   const isAudioDisabled =
     (direction && !revealed) || !currentItem?.audio || audioError;
+
+  // Start Joyride if indicated in location state
+  useEffect(() => {
+    if (location.state?.startJoyride) {
+      setRun(true);
+    }
+  }, [location.state]);
+
+  // Advance Joyride after revealing answer
+  useEffect(() => {
+    if (revealed && stepIndex === 10) {
+      setTimeout(() => setStepIndex(11), 0);
+    }
+  }, [revealed, stepIndex]);
 
   // Handle advancing to next item
   const handleNext = useCallback(
@@ -55,12 +76,12 @@ export default function Practice() {
     }
   }, [currentItem, playAudio]);
 
-  // Auto-play audio on new item if not in reading direction
+  // Auto-play audio on new item if english to czech direction
   useEffect(() => {
-    if (!direction && currentItem?.audio) {
+    if (!direction && currentItem?.audio && !showPlayHint) {
       setTimeout(() => playAudio(currentItem.audio!), 500);
     }
-  }, [currentItem, direction, playAudio]);
+  }, [currentItem, direction, playAudio, showPlayHint]);
 
   // Handle audio errors and retries
   useEffect(() => {
@@ -73,6 +94,47 @@ export default function Practice() {
 
   return (
     <div className="relative flex flex-col w-full grow items-center justify-start">
+      <Joyride
+        steps={steps}
+        run={run}
+        stepIndex={stepIndex}
+        continuous
+        showSkipButton={false}
+        hideBackButton={true}
+        disableOverlayClose={false}
+        disableCloseOnEsc={false}
+        callback={(data) => {
+          if (
+            data.status === "finished" ||
+            data.status === "skipped" ||
+            data.status === "idle" ||
+            data.action === "close"
+          ) {
+            setRun(false);
+          }
+
+          if (data.type === "step:after" && data.index === 10) {
+            setRevealed(true);
+            return;
+          }
+
+          if (data.type === "step:after") {
+            setStepIndex(data.index + 1);
+          }
+
+          if (data.type === "step:after" && data.index === 13) {
+            setRun(false);
+            navigate("/profile", { state: { startJoyride: true } });
+          }
+        }}
+        locale={{
+          back: "Zpět",
+          close: "Zavřít",
+          last: "Další",
+          next: "Další",
+          skip: "Přeskočit",
+        }}
+      />
       {grammarVisible ? (
         <GrammarCard
           grammar_id={currentItem?.grammar_id}
@@ -83,11 +145,15 @@ export default function Practice() {
           <div className="card-height h-full grow">
             {/* Item Card */}
             <div
-              className={`border border-dashed h-full relative flex grow flex-col items-center justify-between p-4 ${
+              className={`joyride-step-11 border border-dashed h-full relative flex grow flex-col items-center justify-between p-4 ${
                 !isAudioDisabled && "color-audio"
               }`}
               onClick={() => {
-                if (!isAudioDisabled) playAudio(currentItem.audio);
+                if (showPlayHint) {
+                  setShowPlayHint(false);
+                } else if (!isAudioDisabled) {
+                  playAudio(currentItem.audio);
+                }
               }}
               aria-label="Přehrát audio"
             >
@@ -106,6 +172,9 @@ export default function Practice() {
               </div>
 
               <div id="item">
+                {showPlayHint && (
+                  <div className="text-center">Stisknutím přehrajte audio</div>
+                )}
                 <p className="text-center font-bold">
                   {direction || revealed ? currentItem?.czech : "\u00A0"}
                 </p>
@@ -124,11 +193,13 @@ export default function Practice() {
                 className="relative flex w-full items-center justify-between"
                 id="bottom-bar"
               >
-                <p className="font-light">{currentItem?.progress}</p>
+                <p className="font-light joyride-step-12">
+                  {currentItem?.progress}
+                </p>
                 <Hint visibility={isOpen} style={{ bottom: "30px" }}>
                   pokrok
                 </Hint>
-                <p className="font-light">
+                <p className="font-light  joyride-step-13">
                   {(userStats?.practiceCountToday || 0) + index} /{" "}
                   {config.practice.dailyGoal}
                 </p>
@@ -146,14 +217,15 @@ export default function Practice() {
             {/* Practice Controls */}
             <div
               id="practice-controls"
-              className="flex relative flex-col gap-1"
+              className=" relative joyride-step-14 flex flex-col gap-1"
             >
-              <div className="flex gap-1">
+              <div className="flex  gap-1">
                 <ButtonRectangular
                   onClick={() => setGrammarVisible(true)}
                   disabled={!grammar_id || !revealed}
+                  className="joyride-step-15"
                 >
-                  <InfoIcon />
+                  <BookIcon />
                 </ButtonRectangular>
                 <Hint visibility={isOpen} style={{ top: "0px", left: "14px" }}>
                   gramatika
@@ -163,6 +235,7 @@ export default function Practice() {
                     handleNext(config.progress.skipProgress);
                   }}
                   disabled={!revealed}
+                  className="joyride-step-16"
                 >
                   <SkipIcon />
                 </ButtonRectangular>
@@ -170,65 +243,68 @@ export default function Practice() {
                   dokončit
                 </Hint>
               </div>
-              <div className="flex gap-1 relative">
-                {!revealed ? (
-                  <>
-                    <ButtonRectangular
-                      onClick={() => setHintIndex((prevIndex) => prevIndex + 1)}
-                    >
-                      <HintIcon />
-                    </ButtonRectangular>
-                    <Hint
-                      visibility={isOpen}
-                      style={{ top: "0px", left: "14px" }}
-                    >
-                      nápověda
-                    </Hint>
-                    <ButtonRectangular
-                      onClick={() => {
-                        setRevealed(true);
-                        if (direction) {
-                          playAudioForItem();
-                        }
-                        setHintIndex(() => 0);
-                      }}
-                    >
-                      <EyeIcon />
-                    </ButtonRectangular>
-                    <Hint
-                      visibility={isOpen}
-                      style={{ top: "0px", right: "14px" }}
-                    >
-                      odhalit
-                    </Hint>
-                  </>
-                ) : (
-                  <>
-                    <ButtonRectangular
-                      onClick={() => handleNext(config.progress.minusProgress)}
-                    >
-                      <MinusIcon />
-                    </ButtonRectangular>
-                    <Hint
-                      visibility={isOpen}
-                      style={{ top: "0px", left: "14px" }}
-                    >
-                      neznám
-                    </Hint>
-                    <ButtonRectangular
-                      onClick={() => handleNext(config.progress.plusProgress)}
-                    >
-                      <PlusIcon />
-                    </ButtonRectangular>
-                    <Hint
-                      visibility={isOpen}
-                      style={{ top: "0px", right: "14px" }}
-                    >
-                      znám
-                    </Hint>
-                  </>
-                )}
-              </div>
+
+              {!revealed ? (
+                <div className="flex gap-1 relative">
+                  <ButtonRectangular
+                    onClick={() => setHintIndex((prevIndex) => prevIndex + 1)}
+                    className="joyride-step-17"
+                  >
+                    <HintIcon />
+                  </ButtonRectangular>
+                  <Hint
+                    visibility={isOpen}
+                    style={{ top: "0px", left: "14px" }}
+                  >
+                    nápověda
+                  </Hint>
+                  <ButtonRectangular
+                    onClick={() => {
+                      setRevealed(true);
+                      if (direction) {
+                        playAudioForItem();
+                      }
+                      setHintIndex(() => 0);
+                    }}
+                    className="joyride-step-18"
+                  >
+                    <EyeIcon />
+                  </ButtonRectangular>
+                  <Hint
+                    visibility={isOpen}
+                    style={{ top: "0px", right: "14px" }}
+                  >
+                    odhalit
+                  </Hint>
+                </div>
+              ) : (
+                <div className="flex gap-1 relative joyride-step-19">
+                  <ButtonRectangular
+                    onClick={() => handleNext(config.progress.minusProgress)}
+                    className="joyride-step-20"
+                  >
+                    <MinusIcon />
+                  </ButtonRectangular>
+                  <Hint
+                    visibility={isOpen}
+                    style={{ top: "0px", left: "14px" }}
+                  >
+                    neznám
+                  </Hint>
+                  <ButtonRectangular
+                    onClick={() => handleNext(config.progress.plusProgress)}
+                    className="joyride-step-21"
+                  >
+                    <PlusIcon />
+                  </ButtonRectangular>
+                  <Hint
+                    visibility={isOpen}
+                    style={{ top: "0px", right: "14px" }}
+                  >
+                    znám
+                  </Hint>
+                </div>
+              )}
             </div>
           </div>
           <HelpButton

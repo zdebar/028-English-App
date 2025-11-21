@@ -121,7 +121,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         updated_at: currentDateTime,
         learned_at:
           item.learned_at === config.database.nullReplacementDate &&
-          item.progress >= config.progress.learnedAtThreshold
+          item.progress >= config.progress.learnedProgress
             ? currentDateTime
             : item.learned_at,
         mastered_at:
@@ -321,7 +321,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     );
 
     if (rpcInsertError) {
-      console.error("Synchronization disallowed for annonymous users.");
+      throw new Error("Synchronization disallowed for annonymous users.");
     }
 
     // Step 5: Call the RPC function to fetch updated user item IDs

@@ -54,7 +54,7 @@ export default function App() {
   return (
     <>
       {isOpen && <Overlay onClose={close} />}
-      <div className="mx-auto min-h-screen max-w-container flex flex-col">
+      <div className="mx-auto min-h-screen  max-w-container flex flex-col justify-start">
         <ToastContainer position="top-right" autoClose={5000} />
         <Header />
         <div className="relative grow flex flex-col items-center gap-4">
