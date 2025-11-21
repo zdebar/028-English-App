@@ -70,7 +70,7 @@
 @layer utilities {
   /* BACKGROUND COLORS */
   .color-button {
-    @apply hover:bg-button-hover hover:text-light active:shadow-none border;
+    @apply hover:bg-button-hover hover:text-light active:shadow-none border cursor-pointer;
     @apply disabled:shadow-none disabled:border-dashed disabled:hover:text-inherit disabled:bg-inherit;
     @apply bg-background-light text-light;
     @apply dark:bg-background-dark dark:text-dark;
@@ -87,7 +87,7 @@
   }
 
   .color-audio {
-    @apply border border-solid;
+    @apply border border-solid cursor-pointer;
     @apply bg-audio-light hover:bg-audio-hover-light;
     @apply dark:bg-audio-dark dark:hover:bg-audio-hover-dark;
   }
@@ -110,7 +110,7 @@
   }
 
   .text-link {
-    @apply hover:underline text-blue-600;
+    @apply underline hover:no-underline cursor-pointer font-headings;
   }
 }
 

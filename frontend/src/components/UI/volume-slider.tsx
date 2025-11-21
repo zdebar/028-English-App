@@ -47,13 +47,14 @@ export default function VolumeSlider({
   return (
     <div
       ref={sliderRef}
-      className={`flex pt-1 ${className}`}
+      className={`flex pt-1  ${className} cursor-pointer`}
       onClick={(event) => event.stopPropagation()}
       {...props}
     >
       <button
         onClick={() => setShowVolumeSlider((prev) => !prev)}
         aria-label="Nastavit hlasitost"
+        className="cursor-pointer"
         disabled={noAudio}
       >
         <VolumeIcon />
@@ -66,7 +67,7 @@ export default function VolumeSlider({
           step="0.01"
           value={volume}
           onChange={handleVolumeChange}
-          className="ml-2 w-24"
+          className="ml-2 w-24 cursor-pointer"
           autoFocus
           aria-valuenow={volume}
           aria-valuemin={0}

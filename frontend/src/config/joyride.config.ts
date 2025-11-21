@@ -50,7 +50,7 @@ export const stepsPractice = [
   {
     target: ".joyride-step-11",
     content:
-      "Učení není rozděleno do lekcí. Jde o jedinou sekvenci prvků a gramatických vět. Není třeba si dělat starosti, co procvičovat příště – aplikace se o správnou posloupnost postará sama.",
+      "Učení není rozděleno do lekcí. Jde o jedinou sekvenci prvků a gramatických vět. Není třeba si dělat starosti, co procvičovat příště, aplikace se o správnou posloupnost postará sama.",
     disableBeacon: true,
   },
   {

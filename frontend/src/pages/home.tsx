@@ -46,14 +46,17 @@ export default function Home() {
         }}
       />
       <h1 className="landscape:pt-6 ">Angličtina</h1>
+      <p className="text-notice dark:text-notice-dark ">
+        Aplikace v testovacím režimu
+      </p>
       <p className="px-4 ">
         Trénujte až 200 vět za 20 minut denně, a dosáhněte základní znalosti
         jazyka za zlomek běžného učebního času.
       </p>
-      <p className="text-notice dark:text-notice-dark ">
-        Aplikace v testovacím režimu
-      </p>
-      <p className="text-link cursor-pointer" onClick={() => setRun(true)}>
+      <p
+        className="text-link  dark:text-notice-dark "
+        onClick={() => setRun(true)}
+      >
         Spustit průvodce
       </p>
 

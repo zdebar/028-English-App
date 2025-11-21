@@ -162,18 +162,14 @@ export default function Practice() {
                 className="relative flex w-full items-center justify-between"
               >
                 <VolumeSlider setVolume={setVolume} />
-                <Hint visibility={isOpen} style={{ top: "30px" }}>
-                  hlasitost
-                </Hint>
                 <p className="font-light">{audioError && "bez audia"}</p>
-                <Hint visibility={isOpen} style={{ top: "30px", right: "0" }}>
-                  chybová hlášení
-                </Hint>
               </div>
 
               <div id="item">
-                {showPlayHint && (
-                  <div className="text-center">Stisknutím přehrajte audio</div>
+                {showPlayHint && !direction && (
+                  <div className="text-center text-notice">
+                    Stisknutím přehrajte audio
+                  </div>
                 )}
                 <p className="text-center font-bold">
                   {direction || revealed ? currentItem?.czech : "\u00A0"}
@@ -260,6 +256,9 @@ export default function Practice() {
                   </Hint>
                   <ButtonRectangular
                     onClick={() => {
+                      if (showPlayHint) {
+                        setShowPlayHint(false);
+                      }
                       setRevealed(true);
                       if (direction) {
                         playAudioForItem();
