@@ -20,7 +20,7 @@ export default function Header() {
         <ButtonHeader
           to="/practice"
           aria-label="Uživatelský dashboard"
-          className="joyride-step-10"
+          className="tour-step-10"
           disabled={!userId}
         >
           <AcademicCapIcon />
@@ -36,7 +36,7 @@ export default function Header() {
           to="/profile"
           aria-label="Nastavení uživatele"
           disabled={!userId}
-          className="joyride-step-30"
+          className="tour-step-30"
         >
           <UserAvatar />
         </ButtonHeader>

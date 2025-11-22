@@ -19,11 +19,15 @@ import type { Session } from "@supabase/supabase-js";
 import { supabaseInstance } from "@/config/supabase.config";
 import Overlay from "./components/UI/overlay";
 import { useOverlayStore } from "@/hooks/use-overlay-store";
+import TourGuideLauncher from "./components/UI/tour-guide";
+import { tour } from "@/config/tour-guide.config";
+import { useTourStore } from "@/hooks/use-tour-store";
 
 export default function App() {
   const { theme, chooseTheme } = useThemeStore();
   const { userId, setSession } = useAuthStore();
   const { isOpen, close } = useOverlayStore();
+  const { showTour, closeTour } = useTourStore();
 
   useEffect(() => {
     supabaseInstance.auth
@@ -56,6 +60,7 @@ export default function App() {
       {isOpen && <Overlay onClose={close} />}
       <div className="mx-auto min-h-screen  max-w-container flex flex-col justify-start">
         <ToastContainer position="top-right" autoClose={5000} />
+        {showTour && <TourGuideLauncher tour={tour} onClose={closeTour} />}
         <Header />
         <div className="relative grow flex flex-col items-center gap-4">
           <Routes>

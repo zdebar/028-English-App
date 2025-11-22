@@ -19,21 +19,14 @@ import Loading from "@/components/UI/loading";
 import HelpButton from "@/components/UI/help-button";
 import Hint from "@/components/UI/hint";
 import { useOverlayStore } from "@/hooks/use-overlay-store";
-import Joyride from "react-joyride";
-import { useLocation } from "react-router-dom";
-import { stepsPractice as steps } from "@/config/joyride.config";
-import { useNavigate } from "react-router-dom";
+import { useTourStore } from "@/hooks/use-tour-store";
 
 export default function Practice() {
   const [revealed, setRevealed] = useState(false);
   const [hintIndex, setHintIndex] = useState(0);
   const [showPlayHint, setShowPlayHint] = useState(true);
-  const [run, setRun] = useState(false); // For Joyride
-  const [stepIndex, setStepIndex] = useState(0); // For Joyride
   const [grammarVisible, setGrammarVisible] = useState(false);
   const { isOpen } = useOverlayStore();
-  const location = useLocation();
-  const navigate = useNavigate();
   const { userId } = useAuthStore();
   const { userStats } = useUserStore();
   const { index, array, nextItem, currentItem, direction, grammar_id } =
@@ -46,23 +39,37 @@ export default function Practice() {
     setAudioError,
     isPlaying,
   } = useAudioManager(array || []);
+  const { current, lastTarget } = useTourStore();
 
   const isAudioDisabled =
     (direction && !revealed) || !currentItem?.audio || audioError;
 
-  // Start Joyride if indicated in location state
   useEffect(() => {
-    if (location.state?.startJoyride) {
-      setRun(true);
-    }
-  }, [location.state]);
+    const revealTransitions = [
+      [".tour-step-18", ".tour-step-19"],
+      [".tour-step-30", ".tour-step-21"],
+    ];
+    const hideTransitions = [[".tour-step-19", ".tour-step-18"]];
 
-  // Advance Joyride after revealing answer
-  useEffect(() => {
-    if (revealed && stepIndex === 10) {
-      setTimeout(() => setStepIndex(11), 0);
+    if (
+      revealTransitions.some(
+        ([from, to]) => lastTarget === from && current?.target === to
+      )
+    ) {
+      setRevealed(true);
+      setShowPlayHint(false);
+      if (isPlaying) stopAudio();
     }
-  }, [revealed, stepIndex]);
+    if (
+      hideTransitions.some(
+        ([from, to]) => lastTarget === from && current?.target === to
+      )
+    ) {
+      setRevealed(false);
+      setShowPlayHint(true);
+      if (isPlaying) stopAudio();
+    }
+  }, [current?.target, lastTarget, isPlaying, stopAudio]);
 
   // Handle advancing to next item
   const handleNext = useCallback(
@@ -100,47 +107,6 @@ export default function Practice() {
 
   return (
     <div className="relative flex flex-col w-full grow items-center justify-start">
-      <Joyride
-        steps={steps}
-        run={run}
-        stepIndex={stepIndex}
-        continuous
-        showSkipButton={false}
-        hideBackButton={true}
-        disableOverlayClose={false}
-        disableCloseOnEsc={false}
-        callback={(data) => {
-          if (
-            data.status === "finished" ||
-            data.status === "skipped" ||
-            data.status === "idle" ||
-            data.action === "close"
-          ) {
-            setRun(false);
-          }
-
-          if (data.type === "step:after" && data.index === 10) {
-            setRevealed(true);
-            return;
-          }
-
-          if (data.type === "step:after") {
-            setStepIndex(data.index + 1);
-          }
-
-          if (data.type === "step:after" && data.index === 13) {
-            setRun(false);
-            navigate("/profile", { state: { startJoyride: true } });
-          }
-        }}
-        locale={{
-          back: "Zpět",
-          close: "Zavřít",
-          last: "Další",
-          next: "Další",
-          skip: "Přeskočit",
-        }}
-      />
       {grammarVisible ? (
         <GrammarCard
           grammar_id={currentItem?.grammar_id}
@@ -151,7 +117,7 @@ export default function Practice() {
           <div className="card-height h-full grow">
             {/* Item Card */}
             <div
-              className={`joyride-step-11 border border-dashed h-full relative flex grow flex-col items-center justify-between p-4 ${
+              className={`tour-step-11 border border-dashed h-full relative flex grow flex-col items-center justify-between p-4 ${
                 !isAudioDisabled && "color-audio"
               }`}
               onClick={() => {
@@ -195,20 +161,20 @@ export default function Practice() {
                 className="relative flex w-full items-center justify-between"
                 id="bottom-bar"
               >
-                <p className="font-light joyride-step-12">
+                <p className="font-light tour-step-12 px-2">
                   {currentItem?.progress}
                 </p>
                 <Hint visibility={isOpen} style={{ bottom: "30px" }}>
                   pokrok
                 </Hint>
-                <p className="font-light  joyride-step-13">
+                <p className="font-light  tour-step-13 px-2">
                   {(userStats?.practiceCountToday || 0) + index} /{" "}
                   {config.practice.dailyGoal}
                 </p>
                 <Hint
                   visibility={isOpen}
                   style={{ bottom: "30px", right: "0" }}
-                  className="flex flex-col items-end"
+                  className="flex flex-col items-end "
                 >
                   <p>počet procvičení</p>
                   <p>/ denní cíl</p>
@@ -219,13 +185,13 @@ export default function Practice() {
             {/* Practice Controls */}
             <div
               id="practice-controls"
-              className=" relative joyride-step-14 flex flex-col gap-1"
+              className=" relative tour-step-14 flex flex-col gap-1"
             >
               <div className="flex  gap-1">
                 <ButtonRectangular
                   onClick={() => setGrammarVisible(true)}
                   disabled={!grammar_id || !revealed}
-                  className="joyride-step-15"
+                  className="tour-step-15"
                 >
                   <BookIcon />
                 </ButtonRectangular>
@@ -237,7 +203,7 @@ export default function Practice() {
                     handleNext(config.progress.skipProgress);
                   }}
                   disabled={!revealed || isPlaying}
-                  className="joyride-step-16"
+                  className="tour-step-16"
                 >
                   <SkipIcon />
                 </ButtonRectangular>
@@ -247,10 +213,10 @@ export default function Practice() {
               </div>
 
               {!revealed ? (
-                <div className="flex gap-1 relative">
+                <div className="flex gap-1 relative tour-step-19">
                   <ButtonRectangular
                     onClick={() => setHintIndex((prevIndex) => prevIndex + 1)}
-                    className="joyride-step-17"
+                    className="tour-step-17"
                   >
                     <HintIcon />
                   </ButtonRectangular>
@@ -271,7 +237,7 @@ export default function Practice() {
                       }
                       setHintIndex(() => 0);
                     }}
-                    className="joyride-step-18"
+                    className="tour-step-18"
                     disabled={isPlaying}
                   >
                     <EyeIcon />
@@ -284,10 +250,10 @@ export default function Practice() {
                   </Hint>
                 </div>
               ) : (
-                <div className="flex gap-1 relative joyride-step-19">
+                <div className="flex gap-1 relative  tour-step-19 ">
                   <ButtonRectangular
                     onClick={() => handleNext(config.progress.minusProgress)}
-                    className="joyride-step-20"
+                    className="tour-step-20"
                     disabled={isPlaying}
                   >
                     <MinusIcon />
@@ -300,7 +266,7 @@ export default function Practice() {
                   </Hint>
                   <ButtonRectangular
                     onClick={() => handleNext(config.progress.plusProgress)}
-                    className="joyride-step-21"
+                    className="tour-step-21"
                     disabled={isPlaying}
                   >
                     <PlusIcon />

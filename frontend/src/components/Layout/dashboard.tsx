@@ -26,14 +26,14 @@ export default function Dashboard({ className = "" }: { className?: string }) {
           lessonNumber={lessonId}
           previousCount={previousCount}
           todayCount={todayCount}
-          className="joyride-step-1"
+          className="tour-step-1"
         />
       ))}
       <Hint visibility={isOpen} style={{ bottom: "5px", right: "5px" }}>
         dnes naučeno
       </Hint>
       <HelpButton
-        className="joyride-step-2"
+        className="tour-step-2"
         style={{
           bottom: "5px",
           left: "50px",
