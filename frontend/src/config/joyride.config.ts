@@ -3,14 +3,73 @@ import config from "./config";
 export const stepsHome = [
   {
     target: ".joyride-step-1",
-    content:
-      "Aplikace je zaměřená na intenzivní drill. Bez zbytečného rozptylování. Bez stresu co dělat příště.",
+    content: "Učení cizích jazyků není složité.",
+    disableBeacon: true,
+  },
+  {
+    target: ".joyride-step-1",
+    content: "Vše je otázkou dostatečného množství opakování.",
+    disableBeacon: true,
+  },
+  {
+    target: ".joyride-step-1",
+    content: "Tato aplikace maximalizuje denní počet opakování.",
+    disableBeacon: true,
+  },
+  {
+    target: ".joyride-step-1",
+    content: "Soustředí se pouze na nejlepší metodu: memorizační kartičky.",
+    disableBeacon: true,
+  },
+  {
+    target: ".joyride-step-1",
+    content: "Učení probíhá v jediné plynulé sekvenci.",
     disableBeacon: true,
   },
   {
     target: ".joyride-step-1",
     content:
-      "Zde zobrazené bloky sdružují cvičební prvky (slovíčka či věty) po 100. Jejich jediným cílem je dát zpětnou vazbu Vašemu pokroku.",
+      "Napřed vždy několik slovíček a poté jednoduchý gramatický princip procvičovaný ve větách.",
+    disableBeacon: true,
+  },
+  {
+    target: ".joyride-step-1",
+    content:
+      "Dle Vašeho sebehodnocení znalosti algoritmus zvolí příští dobu opakování.",
+    disableBeacon: true,
+  },
+  {
+    target: ".joyride-step-1",
+    content:
+      "Není třeba se stresovat zda něco umíte lépe či hůře. Ohodnoťte pravdivě svou znalost a aplikace se o vše postará.",
+    disableBeacon: true,
+  },
+  {
+    target: ".joyride-step-1",
+    content:
+      "Rychlým tempem lze během 20 minut procvičit až 400 slovíček či vět.",
+    disableBeacon: true,
+  },
+  {
+    target: ".joyride-step-1",
+    content:
+      "Můžete ale cvičit i třeba 10 hodin denně. Vždy je připraven další prvek k procvičování.",
+    disableBeacon: true,
+  },
+  {
+    target: ".joyride-step-1",
+    content: "Teď už ale k vysvětlení...",
+    disableBeacon: true,
+  },
+  {
+    target: ".joyride-step-1",
+    content:
+      "Zde zobrazené bloky sdružují cvičební prvky (slovíčka či věty) po 100.",
+    disableBeacon: true,
+  },
+  {
+    target: ".joyride-step-1",
+    content: "Jejich jediným cílem je dát zpětnou vazbu Vašemu pokroku.",
     disableBeacon: true,
   },
   {
@@ -20,12 +79,27 @@ export const stepsHome = [
   },
   {
     target: ".joyride-step-1",
-    content: `Prvek se označí jako naučený po "${config.progress.learnedProgress}" správných odpovědích. To se dá zvládnout během jednoho dne.`,
+    content: `Prvek se označí jako naučený po "${config.progress.learnedProgress}" správných odpovědích.`,
     disableBeacon: true,
   },
   {
     target: ".joyride-step-1",
-    content: `Perfektně zvládnutý prvek bude ale až zhruba po 3 měsících. Poté se již prvek nebude znovu nabízet k procvičování.`,
+    content: `Opakovací algoritmus vrací slovíčka k opakování velice rychle. Napřed hned, poté po minutách, pak hodinách, dnech a nakonec týdnech.`,
+    disableBeacon: true,
+  },
+  {
+    target: ".joyride-step-1",
+    content: `Pokud budete cvičit několikrát denně, lze zvládnout naučení slovíčka již během prvního dne.`,
+    disableBeacon: true,
+  },
+  {
+    target: ".joyride-step-1",
+    content: `Perfektně zvládnutý prvek bude ale až zhruba po 3 měsících.`,
+    disableBeacon: true,
+  },
+  {
+    target: ".joyride-step-1",
+    content: `Poté se již prvek nebude znovu nabízet k procvičování.`,
     disableBeacon: true,
   },
   {
@@ -38,7 +112,7 @@ export const stepsHome = [
 export const stepsPractice = [
   {
     target: ".joyride-step-10",
-    content: "Na druhou záložku!",
+    content: "Na záložku procvičování!",
     disableBeacon: true,
   },
   {
@@ -56,7 +130,7 @@ export const stepsPractice = [
   {
     target: ".joyride-step-11",
     content:
-      "Běžný postup je například 10 zájmen, 10 podstatných jmen, 10 sloves a následné procvičování ve 20 a více větách. Pravidelně se střídá směr z češtiny do angličtiny a naopak.",
+      "Běžný postup je například 20 podstatných jmen, 10 sloves a následné procvičování ve 20 a více větách. Pravidelně se střídá směr z češtiny do angličtiny a naopak.",
     disableBeacon: true,
   },
   {
@@ -66,7 +140,7 @@ export const stepsPractice = [
   },
   {
     target: ".joyride-step-13",
-    content: `Denní počet opakování / doporučený minimální denní cíl.`,
+    content: `Denní počet opakování / Doporučený denní cíl.`,
     disableBeacon: true,
   },
   {
@@ -118,7 +192,7 @@ export const stepsPractice = [
 export const stepsProfile = [
   {
     target: ".joyride-step-30",
-    content: "Na poslední záložku!",
+    content: "Na záložku profilu!",
     disableBeacon: true,
   },
   {

@@ -38,8 +38,14 @@ export default function Practice() {
   const { userStats } = useUserStore();
   const { index, array, nextItem, currentItem, direction, grammar_id } =
     usePracticeDeck(userId!);
-  const { playAudio, stopAudio, setVolume, audioError, setAudioError } =
-    useAudioManager(array || []);
+  const {
+    playAudio,
+    stopAudio,
+    setVolume,
+    audioError,
+    setAudioError,
+    isPlaying,
+  } = useAudioManager(array || []);
 
   const isAudioDisabled =
     (direction && !revealed) || !currentItem?.audio || audioError;
@@ -230,7 +236,7 @@ export default function Practice() {
                   onClick={() => {
                     handleNext(config.progress.skipProgress);
                   }}
-                  disabled={!revealed}
+                  disabled={!revealed || isPlaying}
                   className="joyride-step-16"
                 >
                   <SkipIcon />
@@ -266,6 +272,7 @@ export default function Practice() {
                       setHintIndex(() => 0);
                     }}
                     className="joyride-step-18"
+                    disabled={isPlaying}
                   >
                     <EyeIcon />
                   </ButtonRectangular>
@@ -281,6 +288,7 @@ export default function Practice() {
                   <ButtonRectangular
                     onClick={() => handleNext(config.progress.minusProgress)}
                     className="joyride-step-20"
+                    disabled={isPlaying}
                   >
                     <MinusIcon />
                   </ButtonRectangular>
@@ -293,6 +301,7 @@ export default function Practice() {
                   <ButtonRectangular
                     onClick={() => handleNext(config.progress.plusProgress)}
                     className="joyride-step-21"
+                    disabled={isPlaying}
                   >
                     <PlusIcon />
                   </ButtonRectangular>

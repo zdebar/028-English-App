@@ -169,8 +169,6 @@
   }
 }
 
-/** Joyride Overrides **/
-/* .react-joyride__spotlight,
-.react-joyride__beacon {
-  display: contents !important;
-} */
+.react-joyride__spotlight {
+  padding: 20px !important;
+}

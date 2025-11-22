@@ -32,7 +32,7 @@ export default function Home() {
           ) {
             setRun(false);
           }
-          if (data.type === "step:after" && data.index === 5) {
+          if (data.type === "step:after" && data.index === 19) {
             setRun(false);
             navigate("/practice", { state: { startJoyride: true } });
           }
