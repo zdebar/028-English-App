@@ -359,9 +359,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     }
 
     // Step 7: Trigger event and update metadata
-    if (updatedUserItems.length > 0) {
-      triggerUserItemsUpdatedEvent(userId);
-    }
     await Metadata.markAsSynced(TableName.UserItems, newSyncTime, userId);
 
     return updatedUserItems.length;
