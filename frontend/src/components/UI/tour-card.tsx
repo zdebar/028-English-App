@@ -71,26 +71,26 @@ export default function TourCard({
     <div
       ref={cardRef}
       style={style}
-      className="max-w-card w-full fixed color-audio border border-dashed z-1000 flex flex-col items-center justify-center"
+      className="max-w-card h-50 color-audio z-1000 fixed flex flex-col items-center justify-center w-full border border-dashed"
     >
       <p
-        className="absolute top-0 right-0 w-11 h-11 flex justify-center items-center"
+        className="w-11 h-11 absolute top-0 right-0 flex items-center justify-center"
         onClick={onClose}
       >
         <CloseIcon />
       </p>
-      <div className="p-4 pt-12 h-full min-h-30 flex flex-col justify-center text-center">
+      <div className="min-h-30 flex flex-col justify-center h-full p-4 pt-12 text-center">
         {content}
       </div>
-      <div className="flex gap-1 w-full max-w-full">
+      <div className="flex w-full max-w-full gap-1">
         <ButtonRectangular
           onClick={onPrevious}
           disabled={isFirst}
-          className=" min-w-0 shrink flex-1"
+          className=" shrink flex-1 min-w-0"
         >
           Předchozí
         </ButtonRectangular>
-        <ButtonRectangular onClick={onNext} className=" min-w-0 shrink flex-1">
+        <ButtonRectangular onClick={onNext} className=" shrink flex-1 min-w-0">
           {isLast ? "Dokončit" : "Další"}
         </ButtonRectangular>
       </div>
