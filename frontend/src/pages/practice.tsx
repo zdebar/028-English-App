@@ -13,7 +13,7 @@ import config from "@/config/config";
 import { usePracticeDeck } from "@/hooks/use-practice-deck";
 import { useAudioManager } from "@/hooks/use-audio-manager";
 import { useAuthStore } from "@/hooks/use-auth-store";
-import { useUserStore } from "@/hooks/use-user";
+import { useUserStore } from "@/hooks/use-user-store";
 import GrammarCard from "@/components/Layout/grammar-card";
 import Loading from "@/components/UI/loading";
 import HelpButton from "@/components/UI/help-button";
@@ -39,21 +39,22 @@ export default function Practice() {
     setAudioError,
     isPlaying,
   } = useAudioManager(array || []);
-  const { current, lastTarget } = useTourStore();
+  const { currentId, lastId } = useTourStore();
 
   const isAudioDisabled =
     (direction && !revealed) || !currentItem?.audio || audioError;
 
+  // Tour step transitions
   useEffect(() => {
     const revealTransitions = [
-      [".tour-step-18", ".tour-step-19"],
-      [".tour-step-30", ".tour-step-21"],
+      [34, 33],
+      [30, 31],
     ];
-    const hideTransitions = [[".tour-step-19", ".tour-step-18"]];
+    const hideTransitions = [[31, 30]];
 
     if (
       revealTransitions.some(
-        ([from, to]) => lastTarget === from && current?.target === to
+        ([from, to]) => lastId === from && currentId === to
       )
     ) {
       setRevealed(true);
@@ -61,15 +62,13 @@ export default function Practice() {
       if (isPlaying) stopAudio();
     }
     if (
-      hideTransitions.some(
-        ([from, to]) => lastTarget === from && current?.target === to
-      )
+      hideTransitions.some(([from, to]) => lastId === from && currentId === to)
     ) {
       setRevealed(false);
       setShowPlayHint(true);
       if (isPlaying) stopAudio();
     }
-  }, [current?.target, lastTarget, isPlaying, stopAudio]);
+  }, [currentId, lastId, isPlaying, stopAudio]);
 
   // Handle advancing to next item
   const handleNext = useCallback(
@@ -106,15 +105,15 @@ export default function Practice() {
   }
 
   return (
-    <div className="relative flex flex-col w-full grow items-center justify-start">
+    <div className="grow relative flex flex-col items-center justify-start w-full">
       {grammarVisible ? (
         <GrammarCard
           grammar_id={currentItem?.grammar_id}
           onClose={() => setGrammarVisible(false)}
         />
       ) : (
-        <div className="card-width h-full grow">
-          <div className="card-height h-full grow">
+        <div className="card-width grow h-full">
+          <div className="card-height grow h-full">
             {/* Item Card */}
             <div
               className={`tour-step-11 border border-dashed h-full relative flex grow flex-col items-center justify-between p-4 ${
@@ -131,7 +130,7 @@ export default function Practice() {
             >
               <div
                 id="top-bar"
-                className="relative flex w-full items-center justify-between"
+                className="relative flex items-center justify-between w-full"
               >
                 <VolumeSlider setVolume={setVolume} />
                 <p className="font-light">{audioError && "bez audia"}</p>
@@ -139,11 +138,11 @@ export default function Practice() {
 
               <div id="item">
                 {showPlayHint && !direction && (
-                  <div className="text-center text-notice">
+                  <div className="text-notice text-center">
                     Stisknutím přehrajte audio
                   </div>
                 )}
-                <p className="text-center font-bold">
+                <p className="font-bold text-center">
                   {direction || revealed ? currentItem?.czech : "\u00A0"}
                 </p>
                 <p className="text-center">
@@ -158,23 +157,23 @@ export default function Practice() {
                 </p>
               </div>
               <div
-                className="relative flex w-full items-center justify-between"
+                className="relative flex items-center justify-between w-full"
                 id="bottom-bar"
               >
-                <p className="font-light tour-step-12 px-2">
+                <p className="tour-step-12 px-2 font-light">
                   {currentItem?.progress}
                 </p>
                 <Hint visibility={isOpen} style={{ bottom: "30px" }}>
                   pokrok
                 </Hint>
-                <p className="font-light  tour-step-13 px-2">
+                <p className="tour-step-13 px-2 font-light">
                   {(userStats?.practiceCountToday || 0) + index} /{" "}
                   {config.practice.dailyGoal}
                 </p>
                 <Hint
                   visibility={isOpen}
                   style={{ bottom: "30px", right: "0" }}
-                  className="flex flex-col items-end "
+                  className=" flex flex-col items-end"
                 >
                   <p>počet procvičení</p>
                   <p>/ denní cíl</p>
@@ -185,9 +184,9 @@ export default function Practice() {
             {/* Practice Controls */}
             <div
               id="practice-controls"
-              className=" relative tour-step-14 flex flex-col gap-1"
+              className=" tour-step-14 relative flex flex-col gap-1"
             >
-              <div className="flex  gap-1">
+              <div className="flex gap-1">
                 <ButtonRectangular
                   onClick={() => setGrammarVisible(true)}
                   disabled={!grammar_id || !revealed}
@@ -202,7 +201,7 @@ export default function Practice() {
                   onClick={() => {
                     handleNext(config.progress.skipProgress);
                   }}
-                  disabled={!revealed || isPlaying}
+                  disabled={!revealed}
                   className="tour-step-16"
                 >
                   <SkipIcon />
@@ -213,7 +212,7 @@ export default function Practice() {
               </div>
 
               {!revealed ? (
-                <div className="flex gap-1 relative tour-step-19">
+                <div className="tour-step-19 relative flex gap-1">
                   <ButtonRectangular
                     onClick={() => setHintIndex((prevIndex) => prevIndex + 1)}
                     className="tour-step-17"
@@ -238,7 +237,6 @@ export default function Practice() {
                       setHintIndex(() => 0);
                     }}
                     className="tour-step-18"
-                    disabled={isPlaying}
                   >
                     <EyeIcon />
                   </ButtonRectangular>
@@ -250,11 +248,10 @@ export default function Practice() {
                   </Hint>
                 </div>
               ) : (
-                <div className="flex gap-1 relative  tour-step-19 ">
+                <div className="tour-step-19 relative flex gap-1">
                   <ButtonRectangular
                     onClick={() => handleNext(config.progress.minusProgress)}
                     className="tour-step-20"
-                    disabled={isPlaying}
                   >
                     <MinusIcon />
                   </ButtonRectangular>
@@ -267,7 +264,6 @@ export default function Practice() {
                   <ButtonRectangular
                     onClick={() => handleNext(config.progress.plusProgress)}
                     className="tour-step-21"
-                    disabled={isPlaying}
                   >
                     <PlusIcon />
                   </ButtonRectangular>

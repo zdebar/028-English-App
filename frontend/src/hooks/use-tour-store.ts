@@ -1,24 +1,23 @@
 import { create } from "zustand";
-import { type TourStep } from "./use-tour-guide";
 
 type TourState = {
   showTour: boolean;
-  current: TourStep | null;
-  lastTarget: string | null;
-  setCurrent: (step: TourStep | null) => void;
+  currentId: number | null;
+  lastId: number | null;
+  setCurrentId: (idx: number) => void;
   openTour: () => void;
   closeTour: () => void;
 };
 
 export const useTourStore = create<TourState>((set) => ({
   showTour: false,
-  current: null,
-  lastTarget: null,
-  setCurrent: (step) =>
+  currentId: null,
+  lastId: null,
+  setCurrentId: (idx) =>
     set((state) => ({
-      lastTarget: state.current?.target ?? null,
-      current: step,
+      lastId: state.currentId,
+      currentId: idx,
     })),
   openTour: () => set({ showTour: true }),
-  closeTour: () => set({ showTour: false, current: null }),
+  closeTour: () => set({ showTour: false, currentId: null, lastId: null }),
 }));

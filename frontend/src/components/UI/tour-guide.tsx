@@ -13,13 +13,12 @@ export default function TourGuideLauncher({
   tour,
   onClose,
 }: TourGuideLauncherProps) {
-  const { current, next, prev, isFirst, isLast } = useTourGuide(tour);
-  const setCurrent = useTourStore((s) => s.setCurrent);
+  const { id, current, next, prev, isFirst, isLast } = useTourGuide(tour);
+  const setCurrentId = useTourStore((s) => s.setCurrentId);
 
   useEffect(() => {
-    setCurrent(current);
-  }, [current, setCurrent]);
-
+    setCurrentId(id);
+  }, [id, setCurrentId]);
   return (
     <>
       <Overlay target={current.target} />

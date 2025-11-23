@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 export type TourStep = {
+  id: number;
   content: React.ReactNode;
   target: string;
   onPreviousNavigateTo?: string;
@@ -37,6 +38,8 @@ export function useTourGuide(tour: TourStep[]) {
   }, []);
 
   return {
+    index,
+    id: tour[index].id,
     current: tour[index],
     next,
     prev,
