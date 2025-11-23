@@ -142,6 +142,8 @@
   }
 }
 
+/** RESPONSIVE STYLES **/
+
 @media (max-height: 460px) and (max-width: 640px) {
   .sideheader {
     flex-direction: column;
@@ -153,7 +155,6 @@
     height: 150px;
   }
 }
-
 @media (max-height: 460px) {
   .header-fixed {
     position: fixed;
@@ -169,6 +170,16 @@
   }
 }
 
-.react-tour__spotlight {
-  padding: 20px !important;
+.help-btn-pos {
+  position: absolute;
+  bottom: -35px;
+  right: 3px;
+}
+
+@media (max-height: 400px) {
+  .help-btn-pos {
+    position: absolute;
+    bottom: 3px;
+    right: -35px;
+  }
 }

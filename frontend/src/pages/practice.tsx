@@ -105,15 +105,15 @@ export default function Practice() {
   }
 
   return (
-    <div className="grow relative flex flex-col items-center justify-start w-full">
+    <div className="grow relative flex flex-col items-center w-full">
       {grammarVisible ? (
         <GrammarCard
           grammar_id={currentItem?.grammar_id}
           onClose={() => setGrammarVisible(false)}
         />
       ) : (
-        <div className="card-width grow h-full">
-          <div className="card-height grow h-full">
+        <>
+          <div className="card-width card-height relative">
             {/* Item Card */}
             <div
               className={`tour-step-11 border border-dashed h-full relative flex grow flex-col items-center justify-between p-4 ${
@@ -135,26 +135,46 @@ export default function Practice() {
                 <VolumeSlider setVolume={setVolume} />
                 <p className="font-light">{audioError && "bez audia"}</p>
               </div>
-
-              <div id="item">
-                {showPlayHint && !direction && (
+              <div
+                id="item"
+                className="flex flex-col justify-center h-full gap-1"
+              >
+                {showPlayHint && !direction ? (
                   <div className="text-notice text-center">
                     Stisknutím přehrajte audio
                   </div>
+                ) : (
+                  <>
+                    <p className="font-bold text-center">
+                      {direction || revealed
+                        ? currentItem?.czech
+                        : audioError
+                        ? currentItem?.czech
+                            ?.slice(0, hintIndex)
+                            .padEnd(currentItem?.czech?.length ?? 0, "\u00A0")
+                        : hintIndex >= (currentItem?.english?.length ?? 0)
+                        ? currentItem?.czech
+                            ?.slice(
+                              0,
+                              hintIndex - (currentItem?.english?.length ?? 0)
+                            )
+                            .padEnd(currentItem?.czech?.length ?? 0, "\u00A0")
+                        : "\u00A0"}
+                    </p>
+                    <p className="text-center">
+                      {revealed || (!direction && audioError)
+                        ? currentItem?.english
+                        : currentItem?.english
+                            .slice(0, hintIndex ?? currentItem?.english.length)
+                            .padEnd(currentItem?.english.length, "\u00A0")}
+                    </p>
+                    <p className="text-center">
+                      {revealed
+                        ? currentItem?.pronunciation || "\u00A0"
+                        : "\u00A0"}
+                    </p>
+                  </>
                 )}
-                <p className="font-bold text-center">
-                  {direction || revealed ? currentItem?.czech : "\u00A0"}
-                </p>
-                <p className="text-center">
-                  {revealed || (!direction && audioError)
-                    ? currentItem?.english
-                    : currentItem?.english
-                        .slice(0, hintIndex ?? currentItem?.english.length)
-                        .padEnd(currentItem?.english.length, "\u00A0")}
-                </p>
-                <p className="text-center">
-                  {revealed ? currentItem?.pronunciation || "\u00A0" : "\u00A0"}
-                </p>
               </div>
               <div
                 className="relative flex items-center justify-between w-full"
@@ -180,7 +200,6 @@ export default function Practice() {
                 </Hint>
               </div>
             </div>
-
             {/* Practice Controls */}
             <div
               id="practice-controls"
@@ -210,7 +229,6 @@ export default function Practice() {
                   dokončit
                 </Hint>
               </div>
-
               {!revealed ? (
                 <div className="tour-step-19 relative flex gap-1">
                   <ButtonRectangular
@@ -276,15 +294,9 @@ export default function Practice() {
                 </div>
               )}
             </div>
+            <HelpButton className="help-btn-pos self-end" />
           </div>
-          <HelpButton
-            className="self-end"
-            style={{
-              bottom: "5px",
-              right: "5px",
-            }}
-          />
-        </div>
+        </>
       )}
     </div>
   );
