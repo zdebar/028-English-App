@@ -35,7 +35,6 @@ export default function ButtonResetAll() {
     <ButtonAsync
       isLoading={isLoading}
       message="Resetovat vše"
-      disabledMessage="Resetování..."
       modalTitle="Potvrzení resetu"
       modalDescription="Opravdu chcete vymazat veškerý progress? Změna již nepůjde vrátit."
       onConfirm={handleReset}

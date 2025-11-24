@@ -30,7 +30,9 @@ export default function ProgressBar({
     <div className={`relative mx-auto w-full ${className}`}>
       {/* Popisky */}
       <div className="absolute top-0 left-0 w-full flex  justify-between z-10 pt-1 px-2 font-body font-bold text-sm text-center text-light">
-        <span>Blok: {lessonNumber}</span>
+        <span>
+          Blok: {lessonNumber} / {config.progress.maxBlockCount}
+        </span>
         <span>+ {validTodayCount}</span>
       </div>
 

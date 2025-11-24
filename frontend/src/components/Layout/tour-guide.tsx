@@ -1,6 +1,6 @@
 import { useTourGuide, type TourStep } from "@/hooks/use-tour-guide";
-import TourCard from "./tour-card";
-import Overlay from "./overlay";
+import TourCard from "../UI/tour-card";
+import Overlay from "../UI/overlay";
 import { useTourStore } from "@/hooks/use-tour-store";
 import { useEffect } from "react";
 

@@ -19,7 +19,7 @@ import type { Session } from "@supabase/supabase-js";
 import { supabaseInstance } from "@/config/supabase.config";
 import Overlay from "./components/UI/overlay";
 import { useOverlayStore } from "@/hooks/use-overlay-store";
-import TourGuideLauncher from "./components/UI/tour-guide";
+import TourGuideLauncher from "./components/Layout/tour-guide";
 import { tour } from "@/config/tour-guide.config";
 import { useTourStore } from "@/hooks/use-tour-store";
 

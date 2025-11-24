@@ -11,6 +11,7 @@ const config = {
     skipProgress: 100,
     learnedProgress: 5, // Progress value for a word to be considered learned
     finishedProgress: 0, // Progress value for a word to be considered finished
+    maxBlockCount: 10, // Maximum number of lessons/blocks, visible in the the lesson bar
   },
 
   srs: {

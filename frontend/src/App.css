@@ -101,6 +101,10 @@
     @apply font-headings text-center text-xl;
   }
 
+  .text-help {
+    @apply font-headings text-center text-xl text-white;
+  }
+
   .text-bar {
     @apply font-body font-bold text-sm text-center text-light;
   }

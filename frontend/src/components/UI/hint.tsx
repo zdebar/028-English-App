@@ -12,7 +12,7 @@ export default function Hint({
   return (
     visibility && (
       <div
-        className={`text-notice absolute z-2000 ${className}`}
+        className={`text-help absolute z-2000 ${className}`}
         style={{
           pointerEvents: "none",
           ...style,
