@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 export type TourStep = {
-  id: number;
+  id?: string | number;
   content: React.ReactNode;
   target: string;
   onPreviousNavigateTo?: string;

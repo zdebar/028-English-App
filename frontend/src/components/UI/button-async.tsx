@@ -34,7 +34,7 @@ export default function ButtonAsync({
         className={className}
       >
         <p className={`overlay-hidden ${buttonTextStyle}`}>
-          {disabled || isLoading ? disabledMessage : message}
+          {isLoading ? disabledMessage : message}
         </p>
       </ButtonRectangular>
       <Modal

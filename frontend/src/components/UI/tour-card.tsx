@@ -71,7 +71,7 @@ export default function TourCard({
     <div
       ref={cardRef}
       style={style}
-      className="max-w-card h-50 color-audio z-1000 fixed flex flex-col items-center justify-center w-full border border-dashed"
+      className="max-w-card h-65 color-audio z-1000 fixed flex flex-col items-center justify-center w-full border border-dashed"
     >
       <p
         className="w-11 h-11 absolute top-0 right-0 flex items-center justify-center"
