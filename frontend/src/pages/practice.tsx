@@ -208,7 +208,7 @@ export default function Practice() {
               <div className="flex gap-1">
                 <ButtonRectangular
                   onClick={() => setGrammarVisible(true)}
-                  disabled={!grammar_id || !revealed}
+                  disabled={!grammar_id}
                   className="tour-step-15"
                 >
                   <BookIcon />

@@ -1,11 +1,10 @@
 import ButtonRectangular from "@/components/UI/button-rectangular";
 import { Modal } from "@/components/UI/modal";
 import { useState } from "react";
-import Loading from "./loading";
-
 interface ButtonAsyncProps {
   isLoading: boolean;
   message: string;
+  disabledMessage?: string;
   buttonTextStyle?: string;
   modalTitle?: string;
   modalDescription?: string;
@@ -17,6 +16,7 @@ interface ButtonAsyncProps {
 export default function ButtonAsync({
   isLoading,
   message,
+  disabledMessage = "Načítání...",
   modalTitle = "Potvrzení akce",
   modalDescription = "Opravdu chcete pokračovat?",
   onConfirm,
@@ -34,7 +34,7 @@ export default function ButtonAsync({
         className={className}
       >
         <p className={`overlay-hidden ${buttonTextStyle}`}>
-          {isLoading ? <Loading /> : message}
+          {disabled || isLoading ? disabledMessage : message}
         </p>
       </ButtonRectangular>
       <Modal

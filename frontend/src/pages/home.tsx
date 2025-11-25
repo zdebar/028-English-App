@@ -25,7 +25,10 @@ export default function Home() {
       </p>
 
       {!userId ? (
-        <ButtonRectangular onClick={() => navigate("/login")}>
+        <ButtonRectangular
+          onClick={() => navigate("/login")}
+          className="w-full"
+        >
           Sign in / Sign up
         </ButtonRectangular>
       ) : (
