@@ -1,33 +1,37 @@
 import React from "react";
-import RectangularButton from "@/components/UI/buttons/RectangularButton";
 
-interface AsyncButtonProps
+interface ButtonAsyncProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  message: string;
+  message?: string;
   disabled?: boolean;
-  isLoading: boolean;
+  isLoading?: boolean;
   loadingMessage?: string;
   onClick: () => void;
   className?: string;
 }
 
-export default function AsyncButton({
+/**
+ * Asynchronous button component that displays a loading message.
+ * @param param0
+ * @returns
+ */
+export default function ButtonAsync({
   message,
   disabled = false,
-  isLoading,
+  isLoading = false,
   loadingMessage = "Načítání...",
   onClick,
   className = "",
   ...props
-}: AsyncButtonProps) {
+}: ButtonAsyncProps) {
   return (
-    <RectangularButton
+    <button
       onClick={onClick}
       disabled={isLoading || disabled}
       className={className}
       {...props}
     >
-      <p className="text-button">{isLoading ? loadingMessage : message}</p>
-    </RectangularButton>
+      <span>{isLoading ? loadingMessage : message}</span>
+    </button>
   );
 }

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
-import AsyncButtonWithModal from "./AsyncButtonWithModal";
+import ButtonAsyncModal from "./ButtonAsyncModal";
 import { useAuthStore } from "@/hooks/use-auth-store";
 
 /**
@@ -8,7 +8,6 @@ import { useAuthStore } from "@/hooks/use-auth-store";
  */
 export default function SignoutButton() {
   const { handleLogout } = useAuthStore();
-
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignout = async () => {
@@ -25,14 +24,14 @@ export default function SignoutButton() {
   };
 
   return (
-    <AsyncButtonWithModal
+    <ButtonAsyncModal
       message="Odhlásit se"
       isLoading={isLoading}
       loadingMessage="Probíhá odhlašování..."
       modalTitle="Potvrzení odhlášení"
       modalDescription="Opravdu se chcete odhlásit?"
       onConfirm={handleSignout}
-      className="grow-0"
+      className="grow-0 shape-button-rectangular color-button "
     />
   );
 }

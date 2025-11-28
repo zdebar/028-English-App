@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import RectangularButton from "../components/UI/buttons/RectangularButton";
+import Button from "../components/UI/buttons/Button";
 import Grammar from "@/database/models/grammar";
 import UserItem from "@/database/models/user-items";
 import type { GrammarLocal } from "@/types/local.types";
@@ -47,16 +47,16 @@ export default function GrammarOverview() {
             <div className="flex h-button grow justify-start p-4 border border-dashed">
               {loading ? "Načítání..." : error || "Přehled gramatiky"}
             </div>
-            <RectangularButton
+            <Button
               className="w-button grow-0"
               onClick={() => navigate("/profile")}
             >
               <CloseIcon />
-            </RectangularButton>
+            </Button>
           </div>
           {grammarArray && grammarArray.length > 0 ? (
             grammarArray.map((grammar, index) => (
-              <RectangularButton
+              <Button
                 key={grammar.id}
                 className="text-left h-input flex justify-start p-4 grow-0"
                 onClick={() => {
@@ -65,7 +65,7 @@ export default function GrammarOverview() {
                 }}
               >
                 {`${index + 1} : ${grammar.name} `}
-              </RectangularButton>
+              </Button>
             ))
           ) : (
             <p className="text-left h-input flex justify-start p-4">

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import RectangularButton from "@/components/UI/buttons/RectangularButton";
+import Button from "@/components/UI/buttons/Button";
 import UserItem from "@/database/models/user-items";
 import type { UserItemLocal } from "@/types/local.types";
 import CloseIcon from "@/components/UI/icons/CloseIcon";
@@ -94,12 +94,12 @@ export default function VocabularyOverview() {
                   className="grow p-2 flex items-center border border-dashed h-button"
                 />
               )}
-              <RectangularButton
+              <Button
                 className="w-button grow-0"
                 onClick={() => navigate("/profile")}
               >
                 <CloseIcon />
-              </RectangularButton>
+              </Button>
             </div>
             <input
               type="text"
@@ -115,7 +115,7 @@ export default function VocabularyOverview() {
             {filteredWords && filteredWords.length > 0 ? (
               <>
                 {visibleItems.map((item, index) => (
-                  <RectangularButton
+                  <Button
                     key={item.item_id}
                     className="text-left grow-0 h-input flex justify-start p-4"
                     onClick={() => {
@@ -126,7 +126,7 @@ export default function VocabularyOverview() {
                     {displayField === "czech"
                       ? ` ${item.czech} `
                       : ` ${item.english} `}
-                  </RectangularButton>
+                  </Button>
                 ))}
                 {remainingCount > 0 && (
                   <button

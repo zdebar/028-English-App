@@ -1,6 +1,6 @@
-import RectangularButton from "@/components/UI/buttons/RectangularButton";
+import Button from "@/components/UI/buttons/Button";
 import CloseIcon from "@/components/UI/icons/CloseIcon";
-import AsyncButtonWithModal from "./buttons/AsyncButtonWithModal";
+import ButtonAsyncModal from "./buttons/ButtonAsyncModal";
 import Loading from "./Loading";
 import Hint from "@/components/UI/Hint";
 import { useOverlayStore } from "@/hooks/use-overlay-store";
@@ -31,7 +31,7 @@ export default function OverviewCard({
       className={`card-height card-width flex flex-col gap-1 justify-start ${className}`}
     >
       <div className="h-button flex items-center justify-between gap-1">
-        <AsyncButtonWithModal
+        <ButtonAsyncModal
           message={titleText}
           isLoading={isLoading}
           modalTitle="Obnovení pokroku"
@@ -48,9 +48,9 @@ export default function OverviewCard({
         <Hint visibility={isOpen} style={{ top: "0px", left: "14px" }}>
           obnovit pokrok
         </Hint>
-        <RectangularButton className="w-button grow-0" onClick={onClose}>
+        <Button className="w-button grow-0" onClick={onClose}>
           <CloseIcon />
-        </RectangularButton>
+        </Button>
       </div>
       <div className=" border border-dashed w-full grow p-4">
         {isLoading ? <Loading /> : error ? <p>{error}</p> : children}

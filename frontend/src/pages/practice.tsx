@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import VolumeSlider from "@/components/UI/VolumeSlider";
-import RectangularButton from "@/components/UI/buttons/RectangularButton";
+import Button from "@/components/UI/buttons/Button";
 import ForwardIcon from "@/components/UI/icons/ForwardIcon";
 import BulbIcon from "@/components/UI/icons/BulbIcon";
 import EyeIcon from "@/components/UI/icons/EyeIcon";
@@ -204,17 +204,17 @@ export default function Practice() {
               className=" tour-step-14 relative flex flex-col gap-1"
             >
               <div className="flex gap-1">
-                <RectangularButton
+                <Button
                   onClick={() => setGrammarVisible(true)}
                   disabled={!grammar_id}
                   className="tour-step-15"
                 >
                   <BookIcon />
-                </RectangularButton>
+                </Button>
                 <Hint visibility={isOpen} style={{ top: "0px", left: "14px" }}>
                   gramatika
                 </Hint>
-                <RectangularButton
+                <Button
                   onClick={() => {
                     handleNext(config.progress.skipProgress);
                   }}
@@ -222,26 +222,26 @@ export default function Practice() {
                   className="tour-step-16"
                 >
                   <ForwardIcon />
-                </RectangularButton>
+                </Button>
                 <Hint visibility={isOpen} style={{ top: "0px", right: "14px" }}>
                   dokončit
                 </Hint>
               </div>
               {!revealed ? (
                 <div className="tour-step-19 relative flex gap-1">
-                  <RectangularButton
+                  <Button
                     onClick={() => setHintIndex((prevIndex) => prevIndex + 1)}
                     className="tour-step-17"
                   >
                     <BulbIcon />
-                  </RectangularButton>
+                  </Button>
                   <Hint
                     visibility={isOpen}
                     style={{ top: "0px", left: "14px" }}
                   >
                     nápověda
                   </Hint>
-                  <RectangularButton
+                  <Button
                     onClick={() => {
                       if (showPlayHint) {
                         setShowPlayHint(false);
@@ -255,7 +255,7 @@ export default function Practice() {
                     className="tour-step-18"
                   >
                     <EyeIcon />
-                  </RectangularButton>
+                  </Button>
                   <Hint
                     visibility={isOpen}
                     style={{ top: "0px", right: "14px" }}
@@ -265,24 +265,24 @@ export default function Practice() {
                 </div>
               ) : (
                 <div className="tour-step-19 relative flex gap-1">
-                  <RectangularButton
+                  <Button
                     onClick={() => handleNext(config.progress.minusProgress)}
                     className="tour-step-20"
                   >
                     <MinusIcon />
-                  </RectangularButton>
+                  </Button>
                   <Hint
                     visibility={isOpen}
                     style={{ top: "0px", left: "14px" }}
                   >
                     neznám
                   </Hint>
-                  <RectangularButton
+                  <Button
                     onClick={() => handleNext(config.progress.plusProgress)}
                     className="tour-step-21"
                   >
                     <PlusIcon />
-                  </RectangularButton>
+                  </Button>
                   <Hint
                     visibility={isOpen}
                     style={{ top: "0px", right: "14px" }}

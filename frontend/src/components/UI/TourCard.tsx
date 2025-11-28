@@ -1,4 +1,4 @@
-import RectangularButton from "./buttons/RectangularButton";
+import Button from "./buttons/Button";
 import { useState, useRef, useEffect } from "react";
 import CloseButton from "./buttons/CloseButton";
 
@@ -78,16 +78,16 @@ export default function TourCard({
         {content}
       </div>
       <div className="flex w-full max-w-full gap-1">
-        <RectangularButton
+        <Button
           onClick={onPrevious}
           disabled={isFirst}
           className=" shrink flex-1 min-w-0"
         >
           Předchozí
-        </RectangularButton>
-        <RectangularButton onClick={onNext} className=" shrink flex-1 min-w-0">
+        </Button>
+        <Button onClick={onNext} className=" shrink flex-1 min-w-0">
           {isLast ? "Dokončit" : "Další"}
-        </RectangularButton>
+        </Button>
       </div>
     </div>
   );

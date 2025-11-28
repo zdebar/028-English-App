@@ -8,11 +8,12 @@ export default function CloseButton({
   className?: string;
 }) {
   return (
-    <p
-      className={`w-11 h-11  flex items-center justify-center ${className}`}
+    <button
+      type="button"
+      className={`w-11 h-11 flex items-center justify-center ${className}`}
       onClick={onClick}
     >
       <CloseIcon />
-    </p>
+    </button>
   );
 }

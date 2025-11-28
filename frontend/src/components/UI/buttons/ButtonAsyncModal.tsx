@@ -1,8 +1,8 @@
 import { useState } from "react";
-import AsyncButton from "./AsyncButton";
+import ButtonAsync from "./ButtonAsync";
 import { Modal } from "@/components/UI/Modal";
 
-interface AsyncButtonWithModalProps {
+interface ButtonAsyncModalProps {
   message: string;
   disabled?: boolean;
   isLoading: boolean;
@@ -13,7 +13,7 @@ interface AsyncButtonWithModalProps {
   className?: string;
 }
 
-export default function AsyncButtonWithModal({
+export default function ButtonAsyncModal({
   isLoading,
   message,
   disabled = false,
@@ -22,12 +22,12 @@ export default function AsyncButtonWithModal({
   modalDescription = "Opravdu chcete pokračovat?",
   onConfirm,
   className = "",
-}: AsyncButtonWithModalProps) {
+}: ButtonAsyncModalProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <>
-      <AsyncButton
+      <ButtonAsync
         isLoading={isLoading}
         message={message}
         disabled={disabled}

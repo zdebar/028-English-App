@@ -77,7 +77,7 @@
   }
 
   .color-button-header {
-    @apply hover:bg-white dark:hover:text-light dark:hover:bg-inherit; /* Button Interactions */
+    @apply hover:bg-white hover:text-light; /* Button Interactions */
   }
 
   .color-button-header-disabled {

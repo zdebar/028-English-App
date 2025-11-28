@@ -2,7 +2,7 @@ import { useState } from "react";
 import UserItem from "@/database/models/user-items";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import AsyncButtonWithModal from "./AsyncButtonWithModal";
+import ButtonAsyncModal from "./ButtonAsyncModal";
 import { useAuthStore } from "@/hooks/use-auth-store";
 
 export default function ResetAllButton() {
@@ -29,13 +29,14 @@ export default function ResetAllButton() {
   };
 
   return (
-    <AsyncButtonWithModal
+    <ButtonAsyncModal
       message="Resetovat vše"
+      loadingMessage="Probíhá resetování..."
       isLoading={isLoading}
       modalTitle="Potvrzení resetu"
       modalDescription="Opravdu chcete vymazat veškerý progress? Změna již nepůjde vrátit."
       onConfirm={handleReset}
-      className="grow-0"
+      className="grow-0 shape-button-rectangular color-button "
     />
   );
 }

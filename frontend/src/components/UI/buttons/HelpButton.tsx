@@ -10,12 +10,13 @@ export default function HelpButton({
 }) {
   const { open } = useOverlayStore();
   return (
-    <div
-      className={`help-icon z-10 p-1 ${className}`}
+    <button
+      type="button"
+      className={`z-10 p-1 ${className}`}
       style={style}
       onClick={open}
     >
       <LightBulbIcon />
-    </div>
+    </button>
   );
 }
