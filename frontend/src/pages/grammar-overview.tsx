@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import RectangularButton from "../components/UI/buttons/rectangular-button";
+import RectangularButton from "../components/UI/buttons/RectangularButton";
 import Grammar from "@/database/models/grammar";
 import UserItem from "@/database/models/user-items";
 import type { GrammarLocal } from "@/types/local.types";
@@ -9,7 +9,7 @@ import OverviewCard from "@/components/UI/overview-card";
 import { useFetch } from "@/hooks/use-fetch";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import DOMPurify from "dompurify";
-import HelpButton from "@/components/UI/buttons/help-button";
+import HelpButton from "@/components/UI/buttons/HelpButton";
 
 export default function GrammarOverview() {
   const { userId } = useAuthStore();

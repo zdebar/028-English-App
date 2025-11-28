@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import VolumeSlider from "@/components/UI/volume-slider";
-import RectangularButton from "@/components/UI/buttons/rectangular-button";
+import RectangularButton from "@/components/UI/buttons/RectangularButton";
 import {
   SkipIcon,
   HintIcon,
@@ -16,7 +16,7 @@ import { useAuthStore } from "@/hooks/use-auth-store";
 import { useUserStore } from "@/hooks/use-user-store";
 import GrammarCard from "@/components/Layout/grammar-card";
 import Loading from "@/components/UI/loading";
-import HelpButton from "@/components/UI/buttons/help-button";
+import HelpButton from "@/components/UI/buttons/HelpButton";
 import Hint from "@/components/UI/hint";
 import { useOverlayStore } from "@/hooks/use-overlay-store";
 import { useTourStore } from "@/hooks/use-tour-store";

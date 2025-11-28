@@ -1,4 +1,4 @@
-import CloseButton from "@/components/UI/buttons/close-button";
+import CloseButton from "@/components/UI/buttons/CloseButton";
 
 interface ToastProps {
   message: string;

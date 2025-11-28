@@ -1,4 +1,4 @@
-import RectangularButton from "@/components/UI/buttons/rectangular-button";
+import RectangularButton from "@/components/UI/buttons/RectangularButton";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import Dashboard from "@/components/Layout/dashboard";

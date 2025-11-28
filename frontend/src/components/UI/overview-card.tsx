@@ -1,6 +1,6 @@
-import RectangularButton from "@/components/UI/buttons/rectangular-button";
+import RectangularButton from "@/components/UI/buttons/RectangularButton";
 import { CloseIcon } from "@/components/UI/icons";
-import AsyncButton from "./buttons/async-button";
+import AsyncButton from "./buttons/AsyncButton";
 import Loading from "./loading";
 import Hint from "@/components/UI/hint";
 import { useOverlayStore } from "@/hooks/use-overlay-store";

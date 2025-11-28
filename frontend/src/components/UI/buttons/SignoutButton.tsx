@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
-import AsyncButton from "@/components/UI/buttons/async-button";
+import AsyncButton from "@/components/UI/buttons/AsyncButton";
 import { useAuthStore } from "@/hooks/use-auth-store";
 
 /**

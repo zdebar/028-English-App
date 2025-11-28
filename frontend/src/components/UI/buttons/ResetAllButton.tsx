@@ -2,7 +2,7 @@ import { useState } from "react";
 import UserItem from "@/database/models/user-items";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import AsyncButton from "./async-button";
+import AsyncButton from "./AsyncButton";
 import { useAuthStore } from "@/hooks/use-auth-store";
 
 /**

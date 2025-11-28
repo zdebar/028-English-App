@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import RectangularButton from "@/components/UI/buttons/rectangular-button";
+import RectangularButton from "@/components/UI/buttons/RectangularButton";
 import UserItem from "@/database/models/user-items";
 import type { UserItemLocal } from "@/types/local.types";
 import { CloseIcon } from "@/components/UI/icons";
@@ -12,7 +12,7 @@ import { useFetch } from "@/hooks/use-fetch";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import Loading from "@/components/UI/loading";
 import { getMoreText } from "@/utils/practice.utils";
-import HelpButton from "@/components/UI/buttons/help-button";
+import HelpButton from "@/components/UI/buttons/HelpButton";
 
 export default function VocabularyOverview() {
   const { userId } = useAuthStore();

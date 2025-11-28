@@ -1,6 +1,6 @@
-import RectangularButton from "./buttons/rectangular-button";
+import RectangularButton from "./buttons/RectangularButton";
 import { useState, useRef, useEffect } from "react";
-import CloseButton from "./buttons/close-button";
+import CloseButton from "./buttons/CloseButton";
 
 type TourCardProps = {
   content: React.ReactNode;

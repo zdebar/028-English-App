@@ -5,7 +5,7 @@ import { supabaseInstance } from "@/config/supabase.config";
 import { useNavigate } from "react-router-dom";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { useState, useRef } from "react";
-import RectangularButton from "@/components/UI/buttons/rectangular-button";
+import RectangularButton from "@/components/UI/buttons/RectangularButton";
 
 export default function Login() {
   const [captchaToken, setCaptchaToken] = useState<string | undefined>(

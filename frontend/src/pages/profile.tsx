@@ -1,7 +1,7 @@
-import SignoutButton from "@/components/UI/buttons/signout-button";
+import SignoutButton from "@/components/UI/buttons/SignoutButton";
 import { useNavigate } from "react-router-dom";
-import RectangularButton from "@/components/UI/buttons/rectangular-button";
-import ResetAllButton from "@/components/UI/buttons/reset-all-button";
+import RectangularButton from "@/components/UI/buttons/RectangularButton";
+import ResetAllButton from "@/components/UI/buttons/ResetAllButton";
 
 export default function Profile() {
   const navigate = useNavigate();
