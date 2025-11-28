@@ -3,13 +3,13 @@ import AsyncButton from "./AsyncButton";
 import { Modal } from "@/components/UI/Modal";
 
 interface AsyncButtonWithModalProps {
-  isLoading: boolean;
   message: string;
   disabled?: boolean;
-  disabledMessage?: string;
+  isLoading: boolean;
+  loadingMessage?: string;
   modalTitle?: string;
   modalDescription?: string;
-  onConfirm: () => void;
+  onConfirm?: () => void;
   className?: string;
 }
 
@@ -17,7 +17,7 @@ export default function AsyncButtonWithModal({
   isLoading,
   message,
   disabled = false,
-  disabledMessage = "Načítání...",
+  loadingMessage = "Načítání...",
   modalTitle = "Potvrzení akce",
   modalDescription = "Opravdu chcete pokračovat?",
   onConfirm,
@@ -31,7 +31,7 @@ export default function AsyncButtonWithModal({
         isLoading={isLoading}
         message={message}
         disabled={disabled}
-        loadingMessage={disabledMessage}
+        loadingMessage={loadingMessage}
         onClick={() => setIsModalOpen(true)}
         className={className}
       />
@@ -40,7 +40,7 @@ export default function AsyncButtonWithModal({
         onClose={() => setIsModalOpen(false)}
         onConfirm={() => {
           setIsModalOpen(false);
-          onConfirm();
+          if (onConfirm) onConfirm();
         }}
         title={modalTitle}
         description={modalDescription}

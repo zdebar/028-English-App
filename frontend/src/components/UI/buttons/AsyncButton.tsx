@@ -3,18 +3,18 @@ import RectangularButton from "@/components/UI/buttons/RectangularButton";
 
 interface AsyncButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  isLoading: boolean;
   message: string;
   disabled?: boolean;
+  isLoading: boolean;
   loadingMessage?: string;
   onClick: () => void;
   className?: string;
 }
 
 export default function AsyncButton({
-  isLoading,
   message,
   disabled = false,
+  isLoading,
   loadingMessage = "Načítání...",
   onClick,
   className = "",

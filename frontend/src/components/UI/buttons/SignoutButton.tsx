@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
-import AsyncButton from "@/components/UI/buttons/AsyncButton";
+import AsyncButtonWithModal from "./AsyncButtonWithModal";
 import { useAuthStore } from "@/hooks/use-auth-store";
 
 /**
@@ -25,9 +25,9 @@ export default function SignoutButton() {
   };
 
   return (
-    <AsyncButton
-      isLoading={isLoading}
+    <AsyncButtonWithModal
       message="Odhlásit se"
+      isLoading={isLoading}
       loadingMessage="Probíhá odhlašování..."
       modalTitle="Potvrzení odhlášení"
       modalDescription="Opravdu se chcete odhlásit?"

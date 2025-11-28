@@ -1,41 +1,28 @@
 import RectangularButton from "@/components/UI/buttons/RectangularButton";
 import CloseIcon from "@/components/UI/icons/CloseIcon";
-import AsyncButton from "./buttons/AsyncButton";
+import AsyncButtonWithModal from "./buttons/AsyncButtonWithModal";
 import Loading from "./Loading";
 import Hint from "@/components/UI/Hint";
 import { useOverlayStore } from "@/hooks/use-overlay-store";
 
 interface OverviewCardProps {
   titleText?: string;
-  disabledText?: string;
-  bodyText?: string;
-  children?: React.ReactNode;
+  isLoading?: boolean;
+  error?: string | null;
   className?: string;
   handleReset?: () => void;
   onClose: () => void;
-  isLoading?: boolean;
-  error?: string | null;
+  children?: React.ReactNode;
 }
 
-/**
- * Displays an overview card with a title, content area, and optional reset functionality.
- * @param titleText - The title text to display on the card.
- * @param disabledText - The text to display when content is disabled.
- * @param children - The content to display inside the card.
- * @param className - Additional CSS classes for styling the card.
- * @param handleReset - Optional function to handle reset action. When no function provided, reset button is disabled.
- * @param onClose - Function to handle closing the card.
- * @param isLoading - Indicates if the content is loading.
- * @returns
- */
 export default function OverviewCard({
   titleText = "bez názvu",
-  children,
+  isLoading = false,
+  error = null,
   className = "",
   handleReset,
   onClose,
-  isLoading = false,
-  error = null,
+  children,
 }: OverviewCardProps) {
   const { isOpen } = useOverlayStore();
 
@@ -44,22 +31,21 @@ export default function OverviewCard({
       className={`card-height card-width flex flex-col gap-1 justify-start ${className}`}
     >
       <div className="h-button flex items-center justify-between gap-1">
-        <AsyncButton
-          isLoading={isLoading}
+        <AsyncButtonWithModal
           message={titleText}
-          modalTitle="Potvrzení resetu"
-          modalDescription="Opravdu chcete vymazat veškerý progress? Změna již nepůjde vrátit."
+          isLoading={isLoading}
+          modalTitle="Obnovení pokroku"
+          modalDescription="Opravdu chcete vymazat veškerý pokrok? Změna již nepůjde vrátit."
           onConfirm={() => {
             if (handleReset) {
               handleReset();
             }
             onClose();
           }}
-          buttonTextStyle="p-4"
           disabled={!handleReset}
         />
         <Hint visibility={isOpen} style={{ top: "0px", left: "14px" }}>
-          reset pokroku
+          obnovit pokrok
         </Hint>
         <RectangularButton className="w-button grow-0" onClick={onClose}>
           <CloseIcon />
