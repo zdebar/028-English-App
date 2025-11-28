@@ -9,7 +9,6 @@ export default function CloseButton({
 }) {
   return (
     <button
-      type="button"
       className={`w-11 h-11 flex items-center justify-center ${className}`}
       onClick={onClick}
     >

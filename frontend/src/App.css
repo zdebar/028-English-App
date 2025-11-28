@@ -84,12 +84,6 @@
     @apply cursor-default hover:bg-inherit text-gray-100 dark:text-gray-500; /** Disabled States **/
   }
 
-  .color-disabled {
-    /* TODO: replace */
-    @apply bg-inherit cursor-default hover:bg-inherit border border-dashed;
-    @apply dark:bg-inherit dark:hover:bg-inherit;
-  }
-
   .color-audio {
     @apply border border-solid cursor-pointer;
     @apply bg-audio-light hover:bg-audio-hover-light;
