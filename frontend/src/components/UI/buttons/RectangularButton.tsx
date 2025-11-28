@@ -1,4 +1,3 @@
-import React from "react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 /**
@@ -17,7 +16,7 @@ export interface RectangularButtonProps
 /**
  * A rectangular button component - h-button, w-full.
  */
-function RectangularButton({
+export default function RectangularButton({
   children,
   className = "",
   disabled = false,
@@ -25,10 +24,7 @@ function RectangularButton({
 }: RectangularButtonProps) {
   return (
     <button
-      className={` button-rectangular ${
-        disabled ? "color-disabled" : "color-button"
-      } 
-       ${className}`}
+      className={`button-rectangular color-button ${className}`}
       disabled={disabled}
       aria-disabled={disabled}
       {...props}
@@ -37,5 +33,3 @@ function RectangularButton({
     </button>
   );
 }
-
-export default React.memo(RectangularButton);

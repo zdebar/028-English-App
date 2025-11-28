@@ -2,7 +2,7 @@ import Icon, { type IconProps } from "./Icon";
 
 export default function AudioIcon(props: IconProps) {
   return (
-    <Icon {...props}>
+    <Icon size={22} {...props}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

@@ -2,7 +2,7 @@ import Icon, { type IconProps } from "./Icon";
 
 export default function NoteIcon(props: IconProps) {
   return (
-    <Icon {...props}>
+    <Icon size={20} {...props}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

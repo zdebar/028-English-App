@@ -2,7 +2,7 @@ import Icon, { type IconProps } from "./Icon";
 
 export default function CloseIcon(props: IconProps) {
   return (
-    <Icon {...props}>
+    <Icon size={32} {...props}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

@@ -2,7 +2,7 @@ import Icon, { type IconProps } from "./Icon";
 
 export default function SunIcon(props: IconProps) {
   return (
-    <Icon {...props}>
+    <Icon size={28} {...props}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
