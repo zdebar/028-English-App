@@ -14,7 +14,7 @@ export interface RectangularButtonProps
 }
 
 /**
- * A rectangular button component - h-button, w-full.
+ * A rectangular button component with tailwind classes "shape-button-rectangular color-button".
  */
 export default function RectangularButton({
   children,
@@ -24,7 +24,7 @@ export default function RectangularButton({
 }: RectangularButtonProps) {
   return (
     <button
-      className={`button-rectangular color-button ${className}`}
+      className={`shape-button-rectangular color-button ${className}`}
       disabled={disabled}
       aria-disabled={disabled}
       {...props}

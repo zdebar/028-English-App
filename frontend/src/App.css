@@ -121,7 +121,7 @@
 
 @layer components {
   /** BUTTON STYLES **/
-  .button-rectangular {
+  .shape-button-rectangular {
     @apply h-button font-body font-bold  tracking-wide;
     flex-grow: 1;
     flex-basis: auto;
