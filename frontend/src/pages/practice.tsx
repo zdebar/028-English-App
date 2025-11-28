@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import VolumeSlider from "@/components/UI/VolumeSlider";
 import RectangularButton from "@/components/UI/buttons/RectangularButton";
 import ForwardIcon from "@/components/UI/icons/ForwardIcon";
-import HintIcon from "@/components/UI/icons/HintIcon";
+import BulbIcon from "@/components/UI/icons/BulbIcon";
 import EyeIcon from "@/components/UI/icons/EyeIcon";
 import MinusIcon from "@/components/UI/icons/MinusIcon";
 import PlusIcon from "@/components/UI/icons/PlusIcon";
@@ -233,7 +233,7 @@ export default function Practice() {
                     onClick={() => setHintIndex((prevIndex) => prevIndex + 1)}
                     className="tour-step-17"
                   >
-                    <HintIcon />
+                    <BulbIcon />
                   </RectangularButton>
                   <Hint
                     visibility={isOpen}

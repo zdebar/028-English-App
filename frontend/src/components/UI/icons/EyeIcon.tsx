@@ -2,7 +2,7 @@ import Icon, { type IconProps } from "./Icon";
 
 export default function EyeIcon(props: IconProps) {
   return (
-    <Icon {...props}>
+    <Icon strokeWidth={1.25} {...props}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

@@ -1,8 +1,8 @@
 import Icon, { type IconProps } from "./Icon";
 
-export default function HintIcon(props: IconProps) {
+export default function BulbIcon(props: IconProps) {
   return (
-    <Icon size={22} {...props}>
+    <Icon size={22} strokeWidth={1.25} {...props}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
