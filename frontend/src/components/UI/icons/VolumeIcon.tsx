@@ -2,7 +2,7 @@ import Icon, { type IconProps } from "./Icon";
 
 export default function VolumeIcon(props: IconProps) {
   return (
-    <Icon size={20} {...props}>
+    <Icon size={20} {...props} strokeColor="color-text">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
