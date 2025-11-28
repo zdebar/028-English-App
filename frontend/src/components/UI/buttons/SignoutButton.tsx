@@ -28,7 +28,7 @@ export default function SignoutButton() {
     <AsyncButton
       isLoading={isLoading}
       message="Odhlásit se"
-      disabledMessage="Probíhá odhlašování..."
+      loadingMessage="Probíhá odhlašování..."
       modalTitle="Potvrzení odhlášení"
       modalDescription="Opravdu se chcete odhlásit?"
       onConfirm={handleSignout}
