@@ -1,12 +1,28 @@
-export default function HintIcon() {
+interface HintIconProps {
+  className?: string;
+  size?: number;
+  strokeWidth?: number;
+  strokeColor?: string;
+  fillColor?: string;
+}
+
+export default function HintIcon({
+  className = "",
+  size = 22,
+  strokeWidth = 1.5,
+  strokeColor = "currentColor",
+  fillColor = "none",
+}: HintIconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      fill="none"
       viewBox="0 0 24 24"
-      strokeWidth="1.5"
-      stroke="currentColor"
-      className="size-5.5"
+      fill={fillColor}
+      strokeWidth={strokeWidth}
+      stroke={strokeColor}
+      width={size}
+      height={size}
+      className={className}
     >
       <path
         strokeLinecap="round"

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import VolumeIcon from "@/assets/icons/volume-icon";
+import VolumeIcon from "@/components/UI/icons/VolumeIcon";
 
 /**
  * A component for controlling volume with a slider.

@@ -1,4 +1,4 @@
-import CloseIcon from "@/assets/icons/close-icon";
+import CloseIcon from "@/components/UI/icons/CloseIcon";
 
 export default function CloseButton({
   onClick,
