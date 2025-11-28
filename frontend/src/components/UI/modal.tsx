@@ -1,4 +1,4 @@
-import ButtonRectangular from "./button-rectangular";
+import RectangularButton from "./buttons/rectangular-button";
 
 export function Modal({
   isOpen,
@@ -34,8 +34,8 @@ export function Modal({
           <p>{description}</p>
         </div>
         <div className="flex gap-1">
-          <ButtonRectangular onClick={onClose}>Ne</ButtonRectangular>
-          <ButtonRectangular onClick={onConfirm}>Ano</ButtonRectangular>
+          <RectangularButton onClick={onClose}>Ne</RectangularButton>
+          <RectangularButton onClick={onConfirm}>Ano</RectangularButton>
         </div>
       </div>
     </div>

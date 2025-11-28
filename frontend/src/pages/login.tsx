@@ -5,7 +5,7 @@ import { supabaseInstance } from "@/config/supabase.config";
 import { useNavigate } from "react-router-dom";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { useState, useRef } from "react";
-import ButtonRectangular from "@/components/UI/button-rectangular";
+import RectangularButton from "@/components/UI/buttons/rectangular-button";
 
 export default function Login() {
   const [captchaToken, setCaptchaToken] = useState<string | undefined>(
@@ -35,13 +35,13 @@ export default function Login() {
         Anonymní přihlášení umožňuje práci pouze offline. Synchronizace je
         znepřístupněna.
       </p>
-      <ButtonRectangular
+      <RectangularButton
         onClick={handleAnonymousSignIn}
         className="w-full grow-0"
         disabled={!captchaToken}
       >
         Vyzkoušet anonymně
-      </ButtonRectangular>
+      </RectangularButton>
       <HCaptcha
         ref={captcha}
         sitekey="42dc9b5a-022a-4494-a002-aa1af0fe5d92"

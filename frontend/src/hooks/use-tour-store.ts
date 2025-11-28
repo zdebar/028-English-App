@@ -2,8 +2,8 @@ import { create } from "zustand";
 
 type TourState = {
   showTour: boolean;
-  currentId: number | null;
-  lastId: number | null;
+  currentId: number | string | undefined | null;
+  lastId: number | string | undefined | null;
   setCurrentId: (idx: number) => void;
   openTour: () => void;
   closeTour: () => void;

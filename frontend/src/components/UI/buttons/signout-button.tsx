@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
-import ButtonAsync from "@/components/UI/button-async";
+import AsyncButton from "@/components/UI/buttons/async-button";
 import { useAuthStore } from "@/hooks/use-auth-store";
 
 /**
  * Button for signing out the user.
  */
-export default function ButtonSignout() {
+export default function SignoutButton() {
   const { handleLogout } = useAuthStore();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -25,7 +25,7 @@ export default function ButtonSignout() {
   };
 
   return (
-    <ButtonAsync
+    <AsyncButton
       isLoading={isLoading}
       message="Odhlásit se"
       disabledMessage="Probíhá odhlašování..."

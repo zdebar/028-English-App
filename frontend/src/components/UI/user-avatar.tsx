@@ -1,4 +1,4 @@
-import { UserIcon } from "@/components/UI/icons";
+import UserIcon from "@/assets/icons/user-icon";
 
 /**
  * Avatar component to represent the user.

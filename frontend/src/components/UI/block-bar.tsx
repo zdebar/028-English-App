@@ -1,6 +1,6 @@
 import config from "@/config/config";
 
-interface LessonBarProps {
+interface BlockBarProps {
   previousCount: number;
   todayCount: number;
   lessonNumber: number;
@@ -8,13 +8,13 @@ interface LessonBarProps {
   className?: string;
 }
 
-export default function ProgressBar({
+export default function BlockBar({
   previousCount = 0,
   todayCount = 0,
   lessonNumber = 1,
   divisions = 20,
   className = "",
-}: LessonBarProps) {
+}: BlockBarProps) {
   const lessonSize = config.lesson.lessonSize || 100;
   const totalWidth = 100;
 

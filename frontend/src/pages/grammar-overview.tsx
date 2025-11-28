@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import ButtonRectangular from "../components/UI/button-rectangular";
+import RectangularButton from "../components/UI/buttons/rectangular-button";
 import Grammar from "@/database/models/grammar";
 import UserItem from "@/database/models/user-items";
 import type { GrammarLocal } from "@/types/local.types";
@@ -9,7 +9,7 @@ import OverviewCard from "@/components/UI/overview-card";
 import { useFetch } from "@/hooks/use-fetch";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import DOMPurify from "dompurify";
-import HelpButton from "@/components/UI/help-button";
+import HelpButton from "@/components/UI/buttons/help-button";
 
 export default function GrammarOverview() {
   const { userId } = useAuthStore();
@@ -47,16 +47,16 @@ export default function GrammarOverview() {
             <div className="flex h-button grow justify-start p-4 border border-dashed">
               {loading ? "Načítání..." : error || "Přehled gramatiky"}
             </div>
-            <ButtonRectangular
+            <RectangularButton
               className="w-button grow-0"
               onClick={() => navigate("/profile")}
             >
               <CloseIcon />
-            </ButtonRectangular>
+            </RectangularButton>
           </div>
           {grammarArray && grammarArray.length > 0 ? (
             grammarArray.map((grammar, index) => (
-              <ButtonRectangular
+              <RectangularButton
                 key={grammar.id}
                 className="text-left h-input flex justify-start p-4 grow-0"
                 onClick={() => {
@@ -65,7 +65,7 @@ export default function GrammarOverview() {
                 }}
               >
                 {`${index + 1} : ${grammar.name} `}
-              </ButtonRectangular>
+              </RectangularButton>
             ))
           ) : (
             <p className="text-left h-input flex justify-start p-4">

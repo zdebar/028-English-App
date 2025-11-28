@@ -1,6 +1,6 @@
-import ButtonRectangular from "./button-rectangular";
-import { CloseIcon } from "./icons";
+import RectangularButton from "./buttons/rectangular-button";
 import { useState, useRef, useEffect } from "react";
+import CloseButton from "./buttons/close-button";
 
 type TourCardProps = {
   content: React.ReactNode;
@@ -73,26 +73,21 @@ export default function TourCard({
       style={style}
       className="max-w-card h-65 color-audio z-1000 fixed flex flex-col items-center justify-center w-full border border-dashed"
     >
-      <p
-        className="w-11 h-11 absolute top-0 right-0 flex items-center justify-center"
-        onClick={onClose}
-      >
-        <CloseIcon />
-      </p>
+      <CloseButton onClick={onClose} className="absolute top-0 right-0" />
       <div className="min-h-30 flex flex-col justify-center h-full p-4 pt-12 text-center">
         {content}
       </div>
       <div className="flex w-full max-w-full gap-1">
-        <ButtonRectangular
+        <RectangularButton
           onClick={onPrevious}
           disabled={isFirst}
           className=" shrink flex-1 min-w-0"
         >
           Předchozí
-        </ButtonRectangular>
-        <ButtonRectangular onClick={onNext} className=" shrink flex-1 min-w-0">
+        </RectangularButton>
+        <RectangularButton onClick={onNext} className=" shrink flex-1 min-w-0">
           {isLast ? "Dokončit" : "Další"}
-        </ButtonRectangular>
+        </RectangularButton>
       </div>
     </div>
   );

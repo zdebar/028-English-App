@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import ButtonRectangular from "@/components/UI/button-rectangular";
+import RectangularButton from "@/components/UI/buttons/rectangular-button";
 import UserItem from "@/database/models/user-items";
 import type { UserItemLocal } from "@/types/local.types";
 import { CloseIcon } from "@/components/UI/icons";
@@ -12,7 +12,7 @@ import { useFetch } from "@/hooks/use-fetch";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import Loading from "@/components/UI/loading";
 import { getMoreText } from "@/utils/practice.utils";
-import HelpButton from "@/components/UI/help-button";
+import HelpButton from "@/components/UI/buttons/help-button";
 
 export default function VocabularyOverview() {
   const { userId } = useAuthStore();
@@ -94,12 +94,12 @@ export default function VocabularyOverview() {
                   className="grow p-2 flex items-center border border-dashed h-button"
                 />
               )}
-              <ButtonRectangular
+              <RectangularButton
                 className="w-button grow-0"
                 onClick={() => navigate("/profile")}
               >
                 <CloseIcon />
-              </ButtonRectangular>
+              </RectangularButton>
             </div>
             <input
               type="text"
@@ -115,7 +115,7 @@ export default function VocabularyOverview() {
             {filteredWords && filteredWords.length > 0 ? (
               <>
                 {visibleItems.map((item, index) => (
-                  <ButtonRectangular
+                  <RectangularButton
                     key={item.item_id}
                     className="text-left grow-0 h-input flex justify-start p-4"
                     onClick={() => {
@@ -126,7 +126,7 @@ export default function VocabularyOverview() {
                     {displayField === "czech"
                       ? ` ${item.czech} `
                       : ` ${item.english} `}
-                  </ButtonRectangular>
+                  </RectangularButton>
                 ))}
                 {remainingCount > 0 && (
                   <button

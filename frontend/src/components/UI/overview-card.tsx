@@ -1,6 +1,6 @@
-import ButtonRectangular from "@/components/UI/button-rectangular";
+import RectangularButton from "@/components/UI/buttons/rectangular-button";
 import { CloseIcon } from "@/components/UI/icons";
-import ButtonAsync from "./button-async";
+import AsyncButton from "./buttons/async-button";
 import Loading from "./loading";
 import Hint from "@/components/UI/hint";
 import { useOverlayStore } from "@/hooks/use-overlay-store";
@@ -44,7 +44,7 @@ export default function OverviewCard({
       className={`card-height card-width flex flex-col gap-1 justify-start ${className}`}
     >
       <div className="h-button flex items-center justify-between gap-1">
-        <ButtonAsync
+        <AsyncButton
           isLoading={isLoading}
           message={titleText}
           modalTitle="Potvrzení resetu"
@@ -61,9 +61,9 @@ export default function OverviewCard({
         <Hint visibility={isOpen} style={{ top: "0px", left: "14px" }}>
           reset pokroku
         </Hint>
-        <ButtonRectangular className="w-button grow-0" onClick={onClose}>
+        <RectangularButton className="w-button grow-0" onClick={onClose}>
           <CloseIcon />
-        </ButtonRectangular>
+        </RectangularButton>
       </div>
       <div className=" border border-dashed w-full grow p-4">
         {isLoading ? <Loading /> : error ? <p>{error}</p> : children}

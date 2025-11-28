@@ -7,7 +7,7 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
  * @property {boolean} [disabled] - Whether the button is disabled.
  * @property {string} [className] - Additional CSS classes for styling.
  */
-export interface ButtonRectangularProps
+export interface RectangularButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
   disabled?: boolean;
@@ -17,12 +17,12 @@ export interface ButtonRectangularProps
 /**
  * A rectangular button component - h-button, w-full.
  */
-function ButtonRectangular({
+function RectangularButton({
   children,
   className = "",
   disabled = false,
   ...props
-}: ButtonRectangularProps) {
+}: RectangularButtonProps) {
   return (
     <button
       className={` button-rectangular ${
@@ -38,4 +38,4 @@ function ButtonRectangular({
   );
 }
 
-export default React.memo(ButtonRectangular);
+export default React.memo(RectangularButton);

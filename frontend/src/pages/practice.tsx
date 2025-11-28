@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import VolumeSlider from "@/components/UI/volume-slider";
-import ButtonRectangular from "@/components/UI/button-rectangular";
+import RectangularButton from "@/components/UI/buttons/rectangular-button";
 import {
   SkipIcon,
   HintIcon,
@@ -16,7 +16,7 @@ import { useAuthStore } from "@/hooks/use-auth-store";
 import { useUserStore } from "@/hooks/use-user-store";
 import GrammarCard from "@/components/Layout/grammar-card";
 import Loading from "@/components/UI/loading";
-import HelpButton from "@/components/UI/help-button";
+import HelpButton from "@/components/UI/buttons/help-button";
 import Hint from "@/components/UI/hint";
 import { useOverlayStore } from "@/hooks/use-overlay-store";
 import { useTourStore } from "@/hooks/use-tour-store";
@@ -206,17 +206,17 @@ export default function Practice() {
               className=" tour-step-14 relative flex flex-col gap-1"
             >
               <div className="flex gap-1">
-                <ButtonRectangular
+                <RectangularButton
                   onClick={() => setGrammarVisible(true)}
                   disabled={!grammar_id}
                   className="tour-step-15"
                 >
                   <BookIcon />
-                </ButtonRectangular>
+                </RectangularButton>
                 <Hint visibility={isOpen} style={{ top: "0px", left: "14px" }}>
                   gramatika
                 </Hint>
-                <ButtonRectangular
+                <RectangularButton
                   onClick={() => {
                     handleNext(config.progress.skipProgress);
                   }}
@@ -224,26 +224,26 @@ export default function Practice() {
                   className="tour-step-16"
                 >
                   <SkipIcon />
-                </ButtonRectangular>
+                </RectangularButton>
                 <Hint visibility={isOpen} style={{ top: "0px", right: "14px" }}>
                   dokončit
                 </Hint>
               </div>
               {!revealed ? (
                 <div className="tour-step-19 relative flex gap-1">
-                  <ButtonRectangular
+                  <RectangularButton
                     onClick={() => setHintIndex((prevIndex) => prevIndex + 1)}
                     className="tour-step-17"
                   >
                     <HintIcon />
-                  </ButtonRectangular>
+                  </RectangularButton>
                   <Hint
                     visibility={isOpen}
                     style={{ top: "0px", left: "14px" }}
                   >
                     nápověda
                   </Hint>
-                  <ButtonRectangular
+                  <RectangularButton
                     onClick={() => {
                       if (showPlayHint) {
                         setShowPlayHint(false);
@@ -257,7 +257,7 @@ export default function Practice() {
                     className="tour-step-18"
                   >
                     <EyeIcon />
-                  </ButtonRectangular>
+                  </RectangularButton>
                   <Hint
                     visibility={isOpen}
                     style={{ top: "0px", right: "14px" }}
@@ -267,24 +267,24 @@ export default function Practice() {
                 </div>
               ) : (
                 <div className="tour-step-19 relative flex gap-1">
-                  <ButtonRectangular
+                  <RectangularButton
                     onClick={() => handleNext(config.progress.minusProgress)}
                     className="tour-step-20"
                   >
                     <MinusIcon />
-                  </ButtonRectangular>
+                  </RectangularButton>
                   <Hint
                     visibility={isOpen}
                     style={{ top: "0px", left: "14px" }}
                   >
                     neznám
                   </Hint>
-                  <ButtonRectangular
+                  <RectangularButton
                     onClick={() => handleNext(config.progress.plusProgress)}
                     className="tour-step-21"
                   >
                     <PlusIcon />
-                  </ButtonRectangular>
+                  </RectangularButton>
                   <Hint
                     visibility={isOpen}
                     style={{ top: "0px", right: "14px" }}

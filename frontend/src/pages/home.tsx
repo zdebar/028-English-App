@@ -1,4 +1,4 @@
-import ButtonRectangular from "@/components/UI/button-rectangular";
+import RectangularButton from "@/components/UI/buttons/rectangular-button";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import Dashboard from "@/components/Layout/dashboard";
@@ -25,12 +25,12 @@ export default function Home() {
       </p>
 
       {!userId ? (
-        <ButtonRectangular
+        <RectangularButton
           onClick={() => navigate("/login")}
           className="w-full"
         >
           Sign in / Sign up
-        </ButtonRectangular>
+        </RectangularButton>
       ) : (
         <div className="flex gap-1 flex-col w-full relative">
           <SettingProperty

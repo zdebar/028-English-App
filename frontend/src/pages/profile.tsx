@@ -1,7 +1,7 @@
-import ButtonSignout from "@/components/UI/button-signout";
+import SignoutButton from "@/components/UI/buttons/signout-button";
 import { useNavigate } from "react-router-dom";
-import ButtonRectangular from "@/components/UI/button-rectangular";
-import ButtonResetAll from "@/components/UI/button-reset-all";
+import RectangularButton from "@/components/UI/buttons/rectangular-button";
+import ResetAllButton from "@/components/UI/buttons/reset-all-button";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -9,20 +9,20 @@ export default function Profile() {
   return (
     <>
       <div className="card-width tour-step-31 grow-0">
-        <ButtonResetAll />
-        <ButtonRectangular
+        <ResetAllButton />
+        <RectangularButton
           onClick={() => navigate("/grammar-overview")}
           className="grow-0"
         >
           <p className="text-button">Přehled gramatiky</p>
-        </ButtonRectangular>
-        <ButtonRectangular
+        </RectangularButton>
+        <RectangularButton
           onClick={() => navigate("/vocabulary-overview")}
           className="grow-0"
         >
           <p className="text-button">Přehled slovíček</p>
-        </ButtonRectangular>
-        <ButtonSignout />
+        </RectangularButton>
+        <SignoutButton />
       </div>
     </>
   );

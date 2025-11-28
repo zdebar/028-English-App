@@ -7,7 +7,7 @@ import { Link, useMatch, type LinkProps } from "react-router-dom";
  * @property {boolean} [disabled] - Whether the button is disabled.
  * @property {string} [className] - Additional CSS classes for styling.
  */
-interface ButtonHeaderProps extends LinkProps {
+interface HeaderButtonProps extends LinkProps {
   children: ReactNode;
   disabled?: boolean;
   className?: string;
@@ -17,13 +17,13 @@ interface ButtonHeaderProps extends LinkProps {
 /**
  * A header button component - button-header.
  */
-export default function ButtonHeader({
+export default function HeaderButton({
   children,
   disabled = false,
   className = "",
   to,
   ...props
-}: ButtonHeaderProps) {
+}: HeaderButtonProps) {
   const isSelected = useMatch(to);
 
   return disabled ? (

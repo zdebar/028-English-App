@@ -191,8 +191,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       )
       .sortBy("czech");
 
-    console.log("Result with between:", result.length);
-
     return result;
   }
 

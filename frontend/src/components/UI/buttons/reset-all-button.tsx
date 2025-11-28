@@ -2,13 +2,13 @@ import { useState } from "react";
 import UserItem from "@/database/models/user-items";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import ButtonAsync from "./button-async";
+import AsyncButton from "./async-button";
 import { useAuthStore } from "@/hooks/use-auth-store";
 
 /**
  * Button for resetting all user progress.
  */
-export default function ButtonResetAll() {
+export default function ResetAllButton() {
   const [isLoading, setIsLoading] = useState(false);
   const { userId } = useAuthStore();
 
@@ -32,7 +32,7 @@ export default function ButtonResetAll() {
   };
 
   return (
-    <ButtonAsync
+    <AsyncButton
       isLoading={isLoading}
       message="Resetovat vše"
       modalTitle="Potvrzení resetu"

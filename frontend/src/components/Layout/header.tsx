@@ -1,5 +1,5 @@
 import { HomeIcon, AcademicCapIcon } from "@/components/UI/icons";
-import ButtonHeader from "@/components/UI/button-header";
+import HeaderButton from "@/components/UI/buttons/header-button";
 import UserAvatar from "@/components/UI/user-avatar";
 import ThemeSwitch from "@/components/UI/theme-switch";
 import { useAuthStore } from "@/hooks/use-auth-store";
@@ -14,17 +14,17 @@ export default function Header() {
         role="navigation"
         aria-label="Hlavní navigace"
       >
-        <ButtonHeader to="/" aria-label="Domů">
+        <HeaderButton to="/" aria-label="Domů">
           <HomeIcon />
-        </ButtonHeader>
-        <ButtonHeader
+        </HeaderButton>
+        <HeaderButton
           to="/practice"
           aria-label="Uživatelský dashboard"
           className="tour-step-10"
           disabled={!userId}
         >
           <AcademicCapIcon />
-        </ButtonHeader>
+        </HeaderButton>
       </nav>
       <nav
         className="sideheader rightheader "
@@ -32,14 +32,14 @@ export default function Header() {
         aria-label="Uživatelská navigace"
       >
         <ThemeSwitch />
-        <ButtonHeader
+        <HeaderButton
           to="/profile"
           aria-label="Nastavení uživatele"
           disabled={!userId}
           className="tour-step-30"
         >
           <UserAvatar />
-        </ButtonHeader>
+        </HeaderButton>
       </nav>
     </header>
   );

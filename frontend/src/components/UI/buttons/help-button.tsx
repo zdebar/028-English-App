@@ -1,4 +1,4 @@
-import { HelpIcon } from "./icons";
+import HelpIcon from "@/assets/icons/help-icon";
 import { useOverlayStore } from "@/hooks/use-overlay-store";
 
 export default function HelpButton({

@@ -1,7 +1,8 @@
-import ButtonRectangular from "@/components/UI/button-rectangular";
+import RectangularButton from "@/components/UI/buttons/rectangular-button";
 import { Modal } from "@/components/UI/modal";
 import { useState } from "react";
-interface ButtonAsyncProps {
+
+interface AsyncButtonProps {
   isLoading: boolean;
   message: string;
   disabledMessage?: string;
@@ -13,7 +14,7 @@ interface ButtonAsyncProps {
   className?: string;
 }
 
-export default function ButtonAsync({
+export default function AsyncButton({
   isLoading,
   message,
   disabledMessage = "Načítání...",
@@ -23,12 +24,12 @@ export default function ButtonAsync({
   buttonTextStyle = "text-button",
   disabled = false,
   className = "",
-}: ButtonAsyncProps) {
+}: AsyncButtonProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <>
-      <ButtonRectangular
+      <RectangularButton
         onClick={() => setIsModalOpen(true)}
         disabled={isLoading || disabled}
         className={className}
@@ -36,7 +37,7 @@ export default function ButtonAsync({
         <p className={`overlay-hidden ${buttonTextStyle}`}>
           {isLoading ? disabledMessage : message}
         </p>
-      </ButtonRectangular>
+      </RectangularButton>
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
