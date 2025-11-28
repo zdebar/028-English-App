@@ -43,6 +43,7 @@ export default function OverviewCard({
             onClose();
           }}
           disabled={!handleReset}
+          className="flex justify-start items-start grow"
         />
         <Hint visibility={isOpen} style={{ top: "0px", left: "14px" }}>
           obnovit pokrok

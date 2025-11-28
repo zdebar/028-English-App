@@ -1,6 +1,6 @@
 import Icon, { type IconProps } from "./Icon";
 
-export default function HelpIcon(props: IconProps) {
+export default function LightBulbIcon(props: IconProps) {
   return (
     <Icon {...props}>
       <path

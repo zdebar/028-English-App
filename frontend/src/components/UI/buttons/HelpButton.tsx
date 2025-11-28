@@ -1,4 +1,4 @@
-import HelpIcon from "@/components/UI/icons/HelpIcon";
+import LightBulbIcon from "@/components/UI/icons/LightBulbIcon";
 import { useOverlayStore } from "@/hooks/use-overlay-store";
 
 export default function HelpButton({
@@ -15,7 +15,7 @@ export default function HelpButton({
       style={style}
       onClick={open}
     >
-      <HelpIcon />
+      <LightBulbIcon />
     </div>
   );
 }
