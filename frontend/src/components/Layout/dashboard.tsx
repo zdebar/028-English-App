@@ -1,9 +1,9 @@
-import LessonBar from "@/components/UI/block-bar";
+import LessonBar from "@/components/UI/BlockBar";
 import { getLessonProgress } from "@/utils/dashboard.utils";
 import type { LessonsLocal } from "@/types/local.types";
 import { useUserStore } from "@/hooks/use-user-store";
 import HelpButton from "@/components/UI/buttons/HelpButton";
-import Hint from "@/components/UI/hint";
+import Hint from "@/components/UI/Hint";
 import { useOverlayStore } from "@/hooks/use-overlay-store";
 
 export default function Dashboard({ className = "" }: { className?: string }) {

@@ -9,7 +9,7 @@ export interface IconProps {
 export default function Icon({
   className = "",
   size = 24,
-  strokeWidth = 1.5,
+  strokeWidth = 1,
   strokeColor = "currentColor",
   fillColor = "none",
   children,

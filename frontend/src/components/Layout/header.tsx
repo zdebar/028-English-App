@@ -1,7 +1,8 @@
-import { HomeIcon, AcademicCapIcon } from "@/components/UI/icons";
+import HomeIcon from "../UI/icons/HomeIcon";
+import AcademicCapIcon from "../UI/icons/AcademicCapIcon";
 import HeaderButton from "@/components/UI/buttons/HeaderButton";
-import UserAvatar from "@/components/UI/user-avatar";
-import ThemeSwitch from "@/components/UI/theme-switch";
+import UserAvatar from "@/components/UI/UserAvatar";
+import ThemeSwitch from "@/components/UI/ThemeSwitch";
 import { useAuthStore } from "@/hooks/use-auth-store";
 
 export default function Header() {

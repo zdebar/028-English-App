@@ -18,7 +18,7 @@ export default function Toast({ message, type = "info", onClose }: ToastProps) {
       className={`fixed top-4 right-4 z-50 px-4 py-2 rounded shadow-lg ${typeStyles[type]}`}
     >
       <span>{message}</span>
-      {onClose && <CloseButton onClose={onClose}></CloseButton>}
+      {onClose && <CloseButton onClick={onClose}></CloseButton>}
     </div>
   );
 }

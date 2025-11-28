@@ -1,8 +1,8 @@
 import RectangularButton from "@/components/UI/buttons/RectangularButton";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/hooks/use-auth-store";
-import Dashboard from "@/components/Layout/dashboard";
-import SettingProperty from "@/components/UI/setting-property";
+import Dashboard from "@/components/Layout/Dashboard";
+import Property from "@/components/UI/Property";
 import { useTourStore } from "@/hooks/use-tour-store";
 
 export default function Home() {
@@ -33,11 +33,7 @@ export default function Home() {
         </RectangularButton>
       ) : (
         <div className="flex gap-1 flex-col w-full relative">
-          <SettingProperty
-            label="Uživatel:"
-            className="h-input"
-            value={userEmail}
-          />
+          <Property label="Uživatel:" className="h-input" value={userEmail} />
           <Dashboard />
         </div>
       )}

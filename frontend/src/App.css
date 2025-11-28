@@ -70,7 +70,7 @@
 @layer utilities {
   /* BACKGROUND COLORS */
   .color-button {
-    @apply border; /* Button Base */
+    @apply border border-solid; /* Button Base */
     @apply bg-background-light text-light dark:bg-background-dark dark:text-dark; /* Theming */
     @apply hover:bg-button-hover hover:text-light cursor-pointer; /* Button Interactions */
     @apply disabled:border-dashed cursor-default; /* Disabled States */

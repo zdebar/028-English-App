@@ -1,23 +1,21 @@
 import { useState, useEffect, useCallback } from "react";
-import VolumeSlider from "@/components/UI/volume-slider";
+import VolumeSlider from "@/components/UI/VolumeSlider";
 import RectangularButton from "@/components/UI/buttons/RectangularButton";
-import {
-  SkipIcon,
-  HintIcon,
-  EyeIcon,
-  MinusIcon,
-  PlusIcon,
-  BookIcon,
-} from "@/components/UI/icons";
+import ForwardIcon from "@/components/UI/icons/ForwardIcon";
+import HintIcon from "@/components/UI/icons/HintIcon";
+import EyeIcon from "@/components/UI/icons/EyeIcon";
+import MinusIcon from "@/components/UI/icons/MinusIcon";
+import PlusIcon from "@/components/UI/icons/PlusIcon";
+import BookIcon from "@/components/UI/icons/BookIcon";
 import config from "@/config/config";
 import { usePracticeDeck } from "@/hooks/use-practice-deck";
 import { useAudioManager } from "@/hooks/use-audio-manager";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import { useUserStore } from "@/hooks/use-user-store";
-import GrammarCard from "@/components/Layout/grammar-card";
-import Loading from "@/components/UI/loading";
+import GrammarCard from "@/components/Layout/GrammarCard";
+import Loading from "@/components/UI/Loading";
 import HelpButton from "@/components/UI/buttons/HelpButton";
-import Hint from "@/components/UI/hint";
+import Hint from "@/components/UI/Hint";
 import { useOverlayStore } from "@/hooks/use-overlay-store";
 import { useTourStore } from "@/hooks/use-tour-store";
 
@@ -223,7 +221,7 @@ export default function Practice() {
                   disabled={!revealed}
                   className="tour-step-16"
                 >
-                  <SkipIcon />
+                  <ForwardIcon />
                 </RectangularButton>
                 <Hint visibility={isOpen} style={{ top: "0px", right: "14px" }}>
                   dokončit

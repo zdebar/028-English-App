@@ -4,7 +4,7 @@ type TourState = {
   showTour: boolean;
   currentId: number | string | undefined | null;
   lastId: number | string | undefined | null;
-  setCurrentId: (idx: number) => void;
+  setCurrentId: (idx: number | string | undefined | null) => void;
   openTour: () => void;
   closeTour: () => void;
 };

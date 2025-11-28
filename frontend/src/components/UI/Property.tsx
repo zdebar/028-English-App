@@ -6,7 +6,7 @@
  * @param className - Optional additional CSS classes to apply to the component.
  * @returns A JSX element representing the labeled property.
  */
-export default function SettingProperty({
+export default function Property({
   label,
   value,
   className = "",

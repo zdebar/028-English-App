@@ -1,5 +1,5 @@
 import RectangularButton from "@/components/UI/buttons/RectangularButton";
-import { Modal } from "@/components/UI/modal";
+import { Modal } from "@/components/UI/Modal";
 import { useState } from "react";
 
 interface AsyncButtonProps {

@@ -1,5 +1,5 @@
 import Grammar from "@/database/models/grammar";
-import OverviewCard from "@/components/UI/overview-card";
+import OverviewCard from "@/components/UI/OverviewCard";
 import { useCallback } from "react";
 import { useFetch } from "@/hooks/use-fetch";
 import DOMPurify from "dompurify";

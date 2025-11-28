@@ -1,8 +1,8 @@
 import RectangularButton from "@/components/UI/buttons/RectangularButton";
-import { CloseIcon } from "@/components/UI/icons";
+import CloseIcon from "@/components/UI/icons/CloseIcon";
 import AsyncButton from "./buttons/AsyncButton";
-import Loading from "./loading";
-import Hint from "@/components/UI/hint";
+import Loading from "./Loading";
+import Hint from "@/components/UI/Hint";
 import { useOverlayStore } from "@/hooks/use-overlay-store";
 
 interface OverviewCardProps {

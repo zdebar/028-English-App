@@ -2,15 +2,15 @@ import { useState, useEffect, useCallback } from "react";
 import RectangularButton from "@/components/UI/buttons/RectangularButton";
 import UserItem from "@/database/models/user-items";
 import type { UserItemLocal } from "@/types/local.types";
-import { CloseIcon } from "@/components/UI/icons";
+import CloseIcon from "@/components/UI/icons/CloseIcon";
 import { useNavigate } from "react-router-dom";
-import OverviewCard from "@/components/UI/overview-card";
-import DirectionDropdown from "@/components/UI/direction-dropdown";
-import SettingProperty from "@/components/UI/setting-property";
+import OverviewCard from "@/components/UI/OverviewCard";
+import DirectionDropdown from "@/components/UI/DirectionDropdown";
+import Property from "@/components/UI/Property";
 import { shortenDate } from "@/utils/database.utils";
 import { useFetch } from "@/hooks/use-fetch";
 import { useAuthStore } from "@/hooks/use-auth-store";
-import Loading from "@/components/UI/loading";
+import Loading from "@/components/UI/Loading";
 import { getMoreText } from "@/utils/practice.utils";
 import HelpButton from "@/components/UI/buttons/HelpButton";
 
@@ -153,53 +153,50 @@ export default function VocabularyOverview() {
           >
             <div className="flex flex-col gap-4">
               <div>
-                <SettingProperty
+                <Property
                   label="item_id"
                   className="h-attribute"
                   value={selectedWord?.item_id}
                 />
-                <SettingProperty
+                <Property
                   label="česky"
                   className="h-attribute"
                   value={selectedWord?.czech}
                 />
-                <SettingProperty
-                  label="anglicky"
-                  value={selectedWord?.english}
-                />
-                <SettingProperty
+                <Property label="anglicky" value={selectedWord?.english} />
+                <Property
                   label="výslovnost"
                   className="h-attribute"
                   value={selectedWord?.pronunciation}
                 />
-                <SettingProperty
+                <Property
                   label="pokrok"
                   className="h-attribute"
                   value={selectedWord?.progress}
                 />
               </div>
               <div>
-                <SettingProperty
+                <Property
                   label="start"
                   className="h-attribute"
                   value={shortenDate(selectedWord?.started_at)}
                 />
-                <SettingProperty
+                <Property
                   label="změněno"
                   className="h-attribute"
                   value={shortenDate(selectedWord?.updated_at)}
                 />
-                <SettingProperty
+                <Property
                   label="další"
                   className="h-attribute"
                   value={shortenDate(selectedWord?.next_at)}
                 />
-                <SettingProperty
+                <Property
                   label="naučeno"
                   className="h-attribute"
                   value={shortenDate(selectedWord?.learned_at)}
                 />
-                <SettingProperty
+                <Property
                   label="ukončeno"
                   className="h-attribute"
                   value={shortenDate(selectedWord?.mastered_at)}
