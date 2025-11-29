@@ -2,8 +2,8 @@ import { useState } from "react";
 import UserItem from "@/database/models/user-items";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import ButtonAsyncModal from "./ButtonAsyncModal";
-import { useAuthStore } from "@/hooks/use-auth-store";
+import ButtonAsyncModal from "../../components/UI/buttons/ButtonAsyncModal";
+import { useAuthStore } from "@/features/auth/use-auth-store";
 
 export default function ResetAllButton() {
   const [isLoading, setIsLoading] = useState(false);

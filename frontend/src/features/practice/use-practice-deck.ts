@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import { alternateDirection } from "@/utils/practice.utils";
-import { useUserProgress } from "@/hooks/use-user-progress";
+import { useUserProgress } from "@/features/practice/use-user-progress";
 import type { UserItemLocal } from "@/types/local.types";
 import UserItem from "@/database/models/user-items";
 import { useFetch } from "@/hooks/use-fetch";

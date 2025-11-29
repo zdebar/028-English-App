@@ -9,7 +9,7 @@ import DirectionDropdown from "@/components/UI/DirectionDropdown";
 import Property from "@/components/UI/Property";
 import { shortenDate } from "@/utils/database.utils";
 import { useFetch } from "@/hooks/use-fetch";
-import { useAuthStore } from "@/hooks/use-auth-store";
+import { useAuthStore } from "@/features/auth/use-auth-store";
 import Loading from "@/components/UI/Loading";
 import { getMoreText } from "@/utils/practice.utils";
 import HelpButton from "@/components/UI/buttons/HelpButton";

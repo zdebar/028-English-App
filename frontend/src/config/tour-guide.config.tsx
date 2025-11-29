@@ -1,5 +1,5 @@
 import config from "./config";
-import { type TourStep } from "@/hooks/use-tour-guide";
+import { type TourStep } from "@/features/tour/use-tour-guide";
 
 export const tour: TourStep[] = [
   {

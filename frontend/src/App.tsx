@@ -14,14 +14,14 @@ import PublicLayout from "@/components/utils/public-layout";
 import { ToastContainer } from "react-toastify";
 import Login from "@/pages/login";
 import GrammarOverview from "@/pages/grammar-overview";
-import { useAuthStore } from "@/hooks/use-auth-store";
+import { useAuthStore } from "@/features/auth/use-auth-store";
 import type { Session } from "@supabase/supabase-js";
 import { supabaseInstance } from "@/config/supabase.config";
 import Overlay from "./components/UI/Overlay";
 import { useOverlayStore } from "@/hooks/use-overlay-store";
 import TourGuideLauncher from "./components/Layout/TourGuide";
 import { tour } from "@/config/tour-guide.config";
-import { useTourStore } from "@/hooks/use-tour-store";
+import { useTourStore } from "@/features/tour/use-tour-store";
 
 export default function App() {
   const { theme, chooseTheme } = useThemeStore();

@@ -7,7 +7,7 @@ import CloseIcon from "@/components/UI/icons/CloseIcon";
 import { useNavigate } from "react-router-dom";
 import OverviewCard from "@/components/UI/OverviewCard";
 import { useFetch } from "@/hooks/use-fetch";
-import { useAuthStore } from "@/hooks/use-auth-store";
+import { useAuthStore } from "@/features/auth/use-auth-store";
 import DOMPurify from "dompurify";
 import HelpButton from "@/components/UI/buttons/HelpButton";
 

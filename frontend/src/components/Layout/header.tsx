@@ -3,7 +3,7 @@ import AcademicCapIcon from "../UI/icons/AcademicCapIcon";
 import HeaderButton from "@/components/UI/buttons/HeaderButton";
 import UserAvatar from "@/components/UI/UserAvatar";
 import ThemeSwitch from "@/components/UI/ThemeSwitch";
-import { useAuthStore } from "@/hooks/use-auth-store";
+import { useAuthStore } from "@/features/auth/use-auth-store";
 
 export default function Header() {
   const { userId } = useAuthStore();

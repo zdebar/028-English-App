@@ -8,16 +8,16 @@ import MinusIcon from "@/components/UI/icons/MinusIcon";
 import PlusIcon from "@/components/UI/icons/PlusIcon";
 import BookIcon from "@/components/UI/icons/BookIcon";
 import config from "@/config/config";
-import { usePracticeDeck } from "@/hooks/use-practice-deck";
-import { useAudioManager } from "@/hooks/use-audio-manager";
-import { useAuthStore } from "@/hooks/use-auth-store";
+import { usePracticeDeck } from "@/features/practice/use-practice-deck";
+import { useAudioManager } from "@/features/practice/use-audio-manager";
+import { useAuthStore } from "@/features/auth/use-auth-store";
 import { useUserStore } from "@/hooks/use-user-store";
 import GrammarCard from "@/components/Layout/GrammarCard";
 import Loading from "@/components/UI/Loading";
 import HelpButton from "@/components/UI/buttons/HelpButton";
 import Hint from "@/components/UI/Hint";
 import { useOverlayStore } from "@/hooks/use-overlay-store";
-import { useTourStore } from "@/hooks/use-tour-store";
+import { useTourStore } from "@/features/tour/use-tour-store";
 
 export default function Practice() {
   const [revealed, setRevealed] = useState(false);

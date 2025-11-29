@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
-import ButtonAsyncModal from "./ButtonAsyncModal";
-import { useAuthStore } from "@/hooks/use-auth-store";
+import ButtonAsyncModal from "../../components/UI/buttons/ButtonAsyncModal";
+import { useAuthStore } from "@/features/auth/use-auth-store";
 
 /**
  * Button for signing out the user.
