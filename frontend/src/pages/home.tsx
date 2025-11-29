@@ -1,7 +1,7 @@
 import Button from "@/components/UI/buttons/Button";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/features/auth/use-auth-store";
-import Dashboard from "@/components/Layout/Dashboard";
+import Dashboard from "@/features/dashboard/Dashboard";
 import PropertyView from "@/components/UI/PropertyView";
 import { useTourStore } from "@/features/tour/use-tour-store";
 
