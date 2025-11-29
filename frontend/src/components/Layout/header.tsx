@@ -2,7 +2,7 @@ import HomeIcon from "../UI/icons/HomeIcon";
 import AcademicCapIcon from "../UI/icons/AcademicCapIcon";
 import HeaderButton from "@/components/UI/buttons/HeaderButton";
 import UserAvatar from "@/components/UI/UserAvatar";
-import ThemeSwitch from "@/components/UI/ThemeSwitch";
+import ThemeSwitch from "@/features/theming/ThemeSwitch";
 import { useAuthStore } from "@/features/auth/use-auth-store";
 
 export default function Header() {

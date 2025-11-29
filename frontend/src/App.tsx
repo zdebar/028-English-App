@@ -1,5 +1,5 @@
 import { Route, Routes } from "react-router-dom";
-import { useThemeStore } from "@/hooks/use-theme";
+import { useThemeStore } from "@/features/theming/use-theme";
 import { useEffect } from "react";
 import Footer from "@/components/Layout/Footer";
 import Header from "@/components/Layout/Header";
