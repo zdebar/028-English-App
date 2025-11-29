@@ -3,7 +3,7 @@ import Grammar from "@/database/models/grammar";
 import UserScore from "@/database/models/user-scores";
 import UserItem from "@/database/models/user-items";
 import AudioRecord from "@/database/models/audio-records";
-import { triggerUserItemsUpdatedEvent } from "@/utils/database.utils";
+import { triggerUserItemsUpdatedEvent } from "@/database/database.utils";
 import type { UUID } from "crypto";
 
 export async function dataSync(userId: UUID): Promise<boolean> {

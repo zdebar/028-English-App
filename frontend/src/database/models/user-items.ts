@@ -12,7 +12,7 @@ import {
   getLocalDateFromUTC,
   triggerUserItemsUpdatedEvent,
   resetUserItem,
-} from "@/utils/database.utils";
+} from "@/database/database.utils";
 import UserScore from "./user-scores";
 import Metadata from "./metadata";
 

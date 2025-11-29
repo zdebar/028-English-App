@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import OverviewCard from "@/components/UI/OverviewCard";
 import DirectionDropdown from "@/components/UI/DirectionDropdown";
 import PropertyView from "@/components/UI/PropertyView";
-import { shortenDate } from "@/utils/database.utils";
+import { shortenDate } from "@/features/vocabulary/vocabulary.utils";
 import { useFetch } from "@/hooks/use-fetch";
 import { useAuthStore } from "@/features/auth/use-auth-store";
 import Loading from "@/components/UI/Loading";
