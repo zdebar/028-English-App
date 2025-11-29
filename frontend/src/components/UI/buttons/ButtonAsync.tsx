@@ -31,7 +31,9 @@ export default function ButtonAsync({
       className={className}
       {...props}
     >
-      <span>{isLoading ? loadingMessage : message}</span>
+      <span className="text-button">
+        {isLoading ? loadingMessage : message}
+      </span>
     </button>
   );
 }
