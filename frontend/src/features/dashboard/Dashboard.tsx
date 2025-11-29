@@ -1,4 +1,4 @@
-import LessonBar from "@/components/UI/BlockBar";
+import LessonBar from "@/features/dashboard/BlockBar";
 import { getLessonProgress } from "@/features/dashboard/dashboard.utils";
 import type { LessonsLocal } from "@/types/local.types";
 import { useUserStore } from "@/hooks/use-user-store";
