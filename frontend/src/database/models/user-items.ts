@@ -5,7 +5,8 @@ import { TableName, type UserItemLocal } from "@/types/local.types";
 import type { UUID } from "crypto";
 import config from "@/config/config";
 import { supabaseInstance } from "@/config/supabase.config";
-import { getNextAt, sortOddEvenByProgress } from "@/utils/practice.utils";
+
+import { getNextAt, sortOddEvenByProgress } from "@/database/database.utils";
 import {
   convertLocalToSQL,
   getTodayShortDate,

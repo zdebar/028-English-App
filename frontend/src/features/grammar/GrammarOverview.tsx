@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import Button from "../components/UI/buttons/Button";
+import Button from "@/components/UI/buttons/Button";
 import Grammar from "@/database/models/grammar";
 import UserItem from "@/database/models/user-items";
 import type { GrammarLocal } from "@/types/local.types";

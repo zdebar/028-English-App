@@ -5,13 +5,13 @@ import type { UserItemLocal } from "@/types/local.types";
 import CloseIcon from "@/components/UI/icons/CloseIcon";
 import { useNavigate } from "react-router-dom";
 import OverviewCard from "@/components/UI/OverviewCard";
-import DirectionDropdown from "@/components/UI/DirectionDropdown";
+import DirectionDropdown from "@/features/vocabulary/DirectionDropdown";
 import PropertyView from "@/components/UI/PropertyView";
 import { shortenDate } from "@/features/vocabulary/vocabulary.utils";
 import { useFetch } from "@/hooks/use-fetch";
 import { useAuthStore } from "@/features/auth/use-auth-store";
 import Loading from "@/components/UI/Loading";
-import { getMoreText } from "@/utils/practice.utils";
+import { getMoreText } from "@/features/vocabulary/vocabulary.utils";
 import HelpButton from "@/components/UI/buttons/HelpButton";
 
 export default function VocabularyOverview() {

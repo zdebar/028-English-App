@@ -1,5 +1,5 @@
 import { Route, Routes } from "react-router-dom";
-import { useThemeStore } from "@/features/theming/use-theme";
+import { useThemeStore } from "@/features/theme/use-theme";
 import { useEffect } from "react";
 import Footer from "@/components/Layout/Footer";
 import Header from "@/components/Layout/Header";
@@ -8,11 +8,11 @@ import Profile from "@/pages/profile";
 import Practice from "@/pages/practice";
 import Home from "@/pages/home";
 import { dataSync } from "@/database/models/data-sync";
-import VocabularyOverview from "@/pages/vocabulary-overview";
+import Vocabulary from "@/pages/vocabulary";
 import ProtectedLayout from "@/components/utils/protected-laout";
 import PublicLayout from "@/components/utils/public-layout";
 import Login from "@/pages/login";
-import GrammarOverview from "@/pages/grammar-overview";
+import Grammar from "@/pages/grammar";
 import { useAuthStore } from "@/features/auth/use-auth-store";
 import type { Session } from "@supabase/supabase-js";
 import { supabaseInstance } from "@/config/supabase.config";
@@ -71,11 +71,8 @@ export default function App() {
             <Route element={<ProtectedLayout />}>
               <Route path="/practice" element={<Practice />} />
               <Route path="/profile" element={<Profile />} />
-              <Route path="/grammar-overview" element={<GrammarOverview />} />
-              <Route
-                path="/vocabulary-overview"
-                element={<VocabularyOverview />}
-              />
+              <Route path="/grammar" element={<Grammar />} />
+              <Route path="/vocabulary" element={<Vocabulary />} />
             </Route>
             <Route
               path="/*"
