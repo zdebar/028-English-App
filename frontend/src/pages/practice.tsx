@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import VolumeSlider from "@/components/UI/VolumeSlider";
+import VolumeSlider from "@/features/practice/VolumeSlider";
 import Button from "@/components/UI/buttons/Button";
 import ForwardIcon from "@/components/UI/icons/ForwardIcon";
 import BulbIcon from "@/components/UI/icons/BulbIcon";

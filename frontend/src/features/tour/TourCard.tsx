@@ -1,6 +1,6 @@
-import Button from "./buttons/Button";
+import Button from "../../components/UI/buttons/Button";
 import { useState, useRef, useEffect } from "react";
-import CloseButton from "./buttons/CloseButton";
+import CloseButton from "../../components/UI/buttons/CloseButton";
 
 type TourCardProps = {
   content: React.ReactNode;

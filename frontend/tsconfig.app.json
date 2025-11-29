@@ -32,6 +32,7 @@
   "include": [
     "src",
     "../archive/theme/theme-dropdown.tsx",
-    "../archive/practice-card-backup.tsx"
+    "../archive/practice-card-backup.tsx",
+    "../archive/Checkbox.tsx"
   ]
 }

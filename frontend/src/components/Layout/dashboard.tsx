@@ -29,16 +29,10 @@ export default function Dashboard({ className = "" }: { className?: string }) {
           className="tour-step-1"
         />
       ))}
-      <Hint visibility={isOpen} style={{ bottom: "5px", right: "5px" }}>
+      <Hint visibility={isOpen} className="absolute right-0 top-8">
         dnes naučeno
       </Hint>
-      <HelpButton
-        className="tour-step-2"
-        style={{
-          bottom: "5px",
-          left: "50px",
-        }}
-      />
+      <HelpButton className="tour-step-2 absolute top-7 left-0" />
     </div>
   );
 }

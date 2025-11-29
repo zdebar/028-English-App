@@ -1,5 +1,5 @@
 import { useTourGuide, type TourStep } from "@/features/tour/use-tour-guide";
-import TourCard from "../../components/UI/TourCard";
+import TourCard from "./TourCard";
 import Overlay from "../../components/UI/Overlay";
 import { useTourStore } from "@/features/tour/use-tour-store";
 import { useEffect } from "react";
