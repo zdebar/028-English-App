@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { toast } from "react-toastify";
+import { useToastStore } from "@/features/toast/use-toast-store";
 import ButtonAsyncModal from "../../components/UI/buttons/ButtonAsyncModal";
 import { useAuthStore } from "@/features/auth/use-auth-store";
 
@@ -9,15 +9,19 @@ import { useAuthStore } from "@/features/auth/use-auth-store";
 export default function SignoutButton() {
   const { handleLogout } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
+  const { showToast } = useToastStore();
 
   const handleSignout = async () => {
     setIsLoading(true);
     try {
       await handleLogout();
-      toast.success("Úspěšně jste se odhlásili.");
+      showToast("Úspěšně jste se odhlásili.", "success");
     } catch (error) {
       console.error("Error on user logout:", error);
-      toast.error("Nastala chyba při odhlašování. Zkuste to prosím později.");
+      showToast(
+        "Nastala chyba při odhlašování. Zkuste to prosím později.",
+        "error"
+      );
     } finally {
       setIsLoading(false);
     }

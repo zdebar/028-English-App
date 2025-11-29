@@ -1,4 +1,4 @@
-import ButtonAsync from "./buttons/ButtonAsync";
+import Button from "./buttons/Button";
 
 export function Modal({
   isOpen,
@@ -34,8 +34,8 @@ export function Modal({
           <p>{description}</p>
         </div>
         <div className="flex gap-1">
-          <ButtonAsync onClick={onClose}>Ne</ButtonAsync>
-          <ButtonAsync onClick={onConfirm}>Ano</ButtonAsync>
+          <Button onClick={onClose}>Ne</Button>
+          <Button onClick={onConfirm}>Ano</Button>
         </div>
       </div>
     </div>

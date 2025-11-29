@@ -6,7 +6,7 @@ import CloseIcon from "@/components/UI/icons/CloseIcon";
 import { useNavigate } from "react-router-dom";
 import OverviewCard from "@/components/UI/OverviewCard";
 import DirectionDropdown from "@/components/UI/DirectionDropdown";
-import Property from "@/components/UI/Property";
+import PropertyView from "@/components/UI/PropertyView";
 import { shortenDate } from "@/utils/database.utils";
 import { useFetch } from "@/hooks/use-fetch";
 import { useAuthStore } from "@/features/auth/use-auth-store";
@@ -153,50 +153,50 @@ export default function VocabularyOverview() {
           >
             <div className="flex flex-col gap-4">
               <div>
-                <Property
+                <PropertyView
                   label="item_id"
                   className="h-attribute"
                   value={selectedWord?.item_id}
                 />
-                <Property
+                <PropertyView
                   label="česky"
                   className="h-attribute"
                   value={selectedWord?.czech}
                 />
-                <Property label="anglicky" value={selectedWord?.english} />
-                <Property
+                <PropertyView label="anglicky" value={selectedWord?.english} />
+                <PropertyView
                   label="výslovnost"
                   className="h-attribute"
                   value={selectedWord?.pronunciation}
                 />
-                <Property
+                <PropertyView
                   label="pokrok"
                   className="h-attribute"
                   value={selectedWord?.progress}
                 />
               </div>
               <div>
-                <Property
+                <PropertyView
                   label="start"
                   className="h-attribute"
                   value={shortenDate(selectedWord?.started_at)}
                 />
-                <Property
+                <PropertyView
                   label="změněno"
                   className="h-attribute"
                   value={shortenDate(selectedWord?.updated_at)}
                 />
-                <Property
+                <PropertyView
                   label="další"
                   className="h-attribute"
                   value={shortenDate(selectedWord?.next_at)}
                 />
-                <Property
+                <PropertyView
                   label="naučeno"
                   className="h-attribute"
                   value={shortenDate(selectedWord?.learned_at)}
                 />
-                <Property
+                <PropertyView
                   label="ukončeno"
                   className="h-attribute"
                   value={shortenDate(selectedWord?.mastered_at)}

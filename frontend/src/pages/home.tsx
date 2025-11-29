@@ -2,7 +2,7 @@ import Button from "@/components/UI/buttons/Button";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/features/auth/use-auth-store";
 import Dashboard from "@/components/Layout/Dashboard";
-import Property from "@/components/UI/Property";
+import PropertyView from "@/components/UI/PropertyView";
 import { useTourStore } from "@/features/tour/use-tour-store";
 
 export default function Home() {
@@ -30,7 +30,11 @@ export default function Home() {
         </Button>
       ) : (
         <div className="flex gap-1 flex-col w-full relative">
-          <Property label="Uživatel:" className="h-input" value={userEmail} />
+          <PropertyView
+            label="Uživatel:"
+            className="h-input"
+            value={userEmail}
+          />
           <Dashboard />
         </div>
       )}
