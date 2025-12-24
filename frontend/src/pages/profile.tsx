@@ -2,6 +2,7 @@ import SignoutButton from "@/features/auth/SignoutButton";
 import { useNavigate } from "react-router-dom";
 import Button from "@/components/UI/buttons/Button";
 import ResetAllButton from "@/features/auth/ResetAllButton";
+import DeleteUserButton from "@/features/auth/DeleteUserButton";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ export default function Profile() {
         <Button onClick={() => navigate("/vocabulary")} className="grow-0">
           <p className="text-button">Přehled slovíček</p>
         </Button>
+        <DeleteUserButton />
         <SignoutButton />
       </div>
     </>

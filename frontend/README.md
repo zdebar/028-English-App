@@ -53,8 +53,9 @@ React & TypeScript: Hook `useFetch`, Component `PracticeCard`
 - **Storage**: Supabase Storage
 - **Database**: PostgreSQL
 
-### Database Structure
+### Supabase PostgreSQL Database Structure
 
+- **users**: Stores user id.
 - **items**: Stores practice items (vocabulary words and grammar sentences).
 - **grammar**: Stores grammar explanations.
 - **user_items**: Tracks user's items progress score, next practice date, etc.
@@ -62,7 +63,7 @@ React & TypeScript: Hook `useFetch`, Component `PracticeCard`
 
 ## Storage
 
-Stores audio files zips. Separated into multiple batches. First one smaller to enable faster
+Stores audio files zips. Separated into multiple batches. First one smaller to enable faster start.
 
 ### IndexedDB Structure
 

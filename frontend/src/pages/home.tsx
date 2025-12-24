@@ -1,14 +1,14 @@
-import Button from "@/components/UI/buttons/Button";
-import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/features/auth/use-auth-store";
 import Dashboard from "@/features/dashboard/Dashboard";
 import PropertyView from "@/components/UI/PropertyView";
-import { useTourStore } from "@/features/tour/use-tour-store";
+import { Auth } from "@supabase/auth-ui-react";
+import { ThemeSupa } from "@supabase/auth-ui-shared";
+import { supabaseInstance } from "@/config/supabase.config";
+import { useThemeStore } from "@/features/theme/use-theme";
 
 export default function Home() {
-  const navigate = useNavigate();
+  const { theme } = useThemeStore();
   const { userId, userEmail } = useAuthStore();
-  const { openTour } = useTourStore();
 
   return (
     <div className="flex w-full max-w-hero flex-col items-center  relative justify-start gap-4  text-center">
@@ -20,14 +20,44 @@ export default function Home() {
         Trénujte až 200 vět za 20 minut denně, a dosáhněte základní znalosti
         jazyka za zlomek běžného učebního času.
       </p>
-      <p className="text-link  dark:text-notice-dark " onClick={openTour}>
-        Spustit průvodce
-      </p>
 
       {!userId ? (
-        <Button onClick={() => navigate("/login")} className="w-full">
-          Sign in / Sign up
-        </Button>
+        <Auth
+          supabaseClient={supabaseInstance}
+          appearance={{
+            theme: ThemeSupa,
+            style: { button: { width: 320 } },
+
+            variables: {
+              default: {
+                colors:
+                  theme === "dark"
+                    ? {
+                        messageText: "white",
+                        defaultButtonText: "black",
+                        anchorTextColor: "white",
+                        messageTextDanger: "red",
+                        inputLabelText: "white",
+                        brand: "green",
+                        brandAccent: "green",
+                        inputBorder: "white",
+                      }
+                    : {
+                        messageText: "black",
+                        defaultButtonText: "black",
+                        anchorTextColor: "black",
+                        messageTextDanger: "red",
+                        inputLabelText: "black",
+                        brand: "green",
+                        brandAccent: "green",
+                        inputBorder: "black",
+                      },
+              },
+            },
+          }}
+          providers={["google"]}
+          onlyThirdPartyProviders
+        />
       ) : (
         <div className="flex gap-1 flex-col w-full relative">
           <PropertyView

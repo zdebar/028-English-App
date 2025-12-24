@@ -17,7 +17,6 @@ import Loading from "@/components/UI/Loading";
 import HelpButton from "@/components/UI/buttons/HelpButton";
 import Hint from "@/components/UI/Hint";
 import { useOverlayStore } from "@/hooks/use-overlay-store";
-import { useTourStore } from "@/features/tour/use-tour-store";
 
 export default function PracticeCard() {
   const [revealed, setRevealed] = useState(false);
@@ -29,44 +28,11 @@ export default function PracticeCard() {
   const { userStats } = useUserStore();
   const { index, array, nextItem, currentItem, direction, grammar_id } =
     usePracticeDeck(userId!);
-  const {
-    playAudio,
-    stopAudio,
-    setVolume,
-    audioError,
-    setAudioError,
-    isPlaying,
-  } = useAudioManager(array || []);
-  const { currentId, lastId } = useTourStore();
+  const { playAudio, stopAudio, setVolume, audioError, setAudioError } =
+    useAudioManager(array || []);
 
   const isAudioDisabled =
     (direction && !revealed) || !currentItem?.audio || audioError;
-
-  // Tour step transitions
-  useEffect(() => {
-    const revealTransitions = [
-      [34, 33],
-      [30, 31],
-    ];
-    const hideTransitions = [[31, 30]];
-
-    if (
-      revealTransitions.some(
-        ([from, to]) => lastId === from && currentId === to
-      )
-    ) {
-      setRevealed(true);
-      setShowPlayHint(false);
-      if (isPlaying) stopAudio();
-    }
-    if (
-      hideTransitions.some(([from, to]) => lastId === from && currentId === to)
-    ) {
-      setRevealed(false);
-      setShowPlayHint(true);
-      if (isPlaying) stopAudio();
-    }
-  }, [currentId, lastId, isPlaying, stopAudio]);
 
   // Handle advancing to next item
   const handleNext = useCallback(

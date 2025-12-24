@@ -10,24 +10,18 @@ import Home from "@/pages/home";
 import { dataSync } from "@/database/models/data-sync";
 import Vocabulary from "@/pages/vocabulary";
 import ProtectedLayout from "@/components/utils/protected-laout";
-import PublicLayout from "@/components/utils/public-layout";
-import Login from "@/pages/login";
 import Grammar from "@/pages/grammar";
 import { useAuthStore } from "@/features/auth/use-auth-store";
 import type { Session } from "@supabase/supabase-js";
 import { supabaseInstance } from "@/config/supabase.config";
 import Overlay from "./components/UI/Overlay";
 import { useOverlayStore } from "@/hooks/use-overlay-store";
-import TourGuideLauncher from "./features/tour/TourGuide";
-import { tour } from "@/config/tour-guide.config";
-import { useTourStore } from "@/features/tour/use-tour-store";
 import ToastContainer from "./features/toast/ToastContainer";
 
 export default function App() {
   const { theme, chooseTheme } = useThemeStore();
   const { userId, setSession } = useAuthStore();
   const { isOpen, close } = useOverlayStore();
-  const { showTour, closeTour } = useTourStore();
 
   useEffect(() => {
     supabaseInstance.auth
@@ -60,14 +54,10 @@ export default function App() {
       {isOpen && <Overlay onClose={close} />}
       <div className="mx-auto min-h-screen relative max-w-container flex flex-col justify-start">
         <ToastContainer />
-        {showTour && <TourGuideLauncher tour={tour} onClose={closeTour} />}
         <Header />
         <div className="relative grow flex flex-col items-center gap-4">
           <Routes>
             <Route path="/*" element={<Home />} />
-            <Route element={<PublicLayout />}>
-              <Route path="/login" element={<Login />} />
-            </Route>
             <Route element={<ProtectedLayout />}>
               <Route path="/practice" element={<Practice />} />
               <Route path="/profile" element={<Profile />} />

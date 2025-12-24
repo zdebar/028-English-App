@@ -1,3 +1,10 @@
+-- Users table
+CREATE TABLE IF NOT EXISTS users (
+  id UUID PRIMARY KEY,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  deleted_at TIMESTAMP DEFAULT NULL
+);
+
 -- Grammar table
 CREATE TABLE IF NOT EXISTS grammar (
   id SERIAL PRIMARY KEY,
@@ -32,7 +39,8 @@ CREATE TABLE IF NOT EXISTS user_items (
   learned_at TIMESTAMP,
   mastered_at TIMESTAMP,
   PRIMARY KEY (user_id, item_id),
-  FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
+  FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE 
 );
 
 -- User score table
@@ -42,6 +50,7 @@ CREATE TABLE IF NOT EXISTS user_scores (
   item_count INTEGER NOT NULL DEFAULT 0,
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
   PRIMARY KEY (user_id, date),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Function to update updated_at column
@@ -77,6 +86,24 @@ CREATE TRIGGER set_updated_at_user_score
 BEFORE UPDATE ON user_score
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
+
+-- Function: on new auth user, create row in public.users
+CREATE OR REPLACE FUNCTION public.handle_new_auth_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.users (id)
+  VALUES (NEW.id);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger on auth.users
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+
+CREATE TRIGGER on_auth_user_created
+AFTER INSERT ON auth.users
+FOR EACH ROW
+EXECUTE FUNCTION public.handle_new_auth_user();
 
 -- Indexes on updated_at columns
 CREATE INDEX idx_items_updated_at ON items(updated_at);
