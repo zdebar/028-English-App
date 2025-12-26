@@ -5,6 +5,7 @@ import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabaseInstance } from "@/config/supabase.config";
 import { useThemeStore } from "@/features/theme/use-theme";
+import PrivacyPolicyLink from "@/features/gdpr/privacy-policy-link";
 
 export default function Home() {
   const { theme } = useThemeStore();
@@ -12,7 +13,7 @@ export default function Home() {
 
   return (
     <div className="flex w-full max-w-hero flex-col items-center  relative justify-start gap-4  text-center">
-      <h1 className="landscape:pt-6 ">Angličtina</h1>
+      <h1 className="landscape:pt-6 pt-12 pb-6">Angličtina</h1>
       <p className="text-notice dark:text-notice-dark ">
         Aplikace v testovacím režimu
       </p>
@@ -22,43 +23,45 @@ export default function Home() {
       </p>
 
       {!userId ? (
-        <Auth
-          supabaseClient={supabaseInstance}
-          appearance={{
-            theme: ThemeSupa,
-            style: { button: { width: 320 } },
-
-            variables: {
-              default: {
-                colors:
-                  theme === "dark"
-                    ? {
-                        messageText: "white",
-                        defaultButtonText: "black",
-                        anchorTextColor: "white",
-                        messageTextDanger: "red",
-                        inputLabelText: "white",
-                        brand: "green",
-                        brandAccent: "green",
-                        inputBorder: "white",
-                      }
-                    : {
-                        messageText: "black",
-                        defaultButtonText: "black",
-                        anchorTextColor: "black",
-                        messageTextDanger: "red",
-                        inputLabelText: "black",
-                        brand: "green",
-                        brandAccent: "green",
-                        inputBorder: "black",
-                      },
+        <div>
+          <Auth
+            supabaseClient={supabaseInstance}
+            appearance={{
+              theme: ThemeSupa,
+              style: { button: { width: 320 } },
+              variables: {
+                default: {
+                  colors:
+                    theme === "dark"
+                      ? {
+                          messageText: "white",
+                          defaultButtonText: "black",
+                          anchorTextColor: "white",
+                          messageTextDanger: "red",
+                          inputLabelText: "white",
+                          brand: "green",
+                          brandAccent: "green",
+                          inputBorder: "white",
+                        }
+                      : {
+                          messageText: "black",
+                          defaultButtonText: "black",
+                          anchorTextColor: "black",
+                          messageTextDanger: "red",
+                          inputLabelText: "black",
+                          brand: "green",
+                          brandAccent: "green",
+                          inputBorder: "black",
+                        },
+                },
               },
-            },
-          }}
-          providers={["google"]}
-          onlyThirdPartyProviders
-          queryParams={{ prompt: "select_account" }}
-        />
+            }}
+            providers={["google"]}
+            onlyThirdPartyProviders
+            queryParams={{ prompt: "select_account" }}
+          />
+          <PrivacyPolicyLink />
+        </div>
       ) : (
         <div className="flex gap-1 flex-col w-full relative">
           <PropertyView

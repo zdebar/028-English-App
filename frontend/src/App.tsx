@@ -17,6 +17,7 @@ import { supabaseInstance } from "@/config/supabase.config";
 import Overlay from "./components/UI/Overlay";
 import { useOverlayStore } from "@/hooks/use-overlay-store";
 import ToastContainer from "./features/toast/ToastContainer";
+import PrivacyPolicy from "./pages/privacy-policy";
 
 export default function App() {
   const { theme, chooseTheme } = useThemeStore();
@@ -58,6 +59,7 @@ export default function App() {
         <div className="relative grow flex flex-col items-center gap-4">
           <Routes>
             <Route path="/*" element={<Home />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route element={<ProtectedLayout />}>
               <Route path="/practice" element={<Practice />} />
               <Route path="/profile" element={<Profile />} />

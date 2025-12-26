@@ -58,7 +58,29 @@
   }
 
   h1 {
-    @apply font-headings pb-2 pt-12 text-4xl font-thin;
+    @apply font-headings text-4xl pb-2 font-thin;
+  }
+
+  h2 {
+    @apply font-headings text-xl pb-2 font-thin;
+  }
+
+  h3 {
+    @apply font-headings text-xl pb-1 font-thin;
+  }
+
+  ul {
+    @apply list-disc text-sm pl-6;
+  }
+
+  li {
+    @apply mb-1;
+  }
+
+  th,
+  tr,
+  td {
+    @apply border px-2 py-1;
   }
 
   select,
@@ -112,7 +134,7 @@
   }
 
   .text-link {
-    @apply underline hover:no-underline cursor-pointer font-headings;
+    @apply underline hover:no-underline cursor-pointer font-headings text-blue-600 dark:text-blue-400;
   }
 }
 
