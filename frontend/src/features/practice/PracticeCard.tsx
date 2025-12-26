@@ -80,7 +80,7 @@ export default function PracticeCard() {
           <div className="card-width card-height relative">
             {/* Item Card */}
             <div
-              className={`tour-step-11 border border-dashed h-full relative flex grow flex-col items-center justify-between p-4 ${
+              className={`h-full relative flex grow flex-col items-center justify-between p-4 ${
                 !isAudioDisabled && "color-audio"
               }`}
               onClick={() => {

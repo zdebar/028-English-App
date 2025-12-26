@@ -4,7 +4,7 @@ import { useToastStore } from "@/features/toast/use-toast-store";
 import ButtonAsyncModal from "../../components/UI/buttons/ButtonAsyncModal";
 import { useAuthStore } from "@/features/auth/use-auth-store";
 
-export default function ResetAllButton() {
+export default function ResetAllProgressButton() {
   const [isLoading, setIsLoading] = useState(false);
   const { userId } = useAuthStore();
   const { showToast } = useToastStore();
@@ -31,7 +31,7 @@ export default function ResetAllButton() {
 
   return (
     <ButtonAsyncModal
-      message="Resetovat vše"
+      message="Resetovat veškerý pokrok"
       loadingMessage="Probíhá resetování..."
       isLoading={isLoading}
       modalTitle="Potvrzení resetu"
