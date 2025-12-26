@@ -57,6 +57,7 @@ export default function Home() {
           }}
           providers={["google"]}
           onlyThirdPartyProviders
+          queryParams={{ prompt: "select_account" }}
         />
       ) : (
         <div className="flex gap-1 flex-col w-full relative">

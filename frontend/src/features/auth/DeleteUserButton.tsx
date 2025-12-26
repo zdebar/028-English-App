@@ -14,35 +14,39 @@ export default function DeleteUserButton() {
     try {
       if (!userId) return;
 
+      const session = await supabaseInstance.auth.getSession();
+      const accessToken = session.data.session?.access_token;
+
       // Delete user from Supabase Auth (admin API)
-      // const { error: deleteError } = await supabaseInstance.functions.invoke(
-      //   "delete-user",
-      //   {
-      //     body: { userId },
-      //   }
-      // );
-      // if (deleteError) {
-      //   throw deleteError;
-      // }
+      const { error: deleteError } = await supabaseInstance.functions.invoke(
+        "delete-user",
+        {
+          body: { userId },
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      if (deleteError) {
+        throw deleteError;
+      }
 
       // Set deleted_at in table users
-      // const response = await supabaseInstance
-      //   .from("users")
-      //   .update({
-      //     deleted_at: new Date().toISOString(),
-      //   })
-      //   .eq("id", userId);
+      const response = await supabaseInstance
+        .from("users")
+        .update({
+          deleted_at: new Date().toISOString(),
+        })
+        .eq("id", userId);
 
-      // if (response.error) {
-      //   throw response.error;
-      // }
+      if (response.error) {
+        throw response.error;
+      }
 
       showToast("Váš uživatelský účet byl úspěšně smazán.", "success");
-
-      // Sign out the user
-      // await supabaseInstance.auth.signOut();
+      await supabaseInstance.auth.signOut();
     } catch (error) {
-      console.error("Error clearing all user items:", error);
+      console.error("Error deleting user:", error);
       showToast(
         "Nastala chyba při mazání uživatelského účtu. Zkuste to prosím později.",
         "error"

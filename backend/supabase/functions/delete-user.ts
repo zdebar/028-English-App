@@ -1,4 +1,3 @@
-// delete_user.ts
 // Edge Function: delete-user
 // POST JSON body: { userId: "..." } or { user_id: "..." }
 // Requires Authorization: Bearer <user access token> header
@@ -9,16 +8,21 @@ const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "authorization, content-type",
-  "Content-Type": "application/json",
+  "Access-Control-Allow-Headers":
+    "authorization, content-type, x-client-info, apikey",
 };
 
 async function getUserFromAccessToken(accessToken: string) {
   const url = `${SUPABASE_URL.replace(/\/$/, "")}/auth/v1/user`;
+  // Check if token looks like a JWT
+  if (!/^[\w-]+\.[\w-]+\.[\w-]+$/.test(accessToken)) {
+    throw new Error("Access token is not a valid JWT");
+  }
   const res = await fetch(url, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${accessToken}`,
+      apikey: SERVICE_ROLE_KEY,
       Accept: "application/json",
     },
   });
@@ -60,34 +64,49 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "authorization, content-type",
-      },
+      headers: CORS_HEADERS,
     });
   }
 
   if (req.method !== "POST") {
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
       status: 405,
-      headers: CORS_HEADERS,
+      headers: {
+        ...CORS_HEADERS,
+        "Content-Type": "application/json",
+        Connection: "keep-alive",
+      },
     });
   }
 
   try {
-    const authHeader = req.headers.get("Authorization") ?? "";
+    // Try both 'Authorization' and 'authorization'
+    let authHeader =
+      req.headers.get("Authorization") ??
+      req.headers.get("authorization") ??
+      "";
     if (!authHeader.startsWith("Bearer ")) {
       return new Response(
         JSON.stringify({ error: "Missing Authorization Bearer token" }),
-        { status: 401, headers: CORS_HEADERS }
+        {
+          status: 401,
+          headers: {
+            ...CORS_HEADERS,
+            "Content-Type": "application/json",
+            Connection: "keep-alive",
+          },
+        }
       );
     }
     const accessToken = authHeader.slice(7).trim();
     if (!accessToken) {
       return new Response(JSON.stringify({ error: "Missing access token" }), {
         status: 401,
-        headers: CORS_HEADERS,
+        headers: {
+          ...CORS_HEADERS,
+          "Content-Type": "application/json",
+          Connection: "keep-alive",
+        },
       });
     }
 
@@ -98,7 +117,11 @@ Deno.serve(async (req: Request) => {
     } catch (err) {
       return new Response(JSON.stringify({ error: String(err) }), {
         status: 401,
-        headers: CORS_HEADERS,
+        headers: {
+          ...CORS_HEADERS,
+          "Content-Type": "application/json",
+          Connection: "keep-alive",
+        },
       });
     }
 
@@ -106,7 +129,14 @@ Deno.serve(async (req: Request) => {
     if (!jwtUserId) {
       return new Response(
         JSON.stringify({ error: "Could not determine authenticated user id" }),
-        { status: 401, headers: CORS_HEADERS }
+        {
+          status: 401,
+          headers: {
+            ...CORS_HEADERS,
+            "Content-Type": "application/json",
+            Connection: "keep-alive",
+          },
+        }
       );
     }
 
@@ -117,21 +147,42 @@ Deno.serve(async (req: Request) => {
         JSON.stringify({
           error: "Missing or invalid user id (userId or user_id)",
         }),
-        { status: 400, headers: CORS_HEADERS }
+        {
+          status: 400,
+          headers: {
+            ...CORS_HEADERS,
+            "Content-Type": "application/json",
+            Connection: "keep-alive",
+          },
+        }
       );
     }
 
     if (!isUuidV4(userId.trim())) {
       return new Response(
         JSON.stringify({ error: "Invalid userId format (must be UUID v4)" }),
-        { status: 400, headers: CORS_HEADERS }
+        {
+          status: 400,
+          headers: {
+            ...CORS_HEADERS,
+            "Content-Type": "application/json",
+            Connection: "keep-alive",
+          },
+        }
       );
     }
 
     if (userId.trim() !== jwtUserId) {
       return new Response(
         JSON.stringify({ error: "Forbidden: can only delete own user" }),
-        { status: 403, headers: CORS_HEADERS }
+        {
+          status: 403,
+          headers: {
+            ...CORS_HEADERS,
+            "Content-Type": "application/json",
+            Connection: "keep-alive",
+          },
+        }
       );
     }
 
@@ -141,19 +192,31 @@ Deno.serve(async (req: Request) => {
         JSON.stringify({ error: result.body ?? "Failed to delete user" }),
         {
           status: result.status,
-          headers: CORS_HEADERS,
+          headers: {
+            ...CORS_HEADERS,
+            "Content-Type": "application/json",
+            Connection: "keep-alive",
+          },
         }
       );
     }
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
-      headers: CORS_HEADERS,
+      headers: {
+        ...CORS_HEADERS,
+        "Content-Type": "application/json",
+        Connection: "keep-alive",
+      },
     });
   } catch (err) {
     return new Response(JSON.stringify({ error: String(err) }), {
       status: 500,
-      headers: CORS_HEADERS,
+      headers: {
+        ...CORS_HEADERS,
+        "Content-Type": "application/json",
+        Connection: "keep-alive",
+      },
     });
   }
 });
