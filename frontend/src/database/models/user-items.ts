@@ -287,6 +287,28 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
+   * Deletes all user items for the logged-in user.
+   * @param userId - The ID of the logged-in user.
+   * @returns number of deleted items.
+   * @throws error if operation fails.
+   */
+  static async deleteAllUserItems(userId: UUID): Promise<number> {
+    // Get all item IDs for the user
+    const itemIds = await db.user_items
+      .where("user_id")
+      .equals(userId)
+      .primaryKeys();
+
+    if (itemIds.length > 0) {
+      await db.user_items.bulkDelete(itemIds);
+      triggerUserItemsUpdatedEvent(userId);
+    }
+
+    console.log(`Deleted ${itemIds.length} user items for userId: ${userId}`);
+    return itemIds.length;
+  }
+
+  /**
    * Synchronizes user items data between local IndexedDB and Supabase.
    * @param userId - The ID of the logged-in user.
    * @returns boolean indicating success.

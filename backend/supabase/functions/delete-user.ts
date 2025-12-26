@@ -54,6 +54,29 @@ async function deleteAuthUser(userId: string) {
   return { ok: res.ok, status: res.status, body };
 }
 
+async function markUserDeletedAt(userId: string) {
+  const url = `${SUPABASE_URL.replace(
+    /\/$/,
+    ""
+  )}/rest/v1/users?id=eq.${encodeURIComponent(userId)}`;
+  const res = await fetch(url, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
+      apikey: SERVICE_ROLE_KEY,
+      "Content-Type": "application/json",
+      Prefer: "return=representation",
+    },
+    body: JSON.stringify({ deleted_at: new Date().toISOString() }),
+  });
+  const text = await res.text().catch(() => "");
+  let body: any = text;
+  try {
+    body = text ? JSON.parse(text) : null;
+  } catch {}
+  return { ok: res.ok, status: res.status, body };
+}
+
 function isUuidV4(str: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
     str
@@ -177,6 +200,24 @@ Deno.serve(async (req: Request) => {
         JSON.stringify({ error: "Forbidden: can only delete own user" }),
         {
           status: 403,
+          headers: {
+            ...CORS_HEADERS,
+            "Content-Type": "application/json",
+            Connection: "keep-alive",
+          },
+        }
+      );
+    }
+
+    // Mark user as deleted in users table
+    const markResult = await markUserDeletedAt(userId.trim());
+    if (!markResult.ok) {
+      return new Response(
+        JSON.stringify({
+          error: markResult.body ?? "Failed to mark user as deleted",
+        }),
+        {
+          status: markResult.status,
           headers: {
             ...CORS_HEADERS,
             "Content-Type": "application/json",

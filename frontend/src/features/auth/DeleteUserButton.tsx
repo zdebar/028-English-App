@@ -3,6 +3,7 @@ import { useToastStore } from "@/features/toast/use-toast-store";
 import ButtonAsyncModal from "../../components/UI/buttons/ButtonAsyncModal";
 import { useAuthStore } from "@/features/auth/use-auth-store";
 import { supabaseInstance } from "@/config/supabase.config";
+import UserItem from "@/database/models/user-items";
 
 export default function DeleteUserButton() {
   const [isLoading, setIsLoading] = useState(false);
@@ -44,6 +45,7 @@ export default function DeleteUserButton() {
       }
 
       showToast("Váš uživatelský účet byl úspěšně smazán.", "success");
+      await UserItem.deleteAllUserItems(userId);
       await supabaseInstance.auth.signOut();
     } catch (error) {
       console.error("Error deleting user:", error);
@@ -61,8 +63,8 @@ export default function DeleteUserButton() {
       message="Smazat uživatele"
       loadingMessage="Probíhá mazání..."
       isLoading={isLoading}
-      modalTitle="Potvrzení smazání uživatelského účtu"
-      modalDescription="Opravdu chcete smazat uživatelský účet? Data budou uchována po 30 dní, poté budou nenávratně smazána."
+      modalTitle="Potvrzení mazání uživatelského účtu"
+      modalDescription="Opravdu chcete smazat uživatelský účet? Veškerá data budou nenávratně ztracena."
       onConfirm={handleDelete}
       className="grow-0 shape-button-rectangular color-button"
     />
