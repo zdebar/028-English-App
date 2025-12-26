@@ -23,12 +23,12 @@ export default function Home() {
       </p>
 
       {!userId ? (
-        <div>
+        <div className="w-full">
           <Auth
             supabaseClient={supabaseInstance}
             appearance={{
               theme: ThemeSupa,
-              style: { button: { width: 320 } },
+              style: { button: { width: "100%", borderRadius: "0px" } },
               variables: {
                 default: {
                   colors:
