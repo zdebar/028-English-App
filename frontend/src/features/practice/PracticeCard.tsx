@@ -144,13 +144,11 @@ export default function PracticeCard() {
                 className="relative flex items-center justify-between w-full"
                 id="bottom-bar"
               >
-                <p className="tour-step-12 px-2 font-light">
-                  {currentItem?.progress}
-                </p>
+                <p className="px-2 font-light">{currentItem?.progress}</p>
                 <Hint visibility={isOpen} style={{ bottom: "30px" }}>
                   pokrok
                 </Hint>
-                <p className="tour-step-13 px-2 font-light">
+                <p className="px-2 font-light">
                   {(userStats?.practiceCountToday || 0) + index} /{" "}
                   {config.practice.dailyGoal}
                 </p>
@@ -167,13 +165,12 @@ export default function PracticeCard() {
             {/* Practice Controls */}
             <div
               id="practice-controls"
-              className=" tour-step-14 relative flex flex-col gap-1"
+              className="relative flex flex-col gap-1"
             >
               <div className="flex gap-1">
                 <Button
                   onClick={() => setGrammarVisible(true)}
                   disabled={!grammar_id}
-                  className="tour-step-15"
                 >
                   <BookIcon />
                 </Button>
@@ -185,7 +182,6 @@ export default function PracticeCard() {
                     handleNext(config.progress.skipProgress);
                   }}
                   disabled={!revealed}
-                  className="tour-step-16"
                 >
                   <ForwardIcon />
                 </Button>
@@ -194,10 +190,9 @@ export default function PracticeCard() {
                 </Hint>
               </div>
               {!revealed ? (
-                <div className="tour-step-19 relative flex gap-1">
+                <div className="relative flex gap-1">
                   <Button
                     onClick={() => setHintIndex((prevIndex) => prevIndex + 1)}
-                    className="tour-step-17"
                   >
                     <BulbIcon />
                   </Button>
@@ -218,7 +213,6 @@ export default function PracticeCard() {
                       }
                       setHintIndex(() => 0);
                     }}
-                    className="tour-step-18"
                   >
                     <EyeIcon />
                   </Button>
@@ -230,10 +224,9 @@ export default function PracticeCard() {
                   </Hint>
                 </div>
               ) : (
-                <div className="tour-step-19 relative flex gap-1">
+                <div className=" relative flex gap-1">
                   <Button
                     onClick={() => handleNext(config.progress.minusProgress)}
-                    className="tour-step-20"
                   >
                     <MinusIcon />
                   </Button>
@@ -245,7 +238,6 @@ export default function PracticeCard() {
                   </Hint>
                   <Button
                     onClick={() => handleNext(config.progress.plusProgress)}
-                    className="tour-step-21"
                   >
                     <PlusIcon />
                   </Button>

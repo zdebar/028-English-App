@@ -21,7 +21,6 @@ export default function Header() {
         <HeaderButton
           to="/practice"
           aria-label="Uživatelský dashboard"
-          className="tour-step-10"
           disabled={!userId}
         >
           <AcademicCapIcon />
@@ -37,7 +36,6 @@ export default function Header() {
           to="/profile"
           aria-label="Nastavení uživatele"
           disabled={!userId}
-          className="tour-step-30"
         >
           <UserAvatar />
         </HeaderButton>

@@ -26,13 +26,12 @@ export default function Dashboard({ className = "" }: { className?: string }) {
           lessonNumber={lessonId}
           previousCount={previousCount}
           todayCount={todayCount}
-          className="tour-step-1"
         />
       ))}
       <Hint visibility={isOpen} className="absolute right-0 top-8">
         dnes naučeno
       </Hint>
-      <HelpButton className="tour-step-2 absolute top-7 left-0" />
+      <HelpButton className="absolute top-7 left-0" />
     </div>
   );
 }

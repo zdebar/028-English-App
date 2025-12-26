@@ -29,13 +29,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": [
-    "src",
-    "../archive/theme/theme-dropdown.tsx",
-    "../archive/practice-card-backup.tsx",
-    "../archive/Checkbox.tsx",
-    "../archive/AnonymousSignInButton.tsx",
-    "../archive/public-layout.tsx",
-    "../archive/tour"
-  ]
+  "include": ["src"]
 }

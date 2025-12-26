@@ -9,7 +9,7 @@ export default function Profile() {
 
   return (
     <>
-      <div className="card-width tour-step-31 grow-0">
+      <div className="card-width grow-0">
         <Button onClick={() => navigate("/grammar")} className="grow-0">
           <p className="text-button">Přehled gramatiky</p>
         </Button>
