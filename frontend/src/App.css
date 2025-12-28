@@ -95,10 +95,10 @@
   /* BACKGROUND COLORS */
   .color-button {
     @apply cursor-pointer border;
-    @apply bg-audio-light border-audio-light hover:bg-audio-hover-light  text-light; /* Theming Light */
-    @apply dark:bg-audio-dark dark:border-audio-dark dark:hover:bg-audio-hover-dark dark:text-dark; /* Theming Dark */
+    @apply bg-audio-light border-audio-light   text-light; /* Theming Light */
+    @apply dark:bg-audio-dark dark:border-audio-dark  dark:text-dark; /* Theming Dark */
     @apply hover:border-light dark:hover:border-dark; /* Button Hover Borders  */
-    @apply disabled:border-none disabled:hover:bg-inherit disabled:dark:text-disabled-dark disabled:text-disabled-light disabled:cursor-default disabled:bg-inherit; /* Disabled States */
+    @apply disabled:border-none disabled:hover:bg-inherit disabled:cursor-default disabled:bg-inherit; /* Disabled States */
   }
 
   .color-button-header {
@@ -110,9 +110,13 @@
   }
 
   .color-audio {
-    @apply border  cursor-pointer;
-    @apply bg-audio-light hover:bg-audio-hover-light border-audio-light hover:border-light;
-    @apply dark:bg-audio-dark dark:hover:bg-audio-hover-dark dark:border-audio-dark dark:hover:border-dark;
+    @apply border cursor-pointer;
+    @apply bg-audio-light  border-audio-light hover:border-light;
+    @apply dark:bg-audio-dark  dark:border-audio-dark dark:hover:border-dark;
+  }
+  .color-audio-disabled {
+    @apply border cursor-default;
+    @apply bg-inherit border-background-light dark:border-background-dark text-inherit;
   }
 
   .color-selected {

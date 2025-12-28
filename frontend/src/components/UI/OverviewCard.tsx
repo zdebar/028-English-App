@@ -52,7 +52,7 @@ export default function OverviewCard({
           <CloseIcon />
         </Button>
       </div>
-      <div className=" border border-dashed w-full grow p-4">
+      <div className="w-full grow p-4">
         {isLoading ? <Loading /> : error ? <p>{error}</p> : children}
       </div>
     </div>

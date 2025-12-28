@@ -44,7 +44,7 @@ export default function GrammarOverview() {
       {!cardVisible ? (
         <div className="card-width flex flex-col gap-1 justify-start">
           <div className="h-button flex items-center justify-between gap-1">
-            <div className="flex h-button grow justify-start p-4 border border-dashed">
+            <div className="flex h-button grow justify-start p-4">
               {loading ? "Načítání..." : error || "Přehled gramatiky"}
             </div>
             <Button

@@ -81,7 +81,7 @@ export default function PracticeCard() {
             {/* Item Card */}
             <div
               className={`h-full relative flex grow flex-col items-center justify-between p-4 ${
-                !isAudioDisabled && "color-audio"
+                isAudioDisabled ? "color-audio-disabled" : "color-audio"
               }`}
               onClick={() => {
                 if (showPlayHint) {
