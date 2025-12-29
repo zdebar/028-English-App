@@ -86,7 +86,7 @@ BEFORE UPDATE ON user_score
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
--- Function: on new auth user, create row in public.users
+-- Trigger on auth.users to create entry in public.users
 CREATE OR REPLACE FUNCTION public.handle_new_auth_user()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -96,13 +96,30 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Trigger on auth.users
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 
 CREATE TRIGGER on_auth_user_created
 AFTER INSERT ON auth.users
 FOR EACH ROW
 EXECUTE FUNCTION public.handle_new_auth_user();
+
+-- Trigger on soft delete user
+CREATE OR REPLACE FUNCTION public.restore_user_on_signin()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE public.users
+  SET deleted_at = NULL
+  WHERE id = NEW.id;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_signin ON auth.users;
+
+CREATE TRIGGER on_auth_user_signin
+AFTER UPDATE OF last_sign_in_at ON auth.users
+FOR EACH ROW
+EXECUTE FUNCTION public.restore_user_on_signin();
 
 -- Indexes on updated_at columns
 CREATE INDEX idx_items_updated_at ON items(updated_at);
