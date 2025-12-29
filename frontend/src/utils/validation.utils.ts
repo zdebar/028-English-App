@@ -156,7 +156,6 @@ export function validateUserItemLocal(localItem: UserItemLocal): void {
   validateISODateString(localItem.started_at, "localItem.started_at");
   validateISODateString(localItem.updated_at, "localItem.updated_at");
   validateISODateString(localItem.next_at, "localItem.next_at");
-  validateISODateString(localItem.learned_at, "localItem.learned_at");
   validateISODateString(localItem.mastered_at, "localItem.mastered_at");
 
   // Special case: Validate `deleted_at` only if it exists

@@ -36,7 +36,6 @@ CREATE TABLE IF NOT EXISTS user_items (
   started_at TIMESTAMP DEFAULT NOW(), 
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(), 
   next_at TIMESTAMP, 
-  learned_at TIMESTAMP,
   mastered_at TIMESTAMP,
   PRIMARY KEY (user_id, item_id),
   FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE,
@@ -113,7 +112,7 @@ CREATE INDEX idx_user_score_updated_at ON user_score(updated_at);
 CREATE INDEX idx_user_scores_user_id_updated_at ON user_scores (user_id, updated_at);
 CREATE INDEX idx_items_sequence ON public.items (sequence);
 CREATE INDEX idx_user_items_user_updated ON public.user_items (user_id, updated_at) 
-INCLUDE (item_id, progress, started_at, updated_at, next_at, learned_at, mastered_at);
+INCLUDE (item_id, progress, started_at, updated_at, next_at, mastered_at);
 CREATE INDEX idx_items_updated_sequence ON public.items (updated_at, sequence) 
 INCLUDE (id, czech, english, pronunciation, audio, grammar_id, deleted_at);
 

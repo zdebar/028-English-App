@@ -9,7 +9,7 @@ BEGIN
     RETURN;
   END IF;
 
-  INSERT INTO user_items (user_id, item_id, progress, started_at, updated_at, next_at, learned_at, mastered_at)
+  INSERT INTO user_items (user_id, item_id, progress, started_at, updated_at, next_at, mastered_at)
   SELECT
     user_id_input AS user_id, 
     (item->>'item_id')::INT AS item_id,
@@ -17,7 +17,6 @@ BEGIN
     (item->>'started_at')::TIMESTAMPTZ AS started_at,
     (item->>'updated_at')::TIMESTAMPTZ AS updated_at,
     (item->>'next_at')::TIMESTAMPTZ AS next_at,
-    (item->>'learned_at')::TIMESTAMPTZ AS learned_at,
     (item->>'mastered_at')::TIMESTAMPTZ AS mastered_at
   FROM jsonb_array_elements(items) AS item
   WHERE item->>'item_id' ~ '^\d+$' 
@@ -38,10 +37,6 @@ BEGIN
     next_at = CASE
       WHEN EXCLUDED.updated_at > user_items.updated_at OR user_items.updated_at IS NULL THEN EXCLUDED.next_at
       ELSE user_items.next_at
-    END,
-    learned_at = CASE
-      WHEN EXCLUDED.updated_at > user_items.updated_at OR user_items.updated_at IS NULL THEN EXCLUDED.learned_at
-      ELSE user_items.learned_at
     END,
     mastered_at = CASE
       WHEN EXCLUDED.updated_at > user_items.updated_at OR user_items.updated_at IS NULL THEN EXCLUDED.mastered_at
@@ -70,7 +65,6 @@ RETURNS TABLE (
   updated_at TIMESTAMPTZ,
   deleted_at TIMESTAMPTZ,
   next_at TIMESTAMPTZ,
-  learned_at TIMESTAMPTZ,
   mastered_at TIMESTAMPTZ
 ) AS $$
 BEGIN
@@ -89,7 +83,6 @@ BEGIN
     COALESCE(ui.updated_at, i.updated_at)::TIMESTAMPTZ AS updated_at,
     i.deleted_at::TIMESTAMPTZ AS deleted_at,
     COALESCE(ui.next_at, '9999-12-31T23:59:59Z')::TIMESTAMPTZ AS next_at, 
-    COALESCE(ui.learned_at, '9999-12-31T23:59:59Z')::TIMESTAMPTZ AS learned_at,
     COALESCE(ui.mastered_at, '9999-12-31T23:59:59Z')::TIMESTAMPTZ AS mastered_at
   FROM public.items i
   LEFT JOIN public.user_items ui 

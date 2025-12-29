@@ -14,7 +14,6 @@ export interface UserItemLocal {
   updated_at: string;
   deleted_at: string | null;
   next_at: string; // nulls replaced with config.database.nullReplacementDate
-  learned_at: string; // nulls replaced with config.database.nullReplacementDate
   mastered_at: string; // nulls replaced with config.database.nullReplacementDate
 }
 
@@ -58,8 +57,8 @@ export interface MetadataLocal {
 }
 
 export interface UserStatsLocal {
-  learnedCountToday?: number;
-  learnedCount?: number;
+  startedCountToday?: number;
+  startedCount?: number;
   practiceCountToday?: number;
 }
 

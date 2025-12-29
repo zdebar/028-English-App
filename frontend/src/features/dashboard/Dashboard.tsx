@@ -11,8 +11,8 @@ export default function Dashboard({ className = "" }: { className?: string }) {
   const { isOpen } = useOverlayStore();
   const lessonProgress: LessonsLocal[] = userStats
     ? getLessonProgress(
-        userStats.learnedCount || 0,
-        userStats.learnedCountToday || 0
+        userStats.startedCount || 0,
+        userStats.startedCountToday || 0
       )
     : [];
 
@@ -29,7 +29,7 @@ export default function Dashboard({ className = "" }: { className?: string }) {
         />
       ))}
       <Hint visibility={isOpen} className="absolute right-0 top-8">
-        dnes naučeno
+        dnes započato
       </Hint>
       <HelpButton className="absolute top-7 left-0" />
     </div>

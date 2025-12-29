@@ -31,7 +31,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   updated_at!: string;
   deleted_at!: string | null;
   next_at!: string;
-  learned_at!: string;
   mastered_at!: string;
 
   /**
@@ -120,11 +119,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
             ? currentDateTime
             : item.started_at,
         updated_at: currentDateTime,
-        learned_at:
-          item.learned_at === config.database.nullReplacementDate &&
-          item.progress >= config.progress.learnedProgress
-            ? currentDateTime
-            : item.learned_at,
         mastered_at:
           item.mastered_at === config.database.nullReplacementDate &&
           item.progress >= config.srs.intervals.length
@@ -141,18 +135,18 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Fetches learned counts for the logged-in user.
+   * Fetches started counts for the logged-in user.
    * @param userId - The ID of the logged-in user.
-   * @returns object containing learnedCountToday and learnedCount.
+   * @returns object containing startedCountToday and startedCount.
    * @throws error if operation fails.
    */
-  static async getLearnedCounts(userId: UUID): Promise<{
-    learnedCountToday: number;
-    learnedCount: number;
+  static async getStartedCounts(userId: UUID): Promise<{
+    startedCountToday: number;
+    startedCount: number;
   }> {
     const today = getTodayShortDate();
-    const learnedItems = await db.user_items
-      .where("[user_id+learned_at]")
+    const startedItems = await db.user_items
+      .where("[user_id+started_at]")
       .between(
         [userId, Dexie.minKey],
         [userId, config.database.nullReplacementDate],
@@ -161,12 +155,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       )
       .toArray();
 
-    const learnedCount = learnedItems.length;
-    const learnedCountToday = learnedItems.filter((item) =>
-      getLocalDateFromUTC(item.learned_at).startsWith(today)
+    const startedCount = startedItems.length;
+    const startedCountToday = startedItems.filter((item) =>
+      getLocalDateFromUTC(item.started_at).startsWith(today)
     ).length;
 
-    return { learnedCountToday, learnedCount };
+    return { startedCountToday, startedCount };
   }
 
   /**

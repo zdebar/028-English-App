@@ -40,7 +40,6 @@ export interface UserItemSQL {
   started_at: string | null;
   updated_at: string;
   next_at: string | null;
-  learned_at: string | null;
   mastered_at: string | null;
 }
 

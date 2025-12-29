@@ -194,7 +194,7 @@ export default function VocabularyOverview() {
                 <PropertyView
                   label="naučeno"
                   className="h-attribute"
-                  value={shortenDate(selectedWord?.learned_at)}
+                  value={shortenDate(selectedWord?.started_at)}
                 />
                 <PropertyView
                   label="ukončeno"

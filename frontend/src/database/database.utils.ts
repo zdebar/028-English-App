@@ -16,7 +16,6 @@ export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
     started_at,
     updated_at,
     next_at,
-    learned_at,
     mastered_at,
   } = localItem;
 
@@ -29,7 +28,6 @@ export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
     started_at: started_at === nullReplacementDate ? null : started_at,
     updated_at,
     next_at: next_at === nullReplacementDate ? null : next_at,
-    learned_at: learned_at === nullReplacementDate ? null : learned_at,
     mastered_at: mastered_at === nullReplacementDate ? null : mastered_at,
   };
 }
@@ -121,7 +119,6 @@ export function resetUserItem(item: UserItemLocal): void {
   item.next_at = config.database.nullReplacementDate;
   item.mastered_at = config.database.nullReplacementDate;
   item.updated_at = new Date().toISOString();
-  item.learned_at = config.database.nullReplacementDate;
   item.progress = 0;
 }
 

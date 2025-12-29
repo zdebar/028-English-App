@@ -28,12 +28,12 @@ export const useUserStore = create<UserState>()(
 
           try {
             const todayScore = await UserScore.getUserScoreForToday(userId);
-            const learnedCounts = await UserItem.getLearnedCounts(userId);
+            const startedCounts = await UserItem.getStartedCounts(userId);
 
             set({
               userStats: {
-                learnedCountToday: learnedCounts?.learnedCountToday || 0,
-                learnedCount: learnedCounts?.learnedCount || 0,
+                startedCountToday: startedCounts?.startedCountToday || 0,
+                startedCount: startedCounts?.startedCount || 0,
                 practiceCountToday: todayScore?.item_count || 0,
               },
             });
