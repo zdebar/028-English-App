@@ -8,6 +8,11 @@ interface HeaderButtonProps extends LinkProps {
   to: string;
 }
 
+/**
+ *
+ * @param param0
+ * @returns
+ */
 export default function HeaderButton({
   children,
   disabled = false,

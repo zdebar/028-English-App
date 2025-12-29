@@ -3,6 +3,9 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children?: React.ReactNode;
 }
 
+/**
+ * Button component for rendering a styled button element.
+ */
 export default function Button({
   className = "",
   children,

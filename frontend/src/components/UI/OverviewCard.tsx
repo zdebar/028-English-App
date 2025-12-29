@@ -33,7 +33,6 @@ export default function OverviewCard({
       <div className="h-button flex items-center justify-between gap-1">
         <ButtonAsyncModal
           message={titleText}
-          isLoading={isLoading}
           modalTitle="Obnovení pokroku"
           modalDescription="Opravdu chcete vymazat veškerý pokrok? Změna již nepůjde vrátit."
           onConfirm={() => {

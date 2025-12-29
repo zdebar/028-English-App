@@ -14,7 +14,7 @@ import Grammar from "@/pages/grammar";
 import { useAuthStore } from "@/features/auth/use-auth-store";
 import type { Session } from "@supabase/supabase-js";
 import { supabaseInstance } from "@/config/supabase.config";
-import Overlay from "./components/UI/Overlay";
+import OverlayMask from "./components/UI/Overlay";
 import { useOverlayStore } from "@/hooks/use-overlay-store";
 import ToastContainer from "./features/toast/ToastContainer";
 import PrivacyPolicy from "./pages/privacy-policy";
@@ -52,7 +52,7 @@ export default function App() {
 
   return (
     <>
-      {isOpen && <Overlay onClose={close} />}
+      {isOpen && <OverlayMask onClose={close} />}
       <div className="mx-auto min-h-screen relative max-w-container flex flex-col justify-start">
         <ToastContainer />
         <Header />

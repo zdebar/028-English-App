@@ -5,7 +5,7 @@ import { Modal } from "@/components/UI/Modal";
 interface ButtonAsyncModalProps {
   message: string;
   disabled?: boolean;
-  isLoading: boolean;
+  isLoading?: boolean;
   loadingMessage?: string;
   modalTitle?: string;
   modalDescription?: string;
@@ -13,8 +13,11 @@ interface ButtonAsyncModalProps {
   className?: string;
 }
 
+/**
+ * Button component that shows a confirmation modal before executing an action.
+ */
 export default function ButtonAsyncModal({
-  isLoading,
+  isLoading = false,
   message,
   disabled = false,
   loadingMessage = "Načítání...",

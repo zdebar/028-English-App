@@ -1,34 +1,21 @@
-import Grammar from "@/database/models/grammar";
 import OverviewCard from "@/components/UI/OverviewCard";
-import { useCallback } from "react";
-import { useFetch } from "@/hooks/use-fetch";
 import DOMPurify from "dompurify";
 
-/**
- * Fetches and display individual grammar content by grammar_id in a card.
- * @param grammar_id - The ID of the grammar to display.
- * @param onClose - Callback function to close the grammar card.
- */
+export interface GrammarCardType {
+  id: number;
+  name: string;
+  note?: string;
+}
+
 export default function GrammarCard({
-  grammar_id,
+  grammar,
   onClose,
 }: {
-  grammar_id: number;
+  grammar?: GrammarCardType | null;
   onClose: () => void;
 }) {
-  const fetchGrammar = useCallback(() => {
-    return Grammar.getGrammarById(grammar_id);
-  }, [grammar_id]);
-
-  const { data: grammar, error, loading } = useFetch(fetchGrammar);
-
   return (
-    <OverviewCard
-      titleText={grammar?.name}
-      onClose={onClose}
-      isLoading={loading}
-      error={error}
-    >
+    <OverviewCard titleText={grammar?.name} onClose={onClose}>
       {grammar?.note ? (
         <div
           dangerouslySetInnerHTML={{

@@ -1,3 +1,6 @@
+/**
+ * Hint component for displaying contextual hints.
+ */
 export default function Hint({
   visibility,
   children,

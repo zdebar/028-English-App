@@ -12,17 +12,21 @@ import { usePracticeDeck } from "@/features/practice/use-practice-deck";
 import { useAudioManager } from "@/features/practice/use-audio-manager";
 import { useAuthStore } from "@/features/auth/use-auth-store";
 import { useUserStore } from "@/hooks/use-user-store";
-import GrammarCard from "@/features/practice/GrammarCard";
+import GrammarCard, {
+  type GrammarCardType,
+} from "@/features/practice/GrammarCard";
 import Loading from "@/components/UI/Loading";
 import HelpButton from "@/components/UI/buttons/HelpButton";
 import Hint from "@/components/UI/Hint";
 import { useOverlayStore } from "@/hooks/use-overlay-store";
+import Grammar from "@/database/models/grammar";
 
 export default function PracticeCard() {
   const [revealed, setRevealed] = useState(false);
   const [hintIndex, setHintIndex] = useState(0);
   const [showPlayHint, setShowPlayHint] = useState(true);
   const [grammarVisible, setGrammarVisible] = useState(false);
+  const [grammarData, setGrammarData] = useState<GrammarCardType | null>(null);
   const { isOpen } = useOverlayStore();
   const { userId } = useAuthStore();
   const { userStats } = useUserStore();
@@ -52,6 +56,14 @@ export default function PracticeCard() {
     }
   }, [currentItem, playAudio]);
 
+  // Fetch grammar for the current item and show GrammarCard
+  const fetchGrammar = useCallback(async () => {
+    if (!currentItem?.grammar_id) return;
+    const grammar = await Grammar.getGrammarById(currentItem.grammar_id);
+    setGrammarData(grammar);
+    setGrammarVisible(true);
+  }, [currentItem?.grammar_id]);
+
   // Auto-play audio on new item if english to czech direction
   useEffect(() => {
     if (!direction && currentItem?.audio && !showPlayHint) {
@@ -72,7 +84,7 @@ export default function PracticeCard() {
     <div className="grow relative flex flex-col items-center w-full">
       {grammarVisible ? (
         <GrammarCard
-          grammar_id={currentItem?.grammar_id}
+          grammar={grammarData}
           onClose={() => setGrammarVisible(false)}
         />
       ) : (
@@ -168,10 +180,7 @@ export default function PracticeCard() {
               className="relative flex flex-col gap-1"
             >
               <div className="flex gap-1">
-                <Button
-                  onClick={() => setGrammarVisible(true)}
-                  disabled={!grammar_id}
-                >
+                <Button onClick={() => fetchGrammar()} disabled={!grammar_id}>
                   <BookIcon />
                 </Button>
                 <Hint visibility={isOpen} style={{ top: "0px", left: "14px" }}>

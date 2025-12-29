@@ -5,6 +5,10 @@ import UserAvatar from "@/components/UI/UserAvatar";
 import ThemeSwitch from "@/features/theme/ThemeSwitch";
 import { useAuthStore } from "@/features/auth/use-auth-store";
 
+/**
+ * Header component displaying main navigation and user controls.
+ * Includes links to home, practice, profile, theme switch, and user avatar.
+ */
 export default function Header() {
   const { userId } = useAuthStore();
 

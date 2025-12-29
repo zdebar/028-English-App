@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 
+/**
+ * Loading component that displays a loading message after a specified delay.
+ */
 export default function Loading({
   text = "Načítání...",
   timeDelay = 1000,
