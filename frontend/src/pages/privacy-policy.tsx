@@ -29,18 +29,18 @@ export default function PrivacyPolicy() {
         <tbody>
           <tr>
             <td>Vytvoření a ověření účtu</td>
-            <td>Čl. 6 odst. 1 písm. b) GDPR – plnění smlouvy</td>
+            <td>Čl. 6 odst. 1 písm. b&#41; GDPR – plnění smlouvy</td>
           </tr>
           <tr>
             <td>Poskytování jazykových funkcí</td>
-            <td>Čl. 6 odst. 1 písm. b) GDPR</td>
+            <td>Čl. 6 odst. 1 písm. b&#41; GDPR</td>
           </tr>
           <tr>
             <td>
               Zlepšování funkcí aplikace na základě agregovaných údajů o
               procvičování
             </td>
-            <td>Čl. 6 odst. 1 písm. f) GDPR – oprávněný zájem</td>
+            <td>Čl. 6 odst. 1 písm. f&#41; GDPR – oprávněný zájem</td>
           </tr>
         </tbody>
       </table>
