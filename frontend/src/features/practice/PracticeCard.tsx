@@ -109,13 +109,13 @@ export default function PracticeCard() {
                 className="relative flex items-center justify-between w-full"
               >
                 <VolumeSlider setVolume={setVolume} />
-                <p className="font-light">{audioError && "bez audia"}</p>
+                <p className="text-notice">{audioError && "bez audia"}</p>
               </div>
               <div
                 id="item"
                 className="flex flex-col justify-center h-full gap-1"
               >
-                {showPlayHint && !direction ? (
+                {showPlayHint && !direction && !audioError ? (
                   <div className="text-notice text-center">
                     Stisknutím přehrajte audio
                   </div>
@@ -201,7 +201,10 @@ export default function PracticeCard() {
               {!revealed ? (
                 <div className="relative flex gap-1">
                   <Button
-                    onClick={() => setHintIndex((prevIndex) => prevIndex + 1)}
+                    onClick={() => {
+                      setHintIndex((prevIndex) => prevIndex + 1);
+                      setShowPlayHint(false);
+                    }}
                   >
                     <BulbIcon />
                   </Button>

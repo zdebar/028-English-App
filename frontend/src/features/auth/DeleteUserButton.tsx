@@ -65,7 +65,7 @@ export default function DeleteUserButton() {
       loadingMessage="Probíhá mazání..."
       isLoading={isLoading}
       modalTitle="Potvrzení mazání uživatelského účtu"
-      modalDescription="Opravdu chcete smazat uživatelský účet? Veškerá data budou nenávratně ztracena."
+      modalDescription="Opravdu chcete smazat uživatelský účet? Vaše data budou uchována příštích 30 dní, poté budou nenávratně smazána. Před smazáním můžete kdykoliv obnovit svůj účet obětovným přihlášením."
       onConfirm={handleDelete}
       className="grow-0 shape-button-rectangular color-button"
     />
