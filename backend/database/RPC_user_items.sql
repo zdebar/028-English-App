@@ -87,6 +87,7 @@ BEGIN
   FROM public.items i
   LEFT JOIN public.user_items ui 
     ON i.id = ui.item_id AND ui.user_id = user_id_input
+  WHERE ui.updated_at > last_synced_at OR ui.updated_at IS NULL OR i.updated_at > last_synced_at
   ORDER BY i.sequence ASC;
 END;
 $$ LANGUAGE plpgsql

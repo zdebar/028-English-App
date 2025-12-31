@@ -4,6 +4,8 @@ import ButtonAsyncModal from "../../components/UI/buttons/ButtonAsyncModal";
 import { useAuthStore } from "@/features/auth/use-auth-store";
 import { supabaseInstance } from "@/config/supabase.config";
 import UserItem from "@/database/models/user-items";
+import Metadata from "@/database/models/metadata";
+import UserScore from "@/database/models/user-scores";
 
 export default function DeleteUserButton() {
   const [isLoading, setIsLoading] = useState(false);
@@ -15,17 +17,11 @@ export default function DeleteUserButton() {
     try {
       if (!userId) return;
 
-      const session = await supabaseInstance.auth.getSession();
-      const accessToken = session.data.session?.access_token;
-
       // Delete user from Supabase Auth (admin API)
       const { error: deleteError } = await supabaseInstance.functions.invoke(
         "delete-user",
         {
           body: { userId },
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
         }
       );
       if (deleteError) {
@@ -44,8 +40,13 @@ export default function DeleteUserButton() {
         throw response.error;
       }
 
-      showToast("Váš uživatelský účet byl úspěšně smazán.", "success");
+      await UserItem.syncUserItemsData(userId);
+      await UserScore.syncUserScoreData(userId);
       await UserItem.deleteAllUserItems(userId);
+      await Metadata.deleteSyncRow("user_items", userId);
+      await Metadata.deleteSyncRow("user_scores", userId);
+
+      showToast("Váš uživatelský účet byl úspěšně smazán.", "success");
       await supabaseInstance.auth.signOut();
     } catch (error) {
       console.error("Error deleting user:", error);

@@ -2,6 +2,7 @@ import type { UserItemLocal } from "@/types/local.types";
 import type { UserItemSQL } from "@/types/data.types";
 import { supabaseInstance } from "@/config/supabase.config";
 import config from "@/config/config";
+import type { TableName } from "@/types/local.types";
 
 /**
  * Converts a local user item to SQL format, replacing null replacement dates with null.
@@ -41,6 +42,20 @@ export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
  */
 export function generateUserScoreId(userId: string, date: string): string {
   return `${userId}-${date}`;
+}
+
+/**
+ * Generates a composite ID from user_id and date.
+ * @param userId - The user ID.
+ * @param date - The date in YYYY-MM-DD format.
+ * @returns The composite ID from userId and date.
+ * @throws Error if inputs are invalid.
+ */
+export function generateMetadataId(
+  table_name: TableName,
+  userId: string
+): string {
+  return `${table_name}-${userId}`;
 }
 
 /**
