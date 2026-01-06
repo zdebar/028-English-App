@@ -21,6 +21,11 @@ import Hint from "@/components/UI/Hint";
 import { useOverlayStore } from "@/hooks/use-overlay-store";
 import Grammar from "@/database/models/grammar";
 
+/**
+ * PracticeCard component for interactive language practice.
+ *
+ * @returns The main practice card UI with all practice controls and feedback.
+ */
 export default function PracticeCard() {
   const [revealed, setRevealed] = useState(false);
   const [hintIndex, setHintIndex] = useState(0);
@@ -30,8 +35,15 @@ export default function PracticeCard() {
   const { isOpen } = useOverlayStore();
   const { userId } = useAuthStore();
   const { userStats } = useUserStore();
-  const { index, array, nextItem, currentItem, direction, grammar_id } =
-    usePracticeDeck(userId!);
+  const {
+    index,
+    array,
+    nextItem,
+    currentItem,
+    direction,
+    grammar_id,
+    loading,
+  } = usePracticeDeck(userId!);
   const { playAudio, stopAudio, setVolume, audioError, setAudioError } =
     useAudioManager(array || []);
 
@@ -66,10 +78,10 @@ export default function PracticeCard() {
 
   // Auto-play audio on new item if english to czech direction
   useEffect(() => {
-    if (!direction && currentItem?.audio && !showPlayHint) {
+    if (!direction && currentItem?.audio && !showPlayHint && !loading) {
       setTimeout(() => playAudio(currentItem.audio!), 500);
     }
-  }, [currentItem, direction, playAudio, showPlayHint]);
+  }, [currentItem, direction, playAudio, showPlayHint, loading]);
 
   // Handle audio errors and retries
   useEffect(() => {

@@ -28,7 +28,7 @@ export default function GrammarOverview() {
     data: grammarArray,
     error,
     loading,
-    setReload,
+    setShouldReload,
   } = useFetch<GrammarLocal[]>(fetchGrammarList);
 
   const [cardVisible, setCardVisible] = useState(false);
@@ -38,7 +38,7 @@ export default function GrammarOverview() {
     const grammar_id = grammarArray?.[currentIndex]?.id;
     if (typeof grammar_id === "number" && userId) {
       await UserItem.resetGrammarItems(userId, grammar_id);
-      setReload(true);
+      setShouldReload(true);
     }
   };
 

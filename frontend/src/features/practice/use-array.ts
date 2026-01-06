@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import UserItem from "@/database/models/user-items";
 import type { UserItemLocal } from "@/types/local.types";
 import { useFetch } from "@/hooks/use-fetch";
@@ -7,10 +7,14 @@ import type { UUID } from "crypto";
 /**
  * Manages the practice deck state and index.
  * @param reload Indicates whether to reload the practice deck.
- * @param setReload Function to set the reload state.
+ * @param setShouldReload Function to set the reload state.
  */
 export function useArray(userId: UUID) {
   const [index, setIndex] = useState(0);
+
+  function nextIndex() {
+    setIndex((prev) => wrapIndex(prev + 1));
+  }
 
   const fetchPracticeDeck = useCallback(async () => {
     const data = await UserItem.getPracticeDeck(userId);
@@ -21,16 +25,19 @@ export function useArray(userId: UUID) {
     data: array,
     error,
     loading,
-    setReload,
-  } = useFetch<UserItemLocal[]>(fetchPracticeDeck);
+    setShouldReload,
+  } = useFetch<UserItemLocal[]>(async () => {
+    const deck = await fetchPracticeDeck();
+    return deck;
+  });
+
+  useEffect(() => {
+    setIndex(0);
+  }, [array]);
 
   function wrapIndex(newIndex: number) {
     if (!array || array.length === 0) return 0;
     return newIndex % array.length;
-  }
-
-  function nextIndex() {
-    setIndex((prev) => wrapIndex(prev + 1));
   }
 
   return {
@@ -40,6 +47,6 @@ export function useArray(userId: UUID) {
     nextIndex,
     loading,
     error,
-    setReload,
+    setShouldReload,
   };
 }

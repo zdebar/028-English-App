@@ -1,9 +1,8 @@
-import { useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { alternateDirection } from "@/utils/practice.utils";
 import { useUserProgress } from "@/features/practice/use-user-progress";
 import type { UserItemLocal } from "@/types/local.types";
-import UserItem from "@/database/models/user-items";
-import { useFetch } from "@/hooks/use-fetch";
+import { useArray } from "@/features/practice/use-array";
 import type { UUID } from "crypto";
 
 /**
@@ -11,22 +10,17 @@ import type { UUID } from "crypto";
  */
 export function usePracticeDeck(userId: UUID) {
   const { updateUserItemsInDB } = useUserProgress(userId);
-  const [index, setIndex] = useState(0);
-
-  const fetchPracticeDeck = useCallback(async () => {
-    const data = await UserItem.getPracticeDeck(userId);
-    return data.filter((item) => item !== null && item !== undefined);
-  }, [userId]);
-
   const {
-    data: array = [],
-    error,
+    array,
+    currentItem,
+    index,
+    nextIndex,
     loading,
-    setReload,
-  } = useFetch<UserItemLocal[]>(fetchPracticeDeck);
+    error,
+    setShouldReload,
+  } = useArray(userId);
 
   const userProgressRef = useRef<UserItemLocal[]>([]);
-  const currentItem = array?.[index] || null;
   const direction = currentItem
     ? alternateDirection(currentItem?.progress)
     : false;
@@ -43,18 +37,6 @@ export function usePracticeDeck(userId: UUID) {
       }
     };
   }, [updateUserItemsInDB]);
-
-  const wrapIndex = useCallback(
-    (newIndex: number) => {
-      if (!array || array.length === 0) return 0;
-      return newIndex % array.length;
-    },
-    [array]
-  );
-
-  const nextIndex = useCallback(() => {
-    setIndex((prev) => wrapIndex(prev + 1));
-  }, [wrapIndex]);
 
   // Advance to next item and record progress change
   const nextItem = useCallback(
@@ -75,15 +57,21 @@ export function usePracticeDeck(userId: UUID) {
         try {
           await updateUserItemsInDB(userProgressRef.current);
           userProgressRef.current = [];
-          setReload(true);
+          setShouldReload(true);
         } catch (error) {
           console.error("Failed to update user progress:", error);
         }
+      } else {
+        nextIndex();
       }
-
-      nextIndex();
     },
-    [currentItem, nextIndex, array?.length, setReload, updateUserItemsInDB]
+    [
+      currentItem,
+      nextIndex,
+      array?.length,
+      setShouldReload,
+      updateUserItemsInDB,
+    ]
   );
 
   return {
