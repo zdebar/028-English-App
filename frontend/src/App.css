@@ -95,7 +95,7 @@
   /* BACKGROUND COLORS */
   .color-button {
     @apply cursor-pointer border;
-    @apply bg-audio-light border-audio-light   text-light; /* Theming Light */
+    @apply bg-audio-light border-audio-light text-light; /* Theming Light */
     @apply dark:bg-audio-dark dark:border-audio-dark  dark:text-dark; /* Theming Dark */
     @apply hover:border-light dark:hover:border-dark; /* Button Hover Borders  */
     @apply disabled:border-none disabled:hover:bg-inherit disabled:cursor-default disabled:bg-inherit; /* Disabled States */
@@ -125,6 +125,10 @@
 
   .color-overlay {
     @apply bg-overlay;
+  }
+
+  .color-select {
+    @apply bg-background-light text-light dark:bg-background-dark dark:text-dark border-none;
   }
 
   /* TEXT STYLES */

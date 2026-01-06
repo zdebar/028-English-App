@@ -31,7 +31,7 @@ export default function DirectionDropdown<T>({
   }, [options]);
 
   return (
-    <div className={`centered ${className}`}>
+    <div className={`centered ${className} border-none`}>
       <label htmlFor="direction-dropdown" className="sr-only">
         Směr
       </label>
@@ -44,7 +44,7 @@ export default function DirectionDropdown<T>({
             options.find((o) => String(o.value) === e.target.value)?.value as T
           )
         }
-        className="h-button w-full"
+        className="h-button w-full color-select  px-3"
       >
         {memoizedOptions}
       </select>
