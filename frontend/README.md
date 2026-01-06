@@ -87,4 +87,6 @@ Null for certains columns are replaced with nullReplacementDate or nullReplaceme
 ### Features
 
 - **auth**: User management - register, sign in, sign out, delete user profile, via supabase auth
+- **dashboard**: Shows started items count
+- **gdpr**: GDPR
 - **overlay**: global overlay screen
