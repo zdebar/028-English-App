@@ -1,7 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Mansalva:wght@400;700&family=Roboto:wght@300;400;700&display=swap");
 
 @import "tailwindcss";
-
 @custom-variant dark (&:where(.dark, .dark *));
 
 /** A-13, B-10, C-8, D-11 */
@@ -195,7 +194,6 @@
   .rightheader {
     flex-direction: column-reverse;
     justify-content: start;
-    height: 150px;
   }
 }
 @media (max-height: 460px) {
