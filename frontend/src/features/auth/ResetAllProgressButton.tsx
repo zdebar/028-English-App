@@ -4,6 +4,10 @@ import { useToastStore } from "@/features/toast/use-toast-store";
 import ButtonAsyncModal from "../../components/UI/buttons/ButtonAsyncModal";
 import { useAuthStore } from "@/features/auth/use-auth-store";
 
+/**
+ * ResetAllProgressButton component for resetting all user progress.
+ * @returns A button that opens a confirmation modal and resets user progress with loading feedback.
+ */
 export default function ResetAllProgressButton() {
   const [isLoading, setIsLoading] = useState(false);
   const { userId } = useAuthStore();

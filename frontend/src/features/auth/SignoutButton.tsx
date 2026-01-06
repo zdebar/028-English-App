@@ -4,7 +4,8 @@ import ButtonAsyncModal from "../../components/UI/buttons/ButtonAsyncModal";
 import { useAuthStore } from "@/features/auth/use-auth-store";
 
 /**
- * Button for signing out the user.
+ * SignoutButton component for signing out the user.
+ * @returns A button that opens a confirmation modal and handles user signout with loading feedback.
  */
 export default function SignoutButton() {
   const { handleLogout } = useAuthStore();
