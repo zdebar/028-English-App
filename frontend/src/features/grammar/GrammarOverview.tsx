@@ -9,6 +9,11 @@ import { useAuthStore } from "@/features/auth/use-auth-store";
 import DOMPurify from "dompurify";
 import HelpButton from "@/features/overlay/HelpButton";
 
+/**
+ * GrammarOverview component displays a list of started grammar topics for the user.
+ *
+ * @returns A view with a grammar list and detail card, including progress reset and help features.
+ */
 export default function GrammarOverview() {
   const { userId } = useAuthStore();
 
