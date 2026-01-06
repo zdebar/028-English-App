@@ -7,7 +7,6 @@ import { useAuthStore } from "@/features/auth/use-auth-store";
 
 /**
  * Header component displaying main navigation and user controls.
- * Includes links to home, practice, profile, theme switch, and user avatar.
  */
 export default function Header() {
   const { userId } = useAuthStore();
