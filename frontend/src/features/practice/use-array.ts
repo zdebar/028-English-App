@@ -11,10 +11,11 @@ import type { UUID } from "crypto";
  * @returns An object containing the deck array, current item, index, nextIndex function, loading and error states, and setShouldReload function.
  */
 export function useArray(userId: UUID) {
+  const [array, setArray] = useState<UserItemLocal[]>([]);
   const [index, setIndex] = useState(0);
 
   function nextIndex() {
-    setIndex((prev) => wrapIndex(prev + 1));
+    setIndex((prev) => (array.length ? (prev + 1) % array.length : 0));
   }
 
   const fetchPracticeDeck = useCallback(async () => {
@@ -23,27 +24,20 @@ export function useArray(userId: UUID) {
   }, [userId]);
 
   const {
-    data: array,
+    data: fetchedArray,
     error,
     loading,
     setShouldReload,
-  } = useFetch<UserItemLocal[]>(async () => {
-    const deck = await fetchPracticeDeck();
-    return deck;
-  });
+  } = useFetch<UserItemLocal[]>(fetchPracticeDeck);
 
   useEffect(() => {
+    setArray(fetchedArray || []);
     setIndex(0);
-  }, [array]);
-
-  function wrapIndex(newIndex: number) {
-    if (!array || array.length === 0) return 0;
-    return newIndex % array.length;
-  }
+  }, [fetchedArray]);
 
   return {
-    array: array || [],
-    currentItem: array?.[index] || null,
+    array,
+    currentItem: array[index] || null,
     index,
     nextIndex,
     loading,
