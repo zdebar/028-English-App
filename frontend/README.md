@@ -91,3 +91,7 @@ Null for certains columns are replaced with nullReplacementDate or nullReplaceme
 - **gdpr**: GDPR
 - **grammar**: Grammar overview
 - **overlay**: global overlay screen
+- **practice**: Manages practice deck, and its logic
+- **theme**: Theming
+- **toast**: Notification Toasts
+- **vocabulary**: Vocabulary overview
