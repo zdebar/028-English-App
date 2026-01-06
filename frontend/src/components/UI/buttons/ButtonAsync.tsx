@@ -3,51 +3,61 @@ import { useState, useEffect } from "react";
 interface ButtonAsyncProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   message?: string;
-  disabled?: boolean;
-  isLoading?: boolean;
   loadingMessage?: string;
   onClick: () => void;
-  className?: string;
+  isLoading?: boolean;
+  disabled?: boolean;
   minLoadingTime?: number;
+  className?: string;
 }
 
 /**
- * Asynchronous button component that displays a loading message.
+ * Asynchronous button component that displays a loading message for at least a minimum duration.
+ *
+ * @param message The button label when not loading.
+ * @param loadingMessage The label shown while loading (default: "Načítání...").
+ * @param onClick Function called when the button is clicked.
+ * @param isLoading Controls the loading state of the button.
+ * @param disabled Disables the button if true.
+ * @param minLoadingTime Minimum time (ms) to show the loading message (default: 400).
+ * @param className Additional CSS classes for custom styling.
+ * @param props Other standard button attributes.
+ * @returns A styled button element with loading feedback.
  */
 export default function ButtonAsync({
   message,
-  disabled = false,
-  isLoading = false,
   loadingMessage = "Načítání...",
   onClick,
-  className = "",
+  isLoading = false,
+  disabled = false,
   minLoadingTime = 400,
+  className = "",
   ...props
 }: ButtonAsyncProps) {
-  const [showLoading, setShowLoading] = useState(false);
+  const [minLoadingElapsed, setMinLoadingElapsed] = useState(true);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isLoading) {
-      setShowLoading(true);
-      timer = setTimeout(() => {
-        if (!isLoading) setShowLoading(false);
-      }, minLoadingTime);
-    } else {
-      timer = setTimeout(() => setShowLoading(false), minLoadingTime);
+      setMinLoadingElapsed(false);
+      timer = setTimeout(() => setMinLoadingElapsed(true), minLoadingTime);
     }
-    return () => clearTimeout(timer);
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, [isLoading, minLoadingTime]);
+
+  const isButtonLoading = isLoading || !minLoadingElapsed;
 
   return (
     <button
       onClick={onClick}
-      disabled={isLoading || disabled}
+      disabled={isButtonLoading || disabled}
       className={className}
       {...props}
     >
       <span className="text-button">
-        {showLoading ? loadingMessage : message}
+        {isButtonLoading ? loadingMessage : message}
       </span>
     </button>
   );

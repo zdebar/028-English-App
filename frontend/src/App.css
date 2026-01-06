@@ -26,7 +26,7 @@
   --color-audio-light: #f8c04a;
   --color-audio-hover-dark: #1e283b;
   --color-audio-hover-light: #ffc64d;
-  --color-overlay: rgba(0, 0, 0, 0.2);
+  --color-overlay: rgba(0, 0, 0, 0.5);
 
   /** layout dimensions **/
   --max-width-container: 900px;
@@ -123,6 +123,10 @@
     @apply bg-white text-light;
   }
 
+  .color-overlay {
+    @apply bg-overlay;
+  }
+
   /* TEXT STYLES */
   .text-notice {
     @apply font-headings text-center text-xl;
@@ -156,6 +160,10 @@
 
   .shape-button-header {
     @apply size-button rounded-full;
+  }
+
+  .shape-overlay {
+    @apply fixed inset-0 z-1000 flex justify-center items-center pointer-events-auto top-0;
   }
 
   /** CARD STYLES **/
