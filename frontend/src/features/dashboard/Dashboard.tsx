@@ -23,21 +23,23 @@ export default function Dashboard({ className = "" }: { className?: string }) {
     : [];
 
   return (
-    <div
-      className={`flex max-w-card w-full min-w-card relative mx-auto flex-col gap-1 ${className}`}
-    >
-      {lessonProgress.map(({ lessonId, previousCount, todayCount }) => (
-        <LessonBar
-          key={lessonId}
-          lessonNumber={lessonId}
-          previousCount={previousCount}
-          todayCount={todayCount}
-        />
-      ))}
-      <Hint visibility={isOpen} className="absolute right-0 top-8">
+    <div>
+      <div
+        className={`flex max-w-card w-full min-w-card relative mx-auto flex-col gap-1 ${className}`}
+      >
+        {lessonProgress.map(({ lessonId, previousCount, todayCount }) => (
+          <LessonBar
+            key={lessonId}
+            lessonNumber={lessonId}
+            previousCount={previousCount}
+            todayCount={todayCount}
+          />
+        ))}
+      </div>
+      <Hint visibility={isOpen} className="p-2 right-0">
         dnes započato
       </Hint>
-      <HelpButton className="absolute top-7 left-0" />
+      <HelpButton className="pt-2" />
     </div>
   );
 }
