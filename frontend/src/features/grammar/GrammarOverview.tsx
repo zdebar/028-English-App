@@ -1,10 +1,8 @@
 import { useState, useCallback } from "react";
-import Button from "@/components/UI/buttons/Button";
 import Grammar from "@/database/models/grammar";
 import UserItem from "@/database/models/user-items";
 import type { GrammarLocal } from "@/types/local.types";
-import CloseIcon from "@/components/UI/icons/CloseIcon";
-import { useNavigate } from "react-router-dom";
+import ListOverview from "./ListOverview";
 import OverviewCard from "@/components/UI/OverviewCard";
 import { useFetch } from "@/hooks/use-fetch";
 import { useAuthStore } from "@/features/auth/use-auth-store";
@@ -27,9 +25,9 @@ export default function GrammarOverview() {
     loading,
     setReload,
   } = useFetch<GrammarLocal[]>(fetchGrammarList);
+
   const [cardVisible, setCardVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const navigate = useNavigate();
 
   const handleClearGrammarUserItems = async () => {
     const grammar_id = grammarArray?.[currentIndex]?.id;
@@ -42,37 +40,18 @@ export default function GrammarOverview() {
   return (
     <>
       {!cardVisible ? (
-        <div className="card-width flex flex-col gap-1 justify-start">
-          <div className="h-button flex items-center justify-between gap-1">
-            <div className="flex h-button grow justify-start p-4">
-              {loading ? "Načítání..." : error || "Přehled gramatiky"}
-            </div>
-            <Button
-              className="w-button grow-0"
-              onClick={() => navigate("/profile")}
-            >
-              <CloseIcon />
-            </Button>
-          </div>
-          {grammarArray && grammarArray.length > 0 ? (
-            grammarArray.map((grammar, index) => (
-              <Button
-                key={grammar.id}
-                className="text-left h-input flex justify-start p-4 grow-0"
-                onClick={() => {
-                  setCurrentIndex(index);
-                  setCardVisible(true);
-                }}
-              >
-                {`${index + 1} : ${grammar.name} `}
-              </Button>
-            ))
-          ) : (
-            <p className="text-left h-input flex justify-start p-4">
-              Žádná započatá gramatika
-            </p>
-          )}
-        </div>
+        <ListOverview
+          listTitle="Přehled gramatiky"
+          emptyTitle="Žádné započatá gramatika"
+          array={grammarArray}
+          loading={loading}
+          error={error}
+          onSelect={(index) => {
+            setCurrentIndex(index);
+            setCardVisible(true);
+          }}
+          onClose={() => window.history.back()}
+        />
       ) : (
         <div className="relative flex flex-col w-full grow items-center justify-start">
           <OverviewCard
