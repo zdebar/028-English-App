@@ -16,7 +16,7 @@ import GrammarCard, {
   type GrammarCardType,
 } from "@/features/practice/GrammarCard";
 import Loading from "@/components/UI/Loading";
-import HelpButton from "@/components/UI/buttons/HelpButton";
+import HelpButton from "@/features/overlay/HelpButton";
 import Hint from "@/components/UI/Hint";
 import { useOverlayStore } from "@/hooks/use-overlay-store";
 import Grammar from "@/database/models/grammar";

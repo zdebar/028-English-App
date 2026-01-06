@@ -49,7 +49,7 @@ export default function ButtonAsyncModal({
         className={className}
       />
       <Modal
-        isOpen={isModalOpen}
+        showModal={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={() => {
           setIsModalOpen(false);

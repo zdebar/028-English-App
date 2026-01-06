@@ -9,7 +9,7 @@ import OverviewCard from "@/components/UI/OverviewCard";
 import { useFetch } from "@/hooks/use-fetch";
 import { useAuthStore } from "@/features/auth/use-auth-store";
 import DOMPurify from "dompurify";
-import HelpButton from "@/components/UI/buttons/HelpButton";
+import HelpButton from "@/features/overlay/HelpButton";
 
 export default function GrammarOverview() {
   const { userId } = useAuthStore();
@@ -34,7 +34,7 @@ export default function GrammarOverview() {
   const handleClearGrammarUserItems = async () => {
     const grammar_id = grammarArray?.[currentIndex]?.id;
     if (typeof grammar_id === "number" && userId) {
-      await UserItem.resetUserItemsByGrammarId(userId, grammar_id);
+      await UserItem.resetGrammarItems(userId, grammar_id);
       setReload(true);
     }
   };

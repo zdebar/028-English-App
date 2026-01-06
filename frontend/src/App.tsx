@@ -14,10 +14,10 @@ import Grammar from "@/pages/grammar";
 import { useAuthStore } from "@/features/auth/use-auth-store";
 import type { Session } from "@supabase/supabase-js";
 import { supabaseInstance } from "@/config/supabase.config";
-import OverlayMask from "./components/UI/Overlay";
+import OverlayMask from "@/components/UI/OverlayMask";
 import { useOverlayStore } from "@/hooks/use-overlay-store";
-import ToastContainer from "./features/toast/ToastContainer";
-import PrivacyPolicy from "./pages/privacy-policy";
+import ToastContainer from "@/features/toast/ToastContainer";
+import PrivacyPolicy from "@/pages/privacy-policy";
 
 export default function App() {
   const { theme, chooseTheme } = useThemeStore();

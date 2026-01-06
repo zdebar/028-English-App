@@ -83,3 +83,7 @@ Null for certains columns are replaced with nullReplacementDate or nullReplaceme
   - stores user's daily practice
 - **user_items**
   - stores all relevant information for practicing items. Basically merges backends "items" and "user_items" tables.
+
+### Features
+
+- **overlay**: global overlay screen

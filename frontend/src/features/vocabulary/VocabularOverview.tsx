@@ -12,7 +12,7 @@ import { useFetch } from "@/hooks/use-fetch";
 import { useAuthStore } from "@/features/auth/use-auth-store";
 import Loading from "@/components/UI/Loading";
 import { getMoreText } from "@/features/vocabulary/vocabulary.utils";
-import HelpButton from "@/components/UI/buttons/HelpButton";
+import HelpButton from "@/features/overlay/HelpButton";
 
 export default function VocabularyOverview() {
   const { userId } = useAuthStore();
