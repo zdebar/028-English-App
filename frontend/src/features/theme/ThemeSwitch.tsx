@@ -3,7 +3,6 @@ import MoonIcon from "@/components/UI/icons/MoonIcon";
 import { useThemeStore, type UserTheme } from "@/features/theme/use-theme";
 
 /**
- * ThemeSwitch Component
  * A button that toggles between light and dark themes. Default is system preference.
  */
 export default function ThemeSwitch() {
