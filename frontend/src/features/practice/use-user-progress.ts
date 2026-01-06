@@ -5,6 +5,7 @@ import type { UUID } from "crypto";
 
 /**
  * Hook tosave user progress updates to the IndexedDB.
+ *
  * @param array Practice deck array of user items.
  * @returns Function to update user items in the database.
  */

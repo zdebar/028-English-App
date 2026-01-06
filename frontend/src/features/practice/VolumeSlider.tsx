@@ -6,7 +6,6 @@ import VolumeIcon from "@/components/UI/icons/VolumeIcon";
  *
  * @param setVolume - Function to update the volume.
  * @param className - Optional additional CSS classes.
- * @param props - Additional HTML attributes for the container.
  * @returns A JSX element for the volume slider.
  */
 export default function VolumeSlider({
