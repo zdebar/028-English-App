@@ -2,22 +2,27 @@ import type { ReactNode } from "react";
 import { Link, useMatch, type LinkProps } from "react-router-dom";
 
 interface HeaderButtonProps extends LinkProps {
+  to: string;
   children: ReactNode;
   disabled?: boolean;
   className?: string;
-  to: string;
 }
 
 /**
+ * Header button component for navigation in the app header.
  *
- * @param param0
- * @returns
+ * @param to The navigation target path.
+ * @param children Content to be displayed inside the button.
+ * @param disabled Disables the button if true.
+ * @param className Additional CSS classes for custom styling.
+ * @param props Other LinkProps for the underlying Link component.
+ * @returns A styled navigation button or a disabled span if disabled.
  */
 export default function HeaderButton({
+  to,
   children,
   disabled = false,
   className = "",
-  to,
   ...props
 }: HeaderButtonProps) {
   const isSelected = useMatch(to);
