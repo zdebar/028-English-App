@@ -1,5 +1,5 @@
-import config from "@/config/config";
-import type { LessonsLocal } from "@/types/local.types";
+import config from '@/config/config';
+import type { LessonsLocal } from '@/types/local.types';
 
 /**
  * Calculates the items count in last started lesson before today.
@@ -26,10 +26,7 @@ export function getLessonStarted(countNotToday: number): number {
  * @param todayCount Today's started items count
  * @returns Array of items counts in today's lessons
  */
-export function getTodayStartedItems(
-  previousCount: number,
-  todayCount: number
-): number[] {
+export function getTodayStartedItems(previousCount: number, todayCount: number): number[] {
   const lessonCounts: number[] = [];
   const lessonSize = config.lesson.lessonSize;
 

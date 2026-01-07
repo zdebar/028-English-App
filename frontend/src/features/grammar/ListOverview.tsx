@@ -1,5 +1,5 @@
-import Button from "@/components/UI/buttons/Button";
-import CloseIcon from "@/components/UI/icons/CloseIcon";
+import Button from '@/components/UI/buttons/Button';
+import CloseIcon from '@/components/UI/icons/CloseIcon';
 
 /**
  * Minimal type for list items.
@@ -22,7 +22,7 @@ type ListItem = {
  */
 export default function ListOverview({
   listTitle,
-  emptyTitle = "Žádné položky k zobrazení",
+  emptyTitle = 'Žádné položky k zobrazení',
   array,
   loading,
   error,
@@ -38,10 +38,10 @@ export default function ListOverview({
   onClose: () => void;
 }) {
   return (
-    <div className="card-width flex flex-col gap-1 justify-start">
+    <div className="card-width flex flex-col justify-start gap-1">
       <div className="h-button flex items-center justify-between gap-1">
-        <div className="flex h-button grow justify-start p-4">
-          {loading ? "Načítání..." : error || listTitle}
+        <div className="h-button flex grow justify-start p-4">
+          {loading ? 'Načítání...' : error || listTitle}
         </div>
         <Button className="w-button grow-0" onClick={onClose}>
           <CloseIcon />
@@ -51,14 +51,14 @@ export default function ListOverview({
         array.map((item, index) => (
           <Button
             key={item.id}
-            className="text-left h-input flex justify-start p-4 grow-0"
+            className="h-input flex grow-0 justify-start p-4 text-left"
             onClick={() => onSelect(index)}
           >
             {`${index + 1} : ${item.name} `}
           </Button>
         ))
       ) : (
-        <p className="text-left h-input flex justify-start p-4">{emptyTitle}</p>
+        <p className="h-input flex justify-start p-4 text-left">{emptyTitle}</p>
       )}
     </div>
   );

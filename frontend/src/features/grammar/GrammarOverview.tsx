@@ -1,13 +1,13 @@
-import { useState, useCallback } from "react";
-import Grammar from "@/database/models/grammar";
-import UserItem from "@/database/models/user-items";
-import type { GrammarLocal } from "@/types/local.types";
-import ListOverview from "./ListOverview";
-import OverviewCard from "@/components/UI/OverviewCard";
-import { useFetch } from "@/hooks/use-fetch";
-import { useAuthStore } from "@/features/auth/use-auth-store";
-import DOMPurify from "dompurify";
-import HelpButton from "@/features/overlay/HelpButton";
+import { useState, useCallback } from 'react';
+import Grammar from '@/database/models/grammar';
+import UserItem from '@/database/models/user-items';
+import type { GrammarLocal } from '@/types/local.types';
+import ListOverview from './ListOverview';
+import OverviewCard from '@/components/UI/OverviewCard';
+import { useFetch } from '@/hooks/use-fetch';
+import { useAuthStore } from '@/features/auth/use-auth-store';
+import DOMPurify from 'dompurify';
+import HelpButton from '@/features/overlay/HelpButton';
 
 /**
  * GrammarOverview component displays a list of started grammar topics for the user.
@@ -36,7 +36,7 @@ export default function GrammarOverview() {
 
   const handleClearGrammarUserItems = async () => {
     const grammar_id = grammarArray?.[currentIndex]?.id;
-    if (typeof grammar_id === "number" && userId) {
+    if (typeof grammar_id === 'number' && userId) {
       await UserItem.resetGrammarItems(userId, grammar_id);
       setShouldReload(true);
     }
@@ -58,7 +58,7 @@ export default function GrammarOverview() {
           onClose={() => window.history.back()}
         />
       ) : (
-        <div className="relative flex flex-col w-full grow items-center justify-start">
+        <div className="relative flex w-full grow flex-col items-center justify-start">
           <OverviewCard
             titleText={grammarArray?.[currentIndex].name}
             onClose={() => setCardVisible(false)}
@@ -71,7 +71,7 @@ export default function GrammarOverview() {
                 }}
               />
             ) : (
-              "Žádné poznámky k zobrazení."
+              'Žádné poznámky k zobrazení.'
             )}
           </OverviewCard>
           <HelpButton className="self-end" />

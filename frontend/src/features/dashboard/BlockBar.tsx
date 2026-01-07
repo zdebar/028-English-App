@@ -48,21 +48,21 @@ export default function BlockBar({
 
       {/* Progress bar */}
       <div
-        className="h-attribute relative overflow-hidden bg-white"
+        className="h-attribute bg-progress-bg relative overflow-hidden"
         role="progressbar"
         aria-valuenow={validPreviousCount + validTodayCount}
         aria-valuemin={0}
         aria-valuemax={lessonSize}
         aria-label={`Pokrok pro lekci ${lessonNumber}`}
       >
-        {/* Celkový pokrok */}
+        {/* Nový pokrok */}
         <div
-          className="bg-notice-dark absolute top-0 left-0 h-full dark:bg-[#F7D565]"
+          className="bg-new-progress-light dark:bg-new-progress-dark absolute top-0 left-0 h-full"
           style={{ width: `${previousWidth + todayWidth}%` }}
         ></div>
         {/* Předchozí pokrok */}
         <div
-          className="absolute top-0 left-0 h-full bg-[#42BDDB] dark:bg-[#F7AE25]"
+          className="bg-old-progress-light dark:bg-old-progress-dark absolute top-0 left-0 h-full"
           style={{ width: `${previousWidth}%` }}
         ></div>
         {/* Dělení */}
@@ -71,7 +71,7 @@ export default function BlockBar({
           return (
             <div
               key={index}
-              className="absolute top-0 h-full border-l border-gray-700"
+              className="border-divisions absolute top-0 h-full border-l"
               style={{ left: `${position}%` }}
             ></div>
           );
