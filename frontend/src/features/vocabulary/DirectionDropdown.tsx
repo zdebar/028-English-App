@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo } from 'react';
 
 interface DirectionDropdownProps<T> {
   value: T;
@@ -16,7 +16,7 @@ export default function DirectionDropdown<T>({
   value,
   options,
   onChange,
-  className = "",
+  className = '',
 }: DirectionDropdownProps<T>) {
   if (!options.some((option) => option.value === value)) {
     console.warn(`Hodnota "${value}" není platná pro DirectionDropdown.`);
@@ -40,11 +40,9 @@ export default function DirectionDropdown<T>({
         name="direction"
         value={String(value)}
         onChange={(e) =>
-          onChange(
-            options.find((o) => String(o.value) === e.target.value)?.value as T
-          )
+          onChange(options.find((o) => String(o.value) === e.target.value)?.value as T)
         }
-        className="h-button w-full color-select  px-3"
+        className="h-button color-select w-full px-3"
       >
         {memoizedOptions}
       </select>

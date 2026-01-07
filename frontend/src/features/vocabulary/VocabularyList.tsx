@@ -1,16 +1,16 @@
-import Button from "@/components/UI/buttons/Button";
-import CloseIcon from "@/components/UI/icons/CloseIcon";
-import DirectionDropdown from "@/features/vocabulary/DirectionDropdown";
-import { getMoreText } from "@/features/vocabulary/vocabulary.utils";
-import { type UserItemLocal } from "@/types/local.types";
+import Button from '@/components/UI/buttons/Button';
+import CloseIcon from '@/components/UI/icons/CloseIcon';
+import DirectionDropdown from '@/features/vocabulary/DirectionDropdown';
+import { getMoreText } from '@/features/vocabulary/vocabulary.utils';
+import { type UserItemLocal } from '@/types/local.types';
 
 interface VocabularyListProps {
   filteredWords: UserItemLocal[];
   visibleCount: number;
-  displayField: "czech" | "english";
+  displayField: 'czech' | 'english';
   searchTerm: string;
   setSearchTerm: (val: string) => void;
-  setDisplayField: (val: "czech" | "english") => void;
+  setDisplayField: (val: 'czech' | 'english') => void;
   setVisibleCount: (val: number) => void;
   onSelect: (index: number) => void;
   error: string | null;
@@ -33,24 +33,22 @@ export default function VocabularyList({
   const remainingCount = filteredWords.length - visibleCount;
 
   return (
-    <div className="card-width relative h-full flex flex-col gap-1 justify-start">
-      <div className="flex flex-col gap-1 bg-background-light dark:bg-background-dark">
+    <div className="card-width relative flex h-full flex-col justify-start gap-1">
+      <div className="color-base flex flex-col gap-1">
         <div className="flex items-center justify-between gap-1">
           {error ? (
-            <div className="flex h-button grow justify-start items-center border border-dashed">
+            <div className="h-button flex grow items-center justify-start border border-dashed">
               {error}
             </div>
           ) : (
             <DirectionDropdown
               value={displayField}
               options={[
-                { value: "czech", label: "Čeština" },
-                { value: "english", label: "Angličtina" },
+                { value: 'czech', label: 'Čeština' },
+                { value: 'english', label: 'Angličtina' },
               ]}
-              onChange={(value) =>
-                setDisplayField(value as "czech" | "english")
-              }
-              className="grow flex items-center border border-dashed h-button"
+              onChange={(value) => setDisplayField(value as 'czech' | 'english')}
+              className="h-button flex grow items-center border border-dashed"
             />
           )}
           <Button className="w-button grow-0" onClick={onClose}>
@@ -62,36 +60,32 @@ export default function VocabularyList({
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Zadejte slovo..."
-          className="h-input pl-4 border border-dashed bg-background-light dark:bg-background-dark"
+          className="h-input color-base border border-dashed pl-4"
         />
       </div>
-      <div className="overflow-y-auto flex flex-col gap-1">
+      <div className="flex flex-col gap-1 overflow-y-auto">
         {filteredWords && filteredWords.length > 0 ? (
           <>
             {visibleItems.map((item, index) => (
               <Button
                 key={item.item_id}
-                className="text-left grow-0 h-input flex justify-start p-4"
+                className="h-input flex grow-0 justify-start p-4 text-left"
                 onClick={() => onSelect(index)}
               >
-                {displayField === "czech"
-                  ? ` ${item.czech} `
-                  : ` ${item.english} `}
+                {displayField === 'czech' ? ` ${item.czech} ` : ` ${item.english} `}
               </Button>
             ))}
             {remainingCount > 0 && (
               <button
                 onClick={() => setVisibleCount(visibleCount + 8)}
-                className="mt-2 w-full text-center text-link"
+                className="text-link mt-2 w-full text-center"
               >
-                ... a {remainingCount + " " + getMoreText(remainingCount)}
+                ... a {remainingCount + ' ' + getMoreText(remainingCount)}
               </button>
             )}
           </>
         ) : (
-          <p className="text-left h-input flex justify-start pl-4">
-            Žádná započatá slovíčka
-          </p>
+          <p className="h-input flex justify-start pl-4 text-left">Žádná započatá slovíčka</p>
         )}
       </div>
     </div>

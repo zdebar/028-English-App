@@ -1,7 +1,7 @@
-import { useCallback } from "react";
-import UserItem from "@/database/models/user-items";
-import type { UserItemLocal } from "@/types/local.types";
-import type { UUID } from "crypto";
+import { useCallback } from 'react';
+import UserItem from '@/database/models/user-items';
+import type { UserItemLocal } from '@/types/local.types';
+import type { UUID } from 'crypto';
 
 /**
  * Hook tosave user progress updates to the IndexedDB.
@@ -18,11 +18,11 @@ export function useUserProgress(userId: UUID) {
         await UserItem.savePracticeDeck(userId, updatedItems);
         return true;
       } catch (error) {
-        console.error("Error updating user items in DB:", error);
+        console.error('Error updating user items in DB:', error);
         return false;
       }
     },
-    [userId]
+    [userId],
   );
 
   return { updateUserItemsInDB };

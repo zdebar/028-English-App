@@ -1,8 +1,8 @@
-import { useState, useCallback, useEffect } from "react";
-import UserItem from "@/database/models/user-items";
-import type { UserItemLocal } from "@/types/local.types";
-import { useFetch } from "@/hooks/use-fetch";
-import type { UUID } from "crypto";
+import { useState, useCallback, useEffect } from 'react';
+import UserItem from '@/database/models/user-items';
+import type { UserItemLocal } from '@/types/local.types';
+import { useFetch } from '@/hooks/use-fetch';
+import type { UUID } from 'crypto';
 
 /**
  * useArray hook manages the state and navigation of a practice deck for a given user.

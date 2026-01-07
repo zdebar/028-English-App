@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { UserItemLocal } from "@/types/local.types";
-import AudioRecord from "@/database/models/audio-records";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { UserItemLocal } from '@/types/local.types';
+import AudioRecord from '@/database/models/audio-records';
 
 /**
  * Manages audio playback and caching for a list of user items.
@@ -21,7 +21,7 @@ export function useAudioManager(itemArray: UserItemLocal[]) {
     if (audioCacheRef.current.size > MAX_CACHE_SIZE) {
       const keysToRemove = Array.from(audioCacheRef.current.keys()).slice(
         0,
-        audioCacheRef.current.size - MAX_CACHE_SIZE
+        audioCacheRef.current.size - MAX_CACHE_SIZE,
       );
 
       keysToRemove.forEach((key) => {
@@ -34,7 +34,7 @@ export function useAudioManager(itemArray: UserItemLocal[]) {
       });
 
       console.log(
-        `Audio cache cleaned. Removed ${keysToRemove.length} items. Current cache size: ${audioCacheRef.current.size}`
+        `Audio cache cleaned. Removed ${keysToRemove.length} items. Current cache size: ${audioCacheRef.current.size}`,
       );
     }
   }, []);
@@ -46,10 +46,7 @@ export function useAudioManager(itemArray: UserItemLocal[]) {
       try {
         const audioKeys = itemArray
           .map((item) => item.audio)
-          .filter(
-            (audio): audio is string =>
-              audio !== null && !audioCacheRef.current.has(audio)
-          );
+          .filter((audio): audio is string => audio !== null && !audioCacheRef.current.has(audio));
         if (audioKeys.length > 0) {
           const fetchedAudios = await AudioRecord.bulkGet(audioKeys);
 
@@ -67,7 +64,7 @@ export function useAudioManager(itemArray: UserItemLocal[]) {
           cleanCache();
         }
       } catch (error) {
-        console.error("Error caching audio files:", error);
+        console.error('Error caching audio files:', error);
       }
     };
 

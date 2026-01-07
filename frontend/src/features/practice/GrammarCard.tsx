@@ -1,5 +1,5 @@
-import OverviewCard from "@/components/UI/OverviewCard";
-import DOMPurify from "dompurify";
+import OverviewCard from '@/components/UI/OverviewCard';
+import DOMPurify from 'dompurify';
 
 export interface GrammarCardType {
   id: number;
@@ -30,7 +30,7 @@ export default function GrammarCard({
           }}
         />
       ) : (
-        "Žádné poznámky k zobrazení."
+        'Žádné poznámky k zobrazení.'
       )}
     </OverviewCard>
   );

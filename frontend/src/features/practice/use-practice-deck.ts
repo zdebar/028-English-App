@@ -1,9 +1,9 @@
-import { useEffect, useRef, useCallback } from "react";
-import { alternateDirection } from "@/utils/practice.utils";
-import { useUserProgress } from "@/features/practice/use-user-progress";
-import type { UserItemLocal } from "@/types/local.types";
-import { useArray } from "@/features/practice/use-array";
-import type { UUID } from "crypto";
+import { useEffect, useRef, useCallback } from 'react';
+import { alternateDirection } from '@/utils/practice.utils';
+import { useUserProgress } from '@/features/practice/use-user-progress';
+import type { UserItemLocal } from '@/types/local.types';
+import { useArray } from '@/features/practice/use-array';
+import type { UUID } from 'crypto';
 
 /**
  * usePracticeDeck hook manages the practice deck and user progress for a given user.
@@ -13,20 +13,11 @@ import type { UUID } from "crypto";
  */
 export function usePracticeDeck(userId: UUID) {
   const { updateUserItemsInDB } = useUserProgress(userId);
-  const {
-    array,
-    currentItem,
-    index,
-    nextIndex,
-    loading,
-    error,
-    setShouldReload,
-  } = useArray(userId);
+  const { array, currentItem, index, nextIndex, loading, error, setShouldReload } =
+    useArray(userId);
 
   const userProgressRef = useRef<UserItemLocal[]>([]);
-  const direction = currentItem
-    ? alternateDirection(currentItem?.progress)
-    : false;
+  const direction = currentItem ? alternateDirection(currentItem?.progress) : false;
   const grammar_id = currentItem?.grammar_id;
 
   // Save progress on unmount
@@ -35,7 +26,7 @@ export function usePracticeDeck(userId: UUID) {
       const userProgress = [...userProgressRef.current];
       if (userProgress.length > 0) {
         updateUserItemsInDB(userProgress).catch((error) => {
-          console.error("Failed to save progress on unmount:", error);
+          console.error('Failed to save progress on unmount:', error);
         });
       }
     };
@@ -45,7 +36,7 @@ export function usePracticeDeck(userId: UUID) {
   const nextItem = useCallback(
     async (progressChange: number = 0) => {
       if (!currentItem) {
-        console.warn("No current item to update progress for.");
+        console.warn('No current item to update progress for.');
         return;
       }
 
@@ -62,19 +53,13 @@ export function usePracticeDeck(userId: UUID) {
           userProgressRef.current = [];
           setShouldReload(true);
         } catch (error) {
-          console.error("Failed to update user progress:", error);
+          console.error('Failed to update user progress:', error);
         }
       } else {
         nextIndex();
       }
     },
-    [
-      currentItem,
-      nextIndex,
-      array?.length,
-      setShouldReload,
-      updateUserItemsInDB,
-    ]
+    [currentItem, nextIndex, array?.length, setShouldReload, updateUserItemsInDB],
   );
 
   return {

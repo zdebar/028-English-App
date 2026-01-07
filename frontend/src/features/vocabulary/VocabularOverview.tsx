@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
-import UserItem from "@/database/models/user-items";
-import type { UserItemLocal } from "@/types/local.types";
-import { useFetch } from "@/hooks/use-fetch";
-import { useAuthStore } from "@/features/auth/use-auth-store";
-import Loading from "@/components/UI/Loading";
-import VocabularyList from "./VocabularyList";
-import VocabularyDetailCard from "./VocabularyDetailCard";
+import { useState, useEffect, useCallback } from 'react';
+import UserItem from '@/database/models/user-items';
+import type { UserItemLocal } from '@/types/local.types';
+import { useFetch } from '@/hooks/use-fetch';
+import { useAuthStore } from '@/features/auth/use-auth-store';
+import Loading from '@/components/UI/Loading';
+import VocabularyList from './VocabularyList';
+import VocabularyDetailCard from './VocabularyDetailCard';
 
 export default function VocabularyOverview() {
   const { userId } = useAuthStore();
@@ -28,18 +28,14 @@ export default function VocabularyOverview() {
   const [visibleCount, setVisibleCount] = useState(8);
   const [cardVisible, setCardVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [displayField, setDisplayField] = useState<"czech" | "english">(
-    "czech"
-  );
+  const [searchTerm, setSearchTerm] = useState('');
+  const [displayField, setDisplayField] = useState<'czech' | 'english'>('czech');
   const selectedWord = filteredWords ? filteredWords[currentIndex] : null;
 
   useEffect(() => {
     if (!words) return;
     const filtered = words
-      .filter((item) =>
-        item[displayField]?.toLowerCase().startsWith(searchTerm.toLowerCase())
-      )
+      .filter((item) => item[displayField]?.toLowerCase().startsWith(searchTerm.toLowerCase()))
       .sort((a, b) => {
         const lengthDiff = a[displayField]?.length - b[displayField].length;
         if (lengthDiff !== 0) return lengthDiff;
@@ -50,7 +46,7 @@ export default function VocabularyOverview() {
 
   const handleClearUserItem = async () => {
     const itemId = selectedWord?.item_id;
-    if (typeof itemId === "number" && userId) {
+    if (typeof itemId === 'number' && userId) {
       await UserItem.resetUserItemById(userId, itemId);
       setShouldReload(true);
     }

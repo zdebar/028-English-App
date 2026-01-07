@@ -1,5 +1,5 @@
-import { useToastStore } from "./use-toast-store";
-import Toast from "./Toast";
+import { useToastStore } from './use-toast-store';
+import Toast from './Toast';
 
 /**
  * ToastContainer component that displays toast notifications from the toast store.

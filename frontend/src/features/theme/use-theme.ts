@@ -1,6 +1,6 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
-export type UserTheme = "light" | "dark";
+export type UserTheme = 'light' | 'dark';
 
 interface ThemeState {
   theme: UserTheme;
@@ -15,20 +15,17 @@ export const useThemeStore = create<ThemeState>((set) => {
     // Apply the theme to the document
     if (!document.documentElement.classList.contains(theme)) {
       document.documentElement.classList.add(theme);
-      document.documentElement.classList.remove(
-        theme === "dark" ? "light" : "dark"
-      );
+      document.documentElement.classList.remove(theme === 'dark' ? 'light' : 'dark');
     }
-    localStorage.setItem("theme", theme);
+    localStorage.setItem('theme', theme);
   };
 
   // Determine the default theme based on system settings
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const defaultTheme: UserTheme = prefersDark ? "dark" : "light";
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const defaultTheme: UserTheme = prefersDark ? 'dark' : 'light';
 
   // Load the stored theme or fall back to the system's default
-  const storedTheme =
-    (localStorage.getItem("theme") as UserTheme) || defaultTheme;
+  const storedTheme = (localStorage.getItem('theme') as UserTheme) || defaultTheme;
   applyTheme(storedTheme);
 
   return {

@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import VolumeIcon from "@/components/UI/icons/VolumeIcon";
+import { useState, useRef, useEffect } from 'react';
+import VolumeIcon from '@/components/UI/icons/VolumeIcon';
 
 /**
  * A component for controlling volume with a slider.
@@ -10,7 +10,7 @@ import VolumeIcon from "@/components/UI/icons/VolumeIcon";
  */
 export default function VolumeSlider({
   setVolume,
-  className = "",
+  className = '',
   ...props
 }: {
   setVolume: (volume: number) => void;
@@ -23,17 +23,14 @@ export default function VolumeSlider({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        sliderRef.current &&
-        !sliderRef.current.contains(event.target as Node)
-      ) {
+      if (sliderRef.current && !sliderRef.current.contains(event.target as Node)) {
         setShowVolumeSlider(false);
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
@@ -46,7 +43,7 @@ export default function VolumeSlider({
   return (
     <div
       ref={sliderRef}
-      className={`flex pt-1  ${className} cursor-pointer`}
+      className={`flex pt-1 ${className} cursor-pointer`}
       onClick={(event) => event.stopPropagation()}
       {...props}
     >

@@ -1,5 +1,5 @@
-import LightBulbIcon from "@/components/UI/icons/LightBulbIcon";
-import { useOverlayStore } from "@/hooks/use-overlay-store";
+import LightBulbIcon from '@/components/UI/icons/LightBulbIcon';
+import { useOverlayStore } from '@/hooks/use-overlay-store';
 
 /**
  * Help button component that opens the help overlay.
@@ -9,7 +9,7 @@ import { useOverlayStore } from "@/hooks/use-overlay-store";
  * @returns A styled button with a light bulb icon that triggers the help overlay.
  */
 export default function HelpButton({
-  className = "",
+  className = '',
   style,
 }: {
   className?: string;
@@ -17,12 +17,7 @@ export default function HelpButton({
 }) {
   const { open } = useOverlayStore();
   return (
-    <button
-      type="button"
-      className={`z-10 p-1 ${className}`}
-      style={style}
-      onClick={open}
-    >
+    <button type="button" className={`z-10 p-1 ${className}`} style={style} onClick={open}>
       <LightBulbIcon />
     </button>
   );

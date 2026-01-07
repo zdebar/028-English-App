@@ -1,8 +1,8 @@
-import OverviewCard from "@/components/UI/OverviewCard";
-import PropertyView from "@/components/UI/PropertyView";
-import { shortenDate } from "@/features/vocabulary/vocabulary.utils";
-import HelpButton from "@/features/overlay/HelpButton";
-import type { UserItemLocal } from "@/types/local.types";
+import OverviewCard from '@/components/UI/OverviewCard';
+import PropertyView from '@/components/UI/PropertyView';
+import { shortenDate } from '@/features/vocabulary/vocabulary.utils';
+import HelpButton from '@/features/overlay/HelpButton';
+import type { UserItemLocal } from '@/types/local.types';
 
 interface VocabularyDetailCardProps {
   selectedWord: UserItemLocal | null;
@@ -16,35 +16,19 @@ export default function VocabularyDetailCard({
   onReset,
 }: VocabularyDetailCardProps) {
   return (
-    <div className="relative flex flex-col w-full grow items-center justify-start">
-      <OverviewCard
-        titleText={selectedWord?.czech}
-        onClose={onClose}
-        handleReset={onReset}
-      >
+    <div className="relative flex w-full grow flex-col items-center justify-start">
+      <OverviewCard titleText={selectedWord?.czech} onClose={onClose} handleReset={onReset}>
         <div className="flex flex-col gap-4">
           <div>
-            <PropertyView
-              label="item_id"
-              className="h-attribute"
-              value={selectedWord?.item_id}
-            />
-            <PropertyView
-              label="česky"
-              className="h-attribute"
-              value={selectedWord?.czech}
-            />
+            <PropertyView label="item_id" className="h-attribute" value={selectedWord?.item_id} />
+            <PropertyView label="česky" className="h-attribute" value={selectedWord?.czech} />
             <PropertyView label="anglicky" value={selectedWord?.english} />
             <PropertyView
               label="výslovnost"
               className="h-attribute"
               value={selectedWord?.pronunciation}
             />
-            <PropertyView
-              label="pokrok"
-              className="h-attribute"
-              value={selectedWord?.progress}
-            />
+            <PropertyView label="pokrok" className="h-attribute" value={selectedWord?.progress} />
           </div>
           <div>
             <PropertyView
