@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 /**
  * Generic data fetching hook.
@@ -21,7 +21,7 @@ export function useFetch<T>(fetchFunction: () => Promise<T>) {
         setData(result);
         setError(null);
       } catch (error) {
-        setError("Chyba při načítání.");
+        setError('Chyba při načítání.');
         console.error(error);
       } finally {
         setLoading(false);

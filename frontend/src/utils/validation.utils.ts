@@ -1,5 +1,5 @@
-import config from "@/config/config";
-import type { UserItemLocal } from "@/types/local.types";
+import config from '@/config/config';
+import type { UserItemLocal } from '@/types/local.types';
 
 /**
  * Validates that a value is a positive integer.
@@ -32,7 +32,7 @@ export function validatePositiveInteger(value: number, name: string): void {
 export function validateLessonSize(): void {
   const lessonSize = config.lesson.lessonSize;
   if (!Number.isInteger(lessonSize) || lessonSize <= 0) {
-    throw new Error("config.lesson.lessonSize must be a positive integer.");
+    throw new Error('config.lesson.lessonSize must be a positive integer.');
   }
 }
 
@@ -43,7 +43,7 @@ export function validateLessonSize(): void {
  * @throws Error if the value is not a non-empty string.
  */
 export function validateNonEmptyString(value: string, name: string): void {
-  if (!value || typeof value !== "string") {
+  if (!value || typeof value !== 'string') {
     throw new Error(`${name} must be a non-empty string.`);
   }
 }
@@ -55,18 +55,15 @@ export function validateNonEmptyString(value: string, name: string): void {
  * @throws Error if the value is not a valid ISO date string.
  */
 export function validateISODateString(value: string, name: string): void {
-  const isoDateRegex =
-    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?(Z|[+-]\d{2}:\d{2})$/;
+  const isoDateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?(Z|[+-]\d{2}:\d{2})$/;
 
   if (!value || !isoDateRegex.test(value)) {
-    throw new Error(
-      `${name}: "${value}"  must be a valid ISO 8601 date string.`
-    );
+    throw new Error(`${name}: "${value}"  must be a valid ISO 8601 date string.`);
   }
 
   // Parse the date components
-  const [datePart] = value.split("T");
-  const [year, month, day] = datePart.split("-").map(Number);
+  const [datePart] = value.split('T');
+  const [year, month, day] = datePart.split('-').map(Number);
 
   // Create a Date object and validate the components
   const date = new Date(value);
@@ -89,9 +86,7 @@ export function validateShortDateString(value: string, name: string): void {
   const shortDateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
   if (!value || !shortDateRegex.test(value)) {
-    throw new Error(
-      `${name} must be a valid short date string in the format YYYY-MM-DD.`
-    );
+    throw new Error(`${name} must be a valid short date string in the format YYYY-MM-DD.`);
   }
 
   const date = new Date(value);
@@ -135,31 +130,30 @@ export function validateBlob(value: Blob, name: string): void {
  * @throws Error if the value is not a valid UUID.
  */
 export function validateUUID(value: string, name: string): void {
-  const uuidRegex =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   if (!uuidRegex.test(value)) {
     throw new Error(`${name} must be a valid UUID: ${value}`);
   }
 }
 
 export function validateUserItemLocal(localItem: UserItemLocal): void {
-  if (!localItem || typeof localItem !== "object") {
-    throw new Error("localItem must be a valid UserItemLocal object.");
+  if (!localItem || typeof localItem !== 'object') {
+    throw new Error('localItem must be a valid UserItemLocal object.');
   }
 
   // Additional validations for specific fields
-  validateUUID(localItem.user_id, "localItem.user_id");
-  validatePositiveInteger(localItem.item_id, "localItem.item_id");
-  validateNonNegativeInteger(localItem.progress, "localItem.progress");
+  validateUUID(localItem.user_id, 'localItem.user_id');
+  validatePositiveInteger(localItem.item_id, 'localItem.item_id');
+  validateNonNegativeInteger(localItem.progress, 'localItem.progress');
 
   // Validate date fields
-  validateISODateString(localItem.started_at, "localItem.started_at");
-  validateISODateString(localItem.updated_at, "localItem.updated_at");
-  validateISODateString(localItem.next_at, "localItem.next_at");
-  validateISODateString(localItem.mastered_at, "localItem.mastered_at");
+  validateISODateString(localItem.started_at, 'localItem.started_at');
+  validateISODateString(localItem.updated_at, 'localItem.updated_at');
+  validateISODateString(localItem.next_at, 'localItem.next_at');
+  validateISODateString(localItem.mastered_at, 'localItem.mastered_at');
 
   // Special case: Validate `deleted_at` only if it exists
   if (localItem.deleted_at) {
-    validateISODateString(localItem.deleted_at, "localItem.deleted_at");
+    validateISODateString(localItem.deleted_at, 'localItem.deleted_at');
   }
 }

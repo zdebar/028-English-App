@@ -1,9 +1,9 @@
-import { create } from "zustand";
-import { persist, devtools } from "zustand/middleware";
-import type { UserStatsLocal } from "@/types/local.types";
-import UserScore from "@/database/models/user-scores";
-import UserItem from "@/database/models/user-items";
-import type { UUID } from "crypto";
+import { create } from 'zustand';
+import { persist, devtools } from 'zustand/middleware';
+import type { UserStatsLocal } from '@/types/local.types';
+import UserScore from '@/database/models/user-scores';
+import UserItem from '@/database/models/user-items';
+import type { UUID } from 'crypto';
 
 interface UserState {
   userStats: UserStatsLocal | null;
@@ -38,15 +38,12 @@ export const useUserStore = create<UserState>()(
               },
             });
           } catch (error) {
-            console.error(
-              `Error reloading user score for userId: ${userId}`,
-              error
-            );
+            console.error(`Error reloading user score for userId: ${userId}`, error);
           }
         };
 
         // Add event listener for `userItemsUpdated` event
-        window.addEventListener("userItemsUpdated", (event) => {
+        window.addEventListener('userItemsUpdated', (event) => {
           const { userId } = event.detail;
           if (userId) {
             reloadUserScore(userId);
@@ -59,11 +56,11 @@ export const useUserStore = create<UserState>()(
         };
       },
       {
-        name: "user-store",
-      }
+        name: 'user-store',
+      },
     ),
-    { name: "UserStore" }
-  )
+    { name: 'UserStore' },
+  ),
 );
 
 /**
@@ -74,5 +71,4 @@ export const useUserStats = () => useUserStore((state) => state.userStats);
 /**
  * Hook to manually trigger the reloadUserScore function.
  */
-export const useReloadUserScore = () =>
-  useUserStore((state) => state.reloadUserScore);
+export const useReloadUserScore = () => useUserStore((state) => state.reloadUserScore);

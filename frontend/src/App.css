@@ -145,7 +145,7 @@
 
   /* TEXT STYLES */
   .text-notice {
-    @apply font-headings text-center text-xl;
+    @apply font-headings text-notice-light dark:text-notice-dark text-center text-xl;
   }
 
   .text-help {

@@ -1,4 +1,4 @@
-import type { UUID } from "crypto";
+import type { UUID } from 'crypto';
 
 // Users table
 export interface UserSQL {
@@ -54,6 +54,6 @@ export interface UserScoreSQL {
 export class UserError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = "UserError";
+    this.name = 'UserError';
   }
 }

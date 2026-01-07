@@ -1,4 +1,4 @@
-import type { UUID } from "crypto";
+import type { UUID } from 'crypto';
 
 export interface UserItemLocal {
   item_id: number;
@@ -69,9 +69,9 @@ export interface LessonsLocal {
 }
 
 export const TableName = {
-  Grammar: "grammar",
-  UserScores: "user_scores",
-  UserItems: "user_items",
+  Grammar: 'grammar',
+  UserScores: 'user_scores',
+  UserItems: 'user_items',
 } as const;
 
 export type TableName = (typeof TableName)[keyof typeof TableName];
