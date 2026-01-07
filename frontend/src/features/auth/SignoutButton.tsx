@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { useToastStore } from "@/features/toast/use-toast-store";
-import ButtonAsyncModal from "../../components/UI/buttons/ButtonAsyncModal";
-import { useAuthStore } from "@/features/auth/use-auth-store";
+import { useState } from 'react';
+import { useToastStore } from '@/features/toast/use-toast-store';
+import ButtonAsyncModal from '../../components/UI/buttons/ButtonAsyncModal';
+import { useAuthStore } from '@/features/auth/use-auth-store';
 
 /**
  * SignoutButton component for signing out the user.
@@ -16,13 +16,10 @@ export default function SignoutButton() {
     setIsLoading(true);
     try {
       await handleLogout();
-      showToast("Úspěšně jste se odhlásili.", "success");
+      showToast('Úspěšně jste se odhlásili.', 'success');
     } catch (error) {
-      console.error("Error on user logout:", error);
-      showToast(
-        "Nastala chyba při odhlašování. Zkuste to prosím později.",
-        "error"
-      );
+      console.error('Error on user logout:', error);
+      showToast('Nastala chyba při odhlašování. Zkuste to prosím později.', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -36,7 +33,7 @@ export default function SignoutButton() {
       modalTitle="Potvrzení odhlášení"
       modalDescription="Opravdu se chcete odhlásit?"
       onConfirm={handleSignout}
-      className="grow-0 shape-button-rectangular color-button "
+      className="shape-button-rectangular color-button grow-0"
     />
   );
 }

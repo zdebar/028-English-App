@@ -1,7 +1,7 @@
-import { create } from "zustand";
-import type { Session } from "@supabase/supabase-js";
-import { supabaseInstance } from "@/config/supabase.config";
-import type { UUID } from "crypto";
+import { create } from 'zustand';
+import type { Session } from '@supabase/supabase-js';
+import { supabaseInstance } from '@/config/supabase.config';
+import type { UUID } from 'crypto';
 
 interface AuthState {
   userId: UUID | null;
@@ -19,7 +19,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   setSession: (session) => {
     set({
       userId: (session?.user?.id as UUID) || null,
-      userEmail: session?.user?.email || "Anonymní uživatel",
+      userEmail: session?.user?.email || 'Anonymní uživatel',
       loading: false,
     });
   },
@@ -27,7 +27,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   handleLogout: async () => {
     const { error } = await supabaseInstance.auth.signOut();
     if (error) {
-      console.error("Error logging out:", error.message);
+      console.error('Error logging out:', error.message);
     } else {
       set({ userId: null, userEmail: null });
     }

@@ -32,8 +32,8 @@ export function Modal({
     <>
       <OverlayMask onClose={onClose} />
       <div className="fixed inset-0 z-1001 flex items-center justify-center">
-        <div className="card-width z-1001 flex min-h-40 flex-col justify-between">
-          <div className="bg-background-light dark:bg-background-dark flex grow flex-col items-center gap-2 p-4 text-center">
+        <div className="card-width flex min-h-40 flex-col justify-between">
+          <div className="color-base flex grow flex-col items-center gap-2 p-4 text-center">
             <p className="font-bold">{title}</p>
             <p>{description}</p>
           </div>

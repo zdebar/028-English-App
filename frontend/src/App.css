@@ -94,6 +94,9 @@
 
 @layer utilities {
   /* COLORS */
+  .color-base {
+    @apply bg-background-light dark:bg-background-dark text-light dark:text-dark;
+  }
   .color-button {
     @apply cursor-pointer border;
     @apply bg-audio-light border-audio-light text-light; /* Theming Light */

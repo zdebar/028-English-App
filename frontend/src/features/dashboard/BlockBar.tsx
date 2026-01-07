@@ -1,4 +1,4 @@
-import config from "@/config/config";
+import config from '@/config/config';
 
 interface BlockBarProps {
   previousCount: number;
@@ -23,7 +23,7 @@ export default function BlockBar({
   todayCount = 0,
   lessonNumber = 1,
   divisions = 20,
-  className = "",
+  className = '',
 }: BlockBarProps) {
   const lessonSize = config.lesson.lessonSize || 100;
   const totalWidth = 100;
@@ -39,7 +39,7 @@ export default function BlockBar({
   return (
     <div className={`relative mx-auto w-full ${className}`}>
       {/* Popisky */}
-      <div className="absolute top-0 left-0 w-full flex  justify-between z-10 pt-1 px-2 font-body font-bold text-sm text-center text-light">
+      <div className="font-body text-light absolute top-0 left-0 z-10 flex w-full justify-between px-2 pt-1 text-center text-sm font-bold">
         <span>
           Blok: {lessonNumber} / {config.progress.maxBlockCount}
         </span>
@@ -48,7 +48,7 @@ export default function BlockBar({
 
       {/* Progress bar */}
       <div
-        className="relative h-attribute overflow-hidden bg-white"
+        className="h-attribute relative overflow-hidden bg-white"
         role="progressbar"
         aria-valuenow={validPreviousCount + validTodayCount}
         aria-valuemin={0}
@@ -57,7 +57,7 @@ export default function BlockBar({
       >
         {/* Celkový pokrok */}
         <div
-          className="absolute top-0 left-0 h-full bg-notice-dark dark:bg-[#F7D565]"
+          className="bg-notice-dark absolute top-0 left-0 h-full dark:bg-[#F7D565]"
           style={{ width: `${previousWidth + todayWidth}%` }}
         ></div>
         {/* Předchozí pokrok */}
@@ -71,7 +71,7 @@ export default function BlockBar({
           return (
             <div
               key={index}
-              className="absolute top-0 h-full border-l  border-gray-700"
+              className="absolute top-0 h-full border-l border-gray-700"
               style={{ left: `${position}%` }}
             ></div>
           );
