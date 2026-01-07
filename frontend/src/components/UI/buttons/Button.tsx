@@ -11,16 +11,9 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
  * @param props Other standard button attributes.
  * @returns A styled button element.
  */
-export default function Button({
-  className = "",
-  children,
-  ...props
-}: ButtonProps) {
+export default function Button({ className = '', children, ...props }: ButtonProps) {
   return (
-    <button
-      className={`shape-button-rectangular color-button ${className}`}
-      {...props}
-    >
+    <button className={`shape-button-rectangular color-button ${className}`} {...props}>
       {children}
     </button>
   );

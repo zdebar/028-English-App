@@ -1,4 +1,4 @@
-import CloseIcon from "@/components/UI/icons/CloseIcon";
+import CloseIcon from '@/components/UI/icons/CloseIcon';
 
 /**
  * Button component for closing dialogs or modals.
@@ -9,16 +9,13 @@ import CloseIcon from "@/components/UI/icons/CloseIcon";
  */
 export default function CloseButton({
   onClick,
-  className = "",
+  className = '',
 }: {
   onClick: () => void;
   className?: string;
 }) {
   return (
-    <button
-      className={`w-11 h-11 flex items-center justify-center ${className}`}
-      onClick={onClick}
-    >
+    <button className={`flex items-center justify-center ${className}`} onClick={onClick}>
       <CloseIcon />
     </button>
   );

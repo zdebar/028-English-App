@@ -1,9 +1,9 @@
-import Button from "@/components/UI/buttons/Button";
-import CloseIcon from "@/components/UI/icons/CloseIcon";
-import ButtonAsyncModal from "./buttons/ButtonAsyncModal";
-import Loading from "./Loading";
-import Hint from "@/components/UI/Hint";
-import { useOverlayStore } from "@/hooks/use-overlay-store";
+import Button from '@/components/UI/buttons/Button';
+import CloseIcon from '@/components/UI/icons/CloseIcon';
+import ButtonAsyncModal from './buttons/ButtonAsyncModal';
+import Loading from './Loading';
+import Hint from '@/components/UI/Hint';
+import { useOverlayStore } from '@/hooks/use-overlay-store';
 
 interface OverviewCardProps {
   titleText?: string;
@@ -28,10 +28,10 @@ interface OverviewCardProps {
  * @returns A styled overview card with actions and content.
  */
 export default function OverviewCard({
-  titleText = "bez názvu",
+  titleText = 'bez názvu',
   isLoading = false,
   error = null,
-  className = "",
+  className = '',
   handleReset,
   onClose,
   children,
@@ -39,9 +39,7 @@ export default function OverviewCard({
   const { isOpen } = useOverlayStore();
 
   return (
-    <div
-      className={`card-height card-width flex flex-col gap-1 justify-start ${className}`}
-    >
+    <div className={`card-height card-width flex flex-col justify-start gap-1 ${className}`}>
       <div className="h-button flex items-center justify-between gap-1">
         <ButtonAsyncModal
           message={titleText}
@@ -54,9 +52,9 @@ export default function OverviewCard({
             onClose();
           }}
           disabled={!handleReset}
-          className="flex justify-start items-center pl-4 grow shape-button-rectangular color-button "
+          className="shape-button-rectangular color-button flex grow items-center justify-start pl-4"
         />
-        <Hint visibility={isOpen} style={{ top: "0px", left: "14px" }}>
+        <Hint visibility={isOpen} style={{ top: '0px', left: '14px' }}>
           obnovit pokrok
         </Hint>
         <Button className="w-button grow-0" onClick={onClose}>

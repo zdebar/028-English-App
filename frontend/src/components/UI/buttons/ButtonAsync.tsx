@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
-interface ButtonAsyncProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonAsyncProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   message?: string;
   loadingMessage?: string;
   onClick: () => void;
@@ -26,12 +25,12 @@ interface ButtonAsyncProps
  */
 export default function ButtonAsync({
   message,
-  loadingMessage = "Načítání...",
+  loadingMessage = 'Načítání...',
   onClick,
   isLoading = false,
   disabled = false,
   minLoadingTime = 400,
-  className = "",
+  className = '',
   ...props
 }: ButtonAsyncProps) {
   const [minLoadingElapsed, setMinLoadingElapsed] = useState(true);
@@ -56,9 +55,7 @@ export default function ButtonAsync({
       className={className}
       {...props}
     >
-      <span className="text-button">
-        {isButtonLoading ? loadingMessage : message}
-      </span>
+      <span className="text-button">{isButtonLoading ? loadingMessage : message}</span>
     </button>
   );
 }

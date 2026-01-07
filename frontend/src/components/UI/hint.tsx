@@ -10,7 +10,7 @@
 export default function Hint({
   visibility,
   children,
-  className = "",
+  className = '',
   style,
 }: {
   visibility: boolean;
@@ -21,7 +21,7 @@ export default function Hint({
   return (
     visibility && (
       <div
-        className={`text-help absolute z-2000 pointer-events-none ${className}`}
+        className={`text-help pointer-events-none absolute z-2000 ${className}`}
         style={{
           ...style,
         }}

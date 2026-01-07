@@ -2,9 +2,10 @@
 
 @import 'tailwindcss';
 @custom-variant dark (&:where(.dark, .dark *));
-@import '@/styles/theme.css';
 
-/** A-13, B-10, C-8, D-11 */
+/** SIZES
+* 11 -- close button size
+*/
 
 @theme {
   /** font families **/
@@ -92,7 +93,7 @@
 }
 
 @layer utilities {
-  /* BACKGROUND COLORS */
+  /* COLORS */
   .color-button {
     @apply cursor-pointer border;
     @apply bg-audio-light border-audio-light text-light; /* Theming Light */

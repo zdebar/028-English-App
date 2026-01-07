@@ -1,5 +1,5 @@
-import Button from "./buttons/Button";
-import OverlayMask from "@/components/UI/OverlayMask";
+import Button from './buttons/Button';
+import OverlayMask from '@/components/UI/OverlayMask';
 
 /**
  * Modal component for confirmation dialogs.
@@ -32,8 +32,8 @@ export function Modal({
     <>
       <OverlayMask onClose={onClose} />
       <div className="fixed inset-0 z-1001 flex items-center justify-center">
-        <div className="card-width z-1001 flex flex-col justify-between min-h-40">
-          <div className="bg-background-light dark:bg-background-dark flex flex-col text-center items-center p-4 gap-2 grow">
+        <div className="card-width z-1001 flex min-h-40 flex-col justify-between">
+          <div className="bg-background-light dark:bg-background-dark flex grow flex-col items-center gap-2 p-4 text-center">
             <p className="font-bold">{title}</p>
             <p>{description}</p>
           </div>

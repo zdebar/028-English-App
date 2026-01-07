@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
-import { Link, useMatch, type LinkProps } from "react-router-dom";
+import type { ReactNode } from 'react';
+import { Link, useMatch, type LinkProps } from 'react-router-dom';
 
 interface HeaderButtonProps extends LinkProps {
   to: string;
@@ -22,7 +22,7 @@ export default function HeaderButton({
   to,
   children,
   disabled = false,
-  className = "",
+  className = '',
   ...props
 }: HeaderButtonProps) {
   const isSelected = useMatch(to);
@@ -39,7 +39,7 @@ export default function HeaderButton({
     <Link
       to={to}
       className={`shape-button-header color-button-header flex items-center justify-center ${
-        isSelected && "color-selected"
+        isSelected && 'color-selected'
       } ${className}`}
       {...props}
     >

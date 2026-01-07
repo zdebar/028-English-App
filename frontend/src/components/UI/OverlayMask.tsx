@@ -11,7 +11,5 @@ export default function OverlayMask({ onClose }: { onClose?: () => void }) {
     }
   };
 
-  return (
-    <div className="color-overlay shape-overlay" onClick={handleOverlayClick} />
-  );
+  return <div className="color-overlay shape-overlay" onClick={handleOverlayClick} />;
 }

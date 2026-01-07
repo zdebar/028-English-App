@@ -9,7 +9,7 @@
 export default function PropertyView({
   label,
   value,
-  className = "",
+  className = '',
 }: {
   label: string;
   value: string | number | null | undefined;
@@ -17,8 +17,8 @@ export default function PropertyView({
 }) {
   return (
     <dl className={`flex items-center ${className}`}>
-      <dt className="inline-block w-35 font-bold shrink-0">{label}</dt>
-      <dd>{value ?? "Není k dispozici"}</dd>
+      <dt className="inline-block w-35 shrink-0 font-bold">{label}</dt>
+      <dd>{value ?? 'Není k dispozici'}</dd>
     </dl>
   );
 }

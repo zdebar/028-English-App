@@ -1,6 +1,6 @@
-import { useState } from "react";
-import ButtonAsync from "./ButtonAsync";
-import { Modal } from "@/components/UI/Modal";
+import { useState } from 'react';
+import ButtonAsync from './ButtonAsync';
+import { Modal } from '@/components/UI/Modal';
 
 interface ButtonAsyncModalProps {
   message: string;
@@ -31,10 +31,10 @@ export default function ButtonAsyncModal({
   onConfirm,
   isLoading = false,
   disabled = false,
-  loadingMessage = "Načítání...",
-  modalTitle = "Potvrzení akce",
-  modalDescription = "Opravdu chcete pokračovat?",
-  className = "",
+  loadingMessage = 'Načítání...',
+  modalTitle = 'Potvrzení akce',
+  modalDescription = 'Opravdu chcete pokračovat?',
+  className = '',
 }: ButtonAsyncModalProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
