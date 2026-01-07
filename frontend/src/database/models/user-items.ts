@@ -1,21 +1,21 @@
-import Dexie, { Entity } from "dexie";
-import type AppDB from "@/database/models/app-db";
-import { db } from "@/database/models/db";
-import { TableName, type UserItemLocal } from "@/types/local.types";
-import type { UUID } from "crypto";
-import config from "@/config/config";
-import { supabaseInstance } from "@/config/supabase.config";
+import Dexie, { Entity } from 'dexie';
+import type AppDB from '@/database/models/app-db';
+import { db } from '@/database/models/db';
+import { TableName, type UserItemLocal } from '@/types/local.types';
+import type { UUID } from 'crypto';
+import config from '@/config/config';
+import { supabaseInstance } from '@/config/supabase.config';
 
-import { getNextAt, sortOddEvenByProgress } from "@/database/database.utils";
+import { getNextAt, sortOddEvenByProgress } from '@/database/database.utils';
 import {
   convertLocalToSQL,
   getTodayShortDate,
   getLocalDateFromUTC,
   triggerUserItemsUpdatedEvent,
   resetUserItem,
-} from "@/database/database.utils";
-import UserScore from "./user-scores";
-import Metadata from "./metadata";
+} from '@/database/database.utils';
+import UserScore from './user-scores';
+import Metadata from './metadata';
 
 export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   item_id!: number;
@@ -42,14 +42,14 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    */
   static async getPracticeDeck(
     userId: UUID,
-    deckSize: number = config.lesson.deckSize
+    deckSize: number = config.lesson.deckSize,
   ): Promise<UserItemLocal[]> {
     // Step 1: Fetch items with next_at older than now, sorted by next_at
     const itemsWithNextAt: UserItemLocal[] = await db.user_items
-      .where("[user_id+next_at+mastered_at+sequence]")
+      .where('[user_id+next_at+mastered_at+sequence]')
       .between(
-        [userId, "0000-01-01T00:00:00.000Z", Dexie.minKey, Dexie.minKey],
-        [userId, new Date().toISOString(), Dexie.maxKey, Dexie.maxKey]
+        [userId, '0000-01-01T00:00:00.000Z', Dexie.minKey, Dexie.minKey],
+        [userId, new Date().toISOString(), Dexie.maxKey, Dexie.maxKey],
       )
       .limit(deckSize)
       .toArray();
@@ -61,7 +61,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
     // Query 2: Fetch remaining items with next_at === nullReplacementDate, sorted by sequence
     const remainingItems: UserItemLocal[] = await db.user_items
-      .where("[user_id+next_at+mastered_at+sequence]")
+      .where('[user_id+next_at+mastered_at+sequence]')
       .between(
         [
           userId,
@@ -76,7 +76,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
           Dexie.maxKey,
         ],
         true,
-        false
+        false,
       )
       .limit(deckSize - itemsWithNextAt.length)
       .toArray();
@@ -97,15 +97,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns boolean indicating success.
    * @throws error if operation fails.
    */
-  static async savePracticeDeck(
-    userId: UUID,
-    items: UserItemLocal[]
-  ): Promise<boolean> {
+  static async savePracticeDeck(userId: UUID, items: UserItemLocal[]): Promise<boolean> {
     items.map((item) => {
       if (item.user_id !== userId) {
-        throw new Error(
-          `Item user_id ${item.user_id} does not match provided userId ${userId}.`
-        );
+        throw new Error(`Item user_id ${item.user_id} does not match provided userId ${userId}.`);
       }
     });
 
@@ -146,18 +141,13 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }> {
     const today = getTodayShortDate();
     const startedItems = await db.user_items
-      .where("[user_id+started_at]")
-      .between(
-        [userId, Dexie.minKey],
-        [userId, config.database.nullReplacementDate],
-        true,
-        false
-      )
+      .where('[user_id+started_at]')
+      .between([userId, Dexie.minKey], [userId, config.database.nullReplacementDate], true, false)
       .toArray();
 
     const startedCount = startedItems.length;
     const startedCountToday = startedItems.filter((item) =>
-      getLocalDateFromUTC(item.started_at).startsWith(today)
+      getLocalDateFromUTC(item.started_at).startsWith(today),
     ).length;
 
     return { startedCountToday, startedCount };
@@ -169,22 +159,16 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns array of UserItemLocal objects.
    * @throws error if operation fails.
    */
-  static async getUserStartedVocabulary(
-    userId: UUID
-  ): Promise<UserItemLocal[]> {
+  static async getUserStartedVocabulary(userId: UUID): Promise<UserItemLocal[]> {
     const result = await db.user_items
-      .where("[user_id+grammar_id+started_at]")
+      .where('[user_id+grammar_id+started_at]')
       .between(
         [userId, config.database.nullReplacementNumber, Dexie.minKey],
-        [
-          userId,
-          config.database.nullReplacementNumber,
-          config.database.nullReplacementDate,
-        ],
+        [userId, config.database.nullReplacementNumber, config.database.nullReplacementDate],
         true,
-        false
+        false,
       )
-      .sortBy("czech");
+      .sortBy('czech');
 
     return result;
   }
@@ -197,13 +181,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    */
   static async resetsAllUserItems(userId: UUID): Promise<number> {
     const count = await db.user_items
-      .where("[user_id+started_at]")
-      .between(
-        [userId, Dexie.minKey],
-        [userId, config.database.nullReplacementDate],
-        true,
-        false
-      )
+      .where('[user_id+started_at]')
+      .between([userId, Dexie.minKey], [userId, config.database.nullReplacementDate], true, false)
       .modify((item: UserItemLocal) => {
         resetUserItem(item);
       });
@@ -222,24 +201,15 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns void
    * @throws error if operation fails.
    */
-  static async resetGrammarItems(
-    userId: UUID,
-    grammarId: number
-  ): Promise<number> {
-    console.log(
-      `Resetting user items for userId: ${userId}, grammarId: ${grammarId}`
-    );
+  static async resetGrammarItems(userId: UUID, grammarId: number): Promise<number> {
+    console.log(`Resetting user items for userId: ${userId}, grammarId: ${grammarId}`);
     const count = await db.user_items
-      .where("[user_id+grammar_id+started_at]")
+      .where('[user_id+grammar_id+started_at]')
       .between(
         [userId, config.database.nullReplacementNumber, Dexie.minKey],
-        [
-          userId,
-          config.database.nullReplacementNumber,
-          config.database.nullReplacementDate,
-        ],
+        [userId, config.database.nullReplacementNumber, config.database.nullReplacementDate],
         true,
-        false
+        false,
       )
       .modify((item: UserItemLocal) => {
         resetUserItem(item);
@@ -260,15 +230,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns boolean indicating success.
    * @throws error if operation fails.
    */
-  static async resetUserItemById(
-    userId: UUID,
-    itemId: number
-  ): Promise<boolean> {
+  static async resetUserItemById(userId: UUID, itemId: number): Promise<boolean> {
     const count = await db.user_items
-      .where("[user_id+item_id]")
+      .where('[user_id+item_id]')
       .equals([userId, itemId])
       .modify((item: UserItemLocal) => {
-        console.log("Resetting item:", item);
+        console.log('Resetting item:', item);
         resetUserItem(item);
       });
 
@@ -288,10 +255,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    */
   static async deleteAllUserItems(userId: UUID): Promise<number> {
     // Get all item IDs for the user
-    const itemIds = await db.user_items
-      .where("user_id")
-      .equals(userId)
-      .primaryKeys();
+    const itemIds = await db.user_items.where('user_id').equals(userId).primaryKeys();
 
     if (itemIds.length > 0) {
       await db.user_items.bulkDelete(itemIds);
@@ -310,47 +274,40 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    */
   static async syncUserItemsData(userId: UUID): Promise<number> {
     // Step 1: Get the last synced date for the user_items table
-    const lastSyncedAt = await Metadata.getSyncedDate(
-      TableName.UserItems,
-      userId
-    );
+    const lastSyncedAt = await Metadata.getSyncedDate(TableName.UserItems, userId);
 
     // Step 2: Fetch synced server time
     const newSyncTime = new Date().toISOString();
 
     // Step 3: Fetch all local user items from IndexedDB newer than last synced date
     const localUserItems: UserItemLocal[] = await db.user_items
-      .where("[user_id+updated_at]")
+      .where('[user_id+updated_at]')
       .between([userId, lastSyncedAt], [userId, Dexie.maxKey])
       .toArray();
 
     const sqlUserItems = localUserItems.map(convertLocalToSQL);
 
     // Step 4: Call the RPC function to insert updated user items
-    const { error: rpcInsertError } = await supabaseInstance.rpc(
-      "insert_user_items",
-      {
-        user_id_input: userId,
-        items: sqlUserItems,
-      }
-    );
+    const { error: rpcInsertError } = await supabaseInstance.rpc('insert_user_items', {
+      user_id_input: userId,
+      items: sqlUserItems,
+    });
 
     if (rpcInsertError) {
-      throw new Error("Synchronization disallowed for annonymous users.");
+      throw new Error('Synchronization disallowed for annonymous users.');
     }
 
     // Step 5: Call the RPC function to fetch updated user item IDs
-    const { data: updatedUserItems, error: rpcFetchError } =
-      await supabaseInstance.rpc("fetch_user_items", {
+    const { data: updatedUserItems, error: rpcFetchError } = await supabaseInstance.rpc(
+      'fetch_user_items',
+      {
         user_id_input: userId,
         last_synced_at: lastSyncedAt,
-      });
+      },
+    );
 
     if (rpcFetchError) {
-      throw new Error(
-        "Error fetching user_items with Supabase:",
-        rpcFetchError
-      );
+      throw new Error('Error fetching user_items with Supabase:', rpcFetchError);
     }
 
     // Step 5: Separate items into those to delete and those to upsert

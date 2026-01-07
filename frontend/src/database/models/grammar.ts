@@ -1,13 +1,13 @@
-import { Entity } from "dexie";
-import type AppDB from "@/database/models/app-db";
-import type { GrammarLocal, UserItemLocal } from "@/types/local.types";
-import { supabaseInstance } from "@/config/supabase.config";
-import { db } from "@/database/models/db";
-import config from "@/config/config";
-import Dexie from "dexie";
-import type { UUID } from "crypto";
-import Metadata from "./metadata";
-import { TableName } from "@/types/local.types";
+import { Entity } from 'dexie';
+import type AppDB from '@/database/models/app-db';
+import type { GrammarLocal, UserItemLocal } from '@/types/local.types';
+import { supabaseInstance } from '@/config/supabase.config';
+import { db } from '@/database/models/db';
+import config from '@/config/config';
+import Dexie from 'dexie';
+import type { UUID } from 'crypto';
+import Metadata from './metadata';
+import { TableName } from '@/types/local.types';
 
 export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   id!: number;
@@ -40,23 +40,13 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    */
   static async getStartedGrammarList(userId: UUID): Promise<GrammarLocal[]> {
     const startedUserItems: UserItemLocal[] = await db.user_items
-      .where("[user_id+started_at]")
-      .between(
-        [userId, Dexie.minKey],
-        [userId, config.database.nullReplacementDate],
-        true,
-        false
-      )
+      .where('[user_id+started_at]')
+      .between([userId, Dexie.minKey], [userId, config.database.nullReplacementDate], true, false)
       .toArray();
 
-    const grammarIds = [
-      ...new Set(startedUserItems.map((item) => item.grammar_id)),
-    ];
+    const grammarIds = [...new Set(startedUserItems.map((item) => item.grammar_id))];
 
-    const startedgrammar: GrammarLocal[] = await db.grammar
-      .where("id")
-      .anyOf(grammarIds)
-      .toArray();
+    const startedgrammar: GrammarLocal[] = await db.grammar.where('id').anyOf(grammarIds).toArray();
 
     return startedgrammar;
   }
@@ -76,9 +66,9 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
 
     // Step 3: Fetch grammar records from Supabase newer than the last synced date
     const { data: grammar, error } = await supabaseInstance
-      .from("grammar")
-      .select("id, name, note, updated_at, deleted_at")
-      .gt("updated_at", lastSyncedAt);
+      .from('grammar')
+      .select('id, name, note, updated_at, deleted_at')
+      .gt('updated_at', lastSyncedAt);
 
     if (error) {
       throw new Error(`Failed to fetch data from supabase: ${error.message}`);

@@ -1,8 +1,8 @@
-import type { UserItemLocal } from "@/types/local.types";
-import type { UserItemSQL } from "@/types/data.types";
-import { supabaseInstance } from "@/config/supabase.config";
-import config from "@/config/config";
-import type { TableName } from "@/types/local.types";
+import type { UserItemLocal } from '@/types/local.types';
+import type { UserItemSQL } from '@/types/data.types';
+import { supabaseInstance } from '@/config/supabase.config';
+import config from '@/config/config';
+import type { TableName } from '@/types/local.types';
 
 /**
  * Converts a local user item to SQL format, replacing null replacement dates with null.
@@ -10,15 +10,7 @@ import type { TableName } from "@/types/local.types";
  * @returns Item in format suitable or PostgreSQL.
  */
 export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
-  const {
-    user_id,
-    item_id,
-    progress,
-    started_at,
-    updated_at,
-    next_at,
-    mastered_at,
-  } = localItem;
+  const { user_id, item_id, progress, started_at, updated_at, next_at, mastered_at } = localItem;
 
   const nullReplacementDate = config.database.nullReplacementDate;
 
@@ -51,10 +43,7 @@ export function generateUserScoreId(userId: string, date: string): string {
  * @returns The composite ID from userId and date.
  * @throws Error if inputs are invalid.
  */
-export function generateMetadataId(
-  table_name: TableName,
-  userId: string
-): string {
+export function generateMetadataId(table_name: TableName, userId: string): string {
   return `${table_name}-${userId}`;
 }
 
@@ -64,7 +53,7 @@ export function generateMetadataId(
  */
 export function getTodayShortDate(): string {
   const today = new Date();
-  return today.toLocaleDateString("en-CA");
+  return today.toLocaleDateString('en-CA');
 }
 
 /**
@@ -74,7 +63,7 @@ export function getTodayShortDate(): string {
  */
 export function getLocalDateFromUTC(date: string): string {
   const localDate = new Date(date);
-  return localDate.toLocaleDateString("en-CA");
+  return localDate.toLocaleDateString('en-CA');
 }
 
 /**
@@ -84,19 +73,14 @@ export function getLocalDateFromUTC(date: string): string {
  * @returns blob data or null
  * @throws error if fetching fails, if inputs are invalid
  */
-export async function fetchStorage(
-  bucketName: string,
-  dataFile: string
-): Promise<Blob | null> {
+export async function fetchStorage(bucketName: string, dataFile: string): Promise<Blob | null> {
   const cacheBuster = `?t=${Date.now()}`;
-  const filePath = dataFile.replace(/^\//, "") + cacheBuster;
+  const filePath = dataFile.replace(/^\//, '') + cacheBuster;
 
-  const { data, error } = await supabaseInstance.storage
-    .from(bucketName)
-    .download(filePath);
+  const { data, error } = await supabaseInstance.storage.from(bucketName).download(filePath);
 
   if (error) {
-    console.error("Error fetching data:", error.message);
+    console.error('Error fetching data:', error.message);
     return null;
   }
 
@@ -122,7 +106,7 @@ export function triggerNamedEvent(eventName: string, userId: string) {
  * @returns
  */
 export function triggerUserItemsUpdatedEvent(userId: string) {
-  triggerNamedEvent("userItemsUpdated", userId);
+  triggerNamedEvent('userItemsUpdated', userId);
 }
 
 /**

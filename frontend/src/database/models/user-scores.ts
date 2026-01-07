@@ -1,13 +1,13 @@
-import { Entity } from "dexie";
-import type AppDB from "@/database/models/app-db";
-import { TableName, type UserScoreLocal } from "@/types/local.types";
-import { supabaseInstance } from "@/config/supabase.config";
-import { db } from "@/database/models/db";
-import { generateUserScoreId } from "@/database/database.utils";
-import { getTodayShortDate } from "@/database/database.utils";
-import type { UUID } from "crypto";
-import Metadata from "./metadata";
-import Dexie from "dexie";
+import { Entity } from 'dexie';
+import type AppDB from '@/database/models/app-db';
+import { TableName, type UserScoreLocal } from '@/types/local.types';
+import { supabaseInstance } from '@/config/supabase.config';
+import { db } from '@/database/models/db';
+import { generateUserScoreId } from '@/database/database.utils';
+import { getTodayShortDate } from '@/database/database.utils';
+import type { UUID } from 'crypto';
+import Metadata from './metadata';
+import Dexie from 'dexie';
 
 export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   id!: string;
@@ -47,7 +47,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
       await db.user_scores.put(newRecord);
       return true;
     } catch (error) {
-      console.error("Error adding item count to user score:", error);
+      console.error('Error adding item count to user score:', error);
       return false;
     }
   }
@@ -81,41 +81,37 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    */
   static async syncUserScoreData(userId: UUID): Promise<number> {
     // Step 1: Get the last synced date for the user_scores table
-    const lastSyncedAt = await Metadata.getSyncedDate(
-      TableName.UserScores,
-      userId
-    );
+    const lastSyncedAt = await Metadata.getSyncedDate(TableName.UserScores, userId);
 
     // Step 2: Get the current server time from Supabase
     const newSyncTime = new Date().toISOString();
 
     // Step 3: Gather local changes since the last sync
     const localScores = await db.user_scores
-      .where("[user_id+updated_at]")
+      .where('[user_id+updated_at]')
       .between([userId, lastSyncedAt], [userId, Dexie.maxKey], true, true)
       .toArray();
 
     // Step 3: Send local scores to Supabase for updates
-    const { error: errorInsert } = await supabaseInstance.rpc(
-      "upsert_user_scores",
-      {
-        scores: localScores,
-      }
-    );
+    const { error: errorInsert } = await supabaseInstance.rpc('upsert_user_scores', {
+      scores: localScores,
+    });
 
     if (errorInsert) {
-      throw new Error("Synchronization disallowed for annonymous users.");
+      throw new Error('Synchronization disallowed for annonymous users.');
     }
 
     // Step 4: Fetch updated records from supabase
-    const { data: updatedScores, error: errorFetch } =
-      await supabaseInstance.rpc("fetch_user_scores", {
+    const { data: updatedScores, error: errorFetch } = await supabaseInstance.rpc(
+      'fetch_user_scores',
+      {
         user_id_input: userId,
         last_synced_at: lastSyncedAt,
-      });
+      },
+    );
 
     if (errorFetch) {
-      throw new Error("Error fetching user scores from Supabase:", errorFetch);
+      throw new Error('Error fetching user scores from Supabase:', errorFetch);
     }
 
     // Step 5: Rewrite local database with updated scores

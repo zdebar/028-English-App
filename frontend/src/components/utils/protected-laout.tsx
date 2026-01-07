@@ -1,6 +1,6 @@
-import { useAuthStore } from "@/features/auth/use-auth-store";
-import { Navigate, Outlet } from "react-router-dom";
-import Loading from "@/components/UI/Loading";
+import { useAuthStore } from '@/features/auth/use-auth-store';
+import { Navigate, Outlet } from 'react-router-dom';
+import Loading from '@/components/UI/Loading';
 
 export default function ProtectedLayout() {
   const { userId, loading } = useAuthStore();

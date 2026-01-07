@@ -1,15 +1,12 @@
-import { Entity } from "dexie";
-import type AppDB from "@/database/models/app-db";
-import type { AudioRecordLocal } from "@/types/local.types";
-import AudioMetadata from "@/database/models/audio-metadata";
-import { db } from "@/database/models/db";
-import config from "@/config/config";
-import { fetchStorage } from "@/database/database.utils";
+import { Entity } from 'dexie';
+import type AppDB from '@/database/models/app-db';
+import type { AudioRecordLocal } from '@/types/local.types';
+import AudioMetadata from '@/database/models/audio-metadata';
+import { db } from '@/database/models/db';
+import config from '@/config/config';
+import { fetchStorage } from '@/database/database.utils';
 
-export default class AudioRecord
-  extends Entity<AppDB>
-  implements AudioRecordLocal
-{
+export default class AudioRecord extends Entity<AppDB> implements AudioRecordLocal {
   filename!: string;
   audioBlob!: Blob;
 
@@ -22,8 +19,7 @@ export default class AudioRecord
   static async bulkGet(keys: string[]): Promise<AudioRecordLocal[]> {
     if (keys.length === 0) return [];
 
-    const results: (AudioRecordLocal | undefined)[] =
-      await db.audio_records.bulkGet(keys);
+    const results: (AudioRecordLocal | undefined)[] = await db.audio_records.bulkGet(keys);
 
     return results.filter((record) => record !== undefined);
   }
@@ -36,13 +32,13 @@ export default class AudioRecord
    */
   static async extractZip(zipBlob: Blob): Promise<Map<string, Blob>> {
     const extractedFiles = new Map<string, Blob>();
-    const JSZip = await import("jszip");
+    const JSZip = await import('jszip');
     const zip = await JSZip.loadAsync(zipBlob);
 
     for (const filename of Object.keys(zip.files)) {
       const file = zip.files[filename];
       if (!file.dir) {
-        const fileBlob = await file.async("blob");
+        const fileBlob = await file.async('blob');
         extractedFiles.set(filename, fileBlob);
       }
     }
@@ -65,10 +61,7 @@ export default class AudioRecord
           }
 
           // Fetch the archive from storage
-          const zipBlob: Blob | null = await fetchStorage(
-            config.audio.bucketName,
-            archiveName
-          );
+          const zipBlob: Blob | null = await fetchStorage(config.audio.bucketName, archiveName);
           if (!zipBlob) {
             console.error(`Failed to fetch archive: ${archiveName}`);
             return;
@@ -88,7 +81,7 @@ export default class AudioRecord
         } catch (error) {
           console.error(`Error syncing archive ${archiveName}:`, error);
         }
-      })
+      }),
     );
   }
 }

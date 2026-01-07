@@ -1,7 +1,7 @@
 const config = {
   database: {
-    dbName: "EnglishAppDatabase",
-    nullReplacementDate: "9999-12-31T23:59:59+00:00", // IndexedDB does not support null values in indexes
+    dbName: 'EnglishAppDatabase',
+    nullReplacementDate: '9999-12-31T23:59:59+00:00', // IndexedDB does not support null values in indexes
     nullReplacementNumber: 0,
   },
 
@@ -32,8 +32,8 @@ const config = {
   },
 
   audio: {
-    bucketName: "audio-archive",
-    archives: ["audio_part_1.zip", "audio_part_2.zip"],
+    bucketName: 'audio-archive',
+    archives: ['audio_part_1.zip', 'audio_part_2.zip'],
   },
 
   lesson: {
