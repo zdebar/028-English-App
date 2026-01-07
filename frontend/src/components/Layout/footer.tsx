@@ -5,7 +5,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="w-full text-sm py-4 text-center flex gap-2 justify-center items-center">
+    <footer className="flex w-full items-center justify-center gap-2 py-4 text-center text-sm">
       <p>&copy; {currentYear}</p>
       <a href="/privacy-policy" className="hover:underline">
         Zásady ochrany osobních údajů

@@ -1,9 +1,9 @@
-import HomeIcon from "../UI/icons/HomeIcon";
-import AcademicCapIcon from "../UI/icons/AcademicCapIcon";
-import HeaderButton from "@/components/UI/buttons/HeaderButton";
-import UserAvatar from "@/components/UI/UserAvatar";
-import ThemeSwitch from "@/features/theme/ThemeSwitch";
-import { useAuthStore } from "@/features/auth/use-auth-store";
+import HomeIcon from '../UI/icons/HomeIcon';
+import AcademicCapIcon from '../UI/icons/AcademicCapIcon';
+import HeaderButton from '@/components/UI/buttons/HeaderButton';
+import UserAvatar from '@/components/UI/UserAvatar';
+import ThemeSwitch from '@/features/theme/ThemeSwitch';
+import { useAuthStore } from '@/features/auth/use-auth-store';
 
 /**
  * Header component displaying main navigation and user controls.
@@ -13,33 +13,17 @@ export default function Header() {
 
   return (
     <header className="header-fixed relative z-20 flex w-full flex-none justify-between">
-      <nav
-        className="sideheader "
-        role="navigation"
-        aria-label="Hlavní navigace"
-      >
+      <nav className="sideheader" role="navigation" aria-label="Hlavní navigace">
         <HeaderButton to="/" aria-label="Domů">
           <HomeIcon />
         </HeaderButton>
-        <HeaderButton
-          to="/practice"
-          aria-label="Uživatelský dashboard"
-          disabled={!userId}
-        >
+        <HeaderButton to="/practice" aria-label="Uživatelský dashboard" disabled={!userId}>
           <AcademicCapIcon />
         </HeaderButton>
       </nav>
-      <nav
-        className="sideheader rightheader "
-        role="navigation"
-        aria-label="Uživatelská navigace"
-      >
+      <nav className="sideheader rightheader" role="navigation" aria-label="Uživatelská navigace">
         <ThemeSwitch />
-        <HeaderButton
-          to="/profile"
-          aria-label="Nastavení uživatele"
-          disabled={!userId}
-        >
+        <HeaderButton to="/profile" aria-label="Nastavení uživatele" disabled={!userId}>
           <UserAvatar />
         </HeaderButton>
       </nav>

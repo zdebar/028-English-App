@@ -1,14 +1,15 @@
-@import url("https://fonts.googleapis.com/css2?family=Mansalva:wght@400;700&family=Roboto:wght@300;400;700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Mansalva:wght@400;700&family=Roboto:wght@300;400;700&display=swap');
 
-@import "tailwindcss";
+@import 'tailwindcss';
 @custom-variant dark (&:where(.dark, .dark *));
+@import '@/styles/theme.css';
 
 /** A-13, B-10, C-8, D-11 */
 
 @theme {
   /** font families **/
-  --font-body: "Roboto", serif;
-  --font-headings: "Mansalva", sans-serif;
+  --font-body: 'Roboto', serif;
+  --font-headings: 'Mansalva', sans-serif;
 
   /** colors **/
   --color-dark: white;
@@ -59,19 +60,19 @@
   }
 
   h1 {
-    @apply font-headings text-4xl pb-2 font-thin;
+    @apply font-headings pb-2 text-4xl font-thin;
   }
 
   h2 {
-    @apply font-headings text-xl pb-2 font-thin;
+    @apply font-headings pb-2 text-xl font-thin;
   }
 
   h3 {
-    @apply font-headings text-xl pb-1 font-thin;
+    @apply font-headings pb-1 text-xl font-thin;
   }
 
   ul {
-    @apply list-disc text-sm pl-6;
+    @apply list-disc pl-6 text-sm;
   }
 
   li {
@@ -95,31 +96,31 @@
   .color-button {
     @apply cursor-pointer border;
     @apply bg-audio-light border-audio-light text-light; /* Theming Light */
-    @apply dark:bg-audio-dark dark:border-audio-dark  dark:text-dark; /* Theming Dark */
+    @apply dark:bg-audio-dark dark:border-audio-dark dark:text-dark; /* Theming Dark */
     @apply hover:border-light dark:hover:border-dark; /* Button Hover Borders  */
-    @apply disabled:border-none disabled:hover:bg-inherit disabled:cursor-default disabled:bg-inherit; /* Disabled States */
+    @apply disabled:cursor-default disabled:border-none disabled:bg-inherit disabled:hover:bg-inherit; /* Disabled States */
   }
 
   .color-button-header {
-    @apply hover:bg-white hover:text-light; /* Button Interactions */
+    @apply hover:text-light hover:bg-white; /* Button Interactions */
   }
 
   .color-button-header-disabled {
-    @apply cursor-default hover:bg-inherit text-gray-100 dark:text-gray-500; /** Disabled States **/
+    @apply cursor-default text-gray-100 hover:bg-inherit dark:text-gray-500; /** Disabled States **/
   }
 
   .color-audio {
-    @apply border cursor-pointer;
-    @apply bg-audio-light  border-audio-light hover:border-light;
-    @apply dark:bg-audio-dark  dark:border-audio-dark dark:hover:border-dark;
+    @apply cursor-pointer border;
+    @apply bg-audio-light border-audio-light hover:border-light;
+    @apply dark:bg-audio-dark dark:border-audio-dark dark:hover:border-dark;
   }
   .color-audio-disabled {
-    @apply border cursor-default;
-    @apply bg-inherit border-background-light dark:border-background-dark text-inherit;
+    @apply cursor-default border;
+    @apply border-background-light dark:border-background-dark bg-inherit text-inherit;
   }
 
   .color-selected {
-    @apply bg-white text-light;
+    @apply text-light bg-white;
   }
 
   .color-overlay {
@@ -140,7 +141,7 @@
   }
 
   .text-bar {
-    @apply font-body font-bold text-sm text-center text-light;
+    @apply font-body text-light text-center text-sm font-bold;
   }
 
   .text-button {
@@ -148,7 +149,7 @@
   }
 
   .text-link {
-    @apply underline hover:no-underline cursor-pointer font-headings text-blue-600 dark:text-blue-400;
+    @apply font-headings cursor-pointer text-blue-600 underline hover:no-underline dark:text-blue-400;
   }
 }
 
@@ -166,16 +167,16 @@
   }
 
   .shape-overlay {
-    @apply fixed inset-0 z-1000 flex justify-center items-center pointer-events-auto top-0;
+    @apply pointer-events-auto fixed inset-0 top-0 z-1000 flex items-center justify-center;
   }
 
   /** CARD STYLES **/
   .card-width {
-    @apply w-full max-w-card min-w-card flex grow flex-col gap-1 justify-start;
+    @apply max-w-card min-w-card flex w-full grow flex-col justify-start gap-1;
   }
 
   .card-height {
-    @apply h-full max-h-card min-h-card flex grow flex-col gap-1 justify-start;
+    @apply max-h-card min-h-card flex h-full grow flex-col justify-start gap-1;
   }
 
   /** HEADER STYLES **/
