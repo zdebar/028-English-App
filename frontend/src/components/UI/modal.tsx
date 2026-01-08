@@ -11,6 +11,12 @@ type ModalProps = {
 
 /**
  * Modal component for confirmation dialogs.
+ *
+ * @param showModal Whether the modal is visible.
+ * @param onConfirm Function to call when confirming the action.
+ * @param onClose Function to call when closing the modal.
+ * @param title Title of the modal dialog.
+ * @param description Description text in the modal dialog.
  */
 export function Modal({ showModal, onConfirm, onClose, title, description }: ModalProps) {
   if (!showModal) {

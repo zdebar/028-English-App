@@ -4,6 +4,8 @@ type OverlayMaskProps = {
 
 /**
  * Overlay mask component covering the entire screen.
+ *
+ * @param onClose Function to call when the overlay is clicked.
  */
 export default function OverlayMask({ onClose }: OverlayMaskProps) {
   const handleOverlayClick = () => {

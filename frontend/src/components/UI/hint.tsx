@@ -7,6 +7,11 @@ type HintProps = {
 
 /**
  * Hint component for displaying contextual hints.
+ *
+ * @param visibility Whether the hint is visible.
+ * @param children Content to be displayed inside the hint.
+ * @param className Additional CSS classes for custom styling.
+ * @param style Inline styles for the hint container.
  */
 export default function Hint({ visibility, children, className = '', style }: HintProps) {
   return (

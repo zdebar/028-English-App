@@ -7,6 +7,9 @@ type LoadingProps = {
 
 /**
  * Displays a loading message after a specified delay.
+ *
+ * @param text Loading message to display.
+ * @param timeDelay Delay before showing the loading message (ms).
  */
 export default function Loading({ text = 'Načítání...', timeDelay = 1000 }: LoadingProps) {
   const [show, setShow] = useState(false);
