@@ -9,7 +9,6 @@ import UserScore from '@/database/models/user-scores';
 
 /**
  * DeleteUserButton component for deleting the current user's account.
- * @returns A button that opens a confirmation modal and manages the deletion process with loading feedback.
  */
 export default function DeleteUserButton() {
   const [isLoading, setIsLoading] = useState(false);

@@ -6,7 +6,6 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 
 /**
  * ResetAllProgressButton component for resetting all user progress.
- * @returns A button that opens a confirmation modal and resets user progress with loading feedback.
  */
 export default function ResetAllProgressButton() {
   const [isLoading, setIsLoading] = useState(false);

@@ -3,6 +3,9 @@ import type AppDB from '@/database/models/app-db';
 import type { AudioMetadataLocal } from '@/types/local.types';
 import { db } from '@/database/models/db';
 
+/**
+ * Model for audio archive metadata.
+ */
 export default class AudioMetadata extends Entity<AppDB> implements AudioMetadataLocal {
   archive_name!: string;
   fetched_at!: string;

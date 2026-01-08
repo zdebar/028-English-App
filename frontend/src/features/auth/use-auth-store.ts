@@ -11,6 +11,9 @@ interface AuthState {
   handleLogout: () => Promise<void>;
 }
 
+/**
+ * Zustand store for managing authentication state.
+ */
 export const useAuthStore = create<AuthState>((set) => ({
   userId: null,
   userEmail: null,

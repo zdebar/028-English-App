@@ -5,11 +5,10 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 
 /**
  * SignoutButton component for signing out the user.
- * @returns A button that opens a confirmation modal and handles user signout with loading feedback.
  */
 export default function SignoutButton() {
-  const { handleLogout } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
+  const { handleLogout } = useAuthStore();
   const { showToast } = useToastStore();
 
   const handleSignout = async () => {
