@@ -13,6 +13,13 @@ interface AuthState {
 
 /**
  * Zustand store for managing authentication state.
+ *
+ * Provides:
+ * - `userId`: UUID of the authenticated user, or null if not logged in.
+ * - `userEmail`: Email of the authenticated user, or null if not logged in.
+ * - `loading`: Indicates if authentication state is being determined.
+ * - `setSession(session)`: Updates the store with session data from Supabase.
+ * - `handleLogout()`: Signs out the user and resets authentication state.
  */
 export const useAuthStore = create<AuthState>((set) => ({
   userId: null,
@@ -22,7 +29,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   setSession: (session) => {
     set({
       userId: (session?.user?.id as UUID) || null,
-      userEmail: session?.user?.email || 'Anonymní uživatel',
+      userEmail: session?.user?.email || null,
       loading: false,
     });
   },
