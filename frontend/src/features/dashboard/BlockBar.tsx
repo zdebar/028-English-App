@@ -11,11 +11,11 @@ interface BlockBarProps {
 /**
  * BlockBar component displays a progress bar for a lesson block, showing previous and today's progress.
  *
- * @param previousCount Number of items completed in previous sessions.
- * @param todayCount Number of items completed today.
- * @param lessonNumber The current lesson block number.
- * @param divisions Number of divisions (grid lines) in the progress bar (default: 20).
- * @param className Additional CSS classes for custom styling.
+ * @param previousCount {number} Number of items completed in previous sessions.
+ * @param todayCount {number} Number of items completed today.
+ * @param lessonNumber {number} The current lesson block number.
+ * @param divisions {number} Number of divisions (grid lines) in the progress bar (default: 20).
+ * @param className {string} Additional CSS classes for custom styling.
  * @returns A styled progress bar with labels and visual representation of progress.
  */
 export default function BlockBar({

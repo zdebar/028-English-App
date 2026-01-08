@@ -10,6 +10,12 @@ interface HeaderButtonProps extends LinkProps {
 
 /**
  * Header button component for navigation in the app header.
+ *
+ * @param to Destination path for navigation.
+ * @param children Content to be displayed inside the button.
+ * @param disabled Whether the button is disabled.
+ * @param className Additional CSS classes for custom styling.
+ * @param props Standard link attributes.
  */
 export default function HeaderButton({
   to,

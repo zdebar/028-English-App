@@ -15,6 +15,15 @@ interface ButtonAsyncModalProps {
 
 /**
  * Button component that displays a confirmation modal before executing an action.
+ *
+ * @param message Text to display on the button.
+ * @param onConfirm Function to call when action is confirmed.
+ * @param isLoading Whether the button is in loading state.
+ * @param disabled Whether the button is disabled.
+ * @param loadingMessage Text to display while loading.
+ * @param modalTitle Title of the confirmation modal.
+ * @param modalDescription Description in the confirmation modal.
+ * @param className Additional CSS classes for custom styling.
  */
 export default function ButtonAsyncModal({
   message,

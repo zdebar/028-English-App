@@ -12,6 +12,15 @@ interface ButtonAsyncProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
 
 /**
  * Asynchronous button component that displays a loading message for at least a minimum duration.
+ *
+ * @param message Text to display when not loading.
+ * @param loadingMessage Text to display while loading.
+ * @param onClick Function to call when button is clicked.
+ * @param isLoading Whether the button is in loading state.
+ * @param disabled Whether the button is disabled.
+ * @param minLoadingTime Minimum time to show loading message (ms).
+ * @param className Additional CSS classes for custom styling.
+ * @param props Standard button attributes.
  */
 export default function ButtonAsync({
   message,
