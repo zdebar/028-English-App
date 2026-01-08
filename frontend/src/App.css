@@ -183,7 +183,7 @@
   }
 
   .shape-overlay {
-    @apply pointer-events-auto fixed inset-0 top-0 z-1000 flex items-center justify-center;
+    @apply pointer-events-auto fixed inset-0 top-0 flex items-center justify-center;
   }
 
   /** CARD STYLES **/
