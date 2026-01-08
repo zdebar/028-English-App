@@ -1,15 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
-/**
- * Loading component that displays a loading message after a specified delay.
- */
-export default function Loading({
-  text = "Načítání...",
-  timeDelay = 1000,
-}: {
+type LoadingProps = {
   text?: string;
   timeDelay?: number;
-}) {
+};
+
+/**
+ * Displays a loading message after a specified delay.
+ */
+export default function Loading({ text = 'Načítání...', timeDelay = 1000 }: LoadingProps) {
   const [show, setShow] = useState(false);
 
   useEffect(() => {

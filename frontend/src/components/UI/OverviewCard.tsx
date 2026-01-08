@@ -17,15 +17,6 @@ interface OverviewCardProps {
 
 /**
  * OverviewCard component for displaying a card with a title, actions, and content.
- *
- * @param titleText The card's title text.
- * @param isLoading Controls the loading state of the card.
- * @param error Displays an error message if present.
- * @param className Additional CSS classes for custom styling.
- * @param handleReset Function called to reset progress (optional).
- * @param onClose Function called to close the card.
- * @param children Content to be displayed inside the card.
- * @returns A styled overview card with actions and content.
  */
 export default function OverviewCard({
   titleText = 'bez názvu',

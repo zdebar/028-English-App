@@ -9,6 +9,9 @@ interface ErrorBoundaryState {
   error: Error | null;
 }
 
+/**
+ * React error boundary component for catching and displaying errors in child components.
+ */
 export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);

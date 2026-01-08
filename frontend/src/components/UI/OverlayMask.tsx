@@ -1,10 +1,11 @@
+type OverlayMaskProps = {
+  onClose?: () => void;
+};
+
 /**
  * Overlay mask component covering the entire screen.
- *
- * @param onClose Optional function called when the overlay is clicked.
- * @returns A full-screen overlay mask element.
  */
-export default function OverlayMask({ onClose }: { onClose?: () => void }) {
+export default function OverlayMask({ onClose }: OverlayMaskProps) {
   const handleOverlayClick = () => {
     if (onClose) {
       onClose();

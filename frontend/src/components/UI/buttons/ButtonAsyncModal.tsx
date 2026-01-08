@@ -15,16 +15,6 @@ interface ButtonAsyncModalProps {
 
 /**
  * Button component that displays a confirmation modal before executing an action.
- *
- * @param message The button label.
- * @param onConfirm Function called when the action is confirmed in the modal.
- * @param isLoading Controls the loading state of the button.
- * @param disabled Disables the button if true.
- * @param loadingMessage The label shown while loading (default: "Načítání...").
- * @param modalTitle The title of the confirmation modal (default: "Potvrzení akce").
- * @param modalDescription The description/message in the modal (default: "Opravdu chcete pokračovat?").
- * @param className Additional CSS classes for custom styling.
- * @returns A button with confirmation modal and loading feedback.
  */
 export default function ButtonAsyncModal({
   message,

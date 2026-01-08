@@ -1,29 +1,18 @@
 import Button from './buttons/Button';
 import OverlayMask from '@/components/UI/OverlayMask';
 
-/**
- * Modal component for confirmation dialogs.
- *
- * @param showModal Determines if the modal is visible.
- * @param onConfirm Function called when the "Yes" button is clicked.
- * @param onClose Function called when the "No" button is clicked or when clicking outside the modal.
- * @param title The modal's title.
- * @param description The message or description displayed in the modal.
- * @returns JSX element for the modal, or null if not open.
- */
-export function Modal({
-  showModal,
-  onConfirm,
-  onClose,
-  title,
-  description,
-}: {
+type ModalProps = {
   showModal: boolean;
   onConfirm: () => void;
   onClose: () => void;
   title: string;
   description: string;
-}) {
+};
+
+/**
+ * Modal component for confirmation dialogs.
+ */
+export function Modal({ showModal, onConfirm, onClose, title, description }: ModalProps) {
   if (!showModal) {
     return null;
   }
