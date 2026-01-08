@@ -17,6 +17,21 @@ interface VocabularyListProps {
   onClose: () => void;
 }
 
+/**
+ * VocabularyList component
+ *
+ * @param filteredWords - Array of vocabulary items to display.
+ * @param visibleCount - Number of items currently visible.
+ * @param displayField - Field to display ('czech' or 'english').
+ * @param searchTerm - Current search input value.
+ * @param setSearchTerm - Function to update the search term.
+ * @param setDisplayField - Function to change the displayed field.
+ * @param setVisibleCount - Function to update the number of visible items.
+ * @param onSelect - Callback when a word is selected.
+ * @param error - Error message to display.
+ * @param onClose - Callback to close the list view.
+ * @returns The vocabulary list UI.
+ */
 export default function VocabularyList({
   filteredWords,
   visibleCount,

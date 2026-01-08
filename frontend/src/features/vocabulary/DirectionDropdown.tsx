@@ -8,9 +8,16 @@ interface DirectionDropdownProps<T> {
 }
 
 /**
- * Direction Dropdown Component.
- * A reusable dropdown component for selecting a direction or option.
-
+ * DirectionDropdown Component
+ *
+ * A generic, reusable dropdown component for selecting a direction or option.
+ *
+ * @template T - The type of the option values.
+ * @param value - The currently selected value.
+ * @param options - Array of selectable options, each with a value and label.
+ * @param onChange - Callback invoked when the selected value changes.
+ * @param className - Optional additional CSS classes for custom styling.
+ * @returns A styled dropdown select element for choosing among provided options.
  */
 export default function DirectionDropdown<T>({
   value,

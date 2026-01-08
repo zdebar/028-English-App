@@ -9,6 +9,16 @@ type ListItem = {
   name: string;
 };
 
+type ListOverviewProps = {
+  listTitle?: string;
+  emptyTitle?: string;
+  array: ListItem[] | null;
+  loading: boolean;
+  error: string | null;
+  onSelect: (index: number) => void;
+  onClose: () => void;
+};
+
 /**
  * ListOverview component displays a list of grammar items.
  *
@@ -28,15 +38,7 @@ export default function ListOverview({
   error,
   onSelect,
   onClose,
-}: {
-  listTitle?: string;
-  emptyTitle?: string;
-  array: ListItem[] | null;
-  loading: boolean;
-  error: string | null;
-  onSelect: (index: number) => void;
-  onClose: () => void;
-}) {
+}: ListOverviewProps) {
   return (
     <div className="card-width flex flex-col justify-start gap-1">
       <div className="h-button flex items-center justify-between gap-1">

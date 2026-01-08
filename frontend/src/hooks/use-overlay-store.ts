@@ -6,6 +6,9 @@ interface OverlayState {
   close: () => void;
 }
 
+/**
+ * Zustand store for managing overlay open/close state.
+ */
 export const useOverlayStore = create<OverlayState>((set) => ({
   isOpen: false,
   open: () => set({ isOpen: true }),

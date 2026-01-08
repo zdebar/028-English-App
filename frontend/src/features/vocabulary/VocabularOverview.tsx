@@ -7,6 +7,11 @@ import Loading from '@/components/UI/Loading';
 import VocabularyList from './VocabularyList';
 import VocabularyDetailCard from './VocabularyDetailCard';
 
+/**
+ * VocabularyOverview component
+ *
+ * @returns The vocabulary overview UI with list and detail card functionality.
+ */
 export default function VocabularyOverview() {
   const { userId } = useAuthStore();
 

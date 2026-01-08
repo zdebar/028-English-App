@@ -7,6 +7,11 @@ export interface GrammarCardType {
   note?: string;
 }
 
+type GrammarCardProps = {
+  grammar?: GrammarCardType | null;
+  onClose: () => void;
+};
+
 /**
  * GrammarCard component displays details and notes for a selected grammar topic.
  *
@@ -14,13 +19,7 @@ export interface GrammarCardType {
  * @param onClose Function called to close the card.
  * @returns An OverviewCard with the grammar name and sanitized notes, or a message if no notes are available.
  */
-export default function GrammarCard({
-  grammar,
-  onClose,
-}: {
-  grammar?: GrammarCardType | null;
-  onClose: () => void;
-}) {
+export default function GrammarCard({ grammar, onClose }: GrammarCardProps) {
   return (
     <OverviewCard titleText={grammar?.name} onClose={onClose}>
       {grammar?.note ? (

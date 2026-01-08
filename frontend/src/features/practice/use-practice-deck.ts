@@ -9,7 +9,6 @@ import type { UUID } from 'crypto';
  * usePracticeDeck hook manages the practice deck and user progress for a given user.
  *
  * @param userId The unique identifier of the user.
- * @returns Deck state, navigation, current item, and a function to update progress and advance.
  */
 export function usePracticeDeck(userId: UUID) {
   const { updateUserItemsInDB } = useUserProgress(userId);

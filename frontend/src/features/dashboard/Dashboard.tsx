@@ -6,13 +6,17 @@ import HelpButton from '@/features/overlay/HelpButton';
 import Hint from '@/components/UI/Hint';
 import { useOverlayStore } from '@/hooks/use-overlay-store';
 
+type DashboardProps = {
+  className?: string;
+};
+
 /**
  * Dashboard component displaying the user's lesson progress and helpful UI elements.
  *
  * @param className Additional CSS classes for custom styling.
  * @returns The dashboard view with lesson progress, hints, and help overlay.
  */
-export default function Dashboard({ className = '' }: { className?: string }) {
+export default function Dashboard({ className = '' }: DashboardProps) {
   const { userStats } = useUserStore();
   const { isOpen } = useOverlayStore();
   const lessonProgress: LessonsLocal[] = userStats

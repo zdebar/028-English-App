@@ -8,13 +8,7 @@ import { useOverlayStore } from '@/hooks/use-overlay-store';
  * @param style Inline styles for the button.
  * @returns A styled button with a light bulb icon that triggers the help overlay.
  */
-export default function HelpButton({
-  className = '',
-  style,
-}: {
-  className?: string;
-  style?: React.CSSProperties;
-}) {
+export default function HelpButton({ className = '', style }: HelpButtonProps) {
   const { open } = useOverlayStore();
   return (
     <button type="button" className={`z-10 p-1 ${className}`} style={style} onClick={open}>
@@ -22,3 +16,8 @@ export default function HelpButton({
     </button>
   );
 }
+
+type HelpButtonProps = {
+  className?: string;
+  style?: React.CSSProperties;
+};

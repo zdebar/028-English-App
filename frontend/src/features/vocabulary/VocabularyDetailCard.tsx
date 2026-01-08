@@ -10,6 +10,14 @@ interface VocabularyDetailCardProps {
   onReset: () => void;
 }
 
+/**
+ * VocabularyDetailCard component
+ *
+ * @param selectedWord - The vocabulary item to display details for.
+ * @param onClose - Callback to close the detail card.
+ * @param onReset - Callback to reset the user's progress for the word.
+ * @returns The vocabulary detail card UI.
+ */
 export default function VocabularyDetailCard({
   selectedWord,
   onClose,
