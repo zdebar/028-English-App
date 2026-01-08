@@ -14,7 +14,7 @@ export default function Home() {
   return (
     <div className="max-w-hero relative flex w-full flex-col items-center justify-start gap-4 text-center">
       <h1 className="pt-12 pb-6 landscape:pt-6">Angličtina</h1>
-      <p className="text-notice">Aplikace v testovacím režimu</p>
+      <p className="text-notice color-notice">Aplikace v testovacím režimu</p>
       <p className="px-4">
         Trénujte až 200 vět za 20 minut denně, a dosáhněte základní znalosti jazyka za zlomek
         běžného učebního času.

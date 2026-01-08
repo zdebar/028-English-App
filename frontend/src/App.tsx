@@ -68,7 +68,10 @@ export default function App() {
               <Route path="/grammar" element={<Grammar />} />
               <Route path="/vocabulary" element={<Vocabulary />} />
             </Route>
-            <Route path="/*" element={<div className="text-notice pt-8">Page not found</div>} />
+            <Route
+              path="/*"
+              element={<div className="text-notice color-notice pt-8">Page not found</div>}
+            />
           </Routes>
         </div>
         <Footer />
