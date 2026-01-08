@@ -160,7 +160,7 @@ export default function PracticeCard() {
             </div>
             {/* Practice Controls */}
             <div id="practice-controls" className="relative flex flex-col gap-1">
-              <div className="flex gap-1">
+              <div className="relative grid grid-cols-2 gap-1">
                 <Button onClick={() => fetchGrammar()} disabled={!grammar_id}>
                   <BookIcon />
                 </Button>
@@ -180,7 +180,7 @@ export default function PracticeCard() {
                 </Hint>
               </div>
               {!revealed ? (
-                <div className="relative flex gap-1">
+                <div className="relative grid grid-cols-2 gap-1">
                   <Button
                     onClick={() => {
                       setHintIndex((prevIndex) => prevIndex + 1);
@@ -211,7 +211,7 @@ export default function PracticeCard() {
                   </Hint>
                 </div>
               ) : (
-                <div className="relative flex gap-1">
+                <div className="relative grid grid-cols-2 gap-1">
                   <Button onClick={() => handleNext(config.progress.minusProgress)}>
                     <MinusIcon />
                   </Button>

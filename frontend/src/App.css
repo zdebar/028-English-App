@@ -106,7 +106,7 @@
     @apply bg-background-light dark:bg-background-dark text-light dark:text-dark;
   }
   .color-button {
-    @apply cursor-pointer border;
+    @apply cursor-pointer border-2;
     @apply bg-audio-light border-audio-light text-light; /* Theming Light */
     @apply dark:bg-audio-dark dark:border-audio-dark dark:text-dark; /* Theming Dark */
     @apply hover:border-light dark:hover:border-dark; /* Button Hover Borders  */
@@ -122,7 +122,7 @@
   }
 
   .color-audio {
-    @apply cursor-pointer border;
+    @apply cursor-pointer border-2;
     @apply bg-audio-light border-audio-light hover:border-light;
     @apply dark:bg-audio-dark dark:border-audio-dark dark:hover:border-dark;
   }
