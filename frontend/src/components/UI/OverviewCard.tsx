@@ -1,13 +1,11 @@
 import Button from '@/components/UI/buttons/Button';
 import CloseIcon from '@/components/UI/icons/CloseIcon';
 import ButtonAsyncModal from './buttons/ButtonAsyncModal';
-import Loading from './Loading';
 import Hint from '@/components/UI/Hint';
 import { useOverlayStore } from '@/hooks/use-overlay-store';
 
 interface OverviewCardProps {
   titleText?: string;
-  isLoading?: boolean;
   error?: string | null;
   className?: string;
   handleReset?: () => void;
@@ -16,10 +14,8 @@ interface OverviewCardProps {
 }
 
 /**
- * OverviewCard component for displaying a card with a title, actions, and content.
- *
+ * OverviewCard component for displaying a card with a title, actions, and content. *
  * @param titleText Title text for the card.
- * @param isLoading Whether to show the loading indicator.
  * @param error Error message to display.
  * @param className Additional CSS classes for custom styling.
  * @param handleReset Function to call to reset progress.
@@ -28,7 +24,6 @@ interface OverviewCardProps {
  */
 export default function OverviewCard({
   titleText = 'bez názvu',
-  isLoading = false,
   error = null,
   className = '',
   handleReset,
@@ -60,9 +55,7 @@ export default function OverviewCard({
           <CloseIcon />
         </Button>
       </div>
-      <div className="w-full grow p-4">
-        {isLoading ? <Loading /> : error ? <p>{error}</p> : children}
-      </div>
+      <div className="w-full grow p-4">{error ? <p>{error}</p> : children}</div>
     </div>
   );
 }
