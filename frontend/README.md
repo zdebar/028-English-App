@@ -95,3 +95,12 @@ Null for certains columns are replaced with nullReplacementDate or nullReplaceme
 - **theme**: Theming
 - **toast**: Notification Toasts
 - **vocabulary**: Vocabulary overview
+
+## Z-Guide Layering
+
+| z-index | Component   |
+| ------- | ----------- |
+| 20      | Header      |
+| 1000    | OverlayMask |
+| 1001    | Modal       |
+| 2000    | Hint        |
