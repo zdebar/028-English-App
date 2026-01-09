@@ -1,6 +1,7 @@
 import type { UUID } from 'crypto';
 
 export interface UserItemLocal {
+  // As used by IndexedDB
   item_id: number;
   user_id: UUID;
   czech: string;
@@ -15,6 +16,11 @@ export interface UserItemLocal {
   deleted_at: string | null;
   next_at: string; // nulls replaced with config.database.nullReplacementDate
   mastered_at: string; // nulls replaced with config.database.nullReplacementDate
+}
+
+export interface UserItemPractice extends UserItemLocal {
+  // As used by PracticeCard
+  is_initial_practice: boolean;
 }
 
 export interface GrammarLocal {

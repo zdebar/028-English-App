@@ -1,7 +1,7 @@
 import Dexie, { Entity } from 'dexie';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
-import { TableName, type UserItemLocal } from '@/types/local.types';
+import { TableName, type UserItemLocal, type UserItemPractice } from '@/types/local.types';
 import type { UUID } from 'crypto';
 import config from '@/config/config';
 import { supabaseInstance } from '@/config/supabase.config';
@@ -16,6 +16,7 @@ import {
 } from '@/database/database.utils';
 import UserScore from './user-scores';
 import Metadata from './metadata';
+import Grammar from './grammar';
 
 export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   item_id!: number;
@@ -43,9 +44,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   static async getPracticeDeck(
     userId: UUID,
     deckSize: number = config.lesson.deckSize,
-  ): Promise<UserItemLocal[]> {
-    // Step 1: Fetch items with next_at older than now, sorted by next_at
-    const itemsWithNextAt: UserItemLocal[] = await db.user_items
+  ): Promise<UserItemPractice[]> {
+    // Step 1: Fetch started grammar list
+    const startedGrammar = await Grammar.getStartedGrammarList(userId);
+
+    // Step 2: Fetch items with next_at older than now, sorted by next_at
+    let itemsWithNextAt: UserItemLocal[] = await db.user_items
       .where('[user_id+next_at+mastered_at+sequence]')
       .between(
         [userId, '0000-01-01T00:00:00.000Z', Dexie.minKey, Dexie.minKey],
@@ -54,41 +58,41 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .limit(deckSize)
       .toArray();
 
-    // If we already have enough items, return them
-    if (itemsWithNextAt.length >= deckSize) {
-      return sortOddEvenByProgress(itemsWithNextAt);
+    // Step 3: If not enough items, fetch additional items without next_at set
+    const remainingLimit = deckSize - itemsWithNextAt.length;
+    if (remainingLimit > 0) {
+      const remainingItems = await db.user_items
+        .where('[user_id+next_at+mastered_at+sequence]')
+        .between(
+          [
+            userId,
+            config.database.nullReplacementDate,
+            config.database.nullReplacementDate,
+            Dexie.minKey,
+          ],
+          [
+            userId,
+            config.database.nullReplacementDate,
+            config.database.nullReplacementDate,
+            Dexie.maxKey,
+          ],
+          true,
+          false,
+        )
+        .limit(remainingLimit)
+        .toArray();
+      itemsWithNextAt = [...itemsWithNextAt, ...remainingItems];
     }
 
-    // Query 2: Fetch remaining items with next_at === nullReplacementDate, sorted by sequence
-    const remainingItems: UserItemLocal[] = await db.user_items
-      .where('[user_id+next_at+mastered_at+sequence]')
-      .between(
-        [
-          userId,
-          config.database.nullReplacementDate,
-          config.database.nullReplacementDate,
-          Dexie.minKey,
-        ],
-        [
-          userId,
-          config.database.nullReplacementDate,
-          config.database.nullReplacementDate,
-          Dexie.maxKey,
-        ],
-        true,
-        false,
-      )
-      .limit(deckSize - itemsWithNextAt.length)
-      .toArray();
+    // Step 4: Mark items as initial practice based on started grammar
+    const itemsWithGrammarFlag: UserItemPractice[] = itemsWithNextAt.map((item) => ({
+      ...item,
+      is_initial_practice: !startedGrammar.some(
+        (grammar) => grammar.id === item.grammar_id || item.grammar_id === 0,
+      ),
+    }));
 
-    // Combine the results
-    const combinedItems = [...itemsWithNextAt, ...remainingItems];
-
-    if (combinedItems.length < deckSize) {
-      return [];
-    }
-
-    return sortOddEvenByProgress(combinedItems);
+    return sortOddEvenByProgress(itemsWithGrammarFlag);
   }
 
   /**

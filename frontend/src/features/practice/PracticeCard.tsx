@@ -18,6 +18,7 @@ import HelpButton from '@/features/overlay/HelpButton';
 import Hint from '@/components/UI/Hint';
 import { useOverlayStore } from '@/hooks/use-overlay-store';
 import Grammar from '@/database/models/grammar';
+import Indicator from '@/components/UI/Indicator';
 
 /**
  * PracticeCard component for interactive language practice.
@@ -161,8 +162,12 @@ export default function PracticeCard() {
             {/* Practice Controls */}
             <div id="practice-controls" className="relative flex flex-col gap-1">
               <div className="relative grid grid-cols-2 gap-1">
-                <Button onClick={() => fetchGrammar()} disabled={!grammar_id}>
+                <Button onClick={() => fetchGrammar()} disabled={!grammar_id} className="relative">
                   <BookIcon />
+                  <Indicator
+                    showDot={currentItem.is_initial_practice}
+                    className="absolute top-1 right-1"
+                  />
                 </Button>
                 <Hint visibility={isOpen} style={{ top: '0px', left: '14px' }}>
                   gramatika

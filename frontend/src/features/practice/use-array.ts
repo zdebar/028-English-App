@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import UserItem from '@/database/models/user-items';
-import type { UserItemLocal } from '@/types/local.types';
+import type { UserItemPractice } from '@/types/local.types';
 import { useFetch } from '@/hooks/use-fetch';
 import type { UUID } from 'crypto';
 
@@ -11,7 +11,7 @@ import type { UUID } from 'crypto';
  * @returns An object containing the deck array, current item, index, nextIndex function, loading and error states, and setShouldReload function.
  */
 export function useArray(userId: UUID) {
-  const [array, setArray] = useState<UserItemLocal[]>([]);
+  const [array, setArray] = useState<UserItemPractice[]>([]);
   const [index, setIndex] = useState(0);
 
   function nextIndex() {
@@ -28,7 +28,7 @@ export function useArray(userId: UUID) {
     error,
     loading,
     setShouldReload,
-  } = useFetch<UserItemLocal[]>(fetchPracticeDeck);
+  } = useFetch<UserItemPractice[]>(fetchPracticeDeck);
 
   useEffect(() => {
     setArray(fetchedArray || []);

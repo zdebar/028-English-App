@@ -1,4 +1,4 @@
-import type { UserItemLocal } from '@/types/local.types';
+import type { UserItemLocal, UserItemPractice } from '@/types/local.types';
 import type { UserItemSQL } from '@/types/data.types';
 import { supabaseInstance } from '@/config/supabase.config';
 import config from '@/config/config';
@@ -143,7 +143,7 @@ export function getNextAt(progress: number): string {
  * @returns Sorted array of UserItemLocal.
  * @throws Error if items array is invalid.
  */
-export function sortOddEvenByProgress(items: UserItemLocal[]): UserItemLocal[] {
+export function sortOddEvenByProgress(items: UserItemPractice[]): UserItemPractice[] {
   return items.sort((a, b) => {
     // Sort by odd progress first
     const oddA = a.progress % 2;

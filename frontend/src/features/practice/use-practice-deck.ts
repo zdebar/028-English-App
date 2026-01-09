@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { alternateDirection } from '@/utils/practice.utils';
 import { useUserProgress } from '@/features/practice/use-user-progress';
-import type { UserItemLocal } from '@/types/local.types';
+import type { UserItemPractice } from '@/types/local.types';
 import { useArray } from '@/features/practice/use-array';
 import type { UUID } from 'crypto';
 
@@ -15,7 +15,7 @@ export function usePracticeDeck(userId: UUID) {
   const { array, currentItem, index, nextIndex, loading, error, setShouldReload } =
     useArray(userId);
 
-  const userProgressRef = useRef<UserItemLocal[]>([]);
+  const userProgressRef = useRef<UserItemPractice[]>([]);
   const direction = currentItem ? alternateDirection(currentItem?.progress) : false;
   const grammar_id = currentItem?.grammar_id;
 
