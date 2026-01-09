@@ -127,7 +127,7 @@
     @apply dark:bg-audio-dark dark:border-audio-dark dark:hover:border-dark;
   }
   .color-audio-disabled {
-    @apply cursor-default border;
+    @apply cursor-default border-2;
     @apply border-background-light dark:border-background-dark bg-inherit text-inherit;
   }
 
