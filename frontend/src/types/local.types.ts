@@ -1,9 +1,7 @@
-import type { UUID } from 'crypto';
-
 export interface UserItemLocal {
   // As used by IndexedDB
   item_id: number;
-  user_id: UUID;
+  user_id: string;
   czech: string;
   english: string;
   pronunciation: string;
@@ -33,14 +31,14 @@ export interface GrammarLocal {
 
 export interface UserScoreLocal {
   id: string;
-  user_id: UUID;
+  user_id: string;
   date: string;
   item_count: number;
   updated_at: string;
 }
 
 export interface UserInfoLocal {
-  id: string; // uuid for the user
+  id: string; // string for the user
   name: string | null; // User's full name
   email: string | null; // User's email address
   picture_url: string | null; // URL to the user's profile picture
@@ -58,7 +56,7 @@ export interface AudioMetadataLocal {
 
 export interface MetadataLocal {
   table_name: string; // Name of the table (e.g., "user_items", "grammar")
-  user_id: UUID; // UUID of the user associated with the data
+  user_id: string; // string of the user associated with the data
   synced_at: string; // Timestamp of the last synchronization
 }
 

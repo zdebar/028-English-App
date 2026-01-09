@@ -3,14 +3,13 @@ import { alternateDirection } from '@/utils/practice.utils';
 import { useUserProgress } from '@/features/practice/use-user-progress';
 import type { UserItemPractice } from '@/types/local.types';
 import { useArray } from '@/features/practice/use-array';
-import type { UUID } from 'crypto';
 
 /**
  * usePracticeDeck hook manages the practice deck and user progress for a given user.
  *
  * @param userId The unique identifier of the user.
  */
-export function usePracticeDeck(userId: UUID) {
+export function usePracticeDeck(userId: string) {
   const { updateUserItemsInDB } = useUserProgress(userId);
   const { array, currentItem, index, nextIndex, loading, error, setShouldReload } =
     useArray(userId);

@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
 import UserItem from '@/database/models/user-items';
 import type { UserItemLocal } from '@/types/local.types';
-import type { UUID } from 'crypto';
 
 /**
  * Hook tosave user progress updates to the IndexedDB.
@@ -9,7 +8,7 @@ import type { UUID } from 'crypto';
  * @param array Practice deck array of user items.
  * @returns Function to update user items in the database.
  */
-export function useUserProgress(userId: UUID) {
+export function useUserProgress(userId: string) {
   const updateUserItemsInDB = useCallback(
     async (updatedItems: UserItemLocal[]): Promise<boolean> => {
       if (updatedItems.length === 0 || !userId) return false;

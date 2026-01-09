@@ -5,7 +5,6 @@ import { supabaseInstance } from '@/config/supabase.config';
 import { db } from '@/database/models/db';
 import config from '@/config/config';
 import Dexie from 'dexie';
-import type { UUID } from 'crypto';
 import Metadata from './metadata';
 import { TableName } from '@/types/local.types';
 
@@ -38,7 +37,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * @returns Array of started GrammarLocal records, empty array in case of none found.
    * @throws Error if operation fails.
    */
-  static async getStartedGrammarList(userId: UUID): Promise<GrammarLocal[]> {
+  static async getStartedGrammarList(userId: string): Promise<GrammarLocal[]> {
     const startedUserItems: UserItemLocal[] = await db.user_items
       .where('[user_id+started_at]')
       .between([userId, Dexie.minKey], [userId, config.database.nullReplacementDate], true, false)

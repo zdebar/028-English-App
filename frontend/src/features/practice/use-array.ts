@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect } from 'react';
 import UserItem from '@/database/models/user-items';
 import type { UserItemPractice } from '@/types/local.types';
 import { useFetch } from '@/hooks/use-fetch';
-import type { UUID } from 'crypto';
 
 /**
  * useArray hook manages the state and navigation of a practice deck for a given user.
@@ -10,7 +9,7 @@ import type { UUID } from 'crypto';
  * @param userId The unique identifier of the user whose practice deck is managed.
  * @returns An object containing the deck array, current item, index, nextIndex function, loading and error states, and setShouldReload function.
  */
-export function useArray(userId: UUID) {
+export function useArray(userId: string) {
   const [array, setArray] = useState<UserItemPractice[]>([]);
   const [index, setIndex] = useState(0);
 

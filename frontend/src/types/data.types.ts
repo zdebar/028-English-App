@@ -1,8 +1,6 @@
-import type { UUID } from 'crypto';
-
 // Users table
 export interface UserSQL {
-  id: UUID;
+  id: string;
   username: string | null;
   settings: JSON;
   created_at: string;
@@ -34,7 +32,7 @@ export interface ItemSQL {
 
 // User items table
 export interface UserItemSQL {
-  user_id: UUID;
+  user_id: string;
   item_id: number;
   progress: number;
   started_at: string | null;
@@ -45,7 +43,7 @@ export interface UserItemSQL {
 
 // User score table
 export interface UserScoreSQL {
-  user_id: UUID;
+  user_id: string;
   date: string;
   item_count: number;
   updated_at: string;

@@ -5,25 +5,24 @@ import { supabaseInstance } from '@/config/supabase.config';
 import { db } from '@/database/models/db';
 import { generateUserScoreId } from '@/database/database.utils';
 import { getTodayShortDate } from '@/database/database.utils';
-import type { UUID } from 'crypto';
 import Metadata from './metadata';
 import Dexie from 'dexie';
 
 export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   id!: string;
-  user_id!: UUID;
+  user_id!: string;
   date!: string;
   item_count!: number;
   updated_at!: string;
 
   /**
    * Increases the item count for today's date by the specified amount.
-   * @param userId - The user ID. Must be a valid UUID.
+   * @param userId - The user ID. Must be a valid string.
    * @param addCount - The number to add to today's item count.
    * @returns - True if the operation was successful, false otherwise.
    * @throws Error
    */
-  static async addItemCount(userId: UUID, addCount: number): Promise<boolean> {
+  static async addItemCount(userId: string, addCount: number): Promise<boolean> {
     try {
       const today = getTodayShortDate();
 
@@ -54,11 +53,11 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
   /**
    * Fetches the user score record for today's date.
-   * @param userId - The user ID. Must be a valid UUID.
+   * @param userId - The user ID. Must be a valid string.
    * @returns The user score record for today, or a new record with item_count 0 if none exists.
    * @throws Error
    */
-  static async getUserScoreForToday(userId: UUID): Promise<UserScoreLocal> {
+  static async getUserScoreForToday(userId: string): Promise<UserScoreLocal> {
     const today = getTodayShortDate();
     const key = generateUserScoreId(userId, today);
 
@@ -75,11 +74,11 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
   /**
    * Synchronizes user score data between the local IndexedDB and Supabase.
-   * @param userId - The user ID. Must be a valid UUID.
+   * @param userId - The user ID. Must be a valid string.
    * @returns The number of user score records synced.
    * @throws Error
    */
-  static async syncUserScoreData(userId: UUID): Promise<number> {
+  static async syncUserScoreData(userId: string): Promise<number> {
     // Step 1: Get the last synced date for the user_scores table
     const lastSyncedAt = await Metadata.getSyncedDate(TableName.UserScores, userId);
 

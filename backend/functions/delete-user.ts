@@ -73,7 +73,7 @@ async function markUserDeletedAt(userId: string) {
   return { ok: res.ok, status: res.status, body };
 }
 
-function isUuidV4(str: string) {
+function isstringV4(str: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
     str
   );
@@ -177,9 +177,9 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    if (!isUuidV4(userId.trim())) {
+    if (!isstringV4(userId.trim())) {
       return new Response(
-        JSON.stringify({ error: "Invalid userId format (must be UUID v4)" }),
+        JSON.stringify({ error: "Invalid userId format (must be string v4)" }),
         {
           status: 400,
           headers: {

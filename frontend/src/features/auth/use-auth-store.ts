@@ -1,10 +1,9 @@
 import { create } from 'zustand';
 import type { Session } from '@supabase/supabase-js';
 import { supabaseInstance } from '@/config/supabase.config';
-import type { UUID } from 'crypto';
 
 interface AuthState {
-  userId: UUID | null;
+  userId: string | null;
   userEmail: string | null;
   loading: boolean;
   setSession: (session: Session | null) => void;
@@ -15,7 +14,7 @@ interface AuthState {
  * Zustand store for managing authentication state.
  *
  * Provides:
- * - `userId`: UUID of the authenticated user, or null if not logged in.
+ * - `userId`: string of the authenticated user, or null if not logged in.
  * - `userEmail`: Email of the authenticated user, or null if not logged in.
  * - `loading`: Indicates if authentication state is being determined.
  * - `setSession(session)`: Updates the store with session data from Supabase.
@@ -28,7 +27,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setSession: (session) => {
     set({
-      userId: (session?.user?.id as UUID) || null,
+      userId: (session?.user?.id as string) || null,
       userEmail: session?.user?.email || null,
       loading: false,
     });

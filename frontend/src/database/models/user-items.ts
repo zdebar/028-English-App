@@ -2,7 +2,6 @@ import Dexie, { Entity } from 'dexie';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import { TableName, type UserItemLocal, type UserItemPractice } from '@/types/local.types';
-import type { UUID } from 'crypto';
 import config from '@/config/config';
 import { supabaseInstance } from '@/config/supabase.config';
 
@@ -20,7 +19,7 @@ import Grammar from './grammar';
 
 export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   item_id!: number;
-  user_id!: UUID;
+  user_id!: string;
   czech!: string;
   english!: string;
   pronunciation!: string;
@@ -42,7 +41,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @throws error if operation fails.
    */
   static async getPracticeDeck(
-    userId: UUID,
+    userId: string,
     deckSize: number = config.lesson.deckSize,
   ): Promise<UserItemPractice[]> {
     // Step 1: Fetch started grammar list
@@ -101,7 +100,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns boolean indicating success.
    * @throws error if operation fails.
    */
-  static async savePracticeDeck(userId: UUID, items: UserItemLocal[]): Promise<boolean> {
+  static async savePracticeDeck(userId: string, items: UserItemLocal[]): Promise<boolean> {
     items.map((item) => {
       if (item.user_id !== userId) {
         throw new Error(`Item user_id ${item.user_id} does not match provided userId ${userId}.`);
@@ -139,7 +138,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns object containing startedCountToday and startedCount.
    * @throws error if operation fails.
    */
-  static async getStartedCounts(userId: UUID): Promise<{
+  static async getStartedCounts(userId: string): Promise<{
     startedCountToday: number;
     startedCount: number;
   }> {
@@ -163,7 +162,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns array of UserItemLocal objects.
    * @throws error if operation fails.
    */
-  static async getUserStartedVocabulary(userId: UUID): Promise<UserItemLocal[]> {
+  static async getUserStartedVocabulary(userId: string): Promise<UserItemLocal[]> {
     const result = await db.user_items
       .where('[user_id+grammar_id+started_at]')
       .between(
@@ -183,7 +182,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns number of reset items.
    * @throws error if operation fails.
    */
-  static async resetsAllUserItems(userId: UUID): Promise<number> {
+  static async resetsAllUserItems(userId: string): Promise<number> {
     const count = await db.user_items
       .where('[user_id+started_at]')
       .between([userId, Dexie.minKey], [userId, config.database.nullReplacementDate], true, false)
@@ -205,7 +204,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns void
    * @throws error if operation fails.
    */
-  static async resetGrammarItems(userId: UUID, grammarId: number): Promise<number> {
+  static async resetGrammarItems(userId: string, grammarId: number): Promise<number> {
     console.log(`Resetting user items for userId: ${userId}, grammarId: ${grammarId}`);
     const count = await db.user_items
       .where('[user_id+grammar_id+started_at]')
@@ -234,7 +233,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns boolean indicating success.
    * @throws error if operation fails.
    */
-  static async resetUserItemById(userId: UUID, itemId: number): Promise<boolean> {
+  static async resetUserItemById(userId: string, itemId: number): Promise<boolean> {
     const count = await db.user_items
       .where('[user_id+item_id]')
       .equals([userId, itemId])
@@ -257,7 +256,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns number of deleted items.
    * @throws error if operation fails.
    */
-  static async deleteAllUserItems(userId: UUID): Promise<number> {
+  static async deleteAllUserItems(userId: string): Promise<number> {
     // Get all item IDs for the user
     const itemIds = await db.user_items.where('user_id').equals(userId).primaryKeys();
 
@@ -276,7 +275,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns boolean indicating success.
    * @throws error if operation fails.
    */
-  static async syncUserItemsData(userId: UUID): Promise<number> {
+  static async syncUserItemsData(userId: string): Promise<number> {
     // Step 1: Get the last synced date for the user_items table
     const lastSyncedAt = await Metadata.getSyncedDate(TableName.UserItems, userId);
 

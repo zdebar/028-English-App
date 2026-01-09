@@ -25,9 +25,25 @@ serve(async () => {
     });
   }
 
+  let deletedCount = 0;
+  let failedCount = 0;
+  let failedIds: string[] = [];
+
   for (const user of users) {
-    await client.auth.admin.deleteUser(user.id);
+    try {
+      await client.auth.admin.deleteUser(user.id);
+      deletedCount++;
+    } catch (err) {
+      failedCount++;
+      failedIds.push(user.id);
+      console.error(`Failed to delete user ${user.id}:`, err);
+    }
   }
 
-  return new Response(`Deleted ${users.length} users`, { status: 200 });
+  return new Response(
+    `Deleted ${deletedCount} users, failed to delete ${failedCount} users. Failed IDs: ${failedIds.join(
+      ", "
+    )}`,
+    { status: 200 }
+  );
 });
