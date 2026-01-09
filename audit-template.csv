@@ -1,0 +1,8 @@
+audit_type,file,line,description,priority
+Duplicitní kód,src/example.js,42,"Stejný blok kódu jako v src/other.js:15",Střední
+Mrtvý kód,src/unused.ts,10,"Funkce není nikde volána",Nízká
+Zastaralý vzor,src/legacy.js,5,"Použití zastaralé knihovny",Vysoká
+Zpracování chyb,src/app.ts,88,"Chybí try-catch blok",Střední
+Bezpečnostní riziko,src/auth.js,120,"Ukládání hesla v plaintextu",Kritická
+Výkonnostní problém,src/loop.js,33,"Nefektivní cyklus",Střední
+Typová bezpečnost,src/types.ts,21,"Použití any",Nízká

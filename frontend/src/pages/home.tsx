@@ -5,7 +5,7 @@ import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabaseInstance } from '@/config/supabase.config';
 import { useThemeStore } from '@/features/theme/use-theme';
-import PrivacyPolicyLink from '@/features/gdpr/privacy-policy-link';
+import PrivacyPolicyLink from '@/features/gdpr/PrivacyPolicyLink';
 
 export default function Home() {
   const { theme } = useThemeStore();

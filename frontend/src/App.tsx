@@ -4,20 +4,20 @@ import { useEffect } from 'react';
 import Footer from '@/components/Layout/Footer';
 import Header from '@/components/Layout/Header';
 import './App.css';
-import Profile from '@/pages/profile';
-import Practice from '@/pages/practice';
-import Home from '@/pages/home';
+import Profile from '@/pages/Profile';
+import Practice from '@/pages/Practice';
+import Home from '@/pages/Home';
 import { dataSync } from '@/database/models/data-sync';
-import Vocabulary from '@/pages/vocabulary';
+import Vocabulary from '@/pages/Vocabulary';
 import ProtectedLayout from '@/components/utils/protected-laout';
-import Grammar from '@/pages/grammar';
+import Grammar from '@/pages/Grammar';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import type { Session } from '@supabase/supabase-js';
 import { supabaseInstance } from '@/config/supabase.config';
 import OverlayMask from '@/components/UI/OverlayMask';
 import { useOverlayStore } from '@/hooks/use-overlay-store';
 import ToastContainer from '@/features/toast/ToastContainer';
-import PrivacyPolicy from '@/pages/privacy-policy';
+import PrivacyPolicy from '@/pages/PrivacyPolicy';
 
 export default function App() {
   const { theme, chooseTheme } = useThemeStore();
