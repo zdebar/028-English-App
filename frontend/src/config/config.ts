@@ -38,7 +38,7 @@ const config = {
   },
 
   lesson: {
-    deckSize: 5, // Number of items per deck
+    deckSize: 8, // Number of items per deck
     lessonSize: 100, // Number of items per lesson
   },
 
