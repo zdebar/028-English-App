@@ -3,14 +3,10 @@
 // Requires Authorization: Bearer <user access token> header
 // Only allows a user to delete their own account (userId === authenticated user's id)
 
+import { CORS_HEADERS } from "../shared/constants.ts";
+
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers":
-    "authorization, content-type, x-client-info, apikey",
-};
 
 async function getUserFromAccessToken(accessToken: string) {
   const url = `${SUPABASE_URL.replace(/\/$/, "")}/auth/v1/user`;

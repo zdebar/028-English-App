@@ -12,7 +12,6 @@ import Vocabulary from '@/pages/Vocabulary';
 import ProtectedLayout from '@/components/utils/protected-laout';
 import Grammar from '@/pages/Grammar';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import type { Session } from '@supabase/supabase-js';
 import { supabaseInstance } from '@/config/supabase.config';
 import OverlayMask from '@/components/UI/OverlayMask';
 import { useOverlayStore } from '@/hooks/use-overlay-store';
@@ -26,11 +25,19 @@ export default function App() {
 
   // Handle Supabase auth state changes
   useEffect(() => {
-    supabaseInstance.auth
-      .getSession()
-      .then(({ data: { session } }: { data: { session: Session | null } }) => {
+    const initializeAuth = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabaseInstance.auth.getSession();
         setSession(session);
-      });
+      } catch (error) {
+        console.error('Error getting session:', error);
+        setSession(null);
+      }
+    };
+
+    initializeAuth();
 
     const {
       data: { subscription },
