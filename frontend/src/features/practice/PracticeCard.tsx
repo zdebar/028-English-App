@@ -106,7 +106,7 @@ export default function PracticeCard() {
               }}
               aria-label="Přehrát audio"
             >
-              <div id="top-bar" className="relative flex w-full items-center justify-between">
+              <div id="top-bar" className="relative flex h-8 w-full items-center justify-between">
                 <VolumeSlider setVolume={setVolume} />
                 <p className="text-notice">{audioError && 'bez audia'}</p>
               </div>
@@ -141,7 +141,10 @@ export default function PracticeCard() {
                   </>
                 )}
               </div>
-              <div className="relative flex w-full items-center justify-between" id="bottom-bar">
+              <div
+                className="relative flex h-8 w-full items-center justify-between"
+                id="bottom-bar"
+              >
                 <p className="px-2 font-light">{currentItem?.progress}</p>
                 <Hint visibility={isOpen} style={{ bottom: '30px' }}>
                   pokrok
@@ -154,8 +157,7 @@ export default function PracticeCard() {
                   style={{ bottom: '30px', right: '0' }}
                   className="flex flex-col items-end"
                 >
-                  <p>počet procvičení</p>
-                  <p>/ denní cíl</p>
+                  <p>dnes / denní cíl</p>
                 </Hint>
               </div>
             </div>
