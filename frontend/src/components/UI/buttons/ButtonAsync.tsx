@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { TEXTS } from '@/config/texts';
 
 interface ButtonAsyncProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   message?: string;
@@ -23,8 +24,8 @@ interface ButtonAsyncProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
  * @param props Standard button attributes.
  */
 export default function ButtonAsync({
-  message,
-  loadingMessage = 'Načítání...',
+  message = TEXTS.buttonDefault,
+  loadingMessage = TEXTS.buttonLoading,
   onClick,
   isLoading = false,
   disabled = false,
@@ -33,26 +34,31 @@ export default function ButtonAsync({
   ...props
 }: ButtonAsyncProps) {
   const [minLoadingElapsed, setMinLoadingElapsed] = useState(true);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (isLoading) {
-      setMinLoadingElapsed(false);
-      timer = setTimeout(() => setMinLoadingElapsed(true), minLoadingTime);
-    }
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
+    if (!isLoading) return;
+
+    setMinLoadingElapsed(false);
+
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setMinLoadingElapsed(true), minLoadingTime);
   }, [isLoading, minLoadingTime]);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   const isButtonLoading = isLoading || !minLoadingElapsed;
 
   return (
     <button
+      {...props}
       onClick={onClick}
       disabled={isButtonLoading || disabled}
       className={className}
-      {...props}
     >
       <span className="text-button">{isButtonLoading ? loadingMessage : message}</span>
     </button>
