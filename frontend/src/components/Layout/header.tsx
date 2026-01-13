@@ -39,18 +39,6 @@ export default function Header() {
           aria-disabled={!userId}
           aria-describedby={!userId ? 'auth-required-description' : undefined}
         >
-          <AcademicCapIcon />
-        </HeaderButton>
-      </nav>
-      <nav className="sideheader rightheader" role="navigation" aria-label="Uživatelská navigace">
-        <ThemeSwitch />
-        <HeaderButton
-          to="/profile"
-          aria-label="Nastavení uživatele"
-          disabled={!userId}
-          aria-disabled={!userId}
-          aria-describedby={!userId ? 'auth-required-description' : undefined}
-        >
           <UserAvatar />
         </HeaderButton>
       </nav>
