@@ -4,11 +4,6 @@
     @apply font-body text-light dark:text-dark bg-background-light dark:bg-background-dark;
   }
 
-  button,
-  a {
-    @apply active:shadow-none;
-  }
-
   button {
     @apply flex items-center justify-center;
   }

@@ -4,6 +4,7 @@ import HeaderButton from '@/components/UI/buttons/HeaderButton';
 import UserAvatar from '@/components/UI/UserAvatar';
 import ThemeSwitch from '@/features/theme/ThemeSwitch';
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import { TEXTS } from '@/config/texts';
 
 /**
  * Header component displaying main navigation and user controls.
@@ -13,9 +14,6 @@ export default function Header() {
 
   return (
     <header className="header-fixed relative z-20 flex w-full flex-none justify-between">
-      <span id="auth-required-description" className="sr-only">
-        Pro přístup k této funkci je vyžadováno přihlášení.
-      </span>
       <nav className="sideheader" role="navigation" aria-label="Hlavní navigace">
         <HeaderButton to="/" aria-label="Domů">
           <HomeIcon />
@@ -25,9 +23,14 @@ export default function Header() {
           aria-label="Uživatelský dashboard"
           disabled={!userId}
           aria-disabled={!userId}
-          aria-describedby={!userId ? 'auth-required-description' : undefined}
+          aria-describedby={!userId ? 'auth-required-description-practice' : undefined}
         >
           <AcademicCapIcon />
+          {!userId && (
+            <span id="auth-required-description-practice" className="sr-only">
+              {TEXTS.loginRequired}
+            </span>
+          )}
         </HeaderButton>
       </nav>
       <nav className="sideheader rightheader" role="navigation" aria-label="Uživatelská navigace">
@@ -37,14 +40,16 @@ export default function Header() {
           aria-label="Nastavení uživatele"
           disabled={!userId}
           aria-disabled={!userId}
-          aria-describedby={!userId ? 'auth-required-description' : undefined}
+          aria-describedby={!userId ? 'auth-required-description-profile' : undefined}
         >
           <UserAvatar />
+          {!userId && (
+            <span id="auth-required-description-profile" className="sr-only">
+              {TEXTS.loginRequired}
+            </span>
+          )}
         </HeaderButton>
       </nav>
-      <p id="auth-required-description" className="sr-only">
-        Pro přístup k této sekci je vyžadováno přihlášení.
-      </p>
     </header>
   );
 }
