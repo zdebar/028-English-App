@@ -1,0 +1,33 @@
+@layer components {
+  /** BUTTON STYLES **/
+  .shape-button-rectangular {
+    @apply h-button font-body shrink-0 grow basis-auto font-bold tracking-wide;
+  }
+
+  .shape-button-header {
+    @apply size-button rounded-full;
+  }
+
+  .shape-overlay {
+    @apply pointer-events-auto fixed inset-0 top-0 flex items-center justify-center;
+  }
+
+  /** CARD STYLES **/
+  .card-width,
+  .card-height {
+    @apply flex grow flex-col justify-start gap-1;
+  }
+
+  .card-width {
+    @apply max-w-card min-w-card w-full;
+  }
+
+  .card-height {
+    @apply max-h-card min-h-card h-full;
+  }
+
+  /** HEADER STYLES **/
+  .sideheader {
+    @apply m-4 flex gap-2;
+  }
+}

@@ -3,7 +3,7 @@ import { useThemeStore } from '@/features/theme/use-theme';
 import { useEffect } from 'react';
 import Footer from '@/components/Layout/Footer';
 import Header from '@/components/Layout/Header';
-import './App.css';
+import './styles/index.css';
 import Profile from '@/pages/Profile';
 import Practice from '@/pages/Practice';
 import Home from '@/pages/Home';

@@ -1,0 +1,46 @@
+@layer base {
+  html {
+    font-size: 15px;
+    @apply font-body text-light dark:text-dark bg-background-light dark:bg-background-dark;
+  }
+
+  button,
+  a {
+    @apply active:shadow-none;
+  }
+
+  button {
+    @apply flex items-center justify-center;
+  }
+
+  h1 {
+    @apply font-headings pb-2 text-4xl font-thin;
+  }
+
+  h2 {
+    @apply font-headings pb-2 text-xl font-thin;
+  }
+
+  h3 {
+    @apply font-headings pb-1 text-xl font-thin;
+  }
+
+  ul {
+    @apply list-disc pl-6 text-sm;
+  }
+
+  li {
+    @apply mb-1;
+  }
+
+  th,
+  tr,
+  td {
+    @apply border px-2 py-1;
+  }
+
+  select,
+  input {
+    @apply focus:outline-none active:outline-none;
+  }
+}

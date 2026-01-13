@@ -1,0 +1,49 @@
+/**
+ * Design tokens / theme variables.
+ */
+
+@theme {
+  /** font families **/
+  --font-body: 'Roboto', serif;
+  --font-headings: 'Mansalva', sans-serif;
+
+  /** colors **/
+  --color-dark: white;
+  --color-light: black;
+  --color-notice-light: black;
+  --color-notice-dark: #87d5e8;
+  --color-button-normal: #f7b740;
+  --color-button-hover: white;
+  --color-background-dark: #111827;
+  --color-background-light: #f7b740;
+  --color-disabled-light: #ba8420;
+  --color-disabled-dark: #3f3f46;
+  --color-audio-dark: #1a2333;
+  --color-audio-light: #f8c04a;
+  --color-audio-hover-dark: #1e283b;
+  --color-audio-hover-light: #ffc64d;
+  --color-overlay: rgba(0, 0, 0, 0.5);
+
+  /** progress bar colors **/
+  --color-progress-bg: white;
+  --color-new-progress-light: #87d5e8;
+  --color-old-progress-light: #42bddb;
+  --color-old-progress-dark: #f7ae25;
+  --color-new-progress-dark: #f7d565;
+  --color-divisions: #374151;
+
+  /** layout dimensions **/
+  --max-width-container: 900px;
+  --max-width-hero: 450px;
+  --min-width-card: 320px;
+  --max-width-card: 400px;
+  --min-height-card: 320px;
+  --max-height-card: 400px;
+
+  /** button sizes **/
+  --size-button: 3.25rem;
+  --width-button: 3.25rem;
+  --height-button: 3.25rem;
+  --height-input: 2.5rem;
+  --height-attribute: 1.5rem;
+}

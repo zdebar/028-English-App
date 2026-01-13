@@ -1,0 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Mansalva:wght@400;700&family=Roboto:wght@300;400;700&display=swap');
+
+@import 'tailwindcss';
+
+@import './config.css';
+@import './theme.css';
+@import './base.css';
+@import './utilities.css';
+@import './components.css';
+@import './responsive.css';

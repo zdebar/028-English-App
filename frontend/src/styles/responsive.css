@@ -1,0 +1,40 @@
+/** RESPONSIVE STYLES **/
+
+@media (max-height: 460px) and (max-width: 640px) {
+  .sideheader {
+    flex-direction: column;
+    height: 150px;
+  }
+  .rightheader {
+    flex-direction: column-reverse;
+    justify-content: start;
+  }
+}
+
+@media (max-height: 460px) {
+  .header-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 0;
+  }
+}
+
+@media (min-height: 640px) {
+  .header-fixed {
+    margin-bottom: 80px;
+  }
+}
+
+.help-btn-pos {
+  position: absolute;
+  bottom: -35px;
+  right: 3px;
+}
+
+@media (max-height: 400px) {
+  .help-btn-pos {
+    bottom: 3px;
+    right: -35px;
+  }
+}
