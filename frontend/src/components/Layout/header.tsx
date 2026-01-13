@@ -13,20 +13,50 @@ export default function Header() {
 
   return (
     <header className="header-fixed relative z-20 flex w-full flex-none justify-between">
+      <span id="auth-required-description" className="sr-only">
+        Pro přístup k této funkci je vyžadováno přihlášení.
+      </span>
       <nav className="sideheader" role="navigation" aria-label="Hlavní navigace">
         <HeaderButton to="/" aria-label="Domů">
           <HomeIcon />
         </HeaderButton>
-        <HeaderButton to="/practice" aria-label="Uživatelský dashboard" disabled={!userId}>
+        <HeaderButton
+          to="/practice"
+          aria-label="Uživatelský dashboard"
+          disabled={!userId}
+          aria-disabled={!userId}
+          aria-describedby={!userId ? 'auth-required-description' : undefined}
+        >
           <AcademicCapIcon />
         </HeaderButton>
       </nav>
       <nav className="sideheader rightheader" role="navigation" aria-label="Uživatelská navigace">
         <ThemeSwitch />
-        <HeaderButton to="/profile" aria-label="Nastavení uživatele" disabled={!userId}>
+        <HeaderButton
+          to="/profile"
+          aria-label="Nastavení uživatele"
+          disabled={!userId}
+          aria-disabled={!userId}
+          aria-describedby={!userId ? 'auth-required-description' : undefined}
+        >
+          <AcademicCapIcon />
+        </HeaderButton>
+      </nav>
+      <nav className="sideheader rightheader" role="navigation" aria-label="Uživatelská navigace">
+        <ThemeSwitch />
+        <HeaderButton
+          to="/profile"
+          aria-label="Nastavení uživatele"
+          disabled={!userId}
+          aria-disabled={!userId}
+          aria-describedby={!userId ? 'auth-required-description' : undefined}
+        >
           <UserAvatar />
         </HeaderButton>
       </nav>
+      <p id="auth-required-description" className="sr-only">
+        Pro přístup k této sekci je vyžadováno přihlášení.
+      </p>
     </header>
   );
 }
