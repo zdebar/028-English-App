@@ -1,5 +1,5 @@
 import LightBulbIcon from '@/components/UI/icons/LightBulbIcon';
-import { useOverlayStore } from '@/hooks/use-overlay-store';
+import { useOverlayStore } from '@/features/overlay/use-overlay-store';
 
 /**
  * Help button component that opens the help overlay.

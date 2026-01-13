@@ -2,7 +2,7 @@ import Button from '@/components/UI/buttons/Button';
 import CloseIcon from '@/components/UI/icons/CloseIcon';
 import ButtonAsyncModal from './buttons/ButtonAsyncModal';
 import Hint from '@/components/UI/Hint';
-import { useOverlayStore } from '@/hooks/use-overlay-store';
+import { useOverlayStore } from '@/features/overlay/use-overlay-store';
 
 interface OverviewCardProps {
   titleText?: string;

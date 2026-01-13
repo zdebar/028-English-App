@@ -6,8 +6,8 @@ import Grammar from '@/database/models/grammar';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useAudioManager } from '@/features/practice/use-audio-manager';
 import { usePracticeDeck } from '@/features/practice/use-practice-deck';
-import { useOverlayStore } from '@/hooks/use-overlay-store';
-import { useUserStore } from '@/hooks/use-user-store';
+import { useOverlayStore } from '@/features/overlay/use-overlay-store';
+import { useUserStore } from '@/features/dashboard/use-user-store';
 
 import Hint from '@/components/UI/Hint';
 import Indicator from '@/components/UI/Indicator';

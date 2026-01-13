@@ -1,10 +1,10 @@
 import LessonBar from '@/features/dashboard/BlockBar';
 import { getLessonProgress } from '@/features/dashboard/dashboard.utils';
 import type { LessonsLocal } from '@/types/local.types';
-import { useUserStore } from '@/hooks/use-user-store';
+import { useUserStore } from '@/features/dashboard/use-user-store';
 import HelpButton from '@/features/overlay/HelpButton';
 import Hint from '@/components/UI/Hint';
-import { useOverlayStore } from '@/hooks/use-overlay-store';
+import { useOverlayStore } from '@/features/overlay/use-overlay-store';
 
 type DashboardProps = {
   className?: string;

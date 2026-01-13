@@ -14,7 +14,7 @@ import Grammar from '@/pages/Grammar';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { supabaseInstance } from '@/config/supabase.config';
 import OverlayMask from '@/components/UI/OverlayMask';
-import { useOverlayStore } from '@/hooks/use-overlay-store';
+import { useOverlayStore } from '@/features/overlay/use-overlay-store';
 import ToastContainer from '@/features/toast/ToastContainer';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 
