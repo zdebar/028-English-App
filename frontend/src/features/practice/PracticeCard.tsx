@@ -1,24 +1,28 @@
-import { useState, useEffect, useCallback } from 'react';
-import VolumeSlider from '@/features/practice/VolumeSlider';
-import Button from '@/components/UI/buttons/Button';
-import ForwardIcon from '@/components/UI/icons/ForwardIcon';
-import BulbIcon from '@/components/UI/icons/BulbIcon';
-import EyeIcon from '@/components/UI/icons/EyeIcon';
-import MinusIcon from '@/components/UI/icons/MinusIcon';
-import PlusIcon from '@/components/UI/icons/PlusIcon';
-import BookIcon from '@/components/UI/icons/BookIcon';
+import { useCallback, useEffect, useState } from 'react';
+
 import config from '@/config/config';
-import { usePracticeDeck } from '@/features/practice/use-practice-deck';
-import { useAudioManager } from '@/features/practice/use-audio-manager';
+import Grammar from '@/database/models/grammar';
+
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import { useAudioManager } from '@/features/practice/use-audio-manager';
+import { usePracticeDeck } from '@/features/practice/use-practice-deck';
+import { useOverlayStore } from '@/hooks/use-overlay-store';
 import { useUserStore } from '@/hooks/use-user-store';
-import GrammarCard, { type GrammarCardType } from '@/features/practice/GrammarCard';
+
+import Hint from '@/components/UI/Hint';
+import Indicator from '@/components/UI/Indicator';
 import Loading from '@/components/UI/Loading';
 import HelpButton from '@/features/overlay/HelpButton';
-import Hint from '@/components/UI/Hint';
-import { useOverlayStore } from '@/hooks/use-overlay-store';
-import Grammar from '@/database/models/grammar';
-import Indicator from '@/components/UI/Indicator';
+import GrammarCard, { type GrammarCardType } from '@/features/practice/GrammarCard';
+import VolumeSlider from '@/features/practice/VolumeSlider';
+
+import Button from '@/components/UI/buttons/Button';
+import BookIcon from '@/components/UI/icons/BookIcon';
+import BulbIcon from '@/components/UI/icons/BulbIcon';
+import EyeIcon from '@/components/UI/icons/EyeIcon';
+import ForwardIcon from '@/components/UI/icons/ForwardIcon';
+import MinusIcon from '@/components/UI/icons/MinusIcon';
+import PlusIcon from '@/components/UI/icons/PlusIcon';
 
 /**
  * PracticeCard component for interactive language practice.
