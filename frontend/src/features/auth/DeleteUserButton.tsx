@@ -58,7 +58,7 @@ export default function DeleteUserButton() {
 
   return (
     <ButtonAsyncModal
-      message="Smazat uživatelský účet"
+      buttonTitle="Smazat uživatelský účet"
       loadingMessage="Probíhá mazání..."
       isLoading={isLoading}
       modalTitle="Potvrzení mazání uživatelského účtu"

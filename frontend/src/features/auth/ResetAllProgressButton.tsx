@@ -31,7 +31,7 @@ export default function ResetAllProgressButton() {
 
   return (
     <ButtonAsyncModal
-      message="Resetovat veškerý pokrok"
+      buttonTitle="Resetovat veškerý pokrok"
       loadingMessage="Probíhá resetování..."
       isLoading={isLoading}
       modalTitle="Potvrzení resetu"

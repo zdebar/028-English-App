@@ -4,7 +4,7 @@ import { Modal } from '@/components/UI/Modal';
 import { TEXTS } from '@/config/texts';
 
 interface ButtonAsyncModalProps {
-  message: string;
+  buttonTitle: string;
   onConfirm?: () => void;
   isLoading?: boolean;
   disabled?: boolean;
@@ -17,7 +17,7 @@ interface ButtonAsyncModalProps {
 /**
  * Button component that displays a confirmation modal before executing an action.
  *
- * @param message Text to display on the button.
+ * @param buttonTitle Text to display on the button.
  * @param onConfirm Function to call when action is confirmed.
  * @param isLoading Whether the button is in loading state.
  * @param disabled Whether the button is disabled.
@@ -27,7 +27,7 @@ interface ButtonAsyncModalProps {
  * @param className Additional CSS classes for custom styling.
  */
 export default function ButtonAsyncModal({
-  message,
+  buttonTitle: message,
   onConfirm,
   isLoading = false,
   disabled = false,
