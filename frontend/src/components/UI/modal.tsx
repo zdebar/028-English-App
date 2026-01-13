@@ -26,10 +26,17 @@ export function Modal({ showModal, onConfirm, onClose, title, description }: Mod
   return (
     <>
       <OverlayMask onClose={onClose} />
-      <div className="fixed inset-0 z-1001 flex items-center justify-center">
+      <div
+        className="fixed inset-0 z-1001 flex items-center justify-center"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+      >
         <div className="card-width flex min-h-40 flex-col justify-between">
           <div className="color-base flex grow flex-col items-center gap-2 p-4 text-center">
-            <p className="font-bold">{title}</p>
+            <p id="modal-title" className="font-bold">
+              {title}
+            </p>
             <p>{description}</p>
           </div>
           <div className="flex gap-1">

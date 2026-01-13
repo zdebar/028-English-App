@@ -7,7 +7,10 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="flex w-full items-center justify-center gap-2 py-4 text-center text-sm">
+    <footer
+      className="flex w-full items-center justify-center gap-2 py-4 text-center text-sm"
+      aria-label={TEXTS.footerLabel}
+    >
       <p>{TEXTS.copyright(currentYear)}</p>
       <a href="/privacy-policy" className="hover:underline">
         {TEXTS.privacyPolicy}

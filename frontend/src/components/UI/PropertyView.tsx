@@ -1,3 +1,5 @@
+import { TEXTS } from '@/config/texts';
+
 type PropertyViewProps = {
   label: string;
   value: string | number | null | undefined;
@@ -15,7 +17,7 @@ export default function PropertyView({ label, value, className = '' }: PropertyV
   return (
     <dl className={`flex items-center ${className}`}>
       <dt className="inline-block w-35 shrink-0 font-bold">{label}</dt>
-      <dd>{value ?? 'Není k dispozici'}</dd>
+      <dd>{value ?? TEXTS.notAvailable}</dd>
     </dl>
   );
 }

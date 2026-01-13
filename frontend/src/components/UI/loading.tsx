@@ -22,7 +22,7 @@ export default function Loading({ text = 'Načítání...', timeDelay = 1000 }: 
   if (!show) return null;
 
   return (
-    <p role="status" aria-live="polite" className="text-center">
+    <p role="status" aria-live="polite" aria-busy="true" className="text-center">
       {text}
     </p>
   );

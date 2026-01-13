@@ -1,8 +1,7 @@
-import Button from '@/components/UI/buttons/Button';
-import CloseIcon from '@/components/UI/icons/CloseIcon';
-import ButtonAsyncModal from './buttons/ButtonAsyncModal';
+import CloseButton from '@/components/UI/buttons/CloseButton';
 import Hint from '@/components/UI/Hint';
 import { useOverlayStore } from '@/features/overlay/use-overlay-store';
+import ButtonAsyncModal from './buttons/ButtonAsyncModal';
 
 interface OverviewCardProps {
   titleText?: string;
@@ -51,9 +50,7 @@ export default function OverviewCard({
         <Hint visible={isOpen} className="top-0 left-3.5">
           obnovit pokrok
         </Hint>
-        <Button className="w-button grow-0" onClick={onClose}>
-          <CloseIcon />
-        </Button>
+        <CloseButton className="w-button grow-0" onClick={onClose} />
       </div>
       <div className="w-full grow p-4">{error ? <p>{error}</p> : children}</div>
     </div>

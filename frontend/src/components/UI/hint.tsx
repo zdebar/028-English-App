@@ -14,16 +14,9 @@ type HintProps = {
  * @param style Inline styles for the hint container.
  */
 export default function Hint({ visible, children, className = '', style }: HintProps) {
-  return (
-    visible && (
-      <div
-        className={`text-help pointer-events-none absolute z-2000 ${className}`}
-        style={{
-          ...style,
-        }}
-      >
-        {children}
-      </div>
-    )
-  );
+  return visible ? (
+    <div className={`text-help pointer-events-none absolute z-2000 ${className}`} style={style}>
+      {children}
+    </div>
+  ) : null;
 }
