@@ -37,7 +37,7 @@ export default function Dashboard({ className = '' }: DashboardProps) {
           />
         ))}
       </div>
-      <Hint visibility={isOpen} className="right-0 p-2">
+      <Hint visible={isOpen} className="right-0 p-2">
         dnes započato
       </Hint>
       <HelpButton className="pt-2" />

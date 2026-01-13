@@ -106,10 +106,12 @@ export default function PracticeCard() {
               }}
               aria-label="Přehrát audio"
             >
+              {/** Top Bar */}
               <div id="top-bar" className="relative flex h-8 w-full items-center justify-between">
                 <VolumeSlider setVolume={setVolume} />
                 <p className="text-notice">{audioError && 'bez audia'}</p>
               </div>
+              {/** Item Data */}
               <div id="item" className="flex h-full flex-col justify-center gap-1">
                 {showPlayHint && !direction && !audioError ? (
                   <div className="text-notice text-center">Stisknutím přehrajte audio</div>
@@ -141,19 +143,20 @@ export default function PracticeCard() {
                   </>
                 )}
               </div>
+              {/** Bottom Bar */}
               <div
                 className="relative flex h-8 w-full items-center justify-between"
                 id="bottom-bar"
               >
                 <p className="px-2 font-light">{currentItem?.progress}</p>
-                <Hint visibility={isOpen} style={{ bottom: '30px' }}>
+                <Hint visible={isOpen} style={{ bottom: '30px' }}>
                   pokrok
                 </Hint>
                 <p className="px-2 font-light">
                   {(userStats?.practiceCountToday || 0) + index} / {config.practice.dailyGoal}
                 </p>
                 <Hint
-                  visibility={isOpen}
+                  visible={isOpen}
                   style={{ bottom: '30px', right: '0' }}
                   className="flex flex-col items-end"
                 >
@@ -163,6 +166,7 @@ export default function PracticeCard() {
             </div>
             {/* Practice Controls */}
             <div id="practice-controls" className="relative flex flex-col gap-1">
+              {/** Top Row */}
               <div className="relative grid grid-cols-2 gap-1">
                 <Button onClick={() => fetchGrammar()} disabled={!grammar_id} className="relative">
                   <BookIcon />
@@ -171,7 +175,7 @@ export default function PracticeCard() {
                     className="absolute top-1 right-1"
                   />
                 </Button>
-                <Hint visibility={isOpen} style={{ top: '0px', left: '14px' }}>
+                <Hint visible={isOpen} className="top-0 left-3.5">
                   gramatika
                 </Hint>
                 <Button
@@ -182,11 +186,13 @@ export default function PracticeCard() {
                 >
                   <ForwardIcon />
                 </Button>
-                <Hint visibility={isOpen} style={{ top: '0px', right: '14px' }}>
+                <Hint visible={isOpen} className="top-0 right-3.5">
                   dokončit
                 </Hint>
               </div>
+              {/** Bottom Row */}
               {!revealed ? (
+                /** Not Revealed */
                 <div className="relative grid grid-cols-2 gap-1">
                   <Button
                     onClick={() => {
@@ -196,7 +202,7 @@ export default function PracticeCard() {
                   >
                     <BulbIcon />
                   </Button>
-                  <Hint visibility={isOpen} style={{ top: '0px', left: '14px' }}>
+                  <Hint visible={isOpen} className="top-0 left-3.5">
                     nápověda
                   </Hint>
                   <Button
@@ -213,22 +219,23 @@ export default function PracticeCard() {
                   >
                     <EyeIcon />
                   </Button>
-                  <Hint visibility={isOpen} style={{ top: '0px', right: '14px' }}>
+                  <Hint visible={isOpen} className="top-0 right-3.5">
                     odhalit
                   </Hint>
                 </div>
               ) : (
+                /** Revealed */
                 <div className="relative grid grid-cols-2 gap-1">
                   <Button onClick={() => handleNext(config.progress.minusProgress)}>
                     <MinusIcon />
                   </Button>
-                  <Hint visibility={isOpen} style={{ top: '0px', left: '14px' }}>
+                  <Hint visible={isOpen} className="top-0 left-3.5">
                     neznám
                   </Hint>
                   <Button onClick={() => handleNext(config.progress.plusProgress)}>
                     <PlusIcon />
                   </Button>
-                  <Hint visibility={isOpen} style={{ top: '0px', right: '14px' }}>
+                  <Hint visible={isOpen} className="top-0 right-3.5">
                     znám
                   </Hint>
                 </div>

@@ -48,7 +48,7 @@ export default function OverviewCard({
           disabled={!handleReset}
           className="shape-button-rectangular color-button flex grow items-center justify-start pl-4"
         />
-        <Hint visibility={isOpen} style={{ top: '0px', left: '14px' }}>
+        <Hint visible={isOpen} className="top-0 left-3.5">
           obnovit pokrok
         </Hint>
         <Button className="w-button grow-0" onClick={onClose}>
