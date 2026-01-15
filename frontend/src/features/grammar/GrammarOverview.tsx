@@ -1,13 +1,14 @@
-import { useState, useCallback } from 'react';
+import OverviewCard from '@/components/UI/OverviewCard';
+import { TEXTS } from '@/config/texts';
 import Grammar from '@/database/models/grammar';
 import UserItem from '@/database/models/user-items';
-import type { GrammarLocal } from '@/types/local.types';
-import ListOverview from './ListOverview';
-import OverviewCard from '@/components/UI/OverviewCard';
-import { useFetch } from '@/hooks/use-fetch';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import DOMPurify from 'dompurify';
 import HelpButton from '@/features/overlay/HelpButton';
+import { useFetch } from '@/hooks/use-fetch';
+import type { GrammarLocal } from '@/types/local.types';
+import DOMPurify from 'dompurify';
+import { useCallback, useState } from 'react';
+import ListOverview from './ListOverview';
 
 /**
  * GrammarOverview component displays a list of started grammar topics for the user.
@@ -46,8 +47,8 @@ export default function GrammarOverview() {
     <>
       {!cardVisible ? (
         <ListOverview
-          listTitle="Přehled gramatiky"
-          emptyTitle="Žádné započatá gramatika"
+          listTitle={TEXTS.grammarOverview}
+          emptyTitle={TEXTS.noStartedGrammar}
           array={grammarArray}
           loading={loading}
           error={error}
@@ -60,18 +61,18 @@ export default function GrammarOverview() {
       ) : (
         <div className="relative flex w-full grow flex-col items-center justify-start">
           <OverviewCard
-            titleText={grammarArray?.[currentIndex].name}
+            titleText={grammarArray?.[currentIndex]?.name}
             onClose={() => setCardVisible(false)}
             handleReset={handleClearGrammarUserItems}
           >
-            {grammarArray?.[currentIndex].note ? (
+            {grammarArray?.[currentIndex]?.note ? (
               <div
                 dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(grammarArray[currentIndex].note),
+                  __html: DOMPurify.sanitize(grammarArray?.[currentIndex]?.note ?? ''),
                 }}
               />
             ) : (
-              'Žádné poznámky k zobrazení.'
+              TEXTS.noNotesToDisplay
             )}
           </OverviewCard>
           <HelpButton className="self-end" />

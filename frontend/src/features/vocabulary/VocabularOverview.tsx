@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
-import UserItem from '@/database/models/user-items';
-import type { UserItemLocal } from '@/types/local.types';
-import { useFetch } from '@/hooks/use-fetch';
-import { useAuthStore } from '@/features/auth/use-auth-store';
 import Loading from '@/components/UI/Loading';
-import VocabularyList from './VocabularyList';
+import config from '@/config/config';
+import UserItem from '@/database/models/user-items';
+import { useAuthStore } from '@/features/auth/use-auth-store';
+import { useFetch } from '@/hooks/use-fetch';
+import type { UserItemLocal } from '@/types/local.types';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import VocabularyDetailCard from './VocabularyDetailCard';
+import VocabularyList from './VocabularyList';
 
 /**
  * VocabularyOverview component
@@ -16,10 +17,8 @@ export default function VocabularyOverview() {
   const { userId } = useAuthStore();
 
   const fetchVocabulary = useCallback(async () => {
-    if (userId) {
-      return await UserItem.getUserStartedVocabulary(userId);
-    }
-    return [];
+    if (!userId) return [];
+    return UserItem.getUserStartedVocabulary(userId);
   }, [userId]);
 
   const {
@@ -29,31 +28,55 @@ export default function VocabularyOverview() {
     setShouldReload,
   } = useFetch<UserItemLocal[]>(fetchVocabulary);
 
-  const [filteredWords, setFilteredWords] = useState<UserItemLocal[]>([]);
-  const [visibleCount, setVisibleCount] = useState(8);
+  const [visibleCount, setVisibleCount] = useState(config.vocabulary.itemsPerPage);
   const [cardVisible, setCardVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [displayField, setDisplayField] = useState<'czech' | 'english'>('czech');
-  const selectedWord = filteredWords ? filteredWords[currentIndex] : null;
+
+  const filteredWords = useMemo(() => {
+    if (!words) return [];
+
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+    const normalizedWords = words
+      .filter((item) => {
+        const value = (item[displayField] ?? '').toLowerCase();
+        return normalizedSearch.length === 0 ? true : value.startsWith(normalizedSearch);
+      })
+      .sort((a, b) => {
+        const aValue = a[displayField] ?? '';
+        const bValue = b[displayField] ?? '';
+
+        const lengthDiff = aValue.length - bValue.length;
+        if (lengthDiff !== 0) return lengthDiff;
+        return aValue.localeCompare(bValue);
+      });
+
+    return normalizedWords;
+  }, [words, searchTerm, displayField]);
+
+  const selectedWord =
+    currentIndex >= 0 && currentIndex < filteredWords.length ? filteredWords[currentIndex] : null;
 
   useEffect(() => {
-    if (!words) return;
-    const filtered = words
-      .filter((item) => item[displayField]?.toLowerCase().startsWith(searchTerm.toLowerCase()))
-      .sort((a, b) => {
-        const lengthDiff = a[displayField]?.length - b[displayField].length;
-        if (lengthDiff !== 0) return lengthDiff;
-        return a[displayField].localeCompare(b[displayField]);
-      });
-    setFilteredWords(filtered);
-  }, [words, searchTerm, displayField]);
+    setVisibleCount(config.vocabulary.itemsPerPage);
+    setCurrentIndex(0);
+  }, [searchTerm, displayField]);
+
+  useEffect(() => {
+    if (!cardVisible) return;
+    if (!selectedWord) {
+      setCardVisible(false);
+      setCurrentIndex(0);
+    }
+  }, [cardVisible, selectedWord]);
 
   const handleClearUserItem = async () => {
     const itemId = selectedWord?.item_id;
     if (typeof itemId === 'number' && userId) {
       await UserItem.resetUserItemById(userId, itemId);
       setShouldReload(true);
+      setCardVisible(false);
     }
   };
 

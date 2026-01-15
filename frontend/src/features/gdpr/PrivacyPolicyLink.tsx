@@ -1,3 +1,5 @@
+import { TEXTS } from '@/config/texts';
+
 /**
  * PrivacyPolicyLink component renders a link to the privacy policy page.
  *
@@ -6,8 +8,8 @@
  */
 export default function PrivacyPolicyLink({ className = '' }: { className?: string }) {
   return (
-    <a href="/privacy-policy" className={`text-link ${className}`}>
-      Zásady ochrany osobních údajů
+    <a href="/privacy-policy" className={className}>
+      {TEXTS.privacyPolicy}
     </a>
   );
 }

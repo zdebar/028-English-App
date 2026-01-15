@@ -11,10 +11,10 @@ export default function Profile() {
   return (
     <div className="card-width grow-0">
       <Button onClick={() => navigate('/grammar')} className="grow-0">
-        <p>{TEXTS.profileGrammarOverview}</p>
+        <p>{TEXTS.grammarOverview}</p>
       </Button>
       <Button onClick={() => navigate('/vocabulary')} className="grow-0">
-        <p>{TEXTS.profileVocabularyOverview}</p>
+        <p>{TEXTS.vocabularyOverview}</p>
       </Button>
 
       <ResetAllProgressButton className="mt-4" />

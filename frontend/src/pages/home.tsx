@@ -15,7 +15,7 @@ export default function Home() {
   return (
     <div className="max-w-hero relative flex w-full flex-col items-center justify-start gap-4 text-center">
       <h1 className="pt-12 pb-6 landscape:pt-6">{TEXTS.appTitle}</h1>
-      <p className="text-notice color-notice">{TEXTS.appSubtitle}</p>
+      <p className="notification error-warning">{TEXTS.appSubtitle}</p>
       <p className="px-4">{TEXTS.appDescription}</p>
 
       {!userId ? (

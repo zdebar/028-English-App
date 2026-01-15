@@ -42,4 +42,24 @@
   .card-height {
     @apply max-h-card min-h-card h-full;
   }
+
+  /** TEXT STYLES **/
+  .error-warning {
+    @apply font-headings text-center text-xl;
+  }
+
+  .notification {
+    @apply text-notice-light dark:text-notice-dark;
+  }
+
+  /** TOAST STYLES **/
+  .toast-success {
+    @apply bg-green-500 text-white;
+  }
+  .toast-error {
+    @apply bg-red-500 text-white;
+  }
+  .toast-info {
+    @apply bg-blue-500 text-white;
+  }
 }

@@ -15,10 +15,11 @@ type HelpButtonProps = {
  */
 export default function HelpButton({ className = '', style }: HelpButtonProps) {
   const { open } = useOverlayStore();
+
   return (
     <button
       type="button"
-      className={`absolute top-7 z-10 flex h-10 w-10 items-center justify-center ${className}`}
+      className={`absolute z-10 flex h-10 w-10 items-center justify-center ${className}`}
       style={style}
       onClick={open}
     >

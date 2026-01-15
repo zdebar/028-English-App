@@ -5,5 +5,8 @@
  * @throws Error if progress is not a positive integer.
  */
 export function alternateDirection(progress: number): boolean {
+  if (!Number.isInteger(progress) || progress < 0) {
+    throw new Error('progress must be a non-negative integer');
+  }
   return progress % 2 === 0;
 }

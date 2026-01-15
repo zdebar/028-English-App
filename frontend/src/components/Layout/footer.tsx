@@ -1,4 +1,4 @@
-import { TEXTS } from '@/config/texts';
+import PrivacyPolicyLink from '@/features/gdpr/PrivacyPolicyLink';
 
 /**
  * Footer component that displays the current year copyright and a link to the privacy policy.
@@ -8,8 +8,8 @@ export default function Footer() {
 
   return (
     <footer className="flex w-full items-center justify-center gap-2 py-4 text-center text-sm">
-      <p>{TEXTS.copyright(currentYear)}</p>
-      <a href="/privacy-policy">{TEXTS.privacyPolicy}</a>
+      <p>@{currentYear}</p>
+      <PrivacyPolicyLink />
     </footer>
   );
 }

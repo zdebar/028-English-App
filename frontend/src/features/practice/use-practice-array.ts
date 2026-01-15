@@ -10,7 +10,7 @@ import { useCallback, useEffect, useState } from 'react';
  * @param userId The unique identifier of the user whose practice deck is managed.
  * @returns An object containing the deck array, current item, index, nextIndex function, loading and error states, and setShouldReload function.
  */
-export function useArray(userId: string) {
+export function usePracticeArray(userId: string) {
   const [array, setArray] = useState<UserItemPractice[]>([]);
   const [index, setIndex] = useState(0);
 

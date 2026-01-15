@@ -113,12 +113,12 @@ export default function PracticeCard() {
               {/** Top Bar */}
               <div id="top-bar" className="relative flex h-8 w-full items-center justify-between">
                 <VolumeSlider setVolume={setVolume} />
-                <p className="text-notice">{audioError && 'bez audia'}</p>
+                <p className="error-warning">{audioError && 'bez audia'}</p>
               </div>
               {/** Item Data */}
               <div id="item" className="flex h-full flex-col justify-center gap-1">
                 {showPlayHint && !direction && !audioError ? (
-                  <div className="text-notice text-center">Stisknutím přehrajte audio</div>
+                  <div className="error-warning text-center">Stisknutím přehrajte audio</div>
                 ) : (
                   <>
                     <p className="text-center font-bold">

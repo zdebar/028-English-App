@@ -1,3 +1,4 @@
+import { TEXTS } from '@/config/texts';
 import { useMemo } from 'react';
 
 interface DirectionDropdownProps<T> {
@@ -26,7 +27,7 @@ export default function DirectionDropdown<T>({
   className = '',
 }: DirectionDropdownProps<T>) {
   if (!options.some((option) => option.value === value)) {
-    console.warn(`Hodnota "${value}" není platná pro DirectionDropdown.`);
+    console.error(`Value "${value}" is not valid for DirectionDropdown.`);
   }
 
   const memoizedOptions = useMemo(() => {
@@ -40,7 +41,7 @@ export default function DirectionDropdown<T>({
   return (
     <div className={`centered ${className} border-none`}>
       <label htmlFor="direction-dropdown" className="sr-only">
-        Směr
+        {TEXTS.translationDirection}
       </label>
       <select
         id="direction-dropdown"

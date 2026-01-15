@@ -1,5 +1,6 @@
 import Button from '@/components/UI/buttons/Button';
 import CloseIcon from '@/components/UI/icons/CloseIcon';
+import { TEXTS } from '@/config/texts';
 
 /**
  * Minimal type for list items.
@@ -32,7 +33,7 @@ type ListOverviewProps = {
  */
 export default function ListOverview({
   listTitle,
-  emptyTitle = 'Žádné položky k zobrazení',
+  emptyTitle = TEXTS.noNotesToDisplay,
   array,
   loading,
   error,
@@ -43,7 +44,7 @@ export default function ListOverview({
     <div className="card-width flex flex-col justify-start gap-1">
       <div className="h-button flex items-center justify-between gap-1">
         <div className="h-button flex grow justify-start p-4">
-          {loading ? 'Načítání...' : error || listTitle}
+          {loading ? TEXTS.buttonLoading : error || listTitle}
         </div>
         <Button className="w-button grow-0" onClick={onClose}>
           <CloseIcon />

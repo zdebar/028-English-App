@@ -38,15 +38,6 @@
     @apply bg-background-light text-light dark:bg-background-dark dark:text-dark border-none;
   }
 
-  .color-notice {
-    @apply text-notice-light dark:text-notice-dark;
-  }
-
-  /* TEXT STYLES */
-  .text-notice {
-    @apply font-headings text-center text-xl;
-  }
-
   .text-bar {
     @apply font-body text-light text-center text-sm font-bold;
   }

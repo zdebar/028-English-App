@@ -45,6 +45,10 @@ const config = {
   practice: {
     dailyGoal: 400, // Number of new items recommended for daily practice
   },
+
+  vocabulary: {
+    itemsPerPage: 8, // Number of vocabulary items per page
+  },
 };
 
 export default config;

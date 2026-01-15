@@ -1,8 +1,8 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { alternateDirection } from '@/utils/practice.utils';
+import { alternateDirection } from '@/features/practice/practice.utils';
 import { useUserProgress } from '@/features/practice/use-user-progress';
 import type { UserItemPractice } from '@/types/local.types';
-import { useArray } from '@/features/practice/use-array';
+import { usePracticeArray } from '@/features/practice/use-practice-array';
 
 /**
  * usePracticeDeck hook manages the practice deck and user progress for a given user.
@@ -12,7 +12,7 @@ import { useArray } from '@/features/practice/use-array';
 export function usePracticeDeck(userId: string) {
   const { updateUserItemsInDB } = useUserProgress(userId);
   const { array, currentItem, index, nextIndex, loading, error, setShouldReload } =
-    useArray(userId);
+    usePracticeArray(userId);
 
   const userProgressRef = useRef<UserItemPractice[]>([]);
   const direction = currentItem ? alternateDirection(currentItem?.progress) : false;
@@ -34,7 +34,6 @@ export function usePracticeDeck(userId: string) {
   const nextItem = useCallback(
     async (progressChange: number = 0) => {
       if (!currentItem) {
-        console.warn('No current item to update progress for.');
         return;
       }
 

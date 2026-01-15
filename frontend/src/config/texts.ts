@@ -3,12 +3,37 @@ export const TEXTS = {
   userLabel: 'Uživatel',
   notAvailable: 'Není k dispozici',
   failureToast: 'Nastala chyba. Zkuste to prosím později.',
+  noNotesToDisplay: 'Žádné poznámky k zobrazení.',
   confirm: 'Ano',
   cancel: 'Ne',
+  pageNotFound: 'Stránka nenalezena',
+  and: 'a',
 
-  // Footer
-  copyright: (year: number) => `© ${year}`,
+  // Theme Switch
+  themeLight: 'Přepnout na tmavý režim',
+  themeDark: 'Přepnout na světlý režim',
+
+  // Privacy Policy
   privacyPolicy: 'Zásady ochrany osobních údajů',
+
+  // Vocabulary
+  next: 'další',
+  nextFivePlus: 'dalších',
+  translationDirection: 'Směr překladu',
+  enterPrompt: 'Zadejte slovičko ...',
+  noStartedVocabulary: 'Žádná započatá slovíčka',
+  czech: 'česky',
+  english: 'anglicky',
+  pronunciation: 'výslovnost',
+  progress: 'pokrok',
+  startedAt: 'započato',
+  updatedAt: 'změněno',
+  nextAt: 'další',
+  masteredAt: 'naučeno',
+  finishedAt: 'ukončeno',
+
+  // Grammar
+  noStartedGrammar: 'Žádná započatá gramatika',
 
   // Buttons
   buttonDefault: 'Potvrdit',
@@ -31,8 +56,8 @@ export const TEXTS = {
     'Trénujte až 200 vět za 20 minut denně, a dosáhněte základní znalosti jazyka za zlomek běžného učebního času.',
 
   // Profile
-  profileGrammarOverview: 'Přehled gramatiky',
-  profileVocabularyOverview: 'Přehled slovíček',
+  grammarOverview: 'Přehled gramatiky',
+  vocabularyOverview: 'Přehled slovíček',
 
   // Dashboard
   startedTodayHint: 'dnes započato',

@@ -1,7 +1,8 @@
 import OverviewCard from '@/components/UI/OverviewCard';
 import PropertyView from '@/components/UI/PropertyView';
-import { shortenDate } from '@/features/vocabulary/vocabulary.utils';
+import { TEXTS } from '@/config/texts';
 import HelpButton from '@/features/overlay/HelpButton';
+import { shortenDate } from '@/features/vocabulary/vocabulary.utils';
 import type { UserItemLocal } from '@/types/local.types';
 
 interface VocabularyDetailCardProps {
@@ -24,50 +25,54 @@ export default function VocabularyDetailCard({
   onReset,
 }: VocabularyDetailCardProps) {
   return (
-    <div className="relative flex w-full grow flex-col items-center justify-start">
+    <div className="relative flex w-full flex-col items-center justify-start">
       <OverviewCard titleText={selectedWord?.czech} onClose={onClose} handleReset={onReset}>
         <div className="flex flex-col gap-4">
           <div>
             <PropertyView label="item_id" className="h-attribute" value={selectedWord?.item_id} />
-            <PropertyView label="česky" className="h-attribute" value={selectedWord?.czech} />
-            <PropertyView label="anglicky" value={selectedWord?.english} />
+            <PropertyView label={TEXTS.czech} className="h-attribute" value={selectedWord?.czech} />
+            <PropertyView label={TEXTS.english} value={selectedWord?.english} />
             <PropertyView
-              label="výslovnost"
+              label={TEXTS.pronunciation}
               className="h-attribute"
               value={selectedWord?.pronunciation}
             />
-            <PropertyView label="pokrok" className="h-attribute" value={selectedWord?.progress} />
+            <PropertyView
+              label={TEXTS.progress}
+              className="h-attribute"
+              value={selectedWord?.progress}
+            />
           </div>
           <div>
             <PropertyView
-              label="start"
+              label={TEXTS.startedAt}
               className="h-attribute"
               value={shortenDate(selectedWord?.started_at)}
             />
             <PropertyView
-              label="změněno"
+              label={TEXTS.updatedAt}
               className="h-attribute"
               value={shortenDate(selectedWord?.updated_at)}
             />
             <PropertyView
-              label="další"
+              label={TEXTS.nextAt}
               className="h-attribute"
               value={shortenDate(selectedWord?.next_at)}
             />
             <PropertyView
-              label="naučeno"
+              label={TEXTS.masteredAt}
               className="h-attribute"
               value={shortenDate(selectedWord?.started_at)}
             />
             <PropertyView
-              label="ukončeno"
+              label={TEXTS.finishedAt}
               className="h-attribute"
               value={shortenDate(selectedWord?.mastered_at)}
             />
           </div>
         </div>
       </OverviewCard>
-      <HelpButton className="self-end" />
+      <HelpButton className="right-2 -bottom-12" />
     </div>
   );
 }

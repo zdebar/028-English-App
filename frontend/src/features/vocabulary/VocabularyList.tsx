@@ -1,7 +1,9 @@
 import Button from '@/components/UI/buttons/Button';
-import CloseIcon from '@/components/UI/icons/CloseIcon';
+import CloseButton from '@/components/UI/buttons/CloseButton';
+import config from '@/config/config';
+import { TEXTS } from '@/config/texts';
 import DirectionDropdown from '@/features/vocabulary/DirectionDropdown';
-import { getMoreText } from '@/features/vocabulary/vocabulary.utils';
+import { getMoreTextInCzech } from '@/features/vocabulary/vocabulary.utils';
 import { type UserItemLocal } from '@/types/local.types';
 
 interface VocabularyListProps {
@@ -49,7 +51,7 @@ export default function VocabularyList({
 
   return (
     <div className="card-width relative flex h-full flex-col justify-start gap-1">
-      <div className="color-base flex flex-col gap-1">
+      <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between gap-1">
           {error ? (
             <div className="h-button flex grow items-center justify-start border border-dashed">
@@ -66,15 +68,13 @@ export default function VocabularyList({
               className="h-button flex grow items-center border border-dashed"
             />
           )}
-          <Button className="w-button grow-0" onClick={onClose}>
-            <CloseIcon />
-          </Button>
+          <CloseButton className="w-button grow-0" onClick={onClose} />
         </div>
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Zadejte slovo..."
+          placeholder={TEXTS.enterPrompt}
           className="h-input color-base border border-dashed pl-4"
         />
       </div>
@@ -87,20 +87,20 @@ export default function VocabularyList({
                 className="h-input flex grow-0 justify-start p-4 text-left"
                 onClick={() => onSelect(index)}
               >
-                {displayField === 'czech' ? ` ${item.czech} ` : ` ${item.english} `}
+                {displayField === 'czech' ? item.czech : item.english}
               </Button>
             ))}
             {remainingCount > 0 && (
               <button
-                onClick={() => setVisibleCount(visibleCount + 8)}
+                onClick={() => setVisibleCount(visibleCount + config.vocabulary.itemsPerPage)}
                 className="mt-2 w-full text-center font-bold hover:underline"
               >
-                ... a {remainingCount + ' ' + getMoreText(remainingCount)}
+                ... {TEXTS.and + ' ' + remainingCount + ' ' + getMoreTextInCzech(remainingCount)}
               </button>
             )}
           </>
         ) : (
-          <p className="h-input flex justify-start pl-4 text-left">Žádná započatá slovíčka</p>
+          <p className="h-input flex justify-start pl-4 text-left">{TEXTS.noStartedVocabulary}</p>
         )}
       </div>
     </div>
