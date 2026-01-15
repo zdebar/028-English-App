@@ -1,7 +1,6 @@
 import HeaderButton from '@/components/UI/buttons/HeaderButton';
 import UserAvatar from '@/components/UI/UserAvatar';
 
-import { TEXTS } from '@/config/texts';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 
 import ThemeSwitch from '@/features/theme/ThemeSwitch';
@@ -15,11 +14,8 @@ export default function Header() {
   const { userId } = useAuthStore();
 
   return (
-    <header
-      className="header-fixed relative z-20 flex w-full flex-none justify-between"
-      aria-label={TEXTS.headerLabel}
-    >
-      <nav className="sideheader" role="navigation" aria-label={TEXTS.navMainLabel}>
+    <header className="header-fixed relative z-20 flex w-full flex-none justify-between">
+      <nav className="side-header m-4 flex gap-2" role="navigation">
         <HeaderButton to="/">
           <HomeIcon />
         </HeaderButton>
@@ -27,7 +23,7 @@ export default function Header() {
           <AcademicCapIcon />
         </HeaderButton>
       </nav>
-      <nav className="sideheader rightheader" role="navigation" aria-label={TEXTS.navUserLabel}>
+      <nav className="right-header side-header m-4 flex gap-2" role="navigation">
         <ThemeSwitch />
         <HeaderButton to="/profile" disabled={!userId}>
           <UserAvatar />

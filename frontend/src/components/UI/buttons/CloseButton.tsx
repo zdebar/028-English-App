@@ -1,4 +1,5 @@
 import { useEffect, useCallback } from 'react';
+import Button from './Button';
 
 import CloseIcon from '@/components/UI/icons/CloseIcon';
 
@@ -33,11 +34,8 @@ export default function CloseButton({ onClick, className = '' }: CloseButtonProp
   }, [handleKeyDown]);
 
   return (
-    <button
-      className={`color-button flex items-center justify-center ${className}`}
-      onClick={onClick}
-    >
+    <Button className={`flex items-center justify-center ${className}`} onClick={onClick}>
       <CloseIcon />
-    </button>
+    </Button>
   );
 }

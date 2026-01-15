@@ -2,10 +2,12 @@
   /** BUTTON STYLES **/
   .shape-button-rectangular {
     @apply h-button font-body shrink-0 grow basis-auto font-bold tracking-wide;
+    @apply flex items-center justify-center;
   }
 
   .shape-button-header {
     @apply size-button rounded-full;
+    @apply flex items-center justify-center;
   }
 
   .shape-overlay {
@@ -24,10 +26,5 @@
 
   .card-height {
     @apply max-h-card min-h-card h-full;
-  }
-
-  /** HEADER STYLES **/
-  .sideheader {
-    @apply m-4 flex gap-2;
   }
 }

@@ -4,10 +4,6 @@
     @apply font-body text-light dark:text-dark bg-background-light dark:bg-background-dark;
   }
 
-  button {
-    @apply flex items-center justify-center;
-  }
-
   h1 {
     @apply font-headings pb-2 text-4xl font-thin;
   }

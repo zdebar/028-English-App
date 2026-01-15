@@ -3,10 +3,8 @@ export const TEXTS = {
   copyright: (year: number) => `© ${year}`,
   privacyPolicy: 'Zásady ochrany osobních údajů',
   footerLabel: 'Patička stránky',
-  // Header
-  headerLabel: 'Hlavička stránky',
-  navMainLabel: 'Hlavní navigace',
-  navUserLabel: 'Uživatelská navigace',
+  // ??
+
   buttonDefault: 'Potvrdit',
   buttonLoading: 'Načítání...',
   // Modals
