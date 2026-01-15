@@ -1,5 +1,6 @@
-import Button from './buttons/Button';
 import OverlayMask from '@/components/UI/OverlayMask';
+import { TEXTS } from '@/config/texts';
+import Button from './buttons/Button';
 
 type ModalProps = {
   showModal: boolean;
@@ -26,22 +27,15 @@ export function Modal({ showModal, onConfirm, onClose, title, description }: Mod
   return (
     <>
       <OverlayMask onClose={onClose} />
-      <div
-        className="fixed inset-0 z-1001 flex items-center justify-center"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modal-title"
-      >
-        <div className="card-width flex min-h-40 flex-col justify-between">
+      <div className="pointer-events-none fixed inset-0 z-1001 flex min-h-40 items-center justify-center">
+        <div className="card-width pointer-events-auto flex flex-col justify-between">
           <div className="color-base flex grow flex-col items-center gap-2 p-4 text-center">
-            <p id="modal-title" className="font-bold">
-              {title}
-            </p>
+            <p className="font-bold">{title}</p>
             <p>{description}</p>
           </div>
           <div className="flex gap-1">
-            <Button onClick={onClose}>Ne</Button>
-            <Button onClick={onConfirm}>Ano</Button>
+            <Button onClick={onClose}>{TEXTS.cancel}</Button>
+            <Button onClick={onConfirm}>{TEXTS.confirm}</Button>
           </div>
         </div>
       </div>

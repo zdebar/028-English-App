@@ -1,10 +1,11 @@
+import Hint from '@/components/UI/Hint';
+import { TEXTS } from '@/config/texts';
 import LessonBar from '@/features/dashboard/BlockBar';
 import { getLessonProgress } from '@/features/dashboard/dashboard.utils';
-import type { LessonsLocal } from '@/types/local.types';
 import { useUserStore } from '@/features/dashboard/use-user-store';
 import HelpButton from '@/features/overlay/HelpButton';
-import Hint from '@/components/UI/Hint';
 import { useOverlayStore } from '@/features/overlay/use-overlay-store';
+import type { LessonsLocal } from '@/types/local.types';
 
 type DashboardProps = {
   className?: string;
@@ -19,28 +20,27 @@ type DashboardProps = {
 export default function Dashboard({ className = '' }: DashboardProps) {
   const { userStats } = useUserStore();
   const { isOpen } = useOverlayStore();
+
   const lessonProgress: LessonsLocal[] = userStats
     ? getLessonProgress(userStats.startedCount || 0, userStats.startedCountToday || 0)
     : [];
 
   return (
-    <div>
-      <div
-        className={`max-w-card min-w-card relative mx-auto flex w-full flex-col gap-1 ${className}`}
-      >
-        {lessonProgress.map(({ lessonId, previousCount, todayCount }) => (
-          <LessonBar
-            key={lessonId}
-            lessonNumber={lessonId}
-            previousCount={previousCount}
-            todayCount={todayCount}
-          />
-        ))}
-      </div>
-      <Hint visible={isOpen} className="right-0 p-2">
-        dnes započato
+    <div
+      className={`max-w-card min-w-card relative mx-auto flex w-full flex-col gap-1 ${className}`}
+    >
+      {lessonProgress.map(({ lessonId, previousCount, todayCount }) => (
+        <LessonBar
+          key={lessonId}
+          lessonNumber={lessonId}
+          previousCount={previousCount}
+          todayCount={todayCount}
+        />
+      ))}
+      <Hint visible={isOpen} className="right-3.5 pt-10">
+        {TEXTS.startedTodayHint}
       </Hint>
-      <HelpButton className="pt-2" />
+      <HelpButton />
     </div>
   );
 }

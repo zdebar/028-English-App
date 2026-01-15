@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { TEXTS } from '@/config/texts';
 
 type LoadingProps = {
   text?: string;
@@ -11,7 +12,7 @@ type LoadingProps = {
  * @param text Loading message to display.
  * @param timeDelay Delay before showing the loading message (ms).
  */
-export default function Loading({ text = 'Načítání...', timeDelay = 1000 }: LoadingProps) {
+export default function Loading({ text = TEXTS.buttonLoading, timeDelay = 1000 }: LoadingProps) {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -21,9 +22,5 @@ export default function Loading({ text = 'Načítání...', timeDelay = 1000 }: 
 
   if (!show) return null;
 
-  return (
-    <p role="status" aria-live="polite" aria-busy="true" className="text-center">
-      {text}
-    </p>
-  );
+  return <p>{text}</p>;
 }

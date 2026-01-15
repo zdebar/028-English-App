@@ -58,7 +58,7 @@ export default function BlockBar({
         {/* Nový pokrok */}
         <div
           className="bg-new-progress-light dark:bg-new-progress-dark absolute top-0 left-0 h-full"
-          style={{ width: `${previousWidth + todayWidth}%` }}
+          style={{ width: `${Math.min(previousWidth + todayWidth, 100)}%` }}
         ></div>
         {/* Předchozí pokrok */}
         <div
@@ -66,16 +66,19 @@ export default function BlockBar({
           style={{ width: `${previousWidth}%` }}
         ></div>
         {/* Dělení */}
-        {Array.from({ length: divisions }, (_, index) => {
-          const position = (index / divisions) * 100;
-          return (
-            <div
-              key={index}
-              className="border-divisions absolute top-0 h-full border-l"
-              style={{ left: `${position}%` }}
-            ></div>
-          );
-        })}
+        {(() => {
+          const safeDivisions = Math.max(1, divisions || 0);
+          return Array.from({ length: safeDivisions }, (_, index) => {
+            const position = (index / safeDivisions) * 100;
+            return (
+              <div
+                key={index}
+                className="border-divisions absolute top-0 h-full border-l"
+                style={{ left: `${position}%` }}
+              ></div>
+            );
+          });
+        })()}
       </div>
     </div>
   );

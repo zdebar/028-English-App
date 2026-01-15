@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import ButtonAsyncModal from '../../components/UI/buttons/ButtonAsyncModal';
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import { TEXTS } from '@/config/texts';
 
 /**
  * SignoutButton component for signing out the user.
@@ -15,10 +16,10 @@ export default function SignoutButton() {
     setIsLoading(true);
     try {
       await handleLogout();
-      showToast('Úspěšně jste se odhlásili.', 'success');
+      showToast(TEXTS.signoutSuccessToast, 'success');
     } catch (error) {
       console.error('Error on user logout:', error);
-      showToast('Nastala chyba při odhlašování. Zkuste to prosím později.', 'error');
+      showToast(TEXTS.failureToast, 'error');
     } finally {
       setIsLoading(false);
     }
@@ -26,13 +27,11 @@ export default function SignoutButton() {
 
   return (
     <ButtonAsyncModal
-      buttonTitle="Odhlásit se"
+      buttonTitle={TEXTS.signoutButtonTitle}
       isLoading={isLoading}
-      loadingMessage="Probíhá odhlašování..."
-      modalTitle="Potvrzení odhlášení"
-      modalDescription="Opravdu se chcete odhlásit?"
+      modalDescription={TEXTS.signoutModalDescription}
       onConfirm={handleSignout}
-      className="button-rectangular color-button grow-0"
+      className="button-rectangular color-button w-full grow-0"
     />
   );
 }

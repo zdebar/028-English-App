@@ -1,4 +1,4 @@
-import { useEscapeKey } from '@/hooks/use-escape-key';
+import { useKey } from '@/hooks/use-key';
 import Button from './Button';
 import CloseIcon from '@/components/UI/icons/CloseIcon';
 
@@ -14,7 +14,7 @@ interface CloseButtonProps {
  * @param className Additional CSS classes for custom styling.
  */
 export default function CloseButton({ onClick, className = '' }: CloseButtonProps) {
-  useEscapeKey(onClick);
+  useKey(onClick);
 
   return (
     <Button className={`flex items-center justify-center ${className}`} onClick={onClick}>

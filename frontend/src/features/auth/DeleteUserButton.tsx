@@ -1,11 +1,12 @@
-import { useState } from 'react';
-import { useToastStore } from '@/features/toast/use-toast-store';
-import ButtonAsyncModal from '../../components/UI/buttons/ButtonAsyncModal';
-import { useAuthStore } from '@/features/auth/use-auth-store';
 import { supabaseInstance } from '@/config/supabase.config';
-import UserItem from '@/database/models/user-items';
+import { TEXTS } from '@/config/texts';
 import Metadata from '@/database/models/metadata';
+import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
+import { useAuthStore } from '@/features/auth/use-auth-store';
+import { useToastStore } from '@/features/toast/use-toast-store';
+import { useState } from 'react';
+import ButtonAsyncModal from '../../components/UI/buttons/ButtonAsyncModal';
 
 /**
  * DeleteUserButton component for deleting the current user's account.
@@ -24,33 +25,26 @@ export default function DeleteUserButton() {
       const { error: deleteError } = await supabaseInstance.functions.invoke('delete-user', {
         body: { userId },
       });
+
       if (deleteError) {
         throw deleteError;
       }
 
-      // Set deleted_at in table users
-      const response = await supabaseInstance
-        .from('users')
-        .update({
-          deleted_at: new Date().toISOString(),
-        })
-        .eq('id', userId);
-
-      if (response.error) {
-        throw response.error;
+      try {
+        await UserItem.syncUserItemsData(userId); // Sync before deletion, for potential future recovery
+        await UserScore.syncUserScoreData(userId);
+        await UserItem.deleteAllUserItems(userId);
+        await Metadata.deleteSyncRow('user_items', userId);
+        await Metadata.deleteSyncRow('user_scores', userId);
+      } catch (cleanupError) {
+        console.error('Local cleanup error after user deletion:', cleanupError);
       }
 
-      await UserItem.syncUserItemsData(userId);
-      await UserScore.syncUserScoreData(userId);
-      await UserItem.deleteAllUserItems(userId);
-      await Metadata.deleteSyncRow('user_items', userId);
-      await Metadata.deleteSyncRow('user_scores', userId);
-
-      showToast('Váš uživatelský účet byl úspěšně smazán.', 'success');
+      showToast(TEXTS.deleteUserSuccessToast, 'success');
       await supabaseInstance.auth.signOut();
     } catch (error) {
       console.error('Error deleting user:', error);
-      showToast('Nastala chyba při mazání uživatelského účtu. Zkuste to prosím později.', 'error');
+      showToast(TEXTS.failureToast, 'error');
     } finally {
       setIsLoading(false);
     }
@@ -58,13 +52,12 @@ export default function DeleteUserButton() {
 
   return (
     <ButtonAsyncModal
-      buttonTitle="Smazat uživatelský účet"
-      loadingMessage="Probíhá mazání..."
+      buttonTitle={TEXTS.deleteUserButtonTitle}
+      disabled={isLoading || !userId}
       isLoading={isLoading}
-      modalTitle="Potvrzení mazání uživatelského účtu"
-      modalDescription="Opravdu chcete smazat uživatelský účet? Vaše data budou uchována příštích 30 dní, poté budou nenávratně smazána. Před smazáním můžete kdykoliv obnovit svůj účet obětovným přihlášením."
+      modalDescription={TEXTS.deleteUserModalDescription}
       onConfirm={handleDelete}
-      className="button-rectangular color-button grow-0"
+      className="button-rectangular button-color w-full grow-0"
     />
   );
 }

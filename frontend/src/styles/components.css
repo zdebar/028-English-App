@@ -5,20 +5,28 @@
     @apply flex items-center justify-center;
   }
 
-  .button-practice {
+  .button-color {
+    /* Practice Card Buttons */
     @apply cursor-pointer border-2;
     @apply bg-audio-light border-audio-light; /* Theming Light */
     @apply dark:bg-audio-dark dark:border-audio-dark; /* Theming Dark */
     @apply hover:border-light dark:hover:border-dark; /* Hover Borders */
+    @apply disabled:cursor-default disabled:border-none disabled:bg-inherit disabled:hover:bg-inherit; /* Disabled States */
   }
 
-  .shape-button-header {
+  /** HEADER BUTTON STYLES **/
+
+  .button-header {
     @apply size-button rounded-full;
     @apply flex items-center justify-center;
   }
 
-  .shape-overlay {
-    @apply pointer-events-auto fixed inset-0 top-0 flex items-center justify-center;
+  .color-header {
+    @apply hover:text-light hover:bg-white;
+  }
+
+  .color-header-disabled {
+    @apply cursor-default text-gray-100 hover:bg-inherit dark:text-gray-500;
   }
 
   /** CARD STYLES **/

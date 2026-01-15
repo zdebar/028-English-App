@@ -28,8 +28,7 @@ export default function HeaderButton({
 
   return disabled ? (
     <span
-      className={`shape-button-header color-button-header-disabled flex items-center justify-center ${className}`}
-      aria-disabled="true"
+      className={`button-header color-header-disabled flex items-center justify-center ${className}`}
       {...props}
     >
       {children}
@@ -37,8 +36,8 @@ export default function HeaderButton({
   ) : (
     <Link
       to={to}
-      className={`shape-button-header color-button-header flex items-center justify-center ${
-        isSelected && 'color-selected'
+      className={`button-header color-header flex items-center justify-center ${
+        isSelected ? 'color-selected' : ''
       } ${className}`}
       {...props}
     >

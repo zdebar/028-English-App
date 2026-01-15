@@ -23,6 +23,8 @@
   --color-audio-hover-dark: #1e283b;
   --color-audio-hover-light: #ffc64d;
   --color-overlay: rgba(0, 0, 0, 0.5);
+  --color-hint: white;
+  --color-indicator: #fbbf24;
 
   /** progress bar colors **/
   --color-progress-bg: white;

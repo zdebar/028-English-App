@@ -1,13 +1,16 @@
-import { useState } from 'react';
+import { TEXTS } from '@/config/texts';
 import UserItem from '@/database/models/user-items';
-import { useToastStore } from '@/features/toast/use-toast-store';
-import ButtonAsyncModal from '../../components/UI/buttons/ButtonAsyncModal';
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import { useToastStore } from '@/features/toast/use-toast-store';
+import { useState } from 'react';
+import ButtonAsyncModal from '../../components/UI/buttons/ButtonAsyncModal';
 
 /**
  * ResetAllProgressButton component for resetting all user progress.
+ *
+ * @param className - Optional CSS class name to apply to the button.
  */
-export default function ResetAllProgressButton() {
+export default function ResetAllProgressButton({ className }: { className?: string }) {
   const [isLoading, setIsLoading] = useState(false);
   const { userId } = useAuthStore();
   const { showToast } = useToastStore();
@@ -16,14 +19,11 @@ export default function ResetAllProgressButton() {
     setIsLoading(true);
     try {
       if (!userId) return;
-      if (await UserItem.resetsAllUserItems(userId)) {
-        showToast('Váš pokrok byl úspěšně resetován.', 'success');
-      } else {
-        showToast('Žádný pokrok k resetování.', 'info');
-      }
+      await UserItem.resetAllUserItems(userId);
+      showToast(TEXTS.eraseSuccessToast, 'success');
     } catch (error) {
       console.error('Error clearing all user items:', error);
-      showToast('Nastala chyba při resetování pokroku. Zkuste to prosím později.', 'error');
+      showToast(TEXTS.failureToast, 'error');
     } finally {
       setIsLoading(false);
     }
@@ -31,13 +31,11 @@ export default function ResetAllProgressButton() {
 
   return (
     <ButtonAsyncModal
-      buttonTitle="Resetovat veškerý pokrok"
-      loadingMessage="Probíhá resetování..."
+      buttonTitle={TEXTS.eraseLanguageProgress}
       isLoading={isLoading}
-      modalTitle="Potvrzení resetu"
-      modalDescription="Opravdu chcete vymazat veškerý progress? Změna již nepůjde vrátit."
+      modalDescription={TEXTS.eraseDescription}
       onConfirm={handleReset}
-      className="button-rectangular color-button grow-0"
+      className={`button-rectangular color-button w-full grow-0 ${className}`}
     />
   );
 }

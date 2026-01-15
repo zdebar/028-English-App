@@ -25,14 +25,6 @@
     @apply disabled:cursor-default disabled:border-none disabled:bg-inherit disabled:hover:bg-inherit; /* Disabled States */
   }
 
-  .color-button-header {
-    @apply hover:text-light hover:bg-white; /* Button Interactions */
-  }
-
-  .color-button-header-disabled {
-    @apply cursor-default text-gray-100 hover:bg-inherit dark:text-gray-500; /** Disabled States **/
-  }
-
   .color-audio-disabled {
     @apply cursor-default border-2;
     @apply border-background-light dark:border-background-dark bg-inherit text-inherit;
@@ -40,10 +32,6 @@
 
   .color-selected {
     @apply text-light bg-white;
-  }
-
-  .color-overlay {
-    @apply bg-overlay;
   }
 
   .color-select {
@@ -59,15 +47,7 @@
     @apply font-headings text-center text-xl;
   }
 
-  .text-help {
-    @apply font-headings text-center text-xl text-white;
-  }
-
   .text-bar {
     @apply font-body text-light text-center text-sm font-bold;
-  }
-
-  .text-link {
-    @apply font-headings cursor-pointer text-blue-600 underline hover:no-underline dark:text-blue-400;
   }
 }

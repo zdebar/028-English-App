@@ -15,7 +15,10 @@ type HintProps = {
  */
 export default function Hint({ visible, children, className = '', style }: HintProps) {
   return visible ? (
-    <div className={`text-help pointer-events-none absolute z-2000 ${className}`} style={style}>
+    <div
+      className={`font-headings text-hint pointer-events-none absolute z-2000 text-center text-xl ${className}`}
+      style={style}
+    >
       {children}
     </div>
   ) : null;

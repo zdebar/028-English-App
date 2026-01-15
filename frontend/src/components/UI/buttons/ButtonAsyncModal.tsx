@@ -5,7 +5,7 @@ import ButtonAsync from './ButtonAsync';
 
 interface ButtonAsyncModalProps {
   buttonTitle: string;
-  onConfirm?: () => void;
+  onConfirm?: () => void | Promise<void>;
   isLoading?: boolean;
   disabled?: boolean;
   loadingMessage?: string;

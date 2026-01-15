@@ -182,7 +182,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns number of reset items.
    * @throws error if operation fails.
    */
-  static async resetsAllUserItems(userId: string): Promise<number> {
+  static async resetAllUserItems(userId: string): Promise<number> {
     const count = await db.user_items
       .where('[user_id+started_at]')
       .between([userId, Dexie.minKey], [userId, config.database.nullReplacementDate], true, false)

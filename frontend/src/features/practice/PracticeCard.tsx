@@ -174,10 +174,9 @@ export default function PracticeCard() {
               <div className="relative grid grid-cols-2 gap-1">
                 <Button onClick={() => fetchGrammar()} disabled={!grammar_id} className="relative">
                   <BookIcon />
-                  <Indicator
-                    showDot={currentItem.is_initial_practice}
-                    className="absolute top-1 right-1"
-                  />
+                  {currentItem.is_initial_practice && (
+                    <Indicator className="absolute top-1 right-1" />
+                  )}
                 </Button>
                 <Hint visible={isOpen} className="top-0 left-3.5">
                   gramatika

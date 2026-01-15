@@ -1,5 +1,6 @@
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import Hint from '@/components/UI/Hint';
+import { TEXTS } from '@/config/texts';
 import { useOverlayStore } from '@/features/overlay/use-overlay-store';
 import ButtonAsyncModal from './buttons/ButtonAsyncModal';
 
@@ -13,7 +14,7 @@ interface OverviewCardProps {
 }
 
 /**
- * OverviewCard component for displaying a card with a title, actions, and content. *
+ * OverviewCard component for displaying a card with a title, actions, and content.
  * @param titleText Title text for the card.
  * @param error Error message to display.
  * @param className Additional CSS classes for custom styling.
@@ -22,7 +23,7 @@ interface OverviewCardProps {
  * @param children Content to be displayed inside the card.
  */
 export default function OverviewCard({
-  titleText = 'bez názvu',
+  titleText = TEXTS.notAvailable,
   error = null,
   className = '',
   handleReset,
@@ -36,8 +37,8 @@ export default function OverviewCard({
       <div className="h-button flex items-center justify-between gap-1">
         <ButtonAsyncModal
           buttonTitle={titleText}
-          modalTitle="Vymazat pokrok"
-          modalDescription="Opravdu chcete vymazat veškerý pokrok? Změna již nepůjde vrátit."
+          modalTitle={TEXTS.eraseProgress}
+          modalDescription={TEXTS.eraseDescription}
           onConfirm={() => {
             if (handleReset) {
               handleReset();
@@ -45,10 +46,10 @@ export default function OverviewCard({
             onClose();
           }}
           disabled={!handleReset}
-          className="button-rectangular color-button flex grow items-center justify-start pl-4"
+          className="button-rectangular button-color flex grow items-center justify-start pl-4"
         />
         <Hint visible={isOpen} className="top-0 left-3.5">
-          obnovit pokrok
+          {TEXTS.eraseProgress}
         </Hint>
         <CloseButton className="w-button grow-0" onClick={onClose} />
       </div>

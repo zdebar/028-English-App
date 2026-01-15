@@ -27,7 +27,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setSession: (session) => {
     set({
-      userId: (session?.user?.id as string) || null,
+      userId: session?.user?.id ?? null,
       userEmail: session?.user?.email || null,
       loading: false,
     });
@@ -36,9 +36,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   handleLogout: async () => {
     const { error } = await supabaseInstance.auth.signOut();
     if (error) {
-      console.error('Error logging out:', error.message);
-    } else {
-      set({ userId: null, userEmail: null });
+      throw error;
     }
+    set({ userId: null, userEmail: null, loading: false });
+    set({ loading: false });
   },
 }));

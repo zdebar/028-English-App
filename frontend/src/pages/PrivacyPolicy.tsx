@@ -72,7 +72,7 @@ export default function PrivacyPolicy() {
       <h2>6. Kontakt</h2>
       <p className="text-sm">
         V případě dotazů týkajících se ochrany soukromí mě kontaktujte na adrese{' '}
-        <a href="mailto:zdebarth@gmail.com" className="text-link">
+        <a href="mailto:zdebarth@gmail.com" className="font-bold">
           zdebarth@gmail.com
         </a>
         .

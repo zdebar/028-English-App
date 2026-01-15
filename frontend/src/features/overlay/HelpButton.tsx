@@ -1,6 +1,11 @@
 import LightBulbIcon from '@/components/UI/icons/LightBulbIcon';
 import { useOverlayStore } from '@/features/overlay/use-overlay-store';
 
+type HelpButtonProps = {
+  className?: string;
+  style?: React.CSSProperties;
+};
+
 /**
  * Help button component that opens the help overlay.
  *
@@ -11,13 +16,13 @@ import { useOverlayStore } from '@/features/overlay/use-overlay-store';
 export default function HelpButton({ className = '', style }: HelpButtonProps) {
   const { open } = useOverlayStore();
   return (
-    <button type="button" className={`z-10 p-1 ${className}`} style={style} onClick={open}>
+    <button
+      type="button"
+      className={`absolute top-7 z-10 flex h-10 w-10 items-center justify-center ${className}`}
+      style={style}
+      onClick={open}
+    >
       <LightBulbIcon />
     </button>
   );
 }
-
-type HelpButtonProps = {
-  className?: string;
-  style?: React.CSSProperties;
-};

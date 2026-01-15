@@ -1,11 +1,12 @@
+import PropertyView from '@/components/UI/PropertyView';
+import { supabaseInstance } from '@/config/supabase.config';
+import { TEXTS } from '@/config/texts';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import Dashboard from '@/features/dashboard/Dashboard';
-import PropertyView from '@/components/UI/PropertyView';
+import PrivacyPolicyLink from '@/features/gdpr/PrivacyPolicyLink';
+import { useThemeStore } from '@/features/theme/use-theme';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
-import { supabaseInstance } from '@/config/supabase.config';
-import { useThemeStore } from '@/features/theme/use-theme';
-import PrivacyPolicyLink from '@/features/gdpr/PrivacyPolicyLink';
 
 export default function Home() {
   const { theme } = useThemeStore();
@@ -13,12 +14,9 @@ export default function Home() {
 
   return (
     <div className="max-w-hero relative flex w-full flex-col items-center justify-start gap-4 text-center">
-      <h1 className="pt-12 pb-6 landscape:pt-6">Angličtina</h1>
-      <p className="text-notice color-notice">Aplikace v testovacím režimu</p>
-      <p className="px-4">
-        Trénujte až 200 vět za 20 minut denně, a dosáhněte základní znalosti jazyka za zlomek
-        běžného učebního času.
-      </p>
+      <h1 className="pt-12 pb-6 landscape:pt-6">{TEXTS.appTitle}</h1>
+      <p className="text-notice color-notice">{TEXTS.appSubtitle}</p>
+      <p className="px-4">{TEXTS.appDescription}</p>
 
       {!userId ? (
         <div className="w-full">
@@ -62,7 +60,7 @@ export default function Home() {
         </div>
       ) : (
         <div className="relative flex w-full flex-col gap-1">
-          <PropertyView label="Uživatel:" className="h-input" value={userEmail} />
+          <PropertyView label={TEXTS.userLabel} className="h-input" value={userEmail} />
           <Dashboard />
         </div>
       )}

@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useKey } from '@/hooks/use-key';
 
 type OverlayMaskProps = {
   onClose?: () => void;
@@ -10,29 +10,20 @@ type OverlayMaskProps = {
  * @param onClose Function to call when the overlay is clicked.
  */
 export default function OverlayMask({ onClose }: OverlayMaskProps) {
+  useKey(onClose || (() => {}));
+
   const handleOverlayClick = () => {
     if (onClose) {
       onClose();
     }
   };
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLDivElement>) => {
-      if (e.key === 'Escape' && onClose) {
-        e.preventDefault();
-        onClose();
-      }
-    },
-    [onClose],
-  );
-
   return (
     <div
-      className="color-overlay shape-overlay z-1000"
+      className="bg-overlay pointer-events-auto fixed inset-0 top-0 z-1000"
       onClick={handleOverlayClick}
       role="button"
       tabIndex={0}
-      onKeyDown={handleKeyDown}
     />
   );
 }

@@ -12,7 +12,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
  */
 export default function Button({ className = '', children, ...props }: ButtonProps) {
   return (
-    <button className={`button-rectangular button-practice ${className}`} {...props}>
+    <button className={`button-rectangular button-color ${className}`} {...props}>
       {children}
     </button>
   );

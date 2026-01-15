@@ -8,6 +8,9 @@ import type { LessonsLocal } from '@/types/local.types';
  * @throws Error if countNotToday or lessonSize is invalid.
  */
 export function getPreviousCount(countNotToday: number): number {
+  if (config.lesson.lessonSize <= 0) {
+    throw new Error('lessonSize must be greater than zero.');
+  }
   return countNotToday % config.lesson.lessonSize;
 }
 
@@ -17,6 +20,9 @@ export function getPreviousCount(countNotToday: number): number {
  * @returns Returns last started lesson number before today.
  */
 export function getLessonStarted(countNotToday: number): number {
+  if (config.lesson.lessonSize <= 0) {
+    throw new Error('lessonSize must be greater than zero.');
+  }
   return Math.floor(countNotToday / config.lesson.lessonSize) + 1;
 }
 
@@ -29,6 +35,10 @@ export function getLessonStarted(countNotToday: number): number {
 export function getTodayStartedItems(previousCount: number, todayCount: number): number[] {
   const lessonCounts: number[] = [];
   const lessonSize = config.lesson.lessonSize;
+
+  if (config.lesson.lessonSize <= 0) {
+    throw new Error('lessonSize must be greater than zero.');
+  }
 
   if (previousCount >= lessonSize) {
     throw new Error("'previousCount' must be less than the lesson size.");

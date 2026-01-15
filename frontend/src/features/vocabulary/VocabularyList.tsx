@@ -93,7 +93,7 @@ export default function VocabularyList({
             {remainingCount > 0 && (
               <button
                 onClick={() => setVisibleCount(visibleCount + 8)}
-                className="text-link mt-2 w-full text-center"
+                className="mt-2 w-full text-center font-bold hover:underline"
               >
                 ... a {remainingCount + ' ' + getMoreText(remainingCount)}
               </button>
