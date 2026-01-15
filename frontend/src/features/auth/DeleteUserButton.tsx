@@ -64,7 +64,7 @@ export default function DeleteUserButton() {
       modalTitle="Potvrzení mazání uživatelského účtu"
       modalDescription="Opravdu chcete smazat uživatelský účet? Vaše data budou uchována příštích 30 dní, poté budou nenávratně smazána. Před smazáním můžete kdykoliv obnovit svůj účet obětovným přihlášením."
       onConfirm={handleDelete}
-      className="shape-button-rectangular color-button grow-0"
+      className="button-rectangular color-button grow-0"
     />
   );
 }

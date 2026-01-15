@@ -60,7 +60,7 @@ export default function ButtonAsync({
       disabled={isButtonLoading || disabled}
       className={className}
     >
-      <span className="text-button">{isButtonLoading ? loadingMessage : message}</span>
+      <span>{isButtonLoading ? loadingMessage : message}</span>
     </button>
   );
 }

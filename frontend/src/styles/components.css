@@ -1,8 +1,15 @@
 @layer components {
   /** BUTTON STYLES **/
-  .shape-button-rectangular {
-    @apply h-button font-body shrink-0 grow basis-auto font-bold tracking-wide;
+  .button-rectangular {
+    @apply h-button shrink-0 grow basis-auto font-bold tracking-wide;
     @apply flex items-center justify-center;
+  }
+
+  .button-practice {
+    @apply cursor-pointer border-2;
+    @apply bg-audio-light border-audio-light; /* Theming Light */
+    @apply dark:bg-audio-dark dark:border-audio-dark; /* Theming Dark */
+    @apply hover:border-light dark:hover:border-dark; /* Hover Borders */
   }
 
   .shape-button-header {

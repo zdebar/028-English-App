@@ -2,9 +2,7 @@ export const TEXTS = {
   // Footer
   copyright: (year: number) => `© ${year}`,
   privacyPolicy: 'Zásady ochrany osobních údajů',
-  footerLabel: 'Patička stránky',
-  // ??
-
+  // Buttons
   buttonDefault: 'Potvrdit',
   buttonLoading: 'Načítání...',
   // Modals

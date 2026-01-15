@@ -37,7 +37,7 @@ export default function ResetAllProgressButton() {
       modalTitle="Potvrzení resetu"
       modalDescription="Opravdu chcete vymazat veškerý progress? Změna již nepůjde vrátit."
       onConfirm={handleReset}
-      className="shape-button-rectangular color-button grow-0"
+      className="button-rectangular color-button grow-0"
     />
   );
 }

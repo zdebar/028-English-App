@@ -1,5 +1,13 @@
 @layer utilities {
   /* COLORS */
+  .color-button,
+  .color-audio {
+    @apply cursor-pointer border-2;
+    @apply bg-audio-light border-audio-light; /* Theming Light */
+    @apply dark:bg-audio-dark dark:border-audio-dark; /* Theming Dark */
+    @apply hover:border-light dark:hover:border-dark; /* Hover Borders */
+  }
+
   .color-base {
     @apply bg-background-light dark:bg-background-dark text-light dark:text-dark;
   }
@@ -57,10 +65,6 @@
 
   .text-bar {
     @apply font-body text-light text-center text-sm font-bold;
-  }
-
-  .text-button {
-    @apply text-left;
   }
 
   .text-link {

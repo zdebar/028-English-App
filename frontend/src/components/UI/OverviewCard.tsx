@@ -45,7 +45,7 @@ export default function OverviewCard({
             onClose();
           }}
           disabled={!handleReset}
-          className="shape-button-rectangular color-button flex grow items-center justify-start pl-4"
+          className="button-rectangular color-button flex grow items-center justify-start pl-4"
         />
         <Hint visible={isOpen} className="top-0 left-3.5">
           obnovit pokrok

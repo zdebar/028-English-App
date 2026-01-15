@@ -34,4 +34,8 @@
   input {
     @apply focus:outline-none active:outline-none;
   }
+
+  a {
+    @apply hover:underline;
+  }
 }
