@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import ButtonAsync from './ButtonAsync';
 import { Modal } from '@/components/UI/Modal';
 import { TEXTS } from '@/config/texts';
+import { useState } from 'react';
+import ButtonAsync from './ButtonAsync';
 
 interface ButtonAsyncModalProps {
   buttonTitle: string;

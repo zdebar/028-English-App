@@ -1,6 +1,5 @@
-import { useEffect, useCallback } from 'react';
+import { useEscapeKey } from '@/hooks/use-escape-key';
 import Button from './Button';
-
 import CloseIcon from '@/components/UI/icons/CloseIcon';
 
 interface CloseButtonProps {
@@ -15,23 +14,7 @@ interface CloseButtonProps {
  * @param className Additional CSS classes for custom styling.
  */
 export default function CloseButton({ onClick, className = '' }: CloseButtonProps) {
-  // Handle Escape key
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        onClick();
-      }
-    },
-    [onClick],
-  );
-
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [handleKeyDown]);
+  useEscapeKey(onClick);
 
   return (
     <Button className={`flex items-center justify-center ${className}`} onClick={onClick}>
