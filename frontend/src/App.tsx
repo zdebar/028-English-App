@@ -3,7 +3,6 @@ import Header from '@/components/Layout/Header';
 import OverlayMask from '@/components/UI/OverlayMask';
 import ProtectedLayout from '@/components/utils/protected-laout';
 
-import { supabaseInstance } from '@/config/supabase.config';
 import { dataSync } from '@/database/models/data-sync';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useHelpStore } from '@/features/help/use-help-store';
@@ -22,32 +21,14 @@ import { TEXTS } from './config/texts';
 import './styles/index.css';
 
 export default function App() {
-  const { userId, setSession } = useAuthStore();
+  const { userId, initializeAuth } = useAuthStore();
   const { isOpen, close } = useHelpStore();
 
-  // Handle Supabase auth state changes
+  // Auth initialization effect
   useEffect(() => {
-    const initializeAuth = async () => {
-      const { data, error } = await supabaseInstance.auth.getSession();
-
-      if (error) {
-        console.error('Error getting session:', error);
-        setSession(null);
-      } else {
-        setSession(data.session);
-      }
-    };
-
-    initializeAuth();
-
-    const {
-      data: { subscription },
-    } = supabaseInstance.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, [setSession]);
+    const cleanup = initializeAuth();
+    return cleanup;
+  }, [initializeAuth]);
 
   // Data synchronization effect on userId change
   useEffect(() => {

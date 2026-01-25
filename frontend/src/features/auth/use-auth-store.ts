@@ -8,20 +8,14 @@ interface AuthState {
   userEmail: string | null;
   loading: boolean;
   setSession: (session: Session | null) => void;
+  initializeAuth: () => () => void;
   handleLogout: () => Promise<void>;
 }
 
 /**
  * Zustand store for managing authentication state.
- *
- * Provides:
- * - `userId`: string of the authenticated user, or null if not logged in.
- * - `userEmail`: Email of the authenticated user, or null if not logged in.
- * - `loading`: Indicates if authentication state is being determined.
- * - `setSession(session)`: Updates the store with session data from Supabase.
- * - `handleLogout()`: Signs out the user and resets authentication state.
  */
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   userId: null,
   userEmail: null,
   loading: true,
@@ -34,12 +28,35 @@ export const useAuthStore = create<AuthState>((set) => ({
     });
   },
 
+  initializeAuth: () => {
+    let subscription: { unsubscribe: () => void } | null = null;
+    const { setSession } = get();
+
+    const fetchSession = async () => {
+      const { data, error } = await supabaseInstance.auth.getSession();
+      if (error) {
+        setSession(null);
+      } else {
+        setSession(data.session);
+      }
+    };
+
+    fetchSession();
+
+    subscription = supabaseInstance.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    }).data.subscription;
+
+    return () => {
+      if (subscription) subscription.unsubscribe();
+    };
+  },
+
   handleLogout: async () => {
     const { error } = await supabaseInstance.auth.signOut();
     if (error) {
       throw new AuthenticationError(error.message, error);
     }
     set({ userId: null, userEmail: null, loading: false });
-    set({ loading: false });
   },
 }));
