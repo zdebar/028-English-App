@@ -24,7 +24,7 @@ export default class AudioMetadata extends Entity<AppDB> implements AudioMetadat
   /**
    * Marks an audio archive as fetched by storing its metadata.
    * @param archiveName the name of the fetched audio archive
-   * @returns true if the operation was successful, otherwise false
+   * @returns Promise<void>
    * @throws Error
    */
   static async markAsFetched(archiveName: string): Promise<void> {

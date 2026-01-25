@@ -2,7 +2,7 @@ import { useState, useEffect, useEffectEvent } from 'react';
 import { TEXTS } from '@/config/texts';
 import ButtonRectangular from './ButtonRectangular';
 
-interface ButtonAsyncProps {
+interface ButtonLoadingProps {
   message?: string;
   loadingMessage?: string;
   onClick: () => void;
@@ -13,7 +13,7 @@ interface ButtonAsyncProps {
 }
 
 /**
- * Asynchronous button component that displays a loading message for at least a minimum duration.
+ * Loading button component that displays a loading message for at least a minimum duration.
  *
  * @param message Text to display when not loading.
  * @param loadingMessage Text to display while loading.
@@ -23,7 +23,7 @@ interface ButtonAsyncProps {
  * @param minLoadingTime Minimum time to show loading message (ms).
  * @param className Additional CSS classes for custom styling.
  */
-export default function ButtonAsync({
+export default function ButtonLoading({
   message = TEXTS.buttonDefault,
   loadingMessage = TEXTS.buttonLoading,
   onClick,
@@ -31,7 +31,7 @@ export default function ButtonAsync({
   disabled = false,
   minLoadingTime = 400,
   className = '',
-}: ButtonAsyncProps) {
+}: ButtonLoadingProps) {
   const [minLoadingElapsed, setMinLoadingElapsed] = useState(true);
   const onTimer = useEffectEvent(() => setMinLoadingElapsed(true));
 

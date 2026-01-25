@@ -1,9 +1,9 @@
 import { Modal } from '@/components/UI/Modal';
 import { TEXTS } from '@/config/texts';
 import { useState } from 'react';
-import ButtonAsync from './ButtonAsync';
+import ButtonLoading from './ButtonLoading';
 
-interface ButtonAsyncModalProps {
+interface ButtonLoadingModalProps {
   buttonTitle: string;
   onConfirm?: () => Promise<void>;
   isLoading?: boolean;
@@ -26,7 +26,7 @@ interface ButtonAsyncModalProps {
  * @param modalDescription Description in the confirmation modal.
  * @param className Additional CSS classes for custom styling.
  */
-export default function ButtonAsyncModal({
+export default function ButtonLoadingModal({
   buttonTitle: message,
   onConfirm,
   isLoading = false,
@@ -35,12 +35,12 @@ export default function ButtonAsyncModal({
   modalTitle = TEXTS.modalConfirmTitle,
   modalDescription = TEXTS.modalConfirmDescription,
   className = '',
-}: ButtonAsyncModalProps) {
+}: ButtonLoadingModalProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <>
-      <ButtonAsync
+      <ButtonLoading
         isLoading={isLoading}
         message={message}
         disabled={disabled}

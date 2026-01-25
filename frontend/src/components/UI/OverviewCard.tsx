@@ -2,7 +2,7 @@ import CloseButton from '@/components/UI/buttons/CloseButton';
 import Hint from '@/components/UI/Hint';
 import { TEXTS } from '@/config/texts';
 import { useHelpStore } from '@/features/help/use-help-store';
-import ButtonAsyncModal from './buttons/ButtonAsyncModal';
+import ButtonModal from './buttons/ButtonLoadingModal';
 
 interface OverviewCardProps {
   titleText?: string;
@@ -35,7 +35,7 @@ export default function OverviewCard({
   return (
     <div className={`card-height card-width flex flex-col justify-start gap-1 ${className}`}>
       <div className="flex items-center justify-between gap-1">
-        <ButtonAsyncModal
+        <ButtonModal
           buttonTitle={titleText}
           modalTitle={TEXTS.eraseProgress}
           modalDescription={TEXTS.eraseDescription}

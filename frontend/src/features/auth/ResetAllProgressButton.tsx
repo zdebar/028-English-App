@@ -3,7 +3,7 @@ import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useState } from 'react';
-import ButtonAsyncModal from '../../components/UI/buttons/ButtonAsyncModal';
+import ButtonModal from '../../components/UI/buttons/ButtonLoadingModal';
 
 /**
  * ResetAllProgressButton component for resetting all user progress.
@@ -30,7 +30,7 @@ export default function ResetAllProgressButton({ className }: { className?: stri
   };
 
   return (
-    <ButtonAsyncModal
+    <ButtonModal
       buttonTitle={TEXTS.eraseLanguageProgress}
       isLoading={isLoading}
       modalDescription={TEXTS.eraseDescription}
