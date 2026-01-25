@@ -23,7 +23,7 @@ export default function ThemeSwitch() {
     <button
       aria-label={theme === 'light' ? themeLabels.light : themeLabels.dark}
       onClick={handleChange}
-      className="button-header hover:bg-inherit hover:text-inherit"
+      className="button-round hover:bg-inherit hover:text-inherit"
       title={theme === 'light' ? themeLabels.light : themeLabels.dark}
     >
       {theme === 'light' ? <SunIcon /> : <MoonIcon />}

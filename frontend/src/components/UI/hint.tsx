@@ -1,9 +1,9 @@
-type HintProps = {
+interface HintProps {
   visible: boolean;
   children: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
-};
+}
 
 /**
  * Hint component for displaying contextual hints.
@@ -14,12 +14,14 @@ type HintProps = {
  * @param style Inline styles for the hint container.
  */
 export default function Hint({ visible, children, className = '', style }: HintProps) {
-  return visible ? (
+  if (!visible) return null;
+
+  return (
     <div
       className={`font-headings text-hint pointer-events-none absolute z-2000 text-center text-xl ${className}`}
       style={style}
     >
       {children}
     </div>
-  ) : null;
+  );
 }

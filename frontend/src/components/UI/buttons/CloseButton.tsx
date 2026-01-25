@@ -1,5 +1,5 @@
 import { useKey } from '@/hooks/use-key';
-import Button from './Button';
+import ButtonRectangular from './ButtonRectangular';
 import CloseIcon from '@/components/UI/icons/CloseIcon';
 
 interface CloseButtonProps {
@@ -14,11 +14,14 @@ interface CloseButtonProps {
  * @param className Additional CSS classes for custom styling.
  */
 export default function CloseButton({ onClick, className = '' }: CloseButtonProps) {
-  useKey(onClick);
+  useKey(onClick, ['Escape']);
 
   return (
-    <Button className={`flex items-center justify-center ${className}`} onClick={onClick}>
+    <ButtonRectangular
+      className={`flex items-center justify-center ${className}`}
+      onClick={onClick}
+    >
       <CloseIcon />
-    </Button>
+    </ButtonRectangular>
   );
 }

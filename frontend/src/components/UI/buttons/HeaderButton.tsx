@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
-import { Link, useMatch, type LinkProps } from 'react-router-dom';
+import { Link, useMatch } from 'react-router-dom';
 
-interface HeaderButtonProps extends LinkProps {
+interface HeaderButtonProps {
   to: string;
   children: ReactNode;
   disabled?: boolean;
@@ -15,31 +15,31 @@ interface HeaderButtonProps extends LinkProps {
  * @param children Content to be displayed inside the button.
  * @param disabled Whether the button is disabled.
  * @param className Additional CSS classes for custom styling.
- * @param props Standard link attributes.
+
  */
 export default function HeaderButton({
   to,
   children,
   disabled = false,
   className = '',
-  ...props
 }: HeaderButtonProps) {
   const isSelected = useMatch(to);
 
-  return disabled ? (
-    <span
-      className={`button-header color-header-disabled flex items-center justify-center ${className}`}
-      {...props}
-    >
-      {children}
-    </span>
-  ) : (
+  if (disabled)
+    return (
+      <span
+        className={`button-round flex cursor-default items-center justify-center text-gray-100 hover:bg-inherit dark:text-gray-500 ${className}`}
+      >
+        {children}
+      </span>
+    );
+
+  return (
     <Link
       to={to}
-      className={`button-header color-header flex items-center justify-center ${
-        isSelected ? 'color-selected' : ''
+      className={`button-round hover:text-light flex items-center justify-center hover:bg-white ${
+        isSelected && 'text-light bg-white'
       } ${className}`}
-      {...props}
     >
       {children}
     </Link>

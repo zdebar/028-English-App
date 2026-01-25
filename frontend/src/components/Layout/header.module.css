@@ -1,0 +1,25 @@
+@media (max-height: 460px) {
+  .header-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 0;
+  }
+}
+
+@media (max-height: 460px) and (max-width: 640px) {
+  .header-side {
+    flex-direction: column;
+    height: 150px;
+  }
+  .header-right {
+    flex-direction: column-reverse;
+    justify-content: start;
+  }
+}
+
+@media (min-height: 640px) {
+  .header-fixed {
+    margin-bottom: 80px;
+  }
+}

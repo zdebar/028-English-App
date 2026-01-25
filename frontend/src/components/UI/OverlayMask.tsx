@@ -9,8 +9,8 @@ type OverlayMaskProps = {
  *
  * @param onClose Function to call when the overlay is clicked.
  */
-export default function OverlayMask({ onClose }: OverlayMaskProps) {
-  useKey(onClose || (() => {}));
+export default function OverlayMask({ onClose = () => {} }: OverlayMaskProps) {
+  useKey(onClose, ['Escape']);
 
   const handleOverlayClick = () => {
     if (onClose) {

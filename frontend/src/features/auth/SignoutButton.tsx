@@ -31,7 +31,6 @@ export default function SignoutButton() {
       isLoading={isLoading}
       modalDescription={TEXTS.signoutModalDescription}
       onConfirm={handleSignout}
-      className="button-rectangular color-button w-full grow-0"
     />
   );
 }

@@ -16,7 +16,7 @@ import HelpButton from '@/features/overlay/HelpButton';
 import GrammarCard, { type GrammarCardType } from '@/features/practice/GrammarCard';
 import VolumeSlider from '@/features/practice/VolumeSlider';
 
-import Button from '@/components/UI/buttons/Button';
+import ButtonRectangular from '@/components/UI/buttons/ButtonRectangular';
 import BookIcon from '@/components/UI/icons/BookIcon';
 import BulbIcon from '@/components/UI/icons/BulbIcon';
 import EyeIcon from '@/components/UI/icons/EyeIcon';
@@ -172,23 +172,27 @@ export default function PracticeCard() {
             <div id="practice-controls" className="relative flex flex-col gap-1">
               {/** Top Row */}
               <div className="relative grid grid-cols-2 gap-1">
-                <Button onClick={() => fetchGrammar()} disabled={!grammar_id} className="relative">
+                <ButtonRectangular
+                  onClick={() => fetchGrammar()}
+                  disabled={!grammar_id}
+                  className="relative"
+                >
                   <BookIcon />
                   {currentItem.is_initial_practice && (
                     <Indicator className="absolute top-1 right-1" />
                   )}
-                </Button>
+                </ButtonRectangular>
                 <Hint visible={isOpen} className="top-0 left-3.5">
                   gramatika
                 </Hint>
-                <Button
+                <ButtonRectangular
                   onClick={() => {
                     handleNext(config.progress.skipProgress);
                   }}
                   disabled={!revealed}
                 >
                   <ForwardIcon />
-                </Button>
+                </ButtonRectangular>
                 <Hint visible={isOpen} className="top-0 right-3.5">
                   dokončit
                 </Hint>
@@ -197,18 +201,18 @@ export default function PracticeCard() {
               {!revealed ? (
                 /** Not Revealed */
                 <div className="relative grid grid-cols-2 gap-1">
-                  <Button
+                  <ButtonRectangular
                     onClick={() => {
                       setHintIndex((prevIndex) => prevIndex + 1);
                       setShowPlayHint(false);
                     }}
                   >
                     <BulbIcon />
-                  </Button>
+                  </ButtonRectangular>
                   <Hint visible={isOpen} className="top-0 left-3.5">
                     nápověda
                   </Hint>
-                  <Button
+                  <ButtonRectangular
                     onClick={() => {
                       if (showPlayHint) {
                         setShowPlayHint(false);
@@ -221,7 +225,7 @@ export default function PracticeCard() {
                     }}
                   >
                     <EyeIcon />
-                  </Button>
+                  </ButtonRectangular>
                   <Hint visible={isOpen} className="top-0 right-3.5">
                     odhalit
                   </Hint>
@@ -229,15 +233,15 @@ export default function PracticeCard() {
               ) : (
                 /** Revealed */
                 <div className="relative grid grid-cols-2 gap-1">
-                  <Button onClick={() => handleNext(config.progress.minusProgress)}>
+                  <ButtonRectangular onClick={() => handleNext(config.progress.minusProgress)}>
                     <MinusIcon />
-                  </Button>
+                  </ButtonRectangular>
                   <Hint visible={isOpen} className="top-0 left-3.5">
                     neznám
                   </Hint>
-                  <Button onClick={() => handleNext(config.progress.plusProgress)}>
+                  <ButtonRectangular onClick={() => handleNext(config.progress.plusProgress)}>
                     <PlusIcon />
-                  </Button>
+                  </ButtonRectangular>
                   <Hint visible={isOpen} className="top-0 right-3.5">
                     znám
                   </Hint>

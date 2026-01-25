@@ -1,31 +1,5 @@
 /** RESPONSIVE STYLES **/
 
-@media (max-height: 460px) {
-  .header-fixed {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 0;
-  }
-}
-
-@media (max-height: 460px) and (max-width: 640px) {
-  .side-header {
-    flex-direction: column;
-    height: 150px;
-  }
-  .right-header {
-    flex-direction: column-reverse;
-    justify-content: start;
-  }
-}
-
-@media (min-height: 640px) {
-  .header-fixed {
-    margin-bottom: 80px;
-  }
-}
-
 .help-btn-pos {
   position: absolute;
   bottom: -35px;

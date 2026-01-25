@@ -35,7 +35,7 @@ export default function ResetAllProgressButton({ className }: { className?: stri
       isLoading={isLoading}
       modalDescription={TEXTS.eraseDescription}
       onConfirm={handleReset}
-      className={`button-rectangular color-button w-full grow-0 ${className}`}
+      className={className}
     />
   );
 }

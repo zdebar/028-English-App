@@ -5,7 +5,7 @@ import ButtonAsync from './ButtonAsync';
 
 interface ButtonAsyncModalProps {
   buttonTitle: string;
-  onConfirm?: () => void | Promise<void>;
+  onConfirm?: () => Promise<void>;
   isLoading?: boolean;
   disabled?: boolean;
   loadingMessage?: string;
@@ -51,9 +51,9 @@ export default function ButtonAsyncModal({
       <Modal
         showModal={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onConfirm={() => {
+        onConfirm={async () => {
           setIsModalOpen(false);
-          if (onConfirm) onConfirm();
+          if (onConfirm) await onConfirm();
         }}
         title={modalTitle}
         description={modalDescription}

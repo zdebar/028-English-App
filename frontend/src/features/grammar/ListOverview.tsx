@@ -1,4 +1,4 @@
-import Button from '@/components/UI/buttons/Button';
+import ButtonRectangular from '@/components/UI/buttons/ButtonRectangular';
 import CloseIcon from '@/components/UI/icons/CloseIcon';
 import { TEXTS } from '@/config/texts';
 
@@ -46,19 +46,19 @@ export default function ListOverview({
         <div className="h-button flex grow justify-start p-4">
           {loading ? TEXTS.buttonLoading : error || listTitle}
         </div>
-        <Button className="w-button grow-0" onClick={onClose}>
+        <ButtonRectangular className="w-button grow-0" onClick={onClose}>
           <CloseIcon />
-        </Button>
+        </ButtonRectangular>
       </div>
       {array && array.length > 0 ? (
         array.map((item, index) => (
-          <Button
+          <ButtonRectangular
             key={item.id}
             className="h-input flex grow-0 justify-start p-4 text-left"
             onClick={() => onSelect(index)}
           >
             {`${index + 1} : ${item.name} `}
-          </Button>
+          </ButtonRectangular>
         ))
       ) : (
         <p className="h-input flex justify-start p-4 text-left">{emptyTitle}</p>

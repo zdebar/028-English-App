@@ -1,4 +1,4 @@
-export interface IconProps extends React.SVGProps<SVGSVGElement> {
+export interface IconProps {
   className?: string;
   size?: number | string;
   strokeWidth?: number;
@@ -18,7 +18,6 @@ export interface IconProps extends React.SVGProps<SVGSVGElement> {
  * @param fillColor - The fill color for the SVG. Defaults to 'none'.
  * @param viewBox - The viewBox attribute for the SVG. Defaults to '0 0 24 24'.
  * @param children - The SVG path or other elements to render inside the SVG.
- * @param props - Additional props to spread onto the SVG element.
  *
  * @returns A JSX element representing the SVG icon.
  */
@@ -30,7 +29,6 @@ export default function Icon({
   fillColor = 'none',
   viewBox = '0 0 24 24',
   children,
-  ...props
 }: IconProps) {
   return (
     <svg
@@ -42,7 +40,6 @@ export default function Icon({
       strokeWidth={strokeWidth}
       className={className}
       viewBox={viewBox}
-      {...props}
     >
       {children}
     </svg>

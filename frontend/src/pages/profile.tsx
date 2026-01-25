@@ -1,4 +1,4 @@
-import Button from '@/components/UI/buttons/Button';
+import ButtonRectangular from '@/components/UI/buttons/ButtonRectangular';
 import { TEXTS } from '@/config/texts';
 import DeleteUserButton from '@/features/auth/DeleteUserButton';
 import ResetAllProgressButton from '@/features/auth/ResetAllProgressButton';
@@ -10,12 +10,12 @@ export default function Profile() {
 
   return (
     <div className="card-width grow-0">
-      <Button onClick={() => navigate('/grammar')} className="grow-0">
+      <ButtonRectangular onClick={() => navigate('/grammar')} className="grow-0">
         <p>{TEXTS.grammarOverview}</p>
-      </Button>
-      <Button onClick={() => navigate('/vocabulary')} className="grow-0">
+      </ButtonRectangular>
+      <ButtonRectangular onClick={() => navigate('/vocabulary')} className="grow-0">
         <p>{TEXTS.vocabularyOverview}</p>
-      </Button>
+      </ButtonRectangular>
 
       <ResetAllProgressButton className="mt-4" />
       <DeleteUserButton />

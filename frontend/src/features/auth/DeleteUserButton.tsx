@@ -57,7 +57,6 @@ export default function DeleteUserButton() {
       isLoading={isLoading}
       modalDescription={TEXTS.deleteUserModalDescription}
       onConfirm={handleDelete}
-      className="button-rectangular button-color w-full grow-0"
     />
   );
 }

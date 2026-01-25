@@ -1,0 +1,18 @@
+@import 'tailwindcss';
+@import '@/styles/theme.css';
+
+@layer components {
+  /** BUTTON STYLES **/
+  .button-rectangular {
+    @apply h-button shrink-0 grow basis-auto font-bold tracking-wide;
+    @apply flex items-center justify-center;
+  }
+
+  .button-color {
+    @apply cursor-pointer border-2;
+    @apply bg-audio-light border-audio-light; /* Theming Light */
+    @apply dark:bg-audio-dark dark:border-audio-dark; /* Theming Dark */
+    @apply hover:border-light dark:hover:border-dark; /* Hover Borders */
+    @apply disabled:cursor-default disabled:border-none disabled:bg-inherit disabled:hover:bg-inherit; /* Disabled States */
+  }
+}

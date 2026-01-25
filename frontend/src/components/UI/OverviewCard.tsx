@@ -8,7 +8,7 @@ interface OverviewCardProps {
   titleText?: string;
   error?: string | null;
   className?: string;
-  handleReset?: () => void;
+  handleReset?: () => Promise<void>;
   onClose: () => void;
   children?: React.ReactNode;
 }
@@ -39,14 +39,14 @@ export default function OverviewCard({
           buttonTitle={titleText}
           modalTitle={TEXTS.eraseProgress}
           modalDescription={TEXTS.eraseDescription}
-          onConfirm={() => {
+          onConfirm={async () => {
             if (handleReset) {
-              handleReset();
+              await handleReset();
             }
             onClose();
           }}
           disabled={!handleReset}
-          className="button-rectangular button-color flex grow items-center justify-start pl-4"
+          className="flex items-center justify-start pl-4"
         />
         <Hint visible={isOpen} className="top-0 left-3.5">
           {TEXTS.eraseProgress}

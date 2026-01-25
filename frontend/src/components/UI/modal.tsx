@@ -1,14 +1,15 @@
 import OverlayMask from '@/components/UI/OverlayMask';
 import { TEXTS } from '@/config/texts';
-import Button from './buttons/Button';
+import { createPortal } from 'react-dom';
+import ButtonRectangular from './buttons/ButtonRectangular';
 
-type ModalProps = {
+interface ModalProps {
   showModal: boolean;
   onConfirm: () => void;
   onClose: () => void;
   title: string;
   description: string;
-};
+}
 
 /**
  * Modal component for confirmation dialogs.
@@ -24,7 +25,10 @@ export function Modal({ showModal, onConfirm, onClose, title, description }: Mod
     return null;
   }
 
-  return (
+  const modalRoot = document.getElementById('root');
+  if (!modalRoot) return null;
+
+  return createPortal(
     <>
       <OverlayMask onClose={onClose} />
       <div className="pointer-events-none fixed inset-0 z-1001 flex min-h-40 items-center justify-center">
@@ -34,11 +38,12 @@ export function Modal({ showModal, onConfirm, onClose, title, description }: Mod
             <p>{description}</p>
           </div>
           <div className="flex gap-1">
-            <Button onClick={onClose}>{TEXTS.cancel}</Button>
-            <Button onClick={onConfirm}>{TEXTS.confirm}</Button>
+            <ButtonRectangular onClick={onClose}>{TEXTS.cancel}</ButtonRectangular>
+            <ButtonRectangular onClick={onConfirm}>{TEXTS.confirm}</ButtonRectangular>
           </div>
         </div>
       </div>
-    </>
+    </>,
+    modalRoot,
   );
 }
