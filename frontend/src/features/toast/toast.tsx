@@ -1,12 +1,14 @@
+import { type ToastType } from './use-toast-store';
+
 interface ToastProps {
   message: string;
-  type?: 'success' | 'error' | 'info';
+  type?: ToastType;
 }
 
-const typeStyles: Record<string, string> = {
-  success: 'toast-success',
-  error: 'toast-error',
-  info: 'toast-info',
+const typeStyles: Record<ToastType, string> = {
+  success: 'bg-green-500 text-white',
+  error: 'bg-red-500 text-white',
+  info: 'bg-blue-500 text-white',
 };
 
 /**
