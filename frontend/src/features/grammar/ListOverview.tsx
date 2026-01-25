@@ -1,10 +1,7 @@
 import ButtonRectangular from '@/components/UI/buttons/ButtonRectangular';
-import CloseIcon from '@/components/UI/icons/CloseIcon';
+import CloseButton from '@/components/UI/buttons/CloseButton';
 import { TEXTS } from '@/config/texts';
 
-/**
- * Minimal type for list items.
- */
 type ListItem = {
   id: string | number;
   name: string;
@@ -46,9 +43,7 @@ export default function ListOverview({
         <div className="h-button flex grow justify-start p-4">
           {loading ? TEXTS.buttonLoading : error || listTitle}
         </div>
-        <ButtonRectangular className="w-button grow-0" onClick={onClose}>
-          <CloseIcon />
-        </ButtonRectangular>
+        <CloseButton onClick={onClose} />
       </div>
       {array && array.length > 0 ? (
         array.map((item, index) => (

@@ -8,6 +8,7 @@ import { useFetch } from '@/hooks/use-fetch';
 import type { GrammarLocal } from '@/types/local.types';
 import DOMPurify from 'dompurify';
 import { useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ListOverview from './ListOverview';
 
 /**
@@ -16,7 +17,10 @@ import ListOverview from './ListOverview';
  * @returns A view with a grammar list and detail card, including progress reset and help features.
  */
 export default function GrammarOverview() {
+  const [cardVisible, setCardVisible] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const { userId } = useAuthStore();
+  const navigate = useNavigate();
 
   const fetchGrammarList = useCallback(async () => {
     if (userId) {
@@ -31,9 +35,6 @@ export default function GrammarOverview() {
     loading,
     setShouldReload,
   } = useFetch<GrammarLocal[]>(fetchGrammarList);
-
-  const [cardVisible, setCardVisible] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
 
   const handleClearGrammarUserItems = async () => {
     const grammar_id = grammarArray?.[currentIndex]?.id;
@@ -56,7 +57,7 @@ export default function GrammarOverview() {
             setCurrentIndex(index);
             setCardVisible(true);
           }}
-          onClose={() => window.history.back()}
+          onClose={() => navigate('/profile')}
         />
       ) : (
         <div className="relative flex w-full grow flex-col items-center justify-start">
