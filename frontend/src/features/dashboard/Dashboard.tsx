@@ -3,8 +3,8 @@ import { TEXTS } from '@/config/texts';
 import LessonBar from '@/features/dashboard/BlockBar';
 import { getLessonProgress } from '@/features/dashboard/dashboard.utils';
 import { useUserStore } from '@/features/dashboard/use-user-store';
-import HelpButton from '@/features/overlay/HelpButton';
-import { useOverlayStore } from '@/features/overlay/use-overlay-store';
+import HelpButton from '@/features/help/HelpButton';
+import { useHelpStore } from '@/features/help/use-help-store';
 import type { LessonsLocal } from '@/types/local.types';
 
 type DashboardProps = {
@@ -19,7 +19,7 @@ type DashboardProps = {
  */
 export default function Dashboard({ className = '' }: DashboardProps) {
   const { userStats } = useUserStore();
-  const { isOpen } = useOverlayStore();
+  const { isOpen } = useHelpStore();
 
   const lessonProgress: LessonsLocal[] = userStats
     ? getLessonProgress(userStats.startedCount || 0, userStats.startedCountToday || 0)

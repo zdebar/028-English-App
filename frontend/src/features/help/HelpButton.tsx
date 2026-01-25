@@ -1,5 +1,5 @@
 import LightBulbIcon from '@/components/UI/icons/LightBulbIcon';
-import { useOverlayStore } from '@/features/overlay/use-overlay-store';
+import { useHelpStore } from '@/features/help/use-help-store';
 
 type HelpButtonProps = {
   className?: string;
@@ -11,10 +11,9 @@ type HelpButtonProps = {
  *
  * @param className Additional CSS classes for custom styling.
  * @param style Inline styles for the button.
- * @returns A styled button with a light bulb icon that triggers the help overlay.
  */
 export default function HelpButton({ className = '', style }: HelpButtonProps) {
-  const { open } = useOverlayStore();
+  const { open } = useHelpStore();
 
   return (
     <button

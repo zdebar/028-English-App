@@ -6,7 +6,7 @@ import ProtectedLayout from '@/components/utils/protected-laout';
 import { supabaseInstance } from '@/config/supabase.config';
 import { dataSync } from '@/database/models/data-sync';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { useOverlayStore } from '@/features/overlay/use-overlay-store';
+import { useHelpStore } from '@/features/help/use-help-store';
 
 import ToastContainer from '@/features/toast/ToastContainer';
 import Grammar from '@/pages/Grammar';
@@ -23,7 +23,7 @@ import './styles/index.css';
 
 export default function App() {
   const { userId, setSession } = useAuthStore();
-  const { isOpen, close } = useOverlayStore();
+  const { isOpen, close } = useHelpStore();
 
   // Handle Supabase auth state changes
   useEffect(() => {

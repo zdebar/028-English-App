@@ -1,14 +1,14 @@
 import OverviewCard from '@/components/UI/OverviewCard';
 import PropertyView from '@/components/UI/PropertyView';
 import { TEXTS } from '@/config/texts';
-import HelpButton from '@/features/overlay/HelpButton';
+import HelpButton from '@/features/help/HelpButton';
 import { shortenDate } from '@/features/vocabulary/vocabulary.utils';
 import type { UserItemLocal } from '@/types/local.types';
 
 interface VocabularyDetailCardProps {
   selectedWord: UserItemLocal | null;
   onClose: () => void;
-  onReset: () => void;
+  onReset: () => Promise<void>;
 }
 
 /**

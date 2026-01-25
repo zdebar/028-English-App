@@ -3,7 +3,7 @@ import { TEXTS } from '@/config/texts';
 import Grammar from '@/database/models/grammar';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import HelpButton from '@/features/overlay/HelpButton';
+import HelpButton from '@/features/help/HelpButton';
 import { useFetch } from '@/hooks/use-fetch';
 import type { GrammarLocal } from '@/types/local.types';
 import DOMPurify from 'dompurify';

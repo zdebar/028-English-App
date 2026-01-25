@@ -6,13 +6,13 @@ import Grammar from '@/database/models/grammar';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useAudioManager } from '@/features/practice/use-audio-manager';
 import { usePracticeDeck } from '@/features/practice/use-practice-deck';
-import { useOverlayStore } from '@/features/overlay/use-overlay-store';
+import { useHelpStore } from '@/features/help/use-help-store';
 import { useUserStore } from '@/features/dashboard/use-user-store';
 
 import Hint from '@/components/UI/Hint';
 import Indicator from '@/components/UI/Indicator';
 import Loading from '@/components/UI/Loading';
-import HelpButton from '@/features/overlay/HelpButton';
+import HelpButton from '@/features/help/HelpButton';
 import GrammarCard, { type GrammarCardType } from '@/features/practice/GrammarCard';
 import VolumeSlider from '@/features/practice/VolumeSlider';
 
@@ -35,7 +35,7 @@ export default function PracticeCard() {
   const [showPlayHint, setShowPlayHint] = useState(true);
   const [grammarVisible, setGrammarVisible] = useState(false);
   const [grammarData, setGrammarData] = useState<GrammarCardType | null>(null);
-  const { isOpen } = useOverlayStore();
+  const { isOpen } = useHelpStore();
   const { userId } = useAuthStore();
   const { userStats } = useUserStore();
   const { index, array, nextItem, currentItem, direction, grammar_id, loading } = usePracticeDeck(

@@ -1,7 +1,7 @@
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import Hint from '@/components/UI/Hint';
 import { TEXTS } from '@/config/texts';
-import { useOverlayStore } from '@/features/overlay/use-overlay-store';
+import { useHelpStore } from '@/features/help/use-help-store';
 import ButtonAsyncModal from './buttons/ButtonAsyncModal';
 
 interface OverviewCardProps {
@@ -30,7 +30,7 @@ export default function OverviewCard({
   onClose,
   children,
 }: OverviewCardProps) {
-  const { isOpen } = useOverlayStore();
+  const { isOpen } = useHelpStore();
 
   return (
     <div className={`card-height card-width flex flex-col justify-start gap-1 ${className}`}>
