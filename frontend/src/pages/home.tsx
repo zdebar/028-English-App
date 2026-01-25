@@ -18,7 +18,12 @@ export default function Home() {
       <p className="notification error-warning">{TEXTS.appSubtitle}</p>
       <p className="px-4">{TEXTS.appDescription}</p>
 
-      {!userId ? (
+      {userId ? (
+        <div className="relative flex w-full flex-col gap-1">
+          <PropertyView label={TEXTS.userLabel} className="h-input" value={userEmail} />
+          <Dashboard />
+        </div>
+      ) : (
         <div className="w-full">
           <Auth
             supabaseClient={supabaseInstance}
@@ -57,11 +62,6 @@ export default function Home() {
             queryParams={{ prompt: 'select_account' }}
           />
           <PrivacyPolicyLink />
-        </div>
-      ) : (
-        <div className="relative flex w-full flex-col gap-1">
-          <PropertyView label={TEXTS.userLabel} className="h-input" value={userEmail} />
-          <Dashboard />
         </div>
       )}
     </div>

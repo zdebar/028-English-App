@@ -68,7 +68,7 @@ export default function VocabularyList({
               className="h-button flex grow items-center border border-dashed"
             />
           )}
-          <CloseButton className="w-button grow-0" onClick={onClose} />
+          <CloseButton onClick={onClose} />
         </div>
         <input
           type="text"

@@ -18,7 +18,7 @@ export default function CloseButton({ onClick, className = '' }: CloseButtonProp
 
   return (
     <ButtonRectangular
-      className={`flex items-center justify-center ${className}`}
+      className={`w-button flex grow-0 items-center justify-center ${className}`}
       onClick={onClick}
     >
       <CloseIcon />

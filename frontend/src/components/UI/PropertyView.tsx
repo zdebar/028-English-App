@@ -2,6 +2,7 @@ import { TEXTS } from '@/config/texts';
 
 type PropertyViewProps = {
   label: string;
+  labelWidth?: string;
   value: string | number | null | undefined;
   className?: string;
 };
@@ -10,13 +11,19 @@ type PropertyViewProps = {
  * Visual component to display a setting property with its label and value.
  *
  * @param label Label for the property.
+ * @param labelWidth Width for the label element. Defaults to 'w-35'. Use Tailwind width classes.
  * @param value Value to display for the property.
  * @param className Additional CSS classes for custom styling.
  */
-export default function PropertyView({ label, value, className = '' }: PropertyViewProps) {
+export default function PropertyView({
+  label,
+  labelWidth = 'w-35',
+  value,
+  className = '',
+}: PropertyViewProps) {
   return (
     <dl className={`flex items-center ${className}`}>
-      <dt className="inline-block w-35 shrink-0 font-bold">{label}</dt>
+      <dt className={`inline-block ${labelWidth} shrink-0 font-bold`}>{label}</dt>
       <dd>{value || TEXTS.notAvailable}</dd>
     </dl>
   );

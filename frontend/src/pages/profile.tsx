@@ -10,10 +10,10 @@ export default function Profile() {
 
   return (
     <div className="card-width grow-0">
-      <ButtonRectangular onClick={() => navigate('/grammar')} className="grow-0">
+      <ButtonRectangular onClick={() => navigate('/grammar')}>
         <p>{TEXTS.grammarOverview}</p>
       </ButtonRectangular>
-      <ButtonRectangular onClick={() => navigate('/vocabulary')} className="grow-0">
+      <ButtonRectangular onClick={() => navigate('/vocabulary')}>
         <p>{TEXTS.vocabularyOverview}</p>
       </ButtonRectangular>
 

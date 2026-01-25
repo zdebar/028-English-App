@@ -34,7 +34,7 @@ export default function OverviewCard({
 
   return (
     <div className={`card-height card-width flex flex-col justify-start gap-1 ${className}`}>
-      <div className="h-button flex items-center justify-between gap-1">
+      <div className="flex items-center justify-between gap-1">
         <ButtonAsyncModal
           buttonTitle={titleText}
           modalTitle={TEXTS.eraseProgress}
@@ -51,7 +51,7 @@ export default function OverviewCard({
         <Hint visible={isOpen} className="top-0 left-3.5">
           {TEXTS.eraseProgress}
         </Hint>
-        <CloseButton className="w-button grow-0" onClick={onClose} />
+        <CloseButton onClick={onClose} />
       </div>
       <div className="w-full grow p-4">{error ? <p>{error}</p> : children}</div>
     </div>

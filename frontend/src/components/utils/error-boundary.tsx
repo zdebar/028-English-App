@@ -1,4 +1,5 @@
 import React, { Component, type ReactNode } from 'react';
+import { TEXTS } from '@/config/texts';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -30,7 +31,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
 
   render() {
     if (this.state.hasError) {
-      return <h1>Nepředvídatelná chyba!</h1>;
+      return <h1>{TEXTS.failureToast}</h1>;
     }
 
     return this.props.children;

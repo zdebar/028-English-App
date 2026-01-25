@@ -1,5 +1,3 @@
-import styles from './button.module.css';
-
 interface ButtonRectangularProps {
   className?: string;
   disabled?: boolean;
@@ -22,7 +20,7 @@ export default function ButtonRectangular({
 }: ButtonRectangularProps) {
   return (
     <button
-      className={`${styles['button-rectangular']} ${styles['button-color']} ${className}`}
+      className={`button-rectangular button-color ${className}`}
       onClick={onClick}
       disabled={disabled}
     >
