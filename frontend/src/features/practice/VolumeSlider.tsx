@@ -4,7 +4,7 @@ import VolumeIcon from '@/components/UI/icons/VolumeIcon';
 type VolumeSliderProps = {
   setVolume: (volume: number) => void;
   className?: string;
-} & React.HTMLAttributes<HTMLDivElement>;
+};
 
 /**
  * A component for controlling volume with a slider.
@@ -13,7 +13,7 @@ type VolumeSliderProps = {
  * @param className - Optional additional CSS classes.
  * @returns A JSX element for the volume slider.
  */
-export default function VolumeSlider({ setVolume, className = '', ...props }: VolumeSliderProps) {
+export default function VolumeSlider({ setVolume, className = '' }: VolumeSliderProps) {
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [volume, setLocalVolume] = useState(0.5);
   const sliderRef = useRef<HTMLDivElement>(null);
@@ -41,9 +41,8 @@ export default function VolumeSlider({ setVolume, className = '', ...props }: Vo
   return (
     <div
       ref={sliderRef}
-      className={`flex pt-1 ${className} cursor-pointer`}
+      className={`flex cursor-pointer pt-1 ${className}`}
       onClick={(event) => event.stopPropagation()}
-      {...props}
     >
       <button
         onClick={() => setShowVolumeSlider((prev) => !prev)}

@@ -11,7 +11,7 @@ import { useUserStore } from '@/features/dashboard/use-user-store';
 
 import Hint from '@/components/UI/Hint';
 import Indicator from '@/components/UI/Indicator';
-import Loading from '@/components/UI/Loading';
+import LoadingText from '@/components/UI/LoadingText';
 import HelpButton from '@/features/help/HelpButton';
 import GrammarCard, { type GrammarCardType } from '@/features/practice/GrammarCard';
 import VolumeSlider from '@/features/practice/VolumeSlider';
@@ -86,7 +86,7 @@ export default function PracticeCard() {
   }, [audioError, currentItem, setAudioError]);
 
   if (!array || !currentItem) {
-    return <Loading text="Načítání ..." />;
+    return <LoadingText text="Načítání ..." />;
   }
 
   return (

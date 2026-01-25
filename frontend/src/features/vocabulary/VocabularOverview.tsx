@@ -1,4 +1,4 @@
-import Loading from '@/components/UI/Loading';
+import LoadingText from '@/components/UI/LoadingText';
 import config from '@/config/config';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
@@ -83,7 +83,7 @@ export default function VocabularyOverview() {
   };
 
   if (loading) {
-    return <Loading />;
+    return <LoadingText />;
   }
 
   return (
