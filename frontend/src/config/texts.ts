@@ -7,6 +7,8 @@ export const TEXTS = {
   confirm: 'Ano',
   cancel: 'Ne',
   pageNotFound: 'Stránka nenalezena',
+  dataLoadingError: 'Chyba při načítání dat.',
+
   and: 'a',
 
   // Theme Switch

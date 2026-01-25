@@ -6,6 +6,9 @@ import ButtonModal from './buttons/ButtonLoadingModal';
 
 interface OverviewCardProps {
   titleText?: string;
+  modalText?: string;
+  modalDescription?: string;
+  hintDescription?: string;
   error?: string | null;
   className?: string;
   handleReset?: () => Promise<void>;
@@ -16,6 +19,9 @@ interface OverviewCardProps {
 /**
  * OverviewCard component for displaying a card with a title, actions, and content.
  * @param titleText Title text for the card.
+ * @param modalText Title for the confirmation modal.
+ * @param modalDescription Description for the confirmation modal.
+ * @param hintDescription Description for the hint tooltip.
  * @param error Error message to display.
  * @param className Additional CSS classes for custom styling.
  * @param handleReset Function to call to reset progress.
@@ -24,6 +30,9 @@ interface OverviewCardProps {
  */
 export default function OverviewCard({
   titleText = TEXTS.notAvailable,
+  modalText = TEXTS.eraseProgress,
+  modalDescription = TEXTS.eraseDescription,
+  hintDescription = TEXTS.eraseProgress,
   error = null,
   className = '',
   handleReset,
@@ -37,8 +46,8 @@ export default function OverviewCard({
       <div className="flex items-center justify-between gap-1">
         <ButtonModal
           buttonTitle={titleText}
-          modalTitle={TEXTS.eraseProgress}
-          modalDescription={TEXTS.eraseDescription}
+          modalTitle={modalText}
+          modalDescription={modalDescription}
           onConfirm={async () => {
             if (handleReset) {
               await handleReset();
@@ -49,7 +58,7 @@ export default function OverviewCard({
           className="flex items-center justify-start pl-4"
         />
         <Hint visible={isOpen} className="top-0 left-3.5">
-          {TEXTS.eraseProgress}
+          {hintDescription}
         </Hint>
         <CloseButton onClick={onClose} />
       </div>

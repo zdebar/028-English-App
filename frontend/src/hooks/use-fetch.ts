@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { TEXTS } from '@/config/texts';
 
 /**
  * A custom React hook for fetching data asynchronously.
@@ -30,7 +31,7 @@ export function useFetch<T>(fetchFunction: () => Promise<T>) {
         setData(result);
         setError(null);
       } catch (error) {
-        setError('Chyba při načítání.');
+        setError(TEXTS.dataLoadingError);
         console.error(error);
       } finally {
         setLoading(false);
