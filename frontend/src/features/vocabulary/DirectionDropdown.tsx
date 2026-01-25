@@ -50,7 +50,7 @@ export default function DirectionDropdown<T>({
         onChange={(e) =>
           onChange(options.find((o) => String(o.value) === e.target.value)?.value as T)
         }
-        className="h-button color-select w-full px-3"
+        className="h-button bg-background-light text-light dark:bg-background-dark dark:text-dark w-full border-none px-3"
       >
         {memoizedOptions}
       </select>

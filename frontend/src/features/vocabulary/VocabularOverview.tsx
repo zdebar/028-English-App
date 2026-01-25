@@ -7,6 +7,7 @@ import type { UserItemLocal } from '@/types/local.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import VocabularyDetailCard from './VocabularyDetailCard';
 import VocabularyList from './VocabularyList';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * VocabularyOverview component
@@ -15,6 +16,7 @@ import VocabularyList from './VocabularyList';
  */
 export default function VocabularyOverview() {
   const { userId } = useAuthStore();
+  const navigate = useNavigate();
 
   const fetchVocabulary = useCallback(async () => {
     if (!userId) return [];
@@ -100,7 +102,7 @@ export default function VocabularyOverview() {
             setCardVisible(true);
           }}
           error={error}
-          onClose={() => window.history.back()}
+          onClose={() => navigate('/profile')}
         />
       ) : (
         <VocabularyDetailCard

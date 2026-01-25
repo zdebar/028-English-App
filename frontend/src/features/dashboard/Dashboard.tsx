@@ -40,7 +40,7 @@ export default function Dashboard({ className = '' }: DashboardProps) {
       <Hint visible={isOpen} className="right-3.5 pt-10">
         {TEXTS.startedTodayHint}
       </Hint>
-      <HelpButton />
+      <HelpButton className="top-6.5" />
     </div>
   );
 }

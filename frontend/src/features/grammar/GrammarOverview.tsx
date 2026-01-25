@@ -60,7 +60,7 @@ export default function GrammarOverview() {
           onClose={() => navigate('/profile')}
         />
       ) : (
-        <div className="relative flex w-full grow flex-col items-center justify-start">
+        <div className="relative flex w-full grow flex-col items-center justify-start border">
           <OverviewCard
             titleText={grammarArray?.[currentIndex]?.name}
             onClose={() => setCardVisible(false)}
@@ -76,7 +76,7 @@ export default function GrammarOverview() {
               TEXTS.noNotesToDisplay
             )}
           </OverviewCard>
-          <HelpButton className="self-end" />
+          <HelpButton />
         </div>
       )}
     </>

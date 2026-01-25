@@ -28,17 +28,17 @@ export default function BlockBar({
   const lessonSize = config.lesson.lessonSize || 100;
   const totalWidth = 100;
 
-  // Validace vstupních hodnot
+  // Arguments validation
   const validPreviousCount = Math.max(0, previousCount);
   const validTodayCount = Math.max(0, todayCount);
 
-  // Výpočet šířek
+  // Width calculation
   const previousWidth = (validPreviousCount / lessonSize) * totalWidth;
   const todayWidth = (validTodayCount / lessonSize) * totalWidth;
 
   return (
     <div className={`relative mx-auto w-full ${className}`}>
-      {/* Popisky */}
+      {/* Labels */}
       <div className="font-body text-light absolute top-0 left-0 z-10 flex w-full justify-between px-2 pt-1 text-center text-sm font-bold">
         <span>
           Blok: {lessonNumber} / {config.progress.maxBlockCount}
@@ -53,19 +53,18 @@ export default function BlockBar({
         aria-valuenow={validPreviousCount + validTodayCount}
         aria-valuemin={0}
         aria-valuemax={lessonSize}
-        aria-label={`Pokrok pro lekci ${lessonNumber}`}
       >
-        {/* Nový pokrok */}
+        {/* New progress */}
         <div
           className="bg-new-progress-light dark:bg-new-progress-dark absolute top-0 left-0 h-full"
           style={{ width: `${Math.min(previousWidth + todayWidth, 100)}%` }}
         ></div>
-        {/* Předchozí pokrok */}
+        {/* Previous progress */}
         <div
           className="bg-old-progress-light dark:bg-old-progress-dark absolute top-0 left-0 h-full"
           style={{ width: `${previousWidth}%` }}
         ></div>
-        {/* Dělení */}
+        {/* Divisions */}
         {(() => {
           const safeDivisions = Math.max(1, divisions || 0);
           return Array.from({ length: safeDivisions }, (_, index) => {

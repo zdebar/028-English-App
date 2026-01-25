@@ -30,10 +30,6 @@
     @apply border-background-light dark:border-background-dark bg-inherit text-inherit;
   }
 
-  .color-select {
-    @apply bg-background-light text-light dark:bg-background-dark dark:text-dark border-none;
-  }
-
   .text-bar {
     @apply font-body text-light text-center text-sm font-bold;
   }
