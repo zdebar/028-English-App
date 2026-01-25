@@ -6,7 +6,6 @@
   }
 
   .button-color {
-    /* Practice Card Buttons */
     @apply cursor-pointer border-2;
     @apply bg-audio-light border-audio-light; /* Theming Light */
     @apply dark:bg-audio-dark dark:border-audio-dark; /* Theming Dark */
