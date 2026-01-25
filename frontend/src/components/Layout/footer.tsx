@@ -1,4 +1,4 @@
-import PrivacyPolicyLink from '@/features/gdpr/PrivacyPolicyLink';
+import PrivacyPolicyLink from '@/features/privacy-policy/PrivacyPolicyLink';
 
 /**
  * Footer component that displays the current year copyright and a link to the privacy policy.

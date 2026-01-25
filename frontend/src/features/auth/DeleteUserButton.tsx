@@ -5,13 +5,16 @@ import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useToastStore } from '@/features/toast/use-toast-store';
+import { AuthenticationError } from '@/types/error.types';
 import { useState } from 'react';
 import ButtonAsyncModal from '../../components/UI/buttons/ButtonAsyncModal';
 
 /**
  * DeleteUserButton component for deleting the current user's account.
+ *
+ * @param className - Optional CSS class name to apply to the button.
  */
-export default function DeleteUserButton() {
+export default function DeleteUserButton({ className }: { className?: string }) {
   const [isLoading, setIsLoading] = useState(false);
   const { userId } = useAuthStore();
   const { showToast } = useToastStore();
@@ -27,7 +30,7 @@ export default function DeleteUserButton() {
       });
 
       if (deleteError) {
-        throw deleteError;
+        throw new AuthenticationError(deleteError.message, deleteError);
       }
 
       try {
@@ -57,6 +60,7 @@ export default function DeleteUserButton() {
       isLoading={isLoading}
       modalDescription={TEXTS.deleteUserModalDescription}
       onConfirm={handleDelete}
+      className={className}
     />
   );
 }

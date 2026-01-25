@@ -6,8 +6,10 @@ import { TEXTS } from '@/config/texts';
 
 /**
  * SignoutButton component for signing out the user.
+ *
+ * @param className - Optional CSS class name to apply to the button.
  */
-export default function SignoutButton() {
+export default function SignoutButton({ className }: { className?: string }) {
   const [isLoading, setIsLoading] = useState(false);
   const { handleLogout } = useAuthStore();
   const { showToast } = useToastStore();
@@ -31,6 +33,7 @@ export default function SignoutButton() {
       isLoading={isLoading}
       modalDescription={TEXTS.signoutModalDescription}
       onConfirm={handleSignout}
+      className={className}
     />
   );
 }

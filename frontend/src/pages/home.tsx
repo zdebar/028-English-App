@@ -3,7 +3,7 @@ import { supabaseInstance } from '@/config/supabase.config';
 import { TEXTS } from '@/config/texts';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import Dashboard from '@/features/dashboard/Dashboard';
-import PrivacyPolicyLink from '@/features/gdpr/PrivacyPolicyLink';
+import PrivacyPolicyLink from '@/features/privacy-policy/PrivacyPolicyLink';
 import { useThemeStore } from '@/features/theme/use-theme';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
