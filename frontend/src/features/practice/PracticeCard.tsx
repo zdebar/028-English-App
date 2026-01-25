@@ -11,7 +11,7 @@ import { useUserStore } from '@/features/dashboard/use-user-store';
 
 import Hint from '@/components/UI/Hint';
 import Indicator from '@/components/UI/Indicator';
-import LoadingText from '@/components/UI/LoadingText';
+import LoadingMessage from '@/components/UI/LoadingMessage';
 import HelpButton from '@/features/help/HelpButton';
 import GrammarCard, { type GrammarCardType } from '@/features/practice/GrammarCard';
 import VolumeSlider from '@/features/practice/VolumeSlider';
@@ -86,7 +86,7 @@ export default function PracticeCard() {
   }, [audioError, currentItem, setAudioError]);
 
   if (!array || !currentItem) {
-    return <LoadingText text="Načítání ..." />;
+    return <LoadingMessage text="Načítání ..." />;
   }
 
   return (
@@ -153,17 +153,13 @@ export default function PracticeCard() {
                 id="bottom-bar"
               >
                 <p className="px-2 font-light">{currentItem?.progress}</p>
-                <Hint visible={isOpen} style={{ bottom: '30px' }}>
+                <Hint visible={isOpen} className="bottom-7.5">
                   pokrok
                 </Hint>
                 <p className="px-2 font-light">
                   {(userStats?.practiceCountToday || 0) + index} / {config.practice.dailyGoal}
                 </p>
-                <Hint
-                  visible={isOpen}
-                  style={{ bottom: '30px', right: '0' }}
-                  className="flex flex-col items-end"
-                >
+                <Hint visible={isOpen} className="right-0 bottom-7.5 flex flex-col items-end">
                   <p>dnes / denní cíl</p>
                 </Hint>
               </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { TEXTS } from '@/config/texts';
 
-type LoadingTextProps = {
+type LoadingMessageProps = {
   text?: string;
   timeDelay?: number;
 };
@@ -12,10 +12,10 @@ type LoadingTextProps = {
  * @param text Loading message to display.
  * @param timeDelay Delay before showing the loading message (ms).
  */
-export default function LoadingText({
+export default function LoadingMessage({
   text = TEXTS.buttonLoading,
   timeDelay = 1000,
-}: LoadingTextProps) {
+}: LoadingMessageProps) {
   const [show, setShow] = useState(false);
 
   useEffect(() => {

@@ -23,7 +23,7 @@ export default function PropertyView({
 }: PropertyViewProps) {
   return (
     <dl className={`flex items-center ${className}`}>
-      <dt className={`inline-block ${labelWidth} shrink-0 font-bold`}>{label}</dt>
+      <dt className={`inline-block shrink-0 font-bold ${labelWidth}`}>{label}</dt>
       <dd>{value || TEXTS.notAvailable}</dd>
     </dl>
   );
