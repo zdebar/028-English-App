@@ -39,11 +39,11 @@
     @apply z-100;
   }
 
-  .z-modal {
+  .z-help-text {
     @apply z-200;
   }
 
-  .z-help-text {
+  .z-modal {
     @apply z-300;
   }
 }

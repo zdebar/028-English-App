@@ -4,7 +4,7 @@ import LessonBar from '@/features/dashboard/BlockBar';
 import { getLessonProgress } from '@/features/dashboard/dashboard.utils';
 import { useUserStore } from '@/features/dashboard/use-user-store';
 import HelpButton from '@/features/help/HelpButton';
-import { useOverlayStore } from '@/features/overlay/use-overlay-store';
+import { useHelpStore } from '../help/use-help-store';
 import type { LessonsLocal } from '@/types/local.types';
 
 type DashboardProps = {
@@ -19,7 +19,7 @@ type DashboardProps = {
  */
 export default function Dashboard({ className = '' }: DashboardProps) {
   const { userStats } = useUserStore();
-  const { isOpen } = useOverlayStore();
+  const { isHelpOpened } = useHelpStore();
 
   const lessonProgress: LessonsLocal[] = userStats
     ? getLessonProgress(userStats.startedCount || 0, userStats.startedCountToday || 0)
@@ -37,10 +37,10 @@ export default function Dashboard({ className = '' }: DashboardProps) {
           todayCount={todayCount}
         />
       ))}
-      <HelpText visible={isOpen} className="right-3.5 pt-10">
+      <HelpText visible={isHelpOpened} className="right-3.5 pt-10">
         {TEXTS.startedTodayHint}
       </HelpText>
-      <HelpButton className="top-6.5" />
+      <HelpButton className="top-6.5 left-0" />
     </div>
   );
 }

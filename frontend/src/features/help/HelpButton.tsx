@@ -1,5 +1,5 @@
 import LightBulbIcon from '@/components/UI/icons/LightBulbIcon';
-import { useHelpStore } from '@/features/help/use-help-store';
+import { useHelpStore } from './use-help-store';
 
 type HelpButtonProps = {
   className?: string;
@@ -13,12 +13,12 @@ type HelpButtonProps = {
  * @param style Inline styles for the button.
  */
 export default function HelpButton({ className = '', style }: HelpButtonProps) {
-  const { openHelp } = useHelpStore();
+  const openHelp = useHelpStore((state) => state.openHelp);
 
   return (
     <button
       type="button"
-      className={`absolute z-10 flex h-10 w-10 items-center justify-center ${className}`}
+      className={`h-icon w-icon flex items-center justify-center ${className}`}
       style={style}
       onClick={openHelp}
     >

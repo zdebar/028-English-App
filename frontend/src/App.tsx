@@ -12,14 +12,17 @@ import Practice from '@/pages/Practice';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import Profile from '@/pages/Profile';
 import Vocabulary from '@/pages/Vocabulary';
+import OverlayMask from './features/overlay/OverlayMask';
 
 import { useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { TEXTS } from './config/texts';
+import { useOverlayStore } from './features/overlay/use-overlay-store';
 import './styles/index.css';
 
 export default function App() {
   const { userId, initializeAuth } = useAuthStore();
+  const { isOverlayOpen } = useOverlayStore();
 
   // Auth initialization effect
   useEffect(() => {
@@ -38,6 +41,7 @@ export default function App() {
     <>
       <div className="max-w-container relative mx-auto flex min-h-screen flex-col justify-start">
         <ToastContainer />
+        {isOverlayOpen && <OverlayMask />}
         <Header />
         <div className="relative flex grow flex-col items-center gap-4">
           <Routes>

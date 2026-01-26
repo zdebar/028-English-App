@@ -6,7 +6,7 @@ import Grammar from '@/database/models/grammar';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useAudioManager } from '@/features/practice/use-audio-manager';
 import { usePracticeDeck } from '@/features/practice/use-practice-deck';
-import { useOverlayStore } from '@/features/overlay/use-overlay-store';
+import { useHelpStore } from '../help/use-help-store';
 import { useUserStore } from '@/features/dashboard/use-user-store';
 
 import HelpText from '@/features/help/HelpText';
@@ -35,7 +35,7 @@ export default function PracticeCard() {
   const [showPlayHint, setShowPlayHint] = useState(true);
   const [grammarVisible, setGrammarVisible] = useState(false);
   const [grammarData, setGrammarData] = useState<GrammarCardType | null>(null);
-  const { isOpen } = useOverlayStore();
+  const { isHelpOpened } = useHelpStore();
   const { userId } = useAuthStore();
   const { userStats } = useUserStore();
   const { index, array, nextItem, currentItem, direction, grammar_id, loading } = usePracticeDeck(
@@ -153,13 +153,16 @@ export default function PracticeCard() {
                 id="bottom-bar"
               >
                 <p className="px-2 font-light">{currentItem?.progress}</p>
-                <HelpText visible={isOpen} className="bottom-7.5">
+                <HelpText visible={isHelpOpened} className="bottom-7.5">
                   pokrok
                 </HelpText>
                 <p className="px-2 font-light">
                   {(userStats?.practiceCountToday || 0) + index} / {config.practice.dailyGoal}
                 </p>
-                <HelpText visible={isOpen} className="right-0 bottom-7.5 flex flex-col items-end">
+                <HelpText
+                  visible={isHelpOpened}
+                  className="right-0 bottom-7.5 flex flex-col items-end"
+                >
                   <p>dnes / denní cíl</p>
                 </HelpText>
               </div>
@@ -178,7 +181,7 @@ export default function PracticeCard() {
                     <Indicator className="absolute top-1 right-1" />
                   )}
                 </ButtonRectangular>
-                <HelpText visible={isOpen} className="top-0 left-3.5">
+                <HelpText visible={isHelpOpened} className="top-0 left-3.5">
                   gramatika
                 </HelpText>
                 <ButtonRectangular
@@ -189,7 +192,7 @@ export default function PracticeCard() {
                 >
                   <ForwardIcon />
                 </ButtonRectangular>
-                <HelpText visible={isOpen} className="top-0 right-3.5">
+                <HelpText visible={isHelpOpened} className="top-0 right-3.5">
                   dokončit
                 </HelpText>
               </div>
@@ -205,7 +208,7 @@ export default function PracticeCard() {
                   >
                     <BulbIcon />
                   </ButtonRectangular>
-                  <HelpText visible={isOpen} className="top-0 left-3.5">
+                  <HelpText visible={isHelpOpened} className="top-0 left-3.5">
                     nápověda
                   </HelpText>
                   <ButtonRectangular
@@ -222,7 +225,7 @@ export default function PracticeCard() {
                   >
                     <EyeIcon />
                   </ButtonRectangular>
-                  <HelpText visible={isOpen} className="top-0 right-3.5">
+                  <HelpText visible={isHelpOpened} className="top-0 right-3.5">
                     odhalit
                   </HelpText>
                 </div>
@@ -232,13 +235,13 @@ export default function PracticeCard() {
                   <ButtonRectangular onClick={() => handleNext(config.progress.minusProgress)}>
                     <MinusIcon />
                   </ButtonRectangular>
-                  <HelpText visible={isOpen} className="top-0 left-3.5">
+                  <HelpText visible={isHelpOpened} className="top-0 left-3.5">
                     neznám
                   </HelpText>
                   <ButtonRectangular onClick={() => handleNext(config.progress.plusProgress)}>
                     <PlusIcon />
                   </ButtonRectangular>
-                  <HelpText visible={isOpen} className="top-0 right-3.5">
+                  <HelpText visible={isHelpOpened} className="top-0 right-3.5">
                     znám
                   </HelpText>
                 </div>

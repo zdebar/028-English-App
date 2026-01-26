@@ -15,7 +15,7 @@ interface UseKeyState {
  */
 export function useKey({ onKeyPress, keys, disabledOnOverlayOpen = false }: UseKeyState) {
   const keyArray = useMemo(() => (Array.isArray(keys) ? keys : [keys]), [keys]);
-  const isOverlayOpen = useOverlayStore((state) => state.isOpen);
+  const isOverlayOpen = useOverlayStore((state) => state.isOverlayOpen);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
