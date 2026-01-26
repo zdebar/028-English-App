@@ -28,7 +28,7 @@ export default function HeaderButton({
   if (disabled)
     return (
       <span
-        className={`button-round flex cursor-default items-center justify-center text-gray-100 hover:bg-inherit dark:text-gray-500 ${className}`}
+        className={`button-round text-disabled-light dark:text-disabled-dark flex cursor-default items-center justify-center hover:bg-inherit ${className}`}
       >
         {children}
       </span>
@@ -37,8 +37,8 @@ export default function HeaderButton({
   return (
     <Link
       to={to}
-      className={`button-round hover:text-light flex items-center justify-center hover:bg-white ${
-        isSelected && 'text-light bg-white'
+      className={`button-round hover:text-light hover:bg-button-hover flex items-center justify-center ${
+        isSelected && 'text-light bg-button-hover'
       } ${className}`}
     >
       {children}

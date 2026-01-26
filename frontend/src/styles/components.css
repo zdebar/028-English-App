@@ -38,6 +38,6 @@
   }
 
   .notification {
-    @apply text-notice-light dark:text-notice-dark;
+    @apply text-warning-light dark:text-warning-dark;
   }
 }

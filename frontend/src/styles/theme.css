@@ -3,23 +3,31 @@
  */
 
 @theme {
-  /** font families **/
+  /** FONT FAMILIES **/
   --font-body: 'Roboto', serif;
   --font-headings: 'Mansalva', sans-serif;
 
-  /** colors **/
-  --color-dark: white;
+  /** COLORS **/
+  /** text colors **/
   --color-light: black;
-  --color-notice-light: black;
-  --color-notice-dark: #87d5e8;
+  --color-dark: white;
+
+  /** background colors **/
+  --color-background-light: #f7b740;
+  --color-background-dark: #111827;
+
+  /** button colors **/
   --color-button-normal: #f7b740;
   --color-button-hover: white;
-  --color-background-dark: #111827;
-  --color-background-light: #f7b740;
-  --color-disabled-light: #ba8420;
-  --color-disabled-dark: #3f3f46;
-  --color-audio-dark: #1a2333;
+  --color-disabled-light: #f3f4f6;
+  --color-disabled-dark: #6b7280;
   --color-audio-light: #f8c04a;
+  --color-audio-dark: #030304;
+
+  /* warning colors **/
+  --color-warning-light: black;
+  --color-warning-dark: #87d5e8;
+
   --color-audio-hover-dark: #1e283b;
   --color-audio-hover-light: #ffc64d;
   --color-overlay: rgba(0, 0, 0, 0.5);
@@ -34,7 +42,7 @@
   --color-new-progress-dark: #f7d565;
   --color-divisions: #374151;
 
-  /** layout dimensions **/
+  /** LAYOUT DIMENSIONS **/
   --max-width-container: 900px;
   --max-width-hero: 450px;
   --min-width-card: 320px;
@@ -42,7 +50,7 @@
   --min-height-card: 320px;
   --max-height-card: 400px;
 
-  /** button sizes **/
+  /** BUTTON SIZES **/
   --size-button: 3.25rem;
   --width-button: 3.25rem;
   --height-button: 3.25rem;
