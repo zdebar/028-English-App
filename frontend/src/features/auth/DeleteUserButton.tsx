@@ -7,7 +7,7 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { AuthenticationError } from '@/types/error.types';
 import { useState } from 'react';
-import ButtonModal from '../../components/UI/buttons/ButtonLoadingModal';
+import ButtonModal from '../../components/UI/buttons/ButtonModal';
 
 /**
  * DeleteUserButton component for deleting the current user's account.
@@ -55,7 +55,7 @@ export default function DeleteUserButton({ className }: { className?: string }) 
 
   return (
     <ButtonModal
-      buttonTitle={TEXTS.deleteUserButtonTitle}
+      label={TEXTS.deleteUserButtonTitle}
       disabled={isLoading || !userId}
       isLoading={isLoading}
       modalDescription={TEXTS.deleteUserModalDescription}

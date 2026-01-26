@@ -20,6 +20,7 @@ export default function ButtonRectangular({
 }: ButtonRectangularProps) {
   return (
     <button
+      type="button"
       className={`button-rectangular button-color ${className}`}
       onClick={onClick}
       disabled={disabled}

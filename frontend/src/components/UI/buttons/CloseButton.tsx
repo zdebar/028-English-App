@@ -1,5 +1,4 @@
 import { useKey } from '@/hooks/use-key';
-import ButtonRectangular from './ButtonRectangular';
 import CloseIcon from '@/components/UI/icons/CloseIcon';
 
 interface CloseButtonProps {
@@ -17,8 +16,11 @@ export default function CloseButton({ onClick, className = '' }: CloseButtonProp
   useKey(onClick, ['Escape']);
 
   return (
-    <ButtonRectangular className={`w-button grow-0 ${className}`} onClick={onClick}>
+    <button
+      className={`button-rectangular button-color w-button grow-0 ${className}`}
+      onClick={onClick}
+    >
       <CloseIcon />
-    </ButtonRectangular>
+    </button>
   );
 }

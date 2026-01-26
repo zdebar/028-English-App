@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useToastStore } from '@/features/toast/use-toast-store';
-import ButtonModal from '../../components/UI/buttons/ButtonLoadingModal';
+import ButtonModal from '../../components/UI/buttons/ButtonModal';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { TEXTS } from '@/config/texts';
 
@@ -29,7 +29,7 @@ export default function SignoutButton({ className }: { className?: string }) {
 
   return (
     <ButtonModal
-      buttonTitle={TEXTS.signoutButtonTitle}
+      label={TEXTS.signoutButtonTitle}
       isLoading={isLoading}
       modalDescription={TEXTS.signoutModalDescription}
       onConfirm={handleSignout}
