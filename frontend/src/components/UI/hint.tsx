@@ -16,7 +16,7 @@ export default function Hint({ visible, children, className = '' }: HintProps) {
 
   return (
     <div
-      className={`font-headings text-hint pointer-events-none absolute z-2000 text-center text-xl ${className}`}
+      className={`font-headings text-hint z-hint pointer-events-none absolute text-center text-xl ${className}`}
     >
       {children}
     </div>

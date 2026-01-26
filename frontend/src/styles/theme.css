@@ -22,17 +22,19 @@
   --color-disabled-light: #f3f4f6;
   --color-disabled-dark: #6b7280;
   --color-audio-light: #f8c04a;
-  --color-audio-dark: #030304;
+  --color-audio-dark: #19202e;
 
-  /* warning colors **/
+  /** warning colors **/
   --color-warning-light: black;
   --color-warning-dark: #87d5e8;
+
+  /** other colors **/
+  --color-hint: white;
+  --color-indicator: green;
 
   --color-audio-hover-dark: #1e283b;
   --color-audio-hover-light: #ffc64d;
   --color-overlay: rgba(0, 0, 0, 0.5);
-  --color-hint: white;
-  --color-indicator: green;
 
   /** progress bar colors **/
   --color-progress-bg: white;

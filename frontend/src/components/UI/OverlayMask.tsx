@@ -12,16 +12,10 @@ type OverlayMaskProps = {
 export default function OverlayMask({ onClose = () => {} }: OverlayMaskProps) {
   useKey(onClose, ['Escape']);
 
-  const handleOverlayClick = () => {
-    if (onClose) {
-      onClose();
-    }
-  };
-
   return (
     <div
-      className="bg-overlay pointer-events-auto fixed inset-0 top-0 z-1000"
-      onClick={handleOverlayClick}
+      className="bg-overlay z-overlay pointer-events-auto fixed inset-0 top-0"
+      onClick={onClose}
       role="button"
       tabIndex={0}
     />

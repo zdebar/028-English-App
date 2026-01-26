@@ -33,4 +33,17 @@
   .text-bar {
     @apply font-body text-light text-center text-sm font-bold;
   }
+
+  /* Z-INDEX LEVELS */
+  .z-overlay {
+    @apply z-100;
+  }
+
+  .z-modal {
+    @apply z-200;
+  }
+
+  .z-hint {
+    @apply z-300;
+  }
 }
