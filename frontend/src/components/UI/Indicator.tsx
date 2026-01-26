@@ -10,5 +10,5 @@ interface IndicatorProps {
  * @param color - Optional color for the indicator. Defaults to the theme's indicator color. Use Tailwind CSS classes.
  */
 export default function Indicator({ className = '', color = 'bg-indicator' }: IndicatorProps) {
-  return <span className={`h-3 w-3 rounded-full ${className} ${color}`} />;
+  return <span className={`h-indicator w-indicator rounded-full ${className} ${color}`} />;
 }

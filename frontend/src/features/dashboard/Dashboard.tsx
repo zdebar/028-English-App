@@ -1,10 +1,10 @@
-import Hint from '@/components/UI/Hint';
+import HelpText from '@/features/help/HelpText';
 import { TEXTS } from '@/config/texts';
 import LessonBar from '@/features/dashboard/BlockBar';
 import { getLessonProgress } from '@/features/dashboard/dashboard.utils';
 import { useUserStore } from '@/features/dashboard/use-user-store';
 import HelpButton from '@/features/help/HelpButton';
-import { useHelpStore } from '@/features/help/use-help-store';
+import { useOverlayStore } from '@/features/overlay/use-overlay-store';
 import type { LessonsLocal } from '@/types/local.types';
 
 type DashboardProps = {
@@ -19,7 +19,7 @@ type DashboardProps = {
  */
 export default function Dashboard({ className = '' }: DashboardProps) {
   const { userStats } = useUserStore();
-  const { isOpen } = useHelpStore();
+  const { isOpen } = useOverlayStore();
 
   const lessonProgress: LessonsLocal[] = userStats
     ? getLessonProgress(userStats.startedCount || 0, userStats.startedCountToday || 0)
@@ -37,9 +37,9 @@ export default function Dashboard({ className = '' }: DashboardProps) {
           todayCount={todayCount}
         />
       ))}
-      <Hint visible={isOpen} className="right-3.5 pt-10">
+      <HelpText visible={isOpen} className="right-3.5 pt-10">
         {TEXTS.startedTodayHint}
-      </Hint>
+      </HelpText>
       <HelpButton className="top-6.5" />
     </div>
   );

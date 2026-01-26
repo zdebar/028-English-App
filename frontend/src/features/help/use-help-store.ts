@@ -1,16 +1,23 @@
 import { create } from 'zustand';
+import { useOverlayStore } from '@/features/overlay/use-overlay-store';
 
 interface HelpState {
-  isOpen: boolean;
-  open: () => void;
-  close: () => void;
+  isHelpOpened: boolean;
+  openHelp: () => void;
+  closeHelp: () => void;
 }
 
 /**
  * Zustand store for managing overlay open/close state.
  */
 export const useHelpStore = create<HelpState>((set) => ({
-  isOpen: false,
-  open: () => set({ isOpen: true }),
-  close: () => set({ isOpen: false }),
+  isHelpOpened: false,
+  openHelp: () => {
+    set({ isHelpOpened: true });
+    useOverlayStore.getState().open();
+  },
+  closeHelp: () => {
+    set({ isHelpOpened: false });
+    useOverlayStore.getState().close();
+  },
 }));

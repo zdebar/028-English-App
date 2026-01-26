@@ -1,16 +1,12 @@
 import { useKey } from '@/hooks/use-key';
 
-type OverlayMaskProps = {
-  onClose?: () => void;
-};
-
 /**
  * Overlay mask component covering the entire screen.
  *
  * @param onClose Function to call when the overlay is clicked.
  */
-export default function OverlayMask({ onClose = () => {} }: OverlayMaskProps) {
-  useKey(onClose, ['Escape']);
+export default function OverlayMask({ onClose }: { onClose?: () => void }) {
+  useKey({ onKeyPress: close, keys: ['Escape'] });
 
   return (
     <div

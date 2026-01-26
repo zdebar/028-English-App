@@ -13,14 +13,14 @@ type HelpButtonProps = {
  * @param style Inline styles for the button.
  */
 export default function HelpButton({ className = '', style }: HelpButtonProps) {
-  const { open } = useHelpStore();
+  const { openHelp } = useHelpStore();
 
   return (
     <button
       type="button"
       className={`absolute z-10 flex h-10 w-10 items-center justify-center ${className}`}
       style={style}
-      onClick={open}
+      onClick={openHelp}
     >
       <LightBulbIcon />
     </button>

@@ -1,7 +1,7 @@
-import { Modal } from '@/components/UI/Modal';
+import { Modal } from '@/features/modal/Modal';
 import { TEXTS } from '@/config/texts';
 import { useState } from 'react';
-import ButtonLoading from './ButtonLoading';
+import ButtonLoading from '../../components/UI/buttons/ButtonLoading';
 
 interface ButtonModalProps {
   label: string;

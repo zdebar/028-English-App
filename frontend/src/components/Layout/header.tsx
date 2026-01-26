@@ -1,5 +1,4 @@
 import HeaderButton from '@/components/UI/buttons/HeaderButton';
-import UserAvatar from '@/components/UI/UserAvatar';
 
 import { useAuthStore } from '@/features/auth/use-auth-store';
 
@@ -7,6 +6,7 @@ import ThemeSwitch from '@/features/theme/ThemeSwitch';
 import AcademicCapIcon from '../UI/icons/AcademicCapIcon';
 import HomeIcon from '../UI/icons/HomeIcon';
 import styles from './header.module.css';
+import UserIcon from '../UI/icons/UserIcon';
 
 /**
  * Header component displaying main navigation and user controls.
@@ -32,7 +32,7 @@ export default function Header() {
       >
         <ThemeSwitch />
         <HeaderButton to="/profile" disabled={!userId}>
-          <UserAvatar />
+          <UserIcon />
         </HeaderButton>
       </nav>
     </header>

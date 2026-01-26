@@ -6,10 +6,10 @@ import Grammar from '@/database/models/grammar';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useAudioManager } from '@/features/practice/use-audio-manager';
 import { usePracticeDeck } from '@/features/practice/use-practice-deck';
-import { useHelpStore } from '@/features/help/use-help-store';
+import { useOverlayStore } from '@/features/overlay/use-overlay-store';
 import { useUserStore } from '@/features/dashboard/use-user-store';
 
-import Hint from '@/components/UI/Hint';
+import HelpText from '@/features/help/HelpText';
 import Indicator from '@/components/UI/Indicator';
 import LoadingMessage from '@/components/UI/LoadingMessage';
 import HelpButton from '@/features/help/HelpButton';
@@ -35,7 +35,7 @@ export default function PracticeCard() {
   const [showPlayHint, setShowPlayHint] = useState(true);
   const [grammarVisible, setGrammarVisible] = useState(false);
   const [grammarData, setGrammarData] = useState<GrammarCardType | null>(null);
-  const { isOpen } = useHelpStore();
+  const { isOpen } = useOverlayStore();
   const { userId } = useAuthStore();
   const { userStats } = useUserStore();
   const { index, array, nextItem, currentItem, direction, grammar_id, loading } = usePracticeDeck(
@@ -153,15 +153,15 @@ export default function PracticeCard() {
                 id="bottom-bar"
               >
                 <p className="px-2 font-light">{currentItem?.progress}</p>
-                <Hint visible={isOpen} className="bottom-7.5">
+                <HelpText visible={isOpen} className="bottom-7.5">
                   pokrok
-                </Hint>
+                </HelpText>
                 <p className="px-2 font-light">
                   {(userStats?.practiceCountToday || 0) + index} / {config.practice.dailyGoal}
                 </p>
-                <Hint visible={isOpen} className="right-0 bottom-7.5 flex flex-col items-end">
+                <HelpText visible={isOpen} className="right-0 bottom-7.5 flex flex-col items-end">
                   <p>dnes / denní cíl</p>
-                </Hint>
+                </HelpText>
               </div>
             </div>
             {/* Practice Controls */}
@@ -178,9 +178,9 @@ export default function PracticeCard() {
                     <Indicator className="absolute top-1 right-1" />
                   )}
                 </ButtonRectangular>
-                <Hint visible={isOpen} className="top-0 left-3.5">
+                <HelpText visible={isOpen} className="top-0 left-3.5">
                   gramatika
-                </Hint>
+                </HelpText>
                 <ButtonRectangular
                   onClick={() => {
                     handleNext(config.progress.skipProgress);
@@ -189,9 +189,9 @@ export default function PracticeCard() {
                 >
                   <ForwardIcon />
                 </ButtonRectangular>
-                <Hint visible={isOpen} className="top-0 right-3.5">
+                <HelpText visible={isOpen} className="top-0 right-3.5">
                   dokončit
-                </Hint>
+                </HelpText>
               </div>
               {/** Bottom Row */}
               {!revealed ? (
@@ -205,9 +205,9 @@ export default function PracticeCard() {
                   >
                     <BulbIcon />
                   </ButtonRectangular>
-                  <Hint visible={isOpen} className="top-0 left-3.5">
+                  <HelpText visible={isOpen} className="top-0 left-3.5">
                     nápověda
-                  </Hint>
+                  </HelpText>
                   <ButtonRectangular
                     onClick={() => {
                       if (showPlayHint) {
@@ -222,9 +222,9 @@ export default function PracticeCard() {
                   >
                     <EyeIcon />
                   </ButtonRectangular>
-                  <Hint visible={isOpen} className="top-0 right-3.5">
+                  <HelpText visible={isOpen} className="top-0 right-3.5">
                     odhalit
-                  </Hint>
+                  </HelpText>
                 </div>
               ) : (
                 /** Revealed */
@@ -232,15 +232,15 @@ export default function PracticeCard() {
                   <ButtonRectangular onClick={() => handleNext(config.progress.minusProgress)}>
                     <MinusIcon />
                   </ButtonRectangular>
-                  <Hint visible={isOpen} className="top-0 left-3.5">
+                  <HelpText visible={isOpen} className="top-0 left-3.5">
                     neznám
-                  </Hint>
+                  </HelpText>
                   <ButtonRectangular onClick={() => handleNext(config.progress.plusProgress)}>
                     <PlusIcon />
                   </ButtonRectangular>
-                  <Hint visible={isOpen} className="top-0 right-3.5">
+                  <HelpText visible={isOpen} className="top-0 right-3.5">
                     znám
-                  </Hint>
+                  </HelpText>
                 </div>
               )}
             </div>

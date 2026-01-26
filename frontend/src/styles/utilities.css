@@ -43,7 +43,7 @@
     @apply z-200;
   }
 
-  .z-hint {
+  .z-help-text {
     @apply z-300;
   }
 }

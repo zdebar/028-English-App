@@ -31,9 +31,6 @@
   /** other colors **/
   --color-hint: white;
   --color-indicator: green;
-
-  --color-audio-hover-dark: #1e283b;
-  --color-audio-hover-light: #ffc64d;
   --color-overlay: rgba(0, 0, 0, 0.5);
 
   /** progress bar colors **/
@@ -52,10 +49,11 @@
   --min-height-card: 320px;
   --max-height-card: 400px;
 
-  /** BUTTON SIZES **/
+  /** COMPONENT SIZES **/
   --size-button: 3.25rem;
   --width-button: 3.25rem;
   --height-button: 3.25rem;
   --height-input: 2.5rem;
   --height-attribute: 1.5rem;
+  --size-indicator: 0.75rem;
 }

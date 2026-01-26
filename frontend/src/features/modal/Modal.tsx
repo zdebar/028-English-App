@@ -1,7 +1,7 @@
-import OverlayMask from '@/components/UI/OverlayMask';
+import OverlayMask from '@/features/overlay/OverlayMask';
 import { TEXTS } from '@/config/texts';
 import { createPortal } from 'react-dom';
-import ButtonRectangular from './buttons/ButtonRectangular';
+import ButtonRectangular from '../../components/UI/buttons/ButtonRectangular';
 
 interface ModalProps {
   showModal: boolean;

@@ -13,7 +13,7 @@ interface CloseButtonProps {
  * @param className Additional CSS classes for custom styling.
  */
 export default function CloseButton({ onClick, className = '' }: CloseButtonProps) {
-  useKey(onClick, ['Escape']);
+  useKey({ onKeyPress: onClick, keys: ['Escape'], disabledOnOverlayOpen: true });
 
   return (
     <button

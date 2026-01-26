@@ -3,7 +3,7 @@ import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useState } from 'react';
-import ButtonModal from '../../components/UI/buttons/ButtonModal';
+import ButtonModal from '../modal/ButtonModal';
 
 /**
  * ResetAllProgressButton component for resetting all user progress.

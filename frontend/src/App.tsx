@@ -1,11 +1,9 @@
 import Footer from '@/components/Layout/Footer';
 import Header from '@/components/Layout/Header';
-import OverlayMask from '@/components/UI/OverlayMask';
 import ProtectedLayout from '@/components/utils/protected-laout';
 
 import { dataSync } from '@/database/models/data-sync';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { useHelpStore } from '@/features/help/use-help-store';
 
 import ToastContainer from '@/features/toast/ToastContainer';
 import Grammar from '@/pages/Grammar';
@@ -22,7 +20,6 @@ import './styles/index.css';
 
 export default function App() {
   const { userId, initializeAuth } = useAuthStore();
-  const { isOpen, close } = useHelpStore();
 
   // Auth initialization effect
   useEffect(() => {
@@ -39,7 +36,6 @@ export default function App() {
 
   return (
     <>
-      {isOpen && <OverlayMask onClose={close} />}
       <div className="max-w-container relative mx-auto flex min-h-screen flex-col justify-start">
         <ToastContainer />
         <Header />
