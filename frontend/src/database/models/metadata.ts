@@ -19,7 +19,7 @@ export default class Metadata extends Entity<AppDB> {
   static async getSyncedDate(tableName: TableName, userId?: string | null): Promise<string> {
     const id = generateMetadataId(tableName, userId ?? 'placeholder');
     const metadata = await db.metadata.get(id);
-    return metadata?.synced_at || '1970-01-01T00:00:00.000Z';
+    return metadata?.synced_at ?? '1970-01-01T00:00:00.000Z';
   }
 
   /**
@@ -35,13 +35,13 @@ export default class Metadata extends Entity<AppDB> {
     userId?: string | null,
   ): Promise<boolean> {
     const id = generateMetadataId(tableName, userId ?? 'placeholder');
-    await db.metadata.put({
+    const putResult = await db.metadata.put({
       id,
       table_name: tableName,
       user_id: userId ?? 'placeholder',
       synced_at: syncTime,
     });
-    return true;
+    return !!putResult;
   }
 
   /**

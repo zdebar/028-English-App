@@ -21,21 +21,20 @@ export default class AppDB extends Dexie {
     // Define the database schema
     this.version(1).stores({
       user_items:
-        '[user_id+item_id], [user_id+started_at], [user_id+grammar_id+started_at], [user_id+updated_at], [user_id+next_at+mastered_at+sequence] ',
+        '[user_id+item_id], [user_id+started_at], [user_id+grammar_id+started_at], [user_id+updated_at], [user_id+next_at+mastered_at+sequence]',
       grammar: 'id',
       user_scores: 'id, [user_id+updated_at]',
       audio_records: 'filename',
       audio_metadata: 'archive_name',
       metadata: 'id, [table_name+user_id]',
     });
+
     // Initialize tables and map them to classes
-    this.on('ready', () => {
-      this.user_items.mapToClass(UserItem);
-      this.grammar.mapToClass(Grammar);
-      this.user_scores.mapToClass(UserScore);
-      this.audio_records.mapToClass(AudioRecord);
-      this.audio_metadata.mapToClass(AudioMetadata);
-      this.metadata.mapToClass(Metadata);
-    });
+    this.user_items.mapToClass(UserItem);
+    this.grammar.mapToClass(Grammar);
+    this.user_scores.mapToClass(UserScore);
+    this.audio_records.mapToClass(AudioRecord);
+    this.audio_metadata.mapToClass(AudioMetadata);
+    this.metadata.mapToClass(Metadata);
   }
 }

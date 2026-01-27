@@ -21,7 +21,7 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
 
     const results: (AudioRecordLocal | undefined)[] = await db.audio_records.bulkGet(keys);
 
-    return results.filter((record) => record !== undefined);
+    return results.filter((record): record is AudioRecordLocal => record !== undefined);
   }
 
   /**
@@ -33,7 +33,16 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
   static async extractZip(zipBlob: Blob): Promise<Map<string, Blob>> {
     const extractedFiles = new Map<string, Blob>();
     const JSZip = await import('jszip');
-    const zip = await JSZip.loadAsync(zipBlob);
+    let zip;
+    try {
+      zip = await JSZip.loadAsync(zipBlob);
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message
+          ? `Failed to load zip file: ${error.message}`
+          : 'Failed to load zip file';
+      throw new Error(message);
+    }
 
     for (const filename of Object.keys(zip.files)) {
       const file = zip.files[filename];
@@ -71,11 +80,12 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
           const extractedFiles = await this.extractZip(zipBlob);
 
           // Store extracted files in IndexedDB
-          for (const [filename, audioBlob] of extractedFiles) {
-            await db.audio_records.put({ filename, audioBlob });
-          }
+          const putPromises = Array.from(extractedFiles).map(([filename, audioBlob]) =>
+            db.audio_records.put({ filename, audioBlob }),
+          );
+          await Promise.all(putPromises);
 
-          // Mark the archive as fetched
+          // Mark the archive as fetched -- TODO: still marks all as fetched even if some fail
           await AudioMetadata.markAsFetched(archiveName);
           console.log(`Successfully synced archive: ${archiveName}`);
         } catch (error) {

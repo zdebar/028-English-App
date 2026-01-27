@@ -19,7 +19,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * Returns a grammar record by its ID.
    * @param grammarId fetch grammar by ID
    * @returns A promise that resolves to the grammar record or `undefined` if not found.
-   * @throws Error if grammarId is not a positive integer or if grammar is not found.
+   * @throws Error if grammar is not found.
    */
   static async getGrammarById(grammarId: number): Promise<GrammarLocal> {
     const grammar = await db.grammar.get(grammarId);
@@ -45,9 +45,12 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
 
     const grammarIds = [...new Set(startedUserItems.map((item) => item.grammar_id))];
 
-    const startedgrammar: GrammarLocal[] = await db.grammar.where('id').anyOf(grammarIds).toArray();
+    if (grammarIds.length === 0) {
+      return [];
+    }
+    const startedGrammar: GrammarLocal[] = await db.grammar.where('id').anyOf(grammarIds).toArray();
 
-    return startedgrammar;
+    return startedGrammar;
   }
 
   /**
@@ -60,10 +63,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
     // Step 1: Get the last synced date for the grammar table
     const lastSyncedAt = await Metadata.getSyncedDate(TableName.Grammar);
 
-    // Step 2: Fetch synced time
-    const newSyncTime = new Date().toISOString();
-
-    // Step 3: Fetch grammar records from Supabase newer than the last synced date
+    // Step 2: Fetch grammar records from Supabase newer than the last synced date
     const { data: grammar, error } = await supabaseInstance
       .from('grammar')
       .select('id, name, note, updated_at, deleted_at')
@@ -73,7 +73,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
       throw new Error(`Failed to fetch data from supabase: ${error.message}`);
     }
 
-    // Step 4: Split the fetched grammar records by deleted_at
+    // Step 3: Split the fetched grammar records by deleted_at
     if (grammar && grammar.length > 0) {
       const toDelete: number[] = [];
       const toUpsert: GrammarLocal[] = [];
@@ -94,9 +94,10 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
       }
     }
 
-    // Step 5: Update the metadata table with the new sync time
+    // Step 4: Update the metadata table with the new sync time
+    const newSyncTime = new Date().toISOString();
     await Metadata.markAsSynced(TableName.Grammar, newSyncTime);
 
-    return grammar.length;
+    return grammar?.length ?? 0;
   }
 }
