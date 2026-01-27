@@ -1,7 +1,7 @@
 import { Modal } from '@/features/modal/Modal';
 import { TEXTS } from '@/config/texts';
-import { useState } from 'react';
 import ButtonLoading from '../../components/UI/buttons/ButtonLoading';
+import { useModalStore } from './use-modal-store';
 
 interface ButtonModalProps {
   label: string;
@@ -37,7 +37,8 @@ export default function ButtonModal({
   modalDescription = TEXTS.modalConfirmDescription,
   className = '',
 }: ButtonModalProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const openModal = useModalStore((state) => state.openModal);
+  const isModalOpen = useModalStore((state) => state.isModalOpened);
 
   return (
     <>
@@ -46,19 +47,18 @@ export default function ButtonModal({
         label={label}
         disabled={disabled}
         loadingLabel={loadingLabel}
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => openModal()}
         className={className}
       />
-      <Modal
-        showModal={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onConfirm={async () => {
-          setIsModalOpen(false);
-          if (onConfirm) await onConfirm();
-        }}
-        title={modalTitle}
-        description={modalDescription}
-      />
+      {isModalOpen && (
+        <Modal
+          onConfirm={async () => {
+            if (onConfirm) await onConfirm();
+          }}
+          title={modalTitle}
+          description={modalDescription}
+        />
+      )}
     </>
   );
 }

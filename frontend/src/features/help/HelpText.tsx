@@ -1,5 +1,6 @@
+import { useHelpStore } from './use-help-store';
+
 interface HelpTextProps {
-  visible: boolean;
   children: React.ReactNode;
   className?: string;
 }
@@ -10,8 +11,10 @@ interface HelpTextProps {
  * @param children Content to be displayed inside the hint.
  * @param className Additional CSS classes for custom styling.
  */
-export default function HelpText({ visible, children, className = '' }: HelpTextProps) {
-  if (!visible) return null;
+export default function HelpText({ children, className = '' }: HelpTextProps) {
+  const { isHelpOpened } = useHelpStore();
+
+  if (!isHelpOpened) return null;
 
   return (
     <div
