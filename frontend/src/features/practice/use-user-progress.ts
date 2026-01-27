@@ -17,7 +17,10 @@ export function useUserProgress(userId: string) {
         await UserItem.savePracticeDeck(userId, updatedItems);
         return true;
       } catch (error) {
-        console.error('Error updating user items in DB:', error);
+        console.error(
+          `Error updating user items in DB for user ${userId} with ${updatedItems.length} items:`,
+          error,
+        );
         return false;
       }
     },

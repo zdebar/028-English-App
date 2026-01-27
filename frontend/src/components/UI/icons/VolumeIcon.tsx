@@ -1,8 +1,8 @@
-import Icon, { type IconProps } from "./Icon";
+import Icon, { type IconProps } from './Icon';
 
 export default function VolumeIcon(props: IconProps) {
   return (
-    <Icon size={20} {...props} strokeColor="color-text">
+    <Icon size={20} {...props} strokeColor="currentColor">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

@@ -37,7 +37,7 @@ export function usePracticeArray(userId: string) {
 
   return {
     array,
-    currentItem: array[index] || null,
+    currentItem: array[index] ?? null,
     index,
     nextIndex,
     loading,

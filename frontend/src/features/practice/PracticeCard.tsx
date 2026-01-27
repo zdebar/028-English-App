@@ -106,7 +106,6 @@ export default function PracticeCard() {
                   playAudio(currentItem.audio);
                 }
               }}
-              aria-label="Přehrát audio"
             >
               {/** Top Bar */}
               <div id="top-bar" className="relative flex h-8 w-full items-center justify-between">

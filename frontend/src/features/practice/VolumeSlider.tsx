@@ -17,7 +17,6 @@ export default function VolumeSlider({ setVolume, className = '' }: VolumeSlider
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [volume, setLocalVolume] = useState(0.5);
   const sliderRef = useRef<HTMLDivElement>(null);
-  const noAudio = false;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -48,7 +47,7 @@ export default function VolumeSlider({ setVolume, className = '' }: VolumeSlider
         onClick={() => setShowVolumeSlider((prev) => !prev)}
         aria-label="Nastavit hlasitost"
         className="cursor-pointer"
-        disabled={noAudio}
+        disabled={false}
       >
         <VolumeIcon />
       </button>
@@ -66,7 +65,7 @@ export default function VolumeSlider({ setVolume, className = '' }: VolumeSlider
           aria-valuemin={0}
           aria-valuemax={1}
           aria-label={`Hlasitost: ${Math.round(volume * 100)}%`}
-          disabled={noAudio}
+          disabled={false}
         />
       )}
     </div>
