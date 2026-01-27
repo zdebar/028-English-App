@@ -21,8 +21,9 @@ import { useOverlayStore } from './features/overlay/use-overlay-store';
 import './styles/index.css';
 
 export default function App() {
-  const { userId, initializeAuth } = useAuthStore();
-  const { isOverlayOpen } = useOverlayStore();
+  const userId = useAuthStore((state) => state.userId);
+  const initializeAuth = useAuthStore((state) => state.initializeAuth);
+  const isOverlayOpen = useOverlayStore((state) => state.isOverlayOpen);
   const location = useLocation();
 
   // Auth initialization effect

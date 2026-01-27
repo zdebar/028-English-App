@@ -1,10 +1,10 @@
 import { useState, useEffect, useEffectEvent } from 'react';
 import { TEXTS } from '@/config/texts';
 
-interface ButtonLoadingProps {
+interface LoadingButtonProps {
   label?: string;
   loadingLabel?: string;
-  onClick: () => void | Promise<void>;
+  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>;
   isLoading?: boolean;
   disabled?: boolean;
   minLoadingTime?: number;
@@ -22,7 +22,7 @@ interface ButtonLoadingProps {
  * @param minLoadingTime Minimum time to show loading message (ms).
  * @param className Additional CSS classes for custom styling.
  */
-export default function ButtonLoading({
+export default function LoadingButton({
   label: message = TEXTS.buttonDefault,
   loadingLabel: loadingMessage = TEXTS.buttonLoading,
   onClick,
@@ -30,7 +30,7 @@ export default function ButtonLoading({
   disabled = false,
   minLoadingTime = 400,
   className = '',
-}: ButtonLoadingProps) {
+}: LoadingButtonProps) {
   const [minLoadingElapsed, setMinLoadingElapsed] = useState(true);
   const onTimer = useEffectEvent(() => setMinLoadingElapsed(true));
 

@@ -1,6 +1,6 @@
 import { Modal } from '@/features/modal/Modal';
 import { TEXTS } from '@/config/texts';
-import ButtonLoading from '../../components/UI/buttons/ButtonLoading';
+import LoadingButton from '../../components/UI/buttons/LoadingButton';
 import { useModalStore } from './use-modal-store';
 
 interface ButtonModalProps {
@@ -42,7 +42,7 @@ export default function ButtonModal({
 
   return (
     <>
-      <ButtonLoading
+      <LoadingButton
         isLoading={isLoading}
         label={label}
         disabled={disabled}
