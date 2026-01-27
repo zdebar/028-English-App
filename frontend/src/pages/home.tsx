@@ -9,8 +9,9 @@ import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 
 export default function Home() {
-  const { theme } = useThemeStore();
-  const { userId, userEmail } = useAuthStore();
+  const theme = useThemeStore((state) => state.theme);
+  const userId = useAuthStore((state) => state.userId);
+  const userEmail = useAuthStore((state) => state.userEmail);
 
   return (
     <div className="max-w-hero relative flex w-full flex-col items-center justify-start gap-4 text-center">
