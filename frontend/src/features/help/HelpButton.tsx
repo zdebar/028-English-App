@@ -1,4 +1,4 @@
-import LightBulbIcon from '@/components/UI/icons/LightBulbIcon';
+import QuestionMarkIcon from '@/components/UI/icons/QuestionMarkIcon';
 import { useHelpStore } from './use-help-store';
 
 type HelpButtonProps = {
@@ -22,7 +22,7 @@ export default function HelpButton({ className = '', style }: HelpButtonProps) {
       style={style}
       onClick={openHelp}
     >
-      <LightBulbIcon />
+      <QuestionMarkIcon />
     </button>
   );
 }

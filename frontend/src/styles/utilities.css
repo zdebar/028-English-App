@@ -35,6 +35,9 @@
   }
 
   /* Z-INDEX LEVELS */
+  .z-header {
+    @apply z-50;
+  }
   .z-overlay {
     @apply z-100;
   }

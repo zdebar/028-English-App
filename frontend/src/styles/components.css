@@ -13,6 +13,7 @@
     @apply disabled:cursor-default disabled:border-none disabled:bg-inherit disabled:hover:bg-inherit; /* Disabled States */
   }
 
+  /** HEADER BUTTON STYLES **/
   .button-round {
     @apply size-button rounded-full;
     @apply flex items-center justify-center;

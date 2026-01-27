@@ -12,11 +12,11 @@ import UserIcon from '../UI/icons/UserIcon';
  * Header component displaying main navigation and user controls.
  */
 export default function Header() {
-  const { userId } = useAuthStore();
+  const userId = useAuthStore((state) => state.userId);
 
   return (
     <header
-      className={`${styles['header-fixed']} relative z-20 flex w-full flex-none justify-between`}
+      className={`${styles['header-fixed']} z-header relative flex w-full flex-none justify-between`}
     >
       <nav className={`${styles['header-side']} m-4 flex gap-2`} role="navigation">
         <HeaderButton to="/">

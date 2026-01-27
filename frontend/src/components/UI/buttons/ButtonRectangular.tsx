@@ -1,7 +1,7 @@
 interface ButtonRectangularProps {
   className?: string;
   disabled?: boolean;
-  onClick?: () => void;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   children?: React.ReactNode;
 }
 
@@ -9,6 +9,7 @@ interface ButtonRectangularProps {
  * Button component for rendering a styled button element.
  *
  * @param className Additional CSS classes for custom styling.
+ * @param disabled Whether the button is disabled.
  * @param onClick Function to call when button is clicked.
  * @param children Content to be displayed inside the button.
  */

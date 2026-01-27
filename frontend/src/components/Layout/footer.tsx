@@ -12,7 +12,7 @@ export default function Footer({
 }) {
   return (
     <footer className="flex w-full items-center justify-center gap-2 py-4 text-center text-sm">
-      <p>@{currentYear}</p>
+      <p>© {currentYear}</p>
       <PrivacyPolicyLink />
     </footer>
   );
