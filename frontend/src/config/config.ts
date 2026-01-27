@@ -49,6 +49,10 @@ const config = {
   vocabulary: {
     itemsPerPage: 8, // Number of vocabulary items per page
   },
+
+  toast: {
+    duration: 3000, // Duration in milliseconds for which the toast is visible
+  },
 };
 
 export default config;

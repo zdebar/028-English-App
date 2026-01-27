@@ -41,6 +41,11 @@
   --color-new-progress-dark: #f7d565;
   --color-divisions: #374151;
 
+  /** toast colors **/
+  --color-toast-success: #22c55e;
+  --color-toast-error: #ef4444;
+  --color-toast-info: #3b82f6;
+
   /** LAYOUT DIMENSIONS **/
   --max-width-container: 900px;
   --max-width-hero: 450px;

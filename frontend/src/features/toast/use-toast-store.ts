@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import config from '@/config/config';
 
 export type ToastType = 'success' | 'error' | 'info';
 
@@ -27,7 +28,7 @@ export const useToastStore = create<ToastState>((set) => ({
           visible: false,
           timeoutId: null,
         }));
-      }, 3000);
+      }, config.toast.duration);
       return {
         ...state,
         message,
