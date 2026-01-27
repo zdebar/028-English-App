@@ -18,7 +18,7 @@ export default function HelpButton({ className = '', style }: HelpButtonProps) {
   return (
     <button
       type="button"
-      className={`h-icon w-icon flex items-center justify-center ${className}`}
+      className={`h-icon w-icon absolute flex items-center justify-center ${className}`}
       style={style}
       onClick={openHelp}
     >

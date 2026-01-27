@@ -67,8 +67,10 @@ export default function BlockBar({
         {/* Divisions */}
         {(() => {
           const safeDivisions = Math.max(1, divisions || 0);
-          return Array.from({ length: safeDivisions }, (_, index) => {
+          return Array.from({ length: safeDivisions }, (_, i) => {
+            const index = i + 1;
             const position = (index / safeDivisions) * 100;
+
             return (
               <div
                 key={index}

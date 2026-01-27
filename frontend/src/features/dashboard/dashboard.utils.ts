@@ -5,7 +5,7 @@ import type { LessonsLocal } from '@/types/local.types';
  * Calculates the items count in last started lesson before today.
  * @param countNotToday Started items count excluding today's items.
  * @returns Returns the items count in last started lesson before today.
- * @throws Error if countNotToday or lessonSize is invalid.
+
  */
 export function getPreviousCount(countNotToday: number): number {
   return countNotToday % config.lesson.lessonSize;
@@ -36,16 +36,16 @@ export function getTodayStartedItems(previousCount: number, todayCount: number):
 
   const firstLesson = Math.min(todayCount, lessonSize - previousCount);
   lessonCounts.push(firstLesson);
-  todayCount -= firstLesson;
+  let remainingCount = todayCount - firstLesson;
 
-  const fullLessons = Math.floor(todayCount / lessonSize);
+  const fullLessons = Math.floor(remainingCount / lessonSize);
   for (let i = 0; i < fullLessons; i++) {
     lessonCounts.push(lessonSize);
   }
-  todayCount -= fullLessons * lessonSize;
+  remainingCount -= fullLessons * lessonSize;
 
-  if (todayCount > 0) {
-    lessonCounts.push(todayCount);
+  if (remainingCount > 0) {
+    lessonCounts.push(remainingCount);
   }
 
   return lessonCounts;
@@ -58,6 +58,9 @@ export function getTodayStartedItems(previousCount: number, todayCount: number):
  * @returns Array of LessonsLocal objects.
  */
 export function getLessonProgress(all: number, today: number): LessonsLocal[] {
+  if (all < 0 || today < 0) {
+    throw new Error("'all' and 'today' must be non-negative numbers.");
+  }
   if (all < today) {
     throw new Error("'all' must be greater than or equal to 'today'.");
   }

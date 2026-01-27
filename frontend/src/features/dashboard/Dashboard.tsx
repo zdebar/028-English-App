@@ -35,7 +35,7 @@ export default function Dashboard({ className = '' }: DashboardProps) {
           todayCount={todayCount}
         />
       ))}
-      <HelpText className="right-3.5 pt-10">{TEXTS.startedTodayHint}</HelpText>
+      <HelpText className="right-3.5 pt-7">{TEXTS.startedTodayHint}</HelpText>
       <HelpButton className="top-6.5 left-0" />
     </div>
   );
