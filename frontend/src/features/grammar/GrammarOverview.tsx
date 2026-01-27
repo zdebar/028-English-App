@@ -19,7 +19,7 @@ import ListOverview from './ListOverview';
 export default function GrammarOverview() {
   const [cardVisible, setCardVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const { userId } = useAuthStore();
+  const userId = useAuthStore((state) => state.userId);
   const navigate = useNavigate();
 
   const fetchGrammarList = useCallback(async () => {
@@ -36,10 +36,12 @@ export default function GrammarOverview() {
     setShouldReload,
   } = useFetch<GrammarLocal[]>(fetchGrammarList);
 
+  const currentGrammar = grammarArray?.[currentIndex];
+
   const handleClearGrammarUserItems = async () => {
-    const grammar_id = grammarArray?.[currentIndex]?.id;
-    if (typeof grammar_id === 'number' && userId) {
-      await UserItem.resetGrammarItems(userId, grammar_id);
+    const grammarId = currentGrammar?.id;
+    if (typeof grammarId === 'number' && userId) {
+      await UserItem.resetGrammarItems(userId, grammarId);
       setShouldReload(true);
     }
   };
@@ -60,24 +62,23 @@ export default function GrammarOverview() {
           onClose={() => navigate('/profile')}
         />
       ) : (
-        <div className="relative flex w-full grow flex-col items-center justify-start border">
-          <OverviewCard
-            titleText={grammarArray?.[currentIndex]?.name}
-            onClose={() => setCardVisible(false)}
-            handleReset={handleClearGrammarUserItems}
-          >
-            {grammarArray?.[currentIndex]?.note ? (
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(grammarArray?.[currentIndex]?.note ?? ''),
-                }}
-              />
-            ) : (
-              TEXTS.noNotesToDisplay
-            )}
-          </OverviewCard>
-          <HelpButton />
-        </div>
+        <OverviewCard
+          titleText={currentGrammar?.name ?? TEXTS.grammarOverview}
+          onClose={() => setCardVisible(false)}
+          handleReset={handleClearGrammarUserItems}
+          className="relative"
+        >
+          {currentGrammar?.note ? (
+            <div
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(currentGrammar?.note ?? ''),
+              }}
+            />
+          ) : (
+            TEXTS.noNotesToDisplay
+          )}
+          <HelpButton className="right-3.5 bottom-3.5" />
+        </OverviewCard>
       )}
     </>
   );

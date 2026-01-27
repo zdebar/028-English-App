@@ -15,7 +15,7 @@ import Vocabulary from '@/pages/Vocabulary';
 import OverlayMask from './features/overlay/OverlayMask';
 
 import { useEffect } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import { TEXTS } from './config/texts';
 import { useOverlayStore } from './features/overlay/use-overlay-store';
 import './styles/index.css';
@@ -23,6 +23,7 @@ import './styles/index.css';
 export default function App() {
   const { userId, initializeAuth } = useAuthStore();
   const { isOverlayOpen } = useOverlayStore();
+  const location = useLocation();
 
   // Auth initialization effect
   useEffect(() => {
@@ -59,7 +60,7 @@ export default function App() {
             />
           </Routes>
         </div>
-        <Footer />
+        {location.pathname === '/' && <Footer />}
       </div>
     </>
   );

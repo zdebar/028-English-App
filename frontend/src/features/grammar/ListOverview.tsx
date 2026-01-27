@@ -15,6 +15,7 @@ type ListOverviewProps = {
   error: string | null;
   onSelect: (index: number) => void;
   onClose: () => void;
+  className?: string;
 };
 
 /**
@@ -36,9 +37,10 @@ export default function ListOverview({
   error,
   onSelect,
   onClose,
+  className = '',
 }: ListOverviewProps) {
   return (
-    <div className="card-width flex flex-col justify-start gap-1">
+    <div className={`card-width flex flex-col justify-start gap-1 ${className}`}>
       <div className="h-button flex items-center justify-between gap-1">
         <div className="h-button flex grow justify-start p-4">
           {loading ? TEXTS.buttonLoading : error || listTitle}

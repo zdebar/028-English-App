@@ -1,6 +1,7 @@
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import { TEXTS } from '@/config/texts';
 import ButtonModal from '../../features/modal/ButtonModal';
+import HelpText from '@/features/help/HelpText';
 
 interface OverviewCardProps {
   titleText?: string;
@@ -38,7 +39,7 @@ export default function OverviewCard({
   children,
 }: OverviewCardProps) {
   return (
-    <div className={`card-height card-width flex flex-col justify-start gap-1 ${className}`}>
+    <div className={`card-width flex flex-col justify-start gap-1 ${className}`}>
       <div className="flex items-center justify-between gap-1">
         <ButtonModal
           label={titleText}
@@ -55,6 +56,7 @@ export default function OverviewCard({
         />
         <CloseButton onClick={onClose} />
       </div>
+      <HelpText className="left-3.5 pt-7">{TEXTS.eraseProgress}</HelpText>
       <div className="w-full grow p-4">{error ? <p>{error}</p> : children}</div>
     </div>
   );
