@@ -31,7 +31,7 @@ export default function OverviewCard({
   titleText = TEXTS.notAvailable,
   modalText = TEXTS.eraseProgress,
   modalDescription = TEXTS.eraseDescription,
-  // hintDescription = TEXTS.eraseProgress,
+  hintDescription = TEXTS.eraseProgress,
   error = null,
   className = '',
   handleReset,
@@ -56,7 +56,7 @@ export default function OverviewCard({
         />
         <CloseButton onClick={onClose} />
       </div>
-      <HelpText className="left-3.5 pt-7">{TEXTS.eraseProgress}</HelpText>
+      <HelpText className="left-3.5 pt-7">{hintDescription}</HelpText>
       <div className="w-full grow p-4">{error ? <p>{error}</p> : children}</div>
     </div>
   );
