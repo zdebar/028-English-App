@@ -6,6 +6,7 @@ import { dataSync } from '@/database/models/data-sync';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 
 import ToastContainer from '@/features/toast/ToastContainer';
+import OverlayContainer from './features/overlay/OverlayContainer';
 import Grammar from '@/pages/Grammar';
 import Home from '@/pages/Home';
 import Practice from '@/pages/Practice';
@@ -13,18 +14,15 @@ import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import Profile from '@/pages/Profile';
 import Vocabulary from '@/pages/Vocabulary';
 import { ROUTES } from './config/routes.config';
-import OverlayMask from './features/overlay/OverlayMask';
 
 import { useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { TEXTS } from './config/texts.config';
-import { useOverlayStore } from './features/overlay/use-overlay-store';
 import './styles/index.css';
 
 export default function App() {
   const userId = useAuthStore((state) => state.userId);
   const initializeAuth = useAuthStore((state) => state.initializeAuth);
-  const isOverlayOpen = useOverlayStore((state) => state.isOverlayOpen);
   const location = useLocation();
 
   // Auth initialization effect
@@ -44,7 +42,7 @@ export default function App() {
     <>
       <div className="max-w-container relative mx-auto flex min-h-screen flex-col justify-start">
         <ToastContainer />
-        {isOverlayOpen && <OverlayMask />}
+        <OverlayContainer />
         <Header />
         <main className="relative flex grow flex-col items-center gap-4">
           <Routes>
