@@ -1,14 +1,15 @@
 import { useKey } from '@/hooks/use-key';
 import { useOverlayStore } from './use-overlay-store';
+import { KEYBOARD_KEYS } from '@/config/keys.config';
 
 /**
  * Overlay mask component covering the entire screen.
  *
- * @param onClose Function to call when the overlay is clicked.
+ * @param onClose Function to call when the overlay is clicked or when the Escape key is pressed.
  */
 export default function OverlayMask() {
   const close = useOverlayStore((state) => state.closeOverlay);
-  useKey({ onKeyPress: close, keys: ['Escape'] });
+  useKey({ onKeyPress: close, keys: KEYBOARD_KEYS.Exit });
 
   return (
     <div
