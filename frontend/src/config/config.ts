@@ -56,6 +56,7 @@ const config = {
 
   buttons: {
     minLoadingTime: 400, // Minimum loading time for loading buttons in milliseconds
+    loadingMessageDelay: 1000, // Delay before showing loading message in milliseconds
   },
 };
 

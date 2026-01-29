@@ -8,7 +8,6 @@ export const TEXTS = {
   cancel: 'Ne',
   pageNotFound: 'Stránka nenalezena',
   dataLoadingError: 'Chyba při načítání dat.',
-
   and: 'a',
 
   // Theme Switch
@@ -46,7 +45,7 @@ export const TEXTS = {
   modalConfirmDescription: 'Opravdu chcete pokračovat?',
 
   // Resets
-  eraseProgress: 'Vymazat pokrok',
+  eraseProgress: 'vymazat pokrok',
   eraseDescription: 'Opravdu chcete vymazat veškerý pokrok? Změna již nepůjde vrátit.',
   eraseSuccessToast: 'Váš pokrok byl úspěšně vymazán.',
   eraseLanguageProgress: 'Vymazat veškerý pokrok',

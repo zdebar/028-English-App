@@ -49,4 +49,13 @@
   .z-modal {
     @apply z-300;
   }
+
+  /** HINT PLACEMENTS **/
+  .hint-top {
+    @apply -top-4;
+  }
+
+  .hint-left {
+    @apply left-4;
+  }
 }

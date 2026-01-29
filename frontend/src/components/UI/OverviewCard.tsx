@@ -56,7 +56,7 @@ export default function OverviewCard({
         />
         <CloseButton onClick={onClose} />
       </div>
-      <HelpText className="left-3.5 pt-7">{hintDescription}</HelpText>
+      <HelpText className="hint-top hint-left">{hintDescription}</HelpText>
       <div className="w-full grow p-4">{error ? <p>{error}</p> : children}</div>
     </div>
   );
