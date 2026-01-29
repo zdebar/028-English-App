@@ -1,5 +1,6 @@
 import { useKey } from '@/hooks/use-key';
 import CloseIcon from '@/components/UI/icons/CloseIcon';
+import { KEYBOARD_KEYS } from '@/config/keys.config';
 
 interface CloseButtonProps {
   onClick: () => void;
@@ -13,10 +14,11 @@ interface CloseButtonProps {
  * @param className Additional CSS classes for custom styling.
  */
 export default function CloseButton({ onClick, className = '' }: CloseButtonProps) {
-  useKey({ onKeyPress: onClick, keys: ['Escape'], disabledOnOverlayOpen: true });
+  useKey({ onKeyPress: onClick, keys: KEYBOARD_KEYS.Exit, disabledOnOverlayOpen: true });
 
   return (
     <button
+      type="button"
       className={`button-rectangular button-color w-button grow-0 ${className}`}
       onClick={onClick}
     >
