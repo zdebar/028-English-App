@@ -23,11 +23,13 @@ export default function HeaderButton({
   disabled = false,
   className = '',
 }: HeaderButtonProps) {
-  const isSelected = useMatch(to);
+  const isSelected = useMatch({ path: to, end: true });
 
   if (disabled)
     return (
       <span
+        role="button"
+        aria-disabled="true"
         className={`button-round text-disabled-light dark:text-disabled-dark cursor-default hover:bg-inherit ${className}`}
       >
         {children}
