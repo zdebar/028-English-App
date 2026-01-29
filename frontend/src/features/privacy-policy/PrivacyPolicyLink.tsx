@@ -1,4 +1,5 @@
 import { TEXTS } from '@/config/texts';
+import { ROUTES } from '@/config/routes.config';
 
 /**
  * PrivacyPolicyLink component renders a link to the privacy policy page.
@@ -8,7 +9,7 @@ import { TEXTS } from '@/config/texts';
  */
 export default function PrivacyPolicyLink({ className = '' }: { className?: string }) {
   return (
-    <a href="/privacy-policy" className={className}>
+    <a href={ROUTES.privacyPolicy} className={className}>
       {TEXTS.privacyPolicy}
     </a>
   );

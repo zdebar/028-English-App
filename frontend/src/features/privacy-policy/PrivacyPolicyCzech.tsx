@@ -1,3 +1,5 @@
+import { CONTACTS } from '@/config/contacts.config';
+
 export default function PrivacyPolicyCzech() {
   return (
     <div className="px-2">
@@ -72,8 +74,8 @@ export default function PrivacyPolicyCzech() {
       <h2>6. Kontakt</h2>
       <p className="text-sm">
         V případě dotazů týkajících se ochrany soukromí mě kontaktujte na adrese{' '}
-        <a href="mailto:zdebarth@gmail.com" className="font-bold">
-          zdebarth@gmail.com
+        <a href={CONTACTS.mailTo} className="font-bold">
+          {CONTACTS.email}
         </a>
         .
       </p>
