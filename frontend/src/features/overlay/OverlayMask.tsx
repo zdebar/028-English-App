@@ -1,6 +1,6 @@
 import { useKey } from '@/hooks/use-key';
 import { useOverlayStore } from './use-overlay-store';
-import { KEYBOARD_KEYS } from '@/config/keys.config';
+import { KEYBOARD_KEYS } from '@/config/keyboard-keys.config';
 
 /**
  * Overlay mask component covering the entire screen.

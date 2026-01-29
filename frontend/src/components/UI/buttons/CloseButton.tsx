@@ -1,6 +1,6 @@
 import { useKey } from '@/hooks/use-key';
 import CloseIcon from '@/components/UI/icons/CloseIcon';
-import { KEYBOARD_KEYS } from '@/config/keys.config';
+import { KEYBOARD_KEYS } from '@/config/keyboard-keys.config';
 
 interface CloseButtonProps {
   onClick: () => void;

@@ -39,29 +39,27 @@ export default function App() {
   }, [userId]);
 
   return (
-    <>
-      <div className="max-w-container relative mx-auto flex min-h-screen flex-col justify-start">
-        <ToastContainer />
-        <OverlayContainer />
-        <Header />
-        <main className="relative flex grow flex-col items-center gap-4">
-          <Routes>
-            <Route path={ROUTES.home} element={<Home />} />
-            <Route path={ROUTES.privacyPolicy} element={<PrivacyPolicy />} />
-            <Route element={<ProtectedLayout />}>
-              <Route path={ROUTES.practice} element={<Practice />} />
-              <Route path={ROUTES.profile} element={<Profile />} />
-              <Route path={ROUTES.grammar} element={<Grammar />} />
-              <Route path={ROUTES.vocabulary} element={<Vocabulary />} />
-            </Route>
-            <Route
-              path="*"
-              element={<div className="error-warning pt-8">{TEXTS.pageNotFound}</div>}
-            />
-          </Routes>
-        </main>
-        {location.pathname === '/' && <Footer />}
-      </div>
-    </>
+    <div className="max-w-container relative mx-auto flex min-h-screen flex-col justify-start">
+      <ToastContainer />
+      <OverlayContainer />
+      <Header />
+      <main className="relative flex grow flex-col items-center gap-4">
+        <Routes>
+          <Route path={ROUTES.home} element={<Home />} />
+          <Route path={ROUTES.privacyPolicy} element={<PrivacyPolicy />} />
+          <Route element={<ProtectedLayout />}>
+            <Route path={ROUTES.practice} element={<Practice />} />
+            <Route path={ROUTES.profile} element={<Profile />} />
+            <Route path={ROUTES.grammar} element={<Grammar />} />
+            <Route path={ROUTES.vocabulary} element={<Vocabulary />} />
+          </Route>
+          <Route
+            path="*"
+            element={<div className="error-warning pt-8">{TEXTS.pageNotFound}</div>}
+          />
+        </Routes>
+      </main>
+      {location.pathname === '/' && <Footer />}
+    </div>
   );
 }
