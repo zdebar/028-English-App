@@ -12,7 +12,7 @@ interface HelpTextProps {
  * @param className Additional CSS classes for custom styling.
  */
 export default function HelpText({ children, className = '' }: HelpTextProps) {
-  const { isHelpOpened } = useHelpStore();
+  const isHelpOpened = useHelpStore((state) => state.isHelpOpened);
 
   if (!isHelpOpened) return null;
 
