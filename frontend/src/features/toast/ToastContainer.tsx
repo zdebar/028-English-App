@@ -7,7 +7,9 @@ import { useToastStore } from './use-toast-store';
  * @returns The toast notification element or null if not visible.
  */
 export default function ToastContainer() {
-  const { message, type, visible } = useToastStore();
+  const message = useToastStore((state) => state.message);
+  const type = useToastStore((state) => state.type);
+  const visible = useToastStore((state) => state.visible);
 
   if (!visible) return null;
 
