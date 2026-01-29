@@ -1,4 +1,4 @@
-import { TEXTS } from '@/config/texts';
+import { TEXTS } from '@/config/texts.config';
 import LessonBar from '@/features/dashboard/BlockBar';
 import { getLessonProgress } from '@/features/dashboard/dashboard.utils';
 import { useUserStore } from '@/features/dashboard/use-user-store';

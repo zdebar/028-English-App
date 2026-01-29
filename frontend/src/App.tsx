@@ -12,12 +12,12 @@ import Practice from '@/pages/Practice';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import Profile from '@/pages/Profile';
 import Vocabulary from '@/pages/Vocabulary';
-import OverlayMask from './features/overlay/OverlayMask';
 import { ROUTES } from './config/routes.config';
+import OverlayMask from './features/overlay/OverlayMask';
 
 import { useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
-import { TEXTS } from './config/texts';
+import { TEXTS } from './config/texts.config';
 import { useOverlayStore } from './features/overlay/use-overlay-store';
 import './styles/index.css';
 

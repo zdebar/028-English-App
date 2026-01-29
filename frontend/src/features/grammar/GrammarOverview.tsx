@@ -1,5 +1,5 @@
 import OverviewCard from '@/components/UI/OverviewCard';
-import { TEXTS } from '@/config/texts';
+import { TEXTS } from '@/config/texts.config';
 import Grammar from '@/database/models/grammar';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';

@@ -1,4 +1,4 @@
-import { TEXTS } from '@/config/texts';
+import { TEXTS } from '@/config/texts.config';
 import { ROUTES } from '@/config/routes.config';
 
 /**

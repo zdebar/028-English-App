@@ -1,5 +1,5 @@
 import CloseButton from '@/components/UI/buttons/CloseButton';
-import { TEXTS } from '@/config/texts';
+import { TEXTS } from '@/config/texts.config';
 import ButtonModal from '../../features/modal/ButtonModal';
 import HelpText from '@/features/help/HelpText';
 

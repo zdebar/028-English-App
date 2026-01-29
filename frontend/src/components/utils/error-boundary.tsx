@@ -1,5 +1,5 @@
 import React, { Component, type ReactNode } from 'react';
-import { TEXTS } from '@/config/texts';
+import { TEXTS } from '@/config/texts.config';
 
 interface ErrorBoundaryProps {
   children: ReactNode;

@@ -1,6 +1,6 @@
 import OverviewCard from '@/components/UI/OverviewCard';
 import PropertyView from '@/components/UI/PropertyView';
-import { TEXTS } from '@/config/texts';
+import { TEXTS } from '@/config/texts.config';
 import HelpButton from '@/features/help/HelpButton';
 import { shortenDate } from '@/features/vocabulary/vocabulary.utils';
 import type { UserItemLocal } from '@/types/local.types';

@@ -1,6 +1,6 @@
 import ButtonRectangular from '@/components/UI/buttons/ButtonRectangular';
 import { ROUTES } from '@/config/routes.config';
-import { TEXTS } from '@/config/texts';
+import { TEXTS } from '@/config/texts.config';
 import DeleteUserButton from '@/features/auth/DeleteUserButton';
 import ResetAllProgressButton from '@/features/auth/ResetAllProgressButton';
 import SignoutButton from '@/features/auth/SignoutButton';

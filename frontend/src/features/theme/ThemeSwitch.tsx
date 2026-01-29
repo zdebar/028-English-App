@@ -1,7 +1,7 @@
 import SunIcon from '@/components/UI/icons/SunIcon';
 import MoonIcon from '@/components/UI/icons/MoonIcon';
 import { useThemeStore, type UserTheme } from '@/features/theme/use-theme';
-import { TEXTS } from '@/config/texts';
+import { TEXTS } from '@/config/texts.config';
 
 /**
  * A button that toggles between light and dark themes. Default is system preference.

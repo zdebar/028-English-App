@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { TEXTS } from '@/config/texts';
+import { TEXTS } from '@/config/texts.config';
 
 /**
  * A custom React hook for fetching data asynchronously.

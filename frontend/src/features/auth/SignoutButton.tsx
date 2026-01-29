@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import ButtonModal from '../modal/ButtonModal';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { TEXTS } from '@/config/texts';
+import { TEXTS } from '@/config/texts.config';
 
 /**
  * SignoutButton component for signing out the user.

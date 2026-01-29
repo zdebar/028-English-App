@@ -1,5 +1,5 @@
 import { Modal } from '@/features/modal/Modal';
-import { TEXTS } from '@/config/texts';
+import { TEXTS } from '@/config/texts.config';
 import LoadingButton from '../../components/UI/buttons/LoadingButton';
 import { useModalStore } from './use-modal-store';
 

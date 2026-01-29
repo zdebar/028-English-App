@@ -1,4 +1,4 @@
-import { TEXTS } from '@/config/texts';
+import { TEXTS } from '@/config/texts.config';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useToastStore } from '@/features/toast/use-toast-store';

@@ -1,7 +1,7 @@
 import ButtonRectangular from '@/components/UI/buttons/ButtonRectangular';
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import config from '@/config/config';
-import { TEXTS } from '@/config/texts';
+import { TEXTS } from '@/config/texts.config';
 import DirectionDropdown from '@/features/vocabulary/DirectionDropdown';
 import { getMoreTextInCzech } from '@/features/vocabulary/vocabulary.utils';
 import { type UserItemLocal } from '@/types/local.types';

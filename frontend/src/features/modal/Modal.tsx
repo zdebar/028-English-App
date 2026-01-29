@@ -1,5 +1,5 @@
 import { useOverlayStore } from '@/features/overlay/use-overlay-store';
-import { TEXTS } from '@/config/texts';
+import { TEXTS } from '@/config/texts.config';
 import { createPortal } from 'react-dom';
 import ButtonRectangular from '../../components/UI/buttons/ButtonRectangular';
 

@@ -1,5 +1,5 @@
 import { supabaseInstance } from '@/config/supabase.config';
-import { TEXTS } from '@/config/texts';
+import { TEXTS } from '@/config/texts.config';
 import Metadata from '@/database/models/metadata';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';

@@ -1,6 +1,6 @@
 import ButtonRectangular from '@/components/UI/buttons/ButtonRectangular';
 import CloseButton from '@/components/UI/buttons/CloseButton';
-import { TEXTS } from '@/config/texts';
+import { TEXTS } from '@/config/texts.config';
 
 type ListItem = {
   id: string | number;
