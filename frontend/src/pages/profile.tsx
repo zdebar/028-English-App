@@ -1,4 +1,5 @@
 import ButtonRectangular from '@/components/UI/buttons/ButtonRectangular';
+import { ROUTES } from '@/config/routes.config';
 import { TEXTS } from '@/config/texts';
 import DeleteUserButton from '@/features/auth/DeleteUserButton';
 import ResetAllProgressButton from '@/features/auth/ResetAllProgressButton';
@@ -10,10 +11,10 @@ export default function Profile() {
 
   return (
     <div className="card-width grow-0">
-      <ButtonRectangular onClick={() => navigate('/grammar')}>
+      <ButtonRectangular onClick={() => navigate(ROUTES.grammar)}>
         <p>{TEXTS.grammarOverview}</p>
       </ButtonRectangular>
-      <ButtonRectangular onClick={() => navigate('/vocabulary')}>
+      <ButtonRectangular onClick={() => navigate(ROUTES.vocabulary)}>
         <p>{TEXTS.vocabularyOverview}</p>
       </ButtonRectangular>
 

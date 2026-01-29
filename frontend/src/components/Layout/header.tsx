@@ -2,11 +2,12 @@ import HeaderButton from '@/components/UI/buttons/HeaderButton';
 
 import { useAuthStore } from '@/features/auth/use-auth-store';
 
+import { ROUTES } from '@/config/routes.config';
 import ThemeSwitch from '@/features/theme/ThemeSwitch';
 import AcademicCapIcon from '../UI/icons/AcademicCapIcon';
 import HomeIcon from '../UI/icons/HomeIcon';
-import styles from './header.module.css';
 import UserIcon from '../UI/icons/UserIcon';
+import styles from './header.module.css';
 
 /**
  * Header component displaying main navigation and user controls.
@@ -19,10 +20,10 @@ export default function Header() {
       className={`${styles['header-fixed']} z-header relative flex w-full flex-none justify-between`}
     >
       <nav className={`${styles['header-side']} m-4 flex gap-2`} role="navigation">
-        <HeaderButton to="/">
+        <HeaderButton to={ROUTES.home}>
           <HomeIcon />
         </HeaderButton>
-        <HeaderButton to="/practice" disabled={!userId}>
+        <HeaderButton to={ROUTES.practice} disabled={!userId}>
           <AcademicCapIcon />
         </HeaderButton>
       </nav>
@@ -31,7 +32,7 @@ export default function Header() {
         role="navigation"
       >
         <ThemeSwitch />
-        <HeaderButton to="/profile" disabled={!userId}>
+        <HeaderButton to={ROUTES.profile} disabled={!userId}>
           <UserIcon />
         </HeaderButton>
       </nav>

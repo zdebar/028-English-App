@@ -13,6 +13,7 @@ import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import Profile from '@/pages/Profile';
 import Vocabulary from '@/pages/Vocabulary';
 import OverlayMask from './features/overlay/OverlayMask';
+import { ROUTES } from './config/routes.config';
 
 import { useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
@@ -47,13 +48,13 @@ export default function App() {
         <Header />
         <main className="relative flex grow flex-col items-center gap-4">
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path={ROUTES.home} element={<Home />} />
+            <Route path={ROUTES.privacyPolicy} element={<PrivacyPolicy />} />
             <Route element={<ProtectedLayout />}>
-              <Route path="/practice" element={<Practice />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/grammar" element={<Grammar />} />
-              <Route path="/vocabulary" element={<Vocabulary />} />
+              <Route path={ROUTES.practice} element={<Practice />} />
+              <Route path={ROUTES.profile} element={<Profile />} />
+              <Route path={ROUTES.grammar} element={<Grammar />} />
+              <Route path={ROUTES.vocabulary} element={<Vocabulary />} />
             </Route>
             <Route
               path="*"
