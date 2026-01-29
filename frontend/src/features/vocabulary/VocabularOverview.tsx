@@ -23,12 +23,7 @@ export default function VocabularyOverview() {
     return UserItem.getUserStartedVocabulary(userId);
   }, [userId]);
 
-  const {
-    data: words,
-    error,
-    loading,
-    setShouldReload,
-  } = useFetch<UserItemLocal[]>(fetchVocabulary);
+  const { data: words, error, loading, reload } = useFetch<UserItemLocal[]>(fetchVocabulary);
 
   const [visibleCount, setVisibleCount] = useState(config.vocabulary.itemsPerPage);
   const [cardVisible, setCardVisible] = useState(false);
@@ -77,7 +72,7 @@ export default function VocabularyOverview() {
     const itemId = selectedWord?.item_id;
     if (typeof itemId === 'number' && userId) {
       await UserItem.resetUserItemById(userId, itemId);
-      setShouldReload(true);
+      reload();
       setCardVisible(false);
     }
   };

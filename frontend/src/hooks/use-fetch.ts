@@ -12,8 +12,7 @@ import { TEXTS } from '@/config/texts';
  *   - `data`: The fetched data of type T, or null if not yet fetched or on error.
  *   - `error`: A string error message if the fetch failed, or null otherwise.
  *   - `loading`: A boolean indicating whether the fetch is currently in progress.
- *   - `shouldReload`: A boolean indicating if a reload is pending.
- *   - `setShouldReload`: A function to set the shouldReload state, triggering a new fetch.
+ *   - `reload`: A function to trigger a re-fetch of the data.
  */
 export function useFetch<T>(fetchFunction: () => Promise<T>) {
   const [data, setData] = useState<T | null>(null);
@@ -22,31 +21,42 @@ export function useFetch<T>(fetchFunction: () => Promise<T>) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    let isActive = true;
+
     async function fetchData() {
       if (!shouldReload) return;
       setLoading(true);
 
       try {
         const result = await fetchFunction();
+        if (!isActive) return;
         setData(result);
         setError(null);
       } catch (error) {
+        if (!isActive) return;
         setError(TEXTS.dataLoadingError);
         console.error(error);
       } finally {
-        setLoading(false);
-        setShouldReload(false);
+        if (isActive) {
+          setLoading(false);
+          setShouldReload(false);
+        }
       }
     }
 
     fetchData();
+
+    return () => {
+      isActive = false;
+    };
   }, [fetchFunction, shouldReload]);
+
+  const reload = () => setShouldReload(true);
 
   return {
     data,
     error,
     loading,
-    shouldReload,
-    setShouldReload,
+    reload,
   };
 }

@@ -45,7 +45,7 @@ export default function App() {
         <ToastContainer />
         {isOverlayOpen && <OverlayMask />}
         <Header />
-        <div className="relative flex grow flex-col items-center gap-4">
+        <main className="relative flex grow flex-col items-center gap-4">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
@@ -60,7 +60,7 @@ export default function App() {
               element={<div className="error-warning pt-8">{TEXTS.pageNotFound}</div>}
             />
           </Routes>
-        </div>
+        </main>
         {location.pathname === '/' && <Footer />}
       </div>
     </>

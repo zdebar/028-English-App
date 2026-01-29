@@ -27,7 +27,7 @@ export function usePracticeArray(userId: string) {
     data: fetchedArray,
     error,
     loading,
-    setShouldReload,
+    reload,
   } = useFetch<UserItemPractice[]>(fetchPracticeDeck);
 
   useEffect(() => {
@@ -42,6 +42,6 @@ export function usePracticeArray(userId: string) {
     nextIndex,
     loading,
     error,
-    setShouldReload,
+    reload,
   };
 }

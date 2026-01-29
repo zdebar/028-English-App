@@ -29,12 +29,7 @@ export default function GrammarOverview() {
     return [];
   }, [userId]);
 
-  const {
-    data: grammarArray,
-    error,
-    loading,
-    setShouldReload,
-  } = useFetch<GrammarLocal[]>(fetchGrammarList);
+  const { data: grammarArray, error, loading, reload } = useFetch<GrammarLocal[]>(fetchGrammarList);
 
   const currentGrammar = grammarArray?.[currentIndex];
 
@@ -42,7 +37,7 @@ export default function GrammarOverview() {
     const grammarId = currentGrammar?.id;
     if (typeof grammarId === 'number' && userId) {
       await UserItem.resetGrammarItems(userId, grammarId);
-      setShouldReload(true);
+      reload();
     }
   };
 
