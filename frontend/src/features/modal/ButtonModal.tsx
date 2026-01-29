@@ -44,9 +44,9 @@ export default function ButtonModal({
     <>
       <LoadingButton
         isLoading={isLoading}
-        label={label}
+        message={label}
         disabled={disabled}
-        loadingLabel={loadingLabel}
+        loadingMessage={loadingLabel}
         onClick={() => openModal()}
         className={className}
       />

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useEffectEvent } from 'react';
 import { useOverlayStore } from '@/features/overlay/use-overlay-store';
 
 interface UseKeyState {
@@ -17,16 +17,20 @@ interface UseKeyState {
 export function useKey({ onKeyPress, keys, disabledOnOverlayOpen = false }: UseKeyState) {
   const isOverlayOpen = useOverlayStore((state) => state.isOverlayOpen);
 
+  const stableOnKeyPress = useEffectEvent(onKeyPress);
+
   useEffect(() => {
     if (disabledOnOverlayOpen && isOverlayOpen) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (keys.includes(e.key)) {
-        onKeyPress();
+        stableOnKeyPress();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [keys, disabledOnOverlayOpen, isOverlayOpen, onKeyPress]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [keys, disabledOnOverlayOpen, isOverlayOpen]);
 }

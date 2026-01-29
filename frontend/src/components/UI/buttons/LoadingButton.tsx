@@ -1,9 +1,10 @@
-import { useState, useEffect, useEffectEvent } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { TEXTS } from '@/config/texts';
+import config from '@/config/config';
 
 interface LoadingButtonProps {
-  label?: string;
-  loadingLabel?: string;
+  message?: string;
+  loadingMessage?: string;
   onClick: (event: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>;
   isLoading?: boolean;
   disabled?: boolean;
@@ -14,8 +15,8 @@ interface LoadingButtonProps {
 /**
  * Loading button component that displays a loading message for at least a minimum duration.
  *
- * @param label Text to display when not loading.
- * @param loadingLabel Text to display while loading.
+ * @param message Text to display when not loading.
+ * @param loadingMessage Text to display while loading.
  * @param onClick Function to call when button is clicked.
  * @param isLoading Whether the button is in loading state.
  * @param disabled Whether the button is disabled.
@@ -23,25 +24,37 @@ interface LoadingButtonProps {
  * @param className Additional CSS classes for custom styling.
  */
 export default function LoadingButton({
-  label: message = TEXTS.buttonDefault,
-  loadingLabel: loadingMessage = TEXTS.buttonLoading,
+  message = TEXTS.buttonDefault,
+  loadingMessage = TEXTS.buttonLoading,
   onClick,
   isLoading = false,
   disabled = false,
-  minLoadingTime = 400,
+  minLoadingTime = config.buttons.minLoadingTime,
   className = '',
 }: LoadingButtonProps) {
   const [minLoadingElapsed, setMinLoadingElapsed] = useState(true);
-  const onTimer = useEffectEvent(() => setMinLoadingElapsed(true));
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!isLoading) return;
 
     setMinLoadingElapsed(false);
 
-    const timer = setTimeout(onTimer, minLoadingTime);
-    return () => clearTimeout(timer);
-  }, [isLoading, minLoadingTime, onTimer]);
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+
+    timerRef.current = setTimeout(() => {
+      setMinLoadingElapsed(true);
+      timerRef.current = null;
+    }, minLoadingTime);
+  }, [isLoading, minLoadingTime]);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   const isButtonLoading = isLoading || !minLoadingElapsed;
 

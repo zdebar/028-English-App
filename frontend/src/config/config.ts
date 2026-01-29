@@ -53,6 +53,10 @@ const config = {
   toast: {
     duration: 3000, // Duration in milliseconds for which the toast is visible
   },
+
+  buttons: {
+    minLoadingTime: 400, // Minimum loading time for loading buttons in milliseconds
+  },
 };
 
 export default config;
