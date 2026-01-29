@@ -7,24 +7,22 @@ import { TEXTS } from '@/config/texts';
  * A button that toggles between light and dark themes. Default is system preference.
  */
 export default function ThemeSwitch() {
-  const { theme, chooseTheme } = useThemeStore();
+  const theme = useThemeStore((state) => state.theme);
+  const chooseTheme = useThemeStore((state) => state.chooseTheme);
 
   const handleChange = () => {
     const nextTheme: UserTheme = theme === 'light' ? 'dark' : 'light';
     chooseTheme(nextTheme);
   };
 
-  const themeLabels = {
-    dark: TEXTS.themeDark,
-    light: TEXTS.themeLight,
-  };
+  const themeLabel = theme === 'light' ? TEXTS.themeLight : TEXTS.themeDark;
 
   return (
     <button
-      aria-label={theme === 'light' ? themeLabels.light : themeLabels.dark}
+      aria-label={themeLabel}
       onClick={handleChange}
       className="button-round hover:bg-inherit hover:text-inherit"
-      title={theme === 'light' ? themeLabels.light : themeLabels.dark}
+      title={themeLabel}
     >
       {theme === 'light' ? <SunIcon /> : <MoonIcon />}
     </button>
