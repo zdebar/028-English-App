@@ -1,6 +1,7 @@
 import { useKey } from '@/hooks/use-key';
 import CloseIcon from '@/components/UI/icons/CloseIcon';
 import { KEYBOARD_LISTENERS } from '@/config/keyboard-listeners.config';
+import type { JSX } from 'react';
 
 interface CloseButtonProps {
   onClick: () => void;
@@ -12,8 +13,9 @@ interface CloseButtonProps {
  *
  * @param onClick Function to call when button is clicked.
  * @param className Additional CSS classes for custom styling.
+ * @returns {JSX.Element} The rendered button element.
  */
-export default function CloseButton({ onClick, className = '' }: CloseButtonProps) {
+export default function CloseButton({ onClick, className = '' }: CloseButtonProps): JSX.Element {
   useKey({ onKeyPress: onClick, keys: KEYBOARD_LISTENERS.Exit, disabledOnOverlayOpen: true });
 
   return (

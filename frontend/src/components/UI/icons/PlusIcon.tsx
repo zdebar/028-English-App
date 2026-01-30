@@ -1,6 +1,13 @@
 import Icon, { type IconProps } from './Icon';
+import type { JSX } from 'react';
 
-export default function PlusIcon(props: IconProps) {
+/**
+ * Plus Icon component.
+ *
+ * @param props - IconProps to customize the icon.
+ * @returns {JSX.Element} The rendered icon element.
+ */
+export default function PlusIcon(props: IconProps): JSX.Element {
   return (
     <Icon {...props} size={20} strokeWidth={1} fillColor="currentColor">
       <path

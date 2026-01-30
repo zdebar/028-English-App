@@ -1,6 +1,13 @@
-import Icon, { type IconProps } from "./Icon";
+import Icon, { type IconProps } from './Icon';
+import type { JSX } from 'react';
 
-export default function SunIcon(props: IconProps) {
+/**
+ * Sun Icon component.
+ *
+ * @param props - IconProps to customize the icon.
+ * @returns {JSX.Element} The rendered icon element.
+ */
+export default function SunIcon(props: IconProps): JSX.Element {
   return (
     <Icon size={28} {...props}>
       <path

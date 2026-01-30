@@ -1,3 +1,5 @@
+import type { JSX } from 'react';
+
 interface IndicatorProps {
   className?: string;
 }
@@ -6,7 +8,8 @@ interface IndicatorProps {
  * A component that renders a dot indicator.
  *
  * @param className - Additional CSS classes to apply to the indicator. Defaults to an empty string.
+ * @returns {JSX.Element}
  */
-export default function Indicator({ className = '' }: IndicatorProps) {
+export default function Indicator({ className = '' }: IndicatorProps): JSX.Element {
   return <span className={`h-indicator w-indicator rounded-full${className}`} />;
 }

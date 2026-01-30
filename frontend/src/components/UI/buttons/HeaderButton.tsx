@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link, useMatch } from 'react-router-dom';
+import type { JSX } from 'react';
 
 interface HeaderButtonProps {
   children: ReactNode;
@@ -15,14 +16,14 @@ interface HeaderButtonProps {
  * @param to Destination path for navigation.
  * @param disabled Whether the button is disabled.
  * @param className Additional CSS classes for custom styling.
-
+ * @returns {JSX.Element} The rendered button element.
  */
 export default function HeaderButton({
   children,
   to,
   disabled = false,
   className = '',
-}: HeaderButtonProps) {
+}: HeaderButtonProps): JSX.Element {
   const isSelected = useMatch({ path: to, end: true });
 
   if (disabled)

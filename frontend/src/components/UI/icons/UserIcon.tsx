@@ -1,6 +1,13 @@
 import Icon, { type IconProps } from './Icon';
+import type { JSX } from 'react';
 
-export default function UserIcon(props: IconProps) {
+/**
+ * User Icon component.
+ *
+ * @param props - IconProps to customize the icon.
+ * @returns {JSX.Element} The rendered icon element.
+ */
+export default function UserIcon(props: IconProps): JSX.Element {
   return (
     <Icon size={20} {...props} strokeWidth={0} fillColor="currentColor">
       <path

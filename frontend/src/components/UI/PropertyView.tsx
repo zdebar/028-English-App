@@ -1,4 +1,5 @@
 import { TEXTS } from '@/locales/cs';
+import type { JSX } from 'react';
 
 type PropertyViewProps = {
   label: string;
@@ -14,13 +15,14 @@ type PropertyViewProps = {
  * @param labelWidth Width for the label element. Defaults to 'w-35'. Use Tailwind width classes.
  * @param value Value to display for the property.
  * @param className Additional CSS classes for custom styling.
+ * @returns {JSX.Element} The rendered property view element.
  */
 export default function PropertyView({
   label,
   value,
   labelWidth = 'w-35',
   className = '',
-}: PropertyViewProps) {
+}: PropertyViewProps): JSX.Element {
   return (
     <dl className={`flex items-center ${className}`}>
       <dt className={`inline-block shrink-0 font-bold ${labelWidth}`}>{label}</dt>

@@ -11,6 +11,10 @@ interface ThemeState {
 
 /**
  * Zustand store to manage user theme preferences.
+ *
+ * @returns An object containing:
+ * - `theme`: The current user theme ('light' or 'dark').
+ * - `chooseTheme`: A function to change the user theme to 'light' or 'dark'.
  */
 export const useThemeStore = create<ThemeState>((set, get) => {
   const isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';

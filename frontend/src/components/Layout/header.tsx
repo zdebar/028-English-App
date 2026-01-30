@@ -9,12 +9,14 @@ import AcademicCapIcon from '../UI/icons/AcademicCapIcon';
 import HomeIcon from '../UI/icons/HomeIcon';
 import UserIcon from '../UI/icons/UserIcon';
 
+import type { JSX } from 'react';
 import styles from './header.module.css';
 
 /**
  * Header component displaying main navigation and user controls.
+ * @returns {JSX.Element} The rendered button element.
  */
-export default function Header() {
+export default function Header(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
 
   return (

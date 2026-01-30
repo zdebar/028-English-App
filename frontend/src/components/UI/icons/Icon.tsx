@@ -1,3 +1,5 @@
+import type { JSX } from 'react';
+
 export interface IconProps {
   className?: string;
   size?: number;
@@ -18,8 +20,7 @@ export interface IconProps {
  * @param fillColor - The fill color for the SVG. Defaults to 'none'.
  * @param viewBox - The viewBox attribute for the SVG. Defaults to '0 0 24 24'.
  * @param children - The SVG path or other elements to render inside the SVG.
- *
- * @returns A JSX element representing the SVG icon.
+ * @returns {JSX.Element} A JSX element representing the SVG icon.
  */
 export default function Icon({
   className = '',
@@ -29,7 +30,7 @@ export default function Icon({
   fillColor = 'none',
   viewBox = '0 0 24 24',
   children,
-}: IconProps) {
+}: IconProps): JSX.Element {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

@@ -1,4 +1,5 @@
 import { type ToastType } from './use-toast-store';
+import type { JSX } from 'react';
 
 interface ToastProps {
   message: string;
@@ -16,9 +17,9 @@ const typeStyles: Record<ToastType, string> = {
  *
  * @param message The message to display in the toast.
  * @param type The type of toast ("success", "error", or "info"). Defaults to "info".
- * @returns A styled toast notification element.
+ * @returns {JSX.Element} A styled toast notification element.
  */
-export default function Toast({ message, type = 'info' }: ToastProps) {
+export default function Toast({ message, type = 'info' }: ToastProps): JSX.Element {
   return (
     <div className={`z-modal text-dark absolute top-0 right-0 px-4 py-2 ${typeStyles[type]}`}>
       {message}
