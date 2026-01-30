@@ -1,5 +1,6 @@
 import QuestionMarkIcon from '@/components/UI/icons/QuestionMarkIcon';
 import { useHelpStore } from './use-help-store';
+import type { JSX } from 'react';
 
 type HelpButtonProps = {
   className?: string;
@@ -11,12 +12,13 @@ type HelpButtonProps = {
  *
  * @param className Additional CSS classes for custom styling.
  * @param style Inline styles for the button.
+ * @return {JSX.Element} The rendered help button element.
  */
-export default function HelpButton({ className = '', style }: HelpButtonProps) {
+export default function HelpButton({ className = '', style }: HelpButtonProps): JSX.Element {
   const openHelp = useHelpStore((state) => state.openHelp);
 
   return (
-    <button type="button" className={`absolute ${className}`} style={style} onClick={openHelp}>
+    <button type="button" className={`absolute p-2 ${className}`} style={style} onClick={openHelp}>
       <QuestionMarkIcon />
     </button>
   );
