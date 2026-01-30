@@ -78,4 +78,8 @@ export const TEXTS = {
   deleteUserModalDescription:
     'Opravdu chcete smazat uživatelský účet? Vaše data budou uchována příštích 30 dní, poté budou nenávratně smazána. Před smazáním můžete kdykoliv obnovit svůj účet obětovným přihlášením.',
   deleteUserSuccessToast: 'Váš uživatelský účet byl úspěšně smazán.',
+  deleteUserErrorToast: 'Chyba při mazání uživatelského účtu.',
+
+  // Reset All User Progress
+  resetAllProgressButtonTitle: 'Resetovat veškerý pokrok',
 };

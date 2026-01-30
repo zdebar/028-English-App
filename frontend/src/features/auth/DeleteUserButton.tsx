@@ -1,26 +1,29 @@
 import { supabaseInstance } from '@/config/supabase.config';
-import { TEXTS } from '@/config/texts.config';
+import { TEXTS } from '@/locales/cs';
 import Metadata from '@/database/models/metadata';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useToastStore } from '@/features/toast/use-toast-store';
-import { AuthenticationError } from '@/types/error.types';
-import { useState } from 'react';
+import { type JSX } from 'react';
 import ButtonWithModal from '../modal/ButtonWithModal';
+
+interface DeleteUserButtonProps {
+  className?: string;
+}
 
 /**
  * DeleteUserButton component for deleting the current user's account.
  *
  * @param className - Optional CSS class name to apply to the button.
+ * @returns {JSX.Element} The rendered DeleteUserButton component.
+ * @throws No
  */
-export default function DeleteUserButton({ className }: { className?: string }) {
-  const [isLoading, setIsLoading] = useState(false);
-  const { userId } = useAuthStore();
-  const { showToast } = useToastStore();
+export default function DeleteUserButton({ className }: DeleteUserButtonProps): JSX.Element {
+  const userId = useAuthStore((state) => state.userId);
+  const showToast = useToastStore((state) => state.showToast);
 
   const handleDelete = async () => {
-    setIsLoading(true);
     try {
       if (!userId) return;
 
@@ -30,33 +33,35 @@ export default function DeleteUserButton({ className }: { className?: string }) 
       });
 
       if (deleteError) {
-        throw new AuthenticationError(deleteError.message, deleteError);
+        throw new Error(deleteError.message);
       }
 
-      try {
-        await UserItem.syncUserItemsData(userId); // Sync before deletion, for potential future recovery
-        await UserScore.syncUserScoreData(userId);
-        await UserItem.deleteAllUserItems(userId);
-        await Metadata.deleteSyncRow('user_items', userId);
-        await Metadata.deleteSyncRow('user_scores', userId);
-      } catch (cleanupError) {
-        console.error('Local cleanup error after user deletion:', cleanupError);
-      }
+      const results = await Promise.allSettled([
+        UserItem.syncUserItemsData(userId),
+        UserScore.syncUserScoreData(userId),
+        UserItem.deleteAllUserItems(userId),
+        Metadata.deleteSyncRow('user_items', userId),
+        Metadata.deleteSyncRow('user_scores', userId),
+      ]);
+
+      results.forEach((result) => {
+        if (result.status === 'rejected') {
+          console.error('Operation failed:', result.reason);
+        }
+      });
 
       showToast(TEXTS.deleteUserSuccessToast, 'success');
       await supabaseInstance.auth.signOut();
     } catch (error) {
       console.error('Error deleting user:', error);
-      showToast(TEXTS.failureToast, 'error');
-    } finally {
-      setIsLoading(false);
+      showToast(TEXTS.deleteUserErrorToast, 'error');
     }
   };
 
   return (
     <ButtonWithModal
       buttonText={TEXTS.deleteUserButtonTitle}
-      disabled={isLoading || !userId}
+      disabled={!userId}
       modalDescription={TEXTS.deleteUserModalDescription}
       onConfirm={handleDelete}
       className={className}

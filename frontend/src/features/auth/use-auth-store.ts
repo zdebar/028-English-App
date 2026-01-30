@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import type { Session } from '@supabase/supabase-js';
 import { supabaseInstance } from '@/config/supabase.config';
-import { AuthenticationError } from '@/types/error.types';
 
 interface AuthState {
   userId: string | null;
@@ -63,7 +62,7 @@ export const useAuthStore = create<AuthState>((set) => {
     handleLogout: async () => {
       const { error } = await supabaseInstance.auth.signOut();
       if (error) {
-        throw new AuthenticationError(error.message, error);
+        throw new Error(error.message);
       }
       set({ userId: null, userEmail: null, loading: false });
     },

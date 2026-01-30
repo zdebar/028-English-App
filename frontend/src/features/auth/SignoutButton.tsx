@@ -13,6 +13,7 @@ interface SignoutButtonProps {
  *
  * @param className - Optional CSS class name to apply to the button.
  * @returns {JSX.Element} The rendered SignoutButton component.
+ * @throws No
  */
 export default function SignoutButton({ className }: SignoutButtonProps): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
@@ -21,6 +22,7 @@ export default function SignoutButton({ className }: SignoutButtonProps): JSX.El
 
   const handleSignout = async () => {
     try {
+      if (!userId) return;
       await handleLogout();
       showToast(TEXTS.signoutSuccess, 'success');
     } catch (error) {

@@ -1,5 +1,5 @@
 import { Modal } from '@/features/modal/Modal';
-import { TEXTS } from '@/config/texts.config';
+import { TEXTS } from '@/locales/cs';
 import { useOverlayStore } from '../overlay/use-overlay-store';
 import { useMinLoading } from '@/features/modal/use-min-loading';
 import config from '@/config/config';
@@ -33,7 +33,7 @@ interface ButtonModalProps {
 export default function ButtonWithModal({
   buttonText,
   onConfirm,
-  loadingText = TEXTS.buttonLoading,
+  loadingText = TEXTS.loadingText,
   disabled = false,
   modalTitle = TEXTS.modalConfirmTitle,
   modalDescription = TEXTS.modalConfirmDescription,

@@ -25,8 +25,8 @@ export function Modal({ onConfirm, title, description }: ModalProps): JSX.Elemen
   if (!modalRoot) return null;
 
   return createPortal(
-    <div className="z-modal pointer-events-none fixed inset-0 flex min-h-40 items-center justify-center">
-      <div className="card-width color-base pointer-events-auto flex flex-col justify-between py-1">
+    <div className="z-modal pointer-events-none fixed inset-0 flex items-center justify-center">
+      <div className="card-width color-base pointer-events-auto flex flex-col justify-between pt-2 pb-1">
         <div className="flex grow flex-col items-center gap-2 p-6 text-center">
           <p className="font-bold">{title}</p>
           <p>{description}</p>
