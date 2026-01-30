@@ -7,31 +7,32 @@ interface OverviewCardProps {
   titleText?: string;
   modalText?: string;
   modalDescription?: string;
-  hintDescription?: string;
+  helpText?: string;
   error?: string | null;
-  className?: string;
   handleReset?: () => Promise<void>;
   onClose: () => void;
+  className?: string;
   children?: React.ReactNode;
 }
 
 /**
  * OverviewCard component for displaying a card with a title, actions, and content.
+ *
  * @param titleText Title text for the card.
  * @param modalText Title for the confirmation modal.
  * @param modalDescription Description for the confirmation modal.
- * @param hintDescription Description for the hint tooltip.
+ * @param helpText Description for the help tooltip.
  * @param error Error message to display.
- * @param className Additional CSS classes for custom styling.
  * @param handleReset Function to call to reset progress.
  * @param onClose Function to call when closing the card.
+ * @param className Additional CSS classes for custom styling.
  * @param children Content to be displayed inside the card.
  */
 export default function OverviewCard({
   titleText = TEXTS.notAvailable,
   modalText = TEXTS.eraseProgress,
   modalDescription = TEXTS.eraseDescription,
-  hintDescription = TEXTS.eraseProgress,
+  helpText = TEXTS.eraseProgress,
   error = null,
   className = '',
   handleReset,
@@ -41,6 +42,7 @@ export default function OverviewCard({
   return (
     <div className={`card-width flex flex-col justify-start gap-1 ${className}`}>
       <div className="flex items-center justify-between gap-1">
+        {/* Title and Reset Button */}
         <ButtonModal
           buttonText={titleText}
           modalTitle={modalText}
@@ -54,9 +56,11 @@ export default function OverviewCard({
           disabled={!handleReset}
           className="flex items-center justify-start pl-4"
         />
+        {/* Close Card Button */}
         <CloseButton onClick={onClose} />
       </div>
-      <HelpText className="hint-top hint-left">{hintDescription}</HelpText>
+      <HelpText className="hint-top hint-left">{helpText}</HelpText>
+      {/* Content Area */}
       <div className="w-full grow p-4">{error ? <p>{error}</p> : children}</div>
     </div>
   );

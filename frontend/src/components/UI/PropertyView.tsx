@@ -1,9 +1,9 @@
-import { TEXTS } from '@/config/texts.config';
+import { TEXTS } from '@/locales/cs';
 
 type PropertyViewProps = {
   label: string;
-  labelWidth?: string;
   value: string | number | null | undefined;
+  labelWidth?: string;
   className?: string;
 };
 
@@ -17,8 +17,8 @@ type PropertyViewProps = {
  */
 export default function PropertyView({
   label,
-  labelWidth = 'w-35',
   value,
+  labelWidth = 'w-35',
   className = '',
 }: PropertyViewProps) {
   return (

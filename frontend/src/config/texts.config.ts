@@ -1,14 +1,19 @@
 export const TEXTS = {
   // Generic
-  userLabel: 'Uživatel',
   notAvailable: 'Není k dispozici',
-  failureToast: 'Nastala chyba. Zkuste to prosím později.',
+
   noNotesToDisplay: 'Žádné poznámky k zobrazení.',
   confirm: 'Ano',
   cancel: 'Ne',
   pageNotFound: 'Stránka nenalezena',
   dataLoadingError: 'Chyba při načítání dat.',
   and: 'a',
+
+  // User
+  userLabel: 'Uživatel',
+
+  // Toasts
+  failureToast: 'Nastala chyba. Zkuste to prosím později.',
 
   // Theme Switch
   themeLight: 'Přepnout na tmavý režim',

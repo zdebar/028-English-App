@@ -1,7 +1,7 @@
 import { Modal } from '@/features/modal/Modal';
 import { TEXTS } from '@/config/texts.config';
 import { useModalStore } from './use-modal-store';
-import { useMinLoading } from '@/hooks/use-min-loading';
+import { useMinLoading } from '@/features/modal/use-min-loading';
 import config from '@/config/config';
 
 interface ButtonModalProps {

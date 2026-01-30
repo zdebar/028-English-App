@@ -1,5 +1,5 @@
 import React, { Component, type ReactNode } from 'react';
-import { TEXTS } from '@/config/texts.config';
+import { TEXTS } from '@/locales/cs';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -31,7 +31,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
 
   render() {
     if (this.state.hasError) {
-      return <p>{TEXTS.failureToast}</p>;
+      return <p>{TEXTS.genericError}</p>;
     }
 
     return this.props.children;
