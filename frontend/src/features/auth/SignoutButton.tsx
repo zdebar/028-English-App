@@ -1,5 +1,5 @@
 import { useToastStore } from '@/features/toast/use-toast-store';
-import ButtonModal from '../modal/ButtonModal';
+import ButtonWithModal from '../modal/ButtonWithModal';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { TEXTS } from '@/config/texts.config';
 import type { JSX } from 'react';
@@ -30,7 +30,7 @@ export default function SignoutButton({ className }: SignoutButtonProps): JSX.El
   };
 
   return (
-    <ButtonModal
+    <ButtonWithModal
       buttonText={TEXTS.signoutButtonTitle}
       disabled={!userId}
       modalDescription={TEXTS.signoutModalDescription}

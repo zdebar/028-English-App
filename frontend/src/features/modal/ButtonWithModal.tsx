@@ -3,6 +3,7 @@ import { TEXTS } from '@/config/texts.config';
 import { useModalStore } from './use-modal-store';
 import { useMinLoading } from '@/features/modal/use-min-loading';
 import config from '@/config/config';
+import type { JSX } from 'react';
 
 interface ButtonModalProps {
   buttonText: string;
@@ -25,8 +26,10 @@ interface ButtonModalProps {
  * @param modalTitle Title of the confirmation modal.
  * @param modalDescription Description in the confirmation modal.
  * @param className Additional CSS classes for custom styling.
+ * @return {JSX.Element} The ButtonWithModal component.
+ * @throws Any error thrown by onConfirm will propagate to the caller.
  */
-export default function ButtonModal({
+export default function ButtonWithModal({
   buttonText,
   onConfirm,
   loadingText = TEXTS.buttonLoading,
@@ -34,18 +37,19 @@ export default function ButtonModal({
   modalTitle = TEXTS.modalConfirmTitle,
   modalDescription = TEXTS.modalConfirmDescription,
   className = '',
-}: ButtonModalProps) {
+}: ButtonModalProps): JSX.Element {
   const openModal = useModalStore((state) => state.openModal);
   const isModalOpen = useModalStore((state) => state.isModalOpened);
   const { isLoading, setIsLoading } = useMinLoading(config.buttons.minLoadingTime);
 
   const handleConfirm = async () => {
     if (onConfirm) {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
         await onConfirm();
       } catch (error) {
-        console.error('Error in onConfirm:', error);
+        console.error('Error in ButtonWithModal onConfirm:', error);
+        throw error;
       } finally {
         setIsLoading(false);
       }

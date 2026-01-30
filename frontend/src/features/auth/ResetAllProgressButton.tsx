@@ -2,7 +2,7 @@ import { TEXTS } from '@/config/texts.config';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useToastStore } from '@/features/toast/use-toast-store';
-import ButtonModal from '../modal/ButtonModal';
+import ButtonWithModal from '../modal/ButtonWithModal';
 
 /**
  * ResetAllProgressButton component for resetting all user progress.
@@ -25,7 +25,7 @@ export default function ResetAllProgressButton({ className }: { className?: stri
   };
 
   return (
-    <ButtonModal
+    <ButtonWithModal
       buttonText={TEXTS.eraseLanguageProgress}
       modalDescription={TEXTS.eraseDescription}
       disabled={!userId}

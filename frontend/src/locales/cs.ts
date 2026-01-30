@@ -8,6 +8,10 @@ export const TEXTS = {
   // User
   userLabel: 'Uživatel',
 
+  // Buttons
+  confirm: 'Ano',
+  cancel: 'Ne',
+
   // Generic
   notAvailable: 'Není k dispozici',
 

@@ -1,6 +1,6 @@
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import { TEXTS } from '@/config/texts.config';
-import ButtonModal from '../../features/modal/ButtonModal';
+import ButtonWithModal from '../../features/modal/ButtonWithModal';
 import HelpText from '@/features/help/HelpText';
 
 interface OverviewCardProps {
@@ -43,7 +43,7 @@ export default function OverviewCard({
     <div className={`card-width flex flex-col justify-start gap-1 ${className}`}>
       <div className="flex items-center justify-between gap-1">
         {/* Title and Reset Button */}
-        <ButtonModal
+        <ButtonWithModal
           buttonText={titleText}
           modalTitle={modalText}
           modalDescription={modalDescription}
