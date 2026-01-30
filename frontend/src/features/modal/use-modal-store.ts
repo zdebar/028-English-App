@@ -8,7 +8,13 @@ interface ModalState {
 }
 
 /**
- * Zustand store for managing overlay open/close state.
+ * A Zustand store for managing modal state in the application.
+ *
+ * This store provides state and actions to control the visibility of a modal.
+ * It integrates with an overlay store to handle modal dismissal on overlay interaction.
+ *
+ * @property {boolean} isModalOpened - Indicates whether the modal is currently open.
+ * @property {() => void} openModal - Opens the modal and sets up an overlay to close it on interaction.
  */
 export const useModalStore = create<ModalState>()(
   devtools(

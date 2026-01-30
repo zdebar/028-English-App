@@ -7,12 +7,10 @@ import { TEXTS } from '@/config/texts.config';
  *
  * @template T - The type of the data returned by the fetch function.
  * @param fetchFunction - A memoized function (useCallback or stable reference) that returns a Promise...
- *   Passing a new function on each render will cause repeated fetching.
- * @returns An object containing:
- *   - `data`: The fetched data of type T, or null if not yet fetched or on error.
- *   - `error`: A string error message if the fetch failed, or null otherwise.
- *   - `loading`: A boolean indicating whether the fetch is currently in progress.
- *   - `reload`: A function to trigger a re-fetch of the data.
+ * @property {T | null} data - The fetched data or null if not yet fetched.
+ * @property {string | null} error - An error message if the fetch failed, otherwise null.
+ * @property {boolean} loading - Indicates if the data is currently being fetched.
+ * @property {() => void} reload - Function to trigger a reload of the data.
  */
 export function useFetch<T>(fetchFunction: () => Promise<T>) {
   const [data, setData] = useState<T | null>(null);
