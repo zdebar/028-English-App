@@ -1,6 +1,6 @@
 import { useKey } from '@/hooks/use-key';
 import CloseIcon from '@/components/UI/icons/CloseIcon';
-import { KEYBOARD_KEYS } from '@/config/keyboard-keys.config';
+import { KEYBOARD_LISTENERS } from '@/config/keyboard-listeners.config';
 
 interface CloseButtonProps {
   onClick: () => void;
@@ -14,7 +14,7 @@ interface CloseButtonProps {
  * @param className Additional CSS classes for custom styling.
  */
 export default function CloseButton({ onClick, className = '' }: CloseButtonProps) {
-  useKey({ onKeyPress: onClick, keys: KEYBOARD_KEYS.Exit, disabledOnOverlayOpen: true });
+  useKey({ onKeyPress: onClick, keys: KEYBOARD_LISTENERS.Exit, disabledOnOverlayOpen: true });
 
   return (
     <button

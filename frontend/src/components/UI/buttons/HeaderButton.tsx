@@ -2,8 +2,8 @@ import type { ReactNode } from 'react';
 import { Link, useMatch } from 'react-router-dom';
 
 interface HeaderButtonProps {
-  to: string;
   children: ReactNode;
+  to: string;
   disabled?: boolean;
   className?: string;
 }
@@ -11,15 +11,15 @@ interface HeaderButtonProps {
 /**
  * Header button component for navigation in the app header.
  *
- * @param to Destination path for navigation.
  * @param children Content to be displayed inside the button.
+ * @param to Destination path for navigation.
  * @param disabled Whether the button is disabled.
  * @param className Additional CSS classes for custom styling.
 
  */
 export default function HeaderButton({
-  to,
   children,
+  to,
   disabled = false,
   className = '',
 }: HeaderButtonProps) {
