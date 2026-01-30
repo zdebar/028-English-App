@@ -1,9 +1,10 @@
 import { Modal } from '@/features/modal/Modal';
 import { TEXTS } from '@/config/texts.config';
-import { useModalStore } from './use-modal-store';
+import { useOverlayStore } from '../overlay/use-overlay-store';
 import { useMinLoading } from '@/features/modal/use-min-loading';
 import config from '@/config/config';
 import type { JSX } from 'react';
+import { useState } from 'react';
 
 interface ButtonModalProps {
   buttonText: string;
@@ -38,9 +39,13 @@ export default function ButtonWithModal({
   modalDescription = TEXTS.modalConfirmDescription,
   className = '',
 }: ButtonModalProps): JSX.Element {
-  const openModal = useModalStore((state) => state.openModal);
-  const isModalOpen = useModalStore((state) => state.isModalOpened);
+  const [showModal, setShowModal] = useState(false);
   const { isLoading, setIsLoading } = useMinLoading(config.buttons.minLoadingTime);
+
+  const handleOpenModal = () => {
+    setShowModal(true);
+    useOverlayStore.getState().openOverlay(() => setShowModal(false));
+  };
 
   const handleConfirm = async () => {
     if (onConfirm) {
@@ -59,13 +64,13 @@ export default function ButtonWithModal({
   return (
     <>
       <button
-        onClick={() => openModal()}
+        onClick={handleOpenModal}
         disabled={disabled || isLoading}
         className={`button-rectangular button-color ${className}`}
       >
         <span>{isLoading ? loadingText : buttonText}</span>
       </button>
-      {isModalOpen && (
+      {showModal && (
         <Modal
           onConfirm={async () => {
             if (onConfirm) await handleConfirm();

@@ -28,4 +28,10 @@ export const TEXTS = {
 
   // Privacy Policy
   privacyPolicy: 'Zásady ochrany osobních údajů',
+
+  // Signout
+  signoutButtonTitle: 'Odhlásit se',
+  signoutModalDescription: 'Opravdu se chcete odhlásit ze svého účtu?',
+  signoutSuccess: 'Úspěšně jste se odhlásili.',
+  signoutError: 'Chyba při odhlašování.',
 };

@@ -1,7 +1,7 @@
 import { useToastStore } from '@/features/toast/use-toast-store';
 import ButtonWithModal from '../modal/ButtonWithModal';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { TEXTS } from '@/config/texts.config';
+import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 
 interface SignoutButtonProps {
@@ -22,10 +22,10 @@ export default function SignoutButton({ className }: SignoutButtonProps): JSX.El
   const handleSignout = async () => {
     try {
       await handleLogout();
-      showToast(TEXTS.signoutSuccessToast, 'success');
+      showToast(TEXTS.signoutSuccess, 'success');
     } catch (error) {
       console.error('Error on user logout:', error);
-      showToast(TEXTS.failureToast, 'error');
+      showToast(TEXTS.signoutError, 'error');
     }
   };
 
