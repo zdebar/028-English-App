@@ -30,5 +30,5 @@ export function useMinLoading(minLoadingTime: number) {
 
   const isLoading = loading || !minLoadingElapsed;
 
-  return { isLoading, setLoading: setLoadingWithTimer };
+  return { isLoading, setIsLoading: setLoadingWithTimer };
 }

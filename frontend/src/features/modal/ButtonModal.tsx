@@ -1,8 +1,8 @@
 import { Modal } from '@/features/modal/Modal';
 import { TEXTS } from '@/config/texts.config';
-import LoadingButton from './LoadingButton';
 import { useModalStore } from './use-modal-store';
-import { useState } from 'react';
+import { useMinLoading } from '@/hooks/use-min-loading';
+import config from '@/config/config';
 
 interface ButtonModalProps {
   buttonText: string;
@@ -37,7 +37,7 @@ export default function ButtonModal({
 }: ButtonModalProps) {
   const openModal = useModalStore((state) => state.openModal);
   const isModalOpen = useModalStore((state) => state.isModalOpened);
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, setIsLoading } = useMinLoading(config.buttons.minLoadingTime);
 
   const handleConfirm = async () => {
     if (onConfirm) {
@@ -54,14 +54,13 @@ export default function ButtonModal({
 
   return (
     <>
-      <LoadingButton
-        buttonText={buttonText}
-        isLoading={isLoading}
-        disabled={disabled}
-        loadingText={loadingText}
+      <button
         onClick={() => openModal()}
-        className={className}
-      />
+        disabled={disabled || isLoading}
+        className={`button-rectangular button-color ${className}`}
+      >
+        <span>{isLoading ? loadingText : buttonText}</span>
+      </button>
       {isModalOpen && (
         <Modal
           onConfirm={async () => {
