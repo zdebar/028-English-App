@@ -1,6 +1,6 @@
 import { useKey } from '@/hooks/use-key';
 import { useOverlayStore } from './use-overlay-store';
-import { KEYBOARD_KEYS } from '@/config/keyboard-listeners.config';
+import { KEYBOARD_LISTENERS } from '@/config/keyboard-listeners.config';
 
 /**
  * Overlay mask component covering the entire screen.
@@ -9,7 +9,7 @@ import { KEYBOARD_KEYS } from '@/config/keyboard-listeners.config';
  */
 export default function OverlayMask() {
   const close = useOverlayStore((state) => state.closeOverlay);
-  useKey({ onKeyPress: close, keys: KEYBOARD_KEYS.Exit });
+  useKey({ onKeyPress: close, keys: KEYBOARD_LISTENERS.Exit });
 
   return (
     <div
