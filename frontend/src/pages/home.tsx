@@ -1,6 +1,6 @@
 import PropertyView from '@/components/UI/PropertyView';
 import { supabaseInstance } from '@/config/supabase.config';
-import { TEXTS } from '@/config/texts.config';
+import { TEXTS } from '@/locales/cs';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import Dashboard from '@/features/dashboard/Dashboard';
 import PrivacyPolicyLink from '@/features/privacy-policy/PrivacyPolicyLink';
