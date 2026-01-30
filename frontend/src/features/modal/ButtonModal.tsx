@@ -1,13 +1,13 @@
 import { Modal } from '@/features/modal/Modal';
 import { TEXTS } from '@/config/texts.config';
-import LoadingButton from '../../components/UI/buttons/LoadingButton';
+import LoadingButton from './LoadingButton';
 import { useModalStore } from './use-modal-store';
+import { useState } from 'react';
 
 interface ButtonModalProps {
-  label: string;
-  onConfirm?: () => Promise<void>;
-  loadingLabel?: string;
-  isLoading?: boolean;
+  buttonText: string;
+  onConfirm?: () => Promise<void> | void;
+  loadingText?: string;
   disabled?: boolean;
   modalTitle?: string;
   modalDescription?: string;
@@ -18,20 +18,18 @@ interface ButtonModalProps {
  * Button component that displays a confirmation modal before executing an action.
  * Automatically disables button while executing onConfirm action.
  *
- * @param label Text to display on the button.
+ * @param buttonText Text to display on the button.
  * @param onConfirm Function to call when action is confirmed.
- * @param isLoading Whether the button is in loading state.
- * @param loadingLabel Text to display while loading.
+ * @param loadingText Text to display while loading.
  * @param disabled Whether the button is disabled.
  * @param modalTitle Title of the confirmation modal.
  * @param modalDescription Description in the confirmation modal.
  * @param className Additional CSS classes for custom styling.
  */
 export default function ButtonModal({
-  label,
+  buttonText,
   onConfirm,
-  isLoading = false,
-  loadingLabel = TEXTS.buttonLoading,
+  loadingText = TEXTS.buttonLoading,
   disabled = false,
   modalTitle = TEXTS.modalConfirmTitle,
   modalDescription = TEXTS.modalConfirmDescription,
@@ -39,21 +37,35 @@ export default function ButtonModal({
 }: ButtonModalProps) {
   const openModal = useModalStore((state) => state.openModal);
   const isModalOpen = useModalStore((state) => state.isModalOpened);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleConfirm = async () => {
+    if (onConfirm) {
+      try {
+        setIsLoading(true);
+        await onConfirm();
+      } catch (error) {
+        console.error('Error in onConfirm:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
 
   return (
     <>
       <LoadingButton
+        buttonText={buttonText}
         isLoading={isLoading}
-        message={label}
         disabled={disabled}
-        loadingMessage={loadingLabel}
+        loadingText={loadingText}
         onClick={() => openModal()}
         className={className}
       />
       {isModalOpen && (
         <Modal
           onConfirm={async () => {
-            if (onConfirm) await onConfirm();
+            if (onConfirm) await handleConfirm();
           }}
           title={modalTitle}
           description={modalDescription}

@@ -24,7 +24,7 @@ export function Modal({ onConfirm, title, description }: ModalProps) {
   if (!modalRoot) return null;
 
   return createPortal(
-    <div className="pointer-events-none fixed inset-0 z-1001 flex min-h-40 items-center justify-center">
+    <div className="z-modal pointer-events-none fixed inset-0 flex min-h-40 items-center justify-center">
       <div className="card-width pointer-events-auto flex flex-col justify-between">
         <div className="color-base flex grow flex-col items-center gap-2 p-4 text-center">
           <p className="font-bold">{title}</p>

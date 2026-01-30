@@ -3,8 +3,8 @@ import { TEXTS } from '@/config/texts.config';
 import config from '@/config/config';
 
 interface LoadingButtonProps {
-  message?: string;
-  loadingMessage?: string;
+  buttonText?: string;
+  loadingText?: string;
   onClick: (event: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>;
   isLoading?: boolean;
   disabled?: boolean;
@@ -15,8 +15,8 @@ interface LoadingButtonProps {
 /**
  * Loading button component that displays a loading message for at least a minimum duration.
  *
- * @param message Text to display when not loading.
- * @param loadingMessage Text to display while loading.
+ * @param buttonText Text to display when not loading.
+ * @param loadingText Text to display while loading.
  * @param onClick Function to call when button is clicked.
  * @param isLoading Whether the button is in loading state.
  * @param disabled Whether the button is disabled.
@@ -24,8 +24,8 @@ interface LoadingButtonProps {
  * @param className Additional CSS classes for custom styling.
  */
 export default function LoadingButton({
-  message = TEXTS.buttonDefault,
-  loadingMessage = TEXTS.buttonLoading,
+  buttonText = TEXTS.buttonDefault,
+  loadingText = TEXTS.buttonLoading,
   onClick,
   isLoading = false,
   disabled = false,
@@ -64,7 +64,7 @@ export default function LoadingButton({
       disabled={isButtonLoading || disabled}
       className={`button-rectangular button-color ${className}`}
     >
-      <span>{isButtonLoading ? loadingMessage : message}</span>
+      <span>{isButtonLoading ? loadingText : buttonText}</span>
     </button>
   );
 }

@@ -29,7 +29,7 @@ export default function SignoutButton({ className }: { className?: string }) {
 
   return (
     <ButtonModal
-      label={TEXTS.signoutButtonTitle}
+      message={TEXTS.signoutButtonTitle}
       isLoading={isLoading}
       modalDescription={TEXTS.signoutModalDescription}
       onConfirm={handleSignout}

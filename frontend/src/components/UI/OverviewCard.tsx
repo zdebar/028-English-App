@@ -42,7 +42,7 @@ export default function OverviewCard({
     <div className={`card-width flex flex-col justify-start gap-1 ${className}`}>
       <div className="flex items-center justify-between gap-1">
         <ButtonModal
-          label={titleText}
+          buttonText={titleText}
           modalTitle={modalText}
           modalDescription={modalDescription}
           onConfirm={async () => {

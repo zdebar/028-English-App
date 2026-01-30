@@ -31,7 +31,7 @@ export default function ResetAllProgressButton({ className }: { className?: stri
 
   return (
     <ButtonModal
-      label={TEXTS.eraseLanguageProgress}
+      message={TEXTS.eraseLanguageProgress}
       isLoading={isLoading}
       modalDescription={TEXTS.eraseDescription}
       onConfirm={handleReset}
