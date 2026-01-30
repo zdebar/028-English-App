@@ -17,4 +17,11 @@ export const TEXTS = {
   // Routes
   grammarOverview: 'Přehled gramatiky',
   vocabularyOverview: 'Přehled slovíček',
+
+  // Themes
+  themeLight: 'Přepnout na tmavý režim',
+  themeDark: 'Přepnout na světlý režim',
+
+  // Privacy Policy
+  privacyPolicy: 'Zásady ochrany osobních údajů',
 };

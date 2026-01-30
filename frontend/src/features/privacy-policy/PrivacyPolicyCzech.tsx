@@ -1,6 +1,11 @@
 import { CONTACTS } from '@/config/contacts.config';
+import type { JSX } from 'react';
 
-export default function PrivacyPolicyCzech() {
+/**
+ * PrivacyPolicyCzech component renders the privacy policy in Czech.
+ * @returns {JSX.Element} The privacy policy content.
+ */
+export default function PrivacyPolicyCzech(): JSX.Element {
   return (
     <div className="px-2">
       <h1 className="pb-6 text-2xl">Zásady ochrany osobních údajů</h1>

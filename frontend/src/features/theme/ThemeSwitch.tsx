@@ -1,7 +1,7 @@
 import SunIcon from '@/components/UI/icons/SunIcon';
 import MoonIcon from '@/components/UI/icons/MoonIcon';
 import { useThemeStore, type UserTheme } from '@/features/theme/use-theme';
-import { TEXTS } from '@/config/texts.config';
+import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 
 /**
