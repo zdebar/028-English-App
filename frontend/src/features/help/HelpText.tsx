@@ -8,7 +8,7 @@ interface HelpTextProps {
 /**
  * HelpText component for displaying contextual hints.
  *
- * @param children Content to be displayed inside the hint.
+ * @param children Content to be displayed inside the help.
  * @param className Additional CSS classes for custom styling.
  */
 export default function HelpText({ children, className = '' }: HelpTextProps) {
@@ -18,7 +18,7 @@ export default function HelpText({ children, className = '' }: HelpTextProps) {
 
   return (
     <div
-      className={`font-headings text-hint z-help-text pointer-events-none absolute text-center text-xl ${className}`}
+      className={`font-headings text-help z-help-text pointer-events-none absolute text-xl ${className}`}
     >
       {children}
     </div>

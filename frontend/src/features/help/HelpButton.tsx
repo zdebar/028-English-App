@@ -16,12 +16,7 @@ export default function HelpButton({ className = '', style }: HelpButtonProps) {
   const openHelp = useHelpStore((state) => state.openHelp);
 
   return (
-    <button
-      type="button"
-      className={`h-icon w-icon absolute flex items-center justify-center ${className}`}
-      style={style}
-      onClick={openHelp}
-    >
+    <button type="button" className={`absolute ${className}`} style={style} onClick={openHelp}>
       <QuestionMarkIcon />
     </button>
   );

@@ -1,8 +1,8 @@
-import Icon, { type IconProps } from "./Icon";
+import Icon, { type IconProps } from './Icon';
 
 export default function BulbIcon(props: IconProps) {
   return (
-    <Icon size={22} strokeWidth={1.25} {...props}>
+    <Icon {...props} size={22} strokeWidth={1.25}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

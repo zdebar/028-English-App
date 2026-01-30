@@ -12,14 +12,14 @@ interface ButtonRectangularProps {
  * @param onClick Function to call when button is clicked.
  * @param disabled Whether the button is disabled.
  * @param className Additional CSS classes for custom styling.
-
+ * @returns {React.ReactElement} The rendered button element.
  */
 export default function ButtonRectangular({
   children,
   onClick,
   disabled = false,
   className = '',
-}: ButtonRectangularProps) {
+}: ButtonRectangularProps): React.ReactElement {
   return (
     <button
       type="button"

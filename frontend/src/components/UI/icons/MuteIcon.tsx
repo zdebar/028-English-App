@@ -1,8 +1,8 @@
-import Icon, { type IconProps } from "./Icon";
+import Icon, { type IconProps } from './Icon';
 
 export default function MuteIcon(props: IconProps) {
   return (
-    <Icon size={20} {...props}>
+    <Icon {...props} size={20}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

@@ -51,11 +51,11 @@
   }
 
   /** HINT PLACEMENTS **/
-  .hint-top {
+  .help-top {
     @apply -top-4;
   }
 
-  .hint-left {
+  .help-left {
     @apply left-4;
   }
 }

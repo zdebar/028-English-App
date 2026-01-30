@@ -59,7 +59,7 @@ export default function OverviewCard({
         {/* Close Card Button */}
         <CloseButton onClick={onClose} />
       </div>
-      <HelpText className="hint-top hint-left">{helpText}</HelpText>
+      <HelpText className="help-top help-left">{helpText}</HelpText>
       {/* Content Area */}
       <div className="w-full grow p-4">{error ? <p>{error}</p> : children}</div>
     </div>
