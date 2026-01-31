@@ -12,7 +12,8 @@ interface ModalProps {
 
 /**
  * Modal component for confirmation dialogs.
- * Renders a modal with title, description, overlay and confirm/cancel buttons.
+ * Renders a modal with children as content, and confirm/cancel buttons.
+ * Opens Overlay on mount and closes it on unmount.
  *
  * @param onConfirm Function to call when confirming the action. Component does not handle any errors thrown by this function.
  * @param onClose Function to call when closing the modal.
