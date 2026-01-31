@@ -16,7 +16,7 @@ interface HeaderButtonProps {
  * @param to Destination path for navigation.
  * @param disabled Whether the button is disabled.
  * @param className Additional CSS classes for custom styling.
- * @returns - The rendered button element.
+ * @returns The rendered button element.
  */
 export default function HeaderButton({
   children,

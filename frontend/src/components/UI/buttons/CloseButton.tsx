@@ -13,7 +13,7 @@ interface CloseButtonProps {
  *
  * @param onClick Function to call when button is clicked.
  * @param className Additional CSS classes for custom styling.
- * @returns - The rendered button element.
+ * @returns The rendered button element.
  */
 export default function CloseButton({ onClick, className = '' }: CloseButtonProps): JSX.Element {
   useKey({ onKeyPress: onClick, keys: KEYBOARD_LISTENERS.Exit, disabledOnOverlayOpen: true });

@@ -15,7 +15,7 @@ type PropertyViewProps = {
  * @param labelWidth Width for the label element. Defaults to 'w-35'. Use Tailwind width classes.
  * @param value Value to display for the property.
  * @param className Additional CSS classes for custom styling.
- * @returns {JSX.Element} The rendered property view element.
+ * @returns The rendered property view element.
  */
 export default function PropertyView({
   label,

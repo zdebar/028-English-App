@@ -4,8 +4,8 @@ import type { JSX } from 'react';
 /**
  * Close Icon component.
  *
- * @param props - IconProps to customize the icon.
- * @returns - The rendered icon element.
+ * @param props IconProps to customize the icon.
+ * @returns The rendered icon element.
  */
 export default function CloseIcon(props: IconProps): JSX.Element {
   return (

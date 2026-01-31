@@ -4,8 +4,8 @@ import type { JSX } from 'react';
 /**
  * Minus Icon component.
  *
- * @param props - IconProps to customize the icon.
- * @returns - The rendered icon element.
+ * @param props IconProps to customize the icon.
+ * @returns The rendered icon element.
  */
 export default function MinusIcon(props: IconProps): JSX.Element {
   return (
