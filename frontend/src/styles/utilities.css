@@ -55,6 +55,10 @@
     @apply -top-4;
   }
 
+  .help-bottom {
+    @apply -bottom-4;
+  }
+
   .help-left {
     @apply left-4;
   }

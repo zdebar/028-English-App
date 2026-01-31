@@ -16,7 +16,9 @@ interface OverviewCardProps {
 }
 
 /**
- * OverviewCard component for displaying a card with a title, actions, and content.
+ * OverviewCard component for displaying a card with a title, and content.
+ * Title button triggers confirmation modal for handleReset function. If handleResest is not provided, the reset button is disabled.
+ * Component doesn't handle errors. Errors should be handled in the parent component.
  *
  * @param titleText Title text for the card.
  * @param modalText Title for the confirmation modal.
@@ -40,7 +42,8 @@ export default function OverviewCard({
 }: OverviewCardProps): JSX.Element {
   return (
     <div className={`card-width flex flex-col justify-start gap-1 ${className}`}>
-      <div className="flex items-center justify-between gap-1">
+      {/* Top Bar */}
+      <div className="relative flex items-center justify-between gap-1">
         {/* Title and Reset Button */}
         <ButtonWithModal
           buttonText={titleText}
@@ -57,8 +60,8 @@ export default function OverviewCard({
         />
         {/* Close Card Button */}
         <CloseButton onClick={onClose} />
+        <HelpText className="help-bottom">{helpText}</HelpText>
       </div>
-      <HelpText className="help-top">{helpText}</HelpText>
       {/* Content Area */}
       <div className="w-full grow p-4">{children}</div>
     </div>
