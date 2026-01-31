@@ -1,25 +1,21 @@
 import { supabaseInstance } from '@/config/supabase.config';
-import { TEXTS } from '@/locales/cs';
 import Metadata from '@/database/models/metadata';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useToastStore } from '@/features/toast/use-toast-store';
+import { TEXTS } from '@/locales/cs';
 import { type JSX } from 'react';
 import ButtonWithModal from '../modal/ButtonWithModal';
-
-interface DeleteUserButtonProps {
-  className?: string;
-}
 
 /**
  * DeleteUserButton component for deleting the current user's account.
  *
  * @param className - Optional CSS class name to apply to the button.
- * @returns {JSX.Element} The rendered DeleteUserButton component.
- * @throws No
+ * @returns The rendered DeleteUserButton component.
+ * @throws Doesn't throw errors. Displays a toast notification on success or failure of deleting the user.
  */
-export default function DeleteUserButton({ className }: DeleteUserButtonProps): JSX.Element {
+export default function DeleteUserButton({ className }: { className?: string }): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
 

@@ -13,14 +13,17 @@ interface AuthState {
 /**
  * A Zustand store hook for managing authentication state using Supabase.
  *
- * This hook provides access to the current user's authentication state, including user ID, email, and loading status.
- * It also includes methods to initialize authentication and handle logout.
+ * This hook provides state and methods to handle user authentication, including
+ * initializing auth listeners, fetching the current session, and logging out.
  *
- * @property {string | null} userId - The ID of the authenticated user.
- * @property {string | null} userEmail - The email of the authenticated user.
- * @property {boolean} loading - Indicates if the authentication state is being loaded.
- * @property {() => () => void} initializeAuth - Function to initialize authentication and return a cleanup function.
- * @property {() => Promise<void>} handleLogout - Async function to sign out the user.
+ * @returns An object containing the authentication state and methods:
+ * - `userId`: The ID of the authenticated user, or null if not authenticated.
+ * - `userEmail`: The email of the authenticated user, or null if not authenticated.
+ * - `loading`: A boolean indicating if the authentication state is being initialized.
+ * - `initializeAuth`: A function that sets up authentication listeners and fetches the initial session.
+ *   Returns a cleanup function to unsubscribe from listeners.
+ * - `handleLogout`: An async function that signs out the user and resets the state.
+ *   Throws an error if sign-out fails.
  */
 export const useAuthStore = create<AuthState>((set) => {
   const setSession = (session: Session | null) => {

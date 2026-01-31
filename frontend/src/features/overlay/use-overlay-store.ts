@@ -20,7 +20,6 @@ interface OverlayState {
 export const useOverlayStore = create<OverlayState>()(
   devtools(
     (set) => {
-      // Private variable, not exposed
       let onCloseOverlayCallback: (() => void) | undefined = undefined;
 
       return {

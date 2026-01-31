@@ -5,20 +5,14 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import ButtonWithModal from '../modal/ButtonWithModal';
 import type { JSX } from 'react';
 
-interface ResetAllProgressButtonProps {
-  className?: string;
-}
-
 /**
  * ResetAllProgressButton component for resetting all user progress.
  *
  * @param className - Optional CSS class name to apply to the button.
- * @return {JSX.Element} The rendered ResetAllProgressButton component.
- * @throws No
+ * @returns The rendered ResetAllProgressButton component.
+ * @throws Doesn't throw errors. Displays a toast notification on success or failure of resetting progress.
  */
-export default function ResetAllProgressButton({
-  className,
-}: ResetAllProgressButtonProps): JSX.Element {
+export default function ResetAllProgressButton({ className }: { className?: string }): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
 
