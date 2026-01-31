@@ -6,7 +6,7 @@ import type { JSX } from 'react';
 
 /**
  * A button that toggles between light and dark themes. Default is system preference.
- * @returns {JSX.Element} The rendered theme switch button.
+ * @returns The rendered theme switch button.
  */
 export default function ThemeSwitch(): JSX.Element {
   const theme = useThemeStore((state) => state.theme);
@@ -23,7 +23,7 @@ export default function ThemeSwitch(): JSX.Element {
     <button
       aria-label={themeLabel}
       onClick={handleChange}
-      className="button-round hover:bg-inherit hover:text-inherit"
+      className="button-round"
       title={themeLabel}
     >
       {theme === 'light' ? <SunIcon /> : <MoonIcon />}

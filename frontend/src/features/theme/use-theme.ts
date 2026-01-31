@@ -10,10 +10,19 @@ interface ThemeState {
 }
 
 /**
- * Zustand store to manage user theme preferences.
+ * A Zustand store hook for managing the application's theme state.
  *
- * @property {UserTheme} theme - The current user theme ('light' or 'dark').
- * @property {(newTheme: UserTheme) => void} chooseTheme - Function to change the user theme ('light' or 'dark').
+ * This hook handles theme detection, persistence, and application:
+ * - Detects the system's preferred color scheme (light or dark).
+ * - Reads the stored theme from localStorage if available.
+ * - Applies the theme by toggling CSS classes on the document root.
+ * - Persists the chosen theme to localStorage.
+ *
+ * The store is initialized with the stored theme or system theme on first use.
+ *
+ * @returns An object with the following properties:
+ * - `theme`: The current theme ('light' or 'dark').
+ * - `chooseTheme`: A function to set a new theme ('light' or 'dark')
  */
 export const useThemeStore = create<ThemeState>((set, get) => {
   const isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
