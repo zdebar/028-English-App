@@ -1,7 +1,5 @@
 import HeaderButton from '@/components/UI/buttons/HeaderButton';
-
 import { ROUTES } from '@/config/routes.config';
-
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import ThemeSwitch from '@/features/theme/ThemeSwitch';
 
@@ -14,7 +12,8 @@ import styles from './header.module.css';
 
 /**
  * Header component displaying main navigation and user controls.
- * @returns {JSX.Element} The rendered button element.
+ *
+ * @returns - The rendered header element.
  */
 export default function Header(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);

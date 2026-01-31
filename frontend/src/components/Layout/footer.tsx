@@ -7,7 +7,7 @@ const currentYear = new Date().getFullYear();
  * Footer component that displays the current year copyright and a link to the privacy policy.
  *
  * @param currentYear - The current year to display in the footer. Defaults to the current year.
- * @returns {JSX.Element} The rendered button element.
+ * @returns - The rendered footer element.
  */
 export default function Footer(): JSX.Element {
   return (
