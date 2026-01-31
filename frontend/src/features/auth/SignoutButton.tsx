@@ -1,8 +1,8 @@
-import { useToastStore } from '@/features/toast/use-toast-store';
-import ButtonWithModal from '../modal/ButtonWithModal';
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
+import ButtonWithModal from '../modal/ButtonWithModal';
 
 /**
  * SignoutButton component for signing out the user.
@@ -31,9 +31,10 @@ export default function SignoutButton({ className }: { className?: string }): JS
     <ButtonWithModal
       buttonText={TEXTS.signoutButtonTitle}
       disabled={!userId}
-      modalDescription={TEXTS.signoutModalDescription}
       onConfirm={handleSignout}
       className={className}
-    />
+    >
+      <p>{TEXTS.signoutModalDescription}</p>
+    </ButtonWithModal>
   );
 }

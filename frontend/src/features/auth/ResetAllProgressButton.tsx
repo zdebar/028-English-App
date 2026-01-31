@@ -30,10 +30,11 @@ export default function ResetAllProgressButton({ className }: { className?: stri
   return (
     <ButtonWithModal
       buttonText={TEXTS.resetAllProgressButtonTitle}
-      modalDescription={TEXTS.resetAllProgressModalDescription}
       disabled={!userId}
       onConfirm={handleReset}
       className={className}
-    />
+    >
+      <p>{TEXTS.resetAllProgressModalDescription}</p>
+    </ButtonWithModal>
   );
 }

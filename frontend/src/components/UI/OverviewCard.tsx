@@ -1,8 +1,8 @@
 import CloseButton from '@/components/UI/buttons/CloseButton';
-import { TEXTS } from '@/locales/cs';
-import ButtonWithModal from '../../features/modal/ButtonWithModal';
 import HelpText from '@/features/help/HelpText';
+import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
+import ButtonWithModal from '../../features/modal/ButtonWithModal';
 
 interface OverviewCardProps {
   titleText?: string;
@@ -47,8 +47,6 @@ export default function OverviewCard({
         {/* Title and Reset Button */}
         <ButtonWithModal
           buttonText={titleText}
-          modalTitle={modalText}
-          modalDescription={modalDescription}
           onConfirm={async () => {
             if (handleReset) {
               await handleReset();
@@ -57,7 +55,10 @@ export default function OverviewCard({
           }}
           disabled={!handleReset}
           className="flex items-center justify-start pl-4"
-        />
+        >
+          <p className="font-bold">{modalText}</p>
+          <p className="">{modalDescription}</p>
+        </ButtonWithModal>
         {/* Close Card Button */}
         <CloseButton onClick={onClose} />
         <HelpText className="help-bottom">{helpText}</HelpText>

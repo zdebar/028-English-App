@@ -6,8 +6,9 @@ import { useState, useRef, useEffect, useCallback } from 'react';
  * even if the actual loading completes earlier.
  *
  * @param minLoadingTime - The minimum time in milliseconds to keep the loading state active.
- * @property {boolean} isLoading - Indicates if the loading state is active.
- * @property {(value: boolean) => void} setIsLoading - Function to set the loading state.
+ * @returns An object containing:
+ *  - isLoading - Indicates if the loading state is active.
+ *  - setIsLoading - Function to set the loading state.
  */
 export function useMinLoading(minLoadingTime: number) {
   const [loading, setLoading] = useState(false);

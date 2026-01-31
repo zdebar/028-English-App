@@ -1,8 +1,7 @@
-import { Modal } from '@/features/modal/Modal';
-import { TEXTS } from '@/locales/cs';
-import { useOverlayStore } from '../overlay/use-overlay-store';
-import { useMinLoading } from '@/features/modal/use-min-loading';
 import config from '@/config/config';
+import { Modal } from '@/features/modal/Modal';
+import { useMinLoading } from '@/features/modal/use-min-loading';
+import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { useState } from 'react';
 
@@ -11,23 +10,22 @@ interface ButtonModalProps {
   onConfirm?: () => Promise<void> | void;
   loadingText?: string;
   disabled?: boolean;
-  modalTitle?: string;
-  modalDescription?: string;
   className?: string;
+  children?: React.ReactNode;
 }
 
 /**
  * Button component that displays a confirmation modal before executing an action.
  * Automatically disables button while executing onConfirm action.
+ * Provide children to customize modal content.
  *
  * @param buttonText Text to display on the button.
  * @param onConfirm Function to call when action is confirmed.
  * @param loadingText Text to display while loading.
  * @param disabled Whether the button is disabled.
- * @param modalTitle Title of the confirmation modal.
- * @param modalDescription Description in the confirmation modal.
  * @param className Additional CSS classes for custom styling.
- * @return {JSX.Element} The ButtonWithModal component.
+ * @param children Content to display inside the modal.
+ * @return The ButtonWithModal component.
  * @throws Any error thrown by onConfirm will propagate to the caller.
  */
 export default function ButtonWithModal({
@@ -35,17 +33,11 @@ export default function ButtonWithModal({
   onConfirm,
   loadingText = TEXTS.loadingText,
   disabled = false,
-  modalTitle = TEXTS.modalConfirmTitle,
-  modalDescription = TEXTS.modalConfirmDescription,
+  children,
   className = '',
 }: ButtonModalProps): JSX.Element {
   const [showModal, setShowModal] = useState(false);
   const { isLoading, setIsLoading } = useMinLoading(config.buttons.minLoadingTime);
-
-  const handleOpenModal = () => {
-    setShowModal(true);
-    useOverlayStore.getState().openOverlay(() => setShowModal(false));
-  };
 
   const handleConfirm = async () => {
     if (onConfirm) {
@@ -64,7 +56,7 @@ export default function ButtonWithModal({
   return (
     <>
       <button
-        onClick={handleOpenModal}
+        onClick={() => setShowModal(true)}
         disabled={disabled || isLoading}
         className={`button-rectangular button-color ${className}`}
       >
@@ -75,9 +67,10 @@ export default function ButtonWithModal({
           onConfirm={async () => {
             if (onConfirm) await handleConfirm();
           }}
-          title={modalTitle}
-          description={modalDescription}
-        />
+          onClose={() => setShowModal(false)}
+        >
+          {children}
+        </Modal>
       )}
     </>
   );

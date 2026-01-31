@@ -19,7 +19,7 @@ interface OverlayState {
  */
 export const useOverlayStore = create<OverlayState>()(
   devtools(
-    (set) => {
+    (set, get) => {
       let onCloseOverlayCallback: (() => void) | undefined = undefined;
 
       return {
@@ -29,6 +29,7 @@ export const useOverlayStore = create<OverlayState>()(
           set({ isOverlayOpen: true });
         },
         closeOverlay: () => {
+          if (!get().isOverlayOpen) return;
           set({ isOverlayOpen: false });
           if (onCloseOverlayCallback) {
             onCloseOverlayCallback();
