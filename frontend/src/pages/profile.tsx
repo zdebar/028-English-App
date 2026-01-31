@@ -5,8 +5,14 @@ import DeleteUserButton from '@/features/auth/DeleteUserButton';
 import ResetAllProgressButton from '@/features/auth/ResetAllProgressButton';
 import SignoutButton from '@/features/auth/SignoutButton';
 import { useNavigate } from 'react-router-dom';
+import type { JSX } from 'react/jsx-dev-runtime';
 
-export default function Profile() {
+/**
+ * Profile component that renders the user profile page.
+ *
+ * @returns The JSX element representing the Profile page.
+ */
+export default function Profile(): JSX.Element {
   const navigate = useNavigate();
 
   return (
