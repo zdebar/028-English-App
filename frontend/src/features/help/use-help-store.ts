@@ -8,10 +8,11 @@ interface HelpState {
 }
 
 /**
- * A Zustand store hook for managing the help feature state in the application.
+ * A Zustand store for managing the help overlay state.
  *
- * @property {boolean} isHelpOpened - Indicates whether the help section is currently open.
- * @property {() => void} openHelp - Opens the help section and sets up an overlay to close it on interaction.
+ * @returns {HelpState}
+ * - `isHelpOpened: boolean` - whether the help overlay is visible
+ * - `openHelp(): void` - opens the help overlay and registers a close callback
  */
 export const useHelpStore = create<HelpState>()(
   devtools(

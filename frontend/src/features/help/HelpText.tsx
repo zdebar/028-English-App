@@ -8,10 +8,11 @@ interface HelpTextProps {
 
 /**
  * HelpText component for displaying contextual hints.
+ * Manages visibility based on the help store 'isHelpOpened' state.
  *
  * @param children Content to be displayed inside the help.
  * @param className Additional CSS classes for custom styling.
- * @return {JSX.Element | null} The rendered help text element or null if help is closed.
+ * @return The rendered help text element or null if help is closed.
  */
 export default function HelpText({ children, className = '' }: HelpTextProps): JSX.Element | null {
   const isHelpOpened = useHelpStore((state) => state.isHelpOpened);
