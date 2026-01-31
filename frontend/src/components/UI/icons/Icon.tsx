@@ -20,7 +20,7 @@ export interface IconProps {
  * @param fillColor - The fill color for the SVG. Defaults to 'none'.
  * @param viewBox - The viewBox attribute for the SVG. Defaults to '0 0 24 24'.
  * @param children - The SVG path or other elements to render inside the SVG.
- * @returns {JSX.Element} A JSX element representing the SVG icon.
+ * @returns - A JSX element representing the SVG icon.
  */
 export default function Icon({
   className = '',

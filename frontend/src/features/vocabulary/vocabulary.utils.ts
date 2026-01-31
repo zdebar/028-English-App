@@ -13,8 +13,8 @@ export function shortenDate(isoDate: string | null | undefined): string {
 
 /**
  * Utility functions for text manipulation.
- * @param count
- * @returns
+ * @param {number} count
+ * @returns {string}
  */
 export function getMoreTextInCzech(count: number): string {
   if (count <= 4) return TEXTS.next;

@@ -5,7 +5,7 @@ import type { JSX } from 'react';
  * Home Icon component.
  *
  * @param props - IconProps to customize the icon.
- * @returns {JSX.Element} The rendered icon element.
+ * @returns - The rendered icon element.
  */
 export default function HomeIcon(props: IconProps): JSX.Element {
   return (

@@ -5,7 +5,7 @@ import type { JSX } from 'react';
  * Forward Icon component.
  *
  * @param props - IconProps to customize the icon.
- * @returns {JSX.Element} The rendered icon element.
+ * @returns - The rendered icon element.
  */
 export default function ForwardIcon(props: IconProps): JSX.Element {
   return (

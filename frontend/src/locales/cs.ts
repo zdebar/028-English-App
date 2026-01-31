@@ -17,6 +17,7 @@ export const TEXTS = {
 
   // Generic
   notAvailable: 'Není k dispozici',
+  pageNotFound: 'Stránka nebyla nalezena.',
   dataLoadingError: 'Chyba při načítání dat.',
   resetProgressSuccessToast: 'Pokrok byl úspěšně vymazán.',
   resetProgressErrorToast: 'Chyba při mazání pokroku.',

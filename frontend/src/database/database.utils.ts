@@ -29,7 +29,6 @@ export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
  * Generates a composite ID from user_id and date.
  * @param userId - The user ID.
  * @param date - The date in YYYY-MM-DD format.
- * @returns The composite ID from userId and date.
  * @throws Error if inputs are invalid.
  */
 export function generateUserScoreId(userId: string, date: string): string {

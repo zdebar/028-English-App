@@ -5,7 +5,7 @@ import type { JSX } from 'react';
  * Sun Icon component.
  *
  * @param props - IconProps to customize the icon.
- * @returns {JSX.Element} The rendered icon element.
+ * @returns - The rendered icon element.
  */
 export default function SunIcon(props: IconProps): JSX.Element {
   return (

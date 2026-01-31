@@ -5,7 +5,7 @@ import type { JSX } from 'react';
  * Moon Icon component.
  *
  * @param props - IconProps to customize the icon.
- * @returns {JSX.Element} The rendered icon element.
+ * @returns - The rendered icon element.
  */
 export default function MoonIcon(props: IconProps): JSX.Element {
   return (

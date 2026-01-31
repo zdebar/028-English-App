@@ -6,7 +6,6 @@ import { dataSync } from '@/database/models/data-sync';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 
 import ToastContainer from '@/features/toast/ToastContainer';
-import OverlayContainer from './features/overlay/OverlayContainer';
 import Grammar from '@/pages/Grammar';
 import Home from '@/pages/Home';
 import Practice from '@/pages/Practice';
@@ -14,10 +13,11 @@ import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import Profile from '@/pages/Profile';
 import Vocabulary from '@/pages/Vocabulary';
 import { ROUTES } from './config/routes.config';
+import OverlayContainer from './features/overlay/OverlayContainer';
 
 import { useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
-import { TEXTS } from './config/texts.config';
+import { TEXTS } from './locales/cs';
 import './styles/index.css';
 
 export default function App() {
