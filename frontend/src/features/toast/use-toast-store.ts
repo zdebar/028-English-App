@@ -15,11 +15,12 @@ interface ToastState {
 /**
  * Zustand store to manage toast notifications in the application.
  *
- * @property {string} message - The current toast message.
- * @property {ToastType} type - The type of the toast ('success', 'error', 'info').
- * @property {boolean} visible - Indicates whether the toast is currently visible.
- * @property {(message: string, type?: ToastType) => void} showToast - Function to display a toast with a given message and optional type.
- * @property {() => void} hideToast - Function to hide the currently displayed toast.
+ * @returns {ToastState}
+ *  - message - The current toast message.
+ *  - type - The type of the toast ('success', 'error', 'info').
+ *  - visible - Indicates whether the toast is currently visible.
+ *  - showToast - Function to display a toast with a given message and optional type.
+ *  - hideToast - Function to hide the currently displayed toast.
  */
 export const useToastStore = create<ToastState>((set) => ({
   message: '',

@@ -5,7 +5,7 @@ import type { JSX } from 'react';
 /**
  * ToastContainer component that displays toast notifications from the toast store.
  *
- * @returns {JSX.Element | null} The rendered Toast component or null.
+ * @returns The rendered Toast component or null.
  */
 export default function ToastContainer(): JSX.Element | null {
   const message = useToastStore((state) => state.message);
