@@ -1,5 +1,5 @@
 import CloseButton from '@/components/UI/buttons/CloseButton';
-import { TEXTS } from '@/config/texts.config';
+import { TEXTS } from '@/locales/cs';
 import ButtonWithModal from '../../features/modal/ButtonWithModal';
 import HelpText from '@/features/help/HelpText';
 
@@ -8,7 +8,6 @@ interface OverviewCardProps {
   modalText?: string;
   modalDescription?: string;
   helpText?: string;
-  error?: string | null;
   handleReset?: () => Promise<void>;
   onClose: () => void;
   className?: string;
@@ -22,7 +21,6 @@ interface OverviewCardProps {
  * @param modalText Title for the confirmation modal.
  * @param modalDescription Description for the confirmation modal.
  * @param helpText Description for the help tooltip.
- * @param error Error message to display.
  * @param handleReset Function to call to reset progress.
  * @param onClose Function to call when closing the card.
  * @param className Additional CSS classes for custom styling.
@@ -33,10 +31,9 @@ export default function OverviewCard({
   modalText = TEXTS.eraseProgress,
   modalDescription = TEXTS.eraseDescription,
   helpText = TEXTS.eraseProgress,
-  error = null,
-  className = '',
   handleReset,
   onClose,
+  className = '',
   children,
 }: OverviewCardProps) {
   return (
@@ -59,9 +56,9 @@ export default function OverviewCard({
         {/* Close Card Button */}
         <CloseButton onClick={onClose} />
       </div>
-      <HelpText className="help-top help-left">{helpText}</HelpText>
+      <HelpText className="help-top">{helpText}</HelpText>
       {/* Content Area */}
-      <div className="w-full grow p-4">{error ? <p>{error}</p> : children}</div>
+      <div className="w-full grow p-4">{children}</div>
     </div>
   );
 }

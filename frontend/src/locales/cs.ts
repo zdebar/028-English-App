@@ -17,6 +17,9 @@ export const TEXTS = {
 
   // Generic
   notAvailable: 'Není k dispozici',
+  dataLoadingError: 'Chyba při načítání dat.',
+  resetProgressSuccessToast: 'Pokrok byl úspěšně vymazán.',
+  resetProgressErrorToast: 'Chyba při mazání pokroku.',
 
   // Errors
   genericError: 'Nastala neznámá chyba.',
@@ -50,5 +53,8 @@ export const TEXTS = {
   resetAllProgressModalDescription:
     'Opravdu chcete vymazat veškerý pokrok? Změna již nepůjde vrátit.',
   resetAllProgressSuccessToast: 'Váš pokrok byl úspěšně vymazán.',
-  resetAllProgressErrorToast: 'Chyba při mazání pokroku.',
+
+  // Generic Erase Progress
+  eraseProgress: 'Vymazat pokrok',
+  eraseDescription: 'Opravdu chcete vymazat pokrok? Tuto akci již nelze vrátit zpět.',
 };

@@ -29,7 +29,7 @@ export default function ResetAllProgressButton({
       showToast(TEXTS.resetAllProgressSuccessToast, 'success');
     } catch (error) {
       console.error('Error clearing all user items:', error);
-      showToast(TEXTS.resetAllProgressErrorToast, 'error');
+      showToast(TEXTS.resetProgressErrorToast, 'error');
     }
   };
 

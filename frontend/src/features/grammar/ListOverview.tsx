@@ -1,6 +1,7 @@
 import ButtonRectangular from '@/components/UI/buttons/ButtonRectangular';
 import CloseButton from '@/components/UI/buttons/CloseButton';
-import { TEXTS } from '@/config/texts.config';
+import { TEXTS } from '@/locales/cs';
+import type { JSX } from 'react';
 
 type ListItem = {
   id: string | number;
@@ -8,11 +9,8 @@ type ListItem = {
 };
 
 type ListOverviewProps = {
-  listTitle?: string;
-  emptyTitle?: string;
   array: ListItem[] | null;
-  loading: boolean;
-  error: string | null;
+  listTitle?: string;
   onSelect: (index: number) => void;
   onClose: () => void;
   className?: string;
@@ -21,33 +19,26 @@ type ListOverviewProps = {
 /**
  * ListOverview component displays a list of grammar items.
  *
- * @param listTitle Title of the list overview.
- * @param emptyTitle Title to display when the list is empty.
  * @param array Array of ListItem items.
- * @param loading Loading state.
- * @param error Error message.
+ * @param listTitle Title of the list overview.
  * @param onSelect Callback when a grammar item is selected.
  * @param onClose Callback when the close button is clicked.
+ * @returns {JSX.Element} A list overview component.
  */
 export default function ListOverview({
-  listTitle,
-  emptyTitle = TEXTS.noNotesToDisplay,
+  listTitle = TEXTS.notAvailable,
   array,
-  loading,
-  error,
   onSelect,
   onClose,
   className = '',
-}: ListOverviewProps) {
+}: ListOverviewProps): JSX.Element {
   return (
     <div className={`card-width flex flex-col justify-start gap-1 ${className}`}>
       <div className="h-button flex items-center justify-between gap-1">
-        <div className="h-button flex grow justify-start p-4">
-          {loading ? TEXTS.buttonLoading : error || listTitle}
-        </div>
+        <div className="h-button flex grow justify-start p-4">{listTitle}</div>
         <CloseButton onClick={onClose} />
       </div>
-      {array && array.length > 0 ? (
+      {array &&
         array.map((item, index) => (
           <ButtonRectangular
             key={item.id}
@@ -56,10 +47,7 @@ export default function ListOverview({
           >
             {`${index + 1} : ${item.name} `}
           </ButtonRectangular>
-        ))
-      ) : (
-        <p className="h-input flex justify-start p-4 text-left">{emptyTitle}</p>
-      )}
+        ))}
     </div>
   );
 }

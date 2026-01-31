@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { TEXTS } from '@/config/texts.config';
+import { TEXTS } from '@/locales/cs';
 
 /**
  * A custom React hook for fetching data asynchronously.
@@ -11,6 +11,7 @@ import { TEXTS } from '@/config/texts.config';
  * @property {string | null} error - An error message if the fetch failed, otherwise null.
  * @property {boolean} loading - Indicates if the data is currently being fetched.
  * @property {() => void} reload - Function to trigger a reload of the data.
+ * @returns Doesnt throw errors.
  */
 export function useFetch<T>(fetchFunction: () => Promise<T>) {
   const [data, setData] = useState<T | null>(null);
