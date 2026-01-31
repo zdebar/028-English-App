@@ -3,7 +3,7 @@ import type { JSX } from 'react';
 
 /**
  * PrivacyPolicyCzech component renders the privacy policy in Czech.
- * @returns {JSX.Element} The privacy policy content.
+ * @returns  The privacy policy content.
  */
 export default function PrivacyPolicyCzech(): JSX.Element {
   return (
