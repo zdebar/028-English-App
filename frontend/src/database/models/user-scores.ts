@@ -8,6 +8,13 @@ import { getTodayShortDate } from '@/database/database.utils';
 import Metadata from './metadata';
 import Dexie from 'dexie';
 
+/**
+ * Represents a user score entity in the application database.
+ *
+ * @method addItemCount - Increases the item count for today's date by the specified amount.
+ * @method getUserScoreForToday - Fetches the user score record for today's date.
+ * @method syncUserScoreData - Synchronizes user score data between the local IndexedDB and Supabase.
+ */
 export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   id!: string;
   user_id!: string;
@@ -17,21 +24,22 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
   /**
    * Increases the item count for today's date by the specified amount.
+   *
    * @param userId - The user ID. Must be a valid string.
    * @param addCount - The number to add to today's item count.
    * @returns - True if the operation was successful, false otherwise.
-   * @throws Error
+   * @throws Error if database operation fails.
    */
   static async addItemCount(userId: string, addCount: number): Promise<boolean> {
     try {
       const today = getTodayShortDate();
 
-      // Fetch the existing record for the user and today's date
+      // Fetch the existing record for the userId and today's date
       const key = generateUserScoreId(userId, today);
       const existingRecord = await db.user_scores.get(key);
 
       // Calculate the new item count
-      const newItemCount = (existingRecord?.item_count || 0) + addCount;
+      const newItemCount = (existingRecord?.item_count ?? 0) + addCount;
 
       // Create a new record or update the existing one
       const newRecord: UserScoreLocal = {
@@ -47,7 +55,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
       return true;
     } catch (error) {
       console.error('Error adding item count to user score:', error);
-      return false;
+      throw error;
     }
   }
 

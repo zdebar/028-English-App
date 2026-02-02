@@ -51,6 +51,7 @@ export function generateMetadataId(table_name: TableName, userId: string | null)
 
 /**
  * Returns today's date in YYYY-MM-DD format.
+ *
  * @returns The current date in YYYY-MM-DD format.
  */
 export function getTodayShortDate(): string {
