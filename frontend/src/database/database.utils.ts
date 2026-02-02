@@ -90,22 +90,22 @@ export async function fetchStorage(bucketName: string, dataFile: string): Promis
 }
 
 /**
- * Triggers a custom named event.
- * @param userId
- * @param eventName
- * @returns
+ * Triggers a custom DOM event with the specified name and attaches the user ID as event detail.
+ *
+ * @param eventName - The name of the custom event to trigger.
+ * @param userId - The ID of the user to include in the event detail. If falsy, the event is not triggered.
+ * @throws Error if userId is not provided.
  */
 export function triggerNamedEvent(eventName: string, userId: string) {
-  if (!userId) return;
+  if (!userId) throw new Error('User ID is required to trigger event.');
   const event = new CustomEvent(eventName, { detail: { userId } });
   window.dispatchEvent(event);
 }
 
 /**
- * Triggers a custom event indicating that user items have been updated.
- * @param userId
- * @param eventName
- * @returns
+ * Triggers the 'userItemsUpdated' event for a specific user.
+ *
+ * @param userId - The unique user identifier.
  */
 export function triggerUserItemsUpdatedEvent(userId: string) {
   triggerNamedEvent('userItemsUpdated', userId);
