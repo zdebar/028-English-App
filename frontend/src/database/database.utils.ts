@@ -5,9 +5,11 @@ import config from '@/config/config';
 import type { TableName } from '@/types/local.types';
 
 /**
- * Converts a local user item to SQL format, replacing null replacement dates with null.
- * @param localItem Item in format suitable for IndexedDB.
- * @returns Item in format suitable or PostgreSQL.
+ * Converts a `UserItemLocal` object to a `UserItemSQL` object, replacing specific date fields
+ * with `null` if they match the configured `nullReplacementDate`.
+ *
+ * @param localItem - The local user item to convert.
+ * @returns The converted user item suitable for SQL storage.
  */
 export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
   const { user_id, item_id, progress, started_at, updated_at, next_at, mastered_at } = localItem;
@@ -26,29 +28,30 @@ export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
 }
 
 /**
- * Generates a composite ID from user_id and date.
- * @param userId - The user ID.
- * @param date - The date in YYYY-MM-DD format.
- * @throws Error if inputs are invalid.
+ * Generates a unique identifier for a user's score based on the user ID and date.
+ *
+ * @param userId - The unique identifier of the user.
+ * @param date - The date associated with the score in short ISO format (e.g., '2023-06-01').
+ * @returns A string combining the user ID and date, separated by a hyphen.
  */
 export function generateUserScoreId(userId: string, date: string): string {
   return `${userId}-${date}`;
 }
 
 /**
- * Generates a composite ID from user_id and date.
- * @param userId - The user ID.
- * @param date - The date in YYYY-MM-DD format.
- * @returns The composite ID from userId and date.
- * @throws Error if inputs are invalid.
+ * Generates a unique metadata identifier by combining the table name and user ID.
+ *
+ * @param table_name The name of the table for which the metadata ID is generated.
+ * @param userId The unique identifier of the user. Can be null for global metadata.
+ * @returns A string representing the combined metadata ID in the format `${table_name}-${userId}`.
  */
-export function generateMetadataId(table_name: TableName, userId: string): string {
+export function generateMetadataId(table_name: TableName, userId: string | null): string {
   return `${table_name}-${userId}`;
 }
 
 /**
  * Returns today's date in YYYY-MM-DD format.
- * @returns {string} The current date in YYYY-MM-DD format.
+ * @returns The current date in YYYY-MM-DD format.
  */
 export function getTodayShortDate(): string {
   const today = new Date();
@@ -56,9 +59,10 @@ export function getTodayShortDate(): string {
 }
 
 /**
- * Returns a date string converted to local time string.
- * @param date
- * @returns
+ * Converts a UTC date string to a local date string formatted as 'YYYY-MM-DD'.
+ *
+ * @param date - The UTC date string to convert.
+ * @returns The local date string in 'en-CA' format ('YYYY-MM-DD').
  */
 export function getLocalDateFromUTC(date: string): string {
   const localDate = new Date(date);
@@ -70,7 +74,6 @@ export function getLocalDateFromUTC(date: string): string {
  * @param bucketName name of the storage bucket
  * @param dataFile name of the file to fetch
  * @returns blob data or null
- * @throws error if fetching fails, if inputs are invalid
  */
 export async function fetchStorage(bucketName: string, dataFile: string): Promise<Blob | null> {
   const cacheBuster = `?t=${Date.now()}`;
@@ -109,8 +112,13 @@ export function triggerUserItemsUpdatedEvent(userId: string) {
 }
 
 /**
- * Resets a user item to its initial state.
- * @param item
+ * Resets the properties of a given `UserItemLocal` object to their initial state.
+ *
+ * - Sets `started_at`, `next_at`, and `mastered_at` to the configured null replacement date.
+ * - Updates `updated_at` to the current ISO timestamp.
+ * - Resets `progress` to 0.
+ *
+ * @param item - The user item object to reset.
  */
 export function resetUserItem(item: UserItemLocal): void {
   item.started_at = config.database.nullReplacementDate;

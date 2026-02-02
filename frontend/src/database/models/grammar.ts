@@ -8,6 +8,17 @@ import Dexie from 'dexie';
 import Metadata from './metadata';
 import { TableName } from '@/types/local.types';
 
+/**
+ * Represents a grammar entity in the application database.
+ * - grammar table is shared across all users
+ *
+ * @property {number} id - The unique identifier for the grammar.
+ * @property {string} name - The name of the grammar.
+ * @property {string} note - Additional notes about the grammar.
+ * @property {string} updated_at - The timestamp of the last update to the grammar.
+ * @property {string | null} deleted_at - The timestamp of when the grammar was deleted, or null if not deleted.
+ *
+ */
 export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   id!: number;
   name!: string;
@@ -17,8 +28,9 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
 
   /**
    * Returns a grammar record by its ID.
+   *
    * @param grammarId fetch grammar by ID
-   * @returns A promise that resolves to the grammar record or `undefined` if not found.
+   * @returns A promise that resolves to the grammar record.
    * @throws Error if grammar is not found.
    */
   static async getGrammarById(grammarId: number): Promise<GrammarLocal> {
@@ -33,29 +45,37 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
 
   /**
    * Fetches the list of grammar that the user has started.
+   *
    * @param userId - The user ID.
    * @returns Array of started GrammarLocal records, empty array in case of none found.
    * @throws Error if operation fails.
    */
   static async getStartedGrammarList(userId: string): Promise<GrammarLocal[]> {
+    // select all started user items where started_at is not null
     const startedUserItems: UserItemLocal[] = await db.user_items
       .where('[user_id+started_at]')
       .between([userId, Dexie.minKey], [userId, config.database.nullReplacementDate], true, false)
       .toArray();
 
+    // extract unique grammar IDs from the started user items
     const grammarIds = [...new Set(startedUserItems.map((item) => item.grammar_id))];
 
+    // return empty array if no grammar IDs found
     if (grammarIds.length === 0) {
       return [];
     }
-    const startedGrammar: GrammarLocal[] = await db.grammar.where('id').anyOf(grammarIds).toArray();
 
+    // fetch grammar records by the extracted IDs
+    const startedGrammar: GrammarLocal[] = await db.grammar.where('id').anyOf(grammarIds).toArray();
     return startedGrammar;
   }
 
   /**
    * Synchronizes grammar data from Supabase to the local IndexedDB.
-   * In case of an error during fetching, it logs the error to the console, but does not throw.
+   * - Fetches updated grammar records from Supabase newer than the last synced date from metadata table.
+   * - Updates or deletes records in the local IndexedDB based on the fetched data.
+   * - Updates the metadata table with the new sync time.
+   *
    * @returns The number of grammar records synced.
    * @throws Error if any step of the synchronization process fails.
    */
@@ -73,7 +93,8 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
       throw new Error(`Failed to fetch data from supabase: ${error.message}`);
     }
 
-    // Step 3: Split the fetched grammar records by deleted_at
+    // Step 3: Update or delete records in the local IndexedDB
+    const newSyncTime = new Date().toISOString();
     if (grammar && grammar.length > 0) {
       const toDelete: number[] = [];
       const toUpsert: GrammarLocal[] = [];
@@ -85,18 +106,18 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
         }
       });
 
-      if (toDelete.length > 0) {
-        await db.grammar.bulkDelete(toDelete);
-      }
-
-      if (toUpsert.length > 0) {
-        await db.grammar.bulkPut(toUpsert);
-      }
+      await db.transaction('rw', db.grammar, db.metadata, async () => {
+        if (toDelete.length > 0) {
+          await db.grammar.bulkDelete(toDelete);
+        }
+        if (toUpsert.length > 0) {
+          await db.grammar.bulkPut(toUpsert);
+        }
+        await Metadata.markAsSynced(TableName.Grammar, newSyncTime);
+      });
+    } else {
+      await Metadata.markAsSynced(TableName.Grammar, newSyncTime);
     }
-
-    // Step 4: Update the metadata table with the new sync time
-    const newSyncTime = new Date().toISOString();
-    await Metadata.markAsSynced(TableName.Grammar, newSyncTime);
 
     return grammar?.length ?? 0;
   }

@@ -13,9 +13,13 @@ interface OverlayState {
  * This hook provides state and actions to control the visibility of an overlay,
  * including an optional callback that can be executed when the overlay is closed.
  *
- * @property {boolean} isOverlayOpen - Indicates whether the overlay is currently open.
- * @property {(onCloseOverlayCallback?: () => void) => void} openOverlay - Function to open the overlay with an optional close callback.
- * @property {() => void} closeOverlay - Function to close the overlay and execute the close callback if provided.
+ * Overlay graphically covers the entire viewport, stops propagation of pointer events to underlying elements,
+ * and blocks keyboard events where such behavior is set up (e.g., CloseButton with the Escape key).
+ *
+ * @returns An object containing:
+ *  - isOverlayOpen - Indicates whether the overlay is currently open.
+ *  - openOverlay - Function to open the overlay with an optional close callback.
+ *  - closeOverlay - Function to close the overlay and execute the close callback if provided.
  */
 export const useOverlayStore = create<OverlayState>()(
   devtools(
