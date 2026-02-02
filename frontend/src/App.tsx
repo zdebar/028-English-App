@@ -17,6 +17,7 @@ import OverlayContainer from './features/overlay/OverlayContainer';
 
 import { useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
+import { errorHandler } from './features/error-handler/error-handler';
 import { TEXTS } from './locales/cs';
 import './styles/index.css';
 
@@ -27,8 +28,12 @@ export default function App() {
 
   // Auth initialization effect
   useEffect(() => {
-    const cleanup = initializeAuth();
-    return cleanup;
+    try {
+      const cleanup = initializeAuth();
+      return cleanup;
+    } catch (error) {
+      errorHandler(error, 'Auth Initialization Error');
+    }
   }, [initializeAuth]);
 
   // Data synchronization effect on userId change

@@ -1,5 +1,6 @@
-import React, { Component, type ReactNode } from 'react';
+import { Component, type ReactNode } from 'react';
 import { TEXTS } from '@/locales/cs';
+import { errorHandler } from '@/features/error-handler/error-handler';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -24,9 +25,9 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  componentDidCatch(error: Error) {
     // Log the error to an error reporting service
-    console.error('Error caught by ErrorBoundary:', error, errorInfo);
+    errorHandler(error);
   }
 
   render() {

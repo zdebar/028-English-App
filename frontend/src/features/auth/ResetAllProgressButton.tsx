@@ -4,13 +4,13 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import ButtonWithModal from '../modal/ButtonWithModal';
 import type { JSX } from 'react';
+import { errorHandler } from '@/features/error-handler/error-handler';
 
 /**
  * ResetAllProgressButton component for resetting all user progress.
  *
  * @param className - Optional CSS class name to apply to the button.
  * @returns The rendered ResetAllProgressButton component.
- * @throws Doesn't throw errors. Displays a toast notification on success or failure of resetting progress.
  */
 export default function ResetAllProgressButton({ className }: { className?: string }): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
@@ -22,8 +22,8 @@ export default function ResetAllProgressButton({ className }: { className?: stri
       await UserItem.resetAllUserItems(userId);
       showToast(TEXTS.resetAllProgressSuccessToast, 'success');
     } catch (error) {
-      console.error('Error clearing all user items:', error);
       showToast(TEXTS.resetProgressErrorToast, 'error');
+      errorHandler(error, 'Reset Progress Error');
     }
   };
 

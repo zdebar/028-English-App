@@ -46,9 +46,9 @@ export const useAuthStore = create<AuthState>((set) => {
         const { data, error } = await supabaseInstance.auth.getSession();
         if (error) {
           setSession(null);
-        } else {
-          setSession(data.session);
+          throw new Error(error.message);
         }
+        setSession(data.session);
       };
 
       fetchSession();

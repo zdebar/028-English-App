@@ -4,6 +4,7 @@ import { useMinLoading } from '@/features/modal/use-min-loading';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { useState } from 'react';
+import { errorHandler } from '../error-handler/error-handler';
 
 interface ButtonModalProps {
   buttonText: string;
@@ -20,13 +21,12 @@ interface ButtonModalProps {
  * Provide children to customize modal content.
  *
  * @param buttonText Text to display on the button.
- * @param onConfirm Function to call when action is confirmed.
+ * @param onConfirm Function to call when action is confirmed. Should handle its own errors.
  * @param loadingText Text to display while loading.
  * @param disabled Whether the button is disabled.
  * @param className Additional CSS classes for custom styling.
  * @param children Content to display inside the modal.
  * @return The ButtonWithModal component.
- * @throws Any error thrown by onConfirm will propagate to the caller.
  */
 export default function ButtonWithModal({
   buttonText,
@@ -45,8 +45,7 @@ export default function ButtonWithModal({
       try {
         await onConfirm();
       } catch (error) {
-        console.error('Error in ButtonWithModal onConfirm:', error);
-        throw error;
+        errorHandler(error, 'Button With Modal Error');
       } finally {
         setIsLoading(false);
       }

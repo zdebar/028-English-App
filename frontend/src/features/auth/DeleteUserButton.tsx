@@ -7,13 +7,13 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import { type JSX } from 'react';
 import ButtonWithModal from '../modal/ButtonWithModal';
+import { errorHandler } from '../error-handler/error-handler';
 
 /**
  * DeleteUserButton component for deleting the current user's account.
  *
  * @param className - Optional CSS class name to apply to the button.
  * @returns The rendered DeleteUserButton component.
- * @throws Doesn't throw errors. Displays a toast notification on success or failure of deleting the user.
  */
 export default function DeleteUserButton({ className }: { className?: string }): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
@@ -42,15 +42,15 @@ export default function DeleteUserButton({ className }: { className?: string }):
 
       results.forEach((result) => {
         if (result.status === 'rejected') {
-          console.error('Operation failed:', result.reason);
+          errorHandler(result.reason, 'Operation failed');
         }
       });
 
       showToast(TEXTS.deleteUserSuccessToast, 'success');
       await supabaseInstance.auth.signOut();
     } catch (error) {
-      console.error('Error deleting user:', error);
       showToast(TEXTS.deleteUserErrorToast, 'error');
+      errorHandler(error, 'Delete User Error');
     }
   };
 
