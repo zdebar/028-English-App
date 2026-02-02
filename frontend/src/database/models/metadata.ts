@@ -24,7 +24,7 @@ export default class Metadata extends Entity<AppDB> {
    *
    * @param tableName The name of the table to retrieve the sync date for.
    * @param userId (Optional) The ID of the user. If not provided, null is used.
-   * @throws {Error} If the database operation fails.
+   * @throws Error, if the database operation fails.
    * @returns A promise that resolves to the ISO string of the last synced date.
    *          Returns '1970-01-01T00:00:00.000Z' if no sync date is found. (epoch start)
    */
@@ -40,7 +40,7 @@ export default class Metadata extends Entity<AppDB> {
    * @param tableName - The name of the table to mark as synced.
    * @param syncTime - The ISO string representing the time of synchronization.
    * @param userId - (Optional) The user ID associated with the sync operation. If not provided, null is used.
-   * @throws {Error} If the database operation fails.
+   * @throws Error, if the database operation fails.
    * @returns A promise that resolves to `true` if the operation was successful, otherwise `false`.
    */
   static async markAsSynced(
@@ -63,7 +63,7 @@ export default class Metadata extends Entity<AppDB> {
    *
    * @param tableName - The name of the table whose metadata row should be deleted.
    * @param userId - (Optional) The user ID associated with the metadata row. If not provided, deletes the row for the table only.
-   * @throws {Error} If the database operation fails.
+   * @throws Error, if the database operation fails.
    * @returns A promise that resolves to `true` if the deletion was successful.
    */
   static async deleteSyncRow(tableName: TableName, userId?: string | null): Promise<boolean> {

@@ -18,12 +18,14 @@ import OverlayContainer from './features/overlay/OverlayContainer';
 import { useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { errorHandler } from './features/error-handler/error-handler';
+import { useToastStore } from './features/toast/use-toast-store';
 import { TEXTS } from './locales/cs';
 import './styles/index.css';
 
 export default function App() {
   const userId = useAuthStore((state) => state.userId);
   const initializeAuth = useAuthStore((state) => state.initializeAuth);
+  const showToast = useToastStore((state) => state.showToast);
   const location = useLocation();
 
   // Auth initialization effect
@@ -38,8 +40,14 @@ export default function App() {
 
   // Data synchronization effect on userId change
   useEffect(() => {
-    if (userId) {
-      dataSync(userId);
+    try {
+      if (userId) {
+        dataSync(userId);
+      }
+      showToast(TEXTS.syncSuccessToast, 'success');
+    } catch (error) {
+      showToast(TEXTS.syncErrorToast, 'error');
+      errorHandler(error, 'Data synchronization failed');
     }
   }, [userId]);
 

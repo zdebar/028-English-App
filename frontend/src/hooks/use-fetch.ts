@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { TEXTS } from '@/locales/cs';
+import { errorHandler } from '@/features/error-handler/error-handler';
 
 interface UseFetchResult<T> {
   data: T | null;
@@ -41,7 +42,7 @@ export function useFetch<T>(fetchFunction: () => Promise<T>): UseFetchResult<T> 
       } catch (error) {
         if (!isActive) return;
         setError(TEXTS.dataLoadingError);
-        console.error(error);
+        errorHandler(error, 'Data Fetching Error');
       } finally {
         if (isActive) {
           setLoading(false);

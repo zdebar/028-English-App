@@ -10,7 +10,7 @@ import { TableName } from '@/types/local.types';
 
 /**
  * Represents a grammar entity in the application database.
- * - grammar table is shared across all users
+ * - grammar records are shared across all users
  *
  * @method getGrammarById - Fetches a grammar record by its ID.
  * @method getStartedGrammarList - Retrieves the list of grammar that the user has started.
@@ -55,6 +55,11 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
       .between([userId, Dexie.minKey], [userId, config.database.nullReplacementDate], true, false)
       .toArray();
 
+    // return empty array if no started user items found
+    if (startedUserItems.length === 0) {
+      return [];
+    }
+
     // extract unique grammar IDs from the started user items
     const grammarIds = [...new Set(startedUserItems.map((item) => item.grammar_id))];
 
@@ -93,6 +98,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
 
     // Step 3: Update or delete records in the local IndexedDB
     const newSyncTime = new Date().toISOString();
+
     if (grammar && grammar.length > 0) {
       const toDelete: number[] = [];
       const toUpsert: GrammarLocal[] = [];

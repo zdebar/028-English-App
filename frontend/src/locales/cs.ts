@@ -5,6 +5,10 @@ export const TEXTS = {
   appDescription:
     'Toto je aplikace pro učení angličtiny. V současné době je v testovacím režimu a může obsahovat chyby.',
 
+  // Synchronization
+  syncSuccessToast: 'Data byla úspěšně synchronizována.',
+  syncErrorToast: 'Chyba při synchronizaci dat. Data mohou být zastaralá.',
+
   // User
   userLabel: 'Uživatel',
 
