@@ -13,7 +13,11 @@ export function errorHandler(error: Error | unknown, message?: string): void {
   }
 
   // 1. Log error locally
-  console.error(message ? `${message}: ${errorMsg}` : errorMsg);
+  if (process.env.NODE_ENV === 'development') {
+    console.error(message ? `${message}: ${errorMsg}` : errorMsg);
+  } else {
+    // send to logging service
+  }
 
   // 2. Send error to remote service
   // (future implementation: e.g., Sentry, LogRocket, etc.)

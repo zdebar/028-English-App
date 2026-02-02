@@ -34,6 +34,7 @@ export default function App() {
       const cleanup = initializeAuth();
       return cleanup;
     } catch (error) {
+      showToast(TEXTS.authInitErrorToast, 'error');
       errorHandler(error, 'Auth Initialization Error');
     }
   }, [initializeAuth]);

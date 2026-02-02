@@ -1,12 +1,11 @@
-import { Entity } from 'dexie';
-import type AppDB from '@/database/models/app-db';
-import { TableName, type UserScoreLocal } from '@/types/local.types';
 import { supabaseInstance } from '@/config/supabase.config';
+import { generateUserScoreId, getTodayShortDate } from '@/database/database.utils';
+import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
-import { generateUserScoreId } from '@/database/database.utils';
-import { getTodayShortDate } from '@/database/database.utils';
+import { errorHandler } from '@/features/error-handler/error-handler';
+import { TableName, type UserScoreLocal } from '@/types/local.types';
+import Dexie, { Entity } from 'dexie';
 import Metadata from './metadata';
-import Dexie from 'dexie';
 
 /**
  * Represents a user score entity in the application database.
@@ -25,9 +24,10 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   /**
    * Increases the item count for today's date by the specified amount.
    *
+   * @static
    * @param userId - The user ID. Must be a valid string.
    * @param addCount - The number to add to today's item count.
-   * @returns - True if the operation was successful, false otherwise.
+   * @returns True if the operation was successful, false otherwise.
    * @throws Error if database operation fails.
    */
   static async addItemCount(userId: string, addCount: number): Promise<boolean> {
@@ -54,14 +54,15 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
       await db.user_scores.put(newRecord);
       return true;
     } catch (error) {
-      console.error('Error adding item count to user score:', error);
       throw error;
     }
   }
 
   /**
    * Fetches the user score record for today's date.
-   * @param userId - The user ID. Must be a valid string.
+   *
+   * @static
+   * @param userId The user ID.
    * @returns The user score record for today, or a new record with item_count 0 if none exists.
    * @throws Error
    */
@@ -70,7 +71,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     const key = generateUserScoreId(userId, today);
 
     return (
-      (await db.user_scores.get(key)) || {
+      (await db.user_scores.get(key)) ?? {
         id: key,
         user_id: userId,
         date: today,
@@ -82,15 +83,17 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
   /**
    * Synchronizes user score data between the local IndexedDB and Supabase.
-   * @param userId - The user ID. Must be a valid string.
+   *
+   * @static
+   * @param userId The user ID.
    * @returns The number of user score records synced.
-   * @throws Error
+   * @throws Error, if synchronization fails.
    */
   static async syncUserScoreData(userId: string): Promise<number> {
     // Step 1: Get the last synced date for the user_scores table
     const lastSyncedAt = await Metadata.getSyncedDate(TableName.UserScores, userId);
 
-    // Step 2: Get the current server time from Supabase
+    // Step 2: Get the current time
     const newSyncTime = new Date().toISOString();
 
     // Step 3: Gather local changes since the last sync
@@ -105,7 +108,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     });
 
     if (errorInsert) {
-      throw new Error('Synchronization disallowed for annonymous users.');
+      throw new Error(`User score synchronization failed.`, errorInsert);
     }
 
     // Step 4: Fetch updated records from supabase
@@ -118,20 +121,28 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     );
 
     if (errorFetch) {
-      throw new Error('Error fetching user scores from Supabase:', errorFetch);
+      throw new Error(`Error fetching user scores from Supabase.`, errorFetch);
     }
 
-    // Step 5: Rewrite local database with updated scores
-    if (updatedScores && updatedScores.length > 0) {
+    // Step 5: Rewrite local database with updated scores, update metadata
+    if (!updatedScores || updatedScores.length === 0) {
+      return 0;
+    }
+
+    try {
       const scoresWithId = updatedScores.map((score: UserScore) => ({
         ...score,
         id: generateUserScoreId(score.user_id, score.date),
       }));
-      await db.user_scores.bulkPut(scoresWithId);
-    }
 
-    // Step 6: Update the metadata table with the new sync time
-    await Metadata.markAsSynced(TableName.UserScores, newSyncTime, userId);
+      await db.transaction('rw', db.user_scores, db.metadata, async () => {
+        await db.user_scores.bulkPut(scoresWithId);
+        await Metadata.markAsSynced(TableName.UserScores, newSyncTime, userId);
+      });
+    } catch (error) {
+      errorHandler(error, `Failed to update user scores for userId: ${userId}`);
+      throw new Error('No updated user scores received from Supabase.');
+    }
     return updatedScores.length;
   }
 }

@@ -8,20 +8,21 @@ import { triggerUserItemsUpdatedEvent } from '@/database/database.utils';
 /**
  * Synchronizes user-related data with the local database.
  *
- * This function opens the database connection and performs parallel synchronization
- * of user items, grammar data, user scores, and audio records. It does not return a value.
- * Regardless of the outcome, it triggers an event to notify that user items have been updated.
+ * This function opens the database connection and performs synchronization
+ * of user items, grammar data, user scores, and audio records.
  *
  * @param userId - The unique identifier of the user whose data should be synchronized.
- * @returns A promise that resolves to `true` if synchronization succeeds, or `false` if an error occurs.
+ * @throws Error if any part of the synchronization process fails.
  */
 export async function dataSync(userId: string): Promise<void> {
   await db.open();
-  await Promise.all([
-    UserItem.syncUserItemsData(userId),
-    Grammar.syncGrammarData(),
-    UserScore.syncUserScoreData(userId),
-    AudioRecord.syncAudioData(),
-  ]);
+  await db.transaction('rw', db.user_items, db.grammar, db.user_scores, async () => {
+    await UserItem.syncUserItemsData(userId);
+    await Grammar.syncGrammarData();
+    await UserScore.syncUserScoreData(userId);
+  });
+
+  await AudioRecord.syncAudioData();
+
   triggerUserItemsUpdatedEvent(userId);
 }

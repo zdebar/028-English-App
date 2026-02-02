@@ -22,6 +22,7 @@ export default class Metadata extends Entity<AppDB> {
   /**
    * Retrieves the last synchronization date for a specific table and user.
    *
+   * @static
    * @param tableName The name of the table to retrieve the sync date for.
    * @param userId (Optional) The ID of the user. If not provided, null is used.
    * @throws Error, if the database operation fails.
@@ -37,6 +38,7 @@ export default class Metadata extends Entity<AppDB> {
   /**
    * Marks the specified table as synced by updating or inserting a metadata record with the given sync time.
    *
+   * @static
    * @param tableName - The name of the table to mark as synced.
    * @param syncTime - The ISO string representing the time of synchronization.
    * @param userId - (Optional) The user ID associated with the sync operation. If not provided, null is used.
@@ -61,6 +63,7 @@ export default class Metadata extends Entity<AppDB> {
   /**
    * Deletes a metadata row from the database for the specified table and optional user.
    *
+   * @static
    * @param tableName - The name of the table whose metadata row should be deleted.
    * @param userId - (Optional) The user ID associated with the metadata row. If not provided, deletes the row for the table only.
    * @throws Error, if the database operation fails.

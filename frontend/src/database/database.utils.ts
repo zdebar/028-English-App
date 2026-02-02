@@ -30,8 +30,8 @@ export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
 /**
  * Generates a unique identifier for a user's score based on the user ID and date.
  *
- * @param userId - The unique identifier of the user.
- * @param date - The date associated with the score in short ISO format (e.g., '2023-06-01').
+ * @param userId The unique identifier of the user.
+ * @param date The date associated with the score in short ISO format (e.g., '2023-06-01').
  * @returns A string combining the user ID and date, separated by a hyphen.
  */
 export function generateUserScoreId(userId: string, date: string): string {

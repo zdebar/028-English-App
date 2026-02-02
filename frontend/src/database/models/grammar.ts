@@ -27,6 +27,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   /**
    * Returns a grammar record by its ID.
    *
+   * @static
    * @param grammarId fetch grammar by ID
    * @returns A promise that resolves to the grammar record.
    * @throws Error if grammar is not found.
@@ -44,6 +45,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   /**
    * Fetches the list of grammar that the user has started.
    *
+   * @static
    * @param userId - The user ID.
    * @returns Array of started GrammarLocal records, empty array in case of none found.
    * @throws Error if operation fails.
@@ -79,6 +81,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * - Updates or deletes records in the local IndexedDB based on the fetched data.
    * - Updates the metadata table with the new sync time.
    *
+   * @static
    * @returns The number of grammar records synced.
    * @throws Error if any step of the synchronization process fails.
    */

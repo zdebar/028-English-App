@@ -11,6 +11,7 @@ export const TEXTS = {
 
   // User
   userLabel: 'Uživatel',
+  authInitErrorToast: 'Nastala chyba při přihlašování.',
 
   // Buttons
   confirm: 'Ano',
