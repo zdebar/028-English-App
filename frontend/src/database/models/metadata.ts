@@ -7,14 +7,9 @@ import { generateMetadataId } from '../database.utils';
 /**
  * Represents metadata information for table synchronization in the application database.
  *
- * The `Metadata` class provides static methods to manage synchronization state for different tables,
- * optionally scoped by user. It allows querying the last sync date, marking a table as synced,
- * and deleting sync metadata for a table and user.
- *
- * @property {string} id - The unique identifier for the metadata entry, combining table name and user ID.
- * @property {TableName} table_name - The name of the table this metadata entry corresponds to.
- * @property {string} synced_at - The timestamp of the last synchronization for the table.
- * @property {string | null} user_id - The ID of the user associated with this metadata entry, or null for global entries.
+ * @method getSyncedDate - Retrieves the last synchronization date for a specific table and user.
+ * @method markAsSynced - Marks a specific table as synced by updating or inserting a metadata record.
+ * @method deleteSyncRow - Deletes a metadata row for a specific table and optional user.
  *
  * @extends Entity<AppDB>
  */

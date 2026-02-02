@@ -12,11 +12,9 @@ import { TableName } from '@/types/local.types';
  * Represents a grammar entity in the application database.
  * - grammar table is shared across all users
  *
- * @property {number} id - The unique identifier for the grammar.
- * @property {string} name - The name of the grammar.
- * @property {string} note - Additional notes about the grammar.
- * @property {string} updated_at - The timestamp of the last update to the grammar.
- * @property {string | null} deleted_at - The timestamp of when the grammar was deleted, or null if not deleted.
+ * @method getGrammarById - Fetches a grammar record by its ID.
+ * @method getStartedGrammarList - Retrieves the list of grammar that the user has started.
+ * @method syncGrammarData - Synchronizes grammar data from Supabase to the local IndexedDB.
  *
  */
 export default class Grammar extends Entity<AppDB> implements GrammarLocal {

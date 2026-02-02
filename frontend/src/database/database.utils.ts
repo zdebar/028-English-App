@@ -71,9 +71,10 @@ export function getLocalDateFromUTC(date: string): string {
 
 /**
  * Fetches a file from Supabase storage bucket.
+ *
  * @param bucketName name of the storage bucket
  * @param dataFile name of the file to fetch
- * @returns blob data or null
+ * @returns Blob data or null on missing/error
  */
 export async function fetchStorage(bucketName: string, dataFile: string): Promise<Blob | null> {
   const cacheBuster = `?t=${Date.now()}`;
