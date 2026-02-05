@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { TEXTS } from '@/config/texts.config';
+import { TEXTS } from '@/locales/cs';
 import config from '@/config/config';
 
 type LoadingMessageProps = {
@@ -14,7 +14,7 @@ type LoadingMessageProps = {
  * @param timeDelay Delay before showing the loading message (ms).
  */
 export default function LoadingMessage({
-  text = TEXTS.buttonLoading,
+  text = TEXTS.loadingMessage,
   timeDelay = config.buttons.loadingMessageDelay,
 }: LoadingMessageProps) {
   const [show, setShow] = useState(false);

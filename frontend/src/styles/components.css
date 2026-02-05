@@ -1,7 +1,7 @@
 @layer components {
   /** BUTTON STYLES **/
   .button-rectangular {
-    @apply h-button shrink-0 grow basis-auto font-bold tracking-wide;
+    @apply h-button shrink-0 grow font-bold tracking-wide;
     @apply flex items-center justify-center;
   }
 

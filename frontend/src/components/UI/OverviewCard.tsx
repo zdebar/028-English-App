@@ -2,7 +2,7 @@ import CloseButton from '@/components/UI/buttons/CloseButton';
 import HelpText from '@/features/help/HelpText';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
-import ButtonWithModal from '../../features/modal/ButtonWithModal';
+import ButtonWithModal from '@/features/modal/ButtonWithModal';
 
 interface OverviewCardProps {
   titleText?: string;
@@ -41,9 +41,9 @@ export default function OverviewCard({
   children,
 }: OverviewCardProps): JSX.Element {
   return (
-    <div className={`card-width flex flex-col justify-start gap-1 ${className}`}>
+    <div className={`card-width ${className}`}>
       {/* Top Bar */}
-      <div className="relative flex items-center justify-between gap-1">
+      <div className="relative flex items-center justify-between gap-1 pb-1">
         {/* Title and Reset Button */}
         <ButtonWithModal
           buttonText={titleText}
