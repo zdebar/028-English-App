@@ -54,7 +54,7 @@ export default function OverviewCard({
             onClose();
           }}
           disabled={!handleReset}
-          className="flex items-center justify-start pl-4"
+          className="flex items-center justify-start px-4"
         >
           <p className="font-bold">{modalText}</p>
           <p className="">{modalDescription}</p>

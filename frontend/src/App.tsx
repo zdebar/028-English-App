@@ -41,15 +41,18 @@ export default function App() {
 
   // Data synchronization effect on userId change
   useEffect(() => {
-    try {
-      if (userId) {
-        dataSync(userId);
+    const syncData = async () => {
+      try {
+        if (userId) {
+          await dataSync(userId);
+        }
+        showToast(TEXTS.syncSuccessToast, 'success');
+      } catch (error) {
+        showToast(TEXTS.syncErrorToast, 'error');
+        errorHandler(error, 'Data synchronization failed');
       }
-      showToast(TEXTS.syncSuccessToast, 'success');
-    } catch (error) {
-      showToast(TEXTS.syncErrorToast, 'error');
-      errorHandler(error, 'Data synchronization failed');
-    }
+    };
+    syncData();
   }, [userId]);
 
   return (

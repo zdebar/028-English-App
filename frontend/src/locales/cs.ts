@@ -7,7 +7,7 @@ export const TEXTS = {
 
   // Synchronization
   syncSuccessToast: 'Data byla úspěšně synchronizována.',
-  syncErrorToast: 'Chyba při synchronizaci dat. Data mohou být zastaralá.',
+  syncErrorToast: 'Chyba při synchronizaci dat.',
 
   // User
   userLabel: 'Uživatel',
@@ -59,7 +59,6 @@ export const TEXTS = {
   resetAllProgressButtonTitle: 'Resetovat veškerý pokrok',
   resetAllProgressModalDescription:
     'Opravdu chcete vymazat veškerý pokrok? Změna již nepůjde vrátit.',
-  resetAllProgressSuccessToast: 'Váš pokrok byl úspěšně vymazán.',
 
   // Generic Erase Progress
   eraseProgress: 'Vymazat pokrok',

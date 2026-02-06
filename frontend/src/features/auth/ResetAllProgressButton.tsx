@@ -20,7 +20,7 @@ export default function ResetAllProgressButton({ className }: { className?: stri
     try {
       if (!userId) return;
       await UserItem.resetAllUserItems(userId);
-      showToast(TEXTS.resetAllProgressSuccessToast, 'success');
+      showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (error) {
       showToast(TEXTS.resetProgressErrorToast, 'error');
       errorHandler(error, 'Reset Progress Error');

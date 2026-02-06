@@ -1,9 +1,9 @@
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import { errorHandler } from '@/features/error-handler/error-handler';
+import ButtonWithModal from '@/features/modal/ButtonWithModal';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
-import ButtonWithModal from '../modal/ButtonWithModal';
-import { errorHandler } from '../error-handler/error-handler';
 
 /**
  * SignoutButton component for signing out the user.

@@ -32,7 +32,19 @@ export default function DeleteUserButton({ className }: { className?: string }):
         throw new Error(deleteError.message);
       }
 
-      const results = await Promise.allSettled([
+      // Sync local data before deletion for potential recovery or analytics purposes
+      const resultsSync = await Promise.allSettled([
+        UserItem.syncUserItemsData(userId),
+        UserScore.syncUserScoreData(userId),
+      ]);
+
+      resultsSync.forEach((result) => {
+        if (result.status === 'rejected') {
+          errorHandler(result.reason, 'Operation failed');
+        }
+      });
+
+      const resultsDelete = await Promise.allSettled([
         UserItem.syncUserItemsData(userId),
         UserScore.syncUserScoreData(userId),
         UserItem.deleteAllUserItems(userId),
@@ -40,7 +52,7 @@ export default function DeleteUserButton({ className }: { className?: string }):
         Metadata.deleteSyncRow('user_scores', userId),
       ]);
 
-      results.forEach((result) => {
+      resultsDelete.forEach((result) => {
         if (result.status === 'rejected') {
           errorHandler(result.reason, 'Operation failed');
         }

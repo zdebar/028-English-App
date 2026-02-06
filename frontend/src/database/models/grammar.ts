@@ -113,18 +113,14 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
         }
       });
 
-      await db.transaction('rw', db.grammar, db.metadata, async () => {
-        if (toDelete.length > 0) {
-          await db.grammar.bulkDelete(toDelete);
-        }
-        if (toUpsert.length > 0) {
-          await db.grammar.bulkPut(toUpsert);
-        }
-        await Metadata.markAsSynced(TableName.Grammar, newSyncTime);
-      });
-    } else {
-      await Metadata.markAsSynced(TableName.Grammar, newSyncTime);
+      if (toDelete.length > 0) {
+        await db.grammar.bulkDelete(toDelete);
+      }
+      if (toUpsert.length > 0) {
+        await db.grammar.bulkPut(toUpsert);
+      }
     }
+    await Metadata.markAsSynced(TableName.Grammar, newSyncTime);
 
     return grammar?.length ?? 0;
   }

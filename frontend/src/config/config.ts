@@ -51,7 +51,7 @@ const config = {
   },
 
   toast: {
-    duration: 3000, // Duration in milliseconds for which the toast is visible
+    duration: 10000, // Duration in milliseconds for which the toast is visible
   },
 
   buttons: {

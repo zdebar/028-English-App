@@ -15,14 +15,11 @@ import { triggerUserItemsUpdatedEvent } from '@/database/database.utils';
  * @throws Error if any part of the synchronization process fails.
  */
 export async function dataSync(userId: string): Promise<void> {
-  await db.open();
-  await db.transaction('rw', db.user_items, db.grammar, db.user_scores, async () => {
-    await UserItem.syncUserItemsData(userId);
-    await Grammar.syncGrammarData();
-    await UserScore.syncUserScoreData(userId);
+  await db.transaction('rw', db.user_items, db.grammar, db.user_scores, db.metadata, async () => {
+    // await UserItem.syncUserItemsData(userId);
+    // await Grammar.syncGrammarData();
+    // await UserScore.syncUserScoreData(userId);
   });
-
   await AudioRecord.syncAudioData();
-
   triggerUserItemsUpdatedEvent(userId);
 }
