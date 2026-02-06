@@ -1,9 +1,9 @@
 import ButtonRectangular from '@/components/UI/buttons/ButtonRectangular';
 import { ROUTES } from '@/config/routes.config';
-import { TEXTS } from '@/locales/cs';
 import DeleteUserButton from '@/features/auth/DeleteUserButton';
 import ResetAllProgressButton from '@/features/auth/ResetAllProgressButton';
 import SignoutButton from '@/features/auth/SignoutButton';
+import { TEXTS } from '@/locales/cs';
 import { useNavigate } from 'react-router-dom';
 import type { JSX } from 'react/jsx-dev-runtime';
 
