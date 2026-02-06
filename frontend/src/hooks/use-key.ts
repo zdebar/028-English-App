@@ -18,16 +18,15 @@ interface UseKeyState {
 export function useKey({ onKeyPress, keys, disabledOnOverlayOpen = false }: UseKeyState) {
   const isOverlayOpen = useOverlayStore((state) => state.isOverlayOpen);
 
-  const stableOnKeyPress = useEffectEvent(onKeyPress);
+  const handleKeyDown = useEffectEvent((e: KeyboardEvent) => {
+    if (keys.includes(e.key)) {
+      onKeyPress();
+    }
+  });
 
   useEffect(() => {
     if (disabledOnOverlayOpen && isOverlayOpen) return;
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (keys.includes(e.key)) {
-        stableOnKeyPress();
-      }
-    };
     window.addEventListener('keydown', handleKeyDown);
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
