@@ -40,6 +40,7 @@
     @apply z-50;
   }
   .z-overlay {
+    /* Overlay */
     @apply z-100;
   }
 
@@ -48,6 +49,7 @@
   }
 
   .z-modal {
+    /* Modal */
     @apply z-300;
   }
 

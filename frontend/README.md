@@ -88,14 +88,32 @@ Null for certains columns are replaced with nullReplacementDate or nullReplaceme
 
 - **auth**: User management - register, sign in, sign out, delete user profile, via supabase auth
 - **dashboard**: Shows started items count
-- **error-handler**:
+- **error-handler**: Error Handling Management
+
+  Error Handling Approach
+  - catch errors at hook / component level
+  - showFailure toast to user
+  - log with error-handler - to console in development, to online logging service in production
+  - ErrorBoundary - for unexpected errors
+
 - **grammar**: Grammar overview
 - **help**: Help hints
 - **key-listener**:
+
+  A React hook that listens for specific key presses on the window and executes a callback when those keys are pressed.
+  It can optionally be disabled when an overlay is open, based on the `disabledOnOverlayOpen` flag.
+
 - **modal**:
-- **overlay**: global overlay screen
+- **overlay**: Global Overlay Screen
+
+  Layout Overlay
+  - Covers the screen to reduce the visibility of components below the overlay (z-level)
+  - Prevents click events from propagating to underlying components
+  - Optionally disables key listeners below, based on individual component settings
+  - Closed by pressing Escape or onClick (closing could be linked to feature using Overlay)
+
 - **practice**: Manages practice deck, and its logic
-- **privacy-policy**:
+- **privacy-policy**: Privacy Policy Content
 - **theme**: Theming
 
   This hook handles theme detection, persistence, and application:
@@ -105,4 +123,12 @@ Null for certains columns are replaced with nullReplacementDate or nullReplaceme
   - Persists the chosen theme to localStorage only when user changes theme.
 
 - **toast**: Notification Toasts
+
+  Displays notification to user.
+
+  Types:
+  - success
+  - error
+  - infor
+
 - **vocabulary**: Vocabulary overview
