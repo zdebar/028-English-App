@@ -16,7 +16,7 @@ interface ThemeState {
  * - Detects the system's preferred color scheme (light or dark).
  * - Reads the stored theme from localStorage if available.
  * - Applies the theme by toggling CSS classes on the document root.
- * - Persists the chosen theme to localStorage.
+ * - Persists the chosen theme to localStorage only when user changes theme.
  *
  * The store is initialized with the stored theme or system theme on first use.
  *
@@ -54,7 +54,10 @@ export const useThemeStore = create<ThemeState>((set, get) => {
     const root = document.documentElement;
     root.classList.toggle('dark', theme === 'dark');
     root.classList.toggle('light', theme === 'light');
+  };
 
+  const saveTheme = (theme: UserTheme) => {
+    if (!isBrowser) return;
     try {
       window.localStorage.setItem(THEME_STORAGE_KEY, theme);
     } catch {
@@ -73,6 +76,7 @@ export const useThemeStore = create<ThemeState>((set, get) => {
         return;
       }
       applyTheme(newTheme);
+      saveTheme(newTheme);
       set({ theme: newTheme });
     },
   };
