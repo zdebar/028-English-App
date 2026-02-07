@@ -36,6 +36,7 @@
 
   /* Z-INDEX LEVELS */
   .z-header {
+    /* Header */
     @apply z-50;
   }
   .z-overlay {

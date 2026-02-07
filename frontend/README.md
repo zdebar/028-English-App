@@ -97,15 +97,12 @@ Null for certains columns are replaced with nullReplacementDate or nullReplaceme
 - **practice**: Manages practice deck, and its logic
 - **privacy-policy**:
 - **theme**: Theming
-- On first use defaults
+
+  This hook handles theme detection, persistence, and application:
+  - Detects the system's preferred color scheme (light or dark).
+  - Reads the stored theme from localStorage if available.
+  - Applies the theme by toggling CSS classes on the document root.
+  - Persists the chosen theme to localStorage only when user changes theme.
+
 - **toast**: Notification Toasts
 - **vocabulary**: Vocabulary overview
-
-## Z-Guide Layering
-
-| z-index | Component   |
-| ------- | ----------- |
-| 20      | Header      |
-| 1000    | OverlayMask |
-| 1001    | Modal       |
-| 2000    | Hint        |
