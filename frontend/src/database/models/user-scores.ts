@@ -91,7 +91,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    */
   static async syncUserScoreData(userId: string): Promise<number> {
     // Step 1: Get the last synced date for the user_scores table
-    const lastSyncedAt = await Metadata.getSyncedDate(TableName.UserScores, userId);
+    const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserScores, userId);
 
     // Step 2: Get the current time
     const newSyncTime = new Date().toISOString();

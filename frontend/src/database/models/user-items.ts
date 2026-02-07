@@ -277,7 +277,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    */
   static async syncUserItemsData(userId: string): Promise<number> {
     // Step 1: Get the last synced date for the user_items table
-    const lastSyncedAt = await Metadata.getSyncedDate(TableName.UserItems, userId);
+    const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserItems, userId);
 
     // Step 2: Fetch synced server time
     const newSyncTime = new Date().toISOString();

@@ -29,7 +29,7 @@ export default class Metadata extends Entity<AppDB> {
    * @returns A promise that resolves to the ISO string of the last synced date.
    *          Returns '1970-01-01T00:00:00.000Z' if no sync date is found. (epoch start)
    */
-  static async getSyncedDate(tableName: TableName, userId?: string | null): Promise<string> {
+  static async getSyncedAt(tableName: TableName, userId?: string | null): Promise<string> {
     const id = generateMetadataId(tableName, userId ?? null);
     const metadata = await db.metadata.get(id);
     return metadata?.synced_at ?? '1970-01-01T00:00:00.000Z'; // Default to epoch start if not found

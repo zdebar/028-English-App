@@ -166,7 +166,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * @returns A promise that resolves to the number of grammar records synchronized.
    */
   static async syncGrammarDataSinceLastSync(): Promise<number> {
-    const lastSyncedAt = await Metadata.getSyncedDate(TableName.Grammar);
+    const lastSyncedAt = await Metadata.getSyncedAt(TableName.Grammar);
     return await this.syncGrammarData(lastSyncedAt);
   }
 
