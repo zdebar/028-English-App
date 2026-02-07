@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { useKey } from '../use-key';
+import { useKey } from '../../features/key-listener/use-key';
 
 // Mock the overlay store
 vi.mock('@/features/overlay/use-overlay-store', () => ({

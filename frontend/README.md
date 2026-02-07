@@ -88,11 +88,16 @@ Null for certains columns are replaced with nullReplacementDate or nullReplaceme
 
 - **auth**: User management - register, sign in, sign out, delete user profile, via supabase auth
 - **dashboard**: Shows started items count
-- **gdpr**: GDPR
+- **error-handler**:
 - **grammar**: Grammar overview
+- **help**: Help hints
+- **key-listener**:
+- **modal**:
 - **overlay**: global overlay screen
 - **practice**: Manages practice deck, and its logic
+- **privacy-policy**:
 - **theme**: Theming
+- On first use defaults
 - **toast**: Notification Toasts
 - **vocabulary**: Vocabulary overview
 
