@@ -97,13 +97,22 @@ Null for certains columns are replaced with nullReplacementDate or nullReplaceme
   - ErrorBoundary - for unexpected errors
 
 - **grammar**: Grammar overview
-- **help**: Help hints
+- **help**: Help text hints
+
+  HelpButton
+  - switches on global overlay state
+
+  HelpText
+  - with absolute positioning, to be placed at appropriate element
+  - visibility driven by global help state
+
 - **key-listener**:
 
   A React hook that listens for specific key presses on the window and executes a callback when those keys are pressed.
   It can optionally be disabled when an overlay is open, based on the `disabledOnOverlayOpen` flag.
 
-- **modal**:
+- **modal**: Button with Confirmation Modal
+
 - **overlay**: Global Overlay Screen
 
   Layout Overlay
@@ -113,7 +122,9 @@ Null for certains columns are replaced with nullReplacementDate or nullReplaceme
   - Closed by pressing Escape or onClick (closing could be linked to feature using Overlay)
 
 - **practice**: Manages practice deck, and its logic
+
 - **privacy-policy**: Privacy Policy Content
+
 - **theme**: Theming
 
   This hook handles theme detection, persistence, and application:
