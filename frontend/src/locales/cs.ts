@@ -30,6 +30,7 @@ export const TEXTS = {
 
   // Errors
   genericError: 'Nastala neznámá chyba.',
+  errorBoundaryMessage: 'Něco se pokazilo. Zkuste obnovit stránku.',
 
   // Routes
   grammarOverview: 'Přehled gramatiky',

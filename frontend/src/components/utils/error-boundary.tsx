@@ -32,7 +32,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
 
   render() {
     if (this.state.hasError) {
-      return <p>{TEXTS.genericError}</p>;
+      return <p className="error-warning pt-6">{TEXTS.errorBoundaryMessage}</p>;
     }
 
     return this.props.children;

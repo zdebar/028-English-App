@@ -40,20 +40,20 @@ export default function App() {
   }, [initializeAuth]);
 
   // Data synchronization effect on userId change
-  useEffect(() => {
-    const syncData = async () => {
-      try {
-        if (userId) {
-          await dataSync(userId);
-        }
-        showToast(TEXTS.syncSuccessToast, 'success');
-      } catch (error) {
-        showToast(TEXTS.syncErrorToast, 'error');
-        errorHandler(error, 'Data synchronization failed');
-      }
-    };
-    syncData();
-  }, [userId]);
+  // useEffect(() => {
+  //   const syncData = async () => {
+  //     try {
+  //       if (userId) {
+  //         await dataSync(userId);
+  //       }
+  //       showToast(TEXTS.syncSuccessToast, 'success');
+  //     } catch (error) {
+  //       showToast(TEXTS.syncErrorToast, 'error');
+  //       errorHandler(error, 'Data synchronization failed');
+  //     }
+  //   };
+  //   syncData();
+  // }, [userId]);
 
   return (
     <div className="max-w-container relative mx-auto flex min-h-screen flex-col justify-start">
