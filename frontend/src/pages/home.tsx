@@ -76,8 +76,8 @@ export default function Home(): JSX.Element {
   return (
     <div className="max-w-hero relative flex w-full flex-col gap-4 text-center">
       <h1 className="pt-12 pb-6">{TEXTS.appTitle}</h1>
-      <p className="notification error-warning landscape:hidden">{TEXTS.appSubtitle}</p>
-      <p className="px-4 landscape:hidden">{TEXTS.appDescription}</p>
+      <p className="notification error-warning">{TEXTS.appSubtitle}</p>
+      <p className="px-4">{TEXTS.appDescription}</p>
       {mainSection}
     </div>
   );
