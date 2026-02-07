@@ -1,5 +1,5 @@
 -- INSERT
-CREATE OR REPLACE FUNCTION insert_user_items(
+CREATE OR REPLACE FUNCTION upsert_user_items(
   user_id_input UUID,
   items JSONB
 )

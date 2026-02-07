@@ -76,52 +76,106 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   }
 
   /**
-   * Synchronizes grammar data from Supabase to the local IndexedDB.
-   * - Fetches updated grammar records from Supabase newer than the last synced date from metadata table.
-   * - Updates or deletes records in the local IndexedDB based on the fetched data.
-   * - Updates the metadata table with the new sync time.
+   * Fetches grammar records from Supabase that were updated within a specified time range.
    *
-   * @static
-   * @returns The number of grammar records synced.
-   * @throws Error if any step of the synchronization process fails.
+   * @param lastSyncedAt - The start of the time range (inclusive). Defaults to the null replacement date from config.
+   * @param newSyncedAt - The end of the time range (exclusive).
+   * @returns A promise that resolves to an array of grammar records. Returns an empty array if no records are found.
+   * @throws Error if the Supabase query fails.
    */
-  static async syncGrammarData(): Promise<number> {
-    // Step 1: Get the last synced date for the grammar table
-    const lastSyncedAt = await Metadata.getSyncedDate(TableName.Grammar);
-
-    // Step 2: Fetch grammar records from Supabase newer than the last synced date
+  private static async fetchGrammar(
+    lastSyncedAt: string = config.database.nullReplacementDate,
+    newSyncedAt: string,
+  ): Promise<GrammarLocal[]> {
     const { data: grammar, error } = await supabaseInstance
       .from('grammar')
       .select('id, name, note, updated_at, deleted_at')
-      .gt('updated_at', lastSyncedAt);
+      .gte('updated_at', lastSyncedAt)
+      .lt('updated_at', newSyncedAt);
 
     if (error) {
-      throw new Error(`Failed to fetch data from supabase: ${error.message}`);
+      throw new Error(`Failed to fetch grammar data from supabase: ${error.message}`);
     }
 
-    // Step 3: Update or delete records in the local IndexedDB
-    const newSyncTime = new Date().toISOString();
+    return grammar ?? [];
+  }
 
-    if (grammar && grammar.length > 0) {
-      const toDelete: number[] = [];
-      const toUpsert: GrammarLocal[] = [];
-      grammar.forEach((item) => {
-        if (item.deleted_at === null) {
-          toUpsert.push(item);
-        } else {
-          toDelete.push(item.id);
-        }
-      });
+  /**
+   * Applies grammar synchronization by processing items for deletion or upsert.
+   *
+   * Separates grammar items into two categories based on their `deleted_at` property:
+   * - Items with `deleted_at === null` are upserted to the database
+   * - Items with `deleted_at !== null` are marked for deletion
+   *
+   * @param grammar - Array of grammar items to synchronize
+   * @returns A promise that resolves when the synchronization is complete
+   * @private
+   */
+  private static async applyGrammarSync(grammar: GrammarLocal[]) {
+    const toDelete: number[] = [];
+    const toUpsert: GrammarLocal[] = [];
+    grammar.forEach((item) => {
+      if (item.deleted_at === null) {
+        toUpsert.push(item);
+      } else {
+        toDelete.push(item.id);
+      }
+    });
 
-      if (toDelete.length > 0) {
-        await db.grammar.bulkDelete(toDelete);
-      }
-      if (toUpsert.length > 0) {
-        await db.grammar.bulkPut(toUpsert);
-      }
+    if (toDelete.length > 0) {
+      await db.grammar.bulkDelete(toDelete);
     }
-    await Metadata.markAsSynced(TableName.Grammar, newSyncTime);
+    if (toUpsert.length > 0) {
+      await db.grammar.bulkPut(toUpsert);
+    }
+  }
+
+  /**
+   * Synchronizes grammar data from Supabase with local IndexedDB storage.
+   *
+   * Fetches grammar records that have been modified since the last sync timestamp,
+   * applies the changes to the local database, and updates the sync metadata.
+   *
+   * @param lastSyncedAt - ISO string timestamp of the last synchronization
+   * @returns Promise resolving to the number of grammar records synchronized
+   * @throws Error if synchronization fails at any step
+   */
+  private static async syncGrammarData(lastSyncedAt: string): Promise<number> {
+    // Step 1: Get the Synced dates for the grammar table
+    const newSyncedAt = new Date().toISOString();
+
+    // Step 2: Fetch grammar records from Supabase
+    const grammar = await this.fetchGrammar(lastSyncedAt, newSyncedAt);
+
+    // Step 3: Update local IndexedDB with the fetched grammar data
+    await db.transaction('rw', db.grammar, db.metadata, async () => {
+      if (grammar && grammar.length > 0) {
+        await this.applyGrammarSync(grammar);
+      } else {
+        await Metadata.markAsSynced(TableName.Grammar, newSyncedAt);
+      }
+    });
 
     return grammar?.length ?? 0;
+  }
+
+  /**
+   * Synchronizes grammar data since the last sync operation.
+   * Retrieves the last synced timestamp for the Grammar table and then syncs
+   * all grammar data that has been updated since that timestamp.
+   * @returns A promise that resolves to the number of grammar records synchronized.
+   */
+  static async syncGrammarDataSinceLastSync(): Promise<number> {
+    const lastSyncedAt = await Metadata.getSyncedDate(TableName.Grammar);
+    return await this.syncGrammarData(lastSyncedAt);
+  }
+
+  /**
+   * Synchronizes all grammar data from the remote source.
+   * Uses the null replacement date from the application configuration as the synchronization point.
+   * @returns A promise that resolves to the number of grammar records synchronized.
+   */
+  static async syncGrammarDataAll(): Promise<number> {
+    return await this.syncGrammarData(config.database.nullReplacementDate);
   }
 }
