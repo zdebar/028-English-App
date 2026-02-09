@@ -13,7 +13,8 @@ import Metadata from './metadata';
  *
  * @method addItemCount - Increases the item count for today's date by the specified amount.
  * @method getUserScoreForToday - Fetches the user score record for today's date.
- * @method syncUserScoreData - Synchronizes user score data between the local IndexedDB and Supabase.
+ * @method syncUserScoreSinceLastSync - Synchronizes user score data between the local IndexedDB and Supabase since the last sync.
+ * @method syncUserScoreAll - Synchronizes all user score data between the local IndexedDB and Supabase.
  */
 export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   user_id!: string;

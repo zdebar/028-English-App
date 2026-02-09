@@ -16,7 +16,8 @@ import type { GrammarSQL } from '@/types/data.types';
  *
  * @method getGrammarById - Fetches a grammar record by its ID.
  * @method getStartedGrammarList - Retrieves the list of grammar that the user has started.
- * @method syncGrammarData - Synchronizes grammar data from Supabase to the local IndexedDB.
+ * @method syncGrammarSinceLastSync - Synchronizes grammar data from Supabase to the local IndexedDB since the last sync.
+ * @method syncGrammarAll - Synchronizes all grammar data from Supabase to the local IndexedDB.
  *
  */
 export default class Grammar extends Entity<AppDB> implements GrammarLocal {
@@ -78,7 +79,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    *
    * @returns A promise that resolves to the number of grammar records synchronized.
    */
-  static async syncGrammarDataSinceLastSync(): Promise<number> {
+  static async syncGrammarSinceLastSync(): Promise<number> {
     const lastSyncedAt = await Metadata.getSyncedAt(TableName.Grammar);
     const newSyncedAt = new Date().toISOString();
 
@@ -93,7 +94,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    *
    * @returns A promise that resolves to the number of grammar records synchronized.
    */
-  static async syncGrammarDataAll(): Promise<number> {
+  static async syncGrammarAll(): Promise<number> {
     const lastSyncedAt = config.database.epochStartDate;
     const newSyncedAt = new Date().toISOString();
 

@@ -10,8 +10,6 @@ import { Entity } from 'dexie';
  * @method getSyncedDate - Retrieves the last synchronization date for a specific table and user.
  * @method markAsSynced - Marks a specific table as synced by updating or inserting a metadata record.
  * @method deleteSyncRow - Deletes a metadata row for a specific table and optional user.
- *
- * @extends Entity<AppDB>
  */
 export default class Metadata extends Entity<AppDB> {
   id!: string;
