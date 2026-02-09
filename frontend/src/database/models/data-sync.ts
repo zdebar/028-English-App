@@ -16,14 +16,14 @@ import { infoHandler } from '@/features/logging/info-handler';
  * @throws Error if any part of the synchronization process fails.
  */
 export async function dataSync(userId: string): Promise<void> {
-  const userItemSyncCount = await UserItem.syncUserItemsAll(userId);
-  infoHandler(`Synchronized ${userItemSyncCount} UserItem records.`);
-
   // const grammarSyncCount = await Grammar.syncGrammarDataAll();
   // infoHandler(`Synchronized ${grammarSyncCount} Grammar records.`);
 
   // const userScoreSyncCount = await UserScore.syncUserScoreAll(userId);
   // infoHandler(`Synchronized ${userScoreSyncCount} UserScore records.`);
+
+  // const userItemSyncCount = await UserItem.syncUserItemsAll(userId);
+  // infoHandler(`Synchronized ${userItemSyncCount} UserItem records.`);
 
   // await AudioRecord.syncAudioData();
   triggerUserItemsUpdatedEvent(userId);

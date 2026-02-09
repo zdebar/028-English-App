@@ -3,7 +3,6 @@ import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import type { TableName } from '@/types/local.types';
 import { Entity } from 'dexie';
-import { generateMetadataId } from '../database.utils';
 
 /**
  * Represents metadata information for table synchronization in the application database.
@@ -25,15 +24,16 @@ export default class Metadata extends Entity<AppDB> {
    *
    * @static
    * @param tableName The name of the table to retrieve the sync date for.
-   * @param userId (Optional) The ID of the user. If not provided, null is used.
-   * @throws DatabaseError, if the database operation fails.
+   * @param userId (Optional) The ID of the user. If not provided, the null replacement user ID from config is used.
    * @returns A promise that resolves to the ISO string of the last synced date.
    *          Returns the epoch start date from config if no sync date is found.
    */
   static async getSyncedAt(tableName: TableName, userId?: string | null): Promise<string> {
-    const id = generateMetadataId(tableName, userId ?? null);
-    const metadata = await db.metadata.get(id);
-    return metadata?.synced_at ?? config.database.epochStartDate; // Default to epoch start if not found
+    const metadata = await db.metadata.get([
+      tableName,
+      userId ?? config.database.nullReplacementUserId,
+    ]);
+    return metadata?.synced_at ?? config.database.epochStartDate;
   }
 
   /**
@@ -41,8 +41,7 @@ export default class Metadata extends Entity<AppDB> {
    *
    * @param tableName - The name of the table to mark as synced.
    * @param syncTime - The ISO string representing the time of synchronization.
-   * @param userId - (Optional) The user ID associated with the sync operation. If not provided, null is used.
-   * @throws DatabaseError, if the database operation fails.
+   * @param userId - (Optional) The user ID associated with the sync operation. If not provided, the null replacement user ID from config is used.
    * @returns A promise that resolves to `true` if the operation was successful, otherwise `false`.
    */
   static async markAsSynced(
@@ -50,11 +49,9 @@ export default class Metadata extends Entity<AppDB> {
     syncTime: string,
     userId?: string | null,
   ): Promise<boolean> {
-    const id = generateMetadataId(tableName, userId ?? null);
     const putResult = await db.metadata.put({
-      id,
       table_name: tableName,
-      user_id: userId ?? null,
+      user_id: userId ?? config.database.nullReplacementUserId,
       synced_at: syncTime,
     });
     return !!putResult;
@@ -64,13 +61,11 @@ export default class Metadata extends Entity<AppDB> {
    * Deletes a metadata row from the database for the specified table and optional user.
    *
    * @param tableName - The name of the table whose metadata row should be deleted.
-   * @param userId - (Optional) The user ID associated with the metadata row. If not provided, deletes the row for the table only.
-   * @throws DatabaseError, if the database operation fails.
+   * @param userId - (Optional) The user ID associated with the metadata row. If not provided, the null replacement user ID from config is used.
    * @returns A promise that resolves to `true` if the deletion was successful.
    */
   static async deleteSyncRow(tableName: TableName, userId?: string | null): Promise<boolean> {
-    const id = generateMetadataId(tableName, userId ?? null);
-    await db.metadata.delete(id);
+    await db.metadata.delete([tableName, userId ?? config.database.nullReplacementUserId]);
     return true;
   }
 }

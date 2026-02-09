@@ -23,14 +23,14 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   name!: string;
   note!: string;
   updated_at!: string;
-  deleted_at!: string | null;
+  deleted_at!: string;
 
   /**
-   * Returns a grammar record by its ID.
+   * Retrieves a grammar record by its ID from the database.
    *
-   * @param grammarId fetch grammar by ID
+   * @param grammarId - The unique identifier of the grammar record to retrieve.
    * @returns A promise that resolves to the grammar record.
-   * @throws DatabaseError if grammar is not found. Error on database failure.
+   * @throws {DatabaseError} If no grammar record with the specified ID is found.
    */
   static async getGrammarById(grammarId: number): Promise<GrammarLocal> {
     const grammar = await db.grammar.get(grammarId);
@@ -43,33 +43,31 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   }
 
   /**
-   * Fetches the list of grammar that the user has started.
+   * Retrieves a list of grammar items that have been started by the user.
    *
-   * @param userId - The user ID.
-   * @returns Array of started GrammarLocal records, empty array in case of none found.
-   * @throws Error if operation fails.
+   * Fetches all grammar records associated with user items that have a non-null `started_at` timestamp,
+   * indicating that the user has begun studying those grammar topics.
+   *
+   * @param userId - The unique identifier of the user
+   * @returns A promise that resolves to an array of started grammar items. Returns an empty array
+   *          if the user has not started any grammar items or if no matching grammar records are found.
    */
   static async getStartedGrammarList(userId: string): Promise<GrammarLocal[]> {
-    // select all started user items where started_at is not null
     const startedUserItems: UserItemLocal[] = await db.user_items
       .where('[user_id+started_at]')
       .between([userId, Dexie.minKey], [userId, config.database.nullReplacementDate], true, false)
       .toArray();
 
-    // return empty array if no started user items found
     if (startedUserItems.length === 0) {
       return [];
     }
 
-    // extract unique grammar IDs from the started user items
     const grammarIds = [...new Set(startedUserItems.map((item) => item.grammar_id))];
 
-    // return empty array if no grammar IDs found. Could be in case of only vocabulary started but no grammar started.
     if (grammarIds.length === 0) {
       return [];
     }
 
-    // fetch grammar records by the extracted IDs
     const startedGrammar: GrammarLocal[] = await db.grammar.where('id').anyOf(grammarIds).toArray();
     return startedGrammar;
   }

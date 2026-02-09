@@ -13,7 +13,7 @@ export default class AppDB extends Dexie {
   user_scores!: EntityTable<UserScore, 'id'>;
   audio_records!: EntityTable<AudioRecord, 'filename'>;
   audio_metadata!: EntityTable<AudioMetadata, 'archive_name'>;
-  metadata!: EntityTable<Metadata, 'id'>;
+  metadata!: EntityTable<Metadata, any>;
 
   constructor() {
     super(config.database.dbName);
@@ -26,7 +26,7 @@ export default class AppDB extends Dexie {
       user_scores: 'id, [user_id+updated_at]',
       audio_records: 'filename',
       audio_metadata: 'archive_name',
-      metadata: 'id, [table_name+user_id]',
+      metadata: '[table_name+user_id]',
     });
 
     // Initialize tables and map them to classes

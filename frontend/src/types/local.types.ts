@@ -26,7 +26,7 @@ export interface GrammarLocal {
   name: string;
   note: string;
   updated_at: string;
-  deleted_at: string | null;
+  deleted_at: string;
 }
 
 export interface UserScoreLocal {
