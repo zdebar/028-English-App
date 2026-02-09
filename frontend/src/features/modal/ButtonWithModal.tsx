@@ -4,7 +4,6 @@ import { useMinLoading } from '@/features/modal/use-min-loading';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { useState } from 'react';
-import { errorHandler } from '../error-handler/error-handler';
 
 interface ButtonModalProps {
   buttonText: string;
@@ -44,8 +43,6 @@ export default function ButtonWithModal({
       setIsLoading(true);
       try {
         await onConfirm();
-      } catch (error) {
-        errorHandler(error, 'Button With Modal Error');
       } finally {
         setIsLoading(false);
       }

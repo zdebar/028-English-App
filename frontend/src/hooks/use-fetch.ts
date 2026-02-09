@@ -42,7 +42,7 @@ export function useFetch<T>(fetchFunction: () => Promise<T>): UseFetchResult<T> 
       } catch (error) {
         if (!isActive) return;
         setError(TEXTS.dataLoadingError);
-        errorHandler(error, 'Data Fetching Error');
+        errorHandler('Data Fetching Error', error);
       } finally {
         if (isActive) {
           setLoading(false);

@@ -27,7 +27,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
 
   componentDidCatch(error: Error) {
     // Log the error to an error reporting service
-    errorHandler(error);
+    errorHandler('ErrorBoundary', error);
   }
 
   render() {

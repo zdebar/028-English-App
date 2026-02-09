@@ -23,7 +23,7 @@ export default function SignoutButton({ className }: { className?: string }): JS
       showToast(TEXTS.signoutSuccess, 'success');
     } catch (error) {
       showToast(TEXTS.signoutError, 'error');
-      errorHandler(error, 'Signout Error');
+      errorHandler('Signout Error', error);
     }
   };
 

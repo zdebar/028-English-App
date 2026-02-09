@@ -40,7 +40,7 @@ export default function DeleteUserButton({ className }: { className?: string }):
 
       resultsSync.forEach((result) => {
         if (result.status === 'rejected') {
-          errorHandler(result.reason, 'Operation failed');
+          errorHandler('Operation failed', result.reason);
         }
       });
 
@@ -54,7 +54,7 @@ export default function DeleteUserButton({ className }: { className?: string }):
 
       resultsDelete.forEach((result) => {
         if (result.status === 'rejected') {
-          errorHandler(result.reason, 'Operation failed');
+          errorHandler('Operation failed', result.reason);
         }
       });
 
@@ -62,7 +62,7 @@ export default function DeleteUserButton({ className }: { className?: string }):
       await supabaseInstance.auth.signOut();
     } catch (error) {
       showToast(TEXTS.deleteUserErrorToast, 'error');
-      errorHandler(error, 'Delete User Error');
+      errorHandler('Delete User Error', error);
     }
   };
 

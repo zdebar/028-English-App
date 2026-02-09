@@ -23,7 +23,7 @@ export default function ResetAllProgressButton({ className }: { className?: stri
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (error) {
       showToast(TEXTS.resetProgressErrorToast, 'error');
-      errorHandler(error, 'Reset Progress Error');
+      errorHandler('Reset Progress Error', error);
     }
   };
 

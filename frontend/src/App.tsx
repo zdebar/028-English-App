@@ -35,7 +35,7 @@ export default function App() {
       return cleanup;
     } catch (error) {
       showToast(TEXTS.authInitErrorToast, 'error');
-      errorHandler(error, 'Auth Initialization Error');
+      errorHandler('Auth Initialization Error', error);
     }
   }, [initializeAuth]);
 
@@ -49,7 +49,7 @@ export default function App() {
         showToast(TEXTS.syncSuccessToast, 'success');
       } catch (error) {
         showToast(TEXTS.syncErrorToast, 'error');
-        errorHandler(error, 'Data synchronization failed');
+        errorHandler('Data synchronization failed', error);
       }
     };
     syncData();
