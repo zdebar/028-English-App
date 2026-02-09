@@ -3,7 +3,7 @@ import { supabaseInstance } from '@/config/supabase.config';
 import { addUserScoreId, generateUserScoreId, getTodayShortDate } from '@/database/database.utils';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
-import { DatabaseError } from '@/types/error.types';
+import { SupabaseError } from '@/types/error.types';
 import { TableName, type UserScoreLocal } from '@/types/local.types';
 import { Entity } from 'dexie';
 import Metadata from './metadata';
@@ -106,30 +106,33 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @throws Error, if synchronization fails.
    */
   static async syncUserScoreAll(userId: string): Promise<number> {
+    // Step 1 - Determine the last sync time and the new sync time
     const lastSyncedAt = config.database.epochStartDate;
     const newSyncedAt = new Date().toISOString();
 
+    // Step 2 - Push local changes to Supabase
     const localScores = await UserScore.getUserScore(userId, lastSyncedAt, newSyncedAt);
     await UserScore.upsertUserScores(localScores);
 
+    // Step 3 - Pull server changes from Supabase and update local IndexedDB
     const updatedScores = await UserScore.fetchUserScores(userId, lastSyncedAt, newSyncedAt);
     if (!updatedScores || updatedScores.length === 0) {
       return 0;
     }
     const scoresWithId = addUserScoreId(updatedScores);
 
-    // Clean orphaned data
+    await db.transaction('rw', db.user_scores, db.metadata, async () => {
+      await db.user_scores.bulkPut(scoresWithId);
+      await Metadata.markAsSynced(TableName.UserScores, newSyncedAt, userId);
+    });
+
+    // Step 4 - Clean orphaned data
     const fetchedIds = new Set(scoresWithId.map((score) => score.id));
     const localIds = await db.user_scores.where('user_id').equals(userId).primaryKeys();
     const orphanedIds = localIds.filter((id) => !fetchedIds.has(id));
     if (orphanedIds.length > 0) {
       await db.user_scores.bulkDelete(orphanedIds);
     }
-
-    await db.transaction('rw', db.user_scores, db.metadata, async () => {
-      await db.user_scores.bulkPut(scoresWithId);
-      await Metadata.markAsSynced(TableName.UserScores, newSyncedAt, userId);
-    });
 
     return updatedScores.length;
   }
@@ -162,7 +165,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @param lastSyncedAt - The timestamp of the last synchronization (ISO string format). Defaults to epoch start date if not provided.
    * @param newSyncedAt - The timestamp of the current synchronization (ISO string format)
    * @returns Promise resolving to an array of updated user scores
-   * @throws DatabaseError if the fetch operation fails
+   * @throws SupabaseError if the fetch operation fails
    */
   private static async fetchUserScores(
     userId: string,
@@ -179,7 +182,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     );
 
     if (errorFetch) {
-      throw new DatabaseError(`Error fetching User Scores from Supabase.`, errorFetch, {
+      throw new SupabaseError(`Error fetching User Scores from Supabase.`, errorFetch, {
         userId,
         lastSyncedAt,
         newSyncedAt,
@@ -194,7 +197,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    *
    * @param localScores Array of UserScoreLocal to sync
    * @returns Promise that resolves to a boolean indicating the success of the upsert operation
-   * @throws DatabaseError if the upsert operation fails
+   * @throws SupabaseError if the upsert operation fails
    * @private
    */
   private static async upsertUserScores(localScores: UserScoreLocal[]): Promise<boolean> {
@@ -203,7 +206,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     });
 
     if (errorInsert) {
-      throw new DatabaseError(`User score synchronization failed.`, errorInsert, { localScores });
+      throw new SupabaseError(`User score synchronization failed.`, errorInsert, { localScores });
     }
 
     return true;

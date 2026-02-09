@@ -1,21 +1,24 @@
-import Dexie, { Entity } from 'dexie';
+import config from '@/config/config';
+import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import { TableName, type UserItemLocal, type UserItemPractice } from '@/types/local.types';
-import config from '@/config/config';
-import { supabaseInstance } from '@/config/supabase.config';
+import Dexie, { Entity } from 'dexie';
 
-import { getNextAt, sortOddEvenByProgress } from '@/database/database.utils';
 import {
   convertLocalToSQL,
-  getTodayShortDate,
   getLocalDateFromUTC,
-  triggerUserItemsUpdatedEvent,
+  getNextAt,
+  getTodayShortDate,
   resetUserItem,
+  sortOddEvenByProgress,
+  triggerUserItemsUpdatedEvent,
 } from '@/database/database.utils';
-import UserScore from './user-scores';
-import Metadata from './metadata';
+import { infoHandler } from '@/features/logging/info-handler';
 import Grammar from './grammar';
+import Metadata from './metadata';
+import UserScore from './user-scores';
+import { SupabaseError } from '@/types/error.types';
 
 export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   item_id!: number;
@@ -34,11 +37,13 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   mastered_at!: string;
 
   /**
-   * Gets a practice deck of user items for the logged-in user.
-   * @param userId the ID of the logged-in user.
-   * @param deckSize number of items to include in the practice deck.
-   * @returns array of UserItemLocal objects.
-   * @throws error if operation fails.
+   * Retrieves a practice deck of user items for studying.
+   *
+   * @param userId - The unique identifier of the user
+   * @param deckSize - The maximum number of items to return (defaults to config.lesson.deckSize)
+   * @returns A promise that resolves to an array of UserItemPractice objects,
+   *          sorted by progress with odd/even distribution
+   * @throws Error if any database operation fails
    */
   static async getPracticeDeck(
     userId: string,
@@ -57,7 +62,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .limit(deckSize)
       .toArray();
 
-    // Step 3: If not enough items, fetch additional items without next_at set
+    // Step 3: If not enough items, fetch additional items with next_at equal to nullReplacementDate
     const remainingLimit = deckSize - itemsWithNextAt.length;
     if (remainingLimit > 0) {
       const remainingItems = await db.user_items
@@ -95,18 +100,14 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Saves the practiced deck items to the database.
-   * @param items array of already practiced UserItemLocal objects.
-   * @returns boolean indicating success.
-   * @throws error if operation fails.
+   * Saves practice deck items for a user, updating their progress and metadata.
+   *
+   * @param userId - The unique identifier of the user
+   * @param items - Array of user item records to be saved
+   * @returns Promise that resolves to true when the save operation completes successfully
+   * @throws Error if any database operation fails
    */
   static async savePracticeDeck(userId: string, items: UserItemLocal[]): Promise<boolean> {
-    items.map((item) => {
-      if (item.user_id !== userId) {
-        throw new Error(`Item user_id ${item.user_id} does not match provided userId ${userId}.`);
-      }
-    });
-
     const currentDateTime = new Date(Date.now()).toISOString();
     const updatedItems = items.map((item) => {
       return {
@@ -133,10 +134,13 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Fetches started counts for the logged-in user.
-   * @param userId - The ID of the logged-in user.
-   * @returns object containing startedCountToday and startedCount.
-   * @throws error if operation fails.
+   * Retrieves the count of started items for a user, both today and in total.
+   *
+   * @param userId - The unique identifier of the user
+   * @returns A promise that resolves to an object containing:
+   *   - startedCountToday: The number of items started by the user today
+   *   - startedCount: The total number of items started by the user
+   * @throws Error if any database operation fails
    */
   static async getStartedCounts(userId: string): Promise<{
     startedCountToday: number;
@@ -157,10 +161,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Fetches all started vocabulary items for the logged-in user.
-   * @param userId - The ID of the logged-in user.
-   * @returns array of UserItemLocal objects.
-   * @throws error if operation fails.
+   * Retrieves vocabulary items for a user that have been started (begun learning).
+   *
+   * @param userId - The unique identifier of the user
+   * @returns A promise that resolves to an array of user vocabulary items sorted by Czech translation
+   * @throws Error if any database operation fails
    */
   static async getUserStartedVocabulary(userId: string): Promise<UserItemLocal[]> {
     const result = await db.user_items
@@ -177,10 +182,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Resets all user items for the logged-in user.
-   * @param userId - The ID of the logged-in user.
-   * @returns number of reset items.
-   * @throws error if operation fails.
+   * Resets all user items for a specified user.
+   *
+   * @param userId - The ID of the user whose items should be reset
+   * @returns A promise that resolves to the number of user items that were reset
+   * @throws Error if any database operation fails
    */
   static async resetAllUserItems(userId: string): Promise<number> {
     const count = await db.user_items
@@ -190,7 +196,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         resetUserItem(item);
       });
 
-    console.log(`Reset ${count} user items for userId: ${userId}`);
+    infoHandler(`Reset ${count} user items for userId: ${userId}`);
     if (count !== 0) {
       triggerUserItemsUpdatedEvent(userId);
     }
@@ -198,14 +204,14 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Resets user items associated with a specific grammar ID.
-   * @param userId - The ID of the logged-in user.
-   * @param grammarId - The grammar ID whose items should be cleared.
-   * @returns void
-   * @throws error if operation fails.
+   * Resets grammar items for a specific user.
+   *
+   * @param userId - The unique identifier of the user
+   * @param grammarId - The unique identifier of the grammar whose items should be reset
+   * @returns A promise that resolves to the number of items that were reset
+   * @throws Throws an error if no user items are found for the given grammar ID.
    */
   static async resetGrammarItems(userId: string, grammarId: number): Promise<number> {
-    console.log(`Resetting user items for userId: ${userId}, grammarId: ${grammarId}`);
     const count = await db.user_items
       .where('[user_id+grammar_id+started_at]')
       .between(
@@ -222,16 +228,18 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       throw new Error(`No user items found for grammar ID ${grammarId}.`);
     }
 
+    infoHandler(`Resetted ${count} user items for userId: ${userId}, grammarId: ${grammarId}`);
     triggerUserItemsUpdatedEvent(userId);
     return count;
   }
 
   /**
-   * Resets a specific user item by its ID.
-   * @param userId - The ID of the logged-in user.
-   * @param itemId  - The ID of the item to reset.
-   * @returns boolean indicating success.
-   * @throws error if operation fails.
+   * Resets a user item to its default state by user and item ID.
+   *
+   * @param userId - The unique identifier of the user
+   * @param itemId - The unique identifier of the item to reset
+   * @returns A promise that resolves to true if the item was successfully reset
+   * @throws Throws an error if no user item is found for the specified item ID
    */
   static async resetUserItemById(userId: string, itemId: number): Promise<boolean> {
     const count = await db.user_items
@@ -246,18 +254,19 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       throw new Error(`No user items found for item ID ${itemId}.`);
     }
 
+    infoHandler(`Resetted user item with itemId: ${itemId} for userId: ${userId}`);
     triggerUserItemsUpdatedEvent(userId);
     return true;
   }
 
   /**
-   * Deletes all user items for the logged-in user.
-   * @param userId - The ID of the logged-in user.
-   * @returns number of deleted items.
-   * @throws error if operation fails.
+   * Deletes all user items associated with a specific user.
+   *
+   * @param userId - The unique identifier of the user
+   * @returns A promise that resolves to the number of items deleted
+   * @throws Error if any database operation fails
    */
   static async deleteAllUserItems(userId: string): Promise<number> {
-    // Get all item IDs for the user
     const itemIds = await db.user_items.where('user_id').equals(userId).primaryKeys();
 
     if (itemIds.length > 0) {
@@ -265,55 +274,85 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       triggerUserItemsUpdatedEvent(userId);
     }
 
-    console.log(`Deleted ${itemIds.length} user items for userId: ${userId}`);
+    infoHandler(`Deleted ${itemIds.length} user items for userId: ${userId}`);
     return itemIds.length;
   }
 
-  /**
-   * Synchronizes user items data between local IndexedDB and Supabase.
-   * @param userId - The ID of the logged-in user.
-   * @returns boolean indicating success.
-   * @throws error if operation fails.
-   */
-  static async syncUserItemsData(userId: string): Promise<number> {
-    // Step 1: Get the last synced date for the user_items table
+  static async syncUserItemsSinceLastSync(userId: string): Promise<number> {
     const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserItems, userId);
+    const newSyncedAt = new Date().toISOString();
+    const modifiedItems = await UserItem.syncUserItemsData(userId, lastSyncedAt, newSyncedAt);
+    return modifiedItems.length;
+  }
 
-    // Step 2: Fetch synced server time
-    const newSyncTime = new Date().toISOString();
+  static async syncUserItemsAll(userId: string): Promise<number> {
+    const lastSyncedAt = config.database.epochStartDate;
+    const newSyncedAt = new Date().toISOString();
+    const modifiedItems = await UserItem.syncUserItemsData(userId, lastSyncedAt, newSyncedAt);
 
-    // Step 3: Fetch all local user items from IndexedDB newer than last synced date
+    // Step 4 - Clean orphaned data
+    const fetchedKeys = new Set(modifiedItems.map((item) => `${userId}|${item.item_id}`));
+    const localKeys = await db.user_items.where('user_id').equals(userId).primaryKeys();
+
+    const orphanedKeys = localKeys.filter(([uid, itemId]) => !fetchedKeys.has(`${uid}|${itemId}`));
+    if (orphanedKeys.length > 0) {
+      await db.user_items.bulkDelete(orphanedKeys);
+    }
+
+    return modifiedItems.length;
+  }
+
+  /**
+   * Synchronizes user items data between local database and Supabase.
+   *
+   * @param userId - The unique identifier of the user
+   * @param lastSyncedAt - The timestamp of the last successful sync (defaults to epoch start date)
+   * @param newSyncedAt - The timestamp to mark as the new sync point after completion
+   * @returns A promise resolving to an array of modified UserItemLocal objects
+   * @throws {SupabaseError} If the RPC insert operation fails
+   * @throws {SupabaseError} If the RPC fetch operation fails
+   */
+  private static async syncUserItemsData(
+    userId: string,
+    lastSyncedAt: string = config.database.epochStartDate,
+    newSyncedAt: string,
+  ): Promise<UserItemLocal[]> {
+    // Step 1 - Push all local changes to Supabase
     const localUserItems: UserItemLocal[] = await db.user_items
       .where('[user_id+updated_at]')
-      .between([userId, lastSyncedAt], [userId, Dexie.maxKey])
+      .between([userId, lastSyncedAt], [userId, newSyncedAt], true, false)
       .toArray();
 
     const sqlUserItems = localUserItems.map(convertLocalToSQL);
-
-    // Step 4: Call the RPC function to insert updated user items
     const { error: rpcInsertError } = await supabaseInstance.rpc('insert_user_items', {
       user_id_input: userId,
       items: sqlUserItems,
     });
 
     if (rpcInsertError) {
-      throw new Error('Synchronization disallowed for annonymous users.');
+      throw new SupabaseError('Error inserting user_items to Supabase.', rpcInsertError, {
+        userId,
+      });
     }
 
-    // Step 5: Call the RPC function to fetch updated user item IDs
+    // Step 2 - Pull server changes from Supabase
     const { data: updatedUserItems, error: rpcFetchError } = await supabaseInstance.rpc(
       'fetch_user_items',
       {
         user_id_input: userId,
         last_synced_at: lastSyncedAt,
+        new_synced_at: newSyncedAt,
       },
     );
 
     if (rpcFetchError) {
-      throw new Error('Error fetching user_items with Supabase:', rpcFetchError);
+      throw new SupabaseError('Error fetching user_items with Supabase.', rpcFetchError, {
+        userId,
+        lastSyncedAt,
+        newSyncedAt,
+      });
     }
 
-    // Step 5: Separate items into those to delete and those to upsert
     const toDelete: number[] = [];
     const toUpsert: UserItemLocal[] = [];
     updatedUserItems.forEach((item: UserItemLocal) => {
@@ -324,18 +363,16 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       }
     });
 
-    // Step 6: Perform deletions and upserts
-    if (toDelete.length > 0) {
-      await db.user_items.bulkDelete(toDelete);
-    }
+    await db.transaction('rw', db.user_items, async () => {
+      if (toDelete.length > 0) {
+        await db.user_items.bulkDelete(toDelete);
+      }
+      if (toUpsert.length > 0) {
+        await db.user_items.bulkPut(toUpsert);
+      }
+      await Metadata.markAsSynced(TableName.UserItems, newSyncedAt, userId);
+    });
 
-    if (toUpsert.length > 0) {
-      await db.user_items.bulkPut(toUpsert);
-    }
-
-    // Step 7: Trigger event and update metadata
-    await Metadata.markAsSynced(TableName.UserItems, newSyncTime, userId);
-
-    return updatedUserItems.length;
+    return updatedUserItems;
   }
 }
