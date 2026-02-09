@@ -1,4 +1,4 @@
-import { type ToastType } from './use-toast-store';
+import { useToastStore, type ToastType } from './use-toast-store';
 import type { JSX } from 'react';
 
 const typeStyles: Record<ToastType, string> = {
@@ -21,8 +21,17 @@ export default function Toast({
   message: string;
   type?: ToastType;
 }): JSX.Element {
+  const hideToast = useToastStore((state) => state.hideToast);
+
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    hideToast();
+  };
   return (
-    <div className={`z-modal text-dark absolute top-0 right-0 px-4 py-2 ${typeStyles[type]}`}>
+    <div
+      className={`z-modal text-dark absolute top-0 right-0 px-4 py-2 ${typeStyles[type]}`}
+      onClick={handleClick}
+    >
       {message}
     </div>
   );
