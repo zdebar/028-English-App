@@ -2,11 +2,11 @@ export class DatabaseError extends Error {
   args: Record<string, unknown>;
   constructor(
     message: string,
-    original: Error,
+    original?: Error,
     args: Record<string, unknown> = {},
     options?: ErrorOptions,
   ) {
-    super(`${message}: ${original.message}`, { cause: original, ...options });
+    super(original ? `${message}: ${original.message}` : message, { cause: original, ...options });
     this.name = 'DatabaseError';
     this.args = args;
   }

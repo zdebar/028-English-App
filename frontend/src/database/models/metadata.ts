@@ -3,7 +3,6 @@ import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import type { TableName } from '@/types/local.types';
 import { generateMetadataId } from '../database.utils';
-import { DatabaseError } from '@/types/error.types';
 
 /**
  * Represents metadata information for table synchronization in the application database.
@@ -32,12 +31,7 @@ export default class Metadata extends Entity<AppDB> {
    */
   static async getSyncedAt(tableName: TableName, userId?: string | null): Promise<string> {
     const id = generateMetadataId(tableName, userId ?? null);
-    const metadata = await db.metadata.get(id).catch((error) => {
-      throw new DatabaseError(`Failed to fetch metadata`, error, {
-        tableName,
-        userId,
-      });
-    });
+    const metadata = await db.metadata.get(id);
     return metadata?.synced_at ?? '1970-01-01T00:00:00.000Z'; // Default to epoch start if not found
   }
 
@@ -57,20 +51,12 @@ export default class Metadata extends Entity<AppDB> {
     userId?: string | null,
   ): Promise<boolean> {
     const id = generateMetadataId(tableName, userId ?? null);
-    const putResult = await db.metadata
-      .put({
-        id,
-        table_name: tableName,
-        user_id: userId ?? null,
-        synced_at: syncTime,
-      })
-      .catch((error) => {
-        throw new DatabaseError(`Failed to mark metadata as synced`, error, {
-          tableName,
-          syncTime,
-          userId,
-        });
-      });
+    const putResult = await db.metadata.put({
+      id,
+      table_name: tableName,
+      user_id: userId ?? null,
+      synced_at: syncTime,
+    });
     return !!putResult;
   }
 
@@ -85,12 +71,7 @@ export default class Metadata extends Entity<AppDB> {
    */
   static async deleteSyncRow(tableName: TableName, userId?: string | null): Promise<boolean> {
     const id = generateMetadataId(tableName, userId ?? null);
-    await db.metadata.delete(id).catch((error) => {
-      throw new DatabaseError(`Failed to delete metadata row`, error, {
-        tableName,
-        userId,
-      });
-    });
+    await db.metadata.delete(id);
     return true;
   }
 }

@@ -20,6 +20,6 @@ export async function dataSync(userId: string): Promise<void> {
     // await Grammar.syncGrammarData();
     // await UserScore.syncUserScoreData(userId);
   });
-  await AudioRecord.syncAudioData();
+  // await AudioRecord.syncAudioData();
   triggerUserItemsUpdatedEvent(userId);
 }

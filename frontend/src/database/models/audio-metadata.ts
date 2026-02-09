@@ -2,7 +2,6 @@ import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import type { AudioMetadataLocal } from '@/types/local.types';
 import { Entity } from 'dexie';
-import { DatabaseError } from '@/types/error.types';
 
 /**
  * Represents metadata information for audio archives in the application database.
@@ -23,9 +22,7 @@ export default class AudioMetadata extends Entity<AppDB> implements AudioMetadat
    * @returns true if the archive has been already fetched, otherwise false
    */
   static async isFetched(archiveName: string): Promise<boolean> {
-    const metadata = await db.audio_metadata.get(archiveName).catch((error) => {
-      throw new DatabaseError('Audio archive name fetching failed', error, { archiveName });
-    });
+    const metadata = await db.audio_metadata.get(archiveName);
     return !!metadata;
   }
 
@@ -38,16 +35,10 @@ export default class AudioMetadata extends Entity<AppDB> implements AudioMetadat
    * @returns true if the archive has been successfully marked as fetched, otherwise throws an error
    */
   static async markAsFetched(archiveName: string): Promise<boolean> {
-    await db.audio_metadata
-      .put({
-        archive_name: archiveName,
-        fetched_at: new Date().toISOString(),
-      })
-      .catch((error) => {
-        throw new DatabaseError(`Audio archive name marking as fetched failed`, error, {
-          archiveName,
-        });
-      });
+    await db.audio_metadata.put({
+      archive_name: archiveName,
+      fetched_at: new Date().toISOString(),
+    });
     return true;
   }
 }
