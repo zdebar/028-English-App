@@ -69,7 +69,9 @@ Stores audio files zips. Separated into multiple batches. First one smaller to e
 
 The app uses IndexedDb for locally storing data. It enables offline function as long as refresh toke lasts, and it limits server traffic.
 
-Null for certains columns are replaced with nullReplacementDate or nullReplacementNumber. IndexedDB doesn't enables
+Null for certains columns are replaced with nullReplacementDate or nullReplacementNumber. IndexedDB doesn't enables indexing for nulls.
+To minimize data synchronization update methods utilize lastSyncedAt Date (inclusive), for sync precision app methods utilize newSyncedAt Date (exclusive).
+Combined keys: many uses as primary keys combined keys (usually "userId + itemId" etc.) because IndexedDB cannot naturally do combined primary key from multiple columns.
 
 - **audio_metada**
   - stores synced_at date for audio_records

@@ -2,6 +2,7 @@ const config = {
   database: {
     dbName: 'EnglishAppDatabase', // Name of the IndexedDB database
     nullReplacementDate: '9999-12-31T23:59:59+00:00', // IndexedDB does not support null values in indexes
+    epochStartDate: '1970-01-01T00:00:00+00:00', // Start date for epoch time calculations
     nullReplacementNumber: 0, // IndexedDB does not support null values in indexes
   },
 

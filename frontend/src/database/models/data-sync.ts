@@ -4,6 +4,7 @@ import UserScore from '@/database/models/user-scores';
 import UserItem from '@/database/models/user-items';
 import AudioRecord from '@/database/models/audio-records';
 import { triggerUserItemsUpdatedEvent } from '@/database/database.utils';
+import { infoHandler } from '@/features/logging/info-handler';
 
 /**
  * Synchronizes user-related data with the local database.
@@ -15,11 +16,11 @@ import { triggerUserItemsUpdatedEvent } from '@/database/database.utils';
  * @throws Error if any part of the synchronization process fails.
  */
 export async function dataSync(userId: string): Promise<void> {
-  await db.transaction('rw', db.user_items, db.grammar, db.user_scores, db.metadata, async () => {
-    // await UserItem.syncUserItemsData(userId);
-    // await Grammar.syncGrammarData();
-    // await UserScore.syncUserScoreData(userId);
-  });
+  // await UserItem.syncUserItemsData(userId);
+  // const grammarSyncCount = await Grammar.syncGrammarDataAll();
+  // infoHandler(`Synchronized ${grammarSyncCount} Grammar records.`);
+  const userScoreSyncCount = await UserScore.syncUserScoreAll(userId);
+  infoHandler(`Synchronized ${userScoreSyncCount} UserScore records.`);
   // await AudioRecord.syncAudioData();
   triggerUserItemsUpdatedEvent(userId);
 }

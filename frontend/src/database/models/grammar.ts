@@ -7,6 +7,7 @@ import config from '@/config/config';
 import Dexie from 'dexie';
 import Metadata from './metadata';
 import { TableName } from '@/types/local.types';
+import { DatabaseError, SupabaseError } from '@/types/error.types';
 
 /**
  * Represents a grammar entity in the application database.
@@ -27,16 +28,15 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   /**
    * Returns a grammar record by its ID.
    *
-   * @static
    * @param grammarId fetch grammar by ID
    * @returns A promise that resolves to the grammar record.
-   * @throws Error if grammar is not found.
+   * @throws DatabaseError if grammar is not found. Error on database failure.
    */
   static async getGrammarById(grammarId: number): Promise<GrammarLocal> {
     const grammar = await db.grammar.get(grammarId);
 
     if (!grammar) {
-      throw new Error(`Grammar with ID ${grammarId} not found.`);
+      throw new DatabaseError(`Grammar with ID ${grammarId} not found.`, undefined, { grammarId });
     }
 
     return grammar;
@@ -45,7 +45,6 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   /**
    * Fetches the list of grammar that the user has started.
    *
-   * @static
    * @param userId - The user ID.
    * @returns Array of started GrammarLocal records, empty array in case of none found.
    * @throws Error if operation fails.
@@ -65,7 +64,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
     // extract unique grammar IDs from the started user items
     const grammarIds = [...new Set(startedUserItems.map((item) => item.grammar_id))];
 
-    // return empty array if no grammar IDs found
+    // return empty array if no grammar IDs found. Could be in case of only vocabulary started but no grammar started.
     if (grammarIds.length === 0) {
       return [];
     }
@@ -76,15 +75,46 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   }
 
   /**
+   * Synchronizes grammar data updated since the last sync operation from backend.
+   *
+   * @returns A promise that resolves to the number of grammar records synchronized.
+   */
+  static async syncGrammarDataSinceLastSync(): Promise<number> {
+    const lastSyncedAt = await Metadata.getSyncedAt(TableName.Grammar);
+    const newSyncedAt = new Date().toISOString();
+
+    const grammar = await this.fetchGrammar(lastSyncedAt, newSyncedAt);
+    await this.applyGrammarSync(grammar, newSyncedAt);
+
+    return grammar?.length ?? 0;
+  }
+
+  /**
+   * Synchronizes all grammar data from backend.
+   *
+   * @returns A promise that resolves to the number of grammar records synchronized.
+   */
+  static async syncGrammarDataAll(): Promise<number> {
+    const lastSyncedAt = config.database.epochStartDate;
+    const newSyncedAt = new Date().toISOString();
+
+    const grammar = await this.fetchGrammar(lastSyncedAt, newSyncedAt);
+    await db.grammar.clear();
+    await this.applyGrammarSync(grammar, newSyncedAt);
+
+    return grammar?.length ?? 0;
+  }
+
+  /**
    * Fetches grammar records from Supabase that were updated within a specified time range.
    *
    * @param lastSyncedAt - The start of the time range (inclusive). Defaults to the null replacement date from config.
    * @param newSyncedAt - The end of the time range (exclusive).
    * @returns A promise that resolves to an array of grammar records. Returns an empty array if no records are found.
-   * @throws Error if the Supabase query fails.
+   * @throws SupabaseError if the Supabase query fails.
    */
   private static async fetchGrammar(
-    lastSyncedAt: string = config.database.nullReplacementDate,
+    lastSyncedAt: string = config.database.epochStartDate,
     newSyncedAt: string,
   ): Promise<GrammarLocal[]> {
     const { data: grammar, error } = await supabaseInstance
@@ -94,7 +124,10 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
       .lt('updated_at', newSyncedAt);
 
     if (error) {
-      throw new Error(`Failed to fetch grammar data from supabase: ${error.message}`);
+      throw new SupabaseError(`Failed to fetch grammar data from supabase`, error, {
+        lastSyncedAt,
+        newSyncedAt,
+      });
     }
 
     return grammar ?? [];
@@ -108,74 +141,30 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * - Items with `deleted_at !== null` are marked for deletion
    *
    * @param grammar - Array of grammar items to synchronize
+   * @param newSyncedAt - The timestamp to mark the synchronization time in metadata
    * @returns A promise that resolves when the synchronization is complete
    * @private
    */
-  private static async applyGrammarSync(grammar: GrammarLocal[]) {
-    const toDelete: number[] = [];
-    const toUpsert: GrammarLocal[] = [];
-    grammar.forEach((item) => {
-      if (item.deleted_at === null) {
-        toUpsert.push(item);
-      } else {
-        toDelete.push(item.id);
-      }
-    });
-
-    if (toDelete.length > 0) {
-      await db.grammar.bulkDelete(toDelete);
-    }
-    if (toUpsert.length > 0) {
-      await db.grammar.bulkPut(toUpsert);
-    }
-  }
-
-  /**
-   * Synchronizes grammar data from Supabase with local IndexedDB storage.
-   *
-   * Fetches grammar records that have been modified since the last sync timestamp,
-   * applies the changes to the local database, and updates the sync metadata.
-   *
-   * @param lastSyncedAt - ISO string timestamp of the last synchronization
-   * @returns Promise resolving to the number of grammar records synchronized
-   * @throws Error if synchronization fails at any step
-   */
-  private static async syncGrammarData(lastSyncedAt: string): Promise<number> {
-    // Step 1: Get the Synced dates for the grammar table
-    const newSyncedAt = new Date().toISOString();
-
-    // Step 2: Fetch grammar records from Supabase
-    const grammar = await this.fetchGrammar(lastSyncedAt, newSyncedAt);
-
-    // Step 3: Update local IndexedDB with the fetched grammar data
+  private static async applyGrammarSync(grammar: GrammarLocal[], newSyncedAt: string) {
     await db.transaction('rw', db.grammar, db.metadata, async () => {
       if (grammar && grammar.length > 0) {
-        await this.applyGrammarSync(grammar);
-      } else {
-        await Metadata.markAsSynced(TableName.Grammar, newSyncedAt);
+        const toDelete: number[] = [];
+        const toUpsert: GrammarLocal[] = [];
+        grammar.forEach((item) => {
+          if (item.deleted_at === null) {
+            toUpsert.push(item);
+          } else {
+            toDelete.push(item.id);
+          }
+        });
+        if (toDelete.length > 0) {
+          await db.grammar.bulkDelete(toDelete);
+        }
+        if (toUpsert.length > 0) {
+          await db.grammar.bulkPut(toUpsert);
+        }
       }
+      await Metadata.markAsSynced(TableName.Grammar, newSyncedAt);
     });
-
-    return grammar?.length ?? 0;
-  }
-
-  /**
-   * Synchronizes grammar data since the last sync operation.
-   * Retrieves the last synced timestamp for the Grammar table and then syncs
-   * all grammar data that has been updated since that timestamp.
-   * @returns A promise that resolves to the number of grammar records synchronized.
-   */
-  static async syncGrammarDataSinceLastSync(): Promise<number> {
-    const lastSyncedAt = await Metadata.getSyncedAt(TableName.Grammar);
-    return await this.syncGrammarData(lastSyncedAt);
-  }
-
-  /**
-   * Synchronizes all grammar data from the remote source.
-   * Uses the null replacement date from the application configuration as the synchronization point.
-   * @returns A promise that resolves to the number of grammar records synchronized.
-   */
-  static async syncGrammarDataAll(): Promise<number> {
-    return await this.syncGrammarData(config.database.nullReplacementDate);
   }
 }

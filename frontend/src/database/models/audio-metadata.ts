@@ -16,7 +16,6 @@ export default class AudioMetadata extends Entity<AppDB> implements AudioMetadat
   /**
    * Checks if an audio archive has already been fetched.
    *
-   * @static
    * @param archiveName the name of the checked audio archive
    * @throws DatabaseError, if database operation fails
    * @returns true if the archive has been already fetched, otherwise false
@@ -29,7 +28,6 @@ export default class AudioMetadata extends Entity<AppDB> implements AudioMetadat
   /**
    * Marks an audio archive as fetched by storing its metadata.
    *
-   * @static
    * @param archiveName the name of the fetched audio archive
    * @throws DatabaseError, if database operation fails
    * @returns true if the archive has been successfully marked as fetched, otherwise throws an error

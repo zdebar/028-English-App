@@ -1,7 +1,8 @@
-import { Entity } from 'dexie';
+import config from '@/config/config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import type { TableName } from '@/types/local.types';
+import { Entity } from 'dexie';
 import { generateMetadataId } from '../database.utils';
 
 /**
@@ -27,18 +28,17 @@ export default class Metadata extends Entity<AppDB> {
    * @param userId (Optional) The ID of the user. If not provided, null is used.
    * @throws DatabaseError, if the database operation fails.
    * @returns A promise that resolves to the ISO string of the last synced date.
-   *          Returns '1970-01-01T00:00:00.000Z' if no sync date is found. (epoch start)
+   *          Returns the epoch start date from config if no sync date is found.
    */
   static async getSyncedAt(tableName: TableName, userId?: string | null): Promise<string> {
     const id = generateMetadataId(tableName, userId ?? null);
     const metadata = await db.metadata.get(id);
-    return metadata?.synced_at ?? '1970-01-01T00:00:00.000Z'; // Default to epoch start if not found
+    return metadata?.synced_at ?? config.database.epochStartDate; // Default to epoch start if not found
   }
 
   /**
    * Marks the specified table as synced by updating or inserting a metadata record with the given sync time.
    *
-   * @static
    * @param tableName - The name of the table to mark as synced.
    * @param syncTime - The ISO string representing the time of synchronization.
    * @param userId - (Optional) The user ID associated with the sync operation. If not provided, null is used.
@@ -63,7 +63,6 @@ export default class Metadata extends Entity<AppDB> {
   /**
    * Deletes a metadata row from the database for the specified table and optional user.
    *
-   * @static
    * @param tableName - The name of the table whose metadata row should be deleted.
    * @param userId - (Optional) The user ID associated with the metadata row. If not provided, deletes the row for the table only.
    * @throws DatabaseError, if the database operation fails.
