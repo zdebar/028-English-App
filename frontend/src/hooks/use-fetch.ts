@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { TEXTS } from '@/locales/cs';
-import { errorHandler } from '@/features/error-handler/error-handler';
+import { errorHandler } from '@/features/logging/error-handler';
 
 interface UseFetchResult<T> {
   data: T | null;

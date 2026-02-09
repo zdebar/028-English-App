@@ -1,5 +1,5 @@
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { errorHandler } from '@/features/error-handler/error-handler';
+import { errorHandler } from '@/features/logging/error-handler';
 import ButtonWithModal from '@/features/modal/ButtonWithModal';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';

@@ -4,7 +4,7 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import ButtonWithModal from '../modal/ButtonWithModal';
 import type { JSX } from 'react';
-import { errorHandler } from '@/features/error-handler/error-handler';
+import { errorHandler } from '@/features/logging/error-handler';
 
 /**
  * ResetAllProgressButton component for resetting all user progress.

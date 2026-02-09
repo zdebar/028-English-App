@@ -17,7 +17,7 @@ import OverlayContainer from './features/overlay/OverlayContainer';
 
 import { useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
-import { errorHandler } from './features/error-handler/error-handler';
+import { errorHandler } from './features/logging/error-handler';
 import { useToastStore } from './features/toast/use-toast-store';
 import { TEXTS } from './locales/cs';
 import './styles/index.css';

@@ -7,7 +7,7 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import { type JSX } from 'react';
 import ButtonWithModal from '../modal/ButtonWithModal';
-import { errorHandler } from '../error-handler/error-handler';
+import { errorHandler } from '../logging/error-handler';
 
 /**
  * DeleteUserButton component for deleting the current user's account.
