@@ -17,7 +17,7 @@ export default class Metadata extends Entity<AppDB> {
   id!: string;
   table_name!: TableName;
   synced_at?: string;
-  user_id?: string | null;
+  user_id?: string;
 
   /**
    * Retrieves the last synchronization date for a specific table and user.
@@ -41,7 +41,8 @@ export default class Metadata extends Entity<AppDB> {
    *
    * @param tableName - The name of the table to mark as synced.
    * @param syncTime - The ISO string representing the time of synchronization.
-   * @param userId - (Optional) The user ID associated with the sync operation. If not provided, the null replacement user ID from config is used.
+   * @param userId - (Optional) The user ID associated with the sync operation.
+   *          If not provided, the null replacement user ID from config is used.
    * @returns A promise that resolves to `true` if the operation was successful, otherwise `false`.
    */
   static async markAsSynced(
@@ -61,7 +62,8 @@ export default class Metadata extends Entity<AppDB> {
    * Deletes a metadata row from the database for the specified table and optional user.
    *
    * @param tableName - The name of the table whose metadata row should be deleted.
-   * @param userId - (Optional) The user ID associated with the metadata row. If not provided, the null replacement user ID from config is used.
+   * @param userId - (Optional) The user ID associated with the metadata row.
+   *          If not provided, the null replacement user ID from config is used.
    * @returns A promise that resolves to `true` if the deletion was successful.
    */
   static async deleteSyncRow(tableName: TableName, userId?: string | null): Promise<boolean> {

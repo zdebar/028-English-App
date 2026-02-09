@@ -69,18 +69,31 @@ Stores audio files zips. Separated into multiple batches. First one smaller to e
 
 The app uses IndexedDb for locally storing data. It enables offline function as long as refresh toke lasts, and it limits server traffic.
 
-Null for certains columns are replaced with nullReplacementDate or nullReplacementNumber. IndexedDB doesn't enables indexing for nulls.
-To minimize data synchronization update methods utilize lastSyncedAt Date (inclusive), for sync precision app methods utilize newSyncedAt Date (exclusive).
-Combined keys: many uses as primary keys combined keys (usually "userId + itemId" etc.) because IndexedDB cannot naturally do combined primary key from multiple columns.
+#### Null Replacement Values
 
+- **Primary keys:** IndexedDB does not allow `null` or `undefined` in primary keys (including compound keys).
+- **Sorting:** IndexedDB always sorts `null` values first in ascending order and last in descending order.
+- **Backend sync:** After "get" from backend, `null` values are replaced with `config.nullReplacementValues` where necessary.<br>
+  Before "post" to backend, `config.nullReplacementValues` are replaced with `null` where necessary.
+
+#### IndexedDB Stores
+
+- **metada**
+  - Stores last synchronization dates
+  - **Stores synced_at date for:**
+    - `grammar`
+    - `user_scores`
+    - `user_items`
+  - **Null Replacements:**
+    - `config.NullReplacementUserId` — used because `userId` is part of a compound primary key.
+
+- **grammar**
+  - Stores grammar explanation
 - **audio_metada**
   - stores synced_at date for audio_records
 - **audio_records**
   - store audio files
-- **metada**
-  - stores synced_at date for grammar, user_scores, user_items
-- **grammar**
-  - stores grammar explanation
+
 - **user_scores**
   - stores user's daily practice
 - **user_items**

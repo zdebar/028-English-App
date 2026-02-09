@@ -8,6 +8,7 @@ import Dexie from 'dexie';
 import Metadata from './metadata';
 import { TableName } from '@/types/local.types';
 import { DatabaseError, SupabaseError } from '@/types/error.types';
+import type { GrammarSQL } from '@/types/data.types';
 
 /**
  * Represents a grammar entity in the application database.
@@ -23,7 +24,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   name!: string;
   note!: string;
   updated_at!: string;
-  deleted_at!: string;
+  deleted_at!: string | null;
 
   /**
    * Retrieves a grammar record by its ID from the database.
@@ -114,7 +115,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   private static async fetchGrammar(
     lastSyncedAt: string = config.database.epochStartDate,
     newSyncedAt: string,
-  ): Promise<GrammarLocal[]> {
+  ): Promise<GrammarSQL[]> {
     const { data: grammar, error } = await supabaseInstance
       .from('grammar')
       .select('id, name, note, updated_at, deleted_at')
@@ -143,7 +144,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * @returns A promise that resolves when the synchronization is complete
    * @private
    */
-  private static async applyGrammarSync(grammar: GrammarLocal[], newSyncedAt: string) {
+  private static async applyGrammarSync(grammar: GrammarSQL[], newSyncedAt: string) {
     await db.transaction('rw', db.grammar, db.metadata, async () => {
       if (grammar && grammar.length > 0) {
         const toDelete: number[] = [];
