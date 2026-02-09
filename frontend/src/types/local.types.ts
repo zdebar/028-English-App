@@ -30,7 +30,6 @@ export interface GrammarLocal {
 }
 
 export interface UserScoreLocal {
-  id: string;
   user_id: string;
   date: string;
   item_count: number;

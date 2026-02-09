@@ -10,7 +10,7 @@ import Metadata from '@/database/models/metadata';
 export default class AppDB extends Dexie {
   user_items!: EntityTable<UserItem, 'item_id'>;
   grammar!: EntityTable<Grammar, 'id'>;
-  user_scores!: EntityTable<UserScore, 'id'>;
+  user_scores!: EntityTable<UserScore, any>;
   audio_records!: EntityTable<AudioRecord, 'filename'>;
   audio_metadata!: EntityTable<AudioMetadata, 'archive_name'>;
   metadata!: EntityTable<Metadata, any>;
@@ -23,7 +23,7 @@ export default class AppDB extends Dexie {
       user_items:
         '[user_id+item_id], [user_id+started_at], [user_id+grammar_id+started_at], [user_id+updated_at], [user_id+next_at+mastered_at+sequence]',
       grammar: 'id',
-      user_scores: 'id, [user_id+updated_at]',
+      user_scores: '[user_id+date], [user_id+updated_at]',
       audio_records: 'filename',
       audio_metadata: 'archive_name',
       metadata: '[table_name+user_id]',

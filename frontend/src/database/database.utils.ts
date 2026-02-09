@@ -1,12 +1,7 @@
 import config from '@/config/config';
 import { supabaseInstance } from '@/config/supabase.config';
-import type { UserItemSQL, UserScoreSQL } from '@/types/data.types';
-import type {
-  TableName,
-  UserItemLocal,
-  UserItemPractice,
-  UserScoreLocal,
-} from '@/types/local.types';
+import type { UserItemSQL } from '@/types/data.types';
+import type { TableName, UserItemLocal, UserItemPractice } from '@/types/local.types';
 
 /**
  * Converts a `UserItemLocal` object to a `UserItemSQL` object, replacing specific date fields
@@ -166,17 +161,4 @@ export function sortOddEvenByProgress(items: UserItemPractice[]): UserItemPracti
     // Sort by sequence (ascending)
     return a.sequence - b.sequence;
   });
-}
-
-/**
- * Transforms an array of user scores from the database format by adding generated IDs.
- *
- * @param scores - Array of user scores from the database (UserScoreSQL format)
- * @returns Array of user scores with generated IDs (UserScoreLocal format)
- */
-export function addUserScoreId(scores: UserScoreSQL[]): UserScoreLocal[] {
-  return scores.map((score) => ({
-    ...score,
-    id: generateUserScoreId(score.user_id, score.date),
-  }));
 }

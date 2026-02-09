@@ -1,6 +1,6 @@
 import config from '@/config/config';
 import { supabaseInstance } from '@/config/supabase.config';
-import { addUserScoreId, generateUserScoreId, getTodayShortDate } from '@/database/database.utils';
+import { getTodayShortDate } from '@/database/database.utils';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import { SupabaseError } from '@/types/error.types';
@@ -16,7 +16,6 @@ import Metadata from './metadata';
  * @method syncUserScoreData - Synchronizes user score data between the local IndexedDB and Supabase.
  */
 export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
-  id!: string;
   user_id!: string;
   date!: string;
   item_count!: number;
@@ -32,13 +31,11 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    */
   static async addItemCount(userId: string, addCount: number): Promise<boolean> {
     const today = getTodayShortDate();
-    const key = generateUserScoreId(userId, today);
-    const existingRecord = await db.user_scores.get(key);
+    const existingRecord = await db.user_scores.get([userId, today]);
     const newItemCount = (existingRecord?.item_count ?? 0) + addCount;
 
     const newRecord: UserScoreLocal = {
-      id: existingRecord?.id || key,
-      user_id: existingRecord?.user_id || userId,
+      user_id: userId,
       date: today,
       item_count: newItemCount,
       updated_at: new Date().toISOString(),
@@ -57,11 +54,9 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    */
   static async getUserScoreForToday(userId: string): Promise<UserScoreLocal> {
     const today = getTodayShortDate();
-    const key = generateUserScoreId(userId, today);
 
     return (
-      (await db.user_scores.get(key)) ?? {
-        id: key,
+      (await db.user_scores.get([userId, today])) ?? {
         user_id: userId,
         date: today,
         item_count: 0,
@@ -81,21 +76,20 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserScores, userId);
     const newSyncedAt = new Date().toISOString();
 
-    const localScores = await UserScore.getUserScore(userId, lastSyncedAt, newSyncedAt);
+    const localScores = await UserScore.getUpdatedUserScores(userId, lastSyncedAt, newSyncedAt);
     await UserScore.upsertUserScores(localScores);
 
     const updatedScores = await UserScore.fetchUserScores(userId, lastSyncedAt, newSyncedAt);
     if (!updatedScores || updatedScores.length === 0) {
       return 0;
     }
-    const scoresWithId = addUserScoreId(updatedScores);
 
     await db.transaction('rw', db.user_scores, db.metadata, async () => {
-      await db.user_scores.bulkPut(scoresWithId);
+      await db.user_scores.bulkPut(updatedScores);
       await Metadata.markAsSynced(TableName.UserScores, newSyncedAt, userId);
     });
 
-    return updatedScores.length;
+    return updatedScores?.length ?? 0;
   }
 
   /**
@@ -111,30 +105,29 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     const newSyncedAt = new Date().toISOString();
 
     // Step 2 - Push local changes to Supabase
-    const localScores = await UserScore.getUserScore(userId, lastSyncedAt, newSyncedAt);
+    const localScores = await UserScore.getUpdatedUserScores(userId, lastSyncedAt, newSyncedAt);
     await UserScore.upsertUserScores(localScores);
 
-    // Step 3 - Pull server changes from Supabase and update local IndexedDB
+    // Step 3 - Pull server changes from Supabase
     const updatedScores = await UserScore.fetchUserScores(userId, lastSyncedAt, newSyncedAt);
-    if (!updatedScores || updatedScores.length === 0) {
-      return 0;
-    }
-    const scoresWithId = addUserScoreId(updatedScores);
 
     await db.transaction('rw', db.user_scores, db.metadata, async () => {
-      await db.user_scores.bulkPut(scoresWithId);
+      if (updatedScores && updatedScores.length > 0) {
+        await db.user_scores.bulkPut(updatedScores);
+      }
       await Metadata.markAsSynced(TableName.UserScores, newSyncedAt, userId);
+
+      // Clean orphaned data
+      const fetchedDates = new Set(updatedScores.map((score) => score.date));
+      const localKeys = await db.user_scores.where('user_id').equals(userId).primaryKeys();
+      const orphanedKeys = localKeys.filter(([_, date]) => !fetchedDates.has(date));
+
+      if (orphanedKeys.length > 0) {
+        await db.user_scores.bulkDelete(orphanedKeys);
+      }
     });
 
-    // Step 4 - Clean orphaned data
-    const fetchedIds = new Set(scoresWithId.map((score) => score.id));
-    const localIds = await db.user_scores.where('user_id').equals(userId).primaryKeys();
-    const orphanedIds = localIds.filter((id) => !fetchedIds.has(id));
-    if (orphanedIds.length > 0) {
-      await db.user_scores.bulkDelete(orphanedIds);
-    }
-
-    return updatedScores.length;
+    return updatedScores?.length ?? 0;
   }
 
   /**
@@ -147,7 +140,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @throws Error if database query fails
    * @private
    */
-  private static async getUserScore(
+  private static async getUpdatedUserScores(
     userId: string,
     lastSyncedAt: string,
     newSyncedAt: string,

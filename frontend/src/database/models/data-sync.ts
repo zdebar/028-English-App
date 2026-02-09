@@ -21,8 +21,10 @@ export async function dataSync(userId: string): Promise<void> {
   // const grammarSyncCountAll = await Grammar.syncGrammarDataAll();
   // infoHandler(`Synchronized ${grammarSyncCountAll} Grammar records.`);
 
-  // const userScoreSyncCount = await UserScore.syncUserScoreAll(userId);
-  // infoHandler(`Synchronized ${userScoreSyncCount} UserScore records.`);
+  // const userScoreCountSyncAll = await UserScore.syncUserScoreAll(userId);
+  // infoHandler(`Synchronized ${userScoreCountSyncAll} UserScore records.`);
+  // const userScoreCountSyncPartial = await UserScore.syncUserScoreSinceLastSync(userId);
+  // infoHandler(`Synchronized ${userScoreCountSyncPartial} UserScore records.`);
 
   // const userItemSyncCount = await UserItem.syncUserItemsAll(userId);
   // infoHandler(`Synchronized ${userItemSyncCount} UserItem records.`);

@@ -76,6 +76,11 @@ The app uses IndexedDb for locally storing data. It enables offline function as 
 - **Backend sync:** After "get" from backend, `null` values are replaced with `config.nullReplacementValues` where necessary.<br>
   Before "post" to backend, `config.nullReplacementValues` are replaced with `null` where necessary.
 
+### Synchronization SinceLastSync vs All
+
+- **All** First synchronizes changes to backend, then fetches all data from backend and replaces entire IndexedDB store. To ensure IndexedDB correctness.
+- **SinceLastSync** First synchronizes changes to backend, then fetches only changed data. To ensure minimal traffic.
+
 #### IndexedDB Stores
 
 - **metada**
@@ -86,16 +91,15 @@ The app uses IndexedDb for locally storing data. It enables offline function as 
     - `user_items`
   - **Null Replacements:**
     - `config.NullReplacementUserId` — used because `userId` is part of a compound primary key.
-
 - **grammar**
   - Stores grammar explanation
+- **user_scores**
+  - Stores user's daily practice
 - **audio_metada**
   - stores synced_at date for audio_records
 - **audio_records**
   - store audio files
 
-- **user_scores**
-  - stores user's daily practice
 - **user_items**
   - stores all relevant information for practicing items. Basically merges backends "items" and "user_items" tables.
 
