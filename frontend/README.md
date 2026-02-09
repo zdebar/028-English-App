@@ -96,7 +96,7 @@ The app uses IndexedDb for locally storing data. It enables offline function as 
 - **user_scores**
   - Stores user's daily practice
 - **audio_metada**
-  - stores synced_at date for audio_records
+  - Stores fatched_at date for archive_name of audio files
 - **audio_records**
   - store audio files
 

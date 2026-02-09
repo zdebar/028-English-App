@@ -17,7 +17,6 @@ export default class AudioMetadata extends Entity<AppDB> implements AudioMetadat
    * Checks if an audio archive has already been fetched.
    *
    * @param archiveName the name of the checked audio archive
-   * @throws DatabaseError, if database operation fails
    * @returns true if the archive has been already fetched, otherwise false
    */
   static async isFetched(archiveName: string): Promise<boolean> {
@@ -29,8 +28,7 @@ export default class AudioMetadata extends Entity<AppDB> implements AudioMetadat
    * Marks an audio archive as fetched by storing its metadata.
    *
    * @param archiveName the name of the fetched audio archive
-   * @throws DatabaseError, if database operation fails
-   * @returns true if the archive has been successfully marked as fetched, otherwise throws an error
+   * @returns true if the archive has been successfully marked as fetched
    */
   static async markAsFetched(archiveName: string): Promise<boolean> {
     await db.audio_metadata.put({
