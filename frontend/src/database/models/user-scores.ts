@@ -7,6 +7,7 @@ import { SupabaseError } from '@/types/error.types';
 import { TableName, type UserScoreLocal } from '@/types/local.types';
 import { Entity } from 'dexie';
 import Metadata from './metadata';
+import { infoHandler } from '@/features/logging/info-handler';
 
 /**
  * Represents a user score entity in the application database.
@@ -90,6 +91,9 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
       await Metadata.markAsSynced(TableName.UserScores, newSyncedAt, userId);
     });
 
+    infoHandler(
+      `Completed user score sync since last sync with ${updatedScores.length} records for user ${userId}.`,
+    );
     return updatedScores?.length ?? 0;
   }
 
@@ -128,6 +132,9 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
       }
     });
 
+    infoHandler(
+      `Completed full user score sync with ${updatedScores?.length ?? 0} records for user ${userId}.`,
+    );
     return updatedScores?.length ?? 0;
   }
 

@@ -91,7 +91,7 @@ The app uses IndexedDb for locally storing data. It enables offline function as 
     - `user_scores`
     - `user_items`
   - **Null Replacements:**
-    - `config.NullReplacementUserId` — used because `userId` is part of a compound primary key.
+    - `config.nullReplacementUserId` — used because `userId` is part of a compound primary key.
 - **grammar**
   - Stores grammar explanation
 - **user_scores**
@@ -103,7 +103,8 @@ The app uses IndexedDb for locally storing data. It enables offline function as 
 - **user_items**
   - Stores all relevant information for practicing items. Basically merges backends "items" and "user_items" tables.
   - **Null Replacements:**
-    - `config.NullReplacementDate` - used for started_at, next_at, mastered_at; On fetch Dates are converted on backend, on post Dates are converted in frontend
+    - `config.nullReplacementDate` - used for started_at, next_at, mastered_at; On fetch Dates are converted on backend, on post Dates are converted in frontend
+    - `config.nullReplacementNumber` - used for grammar_id
 
 ### Features
 

@@ -1,7 +1,7 @@
 import config from '@/config/config';
 import { supabaseInstance } from '@/config/supabase.config';
 import type { UserItemSQL } from '@/types/data.types';
-import type { TableName, UserItemLocal, UserItemPractice } from '@/types/local.types';
+import type { UserItemLocal, UserItemPractice } from '@/types/local.types';
 
 /**
  * Converts a `UserItemLocal` object to a `UserItemSQL` object, replacing specific date fields
@@ -24,28 +24,6 @@ export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
     next_at: next_at === nullReplacementDate ? null : next_at,
     mastered_at: mastered_at === nullReplacementDate ? null : mastered_at,
   };
-}
-
-/**
- * Generates a unique identifier for a user's score based on the user ID and date.
- *
- * @param userId The unique identifier of the user.
- * @param date The date associated with the score in short ISO format (e.g., '2023-06-01').
- * @returns A string combining the user ID and date, separated by a hyphen.
- */
-export function generateUserScoreId(userId: string, date: string): string {
-  return `${userId}-${date}`;
-}
-
-/**
- * Generates a unique metadata identifier by combining the table name and user ID.
- *
- * @param table_name The name of the table for which the metadata ID is generated.
- * @param userId The unique identifier of the user. Can be null for global metadata.
- * @returns A string representing the combined metadata ID in the format `${table_name}-${userId}`.
- */
-export function generateMetadataId(table_name: TableName, userId: string | null): string {
-  return `${table_name}-${userId}`;
 }
 
 /**

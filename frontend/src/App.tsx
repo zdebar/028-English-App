@@ -2,7 +2,7 @@ import Footer from '@/components/Layout/Footer';
 import Header from '@/components/Layout/Header';
 import ProtectedLayout from '@/components/utils/protected-laout';
 
-import { dataSync } from '@/database/models/data-sync';
+import { dataSync, dataSyncOnUnmount } from '@/database/models/data-sync';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 
 import ToastContainer from '@/features/toast/ToastContainer';
@@ -53,6 +53,11 @@ export default function App() {
       }
     };
     syncData();
+    return () => {
+      if (userId) {
+        dataSyncOnUnmount(userId);
+      }
+    };
   }, [userId]);
 
   return (

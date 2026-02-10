@@ -9,6 +9,7 @@ import Metadata from './metadata';
 import { TableName } from '@/types/local.types';
 import { DatabaseError, SupabaseError } from '@/types/error.types';
 import type { GrammarSQL } from '@/types/data.types';
+import { infoHandler } from '@/features/logging/info-handler';
 
 /**
  * Represents a grammar entity in the application database.
@@ -86,6 +87,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
     const grammar = await this.fetchGrammar(lastSyncedAt, newSyncedAt);
     await this.applyGrammarSync(grammar, newSyncedAt);
 
+    infoHandler(`Completed grammar sync since last sync with ${grammar?.length ?? 0} records.`);
     return grammar?.length ?? 0;
   }
 
@@ -102,6 +104,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
     await db.grammar.clear();
     await this.applyGrammarSync(grammar, newSyncedAt);
 
+    infoHandler(`Completed full grammar sync with ${grammar?.length ?? 0} records.`);
     return grammar?.length ?? 0;
   }
 

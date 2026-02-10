@@ -1,13 +1,13 @@
-import { Entity } from 'dexie';
-import type AppDB from '@/database/models/app-db';
-import type { AudioRecordLocal } from '@/types/local.types';
-import AudioMetadata from '@/database/models/audio-metadata';
-import { db } from '@/database/models/db';
 import config from '@/config/config';
 import { fetchStorage } from '@/database/database.utils';
-import { ZipExtractionError } from '@/types/error.types';
-import { infoHandler } from '@/features/logging/info-handler';
+import type AppDB from '@/database/models/app-db';
+import AudioMetadata from '@/database/models/audio-metadata';
+import { db } from '@/database/models/db';
 import { errorHandler } from '@/features/logging/error-handler';
+import { infoHandler } from '@/features/logging/info-handler';
+import { ZipExtractionError } from '@/types/error.types';
+import type { AudioRecordLocal } from '@/types/local.types';
+import { Entity } from 'dexie';
 
 /**
  * Represents an audio record entity for managing audio files in the application's database.
@@ -93,8 +93,23 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
     );
   }
 
-  // static async auditAudioData(): Promise<void> {
-  //   const existingFilenames = await db.audio_records.toCollection().primaryKeys();
-  //   const expectedFilenames = new Set<string>();
-  // }
+  static async auditAudioData(): Promise<void> {
+    const existingFilenames = await db.audio_records.toCollection().primaryKeys();
+    const allAudio = await db.user_items.toCollection().toArray();
+    const expectedAudio = Array.from(
+      new Set(allAudio.map((item) => item.audio).filter((audio): audio is string => !!audio)),
+    );
+
+    const existingSet = new Set(existingFilenames);
+    const expectedSet = new Set(expectedAudio);
+
+    const orphaned = Array.from(existingSet).filter((x) => !expectedSet.has(x));
+    const missing = Array.from(expectedSet).filter((x) => !existingSet.has(x));
+
+    if (orphaned.length > 0) {
+      await db.audio_records.bulkDelete(orphaned);
+      infoHandler(`Deleted ${orphaned.length} orphaned audio records.`);
+    }
+    console.log('In expected but not existing:', missing);
+  }
 }

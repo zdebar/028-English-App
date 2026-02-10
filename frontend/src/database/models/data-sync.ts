@@ -1,36 +1,51 @@
+import config from '@/config/config';
+import { triggerUserItemsUpdatedEvent } from '@/database/database.utils';
+import AudioRecord from '@/database/models/audio-records';
 import { db } from '@/database/models/db';
 import Grammar from '@/database/models/grammar';
-import UserScore from '@/database/models/user-scores';
 import UserItem from '@/database/models/user-items';
-import AudioRecord from '@/database/models/audio-records';
-import { triggerUserItemsUpdatedEvent } from '@/database/database.utils';
-import { infoHandler } from '@/features/logging/info-handler';
+import UserScore from '@/database/models/user-scores';
+
+const FULL_SYNC_KEY = 'lastFullSyncAt';
 
 /**
- * Synchronizes user-related data with the local database.
+ * Synchronizes data for a specific user with the database.
  *
- * This function opens the database connection and performs synchronization
- * of user items, grammar data, user scores, and audio records.
- *
- * @param userId - The unique identifier of the user whose data should be synchronized.
- * @throws Error if any part of the synchronization process fails.
+ * @param userId - The unique identifier of the user to synchronize data for
+ * @returns A promise that resolves when the data synchronization is complete
  */
 export async function dataSync(userId: string): Promise<void> {
-  // const grammarSyncCountPartial = await Grammar.syncGrammarDataSinceLastSync();
-  // infoHandler(`Synchronized ${grammarSyncCountPartial} Grammar records.`);
-  // const grammarSyncCountAll = await Grammar.syncGrammarDataAll();
-  // infoHandler(`Synchronized ${grammarSyncCountAll} Grammar records.`);
+  const now = Date.now();
+  const lastFullSync = Number(localStorage.getItem(FULL_SYNC_KEY) || 0);
 
-  // const userScoreCountSyncAll = await UserScore.syncUserScoreAll(userId);
-  // infoHandler(`Synchronized ${userScoreCountSyncAll} UserScore records.`);
-  // const userScoreCountSyncPartial = await UserScore.syncUserScoreSinceLastSync(userId);
-  // infoHandler(`Synchronized ${userScoreCountSyncPartial} UserScore records.`);
-
-  // const userItemSyncCountAll = await UserItem.syncUserItemsAll(userId);
-  // infoHandler(`Synchronized ${userItemSyncCountAll} UserItem records.`);
-  const userItemSyncCountSinceLastSync = await UserItem.syncUserItemsSinceLastSync(userId);
-  infoHandler(`Synchronized ${userItemSyncCountSinceLastSync} UserItem records.`);
-
-  // await AudioRecord.syncAudioData();
+  await db.open();
   triggerUserItemsUpdatedEvent(userId);
+
+  if (now - lastFullSync > config.sync.fullSyncInterval) {
+    // Full synchronization
+    await Grammar.syncGrammarAll();
+    await UserScore.syncUserScoreAll(userId);
+    await UserItem.syncUserItemsAll(userId);
+    localStorage.setItem(FULL_SYNC_KEY, String(now));
+  } else {
+    // Incremental synchronization
+    await UserScore.syncUserScoreSinceLastSync(userId);
+    await UserItem.syncUserItemsSinceLastSync(userId);
+    await Grammar.syncGrammarSinceLastSync();
+  }
+
+  await AudioRecord.syncAudioData();
+  await AudioRecord.auditAudioData();
+  triggerUserItemsUpdatedEvent(userId);
+}
+
+/**
+ * Synchronizes user data when a component unmounts.
+ *
+ * @param userId - The unique identifier of the user whose data should be synchronized
+ * @returns A promise that resolves when the synchronization is complete
+ */
+export async function dataSyncOnUnmount(userId: string): Promise<void> {
+  await UserScore.syncUserScoreSinceLastSync(userId);
+  await UserItem.syncUserItemsSinceLastSync(userId);
 }

@@ -1,4 +1,8 @@
 const config = {
+  sync: {
+    fullSyncInterval: 7 * 24 * 60 * 60 * 1000, // Interval for performing a full sync in milliseconds (7 days)
+  },
+
   database: {
     dbName: 'EnglishAppDatabase', // Name of the IndexedDB database
     nullReplacementDate: '9999-12-31T23:59:59+00:00', // IndexedDB does not support null values in indexes
