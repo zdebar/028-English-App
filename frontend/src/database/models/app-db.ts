@@ -8,7 +8,7 @@ import AudioMetadata from '@/database/models/audio-metadata';
 import Metadata from '@/database/models/metadata';
 
 export default class AppDB extends Dexie {
-  user_items!: EntityTable<UserItem, 'item_id'>;
+  user_items!: EntityTable<UserItem, any>;
   grammar!: EntityTable<Grammar, 'id'>;
   user_scores!: EntityTable<UserScore, any>;
   audio_records!: EntityTable<AudioRecord, 'filename'>;

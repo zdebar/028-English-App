@@ -73,6 +73,7 @@ The app uses IndexedDb for locally storing data. It enables offline function as 
 
 - **Primary keys:** IndexedDB does not allow `null` or `undefined` in primary keys (including compound keys).
 - **Sorting:** IndexedDB always sorts `null` values first in ascending order and last in descending order.
+- **Between:** Dexie is incapable using `null` values in between filtering.
 - **Backend sync:** After "get" from backend, `null` values are replaced with `config.nullReplacementValues` where necessary.<br>
   Before "post" to backend, `config.nullReplacementValues` are replaced with `null` where necessary.
 
@@ -98,10 +99,11 @@ The app uses IndexedDb for locally storing data. It enables offline function as 
 - **audio_metada**
   - Stores fatched_at date for archive_name of audio files
 - **audio_records**
-  - store audio files
-
+  - Stores audio files
 - **user_items**
-  - stores all relevant information for practicing items. Basically merges backends "items" and "user_items" tables.
+  - Stores all relevant information for practicing items. Basically merges backends "items" and "user_items" tables.
+  - **Null Replacements:**
+    - `config.NullReplacementDate` - used for started_at, next_at, mastered_at; On fetch Dates are converted on backend, on post Dates are converted in frontend
 
 ### Features
 

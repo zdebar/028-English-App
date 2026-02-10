@@ -32,7 +32,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   progress!: number;
   started_at!: string;
   updated_at!: string;
-  deleted_at!: string | null;
+  deleted_at!: null;
   next_at!: string;
   mastered_at!: string;
 
@@ -56,7 +56,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     let itemsWithNextAt: UserItemLocal[] = await db.user_items
       .where('[user_id+next_at+mastered_at+sequence]')
       .between(
-        [userId, '0000-01-01T00:00:00.000Z', Dexie.minKey, Dexie.minKey],
+        [userId, config.database.epochStartDate, Dexie.minKey, Dexie.minKey],
         [userId, new Date().toISOString(), Dexie.maxKey, Dexie.maxKey],
       )
       .limit(deckSize)
@@ -140,7 +140,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns A promise that resolves to an object containing:
    *   - startedCountToday: The number of items started by the user today
    *   - startedCount: The total number of items started by the user
-   * @throws Error if any database operation fails
    */
   static async getStartedCounts(userId: string): Promise<{
     startedCountToday: number;
@@ -165,7 +164,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    *
    * @param userId - The unique identifier of the user
    * @returns A promise that resolves to an array of user vocabulary items sorted by Czech translation
-   * @throws Error if any database operation fails
    */
   static async getUserStartedVocabulary(userId: string): Promise<UserItemLocal[]> {
     const result = await db.user_items
@@ -246,7 +244,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .where('[user_id+item_id]')
       .equals([userId, itemId])
       .modify((item: UserItemLocal) => {
-        console.log('Resetting item:', item);
         resetUserItem(item);
       });
 
@@ -278,17 +275,29 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return itemIds.length;
   }
 
+  /**
+   * Synchronizes user items since the last sync and returns the count of modified items.
+   *
+   * @param userId - The unique identifier of the user whose items should be synchronized.
+   * @returns A promise that resolves to the number of items that were modified during synchronization.
+   */
   static async syncUserItemsSinceLastSync(userId: string): Promise<number> {
     const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserItems, userId);
     const newSyncedAt = new Date().toISOString();
-    const modifiedItems = await UserItem.syncUserItemsData(userId, lastSyncedAt, newSyncedAt);
+    const modifiedItems = await UserItem.syncUserItems(userId, lastSyncedAt, newSyncedAt);
     return modifiedItems.length;
   }
 
+  /**
+   * Synchronizes all user items for a given user and cleans up orphaned data.
+   *
+   * @param userId - The ID of the user whose items should be synchronized
+   * @returns A promise that resolves to the number of modified items synced
+   */
   static async syncUserItemsAll(userId: string): Promise<number> {
     const lastSyncedAt = config.database.epochStartDate;
     const newSyncedAt = new Date().toISOString();
-    const modifiedItems = await UserItem.syncUserItemsData(userId, lastSyncedAt, newSyncedAt);
+    const modifiedItems = await UserItem.syncUserItems(userId, lastSyncedAt, newSyncedAt);
 
     // Step 4 - Clean orphaned data
     const fetchedKeys = new Set(modifiedItems.map((item) => `${userId}|${item.item_id}`));
@@ -312,7 +321,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @throws {SupabaseError} If the RPC insert operation fails
    * @throws {SupabaseError} If the RPC fetch operation fails
    */
-  private static async syncUserItemsData(
+  private static async syncUserItems(
     userId: string,
     lastSyncedAt: string = config.database.epochStartDate,
     newSyncedAt: string,
@@ -345,6 +354,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       },
     );
 
+    console.log(
+      `Fetched ${updatedUserItems?.length ?? 0} updated user items from Supabase for userId: ${userId}`,
+    );
+
     if (rpcFetchError) {
       throw new SupabaseError('Error fetching user_items with Supabase.', rpcFetchError, {
         userId,
@@ -353,17 +366,17 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       });
     }
 
-    const toDelete: number[] = [];
+    const toDelete: [string, number][] = [];
     const toUpsert: UserItemLocal[] = [];
     updatedUserItems.forEach((item: UserItemLocal) => {
       if (item.deleted_at === null) {
         toUpsert.push(item);
       } else {
-        toDelete.push(item.item_id);
+        toDelete.push([userId, item.item_id]);
       }
     });
 
-    await db.transaction('rw', db.user_items, async () => {
+    await db.transaction('rw', db.user_items, db.metadata, async () => {
       if (toDelete.length > 0) {
         await db.user_items.bulkDelete(toDelete);
       }

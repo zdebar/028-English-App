@@ -26,9 +26,11 @@ export async function dataSync(userId: string): Promise<void> {
   // const userScoreCountSyncPartial = await UserScore.syncUserScoreSinceLastSync(userId);
   // infoHandler(`Synchronized ${userScoreCountSyncPartial} UserScore records.`);
 
-  // const userItemSyncCount = await UserItem.syncUserItemsAll(userId);
-  // infoHandler(`Synchronized ${userItemSyncCount} UserItem records.`);
+  // const userItemSyncCountAll = await UserItem.syncUserItemsAll(userId);
+  // infoHandler(`Synchronized ${userItemSyncCountAll} UserItem records.`);
+  const userItemSyncCountSinceLastSync = await UserItem.syncUserItemsSinceLastSync(userId);
+  infoHandler(`Synchronized ${userItemSyncCountSinceLastSync} UserItem records.`);
 
-  await AudioRecord.syncAudioData();
+  // await AudioRecord.syncAudioData();
   triggerUserItemsUpdatedEvent(userId);
 }

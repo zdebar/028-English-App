@@ -47,7 +47,7 @@ export default function DeleteUserButton({ className }: { className?: string }):
       const resultsDelete = await Promise.allSettled([
         UserItem.syncUserItemsData(userId),
         UserScore.syncUserScoreAll(userId),
-        UserItem.deleteAllUserItems(userId),
+        UserItem.resetAllUserItems(userId),
         Metadata.deleteSyncRow('user_items', userId),
         Metadata.deleteSyncRow('user_scores', userId),
       ]);
