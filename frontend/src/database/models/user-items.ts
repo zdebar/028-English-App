@@ -276,68 +276,31 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Synchronizes user items since the last sync and returns the count of modified items.
+   * Synchronizes user items since the last sync operation.
    *
-   * @param userId - The unique identifier of the user whose items should be synchronized.
-   * @returns A promise that resolves to the number of items that were modified during synchronization.
+   * @param userId - The unique identifier of the user whose items should be synchronized
+   * @returns A promise that resolves when the sync operation is complete
    */
-  static async syncUserItemsSinceLastSync(userId: string): Promise<number> {
-    // Step 1 - Push local changes to Supabase
+  static async syncUserItemsSinceLastSync(userId: string): Promise<void> {
     const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserItems, userId);
     const newSyncedAt = new Date().toISOString();
-    const pushedItemsCount = await UserItem.pushUserItemsToSupabase(
-      userId,
-      lastSyncedAt,
-      newSyncedAt,
-    );
-    infoHandler(`Completed ${pushedItemsCount} user items push to Supabase for userId: ${userId}`);
-
-    // Step 2 - Pull server changes from Supabase
-    const pulledItems = await UserItem.pullUserItemsFromSupabase(userId, lastSyncedAt, newSyncedAt);
-    infoHandler(
-      `Completed ${pulledItems.length} user items pull from Supabase for userId: ${userId}`,
-    );
-    return pulledItems.length;
+    await UserItem.pushUserItemsToSupabase(userId, lastSyncedAt, newSyncedAt);
+    await UserItem.pullUserItemsFromSupabase(userId, lastSyncedAt, newSyncedAt);
   }
 
   /**
-   * Synchronizes all user items for a given user and cleans up orphaned data.
+   * Synchronizes all user items for a given user by pushing local changes to Supabase,
+   * clearing the local cache, and pulling the latest items from Supabase.
    *
    * @param userId - The ID of the user whose items should be synchronized
-   * @returns A promise that resolves to the number of modified items synced
+   * @returns A promise that resolves when the synchronization is complete
    */
-  static async syncUserItemsAll(userId: string): Promise<number> {
-    // Step 1 - Push local changes to Supabase
+  static async syncUserItemsAll(userId: string): Promise<void> {
     const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserItems, userId);
     const newSyncedAt = new Date().toISOString();
-    const pushedItemsCount = await UserItem.pushUserItemsToSupabase(
-      userId,
-      lastSyncedAt,
-      newSyncedAt,
-    );
-    infoHandler(`Completed ${pushedItemsCount} user items push to Supabase for userId: ${userId}`);
-
-    // Step 2 - Pull all server items from Supabase
-    const pulledItems = await UserItem.pullUserItemsFromSupabase(
-      userId,
-      config.database.epochStartDate,
-      newSyncedAt,
-    );
-    infoHandler(
-      `Completed ${pulledItems.length} user items pull from Supabase for userId: ${userId}`,
-    );
-
-    // Step 3 - Clean orphaned data
-    const fetchedKeys = new Set(pulledItems.map((item) => `${userId}|${item.item_id}`));
-    const localKeys = await db.user_items.where('user_id').equals(userId).primaryKeys();
-
-    const orphanedKeys = localKeys.filter(([uid, itemId]) => !fetchedKeys.has(`${uid}|${itemId}`));
-    if (orphanedKeys.length > 0) {
-      await db.user_items.bulkDelete(orphanedKeys);
-    }
-    infoHandler(`Deleted ${orphanedKeys.length} orphaned user items for userId: ${userId}`);
-
-    return pulledItems.length;
+    await UserItem.pushUserItemsToSupabase(userId, lastSyncedAt, newSyncedAt);
+    await db.user_items.where('user_id').equals(userId).delete();
+    await UserItem.pullUserItemsFromSupabase(userId, config.database.epochStartDate, newSyncedAt);
   }
 
   /**
@@ -362,19 +325,23 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .between([userId, lastSyncedAt], [userId, newSyncedAt], true, false)
       .toArray();
 
-    if (localUserItems.length === 0) return 0;
-
-    const sqlUserItems = localUserItems.map(convertLocalToSQL);
-    const { error: rpcInsertError } = await supabaseInstance.rpc('insert_user_items', {
-      user_id_input: userId,
-      items: sqlUserItems,
-    });
-
-    if (rpcInsertError) {
-      throw new SupabaseError('Error inserting user_items to Supabase.', rpcInsertError, {
-        userId,
+    if (localUserItems.length !== 0) {
+      const sqlUserItems = localUserItems.map(convertLocalToSQL);
+      const { error: rpcInsertError } = await supabaseInstance.rpc('insert_user_items', {
+        user_id_input: userId,
+        items: sqlUserItems,
       });
+
+      if (rpcInsertError) {
+        throw new SupabaseError('Error inserting user_items to Supabase.', rpcInsertError, {
+          userId,
+        });
+      }
     }
+
+    infoHandler(
+      `Completed ${localUserItems.length} user items push to Supabase for userId: ${userId}`,
+    );
 
     return localUserItems.length;
   }
@@ -393,7 +360,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     userId: string,
     lastSyncedAt: string,
     newSyncedAt: string,
-  ): Promise<UserItemLocal[]> {
+  ): Promise<number> {
     const { data: updatedUserItems, error: rpcFetchError } = await supabaseInstance.rpc(
       'fetch_user_items',
       {
@@ -431,6 +398,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       await Metadata.markAsSynced(TableName.UserItems, newSyncedAt, userId);
     });
 
-    return updatedUserItems;
+    infoHandler(
+      `Completed ${updatedUserItems.length} user items pull from Supabase for userId: ${userId}`,
+    );
+
+    return updatedUserItems.length;
   }
 }

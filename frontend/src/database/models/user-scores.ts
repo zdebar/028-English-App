@@ -68,70 +68,43 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   }
 
   /**
-   * Synchronizes user score data between the local IndexedDB and Supabase.
+   * Synchronizes user score data between the local IndexedDB and Supabase. Pulls only changes since the last sync.
    *
    * @param userId The user ID.
-   * @returns The number of user score records synced.
+   * @returns Promise<void>.
    * @throws Error, if synchronization fails.
    */
-  static async syncUserScoreSinceLastSync(userId: string): Promise<number> {
+  static async syncUserScoreSinceLastSync(userId: string): Promise<void> {
     const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserScores, userId);
     const newSyncedAt = new Date().toISOString();
-
-    // Step 1 - Push local updates to Supabase
-    const localUpdatesCount = await UserScore.pushUserScores(userId, lastSyncedAt, newSyncedAt);
-    infoHandler(
-      `Completed ${localUpdatesCount} user scores push to Supabase for userId: ${userId}`,
-    );
-
-    // Step 2 - Pull updates from Supabase
-    const serverUpdatesCount = await UserScore.pullUserScores(userId, lastSyncedAt, newSyncedAt);
-    infoHandler(
-      `Completed ${serverUpdatesCount} user scores pull from Supabase for userId: ${userId}`,
-    );
-
-    return serverUpdatesCount;
+    await UserScore.pushUserScores(userId, lastSyncedAt, newSyncedAt);
+    await UserScore.pullUserScores(userId, lastSyncedAt, newSyncedAt);
   }
 
   /**
-   * Synchronizes user score data between the local IndexedDB and Supabase.
+   * Synchronizes user score data between the local IndexedDB and Supabase. Pulls all new data from the backend.
    *
    * @param userId The user ID.
-   * @returns The number of user score records synced.
+   * @returns Promise<void>.
    * @throws Error, if synchronization fails.
    */
-  static async syncUserScoreAll(userId: string): Promise<number> {
+  static async syncUserScoreAll(userId: string): Promise<void> {
     const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserScores, userId);
     const newSyncedAt = new Date().toISOString();
-
-    // Step 1 - Push local updates to Supabase
-    const localUpdatesCount = await UserScore.pushUserScores(userId, lastSyncedAt, newSyncedAt);
-    infoHandler(
-      `Completed ${localUpdatesCount} user scores push to Supabase for userId: ${userId}`,
-    );
-
-    // Step 2 - Pull updates from Supabase
-    const serverUpdatesCount = await UserScore.pullUserScores(
-      userId,
-      config.database.epochStartDate,
-      newSyncedAt,
-    );
-    infoHandler(
-      `Completed ${serverUpdatesCount} user scores pull from Supabase for userId: ${userId}`,
-    );
-
-    return serverUpdatesCount;
+    await UserScore.pushUserScores(userId, lastSyncedAt, newSyncedAt);
+    await db.user_scores.where('user_id').equals(userId).delete();
+    await UserScore.pullUserScores(userId, config.database.epochStartDate, newSyncedAt);
   }
 
   /**
-   * Retrieves user score updates that have been updated since the last sync.
+   * Pushes local user scores to the remote database that were updated within a specified time range.
    *
-   * @param userId - The unique identifier of the user
-   * @param lastSyncedAt - The timestamp of the last synchronization (ISO string format)
-   * @param newSyncedAt - The timestamp of the current synchronization (ISO string format)
-   * @returns A promise that resolves to an array of user score records updated after lastSyncedAt
-   * @throws Error if database query fails
-   * @private
+   * @param userId - The unique identifier of the user whose scores should be synced.
+   * @param lastSyncedAt - The timestamp (inclusive) marking the start of the time range for scores to sync.
+   * @param newSyncedAt - The timestamp (exclusive) marking the end of the time range for scores to sync.
+   * @returns A promise that resolves to the number of scores successfully pushed to the remote database.
+   *          Returns 0 if no scores were found in the specified time range.
+   * @throws {SupabaseError} If the remote upsert operation fails, with details about the local scores that failed to sync.
    */
   private static async pushUserScores(
     userId: string,
@@ -143,27 +116,32 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
       .between([userId, lastSyncedAt], [userId, newSyncedAt], true, false)
       .toArray();
 
-    if (localScores.length === 0) return 0;
+    if (localScores.length !== 0) {
+      const { error: errorInsert } = await supabaseInstance.rpc('upsert_user_scores', {
+        scores: localScores,
+      });
 
-    const { error: errorInsert } = await supabaseInstance.rpc('upsert_user_scores', {
-      scores: localScores,
-    });
-
-    if (errorInsert) {
-      throw new SupabaseError(`User score synchronization failed.`, errorInsert, { localScores });
+      if (errorInsert) {
+        throw new SupabaseError(`User score synchronization failed.`, errorInsert, { localScores });
+      }
     }
+
+    infoHandler(
+      `Completed ${localScores.length} user scores push to Supabase for userId: ${userId}`,
+    );
 
     return localScores.length;
   }
 
   /**
-   * Fetches updated user scores from Supabase using the fetch_user_scores RPC.
+   * Fetches updated user scores from Supabase for a specific user since the last sync.
+   * Stores the fetched scores in the local database and updates the sync metadata.
    *
-   * @param userId - The unique identifier of the user
-   * @param lastSyncedAt - The timestamp of the last synchronization (ISO string format). Defaults to epoch start date if not provided.
-   * @param newSyncedAt - The timestamp of the current synchronization (ISO string format)
-   * @returns Promise resolving to an array of updated user scores
-   * @throws SupabaseError if the fetch operation fails
+   * @param userId - The ID of the user whose scores should be fetched
+   * @param lastSyncedAt - The timestamp of the last sync (defaults to epoch start date)
+   * @param newSyncedAt - The timestamp to mark as the new sync time
+   * @returns A promise that resolves to the number of scores fetched and stored
+   * @throws {SupabaseError} If the RPC call to fetch scores fails
    */
   private static async pullUserScores(
     userId: string,
@@ -194,6 +172,11 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
       await Metadata.markAsSynced(TableName.UserScores, newSyncedAt, userId);
     });
 
-    return updatedScores?.length ?? 0;
+    const serverUpdatesCount = updatedScores?.length ?? 0;
+    infoHandler(
+      `Completed ${serverUpdatesCount} user scores pull from Supabase for userId: ${userId}`,
+    );
+
+    return serverUpdatesCount;
   }
 }
