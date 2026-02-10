@@ -29,6 +29,6 @@ export async function dataSync(userId: string): Promise<void> {
   // const userItemSyncCount = await UserItem.syncUserItemsAll(userId);
   // infoHandler(`Synchronized ${userItemSyncCount} UserItem records.`);
 
-  // await AudioRecord.syncAudioData();
+  await AudioRecord.syncAudioData();
   triggerUserItemsUpdatedEvent(userId);
 }

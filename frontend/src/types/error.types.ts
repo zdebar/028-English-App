@@ -25,3 +25,10 @@ export class SupabaseError extends Error {
     this.args = args;
   }
 }
+
+export class ZipExtractionError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ZipExtractionError';
+  }
+}
