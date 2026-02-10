@@ -5,6 +5,7 @@ import config from '@/config/config';
 type LoadingMessageProps = {
   text?: string;
   timeDelay?: number;
+  className?: string;
 };
 
 /**
@@ -12,10 +13,12 @@ type LoadingMessageProps = {
  *
  * @param text Loading message to display.
  * @param timeDelay Delay before showing the loading message (ms).
+ * @param className Optional CSS class for styling the message.
  */
 export default function LoadingMessage({
   text = TEXTS.loadingMessage,
   timeDelay = config.buttons.loadingMessageDelay,
+  className = '',
 }: LoadingMessageProps) {
   const [show, setShow] = useState(false);
 
@@ -26,5 +29,5 @@ export default function LoadingMessage({
 
   if (!show) return null;
 
-  return <p>{text}</p>;
+  return <p className={className}>{text}</p>;
 }

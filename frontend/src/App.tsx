@@ -14,8 +14,9 @@ import Profile from '@/pages/Profile';
 import Vocabulary from '@/pages/Vocabulary';
 import { ROUTES } from './config/routes.config';
 import OverlayContainer from './features/overlay/OverlayContainer';
+import LoadingMessage from './components/UI/LoadingMessage';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { errorHandler } from './features/logging/error-handler';
 import { useToastStore } from './features/toast/use-toast-store';
@@ -23,6 +24,7 @@ import { TEXTS } from './locales/cs';
 import './styles/index.css';
 
 export default function App() {
+  const [loading, setLoading] = useState(true);
   const userId = useAuthStore((state) => state.userId);
   const initializeAuth = useAuthStore((state) => state.initializeAuth);
   const showToast = useToastStore((state) => state.showToast);
@@ -42,6 +44,7 @@ export default function App() {
   // Data synchronization effect on userId change
   useEffect(() => {
     const syncData = async () => {
+      setLoading(true);
       try {
         if (userId) {
           await dataSync(userId);
@@ -50,6 +53,8 @@ export default function App() {
       } catch (error) {
         showToast(TEXTS.syncErrorToast, 'error');
         errorHandler('Data synchronization failed', error);
+      } finally {
+        setLoading(false);
       }
     };
     syncData();
@@ -66,6 +71,9 @@ export default function App() {
       <OverlayContainer />
       <Header />
       <main className="relative flex grow flex-col items-center gap-4">
+        {loading && (
+          <LoadingMessage text={TEXTS.syncLoadingText} className="notification error-warning" />
+        )}
         <Routes>
           <Route path={ROUTES.home} element={<Home />} />
           <Route path={ROUTES.privacyPolicy} element={<PrivacyPolicy />} />

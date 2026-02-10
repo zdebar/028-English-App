@@ -8,6 +8,7 @@ export const TEXTS = {
   // Synchronization
   syncSuccessToast: 'Data byla úspěšně synchronizována.',
   syncErrorToast: 'Chyba při synchronizaci dat.',
+  syncLoadingText: 'Synchronizuji data ...',
 
   // User
   userLabel: 'Uživatel',

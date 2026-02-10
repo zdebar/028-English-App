@@ -21,20 +21,28 @@ export async function dataSync(userId: string): Promise<void> {
   await initDbMappings();
   triggerUserItemsUpdatedEvent(userId);
 
+  let syncPromises: Promise<any>[];
+
   if (now - lastFullSync > config.sync.fullSyncInterval) {
     // Full synchronization
-    await Grammar.syncGrammarAll();
-    await UserScore.syncUserScoreAll(userId);
-    await UserItem.syncUserItemsAll(userId);
+    syncPromises = [
+      Grammar.syncGrammarAll(),
+      UserScore.syncUserScoreAll(userId),
+      UserItem.syncUserItemsAll(userId),
+      AudioRecord.syncAudioData(),
+    ];
     localStorage.setItem(FULL_SYNC_KEY, String(now));
   } else {
     // Incremental synchronization
-    await UserScore.syncUserScoreSinceLastSync(userId);
-    await UserItem.syncUserItemsSinceLastSync(userId);
-    await Grammar.syncGrammarSinceLastSync();
+    syncPromises = [
+      UserScore.syncUserScoreSinceLastSync(userId),
+      UserItem.syncUserItemsSinceLastSync(userId),
+      Grammar.syncGrammarSinceLastSync(),
+      AudioRecord.syncAudioData(),
+    ];
   }
 
-  await AudioRecord.syncAudioData();
+  await Promise.all(syncPromises);
   await AudioRecord.auditAudioData();
   triggerUserItemsUpdatedEvent(userId);
 }
