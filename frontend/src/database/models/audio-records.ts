@@ -110,6 +110,6 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
       await db.audio_records.bulkDelete(orphaned);
       infoHandler(`Deleted ${orphaned.length} orphaned audio records.`);
     }
-    console.log('In expected but not existing:', missing);
+    console.log('User Items expected but not existing:', missing);
   }
 }

@@ -87,7 +87,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
     const grammar = await this.fetchGrammar(lastSyncedAt, newSyncedAt);
     await this.applyGrammarSync(grammar, newSyncedAt);
 
-    infoHandler(`Completed grammar sync since last sync with ${grammar?.length ?? 0} records.`);
+    infoHandler(`Completed ${grammar?.length ?? 0} records grammar sync since last sync.`);
     return grammar?.length ?? 0;
   }
 
@@ -104,7 +104,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
     await db.grammar.clear();
     await this.applyGrammarSync(grammar, newSyncedAt);
 
-    infoHandler(`Completed full grammar sync with ${grammar?.length ?? 0} records.`);
+    infoHandler(`Completed ${grammar?.length ?? 0} recordsfull grammar sync.`);
     return grammar?.length ?? 0;
   }
 

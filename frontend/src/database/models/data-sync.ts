@@ -1,7 +1,7 @@
 import config from '@/config/config';
 import { triggerUserItemsUpdatedEvent } from '@/database/database.utils';
 import AudioRecord from '@/database/models/audio-records';
-import { db } from '@/database/models/db';
+import { initDbMappings } from '@/database/models/db-init';
 import Grammar from '@/database/models/grammar';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
@@ -18,7 +18,7 @@ export async function dataSync(userId: string): Promise<void> {
   const now = Date.now();
   const lastFullSync = Number(localStorage.getItem(FULL_SYNC_KEY) || 0);
 
-  await db.open();
+  await initDbMappings();
   triggerUserItemsUpdatedEvent(userId);
 
   if (now - lastFullSync > config.sync.fullSyncInterval) {
@@ -46,6 +46,7 @@ export async function dataSync(userId: string): Promise<void> {
  * @returns A promise that resolves when the synchronization is complete
  */
 export async function dataSyncOnUnmount(userId: string): Promise<void> {
+  await initDbMappings();
   await UserScore.syncUserScoreSinceLastSync(userId);
   await UserItem.syncUserItemsSinceLastSync(userId);
 }

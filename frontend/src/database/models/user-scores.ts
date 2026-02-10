@@ -78,23 +78,19 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserScores, userId);
     const newSyncedAt = new Date().toISOString();
 
-    const localScores = await UserScore.getUpdatedUserScores(userId, lastSyncedAt, newSyncedAt);
-    await UserScore.upsertUserScores(localScores);
-
-    const updatedScores = await UserScore.fetchUserScores(userId, lastSyncedAt, newSyncedAt);
-    if (!updatedScores || updatedScores.length === 0) {
-      return 0;
-    }
-
-    await db.transaction('rw', db.user_scores, db.metadata, async () => {
-      await db.user_scores.bulkPut(updatedScores);
-      await Metadata.markAsSynced(TableName.UserScores, newSyncedAt, userId);
-    });
-
+    // Step 1 - Push local updates to Supabase
+    const localUpdatesCount = await UserScore.pushUserScores(userId, lastSyncedAt, newSyncedAt);
     infoHandler(
-      `Completed user score sync since last sync with ${updatedScores.length} records for user ${userId}.`,
+      `Completed ${localUpdatesCount} user scores push to Supabase for userId: ${userId}`,
     );
-    return updatedScores?.length ?? 0;
+
+    // Step 2 - Pull updates from Supabase
+    const serverUpdatesCount = await UserScore.pullUserScores(userId, lastSyncedAt, newSyncedAt);
+    infoHandler(
+      `Completed ${serverUpdatesCount} user scores pull from Supabase for userId: ${userId}`,
+    );
+
+    return serverUpdatesCount;
   }
 
   /**
@@ -105,37 +101,26 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @throws Error, if synchronization fails.
    */
   static async syncUserScoreAll(userId: string): Promise<number> {
-    // Step 1 - Determine the last sync time and the new sync time
-    const lastSyncedAt = config.database.epochStartDate;
+    const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserScores, userId);
     const newSyncedAt = new Date().toISOString();
 
-    // Step 2 - Push local changes to Supabase
-    const localScores = await UserScore.getUpdatedUserScores(userId, lastSyncedAt, newSyncedAt);
-    await UserScore.upsertUserScores(localScores);
-
-    // Step 3 - Pull server changes from Supabase
-    const updatedScores = await UserScore.fetchUserScores(userId, lastSyncedAt, newSyncedAt);
-
-    await db.transaction('rw', db.user_scores, db.metadata, async () => {
-      if (updatedScores && updatedScores.length > 0) {
-        await db.user_scores.bulkPut(updatedScores);
-      }
-      await Metadata.markAsSynced(TableName.UserScores, newSyncedAt, userId);
-
-      // Clean orphaned data
-      const fetchedDates = new Set(updatedScores.map((score) => score.date));
-      const localKeys = await db.user_scores.where('user_id').equals(userId).primaryKeys();
-      const orphanedKeys = localKeys.filter(([_, date]) => !fetchedDates.has(date));
-
-      if (orphanedKeys.length > 0) {
-        await db.user_scores.bulkDelete(orphanedKeys);
-      }
-    });
-
+    // Step 1 - Push local updates to Supabase
+    const localUpdatesCount = await UserScore.pushUserScores(userId, lastSyncedAt, newSyncedAt);
     infoHandler(
-      `Completed full user score sync with ${updatedScores?.length ?? 0} records for user ${userId}.`,
+      `Completed ${localUpdatesCount} user scores push to Supabase for userId: ${userId}`,
     );
-    return updatedScores?.length ?? 0;
+
+    // Step 2 - Pull updates from Supabase
+    const serverUpdatesCount = await UserScore.pullUserScores(
+      userId,
+      config.database.epochStartDate,
+      newSyncedAt,
+    );
+    infoHandler(
+      `Completed ${serverUpdatesCount} user scores pull from Supabase for userId: ${userId}`,
+    );
+
+    return serverUpdatesCount;
   }
 
   /**
@@ -148,15 +133,27 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @throws Error if database query fails
    * @private
    */
-  private static async getUpdatedUserScores(
+  private static async pushUserScores(
     userId: string,
     lastSyncedAt: string,
     newSyncedAt: string,
-  ): Promise<UserScoreLocal[]> {
-    return await db.user_scores
+  ): Promise<number> {
+    const localScores = await db.user_scores
       .where('[user_id+updated_at]')
       .between([userId, lastSyncedAt], [userId, newSyncedAt], true, false)
       .toArray();
+
+    if (localScores.length === 0) return 0;
+
+    const { error: errorInsert } = await supabaseInstance.rpc('upsert_user_scores', {
+      scores: localScores,
+    });
+
+    if (errorInsert) {
+      throw new SupabaseError(`User score synchronization failed.`, errorInsert, { localScores });
+    }
+
+    return localScores.length;
   }
 
   /**
@@ -168,11 +165,11 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @returns Promise resolving to an array of updated user scores
    * @throws SupabaseError if the fetch operation fails
    */
-  private static async fetchUserScores(
+  private static async pullUserScores(
     userId: string,
     lastSyncedAt: string = config.database.epochStartDate,
     newSyncedAt: string,
-  ): Promise<UserScoreLocal[]> {
+  ): Promise<number> {
     const { data: updatedScores, error: errorFetch } = await supabaseInstance.rpc(
       'fetch_user_scores',
       {
@@ -190,26 +187,13 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
       });
     }
 
-    return updatedScores ?? [];
-  }
-
-  /**
-   * Sends local user scores to Supabase using the upsert_user_scores RPC.
-   *
-   * @param localScores Array of UserScoreLocal to sync
-   * @returns Promise that resolves to a boolean indicating the success of the upsert operation
-   * @throws SupabaseError if the upsert operation fails
-   * @private
-   */
-  private static async upsertUserScores(localScores: UserScoreLocal[]): Promise<boolean> {
-    const { error: errorInsert } = await supabaseInstance.rpc('upsert_user_scores', {
-      scores: localScores,
+    await db.transaction('rw', db.user_scores, db.metadata, async () => {
+      if (updatedScores && updatedScores.length > 0) {
+        await db.user_scores.bulkPut(updatedScores);
+      }
+      await Metadata.markAsSynced(TableName.UserScores, newSyncedAt, userId);
     });
 
-    if (errorInsert) {
-      throw new SupabaseError(`User score synchronization failed.`, errorInsert, { localScores });
-    }
-
-    return true;
+    return updatedScores?.length ?? 0;
   }
 }

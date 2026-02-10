@@ -1,11 +1,11 @@
 import config from '@/config/config';
 import Dexie, { type EntityTable } from 'dexie';
-import Grammar from '@/database/models/grammar';
-import AudioRecord from '@/database/models/audio-records';
-import UserItem from '@/database/models/user-items';
-import UserScore from '@/database/models/user-scores';
-import AudioMetadata from '@/database/models/audio-metadata';
-import Metadata from '@/database/models/metadata';
+import type Grammar from '@/database/models/grammar';
+import type AudioRecord from '@/database/models/audio-records';
+import type UserItem from '@/database/models/user-items';
+import type UserScore from '@/database/models/user-scores';
+import type AudioMetadata from '@/database/models/audio-metadata';
+import type Metadata from '@/database/models/metadata';
 
 export default class AppDB extends Dexie {
   user_items!: EntityTable<UserItem, any>;
@@ -28,13 +28,5 @@ export default class AppDB extends Dexie {
       audio_metadata: 'archive_name',
       metadata: '[table_name+user_id]',
     });
-
-    // Initialize tables and map them to classes
-    this.user_items.mapToClass(UserItem);
-    this.grammar.mapToClass(Grammar);
-    this.user_scores.mapToClass(UserScore);
-    this.audio_records.mapToClass(AudioRecord);
-    this.audio_metadata.mapToClass(AudioMetadata);
-    this.metadata.mapToClass(Metadata);
   }
 }
