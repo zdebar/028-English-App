@@ -34,8 +34,8 @@ export default function DeleteUserButton({ className }: { className?: string }):
 
       // Sync local data before deletion for potential recovery or analytics purposes
       const resultsSync = await Promise.allSettled([
-        UserItem.syncUserItemsData(userId),
-        UserScore.syncUserScoreAll(userId),
+        UserItem.syncUserItemsSinceLastSync(userId),
+        UserScore.syncUserScoreSinceLastSync(userId),
       ]);
 
       resultsSync.forEach((result) => {
@@ -45,10 +45,9 @@ export default function DeleteUserButton({ className }: { className?: string }):
       });
 
       const resultsDelete = await Promise.allSettled([
-        UserItem.syncUserItemsData(userId),
-        UserScore.syncUserScoreAll(userId),
-        UserItem.resetAllUserItems(userId),
+        UserItem.deleteAllUserItems(userId),
         Metadata.deleteSyncRow('user_items', userId),
+        UserScore.deleteAllUserScores(userId),
         Metadata.deleteSyncRow('user_scores', userId),
       ]);
 

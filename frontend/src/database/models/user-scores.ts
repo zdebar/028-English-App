@@ -97,6 +97,15 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   }
 
   /**
+   * Deletes all user score records for a given user.
+   * @param userId - The ID of the user whose scores should be deleted
+   * @returns A promise that resolves to the number of records deleted
+   */
+  static async deleteAllUserScores(userId: string): Promise<number> {
+    return await db.user_scores.where('user_id').equals(userId).delete();
+  }
+
+  /**
    * Pushes local user scores to the remote database that were updated within a specified time range.
    *
    * @param userId - The unique identifier of the user whose scores should be synced.
