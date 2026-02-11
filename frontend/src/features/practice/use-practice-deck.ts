@@ -14,10 +14,24 @@ import { useAudioManager } from './use-audio-manager';
  * @param userId The unique identifier of the user.
  */
 export function usePracticeDeck(userId: string) {
-  // Core array states
+  // Array fetching logic
   const [array, setArray] = useState<UserItemPractice[]>([]);
   const [index, setIndex] = useState(0);
   const currentItem = array[index] ?? null;
+
+  const fetchPracticeDeck = useCallback(async () => {
+    const data = await UserItem.getPracticeDeck(userId);
+    return data.filter((item) => item !== null && item !== undefined);
+  }, [userId]);
+
+  const { data: fetchedArray, error, reload } = useFetch<UserItemPractice[]>(fetchPracticeDeck);
+
+  useEffect(() => {
+    setArray(fetchedArray || []);
+    setIndex(0);
+    setRevealed(false);
+    resetHint();
+  }, [fetchedArray]);
 
   // Logic states
   const [revealed, setRevealed] = useState(false);
@@ -36,21 +50,6 @@ export function usePracticeDeck(userId: string) {
   const shouldShowFullCzech = direction || revealed;
   const czech = shouldShowFullCzech ? currentItem?.czech : czechHinted;
   const english = revealed || audioDisabled ? currentItem?.english : englishHinted;
-
-  // Array fetching logic
-  const fetchPracticeDeck = useCallback(async () => {
-    const data = await UserItem.getPracticeDeck(userId);
-    return data.filter((item) => item !== null && item !== undefined);
-  }, [userId]);
-
-  const { data: fetchedArray, error, reload } = useFetch<UserItemPractice[]>(fetchPracticeDeck);
-
-  useEffect(() => {
-    setArray(fetchedArray || []);
-    setIndex(0);
-    setRevealed(false);
-    resetHint();
-  }, [fetchedArray]);
 
   // Save progress on unmount
   useEffect(() => {

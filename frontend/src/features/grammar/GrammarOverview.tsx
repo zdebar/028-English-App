@@ -82,7 +82,7 @@ export default function GrammarOverview(): JSX.Element {
             </ButtonRectangular>
           ))
         ) : (
-          <p>{TEXTS.noGrammar}</p>
+          <p className="p-4">{TEXTS.noGrammar}</p>
         )}
       </div>
     );
