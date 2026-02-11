@@ -91,7 +91,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     // Step 4: Mark items as initial practice based on started grammar
     const itemsWithGrammarFlag: UserItemPractice[] = itemsWithNextAt.map((item) => ({
       ...item,
-      is_initial_practice: !startedGrammar.some(
+      show_grammar: !startedGrammar.some(
         (grammar) => grammar.id === item.grammar_id || item.grammar_id === 0,
       ),
     }));

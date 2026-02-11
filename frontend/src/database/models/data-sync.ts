@@ -22,8 +22,9 @@ export async function dataSync(userId: string): Promise<void> {
   triggerUserItemsUpdatedEvent(userId);
 
   let syncPromises: Promise<any>[];
+  const doFullSync = now - lastFullSync > config.sync.fullSyncInterval;
 
-  if (now - lastFullSync > config.sync.fullSyncInterval) {
+  if (doFullSync) {
     // Full synchronization
     syncPromises = [
       Grammar.syncGrammarAll(),
@@ -31,7 +32,6 @@ export async function dataSync(userId: string): Promise<void> {
       UserItem.syncUserItemsAll(userId),
       AudioRecord.syncAudioData(),
     ];
-    localStorage.setItem(FULL_SYNC_KEY, String(now));
   } else {
     // Incremental synchronization
     syncPromises = [
@@ -43,7 +43,12 @@ export async function dataSync(userId: string): Promise<void> {
   }
 
   await Promise.all(syncPromises);
-  await AudioRecord.auditAudioData();
+  await AudioRecord.removeOrphaned();
+
+  if (doFullSync) {
+    localStorage.setItem(FULL_SYNC_KEY, String(now));
+  }
+
   triggerUserItemsUpdatedEvent(userId);
 }
 

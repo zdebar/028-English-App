@@ -12,7 +12,7 @@ import { Entity } from 'dexie';
 /**
  * Represents an audio record entity for managing audio files in the application's database.
  *
- * @method bulkGet - Retrieves multiple audio records by their filenames.
+ * @method get - Retrieves audio record by its filename.
  * @method extractZip - Extracts files from a zip Blob and returns them as a map of filename to Blob.
  * @method syncAudioData - Synchronize audio data by downloading, extracting, and storing audio archives from remote storage.
  */
@@ -23,13 +23,51 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
   /**
    * Gets multiple audio records by their filenames.
    *
-   * @param keys Array of filenames to fetch.
-   * @returns An array of AudioRecordLocal
+   * @param audioName The filename of the audio to fetch.
+   * @returns An AudioRecordLocal or null if not found.
    */
-  static async bulkGet(keys: string[]): Promise<AudioRecordLocal[]> {
-    if (keys.length === 0) return [];
-    const results: (AudioRecordLocal | undefined)[] = await db.audio_records.bulkGet(keys);
-    return results.filter((record): record is AudioRecordLocal => record !== undefined);
+  static async getAudio(audioName: string): Promise<AudioRecordLocal | null> {
+    if (!audioName) return null;
+
+    let existingRecord = await db.audio_records.get(audioName);
+
+    if (existingRecord) {
+      return existingRecord;
+    }
+
+    return await AudioRecord.fetchAudioFile(audioName);
+  }
+
+  /**
+   * Synchronizes audio data from configured archives to the local database.
+   *    *
+   * @returns {Promise<void>} A promise that resolves when all audio archives have been synced.
+   */
+  static async syncAudioData(): Promise<void> {
+    await Promise.all(
+      config.audio.archives.map(async (archiveName) => {
+        if (await AudioMetadata.isFetched(archiveName)) return;
+
+        const zipBlob: Blob | null = await fetchStorage(
+          config.audio.archiveBucketName,
+          archiveName,
+        );
+        if (!zipBlob) {
+          errorHandler(`Failed to fetch audio archive: ${archiveName}`, zipBlob);
+          return;
+        }
+
+        const extractedFiles = await this.extractZip(zipBlob);
+        await db.transaction('rw', db.audio_records, db.audio_metadata, async () => {
+          await db.audio_records.bulkPut(
+            Array.from(extractedFiles, ([filename, audioBlob]) => ({ filename, audioBlob })),
+          );
+          await AudioMetadata.markAsFetched(archiveName);
+        });
+
+        infoHandler(`Successfully synced audio archive: ${archiveName}`);
+      }),
+    );
   }
 
   /**
@@ -65,35 +103,32 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
   }
 
   /**
-   * Synchronizes audio data from configured archives to the local database.
-   *    *
-   * @returns {Promise<void>} A promise that resolves when all audio archives have been synced.
+   * Fetches an audio file from storage and stores it in the local database.
+   * @param audioFile - The name/path of the audio file to fetch
+   * @returns A promise that resolves to an object containing the filename and audio blob,
+   *          or null if the fetch operation fails
+   * @throws Logs an error if the audio file cannot be fetched from storage
    */
-  static async syncAudioData(): Promise<void> {
-    await Promise.all(
-      config.audio.archives.map(async (archiveName) => {
-        if (await AudioMetadata.isFetched(archiveName)) return;
+  private static async fetchAudioFile(audioFile: string): Promise<AudioRecordLocal | null> {
+    const audioBlob: Blob | null = await fetchStorage(config.audio.audioBucketName, audioFile);
 
-        const zipBlob: Blob | null = await fetchStorage(config.audio.bucketName, archiveName);
-        if (!zipBlob) {
-          errorHandler(`Failed to fetch audio archive: ${archiveName}`, zipBlob);
-          return;
-        }
+    if (!audioBlob) {
+      errorHandler(`Failed to fetch audio file: ${audioFile}`, audioBlob);
+      return null;
+    }
 
-        const extractedFiles = await this.extractZip(zipBlob);
-        await db.transaction('rw', db.audio_records, db.audio_metadata, async () => {
-          await db.audio_records.bulkPut(
-            Array.from(extractedFiles, ([filename, audioBlob]) => ({ filename, audioBlob })),
-          );
-          await AudioMetadata.markAsFetched(archiveName);
-        });
+    await db.audio_records.put({ filename: audioFile, audioBlob: audioBlob });
+    infoHandler(`Successfully synced audio file: ${audioFile}`);
 
-        infoHandler(`Successfully synced audio archive: ${archiveName}`);
-      }),
-    );
+    return { filename: audioFile, audioBlob };
   }
 
-  static async auditAudioData(): Promise<void> {
+  /**
+   * Removes orphaned audio records from the database.
+   *
+   * @returns A promise that resolves when the removal is complete.
+   */
+  static async removeOrphaned(): Promise<void> {
     const existingFilenames = await db.audio_records.toCollection().primaryKeys();
     const allAudio = await db.user_items.toCollection().toArray();
     const expectedAudio = Array.from(
@@ -104,12 +139,10 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
     const expectedSet = new Set(expectedAudio);
 
     const orphaned = Array.from(existingSet).filter((x) => !expectedSet.has(x));
-    const missing = Array.from(expectedSet).filter((x) => !existingSet.has(x));
 
     if (orphaned.length > 0) {
       await db.audio_records.bulkDelete(orphaned);
       infoHandler(`Deleted ${orphaned.length} orphaned audio records.`);
     }
-    console.log('User Items expected but not existing:', missing);
   }
 }

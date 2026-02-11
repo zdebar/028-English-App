@@ -39,17 +39,20 @@ const config = {
   },
 
   audio: {
-    bucketName: 'audio-archive',
+    audioBucketName: 'audio-files',
+    archiveBucketName: 'audio-archive',
     archives: ['audio_part_1.zip', 'audio_part_2.zip'],
   },
 
   lesson: {
-    deckSize: 8, // Number of items per deck
+    deckSize: 2, // Number of items per deck
     lessonSize: 100, // Number of items per lesson
   },
 
   practice: {
     dailyGoal: 400, // Number of new items recommended for daily practice
+    CZ_TO_EN: 'czToEn',
+    EN_TO_CZ: 'enToCz',
   },
 
   vocabulary: {

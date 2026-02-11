@@ -31,6 +31,7 @@ export const TEXTS = {
 
   // Errors
   genericError: 'Nastala neznámá chyba.',
+  loadingError: 'Chyba při načítání dat.',
   errorBoundaryMessage: 'Něco se pokazilo. Zkuste obnovit stránku.',
 
   // Routes

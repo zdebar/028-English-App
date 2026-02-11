@@ -23,7 +23,7 @@ interface UseFetchResult<T> {
  */
 export function useFetch<T>(fetchFunction: () => Promise<T>): UseFetchResult<T> {
   const [data, setData] = useState<T | null>(null);
-  const [shouldReload, setShouldReload] = useState(true);
+  const [reloading, setReloading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -31,7 +31,7 @@ export function useFetch<T>(fetchFunction: () => Promise<T>): UseFetchResult<T> 
     let isActive = true;
 
     async function fetchData() {
-      if (!shouldReload) return;
+      if (!reloading) return;
       setLoading(true);
 
       try {
@@ -46,7 +46,7 @@ export function useFetch<T>(fetchFunction: () => Promise<T>): UseFetchResult<T> 
       } finally {
         if (isActive) {
           setLoading(false);
-          setShouldReload(false);
+          setReloading(false);
         }
       }
     }
@@ -56,11 +56,11 @@ export function useFetch<T>(fetchFunction: () => Promise<T>): UseFetchResult<T> 
     return () => {
       isActive = false;
     };
-  }, [fetchFunction, shouldReload]);
+  }, [fetchFunction, reloading]);
 
   const reload = () => {
     setLoading(true);
-    setShouldReload(true);
+    setReloading(true);
   };
 
   return {

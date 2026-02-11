@@ -10,11 +10,11 @@ import Grammar from '@/pages/Grammar';
 import Home from '@/pages/Home';
 import Practice from '@/pages/Practice';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
-import Profile from '@/pages/Profile';
 import Vocabulary from '@/pages/Vocabulary';
-import { ROUTES } from './config/routes.config';
-import OverlayContainer from './features/overlay/OverlayContainer';
-import LoadingMessage from './components/UI/LoadingMessage';
+import { ROUTES } from '@/config/routes.config';
+import OverlayContainer from '@/features/overlay/OverlayContainer';
+import LoadingMessage from '@/components/UI/LoadingMessage';
+import Profile from '@/pages/Profile';
 
 import { useEffect, useState } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';

@@ -1,157 +1,83 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { UserItemLocal } from '@/types/local.types';
 import AudioRecord from '@/database/models/audio-records';
 
-/**
- * Manages audio playback and caching for a list of user items.
- *
- * @param itemArray Practice deck items containing audio references.
- */
-export function useAudioManager(itemArray: UserItemLocal[]) {
-  const audioCacheRef = useRef<Map<string, HTMLAudioElement>>(new Map()); // Cache for audio elements
-  const currentAudioRef = useRef<HTMLAudioElement | null>(null); // Currently playing audio WHY?
-  const volumeRef = useRef(0.5); // Volume settings
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [audioError, setAudioError] = useState(false); // Audio error state while playing
-
-  const MAX_CACHE_SIZE = 500; // Maximum number of audio files to keep in the cache
-
-  // Function to clean the audio cache
-  const cleanCache = useCallback(() => {
-    if (audioCacheRef.current.size > MAX_CACHE_SIZE) {
-      const keysToRemove = Array.from(audioCacheRef.current.keys()).slice(
-        0,
-        audioCacheRef.current.size - MAX_CACHE_SIZE,
-      );
-
-      keysToRemove.forEach((key) => {
-        const audio = audioCacheRef.current.get(key);
-        if (audio) {
-          audio.pause();
-          URL.revokeObjectURL(audio.src); // Revoke the object URL to free memory
-        }
-        audioCacheRef.current.delete(key);
-      });
-
-      console.log(
-        `Audio cache cleaned. Removed ${keysToRemove.length} items. Current cache size: ${audioCacheRef.current.size}`,
-      );
-    }
-  }, []);
+export function useAudioManager(audio: string | null) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const volumeRef = useRef(1);
+  const [audioError, setAudioError] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const cacheAudio = async () => {
-      if (itemArray.length === 0) return;
+    let url: string | null = null;
+    let unmounted = false;
+    setLoading(true);
 
+    const loadAudio = async () => {
+      if (!audio) {
+        audioRef.current = null;
+        setAudioError(true);
+        return;
+      }
       try {
-        const audioKeys = itemArray
-          .map((item) => item.audio)
-          .filter((audio): audio is string => audio !== null && !audioCacheRef.current.has(audio));
-        if (audioKeys.length > 0) {
-          const fetchedAudios = await AudioRecord.bulkGet(audioKeys);
-
-          fetchedAudios.forEach((audioRecord) => {
-            const { filename, audioBlob } = audioRecord;
-            if (filename && audioBlob) {
-              const audioUrl = URL.createObjectURL(audioBlob);
-              const audioElement = new Audio(audioUrl);
-              audioCacheRef.current.set(filename, audioElement);
-            } else {
-              console.warn(`Audio not found for: ${filename}`);
-            }
-          });
-
-          cleanCache();
+        const audioRecord = await AudioRecord.getAudio(audio);
+        if (!audioRecord?.audioBlob) throw new Error('Audio not found');
+        url = URL.createObjectURL(audioRecord.audioBlob);
+        if (!unmounted) {
+          const audioElement = new Audio(url);
+          audioElement.volume = volumeRef.current;
+          audioRef.current = audioElement;
+          setAudioError(false);
         }
-      } catch (error) {
-        console.error('Error caching audio files:', error);
+      } catch {
+        if (!unmounted) {
+          audioRef.current = null;
+          setAudioError(true);
+        }
+      } finally {
+        setLoading(false);
       }
     };
 
-    cacheAudio();
-  }, [itemArray, cleanCache]);
+    loadAudio();
 
-  // Function to play audio
-  const playAudio = useCallback((audioPath: string | null) => {
-    if (audioPath && audioCacheRef.current.has(audioPath)) {
-      const audio = audioCacheRef.current.get(audioPath);
-      if (audio) {
-        // Stop any currently playing audio
-        if (currentAudioRef.current) {
-          currentAudioRef.current.pause();
-          currentAudioRef.current.currentTime = 0;
-        }
-
-        // Play the new audio
-        audio.volume = volumeRef.current;
-        currentAudioRef.current = audio;
-        audio.currentTime = 0;
-
-        audio
-          .play()
-          .then(() => {
-            setIsPlaying(true);
-          })
-          .catch(() => {
-            setIsPlaying(false);
-          });
-
-        audio.onended = () => {
-          setIsPlaying(false);
-        };
-
-        audio.onpause = () => {
-          setIsPlaying(false);
-        };
-
-        setAudioError(false);
+    return () => {
+      unmounted = true;
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
       }
-    } else {
-      setIsPlaying(false);
-      setAudioError(true);
-    }
-  }, []);
+      if (url) URL.revokeObjectURL(url);
+    };
+  }, [audio]);
+
+  const playAudio = useCallback(() => {
+    if (!audioRef.current || audioError) return;
+    audioRef.current.currentTime = 0;
+    audioRef.current.volume = volumeRef.current;
+    audioRef.current.play();
+  }, [audioError]);
 
   const stopAudio = useCallback(() => {
-    if (currentAudioRef.current) {
-      currentAudioRef.current.pause();
-      currentAudioRef.current.currentTime = 0;
-      currentAudioRef.current = null;
-      setIsPlaying(false);
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
     }
   }, []);
 
   const setVolume = useCallback((volume: number) => {
     volumeRef.current = Math.min(Math.max(volume, 0), 1);
-  }, []);
-
-  const isAudioReady = useCallback((audioPath: string | null): boolean => {
-    if (audioPath && audioCacheRef.current.has(audioPath)) {
-      return true;
-    } else {
-      return false;
+    if (audioRef.current) {
+      audioRef.current.volume = volumeRef.current;
     }
-  }, []);
-
-  // Stop audio on unmount
-  useEffect(() => {
-    return () => {
-      if (currentAudioRef.current) {
-        currentAudioRef.current.pause();
-        currentAudioRef.current.currentTime = 0;
-        currentAudioRef.current = null;
-        setIsPlaying(false);
-      }
-    };
   }, []);
 
   return {
     playAudio,
     stopAudio,
     setVolume,
-    isPlaying,
     audioError,
     setAudioError,
-    isAudioReady,
+    isAudioReady: () => !!audioRef.current,
+    loading,
   };
 }
