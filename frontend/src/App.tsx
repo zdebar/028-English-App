@@ -41,7 +41,7 @@ export default function App() {
     }
   }, [initializeAuth]);
 
-  // Data synchronization effect on userId change
+  // Data synchronization
   useEffect(() => {
     const syncData = async () => {
       setLoading(true);

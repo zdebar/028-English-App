@@ -84,10 +84,10 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
     const lastSyncedAt = await Metadata.getSyncedAt(TableName.Grammar);
     const newSyncedAt = new Date().toISOString();
 
-    const grammar = await this.fetchGrammar(lastSyncedAt, newSyncedAt);
+    const grammar = await this.fetchGrammar(lastSyncedAt);
     await this.applyGrammarSync(grammar, newSyncedAt);
 
-    infoHandler(`Completed ${grammar?.length ?? 0} records grammar sync since last sync.`);
+    infoHandler(`Completed ${grammar?.length ?? 0} grammars pull from Supabase.`);
     return grammar?.length ?? 0;
   }
 
@@ -100,7 +100,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
     const lastSyncedAt = config.database.epochStartDate;
     const newSyncedAt = new Date().toISOString();
 
-    const grammar = await this.fetchGrammar(lastSyncedAt, newSyncedAt);
+    const grammar = await this.fetchGrammar(lastSyncedAt);
     await db.grammar.clear();
     await this.applyGrammarSync(grammar, newSyncedAt);
 
@@ -118,18 +118,15 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    */
   private static async fetchGrammar(
     lastSyncedAt: string = config.database.epochStartDate,
-    newSyncedAt: string,
   ): Promise<GrammarSQL[]> {
     const { data: grammar, error } = await supabaseInstance
       .from('grammar')
       .select('id, name, note, updated_at, deleted_at')
-      .gte('updated_at', lastSyncedAt)
-      .lt('updated_at', newSyncedAt);
+      .gte('updated_at', lastSyncedAt);
 
     if (error) {
       throw new SupabaseError(`Failed to fetch grammar data from supabase`, error, {
         lastSyncedAt,
-        newSyncedAt,
       });
     }
 

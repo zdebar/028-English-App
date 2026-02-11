@@ -5,6 +5,7 @@ import { initDbMappings } from '@/database/models/db-init';
 import Grammar from '@/database/models/grammar';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
+import { errorHandler } from '@/features/logging/error-handler';
 
 const FULL_SYNC_KEY = 'lastFullSyncAt';
 
@@ -42,9 +43,17 @@ export async function dataSync(userId: string): Promise<void> {
     ];
   }
 
-  await Promise.all(syncPromises);
-  await AudioRecord.removeOrphaned();
+  const results = await Promise.allSettled(syncPromises);
+  let firstError: any = null;
+  results.forEach((r) => {
+    if (r.status === 'rejected') {
+      errorHandler('Data synchronization error:', r.reason);
+      if (!firstError) firstError = r.reason;
+    }
+  });
+  if (firstError) throw firstError;
 
+  await AudioRecord.removeOrphaned();
   if (doFullSync) {
     localStorage.setItem(FULL_SYNC_KEY, String(now));
   }
