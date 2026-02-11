@@ -10,7 +10,8 @@ import type { GrammarLocal } from '@/types/local.types';
 import DOMPurify from 'dompurify';
 import { useCallback, useEffect, useState, type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ListOverview from './ListOverview';
+import ButtonRectangular from '@/components/UI/buttons/ButtonRectangular';
+import CloseButton from '@/components/UI/buttons/CloseButton';
 
 /**
  * GrammarOverview component displays a list of started grammar topics for the user.
@@ -61,24 +62,33 @@ export default function GrammarOverview(): JSX.Element {
 
   // List view
   if (!cardVisible) {
-    if (grammarArray && grammarArray.length > 0) {
-      return (
-        <ListOverview
-          listTitle={TEXTS.grammarOverview}
-          array={grammarArray}
-          onSelect={(index) => {
-            setCurrentIndex(index);
-            setCardVisible(true);
-          }}
-          onClose={() => navigate('/profile')}
-        />
-      );
-    } else {
-      return <p>{TEXTS.notAvailable}</p>;
-    }
+    return (
+      <div className={`card-width flex flex-col justify-start gap-1`}>
+        <div className="h-button flex items-center justify-between gap-1">
+          <div className="h-button flex grow justify-start p-4">{TEXTS.grammarOverview}</div>
+          <CloseButton onClick={() => navigate('/profile')} />
+        </div>
+        {grammarArray && grammarArray.length > 0 ? (
+          grammarArray.map((item, index) => (
+            <ButtonRectangular
+              key={item.id}
+              className="h-input flex grow-0 justify-start p-4 text-left"
+              onClick={() => {
+                setCurrentIndex(index);
+                setCardVisible(true);
+              }}
+            >
+              {`${index + 1} : ${item.name} `}
+            </ButtonRectangular>
+          ))
+        ) : (
+          <p>{TEXTS.noGrammar}</p>
+        )}
+      </div>
+    );
   }
 
-  // Detail card view
+  // GrammarCard view
   return (
     <OverviewCard
       titleText={currentGrammar?.name ?? TEXTS.grammarOverview}

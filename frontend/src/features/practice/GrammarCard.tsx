@@ -1,5 +1,6 @@
 import OverviewCard from '@/components/UI/OverviewCard';
 import DOMPurify from 'dompurify';
+import { TEXTS } from '@/locales/cs';
 
 export interface GrammarCardType {
   id: number;
@@ -29,7 +30,7 @@ export default function GrammarCard({ grammar, onClose }: GrammarCardProps) {
           }}
         />
       ) : (
-        'Žádné poznámky k zobrazení.'
+        TEXTS.noNotesToDisplay
       )}
     </OverviewCard>
   );

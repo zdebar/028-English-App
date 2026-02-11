@@ -95,7 +95,7 @@ export default function PracticeCard() {
               {/** Top Bar */}
               <div id="top-bar" className="relative flex h-8 w-full items-center justify-between">
                 <VolumeSlider setVolume={setVolume} />
-                <p className="error-warning">{audioError && 'bez audia'}</p>
+                <p className="error-warning">{audioError && TEXTS.noAudio}</p>
               </div>
               {/** Item Data */}
               <div id="item" className="flex h-full flex-col justify-center gap-1">
@@ -109,12 +109,14 @@ export default function PracticeCard() {
                 id="bottom-bar"
               >
                 <p className="px-2 font-light">{progress}</p>
-                <HelpText className="bottom-7.5">pokrok</HelpText>
+                <HelpText className="bottom-7.5">{TEXTS.progress}</HelpText>
                 <p className="px-2 font-light">
                   {(userStats?.practiceCountToday || 0) + index} / {config.practice.dailyGoal}
                 </p>
                 <HelpText className="right-0 bottom-7.5 flex flex-col items-end">
-                  <p>dnes / denní cíl</p>
+                  <p>
+                    {TEXTS.today} / {TEXTS.dailyGoal}
+                  </p>
                 </HelpText>
               </div>
             </div>
@@ -130,7 +132,7 @@ export default function PracticeCard() {
                   <BookIcon />
                   {showGrammar && <Indicator className="absolute top-1 right-1" />}
                 </ButtonRectangular>
-                <HelpText className="top-0 left-3.5">gramatika</HelpText>
+                <HelpText className="top-0 left-3.5">{TEXTS.grammar}</HelpText>
                 <ButtonRectangular
                   onClick={() => {
                     nextItem(config.progress.skipProgress);
@@ -139,7 +141,7 @@ export default function PracticeCard() {
                 >
                   <ForwardIcon />
                 </ButtonRectangular>
-                <HelpText className="top-0 right-3.5">dokončit</HelpText>
+                <HelpText className="top-0 right-3.5">{TEXTS.complete}</HelpText>
               </div>
               {/** Bottom Row */}
               {!revealed ? (
@@ -148,7 +150,7 @@ export default function PracticeCard() {
                   <ButtonRectangular onClick={plusHint}>
                     <BulbIcon />
                   </ButtonRectangular>
-                  <HelpText className="top-0 left-3.5">nápověda</HelpText>
+                  <HelpText className="top-0 left-3.5">{TEXTS.hint}</HelpText>
                   <ButtonRectangular
                     onClick={() => {
                       if (direction) {
@@ -159,7 +161,7 @@ export default function PracticeCard() {
                   >
                     <EyeIcon />
                   </ButtonRectangular>
-                  <HelpText className="top-0 right-3.5">odhalit</HelpText>
+                  <HelpText className="top-0 right-3.5">{TEXTS.reveal}</HelpText>
                 </div>
               ) : (
                 /** Revealed */
@@ -167,11 +169,11 @@ export default function PracticeCard() {
                   <ButtonRectangular onClick={() => nextItem(config.progress.minusProgress)}>
                     <MinusIcon />
                   </ButtonRectangular>
-                  <HelpText className="top-0 left-3.5">neznám</HelpText>
+                  <HelpText className="top-0 left-3.5">{TEXTS.unknown}</HelpText>
                   <ButtonRectangular onClick={() => nextItem(config.progress.plusProgress)}>
                     <PlusIcon />
                   </ButtonRectangular>
-                  <HelpText className="top-0 right-3.5">znám</HelpText>
+                  <HelpText className="top-0 right-3.5">{TEXTS.known}</HelpText>
                 </div>
               )}
             </div>

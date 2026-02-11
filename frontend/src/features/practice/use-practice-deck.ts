@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { alternateDirection } from '@/features/practice/practice.utils';
 import type { UserItemPractice } from '@/types/local.types';
-import { usePracticeArray } from '@/features/practice/use-practice-array';
+import { useFetch } from '@/hooks/use-fetch';
 import UserItem from '@/database/models/user-items';
 import { errorHandler } from '../logging/error-handler';
 import { infoHandler } from '../logging/info-handler';
@@ -14,8 +14,13 @@ import { useAudioManager } from './use-audio-manager';
  * @param userId The unique identifier of the user.
  */
 export function usePracticeDeck(userId: string) {
+  // Core array states
+  const [array, setArray] = useState<UserItemPractice[]>([]);
+  const [index, setIndex] = useState(0);
+  const currentItem = array[index] ?? null;
+
+  // Logic states
   const [revealed, setRevealed] = useState(false);
-  const { array, currentItem, index, nextIndex, error, reload } = usePracticeArray(userId);
   const { czechHinted, englishHinted, resetHint, plusHint } = useHint(currentItem);
   const {
     playAudio,
@@ -26,11 +31,26 @@ export function usePracticeDeck(userId: string) {
   const userProgressRef = useRef<UserItemPractice[]>([]);
 
   const direction: boolean = currentItem ? alternateDirection(currentItem?.progress) : true; // true = CZ -> EN, false = EN -> CZ
-  const audioDisabled = (direction && !revealed) || audioError;
+  const audioDisabled = (direction && !revealed) || audioError || !currentItem?.audio;
 
   const shouldShowFullCzech = direction || revealed;
   const czech = shouldShowFullCzech ? currentItem?.czech : czechHinted;
-  const english = revealed ? currentItem?.english : englishHinted;
+  const english = revealed || audioDisabled ? currentItem?.english : englishHinted;
+
+  // Array fetching logic
+  const fetchPracticeDeck = useCallback(async () => {
+    const data = await UserItem.getPracticeDeck(userId);
+    return data.filter((item) => item !== null && item !== undefined);
+  }, [userId]);
+
+  const { data: fetchedArray, error, reload } = useFetch<UserItemPractice[]>(fetchPracticeDeck);
+
+  useEffect(() => {
+    setArray(fetchedArray || []);
+    setIndex(0);
+    setRevealed(false);
+    resetHint();
+  }, [fetchedArray]);
 
   // Save progress on unmount
   useEffect(() => {
@@ -74,12 +94,12 @@ export function usePracticeDeck(userId: string) {
           errorHandler('Failed to update user progress:', error);
         }
       } else {
-        nextIndex();
+        setIndex((prev) => (array.length ? (prev + 1) % array.length : 0));
+        setRevealed(false);
+        resetHint();
       }
-      setRevealed(false);
-      resetHint();
     },
-    [currentItem, nextIndex, array.length, reload, userId],
+    [currentItem, array.length, reload, userId],
   );
 
   // Play audio on item change if direction is EN -> CZ and not revealed

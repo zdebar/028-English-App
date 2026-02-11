@@ -21,7 +21,7 @@ export default function HelpText({ children, className = '' }: HelpTextProps): J
 
   return (
     <div
-      className={`font-headings text-help z-help-text pointer-events-none absolute px-4 text-xl ${className}`}
+      className={`font-headings text-help z-help-text pointer-events-none absolute px-2 text-xl ${className}`}
     >
       {children}
     </div>

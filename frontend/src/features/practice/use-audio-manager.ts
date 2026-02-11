@@ -15,7 +15,6 @@ export function useAudioManager(audio: string | null) {
     const loadAudio = async () => {
       if (!audio) {
         audioRef.current = null;
-        setAudioError(true);
         return;
       }
       try {
@@ -46,6 +45,7 @@ export function useAudioManager(audio: string | null) {
         audioRef.current.pause();
         audioRef.current = null;
       }
+      setAudioError(false);
       if (url) URL.revokeObjectURL(url);
     };
   }, [audio]);
@@ -76,7 +76,6 @@ export function useAudioManager(audio: string | null) {
     stopAudio,
     setVolume,
     audioError,
-    setAudioError,
     isAudioReady: () => !!audioRef.current,
     loading,
   };

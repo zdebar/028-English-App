@@ -10,6 +10,22 @@ export const TEXTS = {
   syncErrorToast: 'Chyba při synchronizaci dat.',
   syncLoadingText: 'Synchronizuji data ...',
 
+  // Practice
+  noNotesToDisplay: 'Žádné poznámky k zobrazení.',
+  noAudio: 'bez audia',
+  progress: 'pokrok',
+  today: 'dnes',
+  dailyGoal: 'denní cíl',
+  grammar: 'gramatika',
+  complete: 'dokončit',
+  hint: 'nápověda',
+  reveal: 'odhalit',
+  unknown: 'neznám',
+  known: 'znám',
+
+  // Grammar Overview
+  noGrammar: 'Žádné započatá gramatika.',
+
   // User
   userLabel: 'Uživatel',
   authInitErrorToast: 'Nastala chyba při přihlašování.',
