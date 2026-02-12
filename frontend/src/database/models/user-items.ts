@@ -346,7 +346,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
     if (localUserItems.length !== 0) {
       const sqlUserItems = localUserItems.map(convertLocalToSQL);
-      const { error: rpcInsertError } = await supabaseInstance.rpc('insert_user_items', {
+      const { error: rpcInsertError } = await supabaseInstance.rpc('upsert_user_items', {
         user_id_input: userId,
         items: sqlUserItems,
       });
