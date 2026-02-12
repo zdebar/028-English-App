@@ -8,6 +8,7 @@ import { TableName, type UserScoreLocal } from '@/types/local.types';
 import { Entity } from 'dexie';
 import Metadata from './metadata';
 import { infoHandler } from '@/features/logging/info-handler';
+import { validateNonNegativeInteger } from '@/utils/validation.utils';
 
 /**
  * Represents a user score entity in the application database.
@@ -32,6 +33,8 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @throws Error if database operation fails.
    */
   static async addItemCount(userId: string, addCount: number): Promise<boolean> {
+    validateNonNegativeInteger(addCount, 'addItemCount');
+
     const today = getTodayShortDate();
     const existingRecord = await db.user_scores.get([userId, today]);
     const newItemCount = (existingRecord?.item_count ?? 0) + addCount;
@@ -155,14 +158,13 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   private static async pullUserScores(
     userId: string,
     lastSyncedAt: string = config.database.epochStartDate,
-    newSyncedAt: string,
+    newSyncedAt: string = new Date().toISOString(),
   ): Promise<number> {
     const { data: updatedScores, error: errorFetch } = await supabaseInstance.rpc(
       'fetch_user_scores',
       {
         user_id_input: userId,
         last_synced_at: lastSyncedAt,
-        new_synced_at: newSyncedAt,
       },
     );
 
@@ -170,7 +172,6 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
       throw new SupabaseError(`Error fetching User Scores from Supabase.`, errorFetch, {
         userId,
         lastSyncedAt,
-        newSyncedAt,
       });
     }
 

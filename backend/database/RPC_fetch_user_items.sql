@@ -1,7 +1,6 @@
 CREATE OR REPLACE FUNCTION fetch_user_items(
   user_id_input UUID,
-  last_synced_at TIMESTAMPTZ,
-  new_synced_at TIMESTAMPTZ
+  last_synced_at TIMESTAMPTZ
 )
 RETURNS TABLE (
   item_id INTEGER,
@@ -42,11 +41,8 @@ BEGIN
   FROM public.items i
   LEFT JOIN public.user_items ui 
     ON i.id = ui.item_id AND ui.user_id = user_id_input
-  WHERE (
-    (ui.updated_at BETWEEN last_synced_at AND new_synced_at)
-    OR ui.updated_at IS NULL
-    OR (i.updated_at BETWEEN last_synced_at AND new_synced_at)
-  )
+  WHERE ui.updated_at > last_synced_at
+    OR i.updated_at > last_synced_at  
   ORDER BY i.sequence ASC;
 END;
 $$;

@@ -20,24 +20,3 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql
 SET search_path TO public;
-
--- SELECT
-CREATE OR REPLACE FUNCTION fetch_user_scores(
-  user_id_input UUID,
-  last_synced_at TIMESTAMPTZ
-)
-RETURNS TABLE (
-  user_id UUID,
-  date DATE,
-  item_count INTEGER,
-  updated_at TIMESTAMPTZ
-) AS $$
-BEGIN
-  RETURN QUERY
-  SELECT us.user_id, us.date, us.item_count, us.updated_at
-  FROM user_scores us
-  WHERE us.updated_at > last_synced_at
-    AND us.user_id = user_id_input;
-END;
-$$ LANGUAGE plpgsql
-SET search_path TO public;

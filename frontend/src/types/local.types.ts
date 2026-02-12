@@ -18,7 +18,7 @@ export interface UserItemLocal {
 
 export interface UserItemPractice extends UserItemLocal {
   // As used by PracticeCard
-  show_grammar: boolean;
+  show_new_grammar_indicator: boolean;
 }
 
 export interface GrammarLocal {

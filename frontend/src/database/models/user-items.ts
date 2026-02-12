@@ -4,6 +4,7 @@ import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import { TableName, type UserItemLocal, type UserItemPractice } from '@/types/local.types';
 import Dexie, { Entity } from 'dexie';
+import { validateNonNegativeInteger, validatePositiveInteger } from '@/utils/validation.utils';
 
 import {
   convertLocalToSQL,
@@ -49,6 +50,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     userId: string,
     deckSize: number = config.lesson.deckSize,
   ): Promise<UserItemPractice[]> {
+    validatePositiveInteger(deckSize, 'deckSize');
+
     // Step 1: Fetch started grammar list
     const startedGrammar = await Grammar.getStartedGrammarList(userId);
 
@@ -88,15 +91,27 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       itemsWithNextAt = [...itemsWithNextAt, ...remainingItems];
     }
 
-    // Step 4: Mark items as initial practice based on started grammar
-    const itemsWithGrammarFlag: UserItemPractice[] = itemsWithNextAt.map((item) => ({
-      ...item,
-      show_grammar: !startedGrammar.some(
-        (grammar) => grammar.id === item.grammar_id || item.grammar_id === 0,
-      ),
-    }));
+    const sortedItems = sortOddEvenByProgress(itemsWithNextAt);
 
-    return sortOddEvenByProgress(itemsWithGrammarFlag);
+    // Step 4: Mark items as grammar initial practice based on started grammar
+    const shownGrammarIds = new Set<number>();
+    const itemsWithGrammarFlag: UserItemPractice[] = sortedItems.map((item) => {
+      let show = false;
+      if (
+        item.grammar_id !== 0 &&
+        !startedGrammar.some((grammar) => grammar.id === item.grammar_id) &&
+        !shownGrammarIds.has(item.grammar_id)
+      ) {
+        show = true;
+        shownGrammarIds.add(item.grammar_id);
+      }
+      return {
+        ...item,
+        show_new_grammar_indicator: show,
+      };
+    });
+
+    return itemsWithGrammarFlag;
   }
 
   /**
@@ -210,11 +225,13 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @throws Throws an error if no user items are found for the given grammar ID.
    */
   static async resetGrammarItems(userId: string, grammarId: number): Promise<number> {
+    validateNonNegativeInteger(grammarId, 'grammarId');
+
     const count = await db.user_items
       .where('[user_id+grammar_id+started_at]')
       .between(
-        [userId, config.database.nullReplacementNumber, Dexie.minKey],
-        [userId, config.database.nullReplacementNumber, config.database.nullReplacementDate],
+        [userId, grammarId, Dexie.minKey],
+        [userId, grammarId, config.database.nullReplacementDate],
         true,
         false,
       )
@@ -240,6 +257,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @throws Throws an error if no user item is found for the specified item ID
    */
   static async resetUserItemById(userId: string, itemId: number): Promise<boolean> {
+    validateNonNegativeInteger(itemId, 'itemId');
+
     const count = await db.user_items
       .where('[user_id+item_id]')
       .equals([userId, itemId])
@@ -366,7 +385,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       {
         user_id_input: userId,
         last_synced_at: lastSyncedAt,
-        new_synced_at: newSyncedAt,
       },
     );
 
@@ -374,7 +392,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       throw new SupabaseError('Error fetching user_items with Supabase.', rpcFetchError, {
         userId,
         lastSyncedAt,
-        newSyncedAt,
       });
     }
 

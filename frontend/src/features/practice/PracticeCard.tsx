@@ -45,7 +45,7 @@ export default function PracticeCard() {
     direction,
     revealed,
     setRevealed,
-    showGrammar,
+    showNewGrammarIndicator,
     czech,
     english,
     pronunciation,
@@ -130,7 +130,7 @@ export default function PracticeCard() {
                   className="relative"
                 >
                   <BookIcon />
-                  {showGrammar && <Indicator className="absolute top-1 right-1" />}
+                  {showNewGrammarIndicator && <Indicator className="absolute top-1 right-1" />}
                 </ButtonRectangular>
                 <HelpText className="top-0 left-3.5">{TEXTS.grammar}</HelpText>
                 <ButtonRectangular

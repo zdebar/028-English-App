@@ -5,7 +5,7 @@ import AudioMetadata from '@/database/models/audio-metadata';
 import { db } from '@/database/models/db';
 import { errorHandler } from '@/features/logging/error-handler';
 import { infoHandler } from '@/features/logging/info-handler';
-import { ZipExtractionError } from '@/types/error.types';
+import { SupabaseError, ZipExtractionError } from '@/types/error.types';
 import type { AudioRecordLocal } from '@/types/local.types';
 import { Entity } from 'dexie';
 
@@ -40,8 +40,9 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
 
   /**
    * Synchronizes audio data from configured archives to the local database.
-   *    *
-   * @returns {Promise<void>} A promise that resolves when all audio archives have been synced.
+   *
+   * @returns A promise that resolves when all audio archives have been synced.
+   * @throws {SupabaseError} If fetching an audio archive fails.
    */
   static async syncAudioData(): Promise<void> {
     await Promise.all(
@@ -53,8 +54,7 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
           archiveName,
         );
         if (!zipBlob) {
-          errorHandler(`Failed to fetch audio archive: ${archiveName}`, zipBlob);
-          return;
+          throw new SupabaseError(`Failed to fetch audio archive: ${archiveName}`);
         }
 
         const extractedFiles = await this.extractZip(zipBlob);
@@ -113,7 +113,7 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
     const audioBlob: Blob | null = await fetchStorage(config.audio.audioBucketName, audioFile);
 
     if (!audioBlob) {
-      errorHandler(`Failed to fetch audio file: ${audioFile}`, audioBlob);
+      infoHandler(`Failed to fetch audio file: ${audioFile}`);
       return null;
     }
 
@@ -125,10 +125,11 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
 
   /**
    * Removes orphaned audio records from the database.
+   * Orphaned records are those that exist in the audio_records table but are not referenced by any user items.
    *
-   * @returns A promise that resolves when the removal is complete.
+   * @returns A promise that resolves to the number of orphaned audio records removed.
    */
-  static async removeOrphaned(): Promise<void> {
+  static async removeOrphaned(): Promise<number> {
     const existingFilenames = await db.audio_records.toCollection().primaryKeys();
     const allAudio = await db.user_items.toCollection().toArray();
     const expectedAudio = Array.from(
@@ -144,5 +145,7 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
       await db.audio_records.bulkDelete(orphaned);
       infoHandler(`Deleted ${orphaned.length} orphaned audio records.`);
     }
+
+    return orphaned.length;
   }
 }

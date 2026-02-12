@@ -117,7 +117,7 @@ export function usePracticeDeck(userId: string) {
     direction,
     revealed,
     setRevealed,
-    showGrammar: currentItem?.show_grammar ?? false,
+    showNewGrammarIndicator: currentItem?.show_new_grammar_indicator ?? false,
 
     // Display values
     czech,

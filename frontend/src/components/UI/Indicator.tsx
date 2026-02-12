@@ -11,5 +11,5 @@ interface IndicatorProps {
  * @returns The rendered indicator element.
  */
 export default function Indicator({ className = '' }: IndicatorProps): JSX.Element {
-  return <span className={`h-indicator w-indicator rounded-full ${className}`} />;
+  return <span className={`size-indicator bg-indicator rounded-full ${className}`} />;
 }

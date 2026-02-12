@@ -129,7 +129,7 @@ export function getNextAt(progress: number): string {
  * @returns Sorted array of UserItemLocal.
  * @throws Error if items array is invalid.
  */
-export function sortOddEvenByProgress(items: UserItemPractice[]): UserItemPractice[] {
+export function sortOddEvenByProgress(items: UserItemLocal[]): UserItemLocal[] {
   return items.sort((a, b) => {
     // Sort by odd progress first
     const oddA = a.progress % 2;
