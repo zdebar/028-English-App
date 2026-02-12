@@ -1,5 +1,6 @@
 import { TEXTS } from '@/config/texts.config';
 import { useMemo } from 'react';
+import { errorHandler } from '../logging/error-handler';
 
 interface DirectionDropdownProps<T> {
   value: T;
@@ -27,7 +28,10 @@ export default function DirectionDropdown<T>({
   className = '',
 }: DirectionDropdownProps<T>) {
   if (!options.some((option) => option.value === value)) {
-    console.error(`Value "${value}" is not valid for DirectionDropdown.`);
+    errorHandler(
+      `Value "${value}" is not valid for DirectionDropdown.`,
+      new Error('Invalid dropdown value'),
+    );
   }
 
   const memoizedOptions = useMemo(() => {

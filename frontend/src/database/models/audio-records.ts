@@ -3,7 +3,6 @@ import { fetchStorage } from '@/database/database.utils';
 import type AppDB from '@/database/models/app-db';
 import AudioMetadata from '@/database/models/audio-metadata';
 import { db } from '@/database/models/db';
-import { errorHandler } from '@/features/logging/error-handler';
 import { infoHandler } from '@/features/logging/info-handler';
 import { SupabaseError, ZipExtractionError } from '@/types/error.types';
 import type { AudioRecordLocal } from '@/types/local.types';

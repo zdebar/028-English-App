@@ -3,6 +3,7 @@ import { persist, devtools } from 'zustand/middleware';
 import type { UserStatsLocal } from '@/types/local.types';
 import UserScore from '@/database/models/user-scores';
 import UserItem from '@/database/models/user-items';
+import { errorHandler } from '../logging/error-handler';
 
 interface UserState {
   userStats: UserStatsLocal | null;
@@ -37,7 +38,7 @@ export const useUserStore = create<UserState>()(
               },
             });
           } catch (error) {
-            console.error(`Error reloading user score for userId: ${userId}`, error);
+            errorHandler(`Error reloading user score for userId: ${userId}`, error);
           }
         };
 

@@ -1,7 +1,8 @@
 import config from '@/config/config';
 import { supabaseInstance } from '@/config/supabase.config';
+import { errorHandler } from '@/features/logging/error-handler';
 import type { UserItemSQL } from '@/types/data.types';
-import type { UserItemLocal, UserItemPractice } from '@/types/local.types';
+import type { UserItemLocal } from '@/types/local.types';
 
 /**
  * Converts a `UserItemLocal` object to a `UserItemSQL` object, replacing specific date fields
@@ -61,7 +62,7 @@ export async function fetchStorage(bucketName: string, dataFile: string): Promis
   const { data, error } = await supabaseInstance.storage.from(bucketName).download(filePath);
 
   if (error) {
-    console.error('Error fetching data:', error.message);
+    errorHandler('Error fetching data:', error.message);
     return null;
   }
 

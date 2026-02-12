@@ -12,7 +12,6 @@ import {
   getNextAt,
   getTodayShortDate,
   resetUserItem,
-  sortOddEvenByProgress,
   triggerUserItemsUpdatedEvent,
 } from '@/database/database.utils';
 import { infoHandler } from '@/features/logging/info-handler';
@@ -52,20 +51,37 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   ): Promise<UserItemPractice[]> {
     validatePositiveInteger(deckSize, 'deckSize');
 
-    // Step 1: Fetch started grammar list
+    // Step 1: Fetch already started grammar list
     const startedGrammar = await Grammar.getStartedGrammarList(userId);
 
-    // Step 2: Fetch items with next_at older than now, sorted by next_at
+    // Step 2: Fetch items with odd progress
+    // SELECT with user_id, next_at = null, mastered_at = null, progress odd
     let itemsWithNextAt: UserItemLocal[] = await db.user_items
-      .where('[user_id+next_at+mastered_at+sequence]')
+      .where('[user_id+next_at+mastered_at]')
       .between(
-        [userId, config.database.epochStartDate, Dexie.minKey, Dexie.minKey],
-        [userId, new Date().toISOString(), Dexie.maxKey, Dexie.maxKey],
+        [userId, Dexie.minKey, config.database.nullReplacementDate],
+        [userId, new Date().toISOString(), config.database.nullReplacementDate],
       )
+      .filter((item) => item.progress % 2 === 1)
       .limit(deckSize)
       .toArray();
 
-    // Step 3: If not enough items, fetch additional items with next_at equal to nullReplacementDate
+    // Step 3: If not enough items, fetch items with even progress
+    // SELECT with user_id, next_at = null, mastered_at = null, progress even
+    if (itemsWithNextAt.length < deckSize) {
+      itemsWithNextAt = await db.user_items
+        .where('[user_id+next_at+mastered_at]')
+        .between(
+          [userId, Dexie.minKey, config.database.nullReplacementDate],
+          [userId, new Date().toISOString(), config.database.nullReplacementDate],
+        )
+        .filter((item) => item.progress % 2 === 0)
+        .limit(deckSize)
+        .toArray();
+    }
+
+    // Step 4: If not enough items, fetch additional items with next_at equal to nullReplacementDate
+    // SELECT with user_id, next_at = null, mastered_at = null, ordered by sequence ASC
     const remainingLimit = deckSize - itemsWithNextAt.length;
     if (remainingLimit > 0) {
       const remainingItems = await db.user_items
@@ -91,11 +107,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       itemsWithNextAt = [...itemsWithNextAt, ...remainingItems];
     }
 
-    const sortedItems = sortOddEvenByProgress(itemsWithNextAt);
-
     // Step 4: Mark items as grammar initial practice based on started grammar
     const shownGrammarIds = new Set<number>();
-    const itemsWithGrammarFlag: UserItemPractice[] = sortedItems.map((item) => {
+    const itemsWithGrammarFlag: UserItemPractice[] = itemsWithNextAt.map((item) => {
       let show = false;
       if (
         item.grammar_id !== 0 &&
