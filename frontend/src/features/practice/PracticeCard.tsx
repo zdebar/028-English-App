@@ -93,9 +93,10 @@ export default function PracticeCard() {
         <>
           <div className="card-width card-height relative">
             {/* Item Card */}
-            <ButtonRectangular
-              className={`relative flex-col items-center justify-between p-4`}
-              disabled={audioDisabled && fromCzech}
+            <div
+              className={`relative flex h-full grow flex-col items-center justify-between p-4 ${
+                audioDisabled ? 'color-audio-disabled' : 'button-color'
+              }`}
               onClick={() => {
                 if (firstItem) {
                   setFirstStop(false);
@@ -145,7 +146,7 @@ export default function PracticeCard() {
                   </div>
                 </>
               )}
-            </ButtonRectangular>
+            </div>
             {/* Practice Controls */}
             <div id="practice-controls" className="relative flex flex-col gap-1">
               {/** Top Row */}
