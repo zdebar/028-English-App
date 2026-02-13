@@ -31,7 +31,7 @@ import { TEXTS } from '@/locales/cs';
  * @returns The main practice card UI with all practice controls and feedback.
  */
 export default function PracticeCard() {
-  const [firstItem, setFirstStop] = useState(true);
+  const [isFirstItem, setIsFirstItem] = useState(true);
   const [grammarVisible, setGrammarVisible] = useState(false);
   const [grammarData, setGrammarData] = useState<GrammarCardType | null>(null);
 
@@ -59,7 +59,7 @@ export default function PracticeCard() {
     audioLoading,
   } = usePracticeDeck(userId!);
 
-  const isAudioPaused = firstItem && !fromCzech && !audioDisabled;
+  const isAudioPaused = isFirstItem && !fromCzech && !audioDisabled;
 
   // Fetch grammar for the current item and show GrammarCard
   const handleGrammar = useCallback(async () => {
@@ -98,8 +98,8 @@ export default function PracticeCard() {
                 audioDisabled ? 'color-audio-disabled' : 'button-color'
               }`}
               onClick={() => {
-                if (firstItem) {
-                  setFirstStop(false);
+                if (isFirstItem) {
+                  setIsFirstItem(false);
                   if (isAudioPaused) {
                     return;
                   }
