@@ -159,7 +159,7 @@ export default function PracticeCard() {
                   <BookIcon />
                   {showNewGrammarIndicator && <Indicator className="absolute top-1 right-1" />}
                 </ButtonRectangular>
-                <HelpText className="top-0 left-3.5">{TEXTS.grammar}</HelpText>
+                <HelpText className="-top-4.5 left-3.5">{TEXTS.grammar}</HelpText>
                 <ButtonRectangular
                   onClick={() => {
                     nextItem(config.progress.skipProgress);
@@ -168,7 +168,7 @@ export default function PracticeCard() {
                 >
                   <ForwardIcon />
                 </ButtonRectangular>
-                <HelpText className="top-0 right-3.5">{TEXTS.complete}</HelpText>
+                <HelpText className="-top-4.5 right-3.5">{TEXTS.complete}</HelpText>
               </div>
               {/** Bottom Row */}
               {!revealed ? (
@@ -177,7 +177,7 @@ export default function PracticeCard() {
                   <ButtonRectangular onClick={plusHint} disabled={isAudioPaused}>
                     <BulbIcon />
                   </ButtonRectangular>
-                  <HelpText className="top-0 left-3.5">{TEXTS.hint}</HelpText>
+                  <HelpText className="-top-4.5 left-3.5">{TEXTS.hint}</HelpText>
                   <ButtonRectangular
                     onClick={() => {
                       if (fromCzech && !audioError) {
@@ -189,7 +189,7 @@ export default function PracticeCard() {
                   >
                     <EyeIcon />
                   </ButtonRectangular>
-                  <HelpText className="top-0 right-3.5">{TEXTS.reveal}</HelpText>
+                  <HelpText className="-top-4.5 right-3.5">{TEXTS.reveal}</HelpText>
                 </div>
               ) : (
                 /** Revealed */
@@ -200,14 +200,14 @@ export default function PracticeCard() {
                   >
                     <MinusIcon />
                   </ButtonRectangular>
-                  <HelpText className="top-0 left-3.5">{TEXTS.unknown}</HelpText>
+                  <HelpText className="-top-4.5 left-3.5">{TEXTS.unknown}</HelpText>
                   <ButtonRectangular
                     onClick={() => nextItem(config.progress.plusProgress)}
                     disabled={isAudioPaused}
                   >
                     <PlusIcon />
                   </ButtonRectangular>
-                  <HelpText className="top-0 right-3.5">{TEXTS.known}</HelpText>
+                  <HelpText className="-top-4.5 right-3.5">{TEXTS.known}</HelpText>
                 </div>
               )}
             </div>
