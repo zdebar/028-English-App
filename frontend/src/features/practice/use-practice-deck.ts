@@ -47,11 +47,11 @@ export function usePracticeDeck(userId: string) {
     isPlaying,
   } = useAudioManager(currentItem?.audio);
 
-  const fromCzech = currentItem ? alternateDirection(currentItem?.progress) : true; // true = CZ -> EN, false = EN -> CZ
-  const audioDisabled = (fromCzech && !revealed) || !currentItem?.audio || audioError;
+  const isCzToEn = currentItem ? alternateDirection(currentItem?.progress) : true; // true = CZ -> EN, false = EN -> CZ
+  const audioDisabled = (isCzToEn && !revealed) || !currentItem?.audio || audioError;
 
-  const czech = fromCzech || revealed ? currentItem?.czech : czechHinted;
-  const english = revealed || (audioDisabled && !fromCzech) ? currentItem?.english : englishHinted;
+  const czech = isCzToEn || revealed ? currentItem?.czech : czechHinted;
+  const english = revealed || (audioDisabled && !isCzToEn) ? currentItem?.english : englishHinted;
 
   // Ref to track user progress changes before saving
   const userProgressRef = useRef<UserItemPractice[]>([]);
@@ -124,7 +124,7 @@ export function usePracticeDeck(userId: string) {
     currentItem,
     grammar_id: currentItem?.grammar_id ?? null,
     progress: currentItem?.progress ?? 0,
-    fromCzech,
+    isCzToEn,
     revealed,
     setRevealed,
     showNewGrammarIndicator: currentItem?.show_new_grammar_indicator ?? false,

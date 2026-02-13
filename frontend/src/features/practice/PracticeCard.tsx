@@ -43,7 +43,7 @@ export default function PracticeCard() {
     currentItem,
     grammar_id,
     progress,
-    fromCzech,
+    isCzToEn,
     revealed,
     setRevealed,
     showNewGrammarIndicator,
@@ -59,7 +59,8 @@ export default function PracticeCard() {
     audioLoading,
   } = usePracticeDeck(userId!);
 
-  const isAudioPaused = isFirstItem && !fromCzech && !audioDisabled;
+  // Initial audio pause if practice starts with EN -> CZ item
+  const isAudioPaused = isFirstItem && !isCzToEn && !audioDisabled;
 
   // Fetch grammar for the current item and show GrammarCard
   const handleGrammar = useCallback(async () => {
@@ -76,10 +77,10 @@ export default function PracticeCard() {
 
   // Play audio on item change if direction is EN -> CZ
   useEffect(() => {
-    if (!audioDisabled && !fromCzech && !audioLoading && !isAudioPaused) {
+    if (!audioDisabled && !isCzToEn && !audioLoading && !isAudioPaused) {
       setTimeout(() => playAudio(), 400);
     }
-  }, [playAudio, audioDisabled, fromCzech, audioLoading, isAudioPaused, currentItem]);
+  }, [playAudio, audioDisabled, isCzToEn, audioLoading, isAudioPaused, currentItem]);
 
   if (!currentItem) {
     return <LoadingMessage text="Žádné položky k procvičování" timeDelay={100} />;
@@ -180,7 +181,7 @@ export default function PracticeCard() {
                   <HelpText className="-top-4.5 left-3.5">{TEXTS.hint}</HelpText>
                   <ButtonRectangular
                     onClick={() => {
-                      if (fromCzech && !audioError) {
+                      if (isCzToEn && !audioError) {
                         playAudio();
                       }
                       setRevealed(true);
