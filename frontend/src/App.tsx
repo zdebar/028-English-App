@@ -15,6 +15,7 @@ import { ROUTES } from '@/config/routes.config';
 import OverlayContainer from '@/features/overlay/OverlayContainer';
 import LoadingMessage from '@/components/UI/LoadingMessage';
 import Profile from '@/pages/Profile';
+import Guide from '@/pages/Guide';
 
 import { useEffect, useState } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
@@ -77,6 +78,7 @@ export default function App() {
         <Routes>
           <Route path={ROUTES.home} element={<Home />} />
           <Route path={ROUTES.privacyPolicy} element={<PrivacyPolicy />} />
+          <Route path={ROUTES.guide} element={<Guide />} />
           <Route element={<ProtectedLayout />}>
             <Route path={ROUTES.practice} element={<Practice />} />
             <Route path={ROUTES.profile} element={<Profile />} />

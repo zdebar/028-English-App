@@ -8,6 +8,7 @@ import { TEXTS } from '@/locales/cs';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { type JSX } from 'react';
+import { Link } from 'react-router-dom';
 
 /**
  * The Home component renders the main page of the application.
@@ -76,8 +77,11 @@ export default function Home(): JSX.Element {
   return (
     <div className="max-w-hero relative flex w-full flex-col gap-4 text-center">
       <h1 className="pt-12 pb-6">{TEXTS.appTitle}</h1>
-      <p className="notification error-warning">{TEXTS.appSubtitle}</p>
+
       <p className="px-4">{TEXTS.appDescription}</p>
+      <Link to="/guide" className="notification error-warning">
+        {TEXTS.guide}
+      </Link>
       {mainSection}
     </div>
   );

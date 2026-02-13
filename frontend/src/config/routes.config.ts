@@ -5,4 +5,5 @@ export const ROUTES = {
   profile: '/profile',
   grammar: '/grammar',
   vocabulary: '/vocabulary',
+  guide: '/guide',
 };

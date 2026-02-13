@@ -4,6 +4,7 @@ export const TEXTS = {
   appSubtitle: 'Aplikace v testovacím režimu',
   appDescription:
     'Toto je aplikace pro učení angličtiny. V současné době je v testovacím režimu a může obsahovat chyby.',
+  guide: 'prohlédnout návod',
 
   // Synchronization
   syncSuccessToast: 'Data byla úspěšně synchronizována.',
