@@ -16,7 +16,7 @@ type VolumeSliderProps = {
  */
 export default function VolumeSlider({ setVolume, className = '' }: VolumeSliderProps) {
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
-  const [volume, setLocalVolume] = useState(0.5);
+  const [volume, setLocalVolume] = useState(1);
   const sliderRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import config from '@/config/config';
 import Grammar from '@/database/models/grammar';
@@ -31,6 +31,7 @@ import { TEXTS } from '@/locales/cs';
  * @returns The main practice card UI with all practice controls and feedback.
  */
 export default function PracticeCard() {
+  const [firstItem, setFirstStop] = useState(true);
   const [grammarVisible, setGrammarVisible] = useState(false);
   const [grammarData, setGrammarData] = useState<GrammarCardType | null>(null);
 
@@ -42,7 +43,7 @@ export default function PracticeCard() {
     currentItem,
     grammar_id,
     progress,
-    direction,
+    fromCzech,
     revealed,
     setRevealed,
     showNewGrammarIndicator,
@@ -55,10 +56,13 @@ export default function PracticeCard() {
     audioError,
     setVolume,
     playAudio,
+    audioLoading,
   } = usePracticeDeck(userId!);
 
+  const isAudioPaused = firstItem && !fromCzech && !audioDisabled;
+
   // Fetch grammar for the current item and show GrammarCard
-  const fetchGrammar = useCallback(async () => {
+  const handleGrammar = useCallback(async () => {
     if (!grammar_id) return;
     try {
       const grammar = await Grammar.getGrammarById(grammar_id);
@@ -70,8 +74,15 @@ export default function PracticeCard() {
     }
   }, [grammar_id, showToast]);
 
+  // Play audio on item change if direction is EN -> CZ
+  useEffect(() => {
+    if (!audioDisabled && !fromCzech && !audioLoading && !isAudioPaused) {
+      setTimeout(() => playAudio(), 400);
+    }
+  }, [playAudio, audioDisabled, fromCzech, audioLoading, isAudioPaused, currentItem]);
+
   if (!currentItem) {
-    return <LoadingMessage text="Načítání ..." />;
+    return <LoadingMessage text="Žádné položky k procvičování" timeDelay={100} />;
   }
 
   return (
@@ -82,51 +93,66 @@ export default function PracticeCard() {
         <>
           <div className="card-width card-height relative">
             {/* Item Card */}
-            <div
-              className={`relative flex h-full grow flex-col items-center justify-between p-4 ${
-                audioDisabled ? 'color-audio-disabled' : 'color-audio'
-              }`}
+            <ButtonRectangular
+              className={`relative flex-col items-center justify-between p-4`}
+              disabled={audioDisabled && fromCzech}
               onClick={() => {
+                if (firstItem) {
+                  setFirstStop(false);
+                  if (isAudioPaused) {
+                    return;
+                  }
+                }
                 if (!audioDisabled) {
                   playAudio();
                 }
               }}
             >
-              {/** Top Bar */}
-              <div id="top-bar" className="relative flex h-8 w-full items-center justify-between">
-                <VolumeSlider setVolume={setVolume} />
-                <p className="error-warning">{audioError && TEXTS.noAudio}</p>
-              </div>
-              {/** Item Data */}
-              <div id="item" className="flex h-full flex-col justify-center gap-1">
-                <p className="text-center font-bold">{czech}</p>
-                <p className="text-center">{english}</p>
-                <p className="text-center">{pronunciation}</p>
-              </div>
-              {/** Bottom Bar */}
-              <div
-                className="relative flex h-8 w-full items-center justify-between"
-                id="bottom-bar"
-              >
-                <p className="px-2 font-light">{progress}</p>
-                <HelpText className="bottom-7.5">{TEXTS.progress}</HelpText>
-                <p className="px-2 font-light">
-                  {(userStats?.practiceCountToday || 0) + index} / {config.practice.dailyGoal}
-                </p>
-                <HelpText className="right-0 bottom-7.5 flex flex-col items-end">
-                  <p>
-                    {TEXTS.today} / {TEXTS.dailyGoal}
-                  </p>
-                </HelpText>
-              </div>
-            </div>
+              {isAudioPaused ? (
+                <p className="error-warning my-auto">{TEXTS.pressToPlayAudio}</p>
+              ) : (
+                <>
+                  {/** Top Bar */}
+                  <div
+                    id="top-bar"
+                    className="relative flex h-8 w-full items-center justify-between"
+                  >
+                    <VolumeSlider setVolume={setVolume} />
+                    <p className="px-2">{audioError && TEXTS.noAudio}</p>
+                  </div>
+                  {/** Item Data */}
+                  <div id="item" className="flex h-full flex-col justify-center gap-1">
+                    <p className="text-center font-bold">{czech}</p>
+                    <p className="text-center font-normal">{english}</p>
+                    <p className="text-center font-normal">{pronunciation}</p>
+                  </div>
+
+                  {/** Bottom Bar */}
+                  <div
+                    className="relative flex h-8 w-full items-center justify-between"
+                    id="bottom-bar"
+                  >
+                    <p className="px-2 font-light">{progress}</p>
+                    <HelpText className="bottom-7.5">{TEXTS.progress}</HelpText>
+                    <p className="px-2 font-light">
+                      {(userStats?.practiceCountToday || 0) + index} / {config.practice.dailyGoal}
+                    </p>
+                    <HelpText className="right-0 bottom-7.5 flex flex-col items-end">
+                      <p>
+                        {TEXTS.today} / {TEXTS.dailyGoal}
+                      </p>
+                    </HelpText>
+                  </div>
+                </>
+              )}
+            </ButtonRectangular>
             {/* Practice Controls */}
             <div id="practice-controls" className="relative flex flex-col gap-1">
               {/** Top Row */}
               <div className="relative grid grid-cols-2 gap-1">
                 <ButtonRectangular
-                  onClick={() => fetchGrammar()}
-                  disabled={!grammar_id}
+                  onClick={() => handleGrammar()}
+                  disabled={!grammar_id || isAudioPaused}
                   className="relative"
                 >
                   <BookIcon />
@@ -137,7 +163,7 @@ export default function PracticeCard() {
                   onClick={() => {
                     nextItem(config.progress.skipProgress);
                   }}
-                  disabled={!revealed}
+                  disabled={!revealed || isAudioPaused}
                 >
                   <ForwardIcon />
                 </ButtonRectangular>
@@ -147,17 +173,18 @@ export default function PracticeCard() {
               {!revealed ? (
                 /** Not Revealed */
                 <div className="relative grid grid-cols-2 gap-1">
-                  <ButtonRectangular onClick={plusHint}>
+                  <ButtonRectangular onClick={plusHint} disabled={isAudioPaused}>
                     <BulbIcon />
                   </ButtonRectangular>
                   <HelpText className="top-0 left-3.5">{TEXTS.hint}</HelpText>
                   <ButtonRectangular
                     onClick={() => {
-                      if (direction) {
+                      if (fromCzech && !audioError) {
                         playAudio();
                       }
                       setRevealed(true);
                     }}
+                    disabled={isAudioPaused}
                   >
                     <EyeIcon />
                   </ButtonRectangular>
@@ -166,11 +193,17 @@ export default function PracticeCard() {
               ) : (
                 /** Revealed */
                 <div className="relative grid grid-cols-2 gap-1">
-                  <ButtonRectangular onClick={() => nextItem(config.progress.minusProgress)}>
+                  <ButtonRectangular
+                    onClick={() => nextItem(config.progress.minusProgress)}
+                    disabled={isAudioPaused}
+                  >
                     <MinusIcon />
                   </ButtonRectangular>
                   <HelpText className="top-0 left-3.5">{TEXTS.unknown}</HelpText>
-                  <ButtonRectangular onClick={() => nextItem(config.progress.plusProgress)}>
+                  <ButtonRectangular
+                    onClick={() => nextItem(config.progress.plusProgress)}
+                    disabled={isAudioPaused}
+                  >
                     <PlusIcon />
                   </ButtonRectangular>
                   <HelpText className="top-0 right-3.5">{TEXTS.known}</HelpText>

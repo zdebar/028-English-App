@@ -6,6 +6,7 @@ import Grammar from '@/database/models/grammar';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
 import { errorHandler } from '@/features/logging/error-handler';
+import { restoreUnsavedFromLocalStorage } from '@/database/database.utils';
 
 const FULL_SYNC_KEY = 'lastFullSyncAt';
 
@@ -20,6 +21,7 @@ export async function dataSync(userId: string): Promise<void> {
   const lastFullSync = Number(localStorage.getItem(FULL_SYNC_KEY) || 0);
 
   await initDbMappings();
+  await restoreUnsavedFromLocalStorage(userId);
   triggerUserItemsUpdatedEvent(userId);
 
   let syncPromises: Promise<any>[];

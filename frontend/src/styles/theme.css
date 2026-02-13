@@ -17,12 +17,11 @@
   --color-background-dark: #111827;
 
   /** button colors **/
-  --color-button-normal: #f7b740;
+  --color-button-light: #f8c04a;
+  --color-button-dark: #19202e;
   --color-button-hover: white;
   --color-disabled-light: #f3f4f6;
   --color-disabled-dark: #6b7280;
-  --color-audio-light: #f8c04a;
-  --color-audio-dark: #19202e;
 
   /** warning colors **/
   --color-warning-light: black;

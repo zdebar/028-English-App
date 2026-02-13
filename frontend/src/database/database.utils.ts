@@ -3,6 +3,8 @@ import { supabaseInstance } from '@/config/supabase.config';
 import { errorHandler } from '@/features/logging/error-handler';
 import type { UserItemSQL } from '@/types/data.types';
 import type { UserItemLocal } from '@/types/local.types';
+import UserItem from './models/user-items';
+import { infoHandler } from '@/features/logging/info-handler';
 
 /**
  * Converts a `UserItemLocal` object to a `UserItemSQL` object, replacing specific date fields
@@ -140,4 +142,31 @@ export function sortOddEvenByProgress(items: UserItemLocal[]): UserItemLocal[] {
     // Sort by sequence (ascending)
     return a.sequence - b.sequence;
   });
+}
+
+/**
+ * Restores unsaved practice deck progress from local storage and saves it to the database.
+ *
+ * @param userId - The ID of the user whose progress should be restored
+ * @returns A promise that resolves when the restore operation is complete
+ * @throws Does not throw; errors are handled internally and logged via errorHandler
+ */
+export async function restoreUnsavedFromLocalStorage(userId: string): Promise<void> {
+  const key = `practiceDeckProgress_${userId}`;
+  const saved = localStorage.getItem(key);
+  if (saved) {
+    try {
+      const userProgress = JSON.parse(saved);
+      if (Array.isArray(userProgress) && userProgress.length > 0) {
+        UserItem.savePracticeDeck(userId, userProgress);
+      }
+      localStorage.removeItem(key);
+      infoHandler(
+        `Restored unsaved practice deck progress for user ${userId} with ${userProgress.length} items.`,
+      );
+    } catch (e) {
+      errorHandler('Error parsing practice deck progress from localStorage', e);
+      localStorage.removeItem(key);
+    }
+  }
 }

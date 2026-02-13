@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import AudioRecord from '@/database/models/audio-records';
+import { infoHandler } from '../logging/info-handler';
 
 export function useAudioManager(audio: string | null) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const volumeRef = useRef(1);
-  const [audioError, setAudioError] = useState(false);
+  const [audioError, setAudioError] = useState(audio == null);
   const [loading, setLoading] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     let url: string | null = null;
@@ -25,12 +27,14 @@ export function useAudioManager(audio: string | null) {
           const audioElement = new Audio(url);
           audioElement.volume = volumeRef.current;
           audioRef.current = audioElement;
+          audioElement.addEventListener('ended', () => setIsPlaying(false));
           setAudioError(false);
         }
       } catch {
         if (!unmounted) {
           audioRef.current = null;
           setAudioError(true);
+          infoHandler(`Error loading audio ${audio}`);
         }
       } finally {
         setLoading(false);
@@ -55,12 +59,14 @@ export function useAudioManager(audio: string | null) {
     audioRef.current.currentTime = 0;
     audioRef.current.volume = volumeRef.current;
     audioRef.current.play();
+    setIsPlaying(true);
   }, [audioError]);
 
   const stopAudio = useCallback(() => {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
+      setIsPlaying(false);
     }
   }, []);
 
@@ -78,5 +84,6 @@ export function useAudioManager(audio: string | null) {
     audioError,
     isAudioReady: () => !!audioRef.current,
     loading,
+    isPlaying,
   };
 }

@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import { type UserItemLocal } from '@/types/local.types';
 
 /**
  * Hook for managing hint progression across two sections.
@@ -18,26 +17,29 @@ import { type UserItemLocal } from '@/types/local.types';
  *  - `from czech to english` - reveal english (with hintFirst)
  *  - `from english to czech` - reveal english (with hintFirst), then czech (with hintSecond)
  */
-export function useHint(currentItem: UserItemLocal | null) {
+export function useHint(czech: string = '', english: string = '') {
+  czech = czech ?? '';
+  english = english ?? '';
+
   const [index, setIndex] = useState(0);
 
   const plusHint = useCallback(() => {
     setIndex((prev) => prev + 1);
   }, []);
 
-  const englishLength = currentItem?.english.length ?? 0;
-  const czechLength = currentItem?.czech.length ?? 0;
+  const englishLength = english.length;
+  const czechLength = czech.length;
 
-  const englishHinted = currentItem
+  const englishHinted = english
     ? index === 0
       ? '\u00A0'
-      : currentItem.english.slice(0, Math.min(index, englishLength))
+      : english.slice(0, Math.min(index, englishLength))
     : '\u00A0';
 
-  const czechHinted = currentItem
+  const czechHinted = czech
     ? index <= englishLength
       ? '\u00A0'
-      : currentItem.czech.slice(0, Math.min(index - englishLength, czechLength))
+      : czech.slice(0, Math.min(index - englishLength, czechLength))
     : '\u00A0';
 
   return {

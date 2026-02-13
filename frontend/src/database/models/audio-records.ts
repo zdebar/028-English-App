@@ -104,16 +104,14 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
   /**
    * Fetches an audio file from storage and stores it in the local database.
    * @param audioFile - The name/path of the audio file to fetch
-   * @returns A promise that resolves to an object containing the filename and audio blob,
-   *          or null if the fetch operation fails
+   * @returns A promise that resolves to an object containing the filename and audio blob
    * @throws Logs an error if the audio file cannot be fetched from storage
    */
   private static async fetchAudioFile(audioFile: string): Promise<AudioRecordLocal | null> {
     const audioBlob: Blob | null = await fetchStorage(config.audio.audioBucketName, audioFile);
 
     if (!audioBlob) {
-      infoHandler(`Failed to fetch audio file: ${audioFile}`);
-      return null;
+      throw new SupabaseError(`Failed to fetch audio file: ${audioFile}`);
     }
 
     await db.audio_records.put({ filename: audioFile, audioBlob: audioBlob });

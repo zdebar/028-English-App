@@ -21,7 +21,7 @@ export function usePracticeDeck(userId: string) {
 
   const fetchPracticeDeck = useCallback(async () => {
     const data = await UserItem.getPracticeDeck(userId);
-    return data.filter((item) => item !== null && item !== undefined);
+    return data.filter((item) => item != null);
   }, [userId]);
 
   const { data: fetchedArray, error, reload } = useFetch<UserItemPractice[]>(fetchPracticeDeck);
@@ -35,21 +35,26 @@ export function usePracticeDeck(userId: string) {
 
   // Logic states
   const [revealed, setRevealed] = useState(false);
-  const { czechHinted, englishHinted, resetHint, plusHint } = useHint(currentItem);
+  const { czechHinted, englishHinted, resetHint, plusHint } = useHint(
+    currentItem?.czech,
+    currentItem?.english,
+  );
   const {
     playAudio,
     setVolume,
     audioError,
     loading: audioLoading,
+    isPlaying,
   } = useAudioManager(currentItem?.audio);
+
+  const fromCzech = currentItem ? alternateDirection(currentItem?.progress) : true; // true = CZ -> EN, false = EN -> CZ
+  const audioDisabled = (fromCzech && !revealed) || !currentItem?.audio || audioError;
+
+  const czech = fromCzech || revealed ? currentItem?.czech : czechHinted;
+  const english = revealed || (audioDisabled && !fromCzech) ? currentItem?.english : englishHinted;
+
+  // Ref to track user progress changes before saving
   const userProgressRef = useRef<UserItemPractice[]>([]);
-
-  const direction: boolean = currentItem ? alternateDirection(currentItem?.progress) : true; // true = CZ -> EN, false = EN -> CZ
-  const audioDisabled = (direction && !revealed) || audioError || !currentItem?.audio;
-
-  const shouldShowFullCzech = direction || revealed;
-  const czech = shouldShowFullCzech ? currentItem?.czech : czechHinted;
-  const english = revealed || audioDisabled ? currentItem?.english : englishHinted;
 
   // Save progress on unmount
   useEffect(() => {
@@ -66,6 +71,18 @@ export function usePracticeDeck(userId: string) {
         })();
       }
     };
+  }, [userId]);
+
+  // Save progress to localStorage on page unload
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      const userProgress = [...userProgressRef.current];
+      if (userProgress.length > 0 && userId) {
+        localStorage.setItem(`practiceDeckProgress_${userId}`, JSON.stringify(userProgress));
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [userId]);
 
   // Advance to next item and record progress change
@@ -101,20 +118,13 @@ export function usePracticeDeck(userId: string) {
     [currentItem, array.length, reload, userId],
   );
 
-  // Play audio on item change if direction is EN -> CZ and not revealed
-  useEffect(() => {
-    if (!audioDisabled && !direction && !audioLoading) {
-      setTimeout(() => playAudio(), 500);
-    }
-  }, [playAudio, audioDisabled, direction, audioLoading]);
-
   return {
     // Core state
     index,
     currentItem,
     grammar_id: currentItem?.grammar_id ?? null,
     progress: currentItem?.progress ?? 0,
-    direction,
+    fromCzech,
     revealed,
     setRevealed,
     showNewGrammarIndicator: currentItem?.show_new_grammar_indicator ?? false,
@@ -137,5 +147,7 @@ export function usePracticeDeck(userId: string) {
     audioError,
     setVolume,
     playAudio,
+    audioLoading,
+    isPlaying,
   };
 }

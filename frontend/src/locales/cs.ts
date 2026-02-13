@@ -22,6 +22,8 @@ export const TEXTS = {
   reveal: 'odhalit',
   unknown: 'neznám',
   known: 'znám',
+  pressToPlayAudio: 'Stiskněte pro přehrání audia',
+  audioIsPlaying: 'přehrává se audio',
 
   // Grammar Overview
   noGrammar: 'Žádné započatá gramatika.',

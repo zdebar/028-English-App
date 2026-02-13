@@ -7,10 +7,10 @@
 
   .button-color {
     @apply cursor-pointer border-2;
-    @apply bg-audio-light border-audio-light; /* Theming Light */
-    @apply dark:bg-audio-dark dark:border-audio-dark; /* Theming Dark */
+    @apply bg-button-light border-button-light; /* Theming Light */
+    @apply dark:bg-button-dark dark:border-button-dark; /* Theming Dark */
     @apply hover:border-light dark:hover:border-dark; /* Hover Borders */
-    @apply disabled:cursor-default disabled:border-none disabled:bg-inherit disabled:hover:bg-inherit; /* Disabled States */
+    @apply disabled:border-background-light disabled:dark:border-background-dark disabled:cursor-default disabled:bg-inherit disabled:hover:bg-inherit; /* Disabled States */
   }
 
   /** HEADER BUTTON STYLES **/

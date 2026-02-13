@@ -1,28 +1,15 @@
 @layer utilities {
   /* COLORS */
-  .color-button,
-  .color-audio {
-    @apply cursor-pointer border-2;
-    @apply bg-audio-light border-audio-light; /* Theming Light */
-    @apply dark:bg-audio-dark dark:border-audio-dark; /* Theming Dark */
-    @apply hover:border-light dark:hover:border-dark; /* Hover Borders */
-  }
-
   .color-base {
     @apply bg-background-light dark:bg-background-dark text-light dark:text-dark;
   }
 
-  .color-button,
-  .color-audio {
-    @apply cursor-pointer border-2;
-    @apply bg-audio-light border-audio-light; /* Theming Light */
-    @apply dark:bg-audio-dark dark:border-audio-dark; /* Theming Dark */
-    @apply hover:border-light dark:hover:border-dark; /* Hover Borders */
-  }
-
   .color-button {
-    @apply text-light dark:text-dark;
-    @apply disabled:cursor-default disabled:border-none disabled:bg-inherit disabled:hover:bg-inherit; /* Disabled States */
+    @apply cursor-pointer border-2;
+    @apply bg-button-light border-button-light; /* Theming Light */
+    @apply dark:bg-button-dark dark:border-button-dark; /* Theming Dark */
+    @apply hover:border-light dark:hover:border-dark; /* Hover Borders */
+    @apply disabled:border-bac disabled:cursor-default disabled:bg-inherit disabled:hover:bg-inherit; /* Disabled States */
   }
 
   .color-audio-disabled {

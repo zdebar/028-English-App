@@ -107,6 +107,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       itemsWithNextAt = [...itemsWithNextAt, ...remainingItems];
     }
 
+    if (itemsWithNextAt.length < deckSize) {
+      return [];
+    }
+
     // Step 4: Mark items as grammar initial practice based on started grammar
     const shownGrammarIds = new Set<number>();
     const itemsWithGrammarFlag: UserItemPractice[] = itemsWithNextAt.map((item) => {

@@ -1,3 +1,5 @@
+import { validateNonNegativeInteger } from '@/utils/validation.utils';
+
 /**
  * Alternates the direction of the words based on their progress.
  * @param progress - The progress value.
@@ -5,8 +7,6 @@
  * @throws Error if progress is not a non-negative integer.
  */
 export function alternateDirection(progress: number): boolean {
-  if (!Number.isInteger(progress) || progress < 0) {
-    throw new Error('progress must be a non-negative integer');
-  }
+  validateNonNegativeInteger(progress, 'progress');
   return progress % 2 === 0;
 }
