@@ -83,5 +83,6 @@ export const TEXTS = {
 
   // Generic Erase Progress
   eraseProgress: 'Vymazat pokrok',
+  eraseProgressHelp: 'vymazat pokrok',
   eraseDescription: 'Opravdu chcete vymazat pokrok? Tuto akci již nelze vrátit zpět.',
 };

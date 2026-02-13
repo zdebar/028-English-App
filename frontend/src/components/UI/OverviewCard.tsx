@@ -34,7 +34,7 @@ export default function OverviewCard({
   titleText = TEXTS.notAvailable,
   modalText = TEXTS.eraseProgress,
   modalDescription = TEXTS.eraseDescription,
-  helpText = TEXTS.eraseProgress,
+  helpText = TEXTS.eraseProgressHelp,
   handleReset,
   onClose,
   className = '',
@@ -61,7 +61,7 @@ export default function OverviewCard({
         </ButtonWithModal>
         {/* Close Card Button */}
         <CloseButton onClick={onClose} />
-        <HelpText className="help-bottom">{helpText}</HelpText>
+        <HelpText className="-bottom-2 left-2">{helpText}</HelpText>
       </div>
       {/* Content Area */}
       <div className="w-full grow p-4">{children}</div>
