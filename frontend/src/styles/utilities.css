@@ -17,6 +17,12 @@
     @apply border-background-light dark:border-background-dark bg-inherit text-inherit;
   }
 
+  .color-not-revealed {
+    @apply outline-4;
+    @apply outline-background-dark; /* Theming Light */
+    @apply dark:outline-background-light; /* Theming Dark */
+  }
+
   .text-bar {
     @apply font-body text-light text-center text-sm font-bold;
   }
