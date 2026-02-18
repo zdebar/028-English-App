@@ -120,7 +120,9 @@ export default function PracticeCard() {
                     className="relative flex h-8 w-full items-center justify-between"
                   >
                     <VolumeSlider setVolume={setVolume} />
-                    <p className="px-2">{audioError && TEXTS.noAudio}</p>
+                    <p className="px-2">
+                      {audioError ? TEXTS.noAudio : audioLoading && TEXTS.loadingAudio}
+                    </p>
                   </div>
                   {/** Item Data */}
                   <div id="item" className="flex h-full flex-col justify-center gap-1">

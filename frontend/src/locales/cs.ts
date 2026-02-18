@@ -14,6 +14,7 @@ export const TEXTS = {
   // Practice
   noNotesToDisplay: 'Žádné poznámky k zobrazení.',
   noAudio: 'bez audia',
+  loadingAudio: 'načítá se audio ...',
   progress: 'pokrok',
   today: 'dnes',
   dailyGoal: 'denní cíl',

@@ -31,6 +31,7 @@
   --color-help: white;
   --color-indicator: green;
   --color-overlay: rgba(0, 0, 0, 0.5);
+  --color-not-revealed-light: #2fa7eb;
 
   /** progress bar colors **/
   --color-progress-bg: white;

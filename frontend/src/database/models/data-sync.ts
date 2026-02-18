@@ -33,7 +33,6 @@ export async function dataSync(userId: string): Promise<void> {
       Grammar.syncGrammarAll(),
       UserScore.syncUserScoreAll(userId),
       UserItem.syncUserItemsAll(userId),
-      AudioRecord.syncAudioData(),
     ];
   } else {
     // Incremental synchronization
@@ -41,7 +40,6 @@ export async function dataSync(userId: string): Promise<void> {
       UserScore.syncUserScoreSinceLastSync(userId),
       UserItem.syncUserItemsSinceLastSync(userId),
       Grammar.syncGrammarSinceLastSync(),
-      AudioRecord.syncAudioData(),
     ];
   }
 
