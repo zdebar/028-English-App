@@ -61,6 +61,7 @@ export default function App() {
       }
       try {
         await AudioRecord.syncAudioData(config.audio.startArchives);
+        await AudioRecord.removeOrphaned();
       } catch (error) {
         errorHandler('Remaining audio data synchronization failed', error);
       }

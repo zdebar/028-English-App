@@ -55,7 +55,6 @@ export async function dataSync(userId: string): Promise<void> {
   });
   if (firstError) throw firstError;
 
-  await AudioRecord.removeOrphaned();
   if (doFullSync) {
     localStorage.setItem(FULL_SYNC_KEY, String(now));
   }
