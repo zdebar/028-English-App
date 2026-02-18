@@ -16,6 +16,8 @@ import OverlayContainer from '@/features/overlay/OverlayContainer';
 import LoadingMessage from '@/components/UI/LoadingMessage';
 import Profile from '@/pages/Profile';
 import Guide from '@/pages/Guide';
+import AudioRecord from '@/database/models/audio-records';
+import config from '@/config/config';
 
 import { useEffect, useState } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
@@ -56,6 +58,11 @@ export default function App() {
         errorHandler('Data synchronization failed', error);
       } finally {
         setLoading(false);
+      }
+      try {
+        await AudioRecord.syncAudioData(config.audio.startArchives);
+      } catch (error) {
+        errorHandler('Remaining audio data synchronization failed', error);
       }
     };
     syncData();

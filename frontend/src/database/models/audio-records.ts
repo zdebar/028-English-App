@@ -43,9 +43,9 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    * @returns A promise that resolves when all audio archives have been synced.
    * @throws {SupabaseError} If fetching an audio archive fails.
    */
-  static async syncAudioData(): Promise<void> {
+  static async syncAudioData(archives: string[]): Promise<void> {
     await Promise.all(
-      config.audio.archives.map(async (archiveName) => {
+      archives.map(async (archiveName) => {
         if (await AudioMetadata.isFetched(archiveName)) return;
 
         const zipBlob: Blob | null = await fetchStorage(

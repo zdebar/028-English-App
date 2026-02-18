@@ -181,3 +181,5 @@ The app uses IndexedDb for locally storing data. It enables offline function as 
 database
 backup
 prevent out of range values
+data
+without
