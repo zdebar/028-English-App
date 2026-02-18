@@ -99,11 +99,9 @@ export default function PracticeCard() {
                 audioDisabled ? 'color-audio-disabled' : 'button-color'
               }`}
               onClick={() => {
-                if (isFirstItem) {
-                  setIsFirstItem(false);
-                  if (isAudioPaused) {
-                    return;
-                  }
+                setIsFirstItem(false);
+                if (isAudioPaused) {
+                  return;
                 }
                 if (!audioDisabled) {
                   playAudio();

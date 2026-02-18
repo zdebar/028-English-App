@@ -8,7 +8,7 @@ import { TableName, type UserScoreLocal } from '@/types/local.types';
 import { Entity } from 'dexie';
 import Metadata from './metadata';
 import { infoHandler } from '@/features/logging/info-handler';
-import { validateNonNegativeInteger } from '@/utils/validation.utils';
+import { assertNonNegativeInteger } from '@/utils/assertions.utils';
 
 /**
  * Represents a user score entity in the application database.
@@ -33,7 +33,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @throws Error if database operation fails.
    */
   static async addItemCount(userId: string, addCount: number): Promise<boolean> {
-    validateNonNegativeInteger(addCount, 'addItemCount');
+    assertNonNegativeInteger(addCount, 'addItemCount');
 
     const today = getTodayShortDate();
     const existingRecord = await db.user_scores.get([userId, today]);

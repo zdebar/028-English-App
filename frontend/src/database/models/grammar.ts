@@ -10,7 +10,7 @@ import { TableName } from '@/types/local.types';
 import { DatabaseError, SupabaseError } from '@/types/error.types';
 import type { GrammarSQL } from '@/types/data.types';
 import { infoHandler } from '@/features/logging/info-handler';
-import { validateNonNegativeInteger } from '@/utils/validation.utils';
+import { assertNonNegativeInteger } from '@/utils/assertions.utils';
 
 /**
  * Represents a grammar entity in the application database.
@@ -37,7 +37,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * @throws {DatabaseError} If no grammar record with the specified ID is found.
    */
   static async getGrammarById(grammarId: number): Promise<GrammarLocal> {
-    validateNonNegativeInteger(grammarId, 'grammarId');
+    assertNonNegativeInteger(grammarId, 'grammarId');
 
     const grammar = await db.grammar.get(grammarId);
 

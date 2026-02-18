@@ -4,6 +4,10 @@
 
 A personal learning app with focus on drill. Learning games are not working.
 
+### Basic functionality
+
+Data management is frontend storage first. Practice data are stored in IndexedDB and regularly synchronized.
+
 ## Git Guidelines
 
 ### Branching Strategies
@@ -65,6 +69,11 @@ React & TypeScript: Hook `useFetch`, Component `PracticeCard`
 
 Stores audio files zips. Separated into multiple batches. First one smaller to enable faster start.
 
+### Data Types
+
+- **SQL** Data as stored on Supabase
+- **Local** Data as used on frontend. Mostly nulls converted to nullReplacementValue. More in Null Replacement Values.
+
 ### IndexedDB Structure
 
 The app uses IndexedDb for locally storing data. It enables offline function as long as refresh toke lasts, and it limits server traffic.
@@ -106,9 +115,10 @@ The app uses IndexedDb for locally storing data. It enables offline function as 
     - `config.nullReplacementDate` - used for started_at, next_at, mastered_at; On fetch Dates are converted on backend, on post Dates are converted in frontend
     - `config.nullReplacementNumber` - used for grammar_id
 
-### Features
+## Features
 
 - **auth**: User management - register, sign in, sign out, delete user profile, via supabase auth
+  - managed by Supabase Auth
 - **dashboard**: Shows started items count
 - **error-handler**: Error Handling Management
 
@@ -165,3 +175,9 @@ The app uses IndexedDb for locally storing data. It enables offline function as 
   - infor
 
 - **vocabulary**: Vocabulary overview
+
+## Future Development
+
+database
+backup
+prevent out of range values

@@ -4,7 +4,7 @@ import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import { TableName, type UserItemLocal, type UserItemPractice } from '@/types/local.types';
 import Dexie, { Entity } from 'dexie';
-import { validateNonNegativeInteger, validatePositiveInteger } from '@/utils/validation.utils';
+import { assertNonNegativeInteger, assertPositiveInteger } from '@/utils/assertions.utils';
 
 import {
   convertLocalToSQL,
@@ -49,7 +49,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     userId: string,
     deckSize: number = config.lesson.deckSize,
   ): Promise<UserItemPractice[]> {
-    validatePositiveInteger(deckSize, 'deckSize');
+    assertPositiveInteger(deckSize, 'deckSize');
 
     // Step 1: Fetch already started grammar list
     const startedGrammar = await Grammar.getStartedGrammarList(userId);
@@ -243,7 +243,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @throws Throws an error if no user items are found for the given grammar ID.
    */
   static async resetGrammarItems(userId: string, grammarId: number): Promise<number> {
-    validateNonNegativeInteger(grammarId, 'grammarId');
+    assertNonNegativeInteger(grammarId, 'grammarId');
 
     const count = await db.user_items
       .where('[user_id+grammar_id+started_at]')
@@ -275,7 +275,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @throws Throws an error if no user item is found for the specified item ID
    */
   static async resetUserItemById(userId: string, itemId: number): Promise<boolean> {
-    validateNonNegativeInteger(itemId, 'itemId');
+    assertNonNegativeInteger(itemId, 'itemId');
 
     const count = await db.user_items
       .where('[user_id+item_id]')
