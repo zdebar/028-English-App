@@ -12,7 +12,12 @@ export function useAudioManager(audio: string | null) {
   useEffect(() => {
     let url: string | null = null;
     let unmounted = false;
-    setLoading(true);
+    let loadingTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    // Start delayed loading indicator
+    loadingTimeout = setTimeout(() => {
+      if (!unmounted) setLoading(true);
+    }, 250);
 
     const loadAudio = async () => {
       if (!audio) {
@@ -37,6 +42,7 @@ export function useAudioManager(audio: string | null) {
           infoHandler(`Error loading audio ${audio}`);
         }
       } finally {
+        if (loadingTimeout) clearTimeout(loadingTimeout);
         setLoading(false);
       }
     };
