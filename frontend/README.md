@@ -200,4 +200,4 @@ App is sync on every refresh or every 24 hours with -**SyncSinceLastSync**- and 
 ### PWA
 
 - Screenshots
-- Sync on demount
+- If localStorage stored unsynced, sync
