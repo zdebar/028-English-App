@@ -5,7 +5,6 @@ import Grammar from '@/database/models/grammar';
 
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { usePracticeDeck } from '@/features/practice/use-practice-deck';
-import { useUserStore } from '@/features/dashboard/use-user-store';
 
 import HelpText from '@/features/help/HelpText';
 import Indicator from '@/components/UI/Indicator';
@@ -24,6 +23,7 @@ import PlusIcon from '@/components/UI/icons/PlusIcon';
 import { errorHandler } from '../logging/error-handler';
 import { useToastStore } from '../toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
+import { useCurrentUserStats } from '@/features/dashboard/use-current-user-stats';
 
 /**
  * PracticeCard component for interactive language practice.
@@ -36,7 +36,7 @@ export default function PracticeCard() {
   const [grammarData, setGrammarData] = useState<GrammarCardType | null>(null);
 
   const userId = useAuthStore((state) => state.userId);
-  const userStats = useUserStore((state) => state.userStats);
+  const userStats = useCurrentUserStats();
   const showToast = useToastStore((state) => state.showToast);
   const {
     index,

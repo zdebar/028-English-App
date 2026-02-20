@@ -6,7 +6,7 @@ import UserItem from '@/database/models/user-items';
 import { errorHandler } from '../logging/error-handler';
 
 interface UserState {
-  userStats: UserStatsLocal | null;
+  userStats: Record<string, UserStatsLocal>;
   reloadUserScore: (userId: string) => Promise<void>;
 }
 
@@ -22,7 +22,7 @@ declare global {
 export const useUserStore = create<UserState>()(
   devtools(
     persist(
-      (set) => {
+      (set, get) => {
         const reloadUserScore = async (userId: string) => {
           if (!userId) return;
 
@@ -32,9 +32,12 @@ export const useUserStore = create<UserState>()(
 
             set({
               userStats: {
-                startedCountToday: startedCounts?.startedCountToday || 0,
-                startedCount: startedCounts?.startedCount || 0,
-                practiceCountToday: todayScore?.item_count || 0,
+                ...get().userStats,
+                [userId]: {
+                  startedCountToday: startedCounts?.startedCountToday || 0,
+                  startedCount: startedCounts?.startedCount || 0,
+                  practiceCountToday: todayScore?.item_count || 0,
+                },
               },
             });
           } catch (error) {
@@ -51,7 +54,7 @@ export const useUserStore = create<UserState>()(
         });
 
         return {
-          userStats: null,
+          userStats: {},
           reloadUserScore,
         };
       },

@@ -1,7 +1,7 @@
 import { TEXTS } from '@/locales/cs';
 import LessonBar from '@/features/dashboard/BlockBar';
 import { getLessonProgress } from '@/features/dashboard/dashboard.utils';
-import { useUserStore } from '@/features/dashboard/use-user-store';
+import { useCurrentUserStats } from './use-current-user-stats';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import type { LessonsLocal } from '@/types/local.types';
@@ -17,7 +17,7 @@ type DashboardProps = {
  * @returns The dashboard view with lesson progress, hints, and help overlay.
  */
 export default function Dashboard({ className = '' }: DashboardProps) {
-  const { userStats } = useUserStore();
+  const userStats = useCurrentUserStats();
 
   const lessonProgress: LessonsLocal[] = userStats
     ? getLessonProgress(userStats.startedCount || 0, userStats.startedCountToday || 0)
