@@ -1,11 +1,13 @@
 import { create } from 'zustand';
+import { loadUserTheme, saveUserTheme } from './theme-utils';
 
 export type UserTheme = 'light' | 'dark';
 
-const THEME_STORAGE_KEY = 'theme';
-
 interface ThemeState {
   theme: UserTheme;
+  userId: string;
+  setUserId: (userId: string) => void;
+  clearTheme: () => void;
   chooseTheme: (newTheme: UserTheme) => void;
 }
 
@@ -38,10 +40,12 @@ export const useThemeStore = create<ThemeState>((set, get) => {
     return 'light';
   };
 
-  const readStoredTheme = (): UserTheme | null => {
+  const readStoredTheme = (userId: string): UserTheme | null => {
     if (!isBrowser) return null;
+    userId = userId || 'guest';
+
     try {
-      const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+      const stored = loadUserTheme(userId);
       return stored === 'light' || stored === 'dark' ? stored : null;
     } catch {
       return null;
@@ -56,27 +60,42 @@ export const useThemeStore = create<ThemeState>((set, get) => {
     root.classList.toggle('light', theme === 'light');
   };
 
-  const saveTheme = (theme: UserTheme) => {
+  const saveTheme = (theme: UserTheme, userId: string) => {
     if (!isBrowser) return;
+    userId = userId || 'guest';
+
     try {
-      window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+      saveUserTheme(theme, userId);
     } catch {
       // Ignore storage failures (e.g., blocked storage)
     }
   };
 
-  const initialTheme: UserTheme = readStoredTheme() ?? getSystemTheme();
+  const initialUserId = 'guest';
+  const initialTheme: UserTheme = readStoredTheme(initialUserId) ?? getSystemTheme();
   applyTheme(initialTheme);
 
   return {
     theme: initialTheme,
-    chooseTheme: (newTheme) => {
+    userId: initialUserId,
+    clearTheme: () => {
+      const userId = get().userId || 'guest';
+      if (!isBrowser) return;
+      try {
+        localStorage.removeItem(`theme_${userId}`);
+      } catch {
+        // Ignore storage failures (e.g., blocked storage)
+      }
+    },
+    setUserId: (userId: string) => set({ userId }),
+    chooseTheme: (newTheme: UserTheme) => {
+      const userId = get().userId || 'guest';
       if (newTheme === get().theme) {
         applyTheme(newTheme);
         return;
       }
       applyTheme(newTheme);
-      saveTheme(newTheme);
+      saveTheme(newTheme, userId);
       set({ theme: newTheme });
     },
   };
