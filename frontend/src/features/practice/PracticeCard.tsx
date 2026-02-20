@@ -97,7 +97,7 @@ export default function PracticeCard() {
           >
             {/* Item Card */}
             <div
-              className={`relative flex h-full grow flex-col items-center justify-between p-4 ${
+              className={`relative flex h-full grow flex-col items-center justify-between p-4 select-none ${
                 audioDisabled ? 'color-audio-disabled' : 'button-color'
               } `}
               onClick={() => {
@@ -109,6 +109,7 @@ export default function PracticeCard() {
                   playAudio();
                 }
               }}
+              role="button"
             >
               {isAudioPaused ? (
                 <p className="error-warning my-auto">{TEXTS.pressToPlayAudio}</p>

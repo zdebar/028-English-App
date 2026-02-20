@@ -1,5 +1,5 @@
 import config from '@/config/config';
-import { TEXTS } from '@/config/texts.config';
+import { TEXTS } from '@/locales/cs';
 
 /**
  * Returns a shortened date string (YYYY-MM-DD) from an ISO date string.

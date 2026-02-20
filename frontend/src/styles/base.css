@@ -4,6 +4,11 @@
     @apply font-body text-light dark:text-dark bg-background-light dark:bg-background-dark;
   }
 
+  body {
+    min-width: 320px;
+    min-height: 600px;
+  }
+
   h1 {
     @apply font-headings pb-2 text-4xl font-thin;
   }
@@ -37,5 +42,9 @@
 
   a {
     @apply hover:underline;
+  }
+
+  button {
+    @apply select-none;
   }
 }

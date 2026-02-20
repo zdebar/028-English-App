@@ -1,6 +1,7 @@
 import PropertyView from '@/components/UI/PropertyView';
 import { supabaseInstance } from '@/config/supabase.config';
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import { useUserStore } from '@/features/dashboard/use-user-store';
 import Dashboard from '@/features/dashboard/Dashboard';
 import PrivacyPolicyLink from '@/features/privacy-policy/PrivacyPolicyLink';
 import { useThemeStore } from '@/features/theme/use-theme';
@@ -9,6 +10,7 @@ import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { type JSX } from 'react';
 import { Link } from 'react-router-dom';
+import config from '@/config/config';
 
 /**
  * The Home component renders the main page of the application.
@@ -19,14 +21,25 @@ export default function Home(): JSX.Element {
   const theme = useThemeStore((state) => state.theme);
   const userId = useAuthStore((state) => state.userId);
   const userEmail = useAuthStore((state) => state.userEmail);
+  const userStats = useUserStore((state) => state.userStats);
+
+  const practiceCountToday = userStats?.practiceCountToday || 0;
+  const dailyGoal = config.practice.dailyGoal;
+  const isPracticeGoalMet = practiceCountToday >= dailyGoal;
 
   let mainSection: JSX.Element;
   if (userId) {
     // User is authenticated - show dashboard
     mainSection = (
-      <div className="relative flex w-full flex-col gap-1">
-        <PropertyView label={TEXTS.userLabel} className="h-input" value={userEmail} />
-        <Dashboard />
+      <div className="relative flex w-full flex-col">
+        <PropertyView label={TEXTS.userLabel} className="h-attribute" value={userEmail} />
+        <PropertyView
+          label={TEXTS.userStatsLabel}
+          className="h-attribute"
+          classNameValue={isPracticeGoalMet ? 'text-toast-success' : 'text-toast-error'}
+          value={`${practiceCountToday} / ${dailyGoal}`}
+        />
+        <Dashboard className="pt-4" />
       </div>
     );
   } else {

@@ -1,4 +1,4 @@
-import { TEXTS } from '@/config/texts.config';
+import { TEXTS } from '@/locales/cs';
 import { useMemo } from 'react';
 import { errorHandler } from '../logging/error-handler';
 

@@ -4,7 +4,8 @@ export const TEXTS = {
   appSubtitle: 'Aplikace v testovacím režimu',
   appDescription:
     'Toto je aplikace pro učení angličtiny. V současné době je v testovacím režimu a může obsahovat chyby.',
-  guide: 'prohlédnout návod',
+  guide: 'návod',
+  startedTodayHint: 'dnes procvičeno',
 
   // Synchronization
   syncSuccessToast: 'Data byla úspěšně synchronizována.',
@@ -32,6 +33,7 @@ export const TEXTS = {
 
   // User
   userLabel: 'Uživatel',
+  userStatsLabel: 'Dnes',
   authInitErrorToast: 'Nastala chyba při přihlašování.',
 
   // Buttons
@@ -48,6 +50,7 @@ export const TEXTS = {
   dataLoadingError: 'Chyba při načítání dat.',
   resetProgressSuccessToast: 'Pokrok byl úspěšně vymazán.',
   resetProgressErrorToast: 'Chyba při mazání pokroku.',
+  and: 'a',
 
   // Errors
   genericError: 'Nastala neznámá chyba.',
@@ -87,4 +90,18 @@ export const TEXTS = {
   eraseProgress: 'Vymazat pokrok',
   eraseProgressHelp: 'vymazat pokrok',
   eraseDescription: 'Opravdu chcete vymazat pokrok? Tuto akci již nelze vrátit zpět.',
+
+  // Vocabulary
+  translationDirection: 'výchozí jazyk',
+  next: 'další',
+  nextFivePlus: 'dalších',
+  enterPrompt: 'Zadejte slovičko ...',
+  noStartedVocabulary: 'Žádná započatá slovíčka',
+  czech: 'česky',
+  english: 'anglicky',
+  pronunciation: 'výslovnost',
+  startedAt: 'započato',
+  updatedAt: 'změněno',
+  nextAt: 'další',
+  masteredAt: 'naučeno',
 };
