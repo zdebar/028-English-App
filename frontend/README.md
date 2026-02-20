@@ -181,6 +181,11 @@ The app uses IndexedDb for locally storing data. It enables offline function as 
 database
 backup
 prevent out of range values
+do not synchronize alredy mastered audio files
 
 layout
 on multiple real screen
+
+error handling
+prevent repeated requests to failed services
+loggin services

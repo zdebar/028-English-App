@@ -62,11 +62,6 @@ export default function VocabularyDetailCard({
             <PropertyView
               label={TEXTS.masteredAt}
               className="h-attribute"
-              value={shortenDate(selectedWord?.started_at)}
-            />
-            <PropertyView
-              label={TEXTS.finishedAt}
-              className="h-attribute"
               value={shortenDate(selectedWord?.mastered_at)}
             />
           </div>
