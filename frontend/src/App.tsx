@@ -2,7 +2,7 @@ import Footer from '@/components/Layout/Footer';
 import Header from '@/components/Layout/Header';
 import ProtectedLayout from '@/components/utils/protected-laout';
 
-import { dataSync, dataSyncOnUnmount } from '@/database/models/data-sync';
+import { startPeriodicSync } from '@/database/models/data-sync';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 
 import ToastContainer from '@/features/toast/ToastContainer';
@@ -16,8 +16,6 @@ import OverlayContainer from '@/features/overlay/OverlayContainer';
 import LoadingMessage from '@/components/UI/LoadingMessage';
 import Profile from '@/pages/Profile';
 import Guide from '@/pages/Guide';
-import AudioRecord from '@/database/models/audio-records';
-import config from '@/config/config';
 
 import { useEffect, useState } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
@@ -66,47 +64,9 @@ export default function App() {
 
   // Data synchronization
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-
-    const syncData = async () => {
-      setLoading(true);
-      try {
-        if (userId) {
-          await dataSync(userId);
-        }
-        showToast(TEXTS.syncSuccessToast, 'success');
-      } catch (error) {
-        showToast(TEXTS.syncErrorToast, 'error');
-        errorHandler('Data synchronization failed', error);
-      } finally {
-        setLoading(false);
-      }
-      try {
-        await AudioRecord.syncAudioData(config.audio.startArchives);
-        await AudioRecord.removeOrphaned();
-      } catch (error) {
-        errorHandler('Remaining audio data synchronization failed', error);
-      }
-    };
-
-    const checkAndSync = () => {
-      const today = new Date().toISOString().slice(0, 10);
-      const lastSyncDate = localStorage.getItem('lastSyncDate');
-      if (lastSyncDate !== today) {
-        syncData();
-      }
-    };
-
-    checkAndSync();
-    intervalId = setInterval(checkAndSync, config.sync.periodicSyncInterval);
-
-    syncData();
-    return () => {
-      clearInterval(intervalId);
-      if (userId) {
-        dataSyncOnUnmount(userId);
-      }
-    };
+    if (!userId) return;
+    const cleanup = startPeriodicSync(userId, setLoading, showToast);
+    return cleanup;
   }, [userId]);
 
   return (

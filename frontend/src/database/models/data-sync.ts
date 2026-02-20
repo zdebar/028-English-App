@@ -8,6 +8,7 @@ import UserScore from '@/database/models/user-scores';
 import { errorHandler } from '@/features/logging/error-handler';
 import { restoreUnsavedFromLocalStorage } from '@/database/database.utils';
 import { getFullSyncTime, setFullSyncTime, setPartialSyncTime } from '@/components/utils/sync-time';
+import { TEXTS } from '@/locales/cs';
 
 /**
  * Synchronizes data for a specific user with the database.
@@ -72,4 +73,67 @@ export async function dataSyncOnUnmount(userId: string): Promise<void> {
   await initDbMappings();
   await UserScore.syncUserScoreSinceLastSync(userId);
   await UserItem.syncUserItemsSinceLastSync(userId);
+}
+
+/**
+ * Starts a periodic synchronization process for user data and audio records.
+ *
+ * Performs an initial sync immediately, then checks daily if sync is needed based on
+ * the last sync date stored in localStorage. Additionally, syncs audio data and removes
+ * orphaned audio files.
+ *
+ * @param userId - The ID of the user whose data should be synchronized
+ * @param setLoading - Callback function to update the loading state during synchronization
+ * @param showToast - Callback function to display toast notifications with success or error messages
+ *
+ * @returns A cleanup function that stops the periodic sync interval and performs final
+ *          synchronization on component unmount
+ */
+export function startPeriodicSync(
+  userId: string,
+  setLoading: (loading: boolean) => void,
+  showToast: (message: string, type: 'success' | 'error') => void,
+): () => void {
+  let intervalId: NodeJS.Timeout;
+
+  const syncData = async () => {
+    setLoading(true);
+    try {
+      if (userId) {
+        await dataSync(userId);
+      }
+      showToast(TEXTS.syncSuccessToast, 'success');
+    } catch (error) {
+      showToast(TEXTS.syncErrorToast, 'error');
+      errorHandler('Data synchronization failed', error);
+    } finally {
+      setLoading(false);
+    }
+    try {
+      await AudioRecord.syncAudioData(config.audio.startArchives);
+      await AudioRecord.removeOrphaned();
+    } catch (error) {
+      errorHandler('Remaining audio data synchronization failed', error);
+    }
+  };
+
+  const checkAndSync = () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const lastSyncDate = localStorage.getItem('lastSyncDate');
+    if (lastSyncDate !== today) {
+      syncData();
+    }
+  };
+
+  checkAndSync();
+  intervalId = setInterval(checkAndSync, config.sync.periodicSyncInterval);
+
+  syncData();
+
+  return () => {
+    clearInterval(intervalId);
+    if (userId) {
+      dataSyncOnUnmount(userId);
+    }
+  };
 }
