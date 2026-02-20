@@ -7,8 +7,7 @@ import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
 import { errorHandler } from '@/features/logging/error-handler';
 import { restoreUnsavedFromLocalStorage } from '@/database/database.utils';
-
-const FULL_SYNC_KEY = 'lastFullSyncAt';
+import { getFullSyncTime, setFullSyncTime, setPartialSyncTime } from '@/components/utils/sync-time';
 
 /**
  * Synchronizes data for a specific user with the database.
@@ -18,7 +17,7 @@ const FULL_SYNC_KEY = 'lastFullSyncAt';
  */
 export async function dataSync(userId: string): Promise<void> {
   const now = Date.now();
-  const lastFullSync = Number(localStorage.getItem(FULL_SYNC_KEY) || 0);
+  const lastFullSync = getFullSyncTime(userId);
 
   await initDbMappings();
   await restoreUnsavedFromLocalStorage(userId);
@@ -56,8 +55,9 @@ export async function dataSync(userId: string): Promise<void> {
   if (firstError) throw firstError;
 
   if (doFullSync) {
-    localStorage.setItem(FULL_SYNC_KEY, String(now));
+    setFullSyncTime(userId, now);
   }
+  setPartialSyncTime(userId, now);
 
   triggerUserItemsUpdatedEvent(userId);
 }

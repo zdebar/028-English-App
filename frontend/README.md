@@ -86,10 +86,12 @@ The app uses IndexedDb for locally storing data. It enables offline function as 
 - **Backend sync:** After "get" from backend, `null` values are replaced with `config.nullReplacementValues` where necessary.<br>
   Before "post" to backend, `config.nullReplacementValues` are replaced with `null` where necessary.
 
-### Synchronization SinceLastSync vs All
+### Synchronization
 
-- **All** First synchronizes changes to backend, then fetches all data from backend and replaces entire IndexedDB store. To ensure IndexedDB correctness.
-- **SinceLastSync** First synchronizes changes to backend, then fetches only changed data. To ensure minimal traffic.
+App is sync on every refresh or every 24 hours with -**SyncSinceLastSync**- and every 7 days with **SyncAll**
+
+- **SyncAll** First synchronizes changes to backend, then fetches all data from backend and replaces entire IndexedDB store. To ensure IndexedDB correctness.
+- **SyncSinceLastSync** First synchronizes changes to backend, then fetches only changed data. To ensure minimal traffic.
 
 #### IndexedDB Stores
 
@@ -178,14 +180,17 @@ The app uses IndexedDb for locally storing data. It enables offline function as 
 
 ## Future Development
 
-database
-backup
-prevent out of range values
-do not synchronize alredy mastered audio files
+### Database
 
-layout
-on multiple real screen
+- Backup
+- Prevent out-of-range values
+- Do not synchronize already mastered audio files
 
-error handling
-prevent repeated requests to failed services
-loggin services
+### Layout
+
+- Support for multiple real screens
+
+### Error Handling
+
+- Prevent repeated requests to failed services
+- Logging services

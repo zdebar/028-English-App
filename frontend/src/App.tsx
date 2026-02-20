@@ -25,6 +25,7 @@ import { errorHandler } from './features/logging/error-handler';
 import { useToastStore } from './features/toast/use-toast-store';
 import { TEXTS } from './locales/cs';
 import './styles/index.css';
+import { infoHandler } from './features/logging/info-handler';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -37,6 +38,16 @@ export default function App() {
   useEffect(() => {
     try {
       const cleanup = initializeAuth();
+      // Request persistent storage
+      if (navigator.storage && navigator.storage.persist) {
+        navigator.storage.persist().then((granted) => {
+          if (granted) {
+            infoHandler('Persistent storage granted.');
+          } else {
+            infoHandler('Persistent storage not granted.');
+          }
+        });
+      }
       return cleanup;
     } catch (error) {
       showToast(TEXTS.authInitErrorToast, 'error');
@@ -46,6 +57,8 @@ export default function App() {
 
   // Data synchronization
   useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
     const syncData = async () => {
       setLoading(true);
       try {
@@ -66,8 +79,21 @@ export default function App() {
         errorHandler('Remaining audio data synchronization failed', error);
       }
     };
+
+    const checkAndSync = () => {
+      const today = new Date().toISOString().slice(0, 10);
+      const lastSyncDate = localStorage.getItem('lastSyncDate');
+      if (lastSyncDate !== today) {
+        syncData();
+      }
+    };
+
+    checkAndSync();
+    intervalId = setInterval(checkAndSync, config.sync.periodicSyncInterval);
+
     syncData();
     return () => {
+      clearInterval(intervalId);
       if (userId) {
         dataSyncOnUnmount(userId);
       }
