@@ -36,7 +36,9 @@ export default function Home(): JSX.Element {
         <PropertyView
           label={TEXTS.userStatsLabel}
           className="h-attribute"
-          classNameValue={isPracticeGoalMet ? 'text-toast-success' : 'text-toast-error'}
+          classNameValue={
+            isPracticeGoalMet ? 'text-toast-success font-bold' : 'text-toast-error font-bold'
+          }
           value={`${practiceCountToday} / ${dailyGoal}`}
         />
         <Dashboard className="pt-4" />
