@@ -4,7 +4,7 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import Dashboard from '@/features/dashboard/Dashboard';
 import PrivacyPolicyLink from '@/features/privacy-policy/PrivacyPolicyLink';
 import { useThemeStore } from '@/features/theme/use-theme';
-import { useCurrentUserStats } from '@/features/dashboard/use-current-user-stats';
+import { useUserStore } from '@/features/dashboard/use-user-store';
 import { TEXTS } from '@/locales/cs';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
@@ -21,7 +21,7 @@ export default function Home(): JSX.Element {
   const theme = useThemeStore((state) => state.theme);
   const userId = useAuthStore((state) => state.userId);
   const userEmail = useAuthStore((state) => state.userEmail);
-  const userStats = useCurrentUserStats();
+  const userStats = useUserStore((state) => state.userStats);
 
   const practiceCountToday = userStats?.practiceCountToday || 0;
   const dailyGoal = config.practice.dailyGoal;

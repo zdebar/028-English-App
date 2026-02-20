@@ -1,77 +1,62 @@
 import { create } from 'zustand';
-import { persist, devtools } from 'zustand/middleware';
 import type { UserStatsLocal } from '@/types/local.types';
 import UserScore from '@/database/models/user-scores';
 import UserItem from '@/database/models/user-items';
-import { errorHandler } from '../logging/error-handler';
 
 interface UserState {
-  userStats: Record<string, UserStatsLocal>;
-  reloadUserScore: (userId: string) => Promise<void>;
+  userId: string;
+  userStats: UserStatsLocal | null;
+  reloadUserStats: () => Promise<void>;
+  clearUserStats: () => void;
+  setUserId: (userId: string) => void;
 }
 
-declare global {
-  interface WindowEventMap {
-    userItemsUpdated: CustomEvent<{ userId: string }>;
+const getUserStatsKey = (userId: string) => `user-stats_${userId}`;
+
+export const useUserStore = create<UserState>((set, get) => {
+  if (typeof window !== 'undefined') {
+    window.addEventListener('userItemsUpdated', (event: any) => {
+      const { userId } = event.detail || {};
+      if (userId) {
+        get().setUserId(userId);
+        get().reloadUserStats();
+      }
+    });
   }
-}
 
-/**
- * Zustand store to manage user statistics and score reloading.
- */
-export const useUserStore = create<UserState>()(
-  devtools(
-    persist(
-      (set, get) => {
-        const reloadUserScore = async (userId: string) => {
-          if (!userId) return;
+  return {
+    userId: 'anonymous',
+    userStats: null,
 
-          try {
-            const todayScore = await UserScore.getUserScoreForToday(userId);
-            const startedCounts = await UserItem.getStartedCounts(userId);
+    setUserId: (userId: string) => set({ userId }),
 
-            set({
-              userStats: {
-                ...get().userStats,
-                [userId]: {
-                  startedCountToday: startedCounts?.startedCountToday || 0,
-                  startedCount: startedCounts?.startedCount || 0,
-                  practiceCountToday: todayScore?.item_count || 0,
-                },
-              },
-            });
-          } catch (error) {
-            errorHandler(`Error reloading user score for userId: ${userId}`, error);
-          }
+    reloadUserStats: async () => {
+      const userId = get().userId || 'guest';
+      try {
+        const todayScore = await UserScore.getUserScoreForToday(userId);
+        const startedCounts = await UserItem.getStartedCounts(userId);
+
+        const stats: UserStatsLocal = {
+          startedCountToday: startedCounts?.startedCountToday || 0,
+          startedCount: startedCounts?.startedCount || 0,
+          practiceCountToday: todayScore?.item_count || 0,
         };
 
-        // Add event listener for `userItemsUpdated` event
-        window.addEventListener('userItemsUpdated', (event) => {
-          const { userId } = event.detail;
-          if (userId) {
-            reloadUserScore(userId);
-          }
-        });
+        localStorage.setItem(getUserStatsKey(userId), JSON.stringify(stats));
+        set({ userStats: stats });
+      } catch (error) {
+        set({ userStats: null });
+      }
+    },
 
-        return {
-          userStats: {},
-          reloadUserScore,
-        };
-      },
-      {
-        name: 'user-store',
-      },
-    ),
-    { name: 'UserStore' },
-  ),
-);
-
-/**
- * Hook to access user statistics.
- */
-export const useUserStats = () => useUserStore((state) => state.userStats);
-
-/**
- * Hook to manually trigger the reloadUserScore function.
- */
-export const useReloadUserScore = () => useUserStore((state) => state.reloadUserScore);
+    clearUserStats: () => {
+      const userId = get().userId || 'guest';
+      try {
+        localStorage.removeItem(getUserStatsKey(userId));
+        set({ userStats: null });
+      } catch {
+        // Ignore storage errors
+      }
+    },
+  };
+});

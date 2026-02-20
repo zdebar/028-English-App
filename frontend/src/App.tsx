@@ -26,11 +26,13 @@ import { useToastStore } from './features/toast/use-toast-store';
 import { TEXTS } from './locales/cs';
 import './styles/index.css';
 import { infoHandler } from './features/logging/info-handler';
+import { useUserStore } from './features/dashboard/use-user-store';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
   const userId = useAuthStore((state) => state.userId);
   const initializeAuth = useAuthStore((state) => state.initializeAuth);
+  const setUserId = useUserStore((state) => state.setUserId);
   const showToast = useToastStore((state) => state.showToast);
   const location = useLocation();
 
@@ -54,6 +56,13 @@ export default function App() {
       errorHandler('Auth Initialization Error', error);
     }
   }, [initializeAuth]);
+
+  // Set User Store userId after auth initialization
+  useEffect(() => {
+    if (userId) {
+      setUserId(userId);
+    }
+  }, [userId, setUserId]);
 
   // Data synchronization
   useEffect(() => {
