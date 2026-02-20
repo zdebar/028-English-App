@@ -185,6 +185,7 @@ App is sync on every refresh or every 24 hours with -**SyncSinceLastSync**- and 
 - Backup
 - Prevent out-of-range values
 - Do not synchronize already mastered audio files
+- Paginate sync
 
 ### Layout
 
@@ -194,3 +195,4 @@ App is sync on every refresh or every 24 hours with -**SyncSinceLastSync**- and 
 
 - Prevent repeated requests to failed services
 - Logging services
+- Resync on Grammar Failure, only limited tries

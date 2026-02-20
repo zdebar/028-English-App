@@ -7,7 +7,12 @@ import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
 import { errorHandler } from '@/features/logging/error-handler';
 import { restoreUnsavedFromLocalStorage } from '@/database/database.utils';
-import { getFullSyncTime, setFullSyncTime, setPartialSyncTime } from '@/components/utils/sync-time';
+import {
+  getFullSyncTime,
+  getPartialSyncTime,
+  setFullSyncTime,
+  setPartialSyncTime,
+} from '@/components/utils/sync-time';
 import { TEXTS } from '@/locales/cs';
 
 /**
@@ -118,10 +123,12 @@ export function startPeriodicSync(
   };
 
   const checkAndSync = () => {
-    const today = new Date().toISOString().slice(0, 10);
-    const lastSyncDate = localStorage.getItem('lastSyncDate');
-    if (lastSyncDate !== today) {
+    const now = Date.now();
+    const lastSyncTimestamp = getPartialSyncTime(userId);
+
+    if (now - lastSyncTimestamp > config.sync.periodicSyncInterval) {
       syncData();
+      localStorage.setItem('lastSyncTimestamp', String(now));
     }
   };
 
