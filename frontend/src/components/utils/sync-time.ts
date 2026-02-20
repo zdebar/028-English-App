@@ -54,3 +54,13 @@ export function setPartialSyncTime(userId: string, time: number): void {
 export function getPartialSyncTime(userId: string): number {
   return Number(localStorage.getItem(getPartialSyncKey(userId)) || 0);
 }
+
+/**
+ * Clears all sync time records for a specific user from local storage.
+ * @param userId - The unique identifier of the user whose sync times should be cleared.
+ * @returns void
+ */
+export function clearSyncTimes(userId: string): void {
+  localStorage.removeItem(getFullSyncKey(userId));
+  localStorage.removeItem(getPartialSyncKey(userId));
+}

@@ -25,7 +25,7 @@ export const useUserStore = create<UserState>((set, get) => {
   }
 
   return {
-    userId: 'anonymous',
+    userId: 'guest',
     userStats: null,
 
     setUserId: (userId: string) => set({ userId }),
