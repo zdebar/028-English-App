@@ -17,7 +17,6 @@ const config = {
     minusProgress: -2, // Progress value for a "minus" button
     skipProgress: 100, // Progress value for a "skip" button
     finishedProgress: 0, // Progress value for a word to be considered finished
-    maxBlockCount: 10, // Maximum number of lessons/blocks, visible in the the lesson bar
   },
 
   srs: {

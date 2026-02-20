@@ -213,6 +213,18 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
+   * Retrieves the total count of user items that have been started by a specific user.
+   *
+   * @param userId - The unique identifier of the user
+   * @returns A promise that resolves to the count of started user items for the specified user
+   */
+  static async getUserItemsCount(userId: string): Promise<number> {
+    const result = await db.user_items.where('user_id').equals(userId).count();
+
+    return result;
+  }
+
+  /**
    * Resets all user items for a specified user.
    *
    * @param userId - The ID of the user whose items should be reset

@@ -1,5 +1,5 @@
 import { TEXTS } from '@/locales/cs';
-import LessonBar from '@/features/dashboard/BlockBar';
+import Blockbar from '@/features/dashboard/BlockBar';
 import { getLessonProgress } from '@/features/dashboard/dashboard.utils';
 import { useUserStore } from './use-user-store';
 import HelpButton from '@/features/help/HelpButton';
@@ -28,7 +28,7 @@ export default function Dashboard({ className = '' }: DashboardProps) {
       className={`max-w-card min-w-card relative mx-auto flex w-full flex-col gap-1 ${className}`}
     >
       {lessonProgress.map(({ lessonId, previousCount, todayCount }) => (
-        <LessonBar
+        <Blockbar
           key={lessonId}
           lessonNumber={lessonId}
           previousCount={previousCount}

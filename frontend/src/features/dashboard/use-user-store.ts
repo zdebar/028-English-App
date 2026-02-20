@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { UserStatsLocal } from '@/types/local.types';
 import UserScore from '@/database/models/user-scores';
 import UserItem from '@/database/models/user-items';
+import config from '@/config/config';
 
 interface UserState {
   userId: string;
@@ -40,6 +41,7 @@ export const useUserStore = create<UserState>((set, get) => {
           startedCountToday: startedCounts?.startedCountToday || 0,
           startedCount: startedCounts?.startedCount || 0,
           practiceCountToday: todayScore?.item_count || 0,
+          totalItemsCount: (await UserItem.getUserItemsCount(userId)) || config.lesson.lessonSize,
         };
 
         localStorage.setItem(getUserStatsKey(userId), JSON.stringify(stats));

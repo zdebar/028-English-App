@@ -63,6 +63,7 @@ export interface UserStatsLocal {
   startedCountToday?: number;
   startedCount?: number;
   practiceCountToday?: number;
+  totalItemsCount?: number;
 }
 
 export interface LessonsLocal {

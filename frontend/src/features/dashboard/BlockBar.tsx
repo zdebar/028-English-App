@@ -1,5 +1,5 @@
 import config from '@/config/config';
-
+import { useUserStore } from './use-user-store';
 interface BlockBarProps {
   previousCount: number;
   todayCount: number;
@@ -25,8 +25,10 @@ export default function BlockBar({
   divisions = 20,
   className = '',
 }: BlockBarProps) {
+  const totalItemsCount = useUserStore((state) => state.userStats?.totalItemsCount);
   const lessonSize = config.lesson.lessonSize || 100;
   const totalWidth = 100;
+  const lessonCount = Math.ceil((totalItemsCount || lessonSize) / lessonSize);
 
   // Arguments validation
   const validPreviousCount = Math.max(0, previousCount);
@@ -41,7 +43,7 @@ export default function BlockBar({
       {/* Labels */}
       <div className="font-body text-light absolute top-0 left-0 z-10 flex w-full justify-between px-4 pt-1 text-center text-sm font-bold">
         <span>
-          Blok: {lessonNumber} / {config.progress.maxBlockCount}
+          Blok: {lessonNumber} / {lessonCount}
         </span>
         <span>+ {validTodayCount}</span>
       </div>
