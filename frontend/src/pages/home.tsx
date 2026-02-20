@@ -37,7 +37,9 @@ export default function Home(): JSX.Element {
           label={TEXTS.userStatsLabel}
           className="h-attribute"
           classNameValue={
-            isPracticeGoalMet ? 'text-toast-success font-bold' : 'text-toast-error font-bold'
+            (isPracticeGoalMet
+              ? 'text-toast-success-light dark:text-toast-success'
+              : 'text-toast-error-light dark:text-toast-error') + ' font-bold'
           }
           value={`${practiceCountToday} / ${dailyGoal}`}
         />

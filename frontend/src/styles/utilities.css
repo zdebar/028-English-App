@@ -19,8 +19,8 @@
 
   .color-not-revealed {
     @apply outline-4;
-    @apply outline-not-revealed-light; /* Theming Light */
-    @apply dark:outline-background-light; /* Theming Dark */
+    @apply outline-white; /* Theming Light */
+    @apply dark:outline-not-revealed-dark; /* Theming Dark */
   }
 
   .text-bar {

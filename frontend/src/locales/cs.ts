@@ -33,7 +33,7 @@ export const TEXTS = {
 
   // User
   userLabel: 'Uživatel',
-  userStatsLabel: 'Dnes',
+  userStatsLabel: 'Procvičeno',
   authInitErrorToast: 'Nastala chyba při přihlašování.',
 
   // Buttons

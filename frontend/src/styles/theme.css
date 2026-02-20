@@ -31,7 +31,7 @@
   --color-help: white;
   --color-indicator: green;
   --color-overlay: rgba(0, 0, 0, 0.5);
-  --color-not-revealed-light: #2fa7eb;
+  --color-not-revealed-dark: #1a5c82;
 
   /** progress bar colors **/
   --color-progress-bg: white;
@@ -45,6 +45,8 @@
   --color-toast-success: #22c55e;
   --color-toast-error: #ef4444;
   --color-toast-info: #3b82f6;
+  --color-toast-success-light: #15803d;
+  --color-toast-error-light: #b91c1c;
 
   /** LAYOUT DIMENSIONS **/
   --max-width-container: 900px;

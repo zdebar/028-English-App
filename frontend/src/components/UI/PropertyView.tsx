@@ -22,13 +22,15 @@ type PropertyViewProps = {
 export default function PropertyView({
   label,
   value,
-  labelWidth = 'w-35',
+  labelWidth = 'w-30',
   className = '',
   classNameValue = '',
 }: PropertyViewProps): JSX.Element {
   return (
     <dl className={`flex items-center ${className}`}>
-      <dt className={`inline-block shrink-0 pl-4 text-left font-bold ${labelWidth}`}>{label}</dt>
+      <dt className={`inline-block shrink-0 truncate pl-4 text-left font-bold ${labelWidth}`}>
+        {label}
+      </dt>
       <dd className={classNameValue}>{value ?? TEXTS.notAvailable}</dd>
     </dl>
   );

@@ -196,3 +196,8 @@ App is sync on every refresh or every 24 hours with -**SyncSinceLastSync**- and 
 - Prevent repeated requests to failed services
 - Logging services
 - Resync on Grammar Failure, only limited tries
+
+### PWA
+
+- Screenshots
+- Sync on demount
