@@ -18,7 +18,7 @@
   }
 
   .color-not-revealed {
-    @apply outline-4;
+    @apply outline-6;
     @apply outline-white; /* Theming Light */
     @apply dark:outline-not-revealed-dark; /* Theming Dark */
   }
