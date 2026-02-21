@@ -13,6 +13,18 @@
     @apply disabled:border-background-light disabled:dark:border-background-dark disabled:cursor-default disabled:bg-inherit disabled:hover:bg-inherit; /* Disabled States */
   }
 
+  .guide p {
+    @apply py-4 text-justify;
+  }
+
+  .guide span {
+    @apply block pt-2;
+  }
+
+  .guide h2 {
+    @apply pt-4 text-center text-2xl font-bold;
+  }
+
   /** HEADER BUTTON STYLES **/
   .button-round {
     @apply size-button rounded-full;

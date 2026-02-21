@@ -1,9 +1,7 @@
 export const TEXTS = {
   // App
   appTitle: 'Angličtina',
-  appSubtitle: 'Aplikace v testovacím režimu',
-  appDescription:
-    'Toto je aplikace pro učení angličtiny. V současné době je v testovacím režimu a může obsahovat chyby.',
+  appDescription: 'Učení angličtiny pomocí drilu. Bez stresu, bez přemýšlení, jen dril.',
   guide: 'návod',
   startedTodayHint: 'dnes započato',
 
