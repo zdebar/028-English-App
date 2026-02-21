@@ -29,7 +29,7 @@ export default function Toast({
   };
   return (
     <div
-      className={`z-modal text-dark absolute top-0 right-0 px-4 py-2 ${typeStyles[type]}`}
+      className={`z-modal text-light absolute top-0 right-0 px-4 py-2 ${typeStyles[type]}`}
       onClick={handleClick}
     >
       {message}
