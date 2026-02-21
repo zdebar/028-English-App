@@ -76,7 +76,9 @@ export default function App() {
       <Header />
       <main className="relative flex grow flex-col items-center gap-4">
         {loading && (
-          <LoadingMessage text={TEXTS.syncLoadingText} className="notification error-warning" />
+          <div className="pointer-events-none absolute top-0 left-1/2 z-50 w-60 -translate-x-1/2">
+            <LoadingMessage text={TEXTS.syncLoadingText} className="notification error-warning" />
+          </div>
         )}
         <Routes>
           <Route path={ROUTES.home} element={<Home />} />

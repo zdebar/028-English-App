@@ -3,7 +3,12 @@
 // Requires Authorization: Bearer <user access token> header
 // Only allows a user to delete their own account (userId === authenticated user's id)
 
-import { CORS_HEADERS } from "../shared/constants.ts";
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers":
+    "authorization, content-type, x-client-info, apikey",
+};
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -50,20 +55,18 @@ async function deleteAuthUser(userId: string) {
   return { ok: res.ok, status: res.status, body };
 }
 
-async function markUserDeletedAt(userId: string) {
+async function deleteUserRow(userId: string) {
   const url = `${SUPABASE_URL.replace(
     /\/$/,
     "",
   )}/rest/v1/users?id=eq.${encodeURIComponent(userId)}`;
   const res = await fetch(url, {
-    method: "PATCH",
+    method: "DELETE",
     headers: {
       Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
       apikey: SERVICE_ROLE_KEY,
-      "Content-Type": "application/json",
       Prefer: "return=representation",
     },
-    body: JSON.stringify({ deleted_at: new Date().toISOString() }),
   });
   const text = await res.text().catch(() => "");
   let body: any = text;
@@ -205,15 +208,15 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Mark user as deleted in users table
-    const markResult = await markUserDeletedAt(userId.trim());
-    if (!markResult.ok) {
+    // Hard delete user row in users table
+    const deleteUserResult = await deleteUserRow(userId.trim());
+    if (!deleteUserResult.ok) {
       return new Response(
         JSON.stringify({
-          error: markResult.body ?? "Failed to mark user as deleted",
+          error: deleteUserResult.body ?? "Failed to delete user row",
         }),
         {
-          status: markResult.status,
+          status: deleteUserResult.status,
           headers: {
             ...CORS_HEADERS,
             "Content-Type": "application/json",

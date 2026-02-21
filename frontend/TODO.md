@@ -7,6 +7,7 @@
 - Do not synchronize already mastered audio files
 - Paginate sync
 - Sync fetch missing audio files -- could lead to thousand files fetched individually
+- Button manually resync audio
 
 ## Accessibility
 
