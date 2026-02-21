@@ -39,8 +39,8 @@ export function useAudioManager(audio: string | null) {
         if (!unmounted) {
           audioRef.current = null;
           setAudioError(true);
-          infoHandler(`Error loading audio ${audio}`);
         }
+        infoHandler(`Error loading audio ${audio}`);
       } finally {
         if (loadingTimeout) clearTimeout(loadingTimeout);
         setLoading(false);

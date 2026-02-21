@@ -38,7 +38,6 @@ export async function dataSync(userId: string): Promise<void> {
       Grammar.syncGrammarAll(),
       UserScore.syncUserScoreAll(userId),
       UserItem.syncUserItemsAll(userId),
-      AudioRecord.syncAudioData(config.audio.startArchives),
     ];
   } else {
     // Incremental synchronization
@@ -46,7 +45,6 @@ export async function dataSync(userId: string): Promise<void> {
       UserScore.syncUserScoreSinceLastSync(userId),
       UserItem.syncUserItemsSinceLastSync(userId),
       Grammar.syncGrammarSinceLastSync(),
-      AudioRecord.syncAudioData(config.audio.startArchives),
     ];
   }
 
@@ -115,7 +113,7 @@ export function startPeriodicSync(
       setLoading(false);
     }
     try {
-      await AudioRecord.syncAudioData(config.audio.startArchives);
+      await AudioRecord.syncAudioData(config.audio.archives);
       await AudioRecord.removeOrphaned();
     } catch (error) {
       errorHandler('Remaining audio data synchronization failed', error);

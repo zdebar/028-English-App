@@ -187,6 +187,10 @@ App is sync on every refresh or every 24 hours with -**SyncSinceLastSync**- and 
 - Do not synchronize already mastered audio files
 - Paginate sync
 
+## Accessibility
+
+- Screen reader optimization
+
 ### Layout
 
 - Support for multiple real screens
