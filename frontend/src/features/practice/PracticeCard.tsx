@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import config from '@/config/config';
 import Grammar from '@/database/models/grammar';
@@ -31,13 +31,17 @@ import { TEXTS } from '@/locales/cs';
  * @returns The main practice card UI with all practice controls and feedback.
  */
 export default function PracticeCard() {
-  const [isFirstItem, setIsFirstItem] = useState(true);
+  const [isFirstItem, setIsFirstItem] = useState(false);
   const [grammarVisible, setGrammarVisible] = useState(false);
   const [grammarData, setGrammarData] = useState<GrammarCardType | null>(null);
+  const hasInitializedFirstItem = useRef(false);
 
   const userId = useAuthStore((state) => state.userId);
   const userStats = useUserStore((state) => state.userStats);
   const showToast = useToastStore((state) => state.showToast);
+
+  if (!userId) return <LoadingMessage text={TEXTS.syncLoadingText} />;
+
   const {
     index,
     currentItem,
@@ -57,10 +61,19 @@ export default function PracticeCard() {
     setVolume,
     playAudio,
     audioLoading,
-  } = usePracticeDeck(userId!);
+  } = usePracticeDeck(userId);
 
   // Initial audio pause if practice starts with EN -> CZ item
   const isAudioPaused = isFirstItem && !isCzToEn && !audioDisabled;
+
+  // Initialize first-item behavior once on Practice page entry
+  useEffect(() => {
+    if (hasInitializedFirstItem.current || !currentItem) {
+      return;
+    }
+    setIsFirstItem(!isCzToEn && !audioDisabled);
+    hasInitializedFirstItem.current = true;
+  }, [currentItem, isCzToEn, audioDisabled]);
 
   // Fetch grammar for the current item and show GrammarCard
   const handleGrammar = useCallback(async () => {

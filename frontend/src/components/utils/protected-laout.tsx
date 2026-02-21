@@ -6,6 +6,11 @@ import { Navigate, Outlet } from 'react-router-dom';
  */
 export default function ProtectedLayout() {
   const userId = useAuthStore((state) => state.userId);
+  const loading = useAuthStore((state) => state.loading);
+
+  if (loading) {
+    return null;
+  }
 
   if (!userId) {
     return <Navigate to="/" replace />;
