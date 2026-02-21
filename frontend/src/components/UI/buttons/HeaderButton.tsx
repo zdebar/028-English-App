@@ -5,6 +5,7 @@ import type { JSX } from 'react';
 interface HeaderButtonProps {
   children: ReactNode;
   to: string;
+  title?: string;
   disabled?: boolean;
   className?: string;
 }
@@ -21,6 +22,7 @@ interface HeaderButtonProps {
 export default function HeaderButton({
   children,
   to,
+  title,
   disabled = false,
   className = '',
 }: HeaderButtonProps): JSX.Element {
@@ -40,6 +42,7 @@ export default function HeaderButton({
   return (
     <Link
       to={to}
+      title={title}
       className={`button-round hover:text-light hover:bg-button-hover ${
         isSelected ? 'text-light bg-button-hover' : ''
       } ${className}`}

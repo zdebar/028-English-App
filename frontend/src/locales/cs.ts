@@ -102,4 +102,10 @@ export const TEXTS = {
   updatedAt: 'změněno',
   nextAt: 'další',
   masteredAt: 'naučeno',
+
+  // Tooltips
+  tooltipHome: 'Domů',
+  tooltipPractice: 'Procvičovat',
+  tooltipProfile: 'Profil',
+  tooltipHelp: 'Nápověda',
 };

@@ -2,6 +2,7 @@ import HeaderButton from '@/components/UI/buttons/HeaderButton';
 import { ROUTES } from '@/config/routes.config';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import ThemeSwitch from '@/features/theme/ThemeSwitch';
+import { TEXTS } from '@/locales/cs';
 
 import AcademicCapIcon from '../UI/icons/AcademicCapIcon';
 import HomeIcon from '../UI/icons/HomeIcon';
@@ -21,10 +22,10 @@ export default function Header(): JSX.Element {
   return (
     <header className={`${styles['header-fixed']} z-header relative flex w-full justify-between`}>
       <nav className={`${styles['header-side']} m-4 flex gap-2`} role="navigation">
-        <HeaderButton to={ROUTES.home}>
+        <HeaderButton to={ROUTES.home} title={TEXTS.tooltipHome}>
           <HomeIcon />
         </HeaderButton>
-        <HeaderButton to={ROUTES.practice} disabled={!userId}>
+        <HeaderButton to={ROUTES.practice} disabled={!userId} title={TEXTS.tooltipPractice}>
           <AcademicCapIcon />
         </HeaderButton>
       </nav>
@@ -33,7 +34,7 @@ export default function Header(): JSX.Element {
         role="navigation"
       >
         <ThemeSwitch />
-        <HeaderButton to={ROUTES.profile} disabled={!userId}>
+        <HeaderButton to={ROUTES.profile} disabled={!userId} title={TEXTS.tooltipProfile}>
           <UserIcon />
         </HeaderButton>
       </nav>

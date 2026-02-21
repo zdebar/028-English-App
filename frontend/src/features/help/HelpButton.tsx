@@ -1,6 +1,7 @@
 import QuestionMarkIcon from '@/components/UI/icons/QuestionMarkIcon';
 import { useHelpStore } from './use-help-store';
 import type { JSX } from 'react';
+import { TEXTS } from '@/locales/cs';
 
 /**
  * Help button component that opens the help overlay.
@@ -12,7 +13,12 @@ export default function HelpButton({ className = '' }: { className?: string }): 
   const openHelp = useHelpStore((state) => state.openHelp);
 
   return (
-    <button type="button" className={`absolute p-2 ${className}`} onClick={openHelp}>
+    <button
+      type="button"
+      className={`absolute p-2 ${className}`}
+      onClick={openHelp}
+      title={TEXTS.tooltipHelp}
+    >
       <QuestionMarkIcon />
     </button>
   );
