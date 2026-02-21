@@ -5,6 +5,7 @@ import type { UserItemSQL } from '@/types/data.types';
 import type { UserItemLocal } from '@/types/local.types';
 import UserItem from './models/user-items';
 import { infoHandler } from '@/features/logging/info-handler';
+import { SupabaseError } from '@/types/error.types';
 
 /**
  * Converts a `UserItemLocal` object to a `UserItemSQL` object, replacing specific date fields
@@ -57,15 +58,16 @@ export function getLocalDateFromUTC(date: string): string {
  * @param dataFile name of the file to fetch
  * @returns Blob data or null on missing/error
  */
-export async function fetchStorage(bucketName: string, dataFile: string): Promise<Blob | null> {
+export async function fetchStorage(bucketName: string, dataFile: string): Promise<Blob> {
   const cacheBuster = `?t=${Date.now()}`;
   const filePath = dataFile.replace(/^\//, '') + cacheBuster;
 
   const { data, error } = await supabaseInstance.storage.from(bucketName).download(filePath);
 
-  if (error) {
-    errorHandler('Error fetching data:', error.message);
-    return null;
+  if (error || !data) {
+    throw new SupabaseError(
+      `Error fetching file ${dataFile} from bucket ${bucketName}: ${error?.message || 'No data returned'}`,
+    );
   }
 
   return data;

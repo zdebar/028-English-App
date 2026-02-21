@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import AudioRecord from '@/database/models/audio-records';
-import { infoHandler } from '../logging/info-handler';
+import { errorHandler } from '../logging/error-handler';
 
 export function useAudioManager(audio: string | null) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -35,12 +35,12 @@ export function useAudioManager(audio: string | null) {
           audioElement.addEventListener('ended', () => setIsPlaying(false));
           setAudioError(false);
         }
-      } catch {
+      } catch (error) {
         if (!unmounted) {
           audioRef.current = null;
           setAudioError(true);
         }
-        infoHandler(`Error loading audio ${audio}`);
+        errorHandler(`Audio Manager Error`, error);
       } finally {
         if (loadingTimeout) clearTimeout(loadingTimeout);
         setLoading(false);

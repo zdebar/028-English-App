@@ -4,7 +4,7 @@ import type AppDB from '@/database/models/app-db';
 import AudioMetadata from '@/database/models/audio-metadata';
 import { db } from '@/database/models/db';
 import { infoHandler } from '@/features/logging/info-handler';
-import { SupabaseError, ZipExtractionError } from '@/types/error.types';
+import { ZipExtractionError } from '@/types/error.types';
 import type { AudioRecordLocal } from '@/types/local.types';
 import { Entity } from 'dexie';
 
@@ -23,7 +23,8 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    * Gets multiple audio records by their filenames.
    *
    * @param audioName The filename of the audio to fetch.
-   * @returns An AudioRecordLocal or null if not found.
+   * @returns An AudioRecordLocal
+   * @throws Throws an error if the audio record cannot be found or fetched.
    */
   static async getAudio(audioName: string): Promise<AudioRecordLocal | null> {
     if (!audioName) return null;
@@ -41,20 +42,13 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    * Synchronizes audio data from configured archives to the local database.
    *
    * @returns A promise that resolves when all audio archives have been synced.
-   * @throws {SupabaseError} If fetching an audio archive fails.
    */
   static async syncAudioData(archives: string[]): Promise<void> {
     await Promise.all(
       archives.map(async (archiveName) => {
         if (await AudioMetadata.isFetched(archiveName)) return;
 
-        const zipBlob: Blob | null = await fetchStorage(
-          config.audio.archiveBucketName,
-          archiveName,
-        );
-        if (!zipBlob) {
-          throw new SupabaseError(`Failed to fetch audio archive: ${archiveName}`);
-        }
+        const zipBlob: Blob = await fetchStorage(config.audio.archiveBucketName, archiveName);
 
         const extractedFiles = await this.extractZip(zipBlob);
         await db.transaction('rw', db.audio_records, db.audio_metadata, async () => {
@@ -107,13 +101,10 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    * @returns A promise that resolves to an object containing the filename and audio blob
    * @throws Logs an error if the audio file cannot be fetched from storage
    */
-  private static async fetchAudioFile(audioFile: string): Promise<AudioRecordLocal | null> {
-    const audioBlob: Blob | null = await fetchStorage(config.audio.audioBucketName, audioFile);
+  private static async fetchAudioFile(audioFile: string): Promise<AudioRecordLocal> {
+    const audioBlob: Blob = await fetchStorage(config.audio.audioBucketName, audioFile);
 
-    if (!audioBlob) {
-      throw new SupabaseError(`Failed to fetch audio file: ${audioFile}`);
-    }
-
+    console.log(`Fetched audio file ${audioFile} from storage, size: ${audioBlob.size} bytes`);
     await db.audio_records.put({ filename: audioFile, audioBlob: audioBlob });
     infoHandler(`Successfully synced audio file: ${audioFile}`);
 
