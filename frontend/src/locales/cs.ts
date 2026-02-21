@@ -5,7 +5,7 @@ export const TEXTS = {
   appDescription:
     'Toto je aplikace pro učení angličtiny. V současné době je v testovacím režimu a může obsahovat chyby.',
   guide: 'návod',
-  startedTodayHint: 'dnes procvičeno',
+  startedTodayHint: 'dnes započato',
 
   // Synchronization
   syncSuccessToast: 'Data byla úspěšně synchronizována.',

@@ -35,11 +35,6 @@
     @apply border px-2 py-1;
   }
 
-  select,
-  input {
-    @apply focus:outline-none active:outline-none;
-  }
-
   a {
     @apply hover:underline;
   }

@@ -110,6 +110,18 @@ export default function PracticeCard() {
                 }
               }}
               role="button"
+              tabIndex={0}
+              aria-disabled={audioDisabled}
+              onKeyDown={(e) => {
+                if (audioDisabled) return;
+                if (e.key === 'Enter' || e.key === ' ') {
+                  setIsFirstItem(false);
+                  if (!isAudioPaused) {
+                    playAudio();
+                  }
+                  e.preventDefault();
+                }
+              }}
             >
               {isAudioPaused ? (
                 <p className="error-warning my-auto">{TEXTS.pressToPlayAudio}</p>
