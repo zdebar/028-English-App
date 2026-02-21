@@ -8,7 +8,7 @@ import { Screenshot } from '@/components/UI/Screenshot';
  */
 export default function Guide(): JSX.Element {
   return (
-    <div className="guide max-w-hero p-4">
+    <div className="guide max-w-hero overflow-x-hidden p-4">
       <h1 className="text-center">Návod</h1>
       <section>
         <p>Učení cizích jazyků není ve své podstatě složité.</p>
