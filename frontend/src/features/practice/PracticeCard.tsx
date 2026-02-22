@@ -110,7 +110,7 @@ export default function PracticeCard() {
             <div
               className={`relative flex h-full grow flex-col items-center justify-between p-4 select-none ${
                 audioDisabled ? 'color-audio-disabled' : 'button-color'
-              } ${!revealed ? 'color-not-revealed' : 'border-12'} `}
+              } `}
               onClick={() => {
                 setIsFirstItem(false);
                 if (isAudioPaused) {
