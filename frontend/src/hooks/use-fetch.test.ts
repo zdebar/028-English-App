@@ -1,6 +1,6 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { useFetch } from '../use-fetch';
+import { useFetch } from './use-fetch';
 
 const mockData = { foo: 'bar' };
 
