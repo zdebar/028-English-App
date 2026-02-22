@@ -24,6 +24,7 @@ import PlusIcon from '@/components/UI/icons/PlusIcon';
 import { errorHandler } from '../logging/error-handler';
 import { useToastStore } from '../toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
+import NotRevealedIcon from '@/components/UI/icons/NotRevealedIcon';
 
 /**
  * PracticeCard component for interactive language practice.
@@ -105,7 +106,7 @@ export default function PracticeCard() {
         <GrammarCard grammar={grammarData} onClose={() => setGrammarVisible(false)} />
       ) : (
         <>
-          <div className={`card-width card-height relative`}>
+          <div className={`card-width card-height relative isolate`}>
             {/* Item Card */}
             <div
               className={`relative flex h-full grow flex-col items-center justify-between p-4 select-none ${
@@ -138,7 +139,13 @@ export default function PracticeCard() {
                 <p className="error-warning my-auto">{TEXTS.pressToPlayAudio}</p>
               ) : (
                 <>
+                  {!revealed && (
+                    <div className="pointer-events-none absolute inset-0 z-10 grid place-items-center">
+                      <NotRevealedIcon className="text-light/70 dark:text-dark/70 opacity-2 mix-blend-saturation" />
+                    </div>
+                  )}
                   {/** Top Bar */}
+
                   <div
                     id="top-bar"
                     className="relative flex h-8 w-full items-center justify-between"

@@ -9,12 +9,6 @@
     @apply border-background-light dark:border-background-dark bg-inherit text-inherit;
   }
 
-  .color-not-revealed {
-    @apply border-12;
-    /* @apply border-white;
-    @apply dark:border-gray-800; */
-  }
-
   .text-bar {
     @apply font-body text-light text-center text-sm font-bold;
   }
