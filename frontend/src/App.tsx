@@ -27,7 +27,7 @@ import { infoHandler } from './features/logging/info-handler';
 import { useUserStore } from './features/dashboard/use-user-store';
 
 export default function App() {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const userId = useAuthStore((state) => state.userId);
   const initializeAuth = useAuthStore((state) => state.initializeAuth);
   const setUserId = useUserStore((state) => state.setUserId);

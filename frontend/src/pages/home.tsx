@@ -2,7 +2,6 @@ import PropertyView from '@/components/UI/PropertyView';
 import { supabaseInstance } from '@/config/supabase.config';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import Dashboard from '@/features/dashboard/Dashboard';
-import PrivacyPolicyLink from '@/features/privacy-policy/PrivacyPolicyLink';
 import { useThemeStore } from '@/features/theme/use-theme';
 import { useUserStore } from '@/features/dashboard/use-user-store';
 import { TEXTS } from '@/locales/cs';
@@ -86,7 +85,7 @@ export default function Home(): JSX.Element {
           onlyThirdPartyProviders
           queryParams={{ prompt: 'select_account' }}
         />
-        <PrivacyPolicyLink />
+        <p className="px-4 text-sm">{TEXTS.offlineDataHint}</p>
       </div>
     );
   }

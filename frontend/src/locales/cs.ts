@@ -4,6 +4,8 @@ export const TEXTS = {
   appDescription: 'Učení angličtiny pomocí drilu. Bez stresu, bez přemýšlení, jen dril.',
   guide: 'návod',
   startedTodayHint: 'dnes započato',
+  offlineDataHint:
+    'Aplikace po přihlášení ukládá cvičební data do úložiště Vašeho prohlížeče. (7.8MB)',
 
   // Synchronization
   syncSuccessToast: 'Data byla úspěšně synchronizována.',
