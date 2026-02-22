@@ -5,7 +5,7 @@
   }
 
   .color-audio-disabled {
-    @apply cursor-default border-2;
+    @apply cursor-default;
     @apply border-background-light dark:border-background-dark bg-inherit text-inherit;
   }
 
