@@ -4,23 +4,15 @@
     @apply bg-background-light dark:bg-background-dark text-light dark:text-dark;
   }
 
-  .color-button {
-    @apply cursor-pointer border-2;
-    @apply bg-button-light border-button-light; /* Theming Light */
-    @apply dark:bg-button-dark dark:border-button-dark; /* Theming Dark */
-    @apply hover:border-light dark:hover:border-dark; /* Hover Borders */
-    @apply disabled:border-background-light disabled:dark:border-background-dark disabled:cursor-default disabled:bg-inherit disabled:hover:bg-inherit; /* Disabled States */
-  }
-
   .color-audio-disabled {
     @apply cursor-default border-2;
     @apply border-background-light dark:border-background-dark bg-inherit text-inherit;
   }
 
   .color-not-revealed {
-    @apply outline-6;
-    @apply outline-white; /* Theming Light */
-    @apply dark:outline-not-revealed-dark; /* Theming Dark */
+    @apply border-12;
+    /* @apply border-white;
+    @apply dark:border-gray-800; */
   }
 
   .text-bar {

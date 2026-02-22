@@ -105,14 +105,12 @@ export default function PracticeCard() {
         <GrammarCard grammar={grammarData} onClose={() => setGrammarVisible(false)} />
       ) : (
         <>
-          <div
-            className={`card-width card-height relative ${!revealed ? 'color-not-revealed' : ''}`}
-          >
+          <div className={`card-width card-height relative`}>
             {/* Item Card */}
             <div
               className={`relative flex h-full grow flex-col items-center justify-between p-4 select-none ${
                 audioDisabled ? 'color-audio-disabled' : 'button-color'
-              } `}
+              } ${!revealed ? 'color-not-revealed' : 'border-12'} `}
               onClick={() => {
                 setIsFirstItem(false);
                 if (isAudioPaused) {
