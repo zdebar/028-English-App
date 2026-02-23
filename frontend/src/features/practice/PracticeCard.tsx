@@ -98,6 +98,8 @@ export default function PracticeCard() {
                 if (e.key === 'Enter' || e.key === ' ') {
                   if (!showDirectionChange) {
                     playAudio();
+                  } else {
+                    hideDirectionChange();
                   }
                   e.preventDefault();
                 }
