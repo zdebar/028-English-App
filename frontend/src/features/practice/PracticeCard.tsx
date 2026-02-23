@@ -78,9 +78,9 @@ export default function PracticeCard() {
           <div className={`card-width card-height relative`}>
             {/* Item Card */}
             <div
-              className={`relative flex h-full grow flex-col items-center p-4 select-none ${
+              className={`relative flex h-full grow flex-col items-center justify-between p-4 select-none ${
                 audioDisabled && !showDirectionChange ? 'color-audio-disabled' : 'button-color'
-              } ${showDirectionChange ? 'justify-center' : 'justify-between'} `}
+              } `}
               onClick={() => {
                 if (showDirectionChange) {
                   hideDirectionChange();
@@ -106,12 +106,9 @@ export default function PracticeCard() {
               }}
             >
               {showDirectionChange ? (
-                <div>
-                  <p className="error-warning my-auto">
-                    {isCzToEn ? TEXTS.directionCzToEn : TEXTS.directionEnToCz}
-                  </p>
-                  <p className="error-warning my-auto">{TEXTS.pressButton}</p>
-                </div>
+                <p className="error-warning my-auto">
+                  {isCzToEn ? TEXTS.directionCzToEn : TEXTS.directionEnToCz}
+                </p>
               ) : (
                 <>
                   {!revealed && (
