@@ -27,30 +27,38 @@ export async function dataSync(userId: string): Promise<void> {
 
   await initDbMappings();
   await restoreUnsavedFromLocalStorage(userId);
-  triggerUserItemsUpdatedEvent(userId);
 
-  let syncPromises: Promise<any>[];
   const doFullSync = now - lastFullSync > config.sync.fullSyncInterval;
 
+  let userPromises: Promise<any>[];
+  let otherPromises: Promise<any>[];
+
   if (doFullSync) {
-    // Full synchronization
-    syncPromises = [
-      Grammar.syncGrammarAll(),
-      UserScore.syncUserScoreAll(userId),
-      UserItem.syncUserItemsAll(userId),
-    ];
+    userPromises = [UserScore.syncUserScoreAll(userId), UserItem.syncUserItemsAll(userId)];
+    otherPromises = [Grammar.syncGrammarAll(), AudioRecord.syncAudioData(config.audio.archives)];
   } else {
-    // Incremental synchronization
-    syncPromises = [
+    userPromises = [
       UserScore.syncUserScoreSinceLastSync(userId),
       UserItem.syncUserItemsSinceLastSync(userId),
+    ];
+    otherPromises = [
       Grammar.syncGrammarSinceLastSync(),
+      AudioRecord.syncAudioData(config.audio.archives),
     ];
   }
+  otherPromises = [Grammar.syncGrammarAll(), AudioRecord.syncAudioData(config.audio.archives)];
 
-  const results = await Promise.allSettled(syncPromises);
+  Promise.allSettled(otherPromises).then((results) => {
+    results.forEach((r) => {
+      if (r.status === 'rejected') {
+        errorHandler('Data synchronization error:', r.reason);
+      }
+    });
+  });
+
+  const userResults = await Promise.allSettled(userPromises);
   let firstError: any = null;
-  results.forEach((r) => {
+  userResults.forEach((r) => {
     if (r.status === 'rejected') {
       errorHandler('Data synchronization error:', r.reason);
       if (!firstError) firstError = r.reason;
@@ -58,12 +66,12 @@ export async function dataSync(userId: string): Promise<void> {
   });
   if (firstError) throw firstError;
 
+  triggerUserItemsUpdatedEvent(userId);
+
   if (doFullSync) {
     setFullSyncTime(userId, now);
   }
   setPartialSyncTime(userId, now);
-
-  triggerUserItemsUpdatedEvent(userId);
 }
 
 /**
@@ -113,7 +121,6 @@ export function startPeriodicSync(
       setLoading(false);
     }
     try {
-      await AudioRecord.syncAudioData(config.audio.archives);
       await AudioRecord.removeOrphaned();
     } catch (error) {
       errorHandler('Remaining audio data synchronization failed', error);
@@ -126,14 +133,12 @@ export function startPeriodicSync(
 
     if (now - lastSyncTimestamp > config.sync.periodicSyncInterval) {
       syncData();
-      localStorage.setItem('lastSyncTimestamp', String(now));
+      setPartialSyncTime(userId, now);
     }
   };
 
-  checkAndSync();
-  intervalId = setInterval(checkAndSync, config.sync.periodicSyncInterval);
-
   syncData();
+  intervalId = setInterval(checkAndSync, config.sync.periodicSyncInterval);
 
   return () => {
     clearInterval(intervalId);
