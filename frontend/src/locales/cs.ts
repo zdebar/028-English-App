@@ -25,7 +25,9 @@ export const TEXTS = {
   reveal: 'odhalit',
   unknown: 'neznám',
   known: 'znám',
-  pressToPlayAudio: 'Stiskněte pro přehrání audia',
+  pressButton: 'Stiskněte pro pokračování',
+  directionEnToCz: 'Z angličtiny do češtiny',
+  directionCzToEn: 'Z češtiny do angličtiny',
   audioIsPlaying: 'přehrává se audio',
   skipTitle: 'Dokončit položku',
   skipText:

@@ -35,10 +35,12 @@ export function usePracticeDeck(userId: string) {
 
   // Logic states
   const [revealed, setRevealed] = useState(false);
+
   const { czechHinted, englishHinted, resetHint, plusHint } = useHint(
     currentItem?.czech,
     currentItem?.english,
   );
+
   const {
     playAudio,
     setVolume,
@@ -47,11 +49,14 @@ export function usePracticeDeck(userId: string) {
     isPlaying,
   } = useAudioManager(currentItem?.audio);
 
+  // Derived states
   const isCzToEn = currentItem ? alternateDirection(currentItem?.progress) : true; // true = CZ -> EN, false = EN -> CZ
   const audioDisabled = (isCzToEn && !revealed) || !currentItem?.audio || audioError;
-
   const czech = isCzToEn || revealed ? currentItem?.czech : czechHinted;
   const english = revealed || (audioDisabled && !isCzToEn) ? currentItem?.english : englishHinted;
+
+  const [wasCzToEn, setWasCzToEn] = useState(true);
+  const showDirectionChange = wasCzToEn !== isCzToEn;
 
   // Ref to track user progress changes before saving
   const userProgressRef = useRef<UserItemPractice[]>([]);
@@ -135,6 +140,8 @@ export function usePracticeDeck(userId: string) {
     pronunciation: revealed ? currentItem?.pronunciation || '\u00A0' : '\u00A0',
     audio: currentItem?.audio ?? null,
     audioDisabled,
+    showDirectionChange,
+    hideDirectionChange: () => setWasCzToEn(isCzToEn),
 
     // Hinting
     plusHint,

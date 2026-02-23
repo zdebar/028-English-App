@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 
 import config from '@/config/config';
-import Grammar from '@/database/models/grammar';
 
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { usePracticeDeck } from '@/features/practice/use-practice-deck';
@@ -11,21 +10,18 @@ import HelpText from '@/features/help/HelpText';
 import Indicator from '@/components/UI/Indicator';
 import LoadingMessage from '@/components/UI/LoadingMessage';
 import HelpButton from '@/features/help/HelpButton';
-import GrammarCard, { type GrammarCardType } from '@/features/practice/GrammarCard';
+import GrammarCard from '@/features/practice/GrammarCard';
 import VolumeSlider from '@/features/practice/VolumeSlider';
 
-import ButtonRectangular from '@/components/UI/buttons/ButtonRectangular';
-import BookIcon from '@/components/UI/icons/BookIcon';
-import BulbIcon from '@/components/UI/icons/BulbIcon';
-import EyeIcon from '@/components/UI/icons/EyeIcon';
-import ForwardIcon from '@/components/UI/icons/ForwardIcon';
-import MinusIcon from '@/components/UI/icons/MinusIcon';
-import PlusIcon from '@/components/UI/icons/PlusIcon';
-import { errorHandler } from '../logging/error-handler';
-import { useToastStore } from '../toast/use-toast-store';
+import HintButton from './HintButton';
+import GrammarButton from './GrammarButton';
 import { TEXTS } from '@/locales/cs';
 import NotRevealedIcon from '@/components/UI/icons/NotRevealedIcon';
-import ButtonWithModal from '../modal/ButtonWithModal';
+import { useGrammar } from './use-grammar';
+import KnownButton from './KnownButton';
+import UnknownButton from './UnknownButton';
+import RevealButton from './RevealButton';
+import SkipButton from './SkipButton';
 
 /**
  * PracticeCard component for interactive language practice.
@@ -33,14 +29,9 @@ import ButtonWithModal from '../modal/ButtonWithModal';
  * @returns The main practice card UI with all practice controls and feedback.
  */
 export default function PracticeCard() {
-  const [isFirstItem, setIsFirstItem] = useState(false);
-  const [grammarVisible, setGrammarVisible] = useState(false);
-  const [grammarData, setGrammarData] = useState<GrammarCardType | null>(null);
-  const hasInitializedFirstItem = useRef(false);
-
   const userId = useAuthStore((state) => state.userId);
   const userStats = useUserStore((state) => state.userStats);
-  const showToast = useToastStore((state) => state.showToast);
+  const { grammarVisible, grammarData, handleGrammar, closeGrammar } = useGrammar();
 
   if (!userId) return <LoadingMessage text={TEXTS.syncLoadingText} />;
 
@@ -57,6 +48,8 @@ export default function PracticeCard() {
     english,
     pronunciation,
     audioDisabled,
+    showDirectionChange,
+    hideDirectionChange,
     plusHint,
     nextItem,
     audioError,
@@ -65,37 +58,12 @@ export default function PracticeCard() {
     audioLoading,
   } = usePracticeDeck(userId);
 
-  // Initial audio pause if practice starts with EN -> CZ item
-  const isAudioPaused = isFirstItem && !isCzToEn && !audioDisabled;
-
-  // Initialize first-item behavior once on Practice page entry
-  useEffect(() => {
-    if (hasInitializedFirstItem.current || !currentItem) {
-      return;
-    }
-    setIsFirstItem(!isCzToEn && !audioDisabled);
-    hasInitializedFirstItem.current = true;
-  }, [currentItem, isCzToEn, audioDisabled]);
-
-  // Fetch grammar for the current item and show GrammarCard
-  const handleGrammar = useCallback(async () => {
-    if (!grammar_id) return;
-    try {
-      const grammar = await Grammar.getGrammarById(grammar_id);
-      setGrammarData(grammar);
-      setGrammarVisible(true);
-    } catch (error) {
-      errorHandler('Error fetching grammar:', error);
-      showToast(TEXTS.loadingError, 'error');
-    }
-  }, [grammar_id, showToast]);
-
   // Play audio on item change if direction is EN -> CZ
   useEffect(() => {
-    if (!audioDisabled && !isCzToEn && !audioLoading && !isAudioPaused) {
+    if (!audioDisabled && !isCzToEn && !audioLoading && !showDirectionChange) {
       setTimeout(() => playAudio(), 400);
     }
-  }, [playAudio, audioDisabled, isCzToEn, audioLoading, isAudioPaused, currentItem]);
+  }, [playAudio, audioDisabled, isCzToEn, audioLoading, showDirectionChange, currentItem]);
 
   if (!currentItem) {
     return <LoadingMessage text="Žádné položky k procvičování" timeDelay={100} />;
@@ -104,18 +72,18 @@ export default function PracticeCard() {
   return (
     <div className="relative flex w-full grow flex-col items-center">
       {grammarVisible ? (
-        <GrammarCard grammar={grammarData} onClose={() => setGrammarVisible(false)} />
+        <GrammarCard grammar={grammarData} onClose={closeGrammar} />
       ) : (
         <>
           <div className={`card-width card-height relative`}>
             {/* Item Card */}
             <div
-              className={`relative flex h-full grow flex-col items-center justify-between p-4 select-none ${
-                audioDisabled ? 'color-audio-disabled' : 'button-color'
-              } `}
+              className={`relative flex h-full grow flex-col items-center p-4 select-none ${
+                audioDisabled && !showDirectionChange ? 'color-audio-disabled' : 'button-color'
+              } ${showDirectionChange ? 'justify-center' : 'justify-between'} `}
               onClick={() => {
-                setIsFirstItem(false);
-                if (isAudioPaused) {
+                if (showDirectionChange) {
+                  hideDirectionChange();
                   return;
                 }
                 if (!audioDisabled) {
@@ -128,16 +96,20 @@ export default function PracticeCard() {
               onKeyDown={(e) => {
                 if (audioDisabled) return;
                 if (e.key === 'Enter' || e.key === ' ') {
-                  setIsFirstItem(false);
-                  if (!isAudioPaused) {
+                  if (!showDirectionChange) {
                     playAudio();
                   }
                   e.preventDefault();
                 }
               }}
             >
-              {isAudioPaused ? (
-                <p className="error-warning my-auto">{TEXTS.pressToPlayAudio}</p>
+              {showDirectionChange ? (
+                <div>
+                  <p className="error-warning my-auto">
+                    {isCzToEn ? TEXTS.directionCzToEn : TEXTS.directionEnToCz}
+                  </p>
+                  <p className="error-warning my-auto">{TEXTS.pressButton}</p>
+                </div>
               ) : (
                 <>
                   {!revealed && (
@@ -191,72 +163,42 @@ export default function PracticeCard() {
             <div id="practice-controls" className="relative flex flex-col gap-1">
               {/** Top Row */}
               <div className="relative grid grid-cols-2 gap-1">
-                <ButtonWithModal
-                  modalTitle={TEXTS.skipTitle}
-                  modalText={TEXTS.skipText}
-                  onConfirm={() => {
-                    nextItem(config.progress.skipProgress);
-                  }}
-                  disabled={!revealed || isAudioPaused}
-                  className="relative"
-                >
-                  <ForwardIcon />
-                  <HelpText className="-top-4.5 left-3.5">{TEXTS.complete}</HelpText>
-                </ButtonWithModal>
+                <SkipButton
+                  onConfirm={() => nextItem(config.progress.skipProgress)}
+                  disabled={!revealed || showDirectionChange}
+                />
                 {!revealed ? (
-                  <ButtonRectangular
-                    onClick={plusHint}
-                    disabled={isAudioPaused}
-                    className="relative"
-                  >
-                    <BulbIcon />
-                    <HelpText className="-top-4.5 right-3.5">{TEXTS.hint}</HelpText>
-                  </ButtonRectangular>
+                  <HintButton onClick={plusHint} disabled={showDirectionChange} />
                 ) : (
-                  <ButtonRectangular
+                  <KnownButton
                     onClick={() => nextItem(config.progress.plusProgress)}
-                    disabled={isAudioPaused}
-                    className="relative"
-                  >
-                    <PlusIcon />
-                    <HelpText className="-top-4.5 right-3.5">{TEXTS.known}</HelpText>
-                  </ButtonRectangular>
+                    disabled={showDirectionChange}
+                  />
                 )}
               </div>
               {/** Bottom Row */}
               <div className="relative grid grid-cols-2 gap-1">
-                <ButtonRectangular
-                  onClick={() => handleGrammar()}
-                  disabled={!grammar_id || isAudioPaused}
-                  className="relative"
+                <GrammarButton
+                  onClick={() => handleGrammar(grammar_id)}
+                  disabled={!grammar_id || showDirectionChange}
                 >
-                  <BookIcon />
                   {showNewGrammarIndicator && <Indicator className="absolute top-1 right-1" />}
-                  <HelpText className="-top-4.5 left-3.5">{TEXTS.grammar}</HelpText>
-                </ButtonRectangular>
+                </GrammarButton>
                 {!revealed ? (
-                  <ButtonRectangular
+                  <RevealButton
                     onClick={() => {
                       if (isCzToEn && !audioError) {
                         playAudio();
                       }
                       setRevealed(true);
                     }}
-                    disabled={isAudioPaused}
-                    className="relative"
-                  >
-                    <EyeIcon />
-                    <HelpText className="-top-4.5 right-3.5">{TEXTS.reveal}</HelpText>
-                  </ButtonRectangular>
+                    disabled={showDirectionChange}
+                  />
                 ) : (
-                  <ButtonRectangular
+                  <UnknownButton
                     onClick={() => nextItem(config.progress.minusProgress)}
-                    disabled={isAudioPaused}
-                    className="relative"
-                  >
-                    <MinusIcon />
-                    <HelpText className="-top-4.5 right-3.5">{TEXTS.unknown}</HelpText>
-                  </ButtonRectangular>
+                    disabled={showDirectionChange}
+                  />
                 )}
               </div>
             </div>
