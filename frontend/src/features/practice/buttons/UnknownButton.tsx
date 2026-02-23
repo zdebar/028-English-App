@@ -8,7 +8,7 @@ export default function UnknownButton({ onClick, disabled, children }: PracticeB
   return (
     <ButtonRectangular onClick={onClick} disabled={disabled} className="relative">
       <MinusIcon />
-      <HelpText className="-top-4.5 right-3.5">{TEXTS.unknown}</HelpText>
+      <HelpText className="-top-4.5 left-3.5">{TEXTS.unknown}</HelpText>
       {children}
     </ButtonRectangular>
   );

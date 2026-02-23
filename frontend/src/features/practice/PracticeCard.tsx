@@ -111,9 +111,12 @@ export default function PracticeCard() {
               ) : (
                 <>
                   {!revealed && (
-                    <div className="pointer-events-none absolute inset-0 z-10 grid place-items-center">
-                      <NotRevealedIcon className="text-light/70 dark:text-dark/70 opacity-5 mix-blend-saturation dark:opacity-2" />
-                    </div>
+                    <>
+                      <div className="pointer-events-none absolute inset-0 z-10 grid place-items-center">
+                        <NotRevealedIcon className="text-light/70 dark:text-dark/70 opacity-5 mix-blend-saturation dark:opacity-2" />
+                      </div>
+                      <HelpText className="center">{TEXTS.reveal}</HelpText>
+                    </>
                   )}
                   {/** Top Bar */}
                   <div
