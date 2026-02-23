@@ -85,7 +85,7 @@ export default function Home(): JSX.Element {
           onlyThirdPartyProviders
           queryParams={{ prompt: 'select_account' }}
         />
-        <p className="px-4 text-sm">{TEXTS.offlineDataHint}</p>
+        <p className="px-4 text-sm">{TEXTS.signupHint}</p>
       </div>
     );
   }

@@ -14,7 +14,7 @@
   }
 
   .guide p {
-    @apply py-4 text-justify;
+    @apply py-4 text-center;
   }
 
   .guide span {
