@@ -106,7 +106,7 @@ export default function PracticeCard() {
         <GrammarCard grammar={grammarData} onClose={() => setGrammarVisible(false)} />
       ) : (
         <>
-          <div className={`card-width card-height relative isolate`}>
+          <div className={`card-width card-height relative`}>
             {/* Item Card */}
             <div
               className={`relative flex h-full grow flex-col items-center justify-between p-4 select-none ${
