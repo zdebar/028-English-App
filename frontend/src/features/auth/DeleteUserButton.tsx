@@ -54,8 +54,8 @@ export default function DeleteUserButton({ className }: { className?: string }):
         Metadata.deleteSyncRow('user_items', userId),
         UserScore.deleteAllUserScores(userId),
         Metadata.deleteSyncRow('user_scores', userId),
-        clearTheme(),
-        clearUserStats(),
+        clearTheme(userId),
+        clearUserStats(userId),
         clearSyncTimes(userId),
       ]);
 

@@ -5,10 +5,9 @@ export type UserTheme = 'light' | 'dark';
 
 interface ThemeState {
   theme: UserTheme;
-  userId: string;
-  setUserId: (userId: string) => void;
-  clearTheme: () => void;
-  chooseTheme: (newTheme: UserTheme) => void;
+  loadTheme: (userId?: string) => void;
+  clearTheme: (userId?: string) => void;
+  chooseTheme: (newTheme: UserTheme, userId?: string) => void;
 }
 
 /**
@@ -71,31 +70,37 @@ export const useThemeStore = create<ThemeState>((set, get) => {
     }
   };
 
-  const initialUserId = 'guest';
-  const initialTheme: UserTheme = readStoredTheme(initialUserId) ?? getSystemTheme();
+  const initialTheme: UserTheme = readStoredTheme('guest') ?? getSystemTheme();
   applyTheme(initialTheme);
 
   return {
     theme: initialTheme,
-    userId: initialUserId,
-    clearTheme: () => {
-      const userId = get().userId || 'guest';
+    loadTheme: (userId?: string) => {
+      const resolvedUserId = userId || 'guest';
+      const storedTheme = readStoredTheme(resolvedUserId) ?? getSystemTheme();
+      applyTheme(storedTheme);
+      set({ theme: storedTheme });
+    },
+    clearTheme: (userId?: string) => {
+      const resolvedUserId = userId || 'guest';
       if (!isBrowser) return;
       try {
-        localStorage.removeItem(`theme_${userId}`);
+        localStorage.removeItem(`theme_${resolvedUserId}`);
       } catch {
         // Ignore storage failures (e.g., blocked storage)
       }
+      const fallbackTheme = getSystemTheme();
+      applyTheme(fallbackTheme);
+      set({ theme: fallbackTheme });
     },
-    setUserId: (userId: string) => set({ userId }),
-    chooseTheme: (newTheme: UserTheme) => {
-      const userId = get().userId || 'guest';
+    chooseTheme: (newTheme: UserTheme, userId?: string) => {
+      const resolvedUserId = userId || 'guest';
       if (newTheme === get().theme) {
         applyTheme(newTheme);
         return;
       }
       applyTheme(newTheme);
-      saveTheme(newTheme, userId);
+      saveTheme(newTheme, resolvedUserId);
       set({ theme: newTheme });
     },
   };

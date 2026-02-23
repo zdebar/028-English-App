@@ -24,15 +24,15 @@ import { useToastStore } from './features/toast/use-toast-store';
 import { TEXTS } from './locales/cs';
 import './styles/index.css';
 import { infoHandler } from './features/logging/info-handler';
-import { useUserStore } from './features/dashboard/use-user-store';
+import { useThemeStore } from './features/theme/use-theme';
 
 export default function App() {
   const [loading, setLoading] = useState(false);
   const userId = useAuthStore((state) => state.userId);
   const initializeAuth = useAuthStore((state) => state.initializeAuth);
-  const setUserId = useUserStore((state) => state.setUserId);
   const showToast = useToastStore((state) => state.showToast);
   const location = useLocation();
+  const loadTheme = useThemeStore((state) => state.loadTheme);
 
   // Auth initialization effect
   useEffect(() => {
@@ -55,19 +55,16 @@ export default function App() {
     }
   }, [initializeAuth]);
 
-  // Set User Store userId after auth initialization
-  useEffect(() => {
-    if (userId) {
-      setUserId(userId);
-    }
-  }, [userId, setUserId]);
-
   // Data synchronization
   useEffect(() => {
     if (!userId) return;
     const cleanup = startPeriodicSync(userId, setLoading, showToast);
     return cleanup;
-  }, [userId]);
+  }, [userId, showToast]);
+
+  useEffect(() => {
+    loadTheme(userId || 'guest');
+  }, [userId, loadTheme]);
 
   return (
     <div className="max-w-container relative mx-auto flex min-h-screen flex-col justify-start">

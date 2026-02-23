@@ -5,11 +5,9 @@ import UserItem from '@/database/models/user-items';
 import config from '@/config/config';
 
 interface UserState {
-  userId: string;
   userStats: UserStatsLocal | null;
-  reloadUserStats: () => Promise<void>;
-  clearUserStats: () => void;
-  setUserId: (userId: string) => void;
+  reloadUserStats: (userId: string) => Promise<void>;
+  clearUserStats: (userId: string) => void;
 }
 
 const getUserStatsKey = (userId: string) => `user-stats_${userId}`;
@@ -19,20 +17,15 @@ export const useUserStore = create<UserState>((set, get) => {
     window.addEventListener('userItemsUpdated', (event: any) => {
       const { userId } = event.detail || {};
       if (userId) {
-        get().setUserId(userId);
-        get().reloadUserStats();
+        get().reloadUserStats(userId);
       }
     });
   }
 
   return {
-    userId: 'guest',
     userStats: null,
 
-    setUserId: (userId: string) => set({ userId }),
-
-    reloadUserStats: async () => {
-      const userId = get().userId || 'guest';
+    reloadUserStats: async (userId: string) => {
       try {
         const todayScore = await UserScore.getUserScoreForToday(userId);
         const startedCounts = await UserItem.getStartedCounts(userId);
@@ -51,8 +44,7 @@ export const useUserStore = create<UserState>((set, get) => {
       }
     },
 
-    clearUserStats: () => {
-      const userId = get().userId || 'guest';
+    clearUserStats: (userId: string) => {
       try {
         localStorage.removeItem(getUserStatsKey(userId));
         set({ userStats: null });
