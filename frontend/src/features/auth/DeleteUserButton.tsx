@@ -75,12 +75,13 @@ export default function DeleteUserButton({ className }: { className?: string }):
 
   return (
     <ButtonWithModal
-      buttonText={TEXTS.deleteUserButtonTitle}
+      modalTitle={TEXTS.deleteUserButtonTitle}
+      modalText={TEXTS.deleteUserModalText}
       disabled={!userId}
       onConfirm={handleDelete}
       className={className}
     >
-      <p>{TEXTS.deleteUserModalDescription}</p>
+      <p className="font-bold">{TEXTS.deleteUserButtonTitle}</p>
     </ButtonWithModal>
   );
 }

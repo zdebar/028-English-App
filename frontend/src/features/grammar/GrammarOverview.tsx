@@ -91,7 +91,7 @@ export default function GrammarOverview(): JSX.Element {
   // GrammarCard view
   return (
     <OverviewCard
-      titleText={currentGrammar?.name ?? TEXTS.grammarOverview}
+      buttonTitle={currentGrammar?.name ?? TEXTS.grammarOverview}
       onClose={() => setCardVisible(false)}
       handleReset={handleClearGrammarUserItems}
       className="relative"

@@ -5,9 +5,9 @@ import type { JSX } from 'react';
 import ButtonWithModal from '@/features/modal/ButtonWithModal';
 
 interface OverviewCardProps {
-  titleText?: string;
+  buttonTitle?: string;
+  modalTitle?: string;
   modalText?: string;
-  modalDescription?: string;
   helpText?: string;
   handleReset?: () => Promise<void>;
   onClose: () => void;
@@ -20,20 +20,20 @@ interface OverviewCardProps {
  * Title button triggers confirmation modal for handleReset function. If handleResest is not provided, the reset button is disabled.
  * Component doesn't handle errors. Errors should be handled in the parent component.
  *
- * @param titleText Title text for the card.
- * @param modalText Title for the confirmation modal.
- * @param modalDescription Description for the confirmation modal.
+ * @param buttonTitle Text to display on the button.
+ * @param modalTitle Title for the confirmation modal.
+ * @param modalText Description for the confirmation modal.
  * @param helpText Description for the help tooltip.
  * @param handleReset Function to call to reset progress.
  * @param onClose Function to call when closing the card.
  * @param className Additional CSS classes for custom styling.
- * @param children Content to be displayed inside the card.
+ * @param children Content to be displayed inside the button.
  * @returns The rendered OverviewCard component.
  */
 export default function OverviewCard({
-  titleText = TEXTS.notAvailable,
-  modalText = TEXTS.eraseProgress,
-  modalDescription = TEXTS.eraseDescription,
+  buttonTitle = TEXTS.notAvailable,
+  modalTitle = TEXTS.eraseProgress,
+  modalText = TEXTS.eraseDescription,
   helpText = TEXTS.eraseProgressHelp,
   handleReset,
   onClose,
@@ -46,7 +46,8 @@ export default function OverviewCard({
       <div className="relative flex items-center justify-between gap-1 pb-1">
         {/* Title and Reset Button */}
         <ButtonWithModal
-          buttonText={titleText}
+          modalTitle={modalTitle}
+          modalText={modalText}
           onConfirm={async () => {
             if (handleReset) {
               await handleReset();
@@ -56,8 +57,7 @@ export default function OverviewCard({
           disabled={!handleReset}
           className="flex items-center justify-start px-4"
         >
-          <p className="font-bold">{modalText}</p>
-          <p className="">{modalDescription}</p>
+          <p className="font-bold">{buttonTitle}</p>
         </ButtonWithModal>
         {/* Close Card Button */}
         <CloseButton onClick={onClose} />

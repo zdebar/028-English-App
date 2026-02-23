@@ -26,7 +26,7 @@ export default function VocabularyDetailCard({
 }: VocabularyDetailCardProps) {
   return (
     <div className="relative flex w-full flex-col items-center justify-start">
-      <OverviewCard titleText={selectedWord?.czech} onClose={onClose} handleReset={onReset}>
+      <OverviewCard buttonTitle={selectedWord?.czech} onClose={onClose} handleReset={onReset}>
         <div className="flex flex-col gap-4">
           <div>
             <PropertyView label="item_id" className="h-attribute" value={selectedWord?.item_id} />

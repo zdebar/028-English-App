@@ -29,12 +29,13 @@ export default function SignoutButton({ className }: { className?: string }): JS
 
   return (
     <ButtonWithModal
-      buttonText={TEXTS.signoutButtonTitle}
+      modalTitle={TEXTS.signoutButtonTitle}
+      modalText={TEXTS.signoutModalText}
       disabled={!userId}
       onConfirm={handleSignout}
       className={className}
     >
-      <p>{TEXTS.signoutModalDescription}</p>
+      <p className="font-bold">{TEXTS.signoutButtonTitle}</p>
     </ButtonWithModal>
   );
 }

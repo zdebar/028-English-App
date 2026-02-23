@@ -6,8 +6,9 @@ import type { JSX } from 'react';
 import { useState } from 'react';
 
 interface ButtonModalProps {
-  buttonText: string;
   onConfirm?: () => Promise<void> | void;
+  modalTitle?: string;
+  modalText?: string;
   loadingText?: string;
   disabled?: boolean;
   className?: string;
@@ -19,17 +20,19 @@ interface ButtonModalProps {
  * Automatically disables button while executing onConfirm action.
  * Provide children to customize modal content.
  *
- * @param buttonText Text to display on the button.
  * @param onConfirm Function to call when action is confirmed. Should handle its own errors.
+ * @param modalTitle Title to display in the confirmation modal.
+ * @param modalText Description to display in the confirmation modal.
  * @param loadingText Text to display while loading.
  * @param disabled Whether the button is disabled.
  * @param className Additional CSS classes for custom styling.
- * @param children Content to display inside the modal.
+ * @param children Content to display inside the button.
  * @return The ButtonWithModal component.
  */
 export default function ButtonWithModal({
-  buttonText,
   onConfirm,
+  modalTitle = TEXTS.modalTitle,
+  modalText = TEXTS.modalText,
   loadingText = TEXTS.loadingText,
   disabled = false,
   children,
@@ -56,7 +59,7 @@ export default function ButtonWithModal({
         disabled={disabled || isLoading}
         className={`button-rectangular button-color ${className}`}
       >
-        <span>{isLoading ? loadingText : buttonText}</span>
+        {isLoading ? loadingText : children}
       </button>
       {showModal && (
         <Modal
@@ -65,7 +68,8 @@ export default function ButtonWithModal({
           }}
           onClose={() => setShowModal(false)}
         >
-          {children}
+          <p className="font-bold">{modalTitle}</p>
+          <p>{modalText}</p>
         </Modal>
       )}
     </>

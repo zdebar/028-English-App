@@ -40,8 +40,8 @@ export const TEXTS = {
   confirm: 'Ano',
   cancel: 'Ne',
   loadingText: 'Probíhá ...',
-  modalConfirmTitle: 'Potvrzení akce',
-  modalConfirmDescription: 'Opravdu chcete pokračovat?',
+  modalTitle: 'Potvrzení akce',
+  modalText: 'Opravdu chcete pokračovat?',
 
   // Generic
   notAvailable: 'Není k dispozici',
@@ -70,21 +70,20 @@ export const TEXTS = {
 
   // Signout
   signoutButtonTitle: 'Odhlásit se',
-  signoutModalDescription: 'Opravdu se chcete odhlásit ze svého účtu?',
+  signoutModalText: 'Opravdu se chcete odhlásit ze svého účtu?',
   signoutSuccess: 'Úspěšně jste se odhlásili.',
   signoutError: 'Chyba při odhlašování.',
 
   // Delete User Account
   deleteUserButtonTitle: 'Smazat uživatelský účet',
-  deleteUserModalDescription:
+  deleteUserModalText:
     'Opravdu chcete smazat svůj uživatelský účet? Vaše data budou nenávratně smazána. Tuto akci již nelze vrátit zpět.',
   deleteUserSuccessToast: 'Váš uživatelský účet byl úspěšně smazán.',
   deleteUserErrorToast: 'Chyba při mazání uživatelského účtu.',
 
   // Reset All User Progress
   resetAllProgressButtonTitle: 'Resetovat veškerý pokrok',
-  resetAllProgressModalDescription:
-    'Opravdu chcete vymazat veškerý pokrok? Změna již nepůjde vrátit.',
+  resetAllProgressModalText: 'Opravdu chcete vymazat veškerý pokrok? Změna již nepůjde vrátit.',
 
   // Generic Erase Progress
   eraseProgress: 'Vymazat pokrok',

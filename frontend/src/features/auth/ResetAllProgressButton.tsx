@@ -29,12 +29,13 @@ export default function ResetAllProgressButton({ className }: { className?: stri
 
   return (
     <ButtonWithModal
-      buttonText={TEXTS.resetAllProgressButtonTitle}
+      modalTitle={TEXTS.resetAllProgressButtonTitle}
+      modalText={TEXTS.resetAllProgressModalText}
       disabled={!userId}
       onConfirm={handleReset}
       className={className}
     >
-      <p>{TEXTS.resetAllProgressModalDescription}</p>
+      <p className="font-bold">{TEXTS.resetAllProgressButtonTitle}</p>
     </ButtonWithModal>
   );
 }

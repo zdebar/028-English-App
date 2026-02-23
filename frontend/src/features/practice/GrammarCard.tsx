@@ -22,7 +22,7 @@ type GrammarCardProps = {
  */
 export default function GrammarCard({ grammar, onClose }: GrammarCardProps) {
   return (
-    <OverviewCard titleText={grammar?.name} onClose={onClose}>
+    <OverviewCard buttonTitle={grammar?.name} onClose={onClose}>
       {grammar?.note ? (
         <div
           dangerouslySetInnerHTML={{
