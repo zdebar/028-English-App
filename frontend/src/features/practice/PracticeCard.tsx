@@ -188,32 +188,41 @@ export default function PracticeCard() {
               {/** Top Row */}
               <div className="relative grid grid-cols-2 gap-1">
                 <ButtonRectangular
-                  onClick={() => handleGrammar()}
-                  disabled={!grammar_id || isAudioPaused}
-                  className="relative"
-                >
-                  <BookIcon />
-                  {showNewGrammarIndicator && <Indicator className="absolute top-1 right-1" />}
-                </ButtonRectangular>
-                <HelpText className="-top-4.5 left-3.5">{TEXTS.grammar}</HelpText>
-                <ButtonRectangular
                   onClick={() => {
                     nextItem(config.progress.skipProgress);
                   }}
                   disabled={!revealed || isAudioPaused}
                 >
                   <ForwardIcon />
+                  <HelpText className="-top-4.5 right-3.5">{TEXTS.complete}</HelpText>
                 </ButtonRectangular>
-                <HelpText className="-top-4.5 right-3.5">{TEXTS.complete}</HelpText>
-              </div>
-              {/** Bottom Row */}
-              {!revealed ? (
-                /** Not Revealed */
-                <div className="relative grid grid-cols-2 gap-1">
+                {!revealed ? (
                   <ButtonRectangular onClick={plusHint} disabled={isAudioPaused}>
                     <BulbIcon />
+                    <HelpText className="-top-4.5 left-3.5">{TEXTS.hint}</HelpText>
                   </ButtonRectangular>
-                  <HelpText className="-top-4.5 left-3.5">{TEXTS.hint}</HelpText>
+                ) : (
+                  <ButtonRectangular
+                    onClick={() => nextItem(config.progress.plusProgress)}
+                    disabled={isAudioPaused}
+                  >
+                    <PlusIcon />
+                    <HelpText className="-top-4.5 right-3.5">{TEXTS.known}</HelpText>
+                  </ButtonRectangular>
+                )}
+              </div>
+              {/** Bottom Row */}
+              <div className="relative grid grid-cols-2 gap-1">
+                <ButtonRectangular
+                  onClick={() => handleGrammar()}
+                  disabled={!grammar_id || isAudioPaused}
+                  className="relative"
+                >
+                  <BookIcon />
+                  {showNewGrammarIndicator && <Indicator className="absolute top-1 right-1" />}
+                  <HelpText className="-top-4.5 left-3.5">{TEXTS.grammar}</HelpText>
+                </ButtonRectangular>
+                {!revealed ? (
                   <ButtonRectangular
                     onClick={() => {
                       if (isCzToEn && !audioError) {
@@ -224,29 +233,20 @@ export default function PracticeCard() {
                     disabled={isAudioPaused}
                   >
                     <EyeIcon />
+                    <HelpText className="-top-4.5 right-3.5">{TEXTS.reveal}</HelpText>
                   </ButtonRectangular>
-                  <HelpText className="-top-4.5 right-3.5">{TEXTS.reveal}</HelpText>
-                </div>
-              ) : (
-                /** Revealed */
-                <div className="relative grid grid-cols-2 gap-1">
+                ) : (
                   <ButtonRectangular
                     onClick={() => nextItem(config.progress.minusProgress)}
                     disabled={isAudioPaused}
                   >
                     <MinusIcon />
+                    <HelpText className="-top-4.5 left-3.5">{TEXTS.unknown}</HelpText>
                   </ButtonRectangular>
-                  <HelpText className="-top-4.5 left-3.5">{TEXTS.unknown}</HelpText>
-                  <ButtonRectangular
-                    onClick={() => nextItem(config.progress.plusProgress)}
-                    disabled={isAudioPaused}
-                  >
-                    <PlusIcon />
-                  </ButtonRectangular>
-                  <HelpText className="-top-4.5 right-3.5">{TEXTS.known}</HelpText>
-                </div>
-              )}
+                )}
+              </div>
             </div>
+
             <HelpButton className="help-btn-pos self-end" />
           </div>
         </>
