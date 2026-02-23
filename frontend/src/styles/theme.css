@@ -42,11 +42,12 @@
   --color-divisions: #374151;
 
   /** toast colors **/
-  --color-toast-success: #22c55e;
-  --color-toast-error: #ef4444;
-  --color-toast-info: #3b82f6;
-  --color-toast-success-light: #15803d;
-  --color-toast-error-light: #b91c1c;
+  --color-success-light: #0d642d;
+  --color-error-light: #a31313;
+  --color-info-light: #1e4789;
+  --color-success-dark: #22c55e;
+  --color-error-dark: #ef4444;
+  --color-info-dark: #3b82f6;
 
   /** LAYOUT DIMENSIONS **/
   --max-width-container: 900px;

@@ -2,9 +2,9 @@ import { useToastStore, type ToastType } from './use-toast-store';
 import type { JSX } from 'react';
 
 const typeStyles: Record<ToastType, string> = {
-  success: 'bg-toast-success',
-  error: 'bg-toast-error',
-  info: 'bg-toast-info',
+  success: 'bg-success-light',
+  error: 'bg-error-light',
+  info: 'bg-info-light',
 };
 
 /**
@@ -29,7 +29,7 @@ export default function Toast({
   };
   return (
     <div
-      className={`z-modal text-light absolute top-0 right-0 px-4 py-2 ${typeStyles[type]}`}
+      className={`z-modal text-dark absolute top-0 right-0 px-4 py-2 ${typeStyles[type]}`}
       onClick={handleClick}
     >
       {message}

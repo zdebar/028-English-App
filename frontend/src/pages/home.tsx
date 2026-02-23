@@ -37,8 +37,8 @@ export default function Home(): JSX.Element {
           className="h-attribute"
           classNameValue={
             (isPracticeGoalMet
-              ? 'text-toast-success-light dark:text-toast-success'
-              : 'text-toast-error-light dark:text-toast-error') + ' font-bold'
+              ? 'text-success-light dark:text-success-dark'
+              : 'text-error-light dark:text-error-dark') + ' font-bold'
           }
           value={`${practiceCountToday} / ${dailyGoal}`}
         />

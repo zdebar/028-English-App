@@ -155,7 +155,7 @@ export default function PracticeCard() {
                       className={`${audioDisabled && 'invisible'}`}
                     />
                     {/**Audio messages*/}
-                    {!audioError ? (
+                    {audioError ? (
                       <p className="px-2">{TEXTS.noAudio}</p>
                     ) : (
                       audioLoading && <LoadingMessage text={TEXTS.loadingAudio} />
