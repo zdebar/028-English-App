@@ -9,7 +9,6 @@ interface ButtonModalProps {
   onConfirm?: () => Promise<void> | void;
   modalTitle?: string;
   modalText?: string;
-  loadingText?: string;
   disabled?: boolean;
   className?: string;
   children?: React.ReactNode;
@@ -23,7 +22,6 @@ interface ButtonModalProps {
  * @param onConfirm Function to call when action is confirmed. Should handle its own errors.
  * @param modalTitle Title to display in the confirmation modal.
  * @param modalText Description to display in the confirmation modal.
- * @param loadingText Text to display while loading.
  * @param disabled Whether the button is disabled.
  * @param className Additional CSS classes for custom styling.
  * @param children Content to display inside the button.
@@ -33,7 +31,6 @@ export default function ButtonWithModal({
   onConfirm,
   modalTitle = TEXTS.modalTitle,
   modalText = TEXTS.modalText,
-  loadingText = TEXTS.loadingText,
   disabled = false,
   children,
   className = '',
@@ -59,7 +56,7 @@ export default function ButtonWithModal({
         disabled={disabled || isLoading}
         className={`button-rectangular button-color ${className}`}
       >
-        {isLoading ? loadingText : children}
+        {children}
       </button>
       {showModal && (
         <Modal

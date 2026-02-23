@@ -27,6 +27,9 @@ export const TEXTS = {
   known: 'znám',
   pressToPlayAudio: 'Stiskněte pro přehrání audia',
   audioIsPlaying: 'přehrává se audio',
+  skipTitle: 'Dokončit položku',
+  skipText:
+    'Opravdu chcete přeskočit tuto položku? Položka se již nebude dále nabízet k procvičování.',
 
   // Grammar Overview
   noGrammar: 'Žádné započatá gramatika.',

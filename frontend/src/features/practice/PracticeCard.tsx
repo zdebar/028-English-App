@@ -25,6 +25,7 @@ import { errorHandler } from '../logging/error-handler';
 import { useToastStore } from '../toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import NotRevealedIcon from '@/components/UI/icons/NotRevealedIcon';
+import ButtonWithModal from '../modal/ButtonWithModal';
 
 /**
  * PracticeCard component for interactive language practice.
@@ -187,15 +188,17 @@ export default function PracticeCard() {
             <div id="practice-controls" className="relative flex flex-col gap-1">
               {/** Top Row */}
               <div className="relative grid grid-cols-2 gap-1">
-                <ButtonRectangular
-                  onClick={() => {
+                <ButtonWithModal
+                  modalTitle={TEXTS.skipTitle}
+                  modalText={TEXTS.skipText}
+                  onConfirm={() => {
                     nextItem(config.progress.skipProgress);
                   }}
                   disabled={!revealed || isAudioPaused}
                 >
                   <ForwardIcon />
                   <HelpText className="-top-4.5 right-3.5">{TEXTS.complete}</HelpText>
-                </ButtonRectangular>
+                </ButtonWithModal>
                 {!revealed ? (
                   <ButtonRectangular onClick={plusHint} disabled={isAudioPaused}>
                     <BulbIcon />
