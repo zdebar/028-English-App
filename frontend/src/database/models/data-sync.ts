@@ -112,6 +112,7 @@ export function startPeriodicSync(
     try {
       if (userId) {
         await dataSync(userId);
+        await AudioRecord.removeOrphaned();
       }
       showToast(TEXTS.syncSuccessToast, 'success');
     } catch (error) {
@@ -119,11 +120,6 @@ export function startPeriodicSync(
       errorHandler('Data synchronization failed', error);
     } finally {
       setLoading(false);
-    }
-    try {
-      await AudioRecord.removeOrphaned();
-    } catch (error) {
-      errorHandler('Remaining audio data synchronization failed', error);
     }
   };
 
