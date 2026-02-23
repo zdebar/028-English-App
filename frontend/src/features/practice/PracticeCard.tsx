@@ -149,7 +149,10 @@ export default function PracticeCard() {
                     id="top-bar"
                     className="relative flex h-8 w-full items-center justify-between"
                   >
-                    <VolumeSlider setVolume={setVolume} />
+                    <VolumeSlider
+                      setVolume={setVolume}
+                      className={`${audioDisabled && 'invisible'}`}
+                    />
                     <p className="px-2">
                       {audioError ? TEXTS.noAudio : audioLoading && TEXTS.loadingAudio}
                     </p>
