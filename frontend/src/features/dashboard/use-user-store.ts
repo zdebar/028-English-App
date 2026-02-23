@@ -12,6 +12,19 @@ interface UserState {
 
 const getUserStatsKey = (userId: string) => `user-stats_${userId}`;
 
+/**
+ * Zustand store for managing user statistics and related operations.
+ *
+ * Features:
+ * - Listens to 'userItemsUpdated' events and automatically reloads user stats
+ * - Caches user stats in localStorage for persistence
+ * - Provides methods to reload and clear user statistics
+ *
+ * @returns {UserState} The user store with the following properties and methods:
+ * @property {UserStatsLocal | null} userStats - Current user statistics or null if not loaded
+ * @property {(userId: string) => Promise<void>} reloadUserStats - Fetches and updates user statistics from the server, including today's score, started counts, and total items count. Results are cached in localStorage.
+ * @property {(userId: string) => void} clearUserStats - Clears user statistics from both localStorage and the store state
+ */
 export const useUserStore = create<UserState>((set, get) => {
   if (typeof window !== 'undefined') {
     window.addEventListener('userItemsUpdated', (event: any) => {
