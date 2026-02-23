@@ -3,8 +3,8 @@ import { alternateDirection } from '@/features/practice/practice.utils';
 import type { UserItemPractice } from '@/types/local.types';
 import { useFetch } from '@/hooks/use-fetch';
 import UserItem from '@/database/models/user-items';
-import { errorHandler } from '../logging/error-handler';
-import { infoHandler } from '../logging/info-handler';
+import { errorHandler } from '@/features/logging/error-handler';
+import { infoHandler } from '@/features/logging/info-handler';
 import { useHint } from './use-hint';
 import { useAudioManager } from './use-audio-manager';
 

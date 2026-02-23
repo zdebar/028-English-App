@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
 import Grammar from '@/database/models/grammar';
-import { errorHandler } from '../logging/error-handler';
+import { errorHandler } from '@/features/logging/error-handler';
 import { TEXTS } from '@/locales/cs';
-import { useToastStore } from '../toast/use-toast-store';
-import type { GrammarCardType } from './GrammarCard';
+import { useToastStore } from '@/features/toast/use-toast-store';
+import type { GrammarCardType } from '../GrammarCard';
 
 export function useGrammar() {
   const [grammarVisible, setGrammarVisible] = useState(false);

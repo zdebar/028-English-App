@@ -2,7 +2,7 @@ import ButtonRectangular from '@/components/UI/buttons/ButtonRectangular';
 import BulbIcon from '@/components/UI/icons/BulbIcon';
 import HelpText from '@/features/help/HelpText';
 import { TEXTS } from '@/locales/cs';
-import { type PracticeButtonProps } from './practice.types';
+import { type PracticeButtonProps } from '../practice.types';
 
 export default function HintButton({ onClick, disabled, children }: PracticeButtonProps) {
   return (

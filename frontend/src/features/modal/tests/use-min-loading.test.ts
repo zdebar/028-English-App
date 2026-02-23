@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useMinLoading } from './use-min-loading';
+import { useMinLoading } from '../use-min-loading';
 
 describe('useMinLoading', () => {
   beforeEach(() => {

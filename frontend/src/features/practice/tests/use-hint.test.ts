@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { useHint } from './use-hint';
+import { useHint } from '../hooks/use-hint';
 
 describe('useHint', () => {
   it('starts with index 0 and no visible hints', () => {

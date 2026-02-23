@@ -13,7 +13,7 @@ import {
   getLessonStarted,
   getPreviousCount,
   getTodayStartedItems,
-} from './dashboard.utils';
+} from '../dashboard.utils';
 
 describe('dashboard.utils', () => {
   describe('getPreviousCount', () => {

@@ -2,7 +2,7 @@ import ButtonRectangular from '@/components/UI/buttons/ButtonRectangular';
 import MinusIcon from '@/components/UI/icons/MinusIcon';
 import HelpText from '@/features/help/HelpText';
 import { TEXTS } from '@/locales/cs';
-import { type PracticeButtonProps } from './practice.types';
+import { type PracticeButtonProps } from '../practice.types';
 
 export default function UnknownButton({ onClick, disabled, children }: PracticeButtonProps) {
   return (

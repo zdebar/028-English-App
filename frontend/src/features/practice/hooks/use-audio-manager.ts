@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import AudioRecord from '@/database/models/audio-records';
-import { errorHandler } from '../logging/error-handler';
+import { errorHandler } from '@/features/logging/error-handler';
 
 export function useAudioManager(audio: string | null) {
   const audioRef = useRef<HTMLAudioElement | null>(null);

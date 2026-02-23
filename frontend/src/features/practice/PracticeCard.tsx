@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import config from '@/config/config';
 
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { usePracticeDeck } from '@/features/practice/use-practice-deck';
+import { usePracticeDeck } from './hooks/use-practice-deck';
 import { useUserStore } from '../dashboard/use-user-store';
 
 import HelpText from '@/features/help/HelpText';
@@ -13,15 +13,15 @@ import HelpButton from '@/features/help/HelpButton';
 import GrammarCard from '@/features/practice/GrammarCard';
 import VolumeSlider from '@/features/practice/VolumeSlider';
 
-import HintButton from './HintButton';
-import GrammarButton from './GrammarButton';
+import HintButton from './buttons/HintButton';
+import GrammarButton from './buttons/GrammarButton';
 import { TEXTS } from '@/locales/cs';
 import NotRevealedIcon from '@/components/UI/icons/NotRevealedIcon';
-import { useGrammar } from './use-grammar';
-import KnownButton from './KnownButton';
-import UnknownButton from './UnknownButton';
-import RevealButton from './RevealButton';
-import SkipButton from './SkipButton';
+import { useGrammar } from './hooks/use-grammar';
+import KnownButton from './buttons/KnownButton';
+import UnknownButton from './buttons/UnknownButton';
+import RevealButton from './buttons/RevealButton';
+import SkipButton from './buttons/SkipButton';
 
 /**
  * PracticeCard component for interactive language practice.
