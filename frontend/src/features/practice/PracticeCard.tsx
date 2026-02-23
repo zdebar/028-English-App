@@ -20,8 +20,8 @@ import NotRevealedIcon from '@/components/UI/icons/NotRevealedIcon';
 import { useGrammar } from './hooks/use-grammar';
 import KnownButton from './buttons/KnownButton';
 import UnknownButton from './buttons/UnknownButton';
-import RevealButton from './buttons/RevealButton';
 import SkipButton from './buttons/SkipButton';
+import PlayAudioButton from './buttons/AudioButton';
 
 /**
  * PracticeCard component for interactive language practice.
@@ -69,6 +69,17 @@ export default function PracticeCard() {
     return <LoadingMessage text="Žádné položky k procvičování" timeDelay={100} />;
   }
 
+  const handleReveal = () => {
+    if (showDirectionChange) {
+      hideDirectionChange();
+      return;
+    }
+    if (isCzToEn && !audioError) {
+      playAudio();
+    }
+    setRevealed(true);
+  };
+
   return (
     <div className="relative flex w-full grow flex-col items-center">
       {grammarVisible ? (
@@ -79,30 +90,18 @@ export default function PracticeCard() {
             {/* Item Card */}
             <div
               className={`relative flex h-full grow flex-col items-center justify-between p-4 select-none ${
-                audioDisabled && !showDirectionChange ? 'color-audio-disabled' : 'button-color'
+                revealed ? 'color-audio-disabled' : 'button-color'
               } `}
-              onClick={() => {
-                if (showDirectionChange) {
-                  hideDirectionChange();
-                  return;
-                }
-                if (!audioDisabled) {
-                  playAudio();
-                }
-              }}
+              onClick={handleReveal}
               role="button"
               tabIndex={0}
-              aria-disabled={audioDisabled}
+              aria-disabled={revealed}
               onKeyDown={(e) => {
                 if (audioDisabled) return;
                 if (e.key === 'Enter' || e.key === ' ') {
-                  if (!showDirectionChange) {
-                    playAudio();
-                  } else {
-                    hideDirectionChange();
-                  }
-                  e.preventDefault();
+                  handleReveal();
                 }
+                e.preventDefault();
               }}
             >
               {showDirectionChange ? (
@@ -166,38 +165,38 @@ export default function PracticeCard() {
                   onConfirm={() => nextItem(config.progress.skipProgress)}
                   disabled={!revealed || showDirectionChange}
                 />
-                {!revealed ? (
-                  <HintButton onClick={plusHint} disabled={showDirectionChange} />
-                ) : (
-                  <KnownButton
-                    onClick={() => nextItem(config.progress.plusProgress)}
-                    disabled={showDirectionChange}
-                  />
-                )}
+                <PlayAudioButton
+                  onClick={() => {
+                    if (!audioDisabled) {
+                      playAudio();
+                    }
+                  }}
+                  disabled={audioDisabled || showDirectionChange}
+                />
               </div>
               {/** Bottom Row */}
-              <div className="relative grid grid-cols-2 gap-1">
-                <GrammarButton
-                  onClick={() => handleGrammar(grammar_id)}
-                  disabled={!grammar_id || showDirectionChange}
-                >
-                  {showNewGrammarIndicator && <Indicator className="absolute top-1 right-1" />}
-                </GrammarButton>
+              <div className={`} relative grid grid-cols-2 gap-1`}>
                 {!revealed ? (
-                  <RevealButton
-                    onClick={() => {
-                      if (isCzToEn && !audioError) {
-                        playAudio();
-                      }
-                      setRevealed(true);
-                    }}
-                    disabled={showDirectionChange}
-                  />
+                  <>
+                    <GrammarButton
+                      onClick={() => handleGrammar(grammar_id)}
+                      disabled={!grammar_id || showDirectionChange}
+                    >
+                      {showNewGrammarIndicator && <Indicator className="absolute top-1 right-1" />}
+                    </GrammarButton>
+                    <HintButton onClick={plusHint} disabled={showDirectionChange} />
+                  </>
                 ) : (
-                  <UnknownButton
-                    onClick={() => nextItem(config.progress.minusProgress)}
-                    disabled={showDirectionChange}
-                  />
+                  <>
+                    <UnknownButton
+                      onClick={() => nextItem(config.progress.minusProgress)}
+                      disabled={showDirectionChange}
+                    />
+                    <KnownButton
+                      onClick={() => nextItem(config.progress.plusProgress)}
+                      disabled={showDirectionChange}
+                    />
+                  </>
                 )}
               </div>
             </div>

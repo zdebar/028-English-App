@@ -20,6 +20,7 @@ export const TEXTS = {
   today: 'dnes',
   dailyGoal: 'denní cíl',
   grammar: 'gramatika',
+  audio: 'přehraj audio',
   complete: 'dokončit',
   hint: 'nápověda',
   reveal: 'odhalit',
