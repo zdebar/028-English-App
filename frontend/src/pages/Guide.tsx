@@ -39,7 +39,26 @@ export default function Guide(): JSX.Element {
         <h2>Neodhalená kartička</h2>
         <Screenshot src="/screenshot-not-revealed.png" alt="Ukázka kartičky před odhalením" />
         <p>
-          <strong>"audio"</strong>
+          <strong>"odhalit"</strong>
+          <span>Tlačítko odhalí správný překlad kartičky.</span>
+        </p>
+        <p>
+          <strong>"pokrok"</strong>
+          <span>Označuje skóre procvičení jednotlivých položek.</span>
+        </p>
+        <p>
+          <strong>"dnes / denní cíl"</strong>
+          <span>Zobrazuje dnešní počet opakování a denní cíl.</span>
+        </p>
+        <p>
+          <strong>"dokončit"</strong>
+          <span>
+            Pokud nějaké slovíčko již znáte z dřívějška, tlačítko umožní přeskočit aktuální slovíčko
+            nebo větu. Položka se ukončí a již se nebude znovu nabízet k opakování.
+          </span>
+        </p>
+        <p>
+          <strong>"přehraj audio"</strong>
           <span>Pokud je k dispozici, můžete kdykoliv znovu přehrát poklepáním na kartičku.</span>
         </p>
 
@@ -53,29 +72,11 @@ export default function Guide(): JSX.Element {
           <strong>"nápověda"</strong>
           <span>Tlačítko nápovědy postupně odhalí jednotlivá písmena správného překladu.</span>
         </p>
-        <p>
-          <strong>"dokončit"</strong>
-          <span>
-            Pokud nějaké slovíčko již znáte z dřívějška, tlačítko umožní přeskočit aktuální slovíčko
-            nebo větu. Položka se ukončí a již se nebude znovu nabízet k opakování.
-          </span>
-        </p>
-        <p>
-          <strong>"odhalit"</strong>
-          <span>Tlačítko odhalí správný překlad kartičky.</span>
-        </p>
       </section>
       <section>
         <h2>Odhalená kartička</h2>
         <Screenshot src="/screenshot-revealed.png" alt="Ukázka kartičky po odhalení" />
-        <p>
-          <strong>"pokrok"</strong>
-          <span>Označuje skóre procvičení jednotlivých položek.</span>
-        </p>
-        <p>
-          <strong>"dnes / denní cíl"</strong>
-          <span>Zobrazuje dnešní počet opakování a denní cíl.</span>
-        </p>
+
         <p>
           <strong>"neznám"</strong>
           <span>
