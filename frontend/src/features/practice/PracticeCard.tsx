@@ -154,9 +154,12 @@ export default function PracticeCard() {
                       setVolume={setVolume}
                       className={`${audioDisabled && 'invisible'}`}
                     />
-                    <p className="px-2">
-                      {audioError ? TEXTS.noAudio : audioLoading && TEXTS.loadingAudio}
-                    </p>
+                    {/**Audio messages*/}
+                    {!audioError ? (
+                      <p className="px-2">{TEXTS.noAudio}</p>
+                    ) : (
+                      audioLoading && <LoadingMessage text={TEXTS.loadingAudio} />
+                    )}
                   </div>
                   {/** Item Data */}
                   <div id="item" className="flex h-full flex-col justify-center gap-1">
@@ -195,19 +198,25 @@ export default function PracticeCard() {
                     nextItem(config.progress.skipProgress);
                   }}
                   disabled={!revealed || isAudioPaused}
+                  className="relative"
                 >
                   <ForwardIcon />
-                  <HelpText className="-top-4.5 right-3.5">{TEXTS.complete}</HelpText>
+                  <HelpText className="-top-4.5 left-3.5">{TEXTS.complete}</HelpText>
                 </ButtonWithModal>
                 {!revealed ? (
-                  <ButtonRectangular onClick={plusHint} disabled={isAudioPaused}>
+                  <ButtonRectangular
+                    onClick={plusHint}
+                    disabled={isAudioPaused}
+                    className="relative"
+                  >
                     <BulbIcon />
-                    <HelpText className="-top-4.5 left-3.5">{TEXTS.hint}</HelpText>
+                    <HelpText className="-top-4.5 right-3.5">{TEXTS.hint}</HelpText>
                   </ButtonRectangular>
                 ) : (
                   <ButtonRectangular
                     onClick={() => nextItem(config.progress.plusProgress)}
                     disabled={isAudioPaused}
+                    className="relative"
                   >
                     <PlusIcon />
                     <HelpText className="-top-4.5 right-3.5">{TEXTS.known}</HelpText>
@@ -234,6 +243,7 @@ export default function PracticeCard() {
                       setRevealed(true);
                     }}
                     disabled={isAudioPaused}
+                    className="relative"
                   >
                     <EyeIcon />
                     <HelpText className="-top-4.5 right-3.5">{TEXTS.reveal}</HelpText>
@@ -242,9 +252,10 @@ export default function PracticeCard() {
                   <ButtonRectangular
                     onClick={() => nextItem(config.progress.minusProgress)}
                     disabled={isAudioPaused}
+                    className="relative"
                   >
                     <MinusIcon />
-                    <HelpText className="-top-4.5 left-3.5">{TEXTS.unknown}</HelpText>
+                    <HelpText className="-top-4.5 right-3.5">{TEXTS.unknown}</HelpText>
                   </ButtonRectangular>
                 )}
               </div>
