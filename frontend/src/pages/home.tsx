@@ -19,6 +19,7 @@ import config from '@/config/config';
 export default function Home(): JSX.Element {
   const theme = useThemeStore((state) => state.theme);
   const userId = useAuthStore((state) => state.userId);
+  const userFullName = useAuthStore((state) => state.userFullName);
   const userEmail = useAuthStore((state) => state.userEmail);
   const userStats = useUserStore((state) => state.userStats);
 
@@ -31,7 +32,11 @@ export default function Home(): JSX.Element {
     // User is authenticated - show dashboard
     mainSection = (
       <div className="relative flex w-full flex-col">
-        <PropertyView label={TEXTS.userLabel} className="h-attribute" value={userEmail} />
+        <PropertyView
+          label={TEXTS.userLabel}
+          className="h-attribute"
+          value={userFullName || userEmail}
+        />
         <PropertyView
           label={TEXTS.userStatsLabel}
           className="h-attribute"
