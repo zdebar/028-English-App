@@ -13,9 +13,9 @@ export default function Guide(): JSX.Element {
       <section>
         <p>Učení cizích jazyků není ve své podstatě složité.</p>
         <p>
-          Stačí pár tisíc slovíček a několik gramatických pravidel, které se dokola opakují. Obtížné
-          je přirozené používání jazyka, kdy vše do sebe zapadá zcela automaticky, bez přemýšlení.
-          Každý toho dosáhne u svého mateřského jazyka v průběhu dětství čistě množstvím opakování.
+          Obtížné je přirozené znalosti jazyka, kdy vše do sebe zapadá zcela automaticky, bez
+          přemýšlení. Každý toho dosáhne u svého mateřského jazyka v průběhu dětství čistě množstvím
+          opakování.
         </p>
         <p>
           Běžné učení jazyků znamená příliš mnoho přemýšlení a málo praxe. Tato aplikace je naopak
@@ -25,10 +25,9 @@ export default function Guide(): JSX.Element {
       <section>
         <h2>Jak aplikace funguje</h2>
 
-        <p>Aplikace využívá pouze procvičování pomocí kartiček.</p>
         <p>
-          V aplikaci nejsou žádné lekce. Slovíčka i gramatika se postupně samy nabízejí k
-          procvičování v kartičkách.
+          Aplikace využívá pouze procvičování pomocí kartiček. Slovíčka i gramatika se postupně samy
+          nabízejí k procvičování v kartičkách.
         </p>
         <p>
           Pravidelně se střídá procvičování z češtiny do angličtiny a z angličtiny do češtiny. Z
@@ -37,92 +36,81 @@ export default function Guide(): JSX.Element {
       </section>
       <section>
         <h2>Neodhalená kartička</h2>
-        <Screenshot src="/screenshot-not-revealed.png" alt="Ukázka kartičky před odhalením" />
-        <p>
-          <strong>"odhalit"</strong>
-          <span>Tlačítko odhalí správný překlad kartičky.</span>
+        <Screenshot src="/screenshot-not-revealed.webp" alt="Ukázka kartičky před odhalením" />
+        <p className="text-left">
+          <strong>"odhalit"</strong> odhalí překlad kartičky{' '}
         </p>
         <p>
-          <strong>"pokrok"</strong>
-          <span>Označuje skóre procvičení jednotlivých položek.</span>
+          <strong>"pokrok"</strong> skóre pokroku položky
         </p>
         <p>
           <strong>"dnes / denní cíl"</strong>
-          <span>Zobrazuje dnešní počet opakování a denní cíl.</span>
+          <span>dnešní počet opakování a cíl</span>
         </p>
         <p>
           <strong>"dokončit"</strong>
-          <span>
-            Pokud nějaké slovíčko již znáte z dřívějška, tlačítko umožní přeskočit aktuální slovíčko
-            nebo větu. Položka se ukončí a již se nebude znovu nabízet k opakování.
-          </span>
+          dokončí položku, ta se již nebude nabízet k dalšímu procvičování
         </p>
         <p>
           <strong>"přehraj audio"</strong>
-          <span>Pokud je k dispozici, můžete kdykoliv znovu přehrát poklepáním na kartičku.</span>
+          přehraje audio položky
         </p>
 
         <p>
-          <strong>"gramatika"</strong>{' '}
-          <span>
-            Tlačítko s vysvětlením gramatiky se zpřístupní, pokud jde o gramatické cvičení.
-          </span>
+          <strong>"gramatika"</strong> vysvětlení příslušné gramatiky
         </p>
         <p>
           <strong>"nápověda"</strong>
-          <span>Tlačítko nápovědy postupně odhalí jednotlivá písmena správného překladu.</span>
+          postupně odhalí jednotlivá písmena správného překladu
         </p>
       </section>
       <section>
         <h2>Odhalená kartička</h2>
-        <Screenshot src="/screenshot-revealed.png" alt="Ukázka kartičky po odhalení" />
+        <Screenshot src="/screenshot-revealed.webp" alt="Ukázka kartičky po odhalení" />
 
         <p>
           <strong>"neznám"</strong>
-          <span>
-            Sníží skóre dané položky a způsobí, že se znovu objeví k procvičování mnohem dříve.
-          </span>
+          sníží skóre dané položky, nabídne se k dalšímu procvičování dříve
         </p>
         <p>
           <strong>"znám"</strong>
-          <span>
-            Tlačítko zvýší skóre dané položky a způsobí, že se znovu objeví k procvičování později.
-            Aplikace je postavena na drilu až do úplné automatizace, doporučujeme tedy dávat "znám"
-            jen pokud je pro vás znalost zcela automatická.
-          </span>
+          <span>zvýší skóre dané položky, bude se tak nabízet k dalšímu procvičování později.</span>
+        </p>
+        <p>
+          Aplikace je postavena na drilu až do úplné automatizace, doporučujeme tedy dávat "znám"
+          jen pokud je pro vás znalost zcela automatická.
         </p>
       </section>
       <section>
         <h2>Profil</h2>
-        <Screenshot src="/screenshot-profile.png" alt="Ukázka profilu uživatele" />
+        <Screenshot src="/screenshot-profile.webp" alt="Ukázka profilu uživatele" />
         <p>
           <strong>"Přehled gramatiky"</strong>
           <span>
-            Zobrazuje přehled již započaté gramatiky a umožňuje restartovat procvičování příslušných
-            vět.
+            přehled již započaté gramatiky, umožňuje restartovat procvičování vět příslušných k dané
+            grammatice
           </span>
         </p>
         <p>
           <strong>"Přehled slovíček"</strong>
           <span>
-            Zobrazuje přehled započatých slovíček a umožňuje restartovat procvičování každého
-            slovíčka.
+            přehled započatých slovíček, umožňuje restartovat procvičování každého slovíčka
           </span>
         </p>
         <p>
-          <strong>"Restartovat celý svůj pokrok"</strong>
-          <span>Umožňuje začít úplně od začátku.</span>
+          <strong>"Restartovat vše"</strong>
+          <span>vynuluje veškerý pokrok</span>
         </p>
         <p>
           <strong>"Smazat účet"</strong>
           <span>
-            Smazat uživatelský účet, včetně všech vašich dat. V této fázi vývoje je každé smazání
-            účtu nevratné a data budou nenávratně ztracena.
+            smaže uživatelský účet, včetně všech vašich dat. V této fázi vývoje je každé smazání
+            účtu nevratné a data budou nenávratně smazána.
           </span>
         </p>
         <p>
           <strong>"Odhlásit se"</strong>
-          <span>Odhlásit se ze svého účtu.</span>
+          <span>odhlásí Vás ze svého účtu.</span>
         </p>
       </section>
     </div>

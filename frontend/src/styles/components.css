@@ -14,15 +14,15 @@
   }
 
   .guide p {
-    @apply py-4 text-center;
-  }
-
-  .guide span {
-    @apply block pt-2;
+    @apply py-2;
   }
 
   .guide h2 {
     @apply pt-4 text-center text-2xl font-bold;
+  }
+
+  .guide strong {
+    @apply pr-4;
   }
 
   /** HEADER BUTTON STYLES **/
