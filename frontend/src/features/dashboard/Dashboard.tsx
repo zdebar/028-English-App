@@ -24,9 +24,7 @@ export default function Dashboard({ className = '' }: DashboardProps) {
     : [];
 
   return (
-    <div
-      className={`max-w-card min-w-card relative mx-auto flex w-full flex-col gap-1 ${className}`}
-    >
+    <div className={`min-w-card relative mx-auto flex w-full flex-col gap-1 ${className}`}>
       {lessonProgress.map(({ lessonId, previousCount, todayCount }) => (
         <Blockbar
           key={lessonId}
