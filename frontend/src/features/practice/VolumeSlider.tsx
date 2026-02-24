@@ -41,7 +41,7 @@ export default function VolumeSlider({ setVolume, className = '' }: VolumeSlider
   return (
     <div
       ref={sliderRef}
-      className={`flex cursor-pointer pt-1 ${className}`}
+      className={`flex h-10 min-w-10 cursor-pointer items-center pl-2 ${className}`}
       onClick={(event) => event.stopPropagation()}
     >
       <button
