@@ -27,6 +27,7 @@ export async function dataSync(userId: string): Promise<void> {
 
   await initDbMappings();
   await restoreUnsavedFromLocalStorage(userId);
+  triggerUserItemsUpdatedEvent(userId);
 
   const doFullSync = now - lastFullSync > config.sync.fullSyncInterval;
 
