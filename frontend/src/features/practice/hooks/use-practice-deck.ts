@@ -55,7 +55,7 @@ export function usePracticeDeck(userId: string) {
   const czech = isCzToEn || revealed ? currentItem?.czech : czechHinted;
   const english = revealed || (audioDisabled && !isCzToEn) ? currentItem?.english : englishHinted;
 
-  const [wasCzToEn, setWasCzToEn] = useState(true);
+  const [wasCzToEn, setWasCzToEn] = useState<boolean | null>(null);
   const showDirectionChange = wasCzToEn !== isCzToEn;
 
   // Ref to track user progress changes before saving
