@@ -14,6 +14,24 @@ CREATE TABLE IF NOT EXISTS grammar (
   deleted_at TIMESTAMPTZ DEFAULT NULL
 );
 
+-- Levels table
+CREATE TABLE IF NOT EXISTS levels (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE, 
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  deleted_at TIMESTAMPTZ DEFAULT NULL
+);
+
+-- Lessons table
+CREATE TABLE IF NOT EXISTS lessons (
+  id SERIAL PRIMARY KEY,
+  name TEXT, 
+  level_id INTEGER,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  deleted_at TIMESTAMPTZ DEFAULT NULL,
+  FOREIGN KEY (level_id) REFERENCES levels(id) ON DELETE SET NULL
+);
+
 -- Items table
 CREATE TABLE IF NOT EXISTS items (  
   id SERIAL PRIMARY KEY,
@@ -23,9 +41,11 @@ CREATE TABLE IF NOT EXISTS items (
   audio TEXT, -- audio file name, without extension
   sequence INTEGER NOT NULL CHECK (sequence >= 0),
   grammar_id INTEGER, 
+  lesson_id INTEGER,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ DEFAULT NULL,
-  FOREIGN KEY (grammar_id) REFERENCES grammar(id) ON DELETE SET NULL
+  FOREIGN KEY (grammar_id) REFERENCES grammar(id) ON DELETE SET NULL,
+  FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE SET NULL
 );
 
 -- User items table
@@ -65,6 +85,18 @@ SET search_path TO public;
 -- Trigger for grammar table
 CREATE TRIGGER set_updated_at_grammar
 BEFORE UPDATE ON grammar
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+-- Trigger for levels table
+CREATE TRIGGER set_updated_at_levels
+BEFORE UPDATE ON levels
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+-- Trigger for lessons table
+CREATE TRIGGER set_updated_at_lessons
+BEFORE UPDATE ON lessons
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
