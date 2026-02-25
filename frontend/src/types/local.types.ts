@@ -14,6 +14,10 @@ export interface UserItemLocal {
   deleted_at: string | null;
   next_at: string; // nulls replaced with config.database.nullReplacementDate
   mastered_at: string; // nulls replaced with config.database.nullReplacementDate
+  level_id: number | null; // TODO: will I index by this
+  level_name: string | null;
+  lesson_id: number | null; // TODO: will I index by this
+  lesson_name: string | null;
 }
 
 export interface UserItemPractice extends UserItemLocal {

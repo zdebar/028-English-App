@@ -35,6 +35,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   deleted_at!: null;
   next_at!: string;
   mastered_at!: string;
+  level_id!: number | null;
+  level_name!: string | null;
+  lesson_id!: number | null;
+  lesson_name!: string | null;
 
   /**
    * Retrieves a practice deck of user items for studying.
