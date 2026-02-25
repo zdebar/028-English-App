@@ -28,7 +28,9 @@ export default function PropertyView({
 }: PropertyViewProps): JSX.Element {
   return (
     <dl className={`flex items-center ${className}`}>
-      <dt className={`inline-block shrink-0 truncate text-left font-bold ${classNameLabel}`}>
+      <dt
+        className={`h-attribute inline-block shrink-0 truncate text-left font-bold ${classNameLabel}`}
+      >
         {label}
       </dt>
       <dd className={classNameValue}>{value ?? TEXTS.notAvailable}</dd>

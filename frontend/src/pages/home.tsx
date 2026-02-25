@@ -33,14 +33,9 @@ export default function Home(): JSX.Element {
     mainSection = (
       <div className="relative flex w-full flex-col">
         <div className="px-2">
-          <PropertyView
-            label={TEXTS.userLabel}
-            className="h-attribute"
-            value={userFullName || userEmail}
-          />
+          <PropertyView label={TEXTS.userLabel} value={userFullName || userEmail} />
           <PropertyView
             label={TEXTS.userStatsLabel}
-            className="h-attribute"
             classNameValue={
               (isPracticeGoalMet
                 ? 'text-success-light dark:text-success-dark'

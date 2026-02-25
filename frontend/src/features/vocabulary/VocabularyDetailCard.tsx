@@ -29,40 +29,31 @@ export default function VocabularyDetailCard({
       <OverviewCard buttonTitle={selectedWord?.czech} onClose={onClose} handleReset={onReset}>
         <div className="flex flex-col gap-4">
           <div>
-            <PropertyView label={TEXTS.czech} className="h-attribute" value={selectedWord?.czech} />
+            <PropertyView label={TEXTS.czech} value={selectedWord?.czech} />
             <PropertyView label={TEXTS.english} value={selectedWord?.english} />
-            <PropertyView
-              label={TEXTS.pronunciation}
-              className="h-attribute"
-              value={selectedWord?.pronunciation}
-            />
-            <PropertyView
-              label={TEXTS.progress}
-              className="h-attribute"
-              value={selectedWord?.progress}
-            />
+            <PropertyView label={TEXTS.pronunciation} value={selectedWord?.pronunciation} />
+            <PropertyView label={TEXTS.progress} value={selectedWord?.progress} />
           </div>
           <div>
+            <PropertyView label={TEXTS.levelId} value={selectedWord?.level_id} />
+
             <PropertyView
-              label={TEXTS.startedAt}
-              className="h-attribute"
-              value={shortenDate(selectedWord?.started_at)}
+              label={TEXTS.levelName}
+              value={selectedWord?.level_name ?? TEXTS.notAvailable}
             />
-            <PropertyView
-              label={TEXTS.updatedAt}
-              className="h-attribute"
-              value={shortenDate(selectedWord?.updated_at)}
-            />
-            <PropertyView
-              label={TEXTS.nextAt}
-              className="h-attribute"
-              value={shortenDate(selectedWord?.next_at)}
-            />
-            <PropertyView
-              label={TEXTS.masteredAt}
-              className="h-attribute"
-              value={shortenDate(selectedWord?.mastered_at)}
-            />
+            <PropertyView label={TEXTS.lessonId} value={selectedWord?.lesson_id} />
+            {selectedWord?.lesson_name && (
+              <PropertyView
+                label={TEXTS.lessonName}
+                value={selectedWord?.lesson_name ?? TEXTS.notAvailable}
+              />
+            )}
+          </div>
+          <div>
+            <PropertyView label={TEXTS.startedAt} value={shortenDate(selectedWord?.started_at)} />
+            <PropertyView label={TEXTS.updatedAt} value={shortenDate(selectedWord?.updated_at)} />
+            <PropertyView label={TEXTS.nextAt} value={shortenDate(selectedWord?.next_at)} />
+            <PropertyView label={TEXTS.masteredAt} value={shortenDate(selectedWord?.mastered_at)} />
           </div>
         </div>
       </OverviewCard>
