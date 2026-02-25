@@ -4,6 +4,7 @@ import ProtectedLayout from '@/components/utils/protected-laout';
 
 import { startPeriodicSync } from '@/database/models/data-sync';
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import Levels from '@/pages/Levels';
 
 import ToastContainer from '@/features/toast/ToastContainer';
 import Grammar from '@/pages/Grammar';
@@ -84,6 +85,7 @@ export default function App() {
           <Route element={<ProtectedLayout />}>
             <Route path={ROUTES.practice} element={<Practice />} />
             <Route path={ROUTES.profile} element={<Profile />} />
+            <Route path={ROUTES.levels} element={<Levels />} />
             <Route path={ROUTES.grammar} element={<Grammar />} />
             <Route path={ROUTES.vocabulary} element={<Vocabulary />} />
           </Route>

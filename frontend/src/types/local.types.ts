@@ -14,15 +14,33 @@ export interface UserItemLocal {
   deleted_at: string | null;
   next_at: string; // nulls replaced with config.database.nullReplacementDate
   mastered_at: string; // nulls replaced with config.database.nullReplacementDate
-  level_id: number | null; // TODO: will I index by this
+  level_id: number | null;
   level_name: string | null;
-  lesson_id: number | null; // TODO: will I index by this
+  lesson_id: number | null;
   lesson_name: string | null;
 }
 
 export interface UserItemPractice extends UserItemLocal {
-  // As used by PracticeCard
   show_new_grammar_indicator: boolean;
+}
+
+export interface LessonsOverview {
+  lesson_id: number | null;
+  lesson_name: string | null;
+  level_id: number | null;
+  level_name: string | null;
+  startedCount: number;
+  masteredCount: number;
+  totalCount: number;
+}
+
+export interface LevelsOverview {
+  level_id: number | null;
+  level_name: string | null;
+  startedCount: number;
+  masteredCount: number;
+  totalCount: number;
+  lessons: LessonsOverview[];
 }
 
 export interface GrammarLocal {

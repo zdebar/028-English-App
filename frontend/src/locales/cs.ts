@@ -68,6 +68,10 @@ export const TEXTS = {
   skipText:
     'Opravdu chcete přeskočit tuto položku? Položka se již nebude dále nabízet k procvičování.',
 
+  // Levels Overview Page
+  lessons: 'Lekce',
+  levelsOverviewHelp: 'započeto / celkem',
+
   // Grammar Overview Page
   noGrammar: 'Žádné započatá gramatika.',
   startedCount: 'započato',
@@ -95,6 +99,7 @@ export const TEXTS = {
   masteredAt: 'naučeno',
 
   // Profile Page
+  levelsOverview: 'Přehled CEFR úrovní',
   grammarOverview: 'Přehled gramatiky',
   vocabularyOverview: 'Přehled slovíček',
 

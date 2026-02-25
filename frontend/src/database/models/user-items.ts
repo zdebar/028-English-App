@@ -2,7 +2,13 @@ import config from '@/config/config';
 import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
-import { TableName, type UserItemLocal, type UserItemPractice } from '@/types/local.types';
+import { TableName } from '@/types/local.types';
+import type {
+  UserItemLocal,
+  UserItemPractice,
+  LessonsOverview,
+  LevelsOverview,
+} from '@/types/local.types';
 import Dexie, { Entity } from 'dexie';
 import { assertNonNegativeInteger, assertPositiveInteger } from '@/utils/assertions.utils';
 
@@ -214,6 +220,57 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .sortBy('czech');
 
     return result;
+  }
+
+  /**
+   * Retrieves an overview of levels for a user, including counts of started and mastered items.
+   *
+   * @param userId - The unique identifier of the user
+   * @returns - A promise that resolves to an array of LevelsOverview objects, each containing level details and associated lessons with their counts
+   */
+  static async getLevelsOverview(userId: string): Promise<LevelsOverview[]> {
+    const result = await db.user_items.where('user_id').equals(userId).toArray();
+
+    // 1. Aggregate lessons
+    const lessonsMap = new Map<number, LessonsOverview>();
+    result.forEach((item) => {
+      if (item.lesson_id == null) return;
+      const prev = lessonsMap.get(item.lesson_id);
+      lessonsMap.set(item.lesson_id, {
+        lesson_id: item.lesson_id,
+        lesson_name: item.lesson_name ?? null,
+        level_id: item.level_id ?? null,
+        level_name: item.level_name ?? null,
+        startedCount:
+          (prev?.startedCount ?? 0) +
+          (item.started_at !== config.database.nullReplacementDate ? 1 : 0),
+        masteredCount:
+          (prev?.masteredCount ?? 0) +
+          (item.mastered_at !== config.database.nullReplacementDate ? 1 : 0),
+        totalCount: (prev?.totalCount ?? 0) + 1,
+      });
+    });
+
+    // 2. Aggregate levels
+    const levelsMap = new Map<number, LevelsOverview>();
+    for (const lesson of lessonsMap.values()) {
+      if (lesson.level_id == null) continue;
+      const prev = levelsMap.get(lesson.level_id);
+      const updatedLessons = [...(prev?.lessons ?? []), lesson].sort(
+        (a, b) => (a.lesson_id ?? 0) - (b.lesson_id ?? 0),
+      );
+      levelsMap.set(lesson.level_id, {
+        level_id: lesson.level_id,
+        level_name: lesson.level_name,
+        startedCount: (prev?.startedCount ?? 0) + lesson.startedCount,
+        masteredCount: (prev?.masteredCount ?? 0) + lesson.masteredCount,
+        totalCount: (prev?.totalCount ?? 0) + lesson.totalCount,
+        lessons: updatedLessons,
+      });
+    }
+
+    // 3. Return sorted array (optional: sort by level_id)
+    return Array.from(levelsMap.values()).sort((a, b) => (a.level_id ?? 0) - (b.level_id ?? 0));
   }
 
   /**
