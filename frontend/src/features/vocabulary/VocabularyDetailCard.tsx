@@ -29,7 +29,6 @@ export default function VocabularyDetailCard({
       <OverviewCard buttonTitle={selectedWord?.czech} onClose={onClose} handleReset={onReset}>
         <div className="flex flex-col gap-4">
           <div>
-            <PropertyView label="item_id" className="h-attribute" value={selectedWord?.item_id} />
             <PropertyView label={TEXTS.czech} className="h-attribute" value={selectedWord?.czech} />
             <PropertyView label={TEXTS.english} value={selectedWord?.english} />
             <PropertyView
