@@ -22,6 +22,10 @@ import CloseButton from '@/components/UI/buttons/CloseButton';
 export default function GrammarOverview(): JSX.Element {
   const [cardVisible, setCardVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [grammarItemsCounts, setGrammarItemsCounts] = useState<{
+    masteredCount: number;
+    totalCount: number;
+  } | null>(null);
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
@@ -60,6 +64,12 @@ export default function GrammarOverview(): JSX.Element {
     }
   };
 
+  // Fetch mastered and total counts for the current grammar topic
+  const getGrammarItemsCounts = async (userId: string, grammarId: number) => {
+    const totalCount = await UserItem.getGrammarItemsCounts(userId, grammarId);
+    setGrammarItemsCounts(totalCount);
+  };
+
   // List view
   if (!cardVisible) {
     return (
@@ -73,7 +83,8 @@ export default function GrammarOverview(): JSX.Element {
             <ButtonRectangular
               key={item.id}
               className="h-input flex grow-0 justify-start p-4 text-left"
-              onClick={() => {
+              onClick={async () => {
+                if (userId) await getGrammarItemsCounts(userId, item.id);
                 setCurrentIndex(index);
                 setCardVisible(true);
               }}
@@ -96,6 +107,10 @@ export default function GrammarOverview(): JSX.Element {
       handleReset={handleClearGrammarUserItems}
       className="relative"
     >
+      <p className="pb-4">
+        {TEXTS.masteredCount} {grammarItemsCounts?.masteredCount ?? 0} /{' '}
+        {grammarItemsCounts?.totalCount ?? 0}
+      </p>
       {(currentGrammar?.note ? (
         <div
           dangerouslySetInnerHTML={{

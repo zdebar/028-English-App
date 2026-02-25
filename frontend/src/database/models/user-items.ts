@@ -213,6 +213,29 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
+   * Retrieves the count of mastered and total items for a specific grammar topic for a user.
+   *
+   * @param userId - The unique identifier of the user
+   * @param grammarId - The unique identifier of the grammar topic
+   * @returns - An object containing the count of mastered items and total items for the specified grammar topic
+   */
+  static async getGrammarItemsCounts(
+    userId: string,
+    grammarId: number,
+  ): Promise<{ masteredCount: number; totalCount: number }> {
+    const result = await db.user_items
+      .where('[user_id+grammar_id]')
+      .equals([userId, grammarId])
+      .toArray();
+
+    const masteredCount = result.filter(
+      (item) => item.mastered_at !== config.database.nullReplacementDate,
+    ).length;
+    const totalCount = result.length;
+    return { masteredCount, totalCount };
+  }
+
+  /**
    * Retrieves the total count of user items that have been started by a specific user.
    *
    * @param userId - The unique identifier of the user

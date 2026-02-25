@@ -70,6 +70,7 @@ export const TEXTS = {
 
   // Grammar Overview Page
   noGrammar: 'Žádné započatá gramatika.',
+  masteredCount: 'naučeno:',
 
   // Privacy Policy Page
   privacyPolicy: 'Zásady ochrany osobních údajů',
