@@ -41,7 +41,7 @@ export default function BlockBar({
   return (
     <div className={`relative mx-auto w-full ${className}`}>
       {/* Labels */}
-      <div className="font-body text-light absolute top-0 left-0 z-10 flex w-full justify-between px-4 pt-1 text-center text-sm font-bold">
+      <div className="font-body text-light absolute top-0 left-0 z-10 flex w-full justify-between px-2 pt-1 text-center text-sm font-bold">
         <span>
           Blok: {lessonNumber} / {lessonCount}
         </span>

@@ -40,7 +40,7 @@ export const TEXTS = {
 
   // User
   userLabel: 'Uživatel',
-  userStatsLabel: 'Procvičeno',
+  userStatsLabel: 'Dnes',
   authInitErrorToast: 'Nastala chyba při přihlašování.',
 
   // Synchronization
@@ -70,7 +70,8 @@ export const TEXTS = {
 
   // Grammar Overview Page
   noGrammar: 'Žádné započatá gramatika.',
-  masteredCount: 'naučeno:',
+  startedCount: 'započato',
+  masteredCount: 'naučeno',
 
   // Privacy Policy Page
   privacyPolicy: 'Zásady ochrany osobních údajů',

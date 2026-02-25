@@ -12,6 +12,7 @@ import { useCallback, useEffect, useState, type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ButtonRectangular from '@/components/UI/buttons/ButtonRectangular';
 import CloseButton from '@/components/UI/buttons/CloseButton';
+import PropertyView from '@/components/UI/PropertyView';
 
 /**
  * GrammarOverview component displays a list of started grammar topics for the user.
@@ -23,6 +24,7 @@ export default function GrammarOverview(): JSX.Element {
   const [cardVisible, setCardVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [grammarItemsCounts, setGrammarItemsCounts] = useState<{
+    startedCount: number;
     masteredCount: number;
     totalCount: number;
   } | null>(null);
@@ -107,10 +109,17 @@ export default function GrammarOverview(): JSX.Element {
       handleReset={handleClearGrammarUserItems}
       className="relative"
     >
-      <p className="pb-4">
-        {TEXTS.masteredCount} {grammarItemsCounts?.masteredCount ?? 0} /{' '}
-        {grammarItemsCounts?.totalCount ?? 0}
-      </p>
+      <PropertyView
+        label={TEXTS.startedCount}
+        value={`${grammarItemsCounts?.startedCount ?? 0} / ${grammarItemsCounts?.totalCount ?? 0}`}
+        classNameValue="text-right w-20"
+      />
+      <PropertyView
+        label={TEXTS.masteredCount}
+        value={`${grammarItemsCounts?.masteredCount ?? 0} / ${grammarItemsCounts?.totalCount ?? 0}`}
+        className="pb-4"
+        classNameValue="w-20 text-right"
+      />
       {(currentGrammar?.note ? (
         <div
           dangerouslySetInnerHTML={{

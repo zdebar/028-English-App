@@ -222,7 +222,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   static async getGrammarItemsCounts(
     userId: string,
     grammarId: number,
-  ): Promise<{ masteredCount: number; totalCount: number }> {
+  ): Promise<{ startedCount: number; masteredCount: number; totalCount: number }> {
     const result = await db.user_items
       .where('[user_id+grammar_id]')
       .equals([userId, grammarId])
@@ -231,8 +231,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const masteredCount = result.filter(
       (item) => item.mastered_at !== config.database.nullReplacementDate,
     ).length;
+    const startedCount = result.filter(
+      (item) => item.started_at !== config.database.nullReplacementDate,
+    ).length;
     const totalCount = result.length;
-    return { masteredCount, totalCount };
+    return { startedCount, masteredCount, totalCount };
   }
 
   /**
