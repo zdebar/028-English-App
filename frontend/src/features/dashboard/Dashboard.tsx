@@ -24,7 +24,7 @@ export default function Dashboard({ className = '' }: DashboardProps) {
    */
   const allLessons = levelsOverview ? levelsOverview.flatMap((level) => level.lessons) : [];
   const nextZeroStartedLessonId = allLessons
-    .filter((lesson) => lesson.startedCount === 0 && lesson.lesson_id != null)
+    .filter((lesson) => lesson.startedCount === 0)
     .reduce<
       number | null
     >((minLessonId, lesson) => (minLessonId === null || lesson.lesson_id! < minLessonId ? lesson.lesson_id! : minLessonId), null);
@@ -39,16 +39,19 @@ export default function Dashboard({ className = '' }: DashboardProps) {
 
   return (
     <div className={`min-w-card relative mx-auto flex w-full flex-col gap-1 ${className}`}>
-      {lessons?.map(({ lesson_id, lesson_name, startedCount, startedTodayCount, totalCount }) => (
-        <Blockbar
-          key={lesson_id}
-          lessonName={lesson_name!}
-          previousCount={startedCount}
-          todayCount={startedTodayCount}
-          lessonCount={totalCount}
-          maxCount={maxTotalCount}
-        />
-      ))}
+      {lessons?.map(
+        ({ lesson_id, lesson_name, level_name, startedCount, startedTodayCount, totalCount }) => (
+          <Blockbar
+            key={lesson_id}
+            lessonName={lesson_name!}
+            levelName={level_name!}
+            previousCount={startedCount - startedTodayCount}
+            todayCount={startedTodayCount}
+            lessonCount={totalCount}
+            maxCount={maxTotalCount}
+          />
+        ),
+      )}
       <HelpButton className="-bottom-11 left-0" />
       <HelpText className="right-3.5 -bottom-11">{TEXTS.startedTodayHint}</HelpText>
     </div>

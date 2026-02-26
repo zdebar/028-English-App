@@ -25,12 +25,12 @@ export interface UserItemPractice extends UserItemLocal {
 }
 
 export interface LessonsOverview {
-  lesson_id: number | null;
-  lesson_order: number | null;
-  lesson_name: string | null;
-  level_id: number | null;
-  level_order: number | null;
-  level_name: string | null;
+  lesson_id: number;
+  lesson_order: number;
+  lesson_name: string;
+  level_id: number;
+  level_order: number;
+  level_name: string;
   startedCount: number;
   startedTodayCount: number;
   masteredCount: number;
@@ -38,9 +38,9 @@ export interface LessonsOverview {
 }
 
 export interface LevelsOverview {
-  level_id: number | null;
-  level_order: number | null;
-  level_name: string | null;
+  level_id: number;
+  level_order: number;
+  level_name: string;
   startedCount: number;
   startedTodayCount: number;
   masteredCount: number;

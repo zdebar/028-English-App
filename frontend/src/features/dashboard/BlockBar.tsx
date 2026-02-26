@@ -2,8 +2,9 @@ interface BlockBarProps {
   previousCount: number;
   todayCount: number;
   lessonName: string;
+  levelName: string;
   divisions?: number;
-  lessonCount?: number;
+  lessonCount: number;
   maxCount?: number;
   className?: string;
 }
@@ -14,6 +15,7 @@ interface BlockBarProps {
  * @param previousCount {number} Number of items completed in previous sessions.
  * @param todayCount {number} Number of items completed today.
  * @param lessonName {string} The name of the current lesson block.
+ * @param levelName {string} The name of the level the lesson belongs to.
  * @param divisions {number} Distance of divisions in the progress bar (default: 5).
  * @param lessonCount {number} Total number of items in the lesson (default: 100).
  * @param maxCount {number} Maximal total count of all lessons (default: 100).
@@ -24,6 +26,7 @@ export default function BlockBar({
   previousCount = 0,
   todayCount = 0,
   lessonName = '',
+  levelName = '',
   divisions = 5,
   lessonCount = 100,
   maxCount = 100,
@@ -43,7 +46,9 @@ export default function BlockBar({
       <div className={`relative h-full w-full ${className}`} style={{ width: `${barWidth}%` }}>
         {/* Labels */}
         <div className="font-body text-light absolute top-0 left-0 z-10 flex w-full justify-between px-2 pt-1 text-center text-sm font-bold">
-          <span>{lessonName}</span>
+          <span>
+            {levelName} {lessonName}
+          </span>
           <span>+ {todayCount}</span>
         </div>
         {/* Progress bar */}

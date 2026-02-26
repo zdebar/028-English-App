@@ -29,8 +29,7 @@ export default function LevelsOverview() {
   };
 
   if (!levels || levels.length === 0) {
-    // TODO: should be not avaiable
-    return <DelayedMessage />;
+    return <DelayedMessage text={TEXTS.notAvailable} />;
   }
 
   return (
