@@ -13,6 +13,10 @@
     @apply disabled:cursor-default disabled:bg-inherit disabled:hover:bg-inherit; /* Disabled States */
   }
 
+  .button-text {
+    @apply w-39 text-left font-bold;
+  }
+
   .guide p {
     @apply py-2;
   }

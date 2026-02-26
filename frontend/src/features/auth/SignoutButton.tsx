@@ -35,7 +35,7 @@ export default function SignoutButton({ className }: { className?: string }): JS
       onConfirm={handleSignout}
       className={className}
     >
-      <p className="font-bold">{TEXTS.signoutButtonTitle}</p>
+      <p className="button-text">{TEXTS.signoutButtonTitle}</p>
     </ButtonWithModal>
   );
 }

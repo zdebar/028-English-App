@@ -110,7 +110,7 @@ export const TEXTS = {
   signoutError: 'Chyba při odhlašování.',
 
   // Delete User Button
-  deleteUserButtonTitle: 'Smazat uživatelský účet',
+  deleteUserButtonTitle: 'Smazat účet',
   deleteUserModalText:
     'Opravdu chcete smazat svůj uživatelský účet? Vaše data budou nenávratně smazána. Tuto akci již nelze vrátit zpět.',
   deleteUserSuccessToast: 'Váš uživatelský účet byl úspěšně smazán.',

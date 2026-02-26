@@ -35,7 +35,7 @@ export default function ResetAllProgressButton({ className }: { className?: stri
       onConfirm={handleReset}
       className={className}
     >
-      <p className="font-bold">{TEXTS.resetAllProgressButtonTitle}</p>
+      <p className="button-text">{TEXTS.resetAllProgressButtonTitle}</p>
     </ButtonWithModal>
   );
 }

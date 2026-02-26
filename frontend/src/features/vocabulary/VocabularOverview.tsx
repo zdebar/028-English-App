@@ -41,11 +41,8 @@ export default function VocabularyOverview() {
         return normalizedSearch.length === 0 ? true : value.startsWith(normalizedSearch);
       })
       .sort((a, b) => {
-        const aValue = a[displayField] ?? '';
-        const bValue = b[displayField] ?? '';
-
-        const lengthDiff = aValue.length - bValue.length;
-        if (lengthDiff !== 0) return lengthDiff;
+        const aValue = (a[displayField] ?? '').toLowerCase();
+        const bValue = (b[displayField] ?? '').toLowerCase();
         return aValue.localeCompare(bValue);
       });
 

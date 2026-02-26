@@ -81,7 +81,7 @@ export default function DeleteUserButton({ className }: { className?: string }):
       onConfirm={handleDelete}
       className={className}
     >
-      <p className="font-bold">{TEXTS.deleteUserButtonTitle}</p>
+      <p className="button-text">{TEXTS.deleteUserButtonTitle}</p>
     </ButtonWithModal>
   );
 }
