@@ -70,7 +70,7 @@ export const TEXTS = {
 
   // Levels Overview Page
   lessons: 'Lekce',
-  levelsOverviewHelp: 'započeto / celkem položek',
+  levelsOverviewHelp: 'naučeno / celkem položek',
 
   // Grammar Overview Page
   noGrammar: 'Žádné započatá gramatika.',

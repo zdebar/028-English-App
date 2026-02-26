@@ -25,7 +25,7 @@ export default function VocabularyDetailCard({
   onReset,
 }: VocabularyDetailCardProps) {
   return (
-    <div className="relative flex w-full flex-col items-center justify-start">
+    <div className="card-width relative flex w-full flex-col items-center justify-start">
       <OverviewCard buttonTitle={selectedWord?.czech} onClose={onClose} handleReset={onReset}>
         <div className="flex flex-col gap-4">
           <div>
@@ -57,7 +57,7 @@ export default function VocabularyDetailCard({
           </div>
         </div>
       </OverviewCard>
-      <HelpButton className="right-0 -bottom-10.5" />
+      <HelpButton className="right-1 -bottom-10.5" />
     </div>
   );
 }

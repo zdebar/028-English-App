@@ -130,7 +130,7 @@ export default function GrammarOverview(): JSX.Element {
       ) : (
         TEXTS.notAvailable
       )) ?? TEXTS.notAvailable}
-      <HelpButton className="right-3.5 bottom-3.5" />
+      <HelpButton className="right-0 -bottom-10.5" />
     </OverviewCard>
   );
 }

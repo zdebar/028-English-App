@@ -1,10 +1,10 @@
 interface GoalMetViewProps {
-  count: number;
+  current: number;
   goal: number;
 }
 
-export default function GoalMetView({ count, goal }: GoalMetViewProps) {
-  const met = count >= goal;
+export default function GoalMetView({ current, goal }: GoalMetViewProps) {
+  const met = current >= goal;
   return (
     <p
       className={
@@ -13,7 +13,7 @@ export default function GoalMetView({ count, goal }: GoalMetViewProps) {
           : 'text-error-light dark:text-error-dark') + ' font-bold'
       }
     >
-      {count} / {goal}
+      {current} / {goal}
     </p>
   );
 }

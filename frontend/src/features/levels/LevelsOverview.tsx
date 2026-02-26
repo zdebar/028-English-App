@@ -50,7 +50,7 @@ export default function LevelsOverview() {
                 >
                   <div className="flex w-full items-center justify-between">
                     <p>{level.level_name}</p>
-                    <GoalMetView count={level.startedCount} goal={level.totalCount} />
+                    <GoalMetView current={level.masteredCount} goal={level.totalCount} />
                   </div>
                 </ButtonRectangular>
                 {unpackedIndex === index && (
@@ -63,7 +63,7 @@ export default function LevelsOverview() {
                       >
                         <div className="flex w-full items-center justify-between">
                           <p>{lesson.lesson_name}</p>
-                          <GoalMetView count={lesson.startedCount} goal={lesson.totalCount} />
+                          <GoalMetView current={lesson.masteredCount} goal={lesson.totalCount} />
                         </div>
                       </ButtonRectangular>
                     ))}
