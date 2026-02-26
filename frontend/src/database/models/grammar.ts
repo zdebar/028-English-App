@@ -86,6 +86,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   static async syncGrammarSinceLastSync(): Promise<number> {
     const lastSyncedAt = await Metadata.getSyncedAt(TableName.Grammar);
     const newSyncedAt = new Date().toISOString();
+    console;
 
     const grammar = await this.fetchGrammar(lastSyncedAt);
     await this.applyGrammarSync(grammar, newSyncedAt);
@@ -107,7 +108,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
     await db.grammar.clear();
     await this.applyGrammarSync(grammar, newSyncedAt);
 
-    infoHandler(`Completed ${grammar?.length ?? 0} records full grammar sync.`);
+    infoHandler(`Completed ${grammar?.length ?? 0} grammars pull from Supabase.`);
     return grammar?.length ?? 0;
   }
 

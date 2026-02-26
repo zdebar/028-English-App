@@ -26,23 +26,32 @@ export interface UserItemPractice extends UserItemLocal {
 
 export interface LessonsOverview {
   lesson_id: number | null;
+  lesson_order: number | null;
   lesson_name: string | null;
   level_id: number | null;
+  level_order: number | null;
   level_name: string | null;
   startedCount: number;
+  startedTodayCount: number;
   masteredCount: number;
   totalCount: number;
 }
 
 export interface LevelsOverview {
   level_id: number | null;
+  level_order: number | null;
   level_name: string | null;
   startedCount: number;
+  startedTodayCount: number;
   masteredCount: number;
   totalCount: number;
   lessons: LessonsOverview[];
 }
 
+export interface UserStats {
+  levelsOverview?: LevelsOverview[] | null;
+  practiceCountToday?: number;
+}
 export interface GrammarLocal {
   id: number;
   name: string;
@@ -79,13 +88,6 @@ export interface MetadataLocal {
   table_name: string; // Name of the table (e.g., "user_items", "grammar")
   user_id: string; // string of the user associated with the data
   synced_at: string; // Timestamp of the last synchronization
-}
-
-export interface UserStatsLocal {
-  startedCountToday?: number;
-  startedCount?: number;
-  practiceCountToday?: number;
-  totalItemsCount?: number;
 }
 
 export interface LessonsLocal {

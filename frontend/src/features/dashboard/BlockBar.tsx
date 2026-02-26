@@ -1,10 +1,10 @@
-import config from '@/config/config';
-import { useUserStore } from './use-user-store';
 interface BlockBarProps {
   previousCount: number;
   todayCount: number;
-  lessonNumber: number;
+  lessonName: string;
   divisions?: number;
+  lessonCount?: number;
+  maxCount?: number;
   className?: string;
 }
 
@@ -13,76 +13,77 @@ interface BlockBarProps {
  *
  * @param previousCount {number} Number of items completed in previous sessions.
  * @param todayCount {number} Number of items completed today.
- * @param lessonNumber {number} The current lesson block number.
- * @param divisions {number} Number of divisions (grid lines) in the progress bar (default: 20).
+ * @param lessonName {string} The name of the current lesson block.
+ * @param divisions {number} Distance of divisions in the progress bar (default: 5).
+ * @param lessonCount {number} Total number of items in the lesson (default: 100).
+ * @param maxCount {number} Maximal total count of all lessons (default: 100).
  * @param className {string} Additional CSS classes for custom styling.
  * @returns A styled progress bar with labels and visual representation of progress.
  */
 export default function BlockBar({
   previousCount = 0,
   todayCount = 0,
-  lessonNumber = 1,
-  divisions = 20,
+  lessonName = '',
+  divisions = 5,
+  lessonCount = 100,
+  maxCount = 100,
   className = '',
 }: BlockBarProps) {
-  const totalItemsCount = useUserStore((state) => state.userStats?.totalItemsCount);
-  const lessonSize = config.lesson.lessonSize || 100;
-  const totalWidth = 100;
-  const lessonCount = Math.ceil((totalItemsCount || lessonSize) / lessonSize);
+  const safeLesson = Math.max(lessonCount, 1);
+  const safeTotal = Math.max(maxCount, safeLesson);
 
-  // Arguments validation
-  const validPreviousCount = Math.max(0, previousCount);
-  const validTodayCount = Math.max(0, todayCount);
+  const barWidth = (safeLesson / safeTotal) * 100;
 
   // Width calculation
-  const previousWidth = (validPreviousCount / lessonSize) * totalWidth;
-  const todayWidth = (validTodayCount / lessonSize) * totalWidth;
+  const previousWidth = (previousCount / safeLesson) * barWidth;
+  const todayWidth = (todayCount / safeLesson) * barWidth;
 
   return (
-    <div className={`relative mx-auto w-full ${className}`}>
-      {/* Labels */}
-      <div className="font-body text-light absolute top-0 left-0 z-10 flex w-full justify-between px-2 pt-1 text-center text-sm font-bold">
-        <span>
-          Blok: {lessonNumber} / {lessonCount}
-        </span>
-        <span>+ {validTodayCount}</span>
-      </div>
-
-      {/* Progress bar */}
-      <div
-        className="h-attribute bg-progress-bg relative overflow-hidden"
-        role="progressbar"
-        aria-valuenow={validPreviousCount + validTodayCount}
-        aria-valuemin={0}
-        aria-valuemax={lessonSize}
-      >
-        {/* New progress */}
+    <div className="h-attribute relative w-full">
+      <div className={`relative h-full w-full ${className}`} style={{ width: `${barWidth}%` }}>
+        {/* Labels */}
+        <div className="font-body text-light absolute top-0 left-0 z-10 flex w-full justify-between px-2 pt-1 text-center text-sm font-bold">
+          <span>{lessonName}</span>
+          <span>+ {todayCount}</span>
+        </div>
+        {/* Progress bar */}
         <div
-          className="bg-new-progress-light dark:bg-new-progress-dark absolute top-0 left-0 h-full"
-          style={{ width: `${Math.min(previousWidth + todayWidth, 100)}%` }}
-        ></div>
-        {/* Previous progress */}
-        <div
-          className="bg-old-progress-light dark:bg-old-progress-dark absolute top-0 left-0 h-full"
-          style={{ width: `${previousWidth}%` }}
-        ></div>
-        {/* Divisions */}
-        {(() => {
-          const safeDivisions = Math.max(1, divisions || 0);
-          return Array.from({ length: safeDivisions }, (_, i) => {
-            const index = i + 1;
-            const position = (index / safeDivisions) * 100;
-
-            return (
-              <div
-                key={index}
-                className="border-divisions absolute top-0 h-full border-l"
-                style={{ left: `${position}%` }}
-              ></div>
-            );
-          });
-        })()}
+          className="bg-progress-bg relative h-full overflow-hidden"
+          role="progressbar"
+          aria-valuenow={previousCount + todayCount}
+          aria-valuemin={0}
+          aria-valuemax={lessonCount}
+        >
+          {/* New progress */}
+          <div
+            className="bg-new-progress-light dark:bg-new-progress-dark absolute top-0 left-0 h-full"
+            style={{ width: `${Math.min(previousWidth + todayWidth, 100)}%` }}
+          ></div>
+          {/* Previous progress */}
+          <div
+            className="bg-old-progress-light dark:bg-old-progress-dark absolute top-0 left-0 h-full"
+            style={{ width: `${previousWidth}%` }}
+          ></div>
+        </div>
       </div>
+      {/* Divisions */}
+      {(() => {
+        const stepPercent = Math.min(100, Math.max(1, divisions || 0));
+        const lineCount = Math.floor(barWidth / stepPercent);
+        return Array.from({ length: lineCount }, (_, i) => {
+          const position = (i + 1) * stepPercent;
+          if (position > barWidth) {
+            return null;
+          }
+          return (
+            <div
+              key={position}
+              className="border-divisions absolute top-0 z-15 h-full border-l"
+              style={{ left: `${position}%` }}
+            ></div>
+          );
+        });
+      })()}
     </div>
   );
 }

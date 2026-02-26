@@ -47,7 +47,6 @@ export async function dataSync(userId: string): Promise<void> {
       AudioRecord.syncAudioData(config.audio.archives),
     ];
   }
-  otherPromises = [Grammar.syncGrammarAll(), AudioRecord.syncAudioData(config.audio.archives)];
 
   Promise.allSettled(otherPromises).then((results) => {
     results.forEach((r) => {

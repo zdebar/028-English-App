@@ -18,13 +18,13 @@ export default function Profile(): JSX.Element {
   return (
     <div className="card-width grow-0">
       <ButtonRectangular onClick={() => navigate(ROUTES.levels)}>
-        <p>{TEXTS.levelsOverview}</p>
+        <p className="w-40 text-left">{TEXTS.levelsOverview}</p>
       </ButtonRectangular>
       <ButtonRectangular onClick={() => navigate(ROUTES.grammar)}>
-        <p>{TEXTS.grammarOverview}</p>
+        <p className="w-40 text-left">{TEXTS.grammarOverview}</p>
       </ButtonRectangular>
       <ButtonRectangular onClick={() => navigate(ROUTES.vocabulary)}>
-        <p>{TEXTS.vocabularyOverview}</p>
+        <p className="w-40 text-left">{TEXTS.vocabularyOverview}</p>
       </ButtonRectangular>
 
       <ResetAllProgressButton className="mt-4" />

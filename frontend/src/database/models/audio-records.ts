@@ -110,7 +110,7 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
   private static async fetchAudioFile(audioFile: string): Promise<AudioRecordLocal> {
     const audioBlob: Blob = await fetchStorage(config.audio.audioBucketName, audioFile);
 
-    console.log(`Fetched audio file ${audioFile} from storage, size: ${audioBlob.size} bytes`);
+    infoHandler(`Fetched audio file ${audioFile} from storage, size: ${audioBlob.size} bytes`);
     await db.audio_records.put({ filename: audioFile, audioBlob: audioBlob });
     infoHandler(`Successfully synced audio file: ${audioFile}`);
 

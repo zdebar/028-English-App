@@ -18,8 +18,10 @@ RETURNS TABLE (
   next_at TIMESTAMPTZ,
   mastered_at TIMESTAMPTZ,
   level_id INTEGER,
+  level_order INTEGER,
   level_name TEXT,
   lesson_id INTEGER,
+  lesson_order INTEGER,
   lesson_name TEXT
 )
 LANGUAGE plpgsql
@@ -42,19 +44,23 @@ BEGIN
     i.deleted_at::TIMESTAMPTZ AS deleted_at,
     COALESCE(ui.next_at, '9999-12-31T23:59:59Z')::TIMESTAMPTZ AS next_at, 
     COALESCE(ui.mastered_at, '9999-12-31T23:59:59Z')::TIMESTAMPTZ AS mastered_at,
-    level.id AS level_id,
-    level.name AS level_name,
+    levels.id AS level_id,
+    levels.order AS level_order,
+    levels.name AS level_name,
     lessons.id AS lesson_id,
+    lessons.order AS lesson_order,
     lessons.name AS lesson_name
   FROM public.items i
   LEFT JOIN public.user_items ui 
     ON i.id = ui.item_id AND ui.user_id = user_id_input
   LEFT JOIN public.lessons lessons
     ON i.lesson_id = lessons.id
-  LEFT JOIN public.levels level
-    ON lessons.level_id = level.id
+  LEFT JOIN public.levels levels
+    ON lessons.level_id = levels.id
   WHERE ui.updated_at > last_synced_at
-    OR i.updated_at > last_synced_at  
+    OR i.updated_at > last_synced_at 
+    OR levels.updated_at > last_synced_at
+    OR lessons.updated_at > last_synced_at 
   ORDER BY i.sequence ASC;
 END;
 $$;

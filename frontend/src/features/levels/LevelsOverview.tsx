@@ -1,9 +1,6 @@
 import LoadingMessage from '@/components/UI/LoadingMessage';
-import UserItem from '@/database/models/user-items';
-import { useAuthStore } from '@/features/auth/use-auth-store';
-import { useFetch } from '@/hooks/use-fetch';
 import type { LevelsOverview } from '@/types/local.types';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import { TEXTS } from '@/locales/cs';
@@ -11,6 +8,7 @@ import ButtonRectangular from '@/components/UI/buttons/ButtonRectangular';
 import GoalMetView from '@/components/UI/GoalMetView';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
+import { useUserStore } from '../dashboard/use-user-store';
 
 /**
  * LevelsOverview component
@@ -19,15 +17,8 @@ import HelpText from '@/features/help/HelpText';
  */
 export default function LevelsOverview() {
   const [unpackedIndex, setUnpackedIndex] = useState<number | null>(null);
-  const { userId } = useAuthStore();
+  const levels = useUserStore((state) => state.userStats?.levelsOverview);
   const navigate = useNavigate();
-
-  const fetchLevels = useCallback(async () => {
-    if (!userId) return [];
-    return UserItem.getLevelsOverview(userId);
-  }, [userId]);
-
-  const { data: levels, loading } = useFetch<LevelsOverview[]>(fetchLevels);
 
   const handleLevelClick = (index: number) => {
     if (unpackedIndex === index) {
@@ -37,7 +28,8 @@ export default function LevelsOverview() {
     }
   };
 
-  if (loading) {
+  if (!levels || levels.length === 0) {
+    // TODO: should be not avaiable
     return <LoadingMessage />;
   }
 
@@ -52,9 +44,9 @@ export default function LevelsOverview() {
         <div className="flex flex-col gap-1 overflow-y-auto">
           {levels && levels.length > 0 ? (
             levels.map((level, index) => (
-              <>
+              <div key={level.level_id} className="flex flex-col gap-1">
                 <ButtonRectangular
-                  key={level.level_id ?? 0}
+                  key={level.level_id}
                   className="h-input flex grow-0 justify-start p-4 text-left"
                   onClick={() => handleLevelClick(index)}
                 >
@@ -67,22 +59,19 @@ export default function LevelsOverview() {
                   <div className="flex flex-col gap-1 pl-8">
                     {level.lessons.map((lesson) => (
                       <ButtonRectangular
-                        key={lesson.lesson_id ?? 0}
+                        key={lesson.lesson_id}
                         className="h-input flex grow-0 justify-start pr-4 text-left"
                         disabled={true}
                       >
                         <div className="flex w-full items-center justify-between">
-                          <p>
-                            {lesson.lesson_id}{' '}
-                            {lesson.lesson_name ?? `${TEXTS.lessons} ${lesson.lesson_id}`}
-                          </p>
+                          <p>{lesson.lesson_name}</p>
                           <GoalMetView count={lesson.startedCount} goal={lesson.totalCount} />
                         </div>
                       </ButtonRectangular>
                     ))}
                   </div>
                 )}
-              </>
+              </div>
             ))
           ) : (
             <p className="p-4">{TEXTS.notAvailable}</p>

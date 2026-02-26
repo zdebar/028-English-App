@@ -42,8 +42,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   next_at!: string;
   mastered_at!: string;
   level_id!: number | null;
+  level_order!: number | null;
   level_name!: string | null;
   lesson_id!: number | null;
+  lesson_order!: number | null;
   lesson_name!: string | null;
 
   /**
@@ -177,32 +179,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Retrieves the count of started items for a user, both today and in total.
-   *
-   * @param userId - The unique identifier of the user
-   * @returns A promise that resolves to an object containing:
-   *   - startedCountToday: The number of items started by the user today
-   *   - startedCount: The total number of items started by the user
-   */
-  static async getStartedCounts(userId: string): Promise<{
-    startedCountToday: number;
-    startedCount: number;
-  }> {
-    const today = getTodayShortDate();
-    const startedItems = await db.user_items
-      .where('[user_id+started_at]')
-      .between([userId, Dexie.minKey], [userId, config.database.nullReplacementDate], true, false)
-      .toArray();
-
-    const startedCount = startedItems.length;
-    const startedCountToday = startedItems.filter((item) =>
-      getLocalDateFromUTC(item.started_at).startsWith(today),
-    ).length;
-
-    return { startedCountToday, startedCount };
-  }
-
-  /**
    * Retrieves vocabulary items for a user that have been started (begun learning).
    *
    * @param userId - The unique identifier of the user
@@ -229,21 +205,38 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns - A promise that resolves to an array of LevelsOverview objects, each containing level details and associated lessons with their counts
    */
   static async getLevelsOverview(userId: string): Promise<LevelsOverview[]> {
+    const today = getTodayShortDate();
     const result = await db.user_items.where('user_id').equals(userId).toArray();
+
+    const filtered = result.filter(
+      (item) =>
+        !(
+          item.lesson_id == null ||
+          item.lesson_name == null ||
+          item.lesson_order == null ||
+          item.level_id == null ||
+          item.level_name == null ||
+          item.level_order == null
+        ),
+    );
 
     // 1. Aggregate lessons
     const lessonsMap = new Map<number, LessonsOverview>();
-    result.forEach((item) => {
-      if (item.lesson_id == null) return;
-      const prev = lessonsMap.get(item.lesson_id);
-      lessonsMap.set(item.lesson_id, {
-        lesson_id: item.lesson_id,
-        lesson_name: item.lesson_name ?? null,
-        level_id: item.level_id ?? null,
-        level_name: item.level_name ?? null,
+    filtered.forEach((item) => {
+      const prev = lessonsMap.get(item.lesson_id!);
+      lessonsMap.set(item.lesson_id!, {
+        lesson_id: item.lesson_id!,
+        lesson_order: item.lesson_order!,
+        lesson_name: item.lesson_name!,
+        level_id: item.level_id!,
+        level_order: item.level_order!,
+        level_name: item.level_name!,
         startedCount:
           (prev?.startedCount ?? 0) +
           (item.started_at !== config.database.nullReplacementDate ? 1 : 0),
+        startedTodayCount:
+          (prev?.startedTodayCount ?? 0) +
+          (getLocalDateFromUTC(item.started_at).startsWith(today) ? 1 : 0),
         masteredCount:
           (prev?.masteredCount ?? 0) +
           (item.mastered_at !== config.database.nullReplacementDate ? 1 : 0),
@@ -254,15 +247,16 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     // 2. Aggregate levels
     const levelsMap = new Map<number, LevelsOverview>();
     for (const lesson of lessonsMap.values()) {
-      if (lesson.level_id == null) continue;
-      const prev = levelsMap.get(lesson.level_id);
+      const prev = levelsMap.get(lesson.level_id!);
       const updatedLessons = [...(prev?.lessons ?? []), lesson].sort(
         (a, b) => (a.lesson_id ?? 0) - (b.lesson_id ?? 0),
       );
-      levelsMap.set(lesson.level_id, {
-        level_id: lesson.level_id,
-        level_name: lesson.level_name,
+      levelsMap.set(lesson.level_id!, {
+        level_id: lesson.level_id!,
+        level_order: lesson.level_order!,
+        level_name: lesson.level_name!,
         startedCount: (prev?.startedCount ?? 0) + lesson.startedCount,
+        startedTodayCount: (prev?.startedTodayCount ?? 0) + lesson.startedTodayCount,
         masteredCount: (prev?.masteredCount ?? 0) + lesson.masteredCount,
         totalCount: (prev?.totalCount ?? 0) + lesson.totalCount,
         lessons: updatedLessons,
@@ -297,18 +291,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     ).length;
     const totalCount = result.length;
     return { startedCount, masteredCount, totalCount };
-  }
-
-  /**
-   * Retrieves the total count of user items that have been started by a specific user.
-   *
-   * @param userId - The unique identifier of the user
-   * @returns A promise that resolves to the count of started user items for the specified user
-   */
-  static async getUserItemsCount(userId: string): Promise<number> {
-    const result = await db.user_items.where('user_id').equals(userId).count();
-
-    return result;
   }
 
   /**

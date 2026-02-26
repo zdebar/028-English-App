@@ -1,10 +1,8 @@
 import { TEXTS } from '@/locales/cs';
 import Blockbar from '@/features/dashboard/BlockBar';
-import { getLessonProgress } from '@/features/dashboard/dashboard.utils';
 import { useUserStore } from './use-user-store';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
-import type { LessonsLocal } from '@/types/local.types';
 
 type DashboardProps = {
   className?: string;
@@ -17,20 +15,38 @@ type DashboardProps = {
  * @returns The dashboard view with lesson progress, hints, and help overlay.
  */
 export default function Dashboard({ className = '' }: DashboardProps) {
-  const userStats = useUserStore((state) => state.userStats);
+  const levelsOverview = useUserStore((state) => state.userStats?.levelsOverview);
 
-  const lessonProgress: LessonsLocal[] = userStats
-    ? getLessonProgress(userStats.startedCount || 0, userStats.startedCountToday || 0)
-    : [];
+  /* Shows all lessons that:
+   *  have items started today, or
+   *  have some items started but not all, or
+   *  is the first lesson with zero items started
+   */
+  const allLessons = levelsOverview ? levelsOverview.flatMap((level) => level.lessons) : [];
+  const nextZeroStartedLessonId = allLessons
+    .filter((lesson) => lesson.startedCount === 0 && lesson.lesson_id != null)
+    .reduce<
+      number | null
+    >((minLessonId, lesson) => (minLessonId === null || lesson.lesson_id! < minLessonId ? lesson.lesson_id! : minLessonId), null);
+  const lessons = allLessons.filter(
+    (lesson) =>
+      lesson.startedTodayCount > 0 ||
+      (lesson.startedCount > 0 && lesson.startedCount !== lesson.totalCount) ||
+      (nextZeroStartedLessonId != null && lesson.lesson_id === nextZeroStartedLessonId),
+  );
+
+  const maxTotalCount = Math.max(...lessons.map((lesson) => lesson.totalCount), 1);
 
   return (
     <div className={`min-w-card relative mx-auto flex w-full flex-col gap-1 ${className}`}>
-      {lessonProgress.map(({ lessonId, previousCount, todayCount }) => (
+      {lessons?.map(({ lesson_id, lesson_name, startedCount, startedTodayCount, totalCount }) => (
         <Blockbar
-          key={lessonId}
-          lessonNumber={lessonId}
-          previousCount={previousCount}
-          todayCount={todayCount}
+          key={lesson_id}
+          lessonName={lesson_name!}
+          previousCount={startedCount}
+          todayCount={startedTodayCount}
+          lessonCount={totalCount}
+          maxCount={maxTotalCount}
         />
       ))}
       <HelpButton className="-bottom-11 left-0" />

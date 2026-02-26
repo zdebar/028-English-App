@@ -1,11 +1,10 @@
 import { create } from 'zustand';
-import type { UserStatsLocal } from '@/types/local.types';
+import type { UserStats } from '@/types/local.types';
 import UserScore from '@/database/models/user-scores';
 import UserItem from '@/database/models/user-items';
-import config from '@/config/config';
 
 interface UserState {
-  userStats: UserStatsLocal | null;
+  userStats: UserStats | null;
   reloadUserStats: (userId: string) => Promise<void>;
   clearUserStats: (userId: string) => void;
 }
@@ -41,13 +40,11 @@ export const useUserStore = create<UserState>((set, get) => {
     reloadUserStats: async (userId: string) => {
       try {
         const todayScore = await UserScore.getUserScoreForToday(userId);
-        const startedCounts = await UserItem.getStartedCounts(userId);
+        const levelsOverview = await UserItem.getLevelsOverview(userId);
 
-        const stats: UserStatsLocal = {
-          startedCountToday: startedCounts?.startedCountToday || 0,
-          startedCount: startedCounts?.startedCount || 0,
+        const stats: UserStats = {
+          levelsOverview: levelsOverview || null,
           practiceCountToday: todayScore?.item_count || 0,
-          totalItemsCount: (await UserItem.getUserItemsCount(userId)) || config.lesson.lessonSize,
         };
 
         localStorage.setItem(getUserStatsKey(userId), JSON.stringify(stats));
