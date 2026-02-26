@@ -35,19 +35,19 @@ export default function VocabularyDetailCard({
             <PropertyView label={TEXTS.progress} value={selectedWord?.progress} />
           </div>
           <div>
-            <PropertyView label={TEXTS.levelId} value={selectedWord?.level_id} />
-
             <PropertyView
               label={TEXTS.levelName}
               value={selectedWord?.level_name ?? TEXTS.notAvailable}
             />
-            <PropertyView label={TEXTS.lessonId} value={selectedWord?.lesson_id} />
-            {selectedWord?.lesson_name && (
-              <PropertyView
-                label={TEXTS.lessonName}
-                value={selectedWord?.lesson_name ?? TEXTS.notAvailable}
-              />
-            )}
+            <PropertyView
+              label={TEXTS.lessonOrder}
+              value={selectedWord?.lesson_order ?? TEXTS.notAvailable}
+            />
+
+            <PropertyView
+              label={TEXTS.lessonName}
+              value={selectedWord?.lesson_name ?? TEXTS.notAvailable}
+            />
           </div>
           <div>
             <PropertyView label={TEXTS.startedAt} value={shortenDate(selectedWord?.started_at)} />

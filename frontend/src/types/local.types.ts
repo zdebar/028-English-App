@@ -15,8 +15,10 @@ export interface UserItemLocal {
   next_at: string; // nulls replaced with config.database.nullReplacementDate
   mastered_at: string; // nulls replaced with config.database.nullReplacementDate
   level_id: number | null;
+  level_order: number | null;
   level_name: string | null;
   lesson_id: number | null;
+  lesson_order: number | null;
   lesson_name: string | null;
 }
 
