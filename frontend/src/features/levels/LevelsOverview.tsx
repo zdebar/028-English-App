@@ -33,13 +33,12 @@ export default function LevelsOverview() {
   }
 
   return (
-    <div className="card-width relative flex h-full flex-col justify-start gap-1">
+    <div className="card-width relative flex flex-col justify-start">
       <div className="relative flex flex-col gap-1">
         <div className="h-button flex items-center justify-between gap-1">
           <div className="h-button flex grow justify-start p-4">{TEXTS.levelsOverview}</div>
           <CloseButton onClick={() => navigate('/profile')} />
         </div>
-        <div className="flex items-center justify-between gap-1"></div>
         <div className="flex flex-col gap-1 overflow-y-auto">
           {levels && levels.length > 0 ? (
             levels.map((level, index) => (
@@ -76,8 +75,8 @@ export default function LevelsOverview() {
             <p className="p-4">{TEXTS.notAvailable}</p>
           )}
         </div>
-        <HelpText className="right-2 -bottom-5">{TEXTS.levelsOverviewHelp}</HelpText>
-        <HelpButton className="right-2 -bottom-13" />
+        <HelpText className="right-2 -bottom-4">{TEXTS.levelsOverviewHelp}</HelpText>
+        <HelpButton className="right-0 -bottom-10.5" />
       </div>
     </div>
   );

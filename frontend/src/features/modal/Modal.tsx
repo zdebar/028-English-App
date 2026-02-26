@@ -33,7 +33,7 @@ export function Modal({ onConfirm, onClose, children }: ModalProps): JSX.Element
 
   return createPortal(
     <div className="z-modal pointer-events-none fixed inset-0 flex items-center justify-center">
-      <div className="card-width pointer-events-auto pt-2">
+      <div className="card-width pointer-events-auto gap-1 pt-2">
         <div className="color-base flex grow flex-col items-center gap-2 p-6 text-center">
           {children}
         </div>

@@ -8,7 +8,7 @@ export default function GrammarButton({ onClick, disabled, children }: PracticeB
   return (
     <ButtonRectangular onClick={onClick} disabled={disabled} className="relative">
       <BookIcon />
-      <HelpText className="-top-4.5 left-3.5">{TEXTS.grammar}</HelpText>
+      <HelpText className="-top-4.5 left-2">{TEXTS.grammar}</HelpText>
       {children}
     </ButtonRectangular>
   );

@@ -16,7 +16,7 @@ export default function Profile(): JSX.Element {
   const navigate = useNavigate();
 
   return (
-    <div className="card-width grow-0">
+    <div className="card-width grow-0 gap-1">
       <ButtonRectangular onClick={() => navigate(ROUTES.levels)}>
         <p className="button-text">{TEXTS.levelsOverview}</p>
       </ButtonRectangular>

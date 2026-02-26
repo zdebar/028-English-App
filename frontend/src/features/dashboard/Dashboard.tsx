@@ -52,8 +52,8 @@ export default function Dashboard({ className = '' }: DashboardProps) {
           />
         ),
       )}
-      <HelpButton className="-bottom-11 left-0" />
-      <HelpText className="right-3.5 -bottom-11">{TEXTS.startedTodayHint}</HelpText>
+      <HelpButton className="-bottom-10.5 left-0" />
+      <HelpText className="right-2 -bottom-10">{TEXTS.startedTodayHint}</HelpText>
     </div>
   );
 }

@@ -57,7 +57,7 @@ export default function VocabularyDetailCard({
           </div>
         </div>
       </OverviewCard>
-      <HelpButton className="right-2 -bottom-12" />
+      <HelpButton className="right-0 -bottom-10.5" />
     </div>
   );
 }

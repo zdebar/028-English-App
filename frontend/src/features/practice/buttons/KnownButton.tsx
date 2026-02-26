@@ -8,7 +8,7 @@ export default function KnownButton({ onClick, disabled, children }: PracticeBut
   return (
     <ButtonRectangular onClick={onClick} disabled={disabled} className="relative">
       <PlusIcon />
-      <HelpText className="-top-4.5 right-3.5">{TEXTS.known}</HelpText>
+      <HelpText className="-top-4.5 right-2">{TEXTS.known}</HelpText>
       {children}
     </ButtonRectangular>
   );

@@ -38,7 +38,7 @@
   /** CARD STYLES **/
   .card-width,
   .card-height {
-    @apply flex grow flex-col justify-start gap-1;
+    @apply flex grow flex-col justify-start;
   }
 
   .card-width {

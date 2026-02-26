@@ -70,7 +70,7 @@ export const TEXTS = {
 
   // Levels Overview Page
   lessons: 'Lekce',
-  levelsOverviewHelp: 'započeto / celkem',
+  levelsOverviewHelp: 'započeto / celkem položek',
 
   // Grammar Overview Page
   noGrammar: 'Žádné započatá gramatika.',
@@ -120,7 +120,7 @@ export const TEXTS = {
   resetAllProgressModalText: 'Opravdu chcete restartovat veškerý pokrok? Změna již nepůjde vrátit.',
 
   // Generic Erase Progress
-  eraseProgress: 'Vymazat pokrok',
-  eraseProgressHelp: 'vymazat pokrok',
-  eraseDescription: 'Opravdu chcete vymazat pokrok? Tuto akci již nelze vrátit zpět.',
+  eraseProgress: 'Restartovat pokrok',
+  eraseProgressHelp: 'restartovat pokrok',
+  eraseDescription: 'Opravdu chcete restartovat pokrok? Tuto akci již nelze vrátit zpět.',
 };

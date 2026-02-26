@@ -4,10 +4,10 @@ import { TEXTS } from '@/locales/cs';
 /**
  * Returns a shortened date string (YYYY-MM-DD) from an ISO date string.
  * @param isoDate ISO date string
- * @returns Shortened date string or "není k dispozici" if date is undefined or null replacement date.
+ * @returns Shortened date string or empty string if date is undefined or null replacement date.
  */
 export function shortenDate(isoDate: string | null | undefined): string {
-  if (!isoDate || isoDate === config.database.nullReplacementDate) return TEXTS.notAvailable;
+  if (!isoDate || isoDate === config.database.nullReplacementDate) return '';
   return isoDate.split('T')[0];
 }
 

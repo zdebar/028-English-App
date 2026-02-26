@@ -86,10 +86,10 @@ export default function PracticeCard() {
         <GrammarCard grammar={grammarData} onClose={closeGrammar} />
       ) : (
         <>
-          <div className={`card-width card-height relative`}>
+          <div className={`card-width card-height relative gap-1`}>
             {/* Item Card */}
             <div
-              className={`relative flex h-full grow flex-col items-center justify-between p-4 select-none ${
+              className={`relative flex h-full grow flex-col items-center justify-between p-2 select-none ${
                 revealed ? 'color-audio-disabled' : 'button-color'
               } `}
               onClick={handleReveal}
@@ -115,7 +115,7 @@ export default function PracticeCard() {
                       <div className="pointer-events-none absolute inset-0 z-10 grid place-items-center">
                         <NotRevealedIcon className="text-light/70 dark:text-dark/70 opacity-5 mix-blend-saturation dark:opacity-2" />
                       </div>
-                      <HelpText className="center">{TEXTS.reveal}</HelpText>
+                      <HelpText className="center top-4">{TEXTS.reveal}</HelpText>
                     </>
                   )}
                   {/** Top Bar */}
