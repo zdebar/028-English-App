@@ -1,4 +1,4 @@
-import LoadingMessage from '@/components/UI/LoadingMessage';
+import DelayedMessage from '@/components/UI/DelayedMessage';
 import config from '@/config/config';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
@@ -78,7 +78,7 @@ export default function VocabularyOverview() {
   };
 
   if (loading) {
-    return <LoadingMessage />;
+    return <DelayedMessage />;
   }
 
   return (

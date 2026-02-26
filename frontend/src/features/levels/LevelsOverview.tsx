@@ -1,4 +1,4 @@
-import LoadingMessage from '@/components/UI/LoadingMessage';
+import DelayedMessage from '@/components/UI/DelayedMessage';
 import type { LevelsOverview } from '@/types/local.types';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -30,7 +30,7 @@ export default function LevelsOverview() {
 
   if (!levels || levels.length === 0) {
     // TODO: should be not avaiable
-    return <LoadingMessage />;
+    return <DelayedMessage />;
   }
 
   return (

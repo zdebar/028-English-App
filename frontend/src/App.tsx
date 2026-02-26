@@ -14,7 +14,7 @@ import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import Vocabulary from '@/pages/Vocabulary';
 import { ROUTES } from '@/config/routes.config';
 import OverlayContainer from '@/features/overlay/OverlayContainer';
-import LoadingMessage from '@/components/UI/LoadingMessage';
+import DelayedMessage from '@/components/UI/DelayedMessage';
 import Profile from '@/pages/Profile';
 import Guide from '@/pages/Guide';
 
@@ -75,7 +75,7 @@ export default function App() {
       <main className="relative flex grow flex-col items-center gap-4">
         {loading && (
           <div className="pointer-events-none absolute top-0 left-1/2 z-50 w-60 -translate-x-1/2">
-            <LoadingMessage text={TEXTS.syncLoadingText} className="notification error-warning" />
+            <DelayedMessage text={TEXTS.syncLoadingText} className="notification error-warning" />
           </div>
         )}
         <Routes>

@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import ButtonRectangular from '@/components/UI/buttons/ButtonRectangular';
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import PropertyView from '@/components/UI/PropertyView';
+import DelayedMessage from '@/components/UI/DelayedMessage';
 
 /**
  * GrammarOverview component displays a list of started grammar topics for the user.
@@ -95,7 +96,7 @@ export default function GrammarOverview(): JSX.Element {
             </ButtonRectangular>
           ))
         ) : (
-          <p className="p-4">{TEXTS.noGrammar}</p>
+          <DelayedMessage text={TEXTS.noGrammar} />
         )}
       </div>
     );

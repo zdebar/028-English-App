@@ -2,24 +2,24 @@ import { useState, useEffect } from 'react';
 import { TEXTS } from '@/locales/cs';
 import config from '@/config/config';
 
-type LoadingMessageProps = {
+type DelayedMessageProps = {
   text?: string;
   timeDelay?: number;
   className?: string;
 };
 
 /**
- * Displays a loading message after a specified delay.
+ * Displays a delayed message after a specified delay.
  *
- * @param text Loading message to display.
- * @param timeDelay Delay before showing the loading message (ms).
+ * @param text Message to display.
+ * @param timeDelay Delay before showing the message (ms).
  * @param className Optional CSS class for styling the message.
  */
-export default function LoadingMessage({
+export default function DelayedMessage({
   text = TEXTS.loadingMessage,
   timeDelay = config.buttons.loadingMessageDelay,
   className = '',
-}: LoadingMessageProps) {
+}: DelayedMessageProps) {
   const [show, setShow] = useState(false);
 
   useEffect(() => {

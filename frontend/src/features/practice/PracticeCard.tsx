@@ -8,7 +8,7 @@ import { useUserStore } from '../dashboard/use-user-store';
 
 import HelpText from '@/features/help/HelpText';
 import Indicator from '@/components/UI/Indicator';
-import LoadingMessage from '@/components/UI/LoadingMessage';
+import DelayedMessage from '@/components/UI/DelayedMessage';
 import HelpButton from '@/features/help/HelpButton';
 import GrammarCard from '@/features/practice/GrammarCard';
 import VolumeSlider from '@/features/practice/VolumeSlider';
@@ -33,7 +33,7 @@ export default function PracticeCard() {
   const userStats = useUserStore((state) => state.userStats);
   const { grammarVisible, grammarData, handleGrammar, closeGrammar } = useGrammar();
 
-  if (!userId) return <LoadingMessage text={TEXTS.syncLoadingText} />;
+  if (!userId) return <DelayedMessage text={TEXTS.syncLoadingText} />;
 
   const {
     index,
@@ -66,7 +66,7 @@ export default function PracticeCard() {
   }, [playAudio, audioDisabled, isCzToEn, audioLoading, showDirectionChange, currentItem]);
 
   if (!currentItem) {
-    return <LoadingMessage text="Žádné položky k procvičování" timeDelay={100} />;
+    return <DelayedMessage text="Žádné položky k procvičování" timeDelay={100} />;
   }
 
   const handleReveal = () => {
@@ -131,7 +131,7 @@ export default function PracticeCard() {
                     {audioError ? (
                       <p className="px-2">{TEXTS.noAudio}</p>
                     ) : (
-                      audioLoading && <LoadingMessage text={TEXTS.loadingAudio} />
+                      audioLoading && <DelayedMessage text={TEXTS.loadingAudio} />
                     )}
                   </div>
                   {/** Item Data */}
