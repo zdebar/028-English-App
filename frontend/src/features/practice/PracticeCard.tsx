@@ -20,7 +20,7 @@ import NotRevealedIcon from '@/components/UI/icons/NotRevealedIcon';
 import { useGrammar } from './hooks/use-grammar';
 import KnownButton from './buttons/KnownButton';
 import UnknownButton from './buttons/UnknownButton';
-import SkipButton from './buttons/SkipButton';
+import MasterItemButton from './buttons/MasterItemButton';
 import PlayAudioButton from './buttons/PlayAudioButton';
 
 /**
@@ -181,7 +181,7 @@ export default function PracticeCard() {
             <div id="practice-controls" className="relative flex flex-col gap-1">
               {/** Top Row */}
               <div className="relative grid grid-cols-2 gap-1">
-                <SkipButton
+                <MasterItemButton
                   onConfirm={() => nextItem(config.progress.skipProgress)}
                   disabled={!revealed || showDirectionChange}
                 />

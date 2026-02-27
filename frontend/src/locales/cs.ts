@@ -69,6 +69,9 @@ export const TEXTS = {
   skipTitle: 'Dokončit položku',
   skipText:
     'Opravdu chcete přeskočit tuto položku? Položka se již nebude dále nabízet k procvičování.',
+  skipHoldInfoToast: 'Pro dokončení položky podržte tlačítko.',
+  skipSuccessToast: 'Položka byla dokončena.',
+  skipErrorToast: 'Dokončení položky se nezdařilo.',
 
   // Levels Overview Page
   lessons: 'Lekce',
