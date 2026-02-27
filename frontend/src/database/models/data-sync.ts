@@ -1,4 +1,5 @@
 import config from '@/config/config';
+import { supabaseInstance } from '@/config/supabase.config';
 import { triggerUserItemsUpdatedEvent } from '@/database/database.utils';
 import AudioRecord from '@/database/models/audio-records';
 import { initDbMappings } from '@/database/models/db-init';
@@ -14,6 +15,12 @@ import {
   setPartialSyncTime,
 } from '@/database/sync-time.utils';
 import { TEXTS } from '@/locales/cs';
+
+async function hasActiveSessionForUser(userId: string): Promise<boolean> {
+  const { data, error } = await supabaseInstance.auth.getSession();
+  if (error) return false;
+  return data.session?.user?.id === userId;
+}
 
 /**
  * Synchronizes data for a specific user with the database.
@@ -81,9 +88,21 @@ export async function dataSync(userId: string): Promise<void> {
  * @returns A promise that resolves when the synchronization is complete
  */
 export async function dataSyncOnUnmount(userId: string): Promise<void> {
+  const canSync = await hasActiveSessionForUser(userId);
+  if (!canSync) return;
+
   await initDbMappings();
-  await UserScore.syncUserScoreSinceLastSync(userId);
-  await UserItem.syncUserItemsSinceLastSync(userId);
+
+  const results = await Promise.allSettled([
+    UserScore.syncUserScoreSinceLastSync(userId),
+    UserItem.syncUserItemsSinceLastSync(userId),
+  ]);
+
+  results.forEach((result) => {
+    if (result.status === 'rejected') {
+      errorHandler('Unmount synchronization failed', result.reason);
+    }
+  });
 }
 
 /**
@@ -106,20 +125,37 @@ export function startPeriodicSync(
   showToast: (message: string, type: 'success' | 'error') => void,
 ): () => void {
   let intervalId: NodeJS.Timeout;
+  let isDisposed = false;
+  let inFlightSync: Promise<void> | null = null;
 
-  const syncData = async () => {
-    setLoading(true);
-    try {
-      if (userId) {
-        await dataSync(userId);
-        await AudioRecord.removeOrphaned();
+  const runSync = async () => {
+    if (inFlightSync) {
+      await inFlightSync;
+      return;
+    }
+
+    inFlightSync = (async () => {
+      setLoading(true);
+      try {
+        if (userId) {
+          await dataSync(userId);
+          await AudioRecord.removeOrphaned();
+        }
+        showToast(TEXTS.syncSuccessToast, 'success');
+      } catch (error) {
+        showToast(TEXTS.syncErrorToast, 'error');
+        errorHandler('Data synchronization failed', error);
+      } finally {
+        if (!isDisposed) {
+          setLoading(false);
+        }
       }
-      showToast(TEXTS.syncSuccessToast, 'success');
-    } catch (error) {
-      showToast(TEXTS.syncErrorToast, 'error');
-      errorHandler('Data synchronization failed', error);
+    })();
+
+    try {
+      await inFlightSync;
     } finally {
-      setLoading(false);
+      inFlightSync = null;
     }
   };
 
@@ -128,18 +164,21 @@ export function startPeriodicSync(
     const lastSyncTimestamp = getPartialSyncTime(userId);
 
     if (now - lastSyncTimestamp > config.sync.periodicSyncInterval) {
-      syncData();
+      void runSync();
       setPartialSyncTime(userId, now);
     }
   };
 
-  syncData();
+  void runSync();
   intervalId = setInterval(checkAndSync, config.sync.periodicSyncInterval);
 
   return () => {
+    isDisposed = true;
     clearInterval(intervalId);
     if (userId) {
-      dataSyncOnUnmount(userId);
+      void dataSyncOnUnmount(userId).catch((error) => {
+        errorHandler('Unmount synchronization failed', error);
+      });
     }
   };
 }

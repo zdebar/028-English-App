@@ -62,6 +62,17 @@ export function usePracticeDeck(userId: string) {
   // Ref to track user progress changes before saving
   const userProgressRef = useRef<UserItemPractice[]>([]);
 
+  const persistProgressToLocalStorage = useCallback(
+    (userProgress: UserItemPractice[]) => {
+      if (userProgress.length === 0 || !userId) {
+        return;
+      }
+
+      localStorage.setItem(`practiceDeckProgress_${userId}`, JSON.stringify(userProgress));
+    },
+    [userId],
+  );
+
   const saveBufferedProgress = useCallback(
     async (userProgress: UserItemPractice[], source: string, shouldReload: boolean = false) => {
       if (userProgress.length === 0 || !userId) {
@@ -77,9 +88,10 @@ export function usePracticeDeck(userId: string) {
         }
       } catch (error) {
         errorHandler(`Failed to save practice deck ${source}`, error);
+        persistProgressToLocalStorage(userProgress);
       }
     },
-    [userId],
+    [persistProgressToLocalStorage, reload, userId],
   );
 
   // Save progress on unmount
@@ -93,13 +105,11 @@ export function usePracticeDeck(userId: string) {
   useEffect(() => {
     const handleBeforeUnload = () => {
       const userProgress = [...userProgressRef.current];
-      if (userProgress.length > 0 && userId) {
-        localStorage.setItem(`practiceDeckProgress_${userId}`, JSON.stringify(userProgress));
-      }
+      persistProgressToLocalStorage(userProgress);
     };
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [userId]);
+  }, [persistProgressToLocalStorage]);
 
   // Advance to next item and record progress change
   const nextItem = useCallback(

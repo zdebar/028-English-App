@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Session } from '@supabase/supabase-js';
 import { supabaseInstance } from '@/config/supabase.config';
+import { dataSyncOnUnmount } from '@/database/models/data-sync';
 
 interface AuthState {
   userId: string | null;
@@ -76,6 +77,11 @@ export const useAuthStore = create<AuthState>((set) => {
     },
 
     handleLogout: async () => {
+      const currentUserId = useAuthStore.getState().userId;
+      if (currentUserId) {
+        await dataSyncOnUnmount(currentUserId);
+      }
+
       const { error } = await supabaseInstance.auth.signOut();
       if (error) {
         throw new Error(error.message);
