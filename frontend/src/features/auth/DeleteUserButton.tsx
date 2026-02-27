@@ -2,6 +2,7 @@ import { supabaseInstance } from '@/config/supabase.config';
 import Metadata from '@/database/models/metadata';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
+import { TableName } from '@/types/local.types';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
@@ -11,6 +12,14 @@ import { errorHandler } from '../logging/error-handler';
 import { useThemeStore } from '../theme/use-theme';
 import { useUserStore } from '../dashboard/use-user-store';
 import { clearSyncTimes } from '@/database/sync-time.utils';
+
+function logRejectedResults(results: PromiseSettledResult<unknown>[], context: string): void {
+  results.forEach((result) => {
+    if (result.status === 'rejected') {
+      errorHandler(context, result.reason);
+    }
+  });
+}
 
 /**
  * DeleteUserButton component for deleting the current user's account.
@@ -25,10 +34,9 @@ export default function DeleteUserButton({ className }: { className?: string }):
   const clearUserStats = useUserStore((state) => state.clearUserStats);
 
   const handleDelete = async () => {
-    try {
-      if (!userId) return;
+    if (!userId) return;
 
-      // Delete user from Supabase Auth (admin API)
+    try {
       const { error: deleteError } = await supabaseInstance.functions.invoke('delete-user', {
         body: { userId },
       });
@@ -37,33 +45,22 @@ export default function DeleteUserButton({ className }: { className?: string }):
         throw new Error(deleteError.message);
       }
 
-      // Sync local data before deletion for potential recovery or analytics purposes
       const resultsSync = await Promise.allSettled([
         UserItem.syncUserItemsSinceLastSync(userId),
         UserScore.syncUserScoreSinceLastSync(userId),
       ]);
-
-      resultsSync.forEach((result) => {
-        if (result.status === 'rejected') {
-          errorHandler('Operation failed', result.reason);
-        }
-      });
+      logRejectedResults(resultsSync, 'Operation failed during user data sync');
 
       const resultsDelete = await Promise.allSettled([
         UserItem.deleteAllUserItems(userId),
-        Metadata.deleteSyncRow('user_items', userId),
+        Metadata.deleteSyncRow(TableName.UserItems, userId),
         UserScore.deleteAllUserScores(userId),
-        Metadata.deleteSyncRow('user_scores', userId),
+        Metadata.deleteSyncRow(TableName.UserScores, userId),
         clearTheme(userId),
         clearUserStats(userId),
         clearSyncTimes(userId),
       ]);
-
-      resultsDelete.forEach((result) => {
-        if (result.status === 'rejected') {
-          errorHandler('Operation failed', result.reason);
-        }
-      });
+      logRejectedResults(resultsDelete, 'Operation failed during local cleanup');
 
       showToast(TEXTS.deleteUserSuccessToast, 'success');
       await supabaseInstance.auth.signOut();
