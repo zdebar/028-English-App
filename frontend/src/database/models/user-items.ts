@@ -26,6 +26,8 @@ import Metadata from './metadata';
 import UserScore from './user-scores';
 import { SupabaseError } from '@/types/error.types';
 
+const NULL_DATE = config.database.nullReplacementDate;
+
 export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   item_id!: number;
   user_id!: string;
@@ -64,63 +66,40 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     assertPositiveInteger(deckSize, 'deckSize');
 
     // Step 1: Fetch already started grammar list
-    const startedGrammarIds = await Grammar.getStartedGrammarIds(userId);
+    const startedGrammarIdSet = new Set(await Grammar.getStartedGrammarIds(userId));
+    const nowIso = new Date().toISOString();
+
+    const fetchDueItemsByParity = async (isOdd: boolean, limit: number): Promise<UserItemLocal[]> =>
+      db.user_items
+        .where('[user_id+next_at+mastered_at]')
+        .between([userId, Dexie.minKey, NULL_DATE], [userId, nowIso, NULL_DATE])
+        .filter((item) => (item.progress % 2 === 1) === isOdd)
+        .limit(limit)
+        .toArray();
 
     // Step 2: Fetch items with odd progress
     // SELECT with user_id, next_at = null, mastered_at = null, progress odd
-    let itemsWithNextAt: UserItemLocal[] = await db.user_items
-      .where('[user_id+next_at+mastered_at]')
-      .between(
-        [userId, Dexie.minKey, config.database.nullReplacementDate],
-        [userId, new Date().toISOString(), config.database.nullReplacementDate],
-      )
-      .filter((item) => item.progress % 2 === 1)
-      .limit(deckSize)
-      .toArray();
+    let itemsWithNextAt: UserItemLocal[] = await fetchDueItemsByParity(true, deckSize);
 
     // Step 3: If not enough items, fetch items with even progress
     // SELECT with user_id, next_at = null, mastered_at = null, progress even
     if (itemsWithNextAt.length < deckSize) {
-      itemsWithNextAt = await db.user_items
-        .where('[user_id+next_at+mastered_at]')
-        .between(
-          [userId, Dexie.minKey, config.database.nullReplacementDate],
-          [userId, new Date().toISOString(), config.database.nullReplacementDate],
-        )
-        .filter((item) => item.progress % 2 === 0)
-        .limit(deckSize)
-        .toArray();
-    }
+      itemsWithNextAt = await fetchDueItemsByParity(false, deckSize - itemsWithNextAt.length);
 
-    // Step 4: If not enough items, fetch additional items with next_at equal to nullReplacementDate
-    // SELECT with user_id, next_at = null, mastered_at = null, ordered by sequence ASC
-    const remainingLimit = deckSize - itemsWithNextAt.length;
-    if (remainingLimit > 0) {
-      const remainingItems = await db.user_items
-        .where('[user_id+next_at+mastered_at+sequence]')
-        .between(
-          [
-            userId,
-            config.database.nullReplacementDate,
-            config.database.nullReplacementDate,
-            Dexie.minKey,
-          ],
-          [
-            userId,
-            config.database.nullReplacementDate,
-            config.database.nullReplacementDate,
-            Dexie.maxKey,
-          ],
-          true,
-          false,
-        )
-        .limit(remainingLimit)
-        .toArray();
-      itemsWithNextAt = [...itemsWithNextAt, ...remainingItems];
-    }
-
-    if (itemsWithNextAt.length < deckSize) {
-      return [];
+      const remainingLimit = deckSize - itemsWithNextAt.length;
+      if (remainingLimit > 0) {
+        const remainingItems = await db.user_items
+          .where('[user_id+next_at+mastered_at+sequence]')
+          .between(
+            [userId, NULL_DATE, NULL_DATE, Dexie.minKey],
+            [userId, NULL_DATE, NULL_DATE, Dexie.maxKey],
+            true,
+            false,
+          )
+          .limit(remainingLimit)
+          .toArray();
+        itemsWithNextAt = [...itemsWithNextAt, ...remainingItems];
+      }
     }
 
     // Step 4: Mark items as grammar initial practice based on started grammar
@@ -129,7 +108,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       let show = false;
       if (
         item.grammar_id !== 0 &&
-        !startedGrammarIds.some((grammarId) => grammarId === item.grammar_id) &&
+        !startedGrammarIdSet.has(item.grammar_id) &&
         !shownGrammarIds.has(item.grammar_id)
       ) {
         show = true;
@@ -158,14 +137,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       return {
         ...item,
         next_at: getNextAt(item.progress),
-        started_at:
-          item.started_at === config.database.nullReplacementDate
-            ? currentDateTime
-            : item.started_at,
+        started_at: item.started_at === NULL_DATE ? currentDateTime : item.started_at,
         updated_at: currentDateTime,
         mastered_at:
-          item.mastered_at === config.database.nullReplacementDate &&
-          item.progress >= config.srs.intervals.length
+          item.mastered_at === NULL_DATE && item.progress >= config.srs.intervals.length
             ? currentDateTime
             : item.mastered_at,
       };
@@ -189,7 +164,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .where('[user_id+grammar_id+started_at]')
       .between(
         [userId, config.database.nullReplacementNumber, Dexie.minKey],
-        [userId, config.database.nullReplacementNumber, config.database.nullReplacementDate],
+        [userId, config.database.nullReplacementNumber, NULL_DATE],
         true,
         false,
       )
@@ -231,15 +206,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         level_id: item.level_id!,
         level_order: item.level_order!,
         level_name: item.level_name!,
-        startedCount:
-          (prev?.startedCount ?? 0) +
-          (item.started_at !== config.database.nullReplacementDate ? 1 : 0),
+        startedCount: (prev?.startedCount ?? 0) + (item.started_at !== NULL_DATE ? 1 : 0),
         startedTodayCount:
           (prev?.startedTodayCount ?? 0) +
           (getLocalDateFromUTC(item.started_at).startsWith(today) ? 1 : 0),
-        masteredCount:
-          (prev?.masteredCount ?? 0) +
-          (item.mastered_at !== config.database.nullReplacementDate ? 1 : 0),
+        masteredCount: (prev?.masteredCount ?? 0) + (item.mastered_at !== NULL_DATE ? 1 : 0),
         masteredTodayCount:
           (prev?.masteredTodayCount ?? 0) +
           (getLocalDateFromUTC(item.mastered_at).startsWith(today) ? 1 : 0),
@@ -281,7 +252,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   static async resetAllUserItems(userId: string): Promise<number> {
     const count = await db.user_items
       .where('[user_id+started_at]')
-      .between([userId, Dexie.minKey], [userId, config.database.nullReplacementDate], true, false)
+      .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
       .modify((item: UserItemLocal) => {
         resetUserItem(item);
       });
@@ -306,12 +277,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
     const count = await db.user_items
       .where('[user_id+grammar_id+started_at]')
-      .between(
-        [userId, grammarId, Dexie.minKey],
-        [userId, grammarId, config.database.nullReplacementDate],
-        true,
-        false,
-      )
+      .between([userId, grammarId, Dexie.minKey], [userId, grammarId, NULL_DATE], true, false)
       .modify((item: UserItemLocal) => {
         resetUserItem(item);
       });
@@ -380,8 +346,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   static async syncUserItemsSinceLastSync(userId: string): Promise<void> {
     const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserItems, userId);
     const newSyncedAt = new Date().toISOString();
-    await UserItem.pushUserItemsToSupabase(userId, lastSyncedAt, newSyncedAt);
-    await UserItem.pullUserItemsFromSupabase(userId, lastSyncedAt, newSyncedAt);
+    await this.pushUserItemsToSupabase(userId, lastSyncedAt, newSyncedAt);
+    await this.pullUserItemsFromSupabase(userId, lastSyncedAt, newSyncedAt);
   }
 
   /**
@@ -394,9 +360,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   static async syncUserItemsAll(userId: string): Promise<void> {
     const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserItems, userId);
     const newSyncedAt = new Date().toISOString();
-    await UserItem.pushUserItemsToSupabase(userId, lastSyncedAt, newSyncedAt);
+    await this.pushUserItemsToSupabase(userId, lastSyncedAt, newSyncedAt);
     await db.user_items.where('user_id').equals(userId).delete();
-    await UserItem.pullUserItemsFromSupabase(userId, config.database.epochStartDate, newSyncedAt);
+    await this.pullUserItemsFromSupabase(userId, config.database.epochStartDate, newSyncedAt);
   }
 
   /**
@@ -421,18 +387,21 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .between([userId, lastSyncedAt], [userId, newSyncedAt], true, false)
       .toArray();
 
-    if (localUserItems.length !== 0) {
-      const sqlUserItems = localUserItems.map(convertLocalToSQL);
-      const { error: rpcInsertError } = await supabaseInstance.rpc('upsert_user_items', {
-        user_id_input: userId,
-        items: sqlUserItems,
-      });
+    if (localUserItems.length === 0) {
+      infoHandler(`No user items to push for userId: ${userId}`);
+      return 0;
+    }
 
-      if (rpcInsertError) {
-        throw new SupabaseError('Error inserting user_items to Supabase.', rpcInsertError, {
-          userId,
-        });
-      }
+    const sqlUserItems = localUserItems.map(convertLocalToSQL);
+    const { error: rpcInsertError } = await supabaseInstance.rpc('upsert_user_items', {
+      user_id_input: userId,
+      items: sqlUserItems,
+    });
+
+    if (rpcInsertError) {
+      throw new SupabaseError('Error inserting user_items to Supabase.', rpcInsertError, {
+        userId,
+      });
     }
 
     infoHandler(
@@ -472,9 +441,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       });
     }
 
+    const serverItems = updatedUserItems ?? [];
+
     const toDelete: [string, number][] = [];
     const toUpsert: UserItemLocal[] = [];
-    updatedUserItems.forEach((item: UserItemLocal) => {
+    serverItems.forEach((item: UserItemLocal) => {
       if (item.deleted_at === null) {
         toUpsert.push(item);
       } else {
@@ -493,9 +464,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     });
 
     infoHandler(
-      `Completed ${updatedUserItems.length} user items pull from Supabase for userId: ${userId}`,
+      `Completed ${serverItems.length} user items pull from Supabase for userId: ${userId}`,
     );
 
-    return updatedUserItems.length;
+    return serverItems.length;
   }
 }
