@@ -11,6 +11,12 @@ interface AuthState {
   handleLogout: () => Promise<void>;
 }
 
+const INITIAL_AUTH_STATE = {
+  userId: null,
+  userEmail: null,
+  userFullName: null,
+};
+
 /**
  * A Zustand store hook for managing authentication state using Supabase.
  *
@@ -28,7 +34,7 @@ interface AuthState {
  *   Throws an error if sign-out fails.
  */
 export const useAuthStore = create<AuthState>((set) => {
-  const setSession = (session: Session | null) => {
+  const applySession = (session: Session | null) => {
     set({
       userId: session?.user?.id ?? null,
       userEmail: session?.user?.email ?? null,
@@ -38,10 +44,12 @@ export const useAuthStore = create<AuthState>((set) => {
     });
   };
 
+  const clearSession = () => {
+    set({ ...INITIAL_AUTH_STATE, loading: false });
+  };
+
   return {
-    userId: null,
-    userEmail: null,
-    userFullName: null,
+    ...INITIAL_AUTH_STATE,
     loading: true,
 
     initializeAuth: () => {
@@ -50,16 +58,16 @@ export const useAuthStore = create<AuthState>((set) => {
       const fetchSession = async () => {
         const { data, error } = await supabaseInstance.auth.getSession();
         if (error) {
-          setSession(null);
-          throw new Error(error.message);
+          clearSession();
+          return;
         }
-        setSession(data.session);
+        applySession(data.session);
       };
 
-      fetchSession();
+      void fetchSession();
 
       subscription = supabaseInstance.auth.onAuthStateChange((_event, session) => {
-        setSession(session);
+        applySession(session);
       }).data.subscription;
 
       return () => {
@@ -72,7 +80,7 @@ export const useAuthStore = create<AuthState>((set) => {
       if (error) {
         throw new Error(error.message);
       }
-      set({ userId: null, userEmail: null, userFullName: null, loading: false });
+      clearSession();
     },
   };
 });
