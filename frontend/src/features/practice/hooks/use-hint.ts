@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react';
 
+const NBSP = '\u00A0';
+
 /**
  * Hook for managing hint progression across two sections.
  *
@@ -18,8 +20,8 @@ import { useState, useCallback } from 'react';
  *  - `from english to czech` - reveal english (with hintFirst), then czech (with hintSecond)
  */
 export function useHint(czech: string = '', english: string = '') {
-  czech = czech ?? '';
-  english = english ?? '';
+  const czechText = czech ?? '';
+  const englishText = english ?? '';
 
   const [index, setIndex] = useState(0);
 
@@ -27,26 +29,30 @@ export function useHint(czech: string = '', english: string = '') {
     setIndex((prev) => prev + 1);
   }, []);
 
-  const englishLength = english.length;
-  const czechLength = czech.length;
+  const englishLength = englishText.length;
+  const czechLength = czechText.length;
 
-  const englishHinted = english
+  const englishHinted = englishText
     ? index === 0
-      ? '\u00A0'
-      : english.slice(0, Math.min(index, englishLength))
-    : '\u00A0';
+      ? NBSP
+      : englishText.slice(0, Math.min(index, englishLength))
+    : NBSP;
 
-  const czechHinted = czech
+  const czechHinted = czechText
     ? index <= englishLength
-      ? '\u00A0'
-      : czech.slice(0, Math.min(index - englishLength, czechLength))
-    : '\u00A0';
+      ? NBSP
+      : czechText.slice(0, Math.min(index - englishLength, czechLength))
+    : NBSP;
+
+  const resetHint = useCallback(() => {
+    setIndex(0);
+  }, []);
 
   return {
     plusHint,
     englishHinted,
     czechHinted,
     index,
-    resetHint: () => setIndex(0),
+    resetHint,
   };
 }
