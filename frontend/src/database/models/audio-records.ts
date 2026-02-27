@@ -30,13 +30,8 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
   static async getAudio(audioName: string): Promise<AudioRecordLocal | null> {
     if (!audioName) return null;
 
-    let existingRecord = await db.audio_records.get(audioName);
-
-    if (existingRecord) {
-      return existingRecord;
-    }
-
-    return await AudioRecord.fetchAudioFile(audioName);
+    const existingRecord = await db.audio_records.get(audioName);
+    return existingRecord ?? this.fetchAudioFile(audioName);
   }
 
   /**
@@ -46,27 +41,27 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    * @throws Logs errors for any archives that fail to sync, but continues processing remaining archives.
    */
   static async syncAudioData(archives: string[]): Promise<void> {
-    await Promise.all(
-      archives.map(async (archiveName) => {
-        try {
-          if (await AudioMetadata.isFetched(archiveName)) return;
+    await Promise.all(archives.map((archiveName) => this.syncAudioArchive(archiveName)));
+  }
 
-          const zipBlob: Blob = await fetchStorage(config.audio.archiveBucketName, archiveName);
+  private static async syncAudioArchive(archiveName: string): Promise<void> {
+    try {
+      if (await AudioMetadata.isFetched(archiveName)) return;
 
-          const extractedFiles = await this.extractZip(zipBlob);
-          await db.transaction('rw', db.audio_records, db.audio_metadata, async () => {
-            await db.audio_records.bulkPut(
-              Array.from(extractedFiles, ([filename, audioBlob]) => ({ filename, audioBlob })),
-            );
-            await AudioMetadata.markAsFetched(archiveName);
-          });
+      const zipBlob = await fetchStorage(config.audio.archiveBucketName, archiveName);
+      const extractedFiles = await this.extractZip(zipBlob);
 
-          infoHandler(`Successfully synced audio archive: ${archiveName}`);
-        } catch (error) {
-          errorHandler(`Failed to sync audio archive: ${archiveName}`, error);
-        }
-      }),
-    );
+      await db.transaction('rw', db.audio_records, db.audio_metadata, async () => {
+        await db.audio_records.bulkPut(
+          Array.from(extractedFiles, ([filename, audioBlob]) => ({ filename, audioBlob })),
+        );
+        await AudioMetadata.markAsFetched(archiveName);
+      });
+
+      infoHandler(`Successfully synced audio archive: ${archiveName}`);
+    } catch (error) {
+      errorHandler(`Failed to sync audio archive: ${archiveName}`, error);
+    }
   }
 
   /**
@@ -108,10 +103,10 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    * @throws Logs an error if the audio file cannot be fetched from storage
    */
   private static async fetchAudioFile(audioFile: string): Promise<AudioRecordLocal> {
-    const audioBlob: Blob = await fetchStorage(config.audio.audioBucketName, audioFile);
+    const audioBlob = await fetchStorage(config.audio.audioBucketName, audioFile);
 
     infoHandler(`Fetched audio file ${audioFile} from storage, size: ${audioBlob.size} bytes`);
-    await db.audio_records.put({ filename: audioFile, audioBlob: audioBlob });
+    await db.audio_records.put({ filename: audioFile, audioBlob });
     infoHandler(`Successfully synced audio file: ${audioFile}`);
 
     return { filename: audioFile, audioBlob };
