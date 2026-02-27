@@ -7,7 +7,7 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import type { GrammarWithProgress } from '@/types/local.types';
 import DOMPurify from 'dompurify';
-import { useCallback, type JSX } from 'react';
+import { useCallback, useMemo, type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ButtonRectangular from '@/components/UI/buttons/ButtonRectangular';
 import CloseButton from '@/components/UI/buttons/CloseButton';
@@ -29,7 +29,7 @@ export default function GrammarOverview(): JSX.Element {
   // -- Data Fetching and Effects --
   const fetchGrammarList = useCallback(async () => {
     if (!userId) return [];
-    return await Grammar.getStartedGrammarListWithProgress(userId);
+    return Grammar.getStartedGrammarListWithProgress(userId);
   }, [userId]);
 
   const {
@@ -40,19 +40,32 @@ export default function GrammarOverview(): JSX.Element {
     setCurrentIndex,
   } = useArray<GrammarWithProgress>(fetchGrammarList);
 
+  const grammarList = grammarArray ?? [];
+  const hasGrammar = grammarList.length > 0;
+  const sanitizedNote = useMemo(() => {
+    if (!currentGrammar?.note) return null;
+    return DOMPurify.sanitize(currentGrammar.note);
+  }, [currentGrammar?.note]);
+
   // -- Handlers --
-  const handleClearGrammarUserItems = async () => {
+  const handleClearGrammarUserItems = useCallback(async () => {
+    if (!userId || typeof currentGrammar?.id !== 'number') return;
+
     try {
-      const grammarId = currentGrammar?.id;
-      if (typeof grammarId === 'number' && userId) {
-        await UserItem.resetGrammarItems(userId, grammarId);
-        reload();
-      }
+      await UserItem.resetGrammarItems(userId, currentGrammar.id);
+      await reload();
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch {
       showToast(TEXTS.resetProgressErrorToast, 'error');
     }
-  };
+  }, [currentGrammar?.id, reload, showToast, userId]);
+
+  const handleOpenGrammar = useCallback(
+    (index: number) => {
+      setCurrentIndex(index);
+    },
+    [setCurrentIndex],
+  );
 
   // List view
   if (currentIndex === null) {
@@ -62,14 +75,12 @@ export default function GrammarOverview(): JSX.Element {
           <div className="h-button flex grow justify-start p-4">{TEXTS.grammarOverview}</div>
           <CloseButton onClick={() => navigate('/profile')} />
         </div>
-        {grammarArray && grammarArray.length > 0 ? (
-          grammarArray.map((item, index) => (
+        {hasGrammar ? (
+          grammarList.map((item, index) => (
             <ButtonRectangular
               key={item.id}
               className="h-input flex grow-0 justify-start p-4 text-left"
-              onClick={() => {
-                setCurrentIndex(index);
-              }}
+              onClick={() => handleOpenGrammar(index)}
             >
               {`${index + 1} : ${item.name} `}
             </ButtonRectangular>
@@ -100,12 +111,8 @@ export default function GrammarOverview(): JSX.Element {
         className="pb-4"
         classNameValue="w-20 text-right"
       />
-      {currentGrammar && currentGrammar.note ? (
-        <div
-          dangerouslySetInnerHTML={{
-            __html: DOMPurify.sanitize(currentGrammar.note),
-          }}
-        />
+      {sanitizedNote ? (
+        <div dangerouslySetInnerHTML={{ __html: sanitizedNote }} />
       ) : (
         <DelayedMessage text={TEXTS.notAvailable} />
       )}
