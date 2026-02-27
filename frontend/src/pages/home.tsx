@@ -32,7 +32,7 @@ export default function Home(): JSX.Element {
     // User is authenticated - show dashboard
     mainSection = (
       <div className="relative flex w-full flex-col">
-        <div className="px-2">
+        <div className="px-4">
           <PropertyView label={TEXTS.userLabel} value={userFullName || userEmail} />
           <PropertyView
             label={TEXTS.userStatsLabel}

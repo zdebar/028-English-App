@@ -89,7 +89,7 @@ export default function PracticeCard() {
           <div className={`card-width card-height relative gap-1`}>
             {/* Item Card */}
             <div
-              className={`relative flex h-full grow flex-col items-center justify-between p-2 select-none ${
+              className={`relative flex h-full grow flex-col items-center justify-between p-4 select-none ${
                 revealed ? 'color-audio-disabled' : 'button-color'
               } `}
               onClick={handleReveal}
