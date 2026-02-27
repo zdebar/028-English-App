@@ -2,6 +2,12 @@ import config from '@/config/config';
 import { TEXTS } from '@/locales/cs';
 import type { UserItemLocal } from '@/types/local.types';
 
+const WORDS_COLLATOR = new Intl.Collator(undefined, { sensitivity: 'base' });
+
+function normalizeText(value: string | null | undefined): string {
+  return (value ?? '').trim().toLowerCase();
+}
+
 /**
  * Returns a shortened date string (YYYY-MM-DD) from an ISO date string.
  * @param isoDate ISO date string
@@ -18,8 +24,7 @@ export function shortenDate(isoDate: string | null | undefined): string {
  * @returns {string}
  */
 export function getMoreTextInCzech(count: number): string {
-  if (count <= 4) return TEXTS.next;
-  return TEXTS.nextFivePlus;
+  return count <= 4 ? TEXTS.next : TEXTS.nextFivePlus;
 }
 
 export type DisplayField = 'czech' | 'english';
@@ -43,16 +48,12 @@ export function filterAndSortWords(
   searchTerm: string,
   displayField: DisplayField,
 ): UserItemLocal[] {
-  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const normalizedSearch = normalizeText(searchTerm);
 
   return words
     .filter((item) => {
-      const value = (item[displayField] ?? '').toLowerCase();
+      const value = normalizeText(item[displayField]);
       return normalizedSearch === '' || value.startsWith(normalizedSearch);
     })
-    .sort((a, b) =>
-      (a[displayField] ?? '').localeCompare(b[displayField] ?? '', undefined, {
-        sensitivity: 'base',
-      }),
-    );
+    .sort((a, b) => WORDS_COLLATOR.compare(a[displayField] ?? '', b[displayField] ?? ''));
 }

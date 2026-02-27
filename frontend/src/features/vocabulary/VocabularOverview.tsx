@@ -19,7 +19,7 @@ const INITIAL_VISIBLE_COUNT = config.vocabulary.itemsPerPage;
  * @returns The vocabulary overview UI with list and detail card functionality.
  */
 export default function VocabularyOverview() {
-  const { userId } = useAuthStore();
+  const userId = useAuthStore((state) => state.userId);
   const navigate = useNavigate();
 
   const fetchVocabulary = useCallback(async () => {
@@ -45,6 +45,8 @@ export default function VocabularyOverview() {
     [words, searchTerm, displayField],
   );
 
+  const isDetailView = currentIndex !== null;
+
   const selectedWord = useMemo(
     () => (currentIndex == null ? null : (filteredWords[currentIndex] ?? null)),
     [currentIndex, filteredWords],
@@ -65,9 +67,24 @@ export default function VocabularyOverview() {
     if (typeof itemId !== 'number' || !userId) return;
 
     await UserItem.resetUserItemById(userId, itemId);
-    reload();
+    await reload();
     setCurrentIndex(null);
   }, [selectedWord, userId, reload, setCurrentIndex]);
+
+  const handleSelectWord = useCallback(
+    (index: number) => {
+      setCurrentIndex(index);
+    },
+    [setCurrentIndex],
+  );
+
+  const handleCloseDetail = useCallback(() => {
+    setCurrentIndex(null);
+  }, [setCurrentIndex]);
+
+  const handleCloseList = useCallback(() => {
+    navigate('/profile');
+  }, [navigate]);
 
   if (loading) {
     return <DelayedMessage />;
@@ -75,7 +92,7 @@ export default function VocabularyOverview() {
 
   return (
     <>
-      {currentIndex === null ? (
+      {!isDetailView ? (
         <VocabularyList
           filteredWords={filteredWords}
           visibleCount={visibleCount}
@@ -84,16 +101,14 @@ export default function VocabularyOverview() {
           setSearchTerm={setSearchTerm}
           setDisplayField={setDisplayField}
           setVisibleCount={setVisibleCount}
-          onSelect={(index) => {
-            setCurrentIndex(index);
-          }}
+          onSelect={handleSelectWord}
           error={error}
-          onClose={() => navigate('/profile')}
+          onClose={handleCloseList}
         />
       ) : (
         <VocabularyDetailCard
           selectedWord={selectedWord}
-          onClose={() => setCurrentIndex(null)}
+          onClose={handleCloseDetail}
           onReset={handleClearUserItem}
         />
       )}

@@ -3,16 +3,21 @@ import CloseButton from '@/components/UI/buttons/CloseButton';
 import config from '@/config/config';
 import { TEXTS } from '@/locales/cs';
 import DirectionDropdown from '@/features/vocabulary/DirectionDropdown';
-import { getMoreTextInCzech } from '@/features/vocabulary/vocabulary.utils';
+import { getMoreTextInCzech, type DisplayField } from '@/features/vocabulary/vocabulary.utils';
 import { type UserItemLocal } from '@/types/local.types';
+
+const DIRECTION_OPTIONS: { value: DisplayField; label: string }[] = [
+  { value: 'czech', label: 'Čeština' },
+  { value: 'english', label: 'Angličtina' },
+];
 
 interface VocabularyListProps {
   filteredWords: UserItemLocal[];
   visibleCount: number;
-  displayField: 'czech' | 'english';
+  displayField: DisplayField;
   searchTerm: string;
   setSearchTerm: (val: string) => void;
-  setDisplayField: (val: 'czech' | 'english') => void;
+  setDisplayField: (val: DisplayField) => void;
   setVisibleCount: (val: number) => void;
   onSelect: (index: number) => void;
   error: string | null;
@@ -48,6 +53,7 @@ export default function VocabularyList({
 }: VocabularyListProps) {
   const visibleItems = filteredWords.slice(0, visibleCount);
   const remainingCount = filteredWords.length - visibleCount;
+  const hasWords = filteredWords.length > 0;
 
   return (
     <div className="card-width relative flex h-full flex-col justify-start gap-1">
@@ -60,11 +66,8 @@ export default function VocabularyList({
           ) : (
             <DirectionDropdown
               value={displayField}
-              options={[
-                { value: 'czech', label: 'Čeština' },
-                { value: 'english', label: 'Angličtina' },
-              ]}
-              onChange={(value) => setDisplayField(value as 'czech' | 'english')}
+              options={DIRECTION_OPTIONS}
+              onChange={setDisplayField}
               className="h-button flex grow items-center border border-dashed"
             />
           )}
@@ -79,7 +82,7 @@ export default function VocabularyList({
         />
       </div>
       <div className="flex flex-col gap-1 overflow-y-auto">
-        {filteredWords && filteredWords.length > 0 ? (
+        {hasWords ? (
           <>
             {visibleItems.map((item, index) => (
               <ButtonRectangular

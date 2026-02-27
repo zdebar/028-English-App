@@ -5,6 +5,8 @@ import HelpButton from '@/features/help/HelpButton';
 import { shortenDate } from '@/features/vocabulary/vocabulary.utils';
 import type { UserItemLocal } from '@/types/local.types';
 
+const NOT_AVAILABLE = TEXTS.notAvailable;
+
 interface VocabularyDetailCardProps {
   selectedWord: UserItemLocal | null;
   onClose: () => void;
@@ -24,36 +26,44 @@ export default function VocabularyDetailCard({
   onClose,
   onReset,
 }: VocabularyDetailCardProps) {
+  const baseProperties = [
+    { label: TEXTS.czech, value: selectedWord?.czech },
+    { label: TEXTS.english, value: selectedWord?.english },
+    { label: TEXTS.pronunciation, value: selectedWord?.pronunciation },
+    { label: TEXTS.progress, value: selectedWord?.progress },
+  ];
+
+  const lessonProperties = [
+    { label: TEXTS.levelName, value: selectedWord?.level_name ?? NOT_AVAILABLE },
+    { label: TEXTS.lessonOrder, value: selectedWord?.lesson_order ?? NOT_AVAILABLE },
+    { label: TEXTS.lessonName, value: selectedWord?.lesson_name ?? NOT_AVAILABLE },
+  ];
+
+  const dateProperties = [
+    { label: TEXTS.startedAt, value: shortenDate(selectedWord?.started_at) },
+    { label: TEXTS.updatedAt, value: shortenDate(selectedWord?.updated_at) },
+    { label: TEXTS.nextAt, value: shortenDate(selectedWord?.next_at) },
+    { label: TEXTS.masteredAt, value: shortenDate(selectedWord?.mastered_at) },
+  ];
+
   return (
     <div className="card-width relative flex w-full flex-col items-center justify-start">
       <OverviewCard buttonTitle={selectedWord?.czech} onClose={onClose} handleReset={onReset}>
         <div className="flex flex-col gap-4">
           <div>
-            <PropertyView label={TEXTS.czech} value={selectedWord?.czech} />
-            <PropertyView label={TEXTS.english} value={selectedWord?.english} />
-            <PropertyView label={TEXTS.pronunciation} value={selectedWord?.pronunciation} />
-            <PropertyView label={TEXTS.progress} value={selectedWord?.progress} />
+            {baseProperties.map((property) => (
+              <PropertyView key={property.label} label={property.label} value={property.value} />
+            ))}
           </div>
           <div>
-            <PropertyView
-              label={TEXTS.levelName}
-              value={selectedWord?.level_name ?? TEXTS.notAvailable}
-            />
-            <PropertyView
-              label={TEXTS.lessonOrder}
-              value={selectedWord?.lesson_order ?? TEXTS.notAvailable}
-            />
-
-            <PropertyView
-              label={TEXTS.lessonName}
-              value={selectedWord?.lesson_name ?? TEXTS.notAvailable}
-            />
+            {lessonProperties.map((property) => (
+              <PropertyView key={property.label} label={property.label} value={property.value} />
+            ))}
           </div>
           <div>
-            <PropertyView label={TEXTS.startedAt} value={shortenDate(selectedWord?.started_at)} />
-            <PropertyView label={TEXTS.updatedAt} value={shortenDate(selectedWord?.updated_at)} />
-            <PropertyView label={TEXTS.nextAt} value={shortenDate(selectedWord?.next_at)} />
-            <PropertyView label={TEXTS.masteredAt} value={shortenDate(selectedWord?.mastered_at)} />
+            {dateProperties.map((property) => (
+              <PropertyView key={property.label} label={property.label} value={property.value} />
+            ))}
           </div>
         </div>
       </OverviewCard>
