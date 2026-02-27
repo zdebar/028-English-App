@@ -38,15 +38,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     const today = getTodayShortDate();
     const existingRecord = await db.user_scores.get([userId, today]);
     const newItemCount = (existingRecord?.item_count ?? 0) + addCount;
-
-    const newRecord: UserScoreLocal = {
-      user_id: userId,
-      date: today,
-      item_count: newItemCount,
-      updated_at: new Date().toISOString(),
-    };
-
-    await db.user_scores.put(newRecord);
+    await db.user_scores.put(this.createRecord(userId, today, newItemCount));
     return true;
   }
 
@@ -59,15 +51,16 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    */
   static async getUserScoreForToday(userId: string): Promise<UserScoreLocal> {
     const today = getTodayShortDate();
+    return (await db.user_scores.get([userId, today])) ?? this.createRecord(userId, today, 0);
+  }
 
-    return (
-      (await db.user_scores.get([userId, today])) ?? {
-        user_id: userId,
-        date: today,
-        item_count: 0,
-        updated_at: new Date().toISOString(),
-      }
-    );
+  private static createRecord(userId: string, date: string, itemCount: number): UserScoreLocal {
+    return {
+      user_id: userId,
+      date,
+      item_count: itemCount,
+      updated_at: new Date().toISOString(),
+    };
   }
 
   /**
@@ -80,8 +73,8 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   static async syncUserScoreSinceLastSync(userId: string): Promise<void> {
     const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserScores, userId);
     const newSyncedAt = new Date().toISOString();
-    await UserScore.pushUserScores(userId, lastSyncedAt, newSyncedAt);
-    await UserScore.pullUserScores(userId, lastSyncedAt, newSyncedAt);
+    await this.pushUserScores(userId, lastSyncedAt, newSyncedAt);
+    await this.pullUserScores(userId, lastSyncedAt, newSyncedAt);
   }
 
   /**
@@ -94,9 +87,9 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   static async syncUserScoreAll(userId: string): Promise<void> {
     const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserScores, userId);
     const newSyncedAt = new Date().toISOString();
-    await UserScore.pushUserScores(userId, lastSyncedAt, newSyncedAt);
+    await this.pushUserScores(userId, lastSyncedAt, newSyncedAt);
     await db.user_scores.where('user_id').equals(userId).delete();
-    await UserScore.pullUserScores(userId, config.database.epochStartDate, newSyncedAt);
+    await this.pullUserScores(userId, config.database.epochStartDate, newSyncedAt);
   }
 
   /**
@@ -105,7 +98,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @returns A promise that resolves to the number of records deleted
    */
   static async deleteAllUserScores(userId: string): Promise<number> {
-    return await db.user_scores.where('user_id').equals(userId).delete();
+    return db.user_scores.where('user_id').equals(userId).delete();
   }
 
   /**
@@ -128,20 +121,22 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
       .between([userId, lastSyncedAt], [userId, newSyncedAt], true, false)
       .toArray();
 
-    if (localScores.length !== 0) {
-      const { error: errorInsert } = await supabaseInstance.rpc('upsert_user_scores', {
-        scores: localScores,
-      });
+    if (localScores.length === 0) {
+      infoHandler(`No user scores to push for userId: ${userId}`);
+      return 0;
+    }
 
-      if (errorInsert) {
-        throw new SupabaseError(`User score synchronization failed.`, errorInsert, { localScores });
-      }
+    const { error: errorInsert } = await supabaseInstance.rpc('upsert_user_scores', {
+      scores: localScores,
+    });
+
+    if (errorInsert) {
+      throw new SupabaseError(`User score synchronization failed.`, errorInsert, { localScores });
     }
 
     infoHandler(
       `Completed ${localScores.length} user scores push to Supabase for userId: ${userId}`,
     );
-
     return localScores.length;
   }
 
@@ -176,17 +171,16 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     }
 
     await db.transaction('rw', db.user_scores, db.metadata, async () => {
-      if (updatedScores && updatedScores.length > 0) {
+      if (Array.isArray(updatedScores) && updatedScores.length > 0) {
         await db.user_scores.bulkPut(updatedScores);
       }
       await Metadata.markAsSynced(TableName.UserScores, newSyncedAt, userId);
     });
 
-    const serverUpdatesCount = updatedScores?.length ?? 0;
+    const serverUpdatesCount = Array.isArray(updatedScores) ? updatedScores.length : 0;
     infoHandler(
       `Completed ${serverUpdatesCount} user scores pull from Supabase for userId: ${userId}`,
     );
-
     return serverUpdatesCount;
   }
 }
