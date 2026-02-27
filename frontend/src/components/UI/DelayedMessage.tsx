@@ -14,6 +14,7 @@ type DelayedMessageProps = {
  * @param text Message to display.
  * @param timeDelay Delay before showing the message (ms).
  * @param className Optional CSS class for styling the message.
+ * @returns The paragraph element with the message, or null if the delay has not yet passed.
  */
 export default function DelayedMessage({
   text = TEXTS.loadingMessage,

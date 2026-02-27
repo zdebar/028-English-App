@@ -21,7 +21,7 @@ export default function Header(): JSX.Element {
 
   return (
     <header className={`${styles['header-fixed']} z-header relative flex w-full justify-between`}>
-      <nav className={`${styles['header-side']} m-4 flex gap-2`} role="navigation">
+      <nav className={`${styles['header-side']} flex gap-2 p-4`} role="navigation">
         <HeaderButton to={ROUTES.home} title={TEXTS.tooltipHome}>
           <HomeIcon />
         </HeaderButton>

@@ -1,34 +1,22 @@
-import type { JSX } from 'react';
+import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
-interface ButtonRectangularProps {
-  children?: React.ReactNode;
-  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  disabled?: boolean;
-  className?: string;
+interface ButtonRectangularProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  children?: ReactNode;
 }
 
 /**
  * Button component for rendering a styled button element.
  *
- * @param children Content to be displayed inside the button.
- * @param onClick Function to call when button is clicked.
- * @param disabled Whether the button is disabled.
+ * @param children The content to be displayed inside the button.
  * @param className Additional CSS classes for custom styling.
- * @returns The rendered button element.
  */
 export default function ButtonRectangular({
   children,
-  onClick,
-  disabled = false,
   className = '',
-}: ButtonRectangularProps): JSX.Element {
+  ...rest
+}: ButtonRectangularProps) {
   return (
-    <button
-      type="button"
-      className={`button-rectangular button-color ${className}`}
-      onClick={onClick}
-      disabled={disabled}
-    >
+    <button type="button" className={`button-rectangular button-color ${className}`} {...rest}>
       {children}
     </button>
   );

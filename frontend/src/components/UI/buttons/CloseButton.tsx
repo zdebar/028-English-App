@@ -1,9 +1,9 @@
 import { useKey } from '@/features/key-listener/use-key';
 import CloseIcon from '@/components/UI/icons/CloseIcon';
 import { KEYBOARD_LISTENERS } from '@/config/keyboard-listeners.config';
-import type { JSX } from 'react';
+import type { ButtonHTMLAttributes, JSX } from 'react';
 
-interface CloseButtonProps {
+interface CloseButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   onClick: () => void;
   className?: string;
 }
@@ -15,7 +15,11 @@ interface CloseButtonProps {
  * @param className Additional CSS classes for custom styling.
  * @returns The rendered button element.
  */
-export default function CloseButton({ onClick, className = '' }: CloseButtonProps): JSX.Element {
+export default function CloseButton({
+  onClick,
+  className = '',
+  ...rest
+}: CloseButtonProps): JSX.Element {
   useKey({ onKeyPress: onClick, keys: KEYBOARD_LISTENERS.Exit, disabledOnOverlayOpen: true });
 
   return (
@@ -23,6 +27,7 @@ export default function CloseButton({ onClick, className = '' }: CloseButtonProp
       type="button"
       className={`button-rectangular button-color w-button grow-0 ${className}`}
       onClick={onClick}
+      {...rest}
     >
       <CloseIcon />
     </button>
