@@ -21,7 +21,7 @@ import { useGrammar } from './hooks/use-grammar';
 import KnownButton from './buttons/KnownButton';
 import UnknownButton from './buttons/UnknownButton';
 import SkipButton from './buttons/SkipButton';
-import PlayAudioButton from './buttons/AudioButton';
+import PlayAudioButton from './buttons/PlayAudioButton';
 
 /**
  * PracticeCard component for interactive language practice.
