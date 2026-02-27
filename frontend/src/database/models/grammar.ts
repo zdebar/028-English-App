@@ -49,6 +49,23 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   }
 
   /**
+   * Retrieves a list of unique grammar IDs for items that have been started by a user.
+   *
+   * @param userId - The ID of the user
+   * @returns A promise that resolves to an array of unique grammar IDs that the user has started, or an empty array if no items have been started
+   */
+  static async getStartedGrammarIds(userId: string): Promise<number[]> {
+    const startedUserItems: UserItemLocal[] = await db.user_items
+      .where('[user_id+started_at]')
+      .between([userId, Dexie.minKey], [userId, config.database.nullReplacementDate], true, false)
+      .toArray();
+
+    if (startedUserItems.length === 0) return [];
+
+    return [...new Set(startedUserItems.map((item) => item.grammar_id))];
+  }
+
+  /**
    * Retrieves a list of grammar items that have been started by the user.
    *
    * Fetches all grammar records associated with user items that have a non-null `started_at` timestamp,
@@ -58,15 +75,8 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * @returns A promise that resolves to an array of started grammar items with progress information. Returns an empty array
    *          if the user has not started any grammar items or if no matching grammar records are found.
    */
-  static async getStartedGrammarList(userId: string): Promise<GrammarWithProgress[]> {
-    const startedUserItems: UserItemLocal[] = await db.user_items
-      .where('[user_id+started_at]')
-      .between([userId, Dexie.minKey], [userId, config.database.nullReplacementDate], true, false)
-      .toArray();
-
-    if (startedUserItems.length === 0) return [];
-
-    const grammarIds = [...new Set(startedUserItems.map((item) => item.grammar_id))];
+  static async getStartedGrammarListWithProgress(userId: string): Promise<GrammarWithProgress[]> {
+    const grammarIds = await this.getStartedGrammarIds(userId);
     if (grammarIds.length === 0) return [];
 
     const startedGrammar: GrammarLocal[] = await db.grammar.where('id').anyOf(grammarIds).toArray();

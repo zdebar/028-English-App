@@ -29,7 +29,7 @@ export default function GrammarOverview(): JSX.Element {
   // -- Data Fetching and Effects --
   const fetchGrammarList = useCallback(async () => {
     if (!userId) return [];
-    return await Grammar.getStartedGrammarList(userId);
+    return await Grammar.getStartedGrammarListWithProgress(userId);
   }, [userId]);
 
   const {

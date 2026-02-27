@@ -64,7 +64,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     assertPositiveInteger(deckSize, 'deckSize');
 
     // Step 1: Fetch already started grammar list
-    const startedGrammar = await Grammar.getStartedGrammarList(userId);
+    const startedGrammarIds = await Grammar.getStartedGrammarIds(userId);
 
     // Step 2: Fetch items with odd progress
     // SELECT with user_id, next_at = null, mastered_at = null, progress odd
@@ -129,7 +129,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       let show = false;
       if (
         item.grammar_id !== 0 &&
-        !startedGrammar.some((grammar) => grammar.id === item.grammar_id) &&
+        !startedGrammarIds.some((grammarId) => grammarId === item.grammar_id) &&
         !shownGrammarIds.has(item.grammar_id)
       ) {
         show = true;
