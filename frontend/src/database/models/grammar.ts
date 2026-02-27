@@ -1,6 +1,6 @@
 import { Entity } from 'dexie';
 import type AppDB from '@/database/models/app-db';
-import type { GrammarLocal, UserItemLocal } from '@/types/local.types';
+import type { GrammarLocal, GrammarWithProgress, UserItemLocal } from '@/types/local.types';
 import { supabaseInstance } from '@/config/supabase.config';
 import { db } from '@/database/models/db';
 import config from '@/config/config';
@@ -55,27 +55,51 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * indicating that the user has begun studying those grammar topics.
    *
    * @param userId - The unique identifier of the user
-   * @returns A promise that resolves to an array of started grammar items. Returns an empty array
+   * @returns A promise that resolves to an array of started grammar items with progress information. Returns an empty array
    *          if the user has not started any grammar items or if no matching grammar records are found.
    */
-  static async getStartedGrammarList(userId: string): Promise<GrammarLocal[]> {
+  static async getStartedGrammarList(userId: string): Promise<GrammarWithProgress[]> {
     const startedUserItems: UserItemLocal[] = await db.user_items
       .where('[user_id+started_at]')
       .between([userId, Dexie.minKey], [userId, config.database.nullReplacementDate], true, false)
       .toArray();
 
-    if (startedUserItems.length === 0) {
-      return [];
-    }
+    if (startedUserItems.length === 0) return [];
 
     const grammarIds = [...new Set(startedUserItems.map((item) => item.grammar_id))];
-
-    if (grammarIds.length === 0) {
-      return [];
-    }
+    if (grammarIds.length === 0) return [];
 
     const startedGrammar: GrammarLocal[] = await db.grammar.where('id').anyOf(grammarIds).toArray();
-    return startedGrammar;
+
+    // Batch fetch all user items for these grammars
+    const allUserItems = await db.user_items
+      .where('user_id')
+      .equals(userId)
+      .and((item) => grammarIds.includes(item.grammar_id))
+      .toArray();
+
+    // Aggregate progress
+    const progressMap = new Map<
+      number,
+      { startedCount: number; masteredCount: number; totalCount: number }
+    >();
+    for (const grammarId of grammarIds) {
+      progressMap.set(grammarId, { startedCount: 0, masteredCount: 0, totalCount: 0 });
+    }
+    for (const item of allUserItems) {
+      const progress = progressMap.get(item.grammar_id);
+      if (progress) {
+        progress.totalCount += 1;
+        if (item.started_at !== config.database.nullReplacementDate) progress.startedCount += 1;
+        if (item.mastered_at !== config.database.nullReplacementDate) progress.masteredCount += 1;
+      }
+    }
+
+    // Combine grammar with progress
+    return startedGrammar.map((grammar) => ({
+      ...grammar,
+      ...(progressMap.get(grammar.id) ?? { startedCount: 0, masteredCount: 0, totalCount: 0 }),
+    }));
   }
 
   /**
@@ -86,7 +110,6 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   static async syncGrammarSinceLastSync(): Promise<number> {
     const lastSyncedAt = await Metadata.getSyncedAt(TableName.Grammar);
     const newSyncedAt = new Date().toISOString();
-    console;
 
     const grammar = await this.fetchGrammar(lastSyncedAt);
     await this.applyGrammarSync(grammar, newSyncedAt);

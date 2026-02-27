@@ -4,16 +4,16 @@ import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import HelpButton from '@/features/help/HelpButton';
 import { useToastStore } from '@/features/toast/use-toast-store';
-import { useFetch } from '@/hooks/use-fetch';
 import { TEXTS } from '@/locales/cs';
-import type { GrammarLocal } from '@/types/local.types';
+import type { GrammarWithProgress } from '@/types/local.types';
 import DOMPurify from 'dompurify';
-import { useCallback, useEffect, useState, type JSX } from 'react';
+import { useCallback, type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ButtonRectangular from '@/components/UI/buttons/ButtonRectangular';
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import PropertyView from '@/components/UI/PropertyView';
 import DelayedMessage from '@/components/UI/DelayedMessage';
+import { useArray } from '@/hooks/use-array';
 
 /**
  * GrammarOverview component displays a list of started grammar topics for the user.
@@ -22,38 +22,25 @@ import DelayedMessage from '@/components/UI/DelayedMessage';
  * @throws Doesn't throw errors; displays toast messages on failures.
  */
 export default function GrammarOverview(): JSX.Element {
-  const [cardVisible, setCardVisible] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [grammarItemsCounts, setGrammarItemsCounts] = useState<{
-    startedCount: number;
-    masteredCount: number;
-    totalCount: number;
-  } | null>(null);
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
 
-  // Fetch grammar list for the user
+  // -- Data Fetching and Effects --
   const fetchGrammarList = useCallback(async () => {
-    if (!userId) return null;
+    if (!userId) return [];
     return await Grammar.getStartedGrammarList(userId);
   }, [userId]);
 
-  const { data: grammarArray, error, reload } = useFetch<GrammarLocal[] | null>(fetchGrammarList);
+  const {
+    data: grammarArray,
+    currentIndex,
+    currentItem: currentGrammar,
+    reload,
+    setCurrentIndex,
+  } = useArray<GrammarWithProgress>(fetchGrammarList);
 
-  useEffect(() => {
-    if (error) {
-      showToast(TEXTS.dataLoadingError, 'error');
-    }
-  }, [error, showToast]);
-
-  useEffect(() => {
-    setCurrentIndex(0);
-  }, [grammarArray]);
-
-  const currentGrammar = grammarArray?.[currentIndex] ?? null;
-
-  // Handler to clear user items for the current grammar topic
+  // -- Handlers --
   const handleClearGrammarUserItems = async () => {
     try {
       const grammarId = currentGrammar?.id;
@@ -67,14 +54,8 @@ export default function GrammarOverview(): JSX.Element {
     }
   };
 
-  // Fetch mastered and total counts for the current grammar topic
-  const getGrammarItemsCounts = async (userId: string, grammarId: number) => {
-    const totalCount = await UserItem.getGrammarItemsCounts(userId, grammarId);
-    setGrammarItemsCounts(totalCount);
-  };
-
   // List view
-  if (!cardVisible) {
+  if (currentIndex === null) {
     return (
       <div className={`card-width flex flex-col justify-start gap-1`}>
         <div className="h-button flex items-center justify-between gap-1">
@@ -86,10 +67,8 @@ export default function GrammarOverview(): JSX.Element {
             <ButtonRectangular
               key={item.id}
               className="h-input flex grow-0 justify-start p-4 text-left"
-              onClick={async () => {
-                if (userId) await getGrammarItemsCounts(userId, item.id);
+              onClick={() => {
                 setCurrentIndex(index);
-                setCardVisible(true);
               }}
             >
               {`${index + 1} : ${item.name} `}
@@ -106,30 +85,30 @@ export default function GrammarOverview(): JSX.Element {
   return (
     <OverviewCard
       buttonTitle={currentGrammar?.name ?? TEXTS.grammarOverview}
-      onClose={() => setCardVisible(false)}
+      onClose={() => setCurrentIndex(null)}
       handleReset={handleClearGrammarUserItems}
       className="relative"
     >
       <PropertyView
         label={TEXTS.startedCount}
-        value={`${grammarItemsCounts?.startedCount ?? 0} / ${grammarItemsCounts?.totalCount ?? 0}`}
+        value={`${currentGrammar?.startedCount ?? 0} / ${currentGrammar?.totalCount ?? 0}`}
         classNameValue="text-right w-20"
       />
       <PropertyView
         label={TEXTS.masteredCount}
-        value={`${grammarItemsCounts?.masteredCount ?? 0} / ${grammarItemsCounts?.totalCount ?? 0}`}
+        value={`${currentGrammar?.masteredCount ?? 0} / ${currentGrammar?.totalCount ?? 0}`}
         className="pb-4"
         classNameValue="w-20 text-right"
       />
-      {(currentGrammar?.note ? (
+      {currentGrammar && currentGrammar.note ? (
         <div
           dangerouslySetInnerHTML={{
-            __html: DOMPurify.sanitize(currentGrammar?.note ?? ''),
+            __html: DOMPurify.sanitize(currentGrammar.note),
           }}
         />
       ) : (
-        TEXTS.notAvailable
-      )) ?? TEXTS.notAvailable}
+        <DelayedMessage text={TEXTS.notAvailable} />
+      )}
       <HelpButton className="right-0 -bottom-10.5" />
     </OverviewCard>
   );
