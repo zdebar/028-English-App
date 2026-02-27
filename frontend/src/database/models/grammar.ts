@@ -12,6 +12,9 @@ import type { GrammarSQL } from '@/types/data.types';
 import { infoHandler } from '@/features/logging/info-handler';
 import { assertNonNegativeInteger } from '@/utils/assertions.utils';
 
+const EMPTY_PROGRESS = { startedCount: 0, masteredCount: 0, totalCount: 0 };
+const NULL_DATE = config.database.nullReplacementDate;
+
 /**
  * Represents a grammar entity in the application database.
  * - grammar records are shared across all users
@@ -57,7 +60,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   static async getStartedGrammarIds(userId: string): Promise<number[]> {
     const startedUserItems: UserItemLocal[] = await db.user_items
       .where('[user_id+started_at]')
-      .between([userId, Dexie.minKey], [userId, config.database.nullReplacementDate], true, false)
+      .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
       .toArray();
 
     if (startedUserItems.length === 0) return [];
@@ -78,6 +81,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   static async getStartedGrammarListWithProgress(userId: string): Promise<GrammarWithProgress[]> {
     const grammarIds = await this.getStartedGrammarIds(userId);
     if (grammarIds.length === 0) return [];
+    const grammarIdSet = new Set(grammarIds);
 
     const startedGrammar: GrammarLocal[] = await db.grammar.where('id').anyOf(grammarIds).toArray();
 
@@ -85,7 +89,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
     const allUserItems = await db.user_items
       .where('user_id')
       .equals(userId)
-      .and((item) => grammarIds.includes(item.grammar_id))
+      .and((item) => grammarIdSet.has(item.grammar_id))
       .toArray();
 
     // Aggregate progress
@@ -94,21 +98,21 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
       { startedCount: number; masteredCount: number; totalCount: number }
     >();
     for (const grammarId of grammarIds) {
-      progressMap.set(grammarId, { startedCount: 0, masteredCount: 0, totalCount: 0 });
+      progressMap.set(grammarId, { ...EMPTY_PROGRESS });
     }
     for (const item of allUserItems) {
       const progress = progressMap.get(item.grammar_id);
       if (progress) {
         progress.totalCount += 1;
-        if (item.started_at !== config.database.nullReplacementDate) progress.startedCount += 1;
-        if (item.mastered_at !== config.database.nullReplacementDate) progress.masteredCount += 1;
+        if (item.started_at !== NULL_DATE) progress.startedCount += 1;
+        if (item.mastered_at !== NULL_DATE) progress.masteredCount += 1;
       }
     }
 
     // Combine grammar with progress
     return startedGrammar.map((grammar) => ({
       ...grammar,
-      ...(progressMap.get(grammar.id) ?? { startedCount: 0, masteredCount: 0, totalCount: 0 }),
+      ...(progressMap.get(grammar.id) ?? EMPTY_PROGRESS),
     }));
   }
 
@@ -124,8 +128,8 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
     const grammar = await this.fetchGrammar(lastSyncedAt);
     await this.applyGrammarSync(grammar, newSyncedAt);
 
-    infoHandler(`Completed ${grammar?.length ?? 0} grammars pull from Supabase.`);
-    return grammar?.length ?? 0;
+    infoHandler(`Completed ${grammar.length} grammars pull from Supabase.`);
+    return grammar.length;
   }
 
   /**
@@ -141,8 +145,8 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
     await db.grammar.clear();
     await this.applyGrammarSync(grammar, newSyncedAt);
 
-    infoHandler(`Completed ${grammar?.length ?? 0} grammars pull from Supabase.`);
-    return grammar?.length ?? 0;
+    infoHandler(`Completed ${grammar.length} grammars pull from Supabase.`);
+    return grammar.length;
   }
 
   /**
