@@ -8,7 +8,7 @@ export default function PlayAudioButton({ onClick, disabled, children }: Practic
   return (
     <ButtonRectangular onClick={onClick} disabled={disabled} className="relative">
       <PlayIcon />
-      <HelpText className="-top-4.5 right-2">{TEXTS.audio}</HelpText>
+      <HelpText className="-top-4.5 right-4">{TEXTS.audio}</HelpText>
       {children}
     </ButtonRectangular>
   );

@@ -8,7 +8,7 @@ export default function HintButton({ onClick, disabled, children }: PracticeButt
   return (
     <ButtonRectangular onClick={onClick} disabled={disabled} className="relative">
       <BulbIcon />
-      <HelpText className="-top-4.5 right-2">{TEXTS.hint}</HelpText>
+      <HelpText className="-top-4.5 right-4">{TEXTS.hint}</HelpText>
       {children}
     </ButtonRectangular>
   );

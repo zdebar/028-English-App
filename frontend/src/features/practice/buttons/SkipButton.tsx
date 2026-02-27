@@ -19,7 +19,7 @@ export default function SkipButton({ onConfirm, disabled, children }: SkipButton
       className="relative"
     >
       <ForwardIcon />
-      <HelpText className="-top-4.5 left-2">{TEXTS.complete}</HelpText>
+      <HelpText className="-top-4.5 left-4">{TEXTS.complete}</HelpText>
       {children}
     </ButtonWithModal>
   );
