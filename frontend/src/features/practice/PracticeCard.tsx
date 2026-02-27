@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import config from '@/config/config';
 
@@ -58,27 +58,44 @@ export default function PracticeCard() {
     audioLoading,
   } = usePracticeDeck(userId);
 
+  const practiceCountToday = (userStats?.practiceCountToday ?? 0) + index;
+
   // Play audio on item change if direction is EN -> CZ
   useEffect(() => {
-    if (!audioDisabled && !isCzToEn && !audioLoading && !showDirectionChange) {
-      setTimeout(() => playAudio(), 400);
+    if (audioDisabled || isCzToEn || audioLoading || showDirectionChange) {
+      return;
     }
-  }, [playAudio, audioDisabled, isCzToEn, audioLoading, showDirectionChange, currentItem]);
 
-  if (!currentItem) {
-    return <DelayedMessage text="Žádné položky k procvičování" />;
-  }
+    const timeoutId = window.setTimeout(() => {
+      playAudio();
+    }, 400);
 
-  const handleReveal = () => {
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [audioDisabled, isCzToEn, audioLoading, showDirectionChange, playAudio, currentItem]);
+
+  const handleReveal = useCallback(() => {
     if (showDirectionChange) {
       hideDirectionChange();
       return;
     }
+
     if (isCzToEn && !audioError) {
       playAudio();
     }
+
     setRevealed(true);
-  };
+  }, [audioError, hideDirectionChange, isCzToEn, playAudio, setRevealed, showDirectionChange]);
+
+  const handlePlayAudio = useCallback(() => {
+    if (audioDisabled) return;
+    playAudio();
+  }, [audioDisabled, playAudio]);
+
+  if (!currentItem) {
+    return <DelayedMessage text="Žádné položky k procvičování" />;
+  }
 
   return (
     <div className="relative flex w-full grow flex-col items-center">
@@ -149,7 +166,7 @@ export default function PracticeCard() {
                     <p className="px-2 font-light">{progress}</p>
                     <HelpText className="bottom-7.5">{TEXTS.progress}</HelpText>
                     <p className="px-2 font-light">
-                      {(userStats?.practiceCountToday || 0) + index} / {config.practice.dailyGoal}
+                      {practiceCountToday} / {config.practice.dailyGoal}
                     </p>
                     <HelpText className="right-0 bottom-7.5 flex flex-col items-end">
                       <p>
@@ -169,16 +186,12 @@ export default function PracticeCard() {
                   disabled={!revealed || showDirectionChange}
                 />
                 <PlayAudioButton
-                  onClick={() => {
-                    if (!audioDisabled) {
-                      playAudio();
-                    }
-                  }}
+                  onClick={handlePlayAudio}
                   disabled={audioDisabled || showDirectionChange}
                 />
               </div>
               {/** Bottom Row */}
-              <div className={`} relative grid grid-cols-2 gap-1`}>
+              <div className="relative grid grid-cols-2 gap-1">
                 {!revealed ? (
                   <>
                     <GrammarButton
