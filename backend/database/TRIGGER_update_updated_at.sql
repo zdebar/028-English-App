@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.update_updated_at()
+CREATE OR REPLACE FUNCTION public.set_updated_at()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER

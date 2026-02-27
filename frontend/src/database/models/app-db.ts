@@ -21,7 +21,7 @@ export default class AppDB extends Dexie {
     // Define the database schema
     this.version(1).stores({
       user_items:
-        '[user_id+item_id], [user_id+started_at], [user_id+grammar_id], [user_id+grammar_id+started_at], [user_id+updated_at], [user_id+next_at+mastered_at], [user_id+next_at+mastered_at+sequence]',
+        '[user_id+item_id], [user_id+started_at], [user_id+grammar_id], [user_id+grammar_id+started_at], [user_id+updated_at], [user_id+next_at+mastered_at], [user_id+next_at+mastered_at+item_sort_order]',
       grammar: 'id',
       user_scores: '[user_id+date], [user_id+updated_at]',
       audio_records: 'filename',

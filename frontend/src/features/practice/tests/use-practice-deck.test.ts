@@ -60,7 +60,7 @@ function makeItem(overrides: Partial<UserItemPractice> = {}): UserItemPractice {
     english: 'hello',
     pronunciation: 'həˈloʊ',
     audio: 'hello.opus',
-    sequence: 1,
+    item_sort_order: 1,
     grammar_id: 10,
     progress: 0,
     started_at: '2026-01-01',

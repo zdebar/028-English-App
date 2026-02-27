@@ -127,7 +127,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     }
 
     const { error: errorInsert } = await supabaseInstance.rpc('upsert_user_scores', {
-      scores: localScores,
+      p_user_scores: localScores,
     });
 
     if (errorInsert) {
@@ -158,8 +158,8 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     const { data: updatedScores, error: errorFetch } = await supabaseInstance.rpc(
       'fetch_user_scores',
       {
-        user_id_input: userId,
-        last_synced_at: lastSyncedAt,
+        p_user_id: userId,
+        p_last_synced_at: lastSyncedAt,
       },
     );
 

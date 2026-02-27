@@ -2,10 +2,9 @@ CREATE OR REPLACE FUNCTION public.restore_user_on_signin()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = pg_catalog, public
+SET search_path = public, pg_catalog
 AS $$
 BEGIN
-  -- Fully-qualified table reference and fixed search_path ensure deterministic resolution
   UPDATE public.users
   SET deleted_at = NULL
   WHERE id = NEW.id;

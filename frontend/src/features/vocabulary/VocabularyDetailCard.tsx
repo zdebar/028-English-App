@@ -35,7 +35,7 @@ export default function VocabularyDetailCard({
 
   const lessonProperties = [
     { label: TEXTS.levelName, value: selectedWord?.level_name ?? NOT_AVAILABLE },
-    { label: TEXTS.lessonOrder, value: selectedWord?.lesson_order ?? NOT_AVAILABLE },
+    { label: TEXTS.lessonOrder, value: selectedWord?.lesson_sort_order ?? NOT_AVAILABLE },
     { label: TEXTS.lessonName, value: selectedWord?.lesson_name ?? NOT_AVAILABLE },
   ];
 

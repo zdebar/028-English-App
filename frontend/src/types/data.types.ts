@@ -24,7 +24,7 @@ export interface ItemSQL {
   english: string;
   pronunciation: string | null;
   audio: string | null;
-  sequence: number;
+  item_sort_order: number;
   grammar_id: number | null;
   updated_at: string;
   deleted_at: string | null;

@@ -35,7 +35,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   english!: string;
   pronunciation!: string;
   audio!: string | null;
-  sequence!: number;
+  item_sort_order!: number;
   grammar_id!: number;
   progress!: number;
   started_at!: string;
@@ -44,10 +44,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   next_at!: string;
   mastered_at!: string;
   level_id!: number | null;
-  level_order!: number | null;
+  level_sort_order!: number | null;
   level_name!: string | null;
   lesson_id!: number | null;
-  lesson_order!: number | null;
+  lesson_sort_order!: number | null;
   lesson_name!: string | null;
 
   /**
@@ -89,7 +89,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       const remainingLimit = deckSize - itemsWithNextAt.length;
       if (remainingLimit > 0) {
         const remainingItems = await db.user_items
-          .where('[user_id+next_at+mastered_at+sequence]')
+          .where('[user_id+next_at+mastered_at+item_sort_order]')
           .between(
             [userId, NULL_DATE, NULL_DATE, Dexie.minKey],
             [userId, NULL_DATE, NULL_DATE, Dexie.maxKey],
@@ -188,10 +188,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         !(
           item.lesson_id == null ||
           item.lesson_name == null ||
-          item.lesson_order == null ||
+          item.lesson_sort_order == null ||
           item.level_id == null ||
           item.level_name == null ||
-          item.level_order == null
+          item.level_sort_order == null
         ),
     );
 
@@ -201,10 +201,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       const prev = lessonsMap.get(item.lesson_id!);
       lessonsMap.set(item.lesson_id!, {
         lesson_id: item.lesson_id!,
-        lesson_order: item.lesson_order!,
+        lesson_sort_order: item.lesson_sort_order!,
         lesson_name: item.lesson_name!,
         level_id: item.level_id!,
-        level_order: item.level_order!,
+        level_sort_order: item.level_sort_order!,
         level_name: item.level_name!,
         startedCount: (prev?.startedCount ?? 0) + (item.started_at !== NULL_DATE ? 1 : 0),
         startedTodayCount:
@@ -227,7 +227,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       );
       levelsMap.set(lesson.level_id!, {
         level_id: lesson.level_id!,
-        level_order: lesson.level_order!,
+        level_sort_order: lesson.level_sort_order!,
         level_name: lesson.level_name!,
         startedCount: (prev?.startedCount ?? 0) + lesson.startedCount,
         startedTodayCount: (prev?.startedTodayCount ?? 0) + lesson.startedTodayCount,
@@ -394,8 +394,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
     const sqlUserItems = localUserItems.map(convertLocalToSQL);
     const { error: rpcInsertError } = await supabaseInstance.rpc('upsert_user_items', {
-      user_id_input: userId,
-      items: sqlUserItems,
+      p_user_id: userId,
+      p_user_items: sqlUserItems,
     });
 
     if (rpcInsertError) {
@@ -429,8 +429,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const { data: updatedUserItems, error: rpcFetchError } = await supabaseInstance.rpc(
       'fetch_user_items',
       {
-        user_id_input: userId,
-        last_synced_at: lastSyncedAt,
+        p_user_id: userId,
+        p_last_synced_at: lastSyncedAt,
       },
     );
 
@@ -441,7 +441,16 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       });
     }
 
-    const serverItems = updatedUserItems ?? [];
+    const serverItems = (updatedUserItems ?? []).map((item: Partial<UserItemLocal>) => ({
+      ...item,
+      item_sort_order: item.item_sort_order ?? 0,
+      grammar_id: item.grammar_id ?? config.database.nullReplacementNumber,
+      started_at: item.started_at ?? NULL_DATE,
+      next_at: item.next_at ?? NULL_DATE,
+      mastered_at: item.mastered_at ?? NULL_DATE,
+      level_sort_order: item.level_sort_order ?? null,
+      lesson_sort_order: item.lesson_sort_order ?? null,
+    }));
 
     const toDelete: [string, number][] = [];
     const toUpsert: UserItemLocal[] = [];

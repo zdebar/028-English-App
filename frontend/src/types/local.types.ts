@@ -6,7 +6,7 @@ export interface UserItemLocal {
   english: string;
   pronunciation: string;
   audio: string | null;
-  sequence: number;
+  item_sort_order: number;
   grammar_id: number; // null replaced with config.database.nullReplacementNumber
   progress: number;
   started_at: string; // nulls replaced with config.database.nullReplacementDate
@@ -15,10 +15,10 @@ export interface UserItemLocal {
   next_at: string; // nulls replaced with config.database.nullReplacementDate
   mastered_at: string; // nulls replaced with config.database.nullReplacementDate
   level_id: number | null;
-  level_order: number | null;
+  level_sort_order: number | null;
   level_name: string | null;
   lesson_id: number | null;
-  lesson_order: number | null;
+  lesson_sort_order: number | null;
   lesson_name: string | null;
 }
 
@@ -28,10 +28,10 @@ export interface UserItemPractice extends UserItemLocal {
 
 export interface LessonsOverview {
   lesson_id: number;
-  lesson_order: number;
+  lesson_sort_order: number;
   lesson_name: string;
   level_id: number;
-  level_order: number;
+  level_sort_order: number;
   level_name: string;
   startedCount: number;
   startedTodayCount: number;
@@ -42,7 +42,7 @@ export interface LessonsOverview {
 
 export interface LevelsOverview {
   level_id: number;
-  level_order: number;
+  level_sort_order: number;
   level_name: string;
   startedCount: number;
   startedTodayCount: number;

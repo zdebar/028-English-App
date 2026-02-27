@@ -141,8 +141,8 @@ export function sortOddEvenByProgress(items: UserItemLocal[]): UserItemLocal[] {
     const oddB = b.progress % 2;
     if (oddA !== oddB) return oddB - oddA;
 
-    // Sort by sequence (ascending)
-    return a.sequence - b.sequence;
+    // Sort by item_sort_order (ascending)
+    return a.item_sort_order - b.item_sort_order;
   });
 }
 
