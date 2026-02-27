@@ -1,7 +1,8 @@
 import { create } from 'zustand';
-import { loadUserTheme, saveUserTheme } from './theme-utils';
+import { clearUserTheme, loadUserTheme, saveUserTheme } from './theme-utils';
 
 export type UserTheme = 'light' | 'dark';
+const DEFAULT_THEME_USER_ID = 'guest';
 
 interface ThemeState {
   theme: UserTheme;
@@ -18,6 +19,9 @@ interface ThemeState {
  */
 export const useThemeStore = create<ThemeState>((set, get) => {
   const isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
+  const resolveUserId = (userId?: string) => userId || DEFAULT_THEME_USER_ID;
+  const isUserTheme = (value: string | null): value is UserTheme =>
+    value === 'light' || value === 'dark';
 
   const getSystemTheme = (): UserTheme => {
     if (
@@ -32,11 +36,10 @@ export const useThemeStore = create<ThemeState>((set, get) => {
 
   const readStoredTheme = (userId: string): UserTheme | null => {
     if (!isBrowser) return null;
-    userId = userId || 'guest';
 
     try {
       const stored = loadUserTheme(userId);
-      return stored === 'light' || stored === 'dark' ? stored : null;
+      return isUserTheme(stored) ? stored : null;
     } catch {
       return null;
     }
@@ -52,7 +55,6 @@ export const useThemeStore = create<ThemeState>((set, get) => {
 
   const saveTheme = (theme: UserTheme, userId: string) => {
     if (!isBrowser) return;
-    userId = userId || 'guest';
 
     try {
       saveUserTheme(theme, userId);
@@ -61,22 +63,22 @@ export const useThemeStore = create<ThemeState>((set, get) => {
     }
   };
 
-  const initialTheme: UserTheme = readStoredTheme('guest') ?? getSystemTheme();
+  const initialTheme: UserTheme = readStoredTheme(DEFAULT_THEME_USER_ID) ?? getSystemTheme();
   applyTheme(initialTheme);
 
   return {
     theme: initialTheme,
     loadTheme: (userId?: string) => {
-      const resolvedUserId = userId || 'guest';
+      const resolvedUserId = resolveUserId(userId);
       const storedTheme = readStoredTheme(resolvedUserId) ?? getSystemTheme();
       applyTheme(storedTheme);
       set({ theme: storedTheme });
     },
     clearTheme: (userId?: string) => {
-      const resolvedUserId = userId || 'guest';
+      const resolvedUserId = resolveUserId(userId);
       if (!isBrowser) return;
       try {
-        localStorage.removeItem(`theme_${resolvedUserId}`);
+        clearUserTheme(resolvedUserId);
       } catch {
         // Ignore storage failures (e.g., blocked storage)
       }
@@ -85,7 +87,7 @@ export const useThemeStore = create<ThemeState>((set, get) => {
       set({ theme: fallbackTheme });
     },
     chooseTheme: (newTheme: UserTheme, userId?: string) => {
-      const resolvedUserId = userId || 'guest';
+      const resolvedUserId = resolveUserId(userId);
       if (newTheme === get().theme) {
         applyTheme(newTheme);
         return;
