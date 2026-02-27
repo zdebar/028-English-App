@@ -44,7 +44,7 @@ export function useArray<T>(fetchFunction: () => Promise<T[]>): UseArrayResult<T
       try {
         const result = await fetchFunction();
         if (!isActive) return;
-        setCurrentIndex(result.length > 0 ? 0 : null);
+        setCurrentIndex(null);
         setData(result);
         setError(null);
       } catch (error) {
