@@ -1,7 +1,7 @@
 import { useKey } from '@/features/key-listener/use-key';
 import { useOverlayStore } from './use-overlay-store';
 import { KEYBOARD_LISTENERS } from '@/config/keyboard-listeners.config';
-import type { JSX } from 'react';
+import { useCallback, type JSX } from 'react';
 
 /**
  * Overlay mask component covering the entire screen.
@@ -10,13 +10,17 @@ import type { JSX } from 'react';
  * @return {JSX.Element} The rendered overlay mask element.
  */
 export default function OverlayMask(): JSX.Element {
-  const close = useOverlayStore((state) => state.closeOverlay);
-  useKey({ onKeyPress: close, keys: KEYBOARD_LISTENERS.Exit });
+  const closeOverlay = useOverlayStore((state) => state.closeOverlay);
+  const handleClose = useCallback(() => {
+    closeOverlay();
+  }, [closeOverlay]);
+
+  useKey({ onKeyPress: handleClose, keys: KEYBOARD_LISTENERS.Exit });
 
   return (
     <div
       className="bg-overlay z-overlay pointer-events-auto fixed inset-0 top-0"
-      onClick={close}
+      onClick={handleClose}
       role="button"
       tabIndex={0}
     />

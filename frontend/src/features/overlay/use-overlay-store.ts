@@ -7,6 +7,8 @@ interface OverlayState {
   closeOverlay: () => void;
 }
 
+type OverlayCloseCallback = (() => void) | undefined;
+
 /**
  * A Zustand store hook for managing overlay state in the application.
  *
@@ -24,21 +26,22 @@ interface OverlayState {
 export const useOverlayStore = create<OverlayState>()(
   devtools(
     (set, get) => {
-      let onCloseOverlayCallback: (() => void) | undefined = undefined;
+      let onCloseOverlayCallback: OverlayCloseCallback = undefined;
 
       return {
         isOverlayOpen: false,
-        openOverlay: (callback) => {
-          onCloseOverlayCallback = callback;
+        openOverlay: (closeCallback) => {
+          onCloseOverlayCallback = closeCallback;
           set({ isOverlayOpen: true });
         },
         closeOverlay: () => {
           if (!get().isOverlayOpen) return;
+
           set({ isOverlayOpen: false });
-          if (onCloseOverlayCallback) {
-            onCloseOverlayCallback();
-            onCloseOverlayCallback = undefined;
-          }
+
+          const closeCallback = onCloseOverlayCallback;
+          onCloseOverlayCallback = undefined;
+          closeCallback?.();
         },
       };
     },

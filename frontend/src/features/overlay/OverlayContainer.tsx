@@ -14,8 +14,5 @@ import type { JSX } from 'react';
  */
 export default function OverlayContainer(): JSX.Element | null {
   const isOverlayOpen = useOverlayStore((state) => state.isOverlayOpen);
-
-  if (!isOverlayOpen) return null;
-
-  return <OverlayMask />;
+  return isOverlayOpen ? <OverlayMask /> : null;
 }

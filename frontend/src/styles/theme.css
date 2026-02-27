@@ -30,7 +30,7 @@
   /** other colors **/
   --color-help: white;
   --color-indicator: green;
-  --color-overlay: rgba(0, 0, 0, 0.25);
+  --color-overlay: rgba(0, 0, 0, 0.4);
   --color-not-revealed-dark: #1a5c82;
 
   /** progress bar colors **/
