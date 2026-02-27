@@ -29,42 +29,23 @@ export const useToastStore = create<ToastState>((set) => ({
   timeoutId: null,
   showToast: (message, type = 'info') => {
     set((state) => {
-      // Clear any existing timeout
       if (state.timeoutId !== null) {
         clearTimeout(state.timeoutId);
       }
 
-      // Set a new timeout
       const timeoutId = window.setTimeout(() => {
-        set((current) => ({
-          ...current,
-          visible: false,
-          timeoutId: null,
-        }));
+        set({ visible: false, timeoutId: null });
       }, config.toast.duration);
 
-      // Update the toast state
-      return {
-        ...state,
-        message,
-        type,
-        visible: true,
-        timeoutId,
-      };
+      return { message, type, visible: true, timeoutId };
     });
   },
   hideToast: () =>
     set((state) => {
-      // Clear any existing timeout
       if (state.timeoutId !== null) {
         clearTimeout(state.timeoutId);
       }
 
-      // Hide the toast
-      return {
-        ...state,
-        visible: false,
-        timeoutId: null,
-      };
+      return { visible: false, timeoutId: null };
     }),
 }));
