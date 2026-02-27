@@ -17,8 +17,9 @@ export default function ResetAllProgressButton({ className }: { className?: stri
   const showToast = useToastStore((state) => state.showToast);
 
   const handleReset = async () => {
+    if (!userId) return;
+
     try {
-      if (!userId) return;
       await UserItem.resetAllUserItems(userId);
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (error) {

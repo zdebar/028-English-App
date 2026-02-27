@@ -17,8 +17,9 @@ export default function SignoutButton({ className }: { className?: string }): JS
   const showToast = useToastStore((state) => state.showToast);
 
   const handleSignout = async () => {
+    if (!userId) return;
+
     try {
-      if (!userId) return;
       await handleLogout();
       showToast(TEXTS.signoutSuccess, 'success');
     } catch (error) {
