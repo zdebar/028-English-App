@@ -66,7 +66,7 @@ export default function PracticeCard() {
   }, [playAudio, audioDisabled, isCzToEn, audioLoading, showDirectionChange, currentItem]);
 
   if (!currentItem) {
-    return <DelayedMessage text="Žádné položky k procvičování" timeDelay={100} />;
+    return <DelayedMessage text="Žádné položky k procvičování" />;
   }
 
   const handleReveal = () => {

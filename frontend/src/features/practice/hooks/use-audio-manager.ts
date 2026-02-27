@@ -10,53 +10,62 @@ export function useAudioManager(audio: string | null) {
   const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
-    let url: string | null = null;
-    let unmounted = false;
-    let loadingTimeout: ReturnType<typeof setTimeout> | null = null;
+    let objectUrl: string | null = null;
+    let isDisposed = false;
 
-    // Start delayed loading indicator
-    loadingTimeout = setTimeout(() => {
-      if (!unmounted) setLoading(true);
-    }, 250);
+    setLoading(true);
 
     const loadAudio = async () => {
       if (!audio) {
         audioRef.current = null;
+        setAudioError(true);
+        setIsPlaying(false);
+        if (!isDisposed) {
+          setLoading(false);
+        }
         return;
       }
+
       try {
         const audioRecord = await AudioRecord.getAudio(audio);
         if (!audioRecord?.audioBlob) throw new Error('Audio not found');
-        url = URL.createObjectURL(audioRecord.audioBlob);
-        if (!unmounted) {
-          const audioElement = new Audio(url);
+
+        objectUrl = URL.createObjectURL(audioRecord.audioBlob);
+        if (!isDisposed) {
+          const audioElement = new Audio(objectUrl);
           audioElement.volume = volumeRef.current;
-          audioRef.current = audioElement;
           audioElement.addEventListener('ended', () => setIsPlaying(false));
+          audioRef.current = audioElement;
           setAudioError(false);
         }
       } catch (error) {
-        if (!unmounted) {
+        if (!isDisposed) {
           audioRef.current = null;
+          setIsPlaying(false);
           setAudioError(true);
         }
         errorHandler(`Audio Manager Error`, error);
       } finally {
-        if (loadingTimeout) clearTimeout(loadingTimeout);
-        setLoading(false);
+        if (!isDisposed) {
+          setLoading(false);
+        }
       }
     };
 
     loadAudio();
 
     return () => {
-      unmounted = true;
+      isDisposed = true;
+
       if (audioRef.current) {
+        audioRef.current.removeEventListener('ended', () => setIsPlaying(false));
         audioRef.current.pause();
         audioRef.current = null;
       }
-      setAudioError(false);
-      if (url) URL.revokeObjectURL(url);
+
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
     };
   }, [audio]);
 
