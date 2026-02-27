@@ -11,10 +11,11 @@ export function useGrammar() {
   const showToast = useToastStore((state) => state.showToast);
 
   const handleGrammar = useCallback(
-    async (grammar_id: number | null) => {
-      if (!grammar_id) return;
+    async (grammarId: number | null) => {
+      if (typeof grammarId !== 'number') return;
+
       try {
-        const grammar = await Grammar.getGrammarById(grammar_id);
+        const grammar = await Grammar.getGrammarById(grammarId);
         setGrammarData(grammar);
         setGrammarVisible(true);
       } catch (error) {
@@ -25,7 +26,9 @@ export function useGrammar() {
     [showToast],
   );
 
-  const closeGrammar = () => setGrammarVisible(false);
+  const closeGrammar = useCallback(() => {
+    setGrammarVisible(false);
+  }, []);
 
   return {
     grammarVisible,
