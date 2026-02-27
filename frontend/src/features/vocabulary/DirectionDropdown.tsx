@@ -43,7 +43,7 @@ export default function DirectionDropdown<T>({
   }, [options]);
 
   return (
-    <div className={`centered ${className} border-none`}>
+    <div className={`centered border-none ${className}`}>
       <label htmlFor="direction-dropdown" className="sr-only">
         {TEXTS.translationDirection}
       </label>

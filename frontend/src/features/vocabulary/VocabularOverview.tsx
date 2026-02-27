@@ -2,12 +2,14 @@ import DelayedMessage from '@/components/UI/DelayedMessage';
 import config from '@/config/config';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { useFetch } from '@/hooks/use-fetch';
 import type { UserItemLocal } from '@/types/local.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import VocabularyDetailCard from './VocabularyDetailCard';
 import VocabularyList from './VocabularyList';
 import { useNavigate } from 'react-router-dom';
+import { useArray } from '@/hooks/use-array';
+import type { DisplayField } from './vocabulary.utils';
+import { filterAndSortWords } from './vocabulary.utils';
 
 /**
  * VocabularyOverview component
@@ -23,54 +25,36 @@ export default function VocabularyOverview() {
     return UserItem.getUserStartedVocabulary(userId);
   }, [userId]);
 
-  const { data: words, error, loading, reload } = useFetch<UserItemLocal[]>(fetchVocabulary);
+  const {
+    data: words,
+    currentIndex,
+    setCurrentIndex,
+    error,
+    loading,
+    reload,
+  } = useArray<UserItemLocal>(fetchVocabulary);
 
   const [visibleCount, setVisibleCount] = useState(config.vocabulary.itemsPerPage);
-  const [cardVisible, setCardVisible] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
-  const [displayField, setDisplayField] = useState<'czech' | 'english'>('czech');
+  const [displayField, setDisplayField] = useState<DisplayField>('czech');
 
-  const filteredWords = useMemo(() => {
-    if (!words) return [];
+  const filteredWords = useMemo(
+    () => filterAndSortWords(words, searchTerm, displayField),
+    [words, searchTerm, displayField],
+  );
 
-    const normalizedSearch = searchTerm.trim().toLowerCase();
-    const normalizedWords = words
-      .filter((item) => {
-        const value = (item[displayField] ?? '').toLowerCase();
-        return normalizedSearch.length === 0 ? true : value.startsWith(normalizedSearch);
-      })
-      .sort((a, b) => {
-        const aValue = (a[displayField] ?? '').toLowerCase();
-        const bValue = (b[displayField] ?? '').toLowerCase();
-        return aValue.localeCompare(bValue);
-      });
-
-    return normalizedWords;
-  }, [words, searchTerm, displayField]);
-
-  const selectedWord =
-    currentIndex >= 0 && currentIndex < filteredWords.length ? filteredWords[currentIndex] : null;
+  const selectedWord = currentIndex == null ? null : (filteredWords[currentIndex] ?? null);
 
   useEffect(() => {
     setVisibleCount(config.vocabulary.itemsPerPage);
-    setCurrentIndex(0);
   }, [searchTerm, displayField]);
-
-  useEffect(() => {
-    if (!cardVisible) return;
-    if (!selectedWord) {
-      setCardVisible(false);
-      setCurrentIndex(0);
-    }
-  }, [cardVisible, selectedWord]);
 
   const handleClearUserItem = async () => {
     const itemId = selectedWord?.item_id;
     if (typeof itemId === 'number' && userId) {
       await UserItem.resetUserItemById(userId, itemId);
       reload();
-      setCardVisible(false);
+      setCurrentIndex(null);
     }
   };
 
@@ -80,7 +64,7 @@ export default function VocabularyOverview() {
 
   return (
     <>
-      {!cardVisible ? (
+      {currentIndex === null ? (
         <VocabularyList
           filteredWords={filteredWords}
           visibleCount={visibleCount}
@@ -91,7 +75,6 @@ export default function VocabularyOverview() {
           setVisibleCount={setVisibleCount}
           onSelect={(index) => {
             setCurrentIndex(index);
-            setCardVisible(true);
           }}
           error={error}
           onClose={() => navigate('/profile')}
@@ -99,7 +82,7 @@ export default function VocabularyOverview() {
       ) : (
         <VocabularyDetailCard
           selectedWord={selectedWord}
-          onClose={() => setCardVisible(false)}
+          onClose={() => setCurrentIndex(null)}
           onReset={handleClearUserItem}
         />
       )}
