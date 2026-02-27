@@ -29,17 +29,37 @@ export default function BlockBar({
   levelName = '',
   divisions = 5,
   lessonCount = 100,
-  maxCount = 100,
+  maxCount,
   className = '',
 }: BlockBarProps) {
+  // Ensure lessonCount is at least 1
   const safeLesson = Math.max(lessonCount, 1);
-  const safeTotal = Math.max(maxCount, safeLesson);
+  // If maxCount is not provided, use safeLesson
+  const safeTotal = typeof maxCount === 'number' ? Math.max(maxCount, safeLesson) : safeLesson;
 
+  // Calculate bar width as percentage
   const barWidth = (safeLesson / safeTotal) * 100;
 
-  // Width calculation
-  const previousWidth = (previousCount / safeLesson) * barWidth;
-  const todayWidth = (todayCount / safeLesson) * barWidth;
+  // Calculate progress widths
+  const previousWidth = safeLesson > 0 ? (previousCount / safeLesson) * barWidth : 0;
+  const todayWidth = safeLesson > 0 ? (todayCount / safeLesson) * barWidth : 0;
+
+  // Helper for rendering division lines
+  const renderDivisions = () => {
+    const stepPercent = Math.min(100, Math.max(1, divisions));
+    const lineCount = Math.floor(barWidth / stepPercent);
+    return Array.from({ length: lineCount }, (_, i) => {
+      const position = (i + 1) * stepPercent;
+      if (position > barWidth) return null;
+      return (
+        <div
+          key={position}
+          className="border-divisions absolute top-0 z-15 h-full border-l"
+          style={{ left: `${position}%` }}
+        ></div>
+      );
+    });
+  };
 
   return (
     <div className="h-attribute relative w-full">
@@ -72,23 +92,7 @@ export default function BlockBar({
         </div>
       </div>
       {/* Divisions */}
-      {(() => {
-        const stepPercent = Math.min(100, Math.max(1, divisions || 0));
-        const lineCount = Math.floor(barWidth / stepPercent);
-        return Array.from({ length: lineCount }, (_, i) => {
-          const position = (i + 1) * stepPercent;
-          if (position > barWidth) {
-            return null;
-          }
-          return (
-            <div
-              key={position}
-              className="border-divisions absolute top-0 z-15 h-full border-l"
-              style={{ left: `${position}%` }}
-            ></div>
-          );
-        });
-      })()}
+      {renderDivisions()}
     </div>
   );
 }

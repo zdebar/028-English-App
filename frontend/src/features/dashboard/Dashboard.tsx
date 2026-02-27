@@ -1,5 +1,5 @@
 import { TEXTS } from '@/locales/cs';
-import Blockbar from '@/features/dashboard/BlockBar';
+import BlockBar from '@/features/dashboard/BlockBar';
 import { useUserStore } from './use-user-store';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
@@ -21,37 +21,31 @@ export default function Dashboard({ className = '' }: DashboardProps) {
   const levelsOverview = useUserStore((state) => state.userStats?.levelsOverview);
 
   const lessonsInProgress = getInProgressLessons(
-    levelsOverview || [],
+    Array.isArray(levelsOverview) ? levelsOverview : [],
     mastered ? 'mastered' : 'started',
   );
-  const maxTotalCount = Math.max(...lessonsInProgress.map((lesson) => lesson.totalCount), 1);
+  const maxTotalCount =
+    lessonsInProgress.length > 0
+      ? Math.max(...lessonsInProgress.map((lesson) => lesson.totalCount), 1)
+      : 1;
 
   return (
     <div className={`min-w-card relative mx-auto mb-12 flex w-full flex-col gap-1 ${className}`}>
-      {lessonsInProgress?.map(
-        ({
-          lesson_id,
-          lesson_name,
-          level_name,
-          startedCount,
-          startedTodayCount,
-          masteredCount,
-          masteredTodayCount,
-          totalCount,
-        }) => (
-          <Blockbar
-            key={lesson_id}
-            lessonName={lesson_name!}
-            levelName={level_name!}
-            previousCount={
-              mastered ? masteredCount - masteredTodayCount : startedCount - startedTodayCount
-            }
-            todayCount={mastered ? masteredTodayCount : startedTodayCount}
-            lessonCount={totalCount}
-            maxCount={maxTotalCount}
-          />
-        ),
-      )}
+      {lessonsInProgress.map((lesson) => (
+        <BlockBar
+          key={lesson.lesson_id}
+          lessonName={lesson.lesson_name ?? ''}
+          levelName={lesson.level_name ?? ''}
+          previousCount={
+            mastered
+              ? (lesson.masteredCount ?? 0) - (lesson.masteredTodayCount ?? 0)
+              : (lesson.startedCount ?? 0) - (lesson.startedTodayCount ?? 0)
+          }
+          todayCount={mastered ? (lesson.masteredTodayCount ?? 0) : (lesson.startedTodayCount ?? 0)}
+          lessonCount={lesson.totalCount ?? 1}
+          maxCount={maxTotalCount}
+        />
+      ))}
       <HelpButton className="right-0 -bottom-14.5" />
       <HelpText className="right-0 -bottom-6">
         {mastered ? TEXTS.masteredTodayHint : TEXTS.startedTodayHint}

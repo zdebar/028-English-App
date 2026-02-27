@@ -67,19 +67,26 @@ export function getInProgressLessons(
   const countKey = mode === 'mastered' ? 'masteredCount' : 'startedCount';
   const todayKey = mode === 'mastered' ? 'masteredTodayCount' : 'startedTodayCount';
 
-  const allLessons = levelsOverview ? levelsOverview.flatMap((level: any) => level.lessons) : [];
-  const nextZeroLessonId = allLessons
-    .filter((lesson) => lesson[countKey] === 0)
-    .reduce(
-      (minLessonId, lesson) =>
-        minLessonId === null || lesson.lesson_id! < minLessonId ? lesson.lesson_id! : minLessonId,
-      null as number | null,
-    );
-  const lessons = allLessons.filter(
+  const allLessons = Array.isArray(levelsOverview)
+    ? levelsOverview.flatMap((level: LevelsOverview) =>
+        Array.isArray(level.lessons) ? level.lessons : [],
+      )
+    : [];
+
+  let nextZeroLessonId: number | null = null;
+  for (const lesson of allLessons) {
+    if (
+      (lesson as any)[countKey] === 0 &&
+      (nextZeroLessonId === null || lesson.lesson_id! < nextZeroLessonId)
+    ) {
+      nextZeroLessonId = lesson.lesson_id!;
+    }
+  }
+
+  return allLessons.filter(
     (lesson: any) =>
       lesson[todayKey] > 0 ||
       (lesson[countKey] > 0 && lesson[countKey] !== lesson.totalCount) ||
       (nextZeroLessonId != null && lesson.lesson_id === nextZeroLessonId),
   );
-  return lessons;
 }

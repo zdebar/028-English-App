@@ -43,8 +43,9 @@ export const useUserStore = create<UserState>((set, get) => {
         const levelsOverview = await UserItem.getLevelsOverview(userId);
 
         const stats: UserStats = {
-          levelsOverview: levelsOverview || null,
-          practiceCountToday: todayScore?.item_count || 0,
+          levelsOverview: Array.isArray(levelsOverview) ? levelsOverview : [],
+          practiceCountToday:
+            typeof todayScore?.item_count === 'number' ? todayScore.item_count : 0,
         };
 
         localStorage.setItem(getUserStatsKey(userId), JSON.stringify(stats));
