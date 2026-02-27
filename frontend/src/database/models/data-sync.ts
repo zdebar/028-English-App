@@ -12,7 +12,7 @@ import {
   getPartialSyncTime,
   setFullSyncTime,
   setPartialSyncTime,
-} from '@/components/utils/sync-time';
+} from '@/database/sync-time.utils';
 import { TEXTS } from '@/locales/cs';
 
 /**

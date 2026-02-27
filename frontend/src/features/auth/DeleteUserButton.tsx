@@ -10,7 +10,7 @@ import ButtonWithModal from '../modal/ButtonWithModal';
 import { errorHandler } from '../logging/error-handler';
 import { useThemeStore } from '../theme/use-theme';
 import { useUserStore } from '../dashboard/use-user-store';
-import { clearSyncTimes } from '@/components/utils/sync-time';
+import { clearSyncTimes } from '@/database/sync-time.utils';
 
 /**
  * DeleteUserButton component for deleting the current user's account.
