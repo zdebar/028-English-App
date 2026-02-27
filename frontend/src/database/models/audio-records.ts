@@ -142,34 +142,4 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
 
     return orphaned.length;
   }
-
-  /**
-   * Fetches and stores missing audio files that are expected but not yet in the database.
-   *
-   * @returns A promise that resolves when all fetch attempts (successful or failed) are complete
-   * @throws Logs errors for any audio files that fail to fetch, but continues processing remaining files.
-   */
-  static async fetchMissingAudioFiles(): Promise<void> {
-    const existingFilenames = await db.audio_records.toCollection().primaryKeys();
-    const allAudio = await db.user_items.toCollection().toArray();
-    const expectedAudio = Array.from(
-      new Set(allAudio.map((item) => item.audio).filter((audio): audio is string => !!audio)),
-    );
-
-    const existingSet = new Set(existingFilenames);
-    const expectedSet = new Set(expectedAudio);
-
-    const missing = Array.from(expectedSet).filter((name) => !existingSet.has(name));
-
-    await Promise.all(
-      missing.slice(0, 6).map(async (audioName) => {
-        try {
-          // await this.fetchAudioFile(audioName);
-          infoHandler(`Fetched missing audio: ${audioName}`);
-        } catch (error) {
-          errorHandler(`Failed to fetch missing audio: ${audioName}`, error);
-        }
-      }),
-    );
-  }
 }
