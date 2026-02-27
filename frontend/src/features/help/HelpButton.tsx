@@ -15,7 +15,7 @@ export default function HelpButton({ className = '' }: { className?: string }): 
   return (
     <button
       type="button"
-      className={`absolute p-2 ${className}`}
+      className={`absolute p-4 ${className}`}
       onClick={openHelp}
       title={TEXTS.tooltipHelp}
     >

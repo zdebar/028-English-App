@@ -7,6 +7,7 @@ export const TEXTS = {
   resetProgressSuccessToast: 'Pokrok byl úspěšně vymazán.',
   resetProgressErrorToast: 'Chyba při mazání pokroku.',
   and: 'a',
+  masteredSwitchHelp: 'přepnout naučeno / započato',
 
   // Header Tooltips
   tooltipHome: 'Domů',
@@ -35,6 +36,7 @@ export const TEXTS = {
   appDescription: 'Bez stresu. Bez přemýšlení. Jen dril.',
   guide: 'návod',
   startedTodayHint: 'dnes započato',
+  masteredTodayHint: 'dnes naučeno',
   signupHint:
     'Aplikace po přihlášení ukládá cvičební data do úložiště Vašeho prohlížeče (7.8MB). Účet je možno kdykoliv smazat, včetně všech dat.',
 
@@ -70,7 +72,8 @@ export const TEXTS = {
 
   // Levels Overview Page
   lessons: 'Lekce',
-  levelsOverviewHelp: 'naučeno / celkem položek',
+  levelsStartedHelp: 'započato / celkem položek',
+  levelsMasteredHelp: 'naučeno / celkem položek',
 
   // Grammar Overview Page
   noGrammar: 'Žádné započatá gramatika.',

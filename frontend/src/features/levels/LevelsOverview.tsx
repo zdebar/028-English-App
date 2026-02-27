@@ -17,6 +17,7 @@ import { useUserStore } from '../dashboard/use-user-store';
  */
 export default function LevelsOverview() {
   const [unpackedIndex, setUnpackedIndex] = useState<number | null>(null);
+  const [mastered, setMastered] = useState<boolean>(false);
   const levels = useUserStore((state) => state.userStats?.levelsOverview);
   const navigate = useNavigate();
 
@@ -31,6 +32,8 @@ export default function LevelsOverview() {
   if (!levels || levels.length === 0) {
     return <DelayedMessage text={TEXTS.notAvailable} />;
   }
+
+  const shownLevels = mastered ? 'masteredCount' : 'startedCount';
 
   return (
     <div className="card-width relative flex flex-col justify-start">
@@ -50,7 +53,7 @@ export default function LevelsOverview() {
                 >
                   <div className="flex w-full items-center justify-between">
                     <p>{level.level_name}</p>
-                    <GoalMetView current={level.masteredCount} goal={level.totalCount} />
+                    <GoalMetView current={level[shownLevels]} goal={level.totalCount} />
                   </div>
                 </ButtonRectangular>
                 {unpackedIndex === index && (
@@ -63,7 +66,7 @@ export default function LevelsOverview() {
                       >
                         <div className="flex w-full items-center justify-between">
                           <p>{lesson.lesson_name}</p>
-                          <GoalMetView current={lesson.masteredCount} goal={lesson.totalCount} />
+                          <GoalMetView current={lesson[shownLevels]} goal={lesson.totalCount} />
                         </div>
                       </ButtonRectangular>
                     ))}
@@ -75,8 +78,17 @@ export default function LevelsOverview() {
             <p className="p-4">{TEXTS.notAvailable}</p>
           )}
         </div>
-        <HelpText className="right-2 -bottom-4">{TEXTS.levelsOverviewHelp}</HelpText>
-        <HelpButton className="right-0 -bottom-10.5" />
+        <HelpText className="right-2 -bottom-4">
+          {mastered ? TEXTS.levelsMasteredHelp : TEXTS.levelsStartedHelp}
+        </HelpText>
+        <HelpButton className="right-0 -bottom-14" />
+        <button
+          className="notification absolute -bottom-9 left-4"
+          onClick={() => setMastered(!mastered)}
+        >
+          {mastered ? TEXTS.masteredCount : TEXTS.startedCount}
+        </button>
+        <HelpText className="-bottom-15 left-2">{TEXTS.masteredSwitchHelp}</HelpText>
       </div>
     </div>
   );

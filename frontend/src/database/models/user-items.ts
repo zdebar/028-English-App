@@ -240,6 +240,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         masteredCount:
           (prev?.masteredCount ?? 0) +
           (item.mastered_at !== config.database.nullReplacementDate ? 1 : 0),
+        masteredTodayCount:
+          (prev?.masteredTodayCount ?? 0) +
+          (getLocalDateFromUTC(item.mastered_at).startsWith(today) ? 1 : 0),
         totalCount: (prev?.totalCount ?? 0) + 1,
       });
     });
@@ -258,6 +261,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         startedCount: (prev?.startedCount ?? 0) + lesson.startedCount,
         startedTodayCount: (prev?.startedTodayCount ?? 0) + lesson.startedTodayCount,
         masteredCount: (prev?.masteredCount ?? 0) + lesson.masteredCount,
+        masteredTodayCount: (prev?.masteredTodayCount ?? 0) + lesson.masteredTodayCount,
         totalCount: (prev?.totalCount ?? 0) + lesson.totalCount,
         lessons: updatedLessons,
       });

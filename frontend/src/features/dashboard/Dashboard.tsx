@@ -3,6 +3,8 @@ import Blockbar from '@/features/dashboard/BlockBar';
 import { useUserStore } from './use-user-store';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
+import { useState } from 'react';
+import { getInProgressLessons } from './dashboard.utils';
 
 type DashboardProps = {
   className?: string;
@@ -15,45 +17,52 @@ type DashboardProps = {
  * @returns The dashboard view with lesson progress, hints, and help overlay.
  */
 export default function Dashboard({ className = '' }: DashboardProps) {
+  const [mastered, setMastered] = useState(false);
   const levelsOverview = useUserStore((state) => state.userStats?.levelsOverview);
 
-  /* Shows all lessons that:
-   *  have items started today, or
-   *  have some items started but not all, or
-   *  is the first lesson with zero items started
-   */
-  const allLessons = levelsOverview ? levelsOverview.flatMap((level) => level.lessons) : [];
-  const nextZeroStartedLessonId = allLessons
-    .filter((lesson) => lesson.startedCount === 0)
-    .reduce<
-      number | null
-    >((minLessonId, lesson) => (minLessonId === null || lesson.lesson_id! < minLessonId ? lesson.lesson_id! : minLessonId), null);
-  const lessons = allLessons.filter(
-    (lesson) =>
-      lesson.startedTodayCount > 0 ||
-      (lesson.startedCount > 0 && lesson.startedCount !== lesson.totalCount) ||
-      (nextZeroStartedLessonId != null && lesson.lesson_id === nextZeroStartedLessonId),
+  const lessonsInProgress = getInProgressLessons(
+    levelsOverview || [],
+    mastered ? 'mastered' : 'started',
   );
-
-  const maxTotalCount = Math.max(...lessons.map((lesson) => lesson.totalCount), 1);
+  const maxTotalCount = Math.max(...lessonsInProgress.map((lesson) => lesson.totalCount), 1);
 
   return (
-    <div className={`min-w-card relative mx-auto flex w-full flex-col gap-1 ${className}`}>
-      {lessons?.map(
-        ({ lesson_id, lesson_name, level_name, startedCount, startedTodayCount, totalCount }) => (
+    <div className={`min-w-card relative mx-auto mb-12 flex w-full flex-col gap-1 ${className}`}>
+      {lessonsInProgress?.map(
+        ({
+          lesson_id,
+          lesson_name,
+          level_name,
+          startedCount,
+          startedTodayCount,
+          masteredCount,
+          masteredTodayCount,
+          totalCount,
+        }) => (
           <Blockbar
             key={lesson_id}
             lessonName={lesson_name!}
             levelName={level_name!}
-            previousCount={startedCount - startedTodayCount}
-            todayCount={startedTodayCount}
+            previousCount={
+              mastered ? masteredCount - masteredTodayCount : startedCount - startedTodayCount
+            }
+            todayCount={mastered ? masteredTodayCount : startedTodayCount}
             lessonCount={totalCount}
             maxCount={maxTotalCount}
           />
         ),
       )}
-      <HelpButton className="-bottom-10.5 left-0" />
-      <HelpText className="right-2 -bottom-10">{TEXTS.startedTodayHint}</HelpText>
+      <HelpButton className="right-0 -bottom-14.5" />
+      <HelpText className="right-0 -bottom-6">
+        {mastered ? TEXTS.masteredTodayHint : TEXTS.startedTodayHint}
+      </HelpText>
+      <button
+        className="notification absolute -bottom-9 left-4"
+        onClick={() => setMastered(!mastered)}
+      >
+        {mastered ? TEXTS.masteredCount : TEXTS.startedCount}
+      </button>
+      <HelpText className="-bottom-15 left-2">{TEXTS.masteredSwitchHelp}</HelpText>
     </div>
   );
 }

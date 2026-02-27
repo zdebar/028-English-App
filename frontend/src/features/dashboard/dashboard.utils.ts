@@ -1,5 +1,5 @@
 import config from '@/config/config';
-import type { LessonsLocal } from '@/types/local.types';
+import type { LessonsOverview, LevelsOverview } from '@/types/local.types';
 
 /**
  * Calculates the items count in last started lesson before today.
@@ -52,31 +52,34 @@ export function getTodayStartedItems(previousCount: number, todayCount: number):
 }
 
 /**
- * Calculates lesson progress data.
- * @param all Started items count including today's items.
- * @param today Started items count for today.
- * @returns Array of LessonsLocal objects.
+ * Returns lessons that:
+ *  have items started today, or
+ *  have some items started but not all, or
+ *  is the first lesson with zero items started
+ *
+ * @param levelsOverview Array of levels overview
+ * @param mode "started" (default) or "mastered" - which lesson attributes to use
  */
-export function getLessonProgress(all: number, today: number): LessonsLocal[] {
-  if (all < 0 || today < 0) {
-    throw new Error("'all' and 'today' must be non-negative numbers.");
-  }
-  if (all < today) {
-    throw new Error("'all' must be greater than or equal to 'today'.");
-  }
+export function getInProgressLessons(
+  levelsOverview: LevelsOverview[],
+  mode: 'started' | 'mastered' = 'started',
+): LessonsOverview[] {
+  const countKey = mode === 'mastered' ? 'masteredCount' : 'startedCount';
+  const todayKey = mode === 'mastered' ? 'masteredTodayCount' : 'startedTodayCount';
 
-  const previousCount = getPreviousCount(all - today);
-  const lessonNumber = getLessonStarted(all - today);
-  const todayCounts = getTodayStartedItems(previousCount, today);
-
-  const result: LessonsLocal[] = todayCounts.map((todayCount, index) => {
-    const prevCount = index === 0 ? previousCount : 0;
-    return {
-      lessonId: lessonNumber + index,
-      previousCount: prevCount,
-      todayCount,
-    };
-  });
-
-  return result;
+  const allLessons = levelsOverview ? levelsOverview.flatMap((level: any) => level.lessons) : [];
+  const nextZeroLessonId = allLessons
+    .filter((lesson) => lesson[countKey] === 0)
+    .reduce(
+      (minLessonId, lesson) =>
+        minLessonId === null || lesson.lesson_id! < minLessonId ? lesson.lesson_id! : minLessonId,
+      null as number | null,
+    );
+  const lessons = allLessons.filter(
+    (lesson: any) =>
+      lesson[todayKey] > 0 ||
+      (lesson[countKey] > 0 && lesson[countKey] !== lesson.totalCount) ||
+      (nextZeroLessonId != null && lesson.lesson_id === nextZeroLessonId),
+  );
+  return lessons;
 }

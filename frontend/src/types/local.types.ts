@@ -36,6 +36,7 @@ export interface LessonsOverview {
   startedCount: number;
   startedTodayCount: number;
   masteredCount: number;
+  masteredTodayCount: number;
   totalCount: number;
 }
 
@@ -46,6 +47,7 @@ export interface LevelsOverview {
   startedCount: number;
   startedTodayCount: number;
   masteredCount: number;
+  masteredTodayCount: number;
   totalCount: number;
   lessons: LessonsOverview[];
 }
@@ -90,12 +92,6 @@ export interface MetadataLocal {
   table_name: string; // Name of the table (e.g., "user_items", "grammar")
   user_id: string; // string of the user associated with the data
   synced_at: string; // Timestamp of the last synchronization
-}
-
-export interface LessonsLocal {
-  lessonId: number;
-  previousCount: number;
-  todayCount: number;
 }
 
 export const TableName = {
