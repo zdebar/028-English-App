@@ -11,6 +11,8 @@ import { useArray } from '@/hooks/use-array';
 import type { DisplayField } from './vocabulary.utils';
 import { filterAndSortWords } from './vocabulary.utils';
 
+const INITIAL_VISIBLE_COUNT = config.vocabulary.itemsPerPage;
+
 /**
  * VocabularyOverview component
  *
@@ -34,7 +36,7 @@ export default function VocabularyOverview() {
     reload,
   } = useArray<UserItemLocal>(fetchVocabulary);
 
-  const [visibleCount, setVisibleCount] = useState(config.vocabulary.itemsPerPage);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
   const [searchTerm, setSearchTerm] = useState('');
   const [displayField, setDisplayField] = useState<DisplayField>('czech');
 
@@ -43,20 +45,29 @@ export default function VocabularyOverview() {
     [words, searchTerm, displayField],
   );
 
-  const selectedWord = currentIndex == null ? null : (filteredWords[currentIndex] ?? null);
+  const selectedWord = useMemo(
+    () => (currentIndex == null ? null : (filteredWords[currentIndex] ?? null)),
+    [currentIndex, filteredWords],
+  );
 
   useEffect(() => {
-    setVisibleCount(config.vocabulary.itemsPerPage);
+    setVisibleCount(INITIAL_VISIBLE_COUNT);
   }, [searchTerm, displayField]);
 
-  const handleClearUserItem = async () => {
-    const itemId = selectedWord?.item_id;
-    if (typeof itemId === 'number' && userId) {
-      await UserItem.resetUserItemById(userId, itemId);
-      reload();
+  useEffect(() => {
+    if (currentIndex !== null && !selectedWord) {
       setCurrentIndex(null);
     }
-  };
+  }, [currentIndex, selectedWord, setCurrentIndex]);
+
+  const handleClearUserItem = useCallback(async () => {
+    const itemId = selectedWord?.item_id;
+    if (typeof itemId !== 'number' || !userId) return;
+
+    await UserItem.resetUserItemById(userId, itemId);
+    reload();
+    setCurrentIndex(null);
+  }, [selectedWord, userId, reload, setCurrentIndex]);
 
   if (loading) {
     return <DelayedMessage />;
