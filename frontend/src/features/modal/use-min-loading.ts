@@ -15,28 +15,33 @@ export function useMinLoading(minLoadingTime: number) {
   const [minLoadingElapsed, setMinLoadingElapsed] = useState(true);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const clearTimer = useCallback(() => {
+    if (!timerRef.current) return;
+    clearTimeout(timerRef.current);
+    timerRef.current = null;
+  }, []);
+
   const setLoadingWithTimer = useCallback(
     (value: boolean) => {
       setLoading(value);
       if (!value) return;
 
       setMinLoadingElapsed(false);
-
-      if (timerRef.current) clearTimeout(timerRef.current);
+      clearTimer();
 
       timerRef.current = setTimeout(() => {
         setMinLoadingElapsed(true);
         timerRef.current = null;
       }, minLoadingTime);
     },
-    [minLoadingTime],
+    [clearTimer, minLoadingTime],
   );
 
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      clearTimer();
     };
-  }, []);
+  }, [clearTimer]);
 
   const isLoading = loading || !minLoadingElapsed;
 

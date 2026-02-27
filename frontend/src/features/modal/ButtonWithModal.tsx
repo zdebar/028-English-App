@@ -2,8 +2,8 @@ import config from '@/config/config';
 import { Modal } from '@/features/modal/Modal';
 import { useMinLoading } from '@/features/modal/use-min-loading';
 import { TEXTS } from '@/locales/cs';
-import type { JSX } from 'react';
-import { useState } from 'react';
+import type { JSX, ReactNode } from 'react';
+import { useCallback, useState } from 'react';
 
 interface ButtonModalProps {
   onConfirm?: () => Promise<void> | void;
@@ -11,7 +11,7 @@ interface ButtonModalProps {
   modalText?: string;
   disabled?: boolean;
   className?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 /**
@@ -37,34 +37,30 @@ export default function ButtonWithModal({
 }: ButtonModalProps): JSX.Element {
   const [showModal, setShowModal] = useState(false);
   const { isLoading, setIsLoading } = useMinLoading(config.buttons.minLoadingTime);
+  const isDisabled = disabled || isLoading;
 
-  const handleConfirm = async () => {
-    if (onConfirm) {
-      setIsLoading(true);
-      try {
-        await onConfirm();
-      } finally {
-        setIsLoading(false);
-      }
+  const handleConfirm = useCallback(async () => {
+    if (!onConfirm) return;
+
+    setIsLoading(true);
+    try {
+      await onConfirm();
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [onConfirm, setIsLoading]);
 
   return (
     <>
       <button
         onClick={() => setShowModal(true)}
-        disabled={disabled || isLoading}
+        disabled={isDisabled}
         className={`button-rectangular button-color ${className}`}
       >
         {children}
       </button>
       {showModal && (
-        <Modal
-          onConfirm={async () => {
-            if (onConfirm) await handleConfirm();
-          }}
-          onClose={() => setShowModal(false)}
-        >
+        <Modal onConfirm={handleConfirm} onClose={() => setShowModal(false)}>
           <p className="font-bold">{modalTitle}</p>
           <p>{modalText}</p>
         </Modal>

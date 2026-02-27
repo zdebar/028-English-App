@@ -1,13 +1,13 @@
 import { useOverlayStore } from '@/features/overlay/use-overlay-store';
 import { TEXTS } from '@/locales/cs';
-import { useEffect, type JSX } from 'react';
+import { useCallback, useEffect, type JSX, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import ButtonRectangular from '../../components/UI/buttons/ButtonRectangular';
 
 interface ModalProps {
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
   onClose: () => void;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 /**
@@ -24,6 +24,15 @@ export function Modal({ onConfirm, onClose, children }: ModalProps): JSX.Element
   const closeOverlay = useOverlayStore((state) => state.closeOverlay);
   const openOverlay = useOverlayStore((state) => state.openOverlay);
 
+  const handleCancel = useCallback(() => {
+    closeOverlay();
+  }, [closeOverlay]);
+
+  const handleConfirm = useCallback(() => {
+    void onConfirm();
+    closeOverlay();
+  }, [closeOverlay, onConfirm]);
+
   const modalRoot = document.getElementById('root');
   if (!modalRoot) return null;
 
@@ -38,21 +47,8 @@ export function Modal({ onConfirm, onClose, children }: ModalProps): JSX.Element
           {children}
         </div>
         <div className="flex gap-1">
-          <ButtonRectangular
-            onClick={() => {
-              closeOverlay();
-            }}
-          >
-            {TEXTS.cancel}
-          </ButtonRectangular>
-          <ButtonRectangular
-            onClick={() => {
-              onConfirm();
-              closeOverlay();
-            }}
-          >
-            {TEXTS.confirm}
-          </ButtonRectangular>
+          <ButtonRectangular onClick={handleCancel}>{TEXTS.cancel}</ButtonRectangular>
+          <ButtonRectangular onClick={handleConfirm}>{TEXTS.confirm}</ButtonRectangular>
         </div>
       </div>
     </div>,
