@@ -48,7 +48,12 @@ export default function VocabularyDetailCard({
 
   return (
     <div className="card-width relative flex w-full flex-col items-center justify-start">
-      <OverviewCard buttonTitle={selectedWord?.czech} onClose={onClose} handleReset={onReset}>
+      <OverviewCard
+        buttonTitle={selectedWord?.czech}
+        onClose={onClose}
+        handleReset={onReset}
+        modalTitle={TEXTS.restartItemProgress}
+      >
         <div className="flex flex-col gap-4">
           <div>
             {baseProperties.map((property) => (

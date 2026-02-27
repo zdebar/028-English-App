@@ -82,6 +82,7 @@ export const TEXTS = {
   noGrammar: 'Žádné započatá gramatika.',
   startedCount: 'započato',
   masteredCount: 'naučeno',
+  restartGrammarProgress: 'Restartovat pokrok všech položek příslušejících této gramatice',
 
   // Privacy Policy Page
   privacyPolicy: 'Zásady ochrany osobních údajů',
@@ -102,6 +103,7 @@ export const TEXTS = {
   updatedAt: 'změněno',
   nextAt: 'další',
   masteredAt: 'naučeno',
+  restartItemProgress: 'Restartovat pokrok této položky',
 
   // Profile Page
   levelsOverview: 'Přehled CEFR úrovní',
@@ -125,8 +127,8 @@ export const TEXTS = {
   resetAllProgressButtonTitle: 'Restartovat vše',
   resetAllProgressModalText: 'Opravdu chcete restartovat veškerý pokrok? Změna již nepůjde vrátit.',
 
-  // Generic Erase Progress
-  eraseProgress: 'Restartovat pokrok',
-  eraseProgressHelp: 'restartovat pokrok',
-  eraseDescription: 'Opravdu chcete restartovat pokrok? Tuto akci již nelze vrátit zpět.',
+  // Generic Restart Progress
+  restartProgress: 'Restartovat pokrok',
+  restartProgressHelp: 'restartovat pokrok',
+  restartDescription: 'Opravdu chcete restartovat pokrok? Tuto akci již nelze vrátit zpět.',
 };

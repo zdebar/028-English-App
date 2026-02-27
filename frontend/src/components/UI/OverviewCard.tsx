@@ -33,9 +33,9 @@ interface OverviewCardProps {
  */
 export default function OverviewCard({
   buttonTitle = TEXTS.notAvailable,
-  modalTitle = TEXTS.eraseProgress,
-  modalText = TEXTS.eraseDescription,
-  helpText = TEXTS.eraseProgressHelp,
+  modalTitle = TEXTS.restartProgress,
+  modalText = TEXTS.restartDescription,
+  helpText = TEXTS.restartProgressHelp,
   handleReset,
   onClose,
   className = '',

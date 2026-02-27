@@ -96,6 +96,7 @@ export default function GrammarOverview(): JSX.Element {
   return (
     <OverviewCard
       buttonTitle={currentGrammar?.name ?? TEXTS.grammarOverview}
+      modalTitle={TEXTS.restartGrammarProgress}
       onClose={() => setCurrentIndex(null)}
       handleReset={handleClearGrammarUserItems}
       className="relative"
