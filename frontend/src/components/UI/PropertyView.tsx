@@ -22,7 +22,7 @@ type PropertyViewProps = {
 export default function PropertyView({
   label,
   value,
-  classNameLabel: classNameLabel = 'w-30',
+  classNameLabel = 'w-30',
   className = '',
   classNameValue = '',
 }: PropertyViewProps): JSX.Element {
