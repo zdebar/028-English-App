@@ -1,8 +1,8 @@
 import { useHelpStore } from './use-help-store';
-import type { JSX } from 'react';
+import type { JSX, ReactNode } from 'react';
 
 interface HelpTextProps {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }
 
@@ -16,14 +16,10 @@ interface HelpTextProps {
  */
 export default function HelpText({ children, className = '' }: HelpTextProps): JSX.Element | null {
   const isHelpOpened = useHelpStore((state) => state.isHelpOpened);
+  const textClassName =
+    'font-headings text-help z-help-text pointer-events-none absolute px-2 text-xl font-bold';
 
   if (!isHelpOpened) return null;
 
-  return (
-    <div
-      className={`font-headings text-help z-help-text pointer-events-none absolute px-2 text-xl font-bold ${className}`}
-    >
-      {children}
-    </div>
-  );
+  return <div className={`${textClassName} ${className}`}>{children}</div>;
 }

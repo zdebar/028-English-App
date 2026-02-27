@@ -5,6 +5,7 @@ import { devtools } from 'zustand/middleware';
 interface HelpState {
   isHelpOpened: boolean;
   openHelp: () => void;
+  closeHelp: () => void;
 }
 
 /**
@@ -18,9 +19,14 @@ export const useHelpStore = create<HelpState>()(
   devtools(
     (set) => ({
       isHelpOpened: false,
+      closeHelp: () => {
+        set({ isHelpOpened: false });
+      },
       openHelp: () => {
         set({ isHelpOpened: true });
-        useOverlayStore.getState().openOverlay(() => set({ isHelpOpened: false }));
+        useOverlayStore.getState().openOverlay(() => {
+          set({ isHelpOpened: false });
+        });
       },
     }),
     { name: 'HelpStore' },
