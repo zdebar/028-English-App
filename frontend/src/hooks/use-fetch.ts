@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { TEXTS } from '@/locales/cs';
 import { errorHandler } from '@/features/logging/error-handler';
 
@@ -58,10 +58,10 @@ export function useFetch<T>(fetchFunction: () => Promise<T>): UseFetchResult<T> 
     };
   }, [fetchFunction, reloading]);
 
-  const reload = () => {
+  const reload = useCallback(() => {
     setLoading(true);
     setReloading(true);
-  };
+  }, []);
 
   return {
     data,

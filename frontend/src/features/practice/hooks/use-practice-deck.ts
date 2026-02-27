@@ -8,6 +8,8 @@ import { infoHandler } from '@/features/logging/info-handler';
 import { useHint } from './use-hint';
 import { useAudioManager } from './use-audio-manager';
 
+const NBSP = '\u00A0';
+
 /**
  * usePracticeDeck hook manages the practice deck and user progress for a given user.
  *
@@ -17,6 +19,8 @@ export function usePracticeDeck(userId: string) {
   // Array fetching logic
   const [array, setArray] = useState<UserItemPractice[]>([]);
   const [index, setIndex] = useState(0);
+  const [revealed, setRevealed] = useState(false);
+
   const currentItem = array[index] ?? null;
 
   const fetchPracticeDeck = useCallback(async () => {
@@ -26,20 +30,17 @@ export function usePracticeDeck(userId: string) {
 
   const { data: fetchedArray, error, reload } = useFetch<UserItemPractice[]>(fetchPracticeDeck);
 
-  useEffect(() => {
-    setArray(fetchedArray || []);
-    setIndex(0);
-    setRevealed(false);
-    resetHint();
-  }, [fetchedArray]);
-
-  // Logic states
-  const [revealed, setRevealed] = useState(false);
-
   const { czechHinted, englishHinted, resetHint, plusHint } = useHint(
     currentItem?.czech,
     currentItem?.english,
   );
+
+  useEffect(() => {
+    setArray(fetchedArray ?? []);
+    setIndex(0);
+    setRevealed(false);
+    resetHint();
+  }, [fetchedArray]);
 
   const {
     playAudio,
@@ -61,22 +62,32 @@ export function usePracticeDeck(userId: string) {
   // Ref to track user progress changes before saving
   const userProgressRef = useRef<UserItemPractice[]>([]);
 
+  const saveBufferedProgress = useCallback(
+    async (userProgress: UserItemPractice[], source: string, shouldReload: boolean = false) => {
+      if (userProgress.length === 0 || !userId) {
+        return;
+      }
+
+      try {
+        await UserItem.savePracticeDeck(userId, userProgress);
+        infoHandler(`Saved practice deck ${source} with ${userProgress.length} items.`);
+        userProgressRef.current = [];
+        if (shouldReload) {
+          reload();
+        }
+      } catch (error) {
+        errorHandler(`Failed to save practice deck ${source}`, error);
+      }
+    },
+    [userId],
+  );
+
   // Save progress on unmount
   useEffect(() => {
     return () => {
-      const userProgress = [...userProgressRef.current];
-      if (userProgress.length > 0 && userId) {
-        (async () => {
-          try {
-            await UserItem.savePracticeDeck(userId, userProgress);
-            infoHandler(`Saved practice deck on unmount with ${userProgress.length} items.`);
-          } catch (error) {
-            errorHandler('Failed to save practice deck on unmount', error);
-          }
-        })();
-      }
+      void saveBufferedProgress([...userProgressRef.current], 'on unmount');
     };
-  }, [userId]);
+  }, [saveBufferedProgress]);
 
   // Save progress to localStorage on page unload
   useEffect(() => {
@@ -106,21 +117,14 @@ export function usePracticeDeck(userId: string) {
 
       const userProgress = [...userProgressRef.current];
       if (userProgress.length >= array.length) {
-        try {
-          await UserItem.savePracticeDeck(userId, userProgress);
-          infoHandler(`Saved practice deck with ${userProgress.length} items.`);
-          userProgressRef.current = [];
-          reload();
-        } catch (error) {
-          errorHandler('Failed to update user progress:', error);
-        }
+        await saveBufferedProgress(userProgress, 'during practice', true);
       } else {
         setIndex((prev) => (array.length ? (prev + 1) % array.length : 0));
         setRevealed(false);
         resetHint();
       }
     },
-    [currentItem, array.length, reload, userId],
+    [array.length, currentItem, resetHint, saveBufferedProgress],
   );
 
   return {
@@ -137,7 +141,7 @@ export function usePracticeDeck(userId: string) {
     // Display values
     czech,
     english,
-    pronunciation: revealed ? currentItem?.pronunciation || '\u00A0' : '\u00A0',
+    pronunciation: revealed ? currentItem?.pronunciation || NBSP : NBSP,
     audio: currentItem?.audio ?? null,
     audioDisabled,
     showDirectionChange,
