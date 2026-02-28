@@ -9,7 +9,7 @@ vi.mock('@/config/config', () => ({
 }));
 
 import {
-  getLessonProgress,
+  getInProgressLessons,
   getLessonStarted,
   getPreviousCount,
   getTodayStartedItems,
@@ -43,24 +43,61 @@ describe('dashboard.utils', () => {
     });
   });
 
-  describe('getLessonProgress', () => {
-    it('returns correct lesson progress', () => {
-      expect(getLessonProgress(12, 8)).toEqual([
-        { lessonId: 1, previousCount: 4, todayCount: 1 },
-        { lessonId: 2, previousCount: 0, todayCount: 5 },
-        { lessonId: 3, previousCount: 0, todayCount: 2 },
-      ]);
-      expect(getLessonProgress(10, 10)).toEqual([
-        { lessonId: 1, previousCount: 0, todayCount: 5 },
-        { lessonId: 2, previousCount: 0, todayCount: 5 },
+  describe('getInProgressLessons', () => {
+    const levelsOverview = [
+      {
+        lessons: [
+          {
+            lesson_id: 1,
+            totalCount: 10,
+            startedCount: 0,
+            startedTodayCount: 0,
+            masteredCount: 0,
+            masteredTodayCount: 0,
+          },
+          {
+            lesson_id: 2,
+            totalCount: 10,
+            startedCount: 3,
+            startedTodayCount: 0,
+            masteredCount: 0,
+            masteredTodayCount: 0,
+          },
+          {
+            lesson_id: 3,
+            totalCount: 10,
+            startedCount: 5,
+            startedTodayCount: 1,
+            masteredCount: 2,
+            masteredTodayCount: 0,
+          },
+          {
+            lesson_id: 4,
+            totalCount: 10,
+            startedCount: 10,
+            startedTodayCount: 0,
+            masteredCount: 10,
+            masteredTodayCount: 2,
+          },
+        ],
+      },
+    ] as any;
+
+    it('returns started in-progress lessons plus first zero-started lesson', () => {
+      expect(getInProgressLessons(levelsOverview, 'started').map((x) => x.lesson_id)).toEqual([
+        1, 2, 3,
       ]);
     });
-    it('throws if all < 0 or today < 0', () => {
-      expect(() => getLessonProgress(-1, 0)).toThrow();
-      expect(() => getLessonProgress(0, -1)).toThrow();
+
+    it('returns mastered in-progress lessons plus first zero-mastered lesson', () => {
+      expect(getInProgressLessons(levelsOverview, 'mastered').map((x) => x.lesson_id)).toEqual([
+        1, 3, 4,
+      ]);
     });
-    it('throws if all < today', () => {
-      expect(() => getLessonProgress(5, 6)).toThrow();
+
+    it('returns empty array for invalid input', () => {
+      expect(getInProgressLessons(null as any)).toEqual([]);
+      expect(getInProgressLessons([])).toEqual([]);
     });
   });
 });
