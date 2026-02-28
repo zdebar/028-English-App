@@ -23,7 +23,7 @@ vi.mock('@/database/models/user-items', () => ({
   },
 }));
 
-vi.mock('./use-hint', () => ({
+vi.mock('@/features/practice/hooks/use-hint', () => ({
   useHint: () => ({
     czechHinted: 'CZ_HINT',
     englishHinted: 'EN_HINT',
@@ -32,7 +32,7 @@ vi.mock('./use-hint', () => ({
   }),
 }));
 
-vi.mock('./use-audio-manager', () => ({
+vi.mock('@/features/practice/hooks/use-audio-manager', () => ({
   useAudioManager: () => ({
     playAudio: playAudioMock,
     setVolume: setVolumeMock,
@@ -42,11 +42,11 @@ vi.mock('./use-audio-manager', () => ({
   }),
 }));
 
-vi.mock('../logging/error-handler', () => ({
+vi.mock('@/features/logging/error-handler', () => ({
   errorHandler: vi.fn(),
 }));
 
-vi.mock('../logging/info-handler', () => ({
+vi.mock('@/features/logging/info-handler', () => ({
   infoHandler: vi.fn(),
 }));
 
