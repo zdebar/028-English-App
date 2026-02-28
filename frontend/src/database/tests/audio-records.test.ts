@@ -1,0 +1,190 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+const mocks = vi.hoisted(() => ({
+  audioGet: vi.fn(),
+  audioPut: vi.fn(),
+  audioBulkPut: vi.fn(),
+  audioBulkDelete: vi.fn(),
+  audioPrimaryKeys: vi.fn(),
+  userItemsToArray: vi.fn(),
+  dbTransaction: vi.fn(),
+  fetchStorage: vi.fn(),
+  metadataIsFetched: vi.fn(),
+  metadataMarkAsFetched: vi.fn(),
+  infoHandler: vi.fn(),
+  errorHandler: vi.fn(),
+  jszipLoadAsync: vi.fn(),
+}));
+
+vi.mock('@/config/config', () => ({
+  default: {
+    audio: {
+      audioBucketName: 'audio-bucket',
+      archiveBucketName: 'archive-bucket',
+    },
+  },
+}));
+
+vi.mock('@/database/database.utils', () => ({
+  fetchStorage: (...args: unknown[]) => mocks.fetchStorage(...args),
+}));
+
+vi.mock('@/database/models/audio-metadata', () => ({
+  default: {
+    isFetched: (...args: unknown[]) => mocks.metadataIsFetched(...args),
+    markAsFetched: (...args: unknown[]) => mocks.metadataMarkAsFetched(...args),
+  },
+}));
+
+vi.mock('@/database/models/db', () => ({
+  db: {
+    audio_records: {
+      get: (...args: unknown[]) => mocks.audioGet(...args),
+      put: (...args: unknown[]) => mocks.audioPut(...args),
+      bulkPut: (...args: unknown[]) => mocks.audioBulkPut(...args),
+      bulkDelete: (...args: unknown[]) => mocks.audioBulkDelete(...args),
+      toCollection: () => ({
+        primaryKeys: () => mocks.audioPrimaryKeys(),
+      }),
+    },
+    user_items: {
+      toCollection: () => ({
+        toArray: () => mocks.userItemsToArray(),
+      }),
+    },
+    audio_metadata: {},
+    transaction: (...args: unknown[]) => mocks.dbTransaction(...args),
+  },
+}));
+
+vi.mock('@/features/logging/info-handler', () => ({
+  infoHandler: (...args: unknown[]) => mocks.infoHandler(...args),
+}));
+
+vi.mock('@/features/logging/error-handler', () => ({
+  errorHandler: (...args: unknown[]) => mocks.errorHandler(...args),
+}));
+
+vi.mock('jszip', () => ({
+  loadAsync: (...args: unknown[]) => mocks.jszipLoadAsync(...args),
+}));
+
+import AudioRecord from '@/database/models/audio-records';
+
+describe('AudioRecord', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.dbTransaction.mockImplementation(async (...args: unknown[]) => {
+      const callback = args[args.length - 1] as () => Promise<unknown>;
+      return callback();
+    });
+  });
+
+  describe('getAudio', () => {
+    it('returns null when audioName is empty', async () => {
+      const result = await AudioRecord.getAudio('');
+
+      expect(result).toBeNull();
+      expect(mocks.audioGet).not.toHaveBeenCalled();
+    });
+
+    it('returns existing local record when present', async () => {
+      const existing = { filename: 'a.opus', audioBlob: new Blob(['cached']) };
+      mocks.audioGet.mockResolvedValue(existing);
+
+      const result = await AudioRecord.getAudio('a.opus');
+
+      expect(mocks.audioGet).toHaveBeenCalledWith('a.opus');
+      expect(mocks.fetchStorage).not.toHaveBeenCalled();
+      expect(result).toEqual(existing);
+    });
+
+    it('fetches from storage and persists when not cached', async () => {
+      const blob = new Blob(['fresh']);
+      mocks.audioGet.mockResolvedValue(undefined);
+      mocks.fetchStorage.mockResolvedValue(blob);
+
+      const result = await AudioRecord.getAudio('b.opus');
+
+      expect(mocks.fetchStorage).toHaveBeenCalledWith('audio-bucket', 'b.opus');
+      expect(mocks.audioPut).toHaveBeenCalledWith({ filename: 'b.opus', audioBlob: blob });
+      expect(result).toEqual({ filename: 'b.opus', audioBlob: blob });
+    });
+  });
+
+  describe('syncAudioData', () => {
+    it('skips archive download when already fetched', async () => {
+      mocks.metadataIsFetched.mockResolvedValue(true);
+
+      await AudioRecord.syncAudioData(['pack-1.zip', 'pack-2.zip']);
+
+      expect(mocks.metadataIsFetched).toHaveBeenCalledTimes(2);
+      expect(mocks.fetchStorage).not.toHaveBeenCalled();
+      expect(mocks.audioBulkPut).not.toHaveBeenCalled();
+      expect(mocks.metadataMarkAsFetched).not.toHaveBeenCalled();
+    });
+
+    it('downloads, extracts, stores files, and marks archive as fetched', async () => {
+      const zipBlob = new Blob(['zip']);
+      const extractedBlob = new Blob(['audio']);
+      const fileAsync = vi.fn().mockResolvedValue(extractedBlob);
+
+      mocks.metadataIsFetched.mockResolvedValue(false);
+      mocks.fetchStorage.mockResolvedValue(zipBlob);
+      mocks.jszipLoadAsync.mockResolvedValue({
+        files: {
+          'word.opus': { dir: false, async: fileAsync },
+          'folder/': { dir: true, async: vi.fn() },
+        },
+      });
+
+      await AudioRecord.syncAudioData(['pack-3.zip']);
+
+      expect(mocks.fetchStorage).toHaveBeenCalledWith('archive-bucket', 'pack-3.zip');
+      expect(mocks.audioBulkPut).toHaveBeenCalledWith([
+        { filename: 'word.opus', audioBlob: extractedBlob },
+      ]);
+      expect(mocks.metadataMarkAsFetched).toHaveBeenCalledWith('pack-3.zip');
+    });
+
+    it('logs and swallows archive sync errors', async () => {
+      const error = new Error('network error');
+      mocks.metadataIsFetched.mockResolvedValue(false);
+      mocks.fetchStorage.mockRejectedValue(error);
+
+      await expect(AudioRecord.syncAudioData(['broken-pack.zip'])).resolves.toBeUndefined();
+
+      expect(mocks.errorHandler).toHaveBeenCalledWith(
+        'Failed to sync audio archive: broken-pack.zip',
+        error,
+      );
+    });
+  });
+
+  describe('removeOrphaned', () => {
+    it('deletes orphaned audio records and returns removed count', async () => {
+      mocks.audioPrimaryKeys.mockResolvedValue(['a.opus', 'b.opus', 'c.opus']);
+      mocks.userItemsToArray.mockResolvedValue([
+        { audio: 'a.opus' },
+        { audio: '' },
+        { audio: null },
+        { audio: 'a.opus' },
+      ]);
+
+      const removedCount = await AudioRecord.removeOrphaned();
+
+      expect(mocks.audioBulkDelete).toHaveBeenCalledWith(['b.opus', 'c.opus']);
+      expect(removedCount).toBe(2);
+    });
+
+    it('returns 0 and does not delete when there are no orphaned records', async () => {
+      mocks.audioPrimaryKeys.mockResolvedValue(['a.opus']);
+      mocks.userItemsToArray.mockResolvedValue([{ audio: 'a.opus' }]);
+
+      const removedCount = await AudioRecord.removeOrphaned();
+
+      expect(mocks.audioBulkDelete).not.toHaveBeenCalled();
+      expect(removedCount).toBe(0);
+    });
+  });
+});
