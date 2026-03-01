@@ -5,9 +5,9 @@ interface GoalMetViewProps {
 
 /**
  * Displays the current progress toward a goal with color coding.
- * @param props - The component props
- * @param props.current - The current progress value
- * @param props.goal - The target goal value
+ *
+ * @param current - The current progress value
+ * @param goal - The target goal value
  * @returns A paragraph element showing "current / goal" with success styling if goal is met, error styling otherwise
  */
 export default function GoalMetView({ current, goal }: GoalMetViewProps) {
