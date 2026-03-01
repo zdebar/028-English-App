@@ -74,7 +74,7 @@ export default function Home(): JSX.Element {
       <h1 className="pt-12 pb-6">{TEXTS.appTitle}</h1>
       <p className="px-4">{TEXTS.appDescription}</p>
       <Link to="/guide">
-        <NotificationText text={TEXTS.guide} className="notification" />
+        <NotificationText text={TEXTS.guide} className="color-info" />
       </Link>
       {userId ? (
         <div className="relative flex w-full flex-col">

@@ -33,7 +33,7 @@ export default function HeaderButton({
       <span
         role="button"
         aria-disabled="true"
-        className={`button-round text-disabled-light dark:text-disabled-dark cursor-default hover:bg-inherit ${className}`}
+        className={`size-button text-disabled-light dark:text-disabled-dark flex cursor-default items-center justify-center rounded-full hover:bg-inherit ${className}`}
       >
         {children}
       </span>
@@ -43,7 +43,7 @@ export default function HeaderButton({
     <Link
       to={to}
       title={title}
-      className={`button-round hover:text-light hover:bg-button-hover ${
+      className={`size-button hover:text-light hover:bg-button-hover flex items-center justify-center rounded-full ${
         isSelected ? 'text-light bg-button-hover' : ''
       } ${className}`}
     >

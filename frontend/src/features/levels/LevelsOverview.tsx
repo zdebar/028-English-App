@@ -8,6 +8,7 @@ import GoalMetView from '@/components/UI/GoalMetView';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import { useUserStore } from '../dashboard/use-user-store';
+import NotificationText from '@/components/UI/NotificationText';
 
 const EMPTY_LEVELS: never[] = [];
 
@@ -28,7 +29,11 @@ export default function LevelsOverview() {
   };
 
   if (levels.length === 0) {
-    return <DelayedMessage text={TEXTS.notAvailable} />;
+    return (
+      <DelayedMessage>
+        <NotificationText text={TEXTS.notAvailable} />{' '}
+      </DelayedMessage>
+    );
   }
 
   const shownLevels = mastered ? 'masteredCount' : 'startedCount';
@@ -76,7 +81,7 @@ export default function LevelsOverview() {
         </HelpText>
         <HelpButton className="right-0 -bottom-14" />
         <button
-          className="notification absolute -bottom-9 left-4"
+          className="color-info absolute -bottom-9 left-4"
           onClick={() => setMastered((current) => !current)}
         >
           {mastered ? TEXTS.masteredCount : TEXTS.startedCount}

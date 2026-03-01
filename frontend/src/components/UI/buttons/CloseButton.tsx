@@ -2,6 +2,7 @@ import { useKey } from '@/features/key-listener/use-key';
 import CloseIcon from '@/components/UI/icons/CloseIcon';
 import { KEYBOARD_LISTENERS } from '@/config/keyboard-listeners.config';
 import type { ButtonHTMLAttributes, JSX } from 'react';
+import ButtonRectangular from './ButtonRectangular';
 
 interface CloseButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   onClick: () => void;
@@ -23,13 +24,13 @@ export default function CloseButton({
   useKey({ onKeyPress: onClick, keys: KEYBOARD_LISTENERS.Exit, disabledOnOverlayOpen: true });
 
   return (
-    <button
+    <ButtonRectangular
       type="button"
-      className={`button-rectangular button-color w-button grow-0 ${className}`}
+      className={`w-button grow-0 ${className}`}
       onClick={onClick}
       {...rest}
     >
       <CloseIcon />
-    </button>
+    </ButtonRectangular>
   );
 }

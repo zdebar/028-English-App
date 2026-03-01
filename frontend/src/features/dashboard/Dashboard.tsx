@@ -51,7 +51,7 @@ export default function Dashboard({ className = '' }: DashboardProps) {
         {mastered ? TEXTS.masteredTodayHint : TEXTS.startedTodayHint}
       </HelpText>
       <button
-        className="notification absolute -bottom-9 left-4"
+        className="color-info absolute -bottom-9 left-4"
         onClick={() => setMastered(!mastered)}
       >
         {mastered ? TEXTS.masteredCount : TEXTS.startedCount}

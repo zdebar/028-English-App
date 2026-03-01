@@ -14,6 +14,7 @@ import CloseButton from '@/components/UI/buttons/CloseButton';
 import PropertyView from '@/components/UI/PropertyView';
 import DelayedMessage from '@/components/UI/DelayedMessage';
 import { useArray } from '@/hooks/use-array';
+import NotificationText from '@/components/UI/NotificationText';
 
 /**
  * GrammarOverview component displays a list of started grammar topics for the user.
@@ -86,7 +87,9 @@ export default function GrammarOverview(): JSX.Element {
             </ButtonRectangular>
           ))
         ) : (
-          <DelayedMessage text={TEXTS.noGrammar} />
+          <DelayedMessage>
+            <NotificationText text={TEXTS.noGrammar} />
+          </DelayedMessage>
         )}
       </div>
     );
@@ -115,7 +118,9 @@ export default function GrammarOverview(): JSX.Element {
       {sanitizedNote ? (
         <div dangerouslySetInnerHTML={{ __html: sanitizedNote }} />
       ) : (
-        <DelayedMessage text={TEXTS.notAvailable} />
+        <DelayedMessage>
+          <NotificationText text={TEXTS.notAvailable} />
+        </DelayedMessage>
       )}
       <HelpButton className="right-0 -bottom-10.5" />
     </OverviewCard>

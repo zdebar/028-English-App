@@ -77,7 +77,7 @@ export default function App() {
         {loading && (
           <div className="pointer-events-none absolute top-0 left-1/2 z-50 w-60 -translate-x-1/2">
             <DelayedMessage>
-              <NotificationText text={TEXTS.syncLoadingText} className="notification" />
+              <NotificationText text={TEXTS.syncLoadingText} className="color-info" />
             </DelayedMessage>
           </div>
         )}

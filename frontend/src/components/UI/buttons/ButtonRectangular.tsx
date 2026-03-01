@@ -16,7 +16,11 @@ export default function ButtonRectangular({
   ...rest
 }: ButtonRectangularProps) {
   return (
-    <button type="button" className={`button-rectangular button-color ${className}`} {...rest}>
+    <button
+      type="button"
+      className={`h-button button-color flex shrink-0 grow cursor-pointer items-center justify-center font-bold tracking-wide disabled:cursor-default ${className}`}
+      {...rest}
+    >
       {children}
     </button>
   );

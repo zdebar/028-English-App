@@ -10,6 +10,8 @@ import { useNavigate } from 'react-router-dom';
 import { useArray } from '@/hooks/use-array';
 import type { DisplayField } from './vocabulary.utils';
 import { filterAndSortWords } from './vocabulary.utils';
+import NotificationText from '@/components/UI/NotificationText';
+import { TEXTS } from '@/locales/cs';
 
 const INITIAL_VISIBLE_COUNT = config.vocabulary.itemsPerPage;
 
@@ -87,7 +89,11 @@ export default function VocabularyOverview() {
   }, [navigate]);
 
   if (loading) {
-    return <DelayedMessage />;
+    return (
+      <DelayedMessage>
+        <NotificationText text={TEXTS.loadingMessage} />
+      </DelayedMessage>
+    );
   }
 
   return (
