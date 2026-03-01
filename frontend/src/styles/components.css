@@ -1,26 +1,5 @@
 @layer components {
-  /** BUTTON STYLES **/
-
-  .button-rectangular {
-    /* DELETE */
-    @apply h-button flex shrink-0 grow items-center justify-center font-bold tracking-wide;
-  }
-
-  .button-color {
-    /* SHOULD NOT HAVE POINTER EVENTS */
-    /* RENAME TO COLOR-BUTTONS */
-    @apply cursor-pointer;
-    @apply bg-button-light border-button-light;
-    @apply dark:bg-button-dark dark:border-button-dark;
-    @apply hover:brightness-103 hover:saturate-98 dark:hover:brightness-112;
-    @apply disabled:cursor-default disabled:bg-inherit disabled:hover:bg-inherit;
-  }
-
-  .button-text {
-    /* TO DELETE */
-    @apply w-40 text-left font-bold;
-  }
-
+  /** GUIDE STYLES **/
   .guide p {
     @apply py-2;
   }
@@ -45,10 +24,5 @@
 
   .card-height {
     @apply max-h-card min-h-card h-full grow;
-  }
-
-  /** TEXT STYLES **/
-  .color-info {
-    @apply text-warning-light dark:text-warning-dark;
   }
 }

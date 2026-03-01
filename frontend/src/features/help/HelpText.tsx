@@ -20,10 +20,10 @@ export default function HelpText({ children, className = '' }: HelpTextProps): J
   if (!isHelpOpened) return null;
 
   return (
-    <div
-      className={`font-headings z-help-text pointer-events-none absolute px-2 text-xl font-bold ${className}`}
+    <p
+      className={`font-headings z-help-text pointer-events-none absolute px-2 text-xl font-bold text-white ${className}`}
     >
       {children}
-    </div>
+    </p>
   );
 }

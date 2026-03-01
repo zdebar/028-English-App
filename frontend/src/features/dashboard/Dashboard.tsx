@@ -47,11 +47,11 @@ export default function Dashboard({ className = '' }: DashboardProps) {
         />
       ))}
       <HelpButton className="right-0 -bottom-14.5" />
-      <HelpText className="right-0 -bottom-6">
+      <HelpText className="right-2 -bottom-6">
         {mastered ? TEXTS.masteredTodayHint : TEXTS.startedTodayHint}
       </HelpText>
       <button
-        className="color-info absolute -bottom-9 left-4"
+        className="color-info absolute -bottom-9 left-4 cursor-pointer"
         onClick={() => setMastered(!mastered)}
       >
         {mastered ? TEXTS.masteredCount : TEXTS.startedCount}

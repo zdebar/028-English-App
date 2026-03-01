@@ -116,8 +116,8 @@ export default function PracticeCard() {
           <div className={`card-width card-height relative gap-1`}>
             {/* Item Card */}
             <div
-              className={`relative flex h-full grow flex-col items-center justify-between p-4 select-none ${
-                revealed ? 'color-audio-disabled' : 'button-color'
+              className={`relative flex h-full grow cursor-pointer flex-col items-center justify-between p-4 select-none ${
+                revealed ? 'color-audio-disabled' : 'color-button'
               } `}
               onClick={handleReveal}
               role="button"

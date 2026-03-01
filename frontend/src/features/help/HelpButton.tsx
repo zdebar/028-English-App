@@ -15,7 +15,7 @@ type HelpButtonProps = {
  */
 export default function HelpButton({ className = '' }: HelpButtonProps): JSX.Element {
   const openHelp = useHelpStore((state) => state.openHelp);
-  const buttonClassName = `absolute p-4 ${className}`;
+  const buttonClassName = `absolute p-4 cursor-pointer ${className}`;
 
   return (
     <button type="button" className={buttonClassName} onClick={openHelp} title={TEXTS.tooltipHelp}>
