@@ -56,7 +56,7 @@ export default function OverviewCard({
             onClose();
           }}
           disabled={!handleReset}
-          className="flex items-center justify-start px-4"
+          className="justify-start px-4"
         >
           {buttonTitle}
         </ModalButton>
