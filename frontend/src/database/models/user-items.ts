@@ -27,6 +27,7 @@ import UserScore from './user-scores';
 import { SupabaseError } from '@/types/error.types';
 
 const NULL_DATE = config.database.nullReplacementDate;
+const NULL_NUMBER = config.database.nullReplacementNumber;
 
 export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   item_id!: number;
@@ -461,7 +462,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const serverItems = (updatedUserItems ?? []).map((item: Partial<UserItemLocal>) => ({
       ...item,
       item_sort_order: item.item_sort_order ?? 0,
-      grammar_id: item.grammar_id ?? config.database.nullReplacementNumber,
+      grammar_id: item.grammar_id ?? NULL_NUMBER,
       started_at: item.started_at ?? NULL_DATE,
       next_at: item.next_at ?? NULL_DATE,
       mastered_at: item.mastered_at ?? NULL_DATE,
