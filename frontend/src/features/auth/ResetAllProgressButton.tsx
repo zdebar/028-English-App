@@ -2,7 +2,7 @@ import { TEXTS } from '@/locales/cs';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useToastStore } from '@/features/toast/use-toast-store';
-import ButtonWithModal from '../modal/ButtonWithModal';
+import ModalButton from '../modal/ModalButton';
 import type { JSX } from 'react';
 import { errorHandler } from '@/features/logging/error-handler';
 
@@ -29,7 +29,7 @@ export default function ResetAllProgressButton({ className }: { className?: stri
   };
 
   return (
-    <ButtonWithModal
+    <ModalButton
       modalTitle={TEXTS.resetAllProgressButtonTitle}
       modalText={TEXTS.resetAllProgressModalText}
       disabled={!userId}
@@ -37,6 +37,6 @@ export default function ResetAllProgressButton({ className }: { className?: stri
       className={className}
     >
       {TEXTS.resetAllProgressButtonTitle}
-    </ButtonWithModal>
+    </ModalButton>
   );
 }

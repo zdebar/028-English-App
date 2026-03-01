@@ -2,7 +2,7 @@ import CloseButton from '@/components/UI/buttons/CloseButton';
 import HelpText from '@/features/help/HelpText';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
-import ButtonWithModal from '@/features/modal/ButtonWithModal';
+import ModalButton from '@/features/modal/ModalButton';
 
 interface OverviewCardProps {
   buttonTitle?: string;
@@ -46,7 +46,7 @@ export default function OverviewCard({
       {/* Top Bar */}
       <div className="relative flex items-center justify-between gap-1">
         {/* Title and Reset Button */}
-        <ButtonWithModal
+        <ModalButton
           modalTitle={modalTitle}
           modalText={modalText}
           onConfirm={async () => {
@@ -59,7 +59,7 @@ export default function OverviewCard({
           className="flex items-center justify-start px-4"
         >
           {buttonTitle}
-        </ButtonWithModal>
+        </ModalButton>
         {/* Close Card Button */}
         <CloseButton onClick={onClose} />
         <HelpText className="-bottom-2 left-2">{helpText}</HelpText>

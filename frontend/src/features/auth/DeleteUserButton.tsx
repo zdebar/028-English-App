@@ -7,7 +7,7 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import { type JSX } from 'react';
-import ButtonWithModal from '../modal/ButtonWithModal';
+import ModalButton from '../modal/ModalButton';
 import { errorHandler } from '../logging/error-handler';
 import { useThemeStore } from '../theme/use-theme';
 import { useUserStore } from '../dashboard/use-user-store';
@@ -71,7 +71,7 @@ export default function DeleteUserButton({ className }: { className?: string }):
   };
 
   return (
-    <ButtonWithModal
+    <ModalButton
       modalTitle={TEXTS.deleteUserButtonTitle}
       modalText={TEXTS.deleteUserModalText}
       disabled={!userId}
@@ -79,6 +79,6 @@ export default function DeleteUserButton({ className }: { className?: string }):
       className={className}
     >
       {TEXTS.deleteUserButtonTitle}
-    </ButtonWithModal>
+    </ModalButton>
   );
 }

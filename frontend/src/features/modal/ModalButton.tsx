@@ -6,7 +6,7 @@ import { TEXTS } from '@/locales/cs';
 import type { JSX, ReactNode } from 'react';
 import { useCallback, useState } from 'react';
 
-interface ButtonModalProps {
+interface ModalButtonProps {
   onConfirm?: () => Promise<void> | void;
   modalTitle?: string;
   modalText?: string;
@@ -25,17 +25,17 @@ interface ButtonModalProps {
  * @param modalText Description to display in the confirmation modal.
  * @param disabled Whether the button is disabled.
  * @param className Additional CSS classes for custom styling.
- * @param children Content to display inside the button.
- * @return The ButtonWithModal component.
+ * @param children Content to display inside the button. Should be inline elements or text (not block elements like <p>, <div>, etc.) to ensure proper styling.
+ * @return The ModalButton component.
  */
-export default function ButtonWithModal({
+export default function ModalButton({
   onConfirm,
   modalTitle = TEXTS.modalTitle,
   modalText = TEXTS.modalText,
   disabled = false,
   children,
   className = '',
-}: ButtonModalProps): JSX.Element {
+}: ModalButtonProps): JSX.Element {
   const [showModal, setShowModal] = useState(false);
   const { isLoading, setIsLoading } = useMinLoading(config.buttons.minLoadingTime);
   const isDisabled = disabled || isLoading;

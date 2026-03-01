@@ -1,6 +1,6 @@
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { errorHandler } from '@/features/logging/error-handler';
-import ButtonWithModal from '@/features/modal/ButtonWithModal';
+import ModalButton from '@/features/modal/ModalButton';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
@@ -29,7 +29,7 @@ export default function SignoutButton({ className }: { className?: string }): JS
   };
 
   return (
-    <ButtonWithModal
+    <ModalButton
       modalTitle={TEXTS.signoutButtonTitle}
       modalText={TEXTS.signoutModalText}
       disabled={!userId}
@@ -37,6 +37,6 @@ export default function SignoutButton({ className }: { className?: string }): JS
       className={className}
     >
       {TEXTS.signoutButtonTitle}
-    </ButtonWithModal>
+    </ModalButton>
   );
 }

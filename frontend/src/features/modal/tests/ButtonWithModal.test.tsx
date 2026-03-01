@@ -42,7 +42,7 @@ vi.mock('@/features/modal/Modal', () => ({
   ),
 }));
 
-import ButtonWithModal from '@/features/modal/ButtonWithModal';
+import ModalButton from '@/features/modal/ModalButton';
 
 describe('ButtonWithModal', () => {
   beforeEach(() => {
@@ -51,7 +51,7 @@ describe('ButtonWithModal', () => {
   });
 
   it('renders trigger button and opens modal on click with default text', () => {
-    render(<ButtonWithModal>Open</ButtonWithModal>);
+    render(<ModalButton>Open</ModalButton>);
 
     fireEvent.click(screen.getByRole('button', { name: 'Open' }));
 
@@ -62,9 +62,9 @@ describe('ButtonWithModal', () => {
 
   it('uses custom modal title and text', () => {
     render(
-      <ButtonWithModal modalTitle="Custom title" modalText="Custom text">
+      <ModalButton modalTitle="Custom title" modalText="Custom text">
         Open
-      </ButtonWithModal>,
+      </ModalButton>,
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Open' }));
@@ -76,7 +76,7 @@ describe('ButtonWithModal', () => {
   it('runs onConfirm and toggles loading states', async () => {
     const onConfirm = vi.fn().mockResolvedValue(undefined);
 
-    render(<ButtonWithModal onConfirm={onConfirm}>Open</ButtonWithModal>);
+    render(<ModalButton onConfirm={onConfirm}>Open</ModalButton>);
     fireEvent.click(screen.getByRole('button', { name: 'Open' }));
     fireEvent.click(screen.getByTestId('modal-confirm'));
 
@@ -88,14 +88,14 @@ describe('ButtonWithModal', () => {
   });
 
   it('disables trigger when disabled prop is true', () => {
-    render(<ButtonWithModal disabled>Open</ButtonWithModal>);
+    render(<ModalButton disabled>Open</ModalButton>);
 
     expect(screen.getByRole('button', { name: 'Open' }).hasAttribute('disabled')).toBe(true);
   });
 
   it('disables trigger when loading is active', () => {
     mocks.isLoading = true;
-    render(<ButtonWithModal>Open</ButtonWithModal>);
+    render(<ModalButton>Open</ModalButton>);
 
     expect(screen.getByRole('button', { name: 'Open' }).hasAttribute('disabled')).toBe(true);
   });
