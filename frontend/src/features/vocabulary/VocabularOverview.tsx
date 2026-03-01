@@ -24,6 +24,7 @@ export default function VocabularyOverview() {
   const userId = useAuthStore((state) => state.userId);
   const navigate = useNavigate();
 
+  // -- DATA FETCHING --
   const fetchVocabulary = useCallback(async () => {
     if (!userId) return [];
     return UserItem.getUserStartedVocabulary(userId);
@@ -38,6 +39,7 @@ export default function VocabularyOverview() {
     reload,
   } = useArray<UserItemLocal>(fetchVocabulary);
 
+  // -- WORDS FILTERING --
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
   const [searchTerm, setSearchTerm] = useState('');
   const [displayField, setDisplayField] = useState<DisplayField>('czech');
@@ -46,8 +48,6 @@ export default function VocabularyOverview() {
     () => filterAndSortWords(words, searchTerm, displayField),
     [words, searchTerm, displayField],
   );
-
-  const isDetailView = currentIndex !== null;
 
   const selectedWord = useMemo(
     () => (currentIndex == null ? null : (filteredWords[currentIndex] ?? null)),
@@ -58,18 +58,13 @@ export default function VocabularyOverview() {
     setVisibleCount(INITIAL_VISIBLE_COUNT);
   }, [searchTerm, displayField]);
 
-  useEffect(() => {
-    if (currentIndex !== null && !selectedWord) {
-      setCurrentIndex(null);
-    }
-  }, [currentIndex, selectedWord, setCurrentIndex]);
-
+  // -- HANDLERS  --
   const handleClearUserItem = useCallback(async () => {
     const itemId = selectedWord?.item_id;
     if (typeof itemId !== 'number' || !userId) return;
 
     await UserItem.resetUserItemById(userId, itemId);
-    await reload();
+    void reload();
     setCurrentIndex(null);
   }, [selectedWord, userId, reload, setCurrentIndex]);
 
@@ -98,7 +93,7 @@ export default function VocabularyOverview() {
 
   return (
     <>
-      {!isDetailView ? (
+      {currentIndex === null || !selectedWord ? (
         <VocabularyList
           filteredWords={filteredWords}
           visibleCount={visibleCount}
