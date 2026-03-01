@@ -9,6 +9,7 @@ import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import { useUserStore } from '../dashboard/use-user-store';
 import NotificationText from '@/components/UI/NotificationText';
+import TextButton from '@/components/UI/buttons/TextButton';
 
 const EMPTY_LEVELS: never[] = [];
 
@@ -19,7 +20,7 @@ const EMPTY_LEVELS: never[] = [];
  */
 export default function LevelsOverview() {
   const [unpackedIndex, setUnpackedIndex] = useState<number | null>(null);
-  const [isMastered, setIsMastered] = useState<boolean>(false);
+  const [showMastered, setShowMastered] = useState<boolean>(false);
   const levelsOverview = useUserStore((state) => state.userStats?.levelsOverview);
   const levels = levelsOverview ?? EMPTY_LEVELS;
   const navigate = useNavigate();
@@ -31,12 +32,12 @@ export default function LevelsOverview() {
   if (levels.length === 0) {
     return (
       <DelayedMessage>
-        <NotificationText text={TEXTS.notAvailable} />{' '}
+        <NotificationText text={TEXTS.notAvailable} />
       </DelayedMessage>
     );
   }
 
-  const shownLevels = isMastered ? 'masteredCount' : 'startedCount';
+  const shownLevels = showMastered ? 'masteredCount' : 'startedCount';
 
   return (
     <div className="card-width relative flex flex-col justify-start">
@@ -77,15 +78,12 @@ export default function LevelsOverview() {
           ))}
         </div>
         <HelpText className="right-2 -bottom-4">
-          {isMastered ? TEXTS.levelsMasteredHelp : TEXTS.levelsStartedHelp}
+          {showMastered ? TEXTS.levelsMasteredHelp : TEXTS.levelsStartedHelp}
         </HelpText>
         <HelpButton className="right-0 -bottom-14" />
-        <button
-          className="color-info absolute -bottom-9 left-4"
-          onClick={() => setIsMastered((current) => !current)}
-        >
-          {isMastered ? TEXTS.masteredCount : TEXTS.startedCount}
-        </button>
+        <TextButton onClick={() => setShowMastered((current) => !current)}>
+          {showMastered ? TEXTS.masteredCount : TEXTS.startedCount}
+        </TextButton>
         <HelpText className="-bottom-15 left-2">{TEXTS.masteredSwitchHelp}</HelpText>
       </div>
     </div>

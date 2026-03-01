@@ -5,6 +5,7 @@ import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import { useState } from 'react';
 import { getInProgressLessons } from './dashboard.utils';
+import TextButton from '@/components/UI/buttons/TextButton';
 
 type DashboardProps = {
   className?: string;
@@ -17,12 +18,12 @@ type DashboardProps = {
  * @returns The dashboard view with lesson progress, hints, and help overlay.
  */
 export default function Dashboard({ className = '' }: DashboardProps) {
-  const [mastered, setMastered] = useState(false);
+  const [showMastered, setShowMastered] = useState(false);
   const levelsOverview = useUserStore((state) => state.userStats?.levelsOverview);
 
   const lessonsInProgress = getInProgressLessons(
     Array.isArray(levelsOverview) ? levelsOverview : [],
-    mastered ? 'mastered' : 'started',
+    showMastered ? 'mastered' : 'started',
   );
   const maxTotalCount =
     lessonsInProgress.length > 0
@@ -37,25 +38,24 @@ export default function Dashboard({ className = '' }: DashboardProps) {
           lessonName={lesson.lesson_name ?? ''}
           levelName={lesson.level_name ?? ''}
           previousCount={
-            mastered
+            showMastered
               ? (lesson.masteredCount ?? 0) - (lesson.masteredTodayCount ?? 0)
               : (lesson.startedCount ?? 0) - (lesson.startedTodayCount ?? 0)
           }
-          todayCount={mastered ? (lesson.masteredTodayCount ?? 0) : (lesson.startedTodayCount ?? 0)}
+          todayCount={
+            showMastered ? (lesson.masteredTodayCount ?? 0) : (lesson.startedTodayCount ?? 0)
+          }
           lessonCount={lesson.totalCount ?? 1}
           maxCount={maxTotalCount}
         />
       ))}
       <HelpButton className="right-0 -bottom-14.5" />
       <HelpText className="right-2 -bottom-6">
-        {mastered ? TEXTS.masteredTodayHint : TEXTS.startedTodayHint}
+        {showMastered ? TEXTS.masteredTodayHint : TEXTS.startedTodayHint}
       </HelpText>
-      <button
-        className="color-info absolute -bottom-9 left-4 cursor-pointer"
-        onClick={() => setMastered(!mastered)}
-      >
-        {mastered ? TEXTS.masteredCount : TEXTS.startedCount}
-      </button>
+      <TextButton onClick={() => setShowMastered((current) => !current)}>
+        {showMastered ? TEXTS.masteredCount : TEXTS.startedCount}
+      </TextButton>
       <HelpText className="-bottom-15 left-2">{TEXTS.masteredSwitchHelp}</HelpText>
     </div>
   );
