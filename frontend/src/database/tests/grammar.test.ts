@@ -202,7 +202,7 @@ describe('Grammar', () => {
         ]),
       });
 
-      const result = await Grammar.getStartedGrammarListWithProgress('u1');
+      const result = await Grammar.getStartedGrammarList('u1');
 
       expect(result).toEqual([
         {
@@ -233,7 +233,7 @@ describe('Grammar', () => {
         toArray: vi.fn().mockResolvedValue([]),
       });
 
-      const result = await Grammar.getStartedGrammarListWithProgress('u1');
+      const result = await Grammar.getStartedGrammarList('u1');
 
       expect(result).toEqual([]);
     });

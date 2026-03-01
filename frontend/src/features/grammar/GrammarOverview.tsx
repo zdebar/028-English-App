@@ -5,7 +5,7 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import HelpButton from '@/features/help/HelpButton';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
-import type { GrammarWithProgress } from '@/types/local.types';
+import type { GrammarLocal } from '@/types/local.types';
 import DOMPurify from 'dompurify';
 import { useCallback, useMemo, type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -29,7 +29,7 @@ export default function GrammarOverview(): JSX.Element {
   // -- Data Fetching and Effects --
   const fetchGrammarList = useCallback(async () => {
     if (!userId) return [];
-    return Grammar.getStartedGrammarListWithProgress(userId);
+    return Grammar.getStartedGrammarList(userId);
   }, [userId]);
 
   const {
@@ -38,7 +38,7 @@ export default function GrammarOverview(): JSX.Element {
     currentItem: currentGrammar,
     reload,
     setCurrentIndex,
-  } = useArray<GrammarWithProgress>(fetchGrammarList);
+  } = useArray<GrammarLocal>(fetchGrammarList);
 
   const grammarList = grammarArray ?? [];
   const hasGrammar = grammarList.length > 0;

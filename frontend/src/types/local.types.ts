@@ -63,12 +63,6 @@ export interface GrammarLocal {
   deleted_at: string | null;
 }
 
-export interface GrammarWithProgress extends GrammarLocal {
-  startedCount: number;
-  masteredCount: number;
-  totalCount: number;
-}
-
 export interface UserScoreLocal {
   user_id: string;
   date: string;

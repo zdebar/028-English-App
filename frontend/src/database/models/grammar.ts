@@ -1,6 +1,6 @@
 import { Entity } from 'dexie';
 import type AppDB from '@/database/models/app-db';
-import type { GrammarLocal, GrammarWithProgress, UserItemLocal } from '@/types/local.types';
+import type { GrammarLocal, UserItemLocal } from '@/types/local.types';
 import { supabaseInstance } from '@/config/supabase.config';
 import { db } from '@/database/models/db';
 import config from '@/config/config';
@@ -12,7 +12,6 @@ import type { GrammarSQL } from '@/types/data.types';
 import { infoHandler } from '@/features/logging/info-handler';
 import { assertNonNegativeInteger } from '@/utils/assertions.utils';
 
-const EMPTY_PROGRESS = { startedCount: 0, masteredCount: 0, totalCount: 0 };
 const NULL_DATE = config.database.nullReplacementDate;
 
 /**
@@ -78,45 +77,14 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * @returns A promise that resolves to an array of started grammar items with progress information. Returns an empty array
    *          if the user has not started any grammar items or if no matching grammar records are found.
    */
-  static async getStartedGrammarListWithProgress(userId: string): Promise<GrammarWithProgress[]> {
+  static async getStartedGrammarList(userId: string): Promise<GrammarLocal[]> {
     if (!userId) throw new Error('userId is required');
 
     // Get unique grammar IDs for started items
     const grammarIds = await this.getStartedGrammarIds(userId);
     if (grammarIds.length === 0) return [];
 
-    const grammarIdSet = new Set(grammarIds);
-    const startedGrammar: GrammarLocal[] = await db.grammar.where('id').anyOf(grammarIds).toArray();
-
-    // Batch fetch all user items for these grammars
-    const allUserItems = await db.user_items
-      .where('user_id')
-      .equals(userId)
-      .and((item) => grammarIdSet.has(item.grammar_id))
-      .toArray();
-
-    // Aggregate progress
-    const progressMap = new Map<
-      number,
-      { startedCount: number; masteredCount: number; totalCount: number }
-    >();
-    for (const grammarId of grammarIds) {
-      progressMap.set(grammarId, { ...EMPTY_PROGRESS });
-    }
-    for (const item of allUserItems) {
-      const progress = progressMap.get(item.grammar_id);
-      if (progress) {
-        progress.totalCount += 1;
-        if (item.started_at !== NULL_DATE) progress.startedCount += 1;
-        if (item.mastered_at !== NULL_DATE) progress.masteredCount += 1;
-      }
-    }
-
-    // Combine grammar with progress
-    return startedGrammar.map((grammar) => ({
-      ...grammar,
-      ...(progressMap.get(grammar.id) ?? EMPTY_PROGRESS),
-    }));
+    return await db.grammar.where('id').anyOf(grammarIds).toArray();
   }
 
   /**
