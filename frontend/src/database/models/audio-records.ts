@@ -65,6 +65,9 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
       infoHandler(`Successfully synced audio archive: ${archiveName}`);
     } catch (error) {
       errorHandler(`Failed to sync audio archive: ${archiveName}`, error);
+      throw new Error(
+        `Failed to sync audio archive: ${archiveName} - ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 

@@ -6,6 +6,7 @@ import type { UserItemLocal } from '@/types/local.types';
 import UserItem from './models/user-items';
 import { infoHandler } from '@/features/logging/info-handler';
 import { SupabaseError } from '@/types/error.types';
+import { assertNonNegativeInteger } from '@/utils/assertions.utils';
 
 /**
  * Converts a `UserItemLocal` object to a `UserItemSQL` object, replacing specific date fields
@@ -31,6 +32,29 @@ export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
 }
 
 /**
+ * Converts a SQL/RPC user item payload to local user item shape,
+ * replacing nullable sortable/date fields with configured null-replacement values.
+ *
+ * @param sqlItem - The SQL/RPC user item payload to normalize.
+ * @returns Normalized local user item.
+ */
+export function convertSQLToLocal(sqlItem: UserItemLocal): UserItemLocal {
+  const nullReplacementDate = config.database.nullReplacementDate;
+  const nullReplacementNumber = config.database.nullReplacementNumber;
+
+  return {
+    ...sqlItem,
+    item_sort_order: sqlItem.item_sort_order ?? 0,
+    grammar_id: sqlItem.grammar_id ?? nullReplacementNumber,
+    started_at: sqlItem.started_at ?? nullReplacementDate,
+    next_at: sqlItem.next_at ?? nullReplacementDate,
+    mastered_at: sqlItem.mastered_at ?? nullReplacementDate,
+    level_sort_order: sqlItem.level_sort_order ?? null,
+    lesson_sort_order: sqlItem.lesson_sort_order ?? null,
+  } as UserItemLocal;
+}
+
+/**
  * Returns today's date in YYYY-MM-DD format.
  *
  * @returns The current date in YYYY-MM-DD format.
@@ -47,6 +71,8 @@ export function getTodayShortDate(): string {
  * @returns The local date string in 'en-CA' format ('YYYY-MM-DD').
  */
 export function getLocalDateFromUTC(date: string): string {
+  if (!date) throw new Error('Date string is required');
+
   const localDate = new Date(date);
   return localDate.toLocaleDateString('en-CA');
 }
@@ -59,6 +85,9 @@ export function getLocalDateFromUTC(date: string): string {
  * @returns Blob data or null on missing/error
  */
 export async function fetchStorage(bucketName: string, dataFile: string): Promise<Blob> {
+  if (!bucketName) throw new Error('Bucket name is required');
+  if (!dataFile) throw new Error('Data file name is required');
+
   const cacheBuster = `?t=${Date.now()}`;
   const filePath = dataFile.replace(/^\//, '') + cacheBuster;
 
@@ -82,6 +111,8 @@ export async function fetchStorage(bucketName: string, dataFile: string): Promis
  */
 export function triggerNamedEvent(eventName: string, userId: string) {
   if (!userId) throw new Error('User ID is required to trigger event.');
+  if (!eventName) throw new Error('Event name is required to trigger event.');
+
   const event = new CustomEvent(eventName, { detail: { userId } });
   window.dispatchEvent(event);
 }
@@ -92,6 +123,8 @@ export function triggerNamedEvent(eventName: string, userId: string) {
  * @param userId - The unique user identifier.
  */
 export function triggerUserItemsUpdatedEvent(userId: string) {
+  if (!userId) throw new Error('User ID is required to trigger userItemsUpdated event.');
+
   triggerNamedEvent('userItemsUpdated', userId);
 }
 
@@ -119,6 +152,8 @@ export function resetUserItem(item: UserItemLocal): void {
  * @throws Error if progress is not a positive integer.
  */
 export function getNextAt(progress: number): string {
+  assertNonNegativeInteger(progress, 'Progress must be a non-negative integer');
+
   const interval = config.srs.intervals[progress];
   if (interval == null) return config.database.nullReplacementDate;
 
@@ -154,6 +189,8 @@ export function sortOddEvenByProgress(items: UserItemLocal[]): UserItemLocal[] {
  * @throws Does not throw; errors are handled internally and logged via errorHandler
  */
 export async function restoreUnsavedFromLocalStorage(userId: string): Promise<void> {
+  if (!userId) throw new Error('User ID is required to restore unsaved progress from localStorage');
+
   const key = `practiceDeckProgress_${userId}`;
   const saved = localStorage.getItem(key);
   if (saved) {

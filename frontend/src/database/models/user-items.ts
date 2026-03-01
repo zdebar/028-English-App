@@ -14,6 +14,7 @@ import { assertNonNegativeInteger, assertPositiveInteger } from '@/utils/asserti
 
 import {
   convertLocalToSQL,
+  convertSQLToLocal,
   getLocalDateFromUTC,
   getNextAt,
   getTodayShortDate,
@@ -27,7 +28,6 @@ import UserScore from './user-scores';
 import { SupabaseError } from '@/types/error.types';
 
 const NULL_DATE = config.database.nullReplacementDate;
-const NULL_NUMBER = config.database.nullReplacementNumber;
 
 export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   item_id!: number;
@@ -459,16 +459,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       });
     }
 
-    const serverItems = (updatedUserItems ?? []).map((item: Partial<UserItemLocal>) => ({
-      ...item,
-      item_sort_order: item.item_sort_order ?? 0,
-      grammar_id: item.grammar_id ?? NULL_NUMBER,
-      started_at: item.started_at ?? NULL_DATE,
-      next_at: item.next_at ?? NULL_DATE,
-      mastered_at: item.mastered_at ?? NULL_DATE,
-      level_sort_order: item.level_sort_order ?? null,
-      lesson_sort_order: item.lesson_sort_order ?? null,
-    }));
+    const serverItems = (updatedUserItems ?? []).map((item: UserItemLocal) =>
+      convertSQLToLocal(item),
+    );
 
     const toDelete: [string, number][] = [];
     const toUpsert: UserItemLocal[] = [];
