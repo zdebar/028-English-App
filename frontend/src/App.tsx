@@ -13,7 +13,7 @@ import Practice from '@/pages/Practice';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import Vocabulary from '@/pages/Vocabulary';
 import { ROUTES } from '@/config/routes.config';
-import OverlayContainer from '@/features/overlay/OverlayContainer';
+import OverlayMask from './features/overlay/OverlayMask';
 import DelayedMessage from '@/components/UI/DelayedMessage';
 import Profile from '@/pages/Profile';
 import Guide from '@/pages/Guide';
@@ -71,7 +71,7 @@ export default function App() {
   return (
     <div className="max-w-container relative mx-auto flex min-h-screen flex-col justify-start">
       <ToastContainer />
-      <OverlayContainer />
+      <OverlayMask />
       <Header />
       <main className="relative flex grow flex-col items-center gap-4">
         {loading && (
