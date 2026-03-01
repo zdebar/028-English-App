@@ -86,12 +86,20 @@ export default function PracticeCard() {
       return;
     }
 
-    if (isCzToEn && !audioError) {
+    if (isCzToEn && !audioError && !revealed) {
       playAudio();
     }
 
     setRevealed(true);
-  }, [audioError, hideDirectionChange, isCzToEn, playAudio, setRevealed, showDirectionChange]);
+  }, [
+    audioError,
+    hideDirectionChange,
+    isCzToEn,
+    playAudio,
+    setRevealed,
+    showDirectionChange,
+    revealed,
+  ]);
 
   const handlePlayAudio = useCallback(() => {
     if (audioDisabled) return;
