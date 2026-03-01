@@ -176,9 +176,7 @@ export default function PracticeCard() {
                       {practiceCountToday} / {config.practice.dailyGoal}
                     </p>
                     <HelpText className="right-0 bottom-7.5 flex flex-col items-end">
-                      <p>
-                        {TEXTS.today} / {TEXTS.dailyGoal}
-                      </p>
+                      {TEXTS.today} / {TEXTS.dailyGoal}
                     </HelpText>
                   </div>
                 </>
