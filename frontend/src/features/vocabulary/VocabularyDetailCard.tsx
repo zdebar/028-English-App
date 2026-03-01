@@ -57,17 +57,23 @@ export default function VocabularyDetailCard({
         <div className="flex flex-col gap-4">
           <div>
             {baseProperties.map((property) => (
-              <PropertyView key={property.label} label={property.label} value={property.value} />
+              <PropertyView key={property.label} label={property.label}>
+                {property.value ?? NOT_AVAILABLE}
+              </PropertyView>
             ))}
           </div>
           <div>
             {lessonProperties.map((property) => (
-              <PropertyView key={property.label} label={property.label} value={property.value} />
+              <PropertyView key={property.label} label={property.label}>
+                {property.value ?? NOT_AVAILABLE}
+              </PropertyView>
             ))}
           </div>
           <div>
             {dateProperties.map((property) => (
-              <PropertyView key={property.label} label={property.label} value={property.value} />
+              <PropertyView key={property.label} label={property.label}>
+                {property.value ?? NOT_AVAILABLE}
+              </PropertyView>
             ))}
           </div>
         </div>

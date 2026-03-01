@@ -11,7 +11,6 @@ import { useCallback, useMemo, type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BaseButton from '@/components/UI/buttons/BaseButton';
 import CloseButton from '@/components/UI/buttons/CloseButton';
-import PropertyView from '@/components/UI/PropertyView';
 import DelayedMessage from '@/components/UI/DelayedMessage';
 import { useArray } from '@/hooks/use-array';
 import NotificationText from '@/components/UI/NotificationText';
@@ -104,17 +103,6 @@ export default function GrammarOverview(): JSX.Element {
       handleReset={handleClearGrammarUserItems}
       className="relative"
     >
-      <PropertyView
-        label={TEXTS.startedCount}
-        value={`${currentGrammar?.startedCount ?? 0} / ${currentGrammar?.totalCount ?? 0}`}
-        classNameValue="text-right w-24"
-      />
-      <PropertyView
-        label={TEXTS.masteredCount}
-        value={`${currentGrammar?.masteredCount ?? 0} / ${currentGrammar?.totalCount ?? 0}`}
-        className="pb-4"
-        classNameValue="w-24 text-right"
-      />
       {sanitizedNote ? (
         <div dangerouslySetInnerHTML={{ __html: sanitizedNote }} />
       ) : (

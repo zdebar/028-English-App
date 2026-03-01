@@ -11,6 +11,7 @@ import { useMemo, type JSX } from 'react';
 import { Link } from 'react-router-dom';
 import config from '@/config/config';
 import NotificationText from '@/components/UI/NotificationText';
+import GoalMetView from '@/components/UI/GoalMetView';
 
 /**
  * The Home component renders the main page of the application.
@@ -26,14 +27,7 @@ export default function Home(): JSX.Element {
 
   const practiceCountToday = userStats?.practiceCountToday ?? 0;
   const dailyGoal = config.practice.dailyGoal;
-  const isPracticeGoalMet = practiceCountToday >= dailyGoal;
   const userDisplayName = userFullName || userEmail;
-
-  const userStatsClassName = `${
-    isPracticeGoalMet
-      ? 'text-success-light dark:text-success-dark'
-      : 'text-error-light dark:text-error-dark'
-  } font-bold`;
 
   const authAppearance = useMemo(
     () => ({
@@ -79,12 +73,10 @@ export default function Home(): JSX.Element {
       {userId ? (
         <div className="relative flex w-full flex-col">
           <div className="px-4">
-            <PropertyView label={TEXTS.userLabel} value={userDisplayName} />
-            <PropertyView
-              label={TEXTS.userStatsLabel}
-              classNameValue={userStatsClassName}
-              value={`${practiceCountToday} / ${dailyGoal}`}
-            />
+            <PropertyView label={TEXTS.userLabel}>{userDisplayName}</PropertyView>
+            <PropertyView label={TEXTS.userStatsLabel}>
+              {GoalMetView({ current: practiceCountToday, goal: dailyGoal })}
+            </PropertyView>
           </div>
           <Dashboard className="pt-4" />
         </div>
