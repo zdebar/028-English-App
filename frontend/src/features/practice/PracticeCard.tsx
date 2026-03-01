@@ -3,26 +3,25 @@ import { useCallback, useEffect } from 'react';
 import config from '@/config/config';
 
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { usePracticeDeck } from './hooks/use-practice-deck';
 import { useUserStore } from '../dashboard/use-user-store';
+import { usePracticeDeck } from './hooks/use-practice-deck';
 
-import HelpText from '@/features/help/HelpText';
-import Indicator from '@/components/UI/Indicator';
 import DelayedMessage from '@/components/UI/DelayedMessage';
+import Indicator from '@/components/UI/Indicator';
 import HelpButton from '@/features/help/HelpButton';
+import HelpText from '@/features/help/HelpText';
 import GrammarCard from '@/features/practice/GrammarCard';
 import VolumeSlider from '@/features/practice/VolumeSlider';
 
-import HintButton from './buttons/HintButton';
-import GrammarButton from './buttons/GrammarButton';
+import NotificationText from '@/components/UI/NotificationText';
 import { TEXTS } from '@/locales/cs';
-import NotRevealedIcon from '@/components/UI/icons/NotRevealedIcon';
-import { useGrammar } from './hooks/use-grammar';
+import GrammarButton from './buttons/GrammarButton';
+import HintButton from './buttons/HintButton';
 import KnownButton from './buttons/KnownButton';
-import UnknownButton from './buttons/UnknownButton';
 import MasterItemButton from './buttons/MasterItemButton';
 import PlayAudioButton from './buttons/PlayAudioButton';
-import NotificationText from '@/components/UI/NotificationText';
+import UnknownButton from './buttons/UnknownButton';
+import { useGrammar } from './hooks/use-grammar';
 
 /**
  * PracticeCard component for interactive language practice.
@@ -138,14 +137,7 @@ export default function PracticeCard() {
                 />
               ) : (
                 <>
-                  {!revealed && (
-                    <>
-                      <div className="pointer-events-none absolute inset-0 z-10 grid place-items-center">
-                        <NotRevealedIcon className="text-light/70 dark:text-dark/70 opacity-5 mix-blend-saturation dark:opacity-2" />
-                      </div>
-                      <HelpText className="center top-4">{TEXTS.reveal}</HelpText>
-                    </>
-                  )}
+                  {!revealed && <HelpText className="center top-4">{TEXTS.reveal}</HelpText>}
                   {/** Top Bar */}
                   <div
                     id="top-bar"
