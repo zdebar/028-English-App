@@ -1,6 +1,7 @@
 import { Component, type ReactNode } from 'react';
 import { TEXTS } from '@/locales/cs';
 import { errorHandler } from '@/features/logging/error-handler';
+import NotificationText from '@/components/UI/NotificationText';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -32,7 +33,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
 
   render() {
     if (this.state.hasError) {
-      return <p className="error-warning pt-6">{TEXTS.errorBoundaryMessage}</p>;
+      return <NotificationText text={TEXTS.errorBoundaryMessage} className="pt-6" />;
     }
 
     return this.props.children;

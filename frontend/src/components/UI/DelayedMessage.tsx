@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { TEXTS } from '@/locales/cs';
 import config from '@/config/config';
 
 type DelayedMessageProps = {
-  text?: string;
+  children?: React.ReactNode;
   timeDelay?: number;
   className?: string;
 };
@@ -11,13 +10,13 @@ type DelayedMessageProps = {
 /**
  * Displays a delayed message after a specified delay.
  *
- * @param text Message to display.
+ * @param children The content to display after the delay.
  * @param timeDelay Delay before showing the message (ms).
  * @param className Optional CSS class for styling the message.
- * @returns The paragraph element with the message, or null if the delay has not yet passed.
+ * @returns The div element with the content, or null if the delay has not yet passed.
  */
 export default function DelayedMessage({
-  text = TEXTS.loadingMessage,
+  children,
   timeDelay = config.buttons.loadingMessageDelay,
   className = '',
 }: DelayedMessageProps) {
@@ -30,5 +29,5 @@ export default function DelayedMessage({
 
   if (!show) return null;
 
-  return <p className={className}>{text}</p>;
+  return <div className={className}>{children}</div>;
 }

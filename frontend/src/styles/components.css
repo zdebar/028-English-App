@@ -50,10 +50,6 @@
   }
 
   /** TEXT STYLES **/
-  .error-warning {
-    @apply font-headings text-center text-xl;
-  }
-
   .notification {
     @apply text-warning-light dark:text-warning-dark;
   }

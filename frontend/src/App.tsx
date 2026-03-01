@@ -26,6 +26,7 @@ import { TEXTS } from './locales/cs';
 import './styles/index.css';
 import { infoHandler } from './features/logging/info-handler';
 import { useThemeStore } from './features/theme/use-theme';
+import NotificationText from './components/UI/NotificationText';
 
 export default function App() {
   const [loading, setLoading] = useState(false);
@@ -75,7 +76,9 @@ export default function App() {
       <main className="relative flex grow flex-col items-center gap-4">
         {loading && (
           <div className="pointer-events-none absolute top-0 left-1/2 z-50 w-60 -translate-x-1/2">
-            <DelayedMessage text={TEXTS.syncLoadingText} className="notification error-warning" />
+            <DelayedMessage>
+              <NotificationText text={TEXTS.syncLoadingText} className="notification" />
+            </DelayedMessage>
           </div>
         )}
         <Routes>
@@ -91,7 +94,7 @@ export default function App() {
           </Route>
           <Route
             path="*"
-            element={<div className="error-warning pt-8">{TEXTS.pageNotFound}</div>}
+            element={<NotificationText text={TEXTS.pageNotFound} className="pt-8" />}
           />
         </Routes>
       </main>

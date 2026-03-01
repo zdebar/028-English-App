@@ -22,6 +22,7 @@ import KnownButton from './buttons/KnownButton';
 import UnknownButton from './buttons/UnknownButton';
 import MasterItemButton from './buttons/MasterItemButton';
 import PlayAudioButton from './buttons/PlayAudioButton';
+import NotificationText from '@/components/UI/NotificationText';
 
 /**
  * PracticeCard component for interactive language practice.
@@ -33,7 +34,12 @@ export default function PracticeCard() {
   const userStats = useUserStore((state) => state.userStats);
   const { grammarVisible, grammarData, handleGrammar, closeGrammar } = useGrammar();
 
-  if (!userId) return <DelayedMessage text={TEXTS.syncLoadingText} />;
+  if (!userId)
+    return (
+      <DelayedMessage>
+        <NotificationText text={TEXTS.syncLoadingText} />
+      </DelayedMessage>
+    );
 
   const {
     index,
@@ -94,7 +100,11 @@ export default function PracticeCard() {
   }, [audioDisabled, playAudio]);
 
   if (!currentItem) {
-    return <DelayedMessage text="Žádné položky k procvičování" />;
+    return (
+      <DelayedMessage>
+        <NotificationText text="Žádné položky k procvičování" className="notification" />
+      </DelayedMessage>
+    );
   }
 
   return (
@@ -122,9 +132,10 @@ export default function PracticeCard() {
               }}
             >
               {showDirectionChange ? (
-                <p className="error-warning my-auto">
-                  {isCzToEn ? TEXTS.directionCzToEn : TEXTS.directionEnToCz}
-                </p>
+                <NotificationText
+                  text={isCzToEn ? TEXTS.directionCzToEn : TEXTS.directionEnToCz}
+                  className="my-auto"
+                />
               ) : (
                 <>
                   {!revealed && (
@@ -148,7 +159,11 @@ export default function PracticeCard() {
                     {audioError ? (
                       <p className="px-2">{TEXTS.noAudio}</p>
                     ) : (
-                      audioLoading && <DelayedMessage text={TEXTS.loadingAudio} />
+                      audioLoading && (
+                        <DelayedMessage>
+                          <NotificationText text={TEXTS.loadingAudio} />
+                        </DelayedMessage>
+                      )
                     )}
                   </div>
                   {/** Item Data */}
