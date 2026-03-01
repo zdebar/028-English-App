@@ -6,7 +6,7 @@ import { type PracticeButtonProps } from '../practice.types';
 
 export default function GrammarButton({ onClick, disabled, children }: PracticeButtonProps) {
   return (
-    <BaseButton onClick={onClick} disabled={disabled} className="relative">
+    <BaseButton onClick={onClick} disabled={disabled} className="h-button relative">
       <BookIcon />
       <HelpText className="-top-4.5 left-4">{TEXTS.grammar}</HelpText>
       {children}

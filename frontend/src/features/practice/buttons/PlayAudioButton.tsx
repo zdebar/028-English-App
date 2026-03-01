@@ -6,7 +6,7 @@ import { type PracticeButtonProps } from '../practice.types';
 
 export default function PlayAudioButton({ onClick, disabled, children }: PracticeButtonProps) {
   return (
-    <BaseButton onClick={onClick} disabled={disabled} className="relative">
+    <BaseButton onClick={onClick} disabled={disabled} className="h-button relative">
       <PlayIcon />
       <HelpText className="-top-4.5 right-4">{TEXTS.audio}</HelpText>
       {children}
