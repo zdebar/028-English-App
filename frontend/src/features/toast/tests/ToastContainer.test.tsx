@@ -5,7 +5,7 @@ const mocks = vi.hoisted(() => ({
   message: '',
   type: 'info' as 'success' | 'error' | 'info',
   visible: false,
-  toastProps: [] as Array<{ message: string; type?: string }>,
+  toastProps: [] as Array<{ children: string; type?: string }>,
 }));
 
 vi.mock('@/features/toast/use-toast-store', () => ({
@@ -24,9 +24,9 @@ vi.mock('@/features/toast/use-toast-store', () => ({
 }));
 
 vi.mock('@/features/toast/Toast', () => ({
-  default: ({ message, type }: { message: string; type?: string }) => {
-    mocks.toastProps.push({ message, type });
-    return <div data-testid="toast">{message}</div>;
+  default: ({ children, type }: { children: string; type?: string }) => {
+    mocks.toastProps.push({ children, type });
+    return <div data-testid="toast">{children}</div>;
   },
 }));
 
@@ -57,6 +57,6 @@ describe('ToastContainer', () => {
 
     expect(screen.getByTestId('toast')).toBeTruthy();
     expect(screen.getByText('Done')).toBeTruthy();
-    expect(mocks.toastProps).toEqual([{ message: 'Done', type: 'success' }]);
+    expect(mocks.toastProps).toEqual([{ children: 'Done', type: 'success' }]);
   });
 });

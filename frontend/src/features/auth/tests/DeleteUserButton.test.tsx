@@ -92,7 +92,7 @@ vi.mock('@/features/logging/error-handler', () => ({
   errorHandler: (...args: unknown[]) => mocks.errorHandler(...args),
 }));
 
-vi.mock('../../modal/ButtonWithModal', () => ({
+vi.mock('@/features/modal/ModalButton', () => ({
   default: ({ disabled, onConfirm, children }: any) => (
     <button data-testid="button-with-modal" disabled={disabled} onClick={() => void onConfirm?.()}>
       {children}

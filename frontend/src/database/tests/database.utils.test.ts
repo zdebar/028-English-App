@@ -11,6 +11,7 @@ vi.mock('@/config/config', () => ({
   default: {
     database: {
       nullReplacementDate: '1970-01-01T00:00:00.000Z',
+      nullReplacementNumber: 0,
     },
     srs: {
       intervals: [10, 20, 30],
@@ -45,6 +46,7 @@ vi.mock('@/database/models/user-items', () => ({
 
 import {
   convertLocalToSQL,
+  convertSQLToLocal,
   fetchStorage,
   getLocalDateFromUTC,
   getNextAt,
@@ -84,6 +86,27 @@ describe('database.utils', () => {
         next_at: null,
         mastered_at: null,
       });
+    });
+  });
+
+  describe('convertSQLToLocal', () => {
+    it('fills null/undefined sortable/date fields with local null-replacement values', () => {
+      const result = convertSQLToLocal({
+        user_id: 'u1',
+        item_id: 1,
+        progress: 0,
+        updated_at: '2026-02-28T10:00:00.000Z',
+        grammar_id: null as unknown as number,
+        started_at: null as unknown as string,
+        next_at: null as unknown as string,
+        mastered_at: null as unknown as string,
+      } as any);
+
+      expect(result.grammar_id).toBe(0);
+      expect(result.started_at).toBe('1970-01-01T00:00:00.000Z');
+      expect(result.next_at).toBe('1970-01-01T00:00:00.000Z');
+      expect(result.mastered_at).toBe('1970-01-01T00:00:00.000Z');
+      expect(result.item_sort_order).toBe(0);
     });
   });
 

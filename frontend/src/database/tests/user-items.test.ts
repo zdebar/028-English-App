@@ -46,6 +46,7 @@ vi.mock('@/config/supabase.config', () => ({
 
 vi.mock('@/database/database.utils', () => ({
   convertLocalToSQL: (...args: unknown[]) => mocks.convertLocalToSQL(...args),
+  convertSQLToLocal: (item: unknown) => item,
   getLocalDateFromUTC: (value: string) => value,
   getNextAt: (...args: unknown[]) => mocks.getNextAt(...args),
   getTodayShortDate: () => '2026-02-28',
@@ -176,12 +177,11 @@ describe('UserItem', () => {
         },
       ] as any;
 
-      const ok = await UserItem.savePracticeDeck('u1', items);
+      await UserItem.savePracticeDeck('u1', items);
 
       expect(mocks.userItemsBulkPut).toHaveBeenCalledTimes(1);
       expect(mocks.addItemCount).toHaveBeenCalledWith('u1', 1);
       expect(mocks.triggerUpdatedEvent).toHaveBeenCalledWith('u1');
-      expect(ok).toBe(true);
     });
   });
 
@@ -189,21 +189,19 @@ describe('UserItem', () => {
     it('deletes records and triggers update event when items exist', async () => {
       mocks.userItemsPrimaryKeys.mockResolvedValue([1, 2, 3]);
 
-      const deleted = await UserItem.deleteAllUserItems('u1');
+      await UserItem.deleteAllUserItems('u1');
 
       expect(mocks.userItemsBulkDelete).toHaveBeenCalledWith([1, 2, 3]);
       expect(mocks.triggerUpdatedEvent).toHaveBeenCalledWith('u1');
-      expect(deleted).toBe(3);
     });
 
-    it('returns 0 and does not trigger update event when no items exist', async () => {
+    it('does not trigger update event when no items exist', async () => {
       mocks.userItemsPrimaryKeys.mockResolvedValue([]);
 
-      const deleted = await UserItem.deleteAllUserItems('u1');
+      await UserItem.deleteAllUserItems('u1');
 
       expect(mocks.userItemsBulkDelete).not.toHaveBeenCalled();
       expect(mocks.triggerUpdatedEvent).not.toHaveBeenCalled();
-      expect(deleted).toBe(0);
     });
   });
 
@@ -219,9 +217,8 @@ describe('UserItem', () => {
     it('triggers update event when reset succeeds', async () => {
       mocks.userItemsGrammarBetweenModify.mockResolvedValue(2);
 
-      const count = await UserItem.resetGrammarItems('u1', 2);
+      await UserItem.resetGrammarItems('u1', 2);
 
-      expect(count).toBe(2);
       expect(mocks.triggerUpdatedEvent).toHaveBeenCalledWith('u1');
     });
   });
@@ -235,12 +232,11 @@ describe('UserItem', () => {
       );
     });
 
-    it('returns true and triggers update event on success', async () => {
+    it('triggers update event on success', async () => {
       mocks.userItemsItemIdModify.mockResolvedValue(1);
 
-      const ok = await UserItem.resetUserItemById('u1', 10);
+      await UserItem.resetUserItemById('u1', 10);
 
-      expect(ok).toBe(true);
       expect(mocks.triggerUpdatedEvent).toHaveBeenCalledWith('u1');
     });
   });

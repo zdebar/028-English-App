@@ -25,7 +25,7 @@ vi.mock('@/features/vocabulary/vocabulary.utils', async () => {
   };
 });
 
-vi.mock('@/components/UI/buttons/ButtonRectangular', () => ({
+vi.mock('@/components/UI/buttons/BaseButton', () => ({
   default: ({ onClick, children, disabled }: any) => (
     <button data-testid="rect-btn" onClick={onClick} disabled={disabled}>
       {children}

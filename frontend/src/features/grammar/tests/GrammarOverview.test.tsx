@@ -38,7 +38,7 @@ vi.mock('@/database/models/user-items', () => ({
 
 vi.mock('@/database/models/grammar', () => ({
   default: {
-    getStartedGrammarListWithProgress: vi.fn(),
+    getStartedGrammarList: vi.fn(),
   },
 }));
 
@@ -79,7 +79,7 @@ vi.mock('@/components/UI/buttons/CloseButton', () => ({
   ),
 }));
 
-vi.mock('@/components/UI/buttons/ButtonRectangular', () => ({
+vi.mock('@/components/UI/buttons/BaseButton', () => ({
   default: ({ onClick, children }: any) => (
     <button data-testid="grammar-button" onClick={onClick}>
       {children}
@@ -88,7 +88,7 @@ vi.mock('@/components/UI/buttons/ButtonRectangular', () => ({
 }));
 
 vi.mock('@/components/UI/DelayedMessage', () => ({
-  default: ({ text }: any) => <div>{text}</div>,
+  default: ({ children }: any) => <div>{children}</div>,
 }));
 
 vi.mock('@/components/UI/PropertyView', () => ({
@@ -163,9 +163,6 @@ describe('GrammarOverview', () => {
     mocks.arrayState.currentItem = {
       id: 3,
       name: 'Articles',
-      startedCount: 4,
-      masteredCount: 1,
-      totalCount: 10,
       note: '<b>safe</b>',
     };
     mocks.sanitize.mockReturnValue('<i>sanitized</i>');
@@ -173,8 +170,6 @@ describe('GrammarOverview', () => {
     render(<GrammarOverview />);
 
     expect(screen.getByText('Articles')).toBeTruthy();
-    expect(screen.getByText('Started:4 / 10')).toBeTruthy();
-    expect(screen.getByText('Mastered:1 / 10')).toBeTruthy();
     expect(mocks.sanitize).toHaveBeenCalledWith('<b>safe</b>');
 
     fireEvent.click(screen.getByTestId('overview-close'));
@@ -186,9 +181,6 @@ describe('GrammarOverview', () => {
     mocks.arrayState.currentItem = {
       id: 8,
       name: 'Reported speech',
-      startedCount: 1,
-      masteredCount: 0,
-      totalCount: 5,
       note: null,
     };
 

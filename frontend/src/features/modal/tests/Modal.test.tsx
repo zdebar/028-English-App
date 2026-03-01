@@ -21,7 +21,7 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 
-vi.mock('../../components/UI/buttons/ButtonRectangular', () => ({
+vi.mock('../../components/UI/buttons/BaseButton', () => ({
   default: ({ onClick, children }: any) => <button onClick={onClick}>{children}</button>,
 }));
 

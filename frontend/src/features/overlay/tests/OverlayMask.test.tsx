@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   closeOverlay: vi.fn(),
   useKey: vi.fn(),
+  isOverlayOpen: true,
 }));
 
 vi.mock('@/config/keyboard-listeners.config', () => ({
@@ -17,8 +18,12 @@ vi.mock('@/features/key-listener/use-key', () => ({
 }));
 
 vi.mock('@/features/overlay/use-overlay-store', () => ({
-  useOverlayStore: (selector: (state: { closeOverlay: typeof mocks.closeOverlay }) => unknown) =>
-    selector({ closeOverlay: mocks.closeOverlay }),
+  useOverlayStore: (
+    selector: (state: {
+      closeOverlay: typeof mocks.closeOverlay;
+      isOverlayOpen: boolean;
+    }) => unknown,
+  ) => selector({ closeOverlay: mocks.closeOverlay, isOverlayOpen: mocks.isOverlayOpen }),
 }));
 
 import OverlayMask from '@/features/overlay/OverlayMask';
@@ -26,6 +31,7 @@ import OverlayMask from '@/features/overlay/OverlayMask';
 describe('OverlayMask', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.isOverlayOpen = true;
   });
 
   it('registers useKey with exit keys and close handler', () => {

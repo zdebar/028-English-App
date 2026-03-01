@@ -99,7 +99,7 @@ describe('UserScore', () => {
       vi.setSystemTime(new Date('2026-02-28T10:00:00.000Z'));
       mocks.userScoresGet.mockResolvedValue({ item_count: 2 });
 
-      const ok = await UserScore.addItemCount('u1', 3);
+      await UserScore.addItemCount('u1', 3);
 
       expect(mocks.userScoresGet).toHaveBeenCalledWith(['u1', '2026-02-28']);
       expect(mocks.userScoresPut).toHaveBeenCalledWith({
@@ -108,7 +108,6 @@ describe('UserScore', () => {
         item_count: 5,
         updated_at: '2026-02-28T10:00:00.000Z',
       });
-      expect(ok).toBe(true);
     });
   });
 
@@ -144,13 +143,12 @@ describe('UserScore', () => {
   });
 
   describe('deleteAllUserScores', () => {
-    it('deletes all scores for the user and returns delete count', async () => {
+    it('deletes all scores for the user', async () => {
       mocks.userScoresDelete.mockResolvedValue(7);
 
-      const deleted = await UserScore.deleteAllUserScores('u1');
+      await UserScore.deleteAllUserScores('u1');
 
       expect(mocks.userScoresEquals).toHaveBeenCalledWith('u1');
-      expect(deleted).toBe(7);
     });
   });
 

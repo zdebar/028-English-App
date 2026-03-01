@@ -3,37 +3,49 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   isOverlayOpen: false,
+  closeOverlay: vi.fn(),
+  useKey: vi.fn(),
+}));
+
+vi.mock('@/config/keyboard-listeners.config', () => ({
+  KEYBOARD_LISTENERS: {
+    Exit: ['Escape'],
+  },
+}));
+
+vi.mock('@/features/key-listener/use-key', () => ({
+  useKey: (...args: unknown[]) => mocks.useKey(...args),
 }));
 
 vi.mock('@/features/overlay/use-overlay-store', () => ({
-  useOverlayStore: (selector: (state: { isOverlayOpen: boolean }) => unknown) =>
-    selector({ isOverlayOpen: mocks.isOverlayOpen }),
+  useOverlayStore: (
+    selector: (state: {
+      isOverlayOpen: boolean;
+      closeOverlay: typeof mocks.closeOverlay;
+    }) => unknown,
+  ) => selector({ isOverlayOpen: mocks.isOverlayOpen, closeOverlay: mocks.closeOverlay }),
 }));
 
-vi.mock('@/features/overlay/OverlayMask', () => ({
-  default: () => <div data-testid="overlay-mask" />,
-}));
+import OverlayMask from '@/features/overlay/OverlayMask';
 
-import OverlayContainer from '@/features/overlay/OverlayContainer';
-
-describe('OverlayContainer', () => {
+describe('OverlayMask visibility', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.isOverlayOpen = false;
   });
 
   it('renders null when overlay is closed', () => {
-    const { container } = render(<OverlayContainer />);
+    const { container } = render(<OverlayMask />);
 
     expect(container.firstChild).toBeNull();
-    expect(screen.queryByTestId('overlay-mask')).toBeNull();
+    expect(screen.queryByRole('button')).toBeNull();
   });
 
-  it('renders OverlayMask when overlay is open', () => {
+  it('renders overlay mask when overlay is open', () => {
     mocks.isOverlayOpen = true;
 
-    render(<OverlayContainer />);
+    render(<OverlayMask />);
 
-    expect(screen.getByTestId('overlay-mask')).toBeTruthy();
+    expect(screen.getByRole('button')).toBeTruthy();
   });
 });

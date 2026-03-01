@@ -93,18 +93,16 @@ describe('Metadata', () => {
   });
 
   describe('deleteSyncRow', () => {
-    it('deletes row by table and explicit user id and returns true', async () => {
-      const ok = await Metadata.deleteSyncRow(tableName, 'u1');
+    it('deletes row by table and explicit user id', async () => {
+      await Metadata.deleteSyncRow(tableName, 'u1');
 
       expect(mocks.metadataDelete).toHaveBeenCalledWith(['grammar', 'u1']);
-      expect(ok).toBe(true);
     });
 
     it('uses null replacement user id when deleting without user id', async () => {
-      const ok = await Metadata.deleteSyncRow(tableName);
+      await Metadata.deleteSyncRow(tableName);
 
       expect(mocks.metadataDelete).toHaveBeenCalledWith(['grammar', '__none__']);
-      expect(ok).toBe(true);
     });
   });
 });

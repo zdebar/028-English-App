@@ -159,8 +159,8 @@ describe('Grammar', () => {
     });
   });
 
-  describe('getStartedGrammarListWithProgress', () => {
-    it('returns grammar with aggregated progress values', async () => {
+  describe('getStartedGrammarList', () => {
+    it('returns started grammar records', async () => {
       mocks.startedBetween.mockReturnValue({
         toArray: vi.fn().mockResolvedValue([{ grammar_id: 1 }, { grammar_id: 2 }]),
       });
@@ -182,25 +182,6 @@ describe('Grammar', () => {
           },
         ]),
       });
-      mocks.userAnd.mockReturnValue({
-        toArray: vi.fn().mockResolvedValue([
-          {
-            grammar_id: 1,
-            started_at: '2026-02-28T00:00:00.000Z',
-            mastered_at: '1970-01-01T00:00:00.000Z',
-          },
-          {
-            grammar_id: 1,
-            started_at: '2026-02-28T00:00:00.000Z',
-            mastered_at: '2026-02-28T01:00:00.000Z',
-          },
-          {
-            grammar_id: 2,
-            started_at: '1970-01-01T00:00:00.000Z',
-            mastered_at: '1970-01-01T00:00:00.000Z',
-          },
-        ]),
-      });
 
       const result = await Grammar.getStartedGrammarList('u1');
 
@@ -211,9 +192,6 @@ describe('Grammar', () => {
           note: 'Present/Past',
           updated_at: '2026-02-28T00:00:00.000Z',
           deleted_at: null,
-          startedCount: 2,
-          masteredCount: 1,
-          totalCount: 2,
         },
         {
           id: 2,
@@ -221,9 +199,6 @@ describe('Grammar', () => {
           note: 'If clauses',
           updated_at: '2026-02-28T00:00:00.000Z',
           deleted_at: null,
-          startedCount: 0,
-          masteredCount: 0,
-          totalCount: 1,
         },
       ]);
     });

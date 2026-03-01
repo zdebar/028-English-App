@@ -18,7 +18,7 @@ describe('Toast', () => {
   });
 
   it('renders message text with success style', () => {
-    const { container } = render(<Toast message="Saved" type="success" />);
+    const { container } = render(<Toast type="success">Saved</Toast>);
 
     expect(screen.getByText('Saved')).toBeTruthy();
     const toastDiv = container.firstElementChild as HTMLElement;
@@ -26,7 +26,7 @@ describe('Toast', () => {
   });
 
   it('uses info style by default', () => {
-    const { container } = render(<Toast message="Info message" />);
+    const { container } = render(<Toast>Info message</Toast>);
 
     const toastDiv = container.firstElementChild as HTMLElement;
     expect(toastDiv.className.includes('bg-info-light')).toBe(true);
@@ -37,7 +37,7 @@ describe('Toast', () => {
 
     render(
       <div onClick={parentClick}>
-        <Toast message="Close me" type="error" />
+        <Toast type="error">Close me</Toast>
       </div>,
     );
 

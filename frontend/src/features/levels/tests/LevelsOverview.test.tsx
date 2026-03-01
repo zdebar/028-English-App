@@ -29,7 +29,7 @@ vi.mock('react-router-dom', () => ({
 }));
 
 vi.mock('@/components/UI/DelayedMessage', () => ({
-  default: ({ text }: any) => <div>{text}</div>,
+  default: ({ children }: any) => <div>{children}</div>,
 }));
 
 vi.mock('@/components/UI/buttons/CloseButton', () => ({
@@ -40,7 +40,7 @@ vi.mock('@/components/UI/buttons/CloseButton', () => ({
   ),
 }));
 
-vi.mock('@/components/UI/buttons/ButtonRectangular', () => ({
+vi.mock('@/components/UI/buttons/BaseButton', () => ({
   default: ({ onClick, children, disabled }: any) => (
     <button data-testid="rect-button" onClick={onClick} disabled={disabled}>
       {children}

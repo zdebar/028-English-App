@@ -81,10 +81,8 @@ describe('AudioRecord', () => {
   });
 
   describe('getAudio', () => {
-    it('returns null when audioName is empty', async () => {
-      const result = await AudioRecord.getAudioRecord('');
-
-      expect(result).toBeNull();
+    it('throws when audioName is empty', async () => {
+      await expect(AudioRecord.getAudioRecord('')).rejects.toThrow('audioName is required');
       expect(mocks.audioGet).not.toHaveBeenCalled();
     });
 
@@ -162,7 +160,7 @@ describe('AudioRecord', () => {
   });
 
   describe('removeOrphaned', () => {
-    it('deletes orphaned audio records and returns removed count', async () => {
+    it('deletes orphaned audio records when they exist', async () => {
       mocks.audioPrimaryKeys.mockResolvedValue(['a.opus', 'b.opus', 'c.opus']);
       mocks.userItemsToArray.mockResolvedValue([
         { audio: 'a.opus' },
@@ -171,20 +169,18 @@ describe('AudioRecord', () => {
         { audio: 'a.opus' },
       ]);
 
-      const removedCount = await AudioRecord.removeOrphaned();
+      await AudioRecord.removeOrphaned();
 
       expect(mocks.audioBulkDelete).toHaveBeenCalledWith(['b.opus', 'c.opus']);
-      expect(removedCount).toBe(2);
     });
 
-    it('returns 0 and does not delete when there are no orphaned records', async () => {
+    it('does not delete when there are no orphaned records', async () => {
       mocks.audioPrimaryKeys.mockResolvedValue(['a.opus']);
       mocks.userItemsToArray.mockResolvedValue([{ audio: 'a.opus' }]);
 
-      const removedCount = await AudioRecord.removeOrphaned();
+      await AudioRecord.removeOrphaned();
 
       expect(mocks.audioBulkDelete).not.toHaveBeenCalled();
-      expect(removedCount).toBe(0);
     });
   });
 });

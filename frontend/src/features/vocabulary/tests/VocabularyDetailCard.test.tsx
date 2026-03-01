@@ -41,9 +41,9 @@ vi.mock('@/components/UI/OverviewCard', () => ({
 }));
 
 vi.mock('@/components/UI/PropertyView', () => ({
-  default: ({ label, value }: any) => (
+  default: ({ label, children }: any) => (
     <div>
-      {label}:{String(value)}
+      {label}:{String(children)}
     </div>
   ),
 }));

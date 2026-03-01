@@ -88,7 +88,7 @@ vi.mock('@/features/practice/hooks/use-practice-deck', () => ({
 }));
 
 vi.mock('@/components/UI/DelayedMessage', () => ({
-  default: ({ text }: any) => <div>{text}</div>,
+  default: ({ children }: any) => <div>{children}</div>,
 }));
 
 vi.mock('@/features/help/HelpButton', () => ({ default: () => <div data-testid="help-button" /> }));

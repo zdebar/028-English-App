@@ -152,6 +152,7 @@ describe('VocabularyOverview', () => {
 
     render(<VocabularyOverview />);
 
-    expect(mocks.setCurrentIndex).toHaveBeenCalledWith(null);
+    expect(screen.getByTestId('list-size').textContent).toBe('0');
+    expect(screen.queryByTestId('detail-word')).toBeNull();
   });
 });
