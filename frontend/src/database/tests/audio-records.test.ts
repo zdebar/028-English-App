@@ -82,7 +82,7 @@ describe('AudioRecord', () => {
 
   describe('getAudio', () => {
     it('returns null when audioName is empty', async () => {
-      const result = await AudioRecord.getAudio('');
+      const result = await AudioRecord.getAudioRecord('');
 
       expect(result).toBeNull();
       expect(mocks.audioGet).not.toHaveBeenCalled();
@@ -92,7 +92,7 @@ describe('AudioRecord', () => {
       const existing = { filename: 'a.opus', audioBlob: new Blob(['cached']) };
       mocks.audioGet.mockResolvedValue(existing);
 
-      const result = await AudioRecord.getAudio('a.opus');
+      const result = await AudioRecord.getAudioRecord('a.opus');
 
       expect(mocks.audioGet).toHaveBeenCalledWith('a.opus');
       expect(mocks.fetchStorage).not.toHaveBeenCalled();
@@ -104,7 +104,7 @@ describe('AudioRecord', () => {
       mocks.audioGet.mockResolvedValue(undefined);
       mocks.fetchStorage.mockResolvedValue(blob);
 
-      const result = await AudioRecord.getAudio('b.opus');
+      const result = await AudioRecord.getAudioRecord('b.opus');
 
       expect(mocks.fetchStorage).toHaveBeenCalledWith('audio-bucket', 'b.opus');
       expect(mocks.audioPut).toHaveBeenCalledWith({ filename: 'b.opus', audioBlob: blob });

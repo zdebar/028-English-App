@@ -27,23 +27,27 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    * @returns An AudioRecordLocal
    * @throws Throws an error if the audio record cannot be found or fetched.
    */
-  static async getAudio(audioName: string): Promise<AudioRecordLocal | null> {
-    if (!audioName) return null;
-
-    const existingRecord = await db.audio_records.get(audioName);
-    return existingRecord ?? this.fetchAudioFile(audioName);
+  static async getAudioRecord(audioName: string): Promise<AudioRecordLocal | null> {
+    if (!audioName) throw new Error('audioName is required');
+    return (await db.audio_records.get(audioName)) ?? this.fetchAudioRecord(audioName);
   }
 
   /**
    * Synchronizes audio data from configured archives to the local database.
    *
-   * @returns A promise that resolves when all audio archives have been synced.
+   * @returns A promise allSettled when all archives have been processed.
    * @throws Logs errors for any archives that fail to sync, but continues processing remaining archives.
    */
   static async syncAudioData(archives: string[]): Promise<void> {
-    await Promise.all(archives.map((archiveName) => this.syncAudioArchive(archiveName)));
+    await Promise.allSettled(archives.map((archiveName) => this.syncAudioArchive(archiveName)));
   }
 
+  /**
+   * Synchronizes a single audio archive into local storage.
+   *
+   * @param archiveName - The name/key of the archive to download and synchronize.
+   * @returns A promise that resolves when synchronization finishes (or is skipped if already fetched).
+   */
   private static async syncAudioArchive(archiveName: string): Promise<void> {
     try {
       if (await AudioMetadata.isFetched(archiveName)) return;
@@ -98,27 +102,28 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
 
   /**
    * Fetches an audio file from storage and stores it in the local database.
-   * @param audioFile - The name/path of the audio file to fetch
+   *
+   * @param audioName - The name/path of the audio file to fetch
    * @returns A promise that resolves to an object containing the filename and audio blob
    * @throws Logs an error if the audio file cannot be fetched from storage
    */
-  private static async fetchAudioFile(audioFile: string): Promise<AudioRecordLocal> {
-    const audioBlob = await fetchStorage(config.audio.audioBucketName, audioFile);
+  private static async fetchAudioRecord(audioName: string): Promise<AudioRecordLocal> {
+    if (!audioName) throw new Error('audioName is required');
 
-    infoHandler(`Fetched audio file ${audioFile} from storage, size: ${audioBlob.size} bytes`);
-    await db.audio_records.put({ filename: audioFile, audioBlob });
-    infoHandler(`Successfully synced audio file: ${audioFile}`);
+    const audioBlob = await fetchStorage(config.audio.audioBucketName, audioName);
+    await db.audio_records.put({ filename: audioName, audioBlob });
+    infoHandler(`Successfully synced audio file: ${audioName}`);
 
-    return { filename: audioFile, audioBlob };
+    return { filename: audioName, audioBlob };
   }
 
   /**
    * Removes orphaned audio records from the database.
    * Orphaned records are those that exist in the audio_records table but are not referenced by any user items.
    *
-   * @returns A promise that resolves to the number of orphaned audio records removed.
+   * @returns A promise that resolves when orphaned audio records are removed.
    */
-  static async removeOrphaned(): Promise<number> {
+  static async removeOrphaned(): Promise<void> {
     const existingFilenames = await db.audio_records.toCollection().primaryKeys();
     const allAudio = await db.user_items.toCollection().toArray();
     const expectedAudio = Array.from(
@@ -134,7 +139,5 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
       await db.audio_records.bulkDelete(orphaned);
       infoHandler(`Deleted ${orphaned.length} orphaned audio records.`);
     }
-
-    return orphaned.length;
   }
 }

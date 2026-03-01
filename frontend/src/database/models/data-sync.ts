@@ -139,7 +139,7 @@ export function startPeriodicSync(
       try {
         if (userId) {
           await dataSync(userId);
-          await AudioRecord.removeOrphaned();
+          void AudioRecord.removeOrphaned();
         }
         showToast(TEXTS.syncSuccessToast, 'success');
       } catch (error) {
