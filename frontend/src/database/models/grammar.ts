@@ -58,12 +58,12 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * @returns A promise that resolves to an array of unique grammar IDs that the user has started, or an empty array if no items have been started
    */
   static async getStartedGrammarIds(userId: string): Promise<number[]> {
+    if (!userId) throw new Error('userId is required');
+
     const startedUserItems: UserItemLocal[] = await db.user_items
       .where('[user_id+started_at]')
       .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
       .toArray();
-
-    if (startedUserItems.length === 0) return [];
 
     return [...new Set(startedUserItems.map((item) => item.grammar_id))];
   }
@@ -79,10 +79,13 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    *          if the user has not started any grammar items or if no matching grammar records are found.
    */
   static async getStartedGrammarListWithProgress(userId: string): Promise<GrammarWithProgress[]> {
+    if (!userId) throw new Error('userId is required');
+
+    // Get unique grammar IDs for started items
     const grammarIds = await this.getStartedGrammarIds(userId);
     if (grammarIds.length === 0) return [];
-    const grammarIdSet = new Set(grammarIds);
 
+    const grammarIdSet = new Set(grammarIds);
     const startedGrammar: GrammarLocal[] = await db.grammar.where('id').anyOf(grammarIds).toArray();
 
     // Batch fetch all user items for these grammars
