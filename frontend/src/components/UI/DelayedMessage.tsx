@@ -8,12 +8,11 @@ type DelayedMessageProps = {
 };
 
 /**
- * Displays a delayed message after a specified delay.
+ * Displays a delayed content after a specified delay.
  *
  * @param children The content to display after the delay.
- * @param timeDelay Delay before showing the message (ms).
- * @param className Optional CSS class for styling the message.
- * @returns The div element with the content, or null if the delay has not yet passed.
+ * @param timeDelay Delay before showing the content (ms).
+ * @param className Optional CSS class for styling the content.
  */
 export default function DelayedMessage({
   children,
