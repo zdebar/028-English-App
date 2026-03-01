@@ -29,17 +29,18 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    *
    * @param userId - The user ID. Must be a valid string.
    * @param addCount - The number to add to today's item count.
-   * @returns True if the operation was successful, false otherwise.
+   * @returns A promise that resolves when the operation is complete.
    * @throws Error if database operation fails.
    */
-  static async addItemCount(userId: string, addCount: number): Promise<boolean> {
+  static async addItemCount(userId: string, addCount: number): Promise<void> {
+    if (!userId) throw new Error('User ID is required to add item count.');
+
     assertNonNegativeInteger(addCount, 'addItemCount');
 
     const today = getTodayShortDate();
     const existingRecord = await db.user_scores.get([userId, today]);
     const newItemCount = (existingRecord?.item_count ?? 0) + addCount;
     await db.user_scores.put(this.createRecord(userId, today, newItemCount));
-    return true;
   }
 
   /**
@@ -50,11 +51,27 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @throws Error if database operation fails.
    */
   static async getUserScoreForToday(userId: string): Promise<UserScoreLocal> {
+    if (!userId) throw new Error('User ID is required to fetch user score for today.');
+
     const today = getTodayShortDate();
     return (await db.user_scores.get([userId, today])) ?? this.createRecord(userId, today, 0);
   }
 
+  /**
+   * Creates a user score record with the provided information.
+   * @param userId - The unique identifier of the user
+   * @param date - The date associated with the score record
+   * @param itemCount - The number of items counted in this score. Should be a non-negative integer.
+   * @returns A new UserScoreLocal object with the provided data and current timestamp
+   */
   private static createRecord(userId: string, date: string, itemCount: number): UserScoreLocal {
+    if (!userId) throw new Error('User ID is required to create a user score record.');
+    if (!date) throw new Error('Date is required to create a user score record.');
+    assertNonNegativeInteger(
+      itemCount,
+      'itemCount must be a non-negative integer to create a user score record.',
+    );
+
     return {
       user_id: userId,
       date,
@@ -71,6 +88,8 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @throws Error, if synchronization fails.
    */
   static async syncUserScoreSinceLastSync(userId: string): Promise<void> {
+    if (!userId) throw new Error('User ID is required to sync user scores since last sync.');
+
     const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserScores, userId);
     const newSyncedAt = new Date().toISOString();
     await this.pushUserScores(userId, lastSyncedAt, newSyncedAt);
@@ -85,6 +104,8 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @throws Error, if synchronization fails.
    */
   static async syncUserScoreAll(userId: string): Promise<void> {
+    if (!userId) throw new Error('User ID is required to sync all user scores.');
+
     const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserScores, userId);
     const newSyncedAt = new Date().toISOString();
     await this.pushUserScores(userId, lastSyncedAt, newSyncedAt);
@@ -95,10 +116,12 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   /**
    * Deletes all user score records for a given user.
    * @param userId - The ID of the user whose scores should be deleted
-   * @returns A promise that resolves to the number of records deleted
+   * @returns A promise that resolves when the records have been deleted
    */
-  static async deleteAllUserScores(userId: string): Promise<number> {
-    return db.user_scores.where('user_id').equals(userId).delete();
+  static async deleteAllUserScores(userId: string): Promise<void> {
+    if (!userId) throw new Error('User ID is required to delete all user scores.');
+
+    await db.user_scores.where('user_id').equals(userId).delete();
   }
 
   /**
@@ -107,15 +130,18 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @param userId - The unique identifier of the user whose scores should be synced.
    * @param lastSyncedAt - The timestamp (inclusive) marking the start of the time range for scores to sync.
    * @param newSyncedAt - The timestamp (exclusive) marking the end of the time range for scores to sync.
-   * @returns A promise that resolves to the number of scores successfully pushed to the remote database.
-   *          Returns 0 if no scores were found in the specified time range.
+   * @returns A promise that resolves when the scores have been successfully pushed to the remote database.
    * @throws {SupabaseError} If the remote upsert operation fails, with details about the local scores that failed to sync.
    */
   private static async pushUserScores(
     userId: string,
     lastSyncedAt: string,
     newSyncedAt: string,
-  ): Promise<number> {
+  ): Promise<void> {
+    if (!userId) throw new Error('User ID is required to push user scores.');
+    if (!lastSyncedAt) throw new Error('Last synced timestamp is required to push user scores.');
+    if (!newSyncedAt) throw new Error('New synced timestamp is required to push user scores.');
+
     const localScores = await db.user_scores
       .where('[user_id+updated_at]')
       .between([userId, lastSyncedAt], [userId, newSyncedAt], true, false)
@@ -123,7 +149,6 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
     if (localScores.length === 0) {
       infoHandler(`No user scores to push for userId: ${userId}`);
-      return 0;
     }
 
     const { error: errorInsert } = await supabaseInstance.rpc('upsert_user_scores', {
@@ -137,7 +162,6 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     infoHandler(
       `Completed ${localScores.length} user scores push to Supabase for userId: ${userId}`,
     );
-    return localScores.length;
   }
 
   /**
@@ -147,14 +171,18 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @param userId - The ID of the user whose scores should be fetched
    * @param lastSyncedAt - The timestamp of the last sync (defaults to epoch start date)
    * @param newSyncedAt - The timestamp to mark as the new sync time
-   * @returns A promise that resolves to the number of scores fetched and stored
+   * @returns A promise that resolves when the scores have been fetched and stored
    * @throws {SupabaseError} If the RPC call to fetch scores fails
    */
   private static async pullUserScores(
     userId: string,
     lastSyncedAt: string = config.database.epochStartDate,
     newSyncedAt: string = new Date().toISOString(),
-  ): Promise<number> {
+  ): Promise<void> {
+    if (!userId) throw new Error('User ID is required to pull user scores.');
+    if (!lastSyncedAt) throw new Error('Last synced timestamp is required to pull user scores.');
+    if (!newSyncedAt) throw new Error('New synced timestamp is required to pull user scores.');
+
     const { data: updatedScores, error: errorFetch } = await supabaseInstance.rpc(
       'fetch_user_scores',
       {
@@ -181,6 +209,5 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     infoHandler(
       `Completed ${serverUpdatesCount} user scores pull from Supabase for userId: ${userId}`,
     );
-    return serverUpdatesCount;
   }
 }
