@@ -47,8 +47,12 @@ export function Modal({ onConfirm, onClose, children }: ModalProps): JSX.Element
           {children}
         </div>
         <div className="flex gap-1">
-          <BaseButton onClick={handleCancel}>{TEXTS.cancel}</BaseButton>
-          <BaseButton onClick={handleConfirm}>{TEXTS.confirm}</BaseButton>
+          <BaseButton onClick={handleCancel} className="h-button font-bold">
+            {TEXTS.cancel}
+          </BaseButton>
+          <BaseButton onClick={handleConfirm} className="h-button font-bold">
+            {TEXTS.confirm}
+          </BaseButton>
         </div>
       </div>
     </div>,

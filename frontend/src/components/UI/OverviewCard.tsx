@@ -58,7 +58,7 @@ export default function OverviewCard({
           disabled={!handleReset}
           className="flex items-center justify-start px-4"
         >
-          <p className="font-bold">{buttonTitle}</p>
+          {buttonTitle}
         </ButtonWithModal>
         {/* Close Card Button */}
         <CloseButton onClick={onClose} />

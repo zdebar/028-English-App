@@ -1,3 +1,4 @@
+import { MenuButton } from '@/components/UI/buttons/MenuButton';
 import config from '@/config/config';
 import { Modal } from '@/features/modal/Modal';
 import { useMinLoading } from '@/features/modal/use-min-loading';
@@ -52,13 +53,13 @@ export default function ButtonWithModal({
 
   return (
     <>
-      <button
+      <MenuButton
         onClick={() => setShowModal(true)}
         disabled={isDisabled}
-        className={`button-rectangular button-color ${className}`}
+        className={`font-bold ${className}`}
       >
         {children}
-      </button>
+      </MenuButton>
       {showModal && (
         <Modal onConfirm={handleConfirm} onClose={() => setShowModal(false)}>
           <p className="font-bold">{modalTitle}</p>

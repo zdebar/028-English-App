@@ -1,20 +1,26 @@
 import BaseButton from './BaseButton';
+import type { ReactNode } from 'react';
 
 interface MenuButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  text: string;
+  children?: ReactNode;
   className?: string;
 }
 
 /**
  * A menu button component that renders a button with bold text aligned to the left.
+ *
+ * MenuButton wraps its children in a <p> element.
+ * Pass only inline elements or text as children (not <p>, <div>, etc.).
+ *
  * @component
- * @param text - The text content to display in the button
+ * @param children - The content to display inside the button
  * @param className - Optional CSS class names to apply to the button
+ * @return A styled button element with the provided content and styles
  */
-export function MenuButton({ text, className, ...rest }: MenuButtonProps) {
+export function MenuButton({ children, className, ...rest }: MenuButtonProps) {
   return (
     <BaseButton {...rest} className={`h-button ${className}`}>
-      <p className="w-40 text-left font-bold">{text}</p>
+      <p className="w-40 text-left font-bold">{children}</p>
     </BaseButton>
   );
 }

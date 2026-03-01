@@ -17,9 +17,11 @@ export default function Profile(): JSX.Element {
 
   return (
     <div className="card-width grow-0 gap-1">
-      <MenuButton text={TEXTS.levelsOverview} onClick={() => navigate(ROUTES.levels)} />
-      <MenuButton text={TEXTS.grammarOverview} onClick={() => navigate(ROUTES.grammar)} />
-      <MenuButton text={TEXTS.vocabularyOverview} onClick={() => navigate(ROUTES.vocabulary)} />
+      <MenuButton onClick={() => navigate(ROUTES.levels)}>{TEXTS.levelsOverview}</MenuButton>
+      <MenuButton onClick={() => navigate(ROUTES.grammar)}>{TEXTS.grammarOverview}</MenuButton>
+      <MenuButton onClick={() => navigate(ROUTES.vocabulary)}>
+        {TEXTS.vocabularyOverview}
+      </MenuButton>
 
       <ResetAllProgressButton className="mt-4" />
       <DeleteUserButton />
