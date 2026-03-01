@@ -63,6 +63,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     userId: string,
     deckSize: number = config.lesson.deckSize,
   ): Promise<UserItemPractice[]> {
+    if (!userId) throw new Error('User ID is required to fetch practice deck.');
     assertPositiveInteger(deckSize, 'deckSize');
 
     // Step 1: Fetch already started grammar list
@@ -128,10 +129,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    *
    * @param userId - The unique identifier of the user
    * @param items - Array of user item records to be saved
-   * @returns Promise that resolves to true when the save operation completes successfully
+   * @returns Promise that resolves when the save operation completes successfully
    * @throws Error if any database operation fails
    */
-  static async savePracticeDeck(userId: string, items: UserItemLocal[]): Promise<boolean> {
+  static async savePracticeDeck(userId: string, items: UserItemLocal[]): Promise<void> {
+    if (!userId) throw new Error('User ID is required to save practice deck.');
+
     const currentDateTime = new Date(Date.now()).toISOString();
     const updatedItems = items.map((item) => {
       return {
@@ -150,7 +153,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     await UserScore.addItemCount(userId, updatedItems.length);
 
     triggerUserItemsUpdatedEvent(userId);
-    return true;
   }
 
   /**
@@ -160,6 +162,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns A promise that resolves to an array of user vocabulary items sorted by Czech translation
    */
   static async getUserStartedVocabulary(userId: string): Promise<UserItemLocal[]> {
+    if (!userId) throw new Error('User ID is required to fetch started vocabulary.');
+
     const result = await db.user_items
       .where('[user_id+grammar_id+started_at]')
       .between(
@@ -178,8 +182,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    *
    * @param userId - The unique identifier of the user
    * @returns - A promise that resolves to an array of LevelsOverview objects, each containing level details and associated lessons with their counts
+   * @throws Error if userId is not provided
    */
   static async getLevelsOverview(userId: string): Promise<LevelsOverview[]> {
+    if (!userId) throw new Error('User ID is required to fetch levels overview.');
+
     const today = getTodayShortDate();
     const result = await db.user_items.where('user_id').equals(userId).toArray();
 
@@ -246,10 +253,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Resets all user items for a specified user.
    *
    * @param userId - The ID of the user whose items should be reset
-   * @returns A promise that resolves to the number of user items that were reset
+   * @returns A promise that resolves when the reset operation is complete
    * @throws Error if any database operation fails
    */
-  static async resetAllUserItems(userId: string): Promise<number> {
+  static async resetAllUserItems(userId: string): Promise<void> {
+    if (!userId) throw new Error('User ID is required to reset all user items.');
+
     const count = await db.user_items
       .where('[user_id+started_at]')
       .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
@@ -261,7 +270,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     if (count !== 0) {
       triggerUserItemsUpdatedEvent(userId);
     }
-    return count;
   }
 
   /**
@@ -272,7 +280,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns A promise that resolves to the number of items that were reset
    * @throws Throws an error if no user items are found for the given grammar ID.
    */
-  static async resetGrammarItems(userId: string, grammarId: number): Promise<number> {
+  static async resetGrammarItems(userId: string, grammarId: number): Promise<void> {
+    if (!userId) throw new Error('User ID is required to reset grammar items.');
+    if (grammarId < 0) throw new Error('Grammar ID must be a non-negative integer.');
     assertNonNegativeInteger(grammarId, 'grammarId');
 
     const count = await db.user_items
@@ -288,7 +298,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
     infoHandler(`Resetted ${count} user items for userId: ${userId}, grammarId: ${grammarId}`);
     triggerUserItemsUpdatedEvent(userId);
-    return count;
   }
 
   /**
@@ -296,10 +305,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    *
    * @param userId - The unique identifier of the user
    * @param itemId - The unique identifier of the item to reset
-   * @returns A promise that resolves to true if the item was successfully reset
+   * @returns A promise that resolves when the item is successfully reset
    * @throws Throws an error if no user item is found for the specified item ID
    */
-  static async resetUserItemById(userId: string, itemId: number): Promise<boolean> {
+  static async resetUserItemById(userId: string, itemId: number): Promise<void> {
+    if (!userId) throw new Error('User ID is required to reset user item.');
     assertNonNegativeInteger(itemId, 'itemId');
 
     const count = await db.user_items
@@ -315,26 +325,25 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
     infoHandler(`Resetted user item with itemId: ${itemId} for userId: ${userId}`);
     triggerUserItemsUpdatedEvent(userId);
-    return true;
   }
 
   /**
    * Deletes all user items associated with a specific user.
    *
    * @param userId - The unique identifier of the user
-   * @returns A promise that resolves to the number of items deleted
+   * @returns A promise that resolves when all user items are deleted
    * @throws Error if any database operation fails
    */
-  static async deleteAllUserItems(userId: string): Promise<number> {
-    const itemIds = await db.user_items.where('user_id').equals(userId).primaryKeys();
+  static async deleteAllUserItems(userId: string): Promise<void> {
+    if (!userId) throw new Error('User ID is required to delete all user items.');
 
+    const itemIds = await db.user_items.where('user_id').equals(userId).primaryKeys();
     if (itemIds.length > 0) {
       await db.user_items.bulkDelete(itemIds);
       triggerUserItemsUpdatedEvent(userId);
     }
 
     infoHandler(`Deleted ${itemIds.length} user items for userId: ${userId}`);
-    return itemIds.length;
   }
 
   /**
@@ -344,6 +353,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns A promise that resolves when the sync operation is complete
    */
   static async syncUserItemsSinceLastSync(userId: string): Promise<void> {
+    if (!userId) throw new Error('User ID is required to sync user items since last sync.');
+
     const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserItems, userId);
     const newSyncedAt = new Date().toISOString();
     await this.pushUserItemsToSupabase(userId, lastSyncedAt, newSyncedAt);
@@ -358,6 +369,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns A promise that resolves when the synchronization is complete
    */
   static async syncUserItemsAll(userId: string): Promise<void> {
+    if (!userId) throw new Error('User ID is required to sync all user items.');
+
     const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserItems, userId);
     const newSyncedAt = new Date().toISOString();
     await this.pushUserItemsToSupabase(userId, lastSyncedAt, newSyncedAt);
@@ -371,7 +384,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param userId - The ID of the user whose items should be synced
    * @param lastSyncedAt - The timestamp of the last sync (exclusive lower bound)
    * @param newSyncedAt - The timestamp of the new sync (inclusive upper bound)
-   * @returns A promise that resolves to the number of items pushed to Supabase
+   * @returns A promise that resolves when the items are pushed to Supabase
    * @throws {SupabaseError} If the RPC call to insert user items fails
    *
    * @private
@@ -381,7 +394,13 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     userId: string,
     lastSyncedAt: string,
     newSyncedAt: string,
-  ): Promise<number> {
+  ): Promise<void> {
+    if (!userId) throw new Error('User ID is required to push user items to Supabase.');
+    if (!lastSyncedAt)
+      throw new Error('Last synced timestamp is required to push user items to Supabase.');
+    if (!newSyncedAt)
+      throw new Error('New synced timestamp is required to push user items to Supabase.');
+
     const localUserItems: UserItemLocal[] = await db.user_items
       .where('[user_id+updated_at]')
       .between([userId, lastSyncedAt], [userId, newSyncedAt], true, false)
@@ -389,7 +408,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
     if (localUserItems.length === 0) {
       infoHandler(`No user items to push for userId: ${userId}`);
-      return 0;
+      return;
     }
 
     const sqlUserItems = localUserItems.map(convertLocalToSQL);
@@ -407,8 +426,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     infoHandler(
       `Completed ${localUserItems.length} user items push to Supabase for userId: ${userId}`,
     );
-
-    return localUserItems.length;
   }
 
   /**
@@ -417,7 +434,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param userId - The ID of the user whose items to fetch
    * @param lastSyncedAt - ISO 8601 timestamp of the last successful sync
    * @param newSyncedAt - ISO 8601 timestamp to mark as the new sync time
-   * @returns Promise resolving to an array of user items from Supabase
+   * @returns Promise resolving when the user items are pulled from Supabase
    * @throws {SupabaseError} If the RPC call to fetch user items fails
    * @private
    */
@@ -425,7 +442,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     userId: string,
     lastSyncedAt: string,
     newSyncedAt: string,
-  ): Promise<number> {
+  ): Promise<void> {
     const { data: updatedUserItems, error: rpcFetchError } = await supabaseInstance.rpc(
       'fetch_user_items',
       {
@@ -475,7 +492,5 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     infoHandler(
       `Completed ${serverItems.length} user items pull from Supabase for userId: ${userId}`,
     );
-
-    return serverItems.length;
   }
 }

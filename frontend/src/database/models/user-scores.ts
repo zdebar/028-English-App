@@ -149,6 +149,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
     if (localScores.length === 0) {
       infoHandler(`No user scores to push for userId: ${userId}`);
+      return;
     }
 
     const { error: errorInsert } = await supabaseInstance.rpc('upsert_user_scores', {
