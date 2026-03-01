@@ -1,5 +1,4 @@
 export interface UserItemLocal {
-  // As used by IndexedDB
   item_id: number;
   user_id: string;
   czech: string;
@@ -10,7 +9,7 @@ export interface UserItemLocal {
   grammar_id: number; // null replaced with config.database.nullReplacementNumber
   progress: number;
   started_at: string; // nulls replaced with config.database.nullReplacementDate
-  updated_at: string;
+  updated_at: string; // nulls replaced with config.database.nullReplacementDate
   deleted_at: string | null;
   next_at: string; // nulls replaced with config.database.nullReplacementDate
   mastered_at: string; // nulls replaced with config.database.nullReplacementDate

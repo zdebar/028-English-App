@@ -56,9 +56,9 @@ AS $$
     ON le.id = i.lesson_id
   LEFT JOIN public.levels lv
     ON lv.id = le.level_id
-  WHERE COALESCE(ui.updated_at, '-infinity'::timestamptz) > p_last_synced_at
+  WHERE ui.updated_at > p_last_synced_at
     OR i.updated_at > p_last_synced_at
-    OR COALESCE(le.updated_at, '-infinity'::timestamptz) > p_last_synced_at
-    OR COALESCE(lv.updated_at, '-infinity'::timestamptz) > p_last_synced_at
+    OR le.updated_at > p_last_synced_at
+    OR lv.updated_at > p_last_synced_at
   ORDER BY i.sort_order ASC, i.id ASC;
 $$;
