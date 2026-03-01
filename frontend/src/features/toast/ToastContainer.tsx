@@ -14,5 +14,5 @@ export default function ToastContainer(): JSX.Element | null {
 
   if (!visible) return null;
 
-  return <Toast message={message} type={type} />;
+  return <Toast type={type}>{message}</Toast>;
 }
