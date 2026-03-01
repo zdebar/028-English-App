@@ -27,10 +27,13 @@ export default class Metadata extends Entity<AppDB> {
    *          Returns the epoch start date from config if no sync date is found.
    */
   static async getSyncedAt(tableName: TableName, userId?: string | null): Promise<string> {
+    if (!tableName) throw new Error('tableName is required');
+
     const metadata = await db.metadata.get([
       tableName,
       userId ?? config.database.nullReplacementUserId,
     ]);
+
     return metadata?.synced_at ?? config.database.epochStartDate;
   }
 
@@ -48,11 +51,14 @@ export default class Metadata extends Entity<AppDB> {
     syncTime: string,
     userId?: string | null,
   ): Promise<boolean> {
+    if (!tableName) throw new Error('tableName is required');
+
     const putResult = await db.metadata.put({
       table_name: tableName,
       user_id: userId ?? config.database.nullReplacementUserId,
       synced_at: syncTime,
     });
+
     return !!putResult;
   }
 
@@ -64,8 +70,9 @@ export default class Metadata extends Entity<AppDB> {
    *          If not provided, the null replacement user ID from config is used.
    * @returns A promise that resolves to `true` if the deletion was successful.
    */
-  static async deleteSyncRow(tableName: TableName, userId?: string | null): Promise<boolean> {
+  static async deleteSyncRow(tableName: TableName, userId?: string | null): Promise<void> {
+    if (!tableName) throw new Error('tableName is required');
+
     await db.metadata.delete([tableName, userId ?? config.database.nullReplacementUserId]);
-    return true;
   }
 }
