@@ -54,7 +54,7 @@ export default function GrammarOverview(): JSX.Element {
 
     try {
       await UserItem.resetGrammarItems(userId, currentGrammar.id);
-      await reload();
+      void reload();
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch {
       showToast(TEXTS.resetProgressErrorToast, 'error');
@@ -73,14 +73,14 @@ export default function GrammarOverview(): JSX.Element {
     return (
       <div className={`card-width flex flex-col justify-start gap-1`}>
         <div className="h-button flex items-center justify-between gap-1">
-          <div className="h-button flex grow justify-start p-4">{TEXTS.grammarOverview}</div>
+          <div className="flex grow justify-start px-4">{TEXTS.grammarOverview}</div>
           <CloseButton onClick={() => navigate('/profile')} />
         </div>
         {hasGrammar ? (
           grammarList.map((item, index) => (
             <BaseButton
               key={item.id}
-              className="h-input flex grow-0 justify-start p-4 text-left"
+              className="h-input flex grow-0 justify-start px-4 text-left"
               onClick={() => handleOpenGrammar(index)}
             >
               {`${index + 1} : ${item.name} `}
@@ -107,13 +107,13 @@ export default function GrammarOverview(): JSX.Element {
       <PropertyView
         label={TEXTS.startedCount}
         value={`${currentGrammar?.startedCount ?? 0} / ${currentGrammar?.totalCount ?? 0}`}
-        classNameValue="text-right w-20"
+        classNameValue="text-right w-24"
       />
       <PropertyView
         label={TEXTS.masteredCount}
         value={`${currentGrammar?.masteredCount ?? 0} / ${currentGrammar?.totalCount ?? 0}`}
         className="pb-4"
-        classNameValue="w-20 text-right"
+        classNameValue="w-24 text-right"
       />
       {sanitizedNote ? (
         <div dangerouslySetInnerHTML={{ __html: sanitizedNote }} />
