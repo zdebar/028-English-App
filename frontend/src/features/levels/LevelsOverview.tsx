@@ -19,7 +19,7 @@ const EMPTY_LEVELS: never[] = [];
  */
 export default function LevelsOverview() {
   const [unpackedIndex, setUnpackedIndex] = useState<number | null>(null);
-  const [mastered, setMastered] = useState<boolean>(false);
+  const [isMastered, setIsMastered] = useState<boolean>(false);
   const levelsOverview = useUserStore((state) => state.userStats?.levelsOverview);
   const levels = levelsOverview ?? EMPTY_LEVELS;
   const navigate = useNavigate();
@@ -36,7 +36,7 @@ export default function LevelsOverview() {
     );
   }
 
-  const shownLevels = mastered ? 'masteredCount' : 'startedCount';
+  const shownLevels = isMastered ? 'masteredCount' : 'startedCount';
 
   return (
     <div className="card-width relative flex flex-col justify-start">
@@ -77,14 +77,14 @@ export default function LevelsOverview() {
           ))}
         </div>
         <HelpText className="right-2 -bottom-4">
-          {mastered ? TEXTS.levelsMasteredHelp : TEXTS.levelsStartedHelp}
+          {isMastered ? TEXTS.levelsMasteredHelp : TEXTS.levelsStartedHelp}
         </HelpText>
         <HelpButton className="right-0 -bottom-14" />
         <button
           className="color-info absolute -bottom-9 left-4"
-          onClick={() => setMastered((current) => !current)}
+          onClick={() => setIsMastered((current) => !current)}
         >
-          {mastered ? TEXTS.masteredCount : TEXTS.startedCount}
+          {isMastered ? TEXTS.masteredCount : TEXTS.startedCount}
         </button>
         <HelpText className="-bottom-15 left-2">{TEXTS.masteredSwitchHelp}</HelpText>
       </div>

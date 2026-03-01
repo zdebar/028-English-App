@@ -13,11 +13,11 @@ export default function PrivacyPolicyCzech(): JSX.Element {
       <h2>1. Osobní údaje, které zpracováváme</h2>
       <ul>
         <li>
-          <b>Údaje pro ověření totožnosti:</b> e-mailová adresa, jméno a jedinečný identifikátor
-          účtu poskytovaný službou Google Sign-In.
+          <b>Údaje pro ověření totožnosti:</b> e-mailová adresa, jméno, profilový obrázek a
+          jedinečný identifikátor účtu poskytovaný službou Google Sign-In.
         </li>
         <li>
-          <b>Údaje o účtu:</b> datum vytvoření účtu, datum posledního přihlášení.
+          <b>Údaje o účtu:</b> datum vytvoření účtu.
         </li>
         <li>
           <b>Údaje o procvičování:</b> pokrok v učení jednotlivých položek.
