@@ -9,7 +9,7 @@ import type { GrammarWithProgress } from '@/types/local.types';
 import DOMPurify from 'dompurify';
 import { useCallback, useMemo, type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ButtonRectangular from '@/components/UI/buttons/ButtonRectangular';
+import BaseButton from '@/components/UI/buttons/BaseButton';
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import PropertyView from '@/components/UI/PropertyView';
 import DelayedMessage from '@/components/UI/DelayedMessage';
@@ -78,13 +78,13 @@ export default function GrammarOverview(): JSX.Element {
         </div>
         {hasGrammar ? (
           grammarList.map((item, index) => (
-            <ButtonRectangular
+            <BaseButton
               key={item.id}
               className="h-input flex grow-0 justify-start p-4 text-left"
               onClick={() => handleOpenGrammar(index)}
             >
               {`${index + 1} : ${item.name} `}
-            </ButtonRectangular>
+            </BaseButton>
           ))
         ) : (
           <DelayedMessage>

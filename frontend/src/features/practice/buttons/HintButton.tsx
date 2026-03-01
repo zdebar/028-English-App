@@ -1,4 +1,4 @@
-import ButtonRectangular from '@/components/UI/buttons/ButtonRectangular';
+import BaseButton from '@/components/UI/buttons/BaseButton';
 import BulbIcon from '@/components/UI/icons/BulbIcon';
 import HelpText from '@/features/help/HelpText';
 import { TEXTS } from '@/locales/cs';
@@ -6,10 +6,10 @@ import { type PracticeButtonProps } from '../practice.types';
 
 export default function HintButton({ onClick, disabled, children }: PracticeButtonProps) {
   return (
-    <ButtonRectangular onClick={onClick} disabled={disabled} className="relative">
+    <BaseButton onClick={onClick} disabled={disabled} className="relative">
       <BulbIcon />
       <HelpText className="-top-4.5 right-4">{TEXTS.hint}</HelpText>
       {children}
-    </ButtonRectangular>
+    </BaseButton>
   );
 }

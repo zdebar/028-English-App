@@ -1,7 +1,8 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
-interface ButtonRectangularProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface BaseButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children?: ReactNode;
+  className?: string;
 }
 
 /**
@@ -10,15 +11,11 @@ interface ButtonRectangularProps extends ButtonHTMLAttributes<HTMLButtonElement>
  * @param children The content to be displayed inside the button.
  * @param className Additional CSS classes for custom styling.
  */
-export default function ButtonRectangular({
-  children,
-  className = '',
-  ...rest
-}: ButtonRectangularProps) {
+export default function BaseButton({ children, className = '', ...rest }: BaseButtonProps) {
   return (
     <button
       type="button"
-      className={`h-button button-color flex shrink-0 grow cursor-pointer items-center justify-center font-bold tracking-wide disabled:cursor-default ${className}`}
+      className={`button-color flex shrink-0 grow cursor-pointer items-center justify-center tracking-wide disabled:cursor-default ${className}`}
       {...rest}
     >
       {children}

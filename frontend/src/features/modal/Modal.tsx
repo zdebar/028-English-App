@@ -2,7 +2,7 @@ import { useOverlayStore } from '@/features/overlay/use-overlay-store';
 import { TEXTS } from '@/locales/cs';
 import { useCallback, useEffect, type JSX, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import ButtonRectangular from '../../components/UI/buttons/ButtonRectangular';
+import BaseButton from '../../components/UI/buttons/BaseButton';
 
 interface ModalProps {
   onConfirm: () => void | Promise<void>;
@@ -47,8 +47,8 @@ export function Modal({ onConfirm, onClose, children }: ModalProps): JSX.Element
           {children}
         </div>
         <div className="flex gap-1">
-          <ButtonRectangular onClick={handleCancel}>{TEXTS.cancel}</ButtonRectangular>
-          <ButtonRectangular onClick={handleConfirm}>{TEXTS.confirm}</ButtonRectangular>
+          <BaseButton onClick={handleCancel}>{TEXTS.cancel}</BaseButton>
+          <BaseButton onClick={handleConfirm}>{TEXTS.confirm}</BaseButton>
         </div>
       </div>
     </div>,

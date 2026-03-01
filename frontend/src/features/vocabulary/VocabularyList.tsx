@@ -1,4 +1,4 @@
-import ButtonRectangular from '@/components/UI/buttons/ButtonRectangular';
+import BaseButton from '@/components/UI/buttons/BaseButton';
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import config from '@/config/config';
 import { TEXTS } from '@/locales/cs';
@@ -85,13 +85,13 @@ export default function VocabularyList({
         {hasWords ? (
           <>
             {visibleItems.map((item, index) => (
-              <ButtonRectangular
+              <BaseButton
                 key={item.item_id}
                 className="h-input flex grow-0 justify-start p-4 text-left"
                 onClick={() => onSelect(index)}
               >
                 {displayField === 'czech' ? item.czech : item.english}
-              </ButtonRectangular>
+              </BaseButton>
             ))}
             {remainingCount > 0 && (
               <button

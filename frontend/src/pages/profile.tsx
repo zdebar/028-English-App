@@ -1,4 +1,4 @@
-import ButtonRectangular from '@/components/UI/buttons/ButtonRectangular';
+import { MenuButton } from '@/components/UI/buttons/MenuButton';
 import { ROUTES } from '@/config/routes.config';
 import DeleteUserButton from '@/features/auth/DeleteUserButton';
 import ResetAllProgressButton from '@/features/auth/ResetAllProgressButton';
@@ -17,15 +17,9 @@ export default function Profile(): JSX.Element {
 
   return (
     <div className="card-width grow-0 gap-1">
-      <ButtonRectangular onClick={() => navigate(ROUTES.levels)}>
-        <p className="button-text">{TEXTS.levelsOverview}</p>
-      </ButtonRectangular>
-      <ButtonRectangular onClick={() => navigate(ROUTES.grammar)}>
-        <p className="button-text">{TEXTS.grammarOverview}</p>
-      </ButtonRectangular>
-      <ButtonRectangular onClick={() => navigate(ROUTES.vocabulary)}>
-        <p className="button-text">{TEXTS.vocabularyOverview}</p>
-      </ButtonRectangular>
+      <MenuButton text={TEXTS.levelsOverview} onClick={() => navigate(ROUTES.levels)} />
+      <MenuButton text={TEXTS.grammarOverview} onClick={() => navigate(ROUTES.grammar)} />
+      <MenuButton text={TEXTS.vocabularyOverview} onClick={() => navigate(ROUTES.vocabulary)} />
 
       <ResetAllProgressButton className="mt-4" />
       <DeleteUserButton />

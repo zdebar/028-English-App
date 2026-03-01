@@ -17,7 +17,8 @@
   }
 
   .button-text {
-    @apply w-39 text-left font-bold;
+    /* TO DELETE */
+    @apply w-40 text-left font-bold;
   }
 
   .guide p {

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import { TEXTS } from '@/locales/cs';
-import ButtonRectangular from '@/components/UI/buttons/ButtonRectangular';
+import BaseButton from '@/components/UI/buttons/BaseButton';
 import GoalMetView from '@/components/UI/GoalMetView';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
@@ -48,7 +48,7 @@ export default function LevelsOverview() {
         <div className="flex flex-col gap-1 overflow-y-auto">
           {levels.map((level, index) => (
             <div key={level.level_id} className="flex flex-col gap-1">
-              <ButtonRectangular
+              <BaseButton
                 className="h-input flex grow-0 justify-start p-4 text-left"
                 onClick={() => handleLevelClick(index)}
               >
@@ -56,11 +56,11 @@ export default function LevelsOverview() {
                   <p>{level.level_name}</p>
                   <GoalMetView current={level[shownLevels]} goal={level.totalCount} />
                 </div>
-              </ButtonRectangular>
+              </BaseButton>
               {unpackedIndex === index && (
                 <div className="flex flex-col gap-1 pl-8">
                   {level.lessons.map((lesson) => (
-                    <ButtonRectangular
+                    <BaseButton
                       key={lesson.lesson_id}
                       className="h-input flex grow-0 justify-start pr-4 text-left"
                       disabled
@@ -69,7 +69,7 @@ export default function LevelsOverview() {
                         <p>{lesson.lesson_name}</p>
                         <GoalMetView current={lesson[shownLevels]} goal={lesson.totalCount} />
                       </div>
-                    </ButtonRectangular>
+                    </BaseButton>
                   ))}
                 </div>
               )}
