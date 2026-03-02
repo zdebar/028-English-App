@@ -3,7 +3,7 @@ import { useCallback, useEffect } from 'react';
 import config from '@/config/config';
 
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { useUserStore } from '../dashboard/use-user-store';
+import { useUserStore } from '../user-stats/use-user-store';
 import { usePracticeDeck } from './hooks/use-practice-deck';
 
 import DelayedMessage from '@/components/UI/DelayedMessage';

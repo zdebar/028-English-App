@@ -7,7 +7,7 @@ import BaseButton from '@/components/UI/buttons/BaseButton';
 import GoalMetView from '@/components/UI/GoalMetView';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
-import { useUserStore } from '../dashboard/use-user-store';
+import { useUserStore } from '../user-stats/use-user-store';
 import NotificationText from '@/components/UI/NotificationText';
 import TextButton from '@/components/UI/buttons/TextButton';
 

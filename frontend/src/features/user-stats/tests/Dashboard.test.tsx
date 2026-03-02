@@ -17,7 +17,7 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 
-vi.mock('@/features/dashboard/use-user-store', () => ({
+vi.mock('@/features/user-stats/use-user-store', () => ({
   useUserStore: (selector: (state: { userStats: { levelsOverview: any[] } | null }) => unknown) =>
     selector({ userStats: { levelsOverview: mocks.levelsOverview } }),
 }));
@@ -30,18 +30,18 @@ vi.mock('@/features/help/HelpText', () => ({
   default: ({ children }: any) => <div>{children}</div>,
 }));
 
-vi.mock('@/features/dashboard/BlockBar', () => ({
+vi.mock('@/features/user-stats/BlockBar', () => ({
   default: (props: any) => {
     mocks.blockBar(props);
     return <div data-testid="blockbar" />;
   },
 }));
 
-vi.mock('@/features/dashboard/dashboard.utils', () => ({
+vi.mock('@/features/user-stats/dashboard.utils', () => ({
   getInProgressLessons: (...args: unknown[]) => mocks.getInProgressLessons(...args),
 }));
 
-import Dashboard from '@/features/dashboard/Dashboard';
+import Dashboard from '@/features/user-stats/Dashboard';
 
 describe('Dashboard', () => {
   beforeEach(() => {

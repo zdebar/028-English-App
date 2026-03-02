@@ -55,7 +55,7 @@ export function getTodayStartedItems(previousCount: number, todayCount: number):
  * Returns lessons that:
  *  have items started today, or
  *  have some items started but not all, or
- *  is the first lesson with zero items started
+ *  is the first lesson with zero items where the previous lesson is fully completed
  *
  * @param levelsOverview Array of levels overview
  * @param mode "started" (default) or "mastered" - which lesson attributes to use
@@ -73,17 +73,30 @@ export function getInProgressLessons(
       )
     : [];
 
+  const sortedLessons = [...allLessons].sort((a, b) => {
+    if ((a.level_sort_order ?? 0) !== (b.level_sort_order ?? 0)) {
+      return (a.level_sort_order ?? 0) - (b.level_sort_order ?? 0);
+    }
+    if ((a.lesson_sort_order ?? 0) !== (b.lesson_sort_order ?? 0)) {
+      return (a.lesson_sort_order ?? 0) - (b.lesson_sort_order ?? 0);
+    }
+    return (a.lesson_id ?? 0) - (b.lesson_id ?? 0);
+  });
+
   let nextZeroLessonId: number | null = null;
-  for (const lesson of allLessons) {
-    if (
-      (lesson as any)[countKey] === 0 &&
-      (nextZeroLessonId === null || lesson.lesson_id! < nextZeroLessonId)
-    ) {
-      nextZeroLessonId = lesson.lesson_id!;
+  for (let index = 0; index < sortedLessons.length; index++) {
+    const lesson = sortedLessons[index] as any;
+    const previousLesson = index > 0 ? (sortedLessons[index - 1] as any) : null;
+    const isPreviousCompleted =
+      previousLesson == null || previousLesson[countKey] === previousLesson.totalCount;
+
+    if (lesson[countKey] === 0 && isPreviousCompleted) {
+      nextZeroLessonId = lesson.lesson_id;
+      break;
     }
   }
 
-  return allLessons.filter(
+  return sortedLessons.filter(
     (lesson: any) =>
       lesson[todayKey] > 0 ||
       (lesson[countKey] > 0 && lesson[countKey] !== lesson.totalCount) ||

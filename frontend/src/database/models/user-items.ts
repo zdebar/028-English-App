@@ -230,9 +230,15 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const levelsMap = new Map<number, LevelsOverview>();
     for (const lesson of lessonsMap.values()) {
       const prev = levelsMap.get(lesson.level_id!);
-      const updatedLessons = [...(prev?.lessons ?? []), lesson].sort(
-        (a, b) => (a.lesson_id ?? 0) - (b.lesson_id ?? 0),
-      );
+      const updatedLessons = [...(prev?.lessons ?? []), lesson].sort((a, b) => {
+        if (a.level_sort_order !== b.level_sort_order) {
+          return a.level_sort_order - b.level_sort_order;
+        }
+        if (a.lesson_sort_order !== b.lesson_sort_order) {
+          return a.lesson_sort_order - b.lesson_sort_order;
+        }
+        return a.lesson_id - b.lesson_id;
+      });
       levelsMap.set(lesson.level_id!, {
         level_id: lesson.level_id!,
         level_sort_order: lesson.level_sort_order!,
@@ -246,8 +252,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       });
     }
 
-    // 3. Return sorted array (optional: sort by level_id)
-    return Array.from(levelsMap.values()).sort((a, b) => (a.level_id ?? 0) - (b.level_id ?? 0));
+    // 3. Return sorted array by level_sort_order
+    return Array.from(levelsMap.values()).sort(
+      (a, b) => (a.level_sort_order ?? 0) - (b.level_sort_order ?? 0),
+    );
   }
 
   /**

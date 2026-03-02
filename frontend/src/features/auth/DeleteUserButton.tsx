@@ -10,7 +10,7 @@ import { type JSX } from 'react';
 import ModalButton from '../modal/ModalButton';
 import { errorHandler } from '../logging/error-handler';
 import { useThemeStore } from '../theme/use-theme';
-import { useUserStore } from '../dashboard/use-user-store';
+import { useUserStore } from '../user-stats/use-user-store';
 import { clearSyncTimes } from '@/database/sync-time.utils';
 
 function logRejectedResults(results: PromiseSettledResult<unknown>[], context: string): void {

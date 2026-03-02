@@ -17,7 +17,7 @@ vi.mock('@/database/models/user-items', () => ({
   },
 }));
 
-import { useUserStore } from '@/features/dashboard/use-user-store';
+import { useUserStore } from '@/features/user-stats/use-user-store';
 
 describe('useUserStore', () => {
   beforeEach(() => {
@@ -26,7 +26,19 @@ describe('useUserStore', () => {
     useUserStore.setState({ userStats: null });
 
     mocks.getUserScoreForToday.mockResolvedValue({ item_count: 7 });
-    mocks.getLevelsOverview.mockResolvedValue([{ level_id: 1, lessons: [] }]);
+    mocks.getLevelsOverview.mockResolvedValue([
+      {
+        level_id: 1,
+        level_sort_order: 1,
+        level_name: 'A1',
+        startedCount: 0,
+        startedTodayCount: 0,
+        masteredCount: 0,
+        masteredTodayCount: 0,
+        totalCount: 0,
+        lessons: [],
+      },
+    ]);
   });
 
   it('reloadUserStats stores fetched data in state and localStorage', async () => {
@@ -34,7 +46,19 @@ describe('useUserStore', () => {
 
     const state = useUserStore.getState();
     expect(state.userStats).toEqual({
-      levelsOverview: [{ level_id: 1, lessons: [] }],
+      levelsOverview: [
+        {
+          level_id: 1,
+          level_sort_order: 1,
+          level_name: 'A1',
+          startedCount: 0,
+          startedTodayCount: 0,
+          masteredCount: 0,
+          masteredTodayCount: 0,
+          totalCount: 0,
+          lessons: [],
+        },
+      ],
       practiceCountToday: 7,
     });
 
@@ -44,7 +68,22 @@ describe('useUserStore', () => {
 
   it('reloadUserStats sets null when fetch fails', async () => {
     useUserStore.setState({
-      userStats: { levelsOverview: [{ level_id: 1, lessons: [] }], practiceCountToday: 1 },
+      userStats: {
+        levelsOverview: [
+          {
+            level_id: 1,
+            level_sort_order: 1,
+            level_name: 'A1',
+            startedCount: 0,
+            startedTodayCount: 0,
+            masteredCount: 0,
+            masteredTodayCount: 0,
+            totalCount: 0,
+            lessons: [],
+          },
+        ],
+        practiceCountToday: 1,
+      },
     });
     mocks.getUserScoreForToday.mockRejectedValue(new Error('fail'));
 

@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import BlockBar from '@/features/dashboard/BlockBar';
+import BlockBar from '@/features/user-stats/BlockBar';
 
 describe('BlockBar', () => {
   it('renders labels and progressbar with accessible values', () => {

@@ -1,5 +1,5 @@
 import { TEXTS } from '@/locales/cs';
-import BlockBar from '@/features/dashboard/BlockBar';
+import BlockBar from '@/features/user-stats/BlockBar';
 import { useUserStore } from './use-user-store';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';

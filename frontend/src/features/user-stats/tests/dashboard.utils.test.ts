@@ -99,5 +99,81 @@ describe('dashboard.utils', () => {
       expect(getInProgressLessons(null as any)).toEqual([]);
       expect(getInProgressLessons([])).toEqual([]);
     });
+
+    it('does not include zero-count lesson when previous lesson is not fully completed', () => {
+      const blockedByPrevious = [
+        {
+          lessons: [
+            {
+              lesson_id: 1,
+              lesson_sort_order: 1,
+              level_sort_order: 1,
+              totalCount: 10,
+              startedCount: 4,
+              startedTodayCount: 0,
+              masteredCount: 4,
+              masteredTodayCount: 0,
+            },
+            {
+              lesson_id: 2,
+              lesson_sort_order: 2,
+              level_sort_order: 1,
+              totalCount: 10,
+              startedCount: 0,
+              startedTodayCount: 0,
+              masteredCount: 0,
+              masteredTodayCount: 0,
+            },
+          ],
+        },
+      ] as any;
+
+      expect(getInProgressLessons(blockedByPrevious, 'started').map((x) => x.lesson_id)).toEqual([
+        1,
+      ]);
+    });
+
+    it('includes first eligible zero-count lesson when previous lesson is fully completed', () => {
+      const eligibleAfterCompleted = [
+        {
+          lessons: [
+            {
+              lesson_id: 1,
+              lesson_sort_order: 1,
+              level_sort_order: 1,
+              totalCount: 10,
+              startedCount: 10,
+              startedTodayCount: 0,
+              masteredCount: 10,
+              masteredTodayCount: 0,
+            },
+            {
+              lesson_id: 2,
+              lesson_sort_order: 2,
+              level_sort_order: 1,
+              totalCount: 10,
+              startedCount: 0,
+              startedTodayCount: 0,
+              masteredCount: 0,
+              masteredTodayCount: 0,
+            },
+            {
+              lesson_id: 3,
+              lesson_sort_order: 3,
+              level_sort_order: 1,
+              totalCount: 10,
+              startedCount: 0,
+              startedTodayCount: 0,
+              masteredCount: 0,
+              masteredTodayCount: 0,
+            },
+          ],
+        },
+      ] as any;
+
+      expect(
+        getInProgressLessons(eligibleAfterCompleted, 'started').map((x) => x.lesson_id),
+      ).toEqual([2]);
+    });
   });
 });
