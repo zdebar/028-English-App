@@ -69,7 +69,7 @@ vi.mock('@/features/auth/use-auth-store', () => ({
     selector({ userId: mocks.userId }),
 }));
 
-vi.mock('@/features/dashboard/use-user-store', () => ({
+vi.mock('@/features/user-stats/use-user-store', () => ({
   useUserStore: (selector: (state: { userStats: any }) => unknown) =>
     selector({ userStats: mocks.userStats }),
 }));

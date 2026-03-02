@@ -19,7 +19,7 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 
-vi.mock('@/features/dashboard/use-user-store', () => ({
+vi.mock('@/features/user-stats/use-user-store', () => ({
   useUserStore: (selector: (state: { userStats: { levelsOverview: any[] } | null }) => unknown) =>
     selector({ userStats: { levelsOverview: mocks.levelsOverview } }),
 }));

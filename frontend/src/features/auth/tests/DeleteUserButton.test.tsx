@@ -32,7 +32,7 @@ vi.mock('@/features/theme/use-theme', () => ({
     selector({ clearTheme: mocks.clearTheme }),
 }));
 
-vi.mock('@/features/dashboard/use-user-store', () => ({
+vi.mock('@/features/user-stats/use-user-store', () => ({
   useUserStore: (selector: (state: { clearUserStats: typeof mocks.clearUserStats }) => unknown) =>
     selector({ clearUserStats: mocks.clearUserStats }),
 }));
