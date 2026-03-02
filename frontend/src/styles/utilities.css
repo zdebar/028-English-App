@@ -16,6 +16,10 @@
     @apply disabled:bg-inherit disabled:hover:bg-inherit;
   }
 
+  .color-info {
+    @apply dark:text-new-progress-light text-black;
+  }
+
   /* Z-INDEX LEVELS */
   .z-header {
     /* Header */
