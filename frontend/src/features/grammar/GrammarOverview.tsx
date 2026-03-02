@@ -72,7 +72,7 @@ export default function GrammarOverview(): JSX.Element {
     return (
       <div className={`card-width flex flex-col justify-start gap-1`}>
         <div className="h-button flex items-center justify-between gap-1">
-          <div className="flex grow justify-start px-4 font-bold">{TEXTS.grammarOverview}</div>
+          <div className="flex grow justify-start px-4">{TEXTS.grammarOverview}</div>
           <CloseButton onClick={() => navigate('/profile')} />
         </div>
         {hasGrammar ? (

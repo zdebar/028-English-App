@@ -43,9 +43,7 @@ export default function LevelsOverview() {
     <div className="card-width relative flex flex-col justify-start">
       <div className="relative flex flex-col gap-1">
         <div className="h-button flex items-center justify-between gap-1">
-          <div className="h-button flex grow justify-start p-3 font-bold">
-            {TEXTS.levelsOverview}
-          </div>
+          <div className="h-button flex grow justify-start p-3">{TEXTS.levelsOverview}</div>
           <CloseButton onClick={() => navigate('/profile')} />
         </div>
         <div className="flex flex-col gap-1 overflow-y-auto">

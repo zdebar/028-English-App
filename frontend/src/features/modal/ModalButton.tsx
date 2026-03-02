@@ -56,7 +56,7 @@ export default function ModalButton({
       <MenuButton
         onClick={() => setShowModal(true)}
         disabled={isDisabled}
-        className={`font-bold ${className}`}
+        className={`${className}`}
       >
         {children}
       </MenuButton>

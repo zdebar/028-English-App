@@ -16,7 +16,7 @@ export default function TextButton({ onClick, children, className = '' }: TextBu
   return (
     <button
       type="button"
-      className={`color-info dark:text-old-progress-light absolute -bottom-9 left-4 cursor-pointer font-bold ${className}`}
+      className={`color-info dark:text-old-progress-light absolute -bottom-9 left-4 cursor-pointer ${className}`}
       onClick={onClick}
     >
       {children}
