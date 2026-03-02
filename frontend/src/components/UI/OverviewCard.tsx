@@ -42,7 +42,7 @@ export default function OverviewCard({
   children,
 }: OverviewCardProps): JSX.Element {
   return (
-    <div className={`card-width ${className}`}>
+    <div className={`card-width min-h-card ${className}`}>
       {/* Top Bar */}
       <div className="relative flex items-center justify-between gap-1">
         {/* Title and Reset Button */}
