@@ -20,9 +20,9 @@ const NULL_DATE = config.database.nullReplacementDate;
  * - grammar records are shared across all users
  *
  * @method getGrammarById - Fetches a grammar record by its ID.
+ * @method getStartedGrammarIds - Retrieves the list of unique grammar IDs that the user has started.
  * @method getStartedGrammarList - Retrieves the list of grammar that the user has started.
- * @method syncGrammarSinceLastSync - Synchronizes grammar data from Supabase to the local IndexedDB since the last sync.
- * @method syncGrammarAll - Synchronizes all grammar data from Supabase to the local IndexedDB.
+ * @method syncGrammar - Synchronizes grammar data between the local database and Supabase, either fully or incrementally based on the last sync timestamp.
  *
  */
 export default class Grammar extends Entity<AppDB> implements GrammarLocal {
