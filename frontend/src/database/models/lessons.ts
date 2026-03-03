@@ -19,9 +19,18 @@ import { SupabaseError } from '@/types/error.types';
 export default class Lessons extends Entity<AppDB> implements LessonLocal {
   id!: number;
   name!: string;
+  note!: string;
   sort_order!: number;
-  level_name!: string;
+  level_id!: number;
   deleted_at!: string | null;
+
+  /**
+   * Retrieves all lessons from the database.
+   * @returns {Promise<LessonLocal[]>} A promise that resolves to an array of all lessons.
+   */
+  static async getAllLessons(): Promise<LessonLocal[]> {
+    return await db.lessons.orderBy('sort_order').toArray();
+  }
 
   /**
    * Synchronizes lessons from the remote server with the local database.
@@ -41,7 +50,7 @@ export default class Lessons extends Entity<AppDB> implements LessonLocal {
     const newSyncedAt = new Date().toISOString();
 
     const lessons = await this.fetchLessons(lastSyncedAt);
-    const [toUpsert, toDelete] = splitDeleted(lessons);
+    const { toUpsert, toDelete } = splitDeleted(lessons);
 
     await db.transaction('rw', db.lessons, db.metadata, async () => {
       if (doFullSync) {
@@ -77,6 +86,6 @@ export default class Lessons extends Entity<AppDB> implements LessonLocal {
       });
     }
 
-    return lessons;
+    return lessons ?? [];
   }
 }

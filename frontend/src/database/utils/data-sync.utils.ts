@@ -78,9 +78,11 @@ export async function dataSyncOnUnmount(userId: string): Promise<void> {
 /**
  * Splits items into upsert and delete arrays based on deleted_at property.
  * @param items - Array of items with deleted_at property
- * @returns [toUpsert, toDelete]
+ * @returns { toUpsert: T[], toDelete: T[] } Object containing arrays of items to upsert and delete
  */
-export function splitDeleted<T extends { deleted_at: unknown }>(items: T[]): [T[], T[]] {
+export function splitDeleted<T extends { deleted_at: string | null }>(
+  items: T[],
+): { toUpsert: T[]; toDelete: T[] } {
   const toUpsert: T[] = [];
   const toDelete: T[] = [];
   items.forEach((item) => {
@@ -90,5 +92,5 @@ export function splitDeleted<T extends { deleted_at: unknown }>(items: T[]): [T[
       toDelete.push(item);
     }
   });
-  return [toUpsert, toDelete];
+  return { toUpsert, toDelete };
 }

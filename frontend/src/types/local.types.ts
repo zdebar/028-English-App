@@ -23,8 +23,9 @@ export interface UserItemPractice extends UserItemLocal {
 export interface LessonLocal {
   id: number;
   name: string;
+  note: string;
   sort_order: number;
-  level_name: string;
+  level_id: number;
   deleted_at: string | null;
 }
 
