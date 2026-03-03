@@ -89,53 +89,32 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   }
 
   /**
-   * Synchronizes grammar data updated since the last sync operation from backend.
+   * Synchronizes grammar data between the local database and Supabase.
    *
-   * @returns A promise that resolves to the number of grammar records synchronized.
+   * @param doFullSync - If true, performs a full sync by clearing all existing grammar data
+   *                     and fetching everything from the epoch start date. If false, performs
+   *                     an incremental sync based on the last sync timestamp. Defaults to false.
+   * @returns A promise that resolves when the sync operation is complete.
    */
-  static async syncGrammarSinceLastSync(): Promise<void> {
-    const lastSyncedAt = await Metadata.getSyncedAt(TableName.Grammar);
+  static async syncGrammar(doFullSync: boolean = false): Promise<void> {
+    const lastSyncedAt = doFullSync
+      ? config.database.epochStartDate
+      : await Metadata.getSyncedAt(TableName.Grammar);
     const newSyncedAt = new Date().toISOString();
 
     const grammar = await this.fetchGrammar(lastSyncedAt);
-
     const [toUpsert, toDelete] = splitDeleted(grammar);
 
     await db.transaction('rw', db.grammar, db.metadata, async () => {
-      const promises: Promise<unknown>[] = [];
-      if (toDelete.length > 0) {
-        promises.push(db.grammar.bulkDelete(toDelete.map((item) => item.id)));
+      if (doFullSync) {
+        await db.grammar.clear();
+      } else if (toDelete.length > 0) {
+        await db.grammar.bulkDelete(toDelete.map((item) => item.id));
       }
       if (toUpsert.length > 0) {
-        promises.push(db.grammar.bulkPut(toUpsert));
+        await db.grammar.bulkPut(toUpsert);
       }
-      promises.push(Metadata.markAsSynced(TableName.Grammar, newSyncedAt));
-      await Promise.all(promises);
-    });
-
-    infoHandler(`Completed ${grammar.length} grammars pull from Supabase.`);
-  }
-
-  /**
-   * Synchronizes all grammar data from backend.
-   *
-   * @returns A promise that resolves to the number of grammar records synchronized.
-   */
-  static async syncGrammarAll(): Promise<void> {
-    const lastSyncedAt = config.database.epochStartDate;
-    const newSyncedAt = new Date().toISOString();
-
-    const grammar = await this.fetchGrammar(lastSyncedAt);
-    const [toUpsert] = splitDeleted(grammar);
-
-    await db.transaction('rw', db.grammar, db.metadata, async () => {
-      await db.grammar.clear();
-      const promises: Promise<unknown>[] = [];
-      if (toUpsert.length > 0) {
-        promises.push(db.grammar.bulkPut(toUpsert));
-      }
-      promises.push(Metadata.markAsSynced(TableName.Grammar, newSyncedAt));
-      await Promise.all(promises);
+      await Metadata.markAsSynced(TableName.Grammar, newSyncedAt);
     });
 
     infoHandler(`Completed ${grammar.length} grammars pull from Supabase.`);
