@@ -9,6 +9,7 @@ const config = {
     epochStartDate: '1970-01-01T00:00:00+00:00', // Start date for epoch time calculations
     nullReplacementDate: '9999-12-31T23:59:59+00:00', // IndexedDB does not support null values in indexes
     nullReplacementNumber: 0, // IndexedDB does not support null values in indexes
+    nullReplacementUserId: 'for_all_users', // Replacement user ID for null values in indexes
   },
 
   progress: {

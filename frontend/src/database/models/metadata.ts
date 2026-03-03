@@ -27,7 +27,7 @@ export default class Metadata extends Entity<AppDB> {
    *          Returns the epoch start date from config if no sync date is found.
    */
   static async getSyncedAt(tableName: TableName, userId?: string | null): Promise<string> {
-    if (!tableName) throw new Error('tableName is required');
+    if (!tableName) throw new Error('tableName is required in getSyncedAt');
 
     const metadata = await db.metadata.get([
       tableName,
@@ -51,7 +51,8 @@ export default class Metadata extends Entity<AppDB> {
     syncTime: string,
     userId?: string | null,
   ): Promise<boolean> {
-    if (!tableName) throw new Error('tableName is required');
+    if (!tableName) throw new Error('tableName is required in markAsSynced');
+    if (!syncTime) throw new Error('syncTime is required in markAsSynced');
 
     const putResult = await db.metadata.put({
       table_name: tableName,
@@ -71,7 +72,7 @@ export default class Metadata extends Entity<AppDB> {
    * @returns A promise that resolves to `true` if the deletion was successful.
    */
   static async deleteSyncRow(tableName: TableName, userId?: string | null): Promise<void> {
-    if (!tableName) throw new Error('tableName is required');
+    if (!tableName) throw new Error('tableName is required in deleteSyncRow');
 
     await db.metadata.delete([tableName, userId ?? config.database.nullReplacementUserId]);
   }
