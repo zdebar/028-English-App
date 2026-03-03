@@ -44,14 +44,17 @@ export default class Levels extends Entity<AppDB> implements LevelLocal {
    * @throws Database transaction errors if the sync operation fails
    */
   static async syncLevels(doFullSync: boolean = false): Promise<void> {
+    // Step 1: Determine the last sync timestamp and the new sync timestamp
     const lastSyncedAt = doFullSync
       ? config.database.epochStartDate
       : await Metadata.getSyncedAt(TableName.Levels);
     const newSyncedAt = new Date().toISOString();
 
-    const levels = await this.fetchLevels(lastSyncedAt);
+    // Step 2: Fetch updated level records from Supabase based on the last sync timestamp
+    const levels = await this.fetchFromRemote(lastSyncedAt);
     const { toUpsert, toDelete } = splitDeleted(levels);
 
+    // Step 3: Update the local database within a transaction to ensure data integrity
     await db.transaction('rw', db.levels, db.metadata, async () => {
       if (doFullSync) {
         await db.levels.clear();
@@ -73,7 +76,7 @@ export default class Levels extends Entity<AppDB> implements LevelLocal {
    * @returns A promise that resolves to an array of local level objects.
    * @throws {SupabaseError} If the RPC call to fetch levels fails, includes the lastSyncedAt parameter in error context.
    */
-  private static async fetchLevels(
+  private static async fetchFromRemote(
     lastSyncedAt: string = config.database.epochStartDate,
   ): Promise<LevelLocal[]> {
     const { data: levels, error } = await supabaseInstance

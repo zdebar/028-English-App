@@ -45,14 +45,17 @@ export default class Lessons extends Entity<AppDB> implements LessonLocal {
    * @throws Database transaction errors if the sync operation fails
    */
   static async syncLessons(doFullSync: boolean = false): Promise<void> {
+    // Step 1: Determine the last sync timestamp and the new sync timestamp
     const lastSyncedAt = doFullSync
       ? config.database.epochStartDate
       : await Metadata.getSyncedAt(TableName.Lessons);
     const newSyncedAt = new Date().toISOString();
 
-    const lessons = await this.fetchLessons(lastSyncedAt);
+    // Step 2: Fetch updated lesson records from Supabase based on the last sync timestamp
+    const lessons = await this.fetchFromRemote(lastSyncedAt);
     const { toUpsert, toDelete } = splitDeleted(lessons);
 
+    // Step 3: Update the local database within a transaction to ensure data integrity
     await db.transaction('rw', db.lessons, db.metadata, async () => {
       if (doFullSync) {
         await db.lessons.clear();
@@ -74,7 +77,7 @@ export default class Lessons extends Entity<AppDB> implements LessonLocal {
    * @returns A promise that resolves to an array of local lesson objects.
    * @throws {SupabaseError} If the RPC call to fetch lessons fails, includes the lastSyncedAt parameter in error context.
    */
-  private static async fetchLessons(
+  private static async fetchFromRemote(
     lastSyncedAt: string = config.database.epochStartDate,
   ): Promise<LessonLocal[]> {
     const { data: lessons, error } = await supabaseInstance

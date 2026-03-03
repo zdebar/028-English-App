@@ -96,14 +96,17 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * @returns A promise that resolves when the sync operation is complete.
    */
   static async syncGrammar(doFullSync: boolean = false): Promise<void> {
+    // Step 1: Determine the last sync timestamp and the new sync timestamp
     const lastSyncedAt = doFullSync
       ? config.database.epochStartDate
       : await Metadata.getSyncedAt(TableName.Grammar);
     const newSyncedAt = new Date().toISOString();
 
-    const grammar = await this.fetchGrammar(lastSyncedAt);
+    // Step 2: Fetch updated grammar records from Supabase based on the last sync timestamp
+    const grammar = await this.fetchFromRemote(lastSyncedAt);
     const { toUpsert, toDelete } = splitDeleted(grammar);
 
+    // Step 3: Update the local database within a transaction to ensure data integrity
     await db.transaction('rw', db.grammar, db.metadata, async () => {
       if (doFullSync) {
         await db.grammar.clear();
@@ -127,7 +130,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * @returns A promise that resolves to an array of grammar records. Returns an empty array if no records are found.
    * @throws SupabaseError if the Supabase query fails.
    */
-  private static async fetchGrammar(
+  private static async fetchFromRemote(
     lastSyncedAt: string = config.database.epochStartDate,
   ): Promise<GrammarLocal[]> {
     assertIsoDateString(lastSyncedAt);
@@ -143,6 +146,6 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
       });
     }
 
-    return grammar;
+    return grammar ?? [];
   }
 }

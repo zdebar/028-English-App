@@ -63,6 +63,7 @@ CREATE TABLE IF NOT EXISTS user_scores (
   date DATE NOT NULL,
   item_count INTEGER NOT NULL DEFAULT 0 CHECK (item_count >= 0),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  deleted_at TIMESTAMPTZ,
   PRIMARY KEY (user_id, date)
 );
 

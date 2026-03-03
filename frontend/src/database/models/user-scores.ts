@@ -8,7 +8,12 @@ import { TableName, type UserScoreLocal } from '@/types/local.types';
 import { Entity } from 'dexie';
 import Metadata from './metadata';
 import { infoHandler } from '@/features/logging/info-handler';
-import { assertNonNegativeInteger, assertPositiveInteger } from '@/utils/assertions.utils';
+import {
+  assertIsoDateString,
+  assertNonNegativeInteger,
+  assertPositiveInteger,
+} from '@/utils/assertions.utils';
+import { splitDeleted } from '../utils/data-sync.utils';
 
 /**
  * Represents a user score entity in the application database.
@@ -23,6 +28,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   date!: string;
   item_count!: number;
   updated_at!: string;
+  deleted_at!: string | null;
 
   /**
    * Increases the item count for today's date by the specified amount.
@@ -74,22 +80,30 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   static async syncUserScores(userId: string, doFullSync: boolean = false): Promise<void> {
     if (!userId) throw new Error('User ID is required to sync user scores.');
 
-    const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserScores, userId);
+    // Step 1: Get the last synced timestamp for user scores
+    const lastSyncedAt = doFullSync
+      ? config.database.epochStartDate
+      : await Metadata.getSyncedAt(TableName.UserScores, userId);
     const newSyncedAt = new Date().toISOString();
 
-    // Push local changes to Supabase
+    // Step 2: Push local changes to Supabase
     const localScores = await this.getUserScores(userId, lastSyncedAt, newSyncedAt);
-    await this.postUserScores(localScores);
+    await this.postToRemote(localScores);
 
-    // Pull scores from Supabase
-    const pullFrom = doFullSync ? config.database.epochStartDate : lastSyncedAt;
-    const updatedScores = await this.fetchUserScores(userId, pullFrom);
+    // Step 3: Pull scores from Supabase
+    const updatedScores = await this.fetchFromRemote(userId, lastSyncedAt);
+    const { toUpsert, toDelete } = splitDeleted(updatedScores);
 
+    // Step 4: Update local database with fetched scores and update sync metadata
     await db.transaction('rw', db.user_scores, db.metadata, async () => {
       if (doFullSync) {
         await this.deleteAllUserScores(userId);
+      } else if (toDelete.length > 0) {
+        await db.user_scores.bulkDelete(toDelete.map((item) => [item.user_id, item.date]));
       }
-      await db.user_scores.bulkPut(updatedScores);
+      if (toUpsert.length > 0) {
+        await db.user_scores.bulkPut(toUpsert);
+      }
       await Metadata.markAsSynced(TableName.UserScores, newSyncedAt, userId);
     });
   }
@@ -121,8 +135,8 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     newSyncedAt: string,
   ): Promise<UserScoreLocal[]> {
     if (!userId) throw new Error('User ID is required to fetch user scores.');
-    if (!lastSyncedAt) throw new Error('Last synced timestamp is required to fetch user scores.');
-    if (!newSyncedAt) throw new Error('New synced timestamp is required to fetch user scores.');
+    assertIsoDateString(lastSyncedAt);
+    assertIsoDateString(newSyncedAt);
 
     const localScores = await db.user_scores
       .where('[user_id+updated_at]')
@@ -146,7 +160,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    */
   private static createRecord(userId: string, date: string, itemCount: number): UserScoreLocal {
     if (!userId) throw new Error('User ID is required to create a user score record.');
-    if (!date) throw new Error('Date is required to create a user score record.');
+    assertIsoDateString(date);
     assertNonNegativeInteger(
       itemCount,
       'itemCount must be a non-negative integer to create a user score record.',
@@ -157,6 +171,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
       date,
       item_count: itemCount,
       updated_at: new Date().toISOString(),
+      deleted_at: null,
     };
   }
 
@@ -169,7 +184,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @returns A promise that resolves when the scores have been successfully pushed to the remote database.
    * @throws {SupabaseError} If the remote upsert operation fails, with details about the local scores that failed to sync.
    */
-  private static async postUserScores(localScores: UserScoreLocal[]): Promise<void> {
+  private static async postToRemote(localScores: UserScoreLocal[]): Promise<void> {
     if (!localScores || localScores.length === 0) return;
 
     const { error: errorInsert } = await supabaseInstance.rpc('upsert_user_scores', {
@@ -195,22 +210,20 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @returns A promise that resolves when the scores have been fetched and stored
    * @throws {SupabaseError} If the RPC call to fetch scores fails
    */
-  private static async fetchUserScores(
+  private static async fetchFromRemote(
     userId: string,
     lastSyncedAt: string = config.database.epochStartDate,
     newSyncedAt: string = new Date().toISOString(),
   ): Promise<UserScoreLocal[]> {
     if (!userId) throw new Error('User ID is required to pull user scores.');
-    if (!lastSyncedAt) throw new Error('Last synced timestamp is required to pull user scores.');
-    if (!newSyncedAt) throw new Error('New synced timestamp is required to pull user scores.');
+    assertIsoDateString(lastSyncedAt);
+    assertIsoDateString(newSyncedAt);
 
-    const { data: updatedScores, error: errorFetch } = await supabaseInstance.rpc(
-      'fetch_user_scores',
-      {
-        p_user_id: userId,
-        p_last_synced_at: lastSyncedAt,
-      },
-    );
+    const { data: updatedScores, error: errorFetch } = await supabaseInstance
+      .from('user_scores')
+      .select('user_id, date, item_count, updated_at, deleted_at')
+      .gt('updated_at', lastSyncedAt)
+      .eq('user_id', userId);
 
     if (errorFetch) {
       throw new SupabaseError(`Error fetching User Scores from Supabase.`, errorFetch, {
@@ -219,6 +232,6 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
       });
     }
 
-    return updatedScores;
+    return updatedScores ?? [];
   }
 }

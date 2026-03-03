@@ -63,6 +63,7 @@ export interface UserScoreLocal {
   date: string;
   item_count: number;
   updated_at: string;
+  deleted_at: string | null;
 }
 
 export interface UserInfoLocal {
