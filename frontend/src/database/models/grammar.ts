@@ -142,6 +142,6 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
       });
     }
 
-    return grammar ?? [];
+    return grammar;
   }
 }
