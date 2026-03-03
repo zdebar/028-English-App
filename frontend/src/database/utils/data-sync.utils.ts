@@ -41,10 +41,9 @@ export async function dataSync(userId: string): Promise<void> {
 
   const userResults = await Promise.allSettled(userPromises);
   const isError = logRejectedResults(userResults, 'Data synchronization error:');
-  if (isError) throw new Error('Data synchronization error');
-
-  // Step 3: Trigger user items updated event and update sync times
   triggerUserItemsUpdatedEvent(userId);
+
+  if (isError) throw new Error('Data synchronization error');
   if (doFullSync) {
     setFullSyncTime(userId, now);
   }
