@@ -25,6 +25,13 @@ export interface UserItemPractice extends UserItemLocal {
   show_new_grammar_indicator: boolean;
 }
 
+export interface LessonLocal {
+  id: number;
+  name: string;
+  sort_order: number;
+  level_name: string;
+  deleted_at: string | null;
+}
 export interface LessonsOverview {
   lesson_id: number;
   lesson_sort_order: number;
@@ -97,6 +104,7 @@ export const TableName = {
   Grammar: 'grammar',
   UserScores: 'user_scores',
   UserItems: 'user_items',
+  Lessons: 'lessons',
 } as const;
 
 export type TableName = (typeof TableName)[keyof typeof TableName];

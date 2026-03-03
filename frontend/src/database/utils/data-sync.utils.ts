@@ -8,6 +8,7 @@ import UserScore from '@/database/models/user-scores';
 import { restoreUnsavedFromLocalStorage } from '@/database/utils/database.utils';
 import { getFullSyncTime, setFullSyncTime } from '@/database/utils/sync-time.utils';
 import { logRejectedResults } from '@/features/logging/logging.utils';
+import Lessons from '@/database/models/lessons';
 
 /**
  * Synchronizes data for a specific user with the database.
@@ -27,8 +28,16 @@ export async function dataSync(userId: string): Promise<void> {
 
   // Step 2: Perform shared stores data synchronization (grammar and audio metadata)
   const sharedPromises = doFullSync
-    ? [Grammar.syncGrammarAll(), AudioRecord.syncAudioData(config.audio.archives)]
-    : [Grammar.syncGrammarSinceLastSync(), AudioRecord.syncAudioData(config.audio.archives)];
+    ? [
+        Grammar.syncGrammarAll(),
+        Lessons.syncLessons(true),
+        AudioRecord.syncAudioData(config.audio.archives),
+      ]
+    : [
+        Grammar.syncGrammarSinceLastSync(),
+        Lessons.syncLessons(false),
+        AudioRecord.syncAudioData(config.audio.archives),
+      ];
 
   void Promise.allSettled(sharedPromises).then((results) => {
     logRejectedResults(results, 'Data synchronization error:');

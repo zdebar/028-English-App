@@ -6,10 +6,12 @@ import type UserItem from '@/database/models/user-items';
 import type UserScore from '@/database/models/user-scores';
 import type AudioMetadata from '@/database/models/audio-metadata';
 import type Metadata from '@/database/models/metadata';
+import type Lessons from './lessons';
 
 export default class AppDB extends Dexie {
   user_items!: EntityTable<UserItem, any>;
   grammar!: EntityTable<Grammar, 'id'>;
+  lessons!: EntityTable<Lessons, 'id'>;
   user_scores!: EntityTable<UserScore, any>;
   audio_records!: EntityTable<AudioRecord, 'filename'>;
   audio_metadata!: EntityTable<AudioMetadata, 'archive_name'>;
@@ -23,6 +25,7 @@ export default class AppDB extends Dexie {
       user_items:
         '[user_id+item_id], [user_id+started_at], [user_id+grammar_id+started_at], [user_id+updated_at], [user_id+next_at+item_sort_order]',
       grammar: 'id',
+      lessons: 'id',
       user_scores: '[user_id+date], [user_id+updated_at]',
       audio_records: 'filename',
       audio_metadata: 'archive_name',
