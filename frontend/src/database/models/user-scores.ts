@@ -92,8 +92,10 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
     const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserScores, userId);
     const newSyncedAt = new Date().toISOString();
+
     await this.pushUserScores(userId, lastSyncedAt, newSyncedAt);
-    await this.pullUserScores(userId, lastSyncedAt, newSyncedAt);
+    const updatedScores = await this.pullUserScores(userId, lastSyncedAt, newSyncedAt);
+    this.saveUserScoresToIndexedDB(userId, newSyncedAt, updatedScores, false);
   }
 
   /**
@@ -108,9 +110,14 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
     const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserScores, userId);
     const newSyncedAt = new Date().toISOString();
+
     await this.pushUserScores(userId, lastSyncedAt, newSyncedAt);
-    await db.user_scores.where('user_id').equals(userId).delete();
-    await this.pullUserScores(userId, config.database.epochStartDate, newSyncedAt);
+    const updatedScores = await this.pullUserScores(
+      userId,
+      config.database.epochStartDate,
+      newSyncedAt,
+    );
+    this.saveUserScoresToIndexedDB(userId, newSyncedAt, updatedScores, true);
   }
 
   /**
@@ -179,7 +186,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     userId: string,
     lastSyncedAt: string = config.database.epochStartDate,
     newSyncedAt: string = new Date().toISOString(),
-  ): Promise<void> {
+  ): Promise<UserScoreLocal[]> {
     if (!userId) throw new Error('User ID is required to pull user scores.');
     if (!lastSyncedAt) throw new Error('Last synced timestamp is required to pull user scores.');
     if (!newSyncedAt) throw new Error('New synced timestamp is required to pull user scores.');
@@ -199,10 +206,40 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
       });
     }
 
+    return updatedScores;
+  }
+
+  /**
+   * Saves user scores to IndexedDB with optional deletion of existing records.
+   *
+   * @param userId - The unique identifier of the user whose scores are being saved.
+   * @param newSyncedAt - The timestamp indicating when the scores were last synced.
+   * @param updatedScores - An array of user score records to persist to IndexedDB.
+   * @param deleteExisting - Optional flag (default: false) to delete all existing scores for the user before saving new ones.
+   *
+   * @throws {Error} If updatedScores are not provided.
+   * @throws {Error} If userId is not provided.
+   * @throws {Error} If newSyncedAt timestamp is not provided.
+   *
+   * @returns A promise that resolves when the scores have been successfully saved to IndexedDB.
+   */
+  private static async saveUserScoresToIndexedDB(
+    userId: string,
+    newSyncedAt: string,
+    updatedScores: UserScoreLocal[],
+    deleteExisting: boolean = false,
+  ): Promise<void> {
+    if (!updatedScores)
+      throw new Error('Updated scores are required to save user scores to IndexedDB.');
+    if (!userId) throw new Error('User ID is required to save user scores to IndexedDB.');
+    if (!newSyncedAt)
+      throw new Error('New synced timestamp is required to save user scores to IndexedDB.');
+
+    if (!Array.isArray(updatedScores) || updatedScores.length <= 0) return;
+
     await db.transaction('rw', db.user_scores, db.metadata, async () => {
-      if (Array.isArray(updatedScores) && updatedScores.length > 0) {
-        await db.user_scores.bulkPut(updatedScores);
-      }
+      if (deleteExisting) await this.deleteAllUserScores(userId);
+      await db.user_scores.bulkPut(updatedScores);
       await Metadata.markAsSynced(TableName.UserScores, newSyncedAt, userId);
     });
 
