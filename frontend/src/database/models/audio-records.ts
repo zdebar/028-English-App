@@ -3,11 +3,11 @@ import { fetchStorage } from '@/database/database.utils';
 import type AppDB from '@/database/models/app-db';
 import AudioMetadata from '@/database/models/audio-metadata';
 import { db } from '@/database/models/db';
-import { errorHandler } from '@/features/logging/error-handler';
 import { infoHandler } from '@/features/logging/info-handler';
 import { ZipExtractionError } from '@/types/error.types';
 import type { AudioRecordLocal } from '@/types/local.types';
 import { Entity } from 'dexie';
+import { logRejectedResults } from '@/features/logging/logging.utils';
 
 /**
  * Represents an audio record entity for managing audio files in the application's database.
@@ -39,7 +39,10 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    * @throws Logs errors for any archives that fail to sync, but continues processing remaining archives.
    */
   static async syncAudioData(archives: string[]): Promise<void> {
-    await Promise.allSettled(archives.map((archiveName) => this.syncAudioArchive(archiveName)));
+    const results = await Promise.allSettled(
+      archives.map((archiveName) => this.syncAudioArchive(archiveName)),
+    );
+    logRejectedResults(results, 'Operation failed during audio data sync');
   }
 
   /**
@@ -49,26 +52,19 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    * @returns A promise that resolves when synchronization finishes (or is skipped if already fetched).
    */
   private static async syncAudioArchive(archiveName: string): Promise<void> {
-    try {
-      if (await AudioMetadata.isFetched(archiveName)) return;
+    if (await AudioMetadata.isFetched(archiveName)) return;
 
-      const zipBlob = await fetchStorage(config.audio.archiveBucketName, archiveName);
-      const extractedFiles = await this.extractZip(zipBlob);
+    const zipBlob = await fetchStorage(config.audio.archiveBucketName, archiveName);
+    const extractedFiles = await this.extractZip(zipBlob);
 
-      await db.transaction('rw', db.audio_records, db.audio_metadata, async () => {
-        await db.audio_records.bulkPut(
-          Array.from(extractedFiles, ([filename, audioBlob]) => ({ filename, audioBlob })),
-        );
-        await AudioMetadata.markAsFetched(archiveName);
-      });
-
-      infoHandler(`Successfully synced audio archive: ${archiveName}`);
-    } catch (error) {
-      errorHandler(`Failed to sync audio archive: ${archiveName}`, error);
-      throw new Error(
-        `Failed to sync audio archive: ${archiveName} - ${error instanceof Error ? error.message : 'Unknown error'}`,
+    await db.transaction('rw', db.audio_records, db.audio_metadata, async () => {
+      await db.audio_records.bulkPut(
+        Array.from(extractedFiles, ([filename, audioBlob]) => ({ filename, audioBlob })),
       );
-    }
+      await AudioMetadata.markAsFetched(archiveName);
+    });
+
+    infoHandler(`Successfully synced audio archive: ${archiveName}`);
   }
 
   /**

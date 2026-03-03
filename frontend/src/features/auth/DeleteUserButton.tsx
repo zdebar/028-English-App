@@ -12,14 +12,7 @@ import { errorHandler } from '../logging/error-handler';
 import { useThemeStore } from '../theme/use-theme';
 import { useUserStore } from '../user-stats/use-user-store';
 import { clearSyncTimes } from '@/database/sync-time.utils';
-
-function logRejectedResults(results: PromiseSettledResult<unknown>[], context: string): void {
-  results.forEach((result) => {
-    if (result.status === 'rejected') {
-      errorHandler(context, result.reason);
-    }
-  });
-}
+import { logRejectedResults } from '@/features/logging/logging.utils.ts';
 
 /**
  * DeleteUserButton component for deleting the current user's account.
