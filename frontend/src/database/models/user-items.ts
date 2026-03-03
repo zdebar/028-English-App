@@ -3,29 +3,25 @@ import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import { TableName } from '@/types/local.types';
-import type {
-  UserItemLocal,
-  UserItemPractice,
-  LessonsOverview,
-  LevelsOverview,
-} from '@/types/local.types';
+import type { UserItemLocal, UserItemPractice, LevelsOverview } from '@/types/local.types';
 import Dexie, { Entity } from 'dexie';
 import { assertNonNegativeInteger, assertPositiveInteger } from '@/utils/assertions.utils';
 
 import {
   convertLocalToSQL,
   convertSQLToLocal,
-  getLocalDateFromUTC,
   getNextAt,
   getTodayShortDate,
   resetUserItem,
   triggerUserItemsUpdatedEvent,
+  aggregateLessonsAndLevels,
 } from '@/database/database.utils';
 import { infoHandler } from '@/features/logging/info-handler';
 import Grammar from './grammar';
 import Metadata from './metadata';
 import UserScore from './user-scores';
 import { SupabaseError } from '@/types/error.types';
+import { addGrammarIndicatorFlag } from '@/database/database.utils';
 
 const NULL_DATE = config.database.nullReplacementDate;
 
@@ -69,60 +65,27 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
     // Step 1: Fetch already started grammar list
     const startedGrammarIdSet = new Set(await Grammar.getStartedGrammarIds(userId));
-    const nowIso = new Date().toISOString();
-
-    const fetchDueItemsByParity = async (isOdd: boolean, limit: number): Promise<UserItemLocal[]> =>
-      db.user_items
-        .where('[user_id+next_at+mastered_at]')
-        .between([userId, Dexie.minKey, NULL_DATE], [userId, nowIso, NULL_DATE])
-        .filter((item) => (item.progress % 2 === 1) === isOdd)
-        .limit(limit)
-        .toArray();
 
     // Step 2: Fetch items with odd progress
-    // SELECT with user_id, next_at = null, mastered_at = null, progress odd
-    let itemsWithNextAt: UserItemLocal[] = await fetchDueItemsByParity(true, deckSize);
+    let practiceItems = await this.fetchPracticeItemsByParity(userId, true, false, deckSize);
 
-    // Step 3: If not enough items, fetch items with even progress
-    // SELECT with user_id, next_at = null, mastered_at = null, progress even
-    if (itemsWithNextAt.length < deckSize) {
-      itemsWithNextAt = await fetchDueItemsByParity(false, deckSize - itemsWithNextAt.length);
+    // Step 3: If not enough items, fetch even progress items instead
+    if (practiceItems.length < deckSize) {
+      practiceItems = await this.fetchPracticeItemsByParity(userId, false, false, deckSize);
 
-      const remainingLimit = deckSize - itemsWithNextAt.length;
+      const remainingLimit = deckSize - practiceItems.length;
       if (remainingLimit > 0) {
-        const remainingItems = await db.user_items
-          .where('[user_id+next_at+mastered_at+item_sort_order]')
-          .between(
-            [userId, NULL_DATE, NULL_DATE, Dexie.minKey],
-            [userId, NULL_DATE, NULL_DATE, Dexie.maxKey],
-            true,
-            false,
-          )
-          .limit(remainingLimit)
-          .toArray();
-        itemsWithNextAt = [...itemsWithNextAt, ...remainingItems];
+        const remainingItems = await this.fetchPracticeItemsByParity(
+          userId,
+          false,
+          true,
+          remainingLimit,
+        );
+        practiceItems = [...practiceItems, ...remainingItems];
       }
     }
 
-    // Step 4: Mark items as grammar initial practice based on started grammar
-    const shownGrammarIds = new Set<number>();
-    const itemsWithGrammarFlag: UserItemPractice[] = itemsWithNextAt.map((item) => {
-      let show = false;
-      if (
-        item.grammar_id !== 0 &&
-        !startedGrammarIdSet.has(item.grammar_id) &&
-        !shownGrammarIds.has(item.grammar_id)
-      ) {
-        show = true;
-        shownGrammarIds.add(item.grammar_id);
-      }
-      return {
-        ...item,
-        show_new_grammar_indicator: show,
-      };
-    });
-
-    return itemsWithGrammarFlag;
+    return addGrammarIndicatorFlag(practiceItems, startedGrammarIdSet);
   }
 
   /**
@@ -133,7 +96,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns Promise that resolves when the save operation completes successfully
    * @throws Error if any database operation fails
    */
-  static async savePracticeDeck(userId: string, items: UserItemLocal[]): Promise<void> {
+  static async savePracticeDeck(userId: string, items: UserItemPractice[]): Promise<void> {
     if (!userId) throw new Error('User ID is required to save practice deck.');
 
     const currentDateTime = new Date(Date.now()).toISOString();
@@ -190,72 +153,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
     const today = getTodayShortDate();
     const result = await db.user_items.where('user_id').equals(userId).toArray();
-
-    const filtered = result.filter(
-      (item) =>
-        !(
-          item.lesson_id == null ||
-          item.lesson_name == null ||
-          item.lesson_sort_order == null ||
-          item.level_id == null ||
-          item.level_name == null ||
-          item.level_sort_order == null
-        ),
-    );
-
-    // 1. Aggregate lessons
-    const lessonsMap = new Map<number, LessonsOverview>();
-    filtered.forEach((item) => {
-      const prev = lessonsMap.get(item.lesson_id!);
-      lessonsMap.set(item.lesson_id!, {
-        lesson_id: item.lesson_id!,
-        lesson_sort_order: item.lesson_sort_order!,
-        lesson_name: item.lesson_name!,
-        level_id: item.level_id!,
-        level_sort_order: item.level_sort_order!,
-        level_name: item.level_name!,
-        startedCount: (prev?.startedCount ?? 0) + (item.started_at !== NULL_DATE ? 1 : 0),
-        startedTodayCount:
-          (prev?.startedTodayCount ?? 0) +
-          (getLocalDateFromUTC(item.started_at).startsWith(today) ? 1 : 0),
-        masteredCount: (prev?.masteredCount ?? 0) + (item.mastered_at !== NULL_DATE ? 1 : 0),
-        masteredTodayCount:
-          (prev?.masteredTodayCount ?? 0) +
-          (getLocalDateFromUTC(item.mastered_at).startsWith(today) ? 1 : 0),
-        totalCount: (prev?.totalCount ?? 0) + 1,
-      });
-    });
-
-    // 2. Aggregate levels
-    const levelsMap = new Map<number, LevelsOverview>();
-    for (const lesson of lessonsMap.values()) {
-      const prev = levelsMap.get(lesson.level_id!);
-      const updatedLessons = [...(prev?.lessons ?? []), lesson].sort((a, b) => {
-        if (a.level_sort_order !== b.level_sort_order) {
-          return a.level_sort_order - b.level_sort_order;
-        }
-        if (a.lesson_sort_order !== b.lesson_sort_order) {
-          return a.lesson_sort_order - b.lesson_sort_order;
-        }
-        return a.lesson_id - b.lesson_id;
-      });
-      levelsMap.set(lesson.level_id!, {
-        level_id: lesson.level_id!,
-        level_sort_order: lesson.level_sort_order!,
-        level_name: lesson.level_name!,
-        startedCount: (prev?.startedCount ?? 0) + lesson.startedCount,
-        startedTodayCount: (prev?.startedTodayCount ?? 0) + lesson.startedTodayCount,
-        masteredCount: (prev?.masteredCount ?? 0) + lesson.masteredCount,
-        masteredTodayCount: (prev?.masteredTodayCount ?? 0) + lesson.masteredTodayCount,
-        totalCount: (prev?.totalCount ?? 0) + lesson.totalCount,
-        lessons: updatedLessons,
-      });
-    }
-
-    // 3. Return sorted array by level_sort_order
-    return Array.from(levelsMap.values()).sort(
-      (a, b) => (a.level_sort_order ?? 0) - (b.level_sort_order ?? 0),
-    );
+    return aggregateLessonsAndLevels(result, today);
   }
 
   /**
@@ -269,7 +167,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     if (!userId) throw new Error('User ID is required to reset all user items.');
 
     const count = await db.user_items
-      .where('[user_id+started_at]')
+      .where('[user_id+next_at]')
       .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
       .modify((item: UserItemLocal) => {
         resetUserItem(item);
@@ -494,5 +392,30 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     infoHandler(
       `Completed ${serverItems.length} user items pull from Supabase for userId: ${userId}`,
     );
+  }
+
+  /**
+   * Fetches practice items by odd/even progress parity for a user.
+   *
+   * @param userId - The unique identifier of the user
+   * @param isOdd - Whether to fetch items with odd progress
+   * @param isNew - Whether to fetch non-started items (next_at = NULL_DATE) or ready to practice items (next_at < today)
+   * @param limit - Maximum number of items to fetch
+   * @returns A promise that resolves to an array of UserItemLocal
+   */
+  static async fetchPracticeItemsByParity(
+    userId: string,
+    isOdd: boolean,
+    isNew: boolean = false,
+    limit: number,
+  ): Promise<UserItemLocal[]> {
+    const minNextAt = isNew ? NULL_DATE : Dexie.minKey;
+    const maxNextAt = isNew ? NULL_DATE : new Date().toISOString();
+    return db.user_items
+      .where('[user_id+next_at+item_sort_order]')
+      .between([userId, minNextAt, Dexie.minKey], [userId, maxNextAt, Dexie.maxKey], true, false)
+      .filter((item) => (item.progress % 2 === 1) === isOdd)
+      .limit(limit)
+      .toArray();
   }
 }

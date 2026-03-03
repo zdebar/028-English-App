@@ -2,11 +2,19 @@ import config from '@/config/config';
 import { supabaseInstance } from '@/config/supabase.config';
 import { errorHandler } from '@/features/logging/error-handler';
 import type { UserItemSQL } from '@/types/data.types';
-import type { UserItemLocal } from '@/types/local.types';
+import type {
+  LessonsOverview,
+  LevelsOverview,
+  UserItemLocal,
+  UserItemPractice,
+} from '@/types/local.types';
 import UserItem from './models/user-items';
 import { infoHandler } from '@/features/logging/info-handler';
 import { SupabaseError } from '@/types/error.types';
 import { assertNonNegativeInteger } from '@/utils/assertions.utils';
+
+const NULL_DATE = config.database.nullReplacementDate;
+const NULL_NUMBER = config.database.nullReplacementNumber;
 
 /**
  * Converts a `UserItemLocal` object to a `UserItemSQL` object, replacing specific date fields
@@ -18,16 +26,14 @@ import { assertNonNegativeInteger } from '@/utils/assertions.utils';
 export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
   const { user_id, item_id, progress, started_at, updated_at, next_at, mastered_at } = localItem;
 
-  const nullReplacementDate = config.database.nullReplacementDate;
-
   return {
     user_id,
     item_id,
     progress,
-    started_at: started_at === nullReplacementDate ? null : started_at,
+    started_at: started_at === NULL_DATE ? null : started_at,
     updated_at,
-    next_at: next_at === nullReplacementDate ? null : next_at,
-    mastered_at: mastered_at === nullReplacementDate ? null : mastered_at,
+    next_at: next_at === NULL_DATE ? null : next_at,
+    mastered_at: mastered_at === NULL_DATE ? null : mastered_at,
   };
 }
 
@@ -39,16 +45,13 @@ export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
  * @returns Normalized local user item.
  */
 export function convertSQLToLocal(sqlItem: UserItemLocal): UserItemLocal {
-  const nullReplacementDate = config.database.nullReplacementDate;
-  const nullReplacementNumber = config.database.nullReplacementNumber;
-
   return {
     ...sqlItem,
     item_sort_order: sqlItem.item_sort_order ?? 0,
-    grammar_id: sqlItem.grammar_id ?? nullReplacementNumber,
-    started_at: sqlItem.started_at ?? nullReplacementDate,
-    next_at: sqlItem.next_at ?? nullReplacementDate,
-    mastered_at: sqlItem.mastered_at ?? nullReplacementDate,
+    grammar_id: sqlItem.grammar_id ?? NULL_NUMBER,
+    started_at: sqlItem.started_at ?? NULL_DATE,
+    next_at: sqlItem.next_at ?? NULL_DATE,
+    mastered_at: sqlItem.mastered_at ?? NULL_DATE,
     level_sort_order: sqlItem.level_sort_order ?? null,
     lesson_sort_order: sqlItem.lesson_sort_order ?? null,
   } as UserItemLocal;
@@ -138,9 +141,9 @@ export function triggerUserItemsUpdatedEvent(userId: string) {
  * @param item - The user item object to reset.
  */
 export function resetUserItem(item: UserItemLocal): void {
-  item.started_at = config.database.nullReplacementDate;
-  item.next_at = config.database.nullReplacementDate;
-  item.mastered_at = config.database.nullReplacementDate;
+  item.started_at = NULL_DATE;
+  item.next_at = NULL_DATE;
+  item.mastered_at = NULL_DATE;
   item.updated_at = new Date().toISOString();
   item.progress = 0;
 }
@@ -155,7 +158,7 @@ export function getNextAt(progress: number): string {
   assertNonNegativeInteger(progress, 'Progress must be a non-negative integer');
 
   const interval = config.srs.intervals[progress];
-  if (interval == null) return config.database.nullReplacementDate;
+  if (interval == null) return NULL_DATE;
 
   const randomFactor = 1 + config.srs.randomness * (Math.random() * 2 - 1);
   const randomizedInterval = Math.round(interval * randomFactor);
@@ -208,4 +211,99 @@ export async function restoreUnsavedFromLocalStorage(userId: string): Promise<vo
       localStorage.removeItem(key);
     }
   }
+}
+
+/**
+ * Adds a grammar indicator flag to practice items based on started grammar IDs.
+ *
+ * @param practiceItems - Array of UserLocal items
+ * @param startedGrammarIdSet - Set of grammar IDs that have already been started
+ * @returns Array of UserItemPractice with show_new_grammar_indicator flag set
+ */
+export function addGrammarIndicatorFlag(
+  practiceItems: UserItemLocal[],
+  startedGrammarIdSet: Set<number>,
+): UserItemPractice[] {
+  const shownGrammarIds = new Set<number>();
+  return practiceItems.map((item) => {
+    let show = false;
+    if (
+      item.grammar_id !== 0 &&
+      !startedGrammarIdSet.has(item.grammar_id) &&
+      !shownGrammarIds.has(item.grammar_id)
+    ) {
+      show = true;
+      shownGrammarIds.add(item.grammar_id);
+    }
+    return {
+      ...item,
+      show_new_grammar_indicator: show,
+    };
+  });
+}
+
+/**
+ * Aggregates lessons and levels from filtered user items.
+ *
+ * @param filtered - Array of filtered UserItemLocal
+ * @param today - Today's date string for startedTodayCount/masteredTodayCount
+ * @returns Sorted array of LevelsOverview objects
+ */
+export function aggregateLessonsAndLevels(
+  filtered: UserItemLocal[],
+  today: string,
+): LevelsOverview[] {
+  // 1. Aggregate lessons
+  const lessonsMap = new Map<number, LessonsOverview>();
+  filtered.forEach((item) => {
+    const prev = lessonsMap.get(item.lesson_id!);
+    lessonsMap.set(item.lesson_id!, {
+      lesson_id: item.lesson_id!,
+      lesson_sort_order: item.lesson_sort_order!,
+      lesson_name: item.lesson_name!,
+      level_id: item.level_id!,
+      level_sort_order: item.level_sort_order!,
+      level_name: item.level_name!,
+      startedCount: (prev?.startedCount ?? 0) + (item.started_at !== NULL_DATE ? 1 : 0),
+      startedTodayCount:
+        (prev?.startedTodayCount ?? 0) +
+        (getLocalDateFromUTC(item.started_at).startsWith(today) ? 1 : 0),
+      masteredCount: (prev?.masteredCount ?? 0) + (item.mastered_at !== NULL_DATE ? 1 : 0),
+      masteredTodayCount:
+        (prev?.masteredTodayCount ?? 0) +
+        (getLocalDateFromUTC(item.mastered_at).startsWith(today) ? 1 : 0),
+      totalCount: (prev?.totalCount ?? 0) + 1,
+    });
+  });
+
+  // 2. Aggregate levels
+  const levelsMap = new Map<number, LevelsOverview>();
+  for (const lesson of lessonsMap.values()) {
+    const prev = levelsMap.get(lesson.level_id!);
+    const updatedLessons = [...(prev?.lessons ?? []), lesson].sort((a, b) => {
+      if (a.level_sort_order !== b.level_sort_order) {
+        return a.level_sort_order - b.level_sort_order;
+      }
+      if (a.lesson_sort_order !== b.lesson_sort_order) {
+        return a.lesson_sort_order - b.lesson_sort_order;
+      }
+      return a.lesson_id - b.lesson_id;
+    });
+    levelsMap.set(lesson.level_id!, {
+      level_id: lesson.level_id!,
+      level_sort_order: lesson.level_sort_order!,
+      level_name: lesson.level_name!,
+      startedCount: (prev?.startedCount ?? 0) + lesson.startedCount,
+      startedTodayCount: (prev?.startedTodayCount ?? 0) + lesson.startedTodayCount,
+      masteredCount: (prev?.masteredCount ?? 0) + lesson.masteredCount,
+      masteredTodayCount: (prev?.masteredTodayCount ?? 0) + lesson.masteredTodayCount,
+      totalCount: (prev?.totalCount ?? 0) + lesson.totalCount,
+      lessons: updatedLessons,
+    });
+  }
+
+  // 3. Return sorted array by level_sort_order
+  return Array.from(levelsMap.values()).sort(
+    (a, b) => (a.level_sort_order ?? 0) - (b.level_sort_order ?? 0),
+  );
 }
