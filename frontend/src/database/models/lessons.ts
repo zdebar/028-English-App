@@ -13,6 +13,7 @@ import { SupabaseError } from '@/types/error.types';
  * Represents a lesson entity in the local database.
  * Handles synchronization of lesson data between the remote Supabase server and local storage.
  *
+ * @method getAllLessons - Retrieves all lessons from the local database.
  * @method syncLessons - Synchronizes lessons from the remote server with the local database.
  *
  */

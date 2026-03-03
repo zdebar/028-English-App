@@ -37,6 +37,14 @@ export interface LessonOverview extends LessonLocal {
   totalCount: number;
 }
 
+export interface LevelLocal {
+  id: number;
+  name: string;
+  note: string;
+  sort_order: number;
+  deleted_at: string | null;
+}
+
 export interface UserStats {
   lessonsOverview?: LessonOverview[] | null;
   practiceCountToday?: number;
@@ -84,6 +92,7 @@ export const TableName = {
   Grammar: 'grammar',
   UserScores: 'user_scores',
   UserItems: 'user_items',
+  Levels: 'levels',
   Lessons: 'lessons',
 } as const;
 

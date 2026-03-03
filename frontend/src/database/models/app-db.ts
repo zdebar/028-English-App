@@ -6,12 +6,14 @@ import type UserItem from '@/database/models/user-items';
 import type UserScore from '@/database/models/user-scores';
 import type AudioMetadata from '@/database/models/audio-metadata';
 import type Metadata from '@/database/models/metadata';
-import type Lessons from './lessons';
+import type Lessons from '@/database/models/lessons';
+import type Levels from '@/database/models/levels';
 
 export default class AppDB extends Dexie {
-  user_items!: EntityTable<UserItem, any>;
-  grammar!: EntityTable<Grammar, 'id'>;
+  levels!: EntityTable<Levels, 'id'>;
   lessons!: EntityTable<Lessons, 'id'>;
+  grammar!: EntityTable<Grammar, 'id'>;
+  user_items!: EntityTable<UserItem, any>;
   user_scores!: EntityTable<UserScore, any>;
   audio_records!: EntityTable<AudioRecord, 'filename'>;
   audio_metadata!: EntityTable<AudioMetadata, 'archive_name'>;
@@ -22,10 +24,11 @@ export default class AppDB extends Dexie {
 
     // Define the database schema
     this.version(1).stores({
+      levels: 'id',
+      lessons: 'id',
+      grammar: 'id',
       user_items:
         '[user_id+item_id], [user_id+started_at], [user_id+grammar_id+started_at], [user_id+updated_at], [user_id+next_at+item_sort_order]',
-      grammar: 'id',
-      lessons: 'id',
       user_scores: '[user_id+date], [user_id+updated_at]',
       audio_records: 'filename',
       audio_metadata: 'archive_name',
