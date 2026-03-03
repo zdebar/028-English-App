@@ -1,7 +1,6 @@
 import { MenuButton } from '@/components/UI/buttons/MenuButton';
 import { ROUTES } from '@/config/routes.config';
 import DeleteUserButton from '@/features/auth/DeleteUserButton';
-import ResetAllProgressButton from '@/features/auth/ResetAllProgressButton';
 import SignoutButton from '@/features/auth/SignoutButton';
 import { TEXTS } from '@/locales/cs';
 import { useNavigate } from 'react-router-dom';
@@ -23,7 +22,6 @@ export default function Profile(): JSX.Element {
         {TEXTS.vocabularyOverview}
       </MenuButton>
 
-      <ResetAllProgressButton className="mt-4" />
       <DeleteUserButton />
       <SignoutButton />
     </div>

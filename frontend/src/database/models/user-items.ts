@@ -47,9 +47,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    *
    * @param userId - The unique identifier of the user
    * @param deckSize - The maximum number of items to return (defaults to config.lesson.deckSize)
-   * @returns A promise that resolves to an array of UserItemPractice objects,
-   *          sorted by progress with odd/even distribution
-   * @throws Error if any database operation fails
    */
   static async getPracticeDeck(
     userId: string,
@@ -88,11 +85,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    *
    * @param userId - The unique identifier of the user
    * @param items - Array of user item records to be saved
-   * @returns Promise that resolves when the save operation completes successfully
-   * @throws Error if any database operation fails
    */
   static async savePracticeDeck(userId: string, items: UserItemPractice[]): Promise<void> {
     if (!userId) throw new Error('User ID is required to save practice deck.');
+    if (!items || items.length === 0)
+      throw new Error('Items array is required and cannot be empty to save practice deck.');
 
     const currentDateTime = new Date(Date.now()).toISOString();
     const updatedItems = items.map((item) => {
@@ -108,8 +105,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       };
     });
 
-    await db.user_items.bulkPut(updatedItems);
-    await UserScore.addItemCount(userId, updatedItems.length);
+    await Promise.allSettled([
+      db.user_items.bulkPut(updatedItems),
+      UserScore.addItemCount(userId, updatedItems.length),
+    ]);
 
     triggerUserItemsUpdatedEvent(userId);
   }
@@ -141,7 +140,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    *
    * @param userId - The unique identifier of the user
    * @returns - A promise that resolves to an array of LessonOverview objects, each containing lesson details and associated counts
-   * @throws Error if userId is not provided
    */
   static async getLessonsOverview(userId: string): Promise<LessonOverview[]> {
     if (!userId) throw new Error('User ID is required to fetch lessons overview.');
@@ -153,63 +151,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Resets all user items for a specified user.
-   *
-   * @param userId - The ID of the user whose items should be reset
-   * @returns A promise that resolves when the reset operation is complete
-   * @throws Error if any database operation fails
-   */
-  static async resetAllUserItems(userId: string): Promise<void> {
-    if (!userId) throw new Error('User ID is required to reset all user items.');
-
-    const count = await db.user_items
-      .where('[user_id+next_at]')
-      .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
-      .modify((item: UserItemLocal) => {
-        resetUserItem(item);
-      });
-
-    infoHandler(`Reset ${count} user items for userId: ${userId}`);
-    if (count !== 0) {
-      triggerUserItemsUpdatedEvent(userId);
-    }
-  }
-
-  /**
-   * Resets grammar items for a specific user.
-   *
-   * @param userId - The unique identifier of the user
-   * @param grammarId - The unique identifier of the grammar whose items should be reset
-   * @returns A promise that resolves to the number of items that were reset
-   * @throws Throws an error if no user items are found for the given grammar ID.
-   */
-  static async resetGrammarItems(userId: string, grammarId: number): Promise<void> {
-    if (!userId) throw new Error('User ID is required to reset grammar items.');
-    if (grammarId < 0) throw new Error('Grammar ID must be a non-negative integer.');
-    assertNonNegativeInteger(grammarId, 'grammarId');
-
-    const count = await db.user_items
-      .where('[user_id+grammar_id+started_at]')
-      .between([userId, grammarId, Dexie.minKey], [userId, grammarId, NULL_DATE], true, false)
-      .modify((item: UserItemLocal) => {
-        resetUserItem(item);
-      });
-
-    if (count === 0) {
-      throw new Error(`No user items found for grammar ID ${grammarId}.`);
-    }
-
-    infoHandler(`Resetted ${count} user items for userId: ${userId}, grammarId: ${grammarId}`);
-    triggerUserItemsUpdatedEvent(userId);
-  }
-
-  /**
    * Resets a user item to its default state by user and item ID.
    *
    * @param userId - The unique identifier of the user
    * @param itemId - The unique identifier of the item to reset
-   * @returns A promise that resolves when the item is successfully reset
-   * @throws Throws an error if no user item is found for the specified item ID
    */
   static async resetUserItemById(userId: string, itemId: number): Promise<void> {
     if (!userId) throw new Error('User ID is required to reset user item.');

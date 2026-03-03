@@ -1,9 +1,7 @@
 import OverviewCard from '@/components/UI/OverviewCard';
 import Grammar from '@/database/models/grammar';
-import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import HelpButton from '@/features/help/HelpButton';
-import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import type { GrammarLocal } from '@/types/local.types';
 import DOMPurify from 'dompurify';
@@ -23,7 +21,6 @@ import NotificationText from '@/components/UI/NotificationText';
  */
 export default function GrammarOverview(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
-  const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
 
   // -- Data Fetching and Effects --
@@ -36,7 +33,6 @@ export default function GrammarOverview(): JSX.Element {
     data: grammarArray,
     currentIndex,
     currentItem: currentGrammar,
-    reload,
     setCurrentIndex,
   } = useArray<GrammarLocal>(fetchGrammarList);
 
@@ -46,19 +42,6 @@ export default function GrammarOverview(): JSX.Element {
     if (!currentGrammar?.note) return null;
     return DOMPurify.sanitize(currentGrammar.note);
   }, [currentGrammar?.note]);
-
-  // -- Handlers --
-  const handleClearGrammarUserItems = useCallback(async () => {
-    if (!userId || typeof currentGrammar?.id !== 'number') return;
-
-    try {
-      await UserItem.resetGrammarItems(userId, currentGrammar.id);
-      void reload();
-      showToast(TEXTS.resetProgressSuccessToast, 'success');
-    } catch {
-      showToast(TEXTS.resetProgressErrorToast, 'error');
-    }
-  }, [currentGrammar?.id, reload, showToast, userId]);
 
   const handleOpenGrammar = useCallback(
     (index: number) => {
@@ -100,7 +83,6 @@ export default function GrammarOverview(): JSX.Element {
       buttonTitle={currentGrammar?.name ?? TEXTS.grammarOverview}
       modalTitle={TEXTS.restartGrammarProgress}
       onClose={() => setCurrentIndex(null)}
-      handleReset={handleClearGrammarUserItems}
       className="relative"
     >
       {sanitizedNote ? (
