@@ -29,7 +29,6 @@ CREATE TABLE IF NOT EXISTS lessons (
   sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ,
-  CONSTRAINT lessons_level_id_sort_order_key UNIQUE (level_id, sort_order)
 );
 
 CREATE TABLE IF NOT EXISTS items (

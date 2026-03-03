@@ -8,7 +8,7 @@ import {
   getPartialSyncTime,
   setFullSyncTime,
   setPartialSyncTime,
-} from '@/database/sync-time.utils';
+} from '@/database/utils/sync-time.utils';
 
 describe('sync-time.utils', () => {
   beforeEach(() => {

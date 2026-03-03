@@ -1,6 +1,6 @@
 import config from '@/config/config';
 import { supabaseInstance } from '@/config/supabase.config';
-import { getTodayShortDate } from '@/database/database.utils';
+import { getTodayShortDate } from '@/database/utils/database.utils';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import { SupabaseError } from '@/types/error.types';

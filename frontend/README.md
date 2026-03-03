@@ -57,17 +57,28 @@ React & TypeScript: Hook `useFetch`, Component `PracticeCard`
 - **Storage**: Supabase Storage
 - **Database**: PostgreSQL
 
-### Supabase PostgreSQL Database Structure
+### Supabase Database Structure
 
-- **users**: Stores user id.
-- **items**: Stores practice items (vocabulary words and grammar sentences).
-- **grammar**: Stores grammar explanations.
+- **users**: Stores user uuid, and user's data.
+- **grammar**: Stores grammar explanations. Grammar are independent of levels and lessons.
+- **levels**: Stores CEFR levels.
+- **lessons**: Stores individual lessons. Every lesson should contain 100 items for simplicity. Every lesson belongs to single level.
+- **items**: Stores practice items (vocabulary words and grammar sentences). Every items belongs to single lesson, and refers to single grammar | null.
 - **user_items**: Tracks user's items progress score, next practice date, etc.
-- **user_score**: Tracks daily practice scores for users.
+- **user_scores**: Tracks daily practice scores for users.
 
-## Storage
+### Supabase Database Logic
 
-Stores audio files zips. Separated into multiple batches. First one smaller to enable faster start.
+- **started_at**: Marks started records.
+- **updated_at**: Marks updated records. Enables to partially synchronize only items changed from last sync time.
+- **next_at**: Stores date of next practice opportunity. User items with next_at > now will filtered out from practice. Next_at should be null for not mastered or deleted items.
+- **mastered_at**: Marks already mastered records. Will be filtered out from more practice.
+- **deleted_at**: Marks deleted records. Marking them instead of directly deleting them enables partial synchronization.
+
+### Supabase Storage
+
+- **audio-archive**: Stores audio files zips. Separated into multiple batches. First one smaller to enable faster start. Intended for app regular synchronization.
+- **audio-files**: Stores individual audio files. Intended for backup fetch of missing audio files.
 
 ### Data Types
 
@@ -78,44 +89,31 @@ Stores audio files zips. Separated into multiple batches. First one smaller to e
 
 The app uses IndexedDb for locally storing data. It enables offline function as long as refresh toke lasts, and it limits server traffic.
 
-#### Null Replacement Values
+- **metadata**: Stores last sync times for grammar, user_items, user_scores
+- **grammar**: Corresponds to backend SQL grammar table
+- **user_scores**: Corresponds to backend SQL user_scores table
+- **user_items**: Flatten data from backend SQL tables items, user_items, lesson, levels
+- **audio_metada**: Stores fatched_at date for archive_name of audio files
+- **audio_records**: Stores audio files
+
+### Null Replacement Values for IndexeDB
 
 - **Primary keys:** IndexedDB does not allow `null` or `undefined` in primary keys (including compound keys).
 - **Sorting:** IndexedDB always sorts `null` values first in ascending order and last in descending order.
 - **Between:** Dexie is incapable using `null` values in between filtering.
-- **Backend sync:** After "get" from backend, `null` values are replaced with `config.nullReplacementValues` where necessary.<br>
-  Before "post" to backend, `config.nullReplacementValues` are replaced with `null` where necessary.
+
+For aformentioned limitations in IndexedDB, nulls are on sync substituted with nullReplacement values.
+
+- **nullReplacementDate**: Highest possible date value '9999-12-31T23:59:59+00:00', so that in ASC null date are sorted last
+- **nullReplacementNumber**: 0, for grammar_id when there is no corresponding grammar, so that in ASC null numbers are sorted first
 
 ### Synchronization
 
-App is sync on every refresh or every 24 hours with -**SyncSinceLastSync**- and every 7 days with **SyncAll**
+App is sync on every refresh or every 24 hours periodically.
+Uses SyncAll or partial SyncSinceLastSync. SyncDates (partial, full) are stored in localStorage.
 
 - **SyncAll** First synchronizes changes to backend, then fetches all data from backend and replaces entire IndexedDB store. To ensure IndexedDB correctness.
 - **SyncSinceLastSync** First synchronizes changes to backend, then fetches only changed data. To ensure minimal traffic.
-
-#### IndexedDB Stores
-
-- **metada**
-  - Stores last synchronization dates
-  - **Stores synced_at date for:**
-    - `grammar`
-    - `user_scores`
-    - `user_items`
-  - **Null Replacements:**
-    - `config.nullReplacementUserId` — used because `userId` is part of a compound primary key.
-- **grammar**
-  - Stores grammar explanation
-- **user_scores**
-  - Stores user's daily practice
-- **audio_metada**
-  - Stores fatched_at date for archive_name of audio files
-- **audio_records**
-  - Stores audio files
-- **user_items**
-  - Stores all relevant information for practicing items. Basically merges backends "items" and "user_items" tables.
-  - **Null Replacements:**
-    - `config.nullReplacementDate` - used for started_at, next_at, mastered_at; On fetch Dates are converted on backend, on post Dates are converted in frontend
-    - `config.nullReplacementNumber` - used for grammar_id
 
 ## Features
 

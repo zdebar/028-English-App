@@ -96,7 +96,7 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 
-import { dataSync, dataSyncOnUnmount, startPeriodicSync } from '@/database/models/data-sync';
+import { dataSync, dataSyncOnUnmount, startPeriodicSync } from '@/database/utils/data-sync.utils';
 
 async function flushAsyncWork(): Promise<void> {
   for (let i = 0; i < 10; i += 1) {

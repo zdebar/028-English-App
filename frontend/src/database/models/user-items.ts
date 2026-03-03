@@ -15,13 +15,13 @@ import {
   resetUserItem,
   triggerUserItemsUpdatedEvent,
   aggregateLessonsAndLevels,
-} from '@/database/database.utils';
+} from '@/database/utils/database.utils';
 import { infoHandler } from '@/features/logging/info-handler';
 import Grammar from './grammar';
 import Metadata from './metadata';
 import UserScore from './user-scores';
 import { SupabaseError } from '@/types/error.types';
-import { addGrammarIndicatorFlag } from '@/database/database.utils';
+import { addGrammarIndicatorFlag } from '@/database/utils/database.utils';
 
 const NULL_DATE = config.database.nullReplacementDate;
 

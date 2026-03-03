@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { dataSync, dataSyncOnUnmount } from '../models/data-sync';
+import { dataSync, dataSyncOnUnmount } from '../utils/data-sync.utils';
 import AudioRecord from '../models/audio-records';
 import { TEXTS } from '@/locales/cs';
-import { getPartialSyncTime, setPartialSyncTime } from '../sync-time.utils';
 import config from '@/config/config';
 import { errorHandler } from '@/features/logging/error-handler';
+import { useToastStore } from '@/features/toast/use-toast-store';
 
 /**
  * Hook that manages periodic data synchronization for a user.
@@ -14,22 +14,20 @@ import { errorHandler } from '@/features/logging/error-handler';
  * Ensures cleanup and final sync when the component unmounts.
  *
  * @param userId - The unique identifier of the user to sync data for
- * @param showToast - Callback function to display toast notifications with success or error messages
  *
  * @returns An object containing:
  *   - loading: Boolean indicating whether a sync operation is currently in progress
  *
  * @example
- * const { loading } = usePeriodicSync(userId, showToast);
+ * const { loading } = usePeriodicSync(userId);
  */
-export function usePeriodicSync(
-  userId: string | null,
-  showToast: (message: string, type: 'success' | 'error') => void,
-) {
+export function usePeriodicSync(userId: string | null) {
   const [loading, setLoading] = useState(false);
   const inFlightSync = useRef<Promise<void> | null>(null);
   const isDisposed = useRef(false);
   const intervalId = useRef<NodeJS.Timeout | null>(null);
+
+  const showToast = useToastStore((state) => state.showToast);
 
   useEffect(() => {
     if (!userId) return;
@@ -64,17 +62,8 @@ export function usePeriodicSync(
       }
     };
 
-    const checkAndSync = () => {
-      const now = Date.now();
-      const lastSyncTimestamp = getPartialSyncTime(userId);
-      if (now - lastSyncTimestamp > config.sync.periodicSyncInterval) {
-        void runSync();
-        setPartialSyncTime(userId, now);
-      }
-    };
-
     void runSync();
-    intervalId.current = setInterval(checkAndSync, config.sync.periodicSyncInterval);
+    intervalId.current = setInterval(runSync, config.sync.periodicSyncInterval);
 
     return () => {
       isDisposed.current = true;
@@ -85,7 +74,7 @@ export function usePeriodicSync(
         });
       }
     };
-  }, [userId, showToast]);
+  }, [userId]);
 
   return { loading };
 }

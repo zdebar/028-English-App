@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { Session } from '@supabase/supabase-js';
 import { supabaseInstance } from '@/config/supabase.config';
-import { dataSyncOnUnmount } from '@/database/models/data-sync';
+import { dataSyncOnUnmount } from '@/database/utils/data-sync.utils';
 
 interface AuthState {
   userId: string | null;

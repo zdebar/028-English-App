@@ -56,7 +56,7 @@ import {
   sortOddEvenByProgress,
   triggerNamedEvent,
   triggerUserItemsUpdatedEvent,
-} from '@/database/database.utils';
+} from '@/database/utils/database.utils';
 
 describe('database.utils', () => {
   beforeEach(() => {

@@ -57,7 +57,7 @@ export default function App() {
   }, [initializeAuth]);
 
   // Data synchronization
-  const { loading } = usePeriodicSync(userId, showToast);
+  const { loading } = usePeriodicSync(userId);
 
   useEffect(() => {
     loadTheme(userId || 'guest');

@@ -1,5 +1,5 @@
 import config from '@/config/config';
-import { fetchStorage } from '@/database/database.utils';
+import { fetchStorage } from '@/database/utils/database.utils';
 import type AppDB from '@/database/models/app-db';
 import AudioMetadata from '@/database/models/audio-metadata';
 import { db } from '@/database/models/db';

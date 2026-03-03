@@ -8,7 +8,7 @@ import type {
   UserItemLocal,
   UserItemPractice,
 } from '@/types/local.types';
-import UserItem from './models/user-items';
+import UserItem from '../models/user-items';
 import { infoHandler } from '@/features/logging/info-handler';
 import { SupabaseError } from '@/types/error.types';
 import { assertNonNegativeInteger } from '@/utils/assertions.utils';

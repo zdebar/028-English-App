@@ -11,7 +11,7 @@ import ModalButton from '../modal/ModalButton';
 import { errorHandler } from '../logging/error-handler';
 import { useThemeStore } from '../theme/use-theme';
 import { useUserStore } from '../user-stats/use-user-store';
-import { clearSyncTimes } from '@/database/sync-time.utils';
+import { clearSyncTimes } from '@/database/utils/sync-time.utils';
 import { logRejectedResults } from '@/features/logging/logging.utils.ts';
 
 /**
