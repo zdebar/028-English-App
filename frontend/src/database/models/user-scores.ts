@@ -102,11 +102,11 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
     // Push local changes to Supabase
     const localScores = await this.getUserScores(userId, lastSyncedAt, newSyncedAt);
-    await this.pushUserScores(localScores);
+    await this.postUserScores(localScores);
 
     // Pull scores from Supabase
     const pullFrom = doFullSync ? config.database.epochStartDate : lastSyncedAt;
-    const updatedScores = await this.pullUserScores(userId, pullFrom);
+    const updatedScores = await this.fetchUserScores(userId, pullFrom);
 
     await db.transaction('rw', db.user_scores, db.metadata, async () => {
       if (doFullSync) {
@@ -169,7 +169,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @returns A promise that resolves when the scores have been successfully pushed to the remote database.
    * @throws {SupabaseError} If the remote upsert operation fails, with details about the local scores that failed to sync.
    */
-  private static async pushUserScores(localScores: UserScoreLocal[]): Promise<void> {
+  private static async postUserScores(localScores: UserScoreLocal[]): Promise<void> {
     if (!localScores || localScores.length === 0) return;
 
     const { error: errorInsert } = await supabaseInstance.rpc('upsert_user_scores', {
@@ -195,7 +195,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @returns A promise that resolves when the scores have been fetched and stored
    * @throws {SupabaseError} If the RPC call to fetch scores fails
    */
-  private static async pullUserScores(
+  private static async fetchUserScores(
     userId: string,
     lastSyncedAt: string = config.database.epochStartDate,
     newSyncedAt: string = new Date().toISOString(),
