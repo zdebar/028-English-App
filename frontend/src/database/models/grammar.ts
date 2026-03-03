@@ -1,6 +1,6 @@
 import { Entity } from 'dexie';
 import type AppDB from '@/database/models/app-db';
-import type { GrammarLocal, UserItemLocal } from '@/types/local.types';
+import type { GrammarLocal } from '@/types/local.types';
 import { supabaseInstance } from '@/config/supabase.config';
 import { db } from '@/database/models/db';
 import config from '@/config/config';
@@ -59,12 +59,12 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   static async getStartedGrammarIds(userId: string): Promise<number[]> {
     if (!userId) throw new Error('userId is required');
 
-    const startedUserItems: UserItemLocal[] = await db.user_items
-      .where('[user_id+started_at]')
-      .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
-      .toArray();
+    const startedGrammarIds = await db.user_items
+      .where('[user_id+grammar_id+started_at]')
+      .between([userId, Dexie.minKey, Dexie.minKey], [userId, Dexie.maxKey, NULL_DATE], true, false)
+      .primaryKeys();
 
-    return [...new Set(startedUserItems.map((item) => item.grammar_id))];
+    return [...new Set(startedGrammarIds.map((key) => key[1]))];
   }
 
   /**
