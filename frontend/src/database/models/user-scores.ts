@@ -15,8 +15,8 @@ import { assertNonNegativeInteger, assertPositiveInteger } from '@/utils/asserti
  *
  * @method addItemCount - Increases the item count for today's date by the specified amount.
  * @method getUserScoreForToday - Fetches the user score record for today's date.
- * @method syncUserScoreSinceLastSync - Synchronizes user score data between the local IndexedDB and Supabase since the last sync.
- * @method syncUserScoreAll - Synchronizes all user score data between the local IndexedDB and Supabase.
+ * @method syncUserScores - Synchronizes user scores between local database and Supabase.
+ * @method deleteAllUserScores - Deletes all user score records for a given user.
  */
 export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   user_id!: string;
@@ -54,29 +54,6 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
     const today = getTodayShortDate();
     return (await db.user_scores.get([userId, today])) ?? this.createRecord(userId, today, 0);
-  }
-
-  /**
-   * Creates a user score record with the provided information.
-   * @param userId - The unique identifier of the user
-   * @param date - The date associated with the score record
-   * @param itemCount - The number of items counted in this score. Should be a non-negative integer.
-   * @returns A new UserScoreLocal object with the provided data and current timestamp
-   */
-  private static createRecord(userId: string, date: string, itemCount: number): UserScoreLocal {
-    if (!userId) throw new Error('User ID is required to create a user score record.');
-    if (!date) throw new Error('Date is required to create a user score record.');
-    assertNonNegativeInteger(
-      itemCount,
-      'itemCount must be a non-negative integer to create a user score record.',
-    );
-
-    return {
-      user_id: userId,
-      date,
-      item_count: itemCount,
-      updated_at: new Date().toISOString(),
-    };
   }
 
   /**
@@ -138,7 +115,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @returns A promise that resolves with the fetched scores
    * @throws {SupabaseError} If the RPC call to fetch scores fails
    */
-  static async getUserScores(
+  private static async getUserScores(
     userId: string,
     lastSyncedAt: string,
     newSyncedAt: string,
@@ -158,6 +135,29 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     }
 
     return localScores;
+  }
+
+  /**
+   * Creates a user score record with the provided information.
+   * @param userId - The unique identifier of the user
+   * @param date - The date associated with the score record
+   * @param itemCount - The number of items counted in this score. Should be a non-negative integer.
+   * @returns A new UserScoreLocal object with the provided data and current timestamp
+   */
+  private static createRecord(userId: string, date: string, itemCount: number): UserScoreLocal {
+    if (!userId) throw new Error('User ID is required to create a user score record.');
+    if (!date) throw new Error('Date is required to create a user score record.');
+    assertNonNegativeInteger(
+      itemCount,
+      'itemCount must be a non-negative integer to create a user score record.',
+    );
+
+    return {
+      user_id: userId,
+      date,
+      item_count: itemCount,
+      updated_at: new Date().toISOString(),
+    };
   }
 
   /**
