@@ -12,9 +12,9 @@ import { logRejectedResults } from '@/features/logging/logging.utils';
 /**
  * Represents an audio record entity for managing audio files in the application's database.
  *
- * @method get - Retrieves audio record by its filename.
- * @method extractZip - Extracts files from a zip Blob and returns them as a map of filename to Blob.
+ * @method getAudioRecord - Retrieves audio record by its filename.
  * @method syncAudioData - Synchronize audio data by downloading, extracting, and storing audio archives from remote storage.
+ * @method removeOrphaned - Removes audio records that are not referenced by any user items.
  */
 export default class AudioRecord extends Entity<AppDB> implements AudioRecordLocal {
   filename!: string;
@@ -43,6 +43,30 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
       archives.map((archiveName) => this.syncAudioArchive(archiveName)),
     );
     logRejectedResults(results, 'Operation failed during audio data sync');
+  }
+
+  /**
+   * Removes orphaned audio records from the database.
+   * Orphaned records are those that exist in the audio_records table but are not referenced by any user items.
+   *
+   * @returns A promise that resolves when orphaned audio records are removed.
+   */
+  static async removeOrphaned(): Promise<void> {
+    const existingFilenames = await db.audio_records.toCollection().primaryKeys();
+    const allAudio = await db.user_items.toCollection().toArray();
+    const expectedAudio = Array.from(
+      new Set(allAudio.map((item) => item.audio).filter((audio): audio is string => !!audio)),
+    );
+
+    const existingSet = new Set(existingFilenames);
+    const expectedSet = new Set(expectedAudio);
+
+    const orphaned = Array.from(existingSet).filter((x) => !expectedSet.has(x));
+
+    if (orphaned.length > 0) {
+      await db.audio_records.bulkDelete(orphaned);
+      infoHandler(`Deleted ${orphaned.length} orphaned audio records.`);
+    }
   }
 
   /**
@@ -114,29 +138,5 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
     infoHandler(`Successfully synced audio file: ${audioName}`);
 
     return { filename: audioName, audioBlob };
-  }
-
-  /**
-   * Removes orphaned audio records from the database.
-   * Orphaned records are those that exist in the audio_records table but are not referenced by any user items.
-   *
-   * @returns A promise that resolves when orphaned audio records are removed.
-   */
-  static async removeOrphaned(): Promise<void> {
-    const existingFilenames = await db.audio_records.toCollection().primaryKeys();
-    const allAudio = await db.user_items.toCollection().toArray();
-    const expectedAudio = Array.from(
-      new Set(allAudio.map((item) => item.audio).filter((audio): audio is string => !!audio)),
-    );
-
-    const existingSet = new Set(existingFilenames);
-    const expectedSet = new Set(expectedAudio);
-
-    const orphaned = Array.from(existingSet).filter((x) => !expectedSet.has(x));
-
-    if (orphaned.length > 0) {
-      await db.audio_records.bulkDelete(orphaned);
-      infoHandler(`Deleted ${orphaned.length} orphaned audio records.`);
-    }
   }
 }
