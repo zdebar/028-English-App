@@ -1,8 +1,8 @@
 import Footer from '@/components/Layout/Footer';
 import Header from '@/components/Layout/Header';
 import ProtectedLayout from '@/components/utils/protected-laout';
+import { usePeriodicSync } from '@/database/hooks/use-periodic-sync';
 
-import { startPeriodicSync } from '@/database/models/data-sync';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import Levels from '@/pages/Levels';
 
@@ -18,7 +18,7 @@ import DelayedMessage from '@/components/UI/DelayedMessage';
 import Profile from '@/pages/Profile';
 import Guide from '@/pages/Guide';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { errorHandler } from './features/logging/error-handler';
 import { useToastStore } from './features/toast/use-toast-store';
@@ -29,7 +29,6 @@ import { useThemeStore } from './features/theme/use-theme';
 import NotificationText from './components/UI/NotificationText';
 
 export default function App() {
-  const [loading, setLoading] = useState(false);
   const userId = useAuthStore((state) => state.userId);
   const initializeAuth = useAuthStore((state) => state.initializeAuth);
   const showToast = useToastStore((state) => state.showToast);
@@ -58,11 +57,7 @@ export default function App() {
   }, [initializeAuth]);
 
   // Data synchronization
-  useEffect(() => {
-    if (!userId) return;
-    const cleanup = startPeriodicSync(userId, setLoading, showToast);
-    return cleanup;
-  }, [userId, showToast]);
+  const { loading } = usePeriodicSync(userId, showToast);
 
   useEffect(() => {
     loadTheme(userId || 'guest');

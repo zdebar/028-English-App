@@ -69,6 +69,12 @@ function makeItem(overrides: Partial<UserItemPractice> = {}): UserItemPractice {
     next_at: '2026-01-01',
     mastered_at: '2026-01-01',
     show_new_grammar_indicator: false,
+    level_id: null,
+    level_name: null,
+    level_sort_order: null,
+    lesson_id: null,
+    lesson_name: null,
+    lesson_sort_order: null,
     ...overrides,
   };
 }
