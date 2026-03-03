@@ -13,14 +13,8 @@ import { SupabaseError } from '@/types/error.types';
  * Represents a lesson entity in the local database.
  * Handles synchronization of lesson data between the remote Supabase server and local storage.
  *
- * @implements {LessonLocal}
- * @extends {Entity<AppDB>}
+ * @method syncLessons - Synchronizes lessons from the remote server with the local database.
  *
- * @property {number} id - The unique identifier for the lesson
- * @property {string} name - The name of the lesson
- * @property {number} sort_order - The display order of the lesson
- * @property {string} level_name - The proficiency level associated with the lesson
- * @property {string | null} deleted_at - Timestamp of when the lesson was deleted, or null if not deleted
  */
 export default class Lessons extends Entity<AppDB> implements LessonLocal {
   id!: number;
