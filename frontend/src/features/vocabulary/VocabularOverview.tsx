@@ -27,7 +27,7 @@ export default function VocabularyOverview() {
   // -- DATA FETCHING --
   const fetchVocabulary = useCallback(async () => {
     if (!userId) return [];
-    return UserItem.getUserStartedVocabulary(userId);
+    return UserItem.getStartedVocabulary(userId);
   }, [userId]);
 
   const {

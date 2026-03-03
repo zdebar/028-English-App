@@ -13,12 +13,7 @@ export interface UserItemLocal {
   deleted_at: string | null;
   next_at: string; // nulls replaced with config.database.nullReplacementDate
   mastered_at: string; // nulls replaced with config.database.nullReplacementDate
-  level_id: number | null;
-  level_sort_order: number | null;
-  level_name: string | null;
-  lesson_id: number | null;
-  lesson_sort_order: number | null;
-  lesson_name: string | null;
+  lesson_id: number;
 }
 
 export interface UserItemPractice extends UserItemLocal {
@@ -32,36 +27,20 @@ export interface LessonLocal {
   level_name: string;
   deleted_at: string | null;
 }
-export interface LessonsOverview {
-  lesson_id: number;
-  lesson_sort_order: number;
-  lesson_name: string;
-  level_id: number;
-  level_sort_order: number;
-  level_name: string;
-  startedCount: number;
-  startedTodayCount: number;
-  masteredCount: number;
-  masteredTodayCount: number;
-  totalCount: number;
-}
 
-export interface LevelsOverview {
-  level_id: number;
-  level_sort_order: number;
-  level_name: string;
+export interface LessonOverview extends LessonLocal {
   startedCount: number;
   startedTodayCount: number;
   masteredCount: number;
   masteredTodayCount: number;
   totalCount: number;
-  lessons: LessonsOverview[];
 }
 
 export interface UserStats {
-  levelsOverview?: LevelsOverview[] | null;
+  lessonsOverview?: LessonOverview[] | null;
   practiceCountToday?: number;
 }
+
 export interface GrammarLocal {
   id: number;
   name: string;

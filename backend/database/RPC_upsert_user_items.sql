@@ -11,6 +11,15 @@ BEGIN
     RETURN;
   END IF;
 
+    -- Delete rows where started_at is null
+    DELETE FROM public.user_items
+    WHERE user_id = p_user_id
+      AND item_id IN (
+        SELECT (entry->>'item_id')::INT
+        FROM jsonb_array_elements(p_user_items) AS entry
+        WHERE (entry->>'started_at') IS NULL OR (entry->>'started_at') = 'null'
+      );
+
   INSERT INTO public.user_items (
     user_id,
     item_id,
@@ -29,7 +38,8 @@ BEGIN
     (entry->>'next_at')::TIMESTAMPTZ AS next_at,
     (entry->>'mastered_at')::TIMESTAMPTZ AS mastered_at
   FROM jsonb_array_elements(p_user_items) AS entry
-  WHERE entry->>'item_id' ~ '^\d+$'
+    WHERE (entry->>'started_at') IS NOT NULL AND (entry->>'started_at') <> 'null'
+      AND entry->>'item_id' ~ '^\d+$'
   ON CONFLICT (user_id, item_id)
   DO UPDATE SET
     progress = CASE

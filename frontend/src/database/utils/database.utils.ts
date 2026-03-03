@@ -3,10 +3,10 @@ import { supabaseInstance } from '@/config/supabase.config';
 import { errorHandler } from '@/features/logging/error-handler';
 import type { UserItemSQL } from '@/types/sql.types';
 import type {
-  LessonsOverview,
-  LevelsOverview,
   UserItemLocal,
   UserItemPractice,
+  LessonLocal,
+  LessonOverview,
 } from '@/types/local.types';
 import UserItem from '../models/user-items';
 import { infoHandler } from '@/features/logging/info-handler';
@@ -52,8 +52,6 @@ export function convertSQLToLocal(sqlItem: UserItemLocal): UserItemLocal {
     started_at: sqlItem.started_at ?? NULL_DATE,
     next_at: sqlItem.next_at ?? NULL_DATE,
     mastered_at: sqlItem.mastered_at ?? NULL_DATE,
-    level_sort_order: sqlItem.level_sort_order ?? null,
-    lesson_sort_order: sqlItem.lesson_sort_order ?? null,
   } as UserItemLocal;
 }
 
@@ -243,67 +241,51 @@ export function addGrammarIndicatorFlag(
 }
 
 /**
- * Aggregates lessons and levels from filtered user items.
+ * Aggregates lessons from user items.
  *
- * @param filtered - Array of filtered UserItemLocal
- * @param today - Today's date string for startedTodayCount/masteredTodayCount
- * @returns Sorted array of LevelsOverview objects
+ * @param items - Array of filtered UserItemLocal
+ * @param lessons - Array of LessonLocal
+ * @param day - Day string for startedTodayCount/masteredTodayCount
+ * @returns Sorted array of LessonOverview objects
  */
-export function aggregateLessonsAndLevels(
-  filtered: UserItemLocal[],
-  today: string,
-): LevelsOverview[] {
-  // 1. Aggregate lessons
-  const lessonsMap = new Map<number, LessonsOverview>();
-  filtered.forEach((item) => {
-    const prev = lessonsMap.get(item.lesson_id!);
-    lessonsMap.set(item.lesson_id!, {
-      lesson_id: item.lesson_id!,
-      lesson_sort_order: item.lesson_sort_order!,
-      lesson_name: item.lesson_name!,
-      level_id: item.level_id!,
-      level_sort_order: item.level_sort_order!,
-      level_name: item.level_name!,
-      startedCount: (prev?.startedCount ?? 0) + (item.started_at !== NULL_DATE ? 1 : 0),
-      startedTodayCount:
-        (prev?.startedTodayCount ?? 0) +
-        (getLocalDateFromUTC(item.started_at).startsWith(today) ? 1 : 0),
-      masteredCount: (prev?.masteredCount ?? 0) + (item.mastered_at !== NULL_DATE ? 1 : 0),
-      masteredTodayCount:
-        (prev?.masteredTodayCount ?? 0) +
-        (getLocalDateFromUTC(item.mastered_at).startsWith(today) ? 1 : 0),
-      totalCount: (prev?.totalCount ?? 0) + 1,
-    });
+export function aggregateLessons(
+  items: UserItemLocal[],
+  lessons: LessonLocal[],
+  day: string,
+): LessonOverview[] {
+  // Prepare count arrays
+  const startedCount = new Array(lessons.length).fill(0);
+  const startedTodayCount = new Array(lessons.length).fill(0);
+  const masteredCount = new Array(lessons.length).fill(0);
+  const masteredTodayCount = new Array(lessons.length).fill(0);
+  const totalCount = new Array(lessons.length).fill(0);
+
+  // Map lesson_id to index for fast lookup
+  const lessonIdToIndex = new Map<number, number>();
+  lessons.forEach((lesson, idx) => lessonIdToIndex.set(lesson.id, idx));
+
+  // Aggregate counts
+  items.forEach((item) => {
+    const idx = lessonIdToIndex.get(item.lesson_id);
+    if (idx === undefined) return;
+    if (item.started_at !== NULL_DATE) startedCount[idx]++;
+    if (item.started_at !== NULL_DATE && getLocalDateFromUTC(item.started_at).startsWith(day))
+      startedTodayCount[idx]++;
+    if (item.mastered_at !== NULL_DATE) masteredCount[idx]++;
+    if (item.mastered_at !== NULL_DATE && getLocalDateFromUTC(item.mastered_at).startsWith(day))
+      masteredTodayCount[idx]++;
+    totalCount[idx]++;
   });
 
-  // 2. Aggregate levels
-  const levelsMap = new Map<number, LevelsOverview>();
-  for (const lesson of lessonsMap.values()) {
-    const prev = levelsMap.get(lesson.level_id!);
-    const updatedLessons = [...(prev?.lessons ?? []), lesson].sort((a, b) => {
-      if (a.level_sort_order !== b.level_sort_order) {
-        return a.level_sort_order - b.level_sort_order;
-      }
-      if (a.lesson_sort_order !== b.lesson_sort_order) {
-        return a.lesson_sort_order - b.lesson_sort_order;
-      }
-      return a.lesson_id - b.lesson_id;
-    });
-    levelsMap.set(lesson.level_id!, {
-      level_id: lesson.level_id!,
-      level_sort_order: lesson.level_sort_order!,
-      level_name: lesson.level_name!,
-      startedCount: (prev?.startedCount ?? 0) + lesson.startedCount,
-      startedTodayCount: (prev?.startedTodayCount ?? 0) + lesson.startedTodayCount,
-      masteredCount: (prev?.masteredCount ?? 0) + lesson.masteredCount,
-      masteredTodayCount: (prev?.masteredTodayCount ?? 0) + lesson.masteredTodayCount,
-      totalCount: (prev?.totalCount ?? 0) + lesson.totalCount,
-      lessons: updatedLessons,
-    });
-  }
-
-  // 3. Return sorted array by level_sort_order
-  return Array.from(levelsMap.values()).sort(
-    (a, b) => (a.level_sort_order ?? 0) - (b.level_sort_order ?? 0),
-  );
+  // Build LessonOverview[]
+  return lessons
+    .map((lesson, idx) => ({
+      ...lesson,
+      startedCount: startedCount[idx],
+      startedTodayCount: startedTodayCount[idx],
+      masteredCount: masteredCount[idx],
+      masteredTodayCount: masteredTodayCount[idx],
+      totalCount: totalCount[idx],
+    }))
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 }

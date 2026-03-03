@@ -3,7 +3,7 @@ import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import { TableName } from '@/types/local.types';
-import type { UserItemLocal, UserItemPractice, LevelsOverview } from '@/types/local.types';
+import type { UserItemLocal, UserItemPractice, LessonOverview } from '@/types/local.types';
 import Dexie, { Entity } from 'dexie';
 import { assertNonNegativeInteger, assertPositiveInteger } from '@/utils/assertions.utils';
 
@@ -14,7 +14,7 @@ import {
   getTodayShortDate,
   resetUserItem,
   triggerUserItemsUpdatedEvent,
-  aggregateLessonsAndLevels,
+  aggregateLessons,
 } from '@/database/utils/database.utils';
 import { infoHandler } from '@/features/logging/info-handler';
 import Grammar from './grammar';
@@ -40,12 +40,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   deleted_at!: null;
   next_at!: string;
   mastered_at!: string;
-  level_id!: number | null;
-  level_sort_order!: number | null;
-  level_name!: string | null;
-  lesson_id!: number | null;
-  lesson_sort_order!: number | null;
-  lesson_name!: string | null;
+  lesson_id!: number;
 
   /**
    * Retrieves a practice deck of user items for studying.
@@ -125,7 +120,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param userId - The unique identifier of the user
    * @returns A promise that resolves to an array of user vocabulary items sorted by Czech translation
    */
-  static async getUserStartedVocabulary(userId: string): Promise<UserItemLocal[]> {
+  static async getStartedVocabulary(userId: string): Promise<UserItemLocal[]> {
     if (!userId) throw new Error('User ID is required to fetch started vocabulary.');
 
     const result = await db.user_items
@@ -142,18 +137,19 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Retrieves an overview of levels for a user, including counts of started and mastered items.
+   * Retrieves an overview of lessons for a user, including counts of started and mastered items.
    *
    * @param userId - The unique identifier of the user
-   * @returns - A promise that resolves to an array of LevelsOverview objects, each containing level details and associated lessons with their counts
+   * @returns - A promise that resolves to an array of LessonOverview objects, each containing lesson details and associated counts
    * @throws Error if userId is not provided
    */
-  static async getLevelsOverview(userId: string): Promise<LevelsOverview[]> {
-    if (!userId) throw new Error('User ID is required to fetch levels overview.');
+  static async getLessonsOverview(userId: string): Promise<LessonOverview[]> {
+    if (!userId) throw new Error('User ID is required to fetch lessons overview.');
 
     const today = getTodayShortDate();
-    const result = await db.user_items.where('user_id').equals(userId).toArray();
-    return aggregateLessonsAndLevels(result, today);
+    const items = await db.user_items.where('user_id').equals(userId).toArray();
+    const lessons = await db.lessons.orderBy('sort_order').toArray();
+    return aggregateLessons(items, lessons, today);
   }
 
   /**
