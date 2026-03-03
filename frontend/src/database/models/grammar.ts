@@ -8,7 +8,7 @@ import Dexie from 'dexie';
 import Metadata from './metadata';
 import { TableName } from '@/types/local.types';
 import { DatabaseError, SupabaseError } from '@/types/error.types';
-import type { GrammarSQL } from '@/types/data.types';
+import type { GrammarSQL } from '@/types/sql.types';
 import { infoHandler } from '@/features/logging/info-handler';
 import { assertPositiveInteger } from '@/utils/assertions.utils';
 import { splitDeleted } from '../utils/data-sync.utils';

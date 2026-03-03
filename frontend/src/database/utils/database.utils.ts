@@ -1,7 +1,7 @@
 import config from '@/config/config';
 import { supabaseInstance } from '@/config/supabase.config';
 import { errorHandler } from '@/features/logging/error-handler';
-import type { UserItemSQL } from '@/types/data.types';
+import type { UserItemSQL } from '@/types/sql.types';
 import type {
   LessonsOverview,
   LevelsOverview,
