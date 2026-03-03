@@ -28,7 +28,7 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    * @throws Throws an error if the audio record cannot be found or fetched.
    */
   static async getAudioRecord(audioName: string): Promise<AudioRecordLocal | null> {
-    if (!audioName) throw new Error('audioName is required');
+    if (!audioName) throw new Error('audioName is required in getAudioRecord');
     return (await db.audio_records.get(audioName)) ?? this.fetchAudioRecord(audioName);
   }
 
