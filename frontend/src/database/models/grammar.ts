@@ -10,7 +10,8 @@ import { TableName } from '@/types/local.types';
 import { DatabaseError, SupabaseError } from '@/types/error.types';
 import type { GrammarSQL } from '@/types/data.types';
 import { infoHandler } from '@/features/logging/info-handler';
-import { assertNonNegativeInteger } from '@/utils/assertions.utils';
+import { assertPositiveInteger } from '@/utils/assertions.utils';
+import { splitDeleted } from '../utils/data-sync.utils';
 
 const NULL_DATE = config.database.nullReplacementDate;
 
@@ -39,7 +40,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * @throws {DatabaseError} If no grammar record with the specified ID is found.
    */
   static async getGrammarById(grammarId: number): Promise<GrammarLocal> {
-    assertNonNegativeInteger(grammarId, 'grammarId');
+    assertPositiveInteger(grammarId, 'grammarId');
 
     const grammar = await db.grammar.get(grammarId);
 
@@ -57,7 +58,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * @returns A promise that resolves to an array of unique grammar IDs that the user has started, or an empty array if no items have been started
    */
   static async getStartedGrammarIds(userId: string): Promise<number[]> {
-    if (!userId) throw new Error('userId is required');
+    if (!userId) throw new Error('userId is required in getStartedGrammarIds');
 
     const startedGrammarIds = await db.user_items
       .where('[user_id+grammar_id+started_at]')
@@ -92,15 +93,27 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    *
    * @returns A promise that resolves to the number of grammar records synchronized.
    */
-  static async syncGrammarSinceLastSync(): Promise<number> {
+  static async syncGrammarSinceLastSync(): Promise<void> {
     const lastSyncedAt = await Metadata.getSyncedAt(TableName.Grammar);
     const newSyncedAt = new Date().toISOString();
 
     const grammar = await this.fetchGrammar(lastSyncedAt);
-    await this.applyGrammarSync(grammar, newSyncedAt);
+
+    const [toUpsert, toDelete] = splitDeleted(grammar);
+
+    await db.transaction('rw', db.grammar, db.metadata, async () => {
+      const promises: Promise<unknown>[] = [];
+      if (toDelete.length > 0) {
+        promises.push(db.grammar.bulkDelete(toDelete.map((item) => item.id)));
+      }
+      if (toUpsert.length > 0) {
+        promises.push(db.grammar.bulkPut(toUpsert));
+      }
+      promises.push(Metadata.markAsSynced(TableName.Grammar, newSyncedAt));
+      await Promise.all(promises);
+    });
 
     infoHandler(`Completed ${grammar.length} grammars pull from Supabase.`);
-    return grammar.length;
   }
 
   /**
@@ -108,16 +121,24 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    *
    * @returns A promise that resolves to the number of grammar records synchronized.
    */
-  static async syncGrammarAll(): Promise<number> {
+  static async syncGrammarAll(): Promise<void> {
     const lastSyncedAt = config.database.epochStartDate;
     const newSyncedAt = new Date().toISOString();
 
     const grammar = await this.fetchGrammar(lastSyncedAt);
-    await db.grammar.clear();
-    await this.applyGrammarSync(grammar, newSyncedAt);
+    const [toUpsert] = splitDeleted(grammar);
+
+    await db.transaction('rw', db.grammar, db.metadata, async () => {
+      await db.grammar.clear();
+      const promises: Promise<unknown>[] = [];
+      if (toUpsert.length > 0) {
+        promises.push(db.grammar.bulkPut(toUpsert));
+      }
+      promises.push(Metadata.markAsSynced(TableName.Grammar, newSyncedAt));
+      await Promise.all(promises);
+    });
 
     infoHandler(`Completed ${grammar.length} grammars pull from Supabase.`);
-    return grammar.length;
   }
 
   /**
@@ -143,40 +164,5 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
     }
 
     return grammar ?? [];
-  }
-
-  /**
-   * Applies grammar synchronization by processing items for deletion or upsert.
-   *
-   * Separates grammar items into two categories based on their `deleted_at` property:
-   * - Items with `deleted_at === null` are upserted to the database
-   * - Items with `deleted_at !== null` are marked for deletion
-   *
-   * @param grammar - Array of grammar items to synchronize
-   * @param newSyncedAt - The timestamp to mark the synchronization time in metadata
-   * @returns A promise that resolves when the synchronization is complete
-   * @private
-   */
-  private static async applyGrammarSync(grammar: GrammarSQL[], newSyncedAt: string) {
-    await db.transaction('rw', db.grammar, db.metadata, async () => {
-      if (grammar && grammar.length > 0) {
-        const toDelete: number[] = [];
-        const toUpsert: GrammarLocal[] = [];
-        grammar.forEach((item) => {
-          if (item.deleted_at === null) {
-            toUpsert.push(item);
-          } else {
-            toDelete.push(item.id);
-          }
-        });
-        if (toDelete.length > 0) {
-          await db.grammar.bulkDelete(toDelete);
-        }
-        if (toUpsert.length > 0) {
-          await db.grammar.bulkPut(toUpsert);
-        }
-      }
-      await Metadata.markAsSynced(TableName.Grammar, newSyncedAt);
-    });
   }
 }

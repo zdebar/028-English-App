@@ -65,3 +65,21 @@ export async function dataSyncOnUnmount(userId: string): Promise<void> {
 
   logRejectedResults(results, 'Unmount synchronization failed');
 }
+
+/**
+ * Splits items into upsert and delete arrays based on deleted_at property.
+ * @param items - Array of items with deleted_at property
+ * @returns [toUpsert, toDelete]
+ */
+export function splitDeleted<T extends { deleted_at: unknown }>(items: T[]): [T[], T[]] {
+  const toUpsert: T[] = [];
+  const toDelete: T[] = [];
+  items.forEach((item) => {
+    if (item.deleted_at === null) {
+      toUpsert.push(item);
+    } else {
+      toDelete.push(item);
+    }
+  });
+  return [toUpsert, toDelete];
+}
