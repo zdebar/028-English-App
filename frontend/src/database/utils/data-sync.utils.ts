@@ -36,8 +36,8 @@ export async function dataSync(userId: string): Promise<void> {
 
   // Step 3: Perform user stores data synchronization (user_scores and user_items)
   const userPromises = doFullSync
-    ? [UserScore.syncUserScoreAll(userId), UserItem.syncUserItemsAll(userId)]
-    : [UserScore.syncUserScoreSinceLastSync(userId), UserItem.syncUserItemsSinceLastSync(userId)];
+    ? [UserScore.syncUserScores(userId, true), UserItem.syncUserItemsAll(userId)]
+    : [UserScore.syncUserScores(userId, false), UserItem.syncUserItemsSinceLastSync(userId)];
 
   const userResults = await Promise.allSettled(userPromises);
   const isError = logRejectedResults(userResults, 'Data synchronization error:');
@@ -59,7 +59,7 @@ export async function dataSyncOnUnmount(userId: string): Promise<void> {
   if (!userId) return;
 
   const results = await Promise.allSettled([
-    UserScore.syncUserScoreSinceLastSync(userId),
+    UserScore.syncUserScores(userId, false),
     UserItem.syncUserItemsSinceLastSync(userId),
   ]);
 

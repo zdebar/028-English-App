@@ -8,7 +8,7 @@ import { TableName, type UserScoreLocal } from '@/types/local.types';
 import { Entity } from 'dexie';
 import Metadata from './metadata';
 import { infoHandler } from '@/features/logging/info-handler';
-import { assertNonNegativeInteger } from '@/utils/assertions.utils';
+import { assertNonNegativeInteger, assertPositiveInteger } from '@/utils/assertions.utils';
 
 /**
  * Represents a user score entity in the application database.
@@ -34,8 +34,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    */
   static async addItemCount(userId: string, addCount: number): Promise<void> {
     if (!userId) throw new Error('User ID is required to add item count.');
-
-    assertNonNegativeInteger(addCount, 'addItemCount');
+    assertPositiveInteger(addCount, 'addItemCount');
 
     const today = getTodayShortDate();
     const existingRecord = await db.user_scores.get([userId, today]);
@@ -81,43 +80,41 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   }
 
   /**
-   * Synchronizes user score data between the local IndexedDB and Supabase. Pulls only changes since the last sync.
+   * Synchronizes user scores between local database and Supabase.
    *
-   * @param userId The user ID.
-   * @returns Promise<void>.
-   * @throws Error, if synchronization fails.
+   * Performs a two-way sync by first pushing local changes to Supabase,
+   * then pulling updated scores back to the local database.
+   *
+   * Optionally performs a full sync by clearing all local scores and resyncing from
+   * the epoch start date.
+   *
+   * @param userId - The unique identifier of the user whose scores to sync
+   * @param doFullSync - If true, performs a full sync by deleting all local scores
+   *                     and pulling from the epoch start date. Defaults to false.
+   * @returns A promise that resolves when the sync operation completes
+   * @throws {Error} Throws an error if userId is not provided
    */
-  static async syncUserScoreSinceLastSync(userId: string): Promise<void> {
-    if (!userId) throw new Error('User ID is required to sync user scores since last sync.');
+  static async syncUserScores(userId: string, doFullSync: boolean = false): Promise<void> {
+    if (!userId) throw new Error('User ID is required to sync user scores.');
 
     const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserScores, userId);
     const newSyncedAt = new Date().toISOString();
 
-    await this.pushUserScores(userId, lastSyncedAt, newSyncedAt);
-    const updatedScores = await this.pullUserScores(userId, lastSyncedAt, newSyncedAt);
-    this.saveUserScoresToIndexedDB(userId, newSyncedAt, updatedScores, false);
-  }
+    // Push local changes to Supabase
+    const localScores = await this.getUserScores(userId, lastSyncedAt, newSyncedAt);
+    await this.pushUserScores(localScores);
 
-  /**
-   * Synchronizes user score data between the local IndexedDB and Supabase. Pulls all new data from the backend.
-   *
-   * @param userId The user ID.
-   * @returns Promise<void>.
-   * @throws Error, if synchronization fails.
-   */
-  static async syncUserScoreAll(userId: string): Promise<void> {
-    if (!userId) throw new Error('User ID is required to sync all user scores.');
+    // Pull scores from Supabase
+    const pullFrom = doFullSync ? config.database.epochStartDate : lastSyncedAt;
+    const updatedScores = await this.pullUserScores(userId, pullFrom);
 
-    const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserScores, userId);
-    const newSyncedAt = new Date().toISOString();
-
-    await this.pushUserScores(userId, lastSyncedAt, newSyncedAt);
-    const updatedScores = await this.pullUserScores(
-      userId,
-      config.database.epochStartDate,
-      newSyncedAt,
-    );
-    this.saveUserScoresToIndexedDB(userId, newSyncedAt, updatedScores, true);
+    await db.transaction('rw', db.user_scores, db.metadata, async () => {
+      if (doFullSync) {
+        await this.deleteAllUserScores(userId);
+      }
+      await db.user_scores.bulkPut(updatedScores);
+      await Metadata.markAsSynced(TableName.UserScores, newSyncedAt, userId);
+    });
   }
 
   /**
@@ -132,22 +129,23 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   }
 
   /**
-   * Pushes local user scores to the remote database that were updated within a specified time range.
+   * Gets user scores for a specific user that were updated since the last sync time.
+   * This is used to determine which local records need to be pushed to the backend during synchronization.
    *
-   * @param userId - The unique identifier of the user whose scores should be synced.
-   * @param lastSyncedAt - The timestamp (inclusive) marking the start of the time range for scores to sync.
-   * @param newSyncedAt - The timestamp (exclusive) marking the end of the time range for scores to sync.
-   * @returns A promise that resolves when the scores have been successfully pushed to the remote database.
-   * @throws {SupabaseError} If the remote upsert operation fails, with details about the local scores that failed to sync.
+   * @param userId - The ID of the user whose scores should be fetched
+   * @param lastSyncedAt - The timestamp of the last sync (defaults to epoch start date)
+   * @param newSyncedAt - The timestamp of the new sync
+   * @returns A promise that resolves with the fetched scores
+   * @throws {SupabaseError} If the RPC call to fetch scores fails
    */
-  private static async pushUserScores(
+  static async getUserScores(
     userId: string,
     lastSyncedAt: string,
     newSyncedAt: string,
-  ): Promise<void> {
-    if (!userId) throw new Error('User ID is required to push user scores.');
-    if (!lastSyncedAt) throw new Error('Last synced timestamp is required to push user scores.');
-    if (!newSyncedAt) throw new Error('New synced timestamp is required to push user scores.');
+  ): Promise<UserScoreLocal[]> {
+    if (!userId) throw new Error('User ID is required to fetch user scores.');
+    if (!lastSyncedAt) throw new Error('Last synced timestamp is required to fetch user scores.');
+    if (!newSyncedAt) throw new Error('New synced timestamp is required to fetch user scores.');
 
     const localScores = await db.user_scores
       .where('[user_id+updated_at]')
@@ -156,8 +154,23 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
     if (localScores.length === 0) {
       infoHandler(`No user scores to push for userId: ${userId}`);
-      return;
+      return [];
     }
+
+    return localScores;
+  }
+
+  /**
+   * Pushes local user scores to the remote database that were updated within a specified time range.
+   *
+   * @param userId - The unique identifier of the user whose scores should be synced.
+   * @param lastSyncedAt - The timestamp (inclusive) marking the start of the time range for scores to sync.
+   * @param newSyncedAt - The timestamp (exclusive) marking the end of the time range for scores to sync.
+   * @returns A promise that resolves when the scores have been successfully pushed to the remote database.
+   * @throws {SupabaseError} If the remote upsert operation fails, with details about the local scores that failed to sync.
+   */
+  private static async pushUserScores(localScores: UserScoreLocal[]): Promise<void> {
+    if (!localScores || localScores.length === 0) return;
 
     const { error: errorInsert } = await supabaseInstance.rpc('upsert_user_scores', {
       p_user_scores: localScores,
@@ -168,7 +181,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     }
 
     infoHandler(
-      `Completed ${localScores.length} user scores push to Supabase for userId: ${userId}`,
+      `Completed ${localScores.length} user scores push to Supabase for userId: ${localScores[0].user_id}`,
     );
   }
 
@@ -207,45 +220,5 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     }
 
     return updatedScores;
-  }
-
-  /**
-   * Saves user scores to IndexedDB with optional deletion of existing records.
-   *
-   * @param userId - The unique identifier of the user whose scores are being saved.
-   * @param newSyncedAt - The timestamp indicating when the scores were last synced.
-   * @param updatedScores - An array of user score records to persist to IndexedDB.
-   * @param deleteExisting - Optional flag (default: false) to delete all existing scores for the user before saving new ones.
-   *
-   * @throws {Error} If updatedScores are not provided.
-   * @throws {Error} If userId is not provided.
-   * @throws {Error} If newSyncedAt timestamp is not provided.
-   *
-   * @returns A promise that resolves when the scores have been successfully saved to IndexedDB.
-   */
-  private static async saveUserScoresToIndexedDB(
-    userId: string,
-    newSyncedAt: string,
-    updatedScores: UserScoreLocal[],
-    deleteExisting: boolean = false,
-  ): Promise<void> {
-    if (!updatedScores)
-      throw new Error('Updated scores are required to save user scores to IndexedDB.');
-    if (!userId) throw new Error('User ID is required to save user scores to IndexedDB.');
-    if (!newSyncedAt)
-      throw new Error('New synced timestamp is required to save user scores to IndexedDB.');
-
-    if (!Array.isArray(updatedScores) || updatedScores.length <= 0) return;
-
-    await db.transaction('rw', db.user_scores, db.metadata, async () => {
-      if (deleteExisting) await this.deleteAllUserScores(userId);
-      await db.user_scores.bulkPut(updatedScores);
-      await Metadata.markAsSynced(TableName.UserScores, newSyncedAt, userId);
-    });
-
-    const serverUpdatesCount = Array.isArray(updatedScores) ? updatedScores.length : 0;
-    infoHandler(
-      `Completed ${serverUpdatesCount} user scores pull from Supabase for userId: ${userId}`,
-    );
   }
 }
