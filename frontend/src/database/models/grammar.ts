@@ -8,9 +8,8 @@ import Dexie from 'dexie';
 import Metadata from './metadata';
 import { TableName } from '@/types/local.types';
 import { DatabaseError, SupabaseError } from '@/types/error.types';
-import type { GrammarSQL } from '@/types/sql.types';
 import { infoHandler } from '@/features/logging/info-handler';
-import { assertPositiveInteger } from '@/utils/assertions.utils';
+import { assertIsoDateString, assertPositiveInteger } from '@/utils/assertions.utils';
 import { splitDeleted } from '../utils/data-sync.utils';
 
 const NULL_DATE = config.database.nullReplacementDate;
@@ -29,7 +28,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   id!: number;
   name!: string;
   note!: string;
-  updated_at!: string;
+  sort_order!: number;
   deleted_at!: string | null;
 
   /**
@@ -79,7 +78,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    *          if the user has not started any grammar items or if no matching grammar records are found.
    */
   static async getStartedGrammarList(userId: string): Promise<GrammarLocal[]> {
-    if (!userId) throw new Error('userId is required');
+    if (!userId) throw new Error('userId is required in getStartedGrammarList');
 
     // Get unique grammar IDs for started items
     const grammarIds = await this.getStartedGrammarIds(userId);
@@ -103,7 +102,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
     const newSyncedAt = new Date().toISOString();
 
     const grammar = await this.fetchGrammar(lastSyncedAt);
-    const [toUpsert, toDelete] = splitDeleted(grammar);
+    const { toUpsert, toDelete } = splitDeleted(grammar);
 
     await db.transaction('rw', db.grammar, db.metadata, async () => {
       if (doFullSync) {
@@ -130,10 +129,12 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    */
   private static async fetchGrammar(
     lastSyncedAt: string = config.database.epochStartDate,
-  ): Promise<GrammarSQL[]> {
+  ): Promise<GrammarLocal[]> {
+    assertIsoDateString(lastSyncedAt);
+
     const { data: grammar, error } = await supabaseInstance
       .from('grammar')
-      .select('id, name, note, updated_at, deleted_at')
+      .select('id, name, note, sort_order, deleted_at')
       .gte('updated_at', lastSyncedAt);
 
     if (error) {

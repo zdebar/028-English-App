@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS grammar (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
   note TEXT NOT NULL,
+  sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ
 );

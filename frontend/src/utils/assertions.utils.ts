@@ -34,3 +34,17 @@ export function assertPositiveInteger(value: number, name: string): void {
     throw new Error(`${name}: ${value} must be a positive integer.`);
   }
 }
+
+/**
+ * Asserts that the provided string is a valid ISO 8601 date format.
+ * Validates dates in the format YYYY-MM-DD with optional time component (HH:mm:ss.sssZ).
+ *
+ * @param value - The string to validate as an ISO date
+ * @throws {Error} If the value is not a valid ISO 8601 date string
+ */
+export function assertIsoDateString(value: string): void {
+  // ISO 8601 regex (YYYY-MM-DD or with time)
+  if (!/^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z?)?$/.test(value)) {
+    throw new Error(`Value: ${value} is not a valid ISO date string.`);
+  }
+}

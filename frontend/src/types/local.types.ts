@@ -54,7 +54,7 @@ export interface GrammarLocal {
   id: number;
   name: string;
   note: string;
-  updated_at: string;
+  sort_order: number;
   deleted_at: string | null;
 }
 
