@@ -34,7 +34,7 @@ export async function dataSync(userId: string): Promise<void> {
     logRejectedResults(results, 'Data synchronization error:');
   });
 
-  // Step 2: Perform user stores data synchronization (user_scores and user_items)
+  // Step 3: Perform user stores data synchronization (user_scores and user_items)
   const userPromises = doFullSync
     ? [UserScore.syncUserScoreAll(userId), UserItem.syncUserItemsAll(userId)]
     : [UserScore.syncUserScoreSinceLastSync(userId), UserItem.syncUserItemsSinceLastSync(userId)];
