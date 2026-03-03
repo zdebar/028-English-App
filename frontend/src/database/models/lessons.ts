@@ -76,9 +76,10 @@ export default class Lessons extends Entity<AppDB> implements LessonLocal {
   private static async fetchLessons(
     lastSyncedAt: string = config.database.epochStartDate,
   ): Promise<LessonLocal[]> {
-    const { data: lessons, error } = await supabaseInstance.rpc('fetch_lessons', {
-      p_last_synced_at: lastSyncedAt,
-    });
+    const { data: lessons, error } = await supabaseInstance
+      .from('lessons')
+      .select('id, name, note, level_id, sort_order, deleted_at')
+      .gt('updated_at', lastSyncedAt);
 
     if (error) {
       throw new SupabaseError(`Failed to fetch lessons data from supabase`, error, {
