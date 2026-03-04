@@ -14,8 +14,8 @@ import {
   getNextAt,
   getSyncTimestamps,
   resetUserItem,
-  triggerUserItemsUpdatedEvent,
 } from '@/database/utils/database.utils';
+import { triggerLevelsUpdatedEvent } from '@/features/user-stats/dashboard.utils';
 import { infoHandler } from '@/features/logging/info-handler';
 import Grammar from './grammar';
 import Metadata from './metadata';
@@ -118,8 +118,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       db.user_items.bulkPut(updatedItems),
       UserScore.addItemCount(userId, updatedItems.length),
     ]);
-
-    triggerUserItemsUpdatedEvent(userId);
   }
 
   /**
@@ -162,7 +160,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     }
 
     infoHandler(`Resetted user item with itemId: ${itemId} for userId: ${userId}`);
-    triggerUserItemsUpdatedEvent(userId);
+    triggerLevelsUpdatedEvent(userId);
   }
 
   /**
@@ -211,6 +209,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         await db.user_items.bulkPut(toUpsert);
       }
       await Metadata.markAsSynced(TableName.UserItems, newSyncedAt, userId);
+      triggerLevelsUpdatedEvent(userId);
     });
   }
 

@@ -30,7 +30,7 @@ import { useGrammar } from './hooks/use-grammar';
  */
 export default function PracticeCard() {
   const userId = useAuthStore((state) => state.userId);
-  const userStats = useUserStore((state) => state.userStats);
+  const dailyCount = useUserStore((state) => state.dailyCount);
   const { grammarVisible, grammarData, handleGrammar, closeGrammar } = useGrammar();
 
   if (!userId)
@@ -63,7 +63,7 @@ export default function PracticeCard() {
     audioLoading,
   } = usePracticeDeck(userId);
 
-  const practiceCountToday = (userStats?.practiceCountToday ?? 0) + index;
+  const practiceCountToday = dailyCount + index;
 
   // Play audio on item change if direction is EN -> CZ
   useEffect(() => {

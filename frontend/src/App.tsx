@@ -26,6 +26,7 @@ import { TEXTS } from './locales/cs';
 import './styles/index.css';
 import NotificationText from './components/UI/NotificationText';
 import { useThemeLoader } from './features/theme/use-theme-loader';
+import { useUserStoreReset } from './features/user-stats/use-user-store-reset';
 
 export default function App() {
   const userId = useAuthStore((state) => state.userId);
@@ -47,6 +48,9 @@ export default function App() {
 
   // Theme load
   useThemeLoader(userId);
+
+  // User store reset on sign-out
+  useUserStoreReset(userId);
 
   // Data synchronization
   const { loading: syncLoading } = usePeriodicSync(userId);

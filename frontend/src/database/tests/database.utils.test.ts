@@ -55,7 +55,7 @@ import {
   restoreUnsavedFromLocalStorage,
   sortOddEvenByProgress,
   triggerNamedEvent,
-  triggerUserItemsUpdatedEvent,
+  triggerLevelsUpdatedEvent,
 } from '@/database/utils/database.utils';
 
 describe('database.utils', () => {
@@ -163,7 +163,7 @@ describe('database.utils', () => {
     it('triggers userItemsUpdated event shortcut', () => {
       const spy = vi.spyOn(window, 'dispatchEvent');
 
-      triggerUserItemsUpdatedEvent('u1');
+      triggerLevelsUpdatedEvent('u1');
 
       const event = spy.mock.calls[0][0] as CustomEvent;
       expect(event.type).toBe('userItemsUpdated');

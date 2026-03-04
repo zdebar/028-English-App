@@ -1,5 +1,4 @@
 import config from '@/config/config';
-import { triggerUserItemsUpdatedEvent } from '@/database/utils/database.utils';
 import AudioRecord from '@/database/models/audio-records';
 import { initDbMappings } from '@/database/models/db-init';
 import Grammar from '@/database/models/grammar';
@@ -53,7 +52,6 @@ export async function dataSync(userId: string): Promise<void> {
 
   const userResults = await Promise.allSettled(userPromises);
   const isError = logRejectedResults(userResults, 'Data synchronization error:');
-  triggerUserItemsUpdatedEvent(userId);
 
   if (isError) throw new Error('Data synchronization error');
   if (doFullSync) {

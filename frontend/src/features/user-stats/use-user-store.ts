@@ -1,67 +1,89 @@
 import { create } from 'zustand';
-import type { UserStats } from '@/types/local.types';
+import type { LevelOverview } from '@/types/local.types';
 import UserScore from '@/database/models/user-scores';
 import Levels from '@/database/models/levels';
 
 interface UserState {
-  userStats: UserStats;
-  reloadUserStats: (userId: string) => Promise<void>;
-  clearUserStats: () => void;
+  levels: LevelOverview[];
+  dailyCount: number;
+  reloadLevels: (userId: string) => Promise<void>;
+  reloadDailyCount: (userId: string) => Promise<void>;
+  clearLevels: () => void;
+  clearDailyCount: () => void;
 }
 
-const initialUserStats: UserStats = { levelsOverview: [], practiceCountToday: 0 };
+const initialLevels: LevelOverview[] = [];
+const initialDailyStats = 0;
 
 /**
- * Zustand store for managing user statistics and related operations.
+ * Creates a Zustand store for managing user statistics and state.
  *
- * Features:
- * - Listens to 'userItemsUpdated' events and automatically reloads user stats
- * - Caches user stats in localStorage for persistence
- * - Provides methods to reload and clear user statistics
+ * Handles levels and daily score statistics with automatic updates via custom window events.
+ * Sets up event listeners for 'levelsUpdated' and 'dailyCountUpdated' events that trigger
+ * store reloads when a userId is provided in the event detail.
  *
- * @returns {UserState} The user store with the following properties and methods:
- * @property {UserStats} userStats - Current user statistics
- * @property {(userId: string) => Promise<void>} reloadUserStats - Fetches and updates user statistics from the server, including today's score, started counts, and total items count. Results are cached in localStorage.
- * @property {() => void} clearUserStats - Clears user statistics from both localStorage and the store state
+ * @returns {UserState & { cleanup: () => void }} The user store with state management methods:
+ * - `levels` - Array of user level data
+ * - `dailyCount` - Today's score count for the user
+ * - `reloadLevels(userId)` - Fetches and updates user levels from the server
+ * - `reloadScoresStats(userId)` - Fetches and updates daily score statistics
+ * - `clearItemsStats()` - Resets levels to initial state
+ * - `clearScoresStats()` - Resets daily count to initial state
+ * - `cleanup()` - Removes event listeners (should be called on store destruction)
  */
 export const useUserStore = create<UserState>((set, get) => {
-  let userItemsUpdatedListener: ((event: any) => void) | undefined;
+  let levelsUpdatedListener: ((event: any) => void) | undefined;
+  let dailyCountUpdatedListener: ((event: any) => void) | undefined;
   if (typeof window !== 'undefined') {
-    userItemsUpdatedListener = (event: any) => {
+    levelsUpdatedListener = (event: any) => {
       const { userId } = event.detail || {};
       if (userId) {
-        get().reloadUserStats(userId);
+        get().reloadLevels(userId);
       }
     };
-    window.addEventListener('userItemsUpdated', userItemsUpdatedListener);
+    window.addEventListener('levelsUpdated', levelsUpdatedListener);
+    dailyCountUpdatedListener = (event: any) => {
+      const { userId } = event.detail || {};
+      if (userId) {
+        get().reloadDailyCount(userId);
+      }
+    };
+    window.addEventListener('dailyCountUpdated', dailyCountUpdatedListener);
   }
   const store: UserState = {
-    userStats: initialUserStats,
-    reloadUserStats: async (userId: string) => {
+    levels: initialLevels,
+    dailyCount: initialDailyStats,
+    reloadLevels: async (userId: string) => {
       try {
-        const todayScore = await UserScore.getOrCreateTodayScore(userId);
-        const levelsOverview = await Levels.getOverview(userId);
-        const stats: UserStats = {
-          levelsOverview: Array.isArray(levelsOverview) ? levelsOverview : [],
-          practiceCountToday:
-            typeof todayScore?.item_count === 'number' ? todayScore.item_count : 0,
-        };
-        set({ userStats: stats });
+        const updatedLevels = (await Levels.getOverview(userId)) ?? [];
+        set({ levels: updatedLevels });
       } catch (error) {
-        set({ userStats: initialUserStats });
+        set({ levels: initialLevels });
       }
     },
-    clearUserStats: () => {
+    reloadDailyCount: async (userId: string) => {
       try {
-        set({ userStats: initialUserStats });
-      } catch {
-        // Ignore storage errors
+        const updatedCount = (await UserScore.getOrCreateTodayScore(userId)) ?? 0;
+        set({ dailyCount: updatedCount });
+      } catch (error) {
+        set({ dailyCount: initialDailyStats });
       }
+    },
+    clearLevels: () => {
+      set({ levels: initialLevels });
+    },
+    clearDailyCount: () => {
+      set({ dailyCount: initialDailyStats });
     },
   };
   (store as any).cleanup = () => {
-    if (typeof window !== 'undefined' && userItemsUpdatedListener) {
-      window.removeEventListener('userItemsUpdated', userItemsUpdatedListener);
+    if (typeof window !== 'undefined') {
+      if (levelsUpdatedListener) {
+        window.removeEventListener('levelsUpdated', levelsUpdatedListener);
+      }
+      if (dailyCountUpdatedListener) {
+        window.removeEventListener('dailyCountUpdated', dailyCountUpdatedListener);
+      }
     }
   };
   return store;

@@ -103,3 +103,33 @@ export function getInProgressLessons(
       (nextZeroLessonId != null && lesson.id === nextZeroLessonId),
   );
 }
+
+/**
+ * Triggers a custom DOM event with the specified name and attaches the user ID as event detail.
+ *
+ * @param eventName - The name of the custom event to trigger.
+ * @param userId - The ID of the user to include in the event detail. If falsy, the event is not triggered.
+ * @throws Error if userId is not provided.
+ */
+export function triggerNamedEvent(eventName: string, userId: string) {
+  const event = new CustomEvent(eventName, { detail: { userId } });
+  window.dispatchEvent(event);
+}
+
+/**
+ * Triggers the 'levelsUpdated' event for a specific user.
+ *
+ * @param userId - The unique user identifier.
+ */
+export function triggerLevelsUpdatedEvent(userId: string) {
+  triggerNamedEvent('levelsUpdated', userId);
+}
+
+/**
+ * Triggers the 'dailyCountUpdated' event for a specific user.
+ *
+ * @param userId - The unique user identifier.
+ */
+export function triggerDailyCountUpdatedEvent(userId: string) {
+  triggerNamedEvent('dailyCountUpdated', userId);
+}

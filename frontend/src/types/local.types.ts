@@ -49,11 +49,6 @@ export interface LevelOverview extends LevelLocal {
   lessons: LessonOverview[];
 }
 
-export interface UserStats {
-  levelsOverview: LevelOverview[];
-  practiceCountToday: number;
-}
-
 export interface GrammarLocal {
   id: number;
   name: string;

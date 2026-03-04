@@ -10,6 +10,7 @@ import { assertNonNegativeInteger, assertPositiveInteger } from '@/utils/asserti
 import { Entity } from 'dexie';
 import { splitDeleted } from '../utils/data-sync.utils';
 import Metadata from './metadata';
+import { triggerDailyCountUpdatedEvent } from '@/features/user-stats/dashboard.utils';
 
 /**
  * Represents a user score entity in the application database.
@@ -39,6 +40,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     const existingRecord = await db.user_scores.get([userId, today]);
     const newItemCount = (existingRecord?.item_count ?? 0) + addCount;
     await db.user_scores.put(this.createRecord(userId, today, newItemCount));
+    triggerDailyCountUpdatedEvent(userId);
   }
 
   /**
@@ -46,9 +48,9 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    *
    * @param userId The user ID.
    */
-  static async getOrCreateTodayScore(userId: string): Promise<UserScoreLocal> {
+  static async getOrCreateTodayScore(userId: string): Promise<number> {
     const today = getTodayShortDate();
-    return (await db.user_scores.get([userId, today])) ?? this.createRecord(userId, today, 0);
+    return (await db.user_scores.get([userId, today]))?.item_count ?? 0;
   }
 
   /**
@@ -87,6 +89,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
         await db.user_scores.bulkPut(toUpsert);
       }
       await Metadata.markAsSynced(TableName.UserScores, newSyncedAt, userId);
+      triggerDailyCountUpdatedEvent(userId);
     });
   }
 

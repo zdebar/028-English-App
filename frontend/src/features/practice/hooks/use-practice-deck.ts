@@ -7,6 +7,7 @@ import { errorHandler } from '@/features/logging/error-handler';
 import { infoHandler } from '@/features/logging/info-handler';
 import { useHint } from './use-hint';
 import { useAudioManager } from './use-audio-manager';
+import { triggerLevelsUpdatedEvent } from '@/features/user-stats/dashboard.utils';
 
 const NBSP = '\u00A0';
 
@@ -98,6 +99,7 @@ export function usePracticeDeck(userId: string) {
   useEffect(() => {
     return () => {
       void saveBufferedProgress([...userProgressRef.current], 'on unmount');
+      triggerLevelsUpdatedEvent(userId);
     };
   }, [saveBufferedProgress]);
 

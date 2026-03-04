@@ -10,7 +10,6 @@ import { type JSX } from 'react';
 import ModalButton from '../modal/ModalButton';
 import { errorHandler } from '../logging/error-handler';
 import { useThemeStore } from '../theme/use-theme-store';
-import { useUserStore } from '../user-stats/use-user-store';
 import { clearSyncTimes } from '@/database/utils/sync-time.utils';
 import { logRejectedResults } from '@/features/logging/logging.utils.ts';
 
@@ -24,7 +23,6 @@ export default function DeleteUserButton({ className }: { className?: string }):
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
   const clearTheme = useThemeStore((state) => state.clearTheme);
-  const clearUserStats = useUserStore((state) => state.clearUserStats);
 
   const handleDelete = async () => {
     if (!userId) return;
@@ -44,7 +42,6 @@ export default function DeleteUserButton({ className }: { className?: string }):
         UserScore.deleteAllScores(userId),
         Metadata.deleteSyncRow(TableName.UserScores, userId),
         clearTheme(userId),
-        clearUserStats(),
         clearSyncTimes(userId),
       ]);
       logRejectedResults(resultsDelete, 'Operation failed during local cleanup');

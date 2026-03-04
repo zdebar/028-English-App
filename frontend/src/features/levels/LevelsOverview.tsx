@@ -21,8 +21,8 @@ const EMPTY_LEVELS: never[] = [];
 export default function LevelsOverview() {
   const [unpackedIndex, setUnpackedIndex] = useState<number | null>(null);
   const [showMastered, setShowMastered] = useState<boolean>(false);
-  const levelsOverview = useUserStore((state) => state.userStats?.levelsOverview);
-  // Allowed lesson count keys
+  const levelsOverview = useUserStore((state) => state.levels);
+
   type LessonCountKey =
     | 'startedCount'
     | 'masteredCount'
