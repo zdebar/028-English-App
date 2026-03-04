@@ -45,6 +45,10 @@ export interface LevelLocal {
   deleted_at: string | null;
 }
 
+export interface LevelOverview extends LevelLocal {
+  lessons: LessonOverview[];
+}
+
 export interface UserStats {
   lessonsOverview?: LessonOverview[] | null;
   practiceCountToday?: number;

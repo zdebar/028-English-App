@@ -17,12 +17,7 @@ RETURNS TABLE (
   deleted_at TIMESTAMPTZ,
   next_at TIMESTAMPTZ,
   mastered_at TIMESTAMPTZ,
-  level_id INTEGER,
-  level_sort_order INTEGER,
-  level_name TEXT,
   lesson_id INTEGER,
-  lesson_sort_order INTEGER,
-  lesson_name TEXT
 )
 LANGUAGE sql
 SET search_path TO public
@@ -42,23 +37,12 @@ AS $$
     i.deleted_at,
     ui.next_at,
     ui.mastered_at,
-    lv.id AS level_id,
-    lv.sort_order AS level_sort_order,
-    lv.name AS level_name,
-    le.id AS lesson_id,
-    le.sort_order AS lesson_sort_order,
-    le.name AS lesson_name
+    i.lesson_id
   FROM public.items i
   LEFT JOIN public.user_items ui
     ON ui.item_id = i.id
     AND ui.user_id = p_user_id
-  LEFT JOIN public.lessons le
-    ON le.id = i.lesson_id
-  LEFT JOIN public.levels lv
-    ON lv.id = le.level_id
   WHERE ui.updated_at > p_last_synced_at
     OR i.updated_at > p_last_synced_at
-    OR le.updated_at > p_last_synced_at
-    OR lv.updated_at > p_last_synced_at
   ORDER BY i.sort_order ASC, i.id ASC;
 $$;

@@ -189,7 +189,7 @@ describe('UserItem', () => {
     it('deletes records and triggers update event when items exist', async () => {
       mocks.userItemsPrimaryKeys.mockResolvedValue([1, 2, 3]);
 
-      await UserItem.deleteAllUserItems('u1');
+      await UserItem.deleteAllItems('u1');
 
       expect(mocks.userItemsBulkDelete).toHaveBeenCalledWith([1, 2, 3]);
       expect(mocks.triggerUpdatedEvent).toHaveBeenCalledWith('u1');
@@ -198,7 +198,7 @@ describe('UserItem', () => {
     it('does not trigger update event when no items exist', async () => {
       mocks.userItemsPrimaryKeys.mockResolvedValue([]);
 
-      await UserItem.deleteAllUserItems('u1');
+      await UserItem.deleteAllItems('u1');
 
       expect(mocks.userItemsBulkDelete).not.toHaveBeenCalled();
       expect(mocks.triggerUpdatedEvent).not.toHaveBeenCalled();
@@ -227,7 +227,7 @@ describe('UserItem', () => {
     it('throws when item id does not exist', async () => {
       mocks.userItemsItemIdModify.mockResolvedValue(0);
 
-      await expect(UserItem.resetUserItemById('u1', 99)).rejects.toThrow(
+      await expect(UserItem.resetItemById('u1', 99)).rejects.toThrow(
         'No user items found for item ID 99.',
       );
     });
@@ -235,7 +235,7 @@ describe('UserItem', () => {
     it('triggers update event on success', async () => {
       mocks.userItemsItemIdModify.mockResolvedValue(1);
 
-      await UserItem.resetUserItemById('u1', 10);
+      await UserItem.resetItemById('u1', 10);
 
       expect(mocks.triggerUpdatedEvent).toHaveBeenCalledWith('u1');
     });

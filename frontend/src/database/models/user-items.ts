@@ -3,18 +3,18 @@ import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import { TableName } from '@/types/local.types';
-import type { UserItemLocal, UserItemPractice, LessonOverview } from '@/types/local.types';
+import type { UserItemLocal, UserItemPractice } from '@/types/local.types';
 import Dexie, { Entity } from 'dexie';
 import { assertNonNegativeInteger, assertPositiveInteger } from '@/utils/assertions.utils';
+import { splitDeleted } from '../utils/data-sync.utils';
 
 import {
   convertLocalToSQL,
   convertSQLToLocal,
   getNextAt,
-  getTodayShortDate,
+  getSyncTimestamps,
   resetUserItem,
   triggerUserItemsUpdatedEvent,
-  aggregateLessons,
 } from '@/database/utils/database.utils';
 import { infoHandler } from '@/features/logging/info-handler';
 import Grammar from './grammar';
@@ -22,9 +22,20 @@ import Metadata from './metadata';
 import UserScore from './user-scores';
 import { SupabaseError } from '@/types/error.types';
 import { addGrammarIndicatorFlag } from '@/database/utils/database.utils';
+import type { UserItemSQL } from '@/types/sql.types';
 
 const NULL_DATE = config.database.nullReplacementDate;
 
+/**
+ * Represents a user item entity in the application database.
+ *
+ * @method getPracticeDeck - Retrieves a practice deck of user items for studying.
+ * @method savePracticeDeck - Saves practice deck items for a user, updating their progress and metadata.
+ * @method getStartedVocabulary - Retrieves vocabulary items for a user that have been started (begun learning). Sorted by czech word.
+ * @method resetItemById - Resets a user item to its default state by user and item ID.
+ * @method deleteAllItems - Deletes all user items associated with a specific user.
+ * @method syncFromRemote - Synchronizes user items from the remote server with the local database.
+ */
 export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   item_id!: number;
   user_id!: string;
@@ -37,7 +48,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   progress!: number;
   started_at!: string;
   updated_at!: string;
-  deleted_at!: null;
+  deleted_at!: string | null;
   next_at!: string;
   mastered_at!: string;
   lesson_id!: number;
@@ -52,22 +63,21 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     userId: string,
     deckSize: number = config.lesson.deckSize,
   ): Promise<UserItemPractice[]> {
-    if (!userId) throw new Error('User ID is required to fetch practice deck.');
     assertPositiveInteger(deckSize, 'deckSize');
 
     // Step 1: Fetch already started grammar list
     const startedGrammarIdSet = new Set(await Grammar.getStartedIds(userId));
 
     // Step 2: Fetch items with odd progress
-    let practiceItems = await this.fetchPracticeItemsByParity(userId, true, false, deckSize);
+    let practiceItems = await this.getPracticeItemsByParity(userId, true, false, deckSize);
 
     // Step 3: If not enough items, fetch even progress items instead
     if (practiceItems.length < deckSize) {
-      practiceItems = await this.fetchPracticeItemsByParity(userId, false, false, deckSize);
+      practiceItems = await this.getPracticeItemsByParity(userId, false, false, deckSize);
 
       const remainingLimit = deckSize - practiceItems.length;
       if (remainingLimit > 0) {
-        const remainingItems = await this.fetchPracticeItemsByParity(
+        const remainingItems = await this.getPracticeItemsByParity(
           userId,
           false,
           true,
@@ -87,7 +97,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param items - Array of user item records to be saved
    */
   static async savePracticeDeck(userId: string, items: UserItemPractice[]): Promise<void> {
-    if (!userId) throw new Error('User ID is required to save practice deck.');
     if (!items || items.length === 0)
       throw new Error('Items array is required and cannot be empty to save practice deck.');
 
@@ -114,14 +123,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Retrieves vocabulary items for a user that have been started (begun learning).
+   * Retrieves vocabulary items for a user that have been started (begun learning). Sorted by czech word.
    *
    * @param userId - The unique identifier of the user
-   * @returns A promise that resolves to an array of user vocabulary items sorted by Czech translation
    */
   static async getStartedVocabulary(userId: string): Promise<UserItemLocal[]> {
-    if (!userId) throw new Error('User ID is required to fetch started vocabulary.');
-
     const result = await db.user_items
       .where('[user_id+grammar_id+started_at]')
       .between(
@@ -136,28 +142,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Retrieves an overview of lessons for a user, including counts of started and mastered items.
-   *
-   * @param userId - The unique identifier of the user
-   * @returns - A promise that resolves to an array of LessonOverview objects, each containing lesson details and associated counts
-   */
-  static async getLessonsOverview(userId: string): Promise<LessonOverview[]> {
-    if (!userId) throw new Error('User ID is required to fetch lessons overview.');
-
-    const today = getTodayShortDate();
-    const items = await db.user_items.where('user_id').equals(userId).toArray();
-    const lessons = await db.lessons.orderBy('sort_order').toArray();
-    return aggregateLessons(items, lessons, today);
-  }
-
-  /**
    * Resets a user item to its default state by user and item ID.
    *
    * @param userId - The unique identifier of the user
    * @param itemId - The unique identifier of the item to reset
    */
-  static async resetUserItemById(userId: string, itemId: number): Promise<void> {
-    if (!userId) throw new Error('User ID is required to reset user item.');
+  static async resetItemById(userId: string, itemId: number): Promise<void> {
     assertNonNegativeInteger(itemId, 'itemId');
 
     const count = await db.user_items
@@ -179,76 +169,48 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Deletes all user items associated with a specific user.
    *
    * @param userId - The unique identifier of the user
-   * @returns A promise that resolves when all user items are deleted
-   * @throws Error if any database operation fails
    */
-  static async deleteAllUserItems(userId: string): Promise<void> {
-    if (!userId) throw new Error('User ID is required to delete all user items.');
-
-    const itemIds = await db.user_items.where('user_id').equals(userId).primaryKeys();
-    if (itemIds.length > 0) {
-      await db.user_items.bulkDelete(itemIds);
-      triggerUserItemsUpdatedEvent(userId);
-    }
-
-    infoHandler(`Deleted ${itemIds.length} user items for userId: ${userId}`);
-  }
-
-  /**
-   * Synchronizes user items since the last sync operation.
-   *
-   * @param userId - The unique identifier of the user whose items should be synchronized
-   * @returns A promise that resolves when the sync operation is complete
-   */
-  static async syncUserItemsSinceLastSync(userId: string): Promise<void> {
-    if (!userId) throw new Error('User ID is required to sync user items since last sync.');
-
-    const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserItems, userId);
-    const newSyncedAt = new Date().toISOString();
-    await this.pushUserItemsToSupabase(userId, lastSyncedAt, newSyncedAt);
-    await this.pullUserItemsFromSupabase(userId, lastSyncedAt, newSyncedAt);
-  }
-
-  /**
-   * Synchronizes all user items for a given user by pushing local changes to Supabase,
-   * clearing the local cache, and pulling the latest items from Supabase.
-   *
-   * @param userId - The ID of the user whose items should be synchronized
-   * @returns A promise that resolves when the synchronization is complete
-   */
-  static async syncUserItemsAll(userId: string): Promise<void> {
-    if (!userId) throw new Error('User ID is required to sync all user items.');
-
-    const lastSyncedAt = await Metadata.getSyncedAt(TableName.UserItems, userId);
-    const newSyncedAt = new Date().toISOString();
-    await this.pushUserItemsToSupabase(userId, lastSyncedAt, newSyncedAt);
+  static async deleteAllItems(userId: string): Promise<void> {
     await db.user_items.where('user_id').equals(userId).delete();
-    await this.pullUserItemsFromSupabase(userId, config.database.epochStartDate, newSyncedAt);
+  }
+
+  static async syncFromRemote(userId: string, doFullSync: boolean = false): Promise<void> {
+    // Step 1: Get the last synced timestamp for user scores
+    const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(doFullSync, userId);
+
+    // Step 2: Push local changes to Supabase
+    const localItems = await this.getUserItemsForSync(userId, lastSyncedAt, newSyncedAt);
+    await this.postToRemote(localItems);
+
+    // Step 3: Pull items from Supabase
+    const updatedItems = await this.fetchFromRemote(userId, lastSyncedAt);
+    const { toUpsert, toDelete } = splitDeleted(updatedItems);
+
+    // Step 4: Update local database with fetched items and update sync metadata
+    await db.transaction('rw', db.user_items, db.metadata, async () => {
+      if (doFullSync) {
+        await this.deleteAllItems(userId);
+      } else if (toDelete.length > 0) {
+        await db.user_items.bulkDelete(toDelete.map((item) => [item.user_id, item.item_id]));
+      }
+      if (toUpsert.length > 0) {
+        await db.user_items.bulkPut(toUpsert);
+      }
+      await Metadata.markAsSynced(TableName.UserItems, newSyncedAt, userId);
+    });
   }
 
   /**
-   * Pushes local user items to Supabase that were updated within a specified time range.
-   *
-   * @param userId - The ID of the user whose items should be synced
-   * @param lastSyncedAt - The timestamp of the last sync (exclusive lower bound)
-   * @param newSyncedAt - The timestamp of the new sync (inclusive upper bound)
-   * @returns A promise that resolves when the items are pushed to Supabase
-   * @throws {SupabaseError} If the RPC call to insert user items fails
-   *
-   * @private
-   * @static
+   * Retrieves user items that have been updated within a specified time range for synchronization.
+   * @param userId - The ID of the user whose items should be retrieved.
+   * @param lastSyncedAt - The timestamp of the last synchronization (inclusive).
+   * @param newSyncedAt - The timestamp of the new synchronization point (exclusive).
    */
-  private static async pushUserItemsToSupabase(
+  private static async getUserItemsForSync(
     userId: string,
     lastSyncedAt: string,
     newSyncedAt: string,
-  ): Promise<void> {
-    if (!userId) throw new Error('User ID is required to push user items to Supabase.');
-    if (!lastSyncedAt)
-      throw new Error('Last synced timestamp is required to push user items to Supabase.');
-    if (!newSyncedAt)
-      throw new Error('New synced timestamp is required to push user items to Supabase.');
-
+  ): Promise<UserItemSQL[]> {
     const localUserItems: UserItemLocal[] = await db.user_items
       .where('[user_id+updated_at]')
       .between([userId, lastSyncedAt], [userId, newSyncedAt], true, false)
@@ -256,41 +218,45 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
     if (localUserItems.length === 0) {
       infoHandler(`No user items to push for userId: ${userId}`);
-      return;
+      return [];
     }
 
-    const sqlUserItems = localUserItems.map(convertLocalToSQL);
+    return localUserItems.map(convertLocalToSQL);
+  }
+
+  /**
+   * Pushes local user items to Supabase for synchronization.
+   *
+   * @param items - An array of user items in SQL format to be pushed to the remote server.
+   */
+  private static async postToRemote(items: UserItemSQL[]): Promise<void> {
+    if (items.length === 0) return;
+
     const { error: rpcInsertError } = await supabaseInstance.rpc('upsert_user_items', {
-      p_user_id: userId,
-      p_user_items: sqlUserItems,
+      p_user_items: items,
     });
 
     if (rpcInsertError) {
       throw new SupabaseError('Error inserting user_items to Supabase.', rpcInsertError, {
-        userId,
+        itemCount: items.length,
       });
     }
 
     infoHandler(
-      `Completed ${localUserItems.length} user items push to Supabase for userId: ${userId}`,
+      `Completed ${items.length} user items push to Supabase for userId: ${items[0].user_id}`,
     );
   }
 
   /**
-   * Pulls user items from Supabase and syncs them with the local database.
+   * Fetches user items from Supabase that have been updated since the specified timestamp.
    *
-   * @param userId - The ID of the user whose items to fetch
-   * @param lastSyncedAt - ISO 8601 timestamp of the last successful sync
-   * @param newSyncedAt - ISO 8601 timestamp to mark as the new sync time
-   * @returns Promise resolving when the user items are pulled from Supabase
-   * @throws {SupabaseError} If the RPC call to fetch user items fails
-   * @private
+   * @param userId - The ID of the user whose items should be fetched.
+   * @param lastSyncedAt - The timestamp of the last synchronization.
    */
-  private static async pullUserItemsFromSupabase(
+  private static async fetchFromRemote(
     userId: string,
     lastSyncedAt: string,
-    newSyncedAt: string,
-  ): Promise<void> {
+  ): Promise<UserItemLocal[]> {
     const { data: updatedUserItems, error: rpcFetchError } = await supabaseInstance.rpc(
       'fetch_user_items',
       {
@@ -306,33 +272,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       });
     }
 
-    const serverItems = (updatedUserItems ?? []).map((item: UserItemLocal) =>
-      convertSQLToLocal(item),
-    );
-
-    const toDelete: [string, number][] = [];
-    const toUpsert: UserItemLocal[] = [];
-    serverItems.forEach((item: UserItemLocal) => {
-      if (item.deleted_at === null) {
-        toUpsert.push(item);
-      } else {
-        toDelete.push([userId, item.item_id]);
-      }
-    });
-
-    await db.transaction('rw', db.user_items, db.metadata, async () => {
-      if (toDelete.length > 0) {
-        await db.user_items.bulkDelete(toDelete);
-      }
-      if (toUpsert.length > 0) {
-        await db.user_items.bulkPut(toUpsert);
-      }
-      await Metadata.markAsSynced(TableName.UserItems, newSyncedAt, userId);
-    });
-
-    infoHandler(
-      `Completed ${serverItems.length} user items pull from Supabase for userId: ${userId}`,
-    );
+    return (updatedUserItems ?? []).map((item: UserItemLocal) => convertSQLToLocal(item));
   }
 
   /**
@@ -342,9 +282,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param isOdd - Whether to fetch items with odd progress
    * @param isNew - Whether to fetch non-started items (next_at = NULL_DATE) or ready to practice items (next_at < today)
    * @param limit - Maximum number of items to fetch
-   * @returns A promise that resolves to an array of UserItemLocal
    */
-  static async fetchPracticeItemsByParity(
+  private static async getPracticeItemsByParity(
     userId: string,
     isOdd: boolean,
     isNew: boolean = false,

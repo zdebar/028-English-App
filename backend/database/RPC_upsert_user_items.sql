@@ -1,24 +1,21 @@
 CREATE OR REPLACE FUNCTION public.upsert_user_items(
-  p_user_id UUID,
   p_user_items JSONB
 )
 RETURNS VOID
 LANGUAGE plpgsql
-SET search_path TO public
 AS $$
+DECLARE
+  v_user_id UUID;
 BEGIN
   IF p_user_items IS NULL OR p_user_items = '[]'::JSONB THEN
     RETURN;
   END IF;
 
-    -- Delete rows where started_at is null
-    DELETE FROM public.user_items
-    WHERE user_id = p_user_id
-      AND item_id IN (
-        SELECT (entry->>'item_id')::INT
-        FROM jsonb_array_elements(p_user_items) AS entry
-        WHERE (entry->>'started_at') IS NULL OR (entry->>'started_at') = 'null'
-      );
+  -- Extract user_id from the first element
+  SELECT (entry->>'user_id')::UUID
+    INTO v_user_id
+    FROM jsonb_array_elements(p_user_items) AS entry
+    LIMIT 1;
 
   INSERT INTO public.user_items (
     user_id,
@@ -30,7 +27,7 @@ BEGIN
     mastered_at
   )
   SELECT
-    p_user_id AS user_id,
+    (entry->>'user_id')::UUID AS user_id,
     (entry->>'item_id')::INT AS item_id,
     GREATEST((entry->>'progress')::INT, 0) AS progress,
     (entry->>'started_at')::TIMESTAMPTZ AS started_at,
@@ -60,4 +57,4 @@ BEGIN
       ELSE public.user_items.mastered_at
     END;
 END;
-$$;
+$$

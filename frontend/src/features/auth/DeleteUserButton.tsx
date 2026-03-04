@@ -45,9 +45,9 @@ export default function DeleteUserButton({ className }: { className?: string }):
       logRejectedResults(resultsSync, 'Operation failed during user data sync');
 
       const resultsDelete = await Promise.allSettled([
-        UserItem.deleteAllUserItems(userId),
+        UserItem.deleteAllItems(userId),
         Metadata.deleteSyncRow(TableName.UserItems, userId),
-        UserScore.clearUserScores(userId),
+        UserScore.deleteAllScores(userId),
         Metadata.deleteSyncRow(TableName.UserScores, userId),
         clearTheme(userId),
         clearUserStats(userId),

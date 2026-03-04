@@ -63,7 +63,7 @@ export default function VocabularyOverview() {
     const itemId = selectedWord?.item_id;
     if (typeof itemId !== 'number' || !userId) return;
 
-    await UserItem.resetUserItemById(userId, itemId);
+    await UserItem.resetItemById(userId, itemId);
     void reload();
     setCurrentIndex(null);
   }, [selectedWord, userId, reload, setCurrentIndex]);

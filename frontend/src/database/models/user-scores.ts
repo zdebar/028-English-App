@@ -17,7 +17,7 @@ import Metadata from './metadata';
  * @method addItemCount - Increases the item count for today's date by the specified amount.
  * @method getUserScoreForToday - Fetches the user score record for today's date.
  * @method syncUserScores - Synchronizes user scores between local database and Supabase.
- * @method deleteAllUserScores - Deletes all user score records for a given user.
+ * @method deleteAllScores - Deletes all user score records for a given user.
  */
 export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   user_id!: string;
@@ -79,7 +79,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     // Step 4: Update local database with fetched scores and update sync metadata
     await db.transaction('rw', db.user_scores, db.metadata, async () => {
       if (doFullSync) {
-        await this.clearUserScores(userId);
+        await this.deleteAllScores(userId);
       } else if (toDelete.length > 0) {
         await db.user_scores.bulkDelete(toDelete.map((item) => [item.user_id, item.date]));
       }
@@ -95,7 +95,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    *
    * @param userId - The ID of the user whose scores should be cleared
    */
-  static async clearUserScores(userId: string): Promise<void> {
+  static async deleteAllScores(userId: string): Promise<void> {
     await db.user_scores.where('user_id').equals(userId).delete();
   }
 

@@ -146,7 +146,7 @@ describe('UserScore', () => {
     it('deletes all scores for the user', async () => {
       mocks.userScoresDelete.mockResolvedValue(7);
 
-      await UserScore.clearUserScores('u1');
+      await UserScore.deleteAllScores('u1');
 
       expect(mocks.userScoresEquals).toHaveBeenCalledWith('u1');
     });

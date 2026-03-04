@@ -2,13 +2,16 @@ import config from '@/config/config';
 import { supabaseInstance } from '@/config/supabase.config';
 import { errorHandler } from '@/features/logging/error-handler';
 import type { UserItemSQL } from '@/types/sql.types';
-import {
-  type UserItemLocal,
-  type UserItemPractice,
-  type LessonLocal,
-  type LessonOverview,
-  TableName,
+import type {
+  UserItemLocal,
+  UserItemPractice,
+  LessonLocal,
+  LevelOverview,
+  LessonOverview,
+  LevelLocal,
 } from '@/types/local.types';
+
+import { TableName } from '@/types/local.types';
 import UserItem from '../models/user-items';
 import { infoHandler } from '@/features/logging/info-handler';
 import { SupabaseError } from '@/types/error.types';
@@ -250,15 +253,17 @@ export function addGrammarIndicatorFlag(
  *
  * @param items - Array of filtered UserItemLocal
  * @param lessons - Array of LessonLocal
+ * @param levels - Array of LevelLocal
  * @param day - Day string for startedTodayCount/masteredTodayCount
  * @returns Sorted array of LessonOverview objects
  */
 export function aggregateLessons(
   items: UserItemLocal[],
   lessons: LessonLocal[],
+  levels: LevelLocal[],
   day: string,
-): LessonOverview[] {
-  // Prepare count arrays
+): LevelOverview[] {
+  // Prepare count arrays for lessons
   const startedCount = new Array(lessons.length).fill(0);
   const startedTodayCount = new Array(lessons.length).fill(0);
   const masteredCount = new Array(lessons.length).fill(0);
@@ -269,7 +274,7 @@ export function aggregateLessons(
   const lessonIdToIndex = new Map<number, number>();
   lessons.forEach((lesson, idx) => lessonIdToIndex.set(lesson.id, idx));
 
-  // Aggregate counts
+  // Aggregate counts for lessons
   items.forEach((item) => {
     const idx = lessonIdToIndex.get(item.lesson_id);
     if (idx === undefined) return;
@@ -283,7 +288,7 @@ export function aggregateLessons(
   });
 
   // Build LessonOverview[]
-  return lessons
+  const lessonOverviews: LessonOverview[] = lessons
     .map((lesson, idx) => ({
       ...lesson,
       startedCount: startedCount[idx],
@@ -293,6 +298,23 @@ export function aggregateLessons(
       totalCount: totalCount[idx],
     }))
     .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+
+  // Group lessons by level_id
+  const levelIdToLessons = new Map<number, LessonOverview[]>();
+  lessonOverviews.forEach((lesson) => {
+    if (!levelIdToLessons.has(lesson.level_id)) {
+      levelIdToLessons.set(lesson.level_id, []);
+    }
+    levelIdToLessons.get(lesson.level_id)!.push(lesson);
+  });
+
+  // Build LevelOverview[] with lessons grouped and sorted by level.sort_order
+  return levels
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+    .map((level) => ({
+      ...level,
+      lessons: levelIdToLessons.get(level.id) ?? [],
+    }));
 }
 
 /**

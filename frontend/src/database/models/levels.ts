@@ -3,9 +3,14 @@ import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import { SupabaseError } from '@/types/error.types';
-import { TableName, type LevelLocal } from '@/types/local.types';
+import type { LevelLocal, LevelOverview } from '@/types/local.types';
+import { TableName } from '@/types/local.types';
 import { Entity } from 'dexie';
-import { syncFromRemoteGeneric } from '../utils/database.utils';
+import {
+  syncFromRemoteGeneric,
+  getTodayShortDate,
+  aggregateLessons,
+} from '../utils/database.utils';
 import Dexie from 'dexie';
 
 /**
@@ -29,6 +34,22 @@ export default class Levels extends Entity<AppDB> implements LevelLocal {
    */
   static async getAll(): Promise<LevelLocal[]> {
     return await db.levels.orderBy('sort_order').toArray();
+  }
+
+  /**
+   * Retrieves a comprehensive overview of user levels with their progress.
+   *
+   * Fetches all user items, lessons, and levels data, then aggregates them
+   * to provide a complete level overview for the specified user.
+   *
+   * @param userId - The unique identifier of the user
+   */
+  static async getOverview(userId: string): Promise<LevelOverview[]> {
+    const today = getTodayShortDate();
+    const items = await db.user_items.where('user_id').equals(userId).toArray();
+    const lessons = await db.lessons.orderBy('sort_order').toArray();
+    const levels = await db.levels.orderBy('sort_order').toArray();
+    return aggregateLessons(items, lessons, levels, today);
   }
 
   /**
