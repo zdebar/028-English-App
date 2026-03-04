@@ -1,15 +1,15 @@
 import { create } from 'zustand';
 import type { UserStats } from '@/types/local.types';
 import UserScore from '@/database/models/user-scores';
-import UserItem from '@/database/models/user-items';
+import Levels from '@/database/models/levels';
 
 interface UserState {
-  userStats: UserStats | null;
+  userStats: UserStats;
   reloadUserStats: (userId: string) => Promise<void>;
-  clearUserStats: (userId: string) => void;
+  clearUserStats: () => void;
 }
 
-const getUserStatsKey = (userId: string) => `user-stats_${userId}`;
+const initialUserStats: UserStats = { levelsOverview: [], practiceCountToday: 0 };
 
 /**
  * Zustand store for managing user statistics and related operations.
@@ -20,48 +20,49 @@ const getUserStatsKey = (userId: string) => `user-stats_${userId}`;
  * - Provides methods to reload and clear user statistics
  *
  * @returns {UserState} The user store with the following properties and methods:
- * @property {UserStatsLocal | null} userStats - Current user statistics or null if not loaded
+ * @property {UserStats} userStats - Current user statistics
  * @property {(userId: string) => Promise<void>} reloadUserStats - Fetches and updates user statistics from the server, including today's score, started counts, and total items count. Results are cached in localStorage.
- * @property {(userId: string) => void} clearUserStats - Clears user statistics from both localStorage and the store state
+ * @property {() => void} clearUserStats - Clears user statistics from both localStorage and the store state
  */
 export const useUserStore = create<UserState>((set, get) => {
+  let userItemsUpdatedListener: ((event: any) => void) | undefined;
   if (typeof window !== 'undefined') {
-    window.addEventListener('userItemsUpdated', (event: any) => {
+    userItemsUpdatedListener = (event: any) => {
       const { userId } = event.detail || {};
       if (userId) {
         get().reloadUserStats(userId);
       }
-    });
+    };
+    window.addEventListener('userItemsUpdated', userItemsUpdatedListener);
   }
-
-  return {
-    userStats: null,
-
+  const store: UserState = {
+    userStats: initialUserStats,
     reloadUserStats: async (userId: string) => {
       try {
         const todayScore = await UserScore.getOrCreateTodayScore(userId);
-        const levelsOverview = await UserItem.getLevelsOverview(userId);
-
+        const levelsOverview = await Levels.getOverview(userId);
         const stats: UserStats = {
           levelsOverview: Array.isArray(levelsOverview) ? levelsOverview : [],
           practiceCountToday:
             typeof todayScore?.item_count === 'number' ? todayScore.item_count : 0,
         };
-
-        localStorage.setItem(getUserStatsKey(userId), JSON.stringify(stats));
         set({ userStats: stats });
       } catch (error) {
-        set({ userStats: null });
+        set({ userStats: initialUserStats });
       }
     },
-
-    clearUserStats: (userId: string) => {
+    clearUserStats: () => {
       try {
-        localStorage.removeItem(getUserStatsKey(userId));
-        set({ userStats: null });
+        set({ userStats: initialUserStats });
       } catch {
         // Ignore storage errors
       }
     },
   };
+  (store as any).cleanup = () => {
+    if (typeof window !== 'undefined' && userItemsUpdatedListener) {
+      window.removeEventListener('userItemsUpdated', userItemsUpdatedListener);
+    }
+  };
+  return store;
 });

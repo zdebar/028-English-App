@@ -50,8 +50,8 @@ export interface LevelOverview extends LevelLocal {
 }
 
 export interface UserStats {
-  lessonsOverview?: LessonOverview[] | null;
-  practiceCountToday?: number;
+  levelsOverview: LevelOverview[];
+  practiceCountToday: number;
 }
 
 export interface GrammarLocal {

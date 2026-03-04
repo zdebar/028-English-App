@@ -174,7 +174,21 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     await db.user_items.where('user_id').equals(userId).delete();
   }
 
-  static async syncFromRemote(userId: string, doFullSync: boolean = false): Promise<void> {
+  /**
+   * Synchronizes user items with the remote database.
+   *
+   * Performs a bidirectional sync by:
+   * 1. Retrieving the last sync timestamp for the user
+   * 2. Getting local user items that have been updated since the last sync timestamp
+   * 3. Pushing local changes to the remote database
+   * 4. Fetching updated items from the remote database
+   * 5. Updating the local database with fetched items and sync metadata
+   *
+   * @param userId - The ID of the user whose items should be synced
+   * @param doFullSync - If true, performs a full sync by deleting all local items before upserting remote items.
+   *                     If false, performs an incremental sync by only deleting items marked as deleted remotely.
+   */
+  static async syncFromRemote(userId: string, doFullSync: boolean): Promise<void> {
     // Step 1: Get the last synced timestamp for user scores
     const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(doFullSync, userId);
 

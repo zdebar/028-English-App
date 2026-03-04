@@ -34,9 +34,9 @@ export default function Dashboard({ className = '' }: DashboardProps) {
     <div className={`min-w-card relative mx-auto mb-12 flex w-full flex-col gap-1 ${className}`}>
       {lessonsInProgress.map((lesson) => (
         <BlockBar
-          key={lesson.lesson_id}
-          lessonName={lesson.lesson_name ?? ''}
-          levelName={lesson.level_name ?? ''}
+          key={lesson.id}
+          lessonName={lesson.name ?? ''}
+          levelName={levelsOverview.find((level) => level.id === lesson.level_id)?.name ?? ''}
           previousCount={
             showMastered
               ? (lesson.masteredCount ?? 0) - (lesson.masteredTodayCount ?? 0)

@@ -14,6 +14,7 @@ import Dexie from 'dexie';
  * Handles synchronization of level data between the remote Supabase server and local storage.
  *
  * @method getAll - Retrieves all levels from the local database.
+ * @method getOverview - Retrieves a comprehensive overview of user levels with their progress.
  * @method syncLevels - Synchronizes levels from the remote server with the local database.
  *
  */

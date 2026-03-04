@@ -38,19 +38,13 @@ export default function DeleteUserButton({ className }: { className?: string }):
         throw new Error(deleteError.message);
       }
 
-      const resultsSync = await Promise.allSettled([
-        UserItem.syncUserItemsSinceLastSync(userId),
-        UserScore.syncUserScoreSinceLastSync(userId),
-      ]);
-      logRejectedResults(resultsSync, 'Operation failed during user data sync');
-
       const resultsDelete = await Promise.allSettled([
         UserItem.deleteAllItems(userId),
         Metadata.deleteSyncRow(TableName.UserItems, userId),
         UserScore.deleteAllScores(userId),
         Metadata.deleteSyncRow(TableName.UserScores, userId),
         clearTheme(userId),
-        clearUserStats(userId),
+        clearUserStats(),
         clearSyncTimes(userId),
       ]);
       logRejectedResults(resultsDelete, 'Operation failed during local cleanup');
@@ -64,14 +58,16 @@ export default function DeleteUserButton({ className }: { className?: string }):
   };
 
   return (
-    <ModalButton
-      modalTitle={TEXTS.deleteUserButtonTitle}
-      modalText={TEXTS.deleteUserModalText}
-      disabled={!userId}
-      onConfirm={handleDelete}
-      className={className}
-    >
-      {TEXTS.deleteUserButtonTitle}
-    </ModalButton>
+    <div>
+      <ModalButton
+        modalTitle={TEXTS.deleteUserButtonTitle}
+        modalText={TEXTS.deleteUserModalText}
+        disabled={!userId}
+        onConfirm={handleDelete}
+        className={className}
+      >
+        {TEXTS.deleteUserButtonTitle}
+      </ModalButton>
+    </div>
   );
 }

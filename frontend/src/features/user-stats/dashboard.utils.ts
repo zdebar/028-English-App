@@ -1,5 +1,5 @@
 import config from '@/config/config';
-import type { LessonsOverview, LevelsOverview } from '@/types/local.types';
+import type { LessonOverview, LevelOverview } from '@/types/local.types';
 
 /**
  * Calculates the items count in last started lesson before today.
@@ -61,26 +61,26 @@ export function getTodayStartedItems(previousCount: number, todayCount: number):
  * @param mode "started" (default) or "mastered" - which lesson attributes to use
  */
 export function getInProgressLessons(
-  levelsOverview: LevelsOverview[],
+  levelsOverview: LevelOverview[],
   mode: 'started' | 'mastered' = 'started',
-): LessonsOverview[] {
+): LessonOverview[] {
   const countKey = mode === 'mastered' ? 'masteredCount' : 'startedCount';
   const todayKey = mode === 'mastered' ? 'masteredTodayCount' : 'startedTodayCount';
 
   const allLessons = Array.isArray(levelsOverview)
-    ? levelsOverview.flatMap((level: LevelsOverview) =>
+    ? levelsOverview.flatMap((level: LevelOverview) =>
         Array.isArray(level.lessons) ? level.lessons : [],
       )
     : [];
 
   const sortedLessons = [...allLessons].sort((a, b) => {
-    if ((a.level_sort_order ?? 0) !== (b.level_sort_order ?? 0)) {
-      return (a.level_sort_order ?? 0) - (b.level_sort_order ?? 0);
+    if ((a.sort_order ?? 0) !== (b.sort_order ?? 0)) {
+      return (a.sort_order ?? 0) - (b.sort_order ?? 0);
     }
-    if ((a.lesson_sort_order ?? 0) !== (b.lesson_sort_order ?? 0)) {
-      return (a.lesson_sort_order ?? 0) - (b.lesson_sort_order ?? 0);
+    if ((a.sort_order ?? 0) !== (b.sort_order ?? 0)) {
+      return (a.sort_order ?? 0) - (b.sort_order ?? 0);
     }
-    return (a.lesson_id ?? 0) - (b.lesson_id ?? 0);
+    return (a.id ?? 0) - (b.id ?? 0);
   });
 
   let nextZeroLessonId: number | null = null;
@@ -91,7 +91,7 @@ export function getInProgressLessons(
       previousLesson == null || previousLesson[countKey] === previousLesson.totalCount;
 
     if (lesson[countKey] === 0 && isPreviousCompleted) {
-      nextZeroLessonId = lesson.lesson_id;
+      nextZeroLessonId = lesson.id;
       break;
     }
   }
@@ -100,6 +100,6 @@ export function getInProgressLessons(
     (lesson: any) =>
       lesson[todayKey] > 0 ||
       (lesson[countKey] > 0 && lesson[countKey] !== lesson.totalCount) ||
-      (nextZeroLessonId != null && lesson.lesson_id === nextZeroLessonId),
+      (nextZeroLessonId != null && lesson.id === nextZeroLessonId),
   );
 }
