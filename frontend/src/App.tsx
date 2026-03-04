@@ -24,31 +24,20 @@ import { errorHandler } from './features/logging/error-handler';
 import { useToastStore } from './features/toast/use-toast-store';
 import { TEXTS } from './locales/cs';
 import './styles/index.css';
-import { infoHandler } from './features/logging/info-handler';
-import { useThemeStore } from './features/theme/use-theme';
 import NotificationText from './components/UI/NotificationText';
+import { useThemeLoader } from './features/theme/use-theme-loader';
 
 export default function App() {
   const userId = useAuthStore((state) => state.userId);
   const initializeAuth = useAuthStore((state) => state.initializeAuth);
+  const authLoading = useAuthStore((state) => state.loading);
   const showToast = useToastStore((state) => state.showToast);
   const location = useLocation();
-  const loadTheme = useThemeStore((state) => state.loadTheme);
 
   // Auth initialization effect
   useEffect(() => {
     try {
       const cleanup = initializeAuth();
-      // Request persistent storage
-      if (navigator.storage && navigator.storage.persist) {
-        navigator.storage.persist().then((granted) => {
-          if (granted) {
-            infoHandler('Persistent storage granted.');
-          } else {
-            infoHandler('Persistent storage not granted.');
-          }
-        });
-      }
       return cleanup;
     } catch (error) {
       showToast(TEXTS.authInitErrorToast, 'error');
@@ -56,12 +45,11 @@ export default function App() {
     }
   }, [initializeAuth]);
 
-  // Data synchronization
-  const { loading } = usePeriodicSync(userId);
+  // Theme load
+  useThemeLoader(userId);
 
-  useEffect(() => {
-    loadTheme(userId || 'guest');
-  }, [userId, loadTheme]);
+  // Data synchronization
+  const { loading: syncLoading } = usePeriodicSync(userId);
 
   return (
     <div className="max-w-container relative mx-auto flex min-h-screen flex-col justify-start">
@@ -69,7 +57,7 @@ export default function App() {
       <OverlayMask />
       <Header />
       <main className="relative flex grow flex-col items-center gap-4">
-        {loading && (
+        {(syncLoading || authLoading) && (
           <div className="pointer-events-none absolute top-0 left-1/2 z-50 w-60 -translate-x-1/2">
             <DelayedMessage>
               <NotificationText text={TEXTS.syncLoadingText} className="color-info" />

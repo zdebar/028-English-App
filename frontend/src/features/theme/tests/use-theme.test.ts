@@ -12,7 +12,7 @@ vi.mock('@/features/theme/theme-utils', () => ({
   clearUserTheme: (...args: unknown[]) => mocks.clearUserTheme(...args),
 }));
 
-import { useThemeStore } from '@/features/theme/use-theme';
+import { useThemeStore } from '@/features/theme/use-theme-store';
 
 describe('useThemeStore', () => {
   beforeEach(() => {

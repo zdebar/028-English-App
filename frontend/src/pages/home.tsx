@@ -2,7 +2,7 @@ import PropertyView from '@/components/UI/PropertyView';
 import { supabaseInstance } from '@/config/supabase.config';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import Dashboard from '@/features/user-stats/Dashboard';
-import { useThemeStore } from '@/features/theme/use-theme';
+import { useThemeStore } from '@/features/theme/use-theme-store';
 import { useUserStore } from '@/features/user-stats/use-user-store';
 import { TEXTS } from '@/locales/cs';
 import { Auth } from '@supabase/auth-ui-react';

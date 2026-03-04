@@ -1,6 +1,6 @@
 import SunIcon from '@/components/UI/icons/SunIcon';
 import MoonIcon from '@/components/UI/icons/MoonIcon';
-import { useThemeStore, type UserTheme } from '@/features/theme/use-theme';
+import { useThemeStore, type UserTheme } from '@/features/theme/use-theme-store';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { useCallback } from 'react';
