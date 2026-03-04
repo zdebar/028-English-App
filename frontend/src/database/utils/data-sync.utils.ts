@@ -31,12 +31,12 @@ export async function dataSync(userId: string): Promise<void> {
     ? [
         Grammar.syncFromRemote(true),
         Lessons.syncFromRemote(true),
-        AudioRecord.syncAudioData(config.audio.archives),
+        AudioRecord.syncFromRemote(config.audio.archives),
       ]
     : [
         Grammar.syncFromRemote(false),
         Lessons.syncFromRemote(false),
-        AudioRecord.syncAudioData(config.audio.archives),
+        AudioRecord.syncFromRemote(config.audio.archives),
       ];
 
   void Promise.allSettled(sharedPromises).then((results) => {
