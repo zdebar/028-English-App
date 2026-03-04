@@ -9,6 +9,7 @@ interface ThemeState {
   loadTheme: (userId?: string | null) => void;
   clearTheme: (userId?: string | null) => void;
   chooseTheme: (newTheme: UserTheme, userId?: string | null) => void;
+  saveCurrentThemeAsGuest: () => void;
 }
 
 /**
@@ -95,6 +96,10 @@ export const useThemeStore = create<ThemeState>((set, get) => {
       applyTheme(newTheme);
       saveTheme(newTheme, resolvedUserId);
       set({ theme: newTheme });
+    },
+    saveCurrentThemeAsGuest: () => {
+      const currentTheme = get().theme;
+      saveTheme(currentTheme, DEFAULT_THEME_USER_ID);
     },
   };
 });

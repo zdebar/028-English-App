@@ -4,6 +4,7 @@ import ModalButton from '@/features/modal/ModalButton';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
+import { useThemeStore } from '../theme/use-theme-store';
 
 /**
  * SignoutButton component for signing out the user.
@@ -14,12 +15,14 @@ import type { JSX } from 'react';
 export default function SignoutButton({ className }: { className?: string }): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const handleLogout = useAuthStore((state) => state.handleLogout);
+  const saveCurrentThemeAsGuest = useThemeStore((state) => state.saveCurrentThemeAsGuest);
   const showToast = useToastStore((state) => state.showToast);
 
   const handleSignout = async () => {
     if (!userId) return;
 
     try {
+      saveCurrentThemeAsGuest();
       await handleLogout();
       showToast(TEXTS.signoutSuccess, 'success');
     } catch (error) {

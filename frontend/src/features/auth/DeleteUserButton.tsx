@@ -23,11 +23,14 @@ export default function DeleteUserButton({ className }: { className?: string }):
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
   const clearTheme = useThemeStore((state) => state.clearTheme);
+  const saveCurrentThemeAsGuest = useThemeStore((state) => state.saveCurrentThemeAsGuest);
 
   const handleDelete = async () => {
     if (!userId) return;
 
     try {
+      saveCurrentThemeAsGuest();
+
       const { error: deleteError } = await supabaseInstance.functions.invoke('delete-user', {
         body: { userId },
       });
