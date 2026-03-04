@@ -5,7 +5,7 @@ import { db } from '@/database/models/db';
 import { DatabaseError, SupabaseError } from '@/types/error.types';
 import type { GrammarLocal } from '@/types/local.types';
 import { TableName } from '@/types/local.types';
-import { assertIsoDateString, assertPositiveInteger } from '@/utils/assertions.utils';
+import { assertPositiveInteger } from '@/utils/assertions.utils';
 import Dexie, { Entity } from 'dexie';
 import { syncFromRemoteGeneric } from '../utils/database.utils';
 
@@ -54,8 +54,6 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * @returns A promise that resolves to an array of unique grammar IDs that the user has started, or an empty array if no items have been started
    */
   static async getStartedIds(userId: string): Promise<number[]> {
-    if (!userId) throw new Error('userId is required in getStartedIds');
-
     const startedGrammarIds = await db.user_items
       .where('[user_id+grammar_id+started_at]')
       .between([userId, Dexie.minKey, Dexie.minKey], [userId, Dexie.maxKey, NULL_DATE], true, false)
@@ -75,9 +73,6 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    *          if the user has not started any grammar items or if no matching grammar records are found.
    */
   static async getStartedList(userId: string): Promise<GrammarLocal[]> {
-    if (!userId) throw new Error('userId is required in getStartedList');
-
-    // Get unique grammar IDs for started items
     const grammarIds = await this.getStartedIds(userId);
     if (grammarIds.length === 0) return [];
 
@@ -112,8 +107,6 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   private static async fetchFromRemote(
     lastSyncedAt: string = config.database.epochStartDate,
   ): Promise<GrammarLocal[]> {
-    assertIsoDateString(lastSyncedAt);
-
     const { data: grammar, error } = await supabaseInstance
       .from('grammar')
       .select('id, name, note, sort_order, deleted_at')
