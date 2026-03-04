@@ -30,12 +30,12 @@ export async function dataSync(userId: string): Promise<void> {
   const sharedPromises = doFullSync
     ? [
         Grammar.syncGrammar(true),
-        Lessons.syncLessons(true),
+        Lessons.syncFromRemote(true),
         AudioRecord.syncAudioData(config.audio.archives),
       ]
     : [
         Grammar.syncGrammar(false),
-        Lessons.syncLessons(false),
+        Lessons.syncFromRemote(false),
         AudioRecord.syncAudioData(config.audio.archives),
       ];
 

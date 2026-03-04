@@ -326,55 +326,6 @@ export function validateUserIdUsage(tableName: TableName, userId?: string) {
 }
 
 /**
- * Returns the last synced timestamp and the new sync timestamp.
- * @param doFullSync - Whether to perform a full sync.
- * @returns Promise resolving to an object with lastSyncedAt and newSyncedAt.
- */
-export async function getSyncTimestamps(
-  doFullSync: boolean,
-  tableName: TableName,
-): Promise<{ lastSyncedAt: string; newSyncedAt: string }> {
-  const lastSyncedAt = doFullSync
-    ? config.database.epochStartDate
-    : await Metadata.getSyncedAt(tableName);
-  const newSyncedAt = new Date().toISOString();
-  return { lastSyncedAt, newSyncedAt };
-}
-
-/**
- * Generic function to sync a Dexie table with upsert and delete logic.
- * @param table - Dexie table instance.
- * @param toUpsert - Array of items to upsert
- * @param toDelete - Array of items to delete
- * @param doFullSync - Whether to clear the table before upserting
- * @param tableName - Table name for metadata
- * @param newSyncedAt - Timestamp for metadata
- *
- * @example
- * await syncTableGeneric(db.userItems, userItemsToUpsert, userItemsToDelete, false, TableName.UserItems, newSyncedAt);
- */
-export async function syncTableGeneric<T extends { id: number }>(
-  table: Dexie.Table<T, number>,
-  toUpsert: T[],
-  toDelete: T[],
-  doFullSync: boolean,
-  tableName: TableName,
-  newSyncedAt: string,
-): Promise<void> {
-  await db.transaction('rw', table, db.metadata, async () => {
-    if (doFullSync) {
-      await table.clear();
-    } else if (toDelete.length > 0) {
-      await table.bulkDelete(toDelete.map((item: any) => item.id));
-    }
-    if (toUpsert.length > 0) {
-      await table.bulkPut(toUpsert);
-    }
-    await Metadata.markAsSynced(tableName, newSyncedAt);
-  });
-}
-
-/**
  * Generic function to sync any table from a remote source.
  * @param dbTable - Dexie table instance. Requires casting to Dexie.Table<TableType, number> see example.
  * @param tableName - Table name for metadata
@@ -391,14 +342,29 @@ export async function syncFromRemoteGeneric<T extends { deleted_at: string | nul
   doFullSync: boolean = false,
 ): Promise<void> {
   // Step 1: Determine last synced timestamp and new sync timestamp
-  const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(doFullSync, tableName);
+  const lastSyncedAt = doFullSync
+    ? config.database.epochStartDate
+    : await Metadata.getSyncedAt(tableName);
+  const newSyncedAt = new Date().toISOString();
 
   // Step 2: Fetch remote data
   const remoteItems = await fetchRemoteFn(lastSyncedAt);
 
-  // Step 3: Split remote items into upsert and delete arrays
+  // Step 3: Split remote items into upsert and delete lists
   const { toUpsert, toDelete } = splitDeleted(remoteItems);
-  await syncTableGeneric(dbTable, toUpsert, toDelete, doFullSync, tableName, newSyncedAt);
+
+  // Step 4: Sync with local database in a transaction
+  await db.transaction('rw', dbTable, db.metadata, async () => {
+    if (doFullSync) {
+      await dbTable.clear();
+    } else if (toDelete.length > 0) {
+      await dbTable.bulkDelete(toDelete.map((item: any) => item.id));
+    }
+    if (toUpsert.length > 0) {
+      await dbTable.bulkPut(toUpsert);
+    }
+    await Metadata.markAsSynced(tableName, newSyncedAt);
+  });
 
   infoHandler(`Completed ${remoteItems.length} ${tableName} pull from remote.`);
 }
