@@ -9,6 +9,7 @@ import { restoreUnsavedFromLocalStorage } from '@/database/utils/database.utils'
 import { getFullSyncTime, setFullSyncTime } from '@/database/utils/sync-time.utils';
 import { logRejectedResults } from '@/features/logging/logging.utils';
 import Lessons from '@/database/models/lessons';
+import Levels from '@/database/models/levels';
 
 /**
  * Synchronizes data for a specific user with the database.
@@ -30,11 +31,13 @@ export async function dataSync(userId: string): Promise<void> {
   const sharedPromises = doFullSync
     ? [
         Grammar.syncFromRemote(true),
+        Levels.syncFromRemote(true),
         Lessons.syncFromRemote(true),
         AudioRecord.syncFromRemote(config.audio.archives),
       ]
     : [
         Grammar.syncFromRemote(false),
+        Levels.syncFromRemote(false),
         Lessons.syncFromRemote(false),
         AudioRecord.syncFromRemote(config.audio.archives),
       ];
@@ -45,8 +48,8 @@ export async function dataSync(userId: string): Promise<void> {
 
   // Step 3: Perform user stores data synchronization (user_scores and user_items)
   const userPromises = doFullSync
-    ? [UserScore.syncFromRemote(userId, true), UserItem.syncUserItemsAll(userId)]
-    : [UserScore.syncFromRemote(userId, false), UserItem.syncUserItemsSinceLastSync(userId)];
+    ? [UserScore.syncFromRemote(userId, true), UserItem.syncFromRemote(userId, true)]
+    : [UserScore.syncFromRemote(userId, false), UserItem.syncFromRemote(userId, false)];
 
   const userResults = await Promise.allSettled(userPromises);
   const isError = logRejectedResults(userResults, 'Data synchronization error:');
@@ -69,7 +72,7 @@ export async function dataSyncOnUnmount(userId: string): Promise<void> {
 
   const results = await Promise.allSettled([
     UserScore.syncFromRemote(userId, false),
-    UserItem.syncUserItemsSinceLastSync(userId),
+    UserItem.syncFromRemote(userId, false),
   ]);
 
   logRejectedResults(results, 'Unmount synchronization failed');
