@@ -39,7 +39,7 @@ export const useUserStore = create<UserState>((set, get) => {
 
     reloadUserStats: async (userId: string) => {
       try {
-        const todayScore = await UserScore.getUserScoreForToday(userId);
+        const todayScore = await UserScore.getOrCreateTodayScore(userId);
         const levelsOverview = await UserItem.getLevelsOverview(userId);
 
         const stats: UserStats = {

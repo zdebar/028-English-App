@@ -342,10 +342,7 @@ export async function syncFromRemoteGeneric<T extends { deleted_at: string | nul
   doFullSync: boolean = false,
 ): Promise<void> {
   // Step 1: Determine last synced timestamp and new sync timestamp
-  const lastSyncedAt = doFullSync
-    ? config.database.epochStartDate
-    : await Metadata.getSyncedAt(tableName);
-  const newSyncedAt = new Date().toISOString();
+  const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(doFullSync);
 
   // Step 2: Fetch remote data
   const remoteItems = await fetchRemoteFn(lastSyncedAt);
@@ -367,4 +364,20 @@ export async function syncFromRemoteGeneric<T extends { deleted_at: string | nul
   });
 
   infoHandler(`Completed ${remoteItems.length} ${tableName} pull from remote.`);
+}
+
+/**
+ * Returns the last synced timestamp and the new sync timestamp for a user.
+ * @param doFullSync - Whether to perform a full sync.
+ * @param userId - The user ID.
+ */
+export async function getSyncTimestamps(
+  doFullSync: boolean,
+  userId?: string,
+): Promise<{ lastSyncedAt: string; newSyncedAt: string }> {
+  const lastSyncedAt = doFullSync
+    ? config.database.epochStartDate
+    : await Metadata.getSyncedAt(TableName.UserScores, userId);
+  const newSyncedAt = new Date().toISOString();
+  return { lastSyncedAt, newSyncedAt };
 }

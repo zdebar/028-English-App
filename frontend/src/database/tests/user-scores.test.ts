@@ -121,7 +121,7 @@ describe('UserScore', () => {
       };
       mocks.userScoresGet.mockResolvedValue(existing);
 
-      const result = await UserScore.getUserScoreForToday('u1');
+      const result = await UserScore.getOrCreateTodayScore('u1');
 
       expect(result).toEqual(existing);
     });
@@ -131,7 +131,7 @@ describe('UserScore', () => {
       vi.setSystemTime(new Date('2026-02-28T11:00:00.000Z'));
       mocks.userScoresGet.mockResolvedValue(undefined);
 
-      const result = await UserScore.getUserScoreForToday('u1');
+      const result = await UserScore.getOrCreateTodayScore('u1');
 
       expect(result).toEqual({
         user_id: 'u1',
@@ -146,7 +146,7 @@ describe('UserScore', () => {
     it('deletes all scores for the user', async () => {
       mocks.userScoresDelete.mockResolvedValue(7);
 
-      await UserScore.deleteAllUserScores('u1');
+      await UserScore.clearUserScores('u1');
 
       expect(mocks.userScoresEquals).toHaveBeenCalledWith('u1');
     });
