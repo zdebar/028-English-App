@@ -23,9 +23,7 @@ export default function Home(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const userFullName = useAuthStore((state) => state.userFullName);
   const userEmail = useAuthStore((state) => state.userEmail);
-  const userStats = useUserStore((state) => state.userStats);
-
-  const practiceCountToday = userStats?.practiceCountToday ?? 0;
+  const dailyCount = useUserStore((state) => state.dailyCount);
   const dailyGoal = config.practice.dailyGoal;
   const userDisplayName = userFullName || userEmail;
 
@@ -75,7 +73,7 @@ export default function Home(): JSX.Element {
           <div className="px-4">
             <PropertyView label={TEXTS.userLabel}>{userDisplayName}</PropertyView>
             <PropertyView label={TEXTS.userStatsLabel}>
-              {GoalMetView({ current: practiceCountToday, goal: dailyGoal })}
+              {GoalMetView({ current: dailyCount, goal: dailyGoal })}
             </PropertyView>
           </div>
           <Dashboard className="pt-4" />

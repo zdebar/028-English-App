@@ -15,5 +15,5 @@ export function useUserStoreReset(userId: string | null) {
       clearItemsStats();
       clearScoresStats();
     }
-  }, [userId]);
+  }, [userId, clearItemsStats, clearScoresStats]);
 }

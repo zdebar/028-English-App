@@ -19,7 +19,7 @@ type DashboardProps = {
  */
 export default function Dashboard({ className = '' }: DashboardProps) {
   const [showMastered, setShowMastered] = useState(false);
-  const levelsOverview = useUserStore((state) => state.userStats?.levelsOverview);
+  const levelsOverview = useUserStore((state) => state.levels);
 
   const lessonsInProgress = getInProgressLessons(
     Array.isArray(levelsOverview) ? levelsOverview : [],
