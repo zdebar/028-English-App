@@ -20,8 +20,8 @@ vi.mock('@/locales/cs', () => ({
 }));
 
 vi.mock('@/features/user-stats/use-user-store', () => ({
-  useUserStore: (selector: (state: { userStats: { levelsOverview: any[] } | null }) => unknown) =>
-    selector({ userStats: { levelsOverview: mocks.levelsOverview } }),
+  useUserStore: (selector: (state: { levels: any[] }) => unknown) =>
+    selector({ levels: mocks.levelsOverview }),
 }));
 
 vi.mock('react-router-dom', () => ({
@@ -85,17 +85,16 @@ describe('LevelsOverview', () => {
   it('renders level list and toggles lesson unpacking on level click', () => {
     mocks.levelsOverview = [
       {
-        level_id: 1,
-        level_name: 'A1',
-        startedCount: 4,
-        masteredCount: 2,
-        totalCount: 10,
+        id: 1,
+        name: 'A1',
         lessons: [
           {
-            lesson_id: 101,
-            lesson_name: 'Lesson 1',
+            id: 101,
+            name: 'Lesson 1',
             startedCount: 3,
+            startedTodayCount: 0,
             masteredCount: 1,
+            masteredTodayCount: 0,
             totalCount: 5,
           },
         ],
@@ -117,17 +116,16 @@ describe('LevelsOverview', () => {
   it('toggles started/mastered mode and updates GoalMetView current values', () => {
     mocks.levelsOverview = [
       {
-        level_id: 1,
-        level_name: 'A1',
-        startedCount: 4,
-        masteredCount: 2,
-        totalCount: 10,
+        id: 1,
+        name: 'A1',
         lessons: [
           {
-            lesson_id: 101,
-            lesson_name: 'Lesson 1',
+            id: 101,
+            name: 'Lesson 1',
             startedCount: 3,
+            startedTodayCount: 0,
             masteredCount: 1,
+            masteredTodayCount: 0,
             totalCount: 5,
           },
         ],
@@ -137,23 +135,20 @@ describe('LevelsOverview', () => {
     render(<LevelsOverview />);
 
     fireEvent.click(screen.getByText('A1'));
-    expect(mocks.goalMetCalls.some((x) => x.current === 4 && x.goal === 10)).toBe(true);
+    expect(mocks.goalMetCalls.some((x) => x.current === 3 && x.goal === 5)).toBe(true);
     expect(mocks.goalMetCalls.some((x) => x.current === 3 && x.goal === 5)).toBe(true);
 
     fireEvent.click(screen.getByRole('button', { name: 'Started' }));
     expect(screen.getByRole('button', { name: 'Mastered' })).toBeTruthy();
-    expect(mocks.goalMetCalls.some((x) => x.current === 2 && x.goal === 10)).toBe(true);
+    expect(mocks.goalMetCalls.some((x) => x.current === 1 && x.goal === 5)).toBe(true);
     expect(mocks.goalMetCalls.some((x) => x.current === 1 && x.goal === 5)).toBe(true);
   });
 
   it('navigates to profile when close button is clicked', () => {
     mocks.levelsOverview = [
       {
-        level_id: 1,
-        level_name: 'A1',
-        startedCount: 1,
-        masteredCount: 1,
-        totalCount: 1,
+        id: 1,
+        name: 'A1',
         lessons: [],
       },
     ];

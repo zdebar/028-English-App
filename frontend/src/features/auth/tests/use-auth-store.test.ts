@@ -19,7 +19,7 @@ vi.mock('@/config/supabase.config', () => ({
   },
 }));
 
-vi.mock('@/database/models/data-sync', () => ({
+vi.mock('@/database/utils/data-sync.utils', () => ({
   dataSyncOnUnmount: (...args: unknown[]) => mocks.dataSyncOnUnmount(...args),
 }));
 

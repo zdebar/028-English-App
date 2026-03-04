@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   userId: 'u1' as string | null,
   navigate: vi.fn(),
-  resetUserItemById: vi.fn(),
+  resetItemById: vi.fn(),
   setCurrentIndex: vi.fn(),
   reload: vi.fn(),
   state: {
@@ -34,8 +34,8 @@ vi.mock('react-router-dom', () => ({
 
 vi.mock('@/database/models/user-items', () => ({
   default: {
-    getUserStartedVocabulary: vi.fn(),
-    resetUserItemById: (...args: unknown[]) => mocks.resetUserItemById(...args),
+    getStartedVocabulary: vi.fn(),
+    resetItemById: (...args: unknown[]) => mocks.resetItemById(...args),
   },
 }));
 
@@ -59,7 +59,13 @@ vi.mock('@/features/vocabulary/vocabulary.utils', async () => {
 });
 
 vi.mock('@/components/UI/DelayedMessage', () => ({
-  default: ({ text }: any) => <div>{text ?? 'Loading'}</div>,
+  default: ({ children }: any) => <div>{children}</div>,
+}));
+
+vi.mock('@/locales/cs', () => ({
+  TEXTS: {
+    loadingMessage: 'Loading',
+  },
 }));
 
 vi.mock('@/features/vocabulary/VocabularyList', () => ({
@@ -101,7 +107,7 @@ describe('VocabularyOverview', () => {
     mocks.state.error = null;
     mocks.state.loading = false;
     mocks.reload.mockResolvedValue(undefined);
-    mocks.resetUserItemById.mockResolvedValue(true);
+    mocks.resetItemById.mockResolvedValue(true);
   });
 
   it('renders loading view when hook is loading', () => {
@@ -137,7 +143,7 @@ describe('VocabularyOverview', () => {
 
     fireEvent.click(screen.getByTestId('detail-reset'));
     await waitFor(() => {
-      expect(mocks.resetUserItemById).toHaveBeenCalledWith('u1', 3);
+      expect(mocks.resetItemById).toHaveBeenCalledWith('u1', 3);
       expect(mocks.reload).toHaveBeenCalledTimes(1);
       expect(mocks.setCurrentIndex).toHaveBeenCalledWith(null);
     });

@@ -54,9 +54,11 @@ import {
   resetUserItem,
   restoreUnsavedFromLocalStorage,
   sortOddEvenByProgress,
-  triggerNamedEvent,
-  triggerLevelsUpdatedEvent,
 } from '@/database/utils/database.utils';
+import {
+  triggerLevelsUpdatedEvent,
+  triggerNamedEvent,
+} from '@/features/user-stats/dashboard.utils';
 
 describe('database.utils', () => {
   beforeEach(() => {
@@ -156,17 +158,13 @@ describe('database.utils', () => {
       expect(event.detail).toEqual({ userId: 'u1' });
     });
 
-    it('throws when triggerNamedEvent is called without userId', () => {
-      expect(() => triggerNamedEvent('evt', '')).toThrow('User ID is required to trigger event.');
-    });
-
-    it('triggers userItemsUpdated event shortcut', () => {
+    it('triggers levelsUpdated event shortcut', () => {
       const spy = vi.spyOn(window, 'dispatchEvent');
 
       triggerLevelsUpdatedEvent('u1');
 
       const event = spy.mock.calls[0][0] as CustomEvent;
-      expect(event.type).toBe('userItemsUpdated');
+      expect(event.type).toBe('levelsUpdated');
       expect(event.detail).toEqual({ userId: 'u1' });
     });
   });

@@ -7,7 +7,7 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import { type JSX } from 'react';
-import ModalButton from '../modal/ModalButton';
+import ModalButton from '@/features/modal/ModalButton';
 import { errorHandler } from '../logging/error-handler';
 import { useThemeStore } from '../theme/use-theme-store';
 import { clearSyncTimes } from '@/database/utils/sync-time.utils';

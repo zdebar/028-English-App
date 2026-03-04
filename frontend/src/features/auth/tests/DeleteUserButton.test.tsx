@@ -5,10 +5,8 @@ const mocks = vi.hoisted(() => ({
   userId: 'u1' as string | null,
   showToast: vi.fn(),
   clearTheme: vi.fn(),
-  clearUserStats: vi.fn(),
-  syncUserItemsSinceLastSync: vi.fn(),
-  syncUserScoreSinceLastSync: vi.fn(),
-  deleteAllUserItems: vi.fn(),
+  saveCurrentThemeAsGuest: vi.fn(),
+  deleteAllItems: vi.fn(),
   deleteAllUserScores: vi.fn(),
   deleteSyncRow: vi.fn(),
   clearSyncTimes: vi.fn(),
@@ -27,27 +25,28 @@ vi.mock('@/features/toast/use-toast-store', () => ({
     selector({ showToast: mocks.showToast }),
 }));
 
-vi.mock('@/features/theme/use-theme', () => ({
-  useThemeStore: (selector: (state: { clearTheme: typeof mocks.clearTheme }) => unknown) =>
-    selector({ clearTheme: mocks.clearTheme }),
-}));
-
-vi.mock('@/features/user-stats/use-user-store', () => ({
-  useUserStore: (selector: (state: { clearUserStats: typeof mocks.clearUserStats }) => unknown) =>
-    selector({ clearUserStats: mocks.clearUserStats }),
+vi.mock('@/features/theme/use-theme-store', () => ({
+  useThemeStore: (
+    selector: (state: {
+      clearTheme: typeof mocks.clearTheme;
+      saveCurrentThemeAsGuest: typeof mocks.saveCurrentThemeAsGuest;
+    }) => unknown,
+  ) =>
+    selector({
+      clearTheme: mocks.clearTheme,
+      saveCurrentThemeAsGuest: mocks.saveCurrentThemeAsGuest,
+    }),
 }));
 
 vi.mock('@/database/models/user-items', () => ({
   default: {
-    syncUserItemsSinceLastSync: (...args: unknown[]) => mocks.syncUserItemsSinceLastSync(...args),
-    deleteAllUserItems: (...args: unknown[]) => mocks.deleteAllUserItems(...args),
+    deleteAllItems: (...args: unknown[]) => mocks.deleteAllItems(...args),
   },
 }));
 
 vi.mock('@/database/models/user-scores', () => ({
   default: {
-    syncUserScoreSinceLastSync: (...args: unknown[]) => mocks.syncUserScoreSinceLastSync(...args),
-    deleteAllUserScores: (...args: unknown[]) => mocks.deleteAllUserScores(...args),
+    deleteAllScores: (...args: unknown[]) => mocks.deleteAllUserScores(...args),
   },
 }));
 
@@ -57,7 +56,7 @@ vi.mock('@/database/models/metadata', () => ({
   },
 }));
 
-vi.mock('@/database/sync-time.utils', () => ({
+vi.mock('@/database/utils/sync-time.utils', () => ({
   clearSyncTimes: (...args: unknown[]) => mocks.clearSyncTimes(...args),
 }));
 
@@ -108,13 +107,11 @@ describe('DeleteUserButton', () => {
     mocks.userId = 'u1';
 
     mocks.invoke.mockResolvedValue({ error: null });
-    mocks.syncUserItemsSinceLastSync.mockResolvedValue(undefined);
-    mocks.syncUserScoreSinceLastSync.mockResolvedValue(undefined);
-    mocks.deleteAllUserItems.mockResolvedValue(0);
+    mocks.deleteAllItems.mockResolvedValue(0);
     mocks.deleteAllUserScores.mockResolvedValue(0);
     mocks.deleteSyncRow.mockResolvedValue(true);
     mocks.clearTheme.mockResolvedValue(undefined);
-    mocks.clearUserStats.mockResolvedValue(undefined);
+    mocks.saveCurrentThemeAsGuest.mockReturnValue(undefined);
     mocks.clearSyncTimes.mockReturnValue(undefined);
     mocks.signOut.mockResolvedValue({ error: null });
   });
@@ -133,6 +130,7 @@ describe('DeleteUserButton', () => {
     fireEvent.click(screen.getByTestId('button-with-modal'));
 
     await waitFor(() => {
+      expect(mocks.saveCurrentThemeAsGuest).toHaveBeenCalled();
       expect(mocks.invoke).toHaveBeenCalledWith('delete-user', {
         body: { userId: 'u1' },
       });

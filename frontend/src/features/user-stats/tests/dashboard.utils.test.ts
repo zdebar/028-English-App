@@ -48,7 +48,8 @@ describe('dashboard.utils', () => {
       {
         lessons: [
           {
-            lesson_id: 1,
+            id: 1,
+            sort_order: 1,
             totalCount: 10,
             startedCount: 0,
             startedTodayCount: 0,
@@ -56,7 +57,8 @@ describe('dashboard.utils', () => {
             masteredTodayCount: 0,
           },
           {
-            lesson_id: 2,
+            id: 2,
+            sort_order: 2,
             totalCount: 10,
             startedCount: 3,
             startedTodayCount: 0,
@@ -64,7 +66,8 @@ describe('dashboard.utils', () => {
             masteredTodayCount: 0,
           },
           {
-            lesson_id: 3,
+            id: 3,
+            sort_order: 3,
             totalCount: 10,
             startedCount: 5,
             startedTodayCount: 1,
@@ -72,7 +75,8 @@ describe('dashboard.utils', () => {
             masteredTodayCount: 0,
           },
           {
-            lesson_id: 4,
+            id: 4,
+            sort_order: 4,
             totalCount: 10,
             startedCount: 10,
             startedTodayCount: 0,
@@ -84,15 +88,11 @@ describe('dashboard.utils', () => {
     ] as any;
 
     it('returns started in-progress lessons plus first zero-started lesson', () => {
-      expect(getInProgressLessons(levelsOverview, 'started').map((x) => x.lesson_id)).toEqual([
-        1, 2, 3,
-      ]);
+      expect(getInProgressLessons(levelsOverview, 'started').map((x) => x.id)).toEqual([1, 2, 3]);
     });
 
     it('returns mastered in-progress lessons plus first zero-mastered lesson', () => {
-      expect(getInProgressLessons(levelsOverview, 'mastered').map((x) => x.lesson_id)).toEqual([
-        1, 3, 4,
-      ]);
+      expect(getInProgressLessons(levelsOverview, 'mastered').map((x) => x.id)).toEqual([1, 3, 4]);
     });
 
     it('returns empty array for invalid input', () => {
@@ -105,9 +105,8 @@ describe('dashboard.utils', () => {
         {
           lessons: [
             {
-              lesson_id: 1,
-              lesson_sort_order: 1,
-              level_sort_order: 1,
+              id: 1,
+              sort_order: 1,
               totalCount: 10,
               startedCount: 4,
               startedTodayCount: 0,
@@ -115,9 +114,8 @@ describe('dashboard.utils', () => {
               masteredTodayCount: 0,
             },
             {
-              lesson_id: 2,
-              lesson_sort_order: 2,
-              level_sort_order: 1,
+              id: 2,
+              sort_order: 2,
               totalCount: 10,
               startedCount: 0,
               startedTodayCount: 0,
@@ -128,9 +126,7 @@ describe('dashboard.utils', () => {
         },
       ] as any;
 
-      expect(getInProgressLessons(blockedByPrevious, 'started').map((x) => x.lesson_id)).toEqual([
-        1,
-      ]);
+      expect(getInProgressLessons(blockedByPrevious, 'started').map((x) => x.id)).toEqual([1]);
     });
 
     it('includes first eligible zero-count lesson when previous lesson is fully completed', () => {
@@ -138,9 +134,8 @@ describe('dashboard.utils', () => {
         {
           lessons: [
             {
-              lesson_id: 1,
-              lesson_sort_order: 1,
-              level_sort_order: 1,
+              id: 1,
+              sort_order: 1,
               totalCount: 10,
               startedCount: 10,
               startedTodayCount: 0,
@@ -148,9 +143,8 @@ describe('dashboard.utils', () => {
               masteredTodayCount: 0,
             },
             {
-              lesson_id: 2,
-              lesson_sort_order: 2,
-              level_sort_order: 1,
+              id: 2,
+              sort_order: 2,
               totalCount: 10,
               startedCount: 0,
               startedTodayCount: 0,
@@ -158,9 +152,8 @@ describe('dashboard.utils', () => {
               masteredTodayCount: 0,
             },
             {
-              lesson_id: 3,
-              lesson_sort_order: 3,
-              level_sort_order: 1,
+              id: 3,
+              sort_order: 3,
               totalCount: 10,
               startedCount: 0,
               startedTodayCount: 0,
@@ -171,9 +164,7 @@ describe('dashboard.utils', () => {
         },
       ] as any;
 
-      expect(
-        getInProgressLessons(eligibleAfterCompleted, 'started').map((x) => x.lesson_id),
-      ).toEqual([2]);
+      expect(getInProgressLessons(eligibleAfterCompleted, 'started').map((x) => x.id)).toEqual([2]);
     });
   });
 });

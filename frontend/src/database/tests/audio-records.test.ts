@@ -12,12 +12,17 @@ const mocks = vi.hoisted(() => ({
   metadataIsFetched: vi.fn(),
   metadataMarkAsFetched: vi.fn(),
   infoHandler: vi.fn(),
-  errorHandler: vi.fn(),
+  logRejectedResults: vi.fn(),
   jszipLoadAsync: vi.fn(),
 }));
 
 vi.mock('@/config/config', () => ({
   default: {
+    database: {
+      nullReplacementDate: '1970-01-01T00:00:00.000Z',
+      nullReplacementNumber: 0,
+      epochStartDate: '1970-01-01T00:00:00.000Z',
+    },
     audio: {
       audioBucketName: 'audio-bucket',
       archiveBucketName: 'archive-bucket',
@@ -25,7 +30,7 @@ vi.mock('@/config/config', () => ({
   },
 }));
 
-vi.mock('@/database/database.utils', () => ({
+vi.mock('@/database/utils/database.utils', () => ({
   fetchStorage: (...args: unknown[]) => mocks.fetchStorage(...args),
 }));
 
@@ -61,8 +66,8 @@ vi.mock('@/features/logging/info-handler', () => ({
   infoHandler: (...args: unknown[]) => mocks.infoHandler(...args),
 }));
 
-vi.mock('@/features/logging/error-handler', () => ({
-  errorHandler: (...args: unknown[]) => mocks.errorHandler(...args),
+vi.mock('@/features/logging/logging.utils', () => ({
+  logRejectedResults: (...args: unknown[]) => mocks.logRejectedResults(...args),
 }));
 
 vi.mock('jszip', () => ({
@@ -81,9 +86,12 @@ describe('AudioRecord', () => {
   });
 
   describe('getAudio', () => {
-    it('throws when audioName is empty', async () => {
-      await expect(AudioRecord.get('')).rejects.toThrow('audioName is required');
-      expect(mocks.audioGet).not.toHaveBeenCalled();
+    it('attempts remote fetch when audioName is empty and no cache exists', async () => {
+      mocks.audioGet.mockResolvedValue(undefined);
+      mocks.fetchStorage.mockRejectedValue(new Error('Data file name is required'));
+
+      await expect(AudioRecord.get('')).rejects.toThrow('Data file name is required');
+      expect(mocks.audioGet).toHaveBeenCalledWith('');
     });
 
     it('returns existing local record when present', async () => {
@@ -152,9 +160,9 @@ describe('AudioRecord', () => {
 
       await expect(AudioRecord.syncFromRemote(['broken-pack.zip'])).resolves.toBeUndefined();
 
-      expect(mocks.errorHandler).toHaveBeenCalledWith(
-        'Failed to sync audio archive: broken-pack.zip',
-        error,
+      expect(mocks.logRejectedResults).toHaveBeenCalledWith(
+        expect.any(Array),
+        'Operation failed during audio data sync',
       );
     });
   });

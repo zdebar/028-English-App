@@ -1,13 +1,10 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   userId: 'u1' as string | null,
-  showToast: vi.fn(),
   navigate: vi.fn(),
   setCurrentIndex: vi.fn(),
-  reload: vi.fn(),
-  resetGrammarItems: vi.fn(),
   sanitize: vi.fn(),
   arrayState: {
     data: [] as any[],
@@ -21,19 +18,8 @@ vi.mock('@/features/auth/use-auth-store', () => ({
     selector({ userId: mocks.userId }),
 }));
 
-vi.mock('@/features/toast/use-toast-store', () => ({
-  useToastStore: (selector: (state: { showToast: typeof mocks.showToast }) => unknown) =>
-    selector({ showToast: mocks.showToast }),
-}));
-
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
-}));
-
-vi.mock('@/database/models/user-items', () => ({
-  default: {
-    resetGrammarItems: (...args: unknown[]) => mocks.resetGrammarItems(...args),
-  },
 }));
 
 vi.mock('@/database/models/grammar', () => ({
@@ -129,8 +115,6 @@ describe('GrammarOverview', () => {
       currentIndex: null,
       currentItem: null,
     };
-    mocks.reload.mockResolvedValue(undefined);
-    mocks.resetGrammarItems.mockResolvedValue(1);
     mocks.sanitize.mockImplementation((value: string) => value);
   });
 
@@ -176,7 +160,7 @@ describe('GrammarOverview', () => {
     expect(mocks.setCurrentIndex).toHaveBeenCalledWith(null);
   });
 
-  it('handles reset success and error toasts from card view', async () => {
+  it('renders detail card view without reset side effects', async () => {
     mocks.arrayState.currentIndex = 0;
     mocks.arrayState.currentItem = {
       id: 8,
@@ -184,21 +168,8 @@ describe('GrammarOverview', () => {
       note: null,
     };
 
-    const { rerender } = render(<GrammarOverview />);
-    fireEvent.click(screen.getByTestId('overview-reset'));
-
-    await waitFor(() => {
-      expect(mocks.resetGrammarItems).toHaveBeenCalledWith('u1', 8);
-      expect(mocks.reload).toHaveBeenCalled();
-      expect(mocks.showToast).toHaveBeenCalledWith('Reset success', 'success');
-    });
-
-    mocks.resetGrammarItems.mockRejectedValue(new Error('fail'));
-    rerender(<GrammarOverview />);
-    fireEvent.click(screen.getByTestId('overview-reset'));
-
-    await waitFor(() => {
-      expect(mocks.showToast).toHaveBeenCalledWith('Reset error', 'error');
-    });
+    render(<GrammarOverview />);
+    expect(screen.getByText('Reported speech')).toBeTruthy();
+    expect(screen.getByText('Not available')).toBeTruthy();
   });
 });

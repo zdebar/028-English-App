@@ -7,9 +7,13 @@ const mocks = vi.hoisted(() => ({
   userId: 'u1' as string | null,
 }));
 
-vi.mock('@/features/theme/use-theme', () => ({
-  useThemeStore: (selector: (state: { theme: 'light' | 'dark'; chooseTheme: typeof mocks.chooseTheme }) => unknown) =>
-    selector({ theme: mocks.theme, chooseTheme: mocks.chooseTheme }),
+vi.mock('@/features/theme/use-theme-store', () => ({
+  useThemeStore: (
+    selector: (state: {
+      theme: 'light' | 'dark';
+      chooseTheme: typeof mocks.chooseTheme;
+    }) => unknown,
+  ) => selector({ theme: mocks.theme, chooseTheme: mocks.chooseTheme }),
 }));
 
 vi.mock('@/features/auth/use-auth-store', () => ({

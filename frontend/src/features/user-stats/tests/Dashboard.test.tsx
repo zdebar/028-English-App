@@ -18,8 +18,8 @@ vi.mock('@/locales/cs', () => ({
 }));
 
 vi.mock('@/features/user-stats/use-user-store', () => ({
-  useUserStore: (selector: (state: { userStats: { levelsOverview: any[] } | null }) => unknown) =>
-    selector({ userStats: { levelsOverview: mocks.levelsOverview } }),
+  useUserStore: (selector: (state: { levels: any[] }) => unknown) =>
+    selector({ levels: mocks.levelsOverview }),
 }));
 
 vi.mock('@/features/help/HelpButton', () => ({
@@ -48,11 +48,13 @@ describe('Dashboard', () => {
     vi.clearAllMocks();
     mocks.levelsOverview = [
       {
+        id: 1,
+        name: 'A1',
         lessons: [
           {
-            lesson_id: 1,
-            lesson_name: 'Lesson 1',
-            level_name: 'A1',
+            id: 1,
+            name: 'Lesson 1',
+            level_id: 1,
             startedCount: 5,
             startedTodayCount: 2,
             masteredCount: 4,
@@ -64,9 +66,9 @@ describe('Dashboard', () => {
     ];
     mocks.getInProgressLessons.mockImplementation((_levels, mode) => [
       {
-        lesson_id: 1,
-        lesson_name: 'Lesson 1',
-        level_name: 'A1',
+        id: 1,
+        name: 'Lesson 1',
+        level_id: 1,
         startedCount: 5,
         startedTodayCount: 2,
         masteredCount: 4,

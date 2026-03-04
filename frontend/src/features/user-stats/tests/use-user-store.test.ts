@@ -1,19 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  getUserScoreForToday: vi.fn(),
-  getLevelsOverview: vi.fn(),
+  getOrCreateTodayScore: vi.fn(),
+  getOverview: vi.fn(),
 }));
 
 vi.mock('@/database/models/user-scores', () => ({
   default: {
-    getUserScoreForToday: (...args: unknown[]) => mocks.getUserScoreForToday(...args),
+    getOrCreateTodayScore: (...args: unknown[]) => mocks.getOrCreateTodayScore(...args),
   },
 }));
 
-vi.mock('@/database/models/user-items', () => ({
+vi.mock('@/database/models/levels', () => ({
   default: {
-    getLevelsOverview: (...args: unknown[]) => mocks.getLevelsOverview(...args),
+    getOverview: (...args: unknown[]) => mocks.getOverview(...args),
   },
 }));
 
@@ -22,93 +22,76 @@ import { useUserStore } from '@/features/user-stats/use-user-store';
 describe('useUserStore', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.clear();
-    useUserStore.setState({ userStats: null });
+    useUserStore.setState({ levels: [], dailyCount: 0 });
 
-    mocks.getUserScoreForToday.mockResolvedValue({ item_count: 7 });
-    mocks.getLevelsOverview.mockResolvedValue([
+    mocks.getOrCreateTodayScore.mockResolvedValue(7);
+    mocks.getOverview.mockResolvedValue([
       {
-        level_id: 1,
-        level_sort_order: 1,
-        level_name: 'A1',
-        startedCount: 0,
-        startedTodayCount: 0,
-        masteredCount: 0,
-        masteredTodayCount: 0,
-        totalCount: 0,
+        id: 1,
+        sort_order: 1,
+        name: 'A1',
+        note: '',
+        deleted_at: null,
         lessons: [],
       },
     ]);
   });
 
-  it('reloadUserStats stores fetched data in state and localStorage', async () => {
-    await useUserStore.getState().reloadUserStats('u1');
+  it('reloadLevels stores fetched levels in state', async () => {
+    await useUserStore.getState().reloadLevels('u1');
 
     const state = useUserStore.getState();
-    expect(state.userStats).toEqual({
-      levelsOverview: [
-        {
-          level_id: 1,
-          level_sort_order: 1,
-          level_name: 'A1',
-          startedCount: 0,
-          startedTodayCount: 0,
-          masteredCount: 0,
-          masteredTodayCount: 0,
-          totalCount: 0,
-          lessons: [],
-        },
-      ],
-      practiceCountToday: 7,
-    });
-
-    const saved = localStorage.getItem('user-stats_u1');
-    expect(saved).toBeTruthy();
-  });
-
-  it('reloadUserStats sets null when fetch fails', async () => {
-    useUserStore.setState({
-      userStats: {
-        levelsOverview: [
-          {
-            level_id: 1,
-            level_sort_order: 1,
-            level_name: 'A1',
-            startedCount: 0,
-            startedTodayCount: 0,
-            masteredCount: 0,
-            masteredTodayCount: 0,
-            totalCount: 0,
-            lessons: [],
-          },
-        ],
-        practiceCountToday: 1,
+    expect(state.levels).toEqual([
+      {
+        id: 1,
+        sort_order: 1,
+        name: 'A1',
+        note: '',
+        deleted_at: null,
+        lessons: [],
       },
-    });
-    mocks.getUserScoreForToday.mockRejectedValue(new Error('fail'));
-
-    await useUserStore.getState().reloadUserStats('u1');
-
-    expect(useUserStore.getState().userStats).toBeNull();
+    ]);
   });
 
-  it('clearUserStats removes persisted value and clears state', () => {
-    localStorage.setItem('user-stats_u1', JSON.stringify({ practiceCountToday: 2 }));
-    useUserStore.setState({
-      userStats: { levelsOverview: [], practiceCountToday: 2 },
-    });
+  it('reloadDailyCount stores fetched daily count in state', async () => {
+    await useUserStore.getState().reloadDailyCount('u1');
 
-    useUserStore.getState().clearUserStats('u1');
-
-    expect(localStorage.getItem('user-stats_u1')).toBeNull();
-    expect(useUserStore.getState().userStats).toBeNull();
+    expect(useUserStore.getState().dailyCount).toBe(7);
   });
 
-  it('reacts to userItemsUpdated event by reloading stats for that user', () => {
+  it('reloadDailyCount resets to initial value when fetch fails', async () => {
+    useUserStore.setState({ dailyCount: 3 });
+    mocks.getOrCreateTodayScore.mockRejectedValue(new Error('fail'));
+
+    await useUserStore.getState().reloadDailyCount('u1');
+
+    expect(useUserStore.getState().dailyCount).toBe(0);
+  });
+
+  it('clearLevels and clearDailyCount reset state', () => {
+    useUserStore.setState({ levels: [{ id: 1 } as any], dailyCount: 2 });
+
+    useUserStore.getState().clearLevels();
+    useUserStore.getState().clearDailyCount();
+
+    expect(useUserStore.getState().levels).toEqual([]);
+    expect(useUserStore.getState().dailyCount).toBe(0);
+  });
+
+  it('reacts to levelsUpdated event by reloading levels for that user', () => {
     const spy = vi.fn().mockResolvedValue(undefined);
-    useUserStore.setState({ reloadUserStats: spy as any });
+    useUserStore.setState({ reloadLevels: spy as any });
 
-    window.dispatchEvent(new CustomEvent('userItemsUpdated', { detail: { userId: 'u9' } }));
+    window.dispatchEvent(new CustomEvent('levelsUpdated', { detail: { userId: 'u9' } }));
+
+    expect(spy).toHaveBeenCalledWith('u9');
+  });
+
+  it('reacts to dailyCountUpdated event by reloading daily count for that user', () => {
+    const spy = vi.fn().mockResolvedValue(undefined);
+    useUserStore.setState({ reloadDailyCount: spy as any });
+
+    window.dispatchEvent(new CustomEvent('dailyCountUpdated', { detail: { userId: 'u9' } }));
 
     expect(spy).toHaveBeenCalledWith('u9');
   });

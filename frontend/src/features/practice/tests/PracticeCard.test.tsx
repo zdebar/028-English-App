@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   userId: 'u1' as string | null,
-  userStats: { practiceCountToday: 5 } as any,
+  dailyCount: 5,
   grammarVisible: false,
   grammarData: null as any,
   handleGrammar: vi.fn(),
@@ -70,8 +70,8 @@ vi.mock('@/features/auth/use-auth-store', () => ({
 }));
 
 vi.mock('@/features/user-stats/use-user-store', () => ({
-  useUserStore: (selector: (state: { userStats: any }) => unknown) =>
-    selector({ userStats: mocks.userStats }),
+  useUserStore: (selector: (state: { dailyCount: number }) => unknown) =>
+    selector({ dailyCount: mocks.dailyCount }),
 }));
 
 vi.mock('@/features/practice/hooks/use-grammar', () => ({
@@ -166,7 +166,7 @@ describe('PracticeCard', () => {
     mocks.userId = 'u1';
     mocks.grammarVisible = false;
     mocks.grammarData = null;
-    mocks.userStats = { practiceCountToday: 5 };
+    mocks.dailyCount = 5;
     mocks.practiceDeck.index = 0;
     mocks.practiceDeck.currentItem = {
       item_id: 1,

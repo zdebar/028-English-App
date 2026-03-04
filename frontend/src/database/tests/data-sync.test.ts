@@ -2,29 +2,22 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   getFullSyncTime: vi.fn(),
-  getPartialSyncTime: vi.fn(),
   setFullSyncTime: vi.fn(),
-  setPartialSyncTime: vi.fn(),
   initDbMappings: vi.fn(),
   restoreUnsavedFromLocalStorage: vi.fn(),
-  triggerUserItemsUpdatedEvent: vi.fn(),
-  userScoreSyncAll: vi.fn(),
-  userScoreSyncSince: vi.fn(),
-  userItemSyncAll: vi.fn(),
-  userItemSyncSince: vi.fn(),
-  grammarSyncAll: vi.fn(),
-  grammarSyncSince: vi.fn(),
-  audioSyncData: vi.fn(),
-  audioRemoveOrphaned: vi.fn(),
-  errorHandler: vi.fn(),
-  getSession: vi.fn(),
+  logRejectedResults: vi.fn(),
+  userScoreSyncFromRemote: vi.fn(),
+  userItemSyncFromRemote: vi.fn(),
+  grammarSyncFromRemote: vi.fn(),
+  levelsSyncFromRemote: vi.fn(),
+  lessonsSyncFromRemote: vi.fn(),
+  audioSyncFromRemote: vi.fn(),
 }));
 
 vi.mock('@/config/config', () => ({
   default: {
     sync: {
       fullSyncInterval: 1000,
-      periodicSyncInterval: 500,
     },
     audio: {
       archives: ['pack-a.zip', 'pack-b.zip'],
@@ -32,213 +25,128 @@ vi.mock('@/config/config', () => ({
   },
 }));
 
-vi.mock('@/database/sync-time.utils', () => ({
+vi.mock('@/database/utils/sync-time.utils', () => ({
   getFullSyncTime: (...args: unknown[]) => mocks.getFullSyncTime(...args),
-  getPartialSyncTime: (...args: unknown[]) => mocks.getPartialSyncTime(...args),
   setFullSyncTime: (...args: unknown[]) => mocks.setFullSyncTime(...args),
-  setPartialSyncTime: (...args: unknown[]) => mocks.setPartialSyncTime(...args),
 }));
 
 vi.mock('@/database/models/db-init', () => ({
   initDbMappings: (...args: unknown[]) => mocks.initDbMappings(...args),
 }));
 
-vi.mock('@/database/database.utils', () => ({
+vi.mock('@/database/utils/database.utils', () => ({
   restoreUnsavedFromLocalStorage: (...args: unknown[]) =>
     mocks.restoreUnsavedFromLocalStorage(...args),
-  triggerUserItemsUpdatedEvent: (...args: unknown[]) => mocks.triggerUserItemsUpdatedEvent(...args),
+}));
+
+vi.mock('@/features/logging/logging.utils', () => ({
+  logRejectedResults: (...args: unknown[]) => mocks.logRejectedResults(...args),
 }));
 
 vi.mock('@/database/models/user-scores', () => ({
   default: {
-    syncUserScoreAll: (...args: unknown[]) => mocks.userScoreSyncAll(...args),
-    syncUserScoreSinceLastSync: (...args: unknown[]) => mocks.userScoreSyncSince(...args),
+    syncFromRemote: (...args: unknown[]) => mocks.userScoreSyncFromRemote(...args),
   },
 }));
 
 vi.mock('@/database/models/user-items', () => ({
   default: {
-    syncUserItemsAll: (...args: unknown[]) => mocks.userItemSyncAll(...args),
-    syncUserItemsSinceLastSync: (...args: unknown[]) => mocks.userItemSyncSince(...args),
+    syncFromRemote: (...args: unknown[]) => mocks.userItemSyncFromRemote(...args),
   },
 }));
 
 vi.mock('@/database/models/grammar', () => ({
   default: {
-    syncGrammarAll: (...args: unknown[]) => mocks.grammarSyncAll(...args),
-    syncGrammarSinceLastSync: (...args: unknown[]) => mocks.grammarSyncSince(...args),
+    syncFromRemote: (...args: unknown[]) => mocks.grammarSyncFromRemote(...args),
+  },
+}));
+
+vi.mock('@/database/models/levels', () => ({
+  default: {
+    syncFromRemote: (...args: unknown[]) => mocks.levelsSyncFromRemote(...args),
+  },
+}));
+
+vi.mock('@/database/models/lessons', () => ({
+  default: {
+    syncFromRemote: (...args: unknown[]) => mocks.lessonsSyncFromRemote(...args),
   },
 }));
 
 vi.mock('@/database/models/audio-records', () => ({
   default: {
-    syncAudioData: (...args: unknown[]) => mocks.audioSyncData(...args),
-    removeOrphaned: (...args: unknown[]) => mocks.audioRemoveOrphaned(...args),
+    syncFromRemote: (...args: unknown[]) => mocks.audioSyncFromRemote(...args),
   },
 }));
 
-vi.mock('@/features/logging/error-handler', () => ({
-  errorHandler: (...args: unknown[]) => mocks.errorHandler(...args),
-}));
+import { dataSync, dataSyncOnUnmount, splitDeleted } from '@/database/utils/data-sync.utils';
 
-vi.mock('@/config/supabase.config', () => ({
-  supabaseInstance: {
-    auth: {
-      getSession: (...args: unknown[]) => mocks.getSession(...args),
-    },
-  },
-}));
-
-vi.mock('@/locales/cs', () => ({
-  TEXTS: {
-    syncSuccessToast: 'sync-success',
-    syncErrorToast: 'sync-error',
-  },
-}));
-
-import { dataSync, dataSyncOnUnmount, startPeriodicSync } from '@/database/utils/data-sync.utils';
-
-async function flushAsyncWork(): Promise<void> {
-  for (let i = 0; i < 10; i += 1) {
-    await Promise.resolve();
-  }
-}
-
-describe('data-sync', () => {
+describe('data-sync.utils', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.useRealTimers();
 
     mocks.getFullSyncTime.mockReturnValue(0);
-    mocks.getPartialSyncTime.mockReturnValue(0);
-
     mocks.initDbMappings.mockResolvedValue(undefined);
     mocks.restoreUnsavedFromLocalStorage.mockResolvedValue(undefined);
-    mocks.userScoreSyncAll.mockResolvedValue(undefined);
-    mocks.userItemSyncAll.mockResolvedValue(undefined);
-    mocks.userScoreSyncSince.mockResolvedValue(undefined);
-    mocks.userItemSyncSince.mockResolvedValue(undefined);
-    mocks.grammarSyncAll.mockResolvedValue(undefined);
-    mocks.grammarSyncSince.mockResolvedValue(undefined);
-    mocks.audioSyncData.mockResolvedValue(undefined);
-    mocks.audioRemoveOrphaned.mockResolvedValue(0);
-    mocks.getSession.mockResolvedValue({ data: { session: { user: { id: 'u1' } } }, error: null });
+    mocks.logRejectedResults.mockReturnValue(false);
+
+    mocks.userScoreSyncFromRemote.mockResolvedValue(undefined);
+    mocks.userItemSyncFromRemote.mockResolvedValue(undefined);
+    mocks.grammarSyncFromRemote.mockResolvedValue(undefined);
+    mocks.levelsSyncFromRemote.mockResolvedValue(undefined);
+    mocks.lessonsSyncFromRemote.mockResolvedValue(undefined);
+    mocks.audioSyncFromRemote.mockResolvedValue(undefined);
   });
 
-  describe('dataSync', () => {
-    it('runs full sync path and stores both full and partial sync times', async () => {
-      vi.spyOn(Date, 'now').mockReturnValue(5000);
-      mocks.getFullSyncTime.mockReturnValue(0);
+  it('dataSync runs full sync and stores full sync time', async () => {
+    vi.spyOn(Date, 'now').mockReturnValue(5000);
+    mocks.getFullSyncTime.mockReturnValue(0);
 
-      await dataSync('u1');
+    await dataSync('u1');
 
-      expect(mocks.userScoreSyncAll).toHaveBeenCalledWith('u1');
-      expect(mocks.userItemSyncAll).toHaveBeenCalledWith('u1');
-      expect(mocks.grammarSyncAll).toHaveBeenCalled();
-      expect(mocks.audioSyncData).toHaveBeenCalledWith(['pack-a.zip', 'pack-b.zip']);
-      expect(mocks.setFullSyncTime).toHaveBeenCalledWith('u1', 5000);
-      expect(mocks.setPartialSyncTime).toHaveBeenCalledWith('u1', 5000);
-      expect(mocks.triggerUserItemsUpdatedEvent).toHaveBeenCalledTimes(2);
-    });
-
-    it('runs partial sync path and sets only partial sync time', async () => {
-      vi.spyOn(Date, 'now').mockReturnValue(900);
-      mocks.getFullSyncTime.mockReturnValue(0);
-
-      await dataSync('u1');
-
-      expect(mocks.userScoreSyncSince).toHaveBeenCalledWith('u1');
-      expect(mocks.userItemSyncSince).toHaveBeenCalledWith('u1');
-      expect(mocks.grammarSyncSince).toHaveBeenCalled();
-      expect(mocks.setFullSyncTime).not.toHaveBeenCalled();
-      expect(mocks.setPartialSyncTime).toHaveBeenCalledWith('u1', 900);
-    });
-
-    it('throws first user promise error and logs it', async () => {
-      const userError = new Error('user sync failed');
-      mocks.userScoreSyncSince.mockRejectedValue(userError);
-      vi.spyOn(Date, 'now').mockReturnValue(900);
-
-      await expect(dataSync('u1')).rejects.toThrow('user sync failed');
-
-      expect(mocks.errorHandler).toHaveBeenCalledWith('Data synchronization error:', userError);
-    });
+    expect(mocks.userScoreSyncFromRemote).toHaveBeenCalledWith('u1', true);
+    expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', true);
+    expect(mocks.grammarSyncFromRemote).toHaveBeenCalledWith(true);
+    expect(mocks.levelsSyncFromRemote).toHaveBeenCalledWith(true);
+    expect(mocks.lessonsSyncFromRemote).toHaveBeenCalledWith(true);
+    expect(mocks.audioSyncFromRemote).toHaveBeenCalledWith(['pack-a.zip', 'pack-b.zip']);
+    expect(mocks.setFullSyncTime).toHaveBeenCalledWith('u1', 5000);
   });
 
-  describe('dataSyncOnUnmount', () => {
-    it('returns early when active session user does not match', async () => {
-      mocks.getSession.mockResolvedValue({
-        data: { session: { user: { id: 'other' } } },
-        error: null,
-      });
+  it('dataSync runs partial sync and does not store full sync time', async () => {
+    vi.spyOn(Date, 'now').mockReturnValue(500);
+    mocks.getFullSyncTime.mockReturnValue(0);
 
-      await dataSyncOnUnmount('u1');
+    await dataSync('u1');
 
-      expect(mocks.initDbMappings).not.toHaveBeenCalled();
-      expect(mocks.userScoreSyncSince).not.toHaveBeenCalled();
-      expect(mocks.userItemSyncSince).not.toHaveBeenCalled();
-    });
-
-    it('syncs user data and logs any unmount sync rejection', async () => {
-      const unmountError = new Error('unmount fail');
-      mocks.userItemSyncSince.mockRejectedValue(unmountError);
-
-      await dataSyncOnUnmount('u1');
-
-      expect(mocks.initDbMappings).toHaveBeenCalled();
-      expect(mocks.userScoreSyncSince).toHaveBeenCalledWith('u1');
-      expect(mocks.userItemSyncSince).toHaveBeenCalledWith('u1');
-      expect(mocks.errorHandler).toHaveBeenCalledWith(
-        'Unmount synchronization failed',
-        unmountError,
-      );
-    });
+    expect(mocks.userScoreSyncFromRemote).toHaveBeenCalledWith('u1', false);
+    expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', false);
+    expect(mocks.grammarSyncFromRemote).toHaveBeenCalledWith(false);
+    expect(mocks.levelsSyncFromRemote).toHaveBeenCalledWith(false);
+    expect(mocks.lessonsSyncFromRemote).toHaveBeenCalledWith(false);
+    expect(mocks.setFullSyncTime).not.toHaveBeenCalled();
   });
 
-  describe('startPeriodicSync', () => {
-    it('runs immediate sync success path and toggles loading', async () => {
-      vi.useFakeTimers();
-      const setLoading = vi.fn();
-      const showToast = vi.fn();
+  it('dataSync throws when user sync reports rejected results', async () => {
+    mocks.logRejectedResults.mockReturnValueOnce(false).mockReturnValueOnce(true);
 
-      const dispose = startPeriodicSync('u1', setLoading, showToast);
-      await vi.advanceTimersByTimeAsync(10);
-      await flushAsyncWork();
+    await expect(dataSync('u1')).rejects.toThrow('Data synchronization error');
+  });
 
-      expect(mocks.audioRemoveOrphaned).toHaveBeenCalled();
-      expect(showToast).toHaveBeenCalledWith('sync-success', 'success');
-      expect(setLoading).toHaveBeenCalledWith(true);
-      expect(setLoading).toHaveBeenCalledWith(false);
+  it('dataSyncOnUnmount syncs only user stores in partial mode', async () => {
+    await dataSyncOnUnmount('u1');
 
-      dispose();
-    });
+    expect(mocks.userScoreSyncFromRemote).toHaveBeenCalledWith('u1', false);
+    expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', false);
+  });
 
-    it('runs periodic check and updates partial sync time when interval elapsed', async () => {
-      vi.useFakeTimers();
-      vi.spyOn(Date, 'now').mockReturnValue(2000);
-      mocks.getPartialSyncTime.mockReturnValue(0);
+  it('splitDeleted splits records into upsert and delete groups', () => {
+    const result = splitDeleted([
+      { id: 1, deleted_at: null },
+      { id: 2, deleted_at: '2026-03-04T00:00:00.000Z' },
+    ]);
 
-      const setLoading = vi.fn();
-      const showToast = vi.fn();
-
-      const dispose = startPeriodicSync('u1', setLoading, showToast);
-      await vi.advanceTimersByTimeAsync(500);
-
-      expect(mocks.setPartialSyncTime).toHaveBeenCalledWith('u1', 2000);
-
-      dispose();
-    });
-
-    it('cleanup triggers unmount sync when userId exists', async () => {
-      vi.useFakeTimers();
-      const setLoading = vi.fn();
-      const showToast = vi.fn();
-
-      const dispose = startPeriodicSync('u1', setLoading, showToast);
-      dispose();
-      await flushAsyncWork();
-
-      expect(mocks.getSession).toHaveBeenCalled();
-    });
+    expect(result.toUpsert).toEqual([{ id: 1, deleted_at: null }]);
+    expect(result.toDelete).toEqual([{ id: 2, deleted_at: '2026-03-04T00:00:00.000Z' }]);
   });
 });

@@ -10,9 +10,6 @@ vi.mock('@/locales/cs', () => ({
     english: 'English',
     pronunciation: 'Pronunciation',
     progress: 'Progress',
-    levelName: 'Level',
-    lessonOrder: 'Lesson order',
-    lessonName: 'Lesson',
     startedAt: 'Started',
     updatedAt: 'Updated',
     nextAt: 'Next',
@@ -68,9 +65,6 @@ describe('VocabularyDetailCard', () => {
             english: 'hello',
             pronunciation: 'həˈloʊ',
             progress: 2,
-            level_name: 'A1',
-            lesson_sort_order: 1,
-            lesson_name: 'Intro',
             started_at: '2026-02-28T10:00:00.000Z',
             updated_at: '2026-02-28T11:00:00.000Z',
             next_at: '2026-03-01T00:00:00.000Z',
@@ -85,11 +79,11 @@ describe('VocabularyDetailCard', () => {
     expect(screen.getByText('ahoj')).toBeTruthy();
     expect(screen.getByText('Czech:ahoj')).toBeTruthy();
     expect(screen.getByText('English:hello')).toBeTruthy();
-    expect(screen.getByText('Level:A1')).toBeTruthy();
+    expect(screen.getByText('Progress:2')).toBeTruthy();
     expect(shortenDateMock).toHaveBeenCalled();
   });
 
-  it('shows N/A fallback for missing lesson fields', () => {
+  it('shows N/A fallback for missing base/date fields', () => {
     render(
       <VocabularyDetailCard
         selectedWord={
@@ -99,9 +93,6 @@ describe('VocabularyDetailCard', () => {
             english: 'house',
             pronunciation: '',
             progress: 0,
-            level_name: null,
-            lesson_sort_order: null,
-            lesson_name: null,
             started_at: null,
             updated_at: null,
             next_at: null,
@@ -113,9 +104,8 @@ describe('VocabularyDetailCard', () => {
       />,
     );
 
-    expect(screen.getByText('Level:N/A')).toBeTruthy();
-    expect(screen.getByText('Lesson order:N/A')).toBeTruthy();
-    expect(screen.getByText('Lesson:N/A')).toBeTruthy();
+    expect(screen.getByText('Pronunciation:')).toBeTruthy();
+    expect(screen.getByText('Started:short:null')).toBeTruthy();
   });
 
   it('calls onClose and onReset handlers', () => {
