@@ -60,12 +60,17 @@ React & TypeScript: Hook `useFetch`, Component `PracticeCard`
 ### Supabase Database Structure
 
 - **users**: Stores user uuid, and user's data.
-- **grammar**: Stores grammar explanations. Grammar are independent of levels and lessons.
-- **levels**: Stores CEFR levels.
+- **levels**: Stores levels.
 - **lessons**: Stores individual lessons. Every lesson should contain 100 items for simplicity. Every lesson belongs to single level.
+- **grammar**: Stores grammar explanations. Grammar are independent of levels and lessons.
 - **items**: Stores practice items (vocabulary words and grammar sentences). Every items belongs to single lesson, and refers to single grammar | null.
 - **user_items**: Tracks user's items progress score, next practice date, etc.
 - **user_scores**: Tracks daily practice scores for users.
+
+### Data Types
+
+- **SQL** Data as stored on Supabase
+- **Local** Data as used on frontend. Mostly nulls converted to nullReplacementValue. More in Null Replacement Values.
 
 ### Supabase Database Logic
 
@@ -79,11 +84,6 @@ React & TypeScript: Hook `useFetch`, Component `PracticeCard`
 
 - **audio-archive**: Stores audio files zips. Separated into multiple batches. First one smaller to enable faster start. Intended for app regular synchronization.
 - **audio-files**: Stores individual audio files. Intended for backup fetch of missing audio files.
-
-### Data Types
-
-- **SQL** Data as stored on Supabase
-- **Local** Data as used on frontend. Mostly nulls converted to nullReplacementValue. More in Null Replacement Values.
 
 ### IndexedDB Structure
 

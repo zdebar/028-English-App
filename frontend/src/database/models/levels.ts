@@ -2,18 +2,17 @@ import config from '@/config/config';
 import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
-import { infoHandler } from '@/features/logging/info-handler';
 import { SupabaseError } from '@/types/error.types';
 import { TableName, type LevelLocal } from '@/types/local.types';
 import { Entity } from 'dexie';
-import { splitDeleted } from '../utils/data-sync.utils';
-import Metadata from './metadata';
+import { syncFromRemoteGeneric } from '../utils/database.utils';
+import Dexie from 'dexie';
 
 /**
  * Represents a level entity in the local database.
  * Handles synchronization of level data between the remote Supabase server and local storage.
  *
- * @method getAllLevels - Retrieves all levels from the local database.
+ * @method getAll - Retrieves all levels from the local database.
  * @method syncLevels - Synchronizes levels from the remote server with the local database.
  *
  */
@@ -28,7 +27,7 @@ export default class Levels extends Entity<AppDB> implements LevelLocal {
    * Retrieves all levels from the database.
    * @returns {Promise<LevelLocal[]>} A promise that resolves to an array of all levels.
    */
-  static async getAllLevels(): Promise<LevelLocal[]> {
+  static async getAll(): Promise<LevelLocal[]> {
     return await db.levels.orderBy('sort_order').toArray();
   }
 
@@ -43,31 +42,13 @@ export default class Levels extends Entity<AppDB> implements LevelLocal {
    * @returns A promise that resolves when the sync operation is complete.
    * @throws Database transaction errors if the sync operation fails
    */
-  static async syncLevels(doFullSync: boolean = false): Promise<void> {
-    // Step 1: Determine the last sync timestamp and the new sync timestamp
-    const lastSyncedAt = doFullSync
-      ? config.database.epochStartDate
-      : await Metadata.getSyncedAt(TableName.Levels);
-    const newSyncedAt = new Date().toISOString();
-
-    // Step 2: Fetch updated level records from Supabase based on the last sync timestamp
-    const levels = await this.fetchFromRemote(lastSyncedAt);
-    const { toUpsert, toDelete } = splitDeleted(levels);
-
-    // Step 3: Update the local database within a transaction to ensure data integrity
-    await db.transaction('rw', db.levels, db.metadata, async () => {
-      if (doFullSync) {
-        await db.levels.clear();
-      } else if (toDelete.length > 0) {
-        await db.levels.bulkDelete(toDelete.map((item) => item.id));
-      }
-      if (toUpsert.length > 0) {
-        await db.levels.bulkPut(toUpsert);
-      }
-      await Metadata.markAsSynced(TableName.Levels, newSyncedAt);
-    });
-
-    infoHandler(`Completed ${levels.length} levels pull from Supabase.`);
+  static async syncFromRemote(doFullSync: boolean = false): Promise<void> {
+    await syncFromRemoteGeneric<LevelLocal>(
+      db.levels as Dexie.Table<LevelLocal, number>,
+      TableName.Levels,
+      this.fetchFromRemote,
+      doFullSync,
+    );
   }
 
   /**
