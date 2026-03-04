@@ -33,12 +33,6 @@ export default function VocabularyDetailCard({
     { label: TEXTS.progress, value: selectedWord?.progress },
   ];
 
-  const lessonProperties = [
-    { label: TEXTS.levelName, value: selectedWord?.level_name ?? NOT_AVAILABLE },
-    { label: TEXTS.lessonOrder, value: selectedWord?.lesson_sort_order ?? NOT_AVAILABLE },
-    { label: TEXTS.lessonName, value: selectedWord?.lesson_name ?? NOT_AVAILABLE },
-  ];
-
   const dateProperties = [
     { label: TEXTS.startedAt, value: shortenDate(selectedWord?.started_at) },
     { label: TEXTS.updatedAt, value: shortenDate(selectedWord?.updated_at) },
@@ -57,13 +51,6 @@ export default function VocabularyDetailCard({
         <div className="flex flex-col gap-4">
           <div>
             {baseProperties.map((property) => (
-              <PropertyView key={property.label} label={property.label}>
-                {property.value ?? NOT_AVAILABLE}
-              </PropertyView>
-            ))}
-          </div>
-          <div>
-            {lessonProperties.map((property) => (
               <PropertyView key={property.label} label={property.label}>
                 {property.value ?? NOT_AVAILABLE}
               </PropertyView>
