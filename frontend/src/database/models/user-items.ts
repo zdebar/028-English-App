@@ -56,7 +56,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     assertPositiveInteger(deckSize, 'deckSize');
 
     // Step 1: Fetch already started grammar list
-    const startedGrammarIdSet = new Set(await Grammar.getStartedGrammarIds(userId));
+    const startedGrammarIdSet = new Set(await Grammar.getStartedIds(userId));
 
     // Step 2: Fetch items with odd progress
     let practiceItems = await this.fetchPracticeItemsByParity(userId, true, false, deckSize);

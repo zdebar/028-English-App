@@ -143,7 +143,7 @@ describe('Grammar', () => {
           .mockResolvedValue([{ grammar_id: 1 }, { grammar_id: 2 }, { grammar_id: 1 }]),
       });
 
-      const result = await Grammar.getStartedGrammarIds('u1');
+      const result = await Grammar.getStartedIds('u1');
 
       expect(result).toEqual([1, 2]);
     });
@@ -153,7 +153,7 @@ describe('Grammar', () => {
         toArray: vi.fn().mockResolvedValue([]),
       });
 
-      const result = await Grammar.getStartedGrammarIds('u1');
+      const result = await Grammar.getStartedIds('u1');
 
       expect(result).toEqual([]);
     });
@@ -183,7 +183,7 @@ describe('Grammar', () => {
         ]),
       });
 
-      const result = await Grammar.getStartedGrammarList('u1');
+      const result = await Grammar.getStartedList('u1');
 
       expect(result).toEqual([
         {
@@ -208,7 +208,7 @@ describe('Grammar', () => {
         toArray: vi.fn().mockResolvedValue([]),
       });
 
-      const result = await Grammar.getStartedGrammarList('u1');
+      const result = await Grammar.getStartedList('u1');
 
       expect(result).toEqual([]);
     });

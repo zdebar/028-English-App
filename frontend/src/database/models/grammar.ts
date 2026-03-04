@@ -1,16 +1,13 @@
-import { Entity } from 'dexie';
-import type AppDB from '@/database/models/app-db';
-import type { GrammarLocal } from '@/types/local.types';
-import { supabaseInstance } from '@/config/supabase.config';
-import { db } from '@/database/models/db';
 import config from '@/config/config';
-import Dexie from 'dexie';
-import Metadata from './metadata';
-import { TableName } from '@/types/local.types';
+import { supabaseInstance } from '@/config/supabase.config';
+import type AppDB from '@/database/models/app-db';
+import { db } from '@/database/models/db';
 import { DatabaseError, SupabaseError } from '@/types/error.types';
-import { infoHandler } from '@/features/logging/info-handler';
+import type { GrammarLocal } from '@/types/local.types';
+import { TableName } from '@/types/local.types';
 import { assertIsoDateString, assertPositiveInteger } from '@/utils/assertions.utils';
-import { splitDeleted } from '../utils/data-sync.utils';
+import Dexie, { Entity } from 'dexie';
+import { syncFromRemoteGeneric } from '../utils/database.utils';
 
 const NULL_DATE = config.database.nullReplacementDate;
 
@@ -19,9 +16,9 @@ const NULL_DATE = config.database.nullReplacementDate;
  * - grammar records are shared across all users
  *
  * @method getGrammarById - Fetches a grammar record by its ID.
- * @method getStartedGrammarIds - Retrieves the list of unique grammar IDs that the user has started.
- * @method getStartedGrammarList - Retrieves the list of grammar that the user has started.
- * @method syncGrammar - Synchronizes grammar data between the local database and Supabase, either fully or incrementally based on the last sync timestamp.
+ * @method getStartedIds - Retrieves the list of unique grammar IDs that the user has started.
+ * @method getStartedList - Retrieves the list of grammar that the user has started.
+ * @method syncFromRemote - Synchronizes grammar data between the local database and Supabase, either fully or incrementally based on the last sync timestamp.
  *
  */
 export default class Grammar extends Entity<AppDB> implements GrammarLocal {
@@ -56,8 +53,8 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * @param userId - The ID of the user
    * @returns A promise that resolves to an array of unique grammar IDs that the user has started, or an empty array if no items have been started
    */
-  static async getStartedGrammarIds(userId: string): Promise<number[]> {
-    if (!userId) throw new Error('userId is required in getStartedGrammarIds');
+  static async getStartedIds(userId: string): Promise<number[]> {
+    if (!userId) throw new Error('userId is required in getStartedIds');
 
     const startedGrammarIds = await db.user_items
       .where('[user_id+grammar_id+started_at]')
@@ -77,11 +74,11 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * @returns A promise that resolves to an array of started grammar items with progress information. Returns an empty array
    *          if the user has not started any grammar items or if no matching grammar records are found.
    */
-  static async getStartedGrammarList(userId: string): Promise<GrammarLocal[]> {
-    if (!userId) throw new Error('userId is required in getStartedGrammarList');
+  static async getStartedList(userId: string): Promise<GrammarLocal[]> {
+    if (!userId) throw new Error('userId is required in getStartedList');
 
     // Get unique grammar IDs for started items
-    const grammarIds = await this.getStartedGrammarIds(userId);
+    const grammarIds = await this.getStartedIds(userId);
     if (grammarIds.length === 0) return [];
 
     return await db.grammar.where('id').anyOf(grammarIds).toArray();
@@ -95,31 +92,13 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    *                     an incremental sync based on the last sync timestamp. Defaults to false.
    * @returns A promise that resolves when the sync operation is complete.
    */
-  static async syncGrammar(doFullSync: boolean = false): Promise<void> {
-    // Step 1: Determine the last sync timestamp and the new sync timestamp
-    const lastSyncedAt = doFullSync
-      ? config.database.epochStartDate
-      : await Metadata.getSyncedAt(TableName.Grammar);
-    const newSyncedAt = new Date().toISOString();
-
-    // Step 2: Fetch updated grammar records from Supabase based on the last sync timestamp
-    const grammar = await this.fetchFromRemote(lastSyncedAt);
-    const { toUpsert, toDelete } = splitDeleted(grammar);
-
-    // Step 3: Update the local database within a transaction to ensure data integrity
-    await db.transaction('rw', db.grammar, db.metadata, async () => {
-      if (doFullSync) {
-        await db.grammar.clear();
-      } else if (toDelete.length > 0) {
-        await db.grammar.bulkDelete(toDelete.map((item) => item.id));
-      }
-      if (toUpsert.length > 0) {
-        await db.grammar.bulkPut(toUpsert);
-      }
-      await Metadata.markAsSynced(TableName.Grammar, newSyncedAt);
-    });
-
-    infoHandler(`Completed ${grammar.length} grammars pull from Supabase.`);
+  static async syncFromRemote(doFullSync: boolean = false): Promise<void> {
+    await syncFromRemoteGeneric<GrammarLocal>(
+      db.grammar as Dexie.Table<GrammarLocal, number>,
+      TableName.Grammar,
+      this.fetchFromRemote,
+      doFullSync,
+    );
   }
 
   /**

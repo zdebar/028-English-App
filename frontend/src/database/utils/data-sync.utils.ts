@@ -29,12 +29,12 @@ export async function dataSync(userId: string): Promise<void> {
   // Step 2: Perform shared stores data synchronization (grammar and audio metadata)
   const sharedPromises = doFullSync
     ? [
-        Grammar.syncGrammar(true),
+        Grammar.syncFromRemote(true),
         Lessons.syncFromRemote(true),
         AudioRecord.syncAudioData(config.audio.archives),
       ]
     : [
-        Grammar.syncGrammar(false),
+        Grammar.syncFromRemote(false),
         Lessons.syncFromRemote(false),
         AudioRecord.syncAudioData(config.audio.archives),
       ];
