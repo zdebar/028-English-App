@@ -22,7 +22,29 @@ export default function LevelsOverview() {
   const [unpackedIndex, setUnpackedIndex] = useState<number | null>(null);
   const [showMastered, setShowMastered] = useState<boolean>(false);
   const levelsOverview = useUserStore((state) => state.userStats?.levelsOverview);
-  const levels = levelsOverview ?? EMPTY_LEVELS;
+  // Allowed lesson count keys
+  type LessonCountKey =
+    | 'startedCount'
+    | 'masteredCount'
+    | 'startedTodayCount'
+    | 'masteredTodayCount'
+    | 'totalCount';
+  const levels = Array.isArray(levelsOverview)
+    ? levelsOverview.map((level) => {
+        const aggregate = (key: LessonCountKey) =>
+          Array.isArray(level.lessons)
+            ? level.lessons.reduce((sum, lesson) => sum + (lesson[key] ?? 0), 0)
+            : 0;
+        return {
+          ...level,
+          startedCount: aggregate('startedCount'),
+          masteredCount: aggregate('masteredCount'),
+          startedTodayCount: aggregate('startedTodayCount'),
+          masteredTodayCount: aggregate('masteredTodayCount'),
+          totalCount: aggregate('totalCount'),
+        };
+      })
+    : EMPTY_LEVELS;
   const navigate = useNavigate();
 
   const handleLevelClick = (index: number) => {
@@ -48,27 +70,27 @@ export default function LevelsOverview() {
         </div>
         <div className="flex flex-col gap-1 overflow-y-auto">
           {levels.map((level, index) => (
-            <div key={level.level_id} className="flex flex-col gap-1">
+            <div key={level.id} className="flex flex-col gap-1">
               <BaseButton
                 className="h-input flex grow-0 justify-start p-4 text-left"
                 onClick={() => handleLevelClick(index)}
               >
                 <div className="flex w-full items-center justify-between">
-                  <p>{level.level_name}</p>
-                  <GoalMetView current={level[shownLevels]} goal={level.totalCount} />
+                  <p>{level.name}</p>
+                  <GoalMetView current={level[shownLevels]} goal={level['totalCount']} />
                 </div>
               </BaseButton>
               {unpackedIndex === index && (
                 <div className="flex flex-col gap-1 pl-8">
                   {level.lessons.map((lesson) => (
                     <BaseButton
-                      key={lesson.lesson_id}
+                      key={lesson.id}
                       className="h-input flex grow-0 justify-start pr-4 text-left"
                       disabled
                     >
                       <div className="flex w-full items-center justify-between">
-                        <p>{lesson.lesson_name}</p>
-                        <GoalMetView current={lesson[shownLevels]} goal={lesson.totalCount} />
+                        <p>{lesson.name}</p>
+                        <GoalMetView current={lesson[shownLevels]} goal={lesson['totalCount']} />
                       </div>
                     </BaseButton>
                   ))}
