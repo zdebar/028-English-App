@@ -249,20 +249,19 @@ export function addGrammarIndicatorFlag(
 }
 
 /**
- * Aggregates lessons from user items.
+ * Aggregates levels from user items.
  *
  * @param items - Array of filtered UserItemLocal
  * @param lessons - Array of LessonLocal
  * @param levels - Array of LevelLocal
- * @param day - Day string for startedTodayCount/masteredTodayCount
- * @returns Sorted array of LessonOverview objects
  */
-export function aggregateLessons(
+export function aggregateLevels(
   items: UserItemLocal[],
   lessons: LessonLocal[],
   levels: LevelLocal[],
-  day: string,
 ): LevelOverview[] {
+  const today = getTodayShortDate();
+
   // Prepare count arrays for lessons
   const startedCount = new Array(lessons.length).fill(0);
   const startedTodayCount = new Array(lessons.length).fill(0);
@@ -279,10 +278,10 @@ export function aggregateLessons(
     const idx = lessonIdToIndex.get(item.lesson_id);
     if (idx === undefined) return;
     if (item.started_at !== NULL_DATE) startedCount[idx]++;
-    if (item.started_at !== NULL_DATE && getLocalDateFromUTC(item.started_at).startsWith(day))
+    if (item.started_at !== NULL_DATE && getLocalDateFromUTC(item.started_at).startsWith(today))
       startedTodayCount[idx]++;
     if (item.mastered_at !== NULL_DATE) masteredCount[idx]++;
-    if (item.mastered_at !== NULL_DATE && getLocalDateFromUTC(item.mastered_at).startsWith(day))
+    if (item.mastered_at !== NULL_DATE && getLocalDateFromUTC(item.mastered_at).startsWith(today))
       masteredTodayCount[idx]++;
     totalCount[idx]++;
   });

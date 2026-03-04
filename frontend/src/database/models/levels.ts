@@ -6,11 +6,7 @@ import { SupabaseError } from '@/types/error.types';
 import type { LevelLocal, LevelOverview } from '@/types/local.types';
 import { TableName } from '@/types/local.types';
 import { Entity } from 'dexie';
-import {
-  syncFromRemoteGeneric,
-  getTodayShortDate,
-  aggregateLessons,
-} from '../utils/database.utils';
+import { syncFromRemoteGeneric, aggregateLevels } from '../utils/database.utils';
 import Dexie from 'dexie';
 
 /**
@@ -45,11 +41,10 @@ export default class Levels extends Entity<AppDB> implements LevelLocal {
    * @param userId - The unique identifier of the user
    */
   static async getOverview(userId: string): Promise<LevelOverview[]> {
-    const today = getTodayShortDate();
     const items = await db.user_items.where('user_id').equals(userId).toArray();
     const lessons = await db.lessons.orderBy('sort_order').toArray();
     const levels = await db.levels.orderBy('sort_order').toArray();
-    return aggregateLessons(items, lessons, levels, today);
+    return aggregateLevels(items, lessons, levels);
   }
 
   /**
