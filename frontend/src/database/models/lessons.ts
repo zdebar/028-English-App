@@ -5,7 +5,7 @@ import { db } from '@/database/models/db';
 import { SupabaseError } from '@/types/error.types';
 import { TableName, type LessonLocal } from '@/types/local.types';
 import Dexie, { Entity } from 'dexie';
-import { syncFromRemoteGeneric } from '../utils/database.utils';
+import { syncFromRemoteGeneric } from '../utils/data-sync.utils';
 
 /**
  * Represents a lesson entity in the local database.
