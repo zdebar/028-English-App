@@ -90,7 +90,7 @@ describe('AudioRecord', () => {
       mocks.audioGet.mockResolvedValue(undefined);
       mocks.fetchStorage.mockRejectedValue(new Error('Data file name is required'));
 
-      await expect(AudioRecord.get('')).rejects.toThrow('Data file name is required');
+      await expect(AudioRecord.getRecord('')).rejects.toThrow('Data file name is required');
       expect(mocks.audioGet).toHaveBeenCalledWith('');
     });
 
@@ -98,7 +98,7 @@ describe('AudioRecord', () => {
       const existing = { filename: 'a.opus', audioBlob: new Blob(['cached']) };
       mocks.audioGet.mockResolvedValue(existing);
 
-      const result = await AudioRecord.get('a.opus');
+      const result = await AudioRecord.getRecord('a.opus');
 
       expect(mocks.audioGet).toHaveBeenCalledWith('a.opus');
       expect(mocks.fetchStorage).not.toHaveBeenCalled();
@@ -110,7 +110,7 @@ describe('AudioRecord', () => {
       mocks.audioGet.mockResolvedValue(undefined);
       mocks.fetchStorage.mockResolvedValue(blob);
 
-      const result = await AudioRecord.get('b.opus');
+      const result = await AudioRecord.getRecord('b.opus');
 
       expect(mocks.fetchStorage).toHaveBeenCalledWith('audio-bucket', 'b.opus');
       expect(mocks.audioPut).toHaveBeenCalledWith({ filename: 'b.opus', audioBlob: blob });
