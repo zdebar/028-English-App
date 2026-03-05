@@ -2,11 +2,16 @@ import config from '@/config/config';
 import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
-import { getSyncTimestamps, getTodayShortDate } from '@/database/utils/database.utils';
+import { getTodayShortDate } from '@/database/utils/database.utils';
+import { getSyncTimestamps } from '../utils/data-sync.utils';
 import { infoHandler } from '@/features/logging/info-handler';
 import { SupabaseError } from '@/types/error.types';
 import { TableName, type UserScoreLocal } from '@/types/local.types';
-import { assertNonNegativeInteger, assertPositiveInteger } from '@/utils/assertions.utils';
+import {
+  assertNonNegativeInteger,
+  assertPositiveInteger,
+  assertShortDateString,
+} from '@/utils/assertions.utils';
 import { Entity } from 'dexie';
 import { splitDeleted } from '../utils/data-sync.utils';
 import Metadata from './metadata';
@@ -29,23 +34,21 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
   /**
    * Increases the item count for today's date by the specified amount.
-   *
    * @param userId - The user ID. Must be a valid string.
-   * @param addCount - The number to add to today's item count. Must be a non-negative integer.
+   * @param count - The number to add to today's item count. Must be a non-negative integer.
    */
-  static async addItemCount(userId: string, addCount: number): Promise<void> {
-    assertPositiveInteger(addCount, 'addItemCount');
+  static async addItemCount(userId: string, count: number): Promise<void> {
+    assertPositiveInteger(count, 'addItemCount');
 
     const today = getTodayShortDate();
     const existingRecord = await db.user_scores.get([userId, today]);
-    const newItemCount = (existingRecord?.item_count ?? 0) + addCount;
+    const newItemCount = (existingRecord?.item_count ?? 0) + count;
     await db.user_scores.put(this.createRecord(userId, today, newItemCount));
     triggerDailyCountUpdatedEvent(userId);
   }
 
   /**
    * Fetches the user score record for today's date. If no record exists, returns a new record with item_count set to 0.
-   *
    * @param userId The user ID.
    */
   static async getOrCreateTodayScore(userId: string): Promise<number> {
@@ -95,7 +98,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
   /**
    * Clears all user score records for a given user.
-   *
+   * Use only for deletion of user account, when user scores on remote are deleted automatically.
    * @param userId - The ID of the user whose scores should be cleared
    */
   static async deleteAllScores(userId: string): Promise<void> {
@@ -103,12 +106,10 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
   }
 
   /**
-   * Gets user scores from IndexedDB for a specific user that were updated since the last sync time.
-   * This is used to determine which local records need to be pushed to the backend during synchronization.
-   *
+   * Gets user scores from IndexedDB for a specific user that were updated in between the last synced timestamp and the new synced timestamp.
    * @param userId - The ID of the user whose scores should be fetched
-   * @param lastSyncedAt - The timestamp of the last sync (defaults to epoch start date)
-   * @param newSyncedAt - The timestamp of the new sync
+   * @param lastSyncedAt - The timestamp of the last sync (inclusive)
+   * @param newSyncedAt - The timestamp of the new sync (exclusive)
    */
   private static async getUserScoresForSync(
     userId: string,
@@ -130,56 +131,52 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
 
   /**
    * Creates a user score record with the provided information.
-   *
    * @param userId - The unique identifier of the user
    * @param date - The date associated with the score record
-   * @param itemCount - The number of items counted in this score. Should be a non-negative integer.
+   * @param count - The number of items counted in this score. Should be a non-negative integer.
    */
-  private static createRecord(userId: string, date: string, itemCount: number): UserScoreLocal {
+  private static createRecord(userId: string, date: string, count: number): UserScoreLocal {
     assertNonNegativeInteger(
-      itemCount,
-      'itemCount must be a non-negative integer to create a user score record.',
+      count,
+      'count must be a non-negative integer to create a user score record.',
     );
+    assertShortDateString(date);
 
     return {
       user_id: userId,
       date,
-      item_count: itemCount,
+      item_count: count,
       updated_at: new Date().toISOString(),
       deleted_at: null,
     };
   }
 
   /**
-   * Pushes local user scores to the remote database that were updated within a specified time range.
-   *
-   * @param userId - The unique identifier of the user whose scores should be synced.
-   * @param lastSyncedAt - The timestamp (inclusive) marking the start of the time range for scores to sync.
-   * @param newSyncedAt - The timestamp (exclusive) marking the end of the time range for scores to sync.
+   * Pushes local user scores to the remote database.
+   * @param scores - The local user scores to be synced.
    */
-  private static async postToRemote(localScores: UserScoreLocal[]): Promise<void> {
-    if (!localScores || localScores.length === 0) return;
+  private static async postToRemote(scores: UserScoreLocal[]): Promise<void> {
+    if (!scores || scores.length === 0) return;
 
     const { error: errorInsert } = await supabaseInstance.rpc('upsert_user_scores', {
-      p_user_scores: localScores,
+      p_user_scores: scores,
     });
 
     if (errorInsert) {
-      throw new SupabaseError(`User score synchronization failed.`, errorInsert, { localScores });
+      throw new SupabaseError(`User score synchronization failed.`, errorInsert, {
+        localScores: scores,
+      });
     }
 
     infoHandler(
-      `Completed ${localScores.length} user scores push to Supabase for userId: ${localScores[0].user_id}`,
+      `Completed ${scores.length} user scores push to Supabase for userId: ${scores[0].user_id}`,
     );
   }
 
   /**
    * Fetches updated user scores from Supabase for a specific user since the last sync.
-   * Stores the fetched scores in the local database and updates the sync metadata.
-   *
    * @param userId - The ID of the user whose scores should be fetched
    * @param lastSyncedAt - The timestamp of the last sync (defaults to epoch start date)
-   * @param newSyncedAt - The timestamp to mark as the new sync time
    */
   private static async fetchFromRemote(
     userId: string,

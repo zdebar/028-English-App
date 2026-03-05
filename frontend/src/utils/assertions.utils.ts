@@ -48,3 +48,15 @@ export function assertIsoDateString(value: string): void {
     throw new Error(`Value: ${value} is not a valid ISO date string.`);
   }
 }
+
+/**
+ * Asserts that the provided string is a valid short date in the format YYYY-MM-DD.
+ *
+ * @param value - The string to validate as a short date
+ * @throws {Error} If the value is not a valid short date string
+ */
+export function assertShortDateString(value: string): void {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    throw new Error(`Value: ${value} is not a valid short date string (YYYY-MM-DD).`);
+  }
+}
