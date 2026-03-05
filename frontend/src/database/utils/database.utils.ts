@@ -2,25 +2,11 @@ import config from '@/config/config';
 import { supabaseInstance } from '@/config/supabase.config';
 import { errorHandler } from '@/features/logging/error-handler';
 import type { UserItemSQL } from '@/types/sql.types';
-import type {
-  UserItemLocal,
-  UserItemPractice,
-  LessonLocal,
-  LevelOverview,
-  LessonOverview,
-  LevelLocal,
-  ProgressCounts,
-} from '@/types/local.types';
-
-import { TableName } from '@/types/local.types';
+import type { UserItemLocal, UserItemPractice } from '@/types/local.types';
 import UserItem from '../models/user-items';
 import { infoHandler } from '@/features/logging/info-handler';
 import { SupabaseError } from '@/types/error.types';
 import { assertNonNegativeInteger } from '@/utils/assertions.utils';
-import Metadata from '../models/metadata';
-import type { Dexie } from 'dexie';
-import { db } from '../models/db';
-import { splitDeleted } from './data-sync.utils';
 
 const NULL_DATE = config.database.nullReplacementDate;
 const NULL_NUMBER = config.database.nullReplacementNumber;
@@ -81,8 +67,6 @@ export function getTodayShortDate(): string {
  * @returns The local date string in 'en-CA' format ('YYYY-MM-DD').
  */
 export function getLocalDateFromUTC(date: string): string {
-  if (!date) throw new Error('Date string is required');
-
   const localDate = new Date(date);
   return localDate.toLocaleDateString('en-CA');
 }
@@ -221,143 +205,4 @@ export function addGrammarIndicatorFlag(
       show_new_grammar_indicator: show,
     };
   });
-}
-
-/**
- * Aggregates levels from user items.
- *
- * @param items - Array of filtered UserItemLocal
- * @param lessons - Array of LessonLocal
- * @param levels - Array of LevelLocal
- */
-export function aggregateLevels(
-  items: UserItemLocal[],
-  lessons: LessonLocal[],
-  levels: LevelLocal[],
-): LevelOverview[] {
-  const today = getTodayShortDate();
-  const progressKeys: (keyof ProgressCounts)[] = [
-    'startedCount',
-    'startedTodayCount',
-    'masteredCount',
-    'masteredTodayCount',
-    'totalCount',
-  ];
-
-  const createEmptyCounts = (): ProgressCounts => ({
-    startedCount: 0,
-    startedTodayCount: 0,
-    masteredCount: 0,
-    masteredTodayCount: 0,
-    totalCount: 0,
-  });
-
-  const lessonCounts: ProgressCounts[] = lessons.map(() => createEmptyCounts());
-
-  // Map lesson_id to index for fast lookup
-  const lessonIdToIndex = new Map<number, number>();
-  lessons.forEach((lesson, idx) => lessonIdToIndex.set(lesson.id, idx));
-
-  // Aggregate counts for lessons
-  items.forEach((item) => {
-    const idx = lessonIdToIndex.get(item.lesson_id);
-    if (idx === undefined) return;
-    const counts = lessonCounts[idx];
-    if (item.started_at !== NULL_DATE) counts.startedCount++;
-    if (item.started_at !== NULL_DATE && getLocalDateFromUTC(item.started_at).startsWith(today))
-      counts.startedTodayCount++;
-    if (item.mastered_at !== NULL_DATE) counts.masteredCount++;
-    if (item.mastered_at !== NULL_DATE && getLocalDateFromUTC(item.mastered_at).startsWith(today))
-      counts.masteredTodayCount++;
-    counts.totalCount++;
-  });
-
-  // Build LessonOverview[]
-  const lessonOverviews: LessonOverview[] = lessons
-    .map((lesson, idx) => ({
-      ...lesson,
-      ...lessonCounts[idx],
-    }))
-    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
-
-  // Build LevelOverview[] with lessons grouped
-  const levelOverviews = new Map<number, LevelOverview>();
-  levels.forEach((level) => {
-    levelOverviews.set(level.id, {
-      ...level,
-      ...createEmptyCounts(),
-      lessons: [],
-    });
-  });
-
-  lessonOverviews.forEach((lesson) => {
-    const level = levelOverviews.get(lesson.level_id);
-    if (level) {
-      level.lessons.push(lesson);
-      for (const key of progressKeys) {
-        level[key] += lesson[key];
-      }
-    }
-  });
-
-  return Array.from(levelOverviews.values()).sort(
-    (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0),
-  );
-}
-
-/**
- * Generic function to sync any table from a remote source.
- * @param dbTable - Dexie table instance. Requires casting to Dexie.Table<TableType, number> see example.
- * @param tableName - Table name for metadata
- * @param fetchRemoteFn - Function to fetch remote data, must return array of entities
- * @param doFullSync - Whether to perform a full sync
- *
- * @example
- * await syncFromRemoteGeneric(db.levels as Dexie.Table<LevelLocal, number>, TableName.Levels, Levels.fetchFromRemote, false);
- */
-export async function syncFromRemoteGeneric<T extends { deleted_at: string | null; id: number }>(
-  dbTable: Dexie.Table<T, number>,
-  tableName: TableName,
-  fetchRemoteFn: (lastSyncedAt: string) => Promise<T[]>,
-  doFullSync: boolean = false,
-): Promise<void> {
-  // Step 1: Determine last synced timestamp and new sync timestamp
-  const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(doFullSync);
-
-  // Step 2: Fetch remote data
-  const remoteItems = await fetchRemoteFn(lastSyncedAt);
-
-  // Step 3: Split remote items into upsert and delete lists
-  const { toUpsert, toDelete } = splitDeleted(remoteItems);
-
-  // Step 4: Sync with local database in a transaction
-  await db.transaction('rw', dbTable, db.metadata, async () => {
-    if (doFullSync) {
-      await dbTable.clear();
-    } else if (toDelete.length > 0) {
-      await dbTable.bulkDelete(toDelete.map((item: any) => item.id));
-    }
-    if (toUpsert.length > 0) {
-      await dbTable.bulkPut(toUpsert);
-    }
-    await Metadata.markAsSynced(tableName, newSyncedAt);
-  });
-
-  infoHandler(`Completed ${remoteItems.length} ${tableName} pull from remote.`);
-}
-
-/**
- * Returns the last synced timestamp and the new sync timestamp for a user.
- * @param doFullSync - Whether to perform a full sync.
- * @param userId - The user ID.
- */
-export async function getSyncTimestamps(
-  doFullSync: boolean,
-  userId?: string,
-): Promise<{ lastSyncedAt: string; newSyncedAt: string }> {
-  const lastSyncedAt = doFullSync
-    ? config.database.epochStartDate
-    : await Metadata.getSyncedAt(TableName.UserScores, userId);
-  const newSyncedAt = new Date().toISOString();
-  return { lastSyncedAt, newSyncedAt };
 }

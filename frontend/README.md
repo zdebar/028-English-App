@@ -72,6 +72,11 @@ React & TypeScript: Hook `useFetch`, Component `PracticeCard`
 - **SQL** Data as stored on Supabase
 - **Local** Data as used on frontend. Mostly nulls converted to nullReplacementValue. More in Null Replacement Values.
 
+### Date Types
+
+- **date_at** Generally dates (started_at, next_at, etc.) are stored as TIMESTAMPTZ
+- **user_score.date** Is stored as "YYYY-MM-DD". Dates are determined on frontend as stripped local time. Ex. User time is "2026-03-05 14:30:00+08" is determined as "2026-03-05"
+
 ### Supabase Database Logic
 
 - **started_at**: Marks started records.

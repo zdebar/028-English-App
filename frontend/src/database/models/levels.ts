@@ -6,7 +6,8 @@ import { SupabaseError } from '@/types/error.types';
 import type { LevelLocal, LevelOverview } from '@/types/local.types';
 import { TableName } from '@/types/local.types';
 import { Entity } from 'dexie';
-import { syncFromRemoteGeneric, aggregateLevels } from '../utils/database.utils';
+import { syncFromRemoteGeneric } from '../utils/data-sync.utils';
+import { aggregateLevels } from '../utils/levels.utils';
 import Dexie from 'dexie';
 
 /**
@@ -27,7 +28,6 @@ export default class Levels extends Entity<AppDB> implements LevelLocal {
 
   /**
    * Retrieves all levels from the database.
-   * @returns {Promise<LevelLocal[]>} A promise that resolves to an array of all levels.
    */
   static async getAll(): Promise<LevelLocal[]> {
     return await db.levels.orderBy('sort_order').toArray();
@@ -35,10 +35,6 @@ export default class Levels extends Entity<AppDB> implements LevelLocal {
 
   /**
    * Retrieves a comprehensive overview of user levels with their progress.
-   *
-   * Fetches all user items, lessons, and levels data, then aggregates them
-   * to provide a complete level overview for the specified user.
-   *
    * @param userId - The unique identifier of the user
    */
   static async getOverview(userId: string): Promise<LevelOverview[]> {
@@ -55,9 +51,6 @@ export default class Levels extends Entity<AppDB> implements LevelLocal {
    *                     and fetching all levels from the epoch start date.
    *                     If false, performs an incremental sync fetching only levels
    *                     modified since the last sync timestamp. Defaults to false.
-   *
-   * @returns A promise that resolves when the sync operation is complete.
-   * @throws Database transaction errors if the sync operation fails
    */
   static async syncFromRemote(doFullSync: boolean = false): Promise<void> {
     await syncFromRemoteGeneric<LevelLocal>(
@@ -71,8 +64,6 @@ export default class Levels extends Entity<AppDB> implements LevelLocal {
   /**
    * Fetches levels from Supabase that have been updated since the specified timestamp.
    * @param lastSyncedAt - The timestamp of the last sync operation. Defaults to the application's epoch start date.
-   * @returns A promise that resolves to an array of local level objects.
-   * @throws {SupabaseError} If the RPC call to fetch levels fails, includes the lastSyncedAt parameter in error context.
    */
   private static async fetchFromRemote(
     lastSyncedAt: string = config.database.epochStartDate,

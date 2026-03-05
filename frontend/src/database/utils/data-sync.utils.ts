@@ -9,6 +9,11 @@ import { getFullSyncTime, setFullSyncTime } from '@/database/utils/sync-time.uti
 import { logRejectedResults } from '@/features/logging/logging.utils';
 import Lessons from '@/database/models/lessons';
 import Levels from '@/database/models/levels';
+import { db } from '../models/db';
+import { TableName } from '@/types/local.types';
+import Dexie from 'dexie';
+import Metadata from '../models/metadata';
+import { infoHandler } from '@/features/logging/info-handler';
 
 /**
  * Synchronizes data for a specific user with the database.
@@ -94,4 +99,61 @@ export function splitDeleted<T extends { deleted_at: string | null }>(
     }
   });
   return { toUpsert, toDelete };
+}
+
+/**
+ * Generic function to sync any table from a remote source.
+ * @param dbTable - Dexie table instance. Requires casting to Dexie.Table<TableType, number> see example.
+ * @param tableName - Table name for metadata
+ * @param fetchRemoteFn - Function to fetch remote data, must return array of entities
+ * @param doFullSync - Whether to perform a full sync
+ *
+ * @example
+ * await syncFromRemoteGeneric(db.levels as Dexie.Table<LevelLocal, number>, TableName.Levels, Levels.fetchFromRemote, false);
+ */
+export async function syncFromRemoteGeneric<T extends { deleted_at: string | null; id: number }>(
+  dbTable: Dexie.Table<T, number>,
+  tableName: TableName,
+  fetchRemoteFn: (lastSyncedAt: string) => Promise<T[]>,
+  doFullSync: boolean = false,
+): Promise<void> {
+  // Step 1: Determine last synced timestamp and new sync timestamp
+  const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(doFullSync);
+
+  // Step 2: Fetch remote data
+  const remoteItems = await fetchRemoteFn(lastSyncedAt);
+
+  // Step 3: Split remote items into upsert and delete lists
+  const { toUpsert, toDelete } = splitDeleted(remoteItems);
+
+  // Step 4: Sync with local database in a transaction
+  await db.transaction('rw', dbTable, db.metadata, async () => {
+    if (doFullSync) {
+      await dbTable.clear();
+    } else if (toDelete.length > 0) {
+      await dbTable.bulkDelete(toDelete.map((item: any) => item.id));
+    }
+    if (toUpsert.length > 0) {
+      await dbTable.bulkPut(toUpsert);
+    }
+    await Metadata.markAsSynced(tableName, newSyncedAt);
+  });
+
+  infoHandler(`Completed ${remoteItems.length} ${tableName} pull from remote.`);
+}
+
+/**
+ * Returns the last synced timestamp and the new sync timestamp for a user.
+ * @param doFullSync - Whether to perform a full sync.
+ * @param userId - The user ID.
+ */
+export async function getSyncTimestamps(
+  doFullSync: boolean,
+  userId?: string,
+): Promise<{ lastSyncedAt: string; newSyncedAt: string }> {
+  const lastSyncedAt = doFullSync
+    ? config.database.epochStartDate
+    : await Metadata.getSyncedAt(TableName.UserScores, userId);
+  const newSyncedAt = new Date().toISOString();
+  return { lastSyncedAt, newSyncedAt };
 }
