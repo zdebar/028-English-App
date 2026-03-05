@@ -3,7 +3,7 @@ import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import { TableName } from '@/types/local.types';
 import { Entity } from 'dexie';
-import { validateUserIdUsage } from '../utils/database.utils';
+import { validateUserIdUsage } from '../utils/metadata.utils';
 
 /**
  * Represents metadata information for table synchronization in the application database.
@@ -51,8 +51,6 @@ export default class Metadata extends Entity<AppDB> {
     userId?: string,
   ): Promise<void> {
     const isUserSpecific = validateUserIdUsage(tableName, userId);
-    if (!syncTime) throw new Error('syncTime is required in markAsSynced');
-
     await db.metadata.put({
       table_name: tableName,
       user_id: isUserSpecific ? userId! : config.database.nullReplacementUserId,
@@ -70,7 +68,6 @@ export default class Metadata extends Entity<AppDB> {
    */
   static async deleteSyncRow(tableName: TableName, userId?: string): Promise<void> {
     const isUserSpecific = validateUserIdUsage(tableName, userId);
-
     await db.metadata.delete([
       tableName,
       isUserSpecific ? userId! : config.database.nullReplacementUserId,
