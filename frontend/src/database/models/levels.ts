@@ -16,7 +16,7 @@ import Dexie from 'dexie';
  *
  * @method getAll - Retrieves all levels from the local database.
  * @method getOverview - Retrieves a comprehensive overview of user levels with their progress.
- * @method syncLevels - Synchronizes levels from the remote server with the local database.
+ * @method syncFromRemote - Synchronizes levels from the remote server with the local database.
  *
  */
 export default class Levels extends Entity<AppDB> implements LevelLocal {
@@ -46,7 +46,6 @@ export default class Levels extends Entity<AppDB> implements LevelLocal {
 
   /**
    * Synchronizes levels from the remote server with the local database.
-   *
    * @param doFullSync - If true, performs a full sync by clearing all existing levels
    *                     and fetching all levels from the epoch start date.
    *                     If false, performs an incremental sync fetching only levels

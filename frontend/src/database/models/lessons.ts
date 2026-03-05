@@ -32,7 +32,6 @@ export default class Lessons extends Entity<AppDB> implements LessonLocal {
 
   /**
    * Synchronizes lessons from the remote server with the local database.
-   *
    * @param doFullSync - If true, performs a full sync by clearing all existing lessons
    *                     and fetching all lessons from the epoch start date.
    *                     If false, performs an incremental sync fetching only lessons
@@ -49,7 +48,6 @@ export default class Lessons extends Entity<AppDB> implements LessonLocal {
 
   /**
    * Fetches lessons from Supabase that have been updated since the specified timestamp.
-   *
    * @param lastSyncedAt - The timestamp of the last sync operation. Defaults to the application's epoch start date.
    */
   private static async fetchFromRemote(

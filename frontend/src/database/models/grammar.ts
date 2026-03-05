@@ -7,7 +7,7 @@ import type { GrammarLocal } from '@/types/local.types';
 import { TableName } from '@/types/local.types';
 import { assertPositiveInteger } from '@/utils/assertions.utils';
 import Dexie, { Entity } from 'dexie';
-import { syncFromRemoteGeneric } from '../utils/database.utils';
+import { syncFromRemoteGeneric } from '../utils/data-sync.utils';
 
 const NULL_DATE = config.database.nullReplacementDate;
 
@@ -30,10 +30,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
 
   /**
    * Retrieves a grammar record by its ID from the database.
-   *
    * @param grammarId - The unique identifier of the grammar record to retrieve.
-   * @returns A promise that resolves to the grammar record.
-   * @throws {DatabaseError} If no grammar record with the specified ID is found.
    */
   static async getGrammarById(grammarId: number): Promise<GrammarLocal> {
     assertPositiveInteger(grammarId, 'grammarId');
@@ -49,9 +46,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
 
   /**
    * Retrieves a list of unique grammar IDs for items that have been started by a user.
-   *
    * @param userId - The ID of the user
-   * @returns A promise that resolves to an array of unique grammar IDs that the user has started, or an empty array if no items have been started
    */
   static async getStartedIds(userId: string): Promise<number[]> {
     const startedGrammarIds = await db.user_items
@@ -64,28 +59,19 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
 
   /**
    * Retrieves a list of grammar items that have been started by the user.
-   *
-   * Fetches all grammar records associated with user items that have a non-null `started_at` timestamp,
-   * indicating that the user has begun studying those grammar topics.
-   *
    * @param userId - The unique identifier of the user
-   * @returns A promise that resolves to an array of started grammar items with progress information. Returns an empty array
-   *          if the user has not started any grammar items or if no matching grammar records are found.
    */
   static async getStartedList(userId: string): Promise<GrammarLocal[]> {
     const grammarIds = await this.getStartedIds(userId);
     if (grammarIds.length === 0) return [];
-
     return await db.grammar.where('id').anyOf(grammarIds).toArray();
   }
 
   /**
    * Synchronizes grammar data between the local database and Supabase.
-   *
    * @param doFullSync - If true, performs a full sync by clearing all existing grammar data
    *                     and fetching everything from the epoch start date. If false, performs
    *                     an incremental sync based on the last sync timestamp. Defaults to false.
-   * @returns A promise that resolves when the sync operation is complete.
    */
   static async syncFromRemote(doFullSync: boolean = false): Promise<void> {
     await syncFromRemoteGeneric<GrammarLocal>(
@@ -98,11 +84,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
 
   /**
    * Fetches grammar records from Supabase that were updated within a specified time range.
-   *
    * @param lastSyncedAt - The start of the time range (inclusive). Defaults to the null replacement date from config.
-   * @param newSyncedAt - The end of the time range (exclusive).
-   * @returns A promise that resolves to an array of grammar records. Returns an empty array if no records are found.
-   * @throws SupabaseError if the Supabase query fails.
    */
   private static async fetchFromRemote(
     lastSyncedAt: string = config.database.epochStartDate,
