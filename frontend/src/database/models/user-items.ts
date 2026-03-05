@@ -2,27 +2,25 @@ import config from '@/config/config';
 import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
-import { TableName } from '@/types/local.types';
 import type { UserItemLocal, UserItemPractice } from '@/types/local.types';
-import Dexie, { Entity } from 'dexie';
+import { TableName } from '@/types/local.types';
 import { assertNonNegativeInteger, assertPositiveInteger } from '@/utils/assertions.utils';
-import { splitDeleted } from '../utils/data-sync.utils';
+import Dexie, { Entity } from 'dexie';
+import { getSyncTimestamps, splitDeleted } from '../utils/data-sync.utils';
 
+import { convertLocalToSQL, convertSQLToLocal } from '@/database/utils/user-items.utils';
 import {
-  convertLocalToSQL,
-  convertSQLToLocal,
+  addGrammarIndicatorFlag,
   getNextAt,
-  getSyncTimestamps,
   resetUserItem,
-} from '@/database/utils/database.utils';
-import { triggerLevelsUpdatedEvent } from '@/features/user-stats/dashboard.utils';
+} from '@/database/utils/user-items.utils';
 import { infoHandler } from '@/features/logging/info-handler';
+import { triggerLevelsUpdatedEvent } from '@/features/user-stats/dashboard.utils';
+import { SupabaseError } from '@/types/error.types';
+import type { UserItemSQL } from '@/types/sql.types';
 import Grammar from './grammar';
 import Metadata from './metadata';
 import UserScore from './user-scores';
-import { SupabaseError } from '@/types/error.types';
-import { addGrammarIndicatorFlag } from '@/database/utils/database.utils';
-import type { UserItemSQL } from '@/types/sql.types';
 
 const NULL_DATE = config.database.nullReplacementDate;
 
@@ -43,19 +41,18 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   english!: string;
   pronunciation!: string;
   audio!: string | null;
-  item_sort_order!: number;
+  sort_order!: number;
   grammar_id!: number;
   progress!: number;
   started_at!: string;
   updated_at!: string;
-  deleted_at!: string | null;
+  deleted_at!: string;
   next_at!: string;
   mastered_at!: string;
   lesson_id!: number;
 
   /**
    * Retrieves a practice deck of user items for studying.
-   *
    * @param userId - The unique identifier of the user
    * @param deckSize - The maximum number of items to return (defaults to config.lesson.deckSize)
    */
@@ -69,13 +66,14 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const startedGrammarIdSet = new Set(await Grammar.getStartedIds(userId));
 
     // Step 2: Fetch items with odd progress
-    let practiceItems = await this.getPracticeItemsByParity(userId, true, false, deckSize);
+    let deck = await this.getPracticeItemsByParity(userId, true, false, deckSize);
 
     // Step 3: If not enough items, fetch even progress items instead
-    if (practiceItems.length < deckSize) {
-      practiceItems = await this.getPracticeItemsByParity(userId, false, false, deckSize);
+    if (deck.length < deckSize) {
+      let evenItems: UserItemLocal[] = [];
+      evenItems = await this.getPracticeItemsByParity(userId, false, false, deckSize);
 
-      const remainingLimit = deckSize - practiceItems.length;
+      const remainingLimit = deckSize - evenItems.length;
       if (remainingLimit > 0) {
         const remainingItems = await this.getPracticeItemsByParity(
           userId,
@@ -83,22 +81,26 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
           true,
           remainingLimit,
         );
-        practiceItems = [...practiceItems, ...remainingItems];
+        evenItems = [...evenItems, ...remainingItems];
+      }
+
+      if (evenItems.length >= deckSize) {
+        deck = [...evenItems];
+      } else {
+        deck = [...deck, ...evenItems];
       }
     }
 
-    return addGrammarIndicatorFlag(practiceItems, startedGrammarIdSet);
+    return addGrammarIndicatorFlag(deck, startedGrammarIdSet);
   }
 
   /**
    * Saves practice deck items for a user, updating their progress and metadata.
-   *
    * @param userId - The unique identifier of the user
    * @param items - Array of user item records to be saved
    */
   static async savePracticeDeck(userId: string, items: UserItemPractice[]): Promise<void> {
-    if (!items || items.length === 0)
-      throw new Error('Items array is required and cannot be empty to save practice deck.');
+    if (!items || items.length === 0) return;
 
     const currentDateTime = new Date(Date.now()).toISOString();
     const updatedItems = items.map((item) => {
@@ -114,15 +116,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       };
     });
 
-    await Promise.allSettled([
-      db.user_items.bulkPut(updatedItems),
-      UserScore.addItemCount(userId, updatedItems.length),
-    ]);
+    await db.user_items.bulkPut(updatedItems);
+    await UserScore.addItemCount(userId, updatedItems.length);
   }
 
   /**
    * Retrieves vocabulary items for a user that have been started (begun learning). Sorted by czech word.
-   *
    * @param userId - The unique identifier of the user
    */
   static async getStartedVocabulary(userId: string): Promise<UserItemLocal[]> {
@@ -135,13 +134,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         false,
       )
       .sortBy('czech');
-
     return result;
   }
 
   /**
    * Resets a user item to its default state by user and item ID.
-   *
    * @param userId - The unique identifier of the user
    * @param itemId - The unique identifier of the item to reset
    */
@@ -165,7 +162,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
   /**
    * Deletes all user items associated with a specific user.
-   *
+   * Use only for deletion of user account, when user-items on remote are deleted automatically.
    * @param userId - The unique identifier of the user
    */
   static async deleteAllItems(userId: string): Promise<void> {
@@ -239,7 +236,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
   /**
    * Pushes local user items to Supabase for synchronization.
-   *
    * @param items - An array of user items in SQL format to be pushed to the remote server.
    */
   private static async postToRemote(items: UserItemSQL[]): Promise<void> {
@@ -262,7 +258,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
   /**
    * Fetches user items from Supabase that have been updated since the specified timestamp.
-   *
    * @param userId - The ID of the user whose items should be fetched.
    * @param lastSyncedAt - The timestamp of the last synchronization.
    */
@@ -285,12 +280,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       });
     }
 
-    return (updatedUserItems ?? []).map((item: UserItemLocal) => convertSQLToLocal(item));
+    return updatedUserItems.map(convertSQLToLocal) ?? [];
   }
 
   /**
    * Fetches practice items by odd/even progress parity for a user.
-   *
    * @param userId - The unique identifier of the user
    * @param isOdd - Whether to fetch items with odd progress
    * @param isNew - Whether to fetch non-started items (next_at = NULL_DATE) or ready to practice items (next_at < today)

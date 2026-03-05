@@ -5,12 +5,12 @@ export interface UserItemLocal {
   english: string;
   pronunciation: string;
   audio: string | null;
-  item_sort_order: number;
-  grammar_id: number; // null replaced with config.database.nullReplacementNumber
+  sort_order: number;
   progress: number;
+  grammar_id: number; // null replaced with config.database.nullReplacementNumber
   started_at: string; // nulls replaced with config.database.nullReplacementDate
-  updated_at: string; // nulls replaced with config.database.nullReplacementDate
-  deleted_at: string | null;
+  updated_at: string;
+  deleted_at: string; // nulls replaced with config.database.nullReplacementDate
   next_at: string; // nulls replaced with config.database.nullReplacementDate
   mastered_at: string; // nulls replaced with config.database.nullReplacementDate
   lesson_id: number;
