@@ -28,15 +28,6 @@ export interface LessonLocal {
   level_id: number;
   deleted_at: string | null;
 }
-
-export interface LessonOverview extends LessonLocal {
-  startedCount: number;
-  startedTodayCount: number;
-  masteredCount: number;
-  masteredTodayCount: number;
-  totalCount: number;
-}
-
 export interface LevelLocal {
   id: number;
   name: string;
@@ -45,7 +36,17 @@ export interface LevelLocal {
   deleted_at: string | null;
 }
 
-export interface LevelOverview extends LevelLocal {
+export interface ProgressCounts {
+  startedCount: number;
+  startedTodayCount: number;
+  masteredCount: number;
+  masteredTodayCount: number;
+  totalCount: number;
+}
+
+export interface LessonOverview extends LessonLocal, ProgressCounts {}
+
+export interface LevelOverview extends LevelLocal, ProgressCounts {
   lessons: LessonOverview[];
 }
 

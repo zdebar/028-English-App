@@ -22,29 +22,7 @@ export default function LevelsOverview() {
   const [unpackedIndex, setUnpackedIndex] = useState<number | null>(null);
   const [showMastered, setShowMastered] = useState<boolean>(false);
   const levelsOverview = useUserStore((state) => state.levels);
-
-  type LessonCountKey =
-    | 'startedCount'
-    | 'masteredCount'
-    | 'startedTodayCount'
-    | 'masteredTodayCount'
-    | 'totalCount';
-  const levels = Array.isArray(levelsOverview)
-    ? levelsOverview.map((level) => {
-        const aggregate = (key: LessonCountKey) =>
-          Array.isArray(level.lessons)
-            ? level.lessons.reduce((sum, lesson) => sum + (lesson[key] ?? 0), 0)
-            : 0;
-        return {
-          ...level,
-          startedCount: aggregate('startedCount'),
-          masteredCount: aggregate('masteredCount'),
-          startedTodayCount: aggregate('startedTodayCount'),
-          masteredTodayCount: aggregate('masteredTodayCount'),
-          totalCount: aggregate('totalCount'),
-        };
-      })
-    : EMPTY_LEVELS;
+  const levels = Array.isArray(levelsOverview) ? levelsOverview : EMPTY_LEVELS;
   const navigate = useNavigate();
 
   const handleLevelClick = (index: number) => {
