@@ -50,7 +50,6 @@ export default function DeleteUserButton({ className }: { className?: string }):
       }
 
       showToast(TEXTS.deleteUserSuccessToast, 'success');
-      await supabaseInstance.auth.signOut();
     } catch (error) {
       showToast(TEXTS.deleteUserErrorToast, 'error');
       errorHandler('Delete User Error', error);

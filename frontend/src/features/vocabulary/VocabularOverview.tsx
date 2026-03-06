@@ -30,20 +30,13 @@ export default function VocabularyOverview() {
     return UserItem.getStartedVocabulary(userId);
   }, [userId]);
 
-  const {
-    data: words,
-    currentIndex,
-    currentItem: selectedWord,
-    setCurrentIndex,
-    error,
-    loading,
-    reload,
-  } = useArray<UserItemLocal>(fetchVocabulary);
+  const { data: words, error, loading, reload } = useArray<UserItemLocal>(fetchVocabulary);
 
   // -- WORDS FILTERING --
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
   const [searchTerm, setSearchTerm] = useState('');
   const [displayField, setDisplayField] = useState<DisplayField>('czech');
+  const [selectedWord, setSelectedWord] = useState<UserItemLocal | null>(null);
 
   const sortedByCzech = useMemo(() => words, [words]);
   const sortedByEnglish = useMemo(
@@ -57,7 +50,7 @@ export default function VocabularyOverview() {
   );
   const sortedWords = displayField === 'czech' ? sortedByCzech : sortedByEnglish;
   const filteredWords = useMemo(
-    () => filterSortedWords(sortedWords, searchTerm, displayField, visibleCount),
+    () => filterSortedWords(sortedWords, searchTerm, displayField, visibleCount + 1),
     [sortedWords, searchTerm, displayField, visibleCount],
   );
 
@@ -67,20 +60,21 @@ export default function VocabularyOverview() {
     if (typeof itemId !== 'number' || !userId) return;
 
     await UserItem.resetItemById(userId, itemId);
-    setCurrentIndex(null);
+    setSelectedWord(null);
     void reload();
-  }, [selectedWord, userId, reload, setCurrentIndex]);
+  }, [selectedWord, userId, reload]);
 
   const handleSelectWord = useCallback(
     (index: number) => {
-      setCurrentIndex(index);
+      if (index < 0 || index >= filteredWords.length) return;
+      setSelectedWord(filteredWords[index]);
     },
-    [setCurrentIndex],
+    [filteredWords],
   );
 
   const handleCloseDetail = useCallback(() => {
-    setCurrentIndex(null);
-  }, [setCurrentIndex]);
+    setSelectedWord(null);
+  }, []);
 
   const handleCloseList = useCallback(() => {
     navigate('/profile');
@@ -96,7 +90,7 @@ export default function VocabularyOverview() {
 
   return (
     <>
-      {currentIndex === null || !selectedWord ? (
+      {selectedWord === null ? (
         <VocabularyList
           filteredWords={filteredWords}
           visibleCount={visibleCount}

@@ -6,7 +6,6 @@ export const TEXTS = {
   dataLoadingError: 'Chyba při načítání dat.',
   resetProgressSuccessToast: 'Pokrok byl úspěšně vymazán.',
   resetProgressErrorToast: 'Chyba při mazání pokroku.',
-  and: 'a',
   masteredSwitchHelp: 'přepnout naučeno / započato',
 
   // Header Tooltips
@@ -91,8 +90,7 @@ export const TEXTS = {
 
   // Vocabulary Page
   translationDirection: 'výchozí jazyk',
-  next: 'další',
-  nextFivePlus: 'dalších',
+  more: 'další',
   enterPrompt: 'Zadejte slovičko ...',
   noStartedVocabulary: 'Žádná započatá slovíčka',
   czech: 'česky',

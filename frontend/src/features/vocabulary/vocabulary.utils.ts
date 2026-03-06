@@ -1,7 +1,6 @@
 import config from '@/config/config';
-import { TEXTS } from '@/locales/cs';
 import type { UserItemLocal } from '@/types/local.types';
-import { assertNonNegativeInteger, assertPositiveInteger } from '@/utils/assertions.utils';
+import { assertPositiveInteger } from '@/utils/assertions.utils';
 
 /**
  * Returns a shortened date string (YYYY-MM-DD) from an ISO date string.
@@ -11,16 +10,6 @@ import { assertNonNegativeInteger, assertPositiveInteger } from '@/utils/asserti
 export function shortenDate(isoDate: string | null | undefined): string {
   if (!isoDate || isoDate === config.database.nullReplacementDate) return '';
   return isoDate.split('T')[0];
-}
-
-/**
- * Utility functions for text manipulation.
- * @param {number} count
- * @returns {string}
- */
-export function getMoreTextInCzech(count: number): string {
-  assertNonNegativeInteger(count, 'count');
-  return count <= 4 ? TEXTS.next : TEXTS.nextFivePlus;
 }
 
 export type DisplayField = 'czech' | 'english';

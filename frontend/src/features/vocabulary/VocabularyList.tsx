@@ -3,7 +3,7 @@ import CloseButton from '@/components/UI/buttons/CloseButton';
 import config from '@/config/config';
 import { TEXTS } from '@/locales/cs';
 import DirectionDropdown from '@/features/vocabulary/DirectionDropdown';
-import { getMoreTextInCzech, type DisplayField } from '@/features/vocabulary/vocabulary.utils';
+import { type DisplayField } from '@/features/vocabulary/vocabulary.utils';
 import { type UserItemLocal } from '@/types/local.types';
 
 const DIRECTION_OPTIONS: { value: DisplayField; label: string }[] = [
@@ -98,7 +98,7 @@ export default function VocabularyList({
                 onClick={() => setVisibleCount(visibleCount + config.vocabulary.itemsPerPage)}
                 className="mt-2 w-full text-center font-bold hover:underline"
               >
-                ... {TEXTS.and + ' ' + remainingCount + ' ' + getMoreTextInCzech(remainingCount)}
+                ... {TEXTS.more}
               </button>
             )}
           </>
