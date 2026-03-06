@@ -49,6 +49,7 @@ export default function LevelsOverview() {
               <BaseButton
                 className="h-input flex grow-0 justify-start p-4 text-left"
                 onClick={() => handleLevelClick(index)}
+                disabled={level.lessons.length === 0}
               >
                 <div className="flex w-full items-center justify-between">
                   <p>{level.name}</p>
@@ -56,18 +57,17 @@ export default function LevelsOverview() {
                 </div>
               </BaseButton>
               {unpackedIndex === index && (
-                <div className="flex flex-col gap-1 pl-8">
+                <div className="flex flex-col gap-1">
                   {level.lessons.map((lesson) => (
-                    <BaseButton
+                    <div
                       key={lesson.id}
-                      className="h-input flex grow-0 justify-start pr-4 text-left"
-                      disabled
+                      className="h-input flex w-full grow justify-start pr-4 pl-8 text-left"
                     >
                       <div className="flex w-full items-center justify-between">
                         <p>{lesson.name}</p>
                         <GoalMetView current={lesson[shownLevels]} goal={lesson['totalCount']} />
                       </div>
-                    </BaseButton>
+                    </div>
                   ))}
                 </div>
               )}
@@ -78,10 +78,13 @@ export default function LevelsOverview() {
           {showMastered ? TEXTS.levelsMasteredHelp : TEXTS.levelsStartedHelp}
         </HelpText>
         <HelpButton className="right-0 -bottom-14" />
-        <TextButton onClick={() => setShowMastered((current) => !current)}>
+        <TextButton
+          onClick={() => setShowMastered((current) => !current)}
+          title={TEXTS.masteredSwitchHelp}
+        >
           {showMastered ? TEXTS.masteredCount : TEXTS.startedCount}
         </TextButton>
-        <HelpText className="-bottom-15 left-2">{TEXTS.masteredSwitchHelp}</HelpText>
+        <HelpText className="-bottom-15 left-2">{TEXTS.masteredSwitchHelp} </HelpText>
       </div>
     </div>
   );

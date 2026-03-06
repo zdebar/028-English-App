@@ -1,6 +1,6 @@
 interface TextButtonProps {
   onClick: () => void;
-  title: string;
+  title?: string;
   children?: React.ReactNode;
   className?: string;
 }
