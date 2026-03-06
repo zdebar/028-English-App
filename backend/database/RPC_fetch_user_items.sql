@@ -17,7 +17,7 @@ RETURNS TABLE (
   deleted_at TIMESTAMPTZ,
   next_at TIMESTAMPTZ,
   mastered_at TIMESTAMPTZ,
-  lesson_id INTEGER,
+  lesson_id INTEGER
 )
 LANGUAGE sql
 SET search_path TO public
