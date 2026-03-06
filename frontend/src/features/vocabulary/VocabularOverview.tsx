@@ -3,15 +3,15 @@ import config from '@/config/config';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import type { UserItemLocal } from '@/types/local.types';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import VocabularyDetailCard from './VocabularyDetailCard';
 import VocabularyList from './VocabularyList';
 import { useNavigate } from 'react-router-dom';
 import { useArray } from '@/hooks/use-array';
 import type { DisplayField } from './vocabulary.utils';
-import { filterAndSortWords } from './vocabulary.utils';
 import NotificationText from '@/components/UI/NotificationText';
 import { TEXTS } from '@/locales/cs';
+import { filterSortedWords } from './vocabulary.utils';
 
 const INITIAL_VISIBLE_COUNT = config.vocabulary.itemsPerPage;
 
@@ -33,6 +33,7 @@ export default function VocabularyOverview() {
   const {
     data: words,
     currentIndex,
+    currentItem: selectedWord,
     setCurrentIndex,
     error,
     loading,
@@ -44,19 +45,21 @@ export default function VocabularyOverview() {
   const [searchTerm, setSearchTerm] = useState('');
   const [displayField, setDisplayField] = useState<DisplayField>('czech');
 
+  const sortedByCzech = useMemo(() => words, [words]);
+  const sortedByEnglish = useMemo(
+    () =>
+      [...words].sort((a, b) => {
+        const valA = a.english?.toLowerCase() || '';
+        const valB = b.english?.toLowerCase() || '';
+        return valA.localeCompare(valB);
+      }),
+    [words],
+  );
+  const sortedWords = displayField === 'czech' ? sortedByCzech : sortedByEnglish;
   const filteredWords = useMemo(
-    () => filterAndSortWords(words, searchTerm, displayField),
-    [words, searchTerm, displayField],
+    () => filterSortedWords(sortedWords, searchTerm, displayField, visibleCount),
+    [sortedWords, searchTerm, displayField, visibleCount],
   );
-
-  const selectedWord = useMemo(
-    () => (currentIndex == null ? null : (filteredWords[currentIndex] ?? null)),
-    [currentIndex, filteredWords],
-  );
-
-  useEffect(() => {
-    setVisibleCount(INITIAL_VISIBLE_COUNT);
-  }, [searchTerm, displayField]);
 
   // -- HANDLERS  --
   const handleClearUserItem = useCallback(async () => {
@@ -64,7 +67,7 @@ export default function VocabularyOverview() {
     if (typeof itemId !== 'number' || !userId) return;
 
     await UserItem.resetItemById(userId, itemId);
-    void reload();
+    void reload(); // Maybe just set to empty
     setCurrentIndex(null);
   }, [selectedWord, userId, reload, setCurrentIndex]);
 

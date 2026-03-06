@@ -2,12 +2,6 @@ import config from '@/config/config';
 import { TEXTS } from '@/locales/cs';
 import type { UserItemLocal } from '@/types/local.types';
 
-const WORDS_COLLATOR = new Intl.Collator(undefined, { sensitivity: 'base' });
-
-function normalizeText(value: string | null | undefined): string {
-  return (value ?? '').trim().toLowerCase();
-}
-
 /**
  * Returns a shortened date string (YYYY-MM-DD) from an ISO date string.
  * @param isoDate ISO date string
@@ -30,30 +24,49 @@ export function getMoreTextInCzech(count: number): string {
 export type DisplayField = 'czech' | 'english';
 
 /**
- * Filters and sorts an array of words based on a search term and display field.
- *
- * @param words - The array of user items to filter and sort
- * @param searchTerm - The search term to filter words by (case-insensitive, prefix matching)
- * @param displayField - The field name to use for filtering and sorting
- * @returns A filtered and sorted array of user items that match the search term
- *
- * @remarks
- * - Search is case-insensitive and matches items that start with the search term
- * - If the search term is empty, all items are included
- * - Results are sorted alphabetically by the display field (case-insensitive)
- * - Null or undefined field values are treated as empty strings
+ * Filters the sorted words based on the search term and display field, returning only the visible count.
+ * @param sortedWords - The array of words sorted by the display field.
+ * @param searchTerm - The search term to filter the words.
+ * @param displayField - The field to display (czech or english).
+ * @param visibleCount - The maximum number of items to return.
+ * @returns An array of filtered words based on the search term and display field.
  */
-export function filterAndSortWords(
-  words: UserItemLocal[],
+export function filterSortedWords(
+  sortedWords: UserItemLocal[],
   searchTerm: string,
   displayField: DisplayField,
+  visibleCount: number,
 ): UserItemLocal[] {
-  const normalizedSearch = normalizeText(searchTerm);
-
-  return words
-    .filter((item) => {
-      const value = normalizeText(item[displayField]);
-      return normalizedSearch === '' || value.startsWith(normalizedSearch);
-    })
-    .sort((a, b) => WORDS_COLLATOR.compare(a[displayField] ?? '', b[displayField] ?? ''));
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  if (!normalizedSearch) {
+    return sortedWords.slice(0, visibleCount);
+  }
+  // Binary search to find the first match
+  let left = 0;
+  let right = sortedWords.length - 1;
+  let firstMatch = -1;
+  while (left <= right) {
+    const mid = Math.floor((left + right) / 2);
+    const value = (sortedWords[mid][displayField] || '').toLowerCase();
+    if (value.startsWith(normalizedSearch)) {
+      firstMatch = mid;
+      right = mid - 1;
+    } else if (value < normalizedSearch) {
+      left = mid + 1;
+    } else {
+      right = mid - 1;
+    }
+  }
+  if (firstMatch === -1) return [];
+  // Collect matches starting from the first match
+  const result = [];
+  for (let i = firstMatch; i < sortedWords.length && result.length < visibleCount; i++) {
+    const value = (sortedWords[i][displayField] || '').toLowerCase();
+    if (value.startsWith(normalizedSearch)) {
+      result.push(sortedWords[i]);
+    } else {
+      break;
+    }
+  }
+  return result;
 }
