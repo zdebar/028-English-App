@@ -20,10 +20,12 @@ export function isUserSpecificTable(tableName: string): boolean {
 export function validateUserIdUsage(tableName: TableName, userId?: string) {
   const isUserSpecific = isUserSpecificTable(tableName);
   if (isUserSpecific && !userId) {
-    throw new Error('userId is required for user-specific tables');
+    throw new Error(`userId is required for user-specific tables: ${tableName} userId: ${userId}`);
   }
   if (!isUserSpecific && userId) {
-    throw new Error('userId should not be provided for non-user-specific tables');
+    throw new Error(
+      `userId should not be provided for non-user-specific tables: ${tableName} userId: ${userId}`,
+    );
   }
   return isUserSpecific;
 }

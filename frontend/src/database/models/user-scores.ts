@@ -76,7 +76,11 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     assertNonEmptyString(userId, 'userId');
 
     // Step 1: Get the last synced timestamp for user scores
-    const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(doFullSync, userId);
+    const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(
+      doFullSync,
+      TableName.UserScores,
+      userId,
+    );
 
     // Step 2: Push local changes to Supabase
     const localScores = await this.getUserScoresForSync(userId, lastSyncedAt, newSyncedAt);
@@ -97,8 +101,11 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
         await db.user_scores.bulkPut(toUpsert);
       }
       await Metadata.markAsSynced(TableName.UserScores, newSyncedAt, userId);
-      triggerDailyCountUpdatedEvent(userId);
     });
+
+    infoHandler(
+      `Completed ${updatedScores.length} user scores pull from remote for userId: ${userId}`,
+    );
   }
 
   /**

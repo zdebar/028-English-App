@@ -15,6 +15,10 @@ import Dexie from 'dexie';
 import Metadata from '../models/metadata';
 import { infoHandler } from '@/features/logging/info-handler';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
+import {
+  triggerDailyCountUpdatedEvent,
+  triggerLevelsUpdatedEvent,
+} from '@/features/user-stats/dashboard.utils';
 
 /**
  * Synchronizes data for a specific user with the database.
@@ -61,6 +65,8 @@ export async function dataSync(userId: string): Promise<void> {
   const userResults = await Promise.allSettled(userPromises);
   const isError = logRejectedResults(userResults, 'Data synchronization error:');
 
+  triggerDailyCountUpdatedEvent(userId);
+  triggerLevelsUpdatedEvent(userId);
   if (isError) throw new Error('Data synchronization error');
   if (doFullSync) {
     setFullSyncTime(userId, now);
@@ -98,7 +104,7 @@ export function splitDeleted<T extends { deleted_at: string | null }>(
   const toUpsert: T[] = [];
   const toDelete: T[] = [];
   items.forEach((item) => {
-    if (item.deleted_at === null) {
+    if (item.deleted_at == null || item.deleted_at === config.database.nullReplacementDate) {
       toUpsert.push(item);
     } else {
       toDelete.push(item);
@@ -127,7 +133,7 @@ export async function syncFromRemoteGeneric<T extends { deleted_at: string | nul
   if (typeof fetchRemoteFn !== 'function') throw new Error('fetchRemoteFn must be a function.');
 
   // Step 1: Determine last synced timestamp and new sync timestamp
-  const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(doFullSync);
+  const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(doFullSync, tableName);
 
   // Step 2: Fetch remote data
   const remoteItems = await fetchRemoteFn(lastSyncedAt);
@@ -154,10 +160,12 @@ export async function syncFromRemoteGeneric<T extends { deleted_at: string | nul
 /**
  * Returns the last synced timestamp and the new sync timestamp for a user.
  * @param doFullSync - Whether to perform a full sync.
+ * @param tableName - The name of the table.
  * @param userId - The user ID.
  */
 export async function getSyncTimestamps(
   doFullSync: boolean,
+  tableName: TableName,
   userId?: string,
 ): Promise<{ lastSyncedAt: string; newSyncedAt: string }> {
   if (!doFullSync && userId != null) {
@@ -165,7 +173,7 @@ export async function getSyncTimestamps(
   }
   const lastSyncedAt = doFullSync
     ? config.database.epochStartDate
-    : await Metadata.getSyncedAt(TableName.UserScores, userId);
+    : await Metadata.getSyncedAt(tableName, userId);
   const newSyncedAt = new Date().toISOString();
   return { lastSyncedAt, newSyncedAt };
 }

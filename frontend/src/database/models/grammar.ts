@@ -68,7 +68,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
 
     const grammarIds = await this.getStartedIds(userId);
     if (grammarIds.length === 0) return [];
-    return await db.grammar.where('id').anyOf(grammarIds).toArray();
+    return await db.grammar.where('id').anyOf(grammarIds).sortBy('sort_order');
   }
 
   /**

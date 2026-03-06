@@ -198,7 +198,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     assertNonEmptyString(userId, 'userId');
 
     // Step 1: Get the last synced timestamp for user scores
-    const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(doFullSync, userId);
+    const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(
+      doFullSync,
+      TableName.UserItems,
+      userId,
+    );
 
     // Step 2: Push local changes to Supabase
     const localItems = await this.getUserItemsForSync(userId, lastSyncedAt, newSyncedAt);
@@ -219,8 +223,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         await db.user_items.bulkPut(toUpsert);
       }
       await Metadata.markAsSynced(TableName.UserItems, newSyncedAt, userId);
-      triggerLevelsUpdatedEvent(userId);
     });
+
+    infoHandler(
+      `Completed ${updatedItems.length} user items pull from remote for userId: ${userId}`,
+    );
   }
 
   /**
