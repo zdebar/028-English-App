@@ -53,7 +53,10 @@ export default function Dashboard({ className = '' }: DashboardProps) {
       <HelpText className="right-2 -bottom-6">
         {showMastered ? TEXTS.masteredTodayHint : TEXTS.startedTodayHint}
       </HelpText>
-      <TextButton onClick={() => setShowMastered((current) => !current)}>
+      <TextButton
+        onClick={() => setShowMastered((current) => !current)}
+        title={TEXTS.masteredSwitchHelp}
+      >
         {showMastered ? TEXTS.masteredCount : TEXTS.startedCount}
       </TextButton>
       <HelpText className="-bottom-15 left-2">{TEXTS.masteredSwitchHelp}</HelpText>
