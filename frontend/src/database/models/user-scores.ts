@@ -8,6 +8,7 @@ import { infoHandler } from '@/features/logging/info-handler';
 import { SupabaseError } from '@/types/error.types';
 import { TableName, type UserScoreLocal } from '@/types/local.types';
 import {
+  assertNonEmptyString,
   assertNonNegativeInteger,
   assertPositiveInteger,
   assertShortDateString,
@@ -38,6 +39,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @param count - The number to add to today's item count. Must be a non-negative integer.
    */
   static async addItemCount(userId: string, count: number): Promise<void> {
+    assertNonEmptyString(userId, 'userId');
     assertPositiveInteger(count, 'addItemCount');
 
     const today = getTodayShortDate();
@@ -52,6 +54,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @param userId The user ID.
    */
   static async getOrCreateTodayScore(userId: string): Promise<number> {
+    assertNonEmptyString(userId, 'userId');
     const today = getTodayShortDate();
     return (await db.user_scores.get([userId, today]))?.item_count ?? 0;
   }
@@ -70,6 +73,8 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    *                     and pulling from the epoch start date. Defaults to false.
    */
   static async syncFromRemote(userId: string, doFullSync: boolean = false): Promise<void> {
+    assertNonEmptyString(userId, 'userId');
+
     // Step 1: Get the last synced timestamp for user scores
     const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(doFullSync, userId);
 
@@ -102,6 +107,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @param userId - The ID of the user whose scores should be cleared
    */
   static async deleteAllScores(userId: string): Promise<void> {
+    assertNonEmptyString(userId, 'userId');
     await db.user_scores.where('user_id').equals(userId).delete();
   }
 

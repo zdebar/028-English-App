@@ -9,6 +9,13 @@ import { SupabaseError } from '@/types/error.types';
  * @returns Blob data or null on missing/error
  */
 export async function fetchStorage(bucketName: string, dataFile: string): Promise<Blob> {
+  if (!bucketName || bucketName.trim() === '') {
+    throw new Error('bucketName is required.');
+  }
+  if (!dataFile || dataFile.trim() === '') {
+    throw new Error('dataFile is required.');
+  }
+
   const cacheBuster = `?t=${Date.now()}`;
   const filePath = dataFile.replace(/^\//, '') + cacheBuster;
 

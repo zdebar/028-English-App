@@ -16,6 +16,13 @@ interface UseKeyState {
  * @param disabledOnOverlayOpen - If true, disables the key listener when an overlay is open. Defaults to false.
  */
 export function useKey({ onKeyPress, keys, disabledOnOverlayOpen = false }: UseKeyState) {
+  if (typeof onKeyPress !== 'function') {
+    throw new Error('onKeyPress must be a function.');
+  }
+  if (!Array.isArray(keys) || keys.length === 0) {
+    throw new Error('keys must be a non-empty array.');
+  }
+
   const isOverlayOpen = useOverlayStore((state) => state.isOverlayOpen);
   const isDisabled = disabledOnOverlayOpen && isOverlayOpen;
 

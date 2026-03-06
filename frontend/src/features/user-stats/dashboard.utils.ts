@@ -112,6 +112,13 @@ export function getInProgressLessons(
  * @throws Error if userId is not provided.
  */
 export function triggerNamedEvent(eventName: string, userId: string) {
+  if (!eventName || eventName.trim() === '') {
+    throw new Error('eventName is required.');
+  }
+  if (!userId || userId.trim() === '') {
+    throw new Error('userId is required.');
+  }
+
   const event = new CustomEvent(eventName, { detail: { userId } });
   window.dispatchEvent(event);
 }

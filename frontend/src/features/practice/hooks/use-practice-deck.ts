@@ -8,6 +8,7 @@ import { infoHandler } from '@/features/logging/info-handler';
 import { useHint } from './use-hint';
 import { useAudioManager } from './use-audio-manager';
 import { triggerLevelsUpdatedEvent } from '@/features/user-stats/dashboard.utils';
+import { assertNonEmptyString } from '@/utils/assertions.utils';
 
 const NBSP = '\u00A0';
 
@@ -17,6 +18,8 @@ const NBSP = '\u00A0';
  * @param userId The unique identifier of the user.
  */
 export function usePracticeDeck(userId: string) {
+  assertNonEmptyString(userId, 'userId');
+
   // Array fetching logic
   const [array, setArray] = useState<UserItemPractice[]>([]);
   const [index, setIndex] = useState(0);

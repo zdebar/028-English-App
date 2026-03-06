@@ -26,6 +26,10 @@ interface UseArrayResult<T> {
  *   - reload: Function to trigger a reload of the data.
  */
 export function useArray<T>(fetchFunction: () => Promise<T[]>): UseArrayResult<T> {
+  if (typeof fetchFunction !== 'function') {
+    throw new Error('fetchFunction must be a function.');
+  }
+
   const showToast = useToastStore((state) => state.showToast);
 
   const [data, setData] = useState<T[]>([]);

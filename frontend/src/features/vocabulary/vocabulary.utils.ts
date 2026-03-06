@@ -1,6 +1,7 @@
 import config from '@/config/config';
 import { TEXTS } from '@/locales/cs';
 import type { UserItemLocal } from '@/types/local.types';
+import { assertNonNegativeInteger, assertPositiveInteger } from '@/utils/assertions.utils';
 
 /**
  * Returns a shortened date string (YYYY-MM-DD) from an ISO date string.
@@ -18,6 +19,7 @@ export function shortenDate(isoDate: string | null | undefined): string {
  * @returns {string}
  */
 export function getMoreTextInCzech(count: number): string {
+  assertNonNegativeInteger(count, 'count');
   return count <= 4 ? TEXTS.next : TEXTS.nextFivePlus;
 }
 
@@ -37,6 +39,11 @@ export function filterSortedWords(
   displayField: DisplayField,
   visibleCount: number,
 ): UserItemLocal[] {
+  if (!Array.isArray(sortedWords)) {
+    throw new Error('sortedWords must be an array.');
+  }
+  assertPositiveInteger(visibleCount, 'visibleCount');
+
   const normalizedSearch = searchTerm.trim().toLowerCase();
   if (!normalizedSearch) {
     return sortedWords.slice(0, visibleCount);

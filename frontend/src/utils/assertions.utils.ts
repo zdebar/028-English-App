@@ -60,3 +60,15 @@ export function assertShortDateString(value: string): void {
     throw new Error(`Value: ${value} is not a valid short date string (YYYY-MM-DD).`);
   }
 }
+
+/**
+ * Asserts that the provided value is a non-empty string.
+ *
+ * @param value - The value to validate
+ * @param name - Parameter name used in the error message
+ */
+export function assertNonEmptyString(value: string, name: string): void {
+  if (typeof value !== 'string' || value.trim() === '') {
+    throw new Error(`${name} must be a non-empty string.`);
+  }
+}

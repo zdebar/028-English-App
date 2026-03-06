@@ -17,6 +17,13 @@ export function addGrammarIndicatorFlag(
   practiceItems: UserItemLocal[],
   startedGrammarIdSet: Set<number>,
 ): UserItemPractice[] {
+  if (!Array.isArray(practiceItems)) {
+    throw new Error('practiceItems must be an array.');
+  }
+  if (!(startedGrammarIdSet instanceof Set)) {
+    throw new Error('startedGrammarIdSet must be a Set.');
+  }
+
   const shownGrammarIds = new Set<number>();
   return practiceItems.map((item) => {
     let show = false;
@@ -61,6 +68,10 @@ export function getNextAt(progress: number): string {
  * @param item - The user item object to reset.
  */
 export function resetUserItem(item: UserItemLocal): void {
+  if (!item || typeof item !== 'object') {
+    throw new Error('item must be an object.');
+  }
+
   item.started_at = NULL_DATE;
   item.next_at = NULL_DATE;
   item.mastered_at = NULL_DATE;
@@ -76,6 +87,10 @@ export function resetUserItem(item: UserItemLocal): void {
  * @returns The converted user item suitable for SQL storage.
  */
 export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
+  if (!localItem || typeof localItem !== 'object') {
+    throw new Error('localItem must be an object.');
+  }
+
   return {
     ...localItem,
     started_at: localItem.started_at === NULL_DATE ? null : localItem.started_at,
@@ -94,6 +109,10 @@ export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
  * @returns Normalized local user item.
  */
 export function convertSQLToLocal(sqlItem: UserItemSQL): UserItemLocal {
+  if (!sqlItem || typeof sqlItem !== 'object') {
+    throw new Error('sqlItem must be an object.');
+  }
+
   return {
     ...sqlItem,
     started_at: sqlItem.started_at ?? NULL_DATE,

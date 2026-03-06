@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { LevelOverview } from '@/types/local.types';
 import UserScore from '@/database/models/user-scores';
 import Levels from '@/database/models/levels';
+import { assertNonEmptyString } from '@/utils/assertions.utils';
 
 interface UserState {
   levels: LevelOverview[];
@@ -55,6 +56,7 @@ export const useUserStore = create<UserState>((set, get) => {
     dailyCount: initialDailyStats,
     reloadLevels: async (userId: string) => {
       try {
+        assertNonEmptyString(userId, 'userId');
         const updatedLevels = (await Levels.getOverview(userId)) ?? [];
         set({ levels: updatedLevels });
       } catch (error) {
@@ -63,6 +65,7 @@ export const useUserStore = create<UserState>((set, get) => {
     },
     reloadDailyCount: async (userId: string) => {
       try {
+        assertNonEmptyString(userId, 'userId');
         const updatedCount = (await UserScore.getOrCreateTodayScore(userId)) ?? 0;
         set({ dailyCount: updatedCount });
       } catch (error) {

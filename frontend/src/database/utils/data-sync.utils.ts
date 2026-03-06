@@ -14,6 +14,7 @@ import { TableName } from '@/types/local.types';
 import Dexie from 'dexie';
 import Metadata from '../models/metadata';
 import { infoHandler } from '@/features/logging/info-handler';
+import { assertNonEmptyString } from '@/utils/assertions.utils';
 
 /**
  * Synchronizes data for a specific user with the database.
@@ -22,6 +23,8 @@ import { infoHandler } from '@/features/logging/info-handler';
  * @returns A promise that resolves when the data synchronization is complete
  */
 export async function dataSync(userId: string): Promise<void> {
+  assertNonEmptyString(userId, 'userId');
+
   const now = Date.now();
   const lastFullSync = getFullSyncTime(userId);
 
@@ -71,7 +74,7 @@ export async function dataSync(userId: string): Promise<void> {
  * @returns A promise that resolves when the synchronization is complete
  */
 export async function dataSyncOnUnmount(userId: string): Promise<void> {
-  if (!userId) return;
+  assertNonEmptyString(userId, 'userId');
 
   const results = await Promise.allSettled([
     UserScore.syncFromRemote(userId, false),
@@ -89,6 +92,9 @@ export async function dataSyncOnUnmount(userId: string): Promise<void> {
 export function splitDeleted<T extends { deleted_at: string | null }>(
   items: T[],
 ): { toUpsert: T[]; toDelete: T[] } {
+  if (!Array.isArray(items)) {
+    throw new Error('items must be an array.');
+  }
   const toUpsert: T[] = [];
   const toDelete: T[] = [];
   items.forEach((item) => {
@@ -117,6 +123,9 @@ export async function syncFromRemoteGeneric<T extends { deleted_at: string | nul
   fetchRemoteFn: (lastSyncedAt: string) => Promise<T[]>,
   doFullSync: boolean = false,
 ): Promise<void> {
+  if (!dbTable) throw new Error('dbTable is required.');
+  if (typeof fetchRemoteFn !== 'function') throw new Error('fetchRemoteFn must be a function.');
+
   // Step 1: Determine last synced timestamp and new sync timestamp
   const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(doFullSync);
 
@@ -151,6 +160,9 @@ export async function getSyncTimestamps(
   doFullSync: boolean,
   userId?: string,
 ): Promise<{ lastSyncedAt: string; newSyncedAt: string }> {
+  if (!doFullSync && userId != null) {
+    assertNonEmptyString(userId, 'userId');
+  }
   const lastSyncedAt = doFullSync
     ? config.database.epochStartDate
     : await Metadata.getSyncedAt(TableName.UserScores, userId);

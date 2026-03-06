@@ -5,7 +5,7 @@ import { db } from '@/database/models/db';
 import { DatabaseError, SupabaseError } from '@/types/error.types';
 import type { GrammarLocal } from '@/types/local.types';
 import { TableName } from '@/types/local.types';
-import { assertPositiveInteger } from '@/utils/assertions.utils';
+import { assertNonEmptyString, assertPositiveInteger } from '@/utils/assertions.utils';
 import Dexie, { Entity } from 'dexie';
 import { syncFromRemoteGeneric } from '../utils/data-sync.utils';
 
@@ -49,6 +49,8 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * @param userId - The ID of the user
    */
   static async getStartedIds(userId: string): Promise<number[]> {
+    assertNonEmptyString(userId, 'userId');
+
     const startedGrammarIds = await db.user_items
       .where('[user_id+grammar_id+started_at]')
       .between([userId, Dexie.minKey, Dexie.minKey], [userId, Dexie.maxKey, NULL_DATE], true, false)
@@ -62,6 +64,8 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * @param userId - The unique identifier of the user
    */
   static async getStartedList(userId: string): Promise<GrammarLocal[]> {
+    assertNonEmptyString(userId, 'userId');
+
     const grammarIds = await this.getStartedIds(userId);
     if (grammarIds.length === 0) return [];
     return await db.grammar.where('id').anyOf(grammarIds).toArray();

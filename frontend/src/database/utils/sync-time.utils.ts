@@ -1,11 +1,18 @@
 const FULL_SYNC_KEY_PREFIX = 'last-full-sync-at_';
 
+function assertUserId(userId: string): void {
+  if (typeof userId !== 'string' || userId.trim() === '') {
+    throw new Error('userId must be a non-empty string.');
+  }
+}
+
 /**
  * Generates a full synchronization key for a given user.
  * @param userId - The unique identifier of the user.
  * @returns A concatenated string combining the full sync key prefix with the user ID.
  */
 export function getFullSyncKey(userId: string): string {
+  assertUserId(userId);
   return `${FULL_SYNC_KEY_PREFIX}${userId}`;
 }
 
@@ -15,6 +22,10 @@ export function getFullSyncKey(userId: string): string {
  * @param time - The synchronization timestamp (in milliseconds) to be saved
  */
 export function setFullSyncTime(userId: string, time: number): void {
+  assertUserId(userId);
+  if (!Number.isFinite(time) || time < 0) {
+    throw new Error('time must be a non-negative finite number.');
+  }
   localStorage.setItem(getFullSyncKey(userId), String(time));
 }
 
@@ -24,6 +35,7 @@ export function setFullSyncTime(userId: string, time: number): void {
  * @returns The full sync time as a number (in milliseconds). Returns 0 if no sync time is stored.
  */
 export function getFullSyncTime(userId: string): number {
+  assertUserId(userId);
   return Number(localStorage.getItem(getFullSyncKey(userId)) || 0);
 }
 
@@ -33,5 +45,6 @@ export function getFullSyncTime(userId: string): number {
  * @returns void
  */
 export function clearSyncTimes(userId: string): void {
+  assertUserId(userId);
   localStorage.removeItem(getFullSyncKey(userId));
 }

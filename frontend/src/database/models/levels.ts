@@ -5,6 +5,7 @@ import { db } from '@/database/models/db';
 import { SupabaseError } from '@/types/error.types';
 import type { LevelLocal, LevelOverview } from '@/types/local.types';
 import { TableName } from '@/types/local.types';
+import { assertNonEmptyString } from '@/utils/assertions.utils';
 import { Entity } from 'dexie';
 import { syncFromRemoteGeneric } from '../utils/data-sync.utils';
 import { aggregateLevels } from '../utils/levels.utils';
@@ -38,6 +39,7 @@ export default class Levels extends Entity<AppDB> implements LevelLocal {
    * @param userId - The unique identifier of the user
    */
   static async getOverview(userId: string): Promise<LevelOverview[]> {
+    assertNonEmptyString(userId, 'userId');
     const items = await db.user_items.where('user_id').equals(userId).toArray();
     const lessons = await db.lessons.orderBy('sort_order').toArray();
     const levels = await db.levels.orderBy('sort_order').toArray();

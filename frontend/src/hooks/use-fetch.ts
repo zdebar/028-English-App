@@ -22,6 +22,10 @@ interface UseFetchResult<T> {
  *   - reload: Function to trigger a reload of the data.
  */
 export function useFetch<T>(fetchFunction: () => Promise<T>): UseFetchResult<T> {
+  if (typeof fetchFunction !== 'function') {
+    throw new Error('fetchFunction must be a function.');
+  }
+
   const [data, setData] = useState<T | null>(null);
   const [reloading, setReloading] = useState(true);
   const [error, setError] = useState<string | null>(null);
