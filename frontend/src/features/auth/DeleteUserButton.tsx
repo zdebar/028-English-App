@@ -31,14 +31,6 @@ export default function DeleteUserButton({ className }: { className?: string }):
     try {
       saveCurrentThemeAsGuest();
 
-      const { error: deleteError } = await supabaseInstance.functions.invoke('delete-user', {
-        body: { userId },
-      });
-
-      if (deleteError) {
-        throw new Error(deleteError.message);
-      }
-
       const resultsDelete = await Promise.allSettled([
         UserItem.deleteAllItems(userId),
         Metadata.deleteSyncRow(TableName.UserItems, userId),
@@ -48,6 +40,14 @@ export default function DeleteUserButton({ className }: { className?: string }):
         clearSyncTimes(userId),
       ]);
       logRejectedResults(resultsDelete, 'Operation failed during local cleanup');
+
+      const { error: deleteError } = await supabaseInstance.functions.invoke('delete-user', {
+        body: { userId },
+      });
+
+      if (deleteError) {
+        throw new Error(deleteError.message);
+      }
 
       showToast(TEXTS.deleteUserSuccessToast, 'success');
       await supabaseInstance.auth.signOut();
