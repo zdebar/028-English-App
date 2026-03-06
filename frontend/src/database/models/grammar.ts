@@ -10,6 +10,7 @@ import Dexie, { Entity } from 'dexie';
 import { syncFromRemoteGeneric } from '../utils/data-sync.utils';
 
 const NULL_DATE = config.database.nullReplacementDate;
+const NULL_NUMBER = config.database.nullReplacementNumber;
 
 /**
  * Represents a grammar entity in the application database.
@@ -51,12 +52,13 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   static async getStartedIds(userId: string): Promise<number[]> {
     assertNonEmptyString(userId, 'userId');
 
-    const startedGrammarIds = await db.user_items
+    const startedItems = await db.user_items
       .where('[user_id+grammar_id+started_at]')
       .between([userId, Dexie.minKey, Dexie.minKey], [userId, Dexie.maxKey, NULL_DATE], true, false)
-      .primaryKeys();
+      .filter((item) => item.grammar_id !== NULL_NUMBER)
+      .toArray();
 
-    return [...new Set(startedGrammarIds.map((key) => key[1]))];
+    return [...new Set(startedItems.map((item) => item.grammar_id))];
   }
 
   /**
