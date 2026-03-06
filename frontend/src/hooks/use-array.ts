@@ -73,7 +73,7 @@ export function useArray<T>(fetchFunction: () => Promise<T[]>): UseArrayResult<T
   }, []);
 
   return {
-    data,
+    data: data ?? [],
     currentIndex,
     currentItem: currentIndex !== null ? data[currentIndex] : null,
     error,

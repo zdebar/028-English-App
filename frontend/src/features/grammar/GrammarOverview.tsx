@@ -23,26 +23,27 @@ export default function GrammarOverview(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const navigate = useNavigate();
 
-  // -- Data Fetching and Effects --
+  // -- Data Fetching --
   const fetchGrammarList = useCallback(async () => {
     if (!userId) return [];
     return Grammar.getStartedList(userId);
   }, [userId]);
 
   const {
-    data: grammarArray,
+    data: grammarList,
     currentIndex,
     currentItem: currentGrammar,
     setCurrentIndex,
   } = useArray<GrammarLocal>(fetchGrammarList);
 
-  const grammarList = grammarArray ?? [];
   const hasGrammar = grammarList.length > 0;
+
   const sanitizedNote = useMemo(() => {
     if (!currentGrammar?.note) return null;
     return DOMPurify.sanitize(currentGrammar.note);
   }, [currentGrammar?.note]);
 
+  // -- Event Handlers --
   const handleOpenGrammar = useCallback(
     (index: number) => {
       setCurrentIndex(index);
@@ -50,7 +51,7 @@ export default function GrammarOverview(): JSX.Element {
     [setCurrentIndex],
   );
 
-  // List view
+  // -- List view --
   if (currentIndex === null) {
     return (
       <div className={`card-width flex flex-col justify-start gap-1`}>
@@ -77,7 +78,7 @@ export default function GrammarOverview(): JSX.Element {
     );
   }
 
-  // GrammarCard view
+  // -- GrammarCard view --
   return (
     <OverviewCard
       buttonTitle={currentGrammar?.name ?? TEXTS.grammarOverview}
