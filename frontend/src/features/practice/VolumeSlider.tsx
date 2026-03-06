@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import VolumeIcon from '@/components/UI/icons/VolumeIcon';
 import MuteIcon from '@/components/UI/icons/MuteIcon';
+import { TEXTS } from '@/locales/cs';
 
 type VolumeSliderProps = {
   setVolume: (volume: number) => void;
@@ -49,6 +50,7 @@ export default function VolumeSlider({ setVolume, className = '' }: VolumeSlider
         aria-label="Nastavit hlasitost"
         className="cursor-pointer"
         disabled={false}
+        title={TEXTS.volume}
       >
         {volume === 0 ? <MuteIcon /> : <VolumeIcon />}
       </button>

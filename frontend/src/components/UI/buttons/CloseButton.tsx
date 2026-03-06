@@ -3,6 +3,7 @@ import CloseIcon from '@/components/UI/icons/CloseIcon';
 import { KEYBOARD_LISTENERS } from '@/config/keyboard-listeners.config';
 import type { ButtonHTMLAttributes, JSX } from 'react';
 import BaseButton from './BaseButton';
+import { TEXTS } from '@/locales/cs';
 
 interface CloseButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   onClick: () => void;
@@ -27,6 +28,7 @@ export default function CloseButton({
       type="button"
       className={`w-button h-button grow-0 ${className}`}
       onClick={onClick}
+      title={`${TEXTS.close} ${KEYBOARD_LISTENERS.Exit.map((key) => `(${key})`).join(' ')}`}
       {...rest}
     >
       <CloseIcon />

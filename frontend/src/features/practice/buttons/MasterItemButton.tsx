@@ -87,6 +87,7 @@ export default function MasterItemButton({ onConfirm, disabled, children }: Skip
       onClick={handleClick}
       disabled={disabled}
       className="h-button relative"
+      title={TEXTS.complete}
     >
       <ForwardIcon />
       <HelpText className="-top-4.5 left-4">{TEXTS.complete}</HelpText>

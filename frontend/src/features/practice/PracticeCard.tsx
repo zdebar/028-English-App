@@ -128,6 +128,7 @@ export default function PracticeCard() {
               } `}
               onClick={handleReveal}
               role="button"
+              title={revealed ? '' : TEXTS.reveal}
               tabIndex={0}
               aria-disabled={revealed}
               onKeyDown={(e) => {
@@ -178,9 +179,11 @@ export default function PracticeCard() {
                     className="relative flex h-8 w-full items-center justify-between"
                     id="bottom-bar"
                   >
-                    <p className="px-2 font-light">{progress}</p>
+                    <p className="px-2 font-light" title={TEXTS.progress}>
+                      {progress}
+                    </p>
                     <HelpText className="bottom-7.5">{TEXTS.progress}</HelpText>
-                    <p className="px-2 font-light">
+                    <p className="px-2 font-light" title={`${TEXTS.today} / ${TEXTS.dailyGoal}`}>
                       {practiceCountToday} / {config.practice.dailyGoal}
                     </p>
                     <HelpText className="right-0 bottom-7.5 flex flex-col items-end">

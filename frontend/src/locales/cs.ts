@@ -25,6 +25,7 @@ export const TEXTS = {
   loadingText: 'Probíhá ...',
   modalTitle: 'Potvrzení akce',
   modalText: 'Opravdu chcete pokračovat?',
+  close: 'Zavřít',
 
   // Errors
   genericError: 'Nastala neznámá chyba.',
@@ -72,6 +73,7 @@ export const TEXTS = {
   skipHoldInfoToast: 'Pro dokončení položky podržte tlačítko.',
   skipSuccessToast: 'Položka byla dokončena.',
   skipErrorToast: 'Dokončení položky se nezdařilo.',
+  volume: 'nastavit hlasitost',
 
   // Levels Overview Page
   lessons: 'Lekce',
