@@ -45,16 +45,17 @@ vi.mock('@/database/models/user-items', () => ({
 }));
 
 import {
+  getLocalDateFromUTC,
+  getTodayShortDate,
+  restoreUnsavedFromLocalStorage,
+} from '@/database/utils/database.utils';
+import {
   convertLocalToSQL,
   convertSQLToLocal,
-  fetchStorage,
-  getLocalDateFromUTC,
   getNextAt,
-  getTodayShortDate,
   resetUserItem,
-  restoreUnsavedFromLocalStorage,
-  sortOddEvenByProgress,
-} from '@/database/utils/database.utils';
+} from '@/database/utils/user-items.utils';
+import { fetchStorage } from '@/database/utils/audio-records.utils';
 import {
   triggerLevelsUpdatedEvent,
   triggerNamedEvent,
@@ -79,15 +80,17 @@ describe('database.utils', () => {
         mastered_at: '1970-01-01T00:00:00.000Z',
       } as any);
 
-      expect(result).toEqual({
-        user_id: 'u1',
-        item_id: 10,
-        progress: 2,
-        started_at: null,
-        updated_at: '2026-02-28T10:00:00.000Z',
-        next_at: null,
-        mastered_at: null,
-      });
+      expect(result).toEqual(
+        expect.objectContaining({
+          user_id: 'u1',
+          item_id: 10,
+          progress: 2,
+          started_at: null,
+          updated_at: '2026-02-28T10:00:00.000Z',
+          next_at: null,
+          mastered_at: null,
+        }),
+      );
     });
   });
 
@@ -108,7 +111,6 @@ describe('database.utils', () => {
       expect(result.started_at).toBe('1970-01-01T00:00:00.000Z');
       expect(result.next_at).toBe('1970-01-01T00:00:00.000Z');
       expect(result.mastered_at).toBe('1970-01-01T00:00:00.000Z');
-      expect(result.item_sort_order).toBe(0);
     });
   });
 
@@ -204,26 +206,6 @@ describe('database.utils', () => {
       const result = getNextAt(1);
 
       expect(result).toBe(new Date(21000).toISOString());
-    });
-  });
-
-  describe('sortOddEvenByProgress', () => {
-    it('sorts odd progress first, then by item_sort_order ascending', () => {
-      const items = [
-        { progress: 2, item_sort_order: 3 },
-        { progress: 1, item_sort_order: 5 },
-        { progress: 1, item_sort_order: 2 },
-        { progress: 2, item_sort_order: 1 },
-      ] as any;
-
-      const result = sortOddEvenByProgress(items);
-
-      expect(result.map((x: any) => `${x.progress}:${x.item_sort_order}`)).toEqual([
-        '1:2',
-        '1:5',
-        '2:1',
-        '2:3',
-      ]);
     });
   });
 

@@ -30,7 +30,7 @@ vi.mock('@/config/config', () => ({
   },
 }));
 
-vi.mock('@/database/utils/database.utils', () => ({
+vi.mock('@/database/utils/audio-records.utils', () => ({
   fetchStorage: (...args: unknown[]) => mocks.fetchStorage(...args),
 }));
 

@@ -24,7 +24,7 @@ vi.mock('react-router-dom', () => ({
 
 vi.mock('@/database/models/grammar', () => ({
   default: {
-    getStartedGrammarList: vi.fn(),
+    getStartedList: vi.fn(),
   },
 }));
 

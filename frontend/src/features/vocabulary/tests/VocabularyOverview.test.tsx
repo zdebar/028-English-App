@@ -43,6 +43,10 @@ vi.mock('@/hooks/use-array', () => ({
   useArray: () => ({
     data: mocks.state.words,
     currentIndex: mocks.state.currentIndex,
+    currentItem:
+      mocks.state.currentIndex == null
+        ? null
+        : (mocks.state.words[mocks.state.currentIndex] ?? null),
     setCurrentIndex: mocks.setCurrentIndex,
     error: mocks.state.error,
     loading: mocks.state.loading,
@@ -54,7 +58,7 @@ vi.mock('@/features/vocabulary/vocabulary.utils', async () => {
   const actual = await vi.importActual<any>('@/features/vocabulary/vocabulary.utils');
   return {
     ...actual,
-    filterAndSortWords: vi.fn((words: any[]) => words),
+    filterSortedWords: vi.fn((words: any[]) => words),
   };
 });
 

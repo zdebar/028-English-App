@@ -33,8 +33,8 @@ vi.mock('@/database/models/db', () => ({
   },
 }));
 
-vi.mock('@/database/utils/database.utils', async () => {
-  const actual = await vi.importActual<any>('@/database/utils/database.utils');
+vi.mock('@/database/utils/data-sync.utils', async () => {
+  const actual = await vi.importActual<any>('@/database/utils/data-sync.utils');
   return {
     ...actual,
     syncFromRemoteGeneric: (...args: unknown[]) => mocks.syncFromRemoteGeneric(...args),

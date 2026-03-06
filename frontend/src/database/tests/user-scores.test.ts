@@ -26,8 +26,15 @@ vi.mock('@/config/config', () => ({
 
 vi.mock('@/database/utils/database.utils', () => ({
   getTodayShortDate: (...args: unknown[]) => mocks.getTodayShortDate(...args),
-  getSyncTimestamps: (...args: unknown[]) => mocks.getSyncTimestamps(...args),
 }));
+
+vi.mock('@/database/utils/data-sync.utils', async () => {
+  const actual = await vi.importActual<any>('@/database/utils/data-sync.utils');
+  return {
+    ...actual,
+    getSyncTimestamps: (...args: unknown[]) => mocks.getSyncTimestamps(...args),
+  };
+});
 
 vi.mock('@/database/models/db', () => ({
   db: {
@@ -64,6 +71,7 @@ vi.mock('@/config/supabase.config', () => ({
 
 vi.mock('@/database/models/metadata', () => ({
   default: {
+    getSyncedAt: vi.fn().mockResolvedValue('1970-01-01T00:00:00.000Z'),
     markAsSynced: (...args: unknown[]) => mocks.markAsSynced(...args),
   },
 }));

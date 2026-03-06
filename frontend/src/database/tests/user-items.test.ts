@@ -91,14 +91,21 @@ vi.mock('@/database/models/grammar', () => ({
   },
 }));
 
-vi.mock('@/database/utils/database.utils', async () => {
-  const actual = await vi.importActual<any>('@/database/utils/database.utils');
+vi.mock('@/database/utils/user-items.utils', async () => {
+  const actual = await vi.importActual<any>('@/database/utils/user-items.utils');
   return {
     ...actual,
     getNextAt: (...args: unknown[]) => mocks.getNextAt(...args),
-    getSyncTimestamps: (...args: unknown[]) => mocks.getSyncTimestamps(...args),
     convertLocalToSQL: (...args: unknown[]) => mocks.convertLocalToSQL(...args),
     convertSQLToLocal: (...args: unknown[]) => mocks.convertSQLToLocal(...args),
+  };
+});
+
+vi.mock('@/database/utils/data-sync.utils', async () => {
+  const actual = await vi.importActual<any>('@/database/utils/data-sync.utils');
+  return {
+    ...actual,
+    getSyncTimestamps: (...args: unknown[]) => mocks.getSyncTimestamps(...args),
   };
 });
 

@@ -16,7 +16,7 @@ vi.mock('@/locales/cs', () => ({
 }));
 
 import {
-  filterAndSortWords,
+  filterSortedWords,
   getMoreTextInCzech,
   shortenDate,
 } from '@/features/vocabulary/vocabulary.utils';
@@ -38,17 +38,22 @@ describe('vocabulary.utils', () => {
     expect(getMoreTextInCzech(5)).toBe('dalších');
   });
 
-  it('filterAndSortWords filters by prefix and sorts by selected field', () => {
+  it('filterSortedWords filters by prefix from pre-sorted arrays and respects visibleCount', () => {
     const words = [
       { czech: 'Banán', english: 'Banana' },
       { czech: 'auto', english: 'Car' },
       { czech: 'Ahoj', english: 'Hello' },
     ] as any;
 
-    const czechResult = filterAndSortWords(words, 'a', 'czech');
+    const sortedByCzech = [...words].sort((a, b) => a.czech.localeCompare(b.czech));
+    const czechResult = filterSortedWords(sortedByCzech, 'a', 'czech', 10);
     expect(czechResult.map((x: any) => x.czech)).toEqual(['Ahoj', 'auto']);
 
-    const englishResult = filterAndSortWords(words, 'b', 'english');
+    const sortedByEnglish = [...words].sort((a, b) => a.english.localeCompare(b.english));
+    const englishResult = filterSortedWords(sortedByEnglish, 'b', 'english', 10);
     expect(englishResult.map((x: any) => x.english)).toEqual(['Banana']);
+
+    const limitedResult = filterSortedWords(sortedByCzech, 'a', 'czech', 1);
+    expect(limitedResult).toHaveLength(1);
   });
 });

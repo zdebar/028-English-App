@@ -79,6 +79,13 @@ vi.mock('@/database/models/audio-records', () => ({
   },
 }));
 
+vi.mock('@/database/models/db', () => ({
+  db: {
+    metadata: {},
+    transaction: vi.fn(),
+  },
+}));
+
 import { dataSync, dataSyncOnUnmount, splitDeleted } from '@/database/utils/data-sync.utils';
 
 describe('data-sync.utils', () => {
