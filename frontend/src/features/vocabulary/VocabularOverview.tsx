@@ -67,8 +67,8 @@ export default function VocabularyOverview() {
     if (typeof itemId !== 'number' || !userId) return;
 
     await UserItem.resetItemById(userId, itemId);
-    void reload(); // Maybe just set to empty
     setCurrentIndex(null);
+    void reload();
   }, [selectedWord, userId, reload, setCurrentIndex]);
 
   const handleSelectWord = useCallback(
