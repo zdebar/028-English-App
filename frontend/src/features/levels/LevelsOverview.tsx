@@ -11,8 +11,6 @@ import { useUserStore } from '../user-stats/use-user-store';
 import NotificationText from '@/components/UI/NotificationText';
 import TextButton from '@/components/UI/buttons/TextButton';
 
-const EMPTY_LEVELS: never[] = [];
-
 /**
  * LevelsOverview component
  *
@@ -21,8 +19,7 @@ const EMPTY_LEVELS: never[] = [];
 export default function LevelsOverview() {
   const [unpackedIndex, setUnpackedIndex] = useState<number | null>(null);
   const [showMastered, setShowMastered] = useState<boolean>(false);
-  const levelsOverview = useUserStore((state) => state.levels);
-  const levels = Array.isArray(levelsOverview) ? levelsOverview : EMPTY_LEVELS;
+  const levels = useUserStore((state) => state.levels);
   const navigate = useNavigate();
 
   const handleLevelClick = (index: number) => {
