@@ -9,6 +9,7 @@ const NOT_AVAILABLE = TEXTS.notAvailable;
 
 interface VocabularyDetailCardProps {
   selectedWord: UserItemLocal | null;
+  selectedTitle: string;
   onClose: () => void;
   onReset: () => Promise<void>;
 }
@@ -17,12 +18,14 @@ interface VocabularyDetailCardProps {
  * VocabularyDetailCard component
  *
  * @param selectedWord - The vocabulary item to display details for.
+ * @param selectedTitle - The title to display on the card. Czech or english name of the word.
  * @param onClose - Callback to close the detail card.
  * @param onReset - Callback to reset the user's progress for the word.
  * @returns The vocabulary detail card UI.
  */
 export default function VocabularyDetailCard({
   selectedWord,
+  selectedTitle,
   onClose,
   onReset,
 }: VocabularyDetailCardProps) {
@@ -43,7 +46,7 @@ export default function VocabularyDetailCard({
   return (
     <div className="card-width relative flex w-full flex-col items-center justify-start">
       <OverviewCard
-        buttonTitle={selectedWord?.czech}
+        buttonTitle={selectedTitle}
         onClose={onClose}
         handleReset={onReset}
         modalTitle={TEXTS.restartItemProgress}
