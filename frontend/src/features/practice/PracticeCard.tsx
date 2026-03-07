@@ -34,6 +34,8 @@ export default function PracticeCard() {
   const [counter, setCounter] = useState(0);
   const { grammarVisible, grammarData, handleGrammar, closeGrammar } = useGrammar();
 
+  const practiceCountToday = dailyCount + counter;
+
   if (!userId)
     return (
       <DelayedMessage>
@@ -62,8 +64,6 @@ export default function PracticeCard() {
     playAudio,
     audioLoading,
   } = usePracticeDeck(userId);
-
-  const practiceCountToday = dailyCount + counter;
 
   // Play audio on item change if direction is EN -> CZ
   useEffect(() => {
@@ -152,10 +152,7 @@ export default function PracticeCard() {
                     id="top-bar"
                     className="relative flex h-8 w-full items-center justify-between"
                   >
-                    <VolumeSlider
-                      setVolume={setVolume}
-                      className={`${audioDisabled && 'invisible'}`}
-                    />
+                    <VolumeSlider setVolume={setVolume} />
                     {/**Audio messages*/}
                     {audioError ? (
                       <p className="px-2">{TEXTS.noAudio}</p>

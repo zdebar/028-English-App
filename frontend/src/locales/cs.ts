@@ -72,7 +72,7 @@ export const TEXTS = {
   skipHoldInfoToast: 'Pro dokončení položky podržte tlačítko.',
   skipSuccessToast: 'Položka byla dokončena.',
   skipErrorToast: 'Dokončení položky se nezdařilo.',
-  volume: 'nastavit hlasitost',
+  volume: 'nastavení hlasitosti',
 
   // Levels Overview Page
   lessons: 'Lekce',
