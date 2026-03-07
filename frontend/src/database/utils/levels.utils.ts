@@ -66,6 +66,7 @@ export function aggregateLevels(
       ...lesson,
       ...lessonCounts[idx],
     }))
+    .filter((lesson) => lesson.totalCount > 0)
     .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 
   // Build LevelOverview[] with lessons grouped
@@ -88,7 +89,7 @@ export function aggregateLevels(
     }
   });
 
-  return Array.from(levelOverviews.values()).sort(
-    (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0),
-  );
+  return Array.from(levelOverviews.values())
+    .filter((level) => level.lessons.length > 0)
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 }
