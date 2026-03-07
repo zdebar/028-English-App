@@ -10,7 +10,7 @@ export default function UnknownButton({ onClick, disabled, children }: PracticeB
       onClick={onClick}
       disabled={disabled}
       className="h-button relative"
-      title={TEXTS.unknown}
+      title={!disabled ? TEXTS.unknown : undefined}
     >
       <MinusIcon />
       <HelpText className="-top-4.5 left-4">{TEXTS.unknown}</HelpText>

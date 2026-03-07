@@ -10,7 +10,7 @@ export default function HintButton({ onClick, disabled, children }: PracticeButt
       onClick={onClick}
       disabled={disabled}
       className="h-button relative"
-      title={TEXTS.hint}
+      title={!disabled ? TEXTS.hint : undefined}
     >
       <BulbIcon />
       <HelpText className="-top-4.5 right-4">{TEXTS.hint}</HelpText>

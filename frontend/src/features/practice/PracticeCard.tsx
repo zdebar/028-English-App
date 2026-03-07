@@ -128,7 +128,7 @@ export default function PracticeCard() {
               } `}
               onClick={handleReveal}
               role="button"
-              title={revealed ? '' : TEXTS.reveal}
+              title={showDirectionChange ? TEXTS.start : !revealed ? TEXTS.reveal : undefined}
               tabIndex={0}
               aria-disabled={revealed}
               onKeyDown={(e) => {

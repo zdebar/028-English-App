@@ -10,7 +10,7 @@ export default function PlayAudioButton({ onClick, disabled, children }: Practic
       onClick={onClick}
       disabled={disabled}
       className="h-button relative"
-      title={TEXTS.audio}
+      title={!disabled ? TEXTS.audio : undefined}
     >
       <PlayIcon />
       <HelpText className="-top-4.5 right-4">{TEXTS.audio}</HelpText>

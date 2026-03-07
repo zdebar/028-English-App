@@ -89,6 +89,7 @@ export const TEXTS = {
   privacyPolicy: 'Zásady ochrany osobních údajů',
 
   // Vocabulary Page
+  start: 'začít',
   translationDirection: 'výchozí jazyk',
   more: 'další',
   enterPrompt: 'Zadejte slovičko ...',

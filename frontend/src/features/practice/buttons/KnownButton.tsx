@@ -10,7 +10,7 @@ export default function KnownButton({ onClick, disabled, children }: PracticeBut
       onClick={onClick}
       disabled={disabled}
       className="h-button relative"
-      title={TEXTS.known}
+      title={!disabled ? TEXTS.known : undefined}
     >
       <PlusIcon />
       <HelpText className="-top-4.5 right-4">{TEXTS.known}</HelpText>
