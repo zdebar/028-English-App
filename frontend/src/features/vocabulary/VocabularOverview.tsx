@@ -35,16 +35,16 @@ export default function VocabularyOverview() {
   // -- WORDS FILTERING --
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
   const [searchTerm, setSearchTerm] = useState('');
-  const [displayField, setDisplayField] = useState<DisplayField>('czech');
+  const [displayField, setDisplayField] = useState<DisplayField>('english');
   const [selectedWord, setSelectedWord] = useState<UserItemLocal | null>(null);
 
-  const sortedByCzech = useMemo(() => words, [words]);
-  const sortedByEnglish = useMemo(
+  const sortedByEnglish = useMemo(() => words, [words]);
+  const sortedByCzech = useMemo(
     () =>
       [...words].sort((a, b) => {
-        const valA = a.english?.toLowerCase() || '';
-        const valB = b.english?.toLowerCase() || '';
-        return valA.localeCompare(valB);
+        const valA = a.czech?.toLowerCase() || '';
+        const valB = b.czech?.toLowerCase() || '';
+        return valA.localeCompare(valB, 'cs');
       }),
     [words],
   );

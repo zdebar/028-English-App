@@ -128,7 +128,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Retrieves vocabulary items for a user that have been started (begun learning). Sorted by czech word.
+   * Retrieves vocabulary items for a user that have been started (begun learning). Sorted by english word.
    * @param userId - The unique identifier of the user
    */
   static async getStartedVocabulary(userId: string): Promise<UserItemLocal[]> {
@@ -142,7 +142,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         true,
         false,
       )
-      .sortBy('czech');
+      .sortBy('english');
     return result;
   }
 
