@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import config from '@/config/config';
 
@@ -31,6 +31,7 @@ import { useGrammar } from './hooks/use-grammar';
 export default function PracticeCard() {
   const userId = useAuthStore((state) => state.userId);
   const dailyCount = useUserStore((state) => state.dailyCount);
+  const [counter, setCounter] = useState(0);
   const { grammarVisible, grammarData, handleGrammar, closeGrammar } = useGrammar();
 
   if (!userId)
@@ -41,7 +42,6 @@ export default function PracticeCard() {
     );
 
   const {
-    index,
     currentItem,
     grammar_id,
     progress,
@@ -63,7 +63,7 @@ export default function PracticeCard() {
     audioLoading,
   } = usePracticeDeck(userId);
 
-  const practiceCountToday = dailyCount + index;
+  const practiceCountToday = dailyCount + counter;
 
   // Play audio on item change if direction is EN -> CZ
   useEffect(() => {
@@ -198,7 +198,10 @@ export default function PracticeCard() {
               {/** Top Row */}
               <div className="relative grid grid-cols-2 gap-1">
                 <MasterItemButton
-                  onConfirm={() => nextItem(config.progress.skipProgress)}
+                  onConfirm={() => {
+                    nextItem(config.progress.skipProgress);
+                    setCounter((prev) => prev + 1);
+                  }}
                   disabled={!revealed || showDirectionChange}
                 />
                 <PlayAudioButton
@@ -221,11 +224,17 @@ export default function PracticeCard() {
                 ) : (
                   <>
                     <UnknownButton
-                      onClick={() => nextItem(config.progress.minusProgress)}
+                      onClick={() => {
+                        nextItem(config.progress.minusProgress);
+                        setCounter((prev) => prev + 1);
+                      }}
                       disabled={showDirectionChange}
                     />
                     <KnownButton
-                      onClick={() => nextItem(config.progress.plusProgress)}
+                      onClick={() => {
+                        nextItem(config.progress.plusProgress);
+                        setCounter((prev) => prev + 1);
+                      }}
                       disabled={showDirectionChange}
                     />
                   </>

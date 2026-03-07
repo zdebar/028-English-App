@@ -7,7 +7,10 @@ import { errorHandler } from '@/features/logging/error-handler';
 import { infoHandler } from '@/features/logging/info-handler';
 import { useHint } from './use-hint';
 import { useAudioManager } from './use-audio-manager';
-import { triggerLevelsUpdatedEvent } from '@/features/user-stats/dashboard.utils';
+import {
+  triggerDailyCountUpdatedEvent,
+  triggerLevelsUpdatedEvent,
+} from '@/features/user-stats/dashboard.utils';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 
 const NBSP = '\u00A0';
@@ -101,8 +104,11 @@ export function usePracticeDeck(userId: string) {
   // Save progress on unmount
   useEffect(() => {
     return () => {
-      void saveBufferedProgress([...userProgressRef.current], 'on unmount');
-      triggerLevelsUpdatedEvent(userId);
+      (async () => {
+        await saveBufferedProgress([...userProgressRef.current], 'on unmount');
+        triggerLevelsUpdatedEvent(userId);
+        triggerDailyCountUpdatedEvent(userId);
+      })();
     };
   }, [saveBufferedProgress]);
 

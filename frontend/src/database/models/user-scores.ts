@@ -16,8 +16,6 @@ import {
 import { Entity } from 'dexie';
 import { splitDeleted } from '../utils/data-sync.utils';
 import Metadata from './metadata';
-import { triggerDailyCountUpdatedEvent } from '@/features/user-stats/dashboard.utils';
-
 /**
  * Represents a user score entity in the application database.
  *
@@ -46,7 +44,6 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     const existingRecord = await db.user_scores.get([userId, today]);
     const newItemCount = (existingRecord?.item_count ?? 0) + count;
     await db.user_scores.put(this.createRecord(userId, today, newItemCount));
-    triggerDailyCountUpdatedEvent(userId);
   }
 
   /**
