@@ -26,14 +26,6 @@ export default function LevelsOverview() {
     setUnpackedIndex((currentIndex) => (currentIndex === index ? null : index));
   };
 
-  if (levels.length === 0) {
-    return (
-      <DelayedMessage>
-        <NotificationText text={TEXTS.notAvailable} />
-      </DelayedMessage>
-    );
-  }
-
   const shownLevels = showMastered ? 'masteredCount' : 'startedCount';
 
   return (
@@ -43,48 +35,59 @@ export default function LevelsOverview() {
           <div className="h-button flex grow justify-start p-3">{TEXTS.levelsOverview}</div>
           <CloseButton onClick={() => navigate('/profile')} />
         </div>
-        <div className="flex flex-col gap-1 overflow-y-auto">
-          {levels.map((level, index) => (
-            <div key={level.id} className="flex flex-col gap-1">
-              <BaseButton
-                className="h-input flex grow-0 justify-start p-4 text-left"
-                onClick={() => handleLevelClick(index)}
-                disabled={level.lessons.length === 0}
-              >
-                <div className="flex w-full items-center justify-between">
-                  <p>{level.name}</p>
-                  <GoalMetView current={level[shownLevels]} goal={level['totalCount']} />
-                </div>
-              </BaseButton>
-              {unpackedIndex === index && (
-                <div className="flex flex-col gap-1">
-                  {level.lessons.map((lesson) => (
-                    <div
-                      key={lesson.id}
-                      className="h-input flex w-full grow justify-start pr-4 pl-8 text-left"
-                    >
-                      <div className="flex w-full items-center justify-between">
-                        <p>{lesson.name}</p>
-                        <GoalMetView current={lesson[shownLevels]} goal={lesson['totalCount']} />
-                      </div>
+        {levels.length === 0 ? (
+          <DelayedMessage>
+            <NotificationText text={TEXTS.notAvailable} className="pt-4" />
+          </DelayedMessage>
+        ) : (
+          <div>
+            <div className="flex flex-col gap-1 overflow-y-auto">
+              {levels.map((level, index) => (
+                <div key={level.id} className="flex flex-col gap-1">
+                  <BaseButton
+                    className="h-input flex grow-0 justify-start p-4 text-left"
+                    onClick={() => handleLevelClick(index)}
+                    disabled={level.lessons.length === 0}
+                  >
+                    <div className="flex w-full items-center justify-between">
+                      <p>{level.name}</p>
+                      <GoalMetView current={level[shownLevels]} goal={level['totalCount']} />
                     </div>
-                  ))}
+                  </BaseButton>
+                  {unpackedIndex === index && (
+                    <div className="flex flex-col gap-1">
+                      {level.lessons.map((lesson) => (
+                        <div
+                          key={lesson.id}
+                          className="h-input flex w-full grow justify-start pr-4 pl-8 text-left"
+                        >
+                          <div className="flex w-full items-center justify-between">
+                            <p>{lesson.name}</p>
+                            <GoalMetView
+                              current={lesson[shownLevels]}
+                              goal={lesson['totalCount']}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
+              ))}
             </div>
-          ))}
-        </div>
-        <HelpText className="right-2 -bottom-4">
-          {showMastered ? TEXTS.levelsMasteredHelp : TEXTS.levelsStartedHelp}
-        </HelpText>
-        <HelpButton className="right-0 -bottom-14" />
-        <TextButton
-          onClick={() => setShowMastered((current) => !current)}
-          title={TEXTS.masteredSwitchHelp}
-        >
-          {showMastered ? TEXTS.masteredCount : TEXTS.startedCount}
-        </TextButton>
-        <HelpText className="-bottom-15 left-2">{TEXTS.masteredSwitchHelp} </HelpText>
+            <HelpText className="right-2 -bottom-4">
+              {showMastered ? TEXTS.levelsMasteredHelp : TEXTS.levelsStartedHelp}
+            </HelpText>
+            <HelpButton className="right-0 -bottom-14" />
+            <TextButton
+              onClick={() => setShowMastered((current) => !current)}
+              title={TEXTS.masteredSwitchHelp}
+            >
+              {showMastered ? TEXTS.masteredCount : TEXTS.startedCount}
+            </TextButton>
+            <HelpText className="-bottom-15 left-2">{TEXTS.masteredSwitchHelp} </HelpText>
+          </div>
+        )}
       </div>
     </div>
   );

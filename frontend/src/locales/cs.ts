@@ -1,6 +1,6 @@
 export const TEXTS = {
   // Generic
-  notAvailable: 'Není k dispozici',
+  notAvailable: 'není k dispozici',
   loadingMessage: 'Načítání ...',
   pageNotFound: 'Stránka nebyla nalezena.',
   dataLoadingError: 'Chyba při načítání dat.',
