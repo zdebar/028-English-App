@@ -142,7 +142,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         true,
         false,
       )
-      .sortBy('english');
+      .toArray();
+
+    result.sort((a, b) => a.english.toLowerCase().localeCompare(b.english.toLowerCase()));
     return result;
   }
 
