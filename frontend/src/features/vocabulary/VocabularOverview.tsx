@@ -12,6 +12,7 @@ import type { DisplayField } from './vocabulary.utils';
 import NotificationText from '@/components/UI/NotificationText';
 import { TEXTS } from '@/locales/cs';
 import { filterSortedWords } from './vocabulary.utils';
+import { useToastStore } from '../toast/use-toast-store';
 
 const INITIAL_VISIBLE_COUNT = config.vocabulary.itemsPerPage;
 
@@ -22,6 +23,7 @@ const INITIAL_VISIBLE_COUNT = config.vocabulary.itemsPerPage;
  */
 export default function VocabularyOverview() {
   const userId = useAuthStore((state) => state.userId);
+  const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
 
   // -- DATA FETCHING --
@@ -58,11 +60,15 @@ export default function VocabularyOverview() {
   const handleClearUserItem = useCallback(async () => {
     const itemId = selectedWord?.item_id;
     if (typeof itemId !== 'number' || !userId) return;
-
-    await UserItem.resetItemById(userId, itemId);
-    setSelectedWord(null);
-    void reload();
-  }, [selectedWord, userId, reload]);
+    try {
+      await UserItem.resetItemById(userId, itemId);
+      setSelectedWord(null);
+      void reload();
+      showToast(TEXTS.resetProgressSuccessToast, 'success');
+    } catch (error) {
+      showToast(TEXTS.resetProgressErrorToast, 'error');
+    }
+  }, [selectedWord, userId, reload, showToast]);
 
   const handleSelectWord = useCallback(
     (index: number) => {
