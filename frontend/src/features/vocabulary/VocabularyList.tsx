@@ -5,6 +5,7 @@ import { TEXTS } from '@/locales/cs';
 import DirectionDropdown from '@/features/vocabulary/DirectionDropdown';
 import { type DisplayField } from '@/features/vocabulary/vocabulary.utils';
 import { type UserItemLocal } from '@/types/local.types';
+import CloseIcon from '@/components/UI/icons/CloseIcon';
 
 const DIRECTION_OPTIONS: { value: DisplayField; label: string }[] = [
   { value: 'czech', label: 'Čeština' },
@@ -73,13 +74,25 @@ export default function VocabularyList({
           )}
           <CloseButton onClick={onClose} />
         </div>
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder={TEXTS.enterPrompt}
-          className="h-input color-base border border-dashed pl-4"
-        />
+        <div className="relative w-full">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder={TEXTS.enterPrompt}
+            className="h-input color-base w-full border border-dashed pr-8 pl-4"
+          />
+          {searchTerm && (
+            <button
+              type="button"
+              className="absolute top-1/2 right-0 flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center bg-transparent"
+              onClick={() => setSearchTerm('')}
+              tabIndex={0}
+            >
+              <CloseIcon size={24} />
+            </button>
+          )}
+        </div>
       </div>
       <div className="flex flex-col gap-1 overflow-y-auto">
         {hasWords ? (

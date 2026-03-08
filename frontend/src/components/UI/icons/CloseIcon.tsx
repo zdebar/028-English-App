@@ -9,7 +9,7 @@ import type { JSX } from 'react';
  */
 export default function CloseIcon(props: IconProps): JSX.Element {
   return (
-    <Icon {...props} size={32}>
+    <Icon size={32} {...props}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
