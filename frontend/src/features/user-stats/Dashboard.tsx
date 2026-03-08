@@ -6,9 +6,24 @@ import HelpText from '@/features/help/HelpText';
 import { useState } from 'react';
 import { getInProgressLessons } from './dashboard.utils';
 import TextButton from '@/components/UI/buttons/TextButton';
+import type { LessonOverview } from '@/types/local.types';
 
 type DashboardProps = {
   className?: string;
+};
+
+const noAvailableLesson: LessonOverview = {
+  id: 0,
+  name: TEXTS.notAvailable,
+  note: '',
+  sort_order: 0,
+  level_id: 0,
+  deleted_at: null,
+  startedCount: 0,
+  startedTodayCount: 0,
+  masteredCount: 0,
+  masteredTodayCount: 0,
+  totalCount: 0,
 };
 
 /**
@@ -29,6 +44,8 @@ export default function Dashboard({ className = '' }: DashboardProps) {
     lessonsInProgress.length > 0
       ? Math.max(...lessonsInProgress.map((lesson) => lesson.totalCount), 1)
       : 1;
+
+  if (lessonsInProgress.length === 0) lessonsInProgress.push(noAvailableLesson);
 
   return (
     <div className={`min-w-card relative mx-auto mb-12 flex w-full flex-col gap-1 ${className}`}>
