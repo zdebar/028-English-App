@@ -86,7 +86,7 @@ export default function GrammarOverview(): JSX.Element {
           ))
         ) : (
           <DelayedMessage>
-            <NotificationText text={TEXTS.noGrammar} />
+            <NotificationText text={TEXTS.noGrammar} className="color-info pt-4" />
           </DelayedMessage>
         )}
       </div>

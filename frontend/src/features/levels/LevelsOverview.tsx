@@ -37,7 +37,7 @@ export default function LevelsOverview() {
         </div>
         {levels.length === 0 ? (
           <DelayedMessage>
-            <NotificationText text={TEXTS.notAvailable} className="pt-4" />
+            <NotificationText text={TEXTS.notAvailable} className="color-info pt-4" />
           </DelayedMessage>
         ) : (
           <div>

@@ -6,6 +6,8 @@ import DirectionDropdown from '@/features/vocabulary/DirectionDropdown';
 import { type DisplayField } from '@/features/vocabulary/vocabulary.utils';
 import { type UserItemLocal } from '@/types/local.types';
 import CloseIcon from '@/components/UI/icons/CloseIcon';
+import DelayedMessage from '@/components/UI/DelayedMessage';
+import NotificationText from '@/components/UI/NotificationText';
 
 const DIRECTION_OPTIONS: { value: DisplayField; label: string }[] = [
   { value: 'czech', label: 'Čeština' },
@@ -80,6 +82,7 @@ export default function VocabularyList({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={TEXTS.enterPrompt}
+            spellCheck={false}
             className="h-input color-base w-full border border-dashed pr-8 pl-4"
           />
           {searchTerm && (
@@ -116,7 +119,9 @@ export default function VocabularyList({
             )}
           </>
         ) : (
-          <p className="h-input flex justify-start pl-4 text-left">{TEXTS.noStartedVocabulary}</p>
+          <DelayedMessage>
+            <NotificationText text={TEXTS.noStartedVocabulary} className="color-info pt-4" />
+          </DelayedMessage>
         )}
       </div>
     </div>

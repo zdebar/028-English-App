@@ -109,7 +109,7 @@ export default function PracticeCard() {
   if (!currentItem) {
     return (
       <DelayedMessage>
-        <NotificationText text="Žádné položky k procvičování" className="color-info" />
+        <NotificationText text={TEXTS.notAvailable} className="color-info pt-4" />
       </DelayedMessage>
     );
   }
