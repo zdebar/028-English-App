@@ -42,7 +42,7 @@ AS $$
   LEFT JOIN public.user_items ui
     ON ui.item_id = i.id
     AND ui.user_id = p_user_id
-  WHERE ui.updated_at > p_last_synced_at
-    OR i.updated_at > p_last_synced_at
+  WHERE ui.updated_at >= p_last_synced_at
+    OR i.updated_at >= p_last_synced_at
   ORDER BY i.sort_order ASC, i.id ASC;
 $$;

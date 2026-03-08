@@ -171,6 +171,30 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
+   * Resets all user items associated with a specific grammar ID to their default state for a given user.
+   * @param userId - The unique identifier of the user
+   * @param grammarId - The unique identifier of the grammar
+   */
+  static async resetItemsByGrammarId(userId: string, grammarId: number): Promise<void> {
+    assertNonEmptyString(userId, 'userId');
+    assertNonNegativeInteger(grammarId, 'grammarId');
+
+    const count = await db.user_items
+      .where('[user_id+grammar_id+started_at]')
+      .between([userId, grammarId, Dexie.minKey], [userId, grammarId, NULL_DATE], true, false)
+      .modify((item: UserItemLocal) => {
+        resetUserItem(item);
+      });
+
+    if (count === 0) {
+      throw new Error(`No user items found for grammar ID ${grammarId}.`);
+    }
+
+    infoHandler(`Resetted ${count} user-items with grammarId: ${grammarId} for userId: ${userId}`);
+    triggerLevelsUpdatedEvent(userId);
+  }
+
+  /**
    * Deletes all user items associated with a specific user.
    * Use only for deletion of user account, when user-items on remote are deleted automatically.
    * @param userId - The unique identifier of the user

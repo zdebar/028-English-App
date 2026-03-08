@@ -53,8 +53,8 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
     assertNonEmptyString(userId, 'userId');
 
     const startedItems = await db.user_items
-      .where('[user_id+grammar_id+started_at]')
-      .between([userId, Dexie.minKey, Dexie.minKey], [userId, Dexie.maxKey, NULL_DATE], true, false)
+      .where('[user_id+started_at]')
+      .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
       .filter((item) => item.grammar_id !== NULL_NUMBER)
       .toArray();
 

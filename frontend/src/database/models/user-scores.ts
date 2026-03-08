@@ -196,7 +196,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
       .from('user_scores')
       .select('user_id, date, item_count, updated_at, deleted_at')
       .eq('user_id', userId)
-      .gt('updated_at', lastSyncedAt);
+      .gte('updated_at', lastSyncedAt);
 
     if (errorFetch) {
       throw new SupabaseError(`Error fetching User Scores from Supabase.`, errorFetch, {

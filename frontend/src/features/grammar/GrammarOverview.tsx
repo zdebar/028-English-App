@@ -12,6 +12,7 @@ import CloseButton from '@/components/UI/buttons/CloseButton';
 import DelayedMessage from '@/components/UI/DelayedMessage';
 import { useArray } from '@/hooks/use-array';
 import NotificationText from '@/components/UI/NotificationText';
+import UserItem from '@/database/models/user-items';
 
 /**
  * GrammarOverview component displays a list of started grammar topics for the user.
@@ -34,6 +35,7 @@ export default function GrammarOverview(): JSX.Element {
     currentIndex,
     currentItem: currentGrammar,
     setCurrentIndex,
+    reload,
   } = useArray<GrammarLocal>(fetchGrammarList);
 
   const hasGrammar = grammarList.length > 0;
@@ -83,6 +85,11 @@ export default function GrammarOverview(): JSX.Element {
     <OverviewCard
       buttonTitle={currentGrammar?.name ?? TEXTS.grammarOverview}
       modalTitle={TEXTS.restartGrammarProgress}
+      handleReset={async () => {
+        if (!currentGrammar) return;
+        await UserItem.resetItemsByGrammarId(userId!, currentGrammar.id);
+        reload();
+      }}
       onClose={() => setCurrentIndex(null)}
       className="relative"
     >
