@@ -65,7 +65,7 @@ export default function BlockBar({
     <div className="h-attribute relative w-full cursor-default select-none">
       <div className={`relative h-full w-full ${className}`} style={{ width: `${barWidth}%` }}>
         {/* Labels */}
-        <div className="font-body text-light absolute -top-0.5 left-0 z-10 flex w-full items-center justify-between truncate px-4 pt-1 text-center">
+        <div className="font-body text-light absolute -top-0.5 left-0 z-10 flex w-full items-center justify-between truncate px-4 pt-1 text-center font-bold">
           <span>
             {levelName} {lessonName}
           </span>
