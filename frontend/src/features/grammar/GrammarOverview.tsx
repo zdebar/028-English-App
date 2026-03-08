@@ -13,6 +13,7 @@ import DelayedMessage from '@/components/UI/DelayedMessage';
 import { useArray } from '@/hooks/use-array';
 import NotificationText from '@/components/UI/NotificationText';
 import UserItem from '@/database/models/user-items';
+import { useToastStore } from '../toast/use-toast-store';
 
 /**
  * GrammarOverview component displays a list of started grammar topics for the user.
@@ -22,6 +23,7 @@ import UserItem from '@/database/models/user-items';
  */
 export default function GrammarOverview(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
+  const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
 
   // -- Data Fetching --
@@ -52,6 +54,17 @@ export default function GrammarOverview(): JSX.Element {
     },
     [setCurrentIndex],
   );
+
+  const handleReset = useCallback(async () => {
+    if (!currentGrammar || !userId) return;
+    try {
+      await UserItem.resetItemsByGrammarId(userId, currentGrammar.id);
+      reload();
+      showToast(TEXTS.resetProgressSuccessToast, 'success');
+    } catch (error) {
+      showToast(TEXTS.resetProgressErrorToast, 'error');
+    }
+  }, [currentGrammar, userId, reload]);
 
   // -- List view --
   if (currentIndex === null) {
@@ -85,11 +98,7 @@ export default function GrammarOverview(): JSX.Element {
     <OverviewCard
       buttonTitle={currentGrammar?.name ?? TEXTS.grammarOverview}
       modalTitle={TEXTS.restartGrammarProgress}
-      handleReset={async () => {
-        if (!currentGrammar) return;
-        await UserItem.resetItemsByGrammarId(userId!, currentGrammar.id);
-        reload();
-      }}
+      handleReset={handleReset}
       onClose={() => setCurrentIndex(null)}
       className="relative"
     >
