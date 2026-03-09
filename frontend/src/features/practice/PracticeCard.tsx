@@ -203,7 +203,7 @@ export default function PracticeCard() {
                 />
                 <PlayAudioButton
                   onClick={handlePlayAudio}
-                  disabled={audioDisabled || showDirectionChange}
+                  disabled={audioDisabled || showDirectionChange || audioLoading}
                 />
               </div>
               {/** Bottom Row */}
