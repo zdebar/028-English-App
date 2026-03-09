@@ -5,6 +5,7 @@ import { TEXTS } from '@/locales/cs';
 import config from '@/config/config';
 import { errorHandler } from '@/features/logging/error-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
+import { logRejectedResults } from '@/features/logging/logging.utils';
 
 /**
  * Hook that manages periodic data synchronization for a user.
@@ -42,8 +43,9 @@ export function usePeriodicSync(userId: string | null) {
         setLoading(true);
         try {
           if (userId) {
-            await dataSync(userId);
-            await audioSync(userId);
+            const userResults = await Promise.allSettled([dataSync(userId), audioSync(userId)]);
+            const isError = logRejectedResults(userResults, 'Data synchronization error:');
+            if (isError) throw new Error('Data synchronization error');
             void AudioRecord.removeOrphaned();
           }
           showToast(TEXTS.syncSuccessToast, 'success');

@@ -114,6 +114,7 @@ export const TEXTS = {
   grammarOverviewTooltip: 'Přehled započaté gramatiky',
   vocabularyOverview: 'Přehled slovíček',
   vocabularyOverviewTooltip: 'Přehled započatých slovíček',
+  syncButton: 'Synchronizovat data',
 
   // Signout Button
   signoutButtonTitle: 'Odhlásit se',

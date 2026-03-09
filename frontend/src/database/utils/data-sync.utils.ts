@@ -26,17 +26,19 @@ import {
  * @param userId - The unique identifier of the user to synchronize data for
  * @returns A promise that resolves when the data synchronization is complete
  */
-export async function dataSync(userId: string): Promise<void> {
+export async function dataSync(userId: string, fullSync: boolean = false): Promise<void> {
   assertNonEmptyString(userId, 'userId');
-
-  const now = Date.now();
-  const lastFullSync = getFullSyncTime(userId);
 
   await initDbMappings();
   await restoreUnsavedFromLocalStorage(userId);
 
   // Step 1: Determine if a full sync is needed
-  const doFullSync = now - lastFullSync > config.sync.fullSyncInterval;
+  const now = Date.now();
+  let doFullSync = fullSync;
+  if (!fullSync) {
+    const lastFullSync = getFullSyncTime(userId);
+    doFullSync = now - lastFullSync > config.sync.fullSyncInterval;
+  }
 
   // Step 2: Perform shared stores data synchronization (grammar and audio metadata)
   const sharedPromises = doFullSync
