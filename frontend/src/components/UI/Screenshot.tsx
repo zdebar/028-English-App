@@ -23,7 +23,7 @@ export function Screenshot({ src, alt }: ScreenshotProps): JSX.Element {
         height={525}
         loading="lazy"
       />
-      <figcaption className="mt-2 text-center text-sm text-gray-500">{alt}</figcaption>
+      <figcaption className="mt-2 text-center text-sm">{alt}</figcaption>
     </figure>
   );
 }

@@ -13,12 +13,12 @@ export default function Guide(): JSX.Element {
       <section>
         <p>Učení cizích jazyků není ve své podstatě složité.</p>
         <p>
-          Obtížné je přirozené znalosti jazyka, kdy vše do sebe zapadá zcela automaticky, bez
+          Obtížná je přirozené znalosti jazyka, kdy vše do sebe zapadá zcela automaticky, bez
           přemýšlení. Každý toho dosáhne u svého mateřského jazyka v průběhu dětství čistě množstvím
           opakování.
         </p>
         <p>
-          Běžné učení jazyků znamená příliš mnoho přemýšlení a málo praxe. Tato aplikace je naopak
+          Běžné učení jazyků používá příliš mnoho přemýšlení a málo praxe. Tato aplikace je naopak
           zaměřená na dril, na velké množství naposlouchaných a vyslovených opakování.
         </p>
       </section>
@@ -26,8 +26,8 @@ export default function Guide(): JSX.Element {
         <h2>Jak aplikace funguje</h2>
 
         <p>
-          Aplikace využívá pouze procvičování pomocí kartiček. Slovíčka i gramatika se postupně samy
-          nabízejí k procvičování v kartičkách.
+          Aplikace využívá pouze procvičování pomocí kartiček. Jak pro jednotlivá slovíčka, tak pro
+          slovní spojení či celé věty.{' '}
         </p>
         <p>
           Pravidelně se střídá procvičování z češtiny do angličtiny a z angličtiny do češtiny. Z
@@ -36,45 +36,45 @@ export default function Guide(): JSX.Element {
       </section>
       <section>
         <h2>Neodhalená kartička</h2>
-        <Screenshot src="/screenshot-not-revealed.webp" alt="Ukázka kartičky před odhalením" />
+        <Screenshot src="/screenshots/not-revealed.webp" alt="Ukázka kartičky před odhalením" />
         <p className="text-left">
-          <strong>"odhalit"</strong> odhalí překlad kartičky{' '}
+          <strong>"odhalit"</strong>Odhalí překlad kartičky{' '}
         </p>
         <p>
-          <strong>"pokrok"</strong> skóre pokroku položky
+          <strong>"pokrok"</strong>Skóre pokroku položky
         </p>
         <p>
           <strong>"dnes / denní cíl"</strong>
-          <span>dnešní počet opakování a cíl</span>
+          <span>Dnešní počet opakování a cíl</span>
         </p>
         <p>
           <strong>"dokončit"</strong>
-          dokončí položku, ta se již nebude nabízet k dalšímu procvičování
+          Položka se nebude nabízet k dalšímu procvičování
         </p>
         <p>
           <strong>"přehraj audio"</strong>
-          přehraje audio položky
+          Přehraje audio položky
         </p>
 
         <p>
-          <strong>"gramatika"</strong> vysvětlení příslušné gramatiky
+          <strong>"gramatika"</strong>Vysvětlení příslušné gramatiky
         </p>
         <p>
           <strong>"nápověda"</strong>
-          postupně odhalí jednotlivá písmena správného překladu
+          Postupně odhalí jednotlivá písmena správného překladu
         </p>
       </section>
       <section>
         <h2>Odhalená kartička</h2>
-        <Screenshot src="/screenshot-revealed.webp" alt="Ukázka kartičky po odhalení" />
+        <Screenshot src="/screenshots/revealed.webp" alt="Ukázka kartičky po odhalení" />
 
         <p>
           <strong>"neznám"</strong>
-          sníží skóre dané položky, nabídne se k dalšímu procvičování dříve
+          Sníží skóre dané položky, nabídne se k dalšímu procvičování dříve
         </p>
         <p>
           <strong>"znám"</strong>
-          <span>zvýší skóre dané položky, bude se tak nabízet k dalšímu procvičování později.</span>
+          <span>Zvýší skóre dané položky, bude se tak nabízet k dalšímu procvičování později.</span>
         </p>
         <p>
           Aplikace je postavena na drilu až do úplné automatizace, doporučujeme tedy dávat "znám"
@@ -83,35 +83,61 @@ export default function Guide(): JSX.Element {
       </section>
       <section>
         <h2>Profil</h2>
-        <Screenshot src="/screenshot-profile.webp" alt="Ukázka profilu uživatele" />
+        <Screenshot src="/screenshots/profile.webp" alt="Ukázka profilu uživatele" />
+        <p>
+          <strong>"Přehled CEFR úrovní"</strong>
+          <span>Přehled postupu na jednotlivých CEFR úrovních a na jednotlivých lekcích</span>
+        </p>
         <p>
           <strong>"Přehled gramatiky"</strong>
           <span>
-            přehled již započaté gramatiky, umožňuje restartovat procvičování vět příslušných k dané
+            Přehled již započaté gramatiky, umožňuje restartovat procvičování vět příslušných k dané
             grammatice
           </span>
         </p>
         <p>
           <strong>"Přehled slovíček"</strong>
           <span>
-            přehled započatých slovíček, umožňuje restartovat procvičování každého slovíčka
+            Přehled započatých slovíček, umožňuje restartovat procvičování každého slovíčka
           </span>
         </p>
         <p>
-          <strong>"Restartovat vše"</strong>
-          <span>vynuluje veškerý pokrok</span>
+          <strong>"Synchronizovat data"</strong>
+          <span>
+            Aplikace je běžně synchronizována při každém startu aplikace či minimálně každých 24
+            hodin. Tato manuální synchronizace je určena pouze pro opravu poškozených dat.
+          </span>
         </p>
         <p>
           <strong>"Smazat účet"</strong>
           <span>
-            smaže uživatelský účet, včetně všech vašich dat. V této fázi vývoje je každé smazání
+            Smaže uživatelský účet, včetně všech vašich dat. V této fázi vývoje je každé smazání
             účtu nevratné a data budou nenávratně smazána.
           </span>
         </p>
         <p>
           <strong>"Odhlásit se"</strong>
-          <span>odhlásí Vás ze svého účtu.</span>
+          <span>Odhlásí Vás ze svého účtu.</span>
         </p>
+      </section>
+      <section>
+        <h2>Synchronizace</h2>
+        <p>
+          Aplikace pravidelně ukládá cvičební data na vzdálený server. Aplikace však není určena pro
+          současnou práci na více zařízeních, vzhledem k nepravidelnosti synchronizace.
+        </p>
+      </section>
+      <section>
+        <h2>Offline</h2>
+        <p>
+          Ve webové verzi aplikace je pro používání offline nejprve zapotřebí stáhnout veškerá data
+          do zařízení. To lze udělat v profily pomocí tlačítka "Stáhnout data".
+        </p>
+        <p>
+          V PWA aplikaci (ke stažení na vyhledávací liště) je již veškerá data stažena a aplikace je
+          plně funkční i bez připojení k internetu.
+        </p>
+        <p>V obou případech se aplikace pokusí synchronizovat data při každém startu.</p>
       </section>
     </div>
   );
