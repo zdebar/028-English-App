@@ -33,7 +33,12 @@ export default function SyncButton({ className }: { className?: string }): JSX.E
   };
 
   return (
-    <MenuButton onClick={handleSync} className={className} disabled={!userId}>
+    <MenuButton
+      onClick={handleSync}
+      className={className}
+      disabled={!userId}
+      title={TEXTS.dataSyncTooltip}
+    >
       {TEXTS.syncButton}
     </MenuButton>
   );

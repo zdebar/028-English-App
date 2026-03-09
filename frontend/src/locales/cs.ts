@@ -115,6 +115,7 @@ export const TEXTS = {
   vocabularyOverview: 'Přehled slovíček',
   vocabularyOverviewTooltip: 'Přehled započatých slovíček',
   syncButton: 'Synchronizovat data',
+  dataSyncTooltip: 'Zajistí opravu dat v případě poruchy synchronizace',
 
   // Signout Button
   signoutButtonTitle: 'Odhlásit se',
