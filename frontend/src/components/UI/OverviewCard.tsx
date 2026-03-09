@@ -41,6 +41,7 @@ export default function OverviewCard({
   className = '',
   children,
 }: OverviewCardProps): JSX.Element {
+  const isDisabled = !handleReset;
   return (
     <div className={`card-width min-h-card ${className}`}>
       {/* Top Bar */}
@@ -49,14 +50,14 @@ export default function OverviewCard({
         <ModalButton
           modalTitle={modalTitle}
           modalText={modalText}
-          title={buttonTitle}
+          title={!isDisabled ? TEXTS.restartProgressHelp : ''}
           onConfirm={async () => {
             if (handleReset) {
               await handleReset();
             }
             onClose();
           }}
-          disabled={!handleReset}
+          disabled={isDisabled}
           className="justify-start px-4"
         >
           {buttonTitle}

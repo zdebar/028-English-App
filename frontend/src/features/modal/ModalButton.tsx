@@ -35,7 +35,7 @@ export default function ModalButton({
   modalTitle = TEXTS.modalTitle,
   modalText = TEXTS.modalText,
   disabled = false,
-  title = TEXTS.restartProgressHelp,
+  title = '',
   children,
   className = '',
 }: ModalButtonProps): JSX.Element {
