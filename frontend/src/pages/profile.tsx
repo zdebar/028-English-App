@@ -16,9 +16,16 @@ export default function Profile(): JSX.Element {
 
   return (
     <div className="card-width grow-0 gap-1">
-      <MenuButton onClick={() => navigate(ROUTES.levels)}>{TEXTS.levelsOverview}</MenuButton>
-      <MenuButton onClick={() => navigate(ROUTES.grammar)}>{TEXTS.grammarOverview}</MenuButton>
-      <MenuButton onClick={() => navigate(ROUTES.vocabulary)}>
+      <MenuButton onClick={() => navigate(ROUTES.levels)} title={TEXTS.levelsOverviewTooltip}>
+        {TEXTS.levelsOverview}
+      </MenuButton>
+      <MenuButton onClick={() => navigate(ROUTES.grammar)} title={TEXTS.grammarOverviewTooltip}>
+        {TEXTS.grammarOverview}
+      </MenuButton>
+      <MenuButton
+        onClick={() => navigate(ROUTES.vocabulary)}
+        title={TEXTS.vocabularyOverviewTooltip}
+      >
         {TEXTS.vocabularyOverview}
       </MenuButton>
 

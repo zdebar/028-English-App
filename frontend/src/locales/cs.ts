@@ -109,8 +109,11 @@ export const TEXTS = {
 
   // Profile Page
   levelsOverview: 'Přehled CEFR úrovní',
+  levelsOverviewTooltip: 'Přehled CEFR úrovní s pokrokem',
   grammarOverview: 'Přehled gramatiky',
+  grammarOverviewTooltip: 'Přehled započaté gramatiky',
   vocabularyOverview: 'Přehled slovíček',
+  vocabularyOverviewTooltip: 'Přehled započatých slovíček',
 
   // Signout Button
   signoutButtonTitle: 'Odhlásit se',
