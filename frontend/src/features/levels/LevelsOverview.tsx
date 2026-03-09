@@ -50,8 +50,12 @@ export default function LevelsOverview() {
                     disabled={level.lessons.length === 0}
                   >
                     <div className="flex w-full items-center justify-between">
-                      <p>{level.name}</p>
-                      <GoalMetView current={level[shownLevels]} goal={level['totalCount']} />
+                      <p title={`${TEXTS.levelName}`}>{level.name}</p>
+                      <GoalMetView
+                        current={level[shownLevels]}
+                        goal={level['totalCount']}
+                        title={showMastered ? TEXTS.levelsMasteredHelp : TEXTS.levelsStartedHelp}
+                      />
                     </div>
                   </BaseButton>
                   {unpackedIndex === index && (
@@ -62,10 +66,13 @@ export default function LevelsOverview() {
                           className="h-input flex w-full grow justify-start pr-4 pl-8 text-left"
                         >
                           <div className="flex w-full items-center justify-between">
-                            <p>{lesson.name}</p>
+                            <p title={`${TEXTS.lessonName}`}>{lesson.name}</p>
                             <GoalMetView
                               current={lesson[shownLevels]}
                               goal={lesson['totalCount']}
+                              title={
+                                showMastered ? TEXTS.levelsMasteredHelp : TEXTS.levelsStartedHelp
+                              }
                             />
                           </div>
                         </div>

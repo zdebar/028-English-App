@@ -49,6 +49,7 @@ export default function OverviewCard({
         <ModalButton
           modalTitle={modalTitle}
           modalText={modalText}
+          title={buttonTitle}
           onConfirm={async () => {
             if (handleReset) {
               await handleReset();

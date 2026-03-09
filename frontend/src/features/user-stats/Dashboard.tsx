@@ -54,6 +54,7 @@ export default function Dashboard({ className = '' }: DashboardProps) {
           key={lesson.id}
           lessonName={lesson.name ?? ''}
           levelName={levelsOverview.find((level) => level.id === lesson.level_id)?.name ?? ''}
+          isMastered={showMastered}
           previousCount={
             showMastered
               ? (lesson.masteredCount ?? 0) - (lesson.masteredTodayCount ?? 0)

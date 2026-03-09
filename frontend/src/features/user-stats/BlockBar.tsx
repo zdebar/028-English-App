@@ -1,8 +1,11 @@
+import { TEXTS } from '@/locales/cs';
+
 interface BlockBarProps {
   previousCount: number;
   todayCount: number;
   lessonName: string;
   levelName: string;
+  isMastered: boolean;
   divisions?: number;
   lessonCount: number;
   maxCount?: number;
@@ -16,6 +19,7 @@ interface BlockBarProps {
  * @param todayCount {number} Number of items completed today.
  * @param lessonName {string} The name of the current lesson block.
  * @param levelName {string} The name of the level the lesson belongs to.
+ * @param isMastered {boolean} Indicates if the items count is mastered or started.
  * @param divisions {number} Distance of divisions in the progress bar (default: 5).
  * @param lessonCount {number} Total number of items in the lesson (default: 100).
  * @param maxCount {number} Maximal total count of all lessons (default: 100).
@@ -27,6 +31,7 @@ export default function BlockBar({
   todayCount = 0,
   lessonName = '',
   levelName = '',
+  isMastered = false,
   divisions = 5,
   lessonCount = 100,
   maxCount,
@@ -66,10 +71,12 @@ export default function BlockBar({
       <div className={`relative h-full w-full ${className}`} style={{ width: `${barWidth}%` }}>
         {/* Labels */}
         <div className="font-body text-light absolute -top-0.5 left-0 z-10 flex w-full items-center justify-between truncate px-4 pt-1 text-center font-bold">
-          <span>
+          <span title={`${TEXTS.levelName} - ${TEXTS.lessonName} `}>
             {levelName} {lessonName}
           </span>
-          <span>+ {todayCount}</span>
+          <span title={isMastered ? TEXTS.masteredTodayHint : TEXTS.startedTodayHint}>
+            + {todayCount}
+          </span>
         </div>
         {/* Progress bar */}
         <div

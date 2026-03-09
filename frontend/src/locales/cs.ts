@@ -55,7 +55,7 @@ export const TEXTS = {
   noAudio: 'bez audia',
   loadingAudio: 'načítá se audio ...',
   progress: 'pokrok',
-  today: 'dnes',
+  today: 'dnes opakování',
   dailyGoal: 'denní cíl',
   grammar: 'gramatika',
   audio: 'přehraj audio',

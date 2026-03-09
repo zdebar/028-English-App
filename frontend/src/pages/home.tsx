@@ -72,7 +72,10 @@ export default function Home(): JSX.Element {
         <div className="relative flex w-full flex-col">
           <div className="px-4">
             <PropertyView label={TEXTS.userLabel}>{userDisplayName}</PropertyView>
-            <PropertyView label={TEXTS.userStatsLabel}>
+            <PropertyView
+              label={TEXTS.userStatsLabel}
+              title={`${TEXTS.today} / ${TEXTS.dailyGoal}`}
+            >
               {GoalMetView({ current: dailyCount, goal: dailyGoal })}
             </PropertyView>
           </div>
