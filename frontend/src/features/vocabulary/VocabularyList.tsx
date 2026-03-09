@@ -5,7 +5,7 @@ import { TEXTS } from '@/locales/cs';
 import DirectionDropdown from '@/features/vocabulary/DirectionDropdown';
 import { type DisplayField } from '@/features/vocabulary/vocabulary.utils';
 import { type UserItemLocal } from '@/types/local.types';
-import CloseIcon from '@/components/UI/icons/CloseIcon';
+import CancelIcon from '@/components/UI/icons/CancelIcon';
 import DelayedMessage from '@/components/UI/DelayedMessage';
 import NotificationText from '@/components/UI/NotificationText';
 
@@ -83,16 +83,17 @@ export default function VocabularyList({
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={TEXTS.enterPrompt}
             spellCheck={false}
+            maxLength={32}
             className="h-input color-base w-full border border-dashed pr-8 pl-4"
           />
           {searchTerm && (
             <button
               type="button"
-              className="absolute top-1/2 right-0 flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center bg-transparent"
+              className="hover:dark:bg-button-dark hover:bg-button-light absolute top-1/2 right-1 flex size-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-transparent"
               onClick={() => setSearchTerm('')}
               tabIndex={0}
             >
-              <CloseIcon size={24} />
+              <CancelIcon size={16} />
             </button>
           )}
         </div>
