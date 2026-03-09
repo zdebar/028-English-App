@@ -6,6 +6,8 @@ import { errorHandler } from '../logging/error-handler';
 import { audioSync } from '@/database/utils/data-sync.utils';
 import { logRejectedResults } from '../logging/logging.utils';
 import { MenuButton } from '@/components/UI/buttons/MenuButton';
+import config from '@/config/config';
+import { useMinLoading } from '../modal/use-min-loading';
 
 /**
  * DownloadButton component for downloading the current user's data.
@@ -16,11 +18,13 @@ import { MenuButton } from '@/components/UI/buttons/MenuButton';
 export default function DownloadButton({ className }: { className?: string }): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
+  const { isLoading, setIsLoading } = useMinLoading(config.buttons.minLoadingTime);
 
   const handleSync = async () => {
     if (!userId) return;
 
     try {
+      setIsLoading(true);
       const userResults = await Promise.allSettled([audioSync(userId, true)]);
       const isError = logRejectedResults(userResults, 'Data download error:');
       if (isError) throw new Error('Data download error');
@@ -29,6 +33,8 @@ export default function DownloadButton({ className }: { className?: string }): J
     } catch (error) {
       showToast(TEXTS.downloadErrorToast, 'error');
       errorHandler('Download Error', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -36,7 +42,7 @@ export default function DownloadButton({ className }: { className?: string }): J
     <MenuButton
       onClick={handleSync}
       className={className}
-      disabled={!userId}
+      disabled={!userId || isLoading}
       title={TEXTS.downloadButtonTooltip}
     >
       {TEXTS.downloadButton}
