@@ -34,6 +34,7 @@ export const TEXTS = {
   // Home Page
   appTitle: 'Angličtina',
   appDescription: 'Bez stresu. Bez přemýšlení. Jen dril.',
+  appTestDescription: 'Aplikace v testovacím režimu. Obsahuje pouze dílčí data.',
   guide: 'návod',
   startedTodayHint: 'dnes započato',
   masteredTodayHint: 'dnes naučeno',
