@@ -69,16 +69,19 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
  * Synchronizes data for a specific user with the database.
  *
  * @param userId - The unique identifier of the user to synchronize data for
+ * @param downloadAll - Whether to download all audio files (for PWA) or only selected ones (for web app)
  * @returns A promise that resolves when the data synchronization is complete
  */
-export async function audioSync(userId: string): Promise<void> {
+export async function audioSync(userId: string, downloadAll: boolean = false): Promise<void> {
   assertNonEmptyString(userId, 'userId');
+
   const isStandalone =
+    downloadAll ||
     window.matchMedia('(display-mode: standalone)').matches ||
     (window.navigator as any).standalone === true;
 
   if (isStandalone) {
-    // PWA: download all audio files
+    // PWA or downloadAll: download all audio files
     await AudioRecord.syncFromRemote(config.audio.allArchives);
   } else {
     // Web app: download only selected audio files

@@ -120,6 +120,12 @@ export const TEXTS = {
   syncButtonDescription: 'Chcete synchronizovat data? Vhodné pouze při poškozených datech.',
   dataSyncTooltip: 'Plná synchronizace',
 
+  // Download Button
+  downloadButton: 'Stáhnout data',
+  downloadButtonTooltip: 'Stáhnout data pro funkci offline. (8MB)',
+  downloadSuccessToast: 'Data byla úspěšně stažena.',
+  downloadErrorToast: 'Chyba při stahování dat.',
+
   // Signout Button
   signoutButtonTitle: 'Odhlásit se',
   signoutModalText: 'Opravdu se chcete odhlásit ze svého účtu?',

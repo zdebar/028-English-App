@@ -6,6 +6,7 @@ import { TEXTS } from '@/locales/cs';
 import { useNavigate } from 'react-router-dom';
 import type { JSX } from 'react/jsx-dev-runtime';
 import SyncButton from '@/features/sync/SyncButton';
+import DownloadButton from '@/features/sync/DownloadButtton';
 
 /**
  * Profile component that renders the user profile page.
@@ -30,6 +31,7 @@ export default function Profile(): JSX.Element {
       >
         {TEXTS.vocabularyOverview}
       </MenuButton>
+      <DownloadButton />
       <SyncButton />
       <DeleteUserButton />
       <SignoutButton />

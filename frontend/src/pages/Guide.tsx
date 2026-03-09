@@ -11,11 +11,9 @@ export default function Guide(): JSX.Element {
     <div className="guide max-w-hero overflow-x-hidden p-4">
       <h1 className="text-center">Návod</h1>
       <section>
-        <p>Učení cizích jazyků není ve své podstatě složité.</p>
         <p>
-          Obtížná je přirozené znalosti jazyka, kdy vše do sebe zapadá zcela automaticky, bez
-          přemýšlení. Každý toho dosáhne u svého mateřského jazyka v průběhu dětství čistě množstvím
-          opakování.
+          Učení cizích jazyků není ve své podstatě složité. Každý toho dosáhne u svého mateřského
+          jazyka v průběhu dětství čistě množstvím opakování.
         </p>
         <p>
           Běžné učení jazyků používá příliš mnoho přemýšlení a málo praxe. Tato aplikace je naopak
@@ -100,6 +98,10 @@ export default function Guide(): JSX.Element {
           <span>
             Přehled započatých slovíček, umožňuje restartovat procvičování každého slovíčka
           </span>
+        </p>
+        <p>
+          <strong>"Stáhnout data"</strong>
+          <span>Stáhne veškerá data do zařízení pro možnost používat aplikaci offline.</span>
         </p>
         <p>
           <strong>"Synchronizovat data"</strong>
