@@ -52,7 +52,7 @@ export default function BlockBar({
   // Helper for rendering division lines
   const renderDivisions = () => {
     const stepPercent = Math.min(100, Math.max(1, divisions));
-    const lineCount = Math.floor(barWidth / stepPercent);
+    const lineCount = Math.floor(barWidth / stepPercent) - 1;
     return Array.from({ length: lineCount }, (_, i) => {
       const position = (i + 1) * stepPercent;
       if (position > barWidth) return null;
