@@ -2,10 +2,10 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import { type JSX } from 'react';
-import { MenuButton } from '@/components/UI/buttons/MenuButton';
 import { errorHandler } from '../logging/error-handler';
 import { audioSync, dataSync } from '@/database/utils/data-sync.utils';
 import { logRejectedResults } from '../logging/logging.utils';
+import ModalButton from '../modal/ModalButton';
 
 /**
  * SyncButton component for synchronizing the current user's data.
@@ -33,13 +33,15 @@ export default function SyncButton({ className }: { className?: string }): JSX.E
   };
 
   return (
-    <MenuButton
-      onClick={handleSync}
+    <ModalButton
+      onConfirm={handleSync}
       className={className}
       disabled={!userId}
       title={TEXTS.dataSyncTooltip}
+      modalTitle={TEXTS.syncButton}
+      modalText={TEXTS.syncButtonDescription}
     >
       {TEXTS.syncButton}
-    </MenuButton>
+    </ModalButton>
   );
 }

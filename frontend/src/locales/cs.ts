@@ -114,8 +114,11 @@ export const TEXTS = {
   grammarOverviewTooltip: 'Přehled započaté gramatiky',
   vocabularyOverview: 'Přehled slovíček',
   vocabularyOverviewTooltip: 'Přehled započatých slovíček',
+
+  // Sync Button
   syncButton: 'Synchronizovat data',
-  dataSyncTooltip: 'Zajistí opravu dat v případě poruchy synchronizace',
+  syncButtonDescription: 'Chcete synchronizovat data? Vhodné pouze při poškozených datech.',
+  dataSyncTooltip: 'Plná synchronizace',
 
   // Signout Button
   signoutButtonTitle: 'Odhlásit se',

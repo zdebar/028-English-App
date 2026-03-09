@@ -24,7 +24,7 @@ interface ModalButtonProps {
  * @param onConfirm Function to call when action is confirmed. Should handle its own errors.
  * @param modalTitle Title to display in the confirmation modal.
  * @param modalText Description to display in the confirmation modal.
- * @param title Text to display on the button. If children are provided, this will be ignored.
+ * @param title Tooltip text to display on hover over the button.
  * @param disabled Whether the button is disabled.
  * @param className Additional CSS classes for custom styling.
  * @param children Content to display inside the button. Should be inline elements or text (not block elements like <p>, <div>, etc.) to ensure proper styling.
