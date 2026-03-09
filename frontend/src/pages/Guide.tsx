@@ -12,10 +12,6 @@ export default function Guide(): JSX.Element {
       <h1 className="text-center">Návod</h1>
       <section>
         <p>
-          Učení cizích jazyků není ve své podstatě složité. Každý toho dosáhne u svého mateřského
-          jazyka v průběhu dětství čistě množstvím opakování.
-        </p>
-        <p>
           Běžné učení jazyků používá příliš mnoho přemýšlení a málo praxe. Tato aplikace je naopak
           zaměřená na dril, na velké množství naposlouchaných a vyslovených opakování.
         </p>
@@ -25,7 +21,7 @@ export default function Guide(): JSX.Element {
 
         <p>
           Aplikace využívá pouze procvičování pomocí kartiček. Jak pro jednotlivá slovíčka, tak pro
-          slovní spojení či celé věty.{' '}
+          slovní spojení či celé věty.
         </p>
         <p>
           Pravidelně se střídá procvičování z češtiny do angličtiny a z angličtiny do češtiny. Z
@@ -68,35 +64,34 @@ export default function Guide(): JSX.Element {
 
         <p>
           <strong>"neznám"</strong>
-          Sníží skóre dané položky, nabídne se k dalšímu procvičování dříve
+          Sníží skóre dané položky. Položka se nabídne k dalšímu procvičování dříve.
         </p>
         <p>
           <strong>"znám"</strong>
-          <span>Zvýší skóre dané položky, bude se tak nabízet k dalšímu procvičování později.</span>
+          <span>
+            Zvýší skóre dané položky. Položka se bude tak nabízet k dalšímu procvičování později.
+          </span>
         </p>
-        <p>
-          Aplikace je postavena na drilu až do úplné automatizace, doporučujeme tedy dávat "znám"
-          jen pokud je pro vás znalost zcela automatická.
-        </p>
+        <p>Doporučujeme dávat "znám" jen pokud je pro vás znalost zcela automatická.</p>
       </section>
       <section>
         <h2>Profil</h2>
         <Screenshot src="/screenshots/profile.webp" alt="Ukázka profilu uživatele" />
         <p>
           <strong>"Přehled CEFR úrovní"</strong>
-          <span>Přehled postupu na jednotlivých CEFR úrovních a na jednotlivých lekcích</span>
+          <span>Přehled postupu na jednotlivých CEFR úrovních a na jednotlivých lekcích.</span>
         </p>
         <p>
           <strong>"Přehled gramatiky"</strong>
           <span>
             Přehled již započaté gramatiky, umožňuje restartovat procvičování vět příslušných k dané
-            grammatice
+            grammatice.
           </span>
         </p>
         <p>
           <strong>"Přehled slovíček"</strong>
           <span>
-            Přehled započatých slovíček, umožňuje restartovat procvičování každého slovíčka
+            Přehled započatých slovíček, umožňuje restartovat procvičování každého slovíčka.
           </span>
         </p>
         <p>
@@ -119,27 +114,19 @@ export default function Guide(): JSX.Element {
         </p>
         <p>
           <strong>"Odhlásit se"</strong>
-          <span>Odhlásí Vás ze svého účtu.</span>
-        </p>
-      </section>
-      <section>
-        <h2>Synchronizace</h2>
-        <p>
-          Aplikace pravidelně ukládá cvičební data na vzdálený server. Aplikace však není určena pro
-          současnou práci na více zařízeních, vzhledem k nepravidelnosti synchronizace.
+          <span>Odhlásí vás z vašeho uživatelského účtu.</span>
         </p>
       </section>
       <section>
         <h2>Offline</h2>
         <p>
           Ve webové verzi aplikace je pro používání offline nejprve zapotřebí stáhnout veškerá data
-          do zařízení. To lze udělat v profily pomocí tlačítka "Stáhnout data".
+          do zařízení. To lze udělat v profilu pomocí tlačítka "Stáhnout data".
         </p>
         <p>
-          V PWA aplikaci (ke stažení na vyhledávací liště) je již veškerá data stažena a aplikace je
-          plně funkční i bez připojení k internetu.
+          V PWA aplikaci (běžně tlačítkem na vyhledávací liště) jsou již veškerá data stažena a
+          aplikace je plně funkční i bez připojení k internetu.
         </p>
-        <p>V obou případech se aplikace pokusí synchronizovat data při každém startu.</p>
       </section>
     </div>
   );
