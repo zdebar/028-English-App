@@ -18,7 +18,7 @@ export default function TextButton({ onClick, title, children, className = '' }:
   return (
     <button
       type="button"
-      className={`color-info absolute -bottom-9 left-4 cursor-pointer ${className}`}
+      className={`absolute -bottom-9 left-4 cursor-pointer ${className}`}
       onClick={onClick}
       title={title}
     >

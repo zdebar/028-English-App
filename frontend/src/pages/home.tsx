@@ -62,10 +62,10 @@ export default function Home(): JSX.Element {
   );
 
   return (
-    <div className="max-w-hero relative flex w-full flex-col gap-4 text-center">
-      <h1 className="pt-12 pb-6">{TEXTS.appTitle}</h1>
+    <div className="max-w-hero relative flex w-full flex-col text-center">
+      <h1 className="py-12">{TEXTS.appTitle}</h1>
       <p className="px-4">{TEXTS.appDescription}</p>
-      <Link to="/guide">
+      <Link to="/guide" className="pb-12">
         <NotificationText text={TEXTS.guide} className="color-info" />
       </Link>
       {userId ? (
