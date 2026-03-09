@@ -26,6 +26,7 @@ export default function Profile(): JSX.Element {
       <MenuButton
         onClick={() => navigate(ROUTES.vocabulary)}
         title={TEXTS.vocabularyOverviewTooltip}
+        className="mb-8"
       >
         {TEXTS.vocabularyOverview}
       </MenuButton>
