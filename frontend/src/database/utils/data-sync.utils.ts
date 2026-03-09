@@ -40,18 +40,8 @@ export async function dataSync(userId: string): Promise<void> {
 
   // Step 2: Perform shared stores data synchronization (grammar and audio metadata)
   const sharedPromises = doFullSync
-    ? [
-        Grammar.syncFromRemote(true),
-        Levels.syncFromRemote(true),
-        Lessons.syncFromRemote(true),
-        AudioRecord.syncFromRemote(config.audio.archives),
-      ]
-    : [
-        Grammar.syncFromRemote(false),
-        Levels.syncFromRemote(false),
-        Lessons.syncFromRemote(false),
-        AudioRecord.syncFromRemote(config.audio.archives),
-      ];
+    ? [Grammar.syncFromRemote(true), Levels.syncFromRemote(true), Lessons.syncFromRemote(true)]
+    : [Grammar.syncFromRemote(false), Levels.syncFromRemote(false), Lessons.syncFromRemote(false)];
 
   void Promise.allSettled(sharedPromises).then((results) => {
     logRejectedResults(results, 'Data synchronization error:');
@@ -70,6 +60,27 @@ export async function dataSync(userId: string): Promise<void> {
   if (isError) throw new Error('Data synchronization error');
   if (doFullSync) {
     setFullSyncTime(userId, now);
+  }
+}
+
+/**
+ * Synchronizes data for a specific user with the database.
+ *
+ * @param userId - The unique identifier of the user to synchronize data for
+ * @returns A promise that resolves when the data synchronization is complete
+ */
+export async function audioSync(userId: string): Promise<void> {
+  assertNonEmptyString(userId, 'userId');
+  const isStandalone =
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (window.navigator as any).standalone === true;
+
+  if (isStandalone) {
+    // PWA: download all audio files
+    await AudioRecord.syncFromRemote(config.audio.allArchives);
+  } else {
+    // Web app: download only selected audio files
+    await AudioRecord.syncFromRemote(config.audio.initialArchive);
   }
 }
 

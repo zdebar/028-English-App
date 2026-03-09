@@ -32,6 +32,17 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    * Synchronizes audio data from configured archives to the local database.
    */
   static async syncFromRemote(archives: string[]): Promise<void> {
+    const archiveList = Array.isArray(archives)
+      ? Array.from(
+          new Set(archives.filter((x): x is string => typeof x === 'string' && x.length > 0)),
+        )
+      : [];
+
+    if (archiveList.length === 0) {
+      infoHandler('No audio archives to sync.');
+      return;
+    }
+
     const results = await Promise.allSettled(
       archives.map((archiveName) => this.syncArchiveFromRemote(archiveName)),
     );

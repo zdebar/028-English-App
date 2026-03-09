@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { dataSync, dataSyncOnUnmount } from '../utils/data-sync.utils';
+import { dataSyncOnUnmount, dataSync, audioSync } from '../utils/data-sync.utils';
 import AudioRecord from '../models/audio-records';
 import { TEXTS } from '@/locales/cs';
 import config from '@/config/config';
@@ -43,6 +43,7 @@ export function usePeriodicSync(userId: string | null) {
         try {
           if (userId) {
             await dataSync(userId);
+            await audioSync(userId);
             void AudioRecord.removeOrphaned();
           }
           showToast(TEXTS.syncSuccessToast, 'success');

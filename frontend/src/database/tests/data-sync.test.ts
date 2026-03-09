@@ -86,7 +86,7 @@ vi.mock('@/database/models/db', () => ({
   },
 }));
 
-import { dataSync, dataSyncOnUnmount, splitDeleted } from '@/database/utils/data-sync.utils';
+import { audioSync, dataSyncOnUnmount, splitDeleted } from '@/database/utils/data-sync.utils';
 
 describe('data-sync.utils', () => {
   beforeEach(() => {
@@ -109,7 +109,7 @@ describe('data-sync.utils', () => {
     vi.spyOn(Date, 'now').mockReturnValue(5000);
     mocks.getFullSyncTime.mockReturnValue(0);
 
-    await dataSync('u1');
+    await audioSync('u1');
 
     expect(mocks.userScoreSyncFromRemote).toHaveBeenCalledWith('u1', true);
     expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', true);
@@ -124,7 +124,7 @@ describe('data-sync.utils', () => {
     vi.spyOn(Date, 'now').mockReturnValue(500);
     mocks.getFullSyncTime.mockReturnValue(0);
 
-    await dataSync('u1');
+    await audioSync('u1');
 
     expect(mocks.userScoreSyncFromRemote).toHaveBeenCalledWith('u1', false);
     expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', false);
@@ -137,7 +137,7 @@ describe('data-sync.utils', () => {
   it('dataSync throws when user sync reports rejected results', async () => {
     mocks.logRejectedResults.mockReturnValueOnce(false).mockReturnValueOnce(true);
 
-    await expect(dataSync('u1')).rejects.toThrow('Data synchronization error');
+    await expect(audioSync('u1')).rejects.toThrow('Data synchronization error');
   });
 
   it('dataSyncOnUnmount syncs only user stores in partial mode', async () => {
