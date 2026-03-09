@@ -75,10 +75,12 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
 export async function audioSync(userId: string, downloadAll: boolean = false): Promise<void> {
   assertNonEmptyString(userId, 'userId');
 
+  const supportsMatchMedia =
+    typeof window !== 'undefined' && typeof window.matchMedia === 'function';
+  const isDisplayStandalone =
+    supportsMatchMedia && window.matchMedia('(display-mode: standalone)').matches;
   const isStandalone =
-    downloadAll ||
-    window.matchMedia('(display-mode: standalone)').matches ||
-    (window.navigator as any).standalone === true;
+    downloadAll || isDisplayStandalone || (window.navigator as any).standalone === true;
 
   if (isStandalone) {
     // PWA or downloadAll: download all audio files

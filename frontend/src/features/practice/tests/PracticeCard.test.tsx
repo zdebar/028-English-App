@@ -53,6 +53,7 @@ vi.mock('@/config/config', () => ({
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
     syncLoadingText: 'Sync loading',
+    notAvailable: 'Není k dispozici',
     reveal: 'Reveal',
     noAudio: 'No audio',
     loadingAudio: 'Loading audio',
@@ -217,7 +218,7 @@ describe('PracticeCard', () => {
 
     render(<PracticeCard />);
 
-    expect(screen.getByText('Žádné položky k procvičování')).toBeTruthy();
+    expect(screen.getByText('Není k dispozici')).toBeTruthy();
   });
 
   it('reveals item and plays audio on item click in CZ->EN mode', () => {

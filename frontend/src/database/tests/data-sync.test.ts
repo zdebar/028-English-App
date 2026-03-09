@@ -12,6 +12,8 @@ const mocks = vi.hoisted(() => ({
   levelsSyncFromRemote: vi.fn(),
   lessonsSyncFromRemote: vi.fn(),
   audioSyncFromRemote: vi.fn(),
+  triggerDailyCountUpdatedEvent: vi.fn(),
+  triggerLevelsUpdatedEvent: vi.fn(),
 }));
 
 vi.mock('@/config/config', () => ({
@@ -19,8 +21,12 @@ vi.mock('@/config/config', () => ({
     sync: {
       fullSyncInterval: 1000,
     },
+    database: {
+      nullReplacementDate: '9999-12-31T23:59:59+00:00',
+    },
     audio: {
-      archives: ['pack-a.zip', 'pack-b.zip'],
+      initialArchive: ['pack-a.zip'],
+      allArchives: ['pack-a.zip', 'pack-b.zip'],
     },
   },
 }));
@@ -86,7 +92,13 @@ vi.mock('@/database/models/db', () => ({
   },
 }));
 
-import { audioSync, dataSyncOnUnmount, splitDeleted } from '@/database/utils/data-sync.utils';
+vi.mock('@/features/user-stats/dashboard.utils', () => ({
+  triggerDailyCountUpdatedEvent: (...args: unknown[]) =>
+    mocks.triggerDailyCountUpdatedEvent(...args),
+  triggerLevelsUpdatedEvent: (...args: unknown[]) => mocks.triggerLevelsUpdatedEvent(...args),
+}));
+
+import { dataSync, dataSyncOnUnmount, splitDeleted } from '@/database/utils/data-sync.utils';
 
 describe('data-sync.utils', () => {
   beforeEach(() => {
@@ -109,14 +121,15 @@ describe('data-sync.utils', () => {
     vi.spyOn(Date, 'now').mockReturnValue(5000);
     mocks.getFullSyncTime.mockReturnValue(0);
 
-    await audioSync('u1');
+    await dataSync('u1');
 
     expect(mocks.userScoreSyncFromRemote).toHaveBeenCalledWith('u1', true);
     expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', true);
     expect(mocks.grammarSyncFromRemote).toHaveBeenCalledWith(true);
     expect(mocks.levelsSyncFromRemote).toHaveBeenCalledWith(true);
     expect(mocks.lessonsSyncFromRemote).toHaveBeenCalledWith(true);
-    expect(mocks.audioSyncFromRemote).toHaveBeenCalledWith(['pack-a.zip', 'pack-b.zip']);
+    expect(mocks.triggerDailyCountUpdatedEvent).toHaveBeenCalledWith('u1');
+    expect(mocks.triggerLevelsUpdatedEvent).toHaveBeenCalledWith('u1');
     expect(mocks.setFullSyncTime).toHaveBeenCalledWith('u1', 5000);
   });
 
@@ -124,20 +137,22 @@ describe('data-sync.utils', () => {
     vi.spyOn(Date, 'now').mockReturnValue(500);
     mocks.getFullSyncTime.mockReturnValue(0);
 
-    await audioSync('u1');
+    await dataSync('u1');
 
     expect(mocks.userScoreSyncFromRemote).toHaveBeenCalledWith('u1', false);
     expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', false);
     expect(mocks.grammarSyncFromRemote).toHaveBeenCalledWith(false);
     expect(mocks.levelsSyncFromRemote).toHaveBeenCalledWith(false);
     expect(mocks.lessonsSyncFromRemote).toHaveBeenCalledWith(false);
+    expect(mocks.triggerDailyCountUpdatedEvent).toHaveBeenCalledWith('u1');
+    expect(mocks.triggerLevelsUpdatedEvent).toHaveBeenCalledWith('u1');
     expect(mocks.setFullSyncTime).not.toHaveBeenCalled();
   });
 
   it('dataSync throws when user sync reports rejected results', async () => {
     mocks.logRejectedResults.mockReturnValueOnce(false).mockReturnValueOnce(true);
 
-    await expect(audioSync('u1')).rejects.toThrow('Data synchronization error');
+    await expect(dataSync('u1')).rejects.toThrow('Data synchronization error');
   });
 
   it('dataSyncOnUnmount syncs only user stores in partial mode', async () => {

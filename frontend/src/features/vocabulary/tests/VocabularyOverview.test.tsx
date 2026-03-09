@@ -5,11 +5,10 @@ const mocks = vi.hoisted(() => ({
   userId: 'u1' as string | null,
   navigate: vi.fn(),
   resetItemById: vi.fn(),
-  setCurrentIndex: vi.fn(),
   reload: vi.fn(),
+  showToast: vi.fn(),
   state: {
     words: [] as any[],
-    currentIndex: null as number | null,
     error: null as string | null,
     loading: false,
   },
@@ -42,16 +41,15 @@ vi.mock('@/database/models/user-items', () => ({
 vi.mock('@/hooks/use-array', () => ({
   useArray: () => ({
     data: mocks.state.words,
-    currentIndex: mocks.state.currentIndex,
-    currentItem:
-      mocks.state.currentIndex == null
-        ? null
-        : (mocks.state.words[mocks.state.currentIndex] ?? null),
-    setCurrentIndex: mocks.setCurrentIndex,
     error: mocks.state.error,
     loading: mocks.state.loading,
     reload: mocks.reload,
   }),
+}));
+
+vi.mock('@/features/toast/use-toast-store', () => ({
+  useToastStore: (selector: (state: { showToast: typeof mocks.showToast }) => unknown) =>
+    selector({ showToast: mocks.showToast }),
 }));
 
 vi.mock('@/features/vocabulary/vocabulary.utils', async () => {
@@ -69,6 +67,8 @@ vi.mock('@/components/UI/DelayedMessage', () => ({
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
     loadingMessage: 'Loading',
+    resetProgressSuccessToast: 'Reset success',
+    resetProgressErrorToast: 'Reset error',
   },
 }));
 
@@ -107,11 +107,10 @@ describe('VocabularyOverview', () => {
     vi.clearAllMocks();
     mocks.userId = 'u1';
     mocks.state.words = [];
-    mocks.state.currentIndex = null;
     mocks.state.error = null;
     mocks.state.loading = false;
     mocks.reload.mockResolvedValue(undefined);
-    mocks.resetItemById.mockResolvedValue(true);
+    mocks.resetItemById.mockResolvedValue(undefined);
   });
 
   it('renders loading view when hook is loading', () => {
@@ -130,18 +129,19 @@ describe('VocabularyOverview', () => {
     render(<VocabularyOverview />);
     expect(screen.getByTestId('list-size').textContent).toBe('2');
 
-    fireEvent.click(screen.getByTestId('select-first'));
-    expect(mocks.setCurrentIndex).toHaveBeenCalledWith(0);
-
     fireEvent.click(screen.getByTestId('list-close'));
     expect(mocks.navigate).toHaveBeenCalledWith('/profile');
+
+    fireEvent.click(screen.getByTestId('select-first'));
+    expect(screen.getByTestId('detail-word').textContent).toBe('ahoj');
   });
 
   it('renders detail view and resets selected item', async () => {
-    mocks.state.words = [{ item_id: 3, czech: 'dům' }] as any;
-    mocks.state.currentIndex = 0;
+    mocks.state.words = [{ item_id: 3, czech: 'dům', english: 'house' }] as any;
 
     render(<VocabularyOverview />);
+
+    fireEvent.click(screen.getByTestId('select-first'));
 
     expect(screen.getByTestId('detail-word').textContent).toBe('dům');
 
@@ -149,16 +149,14 @@ describe('VocabularyOverview', () => {
     await waitFor(() => {
       expect(mocks.resetItemById).toHaveBeenCalledWith('u1', 3);
       expect(mocks.reload).toHaveBeenCalledTimes(1);
-      expect(mocks.setCurrentIndex).toHaveBeenCalledWith(null);
+      expect(mocks.showToast).toHaveBeenCalledWith('Reset success', 'success');
     });
 
-    fireEvent.click(screen.getByTestId('detail-close'));
-    expect(mocks.setCurrentIndex).toHaveBeenCalledWith(null);
+    expect(screen.getByTestId('list-size').textContent).toBe('1');
   });
 
   it('closes detail view if selected index is invalid after filtering', () => {
-    mocks.state.words = [];
-    mocks.state.currentIndex = 0;
+    mocks.state.words = [] as any[];
 
     render(<VocabularyOverview />);
 

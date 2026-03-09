@@ -218,6 +218,5 @@ describe('UserItem', () => {
     expect(mocks.bulkDelete).toHaveBeenCalledWith([['u1', 3]]);
     expect(mocks.bulkPut).toHaveBeenCalled();
     expect(mocks.markAsSynced).toHaveBeenCalledWith('user_items', '2026-03-04T00:00:00.000Z', 'u1');
-    expect(mocks.triggerLevelsUpdatedEvent).toHaveBeenCalledWith('u1');
   });
 });

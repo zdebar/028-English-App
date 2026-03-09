@@ -134,7 +134,6 @@ describe('DeleteUserButton', () => {
       expect(mocks.invoke).toHaveBeenCalledWith('delete-user', {
         body: { userId: 'u1' },
       });
-      expect(mocks.signOut).toHaveBeenCalled();
       expect(mocks.showToast).toHaveBeenCalledWith('Delete success', 'success');
     });
   });

@@ -4,6 +4,7 @@ const mocks = vi.hoisted(() => ({
   grammarGet: vi.fn(),
   grammarAnyOf: vi.fn(),
   startedBetween: vi.fn(),
+  startedToArray: vi.fn(),
   syncFromRemoteGeneric: vi.fn(),
 }));
 
@@ -22,7 +23,7 @@ vi.mock('@/database/models/db', () => ({
     },
     user_items: {
       where: (field: string) => {
-        if (field === '[user_id+grammar_id+started_at]') {
+        if (field === '[user_id+started_at]') {
           return {
             between: (...args: unknown[]) => mocks.startedBetween(...args),
           };
@@ -48,10 +49,13 @@ describe('Grammar', () => {
     vi.clearAllMocks();
 
     mocks.startedBetween.mockReturnValue({
-      primaryKeys: vi.fn().mockResolvedValue([]),
+      filter: () => ({
+        toArray: (...args: unknown[]) => mocks.startedToArray(...args),
+      }),
     });
+    mocks.startedToArray.mockResolvedValue([]);
     mocks.grammarAnyOf.mockReturnValue({
-      toArray: vi.fn().mockResolvedValue([]),
+      sortBy: vi.fn().mockResolvedValue([]),
     });
     mocks.syncFromRemoteGeneric.mockResolvedValue(undefined);
   });
@@ -71,26 +75,22 @@ describe('Grammar', () => {
   });
 
   it('getStartedIds returns unique grammar ids', async () => {
-    mocks.startedBetween.mockReturnValue({
-      primaryKeys: vi.fn().mockResolvedValue([
-        ['u1', 1, '2026-01-01'],
-        ['u1', 2, '2026-01-02'],
-        ['u1', 1, '2026-01-03'],
-      ]),
-    });
+    mocks.startedToArray.mockResolvedValue([
+      { user_id: 'u1', grammar_id: 1, started_at: '2026-01-01' },
+      { user_id: 'u1', grammar_id: 2, started_at: '2026-01-02' },
+      { user_id: 'u1', grammar_id: 1, started_at: '2026-01-03' },
+    ]);
 
     await expect(Grammar.getStartedIds('u1')).resolves.toEqual([1, 2]);
   });
 
   it('getStartedList returns grammar list for started ids', async () => {
-    mocks.startedBetween.mockReturnValue({
-      primaryKeys: vi.fn().mockResolvedValue([
-        ['u1', 1, '2026-01-01'],
-        ['u1', 2, '2026-01-02'],
-      ]),
-    });
+    mocks.startedToArray.mockResolvedValue([
+      { user_id: 'u1', grammar_id: 1, started_at: '2026-01-01' },
+      { user_id: 'u1', grammar_id: 2, started_at: '2026-01-02' },
+    ]);
     mocks.grammarAnyOf.mockReturnValue({
-      toArray: vi.fn().mockResolvedValue([
+      sortBy: vi.fn().mockResolvedValue([
         { id: 1, name: 'A', note: '', sort_order: 1, deleted_at: null },
         { id: 2, name: 'B', note: '', sort_order: 2, deleted_at: null },
       ]),

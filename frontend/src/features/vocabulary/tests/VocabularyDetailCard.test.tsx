@@ -71,12 +71,12 @@ describe('VocabularyDetailCard', () => {
             mastered_at: '2026-03-02T00:00:00.000Z',
           } as any
         }
+        selectedTitle="ahoj"
         onClose={vi.fn()}
         onReset={vi.fn()}
       />,
     );
 
-    expect(screen.getByText('ahoj')).toBeTruthy();
     expect(screen.getByText('Czech:ahoj')).toBeTruthy();
     expect(screen.getByText('English:hello')).toBeTruthy();
     expect(screen.getByText('Progress:2')).toBeTruthy();
@@ -99,6 +99,7 @@ describe('VocabularyDetailCard', () => {
             mastered_at: null,
           } as any
         }
+        selectedTitle="dům"
         onClose={vi.fn()}
         onReset={vi.fn()}
       />,
@@ -114,6 +115,7 @@ describe('VocabularyDetailCard', () => {
     render(
       <VocabularyDetailCard
         selectedWord={{ item_id: 1, czech: 'ahoj' } as any}
+        selectedTitle="ahoj"
         onClose={onClose}
         onReset={onReset}
       />,

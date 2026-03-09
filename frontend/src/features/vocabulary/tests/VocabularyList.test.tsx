@@ -6,6 +6,9 @@ vi.mock('@/config/config', () => ({
     vocabulary: {
       itemsPerPage: 2,
     },
+    buttons: {
+      loadingMessageDelay: 0,
+    },
   },
 }));
 
@@ -13,17 +16,9 @@ vi.mock('@/locales/cs', () => ({
   TEXTS: {
     enterPrompt: 'Search',
     noStartedVocabulary: 'No started vocabulary',
-    and: 'and',
+    more: 'and more words',
   },
 }));
-
-vi.mock('@/features/vocabulary/vocabulary.utils', async () => {
-  const actual = await vi.importActual<any>('@/features/vocabulary/vocabulary.utils');
-  return {
-    ...actual,
-    getMoreTextInCzech: vi.fn().mockReturnValue('more words'),
-  };
-});
 
 vi.mock('@/components/UI/buttons/BaseButton', () => ({
   default: ({ onClick, children, disabled }: any) => (
@@ -47,6 +42,10 @@ vi.mock('@/features/vocabulary/DirectionDropdown', () => ({
       direction
     </button>
   ),
+}));
+
+vi.mock('@/components/UI/DelayedMessage', () => ({
+  default: ({ children }: any) => <>{children}</>,
 }));
 
 import VocabularyList from '@/features/vocabulary/VocabularyList';
@@ -108,7 +107,7 @@ describe('VocabularyList', () => {
       />,
     );
 
-    fireEvent.click(screen.getByText(/and 2 more words/i));
+    fireEvent.click(screen.getByText(/and more words/i));
     expect(setVisibleCount).toHaveBeenCalledWith(3);
   });
 

@@ -20,6 +20,7 @@ vi.mock('@/config/config', () => ({
   default: {
     database: {
       epochStartDate: '1970-01-01T00:00:00.000Z',
+      nullReplacementDate: '9999-12-31T23:59:59+00:00',
     },
   },
 }));
@@ -109,7 +110,7 @@ describe('UserScore', () => {
     mocks.from.mockImplementation(() => ({
       select: () => ({
         eq: () => ({
-          gt: () => Promise.resolve({ data: [], error: null }),
+          gte: () => Promise.resolve({ data: [], error: null }),
         }),
       }),
     }));
@@ -131,7 +132,6 @@ describe('UserScore', () => {
         deleted_at: null,
       }),
     );
-    expect(mocks.triggerDailyCountUpdatedEvent).toHaveBeenCalledWith('u1');
   });
 
   it('getOrCreateTodayScore returns numeric count or zero', async () => {
@@ -163,7 +163,7 @@ describe('UserScore', () => {
     mocks.from.mockImplementation(() => ({
       select: () => ({
         eq: () => ({
-          gt: () =>
+          gte: () =>
             Promise.resolve({
               data: [
                 {
@@ -215,6 +215,5 @@ describe('UserScore', () => {
       '2026-03-04T00:00:00.000Z',
       'u1',
     );
-    expect(mocks.triggerDailyCountUpdatedEvent).toHaveBeenCalledWith('u1');
   });
 });

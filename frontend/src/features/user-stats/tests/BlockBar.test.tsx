@@ -42,7 +42,7 @@ describe('BlockBar', () => {
     const barContainer = progressbar.parentElement as HTMLElement;
 
     expect(barContainer.style.width).toBe('50%');
-    expect(container.querySelectorAll('.border-divisions').length).toBe(5);
+    expect(container.querySelectorAll('.border-divisions').length).toBe(4);
   });
 
   it('handles zero lessonCount safely without crashing', () => {

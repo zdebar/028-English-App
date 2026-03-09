@@ -10,16 +10,11 @@ vi.mock('@/config/config', () => ({
 
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
-    next: 'další',
-    nextFivePlus: 'dalších',
+    more: 'další',
   },
 }));
 
-import {
-  filterSortedWords,
-  getMoreTextInCzech,
-  shortenDate,
-} from '@/features/vocabulary/vocabulary.utils';
+import { filterSortedWords, shortenDate } from '@/features/vocabulary/vocabulary.utils';
 
 describe('vocabulary.utils', () => {
   it('shortenDate returns empty for null/undefined/null-replacement date', () => {
@@ -30,12 +25,6 @@ describe('vocabulary.utils', () => {
 
   it('shortenDate returns YYYY-MM-DD for ISO date', () => {
     expect(shortenDate('2026-02-28T14:20:00.000Z')).toBe('2026-02-28');
-  });
-
-  it('getMoreTextInCzech chooses by count threshold', () => {
-    expect(getMoreTextInCzech(1)).toBe('další');
-    expect(getMoreTextInCzech(4)).toBe('další');
-    expect(getMoreTextInCzech(5)).toBe('dalších');
   });
 
   it('filterSortedWords filters by prefix from pre-sorted arrays and respects visibleCount', () => {
