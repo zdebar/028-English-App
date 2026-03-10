@@ -14,7 +14,11 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 
-import { filterSortedWords, shortenDate } from '@/features/vocabulary/vocabulary.utils';
+import {
+  compareCzechStrings,
+  filterSortedWords,
+  shortenDate,
+} from '@/features/vocabulary/vocabulary.utils';
 
 describe('vocabulary.utils', () => {
   it('shortenDate returns empty for null/undefined/null-replacement date', () => {
@@ -44,5 +48,40 @@ describe('vocabulary.utils', () => {
 
     const limitedResult = filterSortedWords(sortedByCzech, 'a', 'czech', 1);
     expect(limitedResult).toHaveLength(1);
+  });
+
+  it('filterSortedWords handles Czech diacritics in search term', () => {
+    const words = [
+      { czech: 'čaj', english: 'tea' },
+      { czech: 'cena', english: 'price' },
+      { czech: 'čepice', english: 'cap' },
+      { czech: 'dům', english: 'house' },
+      { czech: 'dopis', english: 'letter' },
+    ] as any;
+
+    const sortedByCzech = [...words].sort((a, b) => a.czech.localeCompare(b.czech, 'cs'));
+
+    const exactDiacritics = filterSortedWords(sortedByCzech, 'č', 'czech', 10);
+    expect(exactDiacritics.map((x: any) => x.czech)).toEqual(['čaj', 'čepice']);
+
+    const withoutDiacritics = filterSortedWords(sortedByCzech, 'c', 'czech', 10);
+    expect(withoutDiacritics.map((x: any) => x.czech)).toEqual(['cena']);
+
+    const dWords = filterSortedWords(sortedByCzech, 'd', 'czech', 10);
+    expect(dWords.map((x: any) => x.czech)).toEqual(['dopis', 'dům']);
+  });
+
+  it('Czech locale sorting works for the whole word, not just first letter', () => {
+    const words = ['ca', 'cb', 'čaj', 'čáp', 'da', 'ďas'];
+    const sorted = [...words].sort(compareCzechStrings);
+
+    expect(sorted).toEqual(['ca', 'cb', 'čaj', 'čáp', 'da', 'ďas']);
+  });
+
+  it('sorts diacritics after base letters for Czech words', () => {
+    const words = ['ěra', 'eva', 'íra', 'ivan', 'čaj', 'citron', 'ďábel', 'darek'];
+    const sorted = [...words].sort(compareCzechStrings);
+
+    expect(sorted).toEqual(['citron', 'čaj', 'darek', 'ďábel', 'eva', 'ěra', 'ivan', 'íra']);
   });
 });

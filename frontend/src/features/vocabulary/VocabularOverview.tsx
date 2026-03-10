@@ -8,7 +8,7 @@ import VocabularyDetailCard from './VocabularyDetailCard';
 import VocabularyList from './VocabularyList';
 import { useNavigate } from 'react-router-dom';
 import { useArray } from '@/hooks/use-array';
-import type { DisplayField } from './vocabulary.utils';
+import { compareCzechStrings, type DisplayField } from './vocabulary.utils';
 import NotificationText from '@/components/UI/NotificationText';
 import { TEXTS } from '@/locales/cs';
 import { filterSortedWords } from './vocabulary.utils';
@@ -46,7 +46,7 @@ export default function VocabularyOverview() {
       [...words].sort((a, b) => {
         const valA = a.czech?.toLowerCase() || '';
         const valB = b.czech?.toLowerCase() || '';
-        return valA.localeCompare(valB, 'cs');
+        return compareCzechStrings(valA, valB);
       }),
     [words],
   );

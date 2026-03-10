@@ -98,7 +98,7 @@ export default function VocabularyList({
           )}
         </div>
       </div>
-      <div className="flex flex-col gap-1 overflow-y-auto">
+      <div className="flex flex-col gap-1">
         {hasWords ? (
           <>
             {visibleItems.map((item, index) => (
@@ -121,7 +121,7 @@ export default function VocabularyList({
           </>
         ) : (
           <DelayedMessage>
-            <NotificationText text={TEXTS.noStartedVocabulary} className="color-info pt-4" />
+            <NotificationText text={TEXTS.noStartedVocabulary} className="color-info pt-6" />
           </DelayedMessage>
         )}
       </div>
