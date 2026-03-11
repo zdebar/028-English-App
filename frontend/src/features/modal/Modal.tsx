@@ -42,10 +42,8 @@ export function Modal({ onConfirm, onClose, children }: ModalProps): JSX.Element
 
   return createPortal(
     <div className="z-modal pointer-events-none fixed inset-0 flex items-center justify-center">
-      <div className="card-width pointer-events-auto gap-1 pt-2">
-        <div className="color-base flex grow flex-col items-center gap-2 p-6 text-center">
-          {children}
-        </div>
+      <div className="card-width color-base pointer-events-auto gap-1 py-2">
+        <div className="flex grow flex-col items-center gap-2 p-6 text-center">{children}</div>
         <div className="flex gap-1">
           <BaseButton onClick={handleCancel} className="h-button font-bold">
             {TEXTS.cancel}
