@@ -7,6 +7,11 @@ import App from './App.tsx';
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js');
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'refresh') {
+        window.location.reload();
+      }
+    });
   });
 }
 

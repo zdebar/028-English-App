@@ -21,9 +21,15 @@ self.addEventListener('activate', (event) => {
             .map((cacheName) => caches.delete(cacheName)),
         ),
       )
-      .then(() => self.clients.claim()),
-  );
-});
+      .then(() => self.clients.claim())
+      .then(() => {
+        return self.clients.matchAll({ type: 'window' }).then((clients) => {
+          clients.forEach((client) => {
+            client.postMessage({ type: 'refresh' });
+          });
+        });
+      }),
+)});
 
 function shouldHandleRequest(request) {
   if (request.method !== 'GET') {
