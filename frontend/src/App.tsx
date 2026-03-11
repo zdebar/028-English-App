@@ -14,7 +14,6 @@ import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import Vocabulary from '@/pages/Vocabulary';
 import { ROUTES } from '@/config/routes.config';
 import OverlayMask from './features/overlay/OverlayMask';
-import DelayedMessage from '@/components/UI/DelayedMessage';
 import Profile from '@/pages/Profile';
 import Guide from '@/pages/Guide';
 
@@ -34,6 +33,7 @@ export default function App() {
   const initializeAuth = useAuthStore((state) => state.initializeAuth);
   const authLoading = useAuthStore((state) => state.loading);
   const showToast = useToastStore((state) => state.showToast);
+  const hideToast = useToastStore((state) => state.hideToast);
   const location = useLocation();
 
   // Auth initialization effect
@@ -59,19 +59,21 @@ export default function App() {
   // User store new day reset
   useDailyStatsReset(userId);
 
+  const loading = authLoading || syncLoading;
+  useEffect(() => {
+    if (loading) {
+      showToast(TEXTS.syncLoadingText, 'info', true);
+    } else {
+      hideToast();
+    }
+  }, [loading]);
+
   return (
     <div className="max-w-container relative mx-auto flex min-h-screen flex-col justify-start">
       <ToastContainer />
       <OverlayMask />
       <Header />
       <main className="relative flex grow flex-col items-center gap-4">
-        {(syncLoading || authLoading) && (
-          <div className="pointer-events-none absolute top-0 left-1/2 z-50 w-60 -translate-x-1/2">
-            <DelayedMessage>
-              <NotificationText text={TEXTS.syncLoadingText} className="color-info" />
-            </DelayedMessage>
-          </div>
-        )}
         <Routes>
           <Route path={ROUTES.home} element={<Home />} />
           <Route path={ROUTES.privacyPolicy} element={<PrivacyPolicy />} />

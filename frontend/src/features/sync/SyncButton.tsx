@@ -16,17 +16,20 @@ import ModalButton from '../modal/ModalButton';
 export default function SyncButton({ className }: { className?: string }): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
+  const hideToast = useToastStore((state) => state.hideToast);
 
   const handleSync = async () => {
     if (!userId) return;
 
     try {
+      showToast(TEXTS.syncLoadingText, 'info', true);
       const userResults = await Promise.allSettled([dataSync(userId, true), audioSync(userId)]);
       const isError = logRejectedResults(userResults, 'Data synchronization error:');
       if (isError) throw new Error('Data synchronization error');
-
+      hideToast();
       showToast(TEXTS.syncSuccessToast, 'success');
     } catch (error) {
+      hideToast();
       showToast(TEXTS.syncErrorToast, 'error');
       errorHandler('Sync Error', error);
     }

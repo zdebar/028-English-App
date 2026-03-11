@@ -7,7 +7,7 @@ interface ToastState {
   message: string;
   type: ToastType;
   visible: boolean;
-  showToast: (message: string, type?: ToastType) => void;
+  showToast: (message: string, type?: ToastType, loading?: boolean) => void;
   hideToast: () => void;
   timeoutId: number | null;
 }
@@ -27,15 +27,18 @@ export const useToastStore = create<ToastState>((set) => ({
   type: 'info',
   visible: false,
   timeoutId: null,
-  showToast: (message, type = 'info') => {
+  showToast: (message, type = 'info', loading = false) => {
     set((state) => {
       if (state.timeoutId !== null) {
         clearTimeout(state.timeoutId);
       }
 
-      const timeoutId = window.setTimeout(() => {
-        set({ visible: false, timeoutId: null });
-      }, config.toast.duration);
+      let timeoutId: number | null = null;
+      if (!loading) {
+        timeoutId = window.setTimeout(() => {
+          set({ visible: false, timeoutId: null });
+        }, config.toast.duration);
+      }
 
       return { message, type, visible: true, timeoutId };
     });
@@ -45,7 +48,6 @@ export const useToastStore = create<ToastState>((set) => ({
       if (state.timeoutId !== null) {
         clearTimeout(state.timeoutId);
       }
-
       return { visible: false, timeoutId: null };
     }),
 }));

@@ -19,6 +19,7 @@ import { db } from '@/database/models/db';
 export default function DownloadButton({ className }: { className?: string }): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
+  const hideToast = useToastStore((state) => state.hideToast);
   const { isLoading, setIsLoading } = useMinLoading(config.buttons.minLoadingTime);
 
   const handleSync = async () => {
@@ -26,13 +27,15 @@ export default function DownloadButton({ className }: { className?: string }): J
 
     try {
       setIsLoading(true);
+      showToast(TEXTS.syncLoadingText, 'info', true);
       db.audio_metadata.clear();
       const userResults = await Promise.allSettled([audioSync(userId, true)]);
       const isError = logRejectedResults(userResults, 'Data download error:');
       if (isError) throw new Error('Data download error');
-
+      hideToast();
       showToast(TEXTS.downloadSuccessToast, 'success');
     } catch (error) {
+      hideToast();
       showToast(TEXTS.downloadErrorToast, 'error');
       errorHandler('Download Error', error);
     } finally {
