@@ -9,21 +9,17 @@ import os
 async def prepare_words(file_name: str, output_file: str, audio_folder: str, opus_folder: str) -> None:
 	# 1. Read data
 	df = read_vocab_csv(file_name)
+	if df is None:
+		print("Error: DataFrame is None after reading CSV.")
+		return
 	# 2. Clean data
 	df = clean_DataFrame(df)
-	# 3. Translate to Czech
-	df = fill_missing_czech(df)
-	# 4. Fill IPA pronunciation	
+	# 3. Fill IPA pronunciation	
 	df = await fill_pronunciation(df)
-	# 5. Generate audio files
+	# 4. Generate audio files
 	df = await generate_audio_with_google_cloud(df, audio_folder, "_20260311")
-	# 6. Convert audio files to opus format 
-	df = convert_all_mp3_to_opus(audio_folder, opus_folder, bitrate="16k", df=df)
-	# 7. Save final result with updated audio paths
-	if df is not None:
-		df.to_csv(output_file, index=False)
-	else:
-		print("Error: DataFrame is None, cannot save.")
+	# 5. Save final result with updated audio paths
+	df.to_csv(output_file, index=False)
 	print(f"Processed and saved: {output_file}")
 
 # Runner

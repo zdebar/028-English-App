@@ -5,11 +5,9 @@ import os
 from collections.abc import Awaitable
 import pandas as pd
 from dotenv import load_dotenv
-
-try:
-    import google.cloud.texttospeech as texttospeech
-except ImportError:
-    texttospeech = None
+from io import BytesIO
+from pydub import AudioSegment
+import google.cloud.texttospeech as texttospeech
 
 # Now the GOOGLE_APPLICATION_CREDENTIALS variable is available
 load_dotenv()
@@ -41,10 +39,19 @@ async def generate_audio_with_google_cloud(
     def add_extension(filename: str) -> str:
         return filename + ".mp3"
 
+    # ...existing code...
+
     def save_audio(audio_content, path):
         try:
-            with open(path, "wb") as out:
-                out.write(audio_content)
+            if AudioSegment is not None:
+                # Load audio from bytes
+                audio = AudioSegment.from_file(BytesIO(audio_content), format="ogg")
+                # Trim silence (threshold and chunk size can be adjusted)
+                trimmed = audio.strip_silence(silence_len=100, silence_thresh=-40)
+                trimmed.export(path, format="ogg")
+            else:
+                with open(path, "wb") as out:
+                    out.write(audio_content)
         except Exception as e:
             print(f"Error saving audio file {path}: {e}")
 
@@ -69,11 +76,12 @@ async def generate_audio_with_google_cloud(
 
                 voice = texttospeech.VoiceSelectionParams(
                     language_code=language_code, 
-                    ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL
+                    name="en-US-Wavenet-D",
+                    ssml_gender=texttospeech.SsmlVoiceGender.MALE
                 )
 
                 audio_config = texttospeech.AudioConfig(
-                    audio_encoding=texttospeech.AudioEncoding.MP3
+                    audio_encoding=texttospeech.AudioEncoding.OGG_OPUS
                 )
 
                 response = client.synthesize_speech(
