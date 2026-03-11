@@ -40,6 +40,7 @@ export const TEXTS = {
   masteredTodayHint: 'dnes naučeno',
   signupHint:
     'Aplikace po přihlášení ukládá cvičební data do úložiště Vašeho prohlížeče (7.8MB). Účet je možno kdykoliv smazat, včetně všech dat.',
+  installButton: 'nainstalovat aplikaci',
 
   // User
   userLabel: 'Uživatel',

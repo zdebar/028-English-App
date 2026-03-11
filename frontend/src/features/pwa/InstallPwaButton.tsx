@@ -1,6 +1,12 @@
+import NotificationText from '@/components/UI/NotificationText';
+import { TEXTS } from '@/locales/cs';
 import { useEffect, useState } from 'react';
 
-export function InstallPWAButton() {
+export interface InstallPWAButtonProps extends React.HTMLAttributes<HTMLParagraphElement> {
+  className?: string;
+}
+
+export function InstallPWAButton(props: InstallPWAButtonProps) {
   const [promptEvent, setPromptEvent] = useState<any>(null);
 
   useEffect(() => {
@@ -23,5 +29,12 @@ export function InstallPWAButton() {
 
   if (!promptEvent) return null;
 
-  return <button onClick={handleInstall}>Instalovat aplikaci</button>;
+  return (
+    <NotificationText
+      {...props}
+      text={TEXTS.installButton}
+      onClick={handleInstall}
+      className={`color-info cursor-pointer hover:underline ${props.className}`}
+    />
+  );
 }
