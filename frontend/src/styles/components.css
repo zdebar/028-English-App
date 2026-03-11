@@ -1,7 +1,11 @@
 @layer components {
   /** GUIDE STYLES **/
   .guide p {
-    @apply py-2;
+    @apply my-2;
+  }
+
+  .guide span {
+    @apply block pl-4;
   }
 
   .guide h2 {

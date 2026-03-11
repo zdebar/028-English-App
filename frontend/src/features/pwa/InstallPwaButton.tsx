@@ -33,6 +33,7 @@ export function InstallPWAButton(props: InstallPWAButtonProps) {
     <NotificationText
       {...props}
       text={TEXTS.installButton}
+      title={TEXTS.installButtonTooltip}
       onClick={handleInstall}
       className={`color-info cursor-pointer hover:underline ${props.className}`}
     />

@@ -64,16 +64,17 @@ export default function Home(): JSX.Element {
 
   return (
     <div className="max-w-hero relative flex w-full flex-col text-center">
-      <h1 className="py-8">{TEXTS.appTitle}</h1>
-      <Link to="/guide">
-        <NotificationText text={TEXTS.guide} className="color-info pb-2" />
-      </Link>
+      <h1 className="my-8">{TEXTS.appTitle}</h1>
+      <InstallPWAButton className="my-2 px-4" />
+
       <p className="px-4">{TEXTS.appDescription}</p>
       <p className="text-error-light dark:text-error-dark px-4">{TEXTS.appTestDescription}</p>
-      <InstallPWAButton className="px-4 pt-2" />
+      <Link to="/guide" className="my-">
+        <NotificationText text={TEXTS.guide} className="color-info" />
+      </Link>
 
       {userId ? (
-        <div className="relative flex w-full flex-col pt-12">
+        <div className="relative mt-8 flex w-full flex-col">
           <div className="px-4">
             <PropertyView label={TEXTS.userLabel}>{userDisplayName}</PropertyView>
             <PropertyView
@@ -86,7 +87,7 @@ export default function Home(): JSX.Element {
           <Dashboard className="pt-4" />
         </div>
       ) : (
-        <div className="w-full pt-12">
+        <div className="mt-8 w-full">
           <Auth
             supabaseClient={supabaseInstance}
             appearance={authAppearance}
