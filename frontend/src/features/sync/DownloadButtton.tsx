@@ -8,6 +8,7 @@ import { logRejectedResults } from '../logging/logging.utils';
 import { MenuButton } from '@/components/UI/buttons/MenuButton';
 import config from '@/config/config';
 import { useMinLoading } from '../modal/use-min-loading';
+import { db } from '@/database/models/db';
 
 /**
  * DownloadButton component for downloading the current user's data.
@@ -25,6 +26,7 @@ export default function DownloadButton({ className }: { className?: string }): J
 
     try {
       setIsLoading(true);
+      db.audio_metadata.clear();
       const userResults = await Promise.allSettled([audioSync(userId, true)]);
       const isError = logRejectedResults(userResults, 'Data download error:');
       if (isError) throw new Error('Data download error');

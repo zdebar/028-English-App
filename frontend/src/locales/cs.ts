@@ -116,9 +116,9 @@ export const TEXTS = {
   vocabularyOverviewTooltip: 'Přehled započatých slovíček',
 
   // Sync Button
-  syncButton: 'Synchronizovat data',
-  syncButtonDescription: 'Chcete synchronizovat data? Vhodné pouze při poškozených datech.',
-  dataSyncTooltip: 'Plná synchronizace',
+  syncButton: 'Opravit data',
+  syncButtonDescription: 'Chcete opravit data? Provede se synchronizace a plné obnovení dat.',
+  dataSyncTooltip: 'Synchronizace a plné obnovení dat.',
 
   // Download Button
   downloadButton: 'Stáhnout data',
