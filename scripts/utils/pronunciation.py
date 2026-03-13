@@ -1,6 +1,16 @@
+import eng_to_ipa as ipa
+
+import pandas as pd
+
+async def fill_pronunciation_eng_to_ipa(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Fill the 'pronunciation' column in the DataFrame using eng_to_ipa for English words.
+    """
+    df['pronunciation'] = df['english'].apply(lambda word: ipa.convert(word) if isinstance(word, str) else '')
+    return df
 import asyncio
 
-async def fill_pronunciation(df, lang="en-us"):
+async def fill_pronunciation_espeak_ng(df, lang="en-us"):
     async def get_pron(word):
         try:
             if word:

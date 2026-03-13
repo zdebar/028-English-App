@@ -18,7 +18,7 @@ async def generate_audio_with_google_cloud(
     df: pd.DataFrame,
     audio_folder: str,
     suffix: str = "",
-    language_code: str = "en-us",
+    language_code: str = "en-US",
 ) -> pd.DataFrame:
     if texttospeech is None:
         raise ImportError("Missing dependency: google-cloud-texttospeech. Install with 'pip install google-cloud-texttospeech'.")
@@ -57,14 +57,13 @@ async def generate_audio_with_google_cloud(
 
     os.makedirs(audio_folder, exist_ok=True)
 
-    # Google TTS expects locale style like en-US. Accept en-us input and normalize it.
-    normalized_language_code = language_code.split("-")
-    if len(normalized_language_code) == 2:
-        language_code = f"{normalized_language_code[0].lower()}-{normalized_language_code[1].upper()}"
-
     # Process audio files from english column
     for english in df["english"]:
         cleaned_word = clean_filename(str(english))
+
+        if not cleaned_word:
+            continue
+
         audio_name = f"{cleaned_word}{suffix}"
         audio_names.append(add_extension(audio_name))
         extension_word = add_extension(audio_name)
@@ -76,8 +75,7 @@ async def generate_audio_with_google_cloud(
 
                 voice = texttospeech.VoiceSelectionParams(
                     language_code=language_code, 
-                    name="en-US-Wavenet-D",
-                    ssml_gender=texttospeech.SsmlVoiceGender.MALE
+                    name="en-US-Chirp3-HD-Aoede",
                 )
 
                 audio_config = texttospeech.AudioConfig(

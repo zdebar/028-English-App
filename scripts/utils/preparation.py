@@ -24,7 +24,7 @@ def read_vocab_csv(
     :param columns: List of column names to include.
     :return: DataFrame with the specified columns.
     """
-    df = pd.read_csv(file_path)
+    df = pd.read_csv(file_path, skipinitialspace=True)
     for col in columns:
         if col not in df.columns:
             df[col] = ""
