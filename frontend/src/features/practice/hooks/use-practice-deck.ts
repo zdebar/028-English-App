@@ -75,7 +75,10 @@ export function usePracticeDeck(userId: string) {
         return;
       }
 
-      localStorage.setItem(`practiceDeckProgress_${userId}`, JSON.stringify(userProgress));
+      localStorage.setItem(
+        `practiceDeckProgress_${userId}`,
+        JSON.stringify({ dateTime: new Date(Date.now()).toISOString(), progress: userProgress }),
+      );
     },
     [userId],
   );

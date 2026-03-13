@@ -48,7 +48,7 @@ const config = {
 
   lesson: {
     deckSize: 5, // Number of items per deck
-    lessonSize: 100, // Number of items per lesson
+    lessonSize: 500, // Number of items per lesson
   },
 
   practice: {

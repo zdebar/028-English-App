@@ -103,28 +103,32 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Saves practice deck items for a user, updating their progress and metadata.
    * @param userId - The unique identifier of the user
    * @param items - Array of user item records to be saved
+   * @param dateTime - The date for which the progress is being saved (defaults to today)
    */
-  static async savePracticeDeck(userId: string, items: UserItemPractice[]): Promise<void> {
+  static async savePracticeDeck(
+    userId: string,
+    items: UserItemPractice[],
+    dateTime: string = new Date(Date.now()).toISOString(),
+  ): Promise<void> {
     assertNonEmptyString(userId, 'userId');
     if (!Array.isArray(items)) throw new Error('items must be an array.');
     if (!items || items.length === 0) return;
 
-    const currentDateTime = new Date(Date.now()).toISOString();
     const updatedItems = items.map((item) => {
       return {
         ...item,
         next_at: getNextAt(item.progress),
-        started_at: item.started_at === NULL_DATE ? currentDateTime : item.started_at,
-        updated_at: currentDateTime,
+        started_at: item.started_at === NULL_DATE ? dateTime : item.started_at,
+        updated_at: dateTime,
         mastered_at:
           item.mastered_at === NULL_DATE && item.progress >= config.srs.intervals.length
-            ? currentDateTime
+            ? dateTime
             : item.mastered_at,
       };
     });
 
     await db.user_items.bulkPut(updatedItems);
-    await UserScore.addItemCount(userId, updatedItems.length);
+    await UserScore.addItemCount(userId, updatedItems.length, dateTime);
   }
 
   /**

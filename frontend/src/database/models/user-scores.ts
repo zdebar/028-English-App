@@ -35,15 +35,20 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * Increases the item count for today's date by the specified amount.
    * @param userId - The user ID. Must be a valid string.
    * @param count - The number to add to today's item count. Must be a non-negative integer.
+   * @param dateTime - The ISO string representing the date and time of the update. If not provided, defaults to the current date and time.
    */
-  static async addItemCount(userId: string, count: number): Promise<void> {
+  static async addItemCount(
+    userId: string,
+    count: number,
+    dateTime: string = new Date(Date.now()).toISOString(),
+  ): Promise<void> {
     assertNonEmptyString(userId, 'userId');
     assertPositiveInteger(count, 'addItemCount');
 
-    const today = getTodayShortDate();
-    const existingRecord = await db.user_scores.get([userId, today]);
+    const date = new Date(dateTime).toLocaleDateString('en-CA');
+    const existingRecord = await db.user_scores.get([userId, date]);
     const newItemCount = (existingRecord?.item_count ?? 0) + count;
-    await db.user_scores.put(this.createRecord(userId, today, newItemCount));
+    await db.user_scores.put(this.createRecord(userId, date, newItemCount));
   }
 
   /**

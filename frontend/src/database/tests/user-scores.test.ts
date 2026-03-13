@@ -134,6 +134,22 @@ describe('UserScore', () => {
     );
   });
 
+  it('addItemCount uses provided dateTime to choose score date', async () => {
+    mocks.get.mockResolvedValue({ item_count: 2 });
+
+    await UserScore.addItemCount('u1', 3, '2026-03-06T10:00:00.000Z');
+
+    expect(mocks.get).toHaveBeenCalledWith(['u1', '2026-03-06']);
+    expect(mocks.put).toHaveBeenCalledWith(
+      expect.objectContaining({
+        user_id: 'u1',
+        date: '2026-03-06',
+        item_count: 5,
+        deleted_at: null,
+      }),
+    );
+  });
+
   it('getOrCreateTodayScore returns numeric count or zero', async () => {
     mocks.get.mockResolvedValueOnce({ item_count: 4 }).mockResolvedValueOnce(undefined);
 

@@ -60,21 +60,16 @@ function makeItem(overrides: Partial<UserItemPractice> = {}): UserItemPractice {
     english: 'hello',
     pronunciation: 'həˈloʊ',
     audio: 'hello.opus',
-    item_sort_order: 1,
+    sort_order: 1,
     grammar_id: 10,
     progress: 0,
     started_at: '2026-01-01',
     updated_at: '2026-01-01',
-    deleted_at: null,
+    deleted_at: '2026-01-01',
     next_at: '2026-01-01',
     mastered_at: '2026-01-01',
+    lesson_id: 0,
     show_new_grammar_indicator: false,
-    level_id: null,
-    level_name: null,
-    level_sort_order: null,
-    lesson_id: null,
-    lesson_name: null,
-    lesson_sort_order: null,
     ...overrides,
   };
 }
@@ -153,6 +148,9 @@ describe('usePracticeDeck', () => {
   });
 
   it('stores progress to localStorage on beforeunload and saves remaining on unmount', async () => {
+    const nowSpy = vi
+      .spyOn(Date, 'now')
+      .mockReturnValue(new Date('2026-03-04T10:00:00.000Z').getTime());
     const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
 
     const { result, unmount } = renderHook(() => usePracticeDeck('user-1'));
@@ -166,15 +164,22 @@ describe('usePracticeDeck', () => {
       window.dispatchEvent(new Event('beforeunload'));
     });
 
-    expect(setItemSpy).toHaveBeenCalledWith(
-      'practiceDeckProgress_user-1',
-      expect.stringContaining('"item_id":1'),
-    );
+    expect(setItemSpy).toHaveBeenCalled();
+    const latestCall = setItemSpy.mock.calls[setItemSpy.mock.calls.length - 1];
+    expect(latestCall[0]).toBe('practiceDeckProgress_user-1');
+    const savedPayload = JSON.parse(latestCall[1] as string);
+    expect(savedPayload).toMatchObject({
+      dateTime: '2026-03-04T10:00:00.000Z',
+      progress: [expect.objectContaining({ item_id: 1, progress: 3 })],
+    });
 
-    unmount();
-
-    await waitFor(() => expect(savePracticeDeckMock).toHaveBeenCalledTimes(1));
+    await act(async () => {
+      unmount();
+      await Promise.resolve();
+    });
+    expect(savePracticeDeckMock).toHaveBeenCalledTimes(1);
 
     setItemSpy.mockRestore();
+    nowSpy.mockRestore();
   });
 });

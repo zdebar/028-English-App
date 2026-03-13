@@ -158,7 +158,37 @@ describe('UserItem', () => {
     ]);
 
     expect(mocks.bulkPut).toHaveBeenCalledTimes(1);
-    expect(mocks.addItemCount).toHaveBeenCalledWith('u1', 1);
+    expect(mocks.addItemCount).toHaveBeenCalledWith('u1', 1, '2026-03-04T09:00:00.000Z');
+  });
+
+  it('savePracticeDeck uses provided dateTime when passed explicitly', async () => {
+    const dateTime = '2026-03-06T12:00:00.000Z';
+
+    await UserItem.savePracticeDeck(
+      'u1',
+      [
+        {
+          user_id: 'u1',
+          item_id: 1,
+          progress: 3,
+          started_at: '1970-01-01T00:00:00.000Z',
+          mastered_at: '1970-01-01T00:00:00.000Z',
+          next_at: '1970-01-01T00:00:00.000Z',
+        } as any,
+      ],
+      dateTime,
+    );
+
+    expect(mocks.bulkPut).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          started_at: dateTime,
+          updated_at: dateTime,
+          mastered_at: dateTime,
+        }),
+      ]),
+    );
+    expect(mocks.addItemCount).toHaveBeenCalledWith('u1', 1, dateTime);
   });
 
   it('deleteAllItems deletes by user_id', async () => {

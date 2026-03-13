@@ -1,9 +1,7 @@
 import pandas as pd
 from scripts.preparation import read_vocab_csv, clean_DataFrame
-from scripts.translation import fill_missing_czech
 from scripts.pronunciation import fill_pronunciation
 from scripts.audio import generate_audio_with_google_cloud
-from scripts.convert import convert_all_mp3_to_opus
 import os
 
 async def prepare_words(file_name: str, output_file: str, audio_folder: str, opus_folder: str) -> None:

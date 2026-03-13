@@ -213,12 +213,19 @@ describe('database.utils', () => {
     it('restores saved progress, removes key, and logs info', async () => {
       localStorage.setItem(
         'practiceDeckProgress_u1',
-        JSON.stringify([{ item_id: 1, progress: 2 }]),
+        JSON.stringify({
+          dateTime: '2026-03-04T10:00:00.000Z',
+          progress: [{ item_id: 1, progress: 2 }],
+        }),
       );
 
       await restoreUnsavedFromLocalStorage('u1');
 
-      expect(mocks.savePracticeDeck).toHaveBeenCalledWith('u1', [{ item_id: 1, progress: 2 }]);
+      expect(mocks.savePracticeDeck).toHaveBeenCalledWith(
+        'u1',
+        [{ item_id: 1, progress: 2 }],
+        '2026-03-04T10:00:00.000Z',
+      );
       expect(localStorage.getItem('practiceDeckProgress_u1')).toBeNull();
       expect(mocks.infoHandler).toHaveBeenCalled();
     });
