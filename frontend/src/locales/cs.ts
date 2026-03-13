@@ -123,10 +123,10 @@ export const TEXTS = {
   dataSyncTooltip: 'Synchronizace a plné obnovení dat.',
 
   // Download Button
-  downloadButton: 'Stáhnout data',
-  downloadButtonTooltip: 'Stáhnout data pro funkci offline. (8MB)',
-  downloadSuccessToast: 'Data byla úspěšně stažena.',
-  downloadErrorToast: 'Chyba při stahování dat.',
+  downloadButton: 'Stáhnout audio',
+  downloadButtonTooltip: 'Stáhnout audio soubory pro funkci offline.',
+  downloadSuccessToast: 'Audio soubory byly úspěšně staženy.',
+  downloadErrorToast: 'Chyba při stahování audio souborů.',
 
   // Signout Button
   signoutButtonTitle: 'Odhlásit se',
