@@ -30,3 +30,13 @@ def read_vocab_csv(
             df[col] = ""
     df = df[columns]
     return df
+
+def redo_Id(df, start_id=1):
+    df = df.copy()
+    df['id'] = range(start_id, start_id + len(df))
+    return df
+
+def redo_sort_order(df, start_sort_order=1):
+    df = df.copy()
+    df['sort_order'] = range(start_sort_order, start_sort_order + len(df))
+    return df

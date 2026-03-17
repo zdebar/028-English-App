@@ -37,21 +37,14 @@ async def generate_audio_with_google_cloud(
         return filename
 
     def add_extension(filename: str) -> str:
-        return filename + ".mp3"
+        return filename + ".opus"
 
     # ...existing code...
 
     def save_audio(audio_content, path):
         try:
-            if AudioSegment is not None:
-                # Load audio from bytes
-                audio = AudioSegment.from_file(BytesIO(audio_content), format="ogg")
-                # Trim silence (threshold and chunk size can be adjusted)
-                trimmed = audio.strip_silence(silence_len=100, silence_thresh=-40)
-                trimmed.export(path, format="ogg")
-            else:
-                with open(path, "wb") as out:
-                    out.write(audio_content)
+            with open(path, "wb") as out:
+                out.write(audio_content)
         except Exception as e:
             print(f"Error saving audio file {path}: {e}")
 
@@ -75,7 +68,7 @@ async def generate_audio_with_google_cloud(
 
                 voice = texttospeech.VoiceSelectionParams(
                     language_code=language_code, 
-                    name="en-US-Chirp3-HD-Aoede",
+                    ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL
                 )
 
                 audio_config = texttospeech.AudioConfig(
