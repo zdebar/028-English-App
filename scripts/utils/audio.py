@@ -51,40 +51,45 @@ async def generate_audio_with_google_cloud(
     os.makedirs(audio_folder, exist_ok=True)
 
     # Process audio files from english column
+
     for english in df["english"]:
         cleaned_word = clean_filename(str(english))
-
         if not cleaned_word:
             continue
 
         audio_name = f"{cleaned_word}{suffix}"
-        audio_names.append(add_extension(audio_name))
         extension_word = add_extension(audio_name)
+        audio_names.append(extension_word)
+
+        # Check for any file with the base name (without suffix)
+        base_audio_path = os.path.join(audio_folder, add_extension(cleaned_word))
+        if os.path.exists(base_audio_path):
+            # If base audio exists, skip generation
+            # Optionally, you could copy or reference the existing file
+            print(f"Skipping (audio already exists for base word): {base_audio_path}")
+            continue
 
         audio_path = os.path.join(audio_folder, extension_word)
-        if not os.path.exists(audio_path):
-            try:
-                synthesis_input = texttospeech.SynthesisInput(text=str(english))
+        try:
+            synthesis_input = texttospeech.SynthesisInput(text=str(english))
 
-                voice = texttospeech.VoiceSelectionParams(
-                    language_code=language_code, 
-                    ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL
-                )
+            voice = texttospeech.VoiceSelectionParams(
+                language_code=language_code,
+                ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL
+            )
 
-                audio_config = texttospeech.AudioConfig(
-                    audio_encoding=texttospeech.AudioEncoding.OGG_OPUS
-                )
+            audio_config = texttospeech.AudioConfig(
+                audio_encoding=texttospeech.AudioEncoding.OGG_OPUS
+            )
 
-                response = client.synthesize_speech(
-                    input=synthesis_input, voice=voice, audio_config=audio_config
-                )
+            response = client.synthesize_speech(
+                input=synthesis_input, voice=voice, audio_config=audio_config
+            )
 
-                audio_tasks.append(asyncio.to_thread(save_audio, response.audio_content, audio_path))
-                print(f"Queued audio generation with Google Cloud: {extension_word}")
-            except Exception as e:
-                print(f"Error generating audio for word '{english}': {e}")
-        # else:
-        #     print(f"Skipping (audio already exists): {extension_word}")
+            audio_tasks.append(asyncio.to_thread(save_audio, response.audio_content, audio_path))
+            print(f"Queued audio generation with Google Cloud: {extension_word}")
+        except Exception as e:
+            print(f"Error generating audio for word '{english}': {e}")
 
     await asyncio.gather(*audio_tasks)
     df["audio"] = audio_names
