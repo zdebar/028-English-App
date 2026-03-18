@@ -25,7 +25,7 @@ import { TEXTS } from './locales/cs';
 import './styles/index.css';
 import NotificationText from './components/UI/NotificationText';
 import { useThemeLoader } from './features/theme/use-theme-loader';
-import { useUserStoreReset } from './features/user-stats/use-user-store-reset';
+import { useUserStoreSync } from './features/user-stats/use-user-store-sync';
 import { useDailyStatsReset } from './features/user-stats/use-daily-stats-reset';
 
 export default function App() {
@@ -47,14 +47,14 @@ export default function App() {
     }
   }, [initializeAuth]);
 
+  // User store reset on user change (sign-in/sign-out)
+  useUserStoreSync(userId);
+
   // Theme load
   useThemeLoader(userId);
 
   // Data synchronization
   const { loading: syncLoading } = usePeriodicSync(userId);
-
-  // User store reset on sign-out
-  useUserStoreReset(userId);
 
   // User store new day reset
   useDailyStatsReset(userId);
