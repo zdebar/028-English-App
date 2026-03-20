@@ -36,7 +36,8 @@ def filter_target_file(target_csv: Path, first_words: set[str]) -> None:
 		raise ValueError(f"Missing column 'english' in target file: {target_csv}")
 
 	second_norm = second_df["english"].map(normalize_english)
-	keep_mask = ~second_norm.isin(first_words)
+	# Keep all rows where english is empty, or not in first_words
+	keep_mask = (second_norm == "") | (~second_norm.isin(first_words))
 	filtered_df = second_df[keep_mask].copy()
 	filtered_df.to_csv(target_csv, index=False)
 
