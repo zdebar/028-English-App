@@ -76,3 +76,16 @@ def redo_sort_order(df, file_name: str = "", start_sort_order: int = 1):
     df = df.copy()
     df['sort_order'] = range(start_sort_order, start_sort_order + len(df))
     return df
+
+def add_lesson_id(df, file_name: str = ""):
+    base_name = os.path.basename(file_name) if file_name else ""
+    leading_digits = ""
+    for char in base_name:
+        if char.isdigit():
+            leading_digits += char
+        else:
+            break
+    lesson_id = int(leading_digits) if leading_digits else ""
+    df = df.copy()
+    df['lesson_id'] = lesson_id
+    return df
