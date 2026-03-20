@@ -24,11 +24,36 @@ def read_vocab_csv(
     :param columns: List of column names to include.
     :return: DataFrame with the specified columns.
     """
+    int_columns = {"id", "sort_order", "grammar_id", "lesson_id"}
+    def _clean_and_convert_col(col, value):
+        if pd.isna(value) or isinstance(value, bool):
+            return value
+        if isinstance(value, int):
+            return value
+        if isinstance(value, float):
+            return int(value) if col in int_columns and value.is_integer() else value
+        if isinstance(value, str):
+            stripped = value.strip()
+            if not stripped:
+                return ""
+            if col in int_columns:
+                if stripped.lstrip("+-").isdigit():
+                    return int(stripped)
+                try:
+                    parsed_float = float(stripped)
+                except ValueError:
+                    return stripped
+                return int(parsed_float) if parsed_float.is_integer() else stripped
+            return stripped
+        return value
+
     df = pd.read_csv(file_path, skipinitialspace=True)
     for col in columns:
         if col not in df.columns:
             df[col] = ""
     df = df[columns]
+    for col in df.columns:
+        df[col] = df[col].apply(lambda v: _clean_and_convert_col(col, v))
     return df
 
 def redo_Id(df, start_id=1):
@@ -36,7 +61,18 @@ def redo_Id(df, start_id=1):
     df['id'] = range(start_id, start_id + len(df))
     return df
 
-def redo_sort_order(df, start_sort_order=1):
+def redo_sort_order(df, file_name: str = "", start_sort_order: int = 1):
+    if file_name:
+        base_name = os.path.basename(file_name)
+        leading_digits = ""
+        for char in base_name:
+            if char.isdigit():
+                leading_digits += char
+            else:
+                break
+        if leading_digits:
+            start_sort_order = int(leading_digits) * 1000
+
     df = df.copy()
     df['sort_order'] = range(start_sort_order, start_sort_order + len(df))
     return df

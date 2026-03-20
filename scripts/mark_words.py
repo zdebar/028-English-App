@@ -3,6 +3,7 @@ from typing import Any
 
 import pandas as pd
 
+# Deletes rows from target CSV files if their "english" value matches any "english" value from source CSV files.
 
 def normalize_english(value: Any) -> str:
 	if pd.isna(value):

@@ -5,6 +5,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from scripts.utils.preparation import read_vocab_csv, clean_DataFrame, redo_Id, redo_sort_order
 from scripts.utils.pronunciation import fill_pronunciation_espeak_ng
 from scripts.utils.audio import generate_audio_with_google_cloud
+import pandas as pd
 
 async def prepare_words(file_name: str, output_file: str, audio_folder: str, suffix: str) -> None:
 	# 1. Read data
@@ -12,16 +13,17 @@ async def prepare_words(file_name: str, output_file: str, audio_folder: str, suf
 	if df is None:
 		print("Error: DataFrame is None after reading CSV.")
 		return
-	# 2. Clean data
-	df = clean_DataFrame(df)
-	# 3. Fill IPA pronunciation	
+	# 2. Fill IPA pronunciation	
 	df = await fill_pronunciation_espeak_ng(df)
-	# 4. Redo IDs and sort order
-	df = redo_Id(df)
-	df = redo_sort_order(df)
-	# 5. Generate audio files
+	# 3. Redo IDs and sort order
+	df = redo_sort_order(df, file_name)
+	# 4. Generate audio files
 	df = await generate_audio_with_google_cloud(df, audio_folder, suffix)
-	# 6. Save final result with updated audio paths
+	# 5. Force integer columns before saving
+	for col in ["id", "sort_order", "grammar_id", "lesson_id"]:
+		if col in df.columns:
+			df[col] = pd.to_numeric(df[col], errors="coerce")
+			df[col] = df[col].apply(lambda x: int(x) if pd.notna(x) and x == int(x) else "")
 	df.to_csv(output_file, index=False)
 	print(f"Processed and saved: {output_file}")
 
