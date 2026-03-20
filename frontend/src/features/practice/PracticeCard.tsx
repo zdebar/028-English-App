@@ -109,7 +109,7 @@ export default function PracticeCard() {
   if (!currentItem) {
     return (
       <DelayedMessage>
-        <NotificationText text={TEXTS.notAvailable} className="color-info pt-4" />
+        <NotificationText text={TEXTS.nothingToPractice} className="color-info pt-4" />
       </DelayedMessage>
     );
   }
