@@ -27,6 +27,19 @@ async def generate_audio_with_google_cloud(
     audio_tasks: list[Awaitable[None]] = []
     audio_names: list[str] = []
 
+    # Better defaults for language learning: clear female voice with slower pace.
+    voice_name = os.getenv("GCP_TTS_VOICE_NAME", "en-US-Neural2-F")
+    speaking_rate_raw = os.getenv("GCP_TTS_SPEAKING_RATE", "1")
+    pitch_raw = os.getenv("GCP_TTS_PITCH", "0.0")
+    try:
+        speaking_rate = float(speaking_rate_raw)
+    except ValueError:
+        speaking_rate = 1
+    try:
+        pitch = float(pitch_raw)
+    except ValueError:
+        pitch = 0.0
+
     def clean_filename(filename: str) -> str:
         filename = filename.lower()
         # Normalize to remove accents
@@ -61,25 +74,24 @@ async def generate_audio_with_google_cloud(
         extension_word = add_extension(audio_name)
         audio_names.append(extension_word)
 
-        # Check for any file with the base name (without suffix)
-        base_audio_path = os.path.join(audio_folder, add_extension(cleaned_word))
-        if os.path.exists(base_audio_path):
-            # If base audio exists, skip generation
-            # Optionally, you could copy or reference the existing file
-            print(f"Skipping (audio already exists for base word): {base_audio_path}")
+        audio_path = os.path.join(audio_folder, extension_word)
+        if os.path.exists(audio_path):
+            print(f"Skipping (audio already exists): {audio_path}")
             continue
 
-        audio_path = os.path.join(audio_folder, extension_word)
         try:
             synthesis_input = texttospeech.SynthesisInput(text=str(english))
 
             voice = texttospeech.VoiceSelectionParams(
                 language_code=language_code,
-                ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL
+                name=voice_name,
+                ssml_gender=texttospeech.SsmlVoiceGender.FEMALE
             )
 
             audio_config = texttospeech.AudioConfig(
-                audio_encoding=texttospeech.AudioEncoding.OGG_OPUS
+                audio_encoding=texttospeech.AudioEncoding.OGG_OPUS,
+                speaking_rate=speaking_rate,
+                pitch=pitch,
             )
 
             response = client.synthesize_speech(

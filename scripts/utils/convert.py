@@ -1,10 +1,9 @@
 import os
 from pydub import AudioSegment  
-from pydub.silence import detect_nonsilent
-from typing import Union, List, Any
+from typing import Union
 import pandas as pd
 
-# This script converts MP3 files to Opus format with a lower bitrate. Also trims silence from the beginning and end of the audio files.
+# This script converts MP3 files to Opus format with a lower bitrate.
 
 output_format = "opus"
 
@@ -12,18 +11,6 @@ output_format = "opus"
 def convert_mp3_to_opus(input_path: Union[str, os.PathLike[str]], output_path: Union[str, os.PathLike[str]], bitrate: str = "64k") -> None:
     try:
         audio = AudioSegment.from_mp3(input_path) 
-
-        # Detect and trim silence
-        silence_threshold = -50  # dBFS (must be an integer)
-        silence_chunk_length = 100  # milliseconds
-        non_silent_ranges: List[Any] = detect_nonsilent( 
-            audio, min_silence_len=silence_chunk_length, silence_thresh=silence_threshold
-        )
-
-        if non_silent_ranges:
-            start_trim: int = non_silent_ranges[0][0]
-            end_trim: int = non_silent_ranges[-1][1]
-            audio = audio[start_trim:end_trim]  # Correct slicing of AudioSegment
 
         audio.export(output_path, format=output_format, bitrate=bitrate) 
     except Exception as e:
