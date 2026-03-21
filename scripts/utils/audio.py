@@ -5,8 +5,6 @@ import os
 from collections.abc import Awaitable
 import pandas as pd
 from dotenv import load_dotenv
-from io import BytesIO
-from pydub import AudioSegment
 import google.cloud.texttospeech as texttospeech
 
 # Now the GOOGLE_APPLICATION_CREDENTIALS variable is available
