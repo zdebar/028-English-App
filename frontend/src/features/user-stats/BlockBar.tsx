@@ -47,9 +47,9 @@ export default function BlockBar({
 
   // Calculate progress widths
   const clampedPrevious = Math.min(Math.max(previousCount, 0), safeLesson);
-  const clampedToday = Math.min(Math.max(todayCount, 0), safeLesson);
-  const previousWidth = safeLesson > 0 ? (clampedPrevious / safeLesson) * barWidth : 0;
-  const todayWidth = safeLesson > 0 ? (clampedToday / safeLesson) * barWidth : 0;
+  const clampedTotal = Math.min(Math.max(previousCount + todayCount, 0), safeLesson);
+  const previousWidth = safeLesson > 0 ? (clampedPrevious / safeLesson) * 100 : 0;
+  const totalWidth = safeLesson > 0 ? (clampedTotal / safeLesson) * 100 : 0;
 
   // Render divisions every N items (not percent).
   const renderDivisions = () => {
@@ -72,7 +72,7 @@ export default function BlockBar({
   };
 
   return (
-    <div className="h-attribute relative w-full cursor-default bg-gray-300 select-none">
+    <div className="h-attribute relative w-full cursor-default bg-gray-200 select-none">
       <div className="font-body text-light absolute -top-0.5 right-0 left-0 z-20 flex items-center justify-between truncate px-4 pt-1 text-center font-bold">
         <span title={`${TEXTS.levelName} - ${TEXTS.lessonName} `}>
           {levelName} {lessonName}
@@ -93,7 +93,7 @@ export default function BlockBar({
           {/* New progress */}
           <div
             className="bg-new-progress-light dark:bg-new-progress-dark absolute top-0 left-0 h-full"
-            style={{ width: `${Math.min(previousWidth + todayWidth, 100)}%` }}
+            style={{ width: `${totalWidth}%` }}
           ></div>
           {/* Previous progress */}
           <div

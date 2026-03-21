@@ -69,4 +69,17 @@ describe('BlockBar', () => {
     const barContainer = progressbar.parentElement as HTMLElement;
     expect(barContainer.style.width).toBe('25%');
   });
+
+  it('renders progress relative to lessonCount inside the bar', () => {
+    const { container } = render(
+      <BlockBar previousCount={44} todayCount={0} lessonName="L" levelName="B" lessonCount={50} />,
+    );
+
+    const progressbar = screen.getByRole('progressbar');
+    const barContainer = progressbar.parentElement as HTMLElement;
+    expect(barContainer.style.width).toBe('50%');
+
+    const previousProgress = container.querySelector('.bg-old-progress-light') as HTMLElement;
+    expect(previousProgress.style.width).toBe('88%');
+  });
 });
