@@ -40,10 +40,6 @@ export default function Dashboard({ className = '' }: DashboardProps) {
     Array.isArray(levelsOverview) ? levelsOverview : [],
     showMastered ? 'mastered' : 'started',
   );
-  const maxTotalCount =
-    lessonsInProgress.length > 0
-      ? Math.max(...lessonsInProgress.map((lesson) => lesson.totalCount), 1)
-      : 1;
 
   if (lessonsInProgress.length === 0) lessonsInProgress.push(noAvailableLesson);
 
@@ -64,7 +60,6 @@ export default function Dashboard({ className = '' }: DashboardProps) {
             showMastered ? (lesson.masteredTodayCount ?? 0) : (lesson.startedTodayCount ?? 0)
           }
           lessonCount={lesson.totalCount ?? 1}
-          maxCount={maxTotalCount}
         />
       ))}
       <HelpButton className="right-0 -bottom-14.5" />

@@ -8,7 +8,7 @@ interface BlockBarProps {
   isMastered: boolean;
   divisions?: number;
   lessonCount: number;
-  maxCount?: number;
+  widthBase?: number;
   className?: string;
 }
 
@@ -20,9 +20,9 @@ interface BlockBarProps {
  * @param lessonName {string} The name of the current lesson block.
  * @param levelName {string} The name of the level the lesson belongs to.
  * @param isMastered {boolean} Indicates if the items count is mastered or started.
- * @param divisions {number} Distance of divisions in the progress bar (default: 5).
+ * @param divisions {number} Division step in item count (default: 5).
  * @param lessonCount {number} Total number of items in the lesson (default: 100).
- * @param maxCount {number} Maximal total count of all lessons (default: 100).
+ * @param widthBase {number} Item count that maps to 100% width (default: 100).
  * @param className {string} Additional CSS classes for custom styling.
  * @returns A styled progress bar with labels and visual representation of progress.
  */
@@ -34,28 +34,33 @@ export default function BlockBar({
   isMastered = false,
   divisions = 5,
   lessonCount = 100,
-  maxCount,
+  widthBase = 100,
   className = '',
 }: BlockBarProps) {
   // Ensure lessonCount is at least 1
   const safeLesson = Math.max(lessonCount, 1);
-  // If maxCount is not provided, use safeLesson
-  const safeTotal = typeof maxCount === 'number' ? Math.max(maxCount, safeLesson) : safeLesson;
+  const safeWidthBase = Math.max(widthBase, 1);
+  const visibleItems = Math.min(safeLesson, safeWidthBase);
 
-  // Calculate bar width as percentage
-  const barWidth = (safeLesson / safeTotal) * 100;
+  // Width is proportional up to widthBase; width is capped at 100%.
+  const barWidth = (visibleItems / safeWidthBase) * 100;
 
   // Calculate progress widths
-  const previousWidth = safeLesson > 0 ? (previousCount / safeLesson) * barWidth : 0;
-  const todayWidth = safeLesson > 0 ? (todayCount / safeLesson) * barWidth : 0;
+  const clampedPrevious = Math.min(Math.max(previousCount, 0), safeLesson);
+  const clampedToday = Math.min(Math.max(todayCount, 0), safeLesson);
+  const previousWidth = safeLesson > 0 ? (clampedPrevious / safeLesson) * barWidth : 0;
+  const todayWidth = safeLesson > 0 ? (clampedToday / safeLesson) * barWidth : 0;
 
-  // Helper for rendering division lines
+  // Render divisions every N items (not percent).
   const renderDivisions = () => {
-    const stepPercent = Math.min(100, Math.max(1, divisions));
-    const lineCount = Math.floor(barWidth / stepPercent) - 1;
-    return Array.from({ length: lineCount }, (_, i) => {
-      const position = (i + 1) * stepPercent;
-      if (position > barWidth) return null;
+    const stepItems = Math.max(1, Math.floor(divisions));
+    const positions: number[] = [];
+
+    for (let item = stepItems; item < visibleItems; item += stepItems) {
+      positions.push((item / safeWidthBase) * 100);
+    }
+
+    return positions.map((position) => {
       return (
         <div
           key={position}
@@ -67,17 +72,16 @@ export default function BlockBar({
   };
 
   return (
-    <div className="h-attribute relative w-full cursor-default select-none">
+    <div className="h-attribute relative w-full cursor-default bg-gray-300 select-none">
+      <div className="font-body text-light absolute -top-0.5 right-0 left-0 z-20 flex items-center justify-between truncate px-4 pt-1 text-center font-bold">
+        <span title={`${TEXTS.levelName} - ${TEXTS.lessonName} `}>
+          {levelName} {lessonName}
+        </span>
+        <span title={isMastered ? TEXTS.masteredTodayHint : TEXTS.startedTodayHint}>
+          + {todayCount}
+        </span>
+      </div>
       <div className={`relative h-full w-full ${className}`} style={{ width: `${barWidth}%` }}>
-        {/* Labels */}
-        <div className="font-body text-light absolute -top-0.5 left-0 z-10 flex w-full items-center justify-between truncate px-4 pt-1 text-center font-bold">
-          <span title={`${TEXTS.levelName} - ${TEXTS.lessonName} `}>
-            {levelName} {lessonName}
-          </span>
-          <span title={isMastered ? TEXTS.masteredTodayHint : TEXTS.startedTodayHint}>
-            + {todayCount}
-          </span>
-        </div>
         {/* Progress bar */}
         <div
           className="bg-progress-bg relative h-full overflow-hidden"

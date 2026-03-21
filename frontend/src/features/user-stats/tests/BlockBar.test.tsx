@@ -12,7 +12,6 @@ describe('BlockBar', () => {
         previousCount={2}
         todayCount={3}
         lessonCount={10}
-        maxCount={20}
         divisions={10}
       />,
     );
@@ -32,8 +31,7 @@ describe('BlockBar', () => {
         todayCount={1}
         lessonName="L"
         levelName="B"
-        lessonCount={10}
-        maxCount={20}
+        lessonCount={50}
         divisions={10}
       />,
     );
@@ -52,6 +50,23 @@ describe('BlockBar', () => {
 
     const progressbar = screen.getByRole('progressbar');
     expect(progressbar).toBeTruthy();
-    expect(container.querySelectorAll('.border-divisions').length).toBeGreaterThan(0);
+    expect(container.querySelectorAll('.border-divisions').length).toBe(0);
+  });
+
+  it('uses widthBase to scale bar width', () => {
+    render(
+      <BlockBar
+        previousCount={1}
+        todayCount={1}
+        lessonName="L"
+        levelName="B"
+        lessonCount={50}
+        widthBase={200}
+      />,
+    );
+
+    const progressbar = screen.getByRole('progressbar');
+    const barContainer = progressbar.parentElement as HTMLElement;
+    expect(barContainer.style.width).toBe('25%');
   });
 });
