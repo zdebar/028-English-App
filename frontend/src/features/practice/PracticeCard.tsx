@@ -73,7 +73,7 @@ export default function PracticeCard() {
 
     const timeoutId = window.setTimeout(() => {
       playAudio();
-    }, 400);
+    }, config.practice.audioDelay);
 
     return () => {
       window.clearTimeout(timeoutId);

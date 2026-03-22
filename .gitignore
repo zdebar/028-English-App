@@ -3,4 +3,4 @@ archive/
 venv/
 frontend/TODO.md
 
-**/__pycache__/
+scripts/utils/__pycache__/

@@ -48,10 +48,14 @@ def read_vocab_csv(
         return value
 
     df = pd.read_csv(file_path, skipinitialspace=True)
-    for col in columns:
+
+    # Keep id only when present in source data; do not create it automatically.
+    effective_columns = [col for col in columns if col != "id" or col in df.columns]
+
+    for col in effective_columns:
         if col not in df.columns:
             df[col] = ""
-    df = df[columns]
+    df = df[effective_columns]
     for col in df.columns:
         df[col] = df[col].apply(lambda v: _clean_and_convert_col(col, v))
     return df
