@@ -28,6 +28,7 @@ export default function GrammarCard({ grammar, onClose }: GrammarCardProps) {
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(grammar.note),
           }}
+          className="grammar"
         />
       ) : (
         TEXTS.noNotesToDisplay

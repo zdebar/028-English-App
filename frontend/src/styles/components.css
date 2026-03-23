@@ -30,3 +30,8 @@
     @apply max-h-card min-h-card h-full grow;
   }
 }
+
+/** Grammar styles **/
+.grammar p{
+  @apply mb-4;
+}

@@ -103,7 +103,7 @@ export default function GrammarOverview(): JSX.Element {
       className="relative"
     >
       {sanitizedNote ? (
-        <div dangerouslySetInnerHTML={{ __html: sanitizedNote }} />
+        <div dangerouslySetInnerHTML={{ __html: sanitizedNote }} className="grammar" />
       ) : (
         <DelayedMessage>
           <NotificationText text={TEXTS.notAvailable} />
