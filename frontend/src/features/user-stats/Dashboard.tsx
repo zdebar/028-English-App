@@ -49,7 +49,7 @@ export default function Dashboard({ className = '' }: DashboardProps) {
         <BlockBar
           key={lesson.id}
           lessonName={lesson.name ?? ''}
-          levelName={levelsOverview.find((level) => level.id === lesson.level_id)?.name ?? ''}
+          lessonNumber={lesson.sort_order}
           isMastered={showMastered}
           previousCount={
             showMastered

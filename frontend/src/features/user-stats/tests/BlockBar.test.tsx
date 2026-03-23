@@ -7,7 +7,7 @@ describe('BlockBar', () => {
   it('renders labels and progressbar with accessible values', () => {
     render(
       <BlockBar
-        levelName="A1"
+        lessonNumber="A1"
         lessonName="Lesson 1"
         previousCount={2}
         todayCount={3}
@@ -30,7 +30,7 @@ describe('BlockBar', () => {
         previousCount={1}
         todayCount={1}
         lessonName="L"
-        levelName="B"
+        lessonNumber="B"
         lessonCount={50}
         divisions={10}
       />,
@@ -45,7 +45,7 @@ describe('BlockBar', () => {
 
   it('handles zero lessonCount safely without crashing', () => {
     const { container } = render(
-      <BlockBar previousCount={0} todayCount={0} lessonName="L" levelName="B" lessonCount={0} />,
+      <BlockBar previousCount={0} todayCount={0} lessonName="L" lessonNumber="B" lessonCount={0} />,
     );
 
     const progressbar = screen.getByRole('progressbar');
@@ -59,7 +59,7 @@ describe('BlockBar', () => {
         previousCount={1}
         todayCount={1}
         lessonName="L"
-        levelName="B"
+        lessonNumber="B"
         lessonCount={50}
         widthBase={200}
       />,
@@ -72,7 +72,13 @@ describe('BlockBar', () => {
 
   it('renders progress relative to lessonCount inside the bar', () => {
     const { container } = render(
-      <BlockBar previousCount={44} todayCount={0} lessonName="L" levelName="B" lessonCount={50} />,
+      <BlockBar
+        previousCount={44}
+        todayCount={0}
+        lessonName="L"
+        lessonNumber="B"
+        lessonCount={50}
+      />,
     );
 
     const progressbar = screen.getByRole('progressbar');

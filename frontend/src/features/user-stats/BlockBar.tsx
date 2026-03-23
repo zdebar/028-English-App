@@ -4,7 +4,7 @@ interface BlockBarProps {
   previousCount: number;
   todayCount: number;
   lessonName: string;
-  levelName: string;
+  lessonNumber: number;
   isMastered: boolean;
   divisions?: number;
   lessonCount: number;
@@ -18,7 +18,7 @@ interface BlockBarProps {
  * @param previousCount {number} Number of items completed in previous sessions.
  * @param todayCount {number} Number of items completed today.
  * @param lessonName {string} The name of the current lesson block.
- * @param levelName {string} The name of the level the lesson belongs to.
+ * @param lessonNumber {number} The number of the lesson the block belongs to.
  * @param isMastered {boolean} Indicates if the items count is mastered or started.
  * @param divisions {number} Division step in item count (default: 5).
  * @param lessonCount {number} Total number of items in the lesson (default: 100).
@@ -30,11 +30,11 @@ export default function BlockBar({
   previousCount = 0,
   todayCount = 0,
   lessonName = '',
-  levelName = '',
+  lessonNumber = 0,
   isMastered = false,
   divisions = 5,
   lessonCount = 100,
-  widthBase = 100,
+  widthBase = 50,
   className = '',
 }: BlockBarProps) {
   // Ensure lessonCount is at least 1
@@ -75,7 +75,7 @@ export default function BlockBar({
     <div className="h-attribute relative w-full cursor-default bg-gray-200 select-none">
       <div className="font-body text-light absolute -top-0.5 right-0 left-0 z-20 flex items-center justify-between truncate px-4 pt-1 text-center font-bold">
         <span title={`${TEXTS.levelName} - ${TEXTS.lessonName} `}>
-          {levelName} {lessonName}
+          {lessonNumber} : {lessonName}
         </span>
         <span title={isMastered ? TEXTS.masteredTodayHint : TEXTS.startedTodayHint}>
           + {todayCount}
