@@ -53,7 +53,7 @@ const config = {
 
   practice: {
     dailyGoal: 400, // Number of new items recommended for daily practice
-    audioDelay: 0, // Delay in milliseconds for automatically playing audio
+    audioDelay: 100, // Delay in milliseconds for automatically playing audio
     CZ_TO_EN: 'czToEn',
     EN_TO_CZ: 'enToCz',
   },
