@@ -42,7 +42,6 @@ export default function Dashboard({ className = '' }: DashboardProps) {
   );
 
   if (lessonsInProgress.length === 0) lessonsInProgress.push(noAvailableLesson);
-  console.log('Lessons in progress:', lessonsInProgress);
 
   return (
     <div className={`min-w-card relative mx-auto mb-12 flex w-full flex-col gap-1 ${className}`}>
