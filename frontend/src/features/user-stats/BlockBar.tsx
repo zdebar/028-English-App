@@ -32,8 +32,8 @@ export default function BlockBar({
   lessonName = '',
   lessonNumber = 0,
   isMastered = false,
-  divisions = 5,
-  lessonCount = 100,
+  divisions = 2,
+  lessonCount = 50,
   widthBase = 50,
   className = '',
 }: BlockBarProps) {
