@@ -20,9 +20,9 @@ interface BlockBarProps {
  * @param lessonName {string} The name of the current lesson block.
  * @param lessonNumber {number} The number of the lesson the block belongs to.
  * @param isMastered {boolean} Indicates if the items count is mastered or started.
- * @param divisions {number} Division step in item count (default: 5).
- * @param lessonCount {number} Total number of items in the lesson (default: 100).
- * @param widthBase {number} Item count that maps to 100% width (default: 100).
+ * @param divisions {number} Division step in item count (default: 10).
+ * @param lessonCount {number} Total number of items in the lesson (default: 40).
+ * @param widthBase {number} Item count that maps to 100% width (default: 40).
  * @param className {string} Additional CSS classes for custom styling.
  * @returns A styled progress bar with labels and visual representation of progress.
  */
@@ -32,9 +32,9 @@ export default function BlockBar({
   lessonName = '',
   lessonNumber = 0,
   isMastered = false,
-  divisions = 2,
-  lessonCount = 50,
-  widthBase = 50,
+  divisions = 10,
+  lessonCount = 40,
+  widthBase = 40,
   className = '',
 }: BlockBarProps) {
   // Ensure lessonCount is at least 1
