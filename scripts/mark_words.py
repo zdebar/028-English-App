@@ -3,7 +3,8 @@ from typing import Any
 
 import pandas as pd
 
-# Deletes rows from target CSV files if their "english" value matches any "english" value from source CSV files.
+# Deletes rows from target CSV files only when both "czech" and "english"
+# match a row from the source CSV files.
 
 def normalize_english(value: Any) -> str:
 	if pd.isna(value):
@@ -17,19 +18,22 @@ def normalize_text(value: Any) -> str:
 	return str(value).strip().casefold()
 
 
-def collect_english_words_from_folder(folder: Path) -> set[str]:
+def collect_czech_english_keys_from_folder(folder: Path) -> set[tuple[str, str]]:
 	if not folder.exists():
 		raise FileNotFoundError(f"Source folder does not exist: {folder}")
 
-	first_words: set[str] = set()
+	keys: set[tuple[str, str]] = set()
 	for csv_path in sorted(folder.glob("*.csv")):
 		df = pd.read_csv(csv_path)
-		if "english" not in df.columns:
-			raise ValueError(f"Missing column 'english' in source file: {csv_path}")
-		first_words.update(df["english"].map(normalize_english))
+		if "czech" not in df.columns or "english" not in df.columns:
+			raise ValueError(f"Missing column 'czech' or 'english' in source file: {csv_path}")
 
-	first_words.discard("")
-	return first_words
+		for row in df.itertuples(index=False):
+			key = (normalize_text(getattr(row, "czech", "")), normalize_text(getattr(row, "english", "")))
+			if key != ("", ""):
+				keys.add(key)
+
+	return keys
 
 
 def collect_czech_english_rows_from_folder(folder: Path) -> pd.DataFrame:
@@ -113,18 +117,22 @@ def update_already_used_csv(source_folder: Path, tracker_folder: Path) -> None:
 	print(f"  Total rows: {len(updated_df)}")
 
 
-def filter_target_file(target_csv: Path, first_words: set[str]) -> None:
+def filter_target_file(target_csv: Path, source_keys: set[tuple[str, str]]) -> None:
 	if not target_csv.exists():
 		print(f"Skipping missing target file: {target_csv}")
 		return
 
 	second_df = pd.read_csv(target_csv)
-	if "english" not in second_df.columns:
-		raise ValueError(f"Missing column 'english' in target file: {target_csv}")
+	if "czech" not in second_df.columns or "english" not in second_df.columns:
+		raise ValueError(f"Missing column 'czech' or 'english' in target file: {target_csv}")
 
-	second_norm = second_df["english"].map(normalize_english)
-	# Keep all rows where english is empty, or not in first_words
-	keep_mask = (second_norm == "") | (~second_norm.isin(first_words))
+	target_keys = list(
+		zip(
+			second_df["czech"].map(normalize_text),
+			second_df["english"].map(normalize_text),
+		)
+	)
+	keep_mask = [(key == ("", "")) or (key not in source_keys) for key in target_keys]
 	filtered_df = second_df[keep_mask].copy()
 	filtered_df.to_csv(target_csv, index=False)
 
@@ -140,17 +148,15 @@ def main() -> None:
 	source_folder = script_dir / "data" / "prepare"
 	target_folder = script_dir / "data" / "tracker"
 	target_files = [
-		target_folder / "200_words.csv",
-		target_folder / "1k_words.csv",
 		target_folder / "10k_words.csv",
 	]
 
-	first_words = collect_english_words_from_folder(source_folder)
-	print(f"Collected {len(first_words)} unique english words from: {source_folder}")
+	source_keys = collect_czech_english_keys_from_folder(source_folder)
+	print(f"Collected {len(source_keys)} unique czech/english pairs from: {source_folder}")
 	update_already_used_csv(source_folder, target_folder)
 
 	for target_csv in target_files:
-		filter_target_file(target_csv, first_words)
+		filter_target_file(target_csv, source_keys)
 
 
 if __name__ == "__main__":

@@ -36,13 +36,13 @@ const config = {
       1036800, // 12d
       1382400, // 16d
     ],
-    randomness: 0.1, // Randomness of SRS algorithm 0.1 (10%)
+    randomness: 0.3, // Randomness of SRS algorithm
   },
 
   audio: {
     audioBucketName: 'audio-files',
     archiveBucketName: 'audio-archive',
-    initialArchive: ['audio_part_1.zip'],
+    initialArchive: ['audio_part_1.zip', 'audio_part_2.zip'],
     allArchives: ['audio_part_1.zip', 'audio_part_2.zip'],
   },
 
