@@ -17,8 +17,8 @@ export default function Notification({
   ...rest
 }: NotificationProps): JSX.Element {
   return (
-    <p {...rest} className={`font-headings text-center text-xl ${className}`}>
+    <div {...rest} className={`font-headings text-center text-xl ${className}`}>
       {children}
-    </p>
+    </div>
   );
 }

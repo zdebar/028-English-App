@@ -23,6 +23,7 @@ import MasterItemButton from './buttons/MasterItemButton';
 import PlayAudioButton from './buttons/PlayAudioButton';
 import UnknownButton from './buttons/UnknownButton';
 import { useGrammar } from './hooks/use-grammar';
+import { useHelpStore } from '../help/use-help-store';
 
 /**
  * PracticeCard component for interactive language practice.
@@ -32,6 +33,7 @@ import { useGrammar } from './hooks/use-grammar';
 export default function PracticeCard() {
   const userId = useAuthStore((state) => state.userId);
   const dailyCount = useUserStore((state) => state.dailyCount);
+  const isHelpOpened = useHelpStore((state) => state.isHelpOpened);
   const [counter, setCounter] = useState(0);
   const { grammarVisible, grammarData, handleGrammar, closeGrammar } = useGrammar();
 
@@ -148,6 +150,9 @@ export default function PracticeCard() {
               ) : (
                 <>
                   {!revealed && <HelpText className="center top-4">{TEXTS.reveal}</HelpText>}
+                  <HelpText className="top-20 left-4">{TEXTS.short}</HelpText>
+                  <HelpText className="top-28 left-4">{TEXTS.singular}</HelpText>
+                  <HelpText className="top-36 left-4">{TEXTS.plural}</HelpText>
                   {/** Top Bar */}
                   <div
                     id="top-bar"
@@ -166,11 +171,13 @@ export default function PracticeCard() {
                     )}
                   </div>
                   {/** Item Data */}
-                  <div id="item" className="flex h-full flex-col justify-center gap-1">
-                    <p className="text-center font-bold">{czech}</p>
-                    <p className="text-center font-normal">{english}</p>
-                    <p className="text-center font-normal">{pronunciation}</p>
-                  </div>
+                  {!isHelpOpened && (
+                    <div id="item" className="flex h-full flex-col justify-center gap-1">
+                      <p className="text-center font-bold">{czech}</p>
+                      <p className="text-center font-normal">{english}</p>
+                      <p className="text-center font-normal">{pronunciation}</p>
+                    </div>
+                  )}
 
                   {/** Bottom Bar */}
                   <div
