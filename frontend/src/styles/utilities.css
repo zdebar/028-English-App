@@ -20,6 +20,10 @@
     @apply dark:text-new-progress-light text-black;
   }
 
+    .color-link {
+    @apply dark:text-new-progress-light text-black hover:underline;
+  }
+
   /* Z-INDEX LEVELS */
   .z-header {
     /* Header */

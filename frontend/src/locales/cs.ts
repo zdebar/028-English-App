@@ -2,6 +2,7 @@ export const TEXTS = {
   // Generic
   notAvailable: 'Není k dispozici',
   nothingToPractice: 'Nic k procvičování.',
+  tryAgainLater: 'Zkuste to znovu později.',
   loadingMessage: 'Načítání ...',
   pageNotFound: 'Stránka nebyla nalezena.',
   dataLoadingError: 'Chyba při načítání dat.',
@@ -35,7 +36,7 @@ export const TEXTS = {
   // Home Page
   appTitle: 'Angličtina',
   appDescription: 'Bez stresu. Bez přemýšlení. Jen dril.',
-  appTestDescription: 'Aplikace v testovacím režimu. Obsahuje pouze testovací data.',
+  appTestDescription: 'Aplikace v testovacím režimu',
   guide: 'návod',
   startedTodayHint: 'dnes započato',
   masteredTodayHint: 'dnes naučeno',

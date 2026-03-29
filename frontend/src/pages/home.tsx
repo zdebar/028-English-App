@@ -70,7 +70,7 @@ export default function Home(): JSX.Element {
       <p className="px-4">{TEXTS.appDescription}</p>
       <p className="text-error-light dark:text-error-dark px-4">{TEXTS.appTestDescription}</p>
       <Link to="/guide" className="my-">
-        <NotificationText text={TEXTS.guide} className="color-info" />
+        <NotificationText text={TEXTS.guide} className="color-link" />
       </Link>
 
       {userId ? (

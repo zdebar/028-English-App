@@ -14,6 +14,7 @@ import GrammarCard from '@/features/practice/GrammarCard';
 import VolumeSlider from '@/features/practice/VolumeSlider';
 
 import NotificationText from '@/components/UI/NotificationText';
+import Notification from '@/components/UI/Notification';
 import { TEXTS } from '@/locales/cs';
 import GrammarButton from './buttons/GrammarButton';
 import HintButton from './buttons/HintButton';
@@ -109,7 +110,7 @@ export default function PracticeCard() {
   if (!currentItem) {
     return (
       <DelayedMessage>
-        <NotificationText text={TEXTS.nothingToPractice} className="color-info pt-4" />
+        <Notification className="color-info pt-4"><p>{TEXTS.nothingToPractice}</p><p>{TEXTS.tryAgainLater}</p></Notification>
       </DelayedMessage>
     );
   }
