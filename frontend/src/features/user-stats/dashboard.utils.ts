@@ -77,31 +77,28 @@ export function getInProgressLessons(
     if ((a.sort_order ?? 0) !== (b.sort_order ?? 0)) {
       return (a.sort_order ?? 0) - (b.sort_order ?? 0);
     }
-    if ((a.sort_order ?? 0) !== (b.sort_order ?? 0)) {
-      return (a.sort_order ?? 0) - (b.sort_order ?? 0);
-    }
     return (a.id ?? 0) - (b.id ?? 0);
   });
 
-  let nextZeroLessonId: number | null = null;
-  for (let index = 0; index < sortedLessons.length; index++) {
-    const lesson = sortedLessons[index] as any;
-    const previousLesson = index > 0 ? (sortedLessons[index - 1] as any) : null;
-    const isPreviousCompleted =
-      previousLesson == null || previousLesson[countKey] === previousLesson.totalCount;
-
-    if (lesson[countKey] === 0 && isPreviousCompleted) {
-      nextZeroLessonId = lesson.id;
-      break;
-    }
+  const lessonsStartedToday = sortedLessons.filter((lesson: any) => lesson[todayKey] > 0);
+  if (lessonsStartedToday.length > 0) {
+    return lessonsStartedToday;
   }
 
-  return sortedLessons.filter(
-    (lesson: any) =>
-      lesson[todayKey] > 0 ||
-      (lesson[countKey] > 0 && lesson[countKey] !== lesson.totalCount) ||
-      (nextZeroLessonId != null && lesson.id === nextZeroLessonId),
+  const firstIncompleteLesson = sortedLessons.find(
+    (lesson: any) => lesson[countKey] > 0 && lesson[countKey] < lesson.totalCount,
   );
+  if (firstIncompleteLesson != null) {
+    return [firstIncompleteLesson];
+  }
+
+  const firstZeroLesson = sortedLessons.find((lesson: any) => lesson[countKey] === 0);
+  if (firstZeroLesson != null) {
+    return [firstZeroLesson];
+  }
+
+  const lastLesson = sortedLessons.at(-1);
+  return lastLesson != null ? [lastLesson] : [];
 }
 
 /**
