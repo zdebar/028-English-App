@@ -149,6 +149,7 @@ def main() -> None:
 	target_folder = script_dir / "data" / "tracker"
 	target_files = [
 		target_folder / "10k_words.csv",
+		target_folder / "200_words.csv",
 	]
 
 	source_keys = collect_czech_english_keys_from_folder(source_folder)
