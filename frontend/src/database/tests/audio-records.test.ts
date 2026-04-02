@@ -86,19 +86,20 @@ describe('AudioRecord', () => {
   });
 
   describe('getAudio', () => {
-    it('attempts remote fetch when audioName is empty and no cache exists', async () => {
+    it('throws when audioName is empty and no local cache exists', async () => {
       mocks.audioGet.mockResolvedValue(undefined);
       mocks.fetchStorage.mockRejectedValue(new Error('Data file name is required'));
 
-      await expect(AudioRecord.getRecord('')).rejects.toThrow('Data file name is required');
+      await expect(AudioRecord.getByFilename('')).rejects.toThrow('Data file name is required');
       expect(mocks.audioGet).toHaveBeenCalledWith('');
+      expect(mocks.fetchStorage).toHaveBeenCalled();
     });
 
     it('returns existing local record when present', async () => {
       const existing = { filename: 'a.opus', audioBlob: new Blob(['cached']) };
       mocks.audioGet.mockResolvedValue(existing);
 
-      const result = await AudioRecord.getRecord('a.opus');
+      const result = await AudioRecord.getByFilename('a.opus');
 
       expect(mocks.audioGet).toHaveBeenCalledWith('a.opus');
       expect(mocks.fetchStorage).not.toHaveBeenCalled();
@@ -110,7 +111,7 @@ describe('AudioRecord', () => {
       mocks.audioGet.mockResolvedValue(undefined);
       mocks.fetchStorage.mockResolvedValue(blob);
 
-      const result = await AudioRecord.getRecord('b.opus');
+      const result = await AudioRecord.getByFilename('b.opus');
 
       expect(mocks.fetchStorage).toHaveBeenCalledWith('audio-bucket', 'b.opus');
       expect(mocks.audioPut).toHaveBeenCalledWith({ filename: 'b.opus', audioBlob: blob });

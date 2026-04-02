@@ -29,7 +29,7 @@ const audioInstances: MockAudio[] = [];
 
 vi.mock('@/database/models/audio-records', () => ({
   default: {
-    getRecord: (...args: unknown[]) => getAudioMock(...args),
+    getByFilename: (...args: unknown[]) => getAudioMock(...args),
   },
 }));
 

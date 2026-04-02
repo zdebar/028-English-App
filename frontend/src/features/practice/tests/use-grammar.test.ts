@@ -7,7 +7,7 @@ const errorHandlerMock = vi.fn();
 
 vi.mock('@/database/models/grammar', () => ({
   default: {
-    getGrammarById: (...args: unknown[]) => getGrammarByIdMock(...args),
+    getById: (...args: unknown[]) => getGrammarByIdMock(...args),
   },
 }));
 

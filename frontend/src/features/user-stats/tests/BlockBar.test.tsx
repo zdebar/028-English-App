@@ -7,7 +7,7 @@ describe('BlockBar', () => {
   it('renders labels and progressbar with accessible values', () => {
     render(
       <BlockBar
-        lessonNumber="A1"
+        lessonNumber={1}
         lessonName="Lesson 1"
         previousCount={2}
         todayCount={3}
@@ -20,7 +20,7 @@ describe('BlockBar', () => {
     expect(progressbar.getAttribute('aria-valuenow')).toBe('5');
     expect(progressbar.getAttribute('aria-valuemin')).toBe('0');
     expect(progressbar.getAttribute('aria-valuemax')).toBe('10');
-    expect(screen.getByText('A1 Lesson 1')).toBeTruthy();
+    expect(screen.getByText('1 : Lesson 1')).toBeTruthy();
     expect(screen.getByText('+ 3')).toBeTruthy();
   });
 
@@ -30,7 +30,7 @@ describe('BlockBar', () => {
         previousCount={1}
         todayCount={1}
         lessonName="L"
-        lessonNumber="B"
+        lessonNumber={2}
         lessonCount={50}
         divisions={10}
       />,
@@ -39,13 +39,13 @@ describe('BlockBar', () => {
     const progressbar = screen.getByRole('progressbar');
     const barContainer = progressbar.parentElement as HTMLElement;
 
-    expect(barContainer.style.width).toBe('50%');
-    expect(container.querySelectorAll('.border-divisions').length).toBe(4);
+    expect(barContainer.style.width).toBe('100%');
+    expect(container.querySelectorAll('.border-divisions').length).toBe(3);
   });
 
   it('handles zero lessonCount safely without crashing', () => {
     const { container } = render(
-      <BlockBar previousCount={0} todayCount={0} lessonName="L" lessonNumber="B" lessonCount={0} />,
+      <BlockBar previousCount={0} todayCount={0} lessonName="L" lessonNumber={2} lessonCount={0} />,
     );
 
     const progressbar = screen.getByRole('progressbar');
@@ -59,7 +59,7 @@ describe('BlockBar', () => {
         previousCount={1}
         todayCount={1}
         lessonName="L"
-        lessonNumber="B"
+        lessonNumber={2}
         lessonCount={50}
         widthBase={200}
       />,
@@ -76,14 +76,14 @@ describe('BlockBar', () => {
         previousCount={44}
         todayCount={0}
         lessonName="L"
-        lessonNumber="B"
+        lessonNumber={2}
         lessonCount={50}
       />,
     );
 
     const progressbar = screen.getByRole('progressbar');
     const barContainer = progressbar.parentElement as HTMLElement;
-    expect(barContainer.style.width).toBe('50%');
+    expect(barContainer.style.width).toBe('100%');
 
     const previousProgress = container.querySelector('.bg-old-progress-light') as HTMLElement;
     expect(previousProgress.style.width).toBe('88%');

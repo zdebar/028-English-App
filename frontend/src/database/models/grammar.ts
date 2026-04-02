@@ -16,9 +16,9 @@ const NULL_NUMBER = config.database.nullReplacementNumber;
  * Represents a grammar entity in the application database.
  * - grammar records are shared across all users
  *
- * @method getGrammarById - Fetches a grammar record by its ID.
+ * @method getById - Fetches a grammar record by its ID.
  * @method getStartedIds - Retrieves the list of unique grammar IDs that the user has started.
- * @method getStartedList - Retrieves the list of grammar that the user has started.
+ * @method getStarted - Retrieves the list of grammar that the user has started.
  * @method syncFromRemote - Synchronizes grammar data between the local database and Supabase, either fully or incrementally based on the last sync timestamp.
  *
  */
@@ -33,7 +33,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * Retrieves a grammar record by its ID from the database.
    * @param grammarId - The unique identifier of the grammar record to retrieve.
    */
-  static async getGrammarById(grammarId: number): Promise<GrammarLocal> {
+  static async getById(grammarId: number): Promise<GrammarLocal> {
     assertPositiveInteger(grammarId, 'grammarId');
 
     const grammar = await db.grammar.get(grammarId);
@@ -65,7 +65,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * Retrieves a list of grammar items that have been started by the user.
    * @param userId - The unique identifier of the user
    */
-  static async getStartedList(userId: string): Promise<GrammarLocal[]> {
+  static async getStarted(userId: string): Promise<GrammarLocal[]> {
     assertNonEmptyString(userId, 'userId');
 
     const grammarIds = await this.getStartedIds(userId);

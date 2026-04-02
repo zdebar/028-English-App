@@ -27,7 +27,7 @@ export function useAudioManager(audio: string | null) {
       }
 
       try {
-        const audioRecord = await AudioRecord.getRecord(audio);
+        const audioRecord = await AudioRecord.getByFilename(audio);
         if (!audioRecord?.audioBlob) throw new Error('Audio not found');
 
         objectUrl = URL.createObjectURL(audioRecord.audioBlob);

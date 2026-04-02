@@ -63,7 +63,7 @@ describe('Grammar', () => {
   it('getGrammarById returns grammar when found', async () => {
     mocks.grammarGet.mockResolvedValue({ id: 1, name: 'Articles', note: '', sort_order: 1 });
 
-    await expect(Grammar.getGrammarById(1)).resolves.toEqual(
+    await expect(Grammar.getById(1)).resolves.toEqual(
       expect.objectContaining({ id: 1, name: 'Articles' }),
     );
   });
@@ -71,7 +71,7 @@ describe('Grammar', () => {
   it('getGrammarById throws when missing', async () => {
     mocks.grammarGet.mockResolvedValue(undefined);
 
-    await expect(Grammar.getGrammarById(2)).rejects.toThrow('Grammar with ID 2 not found.');
+    await expect(Grammar.getById(2)).rejects.toThrow('Grammar with ID 2 not found.');
   });
 
   it('getStartedIds returns unique grammar ids', async () => {
@@ -96,7 +96,7 @@ describe('Grammar', () => {
       ]),
     });
 
-    await expect(Grammar.getStartedList('u1')).resolves.toHaveLength(2);
+    await expect(Grammar.getStarted('u1')).resolves.toHaveLength(2);
   });
 
   it('syncFromRemote delegates to generic sync utility', async () => {

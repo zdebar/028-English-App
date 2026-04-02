@@ -80,21 +80,34 @@ export function getInProgressLessons(
     return (a.id ?? 0) - (b.id ?? 0);
   });
 
-  const lessonsStartedToday = sortedLessons.filter((lesson: any) => lesson[todayKey] > 0);
-  if (lessonsStartedToday.length > 0) {
-    return lessonsStartedToday;
+  if (sortedLessons.length === 0) {
+    return [];
   }
 
-  const firstIncompleteLesson = sortedLessons.find(
-    (lesson: any) => lesson[countKey] > 0 && lesson[countKey] < lesson.totalCount,
-  );
-  if (firstIncompleteLesson != null) {
-    return [firstIncompleteLesson];
+  const result: LessonOverview[] = [];
+  let firstEligibleZeroIncluded = false;
+
+  for (const [index, lesson] of sortedLessons.entries()) {
+    const totalCount = lesson.totalCount ?? 0;
+    const count = lesson[countKey] ?? 0;
+    const todayCount = lesson[todayKey] ?? 0;
+    const isIncomplete = count > 0 && count < totalCount;
+    const previousLesson = index > 0 ? sortedLessons[index - 1] : null;
+    const previousCompleted =
+      previousLesson == null ||
+      (previousLesson[countKey] ?? 0) >= (previousLesson.totalCount ?? 0);
+    const isFirstEligibleZero = !firstEligibleZeroIncluded && count === 0 && previousCompleted;
+
+    if (todayCount > 0 || isIncomplete || isFirstEligibleZero) {
+      result.push(lesson);
+      if (isFirstEligibleZero) {
+        firstEligibleZeroIncluded = true;
+      }
+    }
   }
 
-  const firstZeroLesson = sortedLessons.find((lesson: any) => lesson[countKey] === 0);
-  if (firstZeroLesson != null) {
-    return [firstZeroLesson];
+  if (result.length > 0) {
+    return result;
   }
 
   const lastLesson = sortedLessons.at(-1);

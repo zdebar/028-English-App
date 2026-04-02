@@ -15,7 +15,7 @@ export function useGrammar() {
       if (typeof grammarId !== 'number') return;
 
       try {
-        const grammar = await Grammar.getGrammarById(grammarId);
+        const grammar = await Grammar.getById(grammarId);
         setGrammarData(grammar);
         setGrammarVisible(true);
       } catch (error) {

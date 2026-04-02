@@ -54,6 +54,8 @@ vi.mock('@/locales/cs', () => ({
   TEXTS: {
     syncLoadingText: 'Sync loading',
     notAvailable: 'Není k dispozici',
+    nothingToPractice: 'Nic k procvičování.',
+    tryAgainLater: 'Zkuste to znovu později.',
     reveal: 'Reveal',
     noAudio: 'No audio',
     loadingAudio: 'Loading audio',
@@ -218,7 +220,8 @@ describe('PracticeCard', () => {
 
     render(<PracticeCard />);
 
-    expect(screen.getByText('Není k dispozici')).toBeTruthy();
+    expect(screen.getByText('Nic k procvičování.')).toBeTruthy();
+    expect(screen.getByText('Zkuste to znovu později.')).toBeTruthy();
   });
 
   it('reveals item and plays audio on item click in CZ->EN mode', () => {

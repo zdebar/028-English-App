@@ -12,7 +12,7 @@ import { Entity } from 'dexie';
 /**
  * Represents an audio record entity for managing audio files in the application's database.
  *
- * @method getRecord - Retrieves audio record by its filename.
+ * @method getByFilename - Retrieves audio record by its filename.
  * @method syncFromRemote - Synchronize audio data by downloading, extracting, and storing audio archives from remote storage.
  * @method removeOrphaned - Removes audio records that are not referenced by any user items.
  */
@@ -24,7 +24,7 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    * Gets an audio record by its filename.
    * @param audioName The filename of the audio to fetch.
    */
-  static async getRecord(audioName: string): Promise<AudioRecordLocal> {
+  static async getByFilename(audioName: string): Promise<AudioRecordLocal> {
     return (await db.audio_records.get(audioName)) ?? this.fetchAudioRecord(audioName);
   }
 
