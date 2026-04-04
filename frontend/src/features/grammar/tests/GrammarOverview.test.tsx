@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   setCurrentIndex: vi.fn(),
   sanitize: vi.fn(),
+  reload: vi.fn(),
   arrayState: {
     data: [] as any[],
     currentIndex: null as number | null,

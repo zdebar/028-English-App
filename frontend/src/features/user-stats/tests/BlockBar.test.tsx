@@ -13,6 +13,7 @@ describe('BlockBar', () => {
         todayCount={3}
         lessonCount={10}
         divisions={10}
+        isMastered={false}
       />,
     );
 
@@ -33,6 +34,7 @@ describe('BlockBar', () => {
         lessonNumber={2}
         lessonCount={50}
         divisions={10}
+        isMastered={false}
       />,
     );
 
@@ -45,7 +47,7 @@ describe('BlockBar', () => {
 
   it('handles zero lessonCount safely without crashing', () => {
     const { container } = render(
-      <BlockBar previousCount={0} todayCount={0} lessonName="L" lessonNumber={2} lessonCount={0} />,
+      <BlockBar previousCount={0} todayCount={0} lessonName="L" lessonNumber={2} lessonCount={0} isMastered={false} />,
     );
 
     const progressbar = screen.getByRole('progressbar');
@@ -62,6 +64,7 @@ describe('BlockBar', () => {
         lessonNumber={2}
         lessonCount={50}
         widthBase={200}
+        isMastered={false}
       />,
     );
 
@@ -78,6 +81,7 @@ describe('BlockBar', () => {
         lessonName="L"
         lessonNumber={2}
         lessonCount={50}
+        isMastered={false}
       />,
     );
 
