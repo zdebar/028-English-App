@@ -1,4 +1,5 @@
 import { TEXTS } from '@/locales/cs';
+import { ARIA_TEXTS } from '@/locales/cs';
 
 interface BlockBarProps {
   previousCount: number;
@@ -86,7 +87,7 @@ export default function BlockBar({
         <div
           className="bg-progress-bg relative h-full overflow-hidden"
           role="progressbar"
-          aria-label='Ukazatel pokroku lekcí'
+          aria-label={ARIA_TEXTS.lessonProgressBar}
           aria-valuenow={previousCount + todayCount}
           aria-valuemin={0}
           aria-valuemax={lessonCount}

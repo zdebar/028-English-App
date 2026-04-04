@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { getInProgressLessons } from './dashboard.utils';
 import TextButton from '@/components/UI/buttons/TextButton';
 import type { LessonOverview } from '@/types/local.types';
+import { ARIA_TEXTS } from '@/locales/cs';
 
 type DashboardProps = {
   className?: string;
@@ -44,7 +45,7 @@ export default function Dashboard({ className = '' }: DashboardProps) {
   if (lessonsInProgress.length === 0) lessonsInProgress.push(noAvailableLesson);
 
   return (
-    <div className={`min-w-card relative mx-auto mb-12 flex w-full flex-col gap-1 ${className}`} role="region" aria-label="Ukazatel pokroku lekcí">
+    <div className={`min-w-card relative mx-auto mb-12 flex w-full flex-col gap-1 ${className}`} role="region" aria-label={ARIA_TEXTS.dashboardRegion}>
       {lessonsInProgress.map((lesson) => (
         <BlockBar
           key={lesson.id}

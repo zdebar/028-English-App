@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import VolumeIcon from '@/components/UI/icons/VolumeIcon';
 import MuteIcon from '@/components/UI/icons/MuteIcon';
-import { TEXTS } from '@/locales/cs';
+import { ARIA_TEXTS, TEXTS } from '@/locales/cs';
 
 type VolumeSliderProps = {
   setVolume: (volume: number) => void;
@@ -47,7 +47,7 @@ export default function VolumeSlider({ setVolume, className = '' }: VolumeSlider
     >
       <button
         onClick={() => setShowVolumeSlider((prev) => !prev)}
-        aria-label="Nastavit hlasitost"
+        aria-label={ARIA_TEXTS.setVolume}
         className="cursor-pointer"
         disabled={false}
         title={TEXTS.volume}
@@ -67,7 +67,7 @@ export default function VolumeSlider({ setVolume, className = '' }: VolumeSlider
           aria-valuenow={volume}
           aria-valuemin={0}
           aria-valuemax={1}
-          aria-label={`Hlasitost: ${Math.round(volume * 100)}%`}
+          aria-label={ARIA_TEXTS.volumePercent(Math.round(volume * 100))}
           disabled={false}
         />
       )}

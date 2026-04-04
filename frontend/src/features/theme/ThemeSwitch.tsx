@@ -1,7 +1,7 @@
 import SunIcon from '@/components/UI/icons/SunIcon';
 import MoonIcon from '@/components/UI/icons/MoonIcon';
 import { useThemeStore, type UserTheme } from '@/features/theme/use-theme-store';
-import { TEXTS } from '@/locales/cs';
+import { ARIA_TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { useCallback } from 'react';
 import { useAuthStore } from '../auth/use-auth-store';
@@ -20,7 +20,8 @@ export default function ThemeSwitch(): JSX.Element {
     chooseTheme(nextTheme, userId ?? undefined);
   }, [chooseTheme, theme, userId]);
 
-  const themeLabel = theme === 'light' ? TEXTS.themeLight : TEXTS.themeDark;
+  const themeLabel =
+    theme === 'light' ? ARIA_TEXTS.switchToDarkTheme : ARIA_TEXTS.switchToLightTheme;
 
   return (
     <button
