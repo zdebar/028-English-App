@@ -12,7 +12,7 @@ export default function Guide(): JSX.Element {
       <h1 className="text-center">Návod</h1>
       <section>
         <p className="text-center">
-          Běžné učení jazyků používá příliš mnoho teori a málo praxe. Tato aplikace je naopak
+          Běžné učení jazyků používá příliš mnoho teorie a málo praxe. Tato aplikace je naopak
           zaměřená na dril, na velké množství naposlouchaných a vyslovených opakování.
         </p>
       </section>
@@ -28,7 +28,7 @@ export default function Guide(): JSX.Element {
         <Screenshot src="/screenshots/not-revealed.webp" alt="Ukázka kartičky před odhalením" />
         <p>
           <strong>"dnes / denní cíl"</strong>
-          <span>Doporučenný denní počet opakování. Snažte se ho každý den splnit. Vše ostatní můžete pustit z hlavy.</span>
+          <span>Doporučený denní počet opakování. Snažte se ho každý den splnit. Ostatní můžete pustit z hlavy.</span>
         </p>
         <p>
           <strong>"dokončit"</strong>
@@ -64,7 +64,7 @@ export default function Guide(): JSX.Element {
           <strong>"Přehled gramatiky"</strong>
           <span>
             Přehled již započaté gramatiky, umožňuje restartovat procvičování vět příslušných k dané
-            grammatice.
+            gramatice.
           </span>
         </p>
         <p>
@@ -75,20 +75,18 @@ export default function Guide(): JSX.Element {
         </p>
         <p>
           <strong>"Stáhnout data"</strong>
-          <span>Stáhne veškerá data do zařízení pro možnost používat aplikaci offline.</span>
+          <span>Stáhne všechna data do zařízení, abyste mohli aplikaci používat offline.</span>
         </p>
         <p>
           <strong>"Opravit data"</strong>
           <span>
-            Aplikace je běžně synchronizována při každém startu aplikace či minimálně každých 24
-            hodin. Tato manuální synchronizace je určena pouze pro opravu poškozených dat.
+            Aplikace se běžně synchronizuje při každém spuštění nebo alespoň jednou za 24 hodin. Tato manuální synchronizace je určena pouze pro opravu poškozených dat.
           </span>
         </p>
         <p>
           <strong>"Smazat účet"</strong>
           <span>
-            Smaže uživatelský účet, včetně všech vašich dat. V této fázi vývoje je každé smazání
-            účtu nevratné a data budou nenávratně smazána.
+            Smaže uživatelský účet včetně všech vašich dat. V této fázi vývoje je smazání účtu nevratné a data budou nenávratně odstraněna.
           </span>
         </p>
         <p>
@@ -99,12 +97,19 @@ export default function Guide(): JSX.Element {
       <section>
         <h2>Offline</h2>
         <p className="text-center">
-          Ve webové verzi aplikace je pro používání offline nejprve zapotřebí stáhnout veškerá data
-          do zařízení. To lze udělat v profilu pomocí tlačítka "Stáhnout data".
+          Ve webové verzi aplikace je pro používání offline nejprve potřeba stáhnout všechna data do zařízení. To provedete v profilu tlačítkem "Stáhnout data".
         </p>
         <p className="text-center">
-          Ve stažené aplikaci jsou již veškerá data stažena a aplikace je plně funkční i bez
-          připojení k internetu.
+          Ve stažené aplikaci jsou všechna data již obsažena a aplikace je plně funkční i bez připojení k internetu.
+        </p>
+      </section>
+            <section>
+        <h2>Synchronizace</h2>
+        <p className="text-center">
+          Vaše data se každý den synchronizují s cloudem, aby byla bezpečně zálohována.
+        </p>
+        <p className="text-center">
+          Aplikace není určena pro současné používání na více zařízeních. V takovém případě může dojít k neaktuálním datům.
         </p>
       </section>
     </div>
