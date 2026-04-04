@@ -78,9 +78,12 @@ export const TEXTS = {
   skipSuccessToast: 'Položka byla dokončena.',
   skipErrorToast: 'Dokončení položky se nezdařilo.',
   volume: 'nastavení hlasitosti',
-  short: '(zkr.) zkráceně',
-  singular: '(sg.) jednotné číslo',
-  plural: '(pl.) množné číslo',
+  shortCut: '(zk.)',
+  short: 'zkráceně',
+  singularCut: '(sg.)',
+  singular: 'jednotné číslo',
+  pluralCut: '(pl.)',
+  plural: 'množné číslo',
 
   // Levels Overview Page
   lessons: 'Lekce',

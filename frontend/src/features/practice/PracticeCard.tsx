@@ -150,9 +150,9 @@ export default function PracticeCard() {
               ) : (
                 <>
                   {!revealed && <HelpText className="center top-4">{TEXTS.reveal}</HelpText>}
-                  <HelpText className="top-20 left-4">{TEXTS.short}</HelpText>
-                  <HelpText className="top-28 left-4">{TEXTS.singular}</HelpText>
-                  <HelpText className="top-36 left-4">{TEXTS.plural}</HelpText>
+                  <HelpText className="top-20 left-4"><span className='help-text-span'>{TEXTS.shortCut}</span>{TEXTS.short}</HelpText>
+                  <HelpText className="top-28 left-4"><span className='help-text-span'>{TEXTS.singularCut}</span>{TEXTS.singular}</HelpText>
+                  <HelpText className="top-36 left-4"><span className='help-text-span'>{TEXTS.pluralCut}</span>{TEXTS.plural}</HelpText>
                   {/** Top Bar */}
                   <div
                     id="top-bar"
