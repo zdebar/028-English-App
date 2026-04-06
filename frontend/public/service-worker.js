@@ -1,11 +1,51 @@
-const APP_SHELL_CACHE = 'app-shell-v1';
-const STATIC_CACHE = 'static-assets-v1';
+const APP_SHELL_CACHE = 'app-shell-v2';
+const STATIC_CACHE = 'static-assets-v2';
 
-const APP_SHELL_URLS = ['/', '/index.html', '/manifest.json', '/vite.svg'];
+const APP_SHELL_URLS = [
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/vite.svg',
+  '/screenshots/not-revealed.webp',
+  '/screenshots/revealed.webp',
+  '/screenshots/profile.webp',
+  '/screenshots/desktop.webp',
+  '/screenshots/mobile.webp',
+];
+const INJECTED_PRECACHE_URLS = (self.__WB_MANIFEST || []).map((entry) => entry.url);
 const STATIC_DESTINATIONS = new Set(['style', 'script', 'worker', 'font', 'image']);
 
+function normalizeCacheUrl(url) {
+  const resolved = new URL(url, self.location.origin);
+
+  // Treat root and index as a single app-shell entry.
+  if (resolved.pathname === '/') {
+    resolved.pathname = '/index.html';
+  }
+
+  return resolved.href;
+}
+
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(APP_SHELL_CACHE).then((cache) => cache.addAll(APP_SHELL_URLS)));
+  const normalizedToOriginal = new Map();
+
+  [...APP_SHELL_URLS, ...INJECTED_PRECACHE_URLS].forEach((url) => {
+    const normalized = normalizeCacheUrl(url);
+
+    if (!normalizedToOriginal.has(normalized)) {
+      normalizedToOriginal.set(normalized, url);
+    }
+  });
+
+  const urlsToCache = [...normalizedToOriginal.values()];
+
+  event.waitUntil(
+    caches.open(APP_SHELL_CACHE).then((cache) =>
+      cache.addAll(urlsToCache).catch((error) => {
+        console.warn('Failed to precache app shell resources:', error);
+      }),
+    ),
+  );
 
   self.skipWaiting();
 });
@@ -61,6 +101,34 @@ function shouldHandleRequest(request) {
   return STATIC_DESTINATIONS.has(request.destination);
 }
 
+function createOfflineResponse(request) {
+  if (request.destination === 'image') {
+    return new Response('', { status: 503, statusText: 'Offline image unavailable' });
+  }
+
+  if (request.destination === 'style') {
+    return new Response('/* offline */', {
+      status: 503,
+      statusText: 'Offline stylesheet unavailable',
+      headers: { 'Content-Type': 'text/css; charset=utf-8' },
+    });
+  }
+
+  if (request.destination === 'script' || request.destination === 'worker') {
+    return new Response('// offline', {
+      status: 503,
+      statusText: 'Offline script unavailable',
+      headers: { 'Content-Type': 'application/javascript; charset=utf-8' },
+    });
+  }
+
+  return new Response('Offline resource unavailable', {
+    status: 503,
+    statusText: 'Offline resource unavailable',
+    headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+  });
+}
+
 self.addEventListener('fetch', (event) => {
   const { request } = event;
 
@@ -86,20 +154,23 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
-      return fetch(request).then((response) => {
-        if (!response.ok) {
-          return response;
+    caches
+      .match(request)
+      .then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
         }
 
-        const responseClone = response.clone();
-        caches.open(STATIC_CACHE).then((cache) => cache.put(request, responseClone));
-        return response;
-      });
-    }),
+        return fetch(request).then((response) => {
+          if (!response.ok) {
+            return response;
+          }
+
+          const responseClone = response.clone();
+          caches.open(STATIC_CACHE).then((cache) => cache.put(request, responseClone));
+          return response;
+        });
+      })
+      .catch(() => createOfflineResponse(request)),
   );
 });
