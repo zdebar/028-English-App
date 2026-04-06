@@ -63,14 +63,14 @@ export default function Guide(): JSX.Element {
         <p>
           <strong>"Přehled gramatiky"</strong>
           <span>
-            Přehled již započaté gramatiky, umožňuje restartovat procvičování vět příslušných k dané
+            Přehled již započaté gramatiky umožňuje restartovat procvičování vět příslušných k dané
             gramatice.
           </span>
         </p>
         <p>
           <strong>"Přehled slovíček"</strong>
           <span>
-            Přehled započatých slovíček, umožňuje restartovat procvičování každého slovíčka.
+            Přehled započatých slovíček umožňuje restartovat procvičování každého slovíčka.
           </span>
         </p>
         <p>
@@ -80,7 +80,7 @@ export default function Guide(): JSX.Element {
         <p>
           <strong>"Opravit data"</strong>
           <span>
-            Aplikace se běžně synchronizuje při každém spuštění nebo alespoň jednou za 24 hodin. Tato manuální synchronizace je určena pouze pro opravu poškozených dat.
+            Aplikace se běžně synchronizuje při každém spuštění, nebo alespoň jednou za 24 hodin. Tato manuální synchronizace je určena pouze pro opravu poškozených dat.
           </span>
         </p>
         <p>
