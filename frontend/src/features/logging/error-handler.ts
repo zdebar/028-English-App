@@ -10,7 +10,7 @@ export function errorHandler(message: string, error: Error | unknown): void {
     console.error(message, error);
   } else {
     // 2. Send error to remote service
-    // (future implementation: e.g., Sentry, LogRocket, etc.)
+    console.error(message, error);
   }
   // 3. Optionally block app
   // (future implementation: potentially set a global state to disable UI interactions)

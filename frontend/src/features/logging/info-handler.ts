@@ -6,7 +6,5 @@
  */
 export function infoHandler(message: string): void {
   // 1. Log info locally
-  if (process.env.NODE_ENV === 'development') {
-    console.info(message);
-  }
+  console.info(message);
 }
