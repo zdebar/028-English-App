@@ -10,6 +10,7 @@ import HelpText from '@/features/help/HelpText';
 import { useUserStore } from '../user-stats/use-user-store';
 import NotificationText from '@/components/UI/NotificationText';
 import TextButton from '@/components/UI/buttons/TextButton';
+import BlockBar from '@/features/user-stats/BlockBar';
 
 /**
  * LevelsOverview component
@@ -60,29 +61,29 @@ export default function LevelsOverview() {
                   </BaseButton>
                   {unpackedIndex === index && (
                     <div className="flex flex-col gap-1">
-                      {level.lessons.map((lesson) => (
-                        <div
+                      {level.lessons.map((lesson) => (     
+                        <BlockBar
                           key={lesson.id}
-                          className="h-input flex w-full grow justify-start pr-4 pl-8 text-left"
-                        >
-                          <div className="flex w-full items-center justify-between">
-                            <p title={`${TEXTS.lessonName}`}>{lesson.name}</p>
-                            <GoalMetView
-                              current={lesson[shownLevels]}
-                              goal={lesson['totalCount']}
-                              title={
-                                showMastered ? TEXTS.levelsMasteredHelp : TEXTS.levelsStartedHelp
-                              }
-                            />
-                          </div>
-                        </div>
+                          lessonName={lesson.name ?? ''}
+                          lessonNumber={lesson.sort_order}
+                          isMastered={showMastered}
+                          previousCount={
+                            showMastered
+                              ? (lesson.masteredCount ?? 0) - (lesson.masteredTodayCount ?? 0)
+                              : (lesson.startedCount ?? 0) - (lesson.startedTodayCount ?? 0)
+                          }
+                          todayCount={
+                            showMastered ? (lesson.masteredTodayCount ?? 0) : (lesson.startedTodayCount ?? 0)
+                          }
+                          lessonCount={lesson.totalCount ?? 1}
+                        />                          
                       ))}
                     </div>
                   )}
                 </div>
               ))}
             </div>
-            <HelpText className="right-2 -bottom-4">
+            <HelpText className="right-2 top-10">
               {showMastered ? TEXTS.levelsMasteredHelp : TEXTS.levelsStartedHelp}
             </HelpText>
             <HelpButton className="right-0 -bottom-14" />
