@@ -1,13 +1,16 @@
 import Notification from '@/components/UI/Notification';
 import { TEXTS } from '@/locales/cs';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { usePwaStore } from './use-pwa-store';
 
 export interface InstallPWAButtonProps extends React.HTMLAttributes<HTMLParagraphElement> {
   className?: string;
 }
 
 export function InstallPWAButton(props: InstallPWAButtonProps) {
-  const [promptEvent, setPromptEvent] = useState<any>(null);
+  const promptEvent = usePwaStore(state => state.promptEvent);
+  const setPromptEvent = usePwaStore(state => state.setPromptEvent);
+  const clearPromptEvent = usePwaStore(state => state.clearPromptEvent);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -18,12 +21,12 @@ export function InstallPWAButton(props: InstallPWAButtonProps) {
     return () => {
       window.removeEventListener('beforeinstallprompt', handler);
     };
-  }, []);
+  }, [setPromptEvent]);
 
   const handleInstall = () => {
     if (promptEvent) {
       promptEvent.prompt();
-      promptEvent.userChoice.then(() => setPromptEvent(null));
+      promptEvent.userChoice.then(() => clearPromptEvent());
     }
   };
 
