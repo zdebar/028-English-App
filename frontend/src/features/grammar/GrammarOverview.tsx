@@ -11,7 +11,7 @@ import BaseButton from '@/components/UI/buttons/BaseButton';
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import DelayedMessage from '@/components/UI/DelayedMessage';
 import { useArray } from '@/hooks/use-array';
-import NotificationText from '@/components/UI/NotificationText';
+import Notification from '@/components/UI/Notification';
 import UserItem from '@/database/models/user-items';
 import { useToastStore } from '../toast/use-toast-store';
 
@@ -86,7 +86,7 @@ export default function GrammarOverview(): JSX.Element {
           ))
         ) : (
           <DelayedMessage>
-            <NotificationText text={TEXTS.noGrammar} className="color-info pt-4" />
+            <Notification className="color-info pt-4">{TEXTS.noGrammar}</Notification>
           </DelayedMessage>
         )}
       </div>
@@ -106,7 +106,7 @@ export default function GrammarOverview(): JSX.Element {
         <div dangerouslySetInnerHTML={{ __html: sanitizedNote }} className="grammar" />
       ) : (
         <DelayedMessage>
-          <NotificationText text={TEXTS.notAvailable} />
+          <Notification className="color-info pt-4">{TEXTS.notAvailable}</Notification>
         </DelayedMessage>
       )}
       <HelpButton className="right-0 -bottom-10.5" />

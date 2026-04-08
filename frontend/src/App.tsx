@@ -23,10 +23,10 @@ import { errorHandler } from './features/logging/error-handler';
 import { useToastStore } from './features/toast/use-toast-store';
 import { TEXTS } from './locales/cs';
 import './styles/index.css';
-import NotificationText from './components/UI/NotificationText';
 import { useThemeLoader } from './features/theme/use-theme-loader';
 import { useUserStoreSync } from './features/user-stats/use-user-store-sync';
 import { useDailyStatsReset } from './features/user-stats/use-daily-stats-reset';
+import Notification from './components/UI/Notification';
 
 export default function App() {
   const userId = useAuthStore((state) => state.userId);
@@ -87,7 +87,7 @@ export default function App() {
           </Route>
           <Route
             path="*"
-            element={<NotificationText text={TEXTS.pageNotFound} className="pt-8" />}
+            element={<Notification className="pt-8">{TEXTS.pageNotFound}</Notification>}
           />
         </Routes>
       </main>

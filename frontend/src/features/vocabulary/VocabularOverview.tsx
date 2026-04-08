@@ -9,7 +9,7 @@ import VocabularyList from './VocabularyList';
 import { useNavigate } from 'react-router-dom';
 import { useArray } from '@/hooks/use-array';
 import { compareCzechStrings, type DisplayField } from './vocabulary.utils';
-import NotificationText from '@/components/UI/NotificationText';
+import Notification from '@/components/UI/Notification';
 import { TEXTS } from '@/locales/cs';
 import { filterSortedWords } from './vocabulary.utils';
 import { useToastStore } from '../toast/use-toast-store';
@@ -89,7 +89,7 @@ export default function VocabularyOverview() {
   if (loading) {
     return (
       <DelayedMessage>
-        <NotificationText text={TEXTS.loadingMessage} />
+        <Notification className="color-info pt-4">{TEXTS.loadingMessage}</Notification>
       </DelayedMessage>
     );
   }

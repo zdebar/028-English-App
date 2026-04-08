@@ -7,7 +7,7 @@ import { type DisplayField } from '@/features/vocabulary/vocabulary.utils';
 import { type UserItemLocal } from '@/types/local.types';
 import CancelIcon from '@/components/UI/icons/CancelIcon';
 import DelayedMessage from '@/components/UI/DelayedMessage';
-import NotificationText from '@/components/UI/NotificationText';
+import Notification from '@/components/UI/Notification';
 
 const DIRECTION_OPTIONS: { value: DisplayField; label: string }[] = [
   { value: 'czech', label: 'Čeština' },
@@ -121,7 +121,7 @@ export default function VocabularyList({
           </>
         ) : (
           <DelayedMessage>
-            <NotificationText text={TEXTS.noStartedVocabulary} className="color-info pt-6" />
+            <Notification className="color-info pt-6">{TEXTS.noStartedVocabulary}</Notification>
           </DelayedMessage>
         )}
       </div>

@@ -13,7 +13,6 @@ import HelpText from '@/features/help/HelpText';
 import GrammarCard from '@/features/practice/GrammarCard';
 import VolumeSlider from '@/features/practice/VolumeSlider';
 
-import NotificationText from '@/components/UI/NotificationText';
 import Notification from '@/components/UI/Notification';
 import { TEXTS } from '@/locales/cs';
 import GrammarButton from './buttons/GrammarButton';
@@ -42,7 +41,7 @@ export default function PracticeCard() {
   if (!userId)
     return (
       <DelayedMessage>
-        <NotificationText text={TEXTS.syncLoadingText} />
+        <Notification className="color-info pt-4">{TEXTS.syncLoadingText}</Notification>
       </DelayedMessage>
     );
 
@@ -143,10 +142,10 @@ export default function PracticeCard() {
               }}
             >
               {showDirectionChange ? (
-                <NotificationText
-                  text={isCzToEn ? TEXTS.directionCzToEn : TEXTS.directionEnToCz}
+                <Notification
+       
                   className="my-auto"
-                />
+                >{isCzToEn ? TEXTS.directionCzToEn : TEXTS.directionEnToCz}</Notification>
               ) : (
                 <>
                   {!revealed && <HelpText className="center top-4">{TEXTS.reveal}</HelpText>}
@@ -165,7 +164,7 @@ export default function PracticeCard() {
                     ) : (
                       audioLoading && (
                         <DelayedMessage>
-                          <NotificationText text={TEXTS.loadingAudio} />
+                          <Notification className="color-info pt-4">{TEXTS.loadingAudio}</Notification>
                         </DelayedMessage>
                       )
                     )}

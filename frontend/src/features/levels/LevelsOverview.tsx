@@ -8,7 +8,7 @@ import GoalMetView from '@/components/UI/GoalMetView';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import { useUserStore } from '../user-stats/use-user-store';
-import NotificationText from '@/components/UI/NotificationText';
+import Notification from '@/components/UI/Notification';
 import TextButton from '@/components/UI/buttons/TextButton';
 import BlockBar from '@/features/user-stats/BlockBar';
 
@@ -38,7 +38,7 @@ export default function LevelsOverview() {
         </div>
         {levels.length === 0 ? (
           <DelayedMessage>
-            <NotificationText text={TEXTS.notAvailable} className="color-info pt-4" />
+            <Notification className="color-info pt-4">{TEXTS.notAvailable}</Notification>
           </DelayedMessage>
         ) : (
           <div>

@@ -1,4 +1,4 @@
-import NotificationText from '@/components/UI/NotificationText';
+import Notification from '@/components/UI/Notification';
 import { TEXTS } from '@/locales/cs';
 import { useEffect, useState } from 'react';
 
@@ -30,12 +30,11 @@ export function InstallPWAButton(props: InstallPWAButtonProps) {
   if (!promptEvent) return null;
 
   return (
-    <NotificationText
+    <Notification
       {...props}
-      text={TEXTS.installButton}
       title={TEXTS.installButtonTooltip}
       onClick={handleInstall}
       className={`color-link cursor-pointer ${props.className}`}
-    />
+    >{TEXTS.installButton}</Notification>
   );
 }
