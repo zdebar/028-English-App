@@ -42,7 +42,7 @@ export default function LevelsOverview() {
           </DelayedMessage>
         ) : (
           <div>
-            <div className="flex flex-col gap-1 overflow-y-auto">
+            <div className="flex flex-col gap-1 ">
               {levels.map((level, index) => (
                 <div key={level.id} className="flex flex-col gap-1">
                   <BaseButton
