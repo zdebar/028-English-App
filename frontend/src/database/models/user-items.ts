@@ -19,7 +19,7 @@ import {
   resetUserItem,
 } from '@/database/utils/user-items.utils';
 import { infoHandler } from '@/features/logging/info-handler';
-import { triggerLevelsUpdatedEvent } from '@/features/user-stats/dashboard.utils';
+import { triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 import { SupabaseError } from '@/types/error.types';
 import type { UserItemSQL } from '@/types/sql.types';
 import Grammar from './grammar';

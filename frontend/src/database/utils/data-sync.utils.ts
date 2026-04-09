@@ -18,7 +18,7 @@ import { assertNonEmptyString } from '@/utils/assertions.utils';
 import {
   triggerDailyCountUpdatedEvent,
   triggerLevelsUpdatedEvent,
-} from '@/features/user-stats/dashboard.utils';
+} from '@/utils/dashboard.utils';
 
 /**
  * Synchronizes data for a specific user with the database.

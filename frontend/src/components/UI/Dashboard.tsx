@@ -1,10 +1,10 @@
 import { TEXTS } from '@/locales/cs';
-import BlockBar from '@/features/user-stats/BlockBar';
-import { useUserStore } from './use-user-store';
+import BlockBar from '@/components/UI/BlockBar';
+import { useUserStore } from '../../features/user-stats/use-user-store';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import { useState } from 'react';
-import { getInProgressLessons } from './dashboard.utils';
+import { getInProgressLessons } from '../../utils/dashboard.utils';
 import TextButton from '@/components/UI/buttons/TextButton';
 import type { LessonOverview } from '@/types/local.types';
 import { ARIA_TEXTS } from '@/locales/cs';

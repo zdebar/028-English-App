@@ -10,7 +10,7 @@ import HelpText from '@/features/help/HelpText';
 import { useUserStore } from '../user-stats/use-user-store';
 import Notification from '@/components/UI/Notification';
 import TextButton from '@/components/UI/buttons/TextButton';
-import BlockBar from '@/features/user-stats/BlockBar';
+import BlockBar from '@/components/UI/BlockBar';
 
 /**
  * LevelsOverview component

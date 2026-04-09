@@ -59,7 +59,7 @@ import { fetchStorage } from '@/database/utils/audio-records.utils';
 import {
   triggerLevelsUpdatedEvent,
   triggerNamedEvent,
-} from '@/features/user-stats/dashboard.utils';
+} from '@/utils/dashboard.utils';
 
 describe('database.utils', () => {
   beforeEach(() => {

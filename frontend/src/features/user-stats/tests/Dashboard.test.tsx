@@ -41,7 +41,7 @@ vi.mock('@/features/user-stats/dashboard.utils', () => ({
   getInProgressLessons: (...args: unknown[]) => mocks.getInProgressLessons(...args),
 }));
 
-import Dashboard from '@/features/user-stats/Dashboard';
+import Dashboard from '@/components/UI/Dashboard';
 
 describe('Dashboard', () => {
   beforeEach(() => {

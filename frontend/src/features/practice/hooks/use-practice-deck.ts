@@ -10,7 +10,7 @@ import { useAudioManager } from './use-audio-manager';
 import {
   triggerDailyCountUpdatedEvent,
   triggerLevelsUpdatedEvent,
-} from '@/features/user-stats/dashboard.utils';
+} from '@/utils/dashboard.utils';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 
 const NBSP = '\u00A0';

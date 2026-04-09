@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useUserStore } from './use-user-store';
-import { triggerDailyCountUpdatedEvent, triggerLevelsUpdatedEvent } from './dashboard.utils';
+import { triggerDailyCountUpdatedEvent, triggerLevelsUpdatedEvent } from '../../utils/dashboard.utils';
 
 /**
  * Custom hook to automatically reset user stats on sign-off (userId becomes null).
