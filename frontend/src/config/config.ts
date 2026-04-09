@@ -36,7 +36,7 @@ const config = {
       1036800, // 12d
       1382400, // 16d
     ],
-    randomness: 0.3, // Randomness of SRS algorithm
+    randomness: 0.2, // Randomness of SRS algorithm
   },
 
   audio: {
