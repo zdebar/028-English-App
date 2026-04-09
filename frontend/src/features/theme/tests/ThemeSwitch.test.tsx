@@ -22,9 +22,9 @@ vi.mock('@/features/auth/use-auth-store', () => ({
 }));
 
 vi.mock('@/locales/cs', () => ({
-  TEXTS: {
-    themeLight: 'Light mode',
-    themeDark: 'Dark mode',
+  ARIA_TEXTS: {
+    switchToDarkTheme: 'Light mode',
+    switchToLightTheme: 'Dark mode',
   },
 }));
 

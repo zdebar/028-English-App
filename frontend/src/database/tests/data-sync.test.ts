@@ -92,7 +92,7 @@ vi.mock('@/database/models/db', () => ({
   },
 }));
 
-vi.mock('@/features/user-stats/dashboard.utils', () => ({
+vi.mock('@/utils/dashboard.utils', () => ({
   triggerDailyCountUpdatedEvent: (...args: unknown[]) =>
     mocks.triggerDailyCountUpdatedEvent(...args),
   triggerLevelsUpdatedEvent: (...args: unknown[]) => mocks.triggerLevelsUpdatedEvent(...args),

@@ -45,7 +45,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('@/config/config', () => ({
   default: {
-    practice: { dailyGoal: 20 },
+    practice: { dailyGoal: 20, audioDelay: 300 },
     progress: { skipProgress: 10, minusProgress: -1, plusProgress: 1 },
   },
 }));
@@ -247,5 +247,26 @@ describe('PracticeCard', () => {
     });
 
     expect(mocks.practiceDeck.playAudio).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens grammar automatically for a new grammar item', () => {
+    mocks.practiceDeck.showNewGrammarIndicator = true;
+    mocks.practiceDeck.showDirectionChange = false;
+    mocks.practiceDeck.grammar_id = 42;
+
+    render(<PracticeCard />);
+
+    expect(mocks.handleGrammar).toHaveBeenCalledTimes(1);
+    expect(mocks.handleGrammar).toHaveBeenCalledWith(42);
+  });
+
+  it('does not open grammar automatically while direction change is shown', () => {
+    mocks.practiceDeck.showNewGrammarIndicator = true;
+    mocks.practiceDeck.showDirectionChange = true;
+    mocks.practiceDeck.grammar_id = 42;
+
+    render(<PracticeCard />);
+
+    expect(mocks.handleGrammar).not.toHaveBeenCalled();
   });
 });

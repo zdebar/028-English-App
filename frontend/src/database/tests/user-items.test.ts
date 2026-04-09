@@ -109,7 +109,7 @@ vi.mock('@/database/utils/data-sync.utils', async () => {
   };
 });
 
-vi.mock('@/features/user-stats/dashboard.utils', () => ({
+vi.mock('@/utils/dashboard.utils', () => ({
   triggerLevelsUpdatedEvent: (...args: unknown[]) => mocks.triggerLevelsUpdatedEvent(...args),
 }));
 

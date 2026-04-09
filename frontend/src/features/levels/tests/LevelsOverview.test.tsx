@@ -17,6 +17,10 @@ vi.mock('@/locales/cs', () => ({
     startedCount: 'Started',
     masteredSwitchHelp: 'Switch help',
   },
+  ARIA_TEXTS: {
+    lessonProgressBar: 'Lesson progress bar',
+    lessonTextProgressBar: 'Lesson text progress bar',
+  },
 }));
 
 vi.mock('@/features/user-stats/use-user-store', () => ({
@@ -87,6 +91,9 @@ describe('LevelsOverview', () => {
       {
         id: 1,
         name: 'A1',
+        startedCount: 3,
+        masteredCount: 1,
+        totalCount: 5,
         lessons: [
           {
             id: 101,
@@ -118,6 +125,9 @@ describe('LevelsOverview', () => {
       {
         id: 1,
         name: 'A1',
+        startedCount: 3,
+        masteredCount: 1,
+        totalCount: 5,
         lessons: [
           {
             id: 101,
