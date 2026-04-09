@@ -17,7 +17,6 @@ const config = {
     plusProgress: 1, // Progress value for a "plus" button
     minusProgress: -2, // Progress value for a "minus" button
     skipProgress: 100, // Progress value for a "skip" button
-    finishedProgress: 0, // Progress value for a word to be considered finished
   },
 
   srs: {
