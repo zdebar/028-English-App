@@ -50,7 +50,7 @@ export default function DownloadButton({ className }: { className?: string }): J
       disabled={!userId || isLoading}
       title={TEXTS.downloadButtonTooltip}
     >
-      {TEXTS.downloadButton}
+      <p className="w-40 mx-auto">{TEXTS.downloadButton}</p>
     </MenuButton>
   );
 }

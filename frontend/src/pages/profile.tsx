@@ -18,23 +18,23 @@ export default function Profile(): JSX.Element {
 
   return (
     <div className="card-width grow-0 gap-1">
-      <MenuButton onClick={() => navigate(ROUTES.levels)} title={TEXTS.levelsOverviewTooltip} className='px-20'>
-        {TEXTS.levelsOverview}
+      <MenuButton onClick={() => navigate(ROUTES.levels)} title={TEXTS.levelsOverviewTooltip} >
+        <p className="w-40 mx-auto">{TEXTS.levelsOverview}</p>
       </MenuButton>
-      <MenuButton onClick={() => navigate(ROUTES.grammar)} title={TEXTS.grammarOverviewTooltip} className='px-20'>
-        {TEXTS.grammarOverview}
+      <MenuButton onClick={() => navigate(ROUTES.grammar)} title={TEXTS.grammarOverviewTooltip}>
+        <p className="w-40 mx-auto">{TEXTS.grammarOverview}</p>
       </MenuButton>
       <MenuButton
         onClick={() => navigate(ROUTES.vocabulary)}
         title={TEXTS.vocabularyOverviewTooltip}
-        className="mb-8 px-20"
+   
       >
-        {TEXTS.vocabularyOverview}
+        <p className="w-40 mx-auto">{TEXTS.vocabularyOverview}</p>
       </MenuButton >
-      <DownloadButton className="px-20" />
-      <SyncButton className="px-20" />
-      <DeleteUserButton className="px-20" />
-      <SignoutButton className="px-20" />
+      <DownloadButton  />
+      <SyncButton  />
+      <DeleteUserButton  />
+      <SignoutButton  />
     </div>
   );
 }

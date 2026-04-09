@@ -44,7 +44,7 @@ export default function SyncButton({ className }: { className?: string }): JSX.E
       modalTitle={TEXTS.syncButton}
       modalText={TEXTS.syncButtonDescription}
     >
-      {TEXTS.syncButton}
+      <p className="w-40 mx-auto">{TEXTS.syncButton}</p>
     </ModalButton>
   );
 }

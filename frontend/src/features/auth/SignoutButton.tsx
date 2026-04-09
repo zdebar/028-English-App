@@ -39,7 +39,7 @@ export default function SignoutButton({ className }: { className?: string }): JS
       onConfirm={handleSignout}
       className={className}
     >
-      {TEXTS.signoutButtonTitle}
+      <p className="w-40 mx-auto">{TEXTS.signoutButtonTitle}</p>
     </ModalButton>
   );
 }
