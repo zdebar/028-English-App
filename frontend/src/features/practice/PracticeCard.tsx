@@ -82,14 +82,6 @@ export default function PracticeCard() {
     };
   }, [audioDisabled, isCzToEn, audioLoading, showDirectionChange, playAudio, currentItem]);
 
-  const shouldOpenGrammar = showNewGrammarIndicator && !showDirectionChange;
-
-  useEffect(() => {
-    if (shouldOpenGrammar) {
-      handleGrammar(grammar_id);
-    }
-  }, [shouldOpenGrammar]);
-
   const handleReveal = useCallback(() => {
     if (showDirectionChange) {
       hideDirectionChange();
