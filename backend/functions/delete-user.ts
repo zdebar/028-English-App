@@ -32,7 +32,7 @@ async function getUserFromAccessToken(accessToken: string) {
 async function deleteAuthUser(userId: string) {
   const url = `${SUPABASE_URL.replace(
     /\/$/,
-    ""
+    "",
   )}/auth/v1/admin/users/${encodeURIComponent(userId)}`;
   const res = await fetch(url, {
     method: "DELETE",
@@ -53,7 +53,7 @@ async function deleteAuthUser(userId: string) {
 async function markUserDeletedAt(userId: string) {
   const url = `${SUPABASE_URL.replace(
     /\/$/,
-    ""
+    "",
   )}/rest/v1/users?id=eq.${encodeURIComponent(userId)}`;
   const res = await fetch(url, {
     method: "PATCH",
@@ -75,7 +75,7 @@ async function markUserDeletedAt(userId: string) {
 
 function isstringV4(str: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-    str
+    str,
   );
 }
 
@@ -114,7 +114,7 @@ Deno.serve(async (req: Request) => {
             "Content-Type": "application/json",
             Connection: "keep-alive",
           },
-        }
+        },
       );
     }
     const accessToken = authHeader.slice(7).trim();
@@ -155,7 +155,7 @@ Deno.serve(async (req: Request) => {
             "Content-Type": "application/json",
             Connection: "keep-alive",
           },
-        }
+        },
       );
     }
 
@@ -173,7 +173,7 @@ Deno.serve(async (req: Request) => {
             "Content-Type": "application/json",
             Connection: "keep-alive",
           },
-        }
+        },
       );
     }
 
@@ -187,7 +187,7 @@ Deno.serve(async (req: Request) => {
             "Content-Type": "application/json",
             Connection: "keep-alive",
           },
-        }
+        },
       );
     }
 
@@ -201,7 +201,7 @@ Deno.serve(async (req: Request) => {
             "Content-Type": "application/json",
             Connection: "keep-alive",
           },
-        }
+        },
       );
     }
 
@@ -219,7 +219,7 @@ Deno.serve(async (req: Request) => {
             "Content-Type": "application/json",
             Connection: "keep-alive",
           },
-        }
+        },
       );
     }
 
@@ -234,7 +234,7 @@ Deno.serve(async (req: Request) => {
             "Content-Type": "application/json",
             Connection: "keep-alive",
           },
-        }
+        },
       );
     }
 

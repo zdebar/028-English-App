@@ -1,8 +1,15 @@
-import Icon, { type IconProps } from "./Icon";
+import Icon, { type IconProps } from './Icon';
+import type { JSX } from 'react';
 
-export default function MuteIcon(props: IconProps) {
+/**
+ * Mute Icon component.
+ *
+ * @param props IconProps to customize the icon.
+ * @returns The rendered icon element.
+ */
+export default function MuteIcon(props: IconProps): JSX.Element {
   return (
-    <Icon size={20} {...props}>
+    <Icon {...props} size={20}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

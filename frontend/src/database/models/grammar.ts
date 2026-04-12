@@ -1,102 +1,111 @@
-import { Entity } from 'dexie';
-import type AppDB from '@/database/models/app-db';
-import type { GrammarLocal, UserItemLocal } from '@/types/local.types';
-import { supabaseInstance } from '@/config/supabase.config';
-import { db } from '@/database/models/db';
 import config from '@/config/config';
-import Dexie from 'dexie';
-import Metadata from './metadata';
+import { supabaseInstance } from '@/config/supabase.config';
+import type AppDB from '@/database/models/app-db';
+import { db } from '@/database/models/db';
+import { DatabaseError, SupabaseError } from '@/types/error.types';
+import type { GrammarLocal } from '@/types/local.types';
 import { TableName } from '@/types/local.types';
+import { assertNonEmptyString, assertPositiveInteger } from '@/utils/assertions.utils';
+import Dexie, { Entity } from 'dexie';
+import { syncFromRemoteGeneric } from '../utils/data-sync.utils';
 
+const NULL_DATE = config.database.nullReplacementDate;
+const NULL_NUMBER = config.database.nullReplacementNumber;
+
+/**
+ * Represents a grammar entity in the application database.
+ * - grammar records are shared across all users
+ *
+ * @method getById - Fetches a grammar record by its ID.
+ * @method getStartedIds - Retrieves the list of unique grammar IDs that the user has started.
+ * @method getStarted - Retrieves the list of grammar that the user has started.
+ * @method syncFromRemote - Synchronizes grammar data between the local database and Supabase, either fully or incrementally based on the last sync timestamp.
+ *
+ */
 export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   id!: number;
   name!: string;
   note!: string;
-  updated_at!: string;
+  sort_order!: number;
   deleted_at!: string | null;
 
   /**
-   * Returns a grammar record by its ID.
-   * @param grammarId fetch grammar by ID
-   * @returns A promise that resolves to the grammar record or `undefined` if not found.
-   * @throws Error if grammarId is not a positive integer or if grammar is not found.
+   * Retrieves a grammar record by its ID from the database.
+   * @param grammarId - The unique identifier of the grammar record to retrieve.
    */
-  static async getGrammarById(grammarId: number): Promise<GrammarLocal> {
+  static async getById(grammarId: number): Promise<GrammarLocal> {
+    assertPositiveInteger(grammarId, 'grammarId');
+
     const grammar = await db.grammar.get(grammarId);
 
     if (!grammar) {
-      throw new Error(`Grammar with ID ${grammarId} not found.`);
+      throw new DatabaseError(`Grammar with ID ${grammarId} not found.`, undefined, { grammarId });
     }
 
     return grammar;
   }
 
   /**
-   * Fetches the list of grammar that the user has started.
-   * @param userId - The user ID.
-   * @returns Array of started GrammarLocal records, empty array in case of none found.
-   * @throws Error if operation fails.
+   * Retrieves a list of unique grammar IDs for items that have been started by a user.
+   * @param userId - The ID of the user
    */
-  static async getStartedGrammarList(userId: string): Promise<GrammarLocal[]> {
-    const startedUserItems: UserItemLocal[] = await db.user_items
+  static async getStartedIds(userId: string): Promise<number[]> {
+    assertNonEmptyString(userId, 'userId');
+
+    const startedItems = await db.user_items
       .where('[user_id+started_at]')
-      .between([userId, Dexie.minKey], [userId, config.database.nullReplacementDate], true, false)
+      .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
+      .filter((item) => item.grammar_id !== NULL_NUMBER)
       .toArray();
 
-    const grammarIds = [...new Set(startedUserItems.map((item) => item.grammar_id))];
-
-    const startedgrammar: GrammarLocal[] = await db.grammar.where('id').anyOf(grammarIds).toArray();
-
-    return startedgrammar;
+    return [...new Set(startedItems.map((item) => item.grammar_id))];
   }
 
   /**
-   * Synchronizes grammar data from Supabase to the local IndexedDB.
-   * In case of an error during fetching, it logs the error to the console, but does not throw.
-   * @returns The number of grammar records synced.
-   * @throws Error if any step of the synchronization process fails.
+   * Retrieves a list of grammar items that have been started by the user.
+   * @param userId - The unique identifier of the user
    */
-  static async syncGrammarData(): Promise<number> {
-    // Step 1: Get the last synced date for the grammar table
-    const lastSyncedAt = await Metadata.getSyncedDate(TableName.Grammar);
+  static async getStarted(userId: string): Promise<GrammarLocal[]> {
+    assertNonEmptyString(userId, 'userId');
 
-    // Step 2: Fetch synced time
-    const newSyncTime = new Date().toISOString();
+    const grammarIds = await this.getStartedIds(userId);
+    if (grammarIds.length === 0) return [];
+    return await db.grammar.where('id').anyOf(grammarIds).sortBy('sort_order');
+  }
 
-    // Step 3: Fetch grammar records from Supabase newer than the last synced date
+  /**
+   * Synchronizes grammar data between the local database and Supabase.
+   * @param doFullSync - If true, performs a full sync by clearing all existing grammar data
+   *                     and fetching everything from the epoch start date. If false, performs
+   *                     an incremental sync based on the last sync timestamp. Defaults to false.
+   */
+  static async syncFromRemote(doFullSync: boolean = false): Promise<void> {
+    await syncFromRemoteGeneric<GrammarLocal>(
+      db.grammar as Dexie.Table<GrammarLocal, number>,
+      TableName.Grammar,
+      this.fetchFromRemote,
+      doFullSync,
+    );
+  }
+
+  /**
+   * Fetches grammar records from Supabase that were updated within a specified time range.
+   * @param lastSyncedAt - The start of the time range (inclusive). Defaults to the null replacement date from config.
+   */
+  private static async fetchFromRemote(
+    lastSyncedAt: string = config.database.epochStartDate,
+  ): Promise<GrammarLocal[]> {
     const { data: grammar, error } = await supabaseInstance
       .from('grammar')
-      .select('id, name, note, updated_at, deleted_at')
-      .gt('updated_at', lastSyncedAt);
+      .select('id, name, note, sort_order, deleted_at')
+      .gte('updated_at', lastSyncedAt);
 
     if (error) {
-      throw new Error(`Failed to fetch data from supabase: ${error.message}`);
-    }
-
-    // Step 4: Split the fetched grammar records by deleted_at
-    if (grammar && grammar.length > 0) {
-      const toDelete: number[] = [];
-      const toUpsert: GrammarLocal[] = [];
-      grammar.forEach((item) => {
-        if (item.deleted_at === null) {
-          toUpsert.push(item);
-        } else {
-          toDelete.push(item.id);
-        }
+      throw new SupabaseError(`Failed to fetch grammar data from supabase`, error, {
+        lastSyncedAt,
       });
-
-      if (toDelete.length > 0) {
-        await db.grammar.bulkDelete(toDelete);
-      }
-
-      if (toUpsert.length > 0) {
-        await db.grammar.bulkPut(toUpsert);
-      }
     }
 
-    // Step 5: Update the metadata table with the new sync time
-    await Metadata.markAsSynced(TableName.Grammar, newSyncTime);
-
-    return grammar.length;
+    return grammar ?? [];
   }
 }

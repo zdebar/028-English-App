@@ -1,9 +1,11 @@
 import type { ReactNode } from 'react';
-import { Link, useMatch, type LinkProps } from 'react-router-dom';
+import { Link, useMatch } from 'react-router-dom';
+import type { JSX } from 'react';
 
-interface HeaderButtonProps extends LinkProps {
-  to: string;
+interface HeaderButtonProps {
   children: ReactNode;
+  to: string;
+  title?: string;
   disabled?: boolean;
   className?: string;
 }
@@ -11,36 +13,39 @@ interface HeaderButtonProps extends LinkProps {
 /**
  * Header button component for navigation in the app header.
  *
- * @param to Destination path for navigation.
  * @param children Content to be displayed inside the button.
+ * @param to Destination path for navigation.
  * @param disabled Whether the button is disabled.
  * @param className Additional CSS classes for custom styling.
- * @param props Standard link attributes.
+ * @returns The rendered button element.
  */
 export default function HeaderButton({
-  to,
   children,
+  to,
+  title,
   disabled = false,
   className = '',
-  ...props
-}: HeaderButtonProps) {
-  const isSelected = useMatch(to);
+}: HeaderButtonProps): JSX.Element {
+  const isSelected = useMatch({ path: to, end: true });
 
-  return disabled ? (
-    <span
-      className={`shape-button-header color-button-header-disabled flex items-center justify-center ${className}`}
-      aria-disabled="true"
-      {...props}
-    >
-      {children}
-    </span>
-  ) : (
+  if (disabled)
+    return (
+      <span
+        role="button"
+        aria-disabled="true"
+        className={`size-button text-disabled-light dark:text-disabled-dark flex cursor-default items-center justify-center rounded-full hover:bg-inherit ${className}`}
+      >
+        {children}
+      </span>
+    );
+
+  return (
     <Link
       to={to}
-      className={`shape-button-header color-button-header flex items-center justify-center ${
-        isSelected && 'color-selected'
+      title={title}
+      className={`size-button hover:text-light hover:bg-button-hover flex items-center justify-center rounded-full ${
+        isSelected ? 'text-light bg-button-hover' : ''
       } ${className}`}
-      {...props}
     >
       {children}
     </Link>

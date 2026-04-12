@@ -1,4 +1,6 @@
-import { useMemo } from 'react';
+import { TEXTS } from '@/locales/cs';
+import { useEffect, useMemo } from 'react';
+import { errorHandler } from '../logging/error-handler';
 
 interface DirectionDropdownProps<T> {
   value: T;
@@ -25,9 +27,20 @@ export default function DirectionDropdown<T>({
   onChange,
   className = '',
 }: DirectionDropdownProps<T>) {
-  if (!options.some((option) => option.value === value)) {
-    console.warn(`Hodnota "${value}" není platná pro DirectionDropdown.`);
-  }
+  const optionValueMap = useMemo(() => {
+    return new Map(options.map((option) => [String(option.value), option.value]));
+  }, [options]);
+
+  const hasSelectedValue = optionValueMap.has(String(value));
+
+  useEffect(() => {
+    if (hasSelectedValue) return;
+
+    errorHandler(
+      `Value "${value}" is not valid for DirectionDropdown.`,
+      new Error('Invalid dropdown value'),
+    );
+  }, [hasSelectedValue, value]);
 
   const memoizedOptions = useMemo(() => {
     return options.map((option) => (
@@ -38,18 +51,26 @@ export default function DirectionDropdown<T>({
   }, [options]);
 
   return (
-    <div className={`centered ${className} border-none`}>
+    <div className={`centered border-none ${className}`} title={TEXTS.translationDirection}>
       <label htmlFor="direction-dropdown" className="sr-only">
-        Směr
+        {TEXTS.translationDirection}
       </label>
       <select
         id="direction-dropdown"
         name="direction"
         value={String(value)}
-        onChange={(e) =>
-          onChange(options.find((o) => String(o.value) === e.target.value)?.value as T)
-        }
-        className="h-button color-select w-full px-3"
+        onChange={(e) => {
+          const selectedValue = optionValueMap.get(e.target.value);
+          if (selectedValue === undefined) {
+            errorHandler(
+              `Selected value "${e.target.value}" is not available in DirectionDropdown options.`,
+              new Error('Invalid dropdown selection'),
+            );
+            return;
+          }
+          onChange(selectedValue);
+        }}
+        className="h-button bg-background-light text-light dark:bg-background-dark dark:text-dark w-full border-none px-4"
       >
         {memoizedOptions}
       </select>

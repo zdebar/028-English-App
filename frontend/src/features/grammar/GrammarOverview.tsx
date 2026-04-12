@@ -1,82 +1,115 @@
-import { useState, useCallback } from 'react';
-import Grammar from '@/database/models/grammar';
-import UserItem from '@/database/models/user-items';
-import type { GrammarLocal } from '@/types/local.types';
-import ListOverview from './ListOverview';
 import OverviewCard from '@/components/UI/OverviewCard';
-import { useFetch } from '@/hooks/use-fetch';
+import Grammar from '@/database/models/grammar';
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import HelpButton from '@/features/help/HelpButton';
+import { TEXTS } from '@/locales/cs';
+import type { GrammarLocal } from '@/types/local.types';
 import DOMPurify from 'dompurify';
-import HelpButton from '@/features/overlay/HelpButton';
+import { useCallback, useMemo, type JSX } from 'react';
+import { useNavigate } from 'react-router-dom';
+import BaseButton from '@/components/UI/buttons/BaseButton';
+import CloseButton from '@/components/UI/buttons/CloseButton';
+import DelayedMessage from '@/components/UI/DelayedMessage';
+import { useArray } from '@/hooks/use-array';
+import Notification from '@/components/UI/Notification';
+import UserItem from '@/database/models/user-items';
+import { useToastStore } from '../toast/use-toast-store';
 
 /**
  * GrammarOverview component displays a list of started grammar topics for the user.
  *
- * @returns A view with a grammar list and detail card, including progress reset and help features.
+ * @returns {JSX.Element} A view with a grammar list and detail card, including progress reset and help features.
+ * @throws Doesn't throw errors; displays toast messages on failures.
  */
-export default function GrammarOverview() {
-  const { userId } = useAuthStore();
+export default function GrammarOverview(): JSX.Element {
+  const userId = useAuthStore((state) => state.userId);
+  const showToast = useToastStore((state) => state.showToast);
+  const navigate = useNavigate();
 
+  // -- Data Fetching --
   const fetchGrammarList = useCallback(async () => {
-    if (userId) {
-      return await Grammar.getStartedGrammarList(userId);
-    }
-    return [];
+    if (!userId) return [];
+    return Grammar.getStarted(userId);
   }, [userId]);
 
   const {
-    data: grammarArray,
-    error,
-    loading,
-    setShouldReload,
-  } = useFetch<GrammarLocal[]>(fetchGrammarList);
+    data: grammarList,
+    currentIndex,
+    currentItem: currentGrammar,
+    setCurrentIndex,
+    reload,
+  } = useArray<GrammarLocal>(fetchGrammarList);
 
-  const [cardVisible, setCardVisible] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const hasGrammar = grammarList.length > 0;
 
-  const handleClearGrammarUserItems = async () => {
-    const grammar_id = grammarArray?.[currentIndex]?.id;
-    if (typeof grammar_id === 'number' && userId) {
-      await UserItem.resetGrammarItems(userId, grammar_id);
-      setShouldReload(true);
+  const sanitizedNote = useMemo(() => {
+    if (!currentGrammar?.note) return null;
+    return DOMPurify.sanitize(currentGrammar.note);
+  }, [currentGrammar?.note]);
+
+  // -- Event Handlers --
+  const handleOpenGrammar = useCallback(
+    (index: number) => {
+      setCurrentIndex(index);
+    },
+    [setCurrentIndex],
+  );
+
+  const handleReset = useCallback(async () => {
+    if (!currentGrammar || !userId) return;
+    try {
+      await UserItem.resetItemsByGrammarId(userId, currentGrammar.id);
+      reload();
+      showToast(TEXTS.resetProgressSuccessToast, 'success');
+    } catch (error) {
+      showToast(TEXTS.resetProgressErrorToast, 'error');
     }
-  };
+  }, [currentGrammar, userId, reload]);
 
-  return (
-    <>
-      {!cardVisible ? (
-        <ListOverview
-          listTitle="Přehled gramatiky"
-          emptyTitle="Žádné započatá gramatika"
-          array={grammarArray}
-          loading={loading}
-          error={error}
-          onSelect={(index) => {
-            setCurrentIndex(index);
-            setCardVisible(true);
-          }}
-          onClose={() => window.history.back()}
-        />
-      ) : (
-        <div className="relative flex w-full grow flex-col items-center justify-start">
-          <OverviewCard
-            titleText={grammarArray?.[currentIndex].name}
-            onClose={() => setCardVisible(false)}
-            handleReset={handleClearGrammarUserItems}
-          >
-            {grammarArray?.[currentIndex].note ? (
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(grammarArray[currentIndex].note),
-                }}
-              />
-            ) : (
-              'Žádné poznámky k zobrazení.'
-            )}
-          </OverviewCard>
-          <HelpButton className="self-end" />
+  // -- List view --
+  if (currentIndex === null) {
+    return (
+      <div className={`card-width flex flex-col justify-start gap-1`}>
+        <div className="h-button flex items-center justify-between gap-1">
+          <div className="flex grow justify-start px-4">{TEXTS.grammarOverview}</div>
+          <CloseButton onClick={() => navigate('/profile')} />
         </div>
+        {hasGrammar ? (
+          grammarList.map((item, index) => (
+            <BaseButton
+              key={item.id}
+              className="h-input flex grow-0 justify-start px-4 text-left"
+              onClick={() => handleOpenGrammar(index)}
+            >
+              {`${index + 1} : ${item.name} `}
+            </BaseButton>
+          ))
+        ) : (
+          <DelayedMessage>
+            <Notification className="color-info pt-4">{TEXTS.noGrammar}</Notification>
+          </DelayedMessage>
+        )}
+      </div>
+    );
+  }
+
+  // -- GrammarCard view --
+  return (
+    <OverviewCard
+      buttonTitle={currentGrammar?.name ?? TEXTS.grammarOverview}
+      modalTitle={TEXTS.restartGrammarProgress}
+      handleReset={handleReset}
+      onClose={() => setCurrentIndex(null)}
+      className="relative"
+    >
+      {sanitizedNote ? (
+        <div dangerouslySetInnerHTML={{ __html: sanitizedNote }} className="grammar" />
+      ) : (
+        <DelayedMessage>
+          <Notification className="color-info pt-4">{TEXTS.notAvailable}</Notification>
+        </DelayedMessage>
       )}
-    </>
+      <HelpButton className="right-0 -bottom-10.5" />
+    </OverviewCard>
   );
 }

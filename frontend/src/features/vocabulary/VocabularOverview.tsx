@@ -1,11 +1,20 @@
-import { useState, useEffect, useCallback } from 'react';
+import DelayedMessage from '@/components/UI/DelayedMessage';
+import config from '@/config/config';
 import UserItem from '@/database/models/user-items';
-import type { UserItemLocal } from '@/types/local.types';
-import { useFetch } from '@/hooks/use-fetch';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import Loading from '@/components/UI/Loading';
-import VocabularyList from './VocabularyList';
+import type { UserItemLocal } from '@/types/local.types';
+import { useCallback, useMemo, useState } from 'react';
 import VocabularyDetailCard from './VocabularyDetailCard';
+import VocabularyList from './VocabularyList';
+import { useNavigate } from 'react-router-dom';
+import { useArray } from '@/hooks/use-array';
+import { compareCzechStrings, type DisplayField } from './vocabulary.utils';
+import Notification from '@/components/UI/Notification';
+import { TEXTS } from '@/locales/cs';
+import { filterSortedWords } from './vocabulary.utils';
+import { useToastStore } from '../toast/use-toast-store';
+
+const INITIAL_VISIBLE_COUNT = config.vocabulary.itemsPerPage;
 
 /**
  * VocabularyOverview component
@@ -13,57 +22,81 @@ import VocabularyDetailCard from './VocabularyDetailCard';
  * @returns The vocabulary overview UI with list and detail card functionality.
  */
 export default function VocabularyOverview() {
-  const { userId } = useAuthStore();
+  const userId = useAuthStore((state) => state.userId);
+  const showToast = useToastStore((state) => state.showToast);
+  const navigate = useNavigate();
 
+  // -- DATA FETCHING --
   const fetchVocabulary = useCallback(async () => {
-    if (userId) {
-      return await UserItem.getUserStartedVocabulary(userId);
-    }
-    return [];
+    if (!userId) return [];
+    return UserItem.getStartedVocabulary(userId);
   }, [userId]);
 
-  const {
-    data: words,
-    error,
-    loading,
-    setShouldReload,
-  } = useFetch<UserItemLocal[]>(fetchVocabulary);
+  const { data: words, error, loading, reload } = useArray<UserItemLocal>(fetchVocabulary);
 
-  const [filteredWords, setFilteredWords] = useState<UserItemLocal[]>([]);
-  const [visibleCount, setVisibleCount] = useState(8);
-  const [cardVisible, setCardVisible] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  // -- WORDS FILTERING --
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
   const [searchTerm, setSearchTerm] = useState('');
-  const [displayField, setDisplayField] = useState<'czech' | 'english'>('czech');
-  const selectedWord = filteredWords ? filteredWords[currentIndex] : null;
+  const [displayField, setDisplayField] = useState<DisplayField>('english');
+  const [selectedWord, setSelectedWord] = useState<UserItemLocal | null>(null);
 
-  useEffect(() => {
-    if (!words) return;
-    const filtered = words
-      .filter((item) => item[displayField]?.toLowerCase().startsWith(searchTerm.toLowerCase()))
-      .sort((a, b) => {
-        const lengthDiff = a[displayField]?.length - b[displayField].length;
-        if (lengthDiff !== 0) return lengthDiff;
-        return a[displayField].localeCompare(b[displayField]);
-      });
-    setFilteredWords(filtered);
-  }, [words, searchTerm, displayField]);
+  const sortedByEnglish = useMemo(() => words, [words]);
+  const sortedByCzech = useMemo(
+    () =>
+      [...words].sort((a, b) => {
+        const valA = a.czech?.toLowerCase() || '';
+        const valB = b.czech?.toLowerCase() || '';
+        return compareCzechStrings(valA, valB);
+      }),
+    [words],
+  );
+  const sortedWords = displayField === 'czech' ? sortedByCzech : sortedByEnglish;
+  const filteredWords = useMemo(
+    () => filterSortedWords(sortedWords, searchTerm, displayField, visibleCount + 1),
+    [sortedWords, searchTerm, displayField, visibleCount],
+  );
 
-  const handleClearUserItem = async () => {
+  // -- HANDLERS  --
+  const handleClearUserItem = useCallback(async () => {
     const itemId = selectedWord?.item_id;
-    if (typeof itemId === 'number' && userId) {
-      await UserItem.resetUserItemById(userId, itemId);
-      setShouldReload(true);
+    if (typeof itemId !== 'number' || !userId) return;
+    try {
+      await UserItem.resetItemById(userId, itemId);
+      setSelectedWord(null);
+      void reload();
+      showToast(TEXTS.resetProgressSuccessToast, 'success');
+    } catch (error) {
+      showToast(TEXTS.resetProgressErrorToast, 'error');
     }
-  };
+  }, [selectedWord, userId, reload, showToast]);
+
+  const handleSelectWord = useCallback(
+    (index: number) => {
+      if (index < 0 || index >= filteredWords.length) return;
+      setSelectedWord(filteredWords[index]);
+    },
+    [filteredWords],
+  );
+
+  const handleCloseDetail = useCallback(() => {
+    setSelectedWord(null);
+  }, []);
+
+  const handleCloseList = useCallback(() => {
+    navigate('/profile');
+  }, [navigate]);
 
   if (loading) {
-    return <Loading />;
+    return (
+      <DelayedMessage>
+        <Notification className="color-info pt-4">{TEXTS.loadingMessage}</Notification>
+      </DelayedMessage>
+    );
   }
 
   return (
     <>
-      {!cardVisible ? (
+      {selectedWord === null ? (
         <VocabularyList
           filteredWords={filteredWords}
           visibleCount={visibleCount}
@@ -72,17 +105,17 @@ export default function VocabularyOverview() {
           setSearchTerm={setSearchTerm}
           setDisplayField={setDisplayField}
           setVisibleCount={setVisibleCount}
-          onSelect={(index) => {
-            setCurrentIndex(index);
-            setCardVisible(true);
-          }}
+          onSelect={handleSelectWord}
           error={error}
-          onClose={() => window.history.back()}
+          onClose={handleCloseList}
         />
       ) : (
         <VocabularyDetailCard
           selectedWord={selectedWord}
-          onClose={() => setCardVisible(false)}
+          selectedTitle={
+            displayField === 'czech' ? (selectedWord.czech ?? '') : (selectedWord.english ?? '')
+          }
+          onClose={handleCloseDetail}
           onReset={handleClearUserItem}
         />
       )}

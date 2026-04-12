@@ -1,8 +1,15 @@
-import Icon, { type IconProps } from "./Icon";
+import Icon, { type IconProps } from './Icon';
+import type { JSX } from 'react';
 
-export default function BulbIcon(props: IconProps) {
+/**
+ * Bulb Icon component.
+ *
+ * @param props IconProps to customize the icon.
+ * @returns The rendered icon element.
+ */
+export default function BulbIcon(props: IconProps): JSX.Element {
   return (
-    <Icon size={22} strokeWidth={1.25} {...props}>
+    <Icon {...props} size={22} strokeWidth={1.25}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

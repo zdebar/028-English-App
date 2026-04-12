@@ -1,0 +1,45 @@
+@layer base {
+  html {
+    font-size: 15px;
+    @apply font-body text-light dark:text-dark bg-background-light dark:bg-background-dark;
+    overflow-y: scroll;
+  }
+
+  body {
+    min-width: 320px;
+  }
+
+  h1 {
+    @apply font-headings pb-2 text-4xl font-thin;
+  }
+
+  h2 {
+    @apply font-headings pb-2 text-xl font-thin;
+  }
+
+  h3 {
+    @apply font-headings pb-1 text-xl font-thin;
+  }
+
+  ul {
+    @apply list-disc pl-6 text-sm;
+  }
+
+  li {
+    @apply mb-1;
+  }
+
+  th,
+  tr,
+  td {
+    @apply border px-2 py-1;
+  }
+
+  a {
+    @apply hover:underline;
+  }
+
+  button {
+    @apply select-none;
+  }
+}

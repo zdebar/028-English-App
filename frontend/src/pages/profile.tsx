@@ -1,26 +1,40 @@
-import SignoutButton from '@/features/auth/SignoutButton';
-import { useNavigate } from 'react-router-dom';
-import Button from '@/components/UI/buttons/Button';
-import ResetAllProgressButton from '@/features/auth/ResetAllProgressButton';
+import { MenuButton } from '@/components/UI/buttons/MenuButton';
+import { ROUTES } from '@/config/routes.config';
 import DeleteUserButton from '@/features/auth/DeleteUserButton';
+import SignoutButton from '@/features/auth/SignoutButton';
+import { TEXTS } from '@/locales/cs';
+import { useNavigate } from 'react-router-dom';
+import type { JSX } from 'react/jsx-dev-runtime';
+import SyncButton from '@/features/sync/SyncButton';
+import DownloadButton from '@/features/sync/DownloadButtton';
 
-export default function Profile() {
+/**
+ * Profile component that renders the user profile page.
+ *
+ * @returns The JSX element representing the Profile page.
+ */
+export default function Profile(): JSX.Element {
   const navigate = useNavigate();
 
   return (
-    <>
-      <div className="card-width grow-0">
-        <Button onClick={() => navigate('/grammar')} className="grow-0">
-          <p className="text-button">Přehled gramatiky</p>
-        </Button>
-        <Button onClick={() => navigate('/vocabulary')} className="grow-0">
-          <p className="text-button">Přehled slovíček</p>
-        </Button>
-        <br />
-        <ResetAllProgressButton />
-        <DeleteUserButton />
-        <SignoutButton />
-      </div>
-    </>
+    <div className="card-width grow-0 gap-1">
+      <MenuButton onClick={() => navigate(ROUTES.levels)} title={TEXTS.levelsOverviewTooltip} >
+        <p className="w-40 mx-auto">{TEXTS.levelsOverview}</p>
+      </MenuButton>
+      <MenuButton onClick={() => navigate(ROUTES.grammar)} title={TEXTS.grammarOverviewTooltip}>
+        <p className="w-40 mx-auto">{TEXTS.grammarOverview}</p>
+      </MenuButton>
+      <MenuButton
+        onClick={() => navigate(ROUTES.vocabulary)}
+        title={TEXTS.vocabularyOverviewTooltip}
+   
+      >
+        <p className="w-40 mx-auto">{TEXTS.vocabularyOverview}</p>
+      </MenuButton >
+      <DownloadButton  />
+      <SyncButton  />
+      <DeleteUserButton  />
+      <SignoutButton  />
+    </div>
   );
 }

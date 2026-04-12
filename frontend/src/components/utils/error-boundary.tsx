@@ -1,4 +1,7 @@
-import React, { Component, type ReactNode } from 'react';
+import { Component, type ReactNode } from 'react';
+import { TEXTS } from '@/locales/cs';
+import { errorHandler } from '@/features/logging/error-handler';
+import Notification from '@/components/UI/Notification';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -23,14 +26,14 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  componentDidCatch(error: Error) {
     // Log the error to an error reporting service
-    console.error('Error caught by ErrorBoundary:', error, errorInfo);
+    errorHandler('ErrorBoundary', error);
   }
 
   render() {
     if (this.state.hasError) {
-      return <h1>Nepředvídatelná chyba!</h1>;
+      return <Notification className="pt-6">{TEXTS.errorBoundaryMessage}</Notification>;
     }
 
     return this.props.children;

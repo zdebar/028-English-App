@@ -1,42 +1,76 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { TEXTS } from '@/locales/cs';
+import { errorHandler } from '@/features/logging/error-handler';
+
+interface UseFetchResult<T> {
+  data: T | null;
+  error: string | null;
+  loading: boolean;
+  reload: () => void;
+}
 
 /**
- * Generic data fetching hook.
- * @param fetchFunction - An asynchronous function that fetches data of type T.
- * @returns An object containing the fetched data, loading state, and any error message.
+ * A custom React hook for fetching data asynchronously.
+ * It manages loading state, error handling, and provides a mechanism to trigger reloads.
+ *
+ * @template T - The type of the data returned by the fetch function.
+ * @param fetchFunction - An asynchronous function that fetches the data.
+ * @returns An object containing:
+ *   - data: The fetched data or null if not yet fetched.
+ *   - error: An error message if the fetch failed, otherwise null.
+ *   - loading: Indicates if the data is currently being fetched.
+ *   - reload: Function to trigger a reload of the data.
  */
-export function useFetch<T>(fetchFunction: () => Promise<T>) {
+export function useFetch<T>(fetchFunction: () => Promise<T>): UseFetchResult<T> {
+  if (typeof fetchFunction !== 'function') {
+    throw new Error('fetchFunction must be a function.');
+  }
+
   const [data, setData] = useState<T | null>(null);
-  const [shouldReload, setShouldReload] = useState(true);
+  const [reloading, setReloading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isActive = true;
+
     async function fetchData() {
-      if (!shouldReload) return;
+      if (!reloading) return;
       setLoading(true);
 
       try {
         const result = await fetchFunction();
+        if (!isActive) return;
         setData(result);
         setError(null);
       } catch (error) {
-        setError('Chyba při načítání.');
-        console.error(error);
+        if (!isActive) return;
+        setError(TEXTS.dataLoadingError);
+        errorHandler('Data Fetching Error', error);
       } finally {
-        setLoading(false);
-        setShouldReload(false);
+        if (isActive) {
+          setLoading(false);
+          setReloading(false);
+        }
       }
     }
 
     fetchData();
-  }, [fetchFunction, shouldReload]);
+
+    return () => {
+      isActive = false;
+    };
+  }, [fetchFunction, reloading]);
+
+  const reload = useCallback(() => {
+    setLoading(true);
+    setReloading(true);
+  }, []);
 
   return {
     data,
     error,
     loading,
-    shouldReload,
-    setShouldReload,
+    reload,
   };
 }

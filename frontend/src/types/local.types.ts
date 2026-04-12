@@ -1,40 +1,69 @@
 export interface UserItemLocal {
-  // As used by IndexedDB
   item_id: number;
   user_id: string;
   czech: string;
   english: string;
   pronunciation: string;
   audio: string | null;
-  sequence: number;
-  grammar_id: number; // null replaced with config.database.nullReplacementNumber
+  sort_order: number;
   progress: number;
+  grammar_id: number; // null replaced with config.database.nullReplacementNumber
   started_at: string; // nulls replaced with config.database.nullReplacementDate
   updated_at: string;
-  deleted_at: string | null;
+  deleted_at: string; // nulls replaced with config.database.nullReplacementDate
   next_at: string; // nulls replaced with config.database.nullReplacementDate
   mastered_at: string; // nulls replaced with config.database.nullReplacementDate
+  lesson_id: number;
 }
 
 export interface UserItemPractice extends UserItemLocal {
-  // As used by PracticeCard
-  is_initial_practice: boolean;
+  show_new_grammar_indicator: boolean;
+}
+
+export interface LessonLocal {
+  id: number;
+  name: string;
+  note: string;
+  sort_order: number;
+  level_id: number;
+  deleted_at: string | null;
+}
+export interface LevelLocal {
+  id: number;
+  name: string;
+  note: string;
+  sort_order: number;
+  deleted_at: string | null;
+}
+
+export interface ProgressCounts {
+  startedCount: number;
+  startedTodayCount: number;
+  masteredCount: number;
+  masteredTodayCount: number;
+  totalCount: number;
+}
+
+export interface LessonOverview extends LessonLocal, ProgressCounts {}
+
+export interface LevelOverview extends LevelLocal, ProgressCounts {
+  lessons: LessonOverview[];
 }
 
 export interface GrammarLocal {
   id: number;
   name: string;
   note: string;
-  updated_at: string;
+  sort_order: number;
   deleted_at: string | null;
 }
 
 export interface UserScoreLocal {
-  id: string;
   user_id: string;
   date: string;
   item_count: number;
   updated_at: string;
+  deleted_at: string | null;
 }
 
 export interface UserInfoLocal {
@@ -60,22 +89,12 @@ export interface MetadataLocal {
   synced_at: string; // Timestamp of the last synchronization
 }
 
-export interface UserStatsLocal {
-  startedCountToday?: number;
-  startedCount?: number;
-  practiceCountToday?: number;
-}
-
-export interface LessonsLocal {
-  lessonId: number;
-  previousCount: number;
-  todayCount: number;
-}
-
 export const TableName = {
   Grammar: 'grammar',
   UserScores: 'user_scores',
   UserItems: 'user_items',
+  Levels: 'levels',
+  Lessons: 'lessons',
 } as const;
 
 export type TableName = (typeof TableName)[keyof typeof TableName];

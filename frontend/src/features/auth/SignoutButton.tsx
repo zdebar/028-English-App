@@ -1,38 +1,45 @@
-import { useState } from 'react';
-import { useToastStore } from '@/features/toast/use-toast-store';
-import ButtonAsyncModal from '../../components/UI/buttons/ButtonAsyncModal';
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import { errorHandler } from '@/features/logging/error-handler';
+import ModalButton from '@/features/modal/ModalButton';
+import { useToastStore } from '@/features/toast/use-toast-store';
+import { TEXTS } from '@/locales/cs';
+import type { JSX } from 'react';
+import { useThemeStore } from '../theme/use-theme-store';
 
 /**
  * SignoutButton component for signing out the user.
+ *
+ * @param className - Optional CSS class name to apply to the button.
+ * @returns The rendered SignoutButton component.
  */
-export default function SignoutButton() {
-  const [isLoading, setIsLoading] = useState(false);
-  const { handleLogout } = useAuthStore();
-  const { showToast } = useToastStore();
+export default function SignoutButton({ className }: { className?: string }): JSX.Element {
+  const userId = useAuthStore((state) => state.userId);
+  const handleLogout = useAuthStore((state) => state.handleLogout);
+  const saveCurrentThemeAsGuest = useThemeStore((state) => state.saveCurrentThemeAsGuest);
+  const showToast = useToastStore((state) => state.showToast);
 
   const handleSignout = async () => {
-    setIsLoading(true);
+    if (!userId) return;
+
     try {
+      saveCurrentThemeAsGuest();
       await handleLogout();
-      showToast('Úspěšně jste se odhlásili.', 'success');
+      showToast(TEXTS.signoutSuccess, 'success');
     } catch (error) {
-      console.error('Error on user logout:', error);
-      showToast('Nastala chyba při odhlašování. Zkuste to prosím později.', 'error');
-    } finally {
-      setIsLoading(false);
+      showToast(TEXTS.signoutError, 'error');
+      errorHandler('Signout Error', error);
     }
   };
 
   return (
-    <ButtonAsyncModal
-      message="Odhlásit se"
-      isLoading={isLoading}
-      loadingMessage="Probíhá odhlašování..."
-      modalTitle="Potvrzení odhlášení"
-      modalDescription="Opravdu se chcete odhlásit?"
+    <ModalButton
+      modalTitle={TEXTS.signoutButtonTitle}
+      modalText={TEXTS.signoutModalText}
+      disabled={!userId}
       onConfirm={handleSignout}
-      className="shape-button-rectangular color-button grow-0"
-    />
+      className={className}
+    >
+      <p className="w-40 mx-auto">{TEXTS.signoutButtonTitle}</p>
+    </ModalButton>
   );
 }

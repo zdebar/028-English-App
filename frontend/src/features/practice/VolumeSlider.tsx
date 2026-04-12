@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import VolumeIcon from '@/components/UI/icons/VolumeIcon';
+import MuteIcon from '@/components/UI/icons/MuteIcon';
+import { ARIA_TEXTS, TEXTS } from '@/locales/cs';
 
 type VolumeSliderProps = {
   setVolume: (volume: number) => void;
   className?: string;
-} & React.HTMLAttributes<HTMLDivElement>;
+};
 
 /**
  * A component for controlling volume with a slider.
@@ -13,11 +15,10 @@ type VolumeSliderProps = {
  * @param className - Optional additional CSS classes.
  * @returns A JSX element for the volume slider.
  */
-export default function VolumeSlider({ setVolume, className = '', ...props }: VolumeSliderProps) {
+export default function VolumeSlider({ setVolume, className = '' }: VolumeSliderProps) {
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
-  const [volume, setLocalVolume] = useState(0.5);
+  const [volume, setLocalVolume] = useState(1);
   const sliderRef = useRef<HTMLDivElement>(null);
-  const noAudio = false;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -41,17 +42,17 @@ export default function VolumeSlider({ setVolume, className = '', ...props }: Vo
   return (
     <div
       ref={sliderRef}
-      className={`flex pt-1 ${className} cursor-pointer`}
+      className={`flex h-10 min-w-10 cursor-pointer items-center pl-2 ${className}`}
       onClick={(event) => event.stopPropagation()}
-      {...props}
     >
       <button
         onClick={() => setShowVolumeSlider((prev) => !prev)}
-        aria-label="Nastavit hlasitost"
+        aria-label={ARIA_TEXTS.setVolume}
         className="cursor-pointer"
-        disabled={noAudio}
+        disabled={false}
+        title={TEXTS.volume}
       >
-        <VolumeIcon />
+        {volume === 0 ? <MuteIcon /> : <VolumeIcon />}
       </button>
       {showVolumeSlider && (
         <input
@@ -66,8 +67,8 @@ export default function VolumeSlider({ setVolume, className = '', ...props }: Vo
           aria-valuenow={volume}
           aria-valuemin={0}
           aria-valuemax={1}
-          aria-label={`Hlasitost: ${Math.round(volume * 100)}%`}
-          disabled={noAudio}
+          aria-label={ARIA_TEXTS.volumePercent(Math.round(volume * 100))}
+          disabled={false}
         />
       )}
     </div>

@@ -1,88 +1,97 @@
-import { Route, Routes } from 'react-router-dom';
-import { useThemeStore } from '@/features/theme/use-theme';
-import { useEffect } from 'react';
 import Footer from '@/components/Layout/Footer';
 import Header from '@/components/Layout/Header';
-import './App.css';
-import Profile from '@/pages/Profile';
-import Practice from '@/pages/Practice';
-import Home from '@/pages/Home';
-import { dataSync } from '@/database/models/data-sync';
-import Vocabulary from '@/pages/Vocabulary';
 import ProtectedLayout from '@/components/utils/protected-laout';
-import Grammar from '@/pages/Grammar';
+import { usePeriodicSync } from '@/database/hooks/use-periodic-sync';
+
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { supabaseInstance } from '@/config/supabase.config';
-import OverlayMask from '@/components/UI/OverlayMask';
-import { useOverlayStore } from '@/hooks/use-overlay-store';
+import Levels from '@/pages/Levels';
+
 import ToastContainer from '@/features/toast/ToastContainer';
+import Grammar from '@/pages/Grammar';
+import Home from '@/pages/Home';
+import Practice from '@/pages/Practice';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
+import Vocabulary from '@/pages/Vocabulary';
+import { ROUTES } from '@/config/routes.config';
+import OverlayMask from './features/overlay/OverlayMask';
+import Profile from '@/pages/Profile';
+import Guide from '@/pages/Guide';
+
+import { useEffect } from 'react';
+import { Route, Routes, useLocation } from 'react-router-dom';
+import { errorHandler } from './features/logging/error-handler';
+import { useToastStore } from './features/toast/use-toast-store';
+import { TEXTS } from './locales/cs';
+import './styles/index.css';
+import { useThemeLoader } from './features/theme/use-theme-loader';
+import { useUserStoreSync } from './features/user-stats/use-user-store-sync';
+import { useDailyStatsReset } from './features/user-stats/use-daily-stats-reset';
+import Notification from './components/UI/Notification';
 
 export default function App() {
-  const { theme, chooseTheme } = useThemeStore();
-  const { userId, setSession } = useAuthStore();
-  const { isOpen, close } = useOverlayStore();
+  const userId = useAuthStore((state) => state.userId);
+  const initializeAuth = useAuthStore((state) => state.initializeAuth);
+  const authLoading = useAuthStore((state) => state.loading);
+  const showToast = useToastStore((state) => state.showToast);
+  const hideToast = useToastStore((state) => state.hideToast);
+  const location = useLocation();
 
-  // Handle Supabase auth state changes
+  // Auth initialization effect
   useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        const {
-          data: { session },
-        } = await supabaseInstance.auth.getSession();
-        setSession(session);
-      } catch (error) {
-        console.error('Error getting session:', error);
-        setSession(null);
-      }
-    };
-
-    initializeAuth();
-
-    const {
-      data: { subscription },
-    } = supabaseInstance.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, [setSession]);
-
-  useEffect(() => {
-    chooseTheme(theme);
-  }, [theme, chooseTheme]);
-
-  // Data synchronization effect on userId change
-  useEffect(() => {
-    if (userId) {
-      dataSync(userId);
+    try {
+      const cleanup = initializeAuth();
+      return cleanup;
+    } catch (error) {
+      showToast(TEXTS.authInitErrorToast, 'error');
+      errorHandler('Auth Initialization Error', error);
     }
-  }, [userId]);
+  }, [initializeAuth]);
+
+  // User store reset on user change (sign-in/sign-out)
+  useUserStoreSync(userId);
+
+  // Theme load
+  useThemeLoader(userId);
+
+  // Data synchronization
+  const { loading: syncLoading } = usePeriodicSync(userId);
+
+  // User store new day reset
+  useDailyStatsReset(userId);
+
+  const loading = authLoading || syncLoading;
+  useEffect(() => {
+    if (loading) {
+      showToast(TEXTS.syncLoadingText, 'info', true);
+    } else {
+      hideToast();
+    }
+  }, [loading]);
 
   return (
-    <>
-      {isOpen && <OverlayMask onClose={close} />}
-      <div className="max-w-container relative mx-auto flex min-h-screen flex-col justify-start">
-        <ToastContainer />
-        <Header />
-        <div className="relative flex grow flex-col items-center gap-4">
-          <Routes>
-            <Route path="/*" element={<Home />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route element={<ProtectedLayout />}>
-              <Route path="/practice" element={<Practice />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/grammar" element={<Grammar />} />
-              <Route path="/vocabulary" element={<Vocabulary />} />
-            </Route>
-            <Route
-              path="/*"
-              element={<div className="text-notice color-notice pt-8">Page not found</div>}
-            />
-          </Routes>
-        </div>
-        <Footer />
-      </div>
-    </>
+    <div className="max-w-container relative mx-auto flex min-h-screen flex-col justify-start">
+      <ToastContainer />
+      <OverlayMask />
+      <Header />
+      <main className="relative flex grow flex-col items-center gap-4">
+        <Routes>
+          <Route path={ROUTES.home} element={<Home />} />
+          <Route path={ROUTES.privacyPolicy} element={<PrivacyPolicy />} />
+          <Route path={ROUTES.guide} element={<Guide />} />
+          <Route element={<ProtectedLayout />}>
+            <Route path={ROUTES.practice} element={<Practice />} />
+            <Route path={ROUTES.profile} element={<Profile />} />
+            <Route path={ROUTES.levels} element={<Levels />} />
+            <Route path={ROUTES.grammar} element={<Grammar />} />
+            <Route path={ROUTES.vocabulary} element={<Vocabulary />} />
+          </Route>
+          <Route
+            path="*"
+            element={<Notification className="pt-8">{TEXTS.pageNotFound}</Notification>}
+          />
+        </Routes>
+      </main>
+      {location.pathname === '/' && <Footer />}
+    </div>
   );
 }
