@@ -15,7 +15,7 @@ export const OVERVIEW_TEXTS = {
 
   // Vocabulary Page
   start: 'začít',
-  translationDirection: 'výchozí jazyk',
+  translationDirection: 'přepnout výchozí jazyk',
   more: 'další',
   enterPrompt: 'Zadejte slovičko ...',
   noStartedVocabulary: 'Žádná započatá slovíčka',
