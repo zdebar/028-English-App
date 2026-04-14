@@ -33,9 +33,9 @@ export default function BlockBar({
   lessonName = '',
   lessonNumber = 0,
   isMastered = false,
-  divisions = 10,
-  lessonCount = 40,
-  widthBase = 40,
+  divisions = 20,
+  lessonCount = 100,
+  widthBase = 100,
   className = '',
 }: BlockBarProps) {
   // Ensure lessonCount is at least 1
@@ -73,10 +73,10 @@ export default function BlockBar({
   };
 
   return (
-    <div className="h-attribute relative w-full cursor-default bg-gray-200 select-none" >
+    <div className="h-attribute relative w-full cursor-default bg-gray-200 select-none">
       <div className="font-body text-light absolute -top-0.5 right-0 left-0 z-20 flex items-center justify-between truncate px-4 pt-1 text-center font-bold">
         <span title={`${TEXTS.levelName} - ${TEXTS.lessonName} `}>
-          <span className='min-w-6 text-right inline-block'>{lessonNumber}</span>  {lessonName}
+          <span className="inline-block min-w-6 text-right">{lessonNumber}</span> {lessonName}
         </span>
         <span title={isMastered ? TEXTS.masteredTodayHint : TEXTS.startedTodayHint}>
           {todayCount > 0 && `+ ${todayCount}`}
