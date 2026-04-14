@@ -22,11 +22,11 @@ import { infoHandler } from '@/features/logging/info-handler';
 import { triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 import { SupabaseError } from '@/types/error.types';
 import type { UserItemSQL } from '@/types/sql.types';
-import Grammar from './grammar';
 import Metadata from './metadata';
 import UserScore from './user-scores';
 
 const NULL_DATE = config.database.nullReplacementDate;
+const NULL_NUMBER = config.database.nullReplacementNumber;
 
 /**
  * Represents a user item entity in the application database.
@@ -68,7 +68,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     assertPositiveInteger(deckSize, 'deckSize');
 
     // Step 1: Fetch already started grammar list
-    const startedGrammarIdSet = new Set(await Grammar.getStartedIds(userId));
+    const startedGrammarIdSet = new Set(await this.getStartedGrammarIds(userId));
 
     // Step 2: Fetch items with odd progress
     let deck = await this.getPracticeItemsByParity(userId, true, false, deckSize);
@@ -132,6 +132,22 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
+   * Retrieves a list of unique grammar IDs for items that have been started by a user.
+   * @param userId - The ID of the user
+   */
+  static async getStartedGrammarIds(userId: string): Promise<number[]> {
+    assertNonEmptyString(userId, 'userId');
+
+    const startedItems = await db.user_items
+      .where('[user_id+started_at]')
+      .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
+      .filter((item) => item.grammar_id !== NULL_NUMBER)
+      .toArray();
+
+    return [...new Set(startedItems.map((item) => item.grammar_id))];
+  }
+
+  /**
    * Retrieves vocabulary items for a user that have been started (begun learning). Sorted by english word.
    * @param userId - The unique identifier of the user
    */
@@ -141,8 +157,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const result = await db.user_items
       .where('[user_id+grammar_id+started_at]')
       .between(
-        [userId, config.database.nullReplacementNumber, Dexie.minKey],
-        [userId, config.database.nullReplacementNumber, NULL_DATE],
+        [userId, NULL_NUMBER, Dexie.minKey],
+        [userId, NULL_NUMBER, NULL_DATE],
         true,
         false,
       )
@@ -205,7 +221,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Use only for deletion of user account, when user-items on remote are deleted automatically.
    * @param userId - The unique identifier of the user
    */
-  static async deleteAllItems(userId: string): Promise<void> {
+  static async deleteAllByUserId(userId: string): Promise<void> {
     assertNonEmptyString(userId, 'userId');
     await db.user_items.where('user_id').equals(userId).delete();
   }
@@ -245,7 +261,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     // Step 4: Update local database with fetched items and update sync metadata
     await db.transaction('rw', db.user_items, db.metadata, async () => {
       if (doFullSync) {
-        await this.deleteAllItems(userId);
+        await this.deleteAllByUserId(userId);
       } else if (toDelete.length > 0) {
         await db.user_items.bulkDelete(toDelete.map((item) => [item.user_id, item.item_id]));
       }

@@ -81,7 +81,7 @@ describe('Grammar', () => {
       { user_id: 'u1', grammar_id: 1, started_at: '2026-01-03' },
     ]);
 
-    await expect(Grammar.getStartedIds('u1')).resolves.toEqual([1, 2]);
+    await expect(Grammar.getStartedGrammarIds('u1')).resolves.toEqual([1, 2]);
   });
 
   it('getStartedList returns grammar list for started ids', async () => {

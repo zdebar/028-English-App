@@ -20,21 +20,20 @@ export interface UserItemPractice extends UserItemLocal {
   show_new_grammar_indicator: boolean;
 }
 
-export interface LessonLocal {
+export interface RecordLocal {
   id: number;
   name: string;
   note: string;
   sort_order: number;
+  deleted_at: string | null;
+}
+
+export interface LessonLocal extends RecordLocal {
   level_id: number;
-  deleted_at: string | null;
 }
-export interface LevelLocal {
-  id: number;
-  name: string;
-  note: string;
-  sort_order: number;
-  deleted_at: string | null;
-}
+export interface LevelLocal extends RecordLocal {}
+
+export interface GrammarLocal extends RecordLocal {}
 
 export interface ProgressCounts {
   startedCount: number;
@@ -50,13 +49,7 @@ export interface LevelOverview extends LevelLocal, ProgressCounts {
   lessons: LessonOverview[];
 }
 
-export interface GrammarLocal {
-  id: number;
-  name: string;
-  note: string;
-  sort_order: number;
-  deleted_at: string | null;
-}
+
 
 export interface UserScoreLocal {
   user_id: string;

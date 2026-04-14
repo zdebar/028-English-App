@@ -192,7 +192,7 @@ describe('UserItem', () => {
   });
 
   it('deleteAllItems deletes by user_id', async () => {
-    await UserItem.deleteAllItems('u1');
+    await UserItem.deleteAllByUserId('u1');
 
     expect(mocks.equalsDelete).toHaveBeenCalled();
   });

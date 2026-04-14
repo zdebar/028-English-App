@@ -111,7 +111,10 @@ export default function PracticeCard() {
   if (!currentItem) {
     return (
       <DelayedMessage>
-        <Notification className="color-info pt-4"><p>{TEXTS.nothingToPractice}</p><p>{TEXTS.tryAgainLater}</p></Notification>
+        <Notification className="color-info pt-4">
+          <p>{TEXTS.nothingToPractice}</p>
+          <p>{TEXTS.tryAgainLater}</p>
+        </Notification>
       </DelayedMessage>
     );
   }
@@ -142,16 +145,24 @@ export default function PracticeCard() {
               }}
             >
               {showDirectionChange ? (
-                <Notification
-       
-                  className="my-auto"
-                >{isCzToEn ? TEXTS.directionCzToEn : TEXTS.directionEnToCz}</Notification>
+                <Notification className="my-auto">
+                  {isCzToEn ? TEXTS.directionCzToEn : TEXTS.directionEnToCz}
+                </Notification>
               ) : (
                 <>
                   {!revealed && <HelpText className="center top-4">{TEXTS.reveal}</HelpText>}
-                  <HelpText className="top-20 left-4"><span className='help-text-span'>{TEXTS.shortCut}</span>{TEXTS.short}</HelpText>
-                  <HelpText className="top-28 left-4"><span className='help-text-span'>{TEXTS.singularCut}</span>{TEXTS.singular}</HelpText>
-                  <HelpText className="top-36 left-4"><span className='help-text-span'>{TEXTS.pluralCut}</span>{TEXTS.plural}</HelpText>
+                  <HelpText className="top-20 left-4">
+                    <span className="help-text-span">{TEXTS.shortCut}</span>
+                    {TEXTS.short}
+                  </HelpText>
+                  <HelpText className="top-28 left-4">
+                    <span className="help-text-span">{TEXTS.singularCut}</span>
+                    {TEXTS.singular}
+                  </HelpText>
+                  <HelpText className="top-36 left-4">
+                    <span className="help-text-span">{TEXTS.pluralCut}</span>
+                    {TEXTS.plural}
+                  </HelpText>
                   {/** Top Bar */}
                   <div
                     id="top-bar"
@@ -164,7 +175,9 @@ export default function PracticeCard() {
                     ) : (
                       audioLoading && (
                         <DelayedMessage>
-                          <Notification className="color-info pt-4">{TEXTS.loadingAudio}</Notification>
+                          <Notification className="color-info pt-4">
+                            {TEXTS.loadingAudio}
+                          </Notification>
                         </DelayedMessage>
                       )
                     )}

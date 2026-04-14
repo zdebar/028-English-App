@@ -8,9 +8,7 @@ import { TableName } from '@/types/local.types';
 import { assertNonEmptyString, assertPositiveInteger } from '@/utils/assertions.utils';
 import Dexie, { Entity } from 'dexie';
 import { syncFromRemoteGeneric } from '../utils/data-sync.utils';
-
-const NULL_DATE = config.database.nullReplacementDate;
-const NULL_NUMBER = config.database.nullReplacementNumber;
+import UserItem from './user-items';
 
 /**
  * Represents a grammar entity in the application database.
@@ -46,29 +44,13 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   }
 
   /**
-   * Retrieves a list of unique grammar IDs for items that have been started by a user.
-   * @param userId - The ID of the user
-   */
-  static async getStartedIds(userId: string): Promise<number[]> {
-    assertNonEmptyString(userId, 'userId');
-
-    const startedItems = await db.user_items
-      .where('[user_id+started_at]')
-      .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
-      .filter((item) => item.grammar_id !== NULL_NUMBER)
-      .toArray();
-
-    return [...new Set(startedItems.map((item) => item.grammar_id))];
-  }
-
-  /**
    * Retrieves a list of grammar items that have been started by the user.
    * @param userId - The unique identifier of the user
    */
   static async getStarted(userId: string): Promise<GrammarLocal[]> {
     assertNonEmptyString(userId, 'userId');
 
-    const grammarIds = await this.getStartedIds(userId);
+    const grammarIds = await UserItem.getStartedGrammarIds(userId);
     if (grammarIds.length === 0) return [];
     return await db.grammar.where('id').anyOf(grammarIds).sortBy('sort_order');
   }

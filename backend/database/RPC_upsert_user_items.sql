@@ -3,6 +3,7 @@ CREATE OR REPLACE FUNCTION public.upsert_user_items(
 )
 RETURNS VOID
 LANGUAGE plpgsql
+SET search_path TO public
 AS $$
 DECLARE
   v_user_id UUID;
