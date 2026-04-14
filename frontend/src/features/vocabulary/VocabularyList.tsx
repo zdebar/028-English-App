@@ -84,7 +84,7 @@ export default function VocabularyList({
             placeholder={TEXTS.enterPrompt}
             spellCheck={false}
             maxLength={32}
-            className="h-input color-base w-full border border-dashed pr-8 pl-4"
+            className="h-input color-base w-full border border-dashed pr-8 pl-4 focus:outline-none"
           />
           {searchTerm && (
             <button
