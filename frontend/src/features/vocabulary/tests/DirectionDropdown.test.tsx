@@ -33,8 +33,8 @@ describe('DirectionDropdown', () => {
       />,
     );
 
-    const select = screen.getByRole('combobox');
-    fireEvent.change(select, { target: { value: 'english' } });
+    const toggleButton = screen.getByRole('button', { name: 'Translation direction' });
+    fireEvent.click(toggleButton);
 
     expect(onChange).toHaveBeenCalledWith('english');
     expect(screen.getByLabelText('Translation direction')).toBeTruthy();
@@ -44,7 +44,10 @@ describe('DirectionDropdown', () => {
     render(
       <DirectionDropdown
         value={'unknown'}
-        options={[{ value: 'czech', label: 'Čeština' }]}
+        options={[
+          { value: 'czech', label: 'Čeština' },
+          { value: 'english', label: 'Angličtina' },
+        ]}
         onChange={vi.fn()}
       />,
     );
@@ -67,13 +70,16 @@ describe('DirectionDropdown', () => {
       />,
     );
 
-    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'invalid' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Translation direction' }));
 
     expect(onChange).not.toHaveBeenCalled();
-    expect(errorHandlerMock).toHaveBeenCalledTimes(1);
-    expect(errorHandlerMock.mock.calls[0][0]).toContain(
-      'is not available in DirectionDropdown options.',
+    expect(errorHandlerMock).toHaveBeenCalledWith(
+      'DirectionDropdown expects exactly 2 options, received 1.',
+      expect.any(Error),
     );
-    expect(errorHandlerMock.mock.calls[0][1]).toBeInstanceOf(Error);
+    expect(errorHandlerMock).toHaveBeenCalledWith(
+      'Cannot toggle DirectionDropdown: options are not valid.',
+      expect.any(Error),
+    );
   });
 });

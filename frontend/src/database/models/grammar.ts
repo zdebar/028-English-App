@@ -56,6 +56,15 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
   }
 
   /**
+   * Retrieves unique grammar IDs started by the user.
+   * Kept as an explicit model API for call sites/tests that need IDs only.
+   */
+  static async getStartedGrammarIds(userId: string): Promise<number[]> {
+    assertNonEmptyString(userId, 'userId');
+    return await UserItem.getStartedGrammarIds(userId);
+  }
+
+  /**
    * Synchronizes grammar data between the local database and Supabase.
    * @param doFullSync - If true, performs a full sync by clearing all existing grammar data
    *                     and fetching everything from the epoch start date. If false, performs

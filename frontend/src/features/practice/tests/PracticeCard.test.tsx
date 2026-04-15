@@ -249,12 +249,14 @@ describe('PracticeCard', () => {
     expect(mocks.practiceDeck.playAudio).toHaveBeenCalledTimes(1);
   });
 
-  it('opens grammar automatically for a new grammar item', () => {
+  it('opens grammar when grammar button is clicked', () => {
     mocks.practiceDeck.showNewGrammarIndicator = true;
     mocks.practiceDeck.showDirectionChange = false;
     mocks.practiceDeck.grammar_id = 42;
 
     render(<PracticeCard />);
+
+    fireEvent.click(screen.getByTestId('grammar-btn'));
 
     expect(mocks.handleGrammar).toHaveBeenCalledTimes(1);
     expect(mocks.handleGrammar).toHaveBeenCalledWith(42);

@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
   showToast: vi.fn(),
   clearTheme: vi.fn(),
   saveCurrentThemeAsGuest: vi.fn(),
-  deleteAllItems: vi.fn(),
+  deleteAllByUserId: vi.fn(),
   deleteAllUserScores: vi.fn(),
   deleteSyncRow: vi.fn(),
   clearSyncTimes: vi.fn(),
@@ -40,7 +40,7 @@ vi.mock('@/features/theme/use-theme-store', () => ({
 
 vi.mock('@/database/models/user-items', () => ({
   default: {
-    deleteAllItems: (...args: unknown[]) => mocks.deleteAllItems(...args),
+    deleteAllByUserId: (...args: unknown[]) => mocks.deleteAllByUserId(...args),
   },
 }));
 
@@ -107,7 +107,7 @@ describe('DeleteUserButton', () => {
     mocks.userId = 'u1';
 
     mocks.invoke.mockResolvedValue({ error: null });
-    mocks.deleteAllItems.mockResolvedValue(0);
+    mocks.deleteAllByUserId.mockResolvedValue(0);
     mocks.deleteAllUserScores.mockResolvedValue(0);
     mocks.deleteSyncRow.mockResolvedValue(true);
     mocks.clearTheme.mockResolvedValue(undefined);
