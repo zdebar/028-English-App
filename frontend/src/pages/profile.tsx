@@ -5,8 +5,8 @@ import SignoutButton from '@/features/auth/SignoutButton';
 import { TEXTS } from '@/locales/cs';
 import { useNavigate } from 'react-router-dom';
 import type { JSX } from 'react/jsx-dev-runtime';
-import SyncButton from '@/features/sync/SyncButton';
-import DownloadButton from '@/features/sync/DownloadButtton';
+// import SyncButton from '@/features/sync/SyncButton';
+// import DownloadButton from '@/features/sync/DownloadButtton';
 
 /**
  * Profile component that renders the user profile page.
@@ -27,13 +27,13 @@ export default function Profile(): JSX.Element {
       <MenuButton
         onClick={() => navigate(ROUTES.vocabulary)}
         title={TEXTS.vocabularyOverviewTooltip}
-   
       >
         <p className="w-40 mx-auto">{TEXTS.vocabularyOverview}</p>
       </MenuButton >
-      <DownloadButton  />
-      <SyncButton  />
-      <DeleteUserButton  />
+      <hr  className='my-1 border-dashed'/>
+      {/* <DownloadButton  />
+      <SyncButton  /> */}
+      <DeleteUserButton />
       <SignoutButton  />
     </div>
   );
