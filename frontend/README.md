@@ -2,7 +2,7 @@
 
 ## Description
 
-A personal learning app with focus on drill. Learning games are not working.
+A personal learning app with focus on drill.
 
 ### Basic functionality
 
@@ -12,8 +12,12 @@ Data management is frontend storage first. Practice data are stored in IndexedDB
 
 ### Branching Strategies
 
-- **master**: Deployment branch  
-  ├── **0.1.0**: Development branch
+- **master**: Deployment
+  ├── **0.1.0**: Basic Functionality
+  ├── **0.2.0**: Ease of Life Features
+  ├── **0.3.0**: Learning Blocks
+  ├── **0.4.0**: Modifications from Testing
+  ├── **0.5.0**: Multilanguage
 
 ### Commit Message Standard
 
@@ -95,6 +99,8 @@ React & TypeScript: Hook `useFetch`, Component `PracticeCard`
 The app uses IndexedDb for locally storing data. It enables offline function as long as refresh toke lasts, and it limits server traffic.
 
 - **metadata**: Stores last sync times for grammar, user_items, user_scores
+- **levels**: Corresponds to backend SQL levels table
+- **lessons**: Corresponds to backend SQL lesson table
 - **grammar**: Corresponds to backend SQL grammar table
 - **user_scores**: Corresponds to backend SQL user_scores table
 - **user_items**: Flatten data from backend SQL tables items, user_items, lesson, levels
@@ -124,15 +130,6 @@ Uses SyncAll or partial SyncSinceLastSync. SyncDates (partial, full) are stored 
 
 - **auth**: User management - register, sign in, sign out, delete user profile, via supabase auth
   - managed by Supabase Auth
-- **dashboard**: Shows started items count
-- **error-handler**: Error Handling Management
-
-  Error Handling Approach
-  - catch errors at hook / component level
-  - showFailure toast to user
-  - log with error-handler - to console in development, to online logging service in production
-  - ErrorBoundary - for unexpected errors
-
 - **grammar**: Grammar overview
 - **help**: Help text hints
 
@@ -148,8 +145,9 @@ Uses SyncAll or partial SyncSinceLastSync. SyncDates (partial, full) are stored 
   A React hook that listens for specific key presses on the window and executes a callback when those keys are pressed.
   It can optionally be disabled when an overlay is open, based on the `disabledOnOverlayOpen` flag.
 
+- **levels**: Overview of user progress across levels and lessons
+- **logging**: Console logging functions on in development, off in production
 - **modal**: Button with Confirmation Modal
-
 - **overlay**: Global Overlay Screen
 
   Layout Overlay
@@ -159,9 +157,9 @@ Uses SyncAll or partial SyncSinceLastSync. SyncDates (partial, full) are stored 
   - Closed by pressing Escape or onClick (closing could be linked to feature using Overlay)
 
 - **practice**: Manages practice deck, and its logic
-
 - **privacy-policy**: Privacy Policy Content
-
+- **pwa**: Installable application
+- **sync**: IndexedDB synchronization
 - **theme**: Theming
 
   This hook handles theme detection, persistence, and application:
@@ -177,6 +175,7 @@ Uses SyncAll or partial SyncSinceLastSync. SyncDates (partial, full) are stored 
   Types:
   - success
   - error
-  - infor
+  - info
 
+- **user-stats**: User progress statistics
 - **vocabulary**: Vocabulary overview
