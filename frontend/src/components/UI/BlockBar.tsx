@@ -33,7 +33,7 @@ export default function BlockBar({
   lessonName = '',
   lessonNumber = 0,
   isMastered = false,
-  divisions = 20,
+  divisions = 10,
   lessonCount = 100,
   widthBase = 100,
   className = '',
