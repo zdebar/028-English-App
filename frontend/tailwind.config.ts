@@ -15,5 +15,12 @@ export default {
         '6': 'var(--space-6)',
       },
     },
+    safelist: [
+      'w-32',
+      'w-30',
+      'pl-2',
+      'inline-block',
+      // přidejte další potřebné třídy
+    ],
   },
 };

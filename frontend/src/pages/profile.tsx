@@ -30,7 +30,7 @@ export default function Profile(): JSX.Element {
       >
         <p className="w-40 mx-auto">{TEXTS.vocabularyOverview}</p>
       </MenuButton >
-      <hr  className='my-1 border-dashed'/>
+      <hr  className='my-0 border-dashed'/>
       {/* <DownloadButton  />
       <SyncButton  /> */}
       <DeleteUserButton />

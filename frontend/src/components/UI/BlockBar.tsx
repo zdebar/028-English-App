@@ -75,7 +75,7 @@ export default function BlockBar({
   return (
     <div className="h-attribute relative w-full cursor-default bg-gray-200 select-none">
       <div className="font-body text-light absolute -top-0.5 right-0 left-0 z-20 flex items-center justify-between truncate px-2 pt-1 text-center font-bold">
-        <span title={`${TEXTS.levelName} - ${TEXTS.lessonName} `}>
+        <span title={`${TEXTS.lessonOrder} - ${TEXTS.lessonName} `}>
           <span className="inline-block min-w-6 text-right">{lessonNumber}</span> {lessonName}
         </span>
         <span title={isMastered ? TEXTS.masteredTodayHint : TEXTS.startedTodayHint}>
