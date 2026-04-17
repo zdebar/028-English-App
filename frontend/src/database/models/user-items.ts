@@ -365,8 +365,13 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const minNextAt = isNew ? NULL_DATE : Dexie.minKey;
     const maxNextAt = isNew ? NULL_DATE : new Date().toISOString();
     return db.user_items
-      .where('[user_id+next_at+sort_order]')
-      .between([userId, minNextAt, Dexie.minKey], [userId, maxNextAt, Dexie.maxKey], true, false)
+      .where('[user_id+next_at+mastered_at+sort_order]')
+      .between(
+        [userId, minNextAt, NULL_DATE, Dexie.minKey],
+        [userId, maxNextAt, NULL_DATE, Dexie.maxKey],
+        true,
+        false,
+      )
       .filter((item) => (item.progress % 2 === 1) === isOdd)
       .limit(limit)
       .toArray();

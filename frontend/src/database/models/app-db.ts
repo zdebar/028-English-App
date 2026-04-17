@@ -28,7 +28,7 @@ export default class AppDB extends Dexie {
       lessons: 'id, sort_order',
       grammar: 'id, sort_order',
       user_items:
-        '[user_id+item_id], [user_id+grammar_id+started_at], [user_id+started_at], [user_id+updated_at], [user_id+next_at+sort_order]',
+        '[user_id+item_id], [user_id+grammar_id+started_at], [user_id+started_at], [user_id+updated_at], [user_id+next_at+sort_order], [user_id+next_at+mastered_at+sort_order]',
       user_scores: '[user_id+date], [user_id+updated_at]',
       audio_records: 'filename',
       audio_metadata: 'archive_name',
