@@ -19,8 +19,10 @@ import BlockBar from '@/components/UI/BlockBar';
  */
 export default function LevelsOverview() {
   const [unpackedIndex, setUnpackedIndex] = useState<number | null>(null);
-  const [showMastered, setShowMastered] = useState<boolean>(false);
   const levels = useUserStore((state) => state.levels);
+  const showMastered = useUserStore((state) => state.showMasteredLevels);
+  const setShowMastered = useUserStore((state) => state.setMasteredLevels);
+
   const navigate = useNavigate();
 
   const handleLevelClick = (index: number) => {
@@ -42,7 +44,7 @@ export default function LevelsOverview() {
           </DelayedMessage>
         ) : (
           <div>
-            <div className="flex flex-col gap-1 ">
+            <div className="flex flex-col gap-1">
               {levels.map((level, index) => (
                 <div key={level.id} className="flex flex-col gap-1">
                   <BaseButton
@@ -61,7 +63,7 @@ export default function LevelsOverview() {
                   </BaseButton>
                   {unpackedIndex === index && (
                     <div className="flex flex-col gap-1">
-                      {level.lessons.map((lesson) => (     
+                      {level.lessons.map((lesson) => (
                         <BlockBar
                           key={lesson.id}
                           lessonName={lesson.name ?? ''}
@@ -73,22 +75,24 @@ export default function LevelsOverview() {
                               : (lesson.startedCount ?? 0) - (lesson.startedTodayCount ?? 0)
                           }
                           todayCount={
-                            showMastered ? (lesson.masteredTodayCount ?? 0) : (lesson.startedTodayCount ?? 0)
+                            showMastered
+                              ? (lesson.masteredTodayCount ?? 0)
+                              : (lesson.startedTodayCount ?? 0)
                           }
                           lessonCount={lesson.totalCount ?? 1}
-                        />                          
+                        />
                       ))}
                     </div>
                   )}
                 </div>
               ))}
             </div>
-            <HelpText className="right-2 top-10">
+            <HelpText className="top-10 right-2">
               {showMastered ? TEXTS.levelsMasteredHelp : TEXTS.levelsStartedHelp}
             </HelpText>
             <HelpButton className="right-0 -bottom-14" />
             <TextButton
-              onClick={() => setShowMastered((current) => !current)}
+              onClick={() => setShowMastered(!showMastered)}
               title={TEXTS.masteredSwitchHelp}
             >
               {showMastered ? TEXTS.masteredCount : TEXTS.startedCount}
