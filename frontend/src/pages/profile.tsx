@@ -27,10 +27,10 @@ export default function Profile(): JSX.Element {
       <MenuButton
         onClick={() => navigate(ROUTES.vocabulary)}
         title={TEXTS.vocabularyOverviewTooltip}
+        className='mb-10'
       >
         <p className="w-40 mx-auto">{TEXTS.vocabularyOverview}</p>
       </MenuButton >
-      <hr  className='my-0 border-dashed'/>
       {/* <DownloadButton  />
       <SyncButton  /> */}
       <DeleteUserButton />
