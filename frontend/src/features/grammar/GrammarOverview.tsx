@@ -80,6 +80,7 @@ export default function GrammarOverview(): JSX.Element {
               key={item.id}
               className="h-input flex justify-start px-4 text-left"
               onClick={() => handleOpenGrammar(index)}
+              title={item.name}
             >
               <p className="overflow-hidden text-ellipsis whitespace-nowrap">{item.name}</p>
             </BaseButton>
