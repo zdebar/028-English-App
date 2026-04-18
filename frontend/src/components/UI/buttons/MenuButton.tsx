@@ -20,7 +20,7 @@ interface MenuButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> 
 export function MenuButton({ children, className, ...rest }: MenuButtonProps) {
   return (
     <BaseButton {...rest} className={`h-button ${className}`}>
-      <div className="w-full text-left">{children}</div>
+      <div className="overflow-hidden text-left text-ellipsis whitespace-nowrap">{children}</div>
     </BaseButton>
   );
 }

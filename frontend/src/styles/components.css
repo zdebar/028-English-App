@@ -17,13 +17,12 @@
   }
 
   /** CARD STYLES **/
-  .card-width,
   .card-height {
     @apply flex flex-col justify-start;
   }
 
   .card-width {
-    @apply max-w-card min-w-card w-full;
+    @apply max-w-card min-w-card w-full flex flex-col justify-start;
   }
 
   .card-height {

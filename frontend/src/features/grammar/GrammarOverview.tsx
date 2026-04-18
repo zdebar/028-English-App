@@ -78,10 +78,10 @@ export default function GrammarOverview(): JSX.Element {
           grammarList.map((item, index) => (
             <BaseButton
               key={item.id}
-              className="h-input flex grow-0 justify-start px-4 text-left"
+              className="h-input flex justify-start px-4 text-left"
               onClick={() => handleOpenGrammar(index)}
             >
-              {`${index + 1} : ${item.name} `}
+              <p className="overflow-hidden text-ellipsis whitespace-nowrap">{item.name}</p>
             </BaseButton>
           ))
         ) : (

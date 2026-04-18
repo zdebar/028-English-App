@@ -26,7 +26,7 @@ export default function CloseButton({
   return (
     <BaseButton
       type="button"
-      className={`w-button h-button grow-0 ${className}`}
+      className={`w-button h-button shrink-0 grow-0 ${className}`}
       onClick={onClick}
       title={`${TEXTS.close} ${KEYBOARD_LISTENERS.Exit.map((key) => `(${key})`).join(' ')}`}
       {...rest}

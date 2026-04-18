@@ -17,7 +17,7 @@ export default function BaseButton({ children, title, className = '', ...rest }:
   return (
     <button
       type="button"
-      className={`color-button flex shrink-0 grow cursor-pointer items-center justify-center tracking-wide disabled:cursor-default ${className}`}
+      className={`color-button flex grow cursor-pointer items-center justify-center overflow-hidden border border-black tracking-wide text-ellipsis whitespace-nowrap disabled:cursor-default ${className}`}
       title={title}
       {...rest}
     >
