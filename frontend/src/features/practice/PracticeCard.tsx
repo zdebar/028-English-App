@@ -110,7 +110,7 @@ export default function PracticeCard() {
 
   if (!currentItem) {
     return (
-      <DelayedMessage>
+      <DelayedMessage timeDelay={300}>
         <Notification className="color-info pt-4">
           <p>{TEXTS.nothingToPractice}</p>
           <p>{TEXTS.tryAgainLater}</p>
