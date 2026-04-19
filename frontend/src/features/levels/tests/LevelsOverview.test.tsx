@@ -1,10 +1,13 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import React from 'react';
 
 const mocks = vi.hoisted(() => ({
   levelsOverview: [] as any[],
   navigate: vi.fn(),
   goalMetCalls: [] as Array<{ current: number; goal: number }>,
+  showMasteredLevels: false,
+  storeListeners: new Set<() => void>(),
 }));
 
 vi.mock('@/locales/cs', () => ({
@@ -24,8 +27,32 @@ vi.mock('@/locales/cs', () => ({
 }));
 
 vi.mock('@/features/user-stats/use-user-store', () => ({
-  useUserStore: (selector: (state: { levels: any[] }) => unknown) =>
-    selector({ levels: mocks.levelsOverview }),
+  useUserStore: (
+    selector: (state: {
+      levels: any[];
+      showMasteredLevels: boolean;
+      setMasteredLevels: (value: boolean) => void;
+    }) => unknown,
+  ) => {
+    const [, forceUpdate] = React.useReducer((x: number) => x + 1, 0);
+
+    React.useEffect(() => {
+      const listener = () => forceUpdate();
+      mocks.storeListeners.add(listener);
+      return () => {
+        mocks.storeListeners.delete(listener);
+      };
+    }, []);
+
+    return selector({
+      levels: mocks.levelsOverview,
+      showMasteredLevels: mocks.showMasteredLevels,
+      setMasteredLevels: (value: boolean) => {
+        mocks.showMasteredLevels = value;
+        mocks.storeListeners.forEach((listener) => listener());
+      },
+    });
+  },
 }));
 
 vi.mock('react-router-dom', () => ({
@@ -78,6 +105,8 @@ describe('LevelsOverview', () => {
     vi.clearAllMocks();
     mocks.goalMetCalls = [];
     mocks.levelsOverview = [];
+    mocks.showMasteredLevels = false;
+    mocks.storeListeners.clear();
   });
 
   it('renders not available state when levels are empty', () => {

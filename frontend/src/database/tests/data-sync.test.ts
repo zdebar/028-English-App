@@ -150,7 +150,7 @@ describe('data-sync.utils', () => {
   });
 
   it('dataSync throws when user sync reports rejected results', async () => {
-    mocks.logRejectedResults.mockReturnValueOnce(false).mockReturnValueOnce(true);
+    mocks.logRejectedResults.mockReturnValueOnce(true);
 
     await expect(dataSync('u1')).rejects.toThrow('Data synchronization error');
   });
