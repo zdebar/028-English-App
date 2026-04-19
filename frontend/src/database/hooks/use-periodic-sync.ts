@@ -6,6 +6,7 @@ import config from '@/config/config';
 import { errorHandler } from '@/features/logging/error-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { logRejectedResults } from '@/features/logging/logging.utils';
+import { useSyncWarningStore } from '@/features/sync-warning/use-sync-warning';
 
 /**
  * Hook that manages periodic data synchronization for a user.
@@ -30,6 +31,7 @@ export function usePeriodicSync(userId: string | null) {
   const initialSyncTimeoutId = useRef<number | null>(null);
 
   const showToast = useToastStore((state) => state.showToast);
+  const setSynchronized = useSyncWarningStore((state) => state.setSynchronized);
 
   useEffect(() => {
     if (!userId) return;
@@ -50,8 +52,10 @@ export function usePeriodicSync(userId: string | null) {
             void AudioRecord.removeOrphaned();
           }
           showToast(TEXTS.syncSuccessToast, 'success');
+          setSynchronized(true);
         } catch (error) {
           showToast(TEXTS.syncErrorToast, 'error');
+          setSynchronized(false);
           errorHandler('Data synchronization failed', error);
         } finally {
           if (!isDisposed.current) {

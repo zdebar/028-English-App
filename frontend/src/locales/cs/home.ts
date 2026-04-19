@@ -20,4 +20,5 @@ export const HOME_TEXTS = {
   syncSuccessToast: 'Data byla úspěšně synchronizována.',
   syncErrorToast: 'Chyba při synchronizaci dat.',
   syncLoadingText: 'Synchronizuji data ...',
+  syncWarning: 'Chyba synchronizace. Data mohou být zastaralá.',
 } as const;
