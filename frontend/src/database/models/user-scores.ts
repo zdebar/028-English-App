@@ -84,12 +84,9 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
       userId,
     );
 
-    // Step 2: Push local changes to Supabase
+    // Step 2: Push local changes and pull updates in a single RPC call
     const localScores = await this.getUserScoresForSync(userId, lastSyncedAt, newSyncedAt);
-    await this.postToRemote(localScores);
-
-    // Step 3: Pull scores from Supabase
-    const updatedScores = await this.fetchFromRemote(userId, lastSyncedAt);
+    const updatedScores = await this.syncWithRemote(userId, localScores, lastSyncedAt);
     const { toUpsert, toDelete } = splitDeleted(updatedScores);
 
     // Step 4: Update local database with fetched scores and update sync metadata
@@ -170,44 +167,29 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * Pushes local user scores to the remote database.
    * @param scores - The local user scores to be synced.
    */
-  private static async postToRemote(scores: UserScoreLocal[]): Promise<void> {
-    if (!scores || scores.length === 0) return;
-
-    const { error: errorInsert } = await supabaseInstance.rpc('upsert_user_scores', {
-      p_user_scores: scores,
-    });
-
-    if (errorInsert) {
-      throw new SupabaseError(`User score synchronization failed.`, errorInsert, {
-        localScores: scores,
-      });
-    }
-
-    infoHandler(
-      `Completed ${scores.length} user scores push to Supabase for userId: ${scores[0].user_id}`,
-    );
-  }
-
-  /**
-   * Fetches updated user scores from Supabase for a specific user since the last sync.
-   * @param userId - The ID of the user whose scores should be fetched
-   * @param lastSyncedAt - The timestamp of the last sync (defaults to epoch start date)
-   */
-  private static async fetchFromRemote(
+  private static async syncWithRemote(
     userId: string,
+    scores: UserScoreLocal[],
     lastSyncedAt: string = config.database.epochStartDate,
   ): Promise<UserScoreLocal[]> {
-    const { data: updatedScores, error: errorFetch } = await supabaseInstance
-      .from('user_scores')
-      .select('user_id, date, item_count, updated_at, deleted_at')
-      .eq('user_id', userId)
-      .gte('updated_at', lastSyncedAt);
+    const { data: updatedScores, error: errorFetch } = await supabaseInstance.rpc(
+      'upsert_fetch_user_scores',
+      {
+        p_user_id: userId,
+        p_last_synced_at: lastSyncedAt,
+        p_user_scores: scores,
+      },
+    );
 
     if (errorFetch) {
       throw new SupabaseError(`Error fetching User Scores from Supabase.`, errorFetch, {
-        userId,
+        scoreCount: scores.length,
         lastSyncedAt,
       });
+    }
+
+    if (scores.length > 0) {
+      infoHandler(`Completed ${scores.length} user scores push to Supabase for userId: ${userId}`);
     }
 
     return updatedScores ?? [];

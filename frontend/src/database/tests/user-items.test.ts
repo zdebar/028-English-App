@@ -212,7 +212,7 @@ describe('UserItem', () => {
         deleted_at: null,
       },
     ]);
-    mocks.rpc.mockResolvedValueOnce({ error: null }).mockResolvedValueOnce({
+    mocks.rpc.mockResolvedValueOnce({
       data: [
         {
           user_id: 'u1',
@@ -230,7 +230,9 @@ describe('UserItem', () => {
 
     await UserItem.syncFromRemote('u1', false);
 
-    expect(mocks.rpc).toHaveBeenNthCalledWith(1, 'upsert_user_items', {
+    expect(mocks.rpc).toHaveBeenCalledWith('upsert_fetch_user_items', {
+      p_user_id: 'u1',
+      p_last_synced_at: '2026-03-03T00:00:00.000Z',
       p_user_items: [
         {
           user_id: 'u1',
@@ -240,10 +242,6 @@ describe('UserItem', () => {
           sql: true,
         },
       ],
-    });
-    expect(mocks.rpc).toHaveBeenNthCalledWith(2, 'fetch_user_items', {
-      p_user_id: 'u1',
-      p_last_synced_at: '2026-03-03T00:00:00.000Z',
     });
     expect(mocks.bulkDelete).toHaveBeenCalledWith([['u1', 3]]);
     expect(mocks.bulkPut).toHaveBeenCalled();

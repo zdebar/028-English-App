@@ -156,12 +156,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
     const result = await db.user_items
       .where('[user_id+grammar_id+started_at]')
-      .between(
-        [userId, NULL_NUMBER, Dexie.minKey],
-        [userId, NULL_NUMBER, NULL_DATE],
-        true,
-        false,
-      )
+      .between([userId, NULL_NUMBER, Dexie.minKey], [userId, NULL_NUMBER, NULL_DATE], true, false)
       .toArray();
 
     result.sort((a, b) => a.english.toLowerCase().localeCompare(b.english.toLowerCase()));
@@ -250,12 +245,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       userId,
     );
 
-    // Step 2: Push local changes to Supabase
+    // Step 2: Push local changes and pull updates in a single RPC call
     const localItems = await this.getUserItemsForSync(userId, lastSyncedAt, newSyncedAt);
-    await this.postToRemote(localItems);
-
-    // Step 3: Pull items from Supabase
-    const updatedItems = await this.fetchFromRemote(userId, lastSyncedAt);
+    const updatedItems = await this.syncWithRemote(userId, localItems, lastSyncedAt);
     const { toUpsert, toDelete } = splitDeleted(updatedItems);
 
     // Step 4: Update local database with fetched items and update sync metadata
@@ -304,49 +296,32 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Pushes local user items to Supabase for synchronization.
    * @param items - An array of user items in SQL format to be pushed to the remote server.
    */
-  private static async postToRemote(items: UserItemSQL[]): Promise<void> {
-    if (items.length === 0) return;
-
-    const { error: rpcInsertError } = await supabaseInstance.rpc('upsert_user_items', {
-      p_user_items: items,
-    });
-
-    if (rpcInsertError) {
-      throw new SupabaseError('Error inserting user_items to Supabase.', rpcInsertError, {
-        itemCount: items.length,
-      });
-    }
-
-    infoHandler(
-      `Completed ${items.length} user items push to Supabase for userId: ${items[0].user_id}`,
-    );
-  }
-
-  /**
-   * Fetches user items from Supabase that have been updated since the specified timestamp.
-   * @param userId - The ID of the user whose items should be fetched.
-   * @param lastSyncedAt - The timestamp of the last synchronization.
-   */
-  private static async fetchFromRemote(
+  private static async syncWithRemote(
     userId: string,
+    items: UserItemSQL[],
     lastSyncedAt: string,
   ): Promise<UserItemLocal[]> {
     const { data: updatedUserItems, error: rpcFetchError } = await supabaseInstance.rpc(
-      'fetch_user_items',
+      'upsert_fetch_user_items',
       {
         p_user_id: userId,
         p_last_synced_at: lastSyncedAt,
+        p_user_items: items,
       },
     );
 
     if (rpcFetchError) {
       throw new SupabaseError('Error fetching user_items with Supabase.', rpcFetchError, {
-        userId,
+        itemCount: items.length,
         lastSyncedAt,
       });
     }
 
-    return updatedUserItems.map(convertSQLToLocal) ?? [];
+    if (items.length > 0) {
+      infoHandler(`Completed ${items.length} user items push to Supabase for userId: ${userId}`);
+    }
+
+    return (updatedUserItems ?? []).map(convertSQLToLocal);
   }
 
   /**

@@ -11,7 +11,6 @@ const mocks = vi.hoisted(() => ({
   getTodayShortDate: vi.fn(),
   getSyncTimestamps: vi.fn(),
   rpc: vi.fn(),
-  from: vi.fn(),
   markAsSynced: vi.fn(),
   triggerDailyCountUpdatedEvent: vi.fn(),
 }));
@@ -66,7 +65,6 @@ vi.mock('@/database/models/db', () => ({
 vi.mock('@/config/supabase.config', () => ({
   supabaseInstance: {
     rpc: (...args: unknown[]) => mocks.rpc(...args),
-    from: (...args: unknown[]) => mocks.from(...args),
   },
 }));
 
@@ -104,16 +102,8 @@ describe('UserScore', () => {
       lastSyncedAt: '2026-03-03T00:00:00.000Z',
       newSyncedAt: '2026-03-04T00:00:00.000Z',
     });
-    mocks.rpc.mockResolvedValue({ error: null });
+    mocks.rpc.mockResolvedValue({ data: [], error: null });
     mocks.markAsSynced.mockResolvedValue(undefined);
-
-    mocks.from.mockImplementation(() => ({
-      select: () => ({
-        eq: () => ({
-          gte: () => Promise.resolve({ data: [], error: null }),
-        }),
-      }),
-    }));
   });
 
   it('addItemCount increments and stores score for today', async () => {
@@ -176,36 +166,31 @@ describe('UserScore', () => {
       ]),
     });
 
-    mocks.from.mockImplementation(() => ({
-      select: () => ({
-        eq: () => ({
-          gte: () =>
-            Promise.resolve({
-              data: [
-                {
-                  user_id: 'u1',
-                  date: '2026-03-01',
-                  item_count: 1,
-                  updated_at: '2026-03-04T00:00:00.000Z',
-                  deleted_at: '2026-03-04T00:00:00.000Z',
-                },
-                {
-                  user_id: 'u1',
-                  date: '2026-03-02',
-                  item_count: 6,
-                  updated_at: '2026-03-04T00:00:00.000Z',
-                  deleted_at: null,
-                },
-              ],
-              error: null,
-            }),
-        }),
-      }),
-    }));
+    mocks.rpc.mockResolvedValue({
+      data: [
+        {
+          user_id: 'u1',
+          date: '2026-03-01',
+          item_count: 1,
+          updated_at: '2026-03-04T00:00:00.000Z',
+          deleted_at: '2026-03-04T00:00:00.000Z',
+        },
+        {
+          user_id: 'u1',
+          date: '2026-03-02',
+          item_count: 6,
+          updated_at: '2026-03-04T00:00:00.000Z',
+          deleted_at: null,
+        },
+      ],
+      error: null,
+    });
 
     await UserScore.syncFromRemote('u1', false);
 
-    expect(mocks.rpc).toHaveBeenCalledWith('upsert_user_scores', {
+    expect(mocks.rpc).toHaveBeenCalledWith('upsert_fetch_user_scores', {
+      p_user_id: 'u1',
+      p_last_synced_at: '2026-03-03T00:00:00.000Z',
       p_user_scores: [
         {
           user_id: 'u1',
