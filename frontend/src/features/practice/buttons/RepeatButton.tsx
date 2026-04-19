@@ -1,5 +1,5 @@
 import BaseButton from '@/components/UI/buttons/BaseButton';
-import MinusIcon from '@/components/UI/icons/MinusIcon';
+import RepeatIcon from '@/components/UI/icons/RepeatIcon';
 import HelpText from '@/features/help/HelpText';
 import { TEXTS } from '@/locales/cs';
 import { type PracticeButtonProps } from '../practice.types';
@@ -13,7 +13,7 @@ export default function RepeatButton({ onClick, disabled, children }: PracticeBu
         className="h-button relative"
         title={!disabled ? TEXTS.repeat : undefined}
       >
-        <MinusIcon />
+        <RepeatIcon />
 
         {children}
       </BaseButton>
