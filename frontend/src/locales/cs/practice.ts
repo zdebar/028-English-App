@@ -11,7 +11,7 @@ export const PRACTICE_TEXTS = {
   complete: 'dokončit',
   hint: 'nápověda',
   reveal: 'odhalit',
-  unknown: 'neznám',
+  repeat: 'opakovat',
   known: 'znám',
   directionEnToCz: 'Z angličtiny do češtiny',
   directionCzToEn: 'Z češtiny do angličtiny',

@@ -20,7 +20,7 @@ import HintButton from './buttons/HintButton';
 import KnownButton from './buttons/KnownButton';
 import MasterItemButton from './buttons/MasterItemButton';
 import PlayAudioButton from './buttons/PlayAudioButton';
-import UnknownButton from './buttons/UnknownButton';
+import RepeatButton from './buttons/RepeatButton';
 import { useGrammar } from './hooks/use-grammar';
 import { useHelpStore } from '../help/use-help-store';
 
@@ -240,7 +240,7 @@ export default function PracticeCard() {
                   </>
                 ) : (
                   <>
-                    <UnknownButton
+                    <RepeatButton
                       onClick={() => {
                         nextItem(config.progress.minusProgress);
                         setCounter((prev) => prev + 1);
