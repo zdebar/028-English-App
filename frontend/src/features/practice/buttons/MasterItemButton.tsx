@@ -77,21 +77,24 @@ export default function MasterItemButton({ onConfirm, disabled, children }: Skip
   }, [clearHoldTimer]);
 
   return (
-    <BaseButton
-      onMouseDown={handlePressStart}
-      onMouseUp={handlePressEnd}
-      onMouseLeave={handlePressEnd}
-      onTouchStart={handlePressStart}
-      onTouchEnd={handlePressEnd}
-      onTouchCancel={handlePressEnd}
-      onClick={handleClick}
-      disabled={disabled}
-      className="h-button relative"
-      title={!disabled ? TEXTS.complete : undefined}
-    >
-      <ForwardIcon />
+    <>
+      <BaseButton
+        onMouseDown={handlePressStart}
+        onMouseUp={handlePressEnd}
+        onMouseLeave={handlePressEnd}
+        onTouchStart={handlePressStart}
+        onTouchEnd={handlePressEnd}
+        onTouchCancel={handlePressEnd}
+        onClick={handleClick}
+        disabled={disabled}
+        className="h-button relative"
+        title={!disabled ? TEXTS.complete : undefined}
+      >
+        <ForwardIcon />
+
+        {children}
+      </BaseButton>
       <HelpText className="-top-4.5 left-4">{TEXTS.complete}</HelpText>
-      {children}
-    </BaseButton>
+    </>
   );
 }
