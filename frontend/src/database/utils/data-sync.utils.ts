@@ -41,20 +41,23 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
   }
 
   // Step 2: Perform shared stores data synchronization (grammar and audio metadata)
-  const sharedPromises = doFullSync
-    ? [Grammar.syncFromRemote(true), Levels.syncFromRemote(true), Lessons.syncFromRemote(true)]
-    : [Grammar.syncFromRemote(false), Levels.syncFromRemote(false), Lessons.syncFromRemote(false)];
+  const allPromises = doFullSync
+    ? [
+        Grammar.syncFromRemote(true),
+        Levels.syncFromRemote(true),
+        Lessons.syncFromRemote(true),
+        UserScore.syncFromRemote(userId, true),
+        UserItem.syncFromRemote(userId, true),
+      ]
+    : [
+        Grammar.syncFromRemote(false),
+        Levels.syncFromRemote(false),
+        Lessons.syncFromRemote(false),
+        UserScore.syncFromRemote(userId, false),
+        UserItem.syncFromRemote(userId, false),
+      ];
 
-  void Promise.allSettled(sharedPromises).then((results) => {
-    logRejectedResults(results, 'Data synchronization error:');
-  });
-
-  // Step 3: Perform user stores data synchronization (user_scores and user_items)
-  const userPromises = doFullSync
-    ? [UserScore.syncFromRemote(userId, true), UserItem.syncFromRemote(userId, true)]
-    : [UserScore.syncFromRemote(userId, false), UserItem.syncFromRemote(userId, false)];
-
-  const userResults = await Promise.allSettled(userPromises);
+  const userResults = await Promise.allSettled(allPromises);
   const isError = logRejectedResults(userResults, 'Data synchronization error:');
 
   triggerDailyCountUpdatedEvent(userId);
