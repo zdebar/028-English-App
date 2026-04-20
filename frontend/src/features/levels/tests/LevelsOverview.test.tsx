@@ -94,7 +94,7 @@ vi.mock('@/components/UI/GoalMetView', () => ({
     mocks.goalMetCalls.push({ current, goal });
     return (
       <div data-testid="goal-view">
-        {current}/{goal}
+        {current}&gt;{goal}
       </div>
     );
   },
