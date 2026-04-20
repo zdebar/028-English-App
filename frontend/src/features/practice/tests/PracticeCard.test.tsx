@@ -145,7 +145,7 @@ vi.mock('@/features/practice/buttons/UnknownButton', () => ({
 
 vi.mock('@/features/practice/buttons/MasterItemButton', () => ({
   default: ({ onConfirm }: any) => (
-    <button data-testid="master-btn" onClick={() => void onConfirm()}>
+    <button data-testid="master-btn" onClick={() => onConfirm()}>
       master
     </button>
   ),
