@@ -20,7 +20,9 @@ async function buildServiceWorker() {
   console.log(`Injected ${count} files (${size} bytes) into service-worker.js`);
 }
 
-buildServiceWorker().catch((error) => {
+try {
+  await buildServiceWorker();
+} catch (error) {
   console.error('Failed to inject service worker manifest:', error);
   process.exitCode = 1;
-});
+}
