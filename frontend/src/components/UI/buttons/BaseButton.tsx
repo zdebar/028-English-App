@@ -1,10 +1,12 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
-interface BaseButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  children?: ReactNode;
-  title?: string;
-  className?: string;
-}
+type BaseButtonProps = Readonly<
+  ButtonHTMLAttributes<HTMLButtonElement> & {
+    children?: ReactNode;
+    title?: string;
+    className?: string;
+  }
+>;
 
 /**
  * Button component for rendering a styled button element.

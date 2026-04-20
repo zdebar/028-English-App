@@ -1,8 +1,8 @@
 import type { JSX } from 'react';
 
 interface ScreenshotProps {
-  src: string;
-  alt: string;
+  readonly src: string;
+  readonly alt: string;
 }
 
 /**

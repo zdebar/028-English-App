@@ -7,7 +7,7 @@ import type { JSX } from 'react';
  * @param props IconProps to customize the icon.
  * @returns The rendered icon element.
  */
-export default function QuestionMarkIcon(props: IconProps): JSX.Element {
+export default function QuestionMarkIcon(props: Readonly<IconProps>): JSX.Element {
   return (
     <Icon {...props}>
       <path

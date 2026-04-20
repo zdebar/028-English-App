@@ -1,7 +1,7 @@
 import type { JSX } from 'react';
 
 interface IndicatorProps {
-  className?: string;
+  readonly className?: string;
 }
 
 /**

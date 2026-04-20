@@ -1,12 +1,12 @@
 import type { JSX } from 'react';
 
 type PropertyViewProps = {
-  label: string;
-  title?: string;
-  children?: React.ReactNode;
-  className?: string;
-  classNameLabel?: string;
-  classNameValue?: string;
+  readonly label: string;
+  readonly title?: string;
+  readonly children?: React.ReactNode;
+  readonly className?: string;
+  readonly classNameLabel?: string;
+  readonly classNameValue?: string;
 };
 
 /**

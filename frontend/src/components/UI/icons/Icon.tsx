@@ -1,6 +1,6 @@
 import type { JSX } from 'react';
 
-export interface IconProps {
+export type IconProps = Readonly<{
   className?: string;
   size?: number;
   strokeWidth?: number;
@@ -8,7 +8,7 @@ export interface IconProps {
   fillColor?: string;
   viewBox?: string;
   children?: React.ReactNode;
-}
+}>;
 
 /**
  * A reusable SVG icon component that renders custom icons with configurable properties.

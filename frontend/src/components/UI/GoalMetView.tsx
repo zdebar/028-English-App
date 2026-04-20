@@ -1,7 +1,7 @@
 interface GoalMetViewProps {
-  current: number;
-  goal: number;
-  title?: string;
+  readonly current: number;
+  readonly goal: number;
+  readonly title?: string;
 }
 
 /**
