@@ -3,23 +3,25 @@ import { TEXTS } from '@/locales/cs';
 import { useEffect } from 'react';
 import { usePwaStore } from './use-pwa-store';
 
-export interface InstallPWAButtonProps extends React.HTMLAttributes<HTMLParagraphElement> {
+
+type InstallPWAButtonProps = Readonly<{
   className?: string;
-}
+}> &
+  React.HTMLAttributes<HTMLParagraphElement>;
 
 export function InstallPWAButton(props: InstallPWAButtonProps) {
-  const promptEvent = usePwaStore(state => state.promptEvent);
-  const setPromptEvent = usePwaStore(state => state.setPromptEvent);
-  const clearPromptEvent = usePwaStore(state => state.clearPromptEvent);
+  const promptEvent = usePwaStore((state) => state.promptEvent);
+  const setPromptEvent = usePwaStore((state) => state.setPromptEvent);
+  const clearPromptEvent = usePwaStore((state) => state.clearPromptEvent);
 
   useEffect(() => {
     const handler = (e: Event) => {
       e.preventDefault();
       setPromptEvent(e as any);
     };
-    window.addEventListener('beforeinstallprompt', handler);
+    globalThis.addEventListener('beforeinstallprompt', handler);
     return () => {
-      window.removeEventListener('beforeinstallprompt', handler);
+      globalThis.removeEventListener('beforeinstallprompt', handler);
     };
   }, [setPromptEvent]);
 
@@ -38,6 +40,8 @@ export function InstallPWAButton(props: InstallPWAButtonProps) {
       title={TEXTS.installButtonTooltip}
       onClick={handleInstall}
       className={`color-link cursor-pointer ${props.className}`}
-    >{TEXTS.installButton}</Notification>
+    >
+      {TEXTS.installButton}
+    </Notification>
   );
 }
