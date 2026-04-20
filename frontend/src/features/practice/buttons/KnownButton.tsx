@@ -1,5 +1,5 @@
 import BaseButton from '@/components/UI/buttons/BaseButton';
-import PlusIcon from '@/components/UI/icons/PlusIcon';
+import RightArrowIcon from '@/components/UI/icons/RightArrowIcon';
 import HelpText from '@/features/help/HelpText';
 import { TEXTS } from '@/locales/cs';
 import { type PracticeButtonProps } from '../practice.types';
@@ -13,7 +13,7 @@ export default function KnownButton({ onClick, disabled, children }: PracticeBut
         className="h-button relative"
         title={!disabled ? TEXTS.known : undefined}
       >
-        <PlusIcon />
+        <RightArrowIcon />
         {children}
       </BaseButton>
       <HelpText className="-top-4.5 right-4">{TEXTS.known}</HelpText>
