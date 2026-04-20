@@ -27,6 +27,7 @@ export default function Toast({ children, type = 'info' }: ToastProps): JSX.Elem
     hideToast();
   };
 
+
   return (
     <button
       type="button"
