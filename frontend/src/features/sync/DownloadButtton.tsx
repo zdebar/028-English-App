@@ -10,13 +10,17 @@ import config from '@/config/config';
 import { useMinLoading } from '../modal/use-min-loading';
 import { db } from '@/database/models/db';
 
+type DownloadButtonProps = Readonly<{
+  className?: string;
+}>;
+
 /**
  * DownloadButton component for downloading the current user's data.
  *
  * @param className - Optional CSS class name to apply to the button.
  * @returns The rendered DownloadButton component.
  */
-export default function DownloadButton({ className }: { className?: string }): JSX.Element {
+export default function DownloadButton({ className }: DownloadButtonProps): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
   const hideToast = useToastStore((state) => state.hideToast);
@@ -50,7 +54,7 @@ export default function DownloadButton({ className }: { className?: string }): J
       disabled={!userId || isLoading}
       title={TEXTS.downloadButtonTooltip}
     >
-      <p className="w-40 mx-auto">{TEXTS.downloadButton}</p>
+      <p className="mx-auto w-40">{TEXTS.downloadButton}</p>
     </MenuButton>
   );
 }
