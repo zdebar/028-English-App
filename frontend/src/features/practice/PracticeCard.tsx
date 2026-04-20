@@ -130,18 +130,19 @@ export default function PracticeCard() {
       ) : (
         <div className={`card-width card-height relative gap-1`}>
           {/* Item Card */}
-          <button
+          <div
             className={`relative flex h-full grow cursor-pointer flex-col items-center justify-between p-4 select-none ${cardStyle} `}
             onClick={handleReveal}
             title={cardText}
+            role="button"
             tabIndex={0}
             aria-disabled={revealed}
             onKeyDown={(e) => {
               if (audioDisabled) return;
               if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
                 handleReveal();
               }
-              e.preventDefault();
             }}
           >
             {showDirectionChange ? (
@@ -204,7 +205,7 @@ export default function PracticeCard() {
                 </div>
               </>
             )}
-          </button>
+          </div>
           {/* Practice Controls */}
           <div id="practice-controls" className="relative flex flex-col gap-1">
             {/** Top Row */}
