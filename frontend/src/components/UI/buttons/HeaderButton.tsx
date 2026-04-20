@@ -1,13 +1,12 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, JSX } from 'react';
 import { Link, useMatch } from 'react-router-dom';
-import type { JSX } from 'react';
 
 interface HeaderButtonProps {
-  children: ReactNode;
-  to: string;
-  title?: string;
-  disabled?: boolean;
-  className?: string;
+  readonly children: ReactNode;
+  readonly to: string;
+  readonly title?: string;
+  readonly disabled?: boolean;
+  readonly className?: string;
 }
 
 /**
@@ -30,13 +29,15 @@ export default function HeaderButton({
 
   if (disabled)
     return (
-      <span
-        role="button"
+      <button
+        type="button"
+        disabled
         aria-disabled="true"
+        tabIndex={-1}
         className={`size-button text-disabled-light dark:text-disabled-dark flex cursor-default items-center justify-center rounded-full hover:bg-inherit ${className}`}
       >
         {children}
-      </span>
+      </button>
     );
 
   return (
