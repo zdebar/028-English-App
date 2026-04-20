@@ -13,13 +13,17 @@ import { useThemeStore } from '../theme/use-theme-store';
 import { clearSyncTimes } from '@/database/utils/sync-time.utils';
 import { logRejectedResults } from '@/features/logging/logging.utils.ts';
 
+type DeleteUserButtonProps = {
+  readonly className?: string;
+};
+
 /**
  * DeleteUserButton component for deleting the current user's account.
  *
  * @param className - Optional CSS class name to apply to the button.
  * @returns The rendered DeleteUserButton component.
  */
-export default function DeleteUserButton({ className }: { className?: string }): JSX.Element {
+export default function DeleteUserButton({ className }: DeleteUserButtonProps): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
   const clearTheme = useThemeStore((state) => state.clearTheme);
@@ -36,8 +40,8 @@ export default function DeleteUserButton({ className }: { className?: string }):
         Metadata.deleteSyncRow(TableName.UserItems, userId),
         UserScore.deleteAllScores(userId),
         Metadata.deleteSyncRow(TableName.UserScores, userId),
-        clearTheme(userId),
-        clearSyncTimes(userId),
+        Promise.resolve(clearTheme(userId)),
+        Promise.resolve(clearSyncTimes(userId)),
       ]);
       logRejectedResults(resultsDelete, 'Operation failed during local cleanup');
 
