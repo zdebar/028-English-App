@@ -161,13 +161,13 @@ describe('usePracticeDeck', () => {
     });
 
     act(() => {
-      window.dispatchEvent(new Event('beforeunload'));
+      globalThis.dispatchEvent(new Event('beforeunload'));
     });
 
     expect(setItemSpy).toHaveBeenCalled();
-    const latestCall = setItemSpy.mock.calls[setItemSpy.mock.calls.length - 1];
+    const latestCall = setItemSpy.mock.calls.at(-1)!;
     expect(latestCall[0]).toBe('practiceDeckProgress_user-1');
-    const savedPayload = JSON.parse(latestCall[1] as string);
+    const savedPayload = JSON.parse(latestCall[1]);
     expect(savedPayload).toMatchObject({
       dateTime: '2026-03-04T10:00:00.000Z',
       progress: [expect.objectContaining({ item_id: 1, progress: 3 })],
