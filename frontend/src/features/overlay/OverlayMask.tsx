@@ -18,11 +18,12 @@ export default function OverlayMask(): JSX.Element | null {
 
   useKey({ onKeyPress: handleClose, keys: KEYBOARD_LISTENERS.Exit });
 
-  if (!isOverlayOpen) return null;
+  if (!isOverlayOpen) {
+    return null;
+  }
 
   return (
     <button
-      type="button"
       className="bg-overlay z-overlay pointer-events-auto fixed inset-0 top-0"
       onClick={handleClose}
       aria-label="Close overlay"

@@ -49,17 +49,15 @@ export default function Guide(): JSX.Element {
         <h2>Odhalená kartička</h2>
         <Screenshot src="/screenshots/revealed.webp" alt="Ukázka kartičky po odhalení" />
         <p>
-          <strong>"neznám"</strong>
+          <strong>"opakovat"</strong>
           <span>
-            Sníží skóre dané položky. Položka se nabídne k dalšímu procvičování dříve.{' '}
-            <strong>Pokud pro vás není znalost zcela automatická, dávejte vždy "neznám".</strong>
+            Položka se nabídne k dalšímu procvičování dříve.{' '}
+            <strong>DOPORUČUJEME dávat "opakovat", pokud není znalost zcela automatická.</strong>
           </span>
         </p>
         <p>
           <strong>"znám"</strong>
-          <span>
-            Zvýší skóre dané položky. Položka se bude tak nabízet k dalšímu procvičování později.
-          </span>
+          <span>Položka se nabídne k dalšímu procvičování později.</span>
         </p>
       </section>
       <section>
