@@ -8,10 +8,10 @@ import type { UserItemLocal } from '@/types/local.types';
 const NOT_AVAILABLE = TEXTS.notAvailable;
 
 interface VocabularyDetailCardProps {
-  selectedWord: UserItemLocal | null;
-  selectedTitle: string;
-  onClose: () => void;
-  onReset: () => Promise<void>;
+  readonly selectedWord: UserItemLocal | null;
+  readonly selectedTitle: string;
+  readonly onClose: () => void;
+  readonly onReset: () => Promise<void>;
 }
 
 /**
