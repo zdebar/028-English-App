@@ -54,7 +54,7 @@ export default function DirectionDropdown<T>({
     options.length === 2 && currentIndex !== -1 ? options[(currentIndex + 1) % 2] : undefined;
 
   return (
-    <div className={`centered border-none ${className}`} title={TEXTS.translationDirection}>
+    <div className={`border-none text-center ${className}`} title={TEXTS.translationDirection}>
       <label htmlFor="direction-toggle" className="sr-only">
         {TEXTS.translationDirection}
       </label>
