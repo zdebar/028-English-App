@@ -29,7 +29,7 @@ vi.mock('@/components/UI/OverviewCard', () => ({
       <button data-testid="close" onClick={onClose}>
         close
       </button>
-      <button data-testid="reset" onClick={() => void handleReset?.()}>
+      <button data-testid="reset" onClick={() => handleReset?.()}>
         reset
       </button>
       {children}
