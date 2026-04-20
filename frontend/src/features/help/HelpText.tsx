@@ -17,8 +17,10 @@ interface HelpTextProps {
 export default function HelpText({ children, className = '' }: HelpTextProps): JSX.Element | null {
   const isHelpOpened = useHelpStore((state) => state.isHelpOpened);
 
-  if (!isHelpOpened) return null;
-
+  if (!isHelpOpened) {
+    return null;
+  }
+  
   return (
     <p
       className={`font-headings z-help-text pointer-events-none absolute px-2 text-xl font-bold text-white ${className}`}
