@@ -6,10 +6,10 @@ import { SupabaseError } from '@/types/error.types';
 import type { LevelLocal, LevelOverview } from '@/types/local.types';
 import { TableName } from '@/types/local.types';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
-import { Entity } from 'dexie';
+import Dexie, { Entity } from 'dexie';
 import { syncFromRemoteGeneric } from '../utils/data-sync.utils';
 import { aggregateLevels } from '../utils/levels.utils';
-import Dexie from 'dexie';
+
 
 /**
  * Represents a level entity in the local database.
