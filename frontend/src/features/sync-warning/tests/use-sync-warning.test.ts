@@ -4,7 +4,7 @@ import { useSyncWarningStore } from '@/features/sync-warning/use-sync-warning';
 describe('useSyncWarningStore', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    window.localStorage.removeItem('sync-warning');
+    globalThis.localStorage.removeItem('sync-warning');
     useSyncWarningStore.setState({ isSynchronized: true });
   });
 
@@ -21,7 +21,7 @@ describe('useSyncWarningStore', () => {
   it('setSynchronized persists state to localStorage', () => {
     useSyncWarningStore.getState().setSynchronized(false);
 
-    const raw = window.localStorage.getItem('sync-warning');
+    const raw = globalThis.localStorage.getItem('sync-warning');
     expect(raw).toBeTruthy();
 
     const parsed = JSON.parse(raw as string) as {
