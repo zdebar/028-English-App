@@ -48,7 +48,7 @@ describe('useToastStore', () => {
   });
 
   it('calling showToast again clears previous timeout', () => {
-    const clearSpy = vi.spyOn(window, 'clearTimeout');
+    const clearSpy = vi.spyOn(globalThis, 'clearTimeout');
 
     useToastStore.getState().showToast('One');
     const first = useToastStore.getState().timeoutId;
@@ -66,7 +66,7 @@ describe('useToastStore', () => {
   });
 
   it('hideToast clears timeout and hides immediately', () => {
-    const clearSpy = vi.spyOn(window, 'clearTimeout');
+    const clearSpy = vi.spyOn(globalThis, 'clearTimeout');
 
     useToastStore.getState().showToast('Temp');
     expect(useToastStore.getState().visible).toBe(true);
