@@ -14,6 +14,7 @@ import { useArray } from '@/hooks/use-array';
 import Notification from '@/components/UI/Notification';
 import UserItem from '@/database/models/user-items';
 import { useToastStore } from '../toast/use-toast-store';
+import { errorHandler } from '../logging/error-handler';
 
 /**
  * GrammarOverview component displays a list of started grammar topics for the user.
@@ -63,6 +64,7 @@ export default function GrammarOverview(): JSX.Element {
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (error) {
       showToast(TEXTS.resetProgressErrorToast, 'error');
+      errorHandler('Failed to reset grammar progress', error);
     }
   }, [currentGrammar, userId, reload]);
 
