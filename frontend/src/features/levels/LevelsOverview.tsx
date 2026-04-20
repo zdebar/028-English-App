@@ -1,5 +1,4 @@
 import DelayedMessage from '@/components/UI/DelayedMessage';
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import { TEXTS } from '@/locales/cs';
@@ -8,6 +7,7 @@ import GoalMetView from '@/components/UI/GoalMetView';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import { useUserStore } from '../user-stats/use-user-store';
+import { useLevelsStore } from './use-levels-store';
 import Notification from '@/components/UI/Notification';
 import TextButton from '@/components/UI/buttons/TextButton';
 import BlockBar from '@/components/UI/BlockBar';
@@ -18,15 +18,16 @@ import BlockBar from '@/components/UI/BlockBar';
  * @returns The levels overview UI with list and detail card functionality.
  */
 export default function LevelsOverview() {
-  const [unpackedIndex, setUnpackedIndex] = useState<number | null>(null);
+  const unpackedIndex = useLevelsStore((state) => state.unpackedIndex);
+  const setUnpackedIndex = useLevelsStore((state) => state.setUnpackedIndex);
+  const showMastered = useLevelsStore((state) => state.showMastered);
+  const setShowMastered = useLevelsStore((state) => state.setShowMastered);
   const levels = useUserStore((state) => state.levels);
-  const showMastered = useUserStore((state) => state.showMasteredLevels);
-  const setShowMastered = useUserStore((state) => state.setMasteredLevels);
 
   const navigate = useNavigate();
 
   const handleLevelClick = (index: number) => {
-    setUnpackedIndex((currentIndex) => (currentIndex === index ? null : index));
+    setUnpackedIndex(unpackedIndex === index ? null : index);
   };
 
   const shownLevels = showMastered ? 'masteredCount' : 'startedCount';

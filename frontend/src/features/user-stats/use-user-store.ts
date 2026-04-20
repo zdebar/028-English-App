@@ -9,9 +9,7 @@ interface UserState {
   levels: LevelOverview[];
   dailyCount: number;
   showMasteredDashboard: boolean;
-  showMasteredLevels: boolean;
   setMasteredDashboard: (value: boolean) => void;
-  setMasteredLevels: (value: boolean) => void;
   reloadLevels: (userId: string) => Promise<void>;
   reloadDailyCount: (userId: string) => Promise<void>;
   clearLevels: () => void;
@@ -64,12 +62,8 @@ export const useUserStore = create<UserState>((set, get) => {
     levels: initialLevels,
     dailyCount: initialDailyStats,
     showMasteredDashboard: false,
-    showMasteredLevels: false,
     setMasteredDashboard: (value: boolean) => {
       set({ showMasteredDashboard: value });
-    },
-    setMasteredLevels: (value: boolean) => {
-      set({ showMasteredLevels: value });
     },
     reloadLevels: async (userId: string) => {
       try {

@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   goalMetCalls: [] as Array<{ current: number; goal: number }>,
   showMasteredLevels: false,
+  unpackedIndex: null as number | null,
   storeListeners: new Set<() => void>(),
 }));
 
@@ -27,15 +28,21 @@ vi.mock('@/locales/cs', () => ({
 }));
 
 vi.mock('@/features/user-stats/use-user-store', () => ({
-  useUserStore: (
+  useUserStore: (selector: (state: { levels: any[] }) => unknown) => {
+    return selector({ levels: mocks.levelsOverview });
+  },
+}));
+
+vi.mock('@/features/levels/use-levels-store', () => ({
+  useLevelsStore: (
     selector: (state: {
-      levels: any[];
-      showMasteredLevels: boolean;
-      setMasteredLevels: (value: boolean) => void;
+      showMastered: boolean;
+      setShowMastered: (value: boolean) => void;
+      unpackedIndex: number | null;
+      setUnpackedIndex: (value: number | null) => void;
     }) => unknown,
   ) => {
     const [, forceUpdate] = React.useReducer((x: number) => x + 1, 0);
-
     React.useEffect(() => {
       const listener = () => forceUpdate();
       mocks.storeListeners.add(listener);
@@ -43,12 +50,15 @@ vi.mock('@/features/user-stats/use-user-store', () => ({
         mocks.storeListeners.delete(listener);
       };
     }, []);
-
     return selector({
-      levels: mocks.levelsOverview,
-      showMasteredLevels: mocks.showMasteredLevels,
-      setMasteredLevels: (value: boolean) => {
+      showMastered: mocks.showMasteredLevels,
+      setShowMastered: (value: boolean) => {
         mocks.showMasteredLevels = value;
+        mocks.storeListeners.forEach((listener) => listener());
+      },
+      unpackedIndex: mocks.unpackedIndex,
+      setUnpackedIndex: (value: number | null) => {
+        mocks.unpackedIndex = value;
         mocks.storeListeners.forEach((listener) => listener());
       },
     });
@@ -107,6 +117,7 @@ describe('LevelsOverview', () => {
     mocks.levelsOverview = [];
     mocks.showMasteredLevels = false;
     mocks.storeListeners.clear();
+    mocks.unpackedIndex = null;
   });
 
   it('renders not available state when levels are empty', () => {
