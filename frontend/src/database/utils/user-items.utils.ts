@@ -18,10 +18,10 @@ export function addGrammarIndicatorFlag(
   startedGrammarIdSet: Set<number>,
 ): UserItemPractice[] {
   if (!Array.isArray(practiceItems)) {
-    throw new Error('practiceItems must be an array.');
+    throw new TypeError('practiceItems must be an array.');
   }
   if (!(startedGrammarIdSet instanceof Set)) {
-    throw new Error('startedGrammarIdSet must be a Set.');
+    throw new TypeError('startedGrammarIdSet must be a Set.');
   }
 
   const shownGrammarIds = new Set<number>();
