@@ -5,14 +5,14 @@ import type { JSX } from 'react';
 import ModalButton from '@/features/modal/ModalButton';
 
 interface OverviewCardProps {
-  buttonTitle?: string;
-  modalTitle?: string;
-  modalText?: string;
-  helpText?: string;
-  handleReset?: () => Promise<void>;
-  onClose: () => void;
-  className?: string;
-  children?: React.ReactNode;
+  readonly buttonTitle?: string;
+  readonly modalTitle?: string;
+  readonly modalText?: string;
+  readonly helpText?: string;
+  readonly handleReset?: () => Promise<void>;
+  readonly onClose: () => void;
+  readonly className?: string;
+  readonly children?: React.ReactNode;
 }
 
 /**
@@ -50,7 +50,7 @@ export default function OverviewCard({
         <ModalButton
           modalTitle={modalTitle}
           modalText={modalText}
-          title={!isDisabled ? TEXTS.restartProgressHelp : ''}
+          title={isDisabled ? '' : TEXTS.restartProgressHelp}
           onConfirm={async () => {
             if (handleReset) {
               await handleReset();
