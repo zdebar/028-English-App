@@ -39,7 +39,9 @@ export function Modal({ onConfirm, onClose, children }: ModalProps): JSX.Element
     openOverlay(onClose);
   }, [onClose, openOverlay]);
 
-  if (!modalRoot) return null;
+  if (!modalRoot) {
+    return null;
+  }
 
   return createPortal(
     <div className="z-modal pointer-events-none fixed inset-0 flex items-center justify-center">
