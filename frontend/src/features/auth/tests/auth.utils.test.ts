@@ -10,8 +10,8 @@ async function flushMicrotasks(): Promise<void> {
 describe('clearAppStorage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    window.localStorage.clear();
-    window.sessionStorage.clear();
+    globalThis.localStorage.clear();
+    globalThis.sessionStorage.clear();
   });
 
   afterEach(() => {
@@ -19,8 +19,8 @@ describe('clearAppStorage', () => {
   });
 
   it('clears local and session storage, indexedDB databases, and caches', async () => {
-    window.localStorage.setItem('k1', 'v1');
-    window.sessionStorage.setItem('k2', 'v2');
+    globalThis.localStorage.setItem('k1', 'v1');
+    globalThis.sessionStorage.setItem('k2', 'v2');
 
     const databases = vi.fn().mockResolvedValue([{ name: 'db1' }, { name: 'db2' }]);
     const deleteDatabase = vi.fn();
@@ -40,8 +40,8 @@ describe('clearAppStorage', () => {
     clearAppStorage();
     await flushMicrotasks();
 
-    expect(window.localStorage.length).toBe(0);
-    expect(window.sessionStorage.length).toBe(0);
+    expect(globalThis.localStorage.length).toBe(0);
+    expect(globalThis.sessionStorage.length).toBe(0);
 
     expect(databases).toHaveBeenCalledTimes(1);
     expect(deleteDatabase).toHaveBeenCalledWith('db1');
@@ -53,8 +53,8 @@ describe('clearAppStorage', () => {
   });
 
   it('does not throw when indexedDB databases API is unavailable', () => {
-    window.localStorage.setItem('k1', 'v1');
-    window.sessionStorage.setItem('k2', 'v2');
+    globalThis.localStorage.setItem('k1', 'v1');
+    globalThis.sessionStorage.setItem('k2', 'v2');
 
     vi.stubGlobal('indexedDB', {
       deleteDatabase: vi.fn(),
@@ -66,7 +66,7 @@ describe('clearAppStorage', () => {
     });
 
     expect(() => clearAppStorage()).not.toThrow();
-    expect(window.localStorage.length).toBe(0);
-    expect(window.sessionStorage.length).toBe(0);
+    expect(globalThis.localStorage.length).toBe(0);
+    expect(globalThis.sessionStorage.length).toBe(0);
   });
 });
