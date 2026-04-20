@@ -11,7 +11,7 @@ export default function RepeatButton({ onClick, disabled, children }: PracticeBu
         onClick={onClick}
         disabled={disabled}
         className="h-button relative"
-        title={!disabled ? TEXTS.repeat : undefined}
+        title={disabled ? undefined : TEXTS.repeat}
       >
         <RepeatIcon />
 
