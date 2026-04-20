@@ -83,12 +83,14 @@ export default function BlockBar({
       </div>
       <div className={`relative h-full w-full ${className}`} style={{ width: `${barWidth}%` }}>
         {/* Native progress bar for accessibility */}
-        <progress
+        <div
           className="bg-progress-bg relative block h-full w-full"
-          value={previousCount + todayCount}
-          max={lessonCount}
+          role="progressbar"
+          aria-valuenow={previousCount + todayCount}
+          aria-valuemin={0}
+          aria-valuemax={lessonCount}
           aria-label={ARIA_TEXTS.lessonProgressBar}
-        />
+        ></div>
         {/* Visual overlays for today/previous progress */}
         <div
           className="bg-new-progress-light dark:bg-new-progress-dark pointer-events-none absolute top-0 left-0 h-full"
