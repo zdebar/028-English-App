@@ -19,17 +19,12 @@
   /** CARD STYLES **/
   .card-height {
     @apply flex flex-col justify-start;
+    @apply max-h-card min-h-card h-full grow;
   }
 
   .card-width {
     @apply max-w-card min-w-card w-full flex flex-col justify-start;
   }
-
-  .card-height {
-    @apply max-h-card min-h-card h-full grow;
-  }
-
-
 }
 
 /** Grammar styles **/
