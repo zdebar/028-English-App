@@ -9,8 +9,8 @@ export interface GrammarCardType {
 }
 
 type GrammarCardProps = {
-  grammar?: GrammarCardType | null;
-  onClose: () => void;
+  readonly grammar?: GrammarCardType | null;
+  readonly onClose: () => void;
 };
 
 /**
