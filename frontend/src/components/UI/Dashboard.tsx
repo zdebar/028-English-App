@@ -1,4 +1,4 @@
-import { TEXTS } from '@/locales/cs';
+import { TEXTS, ARIA_TEXTS } from '@/locales/cs';
 import BlockBar from '@/components/UI/BlockBar';
 import { useUserStore } from '../../features/user-stats/use-user-store';
 import HelpButton from '@/features/help/HelpButton';
@@ -6,10 +6,9 @@ import HelpText from '@/features/help/HelpText';
 import { getInProgressLessons } from '../../utils/dashboard.utils';
 import TextButton from '@/components/UI/buttons/TextButton';
 import type { LessonOverview } from '@/types/local.types';
-import { ARIA_TEXTS } from '@/locales/cs';
 
 type DashboardProps = {
-  className?: string;
+  readonly className?: string;
 };
 
 const noAvailableLesson: LessonOverview = {
@@ -45,9 +44,8 @@ export default function Dashboard({ className = '' }: DashboardProps) {
   if (lessonsInProgress.length === 0) lessonsInProgress.push(noAvailableLesson);
 
   return (
-    <div
+    <section
       className={`min-w-card relative mx-auto mb-12 flex w-full flex-col gap-1 ${className}`}
-      role="region"
       aria-label={ARIA_TEXTS.dashboardRegion}
     >
       {lessonsInProgress.map((lesson) => (
@@ -80,6 +78,6 @@ export default function Dashboard({ className = '' }: DashboardProps) {
         {showMasteredDashboard ? TEXTS.masteredCount : TEXTS.startedCount}
       </TextButton>
       <HelpText className="-bottom-15 left-2">{TEXTS.masteredSwitchHelp}</HelpText>
-    </div>
+    </section>
   );
 }
