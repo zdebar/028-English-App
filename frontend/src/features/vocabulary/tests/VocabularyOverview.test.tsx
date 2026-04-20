@@ -93,7 +93,7 @@ vi.mock('@/features/vocabulary/VocabularyDetailCard', () => ({
       <button data-testid="detail-close" onClick={onClose}>
         close
       </button>
-      <button data-testid="detail-reset" onClick={() => void onReset()}>
+      <button data-testid="detail-reset" onClick={() => onReset()}>
         reset
       </button>
     </div>
