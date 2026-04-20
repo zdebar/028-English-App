@@ -11,7 +11,7 @@ export default function GrammarButton({ onClick, disabled, children }: PracticeB
         onClick={onClick}
         disabled={disabled}
         className="h-button relative"
-        title={!disabled ? TEXTS.grammar : undefined}
+        title={disabled ? undefined : TEXTS.grammar}
       >
         <BookIcon />
         {children}

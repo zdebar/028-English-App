@@ -21,11 +21,12 @@ export default function OverlayMask(): JSX.Element | null {
   if (!isOverlayOpen) return null;
 
   return (
-    <div
+    <button
+      type="button"
       className="bg-overlay z-overlay pointer-events-auto fixed inset-0 top-0"
       onClick={handleClose}
-      role="button"
-      tabIndex={0}
+      aria-label="Close overlay"
+      style={{ border: 'none', background: 'none', padding: 0, margin: 0 }}
     />
   );
 }
