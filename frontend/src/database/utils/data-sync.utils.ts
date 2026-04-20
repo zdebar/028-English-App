@@ -79,11 +79,11 @@ export async function audioSync(userId: string, downloadAll: boolean = false): P
   assertNonEmptyString(userId, 'userId');
 
   const supportsMatchMedia =
-    typeof window !== 'undefined' && typeof window.matchMedia === 'function';
+    typeof globalThis !== 'undefined' && typeof globalThis.matchMedia === 'function';
   const isDisplayStandalone =
-    supportsMatchMedia && window.matchMedia('(display-mode: standalone)').matches;
+    supportsMatchMedia && globalThis.matchMedia('(display-mode: standalone)').matches;
   const isStandalone =
-    downloadAll || isDisplayStandalone || (window.navigator as any).standalone === true;
+    downloadAll || isDisplayStandalone || (globalThis.navigator as any).standalone === true;
 
   if (isStandalone) {
     // PWA or downloadAll: download all audio files
@@ -120,7 +120,7 @@ export function splitDeleted<T extends { deleted_at: string | null }>(
   items: T[],
 ): { toUpsert: T[]; toDelete: T[] } {
   if (!Array.isArray(items)) {
-    throw new Error('items must be an array.');
+    throw new TypeError('items must be an array.');
   }
   const toUpsert: T[] = [];
   const toDelete: T[] = [];
