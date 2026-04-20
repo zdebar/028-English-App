@@ -150,7 +150,7 @@ describe('database.utils', () => {
 
   describe('event helpers', () => {
     it('dispatches named event with userId detail', () => {
-      const spy = vi.spyOn(window, 'dispatchEvent');
+      const spy = vi.spyOn(globalThis, 'dispatchEvent');
 
       triggerNamedEvent('evt', 'u1');
 
@@ -161,7 +161,7 @@ describe('database.utils', () => {
     });
 
     it('triggers levelsUpdated event shortcut', () => {
-      const spy = vi.spyOn(window, 'dispatchEvent');
+      const spy = vi.spyOn(globalThis, 'dispatchEvent');
 
       triggerLevelsUpdatedEvent('u1');
 
