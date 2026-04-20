@@ -31,18 +31,11 @@ export function useHint(czech: string = '', english: string = '') {
 
   const englishLength = englishText.length;
   const czechLength = czechText.length;
+  const englishRevealedLength = Math.min(index, englishLength);
+  const czechRevealedLength = Math.min(Math.max(index - englishLength, 0), czechLength);
 
-  const englishHinted = englishText
-    ? index === 0
-      ? NBSP
-      : englishText.slice(0, Math.min(index, englishLength))
-    : NBSP;
-
-  const czechHinted = czechText
-    ? index <= englishLength
-      ? NBSP
-      : czechText.slice(0, Math.min(index - englishLength, czechLength))
-    : NBSP;
+  const englishHinted = englishText ? englishText.slice(0, englishRevealedLength) || NBSP : NBSP;
+  const czechHinted = czechText ? czechText.slice(0, czechRevealedLength) || NBSP : NBSP;
 
   const resetHint = useCallback(() => {
     setIndex(0);
