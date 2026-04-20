@@ -23,7 +23,7 @@ interface UseFetchResult<T> {
  */
 export function useFetch<T>(fetchFunction: () => Promise<T>): UseFetchResult<T> {
   if (typeof fetchFunction !== 'function') {
-    throw new Error('fetchFunction must be a function.');
+    throw new TypeError('fetchFunction must be a function.');
   }
 
   const [data, setData] = useState<T | null>(null);
