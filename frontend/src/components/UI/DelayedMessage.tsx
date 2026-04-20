@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import config from '@/config/config';
 
 type DelayedMessageProps = {
-  children?: React.ReactNode;
-  timeDelay?: number;
-  className?: string;
+  readonly children?: React.ReactNode;
+  readonly timeDelay?: number;
+  readonly className?: string;
 };
 
 /**
