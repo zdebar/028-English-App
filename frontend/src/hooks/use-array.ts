@@ -27,7 +27,7 @@ interface UseArrayResult<T> {
  */
 export function useArray<T>(fetchFunction: () => Promise<T[]>): UseArrayResult<T> {
   if (typeof fetchFunction !== 'function') {
-    throw new Error('fetchFunction must be a function.');
+    throw new TypeError('fetchFunction must be a function.');
   }
 
   const showToast = useToastStore((state) => state.showToast);
@@ -79,7 +79,7 @@ export function useArray<T>(fetchFunction: () => Promise<T[]>): UseArrayResult<T
   return {
     data: data ?? [],
     currentIndex,
-    currentItem: currentIndex !== null ? data[currentIndex] : null,
+    currentItem: currentIndex == null ? null : data[currentIndex],
     error,
     loading,
     reload,
