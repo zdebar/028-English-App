@@ -2,8 +2,8 @@ import { useHelpStore } from './use-help-store';
 import type { JSX, ReactNode } from 'react';
 
 interface HelpTextProps {
-  children: ReactNode;
-  className?: string;
+  readonly children: ReactNode;
+  readonly className?: string;
 }
 
 /**
