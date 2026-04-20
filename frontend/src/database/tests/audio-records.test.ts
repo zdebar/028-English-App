@@ -80,7 +80,7 @@ describe('AudioRecord', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.dbTransaction.mockImplementation(async (...args: unknown[]) => {
-      const callback = args[args.length - 1] as () => Promise<unknown>;
+      const callback = args.at(-1) as () => Promise<unknown>;
       return callback();
     });
   });
