@@ -64,6 +64,12 @@ export function getInProgressLessons(
   levelsOverview: LevelOverview[],
   mode: 'started' | 'mastered' = 'started',
 ): LessonOverview[] {
+  const shouldIncludeLesson = (
+    todayCount: number,
+    isIncomplete: boolean,
+    isFirstEligibleZero: boolean,
+  ) => todayCount > 0 || isIncomplete || isFirstEligibleZero;
+
   const countKey = mode === 'mastered' ? 'masteredCount' : 'startedCount';
   const todayKey = mode === 'mastered' ? 'masteredTodayCount' : 'startedTodayCount';
 
@@ -94,15 +100,17 @@ export function getInProgressLessons(
     const isIncomplete = count > 0 && count < totalCount;
     const previousLesson = index > 0 ? sortedLessons[index - 1] : null;
     const previousCompleted =
-      previousLesson == null ||
-      (previousLesson[countKey] ?? 0) >= (previousLesson.totalCount ?? 0);
-    const isFirstEligibleZero = !firstEligibleZeroIncluded && count === 0 && previousCompleted;
+      previousLesson == null || (previousLesson[countKey] ?? 0) >= (previousLesson.totalCount ?? 0);
+    const isZero = count === 0;
+    const isFirstEligibleZero = !firstEligibleZeroIncluded && isZero && previousCompleted;
 
-    if (todayCount > 0 || isIncomplete || isFirstEligibleZero) {
-      result.push(lesson);
-      if (isFirstEligibleZero) {
-        firstEligibleZeroIncluded = true;
-      }
+    if (!shouldIncludeLesson(todayCount, isIncomplete, isFirstEligibleZero)) {
+      continue;
+    }
+
+    result.push(lesson);
+    if (isFirstEligibleZero) {
+      firstEligibleZeroIncluded = true;
     }
   }
 
@@ -111,7 +119,7 @@ export function getInProgressLessons(
   }
 
   const lastLesson = sortedLessons.at(-1);
-  return lastLesson != null ? [lastLesson] : [];
+  return lastLesson == null ? [] : [lastLesson];
 }
 
 /**
@@ -130,7 +138,7 @@ export function triggerNamedEvent(eventName: string, userId: string) {
   }
 
   const event = new CustomEvent(eventName, { detail: { userId } });
-  window.dispatchEvent(event);
+  globalThis.dispatchEvent(event);
 }
 
 /**
