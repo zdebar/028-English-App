@@ -6,21 +6,21 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 
 type SkipButtonProps = {
-  onConfirm: () => void | Promise<void>;
-  disabled: boolean;
-  children?: React.ReactNode;
+  readonly onConfirm: () => void | Promise<void>;
+  readonly disabled: boolean;
+  readonly children?: React.ReactNode;
 };
 
 const HOLD_DURATION_MS = 600;
 
 export default function MasterItemButton({ onConfirm, disabled, children }: SkipButtonProps) {
   const showToast = useToastStore((state) => state.showToast);
-  const timeoutRef = useRef<number | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressTriggeredRef = useRef(false);
 
   const clearHoldTimer = useCallback(() => {
     if (timeoutRef.current !== null) {
-      window.clearTimeout(timeoutRef.current);
+      globalThis.clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
   }, []);
@@ -42,9 +42,9 @@ export default function MasterItemButton({ onConfirm, disabled, children }: Skip
     longPressTriggeredRef.current = false;
     clearHoldTimer();
 
-    timeoutRef.current = window.setTimeout(() => {
+    timeoutRef.current = globalThis.setTimeout(() => {
       longPressTriggeredRef.current = true;
-      void triggerSkip();
+      triggerSkip();
     }, HOLD_DURATION_MS);
   }, [clearHoldTimer, disabled, triggerSkip]);
 
@@ -88,7 +88,7 @@ export default function MasterItemButton({ onConfirm, disabled, children }: Skip
         onClick={handleClick}
         disabled={disabled}
         className="h-button relative"
-        title={!disabled ? TEXTS.complete : undefined}
+        title={disabled ? undefined : TEXTS.complete}
       >
         <ForwardIcon />
 
