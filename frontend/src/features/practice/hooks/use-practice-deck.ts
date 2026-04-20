@@ -7,11 +7,7 @@ import { errorHandler } from '@/features/logging/error-handler';
 import { infoHandler } from '@/features/logging/info-handler';
 import { useHint } from './use-hint';
 import { useAudioManager } from './use-audio-manager';
-import {
-  triggerDailyCountUpdatedEvent,
-  triggerLevelsUpdatedEvent,
-} from '@/utils/dashboard.utils';
-import { assertNonEmptyString } from '@/utils/assertions.utils';
+import { triggerDailyCountUpdatedEvent, triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 
 const NBSP = '\u00A0';
 
@@ -20,9 +16,7 @@ const NBSP = '\u00A0';
  *
  * @param userId The unique identifier of the user.
  */
-export function usePracticeDeck(userId: string) {
-  assertNonEmptyString(userId, 'userId');
-
+export function usePracticeDeck(userId: string | null) {
   // Array fetching logic
   const [array, setArray] = useState<UserItemPractice[]>([]);
   const [index, setIndex] = useState(0);
@@ -31,6 +25,7 @@ export function usePracticeDeck(userId: string) {
   const currentItem = array[index] ?? null;
 
   const fetchPracticeDeck = useCallback(async () => {
+    if (!userId) return [];
     const data = await UserItem.getPracticeDeck(userId);
     return data.filter((item) => item != null);
   }, [userId]);
@@ -108,9 +103,11 @@ export function usePracticeDeck(userId: string) {
   useEffect(() => {
     return () => {
       (async () => {
-        await saveBufferedProgress([...userProgressRef.current], 'on unmount');
-        triggerLevelsUpdatedEvent(userId);
-        triggerDailyCountUpdatedEvent(userId);
+        if (userId) {
+          await saveBufferedProgress([...userProgressRef.current], 'on unmount');
+          triggerLevelsUpdatedEvent(userId);
+          triggerDailyCountUpdatedEvent(userId);
+        }
       })();
     };
   }, [saveBufferedProgress]);
