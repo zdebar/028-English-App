@@ -1,16 +1,15 @@
-import { TEXTS } from '@/locales/cs';
-import { ARIA_TEXTS } from '@/locales/cs';
+import { TEXTS, ARIA_TEXTS } from '@/locales/cs';
 
 interface BlockBarProps {
-  previousCount: number;
-  todayCount: number;
-  lessonName: string;
-  lessonNumber: number;
-  isMastered: boolean;
-  divisions?: number;
-  lessonCount: number;
-  widthBase?: number;
-  className?: string;
+  readonly previousCount: number;
+  readonly todayCount: number;
+  readonly lessonName: string;
+  readonly lessonNumber: number;
+  readonly isMastered: boolean;
+  readonly divisions?: number;
+  readonly lessonCount: number;
+  readonly widthBase?: number;
+  readonly className?: string;
 }
 
 /**
@@ -83,26 +82,22 @@ export default function BlockBar({
         </span>
       </div>
       <div className={`relative h-full w-full ${className}`} style={{ width: `${barWidth}%` }}>
-        {/* Progress bar */}
-        <div
-          className="bg-progress-bg relative h-full overflow-hidden"
-          role="progressbar"
+        {/* Native progress bar for accessibility */}
+        <progress
+          className="bg-progress-bg relative block h-full w-full"
+          value={previousCount + todayCount}
+          max={lessonCount}
           aria-label={ARIA_TEXTS.lessonProgressBar}
-          aria-valuenow={previousCount + todayCount}
-          aria-valuemin={0}
-          aria-valuemax={lessonCount}
-        >
-          {/* New progress */}
-          <div
-            className="bg-new-progress-light dark:bg-new-progress-dark absolute top-0 left-0 h-full"
-            style={{ width: `${totalWidth}%` }}
-          ></div>
-          {/* Previous progress */}
-          <div
-            className="bg-old-progress-light dark:bg-old-progress-dark absolute top-0 left-0 h-full"
-            style={{ width: `${previousWidth}%` }}
-          ></div>
-        </div>
+        />
+        {/* Visual overlays for today/previous progress */}
+        <div
+          className="bg-new-progress-light dark:bg-new-progress-dark pointer-events-none absolute top-0 left-0 h-full"
+          style={{ width: `${totalWidth}%` }}
+        ></div>
+        <div
+          className="bg-old-progress-light dark:bg-old-progress-dark pointer-events-none absolute top-0 left-0 h-full"
+          style={{ width: `${previousWidth}%` }}
+        ></div>
       </div>
       {/* Divisions */}
       {renderDivisions()}
