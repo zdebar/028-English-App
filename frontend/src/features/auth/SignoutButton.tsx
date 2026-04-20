@@ -6,13 +6,17 @@ import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { useThemeStore } from '../theme/use-theme-store';
 
+type SignoutButtonProps = Readonly<{
+  className?: string;
+}>;
+
 /**
  * SignoutButton component for signing out the user.
  *
  * @param className - Optional CSS class name to apply to the button.
  * @returns The rendered SignoutButton component.
  */
-export default function SignoutButton({ className }: { className?: string }): JSX.Element {
+export default function SignoutButton({ className }: SignoutButtonProps): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const handleLogout = useAuthStore((state) => state.handleLogout);
   const saveCurrentThemeAsGuest = useThemeStore((state) => state.saveCurrentThemeAsGuest);
@@ -39,7 +43,7 @@ export default function SignoutButton({ className }: { className?: string }): JS
       onConfirm={handleSignout}
       className={className}
     >
-      <p className="w-40 mx-auto">{TEXTS.signoutButtonTitle}</p>
+      <p className="mx-auto w-40">{TEXTS.signoutButtonTitle}</p>
     </ModalButton>
   );
 }
