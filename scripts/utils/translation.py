@@ -23,21 +23,21 @@ def fill_missing_czech(df: pd.DataFrame) -> pd.DataFrame:
 
     if missing_english:
         try:
-            translations = bulk_translate_to_czech_Google_Translate(missing_english)
+            translations = bulk_translate_to_czech_google_translate(missing_english)
             for idx, translation in zip(missing_indices, translations):
                 df.at[idx, "czech"] = translation
         except Exception as e:
             print(f"Bulk translation failed: {e}")
     return df
 
-def bulk_translate_to_czech_Google_Translate(texts):
+def bulk_translate_to_czech_google_translate(texts):
     """
     Translates a list of English texts to Czech using Google Translate API (bulk).
     Returns a list of translated texts (empty string if not translated).
     """
     api_key = os.getenv("GOOGLE_TRANSLATE_API_KEY")
     if not api_key:
-        raise Exception("GOOGLE_TRANSLATE_API_KEY is not set in the .env file.")
+        raise ValueError("GOOGLE_TRANSLATE_API_KEY is not set in the .env file.")
 
     url = "https://translation.googleapis.com/language/translate/v2"
     headers = {"Content-Type": "application/json"}
@@ -52,23 +52,23 @@ def bulk_translate_to_czech_Google_Translate(texts):
     try:
         response = requests.post(url, json=payload, headers=headers)
         response_data = response.json()
-    except Exception as e:
-        raise Exception(f"Network error: {e}")
+    except requests.RequestException as e:
+        raise ConnectionError(f"Network error: {e}") from e
 
     if response.status_code == 200 and "data" in response_data:
         translations = response_data["data"].get("translations", [])
         return [t.get("translatedText", "") for t in translations]
     else:
         error_message = response_data.get("error", {}).get("message", "Unknown error")
-        raise Exception(f"Translation API error: {error_message}")
+        raise RuntimeError(f"Translation API error: {error_message}")
 
-def translate_to_czech_Google_Translate(text: str) -> str:
+def translate_to_czech_google_translate(text: str) -> str:
     """
     Translates a given text from English to Czech using the Google Translate API.
     """
     api_key = os.getenv("GOOGLE_TRANSLATE_API_KEY")
     if not api_key:
-        raise Exception("GOOGLE_TRANSLATE_API_KEY is not set in the .env file.")
+        raise ValueError("GOOGLE_TRANSLATE_API_KEY is not set in the .env file.")
 
     url = "https://translation.googleapis.com/language/translate/v2"
     headers = {"Content-Type": "application/json"}
@@ -83,8 +83,8 @@ def translate_to_czech_Google_Translate(text: str) -> str:
     try:
         response = requests.post(url, json=payload, headers=headers)
         response_data = response.json()
-    except Exception as e:
-        raise Exception(f"Network error: {e}")
+    except requests.RequestException as e:
+        raise ConnectionError(f"Network error: {e}") from e
 
     if response.status_code == 200 and "data" in response_data:
         translations = response_data["data"].get("translations", [])
@@ -94,7 +94,7 @@ def translate_to_czech_Google_Translate(text: str) -> str:
             return ""
     else:
         error_message = response_data.get("error", {}).get("message", "Unknown error")
-        raise Exception(f"Translation API error: {error_message}")
+        raise RuntimeError(f"Translation API error: {error_message}")
         
 
 
