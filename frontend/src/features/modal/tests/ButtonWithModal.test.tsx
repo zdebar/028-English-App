@@ -32,7 +32,7 @@ vi.mock('@/features/modal/Modal', () => ({
   Modal: ({ onConfirm, onClose, children }: any) => (
     <div data-testid="modal">
       <div>{children}</div>
-      <button data-testid="modal-confirm" onClick={() => void onConfirm?.()}>
+      <button data-testid="modal-confirm" onClick={() => onConfirm?.()}>
         confirm
       </button>
       <button data-testid="modal-close" onClick={onClose}>
