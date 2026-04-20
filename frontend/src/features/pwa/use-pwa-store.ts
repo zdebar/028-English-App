@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 
 interface PwaState {
-	promptEvent: any | null;
-	setPromptEvent: (event: any) => void;
-	clearPromptEvent: () => void;
+  promptEvent: any;
+  setPromptEvent: (event: any) => void;
+  clearPromptEvent: () => void;
 }
 
 export const usePwaStore = create<PwaState>((set) => ({
