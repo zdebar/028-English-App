@@ -21,8 +21,7 @@ describe('useThemeStore', () => {
 
     vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: false }));
 
-    document.documentElement.classList.remove('dark');
-    document.documentElement.classList.remove('light');
+    document.documentElement.classList.remove('dark', 'light');
     useThemeStore.setState({ theme: 'light' });
   });
 
