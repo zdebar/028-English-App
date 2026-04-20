@@ -1,0 +1,14 @@
+/** RESPONSIVE STYLES **/
+
+.help-btn-pos {
+  position: absolute;
+  bottom: -54px;
+  right: 0px;
+}
+
+@media (max-height: 400px) {
+  .help-btn-pos {
+    bottom: 0px;
+    right: -54px;
+  }
+}

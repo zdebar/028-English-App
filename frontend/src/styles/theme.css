@@ -1,0 +1,68 @@
+/**
+ * Design tokens / theme variables.
+ */
+
+@theme {
+  /** FONT FAMILIES **/
+  --font-body: 'Roboto', serif;
+  --font-headings: 'Mansalva', sans-serif;
+
+  /** COLORS **/
+  /** text colors **/
+  --color-light: black;
+  --color-dark: white;
+
+  /** background colors **/
+  --color-background-light: #f7b740;
+  --color-background-dark: #111827;
+
+  /** button colors **/
+  --color-button-light: #f8c04a;
+  --color-button-dark: #19202e;
+  --color-button-hover: white;
+  --color-disabled-light: #f3f4f6;
+  --color-disabled-dark: #6b7280;
+
+  /** warning colors **/
+  --color-warning-light: black;
+  --color-warning-dark: #87d5e8;
+
+  /** other colors **/
+  --color-help: white;
+  --color-indicator: green;
+  --color-overlay: rgba(0, 0, 0, 0.4);
+  --color-not-revealed-dark: #1a5c82;
+
+  /** progress bar colors **/
+  --color-progress-bg: white;
+  --color-new-progress-light: #87d5e8;
+  --color-old-progress-light: #42bddb;
+  --color-old-progress-dark: #f7ae25;
+  --color-new-progress-dark: #f7d565;
+  --color-divisions: #747474;
+
+  /** toast colors **/
+  --color-success-light: #0a6b2e;
+  --color-error-light: #8b1313;
+  --color-info-light: #1e4e9c;
+  --color-success-dark: #22c55e;
+  --color-error-dark: #ef4444;
+  --color-info-dark: #3b82f6;
+
+  /** LAYOUT DIMENSIONS **/
+  --max-width-container: 900px;
+  --max-width-hero: 450px;
+  --min-width-card: 320px;
+  --max-width-card: 400px;
+  --min-height-card: 320px;
+  --max-height-card: 400px;
+
+  /** COMPONENT SIZES **/
+  --size-button: 3.25rem;
+  --width-button: 3.25rem;
+  --height-button: 3.25rem;
+  --height-input: 2.5rem;
+  --height-attribute: 1.5rem;
+  --size-indicator: 0.75rem;
+  --size-icon: 2.5rem;
+}

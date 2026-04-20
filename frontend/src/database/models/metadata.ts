@@ -1,58 +1,76 @@
-import { Entity } from 'dexie';
+import config from '@/config/config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
-import type { TableName } from '@/types/local.types';
-import { generateMetadataId } from '../database.utils';
+import { TableName } from '@/types/local.types';
+import { Entity } from 'dexie';
+import { validateUserIdUsage } from '../utils/metadata.utils';
 
+/**
+ * Represents metadata information for table synchronization in the application database.
+ *
+ * @method getSyncedAt - Retrieves the last synchronization date for a specific table and user.
+ * @method markAsSynced - Marks a specific table as synced by updating or inserting a metadata record.
+ * @method deleteSyncRow - Deletes a metadata row for a specific table and user.
+ */
 export default class Metadata extends Entity<AppDB> {
-  id!: string;
   table_name!: TableName;
   synced_at?: string;
-  user_id?: string | 'placeholder';
+  user_id?: string;
 
   /**
-   * Gets the last synced date for a table and user.
-   * @param tableName the name of the table
-   * @param userId the ID of the user (optional)
-   * @returns the synced_at date or first epoch date if not found
+   * Retrieves the last synchronization date for a specific table and user.
+   *
+   * @static
+   * @param tableName The name of the table to retrieve the sync date for.
+   * @param userId (Optional) The ID of the user. If not provided, the null replacement user ID from config is used.
+   * @returns A promise that resolves to the ISO string of the last synced date.
+   *          Returns the epoch start date from config if no sync date is found.
    */
-  static async getSyncedDate(tableName: TableName, userId?: string | null): Promise<string> {
-    const id = generateMetadataId(tableName, userId ?? 'placeholder');
-    const metadata = await db.metadata.get(id);
-    return metadata?.synced_at || '1970-01-01T00:00:00.000Z';
+  static async getSyncedAt(tableName: TableName, userId?: string): Promise<string> {
+    const isUserSpecific = validateUserIdUsage(tableName, userId);
+
+    const metadata = await db.metadata.get([
+      tableName,
+      isUserSpecific ? userId! : config.database.nullReplacementUserId,
+    ]);
+
+    return metadata?.synced_at ?? config.database.epochStartDate;
   }
 
   /**
-   * Marks a table as synced by storing its metadata.
-   * @param tableName the name of the synced table
-   * @param syncTime sync time (e.g., from the server)
-   * @param userId the ID of the user (optional)
-   * @returns true if the operation was successful
+   * Marks the specified table as synced by updating or inserting a metadata record with the given sync time.
+   *
+   * @param tableName - The name of the table to mark as synced.
+   * @param syncTime - The ISO string representing the time of synchronization.
+   * @param userId - (Optional) The user ID associated with the sync operation.
+   *          If not provided, the null replacement user ID from config is used.
    */
   static async markAsSynced(
     tableName: TableName,
     syncTime: string,
-    userId?: string | null,
-  ): Promise<boolean> {
-    const id = generateMetadataId(tableName, userId ?? 'placeholder');
+    userId?: string,
+  ): Promise<void> {
+    const isUserSpecific = validateUserIdUsage(tableName, userId);
     await db.metadata.put({
-      id,
       table_name: tableName,
-      user_id: userId ?? 'placeholder',
+      user_id: isUserSpecific ? userId! : config.database.nullReplacementUserId,
       synced_at: syncTime,
     });
-    return true;
   }
 
   /**
-   * Deletes the sync metadata row for a table and optional user.
-   * @param tableName the name of the table
-   * @param userId the ID of the user (optional)
-   * @returns true if the operation was successful
+   * Deletes a metadata row from the database for the specified table and optional user.
+   *
+   * @param tableName - The name of the table whose metadata row should be deleted.
+   * @param userId - (Optional) The user ID associated with the metadata row.
+   *          User ID is required when deleting sync rows for user-specific tables (e.g., user_items, user_scores).
+   *          If not provided, the null replacement user ID from config is used.
    */
-  static async deleteSyncRow(tableName: TableName, userId?: string | null): Promise<boolean> {
-    const id = generateMetadataId(tableName, userId ?? 'placeholder');
-    await db.metadata.delete(id);
-    return true;
+  static async deleteSyncRow(tableName: TableName, userId?: string): Promise<void> {
+    const isUserSpecific = validateUserIdUsage(tableName, userId);
+    await db.metadata.delete([
+      tableName,
+      isUserSpecific ? userId! : config.database.nullReplacementUserId,
+    ]);
   }
 }

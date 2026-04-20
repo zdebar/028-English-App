@@ -1,24 +1,28 @@
-import { useState, useEffect, useCallback } from 'react';
-import VolumeSlider from '@/features/practice/VolumeSlider';
-import Button from '@/components/UI/buttons/Button';
-import ForwardIcon from '@/components/UI/icons/ForwardIcon';
-import BulbIcon from '@/components/UI/icons/BulbIcon';
-import EyeIcon from '@/components/UI/icons/EyeIcon';
-import MinusIcon from '@/components/UI/icons/MinusIcon';
-import PlusIcon from '@/components/UI/icons/PlusIcon';
-import BookIcon from '@/components/UI/icons/BookIcon';
+import { useCallback, useEffect, useState } from 'react';
+
 import config from '@/config/config';
-import { usePracticeDeck } from '@/features/practice/use-practice-deck';
-import { useAudioManager } from '@/features/practice/use-audio-manager';
+
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { useUserStore } from '@/hooks/use-user-store';
-import GrammarCard, { type GrammarCardType } from '@/features/practice/GrammarCard';
-import Loading from '@/components/UI/Loading';
-import HelpButton from '@/features/overlay/HelpButton';
-import Hint from '@/components/UI/Hint';
-import { useOverlayStore } from '@/hooks/use-overlay-store';
-import Grammar from '@/database/models/grammar';
+import { useUserStore } from '../user-stats/use-user-store';
+import { usePracticeDeck } from './hooks/use-practice-deck';
+
+import DelayedMessage from '@/components/UI/DelayedMessage';
 import Indicator from '@/components/UI/Indicator';
+import HelpButton from '@/features/help/HelpButton';
+import HelpText from '@/features/help/HelpText';
+import GrammarCard from '@/features/practice/GrammarCard';
+import VolumeSlider from '@/features/practice/VolumeSlider';
+
+import Notification from '@/components/UI/Notification';
+import { TEXTS } from '@/locales/cs';
+import GrammarButton from './buttons/GrammarButton';
+import HintButton from './buttons/HintButton';
+import KnownButton from './buttons/KnownButton';
+import MasterItemButton from './buttons/MasterItemButton';
+import PlayAudioButton from './buttons/PlayAudioButton';
+import RepeatButton from './buttons/RepeatButton';
+import { useGrammar } from './hooks/use-grammar';
+import { useHelpStore } from '../help/use-help-store';
 
 /**
  * PracticeCard component for interactive language practice.
@@ -26,212 +30,235 @@ import Indicator from '@/components/UI/Indicator';
  * @returns The main practice card UI with all practice controls and feedback.
  */
 export default function PracticeCard() {
-  const [revealed, setRevealed] = useState(false);
-  const [hintIndex, setHintIndex] = useState(0);
-  const [showPlayHint, setShowPlayHint] = useState(true);
-  const [grammarVisible, setGrammarVisible] = useState(false);
-  const [grammarData, setGrammarData] = useState<GrammarCardType | null>(null);
-  const { isOpen } = useOverlayStore();
-  const { userId } = useAuthStore();
-  const { userStats } = useUserStore();
-  const { index, array, nextItem, currentItem, direction, grammar_id, loading } = usePracticeDeck(
-    userId!,
-  );
-  const { playAudio, stopAudio, setVolume, audioError, setAudioError } = useAudioManager(
-    array || [],
-  );
+  const userId = useAuthStore((state) => state.userId);
+  const dailyCount = useUserStore((state) => state.dailyCount);
+  const isHelpOpened = useHelpStore((state) => state.isHelpOpened);
+  const [counter, setCounter] = useState(0);
+  const { grammarVisible, grammarData, handleGrammar, closeGrammar } = useGrammar();
 
-  const isAudioDisabled = (direction && !revealed) || !currentItem?.audio || audioError;
+  const practiceCountToday = dailyCount + counter;
 
-  // Handle advancing to next item
-  const handleNext = useCallback(
-    async (progressIncrement: number = 0) => {
-      setRevealed(false);
-      stopAudio();
-      nextItem(progressIncrement);
-      setHintIndex(0);
-    },
-    [nextItem, stopAudio],
-  );
+  if (!userId)
+    return (
+      <DelayedMessage>
+        <Notification className="color-info pt-4">{TEXTS.syncLoadingText}</Notification>
+      </DelayedMessage>
+    );
 
-  // Play audio for the current item
-  const playAudioForItem = useCallback(() => {
-    if (currentItem?.audio) {
-      playAudio(currentItem.audio);
-    }
-  }, [currentItem, playAudio]);
+  const {
+    currentItem,
+    grammar_id,
+    progress,
+    isCzToEn,
+    revealed,
+    setRevealed,
+    showNewGrammarIndicator,
+    czech,
+    english,
+    pronunciation,
+    audioDisabled,
+    showDirectionChange,
+    hideDirectionChange,
+    plusHint,
+    nextItem,
+    audioError,
+    setVolume,
+    playAudio,
+    audioLoading,
+  } = usePracticeDeck(userId);
 
-  // Fetch grammar for the current item and show GrammarCard
-  const fetchGrammar = useCallback(async () => {
-    if (!currentItem?.grammar_id) return;
-    const grammar = await Grammar.getGrammarById(currentItem.grammar_id);
-    setGrammarData(grammar);
-    setGrammarVisible(true);
-  }, [currentItem?.grammar_id]);
-
-  // Auto-play audio on new item if english to czech direction
+  // Play audio on item change if direction is EN -> CZ
   useEffect(() => {
-    if (!direction && currentItem?.audio && !showPlayHint && !loading) {
-      setTimeout(() => playAudio(currentItem.audio!), 500);
+    if (audioDisabled || isCzToEn || audioLoading || showDirectionChange) {
+      return;
     }
-  }, [currentItem, direction, playAudio, showPlayHint, loading]);
 
-  // Handle audio errors and retries
-  useEffect(() => {
-    setAudioError((currentItem && !currentItem?.audio) || audioError);
-  }, [audioError, currentItem, setAudioError]);
+    const timeoutId = window.setTimeout(() => {
+      playAudio();
+    }, config.practice.audioDelay);
 
-  if (!array || !currentItem) {
-    return <Loading text="Načítání ..." />;
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [audioDisabled, isCzToEn, audioLoading, showDirectionChange, playAudio, currentItem]);
+
+  const handleReveal = useCallback(() => {
+    if (showDirectionChange) {
+      hideDirectionChange();
+      return;
+    }
+
+    if (isCzToEn && !audioError && !revealed) {
+      playAudio();
+    }
+
+    setRevealed(true);
+  }, [
+    audioError,
+    hideDirectionChange,
+    isCzToEn,
+    playAudio,
+    setRevealed,
+    showDirectionChange,
+    revealed,
+  ]);
+
+  const handlePlayAudio = useCallback(() => {
+    if (audioDisabled) return;
+    playAudio();
+  }, [audioDisabled, playAudio]);
+
+  if (!currentItem) {
+    return (
+      <DelayedMessage timeDelay={300}>
+        <Notification className="color-info pt-4">
+          <p>{TEXTS.nothingToPractice}</p>
+          <p>{TEXTS.tryAgainLater}</p>
+        </Notification>
+      </DelayedMessage>
+    );
   }
 
   return (
     <div className="relative flex w-full grow flex-col items-center">
       {grammarVisible ? (
-        <GrammarCard grammar={grammarData} onClose={() => setGrammarVisible(false)} />
+        <GrammarCard grammar={grammarData} onClose={closeGrammar} />
       ) : (
         <>
-          <div className="card-width card-height relative">
+          <div className={`card-width card-height relative gap-1`}>
             {/* Item Card */}
             <div
-              className={`relative flex h-full grow flex-col items-center justify-between p-4 ${
-                isAudioDisabled ? 'color-audio-disabled' : 'color-audio'
-              }`}
-              onClick={() => {
-                if (showPlayHint) {
-                  setShowPlayHint(false);
-                } else if (!isAudioDisabled) {
-                  playAudio(currentItem.audio);
+              className={`relative flex h-full grow cursor-pointer flex-col items-center justify-between p-4 select-none ${
+                revealed ? 'color-audio-disabled' : 'color-button'
+              } `}
+              onClick={handleReveal}
+              role="button"
+              title={showDirectionChange ? TEXTS.start : !revealed ? TEXTS.reveal : undefined}
+              tabIndex={0}
+              aria-disabled={revealed}
+              onKeyDown={(e) => {
+                if (audioDisabled) return;
+                if (e.key === 'Enter' || e.key === ' ') {
+                  handleReveal();
                 }
+                e.preventDefault();
               }}
-              aria-label="Přehrát audio"
             >
-              <div id="top-bar" className="relative flex w-full items-center justify-between">
-                <VolumeSlider setVolume={setVolume} />
-                <p className="text-notice">{audioError && 'bez audia'}</p>
-              </div>
-              <div id="item" className="flex h-full flex-col justify-center gap-1">
-                {showPlayHint && !direction && !audioError ? (
-                  <div className="text-notice text-center">Stisknutím přehrajte audio</div>
-                ) : (
-                  <>
-                    <p className="text-center font-bold">
-                      {direction || revealed
-                        ? currentItem?.czech
-                        : audioError
-                          ? currentItem?.czech
-                              ?.slice(0, hintIndex)
-                              .padEnd(currentItem?.czech?.length ?? 0, '\u00A0')
-                          : hintIndex >= (currentItem?.english?.length ?? 0)
-                            ? currentItem?.czech
-                                ?.slice(0, hintIndex - (currentItem?.english?.length ?? 0))
-                                .padEnd(currentItem?.czech?.length ?? 0, '\u00A0')
-                            : '\u00A0'}
+              {showDirectionChange ? (
+                <Notification className="my-auto">
+                  {isCzToEn ? TEXTS.directionCzToEn : TEXTS.directionEnToCz}
+                </Notification>
+              ) : (
+                <>
+                  {!revealed && <HelpText className="center top-4">{TEXTS.reveal}</HelpText>}
+                  <HelpText className="top-20 left-4">
+                    <span className="help-text-span">{TEXTS.shortCut}</span>
+                    {TEXTS.short}
+                  </HelpText>
+                  <HelpText className="top-28 left-4">
+                    <span className="help-text-span">{TEXTS.singularCut}</span>
+                    {TEXTS.singular}
+                  </HelpText>
+                  <HelpText className="top-36 left-4">
+                    <span className="help-text-span">{TEXTS.pluralCut}</span>
+                    {TEXTS.plural}
+                  </HelpText>
+                  {/** Top Bar */}
+                  <div
+                    id="top-bar"
+                    className="relative flex h-8 w-full items-center justify-between"
+                  >
+                    <VolumeSlider setVolume={setVolume} />
+                    {/**Audio messages*/}
+                    {audioError ? (
+                      <p className="px-2">{TEXTS.noAudio}</p>
+                    ) : (
+                      audioLoading && (
+                        <DelayedMessage>
+                          <Notification className="color-info pt-4">
+                            {TEXTS.loadingAudio}
+                          </Notification>
+                        </DelayedMessage>
+                      )
+                    )}
+                  </div>
+                  {/** Item Data */}
+                  {!isHelpOpened && (
+                    <div id="item" className="flex h-full flex-col justify-center gap-1">
+                      <p className="text-center font-bold">{czech}</p>
+                      <p className="text-center font-normal">{english}</p>
+                      <p className="text-center font-normal">{pronunciation}</p>
+                    </div>
+                  )}
+
+                  {/** Bottom Bar */}
+                  <div
+                    className="relative flex h-8 w-full items-center justify-between"
+                    id="bottom-bar"
+                  >
+                    <p className="px-2 font-light" title={TEXTS.progress}>
+                      {progress}
                     </p>
-                    <p className="text-center">
-                      {revealed || (!direction && audioError)
-                        ? currentItem?.english
-                        : currentItem?.english
-                            .slice(0, hintIndex ?? currentItem?.english.length)
-                            .padEnd(currentItem?.english.length, '\u00A0')}
+                    <HelpText className="bottom-7.5">{TEXTS.progress}</HelpText>
+                    <p className="px-2 font-light" title={`${TEXTS.today} / ${TEXTS.dailyGoal}`}>
+                      {practiceCountToday} / {config.practice.dailyGoal}
                     </p>
-                    <p className="text-center">
-                      {revealed ? currentItem?.pronunciation || '\u00A0' : '\u00A0'}
-                    </p>
-                  </>
-                )}
-              </div>
-              <div className="relative flex w-full items-center justify-between" id="bottom-bar">
-                <p className="px-2 font-light">{currentItem?.progress}</p>
-                <Hint visibility={isOpen} style={{ bottom: '30px' }}>
-                  pokrok
-                </Hint>
-                <p className="px-2 font-light">
-                  {(userStats?.practiceCountToday || 0) + index} / {config.practice.dailyGoal}
-                </p>
-                <Hint
-                  visibility={isOpen}
-                  style={{ bottom: '30px', right: '0' }}
-                  className="flex flex-col items-end"
-                >
-                  <p>počet procvičení</p>
-                  <p>/ denní cíl</p>
-                </Hint>
-              </div>
+                    <HelpText className="right-0 bottom-7.5 flex flex-col items-end">
+                      {TEXTS.today} / {TEXTS.dailyGoal}
+                    </HelpText>
+                  </div>
+                </>
+              )}
             </div>
             {/* Practice Controls */}
             <div id="practice-controls" className="relative flex flex-col gap-1">
+              {/** Top Row */}
               <div className="relative grid grid-cols-2 gap-1">
-                <Button onClick={() => fetchGrammar()} disabled={!grammar_id} className="relative">
-                  <BookIcon />
-                  <Indicator
-                    showDot={currentItem.is_initial_practice}
-                    className="absolute top-1 right-1"
-                  />
-                </Button>
-                <Hint visibility={isOpen} style={{ top: '0px', left: '14px' }}>
-                  gramatika
-                </Hint>
-                <Button
-                  onClick={() => {
-                    handleNext(config.progress.skipProgress);
+                <MasterItemButton
+                  onConfirm={() => {
+                    nextItem(config.progress.skipProgress);
+                    setCounter((prev) => prev + 1);
                   }}
-                  disabled={!revealed}
-                >
-                  <ForwardIcon />
-                </Button>
-                <Hint visibility={isOpen} style={{ top: '0px', right: '14px' }}>
-                  dokončit
-                </Hint>
+                  disabled={!revealed || showDirectionChange}
+                />
+                <PlayAudioButton
+                  onClick={handlePlayAudio}
+                  disabled={audioDisabled || showDirectionChange || audioLoading}
+                />
               </div>
-              {!revealed ? (
-                <div className="relative grid grid-cols-2 gap-1">
-                  <Button
-                    onClick={() => {
-                      setHintIndex((prevIndex) => prevIndex + 1);
-                      setShowPlayHint(false);
-                    }}
-                  >
-                    <BulbIcon />
-                  </Button>
-                  <Hint visibility={isOpen} style={{ top: '0px', left: '14px' }}>
-                    nápověda
-                  </Hint>
-                  <Button
-                    onClick={() => {
-                      if (showPlayHint) {
-                        setShowPlayHint(false);
-                      }
-                      setRevealed(true);
-                      if (direction) {
-                        playAudioForItem();
-                      }
-                      setHintIndex(() => 0);
-                    }}
-                  >
-                    <EyeIcon />
-                  </Button>
-                  <Hint visibility={isOpen} style={{ top: '0px', right: '14px' }}>
-                    odhalit
-                  </Hint>
-                </div>
-              ) : (
-                <div className="relative grid grid-cols-2 gap-1">
-                  <Button onClick={() => handleNext(config.progress.minusProgress)}>
-                    <MinusIcon />
-                  </Button>
-                  <Hint visibility={isOpen} style={{ top: '0px', left: '14px' }}>
-                    neznám
-                  </Hint>
-                  <Button onClick={() => handleNext(config.progress.plusProgress)}>
-                    <PlusIcon />
-                  </Button>
-                  <Hint visibility={isOpen} style={{ top: '0px', right: '14px' }}>
-                    znám
-                  </Hint>
-                </div>
-              )}
+              {/** Bottom Row */}
+              <div className="relative grid grid-cols-2 gap-1">
+                {!revealed ? (
+                  <>
+                    <GrammarButton
+                      onClick={() => handleGrammar(grammar_id)}
+                      disabled={!grammar_id || showDirectionChange}
+                    >
+                      {showNewGrammarIndicator && <Indicator className="absolute top-1 right-1" />}
+                    </GrammarButton>
+                    <HintButton onClick={plusHint} disabled={showDirectionChange} />
+                  </>
+                ) : (
+                  <>
+                    <RepeatButton
+                      onClick={() => {
+                        nextItem(config.progress.minusProgress);
+                        setCounter((prev) => prev + 1);
+                      }}
+                      disabled={showDirectionChange}
+                    />
+                    <KnownButton
+                      onClick={() => {
+                        nextItem(config.progress.plusProgress);
+                        setCounter((prev) => prev + 1);
+                      }}
+                      disabled={showDirectionChange}
+                    />
+                  </>
+                )}
+              </div>
             </div>
+
             <HelpButton className="help-btn-pos self-end" />
           </div>
         </>

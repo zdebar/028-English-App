@@ -1,10 +1,13 @@
-import { Entity } from 'dexie';
 import type AppDB from '@/database/models/app-db';
-import type { AudioMetadataLocal } from '@/types/local.types';
 import { db } from '@/database/models/db';
+import type { AudioMetadataLocal } from '@/types/local.types';
+import { Entity } from 'dexie';
 
 /**
- * Model for audio archive metadata.
+ * Represents metadata information for audio archives in the application database.
+ *
+ * @method isFetched - Checks if an audio archive has been fetched.
+ * @method markAsFetched - Marks an audio archive as fetched by storing its metadata.
  */
 export default class AudioMetadata extends Entity<AppDB> implements AudioMetadataLocal {
   archive_name!: string;
@@ -13,19 +16,15 @@ export default class AudioMetadata extends Entity<AppDB> implements AudioMetadat
   /**
    * Checks if an audio archive has already been fetched.
    * @param archiveName the name of the checked audio archive
-   * @returns true if the archive has been fetched, otherwise false
-   * @throws Error
+   * @returns true if the archive has been already fetched, otherwise false
    */
   static async isFetched(archiveName: string): Promise<boolean> {
-    const metadata = await db.audio_metadata.get(archiveName);
-    return !!metadata;
+    return !!(await db.audio_metadata.get(archiveName));
   }
 
   /**
    * Marks an audio archive as fetched by storing its metadata.
    * @param archiveName the name of the fetched audio archive
-   * @returns true if the operation was successful, otherwise false
-   * @throws Error
    */
   static async markAsFetched(archiveName: string): Promise<void> {
     await db.audio_metadata.put({

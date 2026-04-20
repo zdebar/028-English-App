@@ -1,8 +1,15 @@
-import Icon, { type IconProps } from "./Icon";
+import Icon, { type IconProps } from './Icon';
+import type { JSX } from 'react';
 
-export default function VolumeIcon(props: IconProps) {
+/**
+ * Volume Icon component.
+ *
+ * @param props IconProps to customize the icon.
+ * @returns The rendered icon element.
+ */
+export default function VolumeIcon(props: IconProps): JSX.Element {
   return (
-    <Icon size={20} {...props} strokeColor="color-text">
+    <Icon size={20} {...props} strokeColor="currentColor">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

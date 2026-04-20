@@ -1,8 +1,15 @@
-import Icon, { type IconProps } from "./Icon";
+import Icon, { type IconProps } from './Icon';
+import type { JSX } from 'react';
 
-export default function EyeIcon(props: IconProps) {
+/**
+ * Eye Icon component.
+ *
+ * @param props IconProps to customize the icon.
+ * @returns The rendered icon element.
+ */
+export default function EyeIcon(props: IconProps): JSX.Element {
   return (
-    <Icon strokeWidth={1.25} {...props}>
+    <Icon {...props} strokeWidth={1.25}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

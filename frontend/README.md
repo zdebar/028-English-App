@@ -1,106 +1,124 @@
-# Zdeněk Barth's English Learning App 0.1.0
+# Frontend Documentation
 
-## Description
+Frontend for the English Learning App.
 
-A personal learning app with focus on drill. Learning games are not working.
+This application is built as an offline-first practice client:
 
-## Git Guidelines
+- learning progress is stored locally in IndexedDB
+- synchronization keeps local and Supabase data aligned
+- UI is optimized for drill-based repetition workflows
 
-### Branching Strategies
+## Stack
 
-- **master**: Deployment branch  
-  ├── **0.1.0**: Development branch
+- React 19 + TypeScript
+- Vite 7
+- Tailwind CSS
+- Zustand (client state)
+- Dexie (IndexedDB)
+- Supabase JS client
+- Vitest + Testing Library
 
-### Commit Message Standard
+## Directory Layout
 
-Format: `<type>: <description>`
+`src/` high-level structure:
 
-#### Commit Types:
+- `components/`: reusable UI and app utility components
+- `features/`: domain modules (auth, practice, vocabulary, theme, help, sync, etc.)
+- `database/`: Dexie models, synchronization utilities, database hooks
+- `hooks/`: shared hooks
+- `pages/`: route/page composition
+- `types/`: application types
+- `utils/`: cross-domain helpers
+- `workers/`: worker-oriented logic
 
-- **feat**: New feature
-- **fix**: Bug fix
-- **docs**: Documentation updates
-- **style**: UI or design changes
-- **refactor**: Code refactoring
-- **chore**: Dependency or installation updates
-- **test**: Adding or updating tests
-- **perf**: Performance optimizations
-- **ios**: iOS-specific changes
-- **android**: Android-specific changes
+## Scripts
 
-### Styling Guide
+Run commands from `frontend/`:
 
-Vite File Structure: kebab-case (e.g., `use-fetch.ts`)  
-Database Table Names: snake_case (e.g., `user_items`)  
-IndexedDB Object Store Names: snake_case (e.g., `user_items`)  
-React & TypeScript: Hook `useFetch`, Component `PracticeCard`
+```bash
+npm run dev
+npm run build
+npm run preview
+npm run lint
+npm test
+npm run test:ui
+```
 
-## App Structure
+`npm run build` also executes service worker manifest injection via:
 
-### Frontend
+- `scripts/generate-sw.mjs`
 
-- **Build tool**: Vite
-- **Language**: TypeScript
-- **Framework**: React
-- **UI framework**: Tailwind CSS
-- **State management**: Zustand
-- **Database wrapper**: Dexie (for IndexedDB)
+## Environment
 
-### Backend
+Use `frontend/.env.local` for local configuration.
 
-- **Platform**: Supabase (BaaS)
-- **Authentication**: Supabase Auth
-- **Storage**: Supabase Storage
-- **Database**: PostgreSQL
+Typical required values:
 
-### Supabase PostgreSQL Database Structure
+- Supabase URL
+- Supabase anon key
 
-- **users**: Stores user id.
-- **items**: Stores practice items (vocabulary words and grammar sentences).
-- **grammar**: Stores grammar explanations.
-- **user_items**: Tracks user's items progress score, next practice date, etc.
-- **user_score**: Tracks daily practice scores for users.
+## Data Model (Conceptual)
 
-## Storage
+Main entities:
 
-Stores audio files zips. Separated into multiple batches. First one smaller to enable faster start.
+- `levels`
+- `lessons`
+- `items`
+- `grammar`
+- `user_items`
+- `user_scores`
 
-### IndexedDB Structure
+Important synchronization timestamps/flags:
 
-The app uses IndexedDb for locally storing data. It enables offline function as long as refresh toke lasts, and it limits server traffic.
+- `updated_at`
+- `started_at`
+- `next_at`
+- `mastered_at`
+- `deleted_at`
 
-Null for certains columns are replaced with nullReplacementDate or nullReplacementNumber. IndexedDB doesn't enables
+## Offline and Sync Strategy
 
-- **audio_metada**
-  - stores synced_at date for audio_records
-- **audio_records**
-  - store audio files
-- **metada**
-  - stores synced_at date for grammar, user_scores, user_items
-- **grammar**
-  - stores grammar explanation
-- **user_scores**
-  - stores user's daily practice
-- **user_items**
-  - stores all relevant information for practicing items. Basically merges backends "items" and "user_items" tables.
+1. Update local IndexedDB first for fast UI response.
+2. Push local changes to remote backend.
+3. Pull remote updates (delta or full sync).
+4. Keep user-visible state driven by local stores.
 
-### Features
+## PWA
 
-- **auth**: User management - register, sign in, sign out, delete user profile, via supabase auth
-- **dashboard**: Shows started items count
-- **gdpr**: GDPR
-- **grammar**: Grammar overview
-- **overlay**: global overlay screen
-- **practice**: Manages practice deck, and its logic
-- **theme**: Theming
-- **toast**: Notification Toasts
-- **vocabulary**: Vocabulary overview
+- Service worker source: `public/service-worker.js`
+- Web manifest: `public/manifest.json`
+- Precache list is injected at build time using Workbox.
 
-## Z-Guide Layering
+## Testing
 
-| z-index | Component   |
-| ------- | ----------- |
-| 20      | Header      |
-| 1000    | OverlayMask |
-| 1001    | Modal       |
-| 2000    | Hint        |
+Test files live close to feature/domain folders:
+
+- `src/**/tests/*.test.ts`
+- `src/**/tests/*.test.tsx`
+
+Recommended workflow:
+
+```bash
+npm test
+npm run lint
+```
+
+## Conventions
+
+- File naming: kebab-case for files where practical
+- React components: PascalCase
+- Hooks: `useXxx`
+- SQL/database names: snake_case
+
+## Roadmap Snapshot
+
+- stronger retry/error handling around network services
+- deeper accessibility improvements
+- synchronization and performance tuning
+- multilingual content expansion
+
+## Related Docs
+
+- project overview: `../README.md`
+- planning notes: `TODO.md`
+- default Vite template reference: `VITE.md`

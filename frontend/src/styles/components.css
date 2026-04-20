@@ -1,0 +1,43 @@
+@layer components {
+  /** GUIDE STYLES **/
+  .guide p {
+    @apply my-2;
+  }
+
+  .guide span {
+    @apply block pl-4;
+  }
+
+  .guide h2 {
+    @apply pt-4 text-center text-2xl font-bold;
+  }
+
+  .guide strong {
+    @apply pr-4;
+  }
+
+  /** CARD STYLES **/
+  .card-height {
+    @apply flex flex-col justify-start;
+  }
+
+  .card-width {
+    @apply max-w-card min-w-card w-full flex flex-col justify-start;
+  }
+
+  .card-height {
+    @apply max-h-card min-h-card h-full grow;
+  }
+
+
+}
+
+/** Grammar styles **/
+.grammar p{
+  @apply p-0 m-0;
+}
+
+/** Help Text styles */
+.help-text-span {
+  @apply w-15 inline-block;
+}

@@ -1,5 +1,6 @@
 import OverviewCard from '@/components/UI/OverviewCard';
 import DOMPurify from 'dompurify';
+import { TEXTS } from '@/locales/cs';
 
 export interface GrammarCardType {
   id: number;
@@ -21,15 +22,16 @@ type GrammarCardProps = {
  */
 export default function GrammarCard({ grammar, onClose }: GrammarCardProps) {
   return (
-    <OverviewCard titleText={grammar?.name} onClose={onClose}>
+    <OverviewCard buttonTitle={grammar?.name} onClose={onClose}>
       {grammar?.note ? (
         <div
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(grammar.note),
           }}
+          className="grammar"
         />
       ) : (
-        'Žádné poznámky k zobrazení.'
+        TEXTS.noNotesToDisplay
       )}
     </OverviewCard>
   );

@@ -1,25 +1,38 @@
-interface ToastProps {
-  message: string;
-  type?: 'success' | 'error' | 'info';
-}
+import { useToastStore, type ToastType } from './use-toast-store';
+import type { JSX, MouseEvent, ReactNode } from 'react';
 
-const typeStyles: Record<string, string> = {
-  success: 'bg-green-500 text-white',
-  error: 'bg-red-500 text-white',
-  info: 'bg-blue-500 text-white',
+const typeStyles: Record<ToastType, string> = {
+  success: 'bg-success-light',
+  error: 'bg-error-light',
+  info: 'bg-info-light',
 };
+
+interface ToastProps {
+  children?: ReactNode;
+  type?: ToastType;
+}
 
 /**
  * Toast component for displaying brief notification messages.
  *
- * @param message The message to display in the toast.
+ * @param children The content to display in the toast.
  * @param type The type of toast ("success", "error", or "info"). Defaults to "info".
  * @returns A styled toast notification element.
  */
-export default function Toast({ message, type = 'info' }: ToastProps) {
+export default function Toast({ children, type = 'info' }: ToastProps): JSX.Element {
+  const hideToast = useToastStore((state) => state.hideToast);
+
+  const handleClick = (event: MouseEvent<HTMLDivElement>) => {
+    event.stopPropagation();
+    hideToast();
+  };
+
   return (
-    <div className={`absolute top-0 right-0 z-50 px-4 py-2 ${typeStyles[type]}`}>
-      <span>{message}</span>
+    <div
+      className={`z-modal text-dark absolute top-0 right-0 px-4 py-2 ${typeStyles[type]}`}
+      onClick={handleClick}
+    >
+      {children}
     </div>
   );
 }

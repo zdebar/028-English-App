@@ -1,0 +1,44 @@
+@layer utilities {
+  /* COLORS */
+  .color-base {
+    @apply bg-background-light dark:bg-background-dark text-light dark:text-dark;
+  }
+
+  .color-audio-disabled {
+    @apply cursor-default;
+    @apply border-background-light dark:border-background-dark bg-inherit text-inherit;
+  }
+
+  .color-button {
+    @apply bg-button-light border-button-light;
+    @apply dark:bg-button-dark dark:border-button-dark;
+    @apply hover:brightness-103 hover:saturate-98 dark:hover:brightness-112;
+    @apply disabled:bg-inherit disabled:hover:bg-inherit;
+  }
+
+  .color-info {
+    @apply dark:text-new-progress-light text-black;
+  }
+
+    .color-link {
+    @apply dark:text-new-progress-light text-black hover:underline;
+  }
+
+  /* Z-INDEX LEVELS */
+  .z-header {
+    /* Header */
+    @apply z-50;
+  }
+  .z-overlay {
+    /* Overlay */
+    @apply z-100;
+  }
+
+  .z-help-text {
+    @apply z-200;
+  }
+  .z-modal {
+    /* Modal */
+    @apply z-300;
+  }
+}

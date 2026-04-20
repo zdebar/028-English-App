@@ -1,12 +1,15 @@
+import type { JSX } from 'react';
+
 interface IndicatorProps {
-  showDot?: boolean;
   className?: string;
 }
 
-export default function Indicator({ showDot = false, className = '' }: IndicatorProps) {
-  return (
-    <div className={`${className}`}>
-      {showDot && <span className={`h-3 w-3 rounded-full bg-green-500`} aria-label="New" />}
-    </div>
-  );
+/**
+ * A component that renders a dot indicator.
+ *
+ * @param className Additional CSS classes to apply to the indicator. Defaults to an empty string.
+ * @returns The rendered indicator element.
+ */
+export default function Indicator({ className = '' }: IndicatorProps): JSX.Element {
+  return <span className={`size-indicator bg-indicator rounded-full ${className}`} />;
 }

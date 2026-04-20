@@ -1,69 +1,108 @@
-import { useAuthStore } from '@/features/auth/use-auth-store';
-import Dashboard from '@/features/dashboard/Dashboard';
 import PropertyView from '@/components/UI/PropertyView';
+import { supabaseInstance } from '@/config/supabase.config';
+import { useAuthStore } from '@/features/auth/use-auth-store';
+import Dashboard from '@/components/UI/Dashboard';
+import { useThemeStore } from '@/features/theme/use-theme-store';
+import { useUserStore } from '@/features/user-stats/use-user-store';
+import { TEXTS } from '@/locales/cs';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
-import { supabaseInstance } from '@/config/supabase.config';
-import { useThemeStore } from '@/features/theme/use-theme';
-import PrivacyPolicyLink from '@/features/gdpr/PrivacyPolicyLink';
+import { useMemo, type JSX } from 'react';
+import { Link } from 'react-router-dom';
+import config from '@/config/config';
+import Notification from '@/components/UI/Notification';
+import GoalMetView from '@/components/UI/GoalMetView';
+import { InstallPWAButton } from '@/features/pwa/InstallPwaButton';
+import { useSyncWarningStore } from '@/features/sync-warning/use-sync-warning';
 
-export default function Home() {
-  const { theme } = useThemeStore();
-  const { userId, userEmail } = useAuthStore();
+/**
+ * The Home component renders the main page of the application.
+ *
+ * @returns The JSX element representing the Home page.
+ */
+export default function Home(): JSX.Element {
+  const theme = useThemeStore((state) => state.theme);
+  const userId = useAuthStore((state) => state.userId);
+  const userFullName = useAuthStore((state) => state.userFullName);
+  const userEmail = useAuthStore((state) => state.userEmail);
+  const dailyCount = useUserStore((state) => state.dailyCount);
+  const isSynchronized = useSyncWarningStore((state) => state.isSynchronized);
+  const dailyGoal = config.practice.dailyGoal;
+  const userDisplayName = userFullName || userEmail;
+
+  const authAppearance = useMemo(
+    () => ({
+      theme: ThemeSupa,
+      style: { button: { width: '100%', borderRadius: '0px' } },
+      variables: {
+        default: {
+          colors:
+            theme === 'dark'
+              ? {
+                  messageText: 'white',
+                  defaultButtonText: 'black',
+                  anchorTextColor: 'white',
+                  messageTextDanger: 'red',
+                  inputLabelText: 'white',
+                  brand: 'green',
+                  brandAccent: 'green',
+                  inputBorder: 'white',
+                }
+              : {
+                  messageText: 'black',
+                  defaultButtonText: 'black',
+                  anchorTextColor: 'black',
+                  messageTextDanger: 'red',
+                  inputLabelText: 'black',
+                  brand: 'green',
+                  brandAccent: 'green',
+                  inputBorder: 'black',
+                },
+        },
+      },
+    }),
+    [theme],
+  );
 
   return (
-    <div className="max-w-hero relative flex w-full flex-col items-center justify-start gap-4 text-center">
-      <h1 className="pt-12 pb-6 landscape:pt-6">Angličtina</h1>
-      <p className="text-notice color-notice">Aplikace v testovacím režimu</p>
-      <p className="px-4">
-        Trénujte až 200 vět za 20 minut denně, a dosáhněte základní znalosti jazyka za zlomek
-        běžného učebního času.
-      </p>
+    <div className="max-w-hero relative flex w-full flex-col text-center">
+      <h1 className="my-8">{TEXTS.appTitle}</h1>
+      <InstallPWAButton className="my-2 px-4" />
 
-      {!userId ? (
-        <div className="w-full">
+      <p className="px-4">{TEXTS.appDescription}</p>
+      <p className="text-error-light dark:text-error-dark">{TEXTS.appTestDescription}</p>
+      <Link to="/guide" className="my-">
+        <Notification className="color-link">{TEXTS.guide}</Notification>
+      </Link>
+
+      {userId ? (
+        <div className="relative mt-8 flex w-full flex-col">
+          <div className="px-4">
+            <PropertyView label={TEXTS.userLabel}>{userDisplayName}</PropertyView>
+            <PropertyView
+              label={TEXTS.userStatsLabel}
+              title={`${TEXTS.today} / ${TEXTS.dailyGoal}`}
+            >
+              {GoalMetView({ current: dailyCount, goal: dailyGoal })}
+            </PropertyView>
+          </div>
+          {!isSynchronized && (
+            <p className="text-error-light dark:text-error-dark px-4 text-left text-sm pt-2">
+              {TEXTS.syncWarning}
+            </p>
+          )}
+          <Dashboard className="pt-4" />
+        </div>
+      ) : (
+        <div className="mt-8 w-full">
           <Auth
             supabaseClient={supabaseInstance}
-            appearance={{
-              theme: ThemeSupa,
-              style: { button: { width: '100%', borderRadius: '0px' } },
-              variables: {
-                default: {
-                  colors:
-                    theme === 'dark'
-                      ? {
-                          messageText: 'white',
-                          defaultButtonText: 'black',
-                          anchorTextColor: 'white',
-                          messageTextDanger: 'red',
-                          inputLabelText: 'white',
-                          brand: 'green',
-                          brandAccent: 'green',
-                          inputBorder: 'white',
-                        }
-                      : {
-                          messageText: 'black',
-                          defaultButtonText: 'black',
-                          anchorTextColor: 'black',
-                          messageTextDanger: 'red',
-                          inputLabelText: 'black',
-                          brand: 'green',
-                          brandAccent: 'green',
-                          inputBorder: 'black',
-                        },
-                },
-              },
-            }}
+            appearance={authAppearance}
             providers={['google']}
             onlyThirdPartyProviders
             queryParams={{ prompt: 'select_account' }}
           />
-          <PrivacyPolicyLink />
-        </div>
-      ) : (
-        <div className="relative flex w-full flex-col gap-1">
-          <PropertyView label="Uživatel:" className="h-input" value={userEmail} />
-          <Dashboard />
+          <p className="px-4 text-sm">{TEXTS.signupHint}</p>
         </div>
       )}
     </div>

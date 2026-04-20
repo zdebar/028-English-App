@@ -1,15 +1,15 @@
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { Navigate, Outlet } from 'react-router-dom';
-import Loading from '@/components/UI/Loading';
 
 /**
  * Layout component that protects routes by checking user authentication.
  */
 export default function ProtectedLayout() {
-  const { userId, loading } = useAuthStore();
+  const userId = useAuthStore((state) => state.userId);
+  const loading = useAuthStore((state) => state.loading);
 
   if (loading) {
-    return <Loading />;
+    return null;
   }
 
   if (!userId) {

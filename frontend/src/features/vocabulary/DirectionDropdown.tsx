@@ -1,4 +1,7 @@
-import { useMemo } from 'react';
+import { TEXTS } from '@/locales/cs';
+import { useEffect, useMemo } from 'react';
+import { errorHandler } from '../logging/error-handler';
+import BaseButton from '@/components/UI/buttons/BaseButton';
 
 interface DirectionDropdownProps<T> {
   value: T;
@@ -10,14 +13,14 @@ interface DirectionDropdownProps<T> {
 /**
  * DirectionDropdown Component
  *
- * A generic, reusable dropdown component for selecting a direction or option.
+ * A generic, reusable toggle button component for switching between two directions.
  *
  * @template T - The type of the option values.
  * @param value - The currently selected value.
  * @param options - Array of selectable options, each with a value and label.
  * @param onChange - Callback invoked when the selected value changes.
  * @param className - Optional additional CSS classes for custom styling.
- * @returns A styled dropdown select element for choosing among provided options.
+ * @returns A styled button that toggles between exactly two provided options.
  */
 export default function DirectionDropdown<T>({
   value,
@@ -25,34 +28,56 @@ export default function DirectionDropdown<T>({
   onChange,
   className = '',
 }: DirectionDropdownProps<T>) {
-  if (!options.some((option) => option.value === value)) {
-    console.warn(`Hodnota "${value}" není platná pro DirectionDropdown.`);
-  }
+  const currentIndex = useMemo(() => {
+    return options.findIndex((option) => String(option.value) === String(value));
+  }, [options, value]);
 
-  const memoizedOptions = useMemo(() => {
-    return options.map((option) => (
-      <option key={String(option.value)} value={String(option.value)}>
-        {option.label}
-      </option>
-    ));
-  }, [options]);
+  useEffect(() => {
+    if (options.length !== 2) {
+      errorHandler(
+        `DirectionDropdown expects exactly 2 options, received ${options.length}.`,
+        new Error('Invalid toggle options count'),
+      );
+      return;
+    }
+
+    if (currentIndex !== -1) return;
+
+    errorHandler(
+      `Value "${value}" is not valid for DirectionDropdown.`,
+      new Error('Invalid dropdown value'),
+    );
+  }, [currentIndex, options, value]);
+
+  const currentOption = currentIndex >= 0 ? options[currentIndex] : options[0];
+  const nextOption =
+    options.length === 2 && currentIndex !== -1 ? options[(currentIndex + 1) % 2] : undefined;
 
   return (
-    <div className={`centered ${className} border-none`}>
-      <label htmlFor="direction-dropdown" className="sr-only">
-        Směr
+    <div className={`centered border-none ${className}`} title={TEXTS.translationDirection}>
+      <label htmlFor="direction-toggle" className="sr-only">
+        {TEXTS.translationDirection}
       </label>
-      <select
-        id="direction-dropdown"
+      <BaseButton
+        id="direction-toggle"
         name="direction"
-        value={String(value)}
-        onChange={(e) =>
-          onChange(options.find((o) => String(o.value) === e.target.value)?.value as T)
-        }
-        className="h-button color-select w-full px-3"
+        type="button"
+        title={TEXTS.translationDirection}
+        onClick={() => {
+          if (!nextOption) {
+            errorHandler(
+              'Cannot toggle DirectionDropdown: options are not valid.',
+              new Error('Invalid toggle state'),
+            );
+            return;
+          }
+
+          onChange(nextOption.value);
+        }}
+        className="h-full"
       >
-        {memoizedOptions}
-      </select>
+        {currentOption?.label ?? TEXTS.translationDirection}
+      </BaseButton>
     </div>
   );
 }
