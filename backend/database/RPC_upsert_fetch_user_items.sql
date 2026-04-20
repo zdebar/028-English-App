@@ -40,16 +40,16 @@ BEGIN
     RAISE EXCEPTION 'p_user_id must match auth.uid()';
   END IF;
 
+
   IF p_user_items IS NOT NULL AND p_user_items <> '[]'::JSONB THEN
-    SELECT (entry->>'user_id')::UUID
-      INTO v_payload_user_id
+    -- Validate every user_id in p_user_items matches p_user_id
+    IF EXISTS (
+      SELECT 1
       FROM jsonb_array_elements(p_user_items) AS entry
-      LIMIT 1;
-
-    IF v_payload_user_id IS DISTINCT FROM p_user_id THEN
-      RAISE EXCEPTION 'p_user_id does not match p_user_items user_id';
+      WHERE (entry->>'user_id')::UUID IS DISTINCT FROM p_user_id
+    ) THEN
+      RAISE EXCEPTION 'p_user_id does not match at least one user_id in p_user_items';
     END IF;
-
     PERFORM public.upsert_user_items(p_user_items);
   END IF;
 

@@ -2,10 +2,10 @@ import Icon, { type IconProps } from './Icon';
 import type { JSX } from 'react';
 
 /**
- * Minus Icon component.
+ * Repeat Icon component.
  *
  * @param props IconProps to customize the icon.
- * @returns The rendered icon element.
+ * @returns The rendered RepeatIcon element.
  */
 export default function RepeatIcon(props: IconProps): JSX.Element {
   return (

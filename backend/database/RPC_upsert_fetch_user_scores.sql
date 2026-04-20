@@ -31,15 +31,14 @@ BEGIN
   END IF;
 
   IF p_user_scores IS NOT NULL AND p_user_scores <> '[]'::JSONB THEN
-    SELECT (entry->>'user_id')::UUID
-      INTO v_payload_user_id
+    -- Validate every user_id in p_user_scores matches p_user_id
+    IF EXISTS (
+      SELECT 1
       FROM jsonb_array_elements(p_user_scores) AS entry
-      LIMIT 1;
-
-    IF v_payload_user_id IS DISTINCT FROM p_user_id THEN
-      RAISE EXCEPTION 'p_user_id does not match p_user_scores user_id';
+      WHERE (entry->>'user_id')::UUID IS DISTINCT FROM p_user_id
+    ) THEN
+      RAISE EXCEPTION 'p_user_id does not match at least one user_id in p_user_scores';
     END IF;
-
     PERFORM public.upsert_user_scores(p_user_scores);
   END IF;
 

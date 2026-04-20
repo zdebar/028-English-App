@@ -2,10 +2,10 @@ import Icon, { type IconProps } from './Icon';
 import type { JSX } from 'react';
 
 /**
- * Plus Icon component.
+ * Right Arrow Icon component.
  *
  * @param props IconProps to customize the icon.
- * @returns The rendered icon element.
+ * @returns The rendered RightArrowIcon element.
  */
 export default function RightArrowIcon(props: IconProps): JSX.Element {
   return (
