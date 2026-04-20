@@ -1,5 +1,5 @@
 import { useToastStore, type ToastType } from './use-toast-store';
-import type { JSX, ReactNode } from 'react';
+import type { JSX, MouseEvent, ReactNode } from 'react';
 
 const typeStyles = {
   success: 'bg-success-light',
@@ -22,11 +22,16 @@ type ToastProps = {
 export default function Toast({ children, type = 'info' }: ToastProps): JSX.Element {
   const hideToast = useToastStore((state) => state.hideToast);
 
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    hideToast();
+  };
+
   return (
     <button
       type="button"
       className={`z-modal text-dark absolute top-0 right-0 cursor-pointer px-4 py-2 ${typeStyles[type]}`}
-      onClick={hideToast}
+      onClick={handleClick}
     >
       {children}
     </button>

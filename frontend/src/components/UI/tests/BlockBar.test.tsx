@@ -32,10 +32,11 @@ describe('BlockBar', () => {
     expect(screen.getByText('To Be')).toBeTruthy();
     expect(screen.getByText('+ 5')).toBeTruthy();
 
-    const progressBar = screen.getByRole('progressbar', { name: 'Lesson progress bar' });
-    expect(progressBar.getAttribute('aria-valuenow')).toBe('25');
-    expect(progressBar.getAttribute('aria-valuemin')).toBe('0');
-    expect(progressBar.getAttribute('aria-valuemax')).toBe('100');
+    const progressBar = screen.getByRole('progressbar', {
+      name: 'Lesson progress bar',
+    }) as HTMLProgressElement;
+    expect(progressBar.value).toBe(25);
+    expect(progressBar.max).toBe(100);
   });
 
   it('hides today increment when today count is zero', () => {
