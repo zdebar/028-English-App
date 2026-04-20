@@ -2,7 +2,7 @@ import eng_to_ipa as ipa
 
 import pandas as pd
 
-async def fill_pronunciation_eng_to_ipa(df: pd.DataFrame) -> pd.DataFrame:
+def fill_pronunciation_eng_to_ipa(df: pd.DataFrame) -> pd.DataFrame:
     """
     Fill the 'pronunciation' column in the DataFrame using eng_to_ipa for English words.
     """
@@ -14,7 +14,7 @@ async def fill_pronunciation_espeak_ng(df, lang="en-us"):
     async def get_pron(word):
         try:
             if word:
-                return await get_IPA_pronunciation(word.replace(",", ""), lang)
+                return await get_ipa_pronunciation(word.replace(",", ""), lang)
             else:
                 return ""
         except Exception as e:
@@ -24,7 +24,7 @@ async def fill_pronunciation_espeak_ng(df, lang="en-us"):
     df["pronunciation"] = pronunciations
     return df
 
-async def get_IPA_pronunciation(word: str, accent: str) -> str | None:
+async def get_ipa_pronunciation(word: str, accent: str) -> str | None:
     """
     Gets IPA pronunciation of the word using espeak-ng. Works with espeak_ng installed in predefined location.
 
