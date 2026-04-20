@@ -1,16 +1,16 @@
 import { useToastStore, type ToastType } from './use-toast-store';
-import type { JSX, MouseEvent, ReactNode } from 'react';
+import type { JSX, ReactNode } from 'react';
 
-const typeStyles: Record<ToastType, string> = {
+const typeStyles = {
   success: 'bg-success-light',
   error: 'bg-error-light',
   info: 'bg-info-light',
 };
 
-interface ToastProps {
-  children?: ReactNode;
-  type?: ToastType;
-}
+type ToastProps = {
+  readonly children?: ReactNode;
+  readonly type?: ToastType;
+};
 
 /**
  * Toast component for displaying brief notification messages.
@@ -22,17 +22,13 @@ interface ToastProps {
 export default function Toast({ children, type = 'info' }: ToastProps): JSX.Element {
   const hideToast = useToastStore((state) => state.hideToast);
 
-  const handleClick = (event: MouseEvent<HTMLDivElement>) => {
-    event.stopPropagation();
-    hideToast();
-  };
-
   return (
-    <div
-      className={`z-modal text-dark absolute top-0 right-0 px-4 py-2 ${typeStyles[type]}`}
-      onClick={handleClick}
+    <button
+      type="button"
+      className={`z-modal text-dark absolute top-0 right-0 cursor-pointer px-4 py-2 ${typeStyles[type]}`}
+      onClick={hideToast}
     >
       {children}
-    </div>
+    </button>
   );
 }
