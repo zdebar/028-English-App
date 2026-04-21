@@ -20,22 +20,17 @@ const NBSP = '\u00A0';
  *  - `from english to czech` - reveal english (with hintFirst), then czech (with hintSecond)
  */
 export function useHint(czech: string = '', english: string = '') {
-  const czechText = czech ?? '';
-  const englishText = english ?? '';
-
   const [index, setIndex] = useState(0);
 
   const plusHint = useCallback(() => {
     setIndex((prev) => prev + 1);
   }, []);
 
-  const englishLength = englishText.length;
-  const czechLength = czechText.length;
-  const englishRevealedLength = Math.min(index, englishLength);
-  const czechRevealedLength = Math.min(Math.max(index - englishLength, 0), czechLength);
+  const englishRevealedLength = Math.min(index, english.length);
+  const czechRevealedLength = Math.min(Math.max(index - english.length, 0), czech.length);
 
-  const englishHinted = englishText ? englishText.slice(0, englishRevealedLength) || NBSP : NBSP;
-  const czechHinted = czechText ? czechText.slice(0, czechRevealedLength) || NBSP : NBSP;
+  const englishHinted = english.slice(0, englishRevealedLength) || NBSP;
+  const czechHinted = czech.slice(0, czechRevealedLength) || NBSP;
 
   const resetHint = useCallback(() => {
     setIndex(0);
