@@ -2,16 +2,16 @@ import { supabaseInstance } from '@/config/supabase.config';
 import Metadata from '@/database/models/metadata';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
-import { TableName } from '@/types/local.types';
+import { clearSyncTimes } from '@/database/utils/sync-time.utils';
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import { errorHandler } from '@/features/logging/error-handler';
+import { logRejectedResults } from '@/features/logging/logging.utils.ts';
+import ModalButton from '@/features/modal/ModalButton';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
+import { TableName } from '@/types/local.types';
 import { type JSX } from 'react';
-import ModalButton from '@/features/modal/ModalButton';
-import { errorHandler } from '../logging/error-handler';
 import { useThemeStore } from '../theme/use-theme-store';
-import { clearSyncTimes } from '@/database/utils/sync-time.utils';
-import { logRejectedResults } from '@/features/logging/logging.utils.ts';
 
 type DeleteUserButtonProps = Readonly<{
   className?: string;
@@ -25,6 +25,7 @@ type DeleteUserButtonProps = Readonly<{
  */
 export default function DeleteUserButton({ className }: DeleteUserButtonProps): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
+  const handleLogout = useAuthStore((state) => state.handleLogout);
   const showToast = useToastStore((state) => state.showToast);
   const clearTheme = useThemeStore((state) => state.clearTheme);
   const saveCurrentThemeAsGuest = useThemeStore((state) => state.saveCurrentThemeAsGuest);
@@ -53,6 +54,7 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
         throw new Error(deleteError.message);
       }
 
+      await handleLogout({ skipSync: true, skipRemoteSignOut: true });
       showToast(TEXTS.deleteUserSuccessToast, 'success');
     } catch (error) {
       showToast(TEXTS.deleteUserErrorToast, 'error');

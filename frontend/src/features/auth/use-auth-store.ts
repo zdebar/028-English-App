@@ -9,7 +9,11 @@ interface AuthState {
   userFullName: string | null;
   loading: boolean;
   initializeAuth: () => () => void;
-  handleLogout: () => Promise<void>;
+  handleLogout: (options?: {
+    skipSync?: boolean;
+    scope?: 'global' | 'local';
+    skipRemoteSignOut?: boolean;
+  }) => Promise<void>;
 }
 
 const INITIAL_AUTH_STATE = {
@@ -76,13 +80,20 @@ export const useAuthStore = create<AuthState>((set) => {
       };
     },
 
-    handleLogout: async () => {
+    handleLogout: async (options) => {
       const currentUserId = useAuthStore.getState().userId;
-      if (currentUserId) {
+      if (currentUserId && !options?.skipSync) {
         await dataSyncOnUnmount(currentUserId);
       }
 
-      const { error } = await supabaseInstance.auth.signOut();
+      if (options?.skipRemoteSignOut) {
+        clearSession();
+        return;
+      }
+
+      const { error } = await supabaseInstance.auth.signOut({
+        scope: options?.scope ?? 'global',
+      });
       if (error) {
         throw new Error(error.message);
       }

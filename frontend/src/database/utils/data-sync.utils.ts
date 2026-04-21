@@ -15,10 +15,8 @@ import Dexie from 'dexie';
 import Metadata from '../models/metadata';
 import { infoHandler } from '@/features/logging/info-handler';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
-import {
-  triggerDailyCountUpdatedEvent,
-  triggerLevelsUpdatedEvent,
-} from '@/utils/dashboard.utils';
+import { supabaseInstance } from '@/config/supabase.config';
+import { triggerDailyCountUpdatedEvent, triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 
 /**
  * Synchronizes data for a specific user with the database.
@@ -102,6 +100,11 @@ export async function audioSync(userId: string, downloadAll: boolean = false): P
  */
 export async function dataSyncOnUnmount(userId: string): Promise<void> {
   assertNonEmptyString(userId, 'userId');
+
+  const { data: sessionData } = await supabaseInstance.auth.getSession();
+  if (!sessionData.session) {
+    return;
+  }
 
   const results = await Promise.allSettled([
     UserScore.syncFromRemote(userId, false),

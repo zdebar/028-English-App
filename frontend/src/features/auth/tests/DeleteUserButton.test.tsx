@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   userId: 'u1' as string | null,
+  handleLogout: vi.fn(),
   showToast: vi.fn(),
   clearTheme: vi.fn(),
   saveCurrentThemeAsGuest: vi.fn(),
@@ -16,8 +17,12 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@/features/auth/use-auth-store', () => ({
-  useAuthStore: (selector: (state: { userId: string | null }) => unknown) =>
-    selector({ userId: mocks.userId }),
+  useAuthStore: (
+    selector: (state: {
+      userId: string | null;
+      handleLogout: typeof mocks.handleLogout;
+    }) => unknown,
+  ) => selector({ userId: mocks.userId, handleLogout: mocks.handleLogout }),
 }));
 
 vi.mock('@/features/toast/use-toast-store', () => ({
@@ -99,7 +104,7 @@ vi.mock('@/features/modal/ModalButton', () => ({
   ),
 }));
 
-import DeleteUserButton from '@/features/auth/DeleteUserButton';
+import DeleteUserButton from '../DeleteUserButton';
 
 describe('DeleteUserButton', () => {
   beforeEach(() => {
@@ -113,6 +118,7 @@ describe('DeleteUserButton', () => {
     mocks.clearTheme.mockResolvedValue(undefined);
     mocks.saveCurrentThemeAsGuest.mockReturnValue(undefined);
     mocks.clearSyncTimes.mockReturnValue(undefined);
+    mocks.handleLogout.mockResolvedValue(undefined);
     mocks.signOut.mockResolvedValue({ error: null });
   });
 
@@ -133,6 +139,10 @@ describe('DeleteUserButton', () => {
       expect(mocks.saveCurrentThemeAsGuest).toHaveBeenCalled();
       expect(mocks.invoke).toHaveBeenCalledWith('delete-user', {
         body: { userId: 'u1' },
+      });
+      expect(mocks.handleLogout).toHaveBeenCalledWith({
+        skipSync: true,
+        skipRemoteSignOut: true,
       });
       expect(mocks.showToast).toHaveBeenCalledWith('Delete success', 'success');
     });
