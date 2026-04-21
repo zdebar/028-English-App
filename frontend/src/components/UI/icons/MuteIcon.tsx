@@ -7,7 +7,7 @@ import type { JSX } from 'react';
  * @param props IconProps to customize the icon.
  * @returns The rendered icon element.
  */
-export default function MuteIcon(props: IconProps): JSX.Element {
+export default function MuteIcon(props: Readonly<IconProps>): JSX.Element {
   return (
     <Icon {...props} size={20}>
       <path

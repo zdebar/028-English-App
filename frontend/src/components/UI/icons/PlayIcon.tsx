@@ -7,7 +7,7 @@ import type { JSX } from 'react';
  * @param props IconProps to customize the icon.
  * @returns The rendered icon element.
  */
-export default function PlayIcon(props: IconProps): JSX.Element {
+export default function PlayIcon(props: Readonly<IconProps>): JSX.Element {
   return (
     <Icon {...props} strokeWidth={1.25}>
       <path

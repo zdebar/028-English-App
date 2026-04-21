@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({
   audioSyncFromRemote: vi.fn(),
   triggerDailyCountUpdatedEvent: vi.fn(),
   triggerLevelsUpdatedEvent: vi.fn(),
+  getSession: vi.fn(),
 }));
 
 vi.mock('@/config/config', () => ({
@@ -92,6 +93,14 @@ vi.mock('@/database/models/db', () => ({
   },
 }));
 
+vi.mock('@/config/supabase.config', () => ({
+  supabaseInstance: {
+    auth: {
+      getSession: (...args: unknown[]) => mocks.getSession(...args),
+    },
+  },
+}));
+
 vi.mock('@/utils/dashboard.utils', () => ({
   triggerDailyCountUpdatedEvent: (...args: unknown[]) =>
     mocks.triggerDailyCountUpdatedEvent(...args),
@@ -115,6 +124,7 @@ describe('data-sync.utils', () => {
     mocks.levelsSyncFromRemote.mockResolvedValue(undefined);
     mocks.lessonsSyncFromRemote.mockResolvedValue(undefined);
     mocks.audioSyncFromRemote.mockResolvedValue(undefined);
+    mocks.getSession.mockResolvedValue({ data: { session: { user: { id: 'u1' } } }, error: null });
   });
 
   it('dataSync runs full sync and stores full sync time', async () => {
@@ -160,6 +170,15 @@ describe('data-sync.utils', () => {
 
     expect(mocks.userScoreSyncFromRemote).toHaveBeenCalledWith('u1', false);
     expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', false);
+  });
+
+  it('dataSyncOnUnmount does nothing when no auth session exists', async () => {
+    mocks.getSession.mockResolvedValue({ data: { session: null }, error: null });
+
+    await dataSyncOnUnmount('u1');
+
+    expect(mocks.userScoreSyncFromRemote).not.toHaveBeenCalled();
+    expect(mocks.userItemSyncFromRemote).not.toHaveBeenCalled();
   });
 
   it('splitDeleted splits records into upsert and delete groups', () => {

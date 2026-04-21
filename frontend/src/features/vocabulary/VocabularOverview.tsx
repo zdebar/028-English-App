@@ -13,6 +13,7 @@ import Notification from '@/components/UI/Notification';
 import { TEXTS } from '@/locales/cs';
 import { filterSortedWords } from './vocabulary.utils';
 import { useToastStore } from '../toast/use-toast-store';
+import { errorHandler } from '../logging/error-handler';
 
 const INITIAL_VISIBLE_COUNT = config.vocabulary.itemsPerPage;
 
@@ -63,10 +64,11 @@ export default function VocabularyOverview() {
     try {
       await UserItem.resetItemById(userId, itemId);
       setSelectedWord(null);
-      void reload();
+      reload();
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (error) {
       showToast(TEXTS.resetProgressErrorToast, 'error');
+      errorHandler('Reset User Item Error', error);
     }
   }, [selectedWord, userId, reload, showToast]);
 

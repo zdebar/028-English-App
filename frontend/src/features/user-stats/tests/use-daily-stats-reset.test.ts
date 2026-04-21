@@ -72,7 +72,7 @@ describe('useDailyStatsReset', () => {
   });
 
   it('cleans up interval on unmount', () => {
-    const clearIntervalSpy = vi.spyOn(window, 'clearInterval');
+    const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval');
 
     const { unmount } = renderHook(() => useDailyStatsReset('u1'));
     unmount();

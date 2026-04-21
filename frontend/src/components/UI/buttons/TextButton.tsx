@@ -1,9 +1,9 @@
-interface TextButtonProps {
+type TextButtonProps = Readonly<{
   onClick: () => void;
   title?: string;
   children?: React.ReactNode;
   className?: string;
-}
+}>;
 
 /**
  * A styled button component for toggling mastered state.

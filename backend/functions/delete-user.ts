@@ -3,7 +3,12 @@
 // Requires Authorization: Bearer <user access token> header
 // Only allows a user to delete their own account (userId === authenticated user's id)
 
-import { CORS_HEADERS } from "../shared/constants.ts";
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers":
+    "authorization, content-type, x-client-info, apikey",
+};
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -93,7 +98,6 @@ Deno.serve(async (req: Request) => {
       headers: {
         ...CORS_HEADERS,
         "Content-Type": "application/json",
-        Connection: "keep-alive",
       },
     });
   }
@@ -112,7 +116,6 @@ Deno.serve(async (req: Request) => {
           headers: {
             ...CORS_HEADERS,
             "Content-Type": "application/json",
-            Connection: "keep-alive",
           },
         },
       );
@@ -124,7 +127,6 @@ Deno.serve(async (req: Request) => {
         headers: {
           ...CORS_HEADERS,
           "Content-Type": "application/json",
-          Connection: "keep-alive",
         },
       });
     }
@@ -139,7 +141,6 @@ Deno.serve(async (req: Request) => {
         headers: {
           ...CORS_HEADERS,
           "Content-Type": "application/json",
-          Connection: "keep-alive",
         },
       });
     }
@@ -153,7 +154,6 @@ Deno.serve(async (req: Request) => {
           headers: {
             ...CORS_HEADERS,
             "Content-Type": "application/json",
-            Connection: "keep-alive",
           },
         },
       );
@@ -171,7 +171,6 @@ Deno.serve(async (req: Request) => {
           headers: {
             ...CORS_HEADERS,
             "Content-Type": "application/json",
-            Connection: "keep-alive",
           },
         },
       );
@@ -185,7 +184,6 @@ Deno.serve(async (req: Request) => {
           headers: {
             ...CORS_HEADERS,
             "Content-Type": "application/json",
-            Connection: "keep-alive",
           },
         },
       );
@@ -199,7 +197,6 @@ Deno.serve(async (req: Request) => {
           headers: {
             ...CORS_HEADERS,
             "Content-Type": "application/json",
-            Connection: "keep-alive",
           },
         },
       );
@@ -217,7 +214,6 @@ Deno.serve(async (req: Request) => {
           headers: {
             ...CORS_HEADERS,
             "Content-Type": "application/json",
-            Connection: "keep-alive",
           },
         },
       );
@@ -232,7 +228,6 @@ Deno.serve(async (req: Request) => {
           headers: {
             ...CORS_HEADERS,
             "Content-Type": "application/json",
-            Connection: "keep-alive",
           },
         },
       );
@@ -243,7 +238,6 @@ Deno.serve(async (req: Request) => {
       headers: {
         ...CORS_HEADERS,
         "Content-Type": "application/json",
-        Connection: "keep-alive",
       },
     });
   } catch (err) {
@@ -252,7 +246,6 @@ Deno.serve(async (req: Request) => {
       headers: {
         ...CORS_HEADERS,
         "Content-Type": "application/json",
-        Connection: "keep-alive",
       },
     });
   }

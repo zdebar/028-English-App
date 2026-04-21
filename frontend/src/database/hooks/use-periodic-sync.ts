@@ -27,8 +27,8 @@ export function usePeriodicSync(userId: string | null) {
   const [loading, setLoading] = useState(false);
   const inFlightSync = useRef<Promise<void> | null>(null);
   const isDisposed = useRef(false);
-  const intervalId = useRef<NodeJS.Timeout | null>(null);
-  const initialSyncTimeoutId = useRef<number | null>(null);
+  const intervalId = useRef<ReturnType<typeof setInterval> | null>(null);
+  const initialSyncTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showToast = useToastStore((state) => state.showToast);
   const setSynchronized = useSyncWarningStore((state) => state.setSynchronized);
@@ -71,7 +71,7 @@ export function usePeriodicSync(userId: string | null) {
     };
 
     // Defer the first heavy sync to keep startup render path short (better FCP/LCP).
-    initialSyncTimeoutId.current = window.setTimeout(() => {
+    initialSyncTimeoutId.current = globalThis.setTimeout(() => {
       void runSync();
     }, 3000);
     intervalId.current = setInterval(runSync, config.sync.periodicSyncInterval);
@@ -79,7 +79,7 @@ export function usePeriodicSync(userId: string | null) {
     return () => {
       isDisposed.current = true;
       if (initialSyncTimeoutId.current) {
-        window.clearTimeout(initialSyncTimeoutId.current);
+        globalThis.clearTimeout(initialSyncTimeoutId.current);
       }
       if (intervalId.current) clearInterval(intervalId.current);
       if (userId) {

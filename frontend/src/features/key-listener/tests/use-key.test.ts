@@ -25,7 +25,7 @@ describe('useKey', () => {
     renderHook(() => useKey({ onKeyPress, keys: ['Enter'] }));
 
     act(() => {
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
     });
 
     expect(onKeyPress).toHaveBeenCalledTimes(1);
@@ -37,7 +37,7 @@ describe('useKey', () => {
     renderHook(() => useKey({ onKeyPress, keys: ['Enter'] }));
 
     act(() => {
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
     });
 
     expect(onKeyPress).not.toHaveBeenCalled();
@@ -49,11 +49,11 @@ describe('useKey', () => {
     renderHook(() => useKey({ onKeyPress, keys: ['Enter', 'Space'] }));
 
     act(() => {
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
     });
 
     act(() => {
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Space' }));
+      globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'Space' }));
     });
 
     expect(onKeyPress).toHaveBeenCalledTimes(2);
@@ -66,7 +66,7 @@ describe('useKey', () => {
     renderHook(() => useKey({ onKeyPress, keys: ['Enter'], disabledOnOverlayOpen: true }));
 
     act(() => {
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
     });
 
     expect(onKeyPress).not.toHaveBeenCalled();
@@ -78,7 +78,7 @@ describe('useKey', () => {
     renderHook(() => useKey({ onKeyPress, keys: ['Enter'], disabledOnOverlayOpen: true }));
 
     act(() => {
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
     });
 
     expect(onKeyPress).toHaveBeenCalledTimes(1);
@@ -91,7 +91,7 @@ describe('useKey', () => {
     renderHook(() => useKey({ onKeyPress, keys: ['Enter'], disabledOnOverlayOpen: false }));
 
     act(() => {
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
     });
 
     expect(onKeyPress).toHaveBeenCalledTimes(1);
@@ -104,7 +104,7 @@ describe('useKey', () => {
     renderHook(() => useKey({ onKeyPress, keys: ['Enter'] }));
 
     act(() => {
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
     });
 
     expect(onKeyPress).toHaveBeenCalledTimes(1);
@@ -112,7 +112,7 @@ describe('useKey', () => {
 
   it('removes keydown listener on unmount', () => {
     const onKeyPress = vi.fn();
-    const removeSpy = vi.spyOn(window, 'removeEventListener');
+    const removeSpy = vi.spyOn(globalThis, 'removeEventListener');
 
     const { unmount } = renderHook(() => useKey({ onKeyPress, keys: ['Enter'] }));
     unmount();
@@ -128,7 +128,7 @@ describe('useKey', () => {
     );
 
     act(() => {
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
     });
     expect(onKeyPress).toHaveBeenCalledTimes(1);
 
@@ -136,7 +136,7 @@ describe('useKey', () => {
     rerender();
 
     act(() => {
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
     });
     expect(onKeyPress).toHaveBeenCalledTimes(1);
 
@@ -144,7 +144,7 @@ describe('useKey', () => {
     rerender();
 
     act(() => {
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
     });
     expect(onKeyPress).toHaveBeenCalledTimes(2);
   });
@@ -161,7 +161,7 @@ describe('useKey', () => {
     rerender({ onKeyPress: second });
 
     act(() => {
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
     });
 
     expect(first).not.toHaveBeenCalled();

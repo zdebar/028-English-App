@@ -81,7 +81,7 @@ export default function PrivacyPolicyCzech(): JSX.Element {
         V případě dotazů týkajících se ochrany soukromí mě kontaktujte na adrese{' '}
         <a href={CONTACTS.mailTo} className="font-bold">
           {CONTACTS.email}
-        </a>
+        </a>{' '}
         .
       </p>
     </div>

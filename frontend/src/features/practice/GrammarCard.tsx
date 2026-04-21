@@ -8,10 +8,10 @@ export interface GrammarCardType {
   note?: string;
 }
 
-type GrammarCardProps = {
+type GrammarCardProps = Readonly<{
   grammar?: GrammarCardType | null;
   onClose: () => void;
-};
+}>;
 
 /**
  * GrammarCard component displays details and notes for a selected grammar topic.
@@ -25,10 +25,8 @@ export default function GrammarCard({ grammar, onClose }: GrammarCardProps) {
     <OverviewCard buttonTitle={grammar?.name} onClose={onClose}>
       {grammar?.note ? (
         <div
-          dangerouslySetInnerHTML={{
-            __html: DOMPurify.sanitize(grammar.note),
-          }}
           className="grammar"
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(grammar.note) }}
         />
       ) : (
         TEXTS.noNotesToDisplay

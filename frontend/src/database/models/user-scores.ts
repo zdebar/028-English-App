@@ -3,7 +3,7 @@ import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import { getTodayShortDate } from '@/database/utils/database.utils';
-import { getSyncTimestamps } from '../utils/data-sync.utils';
+import { getSyncTimestamps, splitDeleted } from '../utils/data-sync.utils';
 import { infoHandler } from '@/features/logging/info-handler';
 import { SupabaseError } from '@/types/error.types';
 import { TableName, type UserScoreLocal } from '@/types/local.types';
@@ -14,7 +14,6 @@ import {
   assertShortDateString,
 } from '@/utils/assertions.utils';
 import { Entity } from 'dexie';
-import { splitDeleted } from '../utils/data-sync.utils';
 import Metadata from './metadata';
 /**
  * Represents a user score entity in the application database.

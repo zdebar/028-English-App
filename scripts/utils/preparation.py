@@ -2,14 +2,58 @@ import asyncio
 import os
 
 import pandas as pd
-from typing import List, Union
+from typing import Any, List, Union
 
-def clean_DataFrame(df: pd.DataFrame) -> pd.DataFrame:
+INT_COLUMNS = {"id", "sort_order", "grammar_id", "lesson_id"}
+
+
+def clean_data_frame(df: pd.DataFrame) -> pd.DataFrame:
     """Clean the DataFrame by removing empty rows and stripping whitespace from string values.
     """
     df = df.map(lambda x: str(x).strip() if isinstance(x, str) else x)
-    df = df.dropna(how="all")    
+    df = df.dropna(how="all")
     return df
+
+
+def _convert_float_for_int_column(value: float) -> Union[int, float]:
+    return int(value) if value.is_integer() else value
+
+
+def _parse_int_from_string(stripped: str) -> Union[int, str]:
+    if stripped.lstrip("+-").isdigit():
+        return int(stripped)
+
+    try:
+        parsed_float = float(stripped)
+    except ValueError:
+        return stripped
+
+    return int(parsed_float) if parsed_float.is_integer() else stripped
+
+
+def _clean_and_convert_col(col: str, value: Any) -> Any:
+    if pd.isna(value) or isinstance(value, bool):
+        return value
+
+    if isinstance(value, int):
+        return value
+
+    if isinstance(value, float):
+        if col in INT_COLUMNS:
+            return _convert_float_for_int_column(value)
+        return value
+
+    if not isinstance(value, str):
+        return value
+
+    stripped = value.strip()
+    if not stripped:
+        return ""
+
+    if col not in INT_COLUMNS:
+        return stripped
+
+    return _parse_int_from_string(stripped)
 
 def read_vocab_csv(
     file_path: str,
@@ -24,29 +68,6 @@ def read_vocab_csv(
     :param columns: List of column names to include.
     :return: DataFrame with the specified columns.
     """
-    int_columns = {"id", "sort_order", "grammar_id", "lesson_id"}
-    def _clean_and_convert_col(col, value):
-        if pd.isna(value) or isinstance(value, bool):
-            return value
-        if isinstance(value, int):
-            return value
-        if isinstance(value, float):
-            return int(value) if col in int_columns and value.is_integer() else value
-        if isinstance(value, str):
-            stripped = value.strip()
-            if not stripped:
-                return ""
-            if col in int_columns:
-                if stripped.lstrip("+-").isdigit():
-                    return int(stripped)
-                try:
-                    parsed_float = float(stripped)
-                except ValueError:
-                    return stripped
-                return int(parsed_float) if parsed_float.is_integer() else stripped
-            return stripped
-        return value
-
     df = pd.read_csv(file_path, skipinitialspace=True)
 
     # Keep id only when present in source data; do not create it automatically.
@@ -57,10 +78,10 @@ def read_vocab_csv(
             df[col] = ""
     df = df[effective_columns]
     for col in df.columns:
-        df[col] = df[col].apply(lambda v: _clean_and_convert_col(col, v))
+        df[col] = df[col].map(lambda v, col=col: _clean_and_convert_col(col, v))
     return df
 
-def redo_Id(df, start_id=1):
+def redo_id(df, start_id=1):
     df = df.copy()
     df['id'] = range(start_id, start_id + len(df))
     return df

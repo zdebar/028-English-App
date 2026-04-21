@@ -6,7 +6,7 @@ import { TEXTS } from '@/locales/cs';
 import type { JSX, ReactNode } from 'react';
 import { useCallback, useState } from 'react';
 
-interface ModalButtonProps {
+type ModalButtonProps = Readonly<{
   onConfirm?: () => Promise<void> | void;
   modalTitle?: string;
   modalText?: string;
@@ -14,7 +14,7 @@ interface ModalButtonProps {
   disabled?: boolean;
   className?: string;
   children?: ReactNode;
-}
+}>;
 
 /**
  * Button component that displays a confirmation modal before executing an action.

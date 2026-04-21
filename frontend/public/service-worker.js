@@ -12,7 +12,7 @@ const APP_SHELL_URLS = [
   '/screenshots/desktop.webp',
   '/screenshots/mobile.webp',
 ];
-const INJECTED_PRECACHE_URLS = (self.__WB_MANIFEST || []).map((entry) => entry.url);
+const INJECTED_PRECACHE_URLS = (globalThis.__WB_MANIFEST || []).map((entry) => entry.url);
 const STATIC_DESTINATIONS = new Set(['style', 'script', 'worker', 'font', 'image']);
 
 function normalizeCacheUrl(url) {
@@ -47,7 +47,7 @@ self.addEventListener('install', (event) => {
     ),
   );
 
-  self.skipWaiting();
+  globalThis.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
@@ -61,9 +61,9 @@ self.addEventListener('activate', (event) => {
             .map((cacheName) => caches.delete(cacheName)),
         ),
       )
-      .then(() => self.clients.claim())
+      .then(() => globalThis.clients.claim())
       .then(() => {
-        return self.clients.matchAll({ type: 'window' }).then((clients) => {
+        return globalThis.clients.matchAll({ type: 'window' }).then((clients) => {
           clients.forEach((client) => {
             client.postMessage({ type: 'refresh' });
           });
@@ -162,12 +162,11 @@ self.addEventListener('fetch', (event) => {
         }
 
         return fetch(request).then((response) => {
-          if (!response.ok) {
-            return response;
+          if (response.ok) {
+            const responseClone = response.clone();
+            caches.open(STATIC_CACHE).then((cache) => cache.put(request, responseClone));
           }
 
-          const responseClone = response.clone();
-          caches.open(STATIC_CACHE).then((cache) => cache.put(request, responseClone));
           return response;
         });
       })

@@ -1,8 +1,8 @@
-interface GoalMetViewProps {
+type GoalMetViewProps = Readonly<{
   current: number;
   goal: number;
   title?: string;
-}
+}>;
 
 /**
  * Displays the current progress toward a goal with color coding.

@@ -82,7 +82,7 @@ describe('useUserStore', () => {
     const spy = vi.fn().mockResolvedValue(undefined);
     useUserStore.setState({ reloadLevels: spy as any });
 
-    window.dispatchEvent(new CustomEvent('levelsUpdated', { detail: { userId: 'u9' } }));
+    globalThis.dispatchEvent(new CustomEvent('levelsUpdated', { detail: { userId: 'u9' } }));
 
     expect(spy).toHaveBeenCalledWith('u9');
   });
@@ -91,7 +91,7 @@ describe('useUserStore', () => {
     const spy = vi.fn().mockResolvedValue(undefined);
     useUserStore.setState({ reloadDailyCount: spy as any });
 
-    window.dispatchEvent(new CustomEvent('dailyCountUpdated', { detail: { userId: 'u9' } }));
+    globalThis.dispatchEvent(new CustomEvent('dailyCountUpdated', { detail: { userId: 'u9' } }));
 
     expect(spy).toHaveBeenCalledWith('u9');
   });

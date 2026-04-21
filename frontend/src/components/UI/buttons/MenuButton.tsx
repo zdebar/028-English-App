@@ -1,10 +1,12 @@
 import BaseButton from './BaseButton';
 import type { ReactNode } from 'react';
 
-interface MenuButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  children?: ReactNode;
-  className?: string;
-}
+type MenuButtonProps = Readonly<
+  React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    children?: ReactNode;
+    className?: string;
+  }
+>;
 
 /**
  * A menu button component that renders a button with bold text aligned to the left.

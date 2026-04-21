@@ -15,10 +15,8 @@ import Dexie from 'dexie';
 import Metadata from '../models/metadata';
 import { infoHandler } from '@/features/logging/info-handler';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
-import {
-  triggerDailyCountUpdatedEvent,
-  triggerLevelsUpdatedEvent,
-} from '@/utils/dashboard.utils';
+import { supabaseInstance } from '@/config/supabase.config';
+import { triggerDailyCountUpdatedEvent, triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 
 /**
  * Synchronizes data for a specific user with the database.
@@ -79,11 +77,11 @@ export async function audioSync(userId: string, downloadAll: boolean = false): P
   assertNonEmptyString(userId, 'userId');
 
   const supportsMatchMedia =
-    typeof window !== 'undefined' && typeof window.matchMedia === 'function';
+    typeof globalThis !== 'undefined' && typeof globalThis.matchMedia === 'function';
   const isDisplayStandalone =
-    supportsMatchMedia && window.matchMedia('(display-mode: standalone)').matches;
+    supportsMatchMedia && globalThis.matchMedia('(display-mode: standalone)').matches;
   const isStandalone =
-    downloadAll || isDisplayStandalone || (window.navigator as any).standalone === true;
+    downloadAll || isDisplayStandalone || (globalThis.navigator as any).standalone === true;
 
   if (isStandalone) {
     // PWA or downloadAll: download all audio files
@@ -103,6 +101,11 @@ export async function audioSync(userId: string, downloadAll: boolean = false): P
 export async function dataSyncOnUnmount(userId: string): Promise<void> {
   assertNonEmptyString(userId, 'userId');
 
+  const { data: sessionData } = await supabaseInstance.auth.getSession();
+  if (!sessionData.session) {
+    return;
+  }
+
   const results = await Promise.allSettled([
     UserScore.syncFromRemote(userId, false),
     UserItem.syncFromRemote(userId, false),
@@ -120,7 +123,7 @@ export function splitDeleted<T extends { deleted_at: string | null }>(
   items: T[],
 ): { toUpsert: T[]; toDelete: T[] } {
   if (!Array.isArray(items)) {
-    throw new Error('items must be an array.');
+    throw new TypeError('items must be an array.');
   }
   const toUpsert: T[] = [];
   const toDelete: T[] = [];

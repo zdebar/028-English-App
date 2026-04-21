@@ -19,16 +19,16 @@ interface ThemeState {
  * Supports both light and dark themes with automatic system preference detection.
  */
 export const useThemeStore = create<ThemeState>((set, get) => {
-  const isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
+  const isBrowser = typeof globalThis !== 'undefined' && typeof document !== 'undefined';
   const resolveUserId = (userId?: string | null) => userId ?? DEFAULT_THEME_USER_ID;
   const isUserTheme = (value: string | null): value is UserTheme =>
     value === 'light' || value === 'dark';
 
   const getSystemTheme = (): UserTheme => {
     if (
-      typeof window !== 'undefined' &&
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches
+      typeof globalThis !== 'undefined' &&
+      typeof globalThis.matchMedia === 'function' &&
+      globalThis.matchMedia('(prefers-color-scheme: dark)').matches
     ) {
       return 'dark';
     }

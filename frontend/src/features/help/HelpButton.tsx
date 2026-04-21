@@ -3,9 +3,9 @@ import { useHelpStore } from './use-help-store';
 import type { JSX } from 'react';
 import { TEXTS } from '@/locales/cs';
 
-type HelpButtonProps = {
+type HelpButtonProps = Readonly<{
   className?: string;
-};
+}>;
 
 /**
  * Help button component that opens the help overlay.

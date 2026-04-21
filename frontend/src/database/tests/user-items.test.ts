@@ -136,7 +136,7 @@ describe('UserItem', () => {
     mocks.rpc.mockResolvedValue({ data: [], error: null });
     mocks.markAsSynced.mockResolvedValue(undefined);
     mocks.transaction.mockImplementation(async (...args: unknown[]) => {
-      const callback = args[args.length - 1] as () => Promise<unknown>;
+      const callback = args.at(-1) as () => Promise<unknown>;
       return callback();
     });
     mocks.itemIdModify.mockResolvedValue(1);

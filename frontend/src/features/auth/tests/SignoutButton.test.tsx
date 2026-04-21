@@ -37,7 +37,7 @@ vi.mock('@/locales/cs', () => ({
 
 vi.mock('@/features/modal/ModalButton', () => ({
   default: ({ disabled, onConfirm, children }: any) => (
-    <button data-testid="button-with-modal" disabled={disabled} onClick={() => void onConfirm?.()}>
+    <button data-testid="button-with-modal" disabled={disabled} onClick={() => onConfirm?.()}>
       {children}
     </button>
   ),

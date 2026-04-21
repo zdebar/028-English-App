@@ -5,10 +5,11 @@ import type { ButtonHTMLAttributes, JSX } from 'react';
 import BaseButton from './BaseButton';
 import { TEXTS } from '@/locales/cs';
 
-interface CloseButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+type CloseButtonProps = Readonly<{
   onClick: () => void;
   className?: string;
-}
+}> &
+  ButtonHTMLAttributes<HTMLButtonElement>;
 
 /**
  * Button component for closing dialogs or modals.
@@ -26,9 +27,9 @@ export default function CloseButton({
   return (
     <BaseButton
       type="button"
-      className={`w-button h-button shrink-0 grow-0 ${className}`}
+      className={['w-button h-button shrink-0 grow-0', className].filter(Boolean).join(' ')}
       onClick={onClick}
-      title={`${TEXTS.close} ${KEYBOARD_LISTENERS.Exit.map((key) => `(${key})`).join(' ')}`}
+      title={TEXTS.close + ' ' + KEYBOARD_LISTENERS.Exit.map((key) => '(' + key + ')').join(' ')}
       {...rest}
     >
       <CloseIcon />

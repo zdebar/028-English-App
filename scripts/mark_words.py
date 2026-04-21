@@ -82,7 +82,7 @@ def collect_czech_english_rows_from_folder(folder: Path) -> pd.DataFrame:
 	return pd.concat(rows, ignore_index=True)
 
 
-def update_already_used_csv(source_folder: Path, tracker_folder: Path) -> None:
+def ensure_already_used_csv(tracker_folder: Path) -> Path:
 	tracker_folder.mkdir(parents=True, exist_ok=True)
 	already_used_csv = tracker_folder / "already_used.csv"
 
@@ -90,15 +90,17 @@ def update_already_used_csv(source_folder: Path, tracker_folder: Path) -> None:
 		pd.DataFrame(columns=["czech", "english"]).to_csv(already_used_csv, index=False)
 		print(f"Created: {already_used_csv}")
 
+	return already_used_csv
+
+
+def read_tracker_rows(already_used_csv: Path) -> pd.DataFrame:
 	existing_df = pd.read_csv(already_used_csv)
 	if "czech" not in existing_df.columns or "english" not in existing_df.columns:
 		raise ValueError(f"Missing column 'czech' or 'english' in tracker file: {already_used_csv}")
+	return existing_df
 
-	source_rows = collect_czech_english_rows_from_folder(source_folder)
-	if source_rows.empty:
-		print(f"No source rows found in: {source_folder}")
-		return
 
+def prepare_existing_keys(existing_df: pd.DataFrame) -> tuple[set[tuple[str, str]], set[str]]:
 	existing_keys = set(
 		zip(
 			existing_df["czech"].map(normalize_text),
@@ -106,39 +108,136 @@ def update_already_used_csv(source_folder: Path, tracker_folder: Path) -> None:
 		)
 	)
 	existing_english_keys = set(existing_df["english"].map(normalize_text))
+	return existing_keys, existing_english_keys
 
+
+def parse_source_row(row: Any) -> tuple[str, str, str, tuple[str, str]]:
+	czech = "" if pd.isna(row.czech) else str(row.czech).strip()
+	english = "" if pd.isna(row.english) else str(row.english).strip()
+	source_file = "" if pd.isna(row.source_file) else str(row.source_file)
+	key = (normalize_text(czech), normalize_text(english))
+	return czech, english, source_file, key
+
+
+def handle_english_only_row(
+	key: tuple[str, str],
+	czech: str,
+	english: str,
+	source_file: str,
+	existing_english_keys: set[str],
+	seen_english_in_batch: set[str],
+	conflicts: list[tuple[str, str, str]],
+) -> bool:
+	if key[1] in existing_english_keys or key[1] in seen_english_in_batch:
+		conflicts.append((czech, english, source_file))
+		return False
+
+	seen_english_in_batch.add(key[1])
+	return True
+
+
+def handle_bilingual_row(
+	key: tuple[str, str],
+	czech: str,
+	english: str,
+	source_file: str,
+	existing_keys: set[tuple[str, str]],
+	seen_in_batch: set[tuple[str, str]],
+	conflicts: list[tuple[str, str, str]],
+) -> bool:
+	if key in existing_keys or key in seen_in_batch:
+		conflicts.append((czech, english, source_file))
+		return False
+
+	seen_in_batch.add(key)
+	return True
+
+
+def process_tracker_row(
+	czech: str,
+	english: str,
+	source_file: str,
+	key: tuple[str, str],
+	existing_keys: set[tuple[str, str]],
+	existing_english_keys: set[str],
+	seen_in_batch: set[tuple[str, str]],
+	seen_english_in_batch: set[str],
+	to_append: list[dict[str, str]],
+	conflicts: list[tuple[str, str, str]],
+) -> None:
+	if key[1] == "":
+		return
+
+	if key[0] == "":
+		should_append = handle_english_only_row(
+			key,
+			czech,
+			english,
+			source_file,
+			existing_english_keys,
+			seen_english_in_batch,
+			conflicts,
+		)
+		if not should_append:
+			return
+	else:
+		should_append = handle_bilingual_row(
+			key,
+			czech,
+			english,
+			source_file,
+			existing_keys,
+			seen_in_batch,
+			conflicts,
+		)
+		if not should_append:
+			return
+
+	to_append.append({"czech": czech, "english": english})
+
+
+def build_tracker_updates(
+	source_rows: pd.DataFrame,
+	existing_keys: set[tuple[str, str]],
+	existing_english_keys: set[str],
+) -> tuple[list[dict[str, str]], list[tuple[str, str, str]]]:
 	conflicts: list[tuple[str, str, str]] = []
 	to_append: list[dict[str, str]] = []
 	seen_in_batch: set[tuple[str, str]] = set()
 	seen_english_in_batch: set[str] = set()
 
 	for row in source_rows.itertuples(index=False):
-		czech = "" if pd.isna(row.czech) else str(row.czech).strip()
-		english = "" if pd.isna(row.english) else str(row.english).strip()
-		source_file = "" if pd.isna(row.source_file) else str(row.source_file)
+		czech, english, source_file, key = parse_source_row(row)
+		process_tracker_row(
+			czech,
+			english,
+			source_file,
+			key,
+			existing_keys,
+			existing_english_keys,
+			seen_in_batch,
+			seen_english_in_batch,
+			to_append,
+			conflicts,
+		)
 
-		key = (normalize_text(czech), normalize_text(english))
-		if key[1] == "":
-			continue
+	return to_append, conflicts
 
-		if key[0] == "":
-			if key[1] in existing_english_keys or key[1] in seen_english_in_batch:
-				conflicts.append((czech, english, source_file))
-				continue
-			seen_english_in_batch.add(key[1])
-		else:
-			if key in existing_keys or key in seen_in_batch:
-				conflicts.append((czech, english, source_file))
-				continue
-			seen_in_batch.add(key)
 
-		to_append.append({"czech": czech, "english": english})
+def print_conflicts(conflicts: list[tuple[str, str, str]]) -> None:
+	if not conflicts:
+		return
 
-	if conflicts:
-		print("Conflicting rows (already exist in tracker/already_used.csv):")
-		for czech, english, source_file in conflicts:
-			print(f"  source={source_file} czech={czech!r}, english={english!r}")
+	print("Conflicting rows (already exist in tracker/already_used.csv):")
+	for czech, english, source_file in conflicts:
+		print(f"  source={source_file} czech={czech!r}, english={english!r}")
 
+
+def save_tracker_updates(
+	already_used_csv: Path,
+	existing_df: pd.DataFrame,
+	to_append: list[dict[str, str]],
+) -> None:
 	if not to_append:
 		print("No new rows to append into tracker/already_used.csv")
 		return
@@ -149,6 +248,21 @@ def update_already_used_csv(source_folder: Path, tracker_folder: Path) -> None:
 	print(f"Updated: {already_used_csv}")
 	print(f"  Appended rows: {len(append_df)}")
 	print(f"  Total rows: {len(updated_df)}")
+
+
+def update_already_used_csv(source_folder: Path, tracker_folder: Path) -> None:
+	already_used_csv = ensure_already_used_csv(tracker_folder)
+	existing_df = read_tracker_rows(already_used_csv)
+
+	source_rows = collect_czech_english_rows_from_folder(source_folder)
+	if source_rows.empty:
+		print(f"No source rows found in: {source_folder}")
+		return
+
+	existing_keys, existing_english_keys = prepare_existing_keys(existing_df)
+	to_append, conflicts = build_tracker_updates(source_rows, existing_keys, existing_english_keys)
+	print_conflicts(conflicts)
+	save_tracker_updates(already_used_csv, existing_df, to_append)
 
 
 def filter_target_file(

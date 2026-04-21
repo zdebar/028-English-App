@@ -124,7 +124,7 @@ export function filterSortedWords(
   visibleCount: number,
 ): UserItemLocal[] {
   if (!Array.isArray(sortedWords)) {
-    throw new Error('sortedWords must be an array.');
+    throw new TypeError('sortedWords must be an array.');
   }
   assertPositiveInteger(visibleCount, 'visibleCount');
 

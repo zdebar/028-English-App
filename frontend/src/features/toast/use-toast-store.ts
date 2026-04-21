@@ -9,7 +9,7 @@ interface ToastState {
   visible: boolean;
   showToast: (message: string, type?: ToastType, loading?: boolean) => void;
   hideToast: () => void;
-  timeoutId: number | null;
+  timeoutId: ReturnType<typeof setTimeout> | null;
 }
 
 /**
@@ -33,9 +33,9 @@ export const useToastStore = create<ToastState>((set) => ({
         clearTimeout(state.timeoutId);
       }
 
-      let timeoutId: number | null = null;
+      let timeoutId: ReturnType<typeof setTimeout> | null = null;
       if (!loading) {
-        timeoutId = window.setTimeout(() => {
+        timeoutId = globalThis.setTimeout(() => {
           set({ visible: false, timeoutId: null });
         }, config.toast.duration);
       }

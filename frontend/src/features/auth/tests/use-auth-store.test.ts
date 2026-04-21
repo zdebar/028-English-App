@@ -131,7 +131,7 @@ describe('useAuthStore', () => {
     await useAuthStore.getState().handleLogout();
 
     expect(mocks.dataSyncOnUnmount).toHaveBeenCalledWith('u1');
-    expect(mocks.signOut).toHaveBeenCalled();
+    expect(mocks.signOut).toHaveBeenCalledWith({ scope: 'global' });
 
     const state = useAuthStore.getState();
     expect(state.userId).toBeNull();
@@ -145,5 +145,29 @@ describe('useAuthStore', () => {
     mocks.signOut.mockResolvedValue({ error: { message: 'signout failed' } });
 
     await expect(useAuthStore.getState().handleLogout()).rejects.toThrow('signout failed');
+  });
+
+  it('handleLogout skips sync when skipSync option is enabled', async () => {
+    useAuthStore.setState({ userId: 'u1', userEmail: 'u1@example.com', userFullName: 'User One' });
+
+    await useAuthStore.getState().handleLogout({ skipSync: true });
+
+    expect(mocks.dataSyncOnUnmount).not.toHaveBeenCalled();
+    expect(mocks.signOut).toHaveBeenCalledWith({ scope: 'global' });
+  });
+
+  it('handleLogout can clear local auth state without remote signout', async () => {
+    useAuthStore.setState({ userId: 'u1', userEmail: 'u1@example.com', userFullName: 'User One' });
+
+    await useAuthStore.getState().handleLogout({ skipSync: true, skipRemoteSignOut: true });
+
+    expect(mocks.dataSyncOnUnmount).not.toHaveBeenCalled();
+    expect(mocks.signOut).not.toHaveBeenCalled();
+
+    const state = useAuthStore.getState();
+    expect(state.userId).toBeNull();
+    expect(state.userEmail).toBeNull();
+    expect(state.userFullName).toBeNull();
+    expect(state.loading).toBe(false);
   });
 });

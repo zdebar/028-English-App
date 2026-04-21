@@ -7,14 +7,16 @@ SET search_path TO public
 AS $$
 DECLARE
   v_user_id UUID;
+  v_started_at TEXT;
 BEGIN
   IF p_user_items IS NULL OR p_user_items = '[]'::JSONB THEN
     RETURN;
   END IF;
 
+
   -- Extract user_id from the first element
-  SELECT (entry->>'user_id')::UUID
-    INTO v_user_id
+  SELECT (entry->>'user_id')::UUID, (entry->>'started_at')
+    INTO v_user_id, v_started_at
     FROM jsonb_array_elements(p_user_items) AS entry
     LIMIT 1;
 
@@ -31,12 +33,12 @@ BEGIN
     (entry->>'user_id')::UUID AS user_id,
     (entry->>'item_id')::INT AS item_id,
     GREATEST((entry->>'progress')::INT, 0) AS progress,
-    (entry->>'started_at')::TIMESTAMPTZ AS started_at,
+    v_started_at::TIMESTAMPTZ AS started_at,
     (entry->>'updated_at')::TIMESTAMPTZ AS updated_at,
     (entry->>'next_at')::TIMESTAMPTZ AS next_at,
     (entry->>'mastered_at')::TIMESTAMPTZ AS mastered_at
   FROM jsonb_array_elements(p_user_items) AS entry
-    WHERE (entry->>'started_at') IS NOT NULL AND (entry->>'started_at') <> 'null'
+    WHERE v_started_at IS NOT NULL AND v_started_at <> 'null'
       AND entry->>'item_id' ~ '^\d+$'
   ON CONFLICT (user_id, item_id)
   DO UPDATE SET

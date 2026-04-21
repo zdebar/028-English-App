@@ -1,5 +1,5 @@
 export interface PracticeButtonProps {
-  onClick: () => void;
-  disabled: boolean;
-  children?: React.ReactNode;
+  readonly onClick: () => void;
+  readonly disabled: boolean;
+  readonly children?: React.ReactNode;
 }

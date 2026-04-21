@@ -7,7 +7,7 @@ import type { JSX } from 'react';
  * @param props IconProps to customize the icon.
  * @returns The rendered RepeatIcon element.
  */
-export default function RepeatIcon(props: IconProps): JSX.Element {
+export default function RepeatIcon(props: Readonly<IconProps>): JSX.Element {
   return (
     <Icon {...props} size={20} strokeWidth={1.5} fillColor="none">
       <path

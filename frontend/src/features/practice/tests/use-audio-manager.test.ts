@@ -44,12 +44,11 @@ describe('useAudioManager', () => {
     vi.clearAllMocks();
     audioInstances.length = 0;
 
+
     class MockAudioCtor extends MockAudio {
       constructor() {
         super();
-        const instance = new MockAudio();
-        audioInstances.push(instance);
-        return instance as any;
+        audioInstances.push(this);
       }
     }
 

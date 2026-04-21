@@ -1,5 +1,4 @@
 import { ACCOUNT_TEXTS } from './cs/account';
-import { ARIA_TEXTS } from './cs/aria';
 import { COMMON_TEXTS } from './cs/common';
 import { HOME_TEXTS } from './cs/home';
 import { NAVIGATION_TEXTS } from './cs/navigation';
@@ -15,4 +14,4 @@ export const TEXTS = {
   ...ACCOUNT_TEXTS,
 } as const;
 
-export { ARIA_TEXTS };
+export { ARIA_TEXTS } from './cs/aria';

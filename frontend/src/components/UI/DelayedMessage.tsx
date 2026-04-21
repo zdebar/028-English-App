@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import config from '@/config/config';
 
-type DelayedMessageProps = {
-  children?: React.ReactNode;
+type DelayedMessageProps = Readonly<{
+  children?: ReactNode;
   timeDelay?: number;
   className?: string;
-};
+}>;
 
 /**
  * Displays a delayed content after a specified delay.
@@ -26,7 +26,9 @@ export default function DelayedMessage({
     return () => clearTimeout(timer);
   }, [timeDelay]);
 
-  if (!show) return null;
+  if (!show) {
+    return null;
+  }
 
   return <div className={className}>{children}</div>;
 }

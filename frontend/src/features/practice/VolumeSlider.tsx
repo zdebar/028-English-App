@@ -3,10 +3,10 @@ import VolumeIcon from '@/components/UI/icons/VolumeIcon';
 import MuteIcon from '@/components/UI/icons/MuteIcon';
 import { ARIA_TEXTS, TEXTS } from '@/locales/cs';
 
-type VolumeSliderProps = {
+type VolumeSliderProps = Readonly<{
   setVolume: (volume: number) => void;
   className?: string;
-};
+}>;
 
 /**
  * A component for controlling volume with a slider.
@@ -17,7 +17,7 @@ type VolumeSliderProps = {
  */
 export default function VolumeSlider({ setVolume, className = '' }: VolumeSliderProps) {
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
-  const [volume, setLocalVolume] = useState(1);
+  const [localVolume, setLocalVolume] = useState(1);
   const sliderRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -34,25 +34,24 @@ export default function VolumeSlider({ setVolume, className = '' }: VolumeSlider
   }, []);
 
   const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = parseFloat(event.target.value);
+    const newVolume = Number.parseFloat(event.target.value);
     setLocalVolume(newVolume);
     setVolume(newVolume);
   };
 
   return (
-    <div
-      ref={sliderRef}
-      className={`flex h-10 min-w-10 cursor-pointer items-center pl-2 ${className}`}
-      onClick={(event) => event.stopPropagation()}
-    >
+    <div ref={sliderRef} className={`flex h-10 min-w-10 items-center pl-2 ${className}`}>
       <button
-        onClick={() => setShowVolumeSlider((prev) => !prev)}
+        onClick={(event) => {
+          event.stopPropagation();
+          setShowVolumeSlider((prev) => !prev);
+        }}
         aria-label={ARIA_TEXTS.setVolume}
         className="cursor-pointer"
         disabled={false}
         title={TEXTS.volume}
       >
-        {volume === 0 ? <MuteIcon /> : <VolumeIcon />}
+        {localVolume === 0 ? <MuteIcon /> : <VolumeIcon />}
       </button>
       {showVolumeSlider && (
         <input
@@ -60,14 +59,18 @@ export default function VolumeSlider({ setVolume, className = '' }: VolumeSlider
           min="0"
           max="1"
           step="0.01"
-          value={volume}
-          onChange={handleVolumeChange}
+          value={localVolume}
+          onClick={(event) => event.stopPropagation()}
+          onChange={(event) => {
+            event.stopPropagation();
+            handleVolumeChange(event);
+          }}
           className="ml-2 w-24 cursor-pointer"
           autoFocus
-          aria-valuenow={volume}
+          aria-valuenow={localVolume}
           aria-valuemin={0}
           aria-valuemax={1}
-          aria-label={ARIA_TEXTS.volumePercent(Math.round(volume * 100))}
+          aria-label={ARIA_TEXTS.volumePercent(Math.round(localVolume * 100))}
           disabled={false}
         />
       )}

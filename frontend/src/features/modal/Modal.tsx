@@ -4,11 +4,11 @@ import { useCallback, useEffect, type JSX, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import BaseButton from '../../components/UI/buttons/BaseButton';
 
-interface ModalProps {
+type ModalProps = Readonly<{
   onConfirm: () => void | Promise<void>;
   onClose: () => void;
   children?: ReactNode;
-}
+}>;
 
 /**
  * Modal component for confirmation dialogs.
@@ -34,11 +34,14 @@ export function Modal({ onConfirm, onClose, children }: ModalProps): JSX.Element
   }, [closeOverlay, onConfirm]);
 
   const modalRoot = document.getElementById('root');
-  if (!modalRoot) return null;
 
   useEffect(() => {
     openOverlay(onClose);
   }, [onClose, openOverlay]);
+
+  if (!modalRoot) {
+    return null;
+  }
 
   return createPortal(
     <div className="z-modal pointer-events-none fixed inset-0 flex items-center justify-center">

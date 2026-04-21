@@ -1,9 +1,12 @@
 import type { JSX } from 'react';
 
-type NotificationProps = {
-  children?: React.ReactNode;
-  className?: string;
-} & React.HTMLAttributes<HTMLParagraphElement>;
+type NotificationProps = Readonly<
+  {
+    children?: React.ReactNode;
+    className?: string;
+  } & React.HTMLAttributes<HTMLParagraphElement>
+>;
+
 /**
  * Displays a centered notification message with customizable styling.
  *

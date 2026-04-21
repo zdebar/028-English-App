@@ -3,14 +3,13 @@ import type { LevelOverview } from '@/types/local.types';
 import UserScore from '@/database/models/user-scores';
 import Levels from '@/database/models/levels';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
+import { errorHandler } from '../logging/error-handler';
 
 interface UserState {
   levels: LevelOverview[];
   dailyCount: number;
   showMasteredDashboard: boolean;
-  showMasteredLevels: boolean;
   setMasteredDashboard: (value: boolean) => void;
-  setMasteredLevels: (value: boolean) => void;
   reloadLevels: (userId: string) => Promise<void>;
   reloadDailyCount: (userId: string) => Promise<void>;
   clearLevels: () => void;
@@ -23,7 +22,7 @@ const initialDailyStats = 0;
 /**
  * Creates a Zustand store for managing user statistics and state.
  *
- * Handles levels and daily score statistics with automatic updates via custom window events.
+ * Handles levels and daily score statistics with automatic updates via custom globalThis events.
  * Sets up event listeners for 'levelsUpdated' and 'dailyCountUpdated' events that trigger
  * store reloads when a userId is provided in the event detail.
  *
@@ -43,32 +42,28 @@ const initialDailyStats = 0;
 export const useUserStore = create<UserState>((set, get) => {
   let levelsUpdatedListener: ((event: any) => void) | undefined;
   let dailyCountUpdatedListener: ((event: any) => void) | undefined;
-  if (typeof window !== 'undefined') {
+  if (typeof globalThis !== 'undefined') {
     levelsUpdatedListener = (event: any) => {
       const { userId } = event.detail || {};
       if (userId) {
         get().reloadLevels(userId);
       }
     };
-    window.addEventListener('levelsUpdated', levelsUpdatedListener);
+    globalThis.addEventListener('levelsUpdated', levelsUpdatedListener);
     dailyCountUpdatedListener = (event: any) => {
       const { userId } = event.detail || {};
       if (userId) {
         get().reloadDailyCount(userId);
       }
     };
-    window.addEventListener('dailyCountUpdated', dailyCountUpdatedListener);
+    globalThis.addEventListener('dailyCountUpdated', dailyCountUpdatedListener);
   }
   const store: UserState = {
     levels: initialLevels,
     dailyCount: initialDailyStats,
     showMasteredDashboard: false,
-    showMasteredLevels: false,
     setMasteredDashboard: (value: boolean) => {
       set({ showMasteredDashboard: value });
-    },
-    setMasteredLevels: (value: boolean) => {
-      set({ showMasteredLevels: value });
     },
     reloadLevels: async (userId: string) => {
       try {
@@ -77,6 +72,7 @@ export const useUserStore = create<UserState>((set, get) => {
         set({ levels: updatedLevels });
       } catch (error) {
         set({ levels: initialLevels });
+        errorHandler('Error reloading levels', error);
       }
     },
     reloadDailyCount: async (userId: string) => {
@@ -86,6 +82,7 @@ export const useUserStore = create<UserState>((set, get) => {
         set({ dailyCount: updatedCount });
       } catch (error) {
         set({ dailyCount: initialDailyStats });
+        errorHandler('Error reloading daily count', error);
       }
     },
     clearLevels: () => {
@@ -96,12 +93,12 @@ export const useUserStore = create<UserState>((set, get) => {
     },
   };
   (store as any).cleanup = () => {
-    if (typeof window !== 'undefined') {
+    if (typeof globalThis !== 'undefined') {
       if (levelsUpdatedListener) {
-        window.removeEventListener('levelsUpdated', levelsUpdatedListener);
+        globalThis.removeEventListener('levelsUpdated', levelsUpdatedListener);
       }
       if (dailyCountUpdatedListener) {
-        window.removeEventListener('dailyCountUpdated', dailyCountUpdatedListener);
+        globalThis.removeEventListener('dailyCountUpdated', dailyCountUpdatedListener);
       }
     }
   };

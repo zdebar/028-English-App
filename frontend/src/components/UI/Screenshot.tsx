@@ -1,9 +1,9 @@
 import type { JSX } from 'react';
 
-interface ScreenshotProps {
-  src: string;
-  alt: string;
-}
+type ScreenshotProps = Readonly<{
+  readonly src: string;
+  readonly alt: string;
+}>;
 
 /**
  * Renders a screenshot image with a caption.

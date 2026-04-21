@@ -14,7 +14,7 @@ const DIRECTION_OPTIONS: { value: DisplayField; label: string }[] = [
   { value: 'english', label: 'Angličtina' },
 ];
 
-interface VocabularyListProps {
+type VocabularyListProps = Readonly<{
   filteredWords: UserItemLocal[];
   visibleCount: number;
   displayField: DisplayField;
@@ -25,7 +25,7 @@ interface VocabularyListProps {
   onSelect: (index: number) => void;
   error: string | null;
   onClose: () => void;
-}
+}>;
 
 /**
  * VocabularyList component

@@ -11,7 +11,7 @@ export default function KnownButton({ onClick, disabled, children }: PracticeBut
         onClick={onClick}
         disabled={disabled}
         className="h-button relative"
-        title={!disabled ? TEXTS.known : undefined}
+        title={disabled ? undefined : TEXTS.known}
       >
         <RightArrowIcon />
         {children}

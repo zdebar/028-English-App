@@ -95,7 +95,7 @@ describe('UserScore', () => {
       toArray: vi.fn().mockResolvedValue([]),
     });
     mocks.transaction.mockImplementation(async (...args: unknown[]) => {
-      const callback = args[args.length - 1] as () => Promise<unknown>;
+      const callback = args.at(-1) as () => Promise<unknown>;
       return callback();
     });
     mocks.getSyncTimestamps.mockResolvedValue({

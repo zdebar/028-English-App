@@ -11,9 +11,27 @@ const CORS_HEADERS = {
 };
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
+function jsonResponse(body: unknown, status: number) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      ...CORS_HEADERS,
+      "Content-Type": "application/json",
+    },
+  });
+}
+
 async function getUserFromAccessToken(accessToken: string) {
+  if (!SUPABASE_URL) {
+    throw new Error("Missing SUPABASE_URL");
+  }
+  if (!SUPABASE_ANON_KEY) {
+    throw new Error("Missing SUPABASE_ANON_KEY");
+  }
+
   const url = `${SUPABASE_URL.replace(/\/$/, "")}/auth/v1/user`;
   // Check if token looks like a JWT
   if (!/^[\w-]+\.[\w-]+\.[\w-]+$/.test(accessToken)) {
@@ -23,7 +41,7 @@ async function getUserFromAccessToken(accessToken: string) {
     method: "GET",
     headers: {
       Authorization: `Bearer ${accessToken}`,
-      apikey: SERVICE_ROLE_KEY,
+      apikey: SUPABASE_ANON_KEY,
       Accept: "application/json",
     },
   });
@@ -35,6 +53,17 @@ async function getUserFromAccessToken(accessToken: string) {
 }
 
 async function deleteAuthUser(userId: string) {
+  if (!SUPABASE_URL) {
+    return { ok: false, status: 500, body: "Missing SUPABASE_URL" };
+  }
+  if (!SERVICE_ROLE_KEY) {
+    return {
+      ok: false,
+      status: 500,
+      body: "Missing SUPABASE_SERVICE_ROLE_KEY",
+    };
+  }
+
   const url = `${SUPABASE_URL.replace(
     /\/$/,
     "",
@@ -56,6 +85,17 @@ async function deleteAuthUser(userId: string) {
 }
 
 async function deleteUserRow(userId: string) {
+  if (!SUPABASE_URL) {
+    return { ok: false, status: 500, body: "Missing SUPABASE_URL" };
+  }
+  if (!SERVICE_ROLE_KEY) {
+    return {
+      ok: false,
+      status: 500,
+      body: "Missing SUPABASE_SERVICE_ROLE_KEY",
+    };
+  }
+
   const url = `${SUPABASE_URL.replace(
     /\/$/,
     "",
@@ -91,14 +131,7 @@ Deno.serve(async (req: Request) => {
   }
 
   if (req.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), {
-      status: 405,
-      headers: {
-        ...CORS_HEADERS,
-        "Content-Type": "application/json",
-        Connection: "keep-alive",
-      },
-    });
+    return jsonResponse({ error: "Method not allowed" }, 405);
   }
 
   try {
@@ -108,28 +141,11 @@ Deno.serve(async (req: Request) => {
       req.headers.get("authorization") ??
       "";
     if (!authHeader.startsWith("Bearer ")) {
-      return new Response(
-        JSON.stringify({ error: "Missing Authorization Bearer token" }),
-        {
-          status: 401,
-          headers: {
-            ...CORS_HEADERS,
-            "Content-Type": "application/json",
-            Connection: "keep-alive",
-          },
-        },
-      );
+      return jsonResponse({ error: "Missing Authorization Bearer token" }, 401);
     }
     const accessToken = authHeader.slice(7).trim();
     if (!accessToken) {
-      return new Response(JSON.stringify({ error: "Missing access token" }), {
-        status: 401,
-        headers: {
-          ...CORS_HEADERS,
-          "Content-Type": "application/json",
-          Connection: "keep-alive",
-        },
-      });
+      return jsonResponse({ error: "Missing access token" }, 401);
     }
 
     // Validate token and get user
@@ -137,126 +153,65 @@ Deno.serve(async (req: Request) => {
     try {
       userInfo = await getUserFromAccessToken(accessToken);
     } catch (err) {
-      return new Response(JSON.stringify({ error: String(err) }), {
-        status: 401,
-        headers: {
-          ...CORS_HEADERS,
-          "Content-Type": "application/json",
-          Connection: "keep-alive",
-        },
-      });
+      const message = err instanceof Error ? err.message : String(err);
+      const status = message.startsWith("Missing SUPABASE_") ? 500 : 401;
+      return jsonResponse({ error: message }, status);
     }
 
     const jwtUserId = userInfo?.id;
     if (!jwtUserId) {
-      return new Response(
-        JSON.stringify({ error: "Could not determine authenticated user id" }),
-        {
-          status: 401,
-          headers: {
-            ...CORS_HEADERS,
-            "Content-Type": "application/json",
-            Connection: "keep-alive",
-          },
-        },
+      return jsonResponse(
+        { error: "Could not determine authenticated user id" },
+        401,
       );
     }
 
     const body = await req.json().catch(() => ({}));
     const userId = (body.userId ?? body.user_id) as string | undefined;
     if (!userId || typeof userId !== "string" || userId.trim() === "") {
-      return new Response(
-        JSON.stringify({
-          error: "Missing or invalid user id (userId or user_id)",
-        }),
+      return jsonResponse(
         {
-          status: 400,
-          headers: {
-            ...CORS_HEADERS,
-            "Content-Type": "application/json",
-            Connection: "keep-alive",
-          },
+          error: "Missing or invalid user id (userId or user_id)",
         },
+        400,
       );
     }
 
     if (!isstringV4(userId.trim())) {
-      return new Response(
-        JSON.stringify({ error: "Invalid userId format (must be string v4)" }),
-        {
-          status: 400,
-          headers: {
-            ...CORS_HEADERS,
-            "Content-Type": "application/json",
-            Connection: "keep-alive",
-          },
-        },
+      return jsonResponse(
+        { error: "Invalid userId format (must be string v4)" },
+        400,
       );
     }
 
     if (userId.trim() !== jwtUserId) {
-      return new Response(
-        JSON.stringify({ error: "Forbidden: can only delete own user" }),
-        {
-          status: 403,
-          headers: {
-            ...CORS_HEADERS,
-            "Content-Type": "application/json",
-            Connection: "keep-alive",
-          },
-        },
+      return jsonResponse(
+        { error: "Forbidden: can only delete own user" },
+        403,
       );
     }
 
     // Hard delete user row in users table
     const deleteUserResult = await deleteUserRow(userId.trim());
     if (!deleteUserResult.ok) {
-      return new Response(
-        JSON.stringify({
-          error: deleteUserResult.body ?? "Failed to delete user row",
-        }),
+      return jsonResponse(
         {
-          status: deleteUserResult.status,
-          headers: {
-            ...CORS_HEADERS,
-            "Content-Type": "application/json",
-            Connection: "keep-alive",
-          },
+          error: deleteUserResult.body ?? "Failed to delete user row",
         },
+        deleteUserResult.status,
       );
     }
 
     const result = await deleteAuthUser(userId.trim());
     if (!result.ok) {
-      return new Response(
-        JSON.stringify({ error: result.body ?? "Failed to delete user" }),
-        {
-          status: result.status,
-          headers: {
-            ...CORS_HEADERS,
-            "Content-Type": "application/json",
-            Connection: "keep-alive",
-          },
-        },
+      return jsonResponse(
+        { error: result.body ?? "Failed to delete user" },
+        result.status,
       );
     }
 
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: {
-        ...CORS_HEADERS,
-        "Content-Type": "application/json",
-        Connection: "keep-alive",
-      },
-    });
+    return jsonResponse({ success: true }, 200);
   } catch (err) {
-    return new Response(JSON.stringify({ error: String(err) }), {
-      status: 500,
-      headers: {
-        ...CORS_HEADERS,
-        "Content-Type": "application/json",
-        Connection: "keep-alive",
-      },
-    });
+    return jsonResponse({ error: String(err) }, 500);
   }
 });

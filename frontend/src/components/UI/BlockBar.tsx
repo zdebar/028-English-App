@@ -1,7 +1,6 @@
-import { TEXTS } from '@/locales/cs';
-import { ARIA_TEXTS } from '@/locales/cs';
+import { TEXTS, ARIA_TEXTS } from '@/locales/cs';
 
-interface BlockBarProps {
+type BlockBarProps = Readonly<{
   previousCount: number;
   todayCount: number;
   lessonName: string;
@@ -11,7 +10,7 @@ interface BlockBarProps {
   lessonCount: number;
   widthBase?: number;
   className?: string;
-}
+}>;
 
 /**
  * BlockBar component displays a progress bar for a lesson block, showing previous and today's progress.
@@ -83,26 +82,24 @@ export default function BlockBar({
         </span>
       </div>
       <div className={`relative h-full w-full ${className}`} style={{ width: `${barWidth}%` }}>
-        {/* Progress bar */}
+        {/* Native progress bar for accessibility */}
         <div
-          className="bg-progress-bg relative h-full overflow-hidden"
+          className="bg-progress-bg relative block h-full w-full"
           role="progressbar"
-          aria-label={ARIA_TEXTS.lessonProgressBar}
           aria-valuenow={previousCount + todayCount}
           aria-valuemin={0}
           aria-valuemax={lessonCount}
-        >
-          {/* New progress */}
-          <div
-            className="bg-new-progress-light dark:bg-new-progress-dark absolute top-0 left-0 h-full"
-            style={{ width: `${totalWidth}%` }}
-          ></div>
-          {/* Previous progress */}
-          <div
-            className="bg-old-progress-light dark:bg-old-progress-dark absolute top-0 left-0 h-full"
-            style={{ width: `${previousWidth}%` }}
-          ></div>
-        </div>
+          aria-label={ARIA_TEXTS.lessonProgressBar}
+        ></div>
+        {/* Visual overlays for today/previous progress */}
+        <div
+          className="bg-new-progress-light dark:bg-new-progress-dark pointer-events-none absolute top-0 left-0 h-full"
+          style={{ width: `${totalWidth}%` }}
+        ></div>
+        <div
+          className="bg-old-progress-light dark:bg-old-progress-dark pointer-events-none absolute top-0 left-0 h-full"
+          style={{ width: `${previousWidth}%` }}
+        ></div>
       </div>
       {/* Divisions */}
       {renderDivisions()}

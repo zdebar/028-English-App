@@ -1,10 +1,10 @@
 import { useHelpStore } from './use-help-store';
 import type { JSX, ReactNode } from 'react';
 
-interface HelpTextProps {
-  children: ReactNode;
-  className?: string;
-}
+type HelpTextProps = Readonly<{
+  readonly children: ReactNode;
+  readonly className?: string;
+}>;
 
 /**
  * HelpText component for displaying contextual hints.
@@ -17,11 +17,13 @@ interface HelpTextProps {
 export default function HelpText({ children, className = '' }: HelpTextProps): JSX.Element | null {
   const isHelpOpened = useHelpStore((state) => state.isHelpOpened);
 
-  if (!isHelpOpened) return null;
-
+  if (!isHelpOpened) {
+    return null;
+  }
+  
   return (
     <p
-      className={`font-headings z-help-text pointer-events-none absolute px-2 text-xl font-bold text-white ${className}`}
+      className={`font-headings z-help-text pointer-events-none absolute px-2 text-xl font-bold ${className}`}
     >
       {children}
     </p>

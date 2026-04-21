@@ -12,8 +12,9 @@ import {
 import Dexie, { Entity } from 'dexie';
 import { getSyncTimestamps, splitDeleted } from '../utils/data-sync.utils';
 
-import { convertLocalToSQL, convertSQLToLocal } from '@/database/utils/user-items.utils';
 import {
+  convertLocalToSQL,
+  convertSQLToLocal,
   addGrammarIndicatorFlag,
   getNextAt,
   resetUserItem,
@@ -71,20 +72,20 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const startedGrammarIdSet = new Set(await this.getStartedGrammarIds(userId));
 
     // Step 2: Fetch items with odd progress
-    let deck = await this.getPracticeItemsByParity(userId, true, false, deckSize);
+    let deck = await this.getPracticeItemsByParity(userId, true, deckSize, false);
 
     // Step 3: If not enough items, fetch even progress items instead
     if (deck.length < deckSize) {
       let evenItems: UserItemLocal[] = [];
-      evenItems = await this.getPracticeItemsByParity(userId, false, false, deckSize);
+      evenItems = await this.getPracticeItemsByParity(userId, false, deckSize, false);
 
       const remainingLimit = deckSize - evenItems.length;
       if (remainingLimit > 0) {
         const remainingItems = await this.getPracticeItemsByParity(
           userId,
           false,
-          true,
           remainingLimit,
+          true,
         );
         evenItems = [...evenItems, ...remainingItems];
       }
@@ -328,14 +329,14 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Fetches practice items by odd/even progress parity for a user.
    * @param userId - The unique identifier of the user
    * @param isOdd - Whether to fetch items with odd progress
-   * @param isNew - Whether to fetch non-started items (next_at = NULL_DATE) or ready to practice items (next_at < today)
    * @param limit - Maximum number of items to fetch
+   * @param isNew - Whether to fetch non-started items (next_at = NULL_DATE) or ready to practice items (next_at < today)
    */
   private static async getPracticeItemsByParity(
     userId: string,
     isOdd: boolean,
-    isNew: boolean = false,
     limit: number,
+    isNew: boolean = false,
   ): Promise<UserItemLocal[]> {
     const minNextAt = isNew ? NULL_DATE : Dexie.minKey;
     const maxNextAt = isNew ? NULL_DATE : new Date().toISOString();

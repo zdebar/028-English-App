@@ -7,13 +7,17 @@ import { audioSync, dataSync } from '@/database/utils/data-sync.utils';
 import { logRejectedResults } from '../logging/logging.utils';
 import ModalButton from '../modal/ModalButton';
 
+type SyncButtonProps = Readonly<{
+  className?: string;
+}>;
+
 /**
  * SyncButton component for synchronizing the current user's data.
  *
  * @param className - Optional CSS class name to apply to the button.
  * @returns The rendered SyncButton component.
  */
-export default function SyncButton({ className }: { className?: string }): JSX.Element {
+export default function SyncButton({ className }: SyncButtonProps): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
   const hideToast = useToastStore((state) => state.hideToast);
@@ -44,7 +48,7 @@ export default function SyncButton({ className }: { className?: string }): JSX.E
       modalTitle={TEXTS.syncButton}
       modalText={TEXTS.syncButtonDescription}
     >
-      <p className="w-40 mx-auto">{TEXTS.syncButton}</p>
+      <p className="mx-auto w-40">{TEXTS.syncButton}</p>
     </ModalButton>
   );
 }
