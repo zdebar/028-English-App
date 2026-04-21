@@ -3,6 +3,15 @@
 // Requires Authorization: Bearer <user access token> header
 // Only allows a user to delete their own account (userId === authenticated user's id)
 
+export {};
+
+declare const Deno: {
+  env: {
+    get(key: string): string | undefined;
+  };
+  serve(handler: (req: Request) => Response | Promise<Response>): void;
+};
+
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -122,6 +131,70 @@ function isstringV4(str: string) {
   );
 }
 
+function getAccessToken(req: Request) {
+  const authHeader =
+    req.headers.get("Authorization") ?? req.headers.get("authorization") ?? "";
+
+  if (!authHeader.startsWith("Bearer ")) {
+    return jsonResponse({ error: "Missing Authorization Bearer token" }, 401);
+  }
+
+  const accessToken = authHeader.slice(7).trim();
+  if (!accessToken) {
+    return jsonResponse({ error: "Missing access token" }, 401);
+  }
+
+  return accessToken;
+}
+
+async function authenticateUser(accessToken: string) {
+  try {
+    const userInfo = await getUserFromAccessToken(accessToken);
+    const jwtUserId = userInfo?.id;
+
+    if (!jwtUserId) {
+      return jsonResponse(
+        { error: "Could not determine authenticated user id" },
+        401,
+      );
+    }
+
+    return jwtUserId;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    const status = message.startsWith("Missing SUPABASE_") ? 500 : 401;
+    return jsonResponse({ error: message }, status);
+  }
+}
+
+async function getRequestedUserId(req: Request) {
+  const body = await req.json().catch(() => ({}));
+  const userId = (body.userId ?? body.user_id) as string | undefined;
+
+  if (!userId || typeof userId !== "string" || userId.trim() === "") {
+    return jsonResponse(
+      {
+        error: "Missing or invalid user id (userId or user_id)",
+      },
+      400,
+    );
+  }
+
+  const trimmedUserId = userId.trim();
+  if (!isstringV4(trimmedUserId)) {
+    return jsonResponse(
+      { error: "Invalid userId format (must be string v4)" },
+      400,
+    );
+  }
+
+  return trimmedUserId;
+}
+
+function isResponse(value: Response | string) {
+  return value instanceof Response;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, {
@@ -135,56 +208,22 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    // Try both 'Authorization' and 'authorization'
-    let authHeader =
-      req.headers.get("Authorization") ??
-      req.headers.get("authorization") ??
-      "";
-    if (!authHeader.startsWith("Bearer ")) {
-      return jsonResponse({ error: "Missing Authorization Bearer token" }, 401);
-    }
-    const accessToken = authHeader.slice(7).trim();
-    if (!accessToken) {
-      return jsonResponse({ error: "Missing access token" }, 401);
+    const accessToken = getAccessToken(req);
+    if (isResponse(accessToken)) {
+      return accessToken;
     }
 
-    // Validate token and get user
-    let userInfo: any;
-    try {
-      userInfo = await getUserFromAccessToken(accessToken);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      const status = message.startsWith("Missing SUPABASE_") ? 500 : 401;
-      return jsonResponse({ error: message }, status);
+    const jwtUserId = await authenticateUser(accessToken);
+    if (isResponse(jwtUserId)) {
+      return jwtUserId;
     }
 
-    const jwtUserId = userInfo?.id;
-    if (!jwtUserId) {
-      return jsonResponse(
-        { error: "Could not determine authenticated user id" },
-        401,
-      );
+    const userId = await getRequestedUserId(req);
+    if (isResponse(userId)) {
+      return userId;
     }
 
-    const body = await req.json().catch(() => ({}));
-    const userId = (body.userId ?? body.user_id) as string | undefined;
-    if (!userId || typeof userId !== "string" || userId.trim() === "") {
-      return jsonResponse(
-        {
-          error: "Missing or invalid user id (userId or user_id)",
-        },
-        400,
-      );
-    }
-
-    if (!isstringV4(userId.trim())) {
-      return jsonResponse(
-        { error: "Invalid userId format (must be string v4)" },
-        400,
-      );
-    }
-
-    if (userId.trim() !== jwtUserId) {
+    if (userId !== jwtUserId) {
       return jsonResponse(
         { error: "Forbidden: can only delete own user" },
         403,
@@ -192,7 +231,7 @@ Deno.serve(async (req: Request) => {
     }
 
     // Hard delete user row in users table
-    const deleteUserResult = await deleteUserRow(userId.trim());
+    const deleteUserResult = await deleteUserRow(userId);
     if (!deleteUserResult.ok) {
       return jsonResponse(
         {
@@ -202,7 +241,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const result = await deleteAuthUser(userId.trim());
+    const result = await deleteAuthUser(userId);
     if (!result.ok) {
       return jsonResponse(
         { error: result.body ?? "Failed to delete user" },
