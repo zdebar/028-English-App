@@ -1,6 +1,13 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import {
+  createAsyncButtonMock,
+  createAuthStoreMock,
+  createDelegatedMock,
+  createToastStoreMock,
+} from './sync-test-helpers';
+
 const mocks = vi.hoisted(() => ({
   userId: 'u1' as string | null,
   isLoading: false,
@@ -14,21 +21,14 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@/features/auth/use-auth-store', () => ({
-  useAuthStore: (selector: (state: { userId: string | null }) => unknown) =>
-    selector({ userId: mocks.userId }),
+  useAuthStore: createAuthStoreMock(() => mocks.userId),
 }));
 
 vi.mock('@/features/toast/use-toast-store', () => ({
-  useToastStore: (
-    selector: (state: {
-      showToast: typeof mocks.showToast;
-      hideToast: typeof mocks.hideToast;
-    }) => unknown,
-  ) =>
-    selector({
-      showToast: mocks.showToast,
-      hideToast: mocks.hideToast,
-    }),
+  useToastStore: createToastStoreMock(
+    () => mocks.showToast,
+    () => mocks.hideToast,
+  ),
 }));
 
 vi.mock('@/features/modal/use-min-loading', () => ({
@@ -41,21 +41,21 @@ vi.mock('@/features/modal/use-min-loading', () => ({
 vi.mock('@/database/models/db', () => ({
   db: {
     audio_metadata: {
-      clear: (...args: unknown[]) => mocks.clearAudioMeta(...args),
+      clear: createDelegatedMock(mocks.clearAudioMeta),
     },
   },
 }));
 
 vi.mock('@/database/utils/data-sync.utils', () => ({
-  audioSync: (...args: unknown[]) => mocks.audioSync(...args),
+  audioSync: createDelegatedMock(mocks.audioSync),
 }));
 
 vi.mock('@/features/logging/logging.utils', () => ({
-  logRejectedResults: (...args: unknown[]) => mocks.logRejectedResults(...args),
+  logRejectedResults: createDelegatedMock(mocks.logRejectedResults),
 }));
 
 vi.mock('@/features/logging/error-handler', () => ({
-  errorHandler: (...args: unknown[]) => mocks.errorHandler(...args),
+  errorHandler: createDelegatedMock(mocks.errorHandler),
 }));
 
 vi.mock('@/locales/cs', () => ({
@@ -69,19 +69,7 @@ vi.mock('@/locales/cs', () => ({
 }));
 
 vi.mock('@/components/UI/buttons/MenuButton', () => ({
-  MenuButton: ({
-    disabled,
-    onClick,
-    children,
-  }: {
-    disabled?: boolean;
-    onClick?: () => Promise<void>;
-    children?: React.ReactNode;
-  }) => (
-    <button data-testid="download-button" disabled={disabled} onClick={() => void onClick?.()}>
-      {children}
-    </button>
-  ),
+  MenuButton: createAsyncButtonMock('download-button', 'onClick'),
 }));
 
 import DownloadButton from '@/features/sync/DownloadButtton';
