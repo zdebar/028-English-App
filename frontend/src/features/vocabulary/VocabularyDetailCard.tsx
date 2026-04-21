@@ -7,12 +7,12 @@ import type { UserItemLocal } from '@/types/local.types';
 
 const NOT_AVAILABLE = TEXTS.notAvailable;
 
-interface VocabularyDetailCardProps {
-  readonly selectedWord: UserItemLocal | null;
-  readonly selectedTitle: string;
-  readonly onClose: () => void;
-  readonly onReset: () => Promise<void>;
-}
+type VocabularyDetailCardProps = Readonly<{
+  selectedWord: UserItemLocal | null;
+  selectedTitle: string;
+  onClose: () => void;
+  onReset: () => Promise<void>;
+}>;
 
 /**
  * VocabularyDetailCard component

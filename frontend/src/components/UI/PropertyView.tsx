@@ -1,13 +1,13 @@
 import type { JSX } from 'react';
 
-type PropertyViewProps = {
+type PropertyViewProps = Readonly<{
   readonly label: string;
   readonly title?: string;
   readonly children?: React.ReactNode;
   readonly className?: string;
   readonly classNameLabel?: string;
   readonly classNameValue?: string;
-};
+}>;
 
 /**
  * Visual component to display a setting property with its label and value.

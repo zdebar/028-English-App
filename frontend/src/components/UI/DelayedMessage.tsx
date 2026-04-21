@@ -1,11 +1,11 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import config from '@/config/config';
 
-type DelayedMessageProps = {
-  readonly children?: ReactNode;
-  readonly timeDelay?: number;
-  readonly className?: string;
-};
+type DelayedMessageProps = Readonly<{
+  children?: ReactNode;
+  timeDelay?: number;
+  className?: string;
+}>;
 
 /**
  * Displays a delayed content after a specified delay.

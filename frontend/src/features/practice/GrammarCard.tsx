@@ -8,10 +8,10 @@ export interface GrammarCardType {
   note?: string;
 }
 
-type GrammarCardProps = {
-  readonly grammar?: GrammarCardType | null;
-  readonly onClose: () => void;
-};
+type GrammarCardProps = Readonly<{
+  grammar?: GrammarCardType | null;
+  onClose: () => void;
+}>;
 
 /**
  * GrammarCard component displays details and notes for a selected grammar topic.

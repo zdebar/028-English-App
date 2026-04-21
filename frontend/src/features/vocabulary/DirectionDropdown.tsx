@@ -3,12 +3,12 @@ import { useEffect, useMemo } from 'react';
 import { errorHandler } from '../logging/error-handler';
 import BaseButton from '@/components/UI/buttons/BaseButton';
 
-interface DirectionDropdownProps<T> {
-  readonly value: T;
-  readonly options: { value: T; label: string }[];
-  readonly onChange: (value: T) => void;
-  readonly className?: string;
-}
+type DirectionDropdownProps<T> = Readonly<{
+  value: T;
+  options: { value: T; label: string }[];
+  onChange: (value: T) => void;
+  className?: string;
+}>;
 
 /**
  * DirectionDropdown Component

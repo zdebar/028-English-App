@@ -3,10 +3,10 @@ import VolumeIcon from '@/components/UI/icons/VolumeIcon';
 import MuteIcon from '@/components/UI/icons/MuteIcon';
 import { ARIA_TEXTS, TEXTS } from '@/locales/cs';
 
-type VolumeSliderProps = {
-  readonly setVolume: (volume: number) => void;
-  readonly className?: string;
-};
+type VolumeSliderProps = Readonly<{
+  setVolume: (volume: number) => void;
+  className?: string;
+}>;
 
 /**
  * A component for controlling volume with a slider.

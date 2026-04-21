@@ -7,9 +7,9 @@ import { getInProgressLessons } from '../../utils/dashboard.utils';
 import TextButton from '@/components/UI/buttons/TextButton';
 import type { LessonOverview } from '@/types/local.types';
 
-type DashboardProps = {
-  readonly className?: string;
-};
+type DashboardProps = Readonly<{
+  className?: string;
+}>;
 
 const noAvailableLesson: LessonOverview = {
   id: 0,

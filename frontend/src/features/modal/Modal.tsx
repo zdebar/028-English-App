@@ -4,11 +4,11 @@ import { useCallback, useEffect, type JSX, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import BaseButton from '../../components/UI/buttons/BaseButton';
 
-interface ModalProps {
-  readonly onConfirm: () => void | Promise<void>;
-  readonly onClose: () => void;
-  readonly children?: ReactNode;
-}
+type ModalProps = Readonly<{
+  onConfirm: () => void | Promise<void>;
+  onClose: () => void;
+  children?: ReactNode;
+}>;
 
 /**
  * Modal component for confirmation dialogs.

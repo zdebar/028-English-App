@@ -13,9 +13,9 @@ import { useThemeStore } from '../theme/use-theme-store';
 import { clearSyncTimes } from '@/database/utils/sync-time.utils';
 import { logRejectedResults } from '@/features/logging/logging.utils.ts';
 
-type DeleteUserButtonProps = {
-  readonly className?: string;
-};
+type DeleteUserButtonProps = Readonly<{
+  className?: string;
+}>;
 
 /**
  * DeleteUserButton component for deleting the current user's account.

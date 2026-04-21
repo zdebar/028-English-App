@@ -5,11 +5,11 @@ import HelpText from '@/features/help/HelpText';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 
-type SkipButtonProps = {
-  readonly onConfirm: () => void | Promise<void>;
-  readonly disabled: boolean;
-  readonly children?: React.ReactNode;
-};
+type SkipButtonProps = Readonly<{
+  onConfirm: () => void | Promise<void>;
+  disabled: boolean;
+  children?: React.ReactNode;
+}>;
 
 const HOLD_DURATION_MS = 600;
 

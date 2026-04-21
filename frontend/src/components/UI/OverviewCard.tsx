@@ -4,7 +4,7 @@ import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import ModalButton from '@/features/modal/ModalButton';
 
-interface OverviewCardProps {
+type OverviewCardProps = Readonly<{
   readonly buttonTitle?: string;
   readonly modalTitle?: string;
   readonly modalText?: string;
@@ -13,7 +13,7 @@ interface OverviewCardProps {
   readonly onClose: () => void;
   readonly className?: string;
   readonly children?: React.ReactNode;
-}
+}>;
 
 /**
  * OverviewCard component for displaying a card with a title, and content.

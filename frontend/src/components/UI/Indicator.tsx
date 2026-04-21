@@ -1,8 +1,8 @@
 import type { JSX } from 'react';
 
-interface IndicatorProps {
-  readonly className?: string;
-}
+type IndicatorProps = Readonly<{
+  className?: string;
+}>;
 
 /**
  * A component that renders a dot indicator.

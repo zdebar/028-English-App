@@ -7,10 +7,10 @@ const typeStyles = {
   info: 'bg-info-light',
 };
 
-type ToastProps = {
-  readonly children?: ReactNode;
-  readonly type?: ToastType;
-};
+type ToastProps = Readonly<{
+  children?: ReactNode;
+  type?: ToastType;
+}>;
 
 /**
  * Toast component for displaying brief notification messages.

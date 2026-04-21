@@ -1,16 +1,16 @@
 import { TEXTS, ARIA_TEXTS } from '@/locales/cs';
 
-interface BlockBarProps {
-  readonly previousCount: number;
-  readonly todayCount: number;
-  readonly lessonName: string;
-  readonly lessonNumber: number;
-  readonly isMastered: boolean;
-  readonly divisions?: number;
-  readonly lessonCount: number;
-  readonly widthBase?: number;
-  readonly className?: string;
-}
+type BlockBarProps = Readonly<{
+  previousCount: number;
+  todayCount: number;
+  lessonName: string;
+  lessonNumber: number;
+  isMastered: boolean;
+  divisions?: number;
+  lessonCount: number;
+  widthBase?: number;
+  className?: string;
+}>;
 
 /**
  * BlockBar component displays a progress bar for a lesson block, showing previous and today's progress.

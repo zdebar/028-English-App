@@ -1,10 +1,10 @@
 import { useHelpStore } from './use-help-store';
 import type { JSX, ReactNode } from 'react';
 
-interface HelpTextProps {
+type HelpTextProps = Readonly<{
   readonly children: ReactNode;
   readonly className?: string;
-}
+}>;
 
 /**
  * HelpText component for displaying contextual hints.
