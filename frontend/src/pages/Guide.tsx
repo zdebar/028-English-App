@@ -12,8 +12,8 @@ export default function Guide(): JSX.Element {
       <h1 className="text-center">Návod</h1>
       <section>
         <p className="text-center">
-          Běžné učení jazyků používá příliš mnoho teorie a málo praxe. Tato aplikace je zaměřena na
-          dril, na velké množství naposlouchaných a vyslovených opakování.
+          Tato aplikace je zaměřena na dril, na velké množství naposlouchaných a vyslovených
+          opakování.
         </p>
       </section>
       <section>
@@ -28,21 +28,18 @@ export default function Guide(): JSX.Element {
         <Screenshot src="/screenshots/not-revealed.webp" alt="Ukázka kartičky před odhalením" />
         <p>
           <strong>"dnes / denní cíl"</strong>
-          <span>
-            Doporučený denní počet opakování. Snažte se ho každý den splnit. Ostatní můžete pustit z
-            hlavy.
-          </span>
+          <span>Doporučený denní počet opakování.</span>
         </p>
         <p>
           <strong>"dokončit"</strong>
           <span>
-            Položka se nebude nabízet k dalšímu procvičování. Použijte k přeskočení položky, pokud
-            ji již znáte z dřívějška.
+            Položka se označí jako naučená. Použijte k přeskočení položky, pokud ji již znáte z
+            dřívějška.
           </span>
         </p>
         <p>
           <strong>"gramatika"</strong>
-          <span>Vysvětlení příslušné gramatiky ke každé větě či slovnímu spojení.</span>
+          <span>Vysvětlení příslušné gramatiky.</span>
         </p>
       </section>
       <section>
@@ -83,8 +80,8 @@ export default function Guide(): JSX.Element {
         <p>
           <strong>"Smazat účet"</strong>
           <span>
-            Smaže uživatelský účet včetně všech vašich dat. V této fázi vývoje je smazání účtu
-            nevratné a data budou nenávratně odstraněna.
+            Smaže uživatelský účet včetně všech vašich dat. Smazání účtu nevratné a data budou
+            nenávratně odstraněna.
           </span>
         </p>
         <p>
