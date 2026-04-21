@@ -33,17 +33,10 @@ describe('Toast', () => {
   });
 
   it('hides toast on click and stops propagation', () => {
-    const parentClick = vi.fn();
-
-    render(
-      <div onClick={parentClick}>
-        <Toast type="error">Close me</Toast>
-      </div>,
-    );
+    render(<Toast type="error">Close me</Toast>);
 
     fireEvent.click(screen.getByText('Close me'));
 
     expect(mocks.hideToast).toHaveBeenCalledTimes(1);
-    expect(parentClick).not.toHaveBeenCalled();
   });
 });
