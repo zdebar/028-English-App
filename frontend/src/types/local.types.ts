@@ -5,8 +5,10 @@ export interface UserItemLocal {
   english: string;
   pronunciation: string;
   audio: string | null;
+  learnable: boolean; // null replaced with config.database.nullReplacementBoolean
   sort_order: number;
   progress: number;
+  block_id: number; // null replaced with config.database.nullReplacementNumber
   grammar_id: number; // null replaced with config.database.nullReplacementNumber
   started_at: string; // nulls replaced with config.database.nullReplacementDate
   updated_at: string;
@@ -35,6 +37,8 @@ export interface LevelLocal extends RecordLocal {}
 
 export interface GrammarLocal extends RecordLocal {}
 
+export interface BlockLocal extends RecordLocal {}
+
 export interface ProgressCounts {
   startedCount: number;
   startedTodayCount: number;
@@ -48,8 +52,6 @@ export interface LessonOverview extends LessonLocal, ProgressCounts {}
 export interface LevelOverview extends LevelLocal, ProgressCounts {
   lessons: LessonOverview[];
 }
-
-
 
 export interface UserScoreLocal {
   user_id: string;
@@ -88,6 +90,7 @@ export const TableName = {
   UserItems: 'user_items',
   Levels: 'levels',
   Lessons: 'lessons',
+  Blocks: 'blocks',
 } as const;
 
 export type TableName = (typeof TableName)[keyof typeof TableName];

@@ -119,6 +119,7 @@ export function convertSQLToLocal(sqlItem: UserItemSQL): UserItemLocal {
     next_at: sqlItem.next_at ?? NULL_DATE,
     mastered_at: sqlItem.mastered_at ?? NULL_DATE,
     deleted_at: sqlItem.deleted_at ?? NULL_DATE,
+    block_id: sqlItem.block_id ?? NULL_NUMBER,
     grammar_id: sqlItem.grammar_id ?? NULL_NUMBER,
   };
 }

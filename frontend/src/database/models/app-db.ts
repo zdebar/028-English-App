@@ -8,10 +8,12 @@ import type AudioMetadata from '@/database/models/audio-metadata';
 import type Metadata from '@/database/models/metadata';
 import type Lessons from '@/database/models/lessons';
 import type Levels from '@/database/models/levels';
+import type Blocks from '@/database/models/blocks';
 
 export default class AppDB extends Dexie {
   levels!: EntityTable<Levels, 'id'>;
   lessons!: EntityTable<Lessons, 'id'>;
+  blocks!: EntityTable<Blocks, 'id'>;
   grammar!: EntityTable<Grammar, 'id'>;
   user_items!: EntityTable<UserItem, any>;
   user_scores!: EntityTable<UserScore, any>;
@@ -26,9 +28,10 @@ export default class AppDB extends Dexie {
     this.version(1).stores({
       levels: 'id, sort_order',
       lessons: 'id, sort_order',
+      blocks: 'id, sort_order',
       grammar: 'id, sort_order',
       user_items:
-        '[user_id+item_id], [user_id+grammar_id+started_at], [user_id+started_at], [user_id+updated_at], [user_id+next_at+sort_order], [user_id+next_at+mastered_at+sort_order]',
+        '[user_id+item_id], [user_id+grammar_id+started_at],[user_id+grammar_id+started_at+learnable], [user_id+started_at], [user_id+updated_at], [user_id+next_at+sort_order], [user_id+next_at+mastered_at+sort_order+learnable], [user_id+block_id]',
       user_scores: '[user_id+date], [user_id+updated_at]',
       audio_records: 'filename',
       audio_metadata: 'archive_name',

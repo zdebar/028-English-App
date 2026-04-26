@@ -46,7 +46,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   english!: string;
   pronunciation!: string;
   audio!: string | null;
+  learnable!: boolean;
   sort_order!: number;
+  block_id!: number;
   grammar_id!: number;
   progress!: number;
   started_at!: string;
@@ -136,6 +138,22 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Retrieves a list of unique grammar IDs for items that have been started by a user.
    * @param userId - The ID of the user
    */
+  static async getByBlockIds(userId: string, blockId: number): Promise<UserItemLocal[]> {
+    assertNonEmptyString(userId, 'userId');
+    assertPositiveInteger(blockId, 'blockId');
+
+    const blockItems = await db.user_items
+      .where('[user_id+block_id]')
+      .equals([userId, blockId])
+      .toArray();
+
+    return blockItems;
+  }
+
+  /**
+   * Retrieves a list of unique grammar IDs for items that have been started by a user.
+   * @param userId - The ID of the user
+   */
   static async getStartedGrammarIds(userId: string): Promise<number[]> {
     assertNonEmptyString(userId, 'userId');
 
@@ -156,8 +174,13 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     assertNonEmptyString(userId, 'userId');
 
     const result = await db.user_items
-      .where('[user_id+grammar_id+started_at]')
-      .between([userId, NULL_NUMBER, Dexie.minKey], [userId, NULL_NUMBER, NULL_DATE], true, false)
+      .where('[user_id+grammar_id+started_at+learnable]')
+      .between(
+        [userId, NULL_NUMBER, Dexie.minKey, true],
+        [userId, NULL_NUMBER, NULL_DATE, true],
+        true,
+        false,
+      )
       .toArray();
 
     result.sort((a, b) => a.english.toLowerCase().localeCompare(b.english.toLowerCase()));
@@ -341,10 +364,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const minNextAt = isNew ? NULL_DATE : Dexie.minKey;
     const maxNextAt = isNew ? NULL_DATE : new Date().toISOString();
     return db.user_items
-      .where('[user_id+next_at+mastered_at+sort_order]')
+      .where('[user_id+next_at+mastered_at+sort_order+learnable]')
       .between(
-        [userId, minNextAt, NULL_DATE, Dexie.minKey],
-        [userId, maxNextAt, NULL_DATE, Dexie.maxKey],
+        [userId, minNextAt, NULL_DATE, Dexie.minKey, true],
+        [userId, maxNextAt, NULL_DATE, Dexie.maxKey, true],
         true,
         false,
       )

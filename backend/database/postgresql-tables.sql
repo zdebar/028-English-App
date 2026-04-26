@@ -34,13 +34,24 @@ CREATE TABLE IF NOT EXISTS lessons (
   deleted_at TIMESTAMPTZ,
 );
 
+CREATE TABLE IF NOT EXISTS blocks (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  note TEXT NOT NULL,
+  sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 1),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  deleted_at TIMESTAMPTZ
+);
+
 CREATE TABLE IF NOT EXISTS items (
   id SERIAL PRIMARY KEY,
   czech TEXT NOT NULL,
   english TEXT NOT NULL,
   pronunciation TEXT,
   audio TEXT,
+  learnable BOOLEAN NOT NULL DEFAULT TRUE,
   sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 0),
+  block_id INTEGER REFERENCES blocks(id) ON DELETE SET NULL,
   grammar_id INTEGER REFERENCES grammar(id) ON DELETE SET NULL,
   lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE RESTRICT,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
