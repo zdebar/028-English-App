@@ -4,6 +4,8 @@ export const ROUTES = {
   practice: '/practice',
   profile: '/profile',
   levels: '/levels',
+  blocks: '/blocks',
+  blocksDetail: '/blocks/:blockId',
   grammar: '/grammar',
   vocabulary: '/vocabulary',
   guide: '/guide',

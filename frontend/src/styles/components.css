@@ -36,3 +36,7 @@
 .help-text-span {
   @apply w-15 inline-block;
 }
+
+.profile-menu-button {
+  @apply w-44 mx-auto;
+}

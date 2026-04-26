@@ -43,7 +43,7 @@ export default function SignoutButton({ className }: SignoutButtonProps): JSX.El
       onConfirm={handleSignout}
       className={className}
     >
-      <p className="mx-auto w-40">{TEXTS.signoutButtonTitle}</p>
+      <p className="profile-menu-button">{TEXTS.signoutButtonTitle}</p>
     </ModalButton>
   );
 }

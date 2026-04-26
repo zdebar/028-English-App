@@ -46,7 +46,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   english!: string;
   pronunciation!: string;
   audio!: string | null;
-  learnable!: boolean;
+  learnable!: 0 | 1; // boolean represented as 0 or 1
   sort_order!: number;
   block_id!: number;
   grammar_id!: number;
@@ -138,7 +138,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Retrieves a list of unique grammar IDs for items that have been started by a user.
    * @param userId - The ID of the user
    */
-  static async getByBlockIds(userId: string, blockId: number): Promise<UserItemLocal[]> {
+  static async getByBlockId(userId: string, blockId: number): Promise<UserItemLocal[]> {
     assertNonEmptyString(userId, 'userId');
     assertPositiveInteger(blockId, 'blockId');
 
@@ -147,7 +147,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .equals([userId, blockId])
       .toArray();
 
-    return blockItems;
+    return blockItems.sort((a, b) => a.sort_order - b.sort_order);
+  }
+
+  static async getByBlockIds(userId: string, blockId: number): Promise<UserItemLocal[]> {
+    return this.getByBlockId(userId, blockId);
   }
 
   /**
@@ -176,8 +180,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const result = await db.user_items
       .where('[user_id+grammar_id+started_at+learnable]')
       .between(
-        [userId, NULL_NUMBER, Dexie.minKey, true],
-        [userId, NULL_NUMBER, NULL_DATE, true],
+        [userId, NULL_NUMBER, Dexie.minKey, 1],
+        [userId, NULL_NUMBER, NULL_DATE, 1],
         true,
         false,
       )
@@ -366,8 +370,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return db.user_items
       .where('[user_id+next_at+mastered_at+sort_order+learnable]')
       .between(
-        [userId, minNextAt, NULL_DATE, Dexie.minKey, true],
-        [userId, maxNextAt, NULL_DATE, Dexie.maxKey, true],
+        [userId, minNextAt, NULL_DATE, Dexie.minKey, 1],
+        [userId, maxNextAt, NULL_DATE, Dexie.maxKey, 1],
         true,
         false,
       )

@@ -27,6 +27,8 @@ import { useThemeLoader } from './features/theme/use-theme-loader';
 import { useUserStoreSync } from './features/user-stats/use-user-store-sync';
 import { useDailyStatsReset } from './features/user-stats/use-daily-stats-reset';
 import Notification from './components/UI/Notification';
+import Blocks from './pages/Blocks';
+import BlockItems from './pages/BlockItems';
 
 export default function App() {
   const userId = useAuthStore((state) => state.userId);
@@ -82,6 +84,8 @@ export default function App() {
             <Route path={ROUTES.practice} element={<Practice />} />
             <Route path={ROUTES.profile} element={<Profile />} />
             <Route path={ROUTES.levels} element={<Levels />} />
+            <Route path={ROUTES.blocks} element={<Blocks />} />
+            <Route path={ROUTES.blocksDetail} element={<BlockItems />} />
             <Route path={ROUTES.grammar} element={<Grammar />} />
             <Route path={ROUTES.vocabulary} element={<Vocabulary />} />
           </Route>

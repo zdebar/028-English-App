@@ -70,7 +70,7 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
       onConfirm={handleDelete}
       className={className}
     >
-      <p className="mx-auto w-40">{TEXTS.deleteUserButtonTitle}</p>
+      <p className="profile-menu-button">{TEXTS.deleteUserButtonTitle}</p>
     </ModalButton>
   );
 }

@@ -10,6 +10,10 @@ export const OVERVIEW_TEXTS = {
   masteredCount: 'naučeno',
   restartGrammarProgress: 'Restartovat pokrok všech položek příslušejících této gramatice',
 
+  // Blocks Overview Page
+  noBlocks: 'Žádné dostupné bloky.',
+  noBlockItems: 'V tomto bloku nejsou žádné položky.',
+
   // Privacy Policy Page
   privacyPolicy: 'Zásady ochrany osobních údajů',
 
@@ -34,6 +38,8 @@ export const OVERVIEW_TEXTS = {
   // Profile Page
   levelsOverview: 'Přehled CEFR úrovní',
   levelsOverviewTooltip: 'Přehled CEFR úrovní s pokrokem',
+  blocksOverview: 'Přehled bloků slovíček',
+  blocksOverviewTooltip: 'Přehled ucelených bloků slovíček',
   grammarOverview: 'Přehled gramatiky',
   grammarOverviewTooltip: 'Přehled započaté gramatiky',
   vocabularyOverview: 'Přehled slovíček',

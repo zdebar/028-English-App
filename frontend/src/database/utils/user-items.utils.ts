@@ -93,6 +93,7 @@ export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
 
   return {
     ...localItem,
+    learnable: Boolean(localItem.learnable), // Convert number back to boolean
     started_at: localItem.started_at === NULL_DATE ? null : localItem.started_at,
     next_at: localItem.next_at === NULL_DATE ? null : localItem.next_at,
     mastered_at: localItem.mastered_at === NULL_DATE ? null : localItem.mastered_at,
@@ -115,6 +116,7 @@ export function convertSQLToLocal(sqlItem: UserItemSQL): UserItemLocal {
 
   return {
     ...sqlItem,
+    learnable: sqlItem.learnable ? 1 : 0, // Convert boolean to number
     started_at: sqlItem.started_at ?? NULL_DATE,
     next_at: sqlItem.next_at ?? NULL_DATE,
     mastered_at: sqlItem.mastered_at ?? NULL_DATE,

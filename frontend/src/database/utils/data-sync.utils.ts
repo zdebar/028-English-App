@@ -17,6 +17,7 @@ import { infoHandler } from '@/features/logging/info-handler';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 import { supabaseInstance } from '@/config/supabase.config';
 import { triggerDailyCountUpdatedEvent, triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
+import Blocks from '../models/blocks';
 
 /**
  * Synchronizes data for a specific user with the database.
@@ -44,6 +45,7 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
         Grammar.syncFromRemote(true),
         Levels.syncFromRemote(true),
         Lessons.syncFromRemote(true),
+        Blocks.syncFromRemote(true),
         UserScore.syncFromRemote(userId, true),
         UserItem.syncFromRemote(userId, true),
       ]
@@ -51,6 +53,7 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
         Grammar.syncFromRemote(false),
         Levels.syncFromRemote(false),
         Lessons.syncFromRemote(false),
+        Blocks.syncFromRemote(false),
         UserScore.syncFromRemote(userId, false),
         UserItem.syncFromRemote(userId, false),
       ];
