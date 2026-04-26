@@ -4,6 +4,7 @@ const mocks = vi.hoisted(() => ({
   bulkPut: vi.fn(),
   bulkDelete: vi.fn(),
   equalsDelete: vi.fn(),
+  blockEqualsToArray: vi.fn(),
   itemIdModify: vi.fn(),
   updatedBetweenToArray: vi.fn(),
   transaction: vi.fn(),
@@ -56,6 +57,13 @@ vi.mock('@/database/models/db', () => ({
           return {
             between: () => ({
               toArray: (...args: unknown[]) => mocks.updatedBetweenToArray(...args),
+            }),
+          };
+        }
+        if (field === '[user_id+block_id]') {
+          return {
+            equals: () => ({
+              toArray: (...args: unknown[]) => mocks.blockEqualsToArray(...args),
             }),
           };
         }
@@ -132,6 +140,7 @@ describe('UserItem', () => {
     mocks.convertSQLToLocal.mockImplementation((item: unknown) => item);
     mocks.addItemCount.mockResolvedValue(undefined);
     mocks.equalsDelete.mockResolvedValue(0);
+    mocks.blockEqualsToArray.mockResolvedValue([]);
     mocks.updatedBetweenToArray.mockResolvedValue([]);
     mocks.rpc.mockResolvedValue({ data: [], error: null });
     mocks.markAsSynced.mockResolvedValue(undefined);
@@ -195,6 +204,17 @@ describe('UserItem', () => {
     await UserItem.deleteAllByUserId('u1');
 
     expect(mocks.equalsDelete).toHaveBeenCalled();
+  });
+
+  it('getByBlockId returns block items ordered by sort_order', async () => {
+    mocks.blockEqualsToArray.mockResolvedValue([
+      { item_id: 2, sort_order: 20 },
+      { item_id: 1, sort_order: 10 },
+    ]);
+
+    const result = await UserItem.getByBlockId('u1', 3);
+
+    expect(result.map((item: any) => item.item_id)).toEqual([1, 2]);
   });
 
   it('resetItemById triggers levels update when successful', async () => {
