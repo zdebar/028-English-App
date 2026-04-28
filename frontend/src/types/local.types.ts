@@ -5,7 +5,7 @@ export interface UserItemLocal {
   english: string;
   pronunciation: string;
   audio: string | null;
-  learnable: 0 | 1; // boolean represented as 0 or 1
+  is_study_item: 0 | 1; // boolean represented as 0 or 1
   sort_order: number;
   progress: number;
   block_id: number; // null replaced with config.database.nullReplacementNumber

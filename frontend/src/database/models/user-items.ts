@@ -46,7 +46,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   english!: string;
   pronunciation!: string;
   audio!: string | null;
-  learnable!: 0 | 1; // boolean represented as 0 or 1
+  is_study_item!: 0 | 1; // boolean represented as 0 or 1
   sort_order!: number;
   block_id!: number;
   grammar_id!: number;
@@ -178,7 +178,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     assertNonEmptyString(userId, 'userId');
 
     const result = await db.user_items
-      .where('[user_id+grammar_id+started_at+learnable]')
+      .where('[user_id+grammar_id+started_at+is_study_item]')
       .between(
         [userId, NULL_NUMBER, Dexie.minKey, 1],
         [userId, NULL_NUMBER, NULL_DATE, 1],
@@ -368,7 +368,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const minNextAt = isNew ? NULL_DATE : Dexie.minKey;
     const maxNextAt = isNew ? NULL_DATE : new Date().toISOString();
     return db.user_items
-      .where('[user_id+next_at+mastered_at+sort_order+learnable]')
+      .where('[user_id+next_at+mastered_at+sort_order+is_study_item]')
       .between(
         [userId, minNextAt, NULL_DATE, Dexie.minKey, 1],
         [userId, maxNextAt, NULL_DATE, Dexie.maxKey, 1],

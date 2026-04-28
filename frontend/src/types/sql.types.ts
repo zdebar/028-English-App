@@ -6,7 +6,7 @@ export interface UserItemSQL {
   english: string;
   pronunciation: string;
   audio: string | null;
-  learnable: boolean;
+  is_study_item: boolean;
   sort_order: number;
   progress: number;
   block_id: number | null;
