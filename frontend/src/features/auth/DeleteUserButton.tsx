@@ -1,7 +1,7 @@
 import { supabaseInstance } from '@/config/supabase.config';
 import Metadata from '@/database/models/metadata';
 import UserItem from '@/database/models/user-items';
-import UserScore from '@/database/models/user-scores';
+import UserScoreType from '@/database/models/user-scores';
 import { clearSyncTimes } from '@/database/utils/sync-time.utils';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { errorHandler } from '@/features/logging/error-handler';
@@ -9,7 +9,7 @@ import { logRejectedResults } from '@/features/logging/logging.utils.ts';
 import ModalButton from '@/features/modal/ModalButton';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
-import { TableName } from '@/types/local.types';
+import { TableName } from '@/types/table.types';
 import { type JSX } from 'react';
 import { useThemeStore } from '../theme/use-theme-store';
 
@@ -39,7 +39,7 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
       const resultsDelete = await Promise.allSettled([
         UserItem.deleteAllByUserId(userId),
         Metadata.deleteSyncRow(TableName.UserItems, userId),
-        UserScore.deleteAllScores(userId),
+        UserScoreType.deleteAllScores(userId),
         Metadata.deleteSyncRow(TableName.UserScores, userId),
         Promise.resolve(clearTheme(userId)),
         Promise.resolve(clearSyncTimes(userId)),

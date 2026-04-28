@@ -10,7 +10,7 @@ import { errorHandler } from '@/features/logging/error-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useArray } from '@/hooks/use-array';
 import { TEXTS } from '@/locales/cs';
-import type { UserItemLocal } from '@/types/local.types';
+import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 

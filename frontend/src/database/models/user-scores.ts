@@ -6,7 +6,8 @@ import { getTodayShortDate } from '@/database/utils/database.utils';
 import { getSyncTimestamps, splitDeleted } from '../utils/data-sync.utils';
 import { infoHandler } from '@/features/logging/info-handler';
 import { SupabaseError } from '@/types/error.types';
-import { TableName, type UserScoreLocal } from '@/types/local.types';
+import { type UserScoreType } from '@/types/generic.types';
+import { TableName } from '@/types/table.types';
 import {
   assertNonEmptyString,
   assertNonNegativeInteger,
@@ -23,7 +24,7 @@ import Metadata from './metadata';
  * @method syncUserScores - Synchronizes user scores between local database and Supabase.
  * @method deleteAllScores - Deletes all user score records for a given user.
  */
-export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
+export default class UserScore extends Entity<AppDB> implements UserScoreType {
   user_id!: string;
   date!: string;
   item_count!: number;
@@ -126,7 +127,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
     userId: string,
     lastSyncedAt: string,
     newSyncedAt: string,
-  ): Promise<UserScoreLocal[]> {
+  ): Promise<UserScoreType[]> {
     const localScores = await db.user_scores
       .where('[user_id+updated_at]')
       .between([userId, lastSyncedAt], [userId, newSyncedAt], true, false)
@@ -146,7 +147,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    * @param date - The date associated with the score record
    * @param count - The number of items counted in this score. Should be a non-negative integer.
    */
-  private static createRecord(userId: string, date: string, count: number): UserScoreLocal {
+  private static createRecord(userId: string, date: string, count: number): UserScoreType {
     assertNonNegativeInteger(
       count,
       'count must be a non-negative integer to create a user score record.',
@@ -168,9 +169,9 @@ export default class UserScore extends Entity<AppDB> implements UserScoreLocal {
    */
   private static async syncWithRemote(
     userId: string,
-    scores: UserScoreLocal[],
+    scores: UserScoreType[],
     lastSyncedAt: string = config.database.epochStartDate,
-  ): Promise<UserScoreLocal[]> {
+  ): Promise<UserScoreType[]> {
     const { data: updatedScores, error: errorFetch } = await supabaseInstance.rpc(
       'upsert_fetch_user_scores',
       {

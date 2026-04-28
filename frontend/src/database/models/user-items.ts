@@ -2,8 +2,8 @@ import config from '@/config/config';
 import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
-import type { UserItemLocal, UserItemPractice } from '@/types/local.types';
-import { TableName } from '@/types/local.types';
+import type { UserItemPractice, UserItemLocal, UserItemExport } from '@/types/user-item.types';
+import { TableName } from '@/types/table.types';
 import {
   assertNonEmptyString,
   assertNonNegativeInteger,
@@ -13,8 +13,8 @@ import Dexie, { Entity } from 'dexie';
 import { getSyncTimestamps, splitDeleted } from '../utils/data-sync.utils';
 
 import {
-  convertLocalToSQL,
-  convertSQLToLocal,
+  convertLocalToExport,
+  convertAPIToLocal,
   addGrammarIndicatorFlag,
   getNextAt,
   resetUserItem,
@@ -22,9 +22,8 @@ import {
 import { infoHandler } from '@/features/logging/info-handler';
 import { triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 import { SupabaseError } from '@/types/error.types';
-import type { UserItemSQL } from '@/types/sql.types';
 import Metadata from './metadata';
-import UserScore from './user-scores';
+import UserScoreType from './user-scores';
 
 const NULL_DATE = config.database.nullReplacementDate;
 const NULL_NUMBER = config.database.nullReplacementNumber;
@@ -131,7 +130,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     });
 
     await db.user_items.bulkPut(updatedItems);
-    await UserScore.addItemCount(userId, updatedItems.length, dateTime);
+    await UserScoreType.addItemCount(userId, updatedItems.length, dateTime);
   }
 
   /**
@@ -306,7 +305,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     userId: string,
     lastSyncedAt: string,
     newSyncedAt: string,
-  ): Promise<UserItemSQL[]> {
+  ): Promise<UserItemExport[]> {
     const localUserItems: UserItemLocal[] = await db.user_items
       .where('[user_id+updated_at]')
       .between([userId, lastSyncedAt], [userId, newSyncedAt], true, false)
@@ -317,7 +316,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       return [];
     }
 
-    return localUserItems.map(convertLocalToSQL);
+    return localUserItems.map(convertLocalToExport);
   }
 
   /**
@@ -326,7 +325,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    */
   private static async syncWithRemote(
     userId: string,
-    items: UserItemSQL[],
+    items: UserItemExport[],
     lastSyncedAt: string,
   ): Promise<UserItemLocal[]> {
     const { data: updatedUserItems, error: rpcFetchError } = await supabaseInstance.rpc(
@@ -349,7 +348,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       infoHandler(`Completed ${items.length} user items push to Supabase for userId: ${userId}`);
     }
 
-    return (updatedUserItems ?? []).map(convertSQLToLocal);
+    return (updatedUserItems ?? []).map(convertAPIToLocal);
   }
 
   /**

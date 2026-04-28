@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { alternateDirection } from '@/features/practice/practice.utils';
-import type { UserItemPractice } from '@/types/local.types';
+import type { UserItemPractice } from '@/types/user-item.types';
 import { useFetch } from '@/hooks/use-fetch';
 import UserItem from '@/database/models/user-items';
 import { errorHandler } from '@/features/logging/error-handler';

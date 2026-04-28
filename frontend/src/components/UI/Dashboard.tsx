@@ -5,13 +5,13 @@ import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import { getInProgressLessons } from '../../utils/dashboard.utils';
 import TextButton from '@/components/UI/buttons/TextButton';
-import type { LessonOverview } from '@/types/local.types';
+import type { LessonOverviewType } from '@/types/generic.types';
 
 type DashboardProps = Readonly<{
   className?: string;
 }>;
 
-const noAvailableLesson: LessonOverview = {
+const noAvailableLesson: LessonOverviewType = {
   id: 0,
   name: TEXTS.notAvailable,
   note: '',

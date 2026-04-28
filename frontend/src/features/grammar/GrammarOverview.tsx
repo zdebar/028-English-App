@@ -3,7 +3,7 @@ import Grammar from '@/database/models/grammar';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import HelpButton from '@/features/help/HelpButton';
 import { TEXTS } from '@/locales/cs';
-import type { GrammarLocal } from '@/types/local.types';
+import type { GrammarType } from '@/types/generic.types';
 import DOMPurify from 'dompurify';
 import { useCallback, useMemo, type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -39,7 +39,7 @@ export default function GrammarOverview(): JSX.Element {
     currentItem: currentGrammar,
     setCurrentIndex,
     reload,
-  } = useArray<GrammarLocal>(fetchGrammarList);
+  } = useArray<GrammarType>(fetchGrammarList);
 
   const hasGrammar = grammarList.length > 0;
 

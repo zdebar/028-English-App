@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { UserItemPractice } from '@/types/local.types';
+import type { UserItemPractice } from '@/types/user-item.types';
 
 const useFetchMock = vi.fn();
 const getPracticeDeckMock = vi.fn();

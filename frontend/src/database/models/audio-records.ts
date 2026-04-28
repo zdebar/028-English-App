@@ -6,7 +6,7 @@ import { fetchStorage } from '@/database/utils/audio-records.utils';
 import { infoHandler } from '@/features/logging/info-handler';
 import { logRejectedResults } from '@/features/logging/logging.utils';
 import { ZipExtractionError } from '@/types/error.types';
-import type { AudioRecordLocal } from '@/types/local.types';
+import type { AudioRecordLocal } from '@/types/audio.types';
 import { Entity } from 'dexie';
 
 /**

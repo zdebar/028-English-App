@@ -1,5 +1,5 @@
 import config from '@/config/config';
-import type { LessonOverview, LevelOverview } from '@/types/local.types';
+import type { LessonOverviewType, LevelOverviewType } from '@/types/generic.types';
 
 /**
  * Calculates the items count in last started lesson before today.
@@ -61,9 +61,9 @@ export function getTodayStartedItems(previousCount: number, todayCount: number):
  * @param mode "started" (default) or "mastered" - which lesson attributes to use
  */
 export function getInProgressLessons(
-  levelsOverview: LevelOverview[],
+  levelsOverview: LevelOverviewType[],
   mode: 'started' | 'mastered' = 'started',
-): LessonOverview[] {
+): LessonOverviewType[] {
   const shouldIncludeLesson = (
     todayCount: number,
     isIncomplete: boolean,
@@ -74,7 +74,7 @@ export function getInProgressLessons(
   const todayKey = mode === 'mastered' ? 'masteredTodayCount' : 'startedTodayCount';
 
   const allLessons = Array.isArray(levelsOverview)
-    ? levelsOverview.flatMap((level: LevelOverview) =>
+    ? levelsOverview.flatMap((level: LevelOverviewType) =>
         Array.isArray(level.lessons) ? level.lessons : [],
       )
     : [];
@@ -90,7 +90,7 @@ export function getInProgressLessons(
     return [];
   }
 
-  const result: LessonOverview[] = [];
+  const result: LessonOverviewType[] = [];
   let firstEligibleZeroIncluded = false;
 
   for (const [index, lesson] of sortedLessons.entries()) {

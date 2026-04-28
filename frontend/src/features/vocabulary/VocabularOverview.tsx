@@ -2,7 +2,7 @@ import DelayedMessage from '@/components/UI/DelayedMessage';
 import config from '@/config/config';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import type { UserItemLocal } from '@/types/local.types';
+import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useMemo, useState } from 'react';
 import VocabularyDetailCard from './VocabularyDetailCard';
 import VocabularyList from './VocabularyList';

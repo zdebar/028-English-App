@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import DelayedMessage from '@/components/UI/DelayedMessage';
 import Notification from '@/components/UI/Notification';
 import { TEXTS } from '@/locales/cs';
-import type { BlockLocal } from '@/types/local.types';
+import type { BlockType } from '@/types/generic.types';
 import { useArray } from '@/hooks/use-array';
 import BaseButton from '@/components/UI/buttons/BaseButton';
 import CloseButton from '@/components/UI/buttons/CloseButton';
@@ -12,7 +12,7 @@ import { ROUTES } from '@/config/routes.config';
 export default function BlocksOverview() {
   const navigate = useNavigate();
 
-  const { data: blocks, error, loading } = useArray<BlockLocal>(Blocks.getAll);
+  const { data: blocks, error, loading } = useArray<BlockType>(Blocks.getAll);
   const hasBlocks = blocks.length > 0;
 
   if (loading) {

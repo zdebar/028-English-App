@@ -1,6 +1,6 @@
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
-import type { AudioMetadataLocal } from '@/types/local.types';
+import type { AudioMetadataLocal } from '@/types/audio.types';
 import { Entity } from 'dexie';
 
 /**

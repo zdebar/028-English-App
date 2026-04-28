@@ -4,7 +4,7 @@ import config from '@/config/config';
 import { TEXTS } from '@/locales/cs';
 import DirectionDropdown from '@/features/vocabulary/DirectionDropdown';
 import { type DisplayField } from '@/features/vocabulary/vocabulary.utils';
-import { type UserItemLocal } from '@/types/local.types';
+import { type UserItemLocal } from '@/types/user-item.types';
 import CancelIcon from '@/components/UI/icons/CancelIcon';
 import DelayedMessage from '@/components/UI/DelayedMessage';
 import Notification from '@/components/UI/Notification';

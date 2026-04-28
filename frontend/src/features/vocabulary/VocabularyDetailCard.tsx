@@ -3,7 +3,7 @@ import PropertyView from '@/components/UI/PropertyView';
 import { TEXTS } from '@/locales/cs';
 import HelpButton from '@/features/help/HelpButton';
 import { shortenDate } from '@/features/vocabulary/vocabulary.utils';
-import type { UserItemLocal } from '@/types/local.types';
+import type { UserItemLocal } from '@/types/user-item.types';
 
 const NOT_AVAILABLE = TEXTS.notAvailable;
 

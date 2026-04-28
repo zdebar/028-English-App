@@ -1,12 +1,12 @@
 import { create } from 'zustand';
-import type { LevelOverview } from '@/types/local.types';
-import UserScore from '@/database/models/user-scores';
+import type { LevelOverviewType } from '@/types/generic.types';
+import UserScoreType from '@/database/models/user-scores';
 import Levels from '@/database/models/levels';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 import { errorHandler } from '../logging/error-handler';
 
 interface UserState {
-  levels: LevelOverview[];
+  levels: LevelOverviewType[];
   dailyCount: number;
   showMasteredDashboard: boolean;
   setMasteredDashboard: (value: boolean) => void;
@@ -16,7 +16,7 @@ interface UserState {
   clearDailyCount: () => void;
 }
 
-const initialLevels: LevelOverview[] = [];
+const initialLevels: LevelOverviewType[] = [];
 const initialDailyStats = 0;
 
 /**
@@ -78,7 +78,7 @@ export const useUserStore = create<UserState>((set, get) => {
     reloadDailyCount: async (userId: string) => {
       try {
         assertNonEmptyString(userId, 'userId');
-        const updatedCount = (await UserScore.getOrCreateTodayScore(userId)) ?? 0;
+        const updatedCount = (await UserScoreType.getOrCreateTodayScore(userId)) ?? 0;
         set({ dailyCount: updatedCount });
       } catch (error) {
         set({ dailyCount: initialDailyStats });

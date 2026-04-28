@@ -3,8 +3,8 @@ import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import { DatabaseError, SupabaseError } from '@/types/error.types';
-import type { GrammarLocal } from '@/types/local.types';
-import { TableName } from '@/types/local.types';
+import type { GrammarType } from '@/types/generic.types';
+import { TableName } from '@/types/table.types';
 import { assertNonEmptyString, assertPositiveInteger } from '@/utils/assertions.utils';
 import Dexie, { Entity } from 'dexie';
 import { syncFromRemoteGeneric } from '../utils/data-sync.utils';
@@ -20,7 +20,7 @@ import UserItem from './user-items';
  * @method syncFromRemote - Synchronizes grammar data between the local database and Supabase, either fully or incrementally based on the last sync timestamp.
  *
  */
-export default class Grammar extends Entity<AppDB> implements GrammarLocal {
+export default class Grammar extends Entity<AppDB> implements GrammarType {
   id!: number;
   name!: string;
   note!: string;
@@ -31,7 +31,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * Retrieves a grammar record by its ID from the database.
    * @param grammarId - The unique identifier of the grammar record to retrieve.
    */
-  static async getById(grammarId: number): Promise<GrammarLocal> {
+  static async getById(grammarId: number): Promise<GrammarType> {
     assertPositiveInteger(grammarId, 'grammarId');
 
     const grammar = await db.grammar.get(grammarId);
@@ -47,7 +47,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    * Retrieves a list of grammar items that have been started by the user.
    * @param userId - The unique identifier of the user
    */
-  static async getStarted(userId: string): Promise<GrammarLocal[]> {
+  static async getStarted(userId: string): Promise<GrammarType[]> {
     assertNonEmptyString(userId, 'userId');
 
     const grammarIds = await UserItem.getStartedGrammarIds(userId);
@@ -71,8 +71,8 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    *                     an incremental sync based on the last sync timestamp. Defaults to false.
    */
   static async syncFromRemote(doFullSync: boolean = false): Promise<void> {
-    await syncFromRemoteGeneric<GrammarLocal>(
-      db.grammar as Dexie.Table<GrammarLocal, number>,
+    await syncFromRemoteGeneric<GrammarType>(
+      db.grammar as Dexie.Table<GrammarType, number>,
       TableName.Grammar,
       this.fetchFromRemote,
       doFullSync,
@@ -85,7 +85,7 @@ export default class Grammar extends Entity<AppDB> implements GrammarLocal {
    */
   private static async fetchFromRemote(
     lastSyncedAt: string = config.database.epochStartDate,
-  ): Promise<GrammarLocal[]> {
+  ): Promise<GrammarType[]> {
     const { data: grammar, error } = await supabaseInstance
       .from('grammar')
       .select('id, name, note, sort_order, deleted_at')

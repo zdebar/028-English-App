@@ -1,11 +1,11 @@
 import type {
-  UserItemLocal,
-  LessonLocal,
-  LevelOverview,
-  LessonOverview,
-  LevelLocal,
-  ProgressCounts,
-} from '@/types/local.types';
+  LessonType,
+  LevelOverviewType,
+  LessonOverviewType,
+  LevelType,
+  ProgressCountsType,
+} from '@/types/generic.types';
+import type { UserItemLocal } from '@/types/user-item.types';
 import { getTodayShortDate, getLocalDateFromUTC } from './database.utils';
 import config from '@/config/config';
 
@@ -20,11 +20,11 @@ const NULL_DATE = config.database.nullReplacementDate;
  */
 export function aggregateLevels(
   items: UserItemLocal[],
-  lessons: LessonLocal[],
-  levels: LevelLocal[],
-): LevelOverview[] {
+  lessons: LessonType[],
+  levels: LevelType[],
+): LevelOverviewType[] {
   const today = getTodayShortDate();
-  const progressKeys: (keyof ProgressCounts)[] = [
+  const progressKeys: (keyof ProgressCountsType)[] = [
     'startedCount',
     'startedTodayCount',
     'masteredCount',
@@ -32,7 +32,7 @@ export function aggregateLevels(
     'totalCount',
   ];
 
-  const createEmptyCounts = (): ProgressCounts => ({
+  const createEmptyCounts = (): ProgressCountsType => ({
     startedCount: 0,
     startedTodayCount: 0,
     masteredCount: 0,
@@ -40,7 +40,7 @@ export function aggregateLevels(
     totalCount: 0,
   });
 
-  const lessonCounts: ProgressCounts[] = lessons.map(() => createEmptyCounts());
+  const lessonCounts: ProgressCountsType[] = lessons.map(() => createEmptyCounts());
 
   // Map lesson_id to index for fast lookup
   const lessonIdToIndex = new Map<number, number>();
@@ -61,7 +61,7 @@ export function aggregateLevels(
   });
 
   // Build LessonOverview[]
-  const lessonOverviews: LessonOverview[] = lessons
+  const lessonOverviews: LessonOverviewType[] = lessons
     .map((lesson, idx) => ({
       ...lesson,
       ...lessonCounts[idx],
@@ -70,7 +70,7 @@ export function aggregateLevels(
     .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 
   // Build LevelOverview[] with lessons grouped
-  const levelOverviews = new Map<number, LevelOverview>();
+  const levelOverviews = new Map<number, LevelOverviewType>();
   levels.forEach((level) => {
     levelOverviews.set(level.id, {
       ...level,

@@ -50,16 +50,13 @@ import {
   restoreUnsavedFromLocalStorage,
 } from '@/database/utils/database.utils';
 import {
-  convertLocalToSQL,
-  convertSQLToLocal,
+  convertLocalToExport,
+  convertAPIToLocal,
   getNextAt,
   resetUserItem,
 } from '@/database/utils/user-items.utils';
 import { fetchStorage } from '@/database/utils/audio-records.utils';
-import {
-  triggerLevelsUpdatedEvent,
-  triggerNamedEvent,
-} from '@/utils/dashboard.utils';
+import { triggerLevelsUpdatedEvent, triggerNamedEvent } from '@/utils/dashboard.utils';
 
 describe('database.utils', () => {
   beforeEach(() => {
@@ -70,7 +67,7 @@ describe('database.utils', () => {
 
   describe('convertLocalToSQL', () => {
     it('converts null-replacement dates to null', () => {
-      const result = convertLocalToSQL({
+      const result = convertLocalToExport({
         user_id: 'u1',
         item_id: 10,
         progress: 2,
@@ -96,7 +93,7 @@ describe('database.utils', () => {
 
   describe('convertSQLToLocal', () => {
     it('fills null/undefined sortable/date fields with local null-replacement values', () => {
-      const result = convertSQLToLocal({
+      const result = convertAPIToLocal({
         user_id: 'u1',
         item_id: 1,
         progress: 0,
