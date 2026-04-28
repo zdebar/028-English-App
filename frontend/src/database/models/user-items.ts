@@ -149,10 +149,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return blockItems.sort((a, b) => a.sort_order - b.sort_order);
   }
 
-  static async getByBlockIds(userId: string, blockId: number): Promise<UserItemLocal[]> {
-    return this.getByBlockId(userId, blockId);
-  }
-
   /**
    * Retrieves a list of unique grammar IDs for items that have been started by a user.
    * @param userId - The ID of the user
@@ -167,6 +163,22 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .toArray();
 
     return [...new Set(startedItems.map((item) => item.grammar_id))];
+  }
+
+  /**
+   * Retrieves a list of unique block IDs for items that have been started by a user or not intended as study items.
+   * @param userId - The ID of the user
+   */
+  static async getOverviewBlocksIds(userId: string): Promise<number[]> {
+    assertNonEmptyString(userId, 'userId');
+
+    const startedItems = await db.user_items
+      .where('[user_id+started_at]')
+      .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
+      .filter((item) => item.block_id !== NULL_NUMBER || item.is_study_item === 0)
+      .toArray();
+
+    return [...new Set(startedItems.map((item) => item.block_id))];
   }
 
   /**

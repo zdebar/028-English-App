@@ -7,6 +7,8 @@ import { type BlockType } from '@/types/generic.types';
 import { TableName } from '@/types/table.types';
 import Dexie, { Entity } from 'dexie';
 import { syncFromRemoteGeneric } from '../utils/data-sync.utils';
+import UserItem from './user-items';
+import { assertNonEmptyString } from '@/utils/assertions.utils';
 
 /**
  * Represents a lesson entity in the local database.
@@ -28,6 +30,18 @@ export default class Blocks extends Entity<AppDB> implements BlockType {
    */
   static async getAll(): Promise<BlockType[]> {
     return await db.blocks.orderBy('sort_order').toArray();
+  }
+
+  /**
+   * Retrieves all lessons from the database.
+   */
+  static async getOverviewBlocks(userId: string): Promise<BlockType[]> {
+    assertNonEmptyString(userId, 'userId');
+
+    const startedBlockIds = await UserItem.getOverviewBlocksIds(userId);
+    const blocks = await db.blocks.where('id').anyOf(startedBlockIds).toArray();
+
+    return blocks.sort((a, b) => a.sort_order - b.sort_order);
   }
 
   /**

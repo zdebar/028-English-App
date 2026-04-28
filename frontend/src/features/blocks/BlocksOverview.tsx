@@ -8,11 +8,17 @@ import { useArray } from '@/hooks/use-array';
 import BaseButton from '@/components/UI/buttons/BaseButton';
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import { ROUTES } from '@/config/routes.config';
+import { useAuthStore } from '../auth/use-auth-store';
 
 export default function BlocksOverview() {
   const navigate = useNavigate();
+  const userId = useAuthStore((state) => state.userId);
 
-  const { data: blocks, error, loading } = useArray<BlockType>(Blocks.getAll);
+  const {
+    data: blocks,
+    error,
+    loading,
+  } = useArray<BlockType>(() => Blocks.getOverviewBlocks(userId ?? ''));
   const hasBlocks = blocks.length > 0;
 
   if (loading) {
