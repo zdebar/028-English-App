@@ -90,13 +90,13 @@ describe('ButtonWithModal', () => {
   it('disables trigger when disabled prop is true', () => {
     render(<ModalButton disabled>Open</ModalButton>);
 
-    expect(screen.getByRole('button', { name: 'Open' }).hasAttribute('disabled')).toBe(true);
+    expect((screen.getByRole('button', { name: 'Open' }) as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('disables trigger when loading is active', () => {
     mocks.isLoading = true;
     render(<ModalButton>Open</ModalButton>);
 
-    expect(screen.getByRole('button', { name: 'Open' }).hasAttribute('disabled')).toBe(true);
+    expect((screen.getByRole('button', { name: 'Open' }) as HTMLButtonElement).disabled).toBe(true);
   });
 });

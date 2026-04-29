@@ -73,7 +73,7 @@ describe('SyncButton', () => {
 
     render(<SyncButton />);
 
-    expect(screen.getByTestId('sync-modal-button').hasAttribute('disabled')).toBe(true);
+    expect((screen.getByTestId('sync-modal-button') as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('runs sync flow and shows success toast', async () => {

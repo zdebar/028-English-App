@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   get: vi.fn(),
@@ -104,6 +104,11 @@ describe('UserScore', () => {
     });
     mocks.rpc.mockResolvedValue({ data: [], error: null });
     mocks.markAsSynced.mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   it('addItemCount increments and stores score for today', async () => {

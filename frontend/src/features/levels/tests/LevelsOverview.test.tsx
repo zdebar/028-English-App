@@ -186,11 +186,9 @@ describe('LevelsOverview', () => {
 
     fireEvent.click(screen.getByText('A1'));
     expect(mocks.goalMetCalls.some((x) => x.current === 3 && x.goal === 5)).toBe(true);
-    expect(mocks.goalMetCalls.some((x) => x.current === 3 && x.goal === 5)).toBe(true);
 
     fireEvent.click(screen.getByRole('button', { name: 'Started' }));
     expect(screen.getByRole('button', { name: 'Mastered' })).toBeTruthy();
-    expect(mocks.goalMetCalls.some((x) => x.current === 1 && x.goal === 5)).toBe(true);
     expect(mocks.goalMetCalls.some((x) => x.current === 1 && x.goal === 5)).toBe(true);
   });
 

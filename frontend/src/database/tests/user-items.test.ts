@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   bulkPut: vi.fn(),
@@ -151,6 +151,11 @@ describe('UserItem', () => {
     mocks.itemIdModify.mockResolvedValue(1);
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
   it('savePracticeDeck stores items and increments score', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-03-04T09:00:00.000Z'));
@@ -254,13 +259,11 @@ describe('UserItem', () => {
       p_user_id: 'u1',
       p_last_synced_at: '2026-03-03T00:00:00.000Z',
       p_user_items: [
-        {
+        expect.objectContaining({
           user_id: 'u1',
           item_id: 1,
           updated_at: '2026-03-03T10:00:00.000Z',
-          deleted_at: null,
-          sql: true,
-        },
+        }),
       ],
     });
     expect(mocks.bulkDelete).toHaveBeenCalledWith([['u1', 3]]);

@@ -127,7 +127,7 @@ describe('DeleteUserButton', () => {
 
     render(<DeleteUserButton />);
 
-    expect(screen.getByTestId('button-with-modal').hasAttribute('disabled')).toBe(true);
+    expect((screen.getByTestId('button-with-modal') as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('runs delete flow and shows success toast', async () => {

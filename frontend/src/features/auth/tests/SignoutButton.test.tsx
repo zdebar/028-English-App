@@ -57,7 +57,7 @@ describe('SignoutButton', () => {
 
     render(<SignoutButton />);
 
-    expect(screen.getByTestId('button-with-modal').hasAttribute('disabled')).toBe(true);
+    expect((screen.getByTestId('button-with-modal') as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('calls logout and shows success toast', async () => {

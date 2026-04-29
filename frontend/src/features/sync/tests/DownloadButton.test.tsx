@@ -88,7 +88,7 @@ describe('DownloadButton', () => {
 
     render(<DownloadButton />);
 
-    expect(screen.getByTestId('download-button').hasAttribute('disabled')).toBe(true);
+    expect((screen.getByTestId('download-button') as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('is disabled while loading', () => {
@@ -96,7 +96,7 @@ describe('DownloadButton', () => {
 
     render(<DownloadButton />);
 
-    expect(screen.getByTestId('download-button').hasAttribute('disabled')).toBe(true);
+    expect((screen.getByTestId('download-button') as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('runs download flow and shows success toast', async () => {

@@ -32,6 +32,6 @@ describe('HelpText', () => {
 
     const text = screen.getByText('Hint');
     expect(text).toBeTruthy();
-    expect(text.className.includes('pos-class')).toBe(true);
+    expect(text.classList.contains('pos-class')).toBe(true);
   });
 });
