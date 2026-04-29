@@ -92,6 +92,10 @@ BEGIN
   RETURN NEW;
 END;
 $$;
+-- Revoke EXECUTE permission from all roles so only the trigger can call this function
+REVOKE EXECUTE ON FUNCTION public.handle_new_auth_user() FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.handle_new_auth_user() FROM anon;
+REVOKE EXECUTE ON FUNCTION public.handle_new_auth_user() FROM authenticated;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
