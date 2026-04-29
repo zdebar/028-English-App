@@ -119,7 +119,7 @@ export default function BlockItemsOverview() {
           <BaseButton
             key={item.item_id}
             className="h-input flex justify-start px-4 text-left"
-            onClick={() => void playAudio(item.audio)}
+            onClick={() => playAudio(item.audio)}
             title={`${item.czech} / ${item.english}`}
           >
             <div className="flex w-full items-center justify-between gap-3 overflow-hidden">
