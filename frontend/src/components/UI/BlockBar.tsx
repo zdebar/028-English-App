@@ -21,8 +21,8 @@ type BlockBarProps = Readonly<{
  * @param lessonNumber {number} The number of the lesson the block belongs to.
  * @param isMastered {boolean} Indicates if the items count is mastered or started.
  * @param divisions {number} Division step in item count (default: 10).
- * @param lessonCount {number} Total number of items in the lesson (default: 40).
- * @param widthBase {number} Item count that maps to 100% width (default: 40).
+ * @param lessonCount {number} Total number of items in the lesson (default: 50).
+ * @param widthBase {number} Item count that maps to 100% width (default: 50).
  * @param className {string} Additional CSS classes for custom styling.
  * @returns A styled progress bar with labels and visual representation of progress.
  */
@@ -32,9 +32,8 @@ export default function BlockBar({
   lessonName = '',
   lessonNumber = 0,
   isMastered = false,
-  divisions = 10,
-  lessonCount = 100,
-  widthBase = 100,
+  lessonCount = 50,
+  widthBase = 50,
   className = '',
 }: BlockBarProps) {
   // Ensure lessonCount is at least 1
@@ -50,26 +49,6 @@ export default function BlockBar({
   const clampedTotal = Math.min(Math.max(previousCount + todayCount, 0), safeLesson);
   const previousWidth = safeLesson > 0 ? (clampedPrevious / safeLesson) * 100 : 0;
   const totalWidth = safeLesson > 0 ? (clampedTotal / safeLesson) * 100 : 0;
-
-  // Render divisions every N items (not percent).
-  const renderDivisions = () => {
-    const stepItems = Math.max(1, Math.floor(divisions));
-    const positions: number[] = [];
-
-    for (let item = stepItems; item < visibleItems; item += stepItems) {
-      positions.push((item / safeWidthBase) * 100);
-    }
-
-    return positions.map((position) => {
-      return (
-        <div
-          key={position}
-          className="border-divisions absolute top-0 z-15 h-full border-l"
-          style={{ left: `${position}%` }}
-        ></div>
-      );
-    });
-  };
 
   return (
     <div className="h-attribute relative w-full cursor-default bg-gray-200 select-none">
@@ -101,8 +80,6 @@ export default function BlockBar({
           style={{ width: `${previousWidth}%` }}
         ></div>
       </div>
-      {/* Divisions */}
-      {renderDivisions()}
     </div>
   );
 }

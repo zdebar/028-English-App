@@ -38,8 +38,8 @@ export const OVERVIEW_TEXTS = {
   // Profile Page
   levelsOverview: 'Přehled CEFR úrovní',
   levelsOverviewTooltip: 'Přehled CEFR úrovní s pokrokem',
-  blocksOverview: 'Přehled bloků slovíček',
-  blocksOverviewTooltip: 'Přehled ucelených bloků slovíček',
+  blocksOverview: 'Přehled témat',
+  blocksOverviewTooltip: 'Přehled tematických skupin',
   grammarOverview: 'Přehled gramatiky',
   grammarOverviewTooltip: 'Přehled započaté gramatiky',
   vocabularyOverview: 'Přehled slovíček',

@@ -63,7 +63,6 @@ describe('BlockBar', () => {
         lessonName="To Be"
         lessonNumber={1}
         isMastered={false}
-        divisions={20}
         lessonCount={80}
         widthBase={100}
       />,
@@ -77,8 +76,5 @@ describe('BlockBar', () => {
 
     expect(totalProgress.style.width).toBe('50%');
     expect(previousProgress.style.width).toBe('31.25%');
-
-    const divisions = container.querySelectorAll('.border-divisions');
-    expect(divisions).toHaveLength(3);
   });
 });
