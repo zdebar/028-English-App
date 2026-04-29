@@ -48,7 +48,7 @@ export function usePeriodicSync(userId: string | null) {
         const isError = logRejectedResults(syncResults, 'Data synchronization error:');
         if (isError) throw new Error('Data synchronization error');
 
-        void AudioRecord.removeOrphaned();
+        AudioRecord.removeOrphaned();
         showToast(TEXTS.syncSuccessToast, 'success');
         setSynchronized(true);
       } catch (error) {
@@ -81,7 +81,7 @@ export function usePeriodicSync(userId: string | null) {
     };
 
     initialSyncTimeoutId.current = globalThis.setTimeout(() => {
-      void runSync();
+      runSync();
     }, 3000);
     intervalId.current = setInterval(runSync, config.sync.periodicSyncInterval);
 
@@ -98,7 +98,7 @@ export function usePeriodicSync(userId: string | null) {
         intervalId.current = null;
       }
 
-      void dataSyncOnUnmount(activeUserId).catch((error) => {
+      dataSyncOnUnmount(activeUserId).catch((error) => {
         errorHandler('Unmount synchronization failed', error);
       });
     };

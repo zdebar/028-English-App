@@ -69,7 +69,7 @@ export const useAuthStore = create<AuthState>((set) => {
         applySession(data.session);
       };
 
-      void fetchSession();
+      fetchSession();
 
       subscription = supabaseInstance.auth.onAuthStateChange((_event, session) => {
         applySession(session);
