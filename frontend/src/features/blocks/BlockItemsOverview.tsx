@@ -120,7 +120,7 @@ export default function BlockItemsOverview() {
             key={item.item_id}
             className="h-input flex justify-start px-4 text-left"
             onClick={() => playAudio(item.audio)}
-            title={`${item.czech} / ${item.english}`}
+            title={`výslovnost: ${item.pronunciation}`}
           >
             <div className="flex w-full items-center justify-between gap-3 overflow-hidden">
               <span className="min-w-0 flex-1 overflow-hidden text-left text-ellipsis whitespace-nowrap">
