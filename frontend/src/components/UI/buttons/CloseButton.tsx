@@ -5,7 +5,6 @@ import type { ButtonHTMLAttributes, JSX } from 'react';
 import BaseButton from './BaseButton';
 import { TEXTS } from '@/locales/cs';
 import { useNavigate } from 'react-router-dom';
-import { ROUTES } from '@/config/routes.config';
 
 type CloseButtonProps = Readonly<{
   onClick?: () => void;
@@ -32,8 +31,6 @@ export default function CloseButton({
       onClick();
     } else if (window.history.length > 1) {
       navigate(-1);
-    } else {
-      navigate(ROUTES.home);
     }
   };
   useKey({
