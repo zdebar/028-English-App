@@ -6,7 +6,6 @@ type BlockBarProps = Readonly<{
   lessonName: string;
   lessonNumber: number;
   isMastered: boolean;
-  divisions?: number;
   lessonCount: number;
   widthBase?: number;
   className?: string;
@@ -20,7 +19,6 @@ type BlockBarProps = Readonly<{
  * @param lessonName {string} The name of the current lesson block.
  * @param lessonNumber {number} The number of the lesson the block belongs to.
  * @param isMastered {boolean} Indicates if the items count is mastered or started.
- * @param divisions {number} Division step in item count (default: 10).
  * @param lessonCount {number} Total number of items in the lesson (default: 50).
  * @param widthBase {number} Item count that maps to 100% width (default: 50).
  * @param className {string} Additional CSS classes for custom styling.
