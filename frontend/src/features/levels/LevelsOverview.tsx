@@ -7,7 +7,7 @@ import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import { useUserStore } from '../user-stats/use-user-store';
 import { useLevelsStore } from './use-levels-store';
-import MasteredSwitchButton from '@/components/UI/buttons/MasteredSwitchButton';
+import MasteredToggleButton from '@/components/UI/buttons/MasteredToggleButton';
 import BlockBar from '@/components/UI/BlockBar';
 import DelayedNotification from '@/components/UI/DelayedNotification';
 
@@ -89,13 +89,7 @@ export default function LevelsOverview() {
               {showMastered ? TEXTS.levelsMasteredHelp : TEXTS.levelsStartedHelp}
             </HelpText>
             <HelpButton className="right-0 -bottom-14" />
-            <MasteredSwitchButton
-              onClick={() => setShowMastered(!showMastered)}
-              title={TEXTS.masteredSwitchHelp}
-            >
-              {showMastered ? TEXTS.masteredCount : TEXTS.startedCount}
-            </MasteredSwitchButton>
-            <HelpText className="-bottom-15 left-2">{TEXTS.masteredSwitchHelp} </HelpText>
+            <MasteredToggleButton showMastered={showMastered} setShowMastered={setShowMastered} />
           </div>
         )}
       </div>

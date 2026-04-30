@@ -4,7 +4,7 @@ import { useUserStore } from '../../features/user-stats/use-user-store';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import { getInProgressLessons } from '../../utils/dashboard.utils';
-import MasteredSwitchButton from '@/components/UI/buttons/MasteredSwitchButton';
+import MasteredToggleButton from '@/components/UI/buttons/MasteredToggleButton';
 import type { LessonOverviewType } from '@/types/generic.types';
 
 type DashboardProps = Readonly<{
@@ -33,12 +33,12 @@ const noAvailableLesson: LessonOverviewType = {
  */
 export default function Dashboard({ className = '' }: DashboardProps) {
   const levelsOverview = useUserStore((state) => state.levels);
-  const showMasteredDashboard = useUserStore((state) => state.showMasteredDashboard);
-  const setMasteredDashboard = useUserStore((state) => state.setMasteredDashboard);
+  const showMastered = useUserStore((state) => state.showMasteredDashboard);
+  const setShowMastered = useUserStore((state) => state.setMasteredDashboard);
 
   const lessonsInProgress = getInProgressLessons(
     Array.isArray(levelsOverview) ? levelsOverview : [],
-    showMasteredDashboard ? 'mastered' : 'started',
+    showMastered ? 'mastered' : 'started',
   );
 
   if (lessonsInProgress.length === 0) lessonsInProgress.push(noAvailableLesson);
@@ -53,31 +53,23 @@ export default function Dashboard({ className = '' }: DashboardProps) {
           key={lesson.id}
           lessonName={lesson.name ?? ''}
           lessonNumber={lesson.sort_order}
-          isMastered={showMasteredDashboard}
+          isMastered={showMastered}
           previousCount={
-            showMasteredDashboard
+            showMastered
               ? (lesson.masteredCount ?? 0) - (lesson.masteredTodayCount ?? 0)
               : (lesson.startedCount ?? 0) - (lesson.startedTodayCount ?? 0)
           }
           todayCount={
-            showMasteredDashboard
-              ? (lesson.masteredTodayCount ?? 0)
-              : (lesson.startedTodayCount ?? 0)
+            showMastered ? (lesson.masteredTodayCount ?? 0) : (lesson.startedTodayCount ?? 0)
           }
           lessonCount={lesson.totalCount ?? 1}
         />
       ))}
       <HelpButton className="right-0 -bottom-14.5" />
       <HelpText className="right-2 -bottom-6">
-        {showMasteredDashboard ? TEXTS.masteredTodayHint : TEXTS.startedTodayHint}
+        {showMastered ? TEXTS.masteredTodayHint : TEXTS.startedTodayHint}
       </HelpText>
-      <MasteredSwitchButton
-        onClick={() => setMasteredDashboard(!showMasteredDashboard)}
-        title={TEXTS.masteredSwitchHelp}
-      >
-        {showMasteredDashboard ? TEXTS.masteredCount : TEXTS.startedCount}
-      </MasteredSwitchButton>
-      <HelpText className="-bottom-15 left-2">{TEXTS.masteredSwitchHelp}</HelpText>
+      <MasteredToggleButton showMastered={showMastered} setShowMastered={setShowMastered} />
     </section>
   );
 }
