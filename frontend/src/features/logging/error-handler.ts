@@ -1,5 +1,5 @@
 /**
- * Handles errors by logging them locally.
+ * Handles errors by logging them.
  *
  * @param error - The error object or unknown value to handle.
  * @param message - Contextual message to prepend to the error log.
@@ -9,6 +9,4 @@ export function errorHandler(message: string, error: unknown): void {
   if (process.env.NODE_ENV === 'development') {
     console.error(message, error);
   }
-  // 3. Optionally block app
-  // (future implementation: potentially set a global state to disable UI interactions)
 }
