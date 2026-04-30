@@ -1,6 +1,6 @@
 import BaseButton from '@/components/UI/buttons/BaseButton';
 import CloseButton from '@/components/UI/buttons/CloseButton';
-import DelayedMessage from '@/components/UI/DelayedMessage';
+import Delayed from '@/components/UI/DelayedMessage';
 import Notification from '@/components/UI/Notification';
 import { ROUTES } from '@/config/routes.config';
 import UserItem from '@/database/models/user-items';
@@ -10,22 +10,52 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import { useArray } from '@/hooks/use-array';
 import { TEXTS } from '@/locales/cs';
 import type { UserItemLocal } from '@/types/user-item.types';
-import { useCallback } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import ModalButton from '../modal/ModalButton';
+import Blocks from '@/database/models/blocks';
+import { useObject } from '@/hooks/use-object';
 
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import type { BlockType } from '@/types/generic.types';
 
 export default function BlockItemsOverview() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { blockId, blockName } = location.state?.myData;
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
 
+  // Block management
+  const { blockId: blockIdString } = useParams<{ blockId: string }>();
+  const blockId = blockIdString ? Number(blockIdString) : null;
+
+  if (!blockId) {
+    navigate(ROUTES.blocks);
+  }
+
+  const fetchBlock = useCallback(async (): Promise<BlockType | null> => {
+    if (!userId || !blockId) return null;
+    try {
+      return await Blocks.getById(blockId);
+    } catch (err) {
+      showToast(TEXTS.dataLoadingError, 'error');
+      return null;
+    }
+  }, [userId, blockId]);
+
+  const {
+    data: block,
+    error: blockError,
+    loading: blockLoading,
+  } = useObject<BlockType>(fetchBlock);
+
   // Items management
   const fetchBlockItems = useCallback(async () => {
-    if (!userId || blockId === null) return [];
-    return UserItem.getByBlockId(userId, blockId);
+    if (!userId || !blockId) return [];
+    try {
+      return await UserItem.getByBlockId(userId, blockId);
+    } catch (err) {
+      showToast(TEXTS.dataLoadingError, 'error');
+      return [];
+    }
   }, [userId, blockId]);
 
   const { data: items, error, loading } = useArray<UserItemLocal>(fetchBlockItems);
@@ -35,10 +65,10 @@ export default function BlockItemsOverview() {
     if (!userId || !blockId) return;
     try {
       await UserItem.resetItemsByBlockId(userId, blockId);
-      showToast('replace', 'success');
+      showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (error) {
-      showToast('replace', 'error');
-      errorHandler('replace', error);
+      showToast(TEXTS.resetProgressErrorToast, 'error');
+      errorHandler(TEXTS.resetProgressErrorToast, error);
     }
   }, [userId, blockId, showToast]);
 
@@ -46,23 +76,11 @@ export default function BlockItemsOverview() {
     navigate(ROUTES.blocks);
   }, [navigate]);
 
-  if (!userId || !blockId) {
-    return <Notification className="pt-8">{TEXTS.pageNotFound}</Notification>;
-  }
-
-  if (loading) {
-    return (
-      <DelayedMessage>
-        <Notification className="color-info pt-4">{TEXTS.loadingMessage}</Notification>
-      </DelayedMessage>
-    );
-  }
-
   return (
     <div className="card-width flex flex-col justify-start gap-1">
       <div className="h-button flex items-center justify-between gap-1">
-        {error ? (
-          <Notification className="color-error pt-4">{error}</Notification>
+        {blockError ? (
+          <Notification className="color-error pt-4">{blockError}</Notification>
         ) : (
           <ModalButton
             modalTitle={'resetTitle'}
@@ -75,9 +93,8 @@ export default function BlockItemsOverview() {
               onClose();
             }}
             className="justify-start px-4"
-            disabled={!!error}
           >
-            {blockName}
+            {block?.name ?? TEXTS.dataLoadingError}
           </ModalButton>
         )}
         <CloseButton onClick={onClose} />
@@ -100,9 +117,9 @@ export default function BlockItemsOverview() {
           </BaseButton>
         ))
       ) : (
-        <DelayedMessage>
+        <Delayed>
           <Notification className="color-info pt-4">{TEXTS.noBlockItems}</Notification>
-        </DelayedMessage>
+        </Delayed>
       )}
     </div>
   );

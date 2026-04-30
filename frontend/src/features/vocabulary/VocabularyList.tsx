@@ -6,7 +6,7 @@ import DirectionDropdown from '@/features/vocabulary/DirectionDropdown';
 import { type DisplayField } from '@/features/vocabulary/vocabulary.utils';
 import { type UserItemLocal } from '@/types/user-item.types';
 import CancelIcon from '@/components/UI/icons/CancelIcon';
-import DelayedMessage from '@/components/UI/DelayedMessage';
+import Delayed from '@/components/UI/DelayedMessage';
 import Notification from '@/components/UI/Notification';
 
 const DIRECTION_OPTIONS: { value: DisplayField; label: string }[] = [
@@ -120,9 +120,9 @@ export default function VocabularyList({
             )}
           </>
         ) : (
-          <DelayedMessage>
+          <Delayed>
             <Notification className="color-info pt-6">{TEXTS.noStartedVocabulary}</Notification>
-          </DelayedMessage>
+          </Delayed>
         )}
       </div>
     </div>

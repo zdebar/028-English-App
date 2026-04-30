@@ -1,4 +1,4 @@
-import DelayedMessage from '@/components/UI/DelayedMessage';
+import Delayed from '@/components/UI/DelayedMessage';
 import { useNavigate } from 'react-router-dom';
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import { TEXTS } from '@/locales/cs';
@@ -40,9 +40,9 @@ export default function LevelsOverview() {
           <CloseButton onClick={() => navigate('/profile')} />
         </div>
         {levels.length === 0 ? (
-          <DelayedMessage>
+          <Delayed>
             <Notification className="color-info pt-4">{TEXTS.notAvailable}</Notification>
-          </DelayedMessage>
+          </Delayed>
         ) : (
           <div>
             <div className="flex flex-col gap-1">

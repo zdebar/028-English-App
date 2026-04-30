@@ -9,7 +9,7 @@ import { useCallback, useMemo, type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BaseButton from '@/components/UI/buttons/BaseButton';
 import CloseButton from '@/components/UI/buttons/CloseButton';
-import DelayedMessage from '@/components/UI/DelayedMessage';
+import Delayed from '@/components/UI/DelayedMessage';
 import { useArray } from '@/hooks/use-array';
 import Notification from '@/components/UI/Notification';
 import UserItem from '@/database/models/user-items';
@@ -88,9 +88,9 @@ export default function GrammarOverview(): JSX.Element {
             </BaseButton>
           ))
         ) : (
-          <DelayedMessage>
+          <Delayed>
             <Notification className="color-info pt-4">{TEXTS.noGrammar}</Notification>
-          </DelayedMessage>
+          </Delayed>
         )}
       </div>
     );
@@ -108,9 +108,9 @@ export default function GrammarOverview(): JSX.Element {
       {sanitizedNote ? (
         <div dangerouslySetInnerHTML={{ __html: sanitizedNote }} className="grammar" />
       ) : (
-        <DelayedMessage>
+        <Delayed>
           <Notification className="color-info pt-4">{TEXTS.notAvailable}</Notification>
-        </DelayedMessage>
+        </Delayed>
       )}
       <HelpButton className="right-0 -bottom-10.5" />
     </OverviewCard>

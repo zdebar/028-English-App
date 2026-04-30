@@ -6,7 +6,7 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useUserStore } from '../user-stats/use-user-store';
 import { usePracticeDeck } from './hooks/use-practice-deck';
 
-import DelayedMessage from '@/components/UI/DelayedMessage';
+import Delayed from '@/components/UI/DelayedMessage';
 import Indicator from '@/components/UI/Indicator';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
@@ -107,19 +107,19 @@ export default function PracticeCard() {
 
   if (!userId)
     return (
-      <DelayedMessage>
+      <Delayed>
         <Notification className="color-info pt-4">{TEXTS.syncLoadingText}</Notification>
-      </DelayedMessage>
+      </Delayed>
     );
 
   if (!currentItem) {
     return (
-      <DelayedMessage timeDelay={300}>
+      <Delayed timeDelay={300}>
         <Notification className="color-info pt-4">
           <p>{TEXTS.nothingToPractice}</p>
           <p>{TEXTS.tryAgainLater}</p>
         </Notification>
-      </DelayedMessage>
+      </Delayed>
     );
   }
 
@@ -170,11 +170,11 @@ export default function PracticeCard() {
                     <p className="px-2">{TEXTS.noAudio}</p>
                   ) : (
                     audioLoading && (
-                      <DelayedMessage>
+                      <Delayed>
                         <Notification className="color-info pt-4">
                           {TEXTS.loadingAudio}
                         </Notification>
-                      </DelayedMessage>
+                      </Delayed>
                     )
                   )}
                 </div>

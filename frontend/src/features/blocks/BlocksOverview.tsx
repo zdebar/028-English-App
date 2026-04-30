@@ -1,6 +1,6 @@
 import Blocks from '@/database/models/blocks';
 import { useNavigate } from 'react-router-dom';
-import DelayedMessage from '@/components/UI/DelayedMessage';
+import Delayed from '@/components/UI/DelayedMessage';
 import Notification from '@/components/UI/Notification';
 import { TEXTS } from '@/locales/cs';
 import type { BlockType } from '@/types/generic.types';
@@ -9,11 +9,14 @@ import BaseButton from '@/components/UI/buttons/BaseButton';
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import { ROUTES } from '@/config/routes.config';
 import { useAuthStore } from '../auth/use-auth-store';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
+import { useToastStore } from '../toast/use-toast-store';
+import { errorHandler } from '../logging/error-handler';
 
 export default function BlocksOverview() {
   const navigate = useNavigate();
   const userId = useAuthStore((state) => state.userId);
+  const showToast = useToastStore((state) => state.showToast);
 
   // Blocks management
   const fetchBlocks = useCallback(async (): Promise<BlockType[]> => {
@@ -26,25 +29,26 @@ export default function BlocksOverview() {
   const { data: blocks, error, loading } = useArray<BlockType>(fetchBlocks);
   const hasBlocks = blocks.length > 0;
 
+  useEffect(() => {
+    if (error) {
+      showToast(TEXTS.dataLoadingError, 'error');
+      errorHandler(TEXTS.dataLoadingError, error);
+    }
+  }, [error]);
+
   // Early returns
   if (loading) {
     return (
-      <DelayedMessage>
+      <Delayed>
         <Notification className="color-info pt-4">{TEXTS.loadingMessage}</Notification>
-      </DelayedMessage>
+      </Delayed>
     );
   }
 
   return (
     <div className="card-width flex flex-col justify-start gap-1">
       <div className="h-button flex items-center justify-between gap-1">
-        {error ? (
-          <div className="h-button flex grow items-center justify-start border border-dashed px-4">
-            {error}
-          </div>
-        ) : (
-          <div className="flex grow justify-start px-4">{TEXTS.blocksOverview}</div>
-        )}
+        <div className="flex grow justify-start px-4">{TEXTS.blocksOverview}</div>
         <CloseButton onClick={() => navigate(ROUTES.profile)} />
       </div>
 
@@ -53,20 +57,16 @@ export default function BlocksOverview() {
           <BaseButton
             key={block.id}
             className="h-input flex justify-start px-4 text-left"
-            onClick={() =>
-              navigate(`${ROUTES.blocks}/${block.id}`, {
-                state: { blockId: block.id, blockName: block.name },
-              })
-            }
+            onClick={() => navigate(`${ROUTES.blocks}/${block.id}`)}
             title={block.name}
           >
             <p className="overflow-hidden text-ellipsis whitespace-nowrap">{block.name}</p>
           </BaseButton>
         ))
       ) : (
-        <DelayedMessage>
+        <Delayed>
           <Notification className="color-info pt-4">{TEXTS.noBlocks}</Notification>
-        </DelayedMessage>
+        </Delayed>
       )}
     </div>
   );

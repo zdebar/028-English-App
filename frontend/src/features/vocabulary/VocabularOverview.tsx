@@ -1,4 +1,4 @@
-import DelayedMessage from '@/components/UI/DelayedMessage';
+import Delayed from '@/components/UI/DelayedMessage';
 import config from '@/config/config';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
@@ -90,9 +90,9 @@ export default function VocabularyOverview() {
 
   if (loading) {
     return (
-      <DelayedMessage>
+      <Delayed>
         <Notification className="color-info pt-4">{TEXTS.loadingMessage}</Notification>
-      </DelayedMessage>
+      </Delayed>
     );
   }
 
