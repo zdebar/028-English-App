@@ -1,4 +1,3 @@
-import Delayed from '@/components/UI/Delayed';
 import { useNavigate } from 'react-router-dom';
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import { TEXTS } from '@/locales/cs';
@@ -8,9 +7,9 @@ import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import { useUserStore } from '../user-stats/use-user-store';
 import { useLevelsStore } from './use-levels-store';
-import Notification from '@/components/UI/Notification';
 import MasteredSwitchButton from '@/components/UI/buttons/MasteredSwitchButton';
 import BlockBar from '@/components/UI/BlockBar';
+import DelayedNotification from '@/components/UI/DelayedNotification';
 
 /**
  * LevelsOverview component
@@ -40,9 +39,7 @@ export default function LevelsOverview() {
           <CloseButton onClick={() => navigate('/profile')} />
         </div>
         {levels.length === 0 ? (
-          <Delayed>
-            <Notification className="color-info pt-4">{TEXTS.notAvailable}</Notification>
-          </Delayed>
+          <DelayedNotification>{TEXTS.notAvailable}</DelayedNotification>
         ) : (
           <div>
             <div className="flex flex-col gap-1">
