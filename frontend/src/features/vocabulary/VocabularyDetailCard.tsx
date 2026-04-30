@@ -33,10 +33,10 @@ export default function VocabularyDetailCard({
     { label: TEXTS.czech, value: selectedWord?.czech },
     { label: TEXTS.english, value: selectedWord?.english },
     { label: TEXTS.pronunciation, value: selectedWord?.pronunciation },
-    { label: TEXTS.progress, value: selectedWord?.progress },
   ];
 
   const dateProperties = [
+    { label: TEXTS.progress, value: selectedWord?.progress },
     { label: TEXTS.startedAt, value: shortenDate(selectedWord?.started_at) },
     { label: TEXTS.updatedAt, value: shortenDate(selectedWord?.updated_at) },
     { label: TEXTS.nextAt, value: shortenDate(selectedWord?.next_at) },
