@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { clearAppStorage } from '@/features/auth/auth.utils';
+import { clearAppStorage } from '@/utils/storage.utils';
 
 async function flushMicrotasks(): Promise<void> {
   await Promise.resolve();
