@@ -1,20 +1,14 @@
-import config from '@/config/config';
-import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import type { UserItemLocal } from '@/types/user-item.types';
-import { useCallback, useMemo, useState } from 'react';
+import UserItem from '@/database/models/user-items';
+import { useCallback } from 'react';
 import VocabularyDetailCard from './VocabularyDetailCard';
 import VocabularyList from './VocabularyList';
 import { useNavigate } from 'react-router-dom';
-import { useArray } from '@/hooks/use-array';
-import { compareCzechStrings, type DisplayField } from './vocabulary.utils';
 import { TEXTS } from '@/locales/cs';
-import { filterSortedWords } from './vocabulary.utils';
 import { useToastStore } from '../toast/use-toast-store';
 import { errorHandler } from '../logging/error-handler';
 import DelayedNotification from '@/components/UI/DelayedNotification';
-
-const INITIAL_VISIBLE_COUNT = config.vocabulary.itemsPerPage;
+import { useVocabulary } from './use-vocabulary';
 
 /**
  * VocabularyOverview component
@@ -26,35 +20,20 @@ export default function VocabularyOverview() {
   const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
 
-  // -- DATA FETCHING --
-  const fetchVocabulary = useCallback(async () => {
-    if (!userId) return [];
-    return UserItem.getStartedVocabulary(userId);
-  }, [userId]);
-
-  const { data: words, error, loading, reload } = useArray<UserItemLocal>(fetchVocabulary);
-
-  // -- WORDS FILTERING --
-  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [displayField, setDisplayField] = useState<DisplayField>('english');
-  const [selectedWord, setSelectedWord] = useState<UserItemLocal | null>(null);
-
-  const sortedByEnglish = useMemo(() => words, [words]);
-  const sortedByCzech = useMemo(
-    () =>
-      [...words].sort((a, b) => {
-        const valA = a.czech?.toLowerCase() || '';
-        const valB = b.czech?.toLowerCase() || '';
-        return compareCzechStrings(valA, valB);
-      }),
-    [words],
-  );
-  const sortedWords = displayField === 'czech' ? sortedByCzech : sortedByEnglish;
-  const filteredWords = useMemo(
-    () => filterSortedWords(sortedWords, searchTerm, displayField, visibleCount + 1),
-    [sortedWords, searchTerm, displayField, visibleCount],
-  );
+  const {
+    error,
+    loading,
+    reload,
+    visibleCount,
+    setVisibleCount,
+    searchTerm,
+    setSearchTerm,
+    displayField,
+    setDisplayField,
+    selectedWord,
+    setSelectedWord,
+    filteredWords,
+  } = useVocabulary(userId);
 
   // -- HANDLERS  --
   const handleClearUserItem = useCallback(async () => {

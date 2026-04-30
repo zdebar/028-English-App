@@ -1,4 +1,3 @@
-import StyledButton from '@/components/UI/buttons/StyledButton';
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import config from '@/config/config';
 import { TEXTS } from '@/locales/cs';
@@ -7,6 +6,7 @@ import { type DisplayField } from '@/features/vocabulary/vocabulary.utils';
 import { type UserItemLocal } from '@/types/user-item.types';
 import CancelIcon from '@/components/UI/icons/CancelIcon';
 import DelayedNotification from '@/components/UI/DelayedNotification';
+import { ListButton } from '@/components/UI/buttons/ListButton';
 
 const DIRECTION_OPTIONS: { value: DisplayField; label: string }[] = [
   { value: 'czech', label: 'Čeština' },
@@ -101,13 +101,13 @@ export default function VocabularyList({
         {hasWords ? (
           <>
             {visibleItems.map((item, index) => (
-              <StyledButton
+              <ListButton
                 key={item.item_id}
-                className="h-input flex grow-0 justify-start p-4 text-left"
+                className="flex grow-0 justify-start p-4 text-left"
                 onClick={() => onSelect(index)}
               >
                 {displayField === 'czech' ? item.czech : item.english}
-              </StyledButton>
+              </ListButton>
             ))}
             {remainingCount > 0 && (
               <button
