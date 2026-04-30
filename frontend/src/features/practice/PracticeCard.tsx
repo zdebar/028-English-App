@@ -23,6 +23,7 @@ import PlayAudioButton from './buttons/PlayAudioButton';
 import RepeatButton from './buttons/RepeatButton';
 import { useGrammar } from './hooks/use-grammar';
 import { useHelpStore } from '../help/use-help-store';
+import DelayedNotification from '@/components/UI/DelayedNotification';
 
 /**
  * PracticeCard component for interactive language practice.
@@ -63,21 +64,12 @@ export default function PracticeCard() {
   const cardStyle = revealed ? 'color-audio-disabled' : 'color-button';
   const directionText = isCzToEn ? TEXTS.directionCzToEn : TEXTS.directionEnToCz;
 
-  if (!userId)
-    return (
-      <Delayed>
-        <Notification className="color-info pt-4">{TEXTS.syncLoadingText}</Notification>
-      </Delayed>
-    );
-
   if (!currentItem) {
     return (
-      <Delayed timeDelay={300}>
-        <Notification className="color-info pt-4">
-          <p>{TEXTS.nothingToPractice}</p>
-          <p>{TEXTS.tryAgainLater}</p>
-        </Notification>
-      </Delayed>
+      <DelayedNotification timeDelay={300}>
+        <p>{TEXTS.nothingToPractice}</p>
+        <p>{TEXTS.tryAgainLater}</p>
+      </DelayedNotification>
     );
   }
 

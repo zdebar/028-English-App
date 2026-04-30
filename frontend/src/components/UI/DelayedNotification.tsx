@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 
 interface DelayedNotificationProps {
   message?: string;
+  timeDelay?: number;
   className?: string;
   children?: ReactNode;
 }
@@ -15,11 +16,12 @@ interface DelayedNotificationProps {
  */
 export default function DelayedNotification({
   message = TEXTS.loadingMessage,
+  timeDelay,
   className = 'color-info pt-4',
   children,
 }: DelayedNotificationProps) {
   return (
-    <Delayed>
+    <Delayed timeDelay={timeDelay}>
       <Notification className={className}>{children ?? message}</Notification>
     </Delayed>
   );
