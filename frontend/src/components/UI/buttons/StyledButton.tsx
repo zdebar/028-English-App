@@ -15,7 +15,12 @@ type BaseButtonProps = Readonly<
  * @param title The tooltip text to be shown on hover.
  * @param className Additional CSS classes for custom styling.
  */
-export default function BaseButton({ children, title, className = '', ...rest }: BaseButtonProps) {
+export default function StyledButton({
+  children,
+  title,
+  className = '',
+  ...rest
+}: BaseButtonProps) {
   return (
     <button
       type="button"

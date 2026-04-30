@@ -5,7 +5,7 @@ import Notification from '@/components/UI/Notification';
 import { TEXTS } from '@/locales/cs';
 import type { BlockType } from '@/types/generic.types';
 import { useArray } from '@/hooks/use-array';
-import BaseButton from '@/components/UI/buttons/BaseButton';
+import StyledButton from '@/components/UI/buttons/StyledButton';
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import { ROUTES } from '@/config/routes.config';
 import { useAuthStore } from '../auth/use-auth-store';
@@ -54,14 +54,14 @@ export default function BlocksOverview() {
 
       {hasBlocks ? (
         blocks.map((block) => (
-          <BaseButton
+          <StyledButton
             key={block.id}
             className="h-input flex justify-start px-4 text-left"
             onClick={() => navigate(`${ROUTES.blocks}/${block.id}`)}
             title={block.name}
           >
             <p className="overflow-hidden text-ellipsis whitespace-nowrap">{block.name}</p>
-          </BaseButton>
+          </StyledButton>
         ))
       ) : (
         <Delayed>

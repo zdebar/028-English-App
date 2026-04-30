@@ -1,4 +1,4 @@
-import BaseButton from './BaseButton';
+import StyledButton from './StyledButton';
 import type { ReactNode } from 'react';
 
 type MenuButtonProps = Readonly<
@@ -21,8 +21,8 @@ type MenuButtonProps = Readonly<
  */
 export function MenuButton({ children, className, ...rest }: MenuButtonProps) {
   return (
-    <BaseButton {...rest} className={`h-button ${className}`}>
+    <StyledButton {...rest} className={`h-button ${className}`}>
       <div className="overflow-hidden text-left text-ellipsis whitespace-nowrap">{children}</div>
-    </BaseButton>
+    </StyledButton>
   );
 }

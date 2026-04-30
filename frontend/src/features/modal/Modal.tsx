@@ -2,7 +2,7 @@ import { useOverlayStore } from '@/features/overlay/use-overlay-store';
 import { TEXTS } from '@/locales/cs';
 import { useCallback, useEffect, type JSX, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import BaseButton from '../../components/UI/buttons/BaseButton';
+import StyledButton from '../../components/UI/buttons/StyledButton';
 
 type ModalProps = Readonly<{
   onConfirm: () => void | Promise<void>;
@@ -48,12 +48,12 @@ export function Modal({ onConfirm, onClose, children }: ModalProps): JSX.Element
       <div className="card-width color-base pointer-events-auto gap-1 pt-4">
         <div className="flex grow flex-col items-center gap-2 p-6 text-center">{children}</div>
         <div className="flex gap-1">
-          <BaseButton onClick={handleCancel} className="h-button font-bold">
+          <StyledButton onClick={handleCancel} className="h-button font-bold">
             {TEXTS.cancel}
-          </BaseButton>
-          <BaseButton onClick={handleConfirm} className="h-button font-bold">
+          </StyledButton>
+          <StyledButton onClick={handleConfirm} className="h-button font-bold">
             {TEXTS.confirm}
-          </BaseButton>
+          </StyledButton>
         </div>
       </div>
     </div>,

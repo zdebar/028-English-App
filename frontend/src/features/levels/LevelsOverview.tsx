@@ -2,7 +2,7 @@ import Delayed from '@/components/UI/DelayedMessage';
 import { useNavigate } from 'react-router-dom';
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import { TEXTS } from '@/locales/cs';
-import BaseButton from '@/components/UI/buttons/BaseButton';
+import StyledButton from '@/components/UI/buttons/StyledButton';
 import GoalMetView from '@/components/UI/GoalMetView';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
@@ -48,7 +48,7 @@ export default function LevelsOverview() {
             <div className="flex flex-col gap-1">
               {levels.map((level, index) => (
                 <div key={level.id} className="flex flex-col gap-1">
-                  <BaseButton
+                  <StyledButton
                     className="h-input flex grow-0 justify-start p-4 text-left"
                     onClick={() => handleLevelClick(index)}
                     disabled={level.lessons.length === 0}
@@ -61,7 +61,7 @@ export default function LevelsOverview() {
                         title={showMastered ? TEXTS.levelsMasteredHelp : TEXTS.levelsStartedHelp}
                       />
                     </div>
-                  </BaseButton>
+                  </StyledButton>
                   {unpackedIndex === index && (
                     <div className="flex flex-col gap-1">
                       {level.lessons.map((lesson) => (

@@ -2,7 +2,7 @@ import { useKey } from '@/features/key-listener/use-key';
 import CloseIcon from '@/components/UI/icons/CloseIcon';
 import { KEYBOARD_LISTENERS } from '@/config/keyboard-listeners.config';
 import type { ButtonHTMLAttributes, JSX } from 'react';
-import BaseButton from './BaseButton';
+import StyledButton from './StyledButton';
 import { TEXTS } from '@/locales/cs';
 import { useNavigate } from 'react-router-dom';
 
@@ -40,7 +40,7 @@ export default function CloseButton({
   });
 
   return (
-    <BaseButton
+    <StyledButton
       type="button"
       className={['w-button h-button shrink-0 grow-0', className].filter(Boolean).join(' ')}
       onClick={handleClose}
@@ -48,6 +48,6 @@ export default function CloseButton({
       {...rest}
     >
       <CloseIcon />
-    </BaseButton>
+    </StyledButton>
   );
 }

@@ -7,7 +7,7 @@ import type { GrammarType } from '@/types/generic.types';
 import DOMPurify from 'dompurify';
 import { useCallback, useMemo, type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
-import BaseButton from '@/components/UI/buttons/BaseButton';
+import StyledButton from '@/components/UI/buttons/StyledButton';
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import Delayed from '@/components/UI/DelayedMessage';
 import { useArray } from '@/hooks/use-array';
@@ -78,14 +78,14 @@ export default function GrammarOverview(): JSX.Element {
         </div>
         {hasGrammar ? (
           grammarList.map((item, index) => (
-            <BaseButton
+            <StyledButton
               key={item.id}
               className="h-input flex justify-start px-4 text-left"
               onClick={() => handleOpenGrammar(index)}
               title={item.name}
             >
               <p className="overflow-hidden text-ellipsis whitespace-nowrap">{item.name}</p>
-            </BaseButton>
+            </StyledButton>
           ))
         ) : (
           <Delayed>

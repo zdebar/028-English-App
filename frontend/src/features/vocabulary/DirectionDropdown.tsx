@@ -1,7 +1,7 @@
 import { TEXTS } from '@/locales/cs';
 import { useEffect, useMemo } from 'react';
 import { errorHandler } from '../logging/error-handler';
-import BaseButton from '@/components/UI/buttons/BaseButton';
+import StyledButton from '@/components/UI/buttons/StyledButton';
 
 type DirectionDropdownProps<T> = Readonly<{
   value: T;
@@ -58,7 +58,7 @@ export default function DirectionDropdown<T>({
       <label htmlFor="direction-toggle" className="sr-only">
         {TEXTS.translationDirection}
       </label>
-      <BaseButton
+      <StyledButton
         id="direction-toggle"
         name="direction"
         type="button"
@@ -77,7 +77,7 @@ export default function DirectionDropdown<T>({
         className="h-full"
       >
         {currentOption?.label ?? TEXTS.translationDirection}
-      </BaseButton>
+      </StyledButton>
     </div>
   );
 }

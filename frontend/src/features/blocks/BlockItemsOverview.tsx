@@ -1,4 +1,4 @@
-import BaseButton from '@/components/UI/buttons/BaseButton';
+import StyledButton from '@/components/UI/buttons/StyledButton';
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import Delayed from '@/components/UI/DelayedMessage';
 import Notification from '@/components/UI/Notification';
@@ -101,7 +101,7 @@ export default function BlockItemsOverview() {
       </div>
       {items.length > 0 ? (
         items.map((item) => (
-          <BaseButton
+          <StyledButton
             key={item.item_id}
             className="h-input flex justify-start px-4 text-left"
             title={`výslovnost: ${item.pronunciation}`}
@@ -114,7 +114,7 @@ export default function BlockItemsOverview() {
                 {item.english}
               </span>
             </div>
-          </BaseButton>
+          </StyledButton>
         ))
       ) : (
         <Delayed>
