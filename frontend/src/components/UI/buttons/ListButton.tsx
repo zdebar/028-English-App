@@ -22,7 +22,7 @@ type ListButtonProps = Readonly<
 export function ListButton({ children, className, ...rest }: ListButtonProps) {
   return (
     <StyledButton {...rest} className={`h-input ${className}`}>
-      <div className="overflow-hidden text-left text-ellipsis whitespace-nowrap">{children}</div>
+      {children}
     </StyledButton>
   );
 }
