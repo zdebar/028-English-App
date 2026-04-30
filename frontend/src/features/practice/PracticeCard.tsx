@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import config from '@/config/config';
 
@@ -44,14 +44,13 @@ export default function PracticeCard() {
     progress,
     isCzToEn,
     revealed,
-    setRevealed,
+    handleReveal,
     showNewGrammarIndicator,
     czech,
     english,
     pronunciation,
     audioDisabled,
     showDirectionChange,
-    hideDirectionChange,
     plusHint,
     nextItem,
     audioError,
@@ -63,47 +62,6 @@ export default function PracticeCard() {
   const cardText = revealed ? undefined : TEXTS.reveal;
   const cardStyle = revealed ? 'color-audio-disabled' : 'color-button';
   const directionText = isCzToEn ? TEXTS.directionCzToEn : TEXTS.directionEnToCz;
-
-  // Play audio on item change if direction is EN -> CZ
-  useEffect(() => {
-    if (audioDisabled || isCzToEn || audioLoading || showDirectionChange) {
-      return;
-    }
-
-    const timeoutId = globalThis.setTimeout(() => {
-      playAudio();
-    }, config.practice.audioDelay);
-
-    return () => {
-      globalThis.clearTimeout(timeoutId);
-    };
-  }, [audioDisabled, isCzToEn, audioLoading, showDirectionChange, playAudio, currentItem]);
-
-  const handleReveal = useCallback(() => {
-    if (showDirectionChange) {
-      hideDirectionChange();
-      return;
-    }
-
-    if (isCzToEn && !audioError && !revealed) {
-      playAudio();
-    }
-
-    setRevealed(true);
-  }, [
-    audioError,
-    hideDirectionChange,
-    isCzToEn,
-    playAudio,
-    setRevealed,
-    showDirectionChange,
-    revealed,
-  ]);
-
-  const handlePlayAudio = useCallback(() => {
-    if (audioDisabled) return;
-    playAudio();
-  }, [audioDisabled, playAudio]);
 
   if (!userId)
     return (
@@ -218,7 +176,7 @@ export default function PracticeCard() {
                 disabled={!revealed || showDirectionChange}
               />
               <PlayAudioButton
-                onClick={handlePlayAudio}
+                onClick={playAudio}
                 disabled={audioDisabled || showDirectionChange || audioLoading}
               />
             </div>
