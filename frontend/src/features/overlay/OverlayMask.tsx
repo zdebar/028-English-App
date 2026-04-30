@@ -1,4 +1,4 @@
-import { useKey } from '@/features/key-listener/use-key';
+import { useKey } from '@/hooks/use-key';
 import { useOverlayStore } from './use-overlay-store';
 import { KEYBOARD_LISTENERS } from '@/config/keyboard-listeners.config';
 import { useCallback, type JSX } from 'react';

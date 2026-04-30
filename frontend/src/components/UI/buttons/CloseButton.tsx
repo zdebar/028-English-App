@@ -1,4 +1,4 @@
-import { useKey } from '@/features/key-listener/use-key';
+import { useKey } from '@/hooks/use-key';
 import CloseIcon from '@/components/UI/icons/CloseIcon';
 import { KEYBOARD_LISTENERS } from '@/config/keyboard-listeners.config';
 import type { ButtonHTMLAttributes, JSX } from 'react';
