@@ -10,7 +10,7 @@ type OverviewCardProps = Readonly<{
   readonly modalText?: string;
   readonly helpText?: string;
   readonly handleReset?: () => Promise<void>;
-  readonly onClose: () => void;
+  readonly onClose?: () => void;
   readonly className?: string;
   readonly children?: React.ReactNode;
 }>;
@@ -55,7 +55,9 @@ export default function OverviewCard({
             if (handleReset) {
               await handleReset();
             }
-            onClose();
+            if (onClose) {
+              onClose();
+            }
           }}
           disabled={isDisabled}
           className="justify-start px-4"
