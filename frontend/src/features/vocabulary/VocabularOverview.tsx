@@ -1,4 +1,3 @@
-import Delayed from '@/components/UI/Delayed';
 import config from '@/config/config';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
@@ -9,11 +8,11 @@ import VocabularyList from './VocabularyList';
 import { useNavigate } from 'react-router-dom';
 import { useArray } from '@/hooks/use-array';
 import { compareCzechStrings, type DisplayField } from './vocabulary.utils';
-import Notification from '@/components/UI/Notification';
 import { TEXTS } from '@/locales/cs';
 import { filterSortedWords } from './vocabulary.utils';
 import { useToastStore } from '../toast/use-toast-store';
 import { errorHandler } from '../logging/error-handler';
+import DelayedNotification from '@/components/UI/DelayedNotification';
 
 const INITIAL_VISIBLE_COUNT = config.vocabulary.itemsPerPage;
 
@@ -89,11 +88,7 @@ export default function VocabularyOverview() {
   }, [navigate]);
 
   if (loading) {
-    return (
-      <Delayed>
-        <Notification className="color-info pt-4">{TEXTS.loadingMessage}</Notification>
-      </Delayed>
-    );
+    return <DelayedNotification>{TEXTS.loadingMessage}</DelayedNotification>;
   }
 
   return (

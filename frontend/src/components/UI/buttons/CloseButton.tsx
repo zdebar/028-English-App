@@ -42,7 +42,7 @@ export default function CloseButton({
   return (
     <StyledButton
       type="button"
-      className={['w-button h-button shrink-0 grow-0', className].filter(Boolean).join(' ')}
+      className={`w-button h-button shrink-0 grow-0 ${className}`}
       onClick={handleClose}
       title={TEXTS.close + ' ' + KEYBOARD_LISTENERS.Exit.map((key) => '(' + key + ')').join(' ')}
       {...rest}

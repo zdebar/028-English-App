@@ -13,7 +13,7 @@ vi.mock('@/features/logging/error-handler', () => ({
   errorHandler: (...args: unknown[]) => errorHandlerMock(...args),
 }));
 
-import DirectionDropdown from '@/features/vocabulary/DirectionDropdown';
+import DirectionTogggle from '@/features/vocabulary/DirectionToggle';
 
 describe('DirectionDropdown', () => {
   beforeEach(() => {
@@ -23,7 +23,7 @@ describe('DirectionDropdown', () => {
   it('renders options and calls onChange with selected mapped value', () => {
     const onChange = vi.fn();
     render(
-      <DirectionDropdown
+      <DirectionTogggle
         value="czech"
         options={[
           { value: 'czech', label: 'Čeština' },
@@ -42,7 +42,7 @@ describe('DirectionDropdown', () => {
 
   it('logs error when initial value is not in options', async () => {
     render(
-      <DirectionDropdown
+      <DirectionTogggle
         value={'unknown'}
         options={[
           { value: 'czech', label: 'Čeština' },
@@ -63,7 +63,7 @@ describe('DirectionDropdown', () => {
   it('logs error and does not call onChange for invalid selected value', () => {
     const onChange = vi.fn();
     render(
-      <DirectionDropdown
+      <DirectionTogggle
         value="czech"
         options={[{ value: 'czech', label: 'Čeština' }]}
         onChange={onChange}

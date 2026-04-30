@@ -3,7 +3,7 @@ import { useEffect, useMemo } from 'react';
 import { errorHandler } from '../logging/error-handler';
 import StyledButton from '@/components/UI/buttons/StyledButton';
 
-type DirectionDropdownProps<T> = Readonly<{
+type DirectionToggleProps<T> = Readonly<{
   value: T;
   options: { value: T; label: string }[];
   onChange: (value: T) => void;
@@ -11,7 +11,7 @@ type DirectionDropdownProps<T> = Readonly<{
 }>;
 
 /**
- * DirectionDropdown Component
+ * DirectionSwitch Component
  *
  * A generic, reusable toggle button component for switching between two directions.
  *
@@ -22,12 +22,12 @@ type DirectionDropdownProps<T> = Readonly<{
  * @param className - Optional additional CSS classes for custom styling.
  * @returns A styled button that toggles between exactly two provided options.
  */
-export default function DirectionDropdown<T>({
+export default function DirectionTogggle<T>({
   value,
   options,
   onChange,
   className = '',
-}: DirectionDropdownProps<T>) {
+}: DirectionToggleProps<T>) {
   const currentIndex = useMemo(() => {
     return options.findIndex((option) => String(option.value) === String(value));
   }, [options, value]);
@@ -35,7 +35,7 @@ export default function DirectionDropdown<T>({
   useEffect(() => {
     if (options.length !== 2) {
       errorHandler(
-        `DirectionDropdown expects exactly 2 options, received ${options.length}.`,
+        `DirectionToggle expects exactly 2 options, received ${options.length}.`,
         new Error('Invalid toggle options count'),
       );
       return;
@@ -44,8 +44,8 @@ export default function DirectionDropdown<T>({
     if (currentIndex !== -1) return;
 
     errorHandler(
-      `Value "${value}" is not valid for DirectionDropdown.`,
-      new Error('Invalid dropdown value'),
+      `Value "${value}" is not valid for DirectionToggle.`,
+      new Error('Invalid toggle value'),
     );
   }, [currentIndex, options, value]);
 
@@ -66,7 +66,7 @@ export default function DirectionDropdown<T>({
         onClick={() => {
           if (!nextOption) {
             errorHandler(
-              'Cannot toggle DirectionDropdown: options are not valid.',
+              'Cannot toggle DirectionToggle: options are not valid.',
               new Error('Invalid toggle state'),
             );
             return;

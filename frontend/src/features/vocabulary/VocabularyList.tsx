@@ -2,12 +2,11 @@ import StyledButton from '@/components/UI/buttons/StyledButton';
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import config from '@/config/config';
 import { TEXTS } from '@/locales/cs';
-import DirectionDropdown from '@/features/vocabulary/DirectionDropdown';
+import DirectionTogggle from '@/features/vocabulary/DirectionToggle';
 import { type DisplayField } from '@/features/vocabulary/vocabulary.utils';
 import { type UserItemLocal } from '@/types/user-item.types';
 import CancelIcon from '@/components/UI/icons/CancelIcon';
-import Delayed from '@/components/UI/Delayed';
-import Notification from '@/components/UI/Notification';
+import DelayedNotification from '@/components/UI/DelayedNotification';
 
 const DIRECTION_OPTIONS: { value: DisplayField; label: string }[] = [
   { value: 'czech', label: 'Čeština' },
@@ -67,7 +66,7 @@ export default function VocabularyList({
               {error}
             </div>
           ) : (
-            <DirectionDropdown
+            <DirectionTogggle
               value={displayField}
               options={DIRECTION_OPTIONS}
               onChange={setDisplayField}
@@ -120,9 +119,7 @@ export default function VocabularyList({
             )}
           </>
         ) : (
-          <Delayed>
-            <Notification className="color-info pt-6">{TEXTS.noStartedVocabulary}</Notification>
-          </Delayed>
+          <DelayedNotification className="pt-6">{TEXTS.noStartedVocabulary}</DelayedNotification>
         )}
       </div>
     </div>
