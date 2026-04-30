@@ -4,7 +4,7 @@ import { useUserStore } from '../../features/user-stats/use-user-store';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import { getInProgressLessons } from '../../utils/dashboard.utils';
-import TextButton from '@/components/UI/buttons/TextButton';
+import MasteredSwitchButton from '@/components/UI/buttons/MasteredSwitchButton';
 import type { LessonOverviewType } from '@/types/generic.types';
 
 type DashboardProps = Readonly<{
@@ -71,12 +71,12 @@ export default function Dashboard({ className = '' }: DashboardProps) {
       <HelpText className="right-2 -bottom-6">
         {showMasteredDashboard ? TEXTS.masteredTodayHint : TEXTS.startedTodayHint}
       </HelpText>
-      <TextButton
+      <MasteredSwitchButton
         onClick={() => setMasteredDashboard(!showMasteredDashboard)}
         title={TEXTS.masteredSwitchHelp}
       >
         {showMasteredDashboard ? TEXTS.masteredCount : TEXTS.startedCount}
-      </TextButton>
+      </MasteredSwitchButton>
       <HelpText className="-bottom-15 left-2">{TEXTS.masteredSwitchHelp}</HelpText>
     </section>
   );

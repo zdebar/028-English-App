@@ -9,7 +9,7 @@ import HelpText from '@/features/help/HelpText';
 import { useUserStore } from '../user-stats/use-user-store';
 import { useLevelsStore } from './use-levels-store';
 import Notification from '@/components/UI/Notification';
-import TextButton from '@/components/UI/buttons/TextButton';
+import MasteredSwitchButton from '@/components/UI/buttons/MasteredSwitchButton';
 import BlockBar from '@/components/UI/BlockBar';
 
 /**
@@ -92,12 +92,12 @@ export default function LevelsOverview() {
               {showMastered ? TEXTS.levelsMasteredHelp : TEXTS.levelsStartedHelp}
             </HelpText>
             <HelpButton className="right-0 -bottom-14" />
-            <TextButton
+            <MasteredSwitchButton
               onClick={() => setShowMastered(!showMastered)}
               title={TEXTS.masteredSwitchHelp}
             >
               {showMastered ? TEXTS.masteredCount : TEXTS.startedCount}
-            </TextButton>
+            </MasteredSwitchButton>
             <HelpText className="-bottom-15 left-2">{TEXTS.masteredSwitchHelp} </HelpText>
           </div>
         )}

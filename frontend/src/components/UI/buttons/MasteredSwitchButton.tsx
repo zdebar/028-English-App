@@ -14,7 +14,12 @@ type TextButtonProps = Readonly<{
  * @param className - Additional CSS classes to apply to the button
  * @returns A button element with absolute positioning and info color styling
  */
-export default function TextButton({ onClick, title, children, className = '' }: TextButtonProps) {
+export default function MasteredSwitchButton({
+  onClick,
+  title,
+  children,
+  className = '',
+}: TextButtonProps) {
   return (
     <button
       type="button"
