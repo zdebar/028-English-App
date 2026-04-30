@@ -6,7 +6,7 @@ import DirectionDropdown from '@/features/vocabulary/DirectionDropdown';
 import { type DisplayField } from '@/features/vocabulary/vocabulary.utils';
 import { type UserItemLocal } from '@/types/user-item.types';
 import CancelIcon from '@/components/UI/icons/CancelIcon';
-import Delayed from '@/components/UI/DelayedMessage';
+import Delayed from '@/components/UI/Delayed';
 import Notification from '@/components/UI/Notification';
 
 const DIRECTION_OPTIONS: { value: DisplayField; label: string }[] = [

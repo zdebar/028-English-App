@@ -1,4 +1,4 @@
-import Delayed from '@/components/UI/DelayedMessage';
+import Delayed from '@/components/UI/Delayed';
 import config from '@/config/config';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';

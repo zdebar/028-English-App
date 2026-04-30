@@ -9,7 +9,7 @@ import { useCallback, useMemo, type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StyledButton from '@/components/UI/buttons/StyledButton';
 import CloseButton from '@/components/UI/buttons/CloseButton';
-import Delayed from '@/components/UI/DelayedMessage';
+import Delayed from '@/components/UI/Delayed';
 import { useArray } from '@/hooks/use-array';
 import Notification from '@/components/UI/Notification';
 import UserItem from '@/database/models/user-items';

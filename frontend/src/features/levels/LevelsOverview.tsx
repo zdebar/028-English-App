@@ -1,4 +1,4 @@
-import Delayed from '@/components/UI/DelayedMessage';
+import Delayed from '@/components/UI/Delayed';
 import { useNavigate } from 'react-router-dom';
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import { TEXTS } from '@/locales/cs';

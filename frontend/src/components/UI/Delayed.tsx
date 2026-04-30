@@ -14,7 +14,7 @@ type DelayedMessageProps = Readonly<{
  * @param timeDelay Delay before showing the content (ms).
  * @param className Optional CSS class for styling the content.
  */
-export default function DelayedMessage({
+export default function Delayed({
   children,
   timeDelay = config.buttons.loadingMessageDelay,
   className = '',

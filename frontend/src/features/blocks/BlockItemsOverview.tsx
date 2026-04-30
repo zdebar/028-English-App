@@ -1,6 +1,6 @@
 import StyledButton from '@/components/UI/buttons/StyledButton';
 import CloseButton from '@/components/UI/buttons/CloseButton';
-import Delayed from '@/components/UI/DelayedMessage';
+import Delayed from '@/components/UI/Delayed';
 import Notification from '@/components/UI/Notification';
 import { ROUTES } from '@/config/routes.config';
 import UserItem from '@/database/models/user-items';

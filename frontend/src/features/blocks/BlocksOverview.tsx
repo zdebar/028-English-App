@@ -1,6 +1,6 @@
 import Blocks from '@/database/models/blocks';
 import { useNavigate } from 'react-router-dom';
-import Delayed from '@/components/UI/DelayedMessage';
+import Delayed from '@/components/UI/Delayed';
 import Notification from '@/components/UI/Notification';
 import { TEXTS } from '@/locales/cs';
 import type { BlockType } from '@/types/generic.types';
