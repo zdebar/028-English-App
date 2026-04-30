@@ -13,7 +13,7 @@ import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useState, useEffect } from 'react';
 import ModalButton from '../modal/ModalButton';
 import Blocks from '@/database/models/blocks';
-import { useObject } from '@/hooks/use-object';
+import { useFetch } from '@/hooks/use-fetch';
 
 import { useNavigate, useParams } from 'react-router-dom';
 import type { BlockType } from '@/types/generic.types';
@@ -41,11 +41,7 @@ export default function BlockItemsOverview() {
     }
   }, [userId, blockId]);
 
-  const {
-    data: block,
-    error: blockError,
-    loading: blockLoading,
-  } = useObject<BlockType>(fetchBlock);
+  const { data: block, error: blockError, loading: blockLoading } = useFetch<BlockType>(fetchBlock);
 
   // Items management
   const fetchBlockItems = useCallback(async () => {

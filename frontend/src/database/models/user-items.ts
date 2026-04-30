@@ -33,9 +33,16 @@ const NULL_NUMBER = config.database.nullReplacementNumber;
  *
  * @method getPracticeDeck - Retrieves a practice deck of user items for studying.
  * @method savePracticeDeck - Saves practice deck items for a user, updating their progress and metadata.
+ * @method getAll - Retrieves a list of all user items.
+ * @method getByUserId - Retrieves user items for a specific user. Sorted by sort_order.
+ * @method getByBlockId - Retrieves user items for a specific user and block ID. Sorted by sort_order.
+ * @method getStartedGrammarIds - Retrieves a list of unique grammar IDs for items that have been started by a user.
+ * @method getStartedBlocksIds - Retrieves a list of unique block IDs for items that have been started by a user or not intended as study items.
  * @method getStartedVocabulary - Retrieves vocabulary items for a user that have been started (begun learning). Sorted by czech word.
  * @method resetItemById - Resets a user item to its default state by user and item ID.
- * @method deleteAllItems - Deletes all user items associated with a specific user.
+ * @method resetItemsByGrammarId - Resets all user items associated with a specific grammar ID to their default state for a given user.
+ * @method resetItemsByBlockId - Resets all user items associated with a specific block ID to their default state for a given user.
+ * @method deleteByUserId - Deletes all user items associated with a specific user.
  * @method syncFromRemote - Synchronizes user items from the remote server with the local database.
  */
 export default class UserItem extends Entity<AppDB> implements UserItemLocal {
@@ -134,6 +141,22 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
+   * Retrieves a list of all user items.
+   */
+  static async getAll(): Promise<UserItemLocal[]> {
+    return await db.user_items.toCollection().toArray();
+  }
+
+  /**
+   * Retrieves user items for a specific user. Sorted by sort_order.
+   * @param userId - The unique identifier of the user
+   */
+  static async getByUserId(userId: string): Promise<UserItemLocal[]> {
+    assertNonEmptyString(userId, 'userId');
+    return await db.user_items.where('user_id').equals(userId).toArray();
+  }
+
+  /**
    * Retrieves a list of unique grammar IDs for items that have been started by a user.
    * @param userId - The ID of the user
    */
@@ -169,7 +192,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Retrieves a list of unique block IDs for items that have been started by a user or not intended as study items.
    * @param userId - The ID of the user
    */
-  static async getOverviewBlocksIds(userId: string): Promise<number[]> {
+  static async getStartedBlocksIds(userId: string): Promise<number[]> {
     assertNonEmptyString(userId, 'userId');
 
     const startedItems = await db.user_items
@@ -271,7 +294,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Use only for deletion of user account, when user-items on remote are deleted automatically.
    * @param userId - The unique identifier of the user
    */
-  static async deleteAllByUserId(userId: string): Promise<void> {
+  static async deleteByUserId(userId: string): Promise<void> {
     assertNonEmptyString(userId, 'userId');
     await db.user_items.where('user_id').equals(userId).delete();
   }
@@ -308,7 +331,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     // Step 4: Update local database with fetched items and update sync metadata
     await db.transaction('rw', db.user_items, db.metadata, async () => {
       if (doFullSync) {
-        await this.deleteAllByUserId(userId);
+        await this.deleteByUserId(userId);
       } else if (toDelete.length > 0) {
         await db.user_items.bulkDelete(toDelete.map((item) => [item.user_id, item.item_id]));
       }

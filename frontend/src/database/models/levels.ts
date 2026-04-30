@@ -9,12 +9,13 @@ import { assertNonEmptyString } from '@/utils/assertions.utils';
 import Dexie, { Entity } from 'dexie';
 import { syncFromRemoteGeneric } from '../utils/data-sync.utils';
 import { aggregateLevels } from '../utils/levels.utils';
+import UserItem from './user-items';
+import Lessons from './lessons';
 
 /**
  * Represents a level entity in the local database.
  * Handles synchronization of level data between the remote Supabase server and local storage.
  *
- * @method getAll - Retrieves all levels from the local database.
  * @method getOverview - Retrieves a comprehensive overview of user levels with their progress.
  * @method syncFromRemote - Synchronizes levels from the remote server with the local database.
  *
@@ -27,20 +28,13 @@ export default class Levels extends Entity<AppDB> implements LevelType {
   deleted_at!: string | null;
 
   /**
-   * Retrieves all levels from the database.
-   */
-  static async getAll(): Promise<LevelType[]> {
-    return await db.levels.orderBy('sort_order').toArray();
-  }
-
-  /**
    * Retrieves a comprehensive overview of user levels with their progress.
    * @param userId - The unique identifier of the user
    */
   static async getOverview(userId: string): Promise<LevelOverviewType[]> {
     assertNonEmptyString(userId, 'userId');
-    const items = await db.user_items.where('user_id').equals(userId).toArray();
-    const lessons = await db.lessons.orderBy('sort_order').toArray();
+    const items = await UserItem.getByUserId(userId);
+    const lessons = await Lessons.getAll();
     const levels = await db.levels.orderBy('sort_order').toArray();
     return aggregateLevels(items, lessons, levels);
   }

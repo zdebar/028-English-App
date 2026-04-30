@@ -206,7 +206,7 @@ describe('UserItem', () => {
   });
 
   it('deleteAllItems deletes by user_id', async () => {
-    await UserItem.deleteAllByUserId('u1');
+    await UserItem.deleteByUserId('u1');
 
     expect(mocks.equalsDelete).toHaveBeenCalled();
   });

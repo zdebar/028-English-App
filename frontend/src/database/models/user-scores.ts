@@ -20,9 +20,9 @@ import Metadata from './metadata';
  * Represents a user score entity in the application database.
  *
  * @method addItemCount - Increases the item count for today's date by the specified amount.
- * @method getUserScoreForToday - Fetches the user score record for today's date.
- * @method syncUserScores - Synchronizes user scores between local database and Supabase.
- * @method deleteAllScores - Deletes all user score records for a given user.
+ * @method getOrCreateTodayScore - Fetches the user score record for today's date. Creates a new record with item_count set to 0 if no record exists.
+ * @method deleteByUserId - Clears all user score records for a given user.
+ * @method syncFromRemote - Synchronizes user scores between local database and Supabase.
  */
 export default class UserScore extends Entity<AppDB> implements UserScoreType {
   user_id!: string;
@@ -62,6 +62,16 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
   }
 
   /**
+   * Clears all user score records for a given user.
+   * Use only for deletion of user account, when user scores on remote are deleted automatically.
+   * @param userId - The ID of the user whose scores should be cleared
+   */
+  static async deleteByUserId(userId: string): Promise<void> {
+    assertNonEmptyString(userId, 'userId');
+    await db.user_scores.where('user_id').equals(userId).delete();
+  }
+
+  /**
    * Synchronizes user scores between local database and Supabase.
    *
    * Performs a two-way sync by first pushing local changes to Supabase,
@@ -92,7 +102,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
     // Step 4: Update local database with fetched scores and update sync metadata
     await db.transaction('rw', db.user_scores, db.metadata, async () => {
       if (doFullSync) {
-        await this.deleteAllScores(userId);
+        await this.deleteByUserId(userId);
       } else if (toDelete.length > 0) {
         await db.user_scores.bulkDelete(toDelete.map((item) => [item.user_id, item.date]));
       }
@@ -107,15 +117,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
     );
   }
 
-  /**
-   * Clears all user score records for a given user.
-   * Use only for deletion of user account, when user scores on remote are deleted automatically.
-   * @param userId - The ID of the user whose scores should be cleared
-   */
-  static async deleteAllScores(userId: string): Promise<void> {
-    assertNonEmptyString(userId, 'userId');
-    await db.user_scores.where('user_id').equals(userId).delete();
-  }
+
 
   /**
    * Gets user scores from IndexedDB for a specific user that were updated in between the last synced timestamp and the new synced timestamp.

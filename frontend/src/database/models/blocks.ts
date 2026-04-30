@@ -47,7 +47,7 @@ export default class Blocks extends Entity<AppDB> implements BlockType {
   static async getOverviewBlocks(userId: string): Promise<BlockType[]> {
     assertNonEmptyString(userId, 'userId');
 
-    const startedBlockIds = await UserItem.getOverviewBlocksIds(userId);
+    const startedBlockIds = await UserItem.getStartedBlocksIds(userId);
     const blocks = await db.blocks.where('id').anyOf(startedBlockIds).toArray();
 
     return blocks.sort((a, b) => a.sort_order - b.sort_order);

@@ -37,9 +37,9 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
       saveCurrentThemeAsGuest();
 
       const resultsDelete = await Promise.allSettled([
-        UserItem.deleteAllByUserId(userId),
+        UserItem.deleteByUserId(userId),
         Metadata.deleteSyncRow(TableName.UserItems, userId),
-        UserScoreType.deleteAllScores(userId),
+        UserScoreType.deleteByUserId(userId),
         Metadata.deleteSyncRow(TableName.UserScores, userId),
         Promise.resolve(clearTheme(userId)),
         Promise.resolve(clearSyncTimes(userId)),

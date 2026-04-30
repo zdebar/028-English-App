@@ -12,7 +12,7 @@ import { syncFromRemoteGeneric } from '../utils/data-sync.utils';
  * Represents a lesson entity in the local database.
  * Handles synchronization of lesson data between the remote Supabase server and local storage.
  *
- * @method getAll - Retrieves all lessons from the local database.
+ * @method getAll - Retrieves all lessons from the local database ordered by their sort order.
  * @method syncFromRemote - Synchronizes lessons from the remote server with the local database.
  *
  */
@@ -25,7 +25,8 @@ export default class Lessons extends Entity<AppDB> implements LessonType {
   deleted_at!: string | null;
 
   /**
-   * Retrieves all lessons from the database.
+   * Retrieves all lessons from the local database ordered by their sort order.
+   * @returns An array of lessons
    */
   static async getAll(): Promise<LessonType[]> {
     return await db.lessons.orderBy('sort_order').toArray();

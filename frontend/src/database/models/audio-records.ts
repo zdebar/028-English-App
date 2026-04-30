@@ -8,6 +8,7 @@ import { logRejectedResults } from '@/features/logging/logging.utils';
 import { ZipExtractionError } from '@/types/error.types';
 import type { AudioRecordLocal } from '@/types/audio.types';
 import { Entity } from 'dexie';
+import UserItem from './user-items';
 
 /**
  * Represents an audio record entity for managing audio files in the application's database.
@@ -55,9 +56,9 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    */
   static async removeOrphaned(): Promise<void> {
     const existingFilenames = await db.audio_records.toCollection().primaryKeys();
-    const allAudio = await db.user_items.toCollection().toArray();
+    const allUserItems = await UserItem.getAll();
     const expectedAudio = Array.from(
-      new Set(allAudio.map((item) => item.audio).filter((audio): audio is string => !!audio)),
+      new Set(allUserItems.map((item) => item.audio).filter((audio): audio is string => !!audio)),
     );
 
     const existingSet = new Set(existingFilenames);

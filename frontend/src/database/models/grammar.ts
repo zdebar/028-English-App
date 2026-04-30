@@ -15,7 +15,6 @@ import UserItem from './user-items';
  * - grammar records are shared across all users
  *
  * @method getById - Fetches a grammar record by its ID.
- * @method getStartedIds - Retrieves the list of unique grammar IDs that the user has started.
  * @method getStarted - Retrieves the list of grammar that the user has started.
  * @method syncFromRemote - Synchronizes grammar data between the local database and Supabase, either fully or incrementally based on the last sync timestamp.
  *
@@ -53,15 +52,6 @@ export default class Grammar extends Entity<AppDB> implements GrammarType {
     const grammarIds = await UserItem.getStartedGrammarIds(userId);
     if (grammarIds.length === 0) return [];
     return await db.grammar.where('id').anyOf(grammarIds).sortBy('sort_order');
-  }
-
-  /**
-   * Retrieves unique grammar IDs started by the user.
-   * Kept as an explicit model API for call sites/tests that need IDs only.
-   */
-  static async getStartedGrammarIds(userId: string): Promise<number[]> {
-    assertNonEmptyString(userId, 'userId');
-    return await UserItem.getStartedGrammarIds(userId);
   }
 
   /**

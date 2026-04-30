@@ -21,7 +21,7 @@ interface UseFetchResult<T> {
  *   - loading: Indicates if the data is currently being fetched.
  *   - reload: Function to trigger a reload of the data.
  */
-export function useFetch<T>(fetchFunction: () => Promise<T>): UseFetchResult<T> {
+export function useFetch<T>(fetchFunction: () => Promise<T | null>): UseFetchResult<T | null> {
   if (typeof fetchFunction !== 'function') {
     throw new TypeError('fetchFunction must be a function.');
   }

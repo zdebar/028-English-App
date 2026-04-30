@@ -153,7 +153,7 @@ describe('UserScore', () => {
   });
 
   it('deleteAllScores deletes user rows', async () => {
-    await UserScoreType.deleteAllScores('u1');
+    await UserScoreType.deleteByUserId('u1');
 
     expect(mocks.equals).toHaveBeenCalledWith('u1');
   });
