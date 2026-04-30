@@ -9,18 +9,24 @@ import BaseButton from '@/components/UI/buttons/BaseButton';
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import { ROUTES } from '@/config/routes.config';
 import { useAuthStore } from '../auth/use-auth-store';
+import { useCallback } from 'react';
 
 export default function BlocksOverview() {
   const navigate = useNavigate();
   const userId = useAuthStore((state) => state.userId);
 
-  const {
-    data: blocks,
-    error,
-    loading,
-  } = useArray<BlockType>(() => Blocks.getOverviewBlocks(userId ?? ''));
+  // Blocks management
+  const fetchBlocks = useCallback(async (): Promise<BlockType[]> => {
+    if (userId) {
+      return Blocks.getOverviewBlocks(userId);
+    }
+    return [];
+  }, [userId]);
+
+  const { data: blocks, error, loading } = useArray<BlockType>(fetchBlocks);
   const hasBlocks = blocks.length > 0;
 
+  // Early returns
   if (loading) {
     return (
       <DelayedMessage>
@@ -47,7 +53,11 @@ export default function BlocksOverview() {
           <BaseButton
             key={block.id}
             className="h-input flex justify-start px-4 text-left"
-            onClick={() => navigate(`${ROUTES.blocks}/${block.id}`)}
+            onClick={() =>
+              navigate(`${ROUTES.blocks}/${block.id}`, {
+                state: { blockId: block.id, blockName: block.name },
+              })
+            }
             title={block.name}
           >
             <p className="overflow-hidden text-ellipsis whitespace-nowrap">{block.name}</p>

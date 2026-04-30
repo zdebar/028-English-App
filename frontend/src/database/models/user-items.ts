@@ -242,11 +242,27 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         resetUserItem(item);
       });
 
-    if (count === 0) {
-      throw new Error(`No user items found for grammar ID ${grammarId}.`);
-    }
-
     infoHandler(`Resetted ${count} user-items with grammarId: ${grammarId} for userId: ${userId}`);
+    triggerLevelsUpdatedEvent(userId);
+  }
+
+  /**
+   * Resets all user items associated with a specific block ID to their default state for a given user.
+   * @param userId - The unique identifier of the user
+   * @param blockId - The unique identifier of the block
+   */
+  static async resetItemsByBlockId(userId: string, blockId: number): Promise<void> {
+    assertNonEmptyString(userId, 'userId');
+    assertNonNegativeInteger(blockId, 'blockId');
+
+    const count = await db.user_items
+      .where('[user_id+block_id]')
+      .equals([userId, blockId])
+      .modify((item: UserItemLocal) => {
+        resetUserItem(item);
+      });
+
+    infoHandler(`Resetted ${count} user-items with blockId: ${blockId} for userId: ${userId}`);
     triggerLevelsUpdatedEvent(userId);
   }
 
