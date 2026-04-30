@@ -9,12 +9,11 @@ import { useCallback, useMemo, type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StyledButton from '@/components/UI/buttons/StyledButton';
 import CloseButton from '@/components/UI/buttons/CloseButton';
-import Delayed from '@/components/UI/Delayed';
 import { useArray } from '@/hooks/use-array';
-import Notification from '@/components/UI/Notification';
 import UserItem from '@/database/models/user-items';
 import { useToastStore } from '../toast/use-toast-store';
 import { errorHandler } from '../logging/error-handler';
+import DelayedNotification from '@/components/UI/DelayedNotification';
 
 /**
  * GrammarOverview component displays a list of started grammar topics for the user.
@@ -88,9 +87,7 @@ export default function GrammarOverview(): JSX.Element {
             </StyledButton>
           ))
         ) : (
-          <Delayed>
-            <Notification className="color-info pt-4">{TEXTS.noGrammar}</Notification>
-          </Delayed>
+          <DelayedNotification>{TEXTS.noGrammar}</DelayedNotification>
         )}
       </div>
     );
@@ -108,9 +105,7 @@ export default function GrammarOverview(): JSX.Element {
       {sanitizedNote ? (
         <div dangerouslySetInnerHTML={{ __html: sanitizedNote }} className="grammar" />
       ) : (
-        <Delayed>
-          <Notification className="color-info pt-4">{TEXTS.notAvailable}</Notification>
-        </Delayed>
+        <DelayedNotification>{TEXTS.notAvailable}</DelayedNotification>
       )}
       <HelpButton className="right-0 -bottom-10.5" />
     </OverviewCard>

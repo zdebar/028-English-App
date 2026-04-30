@@ -1,6 +1,5 @@
 import StyledButton from '@/components/UI/buttons/StyledButton';
 import CloseButton from '@/components/UI/buttons/CloseButton';
-import Delayed from '@/components/UI/Delayed';
 import Notification from '@/components/UI/Notification';
 import { ROUTES } from '@/config/routes.config';
 import UserItem from '@/database/models/user-items';
@@ -17,6 +16,7 @@ import { useFetch } from '@/hooks/use-fetch';
 
 import { useNavigate, useParams } from 'react-router-dom';
 import type { BlockType } from '@/types/generic.types';
+import DelayedNotification from '@/components/UI/DelayedNotification';
 
 export default function BlockItemsOverview() {
   const navigate = useNavigate();
@@ -113,9 +113,7 @@ export default function BlockItemsOverview() {
           </StyledButton>
         ))
       ) : (
-        <Delayed>
-          <Notification className="color-info pt-4">{TEXTS.noBlockItems}</Notification>
-        </Delayed>
+        <DelayedNotification>{TEXTS.noBlockItems}</DelayedNotification>
       )}
     </div>
   );

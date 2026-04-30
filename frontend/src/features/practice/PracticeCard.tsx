@@ -6,7 +6,6 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useUserStore } from '../user-stats/use-user-store';
 import { usePracticeDeck } from './hooks/use-practice-deck';
 
-import Delayed from '@/components/UI/Delayed';
 import Indicator from '@/components/UI/Indicator';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
@@ -119,13 +118,7 @@ export default function PracticeCard() {
                   {audioError ? (
                     <p className="px-2">{TEXTS.noAudio}</p>
                   ) : (
-                    audioLoading && (
-                      <Delayed>
-                        <Notification className="color-info pt-4">
-                          {TEXTS.loadingAudio}
-                        </Notification>
-                      </Delayed>
-                    )
+                    audioLoading && <DelayedNotification>{TEXTS.loadingAudio}</DelayedNotification>
                   )}
                 </div>
                 {/** Item Data */}

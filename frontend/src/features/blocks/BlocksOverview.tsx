@@ -1,7 +1,5 @@
 import Blocks from '@/database/models/blocks';
 import { useNavigate } from 'react-router-dom';
-import Delayed from '@/components/UI/Delayed';
-import Notification from '@/components/UI/Notification';
 import { TEXTS } from '@/locales/cs';
 import type { BlockType } from '@/types/generic.types';
 import { useArray } from '@/hooks/use-array';
@@ -12,6 +10,7 @@ import { useAuthStore } from '../auth/use-auth-store';
 import { useCallback, useEffect } from 'react';
 import { useToastStore } from '../toast/use-toast-store';
 import { errorHandler } from '../logging/error-handler';
+import DelayedNotification from '@/components/UI/DelayedNotification';
 
 export default function BlocksOverview() {
   const navigate = useNavigate();
@@ -38,11 +37,7 @@ export default function BlocksOverview() {
 
   // Early returns
   if (loading) {
-    return (
-      <Delayed>
-        <Notification className="color-info pt-4">{TEXTS.loadingMessage}</Notification>
-      </Delayed>
-    );
+    return <DelayedNotification>{TEXTS.loadingMessage}</DelayedNotification>;
   }
 
   return (
@@ -64,9 +59,7 @@ export default function BlocksOverview() {
           </StyledButton>
         ))
       ) : (
-        <Delayed>
-          <Notification className="color-info pt-4">{TEXTS.noBlocks}</Notification>
-        </Delayed>
+        <DelayedNotification>{TEXTS.noBlocks}</DelayedNotification>
       )}
     </div>
   );
