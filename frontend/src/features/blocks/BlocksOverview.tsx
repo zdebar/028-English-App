@@ -25,15 +25,8 @@ export default function BlocksOverview() {
     return [];
   }, [userId]);
 
-  const { data: blocks, error, loading } = useArray<BlockType>(fetchBlocks);
+  const { data: blocks, loading } = useArray<BlockType>(fetchBlocks);
   const hasBlocks = blocks.length > 0;
-
-  useEffect(() => {
-    if (error) {
-      showToast(TEXTS.dataLoadingError, 'error');
-      errorHandler(TEXTS.dataLoadingError, error);
-    }
-  }, [error]);
 
   // Early returns
   if (loading) {

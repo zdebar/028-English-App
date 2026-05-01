@@ -55,7 +55,7 @@ export function useOverview<T extends RecordType>({
     handleOpen,
     handleClose,
     handleReset,
-    error: !!error,
+    error,
     loading,
   };
 }
