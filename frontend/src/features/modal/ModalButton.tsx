@@ -5,11 +5,15 @@ import { useMinLoading } from '@/features/modal/use-min-loading';
 import { TEXTS } from '@/locales/cs';
 import type { JSX, ReactNode } from 'react';
 import { useCallback, useState } from 'react';
+import { errorHandler } from '../logging/error-handler';
+import { useToastStore } from '../toast/use-toast-store';
 
 type ModalButtonProps = Readonly<{
   onConfirm?: () => Promise<void> | void;
   modalTitle?: string;
   modalText?: string;
+  successToastText?: string;
+  errorToastText?: string;
   title?: string;
   disabled?: boolean;
   className?: string;
@@ -24,6 +28,8 @@ type ModalButtonProps = Readonly<{
  * @param onConfirm Function to call when action is confirmed. Should handle its own errors.
  * @param modalTitle Title to display in the confirmation modal.
  * @param modalText Description to display in the confirmation modal.
+ * @param successToastText Text to display in the success toast.
+ * @param errorToastText Text to display in the error toast.
  * @param title Tooltip text to display on hover over the button.
  * @param disabled Whether the button is disabled.
  * @param className Additional CSS classes for custom styling.
@@ -34,6 +40,8 @@ export default function ModalButton({
   onConfirm,
   modalTitle = TEXTS.modalTitle,
   modalText = TEXTS.modalText,
+  successToastText = TEXTS.genericSuccess,
+  errorToastText = TEXTS.genericFailure,
   disabled = false,
   title = '',
   children,
@@ -42,6 +50,7 @@ export default function ModalButton({
   const [showModal, setShowModal] = useState(false);
   const { isLoading, setIsLoading } = useMinLoading(config.buttons.minLoadingTime);
   const isDisabled = disabled || isLoading;
+  const showToast = useToastStore((state) => state.showToast);
 
   const handleConfirm = useCallback(async () => {
     if (!onConfirm) return;
@@ -49,10 +58,14 @@ export default function ModalButton({
     setIsLoading(true);
     try {
       await onConfirm();
+      showToast(successToastText, 'success');
+    } catch (err) {
+      errorHandler('Modal function failure', err);
+      showToast(errorToastText, 'error');
     } finally {
       setIsLoading(false);
     }
-  }, [onConfirm, setIsLoading]);
+  }, [onConfirm, setIsLoading, successToastText, errorToastText]);
 
   return (
     <>

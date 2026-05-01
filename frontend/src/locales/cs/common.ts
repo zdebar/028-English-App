@@ -9,6 +9,8 @@ export const COMMON_TEXTS = {
   resetProgressSuccessToast: 'Pokrok byl úspěšně vymazán.',
   resetProgressErrorToast: 'Chyba při mazání pokroku.',
   masteredSwitchHelp: 'přepnout naučeno / započato',
+  genericSuccess: 'Akce byla úspěšná.',
+  genericFailure: 'Akce se nezdařila.',
 
   // Buttons
   confirm: 'Ano',
