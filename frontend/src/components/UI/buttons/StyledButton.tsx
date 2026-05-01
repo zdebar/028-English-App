@@ -1,9 +1,11 @@
-import type { ButtonHTMLAttributes } from 'react';
+import type { ButtonHTMLAttributes, JSX } from 'react';
 
 /**
  * Button component for rendering a styled button element.
  */
-export default function StyledButton(props: ButtonHTMLAttributes<HTMLButtonElement>) {
+export default function StyledButton(
+  props: Readonly<ButtonHTMLAttributes<HTMLButtonElement>>,
+): JSX.Element {
   return (
     <button
       type="button"

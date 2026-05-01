@@ -1,6 +1,6 @@
 import HelpText from '@/features/help/HelpText';
 import { TEXTS } from '@/locales/cs';
-import type { ButtonHTMLAttributes } from 'react';
+import type { ButtonHTMLAttributes, JSX } from 'react';
 
 type MasteredToggleButtonProps = Readonly<{
   showMastered: boolean;
@@ -18,7 +18,7 @@ export default function MasteredToggleButton({
   showMastered,
   setShowMastered,
   ...rest
-}: MasteredToggleButtonProps) {
+}: MasteredToggleButtonProps): JSX.Element {
   return (
     <>
       <button

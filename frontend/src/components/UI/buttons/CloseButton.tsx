@@ -31,7 +31,7 @@ export default function CloseButton({
       onClick();
     } else if (navigateTo) {
       navigate(navigateTo);
-    } else if (window.history.length > 1) {
+    } else if (globalThis.history.length > 1) {
       navigate(-1);
     }
   };
