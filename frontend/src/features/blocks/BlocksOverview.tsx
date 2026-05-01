@@ -4,13 +4,13 @@ import { TEXTS } from '@/locales/cs';
 import type { BlockType } from '@/types/generic.types';
 import { useArray } from '@/hooks/use-array';
 import StyledButton from '@/components/UI/buttons/StyledButton';
-import CloseButton from '@/components/UI/buttons/CloseButton';
 import { ROUTES } from '@/config/routes.config';
 import { useAuthStore } from '../auth/use-auth-store';
 import { useCallback } from 'react';
 import { useToastStore } from '../toast/use-toast-store';
 import { errorHandler } from '../logging/error-handler';
 import { DataState } from '@/components/UI/DataState';
+import { CardHeader } from '@/components/UI/CardHeader';
 
 export default function BlocksOverview() {
   const navigate = useNavigate();
@@ -33,10 +33,9 @@ export default function BlocksOverview() {
 
   return (
     <div className="card-width flex flex-col justify-start gap-1">
-      <div className="h-button flex items-center justify-between gap-1">
+      <CardHeader onClose={() => navigate(ROUTES.profile)}>
         <div className="flex grow justify-start px-4">{TEXTS.blocksOverview}</div>
-        <CloseButton onClick={() => navigate(ROUTES.profile)} />
-      </div>
+      </CardHeader>
       <DataState
         loading={loading}
         error={status === 'error'}

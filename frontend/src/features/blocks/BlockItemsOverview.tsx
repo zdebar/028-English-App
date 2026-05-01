@@ -1,4 +1,3 @@
-import CloseButton from '@/components/UI/buttons/CloseButton';
 import { ROUTES } from '@/config/routes.config';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
@@ -16,6 +15,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import type { BlockType } from '@/types/generic.types';
 import { DataState } from '@/components/UI/DataState';
 import { ListButton } from '@/components/UI/buttons/ListButton';
+import { CardHeader } from '@/components/UI/CardHeader';
 
 export default function BlockItemsOverview() {
   const navigate = useNavigate();
@@ -87,7 +87,7 @@ export default function BlockItemsOverview() {
   return (
     <div className="card-width flex flex-col justify-start gap-1">
       {/** Card Header */}
-      <div className="h-button flex items-center justify-between gap-1">
+      <CardHeader onClose={onClose}>
         <DataState
           loading={blockStatus === 'loading'}
           error={blockStatus === 'error'}
@@ -108,8 +108,7 @@ export default function BlockItemsOverview() {
             {block?.name ?? TEXTS.loadingError}
           </ModalButton>
         </DataState>
-        <CloseButton onClick={onClose} />
-      </div>
+      </CardHeader>
       {/** Items List */}
       <DataState
         loading={itemsStatus === 'loading'}
