@@ -7,6 +7,11 @@ import { compareCzechStrings, filterSortedWords, type DisplayField } from './voc
 
 const INITIAL_VISIBLE_COUNT = config.vocabulary.itemsPerPage;
 
+/**
+ * Custom hook to manage vocabulary state and actions.
+ * @param userId - The ID of the user for whom to fetch vocabulary items.
+ * @returns An object containing vocabulary state and actions.
+ */
 export function useVocabulary(userId: string | null) {
   const fetchVocabulary = useCallback(async () => {
     if (!userId) return [];

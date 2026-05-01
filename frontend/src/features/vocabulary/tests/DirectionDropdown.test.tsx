@@ -54,7 +54,7 @@ describe('DirectionDropdown', () => {
 
     await waitFor(() => {
       expect(errorHandlerMock).toHaveBeenCalledWith(
-        'Value "unknown" is not valid for DirectionDropdown.',
+        'Value "unknown" is not valid for DirectionToggle.',
         expect.any(Error),
       );
     });
@@ -62,23 +62,17 @@ describe('DirectionDropdown', () => {
 
   it('logs error and does not call onChange for invalid selected value', () => {
     const onChange = vi.fn();
-    render(
-      <DirectionTogggle
-        value="czech"
-        options={[{ value: 'czech', label: 'Čeština' }]}
-        onChange={onChange}
-      />,
-    );
+    render(<DirectionTogggle value="czech" options={[]} onChange={onChange} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Translation direction' }));
 
     expect(onChange).not.toHaveBeenCalled();
     expect(errorHandlerMock).toHaveBeenCalledWith(
-      'DirectionDropdown expects exactly 2 options, received 1.',
+      'DirectionToggle expects at least 1 option, received 0.',
       expect.any(Error),
     );
     expect(errorHandlerMock).toHaveBeenCalledWith(
-      'Cannot toggle DirectionDropdown: options are not valid.',
+      'Cannot toggle DirectionToggle: options are not valid.',
       expect.any(Error),
     );
   });

@@ -20,7 +20,7 @@ type DirectionToggleProps<T> = Readonly<{
  * @param options - Array of selectable options, each with a value and label.
  * @param onChange - Callback invoked when the selected value changes.
  * @param className - Optional additional CSS classes for custom styling.
- * @returns A styled button that toggles between exactly two provided options.
+ * @returns A styled button that cycles through provided options.
  */
 export default function DirectionTogggle<T>({
   value,
@@ -29,13 +29,13 @@ export default function DirectionTogggle<T>({
   className = '',
 }: DirectionToggleProps<T>) {
   const currentIndex = useMemo(() => {
-    return options.findIndex((option) => String(option.value) === String(value));
+    return options.findIndex((entry) => String(entry.value) === String(value));
   }, [options, value]);
 
   useEffect(() => {
-    if (options.length !== 2) {
+    if (options.length === 0) {
       errorHandler(
-        `DirectionToggle expects exactly 2 options, received ${options.length}.`,
+        'DirectionToggle expects at least 1 option, received 0.',
         new Error('Invalid toggle options count'),
       );
       return;
@@ -50,8 +50,6 @@ export default function DirectionTogggle<T>({
   }, [currentIndex, options, value]);
 
   const currentOption = currentIndex >= 0 ? options[currentIndex] : options[0];
-  const nextOption =
-    options.length === 2 && currentIndex !== -1 ? options[(currentIndex + 1) % 2] : undefined;
 
   return (
     <div className={`border-none text-center ${className}`} title={TEXTS.translationDirection}>
@@ -64,7 +62,7 @@ export default function DirectionTogggle<T>({
         type="button"
         title={TEXTS.translationDirection}
         onClick={() => {
-          if (!nextOption) {
+          if (options.length === 0) {
             errorHandler(
               'Cannot toggle DirectionToggle: options are not valid.',
               new Error('Invalid toggle state'),
@@ -72,11 +70,13 @@ export default function DirectionTogggle<T>({
             return;
           }
 
-          onChange(nextOption.value);
+          const safeCurrentIndex = Math.max(currentIndex, 0);
+          const nextIndex = (safeCurrentIndex + 1) % options.length;
+          onChange(options[nextIndex].value);
         }}
         className="h-full"
       >
-        {currentOption?.label ?? TEXTS.translationDirection}
+        {currentOption ? currentOption.label : TEXTS.translationDirection}
       </StyledButton>
     </div>
   );
