@@ -1,11 +1,12 @@
 import HelpText from '@/features/help/HelpText';
 import { TEXTS } from '@/locales/cs';
+import type { ButtonHTMLAttributes } from 'react';
 
 type MasteredToggleButtonProps = Readonly<{
   showMastered: boolean;
   setShowMastered: (value: boolean) => void;
-  className?: string;
-}>;
+}> &
+  ButtonHTMLAttributes<HTMLButtonElement>;
 
 /**
  * A styled button component for toggling mastered state.
@@ -18,16 +19,14 @@ type MasteredToggleButtonProps = Readonly<{
 export default function MasteredToggleButton({
   showMastered,
   setShowMastered,
-  className = '',
+  ...rest
 }: MasteredToggleButtonProps) {
-  const onClick = () => setShowMastered(!showMastered);
-
   return (
     <>
       <button
         type="button"
-        className={`absolute -bottom-9 left-4 cursor-pointer ${className}`}
-        onClick={onClick}
+        className={`absolute -bottom-9 left-4 cursor-pointer ${rest.className}`}
+        onClick={() => setShowMastered(!showMastered)}
         title={TEXTS.masteredSwitchHelp}
       >
         {showMastered ? TEXTS.masteredCount : TEXTS.startedCount}
