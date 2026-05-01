@@ -6,7 +6,6 @@ import type { JSX } from 'react';
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ListButton } from '@/components/UI/buttons/ListButton';
-import CloseButton from '@/components/UI/buttons/CloseButton';
 import { useArray } from '@/hooks/use-array';
 import Grammar from '@/database/models/grammar';
 import type { GrammarType } from '@/types/generic.types';
@@ -14,6 +13,7 @@ import UserItem from '@/database/models/user-items';
 import { DataState } from '@/components/UI/DataState';
 import { useToastStore } from '../toast/use-toast-store';
 import { errorHandler } from '../logging/error-handler';
+import { CardHeader } from '@/components/UI/CardHeader';
 
 /**
  * GrammarOverview component displays a list of started grammar topics for the user.
@@ -61,10 +61,9 @@ export default function GrammarOverview(): JSX.Element {
   if (currentIndex === null) {
     return (
       <div className={`card-width flex flex-col justify-start gap-1`}>
-        <div className="h-button flex items-center justify-between gap-1">
+        <CardHeader onClose={() => navigate('/profile')}>
           <div className="flex grow justify-start px-4">{TEXTS.grammarOverview}</div>
-          <CloseButton onClick={() => navigate('/profile')} />
-        </div>
+        </CardHeader>
         <DataState
           loading={loading}
           error={false}
