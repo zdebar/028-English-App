@@ -154,12 +154,6 @@ export function usePracticeDeck(userId: string | null) {
 
   // Play audio on item change if direction is EN -> CZ
   useEffect(() => {
-    console.log('Current item changed, checking audio play conditions...', {
-      audioDisabled,
-      isCzToEn,
-      audioLoading,
-      showDirectionChange,
-    });
     if (audioDisabled || isCzToEn || audioLoading || showDirectionChange) {
       return;
     }
