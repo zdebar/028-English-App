@@ -1,12 +1,12 @@
-import CloseButton from '@/components/UI/buttons/CloseButton';
 import config from '@/config/config';
 import { TEXTS } from '@/locales/cs';
 import DirectionTogggle from '@/features/vocabulary/DirectionToggle';
 import { type DisplayField } from '@/features/vocabulary/vocabulary.utils';
 import { type UserItemLocal } from '@/types/user-item.types';
 import CancelIcon from '@/components/UI/icons/CancelIcon';
-import DelayedNotification from '@/components/UI/DelayedNotification';
+import { CardHeader } from '@/components/UI/CardHeader';
 import { ListButton } from '@/components/UI/buttons/ListButton';
+import { DataState } from '@/components/UI/DataState';
 
 const DIRECTION_OPTIONS: { value: DisplayField; label: string }[] = [
   { value: 'czech', label: 'Čeština' },
@@ -57,63 +57,59 @@ export default function VocabularyList({
 
   return (
     <div className="card-width relative flex h-full flex-col justify-start gap-1">
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center justify-between gap-1">
-          <DirectionTogggle
-            value={displayField}
-            options={DIRECTION_OPTIONS}
-            onChange={setDisplayField}
-            className="h-button flex grow items-center border border-dashed"
-          />
-          <CloseButton onClick={onClose} />
-        </div>
-        <div className="relative w-full">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder={TEXTS.enterPrompt}
-            spellCheck={false}
-            maxLength={32}
-            className="h-input color-base w-full border border-dashed pr-8 pl-4 focus:outline-none"
-          />
-          {searchTerm && (
-            <button
-              type="button"
-              className="hover:dark:bg-button-dark hover:bg-button-light absolute top-1/2 right-1 flex size-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-transparent"
-              onClick={() => setSearchTerm('')}
-              tabIndex={0}
-            >
-              <CancelIcon size={16} />
-            </button>
-          )}
-        </div>
-      </div>
-      <div className="flex flex-col gap-1">
-        {hasWords ? (
-          <>
-            {visibleItems.map((item, index) => (
-              <ListButton
-                key={item.item_id}
-                className="flex grow-0 justify-start p-4 text-left"
-                onClick={() => onSelect(index)}
-              >
-                {displayField === 'czech' ? item.czech : item.english}
-              </ListButton>
-            ))}
-            {remainingCount > 0 && (
-              <button
-                onClick={() => setVisibleCount(visibleCount + config.vocabulary.itemsPerPage)}
-                className="mt-2 w-full text-center font-bold hover:underline"
-              >
-                ... {TEXTS.more}
-              </button>
-            )}
-          </>
-        ) : (
-          <DelayedNotification className="pt-6" message={TEXTS.noStartedVocabulary} />
+      <CardHeader onClose={onClose}>
+        <DirectionTogggle
+          value={displayField}
+          options={DIRECTION_OPTIONS}
+          onChange={setDisplayField}
+          className="h-button flex grow items-center border border-dashed"
+        />
+      </CardHeader>
+      <div className="relative w-full">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder={TEXTS.enterPrompt}
+          spellCheck={false}
+          maxLength={32}
+          className="h-input color-base w-full border border-dashed pr-8 pl-4 focus:outline-none"
+        />
+        {searchTerm && (
+          <button
+            type="button"
+            className="hover:dark:bg-button-dark hover:bg-button-light absolute top-1/2 right-1 flex size-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-transparent"
+            onClick={() => setSearchTerm('')}
+            tabIndex={0}
+          >
+            <CancelIcon size={16} />
+          </button>
         )}
       </div>
+      <DataState
+        loading={false}
+        error={false}
+        hasData={hasWords}
+        noDataMessage={TEXTS.noStartedVocabulary}
+      >
+        {visibleItems.map((item, index) => (
+          <ListButton
+            key={item.item_id}
+            className="flex grow-0 justify-start p-4 text-left"
+            onClick={() => onSelect(index)}
+          >
+            {displayField === 'czech' ? item.czech : item.english}
+          </ListButton>
+        ))}
+        {remainingCount > 0 && (
+          <button
+            onClick={() => setVisibleCount(visibleCount + config.vocabulary.itemsPerPage)}
+            className="mt-2 w-full text-center font-bold hover:underline"
+          >
+            ... {TEXTS.more}
+          </button>
+        )}
+      </DataState>
     </div>
   );
 }

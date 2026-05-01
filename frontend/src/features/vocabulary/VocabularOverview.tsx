@@ -57,42 +57,34 @@ export default function VocabularyOverview() {
     [filteredWords],
   );
 
-  const handleCloseDetail = useCallback(() => {
-    setSelectedWord(null);
-  }, []);
-
-  const handleCloseList = useCallback(() => {
-    navigate('/profile');
-  }, [navigate]);
-
   if (loading) {
     return <DelayedNotification />;
   }
 
+  if (selectedWord === null) {
+    return (
+      <VocabularyList
+        filteredWords={filteredWords}
+        visibleCount={visibleCount}
+        displayField={displayField}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        setDisplayField={setDisplayField}
+        setVisibleCount={setVisibleCount}
+        onSelect={handleSelectWord}
+        onClose={() => navigate('/profile')}
+      />
+    );
+  }
+
   return (
-    <>
-      {selectedWord === null ? (
-        <VocabularyList
-          filteredWords={filteredWords}
-          visibleCount={visibleCount}
-          displayField={displayField}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          setDisplayField={setDisplayField}
-          setVisibleCount={setVisibleCount}
-          onSelect={handleSelectWord}
-          onClose={handleCloseList}
-        />
-      ) : (
-        <VocabularyDetailCard
-          selectedWord={selectedWord}
-          selectedTitle={
-            displayField === 'czech' ? (selectedWord.czech ?? '') : (selectedWord.english ?? '')
-          }
-          onClose={handleCloseDetail}
-          onReset={handleClearUserItem}
-        />
-      )}
-    </>
+    <VocabularyDetailCard
+      selectedWord={selectedWord}
+      selectedTitle={
+        displayField === 'czech' ? (selectedWord.czech ?? '') : (selectedWord.english ?? '')
+      }
+      onClose={() => setSelectedWord(null)}
+      onReset={handleClearUserItem}
+    />
   );
 }

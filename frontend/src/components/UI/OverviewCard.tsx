@@ -1,8 +1,8 @@
-import CloseButton from '@/components/UI/buttons/CloseButton';
 import HelpText from '@/features/help/HelpText';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import ModalButton from '@/features/modal/ModalButton';
+import { CardHeader } from './CardHeader';
 
 type OverviewCardProps = Readonly<{
   buttonTitle?: string;
@@ -45,8 +45,7 @@ export default function OverviewCard({
   return (
     <div className={`card-width min-h-card ${className}`}>
       {/* Top Bar */}
-      <div className="relative flex items-center justify-between gap-1">
-        {/* Title and Reset Button */}
+      <CardHeader onClose={onClose}>
         <ModalButton
           modalTitle={modalTitle}
           modalText={modalText}
@@ -64,10 +63,8 @@ export default function OverviewCard({
         >
           {buttonTitle}
         </ModalButton>
-        {/* Close Card Button */}
-        <CloseButton onClick={onClose} />
         <HelpText className="-bottom-2 left-2">{helpText}</HelpText>
-      </div>
+      </CardHeader>
       {/* Content Area */}
       <div className="w-full grow p-4">{children}</div>
     </div>
