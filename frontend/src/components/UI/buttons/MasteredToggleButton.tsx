@@ -13,8 +13,6 @@ type MasteredToggleButtonProps = Readonly<{
  *
  * @param showMastered - Indicates whether mastered items are currently shown
  * @param setShowMastered - Function to update the mastered state
- * @param className - Additional CSS classes to apply to the button
- * @returns A button element with absolute positioning and info color styling
  */
 export default function MasteredToggleButton({
   showMastered,
