@@ -1,16 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
-import { TEXTS } from '@/locales/cs';
-import { errorHandler } from '@/features/logging/error-handler';
-import { useToastStore } from '@/features/toast/use-toast-store';
 
 interface UseArrayResult<T> {
   data: T[];
   currentIndex: number | null;
+  setCurrentIndex: (index: number | null) => void;
   currentItem: T | null;
-  error: boolean;
+  fetchError: string | null;
   loading: boolean;
   reload: () => void;
-  setCurrentIndex: (index: number | null) => void;
 }
 
 /**
@@ -24,7 +21,7 @@ interface UseArrayResult<T> {
  *   - currentIndex: The index of the currently selected item, or null if none is selected. On reload currentIndex stays the same.
  *   - setCurrentIndex: Function to update the current index.If the index is out of bounds, currentItem will be null.
  *   - currentItem: The currently selected item, or null if none is selected.
- *   - error: Indicates if there was an error during the fetch.
+ *   - fetchError: Indicates if there was an error during the fetch.
  *   - loading: Indicates if the data is currently being fetched.
  *   - reload: Function to trigger a reload of the data.
  */
@@ -33,12 +30,10 @@ export function useArray<T>(fetchFunction: () => Promise<T[]>): UseArrayResult<T
     throw new TypeError('fetchFunction must be a function.');
   }
 
-  const showToast = useToastStore((state) => state.showToast);
-
   const [data, setData] = useState<T[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
   const [reloading, setReloading] = useState(true);
-  const [error, setError] = useState<boolean>(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const currentItem =
@@ -57,15 +52,12 @@ export function useArray<T>(fetchFunction: () => Promise<T[]>): UseArrayResult<T
         const result = await fetchFunction();
         if (!isActive) return;
         setData(result);
-        setError(false);
+        setFetchError(null);
       } catch (error) {
         if (!isActive) return;
-        const errorMsg = TEXTS.dataLoadingError;
-        setError(true);
+        setFetchError(error instanceof Error ? error.message : String(error));
         setCurrentIndex(null);
         setData([]);
-        showToast(errorMsg, 'error');
-        errorHandler('Data Fetching Error', errorMsg);
       } finally {
         if (isActive) {
           setLoading(false);
@@ -91,7 +83,7 @@ export function useArray<T>(fetchFunction: () => Promise<T[]>): UseArrayResult<T
     currentIndex,
     setCurrentIndex,
     currentItem,
-    error,
+    fetchError,
     loading,
     reload,
   };

@@ -21,8 +21,15 @@ export function useOverview<T extends RecordType>({
 }: UseOverviewProps<T>) {
   const showToast = useToastStore((state) => state.showToast);
 
-  const { data, currentIndex, currentItem, setCurrentIndex, reload, error, loading } =
-    useArray<T>(fetchFunction);
+  const {
+    data,
+    currentIndex,
+    currentItem,
+    setCurrentIndex,
+    reload,
+    fetchError: error,
+    loading,
+  } = useArray<T>(fetchFunction);
 
   const handleOpen = useCallback(
     (index: number) => {

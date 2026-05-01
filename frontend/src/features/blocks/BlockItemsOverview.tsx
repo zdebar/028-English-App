@@ -54,7 +54,7 @@ export default function BlockItemsOverview() {
     }
   }, [userId, blockId]);
 
-  const { data: items, error, loading } = useArray<UserItemLocal>(fetchBlockItems);
+  const { data: items, fetchError: error, loading } = useArray<UserItemLocal>(fetchBlockItems);
 
   // Handlers
   const handleReset = useCallback(async () => {
@@ -76,7 +76,7 @@ export default function BlockItemsOverview() {
     <div className="card-width flex flex-col justify-start gap-1">
       <div className="h-button flex items-center justify-between gap-1">
         {blockError ? (
-          <Notification className="color-error pt-4">{blockError}</Notification>
+          <Notification className="color-error pt-4">{TEXTS.dataLoadingError}</Notification>
         ) : (
           <ModalButton
             modalTitle={'resetTitle'}

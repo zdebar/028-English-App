@@ -7,9 +7,8 @@ import StyledButton from '@/components/UI/buttons/StyledButton';
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import { ROUTES } from '@/config/routes.config';
 import { useAuthStore } from '../auth/use-auth-store';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useToastStore } from '../toast/use-toast-store';
-import { errorHandler } from '../logging/error-handler';
 import DelayedNotification from '@/components/UI/DelayedNotification';
 
 export default function BlocksOverview() {

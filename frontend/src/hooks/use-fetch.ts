@@ -1,10 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { TEXTS } from '@/locales/cs';
-import { errorHandler } from '@/features/logging/error-handler';
 
 interface UseFetchResult<T> {
   data: T | null;
-  error: string | null;
+  fetchError: string | null;
   loading: boolean;
   reload: () => void;
 }
@@ -17,7 +15,7 @@ interface UseFetchResult<T> {
  * @param fetchFunction - An asynchronous function that fetches the data.
  * @returns An object containing:
  *   - data: The fetched data or null if not yet fetched.
- *   - error: An error message if the fetch failed, otherwise null.
+ *   - fetchError: An error message if the fetch failed, otherwise null.
  *   - loading: Indicates if the data is currently being fetched.
  *   - reload: Function to trigger a reload of the data.
  */
@@ -28,7 +26,7 @@ export function useFetch<T>(fetchFunction: () => Promise<T | null>): UseFetchRes
 
   const [data, setData] = useState<T | null>(null);
   const [reloading, setReloading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -42,11 +40,10 @@ export function useFetch<T>(fetchFunction: () => Promise<T | null>): UseFetchRes
         const result = await fetchFunction();
         if (!isActive) return;
         setData(result);
-        setError(null);
+        setFetchError(null);
       } catch (error) {
         if (!isActive) return;
-        setError(TEXTS.dataLoadingError);
-        errorHandler('Data Fetching Error', error);
+        setFetchError(error instanceof Error ? error.message : String(error));
       } finally {
         if (isActive) {
           setLoading(false);
@@ -69,7 +66,7 @@ export function useFetch<T>(fetchFunction: () => Promise<T | null>): UseFetchRes
 
   return {
     data,
-    error,
+    fetchError,
     loading,
     reload,
   };
