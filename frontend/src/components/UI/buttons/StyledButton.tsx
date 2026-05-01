@@ -1,11 +1,9 @@
 import type { ButtonHTMLAttributes } from 'react';
 
-type BaseButtonProps = Readonly<ButtonHTMLAttributes<HTMLButtonElement>>;
-
 /**
  * Button component for rendering a styled button element.
  */
-export default function StyledButton(props: BaseButtonProps) {
+export default function StyledButton(props: ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
       type="button"
