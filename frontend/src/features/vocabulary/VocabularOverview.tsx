@@ -67,7 +67,7 @@ export default function VocabularyOverview() {
   }, [navigate]);
 
   if (loading) {
-    return <DelayedNotification>{TEXTS.loadingMessage}</DelayedNotification>;
+    return <DelayedNotification />;
   }
 
   return (

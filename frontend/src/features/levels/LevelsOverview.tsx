@@ -9,8 +9,7 @@ import { useUserStore } from '../user-stats/use-user-store';
 import { useLevelsStore } from './use-levels-store';
 import MasteredToggleButton from '@/components/UI/buttons/MasteredToggleButton';
 import BlockBar from '@/components/UI/BlockBar';
-import DelayedNotification from '@/components/UI/DelayedNotification';
-
+import Notification from '@/components/UI/Notification';
 /**
  * LevelsOverview component
  *
@@ -39,7 +38,7 @@ export default function LevelsOverview() {
           <CloseButton onClick={() => navigate('/profile')} />
         </div>
         {levels.length === 0 ? (
-          <DelayedNotification>{TEXTS.notAvailable}</DelayedNotification>
+          <Notification>{TEXTS.notAvailable}</Notification>
         ) : (
           <div>
             <div className="flex flex-col gap-1">

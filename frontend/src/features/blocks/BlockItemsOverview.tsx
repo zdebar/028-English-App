@@ -113,7 +113,7 @@ export default function BlockItemsOverview() {
           </StyledButton>
         ))
       ) : (
-        <DelayedNotification>{TEXTS.noBlockItems}</DelayedNotification>
+        <DelayedNotification message={TEXTS.noBlockItems} />
       )}
     </div>
   );

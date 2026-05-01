@@ -118,7 +118,7 @@ export default function PracticeCard() {
                   {audioError ? (
                     <p className="px-2">{TEXTS.noAudio}</p>
                   ) : (
-                    audioLoading && <DelayedNotification>{TEXTS.loadingAudio}</DelayedNotification>
+                    audioLoading && <DelayedNotification message={TEXTS.loadingAudio}/>
                   )}
                 </div>
                 {/** Item Data */}

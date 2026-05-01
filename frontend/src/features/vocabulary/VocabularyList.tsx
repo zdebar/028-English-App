@@ -119,7 +119,7 @@ export default function VocabularyList({
             )}
           </>
         ) : (
-          <DelayedNotification className="pt-6">{TEXTS.noStartedVocabulary}</DelayedNotification>
+          <DelayedNotification className="pt-6" message={TEXTS.noStartedVocabulary} />
         )}
       </div>
     </div>

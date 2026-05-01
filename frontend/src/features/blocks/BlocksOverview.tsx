@@ -37,7 +37,7 @@ export default function BlocksOverview() {
 
   // Early returns
   if (loading) {
-    return <DelayedNotification>{TEXTS.loadingMessage}</DelayedNotification>;
+    return <DelayedNotification />;
   }
 
   return (
@@ -59,7 +59,7 @@ export default function BlocksOverview() {
           </StyledButton>
         ))
       ) : (
-        <DelayedNotification>{TEXTS.noBlocks}</DelayedNotification>
+        <DelayedNotification message={TEXTS.noBlocks} />
       )}
     </div>
   );
