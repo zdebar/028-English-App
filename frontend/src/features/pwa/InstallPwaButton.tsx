@@ -6,10 +6,9 @@ import { usePwaStore } from './use-pwa-store';
 
 type InstallPWAButtonProps = Readonly<{
   className?: string;
-}> &
-  React.HTMLAttributes<HTMLParagraphElement>;
+}>;
 
-export function InstallPWAButton(props: InstallPWAButtonProps) {
+export function InstallPWAButton({ className }: InstallPWAButtonProps) {
   const promptEvent = usePwaStore((state) => state.promptEvent);
   const setPromptEvent = usePwaStore((state) => state.setPromptEvent);
   const clearPromptEvent = usePwaStore((state) => state.clearPromptEvent);
@@ -36,10 +35,9 @@ export function InstallPWAButton(props: InstallPWAButtonProps) {
 
   return (
     <Notification
-      {...props}
       title={TEXTS.installButtonTooltip}
       onClick={handleInstall}
-      className={`color-link cursor-pointer ${props.className}`}
+      className={`color-link cursor-pointer ${className}`}
     >
       {TEXTS.installButton}
     </Notification>
