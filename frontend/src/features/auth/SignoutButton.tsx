@@ -3,6 +3,7 @@ import ModalButton from '@/features/modal/ModalButton';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { useThemeStore } from '../theme/use-theme-store';
+import { MenuButtonText } from '@/components/UI/MenuButtonText';
 
 type SignoutButtonProps = Readonly<{
   className?: string;
@@ -35,7 +36,7 @@ export default function SignoutButton({ className }: SignoutButtonProps): JSX.El
       onConfirm={handleSignout}
       className={className}
     >
-      {TEXTS.signoutButtonTitle}
+      <MenuButtonText>{TEXTS.signoutButtonTitle}</MenuButtonText>
     </ModalButton>
   );
 }

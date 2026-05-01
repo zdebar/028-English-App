@@ -5,6 +5,7 @@ import SignoutButton from '@/features/auth/SignoutButton';
 import { TEXTS } from '@/locales/cs';
 import { useNavigate } from 'react-router-dom';
 import type { JSX } from 'react/jsx-dev-runtime';
+import { MenuButtonText } from '@/components/UI/MenuButtonText';
 
 /**
  * Profile page component.
@@ -16,20 +17,20 @@ export default function Profile(): JSX.Element {
   return (
     <div className="card-width grow-0 gap-1">
       <MenuButton onClick={() => navigate(ROUTES.levels)} title={TEXTS.levelsOverviewTooltip}>
-        {TEXTS.levelsOverview}
+        <MenuButtonText>{TEXTS.levelsOverview}</MenuButtonText>
       </MenuButton>
       <MenuButton onClick={() => navigate(ROUTES.grammar)} title={TEXTS.grammarOverviewTooltip}>
-        {TEXTS.grammarOverview}
+        <MenuButtonText>{TEXTS.grammarOverview}</MenuButtonText>
       </MenuButton>
       <MenuButton onClick={() => navigate(ROUTES.blocks)} title={TEXTS.blocksOverviewTooltip}>
-        {TEXTS.blocksOverview}
+        <MenuButtonText>{TEXTS.blocksOverview}</MenuButtonText>
       </MenuButton>
       <MenuButton
         onClick={() => navigate(ROUTES.vocabulary)}
         title={TEXTS.vocabularyOverviewTooltip}
         className="mb-10"
       >
-        {TEXTS.vocabularyOverview}
+        <MenuButtonText>{TEXTS.vocabularyOverview}</MenuButtonText>
       </MenuButton>
       <DeleteUserButton />
       <SignoutButton />

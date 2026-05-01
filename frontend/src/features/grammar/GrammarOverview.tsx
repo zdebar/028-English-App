@@ -4,7 +4,7 @@ import HelpButton from '@/features/help/HelpButton';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
-import StyledButton from '@/components/UI/buttons/StyledButton';
+import { ListButton } from '@/components/UI/buttons/ListButton';
 import CloseButton from '@/components/UI/buttons/CloseButton';
 import { useOverview } from '../../hooks/use-overview';
 import Grammar from '@/database/models/grammar';
@@ -64,19 +64,19 @@ export default function GrammarOverview(): JSX.Element {
         </div>
         <DataState
           loading={loading}
-          error={!!fetchError}
+          error={fetchStatus === 'error'}
           hasData={hasData}
           noDataMessage={TEXTS.noGrammar}
         >
           {grammarList.map((item, index) => (
-            <StyledButton
+            <ListButton
               key={item.id}
-              className="h-input flex justify-start px-4 text-left"
+              className="h-input justify-start px-4"
               onClick={() => setCurrentIndex(index)}
               title={item.name}
             >
-              <p className="overflow-hidden text-ellipsis whitespace-nowrap">{item.name}</p>
-            </StyledButton>
+              {item.name}
+            </ListButton>
           ))}
         </DataState>
       </div>

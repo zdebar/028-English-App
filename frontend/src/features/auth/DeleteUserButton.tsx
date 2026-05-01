@@ -10,6 +10,7 @@ import { TEXTS } from '@/locales/cs';
 import { TableName } from '@/types/table.types';
 import { type JSX } from 'react';
 import { useThemeStore } from '../theme/use-theme-store';
+import { MenuButtonText } from '@/components/UI/MenuButtonText';
 
 type DeleteUserButtonProps = Readonly<{
   className?: string;
@@ -62,7 +63,7 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
       onConfirm={handleDelete}
       className={className}
     >
-      {TEXTS.deleteUserButtonTitle}
+      <MenuButtonText>{TEXTS.deleteUserButtonTitle}</MenuButtonText>
     </ModalButton>
   );
 }
