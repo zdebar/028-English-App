@@ -1,5 +1,3 @@
-import type { JSX } from 'react';
-
 type ScreenshotProps = Readonly<{
   readonly src: string;
   readonly alt: string;
@@ -10,9 +8,8 @@ type ScreenshotProps = Readonly<{
  *
  * @param {string} src - The source URL of the screenshot image
  * @param {string} alt - The alt text for the image, also used as the figure caption
- * @returns {JSX.Element} A figure element containing the image and caption
  */
-export function Screenshot({ src, alt }: ScreenshotProps): JSX.Element {
+export function Screenshot({ src, alt }: ScreenshotProps) {
   return (
     <figure className="mx-auto my-4 max-w-[280px]">
       <img
