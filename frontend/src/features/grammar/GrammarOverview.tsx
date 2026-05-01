@@ -1,19 +1,17 @@
 import OverviewCard from '@/components/UI/OverviewCard';
-import Grammar from '@/database/models/grammar';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import HelpButton from '@/features/help/HelpButton';
 import { TEXTS } from '@/locales/cs';
-import type { GrammarType } from '@/types/generic.types';
-import DOMPurify from 'dompurify';
-import { useCallback, useMemo, type JSX } from 'react';
+import type { JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StyledButton from '@/components/UI/buttons/StyledButton';
 import CloseButton from '@/components/UI/buttons/CloseButton';
-import { useArray } from '@/hooks/use-array';
-import UserItem from '@/database/models/user-items';
-import { useToastStore } from '../toast/use-toast-store';
-import { errorHandler } from '../logging/error-handler';
 import DelayedNotification from '@/components/UI/DelayedNotification';
+import Notification from '@/components/UI/Notification';
+import { useOverview } from '../../hooks/use-overview';
+import Grammar from '@/database/models/grammar';
+import type { GrammarType } from '@/types/generic.types';
+import UserItem from '@/database/models/user-items';
 
 /**
  * GrammarOverview component displays a list of started grammar topics for the user.
@@ -23,49 +21,23 @@ import DelayedNotification from '@/components/UI/DelayedNotification';
  */
 export default function GrammarOverview(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
-  const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
-
-  // -- Data Fetching --
-  const fetchGrammarList = useCallback(async () => {
-    if (!userId) return [];
-    return Grammar.getStarted(userId);
-  }, [userId]);
-
   const {
     data: grammarList,
     currentIndex,
-    currentItem: currentGrammar,
-    setCurrentIndex,
-    reload,
-  } = useArray<GrammarType>(fetchGrammarList);
-
-  const hasGrammar = grammarList.length > 0;
-
-  const sanitizedNote = useMemo(() => {
-    if (!currentGrammar?.note) return null;
-    return DOMPurify.sanitize(currentGrammar.note);
-  }, [currentGrammar?.note]);
-
-  // -- Event Handlers --
-  const handleOpenGrammar = useCallback(
-    (index: number) => {
-      setCurrentIndex(index);
-    },
-    [setCurrentIndex],
-  );
-
-  const handleReset = useCallback(async () => {
-    if (!currentGrammar || !userId) return;
-    try {
-      await UserItem.resetItemsByGrammarId(userId, currentGrammar.id);
-      reload();
-      showToast(TEXTS.resetProgressSuccessToast, 'success');
-    } catch (error) {
-      showToast(TEXTS.resetProgressErrorToast, 'error');
-      errorHandler('Failed to reset grammar progress', error);
-    }
-  }, [currentGrammar, userId, reload]);
+    currentItem,
+    hasGrammar,
+    currentNote,
+    handleOpen,
+    handleClose,
+    handleReset,
+    error,
+    loading,
+  } = useOverview<GrammarType>({
+    fetchFunction: () => (userId ? Grammar.getStarted(userId) : Promise.resolve([])),
+    resetFunction: (item) =>
+      userId ? UserItem.resetItemsByGrammarId(userId, item.id) : Promise.resolve(),
+  });
 
   // -- List view --
   if (currentIndex === null) {
@@ -75,20 +47,23 @@ export default function GrammarOverview(): JSX.Element {
           <div className="flex grow justify-start px-4">{TEXTS.grammarOverview}</div>
           <CloseButton onClick={() => navigate('/profile')} />
         </div>
-        {hasGrammar ? (
-          grammarList.map((item, index) => (
-            <StyledButton
-              key={item.id}
-              className="h-input flex justify-start px-4 text-left"
-              onClick={() => handleOpenGrammar(index)}
-              title={item.name}
-            >
-              <p className="overflow-hidden text-ellipsis whitespace-nowrap">{item.name}</p>
-            </StyledButton>
-          ))
-        ) : (
-          <DelayedNotification>{TEXTS.noGrammar}</DelayedNotification>
-        )}
+        {loading ? (
+          <DelayedNotification>{TEXTS.loadingMessage}</DelayedNotification>
+        ) : error ? (
+          <Notification className="color-error pt-4">{error}</Notification>
+        ) : null}
+        {hasGrammar
+          ? grammarList.map((item, index) => (
+              <StyledButton
+                key={item.id}
+                className="h-input flex justify-start px-4 text-left"
+                onClick={() => handleOpen(index)}
+                title={item.name}
+              >
+                <p className="overflow-hidden text-ellipsis whitespace-nowrap">{item.name}</p>
+              </StyledButton>
+            ))
+          : !loading && <DelayedNotification>{TEXTS.noGrammar}</DelayedNotification>}
       </div>
     );
   }
@@ -96,14 +71,16 @@ export default function GrammarOverview(): JSX.Element {
   // -- GrammarCard view --
   return (
     <OverviewCard
-      buttonTitle={currentGrammar?.name ?? TEXTS.grammarOverview}
+      buttonTitle={currentItem?.name ?? TEXTS.grammarOverview}
       modalTitle={TEXTS.restartGrammarProgress}
       handleReset={handleReset}
-      onClose={() => setCurrentIndex(null)}
+      onClose={handleClose}
       className="relative"
     >
-      {sanitizedNote ? (
-        <div dangerouslySetInnerHTML={{ __html: sanitizedNote }} className="grammar" />
+      {currentNote ? (
+        <div dangerouslySetInnerHTML={{ __html: currentNote }} className="grammar" />
+      ) : error ? (
+        <Notification className="color-error pt-4">{error}</Notification>
       ) : (
         <DelayedNotification>{TEXTS.notAvailable}</DelayedNotification>
       )}
