@@ -13,6 +13,10 @@ export const OVERVIEW_TEXTS = {
   // Blocks Overview Page
   noBlocks: 'Žádné dostupné bloky.',
   noBlockItems: 'V tomto bloku nejsou žádné položky.',
+  resetBlockTitle: 'Restartovat blok',
+  resetBlockDescription:
+    'Opravdu chcete restartovat pokrok všech položek tohoto bloku? Tuto akci nelze vrátit zpět.',
+  resetBlockTooltip: 'restartovat blok',
 
   // Privacy Policy Page
   privacyPolicy: 'Zásady ochrany osobních údajů',

@@ -1,6 +1,4 @@
-import StyledButton from '@/components/UI/buttons/StyledButton';
 import CloseButton from '@/components/UI/buttons/CloseButton';
-import Notification from '@/components/UI/Notification';
 import { ROUTES } from '@/config/routes.config';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
@@ -9,21 +7,21 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import { useArray } from '@/hooks/use-array';
 import { TEXTS } from '@/locales/cs';
 import type { UserItemLocal } from '@/types/user-item.types';
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback } from 'react';
 import ModalButton from '../modal/ModalButton';
 import Blocks from '@/database/models/blocks';
 import { useFetch } from '@/hooks/use-fetch';
-
 import { useNavigate, useParams } from 'react-router-dom';
 import type { BlockType } from '@/types/generic.types';
-import DelayedNotification from '@/components/UI/DelayedNotification';
+import { DataState } from '@/components/UI/DataState';
+import { ListButton } from '@/components/UI/buttons/ListButton';
 
 export default function BlockItemsOverview() {
   const navigate = useNavigate();
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
 
-  // Block management
+  // -- Block management --
   const { blockId: blockIdString } = useParams<{ blockId: string }>();
   const blockId = blockIdString ? Number(blockIdString) : null;
 
@@ -37,26 +35,32 @@ export default function BlockItemsOverview() {
       return await Blocks.getById(blockId);
     } catch (err) {
       showToast(TEXTS.loadingError, 'error');
+      errorHandler('Failed to fetch block details', err);
       return null;
     }
   }, [userId, blockId]);
 
-  const { data: block, error: blockError, loading: blockLoading } = useFetch<BlockType>(fetchBlock);
+  const { data: block, status: blockStatus, hasData: hasBlock } = useFetch<BlockType>(fetchBlock);
 
-  // Items management
+  // -- Items management --
   const fetchBlockItems = useCallback(async () => {
     if (!userId || !blockId) return [];
     try {
       return await UserItem.getByBlockId(userId, blockId);
     } catch (err) {
       showToast(TEXTS.loadingError, 'error');
+      errorHandler('Failed to fetch block items', err);
       return [];
     }
   }, [userId, blockId]);
 
-  const { data: items, error, loading } = useArray<UserItemLocal>(fetchBlockItems);
+  const {
+    data: items,
+    status: itemsStatus,
+    hasData: hasItems,
+  } = useArray<UserItemLocal>(fetchBlockItems);
 
-  // Handlers
+  // -- Handlers --
   const handleReset = useCallback(async () => {
     if (!userId || !blockId) return;
     try {
@@ -74,14 +78,17 @@ export default function BlockItemsOverview() {
 
   return (
     <div className="card-width flex flex-col justify-start gap-1">
+      {/** Card Header */}
       <div className="h-button flex items-center justify-between gap-1">
-        {blockError ? (
-          <Notification className="color-error pt-4">{TEXTS.loadingError}</Notification>
-        ) : (
+        <DataState
+          loading={blockStatus === 'loading'}
+          error={blockStatus === 'error'}
+          hasData={hasBlock}
+        >
           <ModalButton
-            modalTitle={'resetTitle'}
-            modalText={'resetDescription'}
-            title={'reset'}
+            modalTitle={TEXTS.resetBlockTitle}
+            modalText={TEXTS.resetBlockDescription}
+            title={TEXTS.resetBlockTooltip}
             onConfirm={async () => {
               if (handleReset) {
                 await handleReset();
@@ -92,14 +99,19 @@ export default function BlockItemsOverview() {
           >
             {block?.name ?? TEXTS.loadingError}
           </ModalButton>
-        )}
+        </DataState>
         <CloseButton onClick={onClose} />
       </div>
-      {items.length > 0 ? (
-        items.map((item) => (
-          <StyledButton
+      {/** Items List */}
+      <DataState
+        loading={itemsStatus === 'loading'}
+        error={itemsStatus === 'error'}
+        hasData={hasItems}
+      >
+        {items.map((item) => (
+          <ListButton
             key={item.item_id}
-            className="h-input flex justify-start px-4 text-left"
+            className="h-input px-4"
             title={`výslovnost: ${item.pronunciation}`}
           >
             <div className="flex w-full items-center justify-between gap-3 overflow-hidden">
@@ -110,11 +122,9 @@ export default function BlockItemsOverview() {
                 {item.english}
               </span>
             </div>
-          </StyledButton>
-        ))
-      ) : (
-        <DelayedNotification message={TEXTS.noBlockItems} />
-      )}
+          </ListButton>
+        ))}
+      </DataState>
     </div>
   );
 }

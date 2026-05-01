@@ -3,6 +3,7 @@ import type { HookStatus } from '@/types/generic.types';
 
 interface UseFetchResult<T> {
   data: T | null;
+  hasData: boolean;
   status: HookStatus;
   error: string | null;
   loading: boolean;
@@ -17,6 +18,7 @@ interface UseFetchResult<T> {
  * @param fetchFunction - An asynchronous function that fetches the data.
  * @returns An object containing:
  *   - data: The fetched data or null if not yet fetched.
+ *   - hasData: Indicates if there is any data available (data is not null).
  *   - status: Current fetch status (idle/loading/success/error).
  *   - error: An error message if the fetch failed, otherwise null.
  *   - loading: Indicates if the data is currently being fetched.
@@ -64,6 +66,7 @@ export function useFetch<T>(fetchFunction: () => Promise<T | null>): UseFetchRes
 
   return {
     data,
+    hasData: data !== null,
     status,
     error,
     loading: status === 'loading',
