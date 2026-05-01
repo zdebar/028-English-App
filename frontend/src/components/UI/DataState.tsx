@@ -14,5 +14,5 @@ export function DataState({ loading, error, hasData, noDataMessage, children }: 
   if (loading) return <DelayedNotification />;
   if (error) return <Notification className="color-error pt-4">{TEXTS.loadingError}</Notification>;
   if (hasData) return <>{children}</>;
-  return <Notification className="color-info pt-4">{noDataMessage}</Notification>;
+  return <DelayedNotification className="color-info pt-4">{noDataMessage}</DelayedNotification>;
 }

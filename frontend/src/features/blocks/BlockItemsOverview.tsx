@@ -16,6 +16,8 @@ import type { BlockType } from '@/types/generic.types';
 import { DataState } from '@/components/UI/DataState';
 import { ListButton } from '@/components/UI/buttons/ListButton';
 import { CardHeader } from '@/components/UI/CardHeader';
+import HelpButton from '../help/HelpButton';
+import HelpText from '../help/HelpText';
 
 export default function BlockItemsOverview() {
   const navigate = useNavigate();
@@ -41,7 +43,7 @@ export default function BlockItemsOverview() {
     }
   }, [userId, blockId]);
 
-  const { data: block, status: blockStatus, hasData: hasBlock } = useFetch<BlockType>(fetchBlock);
+  const { data: block, loading: blockLoading } = useFetch<BlockType>(fetchBlock);
 
   // -- Items management --
   const fetchBlockItems = useCallback(async () => {
@@ -57,7 +59,7 @@ export default function BlockItemsOverview() {
 
   const {
     data: items,
-    status: itemsStatus,
+    loading: itemsLoading,
     hasData: hasItems,
   } = useArray<UserItemLocal>(fetchBlockItems);
 
@@ -87,12 +89,8 @@ export default function BlockItemsOverview() {
   return (
     <div className="card-width flex flex-col justify-start gap-1">
       {/** Card Header */}
-      <CardHeader onClose={onClose}>
-        <DataState
-          loading={blockStatus === 'loading'}
-          error={blockStatus === 'error'}
-          hasData={hasBlock}
-        >
+      <CardHeader onClose={onClose} className="relative">
+        <DataState loading={blockLoading} error={false} hasData={true}>
           <ModalButton
             modalTitle={TEXTS.resetBlockTitle}
             modalText={TEXTS.resetBlockDescription}
@@ -110,11 +108,7 @@ export default function BlockItemsOverview() {
         </DataState>
       </CardHeader>
       {/** Items List */}
-      <DataState
-        loading={itemsStatus === 'loading'}
-        error={itemsStatus === 'error'}
-        hasData={hasItems}
-      >
+      <DataState loading={itemsLoading} error={false} hasData={hasItems}>
         {items.map((item) => (
           <ListButton
             key={item.item_id}
@@ -135,6 +129,7 @@ export default function BlockItemsOverview() {
             </div>
           </ListButton>
         ))}
+        <HelpButton className="right-1 -bottom-10.5" />
       </DataState>
     </div>
   );

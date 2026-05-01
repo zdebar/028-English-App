@@ -29,7 +29,11 @@ export default function BlocksOverview() {
     }
   }, [userId, showToast]);
 
-  const { data: blocks, loading, status, hasData: hasBlocks } = useArray<BlockType>(fetchBlocks);
+  const {
+    data: blocks,
+    loading: blocksLoading,
+    hasData: hasBlocks,
+  } = useArray<BlockType>(fetchBlocks);
 
   return (
     <div className="card-width flex flex-col justify-start gap-1">
@@ -37,8 +41,8 @@ export default function BlocksOverview() {
         <div className="flex grow justify-start px-4">{TEXTS.blocksOverview}</div>
       </CardHeader>
       <DataState
-        loading={loading}
-        error={status === 'error'}
+        loading={blocksLoading}
+        error={false}
         hasData={hasBlocks}
         noDataMessage={TEXTS.noBlocks}
       >

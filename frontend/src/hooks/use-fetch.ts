@@ -1,11 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import type { HookStatus } from '@/types/generic.types';
 
 interface UseFetchResult<T> {
   data: T | null;
   hasData: boolean;
-  status: HookStatus;
-  error: string | null;
   loading: boolean;
   reload: () => void;
 }
@@ -19,8 +16,6 @@ interface UseFetchResult<T> {
  * @returns An object containing:
  *   - data: The fetched data or null if not yet fetched.
  *   - hasData: Indicates if there is any data available (data is not null).
- *   - status: Current fetch status (idle/loading/success/error).
- *   - error: An error message if the fetch failed, otherwise null.
  *   - loading: Indicates if the data is currently being fetched.
  *   - reload: Function to trigger a reload of the data.
  */
@@ -30,28 +25,22 @@ export function useFetch<T>(fetchFunction: () => Promise<T | null>): UseFetchRes
   }
 
   const [data, setData] = useState<T | null>(null);
-  const [status, setStatus] = useState<HookStatus>('idle');
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const isActiveRef = useRef(true);
 
   const load = useCallback(async () => {
-    setStatus('loading');
-    setError(null);
+    setLoading(true);
 
     try {
       const result = await fetchFunction();
-
       if (!isActiveRef.current) return;
-
       setData(result);
-      setError(null);
-      setStatus('success');
-    } catch (error) {
+    } catch {
       if (!isActiveRef.current) return;
-
-      setError(error instanceof Error ? error.message : String(error));
       setData(null);
-      setStatus('error');
+    } finally {
+      if (!isActiveRef.current) return;
+      setLoading(false);
     }
   }, [fetchFunction]);
 
@@ -67,9 +56,7 @@ export function useFetch<T>(fetchFunction: () => Promise<T | null>): UseFetchRes
   return {
     data,
     hasData: data !== null,
-    status,
-    error,
-    loading: status === 'loading',
+    loading,
     reload: load,
   };
 }
