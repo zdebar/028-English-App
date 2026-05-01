@@ -3,6 +3,7 @@ import type { HookStatus } from '@/types/generic.types';
 
 interface UseArrayResult<T> {
   data: T[];
+  hasData: boolean;
   currentIndex: number | null;
   setCurrentIndex: (index: number | null) => void;
   currentItem: T | null;
@@ -20,6 +21,7 @@ interface UseArrayResult<T> {
  * @param fetchFunction - An asynchronous function that fetches an array of items.
  * @returns An object containing:
  *   - data: The fetched array or null if not yet fetched.
+ *   - hasData: Indicates if there is any data available.
  *   - currentIndex: The index of the currently selected item, or null if none is selected. On reload currentIndex stays the same.
  *   - setCurrentIndex: Function to update the current index.If the index is out of bounds, currentItem will be null.
  *   - currentItem: The currently selected item, or null if none is selected.
@@ -77,6 +79,7 @@ export function useArray<T>(fetchFunction: () => Promise<T[]>): UseArrayResult<T
 
   return {
     data,
+    hasData: data.length > 0,
     currentIndex,
     setCurrentIndex,
     currentItem,
