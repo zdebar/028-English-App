@@ -1,7 +1,6 @@
 import { useArray } from '@/hooks/use-array';
 import { TEXTS } from '@/locales/cs';
-import { useCallback, useMemo } from 'react';
-import DOMPurify from 'dompurify';
+import { useCallback } from 'react';
 import { useToastStore } from '../features/toast/use-toast-store';
 import { errorHandler } from '../features/logging/error-handler';
 import type { RecordType } from '@/types/generic.types';
@@ -24,13 +23,6 @@ export function useOverview<T extends RecordType>({
 
   const { data, currentIndex, currentItem, setCurrentIndex, reload, error, loading } =
     useArray<T>(fetchFunction);
-
-  const hasGrammar = data.length > 0;
-
-  const currentNote = useMemo(() => {
-    if (!currentItem?.note) return null;
-    return DOMPurify.sanitize(currentItem.note);
-  }, [currentItem?.note]);
 
   const handleOpen = useCallback(
     (index: number) => {
@@ -57,14 +49,13 @@ export function useOverview<T extends RecordType>({
 
   return {
     data,
+    hasData: !!data && data.length > 0,
     currentIndex,
     currentItem,
-    hasGrammar,
-    currentNote,
     handleOpen,
     handleClose,
     handleReset,
-    error,
+    error: !!error,
     loading,
   };
 }
