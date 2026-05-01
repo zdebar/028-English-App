@@ -1,4 +1,4 @@
-import { useState, useEffect, type HTMLAttributes } from 'react';
+import { useState, useEffect, type HTMLAttributes, type JSX } from 'react';
 import config from '@/config/config';
 
 type DelayedMessageProps = Readonly<{
@@ -14,7 +14,7 @@ type DelayedMessageProps = Readonly<{
 export default function Delayed({
   timeDelay = config.buttons.loadingMessageDelay,
   ...rest
-}: DelayedMessageProps) {
+}: DelayedMessageProps): JSX.Element | null {
   const [show, setShow] = useState(false);
 
   useEffect(() => {

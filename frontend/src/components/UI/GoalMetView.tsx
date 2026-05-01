@@ -1,3 +1,5 @@
+import type { JSX } from 'react/jsx-dev-runtime';
+
 type GoalMetViewProps = Readonly<{
   current: number;
   goal: number;
@@ -11,7 +13,7 @@ type GoalMetViewProps = Readonly<{
  * @param goal - The target goal value
  * @returns A paragraph element showing "current / goal" with success styling if goal is met, error styling otherwise
  */
-export default function GoalMetView({ current, goal, ...rest }: GoalMetViewProps) {
+export default function GoalMetView({ current, goal, ...rest }: GoalMetViewProps): JSX.Element {
   const met = current >= goal;
   return (
     <p

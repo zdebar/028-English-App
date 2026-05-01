@@ -1,3 +1,5 @@
+import type { JSX } from 'react/jsx-dev-runtime';
+
 type ScreenshotProps = Readonly<{
   readonly src: string;
   readonly alt: string;
@@ -9,7 +11,7 @@ type ScreenshotProps = Readonly<{
  * @param {string} src - The source URL of the screenshot image
  * @param {string} alt - The alt text for the image, also used as the figure caption
  */
-export function Screenshot({ src, alt }: ScreenshotProps) {
+export function Screenshot({ src, alt }: ScreenshotProps): JSX.Element {
   return (
     <figure className="mx-auto my-4 max-w-[280px]">
       <img

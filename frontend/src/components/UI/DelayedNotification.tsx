@@ -1,14 +1,14 @@
 import Delayed from './Delayed';
 import Notification from './Notification';
 import { TEXTS } from '@/locales/cs';
-import type { ReactNode } from 'react';
+import type { JSX, ReactNode } from 'react';
 
-interface DelayedNotificationProps {
+type DelayedNotificationProps = Readonly<{
   message?: string;
   timeDelay?: number;
   className?: string;
   children?: ReactNode;
-}
+}>;
 
 /**
  * Shows a notification after a short delay (for loading or info states).
@@ -19,7 +19,7 @@ export default function DelayedNotification({
   timeDelay,
   className = 'color-info pt-4',
   children,
-}: DelayedNotificationProps) {
+}: DelayedNotificationProps): JSX.Element {
   return (
     <Delayed timeDelay={timeDelay}>
       <Notification className={className}>{children ?? message}</Notification>
