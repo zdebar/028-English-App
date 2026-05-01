@@ -18,7 +18,7 @@ export function useVocabulary(userId: string | null) {
     return UserItem.getStartedVocabulary(userId);
   }, [userId]);
 
-  const { data: words, error, loading, reload } = useArray<UserItemLocal>(fetchVocabulary);
+  const { data: words, loading, reload } = useArray<UserItemLocal>(fetchVocabulary);
 
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
   const [searchTerm, setSearchTerm] = useState('');
@@ -43,7 +43,6 @@ export function useVocabulary(userId: string | null) {
   );
 
   return {
-    error,
     loading,
     reload,
     visibleCount,

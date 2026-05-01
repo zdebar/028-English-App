@@ -22,7 +22,6 @@ type VocabularyListProps = Readonly<{
   setDisplayField: (val: DisplayField) => void;
   setVisibleCount: (val: number) => void;
   onSelect: (index: number) => void;
-  error: string | null;
   onClose: () => void;
 }>;
 
@@ -50,7 +49,6 @@ export default function VocabularyList({
   setDisplayField,
   setVisibleCount,
   onSelect,
-  error,
   onClose,
 }: VocabularyListProps) {
   const visibleItems = filteredWords.slice(0, visibleCount);
@@ -61,18 +59,12 @@ export default function VocabularyList({
     <div className="card-width relative flex h-full flex-col justify-start gap-1">
       <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between gap-1">
-          {error ? (
-            <div className="h-button flex grow items-center justify-start border border-dashed">
-              {error}
-            </div>
-          ) : (
-            <DirectionTogggle
-              value={displayField}
-              options={DIRECTION_OPTIONS}
-              onChange={setDisplayField}
-              className="h-button flex grow items-center border border-dashed"
-            />
-          )}
+          <DirectionTogggle
+            value={displayField}
+            options={DIRECTION_OPTIONS}
+            onChange={setDisplayField}
+            className="h-button flex grow items-center border border-dashed"
+          />
           <CloseButton onClick={onClose} />
         </div>
         <div className="relative w-full">

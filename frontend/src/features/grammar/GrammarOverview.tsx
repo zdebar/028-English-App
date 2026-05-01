@@ -3,15 +3,17 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import HelpButton from '@/features/help/HelpButton';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
+import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ListButton } from '@/components/UI/buttons/ListButton';
 import CloseButton from '@/components/UI/buttons/CloseButton';
-import { useOverview } from '../../hooks/use-overview';
+import { useArray } from '@/hooks/use-array';
 import Grammar from '@/database/models/grammar';
 import type { GrammarType } from '@/types/generic.types';
 import UserItem from '@/database/models/user-items';
 import { DataState } from '@/components/UI/DataState';
-import { useStatusToast } from '@/hooks/use-status-toast';
+import { useToastStore } from '../toast/use-toast-store';
+import { errorHandler } from '../logging/error-handler';
 
 /**
  * GrammarOverview component displays a list of started grammar topics for the user.
@@ -22,37 +24,38 @@ import { useStatusToast } from '@/hooks/use-status-toast';
 export default function GrammarOverview(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const navigate = useNavigate();
+  const showToast = useToastStore((state) => state.showToast);
+
+  const fetchGrammar = useCallback(async () => {
+    if (!userId) return [];
+    try {
+      return await Grammar.getStarted(userId);
+    } catch (err) {
+      showToast(TEXTS.loadingError, 'error');
+      errorHandler('Failed to fetch grammar overview', err);
+      return [];
+    }
+  }, [userId]);
 
   const {
     data: grammarList,
     currentIndex,
     setCurrentIndex,
     currentItem,
-    handleReset,
-    fetchStatus,
-    fetchError,
-    resetStatus,
-    resetError,
     loading,
     hasData,
-  } = useOverview<GrammarType>({
-    fetchFunction: () => (userId ? Grammar.getStarted(userId) : Promise.resolve([])),
-    resetFunction: (item) =>
-      userId ? UserItem.resetItemsByGrammarId(userId, item.id) : Promise.resolve(),
-  });
+  } = useArray<GrammarType>(fetchGrammar);
 
-  useStatusToast({
-    status: fetchStatus,
-    type: 'fetch',
-    error: fetchError,
-  });
-
-  useStatusToast({
-    status: resetStatus,
-    showSuccessToast: true,
-    type: 'reset',
-    error: resetError,
-  });
+  const handleReset = useCallback(async () => {
+    if (!currentItem) return;
+    try {
+      await UserItem.resetItemsByGrammarId(userId!, currentItem.id);
+      showToast(TEXTS.resetProgressSuccessToast, 'success');
+    } catch (err) {
+      showToast(TEXTS.resetProgressErrorToast, 'error');
+      errorHandler('Failed to reset grammar progress', err);
+    }
+  }, [currentItem, userId]);
 
   // -- List view --
   if (currentIndex === null) {
@@ -64,7 +67,7 @@ export default function GrammarOverview(): JSX.Element {
         </div>
         <DataState
           loading={loading}
-          error={fetchStatus === 'error'}
+          error={false}
           hasData={hasData}
           noDataMessage={TEXTS.noGrammar}
         >

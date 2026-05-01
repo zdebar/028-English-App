@@ -21,7 +21,6 @@ export default function VocabularyOverview() {
   const navigate = useNavigate();
 
   const {
-    error,
     loading,
     reload,
     visibleCount,
@@ -82,7 +81,6 @@ export default function VocabularyOverview() {
           setDisplayField={setDisplayField}
           setVisibleCount={setVisibleCount}
           onSelect={handleSelectWord}
-          error={error}
           onClose={handleCloseList}
         />
       ) : (
