@@ -6,7 +6,7 @@ import StyledButton from './StyledButton';
  */
 export function ListButton(props: Readonly<ButtonHTMLAttributes<HTMLButtonElement>>): JSX.Element {
   return (
-    <StyledButton {...props} className={`h-input ${props.className}`}>
+    <StyledButton {...props} className={`h-input w-full ${props.className}`}>
       {props.children}
     </StyledButton>
   );

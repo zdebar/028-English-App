@@ -45,7 +45,7 @@ export default function OverviewCard({
   return (
     <div className={`card-width min-h-card ${className}`}>
       {/* Top Bar */}
-      <CardHeader onClose={onClose}>
+      <CardHeader onClose={onClose} className="relative">
         <ModalButton
           modalTitle={modalTitle}
           modalText={modalText}
@@ -66,7 +66,7 @@ export default function OverviewCard({
         <HelpText className="-bottom-2 left-2">{helpText}</HelpText>
       </CardHeader>
       {/* Content Area */}
-      <div className="w-full grow p-4">{children}</div>
+      <div className="w-full grow">{children}</div>
     </div>
   );
 }

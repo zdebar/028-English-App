@@ -8,16 +8,14 @@ import { useArray } from '@/hooks/use-array';
 import { TEXTS } from '@/locales/cs';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useMemo } from 'react';
-import ModalButton from '../modal/ModalButton';
 import Blocks from '@/database/models/blocks';
 import { useFetch } from '@/hooks/use-fetch';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { BlockType } from '@/types/generic.types';
 import { DataState } from '@/components/UI/DataState';
 import { ListButton } from '@/components/UI/buttons/ListButton';
-import { CardHeader } from '@/components/UI/CardHeader';
 import HelpButton from '../help/HelpButton';
-import HelpText from '../help/HelpText';
+import OverviewCard from '@/components/UI/OverviewCard';
 
 export default function BlockItemsOverview() {
   const navigate = useNavigate();
@@ -43,7 +41,7 @@ export default function BlockItemsOverview() {
     }
   }, [userId, blockId]);
 
-  const { data: block, loading: blockLoading } = useFetch<BlockType>(fetchBlock);
+  const { data: block } = useFetch<BlockType>(fetchBlock);
 
   // -- Items management --
   const fetchBlockItems = useCallback(async () => {
@@ -89,48 +87,40 @@ export default function BlockItemsOverview() {
   return (
     <div className="card-width flex flex-col justify-start gap-1">
       {/** Card Header */}
-      <CardHeader onClose={onClose} className="relative">
-        <DataState loading={blockLoading} error={false} hasData={true}>
-          <ModalButton
-            modalTitle={TEXTS.resetBlockTitle}
-            modalText={TEXTS.resetBlockDescription}
-            title={TEXTS.resetBlockTooltip}
-            onConfirm={async () => {
-              if (handleReset) {
-                await handleReset();
-              }
-              onClose();
-            }}
-            className="justify-start px-4"
-          >
-            {block?.name ?? TEXTS.loadingError}
-          </ModalButton>
+      <OverviewCard
+        className="relative p-0"
+        handleReset={handleReset}
+        onClose={onClose}
+        buttonTitle={block?.name}
+        modalTitle={TEXTS.resetBlockTitle}
+        modalText={TEXTS.resetBlockDescription}
+      >
+        <DataState loading={itemsLoading} error={false} hasData={hasItems}>
+          <div className="flex flex-col gap-1 pt-1">
+            {items.map((item) => (
+              <ListButton
+                key={item.item_id}
+                className="h-input w-full px-4"
+                title={`výslovnost: ${item.pronunciation}`}
+                onClick={() => {
+                  if (!item.audio) return;
+                  playAudio(item.audio);
+                }}
+              >
+                <div className="flex w-full items-center justify-between gap-3 overflow-hidden">
+                  <span className="min-w-0 flex-1 overflow-hidden text-left text-ellipsis whitespace-nowrap">
+                    {item.czech}
+                  </span>
+                  <span className="min-w-0 flex-1 overflow-hidden text-right text-ellipsis whitespace-nowrap">
+                    {item.english}
+                  </span>
+                </div>
+              </ListButton>
+            ))}
+          </div>
+          <HelpButton className="right-1 -bottom-10.5" />
         </DataState>
-      </CardHeader>
-      {/** Items List */}
-      <DataState loading={itemsLoading} error={false} hasData={hasItems}>
-        {items.map((item) => (
-          <ListButton
-            key={item.item_id}
-            className="h-input px-4"
-            title={`výslovnost: ${item.pronunciation}`}
-            onClick={() => {
-              if (!item.audio) return;
-              playAudio(item.audio);
-            }}
-          >
-            <div className="flex w-full items-center justify-between gap-3 overflow-hidden">
-              <span className="min-w-0 flex-1 overflow-hidden text-left text-ellipsis whitespace-nowrap">
-                {item.czech}
-              </span>
-              <span className="min-w-0 flex-1 overflow-hidden text-right text-ellipsis whitespace-nowrap">
-                {item.english}
-              </span>
-            </div>
-          </ListButton>
-        ))}
-        <HelpButton className="right-1 -bottom-10.5" />
-      </DataState>
+      </OverviewCard>
     </div>
   );
 }

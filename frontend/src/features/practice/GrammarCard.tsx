@@ -25,7 +25,7 @@ export default function GrammarCard({ grammar, onClose }: GrammarCardProps) {
     <OverviewCard buttonTitle={grammar?.name} onClose={onClose}>
       {grammar?.note ? (
         <div
-          className="grammar"
+          className="grammar p-4"
           dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(grammar.note) }}
         />
       ) : (

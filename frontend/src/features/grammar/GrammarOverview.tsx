@@ -94,7 +94,7 @@ export default function GrammarOverview(): JSX.Element {
       onClose={() => setCurrentIndex(null)}
       className="relative"
     >
-      <div dangerouslySetInnerHTML={{ __html: currentItem?.note || '' }} className="grammar" />
+      <div dangerouslySetInnerHTML={{ __html: currentItem?.note || '' }} className="grammar p-4" />
       <HelpButton className="right-0 -bottom-10.5" />
     </OverviewCard>
   );

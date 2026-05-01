@@ -46,16 +46,18 @@ export default function BlocksOverview() {
         hasData={hasBlocks}
         noDataMessage={TEXTS.noBlocks}
       >
-        {blocks.map((block) => (
-          <StyledButton
-            key={block.id}
-            className="h-input flex justify-start px-4 text-left"
-            onClick={() => navigate(`${ROUTES.blocks}/${block.id}`)}
-            title={block.name}
-          >
-            <p className="overflow-hidden text-ellipsis whitespace-nowrap">{block.name}</p>
-          </StyledButton>
-        ))}
+        <div className="flex flex-col gap-1">
+          {blocks.map((block) => (
+            <StyledButton
+              key={block.id}
+              className="h-input flex w-full justify-start px-4 text-left"
+              onClick={() => navigate(`${ROUTES.blocks}/${block.id}`)}
+              title={block.name}
+            >
+              <p className="overflow-hidden text-ellipsis whitespace-nowrap">{block.name}</p>
+            </StyledButton>
+          ))}
+        </div>
       </DataState>
     </div>
   );
