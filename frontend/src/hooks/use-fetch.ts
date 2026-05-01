@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface UseFetchResult<T> {
   data: T | null;
@@ -27,34 +27,32 @@ export function useFetch<T>(fetchFunction: () => Promise<T | null>): UseFetchRes
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const isActiveRef = useRef(true);
 
   const load = useCallback(async () => {
-    let isActive = true;
     setLoading(true);
 
     try {
       const result = await fetchFunction();
-      if (!isActive) return;
+      if (!isActiveRef.current) return;
       setData(result);
       setError(null);
     } catch (error) {
-      if (!isActive) return;
+      if (!isActiveRef.current) return;
       setError(error instanceof Error ? error.message : String(error));
     } finally {
-      if (isActive) {
+      if (isActiveRef.current) {
         setLoading(false);
       }
     }
-    return () => {
-      isActive = false;
-    };
   }, [fetchFunction]);
 
   useEffect(() => {
-    let isActive = true;
+    isActiveRef.current = true;
     load();
+
     return () => {
-      isActive = false;
+      isActiveRef.current = false;
     };
   }, [load]);
 
