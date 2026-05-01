@@ -6,7 +6,7 @@ import config from '@/config/config';
 import { errorHandler } from '@/features/logging/error-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { logRejectedResults } from '@/features/logging/logging.utils';
-import { useSyncWarningStore } from '@/features/sync-warning/use-sync-warning';
+import { useSyncWarningStore } from '@/features/sync/use-sync-warning';
 
 /**
  * Hook that manages periodic data synchronization for a user.
