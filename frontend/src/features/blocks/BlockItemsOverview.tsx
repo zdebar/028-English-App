@@ -4,10 +4,11 @@ import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { errorHandler } from '@/features/logging/error-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
+import { useAudioManager } from '@/hooks/use-audio-manager';
 import { useArray } from '@/hooks/use-array';
 import { TEXTS } from '@/locales/cs';
 import type { UserItemLocal } from '@/types/user-item.types';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import ModalButton from '../modal/ModalButton';
 import Blocks from '@/database/models/blocks';
 import { useFetch } from '@/hooks/use-fetch';
@@ -59,6 +60,13 @@ export default function BlockItemsOverview() {
     status: itemsStatus,
     hasData: hasItems,
   } = useArray<UserItemLocal>(fetchBlockItems);
+
+  const itemAudios = useMemo(
+    () => items.map((item) => item.audio).filter((audio): audio is string => Boolean(audio)),
+    [items],
+  );
+
+  const { playAudio } = useAudioManager(itemAudios);
 
   // -- Handlers --
   const handleReset = useCallback(async () => {
@@ -113,6 +121,10 @@ export default function BlockItemsOverview() {
             key={item.item_id}
             className="h-input px-4"
             title={`výslovnost: ${item.pronunciation}`}
+            onClick={() => {
+              if (!item.audio) return;
+              playAudio(item.audio);
+            }}
           >
             <div className="flex w-full items-center justify-between gap-3 overflow-hidden">
               <span className="min-w-0 flex-1 overflow-hidden text-left text-ellipsis whitespace-nowrap">
