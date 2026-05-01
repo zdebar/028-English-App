@@ -11,6 +11,9 @@ import { TableName } from '@/types/table.types';
 import { type JSX } from 'react';
 import { useThemeStore } from '../theme/use-theme-store';
 import { MenuButtonText } from '@/components/UI/MenuButtonText';
+import { errorHandler } from '../logging/error-handler';
+import { infoHandler } from '../logging/info-handler';
+import { useToastStore } from '../toast/use-toast-store';
 
 type DeleteUserButtonProps = Readonly<{
   className?: string;
@@ -27,38 +30,45 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
   const handleLogout = useAuthStore((state) => state.handleLogout);
   const clearTheme = useThemeStore((state) => state.clearTheme);
   const saveCurrentThemeAsGuest = useThemeStore((state) => state.saveCurrentThemeAsGuest);
+  const showToast = useToastStore((state) => state.showToast);
 
   const handleDelete = async () => {
     if (!userId) return;
-    saveCurrentThemeAsGuest();
+    try {
+      saveCurrentThemeAsGuest();
 
-    const resultsDelete = await Promise.allSettled([
-      UserItem.deleteByUserId(userId),
-      Metadata.deleteSyncRow(TableName.UserItems, userId),
-      UserScoreType.deleteByUserId(userId),
-      Metadata.deleteSyncRow(TableName.UserScores, userId),
-      Promise.resolve(clearTheme(userId)),
-      Promise.resolve(clearSyncTimes(userId)),
-    ]);
-    logRejectedResults(resultsDelete, 'Operation failed during local cleanup');
+      const resultsDelete = await Promise.allSettled([
+        UserItem.deleteByUserId(userId),
+        Metadata.deleteSyncRow(TableName.UserItems, userId),
+        UserScoreType.deleteByUserId(userId),
+        Metadata.deleteSyncRow(TableName.UserScores, userId),
+        Promise.resolve(clearTheme(userId)),
+        Promise.resolve(clearSyncTimes(userId)),
+      ]);
+      logRejectedResults(resultsDelete, 'Operation failed during local cleanup');
 
-    const { error: deleteError } = await supabaseInstance.functions.invoke('delete-user', {
-      body: { userId },
-    });
+      const { error: deleteError } = await supabaseInstance.functions.invoke('delete-user', {
+        body: { userId },
+      });
 
-    if (deleteError) {
-      throw new Error(deleteError.message);
+      if (deleteError) {
+        throw new Error(deleteError.message);
+      }
+
+      showToast(TEXTS.deleteUserSuccessToast, 'success');
+      infoHandler(`User ${userId} deleted their account`);
+    } catch (err) {
+      errorHandler('Error deleting user', err);
+      showToast(TEXTS.deleteUserErrorToast, 'error');
+    } finally {
+      handleLogout({ skipSync: true, skipRemoteSignOut: true });
     }
-
-    await handleLogout({ skipSync: true, skipRemoteSignOut: true });
   };
 
   return (
     <ModalButton
       modalTitle={TEXTS.deleteUserButtonTitle}
       modalText={TEXTS.deleteUserModalText}
-      successToastText={TEXTS.deleteUserSuccessToast}
-      errorToastText={TEXTS.deleteUserErrorToast}
       disabled={!userId}
       onConfirm={handleDelete}
       className={className}

@@ -8,8 +8,6 @@ type OverviewCardProps = Readonly<{
   buttonTitle?: string;
   modalTitle?: string;
   modalText?: string;
-  successToastText?: string;
-  errorToastText?: string;
   helpText?: string;
   handleReset?: () => Promise<void>;
   onClose?: () => void;
@@ -31,8 +29,6 @@ type OverviewCardProps = Readonly<{
  * @param onClose Function to call when closing the card.
  * @param className Additional CSS classes for custom styling.
  * @param children Content to be displayed inside the content area.
- * @param successToastText Text to display in the success toast.
- * @param errorToastText Text to display in the error toast.
  * @returns The rendered OverviewCard component.
  */
 export default function OverviewCard({
@@ -44,8 +40,6 @@ export default function OverviewCard({
   onClose,
   className = '',
   children,
-  successToastText,
-  errorToastText,
 }: OverviewCardProps): JSX.Element {
   const isDisabled = !handleReset;
   return (
@@ -56,8 +50,6 @@ export default function OverviewCard({
         <ModalButton
           modalTitle={modalTitle}
           modalText={modalText}
-          successToastText={successToastText}
-          errorToastText={errorToastText}
           title={isDisabled ? '' : TEXTS.restartProgressHelp}
           onConfirm={async () => {
             if (handleReset) {

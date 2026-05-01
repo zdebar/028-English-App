@@ -4,6 +4,8 @@ import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { useThemeStore } from '../theme/use-theme-store';
 import { MenuButtonText } from '@/components/UI/MenuButtonText';
+import { errorHandler } from '../logging/error-handler';
+import { useToastStore } from '../toast/use-toast-store';
 
 type SignoutButtonProps = Readonly<{
   className?: string;
@@ -19,19 +21,23 @@ export default function SignoutButton({ className }: SignoutButtonProps): JSX.El
   const userId = useAuthStore((state) => state.userId);
   const handleLogout = useAuthStore((state) => state.handleLogout);
   const saveCurrentThemeAsGuest = useThemeStore((state) => state.saveCurrentThemeAsGuest);
+  const showToast = useToastStore((state) => state.showToast);
 
   const handleSignout = async () => {
     if (!userId) return;
-    saveCurrentThemeAsGuest();
-    await handleLogout();
+    try {
+      saveCurrentThemeAsGuest();
+      await handleLogout();
+    } catch (err) {
+      showToast(TEXTS.signoutError, 'error');
+      errorHandler('Error signing out', err);
+    }
   };
 
   return (
     <ModalButton
       modalTitle={TEXTS.signoutButtonTitle}
       modalText={TEXTS.signoutModalText}
-      successToastText={TEXTS.signoutSuccess}
-      errorToastText={TEXTS.signoutError}
       disabled={!userId}
       onConfirm={handleSignout}
       className={className}

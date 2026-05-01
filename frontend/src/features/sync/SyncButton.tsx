@@ -4,6 +4,8 @@ import { type JSX } from 'react';
 import { audioSync, dataSync } from '@/database/utils/data-sync.utils';
 import { logRejectedResults } from '../logging/logging.utils';
 import ModalButton from '../modal/ModalButton';
+import { errorHandler } from '../logging/error-handler';
+import { useToastStore } from '../toast/use-toast-store';
 
 type SyncButtonProps = Readonly<{
   className?: string;
@@ -17,20 +19,25 @@ type SyncButtonProps = Readonly<{
  */
 export default function SyncButton({ className }: SyncButtonProps): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
+  const showToast = useToastStore((state) => state.showToast);
 
   const handleSync = async () => {
     if (!userId) return;
-    const userResults = await Promise.allSettled([dataSync(userId, true), audioSync(userId)]);
-    const isError = logRejectedResults(userResults, 'Data synchronization error:');
-    if (isError) throw new Error('Data synchronization error');
+    try {
+      const userResults = await Promise.allSettled([dataSync(userId, true), audioSync(userId)]);
+      const isError = logRejectedResults(userResults, 'Data synchronization error:');
+      if (isError) throw new Error('Data synchronization error');
+      showToast(TEXTS.dataSyncSuccess, 'success');
+    } catch (err) {
+      showToast(TEXTS.dataSyncError, 'error');
+      errorHandler('Error synchronizing data', err);
+    }
   };
 
   return (
     <ModalButton
       onConfirm={handleSync}
       className={className}
-      successToastText={TEXTS.syncSuccessToast}
-      errorToastText={TEXTS.syncErrorToast}
       disabled={!userId}
       title={TEXTS.dataSyncTooltip}
       modalTitle={TEXTS.syncButton}
