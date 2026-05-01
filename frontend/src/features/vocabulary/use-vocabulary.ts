@@ -13,12 +13,7 @@ export function useVocabulary(userId: string | null) {
     return UserItem.getStartedVocabulary(userId);
   }, [userId]);
 
-  const {
-    data: words,
-    fetchError: error,
-    loading,
-    reload,
-  } = useArray<UserItemLocal>(fetchVocabulary);
+  const { data: words, error, loading, reload } = useArray<UserItemLocal>(fetchVocabulary);
 
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
   const [searchTerm, setSearchTerm] = useState('');

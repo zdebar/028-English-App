@@ -24,7 +24,7 @@ export default function BlocksOverview() {
     return [];
   }, [userId]);
 
-  const { data: blocks, loading } = useArray<BlockType>(fetchBlocks);
+  const { data: blocks, error, loading } = useArray<BlockType>(fetchBlocks);
   const hasBlocks = blocks.length > 0;
 
   // Early returns

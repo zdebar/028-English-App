@@ -36,7 +36,7 @@ describe('useArray', () => {
       expect(result.current.data).toEqual(['a', 'b']);
     });
 
-    expect(result.current.fetchError).toBeNull();
+    expect(result.current.error).toBeNull();
     expect(result.current.currentIndex).toBeNull();
     expect(result.current.currentItem).toBeNull();
   });
@@ -89,7 +89,7 @@ describe('useArray', () => {
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
-      expect(result.current.fetchError).toBe('Data loading error');
+      expect(result.current.error).toBe('Data loading error');
     });
 
     expect(showToastMock).toHaveBeenCalledWith('Data loading error', 'error');

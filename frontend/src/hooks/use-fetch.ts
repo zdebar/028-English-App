@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 
 interface UseFetchResult<T> {
   data: T | null;
-  fetchError: string | null;
+  error: string | null;
   loading: boolean;
   reload: () => void;
 }
@@ -15,7 +15,7 @@ interface UseFetchResult<T> {
  * @param fetchFunction - An asynchronous function that fetches the data.
  * @returns An object containing:
  *   - data: The fetched data or null if not yet fetched.
- *   - fetchError: An error message if the fetch failed, otherwise null.
+ *   - error: An error message if the fetch failed, otherwise null.
  *   - loading: Indicates if the data is currently being fetched.
  *   - reload: Function to trigger a reload of the data.
  */
@@ -25,49 +25,43 @@ export function useFetch<T>(fetchFunction: () => Promise<T | null>): UseFetchRes
   }
 
   const [data, setData] = useState<T | null>(null);
-  const [reloading, setReloading] = useState(true);
-  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const load = useCallback(async () => {
     let isActive = true;
+    setLoading(true);
 
-    async function fetchData() {
-      if (!reloading) return;
-      setLoading(true);
-
-      try {
-        const result = await fetchFunction();
-        if (!isActive) return;
-        setData(result);
-        setFetchError(null);
-      } catch (error) {
-        if (!isActive) return;
-        setFetchError(error instanceof Error ? error.message : String(error));
-      } finally {
-        if (isActive) {
-          setLoading(false);
-          setReloading(false);
-        }
+    try {
+      const result = await fetchFunction();
+      if (!isActive) return;
+      setData(result);
+      setError(null);
+    } catch (error) {
+      if (!isActive) return;
+      setError(error instanceof Error ? error.message : String(error));
+    } finally {
+      if (isActive) {
+        setLoading(false);
       }
     }
-
-    fetchData();
-
     return () => {
       isActive = false;
     };
-  }, [fetchFunction, reloading]);
+  }, [fetchFunction]);
 
-  const reload = useCallback(() => {
-    setLoading(true);
-    setReloading(true);
-  }, []);
+  useEffect(() => {
+    let isActive = true;
+    load();
+    return () => {
+      isActive = false;
+    };
+  }, [load]);
 
   return {
     data,
-    fetchError,
+    error,
     loading,
-    reload,
+    reload: load,
   };
 }

@@ -5,7 +5,7 @@ interface UseArrayResult<T> {
   currentIndex: number | null;
   setCurrentIndex: (index: number | null) => void;
   currentItem: T | null;
-  fetchError: string | null;
+  error: string | null;
   loading: boolean;
   reload: () => void;
 }
@@ -21,7 +21,7 @@ interface UseArrayResult<T> {
  *   - currentIndex: The index of the currently selected item, or null if none is selected. On reload currentIndex stays the same.
  *   - setCurrentIndex: Function to update the current index.If the index is out of bounds, currentItem will be null.
  *   - currentItem: The currently selected item, or null if none is selected.
- *   - fetchError: Indicates if there was an error during the fetch.
+ *   - error: Indicates if there was an error during the fetch.
  *   - loading: Indicates if the data is currently being fetched.
  *   - reload: Function to trigger a reload of the data.
  */
@@ -32,8 +32,7 @@ export function useArray<T>(fetchFunction: () => Promise<T[]>): UseArrayResult<T
 
   const [data, setData] = useState<T[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
-  const [reloading, setReloading] = useState(true);
-  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const currentItem =
@@ -41,50 +40,43 @@ export function useArray<T>(fetchFunction: () => Promise<T[]>): UseArrayResult<T
       ? data[currentIndex]
       : null;
 
-  useEffect(() => {
+  const load = useCallback(async () => {
+    setLoading(true);
     let isActive = true;
-
-    async function fetchData() {
-      if (!reloading) return;
-      setLoading(true);
-
-      try {
-        const result = await fetchFunction();
-        if (!isActive) return;
-        setData(result);
-        setFetchError(null);
-      } catch (error) {
-        if (!isActive) return;
-        setFetchError(error instanceof Error ? error.message : String(error));
-        setCurrentIndex(null);
-        setData([]);
-      } finally {
-        if (isActive) {
-          setLoading(false);
-          setReloading(false);
-        }
-      }
+    try {
+      const result = await fetchFunction();
+      if (!isActive) return;
+      setData(result);
+      setError(null);
+      setCurrentIndex(null);
+    } catch (error) {
+      if (!isActive) return;
+      setError(error instanceof Error ? error.message : String(error));
+      setData([]);
+      setCurrentIndex(null);
+    } finally {
+      if (isActive) setLoading(false);
     }
-
-    fetchData();
-
     return () => {
       isActive = false;
     };
-  }, [fetchFunction, reloading]);
+  }, [fetchFunction]);
 
-  const reload = useCallback(() => {
-    setLoading(true);
-    setReloading(true);
-  }, []);
+  useEffect(() => {
+    let isActive = true;
+    load();
+    return () => {
+      isActive = false;
+    };
+  }, [load]);
 
   return {
     data,
     currentIndex,
     setCurrentIndex,
     currentItem,
-    fetchError,
+    error,
     loading,
-    reload,
+    reload: load,
   };
 }

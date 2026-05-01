@@ -25,10 +25,11 @@ export default function GrammarOverview(): JSX.Element {
     data: grammarList,
     currentIndex,
     currentItem,
-    handleOpen,
     handleClose,
+    handleOpen,
     handleReset,
-    error,
+    fetchError,
+    resetError,
     loading,
     hasData,
   } = useOverview<GrammarType>({
@@ -47,7 +48,7 @@ export default function GrammarOverview(): JSX.Element {
         </div>
         <DataState
           loading={loading}
-          error={error}
+          error={!!fetchError}
           hasData={hasData}
           noDataMessage={TEXTS.noGrammar}
         >

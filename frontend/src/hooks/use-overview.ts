@@ -1,8 +1,5 @@
 import { useArray } from '@/hooks/use-array';
-import { TEXTS } from '@/locales/cs';
-import { useCallback } from 'react';
-import { useToastStore } from '../features/toast/use-toast-store';
-import { errorHandler } from '../features/logging/error-handler';
+import { useCallback, useState } from 'react';
 import type { RecordType } from '@/types/generic.types';
 
 type UseOverviewProps<T extends RecordType> = Readonly<{
@@ -11,15 +8,26 @@ type UseOverviewProps<T extends RecordType> = Readonly<{
 }>;
 
 /**
- * Custom hook for managing overview data, including fetching a list of items, handling the current item state, and resetting progress.
+ * Custom hook for managing overview data with fetch and reset capabilities.
  * @param param0 Object containing the fetch and reset functions.
  * @returns An object with the overview data and handlers.
+ *  - data: The fetched data array.
+ *  - hasData: Boolean indicating if there is data available.
+ *  - currentIndex: The index of the currently selected item.
+ *  - setCurrentIndex: Function to set the current index.
+ *  - currentItem: The currently selected item.
+ *  - handleOpen: Function to open an item by index.
+ *  - handleClose: Function to close the currently open item.
+ *  - handleReset: Function to reset the currently selected item.
+ *  - fetchError: Error message from the fetch operation, if any.
+ *  - resetError: Error message from the reset operation, if any.
+ *  - loading: Boolean indicating if the data is currently being fetched.
  */
 export function useOverview<T extends RecordType>({
   fetchFunction,
   resetFunction,
 }: UseOverviewProps<T>) {
-  const showToast = useToastStore((state) => state.showToast);
+  const [resetError, setResetError] = useState<string | null>(null);
 
   const {
     data,
@@ -27,7 +35,7 @@ export function useOverview<T extends RecordType>({
     currentItem,
     setCurrentIndex,
     reload,
-    fetchError: error,
+    error: fetchError,
     loading,
   } = useArray<T>(fetchFunction);
 
@@ -46,23 +54,24 @@ export function useOverview<T extends RecordType>({
     if (!currentItem || !resetFunction) return;
     try {
       await resetFunction(currentItem);
+      setResetError(null);
       reload();
-      showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (resetError) {
-      showToast(TEXTS.resetProgressErrorToast, 'error');
-      errorHandler('Failed to reset progress', resetError);
+      setResetError(resetError instanceof Error ? resetError.message : String(resetError));
     }
-  }, [currentItem, resetFunction, reload, showToast]);
+  }, [currentItem, resetFunction, reload]);
 
   return {
     data,
     hasData: !!data && data.length > 0,
     currentIndex,
+    setCurrentIndex,
     currentItem,
     handleOpen,
     handleClose,
     handleReset,
-    error,
+    fetchError,
+    resetError,
     loading,
   };
 }

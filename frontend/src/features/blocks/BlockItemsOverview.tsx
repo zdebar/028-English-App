@@ -54,7 +54,7 @@ export default function BlockItemsOverview() {
     }
   }, [userId, blockId]);
 
-  const { data: items, fetchError: error, loading } = useArray<UserItemLocal>(fetchBlockItems);
+  const { data: items, error, loading } = useArray<UserItemLocal>(fetchBlockItems);
 
   // Handlers
   const handleReset = useCallback(async () => {
