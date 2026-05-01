@@ -21,6 +21,9 @@ interface UseArrayResult<T> {
  * @param fetchFunction - An asynchronous function that fetches an array of items.
  * @returns An object containing:
  *   - data: The fetched array or null if not yet fetched.
+ *   - currentIndex: The index of the currently selected item, or null if none is selected.
+ *   - setCurrentIndex: Function to update the current index.
+ *   - currentItem: The currently selected item, or null if none is selected.
  *   - error: An error message if the fetch failed, otherwise null.
  *   - loading: Indicates if the data is currently being fetched.
  *   - reload: Function to trigger a reload of the data.
@@ -38,6 +41,8 @@ export function useArray<T>(fetchFunction: () => Promise<T[]>): UseArrayResult<T
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const currentItem = currentIndex != null && currentIndex >= 0 && currentIndex < data.length ? data[currentIndex] : null;
+
   useEffect(() => {
     let isActive = true;
 
@@ -48,16 +53,17 @@ export function useArray<T>(fetchFunction: () => Promise<T[]>): UseArrayResult<T
       try {
         const result = await fetchFunction();
         if (!isActive) return;
-        setCurrentIndex(null);
         setData(result);
         setError(null);
       } catch (error) {
         if (!isActive) return;
         setError(TEXTS.dataLoadingError);
+        setData([]);
         showToast(TEXTS.dataLoadingError, 'error');
         errorHandler('Data Fetching Error', error);
       } finally {
         if (isActive) {
+          setCurrentIndex(null);
           setLoading(false);
           setReloading(false);
         }
@@ -77,12 +83,12 @@ export function useArray<T>(fetchFunction: () => Promise<T[]>): UseArrayResult<T
   }, []);
 
   return {
-    data: data ?? [],
+    data,
     currentIndex,
-    currentItem: currentIndex == null ? null : data[currentIndex],
+    setCurrentIndex,
+    currentItem,
     error,
     loading,
-    reload,
-    setCurrentIndex,
+    reload,    
   };
 }
