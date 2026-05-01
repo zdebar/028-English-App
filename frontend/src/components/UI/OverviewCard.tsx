@@ -5,14 +5,16 @@ import type { JSX } from 'react';
 import ModalButton from '@/features/modal/ModalButton';
 
 type OverviewCardProps = Readonly<{
-  readonly buttonTitle?: string;
-  readonly modalTitle?: string;
-  readonly modalText?: string;
-  readonly helpText?: string;
-  readonly handleReset?: () => Promise<void>;
-  readonly onClose?: () => void;
-  readonly className?: string;
-  readonly children?: React.ReactNode;
+  buttonTitle?: string;
+  modalTitle?: string;
+  modalText?: string;
+  successToastText?: string;
+  errorToastText?: string;
+  helpText?: string;
+  handleReset?: () => Promise<void>;
+  onClose?: () => void;
+  className?: string;
+  children?: React.ReactNode;
 }>;
 
 /**
@@ -29,6 +31,8 @@ type OverviewCardProps = Readonly<{
  * @param onClose Function to call when closing the card.
  * @param className Additional CSS classes for custom styling.
  * @param children Content to be displayed inside the content area.
+ * @param successToastText Text to display in the success toast.
+ * @param errorToastText Text to display in the error toast.
  * @returns The rendered OverviewCard component.
  */
 export default function OverviewCard({
@@ -40,6 +44,8 @@ export default function OverviewCard({
   onClose,
   className = '',
   children,
+  successToastText,
+  errorToastText,
 }: OverviewCardProps): JSX.Element {
   const isDisabled = !handleReset;
   return (
@@ -50,6 +56,8 @@ export default function OverviewCard({
         <ModalButton
           modalTitle={modalTitle}
           modalText={modalText}
+          successToastText={successToastText}
+          errorToastText={errorToastText}
           title={isDisabled ? '' : TEXTS.restartProgressHelp}
           onConfirm={async () => {
             if (handleReset) {

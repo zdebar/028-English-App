@@ -5,7 +5,8 @@ export const COMMON_TEXTS = {
   tryAgainLater: 'Zkuste to znovu později.',
   loadingMessage: 'Načítání ...',
   pageNotFound: 'Stránka nebyla nalezena.',
-  dataLoadingError: 'Chyba při načítání dat.',
+  loadingSuccess: 'Data byla úspěšně načtena.',
+  loadingError: 'Chyba při načítání dat.',
   resetProgressSuccessToast: 'Pokrok byl úspěšně vymazán.',
   resetProgressErrorToast: 'Chyba při mazání pokroku.',
   masteredSwitchHelp: 'přepnout naučeno / započato',
@@ -22,6 +23,5 @@ export const COMMON_TEXTS = {
 
   // Errors
   genericError: 'Nastala neznámá chyba.',
-  loadingError: 'Chyba při načítání dat.',
   errorBoundaryMessage: 'Něco se pokazilo. Zkuste obnovit stránku.',
 } as const;

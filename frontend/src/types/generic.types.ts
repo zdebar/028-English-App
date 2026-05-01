@@ -49,3 +49,5 @@ export interface MetadataType {
   user_id: string; // string of the user associated with the data
   synced_at: string; // Timestamp of the last synchronization
 }
+
+export type HookStatus = 'idle' | 'loading' | 'success' | 'error';

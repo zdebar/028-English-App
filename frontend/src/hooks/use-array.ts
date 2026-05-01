@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import type { HookStatus } from '@/types/generic.types';
 
 interface UseArrayResult<T> {
   data: T[];
   currentIndex: number | null;
   setCurrentIndex: (index: number | null) => void;
   currentItem: T | null;
+  status: HookStatus;
   error: string | null;
   loading: boolean;
   reload: () => void;
@@ -21,6 +23,7 @@ interface UseArrayResult<T> {
  *   - currentIndex: The index of the currently selected item, or null if none is selected. On reload currentIndex stays the same.
  *   - setCurrentIndex: Function to update the current index.If the index is out of bounds, currentItem will be null.
  *   - currentItem: The currently selected item, or null if none is selected.
+ *   - status: Current fetch status (idle/loading/success/error).
  *   - error: Indicates if there was an error during the fetch.
  *   - loading: Indicates if the data is currently being fetched.
  *   - reload: Function to trigger a reload of the data.
@@ -32,8 +35,8 @@ export function useArray<T>(fetchFunction: () => Promise<T[]>): UseArrayResult<T
 
   const [data, setData] = useState<T[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
+  const [status, setStatus] = useState<HookStatus>('idle');
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
   const isActiveRef = useRef(true);
 
   const currentItem =
@@ -42,20 +45,24 @@ export function useArray<T>(fetchFunction: () => Promise<T[]>): UseArrayResult<T
       : null;
 
   const load = useCallback(async () => {
-    setLoading(true);
+    setStatus('loading');
+    setError(null);
+
     try {
       const result = await fetchFunction();
       if (!isActiveRef.current) return;
+
       setData(result);
       setError(null);
       setCurrentIndex(null);
+      setStatus('success');
     } catch (error) {
       if (!isActiveRef.current) return;
+
       setError(error instanceof Error ? error.message : String(error));
       setData([]);
       setCurrentIndex(null);
-    } finally {
-      if (isActiveRef.current) setLoading(false);
+      setStatus('error');
     }
   }, [fetchFunction]);
 
@@ -73,8 +80,9 @@ export function useArray<T>(fetchFunction: () => Promise<T[]>): UseArrayResult<T
     currentIndex,
     setCurrentIndex,
     currentItem,
+    status,
     error,
-    loading,
+    loading: status === 'loading',
     reload: load,
   };
 }

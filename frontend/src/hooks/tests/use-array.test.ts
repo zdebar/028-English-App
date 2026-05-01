@@ -6,7 +6,7 @@ const errorHandlerMock = vi.fn();
 
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
-    dataLoadingError: 'Data loading error',
+    loadingError: 'Data loading error',
   },
 }));
 

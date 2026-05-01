@@ -1,8 +1,8 @@
 import { useArray } from '@/hooks/use-array';
 import { useCallback, useState } from 'react';
-import type { RecordType } from '@/types/generic.types';
+import type { HookStatus } from '@/types/generic.types';
 
-type UseOverviewProps<T extends RecordType> = Readonly<{
+type UseOverviewProps<T> = Readonly<{
   fetchFunction: () => Promise<T[]>;
   resetFunction?: (item: T) => Promise<void>;
 }>;
@@ -17,21 +17,22 @@ type UseOverviewProps<T extends RecordType> = Readonly<{
  *  - setCurrentIndex: Function to set the current index.
  *  - currentItem: The currently selected item.
  *  - handleReset: Function to reset the currently selected item.
+ *  - fetchStatus: Current fetch state (idle/loading/success/error).
  *  - fetchError: Error message from the fetch operation, if any.
+ *  - resetStatus: Current reset state (idle/loading/success/error).
  *  - resetError: Error message from the reset operation, if any.
  *  - loading: Boolean indicating if the data is currently being fetched.
  */
-export function useOverview<T extends RecordType>({
-  fetchFunction,
-  resetFunction,
-}: UseOverviewProps<T>) {
+export function useOverview<T>({ fetchFunction, resetFunction }: UseOverviewProps<T>) {
+  const [resetStatus, setResetStatus] = useState<HookStatus>('idle');
   const [resetError, setResetError] = useState<string | null>(null);
 
   const {
     data,
     currentIndex,
-    currentItem,
     setCurrentIndex,
+    currentItem,
+    status,
     reload,
     error: fetchError,
     loading,
@@ -39,11 +40,17 @@ export function useOverview<T extends RecordType>({
 
   const handleReset = useCallback(async () => {
     if (!currentItem || !resetFunction) return;
+
+    setResetStatus('loading');
+    setResetError(null);
+
     try {
       await resetFunction(currentItem);
+      setResetStatus('success');
       setResetError(null);
       reload();
     } catch (resetError) {
+      setResetStatus('error');
       setResetError(resetError instanceof Error ? resetError.message : String(resetError));
     }
   }, [currentItem, resetFunction, reload]);
@@ -54,9 +61,11 @@ export function useOverview<T extends RecordType>({
     currentIndex,
     setCurrentIndex,
     currentItem,
-    handleReset,
-    fetchError,
-    resetError,
     loading,
+    handleReset,
+    fetchStatus: status,
+    fetchError,
+    resetStatus,
+    resetError,
   };
 }

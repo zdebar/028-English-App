@@ -36,7 +36,7 @@ export default function BlockItemsOverview() {
     try {
       return await Blocks.getById(blockId);
     } catch (err) {
-      showToast(TEXTS.dataLoadingError, 'error');
+      showToast(TEXTS.loadingError, 'error');
       return null;
     }
   }, [userId, blockId]);
@@ -49,7 +49,7 @@ export default function BlockItemsOverview() {
     try {
       return await UserItem.getByBlockId(userId, blockId);
     } catch (err) {
-      showToast(TEXTS.dataLoadingError, 'error');
+      showToast(TEXTS.loadingError, 'error');
       return [];
     }
   }, [userId, blockId]);
@@ -76,7 +76,7 @@ export default function BlockItemsOverview() {
     <div className="card-width flex flex-col justify-start gap-1">
       <div className="h-button flex items-center justify-between gap-1">
         {blockError ? (
-          <Notification className="color-error pt-4">{TEXTS.dataLoadingError}</Notification>
+          <Notification className="color-error pt-4">{TEXTS.loadingError}</Notification>
         ) : (
           <ModalButton
             modalTitle={'resetTitle'}
@@ -90,7 +90,7 @@ export default function BlockItemsOverview() {
             }}
             className="justify-start px-4"
           >
-            {block?.name ?? TEXTS.dataLoadingError}
+            {block?.name ?? TEXTS.loadingError}
           </ModalButton>
         )}
         <CloseButton onClick={onClose} />

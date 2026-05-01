@@ -11,6 +11,7 @@ import Grammar from '@/database/models/grammar';
 import type { GrammarType } from '@/types/generic.types';
 import UserItem from '@/database/models/user-items';
 import { DataState } from '@/components/UI/DataState';
+import { useStatusToast } from '@/hooks/use-status-toast';
 
 /**
  * GrammarOverview component displays a list of started grammar topics for the user.
@@ -21,13 +22,16 @@ import { DataState } from '@/components/UI/DataState';
 export default function GrammarOverview(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const navigate = useNavigate();
+
   const {
     data: grammarList,
     currentIndex,
     setCurrentIndex,
     currentItem,
     handleReset,
+    fetchStatus,
     fetchError,
+    resetStatus,
     resetError,
     loading,
     hasData,
@@ -35,6 +39,19 @@ export default function GrammarOverview(): JSX.Element {
     fetchFunction: () => (userId ? Grammar.getStarted(userId) : Promise.resolve([])),
     resetFunction: (item) =>
       userId ? UserItem.resetItemsByGrammarId(userId, item.id) : Promise.resolve(),
+  });
+
+  useStatusToast({
+    status: fetchStatus,
+    type: 'fetch',
+    error: fetchError,
+  });
+
+  useStatusToast({
+    status: resetStatus,
+    showSuccessToast: true,
+    type: 'reset',
+    error: resetError,
   });
 
   // -- List view --
