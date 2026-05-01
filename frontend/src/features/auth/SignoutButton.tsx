@@ -29,6 +29,8 @@ export default function SignoutButton({ className }: SignoutButtonProps): JSX.El
     <ModalButton
       modalTitle={TEXTS.signoutButtonTitle}
       modalText={TEXTS.signoutModalText}
+      successToastText={TEXTS.signoutSuccess}
+      errorToastText={TEXTS.signoutError}
       disabled={!userId}
       onConfirm={handleSignout}
       className={className}
