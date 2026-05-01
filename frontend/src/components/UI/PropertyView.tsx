@@ -1,5 +1,3 @@
-import type { JSX } from 'react';
-
 type PropertyViewProps = Readonly<{
   readonly label: string;
   readonly title?: string;
@@ -27,7 +25,7 @@ export default function PropertyView({
   classNameLabel = 'w-30',
   className = '',
   classNameValue = '',
-}: PropertyViewProps): JSX.Element {
+}: PropertyViewProps) {
   return (
     <dl className={`flex items-center ${className}`} title={title}>
       <dt
