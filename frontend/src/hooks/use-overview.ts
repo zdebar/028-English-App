@@ -16,8 +16,6 @@ type UseOverviewProps<T extends RecordType> = Readonly<{
  *  - currentIndex: The index of the currently selected item.
  *  - setCurrentIndex: Function to set the current index.
  *  - currentItem: The currently selected item.
- *  - handleOpen: Function to open an item by index.
- *  - handleClose: Function to close the currently open item.
  *  - handleReset: Function to reset the currently selected item.
  *  - fetchError: Error message from the fetch operation, if any.
  *  - resetError: Error message from the reset operation, if any.
@@ -39,17 +37,6 @@ export function useOverview<T extends RecordType>({
     loading,
   } = useArray<T>(fetchFunction);
 
-  const handleOpen = useCallback(
-    (index: number) => {
-      setCurrentIndex(index);
-    },
-    [setCurrentIndex],
-  );
-
-  const handleClose = useCallback(() => {
-    setCurrentIndex(null);
-  }, [setCurrentIndex]);
-
   const handleReset = useCallback(async () => {
     if (!currentItem || !resetFunction) return;
     try {
@@ -67,8 +54,6 @@ export function useOverview<T extends RecordType>({
     currentIndex,
     setCurrentIndex,
     currentItem,
-    handleOpen,
-    handleClose,
     handleReset,
     fetchError,
     resetError,

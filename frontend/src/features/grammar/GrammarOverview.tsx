@@ -24,9 +24,8 @@ export default function GrammarOverview(): JSX.Element {
   const {
     data: grammarList,
     currentIndex,
+    setCurrentIndex,
     currentItem,
-    handleClose,
-    handleOpen,
     handleReset,
     fetchError,
     resetError,
@@ -56,7 +55,7 @@ export default function GrammarOverview(): JSX.Element {
             <StyledButton
               key={item.id}
               className="h-input flex justify-start px-4 text-left"
-              onClick={() => handleOpen(index)}
+              onClick={() => setCurrentIndex(index)}
               title={item.name}
             >
               <p className="overflow-hidden text-ellipsis whitespace-nowrap">{item.name}</p>
@@ -73,7 +72,7 @@ export default function GrammarOverview(): JSX.Element {
       buttonTitle={currentItem?.name ?? TEXTS.grammarOverview}
       modalTitle={TEXTS.restartGrammarProgress}
       handleReset={handleReset}
-      onClose={handleClose}
+      onClose={() => setCurrentIndex(null)}
       className="relative"
     >
       <div dangerouslySetInnerHTML={{ __html: currentItem?.note || '' }} className="grammar" />
