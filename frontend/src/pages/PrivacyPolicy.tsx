@@ -2,9 +2,8 @@ import PrivacyPolicyCzech from '@/features/privacy-policy/PrivacyPolicyCzech';
 import type { JSX } from 'react/jsx-dev-runtime';
 
 /**
- * Renders the Privacy Policy page component.
- *
- * @returns The JSX element representing the Privacy Policy page.
+ * Privacy Policy page component.
+ * @returns The rendered Privacy Policy page component.
  */
 export default function PrivacyPolicy(): JSX.Element {
   return <PrivacyPolicyCzech />;

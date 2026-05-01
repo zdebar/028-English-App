@@ -7,9 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import type { JSX } from 'react/jsx-dev-runtime';
 
 /**
- * Profile component that renders the user profile page.
- *
- * @returns The JSX element representing the Profile page.
+ * Profile page component.
+ * @returns The rendered Profile page component.
  */
 export default function Profile(): JSX.Element {
   const navigate = useNavigate();
@@ -17,20 +16,20 @@ export default function Profile(): JSX.Element {
   return (
     <div className="card-width grow-0 gap-1">
       <MenuButton onClick={() => navigate(ROUTES.levels)} title={TEXTS.levelsOverviewTooltip}>
-        <p className="profile-menu-button">{TEXTS.levelsOverview}</p>
+        {TEXTS.levelsOverview}
       </MenuButton>
       <MenuButton onClick={() => navigate(ROUTES.grammar)} title={TEXTS.grammarOverviewTooltip}>
-        <p className="profile-menu-button">{TEXTS.grammarOverview}</p>
+        {TEXTS.grammarOverview}
       </MenuButton>
       <MenuButton onClick={() => navigate(ROUTES.blocks)} title={TEXTS.blocksOverviewTooltip}>
-        <p className="profile-menu-button">{TEXTS.blocksOverview}</p>
+        {TEXTS.blocksOverview}
       </MenuButton>
       <MenuButton
         onClick={() => navigate(ROUTES.vocabulary)}
         title={TEXTS.vocabularyOverviewTooltip}
         className="mb-10"
       >
-        <p className="profile-menu-button">{TEXTS.vocabularyOverview}</p>
+        {TEXTS.vocabularyOverview}
       </MenuButton>
       <DeleteUserButton />
       <SignoutButton />
