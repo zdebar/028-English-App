@@ -37,6 +37,6 @@
   @apply w-15 inline-block;
 }
 
-.profile-menu-button {
+.profile-menu-button { /* TODO: Delete once refactored to use ModalButton */
   @apply w-40 mx-auto;
 }

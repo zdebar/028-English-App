@@ -7,7 +7,7 @@ import type { ButtonHTMLAttributes, JSX } from 'react';
 export function MenuButton(props: Readonly<ButtonHTMLAttributes<HTMLButtonElement>>): JSX.Element {
   return (
     <StyledButton {...props} className={`h-button text-left ${props.className}`}>
-      {props.children}
+      <p className="mx-auto w-40">{props.children}</p>
     </StyledButton>
   );
 }

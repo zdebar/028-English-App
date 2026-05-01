@@ -1,7 +1,5 @@
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { errorHandler } from '@/features/logging/error-handler';
 import ModalButton from '@/features/modal/ModalButton';
-import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { useThemeStore } from '../theme/use-theme-store';
@@ -20,19 +18,11 @@ export default function SignoutButton({ className }: SignoutButtonProps): JSX.El
   const userId = useAuthStore((state) => state.userId);
   const handleLogout = useAuthStore((state) => state.handleLogout);
   const saveCurrentThemeAsGuest = useThemeStore((state) => state.saveCurrentThemeAsGuest);
-  const showToast = useToastStore((state) => state.showToast);
 
   const handleSignout = async () => {
     if (!userId) return;
-
-    try {
-      saveCurrentThemeAsGuest();
-      await handleLogout();
-      showToast(TEXTS.signoutSuccess, 'success');
-    } catch (error) {
-      showToast(TEXTS.signoutError, 'error');
-      errorHandler('Signout Error', error);
-    }
+    saveCurrentThemeAsGuest();
+    await handleLogout();
   };
 
   return (
@@ -43,7 +33,7 @@ export default function SignoutButton({ className }: SignoutButtonProps): JSX.El
       onConfirm={handleSignout}
       className={className}
     >
-      <p className="profile-menu-button">{TEXTS.signoutButtonTitle}</p>
+      {TEXTS.signoutButtonTitle}
     </ModalButton>
   );
 }
