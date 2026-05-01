@@ -37,7 +37,7 @@ vi.mock('@/features/logging/error-handler', () => ({
   errorHandler: (...args: unknown[]) => errorHandlerMock(...args),
 }));
 
-import { useAudioManager } from '@/features/practice/hooks/use-audio-manager';
+import { useAudioManager } from '@/hooks/use-audio-manager';
 
 describe('useAudioManager', () => {
   beforeEach(() => {

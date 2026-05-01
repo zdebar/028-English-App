@@ -6,7 +6,7 @@ import UserItem from '@/database/models/user-items';
 import { errorHandler } from '@/features/logging/error-handler';
 import { infoHandler } from '@/features/logging/info-handler';
 import { useHint } from './use-hint';
-import { useAudioManager } from './use-audio-manager';
+import { useAudioManager } from '../../../hooks/use-audio-manager';
 import { triggerDailyCountUpdatedEvent, triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 import config from '@/config/config';
 
