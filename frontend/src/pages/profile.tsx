@@ -1,4 +1,4 @@
-import { MenuButton } from '@/components/UI/buttons/MenuButton';
+import { StandardButton } from '@/components/UI/buttons/StandardButton';
 import { ROUTES } from '@/config/routes.config';
 import DeleteUserButton from '@/features/auth/DeleteUserButton';
 import SignoutButton from '@/features/auth/SignoutButton';
@@ -16,22 +16,22 @@ export default function Profile(): JSX.Element {
 
   return (
     <div className="card-width grow-0 gap-1">
-      <MenuButton onClick={() => navigate(ROUTES.levels)} title={TEXTS.levelsOverviewTooltip}>
+      <StandardButton onClick={() => navigate(ROUTES.levels)} title={TEXTS.levelsOverviewTooltip}>
         <MenuButtonText>{TEXTS.levelsOverview}</MenuButtonText>
-      </MenuButton>
-      <MenuButton onClick={() => navigate(ROUTES.grammar)} title={TEXTS.grammarOverviewTooltip}>
+      </StandardButton>
+      <StandardButton onClick={() => navigate(ROUTES.grammar)} title={TEXTS.grammarOverviewTooltip}>
         <MenuButtonText>{TEXTS.grammarOverview}</MenuButtonText>
-      </MenuButton>
-      <MenuButton onClick={() => navigate(ROUTES.blocks)} title={TEXTS.blocksOverviewTooltip}>
+      </StandardButton>
+      <StandardButton onClick={() => navigate(ROUTES.blocks)} title={TEXTS.blocksOverviewTooltip}>
         <MenuButtonText>{TEXTS.blocksOverview}</MenuButtonText>
-      </MenuButton>
-      <MenuButton
+      </StandardButton>
+      <StandardButton
         onClick={() => navigate(ROUTES.vocabulary)}
         title={TEXTS.vocabularyOverviewTooltip}
         className="mb-10"
       >
         <MenuButtonText>{TEXTS.vocabularyOverview}</MenuButtonText>
-      </MenuButton>
+      </StandardButton>
       <DeleteUserButton />
       <SignoutButton />
     </div>

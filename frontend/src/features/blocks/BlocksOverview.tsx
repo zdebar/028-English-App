@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { TEXTS } from '@/locales/cs';
 import type { BlockType } from '@/types/generic.types';
 import { useArray } from '@/hooks/use-array';
-import StyledButton from '@/components/UI/buttons/StyledButton';
 import { ROUTES } from '@/config/routes.config';
 import { useAuthStore } from '../auth/use-auth-store';
 import { useCallback } from 'react';
@@ -11,6 +10,8 @@ import { useToastStore } from '../toast/use-toast-store';
 import { errorHandler } from '../logging/error-handler';
 import { DataState } from '@/components/UI/DataState';
 import { CardHeader } from '@/components/UI/CardHeader';
+import HeaderText from '@/components/UI/HeaderText';
+import { ListButton } from '@/components/UI/buttons/ListButton';
 
 export default function BlocksOverview() {
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ export default function BlocksOverview() {
   return (
     <div className="card-width flex flex-col justify-start gap-1">
       <CardHeader onClose={() => navigate(ROUTES.profile)}>
-        <div className="flex grow justify-start px-4">{TEXTS.blocksOverview}</div>
+        <HeaderText>{TEXTS.blocksOverview}</HeaderText>
       </CardHeader>
       <DataState
         loading={blocksLoading}
@@ -48,17 +49,18 @@ export default function BlocksOverview() {
       >
         <div className="flex flex-col gap-1">
           {blocks.map((block) => (
-            <StyledButton
+            <ListButton
               key={block.id}
               className="h-input flex w-full justify-start px-4 text-left"
               onClick={() => navigate(`${ROUTES.blocks}/${block.id}`)}
               title={block.name}
             >
               <p className="overflow-hidden text-ellipsis whitespace-nowrap">{block.name}</p>
-            </StyledButton>
+            </ListButton>
           ))}
         </div>
       </DataState>
     </div>
   );
 }
+
