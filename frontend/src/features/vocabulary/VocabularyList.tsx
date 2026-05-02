@@ -7,6 +7,7 @@ import CancelIcon from '@/components/UI/icons/CancelIcon';
 import { CardHeader } from '@/components/UI/CardHeader';
 import { ListButton } from '@/components/UI/buttons/ListButton';
 import { DataState } from '@/components/UI/DataState';
+import Card from '@/components/UI/Card';
 
 const DIRECTION_OPTIONS: { value: DisplayField; label: string }[] = [
   { value: 'czech', label: 'Čeština' },
@@ -56,7 +57,7 @@ export default function VocabularyList({
   const hasWords = filteredWords.length > 0;
 
   return (
-    <div className="card-width relative flex h-full flex-col justify-start gap-1">
+    <Card>
       <CardHeader onClose={onClose}>
         <DirectionTogggle
           value={displayField}
@@ -86,12 +87,7 @@ export default function VocabularyList({
           </button>
         )}
       </div>
-      <DataState
-        loading={false}
-        error={false}
-        hasData={hasWords}
-        noDataMessage={TEXTS.noStartedVocabulary}
-      >
+      <DataState loading={false} hasData={hasWords} noDataMessage={TEXTS.noStartedVocabulary}>
         {visibleItems.map((item, index) => (
           <ListButton
             key={item.item_id}
@@ -110,6 +106,6 @@ export default function VocabularyList({
           </button>
         )}
       </DataState>
-    </div>
+    </Card>
   );
 }

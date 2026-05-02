@@ -44,31 +44,29 @@ export default function VocabularyDetailCard({
   ];
 
   return (
-    <div className="card-width relative flex w-full flex-col items-center justify-start">
-      <OverviewCard
-        buttonTitle={selectedTitle}
-        onClose={onClose}
-        handleReset={onReset}
-        modalTitle={TEXTS.restartItemProgress}
-      >
-        <div className="flex flex-col gap-4 p-4">
-          <div>
-            {baseProperties.map((property) => (
-              <PropertyView key={property.label} label={property.label}>
-                {property.value ?? NOT_AVAILABLE}
-              </PropertyView>
-            ))}
-          </div>
-          <div>
-            {dateProperties.map((property) => (
-              <PropertyView key={property.label} label={property.label}>
-                {property.value ?? NOT_AVAILABLE}
-              </PropertyView>
-            ))}
-          </div>
+    <OverviewCard
+      buttonTitle={selectedTitle}
+      onClose={onClose}
+      handleReset={onReset}
+      modalTitle={TEXTS.restartItemProgress}
+    >
+      <div className="flex flex-col gap-4 p-4">
+        <div>
+          {baseProperties.map((property) => (
+            <PropertyView key={property.label} label={property.label}>
+              {property.value ?? NOT_AVAILABLE}
+            </PropertyView>
+          ))}
         </div>
-      </OverviewCard>
+        <div>
+          {dateProperties.map((property) => (
+            <PropertyView key={property.label} label={property.label}>
+              {property.value ?? NOT_AVAILABLE}
+            </PropertyView>
+          ))}
+        </div>
+      </div>
       <HelpButton className="right-1 -bottom-10.5" />
-    </div>
+    </OverviewCard>
   );
 }
