@@ -12,6 +12,7 @@ import { DataState } from '@/components/UI/DataState';
 import { CardHeader } from '@/components/UI/CardHeader';
 import HeaderText from '@/components/UI/HeaderText';
 import { ListButton } from '@/components/UI/buttons/ListButton';
+import Card from '@/components/UI/Card';
 
 export default function BlocksOverview() {
   const navigate = useNavigate();
@@ -37,16 +38,11 @@ export default function BlocksOverview() {
   } = useArray<BlockType>(fetchBlocks);
 
   return (
-    <div className="card-width flex flex-col justify-start gap-1">
+    <Card>
       <CardHeader onClose={() => navigate(ROUTES.profile)}>
         <HeaderText>{TEXTS.blocksOverview}</HeaderText>
       </CardHeader>
-      <DataState
-        loading={blocksLoading}
-        error={false}
-        hasData={hasBlocks}
-        noDataMessage={TEXTS.noBlocks}
-      >
+      <DataState loading={blocksLoading} hasData={hasBlocks} noDataMessage={TEXTS.noBlocks}>
         <div className="flex flex-col gap-1">
           {blocks.map((block) => (
             <ListButton
@@ -60,7 +56,7 @@ export default function BlocksOverview() {
           ))}
         </div>
       </DataState>
-    </div>
+    </Card>
   );
 }
 

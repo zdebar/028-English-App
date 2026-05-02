@@ -11,7 +11,7 @@ export const OVERVIEW_TEXTS = {
   restartGrammarProgress: 'Restartovat pokrok všech položek příslušejících této gramatice',
 
   // Blocks Overview Page
-  noBlocks: 'Žádné dostupné bloky.',
+  noBlocks: 'Žádné započaté bloky.',
   noBlockItems: 'V tomto bloku nejsou žádné položky.',
   resetBlockTitle: 'Restartovat blok',
   resetBlockDescription:

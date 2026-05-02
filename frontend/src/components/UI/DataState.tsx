@@ -1,18 +1,21 @@
-import Notification from './Notification';
-import DelayedNotification from './DelayedNotification';
 import { TEXTS } from '@/locales/cs';
+import DelayedNotification from './DelayedNotification';
 
 type DataStateProps = Readonly<{
   loading: boolean;
-  error: boolean;
   hasData: boolean;
   noDataMessage?: string;
   children: React.ReactNode;
 }>;
 
-export function DataState({ loading, error, hasData, noDataMessage, children }: DataStateProps) {
-  if (loading) return <DelayedNotification />;
-  if (error) return <Notification className="color-error pt-4">{TEXTS.loadingError}</Notification>;
+export function DataState({
+  loading,
+  hasData,
+  noDataMessage = TEXTS.notAvailable,
+  children,
+}: DataStateProps) {
   if (hasData) return <>{children}</>;
-  return <DelayedNotification className="color-info pt-4">{noDataMessage}</DelayedNotification>;
+  if (!loading)
+    return <DelayedNotification className="color-info pt-4">{noDataMessage}</DelayedNotification>;
+  return null;
 }
