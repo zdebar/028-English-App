@@ -9,10 +9,8 @@ import { useCallback } from 'react';
 import { useToastStore } from '../toast/use-toast-store';
 import { errorHandler } from '../logging/error-handler';
 import { DataState } from '@/components/UI/DataState';
-import { CardHeader } from '@/components/UI/CardHeader';
-import HeaderText from '@/components/UI/HeaderText';
 import { ListButton } from '@/components/UI/buttons/ListButton';
-import Card from '@/components/UI/Card';
+import OverviewCard from '@/components/UI/OverviewCard';
 
 export default function BlocksOverview() {
   const navigate = useNavigate();
@@ -38,25 +36,20 @@ export default function BlocksOverview() {
   } = useArray<BlockType>(fetchBlocks);
 
   return (
-    <Card>
-      <CardHeader onClose={() => navigate(ROUTES.profile)}>
-        <HeaderText>{TEXTS.blocksOverview}</HeaderText>
-      </CardHeader>
+    <OverviewCard buttonTitle={TEXTS.blocksOverview} onClose={() => navigate(ROUTES.profile)}>
       <DataState loading={blocksLoading} hasData={hasBlocks} noDataMessage={TEXTS.noBlocks}>
-        <div className="flex flex-col gap-1">
-          {blocks.map((block) => (
-            <ListButton
-              key={block.id}
-              className="h-input flex w-full justify-start px-4 text-left"
-              onClick={() => navigate(`${ROUTES.blocks}/${block.id}`)}
-              title={block.name}
-            >
-              <p className="overflow-hidden text-ellipsis whitespace-nowrap">{block.name}</p>
-            </ListButton>
-          ))}
-        </div>
+        {blocks.map((block) => (
+          <ListButton
+            key={block.id}
+            className="h-input flex w-full justify-start px-4 text-left"
+            onClick={() => navigate(`${ROUTES.blocks}/${block.id}`)}
+            title={block.name}
+          >
+            <p className="overflow-hidden text-ellipsis whitespace-nowrap">{block.name}</p>
+          </ListButton>
+        ))}
       </DataState>
-    </Card>
+    </OverviewCard>
   );
 }
 

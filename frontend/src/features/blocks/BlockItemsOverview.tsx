@@ -89,7 +89,6 @@ export default function BlockItemsOverview() {
       buttonTitle={block?.name}
       modalTitle={TEXTS.resetBlockTitle}
       modalText={TEXTS.resetBlockDescription}
-      className="relative p-0"
       loading={blockLoading}
       handleReset={handleReset}
       onClose={onClose}
@@ -98,7 +97,7 @@ export default function BlockItemsOverview() {
         {items.map((item) => (
           <ListButton
             key={item.item_id}
-            className="h-input w-full px-4"
+            className="px-4"
             title={`výslovnost: ${item.pronunciation}`}
             onClick={() => {
               if (!item.audio) return;
