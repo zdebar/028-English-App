@@ -115,7 +115,7 @@ export default function BlockItemsOverview() {
           </ListButton>
         ))}
       </DataState>
-      <HelpButton className="absolute right-0 bottom-0" />
+      <HelpButton className="absolute right-0 -bottom-14" />
     </OverviewCard>
   );
 }

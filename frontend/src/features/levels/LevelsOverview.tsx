@@ -75,7 +75,7 @@ export default function LevelsOverview() {
           </div>
         ))}
 
-        <HelpText className="top-10 right-2">
+        <HelpText className="top-20 right-2">
           {showMastered ? TEXTS.levelsMasteredHelp : TEXTS.levelsStartedHelp}
         </HelpText>
         <HelpButton className="right-0 -bottom-14" />
