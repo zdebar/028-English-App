@@ -1,7 +1,7 @@
 import HelpText from '@/features/help/HelpText';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
-import ModalButton from '@/features/modal/ModalButton';
+import ButtonWithModal from '@/features/modal/ButtonWithModal';
 import { CardHeader } from './CardHeader';
 
 type OverviewCardProps = Readonly<{
@@ -46,7 +46,7 @@ export default function OverviewCard({
     <div className={`card-width ${className}`}>
       {/* Top Bar */}
       <CardHeader onClose={onClose} className="relative">
-        <ModalButton
+        <ButtonWithModal
           modalTitle={modalTitle}
           modalText={modalText}
           title={isDisabled ? '' : TEXTS.restartProgressHelp}
@@ -62,7 +62,7 @@ export default function OverviewCard({
           className="justify-start px-4"
         >
           {buttonTitle}
-        </ModalButton>
+        </ButtonWithModal>
         <HelpText className="-bottom-2 left-2">{helpText}</HelpText>
       </CardHeader>
       {/* Content Area */}

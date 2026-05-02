@@ -42,7 +42,7 @@ vi.mock('@/features/modal/Modal', () => ({
   ),
 }));
 
-import ModalButton from '@/features/modal/ModalButton';
+import ButtonWithModal from '@/features/modal/ButtonWithModal';
 
 describe('ButtonWithModal', () => {
   beforeEach(() => {
@@ -51,7 +51,7 @@ describe('ButtonWithModal', () => {
   });
 
   it('renders trigger button and opens modal on click with default text', () => {
-    render(<ModalButton>Open</ModalButton>);
+    render(<ButtonWithModal>Open</ButtonWithModal>);
 
     fireEvent.click(screen.getByRole('button', { name: 'Open' }));
 
@@ -62,9 +62,9 @@ describe('ButtonWithModal', () => {
 
   it('uses custom modal title and text', () => {
     render(
-      <ModalButton modalTitle="Custom title" modalText="Custom text">
+      <ButtonWithModal modalTitle="Custom title" modalText="Custom text">
         Open
-      </ModalButton>,
+      </ButtonWithModal>,
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Open' }));
@@ -76,7 +76,7 @@ describe('ButtonWithModal', () => {
   it('runs onConfirm and toggles loading states', async () => {
     const onConfirm = vi.fn().mockResolvedValue(undefined);
 
-    render(<ModalButton onConfirm={onConfirm}>Open</ModalButton>);
+    render(<ButtonWithModal onConfirm={onConfirm}>Open</ButtonWithModal>);
     fireEvent.click(screen.getByRole('button', { name: 'Open' }));
     fireEvent.click(screen.getByTestId('modal-confirm'));
 
@@ -88,14 +88,14 @@ describe('ButtonWithModal', () => {
   });
 
   it('disables trigger when disabled prop is true', () => {
-    render(<ModalButton disabled>Open</ModalButton>);
+    render(<ButtonWithModal disabled>Open</ButtonWithModal>);
 
     expect((screen.getByRole('button', { name: 'Open' }) as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('disables trigger when loading is active', () => {
     mocks.isLoading = true;
-    render(<ModalButton>Open</ModalButton>);
+    render(<ButtonWithModal>Open</ButtonWithModal>);
 
     expect((screen.getByRole('button', { name: 'Open' }) as HTMLButtonElement).disabled).toBe(true);
   });

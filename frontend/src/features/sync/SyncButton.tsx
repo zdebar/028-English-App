@@ -3,7 +3,7 @@ import { TEXTS } from '@/locales/cs';
 import { type JSX } from 'react';
 import { audioSync, dataSync } from '@/database/utils/data-sync.utils';
 import { logRejectedResults } from '../logging/logging.utils';
-import ModalButton from '../modal/ModalButton';
+import ButtonWithModal from '../modal/ButtonWithModal';
 import { errorHandler } from '../logging/error-handler';
 import { useToastStore } from '../toast/use-toast-store';
 
@@ -35,7 +35,7 @@ export default function SyncButton({ className }: SyncButtonProps): JSX.Element 
   };
 
   return (
-    <ModalButton
+    <ButtonWithModal
       onConfirm={handleSync}
       className={className}
       disabled={!userId}
@@ -44,6 +44,6 @@ export default function SyncButton({ className }: SyncButtonProps): JSX.Element 
       modalText={TEXTS.syncButtonDescription}
     >
       {TEXTS.syncButton}
-    </ModalButton>
+    </ButtonWithModal>
   );
 }

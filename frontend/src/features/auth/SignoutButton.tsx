@@ -1,5 +1,5 @@
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import ModalButton from '@/features/modal/ModalButton';
+import ButtonWithModal from '@/features/modal/ButtonWithModal';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { useThemeStore } from '../theme/use-theme-store';
@@ -35,7 +35,7 @@ export default function SignoutButton({ className }: SignoutButtonProps): JSX.El
   };
 
   return (
-    <ModalButton
+    <ButtonWithModal
       modalTitle={TEXTS.signoutButtonTitle}
       modalText={TEXTS.signoutModalText}
       disabled={!userId}
@@ -43,6 +43,6 @@ export default function SignoutButton({ className }: SignoutButtonProps): JSX.El
       className={className}
     >
       <MenuButtonText>{TEXTS.signoutButtonTitle}</MenuButtonText>
-    </ModalButton>
+    </ButtonWithModal>
   );
 }

@@ -5,7 +5,7 @@ import UserScoreType from '@/database/models/user-scores';
 import { clearSyncTimes } from '@/database/utils/sync-time.utils';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { logRejectedResults } from '@/features/logging/logging.utils.ts';
-import ModalButton from '@/features/modal/ModalButton';
+import ButtonWithModal from '@/features/modal/ButtonWithModal';
 import { TEXTS } from '@/locales/cs';
 import { TableName } from '@/types/table.types';
 import { type JSX } from 'react';
@@ -66,7 +66,7 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
   };
 
   return (
-    <ModalButton
+    <ButtonWithModal
       modalTitle={TEXTS.deleteUserButtonTitle}
       modalText={TEXTS.deleteUserModalText}
       disabled={!userId}
@@ -74,6 +74,6 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
       className={className}
     >
       <MenuButtonText>{TEXTS.deleteUserButtonTitle}</MenuButtonText>
-    </ModalButton>
+    </ButtonWithModal>
   );
 }
