@@ -41,7 +41,7 @@ export default function BlockItemsOverview() {
     }
   }, [userId, blockId]);
 
-  const { data: block } = useFetch<BlockType>(fetchBlock);
+  const { data: block, loading: blockLoading } = useFetch<BlockType>(fetchBlock);
 
   // -- Items management --
   const fetchBlockItems = useCallback(async () => {
@@ -91,7 +91,7 @@ export default function BlockItemsOverview() {
         className="relative p-0"
         handleReset={handleReset}
         onClose={onClose}
-        buttonTitle={block?.name}
+        buttonTitle={block?.name || (!blockLoading && TEXTS.notAvailable) || ''}
         modalTitle={TEXTS.resetBlockTitle}
         modalText={TEXTS.resetBlockDescription}
       >
@@ -118,8 +118,8 @@ export default function BlockItemsOverview() {
               </ListButton>
             ))}
           </div>
-          <HelpButton className="right-1 -bottom-10.5" />
         </DataState>
+        <HelpButton className="-bottom-14,5 right-1" />
       </OverviewCard>
     </div>
   );

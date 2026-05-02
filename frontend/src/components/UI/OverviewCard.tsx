@@ -43,7 +43,7 @@ export default function OverviewCard({
 }: OverviewCardProps): JSX.Element {
   const isDisabled = !handleReset;
   return (
-    <div className={`card-width min-h-card ${className}`}>
+    <div className={`card-width ${className}`}>
       {/* Top Bar */}
       <CardHeader onClose={onClose} className="relative">
         <ModalButton
