@@ -2,13 +2,16 @@ import HelpText from '@/features/help/HelpText';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import ButtonWithModal from '@/features/modal/ButtonWithModal';
-import { CardHeader } from './CardHeader';
+import CloseButton from './buttons/CloseButton';
+import Card from './Card';
+import DelayedNotification from './DelayedNotification';
 
 type OverviewCardProps = Readonly<{
   buttonTitle?: string;
   modalTitle?: string;
   modalText?: string;
   helpText?: string;
+  loading?: boolean;
   handleReset?: () => Promise<void>;
   onClose?: () => void;
   className?: string;
@@ -25,6 +28,7 @@ type OverviewCardProps = Readonly<{
  * @param modalTitle Title for the confirmation modal.
  * @param modalText Description for the confirmation modal.
  * @param helpText Description for the help tooltip.
+ * @param loading Whether the reset button should show a loading state.
  * @param handleReset Function to call to reset progress.
  * @param onClose Function to call when closing the card.
  * @param className Additional CSS classes for custom styling.
@@ -32,20 +36,21 @@ type OverviewCardProps = Readonly<{
  * @returns The rendered OverviewCard component.
  */
 export default function OverviewCard({
-  buttonTitle = TEXTS.notAvailable,
+  buttonTitle,
   modalTitle = TEXTS.restartProgress,
   modalText = TEXTS.restartDescription,
   helpText = TEXTS.restartProgressHelp,
+  loading = false,
   handleReset,
   onClose,
   className = '',
   children,
 }: OverviewCardProps): JSX.Element {
-  const isDisabled = !handleReset;
+  const isDisabled = !handleReset || loading;
   return (
-    <div className={`card-width ${className}`}>
+    <Card className={className}>
       {/* Top Bar */}
-      <CardHeader onClose={onClose} className="relative">
+      <div className="relative flex items-center justify-between gap-1">
         <ButtonWithModal
           modalTitle={modalTitle}
           modalText={modalText}
@@ -61,12 +66,15 @@ export default function OverviewCard({
           disabled={isDisabled}
           className="justify-start px-4"
         >
-          {buttonTitle}
+          {buttonTitle ||
+            (!loading && <DelayedNotification>{TEXTS.notAvailable}</DelayedNotification>) ||
+            ''}
         </ButtonWithModal>
+        <CloseButton onClick={onClose} />
         <HelpText className="-bottom-2 left-2">{helpText}</HelpText>
-      </CardHeader>
+      </div>
       {/* Content Area */}
-      <div className="w-full grow">{children}</div>
-    </div>
+      {children}
+    </Card>
   );
 }

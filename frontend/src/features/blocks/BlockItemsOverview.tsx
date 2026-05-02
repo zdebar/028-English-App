@@ -85,42 +85,38 @@ export default function BlockItemsOverview() {
   }, [navigate]);
 
   return (
-    <div className="card-width flex flex-col justify-start gap-1">
-      {/** Card Header */}
-      <OverviewCard
-        className="relative p-0"
-        handleReset={handleReset}
-        onClose={onClose}
-        buttonTitle={block?.name || (!blockLoading && TEXTS.notAvailable) || ''}
-        modalTitle={TEXTS.resetBlockTitle}
-        modalText={TEXTS.resetBlockDescription}
-      >
-        <DataState loading={itemsLoading} error={false} hasData={hasItems}>
-          <div className="flex flex-col gap-1 pt-1">
-            {items.map((item) => (
-              <ListButton
-                key={item.item_id}
-                className="h-input w-full px-4"
-                title={`výslovnost: ${item.pronunciation}`}
-                onClick={() => {
-                  if (!item.audio) return;
-                  playAudio(item.audio);
-                }}
-              >
-                <div className="flex w-full items-center justify-between gap-3 overflow-hidden">
-                  <span className="min-w-0 flex-1 overflow-hidden text-left text-ellipsis whitespace-nowrap">
-                    {item.czech}
-                  </span>
-                  <span className="min-w-0 flex-1 overflow-hidden text-right text-ellipsis whitespace-nowrap">
-                    {item.english}
-                  </span>
-                </div>
-              </ListButton>
-            ))}
-          </div>
-        </DataState>
-        <HelpButton className="-bottom-14,5 right-1" />
-      </OverviewCard>
-    </div>
+    <OverviewCard
+      buttonTitle={block?.name}
+      modalTitle={TEXTS.resetBlockTitle}
+      modalText={TEXTS.resetBlockDescription}
+      className="relative p-0"
+      loading={blockLoading}
+      handleReset={handleReset}
+      onClose={onClose}
+    >
+      <DataState loading={itemsLoading} hasData={hasItems}>
+        {items.map((item) => (
+          <ListButton
+            key={item.item_id}
+            className="h-input w-full px-4"
+            title={`výslovnost: ${item.pronunciation}`}
+            onClick={() => {
+              if (!item.audio) return;
+              playAudio(item.audio);
+            }}
+          >
+            <div className="flex w-full items-center justify-between gap-3 overflow-hidden">
+              <span className="min-w-0 flex-1 overflow-hidden text-left text-ellipsis whitespace-nowrap">
+                {item.czech}
+              </span>
+              <span className="min-w-0 flex-1 overflow-hidden text-right text-ellipsis whitespace-nowrap">
+                {item.english}
+              </span>
+            </div>
+          </ListButton>
+        ))}
+      </DataState>
+      <HelpButton className="absolute right-0 bottom-0" />
+    </OverviewCard>
   );
 }
