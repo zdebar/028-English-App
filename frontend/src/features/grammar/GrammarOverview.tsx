@@ -13,7 +13,6 @@ import UserItem from '@/database/models/user-items';
 import { DataState } from '@/components/UI/DataState';
 import { useToastStore } from '../toast/use-toast-store';
 import { errorHandler } from '../logging/error-handler';
-import { CardHeader } from '@/components/UI/CardHeader';
 
 /**
  * GrammarOverview component displays a list of started grammar topics for the user.
@@ -60,16 +59,12 @@ export default function GrammarOverview(): JSX.Element {
   // -- List view --
   if (currentIndex === null) {
     return (
-      <div className={`card-width flex flex-col justify-start gap-1`}>
-        <CardHeader onClose={() => navigate('/profile')}>
-          <div className="flex grow justify-start px-4">{TEXTS.grammarOverview}</div>
-        </CardHeader>
-        <DataState
-          loading={loading}
-          error={false}
-          hasData={hasData}
-          noDataMessage={TEXTS.noGrammar}
-        >
+      <OverviewCard
+        buttonTitle={TEXTS.grammarOverview}
+        loading={loading}
+        onClose={() => navigate('/profile')}
+      >
+        <DataState loading={loading} hasData={hasData}>
           {grammarList.map((item, index) => (
             <ListButton
               key={item.id}
@@ -81,15 +76,16 @@ export default function GrammarOverview(): JSX.Element {
             </ListButton>
           ))}
         </DataState>
-      </div>
+      </OverviewCard>
     );
   }
 
   // -- GrammarCard view --
   return (
     <OverviewCard
-      buttonTitle={currentItem?.name ?? TEXTS.grammarOverview}
-      modalTitle={TEXTS.restartGrammarProgress}
+      buttonTitle={currentItem?.name}
+      modalTitle={TEXTS.restartGrammarTitle}
+      modalText={TEXTS.restartGrammarDescription}
       handleReset={handleReset}
       onClose={() => setCurrentIndex(null)}
       className="relative"
