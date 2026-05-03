@@ -146,7 +146,7 @@ export function useAudioManager(audio: AudioInput) {
       if (!isDisposed) setLoading(false);
     };
 
-    void loadAllAudio();
+    loadAllAudio();
 
     return () => {
       isDisposed = true;
