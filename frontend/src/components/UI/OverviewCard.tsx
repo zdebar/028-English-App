@@ -1,9 +1,9 @@
 import HelpText from '@/features/help/HelpText';
 import { TEXTS } from '@/locales/cs';
-import type { JSX } from 'react';
+import type { JSX, ReactNode } from 'react';
 import ButtonWithModal from '@/features/modal/ButtonWithModal';
-import CloseButton from './buttons/CloseButton';
 import Card from './Card';
+import { CardHeader } from './CardHeader';
 import DelayedNotification from './DelayedNotification';
 
 type OverviewCardProps = Readonly<{
@@ -15,7 +15,7 @@ type OverviewCardProps = Readonly<{
   handleReset?: () => Promise<void>;
   onClose?: () => void;
   className?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }>;
 
 /**
@@ -49,8 +49,7 @@ export default function OverviewCard({
   const isDisabled = !handleReset || loading;
   return (
     <Card className={className}>
-      {/* Top Bar */}
-      <div className="relative flex items-center justify-between gap-1">
+      <CardHeader onClose={onClose} className="relative">
         <ButtonWithModal
           modalTitle={modalTitle}
           modalText={modalText}
@@ -70,10 +69,8 @@ export default function OverviewCard({
             (!loading && <DelayedNotification>{TEXTS.notAvailable}</DelayedNotification>) ||
             ''}
         </ButtonWithModal>
-        <CloseButton onClick={onClose} />
         <HelpText className="-bottom-2 left-2">{helpText}</HelpText>
-      </div>
-      {/* Content Area */}
+      </CardHeader>
       {children}
     </Card>
   );
