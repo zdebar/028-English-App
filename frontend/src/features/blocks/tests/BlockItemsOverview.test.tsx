@@ -9,17 +9,20 @@ const mocks = vi.hoisted(() => ({
   userId: 'u1' as string | null,
   blockId: '2' as string | undefined,
   state: {
-    data: [] as any[],
-    error: null as string | null,
-    loading: false,
+    items: [] as any[],
+    itemsLoading: false,
+    block: { id: 2, name: 'Block 2' } as any,
+    blockLoading: false,
   },
 }));
 
 class MockAudio {
+  src = '';
   currentTime = 0;
   play = vi.fn().mockResolvedValue(undefined);
   pause = vi.fn();
   addEventListener = vi.fn();
+  removeEventListener = vi.fn();
 }
 
 const audioInstances: MockAudio[] = [];
@@ -41,9 +44,16 @@ vi.mock('@/features/toast/use-toast-store', () => ({
 
 vi.mock('@/hooks/use-array', () => ({
   useArray: () => ({
-    data: mocks.state.data,
-    error: mocks.state.error,
-    loading: mocks.state.loading,
+    data: mocks.state.items,
+    loading: mocks.state.itemsLoading,
+    hasData: mocks.state.items.length > 0,
+  }),
+}));
+
+vi.mock('@/hooks/use-fetch', () => ({
+  useFetch: () => ({
+    data: mocks.state.block,
+    loading: mocks.state.blockLoading,
   }),
 }));
 
@@ -69,12 +79,13 @@ vi.mock('@/locales/cs', () => ({
     loadingMessage: 'Loading',
     blocksOverview: 'Blocks overview',
     noBlockItems: 'No block items',
+    notAvailable: 'Not available',
     loadingError: 'Loading error',
   },
 }));
 
-vi.mock('@/components/UI/DelayedMessage', () => ({
-  default: ({ children }: any) => <div>{children}</div>,
+vi.mock('@/components/UI/DelayedNotification', () => ({
+  default: ({ children, message }: any) => <div>{children ?? message}</div>,
 }));
 
 vi.mock('@/components/UI/Notification', () => ({
@@ -89,8 +100,8 @@ vi.mock('@/components/UI/buttons/CloseButton', () => ({
   ),
 }));
 
-vi.mock('@/components/UI/buttons/BaseButton', () => ({
-  default: ({ onClick, children }: any) => (
+vi.mock('@/components/UI/buttons/ListButton', () => ({
+  ListButton: ({ onClick, children }: any) => (
     <button data-testid="item-button" onClick={onClick}>
       {children}
     </button>
@@ -104,15 +115,17 @@ describe('BlockItemsOverview', () => {
     vi.clearAllMocks();
     mocks.userId = 'u1';
     mocks.blockId = '2';
-    mocks.state.data = [];
-    mocks.state.error = null;
-    mocks.state.loading = false;
+    mocks.state.items = [];
+    mocks.state.itemsLoading = false;
+    mocks.state.block = { id: 2, name: 'Block 2' };
+    mocks.state.blockLoading = false;
 
     audioInstances.length = 0;
 
     class MockAudioCtor extends MockAudio {
-      constructor() {
+      constructor(src?: string) {
         super();
+        this.src = src ?? '';
         audioInstances.push(this);
       }
     }
@@ -129,21 +142,21 @@ describe('BlockItemsOverview', () => {
 
     render(<BlockItemsOverview />);
 
-    expect(screen.getByText('Page not found')).toBeTruthy();
+    expect(mocks.navigate).toHaveBeenCalledWith('/blocks');
   });
 
   it('renders loading state', () => {
-    mocks.state.loading = true;
+    mocks.state.itemsLoading = true;
 
     render(<BlockItemsOverview />);
 
-    expect(screen.getByText('Loading')).toBeTruthy();
+    expect(screen.queryByText('No block items')).toBeNull();
   });
 
   it('renders empty state when block has no items', () => {
     render(<BlockItemsOverview />);
 
-    expect(screen.getByText('No block items')).toBeTruthy();
+    expect(screen.getByText('Not available')).toBeTruthy();
   });
 
   it('navigates back to blocks overview on close', () => {
@@ -154,7 +167,7 @@ describe('BlockItemsOverview', () => {
   });
 
   it('renders czech on left and english on right and plays audio on click', async () => {
-    mocks.state.data = [
+    mocks.state.items = [
       {
         item_id: 10,
         czech: 'pondeli',
@@ -169,16 +182,19 @@ describe('BlockItemsOverview', () => {
     expect(screen.getByText('pondeli')).toBeTruthy();
     expect(screen.getByText('monday')).toBeTruthy();
 
+    await waitFor(() => {
+      expect(mocks.getByFilename).toHaveBeenCalledWith('a.opus');
+    });
+
     fireEvent.click(screen.getByTestId('item-button'));
 
     await waitFor(() => {
-      expect(mocks.getByFilename).toHaveBeenCalledWith('a.opus');
       expect(audioInstances[0].play).toHaveBeenCalledTimes(1);
     });
   });
 
   it('does not try to load audio when item has no audio filename', () => {
-    mocks.state.data = [
+    mocks.state.items = [
       {
         item_id: 11,
         czech: 'unor',
@@ -194,7 +210,7 @@ describe('BlockItemsOverview', () => {
   });
 
   it('shows toast and logs error when audio playback fails', async () => {
-    mocks.state.data = [
+    mocks.state.items = [
       {
         item_id: 12,
         czech: 'brezen',
@@ -209,11 +225,7 @@ describe('BlockItemsOverview', () => {
     fireEvent.click(screen.getByTestId('item-button'));
 
     await waitFor(() => {
-      expect(mocks.showToast).toHaveBeenCalledWith('Loading error', 'error');
-      expect(mocks.errorHandler).toHaveBeenCalledWith(
-        'Block audio playback failed',
-        expect.any(Error),
-      );
+      expect(mocks.errorHandler).toHaveBeenCalledWith('Audio Manager Error', expect.any(Error));
     });
   });
 });

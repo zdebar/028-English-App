@@ -20,7 +20,7 @@ vi.mock('@/database/models/db', () => ({
 
 vi.mock('@/database/models/user-items', () => ({
   default: {
-    getOverviewBlocksIds: (...args: unknown[]) => mocks.getOverviewBlockIds(...args),
+    getStartedBlocksIds: (...args: unknown[]) => mocks.getOverviewBlockIds(...args),
   },
 }));
 

@@ -1,24 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const showToastMock = vi.fn();
-const errorHandlerMock = vi.fn();
-
-vi.mock('@/locales/cs', () => ({
-  TEXTS: {
-    loadingError: 'Data loading error',
-  },
-}));
-
-vi.mock('@/features/toast/use-toast-store', () => ({
-  useToastStore: (selector: (state: { showToast: typeof showToastMock }) => unknown) =>
-    selector({ showToast: showToastMock }),
-}));
-
-vi.mock('@/features/logging/error-handler', () => ({
-  errorHandler: (...args: unknown[]) => errorHandlerMock(...args),
-}));
-
 import { useArray } from '@/hooks/use-array';
 
 describe('useArray', () => {
@@ -36,7 +18,7 @@ describe('useArray', () => {
       expect(result.current.data).toEqual(['a', 'b']);
     });
 
-    expect(result.current.error).toBeNull();
+    expect(result.current.hasData).toBe(true);
     expect(result.current.currentIndex).toBeNull();
     expect(result.current.currentItem).toBeNull();
   });
@@ -55,7 +37,7 @@ describe('useArray', () => {
     expect(result.current.currentItem).toEqual({ id: 2 });
   });
 
-  it('reload refetches data and resets selected index to null', async () => {
+  it('reload refetches data and keeps selected index when still in bounds', async () => {
     let call = 0;
     const fetchFunction = vi.fn().mockImplementation(() => {
       call += 1;
@@ -78,22 +60,20 @@ describe('useArray', () => {
       expect(result.current.data).toEqual(['second']);
     });
 
-    expect(result.current.currentIndex).toBeNull();
-    expect(result.current.currentItem).toBeNull();
+    expect(result.current.currentIndex).toBe(0);
+    expect(result.current.currentItem).toBe('second');
   });
 
-  it('handles fetch error with toast and logging', async () => {
+  it('handles fetch error by returning empty data', async () => {
     const fetchFunction = vi.fn().mockRejectedValue(new Error('fail'));
 
     const { result } = renderHook(() => useArray(fetchFunction));
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
-      expect(result.current.error).toBe('Data loading error');
     });
 
-    expect(showToastMock).toHaveBeenCalledWith('Data loading error', 'error');
-    expect(errorHandlerMock).toHaveBeenCalledWith('Data Fetching Error', expect.any(Error));
     expect(result.current.data).toEqual([]);
+    expect(result.current.hasData).toBe(false);
   });
 });

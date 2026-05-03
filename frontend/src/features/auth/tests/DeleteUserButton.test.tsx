@@ -45,13 +45,13 @@ vi.mock('@/features/theme/use-theme-store', () => ({
 
 vi.mock('@/database/models/user-items', () => ({
   default: {
-    deleteAllByUserId: (...args: unknown[]) => mocks.deleteAllByUserId(...args),
+    deleteByUserId: (...args: unknown[]) => mocks.deleteAllByUserId(...args),
   },
 }));
 
 vi.mock('@/database/models/user-scores', () => ({
   default: {
-    deleteAllScores: (...args: unknown[]) => mocks.deleteAllUserScores(...args),
+    deleteByUserId: (...args: unknown[]) => mocks.deleteAllUserScores(...args),
   },
 }));
 
@@ -85,7 +85,7 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 
-vi.mock('@/types/local.types', () => ({
+vi.mock('@/types/table.types', () => ({
   TableName: {
     UserItems: 'user_items',
     UserScores: 'user_scores',
@@ -96,7 +96,7 @@ vi.mock('@/features/logging/error-handler', () => ({
   errorHandler: (...args: unknown[]) => mocks.errorHandler(...args),
 }));
 
-vi.mock('@/features/modal/ModalButton', () => ({
+vi.mock('@/features/modal/ButtonWithModal', () => ({
   default: ({ disabled, onConfirm, children }: any) => (
     <button data-testid="button-with-modal" disabled={disabled} onClick={() => onConfirm?.()}>
       {children}
@@ -156,7 +156,7 @@ describe('DeleteUserButton', () => {
 
     await waitFor(() => {
       expect(mocks.showToast).toHaveBeenCalledWith('Delete error', 'error');
-      expect(mocks.errorHandler).toHaveBeenCalledWith('Delete User Error', expect.any(Error));
+      expect(mocks.errorHandler).toHaveBeenCalledWith('Error deleting user', expect.any(Error));
     });
   });
 });

@@ -5,6 +5,7 @@ const getAudioMock = vi.fn();
 const errorHandlerMock = vi.fn();
 
 class MockAudio {
+  src = '';
   volume = 1;
   currentTime = 0;
   play = vi.fn();
@@ -44,10 +45,10 @@ describe('useAudioManager', () => {
     vi.clearAllMocks();
     audioInstances.length = 0;
 
-
     class MockAudioCtor extends MockAudio {
-      constructor() {
+      constructor(src?: string) {
         super();
+        this.src = src ?? '';
         audioInstances.push(this);
       }
     }

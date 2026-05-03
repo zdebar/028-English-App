@@ -7,18 +7,17 @@ const mocks = vi.hoisted(() => ({
   resetItemById: vi.fn(),
   reload: vi.fn(),
   showToast: vi.fn(),
-  state: {
-    words: [] as any[],
-    error: null as string | null,
+  vocab: {
     loading: false,
-  },
-}));
-
-vi.mock('@/config/config', () => ({
-  default: {
-    vocabulary: {
-      itemsPerPage: 2,
-    },
+    visibleCount: 2,
+    setVisibleCount: vi.fn(),
+    searchTerm: '',
+    setSearchTerm: vi.fn(),
+    displayField: 'english' as 'czech' | 'english',
+    setDisplayField: vi.fn(),
+    selectedWord: null as any,
+    setSelectedWord: vi.fn(),
+    filteredWords: [] as any[],
   },
 }));
 
@@ -38,12 +37,19 @@ vi.mock('@/database/models/user-items', () => ({
   },
 }));
 
-vi.mock('@/hooks/use-array', () => ({
-  useArray: () => ({
-    data: mocks.state.words,
-    error: mocks.state.error,
-    loading: mocks.state.loading,
+vi.mock('@/features/vocabulary/use-vocabulary', () => ({
+  useVocabulary: () => ({
+    loading: mocks.vocab.loading,
     reload: mocks.reload,
+    visibleCount: mocks.vocab.visibleCount,
+    setVisibleCount: mocks.vocab.setVisibleCount,
+    searchTerm: mocks.vocab.searchTerm,
+    setSearchTerm: mocks.vocab.setSearchTerm,
+    displayField: mocks.vocab.displayField,
+    setDisplayField: mocks.vocab.setDisplayField,
+    selectedWord: mocks.vocab.selectedWord,
+    setSelectedWord: mocks.vocab.setSelectedWord,
+    filteredWords: mocks.vocab.filteredWords,
   }),
 }));
 
@@ -52,16 +58,8 @@ vi.mock('@/features/toast/use-toast-store', () => ({
     selector({ showToast: mocks.showToast }),
 }));
 
-vi.mock('@/features/vocabulary/vocabulary.utils', async () => {
-  const actual = await vi.importActual<any>('@/features/vocabulary/vocabulary.utils');
-  return {
-    ...actual,
-    filterSortedWords: vi.fn((words: any[]) => words),
-  };
-});
-
-vi.mock('@/components/UI/DelayedMessage', () => ({
-  default: ({ children }: any) => <div>{children}</div>,
+vi.mock('@/components/UI/DelayedNotification', () => ({
+  default: ({ children }: any) => <div>{children ?? 'Loading'}</div>,
 }));
 
 vi.mock('@/locales/cs', () => ({
@@ -106,22 +104,25 @@ describe('VocabularyOverview', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.userId = 'u1';
-    mocks.state.words = [];
-    mocks.state.error = null;
-    mocks.state.loading = false;
+    mocks.vocab.loading = false;
+    mocks.vocab.visibleCount = 2;
+    mocks.vocab.searchTerm = '';
+    mocks.vocab.displayField = 'english';
+    mocks.vocab.selectedWord = null;
+    mocks.vocab.filteredWords = [];
     mocks.reload.mockResolvedValue(undefined);
     mocks.resetItemById.mockResolvedValue(undefined);
   });
 
   it('renders loading view when hook is loading', () => {
-    mocks.state.loading = true;
+    mocks.vocab.loading = true;
     render(<VocabularyOverview />);
 
     expect(screen.getByText('Loading')).toBeTruthy();
   });
 
   it('renders list view and wires select/close actions', () => {
-    mocks.state.words = [
+    mocks.vocab.filteredWords = [
       { item_id: 1, czech: 'ahoj' },
       { item_id: 2, czech: 'auto' },
     ] as any;
@@ -133,15 +134,13 @@ describe('VocabularyOverview', () => {
     expect(mocks.navigate).toHaveBeenCalledWith('/profile');
 
     fireEvent.click(screen.getByTestId('select-first'));
-    expect(screen.getByTestId('detail-word').textContent).toBe('ahoj');
+    expect(mocks.vocab.setSelectedWord).toHaveBeenCalledWith(mocks.vocab.filteredWords[0]);
   });
 
   it('renders detail view and resets selected item', async () => {
-    mocks.state.words = [{ item_id: 3, czech: 'dům', english: 'house' }] as any;
+    mocks.vocab.selectedWord = { item_id: 3, czech: 'dům', english: 'house' } as any;
 
     render(<VocabularyOverview />);
-
-    fireEvent.click(screen.getByTestId('select-first'));
 
     expect(screen.getByTestId('detail-word').textContent).toBe('dům');
 
@@ -149,18 +148,17 @@ describe('VocabularyOverview', () => {
     await waitFor(() => {
       expect(mocks.resetItemById).toHaveBeenCalledWith('u1', 3);
       expect(mocks.reload).toHaveBeenCalledTimes(1);
+      expect(mocks.vocab.setSelectedWord).toHaveBeenCalledWith(null);
       expect(mocks.showToast).toHaveBeenCalledWith('Reset success', 'success');
     });
-
-    expect(screen.getByTestId('list-size').textContent).toBe('1');
   });
 
-  it('closes detail view if selected index is invalid after filtering', () => {
-    mocks.state.words = [] as any[];
+  it('closes detail view when close button is clicked', () => {
+    mocks.vocab.selectedWord = { item_id: 9, czech: 'vlak' } as any;
 
     render(<VocabularyOverview />);
 
-    expect(screen.getByTestId('list-size').textContent).toBe('0');
-    expect(screen.queryByTestId('detail-word')).toBeNull();
+    fireEvent.click(screen.getByTestId('detail-close'));
+    expect(mocks.vocab.setSelectedWord).toHaveBeenCalledWith(null);
   });
 });

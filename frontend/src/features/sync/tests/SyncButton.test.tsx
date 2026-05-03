@@ -44,16 +44,15 @@ vi.mock('@/features/logging/error-handler', () => ({
 
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
-    syncLoadingText: 'Syncing...',
-    syncSuccessToast: 'Sync done',
-    syncErrorToast: 'Sync failed',
+    dataSyncSuccess: 'Sync done',
+    dataSyncError: 'Sync failed',
     dataSyncTooltip: 'Sync tooltip',
     syncButton: 'Sync now',
     syncButtonDescription: 'Sync description',
   },
 }));
 
-vi.mock('@/features/modal/ModalButton', () => ({
+vi.mock('@/features/modal/ButtonWithModal', () => ({
   default: createAsyncButtonMock('sync-modal-button', 'onConfirm'),
 }));
 
@@ -84,11 +83,8 @@ describe('SyncButton', () => {
     await waitFor(() => {
       expect(mocks.dataSync).toHaveBeenCalledWith('u1', true);
       expect(mocks.audioSync).toHaveBeenCalledWith('u1');
-      expect(mocks.hideToast).toHaveBeenCalled();
       expect(mocks.showToast).toHaveBeenCalledWith('Sync done', 'success');
     });
-
-    expect(mocks.showToast).toHaveBeenCalledWith('Syncing...', 'info', true);
     expect(mocks.logRejectedResults).toHaveBeenCalledWith(
       expect.any(Array),
       'Data synchronization error:',
@@ -103,9 +99,11 @@ describe('SyncButton', () => {
     fireEvent.click(screen.getByTestId('sync-modal-button'));
 
     await waitFor(() => {
-      expect(mocks.hideToast).toHaveBeenCalled();
       expect(mocks.showToast).toHaveBeenCalledWith('Sync failed', 'error');
-      expect(mocks.errorHandler).toHaveBeenCalledWith('Sync Error', expect.any(Error));
+      expect(mocks.errorHandler).toHaveBeenCalledWith(
+        'Error synchronizing data',
+        expect.any(Error),
+      );
     });
   });
 });

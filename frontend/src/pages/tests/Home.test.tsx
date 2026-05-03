@@ -43,7 +43,7 @@ vi.mock('@/features/user-stats/use-user-store', () => ({
     selector({ dailyCount: mocks.dailyCount }),
 }));
 
-vi.mock('@/features/sync-warning/use-sync-warning', () => ({
+vi.mock('@/features/sync/use-sync-warning', () => ({
   useSyncWarningStore: (selector: (state: { isSynchronized: boolean }) => unknown) =>
     selector({ isSynchronized: mocks.isSynchronized }),
 }));

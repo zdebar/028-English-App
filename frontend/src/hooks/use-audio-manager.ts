@@ -23,7 +23,7 @@ function disposeAudioMap(audioMap: Map<string, ManagedAudio>) {
   audioMap.forEach(({ element, onEnded }) => {
     stopAndReset(element);
     element.removeEventListener('ended', onEnded);
-    if (element.src.startsWith('blob:')) {
+    if (typeof element.src === 'string' && element.src.startsWith('blob:')) {
       URL.revokeObjectURL(element.src);
     }
   });

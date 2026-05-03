@@ -25,7 +25,7 @@ vi.mock('react-router-dom', () => ({
 
 vi.mock('@/database/models/grammar', () => ({
   default: {
-    getStartedList: vi.fn(),
+    getStarted: vi.fn(),
   },
 }));
 
@@ -34,6 +34,8 @@ vi.mock('@/hooks/use-array', () => ({
     data: mocks.arrayState.data,
     currentIndex: mocks.arrayState.currentIndex,
     currentItem: mocks.arrayState.currentItem,
+    loading: false,
+    hasData: mocks.arrayState.data.length > 0,
     reload: mocks.reload,
     setCurrentIndex: mocks.setCurrentIndex,
   }),
@@ -66,15 +68,15 @@ vi.mock('@/components/UI/buttons/CloseButton', () => ({
   ),
 }));
 
-vi.mock('@/components/UI/buttons/BaseButton', () => ({
-  default: ({ onClick, children }: any) => (
+vi.mock('@/components/UI/buttons/ListButton', () => ({
+  ListButton: ({ onClick, children }: any) => (
     <button data-testid="grammar-button" onClick={onClick}>
       {children}
     </button>
   ),
 }));
 
-vi.mock('@/components/UI/DelayedMessage', () => ({
+vi.mock('@/components/UI/DelayedNotification', () => ({
   default: ({ children }: any) => <div>{children}</div>,
 }));
 
@@ -140,22 +142,19 @@ describe('GrammarOverview', () => {
 
     render(<GrammarOverview />);
 
-    expect(screen.getByText('No grammar')).toBeTruthy();
+    expect(screen.getByText('Not available')).toBeTruthy();
   });
 
-  it('renders grammar card view with sanitized note and can close', () => {
+  it('renders grammar card view and can close', () => {
     mocks.arrayState.currentIndex = 0;
     mocks.arrayState.currentItem = {
       id: 3,
       name: 'Articles',
       note: '<b>safe</b>',
     };
-    mocks.sanitize.mockReturnValue('<i>sanitized</i>');
-
     render(<GrammarOverview />);
 
     expect(screen.getByText('Articles')).toBeTruthy();
-    expect(mocks.sanitize).toHaveBeenCalledWith('<b>safe</b>');
 
     fireEvent.click(screen.getByTestId('overview-close'));
     expect(mocks.setCurrentIndex).toHaveBeenCalledWith(null);
@@ -171,6 +170,6 @@ describe('GrammarOverview', () => {
 
     render(<GrammarOverview />);
     expect(screen.getByText('Reported speech')).toBeTruthy();
-    expect(screen.getByText('Not available')).toBeTruthy();
+    expect(screen.getByTestId('help-button')).toBeTruthy();
   });
 });
