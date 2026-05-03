@@ -99,6 +99,32 @@ vi.mock('@/features/practice/hooks/use-grammar', () => ({
 
 vi.mock('@/features/practice/hooks/use-practice-deck', () => ({
   usePracticeDeck: (userId: string | null) => {
+    React.useEffect(() => {
+      if (
+        !userId ||
+        !mocks.practiceDeck.currentItem ||
+        mocks.practiceDeck.isCzToEn ||
+        mocks.practiceDeck.audioDisabled ||
+        mocks.practiceDeck.audioLoading ||
+        mocks.practiceDeck.showDirectionChange
+      ) {
+        return;
+      }
+
+      const timer = globalThis.setTimeout(() => {
+        mocks.practiceDeck.playAudio();
+      }, 300);
+
+      return () => globalThis.clearTimeout(timer);
+    }, [
+      userId,
+      mocks.practiceDeck.audioDisabled,
+      mocks.practiceDeck.audioLoading,
+      mocks.practiceDeck.currentItem,
+      mocks.practiceDeck.isCzToEn,
+      mocks.practiceDeck.showDirectionChange,
+    ]);
+
     if (!userId) {
       return {
         currentItem: null,
@@ -124,30 +150,6 @@ vi.mock('@/features/practice/hooks/use-practice-deck', () => ({
         isPlaying: false,
       };
     }
-
-    React.useEffect(() => {
-      if (
-        !mocks.practiceDeck.currentItem ||
-        mocks.practiceDeck.isCzToEn ||
-        mocks.practiceDeck.audioDisabled ||
-        mocks.practiceDeck.audioLoading ||
-        mocks.practiceDeck.showDirectionChange
-      ) {
-        return;
-      }
-
-      const timer = globalThis.setTimeout(() => {
-        mocks.practiceDeck.playAudio();
-      }, 300);
-
-      return () => globalThis.clearTimeout(timer);
-    }, [
-      mocks.practiceDeck.audioDisabled,
-      mocks.practiceDeck.audioLoading,
-      mocks.practiceDeck.currentItem,
-      mocks.practiceDeck.isCzToEn,
-      mocks.practiceDeck.showDirectionChange,
-    ]);
 
     return mocks.practiceDeck;
   },
