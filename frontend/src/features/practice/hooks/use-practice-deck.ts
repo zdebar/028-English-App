@@ -31,11 +31,7 @@ export function usePracticeDeck(userId: string | null) {
     return data.filter((item) => item != null);
   }, [userId]);
 
-  const {
-    data: fetchedArray,
-    error: fetchError,
-    reload,
-  } = useFetch<UserItemPractice[]>(fetchPracticeDeck);
+  const { data: fetchedArray, reload } = useFetch<UserItemPractice[]>(fetchPracticeDeck);
 
   const { czechHinted, englishHinted, resetHint, plusHint } = useHint(
     currentItem?.czech,
@@ -218,7 +214,6 @@ export function usePracticeDeck(userId: string | null) {
 
     // Navigation & loading
     nextItem,
-    fetchError,
 
     // Audio management
     audioError,
