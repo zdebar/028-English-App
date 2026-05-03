@@ -168,7 +168,7 @@ export function useAudioManager(audio: AudioInput) {
 
       managedAudio.element.currentTime = 0;
       managedAudio.element.volume = volumeRef.current;
-      void managedAudio.element.play();
+      managedAudio.element.play();
       setCurrent(toPlay);
       setIsPlaying(true);
     },
