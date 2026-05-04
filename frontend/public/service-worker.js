@@ -12,7 +12,7 @@ const APP_SHELL_URLS = [
   '/screenshots/desktop.webp',
   '/screenshots/mobile.webp',
 ];
-const INJECTED_PRECACHE_URLS = (globalThis.__WB_MANIFEST || []).map((entry) => entry.url);
+const INJECTED_PRECACHE_URLS = globalThis.__WB_MANIFEST.map((entry) => entry.url);
 const STATIC_DESTINATIONS = new Set(['style', 'script', 'worker', 'font', 'image']);
 
 function normalizeCacheUrl(url) {

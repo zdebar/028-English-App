@@ -4,20 +4,12 @@ import ProtectedLayout from '@/components/utils/protected-laout';
 import { usePeriodicSync } from '@/database/hooks/use-periodic-sync';
 
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import Levels from '@/pages/Levels';
 
 import ToastContainer from '@/features/toast/ToastContainer';
-import Grammar from '@/pages/Grammar';
-import Home from '@/pages/Home';
-import Practice from '@/pages/Practice';
-import PrivacyPolicy from '@/pages/PrivacyPolicy';
-import Vocabulary from '@/pages/Vocabulary';
 import { ROUTES } from '@/config/routes.config';
 import OverlayMask from './features/overlay/OverlayMask';
-import Profile from '@/pages/Profile';
-import Guide from '@/pages/Guide';
 
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { errorHandler } from './features/logging/error-handler';
 import { useToastStore } from './features/toast/use-toast-store';
@@ -27,8 +19,17 @@ import { useThemeLoader } from './features/theme/use-theme-loader';
 import { useUserStoreSync } from './features/user-stats/use-user-store-sync';
 import { useDailyStatsReset } from './features/user-stats/use-daily-stats-reset';
 import Notification from './components/UI/Notification';
-import Blocks from './pages/Blocks';
-import BlockItems from './pages/BlockItems';
+
+const Home = lazy(() => import('@/pages/Home'));
+const PrivacyPolicy = lazy(() => import('@/pages/PrivacyPolicy'));
+const Guide = lazy(() => import('@/pages/Guide'));
+const Practice = lazy(() => import('@/pages/Practice'));
+const Profile = lazy(() => import('@/pages/Profile'));
+const Levels = lazy(() => import('@/pages/Levels'));
+const Blocks = lazy(() => import('./pages/Blocks'));
+const BlockItems = lazy(() => import('./pages/BlockItems'));
+const Grammar = lazy(() => import('@/pages/Grammar'));
+const Vocabulary = lazy(() => import('@/pages/Vocabulary'));
 
 export default function App() {
   const userId = useAuthStore((state) => state.userId);
@@ -76,24 +77,26 @@ export default function App() {
       <OverlayMask />
       <Header />
       <main className="relative flex grow flex-col items-center gap-4">
-        <Routes>
-          <Route path={ROUTES.home} element={<Home />} />
-          <Route path={ROUTES.privacyPolicy} element={<PrivacyPolicy />} />
-          <Route path={ROUTES.guide} element={<Guide />} />
-          <Route element={<ProtectedLayout />}>
-            <Route path={ROUTES.practice} element={<Practice />} />
-            <Route path={ROUTES.profile} element={<Profile />} />
-            <Route path={ROUTES.levels} element={<Levels />} />
-            <Route path={ROUTES.blocks} element={<Blocks />} />
-            <Route path={ROUTES.blocksDetail} element={<BlockItems />} />
-            <Route path={ROUTES.grammar} element={<Grammar />} />
-            <Route path={ROUTES.vocabulary} element={<Vocabulary />} />
-          </Route>
-          <Route
-            path="*"
-            element={<Notification className="pt-8">{TEXTS.pageNotFound}</Notification>}
-          />
-        </Routes>
+        <Suspense fallback={<Notification className="pt-8">{TEXTS.syncLoadingText}</Notification>}>
+          <Routes>
+            <Route path={ROUTES.home} element={<Home />} />
+            <Route path={ROUTES.privacyPolicy} element={<PrivacyPolicy />} />
+            <Route path={ROUTES.guide} element={<Guide />} />
+            <Route element={<ProtectedLayout />}>
+              <Route path={ROUTES.practice} element={<Practice />} />
+              <Route path={ROUTES.profile} element={<Profile />} />
+              <Route path={ROUTES.levels} element={<Levels />} />
+              <Route path={ROUTES.blocks} element={<Blocks />} />
+              <Route path={ROUTES.blocksDetail} element={<BlockItems />} />
+              <Route path={ROUTES.grammar} element={<Grammar />} />
+              <Route path={ROUTES.vocabulary} element={<Vocabulary />} />
+            </Route>
+            <Route
+              path="*"
+              element={<Notification className="pt-8">{TEXTS.pageNotFound}</Notification>}
+            />
+          </Routes>
+        </Suspense>
       </main>
       {location.pathname === '/' && <Footer />}
     </div>
