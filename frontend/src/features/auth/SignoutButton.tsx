@@ -41,6 +41,8 @@ export default function SignoutButton({ className }: SignoutButtonProps): JSX.El
       disabled={!userId}
       onConfirm={handleSignout}
       className={className}
+      aria-haspopup="dialog"
+      title={TEXTS.actionRequiresConfirmation}
     >
       <MenuButtonText>{TEXTS.signoutButtonTitle}</MenuButtonText>
     </ButtonWithModal>

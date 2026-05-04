@@ -72,6 +72,8 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
       disabled={!userId}
       onConfirm={handleDelete}
       className={className}
+      aria-haspopup="dialog"
+      title={TEXTS.actionRequiresConfirmation}
     >
       <MenuButtonText>{TEXTS.deleteUserButtonTitle}</MenuButtonText>
     </ButtonWithModal>

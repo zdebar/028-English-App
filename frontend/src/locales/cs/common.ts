@@ -12,6 +12,7 @@ export const COMMON_TEXTS = {
   masteredSwitchHelp: 'Přepnout naučeno / započato',
   genericSuccess: 'Akce byla úspěšná.',
   genericFailure: 'Akce se nezdařila.',
+  actionRequiresConfirmation: 'Tato akce vyžaduje potvrzení.',
 
   // Buttons
   confirm: 'Ano',
