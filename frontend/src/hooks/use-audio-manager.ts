@@ -154,12 +154,15 @@ export function useAudioManager(audio: AudioInput) {
     };
   }, [audio]);
 
-  // Play audio: if no arg, play current; if arg, play that file
+  // Play audio: ignore non-string args (e.g., React click events),
+  // then play current by default or a specific filename when provided.
   const playAudio = useCallback(
-    (filename?: string) => {
+    (filenameOrEvent?: unknown) => {
       // Always stop all first
       stopAndResetAll(audioMapRef.current);
       setIsPlaying(false);
+
+      const filename = typeof filenameOrEvent === 'string' ? filenameOrEvent : undefined;
 
       const toPlay = resolveFilenameToPlay(filename, current, filenames, audioMapRef.current);
       if (!toPlay) return;

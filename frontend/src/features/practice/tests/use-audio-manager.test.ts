@@ -107,6 +107,21 @@ describe('useAudioManager', () => {
     expect(result.current.isPlaying).toBe(false);
   });
 
+  it('playAudio ignores non-string arg and still plays current audio', async () => {
+    getAudioMock.mockResolvedValue({ audioBlob: new Blob(['a']) });
+    const { result } = renderHook(() => useAudioManager('file.opus'));
+
+    await waitFor(() => expect(result.current.isAudioReady()).toBe(true));
+
+    act(() => {
+      result.current.playAudio({ type: 'click' });
+    });
+
+    expect(audioInstances[0].play).toHaveBeenCalledTimes(1);
+    expect(result.current.current).toBe('file.opus');
+    expect(result.current.isPlaying).toBe(true);
+  });
+
   it('setVolume clamps values and applies to audio element', async () => {
     getAudioMock.mockResolvedValue({ audioBlob: new Blob(['a']) });
     const { result } = renderHook(() => useAudioManager('file.opus'));
