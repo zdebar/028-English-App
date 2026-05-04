@@ -20,13 +20,13 @@
   "screenshots": [
     {
       "src": "/screenshots/desktop.webp",
-      "sizes": "1280x800",
+      "sizes": "1200x800",
       "type": "image/webp",
       "form_factor": "wide"
     },
     {
       "src": "/screenshots/mobile.webp",
-      "sizes": "360x640",
+      "sizes": "280x525",
       "type": "image/webp"
     }
   ]
