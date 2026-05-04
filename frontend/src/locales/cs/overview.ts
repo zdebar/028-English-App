@@ -1,13 +1,13 @@
 export const OVERVIEW_TEXTS = {
   // Levels Overview Page
   lessons: 'Lekce',
-  levelsStartedHelp: 'započato / celkem položek',
-  levelsMasteredHelp: 'naučeno / celkem položek',
+  levelsStartedHelp: 'Započato / celkem položek',
+  levelsMasteredHelp: 'Naučeno / celkem položek',
 
   // Grammar Overview Page
   noGrammar: 'Žádné započatá gramatika.',
-  startedCount: 'započato',
-  masteredCount: 'naučeno',
+  startedCount: 'Započato',
+  masteredCount: 'Naučeno',
   restartGrammarTitle: 'Restartovat gramatiku',
   restartGrammarDescription:
     'Opravdu chcete restartovat pokrok všech položek této gramatiky? Tuto akci nelze vrátit zpět.',
@@ -18,27 +18,27 @@ export const OVERVIEW_TEXTS = {
   resetBlockTitle: 'Restartovat blok',
   resetBlockDescription:
     'Opravdu chcete restartovat pokrok všech položek tohoto bloku? Tuto akci nelze vrátit zpět.',
-  resetBlockTooltip: 'restartovat blok',
+  resetBlockTooltip: 'Restartovat blok',
 
   // Privacy Policy Page
   privacyPolicy: 'Zásady ochrany osobních údajů',
 
   // Vocabulary Page
-  start: 'začít',
-  translationDirection: 'přepnout výchozí jazyk',
-  more: 'další',
+  start: 'Začít',
+  translationDirection: 'Přepnout výchozí jazyk',
+  more: 'Další',
   enterPrompt: 'Zadejte slovičko ...',
   noStartedVocabulary: 'Žádná započatá slovíčka',
-  czech: 'česky',
-  english: 'anglicky',
-  pronunciation: 'výslovnost',
+  czech: 'Česky',
+  english: 'Anglicky',
+  pronunciation: 'Výslovnost',
   levelName: 'CEFR úroveň',
-  lessonOrder: 'číslo lekce',
-  lessonName: 'název lekce',
-  startedAt: 'započato',
-  updatedAt: 'změněno',
-  nextAt: 'další',
-  masteredAt: 'naučeno',
+  lessonOrder: 'Číslo lekce',
+  lessonName: 'Název lekce',
+  startedAt: 'Započato',
+  updatedAt: 'Změněno',
+  nextAt: 'Další',
+  masteredAt: 'Naučeno',
   restartItemProgress: 'Restartovat pokrok této položky',
 
   // Profile Page

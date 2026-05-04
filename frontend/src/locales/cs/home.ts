@@ -3,12 +3,12 @@ export const HOME_TEXTS = {
   appTitle: 'Angličtina',
   appDescription: 'Bez stresu. Bez přemýšlení. Jen dril.',
   appTestDescription: 'Aplikace v testovacím režimu',
-  guide: 'návod',
-  startedTodayHint: 'dnes započato',
-  masteredTodayHint: 'dnes naučeno',
+  guide: 'Návod',
+  startedTodayHint: 'Dnes započato',
+  masteredTodayHint: 'Dnes naučeno',
   signupHint:
     'Aplikace po přihlášení ukládá cvičební data do úložiště Vašeho prohlížeče (7.8MB). Účet je možno kdykoliv smazat, včetně všech dat.',
-  installButton: 'nainstalovat aplikaci',
+  installButton: 'Nainstalovat aplikaci',
   installButtonTooltip: 'Nainstalovat PWA aplikaci.',
 
   // User

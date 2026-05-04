@@ -9,7 +9,7 @@ export const COMMON_TEXTS = {
   loadingError: 'Chyba při načítání dat.',
   resetProgressSuccessToast: 'Pokrok byl úspěšně vymazán.',
   resetProgressErrorToast: 'Chyba při mazání pokroku.',
-  masteredSwitchHelp: 'přepnout naučeno / započato',
+  masteredSwitchHelp: 'Přepnout naučeno / započato',
   genericSuccess: 'Akce byla úspěšná.',
   genericFailure: 'Akce se nezdařila.',
 
