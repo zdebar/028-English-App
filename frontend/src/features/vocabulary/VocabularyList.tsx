@@ -8,7 +8,7 @@ import { CardHeader } from '@/components/UI/CardHeader';
 import { ListButton } from '@/components/UI/buttons/ListButton';
 import { DataState } from '@/components/UI/DataState';
 import Card from '@/components/UI/Card';
-import { useEffect } from 'react';
+
 
 const DIRECTION_OPTIONS: { value: DisplayField; label: string }[] = [
   { value: 'czech', label: 'Čeština' },
@@ -42,7 +42,7 @@ type VocabularyListProps = Readonly<{
  * @param onClose - Callback to close the list view.
  * @returns The vocabulary list UI.
  */
-const SEARCH_KEY = 'vocabulary_search_term';
+
 
 export default function VocabularyList({
   filteredWords,
@@ -55,19 +55,6 @@ export default function VocabularyList({
   onSelect,
   onClose,
 }: VocabularyListProps) {
-  // Load from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem(SEARCH_KEY);
-    if (saved !== null && saved !== searchTerm) {
-      setSearchTerm(saved);
-    }
-  }, []);
-
-  // Save to localStorage on every change
-  useEffect(() => {
-    localStorage.setItem(SEARCH_KEY, searchTerm);
-  }, [searchTerm]);
-
   const visibleItems = filteredWords.slice(0, visibleCount);
   const remainingCount = filteredWords.length - visibleCount;
   const hasWords = filteredWords.length > 0;

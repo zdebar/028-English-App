@@ -59,58 +59,6 @@ describe('VocabularyList', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.clear();
-    vi.restoreAllMocks();
-  });
-  it('loads searchTerm from localStorage on mount', () => {
-    localStorage.setItem('vocabulary_search_term', 'persisted');
-    render(
-      <VocabularyList
-        filteredWords={[]}
-        visibleCount={1}
-        displayField="czech"
-        searchTerm=""
-        setSearchTerm={setSearchTerm}
-        setDisplayField={setDisplayField}
-        setVisibleCount={setVisibleCount}
-        onSelect={onSelect}
-        onClose={onClose}
-      />,
-    );
-    expect(setSearchTerm).toHaveBeenCalledWith('persisted');
-  });
-
-  it('saves searchTerm to localStorage on change', () => {
-    render(
-      <VocabularyList
-        filteredWords={[]}
-        visibleCount={1}
-        displayField="czech"
-        searchTerm=""
-        setSearchTerm={setSearchTerm}
-        setDisplayField={setDisplayField}
-        setVisibleCount={setVisibleCount}
-        onSelect={onSelect}
-        onClose={onClose}
-      />,
-    );
-    fireEvent.change(screen.getByPlaceholderText('Search'), { target: { value: 'abc' } });
-    // The component calls setSearchTerm, but localStorage is updated by useEffect in the next render
-    // Simulate the effect by updating props
-    render(
-      <VocabularyList
-        filteredWords={[]}
-        visibleCount={1}
-        displayField="czech"
-        searchTerm="abc"
-        setSearchTerm={setSearchTerm}
-        setDisplayField={setDisplayField}
-        setVisibleCount={setVisibleCount}
-        onSelect={onSelect}
-        onClose={onClose}
-      />,
-    );
-    expect(localStorage.getItem('vocabulary_search_term')).toBe('abc');
   });
 
   it('renders words and calls onSelect with visible index', () => {

@@ -103,6 +103,7 @@ import VocabularyOverview from '@/features/vocabulary/VocabularOverview';
 describe('VocabularyOverview', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
     mocks.userId = 'u1';
     mocks.vocab.loading = false;
     mocks.vocab.visibleCount = 2;
@@ -112,6 +113,22 @@ describe('VocabularyOverview', () => {
     mocks.vocab.filteredWords = [];
     mocks.reload.mockResolvedValue(undefined);
     mocks.resetItemById.mockResolvedValue(undefined);
+  });
+
+  it('loads searchTerm from localStorage on mount', () => {
+    localStorage.setItem('vocabulary_search_term', 'persisted');
+
+    render(<VocabularyOverview />);
+
+    expect(mocks.vocab.setSearchTerm).toHaveBeenCalledWith('persisted');
+  });
+
+  it('saves searchTerm to localStorage when it changes', () => {
+    mocks.vocab.searchTerm = 'abc';
+
+    render(<VocabularyOverview />);
+
+    expect(localStorage.getItem('vocabulary_search_term')).toBe('abc');
   });
 
   it('renders loading view when hook is loading', () => {

@@ -9,6 +9,9 @@ import { useToastStore } from '../toast/use-toast-store';
 import { errorHandler } from '../logging/error-handler';
 import DelayedNotification from '@/components/UI/DelayedNotification';
 import { useVocabulary } from './use-vocabulary';
+import { useLocalStorageSync } from '@/hooks/user-local-storage-sync';
+
+const SEARCH_KEY = 'vocabulary_search_term';
 
 /**
  * VocabularyOverview component
@@ -33,6 +36,9 @@ export default function VocabularyOverview() {
     setSelectedWord,
     filteredWords,
   } = useVocabulary(userId);
+
+  // Sync searchTerm with localStorage
+  useLocalStorageSync(SEARCH_KEY, searchTerm, setSearchTerm);
 
   // -- HANDLERS  --
   const handleClearUserItem = useCallback(async () => {
