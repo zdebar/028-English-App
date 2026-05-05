@@ -100,7 +100,7 @@ vi.mock('@/components/UI/OverviewCard', () => ({
       <button
         data-testid="reset-button"
         onClick={() => {
-          void handleReset?.();
+          handleReset?.();
         }}
       >
         reset
