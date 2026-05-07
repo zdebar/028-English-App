@@ -19,8 +19,8 @@ import { useThemeLoader } from './features/theme/use-theme-loader';
 import { useUserStoreSync } from './features/user-stats/use-user-store-sync';
 import { useDailyStatsReset } from './features/user-stats/use-daily-stats-reset';
 import Notification from './components/UI/Notification';
+import Home from '@/pages/Home'; 
 
-const Home = lazy(() => import('@/pages/Home'));
 const PrivacyPolicy = lazy(() => import('@/pages/PrivacyPolicy'));
 const Guide = lazy(() => import('@/pages/Guide'));
 const Practice = lazy(() => import('@/pages/Practice'));
