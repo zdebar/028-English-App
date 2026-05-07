@@ -9,6 +9,7 @@ async function buildServiceWorker() {
   const { count, size, warnings } = await injectManifest({
     swSrc,
     swDest,
+    injectionPoint: 'globalThis.__WB_MANIFEST',
     globDirectory: distDir,
     globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff2,woff,ttf,json}'],
   });

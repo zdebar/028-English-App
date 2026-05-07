@@ -1,17 +1,19 @@
 import { supabaseInstance } from '@/config/supabase.config';
 import Metadata from '@/database/models/metadata';
 import UserItem from '@/database/models/user-items';
-import UserScore from '@/database/models/user-scores';
+import UserScoreType from '@/database/models/user-scores';
 import { clearSyncTimes } from '@/database/utils/sync-time.utils';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { errorHandler } from '@/features/logging/error-handler';
 import { logRejectedResults } from '@/features/logging/logging.utils.ts';
-import ModalButton from '@/features/modal/ModalButton';
-import { useToastStore } from '@/features/toast/use-toast-store';
+import ButtonWithModal from '@/features/modal/ButtonWithModal';
 import { TEXTS } from '@/locales/cs';
-import { TableName } from '@/types/local.types';
+import { TableName } from '@/types/table.types';
 import { type JSX } from 'react';
 import { useThemeStore } from '../theme/use-theme-store';
+import { MenuButtonText } from '@/components/UI/MenuButtonText';
+import { errorHandler } from '../logging/error-handler';
+import { infoHandler } from '../logging/info-handler';
+import { useToastStore } from '../toast/use-toast-store';
 
 type DeleteUserButtonProps = Readonly<{
   className?: string;
@@ -26,20 +28,19 @@ type DeleteUserButtonProps = Readonly<{
 export default function DeleteUserButton({ className }: DeleteUserButtonProps): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const handleLogout = useAuthStore((state) => state.handleLogout);
-  const showToast = useToastStore((state) => state.showToast);
   const clearTheme = useThemeStore((state) => state.clearTheme);
   const saveCurrentThemeAsGuest = useThemeStore((state) => state.saveCurrentThemeAsGuest);
+  const showToast = useToastStore((state) => state.showToast);
 
   const handleDelete = async () => {
     if (!userId) return;
-
     try {
       saveCurrentThemeAsGuest();
 
       const resultsDelete = await Promise.allSettled([
-        UserItem.deleteAllByUserId(userId),
+        UserItem.deleteByUserId(userId),
         Metadata.deleteSyncRow(TableName.UserItems, userId),
-        UserScore.deleteAllScores(userId),
+        UserScoreType.deleteByUserId(userId),
         Metadata.deleteSyncRow(TableName.UserScores, userId),
         Promise.resolve(clearTheme(userId)),
         Promise.resolve(clearSyncTimes(userId)),
@@ -54,23 +55,27 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
         throw new Error(deleteError.message);
       }
 
-      await handleLogout({ skipSync: true, skipRemoteSignOut: true });
       showToast(TEXTS.deleteUserSuccessToast, 'success');
-    } catch (error) {
+      infoHandler(`User ${userId} deleted their account`);
+    } catch (err) {
+      errorHandler('Error deleting user', err);
       showToast(TEXTS.deleteUserErrorToast, 'error');
-      errorHandler('Delete User Error', error);
+    } finally {
+      handleLogout({ skipSync: true, skipRemoteSignOut: true });
     }
   };
 
   return (
-    <ModalButton
+    <ButtonWithModal
       modalTitle={TEXTS.deleteUserButtonTitle}
       modalText={TEXTS.deleteUserModalText}
       disabled={!userId}
       onConfirm={handleDelete}
       className={className}
+      aria-haspopup="dialog"
+      title={TEXTS.actionRequiresConfirmation}
     >
-      <p className="profile-menu-button">{TEXTS.deleteUserButtonTitle}</p>
-    </ModalButton>
+      <MenuButtonText>{TEXTS.deleteUserButtonTitle}</MenuButtonText>
+    </ButtonWithModal>
   );
 }

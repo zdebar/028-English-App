@@ -1,16 +1,15 @@
 import config from '@/config/config';
 import AudioRecord from '@/database/models/audio-records';
 import { initDbMappings } from '@/database/models/db-init';
-import Grammar from '@/database/models/grammar';
 import UserItem from '@/database/models/user-items';
-import UserScore from '@/database/models/user-scores';
+import UserScoreType from '@/database/models/user-scores';
 import { restoreUnsavedFromLocalStorage } from '@/database/utils/database.utils';
 import { getFullSyncTime, setFullSyncTime } from '@/database/utils/sync-time.utils';
 import { logRejectedResults } from '@/features/logging/logging.utils';
 import Lessons from '@/database/models/lessons';
 import Levels from '@/database/models/levels';
 import { db } from '../models/db';
-import { TableName } from '@/types/local.types';
+import { TableName } from '@/types/table.types';
 import Dexie from 'dexie';
 import Metadata from '../models/metadata';
 import { infoHandler } from '@/features/logging/info-handler';
@@ -18,6 +17,7 @@ import { assertNonEmptyString } from '@/utils/assertions.utils';
 import { supabaseInstance } from '@/config/supabase.config';
 import { triggerDailyCountUpdatedEvent, triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 import Blocks from '../models/blocks';
+import Grammar from '@/database/models/grammar';
 
 /**
  * Synchronizes data for a specific user with the database.
@@ -46,7 +46,7 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
         Levels.syncFromRemote(true),
         Lessons.syncFromRemote(true),
         Blocks.syncFromRemote(true),
-        UserScore.syncFromRemote(userId, true),
+        UserScoreType.syncFromRemote(userId, true),
         UserItem.syncFromRemote(userId, true),
       ]
     : [
@@ -54,7 +54,7 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
         Levels.syncFromRemote(false),
         Lessons.syncFromRemote(false),
         Blocks.syncFromRemote(false),
-        UserScore.syncFromRemote(userId, false),
+        UserScoreType.syncFromRemote(userId, false),
         UserItem.syncFromRemote(userId, false),
       ];
 
@@ -110,7 +110,7 @@ export async function dataSyncOnUnmount(userId: string): Promise<void> {
   }
 
   const results = await Promise.allSettled([
-    UserScore.syncFromRemote(userId, false),
+    UserScoreType.syncFromRemote(userId, false),
     UserItem.syncFromRemote(userId, false),
   ]);
 

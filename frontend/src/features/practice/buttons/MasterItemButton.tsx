@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
-import BaseButton from '@/components/UI/buttons/BaseButton';
+import StyledButton from '@/components/UI/buttons/StyledButton';
 import ForwardIcon from '@/components/UI/icons/ForwardIcon';
 import HelpText from '@/features/help/HelpText';
 import { useToastStore } from '@/features/toast/use-toast-store';
@@ -78,7 +78,7 @@ export default function MasterItemButton({ onConfirm, disabled, children }: Skip
 
   return (
     <>
-      <BaseButton
+      <StyledButton
         onMouseDown={handlePressStart}
         onMouseUp={handlePressEnd}
         onMouseLeave={handlePressEnd}
@@ -93,7 +93,7 @@ export default function MasterItemButton({ onConfirm, disabled, children }: Skip
         <ForwardIcon />
 
         {children}
-      </BaseButton>
+      </StyledButton>
       <HelpText className="-top-4.5 left-4">{TEXTS.complete}</HelpText>
     </>
   );

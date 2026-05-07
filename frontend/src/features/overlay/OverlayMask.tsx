@@ -1,4 +1,4 @@
-import { useKey } from '@/features/key-listener/use-key';
+import { useKey } from '@/hooks/use-key';
 import { useOverlayStore } from './use-overlay-store';
 import { KEYBOARD_LISTENERS } from '@/config/keyboard-listeners.config';
 import { useCallback, type JSX } from 'react';
@@ -6,7 +6,7 @@ import { useCallback, type JSX } from 'react';
 /**
  * Overlay mask component covering the entire screen.
  *
- * @param onClose Function to call when the overlay is clicked or when the Escape key is pressed.
+ * @param onClose Function to call when the overlay is clicked or when the KEYBOARD_LISTENERS.Exit is pressed.
  * @return {JSX.Element | null} The rendered overlay mask element or null if the overlay is not open.
  */
 export default function OverlayMask(): JSX.Element | null {

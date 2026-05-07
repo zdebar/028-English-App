@@ -1,18 +1,21 @@
-import CloseButton from '@/components/UI/buttons/CloseButton';
 import HelpText from '@/features/help/HelpText';
 import { TEXTS } from '@/locales/cs';
-import type { JSX } from 'react';
-import ModalButton from '@/features/modal/ModalButton';
+import type { JSX, ReactNode } from 'react';
+import ButtonWithModal from '@/features/modal/ButtonWithModal';
+import Card from './Card';
+import { CardHeader } from './CardHeader';
+import DelayedNotification from './DelayedNotification';
 
 type OverviewCardProps = Readonly<{
-  readonly buttonTitle?: string;
-  readonly modalTitle?: string;
-  readonly modalText?: string;
-  readonly helpText?: string;
-  readonly handleReset?: () => Promise<void>;
-  readonly onClose: () => void;
-  readonly className?: string;
-  readonly children?: React.ReactNode;
+  buttonTitle?: string;
+  modalTitle?: string;
+  modalText?: string;
+  helpText?: string;
+  loading?: boolean;
+  handleReset?: () => Promise<void>;
+  onClose?: () => void;
+  className?: string;
+  children?: ReactNode;
 }>;
 
 /**
@@ -25,6 +28,7 @@ type OverviewCardProps = Readonly<{
  * @param modalTitle Title for the confirmation modal.
  * @param modalText Description for the confirmation modal.
  * @param helpText Description for the help tooltip.
+ * @param loading Whether the reset button should show a loading state.
  * @param handleReset Function to call to reset progress.
  * @param onClose Function to call when closing the card.
  * @param className Additional CSS classes for custom styling.
@@ -32,22 +36,21 @@ type OverviewCardProps = Readonly<{
  * @returns The rendered OverviewCard component.
  */
 export default function OverviewCard({
-  buttonTitle = TEXTS.notAvailable,
+  buttonTitle,
   modalTitle = TEXTS.restartProgress,
   modalText = TEXTS.restartDescription,
   helpText = TEXTS.restartProgressHelp,
+  loading = false,
   handleReset,
   onClose,
   className = '',
   children,
 }: OverviewCardProps): JSX.Element {
-  const isDisabled = !handleReset;
+  const isDisabled = !handleReset || loading;
   return (
-    <div className={`card-width min-h-card ${className}`}>
-      {/* Top Bar */}
-      <div className="relative flex items-center justify-between gap-1">
-        {/* Title and Reset Button */}
-        <ModalButton
+    <Card className={className}>
+      <CardHeader onClose={onClose} className="relative">
+        <ButtonWithModal
           modalTitle={modalTitle}
           modalText={modalText}
           title={isDisabled ? '' : TEXTS.restartProgressHelp}
@@ -55,19 +58,20 @@ export default function OverviewCard({
             if (handleReset) {
               await handleReset();
             }
-            onClose();
+            if (onClose) {
+              onClose();
+            }
           }}
           disabled={isDisabled}
           className="justify-start px-4"
         >
-          {buttonTitle}
-        </ModalButton>
-        {/* Close Card Button */}
-        <CloseButton onClick={onClose} />
+          {buttonTitle ||
+            (!loading && <DelayedNotification>{TEXTS.notAvailable}</DelayedNotification>) ||
+            ''}
+        </ButtonWithModal>
         <HelpText className="-bottom-2 left-2">{helpText}</HelpText>
-      </div>
-      {/* Content Area */}
-      <div className="w-full grow p-4">{children}</div>
-    </div>
+      </CardHeader>
+      {children}
+    </Card>
   );
 }

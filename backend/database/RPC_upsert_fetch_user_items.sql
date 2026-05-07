@@ -10,7 +10,7 @@ RETURNS TABLE (
   english TEXT,
   pronunciation TEXT,
   audio TEXT,
-  learnable BOOLEAN,
+  is_study_item BOOLEAN,
   sort_order INTEGER,
   block_id INTEGER,
   grammar_id INTEGER,

@@ -25,6 +25,7 @@ vi.mock('@/hooks/use-array', () => ({
     data: mocks.state.data,
     error: mocks.state.error,
     loading: mocks.state.loading,
+    hasData: mocks.state.data.length > 0,
   }),
 }));
 
@@ -36,7 +37,7 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 
-vi.mock('@/components/UI/DelayedMessage', () => ({
+vi.mock('@/components/UI/DelayedNotification', () => ({
   default: ({ children }: any) => <div>{children}</div>,
 }));
 
@@ -44,8 +45,8 @@ vi.mock('@/components/UI/Notification', () => ({
   default: ({ children }: any) => <div>{children}</div>,
 }));
 
-vi.mock('@/components/UI/buttons/BaseButton', () => ({
-  default: ({ children, onClick }: any) => (
+vi.mock('@/components/UI/buttons/ListButton', () => ({
+  ListButton: ({ children, onClick }: any) => (
     <button data-testid="block-button" onClick={onClick}>
       {children}
     </button>
@@ -75,7 +76,7 @@ describe('BlocksOverview', () => {
 
     render(<BlocksOverview />);
 
-    expect(screen.getByText('Loading')).toBeTruthy();
+    expect(screen.queryByText('No blocks')).toBeNull();
   });
 
   it('renders empty state when there are no blocks', () => {
@@ -106,11 +107,11 @@ describe('BlocksOverview', () => {
     expect(mocks.navigate).toHaveBeenCalledWith('/profile');
   });
 
-  it('renders error in header when data loading fails', () => {
+  it('renders empty state when data loading fails', () => {
     mocks.state.error = 'Load error';
 
     render(<BlocksOverview />);
 
-    expect(screen.getByText('Load error')).toBeTruthy();
+    expect(screen.getByText('No blocks')).toBeTruthy();
   });
 });

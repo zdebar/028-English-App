@@ -3,6 +3,8 @@ export const ACCOUNT_TEXTS = {
   syncButton: 'Opravit data',
   syncButtonDescription: 'Chcete opravit data? Provede se synchronizace a plné obnovení dat.',
   dataSyncTooltip: 'Synchronizace a plné obnovení dat.',
+  dataSyncSuccess: 'Data byla úspěšně synchronizována.',
+  dataSyncError: 'Chyba při synchronizaci dat.',
 
   // Download Button
   downloadButton: 'Stáhnout audio',
@@ -29,6 +31,6 @@ export const ACCOUNT_TEXTS = {
 
   // Generic Restart Progress
   restartProgress: 'Restartovat pokrok',
-  restartProgressHelp: 'restartovat pokrok',
+  restartProgressHelp: 'Restartovat pokrok',
   restartDescription: 'Opravdu chcete restartovat pokrok? Tuto akci již nelze vrátit zpět.',
 } as const;

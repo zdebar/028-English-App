@@ -1,10 +1,11 @@
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { errorHandler } from '@/features/logging/error-handler';
-import ModalButton from '@/features/modal/ModalButton';
-import { useToastStore } from '@/features/toast/use-toast-store';
+import ButtonWithModal from '@/features/modal/ButtonWithModal';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { useThemeStore } from '../theme/use-theme-store';
+import { MenuButtonText } from '@/components/UI/MenuButtonText';
+import { errorHandler } from '../logging/error-handler';
+import { useToastStore } from '../toast/use-toast-store';
 
 type SignoutButtonProps = Readonly<{
   className?: string;
@@ -24,26 +25,26 @@ export default function SignoutButton({ className }: SignoutButtonProps): JSX.El
 
   const handleSignout = async () => {
     if (!userId) return;
-
     try {
       saveCurrentThemeAsGuest();
       await handleLogout();
-      showToast(TEXTS.signoutSuccess, 'success');
-    } catch (error) {
+    } catch (err) {
       showToast(TEXTS.signoutError, 'error');
-      errorHandler('Signout Error', error);
+      errorHandler('Error signing out', err);
     }
   };
 
   return (
-    <ModalButton
+    <ButtonWithModal
       modalTitle={TEXTS.signoutButtonTitle}
       modalText={TEXTS.signoutModalText}
       disabled={!userId}
       onConfirm={handleSignout}
       className={className}
+      aria-haspopup="dialog"
+      title={TEXTS.actionRequiresConfirmation}
     >
-      <p className="profile-menu-button">{TEXTS.signoutButtonTitle}</p>
-    </ModalButton>
+      <MenuButtonText>{TEXTS.signoutButtonTitle}</MenuButtonText>
+    </ButtonWithModal>
   );
 }

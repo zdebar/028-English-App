@@ -1,3 +1,4 @@
+import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -40,6 +41,16 @@ const mocks = vi.hoisted(() => ({
     playAudio: vi.fn(),
     audioLoading: false,
     isPlaying: false,
+    handleReveal: vi.fn(() => {
+      if (
+        mocks.practiceDeck.isCzToEn &&
+        !mocks.practiceDeck.audioError &&
+        !mocks.practiceDeck.revealed
+      ) {
+        mocks.practiceDeck.playAudio();
+      }
+      mocks.practiceDeck.setRevealed(true);
+    }),
   } as any,
 }));
 
@@ -87,10 +98,64 @@ vi.mock('@/features/practice/hooks/use-grammar', () => ({
 }));
 
 vi.mock('@/features/practice/hooks/use-practice-deck', () => ({
-  usePracticeDeck: () => mocks.practiceDeck,
+  usePracticeDeck: (userId: string | null) => {
+    React.useEffect(() => {
+      if (
+        !userId ||
+        !mocks.practiceDeck.currentItem ||
+        mocks.practiceDeck.isCzToEn ||
+        mocks.practiceDeck.audioDisabled ||
+        mocks.practiceDeck.audioLoading ||
+        mocks.practiceDeck.showDirectionChange
+      ) {
+        return;
+      }
+
+      const timer = globalThis.setTimeout(() => {
+        mocks.practiceDeck.playAudio();
+      }, 300);
+
+      return () => globalThis.clearTimeout(timer);
+    }, [
+      userId,
+      mocks.practiceDeck.audioDisabled,
+      mocks.practiceDeck.audioLoading,
+      mocks.practiceDeck.currentItem,
+      mocks.practiceDeck.isCzToEn,
+      mocks.practiceDeck.showDirectionChange,
+    ]);
+
+    if (!userId) {
+      return {
+        currentItem: null,
+        grammar_id: null,
+        progress: 0,
+        isCzToEn: true,
+        revealed: false,
+        setRevealed: vi.fn(),
+        showNewGrammarIndicator: false,
+        czech: '',
+        english: '',
+        pronunciation: '\u00A0',
+        audioDisabled: true,
+        showDirectionChange: false,
+        hideDirectionChange: vi.fn(),
+        handleReveal: vi.fn(),
+        plusHint: vi.fn(),
+        nextItem: vi.fn(),
+        audioError: false,
+        setVolume: vi.fn(),
+        playAudio: vi.fn(),
+        audioLoading: false,
+        isPlaying: false,
+      };
+    }
+
+    return mocks.practiceDeck;
+  },
 }));
 
-vi.mock('@/components/UI/DelayedMessage', () => ({
+vi.mock('@/components/UI/DelayedNotification', () => ({
   default: ({ children }: any) => <div>{children}</div>,
 }));
 
@@ -203,7 +268,7 @@ describe('PracticeCard', () => {
     mocks.userId = null;
     render(<PracticeCard />);
 
-    expect(screen.getByText('Sync loading')).toBeTruthy();
+    expect(screen.getByText('Nic k procvičování.')).toBeTruthy();
   });
 
   it('shows grammar card when grammar overlay is visible', () => {

@@ -2,8 +2,8 @@ import config from '@/config/config';
 import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
-import type { UserItemLocal, UserItemPractice } from '@/types/local.types';
-import { TableName } from '@/types/local.types';
+import type { UserItemPractice, UserItemLocal, UserItemExport } from '@/types/user-item.types';
+import { TableName } from '@/types/table.types';
 import {
   assertNonEmptyString,
   assertNonNegativeInteger,
@@ -13,8 +13,8 @@ import Dexie, { Entity } from 'dexie';
 import { getSyncTimestamps, splitDeleted } from '../utils/data-sync.utils';
 
 import {
-  convertLocalToSQL,
-  convertSQLToLocal,
+  convertLocalToExport,
+  convertAPIToLocal,
   addGrammarIndicatorFlag,
   getNextAt,
   resetUserItem,
@@ -22,9 +22,8 @@ import {
 import { infoHandler } from '@/features/logging/info-handler';
 import { triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 import { SupabaseError } from '@/types/error.types';
-import type { UserItemSQL } from '@/types/sql.types';
 import Metadata from './metadata';
-import UserScore from './user-scores';
+import UserScoreType from './user-scores';
 
 const NULL_DATE = config.database.nullReplacementDate;
 const NULL_NUMBER = config.database.nullReplacementNumber;
@@ -34,9 +33,16 @@ const NULL_NUMBER = config.database.nullReplacementNumber;
  *
  * @method getPracticeDeck - Retrieves a practice deck of user items for studying.
  * @method savePracticeDeck - Saves practice deck items for a user, updating their progress and metadata.
+ * @method getAll - Retrieves a list of all user items.
+ * @method getByUserId - Retrieves user items for a specific user. Sorted by sort_order.
+ * @method getByBlockId - Retrieves user items for a specific user and block ID. Sorted by sort_order.
+ * @method getStartedGrammarIds - Retrieves a list of unique grammar IDs for items that have been started by a user.
+ * @method getStartedBlocksIds - Retrieves a list of unique block IDs for items that have been started by a user or not intended as study items.
  * @method getStartedVocabulary - Retrieves vocabulary items for a user that have been started (begun learning). Sorted by czech word.
  * @method resetItemById - Resets a user item to its default state by user and item ID.
- * @method deleteAllItems - Deletes all user items associated with a specific user.
+ * @method resetItemsByGrammarId - Resets all user items associated with a specific grammar ID to their default state for a given user.
+ * @method resetItemsByBlockId - Resets all user items associated with a specific block ID to their default state for a given user.
+ * @method deleteByUserId - Deletes all user items associated with a specific user.
  * @method syncFromRemote - Synchronizes user items from the remote server with the local database.
  */
 export default class UserItem extends Entity<AppDB> implements UserItemLocal {
@@ -46,7 +52,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   english!: string;
   pronunciation!: string;
   audio!: string | null;
-  learnable!: 0 | 1; // boolean represented as 0 or 1
+  is_study_item!: 0 | 1; // boolean represented as 0 or 1
   sort_order!: number;
   block_id!: number;
   grammar_id!: number;
@@ -131,7 +137,23 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     });
 
     await db.user_items.bulkPut(updatedItems);
-    await UserScore.addItemCount(userId, updatedItems.length, dateTime);
+    await UserScoreType.addItemCount(userId, updatedItems.length, dateTime);
+  }
+
+  /**
+   * Retrieves a list of all user items.
+   */
+  static async getAll(): Promise<UserItemLocal[]> {
+    return await db.user_items.toCollection().toArray();
+  }
+
+  /**
+   * Retrieves user items for a specific user. Sorted by sort_order.
+   * @param userId - The unique identifier of the user
+   */
+  static async getByUserId(userId: string): Promise<UserItemLocal[]> {
+    assertNonEmptyString(userId, 'userId');
+    return await db.user_items.where('user_id').equals(userId).toArray();
   }
 
   /**
@@ -148,10 +170,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .toArray();
 
     return blockItems.sort((a, b) => a.sort_order - b.sort_order);
-  }
-
-  static async getByBlockIds(userId: string, blockId: number): Promise<UserItemLocal[]> {
-    return this.getByBlockId(userId, blockId);
   }
 
   /**
@@ -171,6 +189,22 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
+   * Retrieves a list of unique block IDs for items that have been started by a user or not intended as study items.
+   * @param userId - The ID of the user
+   */
+  static async getStartedBlocksIds(userId: string): Promise<number[]> {
+    assertNonEmptyString(userId, 'userId');
+
+    const startedItems = await db.user_items
+      .where('[user_id+started_at]')
+      .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
+      .filter((item) => item.block_id !== NULL_NUMBER || item.is_study_item === 0)
+      .toArray();
+
+    return [...new Set(startedItems.map((item) => item.block_id))];
+  }
+
+  /**
    * Retrieves vocabulary items for a user that have been started (begun learning). Sorted by english word.
    * @param userId - The unique identifier of the user
    */
@@ -178,7 +212,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     assertNonEmptyString(userId, 'userId');
 
     const result = await db.user_items
-      .where('[user_id+grammar_id+started_at+learnable]')
+      .where('[user_id+grammar_id+started_at+is_study_item]')
       .between(
         [userId, NULL_NUMBER, Dexie.minKey, 1],
         [userId, NULL_NUMBER, NULL_DATE, 1],
@@ -231,11 +265,27 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         resetUserItem(item);
       });
 
-    if (count === 0) {
-      throw new Error(`No user items found for grammar ID ${grammarId}.`);
-    }
-
     infoHandler(`Resetted ${count} user-items with grammarId: ${grammarId} for userId: ${userId}`);
+    triggerLevelsUpdatedEvent(userId);
+  }
+
+  /**
+   * Resets all user items associated with a specific block ID to their default state for a given user.
+   * @param userId - The unique identifier of the user
+   * @param blockId - The unique identifier of the block
+   */
+  static async resetItemsByBlockId(userId: string, blockId: number): Promise<void> {
+    assertNonEmptyString(userId, 'userId');
+    assertNonNegativeInteger(blockId, 'blockId');
+
+    const count = await db.user_items
+      .where('[user_id+block_id]')
+      .equals([userId, blockId])
+      .modify((item: UserItemLocal) => {
+        resetUserItem(item);
+      });
+
+    infoHandler(`Resetted ${count} user-items with blockId: ${blockId} for userId: ${userId}`);
     triggerLevelsUpdatedEvent(userId);
   }
 
@@ -244,7 +294,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Use only for deletion of user account, when user-items on remote are deleted automatically.
    * @param userId - The unique identifier of the user
    */
-  static async deleteAllByUserId(userId: string): Promise<void> {
+  static async deleteByUserId(userId: string): Promise<void> {
     assertNonEmptyString(userId, 'userId');
     await db.user_items.where('user_id').equals(userId).delete();
   }
@@ -281,7 +331,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     // Step 4: Update local database with fetched items and update sync metadata
     await db.transaction('rw', db.user_items, db.metadata, async () => {
       if (doFullSync) {
-        await this.deleteAllByUserId(userId);
+        await this.deleteByUserId(userId);
       } else if (toDelete.length > 0) {
         await db.user_items.bulkDelete(toDelete.map((item) => [item.user_id, item.item_id]));
       }
@@ -306,7 +356,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     userId: string,
     lastSyncedAt: string,
     newSyncedAt: string,
-  ): Promise<UserItemSQL[]> {
+  ): Promise<UserItemExport[]> {
     const localUserItems: UserItemLocal[] = await db.user_items
       .where('[user_id+updated_at]')
       .between([userId, lastSyncedAt], [userId, newSyncedAt], true, false)
@@ -317,7 +367,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       return [];
     }
 
-    return localUserItems.map(convertLocalToSQL);
+    return localUserItems.map(convertLocalToExport);
   }
 
   /**
@@ -326,7 +376,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    */
   private static async syncWithRemote(
     userId: string,
-    items: UserItemSQL[],
+    items: UserItemExport[],
     lastSyncedAt: string,
   ): Promise<UserItemLocal[]> {
     const { data: updatedUserItems, error: rpcFetchError } = await supabaseInstance.rpc(
@@ -349,7 +399,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       infoHandler(`Completed ${items.length} user items push to Supabase for userId: ${userId}`);
     }
 
-    return (updatedUserItems ?? []).map(convertSQLToLocal);
+    return (updatedUserItems ?? []).map(convertAPIToLocal);
   }
 
   /**
@@ -368,7 +418,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const minNextAt = isNew ? NULL_DATE : Dexie.minKey;
     const maxNextAt = isNew ? NULL_DATE : new Date().toISOString();
     return db.user_items
-      .where('[user_id+next_at+mastered_at+sort_order+learnable]')
+      .where('[user_id+next_at+mastered_at+sort_order+is_study_item]')
       .between(
         [userId, minNextAt, NULL_DATE, Dexie.minKey, 1],
         [userId, maxNextAt, NULL_DATE, Dexie.maxKey, 1],

@@ -69,7 +69,7 @@ vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
 }));
 
-vi.mock('@/components/UI/DelayedMessage', () => ({
+vi.mock('@/components/UI/DelayedNotification', () => ({
   default: ({ children }: any) => <div>{children}</div>,
 }));
 
@@ -81,7 +81,7 @@ vi.mock('@/components/UI/buttons/CloseButton', () => ({
   ),
 }));
 
-vi.mock('@/components/UI/buttons/BaseButton', () => ({
+vi.mock('@/components/UI/buttons/StyledButton', () => ({
   default: ({ onClick, children, disabled }: any) => (
     <button data-testid="rect-button" onClick={onClick} disabled={disabled}>
       {children}
@@ -186,11 +186,9 @@ describe('LevelsOverview', () => {
 
     fireEvent.click(screen.getByText('A1'));
     expect(mocks.goalMetCalls.some((x) => x.current === 3 && x.goal === 5)).toBe(true);
-    expect(mocks.goalMetCalls.some((x) => x.current === 3 && x.goal === 5)).toBe(true);
 
     fireEvent.click(screen.getByRole('button', { name: 'Started' }));
     expect(screen.getByRole('button', { name: 'Mastered' })).toBeTruthy();
-    expect(mocks.goalMetCalls.some((x) => x.current === 1 && x.goal === 5)).toBe(true);
     expect(mocks.goalMetCalls.some((x) => x.current === 1 && x.goal === 5)).toBe(true);
   });
 

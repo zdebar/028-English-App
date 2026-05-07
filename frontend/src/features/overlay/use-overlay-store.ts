@@ -21,7 +21,7 @@ type OverlayCloseCallback = (() => void) | undefined;
  * @returns An object containing:
  *  - isOverlayOpen - Indicates whether the overlay is currently open.
  *  - openOverlay - Function to open the overlay with an optional close callback.
- *  - closeOverlay - Function to close the overlay and execute the close callback if provided.
+ *  - closeOverlay - Function to close the overlay and execute the close callback if callback was provided with openOverlay.
  */
 export const useOverlayStore = create<OverlayState>()(
   devtools(

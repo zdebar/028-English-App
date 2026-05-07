@@ -1,4 +1,4 @@
-import { MenuButton } from '@/components/UI/buttons/MenuButton';
+import { StandardButton } from '@/components/UI/buttons/StandardButton';
 import config from '@/config/config';
 import { Modal } from '@/features/modal/Modal';
 import { useMinLoading } from '@/features/modal/use-min-loading';
@@ -6,7 +6,7 @@ import { TEXTS } from '@/locales/cs';
 import type { JSX, ReactNode } from 'react';
 import { useCallback, useState } from 'react';
 
-type ModalButtonProps = Readonly<{
+type ButtonWithModalProps = Readonly<{
   onConfirm?: () => Promise<void> | void;
   modalTitle?: string;
   modalText?: string;
@@ -28,9 +28,9 @@ type ModalButtonProps = Readonly<{
  * @param disabled Whether the button is disabled.
  * @param className Additional CSS classes for custom styling.
  * @param children Content to display inside the button. Should be inline elements or text (not block elements like <p>, <div>, etc.) to ensure proper styling.
- * @return The ModalButton component.
+ * @return The ButtonWithModal component.
  */
-export default function ModalButton({
+export default function ButtonWithModal({
   onConfirm,
   modalTitle = TEXTS.modalTitle,
   modalText = TEXTS.modalText,
@@ -38,7 +38,7 @@ export default function ModalButton({
   title = '',
   children,
   className = '',
-}: ModalButtonProps): JSX.Element {
+}: ButtonWithModalProps): JSX.Element {
   const [showModal, setShowModal] = useState(false);
   const { isLoading, setIsLoading } = useMinLoading(config.buttons.minLoadingTime);
   const isDisabled = disabled || isLoading;
@@ -56,14 +56,14 @@ export default function ModalButton({
 
   return (
     <>
-      <MenuButton
+      <StandardButton
         onClick={() => setShowModal(true)}
         title={title}
         disabled={isDisabled}
         className={className}
       >
         {children}
-      </MenuButton>
+      </StandardButton>
       {showModal && (
         <Modal onConfirm={handleConfirm} onClose={() => setShowModal(false)}>
           <p className="font-bold">{modalTitle}</p>

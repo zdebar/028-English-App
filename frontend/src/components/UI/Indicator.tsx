@@ -1,15 +1,10 @@
-import type { JSX } from 'react';
-
-type IndicatorProps = Readonly<{
-  className?: string;
-}>;
+import type { HTMLAttributes, JSX } from 'react';
 
 /**
  * A component that renders a dot indicator.
- *
- * @param className Additional CSS classes to apply to the indicator. Defaults to an empty string.
- * @returns The rendered indicator element.
  */
-export default function Indicator({ className = '' }: IndicatorProps): JSX.Element {
-  return <span className={`size-indicator bg-indicator rounded-full ${className}`} />;
+export default function Indicator(props: Readonly<HTMLAttributes<HTMLSpanElement>>): JSX.Element {
+  return (
+    <span className={`size-indicator bg-indicator rounded-full ${props.className}`} {...props} />
+  );
 }

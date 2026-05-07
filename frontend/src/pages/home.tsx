@@ -13,7 +13,7 @@ import config from '@/config/config';
 import Notification from '@/components/UI/Notification';
 import GoalMetView from '@/components/UI/GoalMetView';
 import { InstallPWAButton } from '@/features/pwa/InstallPwaButton';
-import { useSyncWarningStore } from '@/features/sync-warning/use-sync-warning';
+import { useSyncWarningStore } from '@/features/sync/use-sync-warning';
 
 /**
  * The Home component renders the main page of the application.

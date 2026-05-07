@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS items (
   english TEXT NOT NULL,
   pronunciation TEXT,
   audio TEXT,
-  learnable BOOLEAN NOT NULL DEFAULT TRUE,
+  is_study_item BOOLEAN NOT NULL DEFAULT TRUE,
   sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 0),
   block_id INTEGER REFERENCES blocks(id) ON DELETE SET NULL,
   grammar_id INTEGER REFERENCES grammar(id) ON DELETE SET NULL,
@@ -92,6 +92,10 @@ BEGIN
   RETURN NEW;
 END;
 $$;
+-- Revoke EXECUTE permission from all roles so only the trigger can call this function
+REVOKE EXECUTE ON FUNCTION public.handle_new_auth_user() FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.handle_new_auth_user() FROM anon;
+REVOKE EXECUTE ON FUNCTION public.handle_new_auth_user() FROM authenticated;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created

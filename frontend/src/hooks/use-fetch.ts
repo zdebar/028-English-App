@@ -1,10 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
-import { TEXTS } from '@/locales/cs';
-import { errorHandler } from '@/features/logging/error-handler';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface UseFetchResult<T> {
   data: T | null;
-  error: string | null;
+  hasData: boolean;
   loading: boolean;
   reload: () => void;
 }
@@ -17,60 +15,48 @@ interface UseFetchResult<T> {
  * @param fetchFunction - An asynchronous function that fetches the data.
  * @returns An object containing:
  *   - data: The fetched data or null if not yet fetched.
- *   - error: An error message if the fetch failed, otherwise null.
+ *   - hasData: Indicates if there is any data available (data is not null).
  *   - loading: Indicates if the data is currently being fetched.
  *   - reload: Function to trigger a reload of the data.
  */
-export function useFetch<T>(fetchFunction: () => Promise<T>): UseFetchResult<T> {
+export function useFetch<T>(fetchFunction: () => Promise<T | null>): UseFetchResult<T | null> {
   if (typeof fetchFunction !== 'function') {
     throw new TypeError('fetchFunction must be a function.');
   }
 
   const [data, setData] = useState<T | null>(null);
-  const [reloading, setReloading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(false);
+  const isActiveRef = useRef(true);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+
+    try {
+      const result = await fetchFunction();
+      if (!isActiveRef.current) return;
+      setData(result);
+    } catch {
+      if (!isActiveRef.current) return;
+      setData(null);
+    } finally {
+      if (!isActiveRef.current) return;
+      setLoading(false);
+    }
+  }, [fetchFunction]);
 
   useEffect(() => {
-    let isActive = true;
-
-    async function fetchData() {
-      if (!reloading) return;
-      setLoading(true);
-
-      try {
-        const result = await fetchFunction();
-        if (!isActive) return;
-        setData(result);
-        setError(null);
-      } catch (error) {
-        if (!isActive) return;
-        setError(TEXTS.dataLoadingError);
-        errorHandler('Data Fetching Error', error);
-      } finally {
-        if (isActive) {
-          setLoading(false);
-          setReloading(false);
-        }
-      }
-    }
-
-    fetchData();
+    isActiveRef.current = true;
+    load();
 
     return () => {
-      isActive = false;
+      isActiveRef.current = false;
     };
-  }, [fetchFunction, reloading]);
-
-  const reload = useCallback(() => {
-    setLoading(true);
-    setReloading(true);
-  }, []);
+  }, [load]);
 
   return {
     data,
-    error,
+    hasData: data !== null,
     loading,
-    reload,
+    reload: load,
   };
 }

@@ -1,4 +1,4 @@
-import { TableName } from '@/types/local.types';
+import { TableName } from '@/types/table.types';
 
 /**
  * Determines whether a table is user-specific based on its name.

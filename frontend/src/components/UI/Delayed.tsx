@@ -1,24 +1,20 @@
-import { useState, useEffect, type ReactNode } from 'react';
+import { useState, useEffect, type HTMLAttributes, type JSX } from 'react';
 import config from '@/config/config';
 
 type DelayedMessageProps = Readonly<{
-  children?: ReactNode;
   timeDelay?: number;
-  className?: string;
-}>;
+}> &
+  HTMLAttributes<HTMLDivElement>;
 
 /**
  * Displays a delayed content after a specified delay.
  *
- * @param children The content to display after the delay.
  * @param timeDelay Delay before showing the content (ms).
- * @param className Optional CSS class for styling the content.
  */
-export default function DelayedMessage({
-  children,
+export default function Delayed({
   timeDelay = config.buttons.loadingMessageDelay,
-  className = '',
-}: DelayedMessageProps) {
+  ...rest
+}: DelayedMessageProps): JSX.Element | null {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -30,5 +26,5 @@ export default function DelayedMessage({
     return null;
   }
 
-  return <div className={className}>{children}</div>;
+  return <div {...rest}>{rest.children}</div>;
 }

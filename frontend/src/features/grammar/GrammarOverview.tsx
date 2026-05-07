@@ -1,18 +1,16 @@
 import OverviewCard from '@/components/UI/OverviewCard';
-import Grammar from '@/database/models/grammar';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import HelpButton from '@/features/help/HelpButton';
 import { TEXTS } from '@/locales/cs';
-import type { GrammarLocal } from '@/types/local.types';
-import DOMPurify from 'dompurify';
-import { useCallback, useMemo, type JSX } from 'react';
+import type { JSX } from 'react';
+import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import BaseButton from '@/components/UI/buttons/BaseButton';
-import CloseButton from '@/components/UI/buttons/CloseButton';
-import DelayedMessage from '@/components/UI/DelayedMessage';
+import { ListButton } from '@/components/UI/buttons/ListButton';
 import { useArray } from '@/hooks/use-array';
-import Notification from '@/components/UI/Notification';
+import Grammar from '@/database/models/grammar';
+import type { GrammarType } from '@/types/generic.types';
 import UserItem from '@/database/models/user-items';
+import { DataState } from '@/components/UI/DataState';
 import { useToastStore } from '../toast/use-toast-store';
 import { errorHandler } from '../logging/error-handler';
 
@@ -24,94 +22,75 @@ import { errorHandler } from '../logging/error-handler';
  */
 export default function GrammarOverview(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
-  const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
+  const showToast = useToastStore((state) => state.showToast);
 
-  // -- Data Fetching --
-  const fetchGrammarList = useCallback(async () => {
+  const fetchGrammar = useCallback(async () => {
     if (!userId) return [];
-    return Grammar.getStarted(userId);
+    try {
+      return await Grammar.getStarted(userId);
+    } catch (err) {
+      showToast(TEXTS.loadingError, 'error');
+      errorHandler('Failed to fetch grammar overview', err);
+      return [];
+    }
   }, [userId]);
 
   const {
     data: grammarList,
     currentIndex,
-    currentItem: currentGrammar,
     setCurrentIndex,
-    reload,
-  } = useArray<GrammarLocal>(fetchGrammarList);
-
-  const hasGrammar = grammarList.length > 0;
-
-  const sanitizedNote = useMemo(() => {
-    if (!currentGrammar?.note) return null;
-    return DOMPurify.sanitize(currentGrammar.note);
-  }, [currentGrammar?.note]);
-
-  // -- Event Handlers --
-  const handleOpenGrammar = useCallback(
-    (index: number) => {
-      setCurrentIndex(index);
-    },
-    [setCurrentIndex],
-  );
+    currentItem,
+    loading,
+    hasData,
+  } = useArray<GrammarType>(fetchGrammar);
 
   const handleReset = useCallback(async () => {
-    if (!currentGrammar || !userId) return;
+    if (!currentItem || !userId) return;
     try {
-      await UserItem.resetItemsByGrammarId(userId, currentGrammar.id);
-      reload();
+      await UserItem.resetItemsByGrammarId(userId, currentItem.id);
       showToast(TEXTS.resetProgressSuccessToast, 'success');
-    } catch (error) {
+    } catch (err) {
       showToast(TEXTS.resetProgressErrorToast, 'error');
-      errorHandler('Failed to reset grammar progress', error);
+      errorHandler('Failed to reset grammar progress', err);
     }
-  }, [currentGrammar, userId, reload]);
+  }, [currentItem, userId]);
 
   // -- List view --
   if (currentIndex === null) {
     return (
-      <div className={`card-width flex flex-col justify-start gap-1`}>
-        <div className="h-button flex items-center justify-between gap-1">
-          <div className="flex grow justify-start px-4">{TEXTS.grammarOverview}</div>
-          <CloseButton onClick={() => navigate('/profile')} />
-        </div>
-        {hasGrammar ? (
-          grammarList.map((item, index) => (
-            <BaseButton
+      <OverviewCard
+        buttonTitle={TEXTS.grammarOverview}
+        loading={loading}
+        onClose={() => navigate('/profile')}
+      >
+        <DataState loading={loading} hasData={hasData}>
+          {grammarList.map((item, index) => (
+            <ListButton
               key={item.id}
-              className="h-input flex justify-start px-4 text-left"
-              onClick={() => handleOpenGrammar(index)}
+              className="h-input justify-start px-4"
+              onClick={() => setCurrentIndex(index)}
               title={item.name}
             >
-              <p className="overflow-hidden text-ellipsis whitespace-nowrap">{item.name}</p>
-            </BaseButton>
-          ))
-        ) : (
-          <DelayedMessage>
-            <Notification className="color-info pt-4">{TEXTS.noGrammar}</Notification>
-          </DelayedMessage>
-        )}
-      </div>
+              {item.name}
+            </ListButton>
+          ))}
+        </DataState>
+      </OverviewCard>
     );
   }
 
   // -- GrammarCard view --
   return (
     <OverviewCard
-      buttonTitle={currentGrammar?.name ?? TEXTS.grammarOverview}
-      modalTitle={TEXTS.restartGrammarProgress}
+      buttonTitle={currentItem?.name}
+      modalTitle={TEXTS.restartGrammarTitle}
+      modalText={TEXTS.restartGrammarDescription}
       handleReset={handleReset}
       onClose={() => setCurrentIndex(null)}
       className="relative"
     >
-      {sanitizedNote ? (
-        <div dangerouslySetInnerHTML={{ __html: sanitizedNote }} className="grammar" />
-      ) : (
-        <DelayedMessage>
-          <Notification className="color-info pt-4">{TEXTS.notAvailable}</Notification>
-        </DelayedMessage>
-      )}
+      <div dangerouslySetInnerHTML={{ __html: currentItem?.note || '' }} className="p-4" />
       <HelpButton className="right-0 -bottom-10.5" />
     </OverviewCard>
   );

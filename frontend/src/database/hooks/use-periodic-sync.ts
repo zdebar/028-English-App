@@ -6,7 +6,7 @@ import config from '@/config/config';
 import { errorHandler } from '@/features/logging/error-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { logRejectedResults } from '@/features/logging/logging.utils';
-import { useSyncWarningStore } from '@/features/sync-warning/use-sync-warning';
+import { useSyncWarningStore } from '@/features/sync/use-sync-warning';
 
 /**
  * Hook that manages periodic data synchronization for a user.
@@ -26,7 +26,7 @@ import { useSyncWarningStore } from '@/features/sync-warning/use-sync-warning';
 export function usePeriodicSync(userId: string | null) {
   const [loading, setLoading] = useState(false);
   const inFlightSync = useRef<Promise<void> | null>(null);
-  const isDisposed = useRef(false);
+  const isUnmounted = useRef(false);
   const intervalId = useRef<ReturnType<typeof setInterval> | null>(null);
   const initialSyncTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -35,58 +35,72 @@ export function usePeriodicSync(userId: string | null) {
 
   useEffect(() => {
     if (!userId) return;
-    isDisposed.current = false;
+    const activeUserId = userId;
+    isUnmounted.current = false;
+
+    const performSync = async () => {
+      setLoading(true);
+      try {
+        const syncResults = await Promise.allSettled([
+          dataSync(activeUserId),
+          audioSync(activeUserId),
+        ]);
+        const isError = logRejectedResults(syncResults, 'Data synchronization error:');
+        if (isError) throw new Error('Data synchronization error');
+
+        AudioRecord.removeOrphaned();
+        showToast(TEXTS.syncSuccessToast, 'success');
+        setSynchronized(true);
+      } catch (error) {
+        showToast(TEXTS.syncErrorToast, 'error');
+        setSynchronized(false);
+        errorHandler('Data synchronization failed', error);
+      } finally {
+        if (!isUnmounted.current) {
+          setLoading(false);
+        }
+      }
+    };
 
     const runSync = async () => {
+      // Reuse ongoing sync promise to avoid overlapping synchronization calls.
       if (inFlightSync.current) {
         await inFlightSync.current;
         return;
       }
+
       inFlightSync.current = (async () => {
-        setLoading(true);
         try {
-          if (userId) {
-            const userResults = await Promise.allSettled([dataSync(userId), audioSync(userId)]);
-            const isError = logRejectedResults(userResults, 'Data synchronization error:');
-            if (isError) throw new Error('Data synchronization error');
-            void AudioRecord.removeOrphaned();
-          }
-          showToast(TEXTS.syncSuccessToast, 'success');
-          setSynchronized(true);
-        } catch (error) {
-          showToast(TEXTS.syncErrorToast, 'error');
-          setSynchronized(false);
-          errorHandler('Data synchronization failed', error);
+          await performSync();
         } finally {
-          if (!isDisposed.current) {
-            setLoading(false);
-          }
+          inFlightSync.current = null;
         }
       })();
-      try {
-        await inFlightSync.current;
-      } finally {
-        inFlightSync.current = null;
-      }
+
+      await inFlightSync.current;
     };
 
-    // Defer the first heavy sync to keep startup render path short (better FCP/LCP).
     initialSyncTimeoutId.current = globalThis.setTimeout(() => {
-      void runSync();
+      runSync();
     }, 3000);
     intervalId.current = setInterval(runSync, config.sync.periodicSyncInterval);
 
     return () => {
-      isDisposed.current = true;
+      isUnmounted.current = true;
+
       if (initialSyncTimeoutId.current) {
         globalThis.clearTimeout(initialSyncTimeoutId.current);
+        initialSyncTimeoutId.current = null;
       }
-      if (intervalId.current) clearInterval(intervalId.current);
-      if (userId) {
-        void dataSyncOnUnmount(userId).catch((error) => {
-          errorHandler('Unmount synchronization failed', error);
-        });
+
+      if (intervalId.current) {
+        clearInterval(intervalId.current);
+        intervalId.current = null;
       }
+
+      dataSyncOnUnmount(activeUserId).catch((error) => {
+        errorHandler('Unmount synchronization failed', error);
+      });
     };
   }, [userId]);
 

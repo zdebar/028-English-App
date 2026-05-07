@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { UserItemPractice } from '@/types/local.types';
+import type { UserItemPractice } from '@/types/user-item.types';
 
 const useFetchMock = vi.fn();
 const getPracticeDeckMock = vi.fn();
@@ -53,14 +53,16 @@ vi.mock('@/features/logging/info-handler', () => ({
 import { usePracticeDeck } from '../hooks/use-practice-deck';
 
 function makeItem(overrides: Partial<UserItemPractice> = {}): UserItemPractice {
-  return {
+  const item: UserItemPractice = {
     item_id: 1,
     user_id: 'u1',
     czech: 'ahoj',
     english: 'hello',
     pronunciation: 'həˈloʊ',
     audio: 'hello.opus',
+    is_study_item: 1,
     sort_order: 1,
+    block_id: 0,
     grammar_id: 10,
     progress: 0,
     started_at: '2026-01-01',
@@ -71,6 +73,11 @@ function makeItem(overrides: Partial<UserItemPractice> = {}): UserItemPractice {
     lesson_id: 0,
     show_new_grammar_indicator: false,
     ...overrides,
+  };
+
+  return {
+    ...item,
+    is_study_item: item.is_study_item ?? 1,
   };
 }
 

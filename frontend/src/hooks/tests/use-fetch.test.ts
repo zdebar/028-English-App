@@ -14,24 +14,21 @@ describe('useFetch', () => {
       expect(result.current.data).toEqual(mockData);
     });
 
-    expect(result.current.error).toBeNull();
+    expect(result.current.hasData).toBe(true);
     expect(result.current.loading).toBe(false);
   });
 
   it('handles fetch error', async () => {
     const fetchFunction = vi.fn().mockRejectedValue(new Error('fail'));
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const { result } = renderHook(() => useFetch(fetchFunction));
 
     await waitFor(() => {
-      expect(result.current.error).not.toBeNull();
+      expect(result.current.loading).toBe(false);
     });
 
     expect(result.current.data).toBeNull();
-    expect(result.current.loading).toBe(false);
-
-    consoleErrorSpy.mockRestore();
+    expect(result.current.hasData).toBe(false);
   });
 
   it('reload triggers fetch again', async () => {

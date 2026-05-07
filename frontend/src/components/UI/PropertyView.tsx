@@ -1,4 +1,4 @@
-import type { JSX } from 'react';
+import type { JSX } from 'react/jsx-dev-runtime';
 
 type PropertyViewProps = Readonly<{
   readonly label: string;

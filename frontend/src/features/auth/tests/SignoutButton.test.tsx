@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   userId: 'u1' as string | null,
   handleLogout: vi.fn(),
+  saveCurrentThemeAsGuest: vi.fn(),
   showToast: vi.fn(),
   errorHandler: vi.fn(),
 }));
@@ -22,6 +23,12 @@ vi.mock('@/features/toast/use-toast-store', () => ({
     selector({ showToast: mocks.showToast }),
 }));
 
+vi.mock('@/features/theme/use-theme-store', () => ({
+  useThemeStore: (
+    selector: (state: { saveCurrentThemeAsGuest: typeof mocks.saveCurrentThemeAsGuest }) => unknown,
+  ) => selector({ saveCurrentThemeAsGuest: mocks.saveCurrentThemeAsGuest }),
+}));
+
 vi.mock('@/features/logging/error-handler', () => ({
   errorHandler: (...args: unknown[]) => mocks.errorHandler(...args),
 }));
@@ -35,7 +42,7 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 
-vi.mock('@/features/modal/ModalButton', () => ({
+vi.mock('@/features/modal/ButtonWithModal', () => ({
   default: ({ disabled, onConfirm, children }: any) => (
     <button data-testid="button-with-modal" disabled={disabled} onClick={() => onConfirm?.()}>
       {children}
@@ -57,7 +64,7 @@ describe('SignoutButton', () => {
 
     render(<SignoutButton />);
 
-    expect(screen.getByTestId('button-with-modal').hasAttribute('disabled')).toBe(true);
+    expect((screen.getByTestId('button-with-modal') as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('calls logout and shows success toast', async () => {
@@ -65,8 +72,8 @@ describe('SignoutButton', () => {
     fireEvent.click(screen.getByTestId('button-with-modal'));
 
     await waitFor(() => {
+      expect(mocks.saveCurrentThemeAsGuest).toHaveBeenCalled();
       expect(mocks.handleLogout).toHaveBeenCalled();
-      expect(mocks.showToast).toHaveBeenCalledWith('Signout success', 'success');
     });
   });
 
@@ -78,7 +85,7 @@ describe('SignoutButton', () => {
 
     await waitFor(() => {
       expect(mocks.showToast).toHaveBeenCalledWith('Signout error', 'error');
-      expect(mocks.errorHandler).toHaveBeenCalledWith('Signout Error', expect.any(Error));
+      expect(mocks.errorHandler).toHaveBeenCalledWith('Error signing out', expect.any(Error));
     });
   });
 });

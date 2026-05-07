@@ -3,26 +3,18 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
-  getByFilename: vi.fn(),
+  playAudio: vi.fn(),
   showToast: vi.fn(),
   errorHandler: vi.fn(),
   userId: 'u1' as string | null,
   blockId: '2' as string | undefined,
   state: {
-    data: [] as any[],
-    error: null as string | null,
-    loading: false,
+    items: [] as any[],
+    itemsLoading: false,
+    block: { id: 2, name: 'Block 2' } as any,
+    blockLoading: false,
   },
 }));
-
-class MockAudio {
-  currentTime = 0;
-  play = vi.fn().mockResolvedValue(undefined);
-  pause = vi.fn();
-  addEventListener = vi.fn();
-}
-
-const audioInstances: MockAudio[] = [];
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
@@ -41,21 +33,29 @@ vi.mock('@/features/toast/use-toast-store', () => ({
 
 vi.mock('@/hooks/use-array', () => ({
   useArray: () => ({
-    data: mocks.state.data,
-    error: mocks.state.error,
-    loading: mocks.state.loading,
+    data: mocks.state.items,
+    loading: mocks.state.itemsLoading,
+    hasData: mocks.state.items.length > 0,
+  }),
+}));
+
+vi.mock('@/hooks/use-fetch', () => ({
+  useFetch: () => ({
+    data: mocks.state.block,
+    loading: mocks.state.blockLoading,
+  }),
+}));
+
+vi.mock('@/hooks/use-audio-manager', () => ({
+  useAudioManager: () => ({
+    playAudio: mocks.playAudio,
   }),
 }));
 
 vi.mock('@/database/models/user-items', () => ({
   default: {
     getByBlockId: vi.fn(),
-  },
-}));
-
-vi.mock('@/database/models/audio-records', () => ({
-  default: {
-    getByFilename: (...args: unknown[]) => mocks.getByFilename(...args),
+    resetItemsByBlockId: vi.fn(),
   },
 }));
 
@@ -65,16 +65,17 @@ vi.mock('@/features/logging/error-handler', () => ({
 
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
-    pageNotFound: 'Page not found',
-    loadingMessage: 'Loading',
-    blocksOverview: 'Blocks overview',
-    noBlockItems: 'No block items',
+    notAvailable: 'Not available',
     loadingError: 'Loading error',
+    resetProgressSuccessToast: 'Reset success',
+    resetProgressErrorToast: 'Reset error',
+    resetBlockTitle: 'Reset block',
+    resetBlockDescription: 'Reset block description',
   },
 }));
 
-vi.mock('@/components/UI/DelayedMessage', () => ({
-  default: ({ children }: any) => <div>{children}</div>,
+vi.mock('@/components/UI/DelayedNotification', () => ({
+  default: ({ children, message }: any) => <div>{children ?? message}</div>,
 }));
 
 vi.mock('@/components/UI/Notification', () => ({
@@ -89,39 +90,55 @@ vi.mock('@/components/UI/buttons/CloseButton', () => ({
   ),
 }));
 
-vi.mock('@/components/UI/buttons/BaseButton', () => ({
-  default: ({ onClick, children }: any) => (
+vi.mock('@/components/UI/OverviewCard', () => ({
+  default: ({ children, buttonTitle, onClose, handleReset }: any) => (
+    <div>
+      <div>{buttonTitle}</div>
+      <button data-testid="close-button" onClick={onClose}>
+        close
+      </button>
+      <button
+        data-testid="reset-button"
+        onClick={() => {
+          handleReset?.();
+        }}
+      >
+        reset
+      </button>
+      {children}
+    </div>
+  ),
+}));
+
+vi.mock('@/components/UI/buttons/ListButton', () => ({
+  ListButton: ({ onClick, children }: any) => (
     <button data-testid="item-button" onClick={onClick}>
       {children}
     </button>
   ),
 }));
 
+vi.mock('@/features/help/HelpButton', () => ({
+  default: ({ className }: { className?: string }) => (
+    <div data-testid="help-button" className={className}>
+      help
+    </div>
+  ),
+}));
+
 import BlockItemsOverview from '@/features/blocks/BlockItemsOverview';
+import UserItem from '@/database/models/user-items';
 
 describe('BlockItemsOverview', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.userId = 'u1';
     mocks.blockId = '2';
-    mocks.state.data = [];
-    mocks.state.error = null;
-    mocks.state.loading = false;
-
-    audioInstances.length = 0;
-
-    class MockAudioCtor extends MockAudio {
-      constructor() {
-        super();
-        audioInstances.push(this);
-      }
-    }
-
-    vi.stubGlobal('Audio', MockAudioCtor as any);
-    vi.stubGlobal('URL', {
-      createObjectURL: vi.fn().mockReturnValue('blob://audio-url'),
-      revokeObjectURL: vi.fn(),
-    });
+    mocks.state.items = [];
+    mocks.state.itemsLoading = false;
+    mocks.state.block = { id: 2, name: 'Block 2' };
+    mocks.state.blockLoading = false;
+    mocks.playAudio.mockReset();
   });
 
   it('renders not found state for invalid block id', () => {
@@ -129,21 +146,21 @@ describe('BlockItemsOverview', () => {
 
     render(<BlockItemsOverview />);
 
-    expect(screen.getByText('Page not found')).toBeTruthy();
+    expect(mocks.navigate).toHaveBeenCalledWith('/blocks');
   });
 
   it('renders loading state', () => {
-    mocks.state.loading = true;
+    mocks.state.itemsLoading = true;
 
     render(<BlockItemsOverview />);
 
-    expect(screen.getByText('Loading')).toBeTruthy();
+    expect(screen.queryByText('Not available')).toBeNull();
   });
 
   it('renders empty state when block has no items', () => {
     render(<BlockItemsOverview />);
 
-    expect(screen.getByText('No block items')).toBeTruthy();
+    expect(screen.getByText('Not available')).toBeTruthy();
   });
 
   it('navigates back to blocks overview on close', () => {
@@ -153,8 +170,8 @@ describe('BlockItemsOverview', () => {
     expect(mocks.navigate).toHaveBeenCalledWith('/blocks');
   });
 
-  it('renders czech on left and english on right and plays audio on click', async () => {
-    mocks.state.data = [
+  it('renders czech and english values and plays audio on click', () => {
+    mocks.state.items = [
       {
         item_id: 10,
         czech: 'pondeli',
@@ -162,23 +179,27 @@ describe('BlockItemsOverview', () => {
         audio: 'a.opus',
       },
     ];
-    mocks.getByFilename.mockResolvedValue({ audioBlob: new Blob(['audio']) });
 
     render(<BlockItemsOverview />);
 
     expect(screen.getByText('pondeli')).toBeTruthy();
     expect(screen.getByText('monday')).toBeTruthy();
 
+    expect(screen.getByTestId('help-button')).toBeTruthy();
+
     fireEvent.click(screen.getByTestId('item-button'));
 
-    await waitFor(() => {
-      expect(mocks.getByFilename).toHaveBeenCalledWith('a.opus');
-      expect(audioInstances[0].play).toHaveBeenCalledTimes(1);
-    });
+    expect(mocks.playAudio).toHaveBeenCalledWith('a.opus');
   });
 
-  it('does not try to load audio when item has no audio filename', () => {
-    mocks.state.data = [
+  it('does not render help button when there are no items', () => {
+    render(<BlockItemsOverview />);
+
+    expect(screen.queryByTestId('help-button')).toBeNull();
+  });
+
+  it('does not try to play audio when item has no audio filename', () => {
+    mocks.state.items = [
       {
         item_id: 11,
         czech: 'unor',
@@ -190,30 +211,32 @@ describe('BlockItemsOverview', () => {
     render(<BlockItemsOverview />);
 
     fireEvent.click(screen.getByTestId('item-button'));
-    expect(mocks.getByFilename).not.toHaveBeenCalled();
+    expect(mocks.playAudio).not.toHaveBeenCalled();
   });
 
-  it('shows toast and logs error when audio playback fails', async () => {
-    mocks.state.data = [
-      {
-        item_id: 12,
-        czech: 'brezen',
-        english: 'march',
-        audio: 'broken.opus',
-      },
-    ];
-    mocks.getByFilename.mockRejectedValue(new Error('boom'));
+  it('resets block items and shows success toast', async () => {
+    vi.mocked(UserItem.resetItemsByBlockId).mockResolvedValue(undefined as never);
 
     render(<BlockItemsOverview />);
 
-    fireEvent.click(screen.getByTestId('item-button'));
+    fireEvent.click(screen.getByTestId('reset-button'));
 
     await waitFor(() => {
-      expect(mocks.showToast).toHaveBeenCalledWith('Loading error', 'error');
-      expect(mocks.errorHandler).toHaveBeenCalledWith(
-        'Block audio playback failed',
-        expect.any(Error),
-      );
+      expect(UserItem.resetItemsByBlockId).toHaveBeenCalledWith('u1', 2);
+      expect(mocks.showToast).toHaveBeenCalledWith('Reset success', 'success');
+    });
+  });
+
+  it('shows toast and logs error when reset fails', async () => {
+    vi.mocked(UserItem.resetItemsByBlockId).mockRejectedValue(new Error('boom') as never);
+
+    render(<BlockItemsOverview />);
+
+    fireEvent.click(screen.getByTestId('reset-button'));
+
+    await waitFor(() => {
+      expect(mocks.showToast).toHaveBeenCalledWith('Reset error', 'error');
+      expect(mocks.errorHandler).toHaveBeenCalledWith('Reset error', expect.any(Error));
     });
   });
 });

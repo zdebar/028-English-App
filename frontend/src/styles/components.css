@@ -27,16 +27,20 @@
   }
 }
 
-/** Grammar styles **/
-.grammar p{
-  @apply p-0 m-0;
-}
-
 /** Help Text styles */
 .help-text-span {
   @apply w-15 inline-block;
 }
 
-.profile-menu-button {
-  @apply w-44 mx-auto;
+.profile-menu-button { /* TODO: Delete once refactored to use ModalButton */
+  @apply w-40 mx-auto;
+}
+
+/** Privacy Policy styles */
+.privacy-policy *{
+  @apply font-body;
+}
+
+.privacy-policy h1,h2{
+  @apply font-bold;
 }

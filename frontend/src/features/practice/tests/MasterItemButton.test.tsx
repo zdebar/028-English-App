@@ -19,7 +19,7 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 
-vi.mock('@/components/UI/buttons/BaseButton', () => ({
+vi.mock('@/components/UI/buttons/StyledButton', () => ({
   default: ({ children, ...props }: any) => (
     <button data-testid="master-button" {...props}>
       {children}
