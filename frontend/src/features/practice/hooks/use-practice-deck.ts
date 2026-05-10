@@ -5,12 +5,10 @@ import { useFetch } from '@/hooks/use-fetch';
 import UserItem from '@/database/models/user-items';
 import { errorHandler } from '@/features/logging/error-handler';
 import { infoHandler } from '@/features/logging/info-handler';
-import { useHint } from './use-hint';
+import { useHint, NBSP } from './use-hint';
 import { useAudioManager } from '../../../hooks/use-audio-manager';
 import { triggerDailyCountUpdatedEvent, triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 import config from '@/config/config';
-
-const NBSP = '\u00A0';
 
 /**
  * usePracticeDeck hook manages the practice deck and user progress for a given user.
@@ -192,7 +190,7 @@ export function usePracticeDeck(userId: string | null) {
     // Core state
     index,
     currentItem,
-    grammar_id: currentItem?.grammar_id ?? null,
+    grammarId: currentItem?.grammar_id ?? null,
     progress: currentItem?.progress ?? 0,
     isCzToEn,
     revealed,

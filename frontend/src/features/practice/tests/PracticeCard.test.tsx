@@ -21,7 +21,7 @@ const mocks = vi.hoisted(() => ({
       progress: 2,
       show_new_grammar_indicator: false,
     },
-    grammar_id: 10,
+    grammarId: 10,
     progress: 2,
     isCzToEn: true,
     revealed: false,
@@ -128,7 +128,7 @@ vi.mock('@/features/practice/hooks/use-practice-deck', () => ({
     if (!userId) {
       return {
         currentItem: null,
-        grammar_id: null,
+        grammarId: null,
         progress: 0,
         isCzToEn: true,
         revealed: false,
@@ -246,7 +246,7 @@ describe('PracticeCard', () => {
       progress: 2,
       show_new_grammar_indicator: false,
     };
-    mocks.practiceDeck.grammar_id = 10;
+    mocks.practiceDeck.grammarId = 10;
     mocks.practiceDeck.progress = 2;
     mocks.practiceDeck.isCzToEn = true;
     mocks.practiceDeck.revealed = false;
@@ -317,7 +317,7 @@ describe('PracticeCard', () => {
   it('opens grammar when grammar button is clicked', () => {
     mocks.practiceDeck.showNewGrammarIndicator = true;
     mocks.practiceDeck.showDirectionChange = false;
-    mocks.practiceDeck.grammar_id = 42;
+    mocks.practiceDeck.grammarId = 42;
 
     render(<PracticeCard />);
 
@@ -330,7 +330,7 @@ describe('PracticeCard', () => {
   it('does not open grammar automatically while direction change is shown', () => {
     mocks.practiceDeck.showNewGrammarIndicator = true;
     mocks.practiceDeck.showDirectionChange = true;
-    mocks.practiceDeck.grammar_id = 42;
+    mocks.practiceDeck.grammarId = 42;
 
     render(<PracticeCard />);
 

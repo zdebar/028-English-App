@@ -40,7 +40,7 @@ export default function PracticeCard() {
 
   const {
     currentItem,
-    grammar_id,
+    grammarId,
     progress,
     isCzToEn,
     revealed,
@@ -186,8 +186,8 @@ export default function PracticeCard() {
             ) : (
               <>
                 <GrammarButton
-                  onClick={() => handleGrammar(grammar_id)}
-                  disabled={!grammar_id || showDirectionChange}
+                  onClick={() => handleGrammar(grammarId)}
+                  disabled={!grammarId || showDirectionChange}
                 >
                   {showNewGrammarIndicator && <Indicator className="absolute top-1 right-1" />}
                 </GrammarButton>

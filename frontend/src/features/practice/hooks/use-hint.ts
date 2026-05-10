@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-const NBSP = '\u00A0';
+export const NBSP = '\u00A0';
 
 /**
  * Hook for managing hint progression across two sections.

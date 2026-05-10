@@ -26,18 +26,15 @@ const initialDailyStats = 0;
  * Sets up event listeners for 'levelsUpdated' and 'dailyCountUpdated' events that trigger
  * store reloads when a userId is provided in the event detail.
  *
- * @returns {UserState & { cleanup: () => void }} The user store with state management methods:
+ * @returns {UserState} The user store with state management methods:
  * - `levels` - Array of user level data
  * - `dailyCount` - Today's score count for the user
  * - `showMasteredDashboard` - Whether to show mastered lessons on the dashboard
- * - `showMasteredLevels` - Whether to show mastered levels in the levels overview
  * - `reloadLevels(userId)` - Fetches and updates user levels from the server
- * - `reloadScoresStats(userId)` - Fetches and updates daily score statistics
+ * - `reloadDailyCount(userId)` - Fetches and updates daily score statistics
  * - `setMasteredDashboard(value)` - Toggles display of mastered lessons on the dashboard
- * - `setMasteredLevels(value)` - Toggles display of mastered levels in the levels overview
- * - `clearItemsStats()` - Resets levels to initial state
- * - `clearScoresStats()` - Resets daily count to initial state
- * - `cleanup()` - Removes event listeners (should be called on store destruction)
+ * - `clearLevels()` - Resets levels to initial state
+ * - `clearDailyCount()` - Resets daily count to initial state
  */
 export const useUserStore = create<UserState>((set, get) => {
   let levelsUpdatedListener: ((event: any) => void) | undefined;
@@ -91,16 +88,6 @@ export const useUserStore = create<UserState>((set, get) => {
     clearDailyCount: () => {
       set({ dailyCount: initialDailyStats });
     },
-  };
-  (store as any).cleanup = () => {
-    if (typeof globalThis !== 'undefined') {
-      if (levelsUpdatedListener) {
-        globalThis.removeEventListener('levelsUpdated', levelsUpdatedListener);
-      }
-      if (dailyCountUpdatedListener) {
-        globalThis.removeEventListener('dailyCountUpdated', dailyCountUpdatedListener);
-      }
-    }
   };
   return store;
 });

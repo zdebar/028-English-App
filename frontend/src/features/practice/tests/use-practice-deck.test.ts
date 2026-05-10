@@ -24,6 +24,7 @@ vi.mock('@/database/models/user-items', () => ({
 }));
 
 vi.mock('@/features/practice/hooks/use-hint', () => ({
+  NBSP: '\u00A0',
   useHint: () => ({
     czechHinted: 'CZ_HINT',
     englishHinted: 'EN_HINT',
@@ -105,7 +106,7 @@ describe('usePracticeDeck', () => {
     expect(result.current.czech).toBe('ahoj');
     expect(result.current.english).toBe('EN_HINT');
     expect(result.current.audioDisabled).toBe(true);
-    expect(result.current.grammar_id).toBe(10);
+    expect(result.current.grammarId).toBe(10);
     expect(result.current.showNewGrammarIndicator).toBe(false);
     expect(resetHintMock).toHaveBeenCalled();
   });
