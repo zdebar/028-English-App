@@ -37,10 +37,10 @@ export async function restoreUnsavedFromLocalStorage(userId: string): Promise<vo
   const saved = localStorage.getItem(key);
   if (saved) {
     try {
-      const parsed = JSON.parse(saved);
-      const userProgress = parsed.progress;
+      const parsed = JSON.parse(saved) as { progress?: unknown; dateTime?: string };
+      const userProgress = Array.isArray(parsed.progress) ? parsed.progress : [];
       if (Array.isArray(userProgress) && userProgress.length > 0) {
-        UserItem.savePracticeDeck(userId, userProgress, parsed.dateTime);
+        await UserItem.savePracticeDeck(userId, userProgress, parsed.dateTime);
       }
       localStorage.removeItem(key);
       infoHandler(

@@ -31,6 +31,19 @@ describe('useFetch', () => {
     expect(result.current.hasData).toBe(false);
   });
 
+  it('keeps hasData false when fetch returns null', async () => {
+    const fetchFunction = vi.fn().mockResolvedValue(null);
+
+    const { result } = renderHook(() => useFetch(fetchFunction));
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.data).toBeNull();
+    expect(result.current.hasData).toBe(false);
+  });
+
   it('reload triggers fetch again', async () => {
     let callCount = 0;
     const fetchFunction = vi.fn().mockImplementation(() => {

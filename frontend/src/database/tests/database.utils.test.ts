@@ -63,6 +63,7 @@ describe('database.utils', () => {
     vi.clearAllMocks();
     vi.useRealTimers();
     localStorage.clear();
+    mocks.savePracticeDeck.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -212,6 +213,35 @@ describe('database.utils', () => {
   });
 
   describe('restoreUnsavedFromLocalStorage', () => {
+    it('awaits savePracticeDeck before removing key and logging info', async () => {
+      localStorage.setItem(
+        'practiceDeckProgress_u1',
+        JSON.stringify({
+          dateTime: '2026-03-04T10:00:00.000Z',
+          progress: [{ item_id: 1, progress: 2 }],
+        }),
+      );
+
+      let resolveSave: (() => void) | undefined;
+      mocks.savePracticeDeck.mockImplementation(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveSave = resolve;
+          }),
+      );
+
+      const restorePromise = restoreUnsavedFromLocalStorage('u1');
+
+      expect(localStorage.getItem('practiceDeckProgress_u1')).not.toBeNull();
+      expect(mocks.infoHandler).not.toHaveBeenCalled();
+
+      resolveSave?.();
+      await restorePromise;
+
+      expect(localStorage.getItem('practiceDeckProgress_u1')).toBeNull();
+      expect(mocks.infoHandler).toHaveBeenCalled();
+    });
+
     it('restores saved progress, removes key, and logs info', async () => {
       localStorage.setItem(
         'practiceDeckProgress_u1',
@@ -230,6 +260,24 @@ describe('database.utils', () => {
       );
       expect(localStorage.getItem('practiceDeckProgress_u1')).toBeNull();
       expect(mocks.infoHandler).toHaveBeenCalled();
+    });
+
+    it('handles non-array progress payload without saving and still cleans up', async () => {
+      localStorage.setItem(
+        'practiceDeckProgress_u1',
+        JSON.stringify({
+          dateTime: '2026-03-04T10:00:00.000Z',
+          progress: { item_id: 1, progress: 2 },
+        }),
+      );
+
+      await restoreUnsavedFromLocalStorage('u1');
+
+      expect(mocks.savePracticeDeck).not.toHaveBeenCalled();
+      expect(localStorage.getItem('practiceDeckProgress_u1')).toBeNull();
+      expect(mocks.infoHandler).toHaveBeenCalledWith(
+        'Restored unsaved practice deck progress for user u1 with 0 items.',
+      );
     });
 
     it('handles parse error by logging and removing invalid key', async () => {
