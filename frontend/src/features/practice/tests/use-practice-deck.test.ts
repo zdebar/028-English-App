@@ -51,7 +51,7 @@ vi.mock('@/features/logging/info-handler', () => ({
   infoHandler: vi.fn(),
 }));
 
-import { usePracticeDeck } from '../hooks/use-practice-deck';
+import { usePracticeDeck } from '../hooks/use-practice-deck.tsx';
 
 function makeItem(overrides: Partial<UserItemPractice> = {}): UserItemPractice {
   const item: UserItemPractice = {
