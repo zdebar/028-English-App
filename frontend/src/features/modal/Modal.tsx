@@ -29,7 +29,7 @@ export function Modal({ onConfirm, onClose, children }: ModalProps): JSX.Element
   }, [closeOverlay]);
 
   const handleConfirm = useCallback(() => {
-    void onConfirm();
+    onConfirm();
     closeOverlay();
   }, [closeOverlay, onConfirm]);
 
