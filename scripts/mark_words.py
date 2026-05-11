@@ -275,6 +275,7 @@ def filter_target_file(
 		print(f"Skipping missing target file: {target_csv}")
 		return
 
+	print(f"Reading target CSV: {target_csv}")
 	second_df = pd.read_csv(target_csv)
 	require_english_column(second_df, target_csv, "target")
 	target_has_czech = has_czech_column(second_df)
@@ -314,7 +315,6 @@ def main() -> None:
 	target_folder = script_dir / "data" / "tracker"
 	target_files = [
 		target_folder / "10k_words.csv",
-		target_folder / "1k_words.csv",
 	]
 
 	source_bilingual_keys, source_english_only_keys, source_all_english_keys = collect_source_match_keys(source_folder)
