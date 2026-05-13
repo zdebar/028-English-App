@@ -4,6 +4,7 @@ import ForwardIcon from '@/components/UI/icons/ForwardIcon';
 import HelpText from '@/features/help/HelpText';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
+import config from '@/config/config';
 
 type SkipButtonProps = Readonly<{
   onConfirm: () => void | Promise<void>;
@@ -11,7 +12,7 @@ type SkipButtonProps = Readonly<{
   children?: React.ReactNode;
 }>;
 
-const HOLD_DURATION_MS = 600;
+const HOLD_DURATION_MS = config.practice.holdDuration;
 
 export default function MasterItemButton({ onConfirm, disabled, children }: SkipButtonProps) {
   const showToast = useToastStore((state) => state.showToast);
