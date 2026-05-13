@@ -7,7 +7,7 @@ from scripts.utils.pronunciation import fill_pronunciation_espeak_ng
 from scripts.utils.audio import generate_audio_with_google_cloud
 import pandas as pd
 
-async def prepare_words(file_name: str, output_file: str, audio_folder: str, suffix: str) -> None:
+async def prepare_words(file_name: str, output_file: str, audio_folder: str, suffix: str = "") -> None:
 	# 1. Read data
 	df = read_vocab_csv(file_name)
 	if df is None:
@@ -49,7 +49,7 @@ async def prepare_words_in_folder(data_dir: str, audio_folder: str) -> None:
 	for file_path in input_files:
 		base_name, extension = os.path.splitext(os.path.basename(file_path))
 		output_file = os.path.join(data_dir, f"{base_name}{suffix}{extension}")
-		await prepare_words(file_path, output_file, audio_folder, suffix)
+		await prepare_words(file_path, output_file, audio_folder)
 
 # Runner
 if __name__ == "__main__":
