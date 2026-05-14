@@ -2,8 +2,8 @@ import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const mocks = vi.hoisted(() => ({
-  userId: 'u1' as string | null,
+const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => ({
+  userId: 'u1',
   dailyCount: 5,
   grammarVisible: false,
   grammarData: null as any,

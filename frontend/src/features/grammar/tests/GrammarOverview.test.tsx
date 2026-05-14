@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  userId: 'u1' as string | null,
+  userId: 'u1',
   navigate: vi.fn(),
   setCurrentIndex: vi.fn(),
   sanitize: vi.fn(),
