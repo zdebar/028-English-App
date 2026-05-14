@@ -189,7 +189,7 @@ export default function PracticeCard() {
                   onClick={() => handleGrammar(grammarId)}
                   disabled={!grammarId || showDirectionChange}
                 >
-                  {showNewGrammarIndicator && <Indicator className="absolute top-1 right-1" />}
+                  {showNewGrammarIndicator && <Indicator className="absolute top-2 right-2" />}
                 </GrammarButton>
                 <HintButton onClick={plusHint} disabled={showDirectionChange} />
               </>
