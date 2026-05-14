@@ -108,7 +108,7 @@ export default function BlockItemsOverview() {
               <span className="min-w-0 flex-1 overflow-hidden text-left text-ellipsis whitespace-nowrap">
                 {item.czech}
               </span>
-              <span className="min-w-0 flex-1 overflow-hidden text-right text-ellipsis whitespace-nowrap">
+              <span className="min-w-0 flex-1 overflow-hidden text-left text-ellipsis whitespace-nowrap">
                 {item.english}
               </span>
             </div>
