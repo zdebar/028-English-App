@@ -65,8 +65,8 @@ export default function OverviewCard({
           disabled={isDisabled}
           className="justify-start px-4"
         >
-          {buttonTitle ||
-            (!loading && <DelayedNotification>{TEXTS.notAvailable}</DelayedNotification>) ||
+          {buttonTitle ??
+            (!loading && <DelayedNotification>{TEXTS.notAvailable}</DelayedNotification>) ??
             ''}
         </ButtonWithModal>
         <HelpText className="-bottom-2 left-2">{helpText}</HelpText>

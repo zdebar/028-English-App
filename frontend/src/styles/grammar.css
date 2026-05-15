@@ -1,7 +1,8 @@
-.grammar-pairs {
+.grammar dl {
   @apply grid grid-cols-2 gap-2;
 }
 
-.grammar-pairs dt {
+.grammar dt {
   @apply font-bold;
 }
+
