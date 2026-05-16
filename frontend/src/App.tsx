@@ -8,6 +8,7 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import ToastContainer from '@/features/toast/ToastContainer';
 import { ROUTES } from '@/config/routes.config';
 import OverlayMask from './features/overlay/OverlayMask';
+import { GoogleAnalytics } from './features/analytics/GoogleAnalytics';
 
 import { lazy, Suspense, useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
@@ -72,33 +73,38 @@ export default function App() {
   }, [loading]);
 
   return (
-    <div className="max-w-container relative mx-auto flex min-h-screen flex-col justify-start">
-      <ToastContainer />
-      <OverlayMask />
-      <Header />
-      <main className="relative flex grow flex-col items-center gap-4">
-        <Suspense fallback={<Notification className="pt-8">{TEXTS.syncLoadingText}</Notification>}>
-          <Routes>
-            <Route path={ROUTES.home} element={<Home />} />
-            <Route path={ROUTES.privacyPolicy} element={<PrivacyPolicy />} />
-            <Route path={ROUTES.guide} element={<Guide />} />
-            <Route element={<ProtectedLayout />}>
-              <Route path={ROUTES.practice} element={<Practice />} />
-              <Route path={ROUTES.profile} element={<Profile />} />
-              <Route path={ROUTES.levels} element={<Levels />} />
-              <Route path={ROUTES.blocks} element={<Blocks />} />
-              <Route path={ROUTES.blocksDetail} element={<BlockItems />} />
-              <Route path={ROUTES.grammar} element={<Grammar />} />
-              <Route path={ROUTES.vocabulary} element={<Vocabulary />} />
-            </Route>
-            <Route
-              path="*"
-              element={<Notification className="pt-8">{TEXTS.pageNotFound}</Notification>}
-            />
-          </Routes>
-        </Suspense>
-      </main>
-      {location.pathname === '/' && <Footer />}
-    </div>
+    <>
+      <GoogleAnalytics />
+      <div className="max-w-container relative mx-auto flex min-h-screen flex-col justify-start">
+        <ToastContainer />
+        <OverlayMask />
+        <Header />
+        <main className="relative flex grow flex-col items-center gap-4">
+          <Suspense
+            fallback={<Notification className="pt-8">{TEXTS.syncLoadingText}</Notification>}
+          >
+            <Routes>
+              <Route path={ROUTES.home} element={<Home />} />
+              <Route path={ROUTES.privacyPolicy} element={<PrivacyPolicy />} />
+              <Route path={ROUTES.guide} element={<Guide />} />
+              <Route element={<ProtectedLayout />}>
+                <Route path={ROUTES.practice} element={<Practice />} />
+                <Route path={ROUTES.profile} element={<Profile />} />
+                <Route path={ROUTES.levels} element={<Levels />} />
+                <Route path={ROUTES.blocks} element={<Blocks />} />
+                <Route path={ROUTES.blocksDetail} element={<BlockItems />} />
+                <Route path={ROUTES.grammar} element={<Grammar />} />
+                <Route path={ROUTES.vocabulary} element={<Vocabulary />} />
+              </Route>
+              <Route
+                path="*"
+                element={<Notification className="pt-8">{TEXTS.pageNotFound}</Notification>}
+              />
+            </Routes>
+          </Suspense>
+        </main>
+        {location.pathname === '/' && <Footer />}
+      </div>
+    </>
   );
 }
