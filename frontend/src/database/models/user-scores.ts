@@ -4,7 +4,7 @@ import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import { getTodayShortDate } from '@/database/utils/database.utils';
 import { getSyncTimestamps, splitDeleted } from '../utils/data-sync.utils';
-import { infoHandler } from '@/features/logging/info-handler';
+import { reportInfo } from '@/features/logging/monitoring-handler';
 import { SupabaseError } from '@/types/error.types';
 import { type UserScoreType } from '@/types/generic.types';
 import { TableName } from '@/types/table.types';
@@ -112,12 +112,8 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
       await Metadata.markAsSynced(TableName.UserScores, newSyncedAt, userId);
     });
 
-    infoHandler(
-      `Completed ${updatedScores.length} user scores pull from remote for userId: ${userId}`,
-    );
+    reportInfo(`Completed ${updatedScores.length} user scores pull from remote.`);
   }
-
-
 
   /**
    * Gets user scores from IndexedDB for a specific user that were updated in between the last synced timestamp and the new synced timestamp.
@@ -136,7 +132,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
       .toArray();
 
     if (localScores.length === 0) {
-      infoHandler(`No user scores to push for userId: ${userId}`);
+      reportInfo(`No user scores to push.`);
       return [];
     }
 
@@ -191,7 +187,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
     }
 
     if (scores.length > 0) {
-      infoHandler(`Completed ${scores.length} user scores push to Supabase for userId: ${userId}`);
+      reportInfo(`Completed ${scores.length} user scores push to Supabase.`);
     }
 
     return updatedScores ?? [];

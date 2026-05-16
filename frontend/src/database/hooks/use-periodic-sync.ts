@@ -3,7 +3,7 @@ import { dataSyncOnUnmount, dataSync, audioSync } from '../utils/data-sync.utils
 import AudioRecord from '../models/audio-records';
 import { TEXTS } from '@/locales/cs';
 import config from '@/config/config';
-import { errorHandler } from '@/features/logging/error-handler';
+import { reportError } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { logRejectedResults } from '@/features/logging/logging.utils';
 import { useSyncWarningStore } from '@/features/sync/use-sync-warning';
@@ -54,7 +54,7 @@ export function usePeriodicSync(userId: string | null) {
       } catch (error) {
         showToast(TEXTS.syncErrorToast, 'error');
         setSynchronized(false);
-        errorHandler('Data synchronization failed', error);
+        reportError('Data synchronization failed', error);
       } finally {
         if (!isUnmounted.current) {
           setLoading(false);
@@ -99,7 +99,7 @@ export function usePeriodicSync(userId: string | null) {
       }
 
       dataSyncOnUnmount(activeUserId).catch((error) => {
-        errorHandler('Unmount synchronization failed', error);
+        reportError('Unmount synchronization failed', error);
       });
     };
   }, [userId]);

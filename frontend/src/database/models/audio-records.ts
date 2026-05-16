@@ -3,7 +3,7 @@ import type AppDB from '@/database/models/app-db';
 import AudioMetadata from '@/database/models/audio-metadata';
 import { db } from '@/database/models/db';
 import { fetchStorage, fetchStorageBucketMetadata } from '@/database/utils/audio-records.utils';
-import { infoHandler } from '@/features/logging/info-handler';
+import { reportInfo } from '@/features/logging/monitoring-handler';
 import { logRejectedResults } from '@/features/logging/logging.utils';
 import { ZipExtractionError } from '@/types/error.types';
 import type { AudioRecordLocal } from '@/types/audio.types';
@@ -48,7 +48,7 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
     if (!bucketMetadata) return;
 
     if (bucketMetadata.size === 0) {
-      infoHandler('No audio archives found in remote bucket.');
+      reportInfo('No audio archives found in remote bucket.');
       return;
     }
 
@@ -78,7 +78,7 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
 
     if (orphaned.length > 0) {
       await db.audio_records.bulkDelete(orphaned);
-      infoHandler(`Deleted ${orphaned.length} orphaned audio records.`);
+      reportInfo(`Deleted ${orphaned.length} orphaned audio records.`);
     }
   }
 
@@ -105,7 +105,7 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
       await AudioMetadata.markAsFetched(archiveName, remoteUpdatedAt);
     });
 
-    infoHandler(`Successfully synced audio archive: ${archiveName}`);
+    reportInfo(`Successfully synced audio archive: ${archiveName}`);
   }
 
   /**
@@ -145,7 +145,7 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
     const audioBlob = await fetchStorage(config.audio.audioBucketName, audioName);
     await db.audio_records.put({ filename: audioName, audioBlob });
 
-    infoHandler(`Successfully synced audio file: ${audioName}`);
+    reportInfo(`Successfully synced audio file: ${audioName}`);
     return { filename: audioName, audioBlob };
   }
 }

@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
   handleLogout: vi.fn(),
   saveCurrentThemeAsGuest: vi.fn(),
   showToast: vi.fn(),
-  errorHandler: vi.fn(),
+  reportError: vi.fn(),
 }));
 
 vi.mock('@/features/auth/use-auth-store', () => ({
@@ -29,8 +29,8 @@ vi.mock('@/features/theme/use-theme-store', () => ({
   ) => selector({ saveCurrentThemeAsGuest: mocks.saveCurrentThemeAsGuest }),
 }));
 
-vi.mock('@/features/logging/error-handler', () => ({
-  errorHandler: (...args: unknown[]) => mocks.errorHandler(...args),
+vi.mock('@/features/logging/monitoring-handler', () => ({
+  reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
 
 vi.mock('@/locales/cs', () => ({
@@ -85,7 +85,7 @@ describe('SignoutButton', () => {
 
     await waitFor(() => {
       expect(mocks.showToast).toHaveBeenCalledWith('Signout error', 'error');
-      expect(mocks.errorHandler).toHaveBeenCalledWith('Error signing out', expect.any(Error));
+      expect(mocks.reportError).toHaveBeenCalledWith('Error signing out', expect.any(Error));
     });
   });
 });

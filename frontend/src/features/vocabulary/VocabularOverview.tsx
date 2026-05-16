@@ -6,7 +6,7 @@ import VocabularyList from './VocabularyList';
 import { useNavigate } from 'react-router-dom';
 import { TEXTS } from '@/locales/cs';
 import { useToastStore } from '../toast/use-toast-store';
-import { errorHandler } from '../logging/error-handler';
+import { reportError } from '../logging/monitoring-handler';
 import DelayedNotification from '@/components/UI/DelayedNotification';
 import { useVocabulary } from './use-vocabulary';
 import { useLocalStorageSync } from '@/hooks/user-local-storage-sync';
@@ -51,7 +51,7 @@ export default function VocabularyOverview() {
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (error) {
       showToast(TEXTS.resetProgressErrorToast, 'error');
-      errorHandler('Reset User Item Error', error);
+      reportError('Reset User Item Error', error);
     }
   }, [selectedWord, userId, reload, showToast]);
 

@@ -3,7 +3,7 @@ import type { LevelOverviewType } from '@/types/generic.types';
 import UserScoreType from '@/database/models/user-scores';
 import Levels from '@/database/models/levels';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
-import { errorHandler } from '../logging/error-handler';
+import { reportError } from '../logging/monitoring-handler';
 
 interface UserState {
   levels: LevelOverviewType[];
@@ -69,7 +69,7 @@ export const useUserStore = create<UserState>((set, get) => {
         set({ levels: updatedLevels });
       } catch (error) {
         set({ levels: initialLevels });
-        errorHandler('Error reloading levels', error);
+        reportError('Error reloading levels', error);
       }
     },
     reloadDailyCount: async (userId: string) => {
@@ -79,7 +79,7 @@ export const useUserStore = create<UserState>((set, get) => {
         set({ dailyCount: updatedCount });
       } catch (error) {
         set({ dailyCount: initialDailyStats });
-        errorHandler('Error reloading daily count', error);
+        reportError('Error reloading daily count', error);
       }
     },
     clearLevels: () => {

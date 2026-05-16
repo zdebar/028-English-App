@@ -11,7 +11,7 @@ import OverlayMask from './features/overlay/OverlayMask';
 
 import { lazy, Suspense, useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
-import { errorHandler } from './features/logging/error-handler';
+import { reportError } from './features/logging/monitoring-handler';
 import { useToastStore } from './features/toast/use-toast-store';
 import { TEXTS } from './locales/cs';
 import './styles/index.css';
@@ -19,7 +19,7 @@ import { useThemeLoader } from './features/theme/use-theme-loader';
 import { useUserStoreSync } from './features/user-stats/use-user-store-sync';
 import { useDailyStatsReset } from './features/user-stats/use-daily-stats-reset';
 import Notification from './components/UI/Notification';
-import Home from '@/pages/Home'; 
+import Home from '@/pages/Home';
 
 const PrivacyPolicy = lazy(() => import('@/pages/PrivacyPolicy'));
 const Guide = lazy(() => import('@/pages/Guide'));
@@ -46,7 +46,7 @@ export default function App() {
       return cleanup;
     } catch (error) {
       showToast(TEXTS.authInitErrorToast, 'error');
-      errorHandler('Auth Initialization Error', error);
+      reportError('Auth Initialization Error', error);
     }
   }, [initializeAuth]);
 

@@ -5,7 +5,7 @@ const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   playAudio: vi.fn(),
   showToast: vi.fn(),
-  errorHandler: vi.fn(),
+  reportError: vi.fn(),
   userId: 'u1' as string | null,
   blockId: '2' as string | undefined,
   state: {
@@ -59,8 +59,8 @@ vi.mock('@/database/models/user-items', () => ({
   },
 }));
 
-vi.mock('@/features/logging/error-handler', () => ({
-  errorHandler: (...args: unknown[]) => mocks.errorHandler(...args),
+vi.mock('@/features/logging/monitoring-handler', () => ({
+  reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
 
 vi.mock('@/locales/cs', () => ({
@@ -236,7 +236,7 @@ describe('BlockItemsOverview', () => {
 
     await waitFor(() => {
       expect(mocks.showToast).toHaveBeenCalledWith('Reset error', 'error');
-      expect(mocks.errorHandler).toHaveBeenCalledWith('Reset error', expect.any(Error));
+      expect(mocks.reportError).toHaveBeenCalledWith('Reset error', expect.any(Error));
     });
   });
 });

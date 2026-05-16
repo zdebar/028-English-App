@@ -34,8 +34,8 @@ vi.mock('@/database/models/audio-records', () => ({
   },
 }));
 
-vi.mock('@/features/logging/error-handler', () => ({
-  errorHandler: (...args: unknown[]) => errorHandlerMock(...args),
+vi.mock('@/features/logging/monitoring-handler', () => ({
+  reportError: (...args: unknown[]) => errorHandlerMock(...args),
 }));
 
 import { useAudioManager } from '@/hooks/use-audio-manager';

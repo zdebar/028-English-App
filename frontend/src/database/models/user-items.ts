@@ -19,7 +19,7 @@ import {
   getNextAt,
   resetUserItem,
 } from '@/database/utils/user-items.utils';
-import { infoHandler } from '@/features/logging/info-handler';
+import { reportInfo } from '@/features/logging/monitoring-handler';
 import { triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 import { SupabaseError } from '@/types/error.types';
 import Metadata from './metadata';
@@ -245,7 +245,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       throw new Error(`No user items found for item ID ${itemId}.`);
     }
 
-    infoHandler(`Resetted user item with itemId: ${itemId} for userId: ${userId}`);
+    reportInfo(`Resetted user item with itemId: ${itemId}.`);
     triggerLevelsUpdatedEvent(userId);
   }
 
@@ -265,7 +265,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         resetUserItem(item);
       });
 
-    infoHandler(`Resetted ${count} user-items with grammarId: ${grammarId} for userId: ${userId}`);
+    reportInfo(`Resetted ${count} user-items with grammarId: ${grammarId}`);
     triggerLevelsUpdatedEvent(userId);
   }
 
@@ -285,7 +285,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         resetUserItem(item);
       });
 
-    infoHandler(`Resetted ${count} user-items with blockId: ${blockId} for userId: ${userId}`);
+    reportInfo(`Resetted ${count} user-items with blockId: ${blockId}`);
     triggerLevelsUpdatedEvent(userId);
   }
 
@@ -341,9 +341,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       await Metadata.markAsSynced(TableName.UserItems, newSyncedAt, userId);
     });
 
-    infoHandler(
-      `Completed ${updatedItems.length} user items pull from remote for userId: ${userId}`,
-    );
+    reportInfo(`Completed ${updatedItems.length} user items pull from remote.`);
   }
 
   /**
@@ -363,7 +361,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .toArray();
 
     if (localUserItems.length === 0) {
-      infoHandler(`No user items to push for userId: ${userId}`);
+      reportInfo(`No user items to push.`);
       return [];
     }
 
@@ -396,7 +394,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     }
 
     if (items.length > 0) {
-      infoHandler(`Completed ${items.length} user items push to Supabase for userId: ${userId}`);
+      reportInfo(`Completed ${items.length} user items push to Supabase.`);
     }
 
     return (updatedUserItems ?? []).map(convertAPIToLocal);

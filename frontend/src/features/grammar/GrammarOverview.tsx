@@ -12,7 +12,7 @@ import type { GrammarType } from '@/types/generic.types';
 import UserItem from '@/database/models/user-items';
 import { DataState } from '@/components/UI/DataState';
 import { useToastStore } from '../toast/use-toast-store';
-import { errorHandler } from '../logging/error-handler';
+import { reportError } from '../logging/monitoring-handler';
 
 /**
  * GrammarOverview component displays a list of started grammar topics for the user.
@@ -31,7 +31,7 @@ export default function GrammarOverview(): JSX.Element {
       return await Grammar.getStarted(userId);
     } catch (err) {
       showToast(TEXTS.loadingError, 'error');
-      errorHandler('Failed to fetch grammar overview', err);
+      reportError('Failed to fetch grammar overview', err);
       return [];
     }
   }, [userId]);
@@ -52,7 +52,7 @@ export default function GrammarOverview(): JSX.Element {
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (err) {
       showToast(TEXTS.resetProgressErrorToast, 'error');
-      errorHandler('Failed to reset grammar progress', err);
+      reportError('Failed to reset grammar progress', err);
     }
   }, [currentItem, userId]);
 

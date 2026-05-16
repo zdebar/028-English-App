@@ -1,6 +1,5 @@
-import { errorHandler } from '@/features/logging/error-handler';
+import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import UserItem from '../models/user-items';
-import { infoHandler } from '@/features/logging/info-handler';
 
 /**
  * Returns today's date in YYYY-MM-DD format.
@@ -43,11 +42,11 @@ export async function restoreUnsavedFromLocalStorage(userId: string): Promise<vo
         await UserItem.savePracticeDeck(userId, userProgress, parsed.dateTime);
       }
       localStorage.removeItem(key);
-      infoHandler(
+      reportInfo(
         `Restored unsaved practice deck progress for user ${userId} with ${userProgress.length} items.`,
       );
     } catch (e) {
-      errorHandler('Error parsing practice deck progress from localStorage', e);
+      reportError('Error parsing practice deck progress from localStorage', e);
       localStorage.removeItem(key);
     }
   }

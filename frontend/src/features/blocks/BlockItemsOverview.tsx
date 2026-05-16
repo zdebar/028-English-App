@@ -1,7 +1,7 @@
 import { ROUTES } from '@/config/routes.config';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { errorHandler } from '@/features/logging/error-handler';
+import { reportError } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useAudioManager } from '@/hooks/use-audio-manager';
 import { useArray } from '@/hooks/use-array';
@@ -36,7 +36,7 @@ export default function BlockItemsOverview() {
       return await Blocks.getById(blockId);
     } catch (err) {
       showToast(TEXTS.loadingError, 'error');
-      errorHandler('Failed to fetch block details', err);
+      reportError('Failed to fetch block details', err);
       return null;
     }
   }, [userId, blockId]);
@@ -50,7 +50,7 @@ export default function BlockItemsOverview() {
       return await UserItem.getByBlockId(userId, blockId);
     } catch (err) {
       showToast(TEXTS.loadingError, 'error');
-      errorHandler('Failed to fetch block items', err);
+      reportError('Failed to fetch block items', err);
       return [];
     }
   }, [userId, blockId]);
@@ -76,7 +76,7 @@ export default function BlockItemsOverview() {
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (error) {
       showToast(TEXTS.resetProgressErrorToast, 'error');
-      errorHandler(TEXTS.resetProgressErrorToast, error);
+      reportError(TEXTS.resetProgressErrorToast, error);
     }
   }, [userId, blockId, showToast]);
 

@@ -3,8 +3,7 @@ import { alternateDirection } from '@/features/practice/practice.utils';
 import type { UserItemPractice } from '@/types/user-item.types';
 import { useFetch } from '@/hooks/use-fetch';
 import UserItem from '@/database/models/user-items';
-import { errorHandler } from '@/features/logging/error-handler';
-import { infoHandler } from '@/features/logging/info-handler';
+import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { useHint, NBSP } from './use-hint';
 import { useAudioManager } from '../../../hooks/use-audio-manager';
 import { triggerDailyCountUpdatedEvent, triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
@@ -88,13 +87,13 @@ export function usePracticeDeck(userId: string | null) {
 
       try {
         await UserItem.savePracticeDeck(userId, userProgress);
-        infoHandler(`Saved practice deck ${source} with ${userProgress.length} items.`);
+        reportInfo(`Saved practice deck ${source} with ${userProgress.length} items.`);
         userProgressRef.current = [];
         if (shouldReload) {
           reload();
         }
       } catch (error) {
-        errorHandler(`Failed to save practice deck ${source}`, error);
+        reportError(`Failed to save practice deck ${source}`, error);
         persistProgressToLocalStorage(userProgress);
       }
     },

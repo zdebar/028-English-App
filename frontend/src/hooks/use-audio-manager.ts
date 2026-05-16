@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import AudioRecord from '@/database/models/audio-records';
-import { errorHandler } from '@/features/logging/error-handler';
+import { reportError } from '@/features/logging/monitoring-handler';
 
 type AudioInput = string | string[] | null;
 type ManagedAudio = {
@@ -77,7 +77,7 @@ async function loadSingleAudio(
     audioMap.set(filename, { element: audioElement, onEnded });
     return true;
   } catch (error) {
-    errorHandler('Audio Manager Error', error);
+    reportError('Audio Manager Error', error);
     return false;
   }
 }

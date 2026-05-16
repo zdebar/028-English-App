@@ -4,7 +4,7 @@ import { type JSX } from 'react';
 import { audioSync, dataSync } from '@/database/utils/data-sync.utils';
 import { logRejectedResults } from '../logging/logging.utils';
 import ButtonWithModal from '../modal/ButtonWithModal';
-import { errorHandler } from '../logging/error-handler';
+import { reportError } from '../logging/monitoring-handler';
 import { useToastStore } from '../toast/use-toast-store';
 
 type SyncButtonProps = Readonly<{
@@ -30,7 +30,7 @@ export default function SyncButton({ className }: SyncButtonProps): JSX.Element 
       showToast(TEXTS.dataSyncSuccess, 'success');
     } catch (err) {
       showToast(TEXTS.dataSyncError, 'error');
-      errorHandler('Error synchronizing data', err);
+      reportError('Error synchronizing data', err);
     }
   };
 

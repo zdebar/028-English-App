@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
   removeOrphaned: vi.fn(),
   showToast: vi.fn(),
   logRejectedResults: vi.fn(),
-  errorHandler: vi.fn(),
+  reportError: vi.fn(),
 }));
 
 vi.mock('@/config/config', () => ({
@@ -40,8 +40,8 @@ vi.mock('@/features/logging/logging.utils', () => ({
   logRejectedResults: (...args: unknown[]) => mocks.logRejectedResults(...args),
 }));
 
-vi.mock('@/features/logging/error-handler', () => ({
-  errorHandler: (...args: unknown[]) => mocks.errorHandler(...args),
+vi.mock('@/features/logging/monitoring-handler', () => ({
+  reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
 
 vi.mock('@/locales/cs', () => ({
@@ -99,7 +99,7 @@ describe('usePeriodicSync', () => {
     });
 
     expect(mocks.showToast).toHaveBeenCalledWith('Sync error', 'error');
-    expect(mocks.errorHandler).toHaveBeenCalledWith(
+    expect(mocks.reportError).toHaveBeenCalledWith(
       'Data synchronization failed',
       expect.any(Error),
     );

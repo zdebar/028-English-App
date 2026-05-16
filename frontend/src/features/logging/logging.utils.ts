@@ -1,4 +1,4 @@
-import { errorHandler } from './error-handler';
+import { reportError } from './monitoring-handler';
 
 /**
  * Logs all rejected promise results with a given context.
@@ -13,7 +13,7 @@ export function logRejectedResults(
   let hasError = false;
   results.forEach((result) => {
     if (result.status === 'rejected') {
-      errorHandler(context, result.reason);
+      reportError(context, result.reason);
       hasError = true;
     }
   });

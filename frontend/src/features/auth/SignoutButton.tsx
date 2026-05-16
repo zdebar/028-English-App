@@ -4,7 +4,7 @@ import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { useThemeStore } from '../theme/use-theme-store';
 import { MenuButtonText } from '@/components/UI/MenuButtonText';
-import { errorHandler } from '../logging/error-handler';
+import { reportError } from '../logging/monitoring-handler';
 import { useToastStore } from '../toast/use-toast-store';
 
 type SignoutButtonProps = Readonly<{
@@ -30,7 +30,7 @@ export default function SignoutButton({ className }: SignoutButtonProps): JSX.El
       await handleLogout();
     } catch (err) {
       showToast(TEXTS.signoutError, 'error');
-      errorHandler('Error signing out', err);
+      reportError('Error signing out', err);
     }
   };
 

@@ -7,7 +7,7 @@ import { ROUTES } from '@/config/routes.config';
 import { useAuthStore } from '../auth/use-auth-store';
 import { useCallback } from 'react';
 import { useToastStore } from '../toast/use-toast-store';
-import { errorHandler } from '../logging/error-handler';
+import { reportError } from '../logging/monitoring-handler';
 import { DataState } from '@/components/UI/DataState';
 import { ListButton } from '@/components/UI/buttons/ListButton';
 import OverviewCard from '@/components/UI/OverviewCard';
@@ -24,7 +24,7 @@ export default function BlocksOverview() {
       return await Blocks.getOverviewBlocks(userId);
     } catch (error) {
       showToast(error instanceof Error ? error.message : String(error));
-      errorHandler('Failed to fetch blocks overview', error);
+      reportError('Failed to fetch blocks overview', error);
       return [];
     }
   }, [userId, showToast]);

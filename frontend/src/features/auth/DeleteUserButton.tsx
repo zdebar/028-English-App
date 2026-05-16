@@ -11,8 +11,7 @@ import { TableName } from '@/types/table.types';
 import { type JSX } from 'react';
 import { useThemeStore } from '../theme/use-theme-store';
 import { MenuButtonText } from '@/components/UI/MenuButtonText';
-import { errorHandler } from '../logging/error-handler';
-import { infoHandler } from '../logging/info-handler';
+import { reportError, reportInfo } from '../logging/monitoring-handler';
 import { useToastStore } from '../toast/use-toast-store';
 
 type DeleteUserButtonProps = Readonly<{
@@ -56,9 +55,9 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
       }
 
       showToast(TEXTS.deleteUserSuccessToast, 'success');
-      infoHandler(`User ${userId} deleted their account`);
+      reportInfo(`User ${userId} deleted their account`);
     } catch (err) {
-      errorHandler('Error deleting user', err);
+      reportError('Error deleting user', err);
       showToast(TEXTS.deleteUserErrorToast, 'error');
     } finally {
       handleLogout({ skipSync: true, skipRemoteSignOut: true });

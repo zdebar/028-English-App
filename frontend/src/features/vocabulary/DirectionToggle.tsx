@@ -1,6 +1,6 @@
 import { TEXTS } from '@/locales/cs';
 import { useEffect, useMemo } from 'react';
-import { errorHandler } from '../logging/error-handler';
+import { reportError } from '../logging/monitoring-handler';
 import StyledButton from '@/components/UI/buttons/StyledButton';
 
 type DirectionToggleProps<T> = Readonly<{
@@ -34,7 +34,7 @@ export default function DirectionTogggle<T>({
 
   useEffect(() => {
     if (options.length === 0) {
-      errorHandler(
+      reportError(
         'DirectionToggle expects at least 1 option, received 0.',
         new Error('Invalid toggle options count'),
       );
@@ -43,7 +43,7 @@ export default function DirectionTogggle<T>({
 
     if (currentIndex !== -1) return;
 
-    errorHandler(
+    reportError(
       `Value "${value}" is not valid for DirectionToggle.`,
       new Error('Invalid toggle value'),
     );
@@ -63,7 +63,7 @@ export default function DirectionTogggle<T>({
         title={TEXTS.translationDirection}
         onClick={() => {
           if (options.length === 0) {
-            errorHandler(
+            reportError(
               'Cannot toggle DirectionToggle: options are not valid.',
               new Error('Invalid toggle state'),
             );

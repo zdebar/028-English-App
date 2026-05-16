@@ -15,7 +15,7 @@ const mocks = vi.hoisted(() => ({
   dataSync: vi.fn(),
   audioSync: vi.fn(),
   logRejectedResults: vi.fn(),
-  errorHandler: vi.fn(),
+  reportError: vi.fn(),
 }));
 
 vi.mock('@/features/auth/use-auth-store', () => ({
@@ -38,8 +38,8 @@ vi.mock('@/features/logging/logging.utils', () => ({
   logRejectedResults: createDelegatedMock(mocks.logRejectedResults),
 }));
 
-vi.mock('@/features/logging/error-handler', () => ({
-  errorHandler: createDelegatedMock(mocks.errorHandler),
+vi.mock('@/features/logging/monitoring-handler', () => ({
+  reportError: createDelegatedMock(mocks.reportError),
 }));
 
 vi.mock('@/locales/cs', () => ({
@@ -100,10 +100,7 @@ describe('SyncButton', () => {
 
     await waitFor(() => {
       expect(mocks.showToast).toHaveBeenCalledWith('Sync failed', 'error');
-      expect(mocks.errorHandler).toHaveBeenCalledWith(
-        'Error synchronizing data',
-        expect.any(Error),
-      );
+      expect(mocks.reportError).toHaveBeenCalledWith('Error synchronizing data', expect.any(Error));
     });
   });
 });

@@ -1,8 +1,11 @@
 import ErrorBoundary from '@/components/utils/error-boundary.tsx';
+import { initializeMonitoring } from '@/features/logging/monitoring-handler';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App.tsx';
+
+initializeMonitoring();
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

@@ -43,12 +43,9 @@ vi.mock('@/features/practice/hooks/use-audio-manager', () => ({
   }),
 }));
 
-vi.mock('@/features/logging/error-handler', () => ({
-  errorHandler: vi.fn(),
-}));
-
-vi.mock('@/features/logging/info-handler', () => ({
-  infoHandler: vi.fn(),
+vi.mock('@/features/logging/monitoring-handler', () => ({
+  reportError: vi.fn(),
+  reportInfo: vi.fn(),
 }));
 
 import { usePracticeDeck } from '../hooks/use-practice-deck';

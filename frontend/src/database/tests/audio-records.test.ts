@@ -12,7 +12,7 @@ const mocks = vi.hoisted(() => ({
   fetchStorageBucketMetadata: vi.fn(),
   metadataGetRemoteUpdatedAt: vi.fn(),
   metadataMarkAsFetched: vi.fn(),
-  infoHandler: vi.fn(),
+  reportInfo: vi.fn(),
   logRejectedResults: vi.fn(),
   jszipLoadAsync: vi.fn(),
 }));
@@ -64,8 +64,8 @@ vi.mock('@/database/models/db', () => ({
   },
 }));
 
-vi.mock('@/features/logging/info-handler', () => ({
-  infoHandler: (...args: unknown[]) => mocks.infoHandler(...args),
+vi.mock('@/features/logging/monitoring-handler', () => ({
+  reportInfo: (...args: unknown[]) => mocks.reportInfo(...args),
 }));
 
 vi.mock('@/features/logging/logging.utils', () => ({
@@ -147,7 +147,7 @@ describe('AudioRecord', () => {
       await AudioRecord.syncFromRemote();
 
       expect(mocks.fetchStorage).not.toHaveBeenCalled();
-      expect(mocks.infoHandler).toHaveBeenCalledWith('No audio archives found in remote bucket.');
+      expect(mocks.reportInfo).toHaveBeenCalledWith('No audio archives found in remote bucket.');
     });
 
     it('downloads, extracts, stores files, and marks archive as fetched', async () => {

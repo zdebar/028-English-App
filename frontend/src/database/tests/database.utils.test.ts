@@ -3,8 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   download: vi.fn(),
   savePracticeDeck: vi.fn(),
-  infoHandler: vi.fn(),
-  errorHandler: vi.fn(),
+  reportInfo: vi.fn(),
+  reportError: vi.fn(),
 }));
 
 vi.mock('@/config/config', () => ({
@@ -30,12 +30,9 @@ vi.mock('@/config/supabase.config', () => ({
   },
 }));
 
-vi.mock('@/features/logging/info-handler', () => ({
-  infoHandler: (...args: unknown[]) => mocks.infoHandler(...args),
-}));
-
-vi.mock('@/features/logging/error-handler', () => ({
-  errorHandler: (...args: unknown[]) => mocks.errorHandler(...args),
+vi.mock('@/features/logging/monitoring-handler', () => ({
+  reportInfo: (...args: unknown[]) => mocks.reportInfo(...args),
+  reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
 
 vi.mock('@/database/models/user-items', () => ({
@@ -233,13 +230,13 @@ describe('database.utils', () => {
       const restorePromise = restoreUnsavedFromLocalStorage('u1');
 
       expect(localStorage.getItem('practiceDeckProgress_u1')).not.toBeNull();
-      expect(mocks.infoHandler).not.toHaveBeenCalled();
+      expect(mocks.reportInfo).not.toHaveBeenCalled();
 
       resolveSave?.();
       await restorePromise;
 
       expect(localStorage.getItem('practiceDeckProgress_u1')).toBeNull();
-      expect(mocks.infoHandler).toHaveBeenCalled();
+      expect(mocks.reportInfo).toHaveBeenCalled();
     });
 
     it('restores saved progress, removes key, and logs info', async () => {
@@ -259,7 +256,7 @@ describe('database.utils', () => {
         '2026-03-04T10:00:00.000Z',
       );
       expect(localStorage.getItem('practiceDeckProgress_u1')).toBeNull();
-      expect(mocks.infoHandler).toHaveBeenCalled();
+      expect(mocks.reportInfo).toHaveBeenCalled();
     });
 
     it('handles non-array progress payload without saving and still cleans up', async () => {
@@ -275,7 +272,7 @@ describe('database.utils', () => {
 
       expect(mocks.savePracticeDeck).not.toHaveBeenCalled();
       expect(localStorage.getItem('practiceDeckProgress_u1')).toBeNull();
-      expect(mocks.infoHandler).toHaveBeenCalledWith(
+      expect(mocks.reportInfo).toHaveBeenCalledWith(
         'Restored unsaved practice deck progress for user u1 with 0 items.',
       );
     });
@@ -285,7 +282,7 @@ describe('database.utils', () => {
 
       await restoreUnsavedFromLocalStorage('u1');
 
-      expect(mocks.errorHandler).toHaveBeenCalledWith(
+      expect(mocks.reportError).toHaveBeenCalledWith(
         'Error parsing practice deck progress from localStorage',
         expect.anything(),
       );

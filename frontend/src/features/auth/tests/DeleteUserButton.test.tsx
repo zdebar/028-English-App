@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
   clearSyncTimes: vi.fn(),
   invoke: vi.fn(),
   signOut: vi.fn(),
-  errorHandler: vi.fn(),
+  reportError: vi.fn(),
 }));
 
 vi.mock('@/features/auth/use-auth-store', () => ({
@@ -92,8 +92,8 @@ vi.mock('@/types/table.types', () => ({
   },
 }));
 
-vi.mock('@/features/logging/error-handler', () => ({
-  errorHandler: (...args: unknown[]) => mocks.errorHandler(...args),
+vi.mock('@/features/logging/monitoring-handler', () => ({
+  reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
 
 vi.mock('@/features/modal/ButtonWithModal', () => ({
@@ -156,7 +156,7 @@ describe('DeleteUserButton', () => {
 
     await waitFor(() => {
       expect(mocks.showToast).toHaveBeenCalledWith('Delete error', 'error');
-      expect(mocks.errorHandler).toHaveBeenCalledWith('Error deleting user', expect.any(Error));
+      expect(mocks.reportError).toHaveBeenCalledWith('Error deleting user', expect.any(Error));
     });
   });
 });
