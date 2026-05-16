@@ -26,8 +26,7 @@ vi.mock('@/config/config', () => ({
       nullReplacementDate: '9999-12-31T23:59:59+00:00',
     },
     audio: {
-      initialArchive: ['pack-a.zip'],
-      allArchives: ['pack-a.zip', 'pack-b.zip'],
+      archiveBucketName: 'archive-bucket',
     },
   },
 }));

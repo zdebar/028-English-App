@@ -76,23 +76,9 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
  * @param downloadAll - Whether to download all audio files (for PWA) or only selected ones (for web app)
  * @returns A promise that resolves when the data synchronization is complete
  */
-export async function audioSync(userId: string, downloadAll: boolean = false): Promise<void> {
+export async function audioSync(userId: string): Promise<void> {
   assertNonEmptyString(userId, 'userId');
-
-  const supportsMatchMedia =
-    typeof globalThis !== 'undefined' && typeof globalThis.matchMedia === 'function';
-  const isDisplayStandalone =
-    supportsMatchMedia && globalThis.matchMedia('(display-mode: standalone)').matches;
-  const isStandalone =
-    downloadAll || isDisplayStandalone || (globalThis.navigator as any).standalone === true;
-
-  if (isStandalone) {
-    // PWA or downloadAll: download all audio files
-    await AudioRecord.syncFromRemote(config.audio.allArchives);
-  } else {
-    // Web app: download only selected audio files
-    await AudioRecord.syncFromRemote(config.audio.initialArchive);
-  }
+  await AudioRecord.syncFromRemote();
 }
 
 /**

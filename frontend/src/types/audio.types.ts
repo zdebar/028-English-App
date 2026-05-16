@@ -5,5 +5,5 @@ export interface AudioRecordLocal {
 
 export interface AudioMetadataLocal {
   archive_name: string; // Name of the audio archive (e.g., "audio_part1.zip")
-  fetched_at: string; // Timestamp when the archive was fetched
+  remote_updated_at: string; // The remote file's updated_at timestamp at the time of last download
 }

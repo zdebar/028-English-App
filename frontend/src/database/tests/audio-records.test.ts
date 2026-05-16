@@ -9,7 +9,8 @@ const mocks = vi.hoisted(() => ({
   userItemsToArray: vi.fn(),
   dbTransaction: vi.fn(),
   fetchStorage: vi.fn(),
-  metadataIsFetched: vi.fn(),
+  fetchStorageBucketMetadata: vi.fn(),
+  metadataGetRemoteUpdatedAt: vi.fn(),
   metadataMarkAsFetched: vi.fn(),
   infoHandler: vi.fn(),
   logRejectedResults: vi.fn(),
@@ -32,11 +33,12 @@ vi.mock('@/config/config', () => ({
 
 vi.mock('@/database/utils/audio-records.utils', () => ({
   fetchStorage: (...args: unknown[]) => mocks.fetchStorage(...args),
+  fetchStorageBucketMetadata: (...args: unknown[]) => mocks.fetchStorageBucketMetadata(...args),
 }));
 
 vi.mock('@/database/models/audio-metadata', () => ({
   default: {
-    isFetched: (...args: unknown[]) => mocks.metadataIsFetched(...args),
+    getRemoteUpdatedAt: (...args: unknown[]) => mocks.metadataGetRemoteUpdatedAt(...args),
     markAsFetched: (...args: unknown[]) => mocks.metadataMarkAsFetched(...args),
   },
 }));
@@ -120,23 +122,44 @@ describe('AudioRecord', () => {
   });
 
   describe('syncAudioData', () => {
-    it('skips archive download when already fetched', async () => {
-      mocks.metadataIsFetched.mockResolvedValue(true);
+    it('skips archive download when local is up to date', async () => {
+      mocks.fetchStorageBucketMetadata.mockResolvedValue(
+        new Map([
+          ['pack-1.zip', '2026-05-01T00:00:00.000Z'],
+          ['pack-2.zip', '2026-05-01T00:00:00.000Z'],
+        ]),
+      );
+      mocks.metadataGetRemoteUpdatedAt.mockResolvedValue('2026-05-01T00:00:00.000Z');
 
-      await AudioRecord.syncFromRemote(['pack-1.zip', 'pack-2.zip']);
+      await AudioRecord.syncFromRemote();
 
-      expect(mocks.metadataIsFetched).toHaveBeenCalledTimes(2);
+      expect(mocks.fetchStorageBucketMetadata).toHaveBeenCalledTimes(1);
+      expect(mocks.fetchStorageBucketMetadata).toHaveBeenCalledWith('archive-bucket');
+      expect(mocks.metadataGetRemoteUpdatedAt).toHaveBeenCalledTimes(2);
       expect(mocks.fetchStorage).not.toHaveBeenCalled();
       expect(mocks.audioBulkPut).not.toHaveBeenCalled();
       expect(mocks.metadataMarkAsFetched).not.toHaveBeenCalled();
     });
 
+    it('does nothing when remote bucket is empty', async () => {
+      mocks.fetchStorageBucketMetadata.mockResolvedValue(new Map());
+
+      await AudioRecord.syncFromRemote();
+
+      expect(mocks.fetchStorage).not.toHaveBeenCalled();
+      expect(mocks.infoHandler).toHaveBeenCalledWith('No audio archives found in remote bucket.');
+    });
+
     it('downloads, extracts, stores files, and marks archive as fetched', async () => {
+      const remoteTimestamp = '2026-05-10T00:00:00.000Z';
       const zipBlob = new Blob(['zip']);
       const extractedBlob = new Blob(['audio']);
       const fileAsync = vi.fn().mockResolvedValue(extractedBlob);
 
-      mocks.metadataIsFetched.mockResolvedValue(false);
+      mocks.fetchStorageBucketMetadata.mockResolvedValue(
+        new Map([['pack-3.zip', remoteTimestamp]]),
+      );
+      mocks.metadataGetRemoteUpdatedAt.mockResolvedValue(null);
       mocks.fetchStorage.mockResolvedValue(zipBlob);
       mocks.jszipLoadAsync.mockResolvedValue({
         files: {
@@ -145,21 +168,22 @@ describe('AudioRecord', () => {
         },
       });
 
-      await AudioRecord.syncFromRemote(['pack-3.zip']);
+      await AudioRecord.syncFromRemote();
 
+      expect(mocks.fetchStorageBucketMetadata).toHaveBeenCalledTimes(1);
+      expect(mocks.fetchStorageBucketMetadata).toHaveBeenCalledWith('archive-bucket');
       expect(mocks.fetchStorage).toHaveBeenCalledWith('archive-bucket', 'pack-3.zip');
       expect(mocks.audioBulkPut).toHaveBeenCalledWith([
         { filename: 'word.opus', audioBlob: extractedBlob },
       ]);
-      expect(mocks.metadataMarkAsFetched).toHaveBeenCalledWith('pack-3.zip');
+      expect(mocks.metadataMarkAsFetched).toHaveBeenCalledWith('pack-3.zip', remoteTimestamp);
     });
 
     it('logs and swallows archive sync errors', async () => {
       const error = new Error('network error');
-      mocks.metadataIsFetched.mockResolvedValue(false);
-      mocks.fetchStorage.mockRejectedValue(error);
+      mocks.fetchStorageBucketMetadata.mockRejectedValue(error);
 
-      await expect(AudioRecord.syncFromRemote(['broken-pack.zip'])).resolves.toBeUndefined();
+      await expect(AudioRecord.syncFromRemote()).resolves.toBeUndefined();
 
       expect(mocks.logRejectedResults).toHaveBeenCalledWith(
         expect.any(Array),
