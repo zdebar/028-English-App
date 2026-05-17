@@ -105,7 +105,6 @@ export async function dataSyncOnUnmount(userId: string): Promise<void> {
   const hasError = logRejectedResults(results, 'Unmount synchronization failed');
   if (hasError) {
     reportInfo('unmount_sync_failed', { userId });
-    return;
   }
 }
 
