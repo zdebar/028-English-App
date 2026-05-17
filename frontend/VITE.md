@@ -108,12 +108,6 @@ Use these helpers directly in app code and tests.
 
 Current sync events sent as `info`/`error` messages:
 
-- `data_sync_started`
-- `data_sync_succeeded`
-- `data_sync_failed`
-- `audio_sync_started`
-- `audio_sync_succeeded`
-- `unmount_sync_succeeded`
 - `unmount_sync_failed`
 
 ### Build release version

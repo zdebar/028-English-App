@@ -28,8 +28,6 @@ import { reportInfo } from '@/features/logging/monitoring-handler';
 export async function dataSync(userId: string, fullSync: boolean = false): Promise<void> {
   assertNonEmptyString(userId, 'userId');
 
-  reportInfo('data_sync_started', { userId, fullSync });
-
   await initDbMappings();
   await restoreUnsavedFromLocalStorage(userId);
 
@@ -66,14 +64,11 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
   triggerDailyCountUpdatedEvent(userId);
   triggerLevelsUpdatedEvent(userId);
   if (isError) {
-    reportInfo('data_sync_failed', { userId, fullSync: doFullSync });
     throw new Error('Data synchronization error');
   }
   if (doFullSync) {
     setFullSyncTime(userId, now);
   }
-
-  reportInfo('data_sync_succeeded', { userId, fullSync: doFullSync });
 }
 
 /**
@@ -85,9 +80,7 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
  */
 export async function audioSync(userId: string): Promise<void> {
   assertNonEmptyString(userId, 'userId');
-  reportInfo('audio_sync_started', { userId });
   await AudioRecord.syncFromRemote();
-  reportInfo('audio_sync_succeeded', { userId });
 }
 
 /**
@@ -114,8 +107,6 @@ export async function dataSyncOnUnmount(userId: string): Promise<void> {
     reportInfo('unmount_sync_failed', { userId });
     return;
   }
-
-  reportInfo('unmount_sync_succeeded', { userId });
 }
 
 /**

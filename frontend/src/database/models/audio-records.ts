@@ -3,7 +3,7 @@ import type AppDB from '@/database/models/app-db';
 import AudioMetadata from '@/database/models/audio-metadata';
 import { db } from '@/database/models/db';
 import { fetchStorage, fetchStorageBucketMetadata } from '@/database/utils/audio-records.utils';
-import { reportInfo } from '@/features/logging/monitoring-handler';
+import { reportInfo, reportError } from '@/features/logging/monitoring-handler';
 import { logRejectedResults } from '@/features/logging/logging.utils';
 import { ZipExtractionError } from '@/types/error.types';
 import type { AudioRecordLocal } from '@/types/audio.types';
@@ -34,17 +34,18 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    * Fetches the bucket file list once, then downloads only files newer than the locally stored version.
    */
   static async syncFromRemote(): Promise<void> {
-    const metadataResults = await Promise.allSettled([
-      fetchStorageBucketMetadata(config.audio.archiveBucketName),
-    ]);
-    const hasMetadataError = logRejectedResults(
-      metadataResults,
-      'Operation failed during audio data sync',
-    );
-    if (hasMetadataError) return;
+    let bucketMetadata;
+    try {
+      bucketMetadata = await fetchStorageBucketMetadata(config.audio.archiveBucketName);
+    } catch (error) {
+      reportError('Audio sync: fetchStorageBucketMetadata failed', error);
+      logRejectedResults(
+        [{ status: 'rejected', reason: error }],
+        'Operation failed during audio data sync',
+      );
+      return;
+    }
 
-    const bucketMetadata =
-      metadataResults[0].status === 'fulfilled' ? metadataResults[0].value : null;
     if (!bucketMetadata) return;
 
     if (bucketMetadata.size === 0) {

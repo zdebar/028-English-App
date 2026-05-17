@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   metadataGetRemoteUpdatedAt: vi.fn(),
   metadataMarkAsFetched: vi.fn(),
   reportInfo: vi.fn(),
+  reportError: vi.fn(),
   logRejectedResults: vi.fn(),
   jszipLoadAsync: vi.fn(),
 }));
@@ -66,6 +67,7 @@ vi.mock('@/database/models/db', () => ({
 
 vi.mock('@/features/logging/monitoring-handler', () => ({
   reportInfo: (...args: unknown[]) => mocks.reportInfo(...args),
+  reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
 
 vi.mock('@/features/logging/logging.utils', () => ({
@@ -186,7 +188,7 @@ describe('AudioRecord', () => {
       await expect(AudioRecord.syncFromRemote()).resolves.toBeUndefined();
 
       expect(mocks.logRejectedResults).toHaveBeenCalledWith(
-        expect.any(Array),
+        [{ status: 'rejected', reason: error }],
         'Operation failed during audio data sync',
       );
     });
