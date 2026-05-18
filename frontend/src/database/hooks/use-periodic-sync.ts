@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { dataSyncOnUnmount, dataSync, audioSync } from '../utils/data-sync.utils';
-import AudioRecord from '../models/audio-records';
 import { TEXTS } from '@/locales/cs';
 import config from '@/config/config';
-import { reportError } from '@/features/logging/monitoring-handler';
-import { useToastStore } from '@/features/toast/use-toast-store';
+import AudioRecord from '@/database/models/audio-records';
+import { audioSync, dataSync, dataSyncOnUnmount } from '@/database/utils/data-sync.utils';
 import { logRejectedResults } from '@/features/logging/logging.utils';
+import { reportError } from '@/features/logging/monitoring-handler';
 import { useSyncWarningStore } from '@/features/sync/use-sync-warning';
+import { useToastStore } from '@/features/toast/use-toast-store';
 
 /**
  * Hook that manages periodic data synchronization for a user.
@@ -23,7 +23,7 @@ import { useSyncWarningStore } from '@/features/sync/use-sync-warning';
  * @example
  * const { loading } = usePeriodicSync(userId);
  */
-export function usePeriodicSync(userId: string | null) {
+export function usePeriodicSync(userId: string | null): { loading: boolean } {
   const [loading, setLoading] = useState(false);
   const inFlightSync = useRef<Promise<void> | null>(null);
   const isUnmounted = useRef(false);
@@ -34,7 +34,10 @@ export function usePeriodicSync(userId: string | null) {
   const setSynchronized = useSyncWarningStore((state) => state.setSynchronized);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      return;
+    }
+
     const activeUserId = userId;
     isUnmounted.current = false;
 
@@ -102,7 +105,7 @@ export function usePeriodicSync(userId: string | null) {
         reportError('Unmount synchronization failed', error);
       });
     };
-  }, [userId]);
+  }, [setSynchronized, showToast, userId]);
 
   return { loading };
 }

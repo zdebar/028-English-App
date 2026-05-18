@@ -1,5 +1,5 @@
 import PracticeCard from '@/features/practice/PracticeCard';
-import type { JSX } from 'react/jsx-dev-runtime';
+import type { JSX } from 'react';
 
 /**
  * Practice page component.

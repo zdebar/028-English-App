@@ -1,5 +1,5 @@
 import VocabularyOverview from '@/features/vocabulary/VocabularOverview';
-import type { JSX } from 'react/jsx-dev-runtime';
+import type { JSX } from 'react';
 
 /**
  * Vocabulary page component.

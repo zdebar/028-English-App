@@ -1,4 +1,4 @@
-import type { JSX } from 'react/jsx-dev-runtime';
+import type { JSX } from 'react';
 
 type ScreenshotProps = Readonly<{
   readonly src: string;

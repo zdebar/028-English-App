@@ -1,5 +1,5 @@
 import PrivacyPolicyCzech from '@/features/privacy-policy/PrivacyPolicyCzech';
-import type { JSX } from 'react/jsx-dev-runtime';
+import type { JSX } from 'react';
 
 /**
  * Privacy Policy page component.

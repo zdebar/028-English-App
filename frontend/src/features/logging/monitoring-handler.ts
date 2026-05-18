@@ -3,11 +3,11 @@ import * as Sentry from '@sentry/react';
 type MonitoringContext = Record<string, string | number | boolean | null | undefined>;
 
 function isLocalhostRuntime(): boolean {
-  if (typeof window === 'undefined') {
+  if (globalThis.location === undefined) {
     return false;
   }
 
-  const hostname = window.location.hostname;
+  const hostname = globalThis.location.hostname;
   return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
 }
 

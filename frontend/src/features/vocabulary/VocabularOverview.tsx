@@ -1,15 +1,15 @@
-import { useAuthStore } from '@/features/auth/use-auth-store';
-import UserItem from '@/database/models/user-items';
-import { useCallback } from 'react';
-import VocabularyDetailCard from './VocabularyDetailCard';
-import VocabularyList from './VocabularyList';
-import { useNavigate } from 'react-router-dom';
-import { TEXTS } from '@/locales/cs';
-import { useToastStore } from '../toast/use-toast-store';
-import { reportError } from '../logging/monitoring-handler';
 import DelayedNotification from '@/components/UI/DelayedNotification';
+import UserItem from '@/database/models/user-items';
+import { useAuthStore } from '@/features/auth/use-auth-store';
+import { reportError } from '@/features/logging/monitoring-handler';
+import { TEXTS } from '@/locales/cs';
+import { useToastStore } from '@/features/toast/use-toast-store';
 import { useVocabulary } from './use-vocabulary';
 import { useLocalStorageSync } from '@/hooks/user-local-storage-sync';
+import { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import VocabularyDetailCard from './VocabularyDetailCard';
+import VocabularyList from './VocabularyList';
 
 const SEARCH_KEY = 'vocabulary_search_term';
 
@@ -43,7 +43,10 @@ export default function VocabularyOverview() {
   // -- HANDLERS  --
   const handleClearUserItem = useCallback(async () => {
     const itemId = selectedWord?.item_id;
-    if (typeof itemId !== 'number' || !userId) return;
+    if (typeof itemId !== 'number' || !userId) {
+      return;
+    }
+
     try {
       await UserItem.resetItemById(userId, itemId);
       setSelectedWord(null);
@@ -57,10 +60,13 @@ export default function VocabularyOverview() {
 
   const handleSelectWord = useCallback(
     (index: number) => {
-      if (index < 0 || index >= filteredWords.length) return;
+      if (index < 0 || index >= filteredWords.length) {
+        return;
+      }
+
       setSelectedWord(filteredWords[index]);
     },
-    [filteredWords],
+    [filteredWords, setSelectedWord],
   );
 
   if (loading) {

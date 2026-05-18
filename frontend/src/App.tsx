@@ -1,36 +1,33 @@
+import { ROUTES } from '@/config/routes.config';
+import Notification from '@/components/UI/Notification';
 import Footer from '@/components/Layout/Footer';
 import Header from '@/components/Layout/Header';
 import ProtectedLayout from '@/components/utils/protected-laout';
 import { usePeriodicSync } from '@/database/hooks/use-periodic-sync';
-
 import { useAuthStore } from '@/features/auth/use-auth-store';
-
+import { GoogleAnalytics } from '@/features/analytics/GoogleAnalytics';
+import { reportError } from '@/features/logging/monitoring-handler';
+import OverlayMask from '@/features/overlay/OverlayMask';
+import { useThemeLoader } from '@/features/theme/use-theme-loader';
 import ToastContainer from '@/features/toast/ToastContainer';
-import { ROUTES } from '@/config/routes.config';
-import OverlayMask from './features/overlay/OverlayMask';
-import { GoogleAnalytics } from './features/analytics/GoogleAnalytics';
-
+import { useToastStore } from '@/features/toast/use-toast-store';
+import { useDailyStatsReset } from '@/features/user-stats/use-daily-stats-reset';
+import { useUserStoreSync } from '@/features/user-stats/use-user-store-sync';
+import { TEXTS } from '@/locales/cs';
+import Blocks from '@/pages/Blocks';
+import BlockItems from '@/pages/BlockItems';
+import Grammar from '@/pages/Grammar';
+import Home from '@/pages/Home';
+import Levels from '@/pages/Levels';
+import Practice from '@/pages/Practice';
+import PrivacyPolicy from '@/pages/PrivacyPolicy';
+import Profile from '@/pages/Profile';
+import Vocabulary from '@/pages/Vocabulary';
 import { lazy, Suspense, useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
-import { reportError } from './features/logging/monitoring-handler';
-import { useToastStore } from './features/toast/use-toast-store';
-import { TEXTS } from './locales/cs';
 import './styles/index.css';
-import { useThemeLoader } from './features/theme/use-theme-loader';
-import { useUserStoreSync } from './features/user-stats/use-user-store-sync';
-import { useDailyStatsReset } from './features/user-stats/use-daily-stats-reset';
-import Notification from './components/UI/Notification';
-import Home from '@/pages/Home';
 
-const PrivacyPolicy = lazy(() => import('@/pages/PrivacyPolicy'));
 const Guide = lazy(() => import('@/pages/Guide'));
-const Practice = lazy(() => import('@/pages/Practice'));
-const Profile = lazy(() => import('@/pages/Profile'));
-const Levels = lazy(() => import('@/pages/Levels'));
-const Blocks = lazy(() => import('./pages/Blocks'));
-const BlockItems = lazy(() => import('./pages/BlockItems'));
-const Grammar = lazy(() => import('@/pages/Grammar'));
-const Vocabulary = lazy(() => import('@/pages/Vocabulary'));
 
 export default function App() {
   const userId = useAuthStore((state) => state.userId);
@@ -40,7 +37,6 @@ export default function App() {
   const hideToast = useToastStore((state) => state.hideToast);
   const location = useLocation();
 
-  // Auth initialization effect
   useEffect(() => {
     try {
       const cleanup = initializeAuth();
@@ -49,28 +45,22 @@ export default function App() {
       showToast(TEXTS.authInitErrorToast, 'error');
       reportError('Auth Initialization Error', error);
     }
-  }, [initializeAuth]);
+  }, [initializeAuth, showToast]);
 
-  // User store reset on user change (sign-in/sign-out)
   useUserStoreSync(userId);
-
-  // Theme load
   useThemeLoader(userId);
-
-  // Data synchronization
   const { loading: syncLoading } = usePeriodicSync(userId);
-
-  // User store new day reset
   useDailyStatsReset(userId);
 
   const loading = authLoading || syncLoading;
+
   useEffect(() => {
     if (loading) {
       showToast(TEXTS.syncLoadingText, 'info', true);
     } else {
       hideToast();
     }
-  }, [loading]);
+  }, [hideToast, loading, showToast]);
 
   return (
     <>

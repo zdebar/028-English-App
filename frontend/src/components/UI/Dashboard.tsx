@@ -1,11 +1,11 @@
 import { TEXTS, ARIA_TEXTS } from '@/locales/cs';
 import BlockBar from '@/components/UI/BlockBar';
-import { useUserStore } from '../../features/user-stats/use-user-store';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
-import { getInProgressLessons } from '../../utils/dashboard.utils';
+import { useUserStore } from '@/features/user-stats/use-user-store';
 import MasteredToggleButton from '@/components/UI/buttons/MasteredToggleButton';
 import type { LessonOverviewType } from '@/types/generic.types';
+import { getInProgressLessons } from '@/utils/dashboard.utils';
 
 type DashboardProps = Readonly<{
   className?: string;

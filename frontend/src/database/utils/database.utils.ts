@@ -1,5 +1,5 @@
 import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
-import UserItem from '../models/user-items';
+import UserItem from '@/database/models/user-items';
 
 /**
  * Returns today's date in YYYY-MM-DD format.

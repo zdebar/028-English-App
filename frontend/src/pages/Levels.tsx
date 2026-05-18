@@ -1,5 +1,5 @@
 import LevelsOverview from '@/features/levels/LevelsOverview';
-import type { JSX } from 'react/jsx-dev-runtime';
+import type { JSX } from 'react';
 
 /**
  * Renders the Levels page component.

@@ -1,6 +1,8 @@
 import config from '@/config/config';
 import AudioRecord from '@/database/models/audio-records';
+import Blocks from '@/database/models/blocks';
 import { initDbMappings } from '@/database/models/db-init';
+import { db } from '@/database/models/db';
 import UserItem from '@/database/models/user-items';
 import UserScoreType from '@/database/models/user-scores';
 import { restoreUnsavedFromLocalStorage } from '@/database/utils/database.utils';
@@ -8,14 +10,12 @@ import { getFullSyncTime, setFullSyncTime } from '@/database/utils/sync-time.uti
 import { logRejectedResults } from '@/features/logging/logging.utils';
 import Lessons from '@/database/models/lessons';
 import Levels from '@/database/models/levels';
-import { db } from '../models/db';
-import { TableName } from '@/types/table.types';
 import Dexie from 'dexie';
-import Metadata from '../models/metadata';
+import Metadata from '@/database/models/metadata';
+import type { TableName } from '@/types/table.types';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 import { supabaseInstance } from '@/config/supabase.config';
 import { triggerDailyCountUpdatedEvent, triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
-import Blocks from '../models/blocks';
 import Grammar from '@/database/models/grammar';
 import { reportInfo } from '@/features/logging/monitoring-handler';
 

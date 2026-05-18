@@ -69,7 +69,8 @@ self.addEventListener('activate', (event) => {
           });
         });
       }),
-)});
+  );
+});
 
 function shouldHandleRequest(request) {
   if (request.method !== 'GET') {

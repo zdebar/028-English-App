@@ -1,11 +1,11 @@
+import { MenuButtonText } from '@/components/UI/MenuButtonText';
 import { StandardButton } from '@/components/UI/buttons/StandardButton';
 import { ROUTES } from '@/config/routes.config';
 import DeleteUserButton from '@/features/auth/DeleteUserButton';
 import SignoutButton from '@/features/auth/SignoutButton';
 import { TEXTS } from '@/locales/cs';
+import type { JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { JSX } from 'react/jsx-dev-runtime';
-import { MenuButtonText } from '@/components/UI/MenuButtonText';
 
 /**
  * Profile page component.

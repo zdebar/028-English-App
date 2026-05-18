@@ -1,10 +1,10 @@
-import type { JSX } from 'react/jsx-dev-runtime';
+import type { HTMLAttributes, JSX } from 'react';
 
 type GoalMetViewProps = Readonly<{
   current: number;
   goal: number;
 }> &
-  React.HTMLAttributes<HTMLParagraphElement>;
+  HTMLAttributes<HTMLParagraphElement>;
 
 /**
  * Displays the current progress toward a goal with color coding.

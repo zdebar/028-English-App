@@ -1,5 +1,5 @@
 import BlocksOverview from '@/features/blocks/BlocksOverview';
-import type { JSX } from 'react/jsx-dev-runtime';
+import type { JSX } from 'react';
 
 /**
  * Renders the Blocks page component.
