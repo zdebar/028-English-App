@@ -16,8 +16,8 @@ vi.mock('@/features/toast/use-toast-store', () => ({
     selector({ showToast: showToastMock }),
 }));
 
-vi.mock('@/features/logging/error-handler', () => ({
-  errorHandler: (...args: unknown[]) => errorHandlerMock(...args),
+vi.mock('@/features/logging/monitoring-handler', () => ({
+  reportError: (...args: unknown[]) => errorHandlerMock(...args),
 }));
 
 vi.mock('@/locales/cs', () => ({

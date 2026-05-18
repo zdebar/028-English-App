@@ -22,14 +22,14 @@ describe('Toast', () => {
 
     expect(screen.getByText('Saved')).toBeTruthy();
     const toastDiv = container.firstElementChild as HTMLElement;
-    expect(toastDiv.className.includes('bg-success-light')).toBe(true);
+    expect(toastDiv.classList.contains('bg-success-light')).toBe(true);
   });
 
   it('uses info style by default', () => {
     const { container } = render(<Toast>Info message</Toast>);
 
     const toastDiv = container.firstElementChild as HTMLElement;
-    expect(toastDiv.className.includes('bg-info-light')).toBe(true);
+    expect(toastDiv.classList.contains('bg-info-light')).toBe(true);
   });
 
   it('hides toast on click and stops propagation', () => {

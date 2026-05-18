@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import Grammar from '@/database/models/grammar';
-import { errorHandler } from '@/features/logging/error-handler';
+import { reportError } from '@/features/logging/monitoring-handler';
 import { TEXTS } from '@/locales/cs';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import type { GrammarCardType } from '../GrammarCard';
@@ -19,7 +19,7 @@ export function useGrammar() {
         setGrammarData(grammar);
         setGrammarVisible(true);
       } catch (error) {
-        errorHandler('Error fetching grammar:', error);
+        reportError('Error fetching grammar:', error);
         showToast(TEXTS.loadingError, 'error');
       }
     },

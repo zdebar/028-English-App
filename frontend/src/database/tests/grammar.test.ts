@@ -3,8 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   grammarGet: vi.fn(),
   grammarAnyOf: vi.fn(),
-  startedBetween: vi.fn(),
-  startedToArray: vi.fn(),
+  getStartedGrammarIds: vi.fn(),
   syncFromRemoteGeneric: vi.fn(),
 }));
 
@@ -21,16 +20,12 @@ vi.mock('@/database/models/db', () => ({
         throw new Error(`Unexpected grammar.where field: ${field}`);
       },
     },
-    user_items: {
-      where: (field: string) => {
-        if (field === '[user_id+started_at]') {
-          return {
-            between: (...args: unknown[]) => mocks.startedBetween(...args),
-          };
-        }
-        throw new Error(`Unexpected user_items.where field: ${field}`);
-      },
-    },
+  },
+}));
+
+vi.mock('@/database/models/user-items', () => ({
+  default: {
+    getStartedGrammarIds: (...args: unknown[]) => mocks.getStartedGrammarIds(...args),
   },
 }));
 
@@ -48,12 +43,7 @@ describe('Grammar', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mocks.startedBetween.mockReturnValue({
-      filter: () => ({
-        toArray: (...args: unknown[]) => mocks.startedToArray(...args),
-      }),
-    });
-    mocks.startedToArray.mockResolvedValue([]);
+    mocks.getStartedGrammarIds.mockResolvedValue([]);
     mocks.grammarAnyOf.mockReturnValue({
       sortBy: vi.fn().mockResolvedValue([]),
     });
@@ -74,21 +64,8 @@ describe('Grammar', () => {
     await expect(Grammar.getById(2)).rejects.toThrow('Grammar with ID 2 not found.');
   });
 
-  it('getStartedIds returns unique grammar ids', async () => {
-    mocks.startedToArray.mockResolvedValue([
-      { user_id: 'u1', grammar_id: 1, started_at: '2026-01-01' },
-      { user_id: 'u1', grammar_id: 2, started_at: '2026-01-02' },
-      { user_id: 'u1', grammar_id: 1, started_at: '2026-01-03' },
-    ]);
-
-    await expect(Grammar.getStartedGrammarIds('u1')).resolves.toEqual([1, 2]);
-  });
-
   it('getStartedList returns grammar list for started ids', async () => {
-    mocks.startedToArray.mockResolvedValue([
-      { user_id: 'u1', grammar_id: 1, started_at: '2026-01-01' },
-      { user_id: 'u1', grammar_id: 2, started_at: '2026-01-02' },
-    ]);
+    mocks.getStartedGrammarIds.mockResolvedValue([1, 2]);
     mocks.grammarAnyOf.mockReturnValue({
       sortBy: vi.fn().mockResolvedValue([
         { id: 1, name: 'A', note: '', sort_order: 1, deleted_at: null },
@@ -97,6 +74,7 @@ describe('Grammar', () => {
     });
 
     await expect(Grammar.getStarted('u1')).resolves.toHaveLength(2);
+    expect(mocks.grammarAnyOf).toHaveBeenCalledWith([1, 2]);
   });
 
   it('syncFromRemote delegates to generic sync utility', async () => {

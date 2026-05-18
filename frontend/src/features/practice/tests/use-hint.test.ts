@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { useHint } from '../hooks/use-hint';
+import { useHint, NBSP } from '../hooks/use-hint';
 
 describe('useHint', () => {
   it('starts with index 0 and no visible hints', () => {
@@ -72,5 +72,9 @@ describe('useHint', () => {
     expect(result.current.index).toBe(0);
     expect(result.current.englishHinted).toBe('\u00A0');
     expect(result.current.czechHinted).toBe('\u00A0');
+  });
+
+  it('NBSP is a non-breaking space character', () => {
+    expect(NBSP).toBe('\u00A0');
   });
 });

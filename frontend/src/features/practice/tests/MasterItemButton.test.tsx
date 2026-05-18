@@ -1,9 +1,12 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import config from '@/config/config';
 
 const mocks = vi.hoisted(() => ({
   showToast: vi.fn(),
 }));
+
+const HOLD_DURATION_MS = config.practice.holdDuration;
 
 vi.mock('@/features/toast/use-toast-store', () => ({
   useToastStore: (selector: (state: { showToast: typeof mocks.showToast }) => unknown) =>
@@ -19,7 +22,7 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 
-vi.mock('@/components/UI/buttons/BaseButton', () => ({
+vi.mock('@/components/UI/buttons/StyledButton', () => ({
   default: ({ children, ...props }: any) => (
     <button data-testid="master-button" {...props}>
       {children}
@@ -64,7 +67,7 @@ describe('MasterItemButton', () => {
     render(<MasterItemButton disabled={false} onConfirm={vi.fn()} />);
 
     fireEvent.mouseDown(screen.getByTestId('master-button'));
-    vi.advanceTimersByTime(300);
+    vi.advanceTimersByTime(Math.max(HOLD_DURATION_MS - 1, 0));
     fireEvent.mouseUp(screen.getByTestId('master-button'));
     fireEvent.click(screen.getByTestId('master-button'));
 
@@ -76,7 +79,7 @@ describe('MasterItemButton', () => {
     render(<MasterItemButton disabled={false} onConfirm={onConfirm} />);
 
     fireEvent.mouseDown(screen.getByTestId('master-button'));
-    await vi.advanceTimersByTimeAsync(600);
+    await vi.advanceTimersByTimeAsync(HOLD_DURATION_MS);
 
     expect(onConfirm).toHaveBeenCalledTimes(1);
     expect(mocks.showToast).toHaveBeenCalledWith('Skip success', 'success');
@@ -87,7 +90,7 @@ describe('MasterItemButton', () => {
     render(<MasterItemButton disabled={false} onConfirm={onConfirm} />);
 
     fireEvent.touchStart(screen.getByTestId('master-button'));
-    await vi.advanceTimersByTimeAsync(600);
+    await vi.advanceTimersByTimeAsync(HOLD_DURATION_MS);
 
     expect(onConfirm).toHaveBeenCalledTimes(1);
     expect(mocks.showToast).toHaveBeenCalledWith('Skip error', 'error');
@@ -110,7 +113,7 @@ describe('MasterItemButton', () => {
     render(<MasterItemButton disabled={false} onConfirm={onConfirm} />);
 
     fireEvent.mouseDown(screen.getByTestId('master-button'));
-    await vi.advanceTimersByTimeAsync(600);
+    await vi.advanceTimersByTimeAsync(HOLD_DURATION_MS);
     expect(onConfirm).toHaveBeenCalledTimes(1);
 
     fireEvent.mouseUp(screen.getByTestId('master-button'));

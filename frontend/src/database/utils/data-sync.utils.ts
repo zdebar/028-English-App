@@ -1,23 +1,23 @@
 import config from '@/config/config';
 import AudioRecord from '@/database/models/audio-records';
+import Blocks from '@/database/models/blocks';
 import { initDbMappings } from '@/database/models/db-init';
-import Grammar from '@/database/models/grammar';
+import { db } from '@/database/models/db';
 import UserItem from '@/database/models/user-items';
-import UserScore from '@/database/models/user-scores';
+import UserScoreType from '@/database/models/user-scores';
 import { restoreUnsavedFromLocalStorage } from '@/database/utils/database.utils';
 import { getFullSyncTime, setFullSyncTime } from '@/database/utils/sync-time.utils';
 import { logRejectedResults } from '@/features/logging/logging.utils';
 import Lessons from '@/database/models/lessons';
 import Levels from '@/database/models/levels';
-import { db } from '../models/db';
-import { TableName } from '@/types/local.types';
 import Dexie from 'dexie';
-import Metadata from '../models/metadata';
-import { infoHandler } from '@/features/logging/info-handler';
+import Metadata from '@/database/models/metadata';
+import type { TableName } from '@/types/table.types';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 import { supabaseInstance } from '@/config/supabase.config';
 import { triggerDailyCountUpdatedEvent, triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
-import Blocks from '../models/blocks';
+import Grammar from '@/database/models/grammar';
+import { reportInfo } from '@/features/logging/monitoring-handler';
 
 /**
  * Synchronizes data for a specific user with the database.
@@ -46,7 +46,7 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
         Levels.syncFromRemote(true),
         Lessons.syncFromRemote(true),
         Blocks.syncFromRemote(true),
-        UserScore.syncFromRemote(userId, true),
+        UserScoreType.syncFromRemote(userId, true),
         UserItem.syncFromRemote(userId, true),
       ]
     : [
@@ -54,7 +54,7 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
         Levels.syncFromRemote(false),
         Lessons.syncFromRemote(false),
         Blocks.syncFromRemote(false),
-        UserScore.syncFromRemote(userId, false),
+        UserScoreType.syncFromRemote(userId, false),
         UserItem.syncFromRemote(userId, false),
       ];
 
@@ -63,7 +63,9 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
 
   triggerDailyCountUpdatedEvent(userId);
   triggerLevelsUpdatedEvent(userId);
-  if (isError) throw new Error('Data synchronization error');
+  if (isError) {
+    throw new Error('Data synchronization error');
+  }
   if (doFullSync) {
     setFullSyncTime(userId, now);
   }
@@ -76,23 +78,9 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
  * @param downloadAll - Whether to download all audio files (for PWA) or only selected ones (for web app)
  * @returns A promise that resolves when the data synchronization is complete
  */
-export async function audioSync(userId: string, downloadAll: boolean = false): Promise<void> {
+export async function audioSync(userId: string): Promise<void> {
   assertNonEmptyString(userId, 'userId');
-
-  const supportsMatchMedia =
-    typeof globalThis !== 'undefined' && typeof globalThis.matchMedia === 'function';
-  const isDisplayStandalone =
-    supportsMatchMedia && globalThis.matchMedia('(display-mode: standalone)').matches;
-  const isStandalone =
-    downloadAll || isDisplayStandalone || (globalThis.navigator as any).standalone === true;
-
-  if (isStandalone) {
-    // PWA or downloadAll: download all audio files
-    await AudioRecord.syncFromRemote(config.audio.allArchives);
-  } else {
-    // Web app: download only selected audio files
-    await AudioRecord.syncFromRemote(config.audio.initialArchive);
-  }
+  await AudioRecord.syncFromRemote();
 }
 
 /**
@@ -110,11 +98,14 @@ export async function dataSyncOnUnmount(userId: string): Promise<void> {
   }
 
   const results = await Promise.allSettled([
-    UserScore.syncFromRemote(userId, false),
+    UserScoreType.syncFromRemote(userId, false),
     UserItem.syncFromRemote(userId, false),
   ]);
 
-  logRejectedResults(results, 'Unmount synchronization failed');
+  const hasError = logRejectedResults(results, 'Unmount synchronization failed');
+  if (hasError) {
+    reportInfo('unmount_sync_failed', { userId });
+  }
 }
 
 /**
@@ -181,7 +172,7 @@ export async function syncFromRemoteGeneric<T extends { deleted_at: string | nul
     await Metadata.markAsSynced(tableName, newSyncedAt);
   });
 
-  infoHandler(`Completed ${remoteItems.length} ${tableName} pull from remote.`);
+  reportInfo(`Completed ${remoteItems.length} ${tableName} pull from remote.`);
 }
 
 /**

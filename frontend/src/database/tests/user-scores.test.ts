@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   get: vi.fn(),
@@ -80,7 +80,7 @@ vi.mock('@/features/user-stats/dashboard.utils', () => ({
     mocks.triggerDailyCountUpdatedEvent(...args),
 }));
 
-import UserScore from '@/database/models/user-scores';
+import UserScoreType from '@/database/models/user-scores';
 
 describe('UserScore', () => {
   beforeEach(() => {
@@ -106,12 +106,17 @@ describe('UserScore', () => {
     mocks.markAsSynced.mockResolvedValue(undefined);
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
   it('addItemCount increments and stores score for today', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-03-04T10:00:00.000Z'));
     mocks.get.mockResolvedValue({ item_count: 2 });
 
-    await UserScore.addItemCount('u1', 3);
+    await UserScoreType.addItemCount('u1', 3);
 
     expect(mocks.get).toHaveBeenCalledWith(['u1', '2026-03-04']);
     expect(mocks.put).toHaveBeenCalledWith(
@@ -127,7 +132,7 @@ describe('UserScore', () => {
   it('addItemCount uses provided dateTime to choose score date', async () => {
     mocks.get.mockResolvedValue({ item_count: 2 });
 
-    await UserScore.addItemCount('u1', 3, '2026-03-06T10:00:00.000Z');
+    await UserScoreType.addItemCount('u1', 3, '2026-03-06T10:00:00.000Z');
 
     expect(mocks.get).toHaveBeenCalledWith(['u1', '2026-03-06']);
     expect(mocks.put).toHaveBeenCalledWith(
@@ -143,12 +148,12 @@ describe('UserScore', () => {
   it('getOrCreateTodayScore returns numeric count or zero', async () => {
     mocks.get.mockResolvedValueOnce({ item_count: 4 }).mockResolvedValueOnce(undefined);
 
-    await expect(UserScore.getOrCreateTodayScore('u1')).resolves.toBe(4);
-    await expect(UserScore.getOrCreateTodayScore('u1')).resolves.toBe(0);
+    await expect(UserScoreType.getOrCreateTodayScore('u1')).resolves.toBe(4);
+    await expect(UserScoreType.getOrCreateTodayScore('u1')).resolves.toBe(0);
   });
 
   it('deleteAllScores deletes user rows', async () => {
-    await UserScore.deleteAllScores('u1');
+    await UserScoreType.deleteByUserId('u1');
 
     expect(mocks.equals).toHaveBeenCalledWith('u1');
   });
@@ -186,7 +191,7 @@ describe('UserScore', () => {
       error: null,
     });
 
-    await UserScore.syncFromRemote('u1', false);
+    await UserScoreType.syncFromRemote('u1', false);
 
     expect(mocks.rpc).toHaveBeenCalledWith('upsert_fetch_user_scores', {
       p_user_id: 'u1',

@@ -1,8 +1,9 @@
+import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const mocks = vi.hoisted(() => ({
-  userId: 'u1' as string | null,
+const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => ({
+  userId: 'u1',
   dailyCount: 5,
   grammarVisible: false,
   grammarData: null as any,
@@ -20,7 +21,7 @@ const mocks = vi.hoisted(() => ({
       progress: 2,
       show_new_grammar_indicator: false,
     },
-    grammar_id: 10,
+    grammarId: 10,
     progress: 2,
     isCzToEn: true,
     revealed: false,
@@ -40,6 +41,16 @@ const mocks = vi.hoisted(() => ({
     playAudio: vi.fn(),
     audioLoading: false,
     isPlaying: false,
+    handleReveal: vi.fn(() => {
+      if (
+        mocks.practiceDeck.isCzToEn &&
+        !mocks.practiceDeck.audioError &&
+        !mocks.practiceDeck.revealed
+      ) {
+        mocks.practiceDeck.playAudio();
+      }
+      mocks.practiceDeck.setRevealed(true);
+    }),
   } as any,
 }));
 
@@ -87,10 +98,64 @@ vi.mock('@/features/practice/hooks/use-grammar', () => ({
 }));
 
 vi.mock('@/features/practice/hooks/use-practice-deck', () => ({
-  usePracticeDeck: () => mocks.practiceDeck,
+  usePracticeDeck: (userId: string | null) => {
+    React.useEffect(() => {
+      if (
+        !userId ||
+        !mocks.practiceDeck.currentItem ||
+        mocks.practiceDeck.isCzToEn ||
+        mocks.practiceDeck.audioDisabled ||
+        mocks.practiceDeck.audioLoading ||
+        mocks.practiceDeck.showDirectionChange
+      ) {
+        return;
+      }
+
+      const timer = globalThis.setTimeout(() => {
+        mocks.practiceDeck.playAudio();
+      }, 300);
+
+      return () => globalThis.clearTimeout(timer);
+    }, [
+      userId,
+      mocks.practiceDeck.audioDisabled,
+      mocks.practiceDeck.audioLoading,
+      mocks.practiceDeck.currentItem,
+      mocks.practiceDeck.isCzToEn,
+      mocks.practiceDeck.showDirectionChange,
+    ]);
+
+    if (!userId) {
+      return {
+        currentItem: null,
+        grammarId: null,
+        progress: 0,
+        isCzToEn: true,
+        revealed: false,
+        setRevealed: vi.fn(),
+        showNewGrammarIndicator: false,
+        czech: '',
+        english: '',
+        pronunciation: '\u00A0',
+        audioDisabled: true,
+        showDirectionChange: false,
+        hideDirectionChange: vi.fn(),
+        handleReveal: vi.fn(),
+        plusHint: vi.fn(),
+        nextItem: vi.fn(),
+        audioError: false,
+        setVolume: vi.fn(),
+        playAudio: vi.fn(),
+        audioLoading: false,
+        isPlaying: false,
+      };
+    }
+
+    return mocks.practiceDeck;
+  },
 }));
 
-vi.mock('@/components/UI/DelayedMessage', () => ({
+vi.mock('@/components/UI/DelayedNotification', () => ({
   default: ({ children }: any) => <div>{children}</div>,
 }));
 
@@ -181,7 +246,7 @@ describe('PracticeCard', () => {
       progress: 2,
       show_new_grammar_indicator: false,
     };
-    mocks.practiceDeck.grammar_id = 10;
+    mocks.practiceDeck.grammarId = 10;
     mocks.practiceDeck.progress = 2;
     mocks.practiceDeck.isCzToEn = true;
     mocks.practiceDeck.revealed = false;
@@ -203,7 +268,7 @@ describe('PracticeCard', () => {
     mocks.userId = null;
     render(<PracticeCard />);
 
-    expect(screen.getByText('Sync loading')).toBeTruthy();
+    expect(screen.getByText('Nic k procvičování.')).toBeTruthy();
   });
 
   it('shows grammar card when grammar overlay is visible', () => {
@@ -252,7 +317,7 @@ describe('PracticeCard', () => {
   it('opens grammar when grammar button is clicked', () => {
     mocks.practiceDeck.showNewGrammarIndicator = true;
     mocks.practiceDeck.showDirectionChange = false;
-    mocks.practiceDeck.grammar_id = 42;
+    mocks.practiceDeck.grammarId = 42;
 
     render(<PracticeCard />);
 
@@ -265,7 +330,7 @@ describe('PracticeCard', () => {
   it('does not open grammar automatically while direction change is shown', () => {
     mocks.practiceDeck.showNewGrammarIndicator = true;
     mocks.practiceDeck.showDirectionChange = true;
-    mocks.practiceDeck.grammar_id = 42;
+    mocks.practiceDeck.grammarId = 42;
 
     render(<PracticeCard />);
 

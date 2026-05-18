@@ -1,5 +1,5 @@
 import config from '@/config/config';
-import type { UserItemLocal } from '@/types/local.types';
+import type { UserItemLocal } from '@/types/user-item.types';
 import { assertPositiveInteger } from '@/utils/assertions.utils';
 
 /**

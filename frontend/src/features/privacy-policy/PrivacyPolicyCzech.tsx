@@ -7,7 +7,7 @@ import type { JSX } from 'react';
  */
 export default function PrivacyPolicyCzech(): JSX.Element {
   return (
-    <div className="card-width px-4">
+    <div className="card-width privacy-policy px-4">
       <h1 className="pb-6 text-2xl">Zásady ochrany osobních údajů</h1>
       {/* 1. Osobní údaje, které zpracováváme */}
       <h2>1. Osobní údaje, které zpracováváme</h2>

@@ -3,7 +3,7 @@ import PropertyView from '@/components/UI/PropertyView';
 import { TEXTS } from '@/locales/cs';
 import HelpButton from '@/features/help/HelpButton';
 import { shortenDate } from '@/features/vocabulary/vocabulary.utils';
-import type { UserItemLocal } from '@/types/local.types';
+import type { UserItemLocal } from '@/types/user-item.types';
 
 const NOT_AVAILABLE = TEXTS.notAvailable;
 
@@ -33,10 +33,10 @@ export default function VocabularyDetailCard({
     { label: TEXTS.czech, value: selectedWord?.czech },
     { label: TEXTS.english, value: selectedWord?.english },
     { label: TEXTS.pronunciation, value: selectedWord?.pronunciation },
-    { label: TEXTS.progress, value: selectedWord?.progress },
   ];
 
   const dateProperties = [
+    { label: TEXTS.progress, value: selectedWord?.progress },
     { label: TEXTS.startedAt, value: shortenDate(selectedWord?.started_at) },
     { label: TEXTS.updatedAt, value: shortenDate(selectedWord?.updated_at) },
     { label: TEXTS.nextAt, value: shortenDate(selectedWord?.next_at) },
@@ -44,31 +44,29 @@ export default function VocabularyDetailCard({
   ];
 
   return (
-    <div className="card-width relative flex w-full flex-col items-center justify-start">
-      <OverviewCard
-        buttonTitle={selectedTitle}
-        onClose={onClose}
-        handleReset={onReset}
-        modalTitle={TEXTS.restartItemProgress}
-      >
-        <div className="flex flex-col gap-4">
-          <div>
-            {baseProperties.map((property) => (
-              <PropertyView key={property.label} label={property.label}>
-                {property.value ?? NOT_AVAILABLE}
-              </PropertyView>
-            ))}
-          </div>
-          <div>
-            {dateProperties.map((property) => (
-              <PropertyView key={property.label} label={property.label}>
-                {property.value ?? NOT_AVAILABLE}
-              </PropertyView>
-            ))}
-          </div>
+    <OverviewCard
+      buttonTitle={selectedTitle}
+      onClose={onClose}
+      handleReset={onReset}
+      modalTitle={TEXTS.restartItemProgress}
+    >
+      <div className="flex flex-col gap-4 p-4">
+        <div>
+          {baseProperties.map((property) => (
+            <PropertyView key={property.label} label={property.label}>
+              {property.value ?? NOT_AVAILABLE}
+            </PropertyView>
+          ))}
         </div>
-      </OverviewCard>
+        <div>
+          {dateProperties.map((property) => (
+            <PropertyView key={property.label} label={property.label}>
+              {property.value ?? NOT_AVAILABLE}
+            </PropertyView>
+          ))}
+        </div>
+      </div>
       <HelpButton className="right-1 -bottom-10.5" />
-    </div>
+    </OverviewCard>
   );
 }

@@ -17,7 +17,7 @@ export default {
     },
     safelist: [
       'w-36',
-      'w-32',
+      'w-44',
       'pl-2',
       'inline-block',
       // přidejte další potřebné třídy

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useSyncWarningStore } from '@/features/sync-warning/use-sync-warning';
+import { useSyncWarningStore } from '@/features/sync/use-sync-warning';
 
 describe('useSyncWarningStore', () => {
   beforeEach(() => {

@@ -1,6 +1,5 @@
-import { errorHandler } from '@/features/logging/error-handler';
-import UserItem from '../models/user-items';
-import { infoHandler } from '@/features/logging/info-handler';
+import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
+import UserItem from '@/database/models/user-items';
 
 /**
  * Returns today's date in YYYY-MM-DD format.
@@ -37,17 +36,17 @@ export async function restoreUnsavedFromLocalStorage(userId: string): Promise<vo
   const saved = localStorage.getItem(key);
   if (saved) {
     try {
-      const parsed = JSON.parse(saved);
-      const userProgress = parsed.progress;
+      const parsed = JSON.parse(saved) as { progress?: unknown; dateTime?: string };
+      const userProgress = Array.isArray(parsed.progress) ? parsed.progress : [];
       if (Array.isArray(userProgress) && userProgress.length > 0) {
-        UserItem.savePracticeDeck(userId, userProgress, parsed.dateTime);
+        await UserItem.savePracticeDeck(userId, userProgress, parsed.dateTime);
       }
       localStorage.removeItem(key);
-      infoHandler(
+      reportInfo(
         `Restored unsaved practice deck progress for user ${userId} with ${userProgress.length} items.`,
       );
     } catch (e) {
-      errorHandler('Error parsing practice deck progress from localStorage', e);
+      reportError('Error parsing practice deck progress from localStorage', e);
       localStorage.removeItem(key);
     }
   }

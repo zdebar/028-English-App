@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { getMock, putMock } = vi.hoisted(() => ({
   getMock: vi.fn(),
@@ -22,41 +22,44 @@ describe('AudioMetadata', () => {
     vi.useRealTimers();
   });
 
-  describe('isFetched', () => {
-    it('returns true when metadata exists', async () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  describe('getRemoteUpdatedAt', () => {
+    it('returns the stored remote_updated_at when metadata exists', async () => {
       getMock.mockResolvedValue({
         archive_name: 'archive-1.zip',
-        fetched_at: '2026-02-28T10:00:00.000Z',
+        remote_updated_at: '2026-05-01T10:00:00.000Z',
       });
 
-      const result = await AudioMetadata.isFetched('archive-1.zip');
+      const result = await AudioMetadata.getRemoteUpdatedAt('archive-1.zip');
 
       expect(getMock).toHaveBeenCalledWith('archive-1.zip');
-      expect(result).toBe(true);
+      expect(result).toBe('2026-05-01T10:00:00.000Z');
     });
 
-    it('returns false when metadata does not exist', async () => {
+    it('returns null when metadata does not exist', async () => {
       getMock.mockResolvedValue(undefined);
 
-      const result = await AudioMetadata.isFetched('archive-2.zip');
+      const result = await AudioMetadata.getRemoteUpdatedAt('archive-2.zip');
 
       expect(getMock).toHaveBeenCalledWith('archive-2.zip');
-      expect(result).toBe(false);
+      expect(result).toBeNull();
     });
   });
 
   describe('markAsFetched', () => {
-    it('stores archive metadata with current ISO timestamp', async () => {
-      vi.useFakeTimers();
-      vi.setSystemTime(new Date('2026-02-28T12:34:56.789Z'));
+    it('stores archive metadata with the provided remote updated_at timestamp', async () => {
       putMock.mockResolvedValue(undefined);
 
-      await AudioMetadata.markAsFetched('archive-3.zip');
+      await AudioMetadata.markAsFetched('archive-3.zip', '2026-05-10T12:34:56.789Z');
 
       expect(putMock).toHaveBeenCalledTimes(1);
       expect(putMock).toHaveBeenCalledWith({
         archive_name: 'archive-3.zip',
-        fetched_at: '2026-02-28T12:34:56.789Z',
+        remote_updated_at: '2026-05-10T12:34:56.789Z',
       });
     });
   });

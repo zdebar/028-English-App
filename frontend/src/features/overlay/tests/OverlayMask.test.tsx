@@ -13,7 +13,7 @@ vi.mock('@/config/keyboard-listeners.config', () => ({
   },
 }));
 
-vi.mock('@/features/key-listener/use-key', () => ({
+vi.mock('@/hooks/use-key', () => ({
   useKey: (...args: unknown[]) => mocks.useKey(...args),
 }));
 

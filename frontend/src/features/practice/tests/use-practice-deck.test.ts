@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { UserItemPractice } from '@/types/local.types';
+import type { UserItemPractice } from '@/types/user-item.types';
 
 const useFetchMock = vi.fn();
 const getPracticeDeckMock = vi.fn();
@@ -24,6 +24,7 @@ vi.mock('@/database/models/user-items', () => ({
 }));
 
 vi.mock('@/features/practice/hooks/use-hint', () => ({
+  NBSP: '\u00A0',
   useHint: () => ({
     czechHinted: 'CZ_HINT',
     englishHinted: 'EN_HINT',
@@ -42,25 +43,24 @@ vi.mock('@/features/practice/hooks/use-audio-manager', () => ({
   }),
 }));
 
-vi.mock('@/features/logging/error-handler', () => ({
-  errorHandler: vi.fn(),
-}));
-
-vi.mock('@/features/logging/info-handler', () => ({
-  infoHandler: vi.fn(),
+vi.mock('@/features/logging/monitoring-handler', () => ({
+  reportError: vi.fn(),
+  reportInfo: vi.fn(),
 }));
 
 import { usePracticeDeck } from '../hooks/use-practice-deck';
 
 function makeItem(overrides: Partial<UserItemPractice> = {}): UserItemPractice {
-  return {
+  const item: UserItemPractice = {
     item_id: 1,
     user_id: 'u1',
     czech: 'ahoj',
     english: 'hello',
     pronunciation: 'həˈloʊ',
     audio: 'hello.opus',
+    is_study_item: 1,
     sort_order: 1,
+    block_id: 0,
     grammar_id: 10,
     progress: 0,
     started_at: '2026-01-01',
@@ -71,6 +71,11 @@ function makeItem(overrides: Partial<UserItemPractice> = {}): UserItemPractice {
     lesson_id: 0,
     show_new_grammar_indicator: false,
     ...overrides,
+  };
+
+  return {
+    ...item,
+    is_study_item: item.is_study_item ?? 1,
   };
 }
 
@@ -98,7 +103,7 @@ describe('usePracticeDeck', () => {
     expect(result.current.czech).toBe('ahoj');
     expect(result.current.english).toBe('EN_HINT');
     expect(result.current.audioDisabled).toBe(true);
-    expect(result.current.grammar_id).toBe(10);
+    expect(result.current.grammarId).toBe(10);
     expect(result.current.showNewGrammarIndicator).toBe(false);
     expect(resetHintMock).toHaveBeenCalled();
   });

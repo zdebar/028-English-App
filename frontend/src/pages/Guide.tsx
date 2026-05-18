@@ -27,18 +27,18 @@ export default function Guide(): JSX.Element {
         <h2>Neodhalená kartička</h2>
         <Screenshot src="/screenshots/not-revealed.webp" alt="Ukázka kartičky před odhalením" />
         <p>
-          <strong>"dnes / denní cíl"</strong>
+          <strong>"Dnes / Denní cíl"</strong>
           <span>Doporučený denní počet opakování.</span>
         </p>
         <p>
-          <strong>"dokončit"</strong>
+          <strong>"Dokončit"</strong>
           <span>
             Položka se označí jako naučená. Použijte k přeskočení položky, pokud ji již znáte z
             dřívějška.
           </span>
         </p>
         <p>
-          <strong>"gramatika"</strong>
+          <strong>"Gramatika"</strong>
           <span>Vysvětlení příslušné gramatiky.</span>
         </p>
       </section>
@@ -46,14 +46,14 @@ export default function Guide(): JSX.Element {
         <h2>Odhalená kartička</h2>
         <Screenshot src="/screenshots/revealed.webp" alt="Ukázka kartičky po odhalení" />
         <p>
-          <strong>"opakovat"</strong>
+          <strong>"Opakovat"</strong>
           <span>
             Položka se nabídne k dalšímu procvičování dříve.{' '}
-            <strong>DOPORUČUJEME dávat "opakovat", pokud není znalost zcela automatická.</strong>
+            <strong>DOPORUČUJEME dávat "Opakovat", pokud není znalost zcela automatická.</strong>
           </span>
         </p>
         <p>
-          <strong>"znám"</strong>
+          <strong>"Znám"</strong>
           <span>Položka se nabídne k dalšímu procvičování později.</span>
         </p>
       </section>
@@ -78,6 +78,10 @@ export default function Guide(): JSX.Element {
           </span>
         </p>
         <p>
+          <strong>"Přehled témat"</strong>
+          <span>Přehled započatých tematických skupin slovíček např. dny v týdnu, měsíce atd.</span>
+        </p>
+        <p>
           <strong>"Smazat účet"</strong>
           <span>
             Smaže uživatelský účet včetně všech vašich dat. Smazání účtu nevratné a data budou
@@ -99,8 +103,9 @@ export default function Guide(): JSX.Element {
       <section>
         <h2>Synchronizace</h2>
         <p className="text-center">
-          Vaše data se každý den synchronizují s cloudem, aby byla bezpečně zálohována. Aplikace
-          není určena pro současné používání na více zařízeních.
+          Data se synchronizují pouze při startu aplikace, či jednou denně, pokud aplikaci necháváte
+          otevřenou. Vzhledem k méně častému synchronizování není aplikace vhodná pro současné
+          používání na více zařízeních.
         </p>
       </section>
     </div>

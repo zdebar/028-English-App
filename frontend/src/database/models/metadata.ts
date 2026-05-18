@@ -1,7 +1,7 @@
 import config from '@/config/config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
-import { TableName } from '@/types/local.types';
+import { TableName } from '@/types/table.types';
 import { Entity } from 'dexie';
 import { validateUserIdUsage } from '../utils/metadata.utils';
 

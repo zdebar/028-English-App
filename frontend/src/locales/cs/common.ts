@@ -5,10 +5,14 @@ export const COMMON_TEXTS = {
   tryAgainLater: 'Zkuste to znovu později.',
   loadingMessage: 'Načítání ...',
   pageNotFound: 'Stránka nebyla nalezena.',
-  dataLoadingError: 'Chyba při načítání dat.',
+  loadingSuccess: 'Data byla úspěšně načtena.',
+  loadingError: 'Chyba při načítání dat.',
   resetProgressSuccessToast: 'Pokrok byl úspěšně vymazán.',
   resetProgressErrorToast: 'Chyba při mazání pokroku.',
-  masteredSwitchHelp: 'přepnout naučeno / započato',
+  masteredSwitchHelp: 'Přepnout naučeno / započato',
+  genericSuccess: 'Akce byla úspěšná.',
+  genericFailure: 'Akce se nezdařila.',
+  actionRequiresConfirmation: 'Tato akce vyžaduje potvrzení.',
 
   // Buttons
   confirm: 'Ano',
@@ -20,6 +24,5 @@ export const COMMON_TEXTS = {
 
   // Errors
   genericError: 'Nastala neznámá chyba.',
-  loadingError: 'Chyba při načítání dat.',
   errorBoundaryMessage: 'Něco se pokazilo. Zkuste obnovit stránku.',
 } as const;

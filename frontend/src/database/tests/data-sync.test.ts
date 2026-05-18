@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   getFullSyncTime: vi.fn(),
@@ -26,8 +26,7 @@ vi.mock('@/config/config', () => ({
       nullReplacementDate: '9999-12-31T23:59:59+00:00',
     },
     audio: {
-      initialArchive: ['pack-a.zip'],
-      allArchives: ['pack-a.zip', 'pack-b.zip'],
+      archiveBucketName: 'archive-bucket',
     },
   },
 }));
@@ -125,6 +124,10 @@ describe('data-sync.utils', () => {
     mocks.lessonsSyncFromRemote.mockResolvedValue(undefined);
     mocks.audioSyncFromRemote.mockResolvedValue(undefined);
     mocks.getSession.mockResolvedValue({ data: { session: { user: { id: 'u1' } } }, error: null });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('dataSync runs full sync and stores full sync time', async () => {

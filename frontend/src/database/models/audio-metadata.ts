@@ -1,35 +1,37 @@
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
-import type { AudioMetadataLocal } from '@/types/local.types';
+import type { AudioMetadataLocal } from '@/types/audio.types';
 import { Entity } from 'dexie';
 
 /**
  * Represents metadata information for audio archives in the application database.
  *
- * @method isFetched - Checks if an audio archive has been fetched.
- * @method markAsFetched - Marks an audio archive as fetched by storing its metadata.
+ * @method getRemoteUpdatedAt - Returns the remote updated_at timestamp stored from the last sync, or null if never synced.
+ * @method markAsFetched - Stores the remote updated_at timestamp for an archive after a successful sync.
  */
 export default class AudioMetadata extends Entity<AppDB> implements AudioMetadataLocal {
   archive_name!: string;
-  fetched_at!: string;
+  remote_updated_at!: string;
 
   /**
-   * Checks if an audio archive has already been fetched.
-   * @param archiveName the name of the checked audio archive
-   * @returns true if the archive has been already fetched, otherwise false
+   * Returns the remote updated_at timestamp stored from the last sync.
+   * @param archiveName the name of the audio archive
+   * @returns the stored remote_updated_at string, or null if the archive has never been synced
    */
-  static async isFetched(archiveName: string): Promise<boolean> {
-    return !!(await db.audio_metadata.get(archiveName));
+  static async getRemoteUpdatedAt(archiveName: string): Promise<string | null> {
+    const record = await db.audio_metadata.get(archiveName);
+    return record?.remote_updated_at ?? null;
   }
 
   /**
-   * Marks an audio archive as fetched by storing its metadata.
-   * @param archiveName the name of the fetched audio archive
+   * Stores the remote file's updated_at timestamp after a successful sync.
+   * @param archiveName the name of the synced audio archive
+   * @param remoteUpdatedAt the updated_at timestamp of the remote file at sync time
    */
-  static async markAsFetched(archiveName: string): Promise<void> {
+  static async markAsFetched(archiveName: string, remoteUpdatedAt: string): Promise<void> {
     await db.audio_metadata.put({
       archive_name: archiveName,
-      fetched_at: new Date().toISOString(),
+      remote_updated_at: remoteUpdatedAt,
     });
   }
 }

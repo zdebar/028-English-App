@@ -1,15 +1,13 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { alternateDirection } from '@/features/practice/practice.utils';
-import type { UserItemPractice } from '@/types/local.types';
+import type { UserItemPractice } from '@/types/user-item.types';
 import { useFetch } from '@/hooks/use-fetch';
 import UserItem from '@/database/models/user-items';
-import { errorHandler } from '@/features/logging/error-handler';
-import { infoHandler } from '@/features/logging/info-handler';
-import { useHint } from './use-hint';
-import { useAudioManager } from './use-audio-manager';
+import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
+import { useHint, NBSP } from './use-hint';
+import { useAudioManager } from '../../../hooks/use-audio-manager';
 import { triggerDailyCountUpdatedEvent, triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
-
-const NBSP = '\u00A0';
+import config from '@/config/config';
 
 /**
  * usePracticeDeck hook manages the practice deck and user progress for a given user.
@@ -30,7 +28,7 @@ export function usePracticeDeck(userId: string | null) {
     return data.filter((item) => item != null);
   }, [userId]);
 
-  const { data: fetchedArray, error, reload } = useFetch<UserItemPractice[]>(fetchPracticeDeck);
+  const { data: fetchedArray, reload } = useFetch<UserItemPractice[]>(fetchPracticeDeck);
 
   const { czechHinted, englishHinted, resetHint, plusHint } = useHint(
     currentItem?.czech,
@@ -45,7 +43,7 @@ export function usePracticeDeck(userId: string | null) {
   }, [fetchedArray]);
 
   const {
-    playAudio,
+    playAudio: playAudioInternal,
     setVolume,
     audioError,
     loading: audioLoading,
@@ -60,6 +58,9 @@ export function usePracticeDeck(userId: string | null) {
 
   const [wasCzToEn, setWasCzToEn] = useState<boolean | null>(null);
   const showDirectionChange = wasCzToEn !== isCzToEn;
+  const hideDirectionChange = useCallback(() => {
+    setWasCzToEn(isCzToEn);
+  }, [isCzToEn]);
 
   // Ref to track user progress changes before saving
   const userProgressRef = useRef<UserItemPractice[]>([]);
@@ -86,13 +87,13 @@ export function usePracticeDeck(userId: string | null) {
 
       try {
         await UserItem.savePracticeDeck(userId, userProgress);
-        infoHandler(`Saved practice deck ${source} with ${userProgress.length} items.`);
+        reportInfo(`Saved practice deck ${source} with ${userProgress.length} items.`);
         userProgressRef.current = [];
         if (shouldReload) {
           reload();
         }
       } catch (error) {
-        errorHandler(`Failed to save practice deck ${source}`, error);
+        reportError(`Failed to save practice deck ${source}`, error);
         persistProgressToLocalStorage(userProgress);
       }
     },
@@ -148,11 +149,47 @@ export function usePracticeDeck(userId: string | null) {
     [array.length, currentItem, resetHint, saveBufferedProgress],
   );
 
+  // Play audio on item change if direction is EN -> CZ
+  useEffect(() => {
+    if (audioDisabled || isCzToEn || audioLoading || showDirectionChange) {
+      return;
+    }
+
+    const timeoutId = globalThis.setTimeout(() => {
+      playAudioInternal();
+    }, config.practice.audioDelay);
+
+    return () => {
+      globalThis.clearTimeout(timeoutId);
+    };
+  }, [audioDisabled, isCzToEn, audioLoading, showDirectionChange, playAudioInternal, currentItem]);
+
+  const handleReveal = useCallback(() => {
+    if (showDirectionChange) {
+      hideDirectionChange();
+      return;
+    }
+
+    if (isCzToEn && !audioError && !revealed) {
+      playAudioInternal();
+    }
+
+    setRevealed(true);
+  }, [
+    audioError,
+    hideDirectionChange,
+    isCzToEn,
+    playAudioInternal,
+    setRevealed,
+    showDirectionChange,
+    revealed,
+  ]);
+
   return {
     // Core state
     index,
     currentItem,
-    grammar_id: currentItem?.grammar_id ?? null,
+    grammarId: currentItem?.grammar_id ?? null,
     progress: currentItem?.progress ?? 0,
     isCzToEn,
     revealed,
@@ -166,19 +203,19 @@ export function usePracticeDeck(userId: string | null) {
     audio: currentItem?.audio ?? null,
     audioDisabled,
     showDirectionChange,
-    hideDirectionChange: () => setWasCzToEn(isCzToEn),
+    hideDirectionChange,
+    handleReveal,
 
     // Hinting
     plusHint,
 
     // Navigation & loading
     nextItem,
-    error,
 
     // Audio management
     audioError,
     setVolume,
-    playAudio,
+    playAudio: playAudioInternal,
     audioLoading,
     isPlaying,
   };

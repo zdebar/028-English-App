@@ -6,7 +6,6 @@ type BlockBarProps = Readonly<{
   lessonName: string;
   lessonNumber: number;
   isMastered: boolean;
-  divisions?: number;
   lessonCount: number;
   widthBase?: number;
   className?: string;
@@ -20,7 +19,6 @@ type BlockBarProps = Readonly<{
  * @param lessonName {string} The name of the current lesson block.
  * @param lessonNumber {number} The number of the lesson the block belongs to.
  * @param isMastered {boolean} Indicates if the items count is mastered or started.
- * @param divisions {number} Division step in item count (default: 10).
  * @param lessonCount {number} Total number of items in the lesson (default: 40).
  * @param widthBase {number} Item count that maps to 100% width (default: 40).
  * @param className {string} Additional CSS classes for custom styling.
@@ -32,9 +30,8 @@ export default function BlockBar({
   lessonName = '',
   lessonNumber = 0,
   isMastered = false,
-  divisions = 10,
-  lessonCount = 100,
-  widthBase = 100,
+  lessonCount = 40,
+  widthBase = 40,
   className = '',
 }: BlockBarProps) {
   // Ensure lessonCount is at least 1
@@ -51,31 +48,15 @@ export default function BlockBar({
   const previousWidth = safeLesson > 0 ? (clampedPrevious / safeLesson) * 100 : 0;
   const totalWidth = safeLesson > 0 ? (clampedTotal / safeLesson) * 100 : 0;
 
-  // Render divisions every N items (not percent).
-  const renderDivisions = () => {
-    const stepItems = Math.max(1, Math.floor(divisions));
-    const positions: number[] = [];
-
-    for (let item = stepItems; item < visibleItems; item += stepItems) {
-      positions.push((item / safeWidthBase) * 100);
-    }
-
-    return positions.map((position) => {
-      return (
-        <div
-          key={position}
-          className="border-divisions absolute top-0 z-15 h-full border-l"
-          style={{ left: `${position}%` }}
-        ></div>
-      );
-    });
-  };
-
   return (
     <div className="h-attribute relative w-full cursor-default bg-gray-200 select-none">
       <div className="font-body text-light absolute -top-0.5 right-0 left-0 z-20 flex items-center justify-between truncate px-2 pt-1 text-center font-bold">
-        <span title={`${TEXTS.lessonOrder} - ${TEXTS.lessonName} `}>
-          <span className="inline-block min-w-6 text-right">{lessonNumber}</span> {lessonName}
+        <span
+          title={`${TEXTS.lessonOrder} - ${TEXTS.lessonName} `}
+          className="flex items-center gap-1"
+        >
+          <span className="inline-block min-w-6 text-right">{lessonNumber}</span>
+          <span className="ml-1 min-w-0 truncate">{lessonName}</span>
         </span>
         <span title={isMastered ? TEXTS.masteredTodayHint : TEXTS.startedTodayHint}>
           {todayCount > 0 && `+ ${todayCount}`}
@@ -101,8 +82,6 @@ export default function BlockBar({
           style={{ width: `${previousWidth}%` }}
         ></div>
       </div>
-      {/* Divisions */}
-      {renderDivisions()}
     </div>
   );
 }

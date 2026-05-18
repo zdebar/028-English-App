@@ -1,10 +1,10 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   download: vi.fn(),
   savePracticeDeck: vi.fn(),
-  infoHandler: vi.fn(),
-  errorHandler: vi.fn(),
+  reportInfo: vi.fn(),
+  reportError: vi.fn(),
 }));
 
 vi.mock('@/config/config', () => ({
@@ -30,12 +30,9 @@ vi.mock('@/config/supabase.config', () => ({
   },
 }));
 
-vi.mock('@/features/logging/info-handler', () => ({
-  infoHandler: (...args: unknown[]) => mocks.infoHandler(...args),
-}));
-
-vi.mock('@/features/logging/error-handler', () => ({
-  errorHandler: (...args: unknown[]) => mocks.errorHandler(...args),
+vi.mock('@/features/logging/monitoring-handler', () => ({
+  reportInfo: (...args: unknown[]) => mocks.reportInfo(...args),
+  reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
 
 vi.mock('@/database/models/user-items', () => ({
@@ -50,27 +47,30 @@ import {
   restoreUnsavedFromLocalStorage,
 } from '@/database/utils/database.utils';
 import {
-  convertLocalToSQL,
-  convertSQLToLocal,
+  convertLocalToExport,
+  convertAPIToLocal,
   getNextAt,
   resetUserItem,
 } from '@/database/utils/user-items.utils';
 import { fetchStorage } from '@/database/utils/audio-records.utils';
-import {
-  triggerLevelsUpdatedEvent,
-  triggerNamedEvent,
-} from '@/utils/dashboard.utils';
+import { triggerLevelsUpdatedEvent, triggerNamedEvent } from '@/utils/dashboard.utils';
 
 describe('database.utils', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useRealTimers();
     localStorage.clear();
+    mocks.savePracticeDeck.mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   describe('convertLocalToSQL', () => {
     it('converts null-replacement dates to null', () => {
-      const result = convertLocalToSQL({
+      const result = convertLocalToExport({
         user_id: 'u1',
         item_id: 10,
         progress: 2,
@@ -96,7 +96,7 @@ describe('database.utils', () => {
 
   describe('convertSQLToLocal', () => {
     it('fills null/undefined sortable/date fields with local null-replacement values', () => {
-      const result = convertSQLToLocal({
+      const result = convertAPIToLocal({
         user_id: 'u1',
         item_id: 1,
         progress: 0,
@@ -210,6 +210,35 @@ describe('database.utils', () => {
   });
 
   describe('restoreUnsavedFromLocalStorage', () => {
+    it('awaits savePracticeDeck before removing key and logging info', async () => {
+      localStorage.setItem(
+        'practiceDeckProgress_u1',
+        JSON.stringify({
+          dateTime: '2026-03-04T10:00:00.000Z',
+          progress: [{ item_id: 1, progress: 2 }],
+        }),
+      );
+
+      let resolveSave: (() => void) | undefined;
+      mocks.savePracticeDeck.mockImplementation(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveSave = resolve;
+          }),
+      );
+
+      const restorePromise = restoreUnsavedFromLocalStorage('u1');
+
+      expect(localStorage.getItem('practiceDeckProgress_u1')).not.toBeNull();
+      expect(mocks.reportInfo).not.toHaveBeenCalled();
+
+      resolveSave?.();
+      await restorePromise;
+
+      expect(localStorage.getItem('practiceDeckProgress_u1')).toBeNull();
+      expect(mocks.reportInfo).toHaveBeenCalled();
+    });
+
     it('restores saved progress, removes key, and logs info', async () => {
       localStorage.setItem(
         'practiceDeckProgress_u1',
@@ -227,7 +256,25 @@ describe('database.utils', () => {
         '2026-03-04T10:00:00.000Z',
       );
       expect(localStorage.getItem('practiceDeckProgress_u1')).toBeNull();
-      expect(mocks.infoHandler).toHaveBeenCalled();
+      expect(mocks.reportInfo).toHaveBeenCalled();
+    });
+
+    it('handles non-array progress payload without saving and still cleans up', async () => {
+      localStorage.setItem(
+        'practiceDeckProgress_u1',
+        JSON.stringify({
+          dateTime: '2026-03-04T10:00:00.000Z',
+          progress: { item_id: 1, progress: 2 },
+        }),
+      );
+
+      await restoreUnsavedFromLocalStorage('u1');
+
+      expect(mocks.savePracticeDeck).not.toHaveBeenCalled();
+      expect(localStorage.getItem('practiceDeckProgress_u1')).toBeNull();
+      expect(mocks.reportInfo).toHaveBeenCalledWith(
+        'Restored unsaved practice deck progress for user u1 with 0 items.',
+      );
     });
 
     it('handles parse error by logging and removing invalid key', async () => {
@@ -235,7 +282,7 @@ describe('database.utils', () => {
 
       await restoreUnsavedFromLocalStorage('u1');
 
-      expect(mocks.errorHandler).toHaveBeenCalledWith(
+      expect(mocks.reportError).toHaveBeenCalledWith(
         'Error parsing practice deck progress from localStorage',
         expect.anything(),
       );

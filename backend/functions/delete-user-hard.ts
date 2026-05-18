@@ -5,6 +5,12 @@
 
 export {};
 
+type DeleteResult = {
+  ok: boolean;
+  status: number;
+  body: unknown;
+};
+
 declare const Deno: {
   env: {
     get(key: string): string | undefined;
@@ -31,6 +37,14 @@ function jsonResponse(body: unknown, status: number) {
       "Content-Type": "application/json",
     },
   });
+}
+
+function parseResponseBody(text: string): unknown {
+  try {
+    return text ? JSON.parse(text) : null;
+  } catch {
+    return text;
+  }
 }
 
 async function getUserFromAccessToken(accessToken: string) {
@@ -61,7 +75,7 @@ async function getUserFromAccessToken(accessToken: string) {
   return res.json();
 }
 
-async function deleteAuthUser(userId: string) {
+async function deleteAuthUser(userId: string): Promise<DeleteResult> {
   if (!SUPABASE_URL) {
     return { ok: false, status: 500, body: "Missing SUPABASE_URL" };
   }
@@ -86,14 +100,10 @@ async function deleteAuthUser(userId: string) {
     },
   });
   const text = await res.text().catch(() => "");
-  let body: any = text;
-  try {
-    body = text ? JSON.parse(text) : null;
-  } catch {}
-  return { ok: res.ok, status: res.status, body };
+  return { ok: res.ok, status: res.status, body: parseResponseBody(text) };
 }
 
-async function deleteUserRow(userId: string) {
+async function deleteUserRow(userId: string): Promise<DeleteResult> {
   if (!SUPABASE_URL) {
     return { ok: false, status: 500, body: "Missing SUPABASE_URL" };
   }
@@ -118,14 +128,10 @@ async function deleteUserRow(userId: string) {
     },
   });
   const text = await res.text().catch(() => "");
-  let body: any = text;
-  try {
-    body = text ? JSON.parse(text) : null;
-  } catch {}
-  return { ok: res.ok, status: res.status, body };
+  return { ok: res.ok, status: res.status, body: parseResponseBody(text) };
 }
 
-function isstringV4(str: string) {
+function isUuidV4(str: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
     str,
   );
@@ -181,7 +187,7 @@ async function getRequestedUserId(req: Request) {
   }
 
   const trimmedUserId = userId.trim();
-  if (!isstringV4(trimmedUserId)) {
+  if (!isUuidV4(trimmedUserId)) {
     return jsonResponse(
       { error: "Invalid userId format (must be string v4)" },
       400,

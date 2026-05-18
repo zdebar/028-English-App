@@ -1,12 +1,11 @@
 import HeaderButton from '@/components/UI/buttons/HeaderButton';
+import AcademicCapIcon from '@/components/UI/icons/AcademicCapIcon';
+import HomeIcon from '@/components/UI/icons/HomeIcon';
+import UserIcon from '@/components/UI/icons/UserIcon';
 import { ROUTES } from '@/config/routes.config';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import ThemeSwitch from '@/features/theme/ThemeSwitch';
 import { TEXTS } from '@/locales/cs';
-
-import AcademicCapIcon from '../UI/icons/AcademicCapIcon';
-import HomeIcon from '../UI/icons/HomeIcon';
-import UserIcon from '../UI/icons/UserIcon';
 
 import type { JSX } from 'react';
 import styles from './header.module.css';

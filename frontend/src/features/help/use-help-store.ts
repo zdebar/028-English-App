@@ -14,19 +14,20 @@ interface HelpState {
  * @returns {HelpState}
  * - `isHelpOpened: boolean` - whether the help overlay is visible
  * - `openHelp(): void` - opens the help overlay and registers a close callback
+ * - `closeHelp(): void` - closes the help overlay
  */
 export const useHelpStore = create<HelpState>()(
   devtools(
     (set) => ({
       isHelpOpened: false,
-      closeHelp: () => {
-        set({ isHelpOpened: false });
-      },
       openHelp: () => {
         set({ isHelpOpened: true });
         useOverlayStore.getState().openOverlay(() => {
           set({ isHelpOpened: false });
         });
+      },
+      closeHelp: () => {
+        set({ isHelpOpened: false });
       },
     }),
     { name: 'HelpStore' },

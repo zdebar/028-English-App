@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { Session } from '@supabase/supabase-js';
 import { supabaseInstance } from '@/config/supabase.config';
 import { dataSyncOnUnmount } from '@/database/utils/data-sync.utils';
+import { setMonitoringUser } from '@/features/logging/monitoring-handler';
 
 interface AuthState {
   userId: string | null;
@@ -40,8 +41,11 @@ const INITIAL_AUTH_STATE = {
  */
 export const useAuthStore = create<AuthState>((set) => {
   const applySession = (session: Session | null) => {
+    const nextUserId = session?.user?.id ?? null;
+    setMonitoringUser(nextUserId);
+
     set({
-      userId: session?.user?.id ?? null,
+      userId: nextUserId,
       userEmail: session?.user?.email ?? null,
       userFullName:
         session?.user?.user_metadata?.full_name || session?.user?.user_metadata?.name || null,
@@ -50,6 +54,7 @@ export const useAuthStore = create<AuthState>((set) => {
   };
 
   const clearSession = () => {
+    setMonitoringUser(null);
     set({ ...INITIAL_AUTH_STATE, loading: false });
   };
 
@@ -69,7 +74,7 @@ export const useAuthStore = create<AuthState>((set) => {
         applySession(data.session);
       };
 
-      void fetchSession();
+      fetchSession();
 
       subscription = supabaseInstance.auth.onAuthStateChange((_event, session) => {
         applySession(session);

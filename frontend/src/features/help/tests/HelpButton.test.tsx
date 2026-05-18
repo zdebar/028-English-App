@@ -42,6 +42,6 @@ describe('HelpButton', () => {
     fireEvent.click(button);
 
     expect(mocks.openHelp).toHaveBeenCalledTimes(1);
-    expect(button.className.includes('custom-class')).toBe(true);
+    expect(button.classList.contains('custom-class')).toBe(true);
   });
 });

@@ -20,8 +20,8 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 
-vi.mock('@/components/UI/buttons/BaseButton', () => ({
-  default: ({ onClick, children, disabled }: any) => (
+vi.mock('@/components/UI/buttons/ListButton', () => ({
+  ListButton: ({ onClick, children, disabled }: any) => (
     <button data-testid="rect-btn" onClick={onClick} disabled={disabled}>
       {children}
     </button>
@@ -36,7 +36,7 @@ vi.mock('@/components/UI/buttons/CloseButton', () => ({
   ),
 }));
 
-vi.mock('@/features/vocabulary/DirectionDropdown', () => ({
+vi.mock('@/features/vocabulary/DirectionToggle', () => ({
   default: ({ onChange }: any) => (
     <button data-testid="direction-dd" onClick={() => onChange('english')}>
       direction
@@ -44,7 +44,7 @@ vi.mock('@/features/vocabulary/DirectionDropdown', () => ({
   ),
 }));
 
-vi.mock('@/components/UI/DelayedMessage', () => ({
+vi.mock('@/components/UI/DelayedNotification', () => ({
   default: ({ children }: any) => <>{children}</>,
 }));
 
@@ -75,7 +75,6 @@ describe('VocabularyList', () => {
         setDisplayField={setDisplayField}
         setVisibleCount={setVisibleCount}
         onSelect={onSelect}
-        error={null}
         onClose={onClose}
       />,
     );
@@ -102,7 +101,6 @@ describe('VocabularyList', () => {
         setDisplayField={setDisplayField}
         setVisibleCount={setVisibleCount}
         onSelect={onSelect}
-        error={null}
         onClose={onClose}
       />,
     );
@@ -111,7 +109,7 @@ describe('VocabularyList', () => {
     expect(setVisibleCount).toHaveBeenCalledWith(3);
   });
 
-  it('renders error instead of dropdown and empty state message when no words', () => {
+  it('renders empty state message when no words', () => {
     render(
       <VocabularyList
         filteredWords={[]}
@@ -122,13 +120,11 @@ describe('VocabularyList', () => {
         setDisplayField={setDisplayField}
         setVisibleCount={setVisibleCount}
         onSelect={onSelect}
-        error="Load error"
         onClose={onClose}
       />,
     );
 
-    expect(screen.getByText('Load error')).toBeTruthy();
-    expect(screen.queryByTestId('direction-dd')).toBeNull();
+    expect(screen.getByTestId('direction-dd')).toBeTruthy();
     expect(screen.getByText('No started vocabulary')).toBeTruthy();
   });
 
@@ -143,7 +139,6 @@ describe('VocabularyList', () => {
         setDisplayField={setDisplayField}
         setVisibleCount={setVisibleCount}
         onSelect={onSelect}
-        error={null}
         onClose={onClose}
       />,
     );

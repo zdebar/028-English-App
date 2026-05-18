@@ -1,6 +1,6 @@
 import { Component, type ReactNode } from 'react';
 import { TEXTS } from '@/locales/cs';
-import { errorHandler } from '@/features/logging/error-handler';
+import { reportError } from '@/features/logging/monitoring-handler';
 import Notification from '@/components/UI/Notification';
 
 interface ErrorBoundaryProps {
@@ -28,7 +28,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
 
   componentDidCatch(error: Error) {
     // Log the error to an error reporting service
-    errorHandler('ErrorBoundary', error);
+    reportError('ErrorBoundary', error);
   }
 
   render() {

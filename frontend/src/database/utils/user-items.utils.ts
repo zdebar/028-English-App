@@ -1,7 +1,11 @@
-import type { UserItemLocal, UserItemPractice } from '@/types/local.types';
+import type {
+  UserItemPractice,
+  UserItemLocal,
+  UserItemAPI,
+  UserItemExport,
+} from '@/types/user-item.types';
 import { assertNonNegativeInteger } from '@/utils/assertions.utils';
 import config from '@/config/config';
-import type { UserItemSQL } from '@/types/sql.types';
 
 const NULL_DATE = config.database.nullReplacementDate;
 const NULL_NUMBER = config.database.nullReplacementNumber;
@@ -68,10 +72,6 @@ export function getNextAt(progress: number): string {
  * @param item - The user item object to reset.
  */
 export function resetUserItem(item: UserItemLocal): void {
-  if (!item || typeof item !== 'object') {
-    throw new Error('item must be an object.');
-  }
-
   item.started_at = NULL_DATE;
   item.next_at = NULL_DATE;
   item.mastered_at = NULL_DATE;
@@ -86,19 +86,16 @@ export function resetUserItem(item: UserItemLocal): void {
  * @param localItem - The local user item to convert.
  * @returns The converted user item suitable for SQL storage.
  */
-export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
-  if (!localItem || typeof localItem !== 'object') {
-    throw new Error('localItem must be an object.');
-  }
-
+export function convertLocalToExport(localItem: UserItemLocal): UserItemExport {
+  const { user_id, item_id, progress, updated_at, started_at, next_at, mastered_at } = localItem;
   return {
-    ...localItem,
-    learnable: Boolean(localItem.learnable), // Convert number back to boolean
-    started_at: localItem.started_at === NULL_DATE ? null : localItem.started_at,
-    next_at: localItem.next_at === NULL_DATE ? null : localItem.next_at,
-    mastered_at: localItem.mastered_at === NULL_DATE ? null : localItem.mastered_at,
-    deleted_at: localItem.deleted_at === NULL_DATE ? null : localItem.deleted_at,
-    grammar_id: localItem.grammar_id === NULL_NUMBER ? null : localItem.grammar_id,
+    user_id,
+    item_id,
+    progress,
+    updated_at,
+    started_at: started_at === NULL_DATE ? null : started_at,
+    next_at: next_at === NULL_DATE ? null : next_at,
+    mastered_at: mastered_at === NULL_DATE ? null : mastered_at,
   };
 }
 
@@ -109,14 +106,10 @@ export function convertLocalToSQL(localItem: UserItemLocal): UserItemSQL {
  * @param sqlItem - The SQL/RPC user item payload to normalize.
  * @returns Normalized local user item.
  */
-export function convertSQLToLocal(sqlItem: UserItemSQL): UserItemLocal {
-  if (!sqlItem || typeof sqlItem !== 'object') {
-    throw new Error('sqlItem must be an object.');
-  }
-
+export function convertAPIToLocal(sqlItem: UserItemAPI): UserItemLocal {
   return {
     ...sqlItem,
-    learnable: sqlItem.learnable ? 1 : 0, // Convert boolean to number
+    is_study_item: sqlItem.is_study_item ? 1 : 0, // Convert boolean to number
     started_at: sqlItem.started_at ?? NULL_DATE,
     next_at: sqlItem.next_at ?? NULL_DATE,
     mastered_at: sqlItem.mastered_at ?? NULL_DATE,

@@ -1,9 +1,9 @@
-import type { JSX } from 'react';
+import type { JSX, ReactNode } from 'react';
 
 type PropertyViewProps = Readonly<{
   readonly label: string;
   readonly title?: string;
-  readonly children?: React.ReactNode;
+  readonly children?: ReactNode;
   readonly className?: string;
   readonly classNameLabel?: string;
   readonly classNameValue?: string;

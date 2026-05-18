@@ -10,15 +10,15 @@
   }
 
   h1 {
-    @apply font-headings pb-2 text-4xl font-thin;
+    @apply font-headings py-2 text-4xl font-thin;
   }
 
   h2 {
-    @apply font-headings pb-2 text-xl font-thin;
+    @apply font-headings py-2 text-xl font-thin;
   }
 
   h3 {
-    @apply font-headings pb-1 text-xl font-thin;
+    @apply font-headings py-2 text-xl font-thin;
   }
 
   ul {

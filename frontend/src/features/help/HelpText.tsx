@@ -1,31 +1,25 @@
 import { useHelpStore } from './use-help-store';
-import type { JSX, ReactNode } from 'react';
-
-type HelpTextProps = Readonly<{
-  readonly children: ReactNode;
-  readonly className?: string;
-}>;
+import type { HTMLAttributes, JSX } from 'react';
 
 /**
  * HelpText component for displaying contextual hints.
  * Manages visibility based on the help store 'isHelpOpened' state.
- *
- * @param children Content to be displayed inside the help.
- * @param className Additional CSS classes for custom styling.
- * @return The rendered help text element or null if help is closed.
  */
-export default function HelpText({ children, className = '' }: HelpTextProps): JSX.Element | null {
+export default function HelpText(
+  props: Readonly<HTMLAttributes<HTMLParagraphElement>>,
+): JSX.Element | null {
   const isHelpOpened = useHelpStore((state) => state.isHelpOpened);
 
   if (!isHelpOpened) {
     return null;
   }
-  
+
   return (
     <p
-      className={`font-headings z-help-text pointer-events-none absolute px-2 text-xl font-bold text-white ${className}`}
+      {...props}
+      className={`font-headings z-help-text pointer-events-none absolute px-2 text-xl font-bold text-white ${props.className}`}
     >
-      {children}
+      {props.children}
     </p>
   );
 }

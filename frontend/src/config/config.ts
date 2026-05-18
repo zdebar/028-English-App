@@ -41,8 +41,6 @@ const config = {
   audio: {
     audioBucketName: 'audio-files',
     archiveBucketName: 'audio-archive',
-    initialArchive: ['audio_part_1.zip'],
-    allArchives: ['audio_part_1.zip'],
   },
 
   lesson: {
@@ -53,6 +51,7 @@ const config = {
   practice: {
     dailyGoal: 400, // Number of new items recommended for daily practice
     audioDelay: 100, // Delay in milliseconds for automatically playing audio
+    holdDuration: 300, // Duration in milliseconds for which the practice card is held before moving to the next item
     CZ_TO_EN: 'czToEn',
     EN_TO_CZ: 'enToCz',
   },
