@@ -14,6 +14,11 @@ Main folders:
 - [backend/shared](backend/shared): shared backend helpers
 - [scripts](scripts): preparation and utility scripts
 
+Repository docs:
+
+- [STYLEGUIDE.md](STYLEGUIDE.md): recommended repository coding style and review defaults
+- [TEAM_POLICY.md](TEAM_POLICY.md): shorter coding guidelines
+
 ## What The Frontend Does
 
 The current frontend provides:
