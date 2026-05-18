@@ -84,7 +84,7 @@ describe('useAudioManager', () => {
     });
 
     expect(getAudioMock).toHaveBeenCalledWith('file.opus');
-    expect(URL.createObjectURL as any as ReturnType<typeof vi.fn>).toHaveBeenCalled();
+    expect(URL.createObjectURL).toHaveBeenCalled();
   });
 
   it('playAudio starts playback and ended event clears playing state', async () => {
@@ -159,8 +159,6 @@ describe('useAudioManager', () => {
     unmount();
 
     expect(audioInstances[0].pause).toHaveBeenCalled();
-    expect(URL.revokeObjectURL as any as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
-      'blob://audio-url',
-    );
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob://audio-url');
   });
 });

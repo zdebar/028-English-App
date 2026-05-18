@@ -18,11 +18,24 @@ function run(command, args, options = {}) {
   }
 }
 
+function getSafeSystemPath() {
+  if (process.platform === 'win32') {
+    return [
+      String.raw`C:\Windows\System32`,
+      String.raw`C:\Windows`,
+      String.raw`C:\Program Files\Git\bin`,
+      String.raw`C:\Program Files\Git\cmd`,
+    ].join(';');
+  }
+  return ['/usr/local/bin', '/usr/bin', '/bin'].join(':');
+}
+
 function getGitSha() {
   const result = spawnSync('git', ['rev-parse', '--short', 'HEAD'], {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'ignore'],
     shell: false,
+    env: { PATH: getSafeSystemPath() },
   });
 
   if (result.status !== 0) {

@@ -22,7 +22,8 @@ export default function VolumeSlider({ setVolume, className = '' }: VolumeSlider
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (sliderRef.current && !sliderRef.current.contains(event.target as Node)) {
+      const target = event.target;
+      if (sliderRef.current && target instanceof Node && !sliderRef.current.contains(target)) {
         setShowVolumeSlider(false);
       }
     };
