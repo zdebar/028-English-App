@@ -6,8 +6,8 @@ const mocks = vi.hoisted(() => ({
   playAudio: vi.fn(),
   showToast: vi.fn(),
   reportError: vi.fn(),
-  userId: 'u1' as string | null,
-  blockId: '2' as string | undefined,
+  userId: 'u1',
+  blockId: '2',
   state: {
     items: [] as any[],
     itemsLoading: false,
@@ -215,7 +215,7 @@ describe('BlockItemsOverview', () => {
   });
 
   it('resets block items and shows success toast', async () => {
-    vi.mocked(UserItem.resetItemsByBlockId).mockResolvedValue(undefined as never);
+    vi.mocked(UserItem.resetItemsByBlockId).mockResolvedValue(undefined);
 
     render(<BlockItemsOverview />);
 
@@ -228,7 +228,7 @@ describe('BlockItemsOverview', () => {
   });
 
   it('shows toast and logs error when reset fails', async () => {
-    vi.mocked(UserItem.resetItemsByBlockId).mockRejectedValue(new Error('boom') as never);
+    vi.mocked(UserItem.resetItemsByBlockId).mockRejectedValue(new Error('boom'));
 
     render(<BlockItemsOverview />);
 

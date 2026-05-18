@@ -6,7 +6,7 @@ export function GoogleAnalytics() {
   useEffect(() => {
     if (
       import.meta.env.PROD &&
-      typeof window !== 'undefined' &&
+      typeof globalThis !== 'undefined' &&
       GA_MEASUREMENT_ID &&
       !document.getElementById('ga-gtag')
     ) {
