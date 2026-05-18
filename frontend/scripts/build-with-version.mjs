@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 function run(command, args, options = {}) {
@@ -30,12 +30,30 @@ function getSafeSystemPath() {
   return ['/usr/local/bin', '/usr/bin', '/bin'].join(':');
 }
 
+function resolveGitExecutable() {
+  const candidates =
+    process.platform === 'win32'
+      ? [
+          String.raw`C:\Program Files\Git\cmd\git.exe`,
+          String.raw`C:\Program Files\Git\bin\git.exe`,
+          String.raw`C:\Windows\System32\git.exe`,
+        ]
+      : ['/usr/bin/git', '/usr/local/bin/git', '/bin/git'];
+
+  return candidates.find((candidate) => existsSync(candidate)) ?? null;
+}
+
 function getGitSha() {
-  const result = spawnSync('git', ['rev-parse', '--short', 'HEAD'], {
+  const gitExecutable = resolveGitExecutable();
+  if (!gitExecutable) {
+    return null;
+  }
+
+  const result = spawnSync(gitExecutable, ['rev-parse', '--short', 'HEAD'], {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'ignore'],
     shell: false,
-    env: { PATH: getSafeSystemPath() },
+    env: { ...process.env, PATH: getSafeSystemPath() },
   });
 
   if (result.status !== 0) {
