@@ -11,8 +11,8 @@ const mocks = vi.hoisted(() => ({
   rpc: vi.fn(),
   getNextAt: vi.fn(),
   getSyncTimestamps: vi.fn(),
-  convertLocalToSQL: vi.fn(),
-  convertSQLToLocal: vi.fn(),
+  convertLocalToExport: vi.fn(),
+  convertAPIToLocal: vi.fn(),
   markAsSynced: vi.fn(),
   addItemCount: vi.fn(),
   triggerLevelsUpdatedEvent: vi.fn(),
@@ -104,8 +104,8 @@ vi.mock('@/database/utils/user-items.utils', async () => {
   return {
     ...actual,
     getNextAt: (...args: unknown[]) => mocks.getNextAt(...args),
-    convertLocalToSQL: (...args: unknown[]) => mocks.convertLocalToSQL(...args),
-    convertSQLToLocal: (...args: unknown[]) => mocks.convertSQLToLocal(...args),
+    convertLocalToExport: (...args: unknown[]) => mocks.convertLocalToExport(...args),
+    convertAPIToLocal: (...args: unknown[]) => mocks.convertAPIToLocal(...args),
   };
 });
 
@@ -133,11 +133,11 @@ describe('UserItem', () => {
       lastSyncedAt: '2026-03-03T00:00:00.000Z',
       newSyncedAt: '2026-03-04T00:00:00.000Z',
     });
-    mocks.convertLocalToSQL.mockImplementation((item: unknown) => ({
+    mocks.convertLocalToExport.mockImplementation((item: unknown) => ({
       ...(item as any),
       sql: true,
     }));
-    mocks.convertSQLToLocal.mockImplementation((item: unknown) => item);
+    mocks.convertAPIToLocal.mockImplementation((item: unknown) => item);
     mocks.addItemCount.mockResolvedValue(undefined);
     mocks.equalsDelete.mockResolvedValue(0);
     mocks.blockEqualsToArray.mockResolvedValue([]);
