@@ -10,6 +10,13 @@ import type Lessons from '@/database/models/lessons';
 import type Levels from '@/database/models/levels';
 import type Blocks from '@/database/models/blocks';
 
+/**
+ * Application IndexedDB wrapper built on Dexie.
+ *
+ * Declares the concrete tables used by the app and their schema for version 1.
+ * Each table maps to a model class under `database/models` and is exposed
+ * as an `EntityTable` for typed access throughout the frontend code.
+ */
 export default class AppDB extends Dexie {
   levels!: EntityTable<Levels, 'id'>;
   lessons!: EntityTable<Lessons, 'id'>;
