@@ -43,7 +43,7 @@ export async function restoreUnsavedFromLocalStorage(userId: string): Promise<vo
       }
       localStorage.removeItem(key);
       reportInfo(
-        `Restored unsaved practice deck progress for user ${userId} with ${userProgress.length} items.`,
+        `Restored unsaved practice deck progress with ${userProgress.length} items.`,
       );
     } catch (e) {
       reportError('Error parsing practice deck progress from localStorage', e);

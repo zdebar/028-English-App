@@ -273,7 +273,7 @@ describe('database.utils', () => {
       expect(mocks.savePracticeDeck).not.toHaveBeenCalled();
       expect(localStorage.getItem('practiceDeckProgress_u1')).toBeNull();
       expect(mocks.reportInfo).toHaveBeenCalledWith(
-        'Restored unsaved practice deck progress for user u1 with 0 items.',
+        'Restored unsaved practice deck progress with 0 items.',
       );
     });
 
