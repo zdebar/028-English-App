@@ -56,6 +56,13 @@ export default function Guide(): JSX.Element {
           <strong>"Znám"</strong>
           <span>Položka se nabídne k dalšímu procvičování později.</span>
         </p>
+        <p>
+          <strong>"Poznámka"</strong>
+          <span>
+            Některé položky mají poznámku, která podrobněji vysvětluje použití daného slovíčka v
+            angličtině.
+          </span>
+        </p>
       </section>
       <section>
         <h2>Profil</h2>

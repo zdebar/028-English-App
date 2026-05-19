@@ -223,6 +223,9 @@ export default function PracticeCard() {
             className={`note-btn-pos absolute mr-2 cursor-pointer self-end p-4`}
           >
             <InfoIcon />
+            <HelpText className="top-0 left-4 flex flex-col items-end">
+              {TEXTS.tooltipNotes}
+            </HelpText>
           </button>
         )}
       </div>
