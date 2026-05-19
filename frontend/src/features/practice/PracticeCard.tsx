@@ -9,8 +9,10 @@ import { usePracticeDeck } from './hooks/use-practice-deck';
 import Indicator from '@/components/UI/Indicator';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
+import OverviewCard from '@/components/UI/OverviewCard';
 import GrammarCard from '@/features/practice/GrammarCard';
 import VolumeSlider from '@/features/practice/VolumeSlider';
+import InfoIcon from '@/components/UI/icons/InfoIcon';
 
 import Notification from '@/components/UI/Notification';
 import { TEXTS } from '@/locales/cs';
@@ -58,6 +60,7 @@ export default function PracticeCard() {
     playAudio,
     audioLoading,
   } = usePracticeDeck(userId);
+  const [showNote, setShowNote] = useState(false);
 
   const cardText = revealed ? undefined : TEXTS.reveal;
   const cardStyle = revealed ? 'color-audio-disabled' : 'color-button';
@@ -73,6 +76,16 @@ export default function PracticeCard() {
   }
 
   if (grammarVisible) return <GrammarCard grammar={grammarData} onClose={closeGrammar} />;
+
+  if (showNote)
+    return (
+      <OverviewCard onClose={() => setShowNote(false)} buttonTitle={currentItem?.english}>
+        <div
+          dangerouslySetInnerHTML={{ __html: currentItem?.note || '' }}
+          className="grammar p-4"
+        />
+      </OverviewCard>
+    );
 
   return (
     <div className="relative flex w-full grow flex-col items-center">
@@ -198,6 +211,20 @@ export default function PracticeCard() {
         </div>
 
         <HelpButton className="help-btn-pos self-end" />
+        {currentItem?.note && currentItem?.note?.length > 0 && revealed && (
+          <button
+            type="button"
+            aria-label="note"
+            title={TEXTS.tooltipNotes}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowNote(true);
+            }}
+            className={`note-btn-pos absolute mr-2 cursor-pointer self-end p-4`}
+          >
+            <InfoIcon />
+          </button>
+        )}
       </div>
     </div>
   );

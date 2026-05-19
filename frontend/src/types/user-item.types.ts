@@ -3,6 +3,7 @@ export interface UserItemBase {
   item_id: number;
   czech: string;
   english: string;
+  note: string | null;
   pronunciation: string;
   audio: string | null;
   sort_order: number;

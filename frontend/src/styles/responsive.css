@@ -12,3 +12,16 @@
     right: -54px;
   }
 }
+
+.note-btn-pos {
+  position: absolute;
+  bottom: -54px;
+  left: 0px;
+}
+
+@media (max-height: 400px) {
+  .note-btn-pos {
+    bottom: 0px;
+    left: -54px;
+  }
+}

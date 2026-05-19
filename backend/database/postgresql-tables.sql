@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS items (
   english TEXT NOT NULL,
   pronunciation TEXT,
   audio TEXT,
+  note TEXT,
   is_study_item BOOLEAN NOT NULL DEFAULT TRUE,
   sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 0),
   block_id INTEGER REFERENCES blocks(id) ON DELETE SET NULL,

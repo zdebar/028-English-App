@@ -8,6 +8,7 @@ RETURNS TABLE (
   user_id UUID,
   czech TEXT,
   english TEXT,
+  note TEXT,
   pronunciation TEXT,
   audio TEXT,
   is_study_item BOOLEAN,
