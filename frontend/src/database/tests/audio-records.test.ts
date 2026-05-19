@@ -4,7 +4,7 @@ const mocks = vi.hoisted(() => ({
   audioGet: vi.fn(),
   audioPut: vi.fn(),
   audioBulkPut: vi.fn(),
-  audioBulkDelete: vi.fn(),
+  audioDelete: vi.fn(),
   audioPrimaryKeys: vi.fn(),
   userItemsToArray: vi.fn(),
   dbTransaction: vi.fn(),
@@ -12,9 +12,8 @@ const mocks = vi.hoisted(() => ({
   fetchStorageBucketMetadata: vi.fn(),
   metadataGetRemoteUpdatedAt: vi.fn(),
   metadataMarkAsFetched: vi.fn(),
-  reportInfo: vi.fn(),
   reportError: vi.fn(),
-  logRejectedResults: vi.fn(),
+  withSettledSummary: vi.fn(),
   jszipLoadAsync: vi.fn(),
 }));
 
@@ -50,7 +49,7 @@ vi.mock('@/database/models/db', () => ({
       get: (...args: unknown[]) => mocks.audioGet(...args),
       put: (...args: unknown[]) => mocks.audioPut(...args),
       bulkPut: (...args: unknown[]) => mocks.audioBulkPut(...args),
-      bulkDelete: (...args: unknown[]) => mocks.audioBulkDelete(...args),
+      delete: (...args: unknown[]) => mocks.audioDelete(...args),
       toCollection: () => ({
         primaryKeys: () => mocks.audioPrimaryKeys(),
       }),
@@ -66,12 +65,11 @@ vi.mock('@/database/models/db', () => ({
 }));
 
 vi.mock('@/features/logging/monitoring-handler', () => ({
-  reportInfo: (...args: unknown[]) => mocks.reportInfo(...args),
   reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
 
 vi.mock('@/features/logging/logging.utils', () => ({
-  logRejectedResults: (...args: unknown[]) => mocks.logRejectedResults(...args),
+  withSettledSummary: (...args: unknown[]) => mocks.withSettledSummary(...args),
 }));
 
 vi.mock('jszip', () => ({
@@ -83,6 +81,15 @@ import AudioRecord from '@/database/models/audio-records';
 describe('AudioRecord', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.withSettledSummary.mockImplementation(async (promises: Promise<unknown>[]) => {
+      const results = await Promise.allSettled(promises);
+      const failed = results.filter((r) => r.status === 'rejected').length;
+      return {
+        total: results.length,
+        success: results.length - failed,
+        failed,
+      };
+    });
     mocks.dbTransaction.mockImplementation(async (...args: unknown[]) => {
       const callback = args.at(-1) as () => Promise<unknown>;
       return callback();
@@ -146,10 +153,10 @@ describe('AudioRecord', () => {
     it('does nothing when remote bucket is empty', async () => {
       mocks.fetchStorageBucketMetadata.mockResolvedValue(new Map());
 
-      await AudioRecord.syncFromRemote();
+      const result = await AudioRecord.syncFromRemote();
 
       expect(mocks.fetchStorage).not.toHaveBeenCalled();
-      expect(mocks.reportInfo).toHaveBeenCalledWith('No audio archives found in remote bucket.');
+      expect(result).toEqual({ total: 0, success: 0, failed: 0 });
     });
 
     it('downloads, extracts, stores files, and marks archive as fetched', async () => {
@@ -181,16 +188,11 @@ describe('AudioRecord', () => {
       expect(mocks.metadataMarkAsFetched).toHaveBeenCalledWith('pack-3.zip', remoteTimestamp);
     });
 
-    it('logs and swallows archive sync errors', async () => {
+    it('throws when bucket metadata fetch fails', async () => {
       const error = new Error('network error');
       mocks.fetchStorageBucketMetadata.mockRejectedValue(error);
 
-      await expect(AudioRecord.syncFromRemote()).resolves.toBeUndefined();
-
-      expect(mocks.logRejectedResults).toHaveBeenCalledWith(
-        [{ status: 'rejected', reason: error }],
-        'Operation failed during audio data sync',
-      );
+      await expect(AudioRecord.syncFromRemote()).rejects.toThrow('network error');
     });
   });
 
@@ -206,7 +208,8 @@ describe('AudioRecord', () => {
 
       await AudioRecord.removeOrphaned();
 
-      expect(mocks.audioBulkDelete).toHaveBeenCalledWith(['b.opus', 'c.opus']);
+      expect(mocks.audioDelete).toHaveBeenCalledWith('b.opus');
+      expect(mocks.audioDelete).toHaveBeenCalledWith('c.opus');
     });
 
     it('does not delete when there are no orphaned records', async () => {
@@ -215,7 +218,7 @@ describe('AudioRecord', () => {
 
       await AudioRecord.removeOrphaned();
 
-      expect(mocks.audioBulkDelete).not.toHaveBeenCalled();
+      expect(mocks.audioDelete).not.toHaveBeenCalled();
     });
   });
 });

@@ -5,7 +5,6 @@ import { db } from '@/database/models/db';
 import { SupabaseError } from '@/types/error.types';
 import type { LevelType, LevelOverviewType } from '@/types/generic.types';
 import { TableName } from '@/types/table.types';
-import { assertNonEmptyString } from '@/utils/assertions.utils';
 import Dexie, { Entity } from 'dexie';
 import { syncFromRemoteGeneric } from '../utils/data-sync.utils';
 import { aggregateLevels } from '../utils/levels.utils';
@@ -32,7 +31,6 @@ export default class Levels extends Entity<AppDB> implements LevelType {
    * @param userId - The unique identifier of the user
    */
   static async getOverview(userId: string): Promise<LevelOverviewType[]> {
-    assertNonEmptyString(userId, 'userId');
     const items = await UserItem.getByUserId(userId);
     const lessons = await Lessons.getAll();
     const levels = await db.levels.orderBy('sort_order').toArray();
@@ -45,9 +43,10 @@ export default class Levels extends Entity<AppDB> implements LevelType {
    *                     and fetching all levels from the epoch start date.
    *                     If false, performs an incremental sync fetching only levels
    *                     modified since the last sync timestamp. Defaults to false.
+   * @return The count of level records that were updated from the remote database during this sync operation.
    */
-  static async syncFromRemote(doFullSync: boolean = false): Promise<void> {
-    await syncFromRemoteGeneric<LevelType>(
+  static async syncFromRemote(doFullSync: boolean = false): Promise<number> {
+    return await syncFromRemoteGeneric<LevelType>(
       db.levels as Dexie.Table<LevelType, number>,
       TableName.Levels,
       this.fetchFromRemote,

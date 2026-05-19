@@ -5,7 +5,6 @@ import { db } from '@/database/models/db';
 import { DatabaseError, SupabaseError } from '@/types/error.types';
 import type { GrammarType } from '@/types/generic.types';
 import { TableName } from '@/types/table.types';
-import { assertNonEmptyString, assertPositiveInteger } from '@/utils/assertions.utils';
 import Dexie, { Entity } from 'dexie';
 import { syncFromRemoteGeneric } from '../utils/data-sync.utils';
 import UserItem from './user-items';
@@ -31,8 +30,6 @@ export default class Grammar extends Entity<AppDB> implements GrammarType {
    * @param grammarId - The unique identifier of the grammar record to retrieve.
    */
   static async getById(grammarId: number): Promise<GrammarType> {
-    assertPositiveInteger(grammarId, 'grammarId');
-
     const grammar = await db.grammar.get(grammarId);
 
     if (!grammar) {
@@ -47,10 +44,10 @@ export default class Grammar extends Entity<AppDB> implements GrammarType {
    * @param userId - The unique identifier of the user
    */
   static async getStarted(userId: string): Promise<GrammarType[]> {
-    assertNonEmptyString(userId, 'userId');
-
     const grammarIds = await UserItem.getStartedGrammarIds(userId);
+
     if (grammarIds.length === 0) return [];
+
     return await db.grammar.where('id').anyOf(grammarIds).sortBy('sort_order');
   }
 
@@ -59,9 +56,10 @@ export default class Grammar extends Entity<AppDB> implements GrammarType {
    * @param doFullSync - If true, performs a full sync by clearing all existing grammar data
    *                     and fetching everything from the epoch start date. If false, performs
    *                     an incremental sync based on the last sync timestamp. Defaults to false.
+   * @returns The count of grammar records that were updated from the remote database during this sync operation.
    */
-  static async syncFromRemote(doFullSync: boolean = false): Promise<void> {
-    await syncFromRemoteGeneric<GrammarType>(
+  static async syncFromRemote(doFullSync: boolean = false): Promise<number> {
+    return await syncFromRemoteGeneric<GrammarType>(
       db.grammar as Dexie.Table<GrammarType, number>,
       TableName.Grammar,
       this.fetchFromRemote,

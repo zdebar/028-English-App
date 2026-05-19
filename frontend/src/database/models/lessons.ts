@@ -38,9 +38,10 @@ export default class Lessons extends Entity<AppDB> implements LessonType {
    *                     and fetching all lessons from the epoch start date.
    *                     If false, performs an incremental sync fetching only lessons
    *                     modified since the last sync timestamp. Defaults to false.
+   * @returns The count of lesson records that were updated from the remote database during this sync operation.
    */
-  static async syncFromRemote(doFullSync: boolean = false): Promise<void> {
-    await syncFromRemoteGeneric<LessonType>(
+  static async syncFromRemote(doFullSync: boolean = false): Promise<number> {
+    return await syncFromRemoteGeneric<LessonType>(
       db.lessons as Dexie.Table<LessonType, number>,
       TableName.Lessons,
       this.fetchFromRemote,

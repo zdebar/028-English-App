@@ -1,7 +1,7 @@
 import DelayedNotification from '@/components/UI/DelayedNotification';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { reportError } from '@/features/logging/monitoring-handler';
+import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { TEXTS } from '@/locales/cs';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useVocabulary } from './use-vocabulary';
@@ -41,17 +41,18 @@ export default function VocabularyOverview() {
   useLocalStorageSync(SEARCH_KEY, searchTerm, setSearchTerm);
 
   // -- HANDLERS  --
-  const handleClearUserItem = useCallback(async () => {
+  const handleResetUserItem = useCallback(async () => {
     const itemId = selectedWord?.item_id;
     if (typeof itemId !== 'number' || !userId) {
       return;
     }
 
     try {
-      await UserItem.resetItemById(userId, itemId);
+      const resetItemId = await UserItem.resetItemById(userId, itemId);
+      reportInfo(`Vocabulary item reset completed: item ${resetItemId}.`);
+      showToast(TEXTS.resetProgressSuccessToast, 'success');
       setSelectedWord(null);
       reload();
-      showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (error) {
       showToast(TEXTS.resetProgressErrorToast, 'error');
       reportError('Reset User Item Error', error);
@@ -96,7 +97,7 @@ export default function VocabularyOverview() {
         displayField === 'czech' ? (selectedWord.czech ?? '') : (selectedWord.english ?? '')
       }
       onClose={() => setSelectedWord(null)}
-      onReset={handleClearUserItem}
+      onReset={handleResetUserItem}
     />
   );
 }

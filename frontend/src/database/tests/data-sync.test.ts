@@ -5,7 +5,7 @@ const mocks = vi.hoisted(() => ({
   setFullSyncTime: vi.fn(),
   initDbMappings: vi.fn(),
   restoreUnsavedFromLocalStorage: vi.fn(),
-  logRejectedResults: vi.fn(),
+  withSettledSummary: vi.fn(),
   userScoreSyncFromRemote: vi.fn(),
   userItemSyncFromRemote: vi.fn(),
   grammarSyncFromRemote: vi.fn(),
@@ -46,7 +46,7 @@ vi.mock('@/database/utils/database.utils', () => ({
 }));
 
 vi.mock('@/features/logging/logging.utils', () => ({
-  logRejectedResults: (...args: unknown[]) => mocks.logRejectedResults(...args),
+  withSettledSummary: (...args: unknown[]) => mocks.withSettledSummary(...args),
 }));
 
 vi.mock('@/database/models/user-scores', () => ({
@@ -115,7 +115,7 @@ describe('data-sync.utils', () => {
     mocks.getFullSyncTime.mockReturnValue(0);
     mocks.initDbMappings.mockResolvedValue(undefined);
     mocks.restoreUnsavedFromLocalStorage.mockResolvedValue(undefined);
-    mocks.logRejectedResults.mockReturnValue(false);
+    mocks.withSettledSummary.mockResolvedValue({ total: 6, success: 6, failed: 0 });
 
     mocks.userScoreSyncFromRemote.mockResolvedValue(undefined);
     mocks.userItemSyncFromRemote.mockResolvedValue(undefined);
@@ -163,7 +163,7 @@ describe('data-sync.utils', () => {
   });
 
   it('dataSync throws when user sync reports rejected results', async () => {
-    mocks.logRejectedResults.mockReturnValueOnce(true);
+    mocks.withSettledSummary.mockResolvedValueOnce({ total: 6, success: 5, failed: 1 });
 
     await expect(dataSync('u1')).rejects.toThrow('Data synchronization error');
   });

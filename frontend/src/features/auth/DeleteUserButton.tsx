@@ -4,7 +4,7 @@ import UserItem from '@/database/models/user-items';
 import UserScoreType from '@/database/models/user-scores';
 import { clearSyncTimes } from '@/database/utils/sync-time.utils';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { logRejectedResults } from '@/features/logging/logging.utils.ts';
+import { withSettledSummary } from '@/features/logging/logging.utils';
 import ButtonWithModal from '@/features/modal/ButtonWithModal';
 import { TEXTS } from '@/locales/cs';
 import { TableName } from '@/types/table.types';
@@ -36,15 +36,17 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
     try {
       saveCurrentThemeAsGuest();
 
-      const resultsDelete = await Promise.allSettled([
-        UserItem.deleteByUserId(userId),
-        Metadata.deleteSyncRow(TableName.UserItems, userId),
-        UserScoreType.deleteByUserId(userId),
-        Metadata.deleteSyncRow(TableName.UserScores, userId),
-        Promise.resolve(clearTheme(userId)),
-        Promise.resolve(clearSyncTimes(userId)),
-      ]);
-      logRejectedResults(resultsDelete, 'Operation failed during local cleanup');
+      await withSettledSummary(
+        [
+          UserItem.deleteByUserId(userId),
+          Metadata.deleteSyncRow(TableName.UserItems, userId),
+          UserScoreType.deleteByUserId(userId),
+          Metadata.deleteSyncRow(TableName.UserScores, userId),
+          Promise.resolve(clearTheme(userId)),
+          Promise.resolve(clearSyncTimes(userId)),
+        ],
+        'Operation failed during local cleanup',
+      );
 
       const { error: deleteError } = await supabaseInstance.functions.invoke('delete-user', {
         body: { userId },

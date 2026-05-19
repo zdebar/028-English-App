@@ -2,9 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { TEXTS } from '@/locales/cs';
 import config from '@/config/config';
 import AudioRecord from '@/database/models/audio-records';
-import { audioSync, dataSync, dataSyncOnUnmount } from '@/database/utils/data-sync.utils';
-import { logRejectedResults } from '@/features/logging/logging.utils';
-import { reportError } from '@/features/logging/monitoring-handler';
+import { dataSync, dataSyncOnUnmount } from '@/database/utils/data-sync.utils';
+import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { useSyncWarningStore } from '@/features/sync/use-sync-warning';
 import { useToastStore } from '@/features/toast/use-toast-store';
 
@@ -44,14 +43,20 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
     const performSync = async () => {
       setLoading(true);
       try {
-        const syncResults = await Promise.allSettled([
-          dataSync(activeUserId),
-          audioSync(activeUserId),
-        ]);
-        const isError = logRejectedResults(syncResults, 'Data synchronization error:');
-        if (isError) throw new Error('Data synchronization error');
+        await dataSync(activeUserId);
+        const audioSummary = await AudioRecord.syncFromRemote();
+        if (audioSummary.failed > 0) {
+          reportError('Audio archive sync errors', audioSummary.sampleErrors);
+        }
 
-        AudioRecord.removeOrphaned();
+        const orphanedCount = await AudioRecord.removeOrphaned();
+        if (orphanedCount.failed > 0) {
+          reportError('Audio archive sync errors', orphanedCount.sampleErrors);
+        }
+        if (orphanedCount.success > 0) {
+          reportInfo(`Deleted ${orphanedCount.success} orphaned audio records.`);
+        }
+
         showToast(TEXTS.syncSuccessToast, 'success');
         setSynchronized(true);
       } catch (error) {

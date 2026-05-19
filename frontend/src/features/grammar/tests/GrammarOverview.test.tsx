@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -7,6 +7,10 @@ const mocks = vi.hoisted(() => ({
   setCurrentIndex: vi.fn(),
   sanitize: vi.fn(),
   reload: vi.fn(),
+  resetItemsByGrammarId: vi.fn(),
+  showToast: vi.fn(),
+  reportInfo: vi.fn(),
+  reportError: vi.fn(),
   arrayState: {
     data: [] as any[],
     currentIndex: null as number | null,
@@ -27,6 +31,22 @@ vi.mock('@/database/models/grammar', () => ({
   default: {
     getStarted: vi.fn(),
   },
+}));
+
+vi.mock('@/database/models/user-items', () => ({
+  default: {
+    resetItemsByGrammarId: (...args: unknown[]) => mocks.resetItemsByGrammarId(...args),
+  },
+}));
+
+vi.mock('@/features/toast/use-toast-store', () => ({
+  useToastStore: (selector: (state: { showToast: typeof mocks.showToast }) => unknown) =>
+    selector({ showToast: mocks.showToast }),
+}));
+
+vi.mock('@/features/logging/monitoring-handler', () => ({
+  reportInfo: (...args: unknown[]) => mocks.reportInfo(...args),
+  reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
 
 vi.mock('@/hooks/use-array', () => ({
@@ -119,6 +139,7 @@ describe('GrammarOverview', () => {
       currentItem: null,
     };
     mocks.sanitize.mockImplementation((value: string) => value);
+    mocks.resetItemsByGrammarId.mockResolvedValue(4);
   });
 
   it('renders list view with grammar items and opens selected grammar', () => {
@@ -171,5 +192,24 @@ describe('GrammarOverview', () => {
     render(<GrammarOverview />);
     expect(screen.getByText('Reported speech')).toBeTruthy();
     expect(screen.getByTestId('help-button')).toBeTruthy();
+  });
+
+  it('resets grammar progress and logs completion info', async () => {
+    mocks.arrayState.currentIndex = 0;
+    mocks.arrayState.currentItem = {
+      id: 8,
+      name: 'Reported speech',
+      note: null,
+    };
+
+    render(<GrammarOverview />);
+
+    fireEvent.click(screen.getByTestId('overview-reset'));
+
+    await waitFor(() => {
+      expect(mocks.resetItemsByGrammarId).toHaveBeenCalledWith('u1', 8);
+      expect(mocks.reportInfo).toHaveBeenCalledWith('Grammar 8 reset completed: 4 items reset.');
+      expect(mocks.showToast).toHaveBeenCalledWith('Reset success', 'success');
+    });
   });
 });

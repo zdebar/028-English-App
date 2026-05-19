@@ -4,11 +4,6 @@ import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import type { UserItemPractice, UserItemLocal, UserItemExport } from '@/types/user-item.types';
 import { TableName } from '@/types/table.types';
-import {
-  assertNonEmptyString,
-  assertNonNegativeInteger,
-  assertPositiveInteger,
-} from '@/utils/assertions.utils';
 import Dexie, { Entity } from 'dexie';
 import { getSyncTimestamps, splitDeleted } from '../utils/data-sync.utils';
 
@@ -19,7 +14,6 @@ import {
   getNextAt,
   resetUserItem,
 } from '@/database/utils/user-items.utils';
-import { reportInfo } from '@/features/logging/monitoring-handler';
 import { triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 import { SupabaseError } from '@/types/error.types';
 import Metadata from './metadata';
@@ -73,9 +67,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     userId: string,
     deckSize: number = config.lesson.deckSize,
   ): Promise<UserItemPractice[]> {
-    assertNonEmptyString(userId, 'userId');
-    assertPositiveInteger(deckSize, 'deckSize');
-
     // Step 1: Fetch already started grammar list
     const startedGrammarIdSet = new Set(await this.getStartedGrammarIds(userId));
 
@@ -119,8 +110,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     items: UserItemPractice[],
     dateTime: string = new Date(Date.now()).toISOString(),
   ): Promise<void> {
-    assertNonEmptyString(userId, 'userId');
-    if (!Array.isArray(items)) throw new Error('items must be an array.');
     if (!items || items.length === 0) return;
 
     const updatedItems = items.map((item) => {
@@ -152,7 +141,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param userId - The unique identifier of the user
    */
   static async getByUserId(userId: string): Promise<UserItemLocal[]> {
-    assertNonEmptyString(userId, 'userId');
     return await db.user_items.where('user_id').equals(userId).toArray();
   }
 
@@ -161,9 +149,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param userId - The ID of the user
    */
   static async getByBlockId(userId: string, blockId: number): Promise<UserItemLocal[]> {
-    assertNonEmptyString(userId, 'userId');
-    assertPositiveInteger(blockId, 'blockId');
-
     const blockItems = await db.user_items
       .where('[user_id+block_id]')
       .equals([userId, blockId])
@@ -177,8 +162,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param userId - The ID of the user
    */
   static async getStartedGrammarIds(userId: string): Promise<number[]> {
-    assertNonEmptyString(userId, 'userId');
-
     const startedItems = await db.user_items
       .where('[user_id+started_at]')
       .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
@@ -193,8 +176,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param userId - The ID of the user
    */
   static async getStartedBlocksIds(userId: string): Promise<number[]> {
-    assertNonEmptyString(userId, 'userId');
-
     const startedItems = await db.user_items
       .where('[user_id+started_at]')
       .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
@@ -209,8 +190,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param userId - The unique identifier of the user
    */
   static async getStartedVocabulary(userId: string): Promise<UserItemLocal[]> {
-    assertNonEmptyString(userId, 'userId');
-
     const result = await db.user_items
       .where('[user_id+grammar_id+started_at+is_study_item]')
       .between(
@@ -229,11 +208,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Resets a user item to its default state by user and item ID.
    * @param userId - The unique identifier of the user
    * @param itemId - The unique identifier of the item to reset
+   * @return The ID of the reset item
    */
-  static async resetItemById(userId: string, itemId: number): Promise<void> {
-    assertNonEmptyString(userId, 'userId');
-    assertNonNegativeInteger(itemId, 'itemId');
-
+  static async resetItemById(userId: string, itemId: number): Promise<number> {
     const count = await db.user_items
       .where('[user_id+item_id]')
       .equals([userId, itemId])
@@ -245,19 +222,17 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       throw new Error(`No user items found for item ID ${itemId}.`);
     }
 
-    reportInfo(`Resetted user item with itemId: ${itemId}.`);
     triggerLevelsUpdatedEvent(userId);
+    return itemId;
   }
 
   /**
    * Resets all user items associated with a specific grammar ID to their default state for a given user.
    * @param userId - The unique identifier of the user
    * @param grammarId - The unique identifier of the grammar
+   * @return The count of reset items
    */
-  static async resetItemsByGrammarId(userId: string, grammarId: number): Promise<void> {
-    assertNonEmptyString(userId, 'userId');
-    assertNonNegativeInteger(grammarId, 'grammarId');
-
+  static async resetItemsByGrammarId(userId: string, grammarId: number): Promise<number> {
     const count = await db.user_items
       .where('[user_id+grammar_id+started_at]')
       .between([userId, grammarId, Dexie.minKey], [userId, grammarId, NULL_DATE], true, false)
@@ -265,19 +240,17 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         resetUserItem(item);
       });
 
-    reportInfo(`Resetted ${count} user-items with grammarId: ${grammarId}`);
     triggerLevelsUpdatedEvent(userId);
+    return count;
   }
 
   /**
    * Resets all user items associated with a specific block ID to their default state for a given user.
    * @param userId - The unique identifier of the user
    * @param blockId - The unique identifier of the block
+   * @return The count of reset items
    */
-  static async resetItemsByBlockId(userId: string, blockId: number): Promise<void> {
-    assertNonEmptyString(userId, 'userId');
-    assertNonNegativeInteger(blockId, 'blockId');
-
+  static async resetItemsByBlockId(userId: string, blockId: number): Promise<number> {
     const count = await db.user_items
       .where('[user_id+block_id]')
       .equals([userId, blockId])
@@ -285,18 +258,19 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         resetUserItem(item);
       });
 
-    reportInfo(`Resetted ${count} user-items with blockId: ${blockId}`);
     triggerLevelsUpdatedEvent(userId);
+    return count;
   }
 
   /**
    * Deletes all user items associated with a specific user.
    * Use only for deletion of user account, when user-items on remote are deleted automatically.
    * @param userId - The unique identifier of the user
+   * @return True if deletion was successful
    */
-  static async deleteByUserId(userId: string): Promise<void> {
-    assertNonEmptyString(userId, 'userId');
+  static async deleteByUserId(userId: string): Promise<boolean> {
     await db.user_items.where('user_id').equals(userId).delete();
+    return true;
   }
 
   /**
@@ -312,10 +286,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param userId - The ID of the user whose items should be synced
    * @param doFullSync - If true, performs a full sync by deleting all local items before upserting remote items.
    *                     If false, performs an incremental sync by only deleting items marked as deleted remotely.
+   * @returns The count of items that were updated from the remote database
    */
-  static async syncFromRemote(userId: string, doFullSync: boolean): Promise<void> {
-    assertNonEmptyString(userId, 'userId');
-
+  static async syncFromRemote(userId: string, doFullSync: boolean): Promise<number> {
     // Step 1: Get the last synced timestamp for user scores
     const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(
       doFullSync,
@@ -341,7 +314,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       await Metadata.markAsSynced(TableName.UserItems, newSyncedAt, userId);
     });
 
-    reportInfo(`Completed ${updatedItems.length} user items pull from remote.`);
+    return updatedItems.length;
   }
 
   /**
@@ -359,11 +332,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .where('[user_id+updated_at]')
       .between([userId, lastSyncedAt], [userId, newSyncedAt], true, false)
       .toArray();
-
-    if (localUserItems.length === 0) {
-      reportInfo(`No user items to push.`);
-      return [];
-    }
 
     return localUserItems.map(convertLocalToExport);
   }
@@ -393,11 +361,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       });
     }
 
-    if (items.length > 0) {
-      reportInfo(`Completed ${items.length} user items push to Supabase.`);
-    }
-
-    return (updatedUserItems ?? []).map(convertAPIToLocal);
+    if (!updatedUserItems || updatedUserItems.length === 0) return [];
+    return updatedUserItems.map(convertAPIToLocal);
   }
 
   /**

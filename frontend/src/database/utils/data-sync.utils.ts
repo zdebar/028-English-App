@@ -1,5 +1,4 @@
 import config from '@/config/config';
-import AudioRecord from '@/database/models/audio-records';
 import Blocks from '@/database/models/blocks';
 import { initDbMappings } from '@/database/models/db-init';
 import { db } from '@/database/models/db';
@@ -7,7 +6,7 @@ import UserItem from '@/database/models/user-items';
 import UserScoreType from '@/database/models/user-scores';
 import { restoreUnsavedFromLocalStorage } from '@/database/utils/database.utils';
 import { getFullSyncTime, setFullSyncTime } from '@/database/utils/sync-time.utils';
-import { logRejectedResults } from '@/features/logging/logging.utils';
+import { withSettledSummary } from '@/features/logging/logging.utils';
 import Lessons from '@/database/models/lessons';
 import Levels from '@/database/models/levels';
 import Dexie from 'dexie';
@@ -58,29 +57,37 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
         UserItem.syncFromRemote(userId, false),
       ];
 
-  const userResults = await Promise.allSettled(allPromises);
-  const isError = logRejectedResults(userResults, 'Data synchronization error:');
+  // Keep a parallel list of human-readable table names to report per-table completions.
+  const tableNames = doFullSync
+    ? ['Grammar', 'Levels', 'Lessons', 'Blocks', 'UserScores', 'UserItems']
+    : ['Grammar', 'Levels', 'Lessons', 'Blocks', 'UserScores', 'UserItems'];
+
+  const results = await Promise.allSettled(allPromises);
+
+  // Report per-table completion counts when available (most syncFromRemote return number of items)
+  results.forEach((r, idx) => {
+    if (r.status === 'fulfilled') {
+      const val = r.value as unknown;
+      if (typeof val === 'number') {
+        try {
+          reportInfo(`Completed ${val} ${tableNames[idx]} pull from remote.`);
+        } catch {
+          // swallow logging errors
+        }
+      }
+    }
+  });
+
+  const summary = await withSettledSummary(allPromises, 'Data sync', 3, false);
 
   triggerDailyCountUpdatedEvent(userId);
   triggerLevelsUpdatedEvent(userId);
-  if (isError) {
+  if (summary.failed > 0) {
     throw new Error('Data synchronization error');
   }
   if (doFullSync) {
     setFullSyncTime(userId, now);
   }
-}
-
-/**
- * Synchronizes data for a specific user with the database.
- *
- * @param userId - The unique identifier of the user to synchronize data for
- * @param downloadAll - Whether to download all audio files (for PWA) or only selected ones (for web app)
- * @returns A promise that resolves when the data synchronization is complete
- */
-export async function audioSync(userId: string): Promise<void> {
-  assertNonEmptyString(userId, 'userId');
-  await AudioRecord.syncFromRemote();
 }
 
 /**
@@ -90,8 +97,6 @@ export async function audioSync(userId: string): Promise<void> {
  * @returns A promise that resolves when the synchronization is complete
  */
 export async function dataSyncOnUnmount(userId: string): Promise<void> {
-  assertNonEmptyString(userId, 'userId');
-
   const { data: sessionData } = await supabaseInstance.auth.getSession();
   if (!sessionData.session) {
     return;
@@ -102,9 +107,8 @@ export async function dataSyncOnUnmount(userId: string): Promise<void> {
     UserItem.syncFromRemote(userId, false),
   ]);
 
-  const hasError = logRejectedResults(results, 'Unmount synchronization failed');
-  if (hasError) {
-    reportInfo('unmount_sync_failed', { userId });
+  if (results.some((r) => r.status === 'rejected')) {
+    throw new Error('Unmount synchronization failed');
   }
 }
 
@@ -116,9 +120,6 @@ export async function dataSyncOnUnmount(userId: string): Promise<void> {
 export function splitDeleted<T extends { deleted_at: string | null }>(
   items: T[],
 ): { toUpsert: T[]; toDelete: T[] } {
-  if (!Array.isArray(items)) {
-    throw new TypeError('items must be an array.');
-  }
   const toUpsert: T[] = [];
   const toDelete: T[] = [];
   items.forEach((item) => {
@@ -137,6 +138,7 @@ export function splitDeleted<T extends { deleted_at: string | null }>(
  * @param tableName - Table name for metadata
  * @param fetchRemoteFn - Function to fetch remote data, must return array of entities
  * @param doFullSync - Whether to perform a full sync
+ * @returns The count of items that were updated from the remote database
  *
  * @example
  * await syncFromRemoteGeneric(db.levels as Dexie.Table<LevelLocal, number>, TableName.Levels, Levels.fetchFromRemote, false);
@@ -146,10 +148,7 @@ export async function syncFromRemoteGeneric<T extends { deleted_at: string | nul
   tableName: TableName,
   fetchRemoteFn: (lastSyncedAt: string) => Promise<T[]>,
   doFullSync: boolean = false,
-): Promise<void> {
-  if (!dbTable) throw new Error('dbTable is required.');
-  if (typeof fetchRemoteFn !== 'function') throw new Error('fetchRemoteFn must be a function.');
-
+): Promise<number> {
   // Step 1: Determine last synced timestamp and new sync timestamp
   const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(doFullSync, tableName);
 
@@ -172,7 +171,7 @@ export async function syncFromRemoteGeneric<T extends { deleted_at: string | nul
     await Metadata.markAsSynced(tableName, newSyncedAt);
   });
 
-  reportInfo(`Completed ${remoteItems.length} ${tableName} pull from remote.`);
+  return remoteItems.length;
 }
 
 /**
@@ -186,9 +185,6 @@ export async function getSyncTimestamps(
   tableName: TableName,
   userId?: string,
 ): Promise<{ lastSyncedAt: string; newSyncedAt: string }> {
-  if (!doFullSync && userId != null) {
-    assertNonEmptyString(userId, 'userId');
-  }
   const lastSyncedAt = doFullSync
     ? config.database.epochStartDate
     : await Metadata.getSyncedAt(tableName, userId);

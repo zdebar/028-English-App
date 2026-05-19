@@ -7,6 +7,8 @@ const mocks = vi.hoisted(() => ({
   resetItemById: vi.fn(),
   reload: vi.fn(),
   showToast: vi.fn(),
+  reportInfo: vi.fn(),
+  reportError: vi.fn(),
   vocab: {
     loading: false,
     visibleCount: 2,
@@ -56,6 +58,11 @@ vi.mock('@/features/vocabulary/use-vocabulary', () => ({
 vi.mock('@/features/toast/use-toast-store', () => ({
   useToastStore: (selector: (state: { showToast: typeof mocks.showToast }) => unknown) =>
     selector({ showToast: mocks.showToast }),
+}));
+
+vi.mock('@/features/logging/monitoring-handler', () => ({
+  reportInfo: (...args: unknown[]) => mocks.reportInfo(...args),
+  reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
 
 vi.mock('@/components/UI/DelayedNotification', () => ({
@@ -112,7 +119,7 @@ describe('VocabularyOverview', () => {
     mocks.vocab.selectedWord = null;
     mocks.vocab.filteredWords = [];
     mocks.reload.mockResolvedValue(undefined);
-    mocks.resetItemById.mockResolvedValue(undefined);
+    mocks.resetItemById.mockResolvedValue(3);
   });
 
   it('loads searchTerm from localStorage on mount', () => {
@@ -167,6 +174,7 @@ describe('VocabularyOverview', () => {
       expect(mocks.reload).toHaveBeenCalledTimes(1);
       expect(mocks.vocab.setSelectedWord).toHaveBeenCalledWith(null);
       expect(mocks.showToast).toHaveBeenCalledWith('Reset success', 'success');
+      expect(mocks.reportInfo).toHaveBeenCalledWith('Vocabulary item reset completed: item 3.');
     });
   });
 

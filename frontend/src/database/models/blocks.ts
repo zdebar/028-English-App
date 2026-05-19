@@ -59,9 +59,10 @@ export default class Blocks extends Entity<AppDB> implements BlockType {
    *                     and fetching all blocks from the epoch start date.
    *                     If false, performs an incremental sync fetching only blocks
    *                     modified since the last sync timestamp. Defaults to false.
+   * @returns The count of block records that were updated from the remote database during this sync operation.
    */
-  static async syncFromRemote(doFullSync: boolean = false): Promise<void> {
-    await syncFromRemoteGeneric<BlockType>(
+  static async syncFromRemote(doFullSync: boolean = false): Promise<number> {
+    return await syncFromRemoteGeneric<BlockType>(
       db.blocks as Dexie.Table<BlockType, number>,
       TableName.Blocks,
       this.fetchFromRemote,

@@ -4,7 +4,6 @@ import type {
   UserItemAPI,
   UserItemExport,
 } from '@/types/user-item.types';
-import { assertNonNegativeInteger } from '@/utils/assertions.utils';
 import config from '@/config/config';
 
 const NULL_DATE = config.database.nullReplacementDate;
@@ -21,13 +20,6 @@ export function addGrammarIndicatorFlag(
   practiceItems: UserItemLocal[],
   startedGrammarIdSet: Set<number>,
 ): UserItemPractice[] {
-  if (!Array.isArray(practiceItems)) {
-    throw new TypeError('practiceItems must be an array.');
-  }
-  if (!(startedGrammarIdSet instanceof Set)) {
-    throw new TypeError('startedGrammarIdSet must be a Set.');
-  }
-
   const shownGrammarIds = new Set<number>();
   return practiceItems.map((item) => {
     let show = false;
@@ -53,8 +45,6 @@ export function addGrammarIndicatorFlag(
  * @throws Error if progress is not a positive integer.
  */
 export function getNextAt(progress: number): string {
-  assertNonNegativeInteger(progress, 'Progress must be a non-negative integer');
-
   const interval = config.srs.intervals[progress];
   if (interval == null) return NULL_DATE;
 

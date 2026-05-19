@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   playAudio: vi.fn(),
   showToast: vi.fn(),
+  reportInfo: vi.fn(),
   reportError: vi.fn(),
   userId: 'u1',
   blockId: '2',
@@ -60,6 +61,7 @@ vi.mock('@/database/models/user-items', () => ({
 }));
 
 vi.mock('@/features/logging/monitoring-handler', () => ({
+  reportInfo: (...args: unknown[]) => mocks.reportInfo(...args),
   reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
 
@@ -215,7 +217,7 @@ describe('BlockItemsOverview', () => {
   });
 
   it('resets block items and shows success toast', async () => {
-    vi.mocked(UserItem.resetItemsByBlockId).mockResolvedValue(undefined);
+    vi.mocked(UserItem.resetItemsByBlockId).mockResolvedValue(3);
 
     render(<BlockItemsOverview />);
 
@@ -223,6 +225,7 @@ describe('BlockItemsOverview', () => {
 
     await waitFor(() => {
       expect(UserItem.resetItemsByBlockId).toHaveBeenCalledWith('u1', 2);
+      expect(mocks.reportInfo).toHaveBeenCalledWith('Reset 3 items in block 2 for user u1');
       expect(mocks.showToast).toHaveBeenCalledWith('Reset success', 'success');
     });
   });
