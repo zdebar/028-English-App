@@ -30,7 +30,7 @@ AS $$
     p_user_id AS user_id,
     i.czech,
     i.english,
-    i.note,
+    n.note,
     i.pronunciation,
     i.audio,
     i.is_study_item,
@@ -48,7 +48,8 @@ AS $$
   LEFT JOIN public.user_items ui
     ON ui.item_id = i.id
     AND ui.user_id = p_user_id
+  LEFT JOIN public.notes n
+    ON n.id = i.note_id
   WHERE ui.updated_at >= p_last_synced_at
-    OR i.updated_at >= p_last_synced_at
-  ORDER BY i.sort_order ASC, i.id ASC;
+    OR i.updated_at >= p_last_synced_at;
 $$;

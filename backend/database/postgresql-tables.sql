@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS lessons (
   level_id INTEGER NOT NULL REFERENCES levels(id) ON DELETE RESTRICT,
   sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ,
+  deleted_at TIMESTAMPTZ
 );
 
 CREATE TABLE IF NOT EXISTS blocks (
@@ -43,13 +43,20 @@ CREATE TABLE IF NOT EXISTS blocks (
   deleted_at TIMESTAMPTZ
 );
 
+CREATE TABLE IF NOT EXISTS notes (
+  id SERIAL PRIMARY KEY,
+  note TEXT UNIQUE,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  deleted_at TIMESTAMPTZ
+);
+
 CREATE TABLE IF NOT EXISTS items (
   id SERIAL PRIMARY KEY,
   czech TEXT NOT NULL,
   english TEXT NOT NULL,
   pronunciation TEXT,
   audio TEXT,
-  note TEXT,
+  note_id INTEGER REFERENCES notes(id) ON DELETE SET NULL,
   is_study_item BOOLEAN NOT NULL DEFAULT TRUE,
   sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 0),
   block_id INTEGER REFERENCES blocks(id) ON DELETE SET NULL,
@@ -106,14 +113,17 @@ EXECUTE FUNCTION public.handle_new_auth_user();
 
 -- CREATE optimalization indexes
 CREATE INDEX IF NOT EXISTS idx_items_updated_at ON public.items (updated_at);
-CREATE INDEX IF NOT EXISTS idx_user_items_updated_at ON public.user_items (updated_at);
-CREATE INDEX IF NOT EXISTS idx_user_scores_updated_at ON public.user_scores (updated_at);
-CREATE INDEX IF NOT EXISTS idx_user_scores_user_id_updated_at ON public.user_scores (user_id, updated_at);
-CREATE INDEX IF NOT EXISTS idx_items_sort_order ON public.items (sort_order);
-CREATE INDEX IF NOT EXISTS idx_levels_sort_order ON public.levels (sort_order);
-CREATE INDEX IF NOT EXISTS idx_lessons_level_sort_order ON public.lessons (level_id, sort_order);
-CREATE INDEX IF NOT EXISTS idx_user_items_user_updated ON public.user_items (user_id, updated_at)
-INCLUDE (item_id, progress, started_at, next_at, mastered_at);
-CREATE INDEX IF NOT EXISTS idx_items_updated_sort_order ON public.items (updated_at, sort_order)
-INCLUDE (id, czech, english, pronunciation, audio, grammar_id, lesson_id, deleted_at);
+CREATE INDEX IF NOT EXISTS idx_grammar_updated_at ON public.grammar (updated_at);
+CREATE INDEX IF NOT EXISTS idx_levels_updated_at ON public.levels (updated_at);
+CREATE INDEX IF NOT EXISTS idx_lessons_updated_at ON public.lessons (updated_at);
+CREATE INDEX IF NOT EXISTS idx_notes_updated_at ON public.notes (updated_at);
+CREATE INDEX IF NOT EXISTS idx_blocks_updated_at ON public.blocks (updated_at);
+
+CREATE INDEX IF NOT EXISTS idx_user_items_user_updated_item
+  ON public.user_items (user_id, updated_at, item_id)
+  INCLUDE (progress, started_at, next_at, mastered_at);
+
+CREATE INDEX IF NOT EXISTS idx_user_items_item_user
+  ON public.user_items (item_id, user_id)
+  INCLUDE (progress, started_at, updated_at, next_at, mastered_at);
 
