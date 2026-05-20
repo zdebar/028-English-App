@@ -12,7 +12,6 @@ import HelpText from '@/features/help/HelpText';
 import OverviewCard from '@/components/UI/OverviewCard';
 import GrammarCard from '@/features/practice/GrammarCard';
 import VolumeSlider from '@/features/practice/VolumeSlider';
-import InfoIcon from '@/components/UI/icons/InfoIcon';
 
 import Notification from '@/components/UI/Notification';
 import { TEXTS } from '@/locales/cs';
@@ -22,6 +21,7 @@ import KnownButton from './buttons/KnownButton';
 import MasterItemButton from './buttons/MasterItemButton';
 import PlayAudioButton from './buttons/PlayAudioButton';
 import RepeatButton from './buttons/RepeatButton';
+import NoteButton from './buttons/NoteButton';
 import { useGrammar } from './hooks/use-grammar';
 import { useHelpStore } from '../help/use-help-store';
 import DelayedNotification from '@/components/UI/DelayedNotification';
@@ -65,6 +65,7 @@ export default function PracticeCard() {
   const cardText = revealed ? undefined : TEXTS.reveal;
   const cardStyle = revealed ? 'color-audio-disabled' : 'color-button';
   const directionText = isCzToEn ? TEXTS.directionCzToEn : TEXTS.directionEnToCz;
+  const showNoteButton = !!currentItem?.note && currentItem.note.length > 0 && revealed;
 
   if (!currentItem) {
     return (
@@ -211,22 +212,14 @@ export default function PracticeCard() {
         </div>
 
         <HelpButton className="help-btn-pos self-end" />
-        {currentItem?.note && currentItem?.note?.length > 0 && revealed && (
-          <button
-            type="button"
-            aria-label="note"
+        {showNoteButton && (
+          <NoteButton
             title={TEXTS.tooltipNotes}
             onClick={(e) => {
               e.stopPropagation();
               setShowNote(true);
             }}
-            className={`note-btn-pos absolute mr-2 cursor-pointer self-end p-4`}
-          >
-            <InfoIcon />
-            <HelpText className="top-0 left-4 flex flex-col items-end">
-              {TEXTS.tooltipNotes}
-            </HelpText>
-          </button>
+          />
         )}
       </div>
     </div>
