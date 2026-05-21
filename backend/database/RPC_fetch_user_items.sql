@@ -50,6 +50,7 @@ AS $$
     AND ui.user_id = p_user_id
   LEFT JOIN public.notes n
     ON n.id = i.note_id
-  WHERE ui.updated_at >= p_last_synced_at
-    OR i.updated_at >= p_last_synced_at;
+  WHERE ui IS NULL
+   OR GREATEST(COALESCE(ui.updated_at, '-infinity'::timestamptz), i.updated_at)
+      >= COALESCE(p_last_synced_at, '1970-01-01'::timestamptz);
 $$;
