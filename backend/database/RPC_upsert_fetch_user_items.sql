@@ -16,6 +16,7 @@ RETURNS TABLE (
   block_id INTEGER,
   grammar_id INTEGER,
   progress INTEGER,
+  progress_history JSONB,
   started_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ,
   deleted_at TIMESTAMPTZ,
@@ -24,11 +25,12 @@ RETURNS TABLE (
   lesson_id INTEGER
 )
 LANGUAGE plpgsql
-SET search_path TO public
+SECURITY DEFINER
+SET search_path TO public, pg_catalog
 AS $$
 DECLARE
   v_auth_user_id UUID;
-  v_payload_user_id UUID;
+  v_history_enabled BOOLEAN := FALSE;
 BEGIN
   IF p_user_id IS NULL THEN
     RAISE EXCEPTION 'p_user_id is required';
@@ -43,6 +45,11 @@ BEGIN
     RAISE EXCEPTION 'p_user_id must match auth.uid()';
   END IF;
 
+  SELECT COALESCE(u.history_enabled, FALSE)
+    INTO v_history_enabled
+    FROM public.users u
+   WHERE u.id = p_user_id;
+
 
   IF p_user_items IS NOT NULL AND p_user_items <> '[]'::JSONB THEN
     -- Validate every user_id in p_user_items matches p_user_id
@@ -53,7 +60,7 @@ BEGIN
     ) THEN
       RAISE EXCEPTION 'p_user_id does not match at least one user_id in p_user_items';
     END IF;
-    PERFORM public.upsert_user_items(p_user_items);
+    PERFORM public.upsert_user_items(p_user_items, v_history_enabled);
   END IF;
 
   RETURN QUERY

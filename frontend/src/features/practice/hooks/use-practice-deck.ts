@@ -133,6 +133,13 @@ export function usePracticeDeck(userId: string | null) {
       const updatedItem = {
         ...currentItem,
         progress: Math.max(currentItem.progress + progressChange, 0),
+        progress_history: [
+          ...currentItem.progress_history,
+          {
+            progress: Math.max(currentItem.progress + progressChange, 0),
+            created_at: new Date().toISOString(),
+          },
+        ],
       };
 
       userProgressRef.current.push(updatedItem);

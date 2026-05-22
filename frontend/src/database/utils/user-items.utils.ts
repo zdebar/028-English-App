@@ -81,6 +81,7 @@ export function convertLocalToExport(localItem: UserItemLocal): UserItemExport {
   return {
     user_id,
     item_id,
+    progress_history: localItem.progress_history ?? [],
     progress,
     updated_at,
     started_at: started_at === NULL_DATE ? null : started_at,

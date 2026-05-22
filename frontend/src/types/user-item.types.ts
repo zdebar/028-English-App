@@ -1,3 +1,8 @@
+export interface ProgressHistoryEntry {
+  progress: number;
+  created_at: string;
+}
+
 export interface UserItemBase {
   user_id: string;
   item_id: number;
@@ -8,6 +13,7 @@ export interface UserItemBase {
   audio: string | null;
   sort_order: number;
   progress: number;
+  progress_history: ProgressHistoryEntry[];
   lesson_id: number;
   updated_at: string;
 }
@@ -24,7 +30,7 @@ export interface UserItemAPI extends UserItemBase {
 
 export type UserItemExport = Pick<
   UserItemAPI,
-  'user_id' | 'item_id' | 'progress' | 'started_at' | 'updated_at' | 'next_at' | 'mastered_at'
+  'user_id' | 'item_id' | 'progress' | 'progress_history' | 'started_at' | 'updated_at' | 'next_at' | 'mastered_at'
 >;
 
 export interface UserItemLocal extends UserItemBase {

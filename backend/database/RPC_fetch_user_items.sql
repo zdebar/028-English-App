@@ -15,6 +15,7 @@ RETURNS TABLE (
   block_id INTEGER,
   grammar_id INTEGER,
   progress INTEGER,
+  progress_history JSONB,
   started_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ,
   deleted_at TIMESTAMPTZ,
@@ -38,6 +39,7 @@ AS $$
     i.block_id,
     i.grammar_id,
     COALESCE(ui.progress, 0) AS progress,
+    '[]'::jsonb AS progress_history,
     ui.started_at,
     COALESCE(ui.updated_at, i.updated_at) AS updated_at,
     i.deleted_at,
@@ -50,7 +52,6 @@ AS $$
     AND ui.user_id = p_user_id
   LEFT JOIN public.notes n
     ON n.id = i.note_id
-  WHERE ui IS NULL
-   OR GREATEST(COALESCE(ui.updated_at, '-infinity'::timestamptz), i.updated_at)
-      >= COALESCE(p_last_synced_at, '1970-01-01'::timestamptz);
+    WHERE GREATEST(COALESCE(ui.updated_at, '-infinity'::timestamptz), i.updated_at)
+      > COALESCE(p_last_synced_at, '1970-01-01'::timestamptz);
 $$;

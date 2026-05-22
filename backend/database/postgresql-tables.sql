@@ -2,6 +2,7 @@ SET search_path TO public;
 
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY,
+  history_enabled BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ
 );
@@ -77,6 +78,14 @@ CREATE TABLE IF NOT EXISTS user_items (
   PRIMARY KEY (user_id, item_id)
 );
 
+CREATE TABLE IF NOT EXISTS user_items_history (
+  item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  progress INTEGER NOT NULL CHECK (progress >= 0),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (user_id, item_id, created_at)
+);
+
 CREATE TABLE IF NOT EXISTS user_scores (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   date DATE NOT NULL,
@@ -126,4 +135,3 @@ CREATE INDEX IF NOT EXISTS idx_user_items_user_updated_item
 CREATE INDEX IF NOT EXISTS idx_user_items_item_user
   ON public.user_items (item_id, user_id)
   INCLUDE (progress, started_at, updated_at, next_at, mastered_at);
-

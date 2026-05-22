@@ -233,6 +233,7 @@ describe('UserItem', () => {
       {
         user_id: 'u1',
         item_id: 1,
+        progress_history: [{ progress: 1, created_at: '2026-03-03T09:59:00.000Z' }],
         updated_at: '2026-03-03T10:00:00.000Z',
         deleted_at: null,
       },
@@ -262,6 +263,7 @@ describe('UserItem', () => {
         expect.objectContaining({
           user_id: 'u1',
           item_id: 1,
+          progress_history: [{ progress: 1, created_at: '2026-03-03T09:59:00.000Z' }],
           updated_at: '2026-03-03T10:00:00.000Z',
         }),
       ],

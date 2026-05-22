@@ -2,7 +2,12 @@ import config from '@/config/config';
 import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
-import type { UserItemPractice, UserItemLocal, UserItemExport } from '@/types/user-item.types';
+import type {
+  UserItemPractice,
+  UserItemLocal,
+  UserItemExport,
+  ProgressHistoryEntry,
+} from '@/types/user-item.types';
 import { TableName } from '@/types/table.types';
 import Dexie, { Entity } from 'dexie';
 import { getSyncTimestamps, splitDeleted } from '../utils/data-sync.utils';
@@ -52,6 +57,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   block_id!: number;
   grammar_id!: number;
   progress!: number;
+  progress_history!: ProgressHistoryEntry[];
   started_at!: string;
   updated_at!: string;
   deleted_at!: string;

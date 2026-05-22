@@ -64,6 +64,7 @@ function makeItem(overrides: Partial<UserItemPractice> = {}): UserItemPractice {
     block_id: 0,
     grammar_id: 10,
     progress: 0,
+    progress_history: [],
     started_at: '2026-01-01',
     updated_at: '2026-01-01',
     deleted_at: '2026-01-01',
@@ -146,8 +147,20 @@ describe('usePracticeDeck', () => {
     expect(savePracticeDeckMock).toHaveBeenCalledWith(
       'user-1',
       expect.arrayContaining([
-        expect.objectContaining({ item_id: 1, progress: 1 }),
-        expect.objectContaining({ item_id: 2, progress: 2 }),
+        expect.objectContaining({
+          item_id: 1,
+          progress: 1,
+          progress_history: expect.arrayContaining([
+            expect.objectContaining({ progress: 1, created_at: expect.any(String) }),
+          ]),
+        }),
+        expect.objectContaining({
+          item_id: 2,
+          progress: 2,
+          progress_history: expect.arrayContaining([
+            expect.objectContaining({ progress: 2, created_at: expect.any(String) }),
+          ]),
+        }),
       ]),
     );
     expect(reloadMock).toHaveBeenCalledTimes(1);

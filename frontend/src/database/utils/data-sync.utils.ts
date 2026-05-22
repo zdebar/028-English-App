@@ -58,9 +58,7 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
       ];
 
   // Keep a parallel list of human-readable table names to report per-table completions.
-  const tableNames = doFullSync
-    ? ['Grammar', 'Levels', 'Lessons', 'Blocks', 'UserScores', 'UserItems']
-    : ['Grammar', 'Levels', 'Lessons', 'Blocks', 'UserScores', 'UserItems'];
+  const tableNames = ['Grammar', 'Levels', 'Lessons', 'Blocks', 'UserScores', 'UserItems'];
 
   const results = await Promise.allSettled(allPromises);
 
