@@ -25,8 +25,7 @@ RETURNS TABLE (
   lesson_id INTEGER
 )
 LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path TO public, pg_catalog
+SET search_path TO public
 AS $$
 DECLARE
   v_auth_user_id UUID;
@@ -68,3 +67,7 @@ BEGIN
   FROM public.fetch_user_items(p_user_id, p_last_synced_at);
 END;
 $$;
+
+REVOKE EXECUTE ON FUNCTION public.upsert_fetch_user_items(UUID, TIMESTAMPTZ, JSONB) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.upsert_fetch_user_items(UUID, TIMESTAMPTZ, JSONB) FROM anon;
+GRANT EXECUTE ON FUNCTION public.upsert_fetch_user_items(UUID, TIMESTAMPTZ, JSONB) TO authenticated;
