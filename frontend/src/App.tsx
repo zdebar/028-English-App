@@ -20,6 +20,7 @@ import Grammar from '@/pages/Grammar';
 import Home from '@/pages/Home';
 import Levels from '@/pages/Levels';
 import Practice from '@/pages/Practice';
+import PracticeOverview from '@/pages/PracticeOverview';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import Profile from '@/pages/Profile';
 import Vocabulary from '@/pages/Vocabulary';
@@ -75,6 +76,7 @@ export default function App() {
             <Route path={ROUTES.guide} element={<Guide />} />
             <Route element={<ProtectedLayout />}>
               <Route path={ROUTES.practice} element={<Practice />} />
+              <Route path={ROUTES.practiceOverview} element={<PracticeOverview />} />
               <Route path={ROUTES.profile} element={<Profile />} />
               <Route path={ROUTES.levels} element={<Levels />} />
               <Route path={ROUTES.blocks} element={<Blocks />} />

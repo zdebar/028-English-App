@@ -1,4 +1,3 @@
-import PropertyView from '@/components/UI/PropertyView';
 import { supabaseInstance } from '@/config/supabase.config';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import Dashboard from '@/components/UI/Dashboard';
@@ -8,12 +7,13 @@ import { TEXTS } from '@/locales/cs';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { useMemo, type JSX } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import config from '@/config/config';
 import Notification from '@/components/UI/Notification';
-import GoalMetView from '@/components/UI/GoalMetView';
+import StarProgressOverview from '@/components/UI/StarProgress';
 import { InstallPWAButton } from '@/features/pwa/InstallPwaButton';
 import { useSyncWarningStore } from '@/features/sync/use-sync-warning';
+import { ROUTES } from '@/config/routes.config';
 
 /**
  * The Home component renders the main page of the application.
@@ -21,14 +21,11 @@ import { useSyncWarningStore } from '@/features/sync/use-sync-warning';
  * @returns The JSX element representing the Home page.
  */
 export default function Home(): JSX.Element {
+  const navigate = useNavigate();
   const theme = useThemeStore((state) => state.theme);
   const userId = useAuthStore((state) => state.userId);
-  const userFullName = useAuthStore((state) => state.userFullName);
-  const userEmail = useAuthStore((state) => state.userEmail);
   const dailyCount = useUserStore((state) => state.dailyCount);
   const isSynchronized = useSyncWarningStore((state) => state.isSynchronized);
-  const dailyGoal = config.practice.dailyGoal;
-  const userDisplayName = userFullName || userEmail;
 
   const authAppearance = useMemo(
     () => ({
@@ -78,16 +75,23 @@ export default function Home(): JSX.Element {
       {userId ? (
         <div className="relative mt-8 flex w-full flex-col">
           <div className="px-4">
-            <PropertyView label={TEXTS.userLabel}>{userDisplayName}</PropertyView>
-            <PropertyView
-              label={TEXTS.userStatsLabel}
-              title={`${TEXTS.today} / ${TEXTS.dailyGoal}`}
-            >
-              {GoalMetView({ current: dailyCount, goal: dailyGoal })}
-            </PropertyView>
+            <div className="flex justify-center pt-2" title={TEXTS.practiceOverviewOpen}>
+              <button
+                type="button"
+                className="inline-flex justify-center border-b border-transparent pt-1 pb-2 text-center hover:border-current"
+                aria-label={TEXTS.practiceOverviewOpen}
+                onClick={() => navigate(ROUTES.practiceOverview)}
+              >
+                <StarProgressOverview
+                  count={dailyCount}
+                  chunkSize={config.practice.starChunk}
+                  starsPerRow={config.practice.starsPerRow}
+                />
+              </button>
+            </div>
           </div>
           {!isSynchronized && (
-            <p className="text-error-light dark:text-error-dark px-4 text-left text-sm pt-2">
+            <p className="text-error-light dark:text-error-dark px-4 pt-2 text-left text-sm">
               {TEXTS.syncWarning}
             </p>
           )}

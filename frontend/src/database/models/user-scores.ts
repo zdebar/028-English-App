@@ -8,6 +8,7 @@ import { SupabaseError } from '@/types/error.types';
 import { type UserScoreType } from '@/types/generic.types';
 import { TableName } from '@/types/table.types';
 import { assertNonNegativeInteger, assertShortDateString } from '@/utils/assertions.utils';
+import { triggerDailyCountUpdatedEvent } from '@/utils/dashboard.utils';
 import { Entity } from 'dexie';
 import Metadata from './metadata';
 /**
@@ -36,10 +37,15 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
     count: number,
     dateTime: string = new Date(Date.now()).toISOString(),
   ): Promise<void> {
+    if (count === 0) {
+      return;
+    }
+
     const date = new Date(dateTime).toLocaleDateString('en-CA');
     const existingRecord = await db.user_scores.get([userId, date]);
     const newItemCount = (existingRecord?.item_count ?? 0) + count;
     await db.user_scores.put(this.createRecord(userId, date, newItemCount));
+    triggerDailyCountUpdatedEvent(userId);
   }
 
   /**
@@ -49,6 +55,18 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
   static async getOrCreateTodayScore(userId: string): Promise<number> {
     const today = getTodayShortDate();
     return (await db.user_scores.get([userId, today]))?.item_count ?? 0;
+  }
+
+  /**
+   * Fetches all non-deleted score records for a user ordered by date descending.
+   * @param userId The user ID.
+   */
+  static async getByUserId(userId: string): Promise<UserScoreType[]> {
+    const records = await db.user_scores.where('user_id').equals(userId).toArray();
+
+    return records
+      .filter((record) => record.deleted_at == null)
+      .sort((left, right) => right.date.localeCompare(left.date));
   }
 
   /**

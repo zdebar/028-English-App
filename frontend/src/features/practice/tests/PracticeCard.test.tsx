@@ -57,7 +57,13 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
 
 vi.mock('@/config/config', () => ({
   default: {
-    practice: { dailyGoal: 20, audioDelay: 300 },
+    practice: {
+      dailyGoal: 20,
+      starChunk: 50,
+      starsPerRow: 10,
+      starFlashDuration: 300,
+      audioDelay: 300,
+    },
     progress: { skipProgress: 10, minusProgress: -1, plusProgress: 1 },
   },
 }));
@@ -72,6 +78,8 @@ vi.mock('@/locales/cs', () => ({
     noAudio: 'No audio',
     loadingAudio: 'Loading audio',
     progress: 'Progress',
+    nextStarProgress: 'Next star progress',
+    currentPracticeStar: 'Current practice star',
     today: 'Today',
     dailyGoal: 'Daily goal',
     directionCzToEn: 'CZ to EN',
@@ -178,6 +186,20 @@ vi.mock('@/components/UI/icons/InfoIcon', () => ({
 vi.mock('@/components/UI/Indicator', () => ({ default: () => <span data-testid="indicator" /> }));
 vi.mock('@/components/UI/icons/NotRevealedIcon', () => ({
   default: () => <span data-testid="not-revealed" />,
+}));
+
+vi.mock('@/components/UI/StarProgress', () => ({
+  STAR_SIZE: 22,
+  CompactSummary: ({ fullTierCount, partialTierCount, partialTier }: any) => (
+    <span data-testid="practice-star-summary">
+      {fullTierCount}:{partialTierCount}:{partialTier ?? 'none'}
+    </span>
+  ),
+  Star: ({ progress, tier }: { progress: number; tier: string }) => (
+    <span data-testid="practice-star">
+      {tier}:{progress}
+    </span>
+  ),
 }));
 
 vi.mock('@/features/practice/GrammarCard', () => ({
@@ -310,6 +332,22 @@ describe('PracticeCard', () => {
 
     expect(mocks.practiceDeck.playAudio).toHaveBeenCalledTimes(1);
     expect(mocks.practiceDeck.setRevealed).toHaveBeenCalledWith(true);
+  });
+
+  it('shows current star chunk progress instead of daily goal progress', () => {
+    render(<PracticeCard />);
+
+    expect(screen.getByText('5 / 50')).toBeTruthy();
+    expect(screen.getByTestId('practice-star').textContent).toBe('bronze:0.1');
+  });
+
+  it('shows the next empty bronze star when mounted exactly on a completed chunk', () => {
+    mocks.dailyCount = 50;
+
+    render(<PracticeCard />);
+
+    expect(screen.getByText('0 / 50')).toBeTruthy();
+    expect(screen.getByTestId('practice-star').textContent).toBe('bronze:0');
   });
 
   it('autoplays audio after delay in EN->CZ mode when allowed', async () => {

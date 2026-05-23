@@ -14,7 +14,6 @@ const mocks = vi.hoisted(() => ({
   convertLocalToExport: vi.fn(),
   convertAPIToLocal: vi.fn(),
   markAsSynced: vi.fn(),
-  addItemCount: vi.fn(),
   triggerLevelsUpdatedEvent: vi.fn(),
 }));
 
@@ -87,12 +86,6 @@ vi.mock('@/database/models/metadata', () => ({
   },
 }));
 
-vi.mock('@/database/models/user-scores', () => ({
-  default: {
-    addItemCount: (...args: unknown[]) => mocks.addItemCount(...args),
-  },
-}));
-
 vi.mock('@/database/models/grammar', () => ({
   default: {
     getStartedIds: vi.fn().mockResolvedValue([]),
@@ -138,7 +131,6 @@ describe('UserItem', () => {
       sql: true,
     }));
     mocks.convertAPIToLocal.mockImplementation((item: unknown) => item);
-    mocks.addItemCount.mockResolvedValue(undefined);
     mocks.equalsDelete.mockResolvedValue(0);
     mocks.blockEqualsToArray.mockResolvedValue([]);
     mocks.updatedBetweenToArray.mockResolvedValue([]);
@@ -156,7 +148,7 @@ describe('UserItem', () => {
     vi.restoreAllMocks();
   });
 
-  it('savePracticeDeck stores items and increments score', async () => {
+  it('savePracticeDeck stores items without changing score', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-03-04T09:00:00.000Z'));
 
@@ -172,7 +164,6 @@ describe('UserItem', () => {
     ]);
 
     expect(mocks.bulkPut).toHaveBeenCalledTimes(1);
-    expect(mocks.addItemCount).toHaveBeenCalledWith('u1', 1, '2026-03-04T09:00:00.000Z');
   });
 
   it('savePracticeDeck uses provided dateTime when passed explicitly', async () => {
@@ -202,7 +193,6 @@ describe('UserItem', () => {
         }),
       ]),
     );
-    expect(mocks.addItemCount).toHaveBeenCalledWith('u1', 1, dateTime);
   });
 
   it('deleteAllItems deletes by user_id', async () => {

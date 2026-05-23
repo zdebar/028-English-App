@@ -11,6 +11,7 @@ const plusHintMock = vi.fn();
 const playAudioMock = vi.fn();
 const setVolumeMock = vi.fn();
 const reloadMock = vi.fn();
+const addItemCountMock = vi.fn();
 
 vi.mock('@/hooks/use-fetch', () => ({
   useFetch: (...args: unknown[]) => useFetchMock(...args),
@@ -20,6 +21,12 @@ vi.mock('@/database/models/user-items', () => ({
   default: {
     getPracticeDeck: (...args: unknown[]) => getPracticeDeckMock(...args),
     savePracticeDeck: (...args: unknown[]) => savePracticeDeckMock(...args),
+  },
+}));
+
+vi.mock('@/database/models/user-scores', () => ({
+  default: {
+    addItemCount: (...args: unknown[]) => addItemCountMock(...args),
   },
 }));
 
@@ -93,6 +100,7 @@ describe('usePracticeDeck', () => {
 
     getPracticeDeckMock.mockResolvedValue([]);
     savePracticeDeckMock.mockResolvedValue(undefined);
+    addItemCountMock.mockResolvedValue(undefined);
   });
 
   it('maps fetched data into deck state and exposes derived values', async () => {
@@ -128,6 +136,7 @@ describe('usePracticeDeck', () => {
     expect(result.current.revealed).toBe(false);
     expect(resetHintMock).toHaveBeenCalled();
     expect(savePracticeDeckMock).not.toHaveBeenCalled();
+    expect(addItemCountMock).toHaveBeenCalledWith('user-1', 1);
   });
 
   it('saves and reloads when progress count reaches deck length', async () => {
@@ -162,7 +171,9 @@ describe('usePracticeDeck', () => {
           ]),
         }),
       ]),
+      expect.any(String),
     );
+    expect(addItemCountMock).toHaveBeenCalledTimes(2);
     expect(reloadMock).toHaveBeenCalledTimes(1);
   });
 

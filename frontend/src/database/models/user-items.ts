@@ -22,7 +22,6 @@ import {
 import { triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 import { SupabaseError } from '@/types/error.types';
 import Metadata from './metadata';
-import UserScoreType from './user-scores';
 
 const NULL_DATE = config.database.nullReplacementDate;
 const NULL_NUMBER = config.database.nullReplacementNumber;
@@ -113,7 +112,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param dateTime - The date for which the progress is being saved (defaults to today)
    */
   static async savePracticeDeck(
-    userId: string,
+    _userId: string,
     items: UserItemPractice[],
     dateTime: string = new Date(Date.now()).toISOString(),
   ): Promise<void> {
@@ -133,7 +132,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     });
 
     await db.user_items.bulkPut(updatedItems);
-    await UserScoreType.addItemCount(userId, updatedItems.length, dateTime);
   }
 
   /**

@@ -14,6 +14,9 @@ export const HOME_TEXTS = {
   // User
   userLabel: 'Uživatel',
   userStatsLabel: 'Dnes',
+  practiceOverviewTitle: 'Přehled procvičování',
+  practiceOverviewOpen: 'Otevřít přehled procvičování',
+  practiceOverviewMoreDays: '... Dalších 7 dní',
   authInitErrorToast: 'Nastala chyba při přihlašování.',
 
   // Synchronization status

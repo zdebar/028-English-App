@@ -49,7 +49,9 @@ const config = {
   },
 
   practice: {
-    dailyGoal: 400, // Number of new items recommended for daily practice
+    starChunk: 50, // Number of repetitions needed to fill one star
+    starsPerRow: 10, // Number of stars shown in one tier row
+    starFlashDuration: 1400, // Duration in milliseconds for highlighting a newly completed star
     audioDelay: 100, // Delay in milliseconds for automatically playing audio
     holdDuration: 300, // Duration in milliseconds for which the practice card is held before moving to the next item
     CZ_TO_EN: 'czToEn',

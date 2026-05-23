@@ -14,6 +14,8 @@ vi.mock('@/config/config', () => ({
   default: {
     practice: {
       dailyGoal: 10,
+      starChunk: 50,
+      starsPerRow: 10,
     },
   },
 }));
@@ -56,20 +58,12 @@ vi.mock('@/locales/cs', () => ({
     guide: 'Guide',
     userLabel: 'User',
     userStatsLabel: 'Today',
+    practiceOverviewOpen: 'Open practice overview',
     today: 'Today',
     dailyGoal: 'Goal',
     syncWarning: 'Data may be stale.',
     signupHint: 'Signup hint',
   },
-}));
-
-vi.mock('@/components/UI/PropertyView', () => ({
-  default: ({ label, children }: any) => (
-    <div>
-      <span>{label}</span>
-      <span>{children}</span>
-    </div>
-  ),
 }));
 
 vi.mock('@/components/UI/Dashboard', () => ({
@@ -80,16 +74,16 @@ vi.mock('@/components/UI/Notification', () => ({
   default: ({ children }: any) => <div>{children}</div>,
 }));
 
-vi.mock('@/components/UI/GoalMetView', () => ({
-  default: ({ current, goal }: { current: number; goal: number }) => (
-    <span>
-      {current}/{goal}
-    </span>
-  ),
-}));
-
 vi.mock('@/features/pwa/InstallPwaButton', () => ({
   InstallPWAButton: () => <button type="button">Install</button>,
+}));
+
+vi.mock('@/components/UI/StarProgress', () => ({
+  default: ({ count, chunkSize, starsPerRow }: any) => (
+    <div data-testid="star-progress">
+      {count}:{chunkSize}:{starsPerRow}
+    </div>
+  ),
 }));
 
 vi.mock('@supabase/auth-ui-react', () => ({
@@ -106,6 +100,7 @@ vi.mock('@/config/supabase.config', () => ({
 
 vi.mock('react-router-dom', () => ({
   Link: ({ children }: any) => <div>{children}</div>,
+  useNavigate: () => vi.fn(),
 }));
 
 import Home from '@/pages/Home';
@@ -132,6 +127,7 @@ describe('Home', () => {
     render(<Home />);
 
     expect(screen.queryByText('Data may be stale.')).toBeNull();
+    expect(screen.getByTestId('star-progress').textContent).toBe('3:50:10');
   });
 
   it('renders auth UI when user is signed out', () => {

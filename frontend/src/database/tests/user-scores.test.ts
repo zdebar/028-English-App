@@ -75,7 +75,7 @@ vi.mock('@/database/models/metadata', () => ({
   },
 }));
 
-vi.mock('@/features/user-stats/dashboard.utils', () => ({
+vi.mock('@/utils/dashboard.utils', () => ({
   triggerDailyCountUpdatedEvent: (...args: unknown[]) =>
     mocks.triggerDailyCountUpdatedEvent(...args),
 }));
@@ -127,6 +127,7 @@ describe('UserScore', () => {
         deleted_at: null,
       }),
     );
+    expect(mocks.triggerDailyCountUpdatedEvent).toHaveBeenCalledWith('u1');
   });
 
   it('addItemCount uses provided dateTime to choose score date', async () => {
