@@ -66,7 +66,7 @@ BEGIN
     END;
 
   IF NOT COALESCE(p_history_enabled, FALSE) THEN
-    RAISE NOTICE 'user_items_history: inserted=0, skipped_invalid=0, skipped_disabled=1, errors=0';
+    RAISE LOG 'user_items_history: inserted=0, skipped_invalid=0, skipped_existing=0, skipped_disabled=1, errors=0';
     RETURN;
   END IF;
 
@@ -82,6 +82,7 @@ BEGIN
     v_inserted_count INT := 0;
     v_skipped_invalid INT := 0;
     v_error_count INT := 0;
+    v_skipped_existing INT := 0;
   BEGIN
     FOR v_entry IN SELECT * FROM jsonb_array_elements(p_user_items) LOOP
       -- skip entries without numeric item_id
@@ -113,6 +114,8 @@ BEGIN
             ON CONFLICT DO NOTHING;
             IF FOUND THEN
               v_inserted_count := v_inserted_count + 1;
+            ELSE
+              v_skipped_existing := v_skipped_existing + 1;
             END IF;
           EXCEPTION WHEN others THEN
             v_error_count := v_error_count + 1;
@@ -123,7 +126,7 @@ BEGIN
     END LOOP;
 
     -- Log result so operator can be aware when items were skipped/failed.
-    RAISE NOTICE 'user_items_history: inserted=%, skipped_invalid=%, skipped_disabled=0, errors=%', v_inserted_count, v_skipped_invalid, v_error_count;
+    RAISE LOG 'user_items_history: inserted=%, skipped_invalid=%, skipped_existing=%, skipped_disabled=0, errors=%', v_inserted_count, v_skipped_invalid, v_skipped_existing, v_error_count;
   END;
 END;
 $$
