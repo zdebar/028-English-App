@@ -6,7 +6,7 @@ import { getStarProgressState, getStarTier, type StarTier } from '@/utils/star-p
 const EMPTY_STAR_BORDER_CLASS = 'text-slate-600 dark:text-slate-500';
 const EMPTY_STAR_FILL_CLASS = 'text-slate-300 dark:text-slate-700';
 export const STAR_SIZE = 22;
-const STAR_FILL_TOP = 3.5;
+const STAR_FILL_TOP = 4.5;
 const STAR_FILL_BOTTOM = 20.54;
 const STAR_FILL_HEIGHT = STAR_FILL_BOTTOM - STAR_FILL_TOP;
 

@@ -139,11 +139,11 @@ export default function PracticeCard() {
           <div id="top-bar" className="relative flex h-8 w-full items-center justify-between">
             <VolumeSlider setVolume={setVolume} />
             {/**Audio messages*/}
-            {audioError ? (
-              <p className="px-2">{TEXTS.noAudio}</p>
-            ) : (
-              audioLoading && <DelayedNotification message={TEXTS.loadingAudio} timeDelay={500} />
-            )}
+            {audioLoading ? (
+              <DelayedNotification message={TEXTS.loadingAudio} timeDelay={500} />
+            ) : audioError ? (
+              <p className="px-2">TEST</p>
+            ) : null}
           </div>
           {/** Item Data */}
           {showDirectionChange ? (
@@ -165,7 +165,7 @@ export default function PracticeCard() {
             </p>
             <HelpText className="bottom-7.5">{TEXTS.progress}</HelpText>
             <div
-              className="relative isolate flex items-center gap-2 overflow-visible px-2 font-light"
+              className="relative flex items-center gap-2 px-2 font-light"
               title={TEXTS.nextStarProgress}
             >
               <CompactSummary
@@ -175,7 +175,7 @@ export default function PracticeCard() {
                 starsPerRow={starsPerRow}
                 size={STAR_SIZE}
               />
-              <span className="relative z-0 inline-flex items-center gap-2 self-center whitespace-nowrap">
+              <span className="inline-flex items-center gap-2 self-center whitespace-nowrap">
                 <Star
                   progress={displayedStarProgress}
                   tier={starProgress.activeTier}

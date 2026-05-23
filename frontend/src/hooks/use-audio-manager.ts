@@ -144,7 +144,7 @@ export function useAudioManager(audio: AudioInput) {
     setCurrent(files[0] ?? null);
 
     if (!files.length) {
-      setAudioError(true);
+      setAudioError(false);
       setLoading(false);
       return;
     }
@@ -161,7 +161,7 @@ export function useAudioManager(audio: AudioInput) {
         audioMapRef.current,
       );
 
-      if (hasFailure) {
+      if (!isDisposed && hasFailure) {
         setAudioError(true);
       }
 
