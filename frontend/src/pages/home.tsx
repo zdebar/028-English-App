@@ -78,7 +78,7 @@ export default function Home(): JSX.Element {
             <div className="flex justify-center pt-2" title={TEXTS.practiceOverviewOpen}>
               <button
                 type="button"
-                className="inline-flex justify-center border-b border-transparent pt-1 pb-2 text-center hover:border-current"
+                className="inline-flex justify-center border-b border-transparent pt-1  mb-2 text-center hover:border-current"
                 aria-label={TEXTS.practiceOverviewOpen}
                 onClick={() => navigate(ROUTES.practiceOverview)}
               >
