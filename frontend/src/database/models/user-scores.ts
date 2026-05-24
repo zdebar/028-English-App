@@ -45,7 +45,8 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
     const existingRecord = await db.user_scores.get([userId, date]);
     const newItemCount = (existingRecord?.item_count ?? 0) + count;
     await db.user_scores.put(this.createRecord(userId, date, newItemCount));
-    triggerDailyCountUpdatedEvent(userId);
+
+      triggerDailyCountUpdatedEvent(userId, newItemCount);
   }
 
   /**

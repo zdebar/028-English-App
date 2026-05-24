@@ -127,7 +127,7 @@ describe('UserScore', () => {
         deleted_at: null,
       }),
     );
-    expect(mocks.triggerDailyCountUpdatedEvent).toHaveBeenCalledWith('u1');
+    expect(mocks.triggerDailyCountUpdatedEvent).toHaveBeenCalledWith('u1', 5);
   });
 
   it('addItemCount uses provided dateTime to choose score date', async () => {
@@ -144,6 +144,7 @@ describe('UserScore', () => {
         deleted_at: null,
       }),
     );
+    expect(mocks.triggerDailyCountUpdatedEvent).toHaveBeenCalledWith('u1', 5);
   });
 
   it('getOrCreateTodayScore returns numeric count or zero', async () => {
