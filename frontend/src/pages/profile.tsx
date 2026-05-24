@@ -1,4 +1,5 @@
 import { MenuButtonText } from '@/components/UI/MenuButtonText';
+import PropertyView from '@/components/UI/PropertyView';
 import { StandardButton } from '@/components/UI/buttons/StandardButton';
 import { ROUTES } from '@/config/routes.config';
 import DeleteUserButton from '@/features/auth/DeleteUserButton';
@@ -16,13 +17,26 @@ export default function Profile(): JSX.Element {
   const navigate = useNavigate();
   const userFullName = useAuthStore((state) => state.userFullName);
   const userEmail = useAuthStore((state) => state.userEmail);
-  const userDisplayName = userFullName || userEmail;
 
   return (
     <div className="card-width grow-0 gap-1">
-      <p className="my-4 mx-auto w-40 text-left">
-        {userDisplayName}
-      </p>
+      <div className="mb-12 mt-4 mx-auto w-64 text-left">
+        <PropertyView
+          label={TEXTS.profileNameLabel}
+          className="mb-1"
+          classNameLabel="w-20"
+          classNameValue="wrap-break-word"
+        >
+          {userFullName ?? TEXTS.notAvailable}
+        </PropertyView>
+        <PropertyView
+          label={TEXTS.profileEmailLabel}
+          classNameLabel="w-20"
+          classNameValue="wrap-break-word"
+        >
+          {userEmail ?? TEXTS.notAvailable}
+        </PropertyView>
+      </div>
       <StandardButton onClick={() => navigate(ROUTES.levels)} title={TEXTS.levelsOverviewTooltip}>
         <MenuButtonText>{TEXTS.levelsOverview}</MenuButtonText>
       </StandardButton>

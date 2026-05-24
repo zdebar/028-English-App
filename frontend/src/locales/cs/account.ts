@@ -1,4 +1,8 @@
 export const ACCOUNT_TEXTS = {
+  // Profile
+  profileNameLabel: 'Jméno',
+  profileEmailLabel: 'E-mail',
+
   // Sync Button
   syncButton: 'Opravit data',
   syncButtonDescription: 'Chcete opravit data? Provede se synchronizace a plné obnovení dat.',
