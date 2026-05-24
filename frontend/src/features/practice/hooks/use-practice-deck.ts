@@ -87,7 +87,7 @@ export function usePracticeDeck(userId: string | null) {
       }
 
       try {
-        await UserItem.savePracticeDeck(userId, userProgress, new Date(Date.now()).toISOString());
+        await UserItem.savePracticeDeck(userProgress);
         reportInfo(`Saved practice deck ${source} with ${userProgress.length} items.`);
         userProgressRef.current = [];
         if (shouldReload) {

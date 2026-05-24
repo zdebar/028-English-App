@@ -18,6 +18,20 @@ export function getStarTier(tierIndex: number): StarTier {
   return 'gold';
 }
 
+export function getCurrentStarProgressCount(totalCount: number, chunkSize: number): number {
+  const safeTotalCount = Math.max(0, Math.floor(totalCount));
+  const safeChunkSize = Math.max(1, Math.floor(chunkSize));
+
+  return safeTotalCount % safeChunkSize;
+}
+
+export function getCompletedStarCount(totalCount: number, chunkSize: number): number {
+  const safeTotalCount = Math.max(0, Math.floor(totalCount));
+  const safeChunkSize = Math.max(1, Math.floor(chunkSize));
+
+  return Math.floor(safeTotalCount / safeChunkSize);
+}
+
 export function getStarProgressState(
   totalCount: number,
   chunkSize: number,
@@ -26,10 +40,10 @@ export function getStarProgressState(
   const safeTotalCount = Math.max(0, Math.floor(totalCount));
   const safeChunkSize = Math.max(1, Math.floor(chunkSize));
   const safeStarsPerRow = Math.max(1, Math.floor(starsPerRow));
-  const completedStars = Math.floor(safeTotalCount / safeChunkSize);
+  const completedStars = getCompletedStarCount(safeTotalCount, safeChunkSize);
   const completedTiers = Math.floor(completedStars / safeStarsPerRow);
   const activeRowCompletedStars = completedStars % safeStarsPerRow;
-  const currentChunkCount = safeTotalCount % safeChunkSize;
+  const currentChunkCount = getCurrentStarProgressCount(safeTotalCount, safeChunkSize);
   const activeStarProgress = currentChunkCount / safeChunkSize;
 
   return {

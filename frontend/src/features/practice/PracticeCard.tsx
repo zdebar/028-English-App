@@ -23,10 +23,11 @@ import PlayAudioButton from './buttons/PlayAudioButton';
 import RepeatButton from './buttons/RepeatButton';
 import NoteButton from './buttons/NoteButton';
 import { useGrammar } from './hooks/use-grammar';
-import { usePracticeStarProgress } from './hooks/use-practice-star-progress';
+import { usePracticeStars } from './hooks/use-practice-stars';
 import { useHelpStore } from '../help/use-help-store';
 import DelayedNotification from '@/components/UI/DelayedNotification';
-import { CompactSummary, Star, STAR_SIZE } from '@/components/UI/StarProgress';
+import { STAR_SIZE } from '@/components/UI/StarProgress';
+import PracticeStarsRow from './components/PracticeStarsRow';
 
 /**
  * PracticeCard component for interactive language practice.
@@ -40,14 +41,8 @@ export default function PracticeCard() {
   const { grammarVisible, grammarData, handleGrammar, closeGrammar } = useGrammar();
 
   const practiceCountToday = dailyCount;
-  const {
-    starChunk,
-    starsPerRow,
-    starProgress,
-    displayedChunkCount,
-    displayedStarProgress,
-    completedStarFlash,
-  } = usePracticeStarProgress(practiceCountToday);
+  const { starChunk, starsPerRow, starCount, displayedChunkCount, completedStarFlash } =
+    usePracticeStars(practiceCountToday);
 
   const {
     currentItem,
@@ -168,35 +163,14 @@ export default function PracticeCard() {
               className="relative flex items-center gap-2 px-2 font-light"
               title={TEXTS.nextStarProgress}
             >
-              <CompactSummary
-                fullTierCount={starProgress.completedTiers}
-                partialTierCount={starProgress.activeRowCompletedStars}
-                partialTier={starProgress.activeTier}
+              <PracticeStarsRow
+                starCount={starCount}
+                displayedChunkCount={displayedChunkCount}
+                starChunk={starChunk}
                 starsPerRow={starsPerRow}
+                completedStarFlash={completedStarFlash}
                 size={STAR_SIZE}
               />
-              <span className="inline-flex items-center gap-2 self-center whitespace-nowrap">
-                <Star
-                  progress={displayedStarProgress}
-                  tier={starProgress.activeTier}
-                  label={TEXTS.currentPracticeStar}
-                  size={STAR_SIZE}
-                  className="self-center"
-                />
-                <span
-                  className={`inline-block w-18 text-right tabular-nums transition-colors duration-200 ${
-                    completedStarFlash === 'bronze'
-                      ? 'font-bold text-[#B87333] dark:text-[#D8A373]'
-                      : completedStarFlash === 'silver'
-                        ? 'font-bold text-[#A8ADB7] dark:text-[#E5E7EB]'
-                        : completedStarFlash === 'gold'
-                          ? 'font-bold text-[#D4AF37] dark:text-[#FFD36B]'
-                          : ''
-                  }`}
-                >
-                  {displayedChunkCount} / {starChunk}
-                </span>
-              </span>
             </div>
             <HelpText className="right-0 bottom-7.5 flex flex-col items-end">
               {TEXTS.nextStarProgress}

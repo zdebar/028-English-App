@@ -4,9 +4,9 @@ import UserScore from '@/database/models/user-scores';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { TEXTS } from '@/locales/cs';
 import type { UserScoreType } from '@/types/generic.types';
-import { CompactSummary, STAR_SIZE } from '@/components/UI/StarProgress';
+import { STAR_SIZE, StarRow } from '@/components/UI/StarProgress';
 import config from '@/config/config';
-import { getStarProgressState } from '@/utils/star-progress.utils';
+import { getCompletedStarCount } from '@/utils/star-progress.utils';
 import { useEffect, useState, type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -27,19 +27,52 @@ function isSunday(date: string): boolean {
   return new Date(year, (month ?? 1) - 1, day ?? 1).getDay() === 0;
 }
 
-function PracticeOverviewRow({ score }: Readonly<{ score: UserScoreType }>): JSX.Element {
-  const progress = getStarProgressState(
-    score.item_count,
-    config.practice.starChunk,
-    config.practice.starsPerRow,
-  );
+function parseShortDate(date: string): Date {
+  const [year, month, day] = date.split('-').map(Number);
+  return new Date(year ?? 1970, (month ?? 1) - 1, day ?? 1);
+}
+
+function formatShortDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
+type PracticeDayScore = Readonly<Pick<UserScoreType, 'date' | 'item_count'>>;
+
+function getScoresWithMissingDays(scores: UserScoreType[]): PracticeDayScore[] {
+  if (scores.length === 0) {
+    return [];
+  }
+
+  const sortedDesc = [...scores].sort((left, right) => right.date.localeCompare(left.date));
+  const scoreByDate = new Map(sortedDesc.map((item) => [item.date, item.item_count]));
+  const newestDate = parseShortDate(sortedDesc[0].date);
+  const oldestDate = parseShortDate(sortedDesc[sortedDesc.length - 1].date);
+  const today = new Date();
+  const endDate = newestDate > today ? newestDate : today;
+  const items: PracticeDayScore[] = [];
+
+  for (let cursor = new Date(endDate); cursor >= oldestDate; cursor.setDate(cursor.getDate() - 1)) {
+    const date = formatShortDate(cursor);
+    items.push({
+      date,
+      item_count: scoreByDate.get(date) ?? 0,
+    });
+  }
+
+  return items;
+}
+
+function PracticeOverviewRow({ score }: Readonly<{ score: PracticeDayScore }>): JSX.Element {
+  const starCount = getCompletedStarCount(score.item_count, config.practice.starChunk);
 
   return (
     <div
-      className={`flex items-center justify-between gap-4 px-4 pt-3 pb-1 dark:border-slate-700 ${
-        isSunday(score.date)
-          ? 'border-b-4 border-double border-slate-300 dark:border-slate-500'
-          : 'border-b border-slate-200 dark:border-slate-700'
+      className={`flex items-center justify-between gap-4 border-slate-200 px-4 pt-3 pb-1 dark:border-slate-700 ${
+        isSunday(score.date) ? 'border-b-4 border-double' : 'border-b'
       }`}
     >
       <span
@@ -48,13 +81,7 @@ function PracticeOverviewRow({ score }: Readonly<{ score: UserScoreType }>): JSX
         {formatPracticeDate(score.date)}
       </span>
       <div className="mr-4 flex items-center gap-2">
-        <CompactSummary
-          fullTierCount={progress.completedTiers}
-          partialTierCount={progress.activeRowCompletedStars}
-          partialTier={progress.activeTier}
-          starsPerRow={config.practice.starsPerRow}
-          size={STAR_SIZE}
-        />
+        <StarRow starCount={starCount} starsPerRow={config.practice.starsPerRow} size={STAR_SIZE} />
       </div>
     </div>
   );
@@ -63,7 +90,7 @@ function PracticeOverviewRow({ score }: Readonly<{ score: UserScoreType }>): JSX
 export default function PracticeOverview(): JSX.Element {
   const navigate = useNavigate();
   const userId = useAuthStore((state) => state.userId);
-  const [scores, setScores] = useState<UserScoreType[]>([]);
+  const [scores, setScores] = useState<PracticeDayScore[]>([]);
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_DAYS);
 
   useEffect(() => {
@@ -76,7 +103,7 @@ export default function PracticeOverview(): JSX.Element {
     let isMounted = true;
     void UserScore.getByUserId(userId).then((items) => {
       if (isMounted) {
-        setScores(items);
+        setScores(getScoresWithMissingDays(items));
       }
     });
 

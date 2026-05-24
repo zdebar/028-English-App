@@ -1,7 +1,13 @@
 import { useId, type JSX } from 'react';
 
+import config from '@/config/config';
 import StarIcon, { STAR_ICON_PATH } from '@/components/UI/icons/StarIcon';
-import { getStarProgressState, getStarTier, type StarTier } from '@/utils/star-progress.utils';
+import {
+  getCompletedStarCount,
+  getStarProgressState,
+  getStarTier,
+  type StarTier,
+} from '@/utils/star-progress.utils';
 
 const EMPTY_STAR_BORDER_CLASS = 'text-slate-600 dark:text-slate-500';
 const EMPTY_STAR_FILL_CLASS = 'text-slate-300 dark:text-slate-700';
@@ -29,101 +35,132 @@ const TIER_STYLES: Record<StarTier, { fillClassName: string; badgeClassName: str
 };
 
 type StarProps = Readonly<{
-  progress: number;
-  tier: StarTier;
-  size?: number;
   className?: string;
-  label?: string;
+  size?: number;
 }>;
 
-export function Star({ progress, tier, size = 22, className = '', label }: StarProps): JSX.Element {
+/**
+ * FullStar component renders a fully filled star icon with customizable size and color.
+ * @param className - CSS class for the star icon.
+ * @param size - Size of the star icon.
+ * @returns JSX.Element representing the full star.
+ */
+export function FullStar({ className = '', size = 22 }: StarProps): JSX.Element {
+  return (
+    <span
+      className={`relative inline-flex shrink-0 items-center justify-center ${className}`.trim()}
+      style={{ width: size, height: size }}
+    >
+      <StarIcon
+        className={className}
+        size={size}
+        fillColor="currentColor"
+        strokeColor="currentColor"
+        strokeWidth={1.25}
+      />
+    </span>
+  );
+}
+
+type FillingStarProps = Readonly<{
+  className?: string;
+  size?: number;
+  currentProgress: number;
+  maxProgress: number;
+}>;
+
+/**
+ * FillingStar component renders a star icon that fills based on the current progress.
+ * @param className - CSS class for the star icon.
+ * @param size - Size of the star icon.
+ * @param currentProgress - Current progress value.
+ * @param maxProgress - Maximum progress value.
+ * @returns JSX.Element representing the filling star.
+ */
+export function FillingStar({
+  className = '',
+  size = 22,
+  currentProgress,
+  maxProgress,
+}: FillingStarProps): JSX.Element {
   const maskId = useId();
-  const safeProgress = Math.max(0, Math.min(1, progress));
-  const tierStyle = TIER_STYLES[tier];
-  const isComplete = safeProgress >= 1;
-  const fillHeight = safeProgress <= 0 ? 0 : STAR_FILL_HEIGHT * safeProgress;
+  const safeMaxProgress = Math.max(1, maxProgress);
+  const relativeProgress = Math.max(0, Math.min(1, currentProgress / safeMaxProgress));
+  const fillHeight = relativeProgress <= 0 ? 0 : STAR_FILL_HEIGHT * relativeProgress;
   const fillY = STAR_FILL_BOTTOM - fillHeight;
 
   return (
     <span
       className={`relative inline-flex shrink-0 items-center justify-center ${className}`.trim()}
       style={{ width: size, height: size }}
-      aria-label={label}
     >
-      {isComplete ? (
-        <StarIcon
-          className={tierStyle.fillClassName}
-          size={size}
-          fillColor="currentColor"
-          strokeColor="currentColor"
-          strokeWidth={1.25}
-        />
-      ) : (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width={size}
-          height={size}
-          viewBox="0 0 24 24"
-          className="block overflow-visible"
-          aria-hidden="true"
-        >
-          <defs>
-            <clipPath id={maskId}>
-              <path d={STAR_ICON_PATH} />
-            </clipPath>
-          </defs>
-          {fillHeight > 0 && (
-            <rect
-              x="0"
-              y={fillY}
-              width="24"
-              height={fillHeight}
-              clipPath={`url(#${maskId})`}
-              className={EMPTY_STAR_FILL_CLASS}
-              fill="currentColor"
-            />
-          )}
-          <path
-            d={STAR_ICON_PATH}
-            className={EMPTY_STAR_BORDER_CLASS}
-            fill="transparent"
-            stroke="currentColor"
-            strokeWidth="1.25"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        className="block overflow-visible"
+        aria-hidden="true"
+      >
+        <defs>
+          <clipPath id={maskId}>
+            <path d={STAR_ICON_PATH} />
+          </clipPath>
+        </defs>
+        {fillHeight > 0 && (
+          <rect
+            x="0"
+            y={fillY}
+            width="24"
+            height={fillHeight}
+            clipPath={`url(#${maskId})`}
+            className={EMPTY_STAR_FILL_CLASS}
+            fill="currentColor"
           />
-        </svg>
-      )}
+        )}
+        <path
+          d={STAR_ICON_PATH}
+          className={EMPTY_STAR_BORDER_CLASS}
+          fill="transparent"
+          stroke="currentColor"
+          strokeWidth="1.25"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
     </span>
   );
 }
 
 type CompactedStarProps = Readonly<{
-  tier: StarTier;
+  starClassName: string;
+  badgeClassName: string;
   count: number;
   size?: number;
-  zIndex?: number;
 }>;
 
+/**
+ * CompactedStar component renders a star icon with a badge indicating the count.
+ * @param starClassName - CSS class for the star icon.
+ * @param badgeClassName - CSS class for the badge.
+ * @param count - Number to display in the badge.
+ * @param size - Size of the star icon.
+ * @returns JSX.Element representing the compacted star.
+ */
 export function CompactedStar({
-  tier,
+  starClassName,
+  badgeClassName,
   count,
   size = STAR_SIZE,
-  zIndex,
 }: CompactedStarProps): JSX.Element {
-  const tierStyle = TIER_STYLES[tier];
   const showCount = count >= 2;
 
   return (
-    <span
-      className="relative z-30 inline-flex items-center justify-center overflow-visible"
-      style={zIndex ? { zIndex } : undefined}
-      aria-label={`${tier} tier complete`}
-    >
-      <Star progress={1} tier={tier} size={size} />
+    <span className="z-star-stack relative inline-flex items-center justify-center overflow-visible">
+      <FullStar className={starClassName} size={size} />
       {showCount && (
         <span
-          className={`absolute -top-1 left-[15px] z-40 inline-flex min-h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-none font-semibold shadow-sm ${tierStyle.badgeClassName}`}
+          className={`z-star-badge absolute -top-1 left-[15px] inline-flex min-h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-none font-semibold shadow-sm ${badgeClassName}`}
         >
           {count}
         </span>
@@ -133,36 +170,88 @@ export function CompactedStar({
 }
 
 type StarRowProps = Readonly<{
-  tier: StarTier;
-  starsPerRow: number;
-  completedStars: number;
-  activeStarProgress: number;
+  starCount: number;
+  starsPerRow?: number;
   size?: number;
 }>;
 
 export function StarRow({
-  tier,
-  starsPerRow,
-  completedStars,
-  activeStarProgress,
+  starCount,
+  starsPerRow = config.practice.starsPerRow,
   size = STAR_SIZE,
 }: StarRowProps): JSX.Element {
+  const safeStarsPerRow = Math.max(1, Math.floor(starsPerRow));
+  const safeStarCount = Math.max(0, Math.floor(starCount));
+  const fullTierCount = Math.floor(safeStarCount / safeStarsPerRow);
+  const partialTierCount = safeStarCount % safeStarsPerRow;
+
+  if (safeStarCount === 0) {
+    return (
+      <div className="z-star-stack relative flex flex-wrap items-center gap-2 overflow-visible" />
+    );
+  }
+
   return (
-    <div className="flex flex-wrap items-center justify-center gap-1">
-      {Array.from({ length: starsPerRow }, (_, index) => {
-        const progress =
-          index < completedStars ? 1 : index === completedStars ? activeStarProgress : 0;
+    <div className="z-star-stack relative flex flex-wrap items-center gap-2 overflow-visible">
+      {Array.from({ length: fullTierCount }, (_, index) => {
+        const tier = getStarTier(index);
+        const tierStyle = TIER_STYLES[tier];
 
         return (
-          <Star
-            key={`${tier}-${index}`}
-            progress={progress}
-            tier={tier}
+          <CompactedStar
+            key={`completed-tier-${index}`}
+            starClassName={tierStyle.fillClassName}
+            badgeClassName={tierStyle.badgeClassName}
+            count={safeStarsPerRow}
             size={size}
-            label={`${tier} star ${index + 1} of ${starsPerRow}`}
           />
         );
       })}
+      {partialTierCount > 0 &&
+        (() => {
+          const tierStyle = TIER_STYLES[getStarTier(fullTierCount)];
+
+          return (
+            <CompactedStar
+              starClassName={tierStyle.fillClassName}
+              badgeClassName={tierStyle.badgeClassName}
+              count={partialTierCount}
+              size={size}
+            />
+          );
+        })()}
+    </div>
+  );
+}
+
+type StarRowWithFillingStarProps = Readonly<{
+  starCount: number;
+  currentProgress: number;
+  maxProgress: number;
+  starsPerRow?: number;
+  size?: number;
+  className?: string;
+}>;
+
+export function StarRowWithFillingStar({
+  starCount,
+  currentProgress,
+  maxProgress,
+  starsPerRow = config.practice.starsPerRow,
+  size = STAR_SIZE,
+  className = '',
+}: StarRowWithFillingStarProps): JSX.Element {
+  return (
+    <div
+      className={`isolate flex flex-wrap items-center justify-center gap-2 overflow-visible ${className}`.trim()}
+    >
+      <StarRow starCount={starCount} starsPerRow={starsPerRow} size={size} />
+      <FillingStar
+        currentProgress={currentProgress}
+        maxProgress={maxProgress}
+        size={size}
+        className="z-star-current relative"
+      />
     </div>
   );
 }
@@ -170,7 +259,6 @@ export function StarRow({
 type CompactSummaryProps = Readonly<{
   fullTierCount: number;
   partialTierCount: number;
-  partialTier?: StarTier;
   starsPerRow?: number;
   size?: number;
 }>;
@@ -178,30 +266,57 @@ type CompactSummaryProps = Readonly<{
 export function CompactSummary({
   fullTierCount,
   partialTierCount,
-  partialTier,
-  starsPerRow = 10,
+  starsPerRow = config.practice.starsPerRow,
   size = STAR_SIZE,
-}: CompactSummaryProps): JSX.Element | null {
-  if (fullTierCount <= 0 && partialTierCount <= 0) {
-    return null;
-  }
+}: CompactSummaryProps): JSX.Element {
+  return (
+    <StarRow
+      starCount={fullTierCount * starsPerRow + partialTierCount}
+      starsPerRow={starsPerRow}
+      size={size}
+    />
+  );
+}
 
-  const compactedStarCount = fullTierCount + (partialTier && partialTierCount > 0 ? 1 : 0);
+type DetailedStarTierRowProps = Readonly<{
+  count: number;
+  countPerStar?: number;
+  starsPerRow?: number;
+  size?: number;
+}>;
+
+function DetailedStarTierRow({
+  count,
+  countPerStar = config.practice.starChunk,
+  starsPerRow = config.practice.starsPerRow,
+  size = STAR_SIZE,
+}: DetailedStarTierRowProps): JSX.Element {
+  const state = getStarProgressState(count, countPerStar, starsPerRow);
+  const tierStyle = TIER_STYLES[state.activeTier];
 
   return (
-    <div className="relative z-30 flex flex-wrap items-center gap-2 overflow-visible">
-      {Array.from({ length: fullTierCount }, (_, index) => (
-        <CompactedStar
-          key={`completed-tier-${index}`}
-          tier={getStarTier(index)}
-          count={starsPerRow}
-          size={size}
-          zIndex={compactedStarCount - index}
-        />
-      ))}
-      {partialTier && partialTierCount > 0 && (
-        <CompactedStar tier={partialTier} count={partialTierCount} size={size} zIndex={1} />
-      )}
+    <div className="flex flex-wrap items-center justify-center gap-1">
+      {Array.from({ length: starsPerRow }, (_, index) => {
+        const isFilledStar = index < state.activeRowCompletedStars;
+        const isActiveStar = index === state.activeRowCompletedStars && state.currentChunkCount > 0;
+
+        return (
+          <span
+            key={`${state.activeTier}-${index}`}
+            aria-label={`${state.activeTier} star ${index + 1} of ${starsPerRow}`}
+          >
+            {isFilledStar ? (
+              <FullStar className={tierStyle.fillClassName} size={size} />
+            ) : (
+              <FillingStar
+                size={size}
+                currentProgress={isActiveStar ? state.currentChunkCount : 0}
+                maxProgress={state.chunkSize}
+              />
+            )}
+          </span>
+        );
+      })}
     </div>
   );
 }
@@ -218,34 +333,21 @@ export default function StarProgressOverview({
   starsPerRow,
 }: StarProgressOverviewProps): JSX.Element {
   const state = getStarProgressState(count, chunkSize, starsPerRow);
+  const completedStarCount = getCompletedStarCount(count, chunkSize);
   const showBronzeRow = state.completedTiers === 0;
 
   return (
     <div className="flex flex-col items-center gap-2" aria-label="Daily star progress">
       {showBronzeRow ? (
-        <StarRow
-          tier={state.activeTier}
-          starsPerRow={starsPerRow}
-          completedStars={state.activeRowCompletedStars}
-          activeStarProgress={state.activeStarProgress}
-        />
+        <DetailedStarTierRow count={count} countPerStar={chunkSize} starsPerRow={starsPerRow} />
       ) : (
-        <div className="isolate flex flex-wrap items-center justify-center gap-2 overflow-visible">
-          <CompactSummary
-            fullTierCount={state.completedTiers}
-            partialTierCount={state.activeRowCompletedStars}
-            partialTier={state.activeTier}
-            starsPerRow={starsPerRow}
-            size={STAR_SIZE}
-          />
-          <Star
-            progress={state.activeStarProgress}
-            tier={state.activeTier}
-            size={STAR_SIZE}
-            label={`${state.activeTier} current star`}
-            className="relative z-0"
-          />
-        </div>
+        <StarRowWithFillingStar
+          starCount={completedStarCount}
+          currentProgress={state.currentChunkCount}
+          maxProgress={state.chunkSize}
+          starsPerRow={starsPerRow}
+          size={STAR_SIZE}
+        />
       )}
     </div>
   );

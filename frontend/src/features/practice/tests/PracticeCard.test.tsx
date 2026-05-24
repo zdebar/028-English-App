@@ -190,14 +190,12 @@ vi.mock('@/components/UI/icons/NotRevealedIcon', () => ({
 
 vi.mock('@/components/UI/StarProgress', () => ({
   STAR_SIZE: 22,
-  CompactSummary: ({ fullTierCount, partialTierCount, partialTier }: any) => (
-    <span data-testid="practice-star-summary">
-      {fullTierCount}:{partialTierCount}:{partialTier ?? 'none'}
-    </span>
-  ),
-  Star: ({ progress, tier }: { progress: number; tier: string }) => (
-    <span data-testid="practice-star">
-      {tier}:{progress}
+}));
+
+vi.mock('@/features/practice/components/PracticeStarsRow', () => ({
+  default: ({ starCount, displayedChunkCount, starChunk }: any) => (
+    <span data-testid="practice-stars-row">
+      {starCount}:{displayedChunkCount}:{starChunk}
     </span>
   ),
 }));
@@ -337,8 +335,7 @@ describe('PracticeCard', () => {
   it('shows current star chunk progress instead of daily goal progress', () => {
     render(<PracticeCard />);
 
-    expect(screen.getByText('5 / 50')).toBeTruthy();
-    expect(screen.getByTestId('practice-star').textContent).toBe('bronze:0.1');
+    expect(screen.getByTestId('practice-stars-row').textContent).toBe('0:5:50');
   });
 
   it('shows the next empty bronze star when mounted exactly on a completed chunk', () => {
@@ -346,8 +343,7 @@ describe('PracticeCard', () => {
 
     render(<PracticeCard />);
 
-    expect(screen.getByText('0 / 50')).toBeTruthy();
-    expect(screen.getByTestId('practice-star').textContent).toBe('bronze:0');
+    expect(screen.getByTestId('practice-stars-row').textContent).toBe('1:0:50');
   });
 
   it('autoplays audio after delay in EN->CZ mode when allowed', async () => {

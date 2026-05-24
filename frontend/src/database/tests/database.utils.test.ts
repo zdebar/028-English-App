@@ -253,7 +253,6 @@ describe('database.utils', () => {
       await restoreUnsavedFromLocalStorage('u1');
 
       expect(mocks.savePracticeDeck).toHaveBeenCalledWith(
-        'u1',
         [{ item_id: 1, progress: 2 }],
         '2026-03-04T10:00:00.000Z',
       );

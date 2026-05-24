@@ -112,7 +112,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param dateTime - The date for which the progress is being saved (defaults to today)
    */
   static async savePracticeDeck(
-    _userId: string,
     items: UserItemPractice[],
     dateTime: string = new Date(Date.now()).toISOString(),
   ): Promise<void> {

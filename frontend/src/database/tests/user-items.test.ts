@@ -152,7 +152,7 @@ describe('UserItem', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-03-04T09:00:00.000Z'));
 
-    await UserItem.savePracticeDeck('u1', [
+    await UserItem.savePracticeDeck([
       {
         user_id: 'u1',
         item_id: 1,
@@ -170,7 +170,6 @@ describe('UserItem', () => {
     const dateTime = '2026-03-06T12:00:00.000Z';
 
     await UserItem.savePracticeDeck(
-      'u1',
       [
         {
           user_id: 'u1',

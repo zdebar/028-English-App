@@ -41,4 +41,16 @@
     /* Modal */
     @apply z-300;
   }
+
+  .z-star-stack {
+    @apply z-30;
+  }
+
+  .z-star-badge {
+    @apply z-40;
+  }
+
+  .z-star-current {
+    @apply z-0;
+  }
 }

@@ -154,7 +154,6 @@ describe('usePracticeDeck', () => {
 
     await waitFor(() => expect(savePracticeDeckMock).toHaveBeenCalledTimes(1));
     expect(savePracticeDeckMock).toHaveBeenCalledWith(
-      'user-1',
       expect.arrayContaining([
         expect.objectContaining({
           item_id: 1,
@@ -171,7 +170,6 @@ describe('usePracticeDeck', () => {
           ]),
         }),
       ]),
-      expect.any(String),
     );
     expect(addItemCountMock).toHaveBeenCalledTimes(2);
     expect(reloadMock).toHaveBeenCalledTimes(1);
