@@ -24,6 +24,15 @@ export default function Guide(): JSX.Element {
         </p>
       </section>
       <section>
+        <h2>Doporučujeme</h2>
+        <ul className="text-left">
+          <li>každé slovíčko či větu nahlas zopakovat</li>
+          <li>preferovat "Opakovat" před "Znám", pokud není znalost zcela automatické</li>
+          <li>procvičit každý den min. 400 opakování tedy 10 hvězdiček</li>
+        </ul>
+      </section>
+
+      <section>
         <h2>Neodhalená kartička</h2>
         <Screenshot src="/screenshots/not-revealed.webp" alt="Ukázka kartičky před odhalením" />
         <p>
@@ -47,10 +56,7 @@ export default function Guide(): JSX.Element {
         <Screenshot src="/screenshots/revealed.webp" alt="Ukázka kartičky po odhalení" />
         <p>
           <strong>"Opakovat"</strong>
-          <span>
-            Položka se nabídne k dalšímu procvičování dříve.{' '}
-            <strong>DOPORUČUJEME dávat "Opakovat", pokud není znalost zcela automatická.</strong>
-          </span>
+          <span>Položka se nabídne k dalšímu procvičování dříve.</span>
         </p>
         <p>
           <strong>"Znám"</strong>
