@@ -11,6 +11,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import config from '@/config/config';
 import Notification from '@/components/UI/Notification';
 import StarProgressOverview from '@/components/UI/StarProgress';
+import '@/styles/home.css';
 import { InstallPWAButton } from '@/features/pwa/InstallPwaButton';
 import { useSyncWarningStore } from '@/features/sync/use-sync-warning';
 import { ROUTES } from '@/config/routes.config';
@@ -78,7 +79,7 @@ export default function Home(): JSX.Element {
             <div className="flex justify-center pt-2" title={TEXTS.practiceOverviewOpen}>
               <button
                 type="button"
-                className="inline-flex justify-center border-b border-transparent pt-1  mb-2 text-center hover:border-current"
+                className="home-star-button inline-flex justify-center items-center pt-1 mb-2 text-center hover:border-current focus:outline-none"
                 aria-label={TEXTS.practiceOverviewOpen}
                 onClick={() => navigate(ROUTES.practiceOverview)}
               >
