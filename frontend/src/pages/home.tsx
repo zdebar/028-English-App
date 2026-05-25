@@ -15,6 +15,7 @@ import '@/styles/home.css';
 import { InstallPWAButton } from '@/features/pwa/InstallPwaButton';
 import { useSyncWarningStore } from '@/features/sync/use-sync-warning';
 import { ROUTES } from '@/config/routes.config';
+import HelpText from '@/features/help/HelpText';
 
 /**
  * The Home component renders the main page of the application.
@@ -79,7 +80,7 @@ export default function Home(): JSX.Element {
             <div className="flex justify-center pt-2" title={TEXTS.practiceOverviewOpen}>
               <button
                 type="button"
-                className="home-star-button inline-flex justify-center items-center pt-1 mb-2 text-center hover:border-current focus:outline-none"
+                className="home-star-button relative inline-flex justify-center items-center pt-1 mb-2 text-center hover:border-current focus:outline-none"
                 aria-label={TEXTS.practiceOverviewOpen}
                 onClick={() => navigate(ROUTES.practiceOverview)}
               >
@@ -88,6 +89,9 @@ export default function Home(): JSX.Element {
                   chunkSize={config.practice.starChunk}
                   starsPerRow={config.practice.starsPerRow}
                 />
+                <HelpText className="-top-4 ">
+                  {TEXTS.starsToday}
+                </HelpText>
               </button>
             </div>
           </div>

@@ -10,6 +10,7 @@ export const HOME_TEXTS = {
     'Aplikace po přihlášení ukládá cvičební data do úložiště Vašeho prohlížeče (7.8MB). Účet je možno kdykoliv smazat, včetně všech dat.',
   installButton: 'Nainstalovat aplikaci',
   installButtonTooltip: 'Nainstalovat PWA aplikaci.',
+  starsToday: 'Denní cíl',
 
   // User
   userLabel: 'Uživatel',
