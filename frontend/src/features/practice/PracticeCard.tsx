@@ -70,6 +70,13 @@ export default function PracticeCard() {
   const cardStyle = revealed ? 'color-audio-disabled' : 'color-button';
   const directionText = isCzToEn ? TEXTS.directionCzToEn : TEXTS.directionEnToCz;
   const showNoteButton = !!currentItem?.note && currentItem.note.length > 0 && revealed;
+  let audioStatusMessage = null;
+
+  if (audioLoading) {
+    audioStatusMessage = <DelayedNotification message={TEXTS.loadingAudio} timeDelay={500} />;
+  } else if (audioError) {
+    audioStatusMessage = <p className="px-2">{TEXTS.noAudio}</p>;
+  }
 
   if (!currentItem) {
     return (
@@ -134,11 +141,7 @@ export default function PracticeCard() {
           <div id="top-bar" className="relative flex h-8 w-full items-center justify-between">
             <VolumeSlider setVolume={setVolume} />
             {/**Audio messages*/}
-            {audioLoading ? (
-              <DelayedNotification message={TEXTS.loadingAudio} timeDelay={500} />
-            ) : audioError ? (
-              <p className="px-2">{TEXTS.noAudio}</p>
-            ) : null}
+            {audioStatusMessage}
           </div>
           {/** Item Data */}
           {showDirectionChange ? (
