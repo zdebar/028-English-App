@@ -38,12 +38,6 @@ export function usePracticeStars(practiceCountToday: number): UsePracticeStarsRe
     if (justCompletedChunk && starCount > lastAnimatedCompletedStarsRef.current) {
       setCompletedStarFlash(getStarTier(Math.floor((starCount - 1) / starsPerRow)));
       lastAnimatedCompletedStarsRef.current = starCount;
-
-      const timeoutId = globalThis.setTimeout(() => {
-        setCompletedStarFlash(null);
-      }, starFlashDuration);
-
-      return () => globalThis.clearTimeout(timeoutId);
     }
 
     lastAnimatedCompletedStarsRef.current = Math.max(
@@ -52,7 +46,19 @@ export function usePracticeStars(practiceCountToday: number): UsePracticeStarsRe
     );
 
     return undefined;
-  }, [practiceCountToday, starChunk, starCount, starFlashDuration, starsPerRow]);
+  }, [practiceCountToday, starChunk, starCount, starsPerRow]);
+
+  useEffect(() => {
+    if (!completedStarFlash) {
+      return undefined;
+    }
+
+    const timeoutId = globalThis.setTimeout(() => {
+      setCompletedStarFlash(null);
+    }, starFlashDuration);
+
+    return () => globalThis.clearTimeout(timeoutId);
+  }, [completedStarFlash, starFlashDuration]);
 
   return {
     starChunk,
