@@ -20,7 +20,7 @@ export default function Profile(): JSX.Element {
 
   return (
     <div className="card-width grow-0 gap-1">
-      <div className="mb-12 mt-4 mx-auto w-64 text-left">
+      <div className="mb-8 mt-4 mx-auto w-64 text-left">
         <PropertyView
           label={TEXTS.profileNameLabel}
           className="mb-1"
