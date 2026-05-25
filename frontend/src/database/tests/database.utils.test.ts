@@ -103,6 +103,8 @@ describe('database.utils', () => {
         item_id: 1,
         progress: 0,
         updated_at: '2026-02-28T10:00:00.000Z',
+        is_study_item: true,
+        is_vocabulary: undefined as unknown as boolean,
         grammar_id: null as unknown as number,
         started_at: null as unknown as string,
         next_at: null as unknown as string,
@@ -110,6 +112,8 @@ describe('database.utils', () => {
       } as any);
 
       expect(result.grammar_id).toBe(0);
+      expect(result.is_study_item).toBe(1);
+      expect(result.is_vocabulary).toBe(0);
       expect(result.started_at).toBe('1970-01-01T00:00:00.000Z');
       expect(result.next_at).toBe('1970-01-01T00:00:00.000Z');
       expect(result.mastered_at).toBe('1970-01-01T00:00:00.000Z');

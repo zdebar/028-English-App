@@ -20,6 +20,7 @@ export interface UserItemBase {
 
 export interface UserItemAPI extends UserItemBase {
   is_study_item: boolean;
+  is_vocabulary: boolean;
   block_id: number | null;
   grammar_id: number | null;
   started_at: string | null;
@@ -30,11 +31,19 @@ export interface UserItemAPI extends UserItemBase {
 
 export type UserItemExport = Pick<
   UserItemAPI,
-  'user_id' | 'item_id' | 'progress' | 'progress_history' | 'started_at' | 'updated_at' | 'next_at' | 'mastered_at'
+  | 'user_id'
+  | 'item_id'
+  | 'progress'
+  | 'progress_history'
+  | 'started_at'
+  | 'updated_at'
+  | 'next_at'
+  | 'mastered_at'
 >;
 
 export interface UserItemLocal extends UserItemBase {
   is_study_item: 0 | 1;
+  is_vocabulary: 0 | 1;
   block_id: number;
   grammar_id: number;
   started_at: string;

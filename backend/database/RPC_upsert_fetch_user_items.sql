@@ -12,6 +12,7 @@ RETURNS TABLE (
   pronunciation TEXT,
   audio TEXT,
   is_study_item BOOLEAN,
+  is_vocabulary BOOLEAN,
   sort_order INTEGER,
   block_id INTEGER,
   grammar_id INTEGER,

@@ -52,6 +52,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   audio!: string | null;
   note!: string | null;
   is_study_item!: 0 | 1; // boolean represented as 0 or 1
+  is_vocabulary!: 0 | 1; // boolean represented as 0 or 1
   sort_order!: number;
   block_id!: number;
   grammar_id!: number;
@@ -195,13 +196,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    */
   static async getStartedVocabulary(userId: string): Promise<UserItemLocal[]> {
     const result = await db.user_items
-      .where('[user_id+grammar_id+started_at+is_study_item]')
-      .between(
-        [userId, NULL_NUMBER, Dexie.minKey, 1],
-        [userId, NULL_NUMBER, NULL_DATE, 1],
-        true,
-        false,
-      )
+      .where('[user_id+is_vocabulary+started_at+is_study_item]')
+      .between([userId, 1, Dexie.minKey, 1], [userId, 1, NULL_DATE, 1], true, false)
       .toArray();
 
     result.sort((a, b) => a.english.toLowerCase().localeCompare(b.english.toLowerCase()));
