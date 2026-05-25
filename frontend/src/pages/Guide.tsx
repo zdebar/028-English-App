@@ -12,7 +12,7 @@ export default function Guide(): JSX.Element {
       <h1 className="text-center">Návod</h1>
       <section>
         <p className="text-center">
-          Tato aplikace je zaměřena na dril, na velké množství naposlouchaných a vyslovených
+          Tato učební aplikace je zaměřena na dril, na velké množství naposlouchaných a vyslovených
           opakování.
         </p>
       </section>
@@ -27,8 +27,8 @@ export default function Guide(): JSX.Element {
         <h2>Neodhalená kartička</h2>
         <Screenshot src="/screenshots/not-revealed.webp" alt="Ukázka kartičky před odhalením" />
         <p>
-          <strong>"Dnes / Denní cíl"</strong>
-          <span>Doporučený denní počet opakování.</span>
+          <strong>"Postup na další hvězdu"</strong>
+          <span>10 bronzových hvězd po 40 opakováních je doporučené minimální procvičování.</span>
         </p>
         <p>
           <strong>"Dokončit"</strong>
