@@ -7,7 +7,7 @@ LANGUAGE plpgsql
 SET search_path TO public
 AS $$
 DECLARE
-  v_user_id UUID;
+  v_auth_user_id UUID;
   -- constants to avoid duplicated literals
   v_empty_json CONSTANT JSONB := '[]'::JSONB;
   v_item_id_re CONSTANT TEXT := '^[0-9]+$';
@@ -22,11 +22,19 @@ BEGIN
     RETURN;
   END IF;
 
-  -- Extract user_id from the first element
-  SELECT (entry->>v_key_user_id)::UUID
-    INTO v_user_id
+  v_auth_user_id := auth.uid();
+  IF v_auth_user_id IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated';
+  END IF;
+
+  -- Validate every user_id in payload matches auth.uid()
+  IF EXISTS (
+    SELECT 1
     FROM jsonb_array_elements(p_user_items) AS entry
-    LIMIT 1;
+    WHERE (entry->>v_key_user_id)::UUID IS DISTINCT FROM v_auth_user_id
+  ) THEN
+    RAISE EXCEPTION 'Payload user_id must match auth.uid()';
+  END IF;
 
   -- Count incoming candidate rows and how many match existing items
   SELECT COUNT(*) INTO v_total_count
@@ -141,4 +149,8 @@ BEGIN
     RAISE LOG 'user_items_history: inserted=%, skipped_invalid=%, skipped_existing=%, skipped_disabled=0, errors=%', v_inserted_count, v_skipped_invalid, v_skipped_existing, v_error_count;
   END;
 END;
-$$
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.upsert_user_items(JSONB, BOOLEAN) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.upsert_user_items(JSONB, BOOLEAN) FROM anon;
+GRANT EXECUTE ON FUNCTION public.upsert_user_items(JSONB, BOOLEAN) TO authenticated;

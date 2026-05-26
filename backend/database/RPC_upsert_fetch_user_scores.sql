@@ -15,7 +15,6 @@ SET search_path TO public
 AS $$
 DECLARE
   v_auth_user_id UUID;
-  v_payload_user_id UUID;
 BEGIN
   IF p_user_id IS NULL THEN
     RAISE EXCEPTION 'p_user_id is required';
@@ -55,3 +54,7 @@ BEGIN
   ORDER BY us.date ASC;
 END;
 $$;
+
+REVOKE EXECUTE ON FUNCTION public.upsert_fetch_user_scores(UUID, TIMESTAMPTZ, JSONB) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.upsert_fetch_user_scores(UUID, TIMESTAMPTZ, JSONB) FROM anon;
+GRANT EXECUTE ON FUNCTION public.upsert_fetch_user_scores(UUID, TIMESTAMPTZ, JSONB) TO authenticated;
