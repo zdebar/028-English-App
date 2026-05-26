@@ -25,7 +25,7 @@ export default function PracticeStarsRow({
         starsPerRow={starsPerRow}
         size={size}
       />
-      <span className={`inline-block w-18 text-right tabular-nums transition-colors duration-200`}>
+      <span className={`inline-block w-18 text-right tabular-nums`}>
         {displayedChunkCount} / {starChunk}
       </span>
     </span>
