@@ -15,7 +15,7 @@ import Lessons from './lessons';
  * Represents a level entity in the local database.
  * Handles synchronization of level data between the remote Supabase server and local storage.
  *
- * @method getOverview - Retrieves a comprehensive overview of user levels with their progress.
+ * @method getAll - Retrieves a comprehensive overview of user levels with their progress.
  * @method syncFromRemote - Synchronizes levels from the remote server with the local database.
  *
  */
@@ -30,7 +30,7 @@ export default class Levels extends Entity<AppDB> implements LevelType {
    * Retrieves a comprehensive overview of user levels with their progress.
    * @param userId - The unique identifier of the user
    */
-  static async getOverview(userId: string): Promise<LevelOverviewType[]> {
+  static async getAll(userId: string): Promise<LevelOverviewType[]> {
     const items = await UserItem.getByUserId(userId);
     const lessons = await Lessons.getAll();
     const levels = await db.levels.orderBy('sort_order').toArray();

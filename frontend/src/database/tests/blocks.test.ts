@@ -63,7 +63,7 @@ describe('Blocks', () => {
   });
 
   it('getOverviewBlocks throws when userId is missing', async () => {
-    await expect(Blocks.getOverviewBlocks('')).rejects.toThrow();
+    await expect(Blocks.getStarted('')).rejects.toThrow();
   });
 
   it('getOverviewBlocks returns blocks sorted by sort_order', async () => {
@@ -73,7 +73,7 @@ describe('Blocks', () => {
       { id: 1, sort_order: 10, name: 'A', note: '', deleted_at: null },
     ]);
 
-    const result = await Blocks.getOverviewBlocks('u1');
+    const result = await Blocks.getStarted('u1');
 
     expect(mocks.where).toHaveBeenCalledWith('id');
     expect(mocks.anyOf).toHaveBeenCalledWith([1, 2, 3]);

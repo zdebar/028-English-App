@@ -71,7 +71,7 @@ export const useUserStore = create<UserState>((set, get) => {
     reloadLevels: async (userId: string) => {
       try {
         assertNonEmptyString(userId, 'userId');
-        const updatedLevels = (await Levels.getOverview(userId)) ?? [];
+        const updatedLevels = (await Levels.getAll(userId)) ?? [];
         set({ levels: updatedLevels });
       } catch (error) {
         set({ levels: initialLevels });

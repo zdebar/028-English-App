@@ -44,7 +44,7 @@ export default class Blocks extends Entity<AppDB> implements BlockType {
   /**
    * Retrieves all overview blocks for a specific user from the database.
    */
-  static async getOverviewBlocks(userId: string): Promise<BlockType[]> {
+  static async getStarted(userId: string): Promise<BlockType[]> {
     assertNonEmptyString(userId, 'userId');
 
     const startedBlockIds = await UserItem.getStartedBlocksIds(userId);
