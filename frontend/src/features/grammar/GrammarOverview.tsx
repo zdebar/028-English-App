@@ -46,6 +46,7 @@ export default function GrammarOverview(): JSX.Element {
     currentItem,
     loading,
     hasData,
+    reload,
   } = useArray<GrammarType>(fetchGrammar);
 
   const handleReset = useCallback(async () => {
@@ -56,6 +57,7 @@ export default function GrammarOverview(): JSX.Element {
     try {
       const resetCount = await UserItem.resetItemsByGrammarId(userId, currentItem.id);
       reportInfo(`Grammar ${currentItem.id} reset completed: ${resetCount} items reset.`);
+      reload();
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (err) {
       showToast(TEXTS.resetProgressErrorToast, 'error');
