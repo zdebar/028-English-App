@@ -52,9 +52,9 @@ export default function Profile(): JSX.Element {
         className="mb-8"
       >
         <MenuButtonText>{TEXTS.vocabularyOverview}</MenuButtonText>
-      </StandardButton>
-      <DeleteUserButton />
+      </StandardButton>    
       <SignoutButton />
+      <DeleteUserButton />
     </div>
   );
 }
