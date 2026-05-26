@@ -49,7 +49,7 @@ export default function Profile(): JSX.Element {
       <StandardButton
         onClick={() => navigate(ROUTES.vocabulary)}
         title={TEXTS.vocabularyOverviewTooltip}
-        className="mb-10"
+        className="mb-8"
       >
         <MenuButtonText>{TEXTS.vocabularyOverview}</MenuButtonText>
       </StandardButton>
