@@ -106,7 +106,8 @@ vi.mock('@/utils/dashboard.utils', () => ({
   triggerLevelsUpdatedEvent: (...args: unknown[]) => mocks.triggerLevelsUpdatedEvent(...args),
 }));
 
-import { dataSync, dataSyncOnUnmount, splitDeleted } from '@/database/utils/data-sync.utils';
+import { dataSync, dataSyncOnUnmount } from '@/database/utils/data-sync.utils';
+import { splitDeleted } from '@/database/utils/sync-generic.utils';
 
 describe('data-sync.utils', () => {
   beforeEach(() => {

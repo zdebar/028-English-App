@@ -1,11 +1,10 @@
-import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import { DatabaseError } from '@/types/error.types';
 import type { GrammarType } from '@/types/generic.types';
 import { TableName } from '@/types/table.types';
-import Dexie, { Entity } from 'dexie';
-import { fetchFromRemoteGeneric, syncFromRemoteGeneric } from '../utils/data-sync.utils';
+import Dexie from 'dexie';
 import UserItem from './user-items';
+import SyncEntityModel from './sync-entity-model';
 
 /**
  * Represents a grammar entity in the application database.
@@ -16,12 +15,17 @@ import UserItem from './user-items';
  * @method syncFromRemote - Synchronizes grammar data between the local database and Supabase, either fully or incrementally based on the last sync timestamp.
  *
  */
-export default class Grammar extends Entity<AppDB> implements GrammarType {
+export default class Grammar extends SyncEntityModel implements GrammarType {
   id!: number;
   name!: string;
   note!: string;
   sort_order!: number;
   deleted_at!: string | null;
+
+  static override syncTable = db.grammar as Dexie.Table<GrammarType, number>;
+  static override syncTableName = TableName.Grammar;
+  static override syncEntityName = 'grammar';
+  static override syncSelect = 'id, name, note, sort_order, deleted_at';
 
   /**
    * Retrieves a grammar record by its ID from the database.
@@ -47,35 +51,5 @@ export default class Grammar extends Entity<AppDB> implements GrammarType {
     if (grammarIds.length === 0) return [];
 
     return await db.grammar.where('id').anyOf(grammarIds).sortBy('sort_order');
-  }
-
-  /**
-   * Synchronizes grammar data between the local database and Supabase.
-   * @param doFullSync - If true, performs a full sync by clearing all existing grammar data
-   *                     and fetching everything from the epoch start date. If false, performs
-   *                     an incremental sync based on the last sync timestamp. Defaults to false.
-   * @returns The count of grammar records that were updated from the remote database during this sync operation.
-   */
-  static async syncFromRemote(doFullSync: boolean = false): Promise<number> {
-    return await syncFromRemoteGeneric<GrammarType>(
-      db.grammar as Dexie.Table<GrammarType, number>,
-      TableName.Grammar,
-      this.fetchFromRemote,
-      doFullSync,
-    );
-  }
-
-  /**
-   * Fetches grammar records from Supabase that were updated within a specified time range.
-   * @param lastSyncedAt - The start of the time range (inclusive). Defaults to the null replacement date from config.
-   */
-  private static async fetchFromRemote(lastSyncedAt: string): Promise<GrammarType[]> {
-    return await fetchFromRemoteGeneric<GrammarType>({
-      tableName: TableName.Grammar,
-      select: 'id, name, note, sort_order, deleted_at',
-      entityName: 'grammar',
-      comparator: 'gte',
-      lastSyncedAt,
-    });
   }
 }

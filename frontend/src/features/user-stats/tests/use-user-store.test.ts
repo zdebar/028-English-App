@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   getOrCreateTodayScore: vi.fn(),
-  getAll: vi.fn(),
+  getOverview: vi.fn(),
 }));
 
 vi.mock('@/database/models/user-scores', () => ({
@@ -13,7 +13,7 @@ vi.mock('@/database/models/user-scores', () => ({
 
 vi.mock('@/database/models/levels', () => ({
   default: {
-    getAll: (...args: unknown[]) => mocks.getAll(...args),
+    getOverview: (...args: unknown[]) => mocks.getOverview(...args),
   },
 }));
 
@@ -25,7 +25,7 @@ describe('useUserStore', () => {
     useUserStore.setState({ levels: [], dailyCount: 0 });
 
     mocks.getOrCreateTodayScore.mockResolvedValue(7);
-    mocks.getAll.mockResolvedValue([
+    mocks.getOverview.mockResolvedValue([
       {
         id: 1,
         sort_order: 1,

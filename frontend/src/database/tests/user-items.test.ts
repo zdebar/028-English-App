@@ -102,8 +102,8 @@ vi.mock('@/database/utils/user-items.utils', async () => {
   };
 });
 
-vi.mock('@/database/utils/data-sync.utils', async () => {
-  const actual = await vi.importActual<any>('@/database/utils/data-sync.utils');
+vi.mock('@/database/utils/sync-generic.utils', async () => {
+  const actual = await vi.importActual<any>('@/database/utils/sync-generic.utils');
   return {
     ...actual,
     getSyncTimestamps: (...args: unknown[]) => mocks.getSyncTimestamps(...args),

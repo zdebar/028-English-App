@@ -10,7 +10,7 @@ import type {
 } from '@/types/user-item.types';
 import { TableName } from '@/types/table.types';
 import Dexie, { Entity } from 'dexie';
-import { getSyncTimestamps, splitDeleted } from '../utils/data-sync.utils';
+import { getSyncTimestamps, splitDeleted } from '../utils/sync-generic.utils';
 
 import {
   convertLocalToExport,

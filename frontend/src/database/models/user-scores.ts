@@ -3,7 +3,7 @@ import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import { getTodayShortDate } from '@/database/utils/database.utils';
-import { getSyncTimestamps, splitDeleted } from '../utils/data-sync.utils';
+import { getSyncTimestamps, splitDeleted } from '../utils/sync-generic.utils';
 import { SupabaseError } from '@/types/error.types';
 import { type UserScoreType } from '@/types/generic.types';
 import { TableName } from '@/types/table.types';
