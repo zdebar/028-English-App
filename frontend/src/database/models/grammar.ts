@@ -1,12 +1,10 @@
-import config from '@/config/config';
-import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
-import { DatabaseError, SupabaseError } from '@/types/error.types';
+import { DatabaseError } from '@/types/error.types';
 import type { GrammarType } from '@/types/generic.types';
 import { TableName } from '@/types/table.types';
 import Dexie, { Entity } from 'dexie';
-import { syncFromRemoteGeneric } from '../utils/data-sync.utils';
+import { fetchFromRemoteGeneric, syncFromRemoteGeneric } from '../utils/data-sync.utils';
 import UserItem from './user-items';
 
 /**
@@ -71,20 +69,13 @@ export default class Grammar extends Entity<AppDB> implements GrammarType {
    * Fetches grammar records from Supabase that were updated within a specified time range.
    * @param lastSyncedAt - The start of the time range (inclusive). Defaults to the null replacement date from config.
    */
-  private static async fetchFromRemote(
-    lastSyncedAt: string = config.database.epochStartDate,
-  ): Promise<GrammarType[]> {
-    const { data: grammar, error } = await supabaseInstance
-      .from('grammar')
-      .select('id, name, note, sort_order, deleted_at')
-      .gte('updated_at', lastSyncedAt);
-
-    if (error) {
-      throw new SupabaseError(`Failed to fetch grammar data from supabase`, error, {
-        lastSyncedAt,
-      });
-    }
-
-    return grammar ?? [];
+  private static async fetchFromRemote(lastSyncedAt: string): Promise<GrammarType[]> {
+    return await fetchFromRemoteGeneric<GrammarType>({
+      tableName: TableName.Grammar,
+      select: 'id, name, note, sort_order, deleted_at',
+      entityName: 'grammar',
+      comparator: 'gte',
+      lastSyncedAt,
+    });
   }
 }

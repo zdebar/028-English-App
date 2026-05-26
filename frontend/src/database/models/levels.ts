@@ -1,12 +1,9 @@
-import config from '@/config/config';
-import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
-import { SupabaseError } from '@/types/error.types';
 import type { LevelType, LevelOverviewType } from '@/types/generic.types';
 import { TableName } from '@/types/table.types';
 import Dexie, { Entity } from 'dexie';
-import { syncFromRemoteGeneric } from '../utils/data-sync.utils';
+import { fetchFromRemoteGeneric, syncFromRemoteGeneric } from '../utils/data-sync.utils';
 import { aggregateLevels } from '../utils/levels.utils';
 import UserItem from './user-items';
 import Lessons from './lessons';
@@ -58,20 +55,12 @@ export default class Levels extends Entity<AppDB> implements LevelType {
    * Fetches levels from Supabase that have been updated since the specified timestamp.
    * @param lastSyncedAt - The timestamp of the last sync operation. Defaults to the application's epoch start date.
    */
-  private static async fetchFromRemote(
-    lastSyncedAt: string = config.database.epochStartDate,
-  ): Promise<LevelType[]> {
-    const { data: levels, error } = await supabaseInstance
-      .from('levels')
-      .select('id, name, note, sort_order, deleted_at')
-      .gt('updated_at', lastSyncedAt);
-
-    if (error) {
-      throw new SupabaseError(`Failed to fetch levels data from supabase`, error, {
-        lastSyncedAt,
-      });
-    }
-
-    return levels ?? [];
+  private static async fetchFromRemote(lastSyncedAt: string): Promise<LevelType[]> {
+    return await fetchFromRemoteGeneric<LevelType>({
+      tableName: TableName.Levels,
+      select: 'id, name, note, sort_order, deleted_at',
+      entityName: 'levels',
+      lastSyncedAt,
+    });
   }
 }

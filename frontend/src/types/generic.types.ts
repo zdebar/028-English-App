@@ -1,4 +1,4 @@
-export interface RecordType {
+export interface SyncEntityType {
   id: number;
   name: string;
   note: string;
@@ -6,14 +6,17 @@ export interface RecordType {
   deleted_at: string | null;
 }
 
-export interface LessonType extends RecordType {
+// Backward-compatible alias used by older model typings.
+export interface RecordType extends SyncEntityType {}
+
+export interface LessonType extends SyncEntityType {
   level_id: number;
 }
-export interface LevelType extends RecordType {}
+export interface LevelType extends SyncEntityType {}
 
-export interface GrammarType extends RecordType {}
+export interface GrammarType extends SyncEntityType {}
 
-export interface BlockType extends RecordType {}
+export interface BlockType extends SyncEntityType {}
 
 export interface ProgressCountsType {
   startedCount: number;

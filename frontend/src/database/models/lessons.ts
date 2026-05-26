@@ -1,12 +1,9 @@
-import config from '@/config/config';
-import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
-import { SupabaseError } from '@/types/error.types';
 import { type LessonType } from '@/types/generic.types';
 import { TableName } from '@/types/table.types';
 import Dexie, { Entity } from 'dexie';
-import { syncFromRemoteGeneric } from '../utils/data-sync.utils';
+import { fetchFromRemoteGeneric, syncFromRemoteGeneric } from '../utils/data-sync.utils';
 
 /**
  * Represents a lesson entity in the local database.
@@ -53,20 +50,12 @@ export default class Lessons extends Entity<AppDB> implements LessonType {
    * Fetches lessons from Supabase that have been updated since the specified timestamp.
    * @param lastSyncedAt - The timestamp of the last sync operation. Defaults to the application's epoch start date.
    */
-  private static async fetchFromRemote(
-    lastSyncedAt: string = config.database.epochStartDate,
-  ): Promise<LessonType[]> {
-    const { data: lessons, error } = await supabaseInstance
-      .from('lessons')
-      .select('id, name, note, level_id, sort_order, deleted_at')
-      .gt('updated_at', lastSyncedAt);
-
-    if (error) {
-      throw new SupabaseError(`Failed to fetch lessons data from supabase`, error, {
-        lastSyncedAt,
-      });
-    }
-
-    return lessons ?? [];
+  private static async fetchFromRemote(lastSyncedAt: string): Promise<LessonType[]> {
+    return await fetchFromRemoteGeneric<LessonType>({
+      tableName: TableName.Lessons,
+      select: 'id, name, note, level_id, sort_order, deleted_at',
+      entityName: 'lessons',
+      lastSyncedAt,
+    });
   }
 }

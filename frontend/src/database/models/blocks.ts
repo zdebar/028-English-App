@@ -1,12 +1,9 @@
-import config from '@/config/config';
-import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
-import { SupabaseError } from '@/types/error.types';
 import { type BlockType } from '@/types/generic.types';
 import { TableName } from '@/types/table.types';
 import Dexie, { Entity } from 'dexie';
-import { syncFromRemoteGeneric } from '../utils/data-sync.utils';
+import { fetchFromRemoteGeneric, syncFromRemoteGeneric } from '../utils/data-sync.utils';
 import UserItem from './user-items';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 
@@ -74,20 +71,12 @@ export default class Blocks extends Entity<AppDB> implements BlockType {
    * Fetches blocks from Supabase that have been updated since the specified timestamp.
    * @param lastSyncedAt - The timestamp of the last sync operation. Defaults to the application's epoch start date.
    */
-  private static async fetchFromRemote(
-    lastSyncedAt: string = config.database.epochStartDate,
-  ): Promise<BlockType[]> {
-    const { data: blocks, error } = await supabaseInstance
-      .from('blocks')
-      .select('id, name, note, sort_order, deleted_at')
-      .gt('updated_at', lastSyncedAt);
-
-    if (error) {
-      throw new SupabaseError(`Failed to fetch blocks data from supabase`, error, {
-        lastSyncedAt,
-      });
-    }
-
-    return blocks ?? [];
+  private static async fetchFromRemote(lastSyncedAt: string): Promise<BlockType[]> {
+    return await fetchFromRemoteGeneric<BlockType>({
+      tableName: TableName.Blocks,
+      select: 'id, name, note, sort_order, deleted_at',
+      entityName: 'blocks',
+      lastSyncedAt,
+    });
   }
 }

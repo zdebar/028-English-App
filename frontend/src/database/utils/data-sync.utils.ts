@@ -17,6 +17,17 @@ import { supabaseInstance } from '@/config/supabase.config';
 import { triggerDailyCountUpdatedEvent, triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 import Grammar from '@/database/models/grammar';
 import { reportInfo } from '@/features/logging/monitoring-handler';
+import { SupabaseError } from '@/types/error.types';
+
+type UpdatedAtComparator = 'gt' | 'gte';
+
+interface RemoteFetchParams {
+  tableName: TableName;
+  select: string;
+  entityName: string;
+  comparator?: UpdatedAtComparator;
+  lastSyncedAt?: string;
+}
 
 /**
  * Synchronizes data for a specific user with the database.
@@ -188,4 +199,29 @@ export async function getSyncTimestamps(
     : await Metadata.getSyncedAt(tableName, userId);
   const newSyncedAt = new Date().toISOString();
   return { lastSyncedAt, newSyncedAt };
+}
+
+/**
+ * Fetches remote records from Supabase for a specific table configuration.
+ */
+export async function fetchFromRemoteGeneric<T>({
+  tableName,
+  select,
+  entityName,
+  comparator = 'gt',
+  lastSyncedAt = config.database.epochStartDate,
+}: RemoteFetchParams): Promise<T[]> {
+  const query = supabaseInstance.from(tableName).select(select);
+  const { data, error } =
+    comparator === 'gte'
+      ? await query.gte('updated_at', lastSyncedAt)
+      : await query.gt('updated_at', lastSyncedAt);
+
+  if (error) {
+    throw new SupabaseError(`Failed to fetch ${entityName} data from supabase`, error, {
+      lastSyncedAt,
+    });
+  }
+
+  return (data as T[] | null) ?? [];
 }
