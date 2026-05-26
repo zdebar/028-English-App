@@ -14,6 +14,9 @@ DECLARE
   v_null_text CONSTANT TEXT := 'null';
   v_key_user_id CONSTANT TEXT := 'user_id';
   v_key_item_id CONSTANT TEXT := 'item_id';
+  v_total_count INT := 0;
+  v_matched_count INT := 0;
+  v_skipped_count INT := 0;
 BEGIN
   IF p_user_items IS NULL OR p_user_items = v_empty_json THEN
     RETURN;
@@ -24,6 +27,18 @@ BEGIN
     INTO v_user_id
     FROM jsonb_array_elements(p_user_items) AS entry
     LIMIT 1;
+
+  -- Count incoming candidate rows and how many match existing items
+  SELECT COUNT(*) INTO v_total_count
+  FROM jsonb_array_elements(p_user_items) AS entry
+  WHERE entry->>v_key_item_id ~ v_item_id_re;
+
+  SELECT COUNT(*) INTO v_matched_count
+  FROM jsonb_array_elements(p_user_items) AS entry
+  JOIN public.items i ON i.id = (entry->>v_key_item_id)::INT
+  WHERE entry->>v_key_item_id ~ v_item_id_re;
+
+  v_skipped_count := v_total_count - v_matched_count;
 
   INSERT INTO public.user_items (
     user_id,
@@ -43,27 +58,19 @@ BEGIN
     (entry->>'next_at')::TIMESTAMPTZ AS next_at,
     (entry->>'mastered_at')::TIMESTAMPTZ AS mastered_at
   FROM jsonb_array_elements(p_user_items) AS entry
-    WHERE entry->>v_key_item_id ~ v_item_id_re
+  JOIN public.items i ON i.id = (entry->>v_key_item_id)::INT
+  WHERE entry->>v_key_item_id ~ v_item_id_re
   ON CONFLICT (user_id, item_id)
   DO UPDATE SET
-    progress = CASE
-      WHEN EXCLUDED.updated_at >= public.user_items.updated_at THEN EXCLUDED.progress
-      ELSE public.user_items.progress
-    END,
-    started_at = CASE
-      WHEN EXCLUDED.updated_at >= public.user_items.updated_at
-        THEN COALESCE(EXCLUDED.started_at, public.user_items.started_at)
-      ELSE public.user_items.started_at
-    END,
-    updated_at = GREATEST(public.user_items.updated_at, EXCLUDED.updated_at),
-    next_at = CASE
-      WHEN EXCLUDED.updated_at >= public.user_items.updated_at THEN EXCLUDED.next_at
-      ELSE public.user_items.next_at
-    END,
-    mastered_at = CASE
-      WHEN EXCLUDED.updated_at >= public.user_items.updated_at THEN EXCLUDED.mastered_at
-      ELSE public.user_items.mastered_at
-    END;
+    progress = EXCLUDED.progress,
+    started_at = EXCLUDED.started_at,
+    updated_at = EXCLUDED.updated_at,
+    next_at = EXCLUDED.next_at,
+    mastered_at = EXCLUDED.mastered_at
+  WHERE COALESCE(EXCLUDED.updated_at, '-infinity'::timestamptz)
+    >= COALESCE(public.user_items.updated_at, '-infinity'::timestamptz);
+
+  RAISE LOG 'user_items: incoming=% matched=% skipped=%', v_total_count, v_matched_count, v_skipped_count;
 
   IF NOT COALESCE(p_history_enabled, FALSE) THEN
     RAISE LOG 'user_items_history: inserted=0, skipped_invalid=0, skipped_existing=0, skipped_disabled=1, errors=0';
@@ -76,7 +83,7 @@ BEGIN
     v_entry jsonb;
     v_hist jsonb;
     v_item_id INT;
-    v_user_id UUID;
+    v_hist_user_id UUID;
     v_progress INT;
     v_created_at timestamptz;
     v_inserted_count INT := 0;
@@ -90,7 +97,12 @@ BEGIN
         CONTINUE;
       END IF;
       v_item_id := (v_entry->>v_key_item_id)::INT;
-      v_user_id := (v_entry->>v_key_user_id)::UUID;
+      v_hist_user_id := (v_entry->>v_key_user_id)::UUID;
+
+      -- skip history for items that no longer exist (avoid FK errors)
+      IF NOT EXISTS (SELECT 1 FROM public.items WHERE id = v_item_id) THEN
+        CONTINUE;
+      END IF;
       FOR v_hist IN SELECT * FROM jsonb_array_elements(COALESCE(v_entry->'progress_history', v_empty_json)) LOOP
         BEGIN
           -- validate and parse created_at; if invalid, skip this hist entry
@@ -110,7 +122,7 @@ BEGIN
           -- Insert if not exists (avoid duplicates). Use ON CONFLICT DO NOTHING if unique constraint added.
           BEGIN
             INSERT INTO public.user_items_history (item_id, user_id, progress, created_at)
-            VALUES (v_item_id, v_user_id, v_progress, v_created_at)
+            VALUES (v_item_id, v_hist_user_id, v_progress, v_created_at)
             ON CONFLICT DO NOTHING;
             IF FOUND THEN
               v_inserted_count := v_inserted_count + 1;

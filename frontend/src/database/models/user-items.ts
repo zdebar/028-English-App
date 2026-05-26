@@ -22,6 +22,7 @@ import {
 import { triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 import { SupabaseError } from '@/types/error.types';
 import Metadata from './metadata';
+import { reportInfo } from '@/features/logging/monitoring-handler';
 
 const NULL_DATE = config.database.nullReplacementDate;
 const NULL_NUMBER = config.database.nullReplacementNumber;
@@ -298,6 +299,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
     // Step 2: Push local changes and pull updates in a single RPC call
     const localItems = await this.getUserItemsForSync(userId, lastSyncedAt, newSyncedAt);
+    reportInfo(`Completed ${localItems.length} UserItems push to remote`);
+
     const updatedItems = await this.syncWithRemote(userId, localItems, lastSyncedAt);
     const { toUpsert, toDelete } = splitDeleted(updatedItems);
 

@@ -11,6 +11,8 @@ import { assertNonNegativeInteger, assertShortDateString } from '@/utils/asserti
 import { triggerDailyCountUpdatedEvent } from '@/utils/dashboard.utils';
 import { Entity } from 'dexie';
 import Metadata from './metadata';
+import { reportInfo } from '@/features/logging/monitoring-handler';
+
 /**
  * Represents a user score entity in the application database.
  *
@@ -46,7 +48,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
     const newItemCount = (existingRecord?.item_count ?? 0) + count;
     await db.user_scores.put(this.createRecord(userId, date, newItemCount));
 
-      triggerDailyCountUpdatedEvent(userId, newItemCount);
+    triggerDailyCountUpdatedEvent(userId, newItemCount);
   }
 
   /**
@@ -103,6 +105,8 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
 
     // Step 2: Push local changes and pull updates in a single RPC call
     const localScores = await this.getUserScoresForSync(userId, lastSyncedAt, newSyncedAt);
+    reportInfo(`Completed ${localScores.length} UserScores push to remote`);
+
     const updatedScores = await this.syncWithRemote(userId, localScores, lastSyncedAt);
     const { toUpsert, toDelete } = splitDeleted(updatedScores);
 
