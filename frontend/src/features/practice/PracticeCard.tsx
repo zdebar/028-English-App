@@ -41,7 +41,7 @@ export default function PracticeCard() {
   const { grammarVisible, grammarData, handleGrammar, closeGrammar } = useGrammar();
 
   const practiceCountToday = dailyCount;
-  const { starChunk, starsPerRow, starCount, displayedChunkCount, completedStarFlash } =
+  const { starChunk, starsPerRow, starCount, displayedChunkCount } =
     usePracticeStars(practiceCountToday);
 
   const {
@@ -171,7 +171,6 @@ export default function PracticeCard() {
                 displayedChunkCount={displayedChunkCount}
                 starChunk={starChunk}
                 starsPerRow={starsPerRow}
-                completedStarFlash={completedStarFlash}
                 size={STAR_SIZE}
               />
             </div>

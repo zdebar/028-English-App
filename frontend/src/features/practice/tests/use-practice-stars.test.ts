@@ -1,4 +1,4 @@
-import { act, renderHook } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/config/config', () => ({
@@ -16,7 +16,6 @@ import { usePracticeStars } from '../hooks/use-practice-stars';
 describe('usePracticeStars', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.useFakeTimers();
   });
 
   it('returns normal partial progress within the current star chunk', () => {
@@ -24,10 +23,9 @@ describe('usePracticeStars', () => {
 
     expect(result.current.starCount).toBe(0);
     expect(result.current.displayedChunkCount).toBe(5);
-    expect(result.current.completedStarFlash).toBeNull();
   });
 
-  it('keeps 50/50 text during flash while a new star has just completed', () => {
+  it('wraps to 0 progress immediately when a star chunk is completed', () => {
     const { result, rerender } = renderHook(({ dailyCount }) => usePracticeStars(dailyCount), {
       initialProps: { dailyCount: 49 },
     });
@@ -35,22 +33,6 @@ describe('usePracticeStars', () => {
     rerender({ dailyCount: 50 });
 
     expect(result.current.starCount).toBe(1);
-    expect(result.current.completedStarFlash).toBe('bronze');
-    expect(result.current.displayedChunkCount).toBe(50);
-  });
-
-  it('clears flash after delay and then shows 0/50 on the next active star', () => {
-    const { result, rerender } = renderHook(({ dailyCount }) => usePracticeStars(dailyCount), {
-      initialProps: { dailyCount: 49 },
-    });
-
-    rerender({ dailyCount: 50 });
-
-    act(() => {
-      vi.advanceTimersByTime(300);
-    });
-
-    expect(result.current.completedStarFlash).toBeNull();
     expect(result.current.displayedChunkCount).toBe(0);
   });
 });
