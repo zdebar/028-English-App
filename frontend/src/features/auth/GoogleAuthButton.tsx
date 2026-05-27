@@ -2,6 +2,7 @@ import { supabaseInstance } from '@/config/supabase.config';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { type JSX } from 'react';
+import * as cs from '@/locales/cs.json';
 
 const GOOGLE_AUTH_APPEARANCE = {
   theme: ThemeSupa,
@@ -13,6 +14,10 @@ const GOOGLE_AUTH_APPEARANCE = {
       fontFamily: 'var(--font-body)',
       fontSize: '1rem',
       fontWeight: '500',
+      margin: '0',
+    },
+    container: {
+      margin: '0',
     },
   },
   variables: {
@@ -40,6 +45,7 @@ export default function GoogleAuthButton(): JSX.Element {
       supabaseClient={supabaseInstance}
       appearance={GOOGLE_AUTH_APPEARANCE}
       providers={['google']}
+      localization={{ variables: cs }}
       onlyThirdPartyProviders
       queryParams={{ prompt: 'select_account' }}
     />

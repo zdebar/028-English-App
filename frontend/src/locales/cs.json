@@ -1,0 +1,43 @@
+{
+  "sign_up": {
+    "email_label": "E-mailová adresa",
+    "password_label": "Vytvořte heslo",
+    "email_input_placeholder": "Vaše e-mailová adresa",
+    "password_input_placeholder": "Vaše heslo",
+    "button_label": "Registrovat se",
+    "loading_button_label": "Probíhá registrace...",
+    "social_provider_text": "Přihlásit se pomocí {{provider}}",
+    "link_text": "Nemáte účet? Zaregistrujte se"
+  },
+  "sign_in": {
+    "email_label": "E-mailová adresa",
+    "password_label": "Heslo",
+    "email_input_placeholder": "Vaše e-mailová adresa",
+    "password_input_placeholder": "Vaše heslo",
+    "button_label": "Přihlásit se",
+    "loading_button_label": "Probíhá přihlášení...",
+    "social_provider_text": "Přihlásit se pomocí {{provider}}",
+    "link_text": "Už máte účet? Přihlásit se"
+  },
+  "magic_link": {
+    "email_input_label": "E-mailová adresa",
+    "email_input_placeholder": "Vaše e-mailová adresa",
+    "button_label": "Poslat magický odkaz",
+    "loading_button_label": "Odesílám magický odkaz...",
+    "link_text": "Poslat magický odkaz e-mailem"
+  },
+  "forgotten_password": {
+    "email_label": "E-mailová adresa",
+    "password_label": "Heslo",
+    "email_input_placeholder": "Vaše e-mailová adresa",
+    "button_label": "Poslat pokyny pro obnovení hesla",
+    "loading_button_label": "Odesílám pokyny...",
+    "link_text": "Zapomněli jste heslo?"
+  },
+  "update_password": {
+    "password_label": "Nové heslo",
+    "password_input_placeholder": "Vaše nové heslo",
+    "button_label": "Aktualizovat heslo",
+    "loading_button_label": "Aktualizuji heslo..."
+  }
+}

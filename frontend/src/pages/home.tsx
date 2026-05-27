@@ -68,11 +68,11 @@ export default function Home(): JSX.Element {
         </div>
       ) : (
         <div className="mt-8 w-full">
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-1">
             <DemoSessionPanel onCaptchaVisibilityChange={setIsDemoCaptchaVisible} />
             {!isDemoCaptchaVisible && <GoogleAuthButton />}
           </div>
-          <p className="px-4 text-sm">{TEXTS.signupHint}</p>
+          <p className="p-4 text-sm">{TEXTS.signupHint}</p>
         </div>
       )}
     </div>
