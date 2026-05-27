@@ -11,7 +11,15 @@ vi.mock('@/config/config', () => ({
 }));
 
 vi.mock('@/components/UI/StarProgress', () => ({
-  default: ({ count, chunkSize, starsPerRow }: { count: number; chunkSize: number; starsPerRow: number }) => (
+  default: ({
+    count,
+    chunkSize,
+    starsPerRow,
+  }: {
+    count: number;
+    chunkSize: number;
+    starsPerRow: number;
+  }) => (
     <div data-testid="star-progress">
       {count}:{chunkSize}:{starsPerRow}
     </div>
@@ -19,7 +27,9 @@ vi.mock('@/components/UI/StarProgress', () => ({
 }));
 
 vi.mock('@/features/help/HelpText', () => ({
-  default: ({ children }: { children: React.ReactNode }) => <div data-testid="help-text">{children}</div>,
+  default: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="help-text">{children}</div>
+  ),
 }));
 
 import PracticeOverviewButton from '@/components/PracticeOverviewButton';
