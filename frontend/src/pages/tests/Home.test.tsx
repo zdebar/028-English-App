@@ -2,10 +2,10 @@ import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  theme: 'light' as 'light' | 'dark',
-  userId: 'u1' as string | null,
-  userFullName: 'User One' as string | null,
-  userEmail: 'u1@example.com' as string | null,
+  theme: 'light',
+  userId: 'u1',
+  userFullName: 'User One',
+  userEmail: 'u1@example.com',
   dailyCount: 3,
   isSynchronized: true,
 }));
@@ -51,9 +51,12 @@ vi.mock('@/locales/cs', () => ({
     appDescription: 'Desc',
     appTestDescription: 'Test mode',
     guide: 'Guide',
+    profileNameLabel: 'Jmeno',
+    notAvailable: 'Nedostupne',
     userLabel: 'User',
     userStatsLabel: 'Today',
     practiceOverviewOpen: 'Open practice overview',
+    starsToday: 'Stars today',
     today: 'Today',
     dailyGoal: 'Goal',
     syncWarning: 'Data may be stale.',
