@@ -4,17 +4,16 @@ import { useUserStore } from '@/features/user-stats/use-user-store';
 import { TEXTS } from '@/locales/cs';
 import { useState, type JSX } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import config from '@/config/config';
 import Notification from '@/components/UI/Notification';
-import StarProgressOverview from '@/components/UI/StarProgress';
 import '@/styles/home.css';
 import { InstallPWAButton } from '@/features/pwa/InstallPwaButton';
 import { useSyncWarningStore } from '@/features/sync/use-sync-warning';
 import { ROUTES } from '@/config/routes.config';
-import HelpText from '@/features/help/HelpText';
+// imports moved into PracticeOverviewButton
 import DemoSessionPanel from '@/features/demo/DemoSessionPanel';
 import GoogleAuthButton from '@/features/auth/GoogleAuthButton';
 import PropertyView from '@/components/UI/PropertyView';
+import PracticeOverviewButton from '@/components/PracticeOverviewButton';
 
 /**
  * The Home component renders the main page of the application.
@@ -42,33 +41,20 @@ export default function Home(): JSX.Element {
 
       {userId ? (
         <div className="relative mt-8 flex w-full flex-col">
-          <div className="px-4">
-            <PropertyView
-              label={TEXTS.profileNameLabel}
-              className="justify-center"
-              classNameLabel="w-20"
-              classNameValue="wrap-break-word"
-            >
-              {userFullName ?? TEXTS.notAvailable}
-            </PropertyView>
-            <div className="flex justify-center pt-2" title={TEXTS.practiceOverviewOpen}>
-              <button
-                type="button"
-                className="home-star-button relative inline-flex justify-center items-center pt-1 mb-2 text-center hover:border-current focus:outline-none"
-                aria-label={TEXTS.practiceOverviewOpen}
-                onClick={() => navigate(ROUTES.practiceOverview)}
-              >
-                <StarProgressOverview
-                  count={dailyCount}
-                  chunkSize={config.practice.starChunk}
-                  starsPerRow={config.practice.starsPerRow}
-                />
-                <HelpText className="-top-4 ">
-                  {TEXTS.starsToday}
-                </HelpText>
-              </button>
-            </div>
-          </div>
+          <PropertyView
+            label={TEXTS.profileNameLabel}
+            className="justify-center"
+            classNameLabel="w-20"
+            classNameValue="wrap-break-word"
+          >
+            {userFullName ?? TEXTS.notAvailable}
+          </PropertyView>
+          <PracticeOverviewButton
+            count={dailyCount}
+            onClick={() => navigate(ROUTES.practiceOverview)}
+            ariaLabel={TEXTS.practiceOverviewOpen}
+            helpText={TEXTS.starsToday}
+          />
           {!isSynchronized && (
             <p className="text-error-light dark:text-error-dark px-4 pt-2 text-left text-sm">
               {TEXTS.syncWarning}
