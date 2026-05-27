@@ -6,7 +6,7 @@ import { useUserStore } from '@/features/user-stats/use-user-store';
 import { TEXTS } from '@/locales/cs';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
-import { useMemo, type JSX } from 'react';
+import { useMemo, useState, type JSX } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import config from '@/config/config';
 import Notification from '@/components/UI/Notification';
@@ -29,6 +29,7 @@ export default function Home(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const dailyCount = useUserStore((state) => state.dailyCount);
   const isSynchronized = useSyncWarningStore((state) => state.isSynchronized);
+  const [isDemoCaptchaVisible, setIsDemoCaptchaVisible] = useState(false);
 
   const authAppearance = useMemo(
     () => ({
@@ -115,14 +116,16 @@ export default function Home(): JSX.Element {
       ) : (
         <div className="mt-8 w-full">
           <div className="flex flex-col">
-            <DemoSessionPanel />
-            <Auth
-              supabaseClient={supabaseInstance}
-              appearance={authAppearance}
-              providers={['google']}
-              onlyThirdPartyProviders
-              queryParams={{ prompt: 'select_account' }}
-            />
+            <DemoSessionPanel onCaptchaVisibilityChange={setIsDemoCaptchaVisible} />
+            {!isDemoCaptchaVisible && (
+              <Auth
+                supabaseClient={supabaseInstance}
+                appearance={authAppearance}
+                providers={['google']}
+                onlyThirdPartyProviders
+                queryParams={{ prompt: 'select_account' }}
+              />
+            )}
           </div>
           <p className="px-4 text-sm">{TEXTS.signupHint}</p>
         </div>

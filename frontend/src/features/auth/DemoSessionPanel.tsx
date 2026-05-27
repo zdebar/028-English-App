@@ -5,6 +5,10 @@ import { TEXTS } from '@/locales/cs';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { reportError } from '@/features/logging/monitoring-handler';
 
+type DemoSessionPanelProps = Readonly<{
+  onCaptchaVisibilityChange?: (visible: boolean) => void;
+}>;
+
 function getErrorMessage(error: unknown): string {
   const raw = error instanceof Error ? error.message : String(error);
   if (raw.startsWith('DEMO_AUTH_FAILED:')) {
@@ -40,7 +44,9 @@ function getErrorMessage(error: unknown): string {
   return TEXTS.demoSigninError;
 }
 
-export default function DemoSessionPanel(): JSX.Element {
+export default function DemoSessionPanel({
+  onCaptchaVisibilityChange,
+}: DemoSessionPanelProps): JSX.Element {
   const loginDemoWithCaptcha = useAuthStore((state) => state.loginDemoWithCaptcha);
   const showToast = useToastStore((state) => state.showToast);
 
@@ -69,6 +75,14 @@ export default function DemoSessionPanel(): JSX.Element {
   }, [showToast, turnstileSiteKey]);
 
   useEffect(() => {
+    onCaptchaVisibilityChange?.(showCaptcha);
+
+    return () => {
+      onCaptchaVisibilityChange?.(false);
+    };
+  }, [onCaptchaVisibilityChange, showCaptcha]);
+
+  useEffect(() => {
     const submitDemoLogin = async () => {
       if (!captchaToken || isSubmitting) {
         return;
@@ -94,7 +108,7 @@ export default function DemoSessionPanel(): JSX.Element {
   }, [captchaToken, isSubmitting, loginDemoWithCaptcha, showToast]);
 
   return (
-    <div className="h-button relative w-full">
+    <div className="relative w-full">
       {showCaptcha ? (
         <DemoCaptcha
           siteKey={turnstileSiteKey}
@@ -105,7 +119,7 @@ export default function DemoSessionPanel(): JSX.Element {
         <button
           type="button"
           onClick={startDemoFlow}
-          className="font-body h-button w-full bg-white text-base font-medium text-black"
+          className="font-body h-button w-full bg-white text-base font-medium text-black hover:bg-[#eaeaea] focus-visible:bg-[#eaeaea] dark:hover:bg-[#3e3e3e] dark:focus-visible:bg-[#3e3e3e]"
           title={TEXTS.demoSigninButtonTooltip}
           disabled={isSubmitting}
         >
