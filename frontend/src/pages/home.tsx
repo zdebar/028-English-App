@@ -16,6 +16,7 @@ import { InstallPWAButton } from '@/features/pwa/InstallPwaButton';
 import { useSyncWarningStore } from '@/features/sync/use-sync-warning';
 import { ROUTES } from '@/config/routes.config';
 import HelpText from '@/features/help/HelpText';
+import DemoSessionPanel from '@/features/auth/DemoSessionPanel';
 
 /**
  * The Home component renders the main page of the application.
@@ -104,6 +105,7 @@ export default function Home(): JSX.Element {
         </div>
       ) : (
         <div className="mt-8 w-full">
+          <DemoSessionPanel />
           <Auth
             supabaseClient={supabaseInstance}
             appearance={authAppearance}

@@ -86,6 +86,10 @@ vi.mock('@/components/UI/StarProgress', () => ({
   ),
 }));
 
+vi.mock('@/features/auth/DemoSessionPanel', () => ({
+  default: () => <div data-testid="demo-session-panel" />,
+}));
+
 vi.mock('@supabase/auth-ui-react', () => ({
   Auth: () => <div data-testid="auth" />,
 }));
@@ -135,6 +139,7 @@ describe('Home', () => {
 
     render(<Home />);
 
+    expect(screen.getByTestId('demo-session-panel')).toBeTruthy();
     expect(screen.getByTestId('auth')).toBeTruthy();
     expect(screen.queryByText('Data may be stale.')).toBeNull();
   });

@@ -9,10 +9,10 @@ import { withSettledSummary } from '@/features/logging/logging.utils';
 import Lessons from '@/database/models/lessons';
 import Levels from '@/database/models/levels';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
-import { supabaseInstance } from '@/config/supabase.config';
 import { triggerDailyCountUpdatedEvent, triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 import Grammar from '@/database/models/grammar';
 import { reportInfo } from '@/features/logging/monitoring-handler';
+import { supabaseInstance } from '@/config/supabase.config';
 
 /**
  * Synchronizes data for a specific user with the database.
