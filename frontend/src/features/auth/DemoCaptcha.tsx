@@ -11,7 +11,7 @@ declare global {
           'error-callback'?: () => void;
           'expired-callback'?: () => void;
           theme?: 'light' | 'dark' | 'auto';
-          size?: 'normal' | 'compact';
+          size?: 'normal' | 'compact' | 'flexible';
         },
       ) => string;
       remove: (widgetId: string) => void;
@@ -21,7 +21,7 @@ declare global {
 
 type DemoCaptchaProps = Readonly<{
   siteKey: string;
-  size?: 'normal' | 'compact';
+  size?: 'normal' | 'compact' | 'flexible';
   onTokenChange: (token: string | null) => void;
 }>;
 
@@ -31,7 +31,7 @@ const TURNSTILE_SCRIPT_URL =
 
 export default function DemoCaptcha({
   siteKey,
-  size = 'normal',
+  size = 'flexible',
   onTokenChange,
 }: DemoCaptchaProps): JSX.Element {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -90,5 +90,5 @@ export default function DemoCaptcha({
     };
   }, [onTokenChange, siteKey, size]);
 
-  return <div ref={containerRef} className="mt-3 flex justify-center" />;
+  return <div ref={containerRef} className="w-full" />;
 }

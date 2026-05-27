@@ -50,7 +50,12 @@ export default function DemoSessionPanel(): JSX.Element {
 
   const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY?.trim() ?? '';
   const captchaSize = useMemo(
-    () => (import.meta.env.VITE_TURNSTILE_SIZE === 'compact' ? 'compact' : 'normal'),
+    () =>
+      import.meta.env.VITE_TURNSTILE_SIZE === 'compact'
+        ? 'compact'
+        : import.meta.env.VITE_TURNSTILE_SIZE === 'normal'
+          ? 'normal'
+          : 'flexible',
     [],
   );
 
@@ -89,25 +94,23 @@ export default function DemoSessionPanel(): JSX.Element {
   }, [captchaToken, isSubmitting, loginDemoWithCaptcha, showToast]);
 
   return (
-    <div className="px-4 pb-4">
-      <button
-        type="button"
-        onClick={startDemoFlow}
-        className="w-full border border-black px-4 py-2 dark:border-white"
-        title={TEXTS.demoSigninButtonTooltip}
-        disabled={isSubmitting}
-      >
-        {isSubmitting ? TEXTS.demoSigninLoading : TEXTS.demoSigninButton}
-      </button>
-      {showCaptcha && (
-        <div className="mt-2">
-          <p className="text-sm">{TEXTS.demoSigninCaptchaHint}</p>
-          <DemoCaptcha
-            siteKey={turnstileSiteKey}
-            size={captchaSize}
-            onTokenChange={(token) => setCaptchaToken(token)}
-          />
-        </div>
+    <div className="h-button relative w-full">
+      {showCaptcha ? (
+        <DemoCaptcha
+          siteKey={turnstileSiteKey}
+          size={captchaSize}
+          onTokenChange={(token) => setCaptchaToken(token)}
+        />
+      ) : (
+        <button
+          type="button"
+          onClick={startDemoFlow}
+          className="font-body h-button w-full bg-white text-base font-medium text-black"
+          title={TEXTS.demoSigninButtonTooltip}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? TEXTS.demoSigninLoading : TEXTS.demoSigninButton}
+        </button>
       )}
     </div>
   );

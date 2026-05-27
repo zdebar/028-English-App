@@ -33,7 +33,16 @@ export default function Home(): JSX.Element {
   const authAppearance = useMemo(
     () => ({
       theme: ThemeSupa,
-      style: { button: { width: '100%', borderRadius: '0px' } },
+      style: {
+        button: {
+          width: '100%',
+          borderRadius: '0px',
+          minHeight: 'var(--height-button)',
+          fontFamily: 'var(--font-body)',
+          fontSize: '1rem',
+          fontWeight: '500',
+        },
+      },
       variables: {
         default: {
           colors:
@@ -105,14 +114,16 @@ export default function Home(): JSX.Element {
         </div>
       ) : (
         <div className="mt-8 w-full">
-          <DemoSessionPanel />
-          <Auth
-            supabaseClient={supabaseInstance}
-            appearance={authAppearance}
-            providers={['google']}
-            onlyThirdPartyProviders
-            queryParams={{ prompt: 'select_account' }}
-          />
+          <div className="flex flex-col">
+            <DemoSessionPanel />
+            <Auth
+              supabaseClient={supabaseInstance}
+              appearance={authAppearance}
+              providers={['google']}
+              onlyThirdPartyProviders
+              queryParams={{ prompt: 'select_account' }}
+            />
+          </div>
           <p className="px-4 text-sm">{TEXTS.signupHint}</p>
         </div>
       )}

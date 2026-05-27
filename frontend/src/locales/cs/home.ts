@@ -29,7 +29,6 @@ export const HOME_TEXTS = {
   // Demo sign-in
   demoSigninButton: 'Vyzkoušet demo účet',
   demoSigninButtonTooltip: 'Přihlásit se do ukázkového účtu.',
-  demoSigninCaptchaHint: 'Potvrďte prosím CAPTCHA pro demo přihlášení.',
   demoSigninLoading: 'Přihlašuji do demo účtu ...',
   demoSigninSuccess: 'Přihlášení do demo účtu proběhlo úspěšně.',
   demoSigninError: 'Demo přihlášení se nepodařilo. Zkuste to prosím znovu.',
