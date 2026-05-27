@@ -1,14 +1,23 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const mocks = vi.hoisted(() => ({
-  theme: 'light',
-  userId: 'u1',
-  userFullName: 'User One',
-  userEmail: 'u1@example.com',
-  dailyCount: 3,
-  isSynchronized: true,
-}));
+const mocks = vi.hoisted(
+  (): {
+    theme: 'light' | 'dark';
+    userId: string | null;
+    userFullName: string | null;
+    userEmail: string | null;
+    dailyCount: number;
+    isSynchronized: boolean;
+  } => ({
+    theme: 'light',
+    userId: 'u1',
+    userFullName: 'User One',
+    userEmail: 'u1@example.com',
+    dailyCount: 3,
+    isSynchronized: true,
+  }),
+);
 
 vi.mock('@/config/config', () => ({
   default: {
