@@ -1,6 +1,6 @@
 export const ACCOUNT_TEXTS = {
   // Profile
-  profileNameLabel: 'Jméno',
+  profileNameLabel: 'Uživatel',
   profileEmailLabel: 'E-mail',
 
   // Sync Button

@@ -14,6 +14,7 @@ import { ROUTES } from '@/config/routes.config';
 import HelpText from '@/features/help/HelpText';
 import DemoSessionPanel from '@/features/demo/DemoSessionPanel';
 import GoogleAuthButton from '@/features/auth/GoogleAuthButton';
+import PropertyView from '@/components/UI/PropertyView';
 
 /**
  * The Home component renders the main page of the application.
@@ -23,6 +24,7 @@ import GoogleAuthButton from '@/features/auth/GoogleAuthButton';
 export default function Home(): JSX.Element {
   const navigate = useNavigate();
   const userId = useAuthStore((state) => state.userId);
+  const userFullName = useAuthStore((state) => state.userFullName);
   const dailyCount = useUserStore((state) => state.dailyCount);
   const isSynchronized = useSyncWarningStore((state) => state.isSynchronized);
   const [isDemoCaptchaVisible, setIsDemoCaptchaVisible] = useState(false);
@@ -41,6 +43,14 @@ export default function Home(): JSX.Element {
       {userId ? (
         <div className="relative mt-8 flex w-full flex-col">
           <div className="px-4">
+            <PropertyView
+              label={TEXTS.profileNameLabel}
+              className="justify-center"
+              classNameLabel="w-20"
+              classNameValue="wrap-break-word"
+            >
+              {userFullName ?? TEXTS.notAvailable}
+            </PropertyView>
             <div className="flex justify-center pt-2" title={TEXTS.practiceOverviewOpen}>
               <button
                 type="button"

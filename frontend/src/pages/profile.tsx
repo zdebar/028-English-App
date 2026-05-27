@@ -15,22 +15,14 @@ import { useNavigate } from 'react-router-dom';
  */
 export default function Profile(): JSX.Element {
   const navigate = useNavigate();
-  const userFullName = useAuthStore((state) => state.userFullName);
   const userEmail = useAuthStore((state) => state.userEmail);
 
   return (
     <div className="card-width grow-0 gap-1">
       <div className="mb-8 mt-4 mx-auto w-64 text-left">
         <PropertyView
-          label={TEXTS.profileNameLabel}
-          className="mb-1"
-          classNameLabel="w-20"
-          classNameValue="wrap-break-word"
-        >
-          {userFullName ?? TEXTS.notAvailable}
-        </PropertyView>
-        <PropertyView
           label={TEXTS.profileEmailLabel}
+          className="justify-center"
           classNameLabel="w-20"
           classNameValue="wrap-break-word"
         >
