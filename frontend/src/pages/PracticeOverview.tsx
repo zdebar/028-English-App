@@ -9,6 +9,7 @@ import config from '@/config/config';
 import { getCompletedStarCount } from '@/utils/star-progress.utils';
 import { useEffect, useState, type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { DataState } from '@/components/UI/DataState';
 
 const INITIAL_VISIBLE_DAYS = 7;
 
@@ -91,19 +92,23 @@ export default function PracticeOverview(): JSX.Element {
   const navigate = useNavigate();
   const userId = useAuthStore((state) => state.userId);
   const [scores, setScores] = useState<PracticeDayScore[]>([]);
+  const [loading, setLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_DAYS);
 
   useEffect(() => {
     if (!userId) {
       setScores([]);
       setVisibleCount(INITIAL_VISIBLE_DAYS);
+      setLoading(false);
       return;
     }
 
     let isMounted = true;
+    setLoading(true);
     void UserScore.getByUserId(userId).then((items) => {
       if (isMounted) {
         setScores(getScoresWithMissingDays(items));
+        setLoading(false);
       }
     });
 
@@ -118,18 +123,20 @@ export default function PracticeOverview(): JSX.Element {
   return (
     <OverviewCard buttonTitle={TEXTS.practiceOverviewTitle} onClose={() => navigate(ROUTES.home)}>
       <div className="flex flex-col pb-4">
-        {visibleScores.map((score) => (
-          <PracticeOverviewRow key={score.date} score={score} />
-        ))}
-        {hasMoreScores && (
-          <button
-            type="button"
-            onClick={() => setVisibleCount((prev) => prev + INITIAL_VISIBLE_DAYS)}
-            className="mt-2 w-full text-center font-bold hover:underline"
-          >
-            {TEXTS.practiceOverviewMoreDays}
-          </button>
-        )}
+        <DataState loading={loading} hasData={scores.length > 0}>
+          {visibleScores.map((score) => (
+            <PracticeOverviewRow key={score.date} score={score} />
+          ))}
+          {hasMoreScores && (
+            <button
+              type="button"
+              onClick={() => setVisibleCount((prev) => prev + INITIAL_VISIBLE_DAYS)}
+              className="mt-2 w-full text-center font-bold hover:underline"
+            >
+              {TEXTS.practiceOverviewMoreDays}
+            </button>
+          )}
+        </DataState>
       </div>
     </OverviewCard>
   );
