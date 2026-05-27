@@ -20,11 +20,6 @@ vi.mock('@/config/config', () => ({
   },
 }));
 
-vi.mock('@/features/theme/use-theme-store', () => ({
-  useThemeStore: (selector: (state: { theme: 'light' | 'dark' }) => unknown) =>
-    selector({ theme: mocks.theme }),
-}));
-
 vi.mock('@/features/auth/use-auth-store', () => ({
   useAuthStore: (
     selector: (state: {
@@ -86,20 +81,12 @@ vi.mock('@/components/UI/StarProgress', () => ({
   ),
 }));
 
-vi.mock('@/features/auth/DemoSessionPanel', () => ({
+vi.mock('@/features/demo/DemoSessionPanel', () => ({
   default: () => <div data-testid="demo-session-panel" />,
 }));
 
-vi.mock('@supabase/auth-ui-react', () => ({
-  Auth: () => <div data-testid="auth" />,
-}));
-
-vi.mock('@supabase/auth-ui-shared', () => ({
-  ThemeSupa: {},
-}));
-
-vi.mock('@/config/supabase.config', () => ({
-  supabaseInstance: {},
+vi.mock('@/features/auth/GoogleAuthButton', () => ({
+  default: () => <div data-testid="google-auth-button" />,
 }));
 
 vi.mock('react-router-dom', () => ({
@@ -140,7 +127,7 @@ describe('Home', () => {
     render(<Home />);
 
     expect(screen.getByTestId('demo-session-panel')).toBeTruthy();
-    expect(screen.getByTestId('auth')).toBeTruthy();
+    expect(screen.getByTestId('google-auth-button')).toBeTruthy();
     expect(screen.queryByText('Data may be stale.')).toBeNull();
   });
 });

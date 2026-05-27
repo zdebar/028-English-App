@@ -52,11 +52,7 @@ export default function DemoCaptcha({
     };
 
     const renderWidget = () => {
-      if (!containerRef.current || !window.turnstile) {
-        return;
-      }
-
-      if (widgetIdRef.current) {
+      if (!containerRef.current || !window.turnstile || widgetIdRef.current) {
         return;
       }
 

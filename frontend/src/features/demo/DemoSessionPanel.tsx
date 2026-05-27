@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type JSX } from 'react';
-import { useAuthStore } from '@/features/auth/use-auth-store';
-import DemoCaptcha from '@/features/auth/DemoCaptcha';
+import DemoCaptcha from '@/features/demo/DemoCaptcha';
+import { loginDemoWithCaptcha } from '@/features/demo/demo-auth-service';
+import { getDemoSigninErrorMessage } from '@/features/demo/demo-signin-error';
 import { TEXTS } from '@/locales/cs';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { reportError } from '@/features/logging/monitoring-handler';
@@ -9,45 +10,9 @@ type DemoSessionPanelProps = Readonly<{
   onCaptchaVisibilityChange?: (visible: boolean) => void;
 }>;
 
-function getErrorMessage(error: unknown): string {
-  const raw = error instanceof Error ? error.message : String(error);
-  if (raw.startsWith('DEMO_AUTH_FAILED:')) {
-    const detail = raw.slice('DEMO_AUTH_FAILED:'.length).trim();
-    if (import.meta.env.DEV && detail) {
-      return `${TEXTS.demoSigninError} (${detail})`;
-    }
-    return TEXTS.demoSigninError;
-  }
-  if (raw === 'DEMO_INVALID_CREDENTIALS') {
-    return TEXTS.demoSigninInvalidCredentialsError;
-  }
-  if (raw === 'DEMO_EMAIL_PROVIDER_DISABLED') {
-    return TEXTS.demoSigninEmailProviderDisabledError;
-  }
-  if (raw === 'DEMO_AUTH_FAILED') {
-    return TEXTS.demoSigninError;
-  }
-  if (raw === 'RATE_LIMIT') {
-    return TEXTS.demoSigninRateLimitError;
-  }
-  if (raw === 'CAPTCHA_FAILED') {
-    return TEXTS.demoSigninCaptchaError;
-  }
-  const normalized = raw.toLowerCase();
-
-  if (normalized.includes('429')) {
-    return TEXTS.demoSigninRateLimitError;
-  }
-  if (normalized.includes('captcha')) {
-    return TEXTS.demoSigninCaptchaError;
-  }
-  return TEXTS.demoSigninError;
-}
-
 export default function DemoSessionPanel({
   onCaptchaVisibilityChange,
 }: DemoSessionPanelProps): JSX.Element {
-  const loginDemoWithCaptcha = useAuthStore((state) => state.loginDemoWithCaptcha);
   const showToast = useToastStore((state) => state.showToast);
 
   const [showCaptcha, setShowCaptcha] = useState(false);
@@ -96,7 +61,7 @@ export default function DemoSessionPanel({
         setCaptchaToken(null);
       } catch (error) {
         reportError('Demo sign-in failed', error);
-        showToast(getErrorMessage(error), 'error');
+        showToast(getDemoSigninErrorMessage(error), 'error');
         setCaptchaToken(null);
         setShowCaptcha(false);
       } finally {
@@ -105,7 +70,7 @@ export default function DemoSessionPanel({
     };
 
     submitDemoLogin();
-  }, [captchaToken, isSubmitting, loginDemoWithCaptcha, showToast]);
+  }, [captchaToken, isSubmitting, showToast]);
 
   return (
     <div className="relative w-full">
@@ -119,7 +84,7 @@ export default function DemoSessionPanel({
         <button
           type="button"
           onClick={startDemoFlow}
-          className="font-body h-button w-full bg-white text-base font-medium text-black hover:bg-[#eaeaea] focus-visible:bg-[#eaeaea] dark:hover:bg-[#3e3e3e] dark:focus-visible:bg-[#3e3e3e]"
+          className="font-body h-button bg-signin-button hover:bg-signin-button-hover focus-visible:bg-signin-button-hover w-full text-base font-medium text-black"
           title={TEXTS.demoSigninButtonTooltip}
           disabled={isSubmitting}
         >

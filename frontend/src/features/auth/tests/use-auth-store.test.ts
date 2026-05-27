@@ -3,9 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   getSession: vi.fn(),
   signOut: vi.fn(),
-  setSession: vi.fn(),
   onAuthStateChange: vi.fn(),
-  functionsInvoke: vi.fn(),
   unsubscribe: vi.fn(),
   dataSyncOnUnmount: vi.fn(),
   authCallback: null as ((event: string, session: any) => void) | null,
@@ -16,11 +14,7 @@ vi.mock('@/config/supabase.config', () => ({
     auth: {
       getSession: (...args: unknown[]) => mocks.getSession(...args),
       signOut: (...args: unknown[]) => mocks.signOut(...args),
-      setSession: (...args: unknown[]) => mocks.setSession(...args),
       onAuthStateChange: (...args: unknown[]) => mocks.onAuthStateChange(...args),
-    },
-    functions: {
-      invoke: (...args: unknown[]) => mocks.functionsInvoke(...args),
     },
   },
 }));
@@ -61,8 +55,6 @@ describe('useAuthStore', () => {
       },
     );
     mocks.signOut.mockResolvedValue({ error: null });
-    mocks.setSession.mockResolvedValue({ error: null });
-    mocks.functionsInvoke.mockResolvedValue({ data: {}, error: null });
     mocks.dataSyncOnUnmount.mockResolvedValue(undefined);
   });
 
@@ -178,36 +170,5 @@ describe('useAuthStore', () => {
     expect(state.userEmail).toBeNull();
     expect(state.userFullName).toBeNull();
     expect(state.loading).toBe(false);
-  });
-
-  it('loginDemoWithCaptcha invokes demo-session and sets session', async () => {
-    mocks.functionsInvoke.mockResolvedValue({
-      data: {
-        access_token: 'access-token',
-        refresh_token: 'refresh-token',
-      },
-      error: null,
-    });
-
-    await useAuthStore.getState().loginDemoWithCaptcha('captcha-token');
-
-    expect(mocks.functionsInvoke).toHaveBeenCalledWith('demo-session', {
-      body: { captchaToken: 'captcha-token' },
-    });
-    expect(mocks.setSession).toHaveBeenCalledWith({
-      access_token: 'access-token',
-      refresh_token: 'refresh-token',
-    });
-  });
-
-  it('loginDemoWithCaptcha maps rate limit error status', async () => {
-    mocks.functionsInvoke.mockResolvedValue({
-      data: null,
-      error: { message: 'Too many requests', context: { status: 429 } },
-    });
-
-    await expect(useAuthStore.getState().loginDemoWithCaptcha('captcha-token')).rejects.toThrow(
-      'RATE_LIMIT',
-    );
   });
 });

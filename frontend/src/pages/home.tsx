@@ -1,12 +1,8 @@
-import { supabaseInstance } from '@/config/supabase.config';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import Dashboard from '@/components/UI/Dashboard';
-import { useThemeStore } from '@/features/theme/use-theme-store';
 import { useUserStore } from '@/features/user-stats/use-user-store';
 import { TEXTS } from '@/locales/cs';
-import { Auth } from '@supabase/auth-ui-react';
-import { ThemeSupa } from '@supabase/auth-ui-shared';
-import { useMemo, useState, type JSX } from 'react';
+import { useState, type JSX } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import config from '@/config/config';
 import Notification from '@/components/UI/Notification';
@@ -16,7 +12,8 @@ import { InstallPWAButton } from '@/features/pwa/InstallPwaButton';
 import { useSyncWarningStore } from '@/features/sync/use-sync-warning';
 import { ROUTES } from '@/config/routes.config';
 import HelpText from '@/features/help/HelpText';
-import DemoSessionPanel from '@/features/auth/DemoSessionPanel';
+import DemoSessionPanel from '@/features/demo/DemoSessionPanel';
+import GoogleAuthButton from '@/features/auth/GoogleAuthButton';
 
 /**
  * The Home component renders the main page of the application.
@@ -25,54 +22,10 @@ import DemoSessionPanel from '@/features/auth/DemoSessionPanel';
  */
 export default function Home(): JSX.Element {
   const navigate = useNavigate();
-  const theme = useThemeStore((state) => state.theme);
   const userId = useAuthStore((state) => state.userId);
   const dailyCount = useUserStore((state) => state.dailyCount);
   const isSynchronized = useSyncWarningStore((state) => state.isSynchronized);
   const [isDemoCaptchaVisible, setIsDemoCaptchaVisible] = useState(false);
-
-  const authAppearance = useMemo(
-    () => ({
-      theme: ThemeSupa,
-      style: {
-        button: {
-          width: '100%',
-          borderRadius: '0px',
-          minHeight: 'var(--height-button)',
-          fontFamily: 'var(--font-body)',
-          fontSize: '1rem',
-          fontWeight: '500',
-        },
-      },
-      variables: {
-        default: {
-          colors:
-            theme === 'dark'
-              ? {
-                  messageText: 'white',
-                  defaultButtonText: 'black',
-                  anchorTextColor: 'white',
-                  messageTextDanger: 'red',
-                  inputLabelText: 'white',
-                  brand: 'green',
-                  brandAccent: 'green',
-                  inputBorder: 'white',
-                }
-              : {
-                  messageText: 'black',
-                  defaultButtonText: 'black',
-                  anchorTextColor: 'black',
-                  messageTextDanger: 'red',
-                  inputLabelText: 'black',
-                  brand: 'green',
-                  brandAccent: 'green',
-                  inputBorder: 'black',
-                },
-        },
-      },
-    }),
-    [theme],
-  );
 
   return (
     <div className="max-w-hero relative flex w-full flex-col text-center">
@@ -117,15 +70,7 @@ export default function Home(): JSX.Element {
         <div className="mt-8 w-full">
           <div className="flex flex-col">
             <DemoSessionPanel onCaptchaVisibilityChange={setIsDemoCaptchaVisible} />
-            {!isDemoCaptchaVisible && (
-              <Auth
-                supabaseClient={supabaseInstance}
-                appearance={authAppearance}
-                providers={['google']}
-                onlyThirdPartyProviders
-                queryParams={{ prompt: 'select_account' }}
-              />
-            )}
+            {!isDemoCaptchaVisible && <GoogleAuthButton />}
           </div>
           <p className="px-4 text-sm">{TEXTS.signupHint}</p>
         </div>
