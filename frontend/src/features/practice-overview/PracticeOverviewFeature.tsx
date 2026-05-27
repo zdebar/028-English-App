@@ -51,7 +51,7 @@ function getScoresWithMissingDays(scores: UserScoreType[]): PracticeDayScore[] {
   const sortedDesc = [...scores].sort((left, right) => right.date.localeCompare(left.date));
   const scoreByDate = new Map(sortedDesc.map((item) => [item.date, item.item_count]));
   const newestDate = parseShortDate(sortedDesc[0].date);
-  const oldestDate = parseShortDate(sortedDesc[sortedDesc.length - 1].date);
+  const oldestDate = parseShortDate(sortedDesc.at(-1)?.date ?? '');
   const today = new Date();
   const endDate = newestDate > today ? newestDate : today;
   const items: PracticeDayScore[] = [];
