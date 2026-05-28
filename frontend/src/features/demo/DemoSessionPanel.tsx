@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type JSX } from 'react';
+import { useCallback, useEffect, useState, type JSX } from 'react';
 import DemoCaptcha from '@/features/demo/DemoCaptcha';
 import { loginDemoWithCaptcha } from '@/features/demo/demo-auth-service';
 import { getDemoSigninErrorMessage } from '@/features/demo/demo-signin-error';
@@ -20,12 +20,6 @@ export default function DemoSessionPanel({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY?.trim() ?? '';
-  const captchaSize = useMemo(() => {
-    const raw = import.meta.env.VITE_TURNSTILE_SIZE;
-    if (raw === 'compact') return 'compact';
-    if (raw === 'normal') return 'normal';
-    return 'flexible';
-  }, []);
 
   const startDemoFlow = useCallback(() => {
     if (!turnstileSiteKey) {
@@ -72,11 +66,7 @@ export default function DemoSessionPanel({
   return (
     <div className="relative w-full">
       {showCaptcha ? (
-        <DemoCaptcha
-          siteKey={turnstileSiteKey}
-          size={captchaSize}
-          onTokenChange={(token) => setCaptchaToken(token)}
-        />
+        <DemoCaptcha siteKey={turnstileSiteKey} onTokenChange={(token) => setCaptchaToken(token)} />
       ) : (
         <button
           type="button"
