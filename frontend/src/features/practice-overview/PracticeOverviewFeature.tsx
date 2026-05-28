@@ -123,7 +123,11 @@ export default function PracticeOverviewFeature(): JSX.Element {
   return (
     <OverviewCard buttonTitle={TEXTS.practiceOverviewTitle} onClose={() => navigate(ROUTES.home)}>
       <div className="flex flex-col pb-4">
-        <DataState loading={loading} hasData={scores.length > 0}>
+        <DataState
+          loading={loading}
+          hasData={scores.length > 0}
+          noDataMessage={TEXTS.practiceOverviewNone}
+        >
           {visibleScores.map((score) => (
             <PracticeOverviewRow key={score.date} score={score} />
           ))}

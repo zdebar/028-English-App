@@ -73,7 +73,7 @@ export default function GrammarOverview(): JSX.Element {
         loading={loading}
         onClose={() => navigate('/profile')}
       >
-        <DataState loading={loading} hasData={hasData}>
+        <DataState loading={loading} hasData={hasData} noDataMessage={TEXTS.noGrammar}>
           {grammarList.map((item, index) => (
             <ListButton
               key={item.id}

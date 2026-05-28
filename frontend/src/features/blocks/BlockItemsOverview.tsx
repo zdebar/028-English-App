@@ -94,7 +94,7 @@ export default function BlockItemsOverview() {
       handleReset={handleReset}
       onClose={onClose}
     >
-      <DataState loading={itemsLoading} hasData={hasItems}>
+      <DataState loading={itemsLoading} hasData={hasItems} noDataMessage={TEXTS.noBlockItems}>
         {items.map((item) => (
           <ListButton
             key={item.item_id}

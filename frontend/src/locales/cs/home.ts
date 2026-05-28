@@ -18,6 +18,7 @@ export const HOME_TEXTS = {
   practiceOverviewTitle: 'Přehled procvičování',
   practiceOverviewOpen: 'Otevřít přehled procvičování',
   practiceOverviewMoreDays: '... Dalších 7 dní',
+  practiceOverviewNone: 'Žádné započaté dny',
   authInitErrorToast: 'Nastala chyba při přihlašování.',
 
   // Synchronization status
