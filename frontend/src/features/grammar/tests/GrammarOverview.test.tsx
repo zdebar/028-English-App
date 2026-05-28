@@ -163,7 +163,7 @@ describe('GrammarOverview', () => {
 
     render(<GrammarOverview />);
 
-    expect(screen.getByText('Not available')).toBeTruthy();
+    expect(screen.getByText('No grammar')).toBeTruthy();
   });
 
   it('renders grammar card view and can close', () => {
