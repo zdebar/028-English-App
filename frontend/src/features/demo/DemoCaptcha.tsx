@@ -1,24 +1,5 @@
 import { useEffect, useRef, type JSX } from 'react';
 
-declare global {
-  interface Window {
-    turnstile?: {
-      render: (
-        container: HTMLElement,
-        options: {
-          sitekey: string;
-          callback: (token: string) => void;
-          'error-callback'?: () => void;
-          'expired-callback'?: () => void;
-          theme?: 'light' | 'dark' | 'auto';
-          size?: 'normal' | 'compact' | 'flexible';
-        },
-      ) => string;
-      remove: (widgetId: string) => void;
-    };
-  }
-}
-
 type DemoCaptchaProps = Readonly<{
   siteKey: string;
   size?: 'normal' | 'compact' | 'flexible';
@@ -39,12 +20,14 @@ export default function DemoCaptcha({
 
   useEffect(() => {
     const safeRemoveWidget = () => {
-      if (!widgetIdRef.current || !window.turnstile) {
-        return;
-      }
+      const id = widgetIdRef.current;
+      if (!id) return;
+
+      const ts = (globalThis as unknown as { turnstile?: Turnstile }).turnstile;
+      if (!ts || typeof ts.remove !== 'function') return;
 
       try {
-        window.turnstile.remove(widgetIdRef.current);
+        ts.remove(id);
       } catch {
         // Ignore stale widget warnings from Turnstile during remounts/HMR.
       }
@@ -52,14 +35,17 @@ export default function DemoCaptcha({
     };
 
     const renderWidget = () => {
-      if (!containerRef.current || !window.turnstile || widgetIdRef.current) {
+      if (!containerRef.current || widgetIdRef.current) {
         return;
       }
 
-      widgetIdRef.current = window.turnstile.render(containerRef.current, {
+      const ts = (globalThis as unknown as { turnstile?: Turnstile }).turnstile;
+      if (!ts || typeof ts.render !== 'function') return;
+
+      widgetIdRef.current = ts.render(containerRef.current, {
         sitekey: siteKey,
         size,
-        callback: (token) => onTokenChange(token),
+        callback: (token: string) => onTokenChange(token),
         'error-callback': () => onTokenChange(null),
         'expired-callback': () => onTokenChange(null),
       });

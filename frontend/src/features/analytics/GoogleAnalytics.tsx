@@ -20,8 +20,8 @@ export function GoogleAnalytics() {
       // Inject config
       const inlineScript = document.createElement('script');
       inlineScript.innerHTML = `
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
+        globalThis.dataLayer = globalThis.dataLayer || [];
+        function gtag(){globalThis.dataLayer.push(arguments);}
         gtag('js', new Date());
         gtag('config', '${GA_MEASUREMENT_ID}');
       `;

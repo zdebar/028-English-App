@@ -119,8 +119,8 @@ export function usePracticeDeck(userId: string | null) {
       const userProgress = [...userProgressRef.current];
       persistProgressToLocalStorage(userProgress);
     };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    globalThis.addEventListener('beforeunload', handleBeforeUnload);
+    return () => globalThis.removeEventListener('beforeunload', handleBeforeUnload);
   }, [persistProgressToLocalStorage]);
 
   // Advance to next item and record progress change

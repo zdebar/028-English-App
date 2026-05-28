@@ -20,15 +20,12 @@ export default function DemoSessionPanel({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY?.trim() ?? '';
-  const captchaSize = useMemo(
-    () =>
-      import.meta.env.VITE_TURNSTILE_SIZE === 'compact'
-        ? 'compact'
-        : import.meta.env.VITE_TURNSTILE_SIZE === 'normal'
-          ? 'normal'
-          : 'flexible',
-    [],
-  );
+  const captchaSize = useMemo(() => {
+    const raw = import.meta.env.VITE_TURNSTILE_SIZE;
+    if (raw === 'compact') return 'compact';
+    if (raw === 'normal') return 'normal';
+    return 'flexible';
+  }, []);
 
   const startDemoFlow = useCallback(() => {
     if (!turnstileSiteKey) {
