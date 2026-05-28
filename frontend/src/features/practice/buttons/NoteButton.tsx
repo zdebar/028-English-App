@@ -2,11 +2,11 @@ import InfoIcon from '@/components/UI/icons/InfoIcon';
 import HelpText from '@/features/help/HelpText';
 import type { MouseEvent } from 'react';
 
-type NoteButtonProps = {
+type NoteButtonProps = Readonly<{
   onClick: (e: MouseEvent<HTMLButtonElement>) => void;
   title: string;
   className?: string;
-};
+}>;
 
 export default function NoteButton({ onClick, title, className = '' }: NoteButtonProps) {
   return (

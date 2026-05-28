@@ -17,10 +17,10 @@ interface SyncEntityModelStatic<T extends SyncRow> {
 }
 
 export default abstract class SyncEntityModel extends Entity<AppDB> {
-  static syncTable: Dexie.Table<SyncRow, number>;
-  static syncTableName: TableName;
-  static syncEntityName: string;
-  static syncSelect: string;
+  static readonly syncTable: Dexie.Table<SyncRow, number>;
+  static readonly syncTableName: TableName;
+  static readonly syncEntityName: string;
+  static readonly syncSelect: string;
 
   static async syncFromRemote<T extends SyncRow>(
     this: SyncEntityModelStatic<T>,

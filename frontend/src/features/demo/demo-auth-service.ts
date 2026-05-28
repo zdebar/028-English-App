@@ -1,27 +1,44 @@
 import { supabaseInstance } from '@/config/supabase.config';
 
-async function mapDemoAuthErrorCode(response?: Response): Promise<string> {
-  if (!response) {
-    return 'DEMO_AUTH_FAILED';
-  }
-
-  const status = response.status;
-  let detail = '';
-
+async function readErrorDetail(response: Response): Promise<string> {
   try {
     const payload = (await response.clone().json()) as {
       detail?: string;
       error?: string;
       msg?: string;
     };
-    detail = `${payload.detail ?? ''} ${payload.error ?? ''} ${payload.msg ?? ''}`.toLowerCase();
+    return `${payload.detail ?? ''} ${payload.error ?? ''} ${payload.msg ?? ''}`.toLowerCase();
   } catch {
     try {
-      detail = (await response.clone().text()).toLowerCase();
+      return (await response.clone().text()).toLowerCase();
     } catch {
-      detail = '';
+      return '';
     }
   }
+}
+
+function mapAuthDetailFor400401(detail: string): string {
+  if (detail.includes('captcha_failed') || detail.includes('captcha_token')) {
+    return 'CAPTCHA_FAILED';
+  }
+  if (detail.includes('invalid login credentials') || detail.includes('invalid_grant')) {
+    return 'DEMO_INVALID_CREDENTIALS';
+  }
+  if (detail.includes('email') && detail.includes('disabled')) {
+    return 'DEMO_EMAIL_PROVIDER_DISABLED';
+  }
+
+  const shortDetail = detail.replace(/\s+/g, ' ').trim().slice(0, 180);
+  return shortDetail ? `DEMO_AUTH_FAILED:${shortDetail}` : 'DEMO_AUTH_FAILED';
+}
+
+async function mapDemoAuthErrorCode(response?: Response): Promise<string> {
+  if (!response) {
+    return 'DEMO_AUTH_FAILED';
+  }
+
+  const status = response.status;
+  const detail = await readErrorDetail(response);
 
   if (status === 429) {
     return 'RATE_LIMIT';
@@ -30,17 +47,7 @@ async function mapDemoAuthErrorCode(response?: Response): Promise<string> {
     return 'CAPTCHA_FAILED';
   }
   if (status === 400 || status === 401) {
-    if (detail.includes('captcha_failed') || detail.includes('captcha_token')) {
-      return 'CAPTCHA_FAILED';
-    }
-    if (detail.includes('invalid login credentials') || detail.includes('invalid_grant')) {
-      return 'DEMO_INVALID_CREDENTIALS';
-    }
-    if (detail.includes('email') && detail.includes('disabled')) {
-      return 'DEMO_EMAIL_PROVIDER_DISABLED';
-    }
-    const shortDetail = detail.replace(/\s+/g, ' ').trim().slice(0, 180);
-    return shortDetail ? `DEMO_AUTH_FAILED:${shortDetail}` : 'DEMO_AUTH_FAILED';
+    return mapAuthDetailFor400401(detail);
   }
 
   return 'DEMO_AUTH_FAILED';

@@ -24,6 +24,7 @@ DECLARE
   v_null_text CONSTANT TEXT := 'null';
   v_key_user_id CONSTANT TEXT := 'user_id';
   v_key_item_id CONSTANT TEXT := 'item_id';
+  v_errcode_insufficient_privilege CONSTANT TEXT := '42501';
   v_total_count INT := 0;
   v_matched_count INT := 0;
   v_skipped_count INT := 0;
@@ -43,7 +44,7 @@ BEGIN
       v_user_id := (v_entry->>v_key_user_id)::UUID;
       IF v_user_id IS DISTINCT FROM v_auth_user_id THEN
         RAISE EXCEPTION USING
-          ERRCODE = '42501',
+          ERRCODE = v_errcode_insufficient_privilege,
           MESSAGE = 'Payload user_id must match auth.uid()';
       END IF;
 
@@ -97,7 +98,7 @@ BEGIN
       GET DIAGNOSTICS v_row_count = ROW_COUNT;
       v_matched_count := v_matched_count + COALESCE(v_row_count, 0);
     EXCEPTION
-      WHEN SQLSTATE '42501' THEN
+      WHEN insufficient_privilege THEN
         RAISE;
       WHEN others THEN
         v_skipped_count := v_skipped_count + 1;
@@ -136,7 +137,7 @@ BEGIN
         v_hist_user_id := (v_entry->>v_key_user_id)::UUID;
         IF v_hist_user_id IS DISTINCT FROM v_auth_user_id THEN
           RAISE EXCEPTION USING
-            ERRCODE = '42501',
+            ERRCODE = v_errcode_insufficient_privilege,
             MESSAGE = 'Payload user_id must match auth.uid()';
         END IF;
 
@@ -183,7 +184,7 @@ BEGIN
           END;
         END LOOP;
       EXCEPTION
-        WHEN SQLSTATE '42501' THEN
+        WHEN insufficient_privilege THEN
           RAISE;
         WHEN others THEN
           v_skipped_invalid := v_skipped_invalid + 1;

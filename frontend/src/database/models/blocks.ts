@@ -23,10 +23,10 @@ export default class Blocks extends SyncEntityModel implements BlockType {
   sort_order!: number;
   deleted_at!: string | null;
 
-  static override syncTable = db.blocks as Dexie.Table<BlockType, number>;
-  static override syncTableName = TableName.Blocks;
-  static override syncEntityName = 'blocks';
-  static override syncSelect = 'id, name, note, sort_order, deleted_at';
+  static override readonly syncTable = db.blocks as Dexie.Table<BlockType, number>;
+  static override readonly syncTableName = TableName.Blocks;
+  static override readonly syncEntityName = 'blocks';
+  static override readonly syncSelect = 'id, name, note, sort_order, deleted_at';
 
   /**
    * Retrieves all blocks from the database.

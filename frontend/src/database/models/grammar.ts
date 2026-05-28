@@ -22,10 +22,10 @@ export default class Grammar extends SyncEntityModel implements GrammarType {
   sort_order!: number;
   deleted_at!: string | null;
 
-  static override syncTable = db.grammar as Dexie.Table<GrammarType, number>;
-  static override syncTableName = TableName.Grammar;
-  static override syncEntityName = 'grammar';
-  static override syncSelect = 'id, name, note, sort_order, deleted_at';
+  static override readonly syncTable = db.grammar as Dexie.Table<GrammarType, number>;
+  static override readonly syncTableName = TableName.Grammar;
+  static override readonly syncEntityName = 'grammar';
+  static override readonly syncSelect = 'id, name, note, sort_order, deleted_at';
 
   /**
    * Retrieves a grammar record by its ID from the database.

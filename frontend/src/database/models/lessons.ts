@@ -20,10 +20,10 @@ export default class Lessons extends SyncEntityModel implements LessonType {
   level_id!: number;
   deleted_at!: string | null;
 
-  static override syncTable = db.lessons as Dexie.Table<LessonType, number>;
-  static override syncTableName = TableName.Lessons;
-  static override syncEntityName = 'lessons';
-  static override syncSelect = 'id, name, note, level_id, sort_order, deleted_at';
+  static override readonly syncTable = db.lessons as Dexie.Table<LessonType, number>;
+  static override readonly syncTableName = TableName.Lessons;
+  static override readonly syncEntityName = 'lessons';
+  static override readonly syncSelect = 'id, name, note, level_id, sort_order, deleted_at';
 
   /**
    * Retrieves all lessons from the local database ordered by their sort order.

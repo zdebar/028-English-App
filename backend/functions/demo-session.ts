@@ -2,8 +2,6 @@
 // POST JSON body: { captchaToken: "..." }
 // Returns: { access_token, refresh_token, expires_in, token_type }
 
-export {};
-
 declare const Deno: {
   env: { get(key: string): string | undefined };
   serve(handler: (req: Request) => Response | Promise<Response>): void;

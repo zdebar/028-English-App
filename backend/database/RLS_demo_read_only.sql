@@ -5,6 +5,23 @@
 -- This script enables RLS and allows each user to read only their own rows,
 -- while write operations are blocked for demo users.
 
+-- Small helpers to avoid repeating the JSON path literals.
+CREATE OR REPLACE FUNCTION jwt_app_metadata_key()
+RETURNS text
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT 'app_metadata';
+$$;
+
+CREATE OR REPLACE FUNCTION jwt_is_demo_key()
+RETURNS text
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT 'is_demo';
+$$;
+
 ALTER TABLE public.user_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_scores ENABLE ROW LEVEL SECURITY;
 
@@ -25,7 +42,7 @@ FOR INSERT
 TO authenticated
 WITH CHECK (
   user_id = auth.uid()
-  AND COALESCE((auth.jwt() -> 'app_metadata' ->> 'is_demo')::BOOLEAN, FALSE) = FALSE
+  AND COALESCE((auth.jwt() -> jwt_app_metadata_key() ->> jwt_is_demo_key())::BOOLEAN, FALSE) = FALSE
 );
 
 CREATE POLICY user_items_update_own_non_demo
@@ -34,11 +51,11 @@ FOR UPDATE
 TO authenticated
 USING (
   user_id = auth.uid()
-  AND COALESCE((auth.jwt() -> 'app_metadata' ->> 'is_demo')::BOOLEAN, FALSE) = FALSE
+  AND COALESCE((auth.jwt() -> jwt_app_metadata_key() ->> jwt_is_demo_key())::BOOLEAN, FALSE) = FALSE
 )
 WITH CHECK (
   user_id = auth.uid()
-  AND COALESCE((auth.jwt() -> 'app_metadata' ->> 'is_demo')::BOOLEAN, FALSE) = FALSE
+  AND COALESCE((auth.jwt() -> jwt_app_metadata_key() ->> jwt_is_demo_key())::BOOLEAN, FALSE) = FALSE
 );
 
 CREATE POLICY user_items_delete_own_non_demo
@@ -47,7 +64,7 @@ FOR DELETE
 TO authenticated
 USING (
   user_id = auth.uid()
-  AND COALESCE((auth.jwt() -> 'app_metadata' ->> 'is_demo')::BOOLEAN, FALSE) = FALSE
+  AND COALESCE((auth.jwt() -> jwt_app_metadata_key() ->> jwt_is_demo_key())::BOOLEAN, FALSE) = FALSE
 );
 
 DROP POLICY IF EXISTS user_scores_select_own ON public.user_scores;
@@ -67,7 +84,7 @@ FOR INSERT
 TO authenticated
 WITH CHECK (
   user_id = auth.uid()
-  AND COALESCE((auth.jwt() -> 'app_metadata' ->> 'is_demo')::BOOLEAN, FALSE) = FALSE
+  AND COALESCE((auth.jwt() -> jwt_app_metadata_key() ->> jwt_is_demo_key())::BOOLEAN, FALSE) = FALSE
 );
 
 CREATE POLICY user_scores_update_own_non_demo
@@ -76,11 +93,11 @@ FOR UPDATE
 TO authenticated
 USING (
   user_id = auth.uid()
-  AND COALESCE((auth.jwt() -> 'app_metadata' ->> 'is_demo')::BOOLEAN, FALSE) = FALSE
+  AND COALESCE((auth.jwt() -> jwt_app_metadata_key() ->> jwt_is_demo_key())::BOOLEAN, FALSE) = FALSE
 )
 WITH CHECK (
   user_id = auth.uid()
-  AND COALESCE((auth.jwt() -> 'app_metadata' ->> 'is_demo')::BOOLEAN, FALSE) = FALSE
+  AND COALESCE((auth.jwt() -> jwt_app_metadata_key() ->> jwt_is_demo_key())::BOOLEAN, FALSE) = FALSE
 );
 
 CREATE POLICY user_scores_delete_own_non_demo
@@ -89,5 +106,5 @@ FOR DELETE
 TO authenticated
 USING (
   user_id = auth.uid()
-  AND COALESCE((auth.jwt() -> 'app_metadata' ->> 'is_demo')::BOOLEAN, FALSE) = FALSE
+  AND COALESCE((auth.jwt() -> jwt_app_metadata_key() ->> jwt_is_demo_key())::BOOLEAN, FALSE) = FALSE
 );

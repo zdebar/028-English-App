@@ -22,10 +22,10 @@ export default class Levels extends SyncEntityModel implements LevelType {
   sort_order!: number;
   deleted_at!: string | null;
 
-  static override syncTable = db.levels as Dexie.Table<LevelType, number>;
-  static override syncTableName = TableName.Levels;
-  static override syncEntityName = 'levels';
-  static override syncSelect = 'id, name, note, sort_order, deleted_at';
+  static override readonly syncTable = db.levels as Dexie.Table<LevelType, number>;
+  static override readonly syncTableName = TableName.Levels;
+  static override readonly syncEntityName = 'levels';
+  static override readonly syncSelect = 'id, name, note, sort_order, deleted_at';
 
   /**
    * Retrieves a comprehensive overview of user levels with their progress.
