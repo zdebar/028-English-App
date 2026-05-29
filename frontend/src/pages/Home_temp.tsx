@@ -9,7 +9,6 @@ import '@/styles/home.css';
 import { InstallPWAButton } from '@/features/pwa/InstallPwaButton';
 import { useSyncWarningStore } from '@/features/sync/use-sync-warning';
 import { ROUTES } from '@/config/routes.config';
-// imports moved into PracticeOverviewButton
 import DemoSessionPanel from '@/features/demo/DemoSessionPanel';
 import GoogleAuthButton from '@/features/auth/GoogleAuthButton';
 import PropertyView from '@/components/UI/PropertyView';

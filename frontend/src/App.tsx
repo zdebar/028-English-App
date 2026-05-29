@@ -17,7 +17,7 @@ import { TEXTS } from '@/locales/cs';
 import Blocks from '@/pages/Blocks';
 import BlockItems from '@/pages/BlockItems';
 import Grammar from '@/pages/Grammar';
-import Home from '@/pages/Home';
+import Home from '@/pages/Home_temp';
 import Levels from '@/pages/Levels';
 import Practice from '@/pages/Practice';
 import PracticeOverview from '@/pages/PracticeOverview';
