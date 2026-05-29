@@ -154,7 +154,14 @@ export function triggerLevelsUpdatedEvent(userId: string) {
  * Triggers the 'dailyCountUpdated' event for a specific user.
  *
  * @param userId - The unique user identifier.
+ * @param dailyCount - Optional updated daily count to avoid extra store reload.
  */
-export function triggerDailyCountUpdatedEvent(userId: string) {
-  triggerNamedEvent('dailyCountUpdated', userId);
+export function triggerDailyCountUpdatedEvent(userId: string, dailyCount?: number) {
+  if (!userId || userId.trim() === '') {
+    throw new Error('userId is required.');
+  }
+
+  const detail = dailyCount == null ? { userId } : { userId, dailyCount };
+  const event = new CustomEvent('dailyCountUpdated', { detail });
+  globalThis.dispatchEvent(event);
 }

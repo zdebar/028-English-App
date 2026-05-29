@@ -74,6 +74,7 @@ describe('database.utils', () => {
         user_id: 'u1',
         item_id: 10,
         progress: 2,
+        progress_history: [{ progress: 2, created_at: '2026-02-28T10:00:00.000Z' }],
         started_at: '1970-01-01T00:00:00.000Z',
         updated_at: '2026-02-28T10:00:00.000Z',
         next_at: '1970-01-01T00:00:00.000Z',
@@ -85,6 +86,7 @@ describe('database.utils', () => {
           user_id: 'u1',
           item_id: 10,
           progress: 2,
+          progress_history: [{ progress: 2, created_at: '2026-02-28T10:00:00.000Z' }],
           started_at: null,
           updated_at: '2026-02-28T10:00:00.000Z',
           next_at: null,
@@ -101,6 +103,8 @@ describe('database.utils', () => {
         item_id: 1,
         progress: 0,
         updated_at: '2026-02-28T10:00:00.000Z',
+        is_study_item: true,
+        is_vocabulary: undefined as unknown as boolean,
         grammar_id: null as unknown as number,
         started_at: null as unknown as string,
         next_at: null as unknown as string,
@@ -108,6 +112,8 @@ describe('database.utils', () => {
       } as any);
 
       expect(result.grammar_id).toBe(0);
+      expect(result.is_study_item).toBe(1);
+      expect(result.is_vocabulary).toBe(0);
       expect(result.started_at).toBe('1970-01-01T00:00:00.000Z');
       expect(result.next_at).toBe('1970-01-01T00:00:00.000Z');
       expect(result.mastered_at).toBe('1970-01-01T00:00:00.000Z');
@@ -251,7 +257,6 @@ describe('database.utils', () => {
       await restoreUnsavedFromLocalStorage('u1');
 
       expect(mocks.savePracticeDeck).toHaveBeenCalledWith(
-        'u1',
         [{ item_id: 1, progress: 2 }],
         '2026-03-04T10:00:00.000Z',
       );
@@ -273,7 +278,7 @@ describe('database.utils', () => {
       expect(mocks.savePracticeDeck).not.toHaveBeenCalled();
       expect(localStorage.getItem('practiceDeckProgress_u1')).toBeNull();
       expect(mocks.reportInfo).toHaveBeenCalledWith(
-        'Restored unsaved practice deck progress for user u1 with 0 items.',
+        'Restored unsaved practice deck progress with 0 items.',
       );
     });
 

@@ -9,6 +9,7 @@ import { usePracticeDeck } from './hooks/use-practice-deck';
 import Indicator from '@/components/UI/Indicator';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
+import OverviewCard from '@/components/UI/OverviewCard';
 import GrammarCard from '@/features/practice/GrammarCard';
 import VolumeSlider from '@/features/practice/VolumeSlider';
 
@@ -20,9 +21,13 @@ import KnownButton from './buttons/KnownButton';
 import MasterItemButton from './buttons/MasterItemButton';
 import PlayAudioButton from './buttons/PlayAudioButton';
 import RepeatButton from './buttons/RepeatButton';
+import NoteButton from './buttons/NoteButton';
 import { useGrammar } from './hooks/use-grammar';
+import { usePracticeStars } from './hooks/use-practice-stars';
 import { useHelpStore } from '../help/use-help-store';
 import DelayedNotification from '@/components/UI/DelayedNotification';
+import { STAR_SIZE } from '@/components/UI/StarProgress';
+import PracticeStarsRow from './components/PracticeStarsRow';
 
 /**
  * PracticeCard component for interactive language practice.
@@ -33,10 +38,11 @@ export default function PracticeCard() {
   const userId = useAuthStore((state) => state.userId);
   const dailyCount = useUserStore((state) => state.dailyCount);
   const isHelpOpened = useHelpStore((state) => state.isHelpOpened);
-  const [counter, setCounter] = useState(0);
   const { grammarVisible, grammarData, handleGrammar, closeGrammar } = useGrammar();
 
-  const practiceCountToday = dailyCount + counter;
+  const practiceCountToday = dailyCount;
+  const { starChunk, starsPerRow, starCount, displayedChunkCount } =
+    usePracticeStars(practiceCountToday);
 
   const {
     currentItem,
@@ -58,10 +64,19 @@ export default function PracticeCard() {
     playAudio,
     audioLoading,
   } = usePracticeDeck(userId);
+  const [showNote, setShowNote] = useState(false);
 
   const cardText = revealed ? undefined : TEXTS.reveal;
   const cardStyle = revealed ? 'color-audio-disabled' : 'color-button';
   const directionText = isCzToEn ? TEXTS.directionCzToEn : TEXTS.directionEnToCz;
+  const showNoteButton = !!currentItem?.note && currentItem.note.length > 0 && revealed;
+  let audioStatusMessage = null;
+
+  if (audioLoading) {
+    audioStatusMessage = <DelayedNotification message={TEXTS.loadingAudio} timeDelay={500} />;
+  } else if (audioError) {
+    audioStatusMessage = <p className="px-2">{TEXTS.noAudio}</p>;
+  }
 
   if (!currentItem) {
     return (
@@ -73,6 +88,16 @@ export default function PracticeCard() {
   }
 
   if (grammarVisible) return <GrammarCard grammar={grammarData} onClose={closeGrammar} />;
+
+  if (showNote)
+    return (
+      <OverviewCard onClose={() => setShowNote(false)} buttonTitle={currentItem?.english}>
+        <div
+          dangerouslySetInnerHTML={{ __html: currentItem?.note || '' }}
+          className="grammar p-4"
+        />
+      </OverviewCard>
+    );
 
   return (
     <div className="relative flex w-full grow flex-col items-center">
@@ -93,11 +118,11 @@ export default function PracticeCard() {
             }
           }}
         >
-          {showDirectionChange ? (
-            <Notification className="my-auto">{directionText}</Notification>
-          ) : (
+          {!revealed && !showDirectionChange && (
+            <HelpText className="center top-4">{TEXTS.reveal}</HelpText>
+          )}
+          {!showDirectionChange && (
             <>
-              {!revealed && <HelpText className="center top-4">{TEXTS.reveal}</HelpText>}
               <HelpText className="top-20 left-4">
                 <span className="help-text-span">{TEXTS.shortCut}</span>
                 {TEXTS.short}
@@ -110,43 +135,49 @@ export default function PracticeCard() {
                 <span className="help-text-span">{TEXTS.pluralCut}</span>
                 {TEXTS.plural}
               </HelpText>
-              {/** Top Bar */}
-              <div id="top-bar" className="relative flex h-8 w-full items-center justify-between">
-                <VolumeSlider setVolume={setVolume} />
-                {/**Audio messages*/}
-                {audioError ? (
-                  <p className="px-2">{TEXTS.noAudio}</p>
-                ) : (
-                  audioLoading && <DelayedNotification message={TEXTS.loadingAudio} />
-                )}
-              </div>
-              {/** Item Data */}
-              {!isHelpOpened && (
-                <div id="item" className="flex h-full flex-col justify-center gap-1">
-                  <p className="text-center font-bold">{czech}</p>
-                  <p className="text-center font-normal">{english}</p>
-                  <p className="text-center font-normal">{pronunciation}</p>
-                </div>
-              )}
-
-              {/** Bottom Bar */}
-              <div
-                className="relative flex h-8 w-full items-center justify-between"
-                id="bottom-bar"
-              >
-                <p className="px-2 font-light" title={TEXTS.progress}>
-                  {progress}
-                </p>
-                <HelpText className="bottom-7.5">{TEXTS.progress}</HelpText>
-                <p className="px-2 font-light" title={`${TEXTS.today} / ${TEXTS.dailyGoal}`}>
-                  {practiceCountToday} / {config.practice.dailyGoal}
-                </p>
-                <HelpText className="right-0 bottom-7.5 flex flex-col items-end">
-                  {TEXTS.today} / {TEXTS.dailyGoal}
-                </HelpText>
-              </div>
             </>
           )}
+          {/** Top Bar */}
+          <div id="top-bar" className="relative flex h-8 w-full items-center justify-between">
+            <VolumeSlider setVolume={setVolume} />
+            {/**Audio messages*/}
+            {audioStatusMessage}
+          </div>
+          {/** Item Data */}
+          {showDirectionChange ? (
+            <Notification className="my-auto">{directionText}</Notification>
+          ) : (
+            !isHelpOpened && (
+              <div id="item" className="flex h-full flex-col justify-center gap-1">
+                <p className="text-center font-bold">{czech}</p>
+                <p className="text-center font-normal">{english}</p>
+                <p className="text-center font-normal">{pronunciation}</p>
+              </div>
+            )
+          )}
+
+          {/** Bottom Bar */}
+          <div className="relative flex h-8 w-full items-center justify-between" id="bottom-bar">
+            <p className="px-2 font-light" title={TEXTS.progress}>
+              {progress}
+            </p>
+            <HelpText className="bottom-7.5">{TEXTS.progress}</HelpText>
+            <div
+              className="relative flex items-center gap-2 px-2 font-light"
+              title={TEXTS.nextStarProgress}
+            >
+              <PracticeStarsRow
+                starCount={starCount}
+                displayedChunkCount={displayedChunkCount}
+                starChunk={starChunk}
+                starsPerRow={starsPerRow}
+                size={STAR_SIZE}
+              />
+            </div>
+            <HelpText className="right-0 bottom-7.5 flex flex-col items-end">
+              {TEXTS.nextStarProgress}
+            </HelpText>
+          </div>
         </div>
         {/* Practice Controls */}
         <div id="practice-controls" className="relative flex flex-col gap-1">
@@ -155,7 +186,6 @@ export default function PracticeCard() {
             <MasterItemButton
               onConfirm={() => {
                 nextItem(config.progress.skipProgress);
-                setCounter((prev) => prev + 1);
               }}
               disabled={!revealed || showDirectionChange}
             />
@@ -171,14 +201,12 @@ export default function PracticeCard() {
                 <RepeatButton
                   onClick={() => {
                     nextItem(config.progress.minusProgress);
-                    setCounter((prev) => prev + 1);
                   }}
                   disabled={showDirectionChange}
                 />
                 <KnownButton
                   onClick={() => {
                     nextItem(config.progress.plusProgress);
-                    setCounter((prev) => prev + 1);
                   }}
                   disabled={showDirectionChange}
                 />
@@ -198,6 +226,15 @@ export default function PracticeCard() {
         </div>
 
         <HelpButton className="help-btn-pos self-end" />
+        {showNoteButton && (
+          <NoteButton
+            title={TEXTS.tooltipNotes}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowNote(true);
+            }}
+          />
+        )}
       </div>
     </div>
   );

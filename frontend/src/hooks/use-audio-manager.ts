@@ -8,17 +8,26 @@ type ManagedAudio = {
   onEnded: () => void;
 };
 
+/**
+ * Stop and reset an HTMLAudioElement to the start.
+ */
 function stopAndReset(element: HTMLAudioElement) {
   element.pause();
   element.currentTime = 0;
 }
 
+/**
+ * Stop and reset all managed audio elements in the provided map.
+ */
 function stopAndResetAll(audioMap: Map<string, ManagedAudio>) {
   audioMap.forEach(({ element }) => {
     stopAndReset(element);
   });
 }
 
+/**
+ * Dispose managed audio elements and revoke object URLs where needed.
+ */
 function disposeAudioMap(audioMap: Map<string, ManagedAudio>) {
   audioMap.forEach(({ element, onEnded }) => {
     stopAndReset(element);
@@ -30,6 +39,9 @@ function disposeAudioMap(audioMap: Map<string, ManagedAudio>) {
   audioMap.clear();
 }
 
+/**
+ * Normalize audio input (string | string[] | null) into an array of filenames.
+ */
 function normalizeAudioInput(audio: AudioInput): string[] {
   if (typeof audio === 'string' && audio) {
     return [audio];
@@ -100,6 +112,16 @@ async function loadAudioBatch(
   return hasFailure;
 }
 
+/**
+ * Hook to manage preloading and playback of audio files stored in the local
+ * IndexedDB (via `AudioRecord` model). It keeps a small in-memory map of
+ * `HTMLAudioElement`s and exposes controls for playing/stopping audio and
+ * adjusting volume.
+ *
+ * @param audio - single filename, array of filenames, or null. The hook will
+ *                attempt to preload the provided files from the IndexedDB.
+ * @returns An object with playback controls and status flags.
+ */
 export function useAudioManager(audio: AudioInput) {
   const audioMapRef = useRef<Map<string, ManagedAudio>>(new Map());
   const volumeRef = useRef(1);
@@ -122,7 +144,7 @@ export function useAudioManager(audio: AudioInput) {
     setCurrent(files[0] ?? null);
 
     if (!files.length) {
-      setAudioError(true);
+      setAudioError(false);
       setLoading(false);
       return;
     }
@@ -139,7 +161,7 @@ export function useAudioManager(audio: AudioInput) {
         audioMapRef.current,
       );
 
-      if (hasFailure) {
+      if (!isDisposed && hasFailure) {
         setAudioError(true);
       }
 

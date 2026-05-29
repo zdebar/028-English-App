@@ -15,6 +15,7 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
       item_id: 1,
       czech: 'ahoj',
       english: 'hello',
+      note: null,
       pronunciation: 'həˈloʊ',
       audio: 'hello.opus',
       grammar_id: 10,
@@ -56,7 +57,13 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
 
 vi.mock('@/config/config', () => ({
   default: {
-    practice: { dailyGoal: 20, audioDelay: 300 },
+    practice: {
+      dailyGoal: 20,
+      starChunk: 50,
+      starsPerRow: 10,
+      starFlashDuration: 300,
+      audioDelay: 300,
+    },
     progress: { skipProgress: 10, minusProgress: -1, plusProgress: 1 },
   },
 }));
@@ -71,6 +78,8 @@ vi.mock('@/locales/cs', () => ({
     noAudio: 'No audio',
     loadingAudio: 'Loading audio',
     progress: 'Progress',
+    nextStarProgress: 'Next star progress',
+    currentPracticeStar: 'Current practice star',
     today: 'Today',
     dailyGoal: 'Daily goal',
     directionCzToEn: 'CZ to EN',
@@ -163,9 +172,32 @@ vi.mock('@/features/help/HelpButton', () => ({ default: () => <div data-testid="
 vi.mock('@/features/help/HelpText', () => ({
   default: ({ children }: any) => <span>{children}</span>,
 }));
+vi.mock('@/components/UI/OverviewCard', () => ({
+  default: ({ children, buttonTitle }: any) => (
+    <div>
+      <div data-testid="overview-title">{buttonTitle}</div>
+      <div data-testid="overview-body">{children}</div>
+    </div>
+  ),
+}));
+vi.mock('@/components/UI/icons/InfoIcon', () => ({
+  default: () => <span data-testid="info-icon">i</span>,
+}));
 vi.mock('@/components/UI/Indicator', () => ({ default: () => <span data-testid="indicator" /> }));
 vi.mock('@/components/UI/icons/NotRevealedIcon', () => ({
   default: () => <span data-testid="not-revealed" />,
+}));
+
+vi.mock('@/components/UI/StarProgress', () => ({
+  STAR_SIZE: 22,
+}));
+
+vi.mock('@/features/practice/components/PracticeStarsRow', () => ({
+  default: ({ starCount, displayedChunkCount, starChunk }: any) => (
+    <span data-testid="practice-stars-row">
+      {starCount}:{displayedChunkCount}:{starChunk}
+    </span>
+  ),
 }));
 
 vi.mock('@/features/practice/GrammarCard', () => ({
@@ -240,6 +272,7 @@ describe('PracticeCard', () => {
       item_id: 1,
       czech: 'ahoj',
       english: 'hello',
+      note: null,
       pronunciation: 'həˈloʊ',
       audio: 'hello.opus',
       grammar_id: 10,
@@ -299,6 +332,20 @@ describe('PracticeCard', () => {
     expect(mocks.practiceDeck.setRevealed).toHaveBeenCalledWith(true);
   });
 
+  it('shows current star chunk progress instead of daily goal progress', () => {
+    render(<PracticeCard />);
+
+    expect(screen.getByTestId('practice-stars-row').textContent).toBe('0:5:50');
+  });
+
+  it('shows the next empty bronze star when mounted exactly on a completed chunk', () => {
+    mocks.dailyCount = 50;
+
+    render(<PracticeCard />);
+
+    expect(screen.getByTestId('practice-stars-row').textContent).toBe('1:0:50');
+  });
+
   it('autoplays audio after delay in EN->CZ mode when allowed', async () => {
     mocks.practiceDeck.isCzToEn = false;
     mocks.practiceDeck.audioDisabled = false;
@@ -335,5 +382,38 @@ describe('PracticeCard', () => {
     render(<PracticeCard />);
 
     expect(mocks.handleGrammar).not.toHaveBeenCalled();
+  });
+
+  it('shows note button only when item is revealed and note exists', () => {
+    mocks.practiceDeck.revealed = false;
+    mocks.practiceDeck.currentItem = {
+      ...mocks.practiceDeck.currentItem,
+      note: 'Tip for this word',
+    };
+
+    const { rerender } = render(<PracticeCard />);
+    expect(screen.queryByRole('button', { name: 'note' })).toBeNull();
+
+    mocks.practiceDeck.revealed = true;
+    rerender(<PracticeCard />);
+
+    expect(screen.getByRole('button', { name: 'note' })).toBeTruthy();
+    expect(screen.getByTestId('info-icon')).toBeTruthy();
+  });
+
+  it('opens note overview after clicking note button', () => {
+    mocks.practiceDeck.revealed = true;
+    mocks.practiceDeck.currentItem = {
+      ...mocks.practiceDeck.currentItem,
+      english: 'hello',
+      note: 'This is item note',
+    };
+
+    render(<PracticeCard />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'note' }));
+
+    expect(screen.getByTestId('overview-title').textContent).toContain('hello');
+    expect(screen.getByTestId('overview-body').textContent).toContain('This is item note');
   });
 });

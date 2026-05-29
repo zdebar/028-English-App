@@ -12,7 +12,7 @@ export default function Guide(): JSX.Element {
       <h1 className="text-center">Návod</h1>
       <section>
         <p className="text-center">
-          Tato aplikace je zaměřena na dril, na velké množství naposlouchaných a vyslovených
+          Tato učební aplikace je zaměřena na dril, na velké množství naposlouchaných a vyslovených
           opakování.
         </p>
       </section>
@@ -24,11 +24,20 @@ export default function Guide(): JSX.Element {
         </p>
       </section>
       <section>
+        <h2>Doporučujeme</h2>
+        <ul className="text-left">
+          <li>každé slovíčko či větu nahlas zopakovat</li>
+          <li>preferovat "Opakovat" před "Znám", pokud není znalost zcela automatické</li>
+          <li>procvičit každý den min. 400 opakování tedy 10 hvězdiček</li>
+        </ul>
+      </section>
+
+      <section>
         <h2>Neodhalená kartička</h2>
         <Screenshot src="/screenshots/not-revealed.webp" alt="Ukázka kartičky před odhalením" />
         <p>
-          <strong>"Dnes / Denní cíl"</strong>
-          <span>Doporučený denní počet opakování.</span>
+          <strong>"Postup na další hvězdu"</strong>
+          <span>10 bronzových hvězd po 40 opakováních je doporučené minimální procvičování.</span>
         </p>
         <p>
           <strong>"Dokončit"</strong>
@@ -47,14 +56,18 @@ export default function Guide(): JSX.Element {
         <Screenshot src="/screenshots/revealed.webp" alt="Ukázka kartičky po odhalení" />
         <p>
           <strong>"Opakovat"</strong>
-          <span>
-            Položka se nabídne k dalšímu procvičování dříve.{' '}
-            <strong>DOPORUČUJEME dávat "Opakovat", pokud není znalost zcela automatická.</strong>
-          </span>
+          <span>Položka se nabídne k dalšímu procvičování dříve.</span>
         </p>
         <p>
           <strong>"Znám"</strong>
           <span>Položka se nabídne k dalšímu procvičování později.</span>
+        </p>
+        <p>
+          <strong>"Poznámka"</strong>
+          <span>
+            Některé položky mají poznámku, která podrobněji vysvětluje použití daného slovíčka v
+            angličtině.
+          </span>
         </p>
       </section>
       <section>

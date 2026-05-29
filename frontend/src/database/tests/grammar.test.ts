@@ -4,11 +4,18 @@ const mocks = vi.hoisted(() => ({
   grammarGet: vi.fn(),
   grammarAnyOf: vi.fn(),
   getStartedGrammarIds: vi.fn(),
-  syncFromRemoteGeneric: vi.fn(),
+  transaction: vi.fn(),
+  getSyncTimestamps: vi.fn(),
+  markAsSynced: vi.fn(),
+  from: vi.fn(),
+  select: vi.fn(),
+  gt: vi.fn(),
 }));
 
 vi.mock('@/database/models/db', () => ({
   db: {
+    metadata: {},
+    transaction: (...args: unknown[]) => mocks.transaction(...args),
     grammar: {
       get: (...args: unknown[]) => mocks.grammarGet(...args),
       where: (field: string) => {
@@ -19,6 +26,9 @@ vi.mock('@/database/models/db', () => ({
         }
         throw new Error(`Unexpected grammar.where field: ${field}`);
       },
+      clear: vi.fn(),
+      bulkDelete: vi.fn(),
+      bulkPut: vi.fn(),
     },
   },
 }));
@@ -29,13 +39,25 @@ vi.mock('@/database/models/user-items', () => ({
   },
 }));
 
-vi.mock('@/database/utils/data-sync.utils', async () => {
-  const actual = await vi.importActual<any>('@/database/utils/data-sync.utils');
+vi.mock('@/database/models/metadata', () => ({
+  default: {
+    markAsSynced: (...args: unknown[]) => mocks.markAsSynced(...args),
+  },
+}));
+
+vi.mock('@/database/utils/sync-generic.utils', async () => {
+  const actual = await vi.importActual<any>('@/database/utils/sync-generic.utils');
   return {
     ...actual,
-    syncFromRemoteGeneric: (...args: unknown[]) => mocks.syncFromRemoteGeneric(...args),
+    getSyncTimestamps: (...args: unknown[]) => mocks.getSyncTimestamps(...args),
   };
 });
+
+vi.mock('@/config/supabase.config', () => ({
+  supabaseInstance: {
+    from: (...args: unknown[]) => mocks.from(...args),
+  },
+}));
 
 import Grammar from '@/database/models/grammar';
 
@@ -47,7 +69,22 @@ describe('Grammar', () => {
     mocks.grammarAnyOf.mockReturnValue({
       sortBy: vi.fn().mockResolvedValue([]),
     });
-    mocks.syncFromRemoteGeneric.mockResolvedValue(undefined);
+    mocks.transaction.mockImplementation(async (...args: unknown[]) => {
+      const callback = args.at(-1) as () => Promise<unknown>;
+      return callback();
+    });
+    mocks.getSyncTimestamps.mockResolvedValue({
+      lastSyncedAt: '2026-03-03T00:00:00.000Z',
+      newSyncedAt: '2026-03-04T00:00:00.000Z',
+    });
+    mocks.markAsSynced.mockResolvedValue(undefined);
+    mocks.gt.mockResolvedValue({ data: [], error: null });
+    mocks.select.mockReturnValue({
+      gt: (...args: unknown[]) => mocks.gt(...args),
+    });
+    mocks.from.mockReturnValue({
+      select: (...args: unknown[]) => mocks.select(...args),
+    });
   });
 
   it('getGrammarById returns grammar when found', async () => {
@@ -77,9 +114,12 @@ describe('Grammar', () => {
     expect(mocks.grammarAnyOf).toHaveBeenCalledWith([1, 2]);
   });
 
-  it('syncFromRemote delegates to generic sync utility', async () => {
+  it('syncFromRemote fetches remote data and marks sync metadata', async () => {
     await Grammar.syncFromRemote(true);
 
-    expect(mocks.syncFromRemoteGeneric).toHaveBeenCalledTimes(1);
+    expect(mocks.from).toHaveBeenCalledWith('grammar');
+    expect(mocks.select).toHaveBeenCalledWith('id, name, note, sort_order, deleted_at');
+    expect(mocks.gt).toHaveBeenCalledWith('updated_at', '2026-03-03T00:00:00.000Z');
+    expect(mocks.markAsSynced).toHaveBeenCalledWith('grammar', '2026-03-04T00:00:00.000Z');
   });
 });

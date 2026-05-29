@@ -3,10 +3,11 @@ import { alternateDirection } from '@/features/practice/practice.utils';
 import type { UserItemPractice } from '@/types/user-item.types';
 import { useFetch } from '@/hooks/use-fetch';
 import UserItem from '@/database/models/user-items';
+import UserScore from '@/database/models/user-scores';
 import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { useHint, NBSP } from './use-hint';
 import { useAudioManager } from '../../../hooks/use-audio-manager';
-import { triggerDailyCountUpdatedEvent, triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
+import { triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 import config from '@/config/config';
 
 /**
@@ -86,7 +87,7 @@ export function usePracticeDeck(userId: string | null) {
       }
 
       try {
-        await UserItem.savePracticeDeck(userId, userProgress);
+        await UserItem.savePracticeDeck(userProgress);
         reportInfo(`Saved practice deck ${source} with ${userProgress.length} items.`);
         userProgressRef.current = [];
         if (shouldReload) {
@@ -107,7 +108,6 @@ export function usePracticeDeck(userId: string | null) {
         if (userId) {
           await saveBufferedProgress([...userProgressRef.current], 'on unmount');
           triggerLevelsUpdatedEvent(userId);
-          triggerDailyCountUpdatedEvent(userId);
         }
       })();
     };
@@ -119,8 +119,8 @@ export function usePracticeDeck(userId: string | null) {
       const userProgress = [...userProgressRef.current];
       persistProgressToLocalStorage(userProgress);
     };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    globalThis.addEventListener('beforeunload', handleBeforeUnload);
+    return () => globalThis.removeEventListener('beforeunload', handleBeforeUnload);
   }, [persistProgressToLocalStorage]);
 
   // Advance to next item and record progress change
@@ -133,9 +133,24 @@ export function usePracticeDeck(userId: string | null) {
       const updatedItem = {
         ...currentItem,
         progress: Math.max(currentItem.progress + progressChange, 0),
+        progress_history: [
+          ...currentItem.progress_history,
+          {
+            progress: Math.max(currentItem.progress + progressChange, 0),
+            created_at: new Date().toISOString(),
+          },
+        ],
       };
 
       userProgressRef.current.push(updatedItem);
+
+      if (userId) {
+        try {
+          await UserScore.addItemCount(userId, 1);
+        } catch (error) {
+          reportError('Failed to update user score during practice', error);
+        }
+      }
 
       const userProgress = [...userProgressRef.current];
       if (userProgress.length >= array.length) {
@@ -146,7 +161,7 @@ export function usePracticeDeck(userId: string | null) {
         resetHint();
       }
     },
-    [array.length, currentItem, resetHint, saveBufferedProgress],
+    [array.length, currentItem, resetHint, saveBufferedProgress, userId],
   );
 
   // Play audio on item change if direction is EN -> CZ

@@ -61,14 +61,14 @@ describe('useAudioManager', () => {
     });
   });
 
-  it('sets audioError for null audio and finishes loading', async () => {
+  it('treats null audio as a non-error empty state and finishes loading', async () => {
     const { result } = renderHook(() => useAudioManager(null));
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(result.current.audioError).toBe(true);
+    expect(result.current.audioError).toBe(false);
     expect(result.current.isAudioReady()).toBe(false);
   });
 

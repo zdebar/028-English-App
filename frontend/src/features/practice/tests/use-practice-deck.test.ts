@@ -11,6 +11,7 @@ const plusHintMock = vi.fn();
 const playAudioMock = vi.fn();
 const setVolumeMock = vi.fn();
 const reloadMock = vi.fn();
+const addItemCountMock = vi.fn();
 
 vi.mock('@/hooks/use-fetch', () => ({
   useFetch: (...args: unknown[]) => useFetchMock(...args),
@@ -20,6 +21,12 @@ vi.mock('@/database/models/user-items', () => ({
   default: {
     getPracticeDeck: (...args: unknown[]) => getPracticeDeckMock(...args),
     savePracticeDeck: (...args: unknown[]) => savePracticeDeckMock(...args),
+  },
+}));
+
+vi.mock('@/database/models/user-scores', () => ({
+  default: {
+    addItemCount: (...args: unknown[]) => addItemCountMock(...args),
   },
 }));
 
@@ -56,13 +63,16 @@ function makeItem(overrides: Partial<UserItemPractice> = {}): UserItemPractice {
     user_id: 'u1',
     czech: 'ahoj',
     english: 'hello',
+    note: null,
     pronunciation: 'həˈloʊ',
     audio: 'hello.opus',
     is_study_item: 1,
+    is_vocabulary: 0,
     sort_order: 1,
     block_id: 0,
     grammar_id: 10,
     progress: 0,
+    progress_history: [],
     started_at: '2026-01-01',
     updated_at: '2026-01-01',
     deleted_at: '2026-01-01',
@@ -91,6 +101,7 @@ describe('usePracticeDeck', () => {
 
     getPracticeDeckMock.mockResolvedValue([]);
     savePracticeDeckMock.mockResolvedValue(undefined);
+    addItemCountMock.mockResolvedValue(undefined);
   });
 
   it('maps fetched data into deck state and exposes derived values', async () => {
@@ -126,6 +137,7 @@ describe('usePracticeDeck', () => {
     expect(result.current.revealed).toBe(false);
     expect(resetHintMock).toHaveBeenCalled();
     expect(savePracticeDeckMock).not.toHaveBeenCalled();
+    expect(addItemCountMock).toHaveBeenCalledWith('user-1', 1);
   });
 
   it('saves and reloads when progress count reaches deck length', async () => {
@@ -143,12 +155,24 @@ describe('usePracticeDeck', () => {
 
     await waitFor(() => expect(savePracticeDeckMock).toHaveBeenCalledTimes(1));
     expect(savePracticeDeckMock).toHaveBeenCalledWith(
-      'user-1',
       expect.arrayContaining([
-        expect.objectContaining({ item_id: 1, progress: 1 }),
-        expect.objectContaining({ item_id: 2, progress: 2 }),
+        expect.objectContaining({
+          item_id: 1,
+          progress: 1,
+          progress_history: expect.arrayContaining([
+            expect.objectContaining({ progress: 1, created_at: expect.any(String) }),
+          ]),
+        }),
+        expect.objectContaining({
+          item_id: 2,
+          progress: 2,
+          progress_history: expect.arrayContaining([
+            expect.objectContaining({ progress: 2, created_at: expect.any(String) }),
+          ]),
+        }),
       ]),
     );
+    expect(addItemCountMock).toHaveBeenCalledTimes(2);
     expect(reloadMock).toHaveBeenCalledTimes(1);
   });
 

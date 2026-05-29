@@ -3,8 +3,7 @@ import type AppDB from '@/database/models/app-db';
 import AudioMetadata from '@/database/models/audio-metadata';
 import { db } from '@/database/models/db';
 import { fetchStorage, fetchStorageBucketMetadata } from '@/database/utils/audio-records.utils';
-import { reportInfo, reportError } from '@/features/logging/monitoring-handler';
-import { logRejectedResults } from '@/features/logging/logging.utils';
+import { withSettledSummary, type SyncSummary } from '@/features/logging/logging.utils';
 import { ZipExtractionError } from '@/types/error.types';
 import type { AudioRecordLocal } from '@/types/audio.types';
 import { Entity } from 'dexie';
@@ -33,39 +32,28 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    * Synchronizes all audio archives from the remote bucket to local storage.
    * Fetches the bucket file list once, then downloads only files newer than the locally stored version.
    */
-  static async syncFromRemote(): Promise<void> {
-    let bucketMetadata;
-    try {
-      bucketMetadata = await fetchStorageBucketMetadata(config.audio.archiveBucketName);
-    } catch (error) {
-      reportError('Audio sync: fetchStorageBucketMetadata failed', error);
-      logRejectedResults(
-        [{ status: 'rejected', reason: error }],
-        'Operation failed during audio data sync',
-      );
-      return;
+  static async syncFromRemote(): Promise<SyncSummary> {
+    const bucketMetadata = await fetchStorageBucketMetadata(config.audio.archiveBucketName);
+
+    if (!bucketMetadata || bucketMetadata.size === 0) {
+      return { total: 0, success: 0, failed: 0 };
     }
 
-    if (!bucketMetadata) return;
-
-    if (bucketMetadata.size === 0) {
-      reportInfo('No audio archives found in remote bucket.');
-      return;
-    }
-
-    const results = await Promise.allSettled(
+    return withSettledSummary(
       Array.from(bucketMetadata.entries(), ([archiveName, remoteUpdatedAt]) =>
         this.syncArchiveFromRemote(archiveName, remoteUpdatedAt),
       ),
+      'Audio archive sync',
+      3,
+      false,
     );
-    logRejectedResults(results, 'Operation failed during audio data sync');
   }
 
   /**
    * Removes orphaned audio records from the database.
    * Orphaned records are those that exist in the audio_records table but are not referenced by any user items.
    */
-  static async removeOrphaned(): Promise<void> {
+  static async removeOrphaned(): Promise<SyncSummary> {
     const existingFilenames = await db.audio_records.toCollection().primaryKeys();
     const allUserItems = await UserItem.getAll();
     const expectedAudio = Array.from(
@@ -77,10 +65,12 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
 
     const orphaned = Array.from(existingSet).filter((x) => !expectedSet.has(x));
 
-    if (orphaned.length > 0) {
-      await db.audio_records.bulkDelete(orphaned);
-      reportInfo(`Deleted ${orphaned.length} orphaned audio records.`);
+    if (orphaned.length === 0) {
+      return { total: 0, success: 0, failed: 0 };
     }
+
+    const tasks = orphaned.map((filename) => db.audio_records.delete(filename));
+    return withSettledSummary(tasks, 'Remove orphaned audio', 3, false);
   }
 
   /**
@@ -105,8 +95,6 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
       );
       await AudioMetadata.markAsFetched(archiveName, remoteUpdatedAt);
     });
-
-    reportInfo(`Successfully synced audio archive: ${archiveName}`);
   }
 
   /**
@@ -146,7 +134,6 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
     const audioBlob = await fetchStorage(config.audio.audioBucketName, audioName);
     await db.audio_records.put({ filename: audioName, audioBlob });
 
-    reportInfo(`Successfully synced audio file: ${audioName}`);
     return { filename: audioName, audioBlob };
   }
 }

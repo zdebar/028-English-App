@@ -1,7 +1,7 @@
 import { ROUTES } from '@/config/routes.config';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { reportError } from '@/features/logging/monitoring-handler';
+import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useAudioManager } from '@/hooks/use-audio-manager';
 import { useArray } from '@/hooks/use-array';
@@ -31,15 +31,15 @@ export default function BlockItemsOverview() {
   }
 
   const fetchBlock = useCallback(async (): Promise<BlockType | null> => {
-    if (!userId || !blockId) return null;
+    if (!blockId) return null;
     try {
       return await Blocks.getById(blockId);
     } catch (err) {
       showToast(TEXTS.loadingError, 'error');
       reportError('Failed to fetch block details', err);
-      return null;
+      throw err;
     }
-  }, [userId, blockId]);
+  }, [blockId]);
 
   const { data: block, loading: blockLoading } = useFetch<BlockType>(fetchBlock);
 
@@ -72,7 +72,8 @@ export default function BlockItemsOverview() {
   const handleReset = useCallback(async () => {
     if (!userId || !blockId) return;
     try {
-      await UserItem.resetItemsByBlockId(userId, blockId);
+      const resetCount = await UserItem.resetItemsByBlockId(userId, blockId);
+      reportInfo(`Reset ${resetCount} items in block ${blockId} for user ${userId}`);
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (error) {
       showToast(TEXTS.resetProgressErrorToast, 'error');
@@ -93,7 +94,7 @@ export default function BlockItemsOverview() {
       handleReset={handleReset}
       onClose={onClose}
     >
-      <DataState loading={itemsLoading} hasData={hasItems}>
+      <DataState loading={itemsLoading} hasData={hasItems} noDataMessage={TEXTS.noBlockItems}>
         {items.map((item) => (
           <ListButton
             key={item.item_id}

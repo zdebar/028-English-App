@@ -11,10 +11,9 @@ const mocks = vi.hoisted(() => ({
   rpc: vi.fn(),
   getNextAt: vi.fn(),
   getSyncTimestamps: vi.fn(),
-  convertLocalToSQL: vi.fn(),
-  convertSQLToLocal: vi.fn(),
+  convertLocalToExport: vi.fn(),
+  convertAPIToLocal: vi.fn(),
   markAsSynced: vi.fn(),
-  addItemCount: vi.fn(),
   triggerLevelsUpdatedEvent: vi.fn(),
 }));
 
@@ -87,12 +86,6 @@ vi.mock('@/database/models/metadata', () => ({
   },
 }));
 
-vi.mock('@/database/models/user-scores', () => ({
-  default: {
-    addItemCount: (...args: unknown[]) => mocks.addItemCount(...args),
-  },
-}));
-
 vi.mock('@/database/models/grammar', () => ({
   default: {
     getStartedIds: vi.fn().mockResolvedValue([]),
@@ -104,13 +97,13 @@ vi.mock('@/database/utils/user-items.utils', async () => {
   return {
     ...actual,
     getNextAt: (...args: unknown[]) => mocks.getNextAt(...args),
-    convertLocalToSQL: (...args: unknown[]) => mocks.convertLocalToSQL(...args),
-    convertSQLToLocal: (...args: unknown[]) => mocks.convertSQLToLocal(...args),
+    convertLocalToExport: (...args: unknown[]) => mocks.convertLocalToExport(...args),
+    convertAPIToLocal: (...args: unknown[]) => mocks.convertAPIToLocal(...args),
   };
 });
 
-vi.mock('@/database/utils/data-sync.utils', async () => {
-  const actual = await vi.importActual<any>('@/database/utils/data-sync.utils');
+vi.mock('@/database/utils/sync-generic.utils', async () => {
+  const actual = await vi.importActual<any>('@/database/utils/sync-generic.utils');
   return {
     ...actual,
     getSyncTimestamps: (...args: unknown[]) => mocks.getSyncTimestamps(...args),
@@ -133,12 +126,11 @@ describe('UserItem', () => {
       lastSyncedAt: '2026-03-03T00:00:00.000Z',
       newSyncedAt: '2026-03-04T00:00:00.000Z',
     });
-    mocks.convertLocalToSQL.mockImplementation((item: unknown) => ({
+    mocks.convertLocalToExport.mockImplementation((item: unknown) => ({
       ...(item as any),
       sql: true,
     }));
-    mocks.convertSQLToLocal.mockImplementation((item: unknown) => item);
-    mocks.addItemCount.mockResolvedValue(undefined);
+    mocks.convertAPIToLocal.mockImplementation((item: unknown) => item);
     mocks.equalsDelete.mockResolvedValue(0);
     mocks.blockEqualsToArray.mockResolvedValue([]);
     mocks.updatedBetweenToArray.mockResolvedValue([]);
@@ -156,11 +148,11 @@ describe('UserItem', () => {
     vi.restoreAllMocks();
   });
 
-  it('savePracticeDeck stores items and increments score', async () => {
+  it('savePracticeDeck stores items without changing score', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-03-04T09:00:00.000Z'));
 
-    await UserItem.savePracticeDeck('u1', [
+    await UserItem.savePracticeDeck([
       {
         user_id: 'u1',
         item_id: 1,
@@ -172,14 +164,12 @@ describe('UserItem', () => {
     ]);
 
     expect(mocks.bulkPut).toHaveBeenCalledTimes(1);
-    expect(mocks.addItemCount).toHaveBeenCalledWith('u1', 1, '2026-03-04T09:00:00.000Z');
   });
 
   it('savePracticeDeck uses provided dateTime when passed explicitly', async () => {
     const dateTime = '2026-03-06T12:00:00.000Z';
 
     await UserItem.savePracticeDeck(
-      'u1',
       [
         {
           user_id: 'u1',
@@ -202,7 +192,6 @@ describe('UserItem', () => {
         }),
       ]),
     );
-    expect(mocks.addItemCount).toHaveBeenCalledWith('u1', 1, dateTime);
   });
 
   it('deleteAllItems deletes by user_id', async () => {
@@ -233,6 +222,7 @@ describe('UserItem', () => {
       {
         user_id: 'u1',
         item_id: 1,
+        progress_history: [{ progress: 1, created_at: '2026-03-03T09:59:00.000Z' }],
         updated_at: '2026-03-03T10:00:00.000Z',
         deleted_at: null,
       },
@@ -262,6 +252,7 @@ describe('UserItem', () => {
         expect.objectContaining({
           user_id: 'u1',
           item_id: 1,
+          progress_history: [{ progress: 1, created_at: '2026-03-03T09:59:00.000Z' }],
           updated_at: '2026-03-03T10:00:00.000Z',
         }),
       ],

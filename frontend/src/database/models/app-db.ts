@@ -10,6 +10,13 @@ import type Lessons from '@/database/models/lessons';
 import type Levels from '@/database/models/levels';
 import type Blocks from '@/database/models/blocks';
 
+/**
+ * Application IndexedDB wrapper built on Dexie.
+ *
+ * Declares the concrete tables used by the app and their schema.
+ * Each table maps to a model class under `database/models` and is exposed
+ * as an `EntityTable` for typed access throughout the frontend code.
+ */
 export default class AppDB extends Dexie {
   levels!: EntityTable<Levels, 'id'>;
   lessons!: EntityTable<Lessons, 'id'>;
@@ -31,7 +38,7 @@ export default class AppDB extends Dexie {
       blocks: 'id, sort_order',
       grammar: 'id, sort_order',
       user_items:
-        '[user_id+item_id], [user_id+grammar_id+started_at], [user_id+grammar_id+started_at+is_study_item], [user_id+started_at], [user_id+updated_at], [user_id+next_at+sort_order], [user_id+next_at+mastered_at+sort_order+is_study_item], [user_id+block_id]',
+        '[user_id+item_id], [user_id+grammar_id+started_at], [user_id+is_vocabulary+started_at+is_study_item], [user_id+started_at], [user_id+updated_at], [user_id+next_at+sort_order], [user_id+next_at+mastered_at+sort_order+is_study_item], [user_id+block_id]',
       user_scores: '[user_id+date], [user_id+updated_at]',
       audio_records: 'filename',
       audio_metadata: 'archive_name',

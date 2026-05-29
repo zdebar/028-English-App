@@ -48,8 +48,14 @@ export const useUserStore = create<UserState>((set, get) => {
     };
     globalThis.addEventListener('levelsUpdated', levelsUpdatedListener);
     dailyCountUpdatedListener = (event: any) => {
-      const { userId } = event.detail || {};
-      if (userId) {
+      const { userId, dailyCount } = event.detail || {};
+      if (!userId) {
+        return;
+      }
+
+      if (typeof dailyCount === 'number') {
+        set({ dailyCount });
+      } else {
         get().reloadDailyCount(userId);
       }
     };

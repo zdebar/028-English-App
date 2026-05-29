@@ -4,7 +4,7 @@ import os
 import pandas as pd
 from typing import Any, List, Union
 
-INT_COLUMNS = {"id", "sort_order", "grammar_id", "lesson_id"}
+INT_COLUMNS = {"id", "sort_order", "grammar_id", "lesson_id", "block_id", "note_id"}
 
 
 def clean_data_frame(df: pd.DataFrame) -> pd.DataFrame:
@@ -58,7 +58,7 @@ def _clean_and_convert_col(col: str, value: Any) -> Any:
 def read_vocab_csv(
     file_path: str,
     columns: List[str] = [
-        "id", "czech", "english", "pronunciation", "audio", "sort_order", "grammar_id", "lesson_id"
+        "id", "czech", "english", "pronunciation", "audio", "sort_order", "grammar_id", "lesson_id", "block_id", "note_id"
     ],
 ) -> pd.DataFrame:
     """

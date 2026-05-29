@@ -8,6 +8,7 @@ interface AuthState {
   userId: string | null;
   userEmail: string | null;
   userFullName: string | null;
+  isDemoUser: boolean;
   loading: boolean;
   initializeAuth: () => () => void;
   handleLogout: (options?: {
@@ -21,7 +22,13 @@ const INITIAL_AUTH_STATE = {
   userId: null,
   userEmail: null,
   userFullName: null,
+  isDemoUser: false,
 };
+
+function isDemoSession(session: Session | null): boolean {
+  const appMetadata = session?.user?.app_metadata as { is_demo?: boolean } | undefined;
+  return appMetadata?.is_demo === true;
+}
 
 /**
  * A Zustand store hook for managing authentication state using Supabase.
@@ -49,6 +56,7 @@ export const useAuthStore = create<AuthState>((set) => {
       userEmail: session?.user?.email ?? null,
       userFullName:
         session?.user?.user_metadata?.full_name || session?.user?.user_metadata?.name || null,
+      isDemoUser: isDemoSession(session),
       loading: false,
     });
   };

@@ -3,12 +3,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   dataSync: vi.fn(),
-  audioSync: vi.fn(),
   dataSyncOnUnmount: vi.fn(),
+  syncFromRemote: vi.fn(),
   removeOrphaned: vi.fn(),
   showToast: vi.fn(),
-  logRejectedResults: vi.fn(),
   reportError: vi.fn(),
+  reportInfo: vi.fn(),
 }));
 
 vi.mock('@/config/config', () => ({
@@ -21,12 +21,12 @@ vi.mock('@/config/config', () => ({
 
 vi.mock('@/database/utils/data-sync.utils', () => ({
   dataSync: (...args: unknown[]) => mocks.dataSync(...args),
-  audioSync: (...args: unknown[]) => mocks.audioSync(...args),
   dataSyncOnUnmount: (...args: unknown[]) => mocks.dataSyncOnUnmount(...args),
 }));
 
 vi.mock('@/database/models/audio-records', () => ({
   default: {
+    syncFromRemote: (...args: unknown[]) => mocks.syncFromRemote(...args),
     removeOrphaned: (...args: unknown[]) => mocks.removeOrphaned(...args),
   },
 }));
@@ -36,12 +36,9 @@ vi.mock('@/features/toast/use-toast-store', () => ({
     selector({ showToast: mocks.showToast }),
 }));
 
-vi.mock('@/features/logging/logging.utils', () => ({
-  logRejectedResults: (...args: unknown[]) => mocks.logRejectedResults(...args),
-}));
-
 vi.mock('@/features/logging/monitoring-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
+  reportInfo: (...args: unknown[]) => mocks.reportInfo(...args),
 }));
 
 vi.mock('@/locales/cs', () => ({
@@ -59,10 +56,9 @@ describe('usePeriodicSync', () => {
     vi.useFakeTimers();
 
     mocks.dataSync.mockResolvedValue(undefined);
-    mocks.audioSync.mockResolvedValue(undefined);
+    mocks.syncFromRemote.mockResolvedValue({ total: 2, success: 2, failed: 0 });
     mocks.dataSyncOnUnmount.mockResolvedValue(undefined);
-    mocks.removeOrphaned.mockResolvedValue(undefined);
-    mocks.logRejectedResults.mockReturnValue(false);
+    mocks.removeOrphaned.mockResolvedValue(0);
   });
 
   afterEach(() => {
@@ -82,15 +78,15 @@ describe('usePeriodicSync', () => {
     });
 
     expect(mocks.dataSync).toHaveBeenCalledWith('u1');
-    expect(mocks.audioSync).toHaveBeenCalledWith('u1');
+    expect(mocks.syncFromRemote).toHaveBeenCalled();
     expect(mocks.showToast).toHaveBeenCalledWith('Sync success', 'success');
     expect(mocks.removeOrphaned).toHaveBeenCalled();
 
     unmount();
   });
 
-  it('shows error toast and logs when settled results contain rejection', async () => {
-    mocks.logRejectedResults.mockReturnValue(true);
+  it('shows error toast and logs when sync fails', async () => {
+    mocks.dataSync.mockRejectedValue(new Error('sync error'));
 
     const { unmount } = renderHook(() => usePeriodicSync('u1'));
 

@@ -1,16 +1,11 @@
-import config from '@/config/config';
-import { supabaseInstance } from '@/config/supabase.config';
-import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
-import { SupabaseError } from '@/types/error.types';
 import type { LevelType, LevelOverviewType } from '@/types/generic.types';
 import { TableName } from '@/types/table.types';
-import { assertNonEmptyString } from '@/utils/assertions.utils';
-import Dexie, { Entity } from 'dexie';
-import { syncFromRemoteGeneric } from '../utils/data-sync.utils';
+import Dexie from 'dexie';
 import { aggregateLevels } from '../utils/levels.utils';
 import UserItem from './user-items';
 import Lessons from './lessons';
+import SyncEntityModel from './sync-entity-model';
 
 /**
  * Represents a level entity in the local database.
@@ -20,59 +15,26 @@ import Lessons from './lessons';
  * @method syncFromRemote - Synchronizes levels from the remote server with the local database.
  *
  */
-export default class Levels extends Entity<AppDB> implements LevelType {
+export default class Levels extends SyncEntityModel implements LevelType {
   id!: number;
   name!: string;
   note!: string;
   sort_order!: number;
   deleted_at!: string | null;
 
+  static override readonly syncTable = db.levels as Dexie.Table<LevelType, number>;
+  static override readonly syncTableName = TableName.Levels;
+  static override readonly syncEntityName = 'levels';
+  static override readonly syncSelect = 'id, name, note, sort_order, deleted_at';
+
   /**
    * Retrieves a comprehensive overview of user levels with their progress.
    * @param userId - The unique identifier of the user
    */
   static async getOverview(userId: string): Promise<LevelOverviewType[]> {
-    assertNonEmptyString(userId, 'userId');
     const items = await UserItem.getByUserId(userId);
     const lessons = await Lessons.getAll();
     const levels = await db.levels.orderBy('sort_order').toArray();
     return aggregateLevels(items, lessons, levels);
-  }
-
-  /**
-   * Synchronizes levels from the remote server with the local database.
-   * @param doFullSync - If true, performs a full sync by clearing all existing levels
-   *                     and fetching all levels from the epoch start date.
-   *                     If false, performs an incremental sync fetching only levels
-   *                     modified since the last sync timestamp. Defaults to false.
-   */
-  static async syncFromRemote(doFullSync: boolean = false): Promise<void> {
-    await syncFromRemoteGeneric<LevelType>(
-      db.levels as Dexie.Table<LevelType, number>,
-      TableName.Levels,
-      this.fetchFromRemote,
-      doFullSync,
-    );
-  }
-
-  /**
-   * Fetches levels from Supabase that have been updated since the specified timestamp.
-   * @param lastSyncedAt - The timestamp of the last sync operation. Defaults to the application's epoch start date.
-   */
-  private static async fetchFromRemote(
-    lastSyncedAt: string = config.database.epochStartDate,
-  ): Promise<LevelType[]> {
-    const { data: levels, error } = await supabaseInstance
-      .from('levels')
-      .select('id, name, note, sort_order, deleted_at')
-      .gt('updated_at', lastSyncedAt);
-
-    if (error) {
-      throw new SupabaseError(`Failed to fetch levels data from supabase`, error, {
-        lastSyncedAt,
-      });
-    }
-
-    return levels ?? [];
   }
 }

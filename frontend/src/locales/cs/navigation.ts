@@ -4,6 +4,7 @@ export const NAVIGATION_TEXTS = {
   tooltipPractice: 'Procvičovat',
   tooltipProfile: 'Profil',
   tooltipHelp: 'Nápověda',
+  tooltipNotes: 'Poznámka',
 
   // Themes
   themeLight: 'Přepnout na tmavý režim',

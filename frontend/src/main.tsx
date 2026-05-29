@@ -8,7 +8,7 @@ import { BrowserRouter } from 'react-router-dom';
 initializeMonitoring();
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
+  globalThis.addEventListener('load', () => {
     if (import.meta.env.PROD) {
       navigator.serviceWorker.register('/service-worker.js');
       navigator.serviceWorker.addEventListener('message', (event) => {

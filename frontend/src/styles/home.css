@@ -1,0 +1,17 @@
+.home-star-button svg path {
+  transition:
+    stroke-width 0.12s ease-in-out,
+    stroke 0.12s ease-in-out;
+  stroke-width: 1.25;
+}
+
+.home-star-button:hover svg path,
+.home-star-button:focus-visible svg path {
+  stroke-width: 1.75;
+}
+
+/* Fallback visual accent if stroke-width change is ignored */
+.home-star-button:hover svg,
+.home-star-button:focus-visible svg {
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.12));
+}

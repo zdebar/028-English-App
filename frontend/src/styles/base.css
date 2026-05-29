@@ -22,7 +22,7 @@
   }
 
   ul {
-    @apply list-disc pl-6 text-sm;
+    @apply list-disc pl-6;
   }
 
   li {

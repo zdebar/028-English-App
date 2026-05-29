@@ -1,26 +1,32 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const mocks = vi.hoisted(() => ({
-  theme: 'light' as 'light' | 'dark',
-  userId: 'u1' as string | null,
-  userFullName: 'User One' as string | null,
-  userEmail: 'u1@example.com' as string | null,
-  dailyCount: 3,
-  isSynchronized: true,
-}));
+const mocks = vi.hoisted(
+  (): {
+    theme: 'light' | 'dark';
+    userId: string | null;
+    userFullName: string | null;
+    userEmail: string | null;
+    dailyCount: number;
+    isSynchronized: boolean;
+  } => ({
+    theme: 'light',
+    userId: 'u1',
+    userFullName: 'User One',
+    userEmail: 'u1@example.com',
+    dailyCount: 3,
+    isSynchronized: true,
+  }),
+);
 
 vi.mock('@/config/config', () => ({
   default: {
     practice: {
       dailyGoal: 10,
+      starChunk: 50,
+      starsPerRow: 10,
     },
   },
-}));
-
-vi.mock('@/features/theme/use-theme-store', () => ({
-  useThemeStore: (selector: (state: { theme: 'light' | 'dark' }) => unknown) =>
-    selector({ theme: mocks.theme }),
 }));
 
 vi.mock('@/features/auth/use-auth-store', () => ({
@@ -54,22 +60,17 @@ vi.mock('@/locales/cs', () => ({
     appDescription: 'Desc',
     appTestDescription: 'Test mode',
     guide: 'Guide',
+    profileNameLabel: 'Jmeno',
+    notAvailable: 'Nedostupne',
     userLabel: 'User',
     userStatsLabel: 'Today',
+    practiceOverviewOpen: 'Open practice overview',
+    starsToday: 'Stars today',
     today: 'Today',
     dailyGoal: 'Goal',
     syncWarning: 'Data may be stale.',
     signupHint: 'Signup hint',
   },
-}));
-
-vi.mock('@/components/UI/PropertyView', () => ({
-  default: ({ label, children }: any) => (
-    <div>
-      <span>{label}</span>
-      <span>{children}</span>
-    </div>
-  ),
 }));
 
 vi.mock('@/components/UI/Dashboard', () => ({
@@ -80,32 +81,29 @@ vi.mock('@/components/UI/Notification', () => ({
   default: ({ children }: any) => <div>{children}</div>,
 }));
 
-vi.mock('@/components/UI/GoalMetView', () => ({
-  default: ({ current, goal }: { current: number; goal: number }) => (
-    <span>
-      {current}/{goal}
-    </span>
-  ),
-}));
-
 vi.mock('@/features/pwa/InstallPwaButton', () => ({
   InstallPWAButton: () => <button type="button">Install</button>,
 }));
 
-vi.mock('@supabase/auth-ui-react', () => ({
-  Auth: () => <div data-testid="auth" />,
+vi.mock('@/components/UI/StarProgress', () => ({
+  default: ({ count, chunkSize, starsPerRow }: any) => (
+    <div data-testid="star-progress">
+      {count}:{chunkSize}:{starsPerRow}
+    </div>
+  ),
 }));
 
-vi.mock('@supabase/auth-ui-shared', () => ({
-  ThemeSupa: {},
+vi.mock('@/features/demo/DemoSessionPanel', () => ({
+  default: () => <div data-testid="demo-session-panel" />,
 }));
 
-vi.mock('@/config/supabase.config', () => ({
-  supabaseInstance: {},
+vi.mock('@/features/auth/GoogleAuthButton', () => ({
+  default: () => <div data-testid="google-auth-button" />,
 }));
 
 vi.mock('react-router-dom', () => ({
   Link: ({ children }: any) => <div>{children}</div>,
+  useNavigate: () => vi.fn(),
 }));
 
 import Home from '@/pages/Home';
@@ -132,6 +130,7 @@ describe('Home', () => {
     render(<Home />);
 
     expect(screen.queryByText('Data may be stale.')).toBeNull();
+    expect(screen.getByTestId('star-progress').textContent).toBe('3:50:10');
   });
 
   it('renders auth UI when user is signed out', () => {
@@ -139,7 +138,8 @@ describe('Home', () => {
 
     render(<Home />);
 
-    expect(screen.getByTestId('auth')).toBeTruthy();
+    expect(screen.getByTestId('demo-session-panel')).toBeTruthy();
+    expect(screen.getByTestId('google-auth-button')).toBeTruthy();
     expect(screen.queryByText('Data may be stale.')).toBeNull();
   });
 });

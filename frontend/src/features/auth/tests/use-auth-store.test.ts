@@ -38,6 +38,7 @@ describe('useAuthStore', () => {
       userId: null,
       userEmail: null,
       userFullName: null,
+      isDemoUser: false,
       loading: true,
     });
 

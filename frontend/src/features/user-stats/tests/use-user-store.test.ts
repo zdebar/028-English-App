@@ -95,4 +95,16 @@ describe('useUserStore', () => {
 
     expect(spy).toHaveBeenCalledWith('u9');
   });
+
+  it('reacts to dailyCountUpdated event with direct count without reloading', () => {
+    const spy = vi.fn().mockResolvedValue(undefined);
+    useUserStore.setState({ dailyCount: 0, reloadDailyCount: spy as any });
+
+    globalThis.dispatchEvent(
+      new CustomEvent('dailyCountUpdated', { detail: { userId: 'u9', dailyCount: 12 } }),
+    );
+
+    expect(useUserStore.getState().dailyCount).toBe(12);
+    expect(spy).not.toHaveBeenCalled();
+  });
 });

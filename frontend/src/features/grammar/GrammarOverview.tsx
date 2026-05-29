@@ -10,7 +10,7 @@ import { useArray } from '@/hooks/use-array';
 import Grammar from '@/database/models/grammar';
 import type { GrammarType } from '@/types/generic.types';
 import UserItem from '@/database/models/user-items';
-import { reportError } from '@/features/logging/monitoring-handler';
+import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { DataState } from '@/components/UI/DataState';
 
@@ -46,6 +46,7 @@ export default function GrammarOverview(): JSX.Element {
     currentItem,
     loading,
     hasData,
+    reload,
   } = useArray<GrammarType>(fetchGrammar);
 
   const handleReset = useCallback(async () => {
@@ -54,7 +55,9 @@ export default function GrammarOverview(): JSX.Element {
     }
 
     try {
-      await UserItem.resetItemsByGrammarId(userId, currentItem.id);
+      const resetCount = await UserItem.resetItemsByGrammarId(userId, currentItem.id);
+      reportInfo(`Grammar ${currentItem.id} reset completed: ${resetCount} items reset.`);
+      reload();
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (err) {
       showToast(TEXTS.resetProgressErrorToast, 'error');
@@ -70,7 +73,7 @@ export default function GrammarOverview(): JSX.Element {
         loading={loading}
         onClose={() => navigate('/profile')}
       >
-        <DataState loading={loading} hasData={hasData}>
+        <DataState loading={loading} hasData={hasData} noDataMessage={TEXTS.noGrammar}>
           {grammarList.map((item, index) => (
             <ListButton
               key={item.id}

@@ -5,7 +5,6 @@ export const PRACTICE_TEXTS = {
   loadingAudio: 'Načítá se audio ...',
   progress: 'Pokrok',
   today: 'Dnes',
-  dailyGoal: 'Denní cíl',
   grammar: 'Gramatika',
   audio: 'Přehrát audio',
   complete: 'Dokončit',
@@ -28,4 +27,6 @@ export const PRACTICE_TEXTS = {
   singular: 'Jednotné číslo',
   pluralCut: '(pl.)',
   plural: 'Množné číslo',
+  nextStarProgress: 'Postup na další hvězdu',
+  currentPracticeStar: 'Aktuální hvězda procvičování',
 } as const;

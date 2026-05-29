@@ -20,14 +20,14 @@ import Grammar from '@/pages/Grammar';
 import Home from '@/pages/Home';
 import Levels from '@/pages/Levels';
 import Practice from '@/pages/Practice';
+import PracticeOverview from '@/pages/PracticeOverview';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import Profile from '@/pages/Profile';
 import Vocabulary from '@/pages/Vocabulary';
-import { lazy, Suspense, useEffect } from 'react';
+import Guide from '@/pages/Guide';
+import { useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import './styles/index.css';
-
-const Guide = lazy(() => import('@/pages/Guide'));
 
 export default function App() {
   const userId = useAuthStore((state) => state.userId);
@@ -70,28 +70,25 @@ export default function App() {
         <OverlayMask />
         <Header />
         <main className="relative flex grow flex-col items-center gap-4">
-          <Suspense
-            fallback={<Notification className="pt-8">{TEXTS.syncLoadingText}</Notification>}
-          >
-            <Routes>
-              <Route path={ROUTES.home} element={<Home />} />
-              <Route path={ROUTES.privacyPolicy} element={<PrivacyPolicy />} />
-              <Route path={ROUTES.guide} element={<Guide />} />
-              <Route element={<ProtectedLayout />}>
-                <Route path={ROUTES.practice} element={<Practice />} />
-                <Route path={ROUTES.profile} element={<Profile />} />
-                <Route path={ROUTES.levels} element={<Levels />} />
-                <Route path={ROUTES.blocks} element={<Blocks />} />
-                <Route path={ROUTES.blocksDetail} element={<BlockItems />} />
-                <Route path={ROUTES.grammar} element={<Grammar />} />
-                <Route path={ROUTES.vocabulary} element={<Vocabulary />} />
-              </Route>
-              <Route
-                path="*"
-                element={<Notification className="pt-8">{TEXTS.pageNotFound}</Notification>}
-              />
-            </Routes>
-          </Suspense>
+          <Routes>
+            <Route path={ROUTES.home} element={<Home />} />
+            <Route path={ROUTES.privacyPolicy} element={<PrivacyPolicy />} />
+            <Route path={ROUTES.guide} element={<Guide />} />
+            <Route element={<ProtectedLayout />}>
+              <Route path={ROUTES.practice} element={<Practice />} />
+              <Route path={ROUTES.practiceOverview} element={<PracticeOverview />} />
+              <Route path={ROUTES.profile} element={<Profile />} />
+              <Route path={ROUTES.levels} element={<Levels />} />
+              <Route path={ROUTES.blocks} element={<Blocks />} />
+              <Route path={ROUTES.blocksDetail} element={<BlockItems />} />
+              <Route path={ROUTES.grammar} element={<Grammar />} />
+              <Route path={ROUTES.vocabulary} element={<Vocabulary />} />
+            </Route>
+            <Route
+              path="*"
+              element={<Notification className="pt-8">{TEXTS.pageNotFound}</Notification>}
+            />
+          </Routes>
         </main>
         {location.pathname === '/' && <Footer />}
       </div>

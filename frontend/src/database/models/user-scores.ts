@@ -3,19 +3,16 @@ import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import { getTodayShortDate } from '@/database/utils/database.utils';
-import { getSyncTimestamps, splitDeleted } from '../utils/data-sync.utils';
-import { reportInfo } from '@/features/logging/monitoring-handler';
+import { getSyncTimestamps, splitDeleted } from '../utils/sync-generic.utils';
 import { SupabaseError } from '@/types/error.types';
 import { type UserScoreType } from '@/types/generic.types';
 import { TableName } from '@/types/table.types';
-import {
-  assertNonEmptyString,
-  assertNonNegativeInteger,
-  assertPositiveInteger,
-  assertShortDateString,
-} from '@/utils/assertions.utils';
+import { assertNonNegativeInteger, assertShortDateString } from '@/utils/assertions.utils';
+import { triggerDailyCountUpdatedEvent } from '@/utils/dashboard.utils';
 import { Entity } from 'dexie';
 import Metadata from './metadata';
+import { reportInfo } from '@/features/logging/monitoring-handler';
+
 /**
  * Represents a user score entity in the application database.
  *
@@ -42,13 +39,16 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
     count: number,
     dateTime: string = new Date(Date.now()).toISOString(),
   ): Promise<void> {
-    assertNonEmptyString(userId, 'userId');
-    assertPositiveInteger(count, 'addItemCount');
+    if (count === 0) {
+      return;
+    }
 
     const date = new Date(dateTime).toLocaleDateString('en-CA');
     const existingRecord = await db.user_scores.get([userId, date]);
     const newItemCount = (existingRecord?.item_count ?? 0) + count;
     await db.user_scores.put(this.createRecord(userId, date, newItemCount));
+
+    triggerDailyCountUpdatedEvent(userId, newItemCount);
   }
 
   /**
@@ -56,9 +56,20 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
    * @param userId The user ID.
    */
   static async getOrCreateTodayScore(userId: string): Promise<number> {
-    assertNonEmptyString(userId, 'userId');
     const today = getTodayShortDate();
     return (await db.user_scores.get([userId, today]))?.item_count ?? 0;
+  }
+
+  /**
+   * Fetches all non-deleted score records for a user ordered by date descending.
+   * @param userId The user ID.
+   */
+  static async getByUserId(userId: string): Promise<UserScoreType[]> {
+    const records = await db.user_scores.where('user_id').equals(userId).toArray();
+
+    return records
+      .filter((record) => record.deleted_at == null)
+      .sort((left, right) => right.date.localeCompare(left.date));
   }
 
   /**
@@ -67,7 +78,6 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
    * @param userId - The ID of the user whose scores should be cleared
    */
   static async deleteByUserId(userId: string): Promise<void> {
-    assertNonEmptyString(userId, 'userId');
     await db.user_scores.where('user_id').equals(userId).delete();
   }
 
@@ -83,10 +93,9 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
    * @param userId - The unique identifier of the user whose scores to sync
    * @param doFullSync - If true, performs a full sync by deleting all local scores
    *                     and pulling from the epoch start date. Defaults to false.
+   * @return The count of items that were updated from the remote database
    */
-  static async syncFromRemote(userId: string, doFullSync: boolean = false): Promise<void> {
-    assertNonEmptyString(userId, 'userId');
-
+  static async syncFromRemote(userId: string, doFullSync: boolean = false): Promise<number> {
     // Step 1: Get the last synced timestamp for user scores
     const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(
       doFullSync,
@@ -96,6 +105,8 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
 
     // Step 2: Push local changes and pull updates in a single RPC call
     const localScores = await this.getUserScoresForSync(userId, lastSyncedAt, newSyncedAt);
+    reportInfo(`Completed ${localScores.length} UserScores push to remote`);
+
     const updatedScores = await this.syncWithRemote(userId, localScores, lastSyncedAt);
     const { toUpsert, toDelete } = splitDeleted(updatedScores);
 
@@ -112,7 +123,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
       await Metadata.markAsSynced(TableName.UserScores, newSyncedAt, userId);
     });
 
-    reportInfo(`Completed ${updatedScores.length} user scores pull from remote.`);
+    return updatedScores.length;
   }
 
   /**
@@ -130,11 +141,6 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
       .where('[user_id+updated_at]')
       .between([userId, lastSyncedAt], [userId, newSyncedAt], true, false)
       .toArray();
-
-    if (localScores.length === 0) {
-      reportInfo(`No user scores to push.`);
-      return [];
-    }
 
     return localScores;
   }
@@ -184,10 +190,6 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
         scoreCount: scores.length,
         lastSyncedAt,
       });
-    }
-
-    if (scores.length > 0) {
-      reportInfo(`Completed ${scores.length} user scores push to Supabase.`);
     }
 
     return updatedScores ?? [];
