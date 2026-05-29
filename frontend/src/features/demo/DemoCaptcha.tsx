@@ -1,5 +1,5 @@
 import { useEffect, useRef, type JSX } from 'react';
-import { ensureTurnstileLoaded } from '@/lib/turnstile-loader';
+import { ensureTurnstileLoaded } from '@/features/demo/turnstile-loader';
 
 type DemoCaptchaProps = Readonly<{
   siteKey: string;

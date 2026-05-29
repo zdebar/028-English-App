@@ -130,7 +130,7 @@ async function verifyTurnstileToken(
     });
 
     const data = await resp.json().catch(() => ({}));
-    if (resp.ok && data && data.success) {
+    if (resp.ok && data?.success) {
       return { success: true };
     }
 

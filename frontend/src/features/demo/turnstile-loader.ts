@@ -1,17 +1,19 @@
 const TURNSTILE_SCRIPT_ID = 'cf-turnstile-script';
-const TURNSTILE_SCRIPT_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+const TURNSTILE_SCRIPT_URL =
+  'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 
 let loadPromise: Promise<void> | null = null;
 
 export function ensureTurnstileLoaded(): Promise<void> {
   if ((globalThis as any).turnstile) return Promise.resolve();
-  if (loadPromise) return loadPromise;
+  if (loadPromise !== null) return loadPromise;
 
   loadPromise = new Promise<void>((resolve, reject) => {
     const existing = document.getElementById(TURNSTILE_SCRIPT_ID) as HTMLScriptElement | null;
     if (existing) {
       const rs = (existing as any).readyState;
-      const alreadyLoaded = existing.getAttribute('data-turnstile-loaded') === '1' || rs === 'complete' || rs === 'loaded';
+      const alreadyLoaded =
+        existing.dataset.turnstileLoaded === '1' || rs === 'complete' || rs === 'loaded';
       if (alreadyLoaded && (globalThis as any).turnstile) {
         resolve();
         return;
@@ -21,13 +23,17 @@ export function ensureTurnstileLoaded(): Promise<void> {
         'load',
         () => {
           try {
-            existing.setAttribute('data-turnstile-loaded', '1');
+            existing.dataset.turnstileLoaded = '1';
           } catch {}
           resolve();
         },
-        { once: true }
+        { once: true },
       );
-      existing.addEventListener('error', () => reject(new Error('Turnstile script failed to load')), { once: true });
+      existing.addEventListener(
+        'error',
+        () => reject(new Error('Turnstile script failed to load')),
+        { once: true },
+      );
       return;
     }
 
@@ -41,13 +47,15 @@ export function ensureTurnstileLoaded(): Promise<void> {
       'load',
       () => {
         try {
-          s.setAttribute('data-turnstile-loaded', '1');
+          s.dataset.turnstileLoaded = '1';
         } catch {}
         resolve();
       },
-      { once: true }
+      { once: true },
     );
-    s.addEventListener('error', () => reject(new Error('Turnstile script failed to load')), { once: true });
+    s.addEventListener('error', () => reject(new Error('Turnstile script failed to load')), {
+      once: true,
+    });
 
     document.head.appendChild(s);
   });
