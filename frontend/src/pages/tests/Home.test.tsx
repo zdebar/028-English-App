@@ -106,7 +106,7 @@ vi.mock('react-router-dom', () => ({
   useNavigate: () => vi.fn(),
 }));
 
-import Home from '@/pages/Home_temp';
+import Home from '@/pages/Home';
 
 describe('Home', () => {
   beforeEach(() => {
