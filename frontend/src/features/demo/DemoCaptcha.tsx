@@ -1,14 +1,11 @@
 import { useEffect, useRef, type JSX } from 'react';
+import { ensureTurnstileLoaded } from '@/lib/turnstile-loader';
 
 type DemoCaptchaProps = Readonly<{
   siteKey: string;
   size?: 'normal' | 'compact' | 'flexible';
   onTokenChange: (token: string | null) => void;
 }>;
-
-const TURNSTILE_SCRIPT_ID = 'cf-turnstile-script';
-const TURNSTILE_SCRIPT_URL =
-  'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 
 export default function DemoCaptcha({
   siteKey,
@@ -19,6 +16,8 @@ export default function DemoCaptcha({
   const widgetIdRef = useRef<string | null>(null);
 
   useEffect(() => {
+    let disposed = false;
+
     const safeRemoveWidget = () => {
       const id = widgetIdRef.current;
       if (!id) return;
@@ -51,23 +50,15 @@ export default function DemoCaptcha({
       });
     };
 
-    const existing = document.getElementById(TURNSTILE_SCRIPT_ID) as HTMLScriptElement | null;
-    if (existing) {
-      renderWidget();
-      return () => {
-        safeRemoveWidget();
-      };
-    }
-
-    const script = document.createElement('script');
-    script.id = TURNSTILE_SCRIPT_ID;
-    script.src = TURNSTILE_SCRIPT_URL;
-    script.async = true;
-    script.defer = true;
-    script.onload = renderWidget;
-    document.head.appendChild(script);
+    // ensure the Turnstile script is loaded centrally
+    ensureTurnstileLoaded()
+      .then(() => {
+        if (!disposed) renderWidget();
+      })
+      .catch(() => onTokenChange(null));
 
     return () => {
+      disposed = true;
       safeRemoveWidget();
     };
   }, [onTokenChange, siteKey, size]);

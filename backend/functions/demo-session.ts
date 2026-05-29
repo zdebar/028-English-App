@@ -39,6 +39,7 @@ const SUPABASE_ANON_KEY =
   PUBLISHABLE_KEY;
 const DEMO_EMAIL = Deno.env.get("DEMO_EMAIL") ?? "";
 const DEMO_PASSWORD = Deno.env.get("DEMO_PASSWORD") ?? "";
+const TURNSTILE_SECRET_KEY = Deno.env.get("TURNSTILE_SECRET_KEY") ?? "";
 
 function jsonResponse(
   body: unknown,
@@ -107,7 +108,40 @@ function validateEnvironment(): string | null {
     return "Missing PUBLISHABLE_KEY or SUPABASE_ANON_KEY";
   if (!DEMO_EMAIL) return "Missing DEMO_EMAIL";
   if (!DEMO_PASSWORD) return "Missing DEMO_PASSWORD";
+  if (!TURNSTILE_SECRET_KEY) return "Missing TURNSTILE_SECRET_KEY";
   return null;
+}
+
+async function verifyTurnstileToken(
+  token: string,
+  remoteip?: string,
+): Promise<{ success: boolean; detail?: string }> {
+  const url = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+  const params = new URLSearchParams();
+  params.append("secret", TURNSTILE_SECRET_KEY);
+  params.append("response", token);
+  if (remoteip) params.append("remoteip", remoteip);
+
+  try {
+    const resp = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: params.toString(),
+    });
+
+    const data = await resp.json().catch(() => ({}));
+    if (resp.ok && data && data.success) {
+      return { success: true };
+    }
+
+    const detail = Array.isArray(data["error-codes"])
+      ? data["error-codes"].join(", ")
+      : JSON.stringify(data);
+    return { success: false, detail };
+  } catch (err) {
+    console.error("Turnstile siteverify failed", err);
+    return { success: false, detail: String(err) };
+  }
 }
 
 Deno.serve(async (req: Request) => {
