@@ -6,3 +6,6 @@ frontend/TODO.md
 scripts/utils/__pycache__/
 .env
 .env.*
+
+supabase/
+node_modules/
