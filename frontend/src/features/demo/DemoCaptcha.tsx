@@ -45,9 +45,13 @@ export default function DemoCaptcha({
       widgetIdRef.current = ts.render(containerRef.current, {
         sitekey: siteKey,
         size,
+        retry: 'never',
+        'refresh-expired': 'manual',
+        'refresh-timeout': 'manual',
         callback: (token: string) => emitTokenChange(token),
         'error-callback': () => emitTokenChange(null),
         'expired-callback': () => emitTokenChange(null),
+        'timeout-callback': () => emitTokenChange(null),
       });
     };
 
@@ -62,7 +66,7 @@ export default function DemoCaptcha({
       disposed = true;
       safeRemoveWidget();
     };
-  }, [emitTokenChange, siteKey, size]);
+  }, [siteKey, size]);
 
   return <div ref={containerRef} className="w-full" />;
 }

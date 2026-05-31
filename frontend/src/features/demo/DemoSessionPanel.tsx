@@ -30,13 +30,19 @@ export default function DemoSessionPanel({
     setShowCaptcha(true);
   }, [showToast, turnstileSiteKey]);
 
+  const handleTokenChange = useCallback((token: string | null) => {
+    setCaptchaToken(token);
+  }, []);
+
   useEffect(() => {
     onCaptchaVisibilityChange?.(showCaptcha);
+  }, [onCaptchaVisibilityChange, showCaptcha]);
 
+  useEffect(() => {
     return () => {
       onCaptchaVisibilityChange?.(false);
     };
-  }, [onCaptchaVisibilityChange, showCaptcha]);
+  }, [onCaptchaVisibilityChange]);
 
   useEffect(() => {
     const submitDemoLogin = async () => {
@@ -66,7 +72,7 @@ export default function DemoSessionPanel({
   return (
     <div className="relative w-full">
       {showCaptcha ? (
-        <DemoCaptcha siteKey={turnstileSiteKey} onTokenChange={(token) => setCaptchaToken(token)} />
+        <DemoCaptcha siteKey={turnstileSiteKey} onTokenChange={handleTokenChange} />
       ) : (
         <button
           type="button"
