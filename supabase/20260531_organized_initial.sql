@@ -1,5 +1,5 @@
-
-
+-- Organized initial migration generated from remote_full.sql
+-- Order: SETs, extensions, tables & sequences, constraints, indexes, functions, triggers, FKs, policies (RLS), grants
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -12,39 +12,257 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
-
 COMMENT ON SCHEMA "public" IS 'standard public schema';
 
-
-
+-- Extensions
 CREATE EXTENSION IF NOT EXISTS "pg_stat_statements" WITH SCHEMA "extensions";
-
-
-
-
-
-
 CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA "extensions";
-
-
-
-
-
-
 CREATE EXTENSION IF NOT EXISTS "supabase_vault" WITH SCHEMA "vault";
-
-
-
-
-
-
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
 
+-- Tables and sequences
+CREATE TABLE IF NOT EXISTS "public"."blocks" (
+    "id" integer NOT NULL,
+    "name" "text" NOT NULL,
+    "note" "text" NOT NULL,
+    "sort_order" integer NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "deleted_at" timestamp with time zone,
+    CONSTRAINT "blocks_sort_order_check" CHECK (("sort_order" >= 1))
+);
 
+ALTER TABLE "public"."blocks" OWNER TO "postgres";
 
+CREATE SEQUENCE IF NOT EXISTS "public"."blocks_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
+ALTER SEQUENCE "public"."blocks_id_seq" OWNER TO "postgres";
+ALTER SEQUENCE "public"."blocks_id_seq" OWNED BY "public"."blocks"."id";
 
+CREATE TABLE IF NOT EXISTS "public"."grammar" (
+    "id" integer NOT NULL,
+    "name" "text" NOT NULL,
+    "note" "text" NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "deleted_at" timestamp with time zone,
+    "sort_order" integer NOT NULL,
+    CONSTRAINT "grammar_sort_order_check" CHECK (("sort_order" >= 1))
+);
 
+ALTER TABLE "public"."grammar" OWNER TO "postgres";
+
+CREATE SEQUENCE IF NOT EXISTS "public"."grammar_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE "public"."grammar_id_seq" OWNER TO "postgres";
+ALTER SEQUENCE "public"."grammar_id_seq" OWNED BY "public"."grammar"."id";
+
+CREATE TABLE IF NOT EXISTS "public"."items" (
+    "id" integer NOT NULL,
+    "czech" "text" NOT NULL,
+    "english" "text" NOT NULL,
+    "pronunciation" "text",
+    "audio" "text",
+    "sort_order" integer NOT NULL,
+    "grammar_id" integer,
+    "deleted_at" timestamp with time zone,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "lesson_id" integer NOT NULL,
+    "is_study_item" boolean DEFAULT true NOT NULL,
+    "block_id" integer,
+    "note_id" integer,
+    "is_vocabulary" boolean DEFAULT true NOT NULL,
+    CONSTRAINT "items_sequence_check" CHECK (("sort_order" >= 0))
+);
+
+ALTER TABLE "public"."items" OWNER TO "postgres";
+
+CREATE SEQUENCE IF NOT EXISTS "public"."items_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE "public"."items_id_seq" OWNER TO "postgres";
+ALTER SEQUENCE "public"."items_id_seq" OWNED BY "public"."items"."id";
+
+CREATE TABLE IF NOT EXISTS "public"."lessons" (
+    "id" integer NOT NULL,
+    "name" "text" NOT NULL,
+    "level_id" integer NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "deleted_at" timestamp with time zone,
+    "sort_order" integer NOT NULL,
+    "note" "text" NOT NULL
+);
+
+ALTER TABLE "public"."lessons" OWNER TO "postgres";
+
+CREATE SEQUENCE IF NOT EXISTS "public"."lessons_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE "public"."lessons_id_seq" OWNER TO "postgres";
+ALTER SEQUENCE "public"."lessons_id_seq" OWNED BY "public"."lessons"."id";
+
+CREATE TABLE IF NOT EXISTS "public"."levels" (
+    "id" integer NOT NULL,
+    "name" "text" NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "deleted_at" timestamp with time zone,
+    "sort_order" integer NOT NULL,
+    "note" "text" NOT NULL
+);
+
+ALTER TABLE "public"."levels" OWNER TO "postgres";
+
+CREATE SEQUENCE IF NOT EXISTS "public"."levels_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE "public"."levels_id_seq" OWNER TO "postgres";
+ALTER SEQUENCE "public"."levels_id_seq" OWNED BY "public"."levels"."id";
+
+CREATE TABLE IF NOT EXISTS "public"."notes" (
+    "id" integer NOT NULL,
+    "note" "text",
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "deleted_at" timestamp with time zone
+);
+
+ALTER TABLE "public"."notes" OWNER TO "postgres";
+
+CREATE SEQUENCE IF NOT EXISTS "public"."notes_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE "public"."notes_id_seq" OWNER TO "postgres";
+ALTER SEQUENCE "public"."notes_id_seq" OWNED BY "public"."notes"."id";
+
+CREATE TABLE IF NOT EXISTS "public"."user_items" (
+    "user_id" "uuid" NOT NULL,
+    "item_id" integer NOT NULL,
+    "progress" integer DEFAULT 0 NOT NULL,
+    "started_at" timestamp with time zone DEFAULT "now"(),
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "next_at" timestamp with time zone,
+    "mastered_at" timestamp with time zone,
+    CONSTRAINT "user_items_progress_check" CHECK (("progress" >= 0))
+);
+
+ALTER TABLE "public"."user_items" OWNER TO "postgres";
+
+CREATE TABLE IF NOT EXISTS "public"."user_items_history" (
+    "item_id" integer NOT NULL,
+    "user_id" "uuid" NOT NULL,
+    "progress" integer NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "user_items_history_progress_check" CHECK (("progress" >= 0))
+);
+
+ALTER TABLE "public"."user_items_history" OWNER TO "postgres";
+
+CREATE TABLE IF NOT EXISTS "public"."user_scores" (
+    "user_id" "uuid" NOT NULL,
+    "date" "date" NOT NULL,
+    "item_count" integer DEFAULT 0 NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "deleted_at" timestamp with time zone,
+    CONSTRAINT "user_scores_item_count_check" CHECK (("item_count" >= 0))
+);
+
+ALTER TABLE "public"."user_scores" OWNER TO "postgres";
+
+CREATE TABLE IF NOT EXISTS "public"."users" (
+    "id" "uuid" NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "deleted_at" timestamp with time zone,
+    "history_enabled" boolean DEFAULT false NOT NULL
+);
+
+ALTER TABLE "public"."users" OWNER TO "postgres";
+
+-- Set sequence defaults
+ALTER TABLE ONLY "public"."blocks" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."blocks_id_seq"'::"regclass");
+ALTER TABLE ONLY "public"."grammar" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."grammar_id_seq"'::"regclass");
+ALTER TABLE ONLY "public"."items" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."items_id_seq"'::"regclass");
+ALTER TABLE ONLY "public"."lessons" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."lessons_id_seq"'::"regclass");
+ALTER TABLE ONLY "public"."levels" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."levels_id_seq"'::"regclass");
+ALTER TABLE ONLY "public"."notes" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."notes_id_seq"'::"regclass");
+
+-- Primary keys and unique constraints
+ALTER TABLE ONLY "public"."blocks"
+    ADD CONSTRAINT "blocks_pkey" PRIMARY KEY ("id");
+ALTER TABLE ONLY "public"."blocks"
+    ADD CONSTRAINT "blocks_sort_order_key" UNIQUE ("sort_order");
+ALTER TABLE ONLY "public"."grammar"
+    ADD CONSTRAINT "grammar_name_key" UNIQUE ("name");
+ALTER TABLE ONLY "public"."grammar"
+    ADD CONSTRAINT "grammar_pkey" PRIMARY KEY ("id");
+ALTER TABLE ONLY "public"."items"
+    ADD CONSTRAINT "items_pkey" PRIMARY KEY ("id");
+ALTER TABLE ONLY "public"."lessons"
+    ADD CONSTRAINT "lessons_name_key" UNIQUE ("name");
+ALTER TABLE ONLY "public"."lessons"
+    ADD CONSTRAINT "lessons_pkey" PRIMARY KEY ("id");
+ALTER TABLE ONLY "public"."levels"
+    ADD CONSTRAINT "levels_name_key" UNIQUE ("name");
+ALTER TABLE ONLY "public"."levels"
+    ADD CONSTRAINT "levels_pkey" PRIMARY KEY ("id");
+ALTER TABLE ONLY "public"."notes"
+    ADD CONSTRAINT "notes_note_key" UNIQUE ("note");
+ALTER TABLE ONLY "public"."notes"
+    ADD CONSTRAINT "notes_pkey" PRIMARY KEY ("id");
+ALTER TABLE ONLY "public"."user_items_history"
+    ADD CONSTRAINT "user_items_history_pkey" PRIMARY KEY ("user_id", "item_id", "created_at");
+ALTER TABLE ONLY "public"."user_items"
+    ADD CONSTRAINT "user_items_pkey" PRIMARY KEY ("user_id", "item_id");
+ALTER TABLE ONLY "public"."user_scores"
+    ADD CONSTRAINT "user_score_pkey" PRIMARY KEY ("user_id", "date");
+ALTER TABLE ONLY "public"."users"
+    ADD CONSTRAINT "users_pkey" PRIMARY KEY ("id");
+
+-- Indexes
+CREATE INDEX "idx_blocks_updated_at" ON "public"."blocks" USING "btree" ("updated_at");
+CREATE INDEX "idx_grammar_updated_at" ON "public"."grammar" USING "btree" ("updated_at");
+CREATE INDEX "idx_items_updated_at" ON "public"."items" USING "btree" ("updated_at");
+CREATE INDEX "idx_lessons_level_sort_order" ON "public"."lessons" USING "btree" ("level_id", "sort_order");
+CREATE INDEX "idx_lessons_updated_at" ON "public"."lessons" USING "btree" ("updated_at");
+CREATE INDEX "idx_levels_sort_order" ON "public"."levels" USING "btree" ("sort_order");
+CREATE INDEX "idx_levels_updated_at" ON "public"."levels" USING "btree" ("updated_at");
+CREATE INDEX "idx_notes_updated_at" ON "public"."notes" USING "btree" ("updated_at");
+CREATE INDEX "idx_user_items_item_user" ON "public"."user_items" USING "btree" ("item_id", "user_id") INCLUDE ("progress", "started_at", "updated_at", "next_at", "mastered_at");
+CREATE INDEX "idx_user_items_updated_at" ON "public"."user_items" USING "btree" ("updated_at");
+CREATE INDEX "idx_user_items_user_updated_item" ON "public"."user_items" USING "btree" ("user_id", "updated_at", "item_id") INCLUDE ("progress", "started_at", "next_at", "mastered_at");
+CREATE INDEX "idx_user_scores_updated_at" ON "public"."user_scores" USING "btree" ("updated_at");
+CREATE INDEX "idx_user_scores_user_id_updated_at" ON "public"."user_scores" USING "btree" ("user_id", "updated_at");
+
+-- Functions (moved after tables so referenced tables exist)
+-- fetch_user_items
 CREATE OR REPLACE FUNCTION "public"."fetch_user_items"("p_user_id" "uuid", "p_last_synced_at" timestamp with time zone) RETURNS TABLE("item_id" integer, "user_id" "uuid", "czech" "text", "english" "text", "note" "text", "pronunciation" "text", "audio" "text", "is_study_item" boolean, "is_vocabulary" boolean, "sort_order" integer, "block_id" integer, "grammar_id" integer, "progress" integer, "progress_history" "jsonb", "started_at" timestamp with time zone, "updated_at" timestamp with time zone, "deleted_at" timestamp with time zone, "next_at" timestamp with time zone, "mastered_at" timestamp with time zone, "lesson_id" integer)
     LANGUAGE "plpgsql"
     SET "search_path" TO 'public'
@@ -98,10 +316,9 @@ BEGIN
 END;
 $$;
 
-
 ALTER FUNCTION "public"."fetch_user_items"("p_user_id" "uuid", "p_last_synced_at" timestamp with time zone) OWNER TO "postgres";
 
-
+-- handle_new_auth_user
 CREATE OR REPLACE FUNCTION "public"."handle_new_auth_user"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public', 'pg_catalog'
@@ -114,10 +331,9 @@ BEGIN
 END;
 $$;
 
-
 ALTER FUNCTION "public"."handle_new_auth_user"() OWNER TO "postgres";
 
-
+-- set_updated_at
 CREATE OR REPLACE FUNCTION "public"."set_updated_at"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     SET "search_path" TO 'public'
@@ -128,10 +344,9 @@ BEGIN
 END;
 $$;
 
-
 ALTER FUNCTION "public"."set_updated_at"() OWNER TO "postgres";
 
-
+-- update_updated_at_column
 CREATE OR REPLACE FUNCTION "public"."update_updated_at_column"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     SET "search_path" TO 'public'
@@ -140,10 +355,9 @@ CREATE OR REPLACE FUNCTION "public"."update_updated_at_column"() RETURNS "trigge
   RETURN NEW;
 END;$$;
 
-
 ALTER FUNCTION "public"."update_updated_at_column"() OWNER TO "postgres";
 
-
+-- upsert_fetch_user_items
 CREATE OR REPLACE FUNCTION "public"."upsert_fetch_user_items"("p_user_id" "uuid", "p_last_synced_at" timestamp with time zone, "p_user_items" "jsonb" DEFAULT '[]'::"jsonb") RETURNS TABLE("item_id" integer, "user_id" "uuid", "czech" "text", "english" "text", "note" "text", "pronunciation" "text", "audio" "text", "is_study_item" boolean, "is_vocabulary" boolean, "sort_order" integer, "block_id" integer, "grammar_id" integer, "progress" integer, "progress_history" "jsonb", "started_at" timestamp with time zone, "updated_at" timestamp with time zone, "deleted_at" timestamp with time zone, "next_at" timestamp with time zone, "mastered_at" timestamp with time zone, "lesson_id" integer)
     LANGUAGE "plpgsql"
     SET "search_path" TO 'public'
@@ -189,10 +403,9 @@ BEGIN
 END;
 $$;
 
-
 ALTER FUNCTION "public"."upsert_fetch_user_items"("p_user_id" "uuid", "p_last_synced_at" timestamp with time zone, "p_user_items" "jsonb") OWNER TO "postgres";
 
-
+-- upsert_fetch_user_scores
 CREATE OR REPLACE FUNCTION "public"."upsert_fetch_user_scores"("p_user_id" "uuid", "p_last_synced_at" timestamp with time zone, "p_user_scores" "jsonb" DEFAULT '[]'::"jsonb") RETURNS TABLE("user_id" "uuid", "date" "date", "item_count" integer, "updated_at" timestamp with time zone, "deleted_at" timestamp with time zone)
     LANGUAGE "plpgsql"
     SET "search_path" TO 'public'
@@ -239,10 +452,9 @@ BEGIN
 END;
 $$;
 
-
 ALTER FUNCTION "public"."upsert_fetch_user_scores"("p_user_id" "uuid", "p_last_synced_at" timestamp with time zone, "p_user_scores" "jsonb") OWNER TO "postgres";
 
-
+-- upsert_user_items
 CREATE OR REPLACE FUNCTION "public"."upsert_user_items"("p_user_items" "jsonb", "p_history_enabled" boolean DEFAULT false) RETURNS "void"
     LANGUAGE "plpgsql"
     SET "search_path" TO 'public'
@@ -439,10 +651,9 @@ BEGIN
 END;
 $_$;
 
-
 ALTER FUNCTION "public"."upsert_user_items"("p_user_items" "jsonb", "p_history_enabled" boolean) OWNER TO "postgres";
 
-
+-- upsert_user_scores
 CREATE OR REPLACE FUNCTION "public"."upsert_user_scores"("p_user_scores" "jsonb") RETURNS "void"
     LANGUAGE "plpgsql"
     SET "search_path" TO 'public'
@@ -507,955 +718,187 @@ BEGIN
 END;
 $$;
 
-
 ALTER FUNCTION "public"."upsert_user_scores"("p_user_scores" "jsonb") OWNER TO "postgres";
 
-SET default_tablespace = '';
-
-SET default_table_access_method = "heap";
-
-
-CREATE TABLE IF NOT EXISTS "public"."blocks" (
-    "id" integer NOT NULL,
-    "name" "text" NOT NULL,
-    "note" "text" NOT NULL,
-    "sort_order" integer NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "deleted_at" timestamp with time zone,
-    CONSTRAINT "blocks_sort_order_check" CHECK (("sort_order" >= 1))
-);
-
-
-ALTER TABLE "public"."blocks" OWNER TO "postgres";
-
-
-CREATE SEQUENCE IF NOT EXISTS "public"."blocks_id_seq"
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE "public"."blocks_id_seq" OWNER TO "postgres";
-
-
-ALTER SEQUENCE "public"."blocks_id_seq" OWNED BY "public"."blocks"."id";
-
-
-
-CREATE TABLE IF NOT EXISTS "public"."grammar" (
-    "id" integer NOT NULL,
-    "name" "text" NOT NULL,
-    "note" "text" NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "deleted_at" timestamp with time zone,
-    "sort_order" integer NOT NULL,
-    CONSTRAINT "grammar_sort_order_check" CHECK (("sort_order" >= 1))
-);
-
-
-ALTER TABLE "public"."grammar" OWNER TO "postgres";
-
-
-CREATE SEQUENCE IF NOT EXISTS "public"."grammar_id_seq"
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE "public"."grammar_id_seq" OWNER TO "postgres";
-
-
-ALTER SEQUENCE "public"."grammar_id_seq" OWNED BY "public"."grammar"."id";
-
-
-
-CREATE TABLE IF NOT EXISTS "public"."items" (
-    "id" integer NOT NULL,
-    "czech" "text" NOT NULL,
-    "english" "text" NOT NULL,
-    "pronunciation" "text",
-    "audio" "text",
-    "sort_order" integer NOT NULL,
-    "grammar_id" integer,
-    "deleted_at" timestamp with time zone,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "lesson_id" integer NOT NULL,
-    "is_study_item" boolean DEFAULT true NOT NULL,
-    "block_id" integer,
-    "note_id" integer,
-    "is_vocabulary" boolean DEFAULT true NOT NULL,
-    CONSTRAINT "items_sequence_check" CHECK (("sort_order" >= 0))
-);
-
-
-ALTER TABLE "public"."items" OWNER TO "postgres";
-
-
-CREATE SEQUENCE IF NOT EXISTS "public"."items_id_seq"
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE "public"."items_id_seq" OWNER TO "postgres";
-
-
-ALTER SEQUENCE "public"."items_id_seq" OWNED BY "public"."items"."id";
-
-
-
-CREATE TABLE IF NOT EXISTS "public"."lessons" (
-    "id" integer NOT NULL,
-    "name" "text" NOT NULL,
-    "level_id" integer NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "deleted_at" timestamp with time zone,
-    "sort_order" integer NOT NULL,
-    "note" "text" NOT NULL
-);
-
-
-ALTER TABLE "public"."lessons" OWNER TO "postgres";
-
-
-CREATE SEQUENCE IF NOT EXISTS "public"."lessons_id_seq"
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE "public"."lessons_id_seq" OWNER TO "postgres";
-
-
-ALTER SEQUENCE "public"."lessons_id_seq" OWNED BY "public"."lessons"."id";
-
-
-
-CREATE TABLE IF NOT EXISTS "public"."levels" (
-    "id" integer NOT NULL,
-    "name" "text" NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "deleted_at" timestamp with time zone,
-    "sort_order" integer NOT NULL,
-    "note" "text" NOT NULL
-);
-
-
-ALTER TABLE "public"."levels" OWNER TO "postgres";
-
-
-CREATE SEQUENCE IF NOT EXISTS "public"."levels_id_seq"
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE "public"."levels_id_seq" OWNER TO "postgres";
-
-
-ALTER SEQUENCE "public"."levels_id_seq" OWNED BY "public"."levels"."id";
-
-
-
-CREATE TABLE IF NOT EXISTS "public"."notes" (
-    "id" integer NOT NULL,
-    "note" "text",
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "deleted_at" timestamp with time zone
-);
-
-
-ALTER TABLE "public"."notes" OWNER TO "postgres";
-
-
-CREATE SEQUENCE IF NOT EXISTS "public"."notes_id_seq"
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE "public"."notes_id_seq" OWNER TO "postgres";
-
-
-ALTER SEQUENCE "public"."notes_id_seq" OWNED BY "public"."notes"."id";
-
-
-
-CREATE TABLE IF NOT EXISTS "public"."user_items" (
-    "user_id" "uuid" NOT NULL,
-    "item_id" integer NOT NULL,
-    "progress" integer DEFAULT 0 NOT NULL,
-    "started_at" timestamp with time zone DEFAULT "now"(),
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "next_at" timestamp with time zone,
-    "mastered_at" timestamp with time zone,
-    CONSTRAINT "user_items_progress_check" CHECK (("progress" >= 0))
-);
-
-
-ALTER TABLE "public"."user_items" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."user_items_history" (
-    "item_id" integer NOT NULL,
-    "user_id" "uuid" NOT NULL,
-    "progress" integer NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    CONSTRAINT "user_items_history_progress_check" CHECK (("progress" >= 0))
-);
-
-
-ALTER TABLE "public"."user_items_history" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."user_scores" (
-    "user_id" "uuid" NOT NULL,
-    "date" "date" NOT NULL,
-    "item_count" integer DEFAULT 0 NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "deleted_at" timestamp with time zone,
-    CONSTRAINT "user_scores_item_count_check" CHECK (("item_count" >= 0))
-);
-
-
-ALTER TABLE "public"."user_scores" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."users" (
-    "id" "uuid" NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "deleted_at" timestamp with time zone,
-    "history_enabled" boolean DEFAULT false NOT NULL
-);
-
-
-ALTER TABLE "public"."users" OWNER TO "postgres";
-
-
-ALTER TABLE ONLY "public"."blocks" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."blocks_id_seq"'::"regclass");
-
-
-
-ALTER TABLE ONLY "public"."grammar" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."grammar_id_seq"'::"regclass");
-
-
-
-ALTER TABLE ONLY "public"."items" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."items_id_seq"'::"regclass");
-
-
-
-ALTER TABLE ONLY "public"."lessons" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."lessons_id_seq"'::"regclass");
-
-
-
-ALTER TABLE ONLY "public"."levels" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."levels_id_seq"'::"regclass");
-
-
-
-ALTER TABLE ONLY "public"."notes" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."notes_id_seq"'::"regclass");
-
-
-
-ALTER TABLE ONLY "public"."blocks"
-    ADD CONSTRAINT "blocks_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."blocks"
-    ADD CONSTRAINT "blocks_sort_order_key" UNIQUE ("sort_order");
-
-
-
-ALTER TABLE ONLY "public"."grammar"
-    ADD CONSTRAINT "grammar_name_key" UNIQUE ("name");
-
-
-
-ALTER TABLE ONLY "public"."grammar"
-    ADD CONSTRAINT "grammar_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."items"
-    ADD CONSTRAINT "items_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."lessons"
-    ADD CONSTRAINT "lessons_name_key" UNIQUE ("name");
-
-
-
-ALTER TABLE ONLY "public"."lessons"
-    ADD CONSTRAINT "lessons_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."levels"
-    ADD CONSTRAINT "levels_name_key" UNIQUE ("name");
-
-
-
-ALTER TABLE ONLY "public"."levels"
-    ADD CONSTRAINT "levels_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."notes"
-    ADD CONSTRAINT "notes_note_key" UNIQUE ("note");
-
-
-
-ALTER TABLE ONLY "public"."notes"
-    ADD CONSTRAINT "notes_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."user_items_history"
-    ADD CONSTRAINT "user_items_history_pkey" PRIMARY KEY ("user_id", "item_id", "created_at");
-
-
-
-ALTER TABLE ONLY "public"."user_items"
-    ADD CONSTRAINT "user_items_pkey" PRIMARY KEY ("user_id", "item_id");
-
-
-
-ALTER TABLE ONLY "public"."user_scores"
-    ADD CONSTRAINT "user_score_pkey" PRIMARY KEY ("user_id", "date");
-
-
-
-ALTER TABLE ONLY "public"."users"
-    ADD CONSTRAINT "users_pkey" PRIMARY KEY ("id");
-
-
-
-CREATE INDEX "idx_blocks_updated_at" ON "public"."blocks" USING "btree" ("updated_at");
-
-
-
-CREATE INDEX "idx_grammar_updated_at" ON "public"."grammar" USING "btree" ("updated_at");
-
-
-
-CREATE INDEX "idx_items_updated_at" ON "public"."items" USING "btree" ("updated_at");
-
-
-
-CREATE INDEX "idx_lessons_level_sort_order" ON "public"."lessons" USING "btree" ("level_id", "sort_order");
-
-
-
-CREATE INDEX "idx_lessons_updated_at" ON "public"."lessons" USING "btree" ("updated_at");
-
-
-
-CREATE INDEX "idx_levels_sort_order" ON "public"."levels" USING "btree" ("sort_order");
-
-
-
-CREATE INDEX "idx_levels_updated_at" ON "public"."levels" USING "btree" ("updated_at");
-
-
-
-CREATE INDEX "idx_notes_updated_at" ON "public"."notes" USING "btree" ("updated_at");
-
-
-
-CREATE INDEX "idx_user_items_item_user" ON "public"."user_items" USING "btree" ("item_id", "user_id") INCLUDE ("progress", "started_at", "updated_at", "next_at", "mastered_at");
-
-
-
-CREATE INDEX "idx_user_items_updated_at" ON "public"."user_items" USING "btree" ("updated_at");
-
-
-
-CREATE INDEX "idx_user_items_user_updated_item" ON "public"."user_items" USING "btree" ("user_id", "updated_at", "item_id") INCLUDE ("progress", "started_at", "next_at", "mastered_at");
-
-
-
-CREATE INDEX "idx_user_scores_updated_at" ON "public"."user_scores" USING "btree" ("updated_at");
-
-
-
-CREATE INDEX "idx_user_scores_user_id_updated_at" ON "public"."user_scores" USING "btree" ("user_id", "updated_at");
-
-
-
+-- Triggers
 CREATE OR REPLACE TRIGGER "trg_set_updated_at__blocks" BEFORE UPDATE ON "public"."blocks" FOR EACH ROW EXECUTE FUNCTION "public"."set_updated_at"();
-
-
-
 CREATE OR REPLACE TRIGGER "trg_set_updated_at__grammar" BEFORE UPDATE ON "public"."grammar" FOR EACH ROW EXECUTE FUNCTION "public"."set_updated_at"();
-
-
-
 CREATE OR REPLACE TRIGGER "trg_set_updated_at__items" BEFORE UPDATE ON "public"."items" FOR EACH ROW EXECUTE FUNCTION "public"."set_updated_at"();
-
-
-
 CREATE OR REPLACE TRIGGER "trg_set_updated_at__lessons" BEFORE UPDATE ON "public"."lessons" FOR EACH ROW EXECUTE FUNCTION "public"."set_updated_at"();
-
-
-
 CREATE OR REPLACE TRIGGER "trg_set_updated_at__levels" BEFORE UPDATE ON "public"."levels" FOR EACH ROW EXECUTE FUNCTION "public"."set_updated_at"();
-
-
-
 CREATE OR REPLACE TRIGGER "trg_set_updated_at__user_items" BEFORE UPDATE ON "public"."user_items" FOR EACH ROW EXECUTE FUNCTION "public"."set_updated_at"();
-
-
-
 CREATE OR REPLACE TRIGGER "trg_set_updated_at__user_scores" BEFORE UPDATE ON "public"."user_scores" FOR EACH ROW EXECUTE FUNCTION "public"."set_updated_at"();
 
-
-
+-- Foreign keys (ensure referenced tables exist prior to adding)
 ALTER TABLE ONLY "public"."user_items"
     ADD CONSTRAINT "fk_user" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE;
 
-
-
 ALTER TABLE ONLY "public"."user_scores"
     ADD CONSTRAINT "fk_user" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE;
-
-
 
 ALTER TABLE ONLY "public"."items"
     ADD CONSTRAINT "items_block_id_fkey" FOREIGN KEY ("block_id") REFERENCES "public"."blocks"("id") ON DELETE SET NULL;
 
-
-
 ALTER TABLE ONLY "public"."items"
     ADD CONSTRAINT "items_grammar_id_fkey" FOREIGN KEY ("grammar_id") REFERENCES "public"."grammar"("id") ON DELETE SET NULL;
-
-
 
 ALTER TABLE ONLY "public"."items"
     ADD CONSTRAINT "items_lesson_id_fkey" FOREIGN KEY ("lesson_id") REFERENCES "public"."lessons"("id") ON DELETE RESTRICT;
 
-
-
 ALTER TABLE ONLY "public"."items"
     ADD CONSTRAINT "items_note_id_fkey" FOREIGN KEY ("note_id") REFERENCES "public"."notes"("id") ON DELETE SET NULL;
-
-
 
 ALTER TABLE ONLY "public"."lessons"
     ADD CONSTRAINT "lessons_level_id_fkey" FOREIGN KEY ("level_id") REFERENCES "public"."levels"("id") ON DELETE RESTRICT;
 
-
-
 ALTER TABLE ONLY "public"."user_items_history"
     ADD CONSTRAINT "user_items_history_item_id_fkey" FOREIGN KEY ("item_id") REFERENCES "public"."items"("id") ON DELETE CASCADE;
-
-
 
 ALTER TABLE ONLY "public"."user_items_history"
     ADD CONSTRAINT "user_items_history_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE;
 
-
-
 ALTER TABLE ONLY "public"."user_items"
     ADD CONSTRAINT "user_items_item_id_fkey" FOREIGN KEY ("item_id") REFERENCES "public"."items"("id") ON DELETE CASCADE;
 
-
-
+-- Policies and RLS
 CREATE POLICY "Allow regular users to modify their own data" ON "public"."user_items" TO "authenticated" USING ((( SELECT "auth"."uid"() AS "uid") = "user_id")) WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
-
-
-
 CREATE POLICY "Allow regular users to modify their own data" ON "public"."user_scores" TO "authenticated" USING ((( SELECT "auth"."uid"() AS "uid") = "user_id")) WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
-
-
-
 CREATE POLICY "Enable insert for users based on user_id" ON "public"."user_items_history" FOR INSERT WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
-
-
-
 CREATE POLICY "Enable read access for all users" ON "public"."blocks" FOR SELECT USING (true);
-
-
-
 CREATE POLICY "Enable read access for all users" ON "public"."grammar" FOR SELECT TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable read access for all users" ON "public"."items" FOR SELECT TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable read access for all users" ON "public"."lessons" FOR SELECT TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable read access for all users" ON "public"."levels" FOR SELECT TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable read access for all users" ON "public"."notes" FOR SELECT USING (true);
-
-
-
 CREATE POLICY "Enable users to view their own data only" ON "public"."users" FOR SELECT TO "authenticated" USING ((( SELECT "auth"."uid"() AS "uid") = "id"));
 
-
-
 ALTER TABLE "public"."blocks" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."grammar" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."items" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."lessons" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."levels" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."notes" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."user_items" ENABLE ROW LEVEL SECURITY;
-
-
 CREATE POLICY "user_items_delete_own_non_demo" ON "public"."user_items" FOR DELETE TO "authenticated" USING ((("user_id" = "auth"."uid"()) AND (COALESCE(((("auth"."jwt"() -> 'app_metadata'::"text") ->> 'is_demo'::"text"))::boolean, false) = false)));
-
-
-
 ALTER TABLE "public"."user_items_history" ENABLE ROW LEVEL SECURITY;
-
-
 CREATE POLICY "user_items_insert_own_non_demo" ON "public"."user_items" FOR INSERT TO "authenticated" WITH CHECK ((("user_id" = "auth"."uid"()) AND (COALESCE(((("auth"."jwt"() -> 'app_metadata'::"text") ->> 'is_demo'::"text"))::boolean, false) = false)));
-
-
-
 CREATE POLICY "user_items_select_own" ON "public"."user_items" FOR SELECT TO "authenticated" USING (("user_id" = "auth"."uid"()));
-
-
-
 CREATE POLICY "user_items_update_own_non_demo" ON "public"."user_items" FOR UPDATE TO "authenticated" USING ((("user_id" = "auth"."uid"()) AND (COALESCE(((("auth"."jwt"() -> 'app_metadata'::"text") ->> 'is_demo'::"text"))::boolean, false) = false))) WITH CHECK ((("user_id" = "auth"."uid"()) AND (COALESCE(((("auth"."jwt"() -> 'app_metadata'::"text") ->> 'is_demo'::"text"))::boolean, false) = false)));
-
-
-
 ALTER TABLE "public"."user_scores" ENABLE ROW LEVEL SECURITY;
-
-
 CREATE POLICY "user_scores_delete_own_non_demo" ON "public"."user_scores" FOR DELETE TO "authenticated" USING ((("user_id" = "auth"."uid"()) AND (COALESCE(((("auth"."jwt"() -> 'app_metadata'::"text") ->> 'is_demo'::"text"))::boolean, false) = false)));
-
-
-
 CREATE POLICY "user_scores_insert_own_non_demo" ON "public"."user_scores" FOR INSERT TO "authenticated" WITH CHECK ((("user_id" = "auth"."uid"()) AND (COALESCE(((("auth"."jwt"() -> 'app_metadata'::"text") ->> 'is_demo'::"text"))::boolean, false) = false)));
-
-
-
 CREATE POLICY "user_scores_select_own" ON "public"."user_scores" FOR SELECT TO "authenticated" USING (("user_id" = "auth"."uid"()));
-
-
-
 CREATE POLICY "user_scores_update_own_non_demo" ON "public"."user_scores" FOR UPDATE TO "authenticated" USING ((("user_id" = "auth"."uid"()) AND (COALESCE(((("auth"."jwt"() -> 'app_metadata'::"text") ->> 'is_demo'::"text"))::boolean, false) = false))) WITH CHECK ((("user_id" = "auth"."uid"()) AND (COALESCE(((("auth"."jwt"() -> 'app_metadata'::"text") ->> 'is_demo'::"text"))::boolean, false) = false)));
-
-
-
 ALTER TABLE "public"."users" ENABLE ROW LEVEL SECURITY;
 
-
-
-
+-- Publication owner
 ALTER PUBLICATION "supabase_realtime" OWNER TO "postgres";
 
-
-GRANT USAGE ON SCHEMA "public" TO "postgres";
-GRANT USAGE ON SCHEMA "public" TO "anon";
-GRANT USAGE ON SCHEMA "public" TO "authenticated";
-GRANT USAGE ON SCHEMA "public" TO "service_role";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+-- Grants: functions and tables
 REVOKE ALL ON FUNCTION "public"."fetch_user_items"("p_user_id" "uuid", "p_last_synced_at" timestamp with time zone) FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."fetch_user_items"("p_user_id" "uuid", "p_last_synced_at" timestamp with time zone) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."fetch_user_items"("p_user_id" "uuid", "p_last_synced_at" timestamp with time zone) TO "service_role";
 
-
-
 REVOKE ALL ON FUNCTION "public"."handle_new_auth_user"() FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."handle_new_auth_user"() TO "service_role";
-
-
 
 GRANT ALL ON FUNCTION "public"."set_updated_at"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_updated_at"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_updated_at"() TO "service_role";
 
-
-
 GRANT ALL ON FUNCTION "public"."update_updated_at_column"() TO "anon";
 GRANT ALL ON FUNCTION "public"."update_updated_at_column"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."update_updated_at_column"() TO "service_role";
-
-
 
 REVOKE ALL ON FUNCTION "public"."upsert_fetch_user_items"("p_user_id" "uuid", "p_last_synced_at" timestamp with time zone, "p_user_items" "jsonb") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."upsert_fetch_user_items"("p_user_id" "uuid", "p_last_synced_at" timestamp with time zone, "p_user_items" "jsonb") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."upsert_fetch_user_items"("p_user_id" "uuid", "p_last_synced_at" timestamp with time zone, "p_user_items" "jsonb") TO "service_role";
 
-
-
 REVOKE ALL ON FUNCTION "public"."upsert_fetch_user_scores"("p_user_id" "uuid", "p_last_synced_at" timestamp with time zone, "p_user_scores" "jsonb") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."upsert_fetch_user_scores"("p_user_id" "uuid", "p_last_synced_at" timestamp with time zone, "p_user_scores" "jsonb") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."upsert_fetch_user_scores"("p_user_id" "uuid", "p_last_synced_at" timestamp with time zone, "p_user_scores" "jsonb") TO "service_role";
-
-
 
 REVOKE ALL ON FUNCTION "public"."upsert_user_items"("p_user_items" "jsonb", "p_history_enabled" boolean) FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."upsert_user_items"("p_user_items" "jsonb", "p_history_enabled" boolean) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."upsert_user_items"("p_user_items" "jsonb", "p_history_enabled" boolean) TO "service_role";
 
-
-
 REVOKE ALL ON FUNCTION "public"."upsert_user_scores"("p_user_scores" "jsonb") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."upsert_user_scores"("p_user_scores" "jsonb") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."upsert_user_scores"("p_user_scores" "jsonb") TO "service_role";
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+-- Grants on tables and sequences
 GRANT ALL ON TABLE "public"."blocks" TO "anon";
 GRANT ALL ON TABLE "public"."blocks" TO "authenticated";
 GRANT ALL ON TABLE "public"."blocks" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."blocks_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."blocks_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."blocks_id_seq" TO "service_role";
 
-
-
 GRANT ALL ON TABLE "public"."grammar" TO "anon";
 GRANT ALL ON TABLE "public"."grammar" TO "authenticated";
 GRANT ALL ON TABLE "public"."grammar" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."grammar_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."grammar_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."grammar_id_seq" TO "service_role";
 
-
-
 GRANT ALL ON TABLE "public"."items" TO "anon";
 GRANT ALL ON TABLE "public"."items" TO "authenticated";
 GRANT ALL ON TABLE "public"."items" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."items_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."items_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."items_id_seq" TO "service_role";
 
-
-
 GRANT ALL ON TABLE "public"."lessons" TO "anon";
 GRANT ALL ON TABLE "public"."lessons" TO "authenticated";
 GRANT ALL ON TABLE "public"."lessons" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."lessons_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."lessons_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."lessons_id_seq" TO "service_role";
 
-
-
 GRANT ALL ON TABLE "public"."levels" TO "anon";
 GRANT ALL ON TABLE "public"."levels" TO "authenticated";
 GRANT ALL ON TABLE "public"."levels" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."levels_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."levels_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."levels_id_seq" TO "service_role";
 
-
-
 GRANT ALL ON TABLE "public"."notes" TO "anon";
 GRANT ALL ON TABLE "public"."notes" TO "authenticated";
 GRANT ALL ON TABLE "public"."notes" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."notes_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."notes_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."notes_id_seq" TO "service_role";
-
-
 
 GRANT ALL ON TABLE "public"."user_items" TO "anon";
 GRANT ALL ON TABLE "public"."user_items" TO "authenticated";
 GRANT ALL ON TABLE "public"."user_items" TO "service_role";
 
-
-
 GRANT ALL ON TABLE "public"."user_items_history" TO "anon";
 GRANT ALL ON TABLE "public"."user_items_history" TO "authenticated";
 GRANT ALL ON TABLE "public"."user_items_history" TO "service_role";
-
-
 
 GRANT ALL ON TABLE "public"."user_scores" TO "anon";
 GRANT ALL ON TABLE "public"."user_scores" TO "authenticated";
 GRANT ALL ON TABLE "public"."user_scores" TO "service_role";
 
-
-
 GRANT ALL ON TABLE "public"."users" TO "anon";
 GRANT ALL ON TABLE "public"."users" TO "authenticated";
 GRANT ALL ON TABLE "public"."users" TO "service_role";
 
-
-
-
-
-
-
-
-
+-- Default privileges
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES TO "postgres";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES TO "service_role";
-
-
-
-
-
 
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS TO "postgres";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS TO "service_role";
 
-
-
-
-
-
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "postgres";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "service_role";
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+-- End of organized migration
