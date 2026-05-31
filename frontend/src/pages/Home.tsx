@@ -30,7 +30,6 @@ export default function Home(): JSX.Element {
     <div className="max-w-hero relative flex w-full flex-col text-center">
       <h1 className="my-8">{TEXTS.appTitle}</h1>
       <InstallPWAButton className="my-2 px-4" />
-
       <p className="px-4">{TEXTS.appDescription}</p>
       <p className="text-error-light dark:text-error-dark">{TEXTS.appTestDescription}</p>
       <Link to="/guide" className="my-">
