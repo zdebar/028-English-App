@@ -85,10 +85,10 @@ vi.mock('@/features/pwa/InstallPwaButton', () => ({
   InstallPWAButton: () => <button type="button">Install</button>,
 }));
 
-vi.mock('@/components/UI/StarProgress', () => ({
-  default: ({ count, chunkSize, starsPerRow }: any) => (
-    <div data-testid="star-progress">
-      {count}:{chunkSize}:{starsPerRow}
+vi.mock('@/components/PracticeOverviewButton', () => ({
+  default: ({ count, ariaLabel, helpText }: any) => (
+    <div data-testid="practice-overview-button">
+      {count}:{ariaLabel}:{helpText}
     </div>
   ),
 }));
@@ -130,7 +130,9 @@ describe('Home', () => {
     render(<Home />);
 
     expect(screen.queryByText('Data may be stale.')).toBeNull();
-    expect(screen.getByTestId('star-progress').textContent).toBe('3:50:10');
+    expect(screen.getByTestId('practice-overview-button').textContent).toBe(
+      '3:Open practice overview:Stars today',
+    );
   });
 
   it('renders auth UI when user is signed out', () => {
