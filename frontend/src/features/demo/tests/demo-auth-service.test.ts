@@ -16,9 +16,9 @@ vi.mock('@/config/supabase.config', () => ({
   },
 }));
 
-import { loginDemoWithCaptcha } from '@/features/demo/demo-auth-service';
+import { loginDemo } from '@/features/demo/demo-auth-service';
 
-describe('loginDemoWithCaptcha', () => {
+describe('loginDemo', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.setSession.mockResolvedValue({ error: null });
@@ -34,10 +34,10 @@ describe('loginDemoWithCaptcha', () => {
       error: null,
     });
 
-    await loginDemoWithCaptcha('captcha-token');
+    await loginDemo();
 
     expect(mocks.functionsInvoke).toHaveBeenCalledWith('demo-session', {
-      body: { captchaToken: 'captcha-token' },
+      body: {},
     });
     expect(mocks.setSession).toHaveBeenCalledWith({
       access_token: 'access-token',
@@ -51,6 +51,6 @@ describe('loginDemoWithCaptcha', () => {
       error: { message: 'Too many requests', context: { status: 429 } },
     });
 
-    await expect(loginDemoWithCaptcha('captcha-token')).rejects.toThrow('RATE_LIMIT');
+    await expect(loginDemo()).rejects.toThrow('RATE_LIMIT');
   });
 });

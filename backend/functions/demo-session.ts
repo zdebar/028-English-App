@@ -1,11 +1,6 @@
 // Edge Function: demo-session
-// POST JSON body: { captchaToken: "..." }
+// POST JSON body: {}
 // Returns: { access_token, refresh_token, expires_in, token_type }
-
-declare const Deno: {
-  env: { get(key: string): string | undefined };
-  serve(handler: (req: Request) => Response | Promise<Response>): void;
-};
 
 type SessionResponse = {
   access_token?: string;
@@ -14,9 +9,37 @@ type SessionResponse = {
   token_type?: string;
 };
 
-type SignInResult =
-  | { ok: true; payload: SessionResponse }
-  | { ok: false; status: number; detail: string };
+type SignInSuccessResult = {
+  ok: true;
+  payload: SessionResponse;
+};
+
+type SignInErrorResult = {
+  ok: false;
+  status: number;
+  detail: string;
+};
+
+type SignInResult = SignInSuccessResult | SignInErrorResult;
+
+function isSignInErrorResult(result: SignInResult): result is SignInErrorResult {
+  return result.ok === false;
+}
+
+type EdgeRuntime = {
+  env: { get(key: string): string | undefined };
+  serve(handler: (req: Request) => Response | Promise<Response>): void;
+};
+
+type RuntimeGlobals = typeof globalThis & {
+  Deno?: EdgeRuntime;
+  __demoSessionRateLimitStore?: Map<string, number[]>;
+};
+
+const runtimeGlobals = globalThis as RuntimeGlobals;
+const edgeRuntime = runtimeGlobals.Deno;
+const rateLimitStore = runtimeGlobals.__demoSessionRateLimitStore ??
+  (runtimeGlobals.__demoSessionRateLimitStore = new Map<string, number[]>());
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -25,21 +48,119 @@ const CORS_HEADERS = {
     "authorization, content-type, x-client-info, apikey",
 };
 
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+const SUPABASE_URL = edgeRuntime?.env.get("SUPABASE_URL") ?? "";
 // prefer a non-reserved secret name. SUPABASE_ prefix is blocked for secrets,
 // so we support PUBLISHABLE_KEY and fallbacks to common names if present.
 const PUBLISHABLE_KEY =
-  Deno.env.get("PUBLISHABLE_KEY") ??
-  Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ??
+  edgeRuntime?.env.get("PUBLISHABLE_KEY") ??
+  edgeRuntime?.env.get("SUPABASE_PUBLISHABLE_KEY") ??
   "";
 // allow an explicit anon key env as well; fall back to the publishable key
 const SUPABASE_ANON_KEY =
-  Deno.env.get("SUPABASE_ANON_KEY") ??
-  Deno.env.get("ANON_KEY") ??
+  edgeRuntime?.env.get("SUPABASE_ANON_KEY") ??
+  edgeRuntime?.env.get("ANON_KEY") ??
   PUBLISHABLE_KEY;
-const DEMO_EMAIL = Deno.env.get("DEMO_EMAIL") ?? "";
-const DEMO_PASSWORD = Deno.env.get("DEMO_PASSWORD") ?? "";
-const TURNSTILE_SECRET_KEY = Deno.env.get("TURNSTILE_SECRET_KEY") ?? "";
+const DEMO_EMAIL = edgeRuntime?.env.get("DEMO_EMAIL") ?? "";
+const DEMO_PASSWORD = edgeRuntime?.env.get("DEMO_PASSWORD") ?? "";
+
+function readEnvNumber(name: string, fallback: number): number {
+  const rawValue = edgeRuntime?.env.get(name)?.trim();
+  if (!rawValue) return fallback;
+
+  const parsedValue = Number.parseInt(rawValue, 10);
+  return Number.isFinite(parsedValue) && parsedValue > 0
+    ? parsedValue
+    : fallback;
+}
+
+const RATE_LIMIT_BURST_WINDOW_MS = readEnvNumber(
+  "DEMO_RATE_LIMIT_BURST_WINDOW_MS",
+  30_000,
+);
+const RATE_LIMIT_BURST_MAX = readEnvNumber("DEMO_RATE_LIMIT_BURST_MAX", 4);
+const RATE_LIMIT_WINDOW_MS = readEnvNumber("DEMO_RATE_LIMIT_WINDOW_MS", 600_000);
+const RATE_LIMIT_MAX = readEnvNumber("DEMO_RATE_LIMIT_MAX", 10);
+
+type RateLimitResult =
+  | { allowed: true }
+  | { allowed: false; retryAfterSeconds: number };
+
+function isRateLimitExceeded(
+  result: RateLimitResult,
+): result is { allowed: false; retryAfterSeconds: number } {
+  return result.allowed === false;
+}
+
+function getClientIdentifier(req: Request): string {
+  const forwardedFor = req.headers.get("x-forwarded-for") ?? "";
+  const realIp = req.headers.get("x-real-ip") ?? "";
+  const cfConnectingIp = req.headers.get("cf-connecting-ip") ?? "";
+  const firstForwardedIp = forwardedFor.split(",")[0]?.trim() ?? "";
+  const ipAddress = firstForwardedIp || realIp.trim() || cfConnectingIp.trim();
+
+  if (ipAddress) {
+    return `ip:${ipAddress}`;
+  }
+
+  const userAgent = req.headers.get("user-agent")?.trim() ?? "unknown";
+  return `fallback:${userAgent}`;
+}
+
+function getRetryAfterSeconds(timestamps: number[], windowMs: number, now: number): number {
+  if (timestamps.length === 0) return Math.ceil(windowMs / 1000);
+
+  const oldestTimestamp = timestamps[0];
+  return Math.max(1, Math.ceil((windowMs - (now - oldestTimestamp)) / 1000));
+}
+
+function checkRateLimit(req: Request): RateLimitResult {
+  const clientIdentifier = getClientIdentifier(req);
+  const now = Date.now();
+  const storedTimestamps = rateLimitStore.get(clientIdentifier) ?? [];
+  const longWindowTimestamps = storedTimestamps.filter(
+    (timestamp) => now - timestamp < RATE_LIMIT_WINDOW_MS,
+  );
+  const burstWindowTimestamps = longWindowTimestamps.filter(
+    (timestamp) => now - timestamp < RATE_LIMIT_BURST_WINDOW_MS,
+  );
+
+  if (burstWindowTimestamps.length >= RATE_LIMIT_BURST_MAX) {
+    rateLimitStore.set(clientIdentifier, longWindowTimestamps);
+    return {
+      allowed: false,
+      retryAfterSeconds: getRetryAfterSeconds(
+        burstWindowTimestamps,
+        RATE_LIMIT_BURST_WINDOW_MS,
+        now,
+      ),
+    };
+  }
+
+  if (longWindowTimestamps.length >= RATE_LIMIT_MAX) {
+    rateLimitStore.set(clientIdentifier, longWindowTimestamps);
+    return {
+      allowed: false,
+      retryAfterSeconds: getRetryAfterSeconds(
+        longWindowTimestamps,
+        RATE_LIMIT_WINDOW_MS,
+        now,
+      ),
+    };
+  }
+
+  longWindowTimestamps.push(now);
+  rateLimitStore.set(clientIdentifier, longWindowTimestamps);
+
+  return { allowed: true };
+}
+
+function logRateLimitExceeded(req: Request, retryAfterSeconds: number) {
+  console.warn("Demo session rate limit exceeded", {
+    clientIdentifier: getClientIdentifier(req),
+    retryAfterSeconds,
+    userAgent: req.headers.get("user-agent") ?? "unknown",
+  });
+}
 
 function jsonResponse(
   body: unknown,
@@ -56,7 +177,7 @@ function jsonResponse(
   });
 }
 
-async function signInDemoUser(captchaToken: string): Promise<SignInResult> {
+async function signInDemoUser(): Promise<SignInResult> {
   const url = `${SUPABASE_URL.replace(/\/$/, "")}/auth/v1/token?grant_type=password`;
 
   const response = await fetch(url, {
@@ -71,10 +192,6 @@ async function signInDemoUser(captchaToken: string): Promise<SignInResult> {
     body: JSON.stringify({
       email: DEMO_EMAIL,
       password: DEMO_PASSWORD,
-      captcha_token: captchaToken,
-      gotrue_meta_security: {
-        captcha_token: captchaToken,
-      },
     }),
   });
 
@@ -108,43 +225,14 @@ function validateEnvironment(): string | null {
     return "Missing PUBLISHABLE_KEY or SUPABASE_ANON_KEY";
   if (!DEMO_EMAIL) return "Missing DEMO_EMAIL";
   if (!DEMO_PASSWORD) return "Missing DEMO_PASSWORD";
-  if (!TURNSTILE_SECRET_KEY) return "Missing TURNSTILE_SECRET_KEY";
   return null;
 }
 
-async function verifyTurnstileToken(
-  token: string,
-  remoteip?: string,
-): Promise<{ success: boolean; detail?: string }> {
-  const url = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
-  const params = new URLSearchParams();
-  params.append("secret", TURNSTILE_SECRET_KEY);
-  params.append("response", token);
-  if (remoteip) params.append("remoteip", remoteip);
-
-  try {
-    const resp = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: params.toString(),
-    });
-
-    const data = await resp.json().catch(() => ({}));
-    if (resp.ok && data?.success) {
-      return { success: true };
-    }
-
-    const detail = Array.isArray(data["error-codes"])
-      ? data["error-codes"].join(", ")
-      : JSON.stringify(data);
-    return { success: false, detail };
-  } catch (err) {
-    console.error("Turnstile siteverify failed", err);
-    return { success: false, detail: String(err) };
-  }
+if (!edgeRuntime) {
+  throw new Error("Deno runtime is not available");
 }
 
-Deno.serve(async (req: Request) => {
+edgeRuntime.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: CORS_HEADERS });
   }
@@ -158,18 +246,17 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ error: envError }, 500);
   }
 
-  try {
-    const body = (await req.json().catch(() => ({}))) as {
-      captchaToken?: unknown;
-    };
-    const captchaToken =
-      typeof body.captchaToken === "string" ? body.captchaToken.trim() : "";
-    if (!captchaToken) {
-      return jsonResponse({ error: "Missing captchaToken" }, 400);
-    }
+  const rateLimitResult = checkRateLimit(req);
+  if (isRateLimitExceeded(rateLimitResult)) {
+    logRateLimitExceeded(req, rateLimitResult.retryAfterSeconds);
+    return jsonResponse({ error: "Too many demo sign-in attempts" }, 429);
+  }
 
-    const signInResult = await signInDemoUser(captchaToken);
-    if (!signInResult.ok) {
+  try {
+    await req.json().catch(() => ({}));
+
+    const signInResult = await signInDemoUser();
+    if (isSignInErrorResult(signInResult)) {
       return jsonResponse(
         {
           error: "Demo authentication failed",

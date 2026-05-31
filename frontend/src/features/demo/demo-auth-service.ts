@@ -18,14 +18,18 @@ async function readErrorDetail(response: Response): Promise<string> {
 }
 
 function mapAuthDetailFor400401(detail: string): string {
-  if (detail.includes('captcha_failed') || detail.includes('captcha_token')) {
-    return 'CAPTCHA_FAILED';
-  }
   if (detail.includes('invalid login credentials') || detail.includes('invalid_grant')) {
     return 'DEMO_INVALID_CREDENTIALS';
   }
   if (detail.includes('email') && detail.includes('disabled')) {
     return 'DEMO_EMAIL_PROVIDER_DISABLED';
+  }
+  if (
+    detail.includes('captcha_failed') ||
+    detail.includes('captcha protection') ||
+    detail.includes('captcha_token')
+  ) {
+    return 'DEMO_AUTH_CAPTCHA_ENABLED';
   }
 
   const shortDetail = detail.replace(/\s+/g, ' ').trim().slice(0, 180);
@@ -43,9 +47,6 @@ async function mapDemoAuthErrorCode(response?: Response): Promise<string> {
   if (status === 429) {
     return 'RATE_LIMIT';
   }
-  if (status === 403) {
-    return 'CAPTCHA_FAILED';
-  }
   if (status === 400 || status === 401) {
     return mapAuthDetailFor400401(detail);
   }
@@ -53,14 +54,9 @@ async function mapDemoAuthErrorCode(response?: Response): Promise<string> {
   return 'DEMO_AUTH_FAILED';
 }
 
-export async function loginDemoWithCaptcha(captchaToken: string): Promise<void> {
-  const token = captchaToken.trim();
-  if (!token) {
-    throw new Error('Missing captcha token');
-  }
-
+export async function loginDemo(): Promise<void> {
   const { data, error } = await supabaseInstance.functions.invoke('demo-session', {
-    body: { captchaToken: token },
+    body: {},
   });
 
   if (error) {

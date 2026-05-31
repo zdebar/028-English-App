@@ -37,7 +37,7 @@ export const HOME_TEXTS = {
     'Demo účet nelze přihlásit: zkontrolujte DEMO_EMAIL a DEMO_PASSWORD v Supabase Secrets.',
   demoSigninEmailProviderDisabledError:
     'Email+heslo přihlášení je v Supabase vypnuté. Zapněte Authentication > Providers > Email.',
-  demoSigninCaptchaError: 'Ověření CAPTCHA se nepodařilo. Zkuste to znovu.',
+  demoSigninCaptchaStillEnabledError:
+    'V Supabase je pro přihlášení stále zapnutá CAPTCHA / Bot Detection. Vypněte ji v Authentication > Bot Detection, jinak demo login bez Turnstile neprojde.',
   demoSigninRateLimitError: 'Příliš mnoho pokusů. Opakujte to prosím později.',
-  demoSigninMissingCaptchaKey: 'Chybí nastavení CAPTCHA klíče pro demo přihlášení.',
 } as const;

@@ -2,7 +2,7 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import Dashboard from '@/components/UI/Dashboard';
 import { useUserStore } from '@/features/user-stats/use-user-store';
 import { TEXTS } from '@/locales/cs';
-import { useState, type JSX } from 'react';
+import type { JSX } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Notification from '@/components/UI/Notification';
 import '@/styles/home.css';
@@ -25,7 +25,6 @@ export default function Home(): JSX.Element {
   const userFullName = useAuthStore((state) => state.userFullName);
   const dailyCount = useUserStore((state) => state.dailyCount);
   const isSynchronized = useSyncWarningStore((state) => state.isSynchronized);
-  const [isDemoCaptchaVisible, setIsDemoCaptchaVisible] = useState(false);
 
   return (
     <div className="max-w-hero relative flex w-full flex-col text-center">
@@ -64,8 +63,8 @@ export default function Home(): JSX.Element {
       ) : (
         <div className="mt-8 w-full">
           <div className="flex flex-col gap-1">
-            <DemoSessionPanel onCaptchaVisibilityChange={setIsDemoCaptchaVisible} />
-            {!isDemoCaptchaVisible && <GoogleAuthButton />}
+            <DemoSessionPanel />
+            <GoogleAuthButton />
           </div>
           <p className="p-4 text-sm">{TEXTS.signupHint}</p>
         </div>

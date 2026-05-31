@@ -1,89 +1,44 @@
-import { useCallback, useEffect, useState, type JSX } from 'react';
-import DemoCaptcha from '@/features/demo/DemoCaptcha';
-import { loginDemoWithCaptcha } from '@/features/demo/demo-auth-service';
+import { useCallback, useState, type JSX } from 'react';
+import { loginDemo } from '@/features/demo/demo-auth-service';
 import { getDemoSigninErrorMessage } from '@/features/demo/demo-signin-error';
 import { TEXTS } from '@/locales/cs';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { reportError } from '@/features/logging/monitoring-handler';
 
-type DemoSessionPanelProps = Readonly<{
-  onCaptchaVisibilityChange?: (visible: boolean) => void;
-}>;
-
-export default function DemoSessionPanel({
-  onCaptchaVisibilityChange,
-}: DemoSessionPanelProps): JSX.Element {
+export default function DemoSessionPanel(): JSX.Element {
   const showToast = useToastStore((state) => state.showToast);
 
-  const [showCaptcha, setShowCaptcha] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY?.trim() ?? '';
-
   const startDemoFlow = useCallback(() => {
-    if (!turnstileSiteKey) {
-      showToast(TEXTS.demoSigninMissingCaptchaKey, 'error');
+    if (isSubmitting) {
       return;
     }
-    setCaptchaToken(null);
-    setShowCaptcha(true);
-  }, [showToast, turnstileSiteKey]);
-
-  const handleTokenChange = useCallback((token: string | null) => {
-    setCaptchaToken(token);
-  }, []);
-
-  useEffect(() => {
-    onCaptchaVisibilityChange?.(showCaptcha);
-  }, [onCaptchaVisibilityChange, showCaptcha]);
-
-  useEffect(() => {
-    return () => {
-      onCaptchaVisibilityChange?.(false);
-    };
-  }, [onCaptchaVisibilityChange]);
-
-  useEffect(() => {
-    const submitDemoLogin = async () => {
-      if (!captchaToken || isSubmitting) {
-        return;
-      }
-
-      setIsSubmitting(true);
-      try {
-        await loginDemoWithCaptcha(captchaToken);
+    setIsSubmitting(true);
+    loginDemo()
+      .then(() => {
         showToast(TEXTS.demoSigninSuccess, 'success');
-        setShowCaptcha(false);
-        setCaptchaToken(null);
-      } catch (error) {
+      })
+      .catch((error) => {
         reportError('Demo sign-in failed', error);
         showToast(getDemoSigninErrorMessage(error), 'error');
-        setCaptchaToken(null);
-        setShowCaptcha(false);
-      } finally {
+      })
+      .finally(() => {
         setIsSubmitting(false);
-      }
-    };
-
-    submitDemoLogin();
-  }, [captchaToken, isSubmitting, showToast]);
+      });
+  }, [isSubmitting, showToast]);
 
   return (
     <div className="relative w-full">
-      {showCaptcha ? (
-        <DemoCaptcha siteKey={turnstileSiteKey} onTokenChange={handleTokenChange} />
-      ) : (
-        <button
-          type="button"
-          onClick={startDemoFlow}
-          className="font-body h-button bg-signin-button hover:bg-signin-button-hover focus-visible:bg-signin-button-hover w-full text-base font-medium text-black"
-          title={TEXTS.demoSigninButtonTooltip}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? TEXTS.demoSigninLoading : TEXTS.demoSigninButton}
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={startDemoFlow}
+        className="font-body h-button bg-signin-button hover:bg-signin-button-hover focus-visible:bg-signin-button-hover w-full text-base font-medium text-black"
+        title={TEXTS.demoSigninButtonTooltip}
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? TEXTS.demoSigninLoading : TEXTS.demoSigninButton}
+      </button>
     </div>
   );
 }
