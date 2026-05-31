@@ -22,7 +22,7 @@ import Levels from '@/pages/Levels';
 import Practice from '@/pages/Practice';
 import PracticeOverview from '@/pages/PracticeOverview';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
-import Profile from '@/pages/Profile';
+import Profile from '@/pages/Profile_temp';
 import Vocabulary from '@/pages/Vocabulary';
 import Guide from '@/pages/Guide';
 import { useEffect } from 'react';
