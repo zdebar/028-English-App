@@ -148,6 +148,19 @@ describe('useAuthStore', () => {
     await expect(useAuthStore.getState().handleLogout()).rejects.toThrow('signout failed');
   });
 
+  it('handleLogout clears local state when remote session is already missing', async () => {
+    useAuthStore.setState({ userId: 'u1', userEmail: 'u1@example.com', userFullName: 'User One' });
+    mocks.signOut.mockResolvedValue({ error: { message: 'Auth session missing!' } });
+
+    await expect(useAuthStore.getState().handleLogout()).resolves.toBeUndefined();
+
+    const state = useAuthStore.getState();
+    expect(state.userId).toBeNull();
+    expect(state.userEmail).toBeNull();
+    expect(state.userFullName).toBeNull();
+    expect(state.loading).toBe(false);
+  });
+
   it('handleLogout skips sync when skipSync option is enabled', async () => {
     useAuthStore.setState({ userId: 'u1', userEmail: 'u1@example.com', userFullName: 'User One' });
 

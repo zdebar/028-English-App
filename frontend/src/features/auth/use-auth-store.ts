@@ -30,6 +30,13 @@ function isDemoSession(session: Session | null): boolean {
   return appMetadata?.is_demo === true;
 }
 
+function isMissingAuthSessionError(message: string | undefined): boolean {
+  if (!message) return false;
+
+  const normalized = message.trim().toLowerCase();
+  return normalized.includes('auth session missing');
+}
+
 /**
  * A Zustand store hook for managing authentication state using Supabase.
  *
@@ -108,6 +115,10 @@ export const useAuthStore = create<AuthState>((set) => {
         scope: options?.scope ?? 'global',
       });
       if (error) {
+        if (isMissingAuthSessionError(error.message)) {
+          clearSession();
+          return;
+        }
         throw new Error(error.message);
       }
       clearSession();
