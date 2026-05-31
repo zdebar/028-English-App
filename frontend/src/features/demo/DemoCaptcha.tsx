@@ -1,4 +1,4 @@
-import { useEffect, useRef, type JSX } from 'react';
+import { useEffect, useEffectEvent, useRef, type JSX } from 'react';
 import { ensureTurnstileLoaded } from '@/features/demo/turnstile-loader';
 
 type DemoCaptchaProps = Readonly<{
@@ -14,6 +14,7 @@ export default function DemoCaptcha({
 }: DemoCaptchaProps): JSX.Element {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const widgetIdRef = useRef<string | null>(null);
+  const emitTokenChange = useEffectEvent((token: string | null) => onTokenChange(token));
 
   useEffect(() => {
     let disposed = false;
@@ -44,9 +45,9 @@ export default function DemoCaptcha({
       widgetIdRef.current = ts.render(containerRef.current, {
         sitekey: siteKey,
         size,
-        callback: (token: string) => onTokenChange(token),
-        'error-callback': () => onTokenChange(null),
-        'expired-callback': () => onTokenChange(null),
+        callback: (token: string) => emitTokenChange(token),
+        'error-callback': () => emitTokenChange(null),
+        'expired-callback': () => emitTokenChange(null),
       });
     };
 
@@ -55,13 +56,13 @@ export default function DemoCaptcha({
       .then(() => {
         if (!disposed) renderWidget();
       })
-      .catch(() => onTokenChange(null));
+      .catch(() => emitTokenChange(null));
 
     return () => {
       disposed = true;
       safeRemoveWidget();
     };
-  }, [onTokenChange, siteKey, size]);
+  }, [emitTokenChange, siteKey, size]);
 
   return <div ref={containerRef} className="w-full" />;
 }
