@@ -3,6 +3,7 @@ import SigninButton from '@/features/auth/SigninButton';
 import { loginAnonymous } from '@/features/auth/anonymous-auth-service';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { reportError } from '@/features/logging/monitoring-handler';
+import { TEXTS } from '@/locales/cs';
 
 export default function AnonymousSigninButton(): JSX.Element {
   const showToast = useToastStore((s) => s.showToast);
@@ -15,7 +16,7 @@ export default function AnonymousSigninButton(): JSX.Element {
       await loginAnonymous();
     } catch (err) {
       reportError('Anonymous sign-in failed', err);
-      showToast('Chyba přihlášení', 'error');
+      showToast(TEXTS.authInitErrorToast, 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -25,9 +26,9 @@ export default function AnonymousSigninButton(): JSX.Element {
     <SigninButton
       isSubmitting={isSubmitting}
       onClick={startAnonymous}
-      title={''}
-      label={'Pokračovat jako host'}
-      loadingLabel={'Probíhá přihlášení...'}
+      title={TEXTS.anonymousSigninTooltip}
+      label={TEXTS.anonymousSigninButton}
+      loadingLabel={TEXTS.anonymousSigninLoading}
     />
   );
 }

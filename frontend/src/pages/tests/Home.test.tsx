@@ -93,10 +93,6 @@ vi.mock('@/components/PracticeOverviewButton', () => ({
   ),
 }));
 
-vi.mock('@/features/demo/DemoSessionPanel', () => ({
-  default: () => <div data-testid="demo-session-panel" />,
-}));
-
 vi.mock('@/features/auth/GoogleAuthButton', () => ({
   default: () => <div data-testid="google-auth-button" />,
 }));
@@ -140,7 +136,6 @@ describe('Home', () => {
 
     render(<Home />);
 
-    expect(screen.getByTestId('demo-session-panel')).toBeTruthy();
     expect(screen.getByTestId('google-auth-button')).toBeTruthy();
     expect(screen.queryByText('Data may be stale.')).toBeNull();
   });

@@ -28,18 +28,9 @@ export const HOME_TEXTS = {
   syncWarning: 'Chyba synchronizace. Data mohou být zastaralá.',
 
   // Demo sign-in
-  demoSigninButton: 'Vyzkoušet demo účet',
-  demoSigninButtonTooltip: 'Použijte pouze pro rychlé vyzkoušení aplikace.',
-  demoSigninLoading: 'Přihlašuji do demo účtu ...',
-  demoSigninSuccess: 'Přihlášení do demo účtu proběhlo úspěšně.',
-  demoSigninError: 'Demo přihlášení se nepodařilo. Zkuste to prosím znovu.',
-  demoSigninInvalidCredentialsError:
-    'Demo účet nelze přihlásit: zkontrolujte DEMO_EMAIL a DEMO_PASSWORD v Supabase Secrets.',
-  demoSigninEmailProviderDisabledError:
-    'Email+heslo přihlášení je v Supabase vypnuté. Zapněte Authentication > Providers > Email.',
-  demoSigninCaptchaStillEnabledError:
-    'V Supabase je pro přihlášení stále zapnutá CAPTCHA / Bot Detection. Vypněte ji v Authentication > Bot Detection, jinak demo login bez Turnstile neprojde.',
-  demoSigninRateLimitError: 'Příliš mnoho pokusů. Opakujte to prosím později.',
+  anonymousSigninButton: 'Pokračovat jako host',
+  anonymousSigninLoading: 'Probíhá přihlášení...',
+  anonymousSigninTooltip: 'Anonymní přihlášení můžete později změnit na skutečné.',
 
   // Convert anonymous account
   convertAnonymousButton: 'Převést účet hosta na Google účet',
