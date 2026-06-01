@@ -6,6 +6,7 @@ type SigninButtonProps = Readonly<{
   title: string;
   label: string;
   loadingLabel: string;
+  className?: string;
 }>;
 
 export default function SigninButton({
@@ -14,9 +15,10 @@ export default function SigninButton({
   title,
   label,
   loadingLabel,
+  className,
 }: SigninButtonProps): JSX.Element {
   return (
-    <div className="relative w-full">
+    <div className={`relative w-full ${className}`}>
       <button
         type="button"
         onClick={onClick}

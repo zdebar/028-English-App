@@ -8,6 +8,7 @@ interface AuthState {
   userId: string | null;
   userEmail: string | null;
   userFullName: string | null;
+  isAnonymousUser: boolean;
   loading: boolean;
   initializeAuth: () => () => void;
   handleLogout: (options?: {
@@ -21,7 +22,13 @@ const INITIAL_AUTH_STATE = {
   userId: null,
   userEmail: null,
   userFullName: null,
+  isAnonymousUser: false,
 };
+
+function isAnonymousSession(session: Session | null): boolean {
+  const user = session?.user as { is_anonymous?: boolean } | undefined;
+  return user?.is_anonymous === true;
+}
 
 function isMissingAuthSessionError(message: string | undefined): boolean {
   if (!message) return false;
@@ -56,6 +63,7 @@ export const useAuthStore = create<AuthState>((set) => {
       userEmail: session?.user?.email ?? null,
       userFullName:
         session?.user?.user_metadata?.full_name || session?.user?.user_metadata?.name || null,
+      isAnonymousUser: isAnonymousSession(session),
       loading: false,
     });
   };

@@ -40,4 +40,11 @@ export const HOME_TEXTS = {
   demoSigninCaptchaStillEnabledError:
     'V Supabase je pro přihlášení stále zapnutá CAPTCHA / Bot Detection. Vypněte ji v Authentication > Bot Detection, jinak demo login bez Turnstile neprojde.',
   demoSigninRateLimitError: 'Příliš mnoho pokusů. Opakujte to prosím později.',
+
+  // Convert anonymous account
+  convertAnonymousButton: 'Převést účet hosta na Google účet',
+  convertAnonymousButtonTooltip: 'Propojí aktuální účet hosta s Google přihlášením.',
+  convertAnonymousLoading: 'Připravuji propojení účtu ...',
+  convertAnonymousSuccessToast: 'Účet hosta byl úspěšně převeden.',
+  convertAnonymousErrorToast: 'Převod účtu hosta se nepodařil.',
 } as const;

@@ -11,6 +11,7 @@ import { useSyncWarningStore } from '@/features/sync/use-sync-warning';
 import { ROUTES } from '@/config/routes.config';
 import GoogleAuthButton from '@/features/auth/GoogleAuthButton';
 import AnonymousSigninButton from '@/features/auth/AnonymousSigninButton';
+import ConvertAnonymousUserButton from '@/features/auth/ConvertAnonymousUserButton';
 import PropertyView from '@/components/UI/PropertyView';
 import PracticeOverviewButton from '@/components/PracticeOverviewButton';
 
@@ -23,6 +24,7 @@ export default function Home(): JSX.Element {
   const navigate = useNavigate();
   const userId = useAuthStore((state) => state.userId);
   const userFullName = useAuthStore((state) => state.userFullName);
+  const isAnonymousUser = useAuthStore((state) => state.isAnonymousUser);
   const dailyCount = useUserStore((state) => state.dailyCount);
   const isSynchronized = useSyncWarningStore((state) => state.isSynchronized);
 
@@ -38,6 +40,7 @@ export default function Home(): JSX.Element {
 
       {userId ? (
         <div className="relative mt-8 flex w-full flex-col">
+          {isAnonymousUser && <ConvertAnonymousUserButton className="mb-8" />}
           <PropertyView
             label={TEXTS.profileNameLabel}
             className="justify-center"
