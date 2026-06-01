@@ -19,14 +19,14 @@ export default function Profile(): JSX.Element {
 
   return (
     <div className="card-width grow-0 gap-1">
-      <div className="mb-8 mt-4 mx-auto w-64 text-left">
+      <div className="mx-auto mt-4 mb-8 w-64 text-left">
         <PropertyView
           label={TEXTS.profileEmailLabel}
           className="justify-center"
           classNameLabel="w-20"
           classNameValue="wrap-break-word"
         >
-          {userEmail ?? TEXTS.notAvailable}
+          {userEmail || TEXTS.notAvailable}
         </PropertyView>
       </div>
       <StandardButton onClick={() => navigate(ROUTES.levels)} title={TEXTS.levelsOverviewTooltip}>
@@ -44,7 +44,7 @@ export default function Profile(): JSX.Element {
         className="mb-8"
       >
         <MenuButtonText>{TEXTS.vocabularyOverview}</MenuButtonText>
-      </StandardButton>    
+      </StandardButton>
       <SignoutButton />
       <DeleteUserButton />
     </div>

@@ -9,8 +9,8 @@ import '@/styles/home.css';
 import { InstallPWAButton } from '@/features/pwa/InstallPwaButton';
 import { useSyncWarningStore } from '@/features/sync/use-sync-warning';
 import { ROUTES } from '@/config/routes.config';
-import DemoSessionPanel from '@/features/demo/DemoSessionPanel';
 import GoogleAuthButton from '@/features/auth/GoogleAuthButton';
+import AnonymousSigninButton from '@/features/auth/AnonymousSigninButton';
 import PropertyView from '@/components/UI/PropertyView';
 import PracticeOverviewButton from '@/components/PracticeOverviewButton';
 
@@ -62,7 +62,7 @@ export default function Home(): JSX.Element {
       ) : (
         <div className="mt-8 w-full">
           <div className="flex flex-col gap-1">
-            <DemoSessionPanel />
+            <AnonymousSigninButton />
             <GoogleAuthButton />
           </div>
           <p className="p-4 text-sm">{TEXTS.signupHint}</p>
