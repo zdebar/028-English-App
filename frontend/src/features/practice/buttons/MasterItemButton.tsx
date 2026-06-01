@@ -80,12 +80,10 @@ export default function MasterItemButton({ onConfirm, disabled, children }: Skip
   return (
     <>
       <StyledButton
-        onMouseDown={handlePressStart}
-        onMouseUp={handlePressEnd}
-        onMouseLeave={handlePressEnd}
-        onTouchStart={handlePressStart}
-        onTouchEnd={handlePressEnd}
-        onTouchCancel={handlePressEnd}
+        onPointerDown={handlePressStart}
+        onPointerUp={handlePressEnd}
+        onPointerLeave={handlePressEnd}
+        onPointerCancel={handlePressEnd}
         onClick={handleClick}
         disabled={disabled}
         className="h-button relative"

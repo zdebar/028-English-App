@@ -51,4 +51,8 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
   },
+  server: {
+    host: true,
+    allowedHosts: ['test.mydomain.com'],
+  },
 });
