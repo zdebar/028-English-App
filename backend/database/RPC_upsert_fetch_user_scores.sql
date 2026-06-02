@@ -13,21 +13,8 @@ RETURNS TABLE (
 LANGUAGE plpgsql
 SET search_path TO public
 AS $$
-DECLARE
-  v_auth_user_id UUID;
 BEGIN
-  IF p_user_id IS NULL THEN
-    RAISE EXCEPTION 'p_user_id is required';
-  END IF;
-
-  v_auth_user_id := auth.uid();
-  IF v_auth_user_id IS NULL THEN
-    RAISE EXCEPTION 'Not authenticated';
-  END IF;
-
-  IF v_auth_user_id IS DISTINCT FROM p_user_id THEN
-    RAISE EXCEPTION 'p_user_id must match auth.uid()';
-  END IF;
+  PERFORM public.require_auth_user_id_match(p_user_id);
 
   IF p_user_scores IS NOT NULL AND p_user_scores <> '[]'::JSONB THEN
     -- Validate every user_id in p_user_scores matches p_user_id
@@ -50,11 +37,10 @@ BEGIN
     us.deleted_at
   FROM public.user_scores us
   WHERE us.user_id = p_user_id
-    AND us.updated_at >= p_last_synced_at
+    AND us.updated_at >= COALESCE(p_last_synced_at, public.rpc_min_timestamptz())
   ORDER BY us.date ASC;
 END;
 $$;
 
-REVOKE EXECUTE ON FUNCTION public.upsert_fetch_user_scores(UUID, TIMESTAMPTZ, JSONB) FROM PUBLIC;
-REVOKE EXECUTE ON FUNCTION public.upsert_fetch_user_scores(UUID, TIMESTAMPTZ, JSONB) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.upsert_fetch_user_scores(UUID, TIMESTAMPTZ, JSONB) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.upsert_fetch_user_scores(UUID, TIMESTAMPTZ, JSONB) TO authenticated;
