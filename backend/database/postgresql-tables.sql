@@ -123,11 +123,11 @@ EXECUTE FUNCTION public.handle_new_auth_user();
 
 -- CREATE optimalization indexes
 CREATE INDEX IF NOT EXISTS idx_items_updated_at ON public.items (updated_at);
-CREATE INDEX IF NOT EXISTS idx_grammar_updated_at ON public.grammar (updated_at);
-CREATE INDEX IF NOT EXISTS idx_levels_updated_at ON public.levels (updated_at);
-CREATE INDEX IF NOT EXISTS idx_lessons_updated_at ON public.lessons (updated_at);
-CREATE INDEX IF NOT EXISTS idx_notes_updated_at ON public.notes (updated_at);
-CREATE INDEX IF NOT EXISTS idx_blocks_updated_at ON public.blocks (updated_at);
+CREATE INDEX IF NOT EXISTS idx_lessons_level_id ON public.lessons (level_id);
+CREATE INDEX IF NOT EXISTS idx_items_note_id ON public.items (note_id);
+CREATE INDEX IF NOT EXISTS idx_items_block_id ON public.items (block_id);
+CREATE INDEX IF NOT EXISTS idx_items_grammar_id ON public.items (grammar_id);
+CREATE INDEX IF NOT EXISTS idx_items_lesson_id ON public.items (lesson_id);
 
 CREATE INDEX IF NOT EXISTS idx_user_items_user_updated_item
   ON public.user_items (user_id, updated_at, item_id)
@@ -136,3 +136,6 @@ CREATE INDEX IF NOT EXISTS idx_user_items_user_updated_item
 CREATE INDEX IF NOT EXISTS idx_user_items_item_user
   ON public.user_items (item_id, user_id)
   INCLUDE (progress, started_at, updated_at, next_at, mastered_at);
+
+CREATE INDEX IF NOT EXISTS idx_user_items_history_item_id
+  ON public.user_items_history (item_id);
