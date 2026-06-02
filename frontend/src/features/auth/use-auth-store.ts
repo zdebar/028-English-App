@@ -88,8 +88,11 @@ export const useAuthStore = create<AuthState>((set) => {
         }
 
         if (data?.session) {
-          const { error: reactError } = await supabaseInstance.rpc('reactivate_user_if_deleted');
-          if (reactError) reportError(reactError);
+          Promise.resolve(supabaseInstance.rpc('reactivate_user_if_deleted'))
+            .then(({ error }) => {
+              if (error) reportError(error);
+            })
+            .catch((e) => reportError(e));
         }
 
         applySession(data.session);
