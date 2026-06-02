@@ -48,16 +48,13 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
         'Operation failed during local cleanup',
       );
 
-      const { error: deleteError } = await supabaseInstance.functions.invoke('delete-user', {
-        body: { userId },
-      });
-
+      const { error: deleteError } = await supabaseInstance.rpc('soft_delete_user');
       if (deleteError) {
         throw new Error(deleteError.message);
       }
 
       showToast(TEXTS.deleteUserSuccessToast, 'success');
-      reportInfo(`User ${userId} deleted their account`);
+      reportInfo(`User ${userId} soft deleted their account`);
     } catch (err) {
       reportError('Error deleting user', err);
       showToast(TEXTS.deleteUserErrorToast, 'error');

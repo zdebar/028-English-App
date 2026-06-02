@@ -86,6 +86,12 @@ export const useAuthStore = create<AuthState>((set) => {
           clearSession();
           return;
         }
+
+        if (data?.session) {
+          const { error: reactError } = await supabaseInstance.rpc('reactivate_user_if_deleted');
+          if (reactError) reportError(reactError);
+        }
+
         applySession(data.session);
       };
 
@@ -94,6 +100,8 @@ export const useAuthStore = create<AuthState>((set) => {
       subscription = supabaseInstance.auth.onAuthStateChange((_event, session) => {
         applySession(session);
       }).data.subscription;
+
+
 
       return () => {
         if (subscription) subscription.unsubscribe();

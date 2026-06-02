@@ -1,7 +1,23 @@
+
+create schema if not exists private;
+
+CREATE TABLE IF NOT EXISTS private.settings (
+  id SERIAL PRIMARY KEY,
+  key TEXT NOT NULL UNIQUE,
+  value JSONB NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+insert into private.settings (key, value)
+values ('soft_delete_retention', '"30 days"'::jsonb)
+on conflict (key) do update
+set value = excluded.value,
+    updated_at = now();
+
 SET search_path TO public;
 
 CREATE TABLE IF NOT EXISTS users (
-  id UUID PRIMARY KEY,
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   history_enabled BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ
