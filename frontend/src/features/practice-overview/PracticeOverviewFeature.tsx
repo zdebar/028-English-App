@@ -6,7 +6,7 @@ import { TEXTS } from '@/locales/cs';
 import type { UserScoreType } from '@/types/generic.types';
 import { STAR_SIZE, StarRow } from '@/components/UI/StarProgress';
 import config from '@/config/config';
-import { getCompletedStarCount } from '@/utils/star-progress.utils';
+import { getCompletedStarCount } from '@/features/practice-overview/star-progress.utils';
 import { useEffect, useState, type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DataState } from '@/components/UI/DataState';

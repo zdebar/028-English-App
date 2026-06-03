@@ -7,7 +7,7 @@ import {
   getStarProgressState,
   getStarTier,
   type StarTier,
-} from '@/utils/star-progress.utils';
+} from '@/features/practice-overview/star-progress.utils';
 
 const EMPTY_STAR_BORDER_CLASS = 'text-slate-600 dark:text-slate-500';
 const EMPTY_STAR_FILL_CLASS = 'text-slate-300 dark:text-slate-700';
