@@ -2,7 +2,7 @@ import { supabaseInstance } from '@/config/supabase.config';
 import Metadata from '@/database/models/metadata';
 import UserItem from '@/database/models/user-items';
 import UserScoreType from '@/database/models/user-scores';
-import { clearSyncTimes } from '@/database/utils/sync-time.utils';
+import { clearAllLocalStorageForUser } from '@/utils/storage.utils';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { withSettledSummary } from '@/features/logging/logging.utils';
 import ButtonWithModal from '@/features/modal/ButtonWithModal';
@@ -27,7 +27,6 @@ type DeleteUserButtonProps = Readonly<{
 export default function DeleteUserButton({ className }: DeleteUserButtonProps): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const handleLogout = useAuthStore((state) => state.handleLogout);
-  const clearTheme = useThemeStore((state) => state.clearTheme);
   const saveCurrentThemeAsGuest = useThemeStore((state) => state.saveCurrentThemeAsGuest);
   const showToast = useToastStore((state) => state.showToast);
 
@@ -42,13 +41,12 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
           Metadata.deleteSyncRow(TableName.UserItems, userId),
           UserScoreType.deleteByUserId(userId),
           Metadata.deleteSyncRow(TableName.UserScores, userId),
-          Promise.resolve(clearTheme(userId)),
-          Promise.resolve(clearSyncTimes(userId)),
         ],
         'Operation failed during local cleanup',
       );
 
       const { error: deleteError } = await supabaseInstance.rpc('soft_delete_user');
+
       if (deleteError) {
         throw new Error(deleteError.message);
       }
@@ -59,6 +57,7 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
       reportError('Error deleting user', err);
       showToast(TEXTS.deleteUserErrorToast, 'error');
     } finally {
+      clearAllLocalStorageForUser(userId);
       handleLogout({ skipSync: true, scope: 'global' });
     }
   };
