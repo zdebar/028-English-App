@@ -2,7 +2,7 @@
 
 English Learning App is a Czech-English practice application built around local-first progress tracking and Supabase-backed synchronization.
 
-The main product is the web frontend in [frontend](frontend), supported by backend SQL assets, edge-function code, and source lesson/audio data in this repository.
+The main product is the web frontend in [frontend](frontend), supported by backend SQL assets, and source lesson/audio data in this repository.
 
 ## Repository Overview
 
@@ -10,14 +10,11 @@ Main folders:
 
 - [frontend](frontend): React + TypeScript + Vite application
 - [backend/database](backend/database): PostgreSQL schema, triggers, and RPC SQL for Supabase
-- [backend/functions](backend/functions): edge function sources
-- [backend/shared](backend/shared): shared backend helpers
 - [scripts](scripts): preparation and utility scripts
 
 Repository docs:
 
 - [STYLEGUIDE.md](STYLEGUIDE.md): recommended repository coding style and review defaults
-- [TEAM_POLICY.md](TEAM_POLICY.md): shorter coding guidelines
 
 ## What The Frontend Does
 
@@ -128,15 +125,32 @@ The current app wiring in [frontend/src/App.tsx](frontend/src/App.tsx) includes:
 
 Unknown routes render a page-not-found notification.
 
-## Runtime Behavior
+## Basic Features
 
 The frontend currently initializes several app-wide flows in [frontend/src/App.tsx](frontend/src/App.tsx):
 
-- auth bootstrapping through the auth store
+- supabase auth
+    * Anonymous Auth for new users
+    * Goolge Auth 
 - theme loading per user
 - periodic synchronization
-- daily stats reset
+    * on app start or every at least once every 24 hours
+    * all practice data is stored to indexedDB
+    * concurrent practice uses indexedDB exclusively
+- overview
+    * app track progress as today started, today mastered, and daily practice items
+    * possible to review started
+        - levels, lesson - and progress of corresponding items
+        - grammar - list all started grammar, possible to reset all corresponding items
+        - blocks - list all started vocabulary groups ex. month etc., possible to reset all corresponding items
+        - vocabulary - list all started vocabulary, possible to reset progress
 - global toast and overlay rendering
+- user account deletion
+    *  soft deletion within 30 days
+- usert item history
+    * app track every item progress history only for specified testing accounts
+    * on frontend indexedDb tracks progress history as array of objects:{date, progress}
+    * on backend it unpack array into individual row in user_items_history
 
 Loading state is driven by combined auth and sync activity.
 
