@@ -11,11 +11,7 @@ interface AuthState {
   isAnonymousUser: boolean;
   loading: boolean;
   initializeAuth: () => () => void;
-  handleLogout: (options?: {
-    skipSync?: boolean;
-    scope?: 'global' | 'local';
-    skipRemoteSignOut?: boolean;
-  }) => Promise<void>;
+  handleLogout: (options?: { skipSync?: boolean; scope?: 'global' | 'local' }) => Promise<void>;
 }
 
 const INITIAL_AUTH_STATE = {
@@ -28,13 +24,6 @@ const INITIAL_AUTH_STATE = {
 function isAnonymousSession(session: Session | null): boolean {
   const user = session?.user as { is_anonymous?: boolean } | undefined;
   return user?.is_anonymous === true;
-}
-
-function isMissingAuthSessionError(message: string | undefined): boolean {
-  if (!message) return false;
-
-  const normalized = message.trim().toLowerCase();
-  return normalized.includes('auth session missing');
 }
 
 /**
@@ -104,8 +93,6 @@ export const useAuthStore = create<AuthState>((set) => {
         applySession(session);
       }).data.subscription;
 
-
-
       return () => {
         if (subscription) subscription.unsubscribe();
       };
@@ -117,21 +104,10 @@ export const useAuthStore = create<AuthState>((set) => {
         await dataSyncOnUnmount(currentUserId);
       }
 
-      if (options?.skipRemoteSignOut) {
-        clearSession();
-        return;
-      }
-
-      const { error } = await supabaseInstance.auth.signOut({
-        scope: options?.scope ?? 'global',
+      await supabaseInstance.auth.signOut({
+        scope: options?.scope ?? 'local',
       });
-      if (error) {
-        if (isMissingAuthSessionError(error.message)) {
-          clearSession();
-          return;
-        }
-        throw new Error(error.message);
-      }
+
       clearSession();
     },
   };

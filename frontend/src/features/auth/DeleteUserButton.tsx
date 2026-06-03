@@ -59,7 +59,7 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
       reportError('Error deleting user', err);
       showToast(TEXTS.deleteUserErrorToast, 'error');
     } finally {
-      handleLogout({ skipSync: true, skipRemoteSignOut: true });
+      handleLogout({ skipSync: true, scope: 'global' });
     }
   };
 
