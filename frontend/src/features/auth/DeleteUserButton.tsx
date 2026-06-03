@@ -58,7 +58,7 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
       showToast(TEXTS.deleteUserErrorToast, 'error');
     } finally {
       clearAllLocalStorageForUser(userId);
-      handleLogout({ skipSync: true, scope: 'global' });
+      handleLogout({ skipSync: true, skipRemoteSignOut: true });
     }
   };
 

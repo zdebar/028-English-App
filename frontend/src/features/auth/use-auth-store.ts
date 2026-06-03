@@ -11,7 +11,11 @@ interface AuthState {
   isAnonymousUser: boolean;
   loading: boolean;
   initializeAuth: () => () => void;
-  handleLogout: (options?: { skipSync?: boolean; scope?: 'global' | 'local' }) => Promise<void>;
+  handleLogout: (options?: {
+    skipSync?: boolean;
+    scope?: 'global' | 'local';
+    skipRemoteSignOut?: boolean;
+  }) => Promise<void>;
 }
 
 const INITIAL_AUTH_STATE = {
@@ -104,9 +108,15 @@ export const useAuthStore = create<AuthState>((set) => {
         await dataSyncOnUnmount(currentUserId);
       }
 
-      await supabaseInstance.auth.signOut({
-        scope: options?.scope ?? 'local',
-      });
+      if (!options?.skipRemoteSignOut) {
+        const { error } = await supabaseInstance.auth.signOut({
+          scope: options?.scope ?? 'global',
+        });
+
+        if (error && error.message !== 'Auth session missing!') {
+          throw new Error(error.message);
+        }
+      }
 
       clearSession();
     },
