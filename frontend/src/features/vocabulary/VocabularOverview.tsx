@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import VocabularyDetailCard from './VocabularyDetailCard';
 import VocabularyList from './VocabularyList';
 
-const SEARCH_KEY = 'vocabulary_search_term';
+const SEARCH_KEY = 'vocabulary_search_term_';
 
 /**
  * VocabularyOverview component
@@ -37,8 +37,9 @@ export default function VocabularyOverview() {
     filteredWords,
   } = useVocabulary(userId);
 
-  // Sync searchTerm with localStorage
-  useLocalStorageSync(SEARCH_KEY, searchTerm, setSearchTerm);
+  // Sync searchTerm with localStorage (per-user key)
+  const storageKey = `${SEARCH_KEY}${userId ?? 'guest'}`;
+  useLocalStorageSync(storageKey, searchTerm, setSearchTerm);
 
   // -- HANDLERS  --
   const handleResetUserItem = useCallback(async () => {
