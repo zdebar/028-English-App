@@ -1,0 +1,23 @@
+@font-face {
+  font-display: swap;
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: url('@/assets/fonts/roboto-v51-latin_latin-ext-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  src: url('@/assets/fonts/roboto-v51-latin_latin-ext-700.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Mansalva';
+  font-style: normal;
+  font-weight: 400;
+  src: url('@/assets/fonts/mansalva-v16-latin_latin-ext-regular.woff2') format('woff2');
+}
