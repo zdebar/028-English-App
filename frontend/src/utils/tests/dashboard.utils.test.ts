@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/config/config', () => ({
   default: {
@@ -13,9 +13,16 @@ import {
   getLessonStarted,
   getPreviousCount,
   getTodayStartedItems,
+  triggerDailyCountUpdatedEvent,
+  triggerLevelsUpdatedEvent,
+  triggerNamedEvent,
 } from '../dashboard.utils';
 
 describe('dashboard.utils', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   describe('getPreviousCount', () => {
     it('returns correct count for non-today items', () => {
       expect(getPreviousCount(12)).toBe(2);
@@ -165,6 +172,55 @@ describe('dashboard.utils', () => {
       ] as any;
 
       expect(getInProgressLessons(eligibleAfterCompleted, 'started').map((x) => x.id)).toEqual([2]);
+    });
+  });
+
+  describe('event triggers', () => {
+    it('triggerNamedEvent dispatches custom event with user id detail', () => {
+      const dispatchSpy = vi.spyOn(globalThis, 'dispatchEvent');
+
+      triggerNamedEvent('levelsUpdated', 'user-1');
+
+      expect(dispatchSpy).toHaveBeenCalledTimes(1);
+      const dispatchedEvent = dispatchSpy.mock.calls[0][0] as CustomEvent;
+      expect(dispatchedEvent.type).toBe('levelsUpdated');
+      expect(dispatchedEvent.detail).toEqual({ userId: 'user-1' });
+    });
+
+    it('triggerNamedEvent validates required inputs', () => {
+      expect(() => triggerNamedEvent('', 'user-1')).toThrow('eventName is required.');
+      expect(() => triggerNamedEvent('levelsUpdated', '')).toThrow('userId is required.');
+    });
+
+    it('triggerLevelsUpdatedEvent dispatches levelsUpdated event', () => {
+      const dispatchSpy = vi.spyOn(globalThis, 'dispatchEvent');
+
+      triggerLevelsUpdatedEvent('user-2');
+
+      const dispatchedEvent = dispatchSpy.mock.calls.at(-1)?.[0] as CustomEvent;
+      expect(dispatchedEvent.type).toBe('levelsUpdated');
+      expect(dispatchedEvent.detail).toEqual({ userId: 'user-2' });
+    });
+
+    it('triggerDailyCountUpdatedEvent dispatches with optional dailyCount', () => {
+      const dispatchSpy = vi.spyOn(globalThis, 'dispatchEvent');
+
+      triggerDailyCountUpdatedEvent('user-3', 7);
+      triggerDailyCountUpdatedEvent('user-3');
+
+      const eventCalls = dispatchSpy.mock.calls.slice(-2);
+      const firstEvent = eventCalls[0][0] as CustomEvent;
+      const secondEvent = eventCalls[1][0] as CustomEvent;
+
+      expect(firstEvent.type).toBe('dailyCountUpdated');
+      expect(firstEvent.detail).toEqual({ userId: 'user-3', dailyCount: 7 });
+
+      expect(secondEvent.type).toBe('dailyCountUpdated');
+      expect(secondEvent.detail).toEqual({ userId: 'user-3' });
+    });
+
+    it('triggerDailyCountUpdatedEvent validates user id', () => {
+      expect(() => triggerDailyCountUpdatedEvent('')).toThrow('userId is required.');
     });
   });
 });

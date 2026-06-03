@@ -4,6 +4,7 @@ const mocks = vi.hoisted(() => ({
   getSession: vi.fn(),
   signOut: vi.fn(),
   onAuthStateChange: vi.fn(),
+  rpc: vi.fn(),
   unsubscribe: vi.fn(),
   dataSyncOnUnmount: vi.fn(),
   authCallback: null as ((event: string, session: any) => void) | null,
@@ -16,6 +17,7 @@ vi.mock('@/config/supabase.config', () => ({
       signOut: (...args: unknown[]) => mocks.signOut(...args),
       onAuthStateChange: (...args: unknown[]) => mocks.onAuthStateChange(...args),
     },
+    rpc: (...args: unknown[]) => mocks.rpc(...args),
   },
 }));
 
@@ -38,7 +40,7 @@ describe('useAuthStore', () => {
       userId: null,
       userEmail: null,
       userFullName: null,
-      isDemoUser: false,
+      isAnonymousUser: false,
       loading: true,
     });
 
@@ -55,6 +57,7 @@ describe('useAuthStore', () => {
       },
     );
     mocks.signOut.mockResolvedValue({ error: null });
+    mocks.rpc.mockResolvedValue({ error: null });
     mocks.dataSyncOnUnmount.mockResolvedValue(undefined);
   });
 

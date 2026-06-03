@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
   deleteAllUserScores: vi.fn(),
   deleteSyncRow: vi.fn(),
   clearSyncTimes: vi.fn(),
-  invoke: vi.fn(),
+  rpc: vi.fn(),
   signOut: vi.fn(),
   reportError: vi.fn(),
 }));
@@ -67,9 +67,7 @@ vi.mock('@/database/utils/sync-time.utils', () => ({
 
 vi.mock('@/config/supabase.config', () => ({
   supabaseInstance: {
-    functions: {
-      invoke: (...args: unknown[]) => mocks.invoke(...args),
-    },
+    rpc: (...args: unknown[]) => mocks.rpc(...args),
     auth: {
       signOut: (...args: unknown[]) => mocks.signOut(...args),
     },
@@ -111,7 +109,7 @@ describe('DeleteUserButton', () => {
     vi.clearAllMocks();
     mocks.userId = 'u1';
 
-    mocks.invoke.mockResolvedValue({ error: null });
+    mocks.rpc.mockResolvedValue({ error: null });
     mocks.deleteAllByUserId.mockResolvedValue(0);
     mocks.deleteAllUserScores.mockResolvedValue(0);
     mocks.deleteSyncRow.mockResolvedValue(true);
@@ -137,9 +135,7 @@ describe('DeleteUserButton', () => {
 
     await waitFor(() => {
       expect(mocks.saveCurrentThemeAsGuest).toHaveBeenCalled();
-      expect(mocks.invoke).toHaveBeenCalledWith('delete-user', {
-        body: { userId: 'u1' },
-      });
+      expect(mocks.rpc).toHaveBeenCalledWith('soft_delete_user');
       expect(mocks.handleLogout).toHaveBeenCalledWith({
         skipSync: true,
         skipRemoteSignOut: true,
@@ -149,7 +145,7 @@ describe('DeleteUserButton', () => {
   });
 
   it('shows error toast and logs error when delete function fails', async () => {
-    mocks.invoke.mockResolvedValue({ error: { message: 'failed' } });
+    mocks.rpc.mockResolvedValue({ error: { message: 'failed' } });
 
     render(<DeleteUserButton />);
     fireEvent.click(screen.getByTestId('button-with-modal'));
