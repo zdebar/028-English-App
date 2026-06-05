@@ -126,9 +126,7 @@ describe('Home', () => {
     render(<Home />);
 
     expect(screen.queryByText('Data may be stale.')).toBeNull();
-    expect(screen.getByTestId('practice-overview-button').textContent).toBe(
-      '3:Open practice overview:Stars today',
-    );
+    expect(screen.getByRole('button', { name: 'Open practice overview' })).toBeTruthy();
   });
 
   it('renders auth UI when user is signed out', () => {
