@@ -2,6 +2,7 @@ create or replace function public.delete_is_anonymous_users_older_than()
 returns void
 language plpgsql
 security definer
+set search_path = ''
 as $$
 declare
   v_older_than interval;
@@ -32,3 +33,6 @@ select cron.schedule(
   '0 3 * * *',
   $$select public.delete_is_anonymous_users_older_than();$$
 );
+
+revoke execute on function public.delete_is_anonymous_users_older_than
+from anon, public;
