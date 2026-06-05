@@ -54,7 +54,13 @@ vi.mock('@/features/help/HelpText', () => ({
 }));
 
 vi.mock('@/components/UI/buttons/MasteredToggleButton', () => ({
-  default: ({ showMastered, setShowMastered }: { showMastered: boolean; setShowMastered: (value: boolean) => void }) => (
+  default: ({
+    showMastered,
+    setShowMastered,
+  }: {
+    showMastered: boolean;
+    setShowMastered: (value: boolean) => void;
+  }) => (
     <button type="button" onClick={() => setShowMastered(!showMastered)}>
       toggle
     </button>

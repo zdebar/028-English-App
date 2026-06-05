@@ -54,9 +54,7 @@ describe('Header', () => {
     mocks.userId = null;
     render(<Header />);
 
-    expect(screen.getByRole('button', { name: 'Procvicovat' }).hasAttribute('disabled')).toBe(
-      true,
-    );
+    expect(screen.getByRole('button', { name: 'Procvicovat' }).hasAttribute('disabled')).toBe(true);
     expect(screen.getByRole('button', { name: 'Profil' }).hasAttribute('disabled')).toBe(true);
   });
 });
