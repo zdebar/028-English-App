@@ -6,7 +6,6 @@ import { ROUTES } from '@/config/routes.config';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import ThemeSwitch from '@/features/theme/ThemeSwitch';
 import { TEXTS } from '@/locales/cs';
-
 import type { JSX } from 'react';
 import styles from './header.module.css';
 

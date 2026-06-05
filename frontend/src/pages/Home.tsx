@@ -13,7 +13,7 @@ import GoogleAuthButton from '@/features/auth/GoogleAuthButton';
 import AnonymousSigninButton from '@/features/auth/AnonymousSigninButton';
 import ConvertAnonymousUserButton from '@/features/auth/ConvertAnonymousUserButton';
 import PropertyView from '@/components/UI/PropertyView';
-import PracticeOverviewButton from '@/components/PracticeOverviewButton';
+import PracticeOverviewButton from '@/features/practice-overview/PracticeOverviewButton';
 
 /**
  * The Home component renders the main page of the application.

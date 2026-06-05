@@ -32,7 +32,7 @@ vi.mock('@/features/help/HelpText', () => ({
   ),
 }));
 
-import PracticeOverviewButton from '@/components/PracticeOverviewButton';
+import PracticeOverviewButton from '@/features/practice-overview/PracticeOverviewButton';
 
 describe('PracticeOverviewButton', () => {
   it('renders star progress and help text', () => {
