@@ -47,6 +47,7 @@ ALTER FUNCTION "private"."hard_delete_deleted_users"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."delete_is_anonymous_users_older_than"() RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO ''
     AS $$
 declare
   v_older_than interval;
