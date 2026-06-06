@@ -26,7 +26,7 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 
-import { useGrammar } from '@/features/practice/hooks/use-grammar';
+import { useGrammar } from '@/features/practice/hooks/use-entity-by-table';
 
 describe('useGrammar', () => {
   beforeEach(() => {

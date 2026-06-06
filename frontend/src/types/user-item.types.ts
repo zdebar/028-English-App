@@ -8,7 +8,6 @@ export interface UserItemBase {
   item_id: number;
   czech: string;
   english: string;
-  note: string | null;
   pronunciation: string;
   audio: string | null;
   sort_order: number;
@@ -21,6 +20,7 @@ export interface UserItemBase {
 export interface UserItemAPI extends UserItemBase {
   is_study_item: boolean;
   is_vocabulary: boolean;
+  note_id: number | null;
   block_id: number | null;
   grammar_id: number | null;
   started_at: string | null;
@@ -44,6 +44,7 @@ export type UserItemExport = Pick<
 export interface UserItemLocal extends UserItemBase {
   is_study_item: 0 | 1;
   is_vocabulary: 0 | 1;
+  note_id: number;
   block_id: number;
   grammar_id: number;
   started_at: string;

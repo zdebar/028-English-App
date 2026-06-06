@@ -24,7 +24,7 @@ vi.mock('@/components/UI/OverviewCard', () => ({
   ),
 }));
 
-import GrammarCard from '@/features/practice/GrammarCard';
+import GrammarCard from '@/features/practice/SimpleOverviewCard';
 
 describe('GrammarCard', () => {
   beforeEach(() => {

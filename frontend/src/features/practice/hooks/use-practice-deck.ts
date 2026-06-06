@@ -204,6 +204,7 @@ export function usePracticeDeck(userId: string | null) {
     // Core state
     index,
     currentItem,
+    noteId: currentItem?.note_id ?? null,
     grammarId: currentItem?.grammar_id ?? null,
     progress: currentItem?.progress ?? 0,
     isCzToEn,
