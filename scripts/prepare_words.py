@@ -21,7 +21,7 @@ async def prepare_words(file_name: str, output_file: str, audio_folder: str, suf
 	# # 4. Generate audio files
 	df = await generate_audio_with_google_cloud(df, audio_folder, suffix)
 	# 5. Force integer columns before saving
-	for col in ["id", "sort_order", "grammar_id", "lesson_id"]:
+	for col in ["id", "sort_order", "grammar_id", "lesson_id", "block_id", "note_id"]:
 		if col in df.columns:
 			df[col] = pd.to_numeric(df[col], errors="coerce")
 			df[col] = df[col].apply(lambda x: int(x) if pd.notna(x) and x == int(x) else "")
