@@ -75,6 +75,8 @@ export default function PracticeCard() {
     audioLoading,
   } = usePracticeDeck(userId);
 
+  console.log('Current Note_id:', noteId); // Debug log for note_id
+
   const cardText = revealed ? undefined : TEXTS.reveal;
   const cardStyle = revealed ? 'color-audio-disabled' : 'color-button';
   const directionText = isCzToEn ? TEXTS.directionCzToEn : TEXTS.directionEnToCz;

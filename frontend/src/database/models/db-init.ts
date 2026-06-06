@@ -8,6 +8,7 @@ import Levels from '@/database/models/levels';
 import Metadata from '@/database/models/metadata';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
+import Notes from './notes';
 
 let isInitialized = false;
 
@@ -17,6 +18,7 @@ export async function initDbMappings(): Promise<void> {
   db.user_items.mapToClass(UserItem);
   db.grammar.mapToClass(Grammar);
   db.blocks.mapToClass(Blocks);
+  db.notes.mapToClass(Notes);
   db.levels.mapToClass(Levels);
   db.lessons.mapToClass(Lessons);
   db.user_scores.mapToClass(UserScore);

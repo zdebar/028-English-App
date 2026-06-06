@@ -44,7 +44,6 @@ export type UserItemExport = Pick<
 export interface UserItemLocal extends UserItemBase {
   is_study_item: 0 | 1;
   is_vocabulary: 0 | 1;
-  note_id: number;
   block_id: number;
   grammar_id: number;
   started_at: string;
