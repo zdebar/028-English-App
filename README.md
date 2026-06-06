@@ -188,7 +188,7 @@ Important files include:
 
 Main domain tables/entities across the project:
 
-- `levels`, `lessons`, `items`, `grammar`
+- `levels`, `lessons`, `items`, `grammar`, `blocks`, `notes`
 - `user_items`, `user_scores`
 - sync metadata and user-linked records
 
