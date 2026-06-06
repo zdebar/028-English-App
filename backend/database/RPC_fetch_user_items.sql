@@ -7,12 +7,12 @@ RETURNS TABLE (
   user_id UUID,
   czech TEXT,
   english TEXT,
-  note TEXT,
   pronunciation TEXT,
   audio TEXT,
   is_study_item BOOLEAN,
   is_vocabulary BOOLEAN,
   sort_order INTEGER,
+  note_id INTEGER,
   block_id INTEGER,
   grammar_id INTEGER,
   progress INTEGER,
@@ -36,12 +36,12 @@ BEGIN
     p_user_id AS user_id,
     i.czech,
     i.english,
-    n.note,
     i.pronunciation,
     i.audio,
     i.is_study_item,
     i.is_vocabulary,
     i.sort_order,
+    i.note_id,
     i.block_id,
     i.grammar_id,
     COALESCE(ui.progress, 0) AS progress,
@@ -56,8 +56,6 @@ BEGIN
   LEFT JOIN public.user_items ui
     ON ui.item_id = i.id
     AND ui.user_id = p_user_id
-  LEFT JOIN public.notes n
-    ON n.id = i.note_id
   WHERE GREATEST(COALESCE(ui.updated_at, public.rpc_min_timestamptz()), i.updated_at)
     > COALESCE(p_last_synced_at, public.rpc_min_timestamptz());
 END;
