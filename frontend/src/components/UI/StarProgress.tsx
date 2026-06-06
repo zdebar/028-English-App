@@ -187,12 +187,12 @@ export function StarRow({
 
   if (safeStarCount === 0) {
     return (
-      <div className="z-star-stack relative flex flex-wrap items-center gap-2 overflow-visible" />
+      <div className="z-star-stack relative flex flex-wrap items-center gap-3 overflow-visible" />
     );
   }
 
   return (
-    <div className="z-star-stack relative flex flex-wrap items-center gap-2 overflow-visible">
+    <div className="z-star-stack relative flex flex-wrap items-center gap-3 overflow-visible">
       {Array.from({ length: fullTierCount }, (_, index) => {
         const tier = getStarTier(index);
         const tierStyle = TIER_STYLES[tier];
