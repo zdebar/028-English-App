@@ -9,6 +9,7 @@ import type Metadata from '@/database/models/metadata';
 import type Lessons from '@/database/models/lessons';
 import type Levels from '@/database/models/levels';
 import type Blocks from '@/database/models/blocks';
+import type Notes from '@/database/models/notes';
 
 /**
  * Application IndexedDB wrapper built on Dexie.
@@ -21,6 +22,7 @@ export default class AppDB extends Dexie {
   levels!: EntityTable<Levels, 'id'>;
   lessons!: EntityTable<Lessons, 'id'>;
   blocks!: EntityTable<Blocks, 'id'>;
+  notes!: EntityTable<Notes, 'id'>;
   grammar!: EntityTable<Grammar, 'id'>;
   user_items!: EntityTable<UserItem, any>;
   user_scores!: EntityTable<UserScore, any>;
@@ -36,6 +38,7 @@ export default class AppDB extends Dexie {
       levels: 'id, sort_order',
       lessons: 'id, sort_order',
       blocks: 'id, sort_order',
+      notes: 'id',
       grammar: 'id, sort_order',
       user_items:
         '[user_id+item_id], [user_id+grammar_id+started_at], [user_id+is_vocabulary+started_at+is_study_item], [user_id+started_at], [user_id+updated_at], [user_id+next_at+sort_order], [user_id+next_at+mastered_at+sort_order+is_study_item], [user_id+block_id]',
