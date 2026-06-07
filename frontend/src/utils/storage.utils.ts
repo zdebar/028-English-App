@@ -28,7 +28,7 @@ export function clearAllLocalStorageForUser(userId: string): void {
 
   for (let i = localStorage.length - 1; i >= 0; i--) {
     const key = localStorage.key(i);
-    if (key && key.includes(userId)) {
+    if (key?.includes(userId)) {
       localStorage.removeItem(key);
     }
   }
