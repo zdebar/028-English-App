@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import config from '@/config/config';
 
 import { useAuthStore } from '@/features/auth/use-auth-store';
@@ -9,12 +7,12 @@ import { usePracticeDeck } from './hooks/use-practice-deck';
 import Indicator from '@/components/UI/Indicator';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
-import OverviewCard from '@/components/UI/OverviewCard';
-import GrammarCard from '@/features/practice/GrammarCard';
+import SimpleOverviewCard from './SimpleOverviewCard';
 import VolumeSlider from '@/features/practice/VolumeSlider';
 
 import Notification from '@/components/UI/Notification';
 import { TEXTS } from '@/locales/cs';
+import { TableName } from '@/types/table.types';
 import GrammarButton from './buttons/GrammarButton';
 import HintButton from './buttons/HintButton';
 import KnownButton from './buttons/KnownButton';
@@ -22,7 +20,7 @@ import MasterItemButton from './buttons/MasterItemButton';
 import PlayAudioButton from './buttons/PlayAudioButton';
 import RepeatButton from './buttons/RepeatButton';
 import NoteButton from './buttons/NoteButton';
-import { useGrammar } from './hooks/use-grammar';
+import { useEntityByTable } from './hooks/use-entity-by-table';
 import { usePracticeStars } from './hooks/use-practice-stars';
 import { useHelpStore } from '../help/use-help-store';
 import DelayedNotification from '@/components/UI/DelayedNotification';
@@ -38,7 +36,18 @@ export default function PracticeCard() {
   const userId = useAuthStore((state) => state.userId);
   const dailyCount = useUserStore((state) => state.dailyCount);
   const isHelpOpened = useHelpStore((state) => state.isHelpOpened);
-  const { grammarVisible, grammarData, handleGrammar, closeGrammar } = useGrammar();
+  const {
+    isVisible: isGrammarVisible,
+    entityData: grammarData,
+    openEntityById: handleGrammar,
+    closeEntity: closeGrammar,
+  } = useEntityByTable(TableName.Grammar);
+  const {
+    isVisible: isNoteVisible,
+    entityData: noteData,
+    openEntityById: handleNote,
+    closeEntity: closeNote,
+  } = useEntityByTable(TableName.Notes);
 
   const practiceCountToday = dailyCount;
   const { starChunk, starsPerRow, starCount, displayedChunkCount } =
@@ -46,6 +55,7 @@ export default function PracticeCard() {
 
   const {
     currentItem,
+    noteId,
     grammarId,
     progress,
     isCzToEn,
@@ -64,12 +74,11 @@ export default function PracticeCard() {
     playAudio,
     audioLoading,
   } = usePracticeDeck(userId);
-  const [showNote, setShowNote] = useState(false);
 
   const cardText = revealed ? undefined : TEXTS.reveal;
   const cardStyle = revealed ? 'color-audio-disabled' : 'color-button';
   const directionText = isCzToEn ? TEXTS.directionCzToEn : TEXTS.directionEnToCz;
-  const showNoteButton = !!currentItem?.note && currentItem.note.length > 0 && revealed;
+  const showNoteButton = noteId && revealed;
   let audioStatusMessage = null;
 
   if (audioLoading) {
@@ -87,17 +96,8 @@ export default function PracticeCard() {
     );
   }
 
-  if (grammarVisible) return <GrammarCard grammar={grammarData} onClose={closeGrammar} />;
-
-  if (showNote)
-    return (
-      <OverviewCard onClose={() => setShowNote(false)} buttonTitle={currentItem?.english}>
-        <div
-          dangerouslySetInnerHTML={{ __html: currentItem?.note || '' }}
-          className="grammar p-4"
-        />
-      </OverviewCard>
-    );
+  if (isGrammarVisible) return <SimpleOverviewCard data={grammarData} onClose={closeGrammar} />;
+  if (isNoteVisible) return <SimpleOverviewCard data={noteData} onClose={closeNote} />;
 
   return (
     <div className="relative flex w-full grow flex-col items-center">
@@ -231,7 +231,7 @@ export default function PracticeCard() {
             title={TEXTS.tooltipNotes}
             onClick={(e) => {
               e.stopPropagation();
-              setShowNote(true);
+              handleNote(noteId);
             }}
           />
         )}

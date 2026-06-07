@@ -51,10 +51,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   english!: string;
   pronunciation!: string;
   audio!: string | null;
-  note!: string | null;
   is_study_item!: 0 | 1; // boolean represented as 0 or 1
   is_vocabulary!: 0 | 1; // boolean represented as 0 or 1
   sort_order!: number;
+  note_id!: number;
   block_id!: number;
   grammar_id!: number;
   progress!: number;

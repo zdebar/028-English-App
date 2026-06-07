@@ -63,7 +63,7 @@ function makeItem(overrides: Partial<UserItemPractice> = {}): UserItemPractice {
     user_id: 'u1',
     czech: 'ahoj',
     english: 'hello',
-    note: null,
+    note_id: null,
     pronunciation: 'həˈloʊ',
     audio: 'hello.opus',
     is_study_item: 1,

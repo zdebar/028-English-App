@@ -40,6 +40,11 @@ vi.mock('@/features/help/HelpText', () => ({
 
 import MasterItemButton from '@/features/practice/buttons/MasterItemButton';
 
+async function flushMicrotasks(): Promise<void> {
+  await Promise.resolve();
+  await Promise.resolve();
+}
+
 describe('MasterItemButton', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -66,9 +71,9 @@ describe('MasterItemButton', () => {
   it('shows info toast on short click when enabled', () => {
     render(<MasterItemButton disabled={false} onConfirm={vi.fn()} />);
 
-    fireEvent.mouseDown(screen.getByTestId('master-button'));
+    fireEvent.pointerDown(screen.getByTestId('master-button'));
     vi.advanceTimersByTime(Math.max(HOLD_DURATION_MS - 1, 0));
-    fireEvent.mouseUp(screen.getByTestId('master-button'));
+    fireEvent.pointerUp(screen.getByTestId('master-button'));
     fireEvent.click(screen.getByTestId('master-button'));
 
     expect(mocks.showToast).toHaveBeenCalledWith('Hold to skip', 'info');
@@ -78,8 +83,9 @@ describe('MasterItemButton', () => {
     const onConfirm = vi.fn().mockResolvedValue(undefined);
     render(<MasterItemButton disabled={false} onConfirm={onConfirm} />);
 
-    fireEvent.mouseDown(screen.getByTestId('master-button'));
+    fireEvent.pointerDown(screen.getByTestId('master-button'));
     await vi.advanceTimersByTimeAsync(HOLD_DURATION_MS);
+    await flushMicrotasks();
 
     expect(onConfirm).toHaveBeenCalledTimes(1);
     expect(mocks.showToast).toHaveBeenCalledWith('Skip success', 'success');
@@ -89,8 +95,9 @@ describe('MasterItemButton', () => {
     const onConfirm = vi.fn().mockRejectedValue(new Error('fail'));
     render(<MasterItemButton disabled={false} onConfirm={onConfirm} />);
 
-    fireEvent.touchStart(screen.getByTestId('master-button'));
+    fireEvent.pointerDown(screen.getByTestId('master-button'));
     await vi.advanceTimersByTimeAsync(HOLD_DURATION_MS);
+    await flushMicrotasks();
 
     expect(onConfirm).toHaveBeenCalledTimes(1);
     expect(mocks.showToast).toHaveBeenCalledWith('Skip error', 'error');
@@ -100,7 +107,7 @@ describe('MasterItemButton', () => {
     const onConfirm = vi.fn();
     render(<MasterItemButton disabled onConfirm={onConfirm} />);
 
-    fireEvent.mouseDown(screen.getByTestId('master-button'));
+    fireEvent.pointerDown(screen.getByTestId('master-button'));
     vi.advanceTimersByTime(700);
     fireEvent.click(screen.getByTestId('master-button'));
 
@@ -112,11 +119,12 @@ describe('MasterItemButton', () => {
     const onConfirm = vi.fn().mockResolvedValue(undefined);
     render(<MasterItemButton disabled={false} onConfirm={onConfirm} />);
 
-    fireEvent.mouseDown(screen.getByTestId('master-button'));
+    fireEvent.pointerDown(screen.getByTestId('master-button'));
     await vi.advanceTimersByTimeAsync(HOLD_DURATION_MS);
+    await flushMicrotasks();
     expect(onConfirm).toHaveBeenCalledTimes(1);
 
-    fireEvent.mouseUp(screen.getByTestId('master-button'));
+    fireEvent.pointerUp(screen.getByTestId('master-button'));
     fireEvent.click(screen.getByTestId('master-button'));
 
     expect(mocks.showToast).not.toHaveBeenCalledWith('Hold to skip', 'info');

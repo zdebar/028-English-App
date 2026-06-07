@@ -7,21 +7,25 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
   dailyCount: 5,
   grammarVisible: false,
   grammarData: null as any,
+  noteVisible: false,
+  noteData: null as any,
   handleGrammar: vi.fn(),
   closeGrammar: vi.fn(),
+  handleNote: vi.fn(),
+  closeNote: vi.fn(),
   practiceDeck: {
     index: 0,
     currentItem: {
       item_id: 1,
       czech: 'ahoj',
       english: 'hello',
-      note: null,
       pronunciation: 'həˈloʊ',
       audio: 'hello.opus',
       grammar_id: 10,
       progress: 2,
       show_new_grammar_indicator: false,
     },
+    noteId: null,
     grammarId: 10,
     progress: 2,
     isCzToEn: true,
@@ -97,13 +101,24 @@ vi.mock('@/features/user-stats/use-user-store', () => ({
     selector({ dailyCount: mocks.dailyCount }),
 }));
 
-vi.mock('@/features/practice/hooks/use-grammar', () => ({
-  useGrammar: () => ({
-    grammarVisible: mocks.grammarVisible,
-    grammarData: mocks.grammarData,
-    handleGrammar: mocks.handleGrammar,
-    closeGrammar: mocks.closeGrammar,
-  }),
+vi.mock('@/features/practice/hooks/use-entity-by-table', () => ({
+  useEntityByTable: (tableName: string) => {
+    if (tableName === 'notes') {
+      return {
+        isVisible: mocks.noteVisible,
+        entityData: mocks.noteData,
+        openEntityById: mocks.handleNote,
+        closeEntity: mocks.closeNote,
+      };
+    }
+
+    return {
+      isVisible: mocks.grammarVisible,
+      entityData: mocks.grammarData,
+      openEntityById: mocks.handleGrammar,
+      closeEntity: mocks.closeGrammar,
+    };
+  },
 }));
 
 vi.mock('@/features/practice/hooks/use-practice-deck', () => ({
@@ -266,19 +281,21 @@ describe('PracticeCard', () => {
     mocks.userId = 'u1';
     mocks.grammarVisible = false;
     mocks.grammarData = null;
+    mocks.noteVisible = false;
+    mocks.noteData = null;
     mocks.dailyCount = 5;
     mocks.practiceDeck.index = 0;
     mocks.practiceDeck.currentItem = {
       item_id: 1,
       czech: 'ahoj',
       english: 'hello',
-      note: null,
       pronunciation: 'həˈloʊ',
       audio: 'hello.opus',
       grammar_id: 10,
       progress: 2,
       show_new_grammar_indicator: false,
     };
+    mocks.practiceDeck.noteId = null;
     mocks.practiceDeck.grammarId = 10;
     mocks.practiceDeck.progress = 2;
     mocks.practiceDeck.isCzToEn = true;
@@ -310,7 +327,7 @@ describe('PracticeCard', () => {
 
     render(<PracticeCard />);
 
-    expect(screen.getByText('GrammarCard:Articles')).toBeTruthy();
+    expect(screen.getByTestId('overview-title').textContent).toContain('Articles');
   });
 
   it('shows empty message when current item is missing', () => {
@@ -386,10 +403,7 @@ describe('PracticeCard', () => {
 
   it('shows note button only when item is revealed and note exists', () => {
     mocks.practiceDeck.revealed = false;
-    mocks.practiceDeck.currentItem = {
-      ...mocks.practiceDeck.currentItem,
-      note: 'Tip for this word',
-    };
+    mocks.practiceDeck.noteId = 88;
 
     const { rerender } = render(<PracticeCard />);
     expect(screen.queryByRole('button', { name: 'note' })).toBeNull();
@@ -403,17 +417,22 @@ describe('PracticeCard', () => {
 
   it('opens note overview after clicking note button', () => {
     mocks.practiceDeck.revealed = true;
-    mocks.practiceDeck.currentItem = {
-      ...mocks.practiceDeck.currentItem,
-      english: 'hello',
-      note: 'This is item note',
-    };
+    mocks.practiceDeck.noteId = 55;
 
     render(<PracticeCard />);
 
     fireEvent.click(screen.getByRole('button', { name: 'note' }));
 
-    expect(screen.getByTestId('overview-title').textContent).toContain('hello');
-    expect(screen.getByTestId('overview-body').textContent).toContain('This is item note');
+    expect(mocks.handleNote).toHaveBeenCalledWith(55);
+  });
+
+  it('shows note overview when note overlay is visible', () => {
+    mocks.noteVisible = true;
+    mocks.noteData = { id: 2, name: 'My note', note: 'Body' };
+
+    render(<PracticeCard />);
+
+    expect(screen.getByTestId('overview-title').textContent).toContain('My note');
+    expect(screen.getByTestId('overview-body').textContent).toContain('Body');
   });
 });

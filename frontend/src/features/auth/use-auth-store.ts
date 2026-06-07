@@ -8,7 +8,7 @@ interface AuthState {
   userId: string | null;
   userEmail: string | null;
   userFullName: string | null;
-  isDemoUser: boolean;
+  isAnonymousUser: boolean;
   loading: boolean;
   initializeAuth: () => () => void;
   handleLogout: (options?: {
@@ -22,12 +22,12 @@ const INITIAL_AUTH_STATE = {
   userId: null,
   userEmail: null,
   userFullName: null,
-  isDemoUser: false,
+  isAnonymousUser: false,
 };
 
-function isDemoSession(session: Session | null): boolean {
-  const appMetadata = session?.user?.app_metadata as { is_demo?: boolean } | undefined;
-  return appMetadata?.is_demo === true;
+function isAnonymousSession(session: Session | null): boolean {
+  const user = session?.user as { is_anonymous?: boolean } | undefined;
+  return user?.is_anonymous === true;
 }
 
 /**
@@ -56,7 +56,7 @@ export const useAuthStore = create<AuthState>((set) => {
       userEmail: session?.user?.email ?? null,
       userFullName:
         session?.user?.user_metadata?.full_name || session?.user?.user_metadata?.name || null,
-      isDemoUser: isDemoSession(session),
+      isAnonymousUser: isAnonymousSession(session),
       loading: false,
     });
   };
@@ -79,6 +79,15 @@ export const useAuthStore = create<AuthState>((set) => {
           clearSession();
           return;
         }
+
+        if (data?.session) {
+          Promise.resolve(supabaseInstance.rpc('reactivate_user_if_deleted'))
+            .then(({ error }) => {
+              if (error) reportError(error);
+            })
+            .catch((e) => reportError(e));
+        }
+
         applySession(data.session);
       };
 
@@ -99,17 +108,16 @@ export const useAuthStore = create<AuthState>((set) => {
         await dataSyncOnUnmount(currentUserId);
       }
 
-      if (options?.skipRemoteSignOut) {
-        clearSession();
-        return;
+      if (!options?.skipRemoteSignOut) {
+        const { error } = await supabaseInstance.auth.signOut({
+          scope: options?.scope ?? 'global',
+        });
+
+        if (error && error.message !== 'Auth session missing!') {
+          throw new Error(error.message);
+        }
       }
 
-      const { error } = await supabaseInstance.auth.signOut({
-        scope: options?.scope ?? 'global',
-      });
-      if (error) {
-        throw new Error(error.message);
-      }
       clearSession();
     },
   };

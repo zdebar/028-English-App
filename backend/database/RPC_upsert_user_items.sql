@@ -24,7 +24,6 @@ DECLARE
   v_null_text CONSTANT TEXT := 'null';
   v_key_user_id CONSTANT TEXT := 'user_id';
   v_key_item_id CONSTANT TEXT := 'item_id';
-  v_errcode_insufficient_privilege CONSTANT TEXT := '42501';
   v_total_count INT := 0;
   v_matched_count INT := 0;
   v_skipped_count INT := 0;
@@ -33,20 +32,13 @@ BEGIN
     RETURN;
   END IF;
 
-  v_auth_user_id := auth.uid();
-  IF v_auth_user_id IS NULL THEN
-    RAISE EXCEPTION 'Not authenticated';
-  END IF;
+  v_auth_user_id := public.require_auth_user_id();
 
   FOR v_entry IN SELECT * FROM jsonb_array_elements(p_user_items) LOOP
     v_total_count := v_total_count + 1;
     BEGIN
       v_user_id := (v_entry->>v_key_user_id)::UUID;
-      IF v_user_id IS DISTINCT FROM v_auth_user_id THEN
-        RAISE EXCEPTION USING
-          ERRCODE = v_errcode_insufficient_privilege,
-          MESSAGE = 'Payload user_id must match auth.uid()';
-      END IF;
+      PERFORM public.assert_payload_user_id_matches_auth(v_user_id, v_auth_user_id);
 
       IF NOT (v_entry->>v_key_item_id) ~ v_item_id_re THEN
         v_skipped_count := v_skipped_count + 1;
@@ -135,11 +127,7 @@ BEGIN
     FOR v_entry IN SELECT * FROM jsonb_array_elements(p_user_items) LOOP
       BEGIN
         v_hist_user_id := (v_entry->>v_key_user_id)::UUID;
-        IF v_hist_user_id IS DISTINCT FROM v_auth_user_id THEN
-          RAISE EXCEPTION USING
-            ERRCODE = v_errcode_insufficient_privilege,
-            MESSAGE = 'Payload user_id must match auth.uid()';
-        END IF;
+        PERFORM public.assert_payload_user_id_matches_auth(v_hist_user_id, v_auth_user_id);
 
         -- skip entries without numeric item_id
         IF NOT (v_entry->>v_key_item_id) ~ v_item_id_re THEN
@@ -199,6 +187,5 @@ BEGIN
 END;
 $$;
 
-REVOKE EXECUTE ON FUNCTION public.upsert_user_items(JSONB, BOOLEAN) FROM PUBLIC;
-REVOKE EXECUTE ON FUNCTION public.upsert_user_items(JSONB, BOOLEAN) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.upsert_user_items(JSONB, BOOLEAN) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.upsert_user_items(JSONB, BOOLEAN) TO authenticated;

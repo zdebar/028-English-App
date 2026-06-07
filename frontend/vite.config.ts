@@ -20,35 +20,15 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (!id.includes('node_modules')) {
-            return;
-          }
-
-          if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('scheduler')) {
-            return 'vendor-react';
-          }
-
-          if (id.includes('/react-router-dom/') || id.includes('/react-router/')) {
-            return 'vendor-router';
-          }
-
-          if (id.includes('/@supabase/')) {
-            return 'vendor-supabase';
-          }
-
-          if (id.includes('/dexie') || id.includes('/dexie-react-hooks/')) {
-            return 'vendor-dexie';
-          }
-
-          return 'vendor-misc';
-        },
-      },
+      output: {},
     },
   },
   test: {
     globals: true,
     environment: 'jsdom',
+  },
+  server: {
+    host: true,
+    allowedHosts: ['test.mydomain.com'],
   },
 });

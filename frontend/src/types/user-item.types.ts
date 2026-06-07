@@ -8,12 +8,12 @@ export interface UserItemBase {
   item_id: number;
   czech: string;
   english: string;
-  note: string | null;
   pronunciation: string;
   audio: string | null;
   sort_order: number;
   progress: number;
   progress_history: ProgressHistoryEntry[];
+  note_id: number | null;
   lesson_id: number;
   updated_at: string;
 }

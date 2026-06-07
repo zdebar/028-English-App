@@ -7,7 +7,7 @@ import {
   getStarProgressState,
   getStarTier,
   type StarTier,
-} from '@/utils/star-progress.utils';
+} from '@/features/practice-overview/star-progress.utils';
 
 const EMPTY_STAR_BORDER_CLASS = 'text-slate-600 dark:text-slate-500';
 const EMPTY_STAR_FILL_CLASS = 'text-slate-300 dark:text-slate-700';
@@ -187,12 +187,12 @@ export function StarRow({
 
   if (safeStarCount === 0) {
     return (
-      <div className="z-star-stack relative flex flex-wrap items-center gap-2 overflow-visible" />
+      <div className="z-star-stack relative flex flex-wrap items-center gap-3 overflow-visible" />
     );
   }
 
   return (
-    <div className="z-star-stack relative flex flex-wrap items-center gap-2 overflow-visible">
+    <div className="z-star-stack relative flex flex-wrap items-center gap-3 overflow-visible">
       {Array.from({ length: fullTierCount }, (_, index) => {
         const tier = getStarTier(index);
         const tierStyle = TIER_STYLES[tier];

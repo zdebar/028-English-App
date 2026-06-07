@@ -1,5 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { TableName } from '@/types/table.types';
 
 const getGrammarByIdMock = vi.fn();
 const showToastMock = vi.fn();
@@ -26,7 +27,7 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 
-import { useGrammar } from '@/features/practice/hooks/use-grammar';
+import { useEntityByTable } from '@/features/practice/hooks/use-entity-by-table';
 
 describe('useGrammar', () => {
   beforeEach(() => {
@@ -34,36 +35,36 @@ describe('useGrammar', () => {
   });
 
   it('starts with hidden grammar and null data', () => {
-    const { result } = renderHook(() => useGrammar());
+    const { result } = renderHook(() => useEntityByTable(TableName.Grammar));
 
-    expect(result.current.grammarVisible).toBe(false);
-    expect(result.current.grammarData).toBeNull();
+    expect(result.current.isVisible).toBe(false);
+    expect(result.current.entityData).toBeNull();
   });
 
   it('ignores non-number grammarId', async () => {
-    const { result } = renderHook(() => useGrammar());
+    const { result } = renderHook(() => useEntityByTable(TableName.Grammar));
 
     await act(async () => {
-      await result.current.handleGrammar(null);
+      await result.current.openEntityById(null);
     });
 
     expect(getGrammarByIdMock).not.toHaveBeenCalled();
-    expect(result.current.grammarVisible).toBe(false);
+    expect(result.current.isVisible).toBe(false);
   });
 
   it('loads grammar and opens card on success', async () => {
     getGrammarByIdMock.mockResolvedValue({ id: 10, name: 'Articles', note: 'Use a/an/the' });
 
-    const { result } = renderHook(() => useGrammar());
+    const { result } = renderHook(() => useEntityByTable(TableName.Grammar));
 
     await act(async () => {
-      await result.current.handleGrammar(10);
+      await result.current.openEntityById(10);
     });
 
     await waitFor(() => {
       expect(getGrammarByIdMock).toHaveBeenCalledWith(10);
-      expect(result.current.grammarVisible).toBe(true);
-      expect(result.current.grammarData).toEqual({
+      expect(result.current.isVisible).toBe(true);
+      expect(result.current.entityData).toEqual({
         id: 10,
         name: 'Articles',
         note: 'Use a/an/the',
@@ -74,30 +75,30 @@ describe('useGrammar', () => {
   it('shows error toast and logs when load fails', async () => {
     getGrammarByIdMock.mockRejectedValue(new Error('db fail'));
 
-    const { result } = renderHook(() => useGrammar());
+    const { result } = renderHook(() => useEntityByTable(TableName.Grammar));
 
     await act(async () => {
-      await result.current.handleGrammar(3);
+      await result.current.openEntityById(3);
     });
 
     expect(errorHandlerMock).toHaveBeenCalledWith('Error fetching grammar:', expect.any(Error));
     expect(showToastMock).toHaveBeenCalledWith('Loading error', 'error');
-    expect(result.current.grammarVisible).toBe(false);
+    expect(result.current.isVisible).toBe(false);
   });
 
   it('closeGrammar hides visible grammar card', async () => {
     getGrammarByIdMock.mockResolvedValue({ id: 5, name: 'Tenses', note: '' });
 
-    const { result } = renderHook(() => useGrammar());
+    const { result } = renderHook(() => useEntityByTable(TableName.Grammar));
 
     await act(async () => {
-      await result.current.handleGrammar(5);
+      await result.current.openEntityById(5);
     });
 
     act(() => {
-      result.current.closeGrammar();
+      result.current.closeEntity();
     });
 
-    expect(result.current.grammarVisible).toBe(false);
+    expect(result.current.isVisible).toBe(false);
   });
 });

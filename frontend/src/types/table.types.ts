@@ -5,6 +5,7 @@ export const TableName = {
   Levels: 'levels',
   Lessons: 'lessons',
   Blocks: 'blocks',
+  Notes: 'notes',
 } as const;
 
 export type TableName = (typeof TableName)[keyof typeof TableName];

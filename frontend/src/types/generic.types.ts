@@ -18,6 +18,8 @@ export interface GrammarType extends SyncEntityType {}
 
 export interface BlockType extends SyncEntityType {}
 
+export interface NoteType extends SyncEntityType {}
+
 export interface ProgressCountsType {
   startedCount: number;
   startedTodayCount: number;

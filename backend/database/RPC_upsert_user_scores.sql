@@ -21,19 +21,12 @@ BEGIN
     RETURN;
   END IF;
 
-  v_auth_user_id := auth.uid();
-  IF v_auth_user_id IS NULL THEN
-    RAISE EXCEPTION 'Not authenticated';
-  END IF;
+  v_auth_user_id := public.require_auth_user_id();
 
   FOR v_entry IN SELECT * FROM jsonb_array_elements(p_user_scores) LOOP
     BEGIN
       v_user_id := (v_entry->>'user_id')::UUID;
-      IF v_user_id IS DISTINCT FROM v_auth_user_id THEN
-        RAISE EXCEPTION USING
-          ERRCODE = '42501',
-          MESSAGE = 'Payload user_id must match auth.uid()';
-      END IF;
+      PERFORM public.assert_payload_user_id_matches_auth(v_user_id, v_auth_user_id);
 
       v_date := (v_entry->>'date')::DATE;
       v_item_count := GREATEST((v_entry->>'item_count')::INTEGER, 0);
@@ -49,7 +42,7 @@ BEGIN
       GET DIAGNOSTICS v_row_count = ROW_COUNT;
       v_upserted_count := v_upserted_count + COALESCE(v_row_count, 0);
     EXCEPTION
-      WHEN SQLSTATE '42501' THEN
+      WHEN insufficient_privilege THEN
         RAISE;
       WHEN others THEN
         v_skipped_invalid := v_skipped_invalid + 1;
@@ -65,6 +58,5 @@ BEGIN
 END;
 $$;
 
-REVOKE EXECUTE ON FUNCTION public.upsert_user_scores(JSONB) FROM PUBLIC;
-REVOKE EXECUTE ON FUNCTION public.upsert_user_scores(JSONB) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.upsert_user_scores(JSONB) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.upsert_user_scores(JSONB) TO authenticated;

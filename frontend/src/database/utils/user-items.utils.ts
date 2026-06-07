@@ -100,7 +100,6 @@ export function convertLocalToExport(localItem: UserItemLocal): UserItemExport {
 export function convertAPIToLocal(sqlItem: UserItemAPI): UserItemLocal {
   return {
     ...sqlItem,
-    note: sqlItem.note ?? null,
     is_study_item: sqlItem.is_study_item ? 1 : 0, // Convert boolean to number
     is_vocabulary: sqlItem.is_vocabulary ? 1 : 0, // Convert boolean to number
     started_at: sqlItem.started_at ?? NULL_DATE,

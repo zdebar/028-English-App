@@ -24,7 +24,7 @@ vi.mock('@/components/UI/OverviewCard', () => ({
   ),
 }));
 
-import GrammarCard from '@/features/practice/GrammarCard';
+import GrammarCard from '@/features/practice/SimpleOverviewCard';
 
 describe('GrammarCard', () => {
   beforeEach(() => {
@@ -37,7 +37,7 @@ describe('GrammarCard', () => {
 
     const { container } = render(
       <GrammarCard
-        grammar={{ id: 1, name: 'Articles', note: '<script>x</script>' }}
+        data={{ id: 1, name: 'Articles', note: '<script>x</script>' }}
         onClose={vi.fn()}
       />,
     );
@@ -48,7 +48,7 @@ describe('GrammarCard', () => {
   });
 
   it('renders fallback message when note is missing', () => {
-    render(<GrammarCard grammar={{ id: 1, name: 'Articles' }} onClose={vi.fn()} />);
+    render(<GrammarCard data={{ id: 1, name: 'Articles' }} onClose={vi.fn()} />);
 
     expect(screen.getByText('No notes')).toBeTruthy();
   });

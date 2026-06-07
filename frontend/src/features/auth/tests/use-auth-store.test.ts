@@ -4,6 +4,7 @@ const mocks = vi.hoisted(() => ({
   getSession: vi.fn(),
   signOut: vi.fn(),
   onAuthStateChange: vi.fn(),
+  rpc: vi.fn(),
   unsubscribe: vi.fn(),
   dataSyncOnUnmount: vi.fn(),
   authCallback: null as ((event: string, session: any) => void) | null,
@@ -16,6 +17,7 @@ vi.mock('@/config/supabase.config', () => ({
       signOut: (...args: unknown[]) => mocks.signOut(...args),
       onAuthStateChange: (...args: unknown[]) => mocks.onAuthStateChange(...args),
     },
+    rpc: (...args: unknown[]) => mocks.rpc(...args),
   },
 }));
 
@@ -38,7 +40,7 @@ describe('useAuthStore', () => {
       userId: null,
       userEmail: null,
       userFullName: null,
-      isDemoUser: false,
+      isAnonymousUser: false,
       loading: true,
     });
 
@@ -55,6 +57,7 @@ describe('useAuthStore', () => {
       },
     );
     mocks.signOut.mockResolvedValue({ error: null });
+    mocks.rpc.mockResolvedValue({ error: null });
     mocks.dataSyncOnUnmount.mockResolvedValue(undefined);
   });
 
@@ -146,6 +149,19 @@ describe('useAuthStore', () => {
     mocks.signOut.mockResolvedValue({ error: { message: 'signout failed' } });
 
     await expect(useAuthStore.getState().handleLogout()).rejects.toThrow('signout failed');
+  });
+
+  it('handleLogout clears local state when remote session is already missing', async () => {
+    useAuthStore.setState({ userId: 'u1', userEmail: 'u1@example.com', userFullName: 'User One' });
+    mocks.signOut.mockResolvedValue({ error: { message: 'Auth session missing!' } });
+
+    await expect(useAuthStore.getState().handleLogout()).resolves.toBeUndefined();
+
+    const state = useAuthStore.getState();
+    expect(state.userId).toBeNull();
+    expect(state.userEmail).toBeNull();
+    expect(state.userFullName).toBeNull();
+    expect(state.loading).toBe(false);
   });
 
   it('handleLogout skips sync when skipSync option is enabled', async () => {

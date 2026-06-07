@@ -8,12 +8,12 @@ RETURNS TABLE (
   user_id UUID,
   czech TEXT,
   english TEXT,
-  note TEXT,
   pronunciation TEXT,
   audio TEXT,
   is_study_item BOOLEAN,
   is_vocabulary BOOLEAN,
   sort_order INTEGER,
+  note_id INTEGER,
   block_id INTEGER,
   grammar_id INTEGER,
   progress INTEGER,
@@ -29,21 +29,9 @@ LANGUAGE plpgsql
 SET search_path TO public
 AS $$
 DECLARE
-  v_auth_user_id UUID;
   v_history_enabled BOOLEAN := FALSE;
 BEGIN
-  IF p_user_id IS NULL THEN
-    RAISE EXCEPTION 'p_user_id is required';
-  END IF;
-
-  v_auth_user_id := auth.uid();
-  IF v_auth_user_id IS NULL THEN
-    RAISE EXCEPTION 'Not authenticated';
-  END IF;
-
-  IF v_auth_user_id IS DISTINCT FROM p_user_id THEN
-    RAISE EXCEPTION 'p_user_id must match auth.uid()';
-  END IF;
+  PERFORM public.require_auth_user_id_match(p_user_id);
 
   SELECT COALESCE(u.history_enabled, FALSE)
     INTO v_history_enabled
@@ -69,6 +57,5 @@ BEGIN
 END;
 $$;
 
-REVOKE EXECUTE ON FUNCTION public.upsert_fetch_user_items(UUID, TIMESTAMPTZ, JSONB) FROM PUBLIC;
-REVOKE EXECUTE ON FUNCTION public.upsert_fetch_user_items(UUID, TIMESTAMPTZ, JSONB) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.upsert_fetch_user_items(UUID, TIMESTAMPTZ, JSONB) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.upsert_fetch_user_items(UUID, TIMESTAMPTZ, JSONB) TO authenticated;

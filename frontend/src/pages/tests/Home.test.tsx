@@ -85,16 +85,12 @@ vi.mock('@/features/pwa/InstallPwaButton', () => ({
   InstallPWAButton: () => <button type="button">Install</button>,
 }));
 
-vi.mock('@/components/UI/StarProgress', () => ({
-  default: ({ count, chunkSize, starsPerRow }: any) => (
-    <div data-testid="star-progress">
-      {count}:{chunkSize}:{starsPerRow}
+vi.mock('@/components/PracticeOverviewButton', () => ({
+  default: ({ count, ariaLabel, helpText }: any) => (
+    <div data-testid="practice-overview-button">
+      {count}:{ariaLabel}:{helpText}
     </div>
   ),
-}));
-
-vi.mock('@/features/demo/DemoSessionPanel', () => ({
-  default: () => <div data-testid="demo-session-panel" />,
 }));
 
 vi.mock('@/features/auth/GoogleAuthButton', () => ({
@@ -130,7 +126,7 @@ describe('Home', () => {
     render(<Home />);
 
     expect(screen.queryByText('Data may be stale.')).toBeNull();
-    expect(screen.getByTestId('star-progress').textContent).toBe('3:50:10');
+    expect(screen.getByRole('button', { name: 'Open practice overview' })).toBeTruthy();
   });
 
   it('renders auth UI when user is signed out', () => {
@@ -138,7 +134,6 @@ describe('Home', () => {
 
     render(<Home />);
 
-    expect(screen.getByTestId('demo-session-panel')).toBeTruthy();
     expect(screen.getByTestId('google-auth-button')).toBeTruthy();
     expect(screen.queryByText('Data may be stale.')).toBeNull();
   });
