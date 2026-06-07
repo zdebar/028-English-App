@@ -13,6 +13,7 @@ export interface UserItemBase {
   sort_order: number;
   progress: number;
   progress_history: ProgressHistoryEntry[];
+  note_id: number | null;
   lesson_id: number;
   updated_at: string;
 }
@@ -20,7 +21,6 @@ export interface UserItemBase {
 export interface UserItemAPI extends UserItemBase {
   is_study_item: boolean;
   is_vocabulary: boolean;
-  note_id: number | null;
   block_id: number | null;
   grammar_id: number | null;
   started_at: string | null;
