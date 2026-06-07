@@ -5,12 +5,14 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 
+const routerBase = import.meta.env.BASE_URL.replace(/\/$/, '');
+
 initializeMonitoring();
 
 if ('serviceWorker' in navigator) {
   globalThis.addEventListener('load', () => {
     if (import.meta.env.PROD) {
-      navigator.serviceWorker.register('/service-worker.js');
+      navigator.serviceWorker.register(`${import.meta.env.BASE_URL}service-worker.js`);
       navigator.serviceWorker.addEventListener('message', (event) => {
         if (event.data?.type === 'refresh') {
           globalThis.location.reload();
@@ -40,7 +42,7 @@ if ('serviceWorker' in navigator) {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
-      <BrowserRouter>
+      <BrowserRouter basename={routerBase || undefined}>
         <App />
       </BrowserRouter>
     </ErrorBoundary>

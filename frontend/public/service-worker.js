@@ -1,26 +1,31 @@
 const APP_SHELL_CACHE = 'app-shell-v2';
 const STATIC_CACHE = 'static-assets-v2';
 
+const BASE_PATH = new URL(globalThis.registration.scope).pathname.replace(/\/$/, '');
+
+function withBase(path) {
+  return `${BASE_PATH}${path}`;
+}
+
 const APP_SHELL_URLS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/vite.svg',
-  '/screenshots/not-revealed.webp',
-  '/screenshots/revealed.webp',
-  '/screenshots/profile.webp',
-  '/screenshots/desktop.webp',
-  '/screenshots/mobile.webp',
+  withBase('/'),
+  withBase('/index.html'),
+  withBase('/manifest.json'),
+  withBase('/screenshots/not-revealed.webp'),
+  withBase('/screenshots/revealed.webp'),
+  withBase('/screenshots/profile.webp'),
+  withBase('/screenshots/desktop.webp'),
+  withBase('/screenshots/mobile.webp'),
 ];
 const INJECTED_PRECACHE_URLS = (globalThis.__WB_MANIFEST || []).map((entry) => entry.url);
 const STATIC_DESTINATIONS = new Set(['style', 'script', 'worker', 'font', 'image']);
 
 function normalizeCacheUrl(url) {
-  const resolved = new URL(url, self.location.origin);
+  const resolved = new URL(url, globalThis.location.origin);
 
   // Treat root and index as a single app-shell entry.
-  if (resolved.pathname === '/') {
-    resolved.pathname = '/index.html';
+  if (resolved.pathname === `${BASE_PATH}/` || resolved.pathname === BASE_PATH) {
+    resolved.pathname = withBase('/index.html');
   }
 
   return resolved.href;
@@ -79,18 +84,18 @@ function shouldHandleRequest(request) {
 
   const url = new URL(request.url);
 
-  if (url.origin !== self.location.origin) {
+  if (url.origin !== globalThis.location.origin) {
     return STATIC_DESTINATIONS.has(request.destination);
   }
 
-  if (url.pathname.startsWith('/data/')) {
+  if (url.pathname.startsWith(withBase('/data/'))) {
     return false;
   }
 
   if (
-    url.pathname.startsWith('/api/') ||
-    url.pathname.startsWith('/rest/') ||
-    url.pathname.startsWith('/rpc/')
+    url.pathname.startsWith(withBase('/api/')) ||
+    url.pathname.startsWith(withBase('/rest/')) ||
+    url.pathname.startsWith(withBase('/rpc/'))
   ) {
     return false;
   }
@@ -142,12 +147,14 @@ self.addEventListener('fetch', (event) => {
       fetch(request)
         .then((response) => {
           const responseClone = response.clone();
-          caches.open(APP_SHELL_CACHE).then((cache) => cache.put('/index.html', responseClone));
+          caches
+            .open(APP_SHELL_CACHE)
+            .then((cache) => cache.put(withBase('/index.html'), responseClone));
           return response;
         })
         .catch(async () => {
           const cache = await caches.open(APP_SHELL_CACHE);
-          return cache.match('/index.html');
+          return cache.match(withBase('/index.html'));
         }),
     );
 
