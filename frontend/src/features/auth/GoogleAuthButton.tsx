@@ -39,6 +39,8 @@ const GOOGLE_AUTH_APPEARANCE = {
   },
 };
 
+const AUTH_REDIRECT_TO = new URL(import.meta.env.BASE_URL, globalThis.location.origin).toString();
+
 export default function GoogleAuthButton(): JSX.Element {
   return (
     <Auth
@@ -47,6 +49,7 @@ export default function GoogleAuthButton(): JSX.Element {
       providers={['google']}
       localization={{ variables: cs }}
       onlyThirdPartyProviders
+      redirectTo={AUTH_REDIRECT_TO}
       queryParams={{ prompt: 'select_account' }}
     />
   );
