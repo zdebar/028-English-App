@@ -73,7 +73,7 @@ function PracticeOverviewRow({ score }: Readonly<{ score: PracticeDayScore }>): 
   return (
     <div
       className={`flex items-center justify-between gap-4 border-slate-200 px-4 pt-3 pb-1 dark:border-slate-700 ${
-        isSunday(score.date) ? 'border border-t-2' : 'border-b'
+        isSunday(score.date) ? 'border-t-2 border-b' : 'border-b'
       }`}
     >
       <span
