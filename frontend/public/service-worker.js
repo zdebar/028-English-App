@@ -10,12 +10,6 @@ function withBase(path) {
 const APP_SHELL_URLS = [
   withBase('/'),
   withBase('/index.html'),
-  withBase('/manifest.json'),
-  withBase('/screenshots/not-revealed.webp'),
-  withBase('/screenshots/revealed.webp'),
-  withBase('/screenshots/profile.webp'),
-  withBase('/screenshots/desktop.webp'),
-  withBase('/screenshots/mobile.webp'),
 ];
 const INJECTED_PRECACHE_URLS = (globalThis.__WB_MANIFEST || []).map((entry) => entry.url);
 const STATIC_DESTINATIONS = new Set(['style', 'script', 'worker', 'font', 'image']);
