@@ -34,7 +34,7 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 
-import Header from '@/components/Layout/Header_temp';
+import Header from '@/components/Layout/Header';
 
 describe('Header', () => {
   beforeEach(() => {
