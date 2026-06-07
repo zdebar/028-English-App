@@ -1,7 +1,7 @@
 import { ROUTES } from '@/config/routes.config';
 import Notification from '@/components/UI/Notification';
 import Footer from '@/components/Layout/Footer';
-import Header from '@/components/Layout/Header';
+import Header from '@/components/Layout/Header_temp';
 import ProtectedLayout from '@/components/utils/protected-laout';
 import { usePeriodicSync } from '@/database/hooks/use-periodic-sync';
 import { useAuthStore } from '@/features/auth/use-auth-store';
