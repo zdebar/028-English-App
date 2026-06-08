@@ -36,7 +36,7 @@
 
 @media (max-height: 400px) {
   .home-title {
-     @apply my-4;
+     @apply mb-2 mt-8;
   }
   .home-body {
     @apply mt-2;
