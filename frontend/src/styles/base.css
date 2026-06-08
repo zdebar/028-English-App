@@ -9,7 +9,7 @@
     min-width: 320px;
   }
 
-  h1 {
+  h1 {  
     @apply font-headings py-2 text-4xl font-thin;
   }
 

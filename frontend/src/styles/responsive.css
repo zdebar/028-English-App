@@ -25,3 +25,20 @@
     left: -54px;
   }
 }
+
+.home-title {
+   @apply my-8;
+}
+
+.home-body {
+  @apply mt-8;
+}
+
+@media (max-height: 400px) {
+  .home-title {
+     @apply my-4;
+  }
+  .home-body {
+    @apply mt-2;
+  }
+}

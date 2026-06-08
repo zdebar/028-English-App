@@ -29,17 +29,18 @@ export default function Home(): JSX.Element {
   const isSynchronized = useSyncWarningStore((state) => state.isSynchronized);
 
   return (
-    <div className="max-w-hero relative flex w-full flex-col text-center">
-      <h1 className="my-8">{TEXTS.appTitle}</h1>
-      <InstallPWAButton className="my-2 px-4" />
-      <p className="px-4">{TEXTS.appDescription}</p>
-      <p className="text-error-light dark:text-error-dark">{TEXTS.appTestDescription}</p>
-      <Link to="/guide" className="my-">
-        <Notification className="color-link">{TEXTS.guide}</Notification>
+    <div className="max-w-hero relative flex w-full flex-col justify-between text-center">
+      <h1 className="home-title">{TEXTS.appTitle}</h1>
+      <div className="landscape:hidden">
+        <InstallPWAButton className="my-2 px-4" />
+        <p className="px-4">{TEXTS.appDescription}</p>
+      </div>
+      <Link to="/guide">
+        <Notification className="color-link my-2">{TEXTS.guide}</Notification>
       </Link>
 
       {userId ? (
-        <div className="relative mt-8 flex w-full flex-col">
+        <div className="home-body relative flex w-full flex-col">
           {isAnonymousUser && <ConvertAnonymousUserButton className="mb-8" />}
           <PropertyView
             label={TEXTS.profileNameLabel}
@@ -63,7 +64,7 @@ export default function Home(): JSX.Element {
           <Dashboard className="pt-4" />
         </div>
       ) : (
-        <div className="mt-8 w-full">
+        <div className="home-body w-full">
           <div className="flex flex-col gap-1">
             <AnonymousSigninButton />
             <GoogleAuthButton />
