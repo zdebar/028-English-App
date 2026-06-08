@@ -32,7 +32,7 @@ export default function PracticeOverviewButton({
             chunkSize={config.practice.starChunk}
             starsPerRow={config.practice.starsPerRow}
           />
-          <HelpText className="-top-4">{helpText}</HelpText>
+          <HelpText className="-top-4 whitespace-nowrap">{helpText}</HelpText>
         </button>
       </div>
     </div>
