@@ -12,6 +12,7 @@ import VocabularyDetailCard from './VocabularyDetailCard';
 import VocabularyList from './VocabularyList';
 
 const SEARCH_KEY = 'vocabulary_search_term';
+const DISPLAY_FIELD_KEY = 'vocabulary_display_field';
 
 /**
  * VocabularyOverview component
@@ -37,8 +38,9 @@ export default function VocabularyOverview() {
     filteredWords,
   } = useVocabulary(userId);
 
-  // Sync searchTerm with localStorage
-  useLocalStorageSync(SEARCH_KEY, searchTerm, setSearchTerm);
+  // Sync searchTerm and displayField with localStorage
+  useLocalStorageSync(`${SEARCH_KEY}_${userId}`, searchTerm, setSearchTerm);
+  useLocalStorageSync(`${DISPLAY_FIELD_KEY}_${userId}`, displayField, setDisplayField);
 
   // -- HANDLERS  --
   const handleResetUserItem = useCallback(async () => {

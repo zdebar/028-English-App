@@ -25,7 +25,11 @@ export function useVocabulary(userId: string | null) {
   const [displayField, setDisplayField] = useState<DisplayField>('english');
   const [selectedWord, setSelectedWord] = useState<UserItemLocal | null>(null);
 
-  const sortedByEnglish = useMemo(() => words, [words]);
+  const sortedByEnglish = useMemo(() => {
+    const result = [...words];
+    result.sort((a, b) => a.english.toLowerCase().localeCompare(b.english.toLowerCase()));
+    return result;
+  }, [words]);
   const sortedByCzech = useMemo(
     () =>
       [...words].sort((a, b) => {

@@ -192,7 +192,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Retrieves vocabulary items for a user that have been started (begun learning). Sorted by english word.
+   * Retrieves vocabulary items for a user that have been started (begun learning).
    * @param userId - The unique identifier of the user
    */
   static async getStartedVocabulary(userId: string): Promise<UserItemLocal[]> {
@@ -200,8 +200,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .where('[user_id+is_vocabulary+started_at+is_study_item]')
       .between([userId, 1, Dexie.minKey, 1], [userId, 1, NULL_DATE, 1], true, false)
       .toArray();
-
-    result.sort((a, b) => a.english.toLowerCase().localeCompare(b.english.toLowerCase()));
     return result;
   }
 

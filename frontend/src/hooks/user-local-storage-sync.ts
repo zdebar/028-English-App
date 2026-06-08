@@ -7,7 +7,7 @@ import { useEffect } from 'react';
  * @param value The value to save
  * @param setter The setter function to update the state
  */
-export function useLocalStorageSync(key: string, value: string, setter: (v: string) => void) {
+export function useLocalStorageSync(key: string, value: string, setter: (v: any) => void) {
   // Load from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem(key);
