@@ -1,23 +1,24 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 /**
  * Custom hook to sync a state value with localStorage.
  * Loads from localStorage on mount and saves on every change.
  * @param key The localStorage key
- * @param value The value to save
- * @param setter The setter function to update the state
+ * @param initialValue The initial value to use if localStorage is empty
+ * @returns A tuple containing the state value and a setter function
  */
-export function useLocalStorageSync(key: string, value: string, setter: (v: any) => void) {
-  // Load from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem(key);
-    if (saved !== null && saved !== value) {
-      setter(saved);
-    }
-  }, []);
+export function useLocalStorageSync<T extends string>(
+  key: string,
+  initialValue: T,
+): [T, (newValue: T) => void] {
+  const storedValue = localStorage.getItem(key);
+  const initial = storedValue ? JSON.parse(storedValue) : initialValue;
 
-  // Save to localStorage on every change
+  const [value, setValue] = useState<T>(initial);
+
   useEffect(() => {
-    localStorage.setItem(key, value);
+    localStorage.setItem(key, JSON.stringify(value));
   }, [key, value]);
+
+  return [value, setValue];
 }

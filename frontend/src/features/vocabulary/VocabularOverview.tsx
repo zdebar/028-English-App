@@ -5,14 +5,10 @@ import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { TEXTS } from '@/locales/cs';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useVocabulary } from './use-vocabulary';
-import { useLocalStorageSync } from '@/hooks/user-local-storage-sync';
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import VocabularyDetailCard from './VocabularyDetailCard';
 import VocabularyList from './VocabularyList';
-
-const SEARCH_KEY = 'vocabulary_search_term';
-const DISPLAY_FIELD_KEY = 'vocabulary_display_field';
 
 /**
  * VocabularyOverview component
@@ -37,10 +33,6 @@ export default function VocabularyOverview() {
     setSelectedWord,
     filteredWords,
   } = useVocabulary(userId);
-
-  // Sync searchTerm and displayField with localStorage
-  useLocalStorageSync(`${SEARCH_KEY}_${userId}`, searchTerm, setSearchTerm);
-  useLocalStorageSync(`${DISPLAY_FIELD_KEY}_${userId}`, displayField, setDisplayField);
 
   // -- HANDLERS  --
   const handleResetUserItem = useCallback(async () => {
