@@ -3,7 +3,7 @@
   "short_name": "ANG",
   "start_url": "./",
   "scope": "./",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#111827",
   "theme_color": "#111827",
   "icons": [
@@ -11,7 +11,7 @@
     { "src": "./android-chrome-512x512.webp", "sizes": "512x512", "type": "image/webp" }
   ],
   "id": "./",
-  "display_override": ["window-controls-overlay", "standalone"],
+  "display_override": ["window-controls-overlay", "fullscreen"],
   "screenshots": [
     {
       "src": "./screenshots/desktop.webp",

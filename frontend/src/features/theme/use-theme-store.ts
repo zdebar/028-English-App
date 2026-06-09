@@ -52,6 +52,14 @@ export const useThemeStore = create<ThemeState>((set, get) => {
     const root = document.documentElement;
     root.classList.toggle('dark', theme === 'dark');
     root.classList.toggle('light', theme === 'light');
+
+    const computed = getComputedStyle(document.documentElement);
+    const cssColor = computed
+      .getPropertyValue(theme === 'dark' ? '--color-background-dark' : '--color-background-light')
+      .trim();
+    document
+      .querySelector<HTMLMetaElement>("meta[name='theme-color']")
+      ?.setAttribute('content', cssColor);
   };
 
   const saveTheme = (theme: UserTheme, userId: string) => {
@@ -72,8 +80,8 @@ export const useThemeStore = create<ThemeState>((set, get) => {
     loadTheme: (userId?: string | null) => {
       const resolvedUserId = resolveUserId(userId);
       const storedTheme = readStoredTheme(resolvedUserId) ?? getSystemTheme();
-      applyTheme(storedTheme);
       set({ theme: storedTheme });
+      applyTheme(storedTheme);
     },
     clearTheme: (userId?: string | null) => {
       const resolvedUserId = resolveUserId(userId);
@@ -84,8 +92,8 @@ export const useThemeStore = create<ThemeState>((set, get) => {
         // Ignore storage failures (e.g., blocked storage)
       }
       const fallbackTheme = getSystemTheme();
-      applyTheme(fallbackTheme);
       set({ theme: fallbackTheme });
+      applyTheme(fallbackTheme);
     },
     chooseTheme: (newTheme: UserTheme, userId?: string | null) => {
       const resolvedUserId = resolveUserId(userId);
@@ -93,9 +101,9 @@ export const useThemeStore = create<ThemeState>((set, get) => {
         applyTheme(newTheme);
         return;
       }
+      set({ theme: newTheme });
       applyTheme(newTheme);
       saveTheme(newTheme, resolvedUserId);
-      set({ theme: newTheme });
     },
     saveCurrentThemeAsGuest: () => {
       const currentTheme = get().theme;
