@@ -2,30 +2,27 @@ import StyledButton from '@/components/UI/buttons/StyledButton';
 import HelpText from '@/features/help/HelpText';
 import type { ReactNode, JSX } from 'react';
 
-type PracticeButtonBaseProps = Readonly<{
-  icon: ReactNode;
-  label: string;
-  helpSide: 'left' | 'right';
-  onClick: () => void;
-  disabled: boolean;
-  children?: ReactNode;
-}>;
+type PracticeButtonBaseProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
+  Readonly<{
+    icon: ReactNode;
+    label: string;
+    helpSide: 'left' | 'right';
+    children?: ReactNode;
+  }>;
 
 export default function PracticeButton({
   icon,
   label,
   helpSide,
-  onClick,
-  disabled,
   children,
+  ...rest
 }: PracticeButtonBaseProps): JSX.Element {
   return (
     <>
       <StyledButton
-        onClick={onClick}
-        disabled={disabled}
-        className="h-button relative"
-        title={disabled ? undefined : label}
+        {...rest}
+        className="h-controls relative"
+        title={rest.disabled ? undefined : label}
       >
         {icon}
         {children}

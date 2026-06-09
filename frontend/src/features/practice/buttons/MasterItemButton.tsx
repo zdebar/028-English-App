@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef } from 'react';
-import StyledButton from '@/components/UI/buttons/StyledButton';
 import ForwardIcon from '@/components/UI/icons/ForwardIcon';
-import HelpText from '@/features/help/HelpText';
+
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import config from '@/config/config';
+import PracticeButton from './PracticeButton';
 
-type SkipButtonProps = Readonly<{
+type MasterItemButtonProps = Readonly<{
   onConfirm: () => void | Promise<void>;
   disabled: boolean;
   children?: React.ReactNode;
@@ -14,7 +14,7 @@ type SkipButtonProps = Readonly<{
 
 const HOLD_DURATION_MS = config.practice.holdDuration;
 
-export default function MasterItemButton({ onConfirm, disabled, children }: SkipButtonProps) {
+export default function MasterItemButton({ onConfirm, disabled, children }: MasterItemButtonProps) {
   const showToast = useToastStore((state) => state.showToast);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressTriggeredRef = useRef(false);
@@ -26,15 +26,6 @@ export default function MasterItemButton({ onConfirm, disabled, children }: Skip
     }
   }, []);
 
-  const triggerSkip = useCallback(async () => {
-    try {
-      await onConfirm();
-      showToast(TEXTS.skipSuccessToast, 'success');
-    } catch {
-      showToast(TEXTS.skipErrorToast, 'error');
-    }
-  }, [onConfirm, showToast]);
-
   const handlePressStart = useCallback(() => {
     if (disabled) {
       return;
@@ -45,9 +36,10 @@ export default function MasterItemButton({ onConfirm, disabled, children }: Skip
 
     timeoutRef.current = globalThis.setTimeout(() => {
       longPressTriggeredRef.current = true;
-      triggerSkip();
+      onConfirm();
+      showToast(TEXTS.skipSuccessToast, 'success');
     }, HOLD_DURATION_MS);
-  }, [clearHoldTimer, disabled, triggerSkip]);
+  }, [clearHoldTimer, disabled, onConfirm, showToast]);
 
   const handlePressEnd = useCallback(() => {
     clearHoldTimer();
@@ -78,22 +70,18 @@ export default function MasterItemButton({ onConfirm, disabled, children }: Skip
   }, [clearHoldTimer]);
 
   return (
-    <>
-      <StyledButton
-        onPointerDown={handlePressStart}
-        onPointerUp={handlePressEnd}
-        onPointerLeave={handlePressEnd}
-        onPointerCancel={handlePressEnd}
-        onClick={handleClick}
-        disabled={disabled}
-        className="h-button relative"
-        title={disabled ? undefined : TEXTS.complete}
-      >
-        <ForwardIcon />
-
-        {children}
-      </StyledButton>
-      <HelpText className="-top-4.5 left-4">{TEXTS.complete}</HelpText>
-    </>
+    <PracticeButton
+      icon={<ForwardIcon />}
+      label={disabled ? '' : TEXTS.complete}
+      helpSide="left"
+      onPointerDown={handlePressStart}
+      onPointerUp={handlePressEnd}
+      onPointerLeave={handlePressEnd}
+      onPointerCancel={handlePressEnd}
+      onClick={handleClick}
+      disabled={disabled}
+    >
+      {children}
+    </PracticeButton>
   );
 }
