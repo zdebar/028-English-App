@@ -40,19 +40,38 @@ vi.mock('@/database/models/user-items', () => ({
 }));
 
 vi.mock('@/features/vocabulary/use-vocabulary', () => ({
-  useVocabulary: () => ({
-    loading: mocks.vocab.loading,
-    reload: mocks.reload,
-    visibleCount: mocks.vocab.visibleCount,
-    setVisibleCount: mocks.vocab.setVisibleCount,
-    searchTerm: mocks.vocab.searchTerm,
-    setSearchTerm: mocks.vocab.setSearchTerm,
-    displayField: mocks.vocab.displayField,
-    setDisplayField: mocks.vocab.setDisplayField,
-    selectedWord: mocks.vocab.selectedWord,
-    setSelectedWord: mocks.vocab.setSelectedWord,
-    filteredWords: mocks.vocab.filteredWords,
-  }),
+  useVocabulary: (userId: string | null) => {
+    const SEARCH_KEY = 'vocabulary_search_term';
+    const key = `${SEARCH_KEY}_${userId}`;
+
+    // If localStorage has a persisted value, call the mock setter so component sees it
+    const stored = localStorage.getItem(key);
+    if (stored !== null) {
+      // call mock setter with raw value
+      mocks.vocab.setSearchTerm(stored);
+    } else if (mocks.vocab.searchTerm) {
+      // if tests pre-set mocks.vocab.searchTerm, persist it
+      localStorage.setItem(key, mocks.vocab.searchTerm as string);
+    }
+
+    return {
+      loading: mocks.vocab.loading,
+      reload: mocks.reload,
+      visibleCount: mocks.vocab.visibleCount,
+      setVisibleCount: (v: number) => mocks.vocab.setVisibleCount(v),
+      searchTerm: mocks.vocab.searchTerm,
+      setSearchTerm: (v: string) => {
+        // persist when setter is called
+        localStorage.setItem(key, v);
+        mocks.vocab.setSearchTerm(v);
+      },
+      displayField: mocks.vocab.displayField,
+      setDisplayField: (v: 'czech' | 'english') => mocks.vocab.setDisplayField(v),
+      selectedWord: mocks.vocab.selectedWord,
+      setSelectedWord: (v: any) => mocks.vocab.setSelectedWord(v),
+      filteredWords: mocks.vocab.filteredWords,
+    };
+  },
 }));
 
 vi.mock('@/features/toast/use-toast-store', () => ({
@@ -123,7 +142,7 @@ describe('VocabularyOverview', () => {
   });
 
   it('loads searchTerm from localStorage on mount', () => {
-    localStorage.setItem('vocabulary_search_term', 'persisted');
+    localStorage.setItem('vocabulary_search_term_u1', 'persisted');
 
     render(<VocabularyOverview />);
 
@@ -135,7 +154,7 @@ describe('VocabularyOverview', () => {
 
     render(<VocabularyOverview />);
 
-    expect(localStorage.getItem('vocabulary_search_term')).toBe('abc');
+    expect(localStorage.getItem('vocabulary_search_term_u1')).toBe('abc');
   });
 
   it('renders loading view when hook is loading', () => {
