@@ -23,7 +23,37 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      output: {},
+      output: {
+        manualChunks(id) {
+          const normalizedId = id.replaceAll('\\', '/');
+
+          if (!normalizedId.includes('/node_modules/')) {
+            return;
+          }
+
+          if (
+            normalizedId.includes('/node_modules/react/') ||
+            normalizedId.includes('/node_modules/react-dom/') ||
+            normalizedId.includes('/node_modules/react-router/') ||
+            normalizedId.includes('/node_modules/react-router-dom/') ||
+            normalizedId.includes('/node_modules/scheduler/')
+          ) {
+            return 'router-vendor';
+          }
+
+          if (normalizedId.includes('/node_modules/@supabase/')) {
+            return 'supabase-vendor';
+          }
+
+          if (normalizedId.includes('/node_modules/@sentry/')) {
+            return 'sentry-vendor';
+          }
+
+          if (normalizedId.includes('/node_modules/dexie/')) {
+            return 'dexie-vendor';
+          }
+        },
+      },
     },
   },
   test: {
