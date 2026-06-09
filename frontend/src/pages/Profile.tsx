@@ -19,7 +19,7 @@ export default function Profile(): JSX.Element {
 
   return (
     <div className="card-width grow-0 gap-1">
-      <div className="mx-auto mt-4 mb-8 w-64 text-left">
+      <div className="mx-auto mt-6 mb-4 w-64 text-left">
         <PropertyView
           label={TEXTS.profileEmailLabel}
           className="justify-center"
