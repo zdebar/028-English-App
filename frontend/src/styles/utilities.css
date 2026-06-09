@@ -20,7 +20,7 @@
     @apply dark:text-new-progress-light text-black;
   }
 
-    .color-link {
+  .color-link {
     @apply dark:text-new-progress-light text-black hover:underline;
   }
 

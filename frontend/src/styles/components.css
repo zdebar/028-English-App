@@ -25,22 +25,23 @@
   .card-width {
     @apply max-w-card min-w-card w-full flex flex-col justify-start;
   }
+
+  /** Help Text styles */
+  .help-text-span {
+    @apply w-15 inline-block;
+  }
+
+  .profile-menu-button { /* TODO: Delete once refactored to use ModalButton */
+    @apply w-40 mx-auto;
+  }
+
+  /** Privacy Policy styles */
+  .privacy-policy *{
+    @apply font-body;
+  }
+
+  .privacy-policy h1,h2{
+    @apply font-bold;
+  }
 }
 
-/** Help Text styles */
-.help-text-span {
-  @apply w-15 inline-block;
-}
-
-.profile-menu-button { /* TODO: Delete once refactored to use ModalButton */
-  @apply w-40 mx-auto;
-}
-
-/** Privacy Policy styles */
-.privacy-policy *{
-  @apply font-body;
-}
-
-.privacy-policy h1,h2{
-  @apply font-bold;
-}

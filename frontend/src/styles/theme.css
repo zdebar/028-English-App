@@ -53,9 +53,9 @@
 
   /** LAYOUT DIMENSIONS **/
   --max-width-container: 900px;
-  --max-width-hero: 450px;
+  --max-width-hero: 500px;
   --min-width-card: 320px;
-  --max-width-card: 400px;
+  --max-width-card: 500px;
   --min-height-card: 320px;
   --max-height-card: 400px;
 
