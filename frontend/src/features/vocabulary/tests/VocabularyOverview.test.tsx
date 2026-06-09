@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  userId: 'u1' as string | null,
+  userId: 'u1',
   navigate: vi.fn(),
   resetItemById: vi.fn(),
   reload: vi.fn(),
@@ -15,7 +15,7 @@ const mocks = vi.hoisted(() => ({
     setVisibleCount: vi.fn(),
     searchTerm: '',
     setSearchTerm: vi.fn(),
-    displayField: 'english' as 'czech' | 'english',
+    displayField: 'english',
     setDisplayField: vi.fn(),
     selectedWord: null as any,
     setSelectedWord: vi.fn(),
@@ -51,7 +51,7 @@ vi.mock('@/features/vocabulary/use-vocabulary', () => ({
       mocks.vocab.setSearchTerm(stored);
     } else if (mocks.vocab.searchTerm) {
       // if tests pre-set mocks.vocab.searchTerm, persist it
-      localStorage.setItem(key, mocks.vocab.searchTerm as string);
+      localStorage.setItem(key, mocks.vocab.searchTerm);
     }
 
     return {
