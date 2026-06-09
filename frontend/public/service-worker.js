@@ -1,5 +1,6 @@
-const APP_SHELL_CACHE = 'app-shell-v2';
-const STATIC_CACHE = 'static-assets-v2';
+const BUILD_HASH = globalThis.__APP_BUILD_HASH__ || `ts-${Date.now()}`;
+const APP_SHELL_CACHE = `app-shell-${BUILD_HASH}`;
+const STATIC_CACHE = `static-assets-${BUILD_HASH}`;
 
 const BASE_PATH = new URL(globalThis.registration.scope).pathname.replace(/\/$/, '');
 
@@ -64,7 +65,7 @@ self.addEventListener('activate', (event) => {
       .then(() => {
         return globalThis.clients.matchAll({ type: 'window' }).then((clients) => {
           clients.forEach((client) => {
-            client.postMessage({ type: 'refresh' });
+            client.postMessage({ type: 'refresh', version: BUILD_HASH });
           });
         });
       }),
