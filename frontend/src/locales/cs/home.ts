@@ -46,5 +46,5 @@ export const HOME_TEXTS = {
   simulateDataSuccessToast: 'Data byla úspěšně simulována.',
   simulateDataErrorToast: 'Chyba při simulaci dat.',
   simulateDataExplanation:
-    'Přehledy v Profilu zobrazují pouze rozcvičené položky. Funkce "Simulovat data" přidá pokrok k prvním 1000 položkám uživatele. Změna je nevratná.',
+    'Přehledy v Profilu zobrazují pouze rozcvičené položky. Funkce "Simulovat data" přidá pokrok k prvním 1000 položkám uživatele a umožní tak Přehledy testovat. Změna je nevratná.',
 } as const;
