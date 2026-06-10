@@ -122,18 +122,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   ): Promise<void> {
     if (!items || items.length === 0) return;
 
-    const updatedItems = items.map((item) => {
-      return {
-        ...item,
-        next_at: getNextAt(item.progress),
-        started_at: item.started_at === NULL_DATE ? dateTime : item.started_at,
-        updated_at: dateTime,
-        mastered_at:
-          item.mastered_at === NULL_DATE && item.progress >= config.srs.intervals.length
-            ? dateTime
-            : item.mastered_at,
-      };
-    });
+    const updatedItems = items.map((item) => this.formatSavedItem(item, dateTime));
 
     await db.user_items.bulkPut(updatedItems);
   }
@@ -288,9 +277,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .where('[user_id+item_id]')
       .between([userId, 1], [userId, SIM_COUNT])
       .modify((item) => {
-        item.progress = SIM_PROGRESS;
-        item.updated_at = dateTime;
-        item.next_at = getNextAt(SIM_PROGRESS);
+        const updated = this.formatSavedItem(item, dateTime, SIM_PROGRESS);
+        Object.assign(item, updated);
       });
 
     return count;
@@ -416,5 +404,31 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .filter((item) => (item.progress % 2 === 1) === isOdd)
       .limit(limit)
       .toArray();
+  }
+
+  /**
+   * Formats a saved item with the provided dateTime.
+   * @param item - The item to format
+   * @param dateTime - The dateTime to use for formatting
+   * @returns The formatted item
+   */
+  private static formatSavedItem(
+    item: UserItemPractice | UserItemLocal,
+    dateTime: string,
+    progressAddition: number = 0,
+  ): UserItemLocal {
+    const newProgress = item.progress + progressAddition;
+
+    return {
+      ...item,
+      progress: newProgress,
+      next_at: getNextAt(newProgress),
+      started_at: item.started_at === NULL_DATE ? dateTime : item.started_at,
+      updated_at: dateTime,
+      mastered_at:
+        item.mastered_at === NULL_DATE && newProgress >= config.srs.intervals.length
+          ? dateTime
+          : item.mastered_at,
+    };
   }
 }
