@@ -14,6 +14,15 @@ const APP_SHELL_URLS = [
 ];
 const INJECTED_PRECACHE_URLS = (globalThis.__WB_MANIFEST || []).map((entry) => entry.url);
 const STATIC_DESTINATIONS = new Set(['style', 'script', 'worker', 'font', 'image']);
+const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif', '.svg', '.ico']);
+
+function hasImageExtension(pathname) {
+  const lowerPath = pathname.toLowerCase();
+  for (const ext of IMAGE_EXTENSIONS) {
+    if (lowerPath.endsWith(ext)) return true;
+  }
+  return false;
+}
 
 function normalizeCacheUrl(url) {
   const resolved = new URL(url, globalThis.location.origin);
@@ -78,9 +87,10 @@ function shouldHandleRequest(request) {
   }
 
   const url = new URL(request.url);
+  const isImageByPath = hasImageExtension(url.pathname);
 
   if (url.origin !== globalThis.location.origin) {
-    return STATIC_DESTINATIONS.has(request.destination);
+    return STATIC_DESTINATIONS.has(request.destination) || isImageByPath;
   }
 
   if (url.pathname.startsWith(withBase('/data/'))) {
@@ -99,7 +109,7 @@ function shouldHandleRequest(request) {
     return true;
   }
 
-  return STATIC_DESTINATIONS.has(request.destination);
+  return STATIC_DESTINATIONS.has(request.destination) || isImageByPath;
 }
 
 function createOfflineResponse(request) {
@@ -157,22 +167,33 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith(
-    caches
-      .match(request)
-      .then((cachedResponse) => {
-        if (cachedResponse) {
-          return cachedResponse;
+    (async () => {
+      try {
+        const normalizedKey = normalizeCacheUrl(request.url);
+
+        const cache = await caches.open(STATIC_CACHE);
+        const cachedNormalized = await cache.match(normalizedKey);
+        if (cachedNormalized) return cachedNormalized;
+
+        const cachedRaw = await caches.match(request);
+        if (cachedRaw) return cachedRaw;
+
+        const response = await fetch(request);
+        const shouldCacheResponse =
+          response.ok ||
+          (request.destination === 'image' && response.type === 'opaque') ||
+          (response.type === 'opaque' && hasImageExtension(new URL(request.url).pathname));
+
+        if (shouldCacheResponse) {
+          const responseClone = response.clone();
+          cache.put(normalizedKey, responseClone).catch(() => {});
         }
 
-        return fetch(request).then((response) => {
-          if (response.ok) {
-            const responseClone = response.clone();
-            caches.open(STATIC_CACHE).then((cache) => cache.put(request, responseClone));
-          }
-
-          return response;
-        });
-      })
-      .catch(() => createOfflineResponse(request)),
+        return response;
+      } catch (e) {
+        console.warn('Failed to serve request from cache/network:', e);
+        return createOfflineResponse(request);
+      }
+    })(),
   );
 });
