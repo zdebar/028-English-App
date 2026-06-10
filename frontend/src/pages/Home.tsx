@@ -14,6 +14,7 @@ import AnonymousSigninButton from '@/features/auth/AnonymousSigninButton';
 import ConvertAnonymousUserButton from '@/features/auth/ConvertAnonymousUserButton';
 import PropertyView from '@/components/UI/PropertyView';
 import PracticeOverviewButton from '@/features/practice-overview/PracticeOverviewButton';
+import SimulateDataButton from '@/features/auth/SimulateDataButton';
 
 /**
  * The Home component renders the main page of the application.
@@ -41,7 +42,13 @@ export default function Home(): JSX.Element {
 
       {userId ? (
         <div className="home-body relative flex w-full flex-col">
-          {isAnonymousUser && <ConvertAnonymousUserButton className="mb-8" />}
+          {isAnonymousUser && (
+            <div className="mb-8 flex flex-col gap-2">
+              <ConvertAnonymousUserButton />
+              <SimulateDataButton />
+              <p className="p-2 text-sm">{TEXTS.simulateDataExplanation}</p>
+            </div>
+          )}
           <PropertyView
             label={TEXTS.profileNameLabel}
             className="justify-center"

@@ -26,6 +26,8 @@ import { reportInfo } from '@/features/logging/monitoring-handler';
 
 const NULL_DATE = config.database.nullReplacementDate;
 const NULL_NUMBER = config.database.nullReplacementNumber;
+const SIM_PROGRESS = config.progress.simulationProgress;
+const SIM_COUNT = config.progress.simulationCount;
 
 /**
  * Represents a user item entity in the application database.
@@ -41,6 +43,7 @@ const NULL_NUMBER = config.database.nullReplacementNumber;
  * @method resetItemById - Resets a user item to its default state by user and item ID.
  * @method resetItemsByGrammarId - Resets all user items associated with a specific grammar ID to their default state for a given user.
  * @method resetItemsByBlockId - Resets all user items associated with a specific block ID to their default state for a given user.
+ * @method simulateData - Adds progress to first 100 user_items.
  * @method deleteByUserId - Deletes all user items associated with a specific user.
  * @method syncFromRemote - Synchronizes user items from the remote server with the local database.
  */
@@ -270,6 +273,27 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   static async deleteByUserId(userId: string): Promise<boolean> {
     await db.user_items.where('user_id').equals(userId).delete();
     return true;
+  }
+
+  /**
+   * Update first {SIM_COUNT} user_items for a user to simulate progress for testing purposes.
+   * Progress is set to {SIM_PROGRESS} and next_at is updated accordingly.
+   * @param userId - The unique identifier of the user
+   * @returns The count of updated items
+   */
+  static async simulateData(userId: string): Promise<number> {
+    const dateTime = new Date().toISOString();
+
+    const count = await db.user_items
+      .where('[user_id+item_id]')
+      .between([userId, 1], [userId, SIM_COUNT])
+      .modify((item) => {
+        item.progress = SIM_PROGRESS;
+        item.updated_at = dateTime;
+        item.next_at = getNextAt(SIM_PROGRESS);
+      });
+
+    return count;
   }
 
   /**

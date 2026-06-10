@@ -38,4 +38,13 @@ export const HOME_TEXTS = {
   convertAnonymousLoading: 'Připravuji propojení účtu ...',
   convertAnonymousSuccessToast: 'Účet hosta byl úspěšně převeden.',
   convertAnonymousErrorToast: 'Převod účtu hosta se nepodařil.',
+
+  // Simulate data
+  simulateDataButton: 'Simulovat data',
+  simulateDataLoading: 'Simuluji data ...',
+  simulateDataTooltip: 'Nevratně změní data uživatele. Použijte pro testování aplikace.',
+  simulateDataSuccessToast: 'Data byla úspěšně simulována.',
+  simulateDataErrorToast: 'Chyba při simulaci dat.',
+  simulateDataExplanation:
+    'Přehledy v Profilu zobrazují pouze rozcvičené položky. Funkce "Simulovat data" přidá pokrok k prvním 200 položkám uživatele. Změna je nevratná.',
 } as const;
