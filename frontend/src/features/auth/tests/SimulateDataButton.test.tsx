@@ -72,7 +72,7 @@ describe('SimulateDataButton', () => {
   });
 
   it('does nothing when user is missing', async () => {
-    mocks.userId = null;
+    mocks.userId = '';
 
     render(<SimulateDataButton />);
     fireEvent.click(screen.getByRole('button', { name: 'Simulovat data' }));
