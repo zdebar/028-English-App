@@ -36,8 +36,14 @@ export default function MasterItemButton({ onConfirm, disabled, children }: Mast
 
     timeoutRef.current = globalThis.setTimeout(() => {
       longPressTriggeredRef.current = true;
-      onConfirm();
-      showToast(TEXTS.skipSuccessToast, 'success');
+      void (async () => {
+        try {
+          await onConfirm();
+          showToast(TEXTS.skipSuccessToast, 'success');
+        } catch {
+          showToast(TEXTS.skipErrorToast, 'error');
+        }
+      })();
     }, HOLD_DURATION_MS);
   }, [clearHoldTimer, disabled, onConfirm, showToast]);
 

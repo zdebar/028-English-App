@@ -97,6 +97,10 @@ vi.mock('@/features/auth/GoogleAuthButton', () => ({
   default: () => <div data-testid="google-auth-button" />,
 }));
 
+vi.mock('@/features/auth/SimulateDataButton', () => ({
+  default: () => <div data-testid="simulate-data-button" />,
+}));
+
 vi.mock('react-router-dom', () => ({
   Link: ({ children }: any) => <div>{children}</div>,
   useNavigate: () => vi.fn(),

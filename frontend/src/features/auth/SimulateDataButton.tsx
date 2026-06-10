@@ -1,33 +1,30 @@
 import { useCallback, useState, type JSX } from 'react';
 import SigninButton from '@/features/auth/SigninButton';
-import { loginAnonymous } from '@/features/auth/anonymous-auth-service';
+import UserItems from '@/database/models/user-items';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { TEXTS } from '@/locales/cs';
+import { useAuthStore } from './use-auth-store';
 
 export default function SimulateDataButton(): JSX.Element {
   const showToast = useToastStore((s) => s.showToast);
   const [isLoading, setIsLoading] = useState(false);
+  const userId = useAuthStore((state) => state.userId);
 
-  const simulateData = useCallback(
-    async (token?: string) => {
-      if (!token) return;
+  const simulateData = useCallback(async () => {
+    if (isLoading || !userId) return;
+    setIsLoading(true);
 
-      if (isLoading) return;
-      setIsLoading(true);
-
-      try {
-        await loginAnonymous({ captchaToken: token });
-        showToast(TEXTS.simulateDataSuccessToast, 'success');
-      } catch (err) {
-        reportError('Simulate data failed', err);
-        showToast(TEXTS.simulateDataErrorToast, 'error');
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [isLoading, showToast],
-  );
+    try {
+      await UserItems.simulateData(userId);
+      showToast(TEXTS.simulateDataSuccessToast, 'success');
+    } catch (err) {
+      reportError('Simulate data failed', err);
+      showToast(TEXTS.simulateDataErrorToast, 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isLoading, showToast, userId]);
 
   return (
     <SigninButton

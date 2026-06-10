@@ -17,7 +17,7 @@ const config = {
     plusProgress: 1, // Progress value for a "plus" button
     minusProgress: -2, // Progress value for a "minus" button
     skipProgress: 100, // Progress value for a "skip" button
-    simulationCount: 200, // Number of items in the testing queue
+    simulationCount: 1000, // Number of items in the testing queue
     simulationProgress: 2, // Progress value for simulated data
   },
 

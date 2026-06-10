@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   equalsDelete: vi.fn(),
   blockEqualsToArray: vi.fn(),
   itemIdModify: vi.fn(),
+  itemIdBetweenModify: vi.fn(),
   updatedBetweenToArray: vi.fn(),
   transaction: vi.fn(),
   rpc: vi.fn(),
@@ -29,6 +30,10 @@ vi.mock('@/config/config', () => ({
     lesson: {
       deckSize: 10,
     },
+    progress: {
+      simulationProgress: 2,
+      simulationCount: 200,
+    },
   },
 }));
 
@@ -49,6 +54,9 @@ vi.mock('@/database/models/db', () => ({
           return {
             equals: () => ({
               modify: (...args: unknown[]) => mocks.itemIdModify(...args),
+            }),
+            between: () => ({
+              modify: (...args: unknown[]) => mocks.itemIdBetweenModify(...args),
             }),
           };
         }
@@ -141,6 +149,7 @@ describe('UserItem', () => {
       return callback();
     });
     mocks.itemIdModify.mockResolvedValue(1);
+    mocks.itemIdBetweenModify.mockResolvedValue(200);
   });
 
   afterEach(() => {
@@ -215,6 +224,31 @@ describe('UserItem', () => {
     await UserItem.resetItemById('u1', 10);
 
     expect(mocks.triggerLevelsUpdatedEvent).toHaveBeenCalledWith('u1');
+  });
+
+  it('simulateData updates first configured range using indexed between+modify', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-10T10:00:00.000Z'));
+    mocks.getNextAt.mockReturnValue('2026-06-12T00:00:00.000Z');
+
+    const count = await UserItem.simulateData('u1');
+
+    expect(count).toBe(200);
+    expect(mocks.itemIdBetweenModify).toHaveBeenCalledTimes(1);
+
+    const modifyFn = mocks.itemIdBetweenModify.mock.calls[0][0] as (item: any) => void;
+    const item = {
+      progress: 0,
+      updated_at: '1970-01-01T00:00:00.000Z',
+      next_at: '1970-01-01T00:00:00.000Z',
+    };
+
+    modifyFn(item);
+
+    expect(item.progress).toBe(2);
+    expect(item.updated_at).toBe('2026-06-10T10:00:00.000Z');
+    expect(item.next_at).toBe('2026-06-12T00:00:00.000Z');
+    expect(mocks.getNextAt).toHaveBeenCalledWith(2);
   });
 
   it('syncFromRemote pushes local items, applies pull, and marks sync', async () => {

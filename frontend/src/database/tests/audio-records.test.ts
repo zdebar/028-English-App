@@ -24,6 +24,10 @@ vi.mock('@/config/config', () => ({
       nullReplacementNumber: 0,
       epochStartDate: '1970-01-01T00:00:00.000Z',
     },
+    progress: {
+      simulationProgress: 2,
+      simulationCount: 200,
+    },
     audio: {
       audioBucketName: 'audio-bucket',
       archiveBucketName: 'archive-bucket',
