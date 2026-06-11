@@ -100,7 +100,7 @@ export default function PracticeCard() {
   if (isNoteVisible) return <SimpleOverviewCard data={noteData} onClose={closeNote} />;
 
   return (
-    <div className="relative flex w-full grow flex-col items-center">
+    <div className="relative mb-14 flex w-full grow flex-col items-center">
       <div className={`card-width card-height relative gap-1`}>
         {/* Item Card */}
         <div
