@@ -23,7 +23,19 @@
   }
 
   .card-width {
-    @apply max-w-card min-w-card w-full flex flex-col justify-start;
+    @apply min-w-card w-full flex flex-col justify-start;
+  }
+
+  @media (max-height: 460px)  {
+    .card-width {
+      max-width: min(calc(100vw - 18rem), var(--max-width-card));
+    }
+  }
+
+  @media (max-height: 460px) and (max-width: 640px) {
+    .card-width {
+      max-width: min(calc(100vw - 10.5rem), var(--max-width-card));
+    }
   }
 
   /** Help Text styles */

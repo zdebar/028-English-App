@@ -100,7 +100,7 @@ export default function PracticeCard() {
   if (isNoteVisible) return <SimpleOverviewCard data={noteData} onClose={closeNote} />;
 
   return (
-    <div className="relative mb-14 flex w-full grow flex-col items-center">
+    <div className="help-btn-margin relative flex w-full grow flex-col items-center">
       <div className={`card-width card-height relative gap-1`}>
         {/* Item Card */}
         <div
@@ -120,22 +120,6 @@ export default function PracticeCard() {
         >
           {!revealed && !showDirectionChange && (
             <HelpText className="center top-4">{TEXTS.reveal}</HelpText>
-          )}
-          {!showDirectionChange && (
-            <>
-              <HelpText className="top-20 left-4">
-                <span className="help-text-span">{TEXTS.shortCut}</span>
-                {TEXTS.short}
-              </HelpText>
-              <HelpText className="top-28 left-4">
-                <span className="help-text-span">{TEXTS.singularCut}</span>
-                {TEXTS.singular}
-              </HelpText>
-              <HelpText className="top-36 left-4">
-                <span className="help-text-span">{TEXTS.pluralCut}</span>
-                {TEXTS.plural}
-              </HelpText>
-            </>
           )}
           {/** Top Bar */}
           <div id="top-bar" className="relative flex h-8 w-full items-center justify-between">

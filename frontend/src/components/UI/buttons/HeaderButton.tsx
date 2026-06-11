@@ -14,6 +14,8 @@ type HeaderButtonProps = Readonly<{
 export default function HeaderButton({ to, ...rest }: HeaderButtonProps): JSX.Element {
   const isSelected = useMatch({ path: to ?? '', end: true });
 
+  const sharedClasses = `${rest.className ?? ''} size-button flex items-center justify-center rounded-full  `;
+
   if (rest.disabled)
     return (
       <button
@@ -21,7 +23,7 @@ export default function HeaderButton({ to, ...rest }: HeaderButtonProps): JSX.El
         disabled
         aria-disabled="true"
         tabIndex={-1}
-        className={`size-button text-disabled-light dark:text-disabled-dark flex cursor-default items-center justify-center rounded-full hover:bg-inherit ${rest.className ?? ''}`}
+        className={` ${sharedClasses} text-disabled-light dark:text-disabled-dark cursor-default hover:bg-inherit`}
       >
         {rest.children}
       </button>
@@ -31,9 +33,9 @@ export default function HeaderButton({ to, ...rest }: HeaderButtonProps): JSX.El
     <Link
       to={to}
       title={rest.title ?? ''}
-      className={`size-button hover:text-light hover:bg-button-hover flex items-center justify-center rounded-full ${
+      className={`${sharedClasses} hover:text-light hover:bg-button-hover ${
         isSelected ? 'text-light bg-button-hover' : ''
-      } ${rest.className ?? ''}`}
+      } `}
     >
       {rest.children}
     </Link>

@@ -1,15 +1,22 @@
 /** RESPONSIVE STYLES **/
 
+/* HELP AND NOTE BUTTON */
 .help-btn-pos {
   position: absolute;
   bottom: -54px;
   right: 0px;
+}
+.help-btn-margin {
+  margin-bottom: 54px;
 }
 
 @media (max-height: 400px) {
   .help-btn-pos {
     bottom: 0px;
     right: -54px;
+  }
+  .help-btn-margin {
+    margin-bottom: 0px;
   }
 }
 
@@ -19,13 +26,14 @@
   left: 0px;
 }
 
-@media (max-height: 400px) {
+@media (max-height: 400px)  {
   .note-btn-pos {
     bottom: 0px;
     left: -54px;
   }
 }
 
+/* HOME PAGE */
 .home-title {
    @apply my-8;
 }
