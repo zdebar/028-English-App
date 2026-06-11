@@ -47,7 +47,7 @@ export default function VocabularyDetailCard({
     { label: TEXTS.masteredAt, value: shortenDate(selectedWord?.mastered_at) || NOT_MASTERED },
   ];
 
-  const { playAudio, setVolume } = useAudioManager(selectedWord?.audio || null);
+  const { playAudio } = useAudioManager(selectedWord?.audio || null);
 
   return (
     <OverviewCard
@@ -88,7 +88,7 @@ export default function VocabularyDetailCard({
           <PlayIcon />
           <HelpText className="-top-3.5 left-0">{TEXTS.audio}</HelpText>
         </button>
-        <VolumeSlider setVolume={setVolume} className="h-13.5" />
+        <VolumeSlider className="h-13.5" />
       </div>
       <HelpButton className="right-0 -bottom-13.5" />
     </OverviewCard>

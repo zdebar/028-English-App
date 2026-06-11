@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import AudioRecord from '@/database/models/audio-records';
 import { reportError } from '@/features/logging/monitoring-handler';
+import { useAudioStore } from './use-audio-store';
 
 type AudioInput = string | string[] | null;
 type ManagedAudio = {
@@ -124,7 +125,7 @@ async function loadAudioBatch(
  */
 export function useAudioManager(audio: AudioInput) {
   const audioMapRef = useRef<Map<string, ManagedAudio>>(new Map());
-  const volumeRef = useRef(1);
+  const volume = useAudioStore((s) => s.volume);
   const [audioError, setAudioError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -154,12 +155,7 @@ export function useAudioManager(audio: AudioInput) {
     };
 
     const loadAllAudio = async () => {
-      const hasFailure = await loadAudioBatch(
-        files,
-        volumeRef.current,
-        handleAudioEnded,
-        audioMapRef.current,
-      );
+      const hasFailure = await loadAudioBatch(files, volume, handleAudioEnded, audioMapRef.current);
 
       if (!isDisposed && hasFailure) {
         setAudioError(true);
@@ -192,7 +188,7 @@ export function useAudioManager(audio: AudioInput) {
       if (!managedAudio) return;
 
       managedAudio.element.currentTime = 0;
-      managedAudio.element.volume = volumeRef.current;
+      managedAudio.element.volume = volume;
       managedAudio.element.play();
       setCurrent(toPlay);
       setIsPlaying(true);
@@ -205,17 +201,9 @@ export function useAudioManager(audio: AudioInput) {
     setIsPlaying(false);
   }, []);
 
-  const setVolume = useCallback((volume: number) => {
-    volumeRef.current = Math.min(Math.max(volume, 0), 1);
-    audioMapRef.current.forEach(({ element }) => {
-      element.volume = volumeRef.current;
-    });
-  }, []);
-
   return {
     playAudio, // playAudio() or playAudio(filename)
     stopAudio,
-    setVolume,
     audioError,
     isAudioReady: () => audioMapRef.current.size > 0,
     loading,

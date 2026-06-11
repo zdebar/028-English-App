@@ -45,7 +45,6 @@ export function usePracticeDeck(userId: string | null) {
 
   const {
     playAudio: playAudioInternal,
-    setVolume,
     audioError,
     loading: audioLoading,
     isPlaying,
@@ -230,7 +229,6 @@ export function usePracticeDeck(userId: string | null) {
 
     // Audio management
     audioError,
-    setVolume,
     playAudio: playAudioInternal,
     audioLoading,
     isPlaying,

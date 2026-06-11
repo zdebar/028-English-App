@@ -28,6 +28,7 @@ import Profile from '@/pages/Profile';
 import { useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import './styles/index.css';
+import { useAudioLoader } from './features/audio/use-audio-loader';
 
 export default function App() {
   const userId = useAuthStore((state) => state.userId);
@@ -47,6 +48,7 @@ export default function App() {
     }
   }, [initializeAuth, showToast]);
 
+  useAudioLoader(userId);
   useUserStoreSync(userId);
   useThemeLoader(userId);
   const { loading: syncLoading } = usePeriodicSync(userId);

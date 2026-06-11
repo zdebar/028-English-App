@@ -2,9 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import VolumeIcon from '@/components/UI/icons/VolumeIcon';
 import MuteIcon from '@/components/UI/icons/MuteIcon';
 import { ARIA_TEXTS, TEXTS } from '@/locales/cs';
+import { useAudioStore } from './use-audio-store';
 
 type VolumeSliderProps = Readonly<{
-  setVolume: (volume: number) => void;
   className?: string;
 }>;
 
@@ -15,9 +15,10 @@ type VolumeSliderProps = Readonly<{
  * @param className - Optional additional CSS classes.
  * @returns A JSX element for the volume slider.
  */
-export default function VolumeSlider({ setVolume, className = '' }: VolumeSliderProps) {
+export default function VolumeSlider({ className = '' }: VolumeSliderProps) {
+  const volume = useAudioStore((s) => s.volume);
+  const setVolume = useAudioStore((s) => s.setVolume);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
-  const [localVolume, setLocalVolume] = useState(1);
   const sliderRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -36,7 +37,6 @@ export default function VolumeSlider({ setVolume, className = '' }: VolumeSlider
 
   const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = Number.parseFloat(event.target.value);
-    setLocalVolume(newVolume);
     setVolume(newVolume);
   };
 
@@ -55,7 +55,7 @@ export default function VolumeSlider({ setVolume, className = '' }: VolumeSlider
         disabled={false}
         title={TEXTS.volume}
       >
-        {localVolume === 0 ? <MuteIcon /> : <VolumeIcon />}
+        {volume === 0 ? <MuteIcon /> : <VolumeIcon />}
       </button>
       {showVolumeSlider && (
         <input
@@ -63,7 +63,7 @@ export default function VolumeSlider({ setVolume, className = '' }: VolumeSlider
           min="0"
           max="1"
           step="0.01"
-          value={localVolume}
+          value={volume}
           onClick={(event) => event.stopPropagation()}
           onChange={(event) => {
             event.stopPropagation();
@@ -71,10 +71,10 @@ export default function VolumeSlider({ setVolume, className = '' }: VolumeSlider
           }}
           className="ml-2 cursor-pointer"
           autoFocus
-          aria-valuenow={localVolume}
+          aria-valuenow={volume}
           aria-valuemin={0}
           aria-valuemax={1}
-          aria-label={ARIA_TEXTS.volumePercent(Math.round(localVolume * 100))}
+          aria-label={ARIA_TEXTS.volumePercent(Math.round(volume * 100))}
           disabled={false}
         />
       )}

@@ -70,7 +70,6 @@ export default function PracticeCard() {
     plusHint,
     nextItem,
     audioError,
-    setVolume,
     playAudio,
     audioLoading,
   } = usePracticeDeck(userId);
@@ -123,7 +122,7 @@ export default function PracticeCard() {
           )}
           {/** Top Bar */}
           <div id="top-bar" className="relative flex h-8 w-full items-center justify-between">
-            <VolumeSlider setVolume={setVolume} className="pl-2" />
+            <VolumeSlider className="pl-2" />
             {/**Audio messages*/}
             {audioStatusMessage}
           </div>
