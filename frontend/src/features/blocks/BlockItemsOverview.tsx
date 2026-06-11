@@ -16,6 +16,7 @@ import { DataState } from '@/components/UI/DataState';
 import { ListButton } from '@/components/UI/buttons/ListButton';
 import HelpButton from '../help/HelpButton';
 import OverviewCard from '@/components/UI/OverviewCard';
+import VolumeSlider from '../audio/VolumeSlider';
 
 export default function BlockItemsOverview() {
   const navigate = useNavigate();
@@ -116,7 +117,8 @@ export default function BlockItemsOverview() {
           </ListButton>
         ))}
       </DataState>
-      {items && items.length > 0 && <HelpButton className="absolute right-0 -bottom-14" />}
+      <VolumeSlider className="h-button absolute -bottom-13 left-0" />
+      {items && items.length > 0 && <HelpButton className="right-0 -bottom-13" />}
     </OverviewCard>
   );
 }
