@@ -76,7 +76,7 @@ export default function VocabularyDetailCard({
           ))}
         </div>
       </div>
-      <div className="absolute -bottom-12.5 left-2 flex">
+      <div className="absolute -bottom-13.5 left-2 flex">
         <button
           onClick={() => {
             if (!selectedWord?.audio) return;
@@ -88,7 +88,7 @@ export default function VocabularyDetailCard({
           <PlayIcon />
           <HelpText className="-top-3.5 left-0">{TEXTS.audio}</HelpText>
         </button>
-        <VolumeSlider className="h-13.5" />
+        <VolumeSlider className="h-button" />
       </div>
       <HelpButton className="right-0 -bottom-13.5" />
     </OverviewCard>
