@@ -73,7 +73,6 @@ function resolveFilenameToPlay(
 
 async function loadSingleAudio(
   filename: string,
-  volume: number,
   onEnded: () => void,
   audioMap: Map<string, ManagedAudio>,
 ): Promise<boolean> {
@@ -85,7 +84,6 @@ async function loadSingleAudio(
 
     const objectUrl = URL.createObjectURL(audioRecord.audioBlob);
     const audioElement = new Audio(objectUrl);
-    audioElement.volume = volume;
     audioElement.addEventListener('ended', onEnded);
     audioMap.set(filename, { element: audioElement, onEnded });
     return true;
@@ -97,14 +95,13 @@ async function loadSingleAudio(
 
 async function loadAudioBatch(
   filenames: string[],
-  volume: number,
   onEnded: () => void,
   audioMap: Map<string, ManagedAudio>,
 ): Promise<boolean> {
   let hasFailure = false;
 
   for (const filename of filenames) {
-    const wasLoaded = await loadSingleAudio(filename, volume, onEnded, audioMap);
+    const wasLoaded = await loadSingleAudio(filename, onEnded, audioMap);
     if (!wasLoaded) {
       hasFailure = true;
     }
@@ -126,11 +123,16 @@ async function loadAudioBatch(
 export function useAudioManager(audio: AudioInput) {
   const audioMapRef = useRef<Map<string, ManagedAudio>>(new Map());
   const volume = useAudioStore((s) => s.volume);
+  const volumeRef = useRef(volume);
   const [audioError, setAudioError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [filenames, setFilenames] = useState<string[]>([]);
   const [current, setCurrent] = useState<string | null>(null);
+
+  useEffect(() => {
+    volumeRef.current = volume;
+  }, [volume]);
 
   // Load audio files
   useEffect(() => {
@@ -155,7 +157,7 @@ export function useAudioManager(audio: AudioInput) {
     };
 
     const loadAllAudio = async () => {
-      const hasFailure = await loadAudioBatch(files, volume, handleAudioEnded, audioMapRef.current);
+      const hasFailure = await loadAudioBatch(files, handleAudioEnded, audioMapRef.current);
 
       if (!isDisposed && hasFailure) {
         setAudioError(true);
@@ -178,7 +180,7 @@ export function useAudioManager(audio: AudioInput) {
     (filenameOrEvent?: unknown) => {
       // Always stop all first
       stopAndResetAll(audioMapRef.current);
-      setIsPlaying(false);
+      setIsPlaying(true);
 
       const filename = typeof filenameOrEvent === 'string' ? filenameOrEvent : undefined;
 
@@ -188,10 +190,10 @@ export function useAudioManager(audio: AudioInput) {
       if (!managedAudio) return;
 
       managedAudio.element.currentTime = 0;
-      managedAudio.element.volume = volume;
+      managedAudio.element.volume = volumeRef.current;
       managedAudio.element.play();
       setCurrent(toPlay);
-      setIsPlaying(true);
+      setIsPlaying(false);
     },
     [current, filenames],
   );
