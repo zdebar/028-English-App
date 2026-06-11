@@ -1,13 +1,21 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-const setVolumeMock = vi.fn();
+let currentVolume = 1;
+const setVolumeMock = vi.fn((v: number) => {
+  currentVolume = v;
+});
 
 vi.mock('@/features/audio/use-audio-store', () => ({
   useAudioStore: (
     selector: (state: { volume: number; setVolume: (v: number) => void }) => unknown,
-  ) => selector({ volume: 1, setVolume: setVolumeMock }),
+  ) => selector({ volume: currentVolume, setVolume: setVolumeMock }),
 }));
+
+beforeEach(() => {
+  currentVolume = 1;
+  setVolumeMock.mockClear();
+});
 
 vi.mock('@/components/UI/icons/VolumeIcon', () => ({
   default: () => <span data-testid="volume-icon" />,
@@ -21,8 +29,7 @@ import VolumeSlider from '@/features/audio/VolumeSlider';
 
 describe('VolumeSlider', () => {
   it('opens slider on button click and updates volume via callback', () => {
-    setVolumeMock.mockReset();
-    render(<VolumeSlider />);
+    const { rerender } = render(<VolumeSlider />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Nastavit hlasitost' }));
 
@@ -30,16 +37,20 @@ describe('VolumeSlider', () => {
     fireEvent.change(slider, { target: { value: '0.34' } });
 
     expect(setVolumeMock).toHaveBeenCalledWith(0.34);
+
+    // update mocked store return and rerender so component reads new volume
+    rerender(<VolumeSlider />);
     expect(screen.getByLabelText('Hlasitost: 34%')).toBeTruthy();
   });
 
   it('shows mute icon when volume is set to 0', () => {
-    setVolumeMock.mockReset();
-    render(<VolumeSlider />);
+    const { rerender } = render(<VolumeSlider />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Nastavit hlasitost' }));
     fireEvent.change(screen.getByRole('slider'), { target: { value: '0' } });
 
+    // update mocked store return and rerender so component reads new volume
+    rerender(<VolumeSlider />);
     expect(screen.getByTestId('mute-icon')).toBeTruthy();
   });
 
