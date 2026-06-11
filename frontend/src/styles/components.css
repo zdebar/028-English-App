@@ -26,6 +26,11 @@
     @apply min-w-card w-full flex flex-col justify-start;
   }
 
+  /** SCREEN SIZE
+  - same as header.module.css media queries
+  - short: max-height: 460px - splits header into sides, pushes main up
+  - short-narrow: max-height: 460px and max-width: 640px - orient side header vertically
+  **/
   @media (max-height: 460px)  {
     .card-width {
       max-width: min(calc(100vw - 18rem), var(--max-width-card));
