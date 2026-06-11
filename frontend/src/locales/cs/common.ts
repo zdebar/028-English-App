@@ -1,6 +1,7 @@
 export const COMMON_TEXTS = {
   // Generic
   notAvailable: 'Není k dispozici',
+  notMastered: 'Nenaučeno',
   nothingToPractice: 'Nic k procvičování.',
   tryAgainLater: 'Zkuste to znovu později.',
   loadingMessage: 'Načítání ...',

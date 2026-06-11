@@ -41,7 +41,10 @@ export default function VolumeSlider({ setVolume, className = '' }: VolumeSlider
   };
 
   return (
-    <div ref={sliderRef} className={`flex h-10 min-w-10 items-center pl-2 ${className}`}>
+    <div
+      ref={sliderRef}
+      className={`flex h-10 w-50 min-w-10 items-center justify-start p-4 ${className}`}
+    >
       <button
         onClick={(event) => {
           event.stopPropagation();
@@ -66,7 +69,7 @@ export default function VolumeSlider({ setVolume, className = '' }: VolumeSlider
             event.stopPropagation();
             handleVolumeChange(event);
           }}
-          className="ml-2 w-24 cursor-pointer"
+          className="ml-2 cursor-pointer"
           autoFocus
           aria-valuenow={localVolume}
           aria-valuemin={0}

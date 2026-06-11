@@ -4,8 +4,13 @@ import { TEXTS } from '@/locales/cs';
 import HelpButton from '@/features/help/HelpButton';
 import { shortenDate } from '@/features/vocabulary/vocabulary.utils';
 import type { UserItemLocal } from '@/types/user-item.types';
+import { useAudioManager } from '@/hooks/use-audio-manager';
+import VolumeSlider from '../practice/VolumeSlider';
+import PlayIcon from '@/components/UI/icons/PlayIcon';
+import HelpText from '../help/HelpText';
 
 const NOT_AVAILABLE = TEXTS.notAvailable;
+const NOT_MASTERED = TEXTS.notMastered;
 
 type VocabularyDetailCardProps = Readonly<{
   selectedWord: UserItemLocal | null;
@@ -36,12 +41,13 @@ export default function VocabularyDetailCard({
   ];
 
   const dateProperties = [
-    { label: TEXTS.progress, value: selectedWord?.progress },
     { label: TEXTS.startedAt, value: shortenDate(selectedWord?.started_at) },
     { label: TEXTS.updatedAt, value: shortenDate(selectedWord?.updated_at) },
     { label: TEXTS.nextAt, value: shortenDate(selectedWord?.next_at) },
-    { label: TEXTS.masteredAt, value: shortenDate(selectedWord?.mastered_at) },
+    { label: TEXTS.masteredAt, value: shortenDate(selectedWord?.mastered_at) || NOT_MASTERED },
   ];
+
+  const { playAudio, setVolume } = useAudioManager(selectedWord?.audio || null);
 
   return (
     <OverviewCard
@@ -49,6 +55,7 @@ export default function VocabularyDetailCard({
       onClose={onClose}
       handleReset={onReset}
       modalTitle={TEXTS.restartItemProgress}
+      className="relative"
     >
       <div className="flex flex-col gap-4 p-4">
         <div>
@@ -58,6 +65,9 @@ export default function VocabularyDetailCard({
             </PropertyView>
           ))}
         </div>
+        <PropertyView key={TEXTS.progress} label={TEXTS.progress}>
+          {selectedWord?.progress ?? NOT_AVAILABLE}
+        </PropertyView>
         <div>
           {dateProperties.map((property) => (
             <PropertyView key={property.label} label={property.label}>
@@ -66,7 +76,21 @@ export default function VocabularyDetailCard({
           ))}
         </div>
       </div>
-      <HelpButton className="right-1 -bottom-10.5" />
+      <div className="absolute -bottom-12.5 left-2 flex">
+        <button
+          onClick={() => {
+            if (!selectedWord?.audio) return;
+            playAudio(selectedWord.audio);
+          }}
+          className="size-help-button relative flex cursor-pointer items-center justify-center"
+          title={TEXTS.audio}
+        >
+          <PlayIcon />
+          <HelpText className="-top-3.5 left-0">{TEXTS.audio}</HelpText>
+        </button>
+        <VolumeSlider setVolume={setVolume} className="h-13.5" />
+      </div>
+      <HelpButton className="right-0 -bottom-13.5" />
     </OverviewCard>
   );
 }

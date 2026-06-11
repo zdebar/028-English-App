@@ -123,7 +123,7 @@ export default function PracticeCard() {
           )}
           {/** Top Bar */}
           <div id="top-bar" className="relative flex h-8 w-full items-center justify-between">
-            <VolumeSlider setVolume={setVolume} />
+            <VolumeSlider setVolume={setVolume} className="pl-0" />
             {/**Audio messages*/}
             {audioStatusMessage}
           </div>
