@@ -122,17 +122,11 @@ async function loadAudioBatch(
  */
 export function useAudioManager(audio: AudioInput) {
   const audioMapRef = useRef<Map<string, ManagedAudio>>(new Map());
-  const volume = useAudioStore((s) => s.volume);
-  const volumeRef = useRef(volume);
   const [audioError, setAudioError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [filenames, setFilenames] = useState<string[]>([]);
   const [current, setCurrent] = useState<string | null>(null);
-
-  useEffect(() => {
-    volumeRef.current = volume;
-  }, [volume]);
 
   // Load audio files
   useEffect(() => {
@@ -176,24 +170,34 @@ export function useAudioManager(audio: AudioInput) {
 
   // Play audio: ignore non-string args (e.g., React click events),
   // then play current by default or a specific filename when provided.
+
   const playAudio = useCallback(
     (filenameOrEvent?: unknown) => {
-      // Always stop all first
       stopAndResetAll(audioMapRef.current);
-      setIsPlaying(true);
 
       const filename = typeof filenameOrEvent === 'string' ? filenameOrEvent : undefined;
-
       const toPlay = resolveFilenameToPlay(filename, current, filenames, audioMapRef.current);
-      if (!toPlay) return;
+      if (!toPlay) {
+        setIsPlaying(false);
+        return;
+      }
+
       const managedAudio = audioMapRef.current.get(toPlay);
-      if (!managedAudio) return;
+      if (!managedAudio) {
+        setIsPlaying(false);
+        return;
+      }
 
       managedAudio.element.currentTime = 0;
-      managedAudio.element.volume = volumeRef.current;
-      managedAudio.element.play();
+      managedAudio.element.volume = useAudioStore.getState().volume;
+
+      const playPromise = managedAudio.element.play();
       setCurrent(toPlay);
-      setIsPlaying(false);
+      setIsPlaying(true);
+
+      if (typeof playPromise.catch === 'function') {
+        playPromise.catch(() => setIsPlaying(false));
+      }
     },
     [current, filenames],
   );
