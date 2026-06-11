@@ -6,7 +6,7 @@ import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
 import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { useHint, NBSP } from './use-hint';
-import { useAudioManager } from '../../../hooks/use-audio-manager';
+import { useAudioManager } from '../../audio/use-audio-manager';
 import { triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 import config from '@/config/config';
 

@@ -8,7 +8,7 @@ import Indicator from '@/components/UI/Indicator';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import SimpleOverviewCard from './SimpleOverviewCard';
-import VolumeSlider from '@/features/practice/VolumeSlider';
+import VolumeSlider from '@/features/audio/VolumeSlider';
 
 import Notification from '@/components/UI/Notification';
 import { TEXTS } from '@/locales/cs';

@@ -4,8 +4,8 @@ import { TEXTS } from '@/locales/cs';
 import HelpButton from '@/features/help/HelpButton';
 import { shortenDate } from '@/features/vocabulary/vocabulary.utils';
 import type { UserItemLocal } from '@/types/user-item.types';
-import { useAudioManager } from '@/hooks/use-audio-manager';
-import VolumeSlider from '../practice/VolumeSlider';
+import { useAudioManager } from '@/features/audio/use-audio-manager';
+import VolumeSlider from '../audio/VolumeSlider';
 import PlayIcon from '@/components/UI/icons/PlayIcon';
 import HelpText from '../help/HelpText';
 

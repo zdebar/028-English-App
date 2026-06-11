@@ -3,7 +3,7 @@ import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
-import { useAudioManager } from '@/hooks/use-audio-manager';
+import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { useArray } from '@/hooks/use-array';
 import { TEXTS } from '@/locales/cs';
 import type { UserItemLocal } from '@/types/user-item.types';

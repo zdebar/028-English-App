@@ -9,7 +9,7 @@ vi.mock('@/components/UI/icons/MuteIcon', () => ({
   default: () => <span data-testid="mute-icon" />,
 }));
 
-import VolumeSlider from '@/features/practice/VolumeSlider';
+import VolumeSlider from '@/features/audio/VolumeSlider';
 
 describe('VolumeSlider', () => {
   it('opens slider on button click and updates volume via callback', () => {
