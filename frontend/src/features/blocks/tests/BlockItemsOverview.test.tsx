@@ -47,7 +47,7 @@ vi.mock('@/hooks/use-fetch', () => ({
   }),
 }));
 
-vi.mock('@/hooks/use-audio-manager', () => ({
+vi.mock('@/features/audio/use-audio-manager', () => ({
   useAudioManager: () => ({
     playAudio: mocks.playAudio,
   }),
@@ -73,6 +73,10 @@ vi.mock('@/locales/cs', () => ({
     resetProgressErrorToast: 'Reset error',
     resetBlockTitle: 'Reset block',
     resetBlockDescription: 'Reset block description',
+  },
+  ARIA_TEXTS: {
+    setVolume: 'Nastavit hlasitost',
+    volumePercent: (value: number) => `Hlasitost: ${value}%`,
   },
 }));
 

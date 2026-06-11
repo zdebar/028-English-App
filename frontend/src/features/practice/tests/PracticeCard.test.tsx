@@ -89,6 +89,10 @@ vi.mock('@/locales/cs', () => ({
     directionCzToEn: 'CZ to EN',
     directionEnToCz: 'EN to CZ',
   },
+  ARIA_TEXTS: {
+    setVolume: 'Nastavit hlasitost',
+    volumePercent: (value: number) => `Hlasitost: ${value}%`,
+  },
 }));
 
 vi.mock('@/features/auth/use-auth-store', () => ({
@@ -219,7 +223,7 @@ vi.mock('@/features/practice/GrammarCard', () => ({
   default: ({ grammar }: any) => <div>GrammarCard:{grammar?.name ?? 'none'}</div>,
 }));
 
-vi.mock('@/features/practice/VolumeSlider', () => ({
+vi.mock('@/features/audio/VolumeSlider', () => ({
   default: () => <div data-testid="volume-slider" />,
 }));
 

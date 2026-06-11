@@ -16,6 +16,16 @@ vi.mock('@/locales/cs', () => ({
     masteredAt: 'Mastered',
     restartItemProgress: 'Restart item',
   },
+  ARIA_TEXTS: {
+    setVolume: 'Nastavit hlasitost',
+    volumePercent: (value: number) => `Hlasitost: ${value}%`,
+  },
+}));
+
+vi.mock('@/features/audio/use-audio-manager', () => ({
+  useAudioManager: () => ({
+    playAudio: vi.fn(),
+  }),
 }));
 
 vi.mock('@/features/vocabulary/vocabulary.utils', () => ({

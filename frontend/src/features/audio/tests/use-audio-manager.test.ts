@@ -8,7 +8,7 @@ class MockAudio {
   src = '';
   volume = 1;
   currentTime = 0;
-  play = vi.fn();
+  play = vi.fn().mockResolvedValue(undefined);
   pause = vi.fn();
   private listeners: Record<string, Array<() => void>> = {};
 
@@ -39,6 +39,7 @@ vi.mock('@/features/logging/monitoring-handler', () => ({
 }));
 
 import { useAudioManager } from '@/features/audio/use-audio-manager';
+import { useAudioStore } from '@/features/audio/use-audio-store';
 
 describe('useAudioManager', () => {
   beforeEach(() => {
@@ -122,20 +123,17 @@ describe('useAudioManager', () => {
     expect(result.current.isPlaying).toBe(true);
   });
 
-  it('setVolume clamps values and applies to audio element', async () => {
+  it('applies current volume from audio store on play', async () => {
     getAudioMock.mockResolvedValue({ audioBlob: new Blob(['a']) });
     const { result } = renderHook(() => useAudioManager('file.opus'));
     await waitFor(() => expect(result.current.isAudioReady()).toBe(true));
 
     act(() => {
-      result.current.setVolume(2);
+      useAudioStore.getState().setVolume(0.25);
+      result.current.playAudio();
     });
-    expect(audioInstances[0].volume).toBe(1);
 
-    act(() => {
-      result.current.setVolume(-1);
-    });
-    expect(audioInstances[0].volume).toBe(0);
+    expect(audioInstances[0].volume).toBe(0.25);
   });
 
   it('handles load failure by setting error state and logging', async () => {
