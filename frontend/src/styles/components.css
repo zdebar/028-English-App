@@ -23,7 +23,7 @@
   }
 
   .card-width {
-    @apply min-w-card w-full flex flex-col justify-start;
+    @apply min-w-card max-w-card w-full flex flex-col justify-start;
   }
 
   /** SCREEN SIZE

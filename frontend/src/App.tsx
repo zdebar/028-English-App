@@ -71,7 +71,7 @@ export default function App() {
         <ToastContainer />
         <OverlayMask />
         <Header />
-        <main className="relative flex grow flex-col items-center gap-4">
+        <main className="relative m-auto flex w-full grow flex-col items-center gap-4">
           <Routes>
             <Route path={ROUTES.home} element={<Home />} />
             <Route path={ROUTES.privacyPolicy} element={<PrivacyPolicy />} />
