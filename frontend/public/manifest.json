@@ -3,7 +3,9 @@
   "short_name": "ANG",
   "start_url": "./",
   "scope": "./",
-  "display": "fullscreen",
+  "display": "standalone",
+  "width": 500,
+  "height": 700,
   "background_color": "#111827",
   "theme_color": "#111827",
   "icons": [
