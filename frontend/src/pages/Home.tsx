@@ -30,7 +30,7 @@ export default function Home(): JSX.Element {
   const isSynchronized = useSyncWarningStore((state) => state.isSynchronized);
 
   return (
-    <div className="max-w-hero relative flex w-full flex-col justify-between text-center">
+    <div className="card-width relative flex w-full flex-col justify-between text-center">
       <h1 className="home-title">{TEXTS.appTitle}</h1>
       <div className="landscape:hidden">
         <InstallPWAButton className="my-2 px-4" />
