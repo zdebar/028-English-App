@@ -5,8 +5,6 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { HashRouter } from 'react-router-dom';
 
-const routerBase = import.meta.env.BASE_URL.replace(/\/$/, '');
-
 initializeMonitoring();
 
 if ('serviceWorker' in navigator) {
@@ -42,7 +40,7 @@ if ('serviceWorker' in navigator) {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
-      <HashRouter basename={routerBase || undefined}>
+      <HashRouter>
         <App />
       </HashRouter>
     </ErrorBoundary>
