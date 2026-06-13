@@ -25,7 +25,6 @@ describe('PracticeButton', () => {
       <PracticeButton
         icon={<span data-testid="icon" />}
         label="Grammar"
-        helpSide="left"
         onClick={vi.fn()}
         disabled={false}
       >
@@ -40,47 +39,11 @@ describe('PracticeButton', () => {
   });
 
   it('passes disabled state to StyledButton and clears title when disabled', () => {
-    render(
-      <PracticeButton
-        icon={<span />}
-        label="Audio"
-        helpSide="right"
-        onClick={vi.fn()}
-        disabled={true}
-      />,
-    );
+    render(<PracticeButton icon={<span />} label="Audio" onClick={vi.fn()} disabled={true} />);
 
     const button = screen.getByTestId('styled-button') as HTMLButtonElement;
     expect(button.disabled).toBe(true);
     expect(button.getAttribute('title')).toBeNull();
-  });
-
-  it('positions HelpText on the left when helpSide is left', () => {
-    render(
-      <PracticeButton
-        icon={<span />}
-        label="Hint"
-        helpSide="left"
-        onClick={vi.fn()}
-        disabled={false}
-      />,
-    );
-
-    expect(screen.getByTestId('help-text').dataset['classname']).toContain('left-4');
-  });
-
-  it('positions HelpText on the right when helpSide is right', () => {
-    render(
-      <PracticeButton
-        icon={<span />}
-        label="Known"
-        helpSide="right"
-        onClick={vi.fn()}
-        disabled={false}
-      />,
-    );
-
-    expect(screen.getByTestId('help-text').dataset['classname']).toContain('right-4');
   });
 
   it('calls onClick when button is clicked', () => {
@@ -89,7 +52,7 @@ describe('PracticeButton', () => {
       <PracticeButton
         icon={<span />}
         label="Play"
-        helpSide="right"
+        className="help-bottom-right"
         onClick={handleClick}
         disabled={false}
       />,

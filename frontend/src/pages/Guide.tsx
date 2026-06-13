@@ -1,6 +1,7 @@
 import type { JSX } from 'react';
 import { Screenshot } from '@/components/UI/Screenshot';
 
+
 /**
  * A React component that renders the Grammar overview page.
  *
@@ -36,7 +37,7 @@ export default function Guide(): JSX.Element {
         <h2>Neodhalená kartička</h2>
         <Screenshot src="/screenshots/not-revealed" alt="Ukázka kartičky před odhalením" />
         <p>
-          <strong>"Postup na další hvězdu"</strong>
+          <strong>"Denní pokrok"</strong>
           <span>10 bronzových hvězd po 40 opakováních je doporučené minimální procvičování.</span>
         </p>
         <p>
