@@ -35,7 +35,10 @@ export default function Guide(): JSX.Element {
 
       <section>
         <h2>Neodhalená kartička</h2>
-        <Screenshot src="/screenshots/not-revealed" alt="Ukázka kartičky před odhalením" />
+        <Screenshot
+          src={`${import.meta.env.BASE_URL}/screenshots/not-revealed`}
+          alt="Ukázka kartičky před odhalením"
+        />
         <p>
           <strong>"Denní pokrok"</strong>
           <span>10 bronzových hvězd po 40 opakováních je doporučené minimální procvičování.</span>
@@ -54,7 +57,10 @@ export default function Guide(): JSX.Element {
       </section>
       <section>
         <h2>Odhalená kartička</h2>
-        <Screenshot src="/screenshots/revealed" alt="Ukázka kartičky po odhalení" />
+        <Screenshot
+          src={`${import.meta.env.BASE_URL}/screenshots/revealed`}
+          alt="Ukázka kartičky po odhalení"
+        />
         <p>
           <strong>"Opakovat"</strong>
           <span>Položka se nabídne k dalšímu procvičování dříve.</span>
@@ -73,7 +79,10 @@ export default function Guide(): JSX.Element {
       </section>
       <section>
         <h2>Profil</h2>
-        <Screenshot src="/screenshots/profile" alt="Ukázka profilu uživatele" />
+        <Screenshot
+          src={`${import.meta.env.BASE_URL}/screenshots/profile`}
+          alt="Ukázka profilu uživatele"
+        />
         <p>
           <strong>"Přehled CEFR úrovní"</strong>
           <span>Přehled postupu na jednotlivých CEFR úrovních a na jednotlivých lekcích.</span>
