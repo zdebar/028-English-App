@@ -6,7 +6,7 @@ export const PRACTICE_TEXTS = {
   progress: 'Pokrok',
   today: 'Dnes',
   grammar: 'Gramatika',
-  audio: 'Přehrát audio',
+  audio: 'Audio',
   complete: 'Dokončit',
   hint: 'Nápověda',
   reveal: 'Odhalit',

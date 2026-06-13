@@ -5,13 +5,7 @@ import PracticeButton from './PracticeButton';
 
 export default function HintButton({ onClick, disabled, children }: PracticeButtonProps) {
   return (
-    <PracticeButton
-      icon={<BulbIcon />}
-      label={TEXTS.hint}
-      helpSide="right"
-      onClick={onClick}
-      disabled={disabled}
-    >
+    <PracticeButton icon={<BulbIcon />} label={TEXTS.hint} onClick={onClick} disabled={disabled}>
       {children}
     </PracticeButton>
   );

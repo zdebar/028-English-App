@@ -22,7 +22,6 @@ import RepeatButton from './buttons/RepeatButton';
 import NoteButton from './buttons/NoteButton';
 import { useEntityByTable } from './hooks/use-entity-by-table';
 import { usePracticeStars } from './hooks/use-practice-stars';
-import { useHelpStore } from '../help/use-help-store';
 import DelayedNotification from '@/components/UI/DelayedNotification';
 import { STAR_SIZE } from '@/components/UI/StarProgress';
 import PracticeStarsRow from './components/PracticeStarsRow';
@@ -35,7 +34,6 @@ import PracticeStarsRow from './components/PracticeStarsRow';
 export default function PracticeCard() {
   const userId = useAuthStore((state) => state.userId);
   const dailyCount = useUserStore((state) => state.dailyCount);
-  const isHelpOpened = useHelpStore((state) => state.isHelpOpened);
   const {
     isVisible: isGrammarVisible,
     entityData: grammarData,
@@ -130,13 +128,11 @@ export default function PracticeCard() {
           {showDirectionChange ? (
             <Notification className="my-auto">{directionText}</Notification>
           ) : (
-            !isHelpOpened && (
-              <div id="item" className="flex h-full flex-col justify-center gap-1">
-                <p className="text-center font-bold">{czech}</p>
-                <p className="text-center font-normal">{english}</p>
-                <p className="text-center font-normal">{pronunciation}</p>
-              </div>
-            )
+            <div id="item" className="flex h-full flex-col justify-center gap-1">
+              <p className="text-center font-bold">{czech}</p>
+              <p className="text-center font-normal">{english}</p>
+              <p className="text-center font-normal">{pronunciation}</p>
+            </div>
           )}
 
           {/** Bottom Bar */}
@@ -163,49 +159,44 @@ export default function PracticeCard() {
           </div>
         </div>
         {/* Practice Controls */}
-        <div id="practice-controls" className="relative flex flex-col gap-1">
+        <div id="practice-controls" className="relative grid w-full grid-cols-4 gap-1">
           {/** Top Row */}
-          <div className="relative grid grid-cols-2 gap-1">
-            <MasterItemButton
-              onConfirm={() => {
-                nextItem(config.progress.skipProgress);
-              }}
-              disabled={!revealed || showDirectionChange}
-            />
-            <PlayAudioButton
-              onClick={playAudio}
-              disabled={audioDisabled || showDirectionChange || audioLoading}
-            />
-          </div>
-          {/** Bottom Row */}
-          <div className="relative grid grid-cols-2 gap-1">
-            {revealed ? (
-              <>
-                <RepeatButton
-                  onClick={() => {
-                    nextItem(config.progress.minusProgress);
-                  }}
-                  disabled={showDirectionChange}
-                />
-                <KnownButton
-                  onClick={() => {
-                    nextItem(config.progress.plusProgress);
-                  }}
-                  disabled={showDirectionChange}
-                />
-              </>
-            ) : (
-              <>
-                <GrammarButton
-                  onClick={() => handleGrammar(grammarId)}
-                  disabled={!grammarId || showDirectionChange}
-                >
-                  {showNewGrammarIndicator && <Indicator className="absolute top-2 right-2" />}
-                </GrammarButton>
-                <HintButton onClick={plusHint} disabled={showDirectionChange} />
-              </>
-            )}
-          </div>
+          <PlayAudioButton
+            onClick={playAudio}
+            disabled={audioDisabled || showDirectionChange || audioLoading}
+          />
+          <MasterItemButton
+            onConfirm={() => {
+              nextItem(config.progress.skipProgress);
+            }}
+            disabled={!revealed || showDirectionChange}
+          />
+          {revealed ? (
+            <>
+              <RepeatButton
+                onClick={() => {
+                  nextItem(config.progress.minusProgress);
+                }}
+                disabled={showDirectionChange}
+              />
+              <KnownButton
+                onClick={() => {
+                  nextItem(config.progress.plusProgress);
+                }}
+                disabled={showDirectionChange}
+              />
+            </>
+          ) : (
+            <>
+              <GrammarButton
+                onClick={() => handleGrammar(grammarId)}
+                disabled={!grammarId || showDirectionChange}
+              >
+                {showNewGrammarIndicator && <Indicator className="absolute top-2 right-2" />}
+              </GrammarButton>
+              <HintButton onClick={plusHint} disabled={showDirectionChange} />
+            </>
+          )}
         </div>
 
         <HelpButton className="help-btn-pos self-end" />

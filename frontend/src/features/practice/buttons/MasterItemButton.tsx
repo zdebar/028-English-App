@@ -78,8 +78,7 @@ export default function MasterItemButton({ onConfirm, disabled, children }: Mast
   return (
     <PracticeButton
       icon={<ForwardIcon />}
-      label={disabled ? '' : TEXTS.complete}
-      helpSide="left"
+      label={TEXTS.complete}
       onPointerDown={handlePressStart}
       onPointerUp={handlePressEnd}
       onPointerLeave={handlePressEnd}
