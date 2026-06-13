@@ -8,7 +8,7 @@ export default function PlayAudioButton({ onClick, disabled, children }: Practic
     <PracticeButton
       icon={<PlayIcon />}
       label={TEXTS.audio}
-      helpSide="right"
+      className="help-top-left"
       onClick={onClick}
       disabled={disabled}
     >

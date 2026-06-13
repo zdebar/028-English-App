@@ -6,14 +6,14 @@ type PracticeButtonBaseProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
   Readonly<{
     icon: ReactNode;
     label: string;
-    helpSide?: 'left' | 'right';
+    className?: string;
     children?: ReactNode;
   }>;
 
 export default function PracticeButton({
   icon,
   label,
-  helpSide = 'left',
+  className = '',
   children,
   ...rest
 }: PracticeButtonBaseProps): JSX.Element {
@@ -27,7 +27,7 @@ export default function PracticeButton({
         {icon}
         {children}
       </StyledButton>
-      <HelpText className={`-top-4.5 ${helpSide === 'left' ? 'left' : 'right'}`}>{label}</HelpText>
+      <HelpText className={className}>{label}</HelpText>
     </div>
   );
 }

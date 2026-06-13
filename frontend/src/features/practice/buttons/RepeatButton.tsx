@@ -8,7 +8,7 @@ export default function RepeatButton({ onClick, disabled, children }: PracticeBu
     <PracticeButton
       icon={<RepeatIcon />}
       label={TEXTS.repeat}
-      helpSide="left"
+      className="help-top-left"
       onClick={onClick}
       disabled={disabled}
     >

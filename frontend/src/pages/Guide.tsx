@@ -8,7 +8,7 @@ import { Screenshot } from '@/components/UI/Screenshot';
  */
 export default function Guide(): JSX.Element {
   return (
-    <div className="guide card-width overflow-x-hidden p-4">
+    <div className="guide card-width overflow-x-hidden">
       <h1 className="text-center">Návod</h1>
       <section>
         <p className="text-center">
@@ -34,7 +34,7 @@ export default function Guide(): JSX.Element {
 
       <section>
         <h2>Neodhalená kartička</h2>
-        <Screenshot src="/screenshots/not-revealed.webp" alt="Ukázka kartičky před odhalením" />
+        <Screenshot src="/screenshots/not-revealed" alt="Ukázka kartičky před odhalením" />
         <p>
           <strong>"Postup na další hvězdu"</strong>
           <span>10 bronzových hvězd po 40 opakováních je doporučené minimální procvičování.</span>
@@ -53,7 +53,7 @@ export default function Guide(): JSX.Element {
       </section>
       <section>
         <h2>Odhalená kartička</h2>
-        <Screenshot src="/screenshots/revealed.webp" alt="Ukázka kartičky po odhalení" />
+        <Screenshot src="/screenshots/revealed" alt="Ukázka kartičky po odhalení" />
         <p>
           <strong>"Opakovat"</strong>
           <span>Položka se nabídne k dalšímu procvičování dříve.</span>
@@ -72,7 +72,7 @@ export default function Guide(): JSX.Element {
       </section>
       <section>
         <h2>Profil</h2>
-        <Screenshot src="/screenshots/profile.webp" alt="Ukázka profilu uživatele" />
+        <Screenshot src="/screenshots/profile" alt="Ukázka profilu uživatele" />
         <p>
           <strong>"Přehled CEFR úrovní"</strong>
           <span>Přehled postupu na jednotlivých CEFR úrovních a na jednotlivých lekcích.</span>

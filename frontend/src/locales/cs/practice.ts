@@ -27,6 +27,6 @@ export const PRACTICE_TEXTS = {
   singular: 'Jednotné číslo',
   pluralCut: '(pl.)',
   plural: 'Množné číslo',
-  nextStarProgress: 'Postup na další hvězdu',
+  nextStarProgress: 'Denní pokrok',
   currentPracticeStar: 'Aktuální hvězda procvičování',
 } as const;
