@@ -86,7 +86,7 @@ export default function PracticeCard() {
 
   if (!currentItem) {
     return (
-      <DelayedNotification timeDelay={300}>
+      <DelayedNotification timeDelay={500}>
         <p>{TEXTS.nothingToPractice}</p>
         <p>{TEXTS.tryAgainLater}</p>
       </DelayedNotification>
