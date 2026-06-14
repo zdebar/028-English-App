@@ -58,6 +58,7 @@ describe('usePeriodicSync', () => {
     useSyncStore.setState({
       isSynchronized: false,
       isSynchronizing: false,
+      isSyncError: false,
     });
 
     mocks.dataSync.mockResolvedValue(undefined);
@@ -90,6 +91,7 @@ describe('usePeriodicSync', () => {
     expect(mocks.removeOrphaned).toHaveBeenCalled();
     expect(useSyncStore.getState().isSynchronized).toBe(true);
     expect(useSyncStore.getState().isSynchronizing).toBe(false);
+    expect(useSyncStore.getState().isSyncError).toBe(false);
 
     unmount();
   });
@@ -110,6 +112,7 @@ describe('usePeriodicSync', () => {
     );
     expect(useSyncStore.getState().isSynchronized).toBe(false);
     expect(useSyncStore.getState().isSynchronizing).toBe(false);
+    expect(useSyncStore.getState().isSyncError).toBe(true);
 
     unmount();
   });
@@ -122,5 +125,6 @@ describe('usePeriodicSync', () => {
     expect(mocks.dataSyncOnUnmount).toHaveBeenCalledWith('u1');
     expect(useSyncStore.getState().isSynchronized).toBe(false);
     expect(useSyncStore.getState().isSynchronizing).toBe(false);
+    expect(useSyncStore.getState().isSyncError).toBe(false);
   });
 });

@@ -8,14 +8,14 @@ const mocks = vi.hoisted(
     userFullName: string | null;
     userEmail: string | null;
     dailyCount: number;
-    isSynchronized: boolean;
+    isSyncError: boolean;
   } => ({
     theme: 'light',
     userId: 'u1',
     userFullName: 'User One',
     userEmail: 'u1@example.com',
     dailyCount: 3,
-    isSynchronized: true,
+    isSyncError: false,
   }),
 );
 
@@ -50,8 +50,8 @@ vi.mock('@/features/user-stats/use-user-store', () => ({
 }));
 
 vi.mock('@/features/synchronization/use-sync-store', () => ({
-  useSyncStore: (selector: (state: { isSynchronized: boolean }) => unknown) =>
-    selector({ isSynchronized: mocks.isSynchronized }),
+  useSyncStore: (selector: (state: { isSyncError: boolean }) => unknown) =>
+    selector({ isSyncError: mocks.isSyncError }),
 }));
 
 vi.mock('@/locales/cs', () => ({
@@ -97,7 +97,7 @@ vi.mock('@/features/auth/GoogleAuthButton', () => ({
   default: () => <div data-testid="google-auth-button" />,
 }));
 
-vi.mock('@/features/auth/SimulateDataButton', () => ({
+vi.mock('@/features/synchronization/SimulateDataButton', () => ({
   default: () => <div data-testid="simulate-data-button" />,
 }));
 
@@ -115,18 +115,18 @@ describe('Home', () => {
     mocks.userFullName = 'User One';
     mocks.userEmail = 'u1@example.com';
     mocks.dailyCount = 3;
-    mocks.isSynchronized = true;
+    mocks.isSyncError = false;
   });
 
-  it('shows sync warning when user is signed in and data is not synchronized', () => {
-    mocks.isSynchronized = false;
+  it('shows sync warning when sync has failed', () => {
+    mocks.isSyncError = true;
 
     render(<Home />);
 
     expect(screen.getByText('Data may be stale.')).toBeTruthy();
   });
 
-  it('does not show sync warning when user is synchronized', () => {
+  it('does not show sync warning when sync is healthy', () => {
     render(<Home />);
 
     expect(screen.queryByText('Data may be stale.')).toBeNull();

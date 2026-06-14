@@ -99,12 +99,10 @@ describe('SimulateDataButton', () => {
     mocks.userId = null;
 
     render(<SimulateDataButton />);
-    fireEvent.click(screen.getByRole('button', { name: 'Simulovat data' }));
+    expect(screen.queryByRole('button', { name: 'Simulovat data' })).toBeNull();
 
-    await waitFor(() => {
-      expect(mocks.simulateData).not.toHaveBeenCalled();
-      expect(mocks.showToast).not.toHaveBeenCalled();
-    });
+    expect(mocks.simulateData).not.toHaveBeenCalled();
+    expect(mocks.showToast).not.toHaveBeenCalled();
   });
 
   it('is disabled until sync completes', () => {
