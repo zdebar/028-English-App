@@ -25,7 +25,7 @@ export const HOME_TEXTS = {
   syncSuccessToast: 'Data byla úspěšně synchronizována.',
   syncErrorToast: 'Chyba při synchronizaci dat.',
   syncLoadingText: 'Synchronizuji data ...',
-  syncWarning: 'Chyba synchronizace. Data mohou být zastaralá.',
+  syncWarning: 'Chyba synchronizace.',
 
   // Demo sign-in
   anonymousSigninButton: 'Pokračovat jako host',

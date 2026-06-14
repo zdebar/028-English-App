@@ -3,14 +3,30 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   userId: 'u1',
+  authLoading: false,
+  isSynchronized: true,
+  isSynchronizing: false,
   simulateData: vi.fn(),
   showToast: vi.fn(),
   reportError: vi.fn(),
 }));
 
 vi.mock('@/features/auth/use-auth-store', () => ({
-  useAuthStore: (selector: (state: { userId: string | null }) => unknown) =>
-    selector({ userId: mocks.userId }),
+  useAuthStore: (selector: (state: { userId: string | null; loading: boolean }) => unknown) =>
+    selector({
+      userId: mocks.userId,
+      loading: mocks.authLoading,
+    }),
+}));
+
+vi.mock('@/features/synchronization/use-sync-store', () => ({
+  useSyncStore: (
+    selector: (state: { isSynchronized: boolean; isSynchronizing: boolean }) => unknown,
+  ) =>
+    selector({
+      isSynchronized: mocks.isSynchronized,
+      isSynchronizing: mocks.isSynchronizing,
+    }),
 }));
 
 vi.mock('@/database/models/user-items', () => ({
@@ -38,16 +54,20 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 
-import SimulateDataButton from '@/features/auth/SimulateDataButton';
+import SimulateDataButton from '@/features/synchronization/SimulateDataButton';
 
 describe('SimulateDataButton', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
     mocks.userId = 'u1';
+    mocks.authLoading = false;
+    mocks.isSynchronized = true;
+    mocks.isSynchronizing = false;
     mocks.simulateData.mockResolvedValue(200);
   });
 
-  it('calls simulateData and shows success toast', async () => {
+  it('calls simulateData and stores simulated state on success', async () => {
     render(<SimulateDataButton />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Simulovat data' }));
@@ -56,6 +76,8 @@ describe('SimulateDataButton', () => {
       expect(mocks.simulateData).toHaveBeenCalledWith('u1');
       expect(mocks.showToast).toHaveBeenCalledWith('Data byla úspěšně simulována.', 'success');
     });
+
+    expect(localStorage.getItem('simulate-data-u1')).toBe(JSON.stringify(true));
   });
 
   it('shows error toast and logs error when simulateData fails', async () => {
@@ -69,10 +91,12 @@ describe('SimulateDataButton', () => {
       expect(mocks.showToast).toHaveBeenCalledWith('Chyba při simulaci dat.', 'error');
       expect(mocks.reportError).toHaveBeenCalledWith('Simulate data failed', error);
     });
+
+    expect(localStorage.getItem('simulate-data-u1')).toBe(JSON.stringify(false));
   });
 
   it('does nothing when user is missing', async () => {
-    mocks.userId = '';
+    mocks.userId = null;
 
     render(<SimulateDataButton />);
     fireEvent.click(screen.getByRole('button', { name: 'Simulovat data' }));
@@ -81,5 +105,37 @@ describe('SimulateDataButton', () => {
       expect(mocks.simulateData).not.toHaveBeenCalled();
       expect(mocks.showToast).not.toHaveBeenCalled();
     });
+  });
+
+  it('is disabled until sync completes', () => {
+    mocks.isSynchronized = false;
+
+    render(<SimulateDataButton />);
+
+    expect(screen.getByRole('button', { name: 'Simulovat data' }).disabled).toBe(true);
+  });
+
+  it('is disabled while auth is loading', () => {
+    mocks.authLoading = true;
+
+    render(<SimulateDataButton />);
+
+    expect(screen.getByRole('button', { name: 'Simulovat data' }).disabled).toBe(true);
+  });
+
+  it('is disabled while synchronization is in progress', () => {
+    mocks.isSynchronizing = true;
+
+    render(<SimulateDataButton />);
+
+    expect(screen.getByRole('button', { name: 'Simulovat data' }).disabled).toBe(true);
+  });
+
+  it('is disabled after the current user has already simulated data', () => {
+    localStorage.setItem('simulate-data-u1', JSON.stringify(true));
+
+    render(<SimulateDataButton />);
+
+    expect(screen.getByRole('button', { name: 'Simulovat data' }).disabled).toBe(true);
   });
 });

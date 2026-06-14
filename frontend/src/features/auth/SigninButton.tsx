@@ -1,32 +1,39 @@
 import { type JSX } from 'react';
 
 type SigninButtonProps = Readonly<{
-  isSubmitting: boolean;
   onClick: () => void;
   title: string;
   label: string;
-  loadingLabel: string;
+  signinLabel?: string;
+  isSignin?: boolean;
+  disabled?: boolean;
   className?: string;
 }>;
 
 export default function SigninButton({
-  isSubmitting,
   onClick,
   title,
   label,
-  loadingLabel,
+  signinLabel,
   className,
-}: SigninButtonProps): JSX.Element {
+  disabled = false,
+  isSignin = false,
+}: SigninButtonProps): JSX.Element | null {
+  const disabledClass =
+    disabled || isSignin
+      ? 'cursor-not-allowed bg-gray-400'
+      : 'hover:bg-signin-button-hover focus-visible:bg-signin-button-hover bg-signin-button';
+
   return (
-    <div className={`relative w-full ${className}`}>
+    <div className={`relative flex w-full flex-col gap-2 ${className}`}>
       <button
         type="button"
         onClick={onClick}
-        className="font-body h-button bg-signin-button hover:bg-signin-button-hover focus-visible:bg-signin-button-hover w-full text-base font-medium text-black"
+        className={`font-body h-button w-full text-base font-medium text-black ${disabledClass}`}
         title={title}
-        disabled={isSubmitting}
+        disabled={disabled || isSignin}
       >
-        {isSubmitting ? loadingLabel : label}
+        {isSignin ? signinLabel : label}
       </button>
     </div>
   );

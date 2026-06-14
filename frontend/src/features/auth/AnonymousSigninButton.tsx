@@ -58,11 +58,11 @@ export default function AnonymousSigninButton(): JSX.Element {
 
   return (
     <SigninButton
-      isSubmitting={isSubmitting}
       onClick={() => setShowCaptcha(true)}
       title={TEXTS.anonymousSigninTooltip}
       label={TEXTS.anonymousSigninButton}
-      loadingLabel={TEXTS.anonymousSigninLoading}
+      signinLabel={TEXTS.anonymousSigninLoading}
+      isSignin={isSubmitting}
     />
   );
 }

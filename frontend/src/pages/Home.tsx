@@ -7,14 +7,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import Notification from '@/components/UI/Notification';
 import '@/styles/home.css';
 import { InstallPWAButton } from '@/features/pwa/InstallPwaButton';
-import { useSyncWarningStore } from '@/features/sync/use-sync-warning';
+import { useSyncStore } from '@/features/synchronization/use-sync-store';
 import { ROUTES } from '@/config/routes.config';
 import GoogleAuthButton from '@/features/auth/GoogleAuthButton';
 import AnonymousSigninButton from '@/features/auth/AnonymousSigninButton';
 import ConvertAnonymousUserButton from '@/features/auth/ConvertAnonymousUserButton';
 import PropertyView from '@/components/UI/PropertyView';
 import PracticeOverviewButton from '@/features/practice-overview/PracticeOverviewButton';
-import SimulateDataButton from '@/features/auth/SimulateDataButton';
+import SimulateDataButton from '@/features/synchronization/SimulateDataButton';
 
 /**
  * The Home component renders the main page of the application.
@@ -27,7 +27,7 @@ export default function Home(): JSX.Element {
   const userFullName = useAuthStore((state) => state.userFullName);
   const isAnonymousUser = useAuthStore((state) => state.isAnonymousUser);
   const dailyCount = useUserStore((state) => state.dailyCount);
-  const isSynchronized = useSyncWarningStore((state) => state.isSynchronized);
+  const isSynchronized = useSyncStore((state) => state.isSynchronized);
 
   return (
     <div className="card-width relative flex w-full flex-col justify-between text-center">
@@ -46,7 +46,6 @@ export default function Home(): JSX.Element {
             <div className="mb-8 flex flex-col gap-2">
               <ConvertAnonymousUserButton />
               <SimulateDataButton />
-              <p className="p-2 text-sm">{TEXTS.simulateDataExplanation}</p>
             </div>
           )}
           <PropertyView

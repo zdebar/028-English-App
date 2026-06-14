@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
-import { TEXTS } from '@/locales/cs';
+import { useEffect, useRef } from 'react';
 import config from '@/config/config';
 import AudioRecord from '@/database/models/audio-records';
 import { dataSync, dataSyncOnUnmount } from '@/database/utils/data-sync.utils';
 import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
-import { useSyncWarningStore } from '@/features/sync/use-sync-warning';
+import { TEXTS } from '@/locales/cs';
 import { useToastStore } from '@/features/toast/use-toast-store';
+import { useSyncStore } from './use-sync-store';
 
 /**
  * Hook that manages periodic data synchronization for a user.
@@ -23,25 +23,29 @@ import { useToastStore } from '@/features/toast/use-toast-store';
  * const { loading } = usePeriodicSync(userId);
  */
 export function usePeriodicSync(userId: string | null): { loading: boolean } {
-  const [loading, setLoading] = useState(false);
   const inFlightSync = useRef<Promise<void> | null>(null);
   const isUnmounted = useRef(false);
   const intervalId = useRef<ReturnType<typeof setInterval> | null>(null);
   const initialSyncTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showToast = useToastStore((state) => state.showToast);
-  const setSynchronized = useSyncWarningStore((state) => state.setSynchronized);
+  const resetSyncState = useSyncStore((state) => state.resetSyncState);
+  const setSynchronized = useSyncStore((state) => state.setSynchronized);
+  const setSynchronizing = useSyncStore((state) => state.setSynchronizing);
+  const isSynchronizing = useSyncStore((state) => state.isSynchronizing);
 
   useEffect(() => {
     if (!userId) {
+      resetSyncState();
       return;
     }
 
     const activeUserId = userId;
     isUnmounted.current = false;
+    setSynchronizing(true);
 
     const performSync = async () => {
-      setLoading(true);
+      setSynchronizing(true);
       try {
         await dataSync(activeUserId);
         const audioSummary = await AudioRecord.syncFromRemote();
@@ -65,14 +69,14 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
         reportError('Data synchronization failed', error);
       } finally {
         if (!isUnmounted.current) {
-          setLoading(false);
+          setSynchronizing(false);
         }
       }
     };
 
     const runSync = async () => {
       // Reuse ongoing sync promise to avoid overlapping synchronization calls.
-      if (inFlightSync.current) {
+      if (inFlightSync.current !== null) {
         await inFlightSync.current;
         return;
       }
@@ -91,7 +95,9 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
     initialSyncTimeoutId.current = globalThis.setTimeout(() => {
       runSync();
     }, 3000);
-    intervalId.current = setInterval(runSync, config.sync.periodicSyncInterval);
+    intervalId.current = setInterval(() => {
+      runSync();
+    }, config.sync.periodicSyncInterval);
 
     return () => {
       isUnmounted.current = true;
@@ -106,11 +112,12 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
         intervalId.current = null;
       }
 
+      resetSyncState();
       dataSyncOnUnmount(activeUserId).catch((error) => {
         reportError('Unmount synchronization failed', error);
       });
     };
-  }, [setSynchronized, showToast, userId]);
+  }, [resetSyncState, setSynchronizing, setSynchronized, showToast, userId]);
 
-  return { loading };
+  return { loading: isSynchronizing };
 }

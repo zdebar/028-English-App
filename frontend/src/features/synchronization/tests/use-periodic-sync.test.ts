@@ -1,5 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { useSyncStore } from '@/features/synchronization/use-sync-store';
 
 const mocks = vi.hoisted(() => ({
   dataSync: vi.fn(),
@@ -48,12 +49,16 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 
-import { usePeriodicSync } from '@/database/hooks/use-periodic-sync';
+import { usePeriodicSync } from '@/features/synchronization/use-periodic-sync';
 
 describe('usePeriodicSync', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
+    useSyncStore.setState({
+      isSynchronized: false,
+      isSynchronizing: false,
+    });
 
     mocks.dataSync.mockResolvedValue(undefined);
     mocks.syncFromRemote.mockResolvedValue({ total: 2, success: 2, failed: 0 });
@@ -73,6 +78,8 @@ describe('usePeriodicSync', () => {
   it('runs deferred sync and shows success toast when sync succeeds', async () => {
     const { unmount } = renderHook(() => usePeriodicSync('u1'));
 
+    expect(useSyncStore.getState().isSynchronizing).toBe(true);
+
     await act(async () => {
       await vi.advanceTimersByTimeAsync(3000);
     });
@@ -81,6 +88,8 @@ describe('usePeriodicSync', () => {
     expect(mocks.syncFromRemote).toHaveBeenCalled();
     expect(mocks.showToast).toHaveBeenCalledWith('Sync success', 'success');
     expect(mocks.removeOrphaned).toHaveBeenCalled();
+    expect(useSyncStore.getState().isSynchronized).toBe(true);
+    expect(useSyncStore.getState().isSynchronizing).toBe(false);
 
     unmount();
   });
@@ -99,6 +108,8 @@ describe('usePeriodicSync', () => {
       'Data synchronization failed',
       expect.any(Error),
     );
+    expect(useSyncStore.getState().isSynchronized).toBe(false);
+    expect(useSyncStore.getState().isSynchronizing).toBe(false);
 
     unmount();
   });
@@ -109,5 +120,7 @@ describe('usePeriodicSync', () => {
     unmount();
 
     expect(mocks.dataSyncOnUnmount).toHaveBeenCalledWith('u1');
+    expect(useSyncStore.getState().isSynchronized).toBe(false);
+    expect(useSyncStore.getState().isSynchronizing).toBe(false);
   });
 });

@@ -4,7 +4,7 @@ import { useArray } from '@/hooks/use-array';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useMemo, useState } from 'react';
 import { compareCzechStrings, filterSortedWords, type DisplayField } from './vocabulary.utils';
-import { useLocalStorageSync } from '@/hooks/user-local-storage-sync';
+import { useLocalStorageSync } from '@/hooks/use-local-storage-sync';
 
 const INITIAL_VISIBLE_COUNT = config.vocabulary.itemsPerPage;
 const SEARCH_KEY = 'vocabulary_search_term';

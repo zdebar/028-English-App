@@ -48,11 +48,11 @@ export default function ConvertAnonymousUserButton({ className }: ConvertButtonP
   return (
     <SigninButton
       className={className}
-      isSubmitting={isSubmitting}
+      disabled={isSubmitting}
       onClick={convertAnonymousUser}
       title={TEXTS.convertAnonymousButtonTooltip}
       label={TEXTS.convertAnonymousButton}
-      loadingLabel={TEXTS.convertAnonymousLoading}
+      disabledLabel={TEXTS.convertAnonymousLoading}
     />
   );
 }

@@ -1,7 +1,7 @@
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useLocalStorageSync } from '../user-local-storage-sync';
+import { useLocalStorageSync } from '../use-local-storage-sync';
 
 describe('useLocalStorageSync', () => {
   beforeEach(() => {
@@ -52,5 +52,21 @@ describe('useLocalStorageSync', () => {
     expect(localStorage.getItem('term-2')).toBe(JSON.stringify('another'));
 
     expect(setItemSpy).toHaveBeenCalled();
+  });
+
+  it('reloads stored value when the storage key changes', async () => {
+    const { result, rerender } = renderHook(({ key, value }) => useLocalStorageSync(key, value), {
+      initialProps: { key: 'term-1', value: 'first' },
+    });
+
+    expect(result.current[0]).toBe('first');
+
+    localStorage.setItem('term-2', JSON.stringify('saved-for-second-key'));
+
+    rerender({ key: 'term-2', value: 'second' });
+
+    await waitFor(() => {
+      expect(result.current[0]).toBe('saved-for-second-key');
+    });
   });
 });

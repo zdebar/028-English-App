@@ -3,7 +3,7 @@ import Notification from '@/components/UI/Notification';
 import Footer from '@/components/Layout/Footer';
 import Header from '@/components/Layout/Header';
 import ProtectedLayout from '@/components/utils/protected-laout';
-import { usePeriodicSync } from '@/database/hooks/use-periodic-sync';
+import { usePeriodicSync } from '@/features/synchronization/use-periodic-sync';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { GoogleAnalytics } from '@/features/analytics/GoogleAnalytics';
 import { reportError } from '@/features/logging/monitoring-handler';
@@ -33,9 +33,7 @@ import { useAudioLoader } from './features/audio/use-audio-loader';
 export default function App() {
   const userId = useAuthStore((state) => state.userId);
   const initializeAuth = useAuthStore((state) => state.initializeAuth);
-  const authLoading = useAuthStore((state) => state.loading);
   const showToast = useToastStore((state) => state.showToast);
-  const hideToast = useToastStore((state) => state.hideToast);
   const location = useLocation();
 
   useEffect(() => {
@@ -51,18 +49,8 @@ export default function App() {
   useAudioLoader(userId);
   useUserStoreSync(userId);
   useThemeLoader(userId);
-  const { loading: syncLoading } = usePeriodicSync(userId);
+  usePeriodicSync(userId);
   useDailyStatsReset(userId);
-
-  const loading = authLoading || syncLoading;
-
-  useEffect(() => {
-    if (loading) {
-      showToast(TEXTS.syncLoadingText, 'info', true);
-    } else {
-      hideToast();
-    }
-  }, [hideToast, loading, showToast]);
 
   return (
     <>
