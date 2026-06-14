@@ -27,7 +27,7 @@ export default function Home(): JSX.Element {
   const userFullName = useAuthStore((state) => state.userFullName);
   const isAnonymousUser = useAuthStore((state) => state.isAnonymousUser);
   const dailyCount = useUserStore((state) => state.dailyCount);
-  const isSynchronized = useSyncStore((state) => state.isSynchronized);
+  const isSyncError = useSyncStore((state) => state.isSyncError);
 
   return (
     <div className="card-width relative flex w-full flex-col justify-between text-center">
@@ -62,7 +62,7 @@ export default function Home(): JSX.Element {
             ariaLabel={TEXTS.practiceOverviewOpen}
             helpText={TEXTS.starsToday}
           />
-          {!isSynchronized && (
+          {isSyncError && (
             <p className="text-error-light dark:text-error-dark px-4 pt-2 text-left text-sm">
               {TEXTS.syncWarning}
             </p>

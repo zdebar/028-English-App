@@ -32,6 +32,7 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
   const resetSyncState = useSyncStore((state) => state.resetSyncState);
   const setSynchronized = useSyncStore((state) => state.setSynchronized);
   const setSynchronizing = useSyncStore((state) => state.setSynchronizing);
+  const setSyncError = useSyncStore((state) => state.setSyncError);
   const isSynchronizing = useSyncStore((state) => state.isSynchronizing);
 
   useEffect(() => {
@@ -63,9 +64,11 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
 
         showToast(TEXTS.syncSuccessToast, 'success');
         setSynchronized(true);
+        setSyncError(false);
       } catch (error) {
         showToast(TEXTS.syncErrorToast, 'error');
         setSynchronized(false);
+        setSyncError(true);
         reportError('Data synchronization failed', error);
       } finally {
         if (!isUnmounted.current) {
