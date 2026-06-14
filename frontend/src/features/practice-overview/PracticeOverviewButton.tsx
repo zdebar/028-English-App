@@ -23,7 +23,7 @@ export default function PracticeOverviewButton({
       <div className="flex justify-center pt-2" title={ariaLabel}>
         <button
           type="button"
-          className="home-star-button relative mb-2 inline-flex items-center justify-center pt-1 text-center hover:border-current focus:outline-none"
+          className="home-star-button relative mb-2 inline-flex cursor-pointer items-center justify-center pt-1 text-center hover:border-current focus:outline-none"
           aria-label={ariaLabel}
           onClick={onClick}
         >

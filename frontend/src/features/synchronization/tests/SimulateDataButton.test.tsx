@@ -150,6 +150,6 @@ describe('SimulateDataButton', () => {
 
     render(<SimulateDataButton />);
 
-    expect(getSimulateButton().disabled).toBe(true);
+    expect(screen.queryByRole('button', { name: 'Simulovat data' })).toBeNull();
   });
 });
