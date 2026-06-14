@@ -23,6 +23,12 @@
   right: 16px;
 }
 
+.help-bottom-left {
+  position: absolute;
+  bottom: -0px;
+  left: 16px;
+}
+
 @media (max-height: 400px) {
   .help-btn-pos {
     bottom: 0px;
