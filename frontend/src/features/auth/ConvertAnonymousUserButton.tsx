@@ -52,7 +52,8 @@ export default function ConvertAnonymousUserButton({ className }: ConvertButtonP
       onClick={convertAnonymousUser}
       title={TEXTS.convertAnonymousButtonTooltip}
       label={TEXTS.convertAnonymousButton}
-      disabledLabel={TEXTS.convertAnonymousLoading}
+      signinLabel={TEXTS.convertAnonymousLoading}
+      isSignin={isSubmitting}
     />
   );
 }

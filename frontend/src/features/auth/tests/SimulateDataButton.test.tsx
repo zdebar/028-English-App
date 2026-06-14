@@ -1,15 +1,29 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const mocks = vi.hoisted(() => ({
-  userId: 'u1',
-  authLoading: false,
-  isSynchronized: true,
-  isSynchronizing: false,
-  simulateData: vi.fn(),
-  showToast: vi.fn(),
-  reportError: vi.fn(),
-}));
+const mocks = vi.hoisted(
+  (): {
+    userId: string | null;
+    authLoading: boolean;
+    isSynchronized: boolean;
+    isSynchronizing: boolean;
+    simulateData: ReturnType<typeof vi.fn>;
+    showToast: ReturnType<typeof vi.fn>;
+    reportError: ReturnType<typeof vi.fn>;
+  } => ({
+    userId: 'u1',
+    authLoading: false,
+    isSynchronized: true,
+    isSynchronizing: false,
+    simulateData: vi.fn(),
+    showToast: vi.fn(),
+    reportError: vi.fn(),
+  }),
+);
+
+function getSimulateButton(): HTMLButtonElement {
+  return screen.getByRole('button', { name: 'Simulovat data' }) as HTMLButtonElement;
+}
 
 vi.mock('@/features/auth/use-auth-store', () => ({
   useAuthStore: (selector: (state: { userId: string | null; loading: boolean }) => unknown) =>
@@ -31,7 +45,8 @@ vi.mock('@/features/synchronization/use-sync-store', () => ({
 
 vi.mock('@/database/models/user-items', () => ({
   default: {
-    simulateData: (...args: unknown[]) => mocks.simulateData(...args),
+    simulateData: (...args: unknown[]) =>
+      (mocks.simulateData as (...args: unknown[]) => unknown)(...args),
   },
 }));
 
@@ -41,7 +56,8 @@ vi.mock('@/features/toast/use-toast-store', () => ({
 }));
 
 vi.mock('@/features/logging/monitoring-handler', () => ({
-  reportError: (...args: unknown[]) => mocks.reportError(...args),
+  reportError: (...args: unknown[]) =>
+    (mocks.reportError as (...args: unknown[]) => unknown)(...args),
 }));
 
 vi.mock('@/locales/cs', () => ({
@@ -110,7 +126,7 @@ describe('SimulateDataButton', () => {
 
     render(<SimulateDataButton />);
 
-    expect(screen.getByRole('button', { name: 'Simulovat data' }).disabled).toBe(true);
+    expect(getSimulateButton().disabled).toBe(true);
   });
 
   it('is disabled while auth is loading', () => {
@@ -118,7 +134,7 @@ describe('SimulateDataButton', () => {
 
     render(<SimulateDataButton />);
 
-    expect(screen.getByRole('button', { name: 'Simulovat data' }).disabled).toBe(true);
+    expect(getSimulateButton().disabled).toBe(true);
   });
 
   it('is disabled while synchronization is in progress', () => {
@@ -126,7 +142,7 @@ describe('SimulateDataButton', () => {
 
     render(<SimulateDataButton />);
 
-    expect(screen.getByRole('button', { name: 'Simulovat data' }).disabled).toBe(true);
+    expect(getSimulateButton().disabled).toBe(true);
   });
 
   it('is disabled after the current user has already simulated data', () => {
@@ -134,6 +150,6 @@ describe('SimulateDataButton', () => {
 
     render(<SimulateDataButton />);
 
-    expect(screen.getByRole('button', { name: 'Simulovat data' }).disabled).toBe(true);
+    expect(getSimulateButton().disabled).toBe(true);
   });
 });

@@ -35,7 +35,7 @@ export default function SimulateDataButton(): JSX.Element | null {
     }
   }, [isDisabled, isLoading, setHasSimulatedData, showToast, userId]);
 
-  if (!userId) return null;
+  if (!userId || hasSimulatedData) return null;
 
   return (
     <>
