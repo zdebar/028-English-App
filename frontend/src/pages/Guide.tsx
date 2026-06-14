@@ -1,13 +1,14 @@
 import type { JSX } from 'react';
 import { Screenshot } from '@/components/UI/Screenshot';
 
-
 /**
  * A React component that renders the Grammar overview page.
  *
  * @returns A JSX element containing the GrammarOverview component.
  */
 export default function Guide(): JSX.Element {
+
+
   return (
     <div className="guide card-width overflow-x-hidden">
       <h1 className="text-center">Návod</h1>
@@ -36,7 +37,7 @@ export default function Guide(): JSX.Element {
       <section>
         <h2>Neodhalená kartička</h2>
         <Screenshot
-          src={`${import.meta.env.BASE_URL}/screenshots/not-revealed`}
+          src={`${import.meta.env.BASE_URL}screenshots/not-revealed`}
           alt="Ukázka kartičky před odhalením"
         />
         <p>
@@ -58,7 +59,7 @@ export default function Guide(): JSX.Element {
       <section>
         <h2>Odhalená kartička</h2>
         <Screenshot
-          src={`${import.meta.env.BASE_URL}/screenshots/revealed`}
+          src={`${import.meta.env.BASE_URL}screenshots/revealed`}
           alt="Ukázka kartičky po odhalení"
         />
         <p>
@@ -80,7 +81,7 @@ export default function Guide(): JSX.Element {
       <section>
         <h2>Profil</h2>
         <Screenshot
-          src={`${import.meta.env.BASE_URL}/screenshots/profile`}
+          src={`${import.meta.env.BASE_URL}screenshots/profile`}
           alt="Ukázka profilu uživatele"
         />
         <p>
