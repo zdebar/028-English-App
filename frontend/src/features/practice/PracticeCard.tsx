@@ -79,14 +79,14 @@ export default function PracticeCard() {
   let audioStatusMessage = null;
 
   if (audioLoading) {
-    audioStatusMessage = <DelayedNotification message={TEXTS.loadingAudio} timeDelay={500} />;
+    audioStatusMessage = <DelayedNotification message={TEXTS.loadingAudio} />;
   } else if (audioError) {
     audioStatusMessage = <p className="px-2">{TEXTS.noAudio}</p>;
   }
 
   if (!currentItem) {
     return (
-      <DelayedNotification timeDelay={500}>
+      <DelayedNotification>
         <p>{TEXTS.nothingToPractice}</p>
         <p>{TEXTS.tryAgainLater}</p>
       </DelayedNotification>
