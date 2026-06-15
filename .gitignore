@@ -9,3 +9,4 @@ scripts/utils/__pycache__/
 
 supabase/
 node_modules/
+test_result.txt

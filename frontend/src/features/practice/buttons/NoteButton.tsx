@@ -1,5 +1,6 @@
 import InfoIcon from '@/components/UI/icons/InfoIcon';
 import HelpText from '@/features/help/HelpText';
+import * as LOCALES from '@/locales/cs';
 import type { MouseEvent } from 'react';
 
 type NoteButtonProps = Readonly<{
@@ -9,10 +10,12 @@ type NoteButtonProps = Readonly<{
 }>;
 
 export default function NoteButton({ onClick, title, className = '' }: NoteButtonProps) {
+  const noteAriaLabel = LOCALES.ARIA_TEXTS?.note ?? 'note';
+
   return (
     <button
       type="button"
-      aria-label="note"
+      aria-label={noteAriaLabel}
       title={title}
       onClick={onClick}
       className={`note-btn-pos absolute mr-2 cursor-pointer self-end p-4 ${className}`}

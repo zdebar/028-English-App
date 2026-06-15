@@ -30,6 +30,10 @@
     @apply min-w-card max-w-card w-full flex flex-col justify-start;
   }
 
+  .screenshot-figure {
+    max-width: var(--max-width-screenshot);
+  }
+
   /** SCREEN SIZE
   - same as header.module.css media queries
   - short: max-height: 460px - splits header into sides, pushes main up
@@ -63,6 +67,83 @@
 
   .privacy-policy h1,h2{
     @apply font-bold;
+  }
+
+  /** Star progress styles */
+  .star-empty-border {
+    color: var(--color-star-empty-border-light);
+  }
+
+  .dark .star-empty-border {
+    color: var(--color-star-empty-border-dark);
+  }
+
+  .star-empty-fill {
+    color: var(--color-star-empty-fill-light);
+  }
+
+  .dark .star-empty-fill {
+    color: var(--color-star-empty-fill-dark);
+  }
+
+  .star-fill-bronze {
+    color: var(--color-star-bronze-light);
+  }
+
+  .dark .star-fill-bronze {
+    color: var(--color-star-bronze-dark);
+  }
+
+  .star-fill-silver {
+    color: var(--color-star-silver-light);
+  }
+
+  .dark .star-fill-silver {
+    color: var(--color-star-silver-dark);
+  }
+
+  .star-fill-gold {
+    color: var(--color-star-gold-light);
+  }
+
+  .dark .star-fill-gold {
+    color: var(--color-star-gold-dark);
+  }
+
+  .star-badge {
+    @apply z-40 absolute -top-1 inline-flex min-h-4 min-w-4 items-center justify-center rounded-full border border-current px-1 leading-none font-semibold shadow-sm;
+    left: var(--space-star-badge-left);
+    font-size: var(--size-star-badge-font);
+  }
+
+  .star-badge-bronze {
+    color: var(--color-star-bronze-badge-text-light);
+    background-color: var(--color-star-bronze-badge-bg-light);
+  }
+
+  .dark .star-badge-bronze {
+    color: var(--color-star-bronze-badge-text-dark);
+    background-color: var(--color-star-bronze-badge-bg-dark);
+  }
+
+  .star-badge-silver {
+    color: var(--color-star-silver-badge-text-light);
+    background-color: var(--color-star-silver-badge-bg-light);
+  }
+
+  .dark .star-badge-silver {
+    color: var(--color-star-silver-badge-text-dark);
+    background-color: var(--color-star-silver-badge-bg-dark);
+  }
+
+  .star-badge-gold {
+    color: var(--color-star-gold-badge-text-light);
+    background-color: var(--color-star-gold-badge-bg-light);
+  }
+
+  .dark .star-badge-gold {
+    color: var(--color-star-gold-badge-text-dark);
+    background-color: var(--color-star-gold-badge-bg-dark);
   }
 }
 

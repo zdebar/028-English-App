@@ -18,6 +18,12 @@ import HelpButton from '../help/HelpButton';
 import OverviewCard from '@/components/UI/OverviewCard';
 import VolumeSlider from '../audio/VolumeSlider';
 
+function getPronunciationTitle(pronunciation: string): string {
+  return typeof TEXTS.pronunciationTitle === 'function'
+    ? TEXTS.pronunciationTitle(pronunciation)
+    : `${TEXTS.pronunciation ?? 'Pronunciation'}: ${pronunciation}`;
+}
+
 export default function BlockItemsOverview() {
   const navigate = useNavigate();
   const userId = useAuthStore((state) => state.userId);
@@ -100,7 +106,7 @@ export default function BlockItemsOverview() {
           <ListButton
             key={item.item_id}
             className="px-4"
-            title={`výslovnost: ${item.pronunciation}`}
+            title={getPronunciationTitle(item.pronunciation)}
             onClick={() => {
               if (!item.audio) return;
               playAudio(item.audio);

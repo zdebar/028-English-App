@@ -13,5 +13,5 @@
 /* Fallback visual accent if stroke-width change is ignored */
 .home-star-button:hover svg,
 .home-star-button:focus-visible svg {
-  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.12));
+  filter: drop-shadow(0 0 1px var(--color-home-star-shadow));
 }

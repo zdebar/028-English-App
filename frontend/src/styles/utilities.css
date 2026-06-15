@@ -17,11 +17,11 @@
   }
 
   .color-info {
-    @apply dark:text-new-progress-light text-black;
+    @apply dark:text-new-progress-light text-light;
   }
 
   .color-link {
-    @apply dark:text-new-progress-light text-black hover:underline;
+    @apply dark:text-new-progress-light text-light hover:underline;
   }
 
   /* Z-INDEX LEVELS */

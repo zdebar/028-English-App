@@ -1,5 +1,6 @@
 import { KEYBOARD_LISTENERS } from '@/config/keyboard-listeners.config';
 import { useKey } from '@/hooks/use-key';
+import { ARIA_TEXTS } from '@/locales/cs';
 import { useCallback, type JSX } from 'react';
 import { useOverlayStore } from './use-overlay-store';
 
@@ -22,10 +23,9 @@ export default function OverlayMask(): JSX.Element | null {
 
   return (
     <button
-      className="bg-overlay z-overlay pointer-events-auto fixed inset-0 top-0"
+      className="bg-overlay z-overlay pointer-events-auto fixed inset-0 top-0 m-0 border-none p-0"
       onClick={handleClose}
-      aria-label="Close overlay"
-      style={{ border: 'none', padding: 0, margin: 0 }}
+      aria-label={ARIA_TEXTS.closeOverlay}
     />
   );
 }

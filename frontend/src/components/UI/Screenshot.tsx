@@ -16,7 +16,7 @@ export function Screenshot({ src, alt }: ScreenshotProps): JSX.Element {
   const isDarkMode = useThemeStore((state) => state.theme === 'dark');
 
   return (
-    <figure className="mx-auto my-4 max-w-[320px]">
+    <figure className="screenshot-figure mx-auto my-4">
       <img
         src={isDarkMode ? `${src}.dark.webp` : `${src}.webp`}
         alt={alt}

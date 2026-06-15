@@ -11,8 +11,8 @@ import Card from '@/components/UI/Card';
 
 
 const DIRECTION_OPTIONS: { value: DisplayField; label: string }[] = [
-  { value: 'czech', label: 'Čeština' },
-  { value: 'english', label: 'Angličtina' },
+  { value: 'czech', label: TEXTS.vocabularyCzechOption },
+  { value: 'english', label: TEXTS.vocabularyEnglishOption },
 ];
 
 type VocabularyListProps = Readonly<{

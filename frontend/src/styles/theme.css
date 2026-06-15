@@ -22,6 +22,12 @@
   --color-button-hover: white;
   --color-signin-button: white;
   --color-signin-button-hover: #eaeaea;
+  --color-signin-disabled: #9ca3af;
+  --color-auth-message: black;
+  --color-auth-button-border: white;
+  --color-auth-button-text: black;
+  --color-auth-danger: red;
+  --color-auth-brand: green;
   --color-disabled-light: #f3f4f6;
   --color-disabled-dark: #6b7280;
 
@@ -34,6 +40,8 @@
   --color-indicator: green;
   --color-overlay: rgba(0, 0, 0, 0.2);
   --color-not-revealed-dark: #1a5c82;
+  --color-block-bar-empty: #e5e7eb;
+  --color-home-star-shadow: rgba(0, 0, 0, 0.12);
 
   /** progress bar colors **/
   --color-progress-bg: white;
@@ -51,10 +59,35 @@
   --color-error-dark: #ef4444;
   --color-info-dark: #3b82f6;
 
+  /** star progress colors **/
+  --color-star-empty-border-light: #475569;
+  --color-star-empty-border-dark: #64748b;
+  --color-star-empty-fill-light: #cbd5e1;
+  --color-star-empty-fill-dark: #334155;
+  --color-star-bronze-light: #b87333;
+  --color-star-bronze-dark: #d8a373;
+  --color-star-bronze-badge-bg-light: #f3e0d0;
+  --color-star-bronze-badge-bg-dark: #6f4a2f;
+  --color-star-bronze-badge-text-light: #8c5224;
+  --color-star-bronze-badge-text-dark: #f6d5b5;
+  --color-star-silver-light: #a8adb7;
+  --color-star-silver-dark: #e5e7eb;
+  --color-star-silver-badge-bg-light: #eef2f7;
+  --color-star-silver-badge-bg-dark: #4b5563;
+  --color-star-silver-badge-text-light: #626b79;
+  --color-star-silver-badge-text-dark: #f8fafc;
+  --color-star-gold-light: #d4af37;
+  --color-star-gold-dark: #ffd36b;
+  --color-star-gold-badge-bg-light: #f8edc2;
+  --color-star-gold-badge-bg-dark: #7a5600;
+  --color-star-gold-badge-text-light: #9b6b00;
+  --color-star-gold-badge-text-dark: #fff2b3;
+
   /** LAYOUT DIMENSIONS **/
   --max-width-container: 900px;
   --min-width-card: 320px;
   --max-width-card: 600px;
+  --max-width-screenshot: 320px;
   --min-height-card: 320px;
   --max-height-card: 400px;
 
@@ -68,4 +101,7 @@
   --height-attribute: 1.5rem;
   --size-indicator: 0.75rem;
   --size-icon: 2.5rem;
+  --size-star: 22px;
+  --size-star-badge-font: 10px;
+  --space-star-badge-left: 15px;
 }

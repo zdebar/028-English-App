@@ -9,8 +9,18 @@ import {
   type StarTier,
 } from '@/features/practice-overview/star-progress.utils';
 
-const EMPTY_STAR_BORDER_CLASS = 'text-slate-600 dark:text-slate-500';
-const EMPTY_STAR_FILL_CLASS = 'text-slate-300 dark:text-slate-700';
+const DEFAULT_DAILY_STAR_PROGRESS_LABEL = 'Daily star progress';
+
+function getStarTierAriaLabel(tier: string, index: number, total: number): string {
+  return `${tier} star ${index} of ${total}`;
+}
+
+function getDailyStarProgressLabel(): string {
+  return DEFAULT_DAILY_STAR_PROGRESS_LABEL;
+}
+
+const EMPTY_STAR_BORDER_CLASS = 'star-empty-border';
+const EMPTY_STAR_FILL_CLASS = 'star-empty-fill';
 export const STAR_SIZE = 22;
 const STAR_FILL_TOP = 4.5;
 const STAR_FILL_BOTTOM = 20.54;
@@ -18,19 +28,16 @@ const STAR_FILL_HEIGHT = STAR_FILL_BOTTOM - STAR_FILL_TOP;
 
 const TIER_STYLES: Record<StarTier, { fillClassName: string; badgeClassName: string }> = {
   bronze: {
-    fillClassName: 'text-[#B87333] dark:text-[#D8A373]',
-    badgeClassName:
-      'bg-[#F3E0D0] text-[#8C5224] dark:bg-[#6F4A2F] dark:text-[#F6D5B5] border border-current',
+    fillClassName: 'star-fill-bronze',
+    badgeClassName: 'star-badge-bronze',
   },
   silver: {
-    fillClassName: 'text-[#A8ADB7] dark:text-[#E5E7EB]',
-    badgeClassName:
-      'bg-[#EEF2F7] text-[#626B79] dark:bg-[#4B5563] dark:text-[#F8FAFC] border border-current',
+    fillClassName: 'star-fill-silver',
+    badgeClassName: 'star-badge-silver',
   },
   gold: {
-    fillClassName: 'text-[#D4AF37] dark:text-[#FFD36B]',
-    badgeClassName:
-      'bg-[#F8EDC2] text-[#9B6B00] dark:bg-[#7A5600] dark:text-[#FFF2B3] border border-current',
+    fillClassName: 'star-fill-gold',
+    badgeClassName: 'star-badge-gold',
   },
 };
 
@@ -159,9 +166,7 @@ export function CompactedStar({
     <span className="z-star-stack relative inline-flex items-center justify-center overflow-visible">
       <FullStar className={starClassName} size={size} />
       {showCount && (
-        <span
-          className={`z-star-badge absolute -top-1 left-[15px] inline-flex min-h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-none font-semibold shadow-sm ${badgeClassName}`}
-        >
+        <span className={`star-badge ${badgeClassName}`}>
           {count}
         </span>
       )}
@@ -303,7 +308,7 @@ function DetailedStarTierRow({
         return (
           <span
             key={`${state.activeTier}-${index}`}
-            aria-label={`${state.activeTier} star ${index + 1} of ${starsPerRow}`}
+            aria-label={getStarTierAriaLabel(state.activeTier, index + 1, starsPerRow)}
           >
             {isFilledStar ? (
               <FullStar className={tierStyle.fillClassName} size={size} />
@@ -337,7 +342,7 @@ export default function StarProgressOverview({
   const showBronzeRow = state.completedTiers === 0;
 
   return (
-    <div className="flex flex-col items-center gap-2" aria-label="Daily star progress">
+    <div className="flex flex-col items-center gap-2" aria-label={getDailyStarProgressLabel()}>
       {showBronzeRow ? (
         <DetailedStarTierRow count={count} countPerStar={chunkSize} starsPerRow={starsPerRow} />
       ) : (

@@ -17,7 +17,7 @@ export default function HelpText(
   return (
     <p
       {...props}
-      className={`font-headings z-help-text pointer-events-none absolute overflow-hidden px-2 text-xl font-bold text-ellipsis whitespace-nowrap text-white ${props.className}`}
+      className={`font-headings z-help-text pointer-events-none absolute overflow-hidden px-2 text-xl font-bold text-ellipsis whitespace-nowrap text-help ${props.className}`}
     >
       {props.children}
     </p>
