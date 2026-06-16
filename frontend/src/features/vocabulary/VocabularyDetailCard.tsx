@@ -8,6 +8,10 @@ import { useAudioManager } from '@/features/audio/use-audio-manager';
 import VolumeSlider from '../audio/VolumeSlider';
 import PlayIcon from '@/components/UI/icons/PlayIcon';
 import HelpText from '../help/HelpText';
+import { TableName } from '@/types/table.types';
+import { useEntityByTable } from '../practice/hooks/use-entity-by-table';
+import SimpleOverviewCard from '../practice/SimpleOverviewCard';
+import NoteButton from '@/components/UI/buttons/NoteButton';
 
 const NOT_AVAILABLE = TEXTS.notAvailable;
 const NOT_MASTERED = TEXTS.notMastered;
@@ -48,6 +52,17 @@ export default function VocabularyDetailCard({
   ];
 
   const { playAudio } = useAudioManager(selectedWord?.audio || null);
+
+  const {
+    isVisible: isNoteVisible,
+    entityData: noteData,
+    openEntityById: handleNote,
+    closeEntity: closeNote,
+  } = useEntityByTable(TableName.Notes);
+
+  const noteId = selectedWord?.note_id;
+
+  if (isNoteVisible) return <SimpleOverviewCard data={noteData} onClose={closeNote} />;
 
   return (
     <OverviewCard
@@ -90,7 +105,18 @@ export default function VocabularyDetailCard({
         </button>
         <VolumeSlider className="h-button" />
       </div>
-      <HelpButton className="right-0 -bottom-13.5" />
+      <div className="absolute right-0 -bottom-13.5 flex flex-row items-center">
+        <HelpButton />
+        {!noteId && (
+          <NoteButton
+            title={TEXTS.tooltipNotes}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNote(1);
+            }}
+          />
+        )}
+      </div>
     </OverviewCard>
   );
 }

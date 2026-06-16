@@ -19,7 +19,7 @@ import KnownButton from './buttons/KnownButton';
 import MasterItemButton from './buttons/MasterItemButton';
 import PlayAudioButton from './buttons/PlayAudioButton';
 import RepeatButton from './buttons/RepeatButton';
-import NoteButton from './buttons/NoteButton';
+import NoteButton from '../../components/UI/buttons/NoteButton';
 import { useEntityByTable } from './hooks/use-entity-by-table';
 import { usePracticeStars } from './hooks/use-practice-stars';
 import DelayedNotification from '@/components/UI/DelayedNotification';
@@ -199,10 +199,11 @@ export default function PracticeCard() {
           )}
         </div>
 
-        <HelpButton className="help-btn-pos self-end" />
+        <HelpButton className="help-btn-pos absolute self-end" />
         {showNoteButton && (
           <NoteButton
             title={TEXTS.tooltipNotes}
+            className="absolute"
             onClick={(e) => {
               e.stopPropagation();
               handleNote(noteId);

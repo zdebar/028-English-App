@@ -124,7 +124,7 @@ export default function BlockItemsOverview() {
         ))}
       </DataState>
       <VolumeSlider className="h-button absolute -bottom-13 left-0" />
-      {items && items.length > 0 && <HelpButton className="right-0 -bottom-13" />}
+      {items && items.length > 0 && <HelpButton className="absolute right-0 -bottom-13" />}
     </OverviewCard>
   );
 }

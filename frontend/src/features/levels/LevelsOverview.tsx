@@ -78,7 +78,7 @@ export default function LevelsOverview() {
         <HelpText className="top-20 right-2">
           {showMastered ? TEXTS.levelsMasteredHelp : TEXTS.levelsStartedHelp}
         </HelpText>
-        <HelpButton className="right-0 -bottom-14" />
+        <HelpButton className="absolute right-0 -bottom-14" />
         <MasteredToggleButton showMastered={showMastered} setShowMastered={setShowMastered} />
       </DataState>
     </OverviewCard>
