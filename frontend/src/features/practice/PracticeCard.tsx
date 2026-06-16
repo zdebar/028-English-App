@@ -199,11 +199,11 @@ export default function PracticeCard() {
           )}
         </div>
 
-        <HelpButton className="help-btn-pos absolute self-end" />
+        <HelpButton className="pos-bottom-right-control self-end" />
         {showNoteButton && (
           <NoteButton
             title={TEXTS.tooltipNotes}
-            className="absolute"
+            className="pos-bottom-left-control"
             onClick={(e) => {
               e.stopPropagation();
               handleNote(noteId);

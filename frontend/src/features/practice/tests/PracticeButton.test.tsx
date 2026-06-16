@@ -52,7 +52,7 @@ describe('PracticeButton', () => {
       <PracticeButton
         icon={<span />}
         label="Play"
-        className="help-bottom-right"
+        className="pos-help-bottom-right"
         onClick={handleClick}
         disabled={false}
       />,

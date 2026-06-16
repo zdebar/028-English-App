@@ -65,11 +65,15 @@ export default function Dashboard({ className = '' }: DashboardProps) {
           lessonCount={lesson.totalCount ?? 1}
         />
       ))}
-      <HelpButton className="absolute right-0 -bottom-14.5" />
+      <HelpButton className="pos-bottom-right-control" />
       <HelpText className="right-2 -bottom-6">
         {showMastered ? TEXTS.masteredTodayHint : TEXTS.startedTodayHint}
       </HelpText>
-      <MasteredToggleButton showMastered={showMastered} setShowMastered={setShowMastered} />
+      <MasteredToggleButton
+        showMastered={showMastered}
+        setShowMastered={setShowMastered}
+        className="pos-mastered-toggle"
+      />
     </section>
   );
 }

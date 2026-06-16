@@ -8,7 +8,7 @@ export default function KnownButton({ onClick, disabled, children }: PracticeBut
     <PracticeButton
       icon={<RightArrowIcon />}
       label={TEXTS.known}
-      className="help-bottom-right"
+      className="pos-help-bottom-right"
       onClick={onClick}
       disabled={disabled}
     >

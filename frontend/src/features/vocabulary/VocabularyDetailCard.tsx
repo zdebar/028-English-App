@@ -91,7 +91,7 @@ export default function VocabularyDetailCard({
           ))}
         </div>
       </div>
-      <div className="absolute -bottom-13.5 left-2 flex">
+      <div className="pos-bottom-left-control flex">
         <button
           onClick={() => {
             if (!selectedWord?.audio) return;
@@ -105,17 +105,17 @@ export default function VocabularyDetailCard({
         </button>
         <VolumeSlider className="h-button" />
       </div>
-      <div className="absolute right-0 -bottom-13.5 flex flex-row items-center">
-        <HelpButton />
-        {!noteId && (
+      <div className="pos-bottom-right-control flex items-center gap-2">
+        {noteId && (
           <NoteButton
             title={TEXTS.tooltipNotes}
             onClick={(e) => {
               e.stopPropagation();
-              handleNote(1);
+              handleNote(noteId);
             }}
           />
         )}
+        <HelpButton />
       </div>
     </OverviewCard>
   );

@@ -1,54 +1,57 @@
 /** RESPONSIVE STYLES **/
 
-/* HELP AND NOTE BUTTON */
-.help-btn-pos {
+/* CONTROL POSITIONS */
+.pos-bottom-right-control {
   position: absolute;
   bottom: -54px;
   right: 0px;
+}
+
+.pos-bottom-left-control {
+  position: absolute;
+  bottom: -54px;
+  left: 0px;
+}
+
+.pos-mastered-toggle {
+  position: absolute;
+  bottom: -36px;
+  left: 16px;
 }
 
 .help-btn-margin {
   margin-bottom: 60px;
 }
 
-.help-top-left {
+.pos-help-top-left {
   position: absolute;
   top: -0px;
   left: 16px;
 }
 
-.help-bottom-right {
+.pos-help-bottom-right {
   position: absolute;
   bottom: -0px;
   right: 16px;
 }
 
-.help-bottom-left {
+.pos-help-bottom-left {
   position: absolute;
   bottom: -0px;
   left: 16px;
 }
 
 @media (max-height: 400px) {
-  .help-btn-pos {
+  .pos-bottom-right-control {
     bottom: 0px;
     right: -54px;
   }
-  .help-btn-margin {
-    margin-bottom: 0px;
-  }
-}
-
-.note-btn-pos {
-  position: absolute;
-  bottom: -54px;
-  left: 0px;
-}
-
-@media (max-height: 400px)  {
-  .note-btn-pos {
+  .pos-bottom-left-control {
     bottom: 0px;
     left: -54px;
+  }
+  .help-btn-margin {
+    margin-bottom: 0px;
   }
 }
 

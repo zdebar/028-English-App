@@ -8,7 +8,7 @@ export default function GrammarButton({ onClick, disabled, children }: PracticeB
     <PracticeButton
       icon={<BookIcon />}
       label={TEXTS.grammar}
-      className="help-top-left"
+      className="pos-help-top-left"
       onClick={onClick}
       disabled={disabled}
     >

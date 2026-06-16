@@ -23,7 +23,7 @@ export default function MasteredToggleButton({
     <>
       <button
         type="button"
-        className={`absolute -bottom-9 left-4 cursor-pointer ${rest.className}`}
+        className={`cursor-pointer ${rest.className ?? ''}`}
         onClick={() => setShowMastered(!showMastered)}
         title={TEXTS.masteredSwitchHelp}
       >
