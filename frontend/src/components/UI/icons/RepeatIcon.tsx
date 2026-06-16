@@ -9,7 +9,7 @@ import type { JSX } from 'react';
  */
 export default function RepeatIcon(props: Readonly<IconProps>): JSX.Element {
   return (
-    <Icon {...props} size={20} strokeWidth={1.5} fillColor="none">
+    <Icon size={20} strokeWidth={1.5} fillColor="none" {...props}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

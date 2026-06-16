@@ -9,7 +9,7 @@ import type { JSX } from 'react';
  */
 export default function VolumeIcon(props: Readonly<IconProps>): JSX.Element {
   return (
-    <Icon size={20} {...props} strokeColor="currentColor">
+    <Icon size={20} strokeColor="currentColor" {...props}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

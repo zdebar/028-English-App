@@ -9,7 +9,7 @@ import type { JSX } from 'react';
  */
 export default function BulbIcon(props: Readonly<IconProps>): JSX.Element {
   return (
-    <Icon {...props} size={22} strokeWidth={1.25}>
+    <Icon size={22} strokeWidth={1.25} {...props}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

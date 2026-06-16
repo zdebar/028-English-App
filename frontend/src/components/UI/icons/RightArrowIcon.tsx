@@ -9,7 +9,7 @@ import type { JSX } from 'react';
  */
 export default function RightArrowIcon(props: Readonly<IconProps>): JSX.Element {
   return (
-    <Icon {...props} size={20} strokeWidth={1.5} fillColor="currentColor">
+    <Icon size={20} strokeWidth={1.5} fillColor="currentColor" {...props}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
     </Icon>
   );

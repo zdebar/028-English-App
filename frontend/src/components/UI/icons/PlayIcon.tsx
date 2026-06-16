@@ -9,7 +9,7 @@ import type { JSX } from 'react';
  */
 export default function PlayIcon(props: Readonly<IconProps>): JSX.Element {
   return (
-    <Icon {...props} strokeWidth={1.25}>
+    <Icon strokeWidth={1.25} {...props}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

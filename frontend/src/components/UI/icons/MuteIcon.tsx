@@ -9,7 +9,7 @@ import type { JSX } from 'react';
  */
 export default function MuteIcon(props: Readonly<IconProps>): JSX.Element {
   return (
-    <Icon {...props} size={20}>
+    <Icon size={20} {...props}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
