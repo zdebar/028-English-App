@@ -16,6 +16,10 @@
     @apply pt-4 text-center text-2xl font-bold;
   }
 
+  .guide h3 {
+    @apply pl-4 ;
+  }
+
   .guide strong {
     @apply pr-4;
   }

@@ -40,19 +40,19 @@ export default function Guide(): JSX.Element {
           src={`${import.meta.env.BASE_URL}screenshots/not-revealed`}
           alt="Ukázka kartičky před odhalením"
         />
+        <h3>Denní pokrok</h3>
         <p>
-          <strong>"Denní pokrok"</strong>
           <span>10 bronzových hvězd po 40 opakováních je doporučené minimální procvičování.</span>
         </p>
+        <h3>Dokončit</h3>
         <p>
-          <strong>"Dokončit"</strong>
           <span>
             Položka se označí jako naučená. Použijte k přeskočení položky, pokud ji již znáte z
             dřívějška.
           </span>
         </p>
+        <h3>Gramatika</h3>
         <p>
-          <strong>"Gramatika"</strong>
           <span>Vysvětlení příslušné gramatiky.</span>
         </p>
       </section>
@@ -62,20 +62,30 @@ export default function Guide(): JSX.Element {
           src={`${import.meta.env.BASE_URL}screenshots/revealed`}
           alt="Ukázka kartičky po odhalení"
         />
+        <h3>Opakovat</h3>
         <p>
-          <strong>"Opakovat"</strong>
           <span>Položka se nabídne k dalšímu procvičování dříve.</span>
         </p>
+        <h3>Znám</h3>
         <p>
-          <strong>"Znám"</strong>
           <span>Položka se nabídne k dalšímu procvičování později.</span>
         </p>
+        <h3>Poznámka</h3>
         <p>
-          <strong>"Poznámka"</strong>
           <span>
             Některé položky mají poznámku, která podrobněji vysvětluje použití daného slovíčka v
             angličtině.
           </span>
+        </p>
+        <h3>Zkratky</h3>
+        <p>
+          <span className="inline-block w-20">zkr.</span>zkrácená varianta
+        </p>
+        <p>
+          <span className="inline-block w-20">sg.</span>jednotné číslo
+        </p>
+        <p>
+          <span className="inline-block w-20">pl.</span>množné číslo
         </p>
       </section>
       <section>
