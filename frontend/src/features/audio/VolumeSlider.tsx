@@ -1,12 +1,24 @@
 import { useState, useRef, useEffect } from 'react';
 import VolumeIcon from '@/components/UI/icons/VolumeIcon';
 import MuteIcon from '@/components/UI/icons/MuteIcon';
+import HalfVolumeIcon from '@/components/UI/icons/HalfVolumeIcon';
 import { ARIA_TEXTS, TEXTS } from '@/locales/cs';
 import { useAudioStore } from './use-audio-store';
 
 type VolumeSliderProps = Readonly<{
   className?: string;
 }>;
+
+function getVolumeIcon(volume: number) {
+  switch (true) {
+    case volume === 0:
+      return <MuteIcon />;
+    case volume <= 0.5:
+      return <HalfVolumeIcon />;
+    default:
+      return <VolumeIcon />;
+  }
+}
 
 /**
  * A component for controlling volume with a slider.
@@ -55,7 +67,7 @@ export default function VolumeSlider({ className = '' }: VolumeSliderProps) {
         disabled={false}
         title={TEXTS.volume}
       >
-        {volume === 0 ? <MuteIcon /> : <VolumeIcon />}
+        {getVolumeIcon(volume)}
       </button>
       {showVolumeSlider && (
         <input
