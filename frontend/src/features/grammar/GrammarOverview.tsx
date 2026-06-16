@@ -1,6 +1,5 @@
 import OverviewCard from '@/components/UI/OverviewCard';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import HelpButton from '@/features/help/HelpButton';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { useCallback } from 'react';
@@ -13,6 +12,7 @@ import UserItem from '@/database/models/user-items';
 import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { DataState } from '@/components/UI/DataState';
+import GrammarDetailCard from './GrammarDetailCard';
 
 /**
  * GrammarOverview component displays a list of started grammar topics for the user.
@@ -89,18 +89,11 @@ export default function GrammarOverview(): JSX.Element {
     );
   }
 
-  // -- GrammarCard view --
   return (
-    <OverviewCard
-      buttonTitle={currentItem?.name}
-      modalTitle={TEXTS.restartGrammarTitle}
-      modalText={TEXTS.restartGrammarDescription}
-      handleReset={handleReset}
+    <GrammarDetailCard
+      grammar={currentItem}
       onClose={() => setCurrentIndex(null)}
-      className="relative"
-    >
-      <div dangerouslySetInnerHTML={{ __html: currentItem?.note || '' }} className="grammar p-4" />
-      <HelpButton className="absolute right-0 -bottom-10.5" />
-    </OverviewCard>
+      onReset={handleReset}
+    />
   );
 }

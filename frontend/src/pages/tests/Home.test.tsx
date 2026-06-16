@@ -73,7 +73,7 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 
-vi.mock('@/components/UI/Dashboard', () => ({
+vi.mock('@/features/dashboard/Dashboard', () => ({
   default: () => <div data-testid="dashboard" />,
 }));
 

@@ -7,7 +7,7 @@ import {
   getStarProgressState,
   getStarTier,
   type StarTier,
-} from '@/features/practice-overview/star-progress.utils';
+} from '@/utils/star-progress.utils';
 
 const DEFAULT_DAILY_STAR_PROGRESS_LABEL = 'Daily star progress';
 

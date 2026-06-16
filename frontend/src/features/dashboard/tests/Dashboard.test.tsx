@@ -53,7 +53,7 @@ vi.mock('@/features/help/HelpText', () => ({
   default: ({ children }: { children: ReactNode }) => <p>{children}</p>,
 }));
 
-vi.mock('@/components/UI/buttons/MasteredToggleButton', () => ({
+vi.mock('@/features/progress/MasteredToggleButton', () => ({
   default: ({
     showMastered,
     setShowMastered,
@@ -76,7 +76,7 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 
-import Dashboard from '@/components/UI/Dashboard';
+import Dashboard from '@/features/dashboard/Dashboard';
 
 describe('Dashboard', () => {
   beforeEach(() => {

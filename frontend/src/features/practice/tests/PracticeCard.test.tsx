@@ -105,12 +105,12 @@ vi.mock('@/features/user-stats/use-user-store', () => ({
     selector({ dailyCount: mocks.dailyCount }),
 }));
 
-vi.mock('@/features/practice/hooks/use-entity-by-table', () => ({
-  useEntityByTable: () => ({
-    isVisible: mocks.grammarVisible,
-    entityData: mocks.grammarData,
-    openEntityById: mocks.handleGrammar,
-    closeEntity: mocks.closeGrammar,
+vi.mock('@/features/grammar/use-grammar-viewer', () => ({
+  useGrammarViewer: () => ({
+    isGrammarVisible: mocks.grammarVisible,
+    grammarData: mocks.grammarData,
+    openGrammar: mocks.handleGrammar,
+    closeGrammar: mocks.closeGrammar,
   }),
 }));
 

@@ -2,7 +2,7 @@ import config from '@/config/config';
 import {
   getCompletedStarCount,
   getCurrentStarProgressCount,
-} from '@/features/practice-overview/star-progress.utils';
+} from '@/utils/star-progress.utils';
 
 type UsePracticeStarsResult = Readonly<{
   starChunk: number;

@@ -1,5 +1,5 @@
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import Dashboard from '@/components/UI/Dashboard';
+import Dashboard from '@/features/dashboard/Dashboard';
 import { useUserStore } from '@/features/user-stats/use-user-store';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';

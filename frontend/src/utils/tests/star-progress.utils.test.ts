@@ -5,7 +5,7 @@ import {
   getCurrentStarProgressCount,
   getStarProgressState,
   getStarTier,
-} from '@/features/practice-overview/star-progress.utils';
+} from '@/utils/star-progress.utils';
 
 describe('star-progress.utils', () => {
   it('returns bronze as the initial tier and partial active progress', () => {

@@ -3,7 +3,7 @@ import BlockBar from '@/components/UI/BlockBar';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import { useUserStore } from '@/features/user-stats/use-user-store';
-import MasteredToggleButton from '@/components/UI/buttons/MasteredToggleButton';
+import MasteredToggleButton from '@/features/progress/MasteredToggleButton';
 import type { LessonOverviewType } from '@/types/generic.types';
 import { getInProgressLessons } from '@/utils/dashboard.utils';
 

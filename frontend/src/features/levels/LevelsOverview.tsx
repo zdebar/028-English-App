@@ -6,7 +6,7 @@ import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import { useUserStore } from '../user-stats/use-user-store';
 import { useLevelsStore } from './use-levels-store';
-import MasteredToggleButton from '@/components/UI/buttons/MasteredToggleButton';
+import MasteredToggleButton from '@/features/progress/MasteredToggleButton';
 import BlockBar from '@/components/UI/BlockBar';
 import { DataState } from '@/components/UI/DataState';
 import OverviewCard from '@/components/UI/OverviewCard';

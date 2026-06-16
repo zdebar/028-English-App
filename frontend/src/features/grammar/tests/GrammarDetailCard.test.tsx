@@ -12,7 +12,13 @@ vi.mock('dompurify', () => ({
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
     noNotesToDisplay: 'No notes',
+    restartGrammarTitle: 'Restart grammar',
+    restartGrammarDescription: 'Restart grammar description',
   },
+}));
+
+vi.mock('@/features/help/HelpButton', () => ({
+  default: () => <div data-testid="help" />,
 }));
 
 vi.mock('@/components/UI/OverviewCard', () => ({
@@ -24,9 +30,9 @@ vi.mock('@/components/UI/OverviewCard', () => ({
   ),
 }));
 
-import GrammarCard from '@/features/practice/SimpleOverviewCard';
+import GrammarDetailCard from '@/features/grammar/GrammarDetailCard';
 
-describe('GrammarCard', () => {
+describe('GrammarDetailCard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     sanitizeMock.mockImplementation((value: string) => value);
@@ -36,8 +42,8 @@ describe('GrammarCard', () => {
     sanitizeMock.mockReturnValue('<b>sanitized</b>');
 
     const { container } = render(
-      <GrammarCard
-        data={{ id: 1, name: 'Articles', note: '<script>x</script>' }}
+      <GrammarDetailCard
+        grammar={{ id: 1, name: 'Articles', note: '<script>x</script>' }}
         onClose={vi.fn()}
       />,
     );
@@ -48,7 +54,7 @@ describe('GrammarCard', () => {
   });
 
   it('renders fallback message when note is missing', () => {
-    render(<GrammarCard data={{ id: 1, name: 'Articles' }} onClose={vi.fn()} />);
+    render(<GrammarDetailCard grammar={{ id: 1, name: 'Articles' }} onClose={vi.fn()} />);
 
     expect(screen.getByText('No notes')).toBeTruthy();
   });

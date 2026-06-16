@@ -7,14 +7,14 @@ import { usePracticeDeck } from './hooks/use-practice-deck';
 import Indicator from '@/components/UI/Indicator';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
-import SimpleOverviewCard from './SimpleOverviewCard';
 import VolumeSlider from '@/features/audio/VolumeSlider';
+import GrammarDetailCard from '@/features/grammar/GrammarDetailCard';
+import { useGrammarViewer } from '@/features/grammar/use-grammar-viewer';
 import NoteDetailCard from '@/features/notes/NoteDetailCard';
 import { useNoteViewer } from '@/features/notes/use-note-viewer';
 
 import Notification from '@/components/UI/Notification';
 import { TEXTS } from '@/locales/cs';
-import { TableName } from '@/types/table.types';
 import GrammarButton from './buttons/GrammarButton';
 import HintButton from './buttons/HintButton';
 import KnownButton from './buttons/KnownButton';
@@ -22,7 +22,6 @@ import MasterItemButton from './buttons/MasterItemButton';
 import PlayAudioButton from './buttons/PlayAudioButton';
 import RepeatButton from './buttons/RepeatButton';
 import NoteButton from '../notes/NoteButton';
-import { useEntityByTable } from './hooks/use-entity-by-table';
 import { usePracticeStars } from './hooks/use-practice-stars';
 import DelayedNotification from '@/components/UI/DelayedNotification';
 import { STAR_SIZE } from '@/components/UI/StarProgress';
@@ -37,11 +36,11 @@ export default function PracticeCard() {
   const userId = useAuthStore((state) => state.userId);
   const dailyCount = useUserStore((state) => state.dailyCount);
   const {
-    isVisible: isGrammarVisible,
-    entityData: grammarData,
-    openEntityById: handleGrammar,
-    closeEntity: closeGrammar,
-  } = useEntityByTable(TableName.Grammar);
+    isGrammarVisible,
+    grammarData,
+    openGrammar,
+    closeGrammar,
+  } = useGrammarViewer();
   const { isNoteVisible, noteData, openNote, closeNote } = useNoteViewer();
 
   const practiceCountToday = dailyCount;
@@ -90,7 +89,7 @@ export default function PracticeCard() {
     );
   }
 
-  if (isGrammarVisible) return <SimpleOverviewCard data={grammarData} onClose={closeGrammar} />;
+  if (isGrammarVisible) return <GrammarDetailCard grammar={grammarData} onClose={closeGrammar} />;
   if (isNoteVisible) return <NoteDetailCard note={noteData} onClose={closeNote} />;
 
   return (
@@ -186,7 +185,7 @@ export default function PracticeCard() {
           ) : (
             <>
               <GrammarButton
-                onClick={() => handleGrammar(grammarId)}
+                onClick={() => openGrammar(grammarId)}
                 disabled={!grammarId || showDirectionChange}
               >
                 {showNewGrammarIndicator && <Indicator className="absolute top-2 right-2" />}
