@@ -106,23 +106,21 @@ vi.mock('@/features/user-stats/use-user-store', () => ({
 }));
 
 vi.mock('@/features/practice/hooks/use-entity-by-table', () => ({
-  useEntityByTable: (tableName: string) => {
-    if (tableName === 'notes') {
-      return {
-        isVisible: mocks.noteVisible,
-        entityData: mocks.noteData,
-        openEntityById: mocks.handleNote,
-        closeEntity: mocks.closeNote,
-      };
-    }
+  useEntityByTable: () => ({
+    isVisible: mocks.grammarVisible,
+    entityData: mocks.grammarData,
+    openEntityById: mocks.handleGrammar,
+    closeEntity: mocks.closeGrammar,
+  }),
+}));
 
-    return {
-      isVisible: mocks.grammarVisible,
-      entityData: mocks.grammarData,
-      openEntityById: mocks.handleGrammar,
-      closeEntity: mocks.closeGrammar,
-    };
-  },
+vi.mock('@/features/notes/use-note-viewer', () => ({
+  useNoteViewer: () => ({
+    isNoteVisible: mocks.noteVisible,
+    noteData: mocks.noteData,
+    openNote: mocks.handleNote,
+    closeNote: mocks.closeNote,
+  }),
 }));
 
 vi.mock('@/features/practice/hooks/use-practice-deck', () => ({

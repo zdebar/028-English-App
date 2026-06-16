@@ -8,10 +8,9 @@ import { useAudioManager } from '@/features/audio/use-audio-manager';
 import VolumeSlider from '../audio/VolumeSlider';
 import PlayIcon from '@/components/UI/icons/PlayIcon';
 import HelpText from '../help/HelpText';
-import { TableName } from '@/types/table.types';
-import { useEntityByTable } from '../practice/hooks/use-entity-by-table';
-import SimpleOverviewCard from '../practice/SimpleOverviewCard';
-import NoteButton from '@/components/UI/buttons/NoteButton';
+import NoteButton from '@/features/notes/NoteButton';
+import NoteDetailCard from '@/features/notes/NoteDetailCard';
+import { useNoteViewer } from '@/features/notes/use-note-viewer';
 
 const NOT_AVAILABLE = TEXTS.notAvailable;
 const NOT_MASTERED = TEXTS.notMastered;
@@ -53,16 +52,11 @@ export default function VocabularyDetailCard({
 
   const { playAudio } = useAudioManager(selectedWord?.audio || null);
 
-  const {
-    isVisible: isNoteVisible,
-    entityData: noteData,
-    openEntityById: handleNote,
-    closeEntity: closeNote,
-  } = useEntityByTable(TableName.Notes);
+  const { isNoteVisible, noteData, openNote, closeNote } = useNoteViewer();
 
   const noteId = selectedWord?.note_id;
 
-  if (isNoteVisible) return <SimpleOverviewCard data={noteData} onClose={closeNote} />;
+  if (isNoteVisible) return <NoteDetailCard note={noteData} onClose={closeNote} />;
 
   return (
     <OverviewCard
@@ -111,7 +105,7 @@ export default function VocabularyDetailCard({
             title={TEXTS.tooltipNotes}
             onClick={(e) => {
               e.stopPropagation();
-              handleNote(noteId);
+              openNote(noteId);
             }}
           />
         )}

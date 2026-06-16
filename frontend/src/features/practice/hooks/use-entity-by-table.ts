@@ -2,7 +2,6 @@ import { useState, useCallback } from 'react';
 import { TableName } from '@/types/table.types';
 import Grammar from '@/database/models/grammar';
 import Blocks from '@/database/models/blocks';
-import Notes from '@/database/models/notes';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { TEXTS } from '@/locales/cs';
 import { useToastStore } from '@/features/toast/use-toast-store';
@@ -15,13 +14,11 @@ type EntityWithNote = {
 
 type SupportedTableName =
   | typeof TableName.Grammar
-  | typeof TableName.Blocks
-  | typeof TableName.Notes;
+  | typeof TableName.Blocks;
 
 const byIdLoaders: Record<SupportedTableName, (id: number) => Promise<EntityWithNote | null>> = {
   [TableName.Grammar]: async (id) => await Grammar.getById(id),
   [TableName.Blocks]: async (id) => await Blocks.getById(id),
-  [TableName.Notes]: async (id) => await Notes.getById(id),
 };
 
 /**

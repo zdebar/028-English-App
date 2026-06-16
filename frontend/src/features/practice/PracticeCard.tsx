@@ -9,6 +9,8 @@ import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import SimpleOverviewCard from './SimpleOverviewCard';
 import VolumeSlider from '@/features/audio/VolumeSlider';
+import NoteDetailCard from '@/features/notes/NoteDetailCard';
+import { useNoteViewer } from '@/features/notes/use-note-viewer';
 
 import Notification from '@/components/UI/Notification';
 import { TEXTS } from '@/locales/cs';
@@ -19,7 +21,7 @@ import KnownButton from './buttons/KnownButton';
 import MasterItemButton from './buttons/MasterItemButton';
 import PlayAudioButton from './buttons/PlayAudioButton';
 import RepeatButton from './buttons/RepeatButton';
-import NoteButton from '../../components/UI/buttons/NoteButton';
+import NoteButton from '../notes/NoteButton';
 import { useEntityByTable } from './hooks/use-entity-by-table';
 import { usePracticeStars } from './hooks/use-practice-stars';
 import DelayedNotification from '@/components/UI/DelayedNotification';
@@ -40,12 +42,7 @@ export default function PracticeCard() {
     openEntityById: handleGrammar,
     closeEntity: closeGrammar,
   } = useEntityByTable(TableName.Grammar);
-  const {
-    isVisible: isNoteVisible,
-    entityData: noteData,
-    openEntityById: handleNote,
-    closeEntity: closeNote,
-  } = useEntityByTable(TableName.Notes);
+  const { isNoteVisible, noteData, openNote, closeNote } = useNoteViewer();
 
   const practiceCountToday = dailyCount;
   const { starChunk, starsPerRow, starCount, displayedChunkCount } =
@@ -94,7 +91,7 @@ export default function PracticeCard() {
   }
 
   if (isGrammarVisible) return <SimpleOverviewCard data={grammarData} onClose={closeGrammar} />;
-  if (isNoteVisible) return <SimpleOverviewCard data={noteData} onClose={closeNote} />;
+  if (isNoteVisible) return <NoteDetailCard note={noteData} onClose={closeNote} />;
 
   return (
     <div className="help-btn-margin relative flex w-full grow flex-col items-center">
@@ -206,7 +203,7 @@ export default function PracticeCard() {
             className="pos-bottom-left-control"
             onClick={(e) => {
               e.stopPropagation();
-              handleNote(noteId);
+              openNote(noteId);
             }}
           />
         )}
