@@ -21,7 +21,7 @@ export default function NoteButton({ onClick, title, className = '' }: NoteButto
       className={`note-btn-pos absolute mr-2 cursor-pointer self-end p-4 ${className}`}
     >
       <InfoIcon />
-      <HelpText className="top-0 left-4 flex flex-col items-end">{title}</HelpText>
+      <HelpText className="top-3 left-12 flex flex-col items-end">{title}</HelpText>
     </button>
   );
 }
