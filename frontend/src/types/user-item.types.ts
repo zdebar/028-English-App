@@ -18,29 +18,6 @@ export interface UserItemBase {
   updated_at: string;
 }
 
-export interface UserItemAPI extends UserItemBase {
-  is_study_item: boolean;
-  is_vocabulary: boolean;
-  block_id: number | null;
-  grammar_id: number | null;
-  started_at: string | null;
-  deleted_at: string | null;
-  next_at: string | null;
-  mastered_at: string | null;
-}
-
-export type UserItemExport = Pick<
-  UserItemAPI,
-  | 'user_id'
-  | 'item_id'
-  | 'progress'
-  | 'progress_history'
-  | 'started_at'
-  | 'updated_at'
-  | 'next_at'
-  | 'mastered_at'
->;
-
 export interface UserItemLocal extends UserItemBase {
   is_study_item: 0 | 1;
   is_vocabulary: 0 | 1;

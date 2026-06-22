@@ -5,7 +5,6 @@ import { db } from '@/database/models/db';
 import type {
   UserItemPractice,
   UserItemLocal,
-  UserItemExport,
   ProgressHistoryEntry,
 } from '@/types/user-item.types';
 import { TableName } from '@/types/table.types';
@@ -13,8 +12,6 @@ import Dexie, { Entity } from 'dexie';
 import { getSyncTimestamps, splitDeleted } from '../utils/sync-generic.utils';
 
 import {
-  convertLocalToExport,
-  convertAPIToLocal,
   addGrammarIndicatorFlag,
   getNextAt,
   resetUserItem,
@@ -28,6 +25,67 @@ const NULL_DATE = config.database.nullReplacementDate;
 const NULL_NUMBER = config.database.nullReplacementNumber;
 const SIM_PROGRESS = config.progress.simulationProgress;
 const SIM_COUNT = config.progress.simulationCount;
+
+type UserItemAPI = Omit<
+  UserItemLocal,
+  | 'is_study_item'
+  | 'is_vocabulary'
+  | 'block_id'
+  | 'grammar_id'
+  | 'started_at'
+  | 'deleted_at'
+  | 'next_at'
+  | 'mastered_at'
+> & {
+  is_study_item: boolean;
+  is_vocabulary: boolean;
+  block_id: number | null;
+  grammar_id: number | null;
+  started_at: string | null;
+  deleted_at: string | null;
+  next_at: string | null;
+  mastered_at: string | null;
+};
+
+type UserItemExport = Pick<
+  UserItemAPI,
+  | 'user_id'
+  | 'item_id'
+  | 'progress'
+  | 'progress_history'
+  | 'started_at'
+  | 'updated_at'
+  | 'next_at'
+  | 'mastered_at'
+>;
+
+function convertLocalToExport(localItem: UserItemLocal): UserItemExport {
+  const { user_id, item_id, progress, updated_at, started_at, next_at, mastered_at } = localItem;
+  return {
+    user_id,
+    item_id,
+    progress_history: localItem.progress_history ?? [],
+    progress,
+    updated_at,
+    started_at: started_at === NULL_DATE ? null : started_at,
+    next_at: next_at === NULL_DATE ? null : next_at,
+    mastered_at: mastered_at === NULL_DATE ? null : mastered_at,
+  };
+}
+
+function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
+  return {
+    ...apiItem,
+    is_study_item: apiItem.is_study_item ? 1 : 0,
+    is_vocabulary: apiItem.is_vocabulary ? 1 : 0,
+    started_at: apiItem.started_at ?? NULL_DATE,
+    next_at: apiItem.next_at ?? NULL_DATE,
+    mastered_at: apiItem.mastered_at ?? NULL_DATE,
+    deleted_at: apiItem.deleted_at ?? NULL_DATE,
+    block_id: apiItem.block_id ?? NULL_NUMBER,
+    grammar_id: apiItem.grammar_id ?? NULL_NUMBER,
+  };
+}
 
 /**
  * Represents a user item entity in the application database.

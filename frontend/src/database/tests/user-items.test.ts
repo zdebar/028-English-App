@@ -12,8 +12,6 @@ const mocks = vi.hoisted(() => ({
   rpc: vi.fn(),
   getNextAt: vi.fn(),
   getSyncTimestamps: vi.fn(),
-  convertLocalToExport: vi.fn(),
-  convertAPIToLocal: vi.fn(),
   markAsSynced: vi.fn(),
   triggerLevelsUpdatedEvent: vi.fn(),
 }));
@@ -105,8 +103,6 @@ vi.mock('@/database/utils/user-items.utils', async () => {
   return {
     ...actual,
     getNextAt: (...args: unknown[]) => mocks.getNextAt(...args),
-    convertLocalToExport: (...args: unknown[]) => mocks.convertLocalToExport(...args),
-    convertAPIToLocal: (...args: unknown[]) => mocks.convertAPIToLocal(...args),
   };
 });
 
@@ -134,11 +130,6 @@ describe('UserItem', () => {
       lastSyncedAt: '2026-03-03T00:00:00.000Z',
       newSyncedAt: '2026-03-04T00:00:00.000Z',
     });
-    mocks.convertLocalToExport.mockImplementation((item: unknown) => ({
-      ...(item as any),
-      sql: true,
-    }));
-    mocks.convertAPIToLocal.mockImplementation((item: unknown) => item);
     mocks.equalsDelete.mockResolvedValue(0);
     mocks.blockEqualsToArray.mockResolvedValue([]);
     mocks.updatedBetweenToArray.mockResolvedValue([]);
@@ -257,7 +248,11 @@ describe('UserItem', () => {
         user_id: 'u1',
         item_id: 1,
         progress_history: [{ progress: 1, created_at: '2026-03-03T09:59:00.000Z' }],
+        progress: 1,
+        started_at: '1970-01-01T00:00:00.000Z',
         updated_at: '2026-03-03T10:00:00.000Z',
+        next_at: '1970-01-01T00:00:00.000Z',
+        mastered_at: '1970-01-01T00:00:00.000Z',
         deleted_at: null,
       },
     ]);
@@ -266,6 +261,23 @@ describe('UserItem', () => {
         {
           user_id: 'u1',
           item_id: 2,
+          czech: 'dva',
+          english: 'two',
+          pronunciation: 'two',
+          audio: null,
+          is_study_item: true,
+          is_vocabulary: true,
+          sort_order: 2,
+          note_id: null,
+          block_id: null,
+          grammar_id: null,
+          progress: 0,
+          progress_history: [],
+          started_at: null,
+          updated_at: '2026-03-04T00:00:00.000Z',
+          next_at: null,
+          mastered_at: null,
+          lesson_id: 1,
           deleted_at: null,
         },
         {
@@ -287,12 +299,27 @@ describe('UserItem', () => {
           user_id: 'u1',
           item_id: 1,
           progress_history: [{ progress: 1, created_at: '2026-03-03T09:59:00.000Z' }],
+          progress: 1,
           updated_at: '2026-03-03T10:00:00.000Z',
+          started_at: null,
+          next_at: null,
+          mastered_at: null,
         }),
       ],
     });
     expect(mocks.bulkDelete).toHaveBeenCalledWith([['u1', 3]]);
-    expect(mocks.bulkPut).toHaveBeenCalled();
+    expect(mocks.bulkPut).toHaveBeenCalledWith([
+      expect.objectContaining({
+        item_id: 2,
+        is_study_item: 1,
+        is_vocabulary: 1,
+        block_id: 0,
+        grammar_id: 0,
+        started_at: '1970-01-01T00:00:00.000Z',
+        next_at: '1970-01-01T00:00:00.000Z',
+        mastered_at: '1970-01-01T00:00:00.000Z',
+      }),
+    ]);
     expect(mocks.markAsSynced).toHaveBeenCalledWith('user_items', '2026-03-04T00:00:00.000Z', 'u1');
   });
 });

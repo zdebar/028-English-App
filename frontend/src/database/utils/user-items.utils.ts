@@ -1,13 +1,7 @@
-import type {
-  UserItemPractice,
-  UserItemLocal,
-  UserItemAPI,
-  UserItemExport,
-} from '@/types/user-item.types';
+import type { UserItemPractice, UserItemLocal } from '@/types/user-item.types';
 import config from '@/config/config';
 
 const NULL_DATE = config.database.nullReplacementDate;
-const NULL_NUMBER = config.database.nullReplacementNumber;
 
 /**
  * Adds a grammar indicator flag to practice items based on started grammar IDs.
@@ -69,44 +63,3 @@ export function resetUserItem(item: UserItemLocal): void {
   item.progress = 0;
 }
 
-/**
- * Converts a `UserItemLocal` object to a `UserItemSQL` object, replacing specific date fields
- * with `null` if they match the configured `nullReplacementDate`.
- *
- * @param localItem - The local user item to convert.
- * @returns The converted user item suitable for SQL storage.
- */
-export function convertLocalToExport(localItem: UserItemLocal): UserItemExport {
-  const { user_id, item_id, progress, updated_at, started_at, next_at, mastered_at } = localItem;
-  return {
-    user_id,
-    item_id,
-    progress_history: localItem.progress_history ?? [],
-    progress,
-    updated_at,
-    started_at: started_at === NULL_DATE ? null : started_at,
-    next_at: next_at === NULL_DATE ? null : next_at,
-    mastered_at: mastered_at === NULL_DATE ? null : mastered_at,
-  };
-}
-
-/**
- * Converts a SQL/RPC user item payload to local user item shape,
- * replacing nullable sortable/date fields with configured null-replacement values.
- *
- * @param sqlItem - The SQL/RPC user item payload to normalize.
- * @returns Normalized local user item.
- */
-export function convertAPIToLocal(sqlItem: UserItemAPI): UserItemLocal {
-  return {
-    ...sqlItem,
-    is_study_item: sqlItem.is_study_item ? 1 : 0, // Convert boolean to number
-    is_vocabulary: sqlItem.is_vocabulary ? 1 : 0, // Convert boolean to number
-    started_at: sqlItem.started_at ?? NULL_DATE,
-    next_at: sqlItem.next_at ?? NULL_DATE,
-    mastered_at: sqlItem.mastered_at ?? NULL_DATE,
-    deleted_at: sqlItem.deleted_at ?? NULL_DATE,
-    block_id: sqlItem.block_id ?? NULL_NUMBER,
-    grammar_id: sqlItem.grammar_id ?? NULL_NUMBER,
-  };
-}
