@@ -26,13 +26,18 @@ import { usePracticeStars } from './hooks/use-practice-stars';
 import DelayedNotification from '@/components/UI/DelayedNotification';
 import { STAR_SIZE } from '@/components/UI/StarProgress';
 import PracticeStarsRow from './components/PracticeStarsRow';
+import type { ReviewPracticeMode } from '@/types/user-item.types';
+
+type PracticeCardProps = Readonly<{
+  mode?: ReviewPracticeMode;
+}>;
 
 /**
  * PracticeCard component for interactive language practice.
  *
  * @returns The main practice card UI with all practice controls and feedback.
  */
-export default function PracticeCard() {
+export default function PracticeCard({ mode = 'vocabulary' }: PracticeCardProps) {
   const userId = useAuthStore((state) => state.userId);
   const dailyCount = useUserStore((state) => state.dailyCount);
   const {
@@ -66,7 +71,7 @@ export default function PracticeCard() {
     audioError,
     playAudio,
     audioLoading,
-  } = usePracticeDeck(userId);
+  } = usePracticeDeck(userId, mode);
 
   const cardText = revealed ? undefined : TEXTS.reveal;
   const cardStyle = revealed ? 'color-audio-disabled' : 'color-button';

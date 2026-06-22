@@ -1,5 +1,4 @@
 import HeaderButton from '@/components/UI/buttons/HeaderButton';
-import AcademicCapIcon from '@/components/UI/icons/AcademicCapIcon';
 import HomeIcon from '@/components/UI/icons/HomeIcon';
 import UserIcon from '@/components/UI/icons/UserIcon';
 import { ROUTES } from '@/config/routes.config';
@@ -24,9 +23,6 @@ export default function Header(): JSX.Element {
       <nav className={`${styles['header-side']} flex gap-2 p-4`} role="navigation">
         <HeaderButton to={ROUTES.home} title={TEXTS.tooltipHome}>
           <HomeIcon />
-        </HeaderButton>
-        <HeaderButton to={ROUTES.practice} disabled={!userId} title={TEXTS.tooltipPractice}>
-          <AcademicCapIcon />
         </HeaderButton>
       </nav>
       <nav

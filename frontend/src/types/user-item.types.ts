@@ -32,3 +32,5 @@ export interface UserItemLocal extends UserItemBase {
 export interface UserItemPractice extends UserItemLocal {
   show_new_grammar_indicator: boolean;
 }
+
+export type ReviewPracticeMode = 'vocabulary' | 'grammar';

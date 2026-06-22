@@ -6,6 +6,7 @@ import type {
   UserItemPractice,
   UserItemLocal,
   ProgressHistoryEntry,
+  ReviewPracticeMode,
 } from '@/types/user-item.types';
 import { TableName } from '@/types/table.types';
 import Dexie, { Entity } from 'dexie';
@@ -135,25 +136,27 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   static async getPracticeDeck(
     userId: string,
     deckSize: number = config.lesson.deckSize,
+    mode: ReviewPracticeMode = 'vocabulary',
   ): Promise<UserItemPractice[]> {
     // Step 1: Fetch already started grammar list
     const startedGrammarIdSet = new Set(await this.getStartedGrammarIds(userId));
 
     // Step 2: Fetch items with odd progress
-    let deck = await this.getPracticeItemsByParity(userId, true, deckSize, false);
+    let deck = await this.getPracticeItemsByParity(userId, true, deckSize, false, mode);
 
     // Step 3: If not enough items, fetch even progress items instead
     if (deck.length < deckSize) {
       let evenItems: UserItemLocal[] = [];
-      evenItems = await this.getPracticeItemsByParity(userId, false, deckSize, false);
+      evenItems = await this.getPracticeItemsByParity(userId, false, deckSize, false, mode);
 
       const remainingLimit = deckSize - evenItems.length;
-      if (remainingLimit > 0) {
+      if (remainingLimit > 0 && mode === 'vocabulary') {
         const remainingItems = await this.getPracticeItemsByParity(
           userId,
           false,
           remainingLimit,
           true,
+          mode,
         );
         evenItems = [...evenItems, ...remainingItems];
       }
@@ -211,6 +214,48 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .toArray();
 
     return blockItems.sort((a, b) => a.sort_order - b.sort_order);
+  }
+
+  static async saveNewGrammarBlockCompletion(
+    userId: string,
+    blockId: number,
+    dateTime: string = new Date(Date.now()).toISOString(),
+  ): Promise<UserItemLocal[]> {
+    const blockItems = await this.getByBlockId(userId, blockId);
+    const updatedItems = blockItems.map((item) => ({
+      ...item,
+      progress: 2,
+      progress_history: item.progress_history ?? [],
+      started_at: item.started_at === NULL_DATE ? dateTime : item.started_at,
+      updated_at: dateTime,
+      next_at: getNextAt(2),
+      mastered_at: item.mastered_at,
+    }));
+
+    if (updatedItems.length > 0) {
+      await db.user_items.bulkPut(updatedItems);
+    }
+
+    triggerLevelsUpdatedEvent(userId);
+    return updatedItems;
+  }
+
+  static async areAllVocabularyItemsStartedForLesson(
+    userId: string,
+    lessonId: number,
+  ): Promise<boolean> {
+    const vocabularyItems = await db.user_items
+      .where('[user_id+lesson_id+is_vocabulary+started_at]')
+      .between(
+        [userId, lessonId, 1, Dexie.minKey],
+        [userId, lessonId, 1, Dexie.maxKey],
+        true,
+        true,
+      )
+      .filter((item) => item.is_study_item === 1)
+      .toArray();
+
+    return vocabularyItems.length > 0 && vocabularyItems.every((item) => item.started_at !== NULL_DATE);
   }
 
   /**
@@ -448,18 +493,20 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     isOdd: boolean,
     limit: number,
     isNew: boolean = false,
+    mode: ReviewPracticeMode = 'vocabulary',
   ): Promise<UserItemLocal[]> {
     const minNextAt = isNew ? NULL_DATE : Dexie.minKey;
     const maxNextAt = isNew ? NULL_DATE : new Date().toISOString();
+    const isVocabulary = mode === 'vocabulary' ? 1 : 0;
     return db.user_items
-      .where('[user_id+next_at+mastered_at+sort_order+is_study_item]')
+      .where('[user_id+is_vocabulary+next_at+mastered_at+sort_order+is_study_item]')
       .between(
-        [userId, minNextAt, NULL_DATE, Dexie.minKey, 1],
-        [userId, maxNextAt, NULL_DATE, Dexie.maxKey, 1],
+        [userId, isVocabulary, minNextAt, NULL_DATE, Dexie.minKey, 1],
+        [userId, isVocabulary, maxNextAt, NULL_DATE, Dexie.maxKey, 1],
         true,
         false,
       )
-      .filter((item) => (item.progress % 2 === 1) === isOdd)
+      .filter((item) => item.mastered_at === NULL_DATE && (item.progress % 2 === 1) === isOdd)
       .limit(limit)
       .toArray();
   }

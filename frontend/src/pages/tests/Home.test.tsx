@@ -70,6 +70,9 @@ vi.mock('@/locales/cs', () => ({
     dailyGoal: 'Goal',
     syncWarning: 'Data may be stale.',
     signupHint: 'Signup hint',
+    vocabularyPracticeButton: 'Vocabulary',
+    newGrammarPracticeButton: 'New grammar',
+    grammarPracticeButton: 'Grammar',
   },
 }));
 
@@ -99,6 +102,18 @@ vi.mock('@/features/auth/GoogleAuthButton', () => ({
 
 vi.mock('@/features/synchronization/SimulateDataButton', () => ({
   default: () => <div data-testid="simulate-data-button" />,
+}));
+
+vi.mock('@/database/models/user-blocks', () => ({
+  default: {
+    unlockNextGrammarBlock: vi.fn().mockResolvedValue(null),
+    getFirstUnlockedGrammarBlock: vi.fn().mockResolvedValue(null),
+    countReadyGrammarItems: vi.fn().mockResolvedValue(0),
+  },
+}));
+
+vi.mock('@/features/logging/monitoring-handler', () => ({
+  reportError: vi.fn(),
 }));
 
 vi.mock('react-router-dom', () => ({

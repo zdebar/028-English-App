@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   equals: vi.fn(),
   get: vi.fn(),
   delete: vi.fn(),
+  update: vi.fn(),
   bulkDelete: vi.fn(),
   bulkPut: vi.fn(),
   toArray: vi.fn(),
@@ -20,6 +21,11 @@ vi.mock('@/config/config', () => ({
   default: {
     database: {
       nullReplacementDate: '9999-12-31T23:59:59+00:00',
+      nullReplacementNumber: -1,
+    },
+    progress: {
+      simulationProgress: 2,
+      simulationCount: 10,
     },
   },
 }));
@@ -33,7 +39,9 @@ vi.mock('@/database/models/db', () => ({
       get: (...args: unknown[]) => mocks.get(...args),
       bulkDelete: (...args: unknown[]) => mocks.bulkDelete(...args),
       bulkPut: (...args: unknown[]) => mocks.bulkPut(...args),
+      update: (...args: unknown[]) => mocks.update(...args),
     },
+    user_items: {},
   },
 }));
 
@@ -71,6 +79,7 @@ describe('UserBlock', () => {
     mocks.get.mockResolvedValue(undefined);
     mocks.bulkDelete.mockResolvedValue(undefined);
     mocks.bulkPut.mockResolvedValue(undefined);
+    mocks.update.mockResolvedValue(1);
     mocks.equals.mockReturnValue({
       toArray: (...args: unknown[]) => mocks.toArray(...args),
       delete: (...args: unknown[]) => mocks.delete(...args),
@@ -129,7 +138,6 @@ describe('UserBlock', () => {
         user_id: 'u1',
         block_id: 1,
         progress: 2,
-        is_vocabulary: false,
         started_at: '2026-03-01T00:00:00.000Z',
         updated_at: '2026-03-03T12:00:00.000Z',
         next_at: '9999-12-31T23:59:59+00:00',
@@ -143,6 +151,8 @@ describe('UserBlock', () => {
           block_id: 1,
           name: 'Block 1',
           note: '',
+          lesson_id: 1,
+          grammar_id: 10,
           sort_order: 1,
           progress: 2,
           is_vocabulary: false,
@@ -173,7 +183,6 @@ describe('UserBlock', () => {
           user_id: 'u1',
           block_id: 1,
           progress: 2,
-          is_vocabulary: false,
           started_at: '2026-03-01T00:00:00.000Z',
           updated_at: '2026-03-03T12:00:00.000Z',
           next_at: null,

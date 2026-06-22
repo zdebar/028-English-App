@@ -12,6 +12,7 @@ const playAudioMock = vi.fn();
 const setVolumeMock = vi.fn();
 const reloadMock = vi.fn();
 const addItemCountMock = vi.fn();
+const unlockNextGrammarBlockMock = vi.fn();
 
 vi.mock('@/hooks/use-fetch', () => ({
   useFetch: (...args: unknown[]) => useFetchMock(...args),
@@ -27,6 +28,12 @@ vi.mock('@/database/models/user-items', () => ({
 vi.mock('@/database/models/user-scores', () => ({
   default: {
     addItemCount: (...args: unknown[]) => addItemCountMock(...args),
+  },
+}));
+
+vi.mock('@/database/models/user-blocks', () => ({
+  default: {
+    unlockNextGrammarBlock: (...args: unknown[]) => unlockNextGrammarBlockMock(...args),
   },
 }));
 
@@ -102,6 +109,7 @@ describe('usePracticeDeck', () => {
     getPracticeDeckMock.mockResolvedValue([]);
     savePracticeDeckMock.mockResolvedValue(undefined);
     addItemCountMock.mockResolvedValue(undefined);
+    unlockNextGrammarBlockMock.mockResolvedValue(null);
   });
 
   it('maps fetched data into deck state and exposes derived values', async () => {
@@ -173,6 +181,7 @@ describe('usePracticeDeck', () => {
       ]),
     );
     expect(addItemCountMock).toHaveBeenCalledTimes(2);
+    expect(unlockNextGrammarBlockMock).toHaveBeenCalledWith('user-1');
     expect(reloadMock).toHaveBeenCalledTimes(1);
   });
 

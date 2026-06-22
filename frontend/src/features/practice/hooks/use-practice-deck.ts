@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { alternateDirection } from '@/features/practice/practice.utils';
-import type { UserItemPractice } from '@/types/user-item.types';
+import type { ReviewPracticeMode, UserItemPractice } from '@/types/user-item.types';
 import { useFetch } from '@/hooks/use-fetch';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
@@ -9,13 +9,14 @@ import { useHint, NBSP } from './use-hint';
 import { useAudioManager } from '../../audio/use-audio-manager';
 import { triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 import config from '@/config/config';
+import UserBlock from '@/database/models/user-blocks';
 
 /**
  * usePracticeDeck hook manages the practice deck and user progress for a given user.
  *
  * @param userId The unique identifier of the user.
  */
-export function usePracticeDeck(userId: string | null) {
+export function usePracticeDeck(userId: string | null, mode: ReviewPracticeMode = 'vocabulary') {
   // Array fetching logic
   const [array, setArray] = useState<UserItemPractice[]>([]);
   const [index, setIndex] = useState(0);
@@ -25,9 +26,9 @@ export function usePracticeDeck(userId: string | null) {
 
   const fetchPracticeDeck = useCallback(async () => {
     if (!userId) return [];
-    const data = await UserItem.getPracticeDeck(userId);
+    const data = await UserItem.getPracticeDeck(userId, config.lesson.deckSize, mode);
     return data.filter((item) => item != null);
-  }, [userId]);
+  }, [mode, userId]);
 
   const { data: fetchedArray, reload } = useFetch<UserItemPractice[]>(fetchPracticeDeck);
 
@@ -87,6 +88,9 @@ export function usePracticeDeck(userId: string | null) {
 
       try {
         await UserItem.savePracticeDeck(userProgress);
+        if (mode === 'vocabulary') {
+          await UserBlock.unlockNextGrammarBlock(userId);
+        }
         reportInfo(`Saved practice deck ${source} with ${userProgress.length} items.`);
         userProgressRef.current = [];
         if (shouldReload) {
@@ -97,7 +101,7 @@ export function usePracticeDeck(userId: string | null) {
         persistProgressToLocalStorage(userProgress);
       }
     },
-    [persistProgressToLocalStorage, reload, userId],
+    [mode, persistProgressToLocalStorage, reload, userId],
   );
 
   // Save progress on unmount

@@ -29,4 +29,6 @@ export const PRACTICE_TEXTS = {
   plural: 'Množné číslo',
   nextStarProgress: 'Denní pokrok',
   currentPracticeStar: 'Aktuální hvězda procvičování',
+  newGrammarRound: 'Kolo',
+  newGrammarComplete: 'Nova gramatika dokoncena.',
 } as const;

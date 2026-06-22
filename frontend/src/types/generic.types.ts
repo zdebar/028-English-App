@@ -16,7 +16,11 @@ export interface LevelType extends SyncEntityType {}
 
 export interface GrammarType extends SyncEntityType {}
 
-export interface BlockType extends SyncEntityType {}
+export interface BlockType extends SyncEntityType {
+  lesson_id: number;
+  is_vocabulary: boolean;
+  grammar_id: number | null;
+}
 
 export interface NoteType extends SyncEntityType {}
 
@@ -47,6 +51,8 @@ export interface UserBlockType {
   block_id: number;
   name: string;
   note: string;
+  lesson_id: number;
+  grammar_id: number | null;
   sort_order: number;
   progress: number;
   is_vocabulary: boolean;

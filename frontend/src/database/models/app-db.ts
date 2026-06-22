@@ -52,5 +52,12 @@ export default class AppDB extends Dexie {
       blocks: null,
       user_blocks: '[user_id+block_id], user_id, [user_id+updated_at], [user_id+sort_order]',
     });
+
+    this.version(3).stores({
+      user_items:
+        '[user_id+item_id], [user_id+grammar_id+started_at], [user_id+is_vocabulary+started_at+is_study_item], [user_id+started_at], [user_id+updated_at], [user_id+next_at+sort_order], [user_id+next_at+mastered_at+sort_order+is_study_item], [user_id+is_vocabulary+next_at+mastered_at+sort_order+is_study_item], [user_id+lesson_id+is_vocabulary+started_at], [user_id+block_id]',
+      user_blocks:
+        '[user_id+block_id], user_id, [user_id+updated_at], [user_id+sort_order], [user_id+is_vocabulary+started_at+sort_order], [user_id+is_vocabulary+started_at+mastered_at+sort_order]',
+    });
   }
 }

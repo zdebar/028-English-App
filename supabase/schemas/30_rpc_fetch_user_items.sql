@@ -39,11 +39,11 @@ BEGIN
     i.pronunciation,
     i.audio,
     i.is_study_item,
-    i.is_vocabulary,
+    b.is_vocabulary,
     i.sort_order,
     i.note_id,
     i.block_id,
-    i.grammar_id,
+    b.grammar_id,
     COALESCE(ui.progress, 0) AS progress,
     '[]'::jsonb AS progress_history,
     ui.started_at,
@@ -51,12 +51,18 @@ BEGIN
     i.deleted_at,
     ui.next_at,
     ui.mastered_at,
-    i.lesson_id
+    b.lesson_id
   FROM public.items i
+  JOIN public.blocks b
+    ON b.id = i.block_id
   LEFT JOIN public.user_items ui
     ON ui.item_id = i.id
     AND ui.user_id = p_user_id
-  WHERE GREATEST(COALESCE(ui.updated_at, public.rpc_min_timestamptz()), i.updated_at)
+  WHERE GREATEST(
+      COALESCE(ui.updated_at, public.rpc_min_timestamptz()),
+      i.updated_at,
+      b.updated_at
+    )
     > COALESCE(p_last_synced_at, public.rpc_min_timestamptz());
 END;
 $$;

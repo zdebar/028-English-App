@@ -8,8 +8,9 @@ import { SupabaseError } from '@/types/error.types';
 import type { UserBlockType } from '@/types/generic.types';
 import { TableName } from '@/types/table.types';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
-import { Entity } from 'dexie';
+import Dexie, { Entity } from 'dexie';
 import Metadata from './metadata';
+import UserItem from './user-items';
 
 const NULL_DATE = config.database.nullReplacementDate;
 
@@ -25,7 +26,6 @@ type UserBlockExport = Pick<
   | 'user_id'
   | 'block_id'
   | 'progress'
-  | 'is_vocabulary'
   | 'started_at'
   | 'updated_at'
   | 'next_at'
@@ -47,7 +47,6 @@ function convertLocalToExport(block: UserBlockType): UserBlockExport {
     user_id: block.user_id,
     block_id: block.block_id,
     progress: block.progress,
-    is_vocabulary: block.is_vocabulary,
     started_at: block.started_at === NULL_DATE ? null : block.started_at,
     updated_at: block.updated_at,
     next_at: block.next_at === NULL_DATE ? null : block.next_at,
@@ -60,6 +59,8 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
   block_id!: number;
   name!: string;
   note!: string;
+  lesson_id!: number;
+  grammar_id!: number | null;
   sort_order!: number;
   progress!: number;
   is_vocabulary!: boolean;
@@ -80,6 +81,107 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     assertNonEmptyString(userId, 'userId');
 
     return (await db.user_blocks.get([userId, blockId])) ?? null;
+  }
+
+  static async getFirstUnlockedGrammarBlock(userId: string): Promise<UserBlockType | null> {
+    assertNonEmptyString(userId, 'userId');
+
+    const blocks = await db.user_blocks
+      .where('[user_id+is_vocabulary+started_at+sort_order]')
+      .between(
+        [userId, false, Dexie.minKey, Dexie.minKey],
+        [userId, false, NULL_DATE, Dexie.maxKey],
+        true,
+        false,
+      )
+      .filter((block) => block.mastered_at === NULL_DATE)
+      .toArray();
+
+    return blocks.sort(compareGrammarBlocks).at(0) ?? null;
+  }
+
+  static async getFirstLockedGrammarBlock(userId: string): Promise<UserBlockType | null> {
+    assertNonEmptyString(userId, 'userId');
+
+    const blocks = await db.user_blocks
+      .where('[user_id+is_vocabulary+started_at+sort_order]')
+      .between(
+        [userId, false, NULL_DATE, Dexie.minKey],
+        [userId, false, NULL_DATE, Dexie.maxKey],
+        true,
+        true,
+      )
+      .toArray();
+
+    return blocks.sort(compareGrammarBlocks).at(0) ?? null;
+  }
+
+  static async countReadyGrammarItems(userId: string): Promise<number> {
+    assertNonEmptyString(userId, 'userId');
+
+    const now = new Date().toISOString();
+    const readyItems = await db.user_items
+      .where('[user_id+is_vocabulary+next_at+mastered_at+sort_order+is_study_item]')
+      .between(
+        [userId, 0, Dexie.minKey, NULL_DATE, Dexie.minKey, 1],
+        [userId, 0, now, NULL_DATE, Dexie.maxKey, 1],
+        true,
+        false,
+      )
+      .filter((item) => item.mastered_at === NULL_DATE && item.is_study_item === 1)
+      .toArray();
+
+    return readyItems.length;
+  }
+
+  static async unlockBlock(userId: string, blockId: number, dateTime: string): Promise<void> {
+    assertNonEmptyString(userId, 'userId');
+
+    await db.user_blocks.update([userId, blockId], {
+      started_at: dateTime,
+      updated_at: dateTime,
+    });
+  }
+
+  static async markBlockMastered(userId: string, blockId: number, dateTime: string): Promise<void> {
+    assertNonEmptyString(userId, 'userId');
+
+    await db.user_blocks.update([userId, blockId], {
+      mastered_at: dateTime,
+      updated_at: dateTime,
+    });
+  }
+
+  static async unlockNextGrammarBlock(
+    userId: string,
+    dateTime: string = new Date(Date.now()).toISOString(),
+  ): Promise<UserBlockType | null> {
+    assertNonEmptyString(userId, 'userId');
+
+    const lockedBlock = await this.getFirstLockedGrammarBlock(userId);
+    if (lockedBlock == null) {
+      return null;
+    }
+
+    const isLessonVocabularyStarted = await UserItem.areAllVocabularyItemsStartedForLesson(
+      userId,
+      lockedBlock.lesson_id,
+    );
+    if (!isLessonVocabularyStarted) {
+      return null;
+    }
+
+    const previousBlock = await this.getPreviousGrammarBlock(userId, lockedBlock);
+    if (previousBlock != null && previousBlock.mastered_at === NULL_DATE) {
+      return null;
+    }
+
+    await this.unlockBlock(userId, lockedBlock.block_id, dateTime);
+    return {
+      ...lockedBlock,
+      started_at: dateTime,
+      updated_at: dateTime,
+    };
   }
 
   static async deleteByUserId(userId: string): Promise<void> {
@@ -147,4 +249,26 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
 
     return (updatedBlocks ?? []).map(convertAPIToLocal);
   }
+
+  private static async getPreviousGrammarBlock(
+    userId: string,
+    block: UserBlockType,
+  ): Promise<UserBlockType | null> {
+    const grammarBlocks = await db.user_blocks
+      .where('user_id')
+      .equals(userId)
+      .filter((candidate) => !candidate.is_vocabulary)
+      .toArray();
+
+    const sortedBlocks = grammarBlocks.sort(compareGrammarBlocks);
+    const blockIndex = sortedBlocks.findIndex((candidate) => candidate.block_id === block.block_id);
+    return blockIndex > 0 ? sortedBlocks[blockIndex - 1] : null;
+  }
+}
+
+function compareGrammarBlocks(left: UserBlockType, right: UserBlockType): number {
+  if (left.lesson_id !== right.lesson_id) {
+    return left.lesson_id - right.lesson_id;
+  }
+  return left.sort_order - right.sort_order;
 }

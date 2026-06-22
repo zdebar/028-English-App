@@ -1,6 +1,7 @@
--- Initial schema generated from supabase/schemas for local start/reset.
+-- Initial schema generated from supabase/schemas on 2026-06-22
 
--- Source: supabase/schemas/00_public_tables.sql
+
+-- schema: 00_public_tables.sql
 
 
 create schema if not exists private;
@@ -53,16 +54,22 @@ CREATE TABLE IF NOT EXISTS blocks (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
   note TEXT NOT NULL,
+  lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE RESTRICT,
+  is_vocabulary BOOLEAN NOT NULL,
+  grammar_id INTEGER REFERENCES grammar(id) ON DELETE RESTRICT,
   sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ
+  deleted_at TIMESTAMPTZ,
+  CONSTRAINT blocks_vocabulary_grammar_check CHECK (
+    (is_vocabulary = TRUE AND grammar_id IS NULL)
+    OR (is_vocabulary = FALSE AND grammar_id IS NOT NULL)
+  )
 );
 
 CREATE TABLE IF NOT EXISTS user_blocks (
   block_id INTEGER NOT NULL REFERENCES blocks(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   progress INTEGER NOT NULL DEFAULT 0 CHECK (progress >= 0),
-  is_vocabulary BOOLEAN NOT NULL DEFAULT FALSE, -- distinguish between sentences and vocabulary items
   started_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   next_at TIMESTAMPTZ,
@@ -87,11 +94,8 @@ CREATE TABLE IF NOT EXISTS items (
   audio TEXT,
   note_id INTEGER REFERENCES notes(id) ON DELETE SET NULL,
   is_study_item BOOLEAN NOT NULL DEFAULT TRUE, -- true - will show in PracticeDeck, if false - only in Blocks (intended for spelling)
-  is_vocabulary BOOLEAN NOT NULL DEFAULT TRUE, -- distinguish between sentences and vocabulary items
   sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 0), 
-  block_id INTEGER REFERENCES blocks(id) ON DELETE SET NULL,
-  grammar_id INTEGER REFERENCES grammar(id) ON DELETE SET NULL,
-  lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE RESTRICT,
+  block_id INTEGER NOT NULL REFERENCES blocks(id) ON DELETE RESTRICT,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ
 );
@@ -152,10 +156,11 @@ EXECUTE FUNCTION public.handle_new_auth_user();
 -- CREATE optimalization indexes
 CREATE INDEX IF NOT EXISTS idx_items_updated_at ON public.items (updated_at);
 CREATE INDEX IF NOT EXISTS idx_lessons_level_id ON public.lessons (level_id);
+CREATE INDEX IF NOT EXISTS idx_blocks_lesson_vocabulary_sort
+  ON public.blocks (lesson_id, is_vocabulary, sort_order);
+CREATE INDEX IF NOT EXISTS idx_blocks_grammar_id ON public.blocks (grammar_id);
 CREATE INDEX IF NOT EXISTS idx_items_note_id ON public.items (note_id);
 CREATE INDEX IF NOT EXISTS idx_items_block_id ON public.items (block_id);
-CREATE INDEX IF NOT EXISTS idx_items_grammar_id ON public.items (grammar_id);
-CREATE INDEX IF NOT EXISTS idx_items_lesson_id ON public.items (lesson_id);
 
 CREATE INDEX IF NOT EXISTS idx_user_items_user_updated_item
   ON public.user_items (user_id, updated_at, item_id)
@@ -179,7 +184,8 @@ CREATE INDEX IF NOT EXISTS idx_user_blocks_user_updated_block
 CREATE INDEX IF NOT EXISTS idx_user_blocks_user_block
   ON public.user_blocks (user_id, block_id);
 
--- Source: supabase/schemas/10_updated_at_triggers.sql
+
+-- schema: 10_updated_at_triggers.sql
 
 CREATE OR REPLACE FUNCTION public.set_updated_at()
 RETURNS trigger
@@ -242,7 +248,8 @@ EXECUTE FUNCTION public.set_updated_at();
 
 
 
--- Source: supabase/schemas/20_auth_helpers.sql
+
+-- schema: 20_auth_helpers.sql
 
 CREATE OR REPLACE FUNCTION public.require_auth_user_id()
 RETURNS UUID
@@ -326,7 +333,8 @@ $$;
 REVOKE EXECUTE ON FUNCTION public.rpc_min_timestamptz() FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.rpc_min_timestamptz() TO authenticated;
 
--- Source: supabase/schemas/30_rpc_fetch_user_items.sql
+
+-- schema: 30_rpc_fetch_user_items.sql
 
 CREATE OR REPLACE FUNCTION public.fetch_user_items(
   p_user_id UUID,
@@ -369,11 +377,11 @@ BEGIN
     i.pronunciation,
     i.audio,
     i.is_study_item,
-    i.is_vocabulary,
+    b.is_vocabulary,
     i.sort_order,
     i.note_id,
     i.block_id,
-    i.grammar_id,
+    b.grammar_id,
     COALESCE(ui.progress, 0) AS progress,
     '[]'::jsonb AS progress_history,
     ui.started_at,
@@ -381,12 +389,18 @@ BEGIN
     i.deleted_at,
     ui.next_at,
     ui.mastered_at,
-    i.lesson_id
+    b.lesson_id
   FROM public.items i
+  JOIN public.blocks b
+    ON b.id = i.block_id
   LEFT JOIN public.user_items ui
     ON ui.item_id = i.id
     AND ui.user_id = p_user_id
-  WHERE GREATEST(COALESCE(ui.updated_at, public.rpc_min_timestamptz()), i.updated_at)
+  WHERE GREATEST(
+      COALESCE(ui.updated_at, public.rpc_min_timestamptz()),
+      i.updated_at,
+      b.updated_at
+    )
     > COALESCE(p_last_synced_at, public.rpc_min_timestamptz());
 END;
 $$;
@@ -394,7 +408,8 @@ $$;
 REVOKE EXECUTE ON FUNCTION public.fetch_user_items(UUID, TIMESTAMPTZ) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.fetch_user_items(UUID, TIMESTAMPTZ) TO authenticated;
 
--- Source: supabase/schemas/31_rpc_upsert_user_items.sql
+
+-- schema: 31_rpc_upsert_user_items.sql
 
 CREATE OR REPLACE FUNCTION public.upsert_user_items(
   p_user_items JSONB,
@@ -595,7 +610,8 @@ $$;
 REVOKE EXECUTE ON FUNCTION public.upsert_user_items(JSONB, BOOLEAN) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.upsert_user_items(JSONB, BOOLEAN) TO authenticated;
 
--- Source: supabase/schemas/32_rpc_upsert_fetch_user_items.sql
+
+-- schema: 32_rpc_upsert_fetch_user_items.sql
 
 CREATE OR REPLACE FUNCTION public.upsert_fetch_user_items(
   p_user_id UUID,
@@ -662,7 +678,8 @@ $$;
 REVOKE EXECUTE ON FUNCTION public.upsert_fetch_user_items(UUID, TIMESTAMPTZ, JSONB) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.upsert_fetch_user_items(UUID, TIMESTAMPTZ, JSONB) TO authenticated;
 
--- Source: supabase/schemas/33_rpc_upsert_user_scores.sql
+
+-- schema: 33_rpc_upsert_user_scores.sql
 
 CREATE OR REPLACE FUNCTION public.upsert_user_scores(
   p_user_scores JSONB
@@ -732,7 +749,8 @@ $$;
 REVOKE EXECUTE ON FUNCTION public.upsert_user_scores(JSONB) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.upsert_user_scores(JSONB) TO authenticated;
 
--- Source: supabase/schemas/34_rpc_upsert_fetch_user_scores.sql
+
+-- schema: 34_rpc_upsert_fetch_user_scores.sql
 
 CREATE OR REPLACE FUNCTION public.upsert_fetch_user_scores(
   p_user_id UUID,
@@ -785,7 +803,8 @@ $$;
 REVOKE EXECUTE ON FUNCTION public.upsert_fetch_user_scores(UUID, TIMESTAMPTZ, JSONB) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.upsert_fetch_user_scores(UUID, TIMESTAMPTZ, JSONB) TO authenticated;
 
--- Source: supabase/schemas/35_rpc_fetch_user_blocks.sql
+
+-- schema: 35_rpc_fetch_user_blocks.sql
 
 CREATE OR REPLACE FUNCTION public.fetch_user_blocks(
   p_user_id UUID,
@@ -796,6 +815,8 @@ RETURNS TABLE (
   block_id INTEGER,
   name TEXT,
   note TEXT,
+  lesson_id INTEGER,
+  grammar_id INTEGER,
   sort_order INTEGER,
   progress INTEGER,
   is_vocabulary BOOLEAN,
@@ -817,9 +838,11 @@ BEGIN
     b.id AS block_id,
     b.name,
     b.note,
+    b.lesson_id,
+    b.grammar_id,
     b.sort_order,
     COALESCE(ub.progress, 0) AS progress,
-    COALESCE(ub.is_vocabulary, FALSE) AS is_vocabulary,
+    b.is_vocabulary,
     ub.started_at,
     GREATEST(
       COALESCE(ub.updated_at, public.rpc_min_timestamptz()),
@@ -843,7 +866,8 @@ $$;
 REVOKE EXECUTE ON FUNCTION public.fetch_user_blocks(UUID, TIMESTAMPTZ) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.fetch_user_blocks(UUID, TIMESTAMPTZ) TO authenticated;
 
--- Source: supabase/schemas/36_rpc_upsert_user_blocks.sql
+
+-- schema: 36_rpc_upsert_user_blocks.sql
 
 CREATE OR REPLACE FUNCTION public.upsert_user_blocks(
   p_user_blocks JSONB
@@ -858,7 +882,6 @@ DECLARE
   v_user_id UUID;
   v_block_id INT;
   v_progress INT;
-  v_is_vocabulary BOOLEAN;
   v_started_at TIMESTAMPTZ;
   v_updated_at TIMESTAMPTZ;
   v_next_at TIMESTAMPTZ;
@@ -868,7 +891,6 @@ DECLARE
   v_key_user_id CONSTANT TEXT := 'user_id';
   v_key_block_id CONSTANT TEXT := 'block_id';
   v_key_progress CONSTANT TEXT := 'progress';
-  v_key_is_vocabulary CONSTANT TEXT := 'is_vocabulary';
   v_key_started_at CONSTANT TEXT := 'started_at';
   v_key_updated_at CONSTANT TEXT := 'updated_at';
   v_key_next_at CONSTANT TEXT := 'next_at';
@@ -896,7 +918,6 @@ BEGIN
       END IF;
 
       v_progress := GREATEST((v_entry->>v_key_progress)::INT, 0);
-      v_is_vocabulary := COALESCE((v_entry->>v_key_is_vocabulary)::BOOLEAN, FALSE);
       v_started_at := NULLIF(v_entry->>v_key_started_at, v_null_text)::TIMESTAMPTZ;
       v_updated_at := (v_entry->>v_key_updated_at)::TIMESTAMPTZ;
       v_next_at := NULLIF(v_entry->>v_key_next_at, v_null_text)::TIMESTAMPTZ;
@@ -906,7 +927,6 @@ BEGIN
         user_id,
         block_id,
         progress,
-        is_vocabulary,
         started_at,
         updated_at,
         next_at,
@@ -916,7 +936,6 @@ BEGIN
         v_user_id,
         v_block_id,
         v_progress,
-        v_is_vocabulary,
         v_started_at,
         v_updated_at,
         v_next_at,
@@ -925,7 +944,6 @@ BEGIN
       ON CONFLICT (block_id, user_id)
       DO UPDATE SET
         progress = EXCLUDED.progress,
-        is_vocabulary = EXCLUDED.is_vocabulary,
         started_at = EXCLUDED.started_at,
         updated_at = EXCLUDED.updated_at,
         next_at = EXCLUDED.next_at,
@@ -955,7 +973,8 @@ $$;
 REVOKE EXECUTE ON FUNCTION public.upsert_user_blocks(JSONB) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.upsert_user_blocks(JSONB) TO authenticated;
 
--- Source: supabase/schemas/37_rpc_upsert_fetch_user_blocks.sql
+
+-- schema: 37_rpc_upsert_fetch_user_blocks.sql
 
 CREATE OR REPLACE FUNCTION public.upsert_fetch_user_blocks(
   p_user_id UUID,
@@ -967,6 +986,8 @@ RETURNS TABLE (
   block_id INTEGER,
   name TEXT,
   note TEXT,
+  lesson_id INTEGER,
+  grammar_id INTEGER,
   sort_order INTEGER,
   progress INTEGER,
   is_vocabulary BOOLEAN,
@@ -1006,7 +1027,8 @@ $$;
 REVOKE EXECUTE ON FUNCTION public.upsert_fetch_user_blocks(UUID, TIMESTAMPTZ, JSONB) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.upsert_fetch_user_blocks(UUID, TIMESTAMPTZ, JSONB) TO authenticated;
 
--- Source: supabase/schemas/40_user_lifecycle_functions.sql
+
+-- schema: 40_user_lifecycle_functions.sql
 
 CREATE OR REPLACE FUNCTION public.soft_delete_user()
 RETURNS BOOLEAN
@@ -1081,7 +1103,8 @@ $$;
 
 REVOKE EXECUTE ON FUNCTION private.hard_delete_deleted_users() FROM anon, authenticated;
 
--- Source: supabase/schemas/41_anonymous_cleanup_function.sql
+
+-- schema: 41_anonymous_cleanup_function.sql
 
 CREATE OR REPLACE FUNCTION public.delete_is_anonymous_users_older_than()
 RETURNS VOID
@@ -1112,7 +1135,8 @@ $$;
 
 REVOKE EXECUTE ON FUNCTION public.delete_is_anonymous_users_older_than() FROM anon, PUBLIC;
 
--- Source: supabase/schemas/90_rls.sql
+
+-- schema: 90_rls.sql
 
 SET search_path TO public;
 
@@ -1335,3 +1359,4 @@ DROP POLICY IF EXISTS user_items_history_insert_own ON public.user_items_history
 CREATE POLICY user_items_history_insert_own ON public.user_items_history
   FOR INSERT TO authenticated
   WITH CHECK (user_id = (SELECT auth.uid()));
+

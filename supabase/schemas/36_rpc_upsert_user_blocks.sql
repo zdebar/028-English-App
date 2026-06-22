@@ -11,7 +11,6 @@ DECLARE
   v_user_id UUID;
   v_block_id INT;
   v_progress INT;
-  v_is_vocabulary BOOLEAN;
   v_started_at TIMESTAMPTZ;
   v_updated_at TIMESTAMPTZ;
   v_next_at TIMESTAMPTZ;
@@ -21,7 +20,6 @@ DECLARE
   v_key_user_id CONSTANT TEXT := 'user_id';
   v_key_block_id CONSTANT TEXT := 'block_id';
   v_key_progress CONSTANT TEXT := 'progress';
-  v_key_is_vocabulary CONSTANT TEXT := 'is_vocabulary';
   v_key_started_at CONSTANT TEXT := 'started_at';
   v_key_updated_at CONSTANT TEXT := 'updated_at';
   v_key_next_at CONSTANT TEXT := 'next_at';
@@ -49,7 +47,6 @@ BEGIN
       END IF;
 
       v_progress := GREATEST((v_entry->>v_key_progress)::INT, 0);
-      v_is_vocabulary := COALESCE((v_entry->>v_key_is_vocabulary)::BOOLEAN, FALSE);
       v_started_at := NULLIF(v_entry->>v_key_started_at, v_null_text)::TIMESTAMPTZ;
       v_updated_at := (v_entry->>v_key_updated_at)::TIMESTAMPTZ;
       v_next_at := NULLIF(v_entry->>v_key_next_at, v_null_text)::TIMESTAMPTZ;
@@ -59,7 +56,6 @@ BEGIN
         user_id,
         block_id,
         progress,
-        is_vocabulary,
         started_at,
         updated_at,
         next_at,
@@ -69,7 +65,6 @@ BEGIN
         v_user_id,
         v_block_id,
         v_progress,
-        v_is_vocabulary,
         v_started_at,
         v_updated_at,
         v_next_at,
@@ -78,7 +73,6 @@ BEGIN
       ON CONFLICT (block_id, user_id)
       DO UPDATE SET
         progress = EXCLUDED.progress,
-        is_vocabulary = EXCLUDED.is_vocabulary,
         started_at = EXCLUDED.started_at,
         updated_at = EXCLUDED.updated_at,
         next_at = EXCLUDED.next_at,

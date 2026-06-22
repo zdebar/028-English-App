@@ -49,16 +49,22 @@ CREATE TABLE IF NOT EXISTS blocks (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
   note TEXT NOT NULL,
+  lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE RESTRICT,
+  is_vocabulary BOOLEAN NOT NULL,
+  grammar_id INTEGER REFERENCES grammar(id) ON DELETE RESTRICT,
   sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ
+  deleted_at TIMESTAMPTZ,
+  CONSTRAINT blocks_vocabulary_grammar_check CHECK (
+    (is_vocabulary = TRUE AND grammar_id IS NULL)
+    OR (is_vocabulary = FALSE AND grammar_id IS NOT NULL)
+  )
 );
 
 CREATE TABLE IF NOT EXISTS user_blocks (
   block_id INTEGER NOT NULL REFERENCES blocks(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   progress INTEGER NOT NULL DEFAULT 0 CHECK (progress >= 0),
-  is_vocabulary BOOLEAN NOT NULL DEFAULT FALSE, -- distinguish between sentences and vocabulary items
   started_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   next_at TIMESTAMPTZ,
@@ -83,11 +89,8 @@ CREATE TABLE IF NOT EXISTS items (
   audio TEXT,
   note_id INTEGER REFERENCES notes(id) ON DELETE SET NULL,
   is_study_item BOOLEAN NOT NULL DEFAULT TRUE, -- true - will show in PracticeDeck, if false - only in Blocks (intended for spelling)
-  is_vocabulary BOOLEAN NOT NULL DEFAULT TRUE, -- distinguish between sentences and vocabulary items
   sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 0), 
-  block_id INTEGER REFERENCES blocks(id) ON DELETE SET NULL,
-  grammar_id INTEGER REFERENCES grammar(id) ON DELETE SET NULL,
-  lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE RESTRICT,
+  block_id INTEGER NOT NULL REFERENCES blocks(id) ON DELETE RESTRICT,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ
 );
@@ -148,10 +151,11 @@ EXECUTE FUNCTION public.handle_new_auth_user();
 -- CREATE optimalization indexes
 CREATE INDEX IF NOT EXISTS idx_items_updated_at ON public.items (updated_at);
 CREATE INDEX IF NOT EXISTS idx_lessons_level_id ON public.lessons (level_id);
+CREATE INDEX IF NOT EXISTS idx_blocks_lesson_vocabulary_sort
+  ON public.blocks (lesson_id, is_vocabulary, sort_order);
+CREATE INDEX IF NOT EXISTS idx_blocks_grammar_id ON public.blocks (grammar_id);
 CREATE INDEX IF NOT EXISTS idx_items_note_id ON public.items (note_id);
 CREATE INDEX IF NOT EXISTS idx_items_block_id ON public.items (block_id);
-CREATE INDEX IF NOT EXISTS idx_items_grammar_id ON public.items (grammar_id);
-CREATE INDEX IF NOT EXISTS idx_items_lesson_id ON public.items (lesson_id);
 
 CREATE INDEX IF NOT EXISTS idx_user_items_user_updated_item
   ON public.user_items (user_id, updated_at, item_id)

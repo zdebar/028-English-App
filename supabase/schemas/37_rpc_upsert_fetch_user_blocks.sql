@@ -8,6 +8,8 @@ RETURNS TABLE (
   block_id INTEGER,
   name TEXT,
   note TEXT,
+  lesson_id INTEGER,
+  grammar_id INTEGER,
   sort_order INTEGER,
   progress INTEGER,
   is_vocabulary BOOLEAN,

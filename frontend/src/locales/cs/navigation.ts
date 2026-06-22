@@ -1,7 +1,6 @@
 export const NAVIGATION_TEXTS = {
   // Header Tooltips
   tooltipHome: 'Domů',
-  tooltipPractice: 'Procvičovat',
   tooltipProfile: 'Profil',
   tooltipHelp: 'Nápověda',
   tooltipNotes: 'Poznámka',
