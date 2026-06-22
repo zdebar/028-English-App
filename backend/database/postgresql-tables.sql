@@ -60,6 +60,18 @@ CREATE TABLE IF NOT EXISTS blocks (
   deleted_at TIMESTAMPTZ
 );
 
+CREATE TABLE IF NOT EXISTS user_blocks (
+  block_id INTEGER NOT NULL REFERENCES blocks(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  progress INTEGER NOT NULL DEFAULT 0 CHECK (progress >= 0),
+  is_vocabulary BOOLEAN NOT NULL DEFAULT FALSE, -- distinguish between sentences and vocabulary items
+  started_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  next_at TIMESTAMPTZ,
+  mastered_at TIMESTAMPTZ,
+  PRIMARY KEY (block_id, user_id)
+);
+
 CREATE TABLE IF NOT EXISTS notes (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
@@ -157,3 +169,10 @@ CREATE INDEX IF NOT EXISTS idx_user_items_item_user
 
 CREATE INDEX IF NOT EXISTS idx_user_items_history_item_id
   ON public.user_items_history (item_id);
+
+CREATE INDEX IF NOT EXISTS idx_user_blocks_user_updated_block
+  ON public.user_blocks (user_id, updated_at, block_id)
+  INCLUDE (progress, started_at, next_at, mastered_at);
+
+CREATE INDEX IF NOT EXISTS idx_user_blocks_user_block
+  ON public.user_blocks (user_id, block_id);

@@ -42,6 +42,21 @@ export interface UserScoreType {
   deleted_at: string | null;
 }
 
+export interface UserBlockType {
+  user_id: string;
+  block_id: number;
+  name: string;
+  note: string;
+  sort_order: number;
+  progress: number;
+  is_vocabulary: boolean;
+  started_at: string;
+  updated_at: string;
+  next_at: string;
+  mastered_at: string;
+  deleted_at: string;
+}
+
 export interface UserInfoType {
   id: string; // string for the user
   name: string | null; // User's full name

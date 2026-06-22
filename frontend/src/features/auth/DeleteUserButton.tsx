@@ -1,5 +1,6 @@
 import { supabaseInstance } from '@/config/supabase.config';
 import Metadata from '@/database/models/metadata';
+import UserBlock from '@/database/models/user-blocks';
 import UserItem from '@/database/models/user-items';
 import UserScoreType from '@/database/models/user-scores';
 import { clearAllLocalStorageForUser } from '@/utils/storage.utils';
@@ -39,6 +40,8 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
         [
           UserItem.deleteByUserId(userId),
           Metadata.deleteSyncRow(TableName.UserItems, userId),
+          UserBlock.deleteByUserId(userId),
+          Metadata.deleteSyncRow(TableName.UserBlocks, userId),
           UserScoreType.deleteByUserId(userId),
           Metadata.deleteSyncRow(TableName.UserScores, userId),
         ],

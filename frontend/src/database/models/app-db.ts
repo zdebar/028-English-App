@@ -4,11 +4,11 @@ import type Grammar from '@/database/models/grammar';
 import type AudioRecord from '@/database/models/audio-records';
 import type UserItem from '@/database/models/user-items';
 import type UserScore from '@/database/models/user-scores';
+import type UserBlock from '@/database/models/user-blocks';
 import type AudioMetadata from '@/database/models/audio-metadata';
 import type Metadata from '@/database/models/metadata';
 import type Lessons from '@/database/models/lessons';
 import type Levels from '@/database/models/levels';
-import type Blocks from '@/database/models/blocks';
 import type Notes from '@/database/models/notes';
 
 /**
@@ -21,11 +21,11 @@ import type Notes from '@/database/models/notes';
 export default class AppDB extends Dexie {
   levels!: EntityTable<Levels, 'id'>;
   lessons!: EntityTable<Lessons, 'id'>;
-  blocks!: EntityTable<Blocks, 'id'>;
   notes!: EntityTable<Notes, 'id'>;
   grammar!: EntityTable<Grammar, 'id'>;
   user_items!: EntityTable<UserItem, any>;
   user_scores!: EntityTable<UserScore, any>;
+  user_blocks!: EntityTable<UserBlock, any>;
   audio_records!: EntityTable<AudioRecord, 'filename'>;
   audio_metadata!: EntityTable<AudioMetadata, 'archive_name'>;
   metadata!: EntityTable<Metadata, any>;
@@ -46,6 +46,11 @@ export default class AppDB extends Dexie {
       audio_records: 'filename',
       audio_metadata: 'archive_name',
       metadata: '[table_name+user_id]',
+    });
+
+    this.version(2).stores({
+      blocks: null,
+      user_blocks: '[user_id+block_id], user_id, [user_id+updated_at], [user_id+sort_order]',
     });
   }
 }

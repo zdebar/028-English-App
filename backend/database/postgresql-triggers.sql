@@ -51,5 +51,10 @@ BEFORE UPDATE ON public.user_scores
 FOR EACH ROW
 EXECUTE FUNCTION public.set_updated_at();
 
+DROP TRIGGER IF EXISTS trg_set_updated_at__user_blocks ON public.user_blocks;
+CREATE TRIGGER trg_set_updated_at__user_blocks
+BEFORE UPDATE ON public.user_blocks
+FOR EACH ROW
+EXECUTE FUNCTION public.set_updated_at();
 
 

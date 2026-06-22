@@ -1,0 +1,44 @@
+CREATE OR REPLACE FUNCTION public.upsert_fetch_user_blocks(
+  p_user_id UUID,
+  p_last_synced_at TIMESTAMPTZ,
+  p_user_blocks JSONB DEFAULT '[]'::JSONB
+)
+RETURNS TABLE (
+  user_id UUID,
+  block_id INTEGER,
+  name TEXT,
+  note TEXT,
+  sort_order INTEGER,
+  progress INTEGER,
+  is_vocabulary BOOLEAN,
+  started_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ,
+  next_at TIMESTAMPTZ,
+  mastered_at TIMESTAMPTZ,
+  deleted_at TIMESTAMPTZ
+)
+LANGUAGE plpgsql
+SET search_path TO public
+AS $$
+BEGIN
+  PERFORM public.require_auth_user_id_match(p_user_id);
+
+  IF p_user_blocks IS NOT NULL AND p_user_blocks <> '[]'::JSONB THEN
+    IF EXISTS (
+      SELECT 1
+      FROM jsonb_array_elements(p_user_blocks) AS entry
+      WHERE (entry->>'user_id')::UUID IS DISTINCT FROM p_user_id
+    ) THEN
+      RAISE EXCEPTION 'p_user_id does not match at least one user_id in p_user_blocks';
+    END IF;
+    PERFORM public.upsert_user_blocks(p_user_blocks);
+  END IF;
+
+  RETURN QUERY
+  SELECT *
+  FROM public.fetch_user_blocks(p_user_id, p_last_synced_at);
+END;
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.upsert_fetch_user_blocks(UUID, TIMESTAMPTZ, JSONB) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.upsert_fetch_user_blocks(UUID, TIMESTAMPTZ, JSONB) TO authenticated;

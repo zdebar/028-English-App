@@ -8,10 +8,10 @@ import { useArray } from '@/hooks/use-array';
 import { TEXTS } from '@/locales/cs';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useMemo } from 'react';
-import Blocks from '@/database/models/blocks';
+import UserBlock from '@/database/models/user-blocks';
 import { useFetch } from '@/hooks/use-fetch';
 import { useNavigate, useParams } from 'react-router-dom';
-import type { BlockType } from '@/types/generic.types';
+import type { UserBlockType } from '@/types/generic.types';
 import { DataState } from '@/components/UI/DataState';
 import { ListButton } from '@/components/UI/buttons/ListButton';
 import HelpButton from '../help/HelpButton';
@@ -37,18 +37,18 @@ export default function BlockItemsOverview() {
     navigate(ROUTES.blocks);
   }
 
-  const fetchBlock = useCallback(async (): Promise<BlockType | null> => {
-    if (!blockId) return null;
+  const fetchBlock = useCallback(async (): Promise<UserBlockType | null> => {
+    if (!userId || !blockId) return null;
     try {
-      return await Blocks.getById(blockId);
+      return await UserBlock.getByBlockId(userId, blockId);
     } catch (err) {
       showToast(TEXTS.loadingError, 'error');
       reportError('Failed to fetch block details', err);
       throw err;
     }
-  }, [blockId]);
+  }, [userId, blockId, showToast]);
 
-  const { data: block, loading: blockLoading } = useFetch<BlockType>(fetchBlock);
+  const { data: block, loading: blockLoading } = useFetch<UserBlockType>(fetchBlock);
 
   // -- Items management --
   const fetchBlockItems = useCallback(async () => {

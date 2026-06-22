@@ -30,6 +30,7 @@ import Metadata from '@/database/models/metadata';
 describe('Metadata', () => {
   const sharedTable = 'grammar' as any;
   const userTable = 'user_items' as any;
+  const userBlocksTable = 'user_blocks' as any;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -76,6 +77,12 @@ describe('Metadata', () => {
         user_id: 'u1',
         synced_at: '2026-02-28T10:00:00.000Z',
       });
+    });
+
+    it('requires user id for user_blocks sync metadata', async () => {
+      await expect(
+        Metadata.markAsSynced(userBlocksTable, '2026-02-28T10:00:00.000Z'),
+      ).rejects.toThrow('userId is required');
     });
 
     it('uses null replacement user id for shared table', async () => {

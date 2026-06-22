@@ -1,6 +1,6 @@
 import config from '@/config/config';
-import Blocks from '@/database/models/blocks';
 import { initDbMappings } from '@/database/models/db-init';
+import UserBlock from '@/database/models/user-blocks';
 import UserItem from '@/database/models/user-items';
 import UserScoreType from '@/database/models/user-scores';
 import { restoreUnsavedFromLocalStorage } from '@/database/utils/database.utils';
@@ -41,8 +41,8 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
         Grammar.syncFromRemote(true),
         Levels.syncFromRemote(true),
         Lessons.syncFromRemote(true),
-        Blocks.syncFromRemote(true),
         Notes.syncFromRemote(true),
+        UserBlock.syncFromRemote(userId, true),
         UserScoreType.syncFromRemote(userId, true),
         UserItem.syncFromRemote(userId, true),
       ]
@@ -50,14 +50,14 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
         Grammar.syncFromRemote(false),
         Levels.syncFromRemote(false),
         Lessons.syncFromRemote(false),
-        Blocks.syncFromRemote(false),
         Notes.syncFromRemote(false),
+        UserBlock.syncFromRemote(userId, false),
         UserScoreType.syncFromRemote(userId, false),
         UserItem.syncFromRemote(userId, false),
       ];
 
   // Keep a parallel list of human-readable table names to report per-table completions.
-  const tableNames = ['Grammar', 'Levels', 'Lessons', 'Blocks', 'Notes', 'UserScores', 'UserItems'];
+  const tableNames = ['Grammar', 'Levels', 'Lessons', 'Notes', 'UserBlocks', 'UserScores', 'UserItems'];
 
   const results = await Promise.allSettled(allPromises);
 
@@ -100,6 +100,7 @@ export async function dataSyncOnUnmount(userId: string): Promise<void> {
   }
 
   const results = await Promise.allSettled([
+    UserBlock.syncFromRemote(userId, false),
     UserScoreType.syncFromRemote(userId, false),
     UserItem.syncFromRemote(userId, false),
   ]);

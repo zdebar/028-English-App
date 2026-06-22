@@ -60,6 +60,12 @@ vi.mock('@/database/models/user-items', () => ({
   },
 }));
 
+vi.mock('@/database/models/user-blocks', () => ({
+  default: {
+    getByBlockId: vi.fn(),
+  },
+}));
+
 vi.mock('@/features/logging/monitoring-handler', () => ({
   reportInfo: (...args: unknown[]) => mocks.reportInfo(...args),
   reportError: (...args: unknown[]) => mocks.reportError(...args),
@@ -142,7 +148,7 @@ describe('BlockItemsOverview', () => {
     mocks.blockId = '2';
     mocks.state.items = [];
     mocks.state.itemsLoading = false;
-    mocks.state.block = { id: 2, name: 'Block 2' };
+    mocks.state.block = { block_id: 2, name: 'Block 2' };
     mocks.state.blockLoading = false;
     mocks.playAudio.mockReset();
   });

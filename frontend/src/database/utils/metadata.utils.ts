@@ -6,7 +6,11 @@ import { TableName } from '@/types/table.types';
  * @returns `true` if the table is a user-specific table (UserScores or UserItems), `false` otherwise.
  */
 export function isUserSpecificTable(tableName: string): boolean {
-  return tableName === TableName.UserScores || tableName === TableName.UserItems;
+  return (
+    tableName === TableName.UserScores ||
+    tableName === TableName.UserItems ||
+    tableName === TableName.UserBlocks
+  );
 }
 
 /**

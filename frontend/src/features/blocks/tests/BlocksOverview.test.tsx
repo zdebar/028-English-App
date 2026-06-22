@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   state: {
-    data: [] as Array<{ id: number; name: string }>,
+    data: [] as Array<{ block_id: number; name: string }>,
     error: null as string | null,
     loading: false,
   },
@@ -14,9 +14,9 @@ vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
 }));
 
-vi.mock('@/database/models/blocks', () => ({
+vi.mock('@/database/models/user-blocks', () => ({
   default: {
-    getAll: vi.fn(),
+    getByUserId: vi.fn(),
   },
 }));
 
@@ -87,8 +87,8 @@ describe('BlocksOverview', () => {
 
   it('renders block list and navigates to block detail on click', () => {
     mocks.state.data = [
-      { id: 1, name: 'Dny v tydnu' },
-      { id: 2, name: 'Mesice' },
+      { block_id: 1, name: 'Dny v tydnu' },
+      { block_id: 2, name: 'Mesice' },
     ];
 
     render(<BlocksOverview />);
