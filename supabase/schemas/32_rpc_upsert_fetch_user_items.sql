@@ -10,7 +10,6 @@ RETURNS TABLE (
   english TEXT,
   pronunciation TEXT,
   audio TEXT,
-  is_study_item BOOLEAN,
   is_vocabulary BOOLEAN,
   sort_order INTEGER,
   note_id INTEGER,

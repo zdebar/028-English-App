@@ -121,14 +121,14 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
 
     const now = new Date().toISOString();
     const readyItems = await db.user_items
-      .where('[user_id+is_vocabulary+next_at+mastered_at+sort_order+is_study_item]')
+      .where('[user_id+is_vocabulary+next_at+mastered_at+sort_order]')
       .between(
-        [userId, 0, Dexie.minKey, NULL_DATE, Dexie.minKey, 1],
-        [userId, 0, now, NULL_DATE, Dexie.maxKey, 1],
+        [userId, 0, Dexie.minKey, NULL_DATE, Dexie.minKey],
+        [userId, 0, now, NULL_DATE, Dexie.maxKey],
         true,
         false,
       )
-      .filter((item) => item.mastered_at === NULL_DATE && item.is_study_item === 1)
+      .filter((item) => item.mastered_at === NULL_DATE)
       .toArray();
 
     return readyItems.length;

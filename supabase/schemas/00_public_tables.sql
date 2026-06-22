@@ -88,7 +88,6 @@ CREATE TABLE IF NOT EXISTS items (
   pronunciation TEXT,
   audio TEXT,
   note_id INTEGER REFERENCES notes(id) ON DELETE SET NULL,
-  is_study_item BOOLEAN NOT NULL DEFAULT TRUE, -- true - will show in PracticeDeck, if false - only in Blocks (intended for spelling)
   sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 0), 
   block_id INTEGER NOT NULL REFERENCES blocks(id) ON DELETE RESTRICT,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

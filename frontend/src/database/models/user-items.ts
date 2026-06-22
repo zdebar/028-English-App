@@ -29,7 +29,6 @@ const SIM_COUNT = config.progress.simulationCount;
 
 type UserItemAPI = Omit<
   UserItemLocal,
-  | 'is_study_item'
   | 'is_vocabulary'
   | 'block_id'
   | 'grammar_id'
@@ -38,7 +37,6 @@ type UserItemAPI = Omit<
   | 'next_at'
   | 'mastered_at'
 > & {
-  is_study_item: boolean;
   is_vocabulary: boolean;
   block_id: number | null;
   grammar_id: number | null;
@@ -77,7 +75,6 @@ function convertLocalToExport(localItem: UserItemLocal): UserItemExport {
 function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
   return {
     ...apiItem,
-    is_study_item: apiItem.is_study_item ? 1 : 0,
     is_vocabulary: apiItem.is_vocabulary ? 1 : 0,
     started_at: apiItem.started_at ?? NULL_DATE,
     next_at: apiItem.next_at ?? NULL_DATE,
@@ -97,7 +94,7 @@ function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
  * @method getByUserId - Retrieves user items for a specific user. Sorted by sort_order.
  * @method getByBlockId - Retrieves user items for a specific user and block ID. Sorted by sort_order.
  * @method getStartedGrammarIds - Retrieves a list of unique grammar IDs for items that have been started by a user.
- * @method getStartedBlocksIds - Retrieves a list of unique block IDs for items that have been started by a user or not intended as study items.
+ * @method getStartedBlocksIds - Retrieves a list of unique block IDs for items that have been started by a user.
  * @method getStartedVocabulary - Retrieves vocabulary items for a user that have been started (begun learning). Sorted by czech word.
  * @method resetItemById - Resets a user item to its default state by user and item ID.
  * @method resetItemsByGrammarId - Resets all user items associated with a specific grammar ID to their default state for a given user.
@@ -113,7 +110,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   english!: string;
   pronunciation!: string;
   audio!: string | null;
-  is_study_item!: 0 | 1; // boolean represented as 0 or 1
   is_vocabulary!: 0 | 1; // boolean represented as 0 or 1
   sort_order!: number;
   note_id!: number;
@@ -252,7 +248,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         true,
         true,
       )
-      .filter((item) => item.is_study_item === 1)
       .toArray();
 
     return vocabularyItems.length > 0 && vocabularyItems.every((item) => item.started_at !== NULL_DATE);
@@ -273,14 +268,14 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Retrieves a list of unique block IDs for items that have been started by a user or not intended as study items.
+   * Retrieves a list of unique block IDs for items that have been started by a user.
    * @param userId - The ID of the user
    */
   static async getStartedBlocksIds(userId: string): Promise<number[]> {
     const startedItems = await db.user_items
       .where('[user_id+started_at]')
       .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
-      .filter((item) => item.block_id !== NULL_NUMBER || item.is_study_item === 0)
+      .filter((item) => item.block_id !== NULL_NUMBER)
       .toArray();
 
     return [...new Set(startedItems.map((item) => item.block_id))];
@@ -292,8 +287,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    */
   static async getStartedVocabulary(userId: string): Promise<UserItemLocal[]> {
     const result = await db.user_items
-      .where('[user_id+is_vocabulary+started_at+is_study_item]')
-      .between([userId, 1, Dexie.minKey, 1], [userId, 1, NULL_DATE, 1], true, false)
+      .where('[user_id+is_vocabulary+started_at]')
+      .between([userId, 1, Dexie.minKey], [userId, 1, NULL_DATE], true, false)
       .toArray();
     return result;
   }
@@ -499,10 +494,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const maxNextAt = isNew ? NULL_DATE : new Date().toISOString();
     const isVocabulary = mode === 'vocabulary' ? 1 : 0;
     return db.user_items
-      .where('[user_id+is_vocabulary+next_at+mastered_at+sort_order+is_study_item]')
+      .where('[user_id+is_vocabulary+next_at+mastered_at+sort_order]')
       .between(
-        [userId, isVocabulary, minNextAt, NULL_DATE, Dexie.minKey, 1],
-        [userId, isVocabulary, maxNextAt, NULL_DATE, Dexie.maxKey, 1],
+        [userId, isVocabulary, minNextAt, NULL_DATE, Dexie.minKey],
+        [userId, isVocabulary, maxNextAt, NULL_DATE, Dexie.maxKey],
         true,
         false,
       )

@@ -73,7 +73,6 @@ function makeItem(overrides: Partial<UserItemPractice> = {}): UserItemPractice {
     note_id: null,
     pronunciation: 'həˈloʊ',
     audio: 'hello.opus',
-    is_study_item: 1,
     is_vocabulary: 0,
     sort_order: 1,
     block_id: 0,
@@ -92,7 +91,6 @@ function makeItem(overrides: Partial<UserItemPractice> = {}): UserItemPractice {
 
   return {
     ...item,
-    is_study_item: item.is_study_item ?? 1,
   };
 }
 

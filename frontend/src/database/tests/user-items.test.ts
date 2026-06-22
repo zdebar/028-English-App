@@ -265,7 +265,6 @@ describe('UserItem', () => {
           english: 'two',
           pronunciation: 'two',
           audio: null,
-          is_study_item: true,
           is_vocabulary: true,
           sort_order: 2,
           note_id: null,
@@ -311,7 +310,6 @@ describe('UserItem', () => {
     expect(mocks.bulkPut).toHaveBeenCalledWith([
       expect.objectContaining({
         item_id: 2,
-        is_study_item: 1,
         is_vocabulary: 1,
         block_id: 0,
         grammar_id: 0,
