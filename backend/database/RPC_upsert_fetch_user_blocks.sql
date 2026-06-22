@@ -20,10 +20,12 @@ RETURNS TABLE (
 LANGUAGE plpgsql
 SET search_path TO public
 AS $$
+DECLARE
+  v_empty_json CONSTANT JSONB := '[]'::JSONB;
 BEGIN
   PERFORM public.require_auth_user_id_match(p_user_id);
 
-  IF p_user_blocks IS NOT NULL AND p_user_blocks <> '[]'::JSONB THEN
+  IF p_user_blocks IS NOT NULL AND p_user_blocks <> v_empty_json THEN
     IF EXISTS (
       SELECT 1
       FROM jsonb_array_elements(p_user_blocks) AS entry

@@ -25,14 +25,21 @@ begin
 end;
 $$;
 
-select cron.unschedule('delete-anonymous-users-daily')
-where exists (select 1 from cron.job where jobname = 'delete-anonymous-users-daily');
+create extension if not exists pg_cron;
 
-select cron.schedule(
-  'delete-anonymous-users-daily',
-  '0 3 * * *',
-  $$select public.delete_is_anonymous_users_older_than();$$
-);
+do $do$
+declare
+  v_job_name constant text := 'delete-anonymous-users-daily';
+begin
+  perform cron.unschedule(v_job_name)
+  where exists (select 1 from cron.job where jobname = v_job_name);
 
-revoke execute on function public.delete_is_anonymous_users_older_than
+  perform cron.schedule(
+    v_job_name,
+    '0 3 * * *',
+    $cron$select public.delete_is_anonymous_users_older_than();$cron$
+  );
+end $do$;
+
+revoke execute on function public.delete_is_anonymous_users_older_than()
 from anon, public;

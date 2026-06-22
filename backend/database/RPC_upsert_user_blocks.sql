@@ -16,12 +16,14 @@ DECLARE
   v_updated_at TIMESTAMPTZ;
   v_next_at TIMESTAMPTZ;
   v_mastered_at TIMESTAMPTZ;
+  v_empty_json CONSTANT JSONB := '[]'::JSONB;
+  v_null_text CONSTANT TEXT := 'null';
   v_row_count INT := 0;
   v_upserted_count INT := 0;
   v_skipped_count INT := 0;
   v_error_count INT := 0;
 BEGIN
-  IF p_user_blocks IS NULL OR p_user_blocks = '[]'::JSONB THEN
+  IF p_user_blocks IS NULL OR p_user_blocks = v_empty_json THEN
     RETURN;
   END IF;
 
@@ -40,10 +42,10 @@ BEGIN
 
       v_progress := GREATEST((v_entry->>'progress')::INT, 0);
       v_is_vocabulary := COALESCE((v_entry->>'is_vocabulary')::BOOLEAN, FALSE);
-      v_started_at := NULLIF(v_entry->>'started_at', 'null')::TIMESTAMPTZ;
+      v_started_at := NULLIF(v_entry->>'started_at', v_null_text)::TIMESTAMPTZ;
       v_updated_at := (v_entry->>'updated_at')::TIMESTAMPTZ;
-      v_next_at := NULLIF(v_entry->>'next_at', 'null')::TIMESTAMPTZ;
-      v_mastered_at := NULLIF(v_entry->>'mastered_at', 'null')::TIMESTAMPTZ;
+      v_next_at := NULLIF(v_entry->>'next_at', v_null_text)::TIMESTAMPTZ;
+      v_mastered_at := NULLIF(v_entry->>'mastered_at', v_null_text)::TIMESTAMPTZ;
 
       INSERT INTO public.user_blocks (
         user_id,
@@ -65,7 +67,7 @@ BEGIN
         v_next_at,
         v_mastered_at
       )
-      ON CONFLICT (user_id, block_id)
+      ON CONFLICT (block_id, user_id)
       DO UPDATE SET
         progress = EXCLUDED.progress,
         is_vocabulary = EXCLUDED.is_vocabulary,

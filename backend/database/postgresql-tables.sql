@@ -14,6 +14,12 @@ on conflict (key) do update
 set value = excluded.value,
     updated_at = now();
 
+insert into private.settings (key, value)
+values ('is_anonymous_deletion', '"30 days"'::jsonb)
+on conflict (key) do update
+set value = excluded.value,
+    updated_at = now();
+
 SET search_path TO public;
 
 CREATE TABLE IF NOT EXISTS users (

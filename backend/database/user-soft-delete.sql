@@ -75,18 +75,23 @@ revoke execute on function private.hard_delete_deleted_users() from anon, authen
 -- 3) pg_cron setup + daily schedule
 create extension if not exists pg_cron;
 
--- Ensure the job is unique by name; remove/recreate to keep it idempotent
-select cron.unschedule('hard_delete_deleted_users_daily')
-where exists (
-  select 1 from cron.job
-  where jobname = 'hard_delete_deleted_users_daily'
-);
+do $do$
+declare
+  v_job_name constant text := 'hard_delete_deleted_users_daily';
+begin
+  -- Ensure the job is unique by name; remove/recreate to keep it idempotent
+  perform cron.unschedule(v_job_name)
+  where exists (
+    select 1 from cron.job
+    where jobname = v_job_name
+  );
 
--- pg_cron stores schedules in cron.job; jobname must be unique
-select cron.schedule(
-  'hard_delete_deleted_users_daily',
-  '0 3 * * *', -- daily at 03:00
-  $$select private.hard_delete_deleted_users();$$
-);
+  -- pg_cron stores schedules in cron.job; jobname must be unique
+  perform cron.schedule(
+    v_job_name,
+    '0 3 * * *', -- daily at 03:00
+    $cron$select private.hard_delete_deleted_users();$cron$
+  );
+end $do$;
 
 commit;
