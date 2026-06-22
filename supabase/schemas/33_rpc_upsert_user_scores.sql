@@ -16,8 +16,13 @@ DECLARE
   v_skipped_invalid INT := 0;
   v_error_count INT := 0;
   v_row_count INT := 0;
+  v_empty_json CONSTANT JSONB := '[]'::JSONB;
+  v_key_user_id CONSTANT TEXT := 'user_id';
+  v_key_date CONSTANT TEXT := 'date';
+  v_key_item_count CONSTANT TEXT := 'item_count';
+  v_key_updated_at CONSTANT TEXT := 'updated_at';
 BEGIN
-  IF p_user_scores IS NULL OR p_user_scores = '[]'::JSONB THEN
+  IF p_user_scores IS NULL OR p_user_scores = v_empty_json THEN
     RETURN;
   END IF;
 
@@ -25,12 +30,12 @@ BEGIN
 
   FOR v_entry IN SELECT * FROM jsonb_array_elements(p_user_scores) LOOP
     BEGIN
-      v_user_id := (v_entry->>'user_id')::UUID;
+      v_user_id := (v_entry->>v_key_user_id)::UUID;
       PERFORM public.assert_payload_user_id_matches_auth(v_user_id, v_auth_user_id);
 
-      v_date := (v_entry->>'date')::DATE;
-      v_item_count := GREATEST((v_entry->>'item_count')::INTEGER, 0);
-      v_updated_at := (v_entry->>'updated_at')::TIMESTAMPTZ;
+      v_date := (v_entry->>v_key_date)::DATE;
+      v_item_count := GREATEST((v_entry->>v_key_item_count)::INTEGER, 0);
+      v_updated_at := (v_entry->>v_key_updated_at)::TIMESTAMPTZ;
 
       INSERT INTO public.user_scores (user_id, date, item_count, updated_at)
       VALUES (v_user_id, v_date, v_item_count, v_updated_at)

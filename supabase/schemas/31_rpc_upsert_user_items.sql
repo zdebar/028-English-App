@@ -24,6 +24,13 @@ DECLARE
   v_null_text CONSTANT TEXT := 'null';
   v_key_user_id CONSTANT TEXT := 'user_id';
   v_key_item_id CONSTANT TEXT := 'item_id';
+  v_key_progress CONSTANT TEXT := 'progress';
+  v_key_started_at CONSTANT TEXT := 'started_at';
+  v_key_updated_at CONSTANT TEXT := 'updated_at';
+  v_key_next_at CONSTANT TEXT := 'next_at';
+  v_key_mastered_at CONSTANT TEXT := 'mastered_at';
+  v_key_progress_history CONSTANT TEXT := 'progress_history';
+  v_key_created_at CONSTANT TEXT := 'created_at';
   v_total_count INT := 0;
   v_matched_count INT := 0;
   v_skipped_count INT := 0;
@@ -53,11 +60,11 @@ BEGIN
         CONTINUE;
       END IF;
 
-      v_progress := GREATEST((v_entry->>'progress')::INT, 0);
-      v_started_at := NULLIF(v_entry->>'started_at', v_null_text)::TIMESTAMPTZ;
-      v_updated_at := (v_entry->>'updated_at')::TIMESTAMPTZ;
-      v_next_at := (v_entry->>'next_at')::TIMESTAMPTZ;
-      v_mastered_at := (v_entry->>'mastered_at')::TIMESTAMPTZ;
+      v_progress := GREATEST((v_entry->>v_key_progress)::INT, 0);
+      v_started_at := NULLIF(v_entry->>v_key_started_at, v_null_text)::TIMESTAMPTZ;
+      v_updated_at := (v_entry->>v_key_updated_at)::TIMESTAMPTZ;
+      v_next_at := (v_entry->>v_key_next_at)::TIMESTAMPTZ;
+      v_mastered_at := (v_entry->>v_key_mastered_at)::TIMESTAMPTZ;
 
       INSERT INTO public.user_items (
         user_id,
@@ -84,8 +91,8 @@ BEGIN
         updated_at = EXCLUDED.updated_at,
         next_at = EXCLUDED.next_at,
         mastered_at = EXCLUDED.mastered_at
-      WHERE COALESCE(EXCLUDED.updated_at, '-infinity'::timestamptz)
-        >= COALESCE(public.user_items.updated_at, '-infinity'::timestamptz);
+      WHERE COALESCE(EXCLUDED.updated_at, public.rpc_min_timestamptz())
+        >= COALESCE(public.user_items.updated_at, public.rpc_min_timestamptz());
 
       GET DIAGNOSTICS v_row_count = ROW_COUNT;
       v_matched_count := v_matched_count + COALESCE(v_row_count, 0);
@@ -139,21 +146,21 @@ BEGIN
         IF NOT EXISTS (SELECT 1 FROM public.items WHERE id = v_item_id) THEN
           CONTINUE;
         END IF;
-        FOR v_hist IN SELECT * FROM jsonb_array_elements(COALESCE(v_entry->'progress_history', v_empty_json)) LOOP
+        FOR v_hist IN SELECT * FROM jsonb_array_elements(COALESCE(v_entry->v_key_progress_history, v_empty_json)) LOOP
           BEGIN
             -- validate and parse created_at; if invalid, skip this hist entry
-            IF (v_hist->>'created_at') IS NULL THEN
+            IF (v_hist->>v_key_created_at) IS NULL THEN
               v_skipped_invalid := v_skipped_invalid + 1;
               CONTINUE;
             END IF;
             BEGIN
-              v_created_at := (v_hist->>'created_at')::timestamptz;
+              v_created_at := (v_hist->>v_key_created_at)::timestamptz;
             EXCEPTION WHEN others THEN
               v_skipped_invalid := v_skipped_invalid + 1;
               CONTINUE;
             END;
 
-            v_progress := (v_hist->>'progress')::INT;
+            v_progress := (v_hist->>v_key_progress)::INT;
 
             -- Insert if not exists (avoid duplicates). Use ON CONFLICT DO NOTHING if unique constraint added.
             BEGIN

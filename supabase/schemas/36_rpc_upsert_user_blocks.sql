@@ -18,6 +18,14 @@ DECLARE
   v_mastered_at TIMESTAMPTZ;
   v_empty_json CONSTANT JSONB := '[]'::JSONB;
   v_null_text CONSTANT TEXT := 'null';
+  v_key_user_id CONSTANT TEXT := 'user_id';
+  v_key_block_id CONSTANT TEXT := 'block_id';
+  v_key_progress CONSTANT TEXT := 'progress';
+  v_key_is_vocabulary CONSTANT TEXT := 'is_vocabulary';
+  v_key_started_at CONSTANT TEXT := 'started_at';
+  v_key_updated_at CONSTANT TEXT := 'updated_at';
+  v_key_next_at CONSTANT TEXT := 'next_at';
+  v_key_mastered_at CONSTANT TEXT := 'mastered_at';
   v_row_count INT := 0;
   v_upserted_count INT := 0;
   v_skipped_count INT := 0;
@@ -31,21 +39,21 @@ BEGIN
 
   FOR v_entry IN SELECT * FROM jsonb_array_elements(p_user_blocks) LOOP
     BEGIN
-      v_user_id := (v_entry->>'user_id')::UUID;
+      v_user_id := (v_entry->>v_key_user_id)::UUID;
       PERFORM public.assert_payload_user_id_matches_auth(v_user_id, v_auth_user_id);
 
-      v_block_id := (v_entry->>'block_id')::INT;
+      v_block_id := (v_entry->>v_key_block_id)::INT;
       IF NOT EXISTS (SELECT 1 FROM public.blocks WHERE id = v_block_id) THEN
         v_skipped_count := v_skipped_count + 1;
         CONTINUE;
       END IF;
 
-      v_progress := GREATEST((v_entry->>'progress')::INT, 0);
-      v_is_vocabulary := COALESCE((v_entry->>'is_vocabulary')::BOOLEAN, FALSE);
-      v_started_at := NULLIF(v_entry->>'started_at', v_null_text)::TIMESTAMPTZ;
-      v_updated_at := (v_entry->>'updated_at')::TIMESTAMPTZ;
-      v_next_at := NULLIF(v_entry->>'next_at', v_null_text)::TIMESTAMPTZ;
-      v_mastered_at := NULLIF(v_entry->>'mastered_at', v_null_text)::TIMESTAMPTZ;
+      v_progress := GREATEST((v_entry->>v_key_progress)::INT, 0);
+      v_is_vocabulary := COALESCE((v_entry->>v_key_is_vocabulary)::BOOLEAN, FALSE);
+      v_started_at := NULLIF(v_entry->>v_key_started_at, v_null_text)::TIMESTAMPTZ;
+      v_updated_at := (v_entry->>v_key_updated_at)::TIMESTAMPTZ;
+      v_next_at := NULLIF(v_entry->>v_key_next_at, v_null_text)::TIMESTAMPTZ;
+      v_mastered_at := NULLIF(v_entry->>v_key_mastered_at, v_null_text)::TIMESTAMPTZ;
 
       INSERT INTO public.user_blocks (
         user_id,
@@ -75,8 +83,8 @@ BEGIN
         updated_at = EXCLUDED.updated_at,
         next_at = EXCLUDED.next_at,
         mastered_at = EXCLUDED.mastered_at
-      WHERE COALESCE(EXCLUDED.updated_at, '-infinity'::timestamptz)
-        >= COALESCE(public.user_blocks.updated_at, '-infinity'::timestamptz);
+      WHERE COALESCE(EXCLUDED.updated_at, public.rpc_min_timestamptz())
+        >= COALESCE(public.user_blocks.updated_at, public.rpc_min_timestamptz());
 
       GET DIAGNOSTICS v_row_count = ROW_COUNT;
       v_upserted_count := v_upserted_count + COALESCE(v_row_count, 0);

@@ -25,14 +25,18 @@ SET search_path TO public
 AS $$
 DECLARE
   v_auth_user_id UUID;
+  v_default_param_name CONSTANT TEXT := 'p_user_id';
+  v_param_name TEXT;
 BEGIN
+  v_param_name := COALESCE(NULLIF(p_param_name, ''), v_default_param_name);
+
   IF p_user_id IS NULL THEN
-    RAISE EXCEPTION '% is required', COALESCE(NULLIF(p_param_name, ''), 'p_user_id');
+    RAISE EXCEPTION '% is required', v_param_name;
   END IF;
 
   v_auth_user_id := public.require_auth_user_id();
   IF v_auth_user_id IS DISTINCT FROM p_user_id THEN
-    RAISE EXCEPTION '% must match auth.uid()', COALESCE(NULLIF(p_param_name, ''), 'p_user_id');
+    RAISE EXCEPTION '% must match auth.uid()', v_param_name;
   END IF;
 
   RETURN v_auth_user_id;
