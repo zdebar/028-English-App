@@ -1,7 +1,6 @@
 export const ROUTES = {
   home: '/',
   privacyPolicy: '/privacy-policy',
-  practice: '/practice',
   practiceVocabulary: '/practice/vocabulary',
   practiceNewGrammar: '/practice/new-grammar',
   practiceGrammar: '/practice/grammar',
