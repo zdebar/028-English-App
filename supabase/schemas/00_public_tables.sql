@@ -8,18 +8,6 @@ CREATE TABLE IF NOT EXISTS private.settings (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-insert into private.settings (key, value)
-values ('soft_delete_retention', '"30 days"'::jsonb)
-on conflict (key) do update
-set value = excluded.value,
-    updated_at = now();
-
-insert into private.settings (key, value)
-values ('is_anonymous_deletion', '"30 days"'::jsonb)
-on conflict (key) do update
-set value = excluded.value,
-    updated_at = now();
-
 SET search_path TO public;
 
 CREATE TABLE IF NOT EXISTS users (

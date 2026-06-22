@@ -61,14 +61,32 @@ max_client_conn = 100
 enabled = true
 # Specifies an ordered list of schema files that describe your database.
 # Supports glob patterns relative to supabase directory: "./schemas/*.sql"
-schema_paths = []
+schema_paths = [
+  "./schemas/00_public_tables.sql",
+  "./schemas/10_updated_at_triggers.sql",
+  "./schemas/20_auth_helpers.sql",
+  "./schemas/30_rpc_fetch_user_items.sql",
+  "./schemas/31_rpc_upsert_user_items.sql",
+  "./schemas/32_rpc_upsert_fetch_user_items.sql",
+  "./schemas/33_rpc_upsert_user_scores.sql",
+  "./schemas/34_rpc_upsert_fetch_user_scores.sql",
+  "./schemas/35_rpc_fetch_user_blocks.sql",
+  "./schemas/36_rpc_upsert_user_blocks.sql",
+  "./schemas/37_rpc_upsert_fetch_user_blocks.sql",
+  "./schemas/40_user_lifecycle_functions.sql",
+  "./schemas/41_anonymous_cleanup_function.sql",
+  "./schemas/90_rls.sql",
+]
 
 [db.seed]
 # If enabled, seeds the database after migrations during a db reset.
 enabled = true
 # Specifies an ordered list of seed files to load during db reset.
 # Supports glob patterns relative to supabase directory: "./seeds/*.sql"
-sql_paths = ["./seed.sql"]
+sql_paths = [
+  "./seeds/00_private_settings.sql",
+  "./seeds/01_cron_schedules.sql",
+]
 
 [db.network_restrictions]
 # Enable management of network restrictions.

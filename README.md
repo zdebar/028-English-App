@@ -9,7 +9,7 @@ The main product is the web frontend in [frontend](frontend), supported by backe
 Main folders:
 
 - [frontend](frontend): React + TypeScript + Vite application
-- [backend/database](backend/database): PostgreSQL schema, triggers, and RPC SQL for Supabase
+- [supabase](supabase): Supabase CLI config, declarative schemas, seeds, and archived dumps
 - [scripts](scripts): preparation and utility scripts
 
 Repository docs:
@@ -174,22 +174,25 @@ Key frontend areas:
 
 ## Database and Backend Assets
 
-The SQL files in [backend/database](backend/database) are intended for Supabase SQL editor or migration usage.
+Supabase SQL is managed through the CLI layout in [supabase](supabase).
+Declarative database objects live in [supabase/schemas](supabase/schemas), and reset-time seed/operational SQL lives in [supabase/seeds](supabase/seeds).
 
 Important files include:
 
-- [backend/database/postgresql-tables.sql](backend/database/postgresql-tables.sql): core tables and indexes
-- [backend/database/postgresql-triggers.sql](backend/database/postgresql-triggers.sql): trigger wiring such as `updated_at`
-- [backend/database/RPC_fetch_user_items.sql](backend/database/RPC_fetch_user_items.sql): user item fetch RPC
-- [backend/database/RPC_upsert_user_items.sql](backend/database/RPC_upsert_user_items.sql): user item sync write RPC
-- [backend/database/RPC_upsert_user_scores.sql](backend/database/RPC_upsert_user_scores.sql): user score sync write RPC
-- [backend/database/RPC_upsert_fetch_user_items.sql](backend/database/RPC_upsert_fetch_user_items.sql): combined upsert + fetch RPC
-- [backend/database/RPC_upsert_fetch_user_scores.sql](backend/database/RPC_upsert_fetch_user_scores.sql): combined upsert + fetch RPC
+- [supabase/schemas/00_public_tables.sql](supabase/schemas/00_public_tables.sql): core tables and indexes
+- [supabase/schemas/10_updated_at_triggers.sql](supabase/schemas/10_updated_at_triggers.sql): trigger wiring such as `updated_at`
+- [supabase/schemas/20_auth_helpers.sql](supabase/schemas/20_auth_helpers.sql): shared RPC auth helpers
+- [supabase/schemas/30_rpc_fetch_user_items.sql](supabase/schemas/30_rpc_fetch_user_items.sql): user item fetch RPC
+- [supabase/schemas/35_rpc_fetch_user_blocks.sql](supabase/schemas/35_rpc_fetch_user_blocks.sql): user block fetch RPC
+- [supabase/schemas/40_user_lifecycle_functions.sql](supabase/schemas/40_user_lifecycle_functions.sql): user soft-delete/reactivation functions
+- [supabase/schemas/90_rls.sql](supabase/schemas/90_rls.sql): RLS policies and table grants
+- [supabase/seeds/00_private_settings.sql](supabase/seeds/00_private_settings.sql): private settings seed values
+- [supabase/seeds/01_cron_schedules.sql](supabase/seeds/01_cron_schedules.sql): local reset cron scheduling SQL
 
 Main domain tables/entities across the project:
 
 - `levels`, `lessons`, `items`, `grammar`, `blocks`, `notes`
-- `user_items`, `user_scores`
+- `user_items`, `user_scores`, `user_blocks`
 - sync metadata and user-linked records
 
 Important sync fields include:
