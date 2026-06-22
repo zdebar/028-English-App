@@ -176,6 +176,10 @@ CREATE INDEX IF NOT EXISTS idx_user_items_item_user
 CREATE INDEX IF NOT EXISTS idx_user_items_history_item_id
   ON public.user_items_history (item_id);
 
+CREATE INDEX IF NOT EXISTS idx_user_scores_user_updated_date
+  ON public.user_scores (user_id, updated_at, date)
+  INCLUDE (item_count, deleted_at);
+
 CREATE INDEX IF NOT EXISTS idx_user_blocks_user_updated_block
   ON public.user_blocks (user_id, updated_at, block_id)
   INCLUDE (progress, started_at, next_at, mastered_at);

@@ -4,7 +4,8 @@ begin;
 create or replace function public.soft_delete_user()
 returns boolean
 language plpgsql
-set search_path = public
+security definer
+set search_path = public, pg_catalog
 as $$
 declare
   v_count integer;
@@ -18,11 +19,15 @@ begin
 end;
 $$;
 
+revoke execute on function public.soft_delete_user() from public, anon;
+grant execute on function public.soft_delete_user() to authenticated;
+
 -- 1) Soft-delete reactivation RPC (single request; conditional update)
 create or replace function public.reactivate_user_if_deleted()
 returns boolean
 language plpgsql
-set search_path = public
+security definer
+set search_path = public, pg_catalog
 as $$
 declare
   v_count integer;
@@ -37,6 +42,9 @@ begin
   return v_count > 0;
 end;
 $$;
+
+revoke execute on function public.reactivate_user_if_deleted() from public, anon;
+grant execute on function public.reactivate_user_if_deleted() to authenticated;
 
 -- 2) Hard-delete function for retention (default: delete after 30 days)
 create schema if not exists private;
