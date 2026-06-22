@@ -258,8 +258,8 @@ vi.mock('@/features/practice/buttons/UnknownButton', () => ({
 }));
 
 vi.mock('@/features/practice/buttons/MasterItemButton', () => ({
-  default: ({ onConfirm }: any) => (
-    <button data-testid="master-btn" onClick={() => onConfirm()}>
+  default: ({ onConfirm, disabled }: any) => (
+    <button data-testid="master-btn" disabled={disabled} onClick={() => onConfirm()}>
       master
     </button>
   ),
@@ -274,6 +274,7 @@ vi.mock('@/features/practice/buttons/PlayAudioButton', () => ({
 }));
 
 import PracticeCard from '@/features/practice/PracticeCard';
+import PracticeSessionCard from '@/features/practice/PracticeSessionCard';
 
 describe('PracticeCard', () => {
   beforeEach(() => {
@@ -436,5 +437,34 @@ describe('PracticeCard', () => {
 
     expect(screen.getByTestId('overview-title').textContent).toContain('My note');
     expect(screen.getByTestId('overview-body').textContent).toContain('Body');
+  });
+
+  it('can disable the complete control for specialized practice sessions', () => {
+    render(
+      <PracticeSessionCard
+        currentItem={{ item_id: 1 }}
+        noteId={null}
+        grammarId={10}
+        progressLabel="Round 1/4"
+        isCzToEn
+        revealed
+        showNewGrammarIndicator={false}
+        czech="ahoj"
+        english="hello"
+        pronunciation="hello"
+        audioDisabled={false}
+        showDirectionChange={false}
+        handleReveal={vi.fn()}
+        plusHint={vi.fn()}
+        nextRepeat={vi.fn()}
+        nextKnown={vi.fn()}
+        completeDisabled
+        audioError={false}
+        playAudio={vi.fn()}
+        audioLoading={false}
+      />,
+    );
+
+    expect((screen.getByTestId('master-btn') as HTMLButtonElement).disabled).toBe(true);
   });
 });
