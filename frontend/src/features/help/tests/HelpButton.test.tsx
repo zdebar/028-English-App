@@ -30,8 +30,10 @@ describe('HelpButton', () => {
   it('renders help button with tooltip and icon', () => {
     render(<HelpButton />);
 
-    const button = screen.getByRole('button');
+    const button = screen.getByRole('button', { name: 'Help tooltip' });
     expect(button.getAttribute('title')).toBe('Help tooltip');
+    expect(button.className).toContain('secondary-control');
+    expect(button.className).toContain('size-help-button');
     expect(screen.getByTestId('question-icon')).toBeTruthy();
   });
 

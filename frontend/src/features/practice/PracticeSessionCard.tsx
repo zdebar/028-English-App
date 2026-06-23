@@ -2,12 +2,13 @@ import Indicator from '@/components/UI/Indicator';
 import Notification from '@/components/UI/Notification';
 import { STAR_SIZE } from '@/components/UI/StarProgress';
 import DelayedNotification from '@/components/UI/DelayedNotification';
+import PlayButton from '@/features/audio/PlayButton';
 import VolumeSlider from '@/features/audio/VolumeSlider';
 import GrammarDetailCard from '@/features/grammar/GrammarDetailCard';
 import { useGrammarViewer } from '@/features/grammar/use-grammar-viewer';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
-import NoteButton from '@/features/notes/NoteButton';
+import InfoButton from '@/features/notes/InfoButton';
 import NoteDetailCard from '@/features/notes/NoteDetailCard';
 import { useNoteViewer } from '@/features/notes/use-note-viewer';
 import { useUserStore } from '@/features/user-stats/use-user-store';
@@ -20,7 +21,6 @@ import RepeatButton from './buttons/RepeatButton';
 import PracticeStarsRow from './components/PracticeStarsRow';
 import { usePracticeStars } from './hooks/use-practice-stars';
 import type { UserItemPractice } from '@/types/user-item.types';
-import PlayIcon from '@/components/UI/icons/PlayIcon';
 
 export type PracticeSessionCardProps = Readonly<{
   currentItem: UserItemPractice | null;
@@ -70,16 +70,10 @@ export default function PracticeSessionCard({
   audioLoading,
 }: PracticeSessionCardProps) {
   const dailyCount = useUserStore((state) => state.dailyCount);
-  const {
-    isGrammarVisible,
-    grammarData,
-    openGrammar,
-    closeGrammar,
-  } = useGrammarViewer();
+  const { isGrammarVisible, grammarData, openGrammar, closeGrammar } = useGrammarViewer();
   const { isNoteVisible, noteData, openNote, closeNote } = useNoteViewer();
 
-  const { starChunk, starsPerRow, starCount, displayedChunkCount } =
-    usePracticeStars(dailyCount);
+  const { starChunk, starsPerRow, starCount, displayedChunkCount } = usePracticeStars(dailyCount);
 
   const cardText = revealed ? undefined : TEXTS.reveal;
   const cardStyle = revealed ? 'color-audio-disabled' : 'color-button';
@@ -189,22 +183,15 @@ export default function PracticeSessionCard({
         </div>
 
         <div className="pos-bottom-left-control">
-          <button
-            type="button"
+          <PlayButton
             onClick={playAudio}
             disabled={audioDisabled || showDirectionChange || audioLoading}
-            className="secondary-control relative flex cursor-pointer items-center justify-center disabled:cursor-default disabled:text-disabled-light dark:disabled:text-disabled-dark"
-            title={audioDisabled || showDirectionChange || audioLoading ? undefined : TEXTS.audio}
-            aria-label={TEXTS.audio}
-          >
-            <PlayIcon />
-            <HelpText className="-top-3.5 left-0">{TEXTS.audio}</HelpText>
-          </button>
+          />
           <VolumeSlider />
         </div>
         <div className="pos-bottom-right-control">
           {showNoteButton && (
-            <NoteButton
+            <InfoButton
               title={TEXTS.tooltipNotes}
               onClick={(e) => {
                 e.stopPropagation();

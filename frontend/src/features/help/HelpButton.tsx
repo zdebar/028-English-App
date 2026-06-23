@@ -1,7 +1,8 @@
+import SecondaryControlButton from '@/components/UI/buttons/SecondaryControlButton';
 import QuestionMarkIcon from '@/components/UI/icons/QuestionMarkIcon';
+import { TEXTS } from '@/locales/cs';
 import { useHelpStore } from './use-help-store';
 import type { JSX } from 'react';
-import { TEXTS } from '@/locales/cs';
 
 type HelpButtonProps = Readonly<{
   className?: string;
@@ -15,11 +16,15 @@ type HelpButtonProps = Readonly<{
  */
 export default function HelpButton({ className = '' }: HelpButtonProps): JSX.Element {
   const openHelp = useHelpStore((state) => state.openHelp);
-  const buttonClassName = `secondary-control size-help-button flex items-center justify-center cursor-pointer ${className}`;
 
   return (
-    <button type="button" className={buttonClassName} onClick={openHelp} title={TEXTS.tooltipHelp}>
+    <SecondaryControlButton
+      className={`size-help-button ${className}`}
+      onClick={openHelp}
+      title={TEXTS.tooltipHelp}
+      ariaLabel={TEXTS.tooltipHelp}
+    >
       <QuestionMarkIcon />
-    </button>
+    </SecondaryControlButton>
   );
 }

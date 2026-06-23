@@ -74,6 +74,13 @@ vi.mock('@/components/UI/PropertyView', () => ({
 }));
 
 vi.mock('@/features/help/HelpButton', () => ({ default: () => <div data-testid="help" /> }));
+vi.mock('@/features/notes/InfoButton', () => ({
+  default: ({ onClick, title }: any) => (
+    <button data-testid="info-button" aria-label="note" title={title} onClick={onClick}>
+      info
+    </button>
+  ),
+}));
 
 import VocabularyDetailCard from '@/features/vocabulary/VocabularyDetailCard';
 

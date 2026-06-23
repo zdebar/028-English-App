@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import SecondaryControlButton from '@/components/UI/buttons/SecondaryControlButton';
 import VolumeIcon from '@/components/UI/icons/VolumeIcon';
 import MuteIcon from '@/components/UI/icons/MuteIcon';
 import HalfVolumeIcon from '@/components/UI/icons/HalfVolumeIcon';
@@ -57,18 +58,16 @@ export default function VolumeSlider({ className = '' }: VolumeSliderProps) {
       ref={sliderRef}
       className={`secondary-control relative flex items-center justify-start ${className}`}
     >
-      <button
+      <SecondaryControlButton
         onClick={(event) => {
           event.stopPropagation();
           setShowVolumeSlider((prev) => !prev);
         }}
-        aria-label={ARIA_TEXTS.setVolume}
-        className="secondary-control flex cursor-pointer items-center justify-center"
-        disabled={false}
         title={TEXTS.volume}
+        ariaLabel={ARIA_TEXTS.setVolume}
       >
         {getVolumeIcon(volume)}
-      </button>
+      </SecondaryControlButton>
       {showVolumeSlider && (
         <input
           type="range"

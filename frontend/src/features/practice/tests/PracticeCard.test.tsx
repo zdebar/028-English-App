@@ -246,6 +246,14 @@ vi.mock('@/features/audio/VolumeSlider', () => ({
   ),
 }));
 
+vi.mock('@/features/notes/InfoButton', () => ({
+  default: ({ onClick, title }: any) => (
+    <button data-testid="info-button" aria-label="note" title={title} onClick={onClick}>
+      <span data-testid="info-icon" />
+    </button>
+  ),
+}));
+
 vi.mock('@/features/practice/buttons/HintButton', () => ({
   default: ({ onClick }: any) => (
     <button data-testid="hint-btn" onClick={onClick}>
@@ -282,14 +290,6 @@ vi.mock('@/features/practice/buttons/MasterItemButton', () => ({
   default: ({ onConfirm, disabled }: any) => (
     <button data-testid="master-btn" disabled={disabled} onClick={() => onConfirm()}>
       master
-    </button>
-  ),
-}));
-
-vi.mock('@/features/practice/buttons/PlayAudioButton', () => ({
-  default: ({ onClick }: any) => (
-    <button data-testid="play-audio-btn" onClick={onClick}>
-      play
     </button>
   ),
 }));

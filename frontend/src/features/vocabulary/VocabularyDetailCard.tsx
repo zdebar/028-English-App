@@ -5,10 +5,9 @@ import HelpButton from '@/features/help/HelpButton';
 import { shortenDate } from '@/features/vocabulary/vocabulary.utils';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
+import PlayButton from '@/features/audio/PlayButton';
 import VolumeSlider from '../audio/VolumeSlider';
-import PlayIcon from '@/components/UI/icons/PlayIcon';
-import HelpText from '../help/HelpText';
-import NoteButton from '@/features/notes/NoteButton';
+import InfoButton from '@/features/notes/InfoButton';
 import NoteDetailCard from '@/features/notes/NoteDetailCard';
 import { useNoteViewer } from '@/features/notes/use-note-viewer';
 import { useToastStore } from '@/features/toast/use-toast-store';
@@ -93,7 +92,7 @@ export default function VocabularyDetailCard({
         </div>
       </div>
       <div className="pos-bottom-left-control">
-        <button
+        <PlayButton
           onClick={async () => {
             if (!selectedWord?.audio) return;
             const didPlay = await playAudio(selectedWord.audio);
@@ -102,23 +101,14 @@ export default function VocabularyDetailCard({
             }
           }}
           disabled={
-            !selectedWord?.audio ||
-            audioLoading ||
-            audioError ||
-            !isAudioReady(selectedWord.audio)
+            !selectedWord?.audio || audioLoading || audioError || !isAudioReady(selectedWord.audio)
           }
-          className="secondary-control relative flex cursor-pointer items-center justify-center disabled:cursor-default disabled:text-disabled-light dark:disabled:text-disabled-dark"
-          title={TEXTS.audio}
-          aria-label={TEXTS.audio}
-        >
-          <PlayIcon />
-          <HelpText className="-top-3.5 left-0">{TEXTS.audio}</HelpText>
-        </button>
+        />
         <VolumeSlider />
       </div>
       <div className="pos-bottom-right-control">
         {noteId && (
-          <NoteButton
+          <InfoButton
             title={TEXTS.tooltipNotes}
             onClick={(e) => {
               e.stopPropagation();
