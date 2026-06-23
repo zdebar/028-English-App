@@ -1,6 +1,7 @@
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { UserItemPractice } from '@/types/user-item.types';
 
 const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => ({
   userId: 'u1',
@@ -13,18 +14,32 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
   closeGrammar: vi.fn(),
   handleNote: vi.fn(),
   closeNote: vi.fn(),
+  makePracticeItem: (overrides: Partial<UserItemPractice> = {}): UserItemPractice => ({
+    user_id: 'u1',
+    item_id: 1,
+    czech: 'ahoj',
+    english: 'hello',
+    pronunciation: 'həˈloʊ',
+    audio: 'hello.opus',
+    sort_order: 1,
+    progress: 2,
+    progress_history: [],
+    note_id: null,
+    lesson_id: 1,
+    updated_at: '2024-01-01T00:00:00.000Z',
+    is_vocabulary: 1,
+    block_id: 1,
+    grammar_id: 10,
+    started_at: '2024-01-01T00:00:00.000Z',
+    deleted_at: '9999-12-31T00:00:00.000Z',
+    next_at: '2024-01-01T00:00:00.000Z',
+    mastered_at: '9999-12-31T00:00:00.000Z',
+    show_new_grammar_indicator: false,
+    ...overrides,
+  }),
   practiceDeck: {
     index: 0,
-    currentItem: {
-      item_id: 1,
-      czech: 'ahoj',
-      english: 'hello',
-      pronunciation: 'həˈloʊ',
-      audio: 'hello.opus',
-      grammar_id: 10,
-      progress: 2,
-      show_new_grammar_indicator: false,
-    },
+    currentItem: null as UserItemPractice | null,
     noteId: null,
     grammarId: 10,
     progress: 2,
@@ -58,6 +73,8 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     }),
   } as any,
 }));
+
+mocks.practiceDeck.currentItem = mocks.makePracticeItem();
 
 vi.mock('@/config/config', () => ({
   default: {
@@ -288,7 +305,7 @@ describe('PracticeCard', () => {
     mocks.noteData = null;
     mocks.dailyCount = 5;
     mocks.practiceDeck.index = 0;
-    mocks.practiceDeck.currentItem = {
+    mocks.practiceDeck.currentItem = mocks.makePracticeItem({
       item_id: 1,
       czech: 'ahoj',
       english: 'hello',
@@ -297,7 +314,7 @@ describe('PracticeCard', () => {
       grammar_id: 10,
       progress: 2,
       show_new_grammar_indicator: false,
-    };
+    });
     mocks.practiceDeck.noteId = null;
     mocks.practiceDeck.grammarId = 10;
     mocks.practiceDeck.progress = 2;
@@ -442,7 +459,7 @@ describe('PracticeCard', () => {
   it('can disable the complete control for specialized practice sessions', () => {
     render(
       <PracticeSessionCard
-        currentItem={{ item_id: 1 }}
+        currentItem={mocks.makePracticeItem()}
         noteId={null}
         grammarId={10}
         progressLabel="Round 1/4"

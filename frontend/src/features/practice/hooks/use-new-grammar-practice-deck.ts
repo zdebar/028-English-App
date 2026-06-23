@@ -8,7 +8,7 @@ import type { GrammarDetail } from '@/features/grammar/GrammarDetailCard';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { TEXTS } from '@/locales/cs';
 import type { UserBlockType } from '@/types/generic.types';
-import type { UserItemLocal } from '@/types/user-item.types';
+import type { UserItemPractice } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { NBSP, useHint } from './use-hint';
 
@@ -28,10 +28,10 @@ function getRoundTarget(round: NewGrammarRound): number {
 }
 
 function pickRandomItem(
-  items: UserItemLocal[],
+  items: UserItemPractice[],
   progressByItemId: Map<number, number>,
   target: number,
-): UserItemLocal | null {
+): UserItemPractice | null {
   const candidates = items.filter((item) => (progressByItemId.get(item.item_id) ?? 0) < target);
   if (candidates.length === 0) return null;
   return candidates[Math.floor(Math.random() * candidates.length)] ?? null;
@@ -39,11 +39,11 @@ function pickRandomItem(
 
 export function useNewGrammarPracticeDeck(userId: string | null) {
   const [block, setBlock] = useState<UserBlockType | null>(null);
-  const [items, setItems] = useState<UserItemLocal[]>([]);
+  const [items, setItems] = useState<UserItemPractice[]>([]);
   const [grammar, setGrammar] = useState<GrammarDetail | null>(null);
   const [round, setRound] = useState<NewGrammarRound>(0);
   const [orderedIndex, setOrderedIndex] = useState(0);
-  const [randomItem, setRandomItem] = useState<UserItemLocal | null>(null);
+  const [randomItem, setRandomItem] = useState<UserItemPractice | null>(null);
   const [progressByItemId, setProgressByItemId] = useState<Map<number, number>>(() => new Map());
   const [isComplete, setIsComplete] = useState(false);
   const [revealed, setRevealed] = useState(false);
@@ -59,7 +59,12 @@ export function useNewGrammarPracticeDeck(userId: string | null) {
         return;
       }
 
-      const blockItems = await UserItem.getByBlockId(userId, nextBlock.block_id);
+      const blockItems = (await UserItem.getByBlockId(userId, nextBlock.block_id)).map(
+        (item): UserItemPractice => ({
+          ...item,
+          show_new_grammar_indicator: false,
+        }),
+      );
       const grammarData =
         nextBlock.grammar_id == null ? null : await Grammar.getById(nextBlock.grammar_id);
       const initialProgress = new Map(blockItems.map((item) => [item.item_id, 0]));
