@@ -172,9 +172,11 @@ describe('VocabularyDetailCard', () => {
       />,
     );
 
-    expect((screen.getByRole('button', { name: 'Audio' }) as HTMLButtonElement).disabled).toBe(
-      true,
-    );
+    const button = screen.getByRole('button', { name: 'Audio' }) as HTMLButtonElement;
+
+    expect(button.disabled).toBe(true);
+    expect(button.className).toContain('disabled:text-disabled-light');
+    expect(button.className).toContain('dark:disabled:text-disabled-dark');
   });
 
   it('shows error toast when playback fails', async () => {

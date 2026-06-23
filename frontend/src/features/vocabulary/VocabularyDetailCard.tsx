@@ -107,7 +107,7 @@ export default function VocabularyDetailCard({
             audioError ||
             !isAudioReady(selectedWord.audio)
           }
-          className="secondary-control relative flex cursor-pointer items-center justify-center"
+          className="secondary-control relative flex cursor-pointer items-center justify-center disabled:cursor-default disabled:text-disabled-light dark:disabled:text-disabled-dark"
           title={TEXTS.audio}
           aria-label={TEXTS.audio}
         >

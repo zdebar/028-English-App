@@ -26,4 +26,13 @@ describe('BaseButton', () => {
     expect(button.className).toContain('color-button');
     expect(button.className).toContain('h-input');
   });
+
+  it('keeps button background and grays content when disabled', () => {
+    render(<StyledButton disabled>Disabled</StyledButton>);
+
+    const button = screen.getByRole('button', { name: 'Disabled' });
+
+    expect(button.className).toContain('color-button');
+    expect(button.className).toContain('disabled:cursor-default');
+  });
 });

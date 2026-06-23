@@ -108,20 +108,12 @@ export default function PracticeSessionCard({
   return (
     <div className="help-btn-margin relative flex w-full grow flex-col items-center">
       <div className="card-width card-height relative gap-1">
-        <div
-          className={`relative flex h-full grow cursor-pointer flex-col items-center justify-between p-4 select-none ${cardStyle} `}
+        <button
+          type="button"
+          className={`relative flex h-full w-full grow cursor-pointer flex-col items-center justify-between p-4 text-inherit select-none ${cardStyle} `}
           onClick={handleReveal}
           title={cardText}
-          role="button"
-          tabIndex={0}
           aria-disabled={revealed}
-          onKeyDown={(e) => {
-            if (audioDisabled) return;
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              handleReveal();
-            }
-          }}
         >
           {!revealed && !showDirectionChange && (
             <HelpText className="center top-4">{TEXTS.reveal}</HelpText>
@@ -160,7 +152,7 @@ export default function PracticeSessionCard({
               {TEXTS.nextStarProgress}
             </HelpText>
           </div>
-        </div>
+        </button>
         <div id="practice-controls" className="relative grid w-full grid-cols-3 gap-1">
           <MasterItemButton
             onConfirm={() => {
@@ -201,7 +193,7 @@ export default function PracticeSessionCard({
             type="button"
             onClick={playAudio}
             disabled={audioDisabled || showDirectionChange || audioLoading}
-            className="secondary-control relative flex cursor-pointer items-center justify-center disabled:cursor-default"
+            className="secondary-control relative flex cursor-pointer items-center justify-center disabled:cursor-default disabled:text-disabled-light dark:disabled:text-disabled-dark"
             title={audioDisabled || showDirectionChange || audioLoading ? undefined : TEXTS.audio}
             aria-label={TEXTS.audio}
           >

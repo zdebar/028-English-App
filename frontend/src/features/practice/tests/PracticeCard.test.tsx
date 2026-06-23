@@ -366,7 +366,7 @@ describe('PracticeCard', () => {
   it('reveals item and plays audio on item click in CZ->EN mode', () => {
     const { container } = render(<PracticeCard />);
 
-    const revealArea = container.querySelector('div[role="button"][tabindex="0"]') as HTMLElement;
+    const revealArea = container.querySelector('button[aria-disabled]') as HTMLElement;
     fireEvent.click(revealArea);
 
     expect(mocks.practiceDeck.playAudio).toHaveBeenCalledTimes(1);
@@ -389,6 +389,19 @@ describe('PracticeCard', () => {
     expect(
       container.querySelector('.pos-bottom-left-control button[aria-label="Audio"]'),
     ).toBeTruthy();
+  });
+
+  it('uses disabled header text colors for disabled secondary audio button', () => {
+    mocks.practiceDeck.audioDisabled = true;
+    const { container } = render(<PracticeCard />);
+
+    const audioButton = container.querySelector(
+      '.pos-bottom-left-control button[aria-label="Audio"]',
+    ) as HTMLButtonElement;
+
+    expect(audioButton.disabled).toBe(true);
+    expect(audioButton.className).toContain('disabled:text-disabled-light');
+    expect(audioButton.className).toContain('dark:disabled:text-disabled-dark');
   });
 
   it('shows the next empty bronze star when mounted exactly on a completed chunk', () => {
