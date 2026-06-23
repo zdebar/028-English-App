@@ -80,6 +80,7 @@ export default function BlockItemsOverview() {
     if (!userId || !blockId) return;
     try {
       const resetCount = await UserItem.resetItemsByBlockId(userId, blockId);
+      await UserBlock.resetByBlockId(userId, blockId);
       reportInfo(`Reset ${resetCount} items in block ${blockId} for user ${userId}`);
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (error) {

@@ -167,6 +167,22 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     });
   }
 
+  static async resetByBlockId(
+    userId: string,
+    blockId: number,
+    dateTime: string = new Date().toISOString(),
+  ): Promise<void> {
+    assertNonEmptyString(userId, 'userId');
+
+    await db.user_blocks.update([userId, blockId], {
+      started_at: NULL_DATE,
+      next_at: NULL_DATE,
+      mastered_at: NULL_DATE,
+      progress: 0,
+      updated_at: dateTime,
+    });
+  }
+
   static async unlockNextGrammarBlock(
     userId: string,
     dateTime: string = new Date(Date.now()).toISOString(),

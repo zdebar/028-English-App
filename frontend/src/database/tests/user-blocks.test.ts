@@ -243,6 +243,18 @@ describe('UserBlock', () => {
     expect(mocks.equals).toHaveBeenCalledWith('u1');
   });
 
+  it('resetByBlockId resets progress dates and updates timestamp', async () => {
+    await UserBlock.resetByBlockId('u1', 7, '2026-06-23T12:00:00.000Z');
+
+    expect(mocks.update).toHaveBeenCalledWith(['u1', 7], {
+      started_at: '9999-12-31T23:59:59+00:00',
+      next_at: '9999-12-31T23:59:59+00:00',
+      mastered_at: '9999-12-31T23:59:59+00:00',
+      progress: 0,
+      updated_at: '2026-06-23T12:00:00.000Z',
+    });
+  });
+
   it('deleteByUserId deletes local user blocks', async () => {
     await UserBlock.deleteByUserId('u1');
 

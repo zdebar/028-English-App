@@ -67,6 +67,7 @@ vi.mock('@/database/models/user-items', () => ({
 vi.mock('@/database/models/user-blocks', () => ({
   default: {
     getByBlockId: vi.fn(),
+    resetByBlockId: vi.fn(),
   },
 }));
 
@@ -145,6 +146,7 @@ vi.mock('@/features/help/HelpButton', () => ({
 
 import BlockItemsOverview from '@/features/blocks/BlockItemsOverview';
 import UserItem from '@/database/models/user-items';
+import UserBlock from '@/database/models/user-blocks';
 
 describe('BlockItemsOverview', () => {
   beforeEach(() => {
@@ -159,6 +161,7 @@ describe('BlockItemsOverview', () => {
     mocks.playAudio.mockResolvedValue(true);
     mocks.audioLoading = false;
     mocks.readyAudio = new Set<string>();
+    vi.mocked(UserBlock.resetByBlockId).mockResolvedValue(undefined);
   });
 
   it('renders not found state for invalid block id', () => {
@@ -280,6 +283,7 @@ describe('BlockItemsOverview', () => {
 
     await waitFor(() => {
       expect(UserItem.resetItemsByBlockId).toHaveBeenCalledWith('u1', 2);
+      expect(UserBlock.resetByBlockId).toHaveBeenCalledWith('u1', 2);
       expect(mocks.reportInfo).toHaveBeenCalledWith('Reset 3 items in block 2 for user u1');
       expect(mocks.showToast).toHaveBeenCalledWith('Reset success', 'success');
     });
