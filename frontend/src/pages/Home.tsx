@@ -78,15 +78,6 @@ export default function Home(): JSX.Element {
 
   return (
     <div className="card-width relative flex w-full flex-col justify-between text-center">
-      <h1 className="home-title">{TEXTS.appTitle}</h1>
-      <div className="landscape:hidden">
-        <InstallPWAButton className="my-2 px-4" />
-        <p className="px-4">{TEXTS.appDescription}</p>
-      </div>
-      <Link to="/guide">
-        <Notification className="color-link my-2">{TEXTS.guide}</Notification>
-      </Link>
-
       {userId ? (
         <div className="home-body relative flex w-full flex-col">
           {isAnonymousUser && (
@@ -145,6 +136,14 @@ export default function Home(): JSX.Element {
         </div>
       ) : (
         <div className="home-body w-full">
+          <h1 className="home-title">{TEXTS.appTitle}</h1>
+          <p className="m-4 landscape:hidden">{TEXTS.appDescription}</p>
+          <div className="mt-4 mb-8 flex items-center justify-center gap-2 px-4">
+            <InstallPWAButton className="pr-4" />
+            <Link to="/guide">
+              <Notification className="color-link">{TEXTS.guide}</Notification>
+            </Link>
+          </div>
           <div className="flex flex-col gap-1">
             <AnonymousSigninButton />
             <GoogleAuthButton />

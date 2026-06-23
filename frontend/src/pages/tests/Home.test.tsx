@@ -158,6 +158,7 @@ describe('Home', () => {
 
     expect(screen.queryByText('Data may be stale.')).toBeNull();
     expect(screen.getByRole('button', { name: 'Open practice overview' })).toBeTruthy();
+    expect(screen.queryByText('App')).toBeNull();
   });
 
   it('loads practice-state data when available', async () => {
@@ -212,6 +213,8 @@ describe('Home', () => {
 
     render(<Home />);
 
+    expect(screen.getByText('App')).toBeTruthy();
+    expect(screen.getByText('Desc')).toBeTruthy();
     expect(screen.getByTestId('google-auth-button')).toBeTruthy();
     expect(screen.queryByText('Data may be stale.')).toBeNull();
   });

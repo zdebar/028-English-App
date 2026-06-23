@@ -85,18 +85,15 @@
 
 /* HOME PAGE */
 .home-title {
-   @apply my-8;
+   @apply mb-8;
 }
 
 .home-body {
-  @apply mt-8;
+  @apply my-8;
 }
 
 @media (max-height: 400px) {
   .home-title {
-     @apply mb-2 mt-8;
-  }
-  .home-body {
-    @apply mt-2;
+     @apply mb-6 mt-8;
   }
 }

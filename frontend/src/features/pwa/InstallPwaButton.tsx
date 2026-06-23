@@ -24,6 +24,10 @@ export function InstallPWAButton({ className }: InstallPWAButtonProps) {
     };
   }, [setPromptEvent]);
 
+  if (!promptEvent) {
+    return null;
+  }
+
   const handleInstall = () => {
     if (promptEvent) {
       promptEvent.prompt();
@@ -35,7 +39,7 @@ export function InstallPWAButton({ className }: InstallPWAButtonProps) {
     <Notification
       title={TEXTS.installButtonTooltip}
       onClick={handleInstall}
-      className={`color-link cursor-pointer ${!promptEvent && 'hidden'} ${className}`}
+      className={`color-link cursor-pointer ${className}`}
     >
       {TEXTS.installButton}
     </Notification>
