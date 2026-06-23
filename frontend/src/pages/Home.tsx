@@ -109,22 +109,22 @@ export default function Home(): JSX.Element {
             ariaLabel={TEXTS.practiceOverviewOpen}
             helpText={TEXTS.starsToday}
           />
-          <div className="my-4 grid grid-cols-1 gap-2 px-4">
+          <div className="my-4 flex flex-col gap-2">
             <StyledButton
-              className="h-controls px-4"
+              className="h-button px-4"
               onClick={() => navigate(ROUTES.practiceVocabulary)}
             >
               {TEXTS.vocabularyPracticeButton}
             </StyledButton>
             <StyledButton
-              className="h-controls px-4"
+              className="h-button px-4"
               disabled={!hasNewGrammarBlock}
               onClick={() => navigate(ROUTES.practiceNewGrammar)}
             >
               {TEXTS.newGrammarPracticeButton}
             </StyledButton>
             <StyledButton
-              className="h-controls relative px-4"
+              className="h-button relative px-4"
               disabled={readyGrammarCount === 0}
               onClick={() => navigate(ROUTES.practiceGrammar)}
             >
