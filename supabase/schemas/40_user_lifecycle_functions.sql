@@ -16,8 +16,7 @@ BEGIN
 END;
 $$;
 
-REVOKE EXECUTE ON FUNCTION public.soft_delete_user() FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.soft_delete_user() TO authenticated;
+REVOKE EXECUTE ON FUNCTION public.soft_delete_user() FROM PUBLIC, anon, authenticated;
 
 CREATE OR REPLACE FUNCTION public.reactivate_user_if_deleted()
 RETURNS BOOLEAN
@@ -38,8 +37,7 @@ BEGIN
 END;
 $$;
 
-REVOKE EXECUTE ON FUNCTION public.reactivate_user_if_deleted() FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.reactivate_user_if_deleted() TO authenticated;
+REVOKE EXECUTE ON FUNCTION public.reactivate_user_if_deleted() FROM PUBLIC, anon, authenticated;
 
 CREATE OR REPLACE FUNCTION private.hard_delete_deleted_users()
 RETURNS INTEGER
