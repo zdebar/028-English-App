@@ -1,0 +1,1 @@
+INSERT INTO "public"."blocks" ("id", "name", "note", "lesson_id", "is_vocabulary", "grammar_id", "sort_order", "updated_at", "deleted_at") VALUES (1, 'osobní zájmena', 'placeholder', 1, true, null, 1, '2026-06-23 07:28:18.89997+00', null), (2, 'sloveso be', 'placeholder', 1, false, 1, 2, '2026-06-23 07:28:18.89997+00', null);

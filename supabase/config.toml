@@ -86,6 +86,12 @@ enabled = true
 sql_paths = [
   "./seeds/00_private_settings.sql",
   "./seeds/01_cron_schedules.sql",
+  "./seeds/levels_row.sql",
+  "./seeds/lessons_row.sql",
+  "./seeds/grammar_rows.sql",
+  "./seeds/notes_rows.sql",  
+  "./seeds/blocks_rows.sql",  
+  "./seeds/items_rows.sql",  
 ]
 
 [db.network_restrictions]
