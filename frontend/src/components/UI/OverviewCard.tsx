@@ -63,6 +63,7 @@ export default function OverviewCard({
             }
           }}
           disabled={isDisabled}
+          preserveEnabledTextColorWhenDisabled
           className="justify-start px-4"
         >
           {buttonTitle ??

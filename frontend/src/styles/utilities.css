@@ -16,6 +16,10 @@
     @apply disabled:bg-inherit disabled:hover:bg-inherit disabled:text-disabled-light dark:disabled:text-disabled-dark;
   }
 
+  .color-button.preserve-disabled-text-color:disabled {
+    @apply text-light dark:text-dark opacity-100;
+  }
+
   .color-info {
     @apply dark:text-new-progress-light text-light;
   }

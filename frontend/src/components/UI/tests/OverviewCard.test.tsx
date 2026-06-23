@@ -11,11 +11,13 @@ vi.mock('@/locales/cs', () => ({
 }));
 
 vi.mock('@/features/modal/ButtonWithModal', () => ({
-  default: ({ children, disabled, onConfirm, title }: any) => (
+  default: ({ children, disabled, onConfirm, title, className, preserveEnabledTextColorWhenDisabled }: any) => (
     <button
       data-testid="reset-button"
       disabled={disabled}
       title={title}
+      className={className}
+      data-preserve-enabled-text-color={preserveEnabledTextColorWhenDisabled ? 'true' : 'false'}
       onClick={() => onConfirm?.()}
     >
       {children}
@@ -75,6 +77,9 @@ describe('OverviewCard', () => {
     const { rerender } = render(<OverviewCard loading buttonTitle="Blocks" onClose={vi.fn()} />);
 
     expect((screen.getByTestId('reset-button') as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByTestId('reset-button').getAttribute('data-preserve-enabled-text-color')).toBe(
+      'true',
+    );
 
     rerender(<OverviewCard buttonTitle="Blocks" handleReset={vi.fn()} onClose={vi.fn()} />);
 

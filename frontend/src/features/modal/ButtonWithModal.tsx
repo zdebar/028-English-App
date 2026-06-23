@@ -12,6 +12,7 @@ type ButtonWithModalProps = Readonly<{
   modalText?: string;
   title?: string;
   disabled?: boolean;
+  preserveEnabledTextColorWhenDisabled?: boolean;
   className?: string;
   children?: ReactNode;
 }>;
@@ -36,6 +37,7 @@ export default function ButtonWithModal({
   modalText = TEXTS.modalText,
   disabled = false,
   title = '',
+  preserveEnabledTextColorWhenDisabled = false,
   children,
   className = '',
 }: ButtonWithModalProps): JSX.Element {
@@ -60,7 +62,12 @@ export default function ButtonWithModal({
         onClick={() => setShowModal(true)}
         title={title}
         disabled={isDisabled}
-        className={className}
+          className={[
+            className,
+          preserveEnabledTextColorWhenDisabled ? 'preserve-disabled-text-color' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
       >
         {children}
       </StandardButton>

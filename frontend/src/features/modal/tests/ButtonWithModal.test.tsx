@@ -99,4 +99,15 @@ describe('ButtonWithModal', () => {
 
     expect((screen.getByRole('button', { name: 'Open' }) as HTMLButtonElement).disabled).toBe(true);
   });
+
+  it('preserves enabled text color when requested even while disabled', () => {
+    render(
+      <ButtonWithModal disabled preserveEnabledTextColorWhenDisabled>
+        Open
+      </ButtonWithModal>,
+    );
+
+    const button = screen.getByRole('button', { name: 'Open' });
+    expect(button.className).toContain('preserve-disabled-text-color');
+  });
 });

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { TEXTS } from '@/locales/cs';
-import StyledButton from '@/components/UI/buttons/StyledButton';
+import { ListButton } from '@/components/UI/buttons/ListButton';
 import GoalMetView from '@/components/UI/GoalMetView';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
@@ -35,8 +35,8 @@ export default function LevelsOverview() {
       <DataState loading={false} hasData={levels.length > 0} noDataMessage={TEXTS.notAvailable}>
         {levels.map((level, index) => (
           <div key={level.id} className="flex flex-col gap-1">
-            <StyledButton
-              className="h-input flex grow-0 justify-start p-4 text-left"
+            <ListButton
+              className="flex justify-start p-4 text-left"
               onClick={() => handleLevelClick(index)}
               disabled={level.lessons.length === 0}
             >
@@ -48,7 +48,7 @@ export default function LevelsOverview() {
                   title={showMastered ? TEXTS.levelsMasteredHelp : TEXTS.levelsStartedHelp}
                 />
               </div>
-            </StyledButton>
+            </ListButton>
             {unpackedIndex === index && (
               <div className="flex flex-col gap-1">
                 {level.lessons.map((lesson) => (
