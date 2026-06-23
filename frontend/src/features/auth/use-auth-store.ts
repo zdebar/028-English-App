@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { Session } from '@supabase/supabase-js';
 import { supabaseInstance } from '@/config/supabase.config';
 import { dataSyncOnUnmount } from '@/database/utils/data-sync.utils';
-import { setMonitoringUser } from '@/features/logging/monitoring-handler';
+import { reportError, setMonitoringUser } from '@/features/logging/monitoring-handler';
 
 interface AuthState {
   userId: string | null;
@@ -81,11 +81,9 @@ export const useAuthStore = create<AuthState>((set) => {
         }
 
         if (data?.session) {
-          Promise.resolve(supabaseInstance.rpc('reactivate_user_if_deleted'))
-            .then(({ error }) => {
-              if (error) reportError(error);
-            })
-            .catch((e) => reportError(e));
+          void supabaseInstance.rpc('reactivate_user_if_deleted').then(({ error }) => {
+            if (error) reportError('Auth reactivation failed', error);
+          });
         }
 
         applySession(data.session);

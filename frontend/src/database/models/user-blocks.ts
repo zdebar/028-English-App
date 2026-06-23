@@ -35,6 +35,7 @@ type UserBlockExport = Pick<
 function convertAPIToLocal(block: UserBlockAPI): UserBlockType {
   return {
     ...block,
+    is_vocabulary: block.is_vocabulary,
     started_at: block.started_at ?? NULL_DATE,
     next_at: block.next_at ?? NULL_DATE,
     mastered_at: block.mastered_at ?? NULL_DATE,
@@ -87,33 +88,29 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     assertNonEmptyString(userId, 'userId');
 
     const blocks = await db.user_blocks
-      .where('[user_id+is_vocabulary+started_at+sort_order]')
-      .between(
-        [userId, false, Dexie.minKey, Dexie.minKey],
-        [userId, false, NULL_DATE, Dexie.maxKey],
-        true,
-        false,
+      .where('user_id')
+      .equals(userId)
+      .filter(
+        (block) =>
+          !block.is_vocabulary && block.started_at !== NULL_DATE && block.mastered_at === NULL_DATE,
       )
-      .filter((block) => block.mastered_at === NULL_DATE)
       .toArray();
 
-    return blocks.sort(compareGrammarBlocks).at(0) ?? null;
+    const sortedBlocks = [...blocks].sort(compareGrammarBlocks);
+    return sortedBlocks.at(0) ?? null;
   }
 
   static async getFirstLockedGrammarBlock(userId: string): Promise<UserBlockType | null> {
     assertNonEmptyString(userId, 'userId');
 
     const blocks = await db.user_blocks
-      .where('[user_id+is_vocabulary+started_at+sort_order]')
-      .between(
-        [userId, false, NULL_DATE, Dexie.minKey],
-        [userId, false, NULL_DATE, Dexie.maxKey],
-        true,
-        true,
-      )
+      .where('user_id')
+      .equals(userId)
+      .filter((block) => !block.is_vocabulary && block.started_at === NULL_DATE)
       .toArray();
 
-    return blocks.sort(compareGrammarBlocks).at(0) ?? null;
+    const sortedBlocks = [...blocks].sort(compareGrammarBlocks);
+    return sortedBlocks.at(0) ?? null;
   }
 
   static async countReadyGrammarItems(userId: string): Promise<number> {
@@ -172,7 +169,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     }
 
     const previousBlock = await this.getPreviousGrammarBlock(userId, lockedBlock);
-    if (previousBlock != null && previousBlock.mastered_at === NULL_DATE) {
+    if (previousBlock?.mastered_at === NULL_DATE) {
       return null;
     }
 
@@ -260,7 +257,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
       .filter((candidate) => !candidate.is_vocabulary)
       .toArray();
 
-    const sortedBlocks = grammarBlocks.sort(compareGrammarBlocks);
+    const sortedBlocks = [...grammarBlocks].sort(compareGrammarBlocks);
     const blockIndex = sortedBlocks.findIndex((candidate) => candidate.block_id === block.block_id);
     return blockIndex > 0 ? sortedBlocks[blockIndex - 1] : null;
   }

@@ -43,6 +43,9 @@ export default function Home(): JSX.Element {
     }
 
     let isMounted = true;
+    setHasNewGrammarBlock(false);
+    setReadyGrammarCount(0);
+
     const loadPracticeState = async () => {
       try {
         await UserBlock.unlockNextGrammarBlock(userId);
@@ -58,6 +61,11 @@ export default function Home(): JSX.Element {
         setHasNewGrammarBlock(newGrammarBlock != null);
         setReadyGrammarCount(grammarCount);
       } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+        setHasNewGrammarBlock(false);
+        setReadyGrammarCount(0);
         reportError('Failed to load practice button state', error);
       }
     };

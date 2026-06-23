@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   where: vi.fn(),
   equals: vi.fn(),
+  filter: vi.fn(),
   get: vi.fn(),
   delete: vi.fn(),
   update: vi.fn(),
@@ -83,6 +84,10 @@ describe('UserBlock', () => {
     mocks.equals.mockReturnValue({
       toArray: (...args: unknown[]) => mocks.toArray(...args),
       delete: (...args: unknown[]) => mocks.delete(...args),
+      filter: (...args: unknown[]) => mocks.filter(...args),
+    });
+    mocks.filter.mockReturnValue({
+      toArray: (...args: unknown[]) => mocks.toArray(...args),
     });
     mocks.between.mockReturnValue({
       toArray: (...args: unknown[]) => mocks.toArray(...args),
@@ -122,6 +127,66 @@ describe('UserBlock', () => {
 
     await expect(UserBlock.getByBlockId('u1', 2)).resolves.toEqual(block);
     expect(mocks.get).toHaveBeenCalledWith(['u1', 2]);
+  });
+
+  it('getFirstUnlockedGrammarBlock loads grammar blocks using user_id filtering', async () => {
+    mocks.toArray.mockResolvedValueOnce([
+      {
+        user_id: 'u1',
+        block_id: 3,
+        lesson_id: 2,
+        sort_order: 30,
+        is_vocabulary: false,
+        started_at: '2026-03-01T00:00:00.000Z',
+        mastered_at: '9999-12-31T23:59:59+00:00',
+      },
+      {
+        user_id: 'u1',
+        block_id: 2,
+        lesson_id: 1,
+        sort_order: 20,
+        is_vocabulary: false,
+        started_at: '2026-03-01T00:00:00.000Z',
+        mastered_at: '9999-12-31T23:59:59+00:00',
+      },
+    ]);
+
+    await expect(UserBlock.getFirstUnlockedGrammarBlock('u1')).resolves.toMatchObject({
+      block_id: 2,
+    });
+
+    expect(mocks.where).toHaveBeenCalledWith('user_id');
+    expect(mocks.equals).toHaveBeenCalledWith('u1');
+  });
+
+  it('getFirstLockedGrammarBlock loads locked grammar blocks using user_id filtering', async () => {
+    mocks.toArray.mockResolvedValueOnce([
+      {
+        user_id: 'u1',
+        block_id: 5,
+        lesson_id: 3,
+        sort_order: 50,
+        is_vocabulary: false,
+        started_at: '9999-12-31T23:59:59+00:00',
+        mastered_at: '9999-12-31T23:59:59+00:00',
+      },
+      {
+        user_id: 'u1',
+        block_id: 4,
+        lesson_id: 2,
+        sort_order: 40,
+        is_vocabulary: false,
+        started_at: '9999-12-31T23:59:59+00:00',
+        mastered_at: '9999-12-31T23:59:59+00:00',
+      },
+    ]);
+
+    await expect(UserBlock.getFirstLockedGrammarBlock('u1')).resolves.toMatchObject({
+      block_id: 4,
+    });
+
+    expect(mocks.where).toHaveBeenCalledWith('user_id');
+    expect(mocks.equals).toHaveBeenCalledWith('u1');
   });
 
   it('deleteByUserId deletes local user blocks', async () => {

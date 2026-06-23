@@ -7,6 +7,8 @@ const mocks = vi.hoisted(() => ({
   rpc: vi.fn(),
   unsubscribe: vi.fn(),
   dataSyncOnUnmount: vi.fn(),
+  setMonitoringUser: vi.fn(),
+  reportError: vi.fn(),
   authCallback: null as ((event: string, session: any) => void) | null,
 }));
 
@@ -23,6 +25,11 @@ vi.mock('@/config/supabase.config', () => ({
 
 vi.mock('@/database/utils/data-sync.utils', () => ({
   dataSyncOnUnmount: (...args: unknown[]) => mocks.dataSyncOnUnmount(...args),
+}));
+
+vi.mock('@/features/logging/monitoring-handler', () => ({
+  reportError: (...args: unknown[]) => mocks.reportError(...args),
+  setMonitoringUser: (...args: unknown[]) => mocks.setMonitoringUser(...args),
 }));
 
 import { useAuthStore } from '@/features/auth/use-auth-store';
@@ -85,6 +92,40 @@ describe('useAuthStore', () => {
     expect(state.loading).toBe(false);
 
     cleanup();
+  });
+
+  it('initializeAuth keeps session hydration working when reactivation fails', async () => {
+    mocks.getSession.mockResolvedValue({
+      data: {
+        session: {
+          user: {
+            id: 'u1',
+            email: 'u1@example.com',
+            user_metadata: { full_name: 'User One' },
+          },
+        },
+      },
+      error: null,
+    });
+    mocks.rpc.mockResolvedValue({
+      data: null,
+      error: { message: 'permission denied for function reactivate_user_if_deleted' },
+    });
+
+    useAuthStore.getState().initializeAuth();
+    await flushMicrotasks();
+
+    const state = useAuthStore.getState();
+    expect(state.userId).toBe('u1');
+    expect(state.userEmail).toBe('u1@example.com');
+    expect(state.userFullName).toBe('User One');
+    expect(state.loading).toBe(false);
+    expect(mocks.reportError).toHaveBeenCalledWith(
+      'Auth reactivation failed',
+      expect.objectContaining({
+        message: 'permission denied for function reactivate_user_if_deleted',
+      }),
+    );
   });
 
   it('initializeAuth clears state when getSession fails', async () => {
