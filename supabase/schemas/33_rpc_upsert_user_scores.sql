@@ -17,10 +17,10 @@ DECLARE
   v_error_count INT := 0;
   v_row_count INT := 0;
   v_empty_json CONSTANT JSONB := '[]'::JSONB;
-  v_key_user_id CONSTANT TEXT := 'user_id';
+  v_key_user_id CONSTANT TEXT := private.json_key_user_id();
   v_key_date CONSTANT TEXT := 'date';
   v_key_item_count CONSTANT TEXT := 'item_count';
-  v_key_updated_at CONSTANT TEXT := 'updated_at';
+  v_key_updated_at CONSTANT TEXT := private.json_key_updated_at();
 BEGIN
   IF p_user_scores IS NULL OR p_user_scores = v_empty_json THEN
     RETURN;

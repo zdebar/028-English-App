@@ -17,11 +17,11 @@ DECLARE
   v_mastered_at TIMESTAMPTZ;
   v_empty_json CONSTANT JSONB := '[]'::JSONB;
   v_null_text CONSTANT TEXT := 'null';
-  v_key_user_id CONSTANT TEXT := 'user_id';
+  v_key_user_id CONSTANT TEXT := private.json_key_user_id();
   v_key_block_id CONSTANT TEXT := 'block_id';
   v_key_progress CONSTANT TEXT := 'progress';
   v_key_started_at CONSTANT TEXT := 'started_at';
-  v_key_updated_at CONSTANT TEXT := 'updated_at';
+  v_key_updated_at CONSTANT TEXT := private.json_key_updated_at();
   v_key_next_at CONSTANT TEXT := 'next_at';
   v_key_mastered_at CONSTANT TEXT := 'mastered_at';
   v_row_count INT := 0;

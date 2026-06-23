@@ -30,7 +30,7 @@ AS $$
 DECLARE
   v_empty_json CONSTANT JSONB := '[]'::JSONB;
   v_history_enabled BOOLEAN := FALSE;
-  v_key_user_id CONSTANT TEXT := 'user_id';
+  v_key_user_id CONSTANT TEXT := private.json_key_user_id();
   v_user_id_mismatch_message CONSTANT TEXT := 'p_user_id does not match at least one user_id in p_user_items';
 BEGIN
   PERFORM public.require_auth_user_id_match(p_user_id);

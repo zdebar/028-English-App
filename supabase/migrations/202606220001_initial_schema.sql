@@ -333,6 +333,35 @@ REVOKE EXECUTE ON FUNCTION public.rpc_min_timestamptz() FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.rpc_min_timestamptz() TO authenticated;
 
 
+-- schema: 21_json_key_helpers.sql
+
+CREATE OR REPLACE FUNCTION private.json_key_user_id()
+RETURNS TEXT
+LANGUAGE sql
+IMMUTABLE
+SET search_path TO pg_catalog
+AS $$
+  SELECT 'user_id'::TEXT;
+$$;
+
+CREATE OR REPLACE FUNCTION private.json_key_updated_at()
+RETURNS TEXT
+LANGUAGE sql
+IMMUTABLE
+SET search_path TO pg_catalog
+AS $$
+  SELECT 'updated_at'::TEXT;
+$$;
+
+GRANT USAGE ON SCHEMA private TO authenticated;
+
+REVOKE EXECUTE ON FUNCTION private.json_key_user_id() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION private.json_key_user_id() TO authenticated;
+
+REVOKE EXECUTE ON FUNCTION private.json_key_updated_at() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION private.json_key_updated_at() TO authenticated;
+
+
 -- schema: 30_rpc_fetch_user_items.sql
 
 CREATE OR REPLACE FUNCTION public.fetch_user_items(
@@ -432,11 +461,11 @@ DECLARE
   v_empty_json CONSTANT JSONB := '[]'::JSONB;
   v_item_id_re CONSTANT TEXT := '^[0-9]+$';
   v_null_text CONSTANT TEXT := 'null';
-  v_key_user_id CONSTANT TEXT := 'user_id';
+  v_key_user_id CONSTANT TEXT := private.json_key_user_id();
   v_key_item_id CONSTANT TEXT := 'item_id';
   v_key_progress CONSTANT TEXT := 'progress';
   v_key_started_at CONSTANT TEXT := 'started_at';
-  v_key_updated_at CONSTANT TEXT := 'updated_at';
+  v_key_updated_at CONSTANT TEXT := private.json_key_updated_at();
   v_key_next_at CONSTANT TEXT := 'next_at';
   v_key_mastered_at CONSTANT TEXT := 'mastered_at';
   v_key_progress_history CONSTANT TEXT := 'progress_history';
@@ -642,7 +671,7 @@ AS $$
 DECLARE
   v_empty_json CONSTANT JSONB := '[]'::JSONB;
   v_history_enabled BOOLEAN := FALSE;
-  v_key_user_id CONSTANT TEXT := 'user_id';
+  v_key_user_id CONSTANT TEXT := private.json_key_user_id();
   v_user_id_mismatch_message CONSTANT TEXT := 'p_user_id does not match at least one user_id in p_user_items';
 BEGIN
   PERFORM public.require_auth_user_id_match(p_user_id);
@@ -696,10 +725,10 @@ DECLARE
   v_error_count INT := 0;
   v_row_count INT := 0;
   v_empty_json CONSTANT JSONB := '[]'::JSONB;
-  v_key_user_id CONSTANT TEXT := 'user_id';
+  v_key_user_id CONSTANT TEXT := private.json_key_user_id();
   v_key_date CONSTANT TEXT := 'date';
   v_key_item_count CONSTANT TEXT := 'item_count';
-  v_key_updated_at CONSTANT TEXT := 'updated_at';
+  v_key_updated_at CONSTANT TEXT := private.json_key_updated_at();
 BEGIN
   IF p_user_scores IS NULL OR p_user_scores = v_empty_json THEN
     RETURN;
@@ -765,7 +794,7 @@ SET search_path TO public
 AS $$
 DECLARE
   v_empty_json CONSTANT JSONB := '[]'::JSONB;
-  v_key_user_id CONSTANT TEXT := 'user_id';
+  v_key_user_id CONSTANT TEXT := private.json_key_user_id();
   v_user_id_mismatch_message CONSTANT TEXT := 'p_user_id does not match at least one user_id in p_user_scores';
 BEGIN
   PERFORM public.require_auth_user_id_match(p_user_id);
@@ -884,11 +913,11 @@ DECLARE
   v_mastered_at TIMESTAMPTZ;
   v_empty_json CONSTANT JSONB := '[]'::JSONB;
   v_null_text CONSTANT TEXT := 'null';
-  v_key_user_id CONSTANT TEXT := 'user_id';
+  v_key_user_id CONSTANT TEXT := private.json_key_user_id();
   v_key_block_id CONSTANT TEXT := 'block_id';
   v_key_progress CONSTANT TEXT := 'progress';
   v_key_started_at CONSTANT TEXT := 'started_at';
-  v_key_updated_at CONSTANT TEXT := 'updated_at';
+  v_key_updated_at CONSTANT TEXT := private.json_key_updated_at();
   v_key_next_at CONSTANT TEXT := 'next_at';
   v_key_mastered_at CONSTANT TEXT := 'mastered_at';
   v_row_count INT := 0;
@@ -998,7 +1027,7 @@ SET search_path TO public
 AS $$
 DECLARE
   v_empty_json CONSTANT JSONB := '[]'::JSONB;
-  v_key_user_id CONSTANT TEXT := 'user_id';
+  v_key_user_id CONSTANT TEXT := private.json_key_user_id();
   v_user_id_mismatch_message CONSTANT TEXT := 'p_user_id does not match at least one user_id in p_user_blocks';
 BEGIN
   PERFORM public.require_auth_user_id_match(p_user_id);
