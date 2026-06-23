@@ -20,9 +20,10 @@ import PlayAudioButton from './buttons/PlayAudioButton';
 import RepeatButton from './buttons/RepeatButton';
 import PracticeStarsRow from './components/PracticeStarsRow';
 import { usePracticeStars } from './hooks/use-practice-stars';
+import type { UserItemPractice } from '@/types/user-item.types';
 
 export type PracticeSessionCardProps = Readonly<{
-  currentItem: unknown | null;
+  currentItem: UserItemPractice | null;
   noteId: number | null;
   grammarId: number | null;
   progressLabel: string | number;

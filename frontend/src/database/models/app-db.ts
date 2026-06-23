@@ -37,23 +37,16 @@ export default class AppDB extends Dexie {
     this.version(1).stores({
       levels: 'id, sort_order',
       lessons: 'id, sort_order',
-      blocks: 'id, sort_order',
       notes: 'id',
       grammar: 'id, sort_order',
-      user_items:
-        '[user_id+item_id], [user_id+grammar_id+started_at], [user_id+is_vocabulary+started_at], [user_id+started_at], [user_id+updated_at], [user_id+next_at+sort_order], [user_id+next_at+mastered_at+sort_order], [user_id+block_id]',
-      user_scores: '[user_id+date], [user_id+updated_at]',
-      audio_records: 'filename',
-      audio_metadata: 'archive_name',
-      metadata: '[table_name+user_id]',
-    });
-
-    this.version(2).stores({
-      blocks: null,
       user_items:
         '[user_id+item_id], [user_id+grammar_id+started_at], [user_id+is_vocabulary+started_at], [user_id+started_at], [user_id+updated_at], [user_id+next_at+sort_order], [user_id+next_at+mastered_at+sort_order], [user_id+is_vocabulary+next_at+mastered_at+sort_order], [user_id+lesson_id+is_vocabulary+started_at], [user_id+block_id]',
       user_blocks:
         '[user_id+block_id], user_id, [user_id+updated_at], [user_id+sort_order], [user_id+is_vocabulary+started_at+sort_order], [user_id+is_vocabulary+started_at+mastered_at+sort_order]',
+      user_scores: '[user_id+date], [user_id+updated_at]',
+      audio_records: 'filename',
+      audio_metadata: 'archive_name',
+      metadata: '[table_name+user_id]',
     });
   }
 }
