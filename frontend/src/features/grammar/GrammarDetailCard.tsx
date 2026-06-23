@@ -33,7 +33,9 @@ export default function GrammarDetailCard({ grammar, onClose, onReset }: Grammar
       ) : (
         TEXTS.noNotesToDisplay
       )}
-      <HelpButton className="absolute right-0 -bottom-10.5" />
+      <div className="pos-bottom-right-control">
+        <HelpButton />
+      </div>
     </OverviewCard>
   );
 }

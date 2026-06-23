@@ -93,23 +93,6 @@ async function loadSingleAudio(
   }
 }
 
-async function loadAudioBatch(
-  filenames: string[],
-  onEnded: () => void,
-  audioMap: Map<string, ManagedAudio>,
-): Promise<boolean> {
-  let hasFailure = false;
-
-  for (const filename of filenames) {
-    const wasLoaded = await loadSingleAudio(filename, onEnded, audioMap);
-    if (!wasLoaded) {
-      hasFailure = true;
-    }
-  }
-
-  return hasFailure;
-}
-
 /**
  * Hook to manage preloading and playback of audio files stored in the local
  * IndexedDB (via `AudioRecord` model). It keeps a small in-memory map of
@@ -127,6 +110,7 @@ export function useAudioManager(audio: AudioInput) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [filenames, setFilenames] = useState<string[]>([]);
   const [current, setCurrent] = useState<string | null>(null);
+  const [failedFilenames, setFailedFilenames] = useState<Set<string>>(new Set());
 
   // Load audio files
   useEffect(() => {
@@ -134,6 +118,7 @@ export function useAudioManager(audio: AudioInput) {
     setLoading(true);
     setAudioError(false);
     setIsPlaying(false);
+    setFailedFilenames(new Set());
     disposeAudioMap(audioMapRef.current);
 
     const files = normalizeAudioInput(audio);
@@ -151,9 +136,19 @@ export function useAudioManager(audio: AudioInput) {
     };
 
     const loadAllAudio = async () => {
-      const hasFailure = await loadAudioBatch(files, handleAudioEnded, audioMapRef.current);
+      const failedFiles: string[] = [];
+
+      for (const filename of files) {
+        const wasLoaded = await loadSingleAudio(filename, handleAudioEnded, audioMapRef.current);
+        if (!wasLoaded) {
+          failedFiles.push(filename);
+        }
+      }
+
+      const hasFailure = failedFiles.length > 0;
 
       if (!isDisposed && hasFailure) {
+        setFailedFilenames(new Set(failedFiles));
         setAudioError(true);
       }
 
@@ -172,31 +167,41 @@ export function useAudioManager(audio: AudioInput) {
   // then play current by default or a specific filename when provided.
 
   const playAudio = useCallback(
-    (filenameOrEvent?: unknown) => {
+    async (filenameOrEvent?: unknown): Promise<boolean> => {
       stopAndResetAll(audioMapRef.current);
 
       const filename = typeof filenameOrEvent === 'string' ? filenameOrEvent : undefined;
       const toPlay = resolveFilenameToPlay(filename, current, filenames, audioMapRef.current);
       if (!toPlay) {
         setIsPlaying(false);
-        return;
+        return false;
       }
 
       const managedAudio = audioMapRef.current.get(toPlay);
       if (!managedAudio) {
         setIsPlaying(false);
-        return;
+        return false;
       }
 
       managedAudio.element.currentTime = 0;
       managedAudio.element.volume = useAudioStore.getState().volume;
 
-      const playPromise = managedAudio.element.play();
-      setCurrent(toPlay);
-      setIsPlaying(true);
+      try {
+        const playPromise = managedAudio.element.play();
+        setCurrent(toPlay);
+        setIsPlaying(true);
 
-      if (typeof playPromise.catch === 'function') {
-        playPromise.catch(() => setIsPlaying(false));
+        if (typeof playPromise.catch === 'function') {
+          await playPromise;
+        }
+
+        return true;
+      } catch (error) {
+        reportError('Audio Playback Error', error);
+        setFailedFilenames((prev) => new Set(prev).add(toPlay));
+        setAudioError(true);
+        setIsPlaying(false);
+        return false;
       }
     },
     [current, filenames],
@@ -207,11 +212,22 @@ export function useAudioManager(audio: AudioInput) {
     setIsPlaying(false);
   }, []);
 
+  const isAudioReady = useCallback(
+    (filename?: string) => {
+      if (filename) {
+        return audioMapRef.current.has(filename) && !failedFilenames.has(filename);
+      }
+
+      return audioMapRef.current.size > 0;
+    },
+    [failedFilenames],
+  );
+
   return {
     playAudio, // playAudio() or playAudio(filename)
     stopAudio,
     audioError,
-    isAudioReady: () => audioMapRef.current.size > 0,
+    isAudioReady,
     loading,
     isPlaying,
     current,

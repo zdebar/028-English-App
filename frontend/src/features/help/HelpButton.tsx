@@ -15,7 +15,7 @@ type HelpButtonProps = Readonly<{
  */
 export default function HelpButton({ className = '' }: HelpButtonProps): JSX.Element {
   const openHelp = useHelpStore((state) => state.openHelp);
-  const buttonClassName = `size-help-button flex items-center justify-center cursor-pointer ${className}`;
+  const buttonClassName = `secondary-control size-help-button flex items-center justify-center cursor-pointer ${className}`;
 
   return (
     <button type="button" className={buttonClassName} onClick={openHelp} title={TEXTS.tooltipHelp}>

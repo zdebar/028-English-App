@@ -98,6 +98,8 @@ vi.mock('@/locales/cs', () => ({
     reveal: 'Reveal',
     noAudio: 'No audio',
     loadingAudio: 'Loading audio',
+    audio: 'Audio',
+    tooltipNotes: 'Notes',
     progress: 'Progress',
     nextStarProgress: 'Next star progress',
     currentPracticeStar: 'Current practice star',
@@ -239,7 +241,9 @@ vi.mock('@/features/practice/GrammarCard', () => ({
 }));
 
 vi.mock('@/features/audio/VolumeSlider', () => ({
-  default: () => <div data-testid="volume-slider" />,
+  default: ({ className }: { className?: string }) => (
+    <div data-testid="volume-slider" className={className} />
+  ),
 }));
 
 vi.mock('@/features/practice/buttons/HintButton', () => ({
@@ -373,6 +377,18 @@ describe('PracticeCard', () => {
     render(<PracticeCard />);
 
     expect(screen.getByTestId('practice-stars-row').textContent).toBe('0:5:50');
+  });
+
+  it('renders audio controls in the left secondary control group', () => {
+    const { container } = render(<PracticeCard />);
+
+    expect(container.querySelector('#top-bar [data-testid="volume-slider"]')).toBeNull();
+    expect(
+      container.querySelector('.pos-bottom-left-control [data-testid="volume-slider"]'),
+    ).toBeTruthy();
+    expect(
+      container.querySelector('.pos-bottom-left-control button[aria-label="Audio"]'),
+    ).toBeTruthy();
   });
 
   it('shows the next empty bronze star when mounted exactly on a completed chunk', () => {

@@ -18,7 +18,7 @@ export default function NoteButton({ onClick, title, className = '' }: NoteButto
       aria-label={noteAriaLabel}
       title={title}
       onClick={onClick}
-      className={`relative cursor-pointer p-4 ${className}`}
+      className={`secondary-control relative flex cursor-pointer items-center justify-center ${className}`}
     >
       <InfoIcon />
       <HelpText className="top-3 left-12 flex flex-col items-end">{title}</HelpText>

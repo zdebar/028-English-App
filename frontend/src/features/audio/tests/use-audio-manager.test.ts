@@ -94,8 +94,8 @@ describe('useAudioManager', () => {
 
     await waitFor(() => expect(result.current.isAudioReady()).toBe(true));
 
-    act(() => {
-      result.current.playAudio();
+    await act(async () => {
+      await result.current.playAudio();
     });
 
     expect(audioInstances[0].play).toHaveBeenCalledTimes(1);
@@ -114,8 +114,8 @@ describe('useAudioManager', () => {
 
     await waitFor(() => expect(result.current.isAudioReady()).toBe(true));
 
-    act(() => {
-      result.current.playAudio({ type: 'click' });
+    await act(async () => {
+      await result.current.playAudio({ type: 'click' });
     });
 
     expect(audioInstances[0].play).toHaveBeenCalledTimes(1);
@@ -128,9 +128,9 @@ describe('useAudioManager', () => {
     const { result } = renderHook(() => useAudioManager('file.opus'));
     await waitFor(() => expect(result.current.isAudioReady()).toBe(true));
 
-    act(() => {
+    await act(async () => {
       useAudioStore.getState().setVolume(0.25);
-      result.current.playAudio();
+      await result.current.playAudio();
     });
 
     expect(audioInstances[0].volume).toBe(0.25);
@@ -146,7 +146,26 @@ describe('useAudioManager', () => {
     });
 
     expect(result.current.audioError).toBe(true);
+    expect(result.current.isAudioReady('missing.opus')).toBe(false);
     expect(errorHandlerMock).toHaveBeenCalledWith('Audio Manager Error', expect.any(Error));
+  });
+
+  it('marks audio as failed when playback rejects', async () => {
+    getAudioMock.mockResolvedValue({ audioBlob: new Blob(['a']) });
+    const { result } = renderHook(() => useAudioManager('file.opus'));
+
+    await waitFor(() => expect(result.current.isAudioReady('file.opus')).toBe(true));
+    audioInstances[0].play.mockRejectedValue(new Error('play failed'));
+
+    let didPlay = true;
+    await act(async () => {
+      didPlay = await result.current.playAudio('file.opus');
+    });
+
+    expect(didPlay).toBe(false);
+    expect(result.current.audioError).toBe(true);
+    expect(result.current.isAudioReady('file.opus')).toBe(false);
+    expect(errorHandlerMock).toHaveBeenCalledWith('Audio Playback Error', expect.any(Error));
   });
 
   it('cleans up audio and object URL on unmount', async () => {

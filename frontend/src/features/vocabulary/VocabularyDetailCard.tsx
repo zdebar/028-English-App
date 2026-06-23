@@ -11,6 +11,7 @@ import HelpText from '../help/HelpText';
 import NoteButton from '@/features/notes/NoteButton';
 import NoteDetailCard from '@/features/notes/NoteDetailCard';
 import { useNoteViewer } from '@/features/notes/use-note-viewer';
+import { useToastStore } from '@/features/toast/use-toast-store';
 
 const NOT_AVAILABLE = TEXTS.notAvailable;
 const NOT_MASTERED = TEXTS.notMastered;
@@ -50,7 +51,13 @@ export default function VocabularyDetailCard({
     { label: TEXTS.masteredAt, value: shortenDate(selectedWord?.mastered_at) || NOT_MASTERED },
   ];
 
-  const { playAudio } = useAudioManager(selectedWord?.audio || null);
+  const {
+    playAudio,
+    audioError,
+    isAudioReady,
+    loading: audioLoading,
+  } = useAudioManager(selectedWord?.audio || null);
+  const showToast = useToastStore((state) => state.showToast);
 
   const { isNoteVisible, noteData, openNote, closeNote } = useNoteViewer();
 
@@ -85,21 +92,31 @@ export default function VocabularyDetailCard({
           ))}
         </div>
       </div>
-      <div className="pos-bottom-left-control flex">
+      <div className="pos-bottom-left-control">
         <button
-          onClick={() => {
+          onClick={async () => {
             if (!selectedWord?.audio) return;
-            playAudio(selectedWord.audio);
+            const didPlay = await playAudio(selectedWord.audio);
+            if (!didPlay) {
+              showToast(TEXTS.noAudio, 'error');
+            }
           }}
-          className="size-help-button relative flex cursor-pointer items-center justify-center"
+          disabled={
+            !selectedWord?.audio ||
+            audioLoading ||
+            audioError ||
+            !isAudioReady(selectedWord.audio)
+          }
+          className="secondary-control relative flex cursor-pointer items-center justify-center"
           title={TEXTS.audio}
+          aria-label={TEXTS.audio}
         >
           <PlayIcon />
           <HelpText className="-top-3.5 left-0">{TEXTS.audio}</HelpText>
         </button>
-        <VolumeSlider className="h-button" />
+        <VolumeSlider />
       </div>
-      <div className="pos-bottom-right-control flex items-center gap-2">
+      <div className="pos-bottom-right-control">
         {noteId && (
           <NoteButton
             title={TEXTS.tooltipNotes}

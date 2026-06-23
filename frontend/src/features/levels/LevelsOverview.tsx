@@ -78,7 +78,9 @@ export default function LevelsOverview() {
         <HelpText className="top-20 right-2">
           {showMastered ? TEXTS.levelsMasteredHelp : TEXTS.levelsStartedHelp}
         </HelpText>
-        <HelpButton className="pos-bottom-right-control" />
+        <div className="pos-bottom-right-control">
+          <HelpButton />
+        </div>
         <MasteredToggleButton
           showMastered={showMastered}
           setShowMastered={setShowMastered}

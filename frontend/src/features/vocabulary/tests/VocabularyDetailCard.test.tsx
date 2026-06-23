@@ -1,7 +1,14 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const shortenDateMock = vi.fn();
+const audioMocks = vi.hoisted(() => ({
+  playAudio: vi.fn(),
+  audioError: false,
+  audioLoading: false,
+  audioReady: true,
+  showToast: vi.fn(),
+}));
 
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
@@ -15,6 +22,9 @@ vi.mock('@/locales/cs', () => ({
     nextAt: 'Next',
     masteredAt: 'Mastered',
     restartItemProgress: 'Restart item',
+    audio: 'Audio',
+    noAudio: 'No audio',
+    tooltipNotes: 'Notes',
   },
   ARIA_TEXTS: {
     setVolume: 'Nastavit hlasitost',
@@ -24,8 +34,16 @@ vi.mock('@/locales/cs', () => ({
 
 vi.mock('@/features/audio/use-audio-manager', () => ({
   useAudioManager: () => ({
-    playAudio: vi.fn(),
+    playAudio: audioMocks.playAudio,
+    audioError: audioMocks.audioError,
+    loading: audioMocks.audioLoading,
+    isAudioReady: () => audioMocks.audioReady,
   }),
+}));
+
+vi.mock('@/features/toast/use-toast-store', () => ({
+  useToastStore: (selector: (state: { showToast: typeof audioMocks.showToast }) => unknown) =>
+    selector({ showToast: audioMocks.showToast }),
 }));
 
 vi.mock('@/features/vocabulary/vocabulary.utils', () => ({
@@ -63,6 +81,10 @@ describe('VocabularyDetailCard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     shortenDateMock.mockImplementation((x: string) => `short:${x}`);
+    audioMocks.playAudio.mockResolvedValue(true);
+    audioMocks.audioError = false;
+    audioMocks.audioLoading = false;
+    audioMocks.audioReady = true;
   });
 
   it('renders selected word details and formatted dates', () => {
@@ -136,5 +158,41 @@ describe('VocabularyDetailCard', () => {
 
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(onReset).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables play button when audio is not ready', () => {
+    audioMocks.audioReady = false;
+
+    render(
+      <VocabularyDetailCard
+        selectedWord={{ item_id: 1, czech: 'ahoj', audio: 'a.opus' } as any}
+        selectedTitle="ahoj"
+        onClose={vi.fn()}
+        onReset={vi.fn()}
+      />,
+    );
+
+    expect((screen.getByRole('button', { name: 'Audio' }) as HTMLButtonElement).disabled).toBe(
+      true,
+    );
+  });
+
+  it('shows error toast when playback fails', async () => {
+    audioMocks.playAudio.mockResolvedValue(false);
+
+    render(
+      <VocabularyDetailCard
+        selectedWord={{ item_id: 1, czech: 'ahoj', audio: 'a.opus' } as any}
+        selectedTitle="ahoj"
+        onClose={vi.fn()}
+        onReset={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Audio' }));
+
+    await waitFor(() => {
+      expect(audioMocks.showToast).toHaveBeenCalledWith('No audio', 'error');
+    });
   });
 });

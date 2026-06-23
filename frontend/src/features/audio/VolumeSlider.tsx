@@ -55,7 +55,7 @@ export default function VolumeSlider({ className = '' }: VolumeSliderProps) {
   return (
     <div
       ref={sliderRef}
-      className={`flex h-10 w-50 min-w-10 items-center justify-start p-4 ${className}`}
+      className={`secondary-control relative flex items-center justify-start ${className}`}
     >
       <button
         onClick={(event) => {
@@ -63,7 +63,7 @@ export default function VolumeSlider({ className = '' }: VolumeSliderProps) {
           setShowVolumeSlider((prev) => !prev);
         }}
         aria-label={ARIA_TEXTS.setVolume}
-        className="cursor-pointer"
+        className="secondary-control flex cursor-pointer items-center justify-center"
         disabled={false}
         title={TEXTS.volume}
       >
@@ -81,7 +81,7 @@ export default function VolumeSlider({ className = '' }: VolumeSliderProps) {
             event.stopPropagation();
             handleVolumeChange(event);
           }}
-          className="ml-2 cursor-pointer"
+          className="absolute left-full z-10 cursor-pointer"
           autoFocus
           aria-valuenow={volume}
           aria-valuemin={0}

@@ -73,7 +73,7 @@ export default function BlockItemsOverview() {
     [items],
   );
 
-  const { playAudio } = useAudioManager(itemAudios);
+  const { playAudio, isAudioReady, loading: audioLoading } = useAudioManager(itemAudios);
 
   // -- Handlers --
   const handleReset = useCallback(async () => {
@@ -107,10 +107,14 @@ export default function BlockItemsOverview() {
             key={item.item_id}
             className="px-4"
             title={getPronunciationTitle(item.pronunciation)}
-            onClick={() => {
+            onClick={async () => {
               if (!item.audio) return;
-              playAudio(item.audio);
+              const didPlay = await playAudio(item.audio);
+              if (!didPlay) {
+                showToast(TEXTS.noAudio, 'error');
+              }
             }}
+            disabled={!item.audio || audioLoading || !isAudioReady(item.audio)}
           >
             <div className="flex w-full items-center justify-between gap-3 overflow-hidden">
               <span className="min-w-0 flex-1 overflow-hidden text-left text-ellipsis whitespace-nowrap">
@@ -123,8 +127,14 @@ export default function BlockItemsOverview() {
           </ListButton>
         ))}
       </DataState>
-      <VolumeSlider className="pos-bottom-left-control h-button" />
-      {items && items.length > 0 && <HelpButton className="pos-bottom-right-control" />}
+      <div className="pos-bottom-left-control">
+        <VolumeSlider />
+      </div>
+      {items && items.length > 0 && (
+        <div className="pos-bottom-right-control">
+          <HelpButton />
+        </div>
+      )}
     </OverviewCard>
   );
 }

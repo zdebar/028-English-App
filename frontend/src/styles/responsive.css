@@ -1,16 +1,27 @@
 /** RESPONSIVE STYLES **/
 
 /* CONTROL POSITIONS */
+.secondary-control {
+  min-width: var(--size-button);
+  min-height: var(--height-button);
+}
+
 .pos-bottom-right-control {
   position: absolute;
-  bottom: -54px;
-  right: 0px;
+  bottom: calc(-1 * var(--height-button));
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 0;
 }
 
 .pos-bottom-left-control {
   position: absolute;
-  bottom: -54px;
-  left: 0px;
+  bottom: calc(-1 * var(--height-button));
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 0;
 }
 
 .pos-mastered-toggle {
@@ -43,16 +54,33 @@
 
 @media (max-height: 400px) {
   .pos-bottom-right-control {
-    bottom: 0px;
-    right: -54px;
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    flex-direction: column;
   }
   .pos-bottom-left-control {
-    bottom: 0px;
-    left: -54px;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    flex-direction: column-reverse;
+  }
+  .pos-mastered-toggle {
+    bottom: -36px;
+    left: 16px;
   }
   .help-btn-margin {
     margin-bottom: 0px;
   }
+}
+
+.pos-home-bottom-right-control {
+  position: absolute;
+  bottom: calc(-1 * var(--height-button));
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 0;
 }
 
 /* HOME PAGE */

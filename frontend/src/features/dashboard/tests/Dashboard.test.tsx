@@ -87,10 +87,11 @@ describe('Dashboard', () => {
   });
 
   it('renders fallback not-available lesson when no lessons are in progress', () => {
-    render(<Dashboard />);
+    const { container } = render(<Dashboard />);
 
     expect(screen.getByTestId('block-bar').textContent).toContain('Nedostupne');
     expect(screen.getByText('Dnes zahajeno')).toBeTruthy();
+    expect(container.querySelector('.pos-home-bottom-right-control button')).toBeTruthy();
   });
 
   it('renders mastered hint and triggers toggle handler', () => {

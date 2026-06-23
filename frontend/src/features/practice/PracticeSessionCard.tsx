@@ -16,11 +16,11 @@ import GrammarButton from './buttons/GrammarButton';
 import HintButton from './buttons/HintButton';
 import KnownButton from './buttons/KnownButton';
 import MasterItemButton from './buttons/MasterItemButton';
-import PlayAudioButton from './buttons/PlayAudioButton';
 import RepeatButton from './buttons/RepeatButton';
 import PracticeStarsRow from './components/PracticeStarsRow';
 import { usePracticeStars } from './hooks/use-practice-stars';
 import type { UserItemPractice } from '@/types/user-item.types';
+import PlayIcon from '@/components/UI/icons/PlayIcon';
 
 export type PracticeSessionCardProps = Readonly<{
   currentItem: UserItemPractice | null;
@@ -126,8 +126,7 @@ export default function PracticeSessionCard({
           {!revealed && !showDirectionChange && (
             <HelpText className="center top-4">{TEXTS.reveal}</HelpText>
           )}
-          <div id="top-bar" className="relative flex h-8 w-full items-center justify-between">
-            <VolumeSlider className="pl-2" />
+          <div id="top-bar" className="relative flex h-8 w-full items-center justify-end">
             {audioStatusMessage}
           </div>
           {showDirectionChange ? (
@@ -162,11 +161,7 @@ export default function PracticeSessionCard({
             </HelpText>
           </div>
         </div>
-        <div id="practice-controls" className="relative grid w-full grid-cols-4 gap-1">
-          <PlayAudioButton
-            onClick={playAudio}
-            disabled={audioDisabled || showDirectionChange || audioLoading}
-          />
+        <div id="practice-controls" className="relative grid w-full grid-cols-3 gap-1">
           <MasterItemButton
             onConfirm={() => {
               void completeCurrent?.();
@@ -201,17 +196,32 @@ export default function PracticeSessionCard({
           )}
         </div>
 
-        <HelpButton className="pos-bottom-right-control self-end" />
-        {showNoteButton && (
-          <NoteButton
-            title={TEXTS.tooltipNotes}
-            className="pos-bottom-left-control"
-            onClick={(e) => {
-              e.stopPropagation();
-              openNote(noteId);
-            }}
-          />
-        )}
+        <div className="pos-bottom-left-control">
+          <button
+            type="button"
+            onClick={playAudio}
+            disabled={audioDisabled || showDirectionChange || audioLoading}
+            className="secondary-control relative flex cursor-pointer items-center justify-center disabled:cursor-default"
+            title={audioDisabled || showDirectionChange || audioLoading ? undefined : TEXTS.audio}
+            aria-label={TEXTS.audio}
+          >
+            <PlayIcon />
+            <HelpText className="-top-3.5 left-0">{TEXTS.audio}</HelpText>
+          </button>
+          <VolumeSlider />
+        </div>
+        <div className="pos-bottom-right-control">
+          {showNoteButton && (
+            <NoteButton
+              title={TEXTS.tooltipNotes}
+              onClick={(e) => {
+                e.stopPropagation();
+                openNote(noteId);
+              }}
+            />
+          )}
+          <HelpButton />
+        </div>
       </div>
     </div>
   );

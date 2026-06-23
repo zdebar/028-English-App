@@ -7,6 +7,8 @@ const mocks = vi.hoisted(() => ({
   showToast: vi.fn(),
   reportInfo: vi.fn(),
   reportError: vi.fn(),
+  audioLoading: false,
+  readyAudio: new Set<string>(),
   userId: 'u1',
   blockId: '2',
   state: {
@@ -50,6 +52,8 @@ vi.mock('@/hooks/use-fetch', () => ({
 vi.mock('@/features/audio/use-audio-manager', () => ({
   useAudioManager: () => ({
     playAudio: mocks.playAudio,
+    loading: mocks.audioLoading,
+    isAudioReady: (filename?: string) => Boolean(filename && mocks.readyAudio.has(filename)),
   }),
 }));
 
@@ -79,6 +83,7 @@ vi.mock('@/locales/cs', () => ({
     resetProgressErrorToast: 'Reset error',
     resetBlockTitle: 'Reset block',
     resetBlockDescription: 'Reset block description',
+    noAudio: 'No audio',
   },
   ARIA_TEXTS: {
     setVolume: 'Nastavit hlasitost',
@@ -123,8 +128,8 @@ vi.mock('@/components/UI/OverviewCard', () => ({
 }));
 
 vi.mock('@/components/UI/buttons/ListButton', () => ({
-  ListButton: ({ onClick, children }: any) => (
-    <button data-testid="item-button" onClick={onClick}>
+  ListButton: ({ onClick, children, disabled }: any) => (
+    <button data-testid="item-button" onClick={onClick} disabled={disabled}>
       {children}
     </button>
   ),
@@ -151,6 +156,9 @@ describe('BlockItemsOverview', () => {
     mocks.state.block = { block_id: 2, name: 'Block 2' };
     mocks.state.blockLoading = false;
     mocks.playAudio.mockReset();
+    mocks.playAudio.mockResolvedValue(true);
+    mocks.audioLoading = false;
+    mocks.readyAudio = new Set<string>();
   });
 
   it('renders not found state for invalid block id', () => {
@@ -191,6 +199,7 @@ describe('BlockItemsOverview', () => {
         audio: 'a.opus',
       },
     ];
+    mocks.readyAudio = new Set(['a.opus']);
 
     render(<BlockItemsOverview />);
 
@@ -202,6 +211,42 @@ describe('BlockItemsOverview', () => {
     fireEvent.click(screen.getByTestId('item-button'));
 
     expect(mocks.playAudio).toHaveBeenCalledWith('a.opus');
+  });
+
+  it('disables item play button when audio is not ready', () => {
+    mocks.state.items = [
+      {
+        item_id: 10,
+        czech: 'pondeli',
+        english: 'monday',
+        audio: 'a.opus',
+      },
+    ];
+
+    render(<BlockItemsOverview />);
+
+    expect((screen.getByTestId('item-button') as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('shows error toast when audio playback fails', async () => {
+    mocks.state.items = [
+      {
+        item_id: 10,
+        czech: 'pondeli',
+        english: 'monday',
+        audio: 'a.opus',
+      },
+    ];
+    mocks.readyAudio = new Set(['a.opus']);
+    mocks.playAudio.mockResolvedValue(false);
+
+    render(<BlockItemsOverview />);
+
+    fireEvent.click(screen.getByTestId('item-button'));
+
+    await waitFor(() => {
+      expect(mocks.showToast).toHaveBeenCalledWith('No audio', 'error');
+    });
   });
 
   it('does not render help button when there are no items', () => {

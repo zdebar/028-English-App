@@ -65,7 +65,9 @@ export default function Dashboard({ className = '' }: DashboardProps) {
           lessonCount={lesson.totalCount ?? 1}
         />
       ))}
-      <HelpButton className="pos-bottom-right-control" />
+      <div className="pos-home-bottom-right-control">
+        <HelpButton />
+      </div>
       <HelpText className="right-2 -bottom-6">
         {showMastered ? TEXTS.masteredTodayHint : TEXTS.startedTodayHint}
       </HelpText>
