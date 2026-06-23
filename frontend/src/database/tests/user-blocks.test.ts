@@ -16,6 +16,7 @@ const mocks = vi.hoisted(() => ({
   markAsSynced: vi.fn(),
   rpc: vi.fn(),
   reportInfo: vi.fn(),
+  getStartedBlocksIds: vi.fn(),
 }));
 
 vi.mock('@/config/config', () => ({
@@ -49,6 +50,13 @@ vi.mock('@/database/models/db', () => ({
 vi.mock('@/database/models/metadata', () => ({
   default: {
     markAsSynced: (...args: unknown[]) => mocks.markAsSynced(...args),
+  },
+}));
+
+vi.mock('@/database/models/user-items', () => ({
+  default: {
+    getStartedBlocksIds: (...args: unknown[]) => mocks.getStartedBlocksIds(...args),
+    areAllVocabularyItemsStartedForLesson: vi.fn(),
   },
 }));
 
@@ -106,6 +114,7 @@ describe('UserBlock', () => {
     });
     mocks.markAsSynced.mockResolvedValue(undefined);
     mocks.rpc.mockResolvedValue({ data: [], error: null });
+    mocks.getStartedBlocksIds.mockResolvedValue([]);
   });
 
   it('getByUserId returns blocks sorted by sort_order', async () => {
@@ -119,6 +128,51 @@ describe('UserBlock', () => {
     expect(mocks.where).toHaveBeenCalledWith('user_id');
     expect(mocks.equals).toHaveBeenCalledWith('u1');
     expect(result.map((block) => block.block_id)).toEqual([1, 2]);
+  });
+
+  it('getStartedByUserId returns started grammar blocks and vocabulary blocks with started items', async () => {
+    mocks.toArray.mockResolvedValueOnce([
+      {
+        user_id: 'u1',
+        block_id: 4,
+        sort_order: 40,
+        name: 'Locked vocabulary',
+        is_vocabulary: true,
+        started_at: '9999-12-31T23:59:59+00:00',
+      },
+      {
+        user_id: 'u1',
+        block_id: 3,
+        sort_order: 30,
+        name: 'Started vocabulary',
+        is_vocabulary: true,
+        started_at: '9999-12-31T23:59:59+00:00',
+      },
+      {
+        user_id: 'u1',
+        block_id: 2,
+        sort_order: 20,
+        name: 'Locked grammar',
+        is_vocabulary: false,
+        started_at: '9999-12-31T23:59:59+00:00',
+      },
+      {
+        user_id: 'u1',
+        block_id: 1,
+        sort_order: 10,
+        name: 'Started grammar',
+        is_vocabulary: false,
+        started_at: '2026-03-01T00:00:00.000Z',
+      },
+    ]);
+    mocks.getStartedBlocksIds.mockResolvedValueOnce([3]);
+
+    const result = await UserBlock.getStartedByUserId('u1');
+
+    expect(mocks.where).toHaveBeenCalledWith('user_id');
+    expect(mocks.equals).toHaveBeenCalledWith('u1');
+    expect(mocks.getStartedBlocksIds).toHaveBeenCalledWith('u1');
+    expect(result.map((block) => block.block_id)).toEqual([1, 3]);
   });
 
   it('getByBlockId reads by compound key', async () => {

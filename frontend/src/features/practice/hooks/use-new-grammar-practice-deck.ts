@@ -233,6 +233,7 @@ export function useNewGrammarPracticeDeck(userId: string | null) {
     showDirectionChange,
     handleReveal,
     plusHint,
+    repeatDisabled: round < 2,
     nextRepeat: () => advance(false),
     nextKnown: () => advance(true),
     audioError,

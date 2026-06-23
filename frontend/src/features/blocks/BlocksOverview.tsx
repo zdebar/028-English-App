@@ -21,7 +21,7 @@ export default function BlocksOverview() {
   const fetchBlocks = useCallback(async (): Promise<UserBlockType[]> => {
     if (!userId) return [];
     try {
-      return await UserBlock.getByUserId(userId);
+      return await UserBlock.getStartedByUserId(userId);
     } catch (error) {
       showToast(error instanceof Error ? error.message : String(error));
       reportError('Failed to fetch blocks overview', error);

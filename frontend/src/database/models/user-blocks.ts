@@ -78,6 +78,24 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     return blocks.sort((left, right) => left.sort_order - right.sort_order);
   }
 
+  static async getStartedByUserId(userId: string): Promise<UserBlockType[]> {
+    assertNonEmptyString(userId, 'userId');
+
+    const [blocks, startedBlockIds] = await Promise.all([
+      db.user_blocks.where('user_id').equals(userId).toArray(),
+      UserItem.getStartedBlocksIds(userId),
+    ]);
+    const startedBlockIdSet = new Set(startedBlockIds);
+
+    return blocks
+      .filter(
+        (block) =>
+          (!block.is_vocabulary && block.started_at !== NULL_DATE) ||
+          (block.is_vocabulary && startedBlockIdSet.has(block.block_id)),
+      )
+      .sort((left, right) => left.sort_order - right.sort_order);
+  }
+
   static async getByBlockId(userId: string, blockId: number): Promise<UserBlockType | null> {
     assertNonEmptyString(userId, 'userId');
 

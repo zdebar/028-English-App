@@ -278,6 +278,14 @@ vi.mock('@/features/practice/buttons/KnownButton', () => ({
   ),
 }));
 
+vi.mock('@/features/practice/buttons/RepeatButton', () => ({
+  default: ({ onClick, disabled }: any) => (
+    <button data-testid="repeat-btn" disabled={disabled} onClick={onClick}>
+      repeat
+    </button>
+  ),
+}));
+
 vi.mock('@/features/practice/buttons/UnknownButton', () => ({
   default: ({ onClick }: any) => (
     <button data-testid="unknown-btn" onClick={onClick}>
@@ -512,5 +520,34 @@ describe('PracticeCard', () => {
     );
 
     expect((screen.getByTestId('master-btn') as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('can disable the repeat control for specialized practice sessions', () => {
+    render(
+      <PracticeSessionCard
+        currentItem={mocks.makePracticeItem()}
+        noteId={null}
+        grammarId={10}
+        progressLabel="Round 1/4"
+        isCzToEn
+        revealed
+        showNewGrammarIndicator={false}
+        czech="ahoj"
+        english="hello"
+        pronunciation="hello"
+        audioDisabled={false}
+        showDirectionChange={false}
+        handleReveal={vi.fn()}
+        plusHint={vi.fn()}
+        nextRepeat={vi.fn()}
+        repeatDisabled
+        nextKnown={vi.fn()}
+        audioError={false}
+        playAudio={vi.fn()}
+        audioLoading={false}
+      />,
+    );
+
+    expect((screen.getByTestId('repeat-btn') as HTMLButtonElement).disabled).toBe(true);
   });
 });

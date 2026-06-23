@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
+  getStartedByUserId: vi.fn(),
+  userId: 'u1' as string | null,
   state: {
     data: [] as Array<{ block_id: number; name: string }>,
     error: null as string | null,
@@ -16,17 +18,25 @@ vi.mock('react-router-dom', () => ({
 
 vi.mock('@/database/models/user-blocks', () => ({
   default: {
-    getByUserId: vi.fn(),
+    getStartedByUserId: (...args: unknown[]) => mocks.getStartedByUserId(...args),
   },
 }));
 
+vi.mock('@/features/auth/use-auth-store', () => ({
+  useAuthStore: (selector: (state: { userId: string | null }) => unknown) =>
+    selector({ userId: mocks.userId }),
+}));
+
 vi.mock('@/hooks/use-array', () => ({
-  useArray: () => ({
-    data: mocks.state.data,
-    error: mocks.state.error,
-    loading: mocks.state.loading,
-    hasData: mocks.state.data.length > 0,
-  }),
+  useArray: (fetcher: () => Promise<unknown[]>) => {
+    void fetcher();
+    return {
+      data: mocks.state.data,
+      error: mocks.state.error,
+      loading: mocks.state.loading,
+      hasData: mocks.state.data.length > 0,
+    };
+  },
 }));
 
 vi.mock('@/locales/cs', () => ({
@@ -66,6 +76,8 @@ import BlocksOverview from '@/features/blocks/BlocksOverview';
 describe('BlocksOverview', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.userId = 'u1';
+    mocks.getStartedByUserId.mockResolvedValue([]);
     mocks.state.data = [];
     mocks.state.error = null;
     mocks.state.loading = false;
@@ -76,6 +88,7 @@ describe('BlocksOverview', () => {
 
     render(<BlocksOverview />);
 
+    expect(mocks.getStartedByUserId).toHaveBeenCalledWith('u1');
     expect(screen.queryByText('No blocks')).toBeNull();
   });
 

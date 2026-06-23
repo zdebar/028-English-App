@@ -147,6 +147,7 @@ describe('useNewGrammarPracticeDeck', () => {
     expect(result.current.currentItem?.item_id).toBe(1);
     expect(result.current.grammar?.name).toBe('Articles');
     expect(result.current.progressLabel).toBe('Round 1/4');
+    expect(result.current.repeatDisabled).toBe(true);
   });
 
   it('uses the same reveal flow, including direction confirmation before audio reveal', async () => {
@@ -173,13 +174,16 @@ describe('useNewGrammarPracticeDeck', () => {
     const { result } = renderHook(() => useNewGrammarPracticeDeck('user-1'));
 
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+    expect(result.current.repeatDisabled).toBe(true);
 
     await act(async () => {
       await result.current.nextKnown();
     });
+    expect(result.current.repeatDisabled).toBe(true);
     await act(async () => {
       await result.current.nextKnown();
     });
+    expect(result.current.repeatDisabled).toBe(false);
     await act(async () => {
       await result.current.nextRepeat();
     });

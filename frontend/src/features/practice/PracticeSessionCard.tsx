@@ -38,6 +38,7 @@ export type PracticeSessionCardProps = Readonly<{
   handleReveal: () => void;
   plusHint: () => void;
   nextRepeat: () => void | Promise<void>;
+  repeatDisabled?: boolean;
   nextKnown: () => void | Promise<void>;
   completeCurrent?: () => void | Promise<void>;
   completeDisabled?: boolean;
@@ -62,6 +63,7 @@ export default function PracticeSessionCard({
   handleReveal,
   plusHint,
   nextRepeat,
+  repeatDisabled = false,
   nextKnown,
   completeCurrent,
   completeDisabled = false,
@@ -160,7 +162,7 @@ export default function PracticeSessionCard({
                 onClick={() => {
                   void nextRepeat();
                 }}
-                disabled={showDirectionChange}
+                disabled={repeatDisabled || showDirectionChange}
               />
               <KnownButton
                 onClick={() => {
