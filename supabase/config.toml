@@ -75,6 +75,7 @@ schema_paths = [
   "./schemas/37_rpc_upsert_fetch_user_blocks.sql",
   "./schemas/40_user_lifecycle_functions.sql",
   "./schemas/41_anonymous_cleanup_function.sql",
+  "./schemas/50_storage_buckets.sql",
   "./schemas/90_rls.sql",
 ]
 
@@ -147,6 +148,16 @@ file_size_limit = "50MiB"
 # file_size_limit = "50MiB"
 # allowed_mime_types = ["image/png", "image/jpeg"]
 # objects_path = "./images"
+
+[storage.buckets.audio-files]
+public = false
+file_size_limit = "50MiB"
+objects_path = "./storage/audio-files"
+
+[storage.buckets.audio-archive]
+public = false
+file_size_limit = "50MiB"
+objects_path = "./storage/audio-archive"
 
 # Allow connections via S3 compatible clients
 [storage.s3_protocol]
