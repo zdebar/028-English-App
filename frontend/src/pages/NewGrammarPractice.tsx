@@ -29,9 +29,11 @@ export default function NewGrammarPractice(): JSX.Element {
 
   if (deck.isComplete) {
     return (
-      <div className="card-width flex flex-col gap-4 p-4 text-center">
-        <Notification>{TEXTS.newGrammarComplete}</Notification>
-        <StyledButton className="h-controls px-4" onClick={() => navigate(ROUTES.home)}>
+      <div className="card-width flex flex-col gap-4 text-center">
+        <p>{TEXTS.newGrammarComplete}</p>
+        <Notification>{deck.block.name}</Notification>
+        <p className="px-4">{TEXTS.newGrammarFurther}</p>
+        <StyledButton className="h-button py-4" onClick={() => navigate(ROUTES.home)}>
           {TEXTS.tooltipHome}
         </StyledButton>
       </div>
