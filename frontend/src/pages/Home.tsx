@@ -72,7 +72,7 @@ export default function Home(): JSX.Element {
               {TEXTS.syncWarning}
             </p>
           )}
-          <Dashboard className="pt-4" />
+          <Dashboard />
         </div>
       ) : (
         <div className="home-body w-full">
