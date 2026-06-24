@@ -32,8 +32,7 @@ export default function NewGrammarPractice(): JSX.Element {
       <div className="card-width flex flex-col gap-4 text-center">
         <p>{TEXTS.newGrammarComplete}</p>
         <Notification>{deck.block.name}</Notification>
-        <p className="px-4">{TEXTS.newGrammarFurther}</p>
-        <StyledButton className="h-button py-4" onClick={() => navigate(ROUTES.home)}>
+        <StyledButton className="h-button mt-2" onClick={() => navigate(ROUTES.home)}>
           {TEXTS.tooltipHome}
         </StyledButton>
       </div>

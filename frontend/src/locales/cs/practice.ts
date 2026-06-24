@@ -31,5 +31,4 @@ export const PRACTICE_TEXTS = {
   currentPracticeStar: 'Aktuální hvězda procvičování',
   newGrammarRound: 'Kolo',
   newGrammarComplete: 'dokončeno úvodní cvičení pro',
-  newGrammarFurther: 'další procvičování bude probíhat v "Procvičit gramatiku".',
 } as const;
