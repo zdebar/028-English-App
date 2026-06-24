@@ -1,19 +1,31 @@
 import Notification from '@/components/UI/Notification';
-import StyledButton from '@/components/UI/buttons/StyledButton';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import GrammarDetailCard from '@/features/grammar/GrammarDetailCard';
 import PracticeSessionCard from '@/features/practice/PracticeSessionCard';
 import { useNewGrammarPracticeDeck } from '@/features/practice/hooks/use-new-grammar-practice-deck';
 import { ROUTES } from '@/config/routes.config';
+import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
-import { useState, type JSX } from 'react';
+import { useEffect, useRef, useState, type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function NewGrammarPractice(): JSX.Element {
+export default function NewGrammarPractice(): JSX.Element | null {
   const userId = useAuthStore((state) => state.userId);
   const navigate = useNavigate();
+  const showToast = useToastStore((state) => state.showToast);
   const [showGrammarIntro, setShowGrammarIntro] = useState(true);
   const deck = useNewGrammarPracticeDeck(userId);
+  const hasHandledCompletion = useRef(false);
+
+  useEffect(() => {
+    if (!deck.isComplete || hasHandledCompletion.current) {
+      return;
+    }
+
+    hasHandledCompletion.current = true;
+    showToast(TEXTS.newGrammarComplete, 'success');
+    navigate(ROUTES.home, { replace: true });
+  }, [deck.isComplete, navigate, showToast]);
 
   if (!userId) {
     return <Notification>{TEXTS.notAvailable}</Notification>;
@@ -28,14 +40,7 @@ export default function NewGrammarPractice(): JSX.Element {
   }
 
   if (deck.isComplete) {
-    return (
-      <div className="card-width flex flex-col gap-4 p-4 text-center">
-        <Notification>{TEXTS.newGrammarComplete}</Notification>
-        <StyledButton className="h-controls px-4" onClick={() => navigate(ROUTES.home)}>
-          {TEXTS.tooltipHome}
-        </StyledButton>
-      </div>
-    );
+    return null;
   }
 
   if (!deck.currentItem) {
