@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(
@@ -9,10 +9,6 @@ const mocks = vi.hoisted(
     userEmail: string | null;
     dailyCount: number;
     isSyncError: boolean;
-    unlockNextGrammarBlock: any;
-    getFirstUnlockedGrammarBlock: any;
-    countReadyGrammarItems: any;
-    reportError: any;
   } => ({
     theme: 'light',
     userId: 'u1',
@@ -20,10 +16,6 @@ const mocks = vi.hoisted(
     userEmail: 'u1@example.com',
     dailyCount: 3,
     isSyncError: false,
-    unlockNextGrammarBlock: vi.fn(),
-    getFirstUnlockedGrammarBlock: vi.fn(),
-    countReadyGrammarItems: vi.fn(),
-    reportError: vi.fn(),
   }),
 );
 
@@ -112,17 +104,8 @@ vi.mock('@/features/synchronization/SimulateDataButton', () => ({
   default: () => <div data-testid="simulate-data-button" />,
 }));
 
-vi.mock('@/database/models/user-blocks', () => ({
-  default: {
-    unlockNextGrammarBlock: (...args: unknown[]) => mocks.unlockNextGrammarBlock(...args),
-    getFirstUnlockedGrammarBlock: (...args: unknown[]) =>
-      mocks.getFirstUnlockedGrammarBlock(...args),
-    countReadyGrammarItems: (...args: unknown[]) => mocks.countReadyGrammarItems(...args),
-  },
-}));
-
-vi.mock('@/features/logging/monitoring-handler', () => ({
-  reportError: (...args: unknown[]) => mocks.reportError(...args),
+vi.mock('@/features/practice/HomePracticeButtons', () => ({
+  default: ({ userId }: any) => <div data-testid="home-practice-buttons">practice:{userId}</div>,
 }));
 
 vi.mock('react-router-dom', () => ({
@@ -140,9 +123,6 @@ describe('Home', () => {
     mocks.userEmail = 'u1@example.com';
     mocks.dailyCount = 3;
     mocks.isSyncError = false;
-    mocks.unlockNextGrammarBlock.mockResolvedValue(null);
-    mocks.getFirstUnlockedGrammarBlock.mockResolvedValue(null);
-    mocks.countReadyGrammarItems.mockResolvedValue(0);
   });
 
   it('shows sync warning when sync has failed', () => {
@@ -161,51 +141,10 @@ describe('Home', () => {
     expect(screen.queryByText('App')).toBeNull();
   });
 
-  it('loads practice-state data when available', async () => {
-    mocks.getFirstUnlockedGrammarBlock.mockResolvedValue({
-      user_id: 'u1',
-      block_id: 10,
-      name: 'Block',
-      note: '',
-      lesson_id: 1,
-      grammar_id: 2,
-      sort_order: 1,
-      progress: 0,
-      is_vocabulary: false,
-      started_at: '2026-01-01T00:00:00.000Z',
-      updated_at: '2026-01-01T00:00:00.000Z',
-      next_at: '9999-12-31T23:59:59+00:00',
-      mastered_at: '9999-12-31T23:59:59+00:00',
-      deleted_at: '9999-12-31T23:59:59+00:00',
-    });
-    mocks.countReadyGrammarItems.mockResolvedValue(4);
-
+  it('renders authenticated practice controls through the practice buttons component', () => {
     render(<Home />);
 
-    await waitFor(() => {
-      const newGrammarButton = screen.getByText('New grammar').closest('button') as HTMLButtonElement;
-      const grammarButton = screen.getByText('Grammar').closest('button') as HTMLButtonElement;
-      expect(newGrammarButton.disabled).toBe(false);
-      expect(grammarButton.disabled).toBe(false);
-    });
-  });
-
-  it('falls back to disabled practice controls when practice-state loading fails', async () => {
-    mocks.unlockNextGrammarBlock.mockRejectedValue(new Error('Dexie failure'));
-
-    render(<Home />);
-
-    await waitFor(() => {
-      expect(mocks.reportError).toHaveBeenCalledWith(
-        'Failed to load practice button state',
-        expect.any(Error),
-      );
-    });
-
-    expect((screen.getByText('New grammar').closest('button') as HTMLButtonElement).disabled).toBe(
-      true,
-    );
-    expect((screen.getByText('Grammar').closest('button') as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByTestId('home-practice-buttons').textContent).toBe('practice:u1');
   });
 
   it('renders auth UI when user is signed out', () => {

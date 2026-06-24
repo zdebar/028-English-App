@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   where: vi.fn(),
@@ -43,7 +43,9 @@ vi.mock('@/database/models/db', () => ({
       bulkPut: (...args: unknown[]) => mocks.bulkPut(...args),
       update: (...args: unknown[]) => mocks.update(...args),
     },
-    user_items: {},
+    user_items: {
+      where: (...args: unknown[]) => mocks.where(...args),
+    },
   },
 }));
 
@@ -99,6 +101,9 @@ describe('UserBlock', () => {
     });
     mocks.between.mockReturnValue({
       toArray: (...args: unknown[]) => mocks.toArray(...args),
+      filter: (predicate: (item: any) => boolean) => ({
+        toArray: async () => (await mocks.toArray()).filter(predicate),
+      }),
     });
     mocks.where.mockReturnValue({
       equals: (...args: unknown[]) => mocks.equals(...args),
@@ -115,6 +120,10 @@ describe('UserBlock', () => {
     mocks.markAsSynced.mockResolvedValue(undefined);
     mocks.rpc.mockResolvedValue({ data: [], error: null });
     mocks.getStartedBlocksIds.mockResolvedValue([]);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('getByUserId returns blocks sorted by sort_order', async () => {
@@ -241,6 +250,103 @@ describe('UserBlock', () => {
 
     expect(mocks.where).toHaveBeenCalledWith('user_id');
     expect(mocks.equals).toHaveBeenCalledWith('u1');
+  });
+
+  it('getReadyGrammarPracticeState returns ready count and grouped future schedule', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
+    mocks.toArray.mockResolvedValueOnce([
+      {
+        user_id: 'u1',
+        item_id: 1,
+        is_vocabulary: 0,
+        next_at: '2026-06-24T11:59:59.000Z',
+        mastered_at: '9999-12-31T23:59:59+00:00',
+        sort_order: 1,
+      },
+      {
+        user_id: 'u1',
+        item_id: 2,
+        is_vocabulary: 0,
+        next_at: '2026-06-24T12:00:10.000Z',
+        mastered_at: '9999-12-31T23:59:59+00:00',
+        sort_order: 2,
+      },
+      {
+        user_id: 'u1',
+        item_id: 3,
+        is_vocabulary: 0,
+        next_at: '2026-06-24T12:00:10.800Z',
+        mastered_at: '9999-12-31T23:59:59+00:00',
+        sort_order: 3,
+      },
+      {
+        user_id: 'u1',
+        item_id: 4,
+        is_vocabulary: 0,
+        next_at: '2026-06-24T12:00:15.000Z',
+        mastered_at: '2026-06-24T10:00:00.000Z',
+        sort_order: 4,
+      },
+      {
+        user_id: 'u1',
+        item_id: 5,
+        is_vocabulary: 0,
+        next_at: '9999-12-31T23:59:59+00:00',
+        mastered_at: '9999-12-31T23:59:59+00:00',
+        sort_order: 5,
+      },
+    ]);
+
+    const result = await UserBlock.getReadyGrammarPracticeState('u1');
+
+    expect(mocks.where).toHaveBeenCalledWith(
+      '[user_id+is_vocabulary+next_at+mastered_at+sort_order]',
+    );
+    expect(mocks.between).toHaveBeenCalledWith(
+      ['u1', 0, expect.anything(), '9999-12-31T23:59:59+00:00', expect.anything()],
+      [
+        'u1',
+        0,
+        '9999-12-31T23:59:59+00:00',
+        '9999-12-31T23:59:59+00:00',
+        expect.anything(),
+      ],
+      true,
+      false,
+    );
+    expect(result).toEqual({
+      readyCount: 1,
+      schedule: [{ date: '2026-06-24T12:00:10.800Z', count: 2 }],
+    });
+  });
+
+  it('getReadyGrammarPracticeState returns sorted future groups outside the grouping window', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
+    mocks.toArray.mockResolvedValueOnce([
+      {
+        next_at: '2026-06-24T12:00:05.000Z',
+        mastered_at: '9999-12-31T23:59:59+00:00',
+      },
+      {
+        next_at: '2026-06-24T12:00:01.000Z',
+        mastered_at: '9999-12-31T23:59:59+00:00',
+      },
+      {
+        next_at: '2026-06-24T12:00:03.000Z',
+        mastered_at: '9999-12-31T23:59:59+00:00',
+      },
+    ]);
+
+    await expect(UserBlock.getReadyGrammarPracticeState('u1')).resolves.toEqual({
+      readyCount: 0,
+      schedule: [
+        { date: '2026-06-24T12:00:01.000Z', count: 1 },
+        { date: '2026-06-24T12:00:03.000Z', count: 1 },
+        { date: '2026-06-24T12:00:05.000Z', count: 1 },
+      ],
+    });
   });
 
   it('resetByBlockId resets progress dates and updates timestamp', async () => {

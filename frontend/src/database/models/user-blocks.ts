@@ -5,7 +5,11 @@ import { db } from '@/database/models/db';
 import { getSyncTimestamps, splitDeleted } from '@/database/utils/sync-generic.utils';
 import { reportInfo } from '@/features/logging/monitoring-handler';
 import { SupabaseError } from '@/types/error.types';
-import type { UserBlockType } from '@/types/generic.types';
+import type {
+  ReadyGrammarPracticeState,
+  ReadyGrammarScheduleEntry,
+  UserBlockType,
+} from '@/types/generic.types';
 import { TableName } from '@/types/table.types';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 import Dexie, { Entity } from 'dexie';
@@ -13,6 +17,7 @@ import Metadata from './metadata';
 import UserItem from './user-items';
 
 const NULL_DATE = config.database.nullReplacementDate;
+const READY_GRAMMAR_GROUP_WINDOW_MS = 1000;
 
 type UserBlockAPI = Omit<UserBlockType, 'started_at' | 'next_at' | 'mastered_at' | 'deleted_at'> & {
   started_at: string | null;
@@ -132,21 +137,48 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
   }
 
   static async countReadyGrammarItems(userId: string): Promise<number> {
+    return (await this.getReadyGrammarPracticeState(userId)).readyCount;
+  }
+
+  static async getReadyGrammarPracticeState(userId: string): Promise<ReadyGrammarPracticeState> {
     assertNonEmptyString(userId, 'userId');
 
-    const now = new Date().toISOString();
-    const readyItems = await db.user_items
+    const nowMs = Date.now();
+    const grammarItems = await db.user_items
       .where('[user_id+is_vocabulary+next_at+mastered_at+sort_order]')
       .between(
         [userId, 0, Dexie.minKey, NULL_DATE, Dexie.minKey],
-        [userId, 0, now, NULL_DATE, Dexie.maxKey],
+        [userId, 0, NULL_DATE, NULL_DATE, Dexie.maxKey],
         true,
         false,
       )
       .filter((item) => item.mastered_at === NULL_DATE)
       .toArray();
 
-    return readyItems.length;
+    const futureDates: string[] = [];
+    let readyCount = 0;
+
+    for (const item of grammarItems) {
+      if (item.next_at === NULL_DATE) {
+        continue;
+      }
+
+      const nextAtMs = Date.parse(item.next_at);
+      if (!Number.isFinite(nextAtMs)) {
+        continue;
+      }
+
+      if (nextAtMs < nowMs) {
+        readyCount += 1;
+      } else {
+        futureDates.push(item.next_at);
+      }
+    }
+
+    return {
+      readyCount,
+      schedule: groupReadyGrammarSchedule(futureDates),
+    };
   }
 
   static async unlockBlock(userId: string, blockId: number, dateTime: string): Promise<void> {
@@ -302,4 +334,36 @@ function compareGrammarBlocks(left: UserBlockType, right: UserBlockType): number
     return left.lesson_id - right.lesson_id;
   }
   return left.sort_order - right.sort_order;
+}
+
+function groupReadyGrammarSchedule(dates: string[]): ReadyGrammarScheduleEntry[] {
+  const sortedDates = dates
+    .map((date) => ({ date, time: Date.parse(date) }))
+    .filter((entry) => Number.isFinite(entry.time))
+    .sort((left, right) => left.time - right.time);
+
+  const schedule: ReadyGrammarScheduleEntry[] = [];
+  let currentGroup: ReadyGrammarScheduleEntry | null = null;
+  let currentGroupStartTime: number | null = null;
+
+  for (const entry of sortedDates) {
+    if (currentGroup == null || currentGroupStartTime == null) {
+      currentGroup = { date: entry.date, count: 1 };
+      currentGroupStartTime = entry.time;
+      schedule.push(currentGroup);
+      continue;
+    }
+
+    if (entry.time - currentGroupStartTime <= READY_GRAMMAR_GROUP_WINDOW_MS) {
+      currentGroup.date = entry.date;
+      currentGroup.count += 1;
+      continue;
+    }
+
+    currentGroup = { date: entry.date, count: 1 };
+    currentGroupStartTime = entry.time;
+    schedule.push(currentGroup);
+  }
+
+  return schedule;
 }

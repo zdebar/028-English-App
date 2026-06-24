@@ -63,6 +63,16 @@ export interface UserBlockType {
   deleted_at: string;
 }
 
+export interface ReadyGrammarScheduleEntry {
+  date: string;
+  count: number;
+}
+
+export interface ReadyGrammarPracticeState {
+  readyCount: number;
+  schedule: ReadyGrammarScheduleEntry[];
+}
+
 export interface UserInfoType {
   id: string; // string for the user
   name: string | null; // User's full name

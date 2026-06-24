@@ -3,7 +3,6 @@ import Dashboard from '@/features/dashboard/Dashboard';
 import { useUserStore } from '@/features/user-stats/use-user-store';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
-import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Notification from '@/components/UI/Notification';
 import '@/styles/home.css';
@@ -16,9 +15,7 @@ import ConvertAnonymousUserButton from '@/features/auth/ConvertAnonymousUserButt
 import PropertyView from '@/components/UI/PropertyView';
 import PracticeOverviewButton from '@/features/practice-overview/PracticeOverviewButton';
 import SimulateDataButton from '@/features/synchronization/SimulateDataButton';
-import StyledButton from '@/components/UI/buttons/StyledButton';
-import UserBlock from '@/database/models/user-blocks';
-import { reportError } from '@/features/logging/monitoring-handler';
+import HomePracticeButtons from '@/features/practice/HomePracticeButtons';
 
 /**
  * The Home component renders the main page of the application.
@@ -32,49 +29,6 @@ export default function Home(): JSX.Element {
   const isAnonymousUser = useAuthStore((state) => state.isAnonymousUser);
   const dailyCount = useUserStore((state) => state.dailyCount);
   const isSyncError = useSyncStore((state) => state.isSyncError);
-  const [hasNewGrammarBlock, setHasNewGrammarBlock] = useState(false);
-  const [readyGrammarCount, setReadyGrammarCount] = useState(0);
-
-  useEffect(() => {
-    if (!userId) {
-      setHasNewGrammarBlock(false);
-      setReadyGrammarCount(0);
-      return;
-    }
-
-    let isMounted = true;
-    setHasNewGrammarBlock(false);
-    setReadyGrammarCount(0);
-
-    const loadPracticeState = async () => {
-      try {
-        await UserBlock.unlockNextGrammarBlock(userId);
-        const [newGrammarBlock, grammarCount] = await Promise.all([
-          UserBlock.getFirstUnlockedGrammarBlock(userId),
-          UserBlock.countReadyGrammarItems(userId),
-        ]);
-
-        if (!isMounted) {
-          return;
-        }
-
-        setHasNewGrammarBlock(newGrammarBlock != null);
-        setReadyGrammarCount(grammarCount);
-      } catch (error) {
-        if (!isMounted) {
-          return;
-        }
-        setHasNewGrammarBlock(false);
-        setReadyGrammarCount(0);
-        reportError('Failed to load practice button state', error);
-      }
-    };
-
-    void loadPracticeState();
-    return () => {
-      isMounted = false;
-    };
-  }, [userId]);
 
   return (
     <div className="card-width relative flex w-full flex-col justify-between text-center">
@@ -100,33 +54,7 @@ export default function Home(): JSX.Element {
             ariaLabel={TEXTS.practiceOverviewOpen}
             helpText={TEXTS.starsToday}
           />
-          <div className="my-4 flex flex-col gap-2">
-            <StyledButton
-              className="h-button px-4"
-              onClick={() => navigate(ROUTES.practiceVocabulary)}
-            >
-              {TEXTS.vocabularyPracticeButton}
-            </StyledButton>
-            <StyledButton
-              className="h-button px-4"
-              disabled={!hasNewGrammarBlock}
-              onClick={() => navigate(ROUTES.practiceNewGrammar)}
-            >
-              {TEXTS.newGrammarPracticeButton}
-            </StyledButton>
-            <StyledButton
-              className="h-button relative px-4"
-              disabled={readyGrammarCount === 0}
-              onClick={() => navigate(ROUTES.practiceGrammar)}
-            >
-              {TEXTS.grammarPracticeButton}
-              {readyGrammarCount > 0 && (
-                <span className="bg-button-hover text-light absolute top-1 right-2 rounded-full px-2 text-xs">
-                  {readyGrammarCount}
-                </span>
-              )}
-            </StyledButton>
-          </div>
+          <HomePracticeButtons userId={userId} />
           {isSyncError && (
             <p className="text-error-light dark:text-error-dark px-4 pt-2 text-left text-sm">
               {TEXTS.syncWarning}
