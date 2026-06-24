@@ -41,6 +41,7 @@ function convertAPIToLocal(block: UserBlockAPI): UserBlockType {
   return {
     ...block,
     is_vocabulary: block.is_vocabulary,
+    show_in_topics: block.show_in_topics ?? true,
     started_at: block.started_at ?? NULL_DATE,
     next_at: block.next_at ?? NULL_DATE,
     mastered_at: block.mastered_at ?? NULL_DATE,
@@ -70,6 +71,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
   sort_order!: number;
   progress!: number;
   is_vocabulary!: boolean;
+  show_in_topics!: boolean;
   started_at!: string;
   updated_at!: string;
   next_at!: string;
@@ -83,7 +85,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     return blocks.sort((left, right) => left.sort_order - right.sort_order);
   }
 
-  static async getStartedByUserId(userId: string): Promise<UserBlockType[]> {
+  static async getStartedTopicsByUserId(userId: string): Promise<UserBlockType[]> {
     assertNonEmptyString(userId, 'userId');
 
     const [blocks, startedBlockIds] = await Promise.all([
@@ -95,8 +97,9 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     return blocks
       .filter(
         (block) =>
-          (!block.is_vocabulary && block.started_at !== NULL_DATE) ||
-          (block.is_vocabulary && startedBlockIdSet.has(block.block_id)),
+          block.show_in_topics !== false &&
+          ((!block.is_vocabulary && block.started_at !== NULL_DATE) ||
+            (block.is_vocabulary && startedBlockIdSet.has(block.block_id))),
       )
       .sort((left, right) => left.sort_order - right.sort_order);
   }

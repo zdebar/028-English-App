@@ -139,7 +139,7 @@ describe('UserBlock', () => {
     expect(result.map((block) => block.block_id)).toEqual([1, 2]);
   });
 
-  it('getStartedByUserId returns started grammar blocks and vocabulary blocks with started items', async () => {
+  it('getStartedTopicsByUserId returns started visible grammar blocks and vocabulary blocks with started items', async () => {
     mocks.toArray.mockResolvedValueOnce([
       {
         user_id: 'u1',
@@ -147,6 +147,7 @@ describe('UserBlock', () => {
         sort_order: 40,
         name: 'Locked vocabulary',
         is_vocabulary: true,
+        show_in_topics: true,
         started_at: '9999-12-31T23:59:59+00:00',
       },
       {
@@ -155,6 +156,7 @@ describe('UserBlock', () => {
         sort_order: 30,
         name: 'Started vocabulary',
         is_vocabulary: true,
+        show_in_topics: true,
         started_at: '9999-12-31T23:59:59+00:00',
       },
       {
@@ -163,6 +165,7 @@ describe('UserBlock', () => {
         sort_order: 20,
         name: 'Locked grammar',
         is_vocabulary: false,
+        show_in_topics: true,
         started_at: '9999-12-31T23:59:59+00:00',
       },
       {
@@ -171,12 +174,22 @@ describe('UserBlock', () => {
         sort_order: 10,
         name: 'Started grammar',
         is_vocabulary: false,
+        show_in_topics: true,
+        started_at: '2026-03-01T00:00:00.000Z',
+      },
+      {
+        user_id: 'u1',
+        block_id: 5,
+        sort_order: 50,
+        name: 'Organizational grammar',
+        is_vocabulary: false,
+        show_in_topics: false,
         started_at: '2026-03-01T00:00:00.000Z',
       },
     ]);
     mocks.getStartedBlocksIds.mockResolvedValueOnce([3]);
 
-    const result = await UserBlock.getStartedByUserId('u1');
+    const result = await UserBlock.getStartedTopicsByUserId('u1');
 
     expect(mocks.where).toHaveBeenCalledWith('user_id');
     expect(mocks.equals).toHaveBeenCalledWith('u1');
@@ -393,6 +406,7 @@ describe('UserBlock', () => {
           sort_order: 1,
           progress: 2,
           is_vocabulary: false,
+          show_in_topics: false,
           started_at: null,
           updated_at: '2026-03-04T00:00:00.000Z',
           next_at: null,
@@ -430,6 +444,7 @@ describe('UserBlock', () => {
     expect(mocks.bulkPut).toHaveBeenCalledWith([
       expect.objectContaining({
         block_id: 1,
+        show_in_topics: false,
         started_at: '9999-12-31T23:59:59+00:00',
         next_at: '9999-12-31T23:59:59+00:00',
         mastered_at: '9999-12-31T23:59:59+00:00',
@@ -441,6 +456,39 @@ describe('UserBlock', () => {
       '2026-03-04T00:00:00.000Z',
       'u1',
     );
+  });
+
+  it('syncFromRemote defaults missing show_in_topics to true', async () => {
+    mocks.rpc.mockResolvedValueOnce({
+      data: [
+        {
+          user_id: 'u1',
+          block_id: 1,
+          name: 'Block 1',
+          note: '',
+          lesson_id: 1,
+          grammar_id: 10,
+          sort_order: 1,
+          progress: 0,
+          is_vocabulary: false,
+          started_at: null,
+          updated_at: '2026-03-04T00:00:00.000Z',
+          next_at: null,
+          mastered_at: null,
+          deleted_at: null,
+        },
+      ],
+      error: null,
+    });
+
+    await expect(UserBlock.syncFromRemote('u1', false)).resolves.toBe(1);
+
+    expect(mocks.bulkPut).toHaveBeenCalledWith([
+      expect.objectContaining({
+        block_id: 1,
+        show_in_topics: true,
+      }),
+    ]);
   });
 
   it('full sync clears local user blocks before upserting', async () => {

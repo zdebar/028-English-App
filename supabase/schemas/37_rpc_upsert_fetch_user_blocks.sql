@@ -13,6 +13,7 @@ RETURNS TABLE (
   sort_order INTEGER,
   progress INTEGER,
   is_vocabulary BOOLEAN,
+  show_in_topics BOOLEAN,
   started_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ,
   next_at TIMESTAMPTZ,

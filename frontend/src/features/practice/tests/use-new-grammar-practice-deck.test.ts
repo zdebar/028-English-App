@@ -90,6 +90,7 @@ function makeBlock(overrides: Partial<UserBlockType> = {}): UserBlockType {
     grammar_id: 20,
     sort_order: 1,
     progress: 0,
+    show_in_topics: true,
     started_at: '2026-01-01',
     updated_at: '2026-01-01',
     next_at: '2026-01-01',

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
-  getStartedByUserId: vi.fn(),
+  getStartedTopicsByUserId: vi.fn(),
   userId: 'u1' as string | null,
   state: {
     data: [] as Array<{ block_id: number; name: string }>,
@@ -18,7 +18,7 @@ vi.mock('react-router-dom', () => ({
 
 vi.mock('@/database/models/user-blocks', () => ({
   default: {
-    getStartedByUserId: (...args: unknown[]) => mocks.getStartedByUserId(...args),
+    getStartedTopicsByUserId: (...args: unknown[]) => mocks.getStartedTopicsByUserId(...args),
   },
 }));
 
@@ -77,7 +77,7 @@ describe('BlocksOverview', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.userId = 'u1';
-    mocks.getStartedByUserId.mockResolvedValue([]);
+    mocks.getStartedTopicsByUserId.mockResolvedValue([]);
     mocks.state.data = [];
     mocks.state.error = null;
     mocks.state.loading = false;
@@ -88,7 +88,7 @@ describe('BlocksOverview', () => {
 
     render(<BlocksOverview />);
 
-    expect(mocks.getStartedByUserId).toHaveBeenCalledWith('u1');
+    expect(mocks.getStartedTopicsByUserId).toHaveBeenCalledWith('u1');
     expect(screen.queryByText('No blocks')).toBeNull();
   });
 

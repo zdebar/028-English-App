@@ -12,6 +12,7 @@ RETURNS TABLE (
   sort_order INTEGER,
   progress INTEGER,
   is_vocabulary BOOLEAN,
+  show_in_topics BOOLEAN,
   started_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ,
   next_at TIMESTAMPTZ,
@@ -35,6 +36,7 @@ BEGIN
     b.sort_order,
     COALESCE(ub.progress, 0) AS progress,
     b.is_vocabulary,
+    b.show_in_topics,
     ub.started_at,
     GREATEST(
       COALESCE(ub.updated_at, public.rpc_min_timestamptz()),

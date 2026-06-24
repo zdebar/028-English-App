@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS blocks (
   note TEXT NOT NULL,
   lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE RESTRICT,
   is_vocabulary BOOLEAN NOT NULL,
+  show_in_topics BOOLEAN NOT NULL DEFAULT TRUE,
   grammar_id INTEGER REFERENCES grammar(id) ON DELETE RESTRICT,
   sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

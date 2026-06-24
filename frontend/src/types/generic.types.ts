@@ -20,6 +20,7 @@ export interface BlockType extends SyncEntityType {
   lesson_id: number;
   is_vocabulary: boolean;
   grammar_id: number | null;
+  show_in_topics: boolean;
 }
 
 export interface NoteType extends SyncEntityType {}
@@ -56,6 +57,7 @@ export interface UserBlockType {
   sort_order: number;
   progress: number;
   is_vocabulary: boolean;
+  show_in_topics: boolean;
   started_at: string;
   updated_at: string;
   next_at: string;
