@@ -54,14 +54,16 @@
 
 @media (max-height: 400px) {
   .pos-bottom-right-control {
+    --short-card-width: max(var(--min-width-card), min(calc(100vw - 18rem), var(--max-width-card)));
     position: fixed;
-    right: 0;
+    right: max(0px, calc(((100vw - var(--short-card-width)) / 2) - var(--size-button)));
     bottom: 0;
     flex-direction: column;
   }
   .pos-bottom-left-control {
+    --short-card-width: max(var(--min-width-card), min(calc(100vw - 18rem), var(--max-width-card)));
     position: fixed;
-    left: 0;
+    left: max(0px, calc(((100vw - var(--short-card-width)) / 2) - var(--size-button)));
     bottom: 0;
     flex-direction: column-reverse;
   }
@@ -71,6 +73,13 @@
   }
   .help-btn-margin {
     margin-bottom: 0px;
+  }
+}
+
+@media (max-height: 400px) and (max-width: 640px) {
+  .pos-bottom-right-control,
+  .pos-bottom-left-control {
+    --short-card-width: max(var(--min-width-card), min(calc(100vw - 10.5rem), var(--max-width-card)));
   }
 }
 
