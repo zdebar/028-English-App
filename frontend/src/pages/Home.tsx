@@ -42,7 +42,7 @@ export default function Home(): JSX.Element {
   const isSyncError = useSyncStore((state) => state.isSyncError);
 
   return (
-    <div className="card-width relative flex w-full flex-col justify-between text-center">
+    <div className="card-width relative flex flex-col justify-start text-center">
       {userId ? (
         <div className="home-body relative flex w-full flex-col">
           {isAnonymousUser && (
