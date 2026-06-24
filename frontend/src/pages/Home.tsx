@@ -17,6 +17,17 @@ import PracticeOverviewButton from '@/features/practice-overview/PracticeOvervie
 import SimulateDataButton from '@/features/synchronization/SimulateDataButton';
 import HomePracticeButtons from '@/features/practice/HomePracticeButtons';
 
+function HomeActionLinks(): JSX.Element {
+  return (
+    <div className="m-4 flex items-center justify-center gap-2 px-4">
+      <InstallPWAButton className="pr-4" />
+      <Link to="/guide">
+        <Notification className="color-link">{TEXTS.guide}</Notification>
+      </Link>
+    </div>
+  );
+}
+
 /**
  * The Home component renders the main page of the application.
  *
@@ -48,6 +59,7 @@ export default function Home(): JSX.Element {
           >
             {userFullName ?? TEXTS.notAvailable}
           </PropertyView>
+          <HomeActionLinks />
           <PracticeOverviewButton
             count={dailyCount}
             onClick={() => navigate(ROUTES.practiceOverview)}
@@ -66,12 +78,7 @@ export default function Home(): JSX.Element {
         <div className="home-body w-full">
           <h1 className="home-title">{TEXTS.appTitle}</h1>
           <p className="m-4 landscape:hidden">{TEXTS.appDescription}</p>
-          <div className="mt-4 mb-8 flex items-center justify-center gap-2 px-4">
-            <InstallPWAButton className="pr-4" />
-            <Link to="/guide">
-              <Notification className="color-link">{TEXTS.guide}</Notification>
-            </Link>
-          </div>
+          <HomeActionLinks />
           <div className="flex flex-col gap-1">
             <AnonymousSigninButton />
             <GoogleAuthButton />

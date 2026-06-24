@@ -7,6 +7,7 @@ const mocks = vi.hoisted(
     userId: string | null;
     userFullName: string | null;
     userEmail: string | null;
+    isAnonymousUser: boolean;
     dailyCount: number;
     isSyncError: boolean;
   } => ({
@@ -14,6 +15,7 @@ const mocks = vi.hoisted(
     userId: 'u1',
     userFullName: 'User One',
     userEmail: 'u1@example.com',
+    isAnonymousUser: false,
     dailyCount: 3,
     isSyncError: false,
   }),
@@ -35,12 +37,14 @@ vi.mock('@/features/auth/use-auth-store', () => ({
       userId: string | null;
       userFullName: string | null;
       userEmail: string | null;
+      isAnonymousUser: boolean;
     }) => unknown,
   ) =>
     selector({
       userId: mocks.userId,
       userFullName: mocks.userFullName,
       userEmail: mocks.userEmail,
+      isAnonymousUser: mocks.isAnonymousUser,
     }),
 }));
 
@@ -121,6 +125,7 @@ describe('Home', () => {
     mocks.userId = 'u1';
     mocks.userFullName = 'User One';
     mocks.userEmail = 'u1@example.com';
+    mocks.isAnonymousUser = false;
     mocks.dailyCount = 3;
     mocks.isSyncError = false;
   });
@@ -147,6 +152,13 @@ describe('Home', () => {
     expect(screen.getByTestId('home-practice-buttons').textContent).toBe('practice:u1');
   });
 
+  it('renders install and guide links when user is signed in', () => {
+    render(<Home />);
+
+    expect(screen.getByRole('button', { name: 'Install' })).toBeTruthy();
+    expect(screen.getByText('Guide')).toBeTruthy();
+  });
+
   it('renders auth UI when user is signed out', () => {
     mocks.userId = null;
 
@@ -154,6 +166,8 @@ describe('Home', () => {
 
     expect(screen.getByText('App')).toBeTruthy();
     expect(screen.getByText('Desc')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Install' })).toBeTruthy();
+    expect(screen.getByText('Guide')).toBeTruthy();
     expect(screen.getByTestId('google-auth-button')).toBeTruthy();
     expect(screen.queryByText('Data may be stale.')).toBeNull();
   });
