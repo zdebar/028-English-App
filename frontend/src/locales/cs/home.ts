@@ -13,7 +13,7 @@ export const HOME_TEXTS = {
   starsToday: 'Denní cíl',
   vocabularyPracticeButton: 'Slovíčka',
   newGrammarPracticeButton: 'Nová gramatika',
-  grammarPracticeButton: 'Procvičit gramatiku',
+  grammarPracticeButton: 'Gramatika',
 
   // User
   userLabel: 'Uživatel',
