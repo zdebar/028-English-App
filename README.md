@@ -15,6 +15,7 @@ Main folders:
 Repository docs:
 
 - [STYLEGUIDE.md](STYLEGUIDE.md): recommended repository coding style and review defaults
+- [docs/README.md](docs/README.md): frontend behavior docs for architecture, state, sync, practice flows, readiness counts, and domain models
 
 ## What The Frontend Does
 
