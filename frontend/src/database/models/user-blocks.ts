@@ -7,7 +7,6 @@ import { reportInfo } from '@/features/logging/monitoring-handler';
 import { SupabaseError } from '@/types/error.types';
 import type {
   ReadyGrammarPracticeState,
-  ReadyGrammarScheduleEntry,
   UserBlockType,
 } from '@/types/generic.types';
 import { TableName } from '@/types/table.types';
@@ -15,9 +14,9 @@ import { assertNonEmptyString } from '@/utils/assertions.utils';
 import Dexie, { Entity } from 'dexie';
 import Metadata from './metadata';
 import UserItem from './user-items';
+import { groupReadyPracticeSchedule } from '../utils/ready-practice.utils';
 
 const NULL_DATE = config.database.nullReplacementDate;
-const READY_GRAMMAR_GROUP_WINDOW_MS = 1000;
 
 type UserBlockAPI = Omit<UserBlockType, 'started_at' | 'next_at' | 'mastered_at' | 'deleted_at'> & {
   started_at: string | null;
@@ -180,7 +179,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
 
     return {
       readyCount,
-      schedule: groupReadyGrammarSchedule(futureDates),
+      schedule: groupReadyPracticeSchedule(futureDates),
     };
   }
 
@@ -337,36 +336,4 @@ function compareGrammarBlocks(left: UserBlockType, right: UserBlockType): number
     return left.lesson_id - right.lesson_id;
   }
   return left.sort_order - right.sort_order;
-}
-
-function groupReadyGrammarSchedule(dates: string[]): ReadyGrammarScheduleEntry[] {
-  const sortedDates = dates
-    .map((date) => ({ date, time: Date.parse(date) }))
-    .filter((entry) => Number.isFinite(entry.time))
-    .sort((left, right) => left.time - right.time);
-
-  const schedule: ReadyGrammarScheduleEntry[] = [];
-  let currentGroup: ReadyGrammarScheduleEntry | null = null;
-  let currentGroupStartTime: number | null = null;
-
-  for (const entry of sortedDates) {
-    if (currentGroup == null || currentGroupStartTime == null) {
-      currentGroup = { date: entry.date, count: 1 };
-      currentGroupStartTime = entry.time;
-      schedule.push(currentGroup);
-      continue;
-    }
-
-    if (entry.time - currentGroupStartTime <= READY_GRAMMAR_GROUP_WINDOW_MS) {
-      currentGroup.date = entry.date;
-      currentGroup.count += 1;
-      continue;
-    }
-
-    currentGroup = { date: entry.date, count: 1 };
-    currentGroupStartTime = entry.time;
-    schedule.push(currentGroup);
-  }
-
-  return schedule;
 }

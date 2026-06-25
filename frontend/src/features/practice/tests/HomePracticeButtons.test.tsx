@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   unlockNextGrammarBlock: vi.fn(),
   getFirstUnlockedGrammarBlock: vi.fn(),
   getReadyGrammarPracticeState: vi.fn(),
+  getReadyVocabularyPracticeState: vi.fn(),
   reportError: vi.fn(),
 }));
 
@@ -24,6 +25,13 @@ vi.mock('@/database/models/user-blocks', () => ({
       mocks.getFirstUnlockedGrammarBlock(...args),
     getReadyGrammarPracticeState: (...args: unknown[]) =>
       mocks.getReadyGrammarPracticeState(...args),
+  },
+}));
+
+vi.mock('@/database/models/user-items', () => ({
+  default: {
+    getReadyVocabularyPracticeState: (...args: unknown[]) =>
+      mocks.getReadyVocabularyPracticeState(...args),
   },
 }));
 
@@ -50,6 +58,7 @@ describe('HomePracticeButtons', () => {
     mocks.unlockNextGrammarBlock.mockResolvedValue(null);
     mocks.getFirstUnlockedGrammarBlock.mockResolvedValue(null);
     mocks.getReadyGrammarPracticeState.mockResolvedValue({ readyCount: 0, schedule: [] });
+    mocks.getReadyVocabularyPracticeState.mockResolvedValue({ readyCount: 0, schedule: [] });
   });
 
   afterEach(() => {
@@ -73,17 +82,73 @@ describe('HomePracticeButtons', () => {
       mastered_at: '9999-12-31T23:59:59+00:00',
       deleted_at: '9999-12-31T23:59:59+00:00',
     });
+    mocks.getReadyVocabularyPracticeState.mockResolvedValue({ readyCount: 7, schedule: [] });
     mocks.getReadyGrammarPracticeState.mockResolvedValue({ readyCount: 4, schedule: [] });
 
     render(<HomePracticeButtons userId="u1" />);
 
     await waitFor(() => {
+      const vocabularyButton = screen.getByText('Vocabulary').closest('button') as HTMLButtonElement;
       const newGrammarButton = screen.getByText('New grammar').closest('button') as HTMLButtonElement;
       const grammarButton = screen.getByText('Grammar').closest('button') as HTMLButtonElement;
+      expect(vocabularyButton.disabled).toBe(false);
       expect(newGrammarButton.disabled).toBe(false);
       expect(grammarButton.disabled).toBe(false);
+      expect(screen.getByText('7')).toBeTruthy();
       expect(screen.getByText('4')).toBeTruthy();
     });
+  });
+
+  it('disables vocabulary practice when no vocabulary is available', async () => {
+    mocks.getReadyVocabularyPracticeState.mockResolvedValue({ readyCount: 0, schedule: [] });
+
+    render(<HomePracticeButtons userId="u1" />);
+
+    await flushPracticeStateLoad();
+
+    expect((screen.getByText('Vocabulary').closest('button') as HTMLButtonElement).disabled).toBe(
+      true,
+    );
+  });
+
+  it('caps the displayed ready vocabulary badge at 99+', async () => {
+    mocks.getReadyVocabularyPracticeState.mockResolvedValue({ readyCount: 100, schedule: [] });
+
+    render(<HomePracticeButtons userId="u1" />);
+
+    await flushPracticeStateLoad();
+
+    expect(screen.getByText('99+')).toBeTruthy();
+    expect(screen.queryByText('100')).toBeNull();
+    expect((screen.getByText('Vocabulary').closest('button') as HTMLButtonElement).disabled).toBe(
+      false,
+    );
+  });
+
+  it('increments vocabulary badge when scheduled vocabulary items become ready', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
+    mocks.getReadyVocabularyPracticeState.mockResolvedValue({
+      readyCount: 0,
+      schedule: [{ date: '2026-06-24T12:00:02.000Z', count: 2 }],
+    });
+
+    render(<HomePracticeButtons userId="u1" />);
+
+    await flushPracticeStateLoad();
+
+    expect((screen.getByText('Vocabulary').closest('button') as HTMLButtonElement).disabled).toBe(
+      true,
+    );
+
+    await act(async () => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(screen.getByText('2')).toBeTruthy();
+    expect((screen.getByText('Vocabulary').closest('button') as HTMLButtonElement).disabled).toBe(
+      false,
+    );
   });
 
   it('increments grammar badge when scheduled grammar items become ready', async () => {
@@ -141,6 +206,7 @@ describe('HomePracticeButtons', () => {
     await flushPracticeStateLoad();
 
     expect(mocks.getReadyGrammarPracticeState).toHaveBeenCalledWith('u1');
+    expect(mocks.getReadyVocabularyPracticeState).toHaveBeenCalledWith('u1');
 
     await act(async () => {
       vi.setSystemTime(new Date('2026-06-24T12:00:05.000Z'));
@@ -196,6 +262,9 @@ describe('HomePracticeButtons', () => {
     });
 
     expect((screen.getByText('New grammar').closest('button') as HTMLButtonElement).disabled).toBe(
+      true,
+    );
+    expect((screen.getByText('Vocabulary').closest('button') as HTMLButtonElement).disabled).toBe(
       true,
     );
     expect((screen.getByText('Grammar').closest('button') as HTMLButtonElement).disabled).toBe(true);

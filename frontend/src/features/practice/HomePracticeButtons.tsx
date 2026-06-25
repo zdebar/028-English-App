@@ -1,27 +1,98 @@
 import StyledButton from '@/components/UI/buttons/StyledButton';
+import config from '@/config/config';
 import { ROUTES } from '@/config/routes.config';
 import UserBlock from '@/database/models/user-blocks';
+import UserItem from '@/database/models/user-items';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { TEXTS } from '@/locales/cs';
-import type { ReadyGrammarScheduleEntry } from '@/types/generic.types';
-import { useEffect, useState, type JSX } from 'react';
+import type { ReadyPracticeScheduleEntry } from '@/types/generic.types';
+import { useEffect, useState, type Dispatch, type JSX, type SetStateAction } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-const MAX_TIMEOUT_DELAY_MS = 2_147_483_647;
-const MAX_READY_GRAMMAR_BADGE_COUNT = 99;
 
 type HomePracticeButtonsProps = Readonly<{
   userId: string;
 }>;
 
+function getReadyPracticeBadgeLabel(count: number): string {
+  const badgeCap = config.practice.readyPracticeBadgeCap;
+  return count > badgeCap ? `${badgeCap}+` : String(count);
+}
+
+function useReadyPracticeSchedule(
+  schedule: ReadyPracticeScheduleEntry[],
+  setReadyCount: Dispatch<SetStateAction<number>>,
+  setSchedule: Dispatch<SetStateAction<ReadyPracticeScheduleEntry[]>>,
+): void {
+  useEffect(() => {
+    if (schedule.length === 0) {
+      return;
+    }
+
+    const nextTime = Date.parse(schedule[0].date);
+    if (!Number.isFinite(nextTime)) {
+      setSchedule((currentSchedule) =>
+        currentSchedule.filter((entry) => Number.isFinite(Date.parse(entry.date))),
+      );
+      return;
+    }
+
+    const delay = Math.min(
+      Math.max(nextTime - Date.now(), 0),
+      config.practice.maxReadyScheduleTimerDelayMs,
+    );
+    const timeoutId = globalThis.setTimeout(() => {
+      const now = Date.now();
+      let readyCountIncrement = 0;
+      const nextSchedule = schedule.filter((entry) => {
+        const entryTime = Date.parse(entry.date);
+        if (!Number.isFinite(entryTime)) {
+          return false;
+        }
+        if (entryTime <= now) {
+          readyCountIncrement += entry.count;
+          return false;
+        }
+        return true;
+      });
+
+      if (readyCountIncrement > 0) {
+        setReadyCount((count) => count + readyCountIncrement);
+      }
+      setSchedule(nextSchedule);
+    }, delay);
+
+    return () => {
+      globalThis.clearTimeout(timeoutId);
+    };
+  }, [schedule, setReadyCount, setSchedule]);
+}
+
+function ReadyPracticeBadge({ count }: Readonly<{ count: number }>): JSX.Element | null {
+  if (count <= 0) {
+    return null;
+  }
+
+  return (
+    <span className="bg-button-hover text-light absolute top-1 right-2 min-w-6 rounded-full px-1 text-xs">
+      {getReadyPracticeBadgeLabel(count)}
+    </span>
+  );
+}
+
 export default function HomePracticeButtons({ userId }: HomePracticeButtonsProps): JSX.Element {
   const navigate = useNavigate();
+  const [readyVocabularyCount, setReadyVocabularyCount] = useState(0);
+  const [readyVocabularySchedule, setReadyVocabularySchedule] = useState<
+    ReadyPracticeScheduleEntry[]
+  >([]);
   const [hasNewGrammarBlock, setHasNewGrammarBlock] = useState(false);
   const [readyGrammarCount, setReadyGrammarCount] = useState(0);
-  const [readyGrammarSchedule, setReadyGrammarSchedule] = useState<ReadyGrammarScheduleEntry[]>([]);
+  const [readyGrammarSchedule, setReadyGrammarSchedule] = useState<ReadyPracticeScheduleEntry[]>([]);
 
   useEffect(() => {
     let isMounted = true;
+    setReadyVocabularyCount(0);
+    setReadyVocabularySchedule([]);
     setHasNewGrammarBlock(false);
     setReadyGrammarCount(0);
     setReadyGrammarSchedule([]);
@@ -29,7 +100,8 @@ export default function HomePracticeButtons({ userId }: HomePracticeButtonsProps
     const loadPracticeState = async () => {
       try {
         await UserBlock.unlockNextGrammarBlock(userId);
-        const [newGrammarBlock, grammarPracticeState] = await Promise.all([
+        const [vocabularyPracticeState, newGrammarBlock, grammarPracticeState] = await Promise.all([
+          UserItem.getReadyVocabularyPracticeState(userId),
           UserBlock.getFirstUnlockedGrammarBlock(userId),
           UserBlock.getReadyGrammarPracticeState(userId),
         ]);
@@ -38,6 +110,8 @@ export default function HomePracticeButtons({ userId }: HomePracticeButtonsProps
           return;
         }
 
+        setReadyVocabularyCount(vocabularyPracticeState.readyCount);
+        setReadyVocabularySchedule(vocabularyPracticeState.schedule);
         setHasNewGrammarBlock(newGrammarBlock != null);
         setReadyGrammarCount(grammarPracticeState.readyCount);
         setReadyGrammarSchedule(grammarPracticeState.schedule);
@@ -45,6 +119,8 @@ export default function HomePracticeButtons({ userId }: HomePracticeButtonsProps
         if (!isMounted) {
           return;
         }
+        setReadyVocabularyCount(0);
+        setReadyVocabularySchedule([]);
         setHasNewGrammarBlock(false);
         setReadyGrammarCount(0);
         setReadyGrammarSchedule([]);
@@ -58,55 +134,22 @@ export default function HomePracticeButtons({ userId }: HomePracticeButtonsProps
     };
   }, [userId]);
 
-  useEffect(() => {
-    if (readyGrammarSchedule.length === 0) {
-      return;
-    }
-
-    const nextTime = Date.parse(readyGrammarSchedule[0].date);
-    if (!Number.isFinite(nextTime)) {
-      setReadyGrammarSchedule((schedule) =>
-        schedule.filter((entry) => Number.isFinite(Date.parse(entry.date))),
-      );
-      return;
-    }
-
-    const delay = Math.min(Math.max(nextTime - Date.now(), 0), MAX_TIMEOUT_DELAY_MS);
-    const timeoutId = globalThis.setTimeout(() => {
-      const now = Date.now();
-      let readyCountIncrement = 0;
-      const nextSchedule = readyGrammarSchedule.filter((entry) => {
-        const entryTime = Date.parse(entry.date);
-        if (!Number.isFinite(entryTime)) {
-          return false;
-        }
-        if (entryTime <= now) {
-          readyCountIncrement += entry.count;
-          return false;
-        }
-        return true;
-      });
-
-      if (readyCountIncrement > 0) {
-        setReadyGrammarCount((count) => count + readyCountIncrement);
-      }
-      setReadyGrammarSchedule(nextSchedule);
-    }, delay);
-
-    return () => {
-      globalThis.clearTimeout(timeoutId);
-    };
-  }, [readyGrammarSchedule]);
-
-  const readyGrammarBadgeLabel =
-    readyGrammarCount > MAX_READY_GRAMMAR_BADGE_COUNT
-      ? `${MAX_READY_GRAMMAR_BADGE_COUNT}+`
-      : String(readyGrammarCount);
+  useReadyPracticeSchedule(
+    readyVocabularySchedule,
+    setReadyVocabularyCount,
+    setReadyVocabularySchedule,
+  );
+  useReadyPracticeSchedule(readyGrammarSchedule, setReadyGrammarCount, setReadyGrammarSchedule);
 
   return (
     <div className="my-4 flex flex-col gap-2">
-      <StyledButton className="h-button px-4" onClick={() => navigate(ROUTES.practiceVocabulary)}>
+      <StyledButton
+        className="h-button relative px-4"
+        disabled={readyVocabularyCount === 0}
+        onClick={() => navigate(ROUTES.practiceVocabulary)}
+      >
         {TEXTS.vocabularyPracticeButton}
+        <ReadyPracticeBadge count={readyVocabularyCount} />
       </StyledButton>
       <StyledButton
         className="h-button px-4"
@@ -121,11 +164,7 @@ export default function HomePracticeButtons({ userId }: HomePracticeButtonsProps
         onClick={() => navigate(ROUTES.practiceGrammar)}
       >
         {TEXTS.grammarPracticeButton}
-        {readyGrammarCount > 0 && (
-          <span className="bg-button-hover text-light absolute top-1 right-2 min-w-6 rounded-full px-1 text-xs">
-            {readyGrammarBadgeLabel}
-          </span>
-        )}
+        <ReadyPracticeBadge count={readyGrammarCount} />
       </StyledButton>
     </div>
   );

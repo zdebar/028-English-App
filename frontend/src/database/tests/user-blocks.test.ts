@@ -29,6 +29,9 @@ vi.mock('@/config/config', () => ({
       simulationProgress: 2,
       simulationCount: 10,
     },
+    practice: {
+      readyPracticeScheduleGroupWindowMs: 1000,
+    },
   },
 }));
 

@@ -19,8 +19,11 @@ import {
 } from '@/database/utils/user-items.utils';
 import { triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 import { SupabaseError } from '@/types/error.types';
+import type { ReadyPracticeState } from '@/types/generic.types';
 import Metadata from './metadata';
 import { reportInfo } from '@/features/logging/monitoring-handler';
+import { assertNonEmptyString } from '@/utils/assertions.utils';
+import { groupReadyPracticeSchedule } from '../utils/ready-practice.utils';
 
 const NULL_DATE = config.database.nullReplacementDate;
 const NULL_NUMBER = config.database.nullReplacementNumber;
@@ -295,6 +298,68 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .between([userId, 1, Dexie.minKey], [userId, 1, NULL_DATE], true, false)
       .toArray();
     return result;
+  }
+
+  static async getReadyVocabularyPracticeState(userId: string): Promise<ReadyPracticeState> {
+    assertNonEmptyString(userId, 'userId');
+
+    const badgeCap = config.practice.readyPracticeBadgeCap;
+    const overflowLimit = badgeCap + 1;
+    const nowIso = new Date(Date.now()).toISOString();
+
+    const readyStartedItems = await db.user_items
+      .where('[user_id+is_vocabulary+next_at+mastered_at+sort_order]')
+      .between(
+        [userId, 1, Dexie.minKey, NULL_DATE, Dexie.minKey],
+        [userId, 1, nowIso, NULL_DATE, Dexie.maxKey],
+        true,
+        false,
+      )
+      .filter((item) => item.mastered_at === NULL_DATE)
+      .limit(overflowLimit)
+      .toArray();
+
+    if (readyStartedItems.length > badgeCap) {
+      return { readyCount: overflowLimit, schedule: [] };
+    }
+
+    const notStartedLimit = overflowLimit - readyStartedItems.length;
+    const notStartedItems = await db.user_items
+      .where('[user_id+is_vocabulary+next_at+mastered_at+sort_order]')
+      .between(
+        [userId, 1, NULL_DATE, NULL_DATE, Dexie.minKey],
+        [userId, 1, NULL_DATE, NULL_DATE, Dexie.maxKey],
+        true,
+        true,
+      )
+      .filter((item) => item.mastered_at === NULL_DATE)
+      .limit(notStartedLimit)
+      .toArray();
+
+    const readyCount = readyStartedItems.length + notStartedItems.length;
+    if (readyCount > badgeCap) {
+      return { readyCount: overflowLimit, schedule: [] };
+    }
+
+    if (readyCount > 0) {
+      return { readyCount, schedule: [] };
+    }
+
+    const futureItems = await db.user_items
+      .where('[user_id+is_vocabulary+next_at+mastered_at+sort_order]')
+      .between(
+        [userId, 1, nowIso, NULL_DATE, Dexie.minKey],
+        [userId, 1, NULL_DATE, NULL_DATE, Dexie.maxKey],
+        false,
+        false,
+      )
+      .filter((item) => item.mastered_at === NULL_DATE)
+      .toArray();
+
+    return {
+      readyCount: 0,
+      schedule: groupReadyPracticeSchedule(futureItems.map((item) => item.next_at)),
+    };
   }
 
   /**

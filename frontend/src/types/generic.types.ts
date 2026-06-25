@@ -65,15 +65,18 @@ export interface UserBlockType {
   deleted_at: string;
 }
 
-export interface ReadyGrammarScheduleEntry {
+export interface ReadyPracticeScheduleEntry {
   date: string;
   count: number;
 }
 
-export interface ReadyGrammarPracticeState {
+export interface ReadyPracticeState {
   readyCount: number;
-  schedule: ReadyGrammarScheduleEntry[];
+  schedule: ReadyPracticeScheduleEntry[];
 }
+
+export type ReadyGrammarScheduleEntry = ReadyPracticeScheduleEntry;
+export type ReadyGrammarPracticeState = ReadyPracticeState;
 
 export interface UserInfoType {
   id: string; // string for the user

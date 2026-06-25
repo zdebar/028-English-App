@@ -7,6 +7,10 @@ const mocks = vi.hoisted(() => ({
   blockEqualsToArray: vi.fn(),
   itemIdModify: vi.fn(),
   itemIdBetweenModify: vi.fn(),
+  indexedBetween: vi.fn(),
+  indexedFilter: vi.fn(),
+  indexedLimit: vi.fn(),
+  indexedToArray: vi.fn(),
   updatedBetweenToArray: vi.fn(),
   transaction: vi.fn(),
   rpc: vi.fn(),
@@ -32,6 +36,10 @@ vi.mock('@/config/config', () => ({
       afterNewGrammarProgress: 2,
       simulationProgress: 2,
       simulationCount: 200,
+    },
+    practice: {
+      readyPracticeBadgeCap: 99,
+      readyPracticeScheduleGroupWindowMs: 1000,
     },
   },
 }));
@@ -64,6 +72,28 @@ vi.mock('@/database/models/db', () => ({
             between: () => ({
               toArray: (...args: unknown[]) => mocks.updatedBetweenToArray(...args),
             }),
+          };
+        }
+        if (field === '[user_id+is_vocabulary+next_at+mastered_at+sort_order]') {
+          return {
+            between: (...args: unknown[]) => {
+              mocks.indexedBetween(...args);
+              return {
+                filter: (...filterArgs: unknown[]) => {
+                  mocks.indexedFilter(...filterArgs);
+                  return {
+                    limit: (...limitArgs: unknown[]) => {
+                      mocks.indexedLimit(...limitArgs);
+                      return {
+                        toArray: (...toArrayArgs: unknown[]) =>
+                          mocks.indexedToArray(...toArrayArgs),
+                      };
+                    },
+                    toArray: (...toArrayArgs: unknown[]) => mocks.indexedToArray(...toArrayArgs),
+                  };
+                },
+              };
+            },
           };
         }
         if (field === '[user_id+block_id]') {
@@ -133,6 +163,7 @@ describe('UserItem', () => {
     });
     mocks.equalsDelete.mockResolvedValue(0);
     mocks.blockEqualsToArray.mockResolvedValue([]);
+    mocks.indexedToArray.mockResolvedValue([]);
     mocks.updatedBetweenToArray.mockResolvedValue([]);
     mocks.rpc.mockResolvedValue({ data: [], error: null });
     mocks.markAsSynced.mockResolvedValue(undefined);
@@ -258,6 +289,98 @@ describe('UserItem', () => {
     await UserItem.resetItemById('u1', 10);
 
     expect(mocks.triggerLevelsUpdatedEvent).toHaveBeenCalledWith('u1');
+  });
+
+  it('getReadyVocabularyPracticeState counts ready started and not-started vocabulary', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
+    mocks.indexedToArray
+      .mockResolvedValueOnce([{ item_id: 1, mastered_at: '1970-01-01T00:00:00.000Z' }])
+      .mockResolvedValueOnce([
+        { item_id: 2, mastered_at: '1970-01-01T00:00:00.000Z' },
+        { item_id: 3, mastered_at: '1970-01-01T00:00:00.000Z' },
+      ]);
+
+    await expect(UserItem.getReadyVocabularyPracticeState('u1')).resolves.toEqual({
+      readyCount: 3,
+      schedule: [],
+    });
+
+    expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
+      1,
+      ['u1', 1, expect.anything(), '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', 1, '2026-06-24T12:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      true,
+      false,
+    );
+    expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
+      2,
+      ['u1', 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      true,
+      true,
+    );
+    expect(mocks.indexedLimit).toHaveBeenNthCalledWith(1, 100);
+    expect(mocks.indexedLimit).toHaveBeenNthCalledWith(2, 99);
+  });
+
+  it('getReadyVocabularyPracticeState caps availability above the badge cap', async () => {
+    mocks.indexedToArray.mockResolvedValueOnce(Array.from({ length: 100 }, (_, index) => ({
+      item_id: index + 1,
+      mastered_at: '1970-01-01T00:00:00.000Z',
+    })));
+
+    await expect(UserItem.getReadyVocabularyPracticeState('u1')).resolves.toEqual({
+      readyCount: 100,
+      schedule: [],
+    });
+
+    expect(mocks.indexedToArray).toHaveBeenCalledTimes(1);
+  });
+
+  it('getReadyVocabularyPracticeState schedules future vocabulary when none is ready', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
+    mocks.indexedToArray
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([
+        {
+          item_id: 1,
+          next_at: '2026-06-24T12:00:10.000Z',
+          mastered_at: '1970-01-01T00:00:00.000Z',
+        },
+        {
+          item_id: 2,
+          next_at: '2026-06-24T12:00:10.800Z',
+          mastered_at: '1970-01-01T00:00:00.000Z',
+        },
+      ]);
+
+    await expect(UserItem.getReadyVocabularyPracticeState('u1')).resolves.toEqual({
+      readyCount: 0,
+      schedule: [{ date: '2026-06-24T12:00:10.800Z', count: 2 }],
+    });
+
+    expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
+      3,
+      ['u1', 1, '2026-06-24T12:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      false,
+      false,
+    );
+  });
+
+  it('getReadyVocabularyPracticeState ignores mastered vocabulary candidates', async () => {
+    mocks.indexedToArray.mockResolvedValueOnce([]);
+
+    await UserItem.getReadyVocabularyPracticeState('u1');
+
+    const filterCandidate = mocks.indexedFilter.mock.calls[0][0] as (item: {
+      mastered_at: string;
+    }) => boolean;
+    expect(filterCandidate({ mastered_at: '1970-01-01T00:00:00.000Z' })).toBe(true);
+    expect(filterCandidate({ mastered_at: '2026-06-24T11:00:00.000Z' })).toBe(false);
   });
 
   it('simulateData updates first configured range using indexed between+modify', async () => {
