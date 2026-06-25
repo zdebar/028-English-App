@@ -7,6 +7,7 @@ import type { UserItemLocal } from '@/types/user-item.types';
 const getFirstUnlockedGrammarBlockMock = vi.fn();
 const markBlockMasteredMock = vi.fn();
 const getByBlockIdMock = vi.fn();
+const savePracticeDeckMock = vi.fn();
 const saveNewGrammarBlockCompletionMock = vi.fn();
 const getGrammarByIdMock = vi.fn();
 const addItemCountMock = vi.fn();
@@ -17,6 +18,7 @@ const plusHintMock = vi.fn();
 vi.mock('@/config/config', () => ({
   default: {
     practice: { audioDelay: 300 },
+    progress: { skipProgress: 100 },
   },
 }));
 
@@ -31,6 +33,7 @@ vi.mock('@/database/models/user-blocks', () => ({
 vi.mock('@/database/models/user-items', () => ({
   default: {
     getByBlockId: (...args: unknown[]) => getByBlockIdMock(...args),
+    savePracticeDeck: (...args: unknown[]) => savePracticeDeckMock(...args),
     saveNewGrammarBlockCompletion: (...args: unknown[]) =>
       saveNewGrammarBlockCompletionMock(...args),
   },
@@ -133,6 +136,7 @@ describe('useNewGrammarPracticeDeck', () => {
     getByBlockIdMock.mockResolvedValue([makeItem()]);
     getGrammarByIdMock.mockResolvedValue({ id: 20, name: 'Articles', note: 'Grammar note' });
     addItemCountMock.mockResolvedValue(undefined);
+    savePracticeDeckMock.mockResolvedValue(undefined);
     saveNewGrammarBlockCompletionMock.mockResolvedValue(undefined);
     markBlockMasteredMock.mockResolvedValue(undefined);
   });
@@ -147,8 +151,8 @@ describe('useNewGrammarPracticeDeck', () => {
     expect(getGrammarByIdMock).toHaveBeenCalledWith(20);
     expect(result.current.currentItem?.item_id).toBe(1);
     expect(result.current.grammar?.name).toBe('Articles');
-    expect(result.current.progressLabel).toBe('Round 1/4');
-    expect(result.current.repeatDisabled).toBe(true);
+    expect(result.current.progressLabel).toBe('Round 1/2');
+    expect('repeatDisabled' in result.current).toBe(false);
   });
 
   it('uses the same reveal flow, including direction confirmation before audio reveal', async () => {
@@ -171,32 +175,45 @@ describe('useNewGrammarPracticeDeck', () => {
     expect(result.current.revealed).toBe(true);
   });
 
-  it('repeat advances random rounds without completing the block', async () => {
+  it('repeat in round 1 requeues the item after the original block pass', async () => {
+    getByBlockIdMock.mockResolvedValue([
+      makeItem({ item_id: 1, sort_order: 1 }),
+      makeItem({ item_id: 2, sort_order: 2 }),
+    ]);
+
     const { result } = renderHook(() => useNewGrammarPracticeDeck('user-1'));
 
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
-    expect(result.current.repeatDisabled).toBe(true);
 
-    await act(async () => {
-      await result.current.nextKnown();
-    });
-    expect(result.current.repeatDisabled).toBe(true);
-    await act(async () => {
-      await result.current.nextKnown();
-    });
-    expect(result.current.repeatDisabled).toBe(false);
     await act(async () => {
       await result.current.nextRepeat();
     });
+    expect(result.current.currentItem?.item_id).toBe(2);
+    expect(result.current.progressLabel).toBe('Round 1/2');
 
-    expect(result.current.progressLabel).toBe('Round 3/4');
-    expect(result.current.isComplete).toBe(false);
+    await act(async () => {
+      await result.current.nextKnown();
+    });
+    expect(result.current.currentItem?.item_id).toBe(1);
+    expect(result.current.progressLabel).toBe('Round 1/2');
+
+    await act(async () => {
+      await result.current.nextKnown();
+    });
+
+    expect(result.current.currentItem?.item_id).toBe(1);
+    expect(result.current.progressLabel).toBe('Round 2/2');
     expect(saveNewGrammarBlockCompletionMock).not.toHaveBeenCalled();
     expect(markBlockMasteredMock).not.toHaveBeenCalled();
     expect(addItemCountMock).toHaveBeenCalledTimes(3);
   });
 
-  it('known advances random rounds and saves completion after the final round', async () => {
+  it('repeat in round 2 requeues the item in the same round', async () => {
+    getByBlockIdMock.mockResolvedValue([
+      makeItem({ item_id: 1, sort_order: 1 }),
+      makeItem({ item_id: 2, sort_order: 2 }),
+    ]);
+
     const { result } = renderHook(() => useNewGrammarPracticeDeck('user-1'));
 
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
@@ -207,9 +224,21 @@ describe('useNewGrammarPracticeDeck', () => {
     await act(async () => {
       await result.current.nextKnown();
     });
+    expect(result.current.progressLabel).toBe('Round 2/2');
+    expect(result.current.currentItem?.item_id).toBe(1);
+
     await act(async () => {
       await result.current.nextKnown();
     });
+    expect(result.current.currentItem?.item_id).toBe(2);
+
+    await act(async () => {
+      await result.current.nextRepeat();
+    });
+    expect(result.current.currentItem?.item_id).toBe(2);
+    expect(result.current.progressLabel).toBe('Round 2/2');
+    expect(result.current.isComplete).toBe(false);
+
     await act(async () => {
       await result.current.nextKnown();
     });
@@ -221,6 +250,115 @@ describe('useNewGrammarPracticeDeck', () => {
       expect.any(String),
     );
     expect(markBlockMasteredMock).toHaveBeenCalledWith('user-1', 10, expect.any(String));
-    expect(addItemCountMock).toHaveBeenCalledTimes(4);
+    expect(addItemCountMock).toHaveBeenCalledTimes(5);
+  });
+
+  it('keeps running repeat waves until repeated items are marked known', async () => {
+    const { result } = renderHook(() => useNewGrammarPracticeDeck('user-1'));
+
+    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+
+    await act(async () => {
+      await result.current.nextRepeat();
+    });
+    expect(result.current.currentItem?.item_id).toBe(1);
+    expect(result.current.progressLabel).toBe('Round 1/2');
+
+    await act(async () => {
+      await result.current.nextRepeat();
+    });
+    expect(result.current.currentItem?.item_id).toBe(1);
+    expect(result.current.progressLabel).toBe('Round 1/2');
+
+    await act(async () => {
+      await result.current.nextKnown();
+    });
+    expect(result.current.progressLabel).toBe('Round 2/2');
+    expect(result.current.currentItem?.item_id).toBe(1);
+    expect(result.current.isComplete).toBe(false);
+  });
+
+  it('known advances two rounds and saves completion after the final round', async () => {
+    const { result } = renderHook(() => useNewGrammarPracticeDeck('user-1'));
+
+    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+
+    await act(async () => {
+      await result.current.nextKnown();
+    });
+    expect(result.current.progressLabel).toBe('Round 2/2');
+
+    await act(async () => {
+      await result.current.nextKnown();
+    });
+
+    expect(result.current.isComplete).toBe(true);
+    expect(saveNewGrammarBlockCompletionMock).toHaveBeenCalledWith(
+      'user-1',
+      10,
+      expect.any(String),
+    );
+    expect(markBlockMasteredMock).toHaveBeenCalledWith('user-1', 10, expect.any(String));
+    expect(addItemCountMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('skip persists the current item immediately and removes it from later rounds', async () => {
+    getByBlockIdMock.mockResolvedValue([
+      makeItem({ item_id: 1, progress: 1, sort_order: 1 }),
+      makeItem({ item_id: 2, sort_order: 2 }),
+    ]);
+
+    const { result } = renderHook(() => useNewGrammarPracticeDeck('user-1'));
+
+    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+
+    await act(async () => {
+      await result.current.completeCurrent();
+    });
+
+    expect(savePracticeDeckMock).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          item_id: 1,
+          progress: 101,
+          progress_history: [expect.objectContaining({ progress: 101 })],
+        }),
+      ],
+      expect.any(String),
+    );
+    expect(result.current.currentItem?.item_id).toBe(2);
+
+    await act(async () => {
+      await result.current.nextKnown();
+    });
+
+    expect(result.current.progressLabel).toBe('Round 2/2');
+    expect(result.current.currentItem?.item_id).toBe(2);
+
+    await act(async () => {
+      await result.current.nextKnown();
+    });
+
+    expect(result.current.isComplete).toBe(true);
+    expect(addItemCountMock).toHaveBeenCalledTimes(3);
+  });
+
+  it('skipping all active items completes the block', async () => {
+    const { result } = renderHook(() => useNewGrammarPracticeDeck('user-1'));
+
+    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+
+    await act(async () => {
+      await result.current.completeCurrent();
+    });
+
+    expect(result.current.isComplete).toBe(true);
+    expect(savePracticeDeckMock).toHaveBeenCalledTimes(1);
+    expect(saveNewGrammarBlockCompletionMock).toHaveBeenCalledWith(
+      'user-1',
+      10,
+      expect.any(String),
+    );
+    expect(markBlockMasteredMock).toHaveBeenCalledWith('user-1', 10, expect.any(String));
   });
 });

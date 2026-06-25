@@ -12,39 +12,20 @@ import type { UserItemPractice } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { NBSP, useHint } from './use-hint';
 
-type NewGrammarRound = 0 | 1 | 2 | 3;
+type NewGrammarRound = 0 | 1;
 
 const ROUND_DIRECTIONS: Record<NewGrammarRound, 'czToEn' | 'enToCz'> = {
   0: 'czToEn',
   1: 'enToCz',
-  2: 'czToEn',
-  3: 'enToCz',
 };
-
-function getRoundTarget(round: NewGrammarRound): number {
-  if (round === 2) return 1;
-  if (round === 3) return 2;
-  return 0;
-}
-
-function pickRandomItem(
-  items: UserItemPractice[],
-  progressByItemId: Map<number, number>,
-  target: number,
-): UserItemPractice | null {
-  const candidates = items.filter((item) => (progressByItemId.get(item.item_id) ?? 0) < target);
-  if (candidates.length === 0) return null;
-  return candidates[Math.floor(Math.random() * candidates.length)] ?? null;
-}
 
 export function useNewGrammarPracticeDeck(userId: string | null) {
   const [block, setBlock] = useState<UserBlockType | null>(null);
   const [items, setItems] = useState<UserItemPractice[]>([]);
   const [grammar, setGrammar] = useState<GrammarDetail | null>(null);
   const [round, setRound] = useState<NewGrammarRound>(0);
-  const [orderedIndex, setOrderedIndex] = useState(0);
-  const [randomItem, setRandomItem] = useState<UserItemPractice | null>(null);
-  const [progressByItemId, setProgressByItemId] = useState<Map<number, number>>(() => new Map());
+  const [currentQueue, setCurrentQueue] = useState<UserItemPractice[]>([]);
+  const [nextWaveQueue, setNextWaveQueue] = useState<UserItemPractice[]>([]);
   const [isComplete, setIsComplete] = useState(false);
   const [revealed, setRevealed] = useState(false);
 
@@ -67,14 +48,16 @@ export function useNewGrammarPracticeDeck(userId: string | null) {
       );
       const grammarData =
         nextBlock.grammar_id == null ? null : await Grammar.getById(nextBlock.grammar_id);
-      const initialProgress = new Map(blockItems.map((item) => [item.item_id, 0]));
       if (!isMounted) return;
 
       setBlock(nextBlock);
       setItems(blockItems);
       setGrammar(grammarData);
-      setProgressByItemId(initialProgress);
-      setRandomItem(pickRandomItem(blockItems, initialProgress, 1));
+      setRound(0);
+      setCurrentQueue(blockItems);
+      setNextWaveQueue([]);
+      setIsComplete(false);
+      setRevealed(false);
     };
 
     void load();
@@ -83,10 +66,7 @@ export function useNewGrammarPracticeDeck(userId: string | null) {
     };
   }, [userId]);
 
-  const currentItem = useMemo(() => {
-    if (round < 2) return items[orderedIndex] ?? null;
-    return randomItem;
-  }, [items, orderedIndex, randomItem, round]);
+  const currentItem = useMemo(() => currentQueue[0] ?? null, [currentQueue]);
 
   const { czechHinted, englishHinted, resetHint, plusHint } = useHint(
     currentItem?.czech,
@@ -116,61 +96,66 @@ export function useNewGrammarPracticeDeck(userId: string | null) {
     resetHint();
   }, [resetHint]);
 
+  const completeBlock = useCallback(
+    async (dateTime: string = new Date().toISOString()) => {
+      if (!userId || !block) return;
+
+      await UserItem.saveNewGrammarBlockCompletion(userId, block.block_id, dateTime);
+      await UserBlock.markBlockMastered(userId, block.block_id, dateTime);
+      setIsComplete(true);
+      setCurrentQueue([]);
+      setNextWaveQueue([]);
+      resetQuestionState();
+    },
+    [block, resetQuestionState, userId],
+  );
+
+  const setNextQueueState = useCallback(
+    async (
+      remainingCurrentQueue: UserItemPractice[],
+      remainingNextWaveQueue: UserItemPractice[],
+      nextRoundItems: UserItemPractice[],
+    ) => {
+      if (remainingCurrentQueue.length > 0) {
+        setCurrentQueue(remainingCurrentQueue);
+        setNextWaveQueue(remainingNextWaveQueue);
+        resetQuestionState();
+        return;
+      }
+
+      if (remainingNextWaveQueue.length > 0) {
+        setCurrentQueue(remainingNextWaveQueue);
+        setNextWaveQueue([]);
+        resetQuestionState();
+        return;
+      }
+
+      if (round === 0 && nextRoundItems.length > 0) {
+        setRound(1);
+        setCurrentQueue(nextRoundItems);
+        setNextWaveQueue([]);
+        resetQuestionState();
+        return;
+      }
+
+      await completeBlock();
+    },
+    [completeBlock, resetQuestionState, round],
+  );
+
   const advance = useCallback(
-    async (isKnown: boolean) => {
+    async (shouldRepeat: boolean) => {
       if (!userId || !block || !currentItem || isComplete) return;
 
       try {
         await UserScore.addItemCount(userId, 1);
 
-        if (round < 2) {
-          const nextIndex = orderedIndex + 1;
-          if (nextIndex < items.length) {
-            setOrderedIndex(nextIndex);
-            resetQuestionState();
-            return;
-          }
+        const remainingCurrentQueue = currentQueue.slice(1);
+        const remainingNextWaveQueue = shouldRepeat
+          ? [...nextWaveQueue, currentItem]
+          : nextWaveQueue;
 
-          const nextRound = (round + 1) as NewGrammarRound;
-          setRound(nextRound);
-          setOrderedIndex(0);
-          resetQuestionState();
-          if (nextRound >= 2) {
-            setRandomItem(pickRandomItem(items, progressByItemId, getRoundTarget(nextRound)));
-          }
-          return;
-        }
-
-        const target = getRoundTarget(round);
-        const nextProgressByItemId = new Map(progressByItemId);
-        if (isKnown) {
-          nextProgressByItemId.set(
-            currentItem.item_id,
-            Math.max(nextProgressByItemId.get(currentItem.item_id) ?? 0, target),
-          );
-        }
-
-        const nextItem = pickRandomItem(items, nextProgressByItemId, target);
-        setProgressByItemId(nextProgressByItemId);
-
-        if (nextItem != null) {
-          setRandomItem(nextItem);
-          resetQuestionState();
-          return;
-        }
-
-        if (round === 2) {
-          const nextRound: NewGrammarRound = 3;
-          setRound(nextRound);
-          setRandomItem(pickRandomItem(items, nextProgressByItemId, getRoundTarget(nextRound)));
-          resetQuestionState();
-          return;
-        }
-
-        const dateTime = new Date().toISOString();
-        await UserItem.saveNewGrammarBlockCompletion(userId, block.block_id, dateTime);
-        await UserBlock.markBlockMastered(userId, block.block_id, dateTime);
-        setIsComplete(true);
+        await setNextQueueState(remainingCurrentQueue, remainingNextWaveQueue, items);
       } catch (error) {
         reportError('Failed to advance new grammar practice', error);
       }
@@ -178,15 +163,64 @@ export function useNewGrammarPracticeDeck(userId: string | null) {
     [
       block,
       currentItem,
+      currentQueue,
       isComplete,
       items,
-      orderedIndex,
-      progressByItemId,
-      resetQuestionState,
-      round,
+      nextWaveQueue,
+      setNextQueueState,
       userId,
     ],
   );
+
+  const completeCurrent = useCallback(async () => {
+    if (!userId || !block || !currentItem || isComplete) return;
+
+    try {
+      const dateTime = new Date().toISOString();
+      const skippedItem: UserItemPractice = {
+        ...currentItem,
+        progress: Math.max(currentItem.progress + config.progress.skipProgress, 0),
+        progress_history: [
+          ...currentItem.progress_history,
+          {
+            progress: Math.max(currentItem.progress + config.progress.skipProgress, 0),
+            created_at: dateTime,
+          },
+        ],
+      };
+      const remainingItems = items.filter((item) => item.item_id !== currentItem.item_id);
+      const remainingCurrentQueue = currentQueue
+        .slice(1)
+        .filter((item) => item.item_id !== currentItem.item_id);
+      const remainingNextWaveQueue = nextWaveQueue.filter(
+        (item) => item.item_id !== currentItem.item_id,
+      );
+
+      await UserItem.savePracticeDeck([skippedItem], dateTime);
+      await UserScore.addItemCount(userId, 1);
+      setItems(remainingItems);
+
+      if (remainingItems.length === 0) {
+        await completeBlock(dateTime);
+        return;
+      }
+
+      await setNextQueueState(remainingCurrentQueue, remainingNextWaveQueue, remainingItems);
+    } catch (error) {
+      reportError('Failed to skip new grammar practice item', error);
+      throw error;
+    }
+  }, [
+    block,
+    completeBlock,
+    currentItem,
+    currentQueue,
+    isComplete,
+    items,
+    nextWaveQueue,
+    setNextQueueState,
+    userId,
+  ]);
 
   useEffect(() => {
     if (audioDisabled || isCzToEn || audioLoading || showDirectionChange) {
@@ -222,7 +256,7 @@ export function useNewGrammarPracticeDeck(userId: string | null) {
     currentItem,
     noteId: currentItem?.note_id ?? null,
     grammarId: currentItem?.grammar_id ?? null,
-    progressLabel: `${TEXTS.newGrammarRound} ${round + 1}/4`,
+    progressLabel: `${TEXTS.newGrammarRound} ${round + 1}/2`,
     isCzToEn,
     revealed,
     showNewGrammarIndicator: false,
@@ -233,9 +267,9 @@ export function useNewGrammarPracticeDeck(userId: string | null) {
     showDirectionChange,
     handleReveal,
     plusHint,
-    repeatDisabled: round < 2,
-    nextRepeat: () => advance(false),
-    nextKnown: () => advance(true),
+    nextRepeat: () => advance(true),
+    nextKnown: () => advance(false),
+    completeCurrent,
     audioError,
     playAudio: playAudioInternal,
     audioLoading,

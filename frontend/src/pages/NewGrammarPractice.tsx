@@ -60,9 +60,8 @@ export default function NewGrammarPractice(): JSX.Element {
       handleReveal={deck.handleReveal}
       plusHint={deck.plusHint}
       nextRepeat={deck.nextRepeat}
-      repeatDisabled={deck.repeatDisabled}
       nextKnown={deck.nextKnown}
-      completeDisabled
+      completeCurrent={deck.completeCurrent}
       audioError={deck.audioError}
       playAudio={deck.playAudio}
       audioLoading={deck.audioLoading}

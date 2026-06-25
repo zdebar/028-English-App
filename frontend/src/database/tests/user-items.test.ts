@@ -211,6 +211,48 @@ describe('UserItem', () => {
     expect(result.map((item: any) => item.item_id)).toEqual([1, 2]);
   });
 
+  it('saveNewGrammarBlockCompletion does not downgrade skipped item progress', async () => {
+    const dateTime = '2026-03-06T12:00:00.000Z';
+    mocks.blockEqualsToArray.mockResolvedValue([
+      {
+        item_id: 1,
+        sort_order: 1,
+        progress: 101,
+        progress_history: [],
+        started_at: '2026-03-01T00:00:00.000Z',
+        mastered_at: '2026-03-06T11:00:00.000Z',
+      },
+      {
+        item_id: 2,
+        sort_order: 2,
+        progress: 0,
+        progress_history: [],
+        started_at: '1970-01-01T00:00:00.000Z',
+        mastered_at: '1970-01-01T00:00:00.000Z',
+      },
+    ]);
+
+    await UserItem.saveNewGrammarBlockCompletion('u1', 3, dateTime);
+
+    expect(mocks.bulkPut).toHaveBeenCalledWith([
+      expect.objectContaining({
+        item_id: 1,
+        progress: 101,
+        started_at: '2026-03-01T00:00:00.000Z',
+        updated_at: dateTime,
+        mastered_at: '2026-03-06T11:00:00.000Z',
+      }),
+      expect.objectContaining({
+        item_id: 2,
+        progress: 2,
+        started_at: dateTime,
+        updated_at: dateTime,
+      }),
+    ]);
+    expect(mocks.getNextAt).toHaveBeenCalledWith(101);
+    expect(mocks.getNextAt).toHaveBeenCalledWith(2);
+  });
+
   it('resetItemById triggers levels update when successful', async () => {
     await UserItem.resetItemById('u1', 10);
 

@@ -218,15 +218,19 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     dateTime: string = new Date(Date.now()).toISOString(),
   ): Promise<UserItemLocal[]> {
     const blockItems = await this.getByBlockId(userId, blockId);
-    const updatedItems = blockItems.map((item) => ({
-      ...item,
-      progress: 2,
-      progress_history: item.progress_history ?? [],
-      started_at: item.started_at === NULL_DATE ? dateTime : item.started_at,
-      updated_at: dateTime,
-      next_at: getNextAt(2),
-      mastered_at: item.mastered_at,
-    }));
+    const updatedItems = blockItems.map((item) => {
+      const progress = Math.max(item.progress, config.progress.afterNewGrammarProgress);
+
+      return {
+        ...item,
+        progress,
+        progress_history: item.progress_history ?? [],
+        started_at: item.started_at === NULL_DATE ? dateTime : item.started_at,
+        updated_at: dateTime,
+        next_at: getNextAt(progress),
+        mastered_at: item.mastered_at,
+      };
+    });
 
     if (updatedItems.length > 0) {
       await db.user_items.bulkPut(updatedItems);
