@@ -29,6 +29,7 @@ vi.mock('@/config/config', () => ({
       deckSize: 10,
     },
     progress: {
+      afterNewGrammarProgress: 2,
       simulationProgress: 2,
       simulationCount: 200,
     },
