@@ -206,7 +206,7 @@ vi.mock('@/features/practice/hooks/use-practice-deck', () => ({
   },
 }));
 
-vi.mock('@/components/UI/DelayedNotification', () => ({
+vi.mock('@/components/UI/Delayed', () => ({
   default: ({ children }: any) => <div>{children}</div>,
 }));
 

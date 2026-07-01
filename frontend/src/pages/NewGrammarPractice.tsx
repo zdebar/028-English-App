@@ -1,17 +1,14 @@
 import Notification from '@/components/UI/Notification';
-import StyledButton from '@/components/UI/buttons/StyledButton';
+import ReturnHomeButton from '@/components/UI/buttons/ReturnHomeButton';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import GrammarDetailCard from '@/features/grammar/GrammarDetailCard';
 import PracticeSessionCard from '@/features/practice/PracticeSessionCard';
 import { useNewGrammarPracticeDeck } from '@/features/practice/hooks/use-new-grammar-practice-deck';
-import { ROUTES } from '@/config/routes.config';
 import { TEXTS } from '@/locales/cs';
 import { useState, type JSX } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 export default function NewGrammarPractice(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
-  const navigate = useNavigate();
   const [showGrammarIntro, setShowGrammarIntro] = useState(true);
   const deck = useNewGrammarPracticeDeck(userId);
 
@@ -32,9 +29,7 @@ export default function NewGrammarPractice(): JSX.Element {
       <div className="card-width flex flex-col gap-4 text-center">
         <p>{TEXTS.newGrammarComplete}</p>
         <Notification>{deck.block.name}</Notification>
-        <StyledButton className="h-button mt-2" onClick={() => navigate(ROUTES.home)}>
-          {TEXTS.tooltipHome}
-        </StyledButton>
+        <ReturnHomeButton />
       </div>
     );
   }
