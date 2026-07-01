@@ -5,6 +5,7 @@ import type { UserItemPractice } from '@/types/user-item.types';
 
 const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => ({
   userId: 'u1',
+  navigate: vi.fn(),
   dailyCount: 5,
   grammarVisible: false,
   grammarData: null as any,
@@ -95,6 +96,7 @@ vi.mock('@/locales/cs', () => ({
     notAvailable: 'Není k dispozici',
     nothingToPractice: 'Nic k procvičování.',
     tryAgainLater: 'Zkuste to znovu později.',
+    tooltipHome: 'Domů',
     reveal: 'Reveal',
     noAudio: 'No audio',
     loadingAudio: 'Loading audio',
@@ -117,6 +119,10 @@ vi.mock('@/locales/cs', () => ({
 vi.mock('@/features/auth/use-auth-store', () => ({
   useAuthStore: (selector: (state: { userId: string | null }) => unknown) =>
     selector({ userId: mocks.userId }),
+}));
+
+vi.mock('react-router-dom', () => ({
+  useNavigate: () => mocks.navigate,
 }));
 
 vi.mock('@/features/user-stats/use-user-store', () => ({
@@ -368,7 +374,18 @@ describe('PracticeCard', () => {
     render(<PracticeCard />);
 
     expect(screen.getByText('Nic k procvičování.')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Domů' })).toBeTruthy();
     expect(screen.getByText('Zkuste to znovu později.')).toBeTruthy();
+  });
+
+  it('returns home from the empty practice state', () => {
+    mocks.practiceDeck.currentItem = null;
+
+    render(<PracticeCard />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Domů' }));
+
+    expect(mocks.navigate).toHaveBeenCalledWith('/');
   });
 
   it('reveals item and plays audio on item click in CZ->EN mode', () => {
@@ -496,7 +513,6 @@ describe('PracticeCard', () => {
   it('can disable the complete control for specialized practice sessions', () => {
     render(
       <PracticeSessionCard
-        currentItem={mocks.makePracticeItem()}
         noteId={null}
         grammarId={10}
         progressLabel="Round 1/4"
@@ -525,7 +541,6 @@ describe('PracticeCard', () => {
   it('can disable the repeat control for specialized practice sessions', () => {
     render(
       <PracticeSessionCard
-        currentItem={mocks.makePracticeItem()}
         noteId={null}
         grammarId={10}
         progressLabel="Round 1/4"

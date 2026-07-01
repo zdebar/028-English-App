@@ -17,12 +17,12 @@ type DelayedNotificationProps = Readonly<{
 export default function DelayedNotification({
   message = TEXTS.loadingMessage,
   timeDelay,
-  className = 'color-info pt-4',
+  className = '',
   children,
 }: DelayedNotificationProps): JSX.Element {
   return (
-    <Delayed timeDelay={timeDelay}>
-      <Notification className={className}>{children ?? message}</Notification>
+    <Delayed timeDelay={timeDelay} className="w-full">
+      <Notification className={`color-info pt-4 ${className}`}>{children ?? message}</Notification>
     </Delayed>
   );
 }

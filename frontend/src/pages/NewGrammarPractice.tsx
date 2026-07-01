@@ -45,7 +45,6 @@ export default function NewGrammarPractice(): JSX.Element {
 
   return (
     <PracticeSessionCard
-      currentItem={deck.currentItem}
       noteId={deck.noteId}
       grammarId={deck.grammarId}
       progressLabel={deck.progressLabel}

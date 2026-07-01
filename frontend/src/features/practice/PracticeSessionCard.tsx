@@ -20,10 +20,8 @@ import MasterItemButton from './buttons/MasterItemButton';
 import RepeatButton from './buttons/RepeatButton';
 import PracticeStarsRow from './components/PracticeStarsRow';
 import { usePracticeStars } from './hooks/use-practice-stars';
-import type { UserItemPractice } from '@/types/user-item.types';
 
 export type PracticeSessionCardProps = Readonly<{
-  currentItem: UserItemPractice | null;
   noteId: number | null;
   grammarId: number | null;
   progressLabel: string | number;
@@ -48,7 +46,6 @@ export type PracticeSessionCardProps = Readonly<{
 }>;
 
 export default function PracticeSessionCard({
-  currentItem,
   noteId,
   grammarId,
   progressLabel,
@@ -87,15 +84,6 @@ export default function PracticeSessionCard({
     audioStatusMessage = <DelayedNotification message={TEXTS.loadingAudio} />;
   } else if (audioError) {
     audioStatusMessage = <p className="px-2">{TEXTS.noAudio}</p>;
-  }
-
-  if (!currentItem) {
-    return (
-      <DelayedNotification>
-        <p>{TEXTS.nothingToPractice}</p>
-        <p>{TEXTS.tryAgainLater}</p>
-      </DelayedNotification>
-    );
   }
 
   if (isGrammarVisible) return <GrammarDetailCard grammar={grammarData} onClose={closeGrammar} />;
