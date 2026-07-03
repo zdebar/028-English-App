@@ -4,8 +4,12 @@ interface UseFetchResult<T> {
   data: T | null;
   hasData: boolean;
   loading: boolean;
-  error: unknown | null;
+  error: Error | null;
   reload: () => void;
+}
+
+function toError(error: unknown): Error {
+  return error instanceof Error ? error : new Error(String(error));
 }
 
 /**
@@ -26,8 +30,8 @@ export function useFetch<T>(fetchFunction: () => Promise<T | null>): UseFetchRes
   }
 
   const [data, setData] = useState<T | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<unknown | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
   const isActiveRef = useRef(true);
 
   const load = useCallback(async () => {
@@ -40,7 +44,7 @@ export function useFetch<T>(fetchFunction: () => Promise<T | null>): UseFetchRes
       setData(result);
     } catch (err) {
       if (!isActiveRef.current) return;
-      setError(err);
+      setError(toError(err));
       setData(null);
     } finally {
       if (!isActiveRef.current) return;

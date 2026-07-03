@@ -8,10 +8,10 @@ import { reportError } from '../logging/monitoring-handler';
 interface UserState {
   levels: LevelOverviewType[];
   levelsLoading: boolean;
-  levelsError: unknown | null;
+  levelsError: Error | null;
   dailyCount: number;
   dailyCountLoading: boolean;
-  dailyCountError: unknown | null;
+  dailyCountError: Error | null;
   showMasteredDashboard: boolean;
   setMasteredDashboard: (value: boolean) => void;
   reloadLevels: (userId: string) => Promise<void>;
@@ -22,6 +22,10 @@ interface UserState {
 
 const initialLevels: LevelOverviewType[] = [];
 const initialDailyStats = 0;
+
+function toError(error: unknown): Error {
+  return error instanceof Error ? error : new Error(String(error));
+}
 
 /**
  * Creates a Zustand store for managing user statistics and state.
@@ -67,7 +71,7 @@ export const useUserStore = create<UserState>((set, get) => {
   }
   const store: UserState = {
     levels: initialLevels,
-    levelsLoading: false,
+    levelsLoading: true,
     levelsError: null,
     dailyCount: initialDailyStats,
     dailyCountLoading: false,
@@ -83,7 +87,7 @@ export const useUserStore = create<UserState>((set, get) => {
         const updatedLevels = (await Levels.getOverview(userId)) ?? [];
         set({ levels: updatedLevels, levelsLoading: false });
       } catch (error) {
-        set({ levels: initialLevels, levelsLoading: false, levelsError: error });
+        set({ levels: initialLevels, levelsLoading: false, levelsError: toError(error) });
         reportError('Error reloading levels', error);
       }
     },
@@ -94,7 +98,11 @@ export const useUserStore = create<UserState>((set, get) => {
         const updatedCount = (await UserScoreType.getOrCreateTodayScore(userId)) ?? 0;
         set({ dailyCount: updatedCount, dailyCountLoading: false });
       } catch (error) {
-        set({ dailyCount: initialDailyStats, dailyCountLoading: false, dailyCountError: error });
+        set({
+          dailyCount: initialDailyStats,
+          dailyCountLoading: false,
+          dailyCountError: toError(error),
+        });
         reportError('Error reloading daily count', error);
       }
     },

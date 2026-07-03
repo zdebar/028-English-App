@@ -19,6 +19,10 @@ const ROUND_DIRECTIONS: Record<NewGrammarRound, 'czToEn' | 'enToCz'> = {
   1: 'enToCz',
 };
 
+function toError(error: unknown): Error {
+  return error instanceof Error ? error : new Error(String(error));
+}
+
 export function useNewGrammarPracticeDeck(userId: string | null) {
   const [block, setBlock] = useState<UserBlockType | null>(null);
   const [items, setItems] = useState<UserItemPractice[]>([]);
@@ -28,8 +32,8 @@ export function useNewGrammarPracticeDeck(userId: string | null) {
   const [nextWaveQueue, setNextWaveQueue] = useState<UserItemPractice[]>([]);
   const [isComplete, setIsComplete] = useState(false);
   const [revealed, setRevealed] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<unknown | null>(null);
+  const [loading, setLoading] = useState(userId != null);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     if (!userId) {
@@ -75,7 +79,7 @@ export function useNewGrammarPracticeDeck(userId: string | null) {
         setRevealed(false);
       } catch (err) {
         if (!isMounted) return;
-        setError(err);
+        setError(toError(err));
         setBlock(null);
         setItems([]);
         setGrammar(null);

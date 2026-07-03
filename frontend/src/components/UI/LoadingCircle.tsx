@@ -12,10 +12,10 @@ export default function LoadingCircle({
 }: LoadingCircleProps): JSX.Element {
   return (
     <div className={`flex w-full justify-center py-4 ${className}`.trim()}>
-      <div
+      <output
         aria-label={label}
+        aria-live="polite"
         className="border-button-light dark:border-button-dark border-t-button-hover size-8 animate-spin rounded-full border-4"
-        role="status"
       />
     </div>
   );

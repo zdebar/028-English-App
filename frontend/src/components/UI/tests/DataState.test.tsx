@@ -43,6 +43,6 @@ describe('DataState', () => {
       vi.advanceTimersByTime(1000);
     });
 
-    expect(screen.getByRole('status')).toBeTruthy();
+    expect(screen.getByLabelText('Načítání ...')).toBeTruthy();
   });
 });

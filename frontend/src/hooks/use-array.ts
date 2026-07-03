@@ -7,8 +7,12 @@ interface UseArrayResult<T> {
   setCurrentIndex: (index: number | null) => void;
   currentItem: T | null;
   loading: boolean;
-  error: unknown | null;
+  error: Error | null;
   reload: () => void;
+}
+
+function toError(error: unknown): Error {
+  return error instanceof Error ? error : new Error(String(error));
 }
 
 /**
@@ -33,8 +37,8 @@ export function useArray<T>(fetchFunction: () => Promise<T[]>): UseArrayResult<T
 
   const [data, setData] = useState<T[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<unknown | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
   const isActiveRef = useRef(true);
 
   const currentItem =
@@ -52,7 +56,7 @@ export function useArray<T>(fetchFunction: () => Promise<T[]>): UseArrayResult<T
       setData(result);
     } catch (err) {
       if (!isActiveRef.current) return;
-      setError(err);
+      setError(toError(err));
       setData([]);
     } finally {
       if (!isActiveRef.current) return;

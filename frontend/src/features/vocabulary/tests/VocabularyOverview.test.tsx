@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
   reportError: vi.fn(),
   vocab: {
     loading: false,
-    error: null as unknown | null,
+    error: null as Error | null,
     visibleCount: 2,
     setVisibleCount: vi.fn(),
     searchTerm: '',
