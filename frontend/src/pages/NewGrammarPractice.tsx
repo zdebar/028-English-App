@@ -1,19 +1,33 @@
+import { DataState } from '@/components/UI/DataState';
 import Notification from '@/components/UI/Notification';
 import ReturnHomeButton from '@/components/UI/buttons/ReturnHomeButton';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import GrammarDetailCard from '@/features/grammar/GrammarDetailCard';
+import { reportError } from '@/features/logging/monitoring-handler';
 import PracticeSessionCard from '@/features/practice/PracticeSessionCard';
 import { useNewGrammarPracticeDeck } from '@/features/practice/hooks/use-new-grammar-practice-deck';
+import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
-import { useState, type JSX } from 'react';
+import { useEffect, useState, type JSX } from 'react';
 
 export default function NewGrammarPractice(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
+  const showToast = useToastStore((state) => state.showToast);
   const [showGrammarIntro, setShowGrammarIntro] = useState(true);
   const deck = useNewGrammarPracticeDeck(userId);
 
+  useEffect(() => {
+    if (!deck.error) return;
+    showToast(TEXTS.loadingError, 'error');
+    reportError('Failed to fetch new grammar practice deck', deck.error);
+  }, [deck.error, showToast]);
+
   if (!userId) {
     return <Notification>{TEXTS.notAvailable}</Notification>;
+  }
+
+  if (deck.loading) {
+    return <DataState loading hasData={false} noDataMessage={TEXTS.nothingToPractice} />;
   }
 
   if (!deck.block) {

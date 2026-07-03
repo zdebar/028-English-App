@@ -1,8 +1,9 @@
 import { act, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   userId: 'u1' as string | null,
+  showToast: vi.fn(),
   scores: [] as Array<{
     date: string;
     item_count: number;
@@ -40,6 +41,9 @@ vi.mock('@/config/config', () => ({
       starChunk: 40,
       starsPerRow: 10,
     },
+    loading: {
+      dataStateDelayMs: 0,
+    },
   },
 }));
 
@@ -47,7 +51,19 @@ vi.mock('@/locales/cs', () => ({
   TEXTS: {
     practiceOverviewTitle: 'Practice Overview',
     practiceOverviewMoreDays: 'More days',
+    practiceOverviewNone: 'No days',
+    loadingError: 'Loading error',
+    loadingMessage: 'Loading',
   },
+}));
+
+vi.mock('@/features/toast/use-toast-store', () => ({
+  useToastStore: (selector: (state: { showToast: typeof mocks.showToast }) => unknown) =>
+    selector({ showToast: mocks.showToast }),
+}));
+
+vi.mock('@/features/logging/monitoring-handler', () => ({
+  reportError: vi.fn(),
 }));
 
 vi.mock('react-router-dom', () => ({
@@ -80,11 +96,15 @@ describe('PracticeOverview', () => {
     ];
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('fills missing days with item_count 0 between known scores', async () => {
     render(<PracticeOverview />);
 
     await act(async () => {
-      await vi.runAllTimersAsync();
+      await Promise.resolve();
     });
 
     expect(screen.getAllByTestId('star-row')).toHaveLength(3);

@@ -4,6 +4,7 @@ interface UseFetchResult<T> {
   data: T | null;
   hasData: boolean;
   loading: boolean;
+  error: unknown | null;
   reload: () => void;
 }
 
@@ -26,17 +27,20 @@ export function useFetch<T>(fetchFunction: () => Promise<T | null>): UseFetchRes
 
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<unknown | null>(null);
   const isActiveRef = useRef(true);
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
 
     try {
       const result = await fetchFunction();
       if (!isActiveRef.current) return;
       setData(result);
-    } catch {
+    } catch (err) {
       if (!isActiveRef.current) return;
+      setError(err);
       setData(null);
     } finally {
       if (!isActiveRef.current) return;
@@ -57,6 +61,7 @@ export function useFetch<T>(fetchFunction: () => Promise<T | null>): UseFetchRes
     data,
     hasData: data !== null,
     loading,
+    error,
     reload: load,
   };
 }

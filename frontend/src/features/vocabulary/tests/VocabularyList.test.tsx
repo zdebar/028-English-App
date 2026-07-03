@@ -9,6 +9,9 @@ vi.mock('@/config/config', () => ({
     buttons: {
       loadingMessageDelay: 0,
     },
+    loading: {
+      dataStateDelayMs: 0,
+    },
   },
 }));
 
@@ -68,6 +71,7 @@ describe('VocabularyList', () => {
           { item_id: 1, czech: 'ahoj', english: 'hello' } as any,
           { item_id: 2, czech: 'auto', english: 'car' } as any,
         ]}
+        loading={false}
         visibleCount={2}
         displayField="czech"
         searchTerm=""
@@ -94,6 +98,7 @@ describe('VocabularyList', () => {
           { item_id: 2, czech: 'auto', english: 'car' } as any,
           { item_id: 3, czech: 'dům', english: 'house' } as any,
         ]}
+        loading={false}
         visibleCount={1}
         displayField="czech"
         searchTerm=""
@@ -113,6 +118,7 @@ describe('VocabularyList', () => {
     render(
       <VocabularyList
         filteredWords={[]}
+        loading={false}
         visibleCount={1}
         displayField="czech"
         searchTerm=""
@@ -132,6 +138,7 @@ describe('VocabularyList', () => {
     render(
       <VocabularyList
         filteredWords={[]}
+        loading={false}
         visibleCount={1}
         displayField="czech"
         searchTerm=""

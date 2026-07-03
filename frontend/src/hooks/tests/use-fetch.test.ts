@@ -16,10 +16,12 @@ describe('useFetch', () => {
 
     expect(result.current.hasData).toBe(true);
     expect(result.current.loading).toBe(false);
+    expect(result.current.error).toBeNull();
   });
 
-  it('handles fetch error', async () => {
-    const fetchFunction = vi.fn().mockRejectedValue(new Error('fail'));
+  it('handles fetch error and exposes error', async () => {
+    const error = new Error('fail');
+    const fetchFunction = vi.fn().mockRejectedValue(error);
 
     const { result } = renderHook(() => useFetch(fetchFunction));
 
@@ -29,6 +31,7 @@ describe('useFetch', () => {
 
     expect(result.current.data).toBeNull();
     expect(result.current.hasData).toBe(false);
+    expect(result.current.error).toBe(error);
   });
 
   it('keeps hasData false when fetch returns null', async () => {
@@ -59,6 +62,42 @@ describe('useFetch', () => {
 
     act(() => {
       result.current.reload();
+    });
+
+    await waitFor(() => {
+      expect(result.current.data).toEqual({ value: 2 });
+    });
+  });
+
+  it('clears stale error before retrying', async () => {
+    let resolveSecondLoad: ((value: { value: number }) => void) | undefined;
+    const fetchFunction = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('fail'))
+      .mockImplementationOnce(
+        () =>
+          new Promise<{ value: number }>((resolve) => {
+            resolveSecondLoad = resolve;
+          }),
+      );
+
+    const { result } = renderHook(() => useFetch(fetchFunction));
+
+    await waitFor(() => {
+      expect(result.current.error).toBeTruthy();
+    });
+
+    act(() => {
+      result.current.reload();
+    });
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(true);
+    });
+    expect(result.current.error).toBeNull();
+
+    act(() => {
+      resolveSecondLoad?.({ value: 2 });
     });
 
     await waitFor(() => {

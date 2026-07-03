@@ -2,7 +2,7 @@ import OverviewCard from '@/components/UI/OverviewCard';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ListButton } from '@/components/UI/buttons/ListButton';
 import { useArray } from '@/hooks/use-array';
@@ -30,14 +30,8 @@ export default function GrammarOverview(): JSX.Element {
       return [];
     }
 
-    try {
-      return await Grammar.getStarted(userId);
-    } catch (err) {
-      showToast(TEXTS.loadingError, 'error');
-      reportError('Failed to fetch grammar overview', err);
-      return [];
-    }
-  }, [showToast, userId]);
+    return Grammar.getStarted(userId);
+  }, [userId]);
 
   const {
     data: grammarList,
@@ -46,8 +40,15 @@ export default function GrammarOverview(): JSX.Element {
     currentItem,
     loading,
     hasData,
+    error,
     reload,
   } = useArray<GrammarType>(fetchGrammar);
+
+  useEffect(() => {
+    if (!error) return;
+    showToast(TEXTS.loadingError, 'error');
+    reportError('Failed to fetch grammar overview', error);
+  }, [error, showToast]);
 
   const handleReset = useCallback(async () => {
     if (!currentItem || !userId) {

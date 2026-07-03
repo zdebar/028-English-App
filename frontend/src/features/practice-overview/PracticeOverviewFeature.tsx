@@ -10,6 +10,8 @@ import { getCompletedStarCount } from '@/utils/star-progress.utils';
 import { useEffect, useState, type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DataState } from '@/components/UI/DataState';
+import { useToastStore } from '@/features/toast/use-toast-store';
+import { reportError } from '@/features/logging/monitoring-handler';
 
 const INITIAL_VISIBLE_DAYS = 7;
 
@@ -91,6 +93,7 @@ function PracticeOverviewRow({ score }: Readonly<{ score: PracticeDayScore }>): 
 export default function PracticeOverviewFeature(): JSX.Element {
   const navigate = useNavigate();
   const userId = useAuthStore((state) => state.userId);
+  const showToast = useToastStore((state) => state.showToast);
   const [scores, setScores] = useState<PracticeDayScore[]>([]);
   const [loading, setLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_DAYS);
@@ -105,17 +108,29 @@ export default function PracticeOverviewFeature(): JSX.Element {
 
     let isMounted = true;
     setLoading(true);
-    void UserScore.getByUserId(userId).then((items) => {
-      if (isMounted) {
+    const loadScores = async () => {
+      try {
+        const items = await UserScore.getByUserId(userId);
+        if (!isMounted) return;
         setScores(getScoresWithMissingDays(items));
-        setLoading(false);
+      } catch (error) {
+        if (!isMounted) return;
+        setScores([]);
+        showToast(TEXTS.loadingError, 'error');
+        reportError('Failed to fetch practice overview', error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-    });
+    };
+
+    void loadScores();
 
     return () => {
       isMounted = false;
     };
-  }, [userId]);
+  }, [showToast, userId]);
 
   const visibleScores = scores.slice(0, visibleCount);
   const hasMoreScores = scores.length > visibleCount;

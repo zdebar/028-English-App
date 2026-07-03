@@ -1,11 +1,10 @@
-import DelayedNotification from '@/components/UI/DelayedNotification';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { TEXTS } from '@/locales/cs';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useVocabulary } from './use-vocabulary';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import VocabularyDetailCard from './VocabularyDetailCard';
 import VocabularyList from './VocabularyList';
@@ -22,6 +21,7 @@ export default function VocabularyOverview() {
 
   const {
     loading,
+    error,
     reload,
     visibleCount,
     setVisibleCount,
@@ -33,6 +33,12 @@ export default function VocabularyOverview() {
     setSelectedWord,
     filteredWords,
   } = useVocabulary(userId);
+
+  useEffect(() => {
+    if (!error) return;
+    showToast(TEXTS.loadingError, 'error');
+    reportError('Failed to fetch vocabulary overview', error);
+  }, [error, showToast]);
 
   // -- HANDLERS  --
   const handleResetUserItem = useCallback(async () => {
@@ -64,14 +70,11 @@ export default function VocabularyOverview() {
     [filteredWords, setSelectedWord],
   );
 
-  if (loading) {
-    return <DelayedNotification />;
-  }
-
   if (selectedWord === null) {
     return (
       <VocabularyList
         filteredWords={filteredWords}
+        loading={loading}
         visibleCount={visibleCount}
         displayField={displayField}
         searchTerm={searchTerm}

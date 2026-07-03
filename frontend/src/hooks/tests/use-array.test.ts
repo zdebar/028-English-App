@@ -19,6 +19,7 @@ describe('useArray', () => {
     });
 
     expect(result.current.hasData).toBe(true);
+    expect(result.current.error).toBeNull();
     expect(result.current.currentIndex).toBeNull();
     expect(result.current.currentItem).toBeNull();
   });
@@ -64,8 +65,9 @@ describe('useArray', () => {
     expect(result.current.currentItem).toBe('second');
   });
 
-  it('handles fetch error by returning empty data', async () => {
-    const fetchFunction = vi.fn().mockRejectedValue(new Error('fail'));
+  it('handles fetch error by returning empty data and exposing error', async () => {
+    const error = new Error('fail');
+    const fetchFunction = vi.fn().mockRejectedValue(error);
 
     const { result } = renderHook(() => useArray(fetchFunction));
 
@@ -75,5 +77,42 @@ describe('useArray', () => {
 
     expect(result.current.data).toEqual([]);
     expect(result.current.hasData).toBe(false);
+    expect(result.current.error).toBe(error);
+  });
+
+  it('clears stale error before retrying', async () => {
+    let resolveSecondLoad: ((value: string[]) => void) | undefined;
+    const fetchFunction = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('fail'))
+      .mockImplementationOnce(
+        () =>
+          new Promise<string[]>((resolve) => {
+            resolveSecondLoad = resolve;
+          }),
+      );
+
+    const { result } = renderHook(() => useArray(fetchFunction));
+
+    await waitFor(() => {
+      expect(result.current.error).toBeTruthy();
+    });
+
+    act(() => {
+      result.current.reload();
+    });
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(true);
+    });
+    expect(result.current.error).toBeNull();
+
+    act(() => {
+      resolveSecondLoad?.(['ok']);
+    });
+
+    await waitFor(() => {
+      expect(result.current.data).toEqual(['ok']);
+    });
   });
 });

@@ -71,6 +71,10 @@ const config = {
     duration: 5000, // Duration in milliseconds for which the toast is visible
   },
 
+  loading: {
+    dataStateDelayMs: 1000, // Delay before showing loading indicator for data views
+  },
+
   buttons: {
     minLoadingTime: 400, // Minimum loading time for loading buttons in milliseconds
     loadingMessageDelay: 300, // Delay before showing loading message in milliseconds

@@ -28,36 +28,64 @@ export function useNewGrammarPracticeDeck(userId: string | null) {
   const [nextWaveQueue, setNextWaveQueue] = useState<UserItemPractice[]>([]);
   const [isComplete, setIsComplete] = useState(false);
   const [revealed, setRevealed] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<unknown | null>(null);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      setLoading(false);
+      setError(null);
+      return;
+    }
 
     let isMounted = true;
     const load = async () => {
-      const nextBlock = await UserBlock.getFirstUnlockedGrammarBlock(userId);
-      if (nextBlock == null) {
-        if (isMounted) setBlock(null);
-        return;
+      setLoading(true);
+      setError(null);
+      try {
+        const nextBlock = await UserBlock.getFirstUnlockedGrammarBlock(userId);
+        if (nextBlock == null) {
+          if (isMounted) {
+            setBlock(null);
+            setItems([]);
+            setGrammar(null);
+            setCurrentQueue([]);
+            setNextWaveQueue([]);
+          }
+          return;
+        }
+
+        const blockItems = (await UserItem.getByBlockId(userId, nextBlock.block_id)).map(
+          (item): UserItemPractice => ({
+            ...item,
+            show_new_grammar_indicator: false,
+          }),
+        );
+        const grammarData =
+          nextBlock.grammar_id == null ? null : await Grammar.getById(nextBlock.grammar_id);
+        if (!isMounted) return;
+
+        setBlock(nextBlock);
+        setItems(blockItems);
+        setGrammar(grammarData);
+        setRound(0);
+        setCurrentQueue(blockItems);
+        setNextWaveQueue([]);
+        setIsComplete(false);
+        setRevealed(false);
+      } catch (err) {
+        if (!isMounted) return;
+        setError(err);
+        setBlock(null);
+        setItems([]);
+        setGrammar(null);
+        setCurrentQueue([]);
+        setNextWaveQueue([]);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-
-      const blockItems = (await UserItem.getByBlockId(userId, nextBlock.block_id)).map(
-        (item): UserItemPractice => ({
-          ...item,
-          show_new_grammar_indicator: false,
-        }),
-      );
-      const grammarData =
-        nextBlock.grammar_id == null ? null : await Grammar.getById(nextBlock.grammar_id);
-      if (!isMounted) return;
-
-      setBlock(nextBlock);
-      setItems(blockItems);
-      setGrammar(grammarData);
-      setRound(0);
-      setCurrentQueue(blockItems);
-      setNextWaveQueue([]);
-      setIsComplete(false);
-      setRevealed(false);
     };
 
     void load();
@@ -253,6 +281,8 @@ export function useNewGrammarPracticeDeck(userId: string | null) {
     block,
     grammar,
     isComplete,
+    loading,
+    error,
     currentItem,
     noteId: currentItem?.note_id ?? null,
     grammarId: currentItem?.grammar_id ?? null,

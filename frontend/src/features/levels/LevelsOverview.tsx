@@ -10,6 +10,8 @@ import MasteredToggleButton from '@/features/progress/MasteredToggleButton';
 import BlockBar from '@/components/UI/BlockBar';
 import { DataState } from '@/components/UI/DataState';
 import OverviewCard from '@/components/UI/OverviewCard';
+import { useToastStore } from '../toast/use-toast-store';
+import { useEffect } from 'react';
 
 /**
  * LevelsOverview component
@@ -22,7 +24,15 @@ export default function LevelsOverview() {
   const showMastered = useLevelsStore((state) => state.showMastered);
   const setShowMastered = useLevelsStore((state) => state.setShowMastered);
   const levels = useUserStore((state) => state.levels);
+  const levelsLoading = useUserStore((state) => state.levelsLoading);
+  const levelsError = useUserStore((state) => state.levelsError);
+  const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!levelsError) return;
+    showToast(TEXTS.loadingError, 'error');
+  }, [levelsError, showToast]);
 
   const handleLevelClick = (index: number) => {
     setUnpackedIndex(unpackedIndex === index ? null : index);
@@ -32,7 +42,11 @@ export default function LevelsOverview() {
 
   return (
     <OverviewCard onClose={() => navigate('/profile')} buttonTitle={TEXTS.levelsOverview}>
-      <DataState loading={false} hasData={levels.length > 0} noDataMessage={TEXTS.notAvailable}>
+      <DataState
+        loading={levelsLoading}
+        hasData={levels.length > 0}
+        noDataMessage={TEXTS.notAvailable}
+      >
         {levels.map((level, index) => (
           <div key={level.id} className="flex flex-col gap-1">
             <ListButton

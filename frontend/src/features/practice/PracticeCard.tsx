@@ -7,6 +7,10 @@ import { usePracticeDeck } from './hooks/use-practice-deck';
 import type { ReviewPracticeMode } from '@/types/user-item.types';
 import PracticeSessionCard from './PracticeSessionCard';
 import { TEXTS } from '@/locales/cs';
+import { DataState } from '@/components/UI/DataState';
+import { useToastStore } from '../toast/use-toast-store';
+import { reportError } from '../logging/monitoring-handler';
+import { useEffect } from 'react';
 
 type PracticeCardProps = Readonly<{
   mode?: ReviewPracticeMode;
@@ -19,6 +23,7 @@ type PracticeCardProps = Readonly<{
  */
 export default function PracticeCard({ mode = 'vocabulary' }: PracticeCardProps) {
   const userId = useAuthStore((state) => state.userId);
+  const showToast = useToastStore((state) => state.showToast);
   const {
     currentItem,
     noteId,
@@ -38,7 +43,19 @@ export default function PracticeCard({ mode = 'vocabulary' }: PracticeCardProps)
     audioError,
     playAudio,
     audioLoading,
+    loading,
+    error,
   } = usePracticeDeck(userId, mode);
+
+  useEffect(() => {
+    if (!error) return;
+    showToast(TEXTS.loadingError, 'error');
+    reportError('Failed to fetch practice deck', error);
+  }, [error, showToast]);
+
+  if (loading && !currentItem) {
+    return <DataState loading hasData={false} noDataMessage={TEXTS.nothingToPractice} />;
+  }
 
   if (!currentItem) {
     return (

@@ -1,16 +1,13 @@
-import { render, screen } from '@testing-library/react';
-import type { ReactNode } from 'react';
-import { describe, expect, it, vi } from 'vitest';
-
-vi.mock('@/components/UI/DelayedNotification', () => ({
-  default: ({ children }: { children: ReactNode }) => (
-    <div data-testid="delayed-notification">{children}</div>
-  ),
-}));
+import { act, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { DataState } from '@/components/UI/DataState';
 
 describe('DataState', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('renders children when data exists', () => {
     render(
       <DataState loading={false} hasData>
@@ -28,10 +25,12 @@ describe('DataState', () => {
       </DataState>,
     );
 
-    expect(screen.getByTestId('delayed-notification').textContent).toContain('Nic tu neni');
+    expect(screen.getByText('Nic tu neni')).toBeTruthy();
   });
 
-  it('renders nothing when loading and no data yet', () => {
+  it('renders loading circle after the configured delay when loading and no data yet', () => {
+    vi.useFakeTimers();
+
     const { container } = render(
       <DataState loading hasData={false}>
         <div>DATA</div>
@@ -39,5 +38,11 @@ describe('DataState', () => {
     );
 
     expect(container.firstChild).toBeNull();
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    expect(screen.getByRole('status')).toBeTruthy();
   });
 });

@@ -7,7 +7,7 @@ import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { useArray } from '@/hooks/use-array';
 import { TEXTS } from '@/locales/cs';
 import type { UserItemLocal } from '@/types/user-item.types';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import UserBlock from '@/database/models/user-blocks';
 import { useFetch } from '@/hooks/use-fetch';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -39,34 +39,39 @@ export default function BlockItemsOverview() {
 
   const fetchBlock = useCallback(async (): Promise<UserBlockType | null> => {
     if (!userId || !blockId) return null;
-    try {
-      return await UserBlock.getByBlockId(userId, blockId);
-    } catch (err) {
-      showToast(TEXTS.loadingError, 'error');
-      reportError('Failed to fetch block details', err);
-      throw err;
-    }
-  }, [userId, blockId, showToast]);
+    return UserBlock.getByBlockId(userId, blockId);
+  }, [userId, blockId]);
 
-  const { data: block, loading: blockLoading } = useFetch<UserBlockType>(fetchBlock);
+  const {
+    data: block,
+    loading: blockLoading,
+    error: blockError,
+  } = useFetch<UserBlockType>(fetchBlock);
 
   // -- Items management --
   const fetchBlockItems = useCallback(async () => {
     if (!userId || !blockId) return [];
-    try {
-      return await UserItem.getByBlockId(userId, blockId);
-    } catch (err) {
-      showToast(TEXTS.loadingError, 'error');
-      reportError('Failed to fetch block items', err);
-      return [];
-    }
+    return UserItem.getByBlockId(userId, blockId);
   }, [userId, blockId]);
 
   const {
     data: items,
     loading: itemsLoading,
     hasData: hasItems,
+    error: itemsError,
   } = useArray<UserItemLocal>(fetchBlockItems);
+
+  useEffect(() => {
+    if (!blockError) return;
+    showToast(TEXTS.loadingError, 'error');
+    reportError('Failed to fetch block details', blockError);
+  }, [blockError, showToast]);
+
+  useEffect(() => {
+    if (!itemsError) return;
+    showToast(TEXTS.loadingError, 'error');
+    reportError('Failed to fetch block items', itemsError);
+  }, [itemsError, showToast]);
 
   const itemAudios = useMemo(
     () => items.map((item) => item.audio).filter((audio): audio is string => Boolean(audio)),

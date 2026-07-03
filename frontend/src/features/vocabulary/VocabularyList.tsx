@@ -17,6 +17,7 @@ const DIRECTION_OPTIONS: { value: DisplayField; label: string }[] = [
 
 type VocabularyListProps = Readonly<{
   filteredWords: UserItemLocal[];
+  loading: boolean;
   visibleCount: number;
   displayField: DisplayField;
   searchTerm: string;
@@ -46,6 +47,7 @@ type VocabularyListProps = Readonly<{
 
 export default function VocabularyList({
   filteredWords,
+  loading,
   visibleCount,
   displayField,
   searchTerm,
@@ -90,7 +92,7 @@ export default function VocabularyList({
           </button>
         )}
       </div>
-      <DataState loading={false} hasData={hasWords} noDataMessage={TEXTS.noStartedVocabulary}>
+      <DataState loading={loading} hasData={hasWords} noDataMessage={TEXTS.noStartedVocabulary}>
         {visibleItems.map((item, index) => (
           <ListButton
             key={item.item_id}

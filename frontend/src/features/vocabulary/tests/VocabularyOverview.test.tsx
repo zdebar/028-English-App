@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   reportError: vi.fn(),
   vocab: {
     loading: false,
+    error: null as unknown | null,
     visibleCount: 2,
     setVisibleCount: vi.fn(),
     searchTerm: '',
@@ -56,6 +57,7 @@ vi.mock('@/features/vocabulary/use-vocabulary', () => ({
 
     return {
       loading: mocks.vocab.loading,
+      error: mocks.vocab.error,
       reload: mocks.reload,
       visibleCount: mocks.vocab.visibleCount,
       setVisibleCount: (v: number) => mocks.vocab.setVisibleCount(v),
@@ -91,14 +93,16 @@ vi.mock('@/components/UI/DelayedNotification', () => ({
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
     loadingMessage: 'Loading',
+    loadingError: 'Loading error',
     resetProgressSuccessToast: 'Reset success',
     resetProgressErrorToast: 'Reset error',
   },
 }));
 
 vi.mock('@/features/vocabulary/VocabularyList', () => ({
-  default: ({ filteredWords, onSelect, onClose }: any) => (
+  default: ({ filteredWords, loading, onSelect, onClose }: any) => (
     <div>
+      {loading && <div>Loading</div>}
       <div data-testid="list-size">{filteredWords.length}</div>
       <button data-testid="select-first" onClick={() => onSelect(0)}>
         select
@@ -132,6 +136,7 @@ describe('VocabularyOverview', () => {
     localStorage.clear();
     mocks.userId = 'u1';
     mocks.vocab.loading = false;
+    mocks.vocab.error = null;
     mocks.vocab.visibleCount = 2;
     mocks.vocab.searchTerm = '';
     mocks.vocab.displayField = 'english';

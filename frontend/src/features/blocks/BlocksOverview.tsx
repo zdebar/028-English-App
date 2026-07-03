@@ -5,7 +5,7 @@ import type { UserBlockType } from '@/types/generic.types';
 import { useArray } from '@/hooks/use-array';
 import { ROUTES } from '@/config/routes.config';
 import { useAuthStore } from '../auth/use-auth-store';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useToastStore } from '../toast/use-toast-store';
 import { reportError } from '../logging/monitoring-handler';
 import { DataState } from '@/components/UI/DataState';
@@ -20,20 +20,21 @@ export default function BlocksOverview() {
   // Blocks management
   const fetchBlocks = useCallback(async (): Promise<UserBlockType[]> => {
     if (!userId) return [];
-    try {
-      return await UserBlock.getStartedTopicsByUserId(userId);
-    } catch (error) {
-      showToast(error instanceof Error ? error.message : String(error));
-      reportError('Failed to fetch blocks overview', error);
-      return [];
-    }
-  }, [userId, showToast]);
+    return UserBlock.getStartedTopicsByUserId(userId);
+  }, [userId]);
 
   const {
     data: blocks,
     loading: blocksLoading,
     hasData: hasBlocks,
+    error: blocksError,
   } = useArray<UserBlockType>(fetchBlocks);
+
+  useEffect(() => {
+    if (!blocksError) return;
+    showToast(TEXTS.loadingError, 'error');
+    reportError('Failed to fetch blocks overview', blocksError);
+  }, [blocksError, showToast]);
 
   return (
     <OverviewCard buttonTitle={TEXTS.blocksOverview} onClose={() => navigate(ROUTES.profile)}>

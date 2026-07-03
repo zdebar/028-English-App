@@ -7,7 +7,11 @@ import { reportError } from '../logging/monitoring-handler';
 
 interface UserState {
   levels: LevelOverviewType[];
+  levelsLoading: boolean;
+  levelsError: unknown | null;
   dailyCount: number;
+  dailyCountLoading: boolean;
+  dailyCountError: unknown | null;
   showMasteredDashboard: boolean;
   setMasteredDashboard: (value: boolean) => void;
   reloadLevels: (userId: string) => Promise<void>;
@@ -63,36 +67,42 @@ export const useUserStore = create<UserState>((set, get) => {
   }
   const store: UserState = {
     levels: initialLevels,
+    levelsLoading: false,
+    levelsError: null,
     dailyCount: initialDailyStats,
+    dailyCountLoading: false,
+    dailyCountError: null,
     showMasteredDashboard: false,
     setMasteredDashboard: (value: boolean) => {
       set({ showMasteredDashboard: value });
     },
     reloadLevels: async (userId: string) => {
+      set({ levelsLoading: true, levelsError: null });
       try {
         assertNonEmptyString(userId, 'userId');
         const updatedLevels = (await Levels.getOverview(userId)) ?? [];
-        set({ levels: updatedLevels });
+        set({ levels: updatedLevels, levelsLoading: false });
       } catch (error) {
-        set({ levels: initialLevels });
+        set({ levels: initialLevels, levelsLoading: false, levelsError: error });
         reportError('Error reloading levels', error);
       }
     },
     reloadDailyCount: async (userId: string) => {
+      set({ dailyCountLoading: true, dailyCountError: null });
       try {
         assertNonEmptyString(userId, 'userId');
         const updatedCount = (await UserScoreType.getOrCreateTodayScore(userId)) ?? 0;
-        set({ dailyCount: updatedCount });
+        set({ dailyCount: updatedCount, dailyCountLoading: false });
       } catch (error) {
-        set({ dailyCount: initialDailyStats });
+        set({ dailyCount: initialDailyStats, dailyCountLoading: false, dailyCountError: error });
         reportError('Error reloading daily count', error);
       }
     },
     clearLevels: () => {
-      set({ levels: initialLevels });
+      set({ levels: initialLevels, levelsLoading: false, levelsError: null });
     },
     clearDailyCount: () => {
-      set({ dailyCount: initialDailyStats });
+      set({ dailyCount: initialDailyStats, dailyCountLoading: false, dailyCountError: null });
     },
   };
   return store;

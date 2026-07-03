@@ -30,7 +30,12 @@ export function usePracticeDeck(userId: string | null, mode: ReviewPracticeMode 
     return data.filter((item) => item != null);
   }, [mode, userId]);
 
-  const { data: fetchedArray, reload } = useFetch<UserItemPractice[]>(fetchPracticeDeck);
+  const {
+    data: fetchedArray,
+    loading,
+    error,
+    reload,
+  } = useFetch<UserItemPractice[]>(fetchPracticeDeck);
 
   const { czechHinted, englishHinted, resetHint, plusHint } = useHint(
     currentItem?.czech,
@@ -230,6 +235,8 @@ export function usePracticeDeck(userId: string | null, mode: ReviewPracticeMode 
 
     // Navigation & loading
     nextItem,
+    loading,
+    error,
 
     // Audio management
     audioError,

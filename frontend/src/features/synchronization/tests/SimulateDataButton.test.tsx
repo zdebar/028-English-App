@@ -93,7 +93,9 @@ describe('SimulateDataButton', () => {
       expect(mocks.showToast).toHaveBeenCalledWith('Data byla úspěšně simulována.', 'success');
     });
 
-    expect(localStorage.getItem('simulate-data-u1')).toBe(JSON.stringify(true));
+    await waitFor(() => {
+      expect(localStorage.getItem('simulate-data-u1')).toBe(JSON.stringify(true));
+    });
   });
 
   it('shows error toast and logs error when simulateData fails', async () => {
