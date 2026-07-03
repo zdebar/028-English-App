@@ -12,8 +12,11 @@
   .color-button {
     @apply bg-button-light border-button-light;
     @apply dark:bg-button-dark dark:border-button-dark;
-    @apply hover:brightness-103 hover:saturate-98 dark:hover:brightness-112;
-    @apply disabled:bg-inherit disabled:hover:bg-inherit disabled:text-disabled-light dark:disabled:text-disabled-dark;
+    @apply disabled:bg-inherit disabled:text-disabled-light dark:disabled:text-disabled-dark;
+  }
+
+  .color-button:not(:disabled):hover {
+    @apply brightness-103 saturate-98 dark:brightness-112;
   }
 
   .color-button.preserve-disabled-text-color:disabled {
