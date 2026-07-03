@@ -27,7 +27,7 @@ export default function ThemeSwitch(): JSX.Element {
     <button
       aria-label={themeLabel}
       onClick={handleChange}
-      className="size-button flex cursor-pointer items-center justify-center rounded-full"
+      className="size-button flex cursor-pointer items-center justify-center rounded-full hover:bg-button-hover hover:text-light focus-visible:outline-none focus-visible:bg-button-hover focus-visible:text-light"
       title={themeLabel}
     >
       {theme === 'light' ? <SunIcon /> : <MoonIcon />}

@@ -50,6 +50,8 @@ describe('ThemeSwitch', () => {
 
     const button = screen.getByRole('button', { name: 'Light mode' });
     expect(screen.getByTestId('sun-icon')).toBeTruthy();
+    expect(button.className).toContain('hover:bg-button-hover');
+    expect(button.className).toContain('focus-visible:bg-button-hover');
 
     fireEvent.click(button);
 

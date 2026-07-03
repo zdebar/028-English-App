@@ -16,7 +16,7 @@ export default function SecondaryControlButton({
   ...rest
 }: SecondaryControlButtonProps): JSX.Element {
   const buttonClassName = [
-    'secondary-control relative flex cursor-pointer items-center justify-center disabled:cursor-default disabled:text-disabled-light dark:disabled:text-disabled-dark',
+    'secondary-control secondary-control-button relative flex cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:text-disabled-light dark:disabled:text-disabled-dark',
     className,
   ]
     .filter(Boolean)

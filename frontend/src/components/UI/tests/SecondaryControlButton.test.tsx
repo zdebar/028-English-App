@@ -23,6 +23,7 @@ describe('SecondaryControlButton', () => {
 
     expect(onClick).toHaveBeenCalledTimes(1);
     expect(button.className).toContain('secondary-control');
+    expect(button.className).toContain('secondary-control-button');
     expect(button.className).toContain('custom-class');
     expect(button.className).toContain('disabled:text-disabled-light');
   });
