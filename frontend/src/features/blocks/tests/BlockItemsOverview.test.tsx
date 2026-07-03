@@ -117,6 +117,7 @@ vi.mock('@/components/UI/OverviewCard', () => ({
       </button>
       <button
         data-testid="reset-button"
+        disabled={!handleReset}
         onClick={() => {
           handleReset?.();
         }}
@@ -155,7 +156,7 @@ describe('BlockItemsOverview', () => {
     mocks.blockId = '2';
     mocks.state.items = [];
     mocks.state.itemsLoading = false;
-    mocks.state.block = { block_id: 2, name: 'Block 2' };
+    mocks.state.block = { block_id: 2, name: 'Block 2', is_practice_block: true };
     mocks.state.blockLoading = false;
     mocks.playAudio.mockReset();
     mocks.playAudio.mockResolvedValue(true);
@@ -287,6 +288,14 @@ describe('BlockItemsOverview', () => {
       expect(mocks.reportInfo).toHaveBeenCalledWith('Reset 3 items in block 2 for user u1');
       expect(mocks.showToast).toHaveBeenCalledWith('Reset success', 'success');
     });
+  });
+
+  it('disables reset for browse-only blocks', () => {
+    mocks.state.block = { block_id: 2, name: 'Letters', is_practice_block: false };
+
+    render(<BlockItemsOverview />);
+
+    expect((screen.getByTestId('reset-button') as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('shows toast and logs error when reset fails', async () => {

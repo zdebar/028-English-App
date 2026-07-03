@@ -41,6 +41,7 @@ function convertAPIToLocal(block: UserBlockAPI): UserBlockType {
     ...block,
     is_vocabulary: block.is_vocabulary,
     show_in_topics: block.show_in_topics ?? true,
+    is_practice_block: block.is_practice_block ?? true,
     started_at: block.started_at ?? NULL_DATE,
     next_at: block.next_at ?? NULL_DATE,
     mastered_at: block.mastered_at ?? NULL_DATE,
@@ -71,6 +72,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
   progress!: number;
   is_vocabulary!: boolean;
   show_in_topics!: boolean;
+  is_practice_block!: boolean;
   started_at!: string;
   updated_at!: string;
   next_at!: string;
@@ -97,7 +99,8 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
       .filter(
         (block) =>
           block.show_in_topics !== false &&
-          ((!block.is_vocabulary && block.started_at !== NULL_DATE) ||
+          (block.is_practice_block === false ||
+            (!block.is_vocabulary && block.started_at !== NULL_DATE) ||
             (block.is_vocabulary && startedBlockIdSet.has(block.block_id))),
       )
       .sort((left, right) => left.sort_order - right.sort_order);
@@ -117,7 +120,10 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
       .equals(userId)
       .filter(
         (block) =>
-          !block.is_vocabulary && block.started_at !== NULL_DATE && block.mastered_at === NULL_DATE,
+          block.is_practice_block !== false &&
+          !block.is_vocabulary &&
+          block.started_at !== NULL_DATE &&
+          block.mastered_at === NULL_DATE,
       )
       .toArray();
 
@@ -131,7 +137,12 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     const blocks = await db.user_blocks
       .where('user_id')
       .equals(userId)
-      .filter((block) => !block.is_vocabulary && block.started_at === NULL_DATE)
+      .filter(
+        (block) =>
+          block.is_practice_block !== false &&
+          !block.is_vocabulary &&
+          block.started_at === NULL_DATE,
+      )
       .toArray();
 
     const sortedBlocks = [...blocks].sort(compareGrammarBlocks);
@@ -147,10 +158,10 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
 
     const nowMs = Date.now();
     const grammarItems = await db.user_items
-      .where('[user_id+is_vocabulary+next_at+mastered_at+sort_order]')
+      .where('[user_id+is_practice_item+is_vocabulary+next_at+mastered_at+sort_order]')
       .between(
-        [userId, 0, Dexie.minKey, NULL_DATE, Dexie.minKey],
-        [userId, 0, NULL_DATE, NULL_DATE, Dexie.maxKey],
+        [userId, 1, 0, Dexie.minKey, NULL_DATE, Dexie.minKey],
+        [userId, 1, 0, NULL_DATE, NULL_DATE, Dexie.maxKey],
         true,
         false,
       )
@@ -322,7 +333,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     const grammarBlocks = await db.user_blocks
       .where('user_id')
       .equals(userId)
-      .filter((candidate) => !candidate.is_vocabulary)
+      .filter((candidate) => candidate.is_practice_block !== false && !candidate.is_vocabulary)
       .toArray();
 
     const sortedBlocks = [...grammarBlocks].sort(compareGrammarBlocks);

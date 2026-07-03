@@ -98,13 +98,15 @@ export default function BlockItemsOverview() {
     navigate(ROUTES.blocks);
   }, [navigate]);
 
+  const resetHandler = block?.is_practice_block === false ? undefined : handleReset;
+
   return (
     <OverviewCard
       buttonTitle={block?.name}
       modalTitle={TEXTS.resetBlockTitle}
       modalText={TEXTS.resetBlockDescription}
       loading={blockLoading}
-      handleReset={handleReset}
+      handleReset={resetHandler}
       onClose={onClose}
     >
       <DataState loading={itemsLoading} hasData={hasItems} noDataMessage={TEXTS.noBlockItems}>

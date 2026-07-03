@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
   getStartedTopicsByUserId: vi.fn(),
   userId: 'u1' as string | null,
   state: {
-    data: [] as Array<{ block_id: number; name: string }>,
+    data: [] as Array<{ block_id: number; name: string; is_practice_block?: boolean }>,
     error: null as string | null,
     loading: false,
   },
@@ -111,6 +111,14 @@ describe('BlocksOverview', () => {
 
     fireEvent.click(buttons[1]);
     expect(mocks.navigate).toHaveBeenCalledWith('/blocks/2');
+  });
+
+  it('renders browse-only blocks returned by topic query', () => {
+    mocks.state.data = [{ block_id: 3, name: 'Letters', is_practice_block: false }];
+
+    render(<BlocksOverview />);
+
+    expect(screen.getByText('Letters')).toBeTruthy();
   });
 
   it('navigates to profile on close', () => {

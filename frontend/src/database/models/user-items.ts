@@ -33,6 +33,7 @@ const SIM_COUNT = config.progress.simulationCount;
 type UserItemAPI = Omit<
   UserItemLocal,
   | 'is_vocabulary'
+  | 'is_practice_item'
   | 'block_id'
   | 'grammar_id'
   | 'started_at'
@@ -41,6 +42,7 @@ type UserItemAPI = Omit<
   | 'mastered_at'
 > & {
   is_vocabulary: boolean;
+  is_practice_item?: boolean;
   block_id: number | null;
   grammar_id: number | null;
   started_at: string | null;
@@ -79,6 +81,7 @@ function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
   return {
     ...apiItem,
     is_vocabulary: apiItem.is_vocabulary ? 1 : 0,
+    is_practice_item: apiItem.is_practice_item !== false ? 1 : 0,
     started_at: apiItem.started_at ?? NULL_DATE,
     next_at: apiItem.next_at ?? NULL_DATE,
     mastered_at: apiItem.mastered_at ?? NULL_DATE,
@@ -114,6 +117,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   pronunciation!: string;
   audio!: string | null;
   is_vocabulary!: 0 | 1; // boolean represented as 0 or 1
+  is_practice_item!: 0 | 1; // boolean represented as 0 or 1
   sort_order!: number;
   note_id!: number;
   block_id!: number;
@@ -199,7 +203,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param userId - The unique identifier of the user
    */
   static async getByUserId(userId: string): Promise<UserItemLocal[]> {
-    return await db.user_items.where('user_id').equals(userId).toArray();
+    return (await db.user_items.where('user_id').equals(userId).toArray()).filter(
+      isPracticeItem,
+    );
   }
 
   /**
@@ -248,10 +254,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     lessonId: number,
   ): Promise<boolean> {
     const vocabularyItems = await db.user_items
-      .where('[user_id+lesson_id+is_vocabulary+started_at]')
+      .where('[user_id+lesson_id+is_practice_item+is_vocabulary+started_at]')
       .between(
-        [userId, lessonId, 1, Dexie.minKey],
-        [userId, lessonId, 1, Dexie.maxKey],
+        [userId, lessonId, 1, 1, Dexie.minKey],
+        [userId, lessonId, 1, 1, Dexie.maxKey],
         true,
         true,
       )
@@ -268,7 +274,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const startedItems = await db.user_items
       .where('[user_id+started_at]')
       .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
-      .filter((item) => item.grammar_id !== NULL_NUMBER)
+      .filter((item) => isPracticeItem(item) && item.grammar_id !== NULL_NUMBER)
       .toArray();
 
     return [...new Set(startedItems.map((item) => item.grammar_id))];
@@ -282,7 +288,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const startedItems = await db.user_items
       .where('[user_id+started_at]')
       .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
-      .filter((item) => item.block_id !== NULL_NUMBER)
+      .filter((item) => isPracticeItem(item) && item.block_id !== NULL_NUMBER)
       .toArray();
 
     return [...new Set(startedItems.map((item) => item.block_id))];
@@ -294,8 +300,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    */
   static async getStartedVocabulary(userId: string): Promise<UserItemLocal[]> {
     const result = await db.user_items
-      .where('[user_id+is_vocabulary+started_at]')
-      .between([userId, 1, Dexie.minKey], [userId, 1, NULL_DATE], true, false)
+      .where('[user_id+is_practice_item+is_vocabulary+started_at]')
+      .between([userId, 1, 1, Dexie.minKey], [userId, 1, 1, NULL_DATE], true, false)
       .toArray();
     return result;
   }
@@ -308,10 +314,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const nowIso = new Date(Date.now()).toISOString();
 
     const readyStartedItems = await db.user_items
-      .where('[user_id+is_vocabulary+next_at+mastered_at+sort_order]')
+      .where('[user_id+is_practice_item+is_vocabulary+next_at+mastered_at+sort_order]')
       .between(
-        [userId, 1, Dexie.minKey, NULL_DATE, Dexie.minKey],
-        [userId, 1, nowIso, NULL_DATE, Dexie.maxKey],
+        [userId, 1, 1, Dexie.minKey, NULL_DATE, Dexie.minKey],
+        [userId, 1, 1, nowIso, NULL_DATE, Dexie.maxKey],
         true,
         false,
       )
@@ -325,10 +331,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
     const notStartedLimit = overflowLimit - readyStartedItems.length;
     const notStartedItems = await db.user_items
-      .where('[user_id+is_vocabulary+next_at+mastered_at+sort_order]')
+      .where('[user_id+is_practice_item+is_vocabulary+next_at+mastered_at+sort_order]')
       .between(
-        [userId, 1, NULL_DATE, NULL_DATE, Dexie.minKey],
-        [userId, 1, NULL_DATE, NULL_DATE, Dexie.maxKey],
+        [userId, 1, 1, NULL_DATE, NULL_DATE, Dexie.minKey],
+        [userId, 1, 1, NULL_DATE, NULL_DATE, Dexie.maxKey],
         true,
         true,
       )
@@ -346,10 +352,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     }
 
     const futureItems = await db.user_items
-      .where('[user_id+is_vocabulary+next_at+mastered_at+sort_order]')
+      .where('[user_id+is_practice_item+is_vocabulary+next_at+mastered_at+sort_order]')
       .between(
-        [userId, 1, nowIso, NULL_DATE, Dexie.minKey],
-        [userId, 1, NULL_DATE, NULL_DATE, Dexie.maxKey],
+        [userId, 1, 1, nowIso, NULL_DATE, Dexie.minKey],
+        [userId, 1, 1, NULL_DATE, NULL_DATE, Dexie.maxKey],
         false,
         false,
       )
@@ -563,14 +569,18 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const maxNextAt = isNew ? NULL_DATE : new Date().toISOString();
     const isVocabulary = mode === 'vocabulary' ? 1 : 0;
     return db.user_items
-      .where('[user_id+is_vocabulary+next_at+mastered_at+sort_order]')
+      .where('[user_id+is_practice_item+is_vocabulary+next_at+mastered_at+sort_order]')
       .between(
-        [userId, isVocabulary, minNextAt, NULL_DATE, Dexie.minKey],
-        [userId, isVocabulary, maxNextAt, NULL_DATE, Dexie.maxKey],
+        [userId, 1, isVocabulary, minNextAt, NULL_DATE, Dexie.minKey],
+        [userId, 1, isVocabulary, maxNextAt, NULL_DATE, Dexie.maxKey],
         true,
         false,
       )
-      .filter((item) => item.mastered_at === NULL_DATE && (item.progress % 2 === 1) === isOdd)
+      .filter(
+        (item) =>
+          item.mastered_at === NULL_DATE &&
+          (item.progress % 2 === 1) === isOdd,
+      )
       .limit(limit)
       .toArray();
   }
@@ -600,4 +610,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
           : item.mastered_at,
     };
   }
+}
+
+function isPracticeItem(item: Pick<UserItemLocal, 'is_practice_item'>): boolean {
+  return item.is_practice_item !== 0;
 }

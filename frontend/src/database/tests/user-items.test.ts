@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   blockEqualsToArray: vi.fn(),
   itemIdModify: vi.fn(),
   itemIdBetweenModify: vi.fn(),
+  userEqualsToArray: vi.fn(),
   indexedBetween: vi.fn(),
   indexedFilter: vi.fn(),
   indexedLimit: vi.fn(),
@@ -54,6 +55,7 @@ vi.mock('@/database/models/db', () => ({
           return {
             equals: () => ({
               delete: (...args: unknown[]) => mocks.equalsDelete(...args),
+              toArray: (...args: unknown[]) => mocks.userEqualsToArray(...args),
             }),
           };
         }
@@ -74,7 +76,7 @@ vi.mock('@/database/models/db', () => ({
             }),
           };
         }
-        if (field === '[user_id+is_vocabulary+next_at+mastered_at+sort_order]') {
+        if (field === '[user_id+is_practice_item+is_vocabulary+next_at+mastered_at+sort_order]') {
           return {
             between: (...args: unknown[]) => {
               mocks.indexedBetween(...args);
@@ -92,6 +94,16 @@ vi.mock('@/database/models/db', () => ({
                     toArray: (...toArrayArgs: unknown[]) => mocks.indexedToArray(...toArrayArgs),
                   };
                 },
+              };
+            },
+          };
+        }
+        if (field === '[user_id+is_practice_item+is_vocabulary+started_at]') {
+          return {
+            between: (...args: unknown[]) => {
+              mocks.indexedBetween(...args);
+              return {
+                toArray: (...toArrayArgs: unknown[]) => mocks.indexedToArray(...toArrayArgs),
               };
             },
           };
@@ -162,6 +174,7 @@ describe('UserItem', () => {
       newSyncedAt: '2026-03-04T00:00:00.000Z',
     });
     mocks.equalsDelete.mockResolvedValue(0);
+    mocks.userEqualsToArray.mockResolvedValue([]);
     mocks.blockEqualsToArray.mockResolvedValue([]);
     mocks.indexedToArray.mockResolvedValue([]);
     mocks.updatedBetweenToArray.mockResolvedValue([]);
@@ -230,6 +243,18 @@ describe('UserItem', () => {
     await UserItem.deleteByUserId('u1');
 
     expect(mocks.equalsDelete).toHaveBeenCalled();
+  });
+
+  it('getByUserId returns only practice items for user stats', async () => {
+    mocks.userEqualsToArray.mockResolvedValueOnce([
+      { item_id: 1, is_practice_item: 1 },
+      { item_id: 2, is_practice_item: 0 },
+      { item_id: 3 },
+    ]);
+
+    const result = await UserItem.getByUserId('u1');
+
+    expect(result.map((item) => item.item_id)).toEqual([1, 3]);
   });
 
   it('getByBlockId returns block items ordered by sort_order', async () => {
@@ -308,15 +333,15 @@ describe('UserItem', () => {
 
     expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
       1,
-      ['u1', 1, expect.anything(), '1970-01-01T00:00:00.000Z', expect.anything()],
-      ['u1', 1, '2026-06-24T12:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', 1, 1, expect.anything(), '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', 1, 1, '2026-06-24T12:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
       true,
       false,
     );
     expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
       2,
-      ['u1', 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
-      ['u1', 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', 1, 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', 1, 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
       true,
       true,
     );
@@ -364,8 +389,8 @@ describe('UserItem', () => {
 
     expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
       3,
-      ['u1', 1, '2026-06-24T12:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
-      ['u1', 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', 1, 1, '2026-06-24T12:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', 1, 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
       false,
       false,
     );
@@ -432,6 +457,7 @@ describe('UserItem', () => {
           pronunciation: 'two',
           audio: null,
           is_vocabulary: true,
+          is_practice_item: false,
           sort_order: 2,
           note_id: null,
           block_id: null,
@@ -477,6 +503,7 @@ describe('UserItem', () => {
       expect.objectContaining({
         item_id: 2,
         is_vocabulary: 1,
+        is_practice_item: 0,
         block_id: 0,
         grammar_id: 0,
         started_at: '1970-01-01T00:00:00.000Z',

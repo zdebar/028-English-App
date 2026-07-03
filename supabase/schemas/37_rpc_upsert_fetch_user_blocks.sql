@@ -14,6 +14,7 @@ RETURNS TABLE (
   progress INTEGER,
   is_vocabulary BOOLEAN,
   show_in_topics BOOLEAN,
+  is_practice_block BOOLEAN,
   started_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ,
   next_at TIMESTAMPTZ,
