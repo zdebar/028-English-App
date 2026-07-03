@@ -187,7 +187,13 @@ describe('LevelsOverview', () => {
     fireEvent.click(screen.getByText('A1'));
     expect(mocks.goalMetCalls.some((x) => x.current === 3 && x.goal === 5)).toBe(true);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Started' }));
+    const toggleButton = screen.getByRole('button', { name: 'Started' });
+    expect(toggleButton.className).toContain('mastered-toggle-button');
+    expect(toggleButton.className).toContain('h-button');
+    expect(toggleButton.className).toContain('rounded-full');
+    expect(toggleButton.className).toContain('px-4');
+
+    fireEvent.click(toggleButton);
     expect(screen.getByRole('button', { name: 'Mastered' })).toBeTruthy();
     expect(mocks.goalMetCalls.some((x) => x.current === 1 && x.goal === 5)).toBe(true);
   });

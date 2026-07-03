@@ -26,8 +26,8 @@
 
 .pos-mastered-toggle {
   position: absolute;
-  bottom: -36px;
-  left: 16px;
+  bottom: calc(-1 * var(--height-button));
+  left: 0;
 }
 
 .help-btn-margin {
@@ -68,8 +68,8 @@
     flex-direction: column-reverse;
   }
   .pos-mastered-toggle {
-    bottom: -36px;
-    left: 16px;
+    bottom: calc(-1 * var(--height-button));
+    left: 0;
   }
   .help-btn-margin {
     margin-bottom: 0px;

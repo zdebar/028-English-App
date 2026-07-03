@@ -23,7 +23,7 @@ export default function MasteredToggleButton({
     <>
       <button
         type="button"
-        className={`cursor-pointer ${rest.className ?? ''}`}
+        className={`mastered-toggle-button h-button inline-flex cursor-pointer items-center justify-center rounded-full px-4 ${rest.className ?? ''}`}
         onClick={() => setShowMastered(!showMastered)}
         title={TEXTS.masteredSwitchHelp}
       >

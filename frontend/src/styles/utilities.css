@@ -31,7 +31,8 @@
     @apply dark:text-new-progress-light text-light hover:underline;
   }
 
-  .secondary-control-button:not(:disabled):hover {
+  .secondary-control-button:not(:disabled):hover,
+  .mastered-toggle-button:not(:disabled):hover {
     @apply bg-button-light dark:bg-button-dark;
   }
 
