@@ -12,6 +12,7 @@ import { DataState } from '@/components/UI/DataState';
 import OverviewCard from '@/components/UI/OverviewCard';
 import { useToastStore } from '../toast/use-toast-store';
 import { useEffect } from 'react';
+import { useAuthStore } from '../auth/use-auth-store';
 
 /**
  * LevelsOverview component
@@ -19,10 +20,12 @@ import { useEffect } from 'react';
  * @returns The levels overview UI with list and detail card functionality.
  */
 export default function LevelsOverview() {
-  const unpackedIndex = useLevelsStore((state) => state.unpackedIndex);
-  const setUnpackedIndex = useLevelsStore((state) => state.setUnpackedIndex);
+  const unpackedLevelId = useLevelsStore((state) => state.unpackedLevelId);
+  const hydrateUnpackedLevelId = useLevelsStore((state) => state.hydrateUnpackedLevelId);
+  const setUnpackedLevelId = useLevelsStore((state) => state.setUnpackedLevelId);
   const showMastered = useLevelsStore((state) => state.showMastered);
   const setShowMastered = useLevelsStore((state) => state.setShowMastered);
+  const userId = useAuthStore((state) => state.userId);
   const levels = useUserStore((state) => state.levels);
   const levelsLoading = useUserStore((state) => state.levelsLoading);
   const levelsError = useUserStore((state) => state.levelsError);
@@ -34,8 +37,19 @@ export default function LevelsOverview() {
     showToast(TEXTS.loadingError, 'error');
   }, [levelsError, showToast]);
 
-  const handleLevelClick = (index: number) => {
-    setUnpackedIndex(unpackedIndex === index ? null : index);
+  useEffect(() => {
+    hydrateUnpackedLevelId(userId);
+  }, [hydrateUnpackedLevelId, userId]);
+
+  useEffect(() => {
+    if (levelsLoading || unpackedLevelId === null) return;
+    if (levels.some((level) => level.id === unpackedLevelId)) return;
+
+    setUnpackedLevelId(userId, null);
+  }, [levels, levelsLoading, setUnpackedLevelId, unpackedLevelId, userId]);
+
+  const handleLevelClick = (levelId: number) => {
+    setUnpackedLevelId(userId, unpackedLevelId === levelId ? null : levelId);
   };
 
   const shownLevels = showMastered ? 'masteredCount' : 'startedCount';
@@ -47,11 +61,11 @@ export default function LevelsOverview() {
         hasData={levels.length > 0}
         noDataMessage={TEXTS.notAvailable}
       >
-        {levels.map((level, index) => (
+        {levels.map((level) => (
           <div key={level.id} className="flex flex-col gap-1">
             <ListButton
               className="flex justify-start p-4 text-left"
-              onClick={() => handleLevelClick(index)}
+              onClick={() => handleLevelClick(level.id)}
               disabled={level.lessons.length === 0}
             >
               <div className="flex w-full items-center justify-between">
@@ -63,7 +77,7 @@ export default function LevelsOverview() {
                 />
               </div>
             </ListButton>
-            {unpackedIndex === index && (
+            {unpackedLevelId === level.id && (
               <div className="flex flex-col gap-1">
                 {level.lessons.map((lesson) => (
                   <BlockBar

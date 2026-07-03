@@ -4,11 +4,29 @@ import React from 'react';
 
 const mocks = vi.hoisted(() => ({
   levelsOverview: [] as any[],
+  userId: 'u1',
   navigate: vi.fn(),
   goalMetCalls: [] as Array<{ current: number; goal: number }>,
   showMasteredLevels: false,
-  unpackedIndex: null as number | null,
+  unpackedLevelId: null as number | null,
   storeListeners: new Set<() => void>(),
+  setShowMasteredLevels: vi.fn((value: boolean) => {
+    mocks.showMasteredLevels = value;
+    mocks.storeListeners.forEach((listener) => listener());
+  }),
+  hydrateUnpackedLevelId: vi.fn((userId: string | null) => {
+    const storedValue = userId ? localStorage.getItem(`levels_unpacked_level_id_${userId}`) : null;
+    mocks.unpackedLevelId = storedValue === null ? null : Number(storedValue);
+    mocks.storeListeners.forEach((listener) => listener());
+  }),
+  setUnpackedLevelId: vi.fn((userId: string | null, value: number | null) => {
+    mocks.unpackedLevelId = value;
+    if (userId && value === null) localStorage.removeItem(`levels_unpacked_level_id_${userId}`);
+    if (userId && value !== null) {
+      localStorage.setItem(`levels_unpacked_level_id_${userId}`, String(value));
+    }
+    mocks.storeListeners.forEach((listener) => listener());
+  }),
 }));
 
 vi.mock('@/locales/cs', () => ({
@@ -33,13 +51,20 @@ vi.mock('@/features/user-stats/use-user-store', () => ({
   },
 }));
 
+vi.mock('@/features/auth/use-auth-store', () => ({
+  useAuthStore: (selector: (state: { userId: string | null }) => unknown) => {
+    return selector({ userId: mocks.userId });
+  },
+}));
+
 vi.mock('@/features/levels/use-levels-store', () => ({
   useLevelsStore: (
     selector: (state: {
       showMastered: boolean;
       setShowMastered: (value: boolean) => void;
-      unpackedIndex: number | null;
-      setUnpackedIndex: (value: number | null) => void;
+      unpackedLevelId: number | null;
+      hydrateUnpackedLevelId: (userId: string | null) => void;
+      setUnpackedLevelId: (userId: string | null, value: number | null) => void;
     }) => unknown,
   ) => {
     const [, forceUpdate] = React.useReducer((x: number) => x + 1, 0);
@@ -52,15 +77,10 @@ vi.mock('@/features/levels/use-levels-store', () => ({
     }, []);
     return selector({
       showMastered: mocks.showMasteredLevels,
-      setShowMastered: (value: boolean) => {
-        mocks.showMasteredLevels = value;
-        mocks.storeListeners.forEach((listener) => listener());
-      },
-      unpackedIndex: mocks.unpackedIndex,
-      setUnpackedIndex: (value: number | null) => {
-        mocks.unpackedIndex = value;
-        mocks.storeListeners.forEach((listener) => listener());
-      },
+      setShowMastered: mocks.setShowMasteredLevels,
+      unpackedLevelId: mocks.unpackedLevelId,
+      hydrateUnpackedLevelId: mocks.hydrateUnpackedLevelId,
+      setUnpackedLevelId: mocks.setUnpackedLevelId,
     });
   },
 }));
@@ -115,9 +135,11 @@ describe('LevelsOverview', () => {
     vi.clearAllMocks();
     mocks.goalMetCalls = [];
     mocks.levelsOverview = [];
+    mocks.userId = 'u1';
     mocks.showMasteredLevels = false;
     mocks.storeListeners.clear();
-    mocks.unpackedIndex = null;
+    mocks.unpackedLevelId = null;
+    localStorage.clear();
   });
 
   it('renders not available state when levels are empty', () => {
@@ -155,9 +177,39 @@ describe('LevelsOverview', () => {
 
     fireEvent.click(screen.getByText('A1'));
     expect(screen.getByText('Lesson 1')).toBeTruthy();
+    expect(localStorage.getItem('levels_unpacked_level_id_u1')).toBe('1');
 
     fireEvent.click(screen.getByText('A1'));
     expect(screen.queryByText('Lesson 1')).toBeNull();
+    expect(localStorage.getItem('levels_unpacked_level_id_u1')).toBeNull();
+  });
+
+  it('restores unpacked lesson list by user and level id', () => {
+    localStorage.setItem('levels_unpacked_level_id_u1', '2');
+    localStorage.setItem('levels_unpacked_level_id_u2', '1');
+    mocks.levelsOverview = [
+      {
+        id: 1,
+        name: 'A1',
+        startedCount: 1,
+        masteredCount: 0,
+        totalCount: 1,
+        lessons: [{ id: 101, name: 'Lesson A1', sort_order: 1, totalCount: 1 }],
+      },
+      {
+        id: 2,
+        name: 'A2',
+        startedCount: 1,
+        masteredCount: 0,
+        totalCount: 1,
+        lessons: [{ id: 201, name: 'Lesson A2', sort_order: 1, totalCount: 1 }],
+      },
+    ];
+
+    render(<LevelsOverview />);
+
+    expect(screen.queryByText('Lesson A1')).toBeNull();
+    expect(screen.getByText('Lesson A2')).toBeTruthy();
   });
 
   it('toggles started/mastered mode and updates GoalMetView current values', () => {
