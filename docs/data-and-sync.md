@@ -27,6 +27,10 @@ UI should generally read from local models and stores, not directly from Supabas
 | Full sync decision | `dataSync` | Uses localStorage full-sync timestamp and `config.sync.fullSyncInterval`. |
 
 `usePeriodicSync` avoids overlapping syncs by reusing an in-flight promise.
+On success it sets sync status flags, increments `useSyncStore.syncRevision`,
+dispatches dashboard refresh events through model sync side effects, and then
+syncs/removes audio archive records. On failure it sets the sync error flag and
+leaves local-first reads available.
 
 ## Full Sync vs Incremental Sync
 
@@ -67,5 +71,6 @@ After sync or progress changes, code dispatches:
 - `levelsUpdated` to reload dashboard/overview progress.
 - `dailyCountUpdated` to reload or directly set today's count.
 
-Practice readiness counts on Home are not event-subscribed. They reload when
-`HomePracticeButtons` mounts and use schedule timers while mounted.
+Dashboard stats use those browser events. Home practice readiness uses local
+model reads and reloads on mount, `userId` changes, successful syncs via
+`useSyncStore.syncRevision`, and schedule timers while Home remains mounted.

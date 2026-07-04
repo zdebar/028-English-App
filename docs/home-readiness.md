@@ -7,13 +7,13 @@ practice buttons on Home.
 
 | Button | Enabled when | Badge source | Recalculated when | Auto-updates while Home is open |
 | --- | --- | --- | --- | --- |
-| Vocabulary | `UserItem.getReadyVocabularyPracticeState(userId).readyCount > 0` | Ready vocabulary count, capped by `config.practice.readyPracticeBadgeCap` | Home mount, user change, page refresh, returning to Home | Yes, using future schedule timer when count starts at `0`. |
-| New grammar | `UserBlock.getFirstUnlockedGrammarBlock(userId) != null` after unlock attempt | No badge | Home mount, user change, page refresh, returning to Home | No timer; recalculates on reload/remount. |
-| Grammar | `UserBlock.getReadyGrammarPracticeState(userId).readyCount > 0` | Ready grammar count, capped by `config.practice.readyPracticeBadgeCap` | Home mount, user change, page refresh, returning to Home | Yes, using future schedule timer when count starts at `0`. |
+| Vocabulary | `UserItem.getReadyVocabularyPracticeState(userId).readyCount > 0` | Ready vocabulary count, capped by `config.practice.readyPracticeBadgeCap` | Home mount, `userId` change, or successful sync via `useSyncStore.syncRevision` | Yes, using successful sync reloads and future schedule timers. |
+| New grammar | `UserBlock.getFirstUnlockedGrammarBlock(userId) != null` after unlock attempt | No badge | Home mount, `userId` change, or successful sync via `useSyncStore.syncRevision` | Yes for sync reloads; no future-date timer. |
+| Grammar | `UserBlock.getReadyGrammarPracticeState(userId).readyCount > 0` | Ready grammar count, capped by `config.practice.readyPracticeBadgeCap` | Home mount, `userId` change, or successful sync via `useSyncStore.syncRevision` | Yes, using successful sync reloads and future schedule timers. |
 
 ## Load Sequence
 
-On mount or user change, `HomePracticeButtons`:
+On mount, `userId` change, or `syncRevision` change, `HomePracticeButtons`:
 
 1. Resets local button state to disabled/empty.
 2. Calls `UserBlock.unlockNextGrammarBlock(userId)`.
@@ -36,7 +36,8 @@ The maximum timer delay comes from `config.practice.maxReadyScheduleTimerDelayMs
 
 ## Important Boundary
 
-There is no global live subscription for Home readiness counts. Practice actions
-write IndexedDB and refresh dashboard stats through global events, but Home
-practice-button readiness is recalculated by mounting/reloading `HomePracticeButtons`
-or by its own future schedule timer while Home remains mounted.
+Home readiness is not refreshed by dashboard events. Practice actions write
+IndexedDB and refresh dashboard stats through global events, while
+`HomePracticeButtons` refreshes from local models on mount, `userId` changes,
+successful syncs signaled by `useSyncStore.syncRevision`, and its own future
+schedule timers while Home remains mounted.

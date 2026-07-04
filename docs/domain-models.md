@@ -38,6 +38,17 @@ Vocabulary items have `is_vocabulary = 1`. Grammar items have `is_vocabulary = 0
 | `UserScore` | Daily practice count creation, incrementing, and sync. |
 | `Levels` | Dashboard/overview progress aggregation. |
 
+## Feature Readers And Writers
+
+| Model | Main readers | Main writers |
+| --- | --- | --- |
+| `UserItem` | Home readiness, practice decks, vocabulary overview, block items, grammar overview | Practice progress, new grammar completion, item/block/grammar/vocabulary resets, sync. |
+| `UserBlock` | Home new grammar readiness, grammar readiness, blocks overview, new grammar practice | Grammar unlock/mastery, block resets, sync. |
+| `UserScore` | Home daily count, practice overview, dashboard stars | Practice progress actions, sync. |
+| `Levels` / `Lessons` | Dashboard, levels overview, block/lesson grouping | Shared content sync. |
+| `Grammar` / `Notes` | Practice detail cards, grammar overview, vocabulary/block detail flows | Shared content sync. |
+| `AudioRecord` / `AudioMetadata` | Practice audio controls and audio manager | Audio archive sync and orphan cleanup. |
+
 ## Key IndexedDB Indexes
 
 Declared in `frontend/src/database/models/app-db.ts`.

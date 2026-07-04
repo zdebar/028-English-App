@@ -106,7 +106,7 @@ Top-level folders in [frontend/src](frontend/src):
 - [frontend/src/components](frontend/src/components): shared UI, layout, and utility components
 - [frontend/src/config](frontend/src/config): routes and app configuration
 - [frontend/src/database](frontend/src/database): Dexie models, sync helpers, and DB hooks
-- [frontend/src/features](frontend/src/features): auth, practice, sync, toast, theme, help, overlay, vocabulary, and more
+- [frontend/src/features](frontend/src/features): auth, practice, synchronization, toast, theme, help, overlay, vocabulary, and more
 - [frontend/src/hooks](frontend/src/hooks): generic reusable hooks
 - [frontend/src/locales](frontend/src/locales): UI text and localization data
 - [frontend/src/pages](frontend/src/pages): route-level pages
@@ -126,34 +126,24 @@ The current app wiring in [frontend/src/App.tsx](frontend/src/App.tsx) includes:
 
 Unknown routes render a page-not-found notification.
 
-## Basic Features
+## Feature Summary
 
-The frontend currently initializes several app-wide flows in [frontend/src/App.tsx](frontend/src/App.tsx):
+The frontend initializes app-wide flows in [frontend/src/App.tsx](frontend/src/App.tsx)
+and keeps user progress local-first through IndexedDB. The main feature areas are:
 
-- supabase auth
-    * Anonymous Auth for new users
-    * Goolge Auth 
-- theme loading per user
-- periodic synchronization
-    * on app start or every at least once every 24 hours
-    * all practice data is stored to indexedDB
-    * concurrent practice uses indexedDB exclusively
-- overview
-    * app track progress as today started, today mastered, and daily practice items
-    * possible to review started
-        - levels, lesson - and progress of corresponding items
-        - grammar - list all started grammar, possible to reset all corresponding items
-        - blocks - list all started vocabulary groups ex. month etc., possible to reset all corresponding items
-        - vocabulary - list all started vocabulary, possible to reset progress
-- global toast and overlay rendering
-- user account deletion
-    *  soft deletion within 30 days
-- usert item history
-    * app track every item progress history only for specified testing accounts
-    * on frontend indexedDb tracks progress history as array of objects:{date, progress}
-    * on backend it unpack array into individual row in user_items_history
+- Supabase authentication with anonymous sign-in, Google sign-in, account
+  conversion, sign-out, and soft-delete/reactivation support.
+- Vocabulary review, grammar review, and new grammar learning flows with local
+  progress saves, audio playback, daily score updates, and sync-backed recovery.
+- Home readiness buttons, dashboard stats, practice overview, and overview pages
+  for levels, blocks, grammar, and vocabulary.
+- Periodic, logout, and unmount synchronization for user progress and shared
+  content, plus audio archive synchronization.
+- Global UI infrastructure for theme, toast, help, overlay, PWA install prompt,
+  privacy policy, guide, logging, and analytics.
 
-Loading state is driven by combined auth and sync activity.
+For developer-oriented ownership, data flow, persistence, and side-effect details,
+start with [docs/features.md](docs/features.md).
 
 ## Offline and Sync Architecture
 
@@ -169,7 +159,7 @@ Typical flow:
 Key frontend areas:
 
 - [frontend/src/database](frontend/src/database)
-- [frontend/src/features/sync](frontend/src/features/sync)
+- [frontend/src/features/synchronization](frontend/src/features/synchronization)
 - [frontend/src/features/auth](frontend/src/features/auth)
 - [frontend/src/features/user-stats](frontend/src/features/user-stats)
 
@@ -279,4 +269,4 @@ The [scripts](scripts) and [data/scripts](data/scripts) areas support content pr
 ## Related Documentation
 
 - frontend Vite reference: [frontend/VITE.md](frontend/VITE.md)
-- frontend task notes: [frontend/TODO.md](frontend/TODO.md)
+- frontend behavior docs: [docs/README.md](docs/README.md)

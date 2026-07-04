@@ -64,3 +64,16 @@ Practice routes share `PracticeSessionCard` where possible:
   grammar learning flow.
 
 Overview pages are route-level shells around feature components and model queries.
+
+## Feature Boundaries
+
+Pages should stay thin: they compose feature components, route parameters, and
+navigation. Feature modules own interaction logic through hooks/components and
+call Dexie model classes for durable progress state. Zustand stores carry
+session, UI, and cached aggregate state; they should not replace IndexedDB as the
+source of truth for user progress.
+
+When a behavior crosses features, identify the connection point first: a route,
+a Zustand store, a browser event such as `levelsUpdated`, a localStorage fallback,
+or a model method. The feature catalog in [features.md](features.md) is the
+highest-level map of those boundaries.

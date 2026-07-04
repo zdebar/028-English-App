@@ -9,7 +9,7 @@ stores hold UI/session/cache state.
 | Store | Owner | Source of truth | Writers | Readers | Reset behavior |
 | --- | --- | --- | --- | --- | --- |
 | `useAuthStore` | `features/auth` | Supabase Auth session | `initializeAuth`, `handleLogout`, Supabase auth listener | `App`, protected pages, auth/profile UI | Cleared on logout or missing session. |
-| `useSyncStore` | `features/synchronization` | In-memory sync status | `usePeriodicSync` | `Home` sync warning, sync-related UI | Reset when no user or sync hook unmounts. |
+| `useSyncStore` | `features/synchronization` | In-memory sync status and successful-sync revision | `usePeriodicSync` | `Home` sync warning, sync-related UI, `HomePracticeButtons` readiness reloads | Reset when no user or sync hook unmounts. |
 | `useUserStore` | `features/user-stats` | IndexedDB model queries | `reloadLevels`, `reloadDailyCount`, global events | `Home`, dashboard, practice stars | Cleared when `useUserStoreSync` sees `userId === null`. |
 | `useAudioStore` | `features/audio` | localStorage per-user volume | `useAudioLoader`, `VolumeSlider` | `VolumeSlider`, audio controls | Reinitialized when user changes. |
 | `useThemeStore` | `features/theme` | localStorage per-user/guest theme plus system fallback | `useThemeLoader`, `ThemeSwitch` | Theme UI and DOM classes | Reloaded when user changes; can clear per user. |
@@ -28,6 +28,14 @@ to by `useUserStore`.
 | `levelsUpdated` | `{ userId }` | sync completion, item/block reset and progress writes | Calls `useUserStore.reloadLevels(userId)`. |
 | `dailyCountUpdated` | `{ userId, dailyCount? }` | sync completion, score updates | If `dailyCount` is present, sets it directly; otherwise reloads from `UserScore`. |
 
+## Sync Revision
+
+`useSyncStore.syncRevision` is a monotonic in-memory counter. `setSynchronized(true)`
+increments it after a successful sync; `setSynchronized(false)` does not. Home
+practice readiness uses this counter to reload local IndexedDB readiness after
+new data arrives from sync, while dashboard stats still use the browser events
+above.
+
 ## Store Synchronization Hooks
 
 | Hook | Mounted by | Purpose |
@@ -42,6 +50,7 @@ to by `useUserStore`.
 
 - Stores should not be treated as durable progress storage. Progress belongs in
   IndexedDB models.
-- Global events refresh dashboard stats, not Home practice-button readiness.
-- Home practice readiness recalculates on Home mount and uses timers only for
-  scheduled ready items while Home remains mounted.
+- Global events refresh dashboard stats; `syncRevision` refreshes Home practice
+  readiness after successful sync.
+- Home practice readiness recalculates on Home mount, `userId` change,
+  successful sync, and future schedule timers while Home remains mounted.

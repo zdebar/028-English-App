@@ -12,6 +12,7 @@ owns this side effect?".
 
 | Topic | Start here |
 | --- | --- |
+| All frontend features and connection points | [features.md](features.md) |
 | App boot, routes, state categories | [frontend-architecture.md](frontend-architecture.md) |
 | Zustand stores and global browser events | [state-and-events.md](state-and-events.md) |
 | IndexedDB, Supabase sync, localStorage fallbacks | [data-and-sync.md](data-and-sync.md) |
@@ -24,10 +25,15 @@ owns this side effect?".
 | Task | Primary doc | Main code entrypoint |
 | --- | --- | --- |
 | Understand app startup | [frontend-architecture.md](frontend-architecture.md) | `frontend/src/App.tsx` |
+| Find a feature owner and its connection points | [features.md](features.md) | `frontend/src/features` |
 | Debug auth/session state | [state-and-events.md](state-and-events.md) | `frontend/src/features/auth/use-auth-store.ts` |
+| Change profile or account actions | [features.md](features.md) | `frontend/src/pages/Profile.tsx` |
 | Debug sync or local-first writes | [data-and-sync.md](data-and-sync.md) | `frontend/src/database/utils/data-sync.utils.ts` |
 | Change practice behavior | [practice-flows.md](practice-flows.md) | `frontend/src/features/practice` |
-| Change Home practice buttons | [home-readiness.md](home-readiness.md) | `frontend/src/features/practice/HomePracticeButtons.tsx` |
+| Change Home practice buttons or sync-triggered readiness | [home-readiness.md](home-readiness.md) | `frontend/src/features/practice/HomePracticeButtons.tsx` |
+| Change overview pages or reset behavior | [features.md](features.md) | `frontend/src/features/levels`, `frontend/src/features/blocks` |
+| Debug audio state or archive sync | [features.md](features.md) | `frontend/src/features/audio` |
+| Change theme, PWA, toast, help, or overlay behavior | [features.md](features.md) | `frontend/src/features/theme`, `frontend/src/features/pwa` |
 | Understand progress dates | [domain-models.md](domain-models.md) | `frontend/src/database/models/user-items.ts` |
 | Debug dashboard counts | [state-and-events.md](state-and-events.md) | `frontend/src/features/user-stats/use-user-store.ts` |
 
