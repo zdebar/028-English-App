@@ -60,7 +60,7 @@ export default function App() {
         <ToastContainer />
         <OverlayMask />
         <Header />
-        <main className="relative mx-auto flex w-full grow flex-col items-center gap-4">
+        <main className="max-w-card relative mx-auto flex w-full grow flex-col items-center gap-4">
           <Routes>
             <Route path={ROUTES.home} element={<Home />} />
             <Route path={ROUTES.privacyPolicy} element={<PrivacyPolicy />} />
