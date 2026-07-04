@@ -101,6 +101,7 @@ describe('usePracticeDeck', () => {
 
     useFetchMock.mockReturnValue({
       data: [makeItem({ item_id: 1, progress: 0 }), makeItem({ item_id: 2, progress: 1 })],
+      loading: false,
       error: null,
       reload: reloadMock,
     });
@@ -124,6 +125,17 @@ describe('usePracticeDeck', () => {
     expect(result.current.grammarId).toBe(10);
     expect(result.current.showNewGrammarIndicator).toBe(false);
     expect(resetHintMock).toHaveBeenCalled();
+  });
+
+  it('exposes fetched current item before local deck state effect settles', async () => {
+    const { result } = renderHook(() => usePracticeDeck('user-1'));
+
+    expect(result.current.currentItem?.item_id).toBe(1);
+    expect(result.current.loading).toBe(false);
+
+    await act(async () => {
+      await Promise.resolve();
+    });
   });
 
   it('nextItem advances through the deck and resets reveal/hints', async () => {

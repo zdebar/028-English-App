@@ -22,8 +22,6 @@ export function usePracticeDeck(userId: string | null, mode: ReviewPracticeMode 
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
 
-  const currentItem = array[index] ?? null;
-
   const fetchPracticeDeck = useCallback(async () => {
     if (!userId) return [];
     const data = await UserItem.getPracticeDeck(userId, config.lesson.deckSize, mode);
@@ -36,6 +34,9 @@ export function usePracticeDeck(userId: string | null, mode: ReviewPracticeMode 
     error,
     reload,
   } = useFetch<UserItemPractice[]>(fetchPracticeDeck);
+
+  const activeArray = array.length > 0 ? array : (fetchedArray ?? []);
+  const currentItem = activeArray[index] ?? null;
 
   const { czechHinted, englishHinted, resetHint, plusHint } = useHint(
     currentItem?.czech,
@@ -161,15 +162,15 @@ export function usePracticeDeck(userId: string | null, mode: ReviewPracticeMode 
       }
 
       const userProgress = [...userProgressRef.current];
-      if (userProgress.length >= array.length) {
+      if (userProgress.length >= activeArray.length) {
         await saveBufferedProgress(userProgress, 'during practice', true);
       } else {
-        setIndex((prev) => (array.length ? (prev + 1) % array.length : 0));
+        setIndex((prev) => (activeArray.length ? (prev + 1) % activeArray.length : 0));
         setRevealed(false);
         resetHint();
       }
     },
-    [array.length, currentItem, resetHint, saveBufferedProgress, userId],
+    [activeArray.length, currentItem, resetHint, saveBufferedProgress, userId],
   );
 
   // Play audio on item change if direction is EN -> CZ
