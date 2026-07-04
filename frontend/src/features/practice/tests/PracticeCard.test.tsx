@@ -57,6 +57,7 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     hideDirectionChange: vi.fn(),
     plusHint: vi.fn(),
     nextItem: vi.fn(),
+    loading: false,
     error: null,
     audioError: false,
     setVolume: vi.fn(),
@@ -88,6 +89,7 @@ vi.mock('@/config/config', () => ({
       audioDelay: 300,
     },
     progress: { skipProgress: 10, minusProgress: -1, plusProgress: 1 },
+    loading: { dataStateDelayMs: 1000 },
   },
 }));
 
@@ -108,6 +110,8 @@ vi.mock('@/locales/cs', () => ({
     currentPracticeStar: 'Current practice star',
     today: 'Today',
     dailyGoal: 'Daily goal',
+    loadingMessage: 'Loading',
+    loadingError: 'Loading error',
     directionCzToEn: 'CZ to EN',
     directionEnToCz: 'EN to CZ',
   },
@@ -195,6 +199,8 @@ vi.mock('@/features/practice/hooks/use-practice-deck', () => ({
         handleReveal: vi.fn(),
         plusHint: vi.fn(),
         nextItem: vi.fn(),
+        loading: false,
+        error: null,
         audioError: false,
         setVolume: vi.fn(),
         playAudio: vi.fn(),
@@ -205,10 +211,6 @@ vi.mock('@/features/practice/hooks/use-practice-deck', () => ({
 
     return mocks.practiceDeck;
   },
-}));
-
-vi.mock('@/components/UI/Delayed', () => ({
-  default: ({ children }: any) => <div>{children}</div>,
 }));
 
 vi.mock('@/features/help/HelpButton', () => ({ default: () => <div data-testid="help-button" /> }));
@@ -345,6 +347,8 @@ describe('PracticeCard', () => {
     mocks.practiceDeck.pronunciation = '\u00A0';
     mocks.practiceDeck.audioDisabled = false;
     mocks.practiceDeck.showDirectionChange = false;
+    mocks.practiceDeck.loading = false;
+    mocks.practiceDeck.error = null;
     mocks.practiceDeck.audioError = false;
     mocks.practiceDeck.audioLoading = false;
   });
@@ -371,6 +375,7 @@ describe('PracticeCard', () => {
 
   it('shows empty message when current item is missing', () => {
     mocks.practiceDeck.currentItem = null;
+    mocks.practiceDeck.loading = false;
 
     render(<PracticeCard />);
 
@@ -381,12 +386,30 @@ describe('PracticeCard', () => {
 
   it('returns home from the empty practice state', () => {
     mocks.practiceDeck.currentItem = null;
+    mocks.practiceDeck.loading = false;
 
     render(<PracticeCard />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Domů' }));
 
     expect(mocks.navigate).toHaveBeenCalledWith('/');
+  });
+
+  it('shows loading circle after configured delay instead of empty state while deck is loading', () => {
+    mocks.practiceDeck.currentItem = null;
+    mocks.practiceDeck.loading = true;
+
+    const { container } = render(<PracticeCard />);
+
+    expect(screen.queryByText('Nic k procviÄovÃ¡nÃ­.')).toBeNull();
+    expect(screen.queryByText('Zkuste to znovu pozdÄ›ji.')).toBeNull();
+    expect(container.firstChild).toBeNull();
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    expect(screen.getByLabelText('Loading')).toBeTruthy();
   });
 
   it('reveals item and plays audio on item click in CZ->EN mode', () => {

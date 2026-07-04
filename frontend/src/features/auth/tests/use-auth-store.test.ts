@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   dataSyncOnUnmount: vi.fn(),
   setMonitoringUser: vi.fn(),
   reportError: vi.fn(),
+  reportInfo: vi.fn(),
   authCallback: null as ((event: string, session: any) => void) | null,
 }));
 
@@ -29,14 +30,16 @@ vi.mock('@/database/utils/data-sync.utils', () => ({
 
 vi.mock('@/features/logging/monitoring-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
+  reportInfo: (...args: unknown[]) => mocks.reportInfo(...args),
   setMonitoringUser: (...args: unknown[]) => mocks.setMonitoringUser(...args),
 }));
 
 import { useAuthStore } from '@/features/auth/use-auth-store';
 
 async function flushMicrotasks(): Promise<void> {
-  await Promise.resolve();
-  await Promise.resolve();
+  for (let i = 0; i < 5; i += 1) {
+    await Promise.resolve();
+  }
 }
 
 describe('useAuthStore', () => {
@@ -126,6 +129,43 @@ describe('useAuthStore', () => {
         message: 'permission denied for function reactivate_user_if_deleted',
       }),
     );
+  });
+
+  it('initializeAuth clears the local session when Supabase rejects a future JWT', async () => {
+    mocks.getSession.mockResolvedValue({
+      data: {
+        session: {
+          user: {
+            id: 'u1',
+            email: 'u1@example.com',
+            user_metadata: { full_name: 'User One' },
+          },
+        },
+      },
+      error: null,
+    });
+    mocks.rpc.mockResolvedValue({
+      data: null,
+      error: { code: 'PGRST303', message: 'JWT issued at future' },
+    });
+
+    useAuthStore.getState().initializeAuth();
+    await flushMicrotasks();
+
+    expect(mocks.signOut).toHaveBeenCalledWith({ scope: 'local' });
+    expect(mocks.reportInfo).toHaveBeenCalledWith(
+      'Clearing local auth session because Supabase rejected its JWT timestamp.',
+    );
+    expect(mocks.reportError).not.toHaveBeenCalledWith(
+      'Auth reactivation failed',
+      expect.anything(),
+    );
+
+    const state = useAuthStore.getState();
+    expect(state.userId).toBeNull();
+    expect(state.userEmail).toBeNull();
+    expect(state.userFullName).toBeNull();
+    expect(state.loading).toBe(false);
   });
 
   it('initializeAuth clears state when getSession fails', async () => {

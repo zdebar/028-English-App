@@ -4,6 +4,7 @@ import ReturnHomeButton from '@/components/UI/buttons/ReturnHomeButton';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import GrammarDetailCard from '@/features/grammar/GrammarDetailCard';
 import { reportError } from '@/features/logging/monitoring-handler';
+import PracticeEmptyState from '@/features/practice/PracticeEmptyState';
 import PracticeSessionCard from '@/features/practice/PracticeSessionCard';
 import { useNewGrammarPracticeDeck } from '@/features/practice/hooks/use-new-grammar-practice-deck';
 import { useToastStore } from '@/features/toast/use-toast-store';
@@ -31,7 +32,7 @@ export default function NewGrammarPractice(): JSX.Element {
   }
 
   if (!deck.block) {
-    return <Notification>{TEXTS.nothingToPractice}</Notification>;
+    return <PracticeEmptyState />;
   }
 
   if (showGrammarIntro && deck.grammar != null) {
@@ -49,7 +50,7 @@ export default function NewGrammarPractice(): JSX.Element {
   }
 
   if (!deck.currentItem) {
-    return <Notification>{TEXTS.nothingToPractice}</Notification>;
+    return <PracticeEmptyState />;
   }
 
   return (

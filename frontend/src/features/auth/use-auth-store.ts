@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { Session } from '@supabase/supabase-js';
 import { supabaseInstance } from '@/config/supabase.config';
 import { dataSyncOnUnmount } from '@/database/utils/data-sync.utils';
-import { reportError, setMonitoringUser } from '@/features/logging/monitoring-handler';
+import { reportError, reportInfo, setMonitoringUser } from '@/features/logging/monitoring-handler';
 
 interface AuthState {
   userId: string | null;
@@ -28,6 +28,15 @@ const INITIAL_AUTH_STATE = {
 function isAnonymousSession(session: Session | null): boolean {
   const user = session?.user as { is_anonymous?: boolean } | undefined;
   return user?.is_anonymous === true;
+}
+
+function isJwtIssuedAtFutureError(error: unknown): boolean {
+  if (typeof error !== 'object' || error === null) {
+    return false;
+  }
+
+  const { code, message } = error as { code?: unknown; message?: unknown };
+  return code === 'PGRST303' && message === 'JWT issued at future';
 }
 
 /**
@@ -66,6 +75,31 @@ export const useAuthStore = create<AuthState>((set) => {
     set({ ...INITIAL_AUTH_STATE, loading: false });
   };
 
+  const clearInvalidLocalSession = async () => {
+    reportInfo('Clearing local auth session because Supabase rejected its JWT timestamp.');
+
+    const { error } = await supabaseInstance.auth.signOut({ scope: 'local' });
+    if (error && error.message !== 'Auth session missing!') {
+      reportError('Invalid auth session cleanup failed', error);
+    }
+
+    clearSession();
+  };
+
+  const reactivateUserIfDeleted = async () => {
+    const { error } = await supabaseInstance.rpc('reactivate_user_if_deleted');
+    if (!error) {
+      return;
+    }
+
+    if (isJwtIssuedAtFutureError(error)) {
+      await clearInvalidLocalSession();
+      return;
+    }
+
+    reportError('Auth reactivation failed', error);
+  };
+
   return {
     ...INITIAL_AUTH_STATE,
     loading: true,
@@ -81,9 +115,7 @@ export const useAuthStore = create<AuthState>((set) => {
         }
 
         if (data?.session) {
-          void supabaseInstance.rpc('reactivate_user_if_deleted').then(({ error }) => {
-            if (error) reportError('Auth reactivation failed', error);
-          });
+          void reactivateUserIfDeleted();
         }
 
         applySession(data.session);

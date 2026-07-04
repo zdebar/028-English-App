@@ -1,11 +1,9 @@
 import config from '@/config/config';
-import Delayed from '@/components/UI/Delayed';
-import InfoNotification from '@/components/UI/InfoNotification';
-import ReturnHomeButton from '@/components/UI/buttons/ReturnHomeButton';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { usePracticeDeck } from './hooks/use-practice-deck';
 import type { ReviewPracticeMode } from '@/types/user-item.types';
 import PracticeSessionCard from './PracticeSessionCard';
+import PracticeEmptyState from './PracticeEmptyState';
 import { TEXTS } from '@/locales/cs';
 import { DataState } from '@/components/UI/DataState';
 import { useToastStore } from '../toast/use-toast-store';
@@ -58,13 +56,7 @@ export default function PracticeCard({ mode = 'vocabulary' }: PracticeCardProps)
   }
 
   if (!currentItem) {
-    return (
-      <Delayed className="w-full">
-        <InfoNotification>{TEXTS.nothingToPractice}</InfoNotification>
-        <InfoNotification>{TEXTS.tryAgainLater}</InfoNotification>
-        <ReturnHomeButton />
-      </Delayed>
-    );
+    return <PracticeEmptyState />;
   }
 
   return (
