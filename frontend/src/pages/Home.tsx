@@ -45,12 +45,6 @@ export default function Home(): JSX.Element {
     <div className="card-width relative flex flex-col justify-start text-center">
       {userId ? (
         <div className="home-body relative flex w-full flex-col">
-          {isAnonymousUser && (
-            <div className="mb-8 flex flex-col gap-2">
-              <ConvertAnonymousUserButton />
-              <SimulateDataButton />
-            </div>
-          )}
           <PropertyView
             label={TEXTS.profileNameLabel}
             className="justify-center"
@@ -73,6 +67,12 @@ export default function Home(): JSX.Element {
             </p>
           )}
           <Dashboard />
+          {isAnonymousUser && (
+            <div className="mt-8 mb-8 flex flex-col gap-2">
+              <ConvertAnonymousUserButton />
+              <SimulateDataButton />
+            </div>
+          )}
         </div>
       ) : (
         <div className="home-body w-full">
