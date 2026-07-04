@@ -135,7 +135,11 @@ export const useAuthStore = create<AuthState>((set) => {
     handleLogout: async (options) => {
       const currentUserId = useAuthStore.getState().userId;
       if (currentUserId && !options?.skipSync) {
-        await dataSyncOnUnmount(currentUserId);
+        try {
+          await dataSyncOnUnmount(currentUserId);
+        } catch (error) {
+          reportError('Pre-logout synchronization failed', error);
+        }
       }
 
       if (!options?.skipRemoteSignOut) {

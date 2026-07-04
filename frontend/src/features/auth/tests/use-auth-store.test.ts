@@ -225,6 +225,28 @@ describe('useAuthStore', () => {
     expect(state.loading).toBe(false);
   });
 
+  it('handleLogout still signs out and clears state when pre-logout sync fails', async () => {
+    const syncError = new Error('Unmount synchronization failed');
+    useAuthStore.setState({
+      userId: 'u1',
+      userEmail: 'u1@example.com',
+      userFullName: 'User One',
+      loading: false,
+    });
+    mocks.dataSyncOnUnmount.mockRejectedValue(syncError);
+
+    await useAuthStore.getState().handleLogout();
+
+    expect(mocks.reportError).toHaveBeenCalledWith('Pre-logout synchronization failed', syncError);
+    expect(mocks.signOut).toHaveBeenCalledWith({ scope: 'global' });
+
+    const state = useAuthStore.getState();
+    expect(state.userId).toBeNull();
+    expect(state.userEmail).toBeNull();
+    expect(state.userFullName).toBeNull();
+    expect(state.loading).toBe(false);
+  });
+
   it('handleLogout throws when signOut fails', async () => {
     useAuthStore.setState({ userId: 'u1', userEmail: 'u1@example.com', userFullName: 'User One' });
     mocks.signOut.mockResolvedValue({ error: { message: 'signout failed' } });
