@@ -4,6 +4,7 @@ import { ROUTES } from '@/config/routes.config';
 import UserBlock from '@/database/models/user-blocks';
 import UserItem from '@/database/models/user-items';
 import { reportError } from '@/features/logging/monitoring-handler';
+import { useSyncStore } from '@/features/synchronization/use-sync-store';
 import { TEXTS } from '@/locales/cs';
 import type { ReadyPracticeScheduleEntry } from '@/types/generic.types';
 import { useEffect, useState, type Dispatch, type JSX, type SetStateAction } from 'react';
@@ -81,6 +82,7 @@ function ReadyPracticeBadge({ count }: Readonly<{ count: number }>): JSX.Element
 
 export default function HomePracticeButtons({ userId }: HomePracticeButtonsProps): JSX.Element {
   const navigate = useNavigate();
+  const syncRevision = useSyncStore((state) => state.syncRevision);
   const [readyVocabularyCount, setReadyVocabularyCount] = useState(0);
   const [readyVocabularySchedule, setReadyVocabularySchedule] = useState<
     ReadyPracticeScheduleEntry[]
@@ -132,7 +134,7 @@ export default function HomePracticeButtons({ userId }: HomePracticeButtonsProps
     return () => {
       isMounted = false;
     };
-  }, [userId]);
+  }, [syncRevision, userId]);
 
   useReadyPracticeSchedule(
     readyVocabularySchedule,

@@ -44,6 +44,7 @@ vi.mock('react-router-dom', () => ({
 }));
 
 import HomePracticeButtons from '@/features/practice/HomePracticeButtons';
+import { useSyncStore } from '@/features/synchronization/use-sync-store';
 
 async function flushPracticeStateLoad() {
   await act(async () => {
@@ -59,6 +60,12 @@ describe('HomePracticeButtons', () => {
     mocks.getFirstUnlockedGrammarBlock.mockResolvedValue(null);
     mocks.getReadyGrammarPracticeState.mockResolvedValue({ readyCount: 0, schedule: [] });
     mocks.getReadyVocabularyPracticeState.mockResolvedValue({ readyCount: 0, schedule: [] });
+    useSyncStore.setState({
+      isSynchronized: false,
+      isSynchronizing: false,
+      isSyncError: false,
+      syncRevision: 0,
+    });
   });
 
   afterEach(() => {
@@ -123,6 +130,32 @@ describe('HomePracticeButtons', () => {
     expect((screen.getByText('Vocabulary').closest('button') as HTMLButtonElement).disabled).toBe(
       false,
     );
+  });
+
+  it('reloads practice-state data after successful synchronization', async () => {
+    mocks.getReadyVocabularyPracticeState
+      .mockResolvedValueOnce({ readyCount: 0, schedule: [] })
+      .mockResolvedValueOnce({ readyCount: 5, schedule: [] });
+
+    render(<HomePracticeButtons userId="u1" />);
+
+    await flushPracticeStateLoad();
+
+    expect((screen.getByText('Vocabulary').closest('button') as HTMLButtonElement).disabled).toBe(
+      true,
+    );
+
+    act(() => {
+      useSyncStore.getState().setSynchronized(true);
+    });
+
+    await waitFor(() => {
+      expect(mocks.getReadyVocabularyPracticeState).toHaveBeenCalledTimes(2);
+      expect((screen.getByText('Vocabulary').closest('button') as HTMLButtonElement).disabled).toBe(
+        false,
+      );
+      expect(screen.getByText('5')).toBeTruthy();
+    });
   });
 
   it('increments vocabulary badge when scheduled vocabulary items become ready', async () => {
