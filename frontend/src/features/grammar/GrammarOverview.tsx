@@ -9,6 +9,7 @@ import { useArray } from '@/hooks/use-array';
 import Grammar from '@/database/models/grammar';
 import type { GrammarType } from '@/types/generic.types';
 import UserItem from '@/database/models/user-items';
+import UserBlock from '@/database/models/user-blocks';
 import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { DataState } from '@/components/UI/DataState';
@@ -57,14 +58,17 @@ export default function GrammarOverview(): JSX.Element {
 
     try {
       const resetCount = await UserItem.resetItemsByGrammarId(userId, currentItem.id);
-      reportInfo(`Grammar ${currentItem.id} reset completed: ${resetCount} items reset.`);
+      const resetBlockCount = await UserBlock.resetByGrammarId(userId, currentItem.id);
+      reportInfo(
+        `Grammar ${currentItem.id} reset completed: ${resetCount} items and ${resetBlockCount} blocks reset.`,
+      );
       reload();
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (err) {
       showToast(TEXTS.resetProgressErrorToast, 'error');
       reportError('Failed to reset grammar progress', err);
     }
-  }, [currentItem, showToast, userId]);
+  }, [currentItem, reload, showToast, userId]);
 
   // -- List view --
   if (currentIndex === null) {

@@ -418,6 +418,67 @@ describe('UserBlock', () => {
     });
   });
 
+  it('resetByGrammarId resets matching user blocks and returns reset count', async () => {
+    mocks.toArray.mockResolvedValueOnce([
+      {
+        user_id: 'u1',
+        block_id: 1,
+        grammar_id: 8,
+        progress: 4,
+        started_at: '2026-06-20T00:00:00.000Z',
+        next_at: '2026-06-25T00:00:00.000Z',
+        mastered_at: '2026-06-26T00:00:00.000Z',
+        updated_at: '2026-06-26T00:00:00.000Z',
+      },
+      {
+        user_id: 'u1',
+        block_id: 2,
+        grammar_id: 8,
+        progress: 2,
+        started_at: '2026-06-21T00:00:00.000Z',
+        next_at: '2026-06-27T00:00:00.000Z',
+        mastered_at: '9999-12-31T23:59:59+00:00',
+        updated_at: '2026-06-27T00:00:00.000Z',
+      },
+    ]);
+
+    const resetCount = await UserBlock.resetByGrammarId('u1', 8, '2026-06-28T12:00:00.000Z');
+
+    expect(resetCount).toBe(2);
+    expect(mocks.where).toHaveBeenCalledWith('user_id');
+    expect(mocks.equals).toHaveBeenCalledWith('u1');
+
+    const grammarFilter = mocks.filter.mock.calls[0][0] as (block: { grammar_id: number }) => boolean;
+    expect(grammarFilter({ grammar_id: 8 })).toBe(true);
+    expect(grammarFilter({ grammar_id: 9 })).toBe(false);
+    expect(mocks.bulkPut).toHaveBeenCalledWith([
+      expect.objectContaining({
+        block_id: 1,
+        started_at: '9999-12-31T23:59:59+00:00',
+        next_at: '9999-12-31T23:59:59+00:00',
+        mastered_at: '9999-12-31T23:59:59+00:00',
+        progress: 0,
+        updated_at: '2026-06-28T12:00:00.000Z',
+      }),
+      expect.objectContaining({
+        block_id: 2,
+        started_at: '9999-12-31T23:59:59+00:00',
+        next_at: '9999-12-31T23:59:59+00:00',
+        mastered_at: '9999-12-31T23:59:59+00:00',
+        progress: 0,
+        updated_at: '2026-06-28T12:00:00.000Z',
+      }),
+    ]);
+  });
+
+  it('resetByGrammarId returns zero without writing when no blocks match', async () => {
+    await expect(UserBlock.resetByGrammarId('u1', 8, '2026-06-28T12:00:00.000Z')).resolves.toBe(
+      0,
+    );
+
+    expect(mocks.bulkPut).not.toHaveBeenCalled();
+  });
+
   it('deleteByUserId deletes local user blocks', async () => {
     await UserBlock.deleteByUserId('u1');
 

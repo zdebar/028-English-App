@@ -219,13 +219,34 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
   ): Promise<void> {
     assertNonEmptyString(userId, 'userId');
 
-    await db.user_blocks.update([userId, blockId], {
-      started_at: NULL_DATE,
-      next_at: NULL_DATE,
-      mastered_at: NULL_DATE,
-      progress: 0,
-      updated_at: dateTime,
-    });
+    await db.user_blocks.update([userId, blockId], getResetBlockFields(dateTime));
+  }
+
+  static async resetByGrammarId(
+    userId: string,
+    grammarId: number,
+    dateTime: string = new Date().toISOString(),
+  ): Promise<number> {
+    assertNonEmptyString(userId, 'userId');
+
+    const blocks = await db.user_blocks
+      .where('user_id')
+      .equals(userId)
+      .filter((block) => block.grammar_id === grammarId)
+      .toArray();
+
+    if (blocks.length === 0) {
+      return 0;
+    }
+
+    await db.user_blocks.bulkPut(
+      blocks.map((block) => ({
+        ...block,
+        ...getResetBlockFields(dateTime),
+      })),
+    );
+
+    return blocks.length;
   }
 
   static async unlockNextGrammarBlock(
@@ -347,4 +368,17 @@ function compareGrammarBlocks(left: UserBlockType, right: UserBlockType): number
     return left.lesson_id - right.lesson_id;
   }
   return left.sort_order - right.sort_order;
+}
+
+function getResetBlockFields(dateTime: string): Pick<
+  UserBlockType,
+  'started_at' | 'next_at' | 'mastered_at' | 'progress' | 'updated_at'
+> {
+  return {
+    started_at: NULL_DATE,
+    next_at: NULL_DATE,
+    mastered_at: NULL_DATE,
+    progress: 0,
+    updated_at: dateTime,
+  };
 }
