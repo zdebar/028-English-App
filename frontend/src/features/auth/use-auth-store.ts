@@ -75,25 +75,37 @@ export const useAuthStore = create<AuthState>((set) => {
     set({ ...INITIAL_AUTH_STATE, loading: false });
   };
 
-  const clearInvalidLocalSession = async () => {
+  const recoverJwtIssuedAtFutureSession = async (): Promise<boolean> => {
+    reportInfo('Refreshing auth session because Supabase rejected its JWT timestamp.');
+
+    const { data, error } = await supabaseInstance.auth.refreshSession();
+    if (!error && data.session) {
+      applySession(data.session);
+      return true;
+    }
+
     reportInfo('Clearing local auth session because Supabase rejected its JWT timestamp.');
 
-    const { error } = await supabaseInstance.auth.signOut({ scope: 'local' });
-    if (error && error.message !== 'Auth session missing!') {
-      reportError('Invalid auth session cleanup failed', error);
+    const { error: signOutError } = await supabaseInstance.auth.signOut({ scope: 'local' });
+    if (signOutError && signOutError.message !== 'Auth session missing!') {
+      reportError('Invalid auth session cleanup failed', signOutError);
     }
 
     clearSession();
+    return false;
   };
 
-  const reactivateUserIfDeleted = async () => {
+  const reactivateUserIfDeleted = async (hasRecoveredJwt = false) => {
     const { error } = await supabaseInstance.rpc('reactivate_user_if_deleted');
     if (!error) {
       return;
     }
 
-    if (isJwtIssuedAtFutureError(error)) {
-      await clearInvalidLocalSession();
+    if (isJwtIssuedAtFutureError(error) && !hasRecoveredJwt) {
+      const didRecover = await recoverJwtIssuedAtFutureSession();
+      if (didRecover) {
+        await reactivateUserIfDeleted(true);
+      }
       return;
     }
 

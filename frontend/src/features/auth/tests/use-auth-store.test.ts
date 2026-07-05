@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   getSession: vi.fn(),
+  refreshSession: vi.fn(),
   signOut: vi.fn(),
   onAuthStateChange: vi.fn(),
   rpc: vi.fn(),
@@ -17,6 +18,7 @@ vi.mock('@/config/supabase.config', () => ({
   supabaseInstance: {
     auth: {
       getSession: (...args: unknown[]) => mocks.getSession(...args),
+      refreshSession: (...args: unknown[]) => mocks.refreshSession(...args),
       signOut: (...args: unknown[]) => mocks.signOut(...args),
       onAuthStateChange: (...args: unknown[]) => mocks.onAuthStateChange(...args),
     },
@@ -67,6 +69,7 @@ describe('useAuthStore', () => {
       },
     );
     mocks.signOut.mockResolvedValue({ error: null });
+    mocks.refreshSession.mockResolvedValue({ data: { session: null }, error: null });
     mocks.rpc.mockResolvedValue({ error: null });
     mocks.dataSyncOnUnmount.mockResolvedValue(undefined);
   });
@@ -131,7 +134,60 @@ describe('useAuthStore', () => {
     );
   });
 
-  it('initializeAuth clears the local session when Supabase rejects a future JWT', async () => {
+  it('initializeAuth refreshes the local session when Supabase rejects a future JWT', async () => {
+    mocks.getSession.mockResolvedValue({
+      data: {
+        session: {
+          user: {
+            id: 'u1',
+            email: 'u1@example.com',
+            user_metadata: { full_name: 'User One' },
+          },
+        },
+      },
+      error: null,
+    });
+    mocks.rpc
+      .mockResolvedValueOnce({
+        data: null,
+        error: { code: 'PGRST303', message: 'JWT issued at future' },
+      })
+      .mockResolvedValueOnce({ data: false, error: null });
+    mocks.refreshSession.mockResolvedValue({
+      data: {
+        session: {
+          user: {
+            id: 'u1',
+            email: 'u1@example.com',
+            user_metadata: { full_name: 'User One' },
+          },
+        },
+      },
+      error: null,
+    });
+
+    useAuthStore.getState().initializeAuth();
+    await flushMicrotasks();
+
+    expect(mocks.refreshSession).toHaveBeenCalled();
+    expect(mocks.rpc).toHaveBeenCalledTimes(2);
+    expect(mocks.signOut).not.toHaveBeenCalled();
+    expect(mocks.reportInfo).toHaveBeenCalledWith(
+      'Refreshing auth session because Supabase rejected its JWT timestamp.',
+    );
+    expect(mocks.reportError).not.toHaveBeenCalledWith(
+      'Auth reactivation failed',
+      expect.anything(),
+    );
+
+    const state = useAuthStore.getState();
+    expect(state.userId).toBe('u1');
+    expect(state.userEmail).toBe('u1@example.com');
+    expect(state.userFullName).toBe('User One');
+    expect(state.loading).toBe(false);
+  });
+
+  it('initializeAuth clears the local session when future JWT recovery fails', async () => {
     mocks.getSession.mockResolvedValue({
       data: {
         session: {
@@ -148,17 +204,18 @@ describe('useAuthStore', () => {
       data: null,
       error: { code: 'PGRST303', message: 'JWT issued at future' },
     });
+    mocks.refreshSession.mockResolvedValue({
+      data: { session: null },
+      error: { message: 'refresh failed' },
+    });
 
     useAuthStore.getState().initializeAuth();
     await flushMicrotasks();
 
+    expect(mocks.refreshSession).toHaveBeenCalled();
     expect(mocks.signOut).toHaveBeenCalledWith({ scope: 'local' });
     expect(mocks.reportInfo).toHaveBeenCalledWith(
       'Clearing local auth session because Supabase rejected its JWT timestamp.',
-    );
-    expect(mocks.reportError).not.toHaveBeenCalledWith(
-      'Auth reactivation failed',
-      expect.anything(),
     );
 
     const state = useAuthStore.getState();
