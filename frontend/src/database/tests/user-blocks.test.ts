@@ -152,6 +152,7 @@ describe('UserBlock', () => {
         is_vocabulary: true,
         is_practice_block: true,
         show_in_topics: true,
+        progress: 0,
         started_at: '9999-12-31T23:59:59+00:00',
       },
       {
@@ -162,6 +163,7 @@ describe('UserBlock', () => {
         is_vocabulary: true,
         is_practice_block: true,
         show_in_topics: true,
+        progress: 0,
         started_at: '9999-12-31T23:59:59+00:00',
       },
       {
@@ -172,16 +174,29 @@ describe('UserBlock', () => {
         is_vocabulary: false,
         is_practice_block: true,
         show_in_topics: true,
+        progress: 0,
         started_at: '9999-12-31T23:59:59+00:00',
       },
       {
         user_id: 'u1',
         block_id: 1,
         sort_order: 10,
-        name: 'Started grammar',
+        name: 'Completed grammar',
         is_vocabulary: false,
         is_practice_block: true,
         show_in_topics: true,
+        progress: 1,
+        started_at: '2026-03-01T00:00:00.000Z',
+      },
+      {
+        user_id: 'u1',
+        block_id: 6,
+        sort_order: 15,
+        name: 'Unlocked grammar',
+        is_vocabulary: false,
+        is_practice_block: true,
+        show_in_topics: true,
+        progress: 0,
         started_at: '2026-03-01T00:00:00.000Z',
       },
       {
@@ -192,6 +207,7 @@ describe('UserBlock', () => {
         is_vocabulary: false,
         is_practice_block: true,
         show_in_topics: false,
+        progress: 1,
         started_at: '2026-03-01T00:00:00.000Z',
       },
     ]);
@@ -414,6 +430,16 @@ describe('UserBlock', () => {
       next_at: '9999-12-31T23:59:59+00:00',
       mastered_at: '9999-12-31T23:59:59+00:00',
       progress: 0,
+      updated_at: '2026-06-23T12:00:00.000Z',
+    });
+  });
+
+  it('markBlockMastered sets mastered date, progress, and updated timestamp', async () => {
+    await UserBlock.markBlockMastered('u1', 7, '2026-06-23T12:00:00.000Z');
+
+    expect(mocks.update).toHaveBeenCalledWith(['u1', 7], {
+      mastered_at: '2026-06-23T12:00:00.000Z',
+      progress: 1,
       updated_at: '2026-06-23T12:00:00.000Z',
     });
   });

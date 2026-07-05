@@ -100,7 +100,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
         (block) =>
           block.show_in_topics !== false &&
           (block.is_practice_block === false ||
-            (!block.is_vocabulary && block.started_at !== NULL_DATE) ||
+            (!block.is_vocabulary && block.started_at !== NULL_DATE && block.progress > 0) ||
             (block.is_vocabulary && startedBlockIdSet.has(block.block_id))),
       )
       .sort((left, right) => left.sort_order - right.sort_order);
@@ -208,6 +208,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
 
     await db.user_blocks.update([userId, blockId], {
       mastered_at: dateTime,
+      progress: 1,
       updated_at: dateTime,
     });
   }
