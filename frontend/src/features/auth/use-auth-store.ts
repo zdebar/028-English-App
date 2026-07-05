@@ -95,8 +95,9 @@ export const useAuthStore = create<AuthState>((set) => {
     return false;
   };
 
-  const reactivateUserIfDeleted = async (hasRecoveredJwt = false) => {
-    const { error } = await supabaseInstance.rpc('reactivate_user_if_deleted');
+  const syncAuthenticatedUserLifecycle = async (hasRecoveredJwt = false) => {
+    // Existing Supabase Auth users do not re-run the auth.users insert trigger on login.
+    const { error } = await supabaseInstance.rpc('restore_current_user_if_deleted');
     if (!error) {
       return;
     }
@@ -104,12 +105,12 @@ export const useAuthStore = create<AuthState>((set) => {
     if (isJwtIssuedAtFutureError(error) && !hasRecoveredJwt) {
       const didRecover = await recoverJwtIssuedAtFutureSession();
       if (didRecover) {
-        await reactivateUserIfDeleted(true);
+        await syncAuthenticatedUserLifecycle(true);
       }
       return;
     }
 
-    reportError('Auth reactivation failed', error);
+    reportError('Auth user lifecycle sync failed', error);
   };
 
   return {
@@ -127,7 +128,7 @@ export const useAuthStore = create<AuthState>((set) => {
         }
 
         if (data?.session) {
-          void reactivateUserIfDeleted();
+          void syncAuthenticatedUserLifecycle();
         }
 
         applySession(data.session);

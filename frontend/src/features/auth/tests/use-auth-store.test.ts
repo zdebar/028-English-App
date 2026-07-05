@@ -96,11 +96,12 @@ describe('useAuthStore', () => {
     expect(state.userEmail).toBe('u1@example.com');
     expect(state.userFullName).toBe('User One');
     expect(state.loading).toBe(false);
+    expect(mocks.rpc).toHaveBeenCalledWith('restore_current_user_if_deleted');
 
     cleanup();
   });
 
-  it('initializeAuth keeps session hydration working when reactivation fails', async () => {
+  it('initializeAuth keeps session hydration working when user lifecycle sync fails', async () => {
     mocks.getSession.mockResolvedValue({
       data: {
         session: {
@@ -115,7 +116,7 @@ describe('useAuthStore', () => {
     });
     mocks.rpc.mockResolvedValue({
       data: null,
-      error: { message: 'permission denied for function reactivate_user_if_deleted' },
+      error: { message: 'permission denied for function restore_current_user_if_deleted' },
     });
 
     useAuthStore.getState().initializeAuth();
@@ -127,9 +128,9 @@ describe('useAuthStore', () => {
     expect(state.userFullName).toBe('User One');
     expect(state.loading).toBe(false);
     expect(mocks.reportError).toHaveBeenCalledWith(
-      'Auth reactivation failed',
+      'Auth user lifecycle sync failed',
       expect.objectContaining({
-        message: 'permission denied for function reactivate_user_if_deleted',
+        message: 'permission denied for function restore_current_user_if_deleted',
       }),
     );
   });
@@ -176,7 +177,7 @@ describe('useAuthStore', () => {
       'Refreshing auth session because Supabase rejected its JWT timestamp.',
     );
     expect(mocks.reportError).not.toHaveBeenCalledWith(
-      'Auth reactivation failed',
+      'Auth user lifecycle sync failed',
       expect.anything(),
     );
 
