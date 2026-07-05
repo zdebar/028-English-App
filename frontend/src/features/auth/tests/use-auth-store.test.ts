@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   getSession: vi.fn(),
+  getUser: vi.fn(),
   refreshSession: vi.fn(),
   signOut: vi.fn(),
   onAuthStateChange: vi.fn(),
@@ -18,6 +19,7 @@ vi.mock('@/config/supabase.config', () => ({
   supabaseInstance: {
     auth: {
       getSession: (...args: unknown[]) => mocks.getSession(...args),
+      getUser: (...args: unknown[]) => mocks.getUser(...args),
       refreshSession: (...args: unknown[]) => mocks.refreshSession(...args),
       signOut: (...args: unknown[]) => mocks.signOut(...args),
       onAuthStateChange: (...args: unknown[]) => mocks.onAuthStateChange(...args),
@@ -69,6 +71,10 @@ describe('useAuthStore', () => {
       },
     );
     mocks.signOut.mockResolvedValue({ error: null });
+    mocks.getUser.mockResolvedValue({
+      data: { user: { id: 'u1' } },
+      error: null,
+    });
     mocks.refreshSession.mockResolvedValue({ data: { session: null }, error: null });
     mocks.rpc.mockResolvedValue({ error: null });
     mocks.dataSyncOnUnmount.mockResolvedValue(undefined);
@@ -99,6 +105,87 @@ describe('useAuthStore', () => {
     expect(mocks.rpc).toHaveBeenCalledWith('restore_current_user_if_deleted');
 
     cleanup();
+  });
+
+  it('initializeAuth refreshes and clears a locally cached session rejected by Supabase Auth', async () => {
+    mocks.getSession.mockResolvedValue({
+      data: {
+        session: {
+          user: {
+            id: 'u1',
+            email: 'u1@example.com',
+            user_metadata: { full_name: 'User One' },
+          },
+        },
+      },
+      error: null,
+    });
+    mocks.getUser.mockResolvedValue({
+      data: { user: null },
+      error: { message: 'JWT expired', status: 401 },
+    });
+    mocks.refreshSession.mockResolvedValue({
+      data: { session: null },
+      error: { message: 'refresh failed' },
+    });
+
+    useAuthStore.getState().initializeAuth();
+    await flushMicrotasks();
+
+    expect(mocks.refreshSession).toHaveBeenCalled();
+    expect(mocks.signOut).toHaveBeenCalledWith({ scope: 'local' });
+    expect(mocks.rpc).not.toHaveBeenCalled();
+
+    const state = useAuthStore.getState();
+    expect(state.userId).toBeNull();
+    expect(state.userEmail).toBeNull();
+    expect(state.userFullName).toBeNull();
+    expect(state.loading).toBe(false);
+  });
+
+  it('initializeAuth refreshes and retries lifecycle sync when the RPC rejects auth', async () => {
+    const originalSession = {
+      user: {
+        id: 'u1',
+        email: 'u1@example.com',
+        user_metadata: { full_name: 'User One' },
+      },
+    };
+    const refreshedSession = {
+      user: {
+        id: 'u1',
+        email: 'u1@example.com',
+        user_metadata: { full_name: 'User One' },
+      },
+    };
+    mocks.getSession.mockResolvedValue({
+      data: { session: originalSession },
+      error: null,
+    });
+    mocks.rpc
+      .mockResolvedValueOnce({
+        data: null,
+        error: { message: 'JWSError JWSInvalidSignature', status: 401 },
+      })
+      .mockResolvedValueOnce({ data: false, error: null });
+    mocks.refreshSession.mockResolvedValue({
+      data: { session: refreshedSession },
+      error: null,
+    });
+
+    useAuthStore.getState().initializeAuth();
+    await flushMicrotasks();
+
+    expect(mocks.refreshSession).toHaveBeenCalled();
+    expect(mocks.rpc).toHaveBeenCalledTimes(2);
+    expect(mocks.signOut).not.toHaveBeenCalled();
+    expect(mocks.reportInfo).toHaveBeenCalledWith(
+      'Refreshing auth session because Supabase rejected the stored session.',
+    );
+
+    const state = useAuthStore.getState();
+    expect(state.userId).toBe('u1');
+    expect(state.loading).toBe(false);
   });
 
   it('initializeAuth keeps session hydration working when user lifecycle sync fails', async () => {

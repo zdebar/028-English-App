@@ -39,6 +39,25 @@ function isJwtIssuedAtFutureError(error: unknown): boolean {
   return code === 'PGRST303' && message === 'JWT issued at future';
 }
 
+function isAuthRejectedError(error: unknown): boolean {
+  if (typeof error !== 'object' || error === null) {
+    return false;
+  }
+
+  const { code, message, status } = error as {
+    code?: unknown;
+    message?: unknown;
+    status?: unknown;
+  };
+
+  return (
+    status === 401 ||
+    code === 'PGRST301' ||
+    (typeof message === 'string' &&
+      (message.includes('JWT') || message.toLowerCase().includes('unauthorized')))
+  );
+}
+
 /**
  * A Zustand store hook for managing authentication state using Supabase.
  *
@@ -95,7 +114,44 @@ export const useAuthStore = create<AuthState>((set) => {
     return false;
   };
 
-  const syncAuthenticatedUserLifecycle = async (hasRecoveredJwt = false) => {
+  const recoverRejectedAuthSession = async (): Promise<boolean> => {
+    reportInfo('Refreshing auth session because Supabase rejected the stored session.');
+
+    const { data, error } = await supabaseInstance.auth.refreshSession();
+    if (!error && data.session) {
+      applySession(data.session);
+      return true;
+    }
+
+    reportInfo('Clearing local auth session because Supabase rejected the stored session.');
+
+    const { error: signOutError } = await supabaseInstance.auth.signOut({ scope: 'local' });
+    if (signOutError && signOutError.message !== 'Auth session missing!') {
+      reportError('Invalid auth session cleanup failed', signOutError);
+    }
+
+    clearSession();
+    return false;
+  };
+
+  const validateStoredSession = async (session: Session): Promise<Session | null> => {
+    const { data, error } = await supabaseInstance.auth.getUser();
+    if (!error && data.user?.id === session.user.id) {
+      return session;
+    }
+
+    if (!error) {
+      reportInfo('Refreshing auth session because stored session user mismatch was detected.');
+    } else if (!isAuthRejectedError(error)) {
+      reportError('Auth session validation failed', error);
+      return session;
+    }
+
+    const didRecover = await recoverRejectedAuthSession();
+    return didRecover ? (await supabaseInstance.auth.getSession()).data.session : null;
+  };
+
+  const syncAuthenticatedUserLifecycle = async (hasRecoveredJwt = false, hasRecoveredAuth = false) => {
     // Existing Supabase Auth users do not re-run the auth.users insert trigger on login.
     const { error } = await supabaseInstance.rpc('restore_current_user_if_deleted');
     if (!error) {
@@ -106,6 +162,14 @@ export const useAuthStore = create<AuthState>((set) => {
       const didRecover = await recoverJwtIssuedAtFutureSession();
       if (didRecover) {
         await syncAuthenticatedUserLifecycle(true);
+      }
+      return;
+    }
+
+    if (isAuthRejectedError(error) && !hasRecoveredAuth) {
+      const didRecover = await recoverRejectedAuthSession();
+      if (didRecover) {
+        await syncAuthenticatedUserLifecycle(hasRecoveredJwt, true);
       }
       return;
     }
@@ -127,17 +191,24 @@ export const useAuthStore = create<AuthState>((set) => {
           return;
         }
 
-        if (data?.session) {
+        const session = data?.session ? await validateStoredSession(data.session) : null;
+
+        if (session) {
           void syncAuthenticatedUserLifecycle();
         }
 
-        applySession(data.session);
+        applySession(session);
       };
 
       fetchSession();
 
-      subscription = supabaseInstance.auth.onAuthStateChange((_event, session) => {
+      subscription = supabaseInstance.auth.onAuthStateChange((event, session) => {
         applySession(session);
+        if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+          queueMicrotask(() => {
+            void syncAuthenticatedUserLifecycle();
+          });
+        }
       }).data.subscription;
 
       return () => {
