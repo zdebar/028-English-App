@@ -9,3 +9,6 @@ scripts/utils/__pycache__/
 
 node_modules/
 test_result.txt
+
+*/__pycache__/
+
