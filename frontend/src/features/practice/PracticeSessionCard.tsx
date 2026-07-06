@@ -183,9 +183,12 @@ export default function PracticeSessionCard({
               disabled={showDirectionChange}
             >
               <BookIcon />
+              <HelpText className="right-2 bottom-10 flex flex-col items-end landscape:invisible">
+                {TEXTS.grammar}
+              </HelpText>
             </SecondaryControlButton>
           )}
-          {!showNoteButton && (
+          {showNoteButton && (
             <InfoButton
               className="note-control-emphasis"
               title={TEXTS.tooltipNotes}
@@ -193,7 +196,11 @@ export default function PracticeSessionCard({
                 e.stopPropagation();
                 openNote(noteId);
               }}
-            />
+            >
+              <HelpText className="right-2 -bottom-4 flex flex-col items-end landscape:invisible">
+                {TEXTS.tooltipNotes}
+              </HelpText>
+            </InfoButton>
           )}
           <HelpButton />
         </div>

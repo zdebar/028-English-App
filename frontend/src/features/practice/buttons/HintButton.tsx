@@ -8,7 +8,7 @@ export default function HintButton({ onClick, disabled, children }: PracticeButt
     <PracticeButton
       icon={<BulbIcon />}
       label={TEXTS.hint}
-      className="pos-help-bottom-right"
+      className="pos-help-top-right"
       onClick={onClick}
       disabled={disabled}
     >
