@@ -285,7 +285,7 @@ describe('BlockItemsOverview', () => {
     await waitFor(() => {
       expect(UserItem.resetItemsByBlockId).toHaveBeenCalledWith('u1', 2);
       expect(UserBlock.resetByBlockId).toHaveBeenCalledWith('u1', 2);
-      expect(mocks.reportInfo).toHaveBeenCalledWith('Reset 3 items in block 2 for user u1');
+      expect(mocks.reportInfo).toHaveBeenCalledWith('Reset 3 items in block 2');
       expect(mocks.showToast).toHaveBeenCalledWith('Reset success', 'success');
     });
   });

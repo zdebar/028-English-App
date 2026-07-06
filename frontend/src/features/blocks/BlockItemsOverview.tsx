@@ -86,7 +86,7 @@ export default function BlockItemsOverview() {
     try {
       const resetCount = await UserItem.resetItemsByBlockId(userId, blockId);
       await UserBlock.resetByBlockId(userId, blockId);
-      reportInfo(`Reset ${resetCount} items in block ${blockId} for user ${userId}`);
+      reportInfo(`Reset ${resetCount} items in block ${blockId}`);
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (error) {
       showToast(TEXTS.resetProgressErrorToast, 'error');
