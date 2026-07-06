@@ -79,6 +79,10 @@ export default function PracticeSessionCard({
   const showAudioControls = !audioDisabled;
   const showGrammarButton = Boolean(grammarId && revealed);
   const showNoteButton = Boolean(noteId && revealed);
+  const audioControlsDisabled =
+    !showAudioControls || showDirectionChange || audioLoading || (isCzToEn && !revealed);
+  const grammarButtonDisabled = !showGrammarButton || showDirectionChange;
+  const noteButtonDisabled = !showNoteButton || showDirectionChange;
   let audioStatusMessage = null;
 
   if (audioLoading) {
@@ -168,40 +172,39 @@ export default function PracticeSessionCard({
           )}
         </div>
 
-        {showAudioControls && (
-          <div className="pos-bottom-left-control">
-            <PlayButton onClick={playAudio} disabled={showDirectionChange || audioLoading} />
-            <VolumeSlider />
-          </div>
-        )}
+        <div className="pos-bottom-left-control">
+          <PlayButton onClick={playAudio} disabled={audioControlsDisabled} />
+          <VolumeSlider disabled={audioControlsDisabled} />
+        </div>
         <div className="pos-bottom-right-control">
-          {showGrammarButton && (
-            <SecondaryControlButton
-              title={TEXTS.grammar}
-              ariaLabel={TEXTS.grammar}
-              onClick={() => openGrammar(grammarId)}
-              disabled={showDirectionChange}
-            >
-              <BookIcon />
-              <HelpText className="right-2 bottom-10 flex flex-col items-end landscape:invisible">
-                {TEXTS.grammar}
-              </HelpText>
-            </SecondaryControlButton>
-          )}
-          {showNoteButton && (
-            <InfoButton
-              className="note-control-emphasis"
-              title={TEXTS.tooltipNotes}
-              onClick={(e) => {
-                e.stopPropagation();
-                openNote(noteId);
-              }}
-            >
-              <HelpText className="right-2 -bottom-4 flex flex-col items-end landscape:invisible">
-                {TEXTS.tooltipNotes}
-              </HelpText>
-            </InfoButton>
-          )}
+          <SecondaryControlButton
+            title={TEXTS.grammar}
+            ariaLabel={TEXTS.grammar}
+            onClick={() => {
+              if (grammarId == null || grammarButtonDisabled) return;
+              openGrammar(grammarId);
+            }}
+            disabled={grammarButtonDisabled}
+          >
+            <BookIcon />
+            <HelpText className="right-2 bottom-10 flex flex-col items-end landscape:invisible">
+              {TEXTS.grammar}
+            </HelpText>
+          </SecondaryControlButton>
+          <InfoButton
+            className="note-control-emphasis"
+            title={TEXTS.tooltipNotes}
+            disabled={noteButtonDisabled}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (noteId == null || noteButtonDisabled) return;
+              openNote(noteId);
+            }}
+          >
+            <HelpText className="right-2 -bottom-4 flex flex-col items-end landscape:invisible">
+              {TEXTS.tooltipNotes}
+            </HelpText>
+          </InfoButton>
           <HelpButton />
         </div>
       </div>

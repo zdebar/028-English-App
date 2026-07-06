@@ -251,18 +251,23 @@ vi.mock('@/features/practice/GrammarCard', () => ({
 }));
 
 vi.mock('@/features/audio/VolumeSlider', () => ({
-  default: ({ className }: { className?: string }) => (
-    <div data-testid="volume-slider" className={className} />
+  default: ({ className, disabled }: { className?: string; disabled?: boolean }) => (
+    <div
+      data-testid="volume-slider"
+      className={className}
+      data-disabled={disabled ? 'true' : 'false'}
+    />
   ),
 }));
 
 vi.mock('@/features/notes/InfoButton', () => ({
-  default: ({ className, onClick, title }: any) => (
+  default: ({ className, disabled, onClick, title }: any) => (
     <button
       data-testid="info-button"
       aria-label="note"
       title={title}
       className={className}
+      disabled={disabled}
       onClick={onClick}
     >
       <span data-testid="info-icon" />
@@ -477,14 +482,41 @@ describe('PracticeCard', () => {
     ).toBeTruthy();
   });
 
-  it('hides audio controls when audio is not available for the current state', () => {
+  it('keeps audio controls visible but disabled when audio is not available', () => {
     mocks.practiceDeck.audioDisabled = true;
 
     const { container } = render(<PracticeCard />);
 
-    expect(container.querySelector('.pos-bottom-left-control')).toBeNull();
-    expect(container.querySelector('button[aria-label="Audio"]')).toBeNull();
-    expect(container.querySelector('[data-testid="volume-slider"]')).toBeNull();
+    const audioButton = container.querySelector(
+      '.pos-bottom-left-control button[aria-label="Audio"]',
+    ) as HTMLButtonElement;
+    const volumeSlider = container.querySelector(
+      '.pos-bottom-left-control [data-testid="volume-slider"]',
+    ) as HTMLElement;
+
+    expect(audioButton).toBeTruthy();
+    expect(audioButton.disabled).toBe(true);
+    expect(volumeSlider).toBeTruthy();
+    expect(volumeSlider.dataset.disabled).toBe('true');
+  });
+
+  it('keeps audio controls disabled before reveal in CZ->EN mode', () => {
+    mocks.practiceDeck.isCzToEn = true;
+    mocks.practiceDeck.revealed = false;
+    mocks.practiceDeck.audioDisabled = false;
+
+    const { container } = render(<PracticeCard />);
+
+    const audioButton = container.querySelector(
+      '.pos-bottom-left-control button[aria-label="Audio"]',
+    ) as HTMLButtonElement;
+    const volumeSlider = container.querySelector(
+      '.pos-bottom-left-control [data-testid="volume-slider"]',
+    ) as HTMLElement;
+
+    expect(audioButton).toBeTruthy();
+    expect(audioButton.disabled).toBe(true);
+    expect(volumeSlider.dataset.disabled).toBe('true');
   });
 
   it('keeps help in the right secondary control group', () => {
@@ -537,16 +569,21 @@ describe('PracticeCard', () => {
     expect(mocks.handleGrammar).toHaveBeenCalledWith(42);
   });
 
-  it('hides grammar before reveal even when grammar data exists', () => {
+  it('keeps grammar disabled before reveal even when grammar data exists', () => {
     mocks.practiceDeck.showNewGrammarIndicator = true;
     mocks.practiceDeck.grammarId = 42;
     mocks.practiceDeck.revealed = false;
 
     const { container } = render(<PracticeCard />);
 
-    expect(
-      container.querySelector('.pos-bottom-right-control button[aria-label="Grammar"]'),
-    ).toBeNull();
+    const grammarButton = container.querySelector(
+      '.pos-bottom-right-control button[aria-label="Grammar"]',
+    ) as HTMLButtonElement;
+
+    expect(grammarButton).toBeTruthy();
+    expect(grammarButton.disabled).toBe(true);
+    fireEvent.click(grammarButton);
+    expect(mocks.handleGrammar).not.toHaveBeenCalled();
     expect(screen.queryByTestId('grammar-btn')).toBeNull();
   });
 
@@ -560,17 +597,21 @@ describe('PracticeCard', () => {
     expect(mocks.handleGrammar).not.toHaveBeenCalled();
   });
 
-  it('shows note button only when item is revealed and note exists', () => {
+  it('keeps note button disabled until item is revealed and note exists', () => {
     mocks.practiceDeck.revealed = false;
     mocks.practiceDeck.noteId = 88;
 
     const { container, rerender } = render(<PracticeCard />);
-    expect(screen.queryByRole('button', { name: 'note' })).toBeNull();
+    expect((screen.getByRole('button', { name: 'note' }) as HTMLButtonElement).disabled).toBe(
+      true,
+    );
 
     mocks.practiceDeck.revealed = true;
     rerender(<PracticeCard />);
 
-    expect(screen.getByRole('button', { name: 'note' })).toBeTruthy();
+    expect((screen.getByRole('button', { name: 'note' }) as HTMLButtonElement).disabled).toBe(
+      false,
+    );
     expect(
       container.querySelector('.pos-bottom-right-control [data-testid="info-button"]'),
     ).toBeTruthy();

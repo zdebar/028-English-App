@@ -12,9 +12,16 @@ type InfoButtonProps = Readonly<{
   children?: React.ReactNode;
   /** Extra classes appended to the secondary control button. */
   className?: string;
+  disabled?: boolean;
 }>;
 
-export default function InfoButton({ onClick, title, className = '', children }: InfoButtonProps) {
+export default function InfoButton({
+  onClick,
+  title,
+  className = '',
+  disabled = false,
+  children,
+}: InfoButtonProps) {
   const noteAriaLabel = ARIA_TEXTS?.note ?? 'note';
 
   return (
@@ -23,6 +30,7 @@ export default function InfoButton({ onClick, title, className = '', children }:
       title={title}
       onClick={onClick}
       className={className}
+      disabled={disabled}
     >
       <InfoIcon />
       {children}

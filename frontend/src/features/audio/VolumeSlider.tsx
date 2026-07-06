@@ -8,6 +8,7 @@ import { useAudioStore } from './use-audio-store';
 
 type VolumeSliderProps = Readonly<{
   className?: string;
+  disabled?: boolean;
 }>;
 
 function getVolumeIcon(volume: number) {
@@ -28,7 +29,7 @@ function getVolumeIcon(volume: number) {
  * @param className - Optional additional CSS classes.
  * @returns A JSX element for the volume slider.
  */
-export default function VolumeSlider({ className = '' }: VolumeSliderProps) {
+export default function VolumeSlider({ className = '', disabled = false }: VolumeSliderProps) {
   const volume = useAudioStore((s) => s.volume);
   const setVolume = useAudioStore((s) => s.setVolume);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
@@ -48,6 +49,12 @@ export default function VolumeSlider({ className = '' }: VolumeSliderProps) {
     };
   }, []);
 
+  useEffect(() => {
+    if (disabled) {
+      setShowVolumeSlider(false);
+    }
+  }, [disabled]);
+
   const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = Number.parseFloat(event.target.value);
     setVolume(newVolume);
@@ -61,8 +68,10 @@ export default function VolumeSlider({ className = '' }: VolumeSliderProps) {
       <SecondaryControlButton
         onClick={(event) => {
           event.stopPropagation();
+          if (disabled) return;
           setShowVolumeSlider((prev) => !prev);
         }}
+        disabled={disabled}
         title={TEXTS.volume}
         ariaLabel={ARIA_TEXTS.setVolume}
       >
@@ -86,7 +95,7 @@ export default function VolumeSlider({ className = '' }: VolumeSliderProps) {
           aria-valuemin={0}
           aria-valuemax={1}
           aria-label={ARIA_TEXTS.volumePercent(Math.round(volume * 100))}
-          disabled={false}
+          disabled={disabled}
         />
       )}
     </div>
