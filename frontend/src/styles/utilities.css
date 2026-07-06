@@ -40,7 +40,7 @@
     @apply text-inherit;
   }
 
-  .note-control-emphasis svg {
+  .note-control-emphasis:not(:disabled) svg {
     @apply text-cyan-900 dark:text-cyan-300;
   }
 
