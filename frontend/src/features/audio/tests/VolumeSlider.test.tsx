@@ -63,4 +63,16 @@ describe('VolumeSlider', () => {
     fireEvent.mouseDown(document.body);
     expect(screen.queryByRole('slider')).toBeNull();
   });
+
+  it('keeps slider open when clicking inside the expanded hit area', () => {
+    render(<VolumeSlider />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Nastavit hlasitost' }));
+
+    const hitArea = screen.getByTestId('volume-slider-hit-area');
+    fireEvent.mouseDown(hitArea);
+    fireEvent.click(hitArea);
+
+    expect(screen.getByRole('slider')).toBeTruthy();
+  });
 });

@@ -78,25 +78,29 @@ export default function VolumeSlider({ className = '', disabled = false }: Volum
         {getVolumeIcon(volume)}
       </SecondaryControlButton>
       {showVolumeSlider && (
-        <input
-          type="range"
-          min="0"
-          max="1"
-          step="0.01"
-          value={volume}
-          onClick={(event) => event.stopPropagation()}
-          onChange={(event) => {
-            event.stopPropagation();
-            handleVolumeChange(event);
-          }}
-          className="absolute left-full z-10 cursor-pointer"
-          autoFocus
-          aria-valuenow={volume}
-          aria-valuemin={0}
-          aria-valuemax={1}
-          aria-label={ARIA_TEXTS.volumePercent(Math.round(volume * 100))}
-          disabled={disabled}
-        />
+        <div
+          className="absolute top-1/2 left-full z-40 flex min-h-[var(--height-button)] -translate-y-1/2 items-center pr-[var(--size-button)]"
+          data-testid="volume-slider-hit-area"
+        >
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={volume}
+            onChange={(event) => {
+              event.stopPropagation();
+              handleVolumeChange(event);
+            }}
+            className="cursor-pointer"
+            autoFocus
+            aria-valuenow={volume}
+            aria-valuemin={0}
+            aria-valuemax={1}
+            aria-label={ARIA_TEXTS.volumePercent(Math.round(volume * 100))}
+            disabled={disabled}
+          />
+        </div>
       )}
     </div>
   );
