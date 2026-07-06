@@ -104,6 +104,7 @@ vi.mock('@/locales/cs', () => ({
     noAudio: 'No audio',
     loadingAudio: 'Loading audio',
     audio: 'Audio',
+    grammar: 'Grammar',
     tooltipNotes: 'Notes',
     progress: 'Progress',
     nextStarProgress: 'Next star progress',
@@ -428,7 +429,37 @@ describe('PracticeCard', () => {
     expect(screen.getByTestId('practice-stars-row').textContent).toBe('0:5:50');
   });
 
+  it('shows only hint in the primary row before reveal', () => {
+    const { container } = render(<PracticeCard />);
+
+    const controls = container.querySelector('#practice-controls');
+
+    expect(controls?.querySelector('[data-testid="hint-btn"]')).toBeTruthy();
+    expect(controls?.querySelector('[data-testid="master-btn"]')).toBeNull();
+    expect(controls?.querySelector('[data-testid="repeat-btn"]')).toBeNull();
+    expect(controls?.querySelector('[data-testid="known-btn"]')).toBeNull();
+    expect(controls?.querySelector('[data-testid="grammar-btn"]')).toBeNull();
+    expect(controls?.querySelector('[data-testid="info-button"]')).toBeNull();
+  });
+
+  it('shows skip, repeat, and know in the primary row after reveal', () => {
+    mocks.practiceDeck.revealed = true;
+
+    const { container } = render(<PracticeCard />);
+
+    const controls = container.querySelector('#practice-controls');
+
+    expect(controls?.querySelector('[data-testid="master-btn"]')).toBeTruthy();
+    expect(controls?.querySelector('[data-testid="repeat-btn"]')).toBeTruthy();
+    expect(controls?.querySelector('[data-testid="known-btn"]')).toBeTruthy();
+    expect(controls?.querySelector('[data-testid="hint-btn"]')).toBeNull();
+    expect(controls?.querySelector('[aria-label="Grammar"]')).toBeNull();
+  });
+
   it('renders audio controls in the left secondary control group', () => {
+    mocks.practiceDeck.revealed = true;
+    mocks.practiceDeck.audioDisabled = false;
+
     const { container } = render(<PracticeCard />);
 
     expect(container.querySelector('#top-bar [data-testid="volume-slider"]')).toBeNull();
@@ -440,17 +471,22 @@ describe('PracticeCard', () => {
     ).toBeTruthy();
   });
 
-  it('uses disabled header text colors for disabled secondary audio button', () => {
+  it('hides audio controls when audio is not available for the current state', () => {
     mocks.practiceDeck.audioDisabled = true;
+
     const { container } = render(<PracticeCard />);
 
-    const audioButton = container.querySelector(
-      '.pos-bottom-left-control button[aria-label="Audio"]',
-    ) as HTMLButtonElement;
+    expect(container.querySelector('.pos-bottom-left-control')).toBeNull();
+    expect(container.querySelector('button[aria-label="Audio"]')).toBeNull();
+    expect(container.querySelector('[data-testid="volume-slider"]')).toBeNull();
+  });
 
-    expect(audioButton.disabled).toBe(true);
-    expect(audioButton.className).toContain('disabled:text-disabled-light');
-    expect(audioButton.className).toContain('dark:disabled:text-disabled-dark');
+  it('keeps help in the right secondary control group', () => {
+    const { container } = render(<PracticeCard />);
+
+    expect(
+      container.querySelector('.pos-bottom-right-control [data-testid="help-button"]'),
+    ).toBeTruthy();
   });
 
   it('shows the next empty bronze star when mounted exactly on a completed chunk', () => {
@@ -476,17 +512,36 @@ describe('PracticeCard', () => {
     expect(mocks.practiceDeck.playAudio).toHaveBeenCalledTimes(1);
   });
 
-  it('opens grammar when grammar button is clicked', () => {
+  it('opens grammar from the right secondary control group after reveal', () => {
     mocks.practiceDeck.showNewGrammarIndicator = true;
     mocks.practiceDeck.showDirectionChange = false;
     mocks.practiceDeck.grammarId = 42;
+    mocks.practiceDeck.revealed = true;
 
-    render(<PracticeCard />);
+    const { container } = render(<PracticeCard />);
 
-    fireEvent.click(screen.getByTestId('grammar-btn'));
+    const grammarButton = container.querySelector(
+      '.pos-bottom-right-control button[aria-label="Grammar"]',
+    ) as HTMLButtonElement;
+
+    expect(grammarButton).toBeTruthy();
+    fireEvent.click(grammarButton);
 
     expect(mocks.handleGrammar).toHaveBeenCalledTimes(1);
     expect(mocks.handleGrammar).toHaveBeenCalledWith(42);
+  });
+
+  it('hides grammar before reveal even when grammar data exists', () => {
+    mocks.practiceDeck.showNewGrammarIndicator = true;
+    mocks.practiceDeck.grammarId = 42;
+    mocks.practiceDeck.revealed = false;
+
+    const { container } = render(<PracticeCard />);
+
+    expect(
+      container.querySelector('.pos-bottom-right-control button[aria-label="Grammar"]'),
+    ).toBeNull();
+    expect(screen.queryByTestId('grammar-btn')).toBeNull();
   });
 
   it('does not open grammar automatically while direction change is shown', () => {
@@ -503,13 +558,16 @@ describe('PracticeCard', () => {
     mocks.practiceDeck.revealed = false;
     mocks.practiceDeck.noteId = 88;
 
-    const { rerender } = render(<PracticeCard />);
+    const { container, rerender } = render(<PracticeCard />);
     expect(screen.queryByRole('button', { name: 'note' })).toBeNull();
 
     mocks.practiceDeck.revealed = true;
     rerender(<PracticeCard />);
 
     expect(screen.getByRole('button', { name: 'note' })).toBeTruthy();
+    expect(
+      container.querySelector('.pos-bottom-right-control [data-testid="info-button"]'),
+    ).toBeTruthy();
     expect(screen.getByTestId('info-icon')).toBeTruthy();
   });
 

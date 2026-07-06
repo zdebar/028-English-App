@@ -1,7 +1,8 @@
-import Indicator from '@/components/UI/Indicator';
 import Notification from '@/components/UI/Notification';
 import { STAR_SIZE } from '@/components/UI/StarProgress';
 import DelayedNotification from '@/components/UI/DelayedNotification';
+import SecondaryControlButton from '@/components/UI/buttons/SecondaryControlButton';
+import BookIcon from '@/components/UI/icons/BookIcon';
 import PlayButton from '@/features/audio/PlayButton';
 import VolumeSlider from '@/features/audio/VolumeSlider';
 import GrammarDetailCard from '@/features/grammar/GrammarDetailCard';
@@ -13,7 +14,6 @@ import NoteDetailCard from '@/features/notes/NoteDetailCard';
 import { useNoteViewer } from '@/features/notes/use-note-viewer';
 import { useUserStore } from '@/features/user-stats/use-user-store';
 import { TEXTS } from '@/locales/cs';
-import GrammarButton from './buttons/GrammarButton';
 import HintButton from './buttons/HintButton';
 import KnownButton from './buttons/KnownButton';
 import MasterItemButton from './buttons/MasterItemButton';
@@ -51,7 +51,6 @@ export default function PracticeSessionCard({
   progressLabel,
   isCzToEn,
   revealed,
-  showNewGrammarIndicator,
   czech,
   english,
   pronunciation,
@@ -77,7 +76,9 @@ export default function PracticeSessionCard({
   const cardText = revealed ? undefined : TEXTS.reveal;
   const cardStyle = revealed ? 'color-audio-disabled' : 'color-button';
   const directionText = isCzToEn ? TEXTS.directionCzToEn : TEXTS.directionEnToCz;
-  const showNoteButton = noteId && revealed;
+  const showAudioControls = !audioDisabled;
+  const showGrammarButton = Boolean(grammarId && revealed);
+  const showNoteButton = Boolean(noteId && revealed);
   let audioStatusMessage = null;
 
   if (audioLoading) {
@@ -137,15 +138,18 @@ export default function PracticeSessionCard({
             </HelpText>
           </div>
         </button>
-        <div id="practice-controls" className="relative grid w-full grid-cols-3 gap-1">
-          <MasterItemButton
-            onConfirm={() => {
-              void completeCurrent?.();
-            }}
-            disabled={completeDisabled || !completeCurrent || !revealed || showDirectionChange}
-          />
+        <div
+          id="practice-controls"
+          className={`relative grid w-full gap-1 ${revealed ? 'grid-cols-3' : 'grid-cols-1'}`}
+        >
           {revealed ? (
             <>
+              <MasterItemButton
+                onConfirm={() => {
+                  void completeCurrent?.();
+                }}
+                disabled={completeDisabled || !completeCurrent || showDirectionChange}
+              />
               <RepeatButton
                 onClick={() => {
                   void nextRepeat();
@@ -160,26 +164,27 @@ export default function PracticeSessionCard({
               />
             </>
           ) : (
-            <>
-              <GrammarButton
-                onClick={() => openGrammar(grammarId)}
-                disabled={!grammarId || showDirectionChange}
-              >
-                {showNewGrammarIndicator && <Indicator className="absolute top-2 right-2" />}
-              </GrammarButton>
-              <HintButton onClick={plusHint} disabled={showDirectionChange} />
-            </>
+            <HintButton onClick={plusHint} disabled={showDirectionChange} />
           )}
         </div>
 
-        <div className="pos-bottom-left-control">
-          <PlayButton
-            onClick={playAudio}
-            disabled={audioDisabled || showDirectionChange || audioLoading}
-          />
-          <VolumeSlider />
-        </div>
+        {showAudioControls && (
+          <div className="pos-bottom-left-control">
+            <PlayButton onClick={playAudio} disabled={showDirectionChange || audioLoading} />
+            <VolumeSlider />
+          </div>
+        )}
         <div className="pos-bottom-right-control">
+          {showGrammarButton && (
+            <SecondaryControlButton
+              title={TEXTS.grammar}
+              ariaLabel={TEXTS.grammar}
+              onClick={() => openGrammar(grammarId)}
+              disabled={showDirectionChange}
+            >
+              <BookIcon />
+            </SecondaryControlButton>
+          )}
           {showNoteButton && (
             <InfoButton
               title={TEXTS.tooltipNotes}
