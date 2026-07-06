@@ -79,7 +79,7 @@ export default function VolumeSlider({ className = '', disabled = false }: Volum
       </SecondaryControlButton>
       {showVolumeSlider && (
         <div
-          className="absolute top-1/2 left-full z-40 flex min-h-[var(--height-button)] -translate-y-1/2 items-center pr-[var(--size-button)]"
+          className="min-h-button pr-size-button absolute top-1/2 left-full z-40 flex -translate-y-1/2 items-center"
           data-testid="volume-slider-hit-area"
         >
           <input
