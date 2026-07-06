@@ -7,6 +7,13 @@ import UserItem from './user-items';
 import Lessons from './lessons';
 import SyncEntityModel from './sync-entity-model';
 
+/**
+ * Shared level lookup model.
+ *
+ * Public API:
+ * - `getOverview` combines local levels, lessons, and user items into dashboard progress summaries.
+ * - `syncFromRemote` is inherited from `SyncEntityModel`.
+ */
 export default class Levels extends SyncEntityModel implements LevelType {
   id!: number;
   name!: string;

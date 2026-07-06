@@ -91,6 +91,17 @@ function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
   };
 }
 
+/**
+ * Local Dexie model and sync API for user-specific vocabulary and grammar item progress.
+ *
+ * Public API:
+ * - Practice flow: `getPracticeDeck`, `savePracticeDeck`, and `getReadyVocabularyPracticeState`.
+ * - Progress lookups: `getStartedGrammarIds`, `getStartedBlocksIds`, and `getStartedVocabulary`.
+ * - Grammar/block workflows: `saveNewGrammarBlockCompletion` and lesson-start checks.
+ * - Maintenance: reset helpers, simulation data, local account deletion, and remote sync.
+ *
+ * Dates use the configured null replacement date locally and convert to null for remote sync.
+ */
 export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   item_id!: number;
   user_id!: string;

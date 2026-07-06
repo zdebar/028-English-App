@@ -61,6 +61,16 @@ function convertLocalToExport(block: UserBlockType): UserBlockExport {
   };
 }
 
+/**
+ * Local Dexie model and sync API for user-specific block/topic progress.
+ *
+ * Public API:
+ * - Topic views: `getByUserId`, `getStartedTopicsByUserId`, and `getByBlockId`.
+ * - Grammar unlock flow: first locked/unlocked lookups, ready-state checks, and unlock/master/reset actions.
+ * - Maintenance: grammar/block resets, local account deletion, and remote sync.
+ *
+ * Block timestamps use the configured null replacement date locally and convert to null for remote sync.
+ */
 export default class UserBlock extends Entity<AppDB> implements UserBlockType {
   user_id!: string;
   block_id!: number;

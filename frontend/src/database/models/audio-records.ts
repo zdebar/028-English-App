@@ -9,6 +9,14 @@ import type { AudioRecordLocal } from '@/types/audio.types';
 import { Entity } from 'dexie';
 import UserItem from './user-items';
 
+/**
+ * Local audio blob cache backed by IndexedDB and Supabase Storage.
+ *
+ * Public API:
+ * - `getByFilename` reads a cached blob or downloads and caches a missing file.
+ * - `syncFromRemote` refreshes archive zips when remote metadata changes.
+ * - `removeOrphaned` deletes cached blobs no longer referenced by user items.
+ */
 export default class AudioRecord extends Entity<AppDB> implements AudioRecordLocal {
   filename!: string;
   audioBlob!: Blob;

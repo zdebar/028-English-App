@@ -3,6 +3,13 @@ import { db } from '@/database/models/db';
 import type { AudioMetadataLocal } from '@/types/audio.types';
 import { Entity } from 'dexie';
 
+/**
+ * Local metadata for audio archive cache freshness.
+ *
+ * Public API:
+ * - `getRemoteUpdatedAt` reads the last synced remote archive timestamp.
+ * - `markAsFetched` stores the remote timestamp after an archive sync succeeds.
+ */
 export default class AudioMetadata extends Entity<AppDB> implements AudioMetadataLocal {
   archive_name!: string;
   remote_updated_at!: string;

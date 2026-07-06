@@ -6,6 +6,14 @@ import Dexie from 'dexie';
 import UserItem from './user-items';
 import SyncEntityModel from './sync-entity-model';
 
+/**
+ * Shared grammar lookup model.
+ *
+ * Public API:
+ * - `getById` resolves grammar references and throws when the local lookup row is missing.
+ * - `getStarted` returns grammar topics discovered from started user items.
+ * - `syncFromRemote` is inherited from `SyncEntityModel`.
+ */
 export default class Grammar extends SyncEntityModel implements GrammarType {
   id!: number;
   name!: string;

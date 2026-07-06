@@ -16,6 +16,12 @@ interface SyncEntityModelStatic<T extends SyncRow> {
   syncSelect: string;
 }
 
+/**
+ * Base model for shared lookup tables synced from Supabase into IndexedDB.
+ *
+ * Subclasses provide the table, table name, entity label, and select list. The shared
+ * `syncFromRemote` implementation handles full/incremental pulls, tombstones, and metadata updates.
+ */
 export default abstract class SyncEntityModel extends Entity<AppDB> {
   static readonly syncTable: Dexie.Table<SyncRow, number>;
   static readonly syncTableName: TableName;

@@ -5,6 +5,16 @@ import { TableName } from '@/types/table.types';
 import { Entity } from 'dexie';
 import { validateUserIdUsage } from '../utils/metadata.utils';
 
+/**
+ * Local sync metadata model for tracking per-table synchronization windows.
+ *
+ * Public API:
+ * - `getSyncedAt` reads a table scope timestamp with an epoch fallback.
+ * - `markAsSynced` stores the timestamp after a successful sync.
+ * - `deleteSyncRow` clears a table scope marker.
+ *
+ * User-specific tables require a user id; shared lookup tables must omit it.
+ */
 export default class Metadata extends Entity<AppDB> {
   table_name!: TableName;
   synced_at?: string;

@@ -4,6 +4,13 @@ import { TableName } from '@/types/table.types';
 import Dexie from 'dexie';
 import SyncEntityModel from './sync-entity-model';
 
+/**
+ * Shared lesson lookup model.
+ *
+ * Public API:
+ * - `getAll` returns local lessons in display order.
+ * - `syncFromRemote` is inherited from `SyncEntityModel`.
+ */
 export default class Lessons extends SyncEntityModel implements LessonType {
   id!: number;
   name!: string;

@@ -13,6 +13,17 @@ import { Entity } from 'dexie';
 import Metadata from './metadata';
 import { reportInfo } from '@/features/logging/monitoring-handler';
 
+/**
+ * Local Dexie model and sync API for daily user score rows.
+ *
+ * Public API:
+ * - `addItemCount` updates the score for a local day and emits `dailyCountUpdated`.
+ * - `getOrCreateTodayScore` returns today's count, falling back to 0.
+ * - `getByUserId` returns visible score history newest first.
+ * - `syncFromRemote` pushes local score changes and applies remote changes.
+ *
+ * Account deletion uses `deleteByUserId`; remote cleanup is handled outside this local model.
+ */
 export default class UserScore extends Entity<AppDB> implements UserScoreType {
   user_id!: string;
   date!: string;

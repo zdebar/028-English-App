@@ -4,6 +4,13 @@ import { TableName } from '@/types/table.types';
 import Dexie from 'dexie';
 import SyncEntityModel from './sync-entity-model';
 
+/**
+ * Shared note lookup model.
+ *
+ * Public API:
+ * - `getById` resolves optional note references and returns null when missing locally.
+ * - `syncFromRemote` is inherited from `SyncEntityModel`.
+ */
 export default class Notes extends SyncEntityModel implements NoteType {
   id!: number;
   name!: string;
