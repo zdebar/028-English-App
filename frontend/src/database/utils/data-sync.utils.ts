@@ -16,10 +16,12 @@ import { supabaseInstance } from '@/config/supabase.config';
 import Notes from '../models/notes';
 
 /**
- * Synchronizes data for a specific user with the database.
+ * Synchronizes shared and user-specific tables with Supabase.
  *
- * @param userId - The unique identifier of the user to synchronize data for
- * @returns A promise that resolves when the data synchronization is complete
+ * @param userId Non-empty user id used for user-specific tables and pending local progress restore.
+ * @param fullSync When true, forces all sync tasks to use the epoch start timestamp and refresh local rows.
+ * When false, a full sync is selected only after the configured full-sync interval expires.
+ * @throws Error when userId is empty or any table sync task fails.
  */
 export async function dataSync(userId: string, fullSync: boolean = false): Promise<void> {
   assertNonEmptyString(userId, 'userId');
@@ -88,10 +90,11 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
 }
 
 /**
- * Synchronizes user data when a component unmounts.
+ * Performs a best-effort incremental sync for user-owned tables during unmount.
  *
- * @param userId - The unique identifier of the user whose data should be synchronized
- * @returns A promise that resolves when the synchronization is complete
+ * @param userId User id whose user_blocks, user_scores, and user_items rows should sync.
+ * @returns Resolves without syncing when there is no active Supabase session.
+ * @throws Error when at least one unmount sync task rejects.
  */
 export async function dataSyncOnUnmount(userId: string): Promise<void> {
   const { data: sessionData } = await supabaseInstance.auth.getSession();

@@ -9,12 +9,10 @@ interface HelpState {
 }
 
 /**
- * A Zustand store for managing the help overlay state.
+ * Stores help overlay visibility and coordinates it with the shared overlay mask.
  *
- * @returns {HelpState}
- * - `isHelpOpened: boolean` - whether the help overlay is visible
- * - `openHelp(): void` - opens the help overlay and registers a close callback
- * - `closeHelp(): void` - closes the help overlay
+ * @returns Zustand hook exposing isHelpOpened plus openHelp and closeHelp actions.
+ * openHelp also registers an overlay close callback that clears the help state.
  */
 export const useHelpStore = create<HelpState>()(
   devtools(

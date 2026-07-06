@@ -4,24 +4,16 @@ import { reportError } from '../logging/monitoring-handler';
 import StyledButton from '@/components/UI/buttons/StyledButton';
 
 type DirectionToggleProps<T> = Readonly<{
+  /** Current selected option value. Compared by string value so primitive ids and enum-like values work. */
   value: T;
+  /** Options cycled in array order. Empty arrays log an error and show fallback text. */
   options: { value: T; label: string }[];
+  /** Receives the next option value when the toggle button is clicked. */
   onChange: (value: T) => void;
+  /** Extra classes appended to the outer wrapper. */
   className?: string;
 }>;
 
-/**
- * DirectionSwitch Component
- *
- * A generic, reusable toggle button component for switching between two directions.
- *
- * @template T - The type of the option values.
- * @param value - The currently selected value.
- * @param options - Array of selectable options, each with a value and label.
- * @param onChange - Callback invoked when the selected value changes.
- * @param className - Optional additional CSS classes for custom styling.
- * @returns A styled button that cycles through provided options.
- */
 export default function DirectionTogggle<T>({
   value,
   options,

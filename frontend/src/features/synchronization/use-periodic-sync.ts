@@ -8,19 +8,10 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import { useSyncStore } from './use-sync-store';
 
 /**
- * Hook that manages periodic data synchronization for a user.
+ * Runs initial, periodic, and unmount data synchronization for a signed-in user.
  *
- * Performs data sync operations at regular intervals and on component mount.
- * Handles in-flight sync requests to prevent concurrent synchronization attempts.
- * Ensures cleanup and final sync when the component unmounts.
- *
- * @param userId - The unique identifier of the user to sync data for
- *
- * @returns An object containing:
- *   - loading: Boolean indicating whether a sync operation is currently in progress
- *
- * @example
- * const { loading } = usePeriodicSync(userId);
+ * @param userId User id to sync. Null resets sync state and skips scheduling.
+ * @returns loading flag from the sync store. Overlapping scheduled syncs reuse the in-flight promise.
  */
 export function usePeriodicSync(userId: string | null): { loading: boolean } {
   const inFlightSync = useRef<Promise<void> | null>(null);

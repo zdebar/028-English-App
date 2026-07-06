@@ -28,21 +28,11 @@ function toError(error: unknown): Error {
 }
 
 /**
- * Creates a Zustand store for managing user statistics and state.
+ * Stores user dashboard progress and listens for global progress update events.
  *
- * Handles levels and daily score statistics with automatic updates via custom globalThis events.
- * Sets up event listeners for 'levelsUpdated' and 'dailyCountUpdated' events that trigger
- * store reloads when a userId is provided in the event detail.
- *
- * @returns {UserState} The user store with state management methods:
- * - `levels` - Array of user level data
- * - `dailyCount` - Today's score count for the user
- * - `showMasteredDashboard` - Whether to show mastered lessons on the dashboard
- * - `reloadLevels(userId)` - Fetches and updates user levels from the server
- * - `reloadDailyCount(userId)` - Fetches and updates daily score statistics
- * - `setMasteredDashboard(value)` - Toggles display of mastered lessons on the dashboard
- * - `clearLevels()` - Resets levels to initial state
- * - `clearDailyCount()` - Resets daily count to initial state
+ * @returns Zustand hook with level overview, daily count, loading/error flags, and reload/clear actions.
+ * The store reloads levels on levelsUpdated events and updates or reloads daily count on
+ * dailyCountUpdated events when event.detail.userId is present.
  */
 export const useUserStore = create<UserState>((set, get) => {
   let levelsUpdatedListener: ((event: any) => void) | undefined;

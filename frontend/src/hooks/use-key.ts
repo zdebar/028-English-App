@@ -8,12 +8,14 @@ interface UseKeyState {
 }
 
 /**
- * A React hook that listens for specific key presses on the window and executes a callback when those keys are pressed.
- * It can optionally be disabled when an overlay is open, based on the `disabledOnOverlayOpen` flag.
+ * Registers a global keydown listener for one or more KeyboardEvent.key values.
  *
- * @param onKeyPress - The callback function to execute when a specified key is pressed.
- * @param keys - An array of key strings (e.g., ['Enter', 'Escape']) to listen for.
- * @param disabledOnOverlayOpen - If true, disables the key listener when an overlay is open. Defaults to false.
+ * @param onKeyPress Callback invoked when one of the configured keys is pressed.
+ * @param keys Non-empty list of KeyboardEvent.key values, such as Enter or Escape.
+ * @param disabledOnOverlayOpen When true, skips listener registration while the overlay store is open.
+ * Defaults to false.
+ * @throws TypeError when onKeyPress is not a function.
+ * @throws Error when keys is empty or not an array.
  */
 export function useKey({ onKeyPress, keys, disabledOnOverlayOpen = false }: UseKeyState) {
   if (typeof onKeyPress !== 'function') {

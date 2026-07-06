@@ -8,8 +8,7 @@ INT_COLUMNS = {"id", "sort_order", "grammar_id", "lesson_id", "block_id", "note_
 
 
 def clean_data_frame(df: pd.DataFrame) -> pd.DataFrame:
-    """Clean the DataFrame by removing empty rows and stripping whitespace from string values.
-    """
+    """Strip string cells and drop rows that are entirely empty."""
     df = df.map(lambda x: str(x).strip() if isinstance(x, str) else x)
     df = df.dropna(how="all")
     return df
@@ -61,13 +60,7 @@ def read_vocab_csv(
         "id", "czech", "english", "pronunciation", "audio", "sort_order", "grammar_id", "lesson_id", "block_id", "note_id"
     ],
 ) -> pd.DataFrame:
-    """
-    Reads a CSV file, ensures specified columns exist, and cleans the DataFrame.
-
-    :param file_path: Relative path to the CSV file.
-    :param columns: List of column names to include.
-    :return: DataFrame with the specified columns.
-    """
+    """Read a vocabulary CSV, add missing requested columns, and normalize configured int columns."""
     df = pd.read_csv(file_path, skipinitialspace=True)
 
     # Keep id only when present in source data; do not create it automatically.
@@ -82,11 +75,13 @@ def read_vocab_csv(
     return df
 
 def redo_id(df, start_id=1):
+    """Return a copy with sequential id values starting at start_id."""
     df = df.copy()
     df['id'] = range(start_id, start_id + len(df))
     return df
 
 def redo_sort_order(df, file_name: str = "", start_sort_order: int = 1):
+    """Return a copy with sequential sort_order values, optionally based on leading file digits."""
     if file_name:
         base_name = os.path.basename(file_name)
         leading_digits = ""
@@ -103,6 +98,7 @@ def redo_sort_order(df, file_name: str = "", start_sort_order: int = 1):
     return df
 
 def add_lesson_id(df, file_name: str = ""):
+    """Return a copy with lesson_id set from leading digits in file_name, or blank when absent."""
     base_name = os.path.basename(file_name) if file_name else ""
     leading_digits = ""
     for char in base_name:

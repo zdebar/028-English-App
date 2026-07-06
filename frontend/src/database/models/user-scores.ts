@@ -13,14 +13,6 @@ import { Entity } from 'dexie';
 import Metadata from './metadata';
 import { reportInfo } from '@/features/logging/monitoring-handler';
 
-/**
- * Represents a user score entity in the application database.
- *
- * @method addItemCount - Increases the item count for today's date by the specified amount.
- * @method getOrCreateTodayScore - Fetches the user score record for today's date. Creates a new record with item_count set to 0 if no record exists.
- * @method deleteByUserId - Clears all user score records for a given user.
- * @method syncFromRemote - Synchronizes user scores between local database and Supabase.
- */
 export default class UserScore extends Entity<AppDB> implements UserScoreType {
   user_id!: string;
   date!: string;
@@ -29,10 +21,12 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
   deleted_at!: string | null;
 
   /**
-   * Increases the item count for today's date by the specified amount.
-   * @param userId - The user ID. Must be a valid string.
-   * @param count - The number to add to today's item count. Must be a non-negative integer.
-   * @param dateTime - The ISO string representing the date and time of the update. If not provided, defaults to the current date and time.
+   * Adds practiced item count to the score row for dateTime's local day.
+   *
+   * @param userId User id for the score row.
+   * @param count Non-negative count to add; zero is ignored.
+   * @param dateTime ISO timestamp whose local YYYY-MM-DD date selects the score row. Defaults to now.
+   * @throws Error when the resulting count is negative or non-integer.
    */
   static async addItemCount(
     userId: string,
@@ -52,8 +46,10 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
   }
 
   /**
-   * Fetches the user score record for today's date. If no record exists, returns a new record with item_count set to 0.
-   * @param userId The user ID.
+   * Reads today's practiced item count.
+   *
+   * @param userId User id for the score row.
+   * @returns Today's item_count, or 0 when the row does not exist.
    */
   static async getOrCreateTodayScore(userId: string): Promise<number> {
     const today = getTodayShortDate();
@@ -61,8 +57,10 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
   }
 
   /**
-   * Fetches all non-deleted score records for a user ordered by date descending.
-   * @param userId The user ID.
+   * Reads visible score history for a user.
+   *
+   * @param userId User id whose scores should be read.
+   * @returns Non-deleted score rows ordered by date descending.
    */
   static async getByUserId(userId: string): Promise<UserScoreType[]> {
     const records = await db.user_scores.where('user_id').equals(userId).toArray();
@@ -73,27 +71,23 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
   }
 
   /**
-   * Clears all user score records for a given user.
-   * Use only for deletion of user account, when user scores on remote are deleted automatically.
-   * @param userId - The ID of the user whose scores should be cleared
+   * Deletes all local score rows for an account being removed.
+   *
+   * @param userId User id whose local score rows should be deleted.
    */
   static async deleteByUserId(userId: string): Promise<void> {
     await db.user_scores.where('user_id').equals(userId).delete();
   }
 
   /**
-   * Synchronizes user scores between local database and Supabase.
+   * Pushes local score changes and applies remote score changes.
    *
-   * Performs a two-way sync by first pushing local changes to Supabase,
-   * then pulling updated scores back to the local database.
-   *
-   * Optionally performs a full sync by clearing all local scores and resyncing from
-   * the epoch start date.
-   *
-   * @param userId - The unique identifier of the user whose scores to sync
-   * @param doFullSync - If true, performs a full sync by deleting all local scores
-   *                     and pulling from the epoch start date. Defaults to false.
-   * @return The count of items that were updated from the remote database
+   * @param userId User id whose score rows should sync.
+   * @param doFullSync When true, local rows are cleared before applying remote rows from the epoch.
+   * Defaults to false for incremental sync.
+   * @returns Number of score rows returned by the remote sync RPC.
+   * @throws SupabaseError when the sync RPC fails.
+   * @throws Error when sync metadata userId validation fails.
    */
   static async syncFromRemote(userId: string, doFullSync: boolean = false): Promise<number> {
     // Step 1: Get the last synced timestamp for user scores
@@ -127,10 +121,12 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
   }
 
   /**
-   * Gets user scores from IndexedDB for a specific user that were updated in between the last synced timestamp and the new synced timestamp.
-   * @param userId - The ID of the user whose scores should be fetched
-   * @param lastSyncedAt - The timestamp of the last sync (inclusive)
-   * @param newSyncedAt - The timestamp of the new sync (exclusive)
+   * Reads local score rows that changed inside a sync window.
+   *
+   * @param userId User id whose local score rows should be exported.
+   * @param lastSyncedAt Inclusive lower updated_at bound.
+   * @param newSyncedAt Exclusive upper updated_at bound.
+   * @returns Score rows to push to the remote sync RPC.
    */
   private static async getUserScoresForSync(
     userId: string,
@@ -146,10 +142,12 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
   }
 
   /**
-   * Creates a user score record with the provided information.
-   * @param userId - The unique identifier of the user
-   * @param date - The date associated with the score record
-   * @param count - The number of items counted in this score. Should be a non-negative integer.
+   * Creates a normalized score row.
+   *
+   * @param userId User id for the score row.
+   * @param date Score date in YYYY-MM-DD format.
+   * @param count Non-negative item count.
+   * @throws Error when date or count is invalid.
    */
   private static createRecord(userId: string, date: string, count: number): UserScoreType {
     assertNonNegativeInteger(
@@ -168,8 +166,13 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
   }
 
   /**
-   * Pushes local user scores to the remote database.
-   * @param scores - The local user scores to be synced.
+   * Calls the Supabase score sync RPC.
+   *
+   * @param userId User id passed to the RPC.
+   * @param scores Local score rows to upsert remotely before fetching remote changes.
+   * @param lastSyncedAt Inclusive remote change lower bound; defaults to the epoch start date.
+   * @returns Remote score rows changed since lastSyncedAt, or [] when none are returned.
+   * @throws SupabaseError when the RPC fails.
    */
   private static async syncWithRemote(
     userId: string,

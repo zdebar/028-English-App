@@ -3,17 +3,13 @@ import { TEXTS } from '@/locales/cs';
 import type { ButtonHTMLAttributes, JSX } from 'react';
 
 type MasteredToggleButtonProps = Readonly<{
+  /** Current dashboard mode: false shows started counts, true shows mastered counts. */
   showMastered: boolean;
+  /** Receives the next dashboard mode when the toggle is clicked. */
   setShowMastered: (value: boolean) => void;
 }> &
   ButtonHTMLAttributes<HTMLButtonElement>;
 
-/**
- * A styled button component for toggling mastered state.
- *
- * @param showMastered - Indicates whether mastered items are currently shown
- * @param setShowMastered - Function to update the mastered state
- */
 export default function MasteredToggleButton({
   showMastered,
   setShowMastered,

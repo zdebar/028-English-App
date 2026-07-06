@@ -6,15 +6,6 @@ import Dexie from 'dexie';
 import UserItem from './user-items';
 import SyncEntityModel from './sync-entity-model';
 
-/**
- * Represents a grammar entity in the application database.
- * - grammar records are shared across all users
- *
- * @method getById - Fetches a grammar record by its ID.
- * @method getStarted - Retrieves the list of grammar that the user has started.
- * @method syncFromRemote - Synchronizes grammar data between the local database and Supabase, either fully or incrementally based on the last sync timestamp.
- *
- */
 export default class Grammar extends SyncEntityModel implements GrammarType {
   id!: number;
   name!: string;
@@ -28,8 +19,11 @@ export default class Grammar extends SyncEntityModel implements GrammarType {
   static override readonly syncSelect = 'id, name, note, sort_order, deleted_at';
 
   /**
-   * Retrieves a grammar record by its ID from the database.
-   * @param grammarId - The unique identifier of the grammar record to retrieve.
+   * Reads one local grammar record by id.
+   *
+   * @param grammarId Grammar id referenced by a user item or block.
+   * @returns The matching grammar record.
+   * @throws DatabaseError when the grammar id is missing locally.
    */
   static async getById(grammarId: number): Promise<GrammarType> {
     const grammar = await db.grammar.get(grammarId);
@@ -42,8 +36,10 @@ export default class Grammar extends SyncEntityModel implements GrammarType {
   }
 
   /**
-   * Retrieves a list of grammar items that have been started by the user.
-   * @param userId - The unique identifier of the user
+   * Reads grammar topics started by a user.
+   *
+   * @param userId User id whose started grammar ids should be inspected.
+   * @returns Started grammar records sorted by sort_order, or [] when the user has none.
    */
   static async getStarted(userId: string): Promise<GrammarType[]> {
     const grammarIds = await UserItem.getStartedGrammarIds(userId);

@@ -28,6 +28,11 @@ def require_english_column(df: pd.DataFrame, csv_path: Path, kind: str) -> None:
 
 
 def collect_source_match_keys(folder: Path) -> tuple[set[tuple[str, str]], set[str], set[str]]:
+	"""Collect normalized source keys from CSV files that must be removed from target files.
+
+	Source CSVs must contain an english column. When a czech column exists, rows are matched by
+	(czech, english); otherwise they are treated as English-only matches.
+	"""
 	if not folder.exists():
 		raise FileNotFoundError(f"Source folder does not exist: {folder}")
 
@@ -61,6 +66,7 @@ def collect_czech_english_keys_from_folder(folder: Path) -> set[tuple[str, str]]
 
 
 def collect_czech_english_rows_from_folder(folder: Path) -> pd.DataFrame:
+	"""Collect source rows with czech, english, and source_file columns for tracker updates."""
 	if not folder.exists():
 		raise FileNotFoundError(f"Source folder does not exist: {folder}")
 
@@ -83,6 +89,7 @@ def collect_czech_english_rows_from_folder(folder: Path) -> pd.DataFrame:
 
 
 def ensure_already_used_csv(tracker_folder: Path) -> Path:
+	"""Create tracker/already_used.csv with czech and english columns when it is missing."""
 	tracker_folder.mkdir(parents=True, exist_ok=True)
 	already_used_csv = tracker_folder / "already_used.csv"
 
@@ -94,6 +101,7 @@ def ensure_already_used_csv(tracker_folder: Path) -> Path:
 
 
 def read_tracker_rows(already_used_csv: Path) -> pd.DataFrame:
+	"""Read tracker rows and validate the required czech and english columns."""
 	existing_df = pd.read_csv(already_used_csv)
 	if "czech" not in existing_df.columns or "english" not in existing_df.columns:
 		raise ValueError(f"Missing column 'czech' or 'english' in tracker file: {already_used_csv}")
@@ -201,6 +209,7 @@ def build_tracker_updates(
 	existing_keys: set[tuple[str, str]],
 	existing_english_keys: set[str],
 ) -> tuple[list[dict[str, str]], list[tuple[str, str, str]]]:
+	"""Build new tracker rows and conflict rows without mutating existing tracker data."""
 	conflicts: list[tuple[str, str, str]] = []
 	to_append: list[dict[str, str]] = []
 	seen_in_batch: set[tuple[str, str]] = set()
@@ -238,6 +247,7 @@ def save_tracker_updates(
 	existing_df: pd.DataFrame,
 	to_append: list[dict[str, str]],
 ) -> None:
+	"""Append prepared tracker rows to already_used.csv, preserving existing rows."""
 	if not to_append:
 		print("No new rows to append into tracker/already_used.csv")
 		return
@@ -251,6 +261,7 @@ def save_tracker_updates(
 
 
 def update_already_used_csv(source_folder: Path, tracker_folder: Path) -> None:
+	"""Update tracker/already_used.csv from prepared source CSV files."""
 	already_used_csv = ensure_already_used_csv(tracker_folder)
 	existing_df = read_tracker_rows(already_used_csv)
 
@@ -271,6 +282,7 @@ def filter_target_file(
 	source_english_only_keys: set[str],
 	source_all_english_keys: set[str],
 ) -> None:
+	"""Remove rows from a target CSV when they match source bilingual or English-only keys."""
 	if not target_csv.exists():
 		print(f"Skipping missing target file: {target_csv}")
 		return
@@ -310,6 +322,7 @@ def filter_target_file(
 
 
 def main() -> None:
+	"""Update the tracker file and filter target CSV files under scripts/data/tracker."""
 	script_dir = Path(__file__).resolve().parent
 	source_folder = script_dir / "data" / "prepare"
 	target_folder = script_dir / "data" / "tracker"

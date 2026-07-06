@@ -9,28 +9,27 @@ import type { AudioRecordLocal } from '@/types/audio.types';
 import { Entity } from 'dexie';
 import UserItem from './user-items';
 
-/**
- * Represents an audio record entity for managing audio files in the application's database.
- *
- * @method getByFilename - Retrieves audio record by its filename.
- * @method syncFromRemote - Synchronize audio data by downloading, extracting, and storing audio archives from remote storage.
- * @method removeOrphaned - Removes audio records that are not referenced by any user items.
- */
 export default class AudioRecord extends Entity<AppDB> implements AudioRecordLocal {
   filename!: string;
   audioBlob!: Blob;
 
   /**
-   * Gets an audio record by its filename.
-   * @param audioName The filename of the audio to fetch.
+   * Gets an audio record from IndexedDB or downloads it on demand.
+   *
+   * @param audioName Filename/path stored on a user item.
+   * @returns The local audio record; missing records are fetched from the audio bucket and cached.
+   * @throws SupabaseError when the fallback storage download fails.
    */
   static async getByFilename(audioName: string): Promise<AudioRecordLocal> {
     return (await db.audio_records.get(audioName)) ?? this.fetchAudioRecord(audioName);
   }
 
   /**
-   * Synchronizes all audio archives from the remote bucket to local storage.
-   * Fetches the bucket file list once, then downloads only files newer than the locally stored version.
+   * Synchronizes audio archives from remote storage to IndexedDB.
+   *
+   * @returns Summary of archive sync tasks. Archives are skipped when their remote updated_at value
+   * is not newer than local audio metadata.
+   * @throws SupabaseError when bucket metadata cannot be listed.
    */
   static async syncFromRemote(): Promise<SyncSummary> {
     const bucketMetadata = await fetchStorageBucketMetadata(config.audio.archiveBucketName);
@@ -50,8 +49,9 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
   }
 
   /**
-   * Removes orphaned audio records from the database.
-   * Orphaned records are those that exist in the audio_records table but are not referenced by any user items.
+   * Removes cached audio blobs that are no longer referenced by any user item.
+   *
+   * @returns Summary of delete tasks, or an empty summary when there are no orphaned records.
    */
   static async removeOrphaned(): Promise<SyncSummary> {
     const existingFilenames = await db.audio_records.toCollection().primaryKeys();
@@ -74,10 +74,12 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
   }
 
   /**
-   * Synchronizes a single audio archive into local storage.
-   * Downloads only if the remote file is newer than the locally stored version.
-   * @param archiveName - The name/key of the archive to download and synchronize.
-   * @param remoteUpdatedAt - The remote file's updated_at timestamp from the bucket listing.
+   * Downloads and stores one archive when the remote version is newer than the local marker.
+   *
+   * @param archiveName Archive filename in the configured archive bucket.
+   * @param remoteUpdatedAt Remote updated_at timestamp from the bucket listing.
+   * @throws SupabaseError when archive download fails.
+   * @throws ZipExtractionError when the downloaded blob cannot be read as a zip.
    */
   private static async syncArchiveFromRemote(
     archiveName: string,
@@ -98,8 +100,11 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
   }
 
   /**
-   * Extracts files from a zip Blob and returns them as a map of filename to Blob.
-   * @param zipBlob The zip file as a Blob.
+   * Extracts non-directory entries from a zip blob.
+   *
+   * @param zipBlob Downloaded archive blob.
+   * @returns Map of archive filename to extracted audio blob.
+   * @throws ZipExtractionError when JSZip cannot parse the blob.
    */
   private static async extractZip(zipBlob: Blob): Promise<Map<string, Blob>> {
     const extractedFiles = new Map<string, Blob>();
@@ -127,8 +132,11 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
   }
 
   /**
-   * Fetches an audio file from storage and stores it in the local database.
-   * @param audioName - The name/path of the audio file to fetch
+   * Downloads one audio file and stores it in IndexedDB.
+   *
+   * @param audioName Filename/path in the configured audio bucket.
+   * @returns Newly cached audio record.
+   * @throws SupabaseError when storage download fails.
    */
   private static async fetchAudioRecord(audioName: string): Promise<AudioRecordLocal> {
     const audioBlob = await fetchStorage(config.audio.audioBucketName, audioName);

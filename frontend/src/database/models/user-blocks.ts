@@ -79,6 +79,13 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
   mastered_at!: string;
   deleted_at!: string;
 
+  /**
+   * Reads all block rows for a user.
+   *
+   * @param userId Non-empty user id whose blocks should be read.
+   * @returns Blocks sorted by sort_order.
+   * @throws Error when userId is empty.
+   */
   static async getByUserId(userId: string): Promise<UserBlockType[]> {
     assertNonEmptyString(userId, 'userId');
 
@@ -86,6 +93,14 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     return blocks.sort((left, right) => left.sort_order - right.sort_order);
   }
 
+  /**
+   * Reads blocks that should appear in the started topics overview.
+   *
+   * @param userId Non-empty user id whose topics should be read.
+   * @returns Visible topic blocks sorted by sort_order. Vocabulary blocks are included when at least
+   * one item from the block has started; grammar blocks are included when their block progress started.
+   * @throws Error when userId is empty.
+   */
   static async getStartedTopicsByUserId(userId: string): Promise<UserBlockType[]> {
     assertNonEmptyString(userId, 'userId');
 
@@ -106,12 +121,27 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
       .sort((left, right) => left.sort_order - right.sort_order);
   }
 
+  /**
+   * Looks up a user block by block id.
+   *
+   * @param userId Non-empty user id owning the block.
+   * @param blockId Block id to look up.
+   * @returns Matching block, or null when no local row exists.
+   * @throws Error when userId is empty.
+   */
   static async getByBlockId(userId: string, blockId: number): Promise<UserBlockType | null> {
     assertNonEmptyString(userId, 'userId');
 
     return (await db.user_blocks.get([userId, blockId])) ?? null;
   }
 
+  /**
+   * Finds the first unlocked grammar block that is not yet mastered.
+   *
+   * @param userId Non-empty user id whose grammar blocks should be inspected.
+   * @returns Earliest started, unmastered grammar block, or null when none are available.
+   * @throws Error when userId is empty.
+   */
   static async getFirstUnlockedGrammarBlock(userId: string): Promise<UserBlockType | null> {
     assertNonEmptyString(userId, 'userId');
 
@@ -131,6 +161,13 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     return sortedBlocks.at(0) ?? null;
   }
 
+  /**
+   * Finds the first locked grammar block in lesson/sort order.
+   *
+   * @param userId Non-empty user id whose grammar blocks should be inspected.
+   * @returns Earliest not-started grammar block, or null when none remain locked.
+   * @throws Error when userId is empty.
+   */
   static async getFirstLockedGrammarBlock(userId: string): Promise<UserBlockType | null> {
     assertNonEmptyString(userId, 'userId');
 
@@ -149,10 +186,23 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     return sortedBlocks.at(0) ?? null;
   }
 
+  /**
+   * Counts grammar review items due now.
+   *
+   * @param userId User id whose grammar practice state should be read.
+   * @returns Number of due grammar items.
+   */
   static async countReadyGrammarItems(userId: string): Promise<number> {
     return (await this.getReadyGrammarPracticeState(userId)).readyCount;
   }
 
+  /**
+   * Calculates ready grammar review state.
+   *
+   * @param userId Non-empty user id whose grammar items should be inspected.
+   * @returns Ready count plus a grouped future schedule. Never-started grammar items are ignored.
+   * @throws Error when userId is empty.
+   */
   static async getReadyGrammarPracticeState(userId: string): Promise<ReadyGrammarPracticeState> {
     assertNonEmptyString(userId, 'userId');
 
@@ -194,6 +244,14 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     };
   }
 
+  /**
+   * Marks a grammar block as unlocked/started.
+   *
+   * @param userId Non-empty user id owning the block.
+   * @param blockId Block id to unlock.
+   * @param dateTime ISO timestamp written to started_at and updated_at.
+   * @throws Error when userId is empty.
+   */
   static async unlockBlock(userId: string, blockId: number, dateTime: string): Promise<void> {
     assertNonEmptyString(userId, 'userId');
 
@@ -203,6 +261,14 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     });
   }
 
+  /**
+   * Marks a grammar block as mastered.
+   *
+   * @param userId Non-empty user id owning the block.
+   * @param blockId Block id to master.
+   * @param dateTime ISO timestamp written to mastered_at and updated_at.
+   * @throws Error when userId is empty.
+   */
   static async markBlockMastered(userId: string, blockId: number, dateTime: string): Promise<void> {
     assertNonEmptyString(userId, 'userId');
 
@@ -213,6 +279,14 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     });
   }
 
+  /**
+   * Resets one user block to its unstarted state.
+   *
+   * @param userId Non-empty user id owning the block.
+   * @param blockId Block id to reset.
+   * @param dateTime ISO timestamp written to updated_at. Defaults to now.
+   * @throws Error when userId is empty.
+   */
   static async resetByBlockId(
     userId: string,
     blockId: number,
@@ -223,6 +297,15 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     await db.user_blocks.update([userId, blockId], getResetBlockFields(dateTime));
   }
 
+  /**
+   * Resets all blocks tied to a grammar id.
+   *
+   * @param userId Non-empty user id owning the blocks.
+   * @param grammarId Grammar id to match.
+   * @param dateTime ISO timestamp written to updated_at. Defaults to now.
+   * @returns Number of reset blocks, or 0 when no block matches.
+   * @throws Error when userId is empty.
+   */
   static async resetByGrammarId(
     userId: string,
     grammarId: number,
@@ -250,6 +333,14 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     return blocks.length;
   }
 
+  /**
+   * Unlocks the next grammar block when lesson and previous-block prerequisites are met.
+   *
+   * @param userId Non-empty user id whose next grammar block should be considered.
+   * @param dateTime ISO timestamp written to started_at and updated_at. Defaults to now.
+   * @returns The unlocked block with updated timestamps, or null when no block is eligible.
+   * @throws Error when userId is empty.
+   */
   static async unlockNextGrammarBlock(
     userId: string,
     dateTime: string = new Date(Date.now()).toISOString(),
@@ -282,10 +373,25 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     };
   }
 
+  /**
+   * Deletes all local block rows for an account being removed.
+   *
+   * @param userId User id whose local block rows should be deleted.
+   */
   static async deleteByUserId(userId: string): Promise<void> {
     await db.user_blocks.where('user_id').equals(userId).delete();
   }
 
+  /**
+   * Pushes local block changes and applies remote block changes.
+   *
+   * @param userId User id whose block rows should sync.
+   * @param doFullSync When true, local rows are cleared before applying remote rows from the epoch.
+   * Defaults to false for incremental sync.
+   * @returns Number of block rows returned by the remote sync RPC.
+   * @throws SupabaseError when the sync RPC fails.
+   * @throws Error when sync metadata userId validation fails.
+   */
   static async syncFromRemote(userId: string, doFullSync: boolean = false): Promise<number> {
     const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(
       doFullSync,
@@ -314,6 +420,14 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     return updatedBlocks.length;
   }
 
+  /**
+   * Reads local block rows that changed inside a sync window.
+   *
+   * @param userId User id whose local block rows should be exported.
+   * @param lastSyncedAt Inclusive lower updated_at bound.
+   * @param newSyncedAt Exclusive upper updated_at bound.
+   * @returns Block rows converted to the remote export shape.
+   */
   private static async getUserBlocksForSync(
     userId: string,
     lastSyncedAt: string,
@@ -327,6 +441,15 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     return localBlocks.map(convertLocalToExport);
   }
 
+  /**
+   * Calls the Supabase block sync RPC.
+   *
+   * @param userId User id passed to the RPC.
+   * @param blocks Local block rows to upsert remotely before fetching remote changes.
+   * @param lastSyncedAt Inclusive remote change lower bound.
+   * @returns Remote block rows converted to local shape, or [] when none are returned.
+   * @throws SupabaseError when the RPC fails.
+   */
   private static async syncWithRemote(
     userId: string,
     blocks: UserBlockExport[],
@@ -348,6 +471,13 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     return (updatedBlocks ?? []).map(convertAPIToLocal);
   }
 
+  /**
+   * Finds the grammar block immediately before another grammar block.
+   *
+   * @param userId User id whose grammar blocks should be inspected.
+   * @param block Reference grammar block.
+   * @returns Previous grammar block in lesson/sort order, or null when the block is first.
+   */
   private static async getPreviousGrammarBlock(
     userId: string,
     block: UserBlockType,

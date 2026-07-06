@@ -4,14 +4,6 @@ import { TableName } from '@/types/table.types';
 import Dexie from 'dexie';
 import SyncEntityModel from './sync-entity-model';
 
-/**
- * Represents a note entity in the local database.
- * Handles synchronization of note data between the remote Supabase server and local storage.
- *
- * @method getById - Retrieves a note by its ID from the local database.
- * @method syncFromRemote - Synchronizes notes from the remote server with the local database.
- *
- */
 export default class Notes extends SyncEntityModel implements NoteType {
   id!: number;
   name!: string;
@@ -25,7 +17,10 @@ export default class Notes extends SyncEntityModel implements NoteType {
   static override readonly syncSelect = 'id, name, note, sort_order, deleted_at';
 
   /**
-   * Retrieves a note by its ID from the database.
+   * Looks up a local note by id.
+   *
+   * @param id Note id from a grammar, block, or item reference.
+   * @returns The matching note, or null when the local table has no row for the id.
    */
   static async getById(id: number): Promise<NoteType | null> {
     return (await db.notes.get(id)) ?? null;

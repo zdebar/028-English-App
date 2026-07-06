@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react';
 
 /**
- * Custom hook to sync a state value with localStorage.
- * Loads from localStorage on mount and saves on every change.
- * @param key The localStorage key
- * @param initialValue The initial value to use if localStorage is empty
- * @returns A tuple containing the state value and a setter function
+ * Keeps React state synchronized with one localStorage key.
+ *
+ * @param key localStorage key to read from and write to. When the key changes, state is reloaded
+ * from the new key and the first save is skipped.
+ * @param initialValue Value used when the current key has no stored JSON value.
+ * @returns A React state tuple. Values are stored as JSON on every state change after initialization.
+ * @throws SyntaxError when an existing localStorage value is not valid JSON.
  */
 export function useLocalStorageSync<T>(
   key: string,

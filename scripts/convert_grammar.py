@@ -28,6 +28,7 @@ def _normalize_text(value: str) -> str:
 
 
 def _extract_pair(paragraph_html: str) -> tuple[str, str] | None:
+    """Extract a Czech/English pair from one paragraph, or return None when it is not a pair."""
     match = PAIR_RE.match(paragraph_html)
     if not match:
         return None
@@ -100,6 +101,7 @@ def _collect_consecutive_pairs(tokens: list[tuple[str, str]], start_index: int) 
 
 
 def convert_note(note_html: str) -> str:
+    """Convert consecutive pair paragraphs in one note HTML fragment into grammar-pairs blocks."""
     if not note_html:
         return ""
 
@@ -127,6 +129,7 @@ def convert_note(note_html: str) -> str:
 
 
 def process_csv(input_path: str, output_path: str) -> None:
+    """Read a grammar CSV, convert its note/NOTE column, and write the converted CSV."""
     with open(input_path, "r", encoding="utf-8", newline="") as src:
         sample = src.read(2048)
         src.seek(0)
@@ -155,6 +158,7 @@ def process_csv(input_path: str, output_path: str) -> None:
 
 
 def main() -> None:
+    """Parse command-line paths and convert the configured grammar CSV."""
     parser = argparse.ArgumentParser(description="Convert grammar CSV notes to dl.grammar-pairs")
     parser.add_argument("--input", "-i", default="data/grammar.csv", help="Input CSV file")
     parser.add_argument("--output", "-o", default="data/grammar-converted.csv", help="Output CSV file")

@@ -4,11 +4,12 @@ import config from '@/config/config';
 const NULL_DATE = config.database.nullReplacementDate;
 
 /**
- * Adds a grammar indicator flag to practice items based on started grammar IDs.
+ * Marks the first unseen grammar item in a practice deck.
  *
- * @param practiceItems - Array of UserLocal items
- * @param startedGrammarIdSet - Set of grammar IDs that have already been started
- * @returns Array of UserItemPractice with show_new_grammar_indicator flag set
+ * @param practiceItems Practice items to decorate without mutating the originals.
+ * @param startedGrammarIdSet Grammar ids already started by the user.
+ * @returns Copies of the input items with show_new_grammar_indicator true only for the first
+ * item whose grammar_id is non-zero and not in startedGrammarIdSet.
  */
 export function addGrammarIndicatorFlag(
   practiceItems: UserItemLocal[],
@@ -33,10 +34,11 @@ export function addGrammarIndicatorFlag(
 }
 
 /**
- * Returns the next review date based on the user's progress with randomness.
- * @param progress Item's progress.
- * @returns Date string in ISO format for the next review.
- * @throws Error if progress is not a positive integer.
+ * Calculates the next SRS review timestamp for a progress level.
+ *
+ * @param progress Progress index used to read config.srs.intervals.
+ * @returns Future ISO timestamp with configured randomness, or the null replacement date when
+ * no interval exists for the progress value.
  */
 export function getNextAt(progress: number): string {
   const interval = config.srs.intervals[progress];
@@ -49,11 +51,9 @@ export function getNextAt(progress: number): string {
 }
 
 /**
- * Resets the properties of a given `UserItemLocal` object to their initial state.
- * - Sets `started_at`, `next_at`, and `mastered_at` to the configured null replacement date.
- * - Updates `updated_at` to the current ISO timestamp.
- * - Resets `progress` to 0.
- * @param item - The user item object to reset.
+ * Mutates a user item back to its unstarted local state.
+ *
+ * @param item Local user item object to reset in place.
  */
 export function resetUserItem(item: UserItemLocal): void {
   item.started_at = NULL_DATE;

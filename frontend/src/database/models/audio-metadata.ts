@@ -3,20 +3,15 @@ import { db } from '@/database/models/db';
 import type { AudioMetadataLocal } from '@/types/audio.types';
 import { Entity } from 'dexie';
 
-/**
- * Represents metadata information for audio archives in the application database.
- *
- * @method getRemoteUpdatedAt - Returns the remote updated_at timestamp stored from the last sync, or null if never synced.
- * @method markAsFetched - Stores the remote updated_at timestamp for an archive after a successful sync.
- */
 export default class AudioMetadata extends Entity<AppDB> implements AudioMetadataLocal {
   archive_name!: string;
   remote_updated_at!: string;
 
   /**
-   * Returns the remote updated_at timestamp stored from the last sync.
-   * @param archiveName the name of the audio archive
-   * @returns the stored remote_updated_at string, or null if the archive has never been synced
+   * Reads the remote updated_at marker for an audio archive.
+   *
+   * @param archiveName Archive filename used as the local metadata key.
+   * @returns Stored remote_updated_at timestamp, or null when the archive has never synced.
    */
   static async getRemoteUpdatedAt(archiveName: string): Promise<string | null> {
     const record = await db.audio_metadata.get(archiveName);
@@ -24,9 +19,10 @@ export default class AudioMetadata extends Entity<AppDB> implements AudioMetadat
   }
 
   /**
-   * Stores the remote file's updated_at timestamp after a successful sync.
-   * @param archiveName the name of the synced audio archive
-   * @param remoteUpdatedAt the updated_at timestamp of the remote file at sync time
+   * Stores the remote updated_at marker after a successful archive sync.
+   *
+   * @param archiveName Archive filename used as the local metadata key.
+   * @param remoteUpdatedAt Remote updated_at timestamp from the bucket listing.
    */
   static async markAsFetched(archiveName: string, remoteUpdatedAt: string): Promise<void> {
     await db.audio_metadata.put({

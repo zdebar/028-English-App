@@ -13,14 +13,10 @@ interface ToastState {
 }
 
 /**
- * Zustand store to manage toast notifications in the application.
+ * Stores one auto-hiding toast notification.
  *
- * @returns {ToastState}
- *  - message - The current toast message.
- *  - type - The type of the toast ('success', 'error', 'info').
- *  - visible - Indicates whether the toast is currently visible.
- *  - showToast - Function to display a toast with a given message and optional type.
- *  - hideToast - Function to hide the currently displayed toast.
+ * @returns Zustand hook exposing the current toast state plus showToast and hideToast actions.
+ * showToast replaces any existing timeout; loading toasts stay visible until replaced or hidden.
  */
 export const useToastStore = create<ToastState>((set) => ({
   message: '',

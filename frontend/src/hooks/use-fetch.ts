@@ -13,16 +13,11 @@ function toError(error: unknown): Error {
 }
 
 /**
- * A custom React hook for fetching data asynchronously.
- * It manages loading state, error handling, and provides a mechanism to trigger reloads.
+ * Fetches nullable async data and exposes loading, error, and reload state.
  *
- * @template T - The type of the data returned by the fetch function.
- * @param fetchFunction - An asynchronous function that fetches the data.
- * @returns An object containing:
- *   - data: The fetched data or null if not yet fetched.
- *   - hasData: Indicates if there is any data available (data is not null).
- *   - loading: Indicates if the data is currently being fetched.
- *   - reload: Function to trigger a reload of the data.
+ * @param fetchFunction Async loader returning data or null when no record is available.
+ * @returns Data, loading/error state, and a manual reload function. Failed loads set data to null.
+ * @throws TypeError when fetchFunction is not a function.
  */
 export function useFetch<T>(fetchFunction: () => Promise<T | null>): UseFetchResult<T> {
   if (typeof fetchFunction !== 'function') {

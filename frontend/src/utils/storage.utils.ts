@@ -1,5 +1,7 @@
 /**
- * Clears all application storage, including localStorage, sessionStorage, IndexedDB, and Cache Storage.
+ * Clears browser-side app state for the current origin.
+ *
+ * @returns Nothing; IndexedDB and Cache Storage deletion are started asynchronously and not awaited.
  */
 export function clearAppStorage() {
   localStorage.clear();
@@ -19,9 +21,9 @@ export function clearAppStorage() {
 }
 
 /**
- * Clears any localStorage entries that contain the given userId in their key.
- * Safeguards against empty or falsy userId.
- * @param userId - The user id to match in localStorage keys
+ * Removes localStorage entries whose key contains a user id.
+ *
+ * @param userId User id substring to match in keys; empty values are ignored.
  */
 export function clearAllLocalStorageForUser(userId: string): void {
   if (!userId) return;

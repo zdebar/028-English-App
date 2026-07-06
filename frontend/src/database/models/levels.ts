@@ -7,14 +7,6 @@ import UserItem from './user-items';
 import Lessons from './lessons';
 import SyncEntityModel from './sync-entity-model';
 
-/**
- * Represents a level entity in the local database.
- * Handles synchronization of level data between the remote Supabase server and local storage.
- *
- * @method getOverview - Retrieves a comprehensive overview of user levels with their progress.
- * @method syncFromRemote - Synchronizes levels from the remote server with the local database.
- *
- */
 export default class Levels extends SyncEntityModel implements LevelType {
   id!: number;
   name!: string;
@@ -28,8 +20,10 @@ export default class Levels extends SyncEntityModel implements LevelType {
   static override readonly syncSelect = 'id, name, note, sort_order, deleted_at';
 
   /**
-   * Retrieves a comprehensive overview of user levels with their progress.
-   * @param userId - The unique identifier of the user
+   * Builds a level overview with lesson progress for a user.
+   *
+   * @param userId User id whose practice items should be aggregated.
+   * @returns Level summaries with nested lessons; levels without lesson items are omitted.
    */
   static async getOverview(userId: string): Promise<LevelOverviewType[]> {
     const items = await UserItem.getByUserId(userId);

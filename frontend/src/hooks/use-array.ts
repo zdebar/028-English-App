@@ -16,19 +16,13 @@ function toError(error: unknown): Error {
 }
 
 /**
- * A custom React hook for fetching data asynchronously.
- * It manages loading state, and provides a mechanism to trigger reloads.
+ * Fetches an array and tracks selection state for list/detail views.
  *
- * @template T - The type of the array item returned by the fetch function.
- * @param fetchFunction - An asynchronous function that fetches an array of items.
- * @returns An object containing:
- *   - data: The fetched array or null if not yet fetched.
- *   - hasData: Indicates if there is any data available.
- *   - currentIndex: The index of the currently selected item, or null if none is selected. On reload currentIndex stays the same.
- *   - setCurrentIndex: Function to update the current index.If the index is out of bounds, currentItem will be null.
- *   - currentItem: The currently selected item, or null if none is selected.
- *   - loading: Indicates if the data is currently being fetched.
- *   - reload: Function to trigger a reload of the data.
+ * @param fetchFunction Async loader returning the full item array.
+ * @returns Data, loading/error state, a manual reload function, and the selected item.
+ * `data` falls back to [] after failures, and `currentItem` is null when currentIndex is null
+ * or outside the current data bounds.
+ * @throws TypeError when fetchFunction is not a function.
  */
 export function useArray<T>(fetchFunction: () => Promise<T[]>): UseArrayResult<T> {
   if (typeof fetchFunction !== 'function') {

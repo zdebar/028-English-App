@@ -8,6 +8,7 @@ import type { LessonOverviewType } from '@/types/generic.types';
 import { getInProgressLessons } from '@/utils/dashboard.utils';
 
 type DashboardProps = Readonly<{
+  /** Extra classes appended to the dashboard section wrapper. */
   className?: string;
 }>;
 
@@ -25,12 +26,6 @@ const noAvailableLesson: LessonOverviewType = {
   totalCount: 0,
 };
 
-/**
- * Dashboard component displaying the user's lesson progress and helpful UI elements.
- *
- * @param className Additional CSS classes for custom styling.
- * @returns The dashboard view with lesson progress, hints, and help overlay.
- */
 export default function Dashboard({ className = '' }: DashboardProps) {
   const levelsOverview = useUserStore((state) => state.levels);
   const showMastered = useUserStore((state) => state.showMasteredDashboard);

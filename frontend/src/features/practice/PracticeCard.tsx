@@ -11,14 +11,10 @@ import { reportError } from '../logging/monitoring-handler';
 import { useEffect } from 'react';
 
 type PracticeCardProps = Readonly<{
+  /** Practice deck mode; vocabulary is the default review flow and grammar selects grammar-only items. */
   mode?: ReviewPracticeMode;
 }>;
 
-/**
- * PracticeCard component for interactive language practice.
- *
- * @returns The main practice card UI with all practice controls and feedback.
- */
 export default function PracticeCard({ mode = 'vocabulary' }: PracticeCardProps) {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);

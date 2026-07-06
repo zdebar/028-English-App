@@ -1,9 +1,10 @@
 import { TableName } from '@/types/table.types';
 
 /**
- * Determines whether a table is user-specific based on its name.
- * @param tableName - The name of the table to check.
- * @returns `true` if the table is a user-specific table (UserScores or UserItems), `false` otherwise.
+ * Checks whether a table stores per-user rows and must be synced with a user id.
+ *
+ * @param tableName Table name to inspect.
+ * @returns true for user_scores, user_items, and user_blocks tables.
  */
 export function isUserSpecificTable(tableName: string): boolean {
   return (
@@ -14,12 +15,12 @@ export function isUserSpecificTable(tableName: string): boolean {
 }
 
 /**
- * Validates that userId is appropriately provided based on the table type.
- * @param tableName - The name of the table to validate against
- * @param userId - Optional user identifier to validate
- * @throws {Error} If userId is required but not provided for user-specific tables
- * @throws {Error} If userId is provided but should not be for non-user-specific tables
- * @return boolean indicating whether the table is user-specific
+ * Validates whether a sync metadata operation uses userId correctly for its table.
+ *
+ * @param tableName Table whose metadata row is being accessed.
+ * @param userId Required for user-specific tables and forbidden for shared tables.
+ * @returns true when the table is user-specific, false for shared tables.
+ * @throws Error when userId is missing for a user-specific table or provided for a shared table.
  */
 export function validateUserIdUsage(tableName: TableName, userId?: string) {
   const isUserSpecific = isUserSpecificTable(tableName);

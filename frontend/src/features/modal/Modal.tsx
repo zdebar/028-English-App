@@ -5,21 +5,14 @@ import { createPortal } from 'react-dom';
 import StyledButton from '../../components/UI/buttons/StyledButton';
 
 type ModalProps = Readonly<{
+  /** Called when the confirm button is pressed; errors are not caught by Modal. */
   onConfirm: () => void | Promise<void>;
+  /** Registered with the overlay store so Escape/outside overlay close can dismiss the owner. */
   onClose: () => void;
+  /** Dialog body rendered above the cancel and confirm buttons. */
   children?: ReactNode;
 }>;
 
-/**
- * Modal component for confirmation dialogs.
- * Renders a modal with children as content, and confirm/cancel buttons.
- * Opens Overlay on mount and closes it on unmount.
- *
- * @param onConfirm Function to call when confirming the action. Component does not handle any errors thrown by this function.
- * @param onClose Function to call when closing the modal.
- * @param children Optional children elements to render inside the modal.
- * @return The Modal component rendered in a portal.
- */
 export function Modal({ onConfirm, onClose, children }: ModalProps): JSX.Element | null {
   const closeOverlay = useOverlayStore((state) => state.closeOverlay);
   const openOverlay = useOverlayStore((state) => state.openOverlay);

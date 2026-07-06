@@ -91,24 +91,6 @@ function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
   };
 }
 
-/**
- * Represents a user item entity in the application database.
- *
- * @method getPracticeDeck - Retrieves a practice deck of user items for studying.
- * @method savePracticeDeck - Saves practice deck items for a user, updating their progress and metadata.
- * @method getAll - Retrieves a list of all user items.
- * @method getByUserId - Retrieves user items for a specific user. Sorted by sort_order.
- * @method getByBlockId - Retrieves user items for a specific user and block ID. Sorted by sort_order.
- * @method getStartedGrammarIds - Retrieves a list of unique grammar IDs for items that have been started by a user.
- * @method getStartedBlocksIds - Retrieves a list of unique block IDs for items that have been started by a user.
- * @method getStartedVocabulary - Retrieves vocabulary items for a user that have been started (begun learning). Sorted by czech word.
- * @method resetItemById - Resets a user item to its default state by user and item ID.
- * @method resetItemsByGrammarId - Resets all user items associated with a specific grammar ID to their default state for a given user.
- * @method resetItemsByBlockId - Resets all user items associated with a specific block ID to their default state for a given user.
- * @method simulateData - Adds progress to first 100 user_items.
- * @method deleteByUserId - Deletes all user items associated with a specific user.
- * @method syncFromRemote - Synchronizes user items from the remote server with the local database.
- */
 export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   item_id!: number;
   user_id!: string;
@@ -132,9 +114,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   lesson_id!: number;
 
   /**
-   * Retrieves a practice deck of user items for studying.
-   * @param userId - The unique identifier of the user
-   * @param deckSize - The maximum number of items to return (defaults to config.lesson.deckSize)
+   * Builds a practice deck for review or new vocabulary.
+   *
+   * @param userId User id whose practice items should be selected.
+   * @param deckSize Maximum deck size; defaults to config.lesson.deckSize.
+   * @param mode Review mode to select vocabulary items or grammar items. Defaults to vocabulary.
+   * @returns Practice items ordered by readiness, decorated with the new-grammar indicator.
    */
   static async getPracticeDeck(
     userId: string,
@@ -175,10 +160,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Saves practice deck items for a user, updating their progress and metadata.
-   * @param userId - The unique identifier of the user
-   * @param items - Array of user item records to be saved
-   * @param dateTime - The date for which the progress is being saved (defaults to today)
+   * Persists practice progress for all items in a completed deck.
+   *
+   * @param items Practice items to save. Empty or nullish arrays are ignored.
+   * @param dateTime ISO timestamp used for started_at, updated_at, and mastered_at transitions.
+   * Defaults to now.
    */
   static async savePracticeDeck(
     items: UserItemPractice[],
@@ -192,15 +178,19 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Retrieves a list of all user items.
+   * Reads every local user item row.
+   *
+   * @returns All rows from IndexedDB, including non-practice and deleted rows.
    */
   static async getAll(): Promise<UserItemLocal[]> {
     return await db.user_items.toCollection().toArray();
   }
 
   /**
-   * Retrieves user items for a specific user. Sorted by sort_order.
-   * @param userId - The unique identifier of the user
+   * Reads practice item rows for a user.
+   *
+   * @param userId User id whose items should be read.
+   * @returns User rows filtered to practice items.
    */
   static async getByUserId(userId: string): Promise<UserItemLocal[]> {
     return (await db.user_items.where('user_id').equals(userId).toArray()).filter(
@@ -209,8 +199,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Retrieves a list of unique grammar IDs for items that have been started by a user.
-   * @param userId - The ID of the user
+   * Reads user items for one block.
+   *
+   * @param userId User id whose block items should be read.
+   * @param blockId Block id to match.
+   * @returns Matching items sorted by sort_order.
    */
   static async getByBlockId(userId: string, blockId: number): Promise<UserItemLocal[]> {
     const blockItems = await db.user_items
@@ -221,6 +214,14 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return blockItems.sort((a, b) => a.sort_order - b.sort_order);
   }
 
+  /**
+   * Marks all items in a newly completed grammar block as started.
+   *
+   * @param userId User id whose block items should be updated.
+   * @param blockId Block id whose items should receive grammar-completion progress.
+   * @param dateTime ISO timestamp used for started_at and updated_at. Defaults to now.
+   * @returns Updated items that were written to IndexedDB; [] when the block has no items.
+   */
   static async saveNewGrammarBlockCompletion(
     userId: string,
     blockId: number,
@@ -249,6 +250,13 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return updatedItems;
   }
 
+  /**
+   * Checks whether all vocabulary practice items in a lesson have been started.
+   *
+   * @param userId User id whose lesson items should be checked.
+   * @param lessonId Lesson id to inspect.
+   * @returns true only when the lesson has vocabulary practice items and every one has started_at set.
+   */
   static async areAllVocabularyItemsStartedForLesson(
     userId: string,
     lessonId: number,
@@ -267,8 +275,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Retrieves a list of unique grammar IDs for items that have been started by a user.
-   * @param userId - The ID of the user
+   * Reads unique grammar ids from started practice items.
+   *
+   * @param userId User id whose started items should be inspected.
+   * @returns Unique non-null-replacement grammar ids.
    */
   static async getStartedGrammarIds(userId: string): Promise<number[]> {
     const startedItems = await db.user_items
@@ -281,8 +291,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Retrieves a list of unique block IDs for items that have been started by a user.
-   * @param userId - The ID of the user
+   * Reads unique block ids from started practice items.
+   *
+   * @param userId User id whose started items should be inspected.
+   * @returns Unique non-null-replacement block ids.
    */
   static async getStartedBlocksIds(userId: string): Promise<number[]> {
     const startedItems = await db.user_items
@@ -295,8 +307,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Retrieves vocabulary items for a user that have been started (begun learning).
-   * @param userId - The unique identifier of the user
+   * Reads started vocabulary practice items for a user.
+   *
+   * @param userId User id whose vocabulary items should be read.
+   * @returns Vocabulary practice items with started_at earlier than the null replacement date.
    */
   static async getStartedVocabulary(userId: string): Promise<UserItemLocal[]> {
     const result = await db.user_items
@@ -306,6 +320,14 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return result;
   }
 
+  /**
+   * Calculates the ready vocabulary review badge state.
+   *
+   * @param userId Non-empty user id whose vocabulary items should be inspected.
+   * @returns Ready count and future schedule. When ready count exceeds the badge cap, returns
+   * badgeCap + 1 and an empty schedule to indicate overflow.
+   * @throws Error when userId is empty.
+   */
   static async getReadyVocabularyPracticeState(userId: string): Promise<ReadyPracticeState> {
     assertNonEmptyString(userId, 'userId');
 
@@ -369,10 +391,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Resets a user item to its default state by user and item ID.
-   * @param userId - The unique identifier of the user
-   * @param itemId - The unique identifier of the item to reset
-   * @return The ID of the reset item
+   * Resets one user item to its unstarted state.
+   *
+   * @param userId User id owning the item.
+   * @param itemId Item id to reset.
+   * @returns The reset item id.
+   * @throws Error when no matching user item exists.
    */
   static async resetItemById(userId: string, itemId: number): Promise<number> {
     const count = await db.user_items
@@ -391,10 +415,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Resets all user items associated with a specific grammar ID to their default state for a given user.
-   * @param userId - The unique identifier of the user
-   * @param grammarId - The unique identifier of the grammar
-   * @return The count of reset items
+   * Resets started user items for one grammar topic.
+   *
+   * @param userId User id owning the items.
+   * @param grammarId Grammar id whose started items should be reset.
+   * @returns Number of modified rows.
    */
   static async resetItemsByGrammarId(userId: string, grammarId: number): Promise<number> {
     const count = await db.user_items
@@ -409,10 +434,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Resets all user items associated with a specific block ID to their default state for a given user.
-   * @param userId - The unique identifier of the user
-   * @param blockId - The unique identifier of the block
-   * @return The count of reset items
+   * Resets all user items in one block.
+   *
+   * @param userId User id owning the items.
+   * @param blockId Block id whose items should be reset.
+   * @returns Number of modified rows.
    */
   static async resetItemsByBlockId(userId: string, blockId: number): Promise<number> {
     const count = await db.user_items
@@ -427,10 +453,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Deletes all user items associated with a specific user.
-   * Use only for deletion of user account, when user-items on remote are deleted automatically.
-   * @param userId - The unique identifier of the user
-   * @return True if deletion was successful
+   * Deletes all local item rows for an account being removed.
+   *
+   * @param userId User id whose local item rows should be deleted.
+   * @returns true after IndexedDB deletion completes.
    */
   static async deleteByUserId(userId: string): Promise<boolean> {
     await db.user_items.where('user_id').equals(userId).delete();
@@ -438,10 +464,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Update first {SIM_COUNT} user_items for a user to simulate progress for testing purposes.
-   * Progress is set to {SIM_PROGRESS} and next_at is updated accordingly.
-   * @param userId - The unique identifier of the user
-   * @returns The count of updated items
+   * Applies simulated progress to the first configured range of user items.
+   *
+   * @param userId User id whose local rows should be modified.
+   * @returns Number of modified rows.
    */
   static async simulateData(userId: string): Promise<number> {
     const dateTime = new Date().toISOString();
@@ -458,19 +484,14 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Synchronizes user items with the remote database.
+   * Pushes local item changes and applies remote item changes.
    *
-   * Performs a bidirectional sync by:
-   * 1. Retrieving the last sync timestamp for the user
-   * 2. Getting local user items that have been updated since the last sync timestamp
-   * 3. Pushing local changes to the remote database
-   * 4. Fetching updated items from the remote database
-   * 5. Updating the local database with fetched items and sync metadata
-   *
-   * @param userId - The ID of the user whose items should be synced
-   * @param doFullSync - If true, performs a full sync by deleting all local items before upserting remote items.
-   *                     If false, performs an incremental sync by only deleting items marked as deleted remotely.
-   * @returns The count of items that were updated from the remote database
+   * @param userId User id whose item rows should sync.
+   * @param doFullSync When true, local rows are cleared before applying remote rows from the epoch.
+   * When false, only remote tombstones are deleted locally.
+   * @returns Number of item rows returned by the remote sync RPC.
+   * @throws SupabaseError when the sync RPC fails.
+   * @throws Error when sync metadata userId validation fails.
    */
   static async syncFromRemote(userId: string, doFullSync: boolean): Promise<number> {
     // Step 1: Get the last synced timestamp for user scores
@@ -504,10 +525,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Retrieves user items that have been updated within a specified time range for synchronization.
-   * @param userId - The ID of the user whose items should be retrieved.
-   * @param lastSyncedAt - The timestamp of the last synchronization (inclusive).
-   * @param newSyncedAt - The timestamp of the new synchronization point (exclusive).
+   * Reads local item rows that changed inside a sync window.
+   *
+   * @param userId User id whose local item rows should be exported.
+   * @param lastSyncedAt Inclusive lower updated_at bound.
+   * @param newSyncedAt Exclusive upper updated_at bound.
+   * @returns Item rows converted to the remote export shape.
    */
   private static async getUserItemsForSync(
     userId: string,
@@ -523,8 +546,13 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Pushes local user items to Supabase for synchronization.
-   * @param items - An array of user items in SQL format to be pushed to the remote server.
+   * Calls the Supabase item sync RPC.
+   *
+   * @param userId User id passed to the RPC.
+   * @param items Local item rows to upsert remotely before fetching remote changes.
+   * @param lastSyncedAt Inclusive remote change lower bound.
+   * @returns Remote item rows converted to local shape, or [] when none are returned.
+   * @throws SupabaseError when the RPC fails.
    */
   private static async syncWithRemote(
     userId: string,
@@ -552,11 +580,15 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Fetches practice items by odd/even progress parity for a user.
-   * @param userId - The unique identifier of the user
-   * @param isOdd - Whether to fetch items with odd progress
-   * @param limit - Maximum number of items to fetch
-   * @param isNew - Whether to fetch non-started items (next_at = NULL_DATE) or ready to practice items (next_at < today)
+   * Reads practice items by progress parity and readiness.
+   *
+   * @param userId User id whose practice items should be selected.
+   * @param isOdd true for odd progress values, false for even progress values.
+   * @param limit Maximum number of rows to return.
+   * @param isNew When true, selects never-scheduled items with next_at equal to the null date.
+   * Otherwise selects due items with next_at before now.
+   * @param mode Review mode to select vocabulary items or grammar items. Defaults to vocabulary.
+   * @returns Matching unmastered practice items.
    */
   private static async getPracticeItemsByParity(
     userId: string,
@@ -586,10 +618,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Formats a saved item with the provided dateTime.
-   * @param item - The item to format
-   * @param dateTime - The dateTime to use for formatting
-   * @returns The formatted item
+   * Applies practice progress fields to a user item copy.
+   *
+   * @param item Practice or local item to format.
+   * @param dateTime ISO timestamp used for started_at, updated_at, and mastered_at transitions.
+   * @param progressAddition Amount added to current progress; defaults to 0 for already incremented items.
+   * @returns Item copy with next_at recalculated and mastered_at set when progress reaches the final SRS interval.
    */
   private static formatSavedItem(
     item: UserItemPractice | UserItemLocal,

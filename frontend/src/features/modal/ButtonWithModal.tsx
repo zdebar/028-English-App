@@ -7,30 +7,24 @@ import type { JSX, ReactNode } from 'react';
 import { useCallback, useState } from 'react';
 
 type ButtonWithModalProps = Readonly<{
+  /** Action executed after confirmation; the button remains loading for at least the configured minimum time. */
   onConfirm?: () => Promise<void> | void;
+  /** Confirmation modal title; defaults to the shared modal title text. */
   modalTitle?: string;
+  /** Confirmation modal body text; defaults to the shared modal text. */
   modalText?: string;
+  /** Tooltip/title applied to the trigger button. */
   title?: string;
+  /** Disables the trigger button; loading state also disables it. */
   disabled?: boolean;
+  /** Keeps normal text color while disabled for buttons that should look visually active. */
   preserveEnabledTextColorWhenDisabled?: boolean;
+  /** Extra classes appended to the trigger button. */
   className?: string;
+  /** Trigger button content; keep it inline to preserve button layout. */
   children?: ReactNode;
 }>;
 
-/**
- * Button component that displays a confirmation modal before executing an action.
- * Automatically disables button while executing onConfirm action.
- * Provide children to customize modal content.
- *
- * @param onConfirm Function to call when action is confirmed. Should handle its own errors.
- * @param modalTitle Title to display in the confirmation modal.
- * @param modalText Description to display in the confirmation modal.
- * @param title Tooltip text to display on hover over the button.
- * @param disabled Whether the button is disabled.
- * @param className Additional CSS classes for custom styling.
- * @param children Content to display inside the button. Should be inline elements or text (not block elements like <p>, <div>, etc.) to ensure proper styling.
- * @return The ButtonWithModal component.
- */
 export default function ButtonWithModal({
   onConfirm,
   modalTitle = TEXTS.modalTitle,

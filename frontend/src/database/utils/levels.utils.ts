@@ -12,11 +12,13 @@ import config from '@/config/config';
 const NULL_DATE = config.database.nullReplacementDate;
 
 /**
- * Aggregates levels from user items.
+ * Builds level and lesson progress summaries from user items.
  *
- * @param items - Array of filtered UserItemLocal
- * @param lessons - Array of LessonLocal
- * @param levels - Array of LevelLocal
+ * @param items User items already filtered for the target user.
+ * @param lessons Lesson records used as aggregation buckets.
+ * @param levels Level records used to group lesson summaries.
+ * @returns Levels that contain at least one lesson with items, sorted by level sort_order. Lesson
+ * summaries include total, started, started-today, mastered, and mastered-today counts.
  */
 export function aggregateLevels(
   items: UserItemLocal[],

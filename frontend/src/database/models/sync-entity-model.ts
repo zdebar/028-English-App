@@ -22,6 +22,15 @@ export default abstract class SyncEntityModel extends Entity<AppDB> {
   static readonly syncEntityName: string;
   static readonly syncSelect: string;
 
+  /**
+   * Synchronizes a shared lookup table from Supabase into IndexedDB.
+   *
+   * @param doFullSync When true, clears the local table before applying remote rows from the epoch.
+   * Defaults to false for incremental sync using stored metadata.
+   * @returns Number of remote rows returned by the query, including tombstones.
+   * @throws SupabaseError when the remote select fails.
+   * @throws Error when metadata validation fails.
+   */
   static async syncFromRemote<T extends SyncRow>(
     this: SyncEntityModelStatic<T>,
     doFullSync: boolean = false,

@@ -2,9 +2,9 @@ import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import UserItem from '@/database/models/user-items';
 
 /**
- * Returns today's date in YYYY-MM-DD format.
+ * Returns today's local calendar date.
  *
- * @returns The current date in YYYY-MM-DD format.
+ * @returns Date string formatted as YYYY-MM-DD using the runtime locale date in en-CA format.
  */
 export function getTodayShortDate(): string {
   const today = new Date();
@@ -12,10 +12,10 @@ export function getTodayShortDate(): string {
 }
 
 /**
- * Converts a UTC date string to a local date string formatted as 'YYYY-MM-DD'.
+ * Converts a date string to the local calendar date used by app counters.
  *
- * @param date - The UTC date string to convert.
- * @returns The local date string in 'en-CA' format ('YYYY-MM-DD').
+ * @param date Date string accepted by Date; normally an ISO UTC timestamp from storage or sync.
+ * @returns Local YYYY-MM-DD date string in en-CA format.
  */
 export function getLocalDateFromUTC(date: string): string {
   const localDate = new Date(date);
@@ -23,11 +23,12 @@ export function getLocalDateFromUTC(date: string): string {
 }
 
 /**
- * Restores unsaved practice deck progress from local storage and saves it to the database.
+ * Restores a saved practice deck snapshot after an interrupted session.
  *
- * @param userId - The ID of the user whose progress should be restored
- * @returns A promise that resolves when the restore operation is complete
- * @throws Does not throw; errors are handled internally and logged via errorHandler
+ * @param userId User id used to build the practiceDeckProgress localStorage key.
+ * @returns Resolves after a valid snapshot is saved and the localStorage entry is removed.
+ * Invalid JSON is logged and removed without rethrowing.
+ * @throws Error when userId is empty.
  */
 export async function restoreUnsavedFromLocalStorage(userId: string): Promise<void> {
   if (!userId) throw new Error('User ID is required to restore unsaved progress from localStorage');

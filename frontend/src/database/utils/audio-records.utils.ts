@@ -2,11 +2,12 @@ import { supabaseInstance } from '@/config/supabase.config';
 import { SupabaseError } from '@/types/error.types';
 
 /**
- * Fetches a file from Supabase storage bucket.
+ * Downloads a file from a Supabase storage bucket, bypassing stale cached responses.
  *
- * @param bucketName name of the storage bucket
- * @param dataFile name of the file to fetch
- * @returns Blob data or null on missing/error
+ * @param bucketName Supabase storage bucket name.
+ * @param dataFile File path inside the bucket; a leading slash is ignored.
+ * @returns Downloaded file contents as a Blob.
+ * @throws SupabaseError when storage returns an error or no data.
  */
 export async function fetchStorage(bucketName: string, dataFile: string): Promise<Blob> {
   const cacheBuster = `?t=${Date.now()}`;
@@ -24,10 +25,11 @@ export async function fetchStorage(bucketName: string, dataFile: string): Promis
 }
 
 /**
- * Fetches metadata for all files in the root of a Supabase storage bucket.
- * Returns a map of filename → updated_at timestamp.
+ * Lists zip archive metadata from the root of a Supabase storage bucket.
  *
- * @param bucketName name of the storage bucket
+ * @param bucketName Supabase storage bucket name.
+ * @returns Map of zip filename to remote updated_at timestamp; non-zip files are ignored.
+ * @throws SupabaseError when storage listing fails or returns no data.
  */
 export async function fetchStorageBucketMetadata(bucketName: string): Promise<Map<string, string>> {
   const { data, error } = await supabaseInstance.storage.from(bucketName).list('', { limit: 1000 });

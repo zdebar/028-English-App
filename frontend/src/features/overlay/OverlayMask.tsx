@@ -4,12 +4,6 @@ import { ARIA_TEXTS } from '@/locales/cs';
 import { useCallback, type JSX } from 'react';
 import { useOverlayStore } from './use-overlay-store';
 
-/**
- * Overlay mask component covering the entire screen.
- *
- * @param onClose Function to call when the overlay is clicked or when the KEYBOARD_LISTENERS.Exit is pressed.
- * @return {JSX.Element | null} The rendered overlay mask element or null if the overlay is not open.
- */
 export default function OverlayMask(): JSX.Element | null {
   const closeOverlay = useOverlayStore((state) => state.closeOverlay);
   const isOverlayOpen = useOverlayStore((state) => state.isOverlayOpen);

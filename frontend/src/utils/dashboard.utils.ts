@@ -2,29 +2,32 @@ import config from '@/config/config';
 import type { LessonOverviewType, LevelOverviewType } from '@/types/generic.types';
 
 /**
- * Calculates the items count in last started lesson before today.
- * @param countNotToday Started items count excluding today's items.
- * @returns Returns the items count in last started lesson before today.
-
+ * Calculates how many items were already completed in the active lesson before today.
+ *
+ * @param countNotToday Started or mastered item count excluding today's items.
+ * @returns A value from 0 up to lessonSize - 1.
  */
 export function getPreviousCount(countNotToday: number): number {
   return countNotToday % config.lesson.lessonSize;
 }
 
 /**
- * Calculates the last started lesson number before today.
- * @param countNotToday Started items count excluding today's items.
- * @returns Returns last started lesson number before today.
+ * Calculates the one-based lesson number reached before today's progress.
+ *
+ * @param countNotToday Started or mastered item count excluding today's items.
+ * @returns The one-based lesson number containing that count.
  */
 export function getLessonStarted(countNotToday: number): number {
   return Math.floor(countNotToday / config.lesson.lessonSize) + 1;
 }
 
 /**
- * Calculates today's lessons items counts.
- * @param previousCount Items count in last started lesson before today
- * @param todayCount Today's started items count
- * @returns Array of items counts in today's lessons
+ * Splits today's progress across lesson-sized chunks.
+ *
+ * @param previousCount Items already present in the first affected lesson before today.
+ * @param todayCount Items added today.
+ * @returns Counts per lesson affected today, including a partial first or last lesson.
+ * @throws Error when previousCount is greater than or equal to the configured lesson size.
  */
 export function getTodayStartedItems(previousCount: number, todayCount: number): number[] {
   const lessonCounts: number[] = [];
@@ -52,13 +55,11 @@ export function getTodayStartedItems(previousCount: number, todayCount: number):
 }
 
 /**
- * Returns lessons that:
- *  have items started today, or
- *  have some items started but not all, or
- *  is the first lesson with zero items where the previous lesson is fully completed
+ * Selects dashboard lessons that should remain visible for current progress.
  *
- * @param levelsOverview Array of levels overview
- * @param mode "started" (default) or "mastered" - which lesson attributes to use
+ * @param levelsOverview Level overview records; missing or non-array lesson lists are ignored.
+ * @param mode Progress fields to inspect: started progress by default, or mastered progress.
+ * @returns In-progress lessons, the first eligible next lesson, or the final lesson as a fallback.
  */
 export function getInProgressLessons(
   levelsOverview: LevelOverviewType[],
@@ -123,11 +124,11 @@ export function getInProgressLessons(
 }
 
 /**
- * Triggers a custom DOM event with the specified name and attaches the user ID as event detail.
+ * Dispatches a user-scoped CustomEvent on globalThis.
  *
- * @param eventName - The name of the custom event to trigger.
- * @param userId - The ID of the user to include in the event detail. If falsy, the event is not triggered.
- * @throws Error if userId is not provided.
+ * @param eventName Non-empty event name to dispatch.
+ * @param userId Non-empty user id added to event.detail.
+ * @throws Error when eventName or userId is empty.
  */
 export function triggerNamedEvent(eventName: string, userId: string) {
   if (!eventName || eventName.trim() === '') {
@@ -142,19 +143,21 @@ export function triggerNamedEvent(eventName: string, userId: string) {
 }
 
 /**
- * Triggers the 'levelsUpdated' event for a specific user.
+ * Dispatches the levelsUpdated event for a specific user.
  *
- * @param userId - The unique user identifier.
+ * @param userId Non-empty user id added to event.detail.
+ * @throws Error when userId is empty.
  */
 export function triggerLevelsUpdatedEvent(userId: string) {
   triggerNamedEvent('levelsUpdated', userId);
 }
 
 /**
- * Triggers the 'dailyCountUpdated' event for a specific user.
+ * Dispatches the dailyCountUpdated event for a specific user.
  *
- * @param userId - The unique user identifier.
- * @param dailyCount - Optional updated daily count to avoid extra store reload.
+ * @param userId Non-empty user id added to event.detail.
+ * @param dailyCount Optional current daily count; when omitted, only userId is sent.
+ * @throws Error when userId is empty.
  */
 export function triggerDailyCountUpdatedEvent(userId: string, dailyCount?: number) {
   if (!userId || userId.trim() === '') {

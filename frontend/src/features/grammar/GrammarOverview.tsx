@@ -15,12 +15,6 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import { DataState } from '@/components/UI/DataState';
 import GrammarDetailCard from './GrammarDetailCard';
 
-/**
- * GrammarOverview component displays a list of started grammar topics for the user.
- *
- * @returns {JSX.Element} A view with a grammar list and detail card, including progress reset and help features.
- * @throws Doesn't throw errors; displays toast messages on failures.
- */
 export default function GrammarOverview(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const navigate = useNavigate();
