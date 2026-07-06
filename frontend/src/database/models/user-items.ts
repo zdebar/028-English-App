@@ -81,7 +81,7 @@ function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
   return {
     ...apiItem,
     is_vocabulary: apiItem.is_vocabulary ? 1 : 0,
-    is_practice_item: apiItem.is_practice_item !== false ? 1 : 0,
+    is_practice_item: apiItem.is_practice_item === true ? 1 : 0,
     started_at: apiItem.started_at ?? NULL_DATE,
     next_at: apiItem.next_at ?? NULL_DATE,
     mastered_at: apiItem.mastered_at ?? NULL_DATE,
