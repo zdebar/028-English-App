@@ -2,9 +2,9 @@ import type { JSX } from 'react';
 import { Screenshot } from '@/components/UI/Screenshot';
 
 /**
- * A React component that renders the Grammar overview page.
+ * Renders the guide page.
  *
- * @returns A JSX element containing the GrammarOverview component.
+ * @returns A JSX element containing the guide page.
  */
 export default function Guide(): JSX.Element {
 
@@ -15,9 +15,8 @@ export default function Guide(): JSX.Element {
       <section>
         <h2>Představení</h2>
         <p>
-          Tato učební aplikace je zaměřena na velké množství naposlouchaných a vyslovených
-          opakování. Není třeba přemýšlet co dělat dále, aplikace vždy sama zvolí procvičování či
-          učení nového.
+          Aplikace stojí na velkém množství naposlouchaných a nahlas zopakovaných položek. Není
+          třeba přemýšlet, co dělat dál. Aplikace sama volí procvičování i učení nového.
         </p>
       </section>
       <section>
@@ -38,16 +37,17 @@ export default function Guide(): JSX.Element {
         <h3>Nová gramatika</h3>
         <p>
           Základní učení a procvičování nové gramatiky. Tlačítko je k dispozici po rozučení všech
-          slovíček souvisejících s danou lekcí.
+          slovíček z dané lekce.
         </p>
         <h3>Gramatika</h3>
         <p>
-          Následné procvičování rozučené gramatiky. Tlačítko je k dispozici pokud je co procvičovat.
+          Následné procvičování rozučené gramatiky. Tlačítko je k dispozici, pokud je co
+          procvičovat.
         </p>
         <h3>Přehled lekcí</h3>
         <p>
-          Přehled dnes dotčených lekcí. Lze přepínat mezi rozučenými a naučenými položkami. Položky
-          se určí jako naučené zhruba po 3 měsících.
+          Přehled dnes dotčených lekcí. Lze přepínat mezi rozučenými a naučenými položkami.
+          Naučené jsou zhruba po 3 měsících.
         </p>
       </section>
       <section>
@@ -94,8 +94,8 @@ export default function Guide(): JSX.Element {
         <h2>Doporučujeme</h2>
         <ul className="text-left">
           <li>Každé slovíčko či větu nahlas zopakovat</li>
-          <li>Preferovat "Opakovat" před "Znám", pokud není znalost zcela automatické</li>
-          <li>Procvičit každý den min. 400 opakování tedy 10 hvězdiček</li>
+          <li>Preferovat "Opakovat" před "Znám", pokud ještě není znalost zcela automatická</li>
+          <li>Procvičit každý den min. 400 opakování, tedy 10 hvězdiček</li>
         </ul>
       </section>
       <section>
@@ -109,12 +109,12 @@ export default function Guide(): JSX.Element {
         <h3>Přehled gramatiky</h3>
         <p>Přehled započaté gramatiky.</p>
         <h3>Přehled témat</h3>
-        <p>Přehled započatých tematických skupin slovíček např. dny v týdnu, měsíce atd.</p>
+        <p>Přehled započatých tematických skupin slovíček, např. dny v týdnu, měsíce atd.</p>
         <h3>Přehled slovíček</h3>
         <p>Přehled započatých slovíček.</p>
         <h3>Smazat účet</h3>
         <p>
-          Vaše údaje budou uchovány po dalších 30 dní, kdy je možné účet obnovit opětovným
+          Vaše údaje budou uchovány dalších 30 dní. Během této doby lze účet obnovit opětovným
           přihlášením. Po 30 dnech je účet nenávratně smazán.
         </p>
         <h3>Odhlásit se</h3>
@@ -130,7 +130,7 @@ export default function Guide(): JSX.Element {
       <section>
         <h2>Synchronizace</h2>
         <p>
-          Data se synchronizují pouze při startu aplikace, či jednou denně, pokud aplikaci necháváte
+          Data se synchronizují pouze při startu aplikace či jednou denně, pokud aplikaci necháváte
           otevřenou.
         </p>
         <p>
