@@ -185,8 +185,9 @@ export default function PracticeSessionCard({
               <BookIcon />
             </SecondaryControlButton>
           )}
-          {showNoteButton && (
+          {!showNoteButton && (
             <InfoButton
+              className="note-control-emphasis"
               title={TEXTS.tooltipNotes}
               onClick={(e) => {
                 e.stopPropagation();

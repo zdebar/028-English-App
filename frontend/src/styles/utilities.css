@@ -36,6 +36,18 @@
     @apply bg-button-light dark:bg-button-dark;
   }
 
+  .note-control-emphasis {
+    @apply text-inherit;
+  }
+
+  .note-control-emphasis svg {
+    @apply text-cyan-900 dark:text-cyan-300;
+  }
+
+  .note-control-emphasis:not(:disabled):hover svg {
+    @apply text-cyan-950 dark:text-cyan-200;
+  }
+
   /* Z-INDEX LEVELS */
   .z-header {
     /* Header */

@@ -257,8 +257,14 @@ vi.mock('@/features/audio/VolumeSlider', () => ({
 }));
 
 vi.mock('@/features/notes/InfoButton', () => ({
-  default: ({ onClick, title }: any) => (
-    <button data-testid="info-button" aria-label="note" title={title} onClick={onClick}>
+  default: ({ className, onClick, title }: any) => (
+    <button
+      data-testid="info-button"
+      aria-label="note"
+      title={title}
+      className={className}
+      onClick={onClick}
+    >
       <span data-testid="info-icon" />
     </button>
   ),
@@ -568,6 +574,9 @@ describe('PracticeCard', () => {
     expect(
       container.querySelector('.pos-bottom-right-control [data-testid="info-button"]'),
     ).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'note' }).className).toContain(
+      'note-control-emphasis',
+    );
     expect(screen.getByTestId('info-icon')).toBeTruthy();
   });
 
