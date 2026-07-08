@@ -34,6 +34,20 @@ describe('NewGrammarIntroCard', () => {
     expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy();
   });
 
+  it('reserves space above the continue action for grammar detail bottom controls', () => {
+    render(
+      <NewGrammarIntroCard
+        grammar={{ id: 1, name: 'Articles' }}
+        onClose={vi.fn()}
+        onContinue={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Continue' }).className).toContain(
+      'mt-[calc(var(--height-button)+0.5rem)]',
+    );
+  });
+
   it('calls onContinue from the continue action', () => {
     const onContinue = vi.fn();
 

@@ -17,7 +17,10 @@ export default function NewGrammarIntroCard({
   return (
     <div className="flex w-full flex-col items-center gap-1">
       <GrammarDetailCard grammar={grammar} onClose={onClose} />
-      <StyledButton className="card-width h-button mt-2 w-full" onClick={onContinue}>
+      <StyledButton
+        className="card-width h-button mt-[calc(var(--height-button)+0.5rem)] w-full"
+        onClick={onContinue}
+      >
         {TEXTS.continuePractice}
       </StyledButton>
     </div>
