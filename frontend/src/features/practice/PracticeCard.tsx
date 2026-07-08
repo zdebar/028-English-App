@@ -5,7 +5,7 @@ import type { ReviewPracticeMode } from '@/types/user-item.types';
 import PracticeSessionCard from './PracticeSessionCard';
 import PracticeEmptyState from './PracticeEmptyState';
 import { TEXTS } from '@/locales/cs';
-import { DataState } from '@/components/UI/DataState';
+import DelayedLoadingCircle from '@/components/UI/DelayedLoadingCircle';
 import { useToastStore } from '../toast/use-toast-store';
 import { reportError } from '../logging/monitoring-handler';
 import { useEffect } from 'react';
@@ -48,7 +48,7 @@ export default function PracticeCard({ mode = 'vocabulary' }: PracticeCardProps)
   }, [error, showToast]);
 
   if (loading && !currentItem) {
-    return <DataState loading hasData={false} noDataMessage={TEXTS.nothingToPractice} />;
+    return <DelayedLoadingCircle />;
   }
 
   if (!currentItem) {

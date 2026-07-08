@@ -1,4 +1,4 @@
-import { DataState } from '@/components/UI/DataState';
+import DelayedLoadingCircle from '@/components/UI/DelayedLoadingCircle';
 import Notification from '@/components/UI/Notification';
 import ReturnHomeButton from '@/components/UI/buttons/ReturnHomeButton';
 import { useAuthStore } from '@/features/auth/use-auth-store';
@@ -28,7 +28,7 @@ export default function NewGrammarPractice(): JSX.Element {
   }
 
   if (deck.loading) {
-    return <DataState loading hasData={false} noDataMessage={TEXTS.nothingToPractice} />;
+    return <DelayedLoadingCircle />;
   }
 
   if (!deck.block) {
