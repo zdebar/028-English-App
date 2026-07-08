@@ -1,18 +1,21 @@
 import DelayedLoadingCircle from '@/components/UI/DelayedLoadingCircle';
 import Notification from '@/components/UI/Notification';
 import ReturnHomeButton from '@/components/UI/buttons/ReturnHomeButton';
+import { ROUTES } from '@/config/routes.config';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import GrammarDetailCard from '@/features/grammar/GrammarDetailCard';
 import { reportError } from '@/features/logging/monitoring-handler';
+import NewGrammarIntroCard from '@/features/practice/NewGrammarIntroCard';
 import PracticeEmptyState from '@/features/practice/PracticeEmptyState';
 import PracticeSessionCard from '@/features/practice/PracticeSessionCard';
 import { useNewGrammarPracticeDeck } from '@/features/practice/hooks/use-new-grammar-practice-deck';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import { useEffect, useState, type JSX } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function NewGrammarPractice(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
+  const navigate = useNavigate();
   const showToast = useToastStore((state) => state.showToast);
   const [showGrammarIntro, setShowGrammarIntro] = useState(true);
   const deck = useNewGrammarPracticeDeck(userId);
@@ -35,10 +38,6 @@ export default function NewGrammarPractice(): JSX.Element {
     return <PracticeEmptyState />;
   }
 
-  if (showGrammarIntro && deck.grammar != null) {
-    return <GrammarDetailCard grammar={deck.grammar} onClose={() => setShowGrammarIntro(false)} />;
-  }
-
   if (deck.isComplete) {
     return (
       <div className="card-width flex flex-col gap-4 text-center">
@@ -51,6 +50,16 @@ export default function NewGrammarPractice(): JSX.Element {
 
   if (!deck.currentItem) {
     return <PracticeEmptyState />;
+  }
+
+  if (showGrammarIntro && deck.grammar != null) {
+    return (
+      <NewGrammarIntroCard
+        grammar={deck.grammar}
+        onClose={() => navigate(ROUTES.home)}
+        onContinue={() => setShowGrammarIntro(false)}
+      />
+    );
   }
 
   return (

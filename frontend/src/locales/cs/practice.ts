@@ -10,6 +10,7 @@ export const PRACTICE_TEXTS = {
   complete: 'Dokončit',
   hint: 'Nápověda',
   reveal: 'Odhalit',
+  continuePractice: 'Pokračovat',
   repeat: 'Opakovat',
   known: 'Znám',
   directionEnToCz: 'Z angličtiny do češtiny',

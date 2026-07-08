@@ -50,6 +50,7 @@ vi.mock('@/locales/cs', () => ({
     loadingMessage: 'Loading',
     loadingError: 'Loading error',
     newGrammarComplete: 'Complete',
+    continuePractice: 'Continue',
   },
 }));
 
@@ -142,15 +143,17 @@ describe('NewGrammarPractice', () => {
 
   it('renders shared empty state when a block has no current item', () => {
     mocks.deck.block = { name: 'Block A' };
+    mocks.deck.grammar = { id: 1, name: 'Articles' };
 
     render(<NewGrammarPractice />);
 
     expect(screen.getByText('Nothing to practice')).toBeTruthy();
     expect(screen.getByText('Try again later')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Home' })).toBeTruthy();
+    expect(screen.queryByTestId('grammar-detail')).toBeNull();
   });
 
-  it('keeps grammar intro behavior before practice session', () => {
+  it('shows grammar intro with an explicit continue action before practice session', () => {
     mocks.deck.block = { name: 'Block A' };
     mocks.deck.grammar = { id: 1, name: 'Articles' };
     mocks.deck.currentItem = { item_id: 1 };
@@ -158,10 +161,37 @@ describe('NewGrammarPractice', () => {
     render(<NewGrammarPractice />);
 
     expect(screen.getByTestId('grammar-detail').textContent).toBe('Articles');
+    expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy();
+    expect(screen.queryByTestId('practice-session')).toBeNull();
+  });
+
+  it('continues from grammar intro to practice session', () => {
+    mocks.deck.block = { name: 'Block A' };
+    mocks.deck.grammar = { id: 1, name: 'Articles' };
+    mocks.deck.currentItem = { item_id: 1 };
+
+    render(<NewGrammarPractice />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+
+    expect(screen.getByTestId('practice-session').textContent).toBe('ahoj:hello');
+  });
+
+  it('closes grammar intro back to home', () => {
+    mocks.deck.block = { name: 'Block A' };
+    mocks.deck.grammar = { id: 1, name: 'Articles' };
+    mocks.deck.currentItem = { item_id: 1 };
+
+    render(<NewGrammarPractice />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'close grammar' }));
+
+    expect(mocks.navigate).toHaveBeenCalledWith('/');
   });
 
   it('keeps completion behavior unchanged', () => {
     mocks.deck.block = { name: 'Block A' };
+    mocks.deck.grammar = { id: 1, name: 'Articles' };
     mocks.deck.isComplete = true;
 
     render(<NewGrammarPractice />);
@@ -169,5 +199,6 @@ describe('NewGrammarPractice', () => {
     expect(screen.getByText('Complete')).toBeTruthy();
     expect(screen.getByText('Block A')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Home' })).toBeTruthy();
+    expect(screen.queryByTestId('grammar-detail')).toBeNull();
   });
 });
