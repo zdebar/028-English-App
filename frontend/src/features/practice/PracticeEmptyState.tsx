@@ -5,9 +5,9 @@ import type { JSX } from 'react';
 
 export default function PracticeEmptyState(): JSX.Element {
   return (
-    <div className="card-width mt-8 w-full">
+    <div className="card-width w-full landscape:my-auto">
       <InfoNotification>{TEXTS.nothingToPractice}</InfoNotification>
-      <InfoNotification>{TEXTS.tryAgainLater}</InfoNotification>
+      <InfoNotification className="mb-4">{TEXTS.tryAgainLater}</InfoNotification>
       <ReturnHomeButton />
     </div>
   );
