@@ -40,7 +40,7 @@ export default function NewGrammarPractice(): JSX.Element {
 
   if (deck.isComplete) {
     return (
-      <div className="card-width flex flex-col gap-4 text-center">
+      <div className="card-width mt-8 flex flex-col gap-4 text-center">
         <p>{TEXTS.newGrammarComplete}</p>
         <Notification>{deck.block.name}</Notification>
         <ReturnHomeButton />
