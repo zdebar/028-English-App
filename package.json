@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "@supabase/cli-windows-x64": "^2.109.1",
     "supabase": "^2.105.0"
   }
 }
