@@ -160,7 +160,7 @@ describe('GrammarOverview', () => {
 
     expect(screen.getByText('Grammar overview')).toBeTruthy();
     const buttons = screen.getAllByTestId('grammar-button');
-    expect(buttons.length).toBe(2);
+    expect(buttons).toHaveLength(2);
 
     fireEvent.click(buttons[1]);
     expect(mocks.setCurrentIndex).toHaveBeenCalledWith(1);
