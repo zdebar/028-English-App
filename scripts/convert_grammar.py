@@ -5,6 +5,7 @@ import argparse
 import csv
 import html
 import re
+from pathlib import Path
 
 
 CLASS_ATTR_RE = re.compile(r"\sclass=(['\"]).*?\1", re.IGNORECASE | re.DOTALL)
@@ -128,9 +129,23 @@ def convert_note(note_html: str) -> str:
     return "".join(output)
 
 
+def _resolve_workspace_path(path: str, workspace: Path) -> Path:
+    """Resolve a CLI path and ensure it stays inside the workspace."""
+    resolved_path = Path(path).resolve()
+    try:
+        resolved_path.relative_to(workspace)
+    except ValueError as exc:
+        raise ValueError(f"Path must be inside the workspace: {path}") from exc
+    return resolved_path
+
+
 def process_csv(input_path: str, output_path: str) -> None:
     """Read a grammar CSV, convert its note/NOTE column, and write the converted CSV."""
-    with open(input_path, "r", encoding="utf-8", newline="") as src:
+    workspace = Path.cwd().resolve()
+    safe_input_path = _resolve_workspace_path(input_path, workspace)
+    safe_output_path = _resolve_workspace_path(output_path, workspace)
+
+    with safe_input_path.open("r", encoding="utf-8", newline="") as src:
         sample = src.read(2048)
         src.seek(0)
         try:
@@ -147,7 +162,7 @@ def process_csv(input_path: str, output_path: str) -> None:
         elif "NOTE" in fieldnames:
             note_key = "NOTE"
 
-        with open(output_path, "w", encoding="utf-8", newline="") as dst:
+        with safe_output_path.open("w", encoding="utf-8", newline="") as dst:
             writer = csv.DictWriter(dst, fieldnames=fieldnames, dialect=dialect, quoting=csv.QUOTE_MINIMAL)
             writer.writeheader()
 
