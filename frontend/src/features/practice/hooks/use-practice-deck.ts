@@ -5,8 +5,8 @@ import { useFetch } from '@/hooks/use-fetch';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
 import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
-import { useHint, NBSP } from './use-hint';
-import { useAudioManager } from '../../audio/use-audio-manager';
+import { NBSP } from './use-hint';
+import { usePracticeCardState } from './use-practice-card-state';
 import { triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 import config from '@/config/config';
 import UserBlock from '@/database/models/user-blocks';
@@ -38,10 +38,21 @@ export function usePracticeDeck(userId: string | null, mode: ReviewPracticeMode 
   const activeArray = array.length > 0 ? array : (fetchedArray ?? []);
   const currentItem = activeArray[index] ?? null;
 
-  const { czechHinted, englishHinted, resetHint, plusHint } = useHint(
-    currentItem?.czech,
-    currentItem?.english,
-  );
+  const isCzToEn = currentItem ? alternateDirection(currentItem?.progress) : true; // true = CZ -> EN, false = EN -> CZ
+  const {
+    audioDisabled,
+    audioError,
+    audioLoading,
+    czech,
+    english,
+    handleReveal,
+    hideDirectionChange,
+    isPlaying,
+    playAudio: playAudioInternal,
+    plusHint,
+    resetHint,
+    showDirectionChange,
+  } = usePracticeCardState({ currentItem, isCzToEn, revealed, setRevealed });
 
   useEffect(() => {
     setArray(fetchedArray ?? []);
@@ -49,25 +60,6 @@ export function usePracticeDeck(userId: string | null, mode: ReviewPracticeMode 
     setRevealed(false);
     resetHint();
   }, [fetchedArray]);
-
-  const {
-    playAudio: playAudioInternal,
-    audioError,
-    loading: audioLoading,
-    isPlaying,
-  } = useAudioManager(currentItem?.audio);
-
-  // Derived states
-  const isCzToEn = currentItem ? alternateDirection(currentItem?.progress) : true; // true = CZ -> EN, false = EN -> CZ
-  const audioDisabled = (isCzToEn && !revealed) || !currentItem?.audio || audioError;
-  const czech = isCzToEn || revealed ? currentItem?.czech : czechHinted;
-  const english = revealed || (audioDisabled && !isCzToEn) ? currentItem?.english : englishHinted;
-
-  const [wasCzToEn, setWasCzToEn] = useState<boolean | null>(null);
-  const showDirectionChange = wasCzToEn !== isCzToEn;
-  const hideDirectionChange = useCallback(() => {
-    setWasCzToEn(isCzToEn);
-  }, [isCzToEn]);
 
   // Ref to track user progress changes before saving
   const userProgressRef = useRef<UserItemPractice[]>([]);
@@ -172,42 +164,6 @@ export function usePracticeDeck(userId: string | null, mode: ReviewPracticeMode 
     },
     [activeArray.length, currentItem, resetHint, saveBufferedProgress, userId],
   );
-
-  // Play audio on item change if direction is EN -> CZ
-  useEffect(() => {
-    if (audioDisabled || isCzToEn || audioLoading || showDirectionChange) {
-      return;
-    }
-
-    const timeoutId = globalThis.setTimeout(() => {
-      playAudioInternal();
-    }, config.practice.audioDelay);
-
-    return () => {
-      globalThis.clearTimeout(timeoutId);
-    };
-  }, [audioDisabled, isCzToEn, audioLoading, showDirectionChange, playAudioInternal, currentItem]);
-
-  const handleReveal = useCallback(() => {
-    if (showDirectionChange) {
-      hideDirectionChange();
-      return;
-    }
-
-    if (isCzToEn && !audioError && !revealed) {
-      playAudioInternal();
-    }
-
-    setRevealed(true);
-  }, [
-    audioError,
-    hideDirectionChange,
-    isCzToEn,
-    playAudioInternal,
-    setRevealed,
-    showDirectionChange,
-    revealed,
-  ]);
 
   return {
     // Core state

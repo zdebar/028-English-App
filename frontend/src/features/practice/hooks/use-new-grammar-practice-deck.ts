@@ -3,14 +3,14 @@ import Grammar from '@/database/models/grammar';
 import UserBlock from '@/database/models/user-blocks';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
-import { useAudioManager } from '@/features/audio/use-audio-manager';
 import type { GrammarDetail } from '@/features/grammar/GrammarDetailCard';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { TEXTS } from '@/locales/cs';
 import type { UserBlockType } from '@/types/generic.types';
 import type { UserItemPractice } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { NBSP, useHint } from './use-hint';
+import { NBSP } from './use-hint';
+import { usePracticeCardState } from './use-practice-card-state';
 
 type NewGrammarRound = 0 | 1;
 
@@ -100,33 +100,20 @@ export function useNewGrammarPracticeDeck(userId: string | null) {
 
   const currentItem = useMemo(() => currentQueue[0] ?? null, [currentQueue]);
 
-  const { czechHinted, englishHinted, resetHint, plusHint } = useHint(
-    currentItem?.czech,
-    currentItem?.english,
-  );
-
-  const {
-    playAudio: playAudioInternal,
-    audioError,
-    loading: audioLoading,
-    isPlaying,
-  } = useAudioManager(currentItem?.audio ?? null);
-
   const isCzToEn = ROUND_DIRECTIONS[round] === 'czToEn';
-  const audioDisabled = (isCzToEn && !revealed) || !currentItem?.audio || audioError;
-  const czech = isCzToEn || revealed ? currentItem?.czech : czechHinted;
-  const english = revealed || (audioDisabled && !isCzToEn) ? currentItem?.english : englishHinted;
-
-  const [wasCzToEn, setWasCzToEn] = useState<boolean | null>(null);
-  const showDirectionChange = wasCzToEn !== isCzToEn;
-  const hideDirectionChange = useCallback(() => {
-    setWasCzToEn(isCzToEn);
-  }, [isCzToEn]);
-
-  const resetQuestionState = useCallback(() => {
-    setRevealed(false);
-    resetHint();
-  }, [resetHint]);
+  const {
+    audioDisabled,
+    audioError,
+    audioLoading,
+    czech,
+    english,
+    handleReveal,
+    isPlaying,
+    playAudio: playAudioInternal,
+    plusHint,
+    resetQuestionState,
+    showDirectionChange,
+  } = usePracticeCardState({ currentItem, isCzToEn, revealed, setRevealed });
 
   const completeBlock = useCallback(
     async (dateTime: string = new Date().toISOString()) => {
@@ -192,16 +179,7 @@ export function useNewGrammarPracticeDeck(userId: string | null) {
         reportError('Failed to advance new grammar practice', error);
       }
     },
-    [
-      block,
-      currentItem,
-      currentQueue,
-      isComplete,
-      items,
-      nextWaveQueue,
-      setNextQueueState,
-      userId,
-    ],
+    [block, currentItem, currentQueue, isComplete, items, nextWaveQueue, setNextQueueState, userId],
   );
 
   const completeCurrent = useCallback(async () => {
@@ -253,33 +231,6 @@ export function useNewGrammarPracticeDeck(userId: string | null) {
     setNextQueueState,
     userId,
   ]);
-
-  useEffect(() => {
-    if (audioDisabled || isCzToEn || audioLoading || showDirectionChange) {
-      return;
-    }
-
-    const timeoutId = globalThis.setTimeout(() => {
-      playAudioInternal();
-    }, config.practice.audioDelay);
-
-    return () => {
-      globalThis.clearTimeout(timeoutId);
-    };
-  }, [audioDisabled, isCzToEn, audioLoading, showDirectionChange, playAudioInternal, currentItem]);
-
-  const handleReveal = useCallback(() => {
-    if (showDirectionChange) {
-      hideDirectionChange();
-      return;
-    }
-
-    if (isCzToEn && !audioError && !revealed) {
-      playAudioInternal();
-    }
-
-    setRevealed(true);
-  }, [audioError, hideDirectionChange, isCzToEn, playAudioInternal, revealed, showDirectionChange]);
 
   return {
     block,
