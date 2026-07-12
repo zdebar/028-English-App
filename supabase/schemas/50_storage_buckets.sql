@@ -13,7 +13,7 @@ BEGIN
 
   EXECUTE 'DROP POLICY IF EXISTS audio_files_read_authenticated_anon ON storage.objects';
   EXECUTE format(
-    'CREATE POLICY %I ON storage.objects FOR SELECT TO anon, authenticated USING (bucket_id = ANY (%L::text[]))',
+    'CREATE POLICY %I ON storage.objects FOR SELECT TO authenticated USING (bucket_id = ANY (%L::text[]))',
     'audio_files_read_authenticated_anon',
     bucket_ids
   );
