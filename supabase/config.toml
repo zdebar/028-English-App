@@ -75,6 +75,7 @@ schema_paths = [
   "./schemas/37_rpc_upsert_fetch_user_blocks.sql",
   "./schemas/40_user_lifecycle_functions.sql",
   "./schemas/41_anonymous_cleanup_function.sql",
+  "./schemas/42_cron_jobs.sql",
   "./schemas/50_storage_buckets.sql",
   "./schemas/90_rls.sql",
 ]
@@ -86,7 +87,6 @@ enabled = true
 # Supports glob patterns relative to supabase directory: "./seeds/*.sql"
 sql_paths = [
   "./seeds/00_private_settings.sql",
-  "./seeds/01_cron_schedules.sql",
   "./seeds/02_levels_rows.sql",
   "./seeds/03_lessons_rows.sql",
   "./seeds/04_grammar_rows.sql",
