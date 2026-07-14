@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -72,8 +72,14 @@ describe('Modal', () => {
     expect(mocks.closeOverlay).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onConfirm and then closeOverlay on confirm', () => {
-    const onConfirm = vi.fn();
+  it('awaits confirmation before closing the overlay', async () => {
+    let resolveConfirmation: (() => void) | undefined;
+    const onConfirm = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveConfirmation = resolve;
+        }),
+    );
 
     render(
       <Modal onConfirm={onConfirm} onClose={vi.fn()}>
@@ -84,7 +90,15 @@ describe('Modal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
 
     expect(onConfirm).toHaveBeenCalledTimes(1);
-    expect(mocks.closeOverlay).toHaveBeenCalledTimes(1);
+    expect(mocks.closeOverlay).not.toHaveBeenCalled();
+    expect((screen.getByRole('button', { name: 'Cancel' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: 'Confirm' }) as HTMLButtonElement).disabled).toBe(true);
+
+    resolveConfirmation?.();
+
+    await waitFor(() => {
+      expect(mocks.closeOverlay).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('returns null when root element is not present', () => {

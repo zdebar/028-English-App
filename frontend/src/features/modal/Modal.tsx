@@ -1,6 +1,6 @@
 import { useOverlayStore } from '@/features/overlay/use-overlay-store';
 import { TEXTS } from '@/locales/cs';
-import { useCallback, useEffect, type JSX, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, type JSX, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import StyledButton from '../../components/UI/buttons/StyledButton';
 
@@ -16,15 +16,24 @@ type ModalProps = Readonly<{
 export function Modal({ onConfirm, onClose, children }: ModalProps): JSX.Element | null {
   const closeOverlay = useOverlayStore((state) => state.closeOverlay);
   const openOverlay = useOverlayStore((state) => state.openOverlay);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleCancel = useCallback(() => {
+    if (isSubmitting) return;
     closeOverlay();
-  }, [closeOverlay]);
+  }, [closeOverlay, isSubmitting]);
 
-  const handleConfirm = useCallback(() => {
-    onConfirm();
-    closeOverlay();
-  }, [closeOverlay, onConfirm]);
+  const handleConfirm = useCallback(async () => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      await onConfirm();
+    } finally {
+      setIsSubmitting(false);
+      closeOverlay();
+    }
+  }, [closeOverlay, isSubmitting, onConfirm]);
 
   const modalRoot = document.getElementById('root');
 
@@ -41,10 +50,10 @@ export function Modal({ onConfirm, onClose, children }: ModalProps): JSX.Element
       <div className="card-width color-base pointer-events-auto gap-1 pt-4">
         <div className="flex grow flex-col items-center gap-2 p-6 text-center">{children}</div>
         <div className="flex gap-1">
-          <StyledButton onClick={handleCancel} className="h-button font-bold">
+          <StyledButton onClick={handleCancel} disabled={isSubmitting} className="h-button font-bold">
             {TEXTS.cancel}
           </StyledButton>
-          <StyledButton onClick={handleConfirm} className="h-button font-bold">
+          <StyledButton onClick={handleConfirm} disabled={isSubmitting} className="h-button font-bold">
             {TEXTS.confirm}
           </StyledButton>
         </div>
