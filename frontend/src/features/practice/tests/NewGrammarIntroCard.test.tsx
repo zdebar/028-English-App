@@ -8,9 +8,10 @@ vi.mock('@/locales/cs', () => ({
 }));
 
 vi.mock('@/features/grammar/GrammarDetailCard', () => ({
-  default: ({ grammar, onClose }: any) => (
+  default: ({ grammar, onClose, showHelpButton }: any) => (
     <div>
       <div data-testid="grammar-detail">{grammar?.name}</div>
+      <div data-testid="grammar-help-enabled">{String(showHelpButton)}</div>
       <button type="button" onClick={onClose}>
         close grammar
       </button>
@@ -34,7 +35,7 @@ describe('NewGrammarIntroCard', () => {
     expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy();
   });
 
-  it('reserves space above the continue action for grammar detail bottom controls', () => {
+  it('hides grammar help and places continue directly below the overview', () => {
     render(
       <NewGrammarIntroCard
         grammar={{ id: 1, name: 'Articles' }}
@@ -43,9 +44,8 @@ describe('NewGrammarIntroCard', () => {
       />,
     );
 
-    expect(screen.getByRole('button', { name: 'Continue' }).className).toContain(
-      'mt-[calc(var(--height-button)+0.5rem)]',
-    );
+    expect(screen.getByTestId('grammar-help-enabled').textContent).toBe('false');
+    expect(screen.getByRole('button', { name: 'Continue' }).className).not.toContain('mt-');
   });
 
   it('calls onContinue from the continue action', () => {

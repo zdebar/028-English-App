@@ -58,4 +58,22 @@ describe('GrammarDetailCard', () => {
 
     expect(screen.getByText('No notes')).toBeTruthy();
   });
+
+  it('renders help by default and can omit it for informational-only views', () => {
+    const { rerender } = render(
+      <GrammarDetailCard grammar={{ id: 1, name: 'Articles' }} onClose={vi.fn()} />,
+    );
+
+    expect(screen.getByTestId('help')).toBeTruthy();
+
+    rerender(
+      <GrammarDetailCard
+        grammar={{ id: 1, name: 'Articles' }}
+        onClose={vi.fn()}
+        showHelpButton={false}
+      />,
+    );
+
+    expect(screen.queryByTestId('help')).toBeNull();
+  });
 });

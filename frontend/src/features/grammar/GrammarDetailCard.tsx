@@ -13,9 +13,16 @@ type GrammarDetailCardProps = Readonly<{
   grammar?: GrammarDetail | null;
   onClose: () => void;
   onReset?: () => Promise<void>;
+  /** Whether to render the bottom-right contextual help control. */
+  showHelpButton?: boolean;
 }>;
 
-export default function GrammarDetailCard({ grammar, onClose, onReset }: GrammarDetailCardProps) {
+export default function GrammarDetailCard({
+  grammar,
+  onClose,
+  onReset,
+  showHelpButton = true,
+}: GrammarDetailCardProps) {
   return (
     <OverviewCard
       buttonTitle={grammar?.name}
@@ -33,9 +40,11 @@ export default function GrammarDetailCard({ grammar, onClose, onReset }: Grammar
       ) : (
         TEXTS.noNotesToDisplay
       )}
-      <div className="pos-bottom-right-control">
-        <HelpButton />
-      </div>
+      {showHelpButton && (
+        <div className="pos-bottom-right-control">
+          <HelpButton />
+        </div>
+      )}
     </OverviewCard>
   );
 }
