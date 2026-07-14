@@ -5,7 +5,7 @@ export const OVERVIEW_TEXTS = {
   levelsMasteredHelp: 'Naučeno / celkem položek',
 
   // Grammar Overview Page
-  noGrammar: 'Žádné započatá gramatika.',
+  noGrammar: 'Žádná započatá gramatika.',
   startedCount: 'Započato',
   masteredCount: 'Naučeno',
   restartGrammarTitle: 'Restartovat gramatiku',
@@ -13,7 +13,7 @@ export const OVERVIEW_TEXTS = {
     'Opravdu chcete restartovat pokrok všech položek této gramatiky? Tuto akci nelze vrátit zpět.',
 
   // Blocks Overview Page
-  noBlocks: 'Žádné započaté bloky.',
+  noBlocks: 'Žádná započatá témata.',
   noBlockItems: 'V tomto bloku nejsou žádné položky.',
   resetBlockTitle: 'Restartovat blok',
   resetBlockDescription:
