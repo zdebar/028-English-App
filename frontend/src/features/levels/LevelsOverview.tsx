@@ -59,7 +59,7 @@ export default function LevelsOverview() {
       <DataState
         loading={levelsLoading}
         hasData={levels.length > 0}
-        noDataMessage={TEXTS.notAvailable}
+        noDataMessage={TEXTS.noDashboardData}
       >
         {levels.map((level) => (
           <div key={level.id} className="flex flex-col gap-1">
