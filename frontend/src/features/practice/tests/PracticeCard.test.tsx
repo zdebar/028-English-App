@@ -145,6 +145,17 @@ vi.mock('@/features/grammar/use-grammar-viewer', () => ({
   }),
 }));
 
+vi.mock('@/features/grammar/GrammarDetailCard', () => ({
+  default: ({ grammar, onClose, showHelpButton }: any) => (
+    <div data-testid="grammar-detail" data-help-enabled={String(showHelpButton)}>
+      {grammar?.name}
+      <button type="button" onClick={onClose}>
+        close grammar
+      </button>
+    </div>
+  ),
+}));
+
 vi.mock('@/features/notes/use-note-viewer', () => ({
   useNoteViewer: () => ({
     isNoteVisible: mocks.noteVisible,
@@ -382,7 +393,8 @@ describe('PracticeCard', () => {
 
     render(<PracticeCard />);
 
-    expect(screen.getByTestId('overview-title').textContent).toContain('Articles');
+    expect(screen.getByTestId('grammar-detail').textContent).toContain('Articles');
+    expect(screen.getByTestId('grammar-detail').dataset.helpEnabled).toBe('false');
   });
 
   it('shows empty message when current item is missing', () => {

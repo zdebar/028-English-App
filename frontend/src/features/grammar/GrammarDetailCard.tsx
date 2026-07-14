@@ -21,7 +21,7 @@ export default function GrammarDetailCard({
   grammar,
   onClose,
   onReset,
-  showHelpButton = true,
+  showHelpButton = false,
 }: GrammarDetailCardProps) {
   return (
     <OverviewCard

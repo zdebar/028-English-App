@@ -91,7 +91,9 @@ export default function PracticeSessionCard({
     audioStatusMessage = <p className="px-2">{TEXTS.noAudio}</p>;
   }
 
-  if (isGrammarVisible) return <GrammarDetailCard grammar={grammarData} onClose={closeGrammar} />;
+  if (isGrammarVisible) {
+    return <GrammarDetailCard grammar={grammarData} onClose={closeGrammar} showHelpButton={false} />;
+  }
   if (isNoteVisible) return <NoteDetailCard note={noteData} onClose={closeNote} />;
 
   return (

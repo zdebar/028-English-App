@@ -93,6 +93,7 @@ export default function GrammarOverview(): JSX.Element {
       grammar={currentItem}
       onClose={() => setCurrentIndex(null)}
       onReset={handleReset}
+      showHelpButton
     />
   );
 }
