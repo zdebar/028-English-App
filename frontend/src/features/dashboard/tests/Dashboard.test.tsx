@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   showMastered: false,
   setMasteredDashboard: vi.fn(),
   levels: [] as unknown[],
+  levelsLoading: false,
   lessons: [] as Array<{
     id: number;
     name: string;
@@ -22,12 +23,14 @@ vi.mock('@/features/user-stats/use-user-store', () => ({
   useUserStore: (
     selector: (state: {
       levels: unknown[];
+      levelsLoading: boolean;
       showMasteredDashboard: boolean;
       setMasteredDashboard: typeof mocks.setMasteredDashboard;
     }) => unknown,
   ) =>
     selector({
       levels: mocks.levels,
+      levelsLoading: mocks.levelsLoading,
       showMasteredDashboard: mocks.showMastered,
       setMasteredDashboard: mocks.setMasteredDashboard,
     }),
@@ -43,10 +46,6 @@ vi.mock('@/components/UI/BlockBar', () => ({
       {lessonName}:{todayCount}
     </div>
   ),
-}));
-
-vi.mock('@/features/help/HelpButton', () => ({
-  default: () => <button type="button">help</button>,
 }));
 
 vi.mock('@/features/help/HelpText', () => ({
@@ -70,7 +69,7 @@ vi.mock('@/features/progress/MasteredToggleButton', () => ({
 vi.mock('@/locales/cs', () => ({
   ARIA_TEXTS: { dashboardRegion: 'Dashboard' },
   TEXTS: {
-    notAvailable: 'Nedostupne',
+    noDashboardData: 'Žádná data.',
     masteredTodayHint: 'Dnes zvladnuto',
     startedTodayHint: 'Dnes zahajeno',
   },
@@ -83,15 +82,28 @@ describe('Dashboard', () => {
     vi.clearAllMocks();
     mocks.showMastered = false;
     mocks.levels = [];
+    mocks.levelsLoading = false;
     mocks.lessons = [];
   });
 
-  it('renders fallback not-available lesson when no lessons are in progress', () => {
-    const { container } = render(<Dashboard />);
+  it('does not render a no-data message while levels are loading', () => {
+    mocks.levelsLoading = true;
 
-    expect(screen.getByTestId('block-bar').textContent).toContain('Nedostupne');
-    expect(screen.getByText('Dnes zahajeno')).toBeTruthy();
-    expect(container.querySelector('.pos-home-bottom-right-control button')).toBeTruthy();
+    render(<Dashboard />);
+
+    expect(screen.queryByText('Žádná data.')).toBeNull();
+    expect(screen.queryByTestId('block-bar')).toBeNull();
+    expect(screen.queryByText('Dnes zahajeno')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'toggle' })).toBeNull();
+  });
+
+  it('renders a no-data message without dashboard controls when no lessons are in progress', () => {
+    render(<Dashboard />);
+
+    expect(screen.getByText('Žádná data.')).toBeTruthy();
+    expect(screen.queryByTestId('block-bar')).toBeNull();
+    expect(screen.queryByText('Dnes zahajeno')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'toggle' })).toBeNull();
   });
 
   it('renders mastered hint and triggers toggle handler', () => {

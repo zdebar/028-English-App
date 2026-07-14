@@ -84,6 +84,10 @@ vi.mock('@/features/dashboard/Dashboard', () => ({
   default: () => <div data-testid="dashboard" />,
 }));
 
+vi.mock('@/features/help/HelpButton', () => ({
+  default: () => <button type="button">Help</button>,
+}));
+
 vi.mock('@/components/UI/Notification', () => ({
   default: ({ children }: any) => <div>{children}</div>,
 }));
@@ -150,6 +154,15 @@ describe('Home', () => {
     render(<Home />);
 
     expect(screen.getByTestId('home-practice-buttons').textContent).toBe('practice:u1');
+  });
+
+  it('renders the dashboard help button in the page-owned dashboard wrapper', () => {
+    render(<Home />);
+
+    const helpButton = screen.getByRole('button', { name: 'Help' });
+    expect(helpButton.closest('.pos-home-dashboard-help')).toBeTruthy();
+    expect(helpButton.parentElement?.parentElement?.className).toContain('relative');
+    expect(helpButton.parentElement?.parentElement?.className).toContain('mb-12');
   });
 
   it('renders install and guide links when user is signed in', () => {

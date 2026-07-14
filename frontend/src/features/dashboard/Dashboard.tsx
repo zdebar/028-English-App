@@ -1,33 +1,19 @@
 import { TEXTS, ARIA_TEXTS } from '@/locales/cs';
 import BlockBar from '@/components/UI/BlockBar';
-import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import { useUserStore } from '@/features/user-stats/use-user-store';
 import MasteredToggleButton from '@/features/progress/MasteredToggleButton';
-import type { LessonOverviewType } from '@/types/generic.types';
 import { getInProgressLessons } from '@/utils/dashboard.utils';
+import Notification from '@/components/UI/Notification';
 
 type DashboardProps = Readonly<{
   /** Extra classes appended to the dashboard section wrapper. */
   className?: string;
 }>;
 
-const noAvailableLesson: LessonOverviewType = {
-  id: 0,
-  name: TEXTS.notAvailable,
-  note: '',
-  sort_order: 0,
-  level_id: 0,
-  deleted_at: null,
-  startedCount: 0,
-  startedTodayCount: 0,
-  masteredCount: 0,
-  masteredTodayCount: 0,
-  totalCount: 0,
-};
-
 export default function Dashboard({ className = '' }: DashboardProps) {
   const levelsOverview = useUserStore((state) => state.levels);
+  const levelsLoading = useUserStore((state) => state.levelsLoading);
   const showMastered = useUserStore((state) => state.showMasteredDashboard);
   const setShowMastered = useUserStore((state) => state.setMasteredDashboard);
 
@@ -36,11 +22,22 @@ export default function Dashboard({ className = '' }: DashboardProps) {
     showMastered ? 'mastered' : 'started',
   );
 
-  if (lessonsInProgress.length === 0) lessonsInProgress.push(noAvailableLesson);
+  if (lessonsInProgress.length === 0) {
+    return (
+      <section
+        className={`min-w-card h-attribute relative mx-auto w-full ${className}`}
+        aria-label={ARIA_TEXTS.dashboardRegion}
+      >
+        {!levelsLoading && (
+          <Notification className="color-info">{TEXTS.noDashboardData}</Notification>
+        )}
+      </section>
+    );
+  }
 
   return (
     <section
-      className={`min-w-card relative mx-auto mb-12 flex w-full flex-col gap-1 ${className}`}
+      className={`min-w-card relative mx-auto flex w-full flex-col gap-1 ${className}`}
       aria-label={ARIA_TEXTS.dashboardRegion}
     >
       {lessonsInProgress.map((lesson) => (
@@ -60,9 +57,6 @@ export default function Dashboard({ className = '' }: DashboardProps) {
           lessonCount={lesson.totalCount ?? 1}
         />
       ))}
-      <div className="pos-home-bottom-right-control">
-        <HelpButton />
-      </div>
       <HelpText className="right-2 -bottom-6">
         {showMastered ? TEXTS.masteredTodayHint : TEXTS.startedTodayHint}
       </HelpText>

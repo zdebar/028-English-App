@@ -89,7 +89,7 @@
   }
 }
 
-.pos-home-bottom-right-control {
+.pos-home-dashboard-help {
   position: absolute;
   bottom: calc(-1 * var(--height-button));
   right: 0;

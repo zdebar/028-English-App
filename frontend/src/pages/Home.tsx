@@ -16,6 +16,7 @@ import PropertyView from '@/components/UI/PropertyView';
 import PracticeOverviewButton from '@/features/practice-overview/PracticeOverviewButton';
 import SimulateDataButton from '@/features/synchronization/SimulateDataButton';
 import HomePracticeButtons from '@/features/practice/HomePracticeButtons';
+import HelpButton from '@/features/help/HelpButton';
 
 function HomeActionLinks(): JSX.Element {
   return (
@@ -66,7 +67,12 @@ export default function Home(): JSX.Element {
               {TEXTS.syncWarning}
             </p>
           )}
-          <Dashboard />
+          <div className="relative mb-12">
+            <Dashboard />
+            <div className="pos-home-dashboard-help">
+              <HelpButton />
+            </div>
+          </div>
           {isAnonymousUser && (
             <div className="mt-8 mb-8 flex flex-col gap-2">
               <ConvertAnonymousUserButton />
