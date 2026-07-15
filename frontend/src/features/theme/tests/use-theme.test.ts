@@ -4,12 +4,18 @@ const mocks = vi.hoisted(() => ({
   loadUserTheme: vi.fn(),
   saveUserTheme: vi.fn(),
   clearUserTheme: vi.fn(),
+  loadActiveTheme: vi.fn(),
+  saveActiveTheme: vi.fn(),
+  clearActiveTheme: vi.fn(),
 }));
 
 vi.mock('@/features/theme/theme-utils', () => ({
   loadUserTheme: (...args: unknown[]) => mocks.loadUserTheme(...args),
   saveUserTheme: (...args: unknown[]) => mocks.saveUserTheme(...args),
   clearUserTheme: (...args: unknown[]) => mocks.clearUserTheme(...args),
+  loadActiveTheme: (...args: unknown[]) => mocks.loadActiveTheme(...args),
+  saveActiveTheme: (...args: unknown[]) => mocks.saveActiveTheme(...args),
+  clearActiveTheme: (...args: unknown[]) => mocks.clearActiveTheme(...args),
 }));
 
 import { useThemeStore } from '@/features/theme/use-theme-store';
@@ -18,6 +24,7 @@ describe('useThemeStore', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.loadUserTheme.mockReturnValue(null);
+    mocks.loadActiveTheme.mockReturnValue(null);
 
     vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: false }));
 
@@ -33,6 +40,7 @@ describe('useThemeStore', () => {
     expect(mocks.loadUserTheme).toHaveBeenCalledWith('u1');
     expect(useThemeStore.getState().theme).toBe('dark');
     expect(document.documentElement.classList.contains('dark')).toBe(true);
+    expect(mocks.saveActiveTheme).toHaveBeenCalledWith('dark');
   });
 
   it('loadTheme falls back to system theme when no stored value', () => {
@@ -43,6 +51,7 @@ describe('useThemeStore', () => {
 
     expect(useThemeStore.getState().theme).toBe('dark');
     expect(document.documentElement.classList.contains('dark')).toBe(true);
+    expect(mocks.clearActiveTheme).toHaveBeenCalled();
   });
 
   it('chooseTheme saves and applies new theme when changed', () => {
@@ -51,6 +60,7 @@ describe('useThemeStore', () => {
     useThemeStore.getState().chooseTheme('dark', 'u1');
 
     expect(mocks.saveUserTheme).toHaveBeenCalledWith('dark', 'u1');
+    expect(mocks.saveActiveTheme).toHaveBeenCalledWith('dark');
     expect(useThemeStore.getState().theme).toBe('dark');
     expect(document.documentElement.classList.contains('dark')).toBe(true);
   });
@@ -61,6 +71,7 @@ describe('useThemeStore', () => {
     useThemeStore.getState().chooseTheme('light', 'u1');
 
     expect(mocks.saveUserTheme).not.toHaveBeenCalled();
+    expect(mocks.saveActiveTheme).toHaveBeenCalledWith('light');
     expect(document.documentElement.classList.contains('light')).toBe(true);
   });
 
@@ -71,6 +82,7 @@ describe('useThemeStore', () => {
     useThemeStore.getState().clearTheme('u1');
 
     expect(mocks.clearUserTheme).toHaveBeenCalledWith('u1');
+    expect(mocks.clearActiveTheme).toHaveBeenCalled();
     expect(useThemeStore.getState().theme).toBe('light');
     expect(document.documentElement.classList.contains('light')).toBe(true);
   });

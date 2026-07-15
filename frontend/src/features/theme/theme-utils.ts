@@ -1,4 +1,6 @@
 const DEFAULT_THEME_USER_ID = 'guest';
+const ACTIVE_THEME_STORAGE_KEY = 'theme_active';
+type StoredTheme = 'light' | 'dark';
 
 function resolveThemeUserId(userId?: string): string {
   return userId || DEFAULT_THEME_USER_ID;
@@ -37,4 +39,32 @@ export function loadUserTheme(userId?: string): string | null {
  */
 export function clearUserTheme(userId?: string): void {
   localStorage.removeItem(getThemeStorageKey(userId));
+}
+
+/** Saves the theme used during the next pre-paint bootstrap. */
+export function saveActiveTheme(theme: StoredTheme): void {
+  try {
+    localStorage.setItem(ACTIVE_THEME_STORAGE_KEY, theme);
+  } catch {
+    // Ignore unavailable or blocked storage.
+  }
+}
+
+/** Loads and validates the theme used during the pre-paint bootstrap. */
+export function loadActiveTheme(): StoredTheme | null {
+  try {
+    const theme = localStorage.getItem(ACTIVE_THEME_STORAGE_KEY);
+    return theme === 'light' || theme === 'dark' ? theme : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Clears the cached pre-paint theme so the system preference is used. */
+export function clearActiveTheme(): void {
+  try {
+    localStorage.removeItem(ACTIVE_THEME_STORAGE_KEY);
+  } catch {
+    // Ignore unavailable or blocked storage.
+  }
 }

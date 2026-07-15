@@ -1,5 +1,12 @@
 import { create } from 'zustand';
-import { clearUserTheme, loadUserTheme, saveUserTheme } from './theme-utils';
+import {
+  clearActiveTheme,
+  clearUserTheme,
+  loadActiveTheme,
+  loadUserTheme,
+  saveActiveTheme,
+  saveUserTheme,
+} from './theme-utils';
 
 export type UserTheme = 'light' | 'dark';
 const DEFAULT_THEME_USER_ID = 'guest';
@@ -70,18 +77,25 @@ export const useThemeStore = create<ThemeState>((set, get) => {
     } catch {
       // Ignore storage failures (e.g., blocked storage)
     }
+    saveActiveTheme(theme);
   };
 
-  const initialTheme: UserTheme = readStoredTheme(DEFAULT_THEME_USER_ID) ?? getSystemTheme();
+  const initialTheme: UserTheme = loadActiveTheme() ?? getSystemTheme();
   applyTheme(initialTheme);
 
   return {
     theme: initialTheme,
     loadTheme: (userId?: string | null) => {
       const resolvedUserId = resolveUserId(userId);
-      const storedTheme = readStoredTheme(resolvedUserId) ?? getSystemTheme();
-      set({ theme: storedTheme });
-      applyTheme(storedTheme);
+      const storedTheme = readStoredTheme(resolvedUserId);
+      const nextTheme = storedTheme ?? getSystemTheme();
+      if (storedTheme) {
+        saveActiveTheme(storedTheme);
+      } else {
+        clearActiveTheme();
+      }
+      set({ theme: nextTheme });
+      applyTheme(nextTheme);
     },
     clearTheme: (userId?: string | null) => {
       const resolvedUserId = resolveUserId(userId);
@@ -91,6 +105,7 @@ export const useThemeStore = create<ThemeState>((set, get) => {
       } catch {
         // Ignore storage failures (e.g., blocked storage)
       }
+      clearActiveTheme();
       const fallbackTheme = getSystemTheme();
       set({ theme: fallbackTheme });
       applyTheme(fallbackTheme);
@@ -99,6 +114,7 @@ export const useThemeStore = create<ThemeState>((set, get) => {
       const resolvedUserId = resolveUserId(userId);
       if (newTheme === get().theme) {
         applyTheme(newTheme);
+        saveActiveTheme(newTheme);
         return;
       }
       set({ theme: newTheme });

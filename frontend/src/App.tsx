@@ -33,6 +33,7 @@ import { useAudioLoader } from './features/audio/use-audio-loader';
 
 export default function App() {
   const userId = useAuthStore((state) => state.userId);
+  const authLoading = useAuthStore((state) => state.loading);
   const initializeAuth = useAuthStore((state) => state.initializeAuth);
   const showToast = useToastStore((state) => state.showToast);
   const location = useLocation();
@@ -49,7 +50,7 @@ export default function App() {
 
   useAudioLoader(userId);
   useUserStoreSync(userId);
-  useThemeLoader(userId);
+  useThemeLoader(userId, authLoading);
   usePeriodicSync(userId);
   useDailyStatsReset(userId);
 
