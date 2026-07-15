@@ -537,7 +537,7 @@ describe('UserBlock', () => {
           user_id: 'u1',
           block_id: 1,
           name: 'Block 1',
-          note: '',
+          note: null,
           lesson_id: 1,
           grammar_id: 10,
           sort_order: 1,
@@ -582,6 +582,7 @@ describe('UserBlock', () => {
     expect(mocks.bulkPut).toHaveBeenCalledWith([
       expect.objectContaining({
         block_id: 1,
+        note: null,
         show_in_topics: false,
         is_practice_block: false,
         started_at: '9999-12-31T23:59:59+00:00',

@@ -53,8 +53,10 @@ describe('GrammarDetailCard', () => {
     expect(container.innerHTML).toContain('<b>sanitized</b>');
   });
 
-  it('renders fallback message when note is missing', () => {
-    render(<GrammarDetailCard grammar={{ id: 1, name: 'Articles' }} onClose={vi.fn()} />);
+  it('renders fallback message when note is null', () => {
+    render(
+      <GrammarDetailCard grammar={{ id: 1, name: 'Articles', note: null }} onClose={vi.fn()} />,
+    );
 
     expect(screen.getByText('No notes')).toBeTruthy();
   });

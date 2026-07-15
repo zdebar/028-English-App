@@ -75,7 +75,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
   user_id!: string;
   block_id!: number;
   name!: string;
-  note!: string;
+  note!: string | null;
   lesson_id!: number;
   grammar_id!: number | null;
   sort_order!: number;
