@@ -210,22 +210,27 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
    * Calculates ready grammar review state.
    *
    * @param userId Non-empty user id whose grammar items should be inspected.
-   * @returns Ready count plus a grouped future schedule. Never-started grammar items are ignored.
+   * @returns Ready count plus a grouped future schedule. Never-scheduled items in mastered grammar
+   * blocks are ready immediately.
    * @throws Error when userId is empty.
    */
   static async getReadyGrammarPracticeState(userId: string): Promise<ReadyGrammarPracticeState> {
     assertNonEmptyString(userId, 'userId');
 
     const nowMs = Date.now();
+    const masteredGrammarBlockIdSet = new Set(await UserItem.getMasteredGrammarBlockIds(userId));
     const grammarItems = await db.user_items
       .where('[user_id+is_practice_item+is_vocabulary+next_at+mastered_at+sort_order]')
       .between(
         [userId, 1, 0, Dexie.minKey, NULL_DATE, Dexie.minKey],
-        [userId, 1, 0, NULL_DATE, NULL_DATE, Dexie.maxKey],
+        [userId, 1, 0, Dexie.maxKey, NULL_DATE, Dexie.maxKey],
         true,
-        false,
+        true,
       )
-      .filter((item) => item.mastered_at === NULL_DATE)
+      .filter(
+        (item) =>
+          item.mastered_at === NULL_DATE && masteredGrammarBlockIdSet.has(item.block_id),
+      )
       .toArray();
 
     const futureDates: string[] = [];
@@ -233,6 +238,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
 
     for (const item of grammarItems) {
       if (item.next_at === NULL_DATE) {
+        readyCount += 1;
         continue;
       }
 
@@ -241,7 +247,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
         continue;
       }
 
-      if (nextAtMs < nowMs) {
+      if (nextAtMs <= nowMs) {
         readyCount += 1;
       } else {
         futureDates.push(item.next_at);

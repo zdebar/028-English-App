@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   bulkDelete: vi.fn(),
   equalsDelete: vi.fn(),
   blockEqualsToArray: vi.fn(),
+  masteredBlockToArray: vi.fn(),
   itemIdModify: vi.fn(),
   itemIdBetweenModify: vi.fn(),
   userEqualsToArray: vi.fn(),
@@ -108,6 +109,21 @@ vi.mock('@/database/models/db', () => ({
             },
           };
         }
+        if (field === '[user_id+started_at]') {
+          return {
+            between: (...args: unknown[]) => {
+              mocks.indexedBetween(...args);
+              return {
+                filter: (...filterArgs: unknown[]) => {
+                  mocks.indexedFilter(...filterArgs);
+                  return {
+                    toArray: (...toArrayArgs: unknown[]) => mocks.indexedToArray(...toArrayArgs),
+                  };
+                },
+              };
+            },
+          };
+        }
         if (field === '[user_id+block_id]') {
           return {
             equals: () => ({
@@ -117,6 +133,13 @@ vi.mock('@/database/models/db', () => ({
         }
         throw new Error(`Unexpected user_items.where field: ${field}`);
       },
+    },
+    user_blocks: {
+      where: () => ({
+        equals: () => ({
+          toArray: (...args: unknown[]) => mocks.masteredBlockToArray(...args),
+        }),
+      }),
     },
     metadata: {},
     transaction: (...args: unknown[]) => mocks.transaction(...args),
@@ -176,6 +199,7 @@ describe('UserItem', () => {
     mocks.equalsDelete.mockResolvedValue(0);
     mocks.userEqualsToArray.mockResolvedValue([]);
     mocks.blockEqualsToArray.mockResolvedValue([]);
+    mocks.masteredBlockToArray.mockResolvedValue([]);
     mocks.indexedToArray.mockResolvedValue([]);
     mocks.updatedBetweenToArray.mockResolvedValue([]);
     mocks.rpc.mockResolvedValue({ data: [], error: null });
@@ -255,6 +279,72 @@ describe('UserItem', () => {
     const result = await UserItem.getByUserId('u1');
 
     expect(result.map((item) => item.item_id)).toEqual([1, 3]);
+  });
+
+  it('getPracticeDeck accepts unscheduled unmastered items from mastered grammar blocks', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
+    mocks.masteredBlockToArray.mockResolvedValueOnce([
+      {
+        block_id: 10,
+        is_vocabulary: false,
+        is_practice_block: true,
+        mastered_at: '2026-06-20T12:00:00.000Z',
+      },
+    ]);
+    mocks.indexedToArray
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([
+        {
+          item_id: 1,
+          block_id: 10,
+          is_practice_item: 1,
+          is_vocabulary: 0,
+          progress: 0,
+          next_at: '1970-01-01T00:00:00.000Z',
+          mastered_at: '1970-01-01T00:00:00.000Z',
+          sort_order: 1,
+        },
+      ]);
+
+    const deck = await UserItem.getPracticeDeck('u1', 10, 'grammar');
+
+    expect(deck).toHaveLength(1);
+    expect(deck[0].item_id).toBe(1);
+    expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
+      2,
+      ['u1', 1, 0, expect.anything(), '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', 1, 0, '2026-06-24T12:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      true,
+      true,
+    );
+    expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
+      3,
+      ['u1', 1, 0, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', 1, 0, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      true,
+      true,
+    );
+
+    const grammarFilter = mocks.indexedFilter.mock.calls[4][0] as (item: any) => boolean;
+    expect(grammarFilter({
+      block_id: 10,
+      mastered_at: '1970-01-01T00:00:00.000Z',
+      progress: 0,
+    })).toBe(true);
+    expect(grammarFilter({
+      block_id: 11,
+      mastered_at: '1970-01-01T00:00:00.000Z',
+      progress: 0,
+    })).toBe(false);
+    expect(grammarFilter({
+      block_id: 10,
+      mastered_at: '2026-06-20T12:00:00.000Z',
+      progress: 0,
+    })).toBe(false);
   });
 
   it('getByBlockId returns block items ordered by sort_order', async () => {
