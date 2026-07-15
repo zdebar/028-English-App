@@ -18,7 +18,6 @@ export interface GrammarType extends SyncEntityType {}
 
 export interface BlockType extends SyncEntityType {
   lesson_id: number;
-  is_vocabulary: boolean;
   grammar_id: number | null;
   show_in_topics: boolean;
   is_practice_block: boolean;

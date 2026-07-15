@@ -36,7 +36,7 @@ BEGIN
     b.grammar_id,
     b.sort_order,
     COALESCE(ub.progress, 0) AS progress,
-    b.is_vocabulary,
+    (b.grammar_id IS NULL) AS is_vocabulary,
     b.show_in_topics,
     b.is_practice_block,
     ub.started_at,

@@ -50,17 +50,12 @@ CREATE TABLE IF NOT EXISTS blocks (
   name TEXT NOT NULL UNIQUE,
   note TEXT,
   lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE RESTRICT,
-  is_vocabulary BOOLEAN NOT NULL,
   show_in_topics BOOLEAN NOT NULL DEFAULT TRUE,
   is_practice_block BOOLEAN NOT NULL DEFAULT TRUE,
   grammar_id INTEGER REFERENCES grammar(id) ON DELETE RESTRICT,
   sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ,
-  CONSTRAINT blocks_vocabulary_grammar_check CHECK (
-    (is_vocabulary = TRUE AND grammar_id IS NULL)
-    OR (is_vocabulary = FALSE AND grammar_id IS NOT NULL)
-  )
+  deleted_at TIMESTAMPTZ
 );
 
 CREATE TABLE IF NOT EXISTS user_blocks (
@@ -152,8 +147,6 @@ EXECUTE FUNCTION public.handle_new_auth_user();
 -- CREATE optimalization indexes
 CREATE INDEX IF NOT EXISTS idx_items_updated_at ON public.items (updated_at);
 CREATE INDEX IF NOT EXISTS idx_lessons_level_id ON public.lessons (level_id);
-CREATE INDEX IF NOT EXISTS idx_blocks_lesson_vocabulary_sort
-  ON public.blocks (lesson_id, is_vocabulary, sort_order);
 CREATE INDEX IF NOT EXISTS idx_blocks_grammar_id ON public.blocks (grammar_id);
 CREATE INDEX IF NOT EXISTS idx_items_note_id ON public.items (note_id);
 CREATE INDEX IF NOT EXISTS idx_items_block_id ON public.items (block_id);
