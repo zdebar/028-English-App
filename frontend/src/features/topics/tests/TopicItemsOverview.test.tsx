@@ -82,8 +82,9 @@ vi.mock('@/locales/cs', () => ({
     loadingError: 'Loading error',
     resetProgressSuccessToast: 'Reset success',
     resetProgressErrorToast: 'Reset error',
-    resetBlockTitle: 'Reset block',
-    resetBlockDescription: 'Reset block description',
+    resetTopicTitle: 'Reset topic',
+    resetTopicDescription: 'Reset topic description',
+    noTopicItems: 'No topic items',
     noAudio: 'No audio',
   },
   ARIA_TEXTS: {
@@ -145,11 +146,11 @@ vi.mock('@/features/help/HelpButton', () => ({
   ),
 }));
 
-import BlockItemsOverview from '@/features/blocks/BlockItemsOverview';
+import TopicItemsOverview from '@/features/topics/TopicItemsOverview';
 import UserItem from '@/database/models/user-items';
 import UserBlock from '@/database/models/user-blocks';
 
-describe('BlockItemsOverview', () => {
+describe('TopicItemsOverview', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.userId = 'u1';
@@ -168,30 +169,30 @@ describe('BlockItemsOverview', () => {
   it('renders not found state for invalid block id', () => {
     mocks.blockId = 'x';
 
-    render(<BlockItemsOverview />);
+    render(<TopicItemsOverview />);
 
-    expect(mocks.navigate).toHaveBeenCalledWith('/blocks');
+    expect(mocks.navigate).toHaveBeenCalledWith('/topics');
   });
 
   it('renders loading state', () => {
     mocks.state.itemsLoading = true;
 
-    render(<BlockItemsOverview />);
+    render(<TopicItemsOverview />);
 
-    expect(screen.queryByText('Not available')).toBeNull();
+    expect(screen.queryByText('No topic items')).toBeNull();
   });
 
-  it('renders empty state when block has no items', () => {
-    render(<BlockItemsOverview />);
+  it('renders empty state when topic has no items', () => {
+    render(<TopicItemsOverview />);
 
-    expect(screen.getByText('Not available')).toBeTruthy();
+    expect(screen.getByText('No topic items')).toBeTruthy();
   });
 
-  it('navigates back to blocks overview on close', () => {
-    render(<BlockItemsOverview />);
+  it('navigates back to topics overview on close', () => {
+    render(<TopicItemsOverview />);
 
     fireEvent.click(screen.getByTestId('close-button'));
-    expect(mocks.navigate).toHaveBeenCalledWith('/blocks');
+    expect(mocks.navigate).toHaveBeenCalledWith('/topics');
   });
 
   it('renders czech and english values and plays audio on click', () => {
@@ -205,7 +206,7 @@ describe('BlockItemsOverview', () => {
     ];
     mocks.readyAudio = new Set(['a.opus']);
 
-    render(<BlockItemsOverview />);
+    render(<TopicItemsOverview />);
 
     expect(screen.getByText('pondeli')).toBeTruthy();
     expect(screen.getByText('monday')).toBeTruthy();
@@ -227,7 +228,7 @@ describe('BlockItemsOverview', () => {
       },
     ];
 
-    render(<BlockItemsOverview />);
+    render(<TopicItemsOverview />);
 
     expect((screen.getByTestId('item-button') as HTMLButtonElement).disabled).toBe(true);
   });
@@ -244,7 +245,7 @@ describe('BlockItemsOverview', () => {
     mocks.readyAudio = new Set(['a.opus']);
     mocks.playAudio.mockResolvedValue(false);
 
-    render(<BlockItemsOverview />);
+    render(<TopicItemsOverview />);
 
     fireEvent.click(screen.getByTestId('item-button'));
 
@@ -254,7 +255,7 @@ describe('BlockItemsOverview', () => {
   });
 
   it('does not render help button when there are no items', () => {
-    render(<BlockItemsOverview />);
+    render(<TopicItemsOverview />);
 
     expect(screen.queryByTestId('help-button')).toBeNull();
   });
@@ -269,31 +270,31 @@ describe('BlockItemsOverview', () => {
       },
     ];
 
-    render(<BlockItemsOverview />);
+    render(<TopicItemsOverview />);
 
     fireEvent.click(screen.getByTestId('item-button'));
     expect(mocks.playAudio).not.toHaveBeenCalled();
   });
 
-  it('resets block items and shows success toast', async () => {
+  it('resets topic items and shows success toast', async () => {
     vi.mocked(UserItem.resetItemsByBlockId).mockResolvedValue(3);
 
-    render(<BlockItemsOverview />);
+    render(<TopicItemsOverview />);
 
     fireEvent.click(screen.getByTestId('reset-button'));
 
     await waitFor(() => {
       expect(UserItem.resetItemsByBlockId).toHaveBeenCalledWith('u1', 2);
       expect(UserBlock.resetByBlockId).toHaveBeenCalledWith('u1', 2);
-      expect(mocks.reportInfo).toHaveBeenCalledWith('Reset 3 items in block 2');
+      expect(mocks.reportInfo).toHaveBeenCalledWith('Reset 3 items in topic block 2');
       expect(mocks.showToast).toHaveBeenCalledWith('Reset success', 'success');
     });
   });
 
-  it('disables reset for browse-only blocks', () => {
+  it('disables reset for browse-only topics', () => {
     mocks.state.block = { block_id: 2, name: 'Letters', is_practice_block: false };
 
-    render(<BlockItemsOverview />);
+    render(<TopicItemsOverview />);
 
     expect((screen.getByTestId('reset-button') as HTMLButtonElement).disabled).toBe(true);
   });
@@ -301,7 +302,7 @@ describe('BlockItemsOverview', () => {
   it('shows toast and logs error when reset fails', async () => {
     vi.mocked(UserItem.resetItemsByBlockId).mockRejectedValue(new Error('boom'));
 
-    render(<BlockItemsOverview />);
+    render(<TopicItemsOverview />);
 
     fireEvent.click(screen.getByTestId('reset-button'));
 

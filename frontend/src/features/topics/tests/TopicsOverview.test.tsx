@@ -42,8 +42,8 @@ vi.mock('@/hooks/use-array', () => ({
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
     loadingMessage: 'Loading',
-    blocksOverview: 'Blocks overview',
-    noBlocks: 'No blocks',
+    topicsOverview: 'Topics overview',
+    noTopics: 'No topics',
   },
 }));
 
@@ -57,7 +57,7 @@ vi.mock('@/components/UI/Notification', () => ({
 
 vi.mock('@/components/UI/buttons/ListButton', () => ({
   ListButton: ({ children, onClick }: any) => (
-    <button data-testid="block-button" onClick={onClick}>
+    <button data-testid="topic-button" onClick={onClick}>
       {children}
     </button>
   ),
@@ -71,9 +71,9 @@ vi.mock('@/components/UI/buttons/CloseButton', () => ({
   ),
 }));
 
-import BlocksOverview from '@/features/blocks/BlocksOverview';
+import TopicsOverview from '@/features/topics/TopicsOverview';
 
-describe('BlocksOverview', () => {
+describe('TopicsOverview', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.userId = 'u1';
@@ -86,43 +86,43 @@ describe('BlocksOverview', () => {
   it('renders loading state', () => {
     mocks.state.loading = true;
 
-    render(<BlocksOverview />);
+    render(<TopicsOverview />);
 
     expect(mocks.getStartedTopicsByUserId).toHaveBeenCalledWith('u1');
-    expect(screen.queryByText('No blocks')).toBeNull();
+    expect(screen.queryByText('No topics')).toBeNull();
   });
 
-  it('renders empty state when there are no blocks', () => {
-    render(<BlocksOverview />);
+  it('renders empty state when there are no topics', () => {
+    render(<TopicsOverview />);
 
-    expect(screen.getByText('No blocks')).toBeTruthy();
+    expect(screen.getByText('No topics')).toBeTruthy();
   });
 
-  it('renders block list and navigates to block detail on click', () => {
+  it('renders topic list and navigates to topic detail on click', () => {
     mocks.state.data = [
       { block_id: 1, name: 'Dny v tydnu' },
       { block_id: 2, name: 'Mesice' },
     ];
 
-    render(<BlocksOverview />);
+    render(<TopicsOverview />);
 
-    const buttons = screen.getAllByTestId('block-button');
+    const buttons = screen.getAllByTestId('topic-button');
     expect(buttons).toHaveLength(2);
 
     fireEvent.click(buttons[1]);
-    expect(mocks.navigate).toHaveBeenCalledWith('/blocks/2');
+    expect(mocks.navigate).toHaveBeenCalledWith('/topics/2');
   });
 
-  it('renders browse-only blocks returned by topic query', () => {
+  it('renders browse-only topics returned by topic query', () => {
     mocks.state.data = [{ block_id: 3, name: 'Letters', is_practice_block: false }];
 
-    render(<BlocksOverview />);
+    render(<TopicsOverview />);
 
     expect(screen.getByText('Letters')).toBeTruthy();
   });
 
   it('navigates to profile on close', () => {
-    render(<BlocksOverview />);
+    render(<TopicsOverview />);
 
     fireEvent.click(screen.getByTestId('close-button'));
     expect(mocks.navigate).toHaveBeenCalledWith('/profile');
@@ -131,8 +131,8 @@ describe('BlocksOverview', () => {
   it('renders empty state when data loading fails', () => {
     mocks.state.error = 'Load error';
 
-    render(<BlocksOverview />);
+    render(<TopicsOverview />);
 
-    expect(screen.getByText('No blocks')).toBeTruthy();
+    expect(screen.getByText('No topics')).toBeTruthy();
   });
 });

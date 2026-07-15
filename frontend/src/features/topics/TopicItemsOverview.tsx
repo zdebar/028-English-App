@@ -24,29 +24,29 @@ function getPronunciationTitle(pronunciation: string): string {
     : `${TEXTS.pronunciation ?? 'Pronunciation'}: ${pronunciation}`;
 }
 
-export default function BlockItemsOverview() {
+export default function TopicItemsOverview() {
   const navigate = useNavigate();
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
 
-  // -- Block management --
+  // -- Topic management --
   const { blockId: blockIdString } = useParams<{ blockId: string }>();
   const blockId = blockIdString ? Number(blockIdString) : null;
 
   if (!blockId) {
-    navigate(ROUTES.blocks);
+    navigate(ROUTES.topics);
   }
 
-  const fetchBlock = useCallback(async (): Promise<UserBlockType | null> => {
+  const fetchTopic = useCallback(async (): Promise<UserBlockType | null> => {
     if (!userId || !blockId) return null;
     return UserBlock.getByBlockId(userId, blockId);
   }, [userId, blockId]);
 
   const {
-    data: block,
-    loading: blockLoading,
-    error: blockError,
-  } = useFetch<UserBlockType>(fetchBlock);
+    data: topic,
+    loading: topicLoading,
+    error: topicError,
+  } = useFetch<UserBlockType>(fetchTopic);
 
   // -- Items management --
   const fetchBlockItems = useCallback(async () => {
@@ -62,15 +62,15 @@ export default function BlockItemsOverview() {
   } = useArray<UserItemLocal>(fetchBlockItems);
 
   useEffect(() => {
-    if (!blockError) return;
+    if (!topicError) return;
     showToast(TEXTS.loadingError, 'error');
-    reportError('Failed to fetch block details', blockError);
-  }, [blockError, showToast]);
+    reportError('Failed to fetch topic details', topicError);
+  }, [showToast, topicError]);
 
   useEffect(() => {
     if (!itemsError) return;
     showToast(TEXTS.loadingError, 'error');
-    reportError('Failed to fetch block items', itemsError);
+    reportError('Failed to fetch topic items', itemsError);
   }, [itemsError, showToast]);
 
   const itemAudios = useMemo(
@@ -86,7 +86,7 @@ export default function BlockItemsOverview() {
     try {
       const resetCount = await UserItem.resetItemsByBlockId(userId, blockId);
       await UserBlock.resetByBlockId(userId, blockId);
-      reportInfo(`Reset ${resetCount} items in block ${blockId}`);
+      reportInfo(`Reset ${resetCount} items in topic block ${blockId}`);
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (error) {
       showToast(TEXTS.resetProgressErrorToast, 'error');
@@ -95,21 +95,21 @@ export default function BlockItemsOverview() {
   }, [userId, blockId, showToast]);
 
   const onClose = useCallback(() => {
-    navigate(ROUTES.blocks);
+    navigate(ROUTES.topics);
   }, [navigate]);
 
-  const resetHandler = block?.is_practice_block === false ? undefined : handleReset;
+  const resetHandler = topic?.is_practice_block === false ? undefined : handleReset;
 
   return (
     <OverviewCard
-      buttonTitle={block?.name}
-      modalTitle={TEXTS.resetBlockTitle}
-      modalText={TEXTS.resetBlockDescription}
-      loading={blockLoading}
+      buttonTitle={topic?.name}
+      modalTitle={TEXTS.resetTopicTitle}
+      modalText={TEXTS.resetTopicDescription}
+      loading={topicLoading}
       handleReset={resetHandler}
       onClose={onClose}
     >
-      <DataState loading={itemsLoading} hasData={hasItems} noDataMessage={TEXTS.noBlockItems}>
+      <DataState loading={itemsLoading} hasData={hasItems} noDataMessage={TEXTS.noTopicItems}>
         {items.map((item) => (
           <ListButton
             key={item.item_id}

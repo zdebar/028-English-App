@@ -12,13 +12,13 @@ export const OVERVIEW_TEXTS = {
   restartGrammarDescription:
     'Opravdu chcete restartovat pokrok všech položek této gramatiky? Tuto akci nelze vrátit zpět.',
 
-  // Blocks Overview Page
-  noBlocks: 'Žádná započatá témata.',
-  noBlockItems: 'V tomto bloku nejsou žádné položky.',
-  resetBlockTitle: 'Restartovat blok',
-  resetBlockDescription:
-    'Opravdu chcete restartovat pokrok všech položek tohoto bloku? Tuto akci nelze vrátit zpět.',
-  resetBlockTooltip: 'Restartovat blok',
+  // Topics Overview Page
+  noTopics: 'Žádná započatá témata.',
+  noTopicItems: 'V tomto tématu nejsou žádné položky.',
+  resetTopicTitle: 'Restartovat téma',
+  resetTopicDescription:
+    'Opravdu chcete restartovat pokrok všech položek tohoto tématu? Tuto akci nelze vrátit zpět.',
+  resetTopicTooltip: 'Restartovat téma',
 
   // Privacy Policy Page
   privacyPolicy: 'Zásady ochrany osobních údajů',
@@ -47,8 +47,8 @@ export const OVERVIEW_TEXTS = {
   // Profile Page
   levelsOverview: 'Přehled CEFR úrovní',
   levelsOverviewTooltip: 'Přehled CEFR úrovní s pokrokem',
-  blocksOverview: 'Přehled témat',
-  blocksOverviewTooltip: 'Přehled tematických skupin',
+  topicsOverview: 'Přehled témat',
+  topicsOverviewTooltip: 'Přehled tematických skupin',
   grammarOverview: 'Přehled gramatiky',
   grammarOverviewTooltip: 'Přehled započaté gramatiky',
   vocabularyOverview: 'Přehled slovíček',

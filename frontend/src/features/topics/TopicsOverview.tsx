@@ -12,41 +12,41 @@ import { DataState } from '@/components/UI/DataState';
 import { ListButton } from '@/components/UI/buttons/ListButton';
 import OverviewCard from '@/components/UI/OverviewCard';
 
-export default function BlocksOverview() {
+export default function TopicsOverview() {
   const navigate = useNavigate();
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
 
-  // Blocks management
-  const fetchBlocks = useCallback(async (): Promise<UserBlockType[]> => {
+  // Topics management
+  const fetchTopics = useCallback(async (): Promise<UserBlockType[]> => {
     if (!userId) return [];
     return UserBlock.getStartedTopicsByUserId(userId);
   }, [userId]);
 
   const {
-    data: blocks,
-    loading: blocksLoading,
-    hasData: hasBlocks,
-    error: blocksError,
-  } = useArray<UserBlockType>(fetchBlocks);
+    data: topics,
+    loading: topicsLoading,
+    hasData: hasTopics,
+    error: topicsError,
+  } = useArray<UserBlockType>(fetchTopics);
 
   useEffect(() => {
-    if (!blocksError) return;
+    if (!topicsError) return;
     showToast(TEXTS.loadingError, 'error');
-    reportError('Failed to fetch blocks overview', blocksError);
-  }, [blocksError, showToast]);
+    reportError('Failed to fetch topics overview', topicsError);
+  }, [showToast, topicsError]);
 
   return (
-    <OverviewCard buttonTitle={TEXTS.blocksOverview} onClose={() => navigate(ROUTES.profile)}>
-      <DataState loading={blocksLoading} hasData={hasBlocks} noDataMessage={TEXTS.noBlocks}>
-        {blocks.map((block) => (
+    <OverviewCard buttonTitle={TEXTS.topicsOverview} onClose={() => navigate(ROUTES.profile)}>
+      <DataState loading={topicsLoading} hasData={hasTopics} noDataMessage={TEXTS.noTopics}>
+        {topics.map((topic) => (
           <ListButton
-            key={block.block_id}
+            key={topic.block_id}
             className="h-input flex w-full justify-start px-4 text-left"
-            onClick={() => navigate(`${ROUTES.blocks}/${block.block_id}`)}
-            title={block.name}
+            onClick={() => navigate(`${ROUTES.topics}/${topic.block_id}`)}
+            title={topic.name}
           >
-            <p className="overflow-hidden text-ellipsis whitespace-nowrap">{block.name}</p>
+            <p className="overflow-hidden text-ellipsis whitespace-nowrap">{topic.name}</p>
           </ListButton>
         ))}
       </DataState>
