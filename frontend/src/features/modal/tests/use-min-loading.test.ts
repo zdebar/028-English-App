@@ -47,7 +47,11 @@ describe('useMinLoading', () => {
     act(() => {
       result.current.setIsLoading(true);
     });
+
+    expect(vi.getTimerCount()).toBe(1);
+
     unmount();
-    // No error should occur
+
+    expect(vi.getTimerCount()).toBe(0);
   });
 });
