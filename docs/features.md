@@ -52,8 +52,8 @@ starting point when a change crosses route, store, model, or sync boundaries.
 | --- | --- | --- | --- | --- |
 | Practice overview | Review recent daily practice counts. | `/practice-overview`, `PracticeOverviewFeature` | `UserScore` | Daily score changes dispatch `dailyCountUpdated`; overview also queries scores directly. |
 | Dashboard and levels | Show progress grouped by course structure. | `Dashboard`, `/levels`, levels feature | `Levels`, `Lessons`, `UserItem`, `UserBlock`, `useUserStore` | `levelsUpdated` reloads cached dashboard/level progress after sync, practice saves, and resets. |
-| Blocks overview | List started vocabulary blocks and allow block-level reset. | `/blocks`, `BlocksOverview` | `UserBlock`, `UserItem`, audio playback for items | Reset writes local progress, dispatches refresh events, and syncs later. |
-| Block items | Show and reset items inside one vocabulary block. | `/blocks/:blockId`, `BlockItemsOverview` | `UserBlock`, `UserItem`, audio and detail links | Route parameter selects the block; reset affects local item/block progress. |
+| Topics overview | List blocks marked for the topics UI and allow topic-level reset. | `/topics`, `TopicsOverview` | `UserBlock`, `UserItem`, audio playback for items | `show_in_topics` controls visibility; reset writes local block/item progress and syncs later. |
+| Topic items | Show and reset items inside one topic. | `/topics/:blockId`, `TopicItemsOverview` | `UserBlock`, `UserItem`, audio and detail links | Route parameter retains the underlying block ID. |
 | Grammar overview | List started grammar and reset related progress. | `/grammar`, `GrammarOverview` | `Grammar`, `UserItem`, `UserBlock` | Reset changes local progress and refreshes dashboard stats. |
 | Vocabulary overview | Search and inspect started vocabulary, then reset item progress. | `/vocabulary`, `VocabularyOverview` | `UserItem`, item detail data, localStorage `vocabulary_search_term_${userId}` | Search state persists per user; reset writes local progress and syncs later. |
 

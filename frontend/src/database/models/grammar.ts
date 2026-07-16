@@ -17,7 +17,7 @@ import SyncEntityModel from './sync-entity-model';
 export default class Grammar extends SyncEntityModel implements GrammarType {
   id!: number;
   name!: string;
-  note!: string;
+  note!: string | null;
   sort_order!: number;
   deleted_at!: string | null;
 

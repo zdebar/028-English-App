@@ -38,7 +38,7 @@ BEGIN
     i.english,
     i.pronunciation,
     i.audio,
-    b.is_vocabulary,
+    (b.grammar_id IS NULL) AS is_vocabulary,
     b.is_practice_block AS is_practice_item,
     i.sort_order,
     i.note_id,

@@ -9,6 +9,33 @@
       content="width=device-width, initial-scale=1, maximum-scale=5, minimum-scale=1"
     />
     <meta name="theme-color" content="#f7b740" />
+    <script data-theme-bootstrap>
+      (() => {
+        const root = document.documentElement;
+        let theme = null;
+
+        try {
+          const storedTheme = localStorage.getItem('theme_active');
+          if (storedTheme === 'light' || storedTheme === 'dark') {
+            theme = storedTheme;
+          }
+        } catch {
+          // Fall back to the system preference when storage is unavailable.
+        }
+
+        if (!theme) {
+          theme = globalThis.matchMedia?.('(prefers-color-scheme: dark)').matches
+            ? 'dark'
+            : 'light';
+        }
+
+        root.classList.remove('light', 'dark');
+        root.classList.add(theme);
+        document
+          .querySelector("meta[name='theme-color']")
+          ?.setAttribute('content', theme === 'dark' ? '#111827' : '#f7b740');
+      })();
+    </script>
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="description" content="Procvičujte angličtinu drillem." />

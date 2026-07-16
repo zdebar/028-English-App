@@ -34,8 +34,8 @@ Routes are configured in `frontend/src/config/routes.config.ts` and wired in
 | `/practice-overview` | `PracticeOverview` | Protected |
 | `/profile` | `Profile` | Protected |
 | `/levels` | `Levels` | Protected |
-| `/blocks` | `Blocks` | Protected |
-| `/blocks/:blockId` | `BlockItems` | Protected |
+| `/topics` | `Topics` | Protected |
+| `/topics/:blockId` | `TopicItems` | Protected |
 | `/grammar` | `Grammar` | Protected |
 | `/vocabulary` | `Vocabulary` | Protected |
 

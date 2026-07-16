@@ -6,7 +6,7 @@ import DOMPurify from 'dompurify';
 export type GrammarDetail = Readonly<{
   id: number;
   name: string;
-  note?: string;
+  note?: string | null;
 }>;
 
 type GrammarDetailCardProps = Readonly<{

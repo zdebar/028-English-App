@@ -35,8 +35,8 @@ export default function Profile(): JSX.Element {
       <StandardButton onClick={() => navigate(ROUTES.grammar)} title={TEXTS.grammarOverviewTooltip}>
         <MenuButtonText>{TEXTS.grammarOverview}</MenuButtonText>
       </StandardButton>
-      <StandardButton onClick={() => navigate(ROUTES.blocks)} title={TEXTS.blocksOverviewTooltip}>
-        <MenuButtonText>{TEXTS.blocksOverview}</MenuButtonText>
+      <StandardButton onClick={() => navigate(ROUTES.topics)} title={TEXTS.topicsOverviewTooltip}>
+        <MenuButtonText>{TEXTS.topicsOverview}</MenuButtonText>
       </StandardButton>
       <StandardButton
         onClick={() => navigate(ROUTES.vocabulary)}

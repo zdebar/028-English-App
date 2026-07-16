@@ -14,7 +14,7 @@ import SyncEntityModel from './sync-entity-model';
 export default class Lessons extends SyncEntityModel implements LessonType {
   id!: number;
   name!: string;
-  note!: string;
+  note!: string | null;
   sort_order!: number;
   level_id!: number;
   deleted_at!: string | null;

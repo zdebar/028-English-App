@@ -1,0 +1,11 @@
+ALTER TABLE public.grammar
+  ALTER COLUMN note DROP NOT NULL;
+
+ALTER TABLE public.levels
+  ALTER COLUMN note DROP NOT NULL;
+
+ALTER TABLE public.lessons
+  ALTER COLUMN note DROP NOT NULL;
+
+ALTER TABLE public.blocks
+  ALTER COLUMN note DROP NOT NULL;

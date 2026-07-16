@@ -31,7 +31,7 @@ owns this side effect?".
 | Debug sync or local-first writes | [data-and-sync.md](data-and-sync.md) | `frontend/src/database/utils/data-sync.utils.ts` |
 | Change practice behavior | [practice-flows.md](practice-flows.md) | `frontend/src/features/practice` |
 | Change Home practice buttons or sync-triggered readiness | [home-readiness.md](home-readiness.md) | `frontend/src/features/practice/HomePracticeButtons.tsx` |
-| Change overview pages or reset behavior | [features.md](features.md) | `frontend/src/features/levels`, `frontend/src/features/blocks` |
+| Change overview pages or reset behavior | [features.md](features.md) | `frontend/src/features/levels`, `frontend/src/features/topics` |
 | Debug audio state or archive sync | [features.md](features.md) | `frontend/src/features/audio` |
 | Change theme, PWA, toast, help, or overlay behavior | [features.md](features.md) | `frontend/src/features/theme`, `frontend/src/features/pwa` |
 | Understand progress dates | [domain-models.md](domain-models.md) | `frontend/src/database/models/user-items.ts` |

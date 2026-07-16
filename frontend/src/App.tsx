@@ -14,8 +14,8 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import { useDailyStatsReset } from '@/features/user-stats/use-daily-stats-reset';
 import { useUserStoreSync } from '@/features/user-stats/use-user-store-sync';
 import { TEXTS } from '@/locales/cs';
-import Blocks from '@/pages/Blocks';
-import BlockItems from '@/pages/BlockItems';
+import Topics from '@/pages/Topics';
+import TopicItems from '@/pages/TopicItems';
 import Grammar from '@/pages/Grammar';
 import Home from '@/pages/Home';
 import Levels from '@/pages/Levels';
@@ -33,6 +33,7 @@ import { useAudioLoader } from './features/audio/use-audio-loader';
 
 export default function App() {
   const userId = useAuthStore((state) => state.userId);
+  const authLoading = useAuthStore((state) => state.loading);
   const initializeAuth = useAuthStore((state) => state.initializeAuth);
   const showToast = useToastStore((state) => state.showToast);
   const location = useLocation();
@@ -49,7 +50,7 @@ export default function App() {
 
   useAudioLoader(userId);
   useUserStoreSync(userId);
-  useThemeLoader(userId);
+  useThemeLoader(userId, authLoading);
   usePeriodicSync(userId);
   useDailyStatsReset(userId);
 
@@ -72,8 +73,8 @@ export default function App() {
               <Route path={ROUTES.practiceOverview} element={<PracticeOverview />} />
               <Route path={ROUTES.profile} element={<Profile />} />
               <Route path={ROUTES.levels} element={<Levels />} />
-              <Route path={ROUTES.blocks} element={<Blocks />} />
-              <Route path={ROUTES.blocksDetail} element={<BlockItems />} />
+              <Route path={ROUTES.topics} element={<Topics />} />
+              <Route path={ROUTES.topicDetail} element={<TopicItems />} />
               <Route path={ROUTES.grammar} element={<Grammar />} />
               <Route path={ROUTES.vocabulary} element={<Vocabulary />} />
             </Route>

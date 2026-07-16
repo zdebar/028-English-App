@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   from: vi.fn(),
   select: vi.fn(),
   gt: vi.fn(),
+  grammarBulkPut: vi.fn(),
 }));
 
 vi.mock('@/database/models/db', () => ({
@@ -28,7 +29,7 @@ vi.mock('@/database/models/db', () => ({
       },
       clear: vi.fn(),
       bulkDelete: vi.fn(),
-      bulkPut: vi.fn(),
+      bulkPut: (...args: unknown[]) => mocks.grammarBulkPut(...args),
     },
   },
 }));
@@ -121,5 +122,18 @@ describe('Grammar', () => {
     expect(mocks.select).toHaveBeenCalledWith('id, name, note, sort_order, deleted_at');
     expect(mocks.gt).toHaveBeenCalledWith('updated_at', '2026-03-03T00:00:00.000Z');
     expect(mocks.markAsSynced).toHaveBeenCalledWith('grammar', '2026-03-04T00:00:00.000Z');
+  });
+
+  it('syncFromRemote stores grammar with a null note', async () => {
+    mocks.gt.mockResolvedValueOnce({
+      data: [{ id: 1, name: 'Articles', note: null, sort_order: 1, deleted_at: null }],
+      error: null,
+    });
+
+    await Grammar.syncFromRemote();
+
+    expect(mocks.grammarBulkPut).toHaveBeenCalledWith([
+      expect.objectContaining({ id: 1, note: null }),
+    ]);
   });
 });

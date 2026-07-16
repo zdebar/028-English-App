@@ -17,7 +17,7 @@ import SyncEntityModel from './sync-entity-model';
 export default class Levels extends SyncEntityModel implements LevelType {
   id!: number;
   name!: string;
-  note!: string;
+  note!: string | null;
   sort_order!: number;
   deleted_at!: string | null;
 

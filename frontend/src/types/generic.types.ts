@@ -1,7 +1,7 @@
 export interface SyncEntityType {
   id: number;
   name: string;
-  note: string;
+  note: string | null;
   sort_order: number;
   deleted_at: string | null;
 }
@@ -18,13 +18,14 @@ export interface GrammarType extends SyncEntityType {}
 
 export interface BlockType extends SyncEntityType {
   lesson_id: number;
-  is_vocabulary: boolean;
   grammar_id: number | null;
   show_in_topics: boolean;
   is_practice_block: boolean;
 }
 
-export interface NoteType extends SyncEntityType {}
+export interface NoteType extends SyncEntityType {
+  note: string;
+}
 
 export interface ProgressCountsType {
   startedCount: number;
@@ -52,7 +53,7 @@ export interface UserBlockType {
   user_id: string;
   block_id: number;
   name: string;
-  note: string;
+  note: string | null;
   lesson_id: number;
   grammar_id: number | null;
   sort_order: number;

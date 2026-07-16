@@ -139,14 +139,30 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   ): Promise<UserItemPractice[]> {
     // Step 1: Fetch already started grammar list
     const startedGrammarIdSet = new Set(await this.getStartedGrammarIds(userId));
+    const masteredGrammarBlockIdSet =
+      mode === 'grammar' ? new Set(await this.getMasteredGrammarBlockIds(userId)) : null;
 
     // Step 2: Fetch items with odd progress
-    let deck = await this.getPracticeItemsByParity(userId, true, deckSize, false, mode);
+    let deck = await this.getPracticeItemsByParity(
+      userId,
+      true,
+      deckSize,
+      false,
+      mode,
+      masteredGrammarBlockIdSet,
+    );
 
     // Step 3: If not enough items, fetch even progress items instead
     if (deck.length < deckSize) {
       let evenItems: UserItemLocal[] = [];
-      evenItems = await this.getPracticeItemsByParity(userId, false, deckSize, false, mode);
+      evenItems = await this.getPracticeItemsByParity(
+        userId,
+        false,
+        deckSize,
+        false,
+        mode,
+        masteredGrammarBlockIdSet,
+      );
 
       const remainingLimit = deckSize - evenItems.length;
       if (remainingLimit > 0 && mode === 'vocabulary') {
@@ -156,6 +172,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
           remainingLimit,
           true,
           mode,
+          masteredGrammarBlockIdSet,
         );
         evenItems = [...evenItems, ...remainingItems];
       }
@@ -207,6 +224,22 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return (await db.user_items.where('user_id').equals(userId).toArray()).filter(
       isPracticeItem,
     );
+  }
+
+  /**
+   * Reads mastered non-vocabulary practice block ids for a user.
+   *
+   * @param userId User id whose grammar blocks should be inspected.
+   * @returns Mastered grammar block ids.
+   */
+  static async getMasteredGrammarBlockIds(userId: string): Promise<number[]> {
+    return (await db.user_blocks.where('user_id').equals(userId).toArray())
+      .filter(
+        (block) =>
+          block.is_vocabulary === false &&
+          block.mastered_at !== NULL_DATE,
+      )
+      .map((block) => block.block_id);
   }
 
   /**
@@ -607,23 +640,55 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     limit: number,
     isNew: boolean = false,
     mode: ReviewPracticeMode = 'vocabulary',
+    masteredGrammarBlockIdSet: Set<number> | null = null,
   ): Promise<UserItemLocal[]> {
+    const isVocabulary = mode === 'vocabulary' ? 1 : 0;
+    const matchesItem = (item: UserItemLocal) =>
+      item.mastered_at === NULL_DATE &&
+      (item.progress % 2 === 1) === isOdd &&
+      (mode !== 'grammar' || masteredGrammarBlockIdSet?.has(item.block_id) === true);
+    const index = db.user_items.where(
+      '[user_id+is_practice_item+is_vocabulary+next_at+mastered_at+sort_order]',
+    );
+
+    if (mode === 'grammar') {
+      const now = new Date().toISOString();
+      const [dueItems, unscheduledItems] = await Promise.all([
+        index
+          .between(
+            [userId, 1, 0, Dexie.minKey, NULL_DATE, Dexie.minKey],
+            [userId, 1, 0, now, NULL_DATE, Dexie.maxKey],
+            true,
+            true,
+          )
+          .filter(matchesItem)
+          .toArray(),
+        index
+          .between(
+            [userId, 1, 0, NULL_DATE, NULL_DATE, Dexie.minKey],
+            [userId, 1, 0, NULL_DATE, NULL_DATE, Dexie.maxKey],
+            true,
+            true,
+          )
+          .filter(matchesItem)
+          .toArray(),
+      ]);
+
+      return [...dueItems, ...unscheduledItems]
+        .sort((left, right) => left.sort_order - right.sort_order)
+        .slice(0, limit);
+    }
+
     const minNextAt = isNew ? NULL_DATE : Dexie.minKey;
     const maxNextAt = isNew ? NULL_DATE : new Date().toISOString();
-    const isVocabulary = mode === 'vocabulary' ? 1 : 0;
-    return db.user_items
-      .where('[user_id+is_practice_item+is_vocabulary+next_at+mastered_at+sort_order]')
+    return index
       .between(
         [userId, 1, isVocabulary, minNextAt, NULL_DATE, Dexie.minKey],
         [userId, 1, isVocabulary, maxNextAt, NULL_DATE, Dexie.maxKey],
         true,
         false,
       )
-      .filter(
-        (item) =>
-          item.mastered_at === NULL_DATE &&
-          (item.progress % 2 === 1) === isOdd,
-      )
+      .filter(matchesItem)
       .limit(limit)
       .toArray();
   }

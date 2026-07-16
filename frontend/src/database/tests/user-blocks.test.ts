@@ -17,6 +17,7 @@ const mocks = vi.hoisted(() => ({
   rpc: vi.fn(),
   reportInfo: vi.fn(),
   getStartedBlocksIds: vi.fn(),
+  getMasteredGrammarBlockIds: vi.fn(),
 }));
 
 vi.mock('@/config/config', () => ({
@@ -61,6 +62,7 @@ vi.mock('@/database/models/metadata', () => ({
 vi.mock('@/database/models/user-items', () => ({
   default: {
     getStartedBlocksIds: (...args: unknown[]) => mocks.getStartedBlocksIds(...args),
+    getMasteredGrammarBlockIds: (...args: unknown[]) => mocks.getMasteredGrammarBlockIds(...args),
     areAllVocabularyItemsStartedForLesson: vi.fn(),
   },
 }));
@@ -123,6 +125,7 @@ describe('UserBlock', () => {
     mocks.markAsSynced.mockResolvedValue(undefined);
     mocks.rpc.mockResolvedValue({ data: [], error: null });
     mocks.getStartedBlocksIds.mockResolvedValue([]);
+    mocks.getMasteredGrammarBlockIds.mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -322,10 +325,12 @@ describe('UserBlock', () => {
   it('getReadyGrammarPracticeState returns ready count and grouped future schedule', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
+    mocks.getMasteredGrammarBlockIds.mockResolvedValueOnce([1]);
     mocks.toArray.mockResolvedValueOnce([
       {
         user_id: 'u1',
         item_id: 1,
+        block_id: 1,
         is_vocabulary: 0,
         is_practice_item: 1,
         next_at: '2026-06-24T11:59:59.000Z',
@@ -335,6 +340,7 @@ describe('UserBlock', () => {
       {
         user_id: 'u1',
         item_id: 2,
+        block_id: 1,
         is_vocabulary: 0,
         is_practice_item: 1,
         next_at: '2026-06-24T12:00:10.000Z',
@@ -344,6 +350,7 @@ describe('UserBlock', () => {
       {
         user_id: 'u1',
         item_id: 3,
+        block_id: 1,
         is_vocabulary: 0,
         is_practice_item: 1,
         next_at: '2026-06-24T12:00:10.800Z',
@@ -353,6 +360,7 @@ describe('UserBlock', () => {
       {
         user_id: 'u1',
         item_id: 4,
+        block_id: 1,
         is_vocabulary: 0,
         is_practice_item: 1,
         next_at: '2026-06-24T12:00:15.000Z',
@@ -362,6 +370,7 @@ describe('UserBlock', () => {
       {
         user_id: 'u1',
         item_id: 5,
+        block_id: 1,
         is_vocabulary: 0,
         is_practice_item: 1,
         next_at: '9999-12-31T23:59:59+00:00',
@@ -377,19 +386,12 @@ describe('UserBlock', () => {
     );
     expect(mocks.between).toHaveBeenCalledWith(
       ['u1', 1, 0, expect.anything(), '9999-12-31T23:59:59+00:00', expect.anything()],
-      [
-        'u1',
-        1,
-        0,
-        '9999-12-31T23:59:59+00:00',
-        '9999-12-31T23:59:59+00:00',
-        expect.anything(),
-      ],
+      ['u1', 1, 0, expect.anything(), '9999-12-31T23:59:59+00:00', expect.anything()],
       true,
-      false,
+      true,
     );
     expect(result).toEqual({
-      readyCount: 1,
+      readyCount: 2,
       schedule: [{ date: '2026-06-24T12:00:10.800Z', count: 2 }],
     });
   });
@@ -397,16 +399,20 @@ describe('UserBlock', () => {
   it('getReadyGrammarPracticeState returns sorted future groups outside the grouping window', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
+    mocks.getMasteredGrammarBlockIds.mockResolvedValueOnce([1]);
     mocks.toArray.mockResolvedValueOnce([
       {
+        block_id: 1,
         next_at: '2026-06-24T12:00:05.000Z',
         mastered_at: '9999-12-31T23:59:59+00:00',
       },
       {
+        block_id: 1,
         next_at: '2026-06-24T12:00:01.000Z',
         mastered_at: '9999-12-31T23:59:59+00:00',
       },
       {
+        block_id: 1,
         next_at: '2026-06-24T12:00:03.000Z',
         mastered_at: '9999-12-31T23:59:59+00:00',
       },
@@ -531,7 +537,7 @@ describe('UserBlock', () => {
           user_id: 'u1',
           block_id: 1,
           name: 'Block 1',
-          note: '',
+          note: null,
           lesson_id: 1,
           grammar_id: 10,
           sort_order: 1,
@@ -576,6 +582,7 @@ describe('UserBlock', () => {
     expect(mocks.bulkPut).toHaveBeenCalledWith([
       expect.objectContaining({
         block_id: 1,
+        note: null,
         show_in_topics: false,
         is_practice_block: false,
         started_at: '9999-12-31T23:59:59+00:00',
