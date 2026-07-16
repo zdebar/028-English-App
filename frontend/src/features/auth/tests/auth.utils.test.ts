@@ -40,8 +40,8 @@ describe('clearAppStorage', () => {
     clearAppStorage();
     await flushMicrotasks();
 
-    expect(globalThis.localStorage.length).toBe(0);
-    expect(globalThis.sessionStorage.length).toBe(0);
+    expect(globalThis.localStorage).toHaveLength(0);
+    expect(globalThis.sessionStorage).toHaveLength(0);
 
     expect(databases).toHaveBeenCalledTimes(1);
     expect(deleteDatabase).toHaveBeenCalledWith('db1');
@@ -66,7 +66,7 @@ describe('clearAppStorage', () => {
     });
 
     expect(() => clearAppStorage()).not.toThrow();
-    expect(globalThis.localStorage.length).toBe(0);
-    expect(globalThis.sessionStorage.length).toBe(0);
+    expect(globalThis.localStorage).toHaveLength(0);
+    expect(globalThis.sessionStorage).toHaveLength(0);
   });
 });
