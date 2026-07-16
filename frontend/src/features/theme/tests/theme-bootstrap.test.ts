@@ -33,7 +33,7 @@ describe('theme bootstrap script', () => {
     runThemeBootstrap();
 
     expect(document.documentElement.classList.contains(theme)).toBe(true);
-    expect(document.documentElement.classList.length).toBe(1);
+    expect(document.documentElement.classList).toHaveLength(1);
     expect(document.querySelector("meta[name='theme-color']")?.getAttribute('content')).toBe(color);
   });
 
