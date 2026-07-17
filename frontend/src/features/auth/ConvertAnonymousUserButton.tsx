@@ -27,7 +27,7 @@ export default function ConvertAnonymousUserButton({ className }: ConvertButtonP
         options: { redirectTo: AUTH_REDIRECT_TO },
       });
       if (error) {
-        throw new Error(error.message);
+        throw error;
       }
 
       const redirectUrl = data?.url;

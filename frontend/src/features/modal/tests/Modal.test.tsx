@@ -49,6 +49,26 @@ describe('Modal', () => {
     expect(screen.getByRole('button', { name: 'Confirm' })).toBeTruthy();
   });
 
+  it('supports custom labels and vertically stacked actions', () => {
+    render(
+      <Modal
+        onConfirm={vi.fn()}
+        onClose={vi.fn()}
+        cancelLabel="Stay guest"
+        confirmLabel="Sign in"
+        actionsLayout="vertical"
+      >
+        content
+      </Modal>,
+    );
+
+    const stayGuest = screen.getByRole('button', { name: 'Stay guest' });
+    const signIn = screen.getByRole('button', { name: 'Sign in' });
+
+    expect(stayGuest.parentElement).toBe(signIn.parentElement);
+    expect(stayGuest.parentElement?.className).toContain('flex-col');
+  });
+
   it('opens overlay on mount with onClose callback', () => {
     const onClose = vi.fn();
 

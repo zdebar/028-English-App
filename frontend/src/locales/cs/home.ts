@@ -42,6 +42,13 @@ export const HOME_TEXTS = {
   convertAnonymousLoading: 'Připravuji propojení účtu ...',
   convertAnonymousSuccessToast: 'Účet hosta byl úspěšně převeden.',
   convertAnonymousErrorToast: 'Převod účtu hosta se nepodařil.',
+  identityLinkConflictTitle: 'Google účet už existuje',
+  identityLinkConflictText:
+    'Tento Google účet je už propojený s jiným účtem. Zůstáváte přihlášeni jako host a váš současný postup se nezměnil. Pokud se přihlásíte k existujícímu účtu, postup z tohoto hostovského účtu se nepřenese.',
+  continueAsGuest: 'Pokračovat jako host',
+  signInExistingAccount: 'Přihlásit se k existujícímu účtu',
+  existingAccountSigninErrorToast:
+    'Přihlášení přes Google se nepodařilo. Zůstáváte přihlášeni jako host.',
 
   // Simulate data
   simulateDataButton: 'Simulovat data',

@@ -5,6 +5,7 @@ import Header from '@/components/Layout/Header';
 import ProtectedLayout from '@/components/utils/protected-laout';
 import { usePeriodicSync } from '@/features/synchronization/use-periodic-sync';
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import IdentityLinkConflictModal from '@/features/auth/IdentityLinkConflictModal';
 import { GoogleAnalytics } from '@/features/analytics/GoogleAnalytics';
 import { reportError } from '@/features/logging/monitoring-handler';
 import OverlayMask from '@/features/overlay/OverlayMask';
@@ -60,6 +61,7 @@ export default function App() {
       <div className="max-w-container relative mx-auto flex min-h-screen flex-col justify-start">
         <ToastContainer />
         <OverlayMask />
+        <IdentityLinkConflictModal />
         <Header />
         <main className="max-w-card relative mx-auto flex w-full grow flex-col items-center gap-4">
           <Routes>

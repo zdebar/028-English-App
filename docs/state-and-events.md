@@ -8,7 +8,7 @@ stores hold UI/session/cache state.
 
 | Store | Owner | Source of truth | Writers | Readers | Reset behavior |
 | --- | --- | --- | --- | --- | --- |
-| `useAuthStore` | `features/auth` | Supabase Auth session | `initializeAuth`, `handleLogout`, Supabase auth listener | `App`, protected pages, auth/profile UI | Cleared on logout or missing session. |
+| `useAuthStore` | `features/auth` | Supabase Auth session | `initializeAuth`, `handleLogout`, Supabase auth listener | `App`, protected pages, auth/profile UI | Cleared on logout or missing session; also exposes an existing-identity collision prompt while retaining the guest session. |
 | `useSyncStore` | `features/synchronization` | In-memory sync status and successful-sync revision | `usePeriodicSync` | `Home` sync warning, sync-related UI, `HomePracticeButtons` readiness reloads | Reset when no user or sync hook unmounts. |
 | `useUserStore` | `features/user-stats` | IndexedDB model queries | `reloadLevels`, `reloadDailyCount`, global events | `Home`, dashboard, practice stars | Cleared when `useUserStoreSync` sees `userId === null`. |
 | `useAudioStore` | `features/audio` | localStorage per-user volume | `useAudioLoader`, `VolumeSlider` | `VolumeSlider`, audio controls | Reinitialized when user changes. |

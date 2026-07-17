@@ -11,9 +11,22 @@ type ModalProps = Readonly<{
   onClose: () => void;
   /** Dialog body rendered above the cancel and confirm buttons. */
   children?: ReactNode;
+  /** Cancel action content; defaults to the shared cancel text. */
+  cancelLabel?: ReactNode;
+  /** Confirm action content; defaults to the shared confirm text. */
+  confirmLabel?: ReactNode;
+  /** Direction used to lay out the action buttons. */
+  actionsLayout?: 'horizontal' | 'vertical';
 }>;
 
-export function Modal({ onConfirm, onClose, children }: ModalProps): JSX.Element | null {
+export function Modal({
+  onConfirm,
+  onClose,
+  children,
+  cancelLabel = TEXTS.cancel,
+  confirmLabel = TEXTS.confirm,
+  actionsLayout = 'horizontal',
+}: ModalProps): JSX.Element | null {
   const closeOverlay = useOverlayStore((state) => state.closeOverlay);
   const openOverlay = useOverlayStore((state) => state.openOverlay);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,12 +62,12 @@ export function Modal({ onConfirm, onClose, children }: ModalProps): JSX.Element
     <div className="z-modal pointer-events-none fixed inset-0 flex items-center justify-center">
       <div className="card-width color-base pointer-events-auto gap-1 pt-4">
         <div className="flex grow flex-col items-center gap-2 p-6 text-center">{children}</div>
-        <div className="flex gap-1">
+        <div className={`flex gap-1 ${actionsLayout === 'vertical' ? 'flex-col' : ''}`}>
           <StyledButton onClick={handleCancel} disabled={isSubmitting} className="h-button font-bold">
-            {TEXTS.cancel}
+            {cancelLabel}
           </StyledButton>
           <StyledButton onClick={handleConfirm} disabled={isSubmitting} className="h-button font-bold">
-            {TEXTS.confirm}
+            {confirmLabel}
           </StyledButton>
         </div>
       </div>

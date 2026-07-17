@@ -3,14 +3,24 @@ import type { Session } from '@supabase/supabase-js';
 import { supabaseInstance } from '@/config/supabase.config';
 import { dataSyncOnUnmount } from '@/database/utils/data-sync.utils';
 import { reportError, reportInfo, setMonitoringUser } from '@/features/logging/monitoring-handler';
+import {
+  clearAnonymousSessionFallback,
+  clearAuthErrorParameters,
+  hasAnonymousSessionFallback,
+  restoreAnonymousSessionFallback,
+} from '@/features/auth/anonymous-session-fallback';
+import { useToastStore } from '@/features/toast/use-toast-store';
+import { TEXTS } from '@/locales/cs';
 
 interface AuthState {
   userId: string | null;
   userEmail: string | null;
   userFullName: string | null;
   isAnonymousUser: boolean;
+  hasIdentityLinkConflict: boolean;
   loading: boolean;
   initializeAuth: () => () => void;
+  dismissIdentityLinkConflict: () => void;
   handleLogout: (options?: {
     skipSync?: boolean;
     scope?: 'global' | 'local';
@@ -23,7 +33,16 @@ const INITIAL_AUTH_STATE = {
   userEmail: null,
   userFullName: null,
   isAnonymousUser: false,
+  hasIdentityLinkConflict: false,
 };
+
+function getAuthErrorCode(error: unknown): string | null {
+  if (typeof error !== 'object' || error === null || !('code' in error)) {
+    return null;
+  }
+
+  return typeof error.code === 'string' ? error.code : null;
+}
 
 function isAnonymousSession(session: Session | null): boolean {
   const user = session?.user as { is_anonymous?: boolean } | undefined;
@@ -85,6 +104,7 @@ export const useAuthStore = create<AuthState>((set) => {
       userFullName:
         session?.user?.user_metadata?.full_name || session?.user?.user_metadata?.name || null,
       isAnonymousUser: isAnonymousSession(session),
+      ...(!isAnonymousSession(session) ? { hasIdentityLinkConflict: false } : {}),
       loading: false,
     });
   };
@@ -183,8 +203,44 @@ export const useAuthStore = create<AuthState>((set) => {
 
     initializeAuth: () => {
       let subscription: { unsubscribe: () => void } | null = null;
+      let isActive = true;
 
       const fetchSession = async () => {
+        const { error: initializationError } = await supabaseInstance.auth.initialize();
+        if (!isActive) {
+          return;
+        }
+
+        const hasFallback = hasAnonymousSessionFallback();
+
+        if (!initializationError) {
+          clearAnonymousSessionFallback();
+        } else {
+          clearAuthErrorParameters();
+
+          if (hasFallback) {
+            try {
+              await restoreAnonymousSessionFallback();
+              reportError(
+                'Google sign-in redirect failed; anonymous session restored',
+                initializationError,
+              );
+              useToastStore
+                .getState()
+                .showToast(TEXTS.existingAccountSigninErrorToast, 'error');
+            } catch (restorationError) {
+              reportError('Google sign-in redirect failed', initializationError);
+              reportError('Anonymous session restoration failed', restorationError);
+              useToastStore.getState().showToast(TEXTS.authInitErrorToast, 'error');
+            }
+          } else if (getAuthErrorCode(initializationError) === 'identity_already_exists') {
+            set({ hasIdentityLinkConflict: true });
+          } else {
+            reportError('Auth redirect initialization failed', initializationError);
+            useToastStore.getState().showToast(TEXTS.authInitErrorToast, 'error');
+          }
+        }
+
         const { data, error } = await supabaseInstance.auth.getSession();
         if (error) {
           clearSession();
@@ -212,9 +268,12 @@ export const useAuthStore = create<AuthState>((set) => {
       }).data.subscription;
 
       return () => {
+        isActive = false;
         if (subscription) subscription.unsubscribe();
       };
     },
+
+    dismissIdentityLinkConflict: () => set({ hasIdentityLinkConflict: false }),
 
     handleLogout: async (options) => {
       const currentUserId = useAuthStore.getState().userId;
