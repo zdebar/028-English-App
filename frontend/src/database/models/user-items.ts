@@ -140,7 +140,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const masteredGrammarBlockIdSet =
       mode === 'grammar' ? new Set(await this.getMasteredGrammarBlockIds(userId)) : null;
 
-    let deck = await this.getDuePracticeItems(
+    const oddItems = await this.getDuePracticeItems(
       userId,
       true,
       deckSize,
@@ -148,28 +148,26 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       mode,
       masteredGrammarBlockIdSet,
     );
+    if (oddItems.length === deckSize) return oddItems;
 
-    if (deck.length < deckSize) {
-      const evenItems = await this.getDuePracticeItems(
-        userId,
-        false,
-        deckSize - deck.length,
-        now,
-        mode,
-        masteredGrammarBlockIdSet,
-      );
-      deck = [...deck, ...evenItems];
-    }
+    let alternativeDeck = await this.getDuePracticeItems(
+      userId,
+      false,
+      deckSize,
+      now,
+      mode,
+      masteredGrammarBlockIdSet,
+    );
 
-    if (deck.length < deckSize && mode === 'vocabulary') {
+    if (alternativeDeck.length < deckSize && mode === 'vocabulary') {
       const newItems = await this.getNewVocabularyPracticeItems(
         userId,
-        deckSize - deck.length,
+        deckSize - alternativeDeck.length,
       );
-      deck = [...deck, ...newItems];
+      alternativeDeck = [...alternativeDeck, ...newItems];
     }
 
-    return deck;
+    return alternativeDeck.length > 0 ? alternativeDeck : oddItems;
   }
 
   /**

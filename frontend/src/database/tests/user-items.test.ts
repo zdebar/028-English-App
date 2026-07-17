@@ -307,7 +307,7 @@ describe('UserItem', () => {
     expect(mocks.indexedToArray).toHaveBeenCalledTimes(1);
   });
 
-  it('fills vocabulary with odd due, even due, then unscheduled items', async () => {
+  it('replaces a partial odd deck with even due and new vocabulary', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
     mocks.indexedToArray
@@ -338,8 +338,8 @@ describe('UserItem', () => {
 
     const deck = await UserItem.getPracticeDeck('u1', 4, 'vocabulary');
 
-    expect(deck.map((item) => item.item_id)).toEqual([1, 2, 3]);
-    expect(mocks.indexedLimit.mock.calls.map(([limit]) => limit)).toEqual([4, 3, 2]);
+    expect(deck.map((item) => item.item_id)).toEqual([2, 3]);
+    expect(mocks.indexedLimit.mock.calls.map(([limit]) => limit)).toEqual([4, 4, 3]);
     expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
       3,
       ['u1', 1, 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
@@ -353,6 +353,85 @@ describe('UserItem', () => {
       next_at: '1970-01-01T00:00:00.000Z',
       mastered_at: '1970-01-01T00:00:00.000Z',
     })).toBe(true);
+  });
+
+  it('returns a new-only vocabulary deck instead of a partial odd deck', async () => {
+    mocks.indexedToArray
+      .mockResolvedValueOnce([
+        {
+          item_id: 1,
+          progress: 1,
+          next_at: '2026-01-01T00:00:00.000Z',
+          mastered_at: '1970-01-01T00:00:00.000Z',
+        },
+      ])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([
+        {
+          item_id: 3,
+          progress: 0,
+          next_at: '1970-01-01T00:00:00.000Z',
+          mastered_at: '1970-01-01T00:00:00.000Z',
+        },
+      ]);
+
+    const deck = await UserItem.getPracticeDeck('u1', 3, 'vocabulary');
+
+    expect(deck.map((item) => item.item_id)).toEqual([3]);
+    expect(mocks.indexedLimit.mock.calls.map(([limit]) => limit)).toEqual([3, 3, 3]);
+  });
+
+  it('restores a partial odd vocabulary deck when even and new alternatives are empty', async () => {
+    mocks.indexedToArray
+      .mockResolvedValueOnce([
+        {
+          item_id: 1,
+          progress: 1,
+          next_at: '2026-01-01T00:00:00.000Z',
+          mastered_at: '1970-01-01T00:00:00.000Z',
+        },
+      ])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([]);
+
+    const deck = await UserItem.getPracticeDeck('u1', 3, 'vocabulary');
+
+    expect(deck.map((item) => item.item_id)).toEqual([1]);
+  });
+
+  it('uses any even grammar deck instead of a partial odd deck', async () => {
+    mocks.masteredBlockToArray.mockResolvedValueOnce([
+      {
+        block_id: 10,
+        is_vocabulary: false,
+        mastered_at: '2026-01-01T00:00:00.000Z',
+      },
+    ]);
+    mocks.indexedToArray
+      .mockResolvedValueOnce([{ item_id: 1, block_id: 10, progress: 1 }])
+      .mockResolvedValueOnce([{ item_id: 2, block_id: 10, progress: 2 }]);
+
+    const deck = await UserItem.getPracticeDeck('u1', 3, 'grammar');
+
+    expect(deck.map((item) => item.item_id)).toEqual([2]);
+    expect(mocks.indexedToArray).toHaveBeenCalledTimes(2);
+  });
+
+  it('restores a partial odd grammar deck when no even items exist', async () => {
+    mocks.masteredBlockToArray.mockResolvedValueOnce([
+      {
+        block_id: 10,
+        is_vocabulary: false,
+        mastered_at: '2026-01-01T00:00:00.000Z',
+      },
+    ]);
+    mocks.indexedToArray
+      .mockResolvedValueOnce([{ item_id: 1, block_id: 10, progress: 1 }])
+      .mockResolvedValueOnce([]);
+
+    const deck = await UserItem.getPracticeDeck('u1', 3, 'grammar');
+
+    expect(deck.map((item) => item.item_id)).toEqual([1]);
   });
 
   it('returns an empty deck without querying when deckSize is not positive', async () => {
