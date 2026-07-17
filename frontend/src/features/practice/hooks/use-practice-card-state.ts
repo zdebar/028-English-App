@@ -1,11 +1,11 @@
 import config from '@/config/config';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
-import type { UserItemPractice } from '@/types/user-item.types';
+import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from 'react';
 import { NBSP, useHint } from './use-hint';
 
 type UsePracticeCardStateOptions = {
-  currentItem: UserItemPractice | null;
+  currentItem: UserItemLocal | null;
   isCzToEn: boolean;
   revealed: boolean;
   setRevealed: Dispatch<SetStateAction<boolean>>;

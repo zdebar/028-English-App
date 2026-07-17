@@ -13,6 +13,7 @@ RETURNS TABLE (
   is_vocabulary BOOLEAN,
   is_practice_item BOOLEAN,
   sort_order INTEGER,
+  curriculum_sort_path INTEGER[],
   note_id INTEGER,
   block_id INTEGER,
   grammar_id INTEGER,

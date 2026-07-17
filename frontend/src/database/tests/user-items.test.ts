@@ -77,7 +77,11 @@ vi.mock('@/database/models/db', () => ({
             }),
           };
         }
-        if (field === '[user_id+is_practice_item+is_vocabulary+next_at+mastered_at+sort_order]') {
+        if (
+          field ===
+            '[user_id+is_practice_item+is_vocabulary+next_at+mastered_at+curriculum_sort_path]' ||
+          field === '[user_id+is_practice_item+is_vocabulary+next_at+mastered_at+sort_order]'
+        ) {
           return {
             between: (...args: unknown[]) => {
               mocks.indexedBetween(...args);
@@ -281,38 +285,82 @@ describe('UserItem', () => {
     expect(result.map((item) => item.item_id)).toEqual([1, 3]);
   });
 
-  it('includes a new vocabulary item even when due reviews fill the deck', async () => {
+  it('fills the deck with odd due items before considering even or new vocabulary', async () => {
+    mocks.indexedToArray.mockResolvedValueOnce([
+      {
+        item_id: 2,
+        progress: 1,
+        next_at: '2026-01-01T00:00:00.000Z',
+        mastered_at: '1970-01-01T00:00:00.000Z',
+      },
+      {
+        item_id: 3,
+        progress: 3,
+        next_at: '2026-01-02T00:00:00.000Z',
+        mastered_at: '1970-01-01T00:00:00.000Z',
+      },
+    ]);
+
+    const deck = await UserItem.getPracticeDeck('u1', 2);
+
+    expect(deck.map((item) => item.item_id)).toEqual([2, 3]);
+    expect(mocks.indexedToArray).toHaveBeenCalledTimes(1);
+  });
+
+  it('fills vocabulary with odd due, even due, then unscheduled items', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
     mocks.indexedToArray
-      .mockResolvedValueOnce([]) // started grammar ids
       .mockResolvedValueOnce([
         {
           item_id: 1,
-          is_practice_item: 1,
-          is_vocabulary: 1,
-          progress: 0,
-          next_at: '1970-01-01T00:00:00.000Z',
+          progress: 1,
+          next_at: '2026-06-20T00:00:00.000Z',
           mastered_at: '1970-01-01T00:00:00.000Z',
-          sort_order: 1,
         },
       ])
       .mockResolvedValueOnce([
         {
           item_id: 2,
-          is_practice_item: 1,
-          is_vocabulary: 1,
-          progress: 1,
-          next_at: '2026-01-01T00:00:00.000Z',
+          progress: 2,
+          next_at: '2026-06-21T00:00:00.000Z',
           mastered_at: '1970-01-01T00:00:00.000Z',
-          sort_order: 2,
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          item_id: 3,
+          progress: 5,
+          next_at: '1970-01-01T00:00:00.000Z',
+          mastered_at: '1970-01-01T00:00:00.000Z',
         },
       ]);
 
-    const deck = await UserItem.getPracticeDeck('u1', 2);
+    const deck = await UserItem.getPracticeDeck('u1', 4, 'vocabulary');
 
-    expect(deck.map((item) => item.item_id)).toEqual([1, 2]);
+    expect(deck.map((item) => item.item_id)).toEqual([1, 2, 3]);
+    expect(mocks.indexedLimit.mock.calls.map(([limit]) => limit)).toEqual([4, 3, 2]);
+    expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
+      3,
+      ['u1', 1, 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', 1, 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      true,
+      true,
+    );
+    const newVocabularyFilter = mocks.indexedFilter.mock.calls[2][0] as (item: any) => boolean;
+    expect(newVocabularyFilter({
+      progress: 5,
+      next_at: '1970-01-01T00:00:00.000Z',
+      mastered_at: '1970-01-01T00:00:00.000Z',
+    })).toBe(true);
   });
 
-  it('getPracticeDeck accepts unscheduled unmastered items from mastered grammar blocks', async () => {
+  it('returns an empty deck without querying when deckSize is not positive', async () => {
+    await expect(UserItem.getPracticeDeck('u1', 0)).resolves.toEqual([]);
+    expect(mocks.indexedToArray).not.toHaveBeenCalled();
+  });
+
+  it('getPracticeDeck excludes unscheduled items even from mastered grammar blocks', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
     mocks.masteredBlockToArray.mockResolvedValueOnce([
@@ -323,57 +371,48 @@ describe('UserItem', () => {
         mastered_at: '2026-06-20T12:00:00.000Z',
       },
     ]);
-    mocks.indexedToArray
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([
-        {
-          item_id: 1,
-          block_id: 10,
-          is_practice_item: 1,
-          is_vocabulary: 0,
-          progress: 0,
-          next_at: '1970-01-01T00:00:00.000Z',
-          mastered_at: '1970-01-01T00:00:00.000Z',
-          sort_order: 1,
-        },
-      ]);
+    mocks.indexedToArray.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
 
     const deck = await UserItem.getPracticeDeck('u1', 10, 'grammar');
 
-    expect(deck).toHaveLength(1);
-    expect(deck[0].item_id).toBe(1);
+    expect(deck).toEqual([]);
     expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
-      2,
+      1,
       ['u1', 1, 0, expect.anything(), '1970-01-01T00:00:00.000Z', expect.anything()],
       ['u1', 1, 0, '2026-06-24T12:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
       true,
-      true,
-    );
-    expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
-      3,
-      ['u1', 1, 0, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
-      ['u1', 1, 0, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
-      true,
-      true,
+      false,
     );
 
-    const grammarFilter = mocks.indexedFilter.mock.calls[4][0] as (item: any) => boolean;
+    const grammarFilter = mocks.indexedFilter.mock.calls[1][0] as (item: any) => boolean;
     expect(grammarFilter({
       block_id: 10,
       mastered_at: '1970-01-01T00:00:00.000Z',
+      next_at: '2026-06-24T11:00:00.000Z',
       progress: 0,
     })).toBe(true);
     expect(grammarFilter({
       block_id: 11,
       mastered_at: '1970-01-01T00:00:00.000Z',
+      next_at: '2026-06-24T11:00:00.000Z',
       progress: 0,
     })).toBe(false);
     expect(grammarFilter({
       block_id: 10,
       mastered_at: '2026-06-20T12:00:00.000Z',
+      next_at: '2026-06-24T11:00:00.000Z',
+      progress: 0,
+    })).toBe(false);
+    expect(grammarFilter({
+      block_id: 10,
+      mastered_at: '1970-01-01T00:00:00.000Z',
+      next_at: '1970-01-01T00:00:00.000Z',
+      progress: 0,
+    })).toBe(false);
+    expect(grammarFilter({
+      block_id: 10,
+      mastered_at: '1970-01-01T00:00:00.000Z',
+      next_at: '2026-06-24T12:00:00.000Z',
       progress: 0,
     })).toBe(false);
   });
@@ -580,6 +619,7 @@ describe('UserItem', () => {
           is_vocabulary: true,
           is_practice_item: false,
           sort_order: 2,
+          curriculum_sort_path: [1, 2, 3, 2],
           note_id: null,
           block_id: null,
           grammar_id: null,
@@ -625,6 +665,7 @@ describe('UserItem', () => {
         item_id: 2,
         is_vocabulary: 1,
         is_practice_item: 0,
+        curriculum_sort_path: [1, 2, 3, 2],
         block_id: 0,
         grammar_id: 0,
         started_at: '1970-01-01T00:00:00.000Z',

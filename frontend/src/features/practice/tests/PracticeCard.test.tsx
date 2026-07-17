@@ -1,7 +1,7 @@
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { UserItemPractice } from '@/types/user-item.types';
+import type { UserItemLocal } from '@/types/user-item.types';
 
 const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => ({
   userId: 'u1',
@@ -15,7 +15,7 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
   closeGrammar: vi.fn(),
   handleNote: vi.fn(),
   closeNote: vi.fn(),
-  makePracticeItem: (overrides: Partial<UserItemPractice> = {}): UserItemPractice => ({
+  makePracticeItem: (overrides: Partial<UserItemLocal> = {}): UserItemLocal => ({
     user_id: 'u1',
     item_id: 1,
     czech: 'ahoj',
@@ -23,6 +23,7 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     pronunciation: 'həˈloʊ',
     audio: 'hello.opus',
     sort_order: 1,
+    curriculum_sort_path: [1, 1, 1, 1],
     progress: 2,
     progress_history: [],
     note_id: null,
@@ -36,19 +37,17 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     deleted_at: '9999-12-31T00:00:00.000Z',
     next_at: '2024-01-01T00:00:00.000Z',
     mastered_at: '9999-12-31T00:00:00.000Z',
-    show_new_grammar_indicator: false,
     ...overrides,
   }),
   practiceDeck: {
     index: 0,
-    currentItem: null as UserItemPractice | null,
+    currentItem: null as UserItemLocal | null,
     noteId: null,
     grammarId: 10,
     progress: 2,
     isCzToEn: true,
     revealed: false,
     setRevealed: vi.fn(),
-    showNewGrammarIndicator: false,
     czech: 'ahoj',
     english: 'hello-hint',
     pronunciation: '\u00A0',
@@ -201,7 +200,6 @@ vi.mock('@/features/practice/hooks/use-practice-deck', () => ({
         isCzToEn: true,
         revealed: false,
         setRevealed: vi.fn(),
-        showNewGrammarIndicator: false,
         czech: '',
         english: '',
         pronunciation: '\u00A0',
@@ -357,14 +355,12 @@ describe('PracticeCard', () => {
       audio: 'hello.opus',
       grammar_id: 10,
       progress: 2,
-      show_new_grammar_indicator: false,
     });
     mocks.practiceDeck.noteId = null;
     mocks.practiceDeck.grammarId = 10;
     mocks.practiceDeck.progress = 2;
     mocks.practiceDeck.isCzToEn = true;
     mocks.practiceDeck.revealed = false;
-    mocks.practiceDeck.showNewGrammarIndicator = false;
     mocks.practiceDeck.czech = 'ahoj';
     mocks.practiceDeck.english = 'hello-hint';
     mocks.practiceDeck.pronunciation = '\u00A0';
@@ -563,7 +559,6 @@ describe('PracticeCard', () => {
   });
 
   it('opens grammar from the right secondary control group after reveal', () => {
-    mocks.practiceDeck.showNewGrammarIndicator = true;
     mocks.practiceDeck.showDirectionChange = false;
     mocks.practiceDeck.grammarId = 42;
     mocks.practiceDeck.revealed = true;
@@ -582,7 +577,6 @@ describe('PracticeCard', () => {
   });
 
   it('keeps grammar disabled before reveal even when grammar data exists', () => {
-    mocks.practiceDeck.showNewGrammarIndicator = true;
     mocks.practiceDeck.grammarId = 42;
     mocks.practiceDeck.revealed = false;
 
@@ -600,7 +594,6 @@ describe('PracticeCard', () => {
   });
 
   it('does not open grammar automatically while direction change is shown', () => {
-    mocks.practiceDeck.showNewGrammarIndicator = true;
     mocks.practiceDeck.showDirectionChange = true;
     mocks.practiceDeck.grammarId = 42;
 
@@ -662,7 +655,6 @@ describe('PracticeCard', () => {
         progressLabel="Round 1/4"
         isCzToEn
         revealed
-        showNewGrammarIndicator={false}
         czech="ahoj"
         english="hello"
         pronunciation="hello"
@@ -690,7 +682,6 @@ describe('PracticeCard', () => {
         progressLabel="Round 1/4"
         isCzToEn
         revealed
-        showNewGrammarIndicator={false}
         czech="ahoj"
         english="hello"
         pronunciation="hello"

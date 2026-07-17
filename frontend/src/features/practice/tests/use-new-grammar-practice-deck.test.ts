@@ -113,6 +113,7 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
     pronunciation: 'hello-pron',
     audio: 'hello.opus',
     sort_order: 1,
+    curriculum_sort_path: [1, 1, 1, 1],
     progress: 0,
     progress_history: [],
     note_id: null,

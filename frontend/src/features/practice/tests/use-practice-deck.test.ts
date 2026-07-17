@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { UserItemPractice } from '@/types/user-item.types';
+import type { UserItemLocal } from '@/types/user-item.types';
 
 const useFetchMock = vi.fn();
 const getPracticeDeckMock = vi.fn();
@@ -64,8 +64,8 @@ vi.mock('@/features/logging/monitoring-handler', () => ({
 
 import { usePracticeDeck } from '../hooks/use-practice-deck';
 
-function makeItem(overrides: Partial<UserItemPractice> = {}): UserItemPractice {
-  const item: UserItemPractice = {
+function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
+  const item: UserItemLocal = {
     item_id: 1,
     user_id: 'u1',
     czech: 'ahoj',
@@ -76,6 +76,7 @@ function makeItem(overrides: Partial<UserItemPractice> = {}): UserItemPractice {
     is_vocabulary: 0,
     is_practice_item: 1,
     sort_order: 1,
+    curriculum_sort_path: [1, 1, 1, 1],
     block_id: 0,
     grammar_id: 10,
     progress: 0,
@@ -86,7 +87,6 @@ function makeItem(overrides: Partial<UserItemPractice> = {}): UserItemPractice {
     next_at: '2026-01-01',
     mastered_at: '2026-01-01',
     lesson_id: 0,
-    show_new_grammar_indicator: false,
     ...overrides,
   };
 
@@ -123,7 +123,6 @@ describe('usePracticeDeck', () => {
     expect(result.current.english).toBe('EN_HINT');
     expect(result.current.audioDisabled).toBe(true);
     expect(result.current.grammarId).toBe(10);
-    expect(result.current.showNewGrammarIndicator).toBe(false);
     expect(resetHintMock).toHaveBeenCalled();
   });
 

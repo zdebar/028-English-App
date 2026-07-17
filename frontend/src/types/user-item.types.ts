@@ -3,6 +3,13 @@ export interface ProgressHistoryEntry {
   created_at: string;
 }
 
+export type CurriculumSortPath = readonly [
+  levelSortOrder: number,
+  lessonSortOrder: number,
+  blockSortOrder: number,
+  itemSortOrder: number,
+];
+
 export interface UserItemBase {
   user_id: string;
   item_id: number;
@@ -27,10 +34,7 @@ export interface UserItemLocal extends UserItemBase {
   deleted_at: string;
   next_at: string;
   mastered_at: string;
-}
-
-export interface UserItemPractice extends UserItemLocal {
-  show_new_grammar_indicator: boolean;
+  curriculum_sort_path: CurriculumSortPath;
 }
 
 export type ReviewPracticeMode = 'vocabulary' | 'grammar';

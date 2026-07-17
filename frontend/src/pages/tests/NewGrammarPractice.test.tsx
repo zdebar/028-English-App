@@ -18,7 +18,6 @@ const mocks = vi.hoisted(() => ({
     progressLabel: 'Round 1/2',
     isCzToEn: true,
     revealed: false,
-    showNewGrammarIndicator: false,
     czech: 'ahoj',
     english: 'hello',
     pronunciation: '\u00A0',

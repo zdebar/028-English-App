@@ -81,7 +81,6 @@ export default function NewGrammarPractice(): JSX.Element {
       progressLabel={deck.progressLabel}
       isCzToEn={deck.isCzToEn}
       revealed={deck.revealed}
-      showNewGrammarIndicator={deck.showNewGrammarIndicator}
       czech={deck.czech}
       english={deck.english}
       pronunciation={deck.pronunciation}

@@ -2,7 +2,7 @@ import { act, renderHook } from '@testing-library/react';
 import { useState } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { UserItemPractice } from '@/types/user-item.types';
+import type { UserItemLocal } from '@/types/user-item.types';
 
 const playAudioMock = vi.fn();
 
@@ -28,9 +28,10 @@ const item = {
   english: 'hello',
   audio: 'hello.opus',
   pronunciation: 'hello-pron',
-} as UserItemPractice;
+  curriculum_sort_path: [1, 1, 1, 1],
+} as unknown as UserItemLocal;
 
-function useTestCard(isCzToEn: boolean, currentItem: UserItemPractice | null = item) {
+function useTestCard(isCzToEn: boolean, currentItem: UserItemLocal | null = item) {
   const [revealed, setRevealed] = useState(false);
   const state = usePracticeCardState({ currentItem, isCzToEn, revealed, setRevealed });
   return { ...state, revealed };
