@@ -32,7 +32,7 @@ starting point when a change crosses route, store, model, or sync boundaries.
 | Signed-in hub | Shows user name, daily count, practice buttons, dashboard, and sync warning. | `Home`, `Dashboard`, `PracticeOverviewButton`, `HomePracticeButtons` | `useAuthStore`, `useUserStore`, `useSyncStore`, IndexedDB models | Home combines global stores with local model reads; it does not read Supabase directly. |
 | Practice readiness buttons | Enable vocabulary, new grammar, and grammar practice when local data is ready. | `HomePracticeButtons` | `UserItem`, `UserBlock`, `useSyncStore.syncRevision` | Recalculates on mount, `userId` change, and successful sync; timers update future ready counts while Home stays mounted. |
 | Sync warning | Warns when the last periodic sync failed. | `Home` | `useSyncStore.isSyncError` | Successful sync clears the warning; failed sync does not prevent local-first practice. |
-| Simulated data | Seed anonymous/test user progress once local sync is ready. | `SimulateDataButton` | `UserItem.simulateData`, `useSyncStore`, localStorage `simulate-data-${userId}` | Hidden after a successful simulation; disabled until auth and initial sync are ready. |
+| Simulated data | Atomically seed anonymous/test item and grammar-block progress once local sync is ready. | `SimulateDataButton`, `simulate-data-service` | `UserItem`, `UserBlock`, localStorage `simulate-data-${userId}` | Advances the first 64 items, masters three grammar blocks, unlocks the fourth, then emits `levelsUpdated`; Dashboard, level aggregates, and Home practice readiness refresh from committed IndexedDB state. |
 
 ## Practice And Learning
 

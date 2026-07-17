@@ -158,6 +158,44 @@ describe('HomePracticeButtons', () => {
     });
   });
 
+  it('reloads practice-state data after progress changes for the current user', async () => {
+    mocks.getReadyVocabularyPracticeState
+      .mockResolvedValueOnce({ readyCount: 0, schedule: [] })
+      .mockResolvedValueOnce({ readyCount: 6, schedule: [] });
+
+    render(<HomePracticeButtons userId="u1" />);
+    await flushPracticeStateLoad();
+
+    act(() => {
+      globalThis.dispatchEvent(new CustomEvent('levelsUpdated', { detail: { userId: 'u1' } }));
+    });
+
+    await waitFor(() => {
+      expect(mocks.getReadyVocabularyPracticeState).toHaveBeenCalledTimes(2);
+      expect(mocks.getFirstUnlockedGrammarBlock).toHaveBeenCalledTimes(2);
+      expect(mocks.getReadyGrammarPracticeState).toHaveBeenCalledTimes(2);
+      expect(screen.getByText('6')).toBeTruthy();
+    });
+  });
+
+  it('ignores progress events for another user and removes its listener on unmount', async () => {
+    const { unmount } = render(<HomePracticeButtons userId="u1" />);
+    await flushPracticeStateLoad();
+
+    act(() => {
+      globalThis.dispatchEvent(new CustomEvent('levelsUpdated', { detail: { userId: 'u2' } }));
+    });
+    await flushPracticeStateLoad();
+    expect(mocks.getReadyVocabularyPracticeState).toHaveBeenCalledTimes(1);
+
+    unmount();
+    act(() => {
+      globalThis.dispatchEvent(new CustomEvent('levelsUpdated', { detail: { userId: 'u1' } }));
+    });
+    await flushPracticeStateLoad();
+    expect(mocks.getReadyVocabularyPracticeState).toHaveBeenCalledTimes(1);
+  });
+
   it('increments vocabulary badge when scheduled vocabulary items become ready', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));

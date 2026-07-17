@@ -83,6 +83,7 @@ function ReadyPracticeBadge({ count }: Readonly<{ count: number }>): JSX.Element
 export default function HomePracticeButtons({ userId }: HomePracticeButtonsProps): JSX.Element {
   const navigate = useNavigate();
   const syncRevision = useSyncStore((state) => state.syncRevision);
+  const [progressRevision, setProgressRevision] = useState(0);
   const [readyVocabularyCount, setReadyVocabularyCount] = useState(0);
   const [readyVocabularySchedule, setReadyVocabularySchedule] = useState<
     ReadyPracticeScheduleEntry[]
@@ -90,6 +91,18 @@ export default function HomePracticeButtons({ userId }: HomePracticeButtonsProps
   const [hasNewGrammarBlock, setHasNewGrammarBlock] = useState(false);
   const [readyGrammarCount, setReadyGrammarCount] = useState(0);
   const [readyGrammarSchedule, setReadyGrammarSchedule] = useState<ReadyPracticeScheduleEntry[]>([]);
+
+  useEffect(() => {
+    const handleLevelsUpdated = (event: Event) => {
+      const updatedUserId = (event as CustomEvent<{ userId?: string }>).detail?.userId;
+      if (updatedUserId === userId) {
+        setProgressRevision((revision) => revision + 1);
+      }
+    };
+
+    globalThis.addEventListener('levelsUpdated', handleLevelsUpdated);
+    return () => globalThis.removeEventListener('levelsUpdated', handleLevelsUpdated);
+  }, [userId]);
 
   useEffect(() => {
     let isMounted = true;
@@ -134,7 +147,7 @@ export default function HomePracticeButtons({ userId }: HomePracticeButtonsProps
     return () => {
       isMounted = false;
     };
-  }, [syncRevision, userId]);
+  }, [progressRevision, syncRevision, userId]);
 
   useReadyPracticeSchedule(
     readyVocabularySchedule,

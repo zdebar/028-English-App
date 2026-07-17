@@ -494,11 +494,13 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Applies simulated progress to the first configured range of user items.
    *
    * @param userId User id whose local rows should be modified.
+   * @param dateTime ISO timestamp used for the simulated save. Defaults to now.
    * @returns Number of modified rows.
    */
-  static async simulateData(userId: string): Promise<number> {
-    const dateTime = new Date().toISOString();
-
+  static async simulateData(
+    userId: string,
+    dateTime: string = new Date(Date.now()).toISOString(),
+  ): Promise<number> {
     const count = await db.user_items
       .where('[user_id+item_id]')
       .between([userId, 1], [userId, SIM_COUNT])

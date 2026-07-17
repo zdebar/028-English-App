@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   blockEqualsToArray: vi.fn(),
   masteredBlockToArray: vi.fn(),
   itemIdModify: vi.fn(),
+  itemIdBetween: vi.fn(),
   itemIdBetweenModify: vi.fn(),
   userEqualsToArray: vi.fn(),
   indexedBetween: vi.fn(),
@@ -37,7 +38,7 @@ vi.mock('@/config/config', () => ({
     progress: {
       afterNewGrammarProgress: 2,
       simulationProgress: 2,
-      simulationCount: 200,
+      simulationCount: 64,
     },
     practice: {
       readyPracticeBadgeCap: 99,
@@ -65,9 +66,12 @@ vi.mock('@/database/models/db', () => ({
             equals: () => ({
               modify: (...args: unknown[]) => mocks.itemIdModify(...args),
             }),
-            between: () => ({
-              modify: (...args: unknown[]) => mocks.itemIdBetweenModify(...args),
-            }),
+            between: (...args: unknown[]) => {
+              mocks.itemIdBetween(...args);
+              return {
+                modify: (...modifyArgs: unknown[]) => mocks.itemIdBetweenModify(...modifyArgs),
+              };
+            },
           };
         }
         if (field === '[user_id+updated_at]') {
@@ -213,7 +217,7 @@ describe('UserItem', () => {
       return callback();
     });
     mocks.itemIdModify.mockResolvedValue(1);
-    mocks.itemIdBetweenModify.mockResolvedValue(200);
+    mocks.itemIdBetweenModify.mockResolvedValue(64);
   });
 
   afterEach(() => {
@@ -654,22 +658,43 @@ describe('UserItem', () => {
 
     const count = await UserItem.simulateData('u1');
 
-    expect(count).toBe(200);
+    expect(count).toBe(64);
+    expect(mocks.itemIdBetween).toHaveBeenCalledWith(['u1', 1], ['u1', 64]);
     expect(mocks.itemIdBetweenModify).toHaveBeenCalledTimes(1);
 
     const modifyFn = mocks.itemIdBetweenModify.mock.calls[0][0] as (item: any) => void;
     const item = {
       progress: 0,
+      started_at: '1970-01-01T00:00:00.000Z',
       updated_at: '1970-01-01T00:00:00.000Z',
       next_at: '1970-01-01T00:00:00.000Z',
+      mastered_at: '1970-01-01T00:00:00.000Z',
     };
 
     modifyFn(item);
 
     expect(item.progress).toBe(2);
+    expect(item.started_at).toBe('2026-06-10T10:00:00.000Z');
     expect(item.updated_at).toBe('2026-06-10T10:00:00.000Z');
     expect(item.next_at).toBe('2026-06-12T00:00:00.000Z');
+    expect(item.mastered_at).toBe('1970-01-01T00:00:00.000Z');
     expect(mocks.getNextAt).toHaveBeenCalledWith(2);
+
+    const completingItem = {
+      progress: 1,
+      started_at: '2026-06-01T10:00:00.000Z',
+      updated_at: '2026-06-01T10:00:00.000Z',
+      next_at: '2026-06-02T10:00:00.000Z',
+      mastered_at: '1970-01-01T00:00:00.000Z',
+    };
+
+    modifyFn(completingItem);
+
+    expect(completingItem.progress).toBe(3);
+    expect(completingItem.started_at).toBe('2026-06-01T10:00:00.000Z');
+    expect(completingItem.updated_at).toBe('2026-06-10T10:00:00.000Z');
+    expect(completingItem.mastered_at).toBe('2026-06-10T10:00:00.000Z');
+    expect(mocks.getNextAt).toHaveBeenCalledWith(3);
   });
 
   it('syncFromRemote pushes local items, applies pull, and marks sync', async () => {

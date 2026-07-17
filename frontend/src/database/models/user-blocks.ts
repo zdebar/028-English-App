@@ -296,6 +296,42 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
   }
 
   /**
+   * Creates the grammar-block portion of the anonymous-user simulation fixture.
+   * The first configured number of grammar blocks are unlocked and mastered; the next block is
+   * unlocked only. Existing next_at values are preserved to match the normal block transitions.
+   *
+   * @param userId Non-empty user id owning the blocks.
+   * @param dateTime Shared ISO timestamp for every simulated transition.
+   * @returns Number of grammar blocks changed, including the final unlocked block.
+   * @throws Error when the required number of practice grammar blocks is unavailable.
+   */
+  static async simulateGrammarProgress(userId: string, dateTime: string): Promise<number> {
+    assertNonEmptyString(userId, 'userId');
+
+    const masteredCount = config.progress.simulationMasteredGrammarBlockCount;
+    const requiredCount = masteredCount + 1;
+    const grammarBlocks = (await this.getByUserId(userId))
+      .filter((block) => block.is_practice_block !== false && !block.is_vocabulary)
+      .sort(compareGrammarBlocks)
+      .slice(0, requiredCount);
+
+    if (grammarBlocks.length < requiredCount) {
+      throw new Error(
+        `Simulation requires at least ${requiredCount} practice grammar blocks for user ${userId}.`,
+      );
+    }
+
+    for (const block of grammarBlocks.slice(0, masteredCount)) {
+      await this.unlockBlock(userId, block.block_id, dateTime);
+      await this.markBlockMastered(userId, block.block_id, dateTime);
+    }
+
+    const nextBlock = grammarBlocks[masteredCount];
+    await this.unlockBlock(userId, nextBlock.block_id, dateTime);
+    return requiredCount;
+  }
+
+  /**
    * Resets one user block to its unstarted state.
    *
    * @param userId Non-empty user id owning the block.

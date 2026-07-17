@@ -21,11 +21,11 @@ stores hold UI/session/cache state.
 ## Global Events
 
 Events are dispatched through `frontend/src/utils/dashboard.utils.ts` and listened
-to by `useUserStore`.
+to by user-stat and Home readiness consumers.
 
 | Event | Detail | Dispatchers | Listener behavior |
 | --- | --- | --- | --- |
-| `levelsUpdated` | `{ userId }` | sync completion, item/block reset and progress writes | Calls `useUserStore.reloadLevels(userId)`. |
+| `levelsUpdated` | `{ userId }` | sync completion, simulation, item/block reset and progress writes | Reloads `useUserStore` level aggregates and matching-user `HomePracticeButtons` readiness. |
 | `dailyCountUpdated` | `{ userId, dailyCount? }` | sync completion, score updates | If `dailyCount` is present, sets it directly; otherwise reloads from `UserScore`. |
 
 ## Sync Revision
@@ -50,7 +50,7 @@ above.
 
 - Stores should not be treated as durable progress storage. Progress belongs in
   IndexedDB models.
-- Global events refresh dashboard stats; `syncRevision` refreshes Home practice
-  readiness after successful sync.
+- `levelsUpdated` refreshes dashboard stats and Home practice readiness for local
+  progress changes; `syncRevision` also refreshes readiness after successful sync.
 - Home practice readiness recalculates on Home mount, `userId` change,
-  successful sync, and future schedule timers while Home remains mounted.
+  matching progress events, successful sync, and future schedule timers while Home remains mounted.
