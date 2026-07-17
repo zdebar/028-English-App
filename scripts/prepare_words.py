@@ -2,7 +2,7 @@ import sys
 import os
 from datetime import datetime
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from scripts.utils.preparation import read_vocab_csv, redo_sort_order, add_lesson_id
+from scripts.utils.preparation import read_vocab_csv, redo_sort_order
 from scripts.utils.pronunciation import fill_pronunciation_espeak_ng
 from scripts.utils.audio import generate_audio_with_google_cloud
 import pandas as pd
@@ -15,13 +15,12 @@ async def prepare_words(file_name: str, output_file: str, audio_folder: str, suf
 		return
 	# 2. Fill IPA pronunciation	
 	df = await fill_pronunciation_espeak_ng(df)
-	# 3. Redo sort order and add lesson_id
+	# 3. Redo sort order
 	df = redo_sort_order(df, file_name)
-	df = add_lesson_id(df, file_name)
 	# # 4. Generate audio files
 	df = await generate_audio_with_google_cloud(df, audio_folder, suffix)
 	# 5. Force integer columns before saving
-	for col in ["id", "sort_order", "grammar_id", "lesson_id", "block_id", "note_id"]:
+	for col in ["id", "sort_order", "block_id", "note_id"]:
 		if col in df.columns:
 			df[col] = pd.to_numeric(df[col], errors="coerce")
 			df[col] = df[col].apply(lambda x: int(x) if pd.notna(x) and x == int(x) else "")

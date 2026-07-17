@@ -4,7 +4,7 @@ import os
 import pandas as pd
 from typing import Any, List, Union
 
-INT_COLUMNS = {"id", "sort_order", "grammar_id", "lesson_id", "block_id", "note_id"}
+INT_COLUMNS = {"id", "sort_order", "block_id", "note_id"}
 
 
 def clean_data_frame(df: pd.DataFrame) -> pd.DataFrame:
@@ -57,7 +57,7 @@ def _clean_and_convert_col(col: str, value: Any) -> Any:
 def read_vocab_csv(
     file_path: str,
     columns: List[str] = [
-        "id", "czech", "english", "pronunciation", "audio", "sort_order", "grammar_id", "lesson_id", "block_id", "note_id"
+        "id", "czech", "english", "pronunciation", "audio", "sort_order", "block_id", "note_id"
     ],
 ) -> pd.DataFrame:
     """Read a vocabulary CSV, add missing requested columns, and normalize configured int columns."""
@@ -95,18 +95,4 @@ def redo_sort_order(df, file_name: str = "", start_sort_order: int = 1):
 
     df = df.copy()
     df['sort_order'] = range(start_sort_order, start_sort_order + len(df))
-    return df
-
-def add_lesson_id(df, file_name: str = ""):
-    """Return a copy with lesson_id set from leading digits in file_name, or blank when absent."""
-    base_name = os.path.basename(file_name) if file_name else ""
-    leading_digits = ""
-    for char in base_name:
-        if char.isdigit():
-            leading_digits += char
-        else:
-            break
-    lesson_id = int(leading_digits) if leading_digits else ""
-    df = df.copy()
-    df['lesson_id'] = lesson_id
     return df
