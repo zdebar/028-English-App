@@ -157,7 +157,7 @@ export default function HomePracticeButtons({ userId }: HomePracticeButtonsProps
   useReadyPracticeSchedule(readyGrammarSchedule, setReadyGrammarCount, setReadyGrammarSchedule);
 
   return (
-    <div className="my-4 flex flex-col gap-2">
+    <div className="my-4 flex flex-col gap-1">
       <StyledButton
         className="h-button relative px-4"
         disabled={readyVocabularyCount === 0}

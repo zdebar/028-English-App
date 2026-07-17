@@ -128,7 +128,10 @@ describe('IdentityLinkConflictModal', () => {
       });
     });
 
-    expect(mocks.saveFallback).toHaveBeenCalledTimes(1);
+    expect(mocks.saveFallback).toHaveBeenCalledWith(
+      expect.objectContaining({ user: expect.objectContaining({ id: 'guest-1' }) }),
+      'sign-in-existing-google-account',
+    );
     expect(mocks.clearFallback).toHaveBeenCalledTimes(1);
     expect(mocks.reportError).toHaveBeenCalledWith(
       'Existing Google account sign-in failed',

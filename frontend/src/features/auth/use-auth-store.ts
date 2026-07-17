@@ -6,7 +6,7 @@ import { reportError, reportInfo, setMonitoringUser } from '@/features/logging/m
 import {
   clearAnonymousSessionFallback,
   clearAuthErrorParameters,
-  hasAnonymousSessionFallback,
+  getAnonymousSessionFallbackIntent,
   restoreAnonymousSessionFallback,
 } from '@/features/auth/anonymous-session-fallback';
 import { useToastStore } from '@/features/toast/use-toast-store';
@@ -37,11 +37,16 @@ const INITIAL_AUTH_STATE = {
 };
 
 function getAuthErrorCode(error: unknown): string | null {
-  if (typeof error !== 'object' || error === null || !('code' in error)) {
+  if (typeof error !== 'object' || error === null) {
     return null;
   }
 
-  return typeof error.code === 'string' ? error.code : null;
+  const candidate = error as { code?: unknown; details?: { code?: unknown } | null };
+  if (typeof candidate.code === 'string') {
+    return candidate.code;
+  }
+
+  return typeof candidate.details?.code === 'string' ? candidate.details.code : null;
 }
 
 function isAnonymousSession(session: Session | null): boolean {
@@ -211,49 +216,98 @@ export const useAuthStore = create<AuthState>((set) => {
           return;
         }
 
-        const hasFallback = hasAnonymousSessionFallback();
+        const fallbackIntent = getAnonymousSessionFallbackIntent();
+        let callbackSession: Session | null | undefined;
+        let shouldOpenIdentityLinkConflict = false;
 
         if (!initializationError) {
           clearAnonymousSessionFallback();
         } else {
           clearAuthErrorParameters();
+          const errorCode = getAuthErrorCode(initializationError);
 
-          if (hasFallback) {
+          if (
+            errorCode === 'identity_already_exists' &&
+            (fallbackIntent === null || fallbackIntent === 'link-google-identity')
+          ) {
             try {
-              await restoreAnonymousSessionFallback();
+              if (fallbackIntent === 'link-google-identity') {
+                callbackSession = await restoreAnonymousSessionFallback(fallbackIntent);
+              } else {
+                const { data, error } = await supabaseInstance.auth.getSession();
+                if (error) {
+                  throw error;
+                }
+                if (!isAnonymousSession(data.session)) {
+                  throw new Error('Anonymous session is unavailable after identity collision.');
+                }
+                callbackSession = data.session;
+              }
+
+              shouldOpenIdentityLinkConflict = true;
+              reportInfo('Google identity already belongs to another user; guest retained.');
+            } catch (restorationError) {
+              clearAnonymousSessionFallback();
+              callbackSession = null;
+              reportError('Google identity linking collision recovery failed', initializationError);
+              reportError('Anonymous session collision recovery failed', restorationError);
+              useToastStore.getState().showToast(TEXTS.authInitErrorToast, 'error');
+            }
+          } else if (fallbackIntent) {
+            try {
+              callbackSession = await restoreAnonymousSessionFallback(fallbackIntent);
               reportError(
-                'Google sign-in redirect failed; anonymous session restored',
+                'Google authentication redirect failed; anonymous session restored',
                 initializationError,
               );
               useToastStore
                 .getState()
                 .showToast(TEXTS.existingAccountSigninErrorToast, 'error');
             } catch (restorationError) {
-              reportError('Google sign-in redirect failed', initializationError);
+              callbackSession = null;
+              reportError('Google authentication redirect failed', initializationError);
               reportError('Anonymous session restoration failed', restorationError);
               useToastStore.getState().showToast(TEXTS.authInitErrorToast, 'error');
             }
-          } else if (getAuthErrorCode(initializationError) === 'identity_already_exists') {
-            set({ hasIdentityLinkConflict: true });
           } else {
             reportError('Auth redirect initialization failed', initializationError);
             useToastStore.getState().showToast(TEXTS.authInitErrorToast, 'error');
           }
         }
 
-        const { data, error } = await supabaseInstance.auth.getSession();
-        if (error) {
-          clearSession();
+        if (!isActive) {
           return;
         }
 
-        const session = data?.session ? await validateStoredSession(data.session) : null;
+        let storedSession = callbackSession;
+        if (storedSession === undefined) {
+          const { data, error } = await supabaseInstance.auth.getSession();
+          if (error) {
+            clearSession();
+            return;
+          }
+          storedSession = data?.session ?? null;
+        }
+
+        const session = storedSession ? await validateStoredSession(storedSession) : null;
+
+        if (shouldOpenIdentityLinkConflict && !isAnonymousSession(session)) {
+          reportError(
+            'Anonymous session unavailable after Google identity collision',
+            initializationError,
+          );
+          useToastStore.getState().showToast(TEXTS.authInitErrorToast, 'error');
+          shouldOpenIdentityLinkConflict = false;
+        }
 
         if (session) {
           void syncAuthenticatedUserLifecycle();
         }
 
         applySession(session);
+        if (shouldOpenIdentityLinkConflict) {
+          set({ hasIdentityLinkConflict: true });
+        }
       };
 
       fetchSession();

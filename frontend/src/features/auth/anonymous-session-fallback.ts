@@ -3,13 +3,16 @@ import type { Session } from '@supabase/supabase-js';
 
 const STORAGE_KEY = 'google-signin-anonymous-session-fallback';
 const FALLBACK_MAX_AGE_MS = 15 * 60 * 1000;
-const FALLBACK_INTENT = 'sign-in-existing-google-account';
+
+export type AnonymousSessionFallbackIntent =
+  | 'link-google-identity'
+  | 'sign-in-existing-google-account';
 
 type StoredAnonymousSession = Readonly<{
   accessToken: string;
   refreshToken: string;
   userId: string;
-  intent: typeof FALLBACK_INTENT;
+  intent: AnonymousSessionFallbackIntent;
   savedAt: number;
 }>;
 
@@ -32,7 +35,8 @@ function isStoredAnonymousSession(value: unknown): value is StoredAnonymousSessi
     candidate.refreshToken.length > 0 &&
     typeof candidate.userId === 'string' &&
     candidate.userId.length > 0 &&
-    candidate.intent === FALLBACK_INTENT &&
+    (candidate.intent === 'link-google-identity' ||
+      candidate.intent === 'sign-in-existing-google-account') &&
     typeof candidate.savedAt === 'number' &&
     age >= 0 &&
     age <= FALLBACK_MAX_AGE_MS
@@ -58,7 +62,10 @@ function readAnonymousSessionFallback(): StoredAnonymousSession | null {
   return null;
 }
 
-export function saveAnonymousSessionFallback(session: Session): void {
+export function saveAnonymousSessionFallback(
+  session: Session,
+  intent: AnonymousSessionFallbackIntent,
+): void {
   if (!isAnonymousSession(session) || !session.access_token || !session.refresh_token) {
     throw new Error('A valid anonymous session is required before Google sign-in.');
   }
@@ -67,7 +74,7 @@ export function saveAnonymousSessionFallback(session: Session): void {
     accessToken: session.access_token,
     refreshToken: session.refresh_token,
     userId: session.user.id,
-    intent: FALLBACK_INTENT,
+    intent,
     savedAt: Date.now(),
   };
 
@@ -78,13 +85,21 @@ export function clearAnonymousSessionFallback(): void {
   globalThis.sessionStorage.removeItem(STORAGE_KEY);
 }
 
-export function hasAnonymousSessionFallback(): boolean {
-  return readAnonymousSessionFallback() !== null;
+export function getAnonymousSessionFallbackIntent(): AnonymousSessionFallbackIntent | null {
+  return readAnonymousSessionFallback()?.intent ?? null;
 }
 
-export async function restoreAnonymousSessionFallback(): Promise<Session> {
+export function hasAnonymousSessionFallback(intent?: AnonymousSessionFallbackIntent): boolean {
   const fallback = readAnonymousSessionFallback();
-  if (!fallback) {
+  return fallback !== null && (intent === undefined || fallback.intent === intent);
+}
+
+export async function restoreAnonymousSessionFallback(
+  expectedIntent: AnonymousSessionFallbackIntent,
+): Promise<Session> {
+  const fallback = readAnonymousSessionFallback();
+  if (!fallback || fallback.intent !== expectedIntent) {
+    clearAnonymousSessionFallback();
     throw new Error('No valid anonymous session fallback is available.');
   }
 

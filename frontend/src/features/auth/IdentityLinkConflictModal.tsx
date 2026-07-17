@@ -29,7 +29,7 @@ export default function IdentityLinkConflictModal(): JSX.Element | null {
         throw new Error('Anonymous session is missing before existing-account sign-in.');
       }
 
-      saveAnonymousSessionFallback(sessionData.session);
+      saveAnonymousSessionFallback(sessionData.session, 'sign-in-existing-google-account');
       fallbackSaved = true;
 
       const { data, error } = await supabaseInstance.auth.signInWithOAuth({

@@ -16,6 +16,7 @@ vi.mock('@/config/supabase.config', () => ({
 
 import {
   clearAuthErrorParameters,
+  getAnonymousSessionFallbackIntent,
   hasAnonymousSessionFallback,
   restoreAnonymousSessionFallback,
   saveAnonymousSessionFallback,
@@ -37,13 +38,16 @@ describe('anonymous session fallback', () => {
   });
 
   it('stores and restores the same anonymous session', async () => {
-    saveAnonymousSessionFallback(anonymousSession as any);
+    saveAnonymousSessionFallback(anonymousSession as any, 'link-google-identity');
+    expect(getAnonymousSessionFallbackIntent()).toBe('link-google-identity');
     mocks.setSession.mockResolvedValue({
       data: { session: anonymousSession },
       error: null,
     });
 
-    await expect(restoreAnonymousSessionFallback()).resolves.toEqual(anonymousSession);
+    await expect(
+      restoreAnonymousSessionFallback('link-google-identity'),
+    ).resolves.toEqual(anonymousSession);
 
     expect(mocks.setSession).toHaveBeenCalledWith({
       access_token: 'access-token',
@@ -53,7 +57,7 @@ describe('anonymous session fallback', () => {
   });
 
   it('rejects and clears a restored session belonging to another user', async () => {
-    saveAnonymousSessionFallback(anonymousSession as any);
+    saveAnonymousSessionFallback(anonymousSession as any, 'sign-in-existing-google-account');
     mocks.setSession.mockResolvedValue({
       data: {
         session: {
@@ -64,9 +68,9 @@ describe('anonymous session fallback', () => {
       error: null,
     });
 
-    await expect(restoreAnonymousSessionFallback()).rejects.toThrow(
-      'Restored session does not match',
-    );
+    await expect(
+      restoreAnonymousSessionFallback('sign-in-existing-google-account'),
+    ).rejects.toThrow('Restored session does not match');
 
     expect(mocks.signOut).toHaveBeenCalledWith({ scope: 'local' });
     expect(hasAnonymousSessionFallback()).toBe(false);
@@ -78,10 +82,21 @@ describe('anonymous session fallback', () => {
 
     const now = Date.now();
     vi.spyOn(Date, 'now').mockReturnValue(now);
-    saveAnonymousSessionFallback(anonymousSession as any);
+    saveAnonymousSessionFallback(anonymousSession as any, 'link-google-identity');
     vi.spyOn(Date, 'now').mockReturnValue(now + 16 * 60 * 1000);
 
     expect(hasAnonymousSessionFallback()).toBe(false);
+  });
+
+  it('rejects and clears a fallback with the wrong intent', async () => {
+    saveAnonymousSessionFallback(anonymousSession as any, 'link-google-identity');
+
+    await expect(
+      restoreAnonymousSessionFallback('sign-in-existing-google-account'),
+    ).rejects.toThrow('No valid anonymous session fallback');
+
+    expect(hasAnonymousSessionFallback()).toBe(false);
+    expect(mocks.setSession).not.toHaveBeenCalled();
   });
 
   it('removes only authentication error parameters from the URL', () => {

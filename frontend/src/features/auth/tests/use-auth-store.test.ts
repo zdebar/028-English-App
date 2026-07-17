@@ -156,7 +156,11 @@ describe('useAuthStore', () => {
       '/?keep=yes&error=server_error&error_code=identity_already_exists&error_description=exists',
     );
     mocks.initialize.mockResolvedValue({
-      error: { code: 'identity_already_exists', message: 'Identity already exists' },
+      error: {
+        name: 'AuthImplicitGrantRedirectError',
+        message: 'Identity is already linked to another user',
+        details: { error: 'server_error', code: 'identity_already_exists' },
+      },
     });
     mocks.getSession.mockResolvedValue({ data: { session: anonymousSession }, error: null });
 
@@ -169,6 +173,113 @@ describe('useAuthStore', () => {
     expect(state.hasIdentityLinkConflict).toBe(true);
     expect(location.search).toBe('?keep=yes');
     expect(mocks.signOut).not.toHaveBeenCalled();
+    expect(mocks.reportError).not.toHaveBeenCalled();
+    expect(mocks.showToast).not.toHaveBeenCalled();
+    expect(mocks.reportInfo).toHaveBeenCalledWith(
+      'Google identity already belongs to another user; guest retained.',
+    );
+  });
+
+  it('restores a backed-up guest before exposing an identity-link collision', async () => {
+    const anonymousSession = {
+      access_token: 'guest-access',
+      refresh_token: 'guest-refresh',
+      user: {
+        id: 'u1',
+        is_anonymous: true,
+        user_metadata: {},
+      },
+    };
+    saveAnonymousSessionFallback(anonymousSession as any, 'link-google-identity');
+    history.replaceState(
+      null,
+      '',
+      '/?error=server_error&error_code=identity_already_exists&error_description=exists',
+    );
+    mocks.initialize.mockResolvedValue({
+      error: {
+        name: 'AuthImplicitGrantRedirectError',
+        message: 'Identity is already linked to another user',
+        details: { error: 'server_error', code: 'identity_already_exists' },
+      },
+    });
+    mocks.setSession.mockResolvedValue({ data: { session: anonymousSession }, error: null });
+
+    useAuthStore.getState().initializeAuth();
+    await flushMicrotasks();
+
+    const state = useAuthStore.getState();
+    expect(state.userId).toBe('u1');
+    expect(state.isAnonymousUser).toBe(true);
+    expect(state.hasIdentityLinkConflict).toBe(true);
+    expect(mocks.setSession).toHaveBeenCalledWith({
+      access_token: 'guest-access',
+      refresh_token: 'guest-refresh',
+    });
+    expect(mocks.getSession).not.toHaveBeenCalled();
+    expect(sessionStorage).toHaveLength(0);
+    expect(mocks.reportError).not.toHaveBeenCalled();
+  });
+
+  it('clears the linking fallback after successful conversion of the same user', async () => {
+    const anonymousSession = {
+      access_token: 'guest-access',
+      refresh_token: 'guest-refresh',
+      user: { id: 'u1', is_anonymous: true, user_metadata: {} },
+    };
+    const permanentSession = {
+      access_token: 'permanent-access',
+      refresh_token: 'permanent-refresh',
+      user: { id: 'u1', is_anonymous: false, user_metadata: {} },
+    };
+    saveAnonymousSessionFallback(anonymousSession as any, 'link-google-identity');
+    mocks.getSession.mockResolvedValue({ data: { session: permanentSession }, error: null });
+
+    useAuthStore.getState().initializeAuth();
+    await flushMicrotasks();
+
+    const state = useAuthStore.getState();
+    expect(state.userId).toBe('u1');
+    expect(state.isAnonymousUser).toBe(false);
+    expect(state.hasIdentityLinkConflict).toBe(false);
+    expect(sessionStorage).toHaveLength(0);
+  });
+
+  it('does not open the collision modal when the backed-up guest cannot be restored', async () => {
+    const anonymousSession = {
+      access_token: 'guest-access',
+      refresh_token: 'guest-refresh',
+      user: { id: 'u1', is_anonymous: true, user_metadata: {} },
+    };
+    saveAnonymousSessionFallback(anonymousSession as any, 'link-google-identity');
+    mocks.initialize.mockResolvedValue({
+      error: {
+        name: 'AuthImplicitGrantRedirectError',
+        message: 'Identity is already linked to another user',
+        details: { error: 'server_error', code: 'identity_already_exists' },
+      },
+    });
+    mocks.setSession.mockResolvedValue({
+      data: { session: null },
+      error: { code: 'refresh_token_not_found', message: 'Expired fallback' },
+    });
+
+    useAuthStore.getState().initializeAuth();
+    await flushMicrotasks();
+
+    const state = useAuthStore.getState();
+    expect(state.userId).toBeNull();
+    expect(state.hasIdentityLinkConflict).toBe(false);
+    expect(sessionStorage).toHaveLength(0);
+    expect(mocks.reportError).toHaveBeenCalledWith(
+      'Google identity linking collision recovery failed',
+      expect.objectContaining({ details: expect.objectContaining({ code: 'identity_already_exists' }) }),
+    );
+    expect(mocks.reportError).toHaveBeenCalledWith(
+      'Anonymous session collision recovery failed',
+      expect.objectContaining({ code: 'refresh_token_not_found' }),
+    );
+    expect(mocks.showToast).toHaveBeenCalledWith(expect.any(String), 'error');
   });
 
   it('restores the anonymous session after normal Google sign-in redirect failure', async () => {
@@ -181,7 +292,7 @@ describe('useAuthStore', () => {
         user_metadata: {},
       },
     };
-    saveAnonymousSessionFallback(anonymousSession as any);
+    saveAnonymousSessionFallback(anonymousSession as any, 'sign-in-existing-google-account');
     history.replaceState(
       null,
       '',
