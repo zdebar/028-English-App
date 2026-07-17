@@ -76,6 +76,20 @@ vi.mock('@/features/practice/hooks/use-new-grammar-practice-deck', () => ({
   useNewGrammarPracticeDeck: () => mocks.deck,
 }));
 
+vi.mock('@/features/practice/BlockOverviewCard', () => ({
+  default: ({ block, onClose, onContinue }: any) => (
+    <div>
+      <div data-testid="block-overview">{block?.name}</div>
+      <button type="button" onClick={onContinue}>
+        Continue
+      </button>
+      <button type="button" onClick={onClose}>
+        close block
+      </button>
+    </div>
+  ),
+}));
+
 vi.mock('@/features/grammar/GrammarDetailCard', () => ({
   default: ({ grammar, onClose }: any) => (
     <div>
@@ -153,19 +167,20 @@ describe('NewGrammarPractice', () => {
     expect(screen.queryByTestId('grammar-detail')).toBeNull();
   });
 
-  it('shows grammar intro with an explicit continue action before practice session', () => {
+  it('shows the block overview before the grammar intro and practice session', () => {
     mocks.deck.block = { name: 'Block A' };
     mocks.deck.grammar = { id: 1, name: 'Articles' };
     mocks.deck.currentItem = { item_id: 1 };
 
     render(<NewGrammarPractice />);
 
-    expect(screen.getByTestId('grammar-detail').textContent).toBe('Articles');
+    expect(screen.getByTestId('block-overview').textContent).toBe('Block A');
     expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy();
+    expect(screen.queryByTestId('grammar-detail')).toBeNull();
     expect(screen.queryByTestId('practice-session')).toBeNull();
   });
 
-  it('continues from grammar intro to practice session', () => {
+  it('continues from block overview to grammar intro, then practice session', () => {
     mocks.deck.block = { name: 'Block A' };
     mocks.deck.grammar = { id: 1, name: 'Articles' };
     mocks.deck.currentItem = { item_id: 1 };
@@ -174,17 +189,21 @@ describe('NewGrammarPractice', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
 
+    expect(screen.getByTestId('grammar-detail').textContent).toBe('Articles');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+
     expect(screen.getByTestId('practice-session').textContent).toBe('ahoj:hello');
   });
 
-  it('closes grammar intro back to home', () => {
+  it('closes the block overview back to home', () => {
     mocks.deck.block = { name: 'Block A' };
     mocks.deck.grammar = { id: 1, name: 'Articles' };
     mocks.deck.currentItem = { item_id: 1 };
 
     render(<NewGrammarPractice />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'close grammar' }));
+    fireEvent.click(screen.getByRole('button', { name: 'close block' }));
 
     expect(mocks.navigate).toHaveBeenCalledWith('/');
   });

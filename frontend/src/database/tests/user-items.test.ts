@@ -281,6 +281,37 @@ describe('UserItem', () => {
     expect(result.map((item) => item.item_id)).toEqual([1, 3]);
   });
 
+  it('includes a new vocabulary item even when due reviews fill the deck', async () => {
+    mocks.indexedToArray
+      .mockResolvedValueOnce([]) // started grammar ids
+      .mockResolvedValueOnce([
+        {
+          item_id: 1,
+          is_practice_item: 1,
+          is_vocabulary: 1,
+          progress: 0,
+          next_at: '1970-01-01T00:00:00.000Z',
+          mastered_at: '1970-01-01T00:00:00.000Z',
+          sort_order: 1,
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          item_id: 2,
+          is_practice_item: 1,
+          is_vocabulary: 1,
+          progress: 1,
+          next_at: '2026-01-01T00:00:00.000Z',
+          mastered_at: '1970-01-01T00:00:00.000Z',
+          sort_order: 2,
+        },
+      ]);
+
+    const deck = await UserItem.getPracticeDeck('u1', 2);
+
+    expect(deck.map((item) => item.item_id)).toEqual([1, 2]);
+  });
+
   it('getPracticeDeck accepts unscheduled unmastered items from mastered grammar blocks', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));

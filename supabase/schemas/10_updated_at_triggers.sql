@@ -9,6 +9,18 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS trg_set_updated_at__settings ON private.settings;
+CREATE TRIGGER trg_set_updated_at__settings
+BEFORE UPDATE ON private.settings
+FOR EACH ROW
+EXECUTE FUNCTION public.set_updated_at();
+
+DROP TRIGGER IF EXISTS trg_set_updated_at__users ON public.users;
+CREATE TRIGGER trg_set_updated_at__users
+BEFORE UPDATE ON public.users
+FOR EACH ROW
+EXECUTE FUNCTION public.set_updated_at();
+
 DROP TRIGGER IF EXISTS trg_set_updated_at__grammar ON public.grammar;
 CREATE TRIGGER trg_set_updated_at__grammar
 BEFORE UPDATE ON public.grammar
@@ -27,6 +39,12 @@ BEFORE UPDATE ON public.lessons
 FOR EACH ROW
 EXECUTE FUNCTION public.set_updated_at();
 
+DROP TRIGGER IF EXISTS trg_set_updated_at__blocks ON public.blocks;
+CREATE TRIGGER trg_set_updated_at__blocks
+BEFORE UPDATE ON public.blocks
+FOR EACH ROW
+EXECUTE FUNCTION public.set_updated_at();
+
 DROP TRIGGER IF EXISTS trg_set_updated_at__notes ON public.notes;
 CREATE TRIGGER trg_set_updated_at__notes
 BEFORE UPDATE ON public.notes
@@ -42,6 +60,12 @@ EXECUTE FUNCTION public.set_updated_at();
 DROP TRIGGER IF EXISTS trg_set_updated_at__user_items ON public.user_items;
 CREATE TRIGGER trg_set_updated_at__user_items
 BEFORE UPDATE ON public.user_items
+FOR EACH ROW
+EXECUTE FUNCTION public.set_updated_at();
+
+DROP TRIGGER IF EXISTS trg_set_updated_at__user_items_history ON public.user_items_history;
+CREATE TRIGGER trg_set_updated_at__user_items_history
+BEFORE UPDATE ON public.user_items_history
 FOR EACH ROW
 EXECUTE FUNCTION public.set_updated_at();
 

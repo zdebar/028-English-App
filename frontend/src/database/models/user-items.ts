@@ -142,30 +142,42 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const masteredGrammarBlockIdSet =
       mode === 'grammar' ? new Set(await this.getMasteredGrammarBlockIds(userId)) : null;
 
-    // Step 2: Fetch items with odd progress
+    // Keep one slot for a new vocabulary item when available. Otherwise a full queue of
+    // due reviews can permanently starve newly added vocabulary blocks.
+    const newVocabularyLimit = Math.max(0, Math.min(1, deckSize));
+    const newVocabularyItems =
+      mode === 'vocabulary'
+        ? await this.getPracticeItemsByParity(userId, false, newVocabularyLimit, true, mode)
+        : [];
+    const remainingAfterNewVocabulary = deckSize - newVocabularyItems.length;
+
+    // Step 2: Fetch due items with odd progress.
     let deck = await this.getPracticeItemsByParity(
       userId,
       true,
-      deckSize,
+      remainingAfterNewVocabulary,
       false,
       mode,
       masteredGrammarBlockIdSet,
     );
 
-    // Step 3: If not enough items, fetch even progress items instead
-    if (deck.length < deckSize) {
-      let evenItems: UserItemLocal[] = [];
-      evenItems = await this.getPracticeItemsByParity(
+    // Step 3: Fill remaining slots with due items with even progress.
+    if (deck.length < remainingAfterNewVocabulary) {
+      const evenItems = await this.getPracticeItemsByParity(
         userId,
         false,
-        deckSize,
+        remainingAfterNewVocabulary - deck.length,
         false,
         mode,
         masteredGrammarBlockIdSet,
       );
 
-      const remainingLimit = deckSize - evenItems.length;
-      if (remainingLimit > 0 && mode === 'vocabulary') {
+      deck = [...deck, ...evenItems];
+    }
+
+    // Step 4: Fill any remaining vocabulary slots with more new items.
+    const remainingLimit = deckSize - newVocabularyItems.length - deck.length;
+    if (remainingLimit > 0 && mode === 'vocabulary') {
         const remainingItems = await this.getPracticeItemsByParity(
           userId,
           false,
@@ -174,17 +186,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
           mode,
           masteredGrammarBlockIdSet,
         );
-        evenItems = [...evenItems, ...remainingItems];
-      }
-
-      if (evenItems.length >= deckSize) {
-        deck = [...evenItems];
-      } else {
-        deck = [...deck, ...evenItems];
-      }
+        deck = [...deck, ...remainingItems];
     }
 
-    return addGrammarIndicatorFlag(deck, startedGrammarIdSet);
+    return addGrammarIndicatorFlag([...newVocabularyItems, ...deck], startedGrammarIdSet);
   }
 
   /**
