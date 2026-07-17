@@ -659,7 +659,7 @@ describe('UserItem', () => {
     const count = await UserItem.simulateData('u1');
 
     expect(count).toBe(64);
-    expect(mocks.itemIdBetween).toHaveBeenCalledWith(['u1', 1], ['u1', 64]);
+    expect(mocks.itemIdBetween).toHaveBeenCalledWith(['u1', 1], ['u1', 64], true, true);
     expect(mocks.itemIdBetweenModify).toHaveBeenCalledTimes(1);
 
     const modifyFn = mocks.itemIdBetweenModify.mock.calls[0][0] as (item: any) => void;

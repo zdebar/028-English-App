@@ -503,7 +503,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   ): Promise<number> {
     const count = await db.user_items
       .where('[user_id+item_id]')
-      .between([userId, 1], [userId, SIM_COUNT])
+      .between([userId, 1], [userId, SIM_COUNT], true, true)
       .modify((item) => {
         const updated = this.formatSavedItem(item, dateTime, SIM_PROGRESS);
         Object.assign(item, updated);
