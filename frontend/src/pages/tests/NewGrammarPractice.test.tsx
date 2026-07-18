@@ -75,26 +75,17 @@ vi.mock('@/features/practice/hooks/use-new-grammar-practice-deck', () => ({
   useNewGrammarPracticeDeck: () => mocks.deck,
 }));
 
-vi.mock('@/features/practice/BlockOverviewCard', () => ({
-  default: ({ block, onClose, onContinue }: any) => (
+vi.mock('@/features/practice/NewGrammarOverviewCard', () => ({
+  default: ({ block, grammar, onClose, onContinue }: any) => (
     <div>
-      <div data-testid="block-overview">{block?.name}</div>
+      <div data-testid="new-grammar-overview">
+        {block?.name}:{grammar?.name}
+      </div>
       <button type="button" onClick={onContinue}>
         Continue
       </button>
       <button type="button" onClick={onClose}>
-        close block
-      </button>
-    </div>
-  ),
-}));
-
-vi.mock('@/features/grammar/GrammarDetailCard', () => ({
-  default: ({ grammar, onClose }: any) => (
-    <div>
-      <div data-testid="grammar-detail">{grammar?.name}</div>
-      <button type="button" onClick={onClose}>
-        close grammar
+        close overview
       </button>
     </div>
   ),
@@ -163,46 +154,41 @@ describe('NewGrammarPractice', () => {
     expect(screen.getByText('Nothing to practice')).toBeTruthy();
     expect(screen.getByText('Try again later')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Home' })).toBeTruthy();
-    expect(screen.queryByTestId('grammar-detail')).toBeNull();
+    expect(screen.queryByTestId('new-grammar-overview')).toBeNull();
   });
 
-  it('shows the block overview before the grammar intro and practice session', () => {
+  it('shows the combined block and grammar overview before practice', () => {
     mocks.deck.block = { name: 'Block A' };
     mocks.deck.grammar = { id: 1, name: 'Articles' };
     mocks.deck.currentItem = { item_id: 1 };
 
     render(<NewGrammarPractice />);
 
-    expect(screen.getByTestId('block-overview').textContent).toBe('Block A');
+    expect(screen.getByTestId('new-grammar-overview').textContent).toBe('Block A:Articles');
     expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy();
-    expect(screen.queryByTestId('grammar-detail')).toBeNull();
     expect(screen.queryByTestId('practice-session')).toBeNull();
   });
 
-  it('continues from block overview to grammar intro, then practice session', () => {
+  it('continues from the combined overview to the practice session', () => {
     mocks.deck.block = { name: 'Block A' };
     mocks.deck.grammar = { id: 1, name: 'Articles' };
     mocks.deck.currentItem = { item_id: 1 };
 
     render(<NewGrammarPractice />);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
-
-    expect(screen.getByTestId('grammar-detail').textContent).toBe('Articles');
 
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
 
     expect(screen.getByTestId('practice-session').textContent).toBe('ahoj:hello');
   });
 
-  it('closes the block overview back to home', () => {
+  it('closes the combined overview back to home', () => {
     mocks.deck.block = { name: 'Block A' };
     mocks.deck.grammar = { id: 1, name: 'Articles' };
     mocks.deck.currentItem = { item_id: 1 };
 
     render(<NewGrammarPractice />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'close block' }));
+    fireEvent.click(screen.getByRole('button', { name: 'close overview' }));
 
     expect(mocks.navigate).toHaveBeenCalledWith('/');
   });
@@ -217,6 +203,6 @@ describe('NewGrammarPractice', () => {
     expect(screen.getByText('Complete')).toBeTruthy();
     expect(screen.getByText('Block A')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Home' })).toBeTruthy();
-    expect(screen.queryByTestId('grammar-detail')).toBeNull();
+    expect(screen.queryByTestId('new-grammar-overview')).toBeNull();
   });
 });

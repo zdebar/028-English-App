@@ -4,8 +4,7 @@ import ReturnHomeButton from '@/components/UI/buttons/ReturnHomeButton';
 import { ROUTES } from '@/config/routes.config';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { reportError } from '@/features/logging/monitoring-handler';
-import BlockOverviewCard from '@/features/practice/BlockOverviewCard';
-import NewGrammarIntroCard from '@/features/practice/NewGrammarIntroCard';
+import NewGrammarOverviewCard from '@/features/practice/NewGrammarOverviewCard';
 import PracticeEmptyState from '@/features/practice/PracticeEmptyState';
 import PracticeSessionCard from '@/features/practice/PracticeSessionCard';
 import { useNewGrammarPracticeDeck } from '@/features/practice/hooks/use-new-grammar-practice-deck';
@@ -18,8 +17,7 @@ export default function NewGrammarPractice(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const navigate = useNavigate();
   const showToast = useToastStore((state) => state.showToast);
-  const [showGrammarIntro, setShowGrammarIntro] = useState(true);
-  const [showBlockOverview, setShowBlockOverview] = useState(true);
+  const [showIntro, setShowIntro] = useState(true);
   const deck = useNewGrammarPracticeDeck(userId);
 
   useEffect(() => {
@@ -54,22 +52,13 @@ export default function NewGrammarPractice(): JSX.Element {
     return <PracticeEmptyState />;
   }
 
-  if (showBlockOverview) {
+  if (showIntro && deck.grammar != null) {
     return (
-      <BlockOverviewCard
+      <NewGrammarOverviewCard
         block={deck.block}
-        onClose={() => navigate(ROUTES.home)}
-        onContinue={() => setShowBlockOverview(false)}
-      />
-    );
-  }
-
-  if (showGrammarIntro && deck.grammar != null) {
-    return (
-      <NewGrammarIntroCard
         grammar={deck.grammar}
         onClose={() => navigate(ROUTES.home)}
-        onContinue={() => setShowGrammarIntro(false)}
+        onContinue={() => setShowIntro(false)}
       />
     );
   }
