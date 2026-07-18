@@ -13,7 +13,6 @@ import Dexie, { Entity } from 'dexie';
 import { getSyncTimestamps, splitDeleted } from '../utils/sync-generic.utils';
 
 import { getNextAt, resetUserItem } from '@/database/utils/user-items.utils';
-import { triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 import { SupabaseError } from '@/types/error.types';
 import type { ReadyPracticeState } from '@/types/generic.types';
 import Metadata from './metadata';
@@ -273,7 +272,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       await db.user_items.bulkPut(updatedItems);
     }
 
-    triggerLevelsUpdatedEvent(userId);
     return updatedItems;
   }
 
@@ -437,7 +435,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       throw new Error(`No user items found for item ID ${itemId}.`);
     }
 
-    triggerLevelsUpdatedEvent(userId);
     return itemId;
   }
 
@@ -456,7 +453,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         resetUserItem(item);
       });
 
-    triggerLevelsUpdatedEvent(userId);
     return count;
   }
 
@@ -475,7 +471,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         resetUserItem(item);
       });
 
-    triggerLevelsUpdatedEvent(userId);
     return count;
   }
 

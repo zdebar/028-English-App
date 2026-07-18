@@ -59,7 +59,6 @@ describe('usePeriodicSync', () => {
       isSynchronized: false,
       isSynchronizing: false,
       isSyncError: false,
-      syncRevision: 0,
     });
 
     mocks.dataSync.mockResolvedValue(undefined);
@@ -93,7 +92,6 @@ describe('usePeriodicSync', () => {
     expect(useSyncStore.getState().isSynchronized).toBe(true);
     expect(useSyncStore.getState().isSynchronizing).toBe(false);
     expect(useSyncStore.getState().isSyncError).toBe(false);
-    expect(useSyncStore.getState().syncRevision).toBe(1);
 
     unmount();
   });

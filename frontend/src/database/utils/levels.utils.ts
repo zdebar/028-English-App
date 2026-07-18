@@ -24,8 +24,8 @@ export function aggregateLevels(
   items: UserItemLocal[],
   lessons: LessonType[],
   levels: LevelType[],
+  today: string = getTodayShortDate(),
 ): LevelOverviewType[] {
-  const today = getTodayShortDate();
   const progressKeys: (keyof ProgressCountsType)[] = [
     'startedCount',
     'startedTodayCount',

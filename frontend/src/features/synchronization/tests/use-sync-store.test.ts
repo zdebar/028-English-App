@@ -8,7 +8,6 @@ describe('useSyncStore', () => {
       isSynchronized: false,
       isSynchronizing: false,
       isSyncError: false,
-      syncRevision: 0,
     });
   });
 
@@ -16,7 +15,6 @@ describe('useSyncStore', () => {
     expect(useSyncStore.getState().isSynchronized).toBe(false);
     expect(useSyncStore.getState().isSynchronizing).toBe(false);
     expect(useSyncStore.getState().isSyncError).toBe(false);
-    expect(useSyncStore.getState().syncRevision).toBe(0);
   });
 
   it('tracks synchronization and error state independently', () => {
@@ -27,15 +25,6 @@ describe('useSyncStore', () => {
     expect(useSyncStore.getState().isSynchronizing).toBe(true);
     expect(useSyncStore.getState().isSyncError).toBe(true);
     expect(useSyncStore.getState().isSynchronized).toBe(true);
-    expect(useSyncStore.getState().syncRevision).toBe(1);
-  });
-
-  it('increments sync revision for each successful synchronization', () => {
-    useSyncStore.getState().setSynchronized(true);
-    useSyncStore.getState().setSynchronized(true);
-    useSyncStore.getState().setSynchronized(false);
-
-    expect(useSyncStore.getState().syncRevision).toBe(2);
   });
 
   it('resetSyncState clears all sync flags', () => {
@@ -48,6 +37,5 @@ describe('useSyncStore', () => {
     expect(useSyncStore.getState().isSynchronized).toBe(false);
     expect(useSyncStore.getState().isSynchronizing).toBe(false);
     expect(useSyncStore.getState().isSyncError).toBe(false);
-    expect(useSyncStore.getState().syncRevision).toBe(0);
   });
 });

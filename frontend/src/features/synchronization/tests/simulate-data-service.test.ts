@@ -4,7 +4,6 @@ const mocks = vi.hoisted(() => ({
   transaction: vi.fn(),
   simulateItems: vi.fn(),
   simulateBlocks: vi.fn(),
-  triggerLevelsUpdatedEvent: vi.fn(),
 }));
 
 vi.mock('@/database/models/db', () => ({
@@ -27,10 +26,6 @@ vi.mock('@/database/models/user-blocks', () => ({
   },
 }));
 
-vi.mock('@/utils/dashboard.utils', () => ({
-  triggerLevelsUpdatedEvent: (...args: unknown[]) => mocks.triggerLevelsUpdatedEvent(...args),
-}));
-
 import { simulateUserProgress } from '@/features/synchronization/simulate-data-service';
 
 describe('simulateUserProgress', () => {
@@ -44,7 +39,7 @@ describe('simulateUserProgress', () => {
     mocks.simulateBlocks.mockResolvedValue(4);
   });
 
-  it('updates items and blocks atomically before invalidating derived UI', async () => {
+  it('updates items and blocks atomically', async () => {
     await expect(
       simulateUserProgress('u1', '2026-07-17T12:00:00.000Z'),
     ).resolves.toBe(64);
@@ -57,13 +52,9 @@ describe('simulateUserProgress', () => {
     );
     expect(mocks.simulateItems).toHaveBeenCalledWith('u1', '2026-07-17T12:00:00.000Z');
     expect(mocks.simulateBlocks).toHaveBeenCalledWith('u1', '2026-07-17T12:00:00.000Z');
-    expect(mocks.triggerLevelsUpdatedEvent).toHaveBeenCalledWith('u1');
-    expect(mocks.triggerLevelsUpdatedEvent.mock.invocationCallOrder[0]).toBeGreaterThan(
-      mocks.simulateBlocks.mock.invocationCallOrder[0],
-    );
   });
 
-  it('propagates transaction failure without dispatching invalidation', async () => {
+  it('propagates transaction failure', async () => {
     const error = new Error('Not enough grammar blocks');
     mocks.simulateBlocks.mockRejectedValue(error);
 
@@ -71,6 +62,5 @@ describe('simulateUserProgress', () => {
       simulateUserProgress('u1', '2026-07-17T12:00:00.000Z'),
     ).rejects.toBe(error);
 
-    expect(mocks.triggerLevelsUpdatedEvent).not.toHaveBeenCalled();
   });
 });

@@ -14,7 +14,7 @@ owns this side effect?".
 | --- | --- |
 | All frontend features and connection points | [features.md](features.md) |
 | App boot, routes, state categories | [frontend-architecture.md](frontend-architecture.md) |
-| Zustand stores and global browser events | [state-and-events.md](state-and-events.md) |
+| Zustand stores and reactive IndexedDB state | [state-and-events.md](state-and-events.md) |
 | IndexedDB, Supabase sync, localStorage fallbacks | [data-and-sync.md](data-and-sync.md) |
 | Vocabulary, grammar, and new grammar practice flows | [practice-flows.md](practice-flows.md) |
 | Home practice button readiness and badges | [home-readiness.md](home-readiness.md) |

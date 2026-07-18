@@ -12,10 +12,9 @@ pushes/pulls Supabase changes.
 | --- | --- | --- |
 | Auth initialization | `useAuthStore.initializeAuth` | Loads Supabase session, listens for auth changes, sets monitoring user. |
 | Audio settings load | `useAudioLoader` | Initializes per-user volume from localStorage. |
-| User stats sync | `useUserStoreSync` | Clears stats on sign-out or triggers stats reload events on sign-in. |
+| User stats sync | `useUserStoreSync` | Maintains active-user Dexie subscriptions and handles local-date rollover. |
 | Theme load | `useThemeLoader` | Loads per-user or guest theme and applies DOM classes/meta color. |
 | Periodic data sync | `usePeriodicSync` | Starts delayed sync, periodic sync, and unmount sync. |
-| Daily stats reset | `useDailyStatsReset` | Polls date changes and reloads daily/level stats after midnight. |
 | Global UI shells | `ToastContainer`, `OverlayMask`, `Header` | Renders global notifications, overlay mask, and navigation. |
 
 ## Routes
@@ -74,6 +73,6 @@ session, UI, and cached aggregate state; they should not replace IndexedDB as th
 source of truth for user progress.
 
 When a behavior crosses features, identify the connection point first: a route,
-a Zustand store, a browser event such as `levelsUpdated`, a localStorage fallback,
-or a model method. The feature catalog in [features.md](features.md) is the
+a Zustand store, a Dexie live query, a localStorage fallback, or a model method.
+The feature catalog in [features.md](features.md) is the
 highest-level map of those boundaries.

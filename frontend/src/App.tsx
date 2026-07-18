@@ -12,7 +12,6 @@ import OverlayMask from '@/features/overlay/OverlayMask';
 import { useThemeLoader } from '@/features/theme/use-theme-loader';
 import ToastContainer from '@/features/toast/ToastContainer';
 import { useToastStore } from '@/features/toast/use-toast-store';
-import { useDailyStatsReset } from '@/features/user-stats/use-daily-stats-reset';
 import { useUserStoreSync } from '@/features/user-stats/use-user-store-sync';
 import { TEXTS } from '@/locales/cs';
 import Topics from '@/pages/Topics';
@@ -53,7 +52,6 @@ export default function App() {
   useUserStoreSync(userId);
   useThemeLoader(userId, authLoading);
   usePeriodicSync(userId);
-  useDailyStatsReset(userId);
 
   return (
     <>

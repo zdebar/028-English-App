@@ -13,8 +13,6 @@ const mocks = vi.hoisted(() => ({
   levelsSyncFromRemote: vi.fn(),
   lessonsSyncFromRemote: vi.fn(),
   audioSyncFromRemote: vi.fn(),
-  triggerDailyCountUpdatedEvent: vi.fn(),
-  triggerLevelsUpdatedEvent: vi.fn(),
   getSession: vi.fn(),
 }));
 
@@ -107,12 +105,6 @@ vi.mock('@/config/supabase.config', () => ({
   },
 }));
 
-vi.mock('@/utils/dashboard.utils', () => ({
-  triggerDailyCountUpdatedEvent: (...args: unknown[]) =>
-    mocks.triggerDailyCountUpdatedEvent(...args),
-  triggerLevelsUpdatedEvent: (...args: unknown[]) => mocks.triggerLevelsUpdatedEvent(...args),
-}));
-
 import { dataSync, dataSyncOnUnmount } from '@/database/utils/data-sync.utils';
 import { splitDeleted } from '@/database/utils/sync-generic.utils';
 
@@ -151,8 +143,6 @@ describe('data-sync.utils', () => {
     expect(mocks.grammarSyncFromRemote).toHaveBeenCalledWith(true);
     expect(mocks.levelsSyncFromRemote).toHaveBeenCalledWith(true);
     expect(mocks.lessonsSyncFromRemote).toHaveBeenCalledWith(true);
-    expect(mocks.triggerDailyCountUpdatedEvent).toHaveBeenCalledWith('u1');
-    expect(mocks.triggerLevelsUpdatedEvent).toHaveBeenCalledWith('u1');
     expect(mocks.setFullSyncTime).toHaveBeenCalledWith('u1', 5000);
   });
 
@@ -168,8 +158,6 @@ describe('data-sync.utils', () => {
     expect(mocks.grammarSyncFromRemote).toHaveBeenCalledWith(false);
     expect(mocks.levelsSyncFromRemote).toHaveBeenCalledWith(false);
     expect(mocks.lessonsSyncFromRemote).toHaveBeenCalledWith(false);
-    expect(mocks.triggerDailyCountUpdatedEvent).toHaveBeenCalledWith('u1');
-    expect(mocks.triggerLevelsUpdatedEvent).toHaveBeenCalledWith('u1');
     expect(mocks.setFullSyncTime).not.toHaveBeenCalled();
   });
 

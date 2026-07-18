@@ -9,7 +9,6 @@ import { withSettledSummary } from '@/features/logging/logging.utils';
 import Lessons from '@/database/models/lessons';
 import Levels from '@/database/models/levels';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
-import { triggerDailyCountUpdatedEvent, triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 import Grammar from '@/database/models/grammar';
 import { reportInfo } from '@/features/logging/monitoring-handler';
 import { supabaseInstance } from '@/config/supabase.config';
@@ -79,8 +78,6 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
 
   const summary = await withSettledSummary(allPromises, 'Data sync', 3, false);
 
-  triggerDailyCountUpdatedEvent(userId);
-  triggerLevelsUpdatedEvent(userId);
   if (summary.failed > 0) {
     throw new Error('Data synchronization error');
   }

@@ -12,7 +12,6 @@ const mocks = vi.hoisted(() => ({
   getSyncTimestamps: vi.fn(),
   rpc: vi.fn(),
   markAsSynced: vi.fn(),
-  triggerDailyCountUpdatedEvent: vi.fn(),
 }));
 
 vi.mock('@/config/config', () => ({
@@ -75,11 +74,6 @@ vi.mock('@/database/models/metadata', () => ({
   },
 }));
 
-vi.mock('@/utils/dashboard.utils', () => ({
-  triggerDailyCountUpdatedEvent: (...args: unknown[]) =>
-    mocks.triggerDailyCountUpdatedEvent(...args),
-}));
-
 import UserScoreType from '@/database/models/user-scores';
 
 describe('UserScore', () => {
@@ -127,7 +121,6 @@ describe('UserScore', () => {
         deleted_at: null,
       }),
     );
-    expect(mocks.triggerDailyCountUpdatedEvent).toHaveBeenCalledWith('u1', 5);
   });
 
   it('addItemCount uses provided dateTime to choose score date', async () => {
@@ -144,14 +137,15 @@ describe('UserScore', () => {
         deleted_at: null,
       }),
     );
-    expect(mocks.triggerDailyCountUpdatedEvent).toHaveBeenCalledWith('u1', 5);
   });
 
-  it('getOrCreateTodayScore returns numeric count or zero', async () => {
+  it('getScoreForDate returns numeric count or zero', async () => {
     mocks.get.mockResolvedValueOnce({ item_count: 4 }).mockResolvedValueOnce(undefined);
 
-    await expect(UserScoreType.getOrCreateTodayScore('u1')).resolves.toBe(4);
-    await expect(UserScoreType.getOrCreateTodayScore('u1')).resolves.toBe(0);
+    await expect(UserScoreType.getScoreForDate('u1', '2026-03-04')).resolves.toBe(4);
+    await expect(UserScoreType.getScoreForDate('u1', '2026-03-05')).resolves.toBe(0);
+    expect(mocks.get).toHaveBeenNthCalledWith(1, ['u1', '2026-03-04']);
+    expect(mocks.get).toHaveBeenNthCalledWith(2, ['u1', '2026-03-05']);
   });
 
   it('deleteAllScores deletes user rows', async () => {

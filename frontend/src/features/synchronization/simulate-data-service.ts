@@ -1,7 +1,6 @@
 import UserBlock from '@/database/models/user-blocks';
 import UserItem from '@/database/models/user-items';
 import { db } from '@/database/models/db';
-import { triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 
 /**
@@ -23,6 +22,5 @@ export async function simulateUserProgress(
     return updatedItemCount;
   });
 
-  triggerLevelsUpdatedEvent(userId);
   return itemCount;
 }

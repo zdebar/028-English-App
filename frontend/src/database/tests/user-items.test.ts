@@ -20,7 +20,6 @@ const mocks = vi.hoisted(() => ({
   getNextAt: vi.fn(),
   getSyncTimestamps: vi.fn(),
   markAsSynced: vi.fn(),
-  triggerLevelsUpdatedEvent: vi.fn(),
 }));
 
 vi.mock('@/config/config', () => ({
@@ -187,10 +186,6 @@ vi.mock('@/database/utils/sync-generic.utils', async () => {
     getSyncTimestamps: (...args: unknown[]) => mocks.getSyncTimestamps(...args),
   };
 });
-
-vi.mock('@/utils/dashboard.utils', () => ({
-  triggerLevelsUpdatedEvent: (...args: unknown[]) => mocks.triggerLevelsUpdatedEvent(...args),
-}));
 
 import UserItem from '@/database/models/user-items';
 
@@ -551,12 +546,6 @@ describe('UserItem', () => {
     ]);
     expect(mocks.getNextAt).toHaveBeenCalledWith(101);
     expect(mocks.getNextAt).toHaveBeenCalledWith(2);
-  });
-
-  it('resetItemById triggers levels update when successful', async () => {
-    await UserItem.resetItemById('u1', 10);
-
-    expect(mocks.triggerLevelsUpdatedEvent).toHaveBeenCalledWith('u1');
   });
 
   it('getReadyVocabularyPracticeState counts ready started and not-started vocabulary', async () => {

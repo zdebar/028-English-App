@@ -7,7 +7,6 @@ import UserScore from '@/database/models/user-scores';
 import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
-import { triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 import config from '@/config/config';
 import UserBlock from '@/database/models/user-blocks';
 
@@ -108,7 +107,6 @@ export function usePracticeDeck(userId: string | null, mode: ReviewPracticeMode 
       (async () => {
         if (userId) {
           await saveBufferedProgress([...userProgressRef.current], 'on unmount');
-          triggerLevelsUpdatedEvent(userId);
         }
       })();
     };
