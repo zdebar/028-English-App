@@ -48,7 +48,6 @@ import {
 } from '@/database/utils/database.utils';
 import { getNextAt, resetUserItem } from '@/database/utils/user-items.utils';
 import { fetchStorage } from '@/database/utils/audio-records.utils';
-import { triggerLevelsUpdatedEvent, triggerNamedEvent } from '@/utils/dashboard.utils';
 
 describe('database.utils', () => {
   beforeEach(() => {
@@ -94,29 +93,6 @@ describe('database.utils', () => {
       await expect(fetchStorage('bucket-a', 'missing.json')).rejects.toThrow(
         'Error fetching file missing.json from bucket bucket-a: not found',
       );
-    });
-  });
-
-  describe('event helpers', () => {
-    it('dispatches named event with userId detail', () => {
-      const spy = vi.spyOn(globalThis, 'dispatchEvent');
-
-      triggerNamedEvent('evt', 'u1');
-
-      expect(spy).toHaveBeenCalledTimes(1);
-      const event = spy.mock.calls[0][0] as CustomEvent;
-      expect(event.type).toBe('evt');
-      expect(event.detail).toEqual({ userId: 'u1' });
-    });
-
-    it('triggers levelsUpdated event shortcut', () => {
-      const spy = vi.spyOn(globalThis, 'dispatchEvent');
-
-      triggerLevelsUpdatedEvent('u1');
-
-      const event = spy.mock.calls[0][0] as CustomEvent;
-      expect(event.type).toBe('levelsUpdated');
-      expect(event.detail).toEqual({ userId: 'u1' });
     });
   });
 

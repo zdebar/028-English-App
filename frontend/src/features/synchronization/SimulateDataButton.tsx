@@ -1,6 +1,6 @@
 import { useCallback, useState, type JSX } from 'react';
 import SigninButton from '@/features/auth/SigninButton';
-import UserItems from '@/database/models/user-items';
+import { simulateUserProgress } from '@/features/synchronization/simulate-data-service';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { TEXTS } from '@/locales/cs';
@@ -24,7 +24,7 @@ export default function SimulateDataButton(): JSX.Element | null {
     setIsLoading(true);
 
     try {
-      await UserItems.simulateData(userId);
+      await simulateUserProgress(userId);
       setHasSimulatedData(true);
       showToast(TEXTS.simulateDataSuccessToast, 'success');
     } catch (err) {

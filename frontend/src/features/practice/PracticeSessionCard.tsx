@@ -27,7 +27,6 @@ export type PracticeSessionCardProps = Readonly<{
   progressLabel: string | number;
   isCzToEn: boolean;
   revealed: boolean;
-  showNewGrammarIndicator: boolean;
   czech: string | undefined;
   english: string | undefined;
   pronunciation: string | undefined;

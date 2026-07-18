@@ -253,6 +253,11 @@ Typical values include:
 - Supabase project URL
 - Supabase anonymous key
 
+Google guest-account conversion also requires manual identity linking in both
+environments. Local development enables `auth.enable_manual_linking` in
+`supabase/config.toml`; hosted projects must separately enable **Allow manual
+linking** in Supabase Dashboard under Authentication configuration.
+
 ## Data and Content Assets
 
 The [data](data) folder contains lesson source files, generated datasets, metadata, and audio assets used by the application and preparation scripts.

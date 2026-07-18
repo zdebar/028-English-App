@@ -1,12 +1,13 @@
 import StyledButton from '@/components/UI/buttons/StyledButton';
 import config from '@/config/config';
 import { ROUTES } from '@/config/routes.config';
+import { db } from '@/database/models/db';
 import UserBlock from '@/database/models/user-blocks';
 import UserItem from '@/database/models/user-items';
 import { reportError } from '@/features/logging/monitoring-handler';
-import { useSyncStore } from '@/features/synchronization/use-sync-store';
 import { TEXTS } from '@/locales/cs';
 import type { ReadyPracticeScheduleEntry } from '@/types/generic.types';
+import { liveQuery } from 'dexie';
 import { useEffect, useState, type Dispatch, type JSX, type SetStateAction } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -82,7 +83,6 @@ function ReadyPracticeBadge({ count }: Readonly<{ count: number }>): JSX.Element
 
 export default function HomePracticeButtons({ userId }: HomePracticeButtonsProps): JSX.Element {
   const navigate = useNavigate();
-  const syncRevision = useSyncStore((state) => state.syncRevision);
   const [readyVocabularyCount, setReadyVocabularyCount] = useState(0);
   const [readyVocabularySchedule, setReadyVocabularySchedule] = useState<
     ReadyPracticeScheduleEntry[]
@@ -92,33 +92,59 @@ export default function HomePracticeButtons({ userId }: HomePracticeButtonsProps
   const [readyGrammarSchedule, setReadyGrammarSchedule] = useState<ReadyPracticeScheduleEntry[]>([]);
 
   useEffect(() => {
-    let isMounted = true;
+    let isActive = true;
+    let unlockInFlight = false;
+    let unlockPending = false;
     setReadyVocabularyCount(0);
     setReadyVocabularySchedule([]);
     setHasNewGrammarBlock(false);
     setReadyGrammarCount(0);
     setReadyGrammarSchedule([]);
 
-    const loadPracticeState = async () => {
+    const ensureNextGrammarBlockUnlocked = async () => {
+      unlockPending = true;
+      if (unlockInFlight) {
+        return;
+      }
+
+      unlockInFlight = true;
       try {
-        await UserBlock.unlockNextGrammarBlock(userId);
+        while (isActive && unlockPending) {
+          unlockPending = false;
+          await UserBlock.unlockNextGrammarBlock(userId);
+        }
+      } catch (error) {
+        if (isActive) {
+          reportError('Failed to unlock next grammar block', error);
+        }
+      } finally {
+        unlockInFlight = false;
+      }
+    };
+
+    const practiceStateSubscription = liveQuery(() =>
+      db.transaction('r', db.user_items, db.user_blocks, async () => {
         const [vocabularyPracticeState, newGrammarBlock, grammarPracticeState] = await Promise.all([
           UserItem.getReadyVocabularyPracticeState(userId),
           UserBlock.getFirstUnlockedGrammarBlock(userId),
           UserBlock.getReadyGrammarPracticeState(userId),
         ]);
-
-        if (!isMounted) {
+        return { vocabularyPracticeState, newGrammarBlock, grammarPracticeState };
+      }),
+    ).subscribe({
+      next: ({ vocabularyPracticeState, newGrammarBlock, grammarPracticeState }) => {
+        if (!isActive) {
           return;
         }
-
         setReadyVocabularyCount(vocabularyPracticeState.readyCount);
         setReadyVocabularySchedule(vocabularyPracticeState.schedule);
         setHasNewGrammarBlock(newGrammarBlock != null);
         setReadyGrammarCount(grammarPracticeState.readyCount);
         setReadyGrammarSchedule(grammarPracticeState.schedule);
-      } catch (error) {
-        if (!isMounted) {
+        void ensureNextGrammarBlockUnlocked();
+      },
+      error: (error) => {
+        if (!isActive) {
           return;
         }
         setReadyVocabularyCount(0);
@@ -127,14 +153,14 @@ export default function HomePracticeButtons({ userId }: HomePracticeButtonsProps
         setReadyGrammarCount(0);
         setReadyGrammarSchedule([]);
         reportError('Failed to load practice button state', error);
-      }
-    };
+      },
+    });
 
-    void loadPracticeState();
     return () => {
-      isMounted = false;
+      isActive = false;
+      practiceStateSubscription.unsubscribe();
     };
-  }, [syncRevision, userId]);
+  }, [userId]);
 
   useReadyPracticeSchedule(
     readyVocabularySchedule,
@@ -144,7 +170,7 @@ export default function HomePracticeButtons({ userId }: HomePracticeButtonsProps
   useReadyPracticeSchedule(readyGrammarSchedule, setReadyGrammarCount, setReadyGrammarSchedule);
 
   return (
-    <div className="my-4 flex flex-col gap-2">
+    <div className="my-4 flex flex-col gap-1">
       <StyledButton
         className="h-button relative px-4"
         disabled={readyVocabularyCount === 0}

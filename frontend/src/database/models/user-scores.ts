@@ -2,13 +2,11 @@ import config from '@/config/config';
 import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
-import { getTodayShortDate } from '@/database/utils/database.utils';
 import { getSyncTimestamps, splitDeleted } from '../utils/sync-generic.utils';
 import { SupabaseError } from '@/types/error.types';
 import { type UserScoreType } from '@/types/generic.types';
 import { TableName } from '@/types/table.types';
 import { assertNonNegativeInteger, assertShortDateString } from '@/utils/assertions.utils';
-import { triggerDailyCountUpdatedEvent } from '@/utils/dashboard.utils';
 import { Entity } from 'dexie';
 import Metadata from './metadata';
 import { reportInfo } from '@/features/logging/monitoring-handler';
@@ -17,8 +15,8 @@ import { reportInfo } from '@/features/logging/monitoring-handler';
  * Local Dexie model and sync API for daily user score rows.
  *
  * Public API:
- * - `addItemCount` updates the score for a local day and emits `dailyCountUpdated`.
- * - `getOrCreateTodayScore` returns today's count, falling back to 0.
+ * - `addItemCount` updates the score for a local day.
+ * - `getScoreForDate` returns a day's count, falling back to 0.
  * - `getByUserId` returns visible score history newest first.
  * - `syncFromRemote` pushes local score changes and applies remote changes.
  *
@@ -52,19 +50,17 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
     const existingRecord = await db.user_scores.get([userId, date]);
     const newItemCount = (existingRecord?.item_count ?? 0) + count;
     await db.user_scores.put(this.createRecord(userId, date, newItemCount));
-
-    triggerDailyCountUpdatedEvent(userId, newItemCount);
   }
 
   /**
    * Reads today's practiced item count.
    *
    * @param userId User id for the score row.
-   * @returns Today's item_count, or 0 when the row does not exist.
+   * @param date Local date in YYYY-MM-DD format.
+   * @returns The date's item_count, or 0 when the row does not exist.
    */
-  static async getOrCreateTodayScore(userId: string): Promise<number> {
-    const today = getTodayShortDate();
-    return (await db.user_scores.get([userId, today]))?.item_count ?? 0;
+  static async getScoreForDate(userId: string, date: string): Promise<number> {
+    return (await db.user_scores.get([userId, date]))?.item_count ?? 0;
   }
 
   /**

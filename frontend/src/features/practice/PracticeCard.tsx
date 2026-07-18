@@ -26,7 +26,6 @@ export default function PracticeCard({ mode = 'vocabulary' }: PracticeCardProps)
     isCzToEn,
     revealed,
     handleReveal,
-    showNewGrammarIndicator,
     czech,
     english,
     pronunciation,
@@ -62,7 +61,6 @@ export default function PracticeCard({ mode = 'vocabulary' }: PracticeCardProps)
       progressLabel={progress}
       isCzToEn={isCzToEn}
       revealed={revealed}
-      showNewGrammarIndicator={showNewGrammarIndicator}
       czech={czech}
       english={english}
       pronunciation={pronunciation}

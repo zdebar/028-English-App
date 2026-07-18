@@ -8,6 +8,8 @@ const mocks = vi.hoisted(() => ({
   getReadyGrammarPracticeState: vi.fn(),
   getReadyVocabularyPracticeState: vi.fn(),
   reportError: vi.fn(),
+  liveQueryRerun: null as null | (() => Promise<void>),
+  liveQueryUnsubscribe: vi.fn(),
 }));
 
 vi.mock('@/locales/cs', () => ({
@@ -35,6 +37,40 @@ vi.mock('@/database/models/user-items', () => ({
   },
 }));
 
+vi.mock('@/database/models/db', () => ({
+  db: {
+    user_items: {},
+    user_blocks: {},
+    transaction: async (...args: unknown[]) => {
+      const callback = args.at(-1) as () => Promise<unknown>;
+      return callback();
+    },
+  },
+}));
+
+vi.mock('dexie', () => ({
+  liveQuery: (query: () => Promise<unknown>) => ({
+    subscribe: (observer: { next: (value: any) => void; error: (error: unknown) => void }) => {
+      let active = true;
+      mocks.liveQueryRerun = async () => {
+        if (!active) return;
+        try {
+          observer.next(await query());
+        } catch (error) {
+          observer.error(error);
+        }
+      };
+      void mocks.liveQueryRerun();
+      return {
+        unsubscribe: () => {
+          active = false;
+          mocks.liveQueryUnsubscribe();
+        },
+      };
+    },
+  }),
+}));
+
 vi.mock('@/features/logging/monitoring-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
@@ -44,7 +80,6 @@ vi.mock('react-router-dom', () => ({
 }));
 
 import HomePracticeButtons from '@/features/practice/HomePracticeButtons';
-import { useSyncStore } from '@/features/synchronization/use-sync-store';
 
 async function flushPracticeStateLoad() {
   await act(async () => {
@@ -60,12 +95,7 @@ describe('HomePracticeButtons', () => {
     mocks.getFirstUnlockedGrammarBlock.mockResolvedValue(null);
     mocks.getReadyGrammarPracticeState.mockResolvedValue({ readyCount: 0, schedule: [] });
     mocks.getReadyVocabularyPracticeState.mockResolvedValue({ readyCount: 0, schedule: [] });
-    useSyncStore.setState({
-      isSynchronized: false,
-      isSynchronizing: false,
-      isSyncError: false,
-      syncRevision: 0,
-    });
+    mocks.liveQueryRerun = null;
   });
 
   afterEach(() => {
@@ -132,7 +162,7 @@ describe('HomePracticeButtons', () => {
     );
   });
 
-  it('reloads practice-state data after successful synchronization', async () => {
+  it('updates practice-state data after the live query is invalidated', async () => {
     mocks.getReadyVocabularyPracticeState
       .mockResolvedValueOnce({ readyCount: 0, schedule: [] })
       .mockResolvedValueOnce({ readyCount: 5, schedule: [] });
@@ -145,8 +175,8 @@ describe('HomePracticeButtons', () => {
       true,
     );
 
-    act(() => {
-      useSyncStore.getState().setSynchronized(true);
+    await act(async () => {
+      await mocks.liveQueryRerun?.();
     });
 
     await waitFor(() => {
@@ -156,6 +186,37 @@ describe('HomePracticeButtons', () => {
       );
       expect(screen.getByText('5')).toBeTruthy();
     });
+  });
+
+  it('reloads all readiness inputs on a live-query emission', async () => {
+    mocks.getReadyVocabularyPracticeState
+      .mockResolvedValueOnce({ readyCount: 0, schedule: [] })
+      .mockResolvedValueOnce({ readyCount: 6, schedule: [] });
+
+    render(<HomePracticeButtons userId="u1" />);
+    await flushPracticeStateLoad();
+
+    await act(async () => {
+      await mocks.liveQueryRerun?.();
+    });
+
+    await waitFor(() => {
+      expect(mocks.getReadyVocabularyPracticeState).toHaveBeenCalledTimes(2);
+      expect(mocks.getFirstUnlockedGrammarBlock).toHaveBeenCalledTimes(2);
+      expect(mocks.getReadyGrammarPracticeState).toHaveBeenCalledTimes(2);
+      expect(screen.getByText('6')).toBeTruthy();
+    });
+  });
+
+  it('unsubscribes from readiness changes on unmount', async () => {
+    const { unmount } = render(<HomePracticeButtons userId="u1" />);
+    await flushPracticeStateLoad();
+
+    unmount();
+
+    await mocks.liveQueryRerun?.();
+    expect(mocks.liveQueryUnsubscribe).toHaveBeenCalledOnce();
+    expect(mocks.getReadyVocabularyPracticeState).toHaveBeenCalledTimes(1);
   });
 
   it('increments vocabulary badge when scheduled vocabulary items become ready', async () => {
@@ -282,14 +343,14 @@ describe('HomePracticeButtons', () => {
     expect(screen.queryByText('11')).toBeNull();
   });
 
-  it('falls back to disabled practice controls when practice-state loading fails', async () => {
+  it('reports grammar unlock failures without discarding loaded readiness', async () => {
     mocks.unlockNextGrammarBlock.mockRejectedValue(new Error('Dexie failure'));
 
     render(<HomePracticeButtons userId="u1" />);
 
     await waitFor(() => {
       expect(mocks.reportError).toHaveBeenCalledWith(
-        'Failed to load practice button state',
+        'Failed to unlock next grammar block',
         expect.any(Error),
       );
     });

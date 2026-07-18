@@ -1,110 +1,45 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-const mocks = vi.hoisted(() => ({
-  getOrCreateTodayScore: vi.fn(),
-  getOverview: vi.fn(),
-}));
-
-vi.mock('@/database/models/user-scores', () => ({
-  default: {
-    getOrCreateTodayScore: (...args: unknown[]) => mocks.getOrCreateTodayScore(...args),
-  },
-}));
-
-vi.mock('@/database/models/levels', () => ({
-  default: {
-    getOverview: (...args: unknown[]) => mocks.getOverview(...args),
-  },
-}));
-
+import { beforeEach, describe, expect, it } from 'vitest';
 import { useUserStore } from '@/features/user-stats/use-user-store';
 
 describe('useUserStore', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    useUserStore.setState({ levels: [], dailyCount: 0 });
-
-    mocks.getOrCreateTodayScore.mockResolvedValue(7);
-    mocks.getOverview.mockResolvedValue([
-      {
-        id: 1,
-        sort_order: 1,
-        name: 'A1',
-        note: '',
-        deleted_at: null,
-        lessons: [],
-      },
-    ]);
+    useUserStore.setState({
+      levels: [],
+      levelsLoading: true,
+      levelsError: null,
+      dailyCount: 0,
+      dailyCountLoading: false,
+      dailyCountError: null,
+      showMasteredDashboard: false,
+    });
   });
 
-  it('reloadLevels stores fetched levels in state', async () => {
-    await useUserStore.getState().reloadLevels('u1');
+  it('stores the dashboard display preference', () => {
+    useUserStore.getState().setMasteredDashboard(true);
 
-    const state = useUserStore.getState();
-    expect(state.levels).toEqual([
-      {
-        id: 1,
-        sort_order: 1,
-        name: 'A1',
-        note: '',
-        deleted_at: null,
-        lessons: [],
-      },
-    ]);
+    expect(useUserStore.getState().showMasteredDashboard).toBe(true);
   });
 
-  it('reloadDailyCount stores fetched daily count in state', async () => {
-    await useUserStore.getState().reloadDailyCount('u1');
-
-    expect(useUserStore.getState().dailyCount).toBe(7);
-  });
-
-  it('reloadDailyCount resets to initial value when fetch fails', async () => {
-    useUserStore.setState({ dailyCount: 3 });
-    mocks.getOrCreateTodayScore.mockRejectedValue(new Error('fail'));
-
-    await useUserStore.getState().reloadDailyCount('u1');
-
-    expect(useUserStore.getState().dailyCount).toBe(0);
-  });
-
-  it('clearLevels and clearDailyCount reset state', () => {
-    useUserStore.setState({ levels: [{ id: 1 } as any], dailyCount: 2 });
+  it('clears level and daily-count snapshots including errors', () => {
+    useUserStore.setState({
+      levels: [{ id: 1 } as any],
+      levelsLoading: true,
+      levelsError: new Error('levels'),
+      dailyCount: 2,
+      dailyCountLoading: true,
+      dailyCountError: new Error('score'),
+    });
 
     useUserStore.getState().clearLevels();
     useUserStore.getState().clearDailyCount();
 
-    expect(useUserStore.getState().levels).toEqual([]);
-    expect(useUserStore.getState().dailyCount).toBe(0);
-  });
-
-  it('reacts to levelsUpdated event by reloading levels for that user', () => {
-    const spy = vi.fn().mockResolvedValue(undefined);
-    useUserStore.setState({ reloadLevels: spy as any });
-
-    globalThis.dispatchEvent(new CustomEvent('levelsUpdated', { detail: { userId: 'u9' } }));
-
-    expect(spy).toHaveBeenCalledWith('u9');
-  });
-
-  it('reacts to dailyCountUpdated event by reloading daily count for that user', () => {
-    const spy = vi.fn().mockResolvedValue(undefined);
-    useUserStore.setState({ reloadDailyCount: spy as any });
-
-    globalThis.dispatchEvent(new CustomEvent('dailyCountUpdated', { detail: { userId: 'u9' } }));
-
-    expect(spy).toHaveBeenCalledWith('u9');
-  });
-
-  it('reacts to dailyCountUpdated event with direct count without reloading', () => {
-    const spy = vi.fn().mockResolvedValue(undefined);
-    useUserStore.setState({ dailyCount: 0, reloadDailyCount: spy as any });
-
-    globalThis.dispatchEvent(
-      new CustomEvent('dailyCountUpdated', { detail: { userId: 'u9', dailyCount: 12 } }),
-    );
-
-    expect(useUserStore.getState().dailyCount).toBe(12);
-    expect(spy).not.toHaveBeenCalled();
+    expect(useUserStore.getState()).toMatchObject({
+      levels: [],
+      levelsLoading: false,
+      levelsError: null,
+      dailyCount: 0,
+      dailyCountLoading: false,
+      dailyCountError: null,
+    });
   });
 });

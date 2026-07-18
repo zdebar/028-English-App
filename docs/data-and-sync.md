@@ -27,10 +27,9 @@ UI should generally read from local models and stores, not directly from Supabas
 | Full sync decision | `dataSync` | Uses localStorage full-sync timestamp and `config.sync.fullSyncInterval`. |
 
 `usePeriodicSync` avoids overlapping syncs by reusing an in-flight promise.
-On success it sets sync status flags, increments `useSyncStore.syncRevision`,
-dispatches dashboard refresh events through model sync side effects, and then
-syncs/removes audio archive records. On failure it sets the sync error flag and
-leaves local-first reads available.
+On success it sets sync status flags and then syncs/removes audio archive records.
+Committed model writes progressively refresh matching Dexie live queries. On
+failure it sets the sync error flag and leaves local-first reads available.
 
 ## Full Sync vs Incremental Sync
 
@@ -64,13 +63,9 @@ models include `UserBlock`, `UserScore`, and `UserItem`.
 | `vocabulary_search_term_${userId}` | vocabulary overview | Persist vocabulary search UI state. |
 | `simulate-data-${userId}` | `SimulateDataButton` | Persist simulation toggle for anonymous/test workflows. |
 
-## Refresh Events After Data Changes
+## Reactive Refresh After Data Changes
 
-After sync or progress changes, code dispatches:
-
-- `levelsUpdated` to reload dashboard/overview progress.
-- `dailyCountUpdated` to reload or directly set today's count.
-
-Dashboard stats use those browser events. Home practice readiness uses local
-model reads and reloads on mount, `userId` changes, successful syncs via
-`useSyncStore.syncRevision`, and schedule timers while Home remains mounted.
+Dashboard statistics and Home readiness observe their IndexedDB inputs through
+Dexie live queries. Each relevant committed write transaction can publish a new
+coherent snapshot; multi-table synchronization may therefore update the UI
+progressively. Schedule timers still handle readiness changes caused only by time.

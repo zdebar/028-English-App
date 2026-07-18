@@ -3,6 +3,10 @@ import { supabaseInstance } from '@/config/supabase.config';
 import SigninButton from '@/features/auth/SigninButton';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { reportError } from '@/features/logging/monitoring-handler';
+import {
+  clearAnonymousSessionFallback,
+  saveAnonymousSessionFallback,
+} from '@/features/auth/anonymous-session-fallback';
 import { TEXTS } from '@/locales/cs';
 
 type ConvertButtonProps = Readonly<{
@@ -22,22 +26,31 @@ export default function ConvertAnonymousUserButton({ className }: ConvertButtonP
 
     setIsSubmitting(true);
     try {
+      const { data: sessionData, error: sessionError } = await supabaseInstance.auth.getSession();
+      if (sessionError) {
+        throw sessionError;
+      }
+      if (!sessionData.session?.user.is_anonymous) {
+        throw new Error('Anonymous session is missing before Google identity linking.');
+      }
+
+      saveAnonymousSessionFallback(sessionData.session, 'link-google-identity');
+
       const { data, error } = await supabaseInstance.auth.linkIdentity({
         provider: 'google',
-        options: { redirectTo: AUTH_REDIRECT_TO },
+        options: { redirectTo: AUTH_REDIRECT_TO, skipBrowserRedirect: true },
       });
       if (error) {
-        throw new Error(error.message);
+        throw error;
       }
 
-      const redirectUrl = data?.url;
-      if (redirectUrl) {
-        globalThis.location.assign(redirectUrl);
-        return;
+      if (!data.url) {
+        throw new Error('Google identity linking did not return a redirect URL.');
       }
 
-      showToast(TEXTS.convertAnonymousSuccessToast, 'success');
+      globalThis.location.assign(data.url);
     } catch (error) {
+      clearAnonymousSessionFallback();
       reportError('Anonymous conversion failed', error);
       showToast(TEXTS.convertAnonymousErrorToast, 'error');
     } finally {

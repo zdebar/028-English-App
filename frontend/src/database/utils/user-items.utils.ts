@@ -1,37 +1,7 @@
-import type { UserItemPractice, UserItemLocal } from '@/types/user-item.types';
+import type { UserItemLocal } from '@/types/user-item.types';
 import config from '@/config/config';
 
 const NULL_DATE = config.database.nullReplacementDate;
-
-/**
- * Marks the first unseen grammar item in a practice deck.
- *
- * @param practiceItems Practice items to decorate without mutating the originals.
- * @param startedGrammarIdSet Grammar ids already started by the user.
- * @returns Copies of the input items with show_new_grammar_indicator true only for the first
- * item whose grammar_id is non-zero and not in startedGrammarIdSet.
- */
-export function addGrammarIndicatorFlag(
-  practiceItems: UserItemLocal[],
-  startedGrammarIdSet: Set<number>,
-): UserItemPractice[] {
-  const shownGrammarIds = new Set<number>();
-  return practiceItems.map((item) => {
-    let show = false;
-    if (
-      item.grammar_id !== 0 &&
-      !startedGrammarIdSet.has(item.grammar_id) &&
-      !shownGrammarIds.has(item.grammar_id)
-    ) {
-      show = true;
-      shownGrammarIds.add(item.grammar_id);
-    }
-    return {
-      ...item,
-      show_new_grammar_indicator: show,
-    };
-  });
-}
 
 /**
  * Calculates the next SRS review timestamp for a progress level.

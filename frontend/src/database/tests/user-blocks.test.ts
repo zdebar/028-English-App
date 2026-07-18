@@ -29,6 +29,7 @@ vi.mock('@/config/config', () => ({
     progress: {
       simulationProgress: 2,
       simulationCount: 10,
+      simulationMasteredGrammarBlockCount: 3,
     },
     practice: {
       readyPracticeScheduleGroupWindowMs: 1000,
@@ -448,6 +449,83 @@ describe('UserBlock', () => {
       progress: 1,
       updated_at: '2026-06-23T12:00:00.000Z',
     });
+  });
+
+  it('simulates three mastered grammar blocks and unlocks the fourth in curriculum order', async () => {
+    mocks.toArray.mockResolvedValueOnce([
+      {
+        user_id: 'u1',
+        block_id: 4,
+        lesson_id: 2,
+        sort_order: 1,
+        is_vocabulary: false,
+        is_practice_block: true,
+      },
+      {
+        user_id: 'u1',
+        block_id: 2,
+        lesson_id: 1,
+        sort_order: 2,
+        is_vocabulary: false,
+        is_practice_block: true,
+      },
+      {
+        user_id: 'u1',
+        block_id: 1,
+        lesson_id: 1,
+        sort_order: 1,
+        is_vocabulary: false,
+        is_practice_block: true,
+      },
+      {
+        user_id: 'u1',
+        block_id: 3,
+        lesson_id: 1,
+        sort_order: 3,
+        is_vocabulary: false,
+        is_practice_block: true,
+      },
+      {
+        user_id: 'u1',
+        block_id: 99,
+        lesson_id: 1,
+        sort_order: 0,
+        is_vocabulary: true,
+        is_practice_block: true,
+      },
+    ]);
+
+    await expect(
+      UserBlock.simulateGrammarProgress('u1', '2026-07-17T12:00:00.000Z'),
+    ).resolves.toBe(4);
+
+    expect(mocks.update.mock.calls).toEqual([
+      [['u1', 1], { started_at: '2026-07-17T12:00:00.000Z', updated_at: '2026-07-17T12:00:00.000Z' }],
+      [['u1', 1], { mastered_at: '2026-07-17T12:00:00.000Z', progress: 1, updated_at: '2026-07-17T12:00:00.000Z' }],
+      [['u1', 2], { started_at: '2026-07-17T12:00:00.000Z', updated_at: '2026-07-17T12:00:00.000Z' }],
+      [['u1', 2], { mastered_at: '2026-07-17T12:00:00.000Z', progress: 1, updated_at: '2026-07-17T12:00:00.000Z' }],
+      [['u1', 3], { started_at: '2026-07-17T12:00:00.000Z', updated_at: '2026-07-17T12:00:00.000Z' }],
+      [['u1', 3], { mastered_at: '2026-07-17T12:00:00.000Z', progress: 1, updated_at: '2026-07-17T12:00:00.000Z' }],
+      [['u1', 4], { started_at: '2026-07-17T12:00:00.000Z', updated_at: '2026-07-17T12:00:00.000Z' }],
+    ]);
+  });
+
+  it('rejects grammar simulation when four eligible blocks are unavailable', async () => {
+    mocks.toArray.mockResolvedValueOnce([
+      {
+        user_id: 'u1',
+        block_id: 1,
+        lesson_id: 1,
+        sort_order: 1,
+        is_vocabulary: false,
+        is_practice_block: true,
+      },
+    ]);
+
+    await expect(
+      UserBlock.simulateGrammarProgress('u1', '2026-07-17T12:00:00.000Z'),
+    ).rejects.toThrow('requires at least 4 practice grammar blocks');
+    expect(mocks.update).not.toHaveBeenCalled();
   });
 
   it('resetByGrammarId resets matching user blocks and returns reset count', async () => {

@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   history_enabled BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ
 );
 
@@ -40,9 +41,11 @@ CREATE TABLE IF NOT EXISTS lessons (
   name TEXT NOT NULL UNIQUE,
   note TEXT,
   level_id INTEGER NOT NULL REFERENCES levels(id) ON DELETE RESTRICT,
-  sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 1),
+  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ
+  deleted_at TIMESTAMPTZ,
+  CONSTRAINT lessons_level_sort_order_key
+    UNIQUE (level_id, sort_order) DEFERRABLE INITIALLY DEFERRED
 );
 
 CREATE TABLE IF NOT EXISTS blocks (
@@ -53,9 +56,11 @@ CREATE TABLE IF NOT EXISTS blocks (
   show_in_topics BOOLEAN NOT NULL DEFAULT TRUE,
   is_practice_block BOOLEAN NOT NULL DEFAULT TRUE,
   grammar_id INTEGER REFERENCES grammar(id) ON DELETE RESTRICT,
-  sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 1),
+  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ
+  deleted_at TIMESTAMPTZ,
+  CONSTRAINT blocks_lesson_sort_order_key
+    UNIQUE (lesson_id, sort_order) DEFERRABLE INITIALLY DEFERRED
 );
 
 CREATE TABLE IF NOT EXISTS user_blocks (
@@ -85,10 +90,12 @@ CREATE TABLE IF NOT EXISTS items (
   pronunciation TEXT,
   audio TEXT,
   note_id INTEGER REFERENCES notes(id) ON DELETE SET NULL,
-  sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 0), 
+  sort_order INTEGER NOT NULL CHECK (sort_order >= 0),
   block_id INTEGER NOT NULL REFERENCES blocks(id) ON DELETE RESTRICT,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ
+  deleted_at TIMESTAMPTZ,
+  CONSTRAINT items_block_sort_order_key
+    UNIQUE (block_id, sort_order) DEFERRABLE INITIALLY DEFERRED
 );
 
 CREATE TABLE IF NOT EXISTS user_items (
@@ -107,6 +114,7 @@ CREATE TABLE IF NOT EXISTS user_items_history (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   progress INTEGER NOT NULL CHECK (progress >= 0),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   PRIMARY KEY (user_id, item_id, created_at)
 );
 

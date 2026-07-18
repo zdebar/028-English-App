@@ -43,11 +43,9 @@ vi.mock('@/features/synchronization/use-sync-store', () => ({
     }),
 }));
 
-vi.mock('@/database/models/user-items', () => ({
-  default: {
-    simulateData: (...args: unknown[]) =>
-      (mocks.simulateData as (...args: unknown[]) => unknown)(...args),
-  },
+vi.mock('@/features/synchronization/simulate-data-service', () => ({
+  simulateUserProgress: (...args: unknown[]) =>
+    (mocks.simulateData as (...args: unknown[]) => unknown)(...args),
 }));
 
 vi.mock('@/features/toast/use-toast-store', () => ({
@@ -80,7 +78,7 @@ describe('SimulateDataButton', () => {
     mocks.authLoading = false;
     mocks.isSynchronized = true;
     mocks.isSynchronizing = false;
-    mocks.simulateData.mockResolvedValue(200);
+    mocks.simulateData.mockResolvedValue(64);
   });
 
   it('calls simulateData and stores simulated state on success', async () => {

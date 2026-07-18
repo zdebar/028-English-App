@@ -7,7 +7,7 @@ import type { GrammarDetail } from '@/features/grammar/GrammarDetailCard';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { TEXTS } from '@/locales/cs';
 import type { UserBlockType } from '@/types/generic.types';
-import type { UserItemPractice } from '@/types/user-item.types';
+import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
@@ -25,11 +25,11 @@ function toError(error: unknown): Error {
 
 export function useNewGrammarPracticeDeck(userId: string | null) {
   const [block, setBlock] = useState<UserBlockType | null>(null);
-  const [items, setItems] = useState<UserItemPractice[]>([]);
+  const [items, setItems] = useState<UserItemLocal[]>([]);
   const [grammar, setGrammar] = useState<GrammarDetail | null>(null);
   const [round, setRound] = useState<NewGrammarRound>(0);
-  const [currentQueue, setCurrentQueue] = useState<UserItemPractice[]>([]);
-  const [nextWaveQueue, setNextWaveQueue] = useState<UserItemPractice[]>([]);
+  const [currentQueue, setCurrentQueue] = useState<UserItemLocal[]>([]);
+  const [nextWaveQueue, setNextWaveQueue] = useState<UserItemLocal[]>([]);
   const [isComplete, setIsComplete] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [loading, setLoading] = useState(userId != null);
@@ -59,12 +59,7 @@ export function useNewGrammarPracticeDeck(userId: string | null) {
           return;
         }
 
-        const blockItems = (await UserItem.getByBlockId(userId, nextBlock.block_id)).map(
-          (item): UserItemPractice => ({
-            ...item,
-            show_new_grammar_indicator: false,
-          }),
-        );
+        const blockItems = await UserItem.getByBlockId(userId, nextBlock.block_id);
         const grammarData =
           nextBlock.grammar_id == null ? null : await Grammar.getById(nextBlock.grammar_id);
         if (!isMounted) return;
@@ -131,9 +126,9 @@ export function useNewGrammarPracticeDeck(userId: string | null) {
 
   const setNextQueueState = useCallback(
     async (
-      remainingCurrentQueue: UserItemPractice[],
-      remainingNextWaveQueue: UserItemPractice[],
-      nextRoundItems: UserItemPractice[],
+      remainingCurrentQueue: UserItemLocal[],
+      remainingNextWaveQueue: UserItemLocal[],
+      nextRoundItems: UserItemLocal[],
     ) => {
       if (remainingCurrentQueue.length > 0) {
         setCurrentQueue(remainingCurrentQueue);
@@ -187,7 +182,7 @@ export function useNewGrammarPracticeDeck(userId: string | null) {
 
     try {
       const dateTime = new Date().toISOString();
-      const skippedItem: UserItemPractice = {
+      const skippedItem: UserItemLocal = {
         ...currentItem,
         progress: Math.max(currentItem.progress + config.progress.skipProgress, 0),
         progress_history: [
@@ -244,7 +239,6 @@ export function useNewGrammarPracticeDeck(userId: string | null) {
     progressLabel: `${TEXTS.newGrammarRound} ${round + 1}/2`,
     isCzToEn,
     revealed,
-    showNewGrammarIndicator: false,
     czech,
     english,
     pronunciation: revealed ? currentItem?.pronunciation || NBSP : NBSP,

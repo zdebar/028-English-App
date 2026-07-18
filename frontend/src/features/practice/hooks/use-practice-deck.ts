@@ -1,13 +1,12 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { alternateDirection } from '@/features/practice/practice.utils';
-import type { ReviewPracticeMode, UserItemPractice } from '@/types/user-item.types';
+import type { ReviewPracticeMode, UserItemLocal } from '@/types/user-item.types';
 import { useFetch } from '@/hooks/use-fetch';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
 import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
-import { triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
 import config from '@/config/config';
 import UserBlock from '@/database/models/user-blocks';
 
@@ -18,7 +17,7 @@ import UserBlock from '@/database/models/user-blocks';
  */
 export function usePracticeDeck(userId: string | null, mode: ReviewPracticeMode = 'vocabulary') {
   // Array fetching logic
-  const [array, setArray] = useState<UserItemPractice[]>([]);
+  const [array, setArray] = useState<UserItemLocal[]>([]);
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
 
@@ -33,7 +32,7 @@ export function usePracticeDeck(userId: string | null, mode: ReviewPracticeMode 
     loading,
     error,
     reload,
-  } = useFetch<UserItemPractice[]>(fetchPracticeDeck);
+  } = useFetch<UserItemLocal[]>(fetchPracticeDeck);
 
   const activeArray = array.length > 0 ? array : (fetchedArray ?? []);
   const currentItem = activeArray[index] ?? null;
@@ -62,10 +61,10 @@ export function usePracticeDeck(userId: string | null, mode: ReviewPracticeMode 
   }, [fetchedArray]);
 
   // Ref to track user progress changes before saving
-  const userProgressRef = useRef<UserItemPractice[]>([]);
+  const userProgressRef = useRef<UserItemLocal[]>([]);
 
   const persistProgressToLocalStorage = useCallback(
-    (userProgress: UserItemPractice[]) => {
+    (userProgress: UserItemLocal[]) => {
       if (userProgress.length === 0 || !userId) {
         return;
       }
@@ -79,7 +78,7 @@ export function usePracticeDeck(userId: string | null, mode: ReviewPracticeMode 
   );
 
   const saveBufferedProgress = useCallback(
-    async (userProgress: UserItemPractice[], source: string, shouldReload: boolean = false) => {
+    async (userProgress: UserItemLocal[], source: string, shouldReload: boolean = false) => {
       if (userProgress.length === 0 || !userId) {
         return;
       }
@@ -108,7 +107,6 @@ export function usePracticeDeck(userId: string | null, mode: ReviewPracticeMode 
       (async () => {
         if (userId) {
           await saveBufferedProgress([...userProgressRef.current], 'on unmount');
-          triggerLevelsUpdatedEvent(userId);
         }
       })();
     };
@@ -175,8 +173,6 @@ export function usePracticeDeck(userId: string | null, mode: ReviewPracticeMode 
     isCzToEn,
     revealed,
     setRevealed,
-    showNewGrammarIndicator: currentItem?.show_new_grammar_indicator ?? false,
-
     // Display values
     czech,
     english,

@@ -5,13 +5,13 @@ import Header from '@/components/Layout/Header';
 import ProtectedLayout from '@/components/utils/protected-laout';
 import { usePeriodicSync } from '@/features/synchronization/use-periodic-sync';
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import IdentityLinkConflictModal from '@/features/auth/IdentityLinkConflictModal';
 import { GoogleAnalytics } from '@/features/analytics/GoogleAnalytics';
 import { reportError } from '@/features/logging/monitoring-handler';
 import OverlayMask from '@/features/overlay/OverlayMask';
 import { useThemeLoader } from '@/features/theme/use-theme-loader';
 import ToastContainer from '@/features/toast/ToastContainer';
 import { useToastStore } from '@/features/toast/use-toast-store';
-import { useDailyStatsReset } from '@/features/user-stats/use-daily-stats-reset';
 import { useUserStoreSync } from '@/features/user-stats/use-user-store-sync';
 import { TEXTS } from '@/locales/cs';
 import Topics from '@/pages/Topics';
@@ -52,7 +52,6 @@ export default function App() {
   useUserStoreSync(userId);
   useThemeLoader(userId, authLoading);
   usePeriodicSync(userId);
-  useDailyStatsReset(userId);
 
   return (
     <>
@@ -60,6 +59,7 @@ export default function App() {
       <div className="max-w-container relative mx-auto flex min-h-screen flex-col justify-start">
         <ToastContainer />
         <OverlayMask />
+        <IdentityLinkConflictModal />
         <Header />
         <main className="max-w-card relative mx-auto flex w-full grow flex-col items-center gap-4">
           <Routes>

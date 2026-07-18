@@ -65,10 +65,10 @@ When a practice route unmounts and the user returns Home:
 - Grammar readiness is recalculated by `HomePracticeButtons`.
 - New grammar availability is recalculated after `unlockNextGrammarBlock`.
 
-While Home stays mounted, readiness also reloads after successful sync through
-`useSyncStore.syncRevision` and future schedule timers. Dashboard stars and level
-aggregates are refreshed through `dailyCountUpdated` and `levelsUpdated`; those
-events are documented in [state-and-events.md](state-and-events.md).
+While Home stays mounted, readiness follows relevant committed IndexedDB changes
+through a Dexie live query and future schedule timers. Dashboard stars and level
+aggregates use active-user live-query snapshots documented in
+[state-and-events.md](state-and-events.md).
 
 Practice audio uses the audio manager and per-user volume state. Grammar and note
 detail buttons are local UI over shared IndexedDB content. Unsaved review

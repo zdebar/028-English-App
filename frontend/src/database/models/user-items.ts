@@ -3,21 +3,16 @@ import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import type {
-  UserItemPractice,
   UserItemLocal,
   ProgressHistoryEntry,
   ReviewPracticeMode,
+  CurriculumSortPath,
 } from '@/types/user-item.types';
 import { TableName } from '@/types/table.types';
 import Dexie, { Entity } from 'dexie';
 import { getSyncTimestamps, splitDeleted } from '../utils/sync-generic.utils';
 
-import {
-  addGrammarIndicatorFlag,
-  getNextAt,
-  resetUserItem,
-} from '@/database/utils/user-items.utils';
-import { triggerLevelsUpdatedEvent } from '@/utils/dashboard.utils';
+import { getNextAt, resetUserItem } from '@/database/utils/user-items.utils';
 import { SupabaseError } from '@/types/error.types';
 import type { ReadyPracticeState } from '@/types/generic.types';
 import Metadata from './metadata';
@@ -112,6 +107,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   is_vocabulary!: 0 | 1; // boolean represented as 0 or 1
   is_practice_item!: 0 | 1; // boolean represented as 0 or 1
   sort_order!: number;
+  curriculum_sort_path!: CurriculumSortPath;
   note_id!: number;
   block_id!: number;
   grammar_id!: number;
@@ -130,61 +126,47 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param userId User id whose practice items should be selected.
    * @param deckSize Maximum deck size; defaults to config.lesson.deckSize.
    * @param mode Review mode to select vocabulary items or grammar items. Defaults to vocabulary.
-   * @returns Practice items ordered by readiness, decorated with the new-grammar indicator.
+   * @returns Practice items ordered by readiness and curriculum position.
    */
   static async getPracticeDeck(
     userId: string,
     deckSize: number = config.lesson.deckSize,
     mode: ReviewPracticeMode = 'vocabulary',
-  ): Promise<UserItemPractice[]> {
-    // Step 1: Fetch already started grammar list
-    const startedGrammarIdSet = new Set(await this.getStartedGrammarIds(userId));
+  ): Promise<UserItemLocal[]> {
+    if (deckSize <= 0) return [];
+
+    const now = new Date().toISOString();
     const masteredGrammarBlockIdSet =
       mode === 'grammar' ? new Set(await this.getMasteredGrammarBlockIds(userId)) : null;
 
-    // Step 2: Fetch items with odd progress
-    let deck = await this.getPracticeItemsByParity(
+    const oddItems = await this.getDuePracticeItems(
       userId,
       true,
       deckSize,
+      now,
+      mode,
+      masteredGrammarBlockIdSet,
+    );
+    if (oddItems.length === deckSize) return oddItems;
+
+    let alternativeDeck = await this.getDuePracticeItems(
+      userId,
       false,
+      deckSize,
+      now,
       mode,
       masteredGrammarBlockIdSet,
     );
 
-    // Step 3: If not enough items, fetch even progress items instead
-    if (deck.length < deckSize) {
-      let evenItems: UserItemLocal[] = [];
-      evenItems = await this.getPracticeItemsByParity(
+    if (alternativeDeck.length < deckSize && mode === 'vocabulary') {
+      const newItems = await this.getNewVocabularyPracticeItems(
         userId,
-        false,
-        deckSize,
-        false,
-        mode,
-        masteredGrammarBlockIdSet,
+        deckSize - alternativeDeck.length,
       );
-
-      const remainingLimit = deckSize - evenItems.length;
-      if (remainingLimit > 0 && mode === 'vocabulary') {
-        const remainingItems = await this.getPracticeItemsByParity(
-          userId,
-          false,
-          remainingLimit,
-          true,
-          mode,
-          masteredGrammarBlockIdSet,
-        );
-        evenItems = [...evenItems, ...remainingItems];
-      }
-
-      if (evenItems.length >= deckSize) {
-        deck = [...evenItems];
-      } else {
-        deck = [...deck, ...evenItems];
-      }
+      alternativeDeck = [...alternativeDeck, ...newItems];
     }
 
-    return addGrammarIndicatorFlag(deck, startedGrammarIdSet);
+    return alternativeDeck.length > 0 ? alternativeDeck : oddItems;
   }
 
   /**
@@ -195,7 +177,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Defaults to now.
    */
   static async savePracticeDeck(
-    items: UserItemPractice[],
+    items: UserItemLocal[],
     dateTime: string = new Date(Date.now()).toISOString(),
   ): Promise<void> {
     if (!items || items.length === 0) return;
@@ -290,7 +272,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       await db.user_items.bulkPut(updatedItems);
     }
 
-    triggerLevelsUpdatedEvent(userId);
     return updatedItems;
   }
 
@@ -454,7 +435,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       throw new Error(`No user items found for item ID ${itemId}.`);
     }
 
-    triggerLevelsUpdatedEvent(userId);
     return itemId;
   }
 
@@ -473,7 +453,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         resetUserItem(item);
       });
 
-    triggerLevelsUpdatedEvent(userId);
     return count;
   }
 
@@ -492,7 +471,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         resetUserItem(item);
       });
 
-    triggerLevelsUpdatedEvent(userId);
     return count;
   }
 
@@ -511,14 +489,16 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Applies simulated progress to the first configured range of user items.
    *
    * @param userId User id whose local rows should be modified.
+   * @param dateTime ISO timestamp used for the simulated save. Defaults to now.
    * @returns Number of modified rows.
    */
-  static async simulateData(userId: string): Promise<number> {
-    const dateTime = new Date().toISOString();
-
+  static async simulateData(
+    userId: string,
+    dateTime: string = new Date(Date.now()).toISOString(),
+  ): Promise<number> {
     const count = await db.user_items
       .where('[user_id+item_id]')
-      .between([userId, 1], [userId, SIM_COUNT])
+      .between([userId, 1], [userId, SIM_COUNT], true, true)
       .modify((item) => {
         const updated = this.formatSavedItem(item, dateTime, SIM_PROGRESS);
         Object.assign(item, updated);
@@ -623,72 +603,54 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return updatedUserItems.map(convertAPIToLocal);
   }
 
-  /**
-   * Reads practice items by progress parity and readiness.
-   *
-   * @param userId User id whose practice items should be selected.
-   * @param isOdd true for odd progress values, false for even progress values.
-   * @param limit Maximum number of rows to return.
-   * @param isNew When true, selects never-scheduled items with next_at equal to the null date.
-   * Otherwise selects due items with next_at before now.
-   * @param mode Review mode to select vocabulary items or grammar items. Defaults to vocabulary.
-   * @returns Matching unmastered practice items.
-   */
-  private static async getPracticeItemsByParity(
+  /** Reads due, unmastered practice items for one progress parity. */
+  private static async getDuePracticeItems(
     userId: string,
     isOdd: boolean,
     limit: number,
-    isNew: boolean = false,
-    mode: ReviewPracticeMode = 'vocabulary',
+    now: string,
+    mode: ReviewPracticeMode,
     masteredGrammarBlockIdSet: Set<number> | null = null,
   ): Promise<UserItemLocal[]> {
     const isVocabulary = mode === 'vocabulary' ? 1 : 0;
     const matchesItem = (item: UserItemLocal) =>
       item.mastered_at === NULL_DATE &&
+      item.next_at !== NULL_DATE &&
+      item.next_at < now &&
       (item.progress % 2 === 1) === isOdd &&
       (mode !== 'grammar' || masteredGrammarBlockIdSet?.has(item.block_id) === true);
-    const index = db.user_items.where(
-      '[user_id+is_practice_item+is_vocabulary+next_at+mastered_at+sort_order]',
-    );
 
-    if (mode === 'grammar') {
-      const now = new Date().toISOString();
-      const [dueItems, unscheduledItems] = await Promise.all([
-        index
-          .between(
-            [userId, 1, 0, Dexie.minKey, NULL_DATE, Dexie.minKey],
-            [userId, 1, 0, now, NULL_DATE, Dexie.maxKey],
-            true,
-            true,
-          )
-          .filter(matchesItem)
-          .toArray(),
-        index
-          .between(
-            [userId, 1, 0, NULL_DATE, NULL_DATE, Dexie.minKey],
-            [userId, 1, 0, NULL_DATE, NULL_DATE, Dexie.maxKey],
-            true,
-            true,
-          )
-          .filter(matchesItem)
-          .toArray(),
-      ]);
-
-      return [...dueItems, ...unscheduledItems]
-        .sort((left, right) => left.sort_order - right.sort_order)
-        .slice(0, limit);
-    }
-
-    const minNextAt = isNew ? NULL_DATE : Dexie.minKey;
-    const maxNextAt = isNew ? NULL_DATE : new Date().toISOString();
-    return index
+    return db.user_items
+      .where(
+        '[user_id+is_practice_item+is_vocabulary+next_at+mastered_at+curriculum_sort_path]',
+      )
       .between(
-        [userId, 1, isVocabulary, minNextAt, NULL_DATE, Dexie.minKey],
-        [userId, 1, isVocabulary, maxNextAt, NULL_DATE, Dexie.maxKey],
+        [userId, 1, isVocabulary, Dexie.minKey, NULL_DATE, Dexie.minKey],
+        [userId, 1, isVocabulary, now, NULL_DATE, Dexie.maxKey],
         true,
         false,
       )
       .filter(matchesItem)
+      .limit(limit)
+      .toArray();
+  }
+
+  /** Reads never-scheduled vocabulary items in curriculum order. */
+  private static async getNewVocabularyPracticeItems(
+    userId: string,
+    limit: number,
+  ): Promise<UserItemLocal[]> {
+    return db.user_items
+      .where(
+        '[user_id+is_practice_item+is_vocabulary+next_at+mastered_at+curriculum_sort_path]',
+      )
+      .between(
+        [userId, 1, 1, NULL_DATE, NULL_DATE, Dexie.minKey],
+        [userId, 1, 1, NULL_DATE, NULL_DATE, Dexie.maxKey],
+        true,
+        true,
+      )
+      .filter((item) => item.mastered_at === NULL_DATE && item.next_at === NULL_DATE)
       .limit(limit)
       .toArray();
   }
@@ -702,7 +664,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns Item copy with next_at recalculated and mastered_at set when progress reaches the final SRS interval.
    */
   private static formatSavedItem(
-    item: UserItemPractice | UserItemLocal,
+    item: UserItemLocal,
     dateTime: string,
     progressAddition: number = 0,
   ): UserItemLocal {

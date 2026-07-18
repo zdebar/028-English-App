@@ -2,8 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   getSession: vi.fn(),
+  initialize: vi.fn(),
   getUser: vi.fn(),
   refreshSession: vi.fn(),
+  setSession: vi.fn(),
   signOut: vi.fn(),
   onAuthStateChange: vi.fn(),
   rpc: vi.fn(),
@@ -12,6 +14,7 @@ const mocks = vi.hoisted(() => ({
   setMonitoringUser: vi.fn(),
   reportError: vi.fn(),
   reportInfo: vi.fn(),
+  showToast: vi.fn(),
   authCallback: null as ((event: string, session: any) => void) | null,
 }));
 
@@ -19,8 +22,10 @@ vi.mock('@/config/supabase.config', () => ({
   supabaseInstance: {
     auth: {
       getSession: (...args: unknown[]) => mocks.getSession(...args),
+      initialize: (...args: unknown[]) => mocks.initialize(...args),
       getUser: (...args: unknown[]) => mocks.getUser(...args),
       refreshSession: (...args: unknown[]) => mocks.refreshSession(...args),
+      setSession: (...args: unknown[]) => mocks.setSession(...args),
       signOut: (...args: unknown[]) => mocks.signOut(...args),
       onAuthStateChange: (...args: unknown[]) => mocks.onAuthStateChange(...args),
     },
@@ -38,10 +43,17 @@ vi.mock('@/features/logging/monitoring-handler', () => ({
   setMonitoringUser: (...args: unknown[]) => mocks.setMonitoringUser(...args),
 }));
 
+vi.mock('@/features/toast/use-toast-store', () => ({
+  useToastStore: {
+    getState: () => ({ showToast: mocks.showToast }),
+  },
+}));
+
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import { saveAnonymousSessionFallback } from '@/features/auth/anonymous-session-fallback';
 
 async function flushMicrotasks(): Promise<void> {
-  for (let i = 0; i < 5; i += 1) {
+  for (let i = 0; i < 20; i += 1) {
     await Promise.resolve();
   }
 }
@@ -55,8 +67,12 @@ describe('useAuthStore', () => {
       userEmail: null,
       userFullName: null,
       isAnonymousUser: false,
+      hasIdentityLinkConflict: false,
       loading: true,
     });
+
+    sessionStorage.clear();
+    history.replaceState(null, '', '/');
 
     mocks.onAuthStateChange.mockImplementation(
       (callback: (event: string, session: any) => void) => {
@@ -71,6 +87,7 @@ describe('useAuthStore', () => {
       },
     );
     mocks.signOut.mockResolvedValue({ error: null });
+    mocks.initialize.mockResolvedValue({ error: null });
     mocks.getUser.mockResolvedValue({
       data: { user: { id: 'u1' } },
       error: null,
@@ -105,6 +122,202 @@ describe('useAuthStore', () => {
     expect(mocks.rpc).toHaveBeenCalledWith('restore_current_user_if_deleted');
 
     cleanup();
+  });
+
+  it('does not process a callback after its initialization subscription is cleaned up', async () => {
+    let resolveInitialization: ((value: { error: null }) => void) | undefined;
+    mocks.initialize.mockReturnValue(
+      new Promise<{ error: null }>((resolve) => {
+        resolveInitialization = resolve;
+      }),
+    );
+
+    const cleanup = useAuthStore.getState().initializeAuth();
+    cleanup();
+    resolveInitialization?.({ error: null });
+    await flushMicrotasks();
+
+    expect(mocks.getSession).not.toHaveBeenCalled();
+  });
+
+  it('keeps the anonymous session and exposes a collision after identity linking fails', async () => {
+    const anonymousSession = {
+      access_token: 'guest-access',
+      refresh_token: 'guest-refresh',
+      user: {
+        id: 'u1',
+        is_anonymous: true,
+        user_metadata: {},
+      },
+    };
+    history.replaceState(
+      null,
+      '',
+      '/?keep=yes&error=server_error&error_code=identity_already_exists&error_description=exists',
+    );
+    mocks.initialize.mockResolvedValue({
+      error: {
+        name: 'AuthImplicitGrantRedirectError',
+        message: 'Identity is already linked to another user',
+        details: { error: 'server_error', code: 'identity_already_exists' },
+      },
+    });
+    mocks.getSession.mockResolvedValue({ data: { session: anonymousSession }, error: null });
+
+    useAuthStore.getState().initializeAuth();
+    await flushMicrotasks();
+
+    const state = useAuthStore.getState();
+    expect(state.userId).toBe('u1');
+    expect(state.isAnonymousUser).toBe(true);
+    expect(state.hasIdentityLinkConflict).toBe(true);
+    expect(location.search).toBe('?keep=yes');
+    expect(mocks.signOut).not.toHaveBeenCalled();
+    expect(mocks.reportError).not.toHaveBeenCalled();
+    expect(mocks.showToast).not.toHaveBeenCalled();
+    expect(mocks.reportInfo).toHaveBeenCalledWith(
+      'Google identity already belongs to another user; guest retained.',
+    );
+  });
+
+  it('restores a backed-up guest before exposing an identity-link collision', async () => {
+    const anonymousSession = {
+      access_token: 'guest-access',
+      refresh_token: 'guest-refresh',
+      user: {
+        id: 'u1',
+        is_anonymous: true,
+        user_metadata: {},
+      },
+    };
+    saveAnonymousSessionFallback(anonymousSession as any, 'link-google-identity');
+    history.replaceState(
+      null,
+      '',
+      '/?error=server_error&error_code=identity_already_exists&error_description=exists',
+    );
+    mocks.initialize.mockResolvedValue({
+      error: {
+        name: 'AuthImplicitGrantRedirectError',
+        message: 'Identity is already linked to another user',
+        details: { error: 'server_error', code: 'identity_already_exists' },
+      },
+    });
+    mocks.setSession.mockResolvedValue({ data: { session: anonymousSession }, error: null });
+
+    useAuthStore.getState().initializeAuth();
+    await flushMicrotasks();
+
+    const state = useAuthStore.getState();
+    expect(state.userId).toBe('u1');
+    expect(state.isAnonymousUser).toBe(true);
+    expect(state.hasIdentityLinkConflict).toBe(true);
+    expect(mocks.setSession).toHaveBeenCalledWith({
+      access_token: 'guest-access',
+      refresh_token: 'guest-refresh',
+    });
+    expect(mocks.getSession).not.toHaveBeenCalled();
+    expect(sessionStorage).toHaveLength(0);
+    expect(mocks.reportError).not.toHaveBeenCalled();
+  });
+
+  it('clears the linking fallback after successful conversion of the same user', async () => {
+    const anonymousSession = {
+      access_token: 'guest-access',
+      refresh_token: 'guest-refresh',
+      user: { id: 'u1', is_anonymous: true, user_metadata: {} },
+    };
+    const permanentSession = {
+      access_token: 'permanent-access',
+      refresh_token: 'permanent-refresh',
+      user: { id: 'u1', is_anonymous: false, user_metadata: {} },
+    };
+    saveAnonymousSessionFallback(anonymousSession as any, 'link-google-identity');
+    mocks.getSession.mockResolvedValue({ data: { session: permanentSession }, error: null });
+
+    useAuthStore.getState().initializeAuth();
+    await flushMicrotasks();
+
+    const state = useAuthStore.getState();
+    expect(state.userId).toBe('u1');
+    expect(state.isAnonymousUser).toBe(false);
+    expect(state.hasIdentityLinkConflict).toBe(false);
+    expect(sessionStorage).toHaveLength(0);
+  });
+
+  it('does not open the collision modal when the backed-up guest cannot be restored', async () => {
+    const anonymousSession = {
+      access_token: 'guest-access',
+      refresh_token: 'guest-refresh',
+      user: { id: 'u1', is_anonymous: true, user_metadata: {} },
+    };
+    saveAnonymousSessionFallback(anonymousSession as any, 'link-google-identity');
+    mocks.initialize.mockResolvedValue({
+      error: {
+        name: 'AuthImplicitGrantRedirectError',
+        message: 'Identity is already linked to another user',
+        details: { error: 'server_error', code: 'identity_already_exists' },
+      },
+    });
+    mocks.setSession.mockResolvedValue({
+      data: { session: null },
+      error: { code: 'refresh_token_not_found', message: 'Expired fallback' },
+    });
+
+    useAuthStore.getState().initializeAuth();
+    await flushMicrotasks();
+
+    const state = useAuthStore.getState();
+    expect(state.userId).toBeNull();
+    expect(state.hasIdentityLinkConflict).toBe(false);
+    expect(sessionStorage).toHaveLength(0);
+    expect(mocks.reportError).toHaveBeenCalledWith(
+      'Google identity linking collision recovery failed',
+      expect.objectContaining({ details: expect.objectContaining({ code: 'identity_already_exists' }) }),
+    );
+    expect(mocks.reportError).toHaveBeenCalledWith(
+      'Anonymous session collision recovery failed',
+      expect.objectContaining({ code: 'refresh_token_not_found' }),
+    );
+    expect(mocks.showToast).toHaveBeenCalledWith(expect.any(String), 'error');
+  });
+
+  it('restores the anonymous session after normal Google sign-in redirect failure', async () => {
+    const anonymousSession = {
+      access_token: 'guest-access',
+      refresh_token: 'guest-refresh',
+      user: {
+        id: 'u1',
+        is_anonymous: true,
+        user_metadata: {},
+      },
+    };
+    saveAnonymousSessionFallback(anonymousSession as any, 'sign-in-existing-google-account');
+    history.replaceState(
+      null,
+      '',
+      '/?error=access_denied&error_code=oauth_error&error_description=cancelled',
+    );
+    const oauthError = { code: 'oauth_error', message: 'Google sign-in cancelled' };
+    mocks.initialize.mockResolvedValue({ error: oauthError });
+    mocks.setSession.mockResolvedValue({ data: { session: anonymousSession }, error: null });
+    mocks.getSession.mockResolvedValue({ data: { session: anonymousSession }, error: null });
+
+    useAuthStore.getState().initializeAuth();
+    await flushMicrotasks();
+
+    const state = useAuthStore.getState();
+    expect(state.userId).toBe('u1');
+    expect(state.isAnonymousUser).toBe(true);
+    expect(mocks.setSession).toHaveBeenCalledWith({
+      access_token: 'guest-access',
+      refresh_token: 'guest-refresh',
+    });
+    expect(mocks.showToast).toHaveBeenCalledWith(
+      expect.stringContaining('Zůstáváte přihlášeni jako host'),
+      'error',
+    );
+    expect(location.search).toBe('');
   });
 
   it('initializeAuth refreshes and clears a locally cached session rejected by Supabase Auth', async () => {
