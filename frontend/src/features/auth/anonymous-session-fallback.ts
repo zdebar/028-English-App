@@ -98,7 +98,7 @@ export async function restoreAnonymousSessionFallback(
   expectedIntent: AnonymousSessionFallbackIntent,
 ): Promise<Session> {
   const fallback = readAnonymousSessionFallback();
-  if (!fallback || fallback.intent !== expectedIntent) {
+  if (fallback?.intent !== expectedIntent) {
     clearAnonymousSessionFallback();
     throw new Error('No valid anonymous session fallback is available.');
   }
