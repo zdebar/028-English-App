@@ -18,15 +18,13 @@ export default function BlockOverviewCard({
   onContinue,
 }: BlockOverviewCardProps): JSX.Element {
   return (
-    <div className="card-height card-width flex w-full flex-col items-center gap-1">
+    <div className="card-width flex w-full flex-col items-center gap-1">
       <OverviewCard buttonTitle={block.name} onClose={onClose} className="relative h-full grow">
-        {block.note ? (
+        {block.note && (
           <div
             className="grammar p-4"
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(block.note) }}
           />
-        ) : (
-          <p className="m-auto p-4">{TEXTS.noNotesToDisplay}</p>
         )}
       </OverviewCard>
       <StyledButton className="card-width h-button w-full grow-0" onClick={onContinue}>
