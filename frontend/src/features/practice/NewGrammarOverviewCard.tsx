@@ -30,11 +30,11 @@ export default function NewGrammarOverviewCard({
   return (
     <Card className="flex w-full flex-col gap-1">
       <CardHeader onClose={onClose}>
-        <h1 className="px-4 text-left text-lg">{block.name}</h1>
+        <h1 className="px-4 text-left text-lg font-bold">{block.name}</h1>
       </CardHeader>
       {block.note && <Note note={block.note} />}
       <section>
-        <h2 className="h-button px-4 pt-4 text-left text-lg">{grammar.name}</h2>
+        <h2 className="h-button px-4 pt-4 text-left text-lg font-bold">{grammar.name}</h2>
         {grammar.note && <Note note={grammar.note} />}
       </section>
       <StyledButton className="card-width h-button w-full" onClick={onContinue}>
