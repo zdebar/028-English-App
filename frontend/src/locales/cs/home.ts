@@ -2,7 +2,6 @@ export const HOME_TEXTS = {
   // Home Page
   appTitle: 'Angličtina',
   appDescription: 'Bez stresu. Bez přemýšlení. Jen dril.',
-  appTestDescription: 'Aplikace v testovacím režimu',
   guide: 'Návod',
   startedTodayHint: 'Dnes započato',
   masteredTodayHint: 'Dnes naučeno',
@@ -17,8 +16,6 @@ export const HOME_TEXTS = {
   grammarPracticeButton: 'Gramatika',
 
   // User
-  userLabel: 'Uživatel',
-  userStatsLabel: 'Dnes',
   practiceOverviewTitle: 'Přehled procvičování',
   practiceOverviewOpen: 'Otevřít přehled procvičování',
   practiceOverviewMoreDays: '... Dalších 7 dní',
@@ -28,7 +25,6 @@ export const HOME_TEXTS = {
   // Synchronization status
   syncSuccessToast: 'Data byla úspěšně synchronizována.',
   syncErrorToast: 'Chyba při synchronizaci dat.',
-  syncLoadingText: 'Synchronizuji data ...',
   syncWarning: 'Chyba synchronizace.',
 
   // Demo sign-in
@@ -40,7 +36,6 @@ export const HOME_TEXTS = {
   convertAnonymousButton: 'Převést účet hosta na Google účet',
   convertAnonymousButtonTooltip: 'Propojí aktuální účet hosta s Google přihlášením.',
   convertAnonymousLoading: 'Připravuji propojení účtu ...',
-  convertAnonymousSuccessToast: 'Účet hosta byl úspěšně převeden.',
   convertAnonymousErrorToast: 'Převod účtu hosta se nepodařil.',
   identityLinkConflictTitle: 'Google účet už existuje',
   identityLinkConflictText:

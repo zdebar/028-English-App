@@ -1,25 +1,4 @@
-import config from '@/config/config';
 import type { LessonOverviewType, LevelOverviewType } from '@/types/generic.types';
-
-/**
- * Calculates how many items were already completed in the active lesson before today.
- *
- * @param countNotToday Started or mastered item count excluding today's items.
- * @returns A value from 0 up to lessonSize - 1.
- */
-export function getPreviousCount(countNotToday: number): number {
-  return countNotToday % config.lesson.lessonSize;
-}
-
-/**
- * Calculates the one-based lesson number reached before today's progress.
- *
- * @param countNotToday Started or mastered item count excluding today's items.
- * @returns The one-based lesson number containing that count.
- */
-export function getLessonStarted(countNotToday: number): number {
-  return Math.floor(countNotToday / config.lesson.lessonSize) + 1;
-}
 
 /**
  * Selects dashboard lessons that should remain visible for current progress.
