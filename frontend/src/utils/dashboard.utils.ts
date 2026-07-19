@@ -22,39 +22,6 @@ export function getLessonStarted(countNotToday: number): number {
 }
 
 /**
- * Splits today's progress across lesson-sized chunks.
- *
- * @param previousCount Items already present in the first affected lesson before today.
- * @param todayCount Items added today.
- * @returns Counts per lesson affected today, including a partial first or last lesson.
- * @throws Error when previousCount is greater than or equal to the configured lesson size.
- */
-export function getTodayStartedItems(previousCount: number, todayCount: number): number[] {
-  const lessonCounts: number[] = [];
-  const lessonSize = config.lesson.lessonSize;
-
-  if (previousCount >= lessonSize) {
-    throw new Error("'previousCount' must be less than the lesson size.");
-  }
-
-  const firstLesson = Math.min(todayCount, lessonSize - previousCount);
-  lessonCounts.push(firstLesson);
-  let remainingCount = todayCount - firstLesson;
-
-  const fullLessons = Math.floor(remainingCount / lessonSize);
-  for (let i = 0; i < fullLessons; i++) {
-    lessonCounts.push(lessonSize);
-  }
-  remainingCount -= fullLessons * lessonSize;
-
-  if (remainingCount > 0) {
-    lessonCounts.push(remainingCount);
-  }
-
-  return lessonCounts;
-}
-
-/**
  * Selects dashboard lessons that should remain visible for current progress.
  *
  * @param levelsOverview Level overview records; missing or non-array lesson lists are ignored.
