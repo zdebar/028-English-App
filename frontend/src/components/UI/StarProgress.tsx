@@ -187,8 +187,11 @@ export function StarRow({
 }: StarRowProps): JSX.Element {
   const safeStarsPerRow = Math.max(1, Math.floor(starsPerRow));
   const safeStarCount = Math.max(0, Math.floor(starCount));
-  const fullTierCount = Math.floor(safeStarCount / safeStarsPerRow);
-  const partialTierCount = safeStarCount % safeStarsPerRow;
+  const tierCounts = [
+    Math.min(safeStarCount, safeStarsPerRow),
+    Math.min(Math.max(safeStarCount - safeStarsPerRow, 0), safeStarsPerRow),
+    Math.max(safeStarCount - safeStarsPerRow * 2, 0),
+  ];
 
   if (safeStarCount === 0) {
     return (
@@ -198,33 +201,24 @@ export function StarRow({
 
   return (
     <div className="z-star-stack relative flex flex-wrap items-center gap-3 overflow-visible">
-      {Array.from({ length: fullTierCount }, (_, index) => {
+      {tierCounts.map((count, index) => {
+        if (count === 0) {
+          return null;
+        }
+
         const tier = getStarTier(index);
         const tierStyle = TIER_STYLES[tier];
 
         return (
           <CompactedStar
-            key={`completed-tier-${index}`}
+            key={`completed-tier-${tier}`}
             starClassName={tierStyle.fillClassName}
             badgeClassName={tierStyle.badgeClassName}
-            count={safeStarsPerRow}
+            count={count}
             size={size}
           />
         );
       })}
-      {partialTierCount > 0 &&
-        (() => {
-          const tierStyle = TIER_STYLES[getStarTier(fullTierCount)];
-
-          return (
-            <CompactedStar
-              starClassName={tierStyle.fillClassName}
-              badgeClassName={tierStyle.badgeClassName}
-              count={partialTierCount}
-              size={size}
-            />
-          );
-        })()}
     </div>
   );
 }
