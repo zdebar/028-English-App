@@ -148,14 +148,14 @@ describe('HomePracticeButtons', () => {
     );
   });
 
-  it('caps the displayed ready vocabulary badge at 99+', async () => {
+  it('hides the ready vocabulary badge above 99', async () => {
     mocks.getReadyVocabularyPracticeState.mockResolvedValue({ readyCount: 100, schedule: [] });
 
     render(<HomePracticeButtons userId="u1" />);
 
     await flushPracticeStateLoad();
 
-    expect(screen.getByText('99+')).toBeTruthy();
+    expect(screen.queryByText('99+')).toBeNull();
     expect(screen.queryByText('100')).toBeNull();
     expect((screen.getByText('Vocabulary').closest('button') as HTMLButtonElement).disabled).toBe(
       false,

@@ -69,13 +69,19 @@ function useReadyPracticeSchedule(
   }, [schedule, setReadyCount, setSchedule]);
 }
 
-function ReadyPracticeBadge({ count }: Readonly<{ count: number }>): JSX.Element | null {
-  if (count <= 0) {
+function ReadyPracticeBadge({
+  count,
+  hideOnOverflow = false,
+}: Readonly<{
+  count: number;
+  hideOnOverflow?: boolean;
+}>): JSX.Element | null {
+  if (count <= 0 || (hideOnOverflow && count > config.practice.readyPracticeBadgeCap)) {
     return null;
   }
 
   return (
-    <span className="bg-button-hover text-light absolute top-1 right-2 min-w-6 rounded-full px-1 text-xs">
+    <span className="bg-button-hover text-light absolute top-1 right-2 min-w-5 rounded-full px-2 text-xs">
       {getReadyPracticeBadgeLabel(count)}
     </span>
   );
@@ -89,7 +95,9 @@ export default function HomePracticeButtons({ userId }: HomePracticeButtonsProps
   >([]);
   const [hasNewGrammarBlock, setHasNewGrammarBlock] = useState(false);
   const [readyGrammarCount, setReadyGrammarCount] = useState(0);
-  const [readyGrammarSchedule, setReadyGrammarSchedule] = useState<ReadyPracticeScheduleEntry[]>([]);
+  const [readyGrammarSchedule, setReadyGrammarSchedule] = useState<ReadyPracticeScheduleEntry[]>(
+    [],
+  );
 
   useEffect(() => {
     let isActive = true;
@@ -177,7 +185,7 @@ export default function HomePracticeButtons({ userId }: HomePracticeButtonsProps
         onClick={() => navigate(ROUTES.practiceVocabulary)}
       >
         {TEXTS.vocabularyPracticeButton}
-        <ReadyPracticeBadge count={readyVocabularyCount} />
+        <ReadyPracticeBadge count={readyVocabularyCount} hideOnOverflow />
       </StyledButton>
       <StyledButton
         className="h-button px-4"
