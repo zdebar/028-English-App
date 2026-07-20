@@ -115,7 +115,7 @@
   }
 
   .star-badge {
-    @apply z-40 absolute -top-1 inline-flex min-h-4 min-w-4 items-center justify-center rounded-full border border-current px-1 leading-none font-semibold shadow-sm;
+    @apply z-40 absolute -top-1 inline-flex min-h-4 min-w-4 items-center justify-center rounded-full border border-current px-2 leading-none font-semibold shadow-sm;
     left: var(--space-star-badge-left);
     font-size: var(--size-star-badge-font);
   }
