@@ -15,7 +15,7 @@ function getVolumeIcon(volume: number) {
   switch (true) {
     case volume === 0:
       return <MuteIcon />;
-    case volume <= 0.5:
+    case volume < 1:
       return <HalfVolumeIcon />;
     default:
       return <VolumeIcon />;
