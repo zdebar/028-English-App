@@ -60,6 +60,7 @@ export default function Home(): JSX.Element {
             onClick={() => navigate(ROUTES.practiceOverview)}
             ariaLabel={TEXTS.practiceOverviewOpen}
             helpText={TEXTS.starsToday}
+            className="portrait:mt-8"
           />
           <HomePracticeButtons userId={userId} />
           {isSyncError && (
@@ -67,7 +68,7 @@ export default function Home(): JSX.Element {
               {TEXTS.syncWarning}
             </p>
           )}
-          <div className="relative mb-12">
+          <div className="relative mb-12 portrait:mt-8">
             <Dashboard />
             <div className="pos-home-dashboard-help">
               <HelpButton />
