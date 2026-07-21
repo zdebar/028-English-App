@@ -67,6 +67,8 @@ function ReadyPracticeBadge({ count }: Readonly<{ count: number }>): JSX.Element
 }
 
 export default function HomePracticeButtons({ userId }: HomePracticeButtonsProps): JSX.Element {
+  const badgeCap = config.practice.readyPracticeBadgeCap;
+
   const navigate = useNavigate();
   const [readyCount, setReadyCount] = useState(0);
   const [readySchedule, setReadySchedule] = useState<ReadyPracticeScheduleEntry[]>([]);
@@ -103,15 +105,13 @@ export default function HomePracticeButtons({ userId }: HomePracticeButtonsProps
   useReadyPracticeSchedule(readySchedule, setReadyCount, setReadySchedule);
 
   return (
-    <div className="my-4 flex flex-col gap-1">
-      <StyledButton
-        className="h-button relative px-4"
-        disabled={readyCount === 0}
-        onClick={() => navigate(ROUTES.practice)}
-      >
-        {TEXTS.practiceButton}
-        <ReadyPracticeBadge count={readyCount} />
-      </StyledButton>
-    </div>
+    <StyledButton
+      className="h-button relative my-4 px-4"
+      disabled={readyCount === 0}
+      onClick={() => navigate(ROUTES.practice)}
+    >
+      {TEXTS.practiceButton}
+      {readyCount < badgeCap && <ReadyPracticeBadge count={readyCount} />}
+    </StyledButton>
   );
 }
