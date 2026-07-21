@@ -39,12 +39,11 @@ starting point when a change crosses route, store, model, or sync boundaries.
 | Feature | User purpose | Main entrypoints | Data and state | Connection points |
 | --- | --- | --- | --- | --- |
 | Shared practice card | Display a prompt, answer, controls, audio, and detail buttons. | `PracticeSessionCard`, practice buttons | Hook-provided current item, audio manager state, grammar/note IDs | Used by review practice and new grammar where behavior overlaps. |
-| Vocabulary review | Practice ready started vocabulary plus new vocabulary fallback. | `/practice/vocabulary`, `Practice mode="vocabulary"`, `usePracticeDeck` | `UserItem.getPracticeDeck`, `UserScore`, localStorage fallback | Progress actions buffer item updates, increment daily count, save locally, and later sync remotely. |
 | Unified practice | Review vocabulary and started grammar, and introduce new items. | `/practice`, `Practice`, `usePracticeDeck` | `UserItem.getPracticeDeck` | Uses odd/even priority and stops at the first unstarted grammar-block trigger. |
 | New grammar | Learn the triggered grammar block in staged rounds. | `/practice/new-grammar`, `NewGrammarPractice`, `useNewGrammarPracticeDeck` | `UserBlock`, `UserItem`, `GrammarChunk` | Completion starts the items, masters the block, and returns to unified practice. |
 | Progress actions | Mark an item as hint/repeat/known/skip/mastered. | `HintButton`, `RepeatButton`, `KnownButton`, `MasterItemButton` | `UserItem` progress fields, `UserScore` daily count | Progress writes refresh matching live queries and are pushed by later sync. |
 | Audio in practice | Play item audio and respect per-user volume. | `PlayAudioButton`, `useAudioManager`, `useAudioStore` | `AudioRecord`, object URLs, localStorage volume | Audio metadata/records are synchronized separately by periodic sync. |
-| Grammar and note details | Show supporting detail cards from practice and overview flows. | `GrammarDetailCard`, `VocabularyDetailCard`, note/grammar viewer hooks | `Grammar`, `Notes`, linked IDs on items | Detail cards are feature-local UI over shared IndexedDB content. |
+| Grammar and note details | Show supporting detail cards from practice and overview flows. | `GrammarDetailCard`, `VocabularyDetailCard`, note/grammar viewer hooks | `GrammarChunk`, `Notes`, linked IDs on items | Detail cards are feature-local UI over shared IndexedDB content. |
 
 ## Overviews
 

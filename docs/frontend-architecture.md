@@ -29,7 +29,6 @@ Routes are configured in `frontend/src/config/routes.config.ts` and wired in
 | `/guide` | `Guide` | Public |
 | `/practice` | `Practice` | Protected |
 | `/practice/new-grammar` | `NewGrammarPractice` | Protected |
-| `/practice/vocabulary`, `/practice/grammar` | Redirect to `/practice` | Protected |
 | `/practice-overview` | `PracticeOverview` | Protected |
 | `/profile` | `Profile` | Protected |
 | `/levels` | `Levels` | Protected |

@@ -74,9 +74,7 @@ vi.mock('@/locales/cs', () => ({
     dailyGoal: 'Goal',
     syncWarning: 'Data may be stale.',
     signupHint: 'Signup hint',
-    vocabularyPracticeButton: 'Vocabulary',
-    newGrammarPracticeButton: 'New grammar',
-    grammarPracticeButton: 'Grammar',
+    practiceButton: 'Practice',
   },
 }));
 
