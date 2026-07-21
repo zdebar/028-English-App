@@ -23,7 +23,7 @@ import { usePracticeStars } from './hooks/use-practice-stars';
 
 export type PracticeSessionCardProps = Readonly<{
   noteId: number | null;
-  grammarId: number | null;
+  grammarChunkId: number | null;
   progressLabel: string | number;
   isCzToEn: boolean;
   revealed: boolean;
@@ -46,7 +46,7 @@ export type PracticeSessionCardProps = Readonly<{
 
 export default function PracticeSessionCard({
   noteId,
-  grammarId,
+  grammarChunkId,
   progressLabel,
   isCzToEn,
   revealed,
@@ -76,7 +76,7 @@ export default function PracticeSessionCard({
   const cardStyle = revealed ? 'color-audio-disabled' : 'color-button';
   const directionText = isCzToEn ? TEXTS.directionCzToEn : TEXTS.directionEnToCz;
   const showAudioControls = !audioDisabled;
-  const showGrammarButton = Boolean(grammarId && revealed);
+  const showGrammarButton = grammarChunkId != null && grammarChunkId > 0 && revealed;
   const showNoteButton = Boolean(noteId && revealed);
   const audioControlsDisabled =
     !showAudioControls || showDirectionChange || audioLoading || (isCzToEn && !revealed);
@@ -182,8 +182,8 @@ export default function PracticeSessionCard({
             title={TEXTS.grammar}
             ariaLabel={TEXTS.grammar}
             onClick={() => {
-              if (grammarId == null || grammarButtonDisabled) return;
-              openGrammar(grammarId);
+              if (grammarChunkId == null || grammarButtonDisabled) return;
+              openGrammar(grammarChunkId);
             }}
             disabled={grammarButtonDisabled}
           >

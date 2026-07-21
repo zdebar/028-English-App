@@ -114,7 +114,7 @@ describe('usePracticeDeck', () => {
     expect(result.current.czech).toBe('ahoj');
     expect(result.current.english).toBe('EN_HINT');
     expect(result.current.audioDisabled).toBe(true);
-    expect(result.current.grammarId).toBe(10);
+    expect(result.current.grammarChunkId).toBe(10);
     expect(resetHintMock).toHaveBeenCalled();
   });
 

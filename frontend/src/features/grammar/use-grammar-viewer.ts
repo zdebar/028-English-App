@@ -11,11 +11,11 @@ export function useGrammarViewer() {
   const showToast = useToastStore((state) => state.showToast);
 
   const openGrammar = useCallback(
-    async (grammarId: number | null | undefined) => {
-      if (typeof grammarId !== 'number') return;
+    async (grammarChunkId: number | null | undefined) => {
+      if (typeof grammarChunkId !== 'number') return;
 
       try {
-        const grammar = await GrammarChunk.getById(grammarId);
+        const grammar = await GrammarChunk.getById(grammarChunkId);
         if (!grammar) return;
 
         setGrammarData(grammar);

@@ -2,7 +2,6 @@ import { db } from '@/database/models/db';
 import type { GrammarChunkType, GrammarGroupType } from '@/types/generic.types';
 import { TableName } from '@/types/table.types';
 import Dexie from 'dexie';
-import GrammarChunk from './grammar-chunks';
 import SyncEntityModel from './sync-entity-model';
 import UserItem from './user-items';
 
@@ -25,21 +24,27 @@ export default class GrammarGroup extends SyncEntityModel implements GrammarGrou
     if (chunkIds.length === 0) return [];
 
     const startedChunks = await db.grammar_chunks.where('id').anyOf(chunkIds).toArray();
-    const groupIds = [
-      ...new Set(
-        startedChunks
-          .map((chunk) => chunk.grammar_group_id)
-          .filter((id): id is number => typeof id === 'number'),
-      ),
-    ];
-    if (groupIds.length === 0) return [];
+    const chunksByGroupId = new Map<number, GrammarChunkType[]>();
 
-    const groups = await db.grammar_groups.where('id').anyOf(groupIds).sortBy('sort_order');
-    return Promise.all(
-      groups.map(async (group) => ({
-        ...group,
-        chunks: await GrammarChunk.getByGroupId(group.id),
-      })),
-    );
+    for (const chunk of startedChunks) {
+      if (chunk.grammar_group_id == null) continue;
+      const groupChunks = chunksByGroupId.get(chunk.grammar_group_id) ?? [];
+      groupChunks.push(chunk);
+      chunksByGroupId.set(chunk.grammar_group_id, groupChunks);
+    }
+
+    if (chunksByGroupId.size === 0) return [];
+
+    const groups = await db.grammar_groups
+      .where('id')
+      .anyOf([...chunksByGroupId.keys()])
+      .sortBy('sort_order');
+
+    return groups.map((group) => ({
+      ...group,
+      chunks: (chunksByGroupId.get(group.id) ?? []).sort(
+        (left, right) => left.sort_order - right.sort_order,
+      ),
+    }));
   }
 }

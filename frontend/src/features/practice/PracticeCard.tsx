@@ -19,7 +19,7 @@ export default function PracticeCard() {
     currentItem,
     triggerBlockId,
     noteId,
-    grammarId,
+    grammarChunkId,
     progress,
     isCzToEn,
     revealed,
@@ -64,7 +64,7 @@ export default function PracticeCard() {
   return (
     <PracticeSessionCard
       noteId={noteId}
-      grammarId={grammarId}
+      grammarChunkId={grammarChunkId}
       progressLabel={progress}
       isCzToEn={isCzToEn}
       revealed={revealed}

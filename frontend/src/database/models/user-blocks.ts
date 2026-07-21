@@ -232,7 +232,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
    * Resets all blocks tied to a grammar id.
    *
    * @param userId Non-empty user id owning the blocks.
-   * @param grammarId Grammar id to match.
+   * @param grammarGroupId Grammar group id to match.
    * @param dateTime ISO timestamp written to updated_at. Defaults to now.
    * @returns Number of reset blocks, or 0 when no block matches.
    * @throws Error when userId is empty.

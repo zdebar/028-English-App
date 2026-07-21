@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => ({
     isComplete: false,
     currentItem: null as { item_id: number } | null,
     noteId: null,
-    grammarId: null,
+    grammarChunkId: null,
     progressLabel: 'Round 1/2',
     isCzToEn: true,
     revealed: false,

@@ -31,4 +31,5 @@ There is no vocabulary or previous-grammar unlock prerequisite.
 ## Grammar Details
 
 Practice cards resolve their detail button through `user_items.grammar_chunk_id` and display only
-that chunk. The grammar overview separately composes all ordered chunks assigned to a group.
+that chunk. The grammar overview lists started groups and composes only their started chunks in
+configured order; ungrouped chunks are omitted.

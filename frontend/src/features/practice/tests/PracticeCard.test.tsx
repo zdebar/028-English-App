@@ -44,7 +44,7 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     currentItem: null as UserItemLocal | null,
     triggerBlockId: null as number | null,
     noteId: null,
-    grammarId: 10,
+    grammarChunkId: 10,
     progress: 2,
     isCzToEn: true,
     revealed: false,
@@ -197,7 +197,7 @@ vi.mock('@/features/practice/hooks/use-practice-deck', () => ({
     if (!userId) {
       return {
         currentItem: null,
-        grammarId: null,
+        grammarChunkId: null,
         progress: 0,
         isCzToEn: true,
         revealed: false,
@@ -359,7 +359,7 @@ describe('PracticeCard', () => {
       progress: 2,
     });
     mocks.practiceDeck.noteId = null;
-    mocks.practiceDeck.grammarId = 10;
+    mocks.practiceDeck.grammarChunkId = 10;
     mocks.practiceDeck.progress = 2;
     mocks.practiceDeck.isCzToEn = true;
     mocks.practiceDeck.revealed = false;
@@ -574,7 +574,7 @@ describe('PracticeCard', () => {
 
   it('opens grammar from the right secondary control group after reveal', () => {
     mocks.practiceDeck.showDirectionChange = false;
-    mocks.practiceDeck.grammarId = 42;
+    mocks.practiceDeck.grammarChunkId = 42;
     mocks.practiceDeck.revealed = true;
 
     const { container } = render(<PracticeCard />);
@@ -591,7 +591,7 @@ describe('PracticeCard', () => {
   });
 
   it('keeps grammar disabled before reveal even when grammar data exists', () => {
-    mocks.practiceDeck.grammarId = 42;
+    mocks.practiceDeck.grammarChunkId = 42;
     mocks.practiceDeck.revealed = false;
 
     const { container } = render(<PracticeCard />);
@@ -609,7 +609,7 @@ describe('PracticeCard', () => {
 
   it('does not open grammar automatically while direction change is shown', () => {
     mocks.practiceDeck.showDirectionChange = true;
-    mocks.practiceDeck.grammarId = 42;
+    mocks.practiceDeck.grammarChunkId = 42;
 
     render(<PracticeCard />);
 
@@ -665,7 +665,7 @@ describe('PracticeCard', () => {
     render(
       <PracticeSessionCard
         noteId={null}
-        grammarId={10}
+        grammarChunkId={10}
         progressLabel="Round 1/4"
         isCzToEn
         revealed
@@ -692,7 +692,7 @@ describe('PracticeCard', () => {
     render(
       <PracticeSessionCard
         noteId={null}
-        grammarId={10}
+        grammarChunkId={10}
         progressLabel="Round 1/4"
         isCzToEn
         revealed

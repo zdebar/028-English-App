@@ -238,7 +238,7 @@ export function useNewGrammarPracticeDeck(userId: string | null, blockId: number
     error,
     currentItem,
     noteId: currentItem?.note_id ?? null,
-    grammarId: currentItem?.grammar_chunk_id ?? null,
+    grammarChunkId: currentItem?.grammar_chunk_id ?? null,
     progressLabel: `${TEXTS.newGrammarRound} ${round + 1}/2`,
     isCzToEn,
     revealed,

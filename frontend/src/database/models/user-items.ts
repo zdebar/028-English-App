@@ -385,7 +385,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Resets started user items for one grammar topic.
    *
    * @param userId User id owning the items.
-   * @param grammarId Grammar id whose started items should be reset.
+   * @param grammarChunkId Grammar chunk id whose started items should be reset.
    * @returns Number of modified rows.
    */
   static async resetItemsByGrammarChunkId(userId: string, grammarChunkId: number): Promise<number> {

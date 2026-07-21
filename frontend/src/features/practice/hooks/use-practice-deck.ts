@@ -165,7 +165,7 @@ export function usePracticeDeck(userId: string | null) {
     currentItem,
     triggerBlockId: currentItem?.is_new_grammar_trigger ? currentItem.block_id : null,
     noteId: currentItem?.note_id ?? null,
-    grammarId: currentItem?.grammar_chunk_id ?? null,
+    grammarChunkId: currentItem?.grammar_chunk_id ?? null,
     progress: currentItem?.progress ?? 0,
     isCzToEn,
     revealed,

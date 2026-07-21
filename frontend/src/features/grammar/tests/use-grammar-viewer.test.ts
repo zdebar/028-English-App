@@ -40,7 +40,7 @@ describe('useGrammarViewer', () => {
     expect(result.current.grammarData).toBeNull();
   });
 
-  it('ignores non-number grammarId', async () => {
+  it('ignores non-number grammarChunkId', async () => {
     const { result } = renderHook(() => useGrammarViewer());
 
     await act(async () => {
