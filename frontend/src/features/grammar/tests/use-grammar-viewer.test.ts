@@ -5,7 +5,7 @@ const getGrammarByIdMock = vi.fn();
 const showToastMock = vi.fn();
 const errorHandlerMock = vi.fn();
 
-vi.mock('@/database/models/grammar', () => ({
+vi.mock('@/database/models/grammar-chunks', () => ({
   default: {
     getById: (...args: unknown[]) => getGrammarByIdMock(...args),
   },

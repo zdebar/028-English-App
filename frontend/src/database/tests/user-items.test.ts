@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   equalsDelete: vi.fn(),
   blockEqualsToArray: vi.fn(),
   masteredBlockToArray: vi.fn(),
+  userBlockGet: vi.fn(),
   itemIdModify: vi.fn(),
   itemIdBetween: vi.fn(),
   itemIdBetweenModify: vi.fn(),
@@ -83,7 +84,8 @@ vi.mock('@/database/models/db', () => ({
         if (
           field ===
             '[user_id+is_practice_item+is_vocabulary+next_at+mastered_at+curriculum_sort_path]' ||
-          field === '[user_id+is_practice_item+is_vocabulary+next_at+mastered_at+sort_order]'
+          field === '[user_id+is_practice_item+is_vocabulary+next_at+mastered_at+sort_order]' ||
+          field === '[user_id+is_practice_item+next_at+mastered_at+curriculum_sort_path]'
         ) {
           return {
             between: (...args: unknown[]) => {
@@ -142,6 +144,7 @@ vi.mock('@/database/models/db', () => ({
       },
     },
     user_blocks: {
+      get: (...args: unknown[]) => mocks.userBlockGet(...args),
       where: () => ({
         equals: () => ({
           toArray: (...args: unknown[]) => mocks.masteredBlockToArray(...args),
@@ -165,7 +168,7 @@ vi.mock('@/database/models/metadata', () => ({
   },
 }));
 
-vi.mock('@/database/models/grammar', () => ({
+vi.mock('@/database/models/grammar-chunks', () => ({
   default: {
     getStartedIds: vi.fn().mockResolvedValue([]),
   },
@@ -203,6 +206,7 @@ describe('UserItem', () => {
     mocks.userEqualsToArray.mockResolvedValue([]);
     mocks.blockEqualsToArray.mockResolvedValue([]);
     mocks.masteredBlockToArray.mockResolvedValue([]);
+    mocks.userBlockGet.mockResolvedValue(null);
     mocks.indexedToArray.mockResolvedValue([]);
     mocks.updatedBetweenToArray.mockResolvedValue([]);
     mocks.rpc.mockResolvedValue({ data: [], error: null });
@@ -335,14 +339,14 @@ describe('UserItem', () => {
         },
       ]);
 
-    const deck = await UserItem.getPracticeDeck('u1', 4, 'vocabulary');
+    const deck = await UserItem.getPracticeDeck('u1', 4);
 
     expect(deck.map((item) => item.item_id)).toEqual([2, 3]);
     expect(mocks.indexedLimit.mock.calls.map(([limit]) => limit)).toEqual([4, 4, 3]);
     expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
       3,
-      ['u1', 1, 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
-      ['u1', 1, 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
       true,
       true,
     );
@@ -374,10 +378,34 @@ describe('UserItem', () => {
         },
       ]);
 
-    const deck = await UserItem.getPracticeDeck('u1', 3, 'vocabulary');
+    const deck = await UserItem.getPracticeDeck('u1', 3);
 
     expect(deck.map((item) => item.item_id)).toEqual([3]);
     expect(mocks.indexedLimit.mock.calls.map(([limit]) => limit)).toEqual([3, 3, 3]);
+  });
+
+  it('shortens the alternative deck at the first item from an unstarted grammar block', async () => {
+    mocks.indexedToArray
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ item_id: 1, progress: 2 }])
+      .mockResolvedValueOnce([
+        { item_id: 2, block_id: 20, grammar_chunk_id: 0, progress: 0 },
+        { item_id: 3, block_id: 30, grammar_chunk_id: 7, progress: 0 },
+        { item_id: 4, block_id: 40, grammar_chunk_id: 0, progress: 0 },
+      ]);
+    mocks.userBlockGet.mockResolvedValueOnce({
+      block_id: 30,
+      started_at: '1970-01-01T00:00:00.000Z',
+    });
+
+    const deck = await UserItem.getPracticeDeck('u1', 5);
+
+    expect(deck.map((item) => item.item_id)).toEqual([1, 2, 3]);
+    expect(deck.at(-1)).toMatchObject({
+      item_id: 3,
+      is_new_grammar_trigger: true,
+    });
+    expect(mocks.userBlockGet).toHaveBeenCalledWith(['u1', 30]);
   });
 
   it('restores a partial odd vocabulary deck when even and new alternatives are empty', async () => {
@@ -393,7 +421,7 @@ describe('UserItem', () => {
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
 
-    const deck = await UserItem.getPracticeDeck('u1', 3, 'vocabulary');
+    const deck = await UserItem.getPracticeDeck('u1', 3);
 
     expect(deck.map((item) => item.item_id)).toEqual([1]);
   });
@@ -410,10 +438,10 @@ describe('UserItem', () => {
       .mockResolvedValueOnce([{ item_id: 1, block_id: 10, progress: 1 }])
       .mockResolvedValueOnce([{ item_id: 2, block_id: 10, progress: 2 }]);
 
-    const deck = await UserItem.getPracticeDeck('u1', 3, 'grammar');
+    const deck = await UserItem.getPracticeDeck('u1', 3);
 
     expect(deck.map((item) => item.item_id)).toEqual([2]);
-    expect(mocks.indexedToArray).toHaveBeenCalledTimes(2);
+    expect(mocks.indexedToArray).toHaveBeenCalledTimes(3);
   });
 
   it('restores a partial odd grammar deck when no even items exist', async () => {
@@ -428,7 +456,7 @@ describe('UserItem', () => {
       .mockResolvedValueOnce([{ item_id: 1, block_id: 10, progress: 1 }])
       .mockResolvedValueOnce([]);
 
-    const deck = await UserItem.getPracticeDeck('u1', 3, 'grammar');
+    const deck = await UserItem.getPracticeDeck('u1', 3);
 
     expect(deck.map((item) => item.item_id)).toEqual([1]);
   });
@@ -451,13 +479,13 @@ describe('UserItem', () => {
     ]);
     mocks.indexedToArray.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
 
-    const deck = await UserItem.getPracticeDeck('u1', 10, 'grammar');
+    const deck = await UserItem.getPracticeDeck('u1', 10);
 
     expect(deck).toEqual([]);
     expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
       1,
-      ['u1', 1, 0, expect.anything(), '1970-01-01T00:00:00.000Z', expect.anything()],
-      ['u1', 1, 0, '2026-06-24T12:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', 1, expect.anything(), '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', 1, '2026-06-24T12:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
       true,
       false,
     );
@@ -474,7 +502,7 @@ describe('UserItem', () => {
       mastered_at: '1970-01-01T00:00:00.000Z',
       next_at: '2026-06-24T11:00:00.000Z',
       progress: 0,
-    })).toBe(false);
+    })).toBe(true);
     expect(grammarFilter({
       block_id: 10,
       mastered_at: '2026-06-20T12:00:00.000Z',
@@ -548,7 +576,7 @@ describe('UserItem', () => {
     expect(mocks.getNextAt).toHaveBeenCalledWith(2);
   });
 
-  it('getReadyVocabularyPracticeState counts ready started and not-started vocabulary', async () => {
+  it('getReadyPracticeState counts ready started and not-started vocabulary', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
     mocks.indexedToArray
@@ -558,22 +586,22 @@ describe('UserItem', () => {
         { item_id: 3, mastered_at: '1970-01-01T00:00:00.000Z' },
       ]);
 
-    await expect(UserItem.getReadyVocabularyPracticeState('u1')).resolves.toEqual({
+    await expect(UserItem.getReadyPracticeState('u1')).resolves.toEqual({
       readyCount: 3,
       schedule: [],
     });
 
     expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
       1,
-      ['u1', 1, 1, expect.anything(), '1970-01-01T00:00:00.000Z', expect.anything()],
-      ['u1', 1, 1, '2026-06-24T12:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', 1, expect.anything(), '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', 1, '2026-06-24T12:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
       true,
       false,
     );
     expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
       2,
-      ['u1', 1, 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
-      ['u1', 1, 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
       true,
       true,
     );
@@ -581,13 +609,13 @@ describe('UserItem', () => {
     expect(mocks.indexedLimit).toHaveBeenNthCalledWith(2, 99);
   });
 
-  it('getReadyVocabularyPracticeState caps availability above the badge cap', async () => {
+  it('getReadyPracticeState caps availability above the badge cap', async () => {
     mocks.indexedToArray.mockResolvedValueOnce(Array.from({ length: 100 }, (_, index) => ({
       item_id: index + 1,
       mastered_at: '1970-01-01T00:00:00.000Z',
     })));
 
-    await expect(UserItem.getReadyVocabularyPracticeState('u1')).resolves.toEqual({
+    await expect(UserItem.getReadyPracticeState('u1')).resolves.toEqual({
       readyCount: 100,
       schedule: [],
     });
@@ -595,7 +623,7 @@ describe('UserItem', () => {
     expect(mocks.indexedToArray).toHaveBeenCalledTimes(1);
   });
 
-  it('getReadyVocabularyPracticeState schedules future vocabulary when none is ready', async () => {
+  it('getReadyPracticeState schedules future vocabulary when none is ready', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
     mocks.indexedToArray
@@ -614,24 +642,24 @@ describe('UserItem', () => {
         },
       ]);
 
-    await expect(UserItem.getReadyVocabularyPracticeState('u1')).resolves.toEqual({
+    await expect(UserItem.getReadyPracticeState('u1')).resolves.toEqual({
       readyCount: 0,
       schedule: [{ date: '2026-06-24T12:00:10.800Z', count: 2 }],
     });
 
     expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
       3,
-      ['u1', 1, 1, '2026-06-24T12:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
-      ['u1', 1, 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', 1, '2026-06-24T12:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
       false,
       false,
     );
   });
 
-  it('getReadyVocabularyPracticeState ignores mastered vocabulary candidates', async () => {
+  it('getReadyPracticeState ignores mastered vocabulary candidates', async () => {
     mocks.indexedToArray.mockResolvedValueOnce([]);
 
-    await UserItem.getReadyVocabularyPracticeState('u1');
+    await UserItem.getReadyPracticeState('u1');
 
     const filterCandidate = mocks.indexedFilter.mock.calls[0][0] as (item: {
       mastered_at: string;
@@ -715,7 +743,7 @@ describe('UserItem', () => {
           curriculum_sort_path: [1, 2, 3, 2],
           note_id: null,
           block_id: null,
-          grammar_id: null,
+          grammar_chunk_id: null,
           progress: 0,
           progress_history: [],
           started_at: null,
@@ -760,7 +788,7 @@ describe('UserItem', () => {
         is_practice_item: 0,
         curriculum_sort_path: [1, 2, 3, 2],
         block_id: 0,
-        grammar_id: 0,
+        grammar_chunk_id: 0,
         started_at: '1970-01-01T00:00:00.000Z',
         next_at: '1970-01-01T00:00:00.000Z',
         mastered_at: '1970-01-01T00:00:00.000Z',

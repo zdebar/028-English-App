@@ -39,11 +39,11 @@ two scripts.
 ## Lesson CSV format
 
 At minimum, source files need `czech` and `english` columns. Optional fields
-such as `grammar_id`, `block_id`, and `note_id` are preserved. A typical source
+such as `grammar_chunk_id`, `block_id`, and `note_id` are preserved. A typical source
 file starts like this:
 
 ```csv
-czech,english,grammar_id,block_id,note_id
+czech,english,grammar_chunk_id,block_id,note_id
 já,I,,1,
 ty,you,,1,
 ```
@@ -51,7 +51,7 @@ ty,you,,1,
 `prepare_words.py` normalizes the file to this column set (when applicable):
 
 ```text
-id, czech, english, pronunciation, audio, sort_order, grammar_id,
+id, czech, english, pronunciation, audio, sort_order, grammar_chunk_id,
 lesson_id, block_id, note_id
 ```
 

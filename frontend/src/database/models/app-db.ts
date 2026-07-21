@@ -1,6 +1,7 @@
 import config from '@/config/config';
 import Dexie, { type EntityTable } from 'dexie';
-import type Grammar from '@/database/models/grammar';
+import type GrammarChunk from '@/database/models/grammar-chunks';
+import type GrammarGroup from '@/database/models/grammar-groups';
 import type AudioRecord from '@/database/models/audio-records';
 import type UserItem from '@/database/models/user-items';
 import type UserScore from '@/database/models/user-scores';
@@ -12,7 +13,7 @@ import type Levels from '@/database/models/levels';
 import type Notes from '@/database/models/notes';
 
 const USER_ITEMS_SCHEMA_V1 =
-  '[user_id+item_id], [user_id+grammar_id+started_at], [user_id+is_vocabulary+started_at], [user_id+is_practice_item+is_vocabulary+started_at], [user_id+started_at], [user_id+updated_at], [user_id+next_at+sort_order], [user_id+next_at+mastered_at+sort_order], [user_id+is_vocabulary+next_at+mastered_at+sort_order], [user_id+is_practice_item+is_vocabulary+next_at+mastered_at+sort_order], [user_id+lesson_id+is_vocabulary+started_at], [user_id+lesson_id+is_practice_item+is_vocabulary+started_at], [user_id+block_id]';
+  '[user_id+item_id], [user_id+grammar_chunk_id+started_at], [user_id+is_vocabulary+started_at], [user_id+is_practice_item+is_vocabulary+started_at], [user_id+started_at], [user_id+updated_at], [user_id+next_at+sort_order], [user_id+next_at+mastered_at+sort_order], [user_id+is_vocabulary+next_at+mastered_at+sort_order], [user_id+is_practice_item+is_vocabulary+next_at+mastered_at+sort_order], [user_id+lesson_id+is_vocabulary+started_at], [user_id+lesson_id+is_practice_item+is_vocabulary+started_at], [user_id+block_id]';
 const USER_ITEMS_SCHEMA_V2 = `${USER_ITEMS_SCHEMA_V1}, [user_id+is_practice_item+is_vocabulary+next_at+mastered_at+curriculum_sort_path]`;
 
 /**
@@ -26,7 +27,8 @@ export default class AppDB extends Dexie {
   levels!: EntityTable<Levels, 'id'>;
   lessons!: EntityTable<Lessons, 'id'>;
   notes!: EntityTable<Notes, 'id'>;
-  grammar!: EntityTable<Grammar, 'id'>;
+  grammar_groups!: EntityTable<GrammarGroup, 'id'>;
+  grammar_chunks!: EntityTable<GrammarChunk, 'id'>;
   user_items!: EntityTable<UserItem, any>;
   user_scores!: EntityTable<UserScore, any>;
   user_blocks!: EntityTable<UserBlock, any>;
@@ -42,7 +44,8 @@ export default class AppDB extends Dexie {
       levels: 'id, sort_order',
       lessons: 'id, sort_order',
       notes: 'id',
-      grammar: 'id, sort_order',
+      grammar_groups: 'id, sort_order',
+      grammar_chunks: 'id, grammar_group_id, sort_order',
       user_items: USER_ITEMS_SCHEMA_V1,
       user_blocks:
         '[user_id+block_id], user_id, [user_id+updated_at], [user_id+sort_order], [user_id+is_vocabulary+started_at+sort_order], [user_id+is_vocabulary+started_at+mastered_at+sort_order]',
@@ -87,5 +90,45 @@ export default class AppDB extends Dexie {
           await transaction.table('user_items').bulkPut(updatedItems);
         }
       });
+
+    this.version(3)
+      .stores({
+        grammar: 'id, sort_order',
+        grammar_groups: 'id, sort_order',
+        grammar_chunks: 'id, grammar_group_id, sort_order',
+        user_items:
+          '[user_id+item_id], [user_id+grammar_chunk_id+started_at], [user_id+is_vocabulary+started_at], [user_id+is_practice_item+is_vocabulary+started_at], [user_id+started_at], [user_id+updated_at], [user_id+next_at+sort_order], [user_id+next_at+mastered_at+sort_order], [user_id+is_vocabulary+next_at+mastered_at+sort_order], [user_id+is_practice_item+is_vocabulary+next_at+mastered_at+sort_order], [user_id+lesson_id+is_vocabulary+started_at], [user_id+lesson_id+is_practice_item+is_vocabulary+started_at], [user_id+block_id], [user_id+is_practice_item+next_at+mastered_at+curriculum_sort_path]',
+      })
+      .upgrade(async (transaction) => {
+        const [oldGrammar, items, blocks] = await Promise.all([
+          transaction.table('grammar').toArray(),
+          transaction.table('user_items').toArray(),
+          transaction.table('user_blocks').toArray(),
+        ]);
+
+        if (oldGrammar.length > 0) {
+          await transaction.table('grammar_chunks').bulkPut(
+            oldGrammar.map((grammar) => ({ ...grammar, grammar_group_id: null })),
+          );
+        }
+        if (items.length > 0) {
+          await transaction.table('user_items').bulkPut(
+            items.map((item) => ({
+              ...item,
+              grammar_chunk_id: item.grammar_chunk_id ?? item.grammar_id ?? 0,
+            })),
+          );
+        }
+        if (blocks.length > 0) {
+          await transaction.table('user_blocks').bulkPut(
+            blocks.map((block) => ({
+              ...block,
+              grammar_chunk_id: block.grammar_chunk_id ?? block.grammar_id ?? null,
+            })),
+          );
+        }
+      });
+
+    this.version(4).stores({ grammar: null });
   }
 }

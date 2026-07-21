@@ -1,5 +1,5 @@
 import config from '@/config/config';
-import Grammar from '@/database/models/grammar';
+import GrammarChunk from '@/database/models/grammar-chunks';
 import UserBlock from '@/database/models/user-blocks';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
@@ -23,7 +23,7 @@ function toError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
 }
 
-export function useNewGrammarPracticeDeck(userId: string | null) {
+export function useNewGrammarPracticeDeck(userId: string | null, blockId: number | null) {
   const [block, setBlock] = useState<UserBlockType | null>(null);
   const [items, setItems] = useState<UserItemLocal[]>([]);
   const [grammar, setGrammar] = useState<GrammarDetail | null>(null);
@@ -47,7 +47,7 @@ export function useNewGrammarPracticeDeck(userId: string | null) {
       setLoading(true);
       setError(null);
       try {
-        const nextBlock = await UserBlock.getFirstUnlockedGrammarBlock(userId);
+        const nextBlock = blockId == null ? null : await UserBlock.getByBlockId(userId, blockId);
         if (nextBlock == null) {
           if (isMounted) {
             setBlock(null);
@@ -61,7 +61,9 @@ export function useNewGrammarPracticeDeck(userId: string | null) {
 
         const blockItems = await UserItem.getByBlockId(userId, nextBlock.block_id);
         const grammarData =
-          nextBlock.grammar_id == null ? null : await Grammar.getById(nextBlock.grammar_id);
+          nextBlock.grammar_chunk_id == null
+            ? null
+            : await GrammarChunk.getById(nextBlock.grammar_chunk_id);
         if (!isMounted) return;
 
         setBlock(nextBlock);
@@ -91,7 +93,7 @@ export function useNewGrammarPracticeDeck(userId: string | null) {
     return () => {
       isMounted = false;
     };
-  }, [userId]);
+  }, [blockId, userId]);
 
   const currentItem = useMemo(() => currentQueue[0] ?? null, [currentQueue]);
 
@@ -115,6 +117,7 @@ export function useNewGrammarPracticeDeck(userId: string | null) {
       if (!userId || !block) return;
 
       await UserItem.saveNewGrammarBlockCompletion(userId, block.block_id, dateTime);
+      await UserBlock.unlockBlock(userId, block.block_id, dateTime);
       await UserBlock.markBlockMastered(userId, block.block_id, dateTime);
       setIsComplete(true);
       setCurrentQueue([]);
@@ -235,7 +238,7 @@ export function useNewGrammarPracticeDeck(userId: string | null) {
     error,
     currentItem,
     noteId: currentItem?.note_id ?? null,
-    grammarId: currentItem?.grammar_id ?? null,
+    grammarId: currentItem?.grammar_chunk_id ?? null,
     progressLabel: `${TEXTS.newGrammarRound} ${round + 1}/2`,
     isCzToEn,
     revealed,

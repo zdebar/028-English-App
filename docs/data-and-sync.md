@@ -46,10 +46,10 @@ models include `UserBlock`, `UserScore`, and `UserItem`.
 | Model | Table/domain | Common readers/writers |
 | --- | --- | --- |
 | `UserItem` | Per-user item progress and scheduling | Practice decks, vocabulary/grammar readiness, resets, sync. |
-| `UserBlock` | Per-user block unlock/completion state | Home new grammar button, new grammar practice, topics, sync. |
+| `UserBlock` | Per-user block unlock/completion state | new grammar interruption and group overview, topics, sync. |
 | `UserScore` | Per-user daily item count | Practice actions, daily stats, overview stars. |
 | `Levels` / `Lessons` | Shared course hierarchy | Dashboard and overview pages. |
-| `Grammar` / `Notes` | Shared detail content | Practice detail buttons and overview pages. |
+| `GrammarGroup` / `GrammarChunk` / `Notes` | Shared detail content | Practice detail buttons and overview pages. |
 | `AudioRecord` / `AudioMetadata` | Audio availability/cache metadata | Audio loader and periodic sync. |
 
 ## LocalStorage Uses

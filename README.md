@@ -133,7 +133,7 @@ and keeps user progress local-first through IndexedDB. The main feature areas ar
 
 - Supabase authentication with anonymous sign-in, Google sign-in, account
   conversion, sign-out, and soft-delete/reactivation support.
-- Vocabulary review, grammar review, and new grammar learning flows with local
+- Unified vocabulary/grammar review and inline new-grammar learning with local
   progress saves, audio playback, daily score updates, and sync-backed recovery.
 - Home readiness buttons, dashboard stats, practice overview, and overview pages
   for levels, blocks, grammar, and vocabulary.
@@ -182,7 +182,7 @@ Important files include:
 
 Main domain tables/entities across the project:
 
-- `levels`, `lessons`, `items`, `grammar`, `blocks`, `notes`
+- `levels`, `lessons`, `items`, `grammar_groups`, `grammar_chunks`, `blocks`, `notes`
 - `user_items`, `user_scores`, `user_blocks`
 - sync metadata and user-linked records
 

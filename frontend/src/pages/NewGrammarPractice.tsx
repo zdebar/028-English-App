@@ -11,14 +11,17 @@ import { useNewGrammarPracticeDeck } from '@/features/practice/hooks/use-new-gra
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import { useEffect, useState, type JSX } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function NewGrammarPractice(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const navigate = useNavigate();
+  const location = useLocation();
   const showToast = useToastStore((state) => state.showToast);
   const [showIntro, setShowIntro] = useState(true);
-  const deck = useNewGrammarPracticeDeck(userId);
+  const state = location.state as { blockId?: unknown } | null;
+  const blockId = typeof state?.blockId === 'number' ? state.blockId : null;
+  const deck = useNewGrammarPracticeDeck(userId, blockId);
 
   useEffect(() => {
     if (!deck.error) return;
@@ -43,7 +46,14 @@ export default function NewGrammarPractice(): JSX.Element {
       <div className="card-width mt-8 flex flex-col gap-4 text-center">
         <p>{TEXTS.newGrammarComplete}</p>
         <Notification>{deck.block.name}</Notification>
-        <ReturnHomeButton />
+        <ReturnHomeButton
+          onClick={(event) => {
+            event.preventDefault();
+            navigate(ROUTES.practice, { replace: true });
+          }}
+        >
+          {TEXTS.continuePractice}
+        </ReturnHomeButton>
       </div>
     );
   }
@@ -57,7 +67,7 @@ export default function NewGrammarPractice(): JSX.Element {
       <NewGrammarOverviewCard
         block={deck.block}
         grammar={deck.grammar}
-        onClose={() => navigate(ROUTES.home)}
+        onClose={() => navigate(ROUTES.practice, { replace: true })}
         onContinue={() => setShowIntro(false)}
       />
     );

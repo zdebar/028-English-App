@@ -14,11 +14,15 @@ export interface LessonType extends SyncEntityType {
 }
 export interface LevelType extends SyncEntityType {}
 
-export interface GrammarType extends SyncEntityType {}
+export interface GrammarGroupType extends SyncEntityType {}
+
+export interface GrammarChunkType extends SyncEntityType {
+  grammar_group_id: number | null;
+}
 
 export interface BlockType extends SyncEntityType {
   lesson_id: number;
-  grammar_id: number | null;
+  grammar_chunk_id: number | null;
   show_in_topics: boolean;
   is_practice_block: boolean;
 }
@@ -55,7 +59,7 @@ export interface UserBlockType {
   name: string;
   note: string | null;
   lesson_id: number;
-  grammar_id: number | null;
+  grammar_chunk_id: number | null;
   sort_order: number;
   progress: number;
   is_vocabulary: boolean;
@@ -77,9 +81,6 @@ export interface ReadyPracticeState {
   readyCount: number;
   schedule: ReadyPracticeScheduleEntry[];
 }
-
-export type ReadyGrammarScheduleEntry = ReadyPracticeScheduleEntry;
-export type ReadyGrammarPracticeState = ReadyPracticeState;
 
 export interface UserInfoType {
   id: string; // string for the user

@@ -61,6 +61,29 @@ describe('GrammarDetailCard', () => {
     expect(screen.getByText('No notes')).toBeTruthy();
   });
 
+  it('renders grouped grammar chunks as ordered sections', () => {
+    const { container } = render(
+      <GrammarDetailCard
+        grammar={{
+          id: 1,
+          name: 'Present simple',
+          chunks: [
+            { id: 11, name: 'Affirmative', note: '<p>affirmative note</p>' },
+            { id: 12, name: 'Negative', note: '<p>negative note</p>' },
+          ],
+        }}
+        onClose={vi.fn()}
+      />,
+    );
+
+    const headings = container.querySelectorAll('h2');
+    expect([...headings].map((heading) => heading.textContent)).toEqual([
+      'Affirmative',
+      'Negative',
+    ]);
+    expect(screen.queryByText('No notes')).toBeNull();
+  });
+
   it('hides help by default and renders it when explicitly enabled', () => {
     const { rerender } = render(
       <GrammarDetailCard grammar={{ id: 1, name: 'Articles' }} onClose={vi.fn()} />,

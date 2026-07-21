@@ -1,76 +1,34 @@
 # Practice Flows
 
-Practice UI is shared where possible through `PracticeSessionCard`, but the deck
-logic differs by mode.
+Practice uses one review route and the shared `PracticeSessionCard`. New grammar temporarily
+interrupts the unified deck and returns to it after completion.
 
-## Shared Session Card
+## Unified Practice
 
-`frontend/src/features/practice/PracticeSessionCard.tsx` renders the common card:
+Route: `/practice`, rendered by `Practice` and `usePracticeDeck`.
 
-| Control | Behavior |
-| --- | --- |
-| Card click | Confirms direction change or reveals answer. |
-| Hint | Calls `plusHint` while unrevealed. |
-| Repeat | Calls `nextRepeat` after reveal. |
-| Known | Calls `nextKnown` after reveal. |
-| Skip/master | Long-presses `MasterItemButton`, then calls `completeCurrent` if supplied. |
-| Audio | Uses audio manager state and auto-play rules from the deck hook. |
-| Grammar/note buttons | Open detail cards when IDs are available. |
+`UserItem.getPracticeDeck` does not filter by `is_vocabulary`:
 
-See [features.md](features.md) for the broader feature map and
-[home-readiness.md](home-readiness.md) for Home button availability.
+1. Select due, unmastered practice items with odd progress, ordered by `next_at`. Return immediately when this fills the deck.
+2. Otherwise build an alternative deck from due even-progress items, then never-scheduled items in curriculum order.
+3. While scanning new items, a non-null `grammar_chunk_id` whose block has no `started_at` becomes the final marked trigger item; selection stops immediately.
+4. Return the even/new alternative when non-empty, otherwise return the partial odd deck.
 
-## Vocabulary Practice
+Progress is buffered during the session, saved at deck completion/unmount, and backed up to
+`practiceDeckProgress_${userId}` on unload or save failure.
 
-Route: `/practice/vocabulary`, rendered by `Practice mode="vocabulary"`.
+## New Grammar Interruption
 
-| Step | Owner | Behavior |
-| --- | --- | --- |
-| Readiness on Home | `UserItem.getReadyVocabularyPracticeState` | Counts ready started vocabulary plus not-started vocabulary, capped by badge config. |
-| Deck load | `usePracticeDeck` -> `UserItem.getPracticeDeck(mode="vocabulary")` | Pulls ready odd-progress items first, then even-progress items, then not-started items if needed. |
-| Progress action | `nextItem(progressChange)` | Buffers updated item progress and increments daily score. |
-| Save during session | `usePracticeDeck` | Saves when buffered progress reaches deck length. |
-| Save on unmount | `usePracticeDeck` cleanup | Saves remaining buffered progress and triggers level refresh. |
-| Save on page unload | `beforeunload` handler | Stores unsaved progress in localStorage fallback. |
+Route: `/practice/new-grammar`, entered with the trigger block ID selected by the unified deck.
 
-## Grammar Practice
+The flow loads that exact block and its grammar chunk, displays the chunk introduction, and runs
+the existing Czech-to-English and English-to-Czech rounds with repeat waves. Completion starts
+all block items at the configured grammar progress, starts and masters the block, and returns to
+`/practice` for a fresh deck. Leaving early keeps the block unstarted, so it triggers again later.
 
-Route: `/practice/grammar`, rendered by `Practice mode="grammar"`.
+There is no vocabulary or previous-grammar unlock prerequisite.
 
-| Step | Owner | Behavior |
-| --- | --- | --- |
-| Readiness on Home | `UserBlock.getReadyGrammarPracticeState` | Counts started grammar items with `next_at < now`; future dates feed the Home timer. |
-| Deck load | `usePracticeDeck` -> `UserItem.getPracticeDeck(mode="grammar")` | Pulls ready grammar items using the shared practice deck logic, without new vocabulary fallback. |
-| Progress/save | `usePracticeDeck` | Same buffering, score increment, unmount save, and unload fallback as vocabulary practice. |
+## Grammar Details
 
-## New Grammar Practice
-
-Route: `/practice/new-grammar`, rendered by `NewGrammarPractice`.
-
-| Step | Owner | Behavior |
-| --- | --- | --- |
-| Unlock check | `HomePracticeButtons` -> `UserBlock.unlockNextGrammarBlock` | Unlocks next grammar block when lesson vocabulary and previous grammar prerequisites are met. |
-| Block selection | `UserBlock.getFirstUnlockedGrammarBlock` | Finds the first started, unmastered grammar block. |
-| Initial content | `useNewGrammarPracticeDeck` | Loads block items and optional grammar intro detail. |
-| Rounds | `useNewGrammarPracticeDeck` | Runs two rounds: Czech to English, then English to Czech. |
-| Repeat waves | `useNewGrammarPracticeDeck` | Original queue runs first; repeated items move into the next wave until known. |
-| Skip | `completeCurrent` | Saves the skipped item immediately with skip progress, removes it from all queues, and increments score. |
-| Completion | `completeBlock` | Saves all block items to after-new-grammar progress and marks the block mastered. |
-
-## Recalculation After Practice
-
-When a practice route unmounts and the user returns Home:
-
-- Vocabulary readiness is recalculated by `HomePracticeButtons`.
-- Grammar readiness is recalculated by `HomePracticeButtons`.
-- New grammar availability is recalculated after `unlockNextGrammarBlock`.
-
-While Home stays mounted, readiness follows relevant committed IndexedDB changes
-through a Dexie live query and future schedule timers. Dashboard stars and level
-aggregates use active-user live-query snapshots documented in
-[state-and-events.md](state-and-events.md).
-
-Practice audio uses the audio manager and per-user volume state. Grammar and note
-detail buttons are local UI over shared IndexedDB content. Unsaved review
-progress uses the `practiceDeckProgress_${userId}` localStorage fallback described
-in [data-and-sync.md](data-and-sync.md).
+Practice cards resolve their detail button through `user_items.grammar_chunk_id` and display only
+that chunk. The grammar overview separately composes all ordered chunks assigned to a group.

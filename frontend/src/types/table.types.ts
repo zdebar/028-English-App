@@ -1,5 +1,6 @@
 export const TableName = {
-  Grammar: 'grammar',
+  GrammarGroups: 'grammar_groups',
+  GrammarChunks: 'grammar_chunks',
   UserScores: 'user_scores',
   UserItems: 'user_items',
   UserBlocks: 'user_blocks',

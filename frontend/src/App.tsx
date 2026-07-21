@@ -27,7 +27,7 @@ import Vocabulary from '@/pages/Vocabulary';
 import Guide from '@/pages/Guide';
 import Profile from '@/pages/Profile';
 import { useEffect } from 'react';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import './styles/index.css';
 import { useAudioLoader } from './features/audio/use-audio-loader';
 
@@ -67,9 +67,16 @@ export default function App() {
             <Route path={ROUTES.privacyPolicy} element={<PrivacyPolicy />} />
             <Route path={ROUTES.guide} element={<Guide />} />
             <Route element={<ProtectedLayout />}>
-              <Route path={ROUTES.practiceVocabulary} element={<Practice mode="vocabulary" />} />
+              <Route path={ROUTES.practice} element={<Practice />} />
+              <Route
+                path={ROUTES.practiceVocabulary}
+                element={<Navigate to={ROUTES.practice} replace />}
+              />
               <Route path={ROUTES.practiceNewGrammar} element={<NewGrammarPractice />} />
-              <Route path={ROUTES.practiceGrammar} element={<Practice mode="grammar" />} />
+              <Route
+                path={ROUTES.practiceGrammar}
+                element={<Navigate to={ROUTES.practice} replace />}
+              />
               <Route path={ROUTES.practiceOverview} element={<PracticeOverview />} />
               <Route path={ROUTES.profile} element={<Profile />} />
               <Route path={ROUTES.levels} element={<Levels />} />

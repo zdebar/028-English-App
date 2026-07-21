@@ -263,172 +263,6 @@ describe('UserBlock', () => {
     expect(mocks.get).toHaveBeenCalledWith(['u1', 2]);
   });
 
-  it('getFirstUnlockedGrammarBlock loads grammar blocks using user_id filtering', async () => {
-    mocks.toArray.mockResolvedValueOnce([
-      {
-        user_id: 'u1',
-        block_id: 3,
-        lesson_id: 2,
-        sort_order: 30,
-        is_vocabulary: false,
-        started_at: '2026-03-01T00:00:00.000Z',
-        mastered_at: '9999-12-31T23:59:59+00:00',
-      },
-      {
-        user_id: 'u1',
-        block_id: 2,
-        lesson_id: 1,
-        sort_order: 20,
-        is_vocabulary: false,
-        started_at: '2026-03-01T00:00:00.000Z',
-        mastered_at: '9999-12-31T23:59:59+00:00',
-      },
-    ]);
-
-    await expect(UserBlock.getFirstUnlockedGrammarBlock('u1')).resolves.toMatchObject({
-      block_id: 2,
-    });
-
-    expect(mocks.where).toHaveBeenCalledWith('user_id');
-    expect(mocks.equals).toHaveBeenCalledWith('u1');
-  });
-
-  it('getFirstLockedGrammarBlock loads locked grammar blocks using user_id filtering', async () => {
-    mocks.toArray.mockResolvedValueOnce([
-      {
-        user_id: 'u1',
-        block_id: 5,
-        lesson_id: 3,
-        sort_order: 50,
-        is_vocabulary: false,
-        started_at: '9999-12-31T23:59:59+00:00',
-        mastered_at: '9999-12-31T23:59:59+00:00',
-      },
-      {
-        user_id: 'u1',
-        block_id: 4,
-        lesson_id: 2,
-        sort_order: 40,
-        is_vocabulary: false,
-        started_at: '9999-12-31T23:59:59+00:00',
-        mastered_at: '9999-12-31T23:59:59+00:00',
-      },
-    ]);
-
-    await expect(UserBlock.getFirstLockedGrammarBlock('u1')).resolves.toMatchObject({
-      block_id: 4,
-    });
-
-    expect(mocks.where).toHaveBeenCalledWith('user_id');
-    expect(mocks.equals).toHaveBeenCalledWith('u1');
-  });
-
-  it('getReadyGrammarPracticeState returns ready count and grouped future schedule', async () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
-    mocks.getMasteredGrammarBlockIds.mockResolvedValueOnce([1]);
-    mocks.toArray.mockResolvedValueOnce([
-      {
-        user_id: 'u1',
-        item_id: 1,
-        block_id: 1,
-        is_vocabulary: 0,
-        is_practice_item: 1,
-        next_at: '2026-06-24T11:59:59.000Z',
-        mastered_at: '9999-12-31T23:59:59+00:00',
-        sort_order: 1,
-      },
-      {
-        user_id: 'u1',
-        item_id: 2,
-        block_id: 1,
-        is_vocabulary: 0,
-        is_practice_item: 1,
-        next_at: '2026-06-24T12:00:10.000Z',
-        mastered_at: '9999-12-31T23:59:59+00:00',
-        sort_order: 2,
-      },
-      {
-        user_id: 'u1',
-        item_id: 3,
-        block_id: 1,
-        is_vocabulary: 0,
-        is_practice_item: 1,
-        next_at: '2026-06-24T12:00:10.800Z',
-        mastered_at: '9999-12-31T23:59:59+00:00',
-        sort_order: 3,
-      },
-      {
-        user_id: 'u1',
-        item_id: 4,
-        block_id: 1,
-        is_vocabulary: 0,
-        is_practice_item: 1,
-        next_at: '2026-06-24T12:00:15.000Z',
-        mastered_at: '2026-06-24T10:00:00.000Z',
-        sort_order: 4,
-      },
-      {
-        user_id: 'u1',
-        item_id: 5,
-        block_id: 1,
-        is_vocabulary: 0,
-        is_practice_item: 1,
-        next_at: '9999-12-31T23:59:59+00:00',
-        mastered_at: '9999-12-31T23:59:59+00:00',
-        sort_order: 5,
-      },
-    ]);
-
-    const result = await UserBlock.getReadyGrammarPracticeState('u1');
-
-    expect(mocks.where).toHaveBeenCalledWith(
-      '[user_id+is_practice_item+is_vocabulary+next_at+mastered_at+sort_order]',
-    );
-    expect(mocks.between).toHaveBeenCalledWith(
-      ['u1', 1, 0, expect.anything(), '9999-12-31T23:59:59+00:00', expect.anything()],
-      ['u1', 1, 0, expect.anything(), '9999-12-31T23:59:59+00:00', expect.anything()],
-      true,
-      true,
-    );
-    expect(result).toEqual({
-      readyCount: 2,
-      schedule: [{ date: '2026-06-24T12:00:10.800Z', count: 2 }],
-    });
-  });
-
-  it('getReadyGrammarPracticeState returns sorted future groups outside the grouping window', async () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
-    mocks.getMasteredGrammarBlockIds.mockResolvedValueOnce([1]);
-    mocks.toArray.mockResolvedValueOnce([
-      {
-        block_id: 1,
-        next_at: '2026-06-24T12:00:05.000Z',
-        mastered_at: '9999-12-31T23:59:59+00:00',
-      },
-      {
-        block_id: 1,
-        next_at: '2026-06-24T12:00:01.000Z',
-        mastered_at: '9999-12-31T23:59:59+00:00',
-      },
-      {
-        block_id: 1,
-        next_at: '2026-06-24T12:00:03.000Z',
-        mastered_at: '9999-12-31T23:59:59+00:00',
-      },
-    ]);
-
-    await expect(UserBlock.getReadyGrammarPracticeState('u1')).resolves.toEqual({
-      readyCount: 0,
-      schedule: [
-        { date: '2026-06-24T12:00:01.000Z', count: 1 },
-        { date: '2026-06-24T12:00:03.000Z', count: 1 },
-        { date: '2026-06-24T12:00:05.000Z', count: 1 },
-      ],
-    });
-  });
-
   it('resetByBlockId resets progress dates and updates timestamp', async () => {
     await UserBlock.resetByBlockId('u1', 7, '2026-06-23T12:00:00.000Z');
 
@@ -451,7 +285,7 @@ describe('UserBlock', () => {
     });
   });
 
-  it('simulates three mastered grammar blocks and unlocks the fourth in curriculum order', async () => {
+  it('simulates three mastered grammar blocks and leaves the fourth unstarted', async () => {
     mocks.toArray.mockResolvedValueOnce([
       {
         user_id: 'u1',
@@ -497,7 +331,7 @@ describe('UserBlock', () => {
 
     await expect(
       UserBlock.simulateGrammarProgress('u1', '2026-07-17T12:00:00.000Z'),
-    ).resolves.toBe(4);
+    ).resolves.toBe(3);
 
     expect(mocks.update.mock.calls).toEqual([
       [['u1', 1], { started_at: '2026-07-17T12:00:00.000Z', updated_at: '2026-07-17T12:00:00.000Z' }],
@@ -506,7 +340,6 @@ describe('UserBlock', () => {
       [['u1', 2], { mastered_at: '2026-07-17T12:00:00.000Z', progress: 1, updated_at: '2026-07-17T12:00:00.000Z' }],
       [['u1', 3], { started_at: '2026-07-17T12:00:00.000Z', updated_at: '2026-07-17T12:00:00.000Z' }],
       [['u1', 3], { mastered_at: '2026-07-17T12:00:00.000Z', progress: 1, updated_at: '2026-07-17T12:00:00.000Z' }],
-      [['u1', 4], { started_at: '2026-07-17T12:00:00.000Z', updated_at: '2026-07-17T12:00:00.000Z' }],
     ]);
   });
 
@@ -528,12 +361,12 @@ describe('UserBlock', () => {
     expect(mocks.update).not.toHaveBeenCalled();
   });
 
-  it('resetByGrammarId resets matching user blocks and returns reset count', async () => {
+  it('resetByGrammarChunkId resets matching user blocks and returns reset count', async () => {
     mocks.toArray.mockResolvedValueOnce([
       {
         user_id: 'u1',
         block_id: 1,
-        grammar_id: 8,
+        grammar_chunk_id: 8,
         progress: 4,
         started_at: '2026-06-20T00:00:00.000Z',
         next_at: '2026-06-25T00:00:00.000Z',
@@ -543,7 +376,7 @@ describe('UserBlock', () => {
       {
         user_id: 'u1',
         block_id: 2,
-        grammar_id: 8,
+        grammar_chunk_id: 8,
         progress: 2,
         started_at: '2026-06-21T00:00:00.000Z',
         next_at: '2026-06-27T00:00:00.000Z',
@@ -552,15 +385,15 @@ describe('UserBlock', () => {
       },
     ]);
 
-    const resetCount = await UserBlock.resetByGrammarId('u1', 8, '2026-06-28T12:00:00.000Z');
+    const resetCount = await UserBlock.resetByGrammarChunkId('u1', 8, '2026-06-28T12:00:00.000Z');
 
     expect(resetCount).toBe(2);
     expect(mocks.where).toHaveBeenCalledWith('user_id');
     expect(mocks.equals).toHaveBeenCalledWith('u1');
 
-    const grammarFilter = mocks.filter.mock.calls[0][0] as (block: { grammar_id: number }) => boolean;
-    expect(grammarFilter({ grammar_id: 8 })).toBe(true);
-    expect(grammarFilter({ grammar_id: 9 })).toBe(false);
+    const grammarFilter = mocks.filter.mock.calls[0][0] as (block: { grammar_chunk_id: number }) => boolean;
+    expect(grammarFilter({ grammar_chunk_id: 8 })).toBe(true);
+    expect(grammarFilter({ grammar_chunk_id: 9 })).toBe(false);
     expect(mocks.bulkPut).toHaveBeenCalledWith([
       expect.objectContaining({
         block_id: 1,
@@ -581,8 +414,8 @@ describe('UserBlock', () => {
     ]);
   });
 
-  it('resetByGrammarId returns zero without writing when no blocks match', async () => {
-    await expect(UserBlock.resetByGrammarId('u1', 8, '2026-06-28T12:00:00.000Z')).resolves.toBe(
+  it('resetByGrammarChunkId returns zero without writing when no blocks match', async () => {
+    await expect(UserBlock.resetByGrammarChunkId('u1', 8, '2026-06-28T12:00:00.000Z')).resolves.toBe(
       0,
     );
 
@@ -617,7 +450,7 @@ describe('UserBlock', () => {
           name: 'Block 1',
           note: null,
           lesson_id: 1,
-          grammar_id: 10,
+          grammar_chunk_id: 10,
           sort_order: 1,
           progress: 2,
           is_vocabulary: false,
@@ -685,7 +518,7 @@ describe('UserBlock', () => {
           name: 'Block 1',
           note: '',
           lesson_id: 1,
-          grammar_id: 10,
+          grammar_chunk_id: 10,
           sort_order: 1,
           progress: 0,
           is_vocabulary: false,

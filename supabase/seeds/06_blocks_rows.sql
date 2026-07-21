@@ -1,7 +1,7 @@
 -- Generated from seeds/remote_data.sql by scripts/extract-catalog-seeds.ps1.
 -- Contains shared catalog data only.
 
-INSERT INTO "public"."blocks" ("id", "name", "note", "lesson_id", "grammar_id", "sort_order", "updated_at", "deleted_at", "show_in_topics", "is_practice_block") VALUES
+INSERT INTO "public"."blocks" ("id", "name", "note", "lesson_id", "grammar_chunk_id", "sort_order", "updated_at", "deleted_at", "show_in_topics", "is_practice_block") VALUES
 	(2, 'být - základní tvary', NULL, 1, 1, 2, '2026-07-17 09:44:00.993319+00', NULL, false, true),
 	(3, 'být - zkrácené tvary', NULL, 1, 1, 3, '2026-07-17 09:44:25.8369+00', NULL, false, true),
 	(4, 'být - věty s přídavnýmí jmény #1', NULL, 1, 2, 4, '2026-07-17 09:44:56.249945+00', NULL, false, true),

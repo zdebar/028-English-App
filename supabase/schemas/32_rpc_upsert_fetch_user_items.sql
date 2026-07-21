@@ -16,7 +16,7 @@ RETURNS TABLE (
   curriculum_sort_path INTEGER[],
   note_id INTEGER,
   block_id INTEGER,
-  grammar_id INTEGER,
+  grammar_chunk_id INTEGER,
   progress INTEGER,
   progress_history JSONB,
   started_at TIMESTAMPTZ,

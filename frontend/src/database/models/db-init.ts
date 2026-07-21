@@ -1,7 +1,8 @@
 import { db } from '@/database/models/db';
 import AudioMetadata from '@/database/models/audio-metadata';
 import AudioRecord from '@/database/models/audio-records';
-import Grammar from '@/database/models/grammar';
+import GrammarChunk from '@/database/models/grammar-chunks';
+import GrammarGroup from '@/database/models/grammar-groups';
 import Lessons from '@/database/models/lessons';
 import Levels from '@/database/models/levels';
 import Metadata from '@/database/models/metadata';
@@ -17,7 +18,8 @@ export async function initDbMappings(): Promise<void> {
 
   db.user_items.mapToClass(UserItem);
   db.user_blocks.mapToClass(UserBlock);
-  db.grammar.mapToClass(Grammar);
+  db.grammar_groups.mapToClass(GrammarGroup);
+  db.grammar_chunks.mapToClass(GrammarChunk);
   db.notes.mapToClass(Notes);
   db.levels.mapToClass(Levels);
   db.lessons.mapToClass(Lessons);

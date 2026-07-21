@@ -60,6 +60,7 @@ vi.mock('@/features/auth/use-auth-store', () => ({
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
+  useLocation: () => ({ state: { blockId: 10 } }),
 }));
 
 vi.mock('@/features/toast/use-toast-store', () => ({
@@ -181,7 +182,7 @@ describe('NewGrammarPractice', () => {
     expect(screen.getByTestId('practice-session').textContent).toBe('ahoj:hello');
   });
 
-  it('closes the combined overview back to home', () => {
+  it('closes the combined overview back to unified practice', () => {
     mocks.deck.block = { name: 'Block A' };
     mocks.deck.grammar = { id: 1, name: 'Articles' };
     mocks.deck.currentItem = { item_id: 1 };
@@ -190,10 +191,10 @@ describe('NewGrammarPractice', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'close overview' }));
 
-    expect(mocks.navigate).toHaveBeenCalledWith('/');
+    expect(mocks.navigate).toHaveBeenCalledWith('/practice', { replace: true });
   });
 
-  it('keeps completion behavior unchanged', () => {
+  it('returns to unified practice after completion', () => {
     mocks.deck.block = { name: 'Block A' };
     mocks.deck.grammar = { id: 1, name: 'Articles' };
     mocks.deck.isComplete = true;
@@ -202,7 +203,8 @@ describe('NewGrammarPractice', () => {
 
     expect(screen.getByText('Complete')).toBeTruthy();
     expect(screen.getByText('Block A')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Home' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    expect(mocks.navigate).toHaveBeenCalledWith('/practice', { replace: true });
     expect(screen.queryByTestId('new-grammar-overview')).toBeNull();
   });
 });

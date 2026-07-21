@@ -29,12 +29,11 @@ export interface UserItemLocal extends UserItemBase {
   is_vocabulary: 0 | 1;
   is_practice_item: 0 | 1;
   block_id: number;
-  grammar_id: number;
+  grammar_chunk_id: number;
   started_at: string;
   deleted_at: string;
   next_at: string;
   mastered_at: string;
   curriculum_sort_path: CurriculumSortPath;
+  is_new_grammar_trigger?: boolean;
 }
-
-export type ReviewPracticeMode = 'vocabulary' | 'grammar';

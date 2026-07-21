@@ -32,7 +32,7 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     is_vocabulary: 1,
     is_practice_item: 1,
     block_id: 1,
-    grammar_id: 10,
+    grammar_chunk_id: 10,
     started_at: '2024-01-01T00:00:00.000Z',
     deleted_at: '9999-12-31T00:00:00.000Z',
     next_at: '2024-01-01T00:00:00.000Z',
@@ -42,6 +42,7 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
   practiceDeck: {
     index: 0,
     currentItem: null as UserItemLocal | null,
+    triggerBlockId: null as number | null,
     noteId: null,
     grammarId: 10,
     progress: 2,
@@ -76,7 +77,8 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
   } as any,
 }));
 
-mocks.practiceDeck.currentItem = mocks.makePracticeItem();
+    mocks.practiceDeck.currentItem = mocks.makePracticeItem();
+    mocks.practiceDeck.triggerBlockId = null;
 
 vi.mock('@/config/config', () => ({
   default: {
@@ -353,7 +355,7 @@ describe('PracticeCard', () => {
       english: 'hello',
       pronunciation: 'həˈloʊ',
       audio: 'hello.opus',
-      grammar_id: 10,
+      grammar_chunk_id: 10,
       progress: 2,
     });
     mocks.practiceDeck.noteId = null;
@@ -413,6 +415,18 @@ describe('PracticeCard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Domů' }));
 
     expect(mocks.navigate).toHaveBeenCalledWith('/');
+  });
+
+  it('opens new grammar for the trigger block instead of rendering the item', () => {
+    mocks.practiceDeck.triggerBlockId = 30;
+
+    render(<PracticeCard />);
+
+    expect(mocks.navigate).toHaveBeenCalledWith('/practice/new-grammar', {
+      state: { blockId: 30 },
+    });
+    mocks.practiceDeck.triggerBlockId = null;
+    expect(screen.queryByText('ahoj')).toBeNull();
   });
 
   it('shows loading circle after configured delay instead of empty state while deck is loading', () => {
