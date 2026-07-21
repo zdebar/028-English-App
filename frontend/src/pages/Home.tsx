@@ -68,7 +68,7 @@ export default function Home(): JSX.Element {
               {TEXTS.syncWarning}
             </p>
           )}
-          <div className="relative mb-12 portrait:mt-8">
+          <div className="relative mb-12 portrait:mt-12">
             <Dashboard />
             <div className="pos-home-dashboard-help">
               <HelpButton />
