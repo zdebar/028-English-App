@@ -56,7 +56,7 @@ const config = {
     starsPerRow: 10, // Number of stars shown in one tier row
     audioDelay: 100, // Delay in milliseconds for automatically playing audio
     holdDuration: 300, // Duration in milliseconds for which the practice card is held before moving to the next item
-    readyPracticeBadgeCap: 99, // Maximum exact ready-practice badge value before showing a capped label
+    readyPracticeBadgeCap: 40, // Maximum exact ready-practice badge value before showing a capped label
     readyPracticeScheduleGroupWindowMs: 1000, // Time window for grouping future ready-practice schedule entries
     maxReadyScheduleTimerDelayMs: 2_147_483_647, // Maximum setTimeout delay supported by browsers
     CZ_TO_EN: 'czToEn',
