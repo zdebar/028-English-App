@@ -63,12 +63,13 @@ export default function Home(): JSX.Element {
             className="portrait:mt-8"
           />
           <PracticeButton userId={userId} />
-          {isSyncError && (
-            <p className="text-error-light dark:text-error-dark px-4 pt-2 text-left text-sm">
-              {TEXTS.syncWarning}
-            </p>
-          )}
-          <div className="relative mb-12 portrait:mt-12">
+          <p
+            className={`text-error-light dark:text-error-dark px-4 py-2 text-center text-sm ${isSyncError ? 'visible' : 'invisible'} portrait:mt-8`}
+          >
+            {TEXTS.syncWarning}
+          </p>
+
+          <div className="relative mb-12">
             <Dashboard />
             <div className="pos-home-dashboard-help">
               <HelpButton />
