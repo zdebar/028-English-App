@@ -1,8 +1,8 @@
 export const PRACTICE_TEXTS = {
   // Practice Page
   noNotesToDisplay: 'Žádné poznámky k zobrazení',
-  noAudio: 'Bez audia',
-  loadingAudio: 'Načítá se audio ...',
+  noAudio: 'bez audia',
+  loadingAudio: 'načítá se audio ...',
   progress: 'Pokrok',
   grammar: 'Gramatika',
   audio: 'Audio',
