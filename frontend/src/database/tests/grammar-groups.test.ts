@@ -55,7 +55,7 @@ describe('GrammarGroup.getStarted', () => {
     });
   });
 
-  it('returns only started grouped chunks in group and chunk order', async () => {
+  it('returns started groups and treats each ungrouped chunk as a group', async () => {
     await expect(GrammarGroup.getStarted('u1')).resolves.toEqual([
       {
         id: 1,
@@ -65,6 +65,13 @@ describe('GrammarGroup.getStarted', () => {
           { id: 11, name: 'First', grammar_group_id: 1, sort_order: 1 },
           { id: 13, name: 'First group second', grammar_group_id: 1, sort_order: 3 },
         ],
+      },
+      {
+        id: 14,
+        name: 'Ungrouped',
+        sort_order: 1,
+        chunks: [],
+        standalone_chunk_id: 14,
       },
       {
         id: 2,
@@ -79,14 +86,22 @@ describe('GrammarGroup.getStarted', () => {
     expect(mocks.groupsAnyOf).toHaveBeenCalledWith([2, 1]);
   });
 
-  it('returns no groups when started chunks are ungrouped', async () => {
+  it('returns an ungrouped started chunk without querying grammar groups', async () => {
     mocks.chunksAnyOf.mockReturnValue({
       toArray: vi.fn().mockResolvedValue([
         { id: 14, name: 'Ungrouped', grammar_group_id: null, sort_order: 1 },
       ]),
     });
 
-    await expect(GrammarGroup.getStarted('u1')).resolves.toEqual([]);
+    await expect(GrammarGroup.getStarted('u1')).resolves.toEqual([
+      {
+        id: 14,
+        name: 'Ungrouped',
+        sort_order: 1,
+        chunks: [],
+        standalone_chunk_id: 14,
+      },
+    ]);
     expect(mocks.groupsAnyOf).not.toHaveBeenCalled();
   });
 

@@ -15,6 +15,7 @@ RETURNS TABLE (
   is_vocabulary BOOLEAN,
   show_in_topics BOOLEAN,
   is_practice_block BOOLEAN,
+  requires_initial_training BOOLEAN,
   started_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ,
   next_at TIMESTAMPTZ,

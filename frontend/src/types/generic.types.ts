@@ -25,6 +25,7 @@ export interface BlockType extends SyncEntityType {
   grammar_chunk_id: number | null;
   show_in_topics: boolean;
   is_practice_block: boolean;
+  requires_initial_training: boolean;
 }
 
 export interface NoteType extends SyncEntityType {
@@ -65,6 +66,7 @@ export interface UserBlockType {
   is_vocabulary: boolean;
   show_in_topics: boolean;
   is_practice_block: boolean;
+  requires_initial_training: boolean;
   started_at: string;
   updated_at: string;
   next_at: string;

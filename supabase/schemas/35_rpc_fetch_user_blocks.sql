@@ -14,6 +14,7 @@ RETURNS TABLE (
   is_vocabulary BOOLEAN,
   show_in_topics BOOLEAN,
   is_practice_block BOOLEAN,
+  requires_initial_training BOOLEAN,
   started_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ,
   next_at TIMESTAMPTZ,
@@ -39,6 +40,7 @@ BEGIN
     (b.grammar_chunk_id IS NULL) AS is_vocabulary,
     b.show_in_topics,
     b.is_practice_block,
+    b.requires_initial_training,
     ub.started_at,
     GREATEST(
       COALESCE(ub.updated_at, public.rpc_min_timestamptz()),

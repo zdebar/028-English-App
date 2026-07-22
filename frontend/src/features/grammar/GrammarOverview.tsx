@@ -52,8 +52,12 @@ export default function GrammarOverview(): JSX.Element {
     }
 
     try {
-      const resetCount = await UserItem.resetItemsByGrammarGroupId(userId, currentItem.id);
-      const resetBlockCount = await UserBlock.resetByGrammarGroupId(userId, currentItem.id);
+      const resetCount = currentItem.standalone_chunk_id != null
+        ? await UserItem.resetItemsByGrammarChunkId(userId, currentItem.standalone_chunk_id)
+        : await UserItem.resetItemsByGrammarGroupId(userId, currentItem.id);
+      const resetBlockCount = currentItem.standalone_chunk_id != null
+        ? await UserBlock.resetByGrammarChunkId(userId, currentItem.standalone_chunk_id)
+        : await UserBlock.resetByGrammarGroupId(userId, currentItem.id);
       reportInfo(
         `Grammar ${currentItem.id} reset completed: ${resetCount} items and ${resetBlockCount} blocks reset.`,
       );
@@ -76,7 +80,7 @@ export default function GrammarOverview(): JSX.Element {
         <DataState loading={loading} hasData={hasData} noDataMessage={TEXTS.noGrammar}>
           {grammarList.map((item, index) => (
             <ListButton
-              key={item.id}
+              key={item.standalone_chunk_id != null ? `chunk-${item.id}` : `group-${item.id}`}
               className="h-input justify-start px-4"
               onClick={() => setCurrentIndex(index)}
               title={item.name}

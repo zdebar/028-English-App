@@ -15,7 +15,7 @@ const mocks = vi.hoisted(() => ({
     currentItem: null as { item_id: number } | null,
     noteId: null,
     grammarChunkId: null,
-    progressLabel: 'Round 1/2',
+    progressLabel: '1/2 · 0/1',
     isCzToEn: true,
     revealed: false,
     czech: 'ahoj',
@@ -48,7 +48,7 @@ vi.mock('@/locales/cs', () => ({
     tooltipHome: 'Home',
     loadingMessage: 'Loading',
     loadingError: 'Loading error',
-    newGrammarComplete: 'Complete',
+    blockTrainingComplete: 'Complete',
     continuePractice: 'Continue',
   },
 }));
@@ -72,14 +72,14 @@ vi.mock('@/features/logging/monitoring-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
 
-vi.mock('@/features/practice/hooks/use-new-grammar-practice-deck', () => ({
-  useNewGrammarPracticeDeck: () => mocks.deck,
+vi.mock('@/features/practice/hooks/use-block-training-deck', () => ({
+  useBlockTrainingDeck: () => mocks.deck,
 }));
 
-vi.mock('@/features/practice/NewGrammarOverviewCard', () => ({
+vi.mock('@/features/practice/BlockTrainingOverviewCard', () => ({
   default: ({ block, grammar, onClose, onContinue }: any) => (
     <div>
-      <div data-testid="new-grammar-overview">
+      <div data-testid="block-training-overview">
         {block?.name}:{grammar?.name}
       </div>
       <button type="button" onClick={onContinue}>
@@ -100,9 +100,9 @@ vi.mock('@/features/practice/PracticeSessionCard', () => ({
   ),
 }));
 
-import NewGrammarPractice from '@/pages/NewGrammarPractice';
+import BlockTrainingPractice from '@/pages/BlockTrainingPractice';
 
-describe('NewGrammarPractice', () => {
+describe('BlockTrainingPractice', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
@@ -123,7 +123,7 @@ describe('NewGrammarPractice', () => {
   it('shows delayed loading circle instead of empty state while deck is loading', () => {
     mocks.deck.loading = true;
 
-    const { container } = render(<NewGrammarPractice />);
+    const { container } = render(<BlockTrainingPractice />);
 
     expect(screen.queryByText('Nothing to practice')).toBeNull();
     expect(screen.queryByText('Try again later')).toBeNull();
@@ -136,8 +136,8 @@ describe('NewGrammarPractice', () => {
     expect(screen.getByLabelText('Loading')).toBeTruthy();
   });
 
-  it('renders shared empty state when there is no new grammar block', () => {
-    render(<NewGrammarPractice />);
+  it('renders shared empty state when there is no training block', () => {
+    render(<BlockTrainingPractice />);
 
     expect(screen.getByText('Nothing to practice')).toBeTruthy();
     expect(screen.getByText('Try again later')).toBeTruthy();
@@ -150,12 +150,12 @@ describe('NewGrammarPractice', () => {
     mocks.deck.block = { name: 'Block A' };
     mocks.deck.grammar = { id: 1, name: 'Articles' };
 
-    render(<NewGrammarPractice />);
+    render(<BlockTrainingPractice />);
 
     expect(screen.getByText('Nothing to practice')).toBeTruthy();
     expect(screen.getByText('Try again later')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Home' })).toBeTruthy();
-    expect(screen.queryByTestId('new-grammar-overview')).toBeNull();
+    expect(screen.queryByTestId('block-training-overview')).toBeNull();
   });
 
   it('shows the combined block and grammar overview before practice', () => {
@@ -163,9 +163,9 @@ describe('NewGrammarPractice', () => {
     mocks.deck.grammar = { id: 1, name: 'Articles' };
     mocks.deck.currentItem = { item_id: 1 };
 
-    render(<NewGrammarPractice />);
+    render(<BlockTrainingPractice />);
 
-    expect(screen.getByTestId('new-grammar-overview').textContent).toBe('Block A:Articles');
+    expect(screen.getByTestId('block-training-overview').textContent).toBe('Block A:Articles');
     expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy();
     expect(screen.queryByTestId('practice-session')).toBeNull();
   });
@@ -175,11 +175,22 @@ describe('NewGrammarPractice', () => {
     mocks.deck.grammar = { id: 1, name: 'Articles' };
     mocks.deck.currentItem = { item_id: 1 };
 
-    render(<NewGrammarPractice />);
+    render(<BlockTrainingPractice />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
 
     expect(screen.getByTestId('practice-session').textContent).toBe('ahoj:hello');
+  });
+
+  it('shows the block overview when the training block has no grammar', () => {
+    mocks.deck.block = { name: 'Block A' };
+    mocks.deck.grammar = null;
+    mocks.deck.currentItem = { item_id: 1 };
+
+    render(<BlockTrainingPractice />);
+
+    expect(screen.getByTestId('block-training-overview').textContent).toBe('Block A:');
+    expect(screen.queryByTestId('practice-session')).toBeNull();
   });
 
   it('closes the combined overview back to unified practice', () => {
@@ -187,7 +198,7 @@ describe('NewGrammarPractice', () => {
     mocks.deck.grammar = { id: 1, name: 'Articles' };
     mocks.deck.currentItem = { item_id: 1 };
 
-    render(<NewGrammarPractice />);
+    render(<BlockTrainingPractice />);
 
     fireEvent.click(screen.getByRole('button', { name: 'close overview' }));
 
@@ -199,12 +210,12 @@ describe('NewGrammarPractice', () => {
     mocks.deck.grammar = { id: 1, name: 'Articles' };
     mocks.deck.isComplete = true;
 
-    render(<NewGrammarPractice />);
+    render(<BlockTrainingPractice />);
 
     expect(screen.getByText('Complete')).toBeTruthy();
     expect(screen.getByText('Block A')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
     expect(mocks.navigate).toHaveBeenCalledWith('/practice', { replace: true });
-    expect(screen.queryByTestId('new-grammar-overview')).toBeNull();
+    expect(screen.queryByTestId('block-training-overview')).toBeNull();
   });
 });

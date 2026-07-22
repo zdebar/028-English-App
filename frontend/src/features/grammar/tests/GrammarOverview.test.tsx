@@ -8,7 +8,9 @@ const mocks = vi.hoisted(() => ({
   sanitize: vi.fn(),
   reload: vi.fn(),
   resetItemsByGrammarGroupId: vi.fn(),
+  resetItemsByGrammarChunkId: vi.fn(),
   resetByGrammarGroupId: vi.fn(),
+  resetByGrammarChunkId: vi.fn(),
   showToast: vi.fn(),
   reportInfo: vi.fn(),
   reportError: vi.fn(),
@@ -37,12 +39,14 @@ vi.mock('@/database/models/grammar-groups', () => ({
 vi.mock('@/database/models/user-items', () => ({
   default: {
     resetItemsByGrammarGroupId: (...args: unknown[]) => mocks.resetItemsByGrammarGroupId(...args),
+    resetItemsByGrammarChunkId: (...args: unknown[]) => mocks.resetItemsByGrammarChunkId(...args),
   },
 }));
 
 vi.mock('@/database/models/user-blocks', () => ({
   default: {
     resetByGrammarGroupId: (...args: unknown[]) => mocks.resetByGrammarGroupId(...args),
+    resetByGrammarChunkId: (...args: unknown[]) => mocks.resetByGrammarChunkId(...args),
   },
 }));
 
@@ -147,7 +151,9 @@ describe('GrammarOverview', () => {
     };
     mocks.sanitize.mockImplementation((value: string) => value);
     mocks.resetItemsByGrammarGroupId.mockResolvedValue(4);
+    mocks.resetItemsByGrammarChunkId.mockResolvedValue(3);
     mocks.resetByGrammarGroupId.mockResolvedValue(2);
+    mocks.resetByGrammarChunkId.mockResolvedValue(1);
   });
 
   it('renders list view with grammar items and opens selected grammar', () => {
@@ -222,6 +228,30 @@ describe('GrammarOverview', () => {
       );
       expect(mocks.showToast).toHaveBeenCalledWith('Reset success', 'success');
     });
+  });
+
+  it('resets an ungrouped grammar chunk directly', async () => {
+    mocks.arrayState.currentIndex = 0;
+    mocks.arrayState.currentItem = {
+      id: 8,
+      name: 'Standalone grammar',
+      note: null,
+      chunks: [],
+      standalone_chunk_id: 8,
+    };
+
+    render(<GrammarOverview />);
+    fireEvent.click(screen.getByTestId('overview-reset'));
+
+    await waitFor(() => {
+      expect(mocks.resetItemsByGrammarChunkId).toHaveBeenCalledWith('u1', 8);
+      expect(mocks.resetByGrammarChunkId).toHaveBeenCalledWith('u1', 8);
+      expect(mocks.reportInfo).toHaveBeenCalledWith(
+        'Grammar 8 reset completed: 3 items and 1 blocks reset.',
+      );
+    });
+    expect(mocks.resetItemsByGrammarGroupId).not.toHaveBeenCalled();
+    expect(mocks.resetByGrammarGroupId).not.toHaveBeenCalled();
   });
 
   it('shows error toast when block reset fails', async () => {

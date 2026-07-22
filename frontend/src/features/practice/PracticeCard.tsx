@@ -17,7 +17,7 @@ export default function PracticeCard() {
   const navigate = useNavigate();
   const {
     currentItem,
-    triggerBlockId,
+    trainingBlockId,
     noteId,
     grammarChunkId,
     progress,
@@ -45,11 +45,11 @@ export default function PracticeCard() {
   }, [error, showToast]);
 
   useEffect(() => {
-    if (triggerBlockId == null) return;
-    navigate(ROUTES.practiceNewGrammar, { state: { blockId: triggerBlockId } });
-  }, [navigate, triggerBlockId]);
+    if (trainingBlockId == null) return;
+    navigate(ROUTES.practiceBlockTraining, { state: { blockId: trainingBlockId } });
+  }, [navigate, trainingBlockId]);
 
-  if (triggerBlockId != null) {
+  if (trainingBlockId != null) {
     return <DelayedLoadingCircle />;
   }
 

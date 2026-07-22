@@ -29,7 +29,7 @@ vi.mock('@/config/config', () => ({
     progress: {
       simulationProgress: 2,
       simulationCount: 10,
-      simulationMasteredGrammarBlockCount: 3,
+      simulationMasteredTrainingBlockCount: 3,
     },
     practice: {
       readyPracticeScheduleGroupWindowMs: 1000,
@@ -285,7 +285,7 @@ describe('UserBlock', () => {
     });
   });
 
-  it('simulates three mastered grammar blocks and leaves the fourth unstarted', async () => {
+  it('simulates three mastered training blocks and leaves the fourth unstarted', async () => {
     mocks.toArray.mockResolvedValueOnce([
       {
         user_id: 'u1',
@@ -294,6 +294,7 @@ describe('UserBlock', () => {
         sort_order: 1,
         is_vocabulary: false,
         is_practice_block: true,
+        requires_initial_training: true,
       },
       {
         user_id: 'u1',
@@ -302,6 +303,7 @@ describe('UserBlock', () => {
         sort_order: 2,
         is_vocabulary: false,
         is_practice_block: true,
+        requires_initial_training: true,
       },
       {
         user_id: 'u1',
@@ -310,6 +312,7 @@ describe('UserBlock', () => {
         sort_order: 1,
         is_vocabulary: false,
         is_practice_block: true,
+        requires_initial_training: true,
       },
       {
         user_id: 'u1',
@@ -318,6 +321,7 @@ describe('UserBlock', () => {
         sort_order: 3,
         is_vocabulary: false,
         is_practice_block: true,
+        requires_initial_training: true,
       },
       {
         user_id: 'u1',
@@ -326,11 +330,12 @@ describe('UserBlock', () => {
         sort_order: 0,
         is_vocabulary: true,
         is_practice_block: true,
+        requires_initial_training: false,
       },
     ]);
 
     await expect(
-      UserBlock.simulateGrammarProgress('u1', '2026-07-17T12:00:00.000Z'),
+      UserBlock.simulateInitialTrainingProgress('u1', '2026-07-17T12:00:00.000Z'),
     ).resolves.toBe(3);
 
     expect(mocks.update.mock.calls).toEqual([
@@ -343,7 +348,7 @@ describe('UserBlock', () => {
     ]);
   });
 
-  it('rejects grammar simulation when four eligible blocks are unavailable', async () => {
+  it('rejects training simulation when four eligible blocks are unavailable', async () => {
     mocks.toArray.mockResolvedValueOnce([
       {
         user_id: 'u1',
@@ -352,12 +357,13 @@ describe('UserBlock', () => {
         sort_order: 1,
         is_vocabulary: false,
         is_practice_block: true,
+        requires_initial_training: true,
       },
     ]);
 
     await expect(
-      UserBlock.simulateGrammarProgress('u1', '2026-07-17T12:00:00.000Z'),
-    ).rejects.toThrow('requires at least 4 practice grammar blocks');
+      UserBlock.simulateInitialTrainingProgress('u1', '2026-07-17T12:00:00.000Z'),
+    ).rejects.toThrow('requires at least 4 initial-training blocks');
     expect(mocks.update).not.toHaveBeenCalled();
   });
 
@@ -456,6 +462,7 @@ describe('UserBlock', () => {
           is_vocabulary: false,
           show_in_topics: false,
           is_practice_block: false,
+          requires_initial_training: true,
           started_at: null,
           updated_at: '2026-03-04T00:00:00.000Z',
           next_at: null,
@@ -496,6 +503,7 @@ describe('UserBlock', () => {
         note: null,
         show_in_topics: false,
         is_practice_block: false,
+        requires_initial_training: true,
         started_at: '9999-12-31T23:59:59+00:00',
         next_at: '9999-12-31T23:59:59+00:00',
         mastered_at: '9999-12-31T23:59:59+00:00',
@@ -522,6 +530,7 @@ describe('UserBlock', () => {
           sort_order: 1,
           progress: 0,
           is_vocabulary: false,
+          requires_initial_training: false,
           started_at: null,
           updated_at: '2026-03-04T00:00:00.000Z',
           next_at: null,
@@ -539,6 +548,7 @@ describe('UserBlock', () => {
         block_id: 1,
         show_in_topics: true,
         is_practice_block: true,
+        requires_initial_training: false,
       }),
     ]);
   });

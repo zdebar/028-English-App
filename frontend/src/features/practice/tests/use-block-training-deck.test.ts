@@ -9,7 +9,7 @@ const markBlockMasteredMock = vi.fn();
 const unlockBlockMock = vi.fn();
 const getByBlockIdMock = vi.fn();
 const savePracticeDeckMock = vi.fn();
-const saveNewGrammarBlockCompletionMock = vi.fn();
+const saveInitialTrainingBlockCompletionMock = vi.fn();
 const getGrammarByIdMock = vi.fn();
 const addItemCountMock = vi.fn();
 const playAudioMock = vi.fn();
@@ -35,8 +35,8 @@ vi.mock('@/database/models/user-items', () => ({
   default: {
     getByBlockId: (...args: unknown[]) => getByBlockIdMock(...args),
     savePracticeDeck: (...args: unknown[]) => savePracticeDeckMock(...args),
-    saveNewGrammarBlockCompletion: (...args: unknown[]) =>
-      saveNewGrammarBlockCompletionMock(...args),
+    saveInitialTrainingBlockCompletion: (...args: unknown[]) =>
+      saveInitialTrainingBlockCompletionMock(...args),
   },
 }));
 
@@ -75,13 +75,7 @@ vi.mock('@/features/logging/monitoring-handler', () => ({
   reportError: vi.fn(),
 }));
 
-vi.mock('@/locales/cs', () => ({
-  TEXTS: {
-    newGrammarRound: 'Round',
-  },
-}));
-
-import { useNewGrammarPracticeDeck } from '../hooks/use-new-grammar-practice-deck';
+import { useBlockTrainingDeck } from '../hooks/use-block-training-deck';
 
 function makeBlock(overrides: Partial<UserBlockType> = {}): UserBlockType {
   return {
@@ -96,6 +90,7 @@ function makeBlock(overrides: Partial<UserBlockType> = {}): UserBlockType {
     progress: 0,
     show_in_topics: true,
     is_practice_block: true,
+    requires_initial_training: true,
     started_at: '2026-01-01',
     updated_at: '2026-01-01',
     next_at: '2026-01-01',
@@ -122,6 +117,7 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
     updated_at: '2026-01-01',
     is_vocabulary: 0,
     is_practice_item: 1,
+    requires_initial_training: true,
     block_id: 10,
     grammar_chunk_id: 20,
     started_at: '2026-01-01',
@@ -132,7 +128,7 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
   };
 }
 
-describe('useNewGrammarPracticeDeck', () => {
+describe('useBlockTrainingDeck', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -141,13 +137,13 @@ describe('useNewGrammarPracticeDeck', () => {
     getGrammarByIdMock.mockResolvedValue({ id: 20, name: 'Articles', note: 'Grammar note' });
     addItemCountMock.mockResolvedValue(undefined);
     savePracticeDeckMock.mockResolvedValue(undefined);
-    saveNewGrammarBlockCompletionMock.mockResolvedValue(undefined);
+    saveInitialTrainingBlockCompletionMock.mockResolvedValue(undefined);
     markBlockMasteredMock.mockResolvedValue(undefined);
     unlockBlockMock.mockResolvedValue(undefined);
   });
 
-  it('loads the first unlocked grammar block and exposes card state', async () => {
-    const { result } = renderHook(() => useNewGrammarPracticeDeck('user-1', 10));
+  it('loads the selected training block and exposes card state', async () => {
+    const { result } = renderHook(() => useBlockTrainingDeck('user-1', 10));
 
     await waitFor(() => expect(result.current.block?.block_id).toBe(10));
 
@@ -160,8 +156,35 @@ describe('useNewGrammarPracticeDeck', () => {
     expect('repeatDisabled' in result.current).toBe(false);
   });
 
+  it('loads a grammarless block when it explicitly requires initial training', async () => {
+    getUserBlockByIdMock.mockResolvedValue(
+      makeBlock({ grammar_chunk_id: null, is_vocabulary: true }),
+    );
+    getByBlockIdMock.mockResolvedValue([makeItem({ grammar_chunk_id: 0, is_vocabulary: 1 })]);
+
+    const { result } = renderHook(() => useBlockTrainingDeck('user-1', 10));
+
+    await waitFor(() => expect(result.current.block?.block_id).toBe(10));
+
+    expect(result.current.grammar).toBeNull();
+    expect(result.current.currentItem?.item_id).toBe(1);
+    expect(getGrammarByIdMock).not.toHaveBeenCalled();
+  });
+
+  it('rejects a grammar-linked block that does not require initial training', async () => {
+    getUserBlockByIdMock.mockResolvedValue(makeBlock({ requires_initial_training: false }));
+
+    const { result } = renderHook(() => useBlockTrainingDeck('user-1', 10));
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.block).toBeNull();
+    expect(getByBlockIdMock).not.toHaveBeenCalled();
+    expect(getGrammarByIdMock).not.toHaveBeenCalled();
+  });
+
   it('uses the same reveal flow, including direction confirmation before audio reveal', async () => {
-    const { result } = renderHook(() => useNewGrammarPracticeDeck('user-1', 10));
+    const { result } = renderHook(() => useBlockTrainingDeck('user-1', 10));
 
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
 
@@ -186,7 +209,7 @@ describe('useNewGrammarPracticeDeck', () => {
       makeItem({ item_id: 2, sort_order: 2 }),
     ]);
 
-    const { result } = renderHook(() => useNewGrammarPracticeDeck('user-1', 10));
+    const { result } = renderHook(() => useBlockTrainingDeck('user-1', 10));
 
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
 
@@ -208,7 +231,7 @@ describe('useNewGrammarPracticeDeck', () => {
 
     expect(result.current.currentItem?.item_id).toBe(1);
     expect(result.current.progressLabel).toBe('2/2 · 0/2');
-    expect(saveNewGrammarBlockCompletionMock).not.toHaveBeenCalled();
+    expect(saveInitialTrainingBlockCompletionMock).not.toHaveBeenCalled();
     expect(markBlockMasteredMock).not.toHaveBeenCalled();
     expect(addItemCountMock).toHaveBeenCalledTimes(3);
   });
@@ -219,7 +242,7 @@ describe('useNewGrammarPracticeDeck', () => {
       makeItem({ item_id: 2, sort_order: 2 }),
     ]);
 
-    const { result } = renderHook(() => useNewGrammarPracticeDeck('user-1', 10));
+    const { result } = renderHook(() => useBlockTrainingDeck('user-1', 10));
 
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
 
@@ -249,7 +272,7 @@ describe('useNewGrammarPracticeDeck', () => {
     });
 
     expect(result.current.isComplete).toBe(true);
-    expect(saveNewGrammarBlockCompletionMock).toHaveBeenCalledWith(
+    expect(saveInitialTrainingBlockCompletionMock).toHaveBeenCalledWith(
       'user-1',
       10,
       expect.any(String),
@@ -260,7 +283,7 @@ describe('useNewGrammarPracticeDeck', () => {
   });
 
   it('keeps running repeat waves until repeated items are marked known', async () => {
-    const { result } = renderHook(() => useNewGrammarPracticeDeck('user-1', 10));
+    const { result } = renderHook(() => useBlockTrainingDeck('user-1', 10));
 
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
 
@@ -285,7 +308,7 @@ describe('useNewGrammarPracticeDeck', () => {
   });
 
   it('known advances two rounds and saves completion after the final round', async () => {
-    const { result } = renderHook(() => useNewGrammarPracticeDeck('user-1', 10));
+    const { result } = renderHook(() => useBlockTrainingDeck('user-1', 10));
 
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
 
@@ -299,7 +322,7 @@ describe('useNewGrammarPracticeDeck', () => {
     });
 
     expect(result.current.isComplete).toBe(true);
-    expect(saveNewGrammarBlockCompletionMock).toHaveBeenCalledWith(
+    expect(saveInitialTrainingBlockCompletionMock).toHaveBeenCalledWith(
       'user-1',
       10,
       expect.any(String),
@@ -315,7 +338,7 @@ describe('useNewGrammarPracticeDeck', () => {
       makeItem({ item_id: 2, sort_order: 2 }),
     ]);
 
-    const { result } = renderHook(() => useNewGrammarPracticeDeck('user-1', 10));
+    const { result } = renderHook(() => useBlockTrainingDeck('user-1', 10));
 
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
 
@@ -351,7 +374,7 @@ describe('useNewGrammarPracticeDeck', () => {
   });
 
   it('skipping all active items completes the block', async () => {
-    const { result } = renderHook(() => useNewGrammarPracticeDeck('user-1', 10));
+    const { result } = renderHook(() => useBlockTrainingDeck('user-1', 10));
 
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
 
@@ -361,7 +384,7 @@ describe('useNewGrammarPracticeDeck', () => {
 
     expect(result.current.isComplete).toBe(true);
     expect(savePracticeDeckMock).toHaveBeenCalledTimes(1);
-    expect(saveNewGrammarBlockCompletionMock).toHaveBeenCalledWith(
+    expect(saveInitialTrainingBlockCompletionMock).toHaveBeenCalledWith(
       'user-1',
       10,
       expect.any(String),

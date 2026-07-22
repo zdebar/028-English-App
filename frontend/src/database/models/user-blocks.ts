@@ -38,6 +38,7 @@ function convertAPIToLocal(block: UserBlockAPI): UserBlockType {
     is_vocabulary: block.is_vocabulary,
     show_in_topics: block.show_in_topics ?? true,
     is_practice_block: block.is_practice_block ?? true,
+    requires_initial_training: block.requires_initial_training,
     started_at: block.started_at ?? NULL_DATE,
     next_at: block.next_at ?? NULL_DATE,
     mastered_at: block.mastered_at ?? NULL_DATE,
@@ -62,7 +63,7 @@ function convertLocalToExport(block: UserBlockType): UserBlockExport {
  *
  * Public API:
  * - Topic views: `getByUserId`, `getStartedTopicsByUserId`, and `getByBlockId`.
- * - Grammar transitions: start/master actions used by the triggered new-grammar flow.
+ * - Block transitions: start/master actions used by the initial-training flow.
  * - Maintenance: grammar/block resets, local account deletion, and remote sync.
  *
  * Block timestamps use the configured null replacement date locally and convert to null for remote sync.
@@ -79,6 +80,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
   is_vocabulary!: boolean;
   show_in_topics!: boolean;
   is_practice_block!: boolean;
+  requires_initial_training!: boolean;
   started_at!: string;
   updated_at!: string;
   next_at!: string;
@@ -142,7 +144,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
   }
 
   /**
-   * Marks a grammar block as unlocked/started.
+   * Marks a block as unlocked/started.
    *
    * @param userId Non-empty user id owning the block.
    * @param blockId Block id to unlock.
@@ -159,7 +161,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
   }
 
   /**
-   * Marks a grammar block as mastered.
+   * Marks a block as mastered.
    *
    * @param userId Non-empty user id owning the block.
    * @param blockId Block id to master.
@@ -177,32 +179,32 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
   }
 
   /**
-   * Creates the grammar-block portion of the anonymous-user simulation fixture.
-   * The first configured number of grammar blocks are started and mastered. The next block stays
-   * unstarted so unified practice can discover it as a new-grammar trigger.
+   * Creates the training-block portion of the anonymous-user simulation fixture.
+   * The first configured number of training blocks are started and mastered. The next block stays
+   * unstarted so unified practice can discover it as an initial-training trigger.
    *
    * @param userId Non-empty user id owning the blocks.
    * @param dateTime Shared ISO timestamp for every simulated transition.
-   * @returns Number of grammar blocks changed.
-   * @throws Error when the required number of practice grammar blocks is unavailable.
+   * @returns Number of training blocks changed.
+   * @throws Error when the required number of training blocks is unavailable.
    */
-  static async simulateGrammarProgress(userId: string, dateTime: string): Promise<number> {
+  static async simulateInitialTrainingProgress(userId: string, dateTime: string): Promise<number> {
     assertNonEmptyString(userId, 'userId');
 
-    const masteredCount = config.progress.simulationMasteredGrammarBlockCount;
+    const masteredCount = config.progress.simulationMasteredTrainingBlockCount;
     const requiredCount = masteredCount + 1;
-    const grammarBlocks = (await this.getByUserId(userId))
-      .filter((block) => block.is_practice_block !== false && !block.is_vocabulary)
-      .sort(compareGrammarBlocks)
+    const trainingBlocks = (await this.getByUserId(userId))
+      .filter((block) => block.is_practice_block !== false && block.requires_initial_training)
+      .sort(compareTrainingBlocks)
       .slice(0, requiredCount);
 
-    if (grammarBlocks.length < requiredCount) {
+    if (trainingBlocks.length < requiredCount) {
       throw new Error(
-        `Simulation requires at least ${requiredCount} practice grammar blocks for user ${userId}.`,
+        `Simulation requires at least ${requiredCount} initial-training blocks for user ${userId}.`,
       );
     }
 
-    for (const block of grammarBlocks.slice(0, masteredCount)) {
+    for (const block of trainingBlocks.slice(0, masteredCount)) {
       await this.unlockBlock(userId, block.block_id, dateTime);
       await this.markBlockMastered(userId, block.block_id, dateTime);
     }
@@ -393,7 +395,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
 
 }
 
-function compareGrammarBlocks(left: UserBlockType, right: UserBlockType): number {
+function compareTrainingBlocks(left: UserBlockType, right: UserBlockType): number {
   if (left.lesson_id !== right.lesson_id) {
     return left.lesson_id - right.lesson_id;
   }

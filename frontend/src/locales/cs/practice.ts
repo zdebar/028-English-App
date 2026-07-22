@@ -19,8 +19,7 @@ export const PRACTICE_TEXTS = {
   skipErrorToast: 'Dokončení položky se nezdařilo.',
   volume: 'Nastavení hlasitosti',
   nextStarProgress: 'Denní pokrok',
-  newGrammarRound: 'Kolo',
-  newGrammarFinishAll: 'dokončete celý blok pro pokračování',
-  newGrammarProgressHelp: 'Kolo · Položky',
-  newGrammarComplete: 'dokončeno úvodní cvičení pro',
+  blockTrainingFinishAll: 'dokončete celý blok pro pokračování',
+  blockTrainingProgressHelp: 'Kolo · Položky',
+  blockTrainingComplete: 'dokončeno úvodní cvičení pro',
 } as const;

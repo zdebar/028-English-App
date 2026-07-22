@@ -34,10 +34,10 @@ export default function Guide(): JSX.Element {
         <p>Doporučený minimální denní cíl je 10 hvězdiček, tedy 400 procvičovaných položek.</p>
         <h3>Slovíčka</h3>
         <p>Základní učení a procvičování slovíček. Tlačítko je vždy k dispozici.</p>
-        <h3>Nová gramatika</h3>
+        <h3>Úvodní procvičení bloku</h3>
         <p>
-          Základní učení a procvičování nové gramatiky. Tlačítko je k dispozici po rozučení všech
-          slovíček z dané lekce.
+          Povinné úvodní procvičení nového bloku. Před procvičováním se zobrazí vysvětlení bloku
+          a případně související gramatiky.
         </p>
         <h3>Gramatika</h3>
         <p>

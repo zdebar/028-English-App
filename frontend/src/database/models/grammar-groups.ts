@@ -5,7 +5,10 @@ import Dexie from 'dexie';
 import SyncEntityModel from './sync-entity-model';
 import UserItem from './user-items';
 
-export type GrammarGroupWithChunks = GrammarGroupType & { chunks: GrammarChunkType[] };
+export type GrammarGroupWithChunks = GrammarGroupType & {
+  chunks: GrammarChunkType[];
+  standalone_chunk_id?: number;
+};
 
 export default class GrammarGroup extends SyncEntityModel implements GrammarGroupType {
   id!: number;
@@ -25,26 +28,39 @@ export default class GrammarGroup extends SyncEntityModel implements GrammarGrou
 
     const startedChunks = await db.grammar_chunks.where('id').anyOf(chunkIds).toArray();
     const chunksByGroupId = new Map<number, GrammarChunkType[]>();
+    const standaloneChunks: GrammarGroupWithChunks[] = [];
 
     for (const chunk of startedChunks) {
-      if (chunk.grammar_group_id == null) continue;
+      if (chunk.grammar_group_id == null) {
+        const { grammar_group_id: _grammarGroupId, ...standaloneChunk } = chunk;
+        standaloneChunks.push({
+          ...standaloneChunk,
+          chunks: [],
+          standalone_chunk_id: chunk.id,
+        });
+        continue;
+      }
       const groupChunks = chunksByGroupId.get(chunk.grammar_group_id) ?? [];
       groupChunks.push(chunk);
       chunksByGroupId.set(chunk.grammar_group_id, groupChunks);
     }
 
-    if (chunksByGroupId.size === 0) return [];
+    const groups =
+      chunksByGroupId.size === 0
+        ? []
+        : await db.grammar_groups
+            .where('id')
+            .anyOf([...chunksByGroupId.keys()])
+            .sortBy('sort_order');
 
-    const groups = await db.grammar_groups
-      .where('id')
-      .anyOf([...chunksByGroupId.keys()])
-      .sortBy('sort_order');
-
-    return groups.map((group) => ({
-      ...group,
-      chunks: (chunksByGroupId.get(group.id) ?? []).sort(
-        (left, right) => left.sort_order - right.sort_order,
-      ),
-    }));
+    return [
+      ...groups.map((group) => ({
+        ...group,
+        chunks: (chunksByGroupId.get(group.id) ?? []).sort(
+          (left, right) => left.sort_order - right.sort_order,
+        ),
+      })),
+      ...standaloneChunks,
+    ].sort((left, right) => left.sort_order - right.sort_order);
   }
 }

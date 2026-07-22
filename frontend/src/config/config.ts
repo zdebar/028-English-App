@@ -17,10 +17,10 @@ const config = {
     plusProgress: 1, // Progress value for a "plus" button
     minusProgress: -100, // Progress value for a "minus" button, -100 will reset the progress to 0
     skipProgress: 100, // Progress value for a "skip" button
-    afterNewGrammarProgress: 2, // Progress value after learning a new grammar item
+    afterInitialTrainingProgress: 2, // Progress after completing a block's initial training
     simulationCount: 64, // Number of items in the testing queue
     simulationProgress: 2, // Progress value for simulated data
-    simulationMasteredGrammarBlockCount: 3, // Completed grammar blocks in simulated data
+    simulationMasteredTrainingBlockCount: 3, // Completed training blocks in simulated data
   },
 
   srs: {

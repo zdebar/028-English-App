@@ -31,6 +31,7 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     updated_at: '2024-01-01T00:00:00.000Z',
     is_vocabulary: 1,
     is_practice_item: 1,
+    requires_initial_training: false,
     block_id: 1,
     grammar_chunk_id: 10,
     started_at: '2024-01-01T00:00:00.000Z',
@@ -42,7 +43,7 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
   practiceDeck: {
     index: 0,
     currentItem: null as UserItemLocal | null,
-    triggerBlockId: null as number | null,
+    trainingBlockId: null as number | null,
     noteId: null,
     grammarChunkId: 10,
     progress: 2,
@@ -78,7 +79,7 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
 }));
 
     mocks.practiceDeck.currentItem = mocks.makePracticeItem();
-    mocks.practiceDeck.triggerBlockId = null;
+    mocks.practiceDeck.trainingBlockId = null;
 
 vi.mock('@/config/config', () => ({
   default: {
@@ -116,8 +117,8 @@ vi.mock('@/locales/cs', () => ({
     loadingError: 'Loading error',
     directionCzToEn: 'CZ to EN',
     directionEnToCz: 'EN to CZ',
-    newGrammarFinishAll: 'Finish the entire block',
-    newGrammarProgressHelp: 'Round · completed items in this round',
+    blockTrainingFinishAll: 'Finish the entire block',
+    blockTrainingProgressHelp: 'Round · completed items in this round',
   },
   ARIA_TEXTS: {
     setVolume: 'Nastavit hlasitost',
@@ -419,15 +420,15 @@ describe('PracticeCard', () => {
     expect(mocks.navigate).toHaveBeenCalledWith('/');
   });
 
-  it('opens new grammar for the trigger block instead of rendering the item', () => {
-    mocks.practiceDeck.triggerBlockId = 30;
+  it('opens initial training for the trigger block instead of rendering the item', () => {
+    mocks.practiceDeck.trainingBlockId = 30;
 
     render(<PracticeCard />);
 
-    expect(mocks.navigate).toHaveBeenCalledWith('/practice/new-grammar', {
+    expect(mocks.navigate).toHaveBeenCalledWith('/practice/block-training', {
       state: { blockId: 30 },
     });
-    mocks.practiceDeck.triggerBlockId = null;
+    mocks.practiceDeck.trainingBlockId = null;
     expect(screen.queryByText('ahoj')).toBeNull();
   });
 
@@ -717,7 +718,7 @@ describe('PracticeCard', () => {
     expect((screen.getByTestId('repeat-btn') as HTMLButtonElement).disabled).toBe(true);
   });
 
-  it('shows the new grammar completion message and progress help', () => {
+  it('shows the block training completion message and progress help', () => {
     render(
       <PracticeSessionCard
         noteId={null}
@@ -737,7 +738,7 @@ describe('PracticeCard', () => {
         audioError={false}
         playAudio={vi.fn()}
         audioLoading={false}
-        isNewGrammarPractice
+        isBlockTrainingPractice
       />,
     );
 
@@ -745,7 +746,7 @@ describe('PracticeCard', () => {
     expect(screen.getByText('Round · completed items in this round')).toBeTruthy();
   });
 
-  it('temporarily replaces the new grammar completion message with an audio error', () => {
+  it('temporarily replaces the block training completion message with an audio error', () => {
     render(
       <PracticeSessionCard
         noteId={null}
@@ -765,7 +766,7 @@ describe('PracticeCard', () => {
         audioError
         playAudio={vi.fn()}
         audioLoading={false}
-        isNewGrammarPractice
+        isBlockTrainingPractice
       />,
     );
 

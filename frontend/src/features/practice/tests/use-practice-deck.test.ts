@@ -68,6 +68,7 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
     audio: 'hello.opus',
     is_vocabulary: 0,
     is_practice_item: 1,
+    requires_initial_training: false,
     sort_order: 1,
     curriculum_sort_path: [1, 1, 1, 1],
     block_id: 0,

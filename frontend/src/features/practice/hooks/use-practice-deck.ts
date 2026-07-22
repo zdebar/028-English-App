@@ -163,7 +163,7 @@ export function usePracticeDeck(userId: string | null) {
     // Core state
     index,
     currentItem,
-    triggerBlockId: currentItem?.is_new_grammar_trigger ? currentItem.block_id : null,
+    trainingBlockId: currentItem?.is_initial_training_trigger ? currentItem.block_id : null,
     noteId: currentItem?.note_id ?? null,
     grammarChunkId: currentItem?.grammar_chunk_id ?? null,
     progress: currentItem?.progress ?? 0,

@@ -36,7 +36,7 @@ vi.mock('@/config/config', () => ({
       deckSize: 10,
     },
     progress: {
-      afterNewGrammarProgress: 2,
+      afterInitialTrainingProgress: 2,
       simulationProgress: 2,
       simulationCount: 64,
     },
@@ -384,14 +384,32 @@ describe('UserItem', () => {
     expect(mocks.indexedLimit.mock.calls.map(([limit]) => limit)).toEqual([3, 3, 3]);
   });
 
-  it('shortens the alternative deck at the first item from an unstarted grammar block', async () => {
+  it('shortens the alternative deck at the first item from an unstarted training block', async () => {
     mocks.indexedToArray
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([{ item_id: 1, progress: 2 }])
       .mockResolvedValueOnce([
-        { item_id: 2, block_id: 20, grammar_chunk_id: 0, progress: 0 },
-        { item_id: 3, block_id: 30, grammar_chunk_id: 7, progress: 0 },
-        { item_id: 4, block_id: 40, grammar_chunk_id: 0, progress: 0 },
+        {
+          item_id: 2,
+          block_id: 20,
+          grammar_chunk_id: 7,
+          requires_initial_training: false,
+          progress: 0,
+        },
+        {
+          item_id: 3,
+          block_id: 30,
+          grammar_chunk_id: 0,
+          requires_initial_training: true,
+          progress: 0,
+        },
+        {
+          item_id: 4,
+          block_id: 40,
+          grammar_chunk_id: 9,
+          requires_initial_training: false,
+          progress: 0,
+        },
       ]);
     mocks.userBlockGet.mockResolvedValueOnce({
       block_id: 30,
@@ -403,7 +421,7 @@ describe('UserItem', () => {
     expect(deck.map((item) => item.item_id)).toEqual([1, 2, 3]);
     expect(deck.at(-1)).toMatchObject({
       item_id: 3,
-      is_new_grammar_trigger: true,
+      is_initial_training_trigger: true,
     });
     expect(mocks.userBlockGet).toHaveBeenCalledWith(['u1', 30]);
   });
@@ -534,7 +552,7 @@ describe('UserItem', () => {
     expect(result.map((item: any) => item.item_id)).toEqual([1, 2]);
   });
 
-  it('saveNewGrammarBlockCompletion does not downgrade skipped item progress', async () => {
+  it('saveInitialTrainingBlockCompletion does not downgrade skipped item progress', async () => {
     const dateTime = '2026-03-06T12:00:00.000Z';
     mocks.blockEqualsToArray.mockResolvedValue([
       {
@@ -555,7 +573,7 @@ describe('UserItem', () => {
       },
     ]);
 
-    await UserItem.saveNewGrammarBlockCompletion('u1', 3, dateTime);
+    await UserItem.saveInitialTrainingBlockCompletion('u1', 3, dateTime);
 
     expect(mocks.bulkPut).toHaveBeenCalledWith([
       expect.objectContaining({
@@ -739,6 +757,7 @@ describe('UserItem', () => {
           audio: null,
           is_vocabulary: true,
           is_practice_item: false,
+          requires_initial_training: true,
           sort_order: 2,
           curriculum_sort_path: [1, 2, 3, 2],
           note_id: null,
@@ -786,6 +805,7 @@ describe('UserItem', () => {
         item_id: 2,
         is_vocabulary: 1,
         is_practice_item: 0,
+        requires_initial_training: true,
         curriculum_sort_path: [1, 2, 3, 2],
         block_id: 0,
         grammar_chunk_id: 0,

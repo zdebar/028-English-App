@@ -9,13 +9,13 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 
-import NewGrammarOverviewCard from '@/features/practice/NewGrammarOverviewCard';
+import BlockTrainingOverviewCard from '@/features/practice/BlockTrainingOverviewCard';
 
-describe('NewGrammarOverviewCard', () => {
+describe('BlockTrainingOverviewCard', () => {
   it('renders the block and grammar content in one overview', () => {
     render(
       <MemoryRouter>
-        <NewGrammarOverviewCard
+        <BlockTrainingOverviewCard
           block={{ name: 'Block A', note: '<p>Block note</p>' }}
           grammar={{ id: 1, name: 'Articles', note: '<p>Grammar note</p>' }}
           onClose={vi.fn()}
@@ -36,7 +36,7 @@ describe('NewGrammarOverviewCard', () => {
     const onContinue = vi.fn();
     render(
       <MemoryRouter>
-        <NewGrammarOverviewCard
+        <BlockTrainingOverviewCard
           block={{ name: 'Block A', note: null }}
           grammar={{ id: 1, name: 'Articles', note: null }}
           onClose={onClose}
@@ -51,5 +51,22 @@ describe('NewGrammarOverviewCard', () => {
 
     expect(onContinue).toHaveBeenCalledOnce();
     expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it('shows only the block explanation when no grammar is attached', () => {
+    render(
+      <MemoryRouter>
+        <BlockTrainingOverviewCard
+          block={{ name: 'Pronouns', note: '<p>Block explanation</p>' }}
+          grammar={null}
+          onClose={vi.fn()}
+          onContinue={vi.fn()}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole('heading', { name: 'Pronouns' })).toBeTruthy();
+    expect(screen.getByText('Block explanation')).toBeTruthy();
+    expect(screen.queryByRole('heading', { level: 2 })).toBeNull();
   });
 });

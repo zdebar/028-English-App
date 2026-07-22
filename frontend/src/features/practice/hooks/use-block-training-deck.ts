@@ -11,9 +11,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
 
-type NewGrammarRound = 0 | 1;
+type BlockTrainingRound = 0 | 1;
 
-const ROUND_DIRECTIONS: Record<NewGrammarRound, 'czToEn' | 'enToCz'> = {
+const ROUND_DIRECTIONS: Record<BlockTrainingRound, 'czToEn' | 'enToCz'> = {
   0: 'czToEn',
   1: 'enToCz',
 };
@@ -22,11 +22,11 @@ function toError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
 }
 
-export function useNewGrammarPracticeDeck(userId: string | null, blockId: number | null) {
+export function useBlockTrainingDeck(userId: string | null, blockId: number | null) {
   const [block, setBlock] = useState<UserBlockType | null>(null);
   const [items, setItems] = useState<UserItemLocal[]>([]);
   const [grammar, setGrammar] = useState<GrammarDetail | null>(null);
-  const [round, setRound] = useState<NewGrammarRound>(0);
+  const [round, setRound] = useState<BlockTrainingRound>(0);
   const [totalItemCount, setTotalItemCount] = useState(0);
   const [completedItemIds, setCompletedItemIds] = useState<Set<number>>(
     () => new Set<number>(),
@@ -51,7 +51,7 @@ export function useNewGrammarPracticeDeck(userId: string | null, blockId: number
       setError(null);
       try {
         const nextBlock = blockId == null ? null : await UserBlock.getByBlockId(userId, blockId);
-        if (nextBlock == null) {
+        if (nextBlock == null || !nextBlock.requires_initial_training) {
           if (isMounted) {
             setBlock(null);
             setItems([]);
@@ -125,7 +125,7 @@ export function useNewGrammarPracticeDeck(userId: string | null, blockId: number
     async (dateTime: string = new Date().toISOString()) => {
       if (!userId || !block) return;
 
-      await UserItem.saveNewGrammarBlockCompletion(userId, block.block_id, dateTime);
+      await UserItem.saveInitialTrainingBlockCompletion(userId, block.block_id, dateTime);
       await UserBlock.unlockBlock(userId, block.block_id, dateTime);
       await UserBlock.markBlockMastered(userId, block.block_id, dateTime);
       setIsComplete(true);
@@ -192,7 +192,7 @@ export function useNewGrammarPracticeDeck(userId: string | null, blockId: number
 
         await setNextQueueState(remainingCurrentQueue, remainingNextWaveQueue, items);
       } catch (error) {
-        reportError('Failed to advance new grammar practice', error);
+        reportError('Failed to advance block training', error);
       }
     },
     [block, currentItem, currentQueue, isComplete, items, nextWaveQueue, setNextQueueState, userId],
@@ -238,7 +238,7 @@ export function useNewGrammarPracticeDeck(userId: string | null, blockId: number
 
       await setNextQueueState(remainingCurrentQueue, remainingNextWaveQueue, remainingItems);
     } catch (error) {
-      reportError('Failed to skip new grammar practice item', error);
+      reportError('Failed to skip block training item', error);
       throw error;
     }
   }, [

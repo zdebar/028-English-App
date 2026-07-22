@@ -28,6 +28,7 @@ export interface UserItemBase {
 export interface UserItemLocal extends UserItemBase {
   is_vocabulary: 0 | 1;
   is_practice_item: 0 | 1;
+  requires_initial_training: boolean;
   block_id: number;
   grammar_chunk_id: number;
   started_at: string;
@@ -35,5 +36,5 @@ export interface UserItemLocal extends UserItemBase {
   next_at: string;
   mastered_at: string;
   curriculum_sort_path: CurriculumSortPath;
-  is_new_grammar_trigger?: boolean;
+  is_initial_training_trigger?: boolean;
 }

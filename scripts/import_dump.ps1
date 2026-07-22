@@ -1,6 +1,6 @@
 param(
     [string]$DumpPath = "backend/supabase/remote_full.sql",
-    [int]$Port = 54322,
+    [int]$Port = 55432,
     [string]$User = "postgres",
     [string]$Db = "postgres"
 )
@@ -12,7 +12,7 @@ if (-not (Test-Path $DumpPath)) {
 
 Write-Host "Importing $DumpPath into local supabase DB on port $Port..."
 
-# Přes psql import (supabase start spustí Postgres na 54322)
+# Přes psql import (supabase start spustí Postgres na 55432)
 psql -h localhost -p $Port -U $User -d $Db -f $DumpPath
 
 if ($LASTEXITCODE -ne 0) {

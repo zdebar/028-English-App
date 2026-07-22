@@ -18,7 +18,7 @@ export async function simulateUserProgress(
 
   const itemCount = await db.transaction('rw', db.user_items, db.user_blocks, async () => {
     const updatedItemCount = await UserItem.simulateData(userId, dateTime);
-    await UserBlock.simulateGrammarProgress(userId, dateTime);
+    await UserBlock.simulateInitialTrainingProgress(userId, dateTime);
     return updatedItemCount;
   });
 

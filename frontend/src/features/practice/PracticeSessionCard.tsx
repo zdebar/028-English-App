@@ -42,7 +42,7 @@ export type PracticeSessionCardProps = Readonly<{
   audioError: boolean;
   playAudio: () => void;
   audioLoading: boolean;
-  isNewGrammarPractice?: boolean;
+  isBlockTrainingPractice?: boolean;
 }>;
 
 export default function PracticeSessionCard({
@@ -66,7 +66,7 @@ export default function PracticeSessionCard({
   audioError,
   playAudio,
   audioLoading,
-  isNewGrammarPractice = false,
+  isBlockTrainingPractice = false,
 }: PracticeSessionCardProps) {
   const dailyCount = useUserStore((state) => state.dailyCount);
   const { isGrammarVisible, grammarData, openGrammar, closeGrammar } = useGrammarViewer();
@@ -94,8 +94,8 @@ export default function PracticeSessionCard({
 
   const topStatusMessage =
     audioStatusMessage ??
-    (isNewGrammarPractice ? (
-      <p className="color-info font-headings">{TEXTS.newGrammarFinishAll}</p>
+    (isBlockTrainingPractice ? (
+      <p className="color-info font-headings">{TEXTS.blockTrainingFinishAll}</p>
     ) : null);
 
   if (isGrammarVisible) {
@@ -136,7 +136,7 @@ export default function PracticeSessionCard({
               {progressLabel}
             </p>
             <HelpText className="bottom-7.5">
-              {isNewGrammarPractice ? TEXTS.newGrammarProgressHelp : TEXTS.progress}
+              {isBlockTrainingPractice ? TEXTS.blockTrainingProgressHelp : TEXTS.progress}
             </HelpText>
             <div
               className="relative flex items-center gap-2 px-2 font-light"

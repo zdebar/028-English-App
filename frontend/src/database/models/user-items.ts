@@ -91,7 +91,7 @@ function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
  * Public API:
  * - Practice flow: `getPracticeDeck`, `savePracticeDeck`, and `getReadyPracticeState`.
  * - Progress lookups: `getStartedGrammarChunkIds`, `getStartedBlocksIds`, and `getStartedVocabulary`.
- * - Grammar/block workflows: trigger discovery and `saveNewGrammarBlockCompletion`.
+ * - Initial-training workflows: trigger discovery and block completion.
  * - Maintenance: reset helpers, simulation data, local account deletion, and remote sync.
  *
  * Dates use the configured null replacement date locally and convert to null for remote sync.
@@ -105,6 +105,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   audio!: string | null;
   is_vocabulary!: 0 | 1; // boolean represented as 0 or 1
   is_practice_item!: 0 | 1; // boolean represented as 0 or 1
+  requires_initial_training!: boolean;
   sort_order!: number;
   curriculum_sort_path!: CurriculumSortPath;
   note_id!: number;
@@ -141,7 +142,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     if (alternativeDeck.length < deckSize) {
       const remainingSize = deckSize - alternativeDeck.length;
       const newItems = await this.getNewPracticeItems(userId, remainingSize);
-      const checkedNewItems = await this.stopAtFirstUnstartedGrammarBlock(
+      const checkedNewItems = await this.stopAtFirstUnstartedTrainingBlock(
         userId,
         newItems,
         remainingSize,
@@ -208,21 +209,21 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Marks all items in a newly completed grammar block as started.
+   * Marks all items in a completed initial-training block as started.
    *
    * @param userId User id whose block items should be updated.
    * @param blockId Block id whose items should receive grammar-completion progress.
    * @param dateTime ISO timestamp used for started_at and updated_at. Defaults to now.
    * @returns Updated items that were written to IndexedDB; [] when the block has no items.
    */
-  static async saveNewGrammarBlockCompletion(
+  static async saveInitialTrainingBlockCompletion(
     userId: string,
     blockId: number,
     dateTime: string = new Date(Date.now()).toISOString(),
   ): Promise<UserItemLocal[]> {
     const blockItems = await this.getByBlockId(userId, blockId);
     const updatedItems = blockItems.map((item) => {
-      const progress = Math.max(item.progress, config.progress.afterNewGrammarProgress);
+      const progress = Math.max(item.progress, config.progress.afterInitialTrainingProgress);
 
       return {
         ...item,
@@ -610,8 +611,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .toArray();
   }
 
-  /** Stops new-item selection at the first item belonging to an unstarted grammar block. */
-  private static async stopAtFirstUnstartedGrammarBlock(
+  /** Stops new-item selection at the first item belonging to an unstarted training block. */
+  private static async stopAtFirstUnstartedTrainingBlock(
     userId: string,
     items: UserItemLocal[],
     limit: number,
@@ -619,10 +620,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const selected: UserItemLocal[] = [];
 
     for (const item of items) {
-      if (item.grammar_chunk_id > NULL_NUMBER) {
+      if (item.requires_initial_training) {
         const block = await db.user_blocks.get([userId, item.block_id]);
         if (block?.started_at === NULL_DATE) {
-          selected.push({ ...item, is_new_grammar_trigger: true });
+          selected.push({ ...item, is_initial_training_trigger: true });
           return selected;
         }
       }

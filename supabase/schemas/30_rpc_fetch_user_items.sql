@@ -11,6 +11,7 @@ RETURNS TABLE (
   audio TEXT,
   is_vocabulary BOOLEAN,
   is_practice_item BOOLEAN,
+  requires_initial_training BOOLEAN,
   sort_order INTEGER,
   curriculum_sort_path INTEGER[],
   note_id INTEGER,
@@ -41,6 +42,7 @@ BEGIN
     i.audio,
     (b.grammar_chunk_id IS NULL) AS is_vocabulary,
     b.is_practice_block AS is_practice_item,
+    b.requires_initial_training,
     i.sort_order,
     ARRAY[lv.sort_order, le.sort_order, b.sort_order, i.sort_order]::INTEGER[]
       AS curriculum_sort_path,
