@@ -10,7 +10,7 @@ import { liveQuery } from 'dexie';
 import { useEffect, useState, type Dispatch, type JSX, type SetStateAction } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-type HomePracticeButtonsProps = Readonly<{ userId: string }>;
+type PracticeButtonProps = Readonly<{ userId: string }>;
 
 function getReadyPracticeBadgeLabel(count: number): string {
   const badgeCap = config.practice.readyPracticeBadgeCap;
@@ -27,9 +27,7 @@ function useReadyPracticeSchedule(
 
     const nextTime = Date.parse(schedule[0].date);
     if (!Number.isFinite(nextTime)) {
-      setSchedule((current) =>
-        current.filter((entry) => Number.isFinite(Date.parse(entry.date))),
-      );
+      setSchedule((current) => current.filter((entry) => Number.isFinite(Date.parse(entry.date))));
       return;
     }
 
@@ -66,7 +64,7 @@ function ReadyPracticeBadge({ count }: Readonly<{ count: number }>): JSX.Element
   );
 }
 
-export default function HomePracticeButtons({ userId }: HomePracticeButtonsProps): JSX.Element {
+export default function PracticeButton({ userId }: PracticeButtonProps): JSX.Element {
   const badgeCap = config.practice.readyPracticeBadgeCap;
 
   const navigate = useNavigate();

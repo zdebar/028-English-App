@@ -17,19 +17,19 @@ vi.mock('@/features/help/HelpText', () => ({
   ),
 }));
 
-import PracticeButton from '@/features/practice/buttons/PracticeButton';
+import ControlButton from '@/features/practice/buttons/ControlButton';
 
 describe('PracticeButton', () => {
   it('renders icon, label as title, and children inside the button', () => {
     render(
-      <PracticeButton
+      <ControlButton
         icon={<span data-testid="icon" />}
         label="Grammar"
         onClick={vi.fn()}
         disabled={false}
       >
         <span data-testid="child" />
-      </PracticeButton>,
+      </ControlButton>,
     );
 
     expect(screen.getByTestId('icon')).toBeTruthy();
@@ -39,7 +39,7 @@ describe('PracticeButton', () => {
   });
 
   it('passes disabled state to StyledButton and clears title when disabled', () => {
-    render(<PracticeButton icon={<span />} label="Audio" onClick={vi.fn()} disabled={true} />);
+    render(<ControlButton icon={<span />} label="Audio" onClick={vi.fn()} disabled={true} />);
 
     const button = screen.getByTestId('styled-button') as HTMLButtonElement;
     expect(button.disabled).toBe(true);
@@ -49,7 +49,7 @@ describe('PracticeButton', () => {
   it('calls onClick when button is clicked', () => {
     const handleClick = vi.fn();
     render(
-      <PracticeButton
+      <ControlButton
         icon={<span />}
         label="Play"
         className="pos-help-bottom-right"

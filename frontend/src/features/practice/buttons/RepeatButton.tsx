@@ -1,11 +1,11 @@
 import RepeatIcon from '@/components/UI/icons/RepeatIcon';
 import { TEXTS } from '@/locales/cs';
 import { type PracticeButtonProps } from '../practice.types';
-import PracticeButton from './PracticeButton';
+import ControlButton from './ControlButton';
 
 export default function RepeatButton({ onClick, disabled, children }: PracticeButtonProps) {
   return (
-    <PracticeButton
+    <ControlButton
       icon={<RepeatIcon />}
       label={TEXTS.repeat}
       className="pos-help-top-left"
@@ -13,6 +13,6 @@ export default function RepeatButton({ onClick, disabled, children }: PracticeBu
       disabled={disabled}
     >
       {children}
-    </PracticeButton>
+    </ControlButton>
   );
 }

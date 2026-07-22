@@ -4,7 +4,7 @@ import ForwardIcon from '@/components/UI/icons/ForwardIcon';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import config from '@/config/config';
-import PracticeButton from './PracticeButton';
+import ControlButton from './ControlButton';
 
 type MasterItemButtonProps = Readonly<{
   onConfirm: () => void | Promise<void>;
@@ -76,7 +76,7 @@ export default function MasterItemButton({ onConfirm, disabled, children }: Mast
   }, [clearHoldTimer]);
 
   return (
-    <PracticeButton
+    <ControlButton
       icon={<ForwardIcon />}
       label={TEXTS.complete}
       className="pos-help-top-left"
@@ -88,6 +88,6 @@ export default function MasterItemButton({ onConfirm, disabled, children }: Mast
       disabled={disabled}
     >
       {children}
-    </PracticeButton>
+    </ControlButton>
   );
 }

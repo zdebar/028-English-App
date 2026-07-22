@@ -15,7 +15,7 @@ import ConvertAnonymousUserButton from '@/features/auth/ConvertAnonymousUserButt
 import PropertyView from '@/components/UI/PropertyView';
 import PracticeOverviewButton from '@/features/practice-overview/PracticeOverviewButton';
 import SimulateDataButton from '@/features/synchronization/SimulateDataButton';
-import HomePracticeButtons from '@/features/practice/HomePracticeButtons';
+import PracticeButton from '@/features/practice/PracticeButton';
 import HelpButton from '@/features/help/HelpButton';
 
 function HomeActionLinks(): JSX.Element {
@@ -62,7 +62,7 @@ export default function Home(): JSX.Element {
             helpText={TEXTS.starsToday}
             className="portrait:mt-8"
           />
-          <HomePracticeButtons userId={userId} />
+          <PracticeButton userId={userId} />
           {isSyncError && (
             <p className="text-error-light dark:text-error-dark px-4 pt-2 text-left text-sm">
               {TEXTS.syncWarning}

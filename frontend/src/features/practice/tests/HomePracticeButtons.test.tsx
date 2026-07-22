@@ -52,7 +52,7 @@ vi.mock('@/features/logging/monitoring-handler', () => ({
 }));
 vi.mock('react-router-dom', () => ({ useNavigate: () => mocks.navigate }));
 
-import HomePracticeButtons from '@/features/practice/HomePracticeButtons';
+import PracticeButton from '@/features/practice/PracticeButton';
 
 describe('HomePracticeButtons', () => {
   beforeEach(() => {
@@ -65,7 +65,7 @@ describe('HomePracticeButtons', () => {
 
   it('shows one enabled unified practice button with a capped badge', async () => {
     mocks.getReadyPracticeState.mockResolvedValue({ readyCount: 123, schedule: [] });
-    render(<HomePracticeButtons userId="u1" />);
+    render(<PracticeButton userId="u1" />);
 
     const button = await screen.findByRole('button', { name: /Practice/ });
     expect((button as HTMLButtonElement).disabled).toBe(false);
@@ -74,19 +74,19 @@ describe('HomePracticeButtons', () => {
   });
 
   it('disables practice when no item is ready', async () => {
-    render(<HomePracticeButtons userId="u1" />);
+    render(<PracticeButton userId="u1" />);
     expect((await screen.findByRole('button', { name: 'Practice' }) as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('navigates to the unified practice route', async () => {
     mocks.getReadyPracticeState.mockResolvedValue({ readyCount: 1, schedule: [] });
-    render(<HomePracticeButtons userId="u1" />);
+    render(<PracticeButton userId="u1" />);
     fireEvent.click(await screen.findByRole('button', { name: /Practice/ }));
     expect(mocks.navigate).toHaveBeenCalledWith('/practice');
   });
 
   it('updates readiness after a live-query rerun', async () => {
-    render(<HomePracticeButtons userId="u1" />);
+    render(<PracticeButton userId="u1" />);
     expect((await screen.findByRole('button', { name: 'Practice' }) as HTMLButtonElement).disabled).toBe(true);
 
     mocks.getReadyPracticeState.mockResolvedValue({ readyCount: 4, schedule: [] });
@@ -101,7 +101,7 @@ describe('HomePracticeButtons', () => {
       readyCount: 1,
       schedule: [{ date: '2026-07-21T10:00:01.000Z', count: 2 }],
     });
-    render(<HomePracticeButtons userId="u1" />);
+    render(<PracticeButton userId="u1" />);
     await act(async () => Promise.resolve());
     expect(screen.getByText('1')).toBeTruthy();
     await act(async () => vi.advanceTimersByTimeAsync(1000));
@@ -111,7 +111,7 @@ describe('HomePracticeButtons', () => {
   it('reports readiness failures and unsubscribes on unmount', async () => {
     const error = new Error('Dexie failure');
     mocks.getReadyPracticeState.mockRejectedValue(error);
-    const { unmount } = render(<HomePracticeButtons userId="u1" />);
+    const { unmount } = render(<PracticeButton userId="u1" />);
     await waitFor(() =>
       expect(mocks.reportError).toHaveBeenCalledWith(
         'Failed to load unified practice button state',

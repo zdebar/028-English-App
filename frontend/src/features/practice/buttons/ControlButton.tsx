@@ -2,7 +2,7 @@ import StyledButton from '@/components/UI/buttons/StyledButton';
 import HelpText from '@/features/help/HelpText';
 import type { ReactNode, JSX } from 'react';
 
-type PracticeButtonBaseProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
+type ControlButtonBaseProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
   Readonly<{
     icon: ReactNode;
     label: string;
@@ -10,13 +10,13 @@ type PracticeButtonBaseProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
     children?: ReactNode;
   }>;
 
-export default function PracticeButton({
+export default function ControlButton({
   icon,
   label,
   className = '',
   children,
   ...rest
-}: PracticeButtonBaseProps): JSX.Element {
+}: ControlButtonBaseProps): JSX.Element {
   return (
     <div className="relative w-full">
       <StyledButton
