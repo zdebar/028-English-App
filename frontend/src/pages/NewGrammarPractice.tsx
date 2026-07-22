@@ -93,6 +93,7 @@ export default function NewGrammarPractice(): JSX.Element {
       audioError={deck.audioError}
       playAudio={deck.playAudio}
       audioLoading={deck.audioLoading}
+      isNewGrammarPractice
     />
   );
 }

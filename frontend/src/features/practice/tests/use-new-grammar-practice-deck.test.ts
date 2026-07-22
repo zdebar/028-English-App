@@ -156,7 +156,7 @@ describe('useNewGrammarPracticeDeck', () => {
     expect(getGrammarByIdMock).toHaveBeenCalledWith(20);
     expect(result.current.currentItem?.item_id).toBe(1);
     expect(result.current.grammar?.name).toBe('Articles');
-    expect(result.current.progressLabel).toBe('Round 1/2');
+    expect(result.current.progressLabel).toBe('1/2 · 0/1');
     expect('repeatDisabled' in result.current).toBe(false);
   });
 
@@ -194,20 +194,20 @@ describe('useNewGrammarPracticeDeck', () => {
       await result.current.nextRepeat();
     });
     expect(result.current.currentItem?.item_id).toBe(2);
-    expect(result.current.progressLabel).toBe('Round 1/2');
+    expect(result.current.progressLabel).toBe('1/2 · 0/2');
 
     await act(async () => {
       await result.current.nextKnown();
     });
     expect(result.current.currentItem?.item_id).toBe(1);
-    expect(result.current.progressLabel).toBe('Round 1/2');
+    expect(result.current.progressLabel).toBe('1/2 · 1/2');
 
     await act(async () => {
       await result.current.nextKnown();
     });
 
     expect(result.current.currentItem?.item_id).toBe(1);
-    expect(result.current.progressLabel).toBe('Round 2/2');
+    expect(result.current.progressLabel).toBe('2/2 · 0/2');
     expect(saveNewGrammarBlockCompletionMock).not.toHaveBeenCalled();
     expect(markBlockMasteredMock).not.toHaveBeenCalled();
     expect(addItemCountMock).toHaveBeenCalledTimes(3);
@@ -229,7 +229,7 @@ describe('useNewGrammarPracticeDeck', () => {
     await act(async () => {
       await result.current.nextKnown();
     });
-    expect(result.current.progressLabel).toBe('Round 2/2');
+    expect(result.current.progressLabel).toBe('2/2 · 0/2');
     expect(result.current.currentItem?.item_id).toBe(1);
 
     await act(async () => {
@@ -241,7 +241,7 @@ describe('useNewGrammarPracticeDeck', () => {
       await result.current.nextRepeat();
     });
     expect(result.current.currentItem?.item_id).toBe(2);
-    expect(result.current.progressLabel).toBe('Round 2/2');
+    expect(result.current.progressLabel).toBe('2/2 · 1/2');
     expect(result.current.isComplete).toBe(false);
 
     await act(async () => {
@@ -268,18 +268,18 @@ describe('useNewGrammarPracticeDeck', () => {
       await result.current.nextRepeat();
     });
     expect(result.current.currentItem?.item_id).toBe(1);
-    expect(result.current.progressLabel).toBe('Round 1/2');
+    expect(result.current.progressLabel).toBe('1/2 · 0/1');
 
     await act(async () => {
       await result.current.nextRepeat();
     });
     expect(result.current.currentItem?.item_id).toBe(1);
-    expect(result.current.progressLabel).toBe('Round 1/2');
+    expect(result.current.progressLabel).toBe('1/2 · 0/1');
 
     await act(async () => {
       await result.current.nextKnown();
     });
-    expect(result.current.progressLabel).toBe('Round 2/2');
+    expect(result.current.progressLabel).toBe('2/2 · 0/1');
     expect(result.current.currentItem?.item_id).toBe(1);
     expect(result.current.isComplete).toBe(false);
   });
@@ -292,7 +292,7 @@ describe('useNewGrammarPracticeDeck', () => {
     await act(async () => {
       await result.current.nextKnown();
     });
-    expect(result.current.progressLabel).toBe('Round 2/2');
+    expect(result.current.progressLabel).toBe('2/2 · 0/1');
 
     await act(async () => {
       await result.current.nextKnown();
@@ -339,7 +339,7 @@ describe('useNewGrammarPracticeDeck', () => {
       await result.current.nextKnown();
     });
 
-    expect(result.current.progressLabel).toBe('Round 2/2');
+    expect(result.current.progressLabel).toBe('2/2 · 0/2');
     expect(result.current.currentItem?.item_id).toBe(2);
 
     await act(async () => {

@@ -42,6 +42,7 @@ export type PracticeSessionCardProps = Readonly<{
   audioError: boolean;
   playAudio: () => void;
   audioLoading: boolean;
+  isNewGrammarPractice?: boolean;
 }>;
 
 export default function PracticeSessionCard({
@@ -65,6 +66,7 @@ export default function PracticeSessionCard({
   audioError,
   playAudio,
   audioLoading,
+  isNewGrammarPractice = false,
 }: PracticeSessionCardProps) {
   const dailyCount = useUserStore((state) => state.dailyCount);
   const { isGrammarVisible, grammarData, openGrammar, closeGrammar } = useGrammarViewer();
@@ -87,11 +89,19 @@ export default function PracticeSessionCard({
   if (audioLoading) {
     audioStatusMessage = <DelayedNotification message={TEXTS.loadingAudio} />;
   } else if (audioError) {
-    audioStatusMessage = <p className="px-2">{TEXTS.noAudio}</p>;
+    audioStatusMessage = <p className="font-headings color-info">{TEXTS.noAudio}</p>;
   }
 
+  const topStatusMessage =
+    audioStatusMessage ??
+    (isNewGrammarPractice ? (
+      <p className="color-info font-headings">{TEXTS.newGrammarFinishAll}</p>
+    ) : null);
+
   if (isGrammarVisible) {
-    return <GrammarDetailCard grammar={grammarData} onClose={closeGrammar} showHelpButton={false} />;
+    return (
+      <GrammarDetailCard grammar={grammarData} onClose={closeGrammar} showHelpButton={false} />
+    );
   }
   if (isNoteVisible) return <NoteDetailCard note={noteData} onClose={closeNote} />;
 
@@ -108,8 +118,8 @@ export default function PracticeSessionCard({
           {!revealed && !showDirectionChange && (
             <HelpText className="center top-4">{TEXTS.reveal}</HelpText>
           )}
-          <div id="top-bar" className="relative flex h-8 w-full items-center justify-end">
-            {audioStatusMessage}
+          <div id="top-bar" className="relative h-8 w-full pt-2 text-center">
+            {topStatusMessage}
           </div>
           {showDirectionChange ? (
             <Notification className="my-auto">{directionText}</Notification>
@@ -125,7 +135,9 @@ export default function PracticeSessionCard({
             <p className="px-2 font-light" title={TEXTS.progress}>
               {progressLabel}
             </p>
-            <HelpText className="bottom-7.5">{TEXTS.progress}</HelpText>
+            <HelpText className="bottom-7.5">
+              {isNewGrammarPractice ? TEXTS.newGrammarProgressHelp : TEXTS.progress}
+            </HelpText>
             <div
               className="relative flex items-center gap-2 px-2 font-light"
               title={TEXTS.nextStarProgress}

@@ -5,7 +5,6 @@ import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
 import type { GrammarDetail } from '@/features/grammar/GrammarDetailCard';
 import { reportError } from '@/features/logging/monitoring-handler';
-import { TEXTS } from '@/locales/cs';
 import type { UserBlockType } from '@/types/generic.types';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -28,6 +27,10 @@ export function useNewGrammarPracticeDeck(userId: string | null, blockId: number
   const [items, setItems] = useState<UserItemLocal[]>([]);
   const [grammar, setGrammar] = useState<GrammarDetail | null>(null);
   const [round, setRound] = useState<NewGrammarRound>(0);
+  const [totalItemCount, setTotalItemCount] = useState(0);
+  const [completedItemIds, setCompletedItemIds] = useState<Set<number>>(
+    () => new Set<number>(),
+  );
   const [currentQueue, setCurrentQueue] = useState<UserItemLocal[]>([]);
   const [nextWaveQueue, setNextWaveQueue] = useState<UserItemLocal[]>([]);
   const [isComplete, setIsComplete] = useState(false);
@@ -52,6 +55,8 @@ export function useNewGrammarPracticeDeck(userId: string | null, blockId: number
           if (isMounted) {
             setBlock(null);
             setItems([]);
+            setTotalItemCount(0);
+            setCompletedItemIds(new Set());
             setGrammar(null);
             setCurrentQueue([]);
             setNextWaveQueue([]);
@@ -68,6 +73,8 @@ export function useNewGrammarPracticeDeck(userId: string | null, blockId: number
 
         setBlock(nextBlock);
         setItems(blockItems);
+        setTotalItemCount(blockItems.length);
+        setCompletedItemIds(new Set());
         setGrammar(grammarData);
         setRound(0);
         setCurrentQueue(blockItems);
@@ -82,6 +89,8 @@ export function useNewGrammarPracticeDeck(userId: string | null, blockId: number
         setGrammar(null);
         setCurrentQueue([]);
         setNextWaveQueue([]);
+        setTotalItemCount(0);
+        setCompletedItemIds(new Set());
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -149,6 +158,7 @@ export function useNewGrammarPracticeDeck(userId: string | null, blockId: number
 
       if (round === 0 && nextRoundItems.length > 0) {
         setRound(1);
+        setCompletedItemIds(new Set());
         setCurrentQueue(nextRoundItems);
         setNextWaveQueue([]);
         resetQuestionState();
@@ -166,6 +176,14 @@ export function useNewGrammarPracticeDeck(userId: string | null, blockId: number
 
       try {
         await UserScore.addItemCount(userId, 1);
+
+        if (!shouldRepeat) {
+          setCompletedItemIds((previous) => {
+            const next = new Set(previous);
+            next.add(currentItem.item_id);
+            return next;
+          });
+        }
 
         const remainingCurrentQueue = currentQueue.slice(1);
         const remainingNextWaveQueue = shouldRepeat
@@ -206,6 +224,11 @@ export function useNewGrammarPracticeDeck(userId: string | null, blockId: number
 
       await UserItem.savePracticeDeck([skippedItem], dateTime);
       await UserScore.addItemCount(userId, 1);
+      setCompletedItemIds((previous) => {
+        const next = new Set(previous);
+        next.add(currentItem.item_id);
+        return next;
+      });
       setItems(remainingItems);
 
       if (remainingItems.length === 0) {
@@ -239,7 +262,7 @@ export function useNewGrammarPracticeDeck(userId: string | null, blockId: number
     currentItem,
     noteId: currentItem?.note_id ?? null,
     grammarChunkId: currentItem?.grammar_chunk_id ?? null,
-    progressLabel: `${TEXTS.newGrammarRound} ${round + 1}/2`,
+    progressLabel: `${round + 1}/2 · ${completedItemIds.size}/${totalItemCount}`,
     isCzToEn,
     revealed,
     czech,

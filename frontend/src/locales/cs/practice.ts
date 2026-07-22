@@ -20,5 +20,7 @@ export const PRACTICE_TEXTS = {
   volume: 'Nastavení hlasitosti',
   nextStarProgress: 'Denní pokrok',
   newGrammarRound: 'Kolo',
+  newGrammarFinishAll: 'dokončete celý blok pro pokračování',
+  newGrammarProgressHelp: 'Kolo · Položky',
   newGrammarComplete: 'dokončeno úvodní cvičení pro',
 } as const;

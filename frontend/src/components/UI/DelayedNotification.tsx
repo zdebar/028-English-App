@@ -22,7 +22,7 @@ export default function DelayedNotification({
 }: DelayedNotificationProps): JSX.Element {
   return (
     <Delayed timeDelay={timeDelay} className="w-full">
-      <Notification className={`color-info pt-4 ${className}`}>{children ?? message}</Notification>
+      <Notification className={`color-info ${className}`}>{children ?? message}</Notification>
     </Delayed>
   );
 }

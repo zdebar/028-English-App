@@ -116,6 +116,8 @@ vi.mock('@/locales/cs', () => ({
     loadingError: 'Loading error',
     directionCzToEn: 'CZ to EN',
     directionEnToCz: 'EN to CZ',
+    newGrammarFinishAll: 'Finish the entire block',
+    newGrammarProgressHelp: 'Round · completed items in this round',
   },
   ARIA_TEXTS: {
     setVolume: 'Nastavit hlasitost',
@@ -713,5 +715,61 @@ describe('PracticeCard', () => {
     );
 
     expect((screen.getByTestId('repeat-btn') as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('shows the new grammar completion message and progress help', () => {
+    render(
+      <PracticeSessionCard
+        noteId={null}
+        grammarChunkId={10}
+        progressLabel="1/2 · 7/8"
+        isCzToEn
+        revealed={false}
+        czech="ahoj"
+        english="hello"
+        pronunciation="\u00A0"
+        audioDisabled={false}
+        showDirectionChange={false}
+        handleReveal={vi.fn()}
+        plusHint={vi.fn()}
+        nextRepeat={vi.fn()}
+        nextKnown={vi.fn()}
+        audioError={false}
+        playAudio={vi.fn()}
+        audioLoading={false}
+        isNewGrammarPractice
+      />,
+    );
+
+    expect(screen.getByText('Finish the entire block')).toBeTruthy();
+    expect(screen.getByText('Round · completed items in this round')).toBeTruthy();
+  });
+
+  it('temporarily replaces the new grammar completion message with an audio error', () => {
+    render(
+      <PracticeSessionCard
+        noteId={null}
+        grammarChunkId={10}
+        progressLabel="1/2 · 7/8"
+        isCzToEn
+        revealed
+        czech="ahoj"
+        english="hello"
+        pronunciation="hello"
+        audioDisabled={false}
+        showDirectionChange={false}
+        handleReveal={vi.fn()}
+        plusHint={vi.fn()}
+        nextRepeat={vi.fn()}
+        nextKnown={vi.fn()}
+        audioError
+        playAudio={vi.fn()}
+        audioLoading={false}
+        isNewGrammarPractice
+      />,
+    );
+
+    expect(screen.queryByText('Finish the entire block')).toBeNull();
+    expect(screen.getByText('No audio')).toBeTruthy();
   });
 });
