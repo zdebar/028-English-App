@@ -77,16 +77,13 @@ vi.mock('@/features/practice/hooks/use-block-training-deck', () => ({
 }));
 
 vi.mock('@/features/practice/BlockTrainingOverviewCard', () => ({
-  default: ({ block, grammar, onClose, onContinue }: any) => (
+  default: ({ block, grammar, onContinue }: any) => (
     <div>
       <div data-testid="block-training-overview">
         {block?.name}:{grammar?.name}
       </div>
       <button type="button" onClick={onContinue}>
         Continue
-      </button>
-      <button type="button" onClick={onClose}>
-        close overview
       </button>
     </div>
   ),
@@ -193,16 +190,15 @@ describe('BlockTrainingPractice', () => {
     expect(screen.queryByTestId('practice-session')).toBeNull();
   });
 
-  it('closes the combined overview back to unified practice', () => {
+  it('does not offer a close action on the mandatory overview', () => {
     mocks.deck.block = { name: 'Block A' };
     mocks.deck.grammar = { id: 1, name: 'Articles' };
     mocks.deck.currentItem = { item_id: 1 };
 
     render(<BlockTrainingPractice />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'close overview' }));
-
-    expect(mocks.navigate).toHaveBeenCalledWith('/practice', { replace: true });
+    expect(screen.queryByRole('button', { name: 'close overview' })).toBeNull();
+    expect(mocks.navigate).not.toHaveBeenCalled();
   });
 
   it('returns to unified practice after completion', () => {

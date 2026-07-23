@@ -67,7 +67,6 @@ export default function BlockTrainingPractice(): JSX.Element {
       <BlockTrainingOverviewCard
         block={deck.block}
         grammar={deck.grammar}
-        onClose={() => navigate(ROUTES.practice, { replace: true })}
         onContinue={() => setShowIntro(false)}
       />
     );

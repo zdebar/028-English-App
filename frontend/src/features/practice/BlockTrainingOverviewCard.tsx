@@ -1,5 +1,4 @@
 import Card from '@/components/UI/Card';
-import { CardHeader } from '@/components/UI/CardHeader';
 import StyledButton from '@/components/UI/buttons/StyledButton';
 import type { GrammarDetail } from '@/features/grammar/GrammarDetailCard';
 import { TEXTS } from '@/locales/cs';
@@ -10,7 +9,6 @@ import type { JSX } from 'react';
 type BlockTrainingOverviewCardProps = Readonly<{
   block: Pick<UserBlockType, 'name' | 'note'>;
   grammar: GrammarDetail | null;
-  onClose: () => void;
   onContinue: () => void;
 }>;
 
@@ -24,14 +22,11 @@ function Note({ note }: Readonly<{ note: string }>): JSX.Element {
 export default function BlockTrainingOverviewCard({
   block,
   grammar,
-  onClose,
   onContinue,
 }: BlockTrainingOverviewCardProps): JSX.Element {
   return (
     <Card className="flex w-full flex-col gap-1">
-      <CardHeader onClose={onClose}>
-        <h1 className="px-4 text-left text-lg font-bold">{block.name}</h1>
-      </CardHeader>
+      <h1 className="h-button flex items-center px-4 text-left text-lg font-bold">{block.name}</h1>
       {block.note && <Note note={block.note} />}
       {grammar && (
         <section>
