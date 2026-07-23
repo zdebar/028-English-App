@@ -63,13 +63,13 @@ describe('HomePracticeButtons', () => {
 
   afterEach(() => vi.useRealTimers());
 
-  it('shows one enabled unified practice button with a capped badge', async () => {
+  it('shows one enabled unified practice button when the ready count exceeds the badge cap', async () => {
     mocks.getReadyPracticeState.mockResolvedValue({ readyCount: 123, schedule: [] });
     render(<PracticeButton userId="u1" />);
 
     const button = await screen.findByRole('button', { name: /Practice/ });
     expect((button as HTMLButtonElement).disabled).toBe(false);
-    expect(screen.getByText('99+')).toBeTruthy();
+    expect(screen.queryByText('99+')).toBeNull();
     expect(mocks.getReadyPracticeState).toHaveBeenCalledWith('u1');
   });
 
