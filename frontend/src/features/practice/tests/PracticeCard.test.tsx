@@ -746,7 +746,7 @@ describe('PracticeCard', () => {
     expect(screen.getByText('Round · completed items in this round')).toBeTruthy();
   });
 
-  it('temporarily replaces the block training completion message with an audio error', () => {
+  it('shows an audio error above the block training completion message', () => {
     render(
       <PracticeSessionCard
         noteId={null}
@@ -770,7 +770,12 @@ describe('PracticeCard', () => {
       />,
     );
 
-    expect(screen.queryByText('Finish the entire block')).toBeNull();
+    expect(screen.getByText('Finish the entire block')).toBeTruthy();
     expect(screen.getByText('No audio')).toBeTruthy();
+
+    const topBar = document.querySelector('#top-bar');
+    expect(topBar?.children).toHaveLength(2);
+    expect(topBar?.children[0]?.textContent).toContain('No audio');
+    expect(topBar?.children[1]?.textContent).toContain('Finish the entire block');
   });
 });

@@ -92,12 +92,6 @@ export default function PracticeSessionCard({
     audioStatusMessage = <p className="font-headings color-info">{TEXTS.noAudio}</p>;
   }
 
-  const topStatusMessage =
-    audioStatusMessage ??
-    (isBlockTrainingPractice ? (
-      <p className="color-info font-headings">{TEXTS.blockTrainingFinishAll}</p>
-    ) : null);
-
   if (isGrammarVisible) {
     return (
       <GrammarDetailCard grammar={grammarData} onClose={closeGrammar} showHelpButton={false} />
@@ -118,8 +112,13 @@ export default function PracticeSessionCard({
           {!revealed && !showDirectionChange && (
             <HelpText className="center top-4">{TEXTS.reveal}</HelpText>
           )}
-          <div id="top-bar" className="relative h-8 w-full pt-2 text-center">
-            {topStatusMessage}
+          <div id="top-bar" className="relative grid h-14 w-full grid-rows-2 text-center">
+            <div className="flex min-h-0 items-center justify-center">
+              {isBlockTrainingPractice ? (
+                <p className="color-info font-headings">{TEXTS.blockTrainingFinishAll}</p>
+              ) : null}
+            </div>
+            <div className="flex min-h-0 items-center justify-center">{audioStatusMessage}</div>
           </div>
           {showDirectionChange ? (
             <Notification className="my-auto">{directionText}</Notification>
