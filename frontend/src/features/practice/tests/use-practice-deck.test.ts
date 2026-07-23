@@ -70,7 +70,7 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
     is_practice_item: 1,
     requires_initial_training: false,
     sort_order: 1,
-    curriculum_sort_path: [1, 1, 1, 1],
+    curriculum_sort_path: [1, 1, 1],
     block_id: 0,
     grammar_chunk_id: 10,
     progress: 0,

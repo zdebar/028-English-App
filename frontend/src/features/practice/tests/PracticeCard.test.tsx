@@ -23,7 +23,7 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     pronunciation: 'həˈloʊ',
     audio: 'hello.opus',
     sort_order: 1,
-    curriculum_sort_path: [1, 1, 1, 1],
+    curriculum_sort_path: [1, 1, 1],
     progress: 2,
     progress_history: [],
     note_id: null,

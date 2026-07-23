@@ -81,12 +81,7 @@ vi.mock('@/database/models/db', () => ({
             }),
           };
         }
-        if (
-          field ===
-            '[user_id+is_practice_item+is_vocabulary+next_at+mastered_at+curriculum_sort_path]' ||
-          field === '[user_id+is_practice_item+is_vocabulary+next_at+mastered_at+sort_order]' ||
-          field === '[user_id+is_practice_item+next_at+mastered_at+curriculum_sort_path]'
-        ) {
+        if (field === '[user_id+is_practice_item+next_at+mastered_at+curriculum_sort_path]') {
           return {
             between: (...args: unknown[]) => {
               mocks.indexedBetween(...args);
@@ -759,7 +754,7 @@ describe('UserItem', () => {
           is_practice_item: false,
           requires_initial_training: true,
           sort_order: 2,
-          curriculum_sort_path: [1, 2, 3, 2],
+          curriculum_sort_path: [1, 2, 2],
           note_id: null,
           block_id: null,
           grammar_chunk_id: null,
@@ -806,7 +801,7 @@ describe('UserItem', () => {
         is_vocabulary: 1,
         is_practice_item: 0,
         requires_initial_training: true,
-        curriculum_sort_path: [1, 2, 3, 2],
+        curriculum_sort_path: [1, 2, 2],
         block_id: 0,
         grammar_chunk_id: 0,
         started_at: '1970-01-01T00:00:00.000Z',

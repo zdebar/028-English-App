@@ -53,6 +53,5 @@ export default class AppDB extends Dexie {
       audio_metadata: 'archive_name',
       metadata: '[table_name+user_id]',
     });
-
   }
 }

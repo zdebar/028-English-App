@@ -6,7 +6,6 @@ export interface ProgressHistoryEntry {
 export type CurriculumSortPath = readonly [
   levelSortOrder: number,
   lessonSortOrder: number,
-  blockSortOrder: number,
   itemSortOrder: number,
 ];
 

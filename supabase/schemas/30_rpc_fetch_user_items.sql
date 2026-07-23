@@ -44,7 +44,7 @@ BEGIN
     b.is_practice_block AS is_practice_item,
     b.requires_initial_training,
     i.sort_order,
-    ARRAY[lv.sort_order, le.sort_order, b.sort_order, i.sort_order]::INTEGER[]
+    ARRAY[lv.sort_order, le.sort_order, i.sort_order]::INTEGER[]
       AS curriculum_sort_path,
     i.note_id,
     i.block_id,
