@@ -108,7 +108,7 @@ export default function Guide(): JSX.Element {
         <h3>Přehled gramatiky</h3>
         <p>Přehled započaté gramatiky.</p>
         <h3>Přehled témat</h3>
-        <p>Přehled započatých tematických skupin slovíček, např. dny v týdnu, měsíce atd.</p>
+        <p>Přehled započatých tematických bloků slovíček, např. dny v týdnu, měsíce atd.</p>
         <h3>Přehled slovíček</h3>
         <p>Přehled započatých slovíček.</p>
         <h3>Smazat účet</h3>
