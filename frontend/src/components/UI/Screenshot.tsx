@@ -20,7 +20,7 @@ export function Screenshot({ src, alt }: ScreenshotProps): JSX.Element {
       <img
         src={isDarkMode ? `${src}.dark.webp` : `${src}.webp`}
         alt={alt}
-        className="h-auto w-full rounded"
+        className="h-auto w-full border"
         width={320}
         height={600}
         loading="lazy"

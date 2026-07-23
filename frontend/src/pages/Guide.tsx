@@ -15,9 +15,17 @@ export default function Guide(): JSX.Element {
       <section>
         <h2>Představení</h2>
         <p>
-          Aplikace stojí na velkém množství naposlouchaných a nahlas zopakovaných položek. Není
-          třeba přemýšlet, co dělat dál. Aplikace sama volí procvičování i učení nového.
+          Hlavní důraz této aplikace je na neustálé mluvené procvičování slovíček a vět. Není třeba
+          přemýšlet co se dříve učit, aplikace sama určuje co je třeba procvičovat.
         </p>
+      </section>
+      <section>
+        <h2>Doporučujeme</h2>
+        <ul className="text-left">
+          <li>Každé slovíčko či větu nahlas zopakovat</li>
+          <li>Preferovat "Opakovat" před "Znám", pokud ještě není znalost zcela automatická</li>
+          <li>Procvičit každý den min. 400 opakování, tedy 10 hvězdiček</li>
+        </ul>
       </section>
       <section>
         <h2>Domácí stránka</h2>
@@ -27,27 +35,23 @@ export default function Guide(): JSX.Element {
         />
         <h3>Nainstalovat aplikaci</h3>
         <p>
-          Umožňuje nainstalovat aplikaci na plochu vašeho zařízení. Aplikace je plně funkční
-          offline.
+          Umožňuje nainstalovat PWA aplikaci na vaše zařízení. Aplikace je plně funkční offline.
         </p>
         <h3>Denní cíl</h3>
-        <p>Doporučený minimální denní cíl je 10 hvězdiček, tedy 400 procvičovaných položek.</p>
-        <h3>Slovíčka</h3>
-        <p>Základní učení a procvičování slovíček. Tlačítko je vždy k dispozici.</p>
-        <h3>Úvodní procvičení bloku</h3>
         <p>
-          Povinné úvodní procvičení nového bloku. Před procvičováním se zobrazí vysvětlení bloku
-          a případně související gramatiky.
+          Doporučený minimální denní cíl je 10 hvězdiček, tedy 400 procvičovaných položek. Ale
+          množství denního učení není nikterak omezen.
         </p>
-        <h3>Gramatika</h3>
+        <h3>Procvičovat</h3>
         <p>
-          Následné procvičování rozučené gramatiky. Tlačítko je k dispozici, pokud je co
-          procvičovat.
+          Společné učení a procvičování slovíček a gramatiky. Napřed se vždy nabízí procvičování
+          rozučených položek, než se přejde na nové.
         </p>
         <h3>Přehled lekcí</h3>
         <p>
-          Přehled dnes dotčených lekcí. Lze přepínat mezi rozučenými a naučenými položkami.
-          Naučené jsou zhruba po 3 měsících.
+          Přehled dnes dotčených lekcí. Lze přepínat mezi rozučenými a naučenými položkami. Položka
+          se stane naučená, pokud mnoha postupně se prodlužijích se intervalech procvičování. Což
+          zabere přibližně 3 měsíce.
         </p>
       </section>
       <section>
@@ -79,7 +83,7 @@ export default function Guide(): JSX.Element {
         <p>Položka se nabídne k dalšímu procvičování dříve.</p>
         <h3>Znám</h3>
         <p>Položka se nabídne k dalšímu procvičování později.</p>
-        <h3>Zkratky</h3>
+        <h3>Zkratky položek</h3>
         <p>
           <span className="inline-block w-20">zkr.</span>zkrácená varianta
         </p>
@@ -91,12 +95,21 @@ export default function Guide(): JSX.Element {
         </p>
       </section>
       <section>
-        <h2>Doporučujeme</h2>
-        <ul className="text-left">
-          <li>Každé slovíčko či větu nahlas zopakovat</li>
-          <li>Preferovat "Opakovat" před "Znám", pokud ještě není znalost zcela automatická</li>
-          <li>Procvičit každý den min. 400 opakování, tedy 10 hvězdiček</li>
-        </ul>
+        <h2>Úvod cvičení bloku</h2>
+        <Screenshot
+          src={`${import.meta.env.BASE_URL}screenshots/intro`}
+          alt="Ukázka kartičky s úvodem bloku"
+        />
+        <p>
+          Aplikace sdružuje položky do tematických bloků. Jde o bloky slovíček (např. dny v týdnu)
+          nebo bloky gramatiky (např. tvary slovesa být). Celý blok je spuštěn automaticky ve
+          chvíli, kdy jsou předchozí potřebné položky rozučeny. Blok je zapotřebí celý dokončit pro
+          další postup.
+        </p>
+        <p>
+          V levém spodním rohu kartičky jsou zobrazeny kola, které indikují dva směry procvičování.
+          Z češtiny do angličtiny, a obráceně. A také počet naučených položek v bloku v každém kole.
+        </p>
       </section>
       <section>
         <h2>Profil</h2>
