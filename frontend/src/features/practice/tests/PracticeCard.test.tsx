@@ -775,7 +775,7 @@ describe('PracticeCard', () => {
 
     const topBar = document.querySelector('#top-bar');
     expect(topBar?.children).toHaveLength(2);
-    expect(topBar?.children[0]?.textContent).toContain('No audio');
-    expect(topBar?.children[1]?.textContent).toContain('Finish the entire block');
+    expect(topBar?.children[0]?.textContent).toContain('Finish the entire block');
+    expect(topBar?.children[1]?.textContent).toContain('No audio');
   });
 });
