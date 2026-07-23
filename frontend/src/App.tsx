@@ -19,7 +19,7 @@ import TopicItems from '@/pages/TopicItems';
 import Grammar from '@/pages/Grammar';
 import Home from '@/pages/Home';
 import Levels from '@/pages/Levels';
-import NewGrammarPractice from '@/pages/NewGrammarPractice';
+import BlockTrainingPractice from '@/pages/BlockTrainingPractice';
 import Practice from '@/pages/Practice';
 import PracticeOverview from '@/pages/PracticeOverview';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
@@ -67,9 +67,8 @@ export default function App() {
             <Route path={ROUTES.privacyPolicy} element={<PrivacyPolicy />} />
             <Route path={ROUTES.guide} element={<Guide />} />
             <Route element={<ProtectedLayout />}>
-              <Route path={ROUTES.practiceVocabulary} element={<Practice mode="vocabulary" />} />
-              <Route path={ROUTES.practiceNewGrammar} element={<NewGrammarPractice />} />
-              <Route path={ROUTES.practiceGrammar} element={<Practice mode="grammar" />} />
+              <Route path={ROUTES.practice} element={<Practice />} />
+              <Route path={ROUTES.practiceBlockTraining} element={<BlockTrainingPractice />} />
               <Route path={ROUTES.practiceOverview} element={<PracticeOverview />} />
               <Route path={ROUTES.profile} element={<Profile />} />
               <Route path={ROUTES.levels} element={<Levels />} />

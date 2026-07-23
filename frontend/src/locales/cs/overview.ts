@@ -1,6 +1,5 @@
 export const OVERVIEW_TEXTS = {
   // Levels Overview Page
-  lessons: 'Lekce',
   levelsStartedHelp: 'Započato / celkem položek',
   levelsMasteredHelp: 'Naučeno / celkem položek',
 
@@ -18,13 +17,11 @@ export const OVERVIEW_TEXTS = {
   resetTopicTitle: 'Restartovat téma',
   resetTopicDescription:
     'Opravdu chcete restartovat pokrok všech položek tohoto tématu? Tuto akci nelze vrátit zpět.',
-  resetTopicTooltip: 'Restartovat téma',
 
   // Privacy Policy Page
   privacyPolicy: 'Zásady ochrany osobních údajů',
 
   // Vocabulary Page
-  start: 'Začít',
   translationDirection: 'Přepnout výchozí jazyk',
   more: 'Další',
   enterPrompt: 'Zadejte slovičko ...',

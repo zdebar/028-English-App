@@ -23,7 +23,7 @@ Dexie models under `frontend/src/database/models`.
 | `lessons` | Contain blocks/items through lesson IDs. |
 | `blocks` / `user_blocks` | Group vocabulary or grammar work. User blocks track unlock/mastery state. |
 | `items` / `user_items` | Individual vocabulary or grammar practice units. User items track progress and scheduling. |
-| `grammar` | Shared grammar detail content, linked by `grammar_id`. |
+| `grammar_groups` / `grammar_chunks` | Overview pages group ordered chunks; blocks and practice items link to one relevant chunk through `grammar_chunk_id`. |
 | `notes` | Shared note/detail content, linked by `note_id`. |
 | `user_scores` | Per-user daily practice count. |
 
@@ -46,7 +46,7 @@ Vocabulary items have `is_vocabulary = 1`. Grammar items have `is_vocabulary = 0
 | `UserBlock` | Home new grammar readiness, grammar readiness, blocks overview, new grammar practice | Grammar unlock/mastery, block resets, sync. |
 | `UserScore` | Home daily count, practice overview, dashboard stars | Practice progress actions, sync. |
 | `Levels` / `Lessons` | Dashboard, levels overview, block/lesson grouping | Shared content sync. |
-| `Grammar` / `Notes` | Practice detail cards, grammar overview, vocabulary/block detail flows | Shared content sync. |
+| `GrammarGroup` / `GrammarChunk` / `Notes` | Grouped grammar overview and chunk-level practice details | Shared content sync. |
 | `AudioRecord` / `AudioMetadata` | Practice audio controls and audio manager | Audio archive sync and orphan cleanup. |
 
 ## Key IndexedDB Indexes
@@ -57,11 +57,11 @@ Declared in `frontend/src/database/models/app-db.ts`.
 | --- | --- |
 | `[user_id+item_id]` | Direct user item lookup/reset/update. |
 | `[user_id+block_id]` | Block item loading and block reset operations. |
-| `[user_id+grammar_id+started_at]` | Grammar-related started item queries and resets. |
+| `[user_id+grammar_chunk_id+started_at]` | Grammar-chunk started-item queries and resets. |
 | `[user_id+is_vocabulary+started_at]` | Started vocabulary queries. |
 | `[user_id+started_at]` | Started block/grammar discovery. |
 | `[user_id+updated_at]` | Incremental sync push windows. |
-| `[user_id+is_vocabulary+next_at+mastered_at+sort_order]` | Practice deck queries and vocabulary/grammar readiness. |
+| `[user_id+is_practice_item+next_at+mastered_at+curriculum_sort_path]` | Unified practice deck and readiness queries. |
 | `[user_id+lesson_id+is_vocabulary+started_at]` | Checks whether lesson vocabulary is started before grammar unlock. |
 
 ## Readiness Meaning

@@ -27,9 +27,8 @@ Routes are configured in `frontend/src/config/routes.config.ts` and wired in
 | `/` | `Home` | Public |
 | `/privacy-policy` | `PrivacyPolicy` | Public |
 | `/guide` | `Guide` | Public |
-| `/practice/vocabulary` | `Practice mode="vocabulary"` | Protected |
+| `/practice` | `Practice` | Protected |
 | `/practice/new-grammar` | `NewGrammarPractice` | Protected |
-| `/practice/grammar` | `Practice mode="grammar"` | Protected |
 | `/practice-overview` | `PracticeOverview` | Protected |
 | `/profile` | `Profile` | Protected |
 | `/levels` | `Levels` | Protected |
@@ -58,7 +57,7 @@ and renders `HomePracticeButtons` plus dashboard and overview links.
 
 Practice routes share `PracticeSessionCard` where possible:
 
-- `Practice` uses `usePracticeDeck` for vocabulary and review grammar.
+- `Practice` uses one `usePracticeDeck` for vocabulary, grammar review, and new-item discovery.
 - `NewGrammarPractice` uses `useNewGrammarPracticeDeck` for the special new
   grammar learning flow.
 

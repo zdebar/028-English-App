@@ -18,10 +18,20 @@ CREATE TABLE IF NOT EXISTS users (
   deleted_at TIMESTAMPTZ
 );
 
-CREATE TABLE IF NOT EXISTS grammar (
+CREATE TABLE IF NOT EXISTS grammar_groups (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
   note TEXT,
+  sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 1),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  deleted_at TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS grammar_chunks (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE,
+  note TEXT,
+  grammar_group_id INTEGER REFERENCES grammar_groups(id) ON DELETE SET NULL,
   sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ
@@ -55,7 +65,8 @@ CREATE TABLE IF NOT EXISTS blocks (
   lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE RESTRICT,
   show_in_topics BOOLEAN NOT NULL DEFAULT TRUE,
   is_practice_block BOOLEAN NOT NULL DEFAULT TRUE,
-  grammar_id INTEGER REFERENCES grammar(id) ON DELETE RESTRICT,
+  requires_initial_training BOOLEAN NOT NULL DEFAULT FALSE,
+  grammar_chunk_id INTEGER REFERENCES grammar_chunks(id) ON DELETE RESTRICT,
   sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ,
@@ -155,7 +166,9 @@ EXECUTE FUNCTION public.handle_new_auth_user();
 -- CREATE optimalization indexes
 CREATE INDEX IF NOT EXISTS idx_items_updated_at ON public.items (updated_at);
 CREATE INDEX IF NOT EXISTS idx_lessons_level_id ON public.lessons (level_id);
-CREATE INDEX IF NOT EXISTS idx_blocks_grammar_id ON public.blocks (grammar_id);
+CREATE INDEX IF NOT EXISTS idx_blocks_grammar_chunk_id ON public.blocks (grammar_chunk_id);
+CREATE INDEX IF NOT EXISTS idx_grammar_chunks_group_id
+  ON public.grammar_chunks (grammar_group_id, sort_order);
 CREATE INDEX IF NOT EXISTS idx_items_note_id ON public.items (note_id);
 CREATE INDEX IF NOT EXISTS idx_items_block_id ON public.items (block_id);
 

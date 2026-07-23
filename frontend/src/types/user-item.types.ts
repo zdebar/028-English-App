@@ -6,7 +6,6 @@ export interface ProgressHistoryEntry {
 export type CurriculumSortPath = readonly [
   levelSortOrder: number,
   lessonSortOrder: number,
-  blockSortOrder: number,
   itemSortOrder: number,
 ];
 
@@ -28,13 +27,13 @@ export interface UserItemBase {
 export interface UserItemLocal extends UserItemBase {
   is_vocabulary: 0 | 1;
   is_practice_item: 0 | 1;
+  requires_initial_training: boolean;
   block_id: number;
-  grammar_id: number;
+  grammar_chunk_id: number;
   started_at: string;
   deleted_at: string;
   next_at: string;
   mastered_at: string;
   curriculum_sort_path: CurriculumSortPath;
+  is_initial_training_trigger?: boolean;
 }
-
-export type ReviewPracticeMode = 'vocabulary' | 'grammar';

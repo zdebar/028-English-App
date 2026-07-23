@@ -22,7 +22,7 @@ vi.mock('@/database/models/user-items', () => ({
 
 vi.mock('@/database/models/user-blocks', () => ({
   default: {
-    simulateGrammarProgress: (...args: unknown[]) => mocks.simulateBlocks(...args),
+    simulateInitialTrainingProgress: (...args: unknown[]) => mocks.simulateBlocks(...args),
   },
 }));
 
@@ -55,7 +55,7 @@ describe('simulateUserProgress', () => {
   });
 
   it('propagates transaction failure', async () => {
-    const error = new Error('Not enough grammar blocks');
+    const error = new Error('Not enough training blocks');
     mocks.simulateBlocks.mockRejectedValue(error);
 
     await expect(

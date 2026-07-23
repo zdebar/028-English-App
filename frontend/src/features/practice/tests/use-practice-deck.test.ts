@@ -12,7 +12,6 @@ const playAudioMock = vi.fn();
 const setVolumeMock = vi.fn();
 const reloadMock = vi.fn();
 const addItemCountMock = vi.fn();
-const unlockNextGrammarBlockMock = vi.fn();
 
 vi.mock('@/hooks/use-fetch', () => ({
   useFetch: (...args: unknown[]) => useFetchMock(...args),
@@ -28,12 +27,6 @@ vi.mock('@/database/models/user-items', () => ({
 vi.mock('@/database/models/user-scores', () => ({
   default: {
     addItemCount: (...args: unknown[]) => addItemCountMock(...args),
-  },
-}));
-
-vi.mock('@/database/models/user-blocks', () => ({
-  default: {
-    unlockNextGrammarBlock: (...args: unknown[]) => unlockNextGrammarBlockMock(...args),
   },
 }));
 
@@ -75,10 +68,11 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
     audio: 'hello.opus',
     is_vocabulary: 0,
     is_practice_item: 1,
+    requires_initial_training: false,
     sort_order: 1,
-    curriculum_sort_path: [1, 1, 1, 1],
+    curriculum_sort_path: [1, 1, 1],
     block_id: 0,
-    grammar_id: 10,
+    grammar_chunk_id: 10,
     progress: 0,
     progress_history: [],
     started_at: '2026-01-01',
@@ -109,7 +103,6 @@ describe('usePracticeDeck', () => {
     getPracticeDeckMock.mockResolvedValue([]);
     savePracticeDeckMock.mockResolvedValue(undefined);
     addItemCountMock.mockResolvedValue(undefined);
-    unlockNextGrammarBlockMock.mockResolvedValue(null);
   });
 
   it('maps fetched data into deck state and exposes derived values', async () => {
@@ -122,7 +115,7 @@ describe('usePracticeDeck', () => {
     expect(result.current.czech).toBe('ahoj');
     expect(result.current.english).toBe('EN_HINT');
     expect(result.current.audioDisabled).toBe(true);
-    expect(result.current.grammarId).toBe(10);
+    expect(result.current.grammarChunkId).toBe(10);
     expect(resetHintMock).toHaveBeenCalled();
   });
 
@@ -191,7 +184,6 @@ describe('usePracticeDeck', () => {
       ]),
     );
     expect(addItemCountMock).toHaveBeenCalledTimes(2);
-    expect(unlockNextGrammarBlockMock).toHaveBeenCalledWith('user-1');
     expect(reloadMock).toHaveBeenCalledTimes(1);
   });
 

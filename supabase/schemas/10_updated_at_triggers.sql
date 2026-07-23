@@ -21,9 +21,15 @@ BEFORE UPDATE ON public.users
 FOR EACH ROW
 EXECUTE FUNCTION public.set_updated_at();
 
-DROP TRIGGER IF EXISTS trg_set_updated_at__grammar ON public.grammar;
-CREATE TRIGGER trg_set_updated_at__grammar
-BEFORE UPDATE ON public.grammar
+DROP TRIGGER IF EXISTS trg_set_updated_at__grammar_groups ON public.grammar_groups;
+CREATE TRIGGER trg_set_updated_at__grammar_groups
+BEFORE UPDATE ON public.grammar_groups
+FOR EACH ROW
+EXECUTE FUNCTION public.set_updated_at();
+
+DROP TRIGGER IF EXISTS trg_set_updated_at__grammar_chunks ON public.grammar_chunks;
+CREATE TRIGGER trg_set_updated_at__grammar_chunks
+BEFORE UPDATE ON public.grammar_chunks
 FOR EACH ROW
 EXECUTE FUNCTION public.set_updated_at();
 

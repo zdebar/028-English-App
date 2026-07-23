@@ -7,8 +7,10 @@ const mocks = vi.hoisted(() => ({
   setCurrentIndex: vi.fn(),
   sanitize: vi.fn(),
   reload: vi.fn(),
-  resetItemsByGrammarId: vi.fn(),
-  resetByGrammarId: vi.fn(),
+  resetItemsByGrammarGroupId: vi.fn(),
+  resetItemsByGrammarChunkId: vi.fn(),
+  resetByGrammarGroupId: vi.fn(),
+  resetByGrammarChunkId: vi.fn(),
   showToast: vi.fn(),
   reportInfo: vi.fn(),
   reportError: vi.fn(),
@@ -28,7 +30,7 @@ vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
 }));
 
-vi.mock('@/database/models/grammar', () => ({
+vi.mock('@/database/models/grammar-groups', () => ({
   default: {
     getStarted: vi.fn(),
   },
@@ -36,13 +38,15 @@ vi.mock('@/database/models/grammar', () => ({
 
 vi.mock('@/database/models/user-items', () => ({
   default: {
-    resetItemsByGrammarId: (...args: unknown[]) => mocks.resetItemsByGrammarId(...args),
+    resetItemsByGrammarGroupId: (...args: unknown[]) => mocks.resetItemsByGrammarGroupId(...args),
+    resetItemsByGrammarChunkId: (...args: unknown[]) => mocks.resetItemsByGrammarChunkId(...args),
   },
 }));
 
 vi.mock('@/database/models/user-blocks', () => ({
   default: {
-    resetByGrammarId: (...args: unknown[]) => mocks.resetByGrammarId(...args),
+    resetByGrammarGroupId: (...args: unknown[]) => mocks.resetByGrammarGroupId(...args),
+    resetByGrammarChunkId: (...args: unknown[]) => mocks.resetByGrammarChunkId(...args),
   },
 }));
 
@@ -146,8 +150,10 @@ describe('GrammarOverview', () => {
       currentItem: null,
     };
     mocks.sanitize.mockImplementation((value: string) => value);
-    mocks.resetItemsByGrammarId.mockResolvedValue(4);
-    mocks.resetByGrammarId.mockResolvedValue(2);
+    mocks.resetItemsByGrammarGroupId.mockResolvedValue(4);
+    mocks.resetItemsByGrammarChunkId.mockResolvedValue(3);
+    mocks.resetByGrammarGroupId.mockResolvedValue(2);
+    mocks.resetByGrammarChunkId.mockResolvedValue(1);
   });
 
   it('renders list view with grammar items and opens selected grammar', () => {
@@ -215,8 +221,8 @@ describe('GrammarOverview', () => {
     fireEvent.click(screen.getByTestId('overview-reset'));
 
     await waitFor(() => {
-      expect(mocks.resetItemsByGrammarId).toHaveBeenCalledWith('u1', 8);
-      expect(mocks.resetByGrammarId).toHaveBeenCalledWith('u1', 8);
+      expect(mocks.resetItemsByGrammarGroupId).toHaveBeenCalledWith('u1', 8);
+      expect(mocks.resetByGrammarGroupId).toHaveBeenCalledWith('u1', 8);
       expect(mocks.reportInfo).toHaveBeenCalledWith(
         'Grammar 8 reset completed: 4 items and 2 blocks reset.',
       );
@@ -224,9 +230,33 @@ describe('GrammarOverview', () => {
     });
   });
 
+  it('resets an ungrouped grammar chunk directly', async () => {
+    mocks.arrayState.currentIndex = 0;
+    mocks.arrayState.currentItem = {
+      id: 8,
+      name: 'Standalone grammar',
+      note: null,
+      chunks: [],
+      standalone_chunk_id: 8,
+    };
+
+    render(<GrammarOverview />);
+    fireEvent.click(screen.getByTestId('overview-reset'));
+
+    await waitFor(() => {
+      expect(mocks.resetItemsByGrammarChunkId).toHaveBeenCalledWith('u1', 8);
+      expect(mocks.resetByGrammarChunkId).toHaveBeenCalledWith('u1', 8);
+      expect(mocks.reportInfo).toHaveBeenCalledWith(
+        'Grammar 8 reset completed: 3 items and 1 blocks reset.',
+      );
+    });
+    expect(mocks.resetItemsByGrammarGroupId).not.toHaveBeenCalled();
+    expect(mocks.resetByGrammarGroupId).not.toHaveBeenCalled();
+  });
+
   it('shows error toast when block reset fails', async () => {
     const error = new Error('Dexie failure');
-    mocks.resetByGrammarId.mockRejectedValueOnce(error);
+    mocks.resetByGrammarGroupId.mockRejectedValueOnce(error);
     mocks.arrayState.currentIndex = 0;
     mocks.arrayState.currentItem = {
       id: 8,
@@ -239,8 +269,8 @@ describe('GrammarOverview', () => {
     fireEvent.click(screen.getByTestId('overview-reset'));
 
     await waitFor(() => {
-      expect(mocks.resetItemsByGrammarId).toHaveBeenCalledWith('u1', 8);
-      expect(mocks.resetByGrammarId).toHaveBeenCalledWith('u1', 8);
+      expect(mocks.resetItemsByGrammarGroupId).toHaveBeenCalledWith('u1', 8);
+      expect(mocks.resetByGrammarGroupId).toHaveBeenCalledWith('u1', 8);
       expect(mocks.showToast).toHaveBeenCalledWith('Reset error', 'error');
       expect(mocks.reportError).toHaveBeenCalledWith('Failed to reset grammar progress', error);
     });

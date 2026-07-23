@@ -5,16 +5,12 @@ import { db } from '@/database/models/db';
 import { getSyncTimestamps, splitDeleted } from '@/database/utils/sync-generic.utils';
 import { reportInfo } from '@/features/logging/monitoring-handler';
 import { SupabaseError } from '@/types/error.types';
-import type {
-  ReadyGrammarPracticeState,
-  UserBlockType,
-} from '@/types/generic.types';
+import type { UserBlockType } from '@/types/generic.types';
 import { TableName } from '@/types/table.types';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
-import Dexie, { Entity } from 'dexie';
+import { Entity } from 'dexie';
 import Metadata from './metadata';
 import UserItem from './user-items';
-import { groupReadyPracticeSchedule } from '../utils/ready-practice.utils';
 
 const NULL_DATE = config.database.nullReplacementDate;
 
@@ -42,6 +38,7 @@ function convertAPIToLocal(block: UserBlockAPI): UserBlockType {
     is_vocabulary: block.is_vocabulary,
     show_in_topics: block.show_in_topics ?? true,
     is_practice_block: block.is_practice_block ?? true,
+    requires_initial_training: block.requires_initial_training,
     started_at: block.started_at ?? NULL_DATE,
     next_at: block.next_at ?? NULL_DATE,
     mastered_at: block.mastered_at ?? NULL_DATE,
@@ -66,7 +63,7 @@ function convertLocalToExport(block: UserBlockType): UserBlockExport {
  *
  * Public API:
  * - Topic views: `getByUserId`, `getStartedTopicsByUserId`, and `getByBlockId`.
- * - Grammar unlock flow: first locked/unlocked lookups, ready-state checks, and unlock/master/reset actions.
+ * - Block transitions: start/master actions used by the initial-training flow.
  * - Maintenance: grammar/block resets, local account deletion, and remote sync.
  *
  * Block timestamps use the configured null replacement date locally and convert to null for remote sync.
@@ -77,12 +74,13 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
   name!: string;
   note!: string | null;
   lesson_id!: number;
-  grammar_id!: number | null;
+  grammar_chunk_id!: number | null;
   sort_order!: number;
   progress!: number;
   is_vocabulary!: boolean;
   show_in_topics!: boolean;
   is_practice_block!: boolean;
+  requires_initial_training!: boolean;
   started_at!: string;
   updated_at!: string;
   next_at!: string;
@@ -146,122 +144,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
   }
 
   /**
-   * Finds the first unlocked grammar block that is not yet mastered.
-   *
-   * @param userId Non-empty user id whose grammar blocks should be inspected.
-   * @returns Earliest started, unmastered grammar block, or null when none are available.
-   * @throws Error when userId is empty.
-   */
-  static async getFirstUnlockedGrammarBlock(userId: string): Promise<UserBlockType | null> {
-    assertNonEmptyString(userId, 'userId');
-
-    const blocks = await db.user_blocks
-      .where('user_id')
-      .equals(userId)
-      .filter(
-        (block) =>
-          block.is_practice_block !== false &&
-          !block.is_vocabulary &&
-          block.started_at !== NULL_DATE &&
-          block.mastered_at === NULL_DATE,
-      )
-      .toArray();
-
-    const sortedBlocks = [...blocks].sort(compareGrammarBlocks);
-    return sortedBlocks.at(0) ?? null;
-  }
-
-  /**
-   * Finds the first locked grammar block in lesson/sort order.
-   *
-   * @param userId Non-empty user id whose grammar blocks should be inspected.
-   * @returns Earliest not-started grammar block, or null when none remain locked.
-   * @throws Error when userId is empty.
-   */
-  static async getFirstLockedGrammarBlock(userId: string): Promise<UserBlockType | null> {
-    assertNonEmptyString(userId, 'userId');
-
-    const blocks = await db.user_blocks
-      .where('user_id')
-      .equals(userId)
-      .filter(
-        (block) =>
-          block.is_practice_block !== false &&
-          !block.is_vocabulary &&
-          block.started_at === NULL_DATE,
-      )
-      .toArray();
-
-    const sortedBlocks = [...blocks].sort(compareGrammarBlocks);
-    return sortedBlocks.at(0) ?? null;
-  }
-
-  /**
-   * Counts grammar review items due now.
-   *
-   * @param userId User id whose grammar practice state should be read.
-   * @returns Number of due grammar items.
-   */
-  static async countReadyGrammarItems(userId: string): Promise<number> {
-    return (await this.getReadyGrammarPracticeState(userId)).readyCount;
-  }
-
-  /**
-   * Calculates ready grammar review state.
-   *
-   * @param userId Non-empty user id whose grammar items should be inspected.
-   * @returns Ready count plus a grouped future schedule. Never-scheduled items in mastered grammar
-   * blocks are ready immediately.
-   * @throws Error when userId is empty.
-   */
-  static async getReadyGrammarPracticeState(userId: string): Promise<ReadyGrammarPracticeState> {
-    assertNonEmptyString(userId, 'userId');
-
-    const nowMs = Date.now();
-    const masteredGrammarBlockIdSet = new Set(await UserItem.getMasteredGrammarBlockIds(userId));
-    const grammarItems = await db.user_items
-      .where('[user_id+is_practice_item+is_vocabulary+next_at+mastered_at+sort_order]')
-      .between(
-        [userId, 1, 0, Dexie.minKey, NULL_DATE, Dexie.minKey],
-        [userId, 1, 0, Dexie.maxKey, NULL_DATE, Dexie.maxKey],
-        true,
-        true,
-      )
-      .filter(
-        (item) =>
-          item.mastered_at === NULL_DATE && masteredGrammarBlockIdSet.has(item.block_id),
-      )
-      .toArray();
-
-    const futureDates: string[] = [];
-    let readyCount = 0;
-
-    for (const item of grammarItems) {
-      if (item.next_at === NULL_DATE) {
-        readyCount += 1;
-        continue;
-      }
-
-      const nextAtMs = Date.parse(item.next_at);
-      if (!Number.isFinite(nextAtMs)) {
-        continue;
-      }
-
-      if (nextAtMs <= nowMs) {
-        readyCount += 1;
-      } else {
-        futureDates.push(item.next_at);
-      }
-    }
-
-    return {
-      readyCount,
-      schedule: groupReadyPracticeSchedule(futureDates),
-    };
-  }
-
-  /**
-   * Marks a grammar block as unlocked/started.
+   * Marks a block as unlocked/started.
    *
    * @param userId Non-empty user id owning the block.
    * @param blockId Block id to unlock.
@@ -278,7 +161,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
   }
 
   /**
-   * Marks a grammar block as mastered.
+   * Marks a block as mastered.
    *
    * @param userId Non-empty user id owning the block.
    * @param blockId Block id to master.
@@ -296,39 +179,37 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
   }
 
   /**
-   * Creates the grammar-block portion of the anonymous-user simulation fixture.
-   * The first configured number of grammar blocks are unlocked and mastered; the next block is
-   * unlocked only. Existing next_at values are preserved to match the normal block transitions.
+   * Creates the training-block portion of the anonymous-user simulation fixture.
+   * The first configured number of training blocks are started and mastered. The next block stays
+   * unstarted so unified practice can discover it as an initial-training trigger.
    *
    * @param userId Non-empty user id owning the blocks.
    * @param dateTime Shared ISO timestamp for every simulated transition.
-   * @returns Number of grammar blocks changed, including the final unlocked block.
-   * @throws Error when the required number of practice grammar blocks is unavailable.
+   * @returns Number of training blocks changed.
+   * @throws Error when the required number of training blocks is unavailable.
    */
-  static async simulateGrammarProgress(userId: string, dateTime: string): Promise<number> {
+  static async simulateInitialTrainingProgress(userId: string, dateTime: string): Promise<number> {
     assertNonEmptyString(userId, 'userId');
 
-    const masteredCount = config.progress.simulationMasteredGrammarBlockCount;
+    const masteredCount = config.progress.simulationMasteredTrainingBlockCount;
     const requiredCount = masteredCount + 1;
-    const grammarBlocks = (await this.getByUserId(userId))
-      .filter((block) => block.is_practice_block !== false && !block.is_vocabulary)
-      .sort(compareGrammarBlocks)
+    const trainingBlocks = (await this.getByUserId(userId))
+      .filter((block) => block.is_practice_block !== false && block.requires_initial_training)
+      .sort(compareTrainingBlocks)
       .slice(0, requiredCount);
 
-    if (grammarBlocks.length < requiredCount) {
+    if (trainingBlocks.length < requiredCount) {
       throw new Error(
-        `Simulation requires at least ${requiredCount} practice grammar blocks for user ${userId}.`,
+        `Simulation requires at least ${requiredCount} initial-training blocks for user ${userId}.`,
       );
     }
 
-    for (const block of grammarBlocks.slice(0, masteredCount)) {
+    for (const block of trainingBlocks.slice(0, masteredCount)) {
       await this.unlockBlock(userId, block.block_id, dateTime);
       await this.markBlockMastered(userId, block.block_id, dateTime);
     }
 
-    const nextBlock = grammarBlocks[masteredCount];
-    await this.unlockBlock(userId, nextBlock.block_id, dateTime);
-    return requiredCount;
+    return masteredCount;
   }
 
   /**
@@ -353,14 +234,14 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
    * Resets all blocks tied to a grammar id.
    *
    * @param userId Non-empty user id owning the blocks.
-   * @param grammarId Grammar id to match.
+   * @param grammarGroupId Grammar group id to match.
    * @param dateTime ISO timestamp written to updated_at. Defaults to now.
    * @returns Number of reset blocks, or 0 when no block matches.
    * @throws Error when userId is empty.
    */
-  static async resetByGrammarId(
+  static async resetByGrammarChunkId(
     userId: string,
-    grammarId: number,
+    grammarChunkId: number,
     dateTime: string = new Date().toISOString(),
   ): Promise<number> {
     assertNonEmptyString(userId, 'userId');
@@ -368,7 +249,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     const blocks = await db.user_blocks
       .where('user_id')
       .equals(userId)
-      .filter((block) => block.grammar_id === grammarId)
+      .filter((block) => block.grammar_chunk_id === grammarChunkId)
       .toArray();
 
     if (blocks.length === 0) {
@@ -385,44 +266,33 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     return blocks.length;
   }
 
-  /**
-   * Unlocks the next grammar block when lesson and previous-block prerequisites are met.
-   *
-   * @param userId Non-empty user id whose next grammar block should be considered.
-   * @param dateTime ISO timestamp written to started_at and updated_at. Defaults to now.
-   * @returns The unlocked block with updated timestamps, or null when no block is eligible.
-   * @throws Error when userId is empty.
-   */
-  static async unlockNextGrammarBlock(
+  static async resetByGrammarGroupId(
     userId: string,
-    dateTime: string = new Date(Date.now()).toISOString(),
-  ): Promise<UserBlockType | null> {
+    grammarGroupId: number,
+    dateTime: string = new Date().toISOString(),
+  ): Promise<number> {
     assertNonEmptyString(userId, 'userId');
-
-    const lockedBlock = await this.getFirstLockedGrammarBlock(userId);
-    if (lockedBlock == null) {
-      return null;
-    }
-
-    const isLessonVocabularyStarted = await UserItem.areAllVocabularyItemsStartedForLesson(
-      userId,
-      lockedBlock.lesson_id,
+    const chunkIds = new Set(
+      (
+        await db.grammar_chunks.where('grammar_group_id').equals(grammarGroupId).toArray()
+      ).map((chunk) => chunk.id),
     );
-    if (!isLessonVocabularyStarted) {
-      return null;
-    }
+    if (chunkIds.size === 0) return 0;
 
-    const previousBlock = await this.getPreviousGrammarBlock(userId, lockedBlock);
-    if (previousBlock?.mastered_at === NULL_DATE) {
-      return null;
-    }
+    const blocks = await db.user_blocks
+      .where('user_id')
+      .equals(userId)
+      .filter(
+        (block) =>
+          block.grammar_chunk_id != null && chunkIds.has(block.grammar_chunk_id),
+      )
+      .toArray();
+    if (blocks.length === 0) return 0;
 
-    await this.unlockBlock(userId, lockedBlock.block_id, dateTime);
-    return {
-      ...lockedBlock,
-      started_at: dateTime,
-      updated_at: dateTime,
-    };
+    await db.user_blocks.bulkPut(
+      blocks.map((block) => ({ ...block, ...getResetBlockFields(dateTime) })),
+    );
+    return blocks.length;
   }
 
   /**
@@ -523,30 +393,9 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     return (updatedBlocks ?? []).map(convertAPIToLocal);
   }
 
-  /**
-   * Finds the grammar block immediately before another grammar block.
-   *
-   * @param userId User id whose grammar blocks should be inspected.
-   * @param block Reference grammar block.
-   * @returns Previous grammar block in lesson/sort order, or null when the block is first.
-   */
-  private static async getPreviousGrammarBlock(
-    userId: string,
-    block: UserBlockType,
-  ): Promise<UserBlockType | null> {
-    const grammarBlocks = await db.user_blocks
-      .where('user_id')
-      .equals(userId)
-      .filter((candidate) => candidate.is_practice_block !== false && !candidate.is_vocabulary)
-      .toArray();
-
-    const sortedBlocks = [...grammarBlocks].sort(compareGrammarBlocks);
-    const blockIndex = sortedBlocks.findIndex((candidate) => candidate.block_id === block.block_id);
-    return blockIndex > 0 ? sortedBlocks[blockIndex - 1] : null;
-  }
 }
 
-function compareGrammarBlocks(left: UserBlockType, right: UserBlockType): number {
+function compareTrainingBlocks(left: UserBlockType, right: UserBlockType): number {
   if (left.lesson_id !== right.lesson_id) {
     return left.lesson_id - right.lesson_id;
   }

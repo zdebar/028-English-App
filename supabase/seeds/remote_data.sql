@@ -189,10 +189,10 @@ INSERT INTO "auth"."refresh_tokens" ("instance_id", "id", "token", "user_id", "r
 
 
 --
--- Data for Name: grammar; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: grammar_chunks; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "public"."grammar" ("id", "name", "note", "sort_order", "updated_at", "deleted_at") VALUES
+INSERT INTO "public"."grammar_chunks" ("id", "name", "note", "sort_order", "updated_at", "deleted_at") VALUES
 	(1, 'sloveso být', '<p>Sloveso <b>být</b> je v angličtině nepravidelné a má různé tvary podle osoby a času.</p><br /><p><span class=''inline-block w-30 pl-2''>já jsem</span><b>I am</b></p><p><span class=''inline-block w-30 pl-2''>ty jsi</span><b>you are</b></p><p><span class=''inline-block w-30 pl-2''>on je</span><b>he is</b></p><p><span class=''inline-block w-30 pl-2''>ona je</span><b>she is</b></p><p><span class=''inline-block w-30 pl-2''>ono je</span><b>it is</b></p><p><span class=''inline-block w-30 pl-2''>my jsme</span><b>we are</b></p><p><span class=''inline-block w-30 pl-2''>vy jste</span><b>you are</b></p><p><span class=''inline-block w-30 pl-2''>oni jsou</span><b>they are</b></p><br /><p>V mluveném jazyce se běžně používají zkrácené tvary:</p><br /><p><span class=''inline-block w-30 pl-2''>já jsem</span><b>I''m</b></p><p><span class=''inline-block w-30 pl-2''>ty jsi</span><b>you''re</b></p><p><span class=''inline-block w-30 pl-2''>on je</span><b>he''s</b></p><p><span class=''inline-block w-30 pl-2''>ona je</span><b>she''s</b></p><p><span class=''inline-block w-30 pl-2''>ono je</span><b>it''s</b></p><p><span class=''inline-block w-30 pl-2''>my jsme</span><b>we''re</b></p><p><span class=''inline-block w-30 pl-2''>vy jste</span><b>you''re</b></p><p><span class=''inline-block w-30 pl-2''>oni jsou</span><b>they''re</b></p>', 2, '2026-07-17 09:42:43.807261+00', NULL),
 	(2, 'pořadí slov ve větě', '<p>Angličtina má pevné pořadí slov:</p><p class=''pl-2''><b>podmět + sloveso</b></p><br /><p>Ostatní větné členy se většinou řadí za sloveso podle významu a důrazu, podobně jako v češtině.</p>', 1, '2026-07-17 09:42:43.807261+00', NULL),
 	(3, 'sloveso být - zápor', '<p>V angličtině se zápor tvoří pomocí pomocného slovesa <b>not</b>, které se přidává za sloveso.</p><br /><p><span class=''inline-block w-32 pl-2''>já nejsem</span><b>I am not</b></p><p><span class=''inline-block w-32 pl-2''>ty nejsi</span><b>you are not</b></p><p><span class=''inline-block w-32 pl-2''>on není</span><b>he is not</b></p><p><span class=''inline-block w-32 pl-2''>ona není</span><b>she is not</b></p><p><span class=''inline-block w-32 pl-2''>ono není</span><b>it is not</b></p><p><span class=''inline-block w-32 pl-2''>my nejsme</span><b>we are not</b></p><p><span class=''inline-block w-32 pl-2''>vy nejste</span><b>you are not</b></p><p><span class=''inline-block w-32 pl-2''>oni nejsou</span><b>they are not</b></p><br /><p>V mluveném jazyce se běžně používají zkrácené tvary:</p><br /><p><span class=''inline-block w-32 pl-2''>já nejsem</span><b>I''m not</b></p><p><span class=''inline-block w-32 pl-2''>ty nejsi</span><b>you aren''t</b></p><p><span class=''inline-block w-32 pl-2''>on není</span><b>he isn''t</b></p><p><span class=''inline-block w-32 pl-2''>ona není</span><b>she isn''t</b></p><p><span class=''inline-block w-32 pl-2''>my nejsme</span><b>we aren''t</b></p><p><span class=''inline-block w-32 pl-2''>vy nejste</span><b>you aren''t</b></p><p><span class=''inline-block w-32 pl-2''>oni nejsou</span><b>they aren''t</b></p><br /><p>Existuje i druhá varianta zkráceného tvaru, která je vnímána s větším důrazem na negaci:</p><br /><p><span class=''inline-block w-32 pl-2''>já nejsem</span><b>I''m not</b></p><p><span class=''inline-block w-32 pl-2''>ty nejsi</span><b>you''re not</b></p><p><span class=''inline-block w-32 pl-2''>on není</span><b>he''s not</b></p><p><span class=''inline-block w-32 pl-2''>ona není</span><b>she''s not</b></p><p><span class=''inline-block w-32 pl-2''>ono není</span><b>it''s not</b></p><p><span class=''inline-block w-32 pl-2''>my nejsme</span><b>we''re not</b></p><p><span class=''inline-block w-32 pl-2''>vy nejste</span><b>you''re not</b></p><p><span class=''inline-block w-32 pl-2''>oni nejsou</span><b>they''re not</b></p>', 3, '2026-07-17 09:42:43.807261+00', NULL),
@@ -264,14 +264,14 @@ INSERT INTO "public"."lessons" ("id", "name", "note", "level_id", "sort_order", 
 -- Data for Name: blocks; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "public"."blocks" ("id", "name", "note", "lesson_id", "grammar_id", "sort_order", "updated_at", "deleted_at", "show_in_topics", "is_practice_block") VALUES
-	(2, 'být - základní tvary', NULL, 1, 1, 2, '2026-07-17 09:44:00.993319+00', NULL, false, true),
-	(3, 'být - zkrácené tvary', NULL, 1, 1, 3, '2026-07-17 09:44:25.8369+00', NULL, false, true),
-	(4, 'být - věty s přídavnýmí jmény #1', NULL, 1, 2, 4, '2026-07-17 09:44:56.249945+00', NULL, false, true),
-	(5, 'být - věty s přídavnými jmény #2', NULL, 1, 2, 5, '2026-07-17 09:45:31.889596+00', NULL, false, true),
-	(6, 'být - věty s přídavnými jmény #3', NULL, 1, 2, 6, '2026-07-17 09:46:10.209435+00', NULL, false, true),
-	(7, 'slovíčka', NULL, 1, NULL, 7, '2026-07-17 09:57:54.738876+00', NULL, false, true),
-	(1, 'osobní zájmena', NULL, 1, NULL, 1, '2026-07-15 08:53:02.826619+00', NULL, true, true);
+INSERT INTO "public"."blocks" ("id", "name", "note", "lesson_id", "grammar_chunk_id", "sort_order", "updated_at", "deleted_at", "show_in_topics", "is_practice_block", "requires_initial_training") VALUES
+	(2, 'být - základní tvary', NULL, 1, 1, 2, '2026-07-17 09:44:00.993319+00', NULL, false, true, true),
+	(3, 'být - zkrácené tvary', NULL, 1, 1, 3, '2026-07-17 09:44:25.8369+00', NULL, false, true, true),
+	(4, 'být - věty s přídavnýmí jmény #1', NULL, 1, 2, 4, '2026-07-17 09:44:56.249945+00', NULL, false, true, true),
+	(5, 'být - věty s přídavnými jmény #2', NULL, 1, 2, 5, '2026-07-17 09:45:31.889596+00', NULL, false, true, true),
+	(6, 'být - věty s přídavnými jmény #3', NULL, 1, 2, 6, '2026-07-17 09:46:10.209435+00', NULL, false, true, true),
+	(7, 'slovíčka', NULL, 1, NULL, 7, '2026-07-17 09:57:54.738876+00', NULL, false, true, false),
+	(1, 'osobní zájmena', NULL, 1, NULL, 1, '2026-07-15 08:53:02.826619+00', NULL, true, true, false);
 
 
 --
@@ -552,10 +552,10 @@ SELECT pg_catalog.setval('"public"."blocks_id_seq"', 1, false);
 
 
 --
--- Name: grammar_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: grammar_chunks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('"public"."grammar_id_seq"', 29, true);
+SELECT pg_catalog.setval('"public"."grammar_chunks_id_seq"', 29, true);
 
 
 --

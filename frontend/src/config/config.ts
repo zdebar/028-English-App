@@ -17,10 +17,10 @@ const config = {
     plusProgress: 1, // Progress value for a "plus" button
     minusProgress: -100, // Progress value for a "minus" button, -100 will reset the progress to 0
     skipProgress: 100, // Progress value for a "skip" button
-    afterNewGrammarProgress: 2, // Progress value after learning a new grammar item
+    afterInitialTrainingProgress: 2, // Progress after completing a block's initial training
     simulationCount: 64, // Number of items in the testing queue
     simulationProgress: 2, // Progress value for simulated data
-    simulationMasteredGrammarBlockCount: 3, // Completed grammar blocks in simulated data
+    simulationMasteredTrainingBlockCount: 3, // Completed training blocks in simulated data
   },
 
   srs: {
@@ -49,7 +49,6 @@ const config = {
 
   lesson: {
     deckSize: 5, // Number of items per deck
-    lessonSize: 500, // Number of items per lesson
   },
 
   practice: {
@@ -57,7 +56,7 @@ const config = {
     starsPerRow: 10, // Number of stars shown in one tier row
     audioDelay: 100, // Delay in milliseconds for automatically playing audio
     holdDuration: 300, // Duration in milliseconds for which the practice card is held before moving to the next item
-    readyPracticeBadgeCap: 99, // Maximum exact ready-practice badge value before showing a capped label
+    readyPracticeBadgeCap: 40, // Maximum exact ready-practice badge value before showing a capped label, preferable same as starChunk
     readyPracticeScheduleGroupWindowMs: 1000, // Time window for grouping future ready-practice schedule entries
     maxReadyScheduleTimerDelayMs: 2_147_483_647, // Maximum setTimeout delay supported by browsers
     CZ_TO_EN: 'czToEn',

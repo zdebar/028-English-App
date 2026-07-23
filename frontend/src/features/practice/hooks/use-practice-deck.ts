@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { alternateDirection } from '@/features/practice/practice.utils';
-import type { ReviewPracticeMode, UserItemLocal } from '@/types/user-item.types';
+import type { UserItemLocal } from '@/types/user-item.types';
 import { useFetch } from '@/hooks/use-fetch';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
@@ -8,14 +8,13 @@ import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
 import config from '@/config/config';
-import UserBlock from '@/database/models/user-blocks';
 
 /**
  * usePracticeDeck hook manages the practice deck and user progress for a given user.
  *
  * @param userId The unique identifier of the user.
  */
-export function usePracticeDeck(userId: string | null, mode: ReviewPracticeMode = 'vocabulary') {
+export function usePracticeDeck(userId: string | null) {
   // Array fetching logic
   const [array, setArray] = useState<UserItemLocal[]>([]);
   const [index, setIndex] = useState(0);
@@ -23,9 +22,9 @@ export function usePracticeDeck(userId: string | null, mode: ReviewPracticeMode 
 
   const fetchPracticeDeck = useCallback(async () => {
     if (!userId) return [];
-    const data = await UserItem.getPracticeDeck(userId, config.lesson.deckSize, mode);
+    const data = await UserItem.getPracticeDeck(userId, config.lesson.deckSize);
     return data.filter((item) => item != null);
-  }, [mode, userId]);
+  }, [userId]);
 
   const {
     data: fetchedArray,
@@ -85,9 +84,6 @@ export function usePracticeDeck(userId: string | null, mode: ReviewPracticeMode 
 
       try {
         await UserItem.savePracticeDeck(userProgress);
-        if (mode === 'vocabulary') {
-          await UserBlock.unlockNextGrammarBlock(userId);
-        }
         reportInfo(`Saved practice deck ${source} with ${userProgress.length} items.`);
         userProgressRef.current = [];
         if (shouldReload) {
@@ -98,7 +94,7 @@ export function usePracticeDeck(userId: string | null, mode: ReviewPracticeMode 
         persistProgressToLocalStorage(userProgress);
       }
     },
-    [mode, persistProgressToLocalStorage, reload, userId],
+    [persistProgressToLocalStorage, reload, userId],
   );
 
   // Save progress on unmount
@@ -167,8 +163,9 @@ export function usePracticeDeck(userId: string | null, mode: ReviewPracticeMode 
     // Core state
     index,
     currentItem,
+    trainingBlockId: currentItem?.is_initial_training_trigger ? currentItem.block_id : null,
     noteId: currentItem?.note_id ?? null,
-    grammarId: currentItem?.grammar_id ?? null,
+    grammarChunkId: currentItem?.grammar_chunk_id ?? null,
     progress: currentItem?.progress ?? 0,
     isCzToEn,
     revealed,

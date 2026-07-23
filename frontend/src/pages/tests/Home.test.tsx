@@ -23,6 +23,9 @@ const mocks = vi.hoisted(
 
 vi.mock('@/config/config', () => ({
   default: {
+    database: {
+      dbName: 'test-db',
+    },
     practice: {
       dailyGoal: 10,
       starChunk: 50,
@@ -74,9 +77,7 @@ vi.mock('@/locales/cs', () => ({
     dailyGoal: 'Goal',
     syncWarning: 'Data may be stale.',
     signupHint: 'Signup hint',
-    vocabularyPracticeButton: 'Vocabulary',
-    newGrammarPracticeButton: 'New grammar',
-    grammarPracticeButton: 'Grammar',
+    practiceButton: 'Practice',
   },
 }));
 
@@ -112,7 +113,7 @@ vi.mock('@/features/synchronization/SimulateDataButton', () => ({
   default: () => <div data-testid="simulate-data-button" />,
 }));
 
-vi.mock('@/features/practice/HomePracticeButtons', () => ({
+vi.mock('@/features/practice/PracticeButton', () => ({
   default: ({ userId }: any) => <div data-testid="home-practice-buttons">practice:{userId}</div>,
 }));
 
@@ -145,7 +146,7 @@ describe('Home', () => {
   it('does not show sync warning when sync is healthy', () => {
     render(<Home />);
 
-    expect(screen.queryByText('Data may be stale.')).toBeNull();
+    expect(screen.getByText('Data may be stale.').className).toContain('invisible');
     expect(screen.getByRole('button', { name: 'Open practice overview' })).toBeTruthy();
     expect(screen.queryByText('App')).toBeNull();
   });

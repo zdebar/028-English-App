@@ -1,11 +1,11 @@
 import RightArrowIcon from '@/components/UI/icons/RightArrowIcon';
 import { TEXTS } from '@/locales/cs';
 import { type PracticeButtonProps } from '../practice.types';
-import PracticeButton from './PracticeButton';
+import ControlButton from './ControlButton';
 
 export default function KnownButton({ onClick, disabled, children }: PracticeButtonProps) {
   return (
-    <PracticeButton
+    <ControlButton
       icon={<RightArrowIcon />}
       label={TEXTS.known}
       className="pos-help-top-right"
@@ -13,6 +13,6 @@ export default function KnownButton({ onClick, disabled, children }: PracticeBut
       disabled={disabled}
     >
       {children}
-    </PracticeButton>
+    </ControlButton>
   );
 }

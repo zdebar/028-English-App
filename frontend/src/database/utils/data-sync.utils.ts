@@ -9,7 +9,8 @@ import { withSettledSummary } from '@/features/logging/logging.utils';
 import Lessons from '@/database/models/lessons';
 import Levels from '@/database/models/levels';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
-import Grammar from '@/database/models/grammar';
+import GrammarChunk from '@/database/models/grammar-chunks';
+import GrammarGroup from '@/database/models/grammar-groups';
 import { reportInfo } from '@/features/logging/monitoring-handler';
 import { supabaseInstance } from '@/config/supabase.config';
 import Notes from '../models/notes';
@@ -39,7 +40,8 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
   // Step 2: Perform shared stores data synchronization (grammar and audio metadata)
   const allPromises = doFullSync
     ? [
-        Grammar.syncFromRemote(true),
+        GrammarGroup.syncFromRemote(true),
+        GrammarChunk.syncFromRemote(true),
         Levels.syncFromRemote(true),
         Lessons.syncFromRemote(true),
         Notes.syncFromRemote(true),
@@ -48,7 +50,8 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
         UserItem.syncFromRemote(userId, true),
       ]
     : [
-        Grammar.syncFromRemote(false),
+        GrammarGroup.syncFromRemote(false),
+        GrammarChunk.syncFromRemote(false),
         Levels.syncFromRemote(false),
         Lessons.syncFromRemote(false),
         Notes.syncFromRemote(false),
@@ -58,7 +61,7 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
       ];
 
   // Keep a parallel list of human-readable table names to report per-table completions.
-  const tableNames = ['Grammar', 'Levels', 'Lessons', 'Notes', 'UserBlocks', 'UserScores', 'UserItems'];
+  const tableNames = ['GrammarGroups', 'GrammarChunks', 'Levels', 'Lessons', 'Notes', 'UserBlocks', 'UserScores', 'UserItems'];
 
   const results = await Promise.allSettled(allPromises);
 

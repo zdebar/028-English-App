@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   grammarGet: vi.fn(),
   grammarAnyOf: vi.fn(),
-  getStartedGrammarIds: vi.fn(),
+  getStartedGrammarChunkIds: vi.fn(),
   transaction: vi.fn(),
   getSyncTimestamps: vi.fn(),
   markAsSynced: vi.fn(),
@@ -17,7 +17,7 @@ vi.mock('@/database/models/db', () => ({
   db: {
     metadata: {},
     transaction: (...args: unknown[]) => mocks.transaction(...args),
-    grammar: {
+    grammar_chunks: {
       get: (...args: unknown[]) => mocks.grammarGet(...args),
       where: (field: string) => {
         if (field === 'id') {
@@ -36,7 +36,7 @@ vi.mock('@/database/models/db', () => ({
 
 vi.mock('@/database/models/user-items', () => ({
   default: {
-    getStartedGrammarIds: (...args: unknown[]) => mocks.getStartedGrammarIds(...args),
+    getStartedGrammarChunkIds: (...args: unknown[]) => mocks.getStartedGrammarChunkIds(...args),
   },
 }));
 
@@ -60,13 +60,13 @@ vi.mock('@/config/supabase.config', () => ({
   },
 }));
 
-import Grammar from '@/database/models/grammar';
+import Grammar from '@/database/models/grammar-chunks';
 
 describe('Grammar', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mocks.getStartedGrammarIds.mockResolvedValue([]);
+    mocks.getStartedGrammarChunkIds.mockResolvedValue([]);
     mocks.grammarAnyOf.mockReturnValue({
       sortBy: vi.fn().mockResolvedValue([]),
     });
@@ -99,11 +99,11 @@ describe('Grammar', () => {
   it('getGrammarById throws when missing', async () => {
     mocks.grammarGet.mockResolvedValue(undefined);
 
-    await expect(Grammar.getById(2)).rejects.toThrow('Grammar with ID 2 not found.');
+    await expect(Grammar.getById(2)).rejects.toThrow('Grammar chunk with ID 2 not found.');
   });
 
   it('getStartedList returns grammar list for started ids', async () => {
-    mocks.getStartedGrammarIds.mockResolvedValue([1, 2]);
+    mocks.getStartedGrammarChunkIds.mockResolvedValue([1, 2]);
     mocks.grammarAnyOf.mockReturnValue({
       sortBy: vi.fn().mockResolvedValue([
         { id: 1, name: 'A', note: '', sort_order: 1, deleted_at: null },
@@ -118,10 +118,10 @@ describe('Grammar', () => {
   it('syncFromRemote fetches remote data and marks sync metadata', async () => {
     await Grammar.syncFromRemote(true);
 
-    expect(mocks.from).toHaveBeenCalledWith('grammar');
-    expect(mocks.select).toHaveBeenCalledWith('id, name, note, sort_order, deleted_at');
+    expect(mocks.from).toHaveBeenCalledWith('grammar_chunks');
+    expect(mocks.select).toHaveBeenCalledWith('id, name, note, grammar_group_id, sort_order, deleted_at');
     expect(mocks.gt).toHaveBeenCalledWith('updated_at', '2026-03-03T00:00:00.000Z');
-    expect(mocks.markAsSynced).toHaveBeenCalledWith('grammar', '2026-03-04T00:00:00.000Z');
+    expect(mocks.markAsSynced).toHaveBeenCalledWith('grammar_chunks', '2026-03-04T00:00:00.000Z');
   });
 
   it('syncFromRemote stores grammar with a null note', async () => {

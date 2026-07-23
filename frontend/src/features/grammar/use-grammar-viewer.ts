@@ -1,4 +1,4 @@
-import Grammar from '@/database/models/grammar';
+import GrammarChunk from '@/database/models/grammar-chunks';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
@@ -11,11 +11,11 @@ export function useGrammarViewer() {
   const showToast = useToastStore((state) => state.showToast);
 
   const openGrammar = useCallback(
-    async (grammarId: number | null | undefined) => {
-      if (typeof grammarId !== 'number') return;
+    async (grammarChunkId: number | null | undefined) => {
+      if (typeof grammarChunkId !== 'number') return;
 
       try {
-        const grammar = await Grammar.getById(grammarId);
+        const grammar = await GrammarChunk.getById(grammarChunkId);
         if (!grammar) return;
 
         setGrammarData(grammar);

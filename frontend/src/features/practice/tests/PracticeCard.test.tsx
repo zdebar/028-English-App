@@ -23,7 +23,7 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     pronunciation: 'həˈloʊ',
     audio: 'hello.opus',
     sort_order: 1,
-    curriculum_sort_path: [1, 1, 1, 1],
+    curriculum_sort_path: [1, 1, 1],
     progress: 2,
     progress_history: [],
     note_id: null,
@@ -31,8 +31,9 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     updated_at: '2024-01-01T00:00:00.000Z',
     is_vocabulary: 1,
     is_practice_item: 1,
+    requires_initial_training: false,
     block_id: 1,
-    grammar_id: 10,
+    grammar_chunk_id: 10,
     started_at: '2024-01-01T00:00:00.000Z',
     deleted_at: '9999-12-31T00:00:00.000Z',
     next_at: '2024-01-01T00:00:00.000Z',
@@ -42,8 +43,9 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
   practiceDeck: {
     index: 0,
     currentItem: null as UserItemLocal | null,
+    trainingBlockId: null as number | null,
     noteId: null,
-    grammarId: 10,
+    grammarChunkId: 10,
     progress: 2,
     isCzToEn: true,
     revealed: false,
@@ -76,7 +78,8 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
   } as any,
 }));
 
-mocks.practiceDeck.currentItem = mocks.makePracticeItem();
+    mocks.practiceDeck.currentItem = mocks.makePracticeItem();
+    mocks.practiceDeck.trainingBlockId = null;
 
 vi.mock('@/config/config', () => ({
   default: {
@@ -114,6 +117,8 @@ vi.mock('@/locales/cs', () => ({
     loadingError: 'Loading error',
     directionCzToEn: 'CZ to EN',
     directionEnToCz: 'EN to CZ',
+    blockTrainingFinishAll: 'Finish the entire block',
+    blockTrainingProgressHelp: 'Round · completed items in this round',
   },
   ARIA_TEXTS: {
     setVolume: 'Nastavit hlasitost',
@@ -195,7 +200,7 @@ vi.mock('@/features/practice/hooks/use-practice-deck', () => ({
     if (!userId) {
       return {
         currentItem: null,
-        grammarId: null,
+        grammarChunkId: null,
         progress: 0,
         isCzToEn: true,
         revealed: false,
@@ -353,11 +358,11 @@ describe('PracticeCard', () => {
       english: 'hello',
       pronunciation: 'həˈloʊ',
       audio: 'hello.opus',
-      grammar_id: 10,
+      grammar_chunk_id: 10,
       progress: 2,
     });
     mocks.practiceDeck.noteId = null;
-    mocks.practiceDeck.grammarId = 10;
+    mocks.practiceDeck.grammarChunkId = 10;
     mocks.practiceDeck.progress = 2;
     mocks.practiceDeck.isCzToEn = true;
     mocks.practiceDeck.revealed = false;
@@ -413,6 +418,18 @@ describe('PracticeCard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Domů' }));
 
     expect(mocks.navigate).toHaveBeenCalledWith('/');
+  });
+
+  it('opens initial training for the trigger block instead of rendering the item', () => {
+    mocks.practiceDeck.trainingBlockId = 30;
+
+    render(<PracticeCard />);
+
+    expect(mocks.navigate).toHaveBeenCalledWith('/practice/block-training', {
+      state: { blockId: 30 },
+    });
+    mocks.practiceDeck.trainingBlockId = null;
+    expect(screen.queryByText('ahoj')).toBeNull();
   });
 
   it('shows loading circle after configured delay instead of empty state while deck is loading', () => {
@@ -560,7 +577,7 @@ describe('PracticeCard', () => {
 
   it('opens grammar from the right secondary control group after reveal', () => {
     mocks.practiceDeck.showDirectionChange = false;
-    mocks.practiceDeck.grammarId = 42;
+    mocks.practiceDeck.grammarChunkId = 42;
     mocks.practiceDeck.revealed = true;
 
     const { container } = render(<PracticeCard />);
@@ -577,7 +594,7 @@ describe('PracticeCard', () => {
   });
 
   it('keeps grammar disabled before reveal even when grammar data exists', () => {
-    mocks.practiceDeck.grammarId = 42;
+    mocks.practiceDeck.grammarChunkId = 42;
     mocks.practiceDeck.revealed = false;
 
     const { container } = render(<PracticeCard />);
@@ -595,7 +612,7 @@ describe('PracticeCard', () => {
 
   it('does not open grammar automatically while direction change is shown', () => {
     mocks.practiceDeck.showDirectionChange = true;
-    mocks.practiceDeck.grammarId = 42;
+    mocks.practiceDeck.grammarChunkId = 42;
 
     render(<PracticeCard />);
 
@@ -651,7 +668,7 @@ describe('PracticeCard', () => {
     render(
       <PracticeSessionCard
         noteId={null}
-        grammarId={10}
+        grammarChunkId={10}
         progressLabel="Round 1/4"
         isCzToEn
         revealed
@@ -678,7 +695,7 @@ describe('PracticeCard', () => {
     render(
       <PracticeSessionCard
         noteId={null}
-        grammarId={10}
+        grammarChunkId={10}
         progressLabel="Round 1/4"
         isCzToEn
         revealed
@@ -699,5 +716,66 @@ describe('PracticeCard', () => {
     );
 
     expect((screen.getByTestId('repeat-btn') as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('shows the block training completion message and progress help', () => {
+    render(
+      <PracticeSessionCard
+        noteId={null}
+        grammarChunkId={10}
+        progressLabel="1/2 · 7/8"
+        isCzToEn
+        revealed={false}
+        czech="ahoj"
+        english="hello"
+        pronunciation="\u00A0"
+        audioDisabled={false}
+        showDirectionChange={false}
+        handleReveal={vi.fn()}
+        plusHint={vi.fn()}
+        nextRepeat={vi.fn()}
+        nextKnown={vi.fn()}
+        audioError={false}
+        playAudio={vi.fn()}
+        audioLoading={false}
+        isBlockTrainingPractice
+      />,
+    );
+
+    expect(screen.getByText('Finish the entire block')).toBeTruthy();
+    expect(screen.getByText('Round · completed items in this round')).toBeTruthy();
+  });
+
+  it('shows an audio error above the block training completion message', () => {
+    render(
+      <PracticeSessionCard
+        noteId={null}
+        grammarChunkId={10}
+        progressLabel="1/2 · 7/8"
+        isCzToEn
+        revealed
+        czech="ahoj"
+        english="hello"
+        pronunciation="hello"
+        audioDisabled={false}
+        showDirectionChange={false}
+        handleReveal={vi.fn()}
+        plusHint={vi.fn()}
+        nextRepeat={vi.fn()}
+        nextKnown={vi.fn()}
+        audioError
+        playAudio={vi.fn()}
+        audioLoading={false}
+        isBlockTrainingPractice
+      />,
+    );
+
+    expect(screen.getByText('Finish the entire block')).toBeTruthy();
+    expect(screen.getByText('No audio')).toBeTruthy();
+
+    const topBar = document.querySelector('#top-bar');
+    expect(topBar?.children).toHaveLength(2);
+    expect(topBar?.children[0]?.textContent).toContain('Finish the entire block');
+    expect(topBar?.children[1]?.textContent).toContain('No audio');
   });
 });

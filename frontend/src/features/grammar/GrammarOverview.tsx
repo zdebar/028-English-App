@@ -6,8 +6,9 @@ import { useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ListButton } from '@/components/UI/buttons/ListButton';
 import { useArray } from '@/hooks/use-array';
-import Grammar from '@/database/models/grammar';
-import type { GrammarType } from '@/types/generic.types';
+import GrammarGroup, {
+  type GrammarGroupWithChunks,
+} from '@/database/models/grammar-groups';
 import UserItem from '@/database/models/user-items';
 import UserBlock from '@/database/models/user-blocks';
 import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
@@ -25,7 +26,7 @@ export default function GrammarOverview(): JSX.Element {
       return [];
     }
 
-    return Grammar.getStarted(userId);
+    return GrammarGroup.getStarted(userId);
   }, [userId]);
 
   const {
@@ -37,7 +38,7 @@ export default function GrammarOverview(): JSX.Element {
     hasData,
     error,
     reload,
-  } = useArray<GrammarType>(fetchGrammar);
+  } = useArray<GrammarGroupWithChunks>(fetchGrammar);
 
   useEffect(() => {
     if (!error) return;
@@ -51,8 +52,12 @@ export default function GrammarOverview(): JSX.Element {
     }
 
     try {
-      const resetCount = await UserItem.resetItemsByGrammarId(userId, currentItem.id);
-      const resetBlockCount = await UserBlock.resetByGrammarId(userId, currentItem.id);
+      const resetCount = currentItem.standalone_chunk_id != null
+        ? await UserItem.resetItemsByGrammarChunkId(userId, currentItem.standalone_chunk_id)
+        : await UserItem.resetItemsByGrammarGroupId(userId, currentItem.id);
+      const resetBlockCount = currentItem.standalone_chunk_id != null
+        ? await UserBlock.resetByGrammarChunkId(userId, currentItem.standalone_chunk_id)
+        : await UserBlock.resetByGrammarGroupId(userId, currentItem.id);
       reportInfo(
         `Grammar ${currentItem.id} reset completed: ${resetCount} items and ${resetBlockCount} blocks reset.`,
       );
@@ -75,7 +80,7 @@ export default function GrammarOverview(): JSX.Element {
         <DataState loading={loading} hasData={hasData} noDataMessage={TEXTS.noGrammar}>
           {grammarList.map((item, index) => (
             <ListButton
-              key={item.id}
+              key={item.standalone_chunk_id != null ? `chunk-${item.id}` : `group-${item.id}`}
               className="h-input justify-start px-4"
               onClick={() => setCurrentIndex(index)}
               title={item.name}

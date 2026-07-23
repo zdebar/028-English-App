@@ -66,7 +66,7 @@ vi.mock('@/database/models/user-blocks', () => ({
   },
 }));
 
-vi.mock('@/database/models/grammar', () => ({
+vi.mock('@/database/models/grammar-chunks', () => ({
   default: {
     syncFromRemote: (...args: unknown[]) => mocks.grammarSyncFromRemote(...args),
   },
