@@ -51,7 +51,7 @@ export function useBlockTrainingDeck(userId: string | null, blockId: number | nu
       setError(null);
       try {
         const nextBlock = blockId == null ? null : await UserBlock.getByBlockId(userId, blockId);
-        if (nextBlock == null || !nextBlock.requires_initial_training) {
+        if (!nextBlock?.requires_initial_training) {
           if (isMounted) {
             setBlock(null);
             setItems([]);
