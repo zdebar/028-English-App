@@ -83,13 +83,11 @@ function makeBlock(overrides: Partial<UserBlockType> = {}): UserBlockType {
     block_id: 10,
     name: 'Grammar block',
     note: '',
-    lesson_id: 1,
-    is_vocabulary: false,
     grammar_chunk_id: 20,
     sort_order: 1,
     progress: 0,
     show_in_topics: true,
-    is_practice_block: true,
+    is_removed_from_practice: false,
     requires_initial_training: true,
     started_at: '2026-01-01',
     updated_at: '2026-01-01',
@@ -117,7 +115,6 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
     updated_at: '2026-01-01',
     is_vocabulary: 0,
     is_practice_item: 1,
-    requires_initial_training: true,
     block_id: 10,
     grammar_chunk_id: 20,
     started_at: '2026-01-01',
@@ -143,6 +140,7 @@ describe('useBlockTrainingDeck', () => {
   });
 
   it('loads the selected training block and exposes card state', async () => {
+    getByBlockIdMock.mockResolvedValue([makeItem({ grammar_chunk_id: 99 })]);
     const { result } = renderHook(() => useBlockTrainingDeck('user-1', 10));
 
     await waitFor(() => expect(result.current.block?.block_id).toBe(10));
@@ -152,13 +150,14 @@ describe('useBlockTrainingDeck', () => {
     expect(getGrammarByIdMock).toHaveBeenCalledWith(20);
     expect(result.current.currentItem?.item_id).toBe(1);
     expect(result.current.grammar?.name).toBe('Articles');
+    expect(result.current.grammarChunkId).toBe(99);
     expect(result.current.progressLabel).toBe('1/2 · 0/1');
     expect('repeatDisabled' in result.current).toBe(false);
   });
 
   it('loads a grammarless block when it explicitly requires initial training', async () => {
     getUserBlockByIdMock.mockResolvedValue(
-      makeBlock({ grammar_chunk_id: null, is_vocabulary: true }),
+      makeBlock({ grammar_chunk_id: null }),
     );
     getByBlockIdMock.mockResolvedValue([makeItem({ grammar_chunk_id: 0, is_vocabulary: 1 })]);
 

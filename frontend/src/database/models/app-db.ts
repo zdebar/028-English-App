@@ -47,7 +47,7 @@ export default class AppDB extends Dexie {
       grammar_chunks: 'id, grammar_group_id, sort_order',
       user_items: USER_ITEMS_SCHEMA,
       user_blocks:
-        '[user_id+block_id], user_id, [user_id+updated_at], [user_id+sort_order], [user_id+is_vocabulary+started_at+sort_order], [user_id+is_vocabulary+started_at+mastered_at+sort_order]',
+        '[user_id+block_id], user_id, [user_id+updated_at]',
       user_scores: '[user_id+date], [user_id+updated_at]',
       audio_records: 'filename',
       audio_metadata: 'archive_name',

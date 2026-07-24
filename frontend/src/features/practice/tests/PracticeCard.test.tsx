@@ -31,7 +31,6 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     updated_at: '2024-01-01T00:00:00.000Z',
     is_vocabulary: 1,
     is_practice_item: 1,
-    requires_initial_training: false,
     block_id: 1,
     grammar_chunk_id: 10,
     started_at: '2024-01-01T00:00:00.000Z',

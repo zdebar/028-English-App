@@ -20,14 +20,17 @@ Dexie models under `frontend/src/database/models`.
 | Entity | Relationship |
 | --- | --- |
 | `levels` | Contain lessons and support dashboard/overview grouping. |
-| `lessons` | Contain blocks/items through lesson IDs. |
-| `blocks` / `user_blocks` | Group vocabulary or grammar work. User blocks track unlock/mastery state. |
+| `lessons` | Contain items directly through `items.lesson_id`. |
+| `blocks` / `user_blocks` | Optionally group items for Topics, practice eligibility, or initial training. User blocks track unlock/mastery state. |
 | `items` / `user_items` | Individual vocabulary or grammar practice units. User items track progress and scheduling. |
 | `grammar_groups` / `grammar_chunks` | Overview pages group ordered chunks; blocks and practice items link to one relevant chunk through `grammar_chunk_id`. |
 | `notes` | Shared note/detail content, linked by `note_id`. |
 | `user_scores` | Per-user daily practice count. |
 
-Vocabulary items have `is_vocabulary = 1`. Grammar items have `is_vocabulary = 0`.
+Vocabulary items have `is_vocabulary = 1`. Grammar items have `is_vocabulary = 0`. The flag
+and `grammar_chunk_id` are independent item fields. Backend blocks opt their items out through
+`is_removed_from_practice`; item RPCs invert that into `user_items.is_practice_item`. Unblocked
+items default to practice items.
 
 ## Important Model Responsibilities
 

@@ -6,6 +6,7 @@ import { getSyncTimestamps, splitDeleted } from '@/database/utils/sync-generic.u
 import { reportInfo } from '@/features/logging/monitoring-handler';
 import { SupabaseError } from '@/types/error.types';
 import type { UserBlockType } from '@/types/generic.types';
+import type { CurriculumSortPath, UserItemLocal } from '@/types/user-item.types';
 import { TableName } from '@/types/table.types';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 import { Entity } from 'dexie';
@@ -13,6 +14,7 @@ import Metadata from './metadata';
 import UserItem from './user-items';
 
 const NULL_DATE = config.database.nullReplacementDate;
+const NULL_NUMBER = config.database.nullReplacementNumber;
 
 type UserBlockAPI = Omit<UserBlockType, 'started_at' | 'next_at' | 'mastered_at' | 'deleted_at'> & {
   started_at: string | null;
@@ -35,9 +37,8 @@ type UserBlockExport = Pick<
 function convertAPIToLocal(block: UserBlockAPI): UserBlockType {
   return {
     ...block,
-    is_vocabulary: block.is_vocabulary,
     show_in_topics: block.show_in_topics ?? true,
-    is_practice_block: block.is_practice_block ?? true,
+    is_removed_from_practice: block.is_removed_from_practice ?? false,
     requires_initial_training: block.requires_initial_training,
     started_at: block.started_at ?? NULL_DATE,
     next_at: block.next_at ?? NULL_DATE,
@@ -73,13 +74,11 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
   block_id!: number;
   name!: string;
   note!: string | null;
-  lesson_id!: number;
   grammar_chunk_id!: number | null;
-  sort_order!: number;
+  sort_order!: number | null;
   progress!: number;
-  is_vocabulary!: boolean;
   show_in_topics!: boolean;
-  is_practice_block!: boolean;
+  is_removed_from_practice!: boolean;
   requires_initial_training!: boolean;
   started_at!: string;
   updated_at!: string;
@@ -91,22 +90,22 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
    * Reads all block rows for a user.
    *
    * @param userId Non-empty user id whose blocks should be read.
-   * @returns Blocks sorted by sort_order.
+   * @returns Blocks sorted by non-null sort_order, followed by unordered blocks.
    * @throws Error when userId is empty.
    */
   static async getByUserId(userId: string): Promise<UserBlockType[]> {
     assertNonEmptyString(userId, 'userId');
 
     const blocks = await db.user_blocks.where('user_id').equals(userId).toArray();
-    return blocks.sort((left, right) => left.sort_order - right.sort_order);
+    return blocks.sort(compareNullableBlockOrder);
   }
 
   /**
    * Reads blocks that should appear in the started topics overview.
    *
    * @param userId Non-empty user id whose topics should be read.
-   * @returns Visible topic blocks sorted by sort_order. Vocabulary blocks are included when at least
-   * one item from the block has started; grammar blocks are included when their block progress started.
+   * @returns Ordered topic blocks. Non-practice topics are always visible; practice topics become
+   * visible after at least one associated item starts.
    * @throws Error when userId is empty.
    */
   static async getStartedTopicsByUserId(userId: string): Promise<UserBlockType[]> {
@@ -122,11 +121,10 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
       .filter(
         (block) =>
           block.show_in_topics !== false &&
-          (block.is_practice_block === false ||
-            (!block.is_vocabulary && block.started_at !== NULL_DATE && block.progress > 0) ||
-            (block.is_vocabulary && startedBlockIdSet.has(block.block_id))),
+          block.sort_order != null &&
+          (block.is_removed_from_practice || startedBlockIdSet.has(block.block_id)),
       )
-      .sort((left, right) => left.sort_order - right.sort_order);
+      .sort(compareNullableBlockOrder);
   }
 
   /**
@@ -193,9 +191,16 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
 
     const masteredCount = config.progress.simulationMasteredTrainingBlockCount;
     const requiredCount = masteredCount + 1;
-    const trainingBlocks = (await this.getByUserId(userId))
-      .filter((block) => block.is_practice_block !== false && block.requires_initial_training)
-      .sort(compareTrainingBlocks)
+    const [blocks, practiceItems] = await Promise.all([
+      this.getByUserId(userId),
+      UserItem.getByUserId(userId),
+    ]);
+    const firstItemPathByBlockId = getFirstItemPathByBlockId(practiceItems);
+    const trainingBlocks = blocks
+      .filter((block) => !block.is_removed_from_practice && block.requires_initial_training)
+      .sort((left, right) =>
+        compareTrainingBlocks(left, right, firstItemPathByBlockId),
+      )
       .slice(0, requiredCount);
 
     if (trainingBlocks.length < requiredCount) {
@@ -395,11 +400,49 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
 
 }
 
-function compareTrainingBlocks(left: UserBlockType, right: UserBlockType): number {
-  if (left.lesson_id !== right.lesson_id) {
-    return left.lesson_id - right.lesson_id;
+function compareNullableBlockOrder(left: UserBlockType, right: UserBlockType): number {
+  if (left.sort_order == null && right.sort_order == null) return left.block_id - right.block_id;
+  if (left.sort_order == null) return 1;
+  if (right.sort_order == null) return -1;
+  return left.sort_order - right.sort_order || left.block_id - right.block_id;
+}
+
+function getFirstItemPathByBlockId(
+  items: UserItemLocal[],
+): Map<number, CurriculumSortPath> {
+  const result = new Map<number, CurriculumSortPath>();
+  for (const item of items) {
+    if (item.block_id === NULL_NUMBER) continue;
+    const current = result.get(item.block_id);
+    if (!current || compareCurriculumPaths(item.curriculum_sort_path, current) < 0) {
+      result.set(item.block_id, item.curriculum_sort_path);
+    }
   }
-  return left.sort_order - right.sort_order;
+  return result;
+}
+
+function compareTrainingBlocks(
+  left: UserBlockType,
+  right: UserBlockType,
+  firstItemPathByBlockId: Map<number, CurriculumSortPath>,
+): number {
+  const leftPath = firstItemPathByBlockId.get(left.block_id);
+  const rightPath = firstItemPathByBlockId.get(right.block_id);
+  if (!leftPath && !rightPath) return left.block_id - right.block_id;
+  if (!leftPath) return 1;
+  if (!rightPath) return -1;
+  return compareCurriculumPaths(leftPath, rightPath) || left.block_id - right.block_id;
+}
+
+function compareCurriculumPaths(
+  left: CurriculumSortPath,
+  right: CurriculumSortPath,
+): number {
+  for (let index = 0; index < left.length; index += 1) {
+    const difference = left[index] - right[index];
+    if (difference !== 0) return difference;
+  }
+  return 0;
 }
 
 function getResetBlockFields(dateTime: string): Pick<

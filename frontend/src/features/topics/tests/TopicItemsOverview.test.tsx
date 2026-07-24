@@ -157,7 +157,7 @@ describe('TopicItemsOverview', () => {
     mocks.blockId = '2';
     mocks.state.items = [];
     mocks.state.itemsLoading = false;
-    mocks.state.block = { block_id: 2, name: 'Block 2', is_practice_block: true };
+    mocks.state.block = { block_id: 2, name: 'Block 2', is_removed_from_practice: false };
     mocks.state.blockLoading = false;
     mocks.playAudio.mockReset();
     mocks.playAudio.mockResolvedValue(true);
@@ -292,7 +292,7 @@ describe('TopicItemsOverview', () => {
   });
 
   it('disables reset for browse-only topics', () => {
-    mocks.state.block = { block_id: 2, name: 'Letters', is_practice_block: false };
+    mocks.state.block = { block_id: 2, name: 'Letters', is_removed_from_practice: true };
 
     render(<TopicItemsOverview />);
 

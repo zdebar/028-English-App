@@ -388,28 +388,28 @@ describe('UserItem', () => {
           item_id: 2,
           block_id: 20,
           grammar_chunk_id: 7,
-          requires_initial_training: false,
           progress: 0,
         },
         {
           item_id: 3,
           block_id: 30,
           grammar_chunk_id: 0,
-          requires_initial_training: true,
           progress: 0,
         },
         {
           item_id: 4,
           block_id: 40,
           grammar_chunk_id: 9,
-          requires_initial_training: false,
           progress: 0,
         },
       ]);
-    mocks.userBlockGet.mockResolvedValueOnce({
-      block_id: 30,
-      started_at: '1970-01-01T00:00:00.000Z',
-    });
+    mocks.userBlockGet
+      .mockResolvedValueOnce({ block_id: 20, requires_initial_training: false })
+      .mockResolvedValueOnce({
+        block_id: 30,
+        requires_initial_training: true,
+        started_at: '1970-01-01T00:00:00.000Z',
+      });
 
     const deck = await UserItem.getPracticeDeck('u1', 5);
 
@@ -418,7 +418,7 @@ describe('UserItem', () => {
       item_id: 3,
       is_initial_training_trigger: true,
     });
-    expect(mocks.userBlockGet).toHaveBeenCalledWith(['u1', 30]);
+    expect(mocks.userBlockGet.mock.calls).toEqual([[['u1', 20]], [['u1', 30]]]);
   });
 
   it('restores a partial odd vocabulary deck when even and new alternatives are empty', async () => {
@@ -486,7 +486,7 @@ describe('UserItem', () => {
       {
         block_id: 10,
         is_vocabulary: false,
-        is_practice_block: true,
+        is_practice_item: true,
         mastered_at: '2026-06-20T12:00:00.000Z',
       },
     ]);
@@ -752,7 +752,6 @@ describe('UserItem', () => {
           audio: null,
           is_vocabulary: true,
           is_practice_item: false,
-          requires_initial_training: true,
           sort_order: 2,
           curriculum_sort_path: [1, 2, 2],
           note_id: null,
@@ -800,7 +799,6 @@ describe('UserItem', () => {
         item_id: 2,
         is_vocabulary: 1,
         is_practice_item: 0,
-        requires_initial_training: true,
         curriculum_sort_path: [1, 2, 2],
         block_id: 0,
         grammar_chunk_id: 0,
