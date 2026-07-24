@@ -11,7 +11,6 @@ RETURNS TABLE (
   audio TEXT,
   is_vocabulary BOOLEAN,
   is_practice_item BOOLEAN,
-  requires_initial_training BOOLEAN,
   sort_order INTEGER,
   curriculum_sort_path INTEGER[],
   note_id INTEGER,
@@ -40,15 +39,14 @@ BEGIN
     i.english,
     i.pronunciation,
     i.audio,
-    (b.grammar_chunk_id IS NULL) AS is_vocabulary,
-    b.is_practice_block AS is_practice_item,
-    b.requires_initial_training,
+    i.is_vocabulary,
+    COALESCE(NOT b.is_removed_from_practice, TRUE) AS is_practice_item,
     i.sort_order,
     ARRAY[lv.sort_order, le.sort_order, i.sort_order]::INTEGER[]
       AS curriculum_sort_path,
     i.note_id,
     i.block_id,
-    b.grammar_chunk_id,
+    i.grammar_chunk_id,
     COALESCE(ui.progress, 0) AS progress,
     '[]'::jsonb AS progress_history,
     ui.started_at,
@@ -56,12 +54,12 @@ BEGIN
     i.deleted_at,
     ui.next_at,
     ui.mastered_at,
-    b.lesson_id
+    i.lesson_id
   FROM public.items i
-  JOIN public.blocks b
+  LEFT JOIN public.blocks b
     ON b.id = i.block_id
   JOIN public.lessons le
-    ON le.id = b.lesson_id
+    ON le.id = i.lesson_id
   JOIN public.levels lv
     ON lv.id = le.level_id
   LEFT JOIN public.user_items ui
@@ -70,7 +68,7 @@ BEGIN
   WHERE GREATEST(
       COALESCE(ui.updated_at, public.rpc_min_timestamptz()),
       i.updated_at,
-      b.updated_at,
+      COALESCE(b.updated_at, public.rpc_min_timestamptz()),
       le.updated_at,
       lv.updated_at
     )

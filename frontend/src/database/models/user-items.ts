@@ -75,7 +75,7 @@ function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
   return {
     ...apiItem,
     is_vocabulary: apiItem.is_vocabulary ? 1 : 0,
-    is_practice_item: apiItem.is_practice_item === true ? 1 : 0,
+    is_practice_item: apiItem.is_practice_item === false ? 0 : 1,
     started_at: apiItem.started_at ?? NULL_DATE,
     next_at: apiItem.next_at ?? NULL_DATE,
     mastered_at: apiItem.mastered_at ?? NULL_DATE,
@@ -105,7 +105,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   audio!: string | null;
   is_vocabulary!: 0 | 1; // boolean represented as 0 or 1
   is_practice_item!: 0 | 1; // boolean represented as 0 or 1
-  requires_initial_training!: boolean;
   sort_order!: number;
   curriculum_sort_path!: CurriculumSortPath;
   note_id!: number;
@@ -260,16 +259,16 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Reads unique block ids from started practice items.
+   * Reads unique block ids from all started items.
    *
    * @param userId User id whose started items should be inspected.
-   * @returns Unique non-null-replacement block ids.
+   * @returns Unique non-null-replacement block ids, including non-practice topic items.
    */
   static async getStartedBlocksIds(userId: string): Promise<number[]> {
     const startedItems = await db.user_items
       .where('[user_id+started_at]')
       .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
-      .filter((item) => isPracticeItem(item) && item.block_id !== NULL_NUMBER)
+      .filter((item) => item.block_id !== NULL_NUMBER)
       .toArray();
 
     return [...new Set(startedItems.map((item) => item.block_id))];
@@ -620,9 +619,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const selected: UserItemLocal[] = [];
 
     for (const item of items) {
-      if (item.requires_initial_training) {
+      if (item.block_id !== NULL_NUMBER) {
         const block = await db.user_blocks.get([userId, item.block_id]);
-        if (block?.started_at === NULL_DATE) {
+        if (block?.requires_initial_training && block.started_at === NULL_DATE) {
           selected.push({ ...item, is_initial_training_trigger: true });
           return selected;
         }

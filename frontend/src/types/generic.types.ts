@@ -20,12 +20,12 @@ export interface GrammarChunkType extends SyncEntityType {
   grammar_group_id: number | null;
 }
 
-export interface BlockType extends SyncEntityType {
-  lesson_id: number;
+export interface BlockType extends Omit<SyncEntityType, 'sort_order'> {
   grammar_chunk_id: number | null;
   show_in_topics: boolean;
-  is_practice_block: boolean;
+  is_removed_from_practice: boolean;
   requires_initial_training: boolean;
+  sort_order: number | null;
 }
 
 export interface NoteType extends SyncEntityType {
@@ -59,13 +59,11 @@ export interface UserBlockType {
   block_id: number;
   name: string;
   note: string | null;
-  lesson_id: number;
   grammar_chunk_id: number | null;
-  sort_order: number;
+  sort_order: number | null;
   progress: number;
-  is_vocabulary: boolean;
   show_in_topics: boolean;
-  is_practice_block: boolean;
+  is_removed_from_practice: boolean;
   requires_initial_training: boolean;
   started_at: string;
   updated_at: string;

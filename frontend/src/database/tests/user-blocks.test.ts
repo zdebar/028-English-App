@@ -17,6 +17,7 @@ const mocks = vi.hoisted(() => ({
   rpc: vi.fn(),
   reportInfo: vi.fn(),
   getStartedBlocksIds: vi.fn(),
+  getPracticeItems: vi.fn(),
   getMasteredGrammarBlockIds: vi.fn(),
 }));
 
@@ -63,6 +64,7 @@ vi.mock('@/database/models/metadata', () => ({
 vi.mock('@/database/models/user-items', () => ({
   default: {
     getStartedBlocksIds: (...args: unknown[]) => mocks.getStartedBlocksIds(...args),
+    getByUserId: (...args: unknown[]) => mocks.getPracticeItems(...args),
     getMasteredGrammarBlockIds: (...args: unknown[]) => mocks.getMasteredGrammarBlockIds(...args),
     areAllVocabularyItemsStartedForLesson: vi.fn(),
   },
@@ -126,6 +128,7 @@ describe('UserBlock', () => {
     mocks.markAsSynced.mockResolvedValue(undefined);
     mocks.rpc.mockResolvedValue({ data: [], error: null });
     mocks.getStartedBlocksIds.mockResolvedValue([]);
+    mocks.getPracticeItems.mockResolvedValue([]);
     mocks.getMasteredGrammarBlockIds.mockResolvedValue([]);
   });
 
@@ -153,8 +156,7 @@ describe('UserBlock', () => {
         block_id: 4,
         sort_order: 40,
         name: 'Locked vocabulary',
-        is_vocabulary: true,
-        is_practice_block: true,
+        is_removed_from_practice: false,
         show_in_topics: true,
         progress: 0,
         started_at: '9999-12-31T23:59:59+00:00',
@@ -164,8 +166,7 @@ describe('UserBlock', () => {
         block_id: 3,
         sort_order: 30,
         name: 'Started vocabulary',
-        is_vocabulary: true,
-        is_practice_block: true,
+        is_removed_from_practice: false,
         show_in_topics: true,
         progress: 0,
         started_at: '9999-12-31T23:59:59+00:00',
@@ -175,8 +176,7 @@ describe('UserBlock', () => {
         block_id: 2,
         sort_order: 20,
         name: 'Locked grammar',
-        is_vocabulary: false,
-        is_practice_block: true,
+        is_removed_from_practice: false,
         show_in_topics: true,
         progress: 0,
         started_at: '9999-12-31T23:59:59+00:00',
@@ -186,8 +186,7 @@ describe('UserBlock', () => {
         block_id: 1,
         sort_order: 10,
         name: 'Completed grammar',
-        is_vocabulary: false,
-        is_practice_block: true,
+        is_removed_from_practice: false,
         show_in_topics: true,
         progress: 1,
         started_at: '2026-03-01T00:00:00.000Z',
@@ -197,8 +196,7 @@ describe('UserBlock', () => {
         block_id: 6,
         sort_order: 15,
         name: 'Unlocked grammar',
-        is_vocabulary: false,
-        is_practice_block: true,
+        is_removed_from_practice: false,
         show_in_topics: true,
         progress: 0,
         started_at: '2026-03-01T00:00:00.000Z',
@@ -208,14 +206,13 @@ describe('UserBlock', () => {
         block_id: 5,
         sort_order: 50,
         name: 'Organizational grammar',
-        is_vocabulary: false,
-        is_practice_block: true,
+        is_removed_from_practice: false,
         show_in_topics: false,
         progress: 1,
         started_at: '2026-03-01T00:00:00.000Z',
       },
     ]);
-    mocks.getStartedBlocksIds.mockResolvedValueOnce([3]);
+    mocks.getStartedBlocksIds.mockResolvedValueOnce([3, 1]);
 
     const result = await UserBlock.getStartedTopicsByUserId('u1');
 
@@ -232,8 +229,7 @@ describe('UserBlock', () => {
         block_id: 1,
         sort_order: 10,
         name: 'Letters',
-        is_vocabulary: true,
-        is_practice_block: false,
+        is_removed_from_practice: true,
         show_in_topics: true,
         started_at: '9999-12-31T23:59:59+00:00',
       },
@@ -242,9 +238,17 @@ describe('UserBlock', () => {
         block_id: 2,
         sort_order: 20,
         name: 'Hidden letters',
-        is_vocabulary: true,
-        is_practice_block: false,
+        is_removed_from_practice: true,
         show_in_topics: false,
+        started_at: '9999-12-31T23:59:59+00:00',
+      },
+      {
+        user_id: 'u1',
+        block_id: 3,
+        sort_order: null,
+        name: 'Unordered letters',
+        is_removed_from_practice: true,
+        show_in_topics: true,
         started_at: '9999-12-31T23:59:59+00:00',
       },
     ]);
@@ -290,48 +294,44 @@ describe('UserBlock', () => {
       {
         user_id: 'u1',
         block_id: 4,
-        lesson_id: 2,
-        sort_order: 1,
-        is_vocabulary: false,
-        is_practice_block: true,
+        sort_order: null,
+        is_removed_from_practice: false,
         requires_initial_training: true,
       },
       {
         user_id: 'u1',
         block_id: 2,
-        lesson_id: 1,
-        sort_order: 2,
-        is_vocabulary: false,
-        is_practice_block: true,
+        sort_order: null,
+        is_removed_from_practice: false,
         requires_initial_training: true,
       },
       {
         user_id: 'u1',
         block_id: 1,
-        lesson_id: 1,
-        sort_order: 1,
-        is_vocabulary: false,
-        is_practice_block: true,
+        sort_order: null,
+        is_removed_from_practice: false,
         requires_initial_training: true,
       },
       {
         user_id: 'u1',
         block_id: 3,
-        lesson_id: 1,
-        sort_order: 3,
-        is_vocabulary: false,
-        is_practice_block: true,
+        sort_order: null,
+        is_removed_from_practice: false,
         requires_initial_training: true,
       },
       {
         user_id: 'u1',
         block_id: 99,
-        lesson_id: 1,
-        sort_order: 0,
-        is_vocabulary: true,
-        is_practice_block: true,
+        sort_order: null,
+        is_removed_from_practice: false,
         requires_initial_training: false,
       },
+    ]);
+    mocks.getPracticeItems.mockResolvedValueOnce([
+      { block_id: 4, curriculum_sort_path: [1, 2, 1] },
+      { block_id: 2, curriculum_sort_path: [1, 1, 2] },
+      { block_id: 1, curriculum_sort_path: [1, 1, 1] },
+      { block_id: 3, curriculum_sort_path: [1, 1, 3] },
     ]);
 
     await expect(
@@ -353,10 +353,8 @@ describe('UserBlock', () => {
       {
         user_id: 'u1',
         block_id: 1,
-        lesson_id: 1,
-        sort_order: 1,
-        is_vocabulary: false,
-        is_practice_block: true,
+        sort_order: null,
+        is_removed_from_practice: false,
         requires_initial_training: true,
       },
     ]);
@@ -455,13 +453,11 @@ describe('UserBlock', () => {
           block_id: 1,
           name: 'Block 1',
           note: null,
-          lesson_id: 1,
           grammar_chunk_id: 10,
           sort_order: 1,
           progress: 2,
-          is_vocabulary: false,
           show_in_topics: false,
-          is_practice_block: false,
+          is_removed_from_practice: false,
           requires_initial_training: true,
           started_at: null,
           updated_at: '2026-03-04T00:00:00.000Z',
@@ -502,7 +498,7 @@ describe('UserBlock', () => {
         block_id: 1,
         note: null,
         show_in_topics: false,
-        is_practice_block: false,
+        is_removed_from_practice: false,
         requires_initial_training: true,
         started_at: '9999-12-31T23:59:59+00:00',
         next_at: '9999-12-31T23:59:59+00:00',
@@ -517,7 +513,7 @@ describe('UserBlock', () => {
     );
   });
 
-  it('syncFromRemote defaults missing topic and practice flags to true', async () => {
+  it('syncFromRemote defaults missing topic visibility to true and removal from practice to false', async () => {
     mocks.rpc.mockResolvedValueOnce({
       data: [
         {
@@ -525,11 +521,9 @@ describe('UserBlock', () => {
           block_id: 1,
           name: 'Block 1',
           note: '',
-          lesson_id: 1,
           grammar_chunk_id: 10,
           sort_order: 1,
           progress: 0,
-          is_vocabulary: false,
           requires_initial_training: false,
           started_at: null,
           updated_at: '2026-03-04T00:00:00.000Z',
@@ -547,7 +541,7 @@ describe('UserBlock', () => {
       expect.objectContaining({
         block_id: 1,
         show_in_topics: true,
-        is_practice_block: true,
+        is_removed_from_practice: false,
         requires_initial_training: false,
       }),
     ]);

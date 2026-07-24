@@ -98,7 +98,7 @@ export default function TopicItemsOverview() {
     navigate(ROUTES.topics);
   }, [navigate]);
 
-  const resetHandler = topic?.is_practice_block === false ? undefined : handleReset;
+  const resetHandler = topic?.is_removed_from_practice ? undefined : handleReset;
 
   return (
     <OverviewCard

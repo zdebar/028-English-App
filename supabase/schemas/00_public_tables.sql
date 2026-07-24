@@ -62,16 +62,17 @@ CREATE TABLE IF NOT EXISTS blocks (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
   note TEXT,
-  lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE RESTRICT,
   show_in_topics BOOLEAN NOT NULL DEFAULT TRUE,
-  is_practice_block BOOLEAN NOT NULL DEFAULT TRUE,
+  is_removed_from_practice BOOLEAN NOT NULL DEFAULT FALSE,
   requires_initial_training BOOLEAN NOT NULL DEFAULT FALSE,
   grammar_chunk_id INTEGER REFERENCES grammar_chunks(id) ON DELETE RESTRICT,
-  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
+  sort_order INTEGER CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ,
-  CONSTRAINT blocks_lesson_sort_order_key
-    UNIQUE (lesson_id, sort_order) DEFERRABLE INITIALLY DEFERRED
+  CONSTRAINT blocks_sort_order_key
+    UNIQUE (sort_order) DEFERRABLE INITIALLY DEFERRED,
+  CONSTRAINT blocks_training_not_removed_from_practice_check
+    CHECK (requires_initial_training = FALSE OR is_removed_from_practice = FALSE)
 );
 
 CREATE TABLE IF NOT EXISTS user_blocks (
@@ -101,12 +102,15 @@ CREATE TABLE IF NOT EXISTS items (
   pronunciation TEXT,
   audio TEXT,
   note_id INTEGER REFERENCES notes(id) ON DELETE SET NULL,
+  lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE RESTRICT,
+  grammar_chunk_id INTEGER REFERENCES grammar_chunks(id) ON DELETE RESTRICT,
+  is_vocabulary BOOLEAN NOT NULL,
   sort_order INTEGER NOT NULL CHECK (sort_order >= 0),
-  block_id INTEGER NOT NULL REFERENCES blocks(id) ON DELETE RESTRICT,
+  block_id INTEGER REFERENCES blocks(id) ON DELETE RESTRICT,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ,
-  CONSTRAINT items_block_sort_order_key
-    UNIQUE (block_id, sort_order) DEFERRABLE INITIALLY DEFERRED
+  CONSTRAINT items_lesson_sort_order_key
+    UNIQUE (lesson_id, sort_order) DEFERRABLE INITIALLY DEFERRED
 );
 
 CREATE TABLE IF NOT EXISTS user_items (
@@ -171,6 +175,8 @@ CREATE INDEX IF NOT EXISTS idx_grammar_chunks_group_id
   ON public.grammar_chunks (grammar_group_id, sort_order);
 CREATE INDEX IF NOT EXISTS idx_items_note_id ON public.items (note_id);
 CREATE INDEX IF NOT EXISTS idx_items_block_id ON public.items (block_id);
+CREATE INDEX IF NOT EXISTS idx_items_lesson_id ON public.items (lesson_id);
+CREATE INDEX IF NOT EXISTS idx_items_grammar_chunk_id ON public.items (grammar_chunk_id);
 
 CREATE INDEX IF NOT EXISTS idx_user_items_user_updated_item
   ON public.user_items (user_id, updated_at, item_id)

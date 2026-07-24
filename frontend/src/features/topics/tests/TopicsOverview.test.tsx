@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
   getStartedTopicsByUserId: vi.fn(),
   userId: 'u1' as string | null,
   state: {
-    data: [] as Array<{ block_id: number; name: string; is_practice_block?: boolean }>,
+    data: [] as Array<{ block_id: number; name: string; is_removed_from_practice?: boolean }>,
     error: null as string | null,
     loading: false,
   },
@@ -114,7 +114,7 @@ describe('TopicsOverview', () => {
   });
 
   it('renders browse-only topics returned by topic query', () => {
-    mocks.state.data = [{ block_id: 3, name: 'Letters', is_practice_block: false }];
+    mocks.state.data = [{ block_id: 3, name: 'Letters', is_removed_from_practice: true }];
 
     render(<TopicsOverview />);
 
