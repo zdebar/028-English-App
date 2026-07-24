@@ -16,6 +16,25 @@ SET
 FROM public.blocks b
 WHERE b.id = i.block_id;
 
+-- Item ordering was previously scoped to a block, so multiple blocks in the
+-- same lesson can contain the same sort_order. Flatten those block-local
+-- positions into one deterministic lesson-wide sequence before enforcing the
+-- new lesson-scoped unique constraint.
+WITH ordered AS (
+  SELECT
+    i.id,
+    ROW_NUMBER() OVER (
+      PARTITION BY i.lesson_id
+      ORDER BY b.sort_order, i.sort_order, i.id
+    )::INTEGER AS position
+  FROM public.items i
+  JOIN public.blocks b ON b.id = i.block_id
+)
+UPDATE public.items AS target
+SET sort_order = ordered.position
+FROM ordered
+WHERE target.id = ordered.id;
+
 DO $$
 BEGIN
   IF EXISTS (
