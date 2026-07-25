@@ -1,5 +1,6 @@
 import sys
 import os
+import re
 from datetime import datetime
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from scripts.utils.preparation import read_vocab_csv, redo_sort_order
@@ -7,12 +8,23 @@ from scripts.utils.pronunciation import fill_pronunciation_espeak_ng
 from scripts.utils.audio import generate_audio_with_google_cloud
 import pandas as pd
 
+def get_lesson_id(file_name: str) -> int:
+	match = re.match(r"^(\d+)", os.path.basename(file_name))
+	if not match:
+		raise ValueError(f"File name must start with a lesson number: {file_name}")
+	return int(match.group(1))
+
 async def prepare_words(file_name: str, output_file: str, audio_folder: str, suffix: str = "") -> None:
 	# 1. Read data
-	df = read_vocab_csv(file_name)
+	df = read_vocab_csv(file_name, columns=[
+		"id", "czech", "english", "pronunciation", "audio", "sort_order",
+		"block_id", "note_id", "grammar_chunk_id"
+	])
 	if df is None:
 		print("Error: DataFrame is None after reading CSV.")
 		return
+	df["is_vocabulary"] = df["grammar_chunk_id"].isna() | df["grammar_chunk_id"].astype(str).str.strip().eq("")
+	df["lesson_id"] = get_lesson_id(file_name)
 	# 2. Fill IPA pronunciation	
 	df = await fill_pronunciation_espeak_ng(df)
 	# 3. Redo sort order
@@ -20,7 +32,7 @@ async def prepare_words(file_name: str, output_file: str, audio_folder: str, suf
 	# # 4. Generate audio files
 	df = await generate_audio_with_google_cloud(df, audio_folder, suffix)
 	# 5. Force integer columns before saving
-	for col in ["id", "sort_order", "block_id", "note_id"]:
+	for col in ["id", "sort_order", "block_id", "note_id", "grammar_chunk_id", "lesson_id"]:
 		if col in df.columns:
 			df[col] = pd.to_numeric(df[col], errors="coerce")
 			df[col] = df[col].apply(lambda x: int(x) if pd.notna(x) and x == int(x) else "")
