@@ -90,6 +90,7 @@ vi.mock('@/config/config', () => ({
       audioDelay: 300,
     },
     progress: { skipProgress: 10, minusProgress: -1, plusProgress: 1 },
+    buttons: { loadingMessageDelay: 300 },
     loading: { dataStateDelayMs: 1000 },
   },
 }));
@@ -462,6 +463,43 @@ describe('PracticeCard', () => {
     render(<PracticeCard />);
 
     expect(screen.getByTestId('practice-stars-row').textContent).toBe('0:5:50');
+  });
+
+  it('keeps vocabulary and direction changes centered while audio status changes', () => {
+    const { container, rerender } = render(<PracticeCard />);
+
+    const cardButton = container.querySelector('button[aria-disabled]') as HTMLButtonElement;
+    const topBar = container.querySelector('#top-bar') as HTMLElement;
+    const mainContent = container.querySelector('#practice-main-content') as HTMLElement;
+    const bottomBar = container.querySelector('#bottom-bar') as HTMLElement;
+
+    expect(cardButton.className).toContain(
+      'grid-rows-[3.5rem_minmax(0,1fr)_3.5rem]',
+    );
+    expect(topBar.className).toContain('h-14');
+    expect(mainContent.className).toContain('items-center');
+    expect(mainContent.querySelector('#item')).toBeTruthy();
+    expect(bottomBar.className).toContain('self-end');
+
+    mocks.practiceDeck.audioLoading = true;
+    rerender(<PracticeCard />);
+
+    expect(container.querySelector('#practice-main-content')).toBe(mainContent);
+
+    mocks.practiceDeck.audioLoading = false;
+    mocks.practiceDeck.audioError = true;
+    rerender(<PracticeCard />);
+
+    expect(container.querySelector('#practice-main-content')).toBe(mainContent);
+    expect(screen.getByText('No audio')).toBeTruthy();
+
+    mocks.practiceDeck.audioError = false;
+    mocks.practiceDeck.showDirectionChange = true;
+    rerender(<PracticeCard />);
+
+    expect(container.querySelector('#practice-main-content')).toBe(mainContent);
+    expect(mainContent.querySelector('#item')).toBeNull();
+    expect(mainContent.textContent).toContain('CZ to EN');
   });
 
   it('shows only hint in the primary row before reveal', () => {
