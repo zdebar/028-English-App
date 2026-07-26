@@ -12,7 +12,7 @@ vi.mock('@/locales/cs', () => ({
 import BlockTrainingOverviewCard from '@/features/practice/BlockTrainingOverviewCard';
 
 describe('BlockTrainingOverviewCard', () => {
-  it('renders the block and grammar content in one overview', () => {
+  it('renders only the grammar content when grammar is attached', () => {
     render(
       <MemoryRouter>
         <BlockTrainingOverviewCard
@@ -23,9 +23,9 @@ describe('BlockTrainingOverviewCard', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole('heading', { name: 'Block A' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Articles' })).toBeTruthy();
-    expect(screen.getByText('Block note')).toBeTruthy();
+    expect(screen.queryByRole('heading', { name: 'Block A' })).toBeNull();
+    expect(screen.queryByText('Block note')).toBeNull();
     expect(screen.getByText('Grammar note')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy();
   });

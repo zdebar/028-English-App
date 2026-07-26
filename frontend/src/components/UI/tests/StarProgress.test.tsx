@@ -9,6 +9,9 @@ describe('StarProgress', () => {
 
     expect(screen.getAllByText('10')).toHaveLength(2);
     expect(screen.getByText('5')).toBeTruthy();
+    expect(screen.getAllByText(/^(10|5)$/).every((badge) => badge.classList.contains('z-star-badge'))).toBe(
+      true,
+    );
   });
 
   it('accumulates completed stars beyond silver in the gold badge', () => {

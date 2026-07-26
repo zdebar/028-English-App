@@ -104,7 +104,7 @@ export default function PracticeSessionCard({
       <div className="card-width card-height relative gap-1">
         <button
           type="button"
-          className={`relative flex h-full w-full grow cursor-pointer flex-col items-center justify-between p-4 text-inherit select-none ${cardStyle} `}
+          className={`relative grid h-full w-full grow cursor-pointer grid-rows-[3.5rem_minmax(0,1fr)_3.5rem] items-center p-4 text-inherit select-none ${cardStyle} `}
           onClick={handleReveal}
           title={cardText}
           aria-disabled={revealed}
@@ -120,17 +120,25 @@ export default function PracticeSessionCard({
             </div>
             <div className="flex min-h-0 items-center justify-center">{audioStatusMessage}</div>
           </div>
-          {showDirectionChange ? (
-            <Notification className="my-auto">{directionText}</Notification>
-          ) : (
-            <div id="item" className="flex h-full flex-col justify-center gap-1">
-              <p className="text-center font-bold">{czech}</p>
-              <p className="text-center font-normal">{english}</p>
-              <p className="text-center font-normal">{pronunciation}</p>
-            </div>
-          )}
+          <div
+            id="practice-main-content"
+            className="flex min-h-0 w-full items-center justify-center"
+          >
+            {showDirectionChange ? (
+              <Notification>{directionText}</Notification>
+            ) : (
+              <div id="item" className="flex flex-col justify-center gap-1">
+                <p className="text-center font-bold">{czech}</p>
+                <p className="text-center font-normal">{english}</p>
+                <p className="text-center font-normal">{pronunciation}</p>
+              </div>
+            )}
+          </div>
 
-          <div className="relative flex h-8 w-full items-center justify-between" id="bottom-bar">
+          <div
+            className="relative flex h-8 w-full self-end items-center justify-between"
+            id="bottom-bar"
+          >
             <p className="px-2 font-light" title={TEXTS.progress}>
               {progressLabel}
             </p>

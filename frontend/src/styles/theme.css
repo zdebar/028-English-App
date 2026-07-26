@@ -62,7 +62,7 @@
   /** star progress colors **/
   --color-star-empty-border-light: #475569;
   --color-star-empty-border-dark: #64748b;
-  --color-star-empty-fill-light: #cbd5e1;
+  --color-star-empty-fill-light: #a5afbbcb;
   --color-star-empty-fill-dark: #334155;
   --color-star-bronze-light: #b87333;
   --color-star-bronze-dark: #d8a373;
@@ -70,13 +70,13 @@
   --color-star-bronze-badge-bg-dark: #6f4a2f;
   --color-star-bronze-badge-text-light: #8c5224;
   --color-star-bronze-badge-text-dark: #f6d5b5;
-  --color-star-silver-light: #a8adb7;
+  --color-star-silver-light: #777a81;
   --color-star-silver-dark: #e5e7eb;
-  --color-star-silver-badge-bg-light: #eef2f7;
+  --color-star-silver-badge-bg-light: #e7ecf3;
   --color-star-silver-badge-bg-dark: #4b5563;
   --color-star-silver-badge-text-light: #626b79;
   --color-star-silver-badge-text-dark: #f8fafc;
-  --color-star-gold-light: #d4af37;
+  --color-star-gold-light: #a27e08;
   --color-star-gold-dark: #ffd36b;
   --color-star-gold-badge-bg-light: #f8edc2;
   --color-star-gold-badge-bg-dark: #7a5600;

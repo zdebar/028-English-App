@@ -15,7 +15,7 @@ export default class Notes extends SyncEntityModel implements NoteType {
   id!: number;
   name!: string;
   note!: string;
-  sort_order!: number;
+  sort_order!: number | null;
   deleted_at!: string | null;
 
   static override readonly syncTable = db.notes as Dexie.Table<NoteType, number>;

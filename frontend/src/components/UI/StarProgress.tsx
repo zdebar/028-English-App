@@ -163,13 +163,9 @@ export function CompactedStar({
   const showCount = count >= 2;
 
   return (
-    <span className="z-star-stack relative inline-flex items-center justify-center overflow-visible">
+    <span className="relative inline-flex items-center justify-center overflow-visible">
       <FullStar className={starClassName} size={size} />
-      {showCount && (
-        <span className={`star-badge ${badgeClassName}`}>
-          {count}
-        </span>
-      )}
+      {showCount && <span className={`star-badge z-star-badge ${badgeClassName}`}>{count}</span>}
     </span>
   );
 }
@@ -194,13 +190,11 @@ export function StarRow({
   ];
 
   if (safeStarCount === 0) {
-    return (
-      <div className="z-star-stack relative flex flex-wrap items-center gap-3 overflow-visible" />
-    );
+    return <div className="relative flex flex-wrap items-center gap-3 overflow-visible" />;
   }
 
   return (
-    <div className="z-star-stack relative flex flex-wrap items-center gap-3 overflow-visible">
+    <div className="relative flex flex-wrap items-center gap-0 overflow-visible">
       {tierCounts.map((count, index) => {
         if (count === 0) {
           return null;
@@ -242,7 +236,7 @@ export function StarRowWithFillingStar({
 }: StarRowWithFillingStarProps): JSX.Element {
   return (
     <div
-      className={`isolate flex flex-wrap items-center justify-center gap-2 overflow-visible ${className}`.trim()}
+      className={`flex flex-wrap items-center justify-center gap-2 overflow-visible ${className}`.trim()}
     >
       <StarRow starCount={starCount} starsPerRow={starsPerRow} size={size} />
       <FillingStar

@@ -14,19 +14,23 @@ export default function Guide(): JSX.Element {
       <h1 className="text-center">Návod</h1>
       <section>
         <h2>Úvod</h2>
-        <p>Aplikace je určena pro všechny, kteří se chtějí naučit mluvit anglicky.</p>
         <p>
-          I pokud nejste úplný začátečník, musíte projít všechny lekce. Jen si tak budete jisti že
-          jste se naučili vše potřebné. Můžete ale velice rychle přeskakovat vám známá slovíčka.
+          Učení je zde jednoduché jako mobilní hra: stačí stisknout jediné tlačítko a procvičovat.
+          Slovíčka i gramatika se vám nabídnou automaticky ve správném pořadí.
         </p>
         <p>
-          Je zde jediný cvičební postup, slovíčka i gramatika se vám budou nabízet sama k učení ve
-          správném pořadí. Napřed se vždy procvičuje rozučené, a až poté se učí nové.
+          Každé slovíčko i věta mají audio se správnou výslovností. Vždy opakujte nahlas, ideálně
+          několikrát.
         </p>
-        <h3>Důležité je:</h3>
+        <p>
+          Aplikace přednostně vybírá procvičování. Buďte trpěliví, k novému se dostanete po
+          zopakování rozučeného.
+        </p>
+        <h3>Stručně:</h3>
         <ul>
-          <li>opakovat každý den</li>
-          <li>snažit se napodobit správnou výslovnost</li>
+          <li>opakujte nahlas slyšené</li>
+          <li>procvičujte alespoň 400 položek denně</li>
+          <li>procvičovat můžete kdykoli a bez omezení</li>
         </ul>
       </section>
       <section>
