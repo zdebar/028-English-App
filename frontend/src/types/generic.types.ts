@@ -28,8 +28,9 @@ export interface BlockType extends Omit<SyncEntityType, 'sort_order'> {
   sort_order: number | null;
 }
 
-export interface NoteType extends SyncEntityType {
+export interface NoteType extends Omit<SyncEntityType, 'sort_order'> {
   note: string;
+  sort_order: number | null;
 }
 
 export interface ProgressCountsType {
