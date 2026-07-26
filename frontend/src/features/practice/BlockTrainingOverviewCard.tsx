@@ -26,13 +26,18 @@ export default function BlockTrainingOverviewCard({
 }: BlockTrainingOverviewCardProps): JSX.Element {
   return (
     <Card className="flex w-full flex-col gap-1">
-      <h1 className="h-button flex items-center px-4 text-left text-lg font-bold">{block.name}</h1>
-      {block.note && <Note note={block.note} />}
-      {grammar && (
+      {grammar ? (
         <section>
-          <h2 className="h-button px-4 pt-4 text-left text-lg font-bold">{grammar.name}</h2>
+          <h1 className="h-button flex items-center px-4 text-left text-lg font-bold">
+            {grammar.name}
+          </h1>
           {grammar.note && <Note note={grammar.note} />}
         </section>
+      ) : (
+        <>
+          <h1 className="h-button flex items-center px-4 text-left text-lg font-bold">{block.name}</h1>
+          {block.note && <Note note={block.note} />}
+        </>
       )}
       <StyledButton className="card-width h-button w-full" onClick={onContinue}>
         {TEXTS.continuePractice}
