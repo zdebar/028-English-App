@@ -200,7 +200,7 @@ export function StarRow({
   }
 
   return (
-    <div className="z-star-stack relative flex flex-wrap items-center gap-3 overflow-visible">
+    <div className="z-star-stack relative flex flex-wrap items-center gap-1 overflow-visible">
       {tierCounts.map((count, index) => {
         if (count === 0) {
           return null;
