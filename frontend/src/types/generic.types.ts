@@ -36,8 +36,6 @@ export interface NoteType extends Omit<SyncEntityType, 'sort_order'> {
 export interface ProgressCountsType {
   startedCount: number;
   startedTodayCount: number;
-  masteredCount: number;
-  masteredTodayCount: number;
   totalCount: number;
 }
 

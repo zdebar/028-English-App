@@ -30,7 +30,7 @@ export default class Levels extends SyncEntityModel implements LevelType {
    * Builds a level overview with lesson progress for a user.
    *
    * @param userId User id whose practice items should be aggregated.
-   * @param localDate Local date used for started/mastered-today counts.
+   * @param localDate Local date used for started-today counts.
    * @returns Level summaries with nested lessons; levels without lesson items are omitted.
    */
   static async getOverview(userId: string, localDate: string): Promise<LevelOverviewType[]> {

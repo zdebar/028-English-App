@@ -5,7 +5,6 @@ vi.mock('@/locales/cs', () => ({
   TEXTS: {
     levelName: 'Level',
     lessonName: 'Lesson',
-    masteredTodayHint: 'Mastered today',
     startedTodayHint: 'Started today',
   },
   ARIA_TEXTS: {
@@ -23,7 +22,6 @@ describe('BlockBar', () => {
         todayCount={5}
         lessonName="To Be"
         lessonNumber={1}
-        isMastered={false}
         lessonCount={100}
         widthBase={100}
       />,
@@ -46,7 +44,6 @@ describe('BlockBar', () => {
         todayCount={0}
         lessonName="To Be"
         lessonNumber={1}
-        isMastered={true}
         lessonCount={100}
         widthBase={100}
       />,
@@ -62,7 +59,6 @@ describe('BlockBar', () => {
         todayCount={15}
         lessonName="To Be"
         lessonNumber={1}
-        isMastered={false}
         lessonCount={80}
         widthBase={100}
       />,

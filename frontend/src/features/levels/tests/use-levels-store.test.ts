@@ -4,7 +4,7 @@ import { getUnpackedLevelStorageKey, useLevelsStore } from '@/features/levels/us
 describe('useLevelsStore', () => {
   beforeEach(() => {
     localStorage.clear();
-    useLevelsStore.setState({ showMastered: false, unpackedLevelId: null });
+    useLevelsStore.setState({ unpackedLevelId: null });
   });
 
   it('persists unpacked level id by user id', () => {

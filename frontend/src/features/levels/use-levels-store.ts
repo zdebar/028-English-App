@@ -1,8 +1,6 @@
 import { create } from 'zustand';
 
 interface LevelsStoreState {
-  showMastered: boolean;
-  setShowMastered: (show: boolean) => void;
   unpackedLevelId: number | null;
   hydrateUnpackedLevelId: (userId: string | null) => void;
   setUnpackedLevelId: (userId: string | null, levelId: number | null) => void;
@@ -42,8 +40,6 @@ function saveUnpackedLevelId(userId: string | null, levelId: number | null): voi
 }
 
 export const useLevelsStore = create<LevelsStoreState>((set) => ({
-  showMastered: false,
-  setShowMastered: (show) => set({ showMastered: show }),
   unpackedLevelId: null,
   hydrateUnpackedLevelId: (userId) => set({ unpackedLevelId: loadUnpackedLevelId(userId) }),
   setUnpackedLevelId: (userId, levelId) => {

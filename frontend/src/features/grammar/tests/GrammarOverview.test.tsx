@@ -84,8 +84,6 @@ vi.mock('@/locales/cs', () => ({
     noGrammar: 'No grammar',
     notAvailable: 'Not available',
     restartGrammarProgress: 'Restart grammar progress',
-    startedCount: 'Started',
-    masteredCount: 'Mastered',
     resetProgressSuccessToast: 'Reset success',
     resetProgressErrorToast: 'Reset error',
   },
