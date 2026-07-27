@@ -4,7 +4,6 @@ export const HOME_TEXTS = {
   appDescription: 'Bez stresu. Bez přemýšlení. Jen dril.',
   guide: 'Návod',
   startedTodayHint: 'Dnes započato',
-  masteredTodayHint: 'Dnes naučeno',
   noDashboardData: 'Žádná dostupná data.',
   signupHint:
     'Aplikace po přihlášení ukládá cvičební data do úložiště Vašeho prohlížeče (7.8MB). Účet je možno kdykoliv smazat, včetně všech dat.',

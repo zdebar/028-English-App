@@ -7,13 +7,8 @@ const mocks = vi.hoisted(() => ({
   userId: 'u1',
   navigate: vi.fn(),
   goalMetCalls: [] as Array<{ current: number; goal: number }>,
-  showMasteredLevels: false,
   unpackedLevelId: null as number | null,
   storeListeners: new Set<() => void>(),
-  setShowMasteredLevels: vi.fn((value: boolean) => {
-    mocks.showMasteredLevels = value;
-    mocks.storeListeners.forEach((listener) => listener());
-  }),
   hydrateUnpackedLevelId: vi.fn((userId: string | null) => {
     const storedValue = userId ? localStorage.getItem(`levels_unpacked_level_id_${userId}`) : null;
     mocks.unpackedLevelId = storedValue === null ? null : Number(storedValue);
@@ -33,11 +28,7 @@ vi.mock('@/locales/cs', () => ({
   TEXTS: {
     notAvailable: 'Not available',
     levelsOverview: 'Levels overview',
-    levelsMasteredHelp: 'Mastered help',
     levelsStartedHelp: 'Started help',
-    masteredCount: 'Mastered',
-    startedCount: 'Started',
-    masteredSwitchHelp: 'Switch help',
   },
   ARIA_TEXTS: {
     lessonProgressBar: 'Lesson progress bar',
@@ -60,8 +51,6 @@ vi.mock('@/features/auth/use-auth-store', () => ({
 vi.mock('@/features/levels/use-levels-store', () => ({
   useLevelsStore: (
     selector: (state: {
-      showMastered: boolean;
-      setShowMastered: (value: boolean) => void;
       unpackedLevelId: number | null;
       hydrateUnpackedLevelId: (userId: string | null) => void;
       setUnpackedLevelId: (userId: string | null, value: number | null) => void;
@@ -76,8 +65,6 @@ vi.mock('@/features/levels/use-levels-store', () => ({
       };
     }, []);
     return selector({
-      showMastered: mocks.showMasteredLevels,
-      setShowMastered: mocks.setShowMasteredLevels,
       unpackedLevelId: mocks.unpackedLevelId,
       hydrateUnpackedLevelId: mocks.hydrateUnpackedLevelId,
       setUnpackedLevelId: mocks.setUnpackedLevelId,
@@ -136,7 +123,6 @@ describe('LevelsOverview', () => {
     mocks.goalMetCalls = [];
     mocks.levelsOverview = [];
     mocks.userId = 'u1';
-    mocks.showMasteredLevels = false;
     mocks.storeListeners.clear();
     mocks.unpackedLevelId = null;
     localStorage.clear();
@@ -154,7 +140,6 @@ describe('LevelsOverview', () => {
         id: 1,
         name: 'A1',
         startedCount: 3,
-        masteredCount: 1,
         totalCount: 5,
         lessons: [
           {
@@ -162,8 +147,6 @@ describe('LevelsOverview', () => {
             name: 'Lesson 1',
             startedCount: 3,
             startedTodayCount: 0,
-            masteredCount: 1,
-            masteredTodayCount: 0,
             totalCount: 5,
           },
         ],
@@ -192,7 +175,6 @@ describe('LevelsOverview', () => {
         id: 1,
         name: 'A1',
         startedCount: 1,
-        masteredCount: 0,
         totalCount: 1,
         lessons: [{ id: 101, name: 'Lesson A1', sort_order: 1, totalCount: 1 }],
       },
@@ -200,7 +182,6 @@ describe('LevelsOverview', () => {
         id: 2,
         name: 'A2',
         startedCount: 1,
-        masteredCount: 0,
         totalCount: 1,
         lessons: [{ id: 201, name: 'Lesson A2', sort_order: 1, totalCount: 1 }],
       },
@@ -212,13 +193,12 @@ describe('LevelsOverview', () => {
     expect(screen.getByText('Lesson A2')).toBeTruthy();
   });
 
-  it('toggles started/mastered mode and updates GoalMetView current values', () => {
+  it('renders started progress without a mastered toggle', () => {
     mocks.levelsOverview = [
       {
         id: 1,
         name: 'A1',
         startedCount: 3,
-        masteredCount: 1,
         totalCount: 5,
         lessons: [
           {
@@ -226,8 +206,6 @@ describe('LevelsOverview', () => {
             name: 'Lesson 1',
             startedCount: 3,
             startedTodayCount: 0,
-            masteredCount: 1,
-            masteredTodayCount: 0,
             totalCount: 5,
           },
         ],
@@ -238,16 +216,8 @@ describe('LevelsOverview', () => {
 
     fireEvent.click(screen.getByText('A1'));
     expect(mocks.goalMetCalls.some((x) => x.current === 3 && x.goal === 5)).toBe(true);
-
-    const toggleButton = screen.getByRole('button', { name: 'Started' });
-    expect(toggleButton.className).toContain('mastered-toggle-button');
-    expect(toggleButton.className).toContain('h-button');
-    expect(toggleButton.className).toContain('rounded-full');
-    expect(toggleButton.className).toContain('px-4');
-
-    fireEvent.click(toggleButton);
-    expect(screen.getByRole('button', { name: 'Mastered' })).toBeTruthy();
-    expect(mocks.goalMetCalls.some((x) => x.current === 1 && x.goal === 5)).toBe(true);
+    expect(screen.getByText('Started help')).toBeTruthy();
+    expect(screen.queryByText('Mastered')).toBeNull();
   });
 
   it('navigates to profile when close button is clicked', () => {

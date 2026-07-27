@@ -8,8 +8,6 @@ interface UserState {
   dailyCount: number;
   dailyCountLoading: boolean;
   dailyCountError: Error | null;
-  showMasteredDashboard: boolean;
-  setMasteredDashboard: (value: boolean) => void;
   clearLevels: () => void;
   clearDailyCount: () => void;
 }
@@ -30,10 +28,6 @@ export const useUserStore = create<UserState>((set) => {
     dailyCount: initialDailyStats,
     dailyCountLoading: false,
     dailyCountError: null,
-    showMasteredDashboard: false,
-    setMasteredDashboard: (value: boolean) => {
-      set({ showMasteredDashboard: value });
-    },
     clearLevels: () => {
       set({ levels: initialLevels, levelsLoading: false, levelsError: null });
     },

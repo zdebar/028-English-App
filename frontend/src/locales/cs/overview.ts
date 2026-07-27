@@ -1,12 +1,9 @@
 export const OVERVIEW_TEXTS = {
   // Levels Overview Page
-  levelsStartedHelp: 'Započato / celkem položek',
-  levelsMasteredHelp: 'Naučeno / celkem položek',
+  levelsStartedHelp: 'započato / celkem položek',
 
   // Grammar Overview Page
   noGrammar: 'Žádná započatá gramatika.',
-  startedCount: 'Započato',
-  masteredCount: 'Naučeno',
   restartGrammarTitle: 'Restartovat gramatiku',
   restartGrammarDescription:
     'Opravdu chcete restartovat pokrok všech položek této gramatiky? Tuto akci nelze vrátit zpět.',

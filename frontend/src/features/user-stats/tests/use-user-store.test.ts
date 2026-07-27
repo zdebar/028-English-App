@@ -10,14 +10,7 @@ describe('useUserStore', () => {
       dailyCount: 0,
       dailyCountLoading: false,
       dailyCountError: null,
-      showMasteredDashboard: false,
     });
-  });
-
-  it('stores the dashboard display preference', () => {
-    useUserStore.getState().setMasteredDashboard(true);
-
-    expect(useUserStore.getState().showMasteredDashboard).toBe(true);
   });
 
   it('clears level and daily-count snapshots including errors', () => {

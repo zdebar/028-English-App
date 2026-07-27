@@ -5,7 +5,6 @@ import StarIcon, { STAR_ICON_PATH } from '@/components/UI/icons/StarIcon';
 import {
   getCompletedStarCount,
   getStarProgressState,
-  getStarTier,
   type StarTier,
 } from '@/utils/star-progress.utils';
 
@@ -183,11 +182,15 @@ export function StarRow({
 }: StarRowProps): JSX.Element {
   const safeStarsPerRow = Math.max(1, Math.floor(starsPerRow));
   const safeStarCount = Math.max(0, Math.floor(starCount));
-  const tierCounts = [
-    Math.min(safeStarCount, safeStarsPerRow),
-    Math.min(Math.max(safeStarCount - safeStarsPerRow, 0), safeStarsPerRow),
-    Math.max(safeStarCount - safeStarsPerRow * 2, 0),
+  const tierCounts: Array<Readonly<{ tier: StarTier; count: number }>> = [
+    { tier: 'bronze', count: Math.min(safeStarCount, safeStarsPerRow) },
+    {
+      tier: 'silver',
+      count: Math.min(Math.max(safeStarCount - safeStarsPerRow, 0), safeStarsPerRow),
+    },
+    { tier: 'gold', count: Math.max(safeStarCount - safeStarsPerRow * 2, 0) },
   ];
+  tierCounts.reverse();
 
   if (safeStarCount === 0) {
     return <div className="relative flex flex-wrap items-center gap-3 overflow-visible" />;
@@ -195,12 +198,11 @@ export function StarRow({
 
   return (
     <div className="relative flex flex-wrap items-center gap-0 overflow-visible">
-      {tierCounts.map((count, index) => {
+      {tierCounts.map(({ tier, count }) => {
         if (count === 0) {
           return null;
         }
 
-        const tier = getStarTier(index);
         const tierStyle = TIER_STYLES[tier];
 
         return (

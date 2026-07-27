@@ -18,7 +18,7 @@ const NULL_DATE = config.database.nullReplacementDate;
  * @param lessons Lesson records used as aggregation buckets.
  * @param levels Level records used to group lesson summaries.
  * @returns Levels that contain at least one lesson with items, sorted by level sort_order. Lesson
- * summaries include total, started, started-today, mastered, and mastered-today counts.
+ * summaries include total, started, and started-today counts.
  */
 export function aggregateLevels(
   items: UserItemLocal[],
@@ -29,16 +29,12 @@ export function aggregateLevels(
   const progressKeys: (keyof ProgressCountsType)[] = [
     'startedCount',
     'startedTodayCount',
-    'masteredCount',
-    'masteredTodayCount',
     'totalCount',
   ];
 
   const createEmptyCounts = (): ProgressCountsType => ({
     startedCount: 0,
     startedTodayCount: 0,
-    masteredCount: 0,
-    masteredTodayCount: 0,
     totalCount: 0,
   });
 
@@ -56,9 +52,6 @@ export function aggregateLevels(
     if (item.started_at !== NULL_DATE) counts.startedCount++;
     if (item.started_at !== NULL_DATE && getLocalDateFromUTC(item.started_at).startsWith(today))
       counts.startedTodayCount++;
-    if (item.mastered_at !== NULL_DATE) counts.masteredCount++;
-    if (item.mastered_at !== NULL_DATE && getLocalDateFromUTC(item.mastered_at).startsWith(today))
-      counts.masteredTodayCount++;
     counts.totalCount++;
   });
 

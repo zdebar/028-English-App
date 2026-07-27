@@ -1,18 +1,14 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  showMastered: false,
-  setMasteredDashboard: vi.fn(),
   levels: [] as unknown[],
   levelsLoading: false,
   lessons: [] as Array<{
     id: number;
     name: string;
     sort_order: number;
-    masteredCount?: number;
-    masteredTodayCount?: number;
     startedCount?: number;
     startedTodayCount?: number;
     totalCount?: number;
@@ -24,15 +20,11 @@ vi.mock('@/features/user-stats/use-user-store', () => ({
     selector: (state: {
       levels: unknown[];
       levelsLoading: boolean;
-      showMasteredDashboard: boolean;
-      setMasteredDashboard: typeof mocks.setMasteredDashboard;
     }) => unknown,
   ) =>
     selector({
       levels: mocks.levels,
       levelsLoading: mocks.levelsLoading,
-      showMasteredDashboard: mocks.showMastered,
-      setMasteredDashboard: mocks.setMasteredDashboard,
     }),
 }));
 
@@ -52,25 +44,10 @@ vi.mock('@/features/help/HelpText', () => ({
   default: ({ children }: { children: ReactNode }) => <p>{children}</p>,
 }));
 
-vi.mock('@/features/progress/MasteredToggleButton', () => ({
-  default: ({
-    showMastered,
-    setShowMastered,
-  }: {
-    showMastered: boolean;
-    setShowMastered: (value: boolean) => void;
-  }) => (
-    <button type="button" onClick={() => setShowMastered(!showMastered)}>
-      toggle
-    </button>
-  ),
-}));
-
 vi.mock('@/locales/cs', () => ({
   ARIA_TEXTS: { dashboardRegion: 'Dashboard' },
   TEXTS: {
     noDashboardData: 'Žádná data.',
-    masteredTodayHint: 'Dnes zvladnuto',
     startedTodayHint: 'Dnes zahajeno',
   },
 }));
@@ -80,7 +57,6 @@ import Dashboard from '@/features/dashboard/Dashboard';
 describe('Dashboard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.showMastered = false;
     mocks.levels = [];
     mocks.levelsLoading = false;
     mocks.lessons = [];
@@ -106,15 +82,12 @@ describe('Dashboard', () => {
     expect(screen.queryByRole('button', { name: 'toggle' })).toBeNull();
   });
 
-  it('renders mastered hint and triggers toggle handler', () => {
-    mocks.showMastered = true;
+  it('renders started progress without a mastered toggle', () => {
     mocks.lessons = [
       {
         id: 1,
         name: 'Lesson 1',
         sort_order: 1,
-        masteredCount: 3,
-        masteredTodayCount: 1,
         startedCount: 2,
         startedTodayCount: 1,
         totalCount: 10,
@@ -123,8 +96,8 @@ describe('Dashboard', () => {
 
     render(<Dashboard />);
 
-    expect(screen.getByText('Dnes zvladnuto')).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'toggle' }));
-    expect(mocks.setMasteredDashboard).toHaveBeenCalledWith(false);
+    expect(screen.getByText('Dnes zahajeno')).toBeTruthy();
+    expect(screen.getByText('Lesson 1:1')).toBeTruthy();
+    expect(screen.queryByRole('button')).toBeNull();
   });
 });

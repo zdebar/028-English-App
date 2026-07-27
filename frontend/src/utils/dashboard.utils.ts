@@ -4,21 +4,14 @@ import type { LessonOverviewType, LevelOverviewType } from '@/types/generic.type
  * Selects dashboard lessons that should remain visible for current progress.
  *
  * @param levelsOverview Level overview records; missing or non-array lesson lists are ignored.
- * @param mode Progress fields to inspect: started progress by default, or mastered progress.
  * @returns In-progress lessons, the first eligible next lesson, or the final lesson as a fallback.
  */
-export function getInProgressLessons(
-  levelsOverview: LevelOverviewType[],
-  mode: 'started' | 'mastered' = 'started',
-): LessonOverviewType[] {
+export function getInProgressLessons(levelsOverview: LevelOverviewType[]): LessonOverviewType[] {
   const shouldIncludeLesson = (
     todayCount: number,
     isIncomplete: boolean,
     isFirstEligibleZero: boolean,
   ) => todayCount > 0 || isIncomplete || isFirstEligibleZero;
-
-  const countKey = mode === 'mastered' ? 'masteredCount' : 'startedCount';
-  const todayKey = mode === 'mastered' ? 'masteredTodayCount' : 'startedTodayCount';
 
   const allLessons = Array.isArray(levelsOverview)
     ? levelsOverview.flatMap((level: LevelOverviewType) =>
@@ -42,12 +35,13 @@ export function getInProgressLessons(
 
   for (const [index, lesson] of sortedLessons.entries()) {
     const totalCount = lesson.totalCount ?? 0;
-    const count = lesson[countKey] ?? 0;
-    const todayCount = lesson[todayKey] ?? 0;
+    const count = lesson.startedCount ?? 0;
+    const todayCount = lesson.startedTodayCount ?? 0;
     const isIncomplete = count > 0 && count < totalCount;
     const previousLesson = index > 0 ? sortedLessons[index - 1] : null;
     const previousCompleted =
-      previousLesson == null || (previousLesson[countKey] ?? 0) >= (previousLesson.totalCount ?? 0);
+      previousLesson == null ||
+      (previousLesson.startedCount ?? 0) >= (previousLesson.totalCount ?? 0);
     const isZero = count === 0;
     const isFirstEligibleZero = !firstEligibleZeroIncluded && isZero && previousCompleted;
 
