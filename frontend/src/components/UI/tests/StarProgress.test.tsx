@@ -4,14 +4,21 @@ import { describe, expect, it } from 'vitest';
 import { CompactSummary, StarRow } from '@/components/UI/StarProgress';
 
 describe('StarProgress', () => {
-  it('renders compacted badges for full and partial star groups', () => {
-    render(<StarRow starCount={25} starsPerRow={10} size={22} />);
+  it('renders compacted badges in gold, silver, bronze order', () => {
+    const { container } = render(<StarRow starCount={25} starsPerRow={10} size={22} />);
 
     expect(screen.getAllByText('10')).toHaveLength(2);
     expect(screen.getByText('5')).toBeTruthy();
     expect(screen.getAllByText(/^(10|5)$/).every((badge) => badge.classList.contains('z-star-badge'))).toBe(
       true,
     );
+    expect(
+      Array.from(
+        container.querySelectorAll(
+          'svg.star-fill-gold, svg.star-fill-silver, svg.star-fill-bronze',
+        ),
+      ).map((star) => star.getAttribute('class')),
+    ).toEqual(['star-fill-gold', 'star-fill-silver', 'star-fill-bronze']);
   });
 
   it('accumulates completed stars beyond silver in the gold badge', () => {
