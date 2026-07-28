@@ -89,6 +89,24 @@ export default class AppDB extends Dexie {
             delete item.next_at;
             delete item.mastered_at;
           });
+
+        await transaction
+          .table('user_blocks')
+          .toCollection()
+          .modify((block) => {
+            const hasNoCompletion = block.started_at == null || block.started_at === nullDate;
+            const oldMasteredAt = block.mastered_at ?? nullDate;
+
+            if (hasNoCompletion && oldMasteredAt !== nullDate) {
+              block.started_at = oldMasteredAt;
+            } else if (hasNoCompletion && (block.progress ?? 0) > 0 && block.updated_at != null) {
+              block.started_at = block.updated_at;
+            }
+
+            delete block.progress;
+            delete block.next_at;
+            delete block.mastered_at;
+          });
       });
   }
 }

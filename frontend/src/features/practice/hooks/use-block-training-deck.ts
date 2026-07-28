@@ -51,7 +51,10 @@ export function useBlockTrainingDeck(userId: string | null, blockId: number | nu
       setError(null);
       try {
         const nextBlock = blockId == null ? null : await UserBlock.getByBlockId(userId, blockId);
-        if (!nextBlock?.requires_initial_training) {
+        if (
+          !nextBlock?.requires_initial_training ||
+          nextBlock.started_at !== config.database.nullReplacementDate
+        ) {
           if (isMounted) {
             setBlock(null);
             setItems([]);
@@ -126,8 +129,7 @@ export function useBlockTrainingDeck(userId: string | null, blockId: number | nu
       if (!userId || !block) return;
 
       await UserItem.saveInitialTrainingBlockCompletion(userId, block.block_id, dateTime);
-      await UserBlock.unlockBlock(userId, block.block_id, dateTime);
-      await UserBlock.markBlockMastered(userId, block.block_id, dateTime);
+      await UserBlock.completeInitialTraining(userId, block.block_id, dateTime);
       setIsComplete(true);
       setCurrentQueue([]);
       setNextWaveQueue([]);

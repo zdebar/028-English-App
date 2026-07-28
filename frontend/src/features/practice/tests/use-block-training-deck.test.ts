@@ -5,8 +5,7 @@ import type { UserBlockType } from '@/types/generic.types';
 import type { UserItemLocal } from '@/types/user-item.types';
 
 const getUserBlockByIdMock = vi.fn();
-const markBlockMasteredMock = vi.fn();
-const unlockBlockMock = vi.fn();
+const completeInitialTrainingMock = vi.fn();
 const getByBlockIdMock = vi.fn();
 const savePracticeDeckMock = vi.fn();
 const saveInitialTrainingBlockCompletionMock = vi.fn();
@@ -20,14 +19,14 @@ vi.mock('@/config/config', () => ({
   default: {
     practice: { audioDelay: 300 },
     progress: { skipProgress: 100 },
+    database: { nullReplacementDate: '1970-01-01T00:00:00.000Z' },
   },
 }));
 
 vi.mock('@/database/models/user-blocks', () => ({
   default: {
     getByBlockId: (...args: unknown[]) => getUserBlockByIdMock(...args),
-    unlockBlock: (...args: unknown[]) => unlockBlockMock(...args),
-    markBlockMastered: (...args: unknown[]) => markBlockMasteredMock(...args),
+    completeInitialTraining: (...args: unknown[]) => completeInitialTrainingMock(...args),
   },
 }));
 
@@ -95,14 +94,11 @@ function makeBlock(overrides: Partial<UserBlockType> = {}): UserBlockType {
     note: '',
     grammar_chunk_id: 20,
     sort_order: 1,
-    progress: 0,
     show_in_topics: true,
     is_removed_from_practice: false,
     requires_initial_training: true,
-    started_at: '2026-01-01',
+    started_at: '1970-01-01T00:00:00.000Z',
     updated_at: '2026-01-01',
-    next_at: '2026-01-01',
-    mastered_at: '',
     deleted_at: '',
     ...overrides,
   };
@@ -148,8 +144,7 @@ describe('useBlockTrainingDeck', () => {
     addItemCountMock.mockResolvedValue(undefined);
     savePracticeDeckMock.mockResolvedValue(undefined);
     saveInitialTrainingBlockCompletionMock.mockResolvedValue(undefined);
-    markBlockMasteredMock.mockResolvedValue(undefined);
-    unlockBlockMock.mockResolvedValue(undefined);
+    completeInitialTrainingMock.mockResolvedValue(undefined);
   });
 
   it('loads the selected training block and exposes card state', async () => {
@@ -185,6 +180,20 @@ describe('useBlockTrainingDeck', () => {
 
   it('rejects a grammar-linked block that does not require initial training', async () => {
     getUserBlockByIdMock.mockResolvedValue(makeBlock({ requires_initial_training: false }));
+
+    const { result } = renderHook(() => useBlockTrainingDeck('user-1', 10));
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.block).toBeNull();
+    expect(getByBlockIdMock).not.toHaveBeenCalled();
+    expect(getGrammarByIdMock).not.toHaveBeenCalled();
+  });
+
+  it('rejects a block whose initial training is already completed', async () => {
+    getUserBlockByIdMock.mockResolvedValue(
+      makeBlock({ started_at: '2026-07-28T10:00:00.000Z' }),
+    );
 
     const { result } = renderHook(() => useBlockTrainingDeck('user-1', 10));
 
@@ -244,7 +253,7 @@ describe('useBlockTrainingDeck', () => {
     expect(result.current.currentItem?.item_id).toBe(1);
     expect(result.current.progressLabel).toBe('2/2 · 0/2');
     expect(saveInitialTrainingBlockCompletionMock).not.toHaveBeenCalled();
-    expect(markBlockMasteredMock).not.toHaveBeenCalled();
+    expect(completeInitialTrainingMock).not.toHaveBeenCalled();
     expect(addItemCountMock).toHaveBeenCalledTimes(3);
   });
 
@@ -289,8 +298,11 @@ describe('useBlockTrainingDeck', () => {
       10,
       expect.any(String),
     );
-    expect(unlockBlockMock).toHaveBeenCalledWith('user-1', 10, expect.any(String));
-    expect(markBlockMasteredMock).toHaveBeenCalledWith('user-1', 10, expect.any(String));
+    expect(completeInitialTrainingMock).toHaveBeenCalledWith(
+      'user-1',
+      10,
+      expect.any(String),
+    );
     expect(addItemCountMock).toHaveBeenCalledTimes(5);
   });
 
@@ -339,8 +351,11 @@ describe('useBlockTrainingDeck', () => {
       10,
       expect.any(String),
     );
-    expect(unlockBlockMock).toHaveBeenCalledWith('user-1', 10, expect.any(String));
-    expect(markBlockMasteredMock).toHaveBeenCalledWith('user-1', 10, expect.any(String));
+    expect(completeInitialTrainingMock).toHaveBeenCalledWith(
+      'user-1',
+      10,
+      expect.any(String),
+    );
     expect(addItemCountMock).toHaveBeenCalledTimes(2);
   });
 
@@ -399,6 +414,10 @@ describe('useBlockTrainingDeck', () => {
       10,
       expect.any(String),
     );
-    expect(markBlockMasteredMock).toHaveBeenCalledWith('user-1', 10, expect.any(String));
+    expect(completeInitialTrainingMock).toHaveBeenCalledWith(
+      'user-1',
+      10,
+      expect.any(String),
+    );
   });
 });

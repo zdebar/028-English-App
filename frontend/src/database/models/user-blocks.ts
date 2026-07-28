@@ -16,10 +16,8 @@ import UserItem from './user-items';
 const NULL_DATE = config.database.nullReplacementDate;
 const NULL_NUMBER = config.database.nullReplacementNumber;
 
-type UserBlockAPI = Omit<UserBlockType, 'started_at' | 'next_at' | 'mastered_at' | 'deleted_at'> & {
+type UserBlockAPI = Omit<UserBlockType, 'started_at' | 'deleted_at'> & {
   started_at: string | null;
-  next_at: string | null;
-  mastered_at: string | null;
   deleted_at: string | null;
 };
 
@@ -27,11 +25,8 @@ type UserBlockExport = Pick<
   UserBlockAPI,
   | 'user_id'
   | 'block_id'
-  | 'progress'
   | 'started_at'
   | 'updated_at'
-  | 'next_at'
-  | 'mastered_at'
 >;
 
 function convertAPIToLocal(block: UserBlockAPI): UserBlockType {
@@ -41,8 +36,6 @@ function convertAPIToLocal(block: UserBlockAPI): UserBlockType {
     is_removed_from_practice: block.is_removed_from_practice ?? false,
     requires_initial_training: block.requires_initial_training,
     started_at: block.started_at ?? NULL_DATE,
-    next_at: block.next_at ?? NULL_DATE,
-    mastered_at: block.mastered_at ?? NULL_DATE,
     deleted_at: block.deleted_at ?? NULL_DATE,
   };
 }
@@ -51,11 +44,8 @@ function convertLocalToExport(block: UserBlockType): UserBlockExport {
   return {
     user_id: block.user_id,
     block_id: block.block_id,
-    progress: block.progress,
     started_at: block.started_at === NULL_DATE ? null : block.started_at,
     updated_at: block.updated_at,
-    next_at: block.next_at === NULL_DATE ? null : block.next_at,
-    mastered_at: block.mastered_at === NULL_DATE ? null : block.mastered_at,
   };
 }
 
@@ -64,7 +54,7 @@ function convertLocalToExport(block: UserBlockType): UserBlockExport {
  *
  * Public API:
  * - Topic views: `getByUserId`, `getStartedTopicsByUserId`, and `getByBlockId`.
- * - Block transitions: start/master actions used by the initial-training flow.
+ * - Block transitions: completion state used by the initial-training flow.
  * - Maintenance: grammar/block resets, local account deletion, and remote sync.
  *
  * Block timestamps use the configured null replacement date locally and convert to null for remote sync.
@@ -76,14 +66,11 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
   note!: string | null;
   grammar_chunk_id!: number | null;
   sort_order!: number | null;
-  progress!: number;
   show_in_topics!: boolean;
   is_removed_from_practice!: boolean;
   requires_initial_training!: boolean;
   started_at!: string;
   updated_at!: string;
-  next_at!: string;
-  mastered_at!: string;
   deleted_at!: string;
 
   /**
@@ -142,14 +129,18 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
   }
 
   /**
-   * Marks a block as unlocked/started.
+   * Marks a block's initial training as completed.
    *
    * @param userId Non-empty user id owning the block.
-   * @param blockId Block id to unlock.
-   * @param dateTime ISO timestamp written to started_at and updated_at.
+   * @param blockId Block id whose initial training was completed.
+   * @param dateTime ISO completion timestamp written to started_at and updated_at.
    * @throws Error when userId is empty.
    */
-  static async unlockBlock(userId: string, blockId: number, dateTime: string): Promise<void> {
+  static async completeInitialTraining(
+    userId: string,
+    blockId: number,
+    dateTime: string,
+  ): Promise<void> {
     assertNonEmptyString(userId, 'userId');
 
     await db.user_blocks.update([userId, blockId], {
@@ -159,26 +150,8 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
   }
 
   /**
-   * Marks a block as mastered.
-   *
-   * @param userId Non-empty user id owning the block.
-   * @param blockId Block id to master.
-   * @param dateTime ISO timestamp written to mastered_at and updated_at.
-   * @throws Error when userId is empty.
-   */
-  static async markBlockMastered(userId: string, blockId: number, dateTime: string): Promise<void> {
-    assertNonEmptyString(userId, 'userId');
-
-    await db.user_blocks.update([userId, blockId], {
-      mastered_at: dateTime,
-      progress: 1,
-      updated_at: dateTime,
-    });
-  }
-
-  /**
    * Creates the training-block portion of the anonymous-user simulation fixture.
-   * The first configured number of training blocks are started and mastered. The next block stays
+   * The first configured number of training blocks are completed. The next block stays
    * unstarted so unified practice can discover it as an initial-training trigger.
    *
    * @param userId Non-empty user id owning the blocks.
@@ -210,8 +183,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     }
 
     for (const block of trainingBlocks.slice(0, masteredCount)) {
-      await this.unlockBlock(userId, block.block_id, dateTime);
-      await this.markBlockMastered(userId, block.block_id, dateTime);
+      await this.completeInitialTraining(userId, block.block_id, dateTime);
     }
 
     return masteredCount;
@@ -447,13 +419,10 @@ function compareCurriculumPaths(
 
 function getResetBlockFields(dateTime: string): Pick<
   UserBlockType,
-  'started_at' | 'next_at' | 'mastered_at' | 'progress' | 'updated_at'
+  'started_at' | 'updated_at'
 > {
   return {
     started_at: NULL_DATE,
-    next_at: NULL_DATE,
-    mastered_at: NULL_DATE,
-    progress: 0,
     updated_at: dateTime,
   };
 }

@@ -60,14 +60,11 @@ export interface UserBlockType {
   note: string | null;
   grammar_chunk_id: number | null;
   sort_order: number | null;
-  progress: number;
   show_in_topics: boolean;
   is_removed_from_practice: boolean;
   requires_initial_training: boolean;
   started_at: string;
   updated_at: string;
-  next_at: string;
-  mastered_at: string;
   deleted_at: string;
 }
 

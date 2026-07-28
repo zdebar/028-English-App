@@ -9,14 +9,11 @@ RETURNS TABLE (
   note TEXT,
   grammar_chunk_id INTEGER,
   sort_order INTEGER,
-  progress INTEGER,
   show_in_topics BOOLEAN,
   is_removed_from_practice BOOLEAN,
   requires_initial_training BOOLEAN,
   started_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ,
-  next_at TIMESTAMPTZ,
-  mastered_at TIMESTAMPTZ,
   deleted_at TIMESTAMPTZ
 )
 LANGUAGE plpgsql
@@ -33,7 +30,6 @@ BEGIN
     b.note,
     b.grammar_chunk_id,
     b.sort_order,
-    COALESCE(ub.progress, 0) AS progress,
     b.show_in_topics,
     b.is_removed_from_practice,
     b.requires_initial_training,
@@ -42,8 +38,6 @@ BEGIN
       COALESCE(ub.updated_at, public.rpc_min_timestamptz()),
       b.updated_at
     ) AS updated_at,
-    ub.next_at,
-    ub.mastered_at,
     b.deleted_at
   FROM public.blocks b
   LEFT JOIN public.user_blocks ub

@@ -78,11 +78,8 @@ CREATE TABLE IF NOT EXISTS blocks (
 CREATE TABLE IF NOT EXISTS user_blocks (
   block_id INTEGER NOT NULL REFERENCES blocks(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  progress INTEGER NOT NULL DEFAULT 0 CHECK (progress >= 0),
-  started_at TIMESTAMPTZ DEFAULT NOW(),
+  started_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  next_at TIMESTAMPTZ,
-  mastered_at TIMESTAMPTZ,
   PRIMARY KEY (block_id, user_id)
 );
 
@@ -217,7 +214,7 @@ CREATE INDEX IF NOT EXISTS idx_user_scores_user_updated_date
 
 CREATE INDEX IF NOT EXISTS idx_user_blocks_user_updated_block
   ON public.user_blocks (user_id, updated_at, block_id)
-  INCLUDE (progress, started_at, next_at, mastered_at);
+  INCLUDE (started_at);
 
 CREATE INDEX IF NOT EXISTS idx_user_blocks_user_block
   ON public.user_blocks (user_id, block_id);

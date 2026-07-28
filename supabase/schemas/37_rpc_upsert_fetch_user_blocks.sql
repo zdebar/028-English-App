@@ -10,14 +10,11 @@ RETURNS TABLE (
   note TEXT,
   grammar_chunk_id INTEGER,
   sort_order INTEGER,
-  progress INTEGER,
   show_in_topics BOOLEAN,
   is_removed_from_practice BOOLEAN,
   requires_initial_training BOOLEAN,
   started_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ,
-  next_at TIMESTAMPTZ,
-  mastered_at TIMESTAMPTZ,
   deleted_at TIMESTAMPTZ
 )
 LANGUAGE plpgsql

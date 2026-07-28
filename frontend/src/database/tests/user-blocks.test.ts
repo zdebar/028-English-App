@@ -158,7 +158,6 @@ describe('UserBlock', () => {
         name: 'Locked vocabulary',
         is_removed_from_practice: false,
         show_in_topics: true,
-        progress: 0,
         started_at: '9999-12-31T23:59:59+00:00',
       },
       {
@@ -168,7 +167,6 @@ describe('UserBlock', () => {
         name: 'Started vocabulary',
         is_removed_from_practice: false,
         show_in_topics: true,
-        progress: 0,
         started_at: '9999-12-31T23:59:59+00:00',
       },
       {
@@ -178,7 +176,6 @@ describe('UserBlock', () => {
         name: 'Locked grammar',
         is_removed_from_practice: false,
         show_in_topics: true,
-        progress: 0,
         started_at: '9999-12-31T23:59:59+00:00',
       },
       {
@@ -188,7 +185,6 @@ describe('UserBlock', () => {
         name: 'Completed grammar',
         is_removed_from_practice: false,
         show_in_topics: true,
-        progress: 1,
         started_at: '2026-03-01T00:00:00.000Z',
       },
       {
@@ -198,7 +194,6 @@ describe('UserBlock', () => {
         name: 'Unlocked grammar',
         is_removed_from_practice: false,
         show_in_topics: true,
-        progress: 0,
         started_at: '2026-03-01T00:00:00.000Z',
       },
       {
@@ -208,7 +203,6 @@ describe('UserBlock', () => {
         name: 'Organizational grammar',
         is_removed_from_practice: false,
         show_in_topics: false,
-        progress: 1,
         started_at: '2026-03-01T00:00:00.000Z',
       },
     ]);
@@ -267,24 +261,20 @@ describe('UserBlock', () => {
     expect(mocks.get).toHaveBeenCalledWith(['u1', 2]);
   });
 
-  it('resetByBlockId resets progress dates and updates timestamp', async () => {
+  it('resetByBlockId clears completion and updates timestamp', async () => {
     await UserBlock.resetByBlockId('u1', 7, '2026-06-23T12:00:00.000Z');
 
     expect(mocks.update).toHaveBeenCalledWith(['u1', 7], {
       started_at: '9999-12-31T23:59:59+00:00',
-      next_at: '9999-12-31T23:59:59+00:00',
-      mastered_at: '9999-12-31T23:59:59+00:00',
-      progress: 0,
       updated_at: '2026-06-23T12:00:00.000Z',
     });
   });
 
-  it('markBlockMastered sets mastered date, progress, and updated timestamp', async () => {
-    await UserBlock.markBlockMastered('u1', 7, '2026-06-23T12:00:00.000Z');
+  it('completeInitialTraining sets completion and updated timestamps', async () => {
+    await UserBlock.completeInitialTraining('u1', 7, '2026-06-23T12:00:00.000Z');
 
     expect(mocks.update).toHaveBeenCalledWith(['u1', 7], {
-      mastered_at: '2026-06-23T12:00:00.000Z',
-      progress: 1,
+      started_at: '2026-06-23T12:00:00.000Z',
       updated_at: '2026-06-23T12:00:00.000Z',
     });
   });
@@ -340,11 +330,8 @@ describe('UserBlock', () => {
 
     expect(mocks.update.mock.calls).toEqual([
       [['u1', 1], { started_at: '2026-07-17T12:00:00.000Z', updated_at: '2026-07-17T12:00:00.000Z' }],
-      [['u1', 1], { mastered_at: '2026-07-17T12:00:00.000Z', progress: 1, updated_at: '2026-07-17T12:00:00.000Z' }],
       [['u1', 2], { started_at: '2026-07-17T12:00:00.000Z', updated_at: '2026-07-17T12:00:00.000Z' }],
-      [['u1', 2], { mastered_at: '2026-07-17T12:00:00.000Z', progress: 1, updated_at: '2026-07-17T12:00:00.000Z' }],
       [['u1', 3], { started_at: '2026-07-17T12:00:00.000Z', updated_at: '2026-07-17T12:00:00.000Z' }],
-      [['u1', 3], { mastered_at: '2026-07-17T12:00:00.000Z', progress: 1, updated_at: '2026-07-17T12:00:00.000Z' }],
     ]);
   });
 
@@ -371,20 +358,14 @@ describe('UserBlock', () => {
         user_id: 'u1',
         block_id: 1,
         grammar_chunk_id: 8,
-        progress: 4,
         started_at: '2026-06-20T00:00:00.000Z',
-        next_at: '2026-06-25T00:00:00.000Z',
-        mastered_at: '2026-06-26T00:00:00.000Z',
         updated_at: '2026-06-26T00:00:00.000Z',
       },
       {
         user_id: 'u1',
         block_id: 2,
         grammar_chunk_id: 8,
-        progress: 2,
         started_at: '2026-06-21T00:00:00.000Z',
-        next_at: '2026-06-27T00:00:00.000Z',
-        mastered_at: '9999-12-31T23:59:59+00:00',
         updated_at: '2026-06-27T00:00:00.000Z',
       },
     ]);
@@ -402,17 +383,11 @@ describe('UserBlock', () => {
       expect.objectContaining({
         block_id: 1,
         started_at: '9999-12-31T23:59:59+00:00',
-        next_at: '9999-12-31T23:59:59+00:00',
-        mastered_at: '9999-12-31T23:59:59+00:00',
-        progress: 0,
         updated_at: '2026-06-28T12:00:00.000Z',
       }),
       expect.objectContaining({
         block_id: 2,
         started_at: '9999-12-31T23:59:59+00:00',
-        next_at: '9999-12-31T23:59:59+00:00',
-        mastered_at: '9999-12-31T23:59:59+00:00',
-        progress: 0,
         updated_at: '2026-06-28T12:00:00.000Z',
       }),
     ]);
@@ -439,11 +414,8 @@ describe('UserBlock', () => {
       {
         user_id: 'u1',
         block_id: 1,
-        progress: 2,
         started_at: '2026-03-01T00:00:00.000Z',
         updated_at: '2026-03-03T12:00:00.000Z',
-        next_at: '9999-12-31T23:59:59+00:00',
-        mastered_at: '9999-12-31T23:59:59+00:00',
       },
     ]);
     mocks.rpc.mockResolvedValueOnce({
@@ -455,14 +427,11 @@ describe('UserBlock', () => {
           note: null,
           grammar_chunk_id: 10,
           sort_order: 1,
-          progress: 2,
           show_in_topics: false,
           is_removed_from_practice: false,
           requires_initial_training: true,
           started_at: null,
           updated_at: '2026-03-04T00:00:00.000Z',
-          next_at: null,
-          mastered_at: null,
           deleted_at: null,
         },
       ],
@@ -485,11 +454,8 @@ describe('UserBlock', () => {
         {
           user_id: 'u1',
           block_id: 1,
-          progress: 2,
           started_at: '2026-03-01T00:00:00.000Z',
           updated_at: '2026-03-03T12:00:00.000Z',
-          next_at: null,
-          mastered_at: null,
         },
       ],
     });
@@ -501,8 +467,6 @@ describe('UserBlock', () => {
         is_removed_from_practice: false,
         requires_initial_training: true,
         started_at: '9999-12-31T23:59:59+00:00',
-        next_at: '9999-12-31T23:59:59+00:00',
-        mastered_at: '9999-12-31T23:59:59+00:00',
         deleted_at: '9999-12-31T23:59:59+00:00',
       }),
     ]);
@@ -523,12 +487,9 @@ describe('UserBlock', () => {
           note: '',
           grammar_chunk_id: 10,
           sort_order: 1,
-          progress: 0,
           requires_initial_training: false,
           started_at: null,
           updated_at: '2026-03-04T00:00:00.000Z',
-          next_at: null,
-          mastered_at: null,
           deleted_at: null,
         },
       ],
