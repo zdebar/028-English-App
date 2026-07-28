@@ -1,7 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { CompactSummary, StarRow } from '@/components/UI/StarProgress';
+import {
+  CompactSummary,
+  StarRow,
+  StarRowWithFillingStar,
+} from '@/components/UI/StarProgress';
 
 describe('StarProgress', () => {
   it('renders compacted badges in gold, silver, bronze order', () => {
@@ -27,6 +31,22 @@ describe('StarProgress', () => {
     expect(screen.getAllByText('10')).toHaveLength(2);
     expect(screen.getByText('15')).toBeTruthy();
     expect(screen.queryByText('5')).toBeNull();
+  });
+
+  it('renders the filling star before the completed star tiers', () => {
+    const { container } = render(
+      <StarRowWithFillingStar
+        starCount={25}
+        currentProgress={20}
+        maxProgress={50}
+        starsPerRow={10}
+        size={22}
+      />,
+    );
+    const row = container.firstElementChild;
+
+    expect(row?.children[0]?.classList.contains('z-star-current')).toBe(true);
+    expect(row?.children[1]?.querySelector('svg.star-fill-gold')).toBeTruthy();
   });
 
   it('renders CompactSummary using fullTierCount and partialTierCount', () => {

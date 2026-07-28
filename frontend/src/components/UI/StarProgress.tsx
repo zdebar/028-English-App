@@ -238,15 +238,15 @@ export function StarRowWithFillingStar({
 }: StarRowWithFillingStarProps): JSX.Element {
   return (
     <div
-      className={`flex flex-wrap items-center justify-center gap-2 overflow-visible ${className}`.trim()}
+      className={`flex flex-wrap items-center justify-center overflow-visible ${className}`.trim()}
     >
-      <StarRow starCount={starCount} starsPerRow={starsPerRow} size={size} />
       <FillingStar
         currentProgress={currentProgress}
         maxProgress={maxProgress}
         size={size}
         className="z-star-current relative"
       />
+      <StarRow starCount={starCount} starsPerRow={starsPerRow} size={size} />
     </div>
   );
 }
