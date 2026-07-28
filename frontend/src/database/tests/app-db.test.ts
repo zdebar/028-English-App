@@ -48,9 +48,9 @@ describe('AppDB migrations', () => {
     mocks.versions.length = 0;
   });
 
-  it('migrates directional items and legacy block completion together in version 3', async () => {
+  it('migrates directional items and legacy block completion together in version 2', async () => {
     new AppDB();
-    const version = mocks.versions.find(({ number }) => number === 3);
+    const version = mocks.versions.find(({ number }) => number === 2);
     const upgrade = version?.upgrade;
     const nullDate = '9999-12-31T23:59:59+00:00';
     const items: Array<Record<string, unknown>> = [
@@ -99,7 +99,7 @@ describe('AppDB migrations', () => {
       })),
     };
 
-    expect(mocks.versions.map(({ number }) => number)).toEqual([1, 3]);
+    expect(mocks.versions.map(({ number }) => number)).toEqual([1, 2]);
     expect(version?.schema).toHaveProperty('user_items');
     expect(upgrade).toBeTypeOf('function');
     await upgrade?.(transaction);
