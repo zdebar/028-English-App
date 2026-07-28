@@ -30,7 +30,10 @@ vi.mock('@/config/config', () => ({
       nullReplacementNumber: 0,
     },
     srs: {
-      intervals: [1, 2, 3],
+      intervals: {
+        czToEn: [1, 2, 3],
+        enToCz: [1, 2, 3],
+      },
     },
     lesson: {
       deckSize: 10,
@@ -39,6 +42,7 @@ vi.mock('@/config/config', () => ({
       afterInitialTrainingProgress: 2,
       simulationProgress: 2,
       simulationCount: 64,
+      skipProgress: 100,
     },
     practice: {
       readyPracticeBadgeCap: 99,
@@ -81,7 +85,12 @@ vi.mock('@/database/models/db', () => ({
             }),
           };
         }
-        if (field === '[user_id+is_practice_item+next_at+mastered_at+curriculum_sort_path]') {
+        if (
+          field ===
+            '[user_id+is_practice_item+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]' ||
+          field ===
+            '[user_id+is_practice_item+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]'
+        ) {
           return {
             between: (...args: unknown[]) => {
               mocks.indexedBetween(...args);
@@ -93,7 +102,24 @@ vi.mock('@/database/models/db', () => ({
                       mocks.indexedLimit(...limitArgs);
                       return {
                         toArray: (...toArrayArgs: unknown[]) =>
-                          mocks.indexedToArray(...toArrayArgs),
+                          Promise.resolve(mocks.indexedToArray(...toArrayArgs)).then((items) =>
+                            (items ?? []).map((item: any) => ({
+                              ...item,
+                              progress_cz_to_en: item.progress_cz_to_en ?? item.progress ?? 0,
+                              progress_en_to_cz: item.progress_en_to_cz ?? item.progress ?? 0,
+                              next_at_cz_to_en: item.next_at_cz_to_en ?? item.next_at,
+                              next_at_en_to_cz: item.next_at_en_to_cz ?? item.next_at,
+                              mastered_at_cz_to_en:
+                                item.mastered_at_cz_to_en ?? item.mastered_at,
+                              mastered_at_en_to_cz:
+                                item.mastered_at_en_to_cz ?? item.mastered_at,
+                              started_at:
+                                item.started_at ??
+                                (item.next_at === '1970-01-01T00:00:00.000Z'
+                                  ? '1970-01-01T00:00:00.000Z'
+                                  : '2025-01-01T00:00:00.000Z'),
+                            })),
+                          ),
                       };
                     },
                     toArray: (...toArrayArgs: unknown[]) => mocks.indexedToArray(...toArrayArgs),
@@ -237,32 +263,78 @@ describe('UserItem', () => {
     expect(mocks.bulkPut).toHaveBeenCalledTimes(1);
   });
 
-  it('savePracticeDeck uses provided dateTime when passed explicitly', async () => {
-    const dateTime = '2026-03-06T12:00:00.000Z';
-
-    await UserItem.savePracticeDeck(
-      [
-        {
-          user_id: 'u1',
-          item_id: 1,
-          progress: 3,
-          started_at: '1970-01-01T00:00:00.000Z',
-          mastered_at: '1970-01-01T00:00:00.000Z',
-          next_at: '1970-01-01T00:00:00.000Z',
-        } as any,
-      ],
-      dateTime,
+  it('initializes both directions from the first known CZ to EN answer', () => {
+    mocks.getNextAt.mockReturnValue('2026-03-04T09:02:00.000Z');
+    const updated = UserItem.applyPracticeProgress(
+      {
+        progress_cz_to_en: 0,
+        progress_en_to_cz: 0,
+        progress_history: [],
+        started_at: '1970-01-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+      } as any,
+      'czToEn',
+      1,
+      '2026-03-04T09:00:00.000Z',
     );
 
-    expect(mocks.bulkPut).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.objectContaining({
-          started_at: dateTime,
-          updated_at: dateTime,
-          mastered_at: dateTime,
-        }),
-      ]),
+    expect(updated).toMatchObject({
+      progress_cz_to_en: 1,
+      progress_en_to_cz: 1,
+      started_at: '2026-03-04T09:00:00.000Z',
+      next_at_cz_to_en: '2026-03-04T09:02:00.000Z',
+      next_at_en_to_cz: '2026-03-04T09:02:00.000Z',
+    });
+    expect(updated.progress_history).toEqual([
+      expect.objectContaining({ direction: 'czToEn', progress: 1 }),
+      expect.objectContaining({ direction: 'enToCz', progress: 1 }),
+    ]);
+  });
+
+  it('updates only the displayed direction after an item is started', () => {
+    mocks.getNextAt.mockReturnValue('2026-03-04T09:02:00.000Z');
+    const updated = UserItem.applyPracticeProgress(
+      {
+        progress_cz_to_en: 4,
+        progress_en_to_cz: 2,
+        progress_history: [],
+        started_at: '2026-03-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+      } as any,
+      'enToCz',
+      1,
+      '2026-03-04T09:00:00.000Z',
     );
+
+    expect(updated.progress_cz_to_en).toBe(4);
+    expect(updated.progress_en_to_cz).toBe(3);
+    expect(updated.progress_history).toEqual([
+      expect.objectContaining({ direction: 'enToCz', progress: 3 }),
+    ]);
+  });
+
+  it('first-answer skip masters CZ to EN but only initializes EN to CZ', () => {
+    mocks.getNextAt.mockReturnValue('1970-01-01T00:00:00.000Z');
+    const updated = UserItem.applyPracticeProgress(
+      {
+        progress_cz_to_en: 0,
+        progress_en_to_cz: 0,
+        progress_history: [],
+        started_at: '1970-01-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+      } as any,
+      'czToEn',
+      100,
+      '2026-03-04T09:00:00.000Z',
+    );
+
+    expect(updated.progress_cz_to_en).toBe(100);
+    expect(updated.progress_en_to_cz).toBe(0);
+    expect(updated.mastered_at_cz_to_en).toBe('2026-03-04T09:00:00.000Z');
+    expect(updated.mastered_at_en_to_cz).toBe('1970-01-01T00:00:00.000Z');
   });
 
   it('deleteAllItems deletes by user_id', async () => {
@@ -283,7 +355,7 @@ describe('UserItem', () => {
     expect(result.map((item) => item.item_id)).toEqual([1, 3]);
   });
 
-  it('fills the deck with odd due items before considering even or new vocabulary', async () => {
+  it('returns a full EN to CZ due deck before considering CZ to EN or new items', async () => {
     mocks.indexedToArray.mockResolvedValueOnce([
       {
         item_id: 2,
@@ -305,7 +377,7 @@ describe('UserItem', () => {
     expect(mocks.indexedToArray).toHaveBeenCalledTimes(1);
   });
 
-  it('replaces a partial odd deck with even due and new vocabulary', async () => {
+  it('replaces a partial EN to CZ deck with due and new CZ to EN items', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
     mocks.indexedToArray
@@ -347,13 +419,11 @@ describe('UserItem', () => {
     );
     const newVocabularyFilter = mocks.indexedFilter.mock.calls[2][0] as (item: any) => boolean;
     expect(newVocabularyFilter({
-      progress: 5,
-      next_at: '1970-01-01T00:00:00.000Z',
-      mastered_at: '1970-01-01T00:00:00.000Z',
+      started_at: '1970-01-01T00:00:00.000Z',
     })).toBe(true);
   });
 
-  it('returns a new-only vocabulary deck instead of a partial odd deck', async () => {
+  it('returns a new-only CZ to EN deck instead of a partial EN to CZ deck', async () => {
     mocks.indexedToArray
       .mockResolvedValueOnce([
         {
@@ -421,7 +491,7 @@ describe('UserItem', () => {
     expect(mocks.userBlockGet.mock.calls).toEqual([[['u1', 20]], [['u1', 30]]]);
   });
 
-  it('restores a partial odd vocabulary deck when even and new alternatives are empty', async () => {
+  it('restores a partial EN to CZ deck when CZ to EN and new alternatives are empty', async () => {
     mocks.indexedToArray
       .mockResolvedValueOnce([
         {
@@ -439,7 +509,7 @@ describe('UserItem', () => {
     expect(deck.map((item) => item.item_id)).toEqual([1]);
   });
 
-  it('uses any even grammar deck instead of a partial odd deck', async () => {
+  it('uses any CZ to EN grammar deck instead of a partial EN to CZ deck', async () => {
     mocks.masteredBlockToArray.mockResolvedValueOnce([
       {
         block_id: 10,
@@ -457,7 +527,7 @@ describe('UserItem', () => {
     expect(mocks.indexedToArray).toHaveBeenCalledTimes(3);
   });
 
-  it('restores a partial odd grammar deck when no even items exist', async () => {
+  it('restores a partial EN to CZ grammar deck when no CZ to EN items exist', async () => {
     mocks.masteredBlockToArray.mockResolvedValueOnce([
       {
         block_id: 10,
@@ -506,33 +576,33 @@ describe('UserItem', () => {
     const grammarFilter = mocks.indexedFilter.mock.calls[1][0] as (item: any) => boolean;
     expect(grammarFilter({
       block_id: 10,
-      mastered_at: '1970-01-01T00:00:00.000Z',
-      next_at: '2026-06-24T11:00:00.000Z',
-      progress: 0,
+      started_at: '2026-01-01T00:00:00.000Z',
+      mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+      next_at_cz_to_en: '2026-06-24T11:00:00.000Z',
     })).toBe(true);
     expect(grammarFilter({
       block_id: 11,
-      mastered_at: '1970-01-01T00:00:00.000Z',
-      next_at: '2026-06-24T11:00:00.000Z',
-      progress: 0,
+      started_at: '2026-01-01T00:00:00.000Z',
+      mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+      next_at_cz_to_en: '2026-06-24T11:00:00.000Z',
     })).toBe(true);
     expect(grammarFilter({
       block_id: 10,
-      mastered_at: '2026-06-20T12:00:00.000Z',
-      next_at: '2026-06-24T11:00:00.000Z',
-      progress: 0,
+      started_at: '2026-01-01T00:00:00.000Z',
+      mastered_at_cz_to_en: '2026-06-20T12:00:00.000Z',
+      next_at_cz_to_en: '2026-06-24T11:00:00.000Z',
     })).toBe(false);
     expect(grammarFilter({
       block_id: 10,
-      mastered_at: '1970-01-01T00:00:00.000Z',
-      next_at: '1970-01-01T00:00:00.000Z',
-      progress: 0,
+      started_at: '2026-01-01T00:00:00.000Z',
+      mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+      next_at_cz_to_en: '1970-01-01T00:00:00.000Z',
     })).toBe(false);
     expect(grammarFilter({
       block_id: 10,
-      mastered_at: '1970-01-01T00:00:00.000Z',
-      next_at: '2026-06-24T12:00:00.000Z',
-      progress: 0,
+      started_at: '2026-01-01T00:00:00.000Z',
+      mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+      next_at_cz_to_en: '2026-06-24T12:00:00.000Z',
     })).toBe(false);
   });
 
@@ -553,18 +623,22 @@ describe('UserItem', () => {
       {
         item_id: 1,
         sort_order: 1,
-        progress: 101,
+        progress_cz_to_en: 101,
+        progress_en_to_cz: 101,
         progress_history: [],
         started_at: '2026-03-01T00:00:00.000Z',
-        mastered_at: '2026-03-06T11:00:00.000Z',
+        mastered_at_cz_to_en: '2026-03-06T11:00:00.000Z',
+        mastered_at_en_to_cz: '2026-03-06T11:00:00.000Z',
       },
       {
         item_id: 2,
         sort_order: 2,
-        progress: 0,
+        progress_cz_to_en: 0,
+        progress_en_to_cz: 0,
         progress_history: [],
         started_at: '1970-01-01T00:00:00.000Z',
-        mastered_at: '1970-01-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
       },
     ]);
 
@@ -573,59 +647,59 @@ describe('UserItem', () => {
     expect(mocks.bulkPut).toHaveBeenCalledWith([
       expect.objectContaining({
         item_id: 1,
-        progress: 101,
+        progress_cz_to_en: 101,
+        progress_en_to_cz: 101,
         started_at: '2026-03-01T00:00:00.000Z',
         updated_at: dateTime,
-        mastered_at: '2026-03-06T11:00:00.000Z',
+        mastered_at_cz_to_en: '2026-03-06T11:00:00.000Z',
+        mastered_at_en_to_cz: '2026-03-06T11:00:00.000Z',
       }),
       expect.objectContaining({
         item_id: 2,
-        progress: 2,
+        progress_cz_to_en: 2,
+        progress_en_to_cz: 2,
         started_at: dateTime,
         updated_at: dateTime,
       }),
     ]);
-    expect(mocks.getNextAt).toHaveBeenCalledWith(101);
-    expect(mocks.getNextAt).toHaveBeenCalledWith(2);
+    expect(mocks.getNextAt).toHaveBeenCalledWith(101, 'czToEn');
+    expect(mocks.getNextAt).toHaveBeenCalledWith(101, 'enToCz');
+    expect(mocks.getNextAt).toHaveBeenCalledWith(2, 'czToEn');
+    expect(mocks.getNextAt).toHaveBeenCalledWith(2, 'enToCz');
   });
 
   it('getReadyPracticeState counts ready started and not-started vocabulary', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
-    mocks.indexedToArray
-      .mockResolvedValueOnce([{ item_id: 1, mastered_at: '1970-01-01T00:00:00.000Z' }])
-      .mockResolvedValueOnce([
-        { item_id: 2, mastered_at: '1970-01-01T00:00:00.000Z' },
-        { item_id: 3, mastered_at: '1970-01-01T00:00:00.000Z' },
-      ]);
+    mocks.userEqualsToArray.mockResolvedValueOnce([
+      {
+        item_id: 1,
+        is_practice_item: 1,
+        started_at: '2026-01-01T00:00:00.000Z',
+        next_at_cz_to_en: '2026-06-20T00:00:00.000Z',
+        next_at_en_to_cz: '2026-06-20T00:00:00.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+      },
+      {
+        item_id: 2,
+        is_practice_item: 1,
+        started_at: '1970-01-01T00:00:00.000Z',
+      },
+    ]);
 
     await expect(UserItem.getReadyPracticeState('u1')).resolves.toEqual({
       readyCount: 3,
       schedule: [],
     });
 
-    expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
-      1,
-      ['u1', 1, expect.anything(), '1970-01-01T00:00:00.000Z', expect.anything()],
-      ['u1', 1, '2026-06-24T12:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
-      true,
-      false,
-    );
-    expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
-      2,
-      ['u1', 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
-      ['u1', 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
-      true,
-      true,
-    );
-    expect(mocks.indexedLimit).toHaveBeenNthCalledWith(1, 100);
-    expect(mocks.indexedLimit).toHaveBeenNthCalledWith(2, 99);
   });
 
   it('getReadyPracticeState caps availability above the badge cap', async () => {
-    mocks.indexedToArray.mockResolvedValueOnce(Array.from({ length: 100 }, (_, index) => ({
+    mocks.userEqualsToArray.mockResolvedValueOnce(Array.from({ length: 100 }, (_, index) => ({
       item_id: index + 1,
-      mastered_at: '1970-01-01T00:00:00.000Z',
+      is_practice_item: 1,
+      started_at: '1970-01-01T00:00:00.000Z',
     })));
 
     await expect(UserItem.getReadyPracticeState('u1')).resolves.toEqual({
@@ -633,52 +707,48 @@ describe('UserItem', () => {
       schedule: [],
     });
 
-    expect(mocks.indexedToArray).toHaveBeenCalledTimes(1);
+    expect(mocks.userEqualsToArray).toHaveBeenCalledTimes(1);
   });
 
   it('getReadyPracticeState schedules future vocabulary when none is ready', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
-    mocks.indexedToArray
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([
-        {
-          item_id: 1,
-          next_at: '2026-06-24T12:00:10.000Z',
-          mastered_at: '1970-01-01T00:00:00.000Z',
-        },
-        {
-          item_id: 2,
-          next_at: '2026-06-24T12:00:10.800Z',
-          mastered_at: '1970-01-01T00:00:00.000Z',
-        },
-      ]);
+    mocks.userEqualsToArray.mockResolvedValueOnce([
+      {
+        item_id: 1,
+        is_practice_item: 1,
+        started_at: '2026-01-01T00:00:00.000Z',
+        next_at_cz_to_en: '2026-06-24T12:00:10.000Z',
+        next_at_en_to_cz: '2026-06-24T12:00:10.800Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+      },
+    ]);
 
     await expect(UserItem.getReadyPracticeState('u1')).resolves.toEqual({
       readyCount: 0,
       schedule: [{ date: '2026-06-24T12:00:10.800Z', count: 2 }],
     });
 
-    expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
-      3,
-      ['u1', 1, '2026-06-24T12:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
-      ['u1', 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
-      false,
-      false,
-    );
   });
 
   it('getReadyPracticeState ignores mastered vocabulary candidates', async () => {
-    mocks.indexedToArray.mockResolvedValueOnce([]);
+    mocks.userEqualsToArray.mockResolvedValueOnce([
+      {
+        item_id: 1,
+        is_practice_item: 1,
+        started_at: '2026-01-01T00:00:00.000Z',
+        next_at_cz_to_en: '2026-01-01T00:00:00.000Z',
+        next_at_en_to_cz: '2026-01-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '2026-06-24T11:00:00.000Z',
+        mastered_at_en_to_cz: '2026-06-24T11:00:00.000Z',
+      },
+    ]);
 
-    await UserItem.getReadyPracticeState('u1');
-
-    const filterCandidate = mocks.indexedFilter.mock.calls[0][0] as (item: {
-      mastered_at: string;
-    }) => boolean;
-    expect(filterCandidate({ mastered_at: '1970-01-01T00:00:00.000Z' })).toBe(true);
-    expect(filterCandidate({ mastered_at: '2026-06-24T11:00:00.000Z' })).toBe(false);
+    await expect(UserItem.getReadyPracticeState('u1')).resolves.toEqual({
+      readyCount: 0,
+      schedule: [],
+    });
   });
 
   it('simulateData updates first configured range using indexed between+modify', async () => {
@@ -694,37 +764,49 @@ describe('UserItem', () => {
 
     const modifyFn = mocks.itemIdBetweenModify.mock.calls[0][0] as (item: any) => void;
     const item = {
-      progress: 0,
+      progress_cz_to_en: 0,
+      progress_en_to_cz: 0,
       started_at: '1970-01-01T00:00:00.000Z',
       updated_at: '1970-01-01T00:00:00.000Z',
-      next_at: '1970-01-01T00:00:00.000Z',
-      mastered_at: '1970-01-01T00:00:00.000Z',
+      next_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+      next_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+      mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+      mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
     };
 
     modifyFn(item);
 
-    expect(item.progress).toBe(2);
+    expect(item.progress_cz_to_en).toBe(2);
+    expect(item.progress_en_to_cz).toBe(2);
     expect(item.started_at).toBe('2026-06-10T10:00:00.000Z');
     expect(item.updated_at).toBe('2026-06-10T10:00:00.000Z');
-    expect(item.next_at).toBe('2026-06-12T00:00:00.000Z');
-    expect(item.mastered_at).toBe('1970-01-01T00:00:00.000Z');
-    expect(mocks.getNextAt).toHaveBeenCalledWith(2);
+    expect(item.next_at_cz_to_en).toBe('2026-06-12T00:00:00.000Z');
+    expect(item.next_at_en_to_cz).toBe('2026-06-12T00:00:00.000Z');
+    expect(item.mastered_at_cz_to_en).toBe('1970-01-01T00:00:00.000Z');
+    expect(item.mastered_at_en_to_cz).toBe('1970-01-01T00:00:00.000Z');
+    expect(mocks.getNextAt).toHaveBeenCalledWith(2, 'czToEn');
+    expect(mocks.getNextAt).toHaveBeenCalledWith(2, 'enToCz');
 
     const completingItem = {
-      progress: 1,
+      progress_cz_to_en: 1,
+      progress_en_to_cz: 1,
       started_at: '2026-06-01T10:00:00.000Z',
       updated_at: '2026-06-01T10:00:00.000Z',
-      next_at: '2026-06-02T10:00:00.000Z',
-      mastered_at: '1970-01-01T00:00:00.000Z',
+      next_at_cz_to_en: '2026-06-02T10:00:00.000Z',
+      next_at_en_to_cz: '2026-06-02T10:00:00.000Z',
+      mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+      mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
     };
 
     modifyFn(completingItem);
 
-    expect(completingItem.progress).toBe(3);
+    expect(completingItem.progress_cz_to_en).toBe(3);
+    expect(completingItem.progress_en_to_cz).toBe(1);
     expect(completingItem.started_at).toBe('2026-06-01T10:00:00.000Z');
     expect(completingItem.updated_at).toBe('2026-06-10T10:00:00.000Z');
-    expect(completingItem.mastered_at).toBe('2026-06-10T10:00:00.000Z');
-    expect(mocks.getNextAt).toHaveBeenCalledWith(3);
+    expect(completingItem.mastered_at_cz_to_en).toBe('2026-06-10T10:00:00.000Z');
+    expect(completingItem.mastered_at_en_to_cz).toBe('1970-01-01T00:00:00.000Z');
+    expect(mocks.getNextAt).toHaveBeenCalledWith(3, 'czToEn');
   });
 
   it('syncFromRemote pushes local items, applies pull, and marks sync', async () => {
@@ -733,11 +815,14 @@ describe('UserItem', () => {
         user_id: 'u1',
         item_id: 1,
         progress_history: [{ progress: 1, created_at: '2026-03-03T09:59:00.000Z' }],
-        progress: 1,
+        progress_cz_to_en: 1,
+        progress_en_to_cz: 1,
         started_at: '1970-01-01T00:00:00.000Z',
         updated_at: '2026-03-03T10:00:00.000Z',
-        next_at: '1970-01-01T00:00:00.000Z',
-        mastered_at: '1970-01-01T00:00:00.000Z',
+        next_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        next_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
         deleted_at: null,
       },
     ]);
@@ -757,12 +842,15 @@ describe('UserItem', () => {
           note_id: null,
           block_id: null,
           grammar_chunk_id: null,
-          progress: 0,
+          progress_cz_to_en: 0,
+          progress_en_to_cz: 0,
           progress_history: [],
           started_at: null,
           updated_at: '2026-03-04T00:00:00.000Z',
-          next_at: null,
-          mastered_at: null,
+          next_at_cz_to_en: null,
+          next_at_en_to_cz: null,
+          mastered_at_cz_to_en: null,
+          mastered_at_en_to_cz: null,
           lesson_id: 1,
           deleted_at: null,
         },
@@ -785,11 +873,14 @@ describe('UserItem', () => {
           user_id: 'u1',
           item_id: 1,
           progress_history: [{ progress: 1, created_at: '2026-03-03T09:59:00.000Z' }],
-          progress: 1,
+          progress_cz_to_en: 1,
+          progress_en_to_cz: 1,
           updated_at: '2026-03-03T10:00:00.000Z',
           started_at: null,
-          next_at: null,
-          mastered_at: null,
+          next_at_cz_to_en: null,
+          next_at_en_to_cz: null,
+          mastered_at_cz_to_en: null,
+          mastered_at_en_to_cz: null,
         }),
       ],
     });
@@ -803,8 +894,10 @@ describe('UserItem', () => {
         block_id: 0,
         grammar_chunk_id: 0,
         started_at: '1970-01-01T00:00:00.000Z',
-        next_at: '1970-01-01T00:00:00.000Z',
-        mastered_at: '1970-01-01T00:00:00.000Z',
+        next_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        next_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
       }),
     ]);
     expect(mocks.markAsSynced).toHaveBeenCalledWith('user_items', '2026-03-04T00:00:00.000Z', 'u1');

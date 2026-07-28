@@ -31,14 +31,24 @@ vi.mock('@/database/models/user-blocks', () => ({
   },
 }));
 
-vi.mock('@/database/models/user-items', () => ({
-  default: {
+vi.mock('@/database/models/user-items', () => {
+  const applyPracticeProgress = (item: any, direction: 'czToEn' | 'enToCz', change: number) => ({
+    ...item,
+    progress_cz_to_en:
+      direction === 'czToEn' ? Math.max(item.progress_cz_to_en + change, 0) : item.progress_cz_to_en,
+    progress_en_to_cz:
+      direction === 'enToCz' ? Math.max(item.progress_en_to_cz + change, 0) : item.progress_en_to_cz,
+  });
+  return {
+    default: {
     getByBlockId: (...args: unknown[]) => getByBlockIdMock(...args),
     savePracticeDeck: (...args: unknown[]) => savePracticeDeckMock(...args),
     saveInitialTrainingBlockCompletion: (...args: unknown[]) =>
       saveInitialTrainingBlockCompletionMock(...args),
-  },
-}));
+    applyPracticeProgress,
+    },
+  };
+});
 
 vi.mock('@/database/models/grammar-chunks', () => ({
   default: {
@@ -108,7 +118,8 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
     audio: 'hello.opus',
     sort_order: 1,
     curriculum_sort_path: [1, 1, 1],
-    progress: 0,
+    progress_cz_to_en: 0,
+    progress_en_to_cz: 0,
     progress_history: [],
     note_id: null,
     lesson_id: 1,
@@ -119,8 +130,10 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
     grammar_chunk_id: 20,
     started_at: '2026-01-01',
     deleted_at: '',
-    next_at: '2026-01-01',
-    mastered_at: '',
+    next_at_cz_to_en: '2026-01-01',
+    next_at_en_to_cz: '2026-01-01',
+    mastered_at_cz_to_en: '',
+    mastered_at_en_to_cz: '',
     ...overrides,
   };
 }
@@ -333,7 +346,7 @@ describe('useBlockTrainingDeck', () => {
 
   it('skip persists the current item immediately and removes it from later rounds', async () => {
     getByBlockIdMock.mockResolvedValue([
-      makeItem({ item_id: 1, progress: 1, sort_order: 1 }),
+      makeItem({ item_id: 1, progress_cz_to_en: 1, sort_order: 1 }),
       makeItem({ item_id: 2, sort_order: 2 }),
     ]);
 
@@ -349,11 +362,9 @@ describe('useBlockTrainingDeck', () => {
       [
         expect.objectContaining({
           item_id: 1,
-          progress: 101,
-          progress_history: [expect.objectContaining({ progress: 101 })],
+          progress_cz_to_en: 101,
         }),
       ],
-      expect.any(String),
     );
     expect(result.current.currentItem?.item_id).toBe(2);
 

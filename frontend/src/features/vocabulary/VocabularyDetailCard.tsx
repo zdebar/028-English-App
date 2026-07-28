@@ -46,8 +46,22 @@ export default function VocabularyDetailCard({
   const dateProperties = [
     { label: TEXTS.startedAt, value: shortenDate(selectedWord?.started_at) },
     { label: TEXTS.updatedAt, value: shortenDate(selectedWord?.updated_at) },
-    { label: TEXTS.nextAt, value: shortenDate(selectedWord?.next_at) },
-    { label: TEXTS.masteredAt, value: shortenDate(selectedWord?.mastered_at) || NOT_MASTERED },
+    {
+      label: `${TEXTS.nextAt} (${TEXTS.directionCzToEn})`,
+      value: shortenDate(selectedWord?.next_at_cz_to_en),
+    },
+    {
+      label: `${TEXTS.masteredAt} (${TEXTS.directionCzToEn})`,
+      value: shortenDate(selectedWord?.mastered_at_cz_to_en) || NOT_MASTERED,
+    },
+    {
+      label: `${TEXTS.nextAt} (${TEXTS.directionEnToCz})`,
+      value: shortenDate(selectedWord?.next_at_en_to_cz),
+    },
+    {
+      label: `${TEXTS.masteredAt} (${TEXTS.directionEnToCz})`,
+      value: shortenDate(selectedWord?.mastered_at_en_to_cz) || NOT_MASTERED,
+    },
   ];
 
   const {
@@ -80,8 +94,17 @@ export default function VocabularyDetailCard({
             </PropertyView>
           ))}
         </div>
-        <PropertyView key={TEXTS.progress} label={TEXTS.progress}>
-          {selectedWord?.progress ?? NOT_AVAILABLE}
+        <PropertyView
+          key={`${TEXTS.progress}-cz-to-en`}
+          label={`${TEXTS.progress} (${TEXTS.directionCzToEn})`}
+        >
+          {selectedWord?.progress_cz_to_en ?? NOT_AVAILABLE}
+        </PropertyView>
+        <PropertyView
+          key={`${TEXTS.progress}-en-to-cz`}
+          label={`${TEXTS.progress} (${TEXTS.directionEnToCz})`}
+        >
+          {selectedWord?.progress_en_to_cz ?? NOT_AVAILABLE}
         </PropertyView>
         <div>
           {dateProperties.map((property) => (

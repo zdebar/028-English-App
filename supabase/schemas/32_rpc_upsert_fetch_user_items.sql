@@ -17,13 +17,16 @@ RETURNS TABLE (
   note_id INTEGER,
   block_id INTEGER,
   grammar_chunk_id INTEGER,
-  progress INTEGER,
+  progress_cz_to_en INTEGER,
+  progress_en_to_cz INTEGER,
   progress_history JSONB,
   started_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ,
   deleted_at TIMESTAMPTZ,
-  next_at TIMESTAMPTZ,
-  mastered_at TIMESTAMPTZ,
+  next_at_cz_to_en TIMESTAMPTZ,
+  next_at_en_to_cz TIMESTAMPTZ,
+  mastered_at_cz_to_en TIMESTAMPTZ,
+  mastered_at_en_to_cz TIMESTAMPTZ,
   lesson_id INTEGER
 )
 LANGUAGE plpgsql

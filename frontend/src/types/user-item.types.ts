@@ -1,6 +1,9 @@
+export type PracticeDirection = 'czToEn' | 'enToCz';
+
 export interface ProgressHistoryEntry {
   progress: number;
   created_at: string;
+  direction?: PracticeDirection | 'legacy';
 }
 
 export type CurriculumSortPath = readonly [
@@ -17,7 +20,8 @@ export interface UserItemBase {
   pronunciation: string;
   audio: string | null;
   sort_order: number;
-  progress: number;
+  progress_cz_to_en: number;
+  progress_en_to_cz: number;
   progress_history: ProgressHistoryEntry[];
   note_id: number | null;
   lesson_id: number;
@@ -31,8 +35,14 @@ export interface UserItemLocal extends UserItemBase {
   grammar_chunk_id: number;
   started_at: string;
   deleted_at: string;
-  next_at: string;
-  mastered_at: string;
+  next_at_cz_to_en: string;
+  next_at_en_to_cz: string;
+  mastered_at_cz_to_en: string;
+  mastered_at_en_to_cz: string;
   curriculum_sort_path: CurriculumSortPath;
   is_initial_training_trigger?: boolean;
+}
+
+export interface PracticeDeckItem extends UserItemLocal {
+  practice_direction: PracticeDirection;
 }
