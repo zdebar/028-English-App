@@ -16,7 +16,7 @@ export const ACCOUNT_TEXTS = {
   deleteUserErrorToast: 'Chyba při mazání uživatelského účtu.',
 
   // Generic Restart Progress
-  restartProgress: 'Restartovat pokrok',
-  restartProgressHelp: 'Restartovat pokrok',
+  restartProgress: 'restartovat pokrok',
+  restartProgressHelp: 'restartovat pokrok',
   restartDescription: 'Opravdu chcete restartovat pokrok? Tuto akci již nelze vrátit zpět.',
 } as const;

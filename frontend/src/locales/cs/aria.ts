@@ -5,6 +5,6 @@ export const ARIA_TEXTS = {
   volumePercent: (percent: number) => `Hlasitost: ${percent}%`,
   switchToDarkTheme: 'Přepnout na tmavý režim',
   switchToLightTheme: 'Přepnout na světlý režim',
-  closeOverlay: 'Zavřít překryv',
-  note: 'Poznámka',
+  closeOverlay: 'zavřít překryv',
+  note: 'poznámka',
 } as const;

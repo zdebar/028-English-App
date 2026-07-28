@@ -16,13 +16,16 @@ RETURNS TABLE (
   note_id INTEGER,
   block_id INTEGER,
   grammar_chunk_id INTEGER,
-  progress INTEGER,
+  progress_cz_to_en INTEGER,
+  progress_en_to_cz INTEGER,
   progress_history JSONB,
   started_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ,
   deleted_at TIMESTAMPTZ,
-  next_at TIMESTAMPTZ,
-  mastered_at TIMESTAMPTZ,
+  next_at_cz_to_en TIMESTAMPTZ,
+  next_at_en_to_cz TIMESTAMPTZ,
+  mastered_at_cz_to_en TIMESTAMPTZ,
+  mastered_at_en_to_cz TIMESTAMPTZ,
   lesson_id INTEGER
 )
 LANGUAGE plpgsql
@@ -47,13 +50,16 @@ BEGIN
     i.note_id,
     i.block_id,
     i.grammar_chunk_id,
-    COALESCE(ui.progress, 0) AS progress,
+    COALESCE(ui.progress_cz_to_en, 0) AS progress_cz_to_en,
+    COALESCE(ui.progress_en_to_cz, 0) AS progress_en_to_cz,
     '[]'::jsonb AS progress_history,
     ui.started_at,
     COALESCE(ui.updated_at, i.updated_at) AS updated_at,
     i.deleted_at,
-    ui.next_at,
-    ui.mastered_at,
+    ui.next_at_cz_to_en,
+    ui.next_at_en_to_cz,
+    ui.mastered_at_cz_to_en,
+    ui.mastered_at_en_to_cz,
     i.lesson_id
   FROM public.items i
   LEFT JOIN public.blocks b

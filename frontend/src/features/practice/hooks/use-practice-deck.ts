@@ -1,6 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
-import { alternateDirection } from '@/features/practice/practice.utils';
-import type { UserItemLocal } from '@/types/user-item.types';
+import type { PracticeDeckItem, UserItemLocal } from '@/types/user-item.types';
 import { useFetch } from '@/hooks/use-fetch';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
@@ -16,7 +15,7 @@ import config from '@/config/config';
  */
 export function usePracticeDeck(userId: string | null) {
   // Array fetching logic
-  const [array, setArray] = useState<UserItemLocal[]>([]);
+  const [array, setArray] = useState<PracticeDeckItem[]>([]);
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
 
@@ -31,12 +30,12 @@ export function usePracticeDeck(userId: string | null) {
     loading,
     error,
     reload,
-  } = useFetch<UserItemLocal[]>(fetchPracticeDeck);
+  } = useFetch<PracticeDeckItem[]>(fetchPracticeDeck);
 
   const activeArray = array.length > 0 ? array : (fetchedArray ?? []);
   const currentItem = activeArray[index] ?? null;
 
-  const isCzToEn = currentItem ? alternateDirection(currentItem?.progress) : true; // true = CZ -> EN, false = EN -> CZ
+  const isCzToEn = currentItem?.practice_direction !== 'enToCz';
   const {
     audioDisabled,
     audioError,
@@ -125,17 +124,12 @@ export function usePracticeDeck(userId: string | null) {
         return;
       }
 
-      const updatedItem = {
-        ...currentItem,
-        progress: Math.max(currentItem.progress + progressChange, 0),
-        progress_history: [
-          ...currentItem.progress_history,
-          {
-            progress: Math.max(currentItem.progress + progressChange, 0),
-            created_at: new Date().toISOString(),
-          },
-        ],
-      };
+      const updatedItem = UserItem.applyPracticeProgress(
+        currentItem,
+        currentItem.practice_direction,
+        progressChange,
+        new Date().toISOString(),
+      );
 
       userProgressRef.current.push(updatedItem);
 
@@ -159,6 +153,8 @@ export function usePracticeDeck(userId: string | null) {
     [activeArray.length, currentItem, resetHint, saveBufferedProgress, userId],
   );
 
+  const progress = getPracticeProgress(currentItem);
+
   return {
     // Core state
     index,
@@ -166,7 +162,7 @@ export function usePracticeDeck(userId: string | null) {
     trainingBlockId: currentItem?.is_initial_training_trigger ? currentItem.block_id : null,
     noteId: currentItem?.note_id ?? null,
     grammarChunkId: currentItem?.grammar_chunk_id ?? null,
-    progress: currentItem?.progress ?? 0,
+    progress,
     isCzToEn,
     revealed,
     setRevealed,
@@ -194,4 +190,10 @@ export function usePracticeDeck(userId: string | null) {
     audioLoading,
     isPlaying,
   };
+}
+
+function getPracticeProgress(item: PracticeDeckItem | null): number {
+  if (!item) return 0;
+  if (item.practice_direction === 'czToEn') return item.progress_cz_to_en;
+  return item.progress_en_to_cz;
 }

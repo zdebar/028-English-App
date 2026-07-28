@@ -78,11 +78,8 @@ CREATE TABLE IF NOT EXISTS blocks (
 CREATE TABLE IF NOT EXISTS user_blocks (
   block_id INTEGER NOT NULL REFERENCES blocks(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  progress INTEGER NOT NULL DEFAULT 0 CHECK (progress >= 0),
-  started_at TIMESTAMPTZ DEFAULT NOW(),
+  started_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  next_at TIMESTAMPTZ,
-  mastered_at TIMESTAMPTZ,
   PRIMARY KEY (block_id, user_id)
 );
 
@@ -116,11 +113,14 @@ CREATE TABLE IF NOT EXISTS items (
 CREATE TABLE IF NOT EXISTS user_items (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
-  progress INTEGER NOT NULL DEFAULT 0 CHECK (progress >= 0),
+  progress_cz_to_en INTEGER NOT NULL DEFAULT 0 CHECK (progress_cz_to_en >= 0),
+  progress_en_to_cz INTEGER NOT NULL DEFAULT 0 CHECK (progress_en_to_cz >= 0),
   started_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  next_at TIMESTAMPTZ,
-  mastered_at TIMESTAMPTZ,
+  next_at_cz_to_en TIMESTAMPTZ,
+  next_at_en_to_cz TIMESTAMPTZ,
+  mastered_at_cz_to_en TIMESTAMPTZ,
+  mastered_at_en_to_cz TIMESTAMPTZ,
   PRIMARY KEY (user_id, item_id)
 );
 
@@ -128,9 +128,11 @@ CREATE TABLE IF NOT EXISTS user_items_history (
   item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   progress INTEGER NOT NULL CHECK (progress >= 0),
+  direction TEXT NOT NULL DEFAULT 'legacy'
+    CHECK (direction IN ('czToEn', 'enToCz', 'legacy')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  PRIMARY KEY (user_id, item_id, created_at)
+  PRIMARY KEY (user_id, item_id, created_at, direction)
 );
 
 CREATE TABLE IF NOT EXISTS user_scores (
@@ -180,11 +182,28 @@ CREATE INDEX IF NOT EXISTS idx_items_grammar_chunk_id ON public.items (grammar_c
 
 CREATE INDEX IF NOT EXISTS idx_user_items_user_updated_item
   ON public.user_items (user_id, updated_at, item_id)
-  INCLUDE (progress, started_at, next_at, mastered_at);
+  INCLUDE (
+    progress_cz_to_en,
+    progress_en_to_cz,
+    started_at,
+    next_at_cz_to_en,
+    next_at_en_to_cz,
+    mastered_at_cz_to_en,
+    mastered_at_en_to_cz
+  );
 
 CREATE INDEX IF NOT EXISTS idx_user_items_item_user
   ON public.user_items (item_id, user_id)
-  INCLUDE (progress, started_at, updated_at, next_at, mastered_at);
+  INCLUDE (
+    progress_cz_to_en,
+    progress_en_to_cz,
+    started_at,
+    updated_at,
+    next_at_cz_to_en,
+    next_at_en_to_cz,
+    mastered_at_cz_to_en,
+    mastered_at_en_to_cz
+  );
 
 CREATE INDEX IF NOT EXISTS idx_user_items_history_item_id
   ON public.user_items_history (item_id);
@@ -195,7 +214,7 @@ CREATE INDEX IF NOT EXISTS idx_user_scores_user_updated_date
 
 CREATE INDEX IF NOT EXISTS idx_user_blocks_user_updated_block
   ON public.user_blocks (user_id, updated_at, block_id)
-  INCLUDE (progress, started_at, next_at, mastered_at);
+  INCLUDE (started_at);
 
 CREATE INDEX IF NOT EXISTS idx_user_blocks_user_block
   ON public.user_blocks (user_id, block_id);

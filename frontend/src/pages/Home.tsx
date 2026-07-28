@@ -20,7 +20,7 @@ import HelpButton from '@/features/help/HelpButton';
 
 function HomeActionLinks(): JSX.Element {
   return (
-    <div className="m-4 flex items-center justify-center gap-2 px-4">
+    <div className="flex items-center justify-center gap-2 px-4">
       <InstallPWAButton className="pr-4" />
       <Link to="/guide">
         <Notification className="color-link">{TEXTS.guide}</Notification>
@@ -43,33 +43,35 @@ export default function Home(): JSX.Element {
   const isSyncError = useSyncStore((state) => state.isSyncError);
 
   return (
-    <div className="card-width relative flex flex-col justify-start text-center">
+    <>
       {userId ? (
-        <div className="home-body relative flex w-full flex-col">
-          <PropertyView
-            label={TEXTS.profileNameLabel}
-            className="justify-center"
-            classNameLabel="w-20"
-            classNameValue="wrap-break-word"
-          >
-            {userFullName ?? TEXTS.notAvailable}
-          </PropertyView>
-          <HomeActionLinks />
-          <PracticeOverviewButton
-            count={dailyCount}
-            onClick={() => navigate(ROUTES.practiceOverview)}
-            ariaLabel={TEXTS.practiceOverviewOpen}
-            helpText={TEXTS.starsToday}
-            className="portrait:mt-8"
-          />
-          <PracticeButton userId={userId} />
-          <p
-            className={`text-error-light dark:text-error-dark px-4 py-2 text-center text-sm ${isSyncError ? 'visible' : 'invisible'} portrait:mt-8`}
-          >
-            {TEXTS.syncWarning}
-          </p>
-
-          <div className="relative mb-12">
+        <div className="home-body card-width relative flex h-full w-full grow flex-col justify-start">
+          <div className="pt-0">
+            <PropertyView
+              label={TEXTS.profileNameLabel}
+              className="justify-center"
+              classNameLabel="w-20"
+              classNameValue="wrap-break-word"
+            >
+              {userFullName ?? TEXTS.notAvailable}
+            </PropertyView>
+            <HomeActionLinks />
+          </div>
+          <div className="mt-4 w-full portrait:mt-8">
+            <PracticeOverviewButton
+              count={dailyCount}
+              onClick={() => navigate(ROUTES.practiceOverview)}
+              ariaLabel={TEXTS.practiceOverviewOpen}
+              helpText={TEXTS.starsToday}
+            />
+            <PracticeButton userId={userId} />
+          </div>
+          <div className="relative mb-12 portrait:mt-8">
+            <p
+              className={`text-error-light dark:text-error-dark px-4 py-2 text-center text-sm ${isSyncError ? 'visible' : 'invisible'}`}
+            >
+              {TEXTS.syncWarning}
+            </p>
             <Dashboard />
             <div className="pos-home-dashboard-help">
               <HelpButton />
@@ -83,17 +85,17 @@ export default function Home(): JSX.Element {
           )}
         </div>
       ) : (
-        <div className="home-body w-full">
-          <h1 className="home-title">{TEXTS.appTitle}</h1>
-          <p className="m-4 landscape:hidden">{TEXTS.appDescription}</p>
+        <div className="home-body card-width w-full">
+          <h1 className="home-title mx-auto">{TEXTS.appTitle}</h1>
+          <p className="mx-auto my-4 landscape:hidden">{TEXTS.appDescription}</p>
           <HomeActionLinks />
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 pt-4">
             <AnonymousSigninButton />
             <GoogleAuthButton />
           </div>
           <p className="p-4 text-sm">{TEXTS.signupHint}</p>
         </div>
       )}
-    </div>
+    </>
   );
 }

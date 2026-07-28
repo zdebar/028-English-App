@@ -19,8 +19,11 @@ vi.mock('@/locales/cs', () => ({
     progress: 'Progress',
     startedAt: 'Started',
     updatedAt: 'Updated',
+    completedAt: 'Completed',
     nextAt: 'Next',
     masteredAt: 'Mastered',
+    directionCzToEn: 'CZ to EN',
+    directionEnToCz: 'EN to CZ',
     restartItemProgress: 'Restart item',
     audio: 'Audio',
     noAudio: 'No audio',
@@ -103,11 +106,14 @@ describe('VocabularyDetailCard', () => {
             czech: 'ahoj',
             english: 'hello',
             pronunciation: 'həˈloʊ',
-            progress: 2,
+            progress_cz_to_en: 2,
+            progress_en_to_cz: 3,
             started_at: '2026-02-28T10:00:00.000Z',
             updated_at: '2026-02-28T11:00:00.000Z',
-            next_at: '2026-03-01T00:00:00.000Z',
-            mastered_at: '2026-03-02T00:00:00.000Z',
+            next_at_cz_to_en: '2026-03-01T00:00:00.000Z',
+            next_at_en_to_cz: '2026-03-01T01:00:00.000Z',
+            mastered_at_cz_to_en: '2026-03-02T00:00:00.000Z',
+            mastered_at_en_to_cz: '2026-03-03T00:00:00.000Z',
           } as any
         }
         selectedTitle="ahoj"
@@ -116,9 +122,14 @@ describe('VocabularyDetailCard', () => {
       />,
     );
 
-    expect(screen.getByText('Czech:ahoj')).toBeTruthy();
-    expect(screen.getByText('English:hello')).toBeTruthy();
-    expect(screen.getByText('Progress:2')).toBeTruthy();
+    expect(screen.getByText('czech:ahoj')).toBeTruthy();
+    expect(screen.getByText('english:hello')).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'cZ to EN' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'eN to CZ' })).toBeTruthy();
+    expect(screen.getByText('progress:2')).toBeTruthy();
+    expect(screen.getByText('progress:3')).toBeTruthy();
+    expect(screen.getByText('started:short:2026-02-28T10:00:00.000Z')).toBeTruthy();
+    expect(screen.getByText('completed:short:2026-02-28T11:00:00.000Z')).toBeTruthy();
     expect(shortenDateMock).toHaveBeenCalled();
   });
 
@@ -144,8 +155,8 @@ describe('VocabularyDetailCard', () => {
       />,
     );
 
-    expect(screen.getByText('Pronunciation:')).toBeTruthy();
-    expect(screen.getByText('Started:short:null')).toBeTruthy();
+    expect(screen.getByText('pronunciation:')).toBeTruthy();
+    expect(screen.getByText('started:short:null')).toBeTruthy();
   });
 
   it('calls onClose and onReset handlers', () => {

@@ -34,6 +34,7 @@ export const OVERVIEW_TEXTS = {
   lessonName: 'Název lekce',
   startedAt: 'Započato',
   updatedAt: 'Změněno',
+  completedAt: 'dokončeno',
   nextAt: 'Další',
   masteredAt: 'Naučeno',
   restartItemProgress: 'Restartovat pokrok této položky',

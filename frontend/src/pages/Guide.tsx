@@ -57,7 +57,10 @@ export default function Guide(): JSX.Element {
           alt="Ukázka kartičky před odhalením"
         />
         <h3>Pokrok</h3>
-        <p>Učební skóre dané položky.</p>
+        <p>
+          Učební skóre dané položky. Je oddělené skóre pro směr z češtiny do angličiny, a z
+          angličtiny do češtiny.
+        </p>
         <h3>Denní pokrok</h3>
         <p>Zobrazuje počet dosažených denních hvězdiček a číselný postup na hvězdičce.</p>
         <h3>Nápověda</h3>

@@ -11,7 +11,7 @@ vi.mock('@/components/UI/icons/InfoIcon', () => ({
 
 vi.mock('@/locales/cs', () => ({
   ARIA_TEXTS: {
-    note: 'Poznámka',
+    note: 'poznámka',
   },
 }));
 
@@ -21,7 +21,7 @@ describe('InfoButton', () => {
   it('renders shared secondary styling and uses note aria label', () => {
     render(<InfoButton onClick={mocks.onClick} title="Notes" />);
 
-    const button = screen.getByRole('button', { name: 'Poznámka' }) as HTMLButtonElement;
+    const button = screen.getByRole('button', { name: 'poznámka' }) as HTMLButtonElement;
     fireEvent.click(button);
 
     expect(mocks.onClick).toHaveBeenCalledTimes(1);

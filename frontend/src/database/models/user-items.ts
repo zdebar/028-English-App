@@ -3,6 +3,8 @@ import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import type {
+  PracticeDeckItem,
+  PracticeDirection,
   UserItemLocal,
   ProgressHistoryEntry,
   CurriculumSortPath,
@@ -32,8 +34,10 @@ type UserItemAPI = Omit<
   | 'grammar_chunk_id'
   | 'started_at'
   | 'deleted_at'
-  | 'next_at'
-  | 'mastered_at'
+  | 'next_at_cz_to_en'
+  | 'next_at_en_to_cz'
+  | 'mastered_at_cz_to_en'
+  | 'mastered_at_en_to_cz'
 > & {
   is_vocabulary: boolean;
   is_practice_item?: boolean;
@@ -41,33 +45,54 @@ type UserItemAPI = Omit<
   grammar_chunk_id: number | null;
   started_at: string | null;
   deleted_at: string | null;
-  next_at: string | null;
-  mastered_at: string | null;
+  next_at_cz_to_en: string | null;
+  next_at_en_to_cz: string | null;
+  mastered_at_cz_to_en: string | null;
+  mastered_at_en_to_cz: string | null;
 };
 
 type UserItemExport = Pick<
   UserItemAPI,
   | 'user_id'
   | 'item_id'
-  | 'progress'
+  | 'progress_cz_to_en'
+  | 'progress_en_to_cz'
   | 'progress_history'
   | 'started_at'
   | 'updated_at'
-  | 'next_at'
-  | 'mastered_at'
+  | 'next_at_cz_to_en'
+  | 'next_at_en_to_cz'
+  | 'mastered_at_cz_to_en'
+  | 'mastered_at_en_to_cz'
 >;
 
 function convertLocalToExport(localItem: UserItemLocal): UserItemExport {
-  const { user_id, item_id, progress, updated_at, started_at, next_at, mastered_at } = localItem;
+  const {
+    user_id,
+    item_id,
+    progress_cz_to_en,
+    progress_en_to_cz,
+    updated_at,
+    started_at,
+    next_at_cz_to_en,
+    next_at_en_to_cz,
+    mastered_at_cz_to_en,
+    mastered_at_en_to_cz,
+  } = localItem;
   return {
     user_id,
     item_id,
     progress_history: localItem.progress_history ?? [],
-    progress,
+    progress_cz_to_en,
+    progress_en_to_cz,
     updated_at,
     started_at: started_at === NULL_DATE ? null : started_at,
-    next_at: next_at === NULL_DATE ? null : next_at,
-    mastered_at: mastered_at === NULL_DATE ? null : mastered_at,
+    next_at_cz_to_en: next_at_cz_to_en === NULL_DATE ? null : next_at_cz_to_en,
+    next_at_en_to_cz: next_at_en_to_cz === NULL_DATE ? null : next_at_en_to_cz,
+    mastered_at_cz_to_en:
+      mastered_at_cz_to_en === NULL_DATE ? null : mastered_at_cz_to_en,
+    mastered_at_en_to_cz:
+      mastered_at_en_to_cz === NULL_DATE ? null : mastered_at_en_to_cz,
   };
 }
 
@@ -77,8 +102,10 @@ function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
     is_vocabulary: apiItem.is_vocabulary ? 1 : 0,
     is_practice_item: apiItem.is_practice_item === false ? 0 : 1,
     started_at: apiItem.started_at ?? NULL_DATE,
-    next_at: apiItem.next_at ?? NULL_DATE,
-    mastered_at: apiItem.mastered_at ?? NULL_DATE,
+    next_at_cz_to_en: apiItem.next_at_cz_to_en ?? NULL_DATE,
+    next_at_en_to_cz: apiItem.next_at_en_to_cz ?? NULL_DATE,
+    mastered_at_cz_to_en: apiItem.mastered_at_cz_to_en ?? NULL_DATE,
+    mastered_at_en_to_cz: apiItem.mastered_at_en_to_cz ?? NULL_DATE,
     deleted_at: apiItem.deleted_at ?? NULL_DATE,
     block_id: apiItem.block_id ?? NULL_NUMBER,
     grammar_chunk_id: apiItem.grammar_chunk_id ?? NULL_NUMBER,
@@ -110,13 +137,16 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   note_id!: number;
   block_id!: number;
   grammar_chunk_id!: number;
-  progress!: number;
+  progress_cz_to_en!: number;
+  progress_en_to_cz!: number;
   progress_history!: ProgressHistoryEntry[];
   started_at!: string;
   updated_at!: string;
   deleted_at!: string;
-  next_at!: string;
-  mastered_at!: string;
+  next_at_cz_to_en!: string;
+  next_at_en_to_cz!: string;
+  mastered_at_cz_to_en!: string;
+  mastered_at_en_to_cz!: string;
   lesson_id!: number;
 
   /**
@@ -129,14 +159,14 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   static async getPracticeDeck(
     userId: string,
     deckSize: number = config.lesson.deckSize,
-  ): Promise<UserItemLocal[]> {
+  ): Promise<PracticeDeckItem[]> {
     if (deckSize <= 0) return [];
 
     const now = new Date().toISOString();
-    const oddItems = await this.getDuePracticeItems(userId, true, deckSize, now);
-    if (oddItems.length === deckSize) return oddItems;
+    const enToCzItems = await this.getDuePracticeItems(userId, 'enToCz', deckSize, now);
+    if (enToCzItems.length === deckSize) return enToCzItems;
 
-    let alternativeDeck = await this.getDuePracticeItems(userId, false, deckSize, now);
+    let alternativeDeck = await this.getDuePracticeItems(userId, 'czToEn', deckSize, now);
 
     if (alternativeDeck.length < deckSize) {
       const remainingSize = deckSize - alternativeDeck.length;
@@ -149,23 +179,24 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       alternativeDeck = [...alternativeDeck, ...checkedNewItems];
     }
 
-    return alternativeDeck.length > 0 ? alternativeDeck : oddItems;
+    return alternativeDeck.length > 0 ? alternativeDeck : enToCzItems;
   }
 
   /**
    * Persists practice progress for all items in a completed deck.
    *
    * @param items Practice items to save. Empty or nullish arrays are ignored.
-   * @param dateTime ISO timestamp used for started_at, updated_at, and mastered_at transitions.
-   * Defaults to now.
    */
   static async savePracticeDeck(
     items: UserItemLocal[],
-    dateTime: string = new Date(Date.now()).toISOString(),
   ): Promise<void> {
     if (!items || items.length === 0) return;
 
-    const updatedItems = items.map((item) => this.formatSavedItem(item, dateTime));
+    const updatedItems = items.map((item) => {
+      const { practice_direction: _direction, ...persistedItem } =
+        item as PracticeDeckItem;
+      return persistedItem;
+    });
 
     await db.user_items.bulkPut(updatedItems);
   }
@@ -222,16 +253,36 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   ): Promise<UserItemLocal[]> {
     const blockItems = await this.getByBlockId(userId, blockId);
     const updatedItems = blockItems.map((item) => {
-      const progress = Math.max(item.progress, config.progress.afterInitialTrainingProgress);
+      const progressCzToEn = Math.max(
+        item.progress_cz_to_en,
+        config.progress.afterInitialTrainingProgress,
+      );
+      const progressEnToCz = Math.max(
+        item.progress_en_to_cz,
+        config.progress.afterInitialTrainingProgress,
+      );
 
       return {
         ...item,
-        progress,
+        progress_cz_to_en: progressCzToEn,
+        progress_en_to_cz: progressEnToCz,
         progress_history: item.progress_history ?? [],
         started_at: item.started_at === NULL_DATE ? dateTime : item.started_at,
         updated_at: dateTime,
-        next_at: getNextAt(progress),
-        mastered_at: item.mastered_at,
+        next_at_cz_to_en: getNextAt(progressCzToEn, 'czToEn'),
+        next_at_en_to_cz: getNextAt(progressEnToCz, 'enToCz'),
+        mastered_at_cz_to_en: resolveMasteredAt(
+          progressCzToEn,
+          'czToEn',
+          item.mastered_at_cz_to_en,
+          dateTime,
+        ),
+        mastered_at_en_to_cz: resolveMasteredAt(
+          progressEnToCz,
+          'enToCz',
+          item.mastered_at_en_to_cz,
+          dateTime,
+        ),
       };
     });
 
@@ -303,58 +354,29 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const overflowLimit = badgeCap + 1;
     const nowIso = new Date(Date.now()).toISOString();
 
-    const readyStartedItems = await db.user_items
-      .where('[user_id+is_practice_item+next_at+mastered_at+curriculum_sort_path]')
-      .between(
-        [userId, 1, Dexie.minKey, NULL_DATE, Dexie.minKey],
-        [userId, 1, nowIso, NULL_DATE, Dexie.maxKey],
-        true,
-        false,
-      )
-      .filter((item) => item.mastered_at === NULL_DATE)
-      .limit(overflowLimit)
-      .toArray();
+    const items = (await db.user_items.where('user_id').equals(userId).toArray()).filter(
+      isPracticeItem,
+    );
+    let readyCount = 0;
+    const futureDates: string[] = [];
 
-    if (readyStartedItems.length > badgeCap) {
-      return { readyCount: overflowLimit, schedule: [] };
-    }
+    for (const item of items) {
+      const itemReadiness = getItemReadiness(item, nowIso);
+      readyCount += itemReadiness.readyCount;
+      futureDates.push(...itemReadiness.futureDates);
 
-    const notStartedLimit = overflowLimit - readyStartedItems.length;
-    const notStartedItems = await db.user_items
-      .where('[user_id+is_practice_item+next_at+mastered_at+curriculum_sort_path]')
-      .between(
-        [userId, 1, NULL_DATE, NULL_DATE, Dexie.minKey],
-        [userId, 1, NULL_DATE, NULL_DATE, Dexie.maxKey],
-        true,
-        true,
-      )
-      .filter((item) => item.mastered_at === NULL_DATE)
-      .limit(notStartedLimit)
-      .toArray();
-
-    const readyCount = readyStartedItems.length + notStartedItems.length;
-    if (readyCount > badgeCap) {
-      return { readyCount: overflowLimit, schedule: [] };
+      if (readyCount > badgeCap) {
+        return { readyCount: overflowLimit, schedule: [] };
+      }
     }
 
     if (readyCount > 0) {
       return { readyCount, schedule: [] };
     }
 
-    const futureItems = await db.user_items
-      .where('[user_id+is_practice_item+next_at+mastered_at+curriculum_sort_path]')
-      .between(
-        [userId, 1, nowIso, NULL_DATE, Dexie.minKey],
-        [userId, 1, NULL_DATE, NULL_DATE, Dexie.maxKey],
-        false,
-        false,
-      )
-      .filter((item) => item.mastered_at === NULL_DATE)
-      .toArray();
-
     return {
       readyCount: 0,
-      schedule: groupReadyPracticeSchedule(futureItems.map((item) => item.next_at)),
+      schedule: groupReadyPracticeSchedule(futureDates),
     };
   }
 
@@ -459,7 +481,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .where('[user_id+item_id]')
       .between([userId, 1], [userId, SIM_COUNT], true, true)
       .modify((item) => {
-        const updated = this.formatSavedItem(item, dateTime, SIM_PROGRESS);
+        const updated = this.applyPracticeProgress(
+          item,
+          'czToEn',
+          SIM_PROGRESS,
+          dateTime,
+        );
         Object.assign(item, updated);
       });
 
@@ -562,23 +589,26 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return updatedUserItems.map(convertAPIToLocal);
   }
 
-  /** Reads due, unmastered practice items for one progress parity. */
+  /** Reads due, unmastered practice items for one explicit direction. */
   private static async getDuePracticeItems(
     userId: string,
-    isOdd: boolean,
+    direction: PracticeDirection,
     limit: number,
     now: string,
-  ): Promise<UserItemLocal[]> {
+  ): Promise<PracticeDeckItem[]> {
     const matchesItem = (item: UserItemLocal) =>
-      item.mastered_at === NULL_DATE &&
-      item.next_at !== NULL_DATE &&
-      item.next_at < now &&
-      (item.progress % 2 === 1) === isOdd;
+      item.started_at !== NULL_DATE &&
+      getDirectionMasteredAt(item, direction) === NULL_DATE &&
+      getDirectionNextAt(item, direction) !== NULL_DATE &&
+      getDirectionNextAt(item, direction) < now;
+
+    const index =
+      direction === 'czToEn'
+        ? '[user_id+is_practice_item+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]'
+        : '[user_id+is_practice_item+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]';
 
     return db.user_items
-      .where(
-        '[user_id+is_practice_item+next_at+mastered_at+curriculum_sort_path]',
-      )
+      .where(index)
       .between(
         [userId, 1, Dexie.minKey, NULL_DATE, Dexie.minKey],
         [userId, 1, now, NULL_DATE, Dexie.maxKey],
@@ -587,17 +617,18 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       )
       .filter(matchesItem)
       .limit(limit)
-      .toArray();
+      .toArray()
+      .then((items) => items.map((item) => ({ ...item, practice_direction: direction })));
   }
 
   /** Reads never-scheduled practice items in curriculum order. */
   private static async getNewPracticeItems(
     userId: string,
     limit: number,
-  ): Promise<UserItemLocal[]> {
+  ): Promise<PracticeDeckItem[]> {
     return db.user_items
       .where(
-        '[user_id+is_practice_item+next_at+mastered_at+curriculum_sort_path]',
+        '[user_id+is_practice_item+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]',
       )
       .between(
         [userId, 1, NULL_DATE, NULL_DATE, Dexie.minKey],
@@ -605,18 +636,21 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         true,
         true,
       )
-      .filter((item) => item.mastered_at === NULL_DATE && item.next_at === NULL_DATE)
+      .filter((item) => item.started_at === NULL_DATE)
       .limit(limit)
-      .toArray();
+      .toArray()
+      .then((items) =>
+        items.map((item) => ({ ...item, practice_direction: 'czToEn' })),
+      );
   }
 
   /** Stops new-item selection at the first item belonging to an unstarted training block. */
   private static async stopAtFirstUnstartedTrainingBlock(
     userId: string,
-    items: UserItemLocal[],
+    items: PracticeDeckItem[],
     limit: number,
-  ): Promise<UserItemLocal[]> {
-    const selected: UserItemLocal[] = [];
+  ): Promise<PracticeDeckItem[]> {
+    const selected: PracticeDeckItem[] = [];
 
     for (const item of items) {
       if (item.block_id !== NULL_NUMBER) {
@@ -635,32 +669,124 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Applies practice progress fields to a user item copy.
+   * Applies one practice answer to the active direction.
    *
-   * @param item Practice or local item to format.
-   * @param dateTime ISO timestamp used for started_at, updated_at, and mastered_at transitions.
-   * @param progressAddition Amount added to current progress; defaults to 0 for already incremented items.
-   * @returns Item copy with next_at recalculated and mastered_at set when progress reaches the final SRS interval.
+   * The first answer initializes both directions; later answers update only the displayed one.
    */
-  private static formatSavedItem(
+  static applyPracticeProgress(
     item: UserItemLocal,
+    direction: PracticeDirection,
+    progressChange: number,
     dateTime: string,
-    progressAddition: number = 0,
   ): UserItemLocal {
-    const newProgress = item.progress + progressAddition;
+    const isFirstAnswer = item.started_at === NULL_DATE;
+    const currentProgress = getDirectionProgress(item, direction);
+    const otherDirection: PracticeDirection = direction === 'czToEn' ? 'enToCz' : 'czToEn';
+    const changes: Partial<UserItemLocal> = {
+      ...item,
+      started_at: item.started_at === NULL_DATE ? dateTime : item.started_at,
+      updated_at: dateTime,
+    };
+
+    const directionProgress = Math.max(currentProgress + progressChange, 0);
+    setDirectionState(changes, item, direction, directionProgress, dateTime);
+
+    const historyEntries: ProgressHistoryEntry[] = [
+      { progress: directionProgress, created_at: dateTime, direction },
+    ];
+
+    if (isFirstAnswer) {
+      const otherProgress = progressChange > 0 && progressChange < config.progress.skipProgress
+        ? Math.max(getDirectionProgress(item, otherDirection) + progressChange, 0)
+        : 0;
+      setDirectionState(changes, item, otherDirection, otherProgress, dateTime);
+      historyEntries.push({
+        progress: otherProgress,
+        created_at: dateTime,
+        direction: otherDirection,
+      });
+    }
 
     return {
       ...item,
-      progress: newProgress,
-      next_at: getNextAt(newProgress),
-      started_at: item.started_at === NULL_DATE ? dateTime : item.started_at,
-      updated_at: dateTime,
-      mastered_at:
-        item.mastered_at === NULL_DATE && newProgress >= config.srs.intervals.length
-          ? dateTime
-          : item.mastered_at,
+      ...changes,
+      progress_history: [...(item.progress_history ?? []), ...historyEntries],
     };
   }
+
+}
+
+const DIRECTIONS: readonly PracticeDirection[] = ['czToEn', 'enToCz'];
+
+function getItemReadiness(
+  item: UserItemLocal,
+  nowIso: string,
+): { readyCount: number; futureDates: string[] } {
+  if (item.started_at === NULL_DATE) {
+    return { readyCount: 1, futureDates: [] };
+  }
+
+  let readyCount = 0;
+  const futureDates: string[] = [];
+
+  for (const direction of DIRECTIONS) {
+    if (getDirectionMasteredAt(item, direction) !== NULL_DATE) continue;
+
+    const nextAt = getDirectionNextAt(item, direction);
+    if (nextAt === NULL_DATE) continue;
+    if (nextAt <= nowIso) readyCount += 1;
+    else futureDates.push(nextAt);
+  }
+
+  return { readyCount, futureDates };
+}
+
+function getDirectionProgress(item: UserItemLocal, direction: PracticeDirection): number {
+  return direction === 'czToEn' ? item.progress_cz_to_en : item.progress_en_to_cz;
+}
+
+function getDirectionNextAt(item: UserItemLocal, direction: PracticeDirection): string {
+  return direction === 'czToEn' ? item.next_at_cz_to_en : item.next_at_en_to_cz;
+}
+
+function getDirectionMasteredAt(item: UserItemLocal, direction: PracticeDirection): string {
+  return direction === 'czToEn' ? item.mastered_at_cz_to_en : item.mastered_at_en_to_cz;
+}
+
+function setDirectionState(
+  target: Partial<UserItemLocal>,
+  original: UserItemLocal,
+  direction: PracticeDirection,
+  progress: number,
+  dateTime: string,
+): void {
+  const masteredAt = resolveMasteredAt(
+    progress,
+    direction,
+    getDirectionMasteredAt(original, direction),
+    dateTime,
+  );
+
+  if (direction === 'czToEn') {
+    target.progress_cz_to_en = progress;
+    target.next_at_cz_to_en = getNextAt(progress, direction);
+    target.mastered_at_cz_to_en = masteredAt;
+  } else {
+    target.progress_en_to_cz = progress;
+    target.next_at_en_to_cz = getNextAt(progress, direction);
+    target.mastered_at_en_to_cz = masteredAt;
+  }
+}
+
+function resolveMasteredAt(
+  progress: number,
+  direction: PracticeDirection,
+  currentMasteredAt: string,
+  dateTime: string,
+): string {
+  if (progress < config.srs.intervals[direction].length) return currentMasteredAt;
+  if (currentMasteredAt !== NULL_DATE) return currentMasteredAt;
+  return dateTime;
 }
 
 function isPracticeItem(item: Pick<UserItemLocal, 'is_practice_item'>): boolean {

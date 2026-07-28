@@ -16,13 +16,13 @@ describe('aggregateLevels', () => {
         item_id: 100,
         lesson_id: 10,
         started_at: '2026-07-27T08:00:00.000Z',
-        mastered_at: '2026-07-27T09:00:00.000Z',
+        mastered_at_cz_to_en: '2026-07-27T09:00:00.000Z',
       },
       {
         item_id: 101,
         lesson_id: 10,
         started_at: '9999-12-31T23:59:59+00:00',
-        mastered_at: '9999-12-31T23:59:59+00:00',
+        mastered_at_cz_to_en: '9999-12-31T23:59:59+00:00',
       },
     ] as UserItemLocal[];
 

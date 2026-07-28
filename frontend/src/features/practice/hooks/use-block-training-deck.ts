@@ -51,7 +51,10 @@ export function useBlockTrainingDeck(userId: string | null, blockId: number | nu
       setError(null);
       try {
         const nextBlock = blockId == null ? null : await UserBlock.getByBlockId(userId, blockId);
-        if (!nextBlock?.requires_initial_training) {
+        if (
+          !nextBlock?.requires_initial_training ||
+          nextBlock.started_at !== config.database.nullReplacementDate
+        ) {
           if (isMounted) {
             setBlock(null);
             setItems([]);
@@ -126,8 +129,7 @@ export function useBlockTrainingDeck(userId: string | null, blockId: number | nu
       if (!userId || !block) return;
 
       await UserItem.saveInitialTrainingBlockCompletion(userId, block.block_id, dateTime);
-      await UserBlock.unlockBlock(userId, block.block_id, dateTime);
-      await UserBlock.markBlockMastered(userId, block.block_id, dateTime);
+      await UserBlock.completeInitialTraining(userId, block.block_id, dateTime);
       setIsComplete(true);
       setCurrentQueue([]);
       setNextWaveQueue([]);
@@ -203,17 +205,12 @@ export function useBlockTrainingDeck(userId: string | null, blockId: number | nu
 
     try {
       const dateTime = new Date().toISOString();
-      const skippedItem: UserItemLocal = {
-        ...currentItem,
-        progress: Math.max(currentItem.progress + config.progress.skipProgress, 0),
-        progress_history: [
-          ...currentItem.progress_history,
-          {
-            progress: Math.max(currentItem.progress + config.progress.skipProgress, 0),
-            created_at: dateTime,
-          },
-        ],
-      };
+      const skippedItem = UserItem.applyPracticeProgress(
+        currentItem,
+        ROUND_DIRECTIONS[round],
+        config.progress.skipProgress,
+        dateTime,
+      );
       const remainingItems = items.filter((item) => item.item_id !== currentItem.item_id);
       const remainingCurrentQueue = currentQueue
         .slice(1)
@@ -222,7 +219,7 @@ export function useBlockTrainingDeck(userId: string | null, blockId: number | nu
         (item) => item.item_id !== currentItem.item_id,
       );
 
-      await UserItem.savePracticeDeck([skippedItem], dateTime);
+      await UserItem.savePracticeDeck([skippedItem]);
       await UserScore.addItemCount(userId, 1);
       setCompletedItemIds((previous) => {
         const next = new Set(previous);

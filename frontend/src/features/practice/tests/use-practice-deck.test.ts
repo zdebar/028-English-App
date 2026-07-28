@@ -17,12 +17,19 @@ vi.mock('@/hooks/use-fetch', () => ({
   useFetch: (...args: unknown[]) => useFetchMock(...args),
 }));
 
-vi.mock('@/database/models/user-items', () => ({
-  default: {
+vi.mock('@/database/models/user-items', async () => {
+  const actual = await vi.importActual<typeof import('@/database/models/user-items')>(
+    '@/database/models/user-items',
+  );
+  return {
+    default: {
+    ...actual.default,
     getPracticeDeck: (...args: unknown[]) => getPracticeDeckMock(...args),
     savePracticeDeck: (...args: unknown[]) => savePracticeDeckMock(...args),
-  },
-}));
+    applyPracticeProgress: actual.default.applyPracticeProgress,
+    },
+  };
+});
 
 vi.mock('@/database/models/user-scores', () => ({
   default: {
@@ -72,13 +79,16 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
     curriculum_sort_path: [1, 1, 1],
     block_id: 0,
     grammar_chunk_id: 10,
-    progress: 0,
+    progress_cz_to_en: 0,
+    progress_en_to_cz: 0,
     progress_history: [],
     started_at: '2026-01-01',
     updated_at: '2026-01-01',
     deleted_at: '2026-01-01',
-    next_at: '2026-01-01',
-    mastered_at: '2026-01-01',
+    next_at_cz_to_en: '2026-01-01',
+    next_at_en_to_cz: '2026-01-01',
+    mastered_at_cz_to_en: '2026-01-01',
+    mastered_at_en_to_cz: '2026-01-01',
     lesson_id: 0,
     ...overrides,
   };
@@ -93,7 +103,10 @@ describe('usePracticeDeck', () => {
     vi.clearAllMocks();
 
     useFetchMock.mockReturnValue({
-      data: [makeItem({ item_id: 1, progress: 0 }), makeItem({ item_id: 2, progress: 1 })],
+      data: [
+        { ...makeItem({ item_id: 1, progress_cz_to_en: 0 }), practice_direction: 'czToEn' },
+        { ...makeItem({ item_id: 2, progress_cz_to_en: 1 }), practice_direction: 'czToEn' },
+      ],
       loading: false,
       error: null,
       reload: reloadMock,
@@ -168,14 +181,14 @@ describe('usePracticeDeck', () => {
       expect.arrayContaining([
         expect.objectContaining({
           item_id: 1,
-          progress: 1,
+          progress_cz_to_en: 1,
           progress_history: expect.arrayContaining([
             expect.objectContaining({ progress: 1, created_at: expect.any(String) }),
           ]),
         }),
         expect.objectContaining({
           item_id: 2,
-          progress: 2,
+          progress_cz_to_en: 2,
           progress_history: expect.arrayContaining([
             expect.objectContaining({ progress: 2, created_at: expect.any(String) }),
           ]),
@@ -209,7 +222,7 @@ describe('usePracticeDeck', () => {
     const savedPayload = JSON.parse(latestCall[1]);
     expect(savedPayload).toMatchObject({
       dateTime: '2026-03-04T10:00:00.000Z',
-      progress: [expect.objectContaining({ item_id: 1, progress: 3 })],
+      progress: [expect.objectContaining({ item_id: 1, progress_cz_to_en: 3 })],
     });
 
     await act(async () => {
