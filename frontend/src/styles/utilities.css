@@ -13,6 +13,7 @@
     @apply bg-button-light border-button-light;
     @apply dark:bg-button-dark dark:border-button-dark;
     @apply disabled:bg-inherit disabled:text-disabled-light dark:disabled:text-disabled-dark;
+    @apply disabled:border-disabled-light dark:disabled:border-disabled-dark;
   }
 
   .color-button:not(:disabled):hover {

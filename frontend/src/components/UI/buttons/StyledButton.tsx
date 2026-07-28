@@ -10,7 +10,7 @@ export default function StyledButton(
     <button
       type="button"
       {...props}
-      className={`color-button flex grow cursor-pointer items-center justify-center overflow-hidden tracking-wide text-ellipsis whitespace-nowrap disabled:cursor-default ${props.className}`}
+      className={`color-button flex grow cursor-pointer items-center justify-center overflow-hidden tracking-wide text-ellipsis whitespace-nowrap disabled:cursor-default disabled:border disabled:border-dashed ${props.className}`}
     >
       {props.children}
     </button>
