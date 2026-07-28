@@ -3,5 +3,5 @@ export const NAVIGATION_TEXTS = {
   tooltipHome: 'Domů',
   tooltipProfile: 'Profil',
   tooltipHelp: 'Nápověda',
-  tooltipNotes: 'Poznámka',
+  tooltipNotes: 'poznámka',
 } as const;
