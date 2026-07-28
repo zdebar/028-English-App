@@ -38,29 +38,52 @@ export default function VocabularyDetailCard({
   onReset,
 }: VocabularyDetailCardProps) {
   const baseProperties = [
-    { label: TEXTS.czech, value: selectedWord?.czech },
-    { label: TEXTS.english, value: selectedWord?.english },
-    { label: TEXTS.pronunciation, value: selectedWord?.pronunciation },
+    { label: lowercaseInitial(TEXTS.czech), value: selectedWord?.czech },
+    { label: lowercaseInitial(TEXTS.english), value: selectedWord?.english },
+    { label: lowercaseInitial(TEXTS.pronunciation), value: selectedWord?.pronunciation },
   ];
 
+  const directionSections = [
+    {
+      direction: 'czToEn',
+      title: lowercaseInitial(TEXTS.directionCzToEn),
+      properties: [
+        { label: lowercaseInitial(TEXTS.progress), value: selectedWord?.progress_cz_to_en },
+        {
+          label: lowercaseInitial(TEXTS.nextAt),
+          value: shortenDate(selectedWord?.next_at_cz_to_en),
+        },
+        {
+          label: lowercaseInitial(TEXTS.masteredAt),
+          value: shortenDate(selectedWord?.mastered_at_cz_to_en) || NOT_MASTERED,
+        },
+      ],
+    },
+    {
+      direction: 'enToCz',
+      title: lowercaseInitial(TEXTS.directionEnToCz),
+      properties: [
+        { label: lowercaseInitial(TEXTS.progress), value: selectedWord?.progress_en_to_cz },
+        {
+          label: lowercaseInitial(TEXTS.nextAt),
+          value: shortenDate(selectedWord?.next_at_en_to_cz),
+        },
+        {
+          label: lowercaseInitial(TEXTS.masteredAt),
+          value: shortenDate(selectedWord?.mastered_at_en_to_cz) || NOT_MASTERED,
+        },
+      ],
+    },
+  ] as const;
+
   const dateProperties = [
-    { label: TEXTS.startedAt, value: shortenDate(selectedWord?.started_at) },
-    { label: TEXTS.updatedAt, value: shortenDate(selectedWord?.updated_at) },
     {
-      label: `${TEXTS.nextAt} (${TEXTS.directionCzToEn})`,
-      value: shortenDate(selectedWord?.next_at_cz_to_en),
+      label: lowercaseInitial(TEXTS.startedAt),
+      value: shortenDate(selectedWord?.started_at),
     },
     {
-      label: `${TEXTS.masteredAt} (${TEXTS.directionCzToEn})`,
-      value: shortenDate(selectedWord?.mastered_at_cz_to_en) || NOT_MASTERED,
-    },
-    {
-      label: `${TEXTS.nextAt} (${TEXTS.directionEnToCz})`,
-      value: shortenDate(selectedWord?.next_at_en_to_cz),
-    },
-    {
-      label: `${TEXTS.masteredAt} (${TEXTS.directionEnToCz})`,
-      value: shortenDate(selectedWord?.mastered_at_en_to_cz) || NOT_MASTERED,
+      label: lowercaseInitial(TEXTS.completedAt),
+      value: shortenDate(selectedWord?.updated_at),
     },
   ];
 
@@ -94,18 +117,16 @@ export default function VocabularyDetailCard({
             </PropertyView>
           ))}
         </div>
-        <PropertyView
-          key={`${TEXTS.progress}-cz-to-en`}
-          label={`${TEXTS.progress} (${TEXTS.directionCzToEn})`}
-        >
-          {selectedWord?.progress_cz_to_en ?? NOT_AVAILABLE}
-        </PropertyView>
-        <PropertyView
-          key={`${TEXTS.progress}-en-to-cz`}
-          label={`${TEXTS.progress} (${TEXTS.directionEnToCz})`}
-        >
-          {selectedWord?.progress_en_to_cz ?? NOT_AVAILABLE}
-        </PropertyView>
+        {directionSections.map((section) => (
+          <section key={section.direction}>
+            <h3 className="font-bold">{section.title}</h3>
+            {section.properties.map((property) => (
+              <PropertyView key={property.label} label={property.label}>
+                {property.value ?? NOT_AVAILABLE}
+              </PropertyView>
+            ))}
+          </section>
+        ))}
         <div>
           {dateProperties.map((property) => (
             <PropertyView key={property.label} label={property.label}>
@@ -143,4 +164,8 @@ export default function VocabularyDetailCard({
       </div>
     </OverviewCard>
   );
+}
+
+function lowercaseInitial(value: string): string {
+  return value.charAt(0).toLocaleLowerCase('cs-CZ') + value.slice(1);
 }

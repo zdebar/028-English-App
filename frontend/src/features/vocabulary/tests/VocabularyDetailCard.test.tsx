@@ -19,6 +19,7 @@ vi.mock('@/locales/cs', () => ({
     progress: 'Progress',
     startedAt: 'Started',
     updatedAt: 'Updated',
+    completedAt: 'Completed',
     nextAt: 'Next',
     masteredAt: 'Mastered',
     directionCzToEn: 'CZ to EN',
@@ -121,10 +122,14 @@ describe('VocabularyDetailCard', () => {
       />,
     );
 
-    expect(screen.getByText('Czech:ahoj')).toBeTruthy();
-    expect(screen.getByText('English:hello')).toBeTruthy();
-    expect(screen.getByText('Progress (CZ to EN):2')).toBeTruthy();
-    expect(screen.getByText('Progress (EN to CZ):3')).toBeTruthy();
+    expect(screen.getByText('czech:ahoj')).toBeTruthy();
+    expect(screen.getByText('english:hello')).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'cZ to EN' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'eN to CZ' })).toBeTruthy();
+    expect(screen.getByText('progress:2')).toBeTruthy();
+    expect(screen.getByText('progress:3')).toBeTruthy();
+    expect(screen.getByText('started:short:2026-02-28T10:00:00.000Z')).toBeTruthy();
+    expect(screen.getByText('completed:short:2026-02-28T11:00:00.000Z')).toBeTruthy();
     expect(shortenDateMock).toHaveBeenCalled();
   });
 
@@ -150,8 +155,8 @@ describe('VocabularyDetailCard', () => {
       />,
     );
 
-    expect(screen.getByText('Pronunciation:')).toBeTruthy();
-    expect(screen.getByText('Started:short:null')).toBeTruthy();
+    expect(screen.getByText('pronunciation:')).toBeTruthy();
+    expect(screen.getByText('started:short:null')).toBeTruthy();
   });
 
   it('calls onClose and onReset handlers', () => {
