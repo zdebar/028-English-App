@@ -86,10 +86,10 @@ export default function Home(): JSX.Element {
         </div>
       ) : (
         <div className="home-body card-width w-full">
-          <h1 className="home-title">{TEXTS.appTitle}</h1>
-          <p className="m-4 landscape:hidden">{TEXTS.appDescription}</p>
+          <h1 className="home-title mx-auto">{TEXTS.appTitle}</h1>
+          <p className="mx-auto my-4 landscape:hidden">{TEXTS.appDescription}</p>
           <HomeActionLinks />
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 pt-4">
             <AnonymousSigninButton />
             <GoogleAuthButton />
           </div>
