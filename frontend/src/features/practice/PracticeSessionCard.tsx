@@ -110,7 +110,7 @@ export default function PracticeSessionCard({
           aria-disabled={revealed}
         >
           {!revealed && !showDirectionChange && (
-            <HelpText className="top-10 left-1/2 -translate-x-1/2">{TEXTS.reveal}</HelpText>
+            <HelpText className="top-17 left-1/2 -translate-x-1/2">{TEXTS.reveal}</HelpText>
           )}
           <div id="top-bar" className="relative grid h-14 w-full grid-rows-2 text-center">
             <div className="flex min-h-0 items-center justify-center">
