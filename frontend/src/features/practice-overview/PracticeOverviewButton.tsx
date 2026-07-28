@@ -19,22 +19,18 @@ export default function PracticeOverviewButton({
   className = '',
 }: Readonly<Props>): JSX.Element {
   return (
-    <div className={`px-4 ${className}`}>
-      <div className="flex justify-center pt-2" title={ariaLabel}>
-        <button
-          type="button"
-          className="home-star-button relative mb-2 inline-flex cursor-pointer items-center justify-center pt-1 text-center hover:border-current focus:outline-none"
-          aria-label={ariaLabel}
-          onClick={onClick}
-        >
-          <StarProgressOverview
-            count={count}
-            chunkSize={config.practice.starChunk}
-            starsPerRow={config.practice.starsPerRow}
-          />
-          <HelpText className="-top-4 whitespace-nowrap">{helpText}</HelpText>
-        </button>
-      </div>
-    </div>
+    <button
+      type="button"
+      className={`home-star-button relative mx-auto inline-flex w-full cursor-pointer items-center justify-center pt-2 text-center hover:border-current focus:outline-none ${className}`}
+      aria-label={ariaLabel}
+      onClick={onClick}
+    >
+      <StarProgressOverview
+        count={count}
+        chunkSize={config.practice.starChunk}
+        starsPerRow={config.practice.starsPerRow}
+      />
+      <HelpText className="-top-4 whitespace-nowrap">{helpText}</HelpText>
+    </button>
   );
 }

@@ -104,7 +104,7 @@ export default function PracticeButton({ userId }: PracticeButtonProps): JSX.Ele
 
   return (
     <StyledButton
-      className="h-button relative px-4"
+      className="h-button max-h-button relative w-full px-4"
       disabled={readyCount === 0}
       onClick={() => navigate(ROUTES.practice)}
     >
