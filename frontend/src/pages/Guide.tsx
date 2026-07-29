@@ -77,11 +77,14 @@ export default function Guide(): JSX.Element {
           alt="Ukázka kartičky po odhalení"
         />
         <h3>Dokončit</h3>
-        <p>Označí danou položku jako naučenou. Položka se dále nebude nabízet k procvičování.</p>
+        <p>
+          Označí danou položku jako naučenou. Položka se dále nebude nabízet k procvičování v daném
+          směru. Stále se nabízí v opačném směru.
+        </p>
         <h3>Opakovat</h3>
-        <p>Položka se nabídne k dalšímu procvičování dříve.</p>
+        <p>Položka se nabídne k dalšímu procvičování dříve pro daný směr.</p>
         <h3>Znám</h3>
-        <p>Položka se nabídne k dalšímu procvičování později.</p>
+        <p>Položka se nabídne k dalšímu procvičování později pro daný směr.</p>
         <h3>Zkratky položek</h3>
         <p>
           <span className="inline-block w-20">zkr.</span>zkrácená varianta
