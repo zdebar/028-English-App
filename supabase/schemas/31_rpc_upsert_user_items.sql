@@ -39,6 +39,7 @@ DECLARE
   v_key_progress_history CONSTANT TEXT := 'progress_history';
   v_key_created_at CONSTANT TEXT := 'created_at';
   v_key_direction CONSTANT TEXT := 'direction';
+  v_key_outcome CONSTANT TEXT := 'outcome';
   v_total_count INT := 0;
   v_matched_count INT := 0;
   v_skipped_count INT := 0;
@@ -146,6 +147,7 @@ BEGIN
     v_hist_user_id UUID;
     v_progress INT;
     v_direction TEXT;
+    v_outcome TEXT;
     v_created_at timestamptz;
     v_inserted_count INT := 0;
     v_skipped_invalid INT := 0;
@@ -187,11 +189,30 @@ BEGIN
               v_skipped_invalid := v_skipped_invalid + 1;
               CONTINUE;
             END IF;
+            v_outcome := COALESCE(NULLIF(v_hist->>v_key_outcome, v_null_text), 'legacy');
+            IF v_outcome NOT IN ('correct', 'incorrect', 'skip', 'legacy') THEN
+              v_skipped_invalid := v_skipped_invalid + 1;
+              CONTINUE;
+            END IF;
 
             -- Insert if not exists (avoid duplicates). Use ON CONFLICT DO NOTHING if unique constraint added.
             BEGIN
-              INSERT INTO public.user_items_history (item_id, user_id, progress, direction, created_at)
-              VALUES (v_item_id, v_hist_user_id, v_progress, v_direction, v_created_at)
+              INSERT INTO public.user_items_history (
+                item_id,
+                user_id,
+                progress,
+                direction,
+                outcome,
+                created_at
+              )
+              VALUES (
+                v_item_id,
+                v_hist_user_id,
+                v_progress,
+                v_direction,
+                v_outcome,
+                v_created_at
+              )
               ON CONFLICT DO NOTHING;
               IF FOUND THEN
                 v_inserted_count := v_inserted_count + 1;

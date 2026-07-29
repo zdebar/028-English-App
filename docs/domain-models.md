@@ -7,8 +7,8 @@ Dexie models under `frontend/src/database/models`.
 
 | Field | Meaning |
 | --- | --- |
-| `progress` | Numeric SRS/progress level. Practice increments/decrements it; skip adds a large configured value. |
-| `progress_history` | Array of progress snapshots for item history/testing workflows. |
+| Directional progress | Numeric SRS level. Correct answers increment it, incorrect answers reset it, and skips preserve it while mastering the direction. |
+| `progress_history` | Array of progress snapshots with direction and explicit `correct`, `incorrect`, `skip`, or legacy outcome. |
 | `started_at` | First time the user started an item/block. Null is represented by config's null replacement date. |
 | `next_at` | When the item/block is next ready. Null replacement date means not scheduled/not started depending on context. |
 | `mastered_at` | Completion/mastery timestamp. Null replacement date means not mastered. |

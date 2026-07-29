@@ -1,4 +1,3 @@
-import config from '@/config/config';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { usePracticeDeck } from './hooks/use-practice-deck';
 import PracticeSessionCard from './PracticeSessionCard';
@@ -75,9 +74,9 @@ export default function PracticeCard() {
       showDirectionChange={showDirectionChange}
       handleReveal={handleReveal}
       plusHint={plusHint}
-      nextRepeat={() => nextItem(config.progress.minusProgress)}
-      nextKnown={() => nextItem(config.progress.plusProgress)}
-      completeCurrent={() => nextItem(config.progress.skipProgress)}
+      nextRepeat={() => nextItem('incorrect')}
+      nextKnown={() => nextItem('correct')}
+      completeCurrent={() => nextItem('skip')}
       audioError={audioError}
       playAudio={playAudio}
       audioLoading={audioLoading}

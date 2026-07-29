@@ -92,7 +92,6 @@ vi.mock('@/config/config', () => ({
       starFlashDuration: 300,
       audioDelay: 300,
     },
-    progress: { skipProgress: 10, minusProgress: -1, plusProgress: 1 },
     buttons: { loadingMessageDelay: 300 },
     loading: { dataStateDelayMs: 1000 },
   },
@@ -530,6 +529,19 @@ describe('PracticeCard', () => {
     expect(controls?.querySelector('[data-testid="known-btn"]')).toBeTruthy();
     expect(controls?.querySelector('[data-testid="hint-btn"]')).toBeNull();
     expect(controls?.querySelector('[aria-label="Grammar"]')).toBeNull();
+  });
+
+  it('maps practice controls to explicit outcomes', () => {
+    mocks.practiceDeck.revealed = true;
+    render(<PracticeCard />);
+
+    fireEvent.click(screen.getByTestId('repeat-btn'));
+    fireEvent.click(screen.getByTestId('known-btn'));
+    fireEvent.click(screen.getByTestId('master-btn'));
+
+    expect(mocks.practiceDeck.nextItem).toHaveBeenNthCalledWith(1, 'incorrect');
+    expect(mocks.practiceDeck.nextItem).toHaveBeenNthCalledWith(2, 'correct');
+    expect(mocks.practiceDeck.nextItem).toHaveBeenNthCalledWith(3, 'skip');
   });
 
   it('renders audio controls in the left secondary control group', () => {

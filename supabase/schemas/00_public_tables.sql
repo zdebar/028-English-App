@@ -130,6 +130,8 @@ CREATE TABLE IF NOT EXISTS user_items_history (
   progress INTEGER NOT NULL CHECK (progress >= 0),
   direction TEXT NOT NULL DEFAULT 'legacy'
     CHECK (direction IN ('czToEn', 'enToCz', 'legacy')),
+  outcome TEXT NOT NULL DEFAULT 'legacy'
+    CHECK (outcome IN ('correct', 'incorrect', 'skip', 'legacy')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   PRIMARY KEY (user_id, item_id, created_at, direction)
