@@ -1,5 +1,5 @@
 ALTER TABLE public.user_items_history
-  ADD COLUMN outcome TEXT NOT NULL DEFAULT 'legacy'
+  ADD COLUMN outcome TEXT NOT NULL DEFAULT 'legacy' -- NOSONAR: shared SQL/PLpgSQL constants are not available across these scopes
   CHECK (outcome IN ('correct', 'incorrect', 'skip', 'legacy'));
 
 CREATE OR REPLACE FUNCTION public.upsert_user_items(
@@ -18,8 +18,7 @@ DECLARE
   v_item_id INTEGER;
   v_direction TEXT;
   v_outcome TEXT;
-  v_legacy_direction CONSTANT TEXT := 'legacy';
-  v_legacy_outcome CONSTANT TEXT := 'legacy';
+  v_legacy_value CONSTANT TEXT := 'legacy';
 BEGIN
   IF p_user_items IS NULL OR p_user_items = '[]'::JSONB THEN
     RETURN;
@@ -86,16 +85,16 @@ BEGIN
           BEGIN
             v_direction := COALESCE(
               NULLIF(v_history->>'direction', 'null'),
-              v_legacy_direction
+              v_legacy_value
             );
-            IF v_direction NOT IN ('czToEn', 'enToCz', v_legacy_direction) THEN
+            IF v_direction NOT IN ('czToEn', 'enToCz', v_legacy_value) THEN
               CONTINUE;
             END IF;
             v_outcome := COALESCE(
               NULLIF(v_history->>'outcome', 'null'),
-              v_legacy_outcome
+              v_legacy_value
             );
-            IF v_outcome NOT IN ('correct', 'incorrect', 'skip', v_legacy_outcome) THEN
+            IF v_outcome NOT IN ('correct', 'incorrect', 'skip', v_legacy_value) THEN
               CONTINUE;
             END IF;
             INSERT INTO public.user_items_history (
@@ -130,4 +129,3 @@ $$;
 
 REVOKE EXECUTE ON FUNCTION public.upsert_user_items(JSONB, BOOLEAN) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.upsert_user_items(JSONB, BOOLEAN) TO authenticated;
-

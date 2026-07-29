@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS user_items_history (
   item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   progress INTEGER NOT NULL CHECK (progress >= 0),
-  direction TEXT NOT NULL DEFAULT 'legacy'
+  direction TEXT NOT NULL DEFAULT 'legacy' -- NOSONAR: shared SQL/PLpgSQL constants are not available across these scopes
     CHECK (direction IN ('czToEn', 'enToCz', 'legacy')),
   outcome TEXT NOT NULL DEFAULT 'legacy'
     CHECK (outcome IN ('correct', 'incorrect', 'skip', 'legacy')),

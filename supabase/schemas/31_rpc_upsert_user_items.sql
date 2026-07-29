@@ -40,6 +40,7 @@ DECLARE
   v_key_created_at CONSTANT TEXT := 'created_at';
   v_key_direction CONSTANT TEXT := 'direction';
   v_key_outcome CONSTANT TEXT := 'outcome';
+  v_legacy_value CONSTANT TEXT := 'legacy';
   v_total_count INT := 0;
   v_matched_count INT := 0;
   v_skipped_count INT := 0;
@@ -184,13 +185,19 @@ BEGIN
             END;
 
             v_progress := (v_hist->>v_key_progress)::INT;
-            v_direction := COALESCE(NULLIF(v_hist->>v_key_direction, v_null_text), 'legacy');
-            IF v_direction NOT IN ('czToEn', 'enToCz', 'legacy') THEN
+            v_direction := COALESCE(
+              NULLIF(v_hist->>v_key_direction, v_null_text),
+              v_legacy_value
+            );
+            IF v_direction NOT IN ('czToEn', 'enToCz', v_legacy_value) THEN
               v_skipped_invalid := v_skipped_invalid + 1;
               CONTINUE;
             END IF;
-            v_outcome := COALESCE(NULLIF(v_hist->>v_key_outcome, v_null_text), 'legacy');
-            IF v_outcome NOT IN ('correct', 'incorrect', 'skip', 'legacy') THEN
+            v_outcome := COALESCE(
+              NULLIF(v_hist->>v_key_outcome, v_null_text),
+              v_legacy_value
+            );
+            IF v_outcome NOT IN ('correct', 'incorrect', 'skip', v_legacy_value) THEN
               v_skipped_invalid := v_skipped_invalid + 1;
               CONTINUE;
             END IF;
