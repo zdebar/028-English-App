@@ -98,7 +98,7 @@ describe('VocabularyDetailCard', () => {
   });
 
   it('renders selected word details and formatted dates', () => {
-    render(
+    const { container } = render(
       <VocabularyDetailCard
         selectedWord={
           {
@@ -129,7 +129,15 @@ describe('VocabularyDetailCard', () => {
     expect(screen.getByText('progress:2')).toBeTruthy();
     expect(screen.getByText('progress:3')).toBeTruthy();
     expect(screen.getByText('started:short:2026-02-28T10:00:00.000Z')).toBeTruthy();
-    expect(screen.getByText('completed:short:2026-02-28T11:00:00.000Z')).toBeTruthy();
+    expect(screen.getByText('updated:short:2026-02-28T11:00:00.000Z')).toBeTruthy();
+    expect(screen.getByText('next:short:2026-03-01T00:00:00.000Z')).toBeTruthy();
+    expect(screen.getByText('next:short:2026-03-01T01:00:00.000Z')).toBeTruthy();
+    expect(screen.getByText('mastered:short:2026-03-02T00:00:00.000Z')).toBeTruthy();
+    expect(screen.getByText('mastered:short:2026-03-03T00:00:00.000Z')).toBeTruthy();
+
+    expect(container.textContent).toMatch(
+      /czech:ahoj.*english:hello.*pronunciation:həˈloʊ.*started:.*updated:.*cZ to EN.*progress:2.*next:.*mastered:.*eN to CZ.*progress:3.*next:.*mastered:/,
+    );
     expect(shortenDateMock).toHaveBeenCalled();
   });
 

@@ -13,7 +13,6 @@ import { useNoteViewer } from '@/features/notes/use-note-viewer';
 import { useToastStore } from '@/features/toast/use-toast-store';
 
 const NOT_AVAILABLE = TEXTS.notAvailable;
-const NOT_MASTERED = TEXTS.notMastered;
 
 type VocabularyDetailCardProps = Readonly<{
   selectedWord: UserItemLocal | null;
@@ -55,7 +54,7 @@ export default function VocabularyDetailCard({
         },
         {
           label: lowercaseInitial(TEXTS.masteredAt),
-          value: shortenDate(selectedWord?.mastered_at_cz_to_en) || NOT_MASTERED,
+          value: shortenDate(selectedWord?.mastered_at_cz_to_en),
         },
       ],
     },
@@ -70,7 +69,7 @@ export default function VocabularyDetailCard({
         },
         {
           label: lowercaseInitial(TEXTS.masteredAt),
-          value: shortenDate(selectedWord?.mastered_at_en_to_cz) || NOT_MASTERED,
+          value: shortenDate(selectedWord?.mastered_at_en_to_cz),
         },
       ],
     },
@@ -82,7 +81,7 @@ export default function VocabularyDetailCard({
       value: shortenDate(selectedWord?.started_at),
     },
     {
-      label: lowercaseInitial(TEXTS.completedAt),
+      label: lowercaseInitial(TEXTS.updatedAt),
       value: shortenDate(selectedWord?.updated_at),
     },
   ];
@@ -117,6 +116,13 @@ export default function VocabularyDetailCard({
             </PropertyView>
           ))}
         </div>
+        <div>
+          {dateProperties.map((property) => (
+            <PropertyView key={property.label} label={property.label}>
+              {property.value ?? NOT_AVAILABLE}
+            </PropertyView>
+          ))}
+        </div>
         {directionSections.map((section) => (
           <section key={section.direction}>
             <h3 className="font-bold">{section.title}</h3>
@@ -127,13 +133,6 @@ export default function VocabularyDetailCard({
             ))}
           </section>
         ))}
-        <div>
-          {dateProperties.map((property) => (
-            <PropertyView key={property.label} label={property.label}>
-              {property.value ?? NOT_AVAILABLE}
-            </PropertyView>
-          ))}
-        </div>
       </div>
       <div className="pos-bottom-left-control">
         <PlayButton
