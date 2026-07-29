@@ -111,14 +111,26 @@ export default function VocabularyDetailCard({
       <div className="flex flex-col gap-4 p-4">
         <div>
           {baseProperties.map((property) => (
-            <PropertyView key={property.label} label={property.label}>
+            <PropertyView
+              key={property.label}
+              label={property.label}
+              className="grid grid-cols-2"
+              classNameLabel="w-auto"
+              classNameValue="min-w-0"
+            >
               {property.value ?? NOT_AVAILABLE}
             </PropertyView>
           ))}
         </div>
         <div>
           {dateProperties.map((property) => (
-            <PropertyView key={property.label} label={property.label}>
+            <PropertyView
+              key={property.label}
+              label={property.label}
+              className="grid grid-cols-2"
+              classNameLabel="w-30 w-auto"
+              classNameValue="min-w-0"
+            >
               {property.value ?? NOT_AVAILABLE}
             </PropertyView>
           ))}
@@ -127,7 +139,13 @@ export default function VocabularyDetailCard({
           <section key={section.direction}>
             <h3 className="font-bold">{section.title}</h3>
             {section.properties.map((property) => (
-              <PropertyView key={property.label} label={property.label}>
+              <PropertyView
+                key={property.label}
+                label={property.label}
+                className="grid grid-cols-2"
+                classNameLabel="w-30 w-auto"
+                classNameValue="min-w-0"
+              >
                 {property.value ?? NOT_AVAILABLE}
               </PropertyView>
             ))}
