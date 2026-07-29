@@ -5,6 +5,7 @@ import { db } from '@/database/models/db';
 import type {
   PracticeDeckItem,
   PracticeDirection,
+  PracticeOutcome,
   UserItemLocal,
   ProgressHistoryEntry,
   CurriculumSortPath,
@@ -481,13 +482,36 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .where('[user_id+item_id]')
       .between([userId, 1], [userId, SIM_COUNT], true, true)
       .modify((item) => {
-        const updated = this.applyPracticeProgress(
-          item,
-          'czToEn',
-          SIM_PROGRESS,
-          dateTime,
-        );
-        Object.assign(item, updated);
+        const isFirstSimulation = item.started_at === NULL_DATE;
+        const progressCzToEn = item.progress_cz_to_en + SIM_PROGRESS;
+        const progressEnToCz = isFirstSimulation
+          ? item.progress_en_to_cz + SIM_PROGRESS
+          : item.progress_en_to_cz;
+        item.progress_cz_to_en = progressCzToEn;
+        item.progress_en_to_cz = progressEnToCz;
+        item.progress_history = [
+          ...(item.progress_history ?? []),
+          {
+            progress: progressCzToEn,
+            created_at: dateTime,
+            direction: 'czToEn',
+            outcome: 'legacy',
+          },
+          ...(isFirstSimulation
+            ? [{
+                progress: progressEnToCz,
+                created_at: dateTime,
+                direction: 'enToCz' as const,
+                outcome: 'legacy' as const,
+              }]
+            : []),
+        ];
+        item.started_at = isFirstSimulation ? dateTime : item.started_at;
+        item.updated_at = dateTime;
+        setDirectionState(item, item, 'czToEn', progressCzToEn, dateTime);
+        if (isFirstSimulation) {
+          setDirectionState(item, item, 'enToCz', progressEnToCz, dateTime);
+        }
       });
 
     return count;
@@ -669,14 +693,14 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Applies one practice answer to the active direction.
+   * Applies one explicit practice outcome to the active direction.
    *
-   * The first answer initializes both directions; later answers update only the displayed one.
+   * The first answer schedules the opposite direction at zero progress without recording history.
    */
   static applyPracticeProgress(
     item: UserItemLocal,
     direction: PracticeDirection,
-    progressChange: number,
+    outcome: PracticeOutcome,
     dateTime: string,
   ): UserItemLocal {
     const isFirstAnswer = item.started_at === NULL_DATE;
@@ -688,29 +712,29 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       updated_at: dateTime,
     };
 
-    const directionProgress = Math.max(currentProgress + progressChange, 0);
-    setDirectionState(changes, item, direction, directionProgress, dateTime);
-
-    const historyEntries: ProgressHistoryEntry[] = [
-      { progress: directionProgress, created_at: dateTime, direction },
-    ];
-
     if (isFirstAnswer) {
-      const otherProgress = progressChange > 0 && progressChange < config.progress.skipProgress
-        ? Math.max(getDirectionProgress(item, otherDirection) + progressChange, 0)
-        : 0;
-      setDirectionState(changes, item, otherDirection, otherProgress, dateTime);
-      historyEntries.push({
-        progress: otherProgress,
-        created_at: dateTime,
-        direction: otherDirection,
-      });
+      initializeDirectionState(changes, otherDirection);
+    }
+
+    let directionProgress = currentProgress;
+    if (outcome === 'correct') {
+      directionProgress += 1;
+      setDirectionState(changes, item, direction, directionProgress, dateTime);
+    } else if (outcome === 'incorrect') {
+      directionProgress = 0;
+      setDirectionState(changes, item, direction, directionProgress, dateTime);
+      clearDirectionMastery(changes, direction);
+    } else {
+      setDirectionMastered(changes, direction, currentProgress, dateTime);
     }
 
     return {
       ...item,
       ...changes,
-      progress_history: [...(item.progress_history ?? []), ...historyEntries],
+      progress_history: [
+        ...(item.progress_history ?? []),
+        { progress: directionProgress, created_at: dateTime, direction, outcome },
+      ],
     };
   }
 
@@ -775,6 +799,49 @@ function setDirectionState(
     target.progress_en_to_cz = progress;
     target.next_at_en_to_cz = getNextAt(progress, direction);
     target.mastered_at_en_to_cz = masteredAt;
+  }
+}
+
+function initializeDirectionState(
+  target: Partial<UserItemLocal>,
+  direction: PracticeDirection,
+): void {
+  if (direction === 'czToEn') {
+    target.progress_cz_to_en = 0;
+    target.next_at_cz_to_en = getNextAt(0, direction);
+    target.mastered_at_cz_to_en = NULL_DATE;
+  } else {
+    target.progress_en_to_cz = 0;
+    target.next_at_en_to_cz = getNextAt(0, direction);
+    target.mastered_at_en_to_cz = NULL_DATE;
+  }
+}
+
+function setDirectionMastered(
+  target: Partial<UserItemLocal>,
+  direction: PracticeDirection,
+  progress: number,
+  dateTime: string,
+): void {
+  if (direction === 'czToEn') {
+    target.progress_cz_to_en = progress;
+    target.next_at_cz_to_en = NULL_DATE;
+    target.mastered_at_cz_to_en = dateTime;
+  } else {
+    target.progress_en_to_cz = progress;
+    target.next_at_en_to_cz = NULL_DATE;
+    target.mastered_at_en_to_cz = dateTime;
+  }
+}
+
+function clearDirectionMastery(
+  target: Partial<UserItemLocal>,
+  direction: PracticeDirection,
+): void {
+  if (direction === 'czToEn') {
+    target.mastered_at_cz_to_en = NULL_DATE;
+  } else {
+    target.mastered_at_en_to_cz = NULL_DATE;
   }
 }
 

@@ -14,9 +14,6 @@ const config = {
   },
 
   progress: {
-    plusProgress: 1, // Progress value for a "plus" button
-    minusProgress: -100, // Progress value for a "minus" button, -100 will reset the progress to 0
-    skipProgress: 100, // Progress value for a "skip" button
     afterInitialTrainingProgress: 2, // Progress after completing a block's initial training
     simulationCount: 64, // Number of items in the testing queue
     simulationProgress: 2, // Progress value for simulated data

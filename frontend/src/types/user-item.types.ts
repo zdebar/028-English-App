@@ -1,9 +1,11 @@
 export type PracticeDirection = 'czToEn' | 'enToCz';
+export type PracticeOutcome = 'correct' | 'incorrect' | 'skip';
 
 export interface ProgressHistoryEntry {
   progress: number;
   created_at: string;
   direction?: PracticeDirection | 'legacy';
+  outcome?: PracticeOutcome | 'legacy';
 }
 
 export type CurriculumSortPath = readonly [

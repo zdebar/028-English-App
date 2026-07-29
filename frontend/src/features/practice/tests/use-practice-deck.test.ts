@@ -152,7 +152,7 @@ describe('usePracticeDeck', () => {
     });
 
     await act(async () => {
-      await result.current.nextItem(2);
+      await result.current.nextItem('correct');
     });
 
     expect(result.current.index).toBe(1);
@@ -169,11 +169,11 @@ describe('usePracticeDeck', () => {
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
 
     await act(async () => {
-      await result.current.nextItem(1);
+      await result.current.nextItem('correct');
     });
 
     await act(async () => {
-      await result.current.nextItem(1);
+      await result.current.nextItem('correct');
     });
 
     await waitFor(() => expect(savePracticeDeckMock).toHaveBeenCalledTimes(1));
@@ -183,14 +183,22 @@ describe('usePracticeDeck', () => {
           item_id: 1,
           progress_cz_to_en: 1,
           progress_history: expect.arrayContaining([
-            expect.objectContaining({ progress: 1, created_at: expect.any(String) }),
+            expect.objectContaining({
+              progress: 1,
+              outcome: 'correct',
+              created_at: expect.any(String),
+            }),
           ]),
         }),
         expect.objectContaining({
           item_id: 2,
           progress_cz_to_en: 2,
           progress_history: expect.arrayContaining([
-            expect.objectContaining({ progress: 2, created_at: expect.any(String) }),
+            expect.objectContaining({
+              progress: 2,
+              outcome: 'correct',
+              created_at: expect.any(String),
+            }),
           ]),
         }),
       ]),
@@ -209,7 +217,7 @@ describe('usePracticeDeck', () => {
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
 
     await act(async () => {
-      await result.current.nextItem(3);
+      await result.current.nextItem('correct');
     });
 
     act(() => {
@@ -222,7 +230,15 @@ describe('usePracticeDeck', () => {
     const savedPayload = JSON.parse(latestCall[1]);
     expect(savedPayload).toMatchObject({
       dateTime: '2026-03-04T10:00:00.000Z',
-      progress: [expect.objectContaining({ item_id: 1, progress_cz_to_en: 3 })],
+      progress: [
+        expect.objectContaining({
+          item_id: 1,
+          progress_cz_to_en: 1,
+          progress_history: [
+            expect.objectContaining({ outcome: 'correct', progress: 1 }),
+          ],
+        }),
+      ],
     });
 
     await act(async () => {

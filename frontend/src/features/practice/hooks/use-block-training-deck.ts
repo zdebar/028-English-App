@@ -208,7 +208,7 @@ export function useBlockTrainingDeck(userId: string | null, blockId: number | nu
       const skippedItem = UserItem.applyPracticeProgress(
         currentItem,
         ROUND_DIRECTIONS[round],
-        config.progress.skipProgress,
+        'skip',
         dateTime,
       );
       const remainingItems = items.filter((item) => item.item_id !== currentItem.item_id);

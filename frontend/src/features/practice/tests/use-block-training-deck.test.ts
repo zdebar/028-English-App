@@ -14,11 +14,11 @@ const addItemCountMock = vi.fn();
 const playAudioMock = vi.fn();
 const resetHintMock = vi.fn();
 const plusHintMock = vi.fn();
+const applyPracticeProgressMock = vi.fn();
 
 vi.mock('@/config/config', () => ({
   default: {
     practice: { audioDelay: 300 },
-    progress: { skipProgress: 100 },
     database: { nullReplacementDate: '1970-01-01T00:00:00.000Z' },
   },
 }));
@@ -31,20 +31,13 @@ vi.mock('@/database/models/user-blocks', () => ({
 }));
 
 vi.mock('@/database/models/user-items', () => {
-  const applyPracticeProgress = (item: any, direction: 'czToEn' | 'enToCz', change: number) => ({
-    ...item,
-    progress_cz_to_en:
-      direction === 'czToEn' ? Math.max(item.progress_cz_to_en + change, 0) : item.progress_cz_to_en,
-    progress_en_to_cz:
-      direction === 'enToCz' ? Math.max(item.progress_en_to_cz + change, 0) : item.progress_en_to_cz,
-  });
   return {
     default: {
     getByBlockId: (...args: unknown[]) => getByBlockIdMock(...args),
     savePracticeDeck: (...args: unknown[]) => savePracticeDeckMock(...args),
     saveInitialTrainingBlockCompletion: (...args: unknown[]) =>
       saveInitialTrainingBlockCompletionMock(...args),
-    applyPracticeProgress,
+    applyPracticeProgress: (...args: unknown[]) => applyPracticeProgressMock(...args),
     },
   };
 });
@@ -137,6 +130,7 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
 describe('useBlockTrainingDeck', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    applyPracticeProgressMock.mockImplementation((item) => ({ ...item }));
 
     getUserBlockByIdMock.mockResolvedValue(makeBlock());
     getByBlockIdMock.mockResolvedValue([makeItem()]);
@@ -377,9 +371,15 @@ describe('useBlockTrainingDeck', () => {
       [
         expect.objectContaining({
           item_id: 1,
-          progress_cz_to_en: 101,
+          progress_cz_to_en: 1,
         }),
       ],
+    );
+    expect(applyPracticeProgressMock).toHaveBeenCalledWith(
+      expect.objectContaining({ item_id: 1 }),
+      'czToEn',
+      'skip',
+      expect.any(String),
     );
     expect(result.current.currentItem?.item_id).toBe(2);
 

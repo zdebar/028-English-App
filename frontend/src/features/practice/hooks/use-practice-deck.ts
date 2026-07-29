@@ -1,5 +1,9 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
-import type { PracticeDeckItem, UserItemLocal } from '@/types/user-item.types';
+import type {
+  PracticeDeckItem,
+  PracticeOutcome,
+  UserItemLocal,
+} from '@/types/user-item.types';
 import { useFetch } from '@/hooks/use-fetch';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
@@ -117,9 +121,9 @@ export function usePracticeDeck(userId: string | null) {
     return () => globalThis.removeEventListener('beforeunload', handleBeforeUnload);
   }, [persistProgressToLocalStorage]);
 
-  // Advance to next item and record progress change
+  // Advance to next item and record the explicit practice outcome.
   const nextItem = useCallback(
-    async (progressChange: number = 0) => {
+    async (outcome: PracticeOutcome) => {
       if (!currentItem) {
         return;
       }
@@ -127,7 +131,7 @@ export function usePracticeDeck(userId: string | null) {
       const updatedItem = UserItem.applyPracticeProgress(
         currentItem,
         currentItem.practice_direction,
-        progressChange,
+        outcome,
         new Date().toISOString(),
       );
 
