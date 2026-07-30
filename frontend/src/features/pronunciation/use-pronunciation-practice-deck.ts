@@ -31,13 +31,28 @@ export function usePronunciationPracticeDeck(userId: string | null) {
     cardState.hideDirectionChange();
   }, [cardState.hideDirectionChange, cardState.resetHint, data]);
 
-  const next = useCallback(() => {
+  const next = useCallback(async () => {
     if (!currentItem) return;
-    setIndex((current) => (current + 1) % items.length);
+
+    if (index < items.length - 1) {
+      setIndex(index + 1);
+    } else {
+      const nextRoundItems = await fetchDeck();
+      setItems(nextRoundItems);
+      setIndex(0);
+    }
+
     setRevealed(true);
     cardState.resetHint();
     cardState.hideDirectionChange();
-  }, [cardState.hideDirectionChange, cardState.resetHint, currentItem, items.length]);
+  }, [
+    cardState.hideDirectionChange,
+    cardState.resetHint,
+    currentItem,
+    fetchDeck,
+    index,
+    items.length,
+  ]);
 
   return {
     ...cardState,

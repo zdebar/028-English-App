@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { UserItemLocal } from '@/types/user-item.types';
 
 const mocks = vi.hoisted(() => ({
+  getPronunciationPracticeDeck: vi.fn(),
   hideDirectionChange: vi.fn(),
   resetHint: vi.fn(),
 }));
@@ -15,7 +16,7 @@ const items = [
 
 vi.mock('@/database/models/user-items', () => ({
   default: {
-    getPronunciationPracticeDeck: vi.fn(async () => items),
+    getPronunciationPracticeDeck: mocks.getPronunciationPracticeDeck,
   },
 }));
 
@@ -52,6 +53,7 @@ import { usePronunciationPracticeDeck } from '../use-pronunciation-practice-deck
 describe('usePronunciationPracticeDeck', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.getPronunciationPracticeDeck.mockResolvedValue(items);
   });
 
   it('starts revealed and loops back to the first item after the last one', async () => {
@@ -61,16 +63,35 @@ describe('usePronunciationPracticeDeck', () => {
     expect(result.current.revealed).toBe(true);
     expect(mocks.hideDirectionChange).toHaveBeenCalled();
 
-    act(() => result.current.next());
+    await act(() => result.current.next());
 
     expect(result.current.currentItem?.english).toBe('men');
     expect(result.current.revealed).toBe(true);
     expect(result.current.progressLabel).toBe('2 / 2');
+    expect(mocks.getPronunciationPracticeDeck).not.toHaveBeenCalled();
 
-    act(() => result.current.next());
+    await act(() => result.current.next());
 
     expect(result.current.currentItem?.english).toBe('man');
     expect(result.current.revealed).toBe(true);
     expect(result.current.progressLabel).toBe('1 / 2');
+    expect(mocks.getPronunciationPracticeDeck).toHaveBeenCalledWith('u1');
+  });
+
+  it('removes an item switched off during practice from the next round', async () => {
+    mocks.getPronunciationPracticeDeck.mockResolvedValue([items[1]]);
+    const { result } = renderHook(() => usePronunciationPracticeDeck('u1'));
+
+    await waitFor(() => expect(result.current.currentItem?.english).toBe('man'));
+
+    await act(() => result.current.next());
+
+    expect(result.current.currentItem?.english).toBe('men');
+    expect(result.current.progressLabel).toBe('2 / 2');
+
+    await act(() => result.current.next());
+
+    expect(result.current.currentItem?.english).toBe('men');
+    expect(result.current.progressLabel).toBe('1 / 1');
   });
 });
