@@ -35,14 +35,9 @@ vi.mock('@/components/UI/DelayedLoadingCircle', () => ({
   default: () => <div>loading</div>,
 }));
 
-vi.mock('@/components/UI/buttons/ReturnHomeButton', () => ({
-  default: () => <button>Domů</button>,
-}));
-
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
     loadingError: 'Loading error',
-    pronunciationPracticeComplete: 'Procvičování výslovnosti dokončeno',
   },
 }));
 
@@ -53,7 +48,6 @@ describe('PronunciationPractice', () => {
     mocks.deck = {
       loading: false,
       error: null,
-      isComplete: false,
       currentItem: {
         item_id: 1,
         english: 'man',
@@ -80,14 +74,5 @@ describe('PronunciationPractice', () => {
     render(<PronunciationPractice />);
 
     expect(screen.getByTestId('session').textContent).toContain('false:true:true:1 / 2:man');
-  });
-
-  it('shows completion with a Home button after the snapshot ends', () => {
-    mocks.deck.isComplete = true;
-
-    render(<PronunciationPractice />);
-
-    expect(screen.getByText('Procvičování výslovnosti dokončeno')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Domů' })).toBeTruthy();
   });
 });

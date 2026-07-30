@@ -24,7 +24,6 @@ export const PRACTICE_TEXTS = {
   blockTrainingComplete: 'dokončeno úvodní cvičení pro',
   next: 'další',
   pronunciationPracticeButton: 'Výslovnost',
-  pronunciationPracticeComplete: 'Procvičování výslovnosti dokončeno',
   pronunciationToggleAria: 'Zařazení do procvičování výslovnosti',
   addToPronunciation: 'Přidat do procvičování výslovnosti',
   removeFromPronunciation: 'Odebrat z procvičování výslovnosti',

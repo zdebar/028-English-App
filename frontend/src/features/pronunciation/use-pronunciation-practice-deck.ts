@@ -8,7 +8,6 @@ export function usePronunciationPracticeDeck(userId: string | null) {
   const [items, setItems] = useState<UserItemLocal[]>([]);
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(true);
-  const [isComplete, setIsComplete] = useState(false);
 
   const fetchDeck = useCallback(async () => {
     if (!userId) return [];
@@ -27,7 +26,6 @@ export function usePronunciationPracticeDeck(userId: string | null) {
   useEffect(() => {
     setItems(data ?? []);
     setIndex(0);
-    setIsComplete(false);
     setRevealed(true);
     cardState.resetHint();
     cardState.hideDirectionChange();
@@ -35,15 +33,11 @@ export function usePronunciationPracticeDeck(userId: string | null) {
 
   const next = useCallback(() => {
     if (!currentItem) return;
-    if (index >= items.length - 1) {
-      setIsComplete(true);
-      return;
-    }
-    setIndex((current) => current + 1);
+    setIndex((current) => (current + 1) % items.length);
     setRevealed(true);
     cardState.resetHint();
     cardState.hideDirectionChange();
-  }, [cardState.hideDirectionChange, cardState.resetHint, currentItem, index, items.length]);
+  }, [cardState.hideDirectionChange, cardState.resetHint, currentItem, items.length]);
 
   return {
     ...cardState,
@@ -51,7 +45,6 @@ export function usePronunciationPracticeDeck(userId: string | null) {
     revealed,
     loading,
     error,
-    isComplete,
     progressLabel: items.length > 0 ? `${index + 1} / ${items.length}` : '0 / 0',
     next,
   };

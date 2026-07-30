@@ -1,5 +1,4 @@
 import DelayedLoadingCircle from '@/components/UI/DelayedLoadingCircle';
-import ReturnHomeButton from '@/components/UI/buttons/ReturnHomeButton';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { reportError } from '@/features/logging/monitoring-handler';
 import PracticeEmptyState from '@/features/practice/PracticeEmptyState';
@@ -21,14 +20,6 @@ export default function PronunciationPractice() {
   }, [deck.error, showToast]);
 
   if (deck.loading) return <DelayedLoadingCircle />;
-  if (deck.isComplete) {
-    return (
-      <div className="card-width mt-8 flex flex-col gap-4 text-center">
-        <p>{TEXTS.pronunciationPracticeComplete}</p>
-        <ReturnHomeButton />
-      </div>
-    );
-  }
   if (!deck.currentItem) return <PracticeEmptyState />;
 
   return (

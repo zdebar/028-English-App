@@ -54,7 +54,7 @@ describe('usePronunciationPracticeDeck', () => {
     vi.clearAllMocks();
   });
 
-  it('starts revealed, confirms the fixed direction, and keeps the next item revealed', async () => {
+  it('starts revealed and loops back to the first item after the last one', async () => {
     const { result } = renderHook(() => usePronunciationPracticeDeck('u1'));
 
     await waitFor(() => expect(result.current.currentItem?.english).toBe('man'));
@@ -65,5 +65,12 @@ describe('usePronunciationPracticeDeck', () => {
 
     expect(result.current.currentItem?.english).toBe('men');
     expect(result.current.revealed).toBe(true);
+    expect(result.current.progressLabel).toBe('2 / 2');
+
+    act(() => result.current.next());
+
+    expect(result.current.currentItem?.english).toBe('man');
+    expect(result.current.revealed).toBe(true);
+    expect(result.current.progressLabel).toBe('1 / 2');
   });
 });
