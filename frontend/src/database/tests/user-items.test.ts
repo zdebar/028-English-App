@@ -21,6 +21,10 @@ const mocks = vi.hoisted(() => ({
   getNextAt: vi.fn(),
   getSyncTimestamps: vi.fn(),
   markAsSynced: vi.fn(),
+  userItemGet: vi.fn(),
+  userItemUpdate: vi.fn(),
+  pronunciationCount: vi.fn(),
+  pronunciationToArray: vi.fn(),
 }));
 
 vi.mock('@/config/config', () => ({
@@ -53,6 +57,8 @@ vi.mock('@/config/config', () => ({
 vi.mock('@/database/models/db', () => ({
   db: {
     user_items: {
+      get: (...args: unknown[]) => mocks.userItemGet(...args),
+      update: (...args: unknown[]) => mocks.userItemUpdate(...args),
       bulkPut: (...args: unknown[]) => mocks.bulkPut(...args),
       bulkDelete: (...args: unknown[]) => mocks.bulkDelete(...args),
       where: (field: string) => {
@@ -160,6 +166,14 @@ vi.mock('@/database/models/db', () => ({
             }),
           };
         }
+        if (field === '[user_id+has_pronunciation_practice]') {
+          return {
+            equals: () => ({
+              count: (...args: unknown[]) => mocks.pronunciationCount(...args),
+              toArray: (...args: unknown[]) => mocks.pronunciationToArray(...args),
+            }),
+          };
+        }
         throw new Error(`Unexpected user_items.where field: ${field}`);
       },
     },
@@ -237,6 +251,10 @@ describe('UserItem', () => {
     });
     mocks.itemIdModify.mockResolvedValue(1);
     mocks.itemIdBetweenModify.mockResolvedValue(64);
+    mocks.userItemGet.mockResolvedValue(undefined);
+    mocks.userItemUpdate.mockResolvedValue(1);
+    mocks.pronunciationCount.mockResolvedValue(0);
+    mocks.pronunciationToArray.mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -260,6 +278,86 @@ describe('UserItem', () => {
     ]);
 
     expect(mocks.bulkPut).toHaveBeenCalledTimes(1);
+  });
+
+  it('toggles pronunciation selection without changing progress fields', async () => {
+    mocks.userItemGet.mockResolvedValue({
+      item_id: 7,
+      is_vocabulary: 1,
+      audio: 'seven.opus',
+      has_pronunciation_practice: 0,
+    });
+
+    await expect(
+      UserItem.togglePronunciationPractice(
+        'u1',
+        7,
+        '2026-07-30T10:00:00.000Z',
+      ),
+    ).resolves.toBe(true);
+
+    expect(mocks.userItemUpdate).toHaveBeenCalledWith(['u1', 7], {
+      has_pronunciation_practice: 1,
+      updated_at: '2026-07-30T10:00:00.000Z',
+    });
+  });
+
+  it('rejects pronunciation selection for non-vocabulary and audio-less items', async () => {
+    mocks.userItemGet
+      .mockResolvedValueOnce({
+        item_id: 8,
+        is_vocabulary: 0,
+        audio: 'grammar.opus',
+        has_pronunciation_practice: 0,
+      })
+      .mockResolvedValueOnce({
+        item_id: 9,
+        is_vocabulary: 1,
+        audio: null,
+        has_pronunciation_practice: 0,
+      });
+
+    await expect(UserItem.togglePronunciationPractice('u1', 8)).rejects.toThrow(
+      'not eligible',
+    );
+    await expect(UserItem.togglePronunciationPractice('u1', 9)).rejects.toThrow(
+      'not eligible',
+    );
+    expect(mocks.userItemUpdate).not.toHaveBeenCalled();
+  });
+
+  it('counts pronunciation selections on the dedicated index', async () => {
+    mocks.pronunciationCount.mockResolvedValue(3);
+
+    await expect(UserItem.getPronunciationPracticeCount('u1')).resolves.toBe(3);
+    expect(mocks.pronunciationCount).toHaveBeenCalledTimes(1);
+  });
+
+  it('builds an eligible pronunciation deck in curriculum order', async () => {
+    mocks.pronunciationToArray.mockResolvedValue([
+      {
+        item_id: 3,
+        is_vocabulary: 1,
+        audio: 'three.opus',
+        curriculum_sort_path: [2, 1, 1],
+      },
+      {
+        item_id: 2,
+        is_vocabulary: 0,
+        audio: 'grammar.opus',
+        curriculum_sort_path: [1, 1, 2],
+      },
+      {
+        item_id: 1,
+        is_vocabulary: 1,
+        audio: 'one.opus',
+        curriculum_sort_path: [1, 1, 1],
+      },
+    ]);
+
+    const deck = await UserItem.getPronunciationPracticeDeck('u1');
+
+    expect(deck.map((item) => item.item_id)).toEqual([1, 3]);
   });
 
   it('records a correct first answer and schedules the opposite direction at zero', () => {
@@ -877,6 +975,7 @@ describe('UserItem', () => {
         ],
         progress_cz_to_en: 1,
         progress_en_to_cz: 1,
+        has_pronunciation_practice: 1,
         started_at: '1970-01-01T00:00:00.000Z',
         updated_at: '2026-03-03T10:00:00.000Z',
         next_at_cz_to_en: '1970-01-01T00:00:00.000Z',
@@ -897,6 +996,7 @@ describe('UserItem', () => {
           audio: null,
           is_vocabulary: true,
           is_practice_item: false,
+          has_pronunciation_practice: true,
           sort_order: 2,
           curriculum_sort_path: [1, 2, 2],
           note_id: null,
@@ -942,6 +1042,7 @@ describe('UserItem', () => {
           ],
           progress_cz_to_en: 1,
           progress_en_to_cz: 1,
+          has_pronunciation_practice: true,
           updated_at: '2026-03-03T10:00:00.000Z',
           started_at: null,
           next_at_cz_to_en: null,
@@ -957,6 +1058,7 @@ describe('UserItem', () => {
         item_id: 2,
         is_vocabulary: 1,
         is_practice_item: 0,
+        has_pronunciation_practice: 1,
         curriculum_sort_path: [1, 2, 2],
         block_id: 0,
         grammar_chunk_id: 0,

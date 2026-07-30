@@ -48,4 +48,12 @@ export const OVERVIEW_TEXTS = {
   grammarOverviewTooltip: 'Přehled započaté gramatiky',
   vocabularyOverview: 'Přehled slovíček',
   vocabularyOverviewTooltip: 'Přehled započatých slovíček',
+  pronunciationOverview: 'Přehled výslovnosti',
+  pronunciationOverviewTooltip: 'Přehled skupin podobně znějících slovíček',
+  pronunciationStartedHelp: 'započato/celkem položek',
+  noPronunciationGroups: 'Žádné dostupné skupiny výslovnosti.',
+  noPronunciationGroupItems: 'V této skupině nejsou dostupná slovíčka.',
+  addPronunciationGroup: 'Přidat skupinu',
+  pronunciationGroupAdded: 'Přidáno',
+  pronunciationGroupAddError: 'Skupinu se nepodařilo přidat.',
 } as const;

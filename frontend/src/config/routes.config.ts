@@ -3,6 +3,7 @@ export const ROUTES = {
   privacyPolicy: '/privacy-policy',
   practice: '/practice',
   practiceBlockTraining: '/practice/block-training',
+  pronunciationPractice: '/practice/pronunciation',
   practiceOverview: '/practice-overview',
   profile: '/profile',
   levels: '/levels',
@@ -10,5 +11,7 @@ export const ROUTES = {
   topicDetail: '/topics/:blockId',
   grammar: '/grammar',
   vocabulary: '/vocabulary',
+  pronunciationOverview: '/pronunciation',
+  pronunciationGroup: '/pronunciation/:groupId',
   guide: '/guide',
 };

@@ -14,6 +14,8 @@ import GrammarGroup from '@/database/models/grammar-groups';
 import { reportInfo } from '@/features/logging/monitoring-handler';
 import { supabaseInstance } from '@/config/supabase.config';
 import Notes from '../models/notes';
+import PronunciationGroup from '../models/pronunciation-groups';
+import PronunciationGroupItem from '../models/pronunciation-group-items';
 
 /**
  * Synchronizes shared and user-specific tables with Supabase.
@@ -45,6 +47,8 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
         Levels.syncFromRemote(true),
         Lessons.syncFromRemote(true),
         Notes.syncFromRemote(true),
+        PronunciationGroup.syncFromRemote(true),
+        PronunciationGroupItem.syncFromRemote(true),
         UserBlock.syncFromRemote(userId, true),
         UserScoreType.syncFromRemote(userId, true),
         UserItem.syncFromRemote(userId, true),
@@ -55,13 +59,26 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
         Levels.syncFromRemote(false),
         Lessons.syncFromRemote(false),
         Notes.syncFromRemote(false),
+        PronunciationGroup.syncFromRemote(false),
+        PronunciationGroupItem.syncFromRemote(false),
         UserBlock.syncFromRemote(userId, false),
         UserScoreType.syncFromRemote(userId, false),
         UserItem.syncFromRemote(userId, false),
       ];
 
   // Keep a parallel list of human-readable table names to report per-table completions.
-  const tableNames = ['GrammarGroups', 'GrammarChunks', 'Levels', 'Lessons', 'Notes', 'UserBlocks', 'UserScores', 'UserItems'];
+  const tableNames = [
+    'GrammarGroups',
+    'GrammarChunks',
+    'Levels',
+    'Lessons',
+    'Notes',
+    'PronunciationGroups',
+    'PronunciationGroupItems',
+    'UserBlocks',
+    'UserScores',
+    'UserItems',
+  ];
 
   const results = await Promise.allSettled(allPromises);
 

@@ -21,7 +21,9 @@ REVOKE ALL PRIVILEGES ON TABLE
   public.items,
   public.lessons,
   public.levels,
-  public.notes
+  public.notes,
+  public.pronunciation_groups,
+  public.pronunciation_group_items
 FROM PUBLIC, anon, authenticated;
 
 GRANT SELECT ON TABLE
@@ -31,7 +33,9 @@ GRANT SELECT ON TABLE
   public.items,
   public.lessons,
   public.levels,
-  public.notes
+  public.notes,
+  public.pronunciation_groups,
+  public.pronunciation_group_items
 TO authenticated;
 
 ALTER TABLE public.blocks ENABLE ROW LEVEL SECURITY;
@@ -41,6 +45,8 @@ ALTER TABLE public.items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.lessons ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.levels ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.pronunciation_groups ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.pronunciation_group_items ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Enable read access for all users" ON public.blocks;
 DROP POLICY IF EXISTS "Enable read access for all users" ON public.grammar_groups;
@@ -56,6 +62,8 @@ DROP POLICY IF EXISTS catalog_select_authenticated ON public.items;
 DROP POLICY IF EXISTS catalog_select_authenticated ON public.lessons;
 DROP POLICY IF EXISTS catalog_select_authenticated ON public.levels;
 DROP POLICY IF EXISTS catalog_select_authenticated ON public.notes;
+DROP POLICY IF EXISTS catalog_select_authenticated ON public.pronunciation_groups;
+DROP POLICY IF EXISTS catalog_select_authenticated ON public.pronunciation_group_items;
 
 CREATE POLICY catalog_select_authenticated ON public.blocks
   FOR SELECT TO authenticated
@@ -82,6 +90,14 @@ CREATE POLICY catalog_select_authenticated ON public.levels
   USING (TRUE);
 
 CREATE POLICY catalog_select_authenticated ON public.notes
+  FOR SELECT TO authenticated
+  USING (TRUE);
+
+CREATE POLICY catalog_select_authenticated ON public.pronunciation_groups
+  FOR SELECT TO authenticated
+  USING (TRUE);
+
+CREATE POLICY catalog_select_authenticated ON public.pronunciation_group_items
   FOR SELECT TO authenticated
   USING (TRUE);
 

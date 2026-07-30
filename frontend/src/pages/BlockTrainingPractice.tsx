@@ -93,6 +93,7 @@ export default function BlockTrainingPractice(): JSX.Element {
       playAudio={deck.playAudio}
       audioLoading={deck.audioLoading}
       isBlockTrainingPractice
+      pronunciationItem={deck.currentItem}
     />
   );
 }

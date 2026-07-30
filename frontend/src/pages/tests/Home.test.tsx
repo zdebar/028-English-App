@@ -117,6 +117,12 @@ vi.mock('@/features/practice/PracticeButton', () => ({
   default: ({ userId }: any) => <div data-testid="home-practice-buttons">practice:{userId}</div>,
 }));
 
+vi.mock('@/features/pronunciation/PronunciationPracticeButton', () => ({
+  default: ({ userId }: any) => (
+    <div data-testid="pronunciation-practice-button">pronunciation:{userId}</div>
+  ),
+}));
+
 vi.mock('react-router-dom', () => ({
   Link: ({ children }: any) => <div>{children}</div>,
   useNavigate: () => vi.fn(),
@@ -155,6 +161,9 @@ describe('Home', () => {
     render(<Home />);
 
     expect(screen.getByTestId('home-practice-buttons').textContent).toBe('practice:u1');
+    expect(screen.getByTestId('pronunciation-practice-button').parentElement?.className).toContain(
+      'gap-1',
+    );
   });
 
   it('renders the dashboard help button in the page-owned dashboard wrapper', () => {

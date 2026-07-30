@@ -17,6 +17,7 @@ import PracticeOverviewButton from '@/features/practice-overview/PracticeOvervie
 import SimulateDataButton from '@/features/synchronization/SimulateDataButton';
 import PracticeButton from '@/features/practice/PracticeButton';
 import HelpButton from '@/features/help/HelpButton';
+import PronunciationPracticeButton from '@/features/pronunciation/PronunciationPracticeButton';
 
 function HomeActionLinks(): JSX.Element {
   return (
@@ -57,7 +58,7 @@ export default function Home(): JSX.Element {
             </PropertyView>
             <HomeActionLinks />
           </div>
-          <div className="mt-4 w-full portrait:mt-8">
+          <div className="mt-4 flex w-full flex-col gap-1 portrait:mt-8">
             <PracticeOverviewButton
               count={dailyCount}
               onClick={() => navigate(ROUTES.practiceOverview)}
@@ -65,6 +66,7 @@ export default function Home(): JSX.Element {
               helpText={TEXTS.starsToday}
             />
             <PracticeButton userId={userId} />
+            <PronunciationPracticeButton userId={userId} />
           </div>
           <div className="relative mb-12 portrait:mt-8">
             <p

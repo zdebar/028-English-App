@@ -20,6 +20,11 @@ import MasterItemButton from './buttons/MasterItemButton';
 import RepeatButton from './buttons/RepeatButton';
 import PracticeStarsRow from './components/PracticeStarsRow';
 import { usePracticeStars } from './hooks/use-practice-stars';
+import PronunciationToggleButton from '@/features/pronunciation/PronunciationToggleButton';
+import { useAuthStore } from '@/features/auth/use-auth-store';
+import type { UserItemLocal } from '@/types/user-item.types';
+import RightArrowIcon from '@/components/UI/icons/RightArrowIcon';
+import ControlButton from './buttons/ControlButton';
 
 export type PracticeSessionCardProps = Readonly<{
   noteId: number | null;
@@ -43,7 +48,88 @@ export type PracticeSessionCardProps = Readonly<{
   playAudio: () => void;
   audioLoading: boolean;
   isBlockTrainingPractice?: boolean;
+  isPronunciationPractice?: boolean;
+  pronunciationItem?: UserItemLocal | null;
+  nextPronunciation?: () => void;
 }>;
+
+type PracticeControlsProps = Pick<
+  PracticeSessionCardProps,
+  | 'completeCurrent'
+  | 'completeDisabled'
+  | 'isPronunciationPractice'
+  | 'nextKnown'
+  | 'nextPronunciation'
+  | 'nextRepeat'
+  | 'plusHint'
+  | 'repeatDisabled'
+  | 'revealed'
+  | 'showDirectionChange'
+>;
+
+function AudioStatusMessage({
+  audioError,
+  audioLoading,
+}: Pick<PracticeSessionCardProps, 'audioError' | 'audioLoading'>) {
+  if (audioLoading) {
+    return <DelayedNotification message={TEXTS.loadingAudio} />;
+  }
+  if (audioError) {
+    return <p className="font-headings color-info">{TEXTS.noAudio}</p>;
+  }
+  return null;
+}
+
+function PracticeControls({
+  completeCurrent,
+  completeDisabled = false,
+  isPronunciationPractice = false,
+  nextKnown,
+  nextPronunciation,
+  nextRepeat,
+  plusHint,
+  repeatDisabled = false,
+  revealed,
+  showDirectionChange,
+}: PracticeControlsProps) {
+  if (!revealed) {
+    return <HintButton onClick={plusHint} disabled={showDirectionChange} />;
+  }
+
+  if (isPronunciationPractice) {
+    return (
+      <ControlButton
+        icon={<RightArrowIcon />}
+        label={TEXTS.next}
+        onClick={nextPronunciation}
+        disabled={!nextPronunciation}
+      />
+    );
+  }
+
+  return (
+    <>
+      <MasterItemButton
+        onConfirm={() => {
+          void completeCurrent?.();
+        }}
+        disabled={completeDisabled || !completeCurrent || showDirectionChange}
+      />
+      <RepeatButton
+        onClick={() => {
+          void nextRepeat();
+        }}
+        disabled={repeatDisabled || showDirectionChange}
+      />
+      <KnownButton
+        onClick={() => {
+          void nextKnown();
+        }}
+        disabled={showDirectionChange}
+      />
+    </>
+  );
+}
 
 export default function PracticeSessionCard({
   noteId,
@@ -67,7 +153,11 @@ export default function PracticeSessionCard({
   playAudio,
   audioLoading,
   isBlockTrainingPractice = false,
+  isPronunciationPractice = false,
+  pronunciationItem = null,
+  nextPronunciation,
 }: PracticeSessionCardProps) {
+  const userId = useAuthStore((state) => state.userId);
   const dailyCount = useUserStore((state) => state.dailyCount);
   const { isGrammarVisible, grammarData, openGrammar, closeGrammar } = useGrammarViewer();
   const { isNoteVisible, noteData, openNote, closeNote } = useNoteViewer();
@@ -84,13 +174,8 @@ export default function PracticeSessionCard({
     !showAudioControls || showDirectionChange || audioLoading || (isCzToEn && !revealed);
   const grammarButtonDisabled = !showGrammarButton || showDirectionChange;
   const noteButtonDisabled = !showNoteButton || showDirectionChange;
-  let audioStatusMessage = null;
-
-  if (audioLoading) {
-    audioStatusMessage = <DelayedNotification message={TEXTS.loadingAudio} />;
-  } else if (audioError) {
-    audioStatusMessage = <p className="font-headings color-info">{TEXTS.noAudio}</p>;
-  }
+  const practiceControlColumns =
+    revealed && !isPronunciationPractice ? 'grid-cols-3' : 'grid-cols-1';
 
   if (isGrammarVisible) {
     return (
@@ -118,7 +203,9 @@ export default function PracticeSessionCard({
                 <p className="color-info font-headings">{TEXTS.blockTrainingFinishAll}</p>
               ) : null}
             </div>
-            <div className="flex min-h-0 items-center justify-center">{audioStatusMessage}</div>
+            <div className="flex min-h-0 items-center justify-center">
+              <AudioStatusMessage audioError={audioError} audioLoading={audioLoading} />
+            </div>
           </div>
           <div
             id="practice-main-content"
@@ -145,56 +232,49 @@ export default function PracticeSessionCard({
             <HelpText className="bottom-7.5">
               {isBlockTrainingPractice ? TEXTS.blockTrainingProgressHelp : TEXTS.progress}
             </HelpText>
-            <div
-              className="relative flex items-center gap-2 px-2 font-light"
-              title={TEXTS.nextStarProgress}
-            >
-              <PracticeStarsRow
-                starCount={starCount}
-                displayedChunkCount={displayedChunkCount}
-                starChunk={starChunk}
-                starsPerRow={starsPerRow}
-                size={STAR_SIZE}
-              />
-            </div>
-            <HelpText className="right-0 bottom-7.5 flex flex-col items-end">
-              {TEXTS.nextStarProgress}
-            </HelpText>
+            {!isPronunciationPractice && (
+              <>
+                <div
+                  className="relative flex items-center gap-2 px-2 font-light"
+                  title={TEXTS.nextStarProgress}
+                >
+                  <PracticeStarsRow
+                    starCount={starCount}
+                    displayedChunkCount={displayedChunkCount}
+                    starChunk={starChunk}
+                    starsPerRow={starsPerRow}
+                    size={STAR_SIZE}
+                  />
+                </div>
+                <HelpText className="right-0 bottom-7.5 flex flex-col items-end">
+                  {TEXTS.nextStarProgress}
+                </HelpText>
+              </>
+            )}
           </div>
         </button>
         <div
           id="practice-controls"
-          className={`relative grid w-full gap-1 ${revealed ? 'grid-cols-3' : 'grid-cols-1'}`}
+          className={`relative grid w-full gap-1 ${practiceControlColumns}`}
         >
-          {revealed ? (
-            <>
-              <MasterItemButton
-                onConfirm={() => {
-                  void completeCurrent?.();
-                }}
-                disabled={completeDisabled || !completeCurrent || showDirectionChange}
-              />
-              <RepeatButton
-                onClick={() => {
-                  void nextRepeat();
-                }}
-                disabled={repeatDisabled || showDirectionChange}
-              />
-              <KnownButton
-                onClick={() => {
-                  void nextKnown();
-                }}
-                disabled={showDirectionChange}
-              />
-            </>
-          ) : (
-            <HintButton onClick={plusHint} disabled={showDirectionChange} />
-          )}
+          <PracticeControls
+            completeCurrent={completeCurrent}
+            completeDisabled={completeDisabled}
+            isPronunciationPractice={isPronunciationPractice}
+            nextKnown={nextKnown}
+            nextPronunciation={nextPronunciation}
+            nextRepeat={nextRepeat}
+            plusHint={plusHint}
+            repeatDisabled={repeatDisabled}
+            revealed={revealed}
+            showDirectionChange={showDirectionChange}
+          />
         </div>
 
         <div className="pos-bottom-left-control">
           <PlayButton onClick={playAudio} disabled={audioControlsDisabled} />
           <VolumeSlider disabled={audioControlsDisabled} />
+          <PronunciationToggleButton userId={userId} item={pronunciationItem} showHelpText />
         </div>
         <div className="pos-bottom-right-control">
           <SecondaryControlButton
@@ -212,7 +292,6 @@ export default function PracticeSessionCard({
             </HelpText>
           </SecondaryControlButton>
           <InfoButton
-            className="note-control-emphasis"
             title={TEXTS.tooltipNotes}
             disabled={noteButtonDisabled}
             onClick={(e) => {

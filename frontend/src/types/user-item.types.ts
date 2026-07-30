@@ -33,6 +33,7 @@ export interface UserItemBase {
 export interface UserItemLocal extends UserItemBase {
   is_vocabulary: 0 | 1;
   is_practice_item: 0 | 1;
+  has_pronunciation_practice: 0 | 1;
   block_id: number;
   grammar_chunk_id: number;
   started_at: string;

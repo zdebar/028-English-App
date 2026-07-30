@@ -110,11 +110,33 @@ CREATE TABLE IF NOT EXISTS items (
     UNIQUE (lesson_id, sort_order) DEFERRABLE INITIALLY DEFERRED
 );
 
+CREATE TABLE IF NOT EXISTS pronunciation_groups (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE,
+  note TEXT,
+  sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 1),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  deleted_at TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS pronunciation_group_items (
+  pronunciation_group_id INTEGER NOT NULL
+    REFERENCES pronunciation_groups(id) ON DELETE CASCADE,
+  item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  deleted_at TIMESTAMPTZ,
+  PRIMARY KEY (pronunciation_group_id, item_id),
+  CONSTRAINT pronunciation_group_items_group_sort_order_key
+    UNIQUE (pronunciation_group_id, sort_order) DEFERRABLE INITIALLY DEFERRED
+);
+
 CREATE TABLE IF NOT EXISTS user_items (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
   progress_cz_to_en INTEGER NOT NULL DEFAULT 0 CHECK (progress_cz_to_en >= 0),
   progress_en_to_cz INTEGER NOT NULL DEFAULT 0 CHECK (progress_en_to_cz >= 0),
+  has_pronunciation_practice BOOLEAN NOT NULL DEFAULT FALSE,
   started_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   next_at_cz_to_en TIMESTAMPTZ,
@@ -181,6 +203,8 @@ CREATE INDEX IF NOT EXISTS idx_items_note_id ON public.items (note_id);
 CREATE INDEX IF NOT EXISTS idx_items_block_id ON public.items (block_id);
 CREATE INDEX IF NOT EXISTS idx_items_lesson_id ON public.items (lesson_id);
 CREATE INDEX IF NOT EXISTS idx_items_grammar_chunk_id ON public.items (grammar_chunk_id);
+CREATE INDEX IF NOT EXISTS idx_pronunciation_group_items_item_id
+  ON public.pronunciation_group_items (item_id);
 
 CREATE INDEX IF NOT EXISTS idx_user_items_user_updated_item
   ON public.user_items (user_id, updated_at, item_id)
@@ -206,6 +230,9 @@ CREATE INDEX IF NOT EXISTS idx_user_items_item_user
     mastered_at_cz_to_en,
     mastered_at_en_to_cz
   );
+
+CREATE INDEX IF NOT EXISTS idx_user_items_user_pronunciation_practice
+  ON public.user_items (user_id, has_pronunciation_practice);
 
 CREATE INDEX IF NOT EXISTS idx_user_items_history_item_id
   ON public.user_items_history (item_id);

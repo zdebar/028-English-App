@@ -13,6 +13,8 @@ const mocks = vi.hoisted(() => ({
   levelsSyncFromRemote: vi.fn(),
   lessonsSyncFromRemote: vi.fn(),
   audioSyncFromRemote: vi.fn(),
+  pronunciationGroupSyncFromRemote: vi.fn(),
+  pronunciationGroupItemSyncFromRemote: vi.fn(),
   getSession: vi.fn(),
 }));
 
@@ -90,6 +92,20 @@ vi.mock('@/database/models/audio-records', () => ({
   },
 }));
 
+vi.mock('@/database/models/pronunciation-groups', () => ({
+  default: {
+    syncFromRemote: (...args: unknown[]) =>
+      mocks.pronunciationGroupSyncFromRemote(...args),
+  },
+}));
+
+vi.mock('@/database/models/pronunciation-group-items', () => ({
+  default: {
+    syncFromRemote: (...args: unknown[]) =>
+      mocks.pronunciationGroupItemSyncFromRemote(...args),
+  },
+}));
+
 vi.mock('@/database/models/db', () => ({
   db: {
     metadata: {},
@@ -115,7 +131,7 @@ describe('data-sync.utils', () => {
     mocks.getFullSyncTime.mockReturnValue(0);
     mocks.initDbMappings.mockResolvedValue(undefined);
     mocks.restoreUnsavedFromLocalStorage.mockResolvedValue(undefined);
-    mocks.withSettledSummary.mockResolvedValue({ total: 7, success: 7, failed: 0 });
+    mocks.withSettledSummary.mockResolvedValue({ total: 10, success: 10, failed: 0 });
 
     mocks.userScoreSyncFromRemote.mockResolvedValue(undefined);
     mocks.userItemSyncFromRemote.mockResolvedValue(undefined);
@@ -124,6 +140,8 @@ describe('data-sync.utils', () => {
     mocks.levelsSyncFromRemote.mockResolvedValue(undefined);
     mocks.lessonsSyncFromRemote.mockResolvedValue(undefined);
     mocks.audioSyncFromRemote.mockResolvedValue(undefined);
+    mocks.pronunciationGroupSyncFromRemote.mockResolvedValue(undefined);
+    mocks.pronunciationGroupItemSyncFromRemote.mockResolvedValue(undefined);
     mocks.getSession.mockResolvedValue({ data: { session: { user: { id: 'u1' } } }, error: null });
   });
 
@@ -143,6 +161,8 @@ describe('data-sync.utils', () => {
     expect(mocks.grammarSyncFromRemote).toHaveBeenCalledWith(true);
     expect(mocks.levelsSyncFromRemote).toHaveBeenCalledWith(true);
     expect(mocks.lessonsSyncFromRemote).toHaveBeenCalledWith(true);
+    expect(mocks.pronunciationGroupSyncFromRemote).toHaveBeenCalledWith(true);
+    expect(mocks.pronunciationGroupItemSyncFromRemote).toHaveBeenCalledWith(true);
     expect(mocks.setFullSyncTime).toHaveBeenCalledWith('u1', 5000);
   });
 
@@ -158,11 +178,13 @@ describe('data-sync.utils', () => {
     expect(mocks.grammarSyncFromRemote).toHaveBeenCalledWith(false);
     expect(mocks.levelsSyncFromRemote).toHaveBeenCalledWith(false);
     expect(mocks.lessonsSyncFromRemote).toHaveBeenCalledWith(false);
+    expect(mocks.pronunciationGroupSyncFromRemote).toHaveBeenCalledWith(false);
+    expect(mocks.pronunciationGroupItemSyncFromRemote).toHaveBeenCalledWith(false);
     expect(mocks.setFullSyncTime).not.toHaveBeenCalled();
   });
 
   it('dataSync throws when user sync reports rejected results', async () => {
-    mocks.withSettledSummary.mockResolvedValueOnce({ total: 7, success: 6, failed: 1 });
+    mocks.withSettledSummary.mockResolvedValueOnce({ total: 10, success: 9, failed: 1 });
 
     await expect(dataSync('u1')).rejects.toThrow('Data synchronization error');
   });

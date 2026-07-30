@@ -32,6 +32,7 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     updated_at: '2024-01-01T00:00:00.000Z',
     is_vocabulary: 1,
     is_practice_item: 1,
+    has_pronunciation_practice: 0,
     block_id: 1,
     grammar_chunk_id: 10,
     started_at: '2024-01-01T00:00:00.000Z',
@@ -80,8 +81,8 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
   } as any,
 }));
 
-    mocks.practiceDeck.currentItem = mocks.makePracticeItem();
-    mocks.practiceDeck.trainingBlockId = null;
+mocks.practiceDeck.currentItem = mocks.makePracticeItem();
+mocks.practiceDeck.trainingBlockId = null;
 
 vi.mock('@/config/config', () => ({
   default: {
@@ -121,6 +122,7 @@ vi.mock('@/locales/cs', () => ({
     directionEnToCz: 'EN to CZ',
     blockTrainingFinishAll: 'Finish the entire block',
     blockTrainingProgressHelp: 'Round · completed items in this round',
+    next: 'Next',
   },
   ARIA_TEXTS: {
     setVolume: 'Nastavit hlasitost',
@@ -231,6 +233,11 @@ vi.mock('@/features/practice/hooks/use-practice-deck', () => ({
 }));
 
 vi.mock('@/features/help/HelpButton', () => ({ default: () => <div data-testid="help-button" /> }));
+vi.mock('@/features/pronunciation/PronunciationToggleButton', () => ({
+  default: ({ showHelpText }: { showHelpText?: boolean }) => (
+    <button data-testid="pronunciation-toggle" data-show-help-text={String(showHelpText)} />
+  ),
+}));
 vi.mock('@/features/help/HelpText', () => ({
   default: ({ children }: any) => <span>{children}</span>,
 }));
@@ -475,9 +482,7 @@ describe('PracticeCard', () => {
     const mainContent = container.querySelector('#practice-main-content') as HTMLElement;
     const bottomBar = container.querySelector('#bottom-bar') as HTMLElement;
 
-    expect(cardButton.className).toContain(
-      'grid-rows-[3.5rem_minmax(0,1fr)_3.5rem]',
-    );
+    expect(cardButton.className).toContain('grid-rows-[3.5rem_minmax(0,1fr)_3.5rem]');
     expect(topBar.className).toContain('h-14');
     expect(mainContent.className).toContain('items-center');
     expect(mainContent.querySelector('#item')).toBeTruthy();
@@ -544,7 +549,7 @@ describe('PracticeCard', () => {
     expect(mocks.practiceDeck.nextItem).toHaveBeenNthCalledWith(3, 'skip');
   });
 
-  it('renders audio controls in the left secondary control group', () => {
+  it('renders audio and pronunciation controls in the left secondary control group', () => {
     mocks.practiceDeck.revealed = true;
     mocks.practiceDeck.audioDisabled = false;
 
@@ -557,6 +562,18 @@ describe('PracticeCard', () => {
     expect(
       container.querySelector('.pos-bottom-left-control button[aria-label="Audio"]'),
     ).toBeTruthy();
+    expect(
+      container.querySelector('.pos-bottom-left-control [data-testid="pronunciation-toggle"]'),
+    ).toBeTruthy();
+    expect(
+      container.querySelector('.pos-bottom-right-control [data-testid="pronunciation-toggle"]'),
+    ).toBeNull();
+    expect(
+      container
+        .querySelector('.pos-bottom-left-control')
+        ?.lastElementChild?.getAttribute('data-testid'),
+    ).toBe('pronunciation-toggle');
+    expect(screen.getByTestId('pronunciation-toggle').dataset.showHelpText).toBe('true');
   });
 
   it('keeps audio controls visible but disabled when audio is not available', () => {
@@ -676,9 +693,7 @@ describe('PracticeCard', () => {
     mocks.practiceDeck.noteId = 88;
 
     const { container, rerender } = render(<PracticeCard />);
-    expect((screen.getByRole('button', { name: 'note' }) as HTMLButtonElement).disabled).toBe(
-      true,
-    );
+    expect((screen.getByRole('button', { name: 'note' }) as HTMLButtonElement).disabled).toBe(true);
 
     mocks.practiceDeck.revealed = true;
     rerender(<PracticeCard />);
@@ -689,7 +704,7 @@ describe('PracticeCard', () => {
     expect(
       container.querySelector('.pos-bottom-right-control [data-testid="info-button"]'),
     ).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'note' }).className).toContain(
+    expect(screen.getByRole('button', { name: 'note' }).className).not.toContain(
       'note-control-emphasis',
     );
     expect(screen.getByTestId('info-icon')).toBeTruthy();
@@ -741,6 +756,39 @@ describe('PracticeCard', () => {
     );
 
     expect((screen.getByTestId('master-btn') as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('shows only Next and hides stars after reveal in pronunciation practice', () => {
+    const next = vi.fn();
+    render(
+      <PracticeSessionCard
+        noteId={null}
+        grammarChunkId={10}
+        progressLabel="1 / 4"
+        isCzToEn={false}
+        revealed
+        czech="muž"
+        english="man"
+        pronunciation="mæn"
+        audioDisabled={false}
+        showDirectionChange={false}
+        handleReveal={vi.fn()}
+        plusHint={vi.fn()}
+        nextRepeat={vi.fn()}
+        nextKnown={vi.fn()}
+        audioError={false}
+        playAudio={vi.fn()}
+        audioLoading={false}
+        isPronunciationPractice
+        nextPronunciation={next}
+      />,
+    );
+
+    expect(screen.getByTitle('Next')).toBeTruthy();
+    expect(screen.queryByTestId('master-btn')).toBeNull();
+    expect(screen.queryByTestId('repeat-btn')).toBeNull();
+    expect(screen.queryByTestId('known-btn')).toBeNull();
+    expect(screen.queryByTestId('practice-stars-row')).toBeNull();
   });
 
   it('can disable the repeat control for specialized practice sessions', () => {

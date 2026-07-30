@@ -41,9 +41,15 @@ export default function Profile(): JSX.Element {
       <StandardButton
         onClick={() => navigate(ROUTES.vocabulary)}
         title={TEXTS.vocabularyOverviewTooltip}
-        className="mb-8"
       >
         <MenuButtonText>{TEXTS.vocabularyOverview}</MenuButtonText>
+      </StandardButton>
+      <StandardButton
+        onClick={() => navigate(ROUTES.pronunciationOverview)}
+        title={TEXTS.pronunciationOverviewTooltip}
+        className="mb-8"
+      >
+        <MenuButtonText>{TEXTS.pronunciationOverview}</MenuButtonText>
       </StandardButton>
       <SignoutButton />
       <DeleteUserButton />

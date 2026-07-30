@@ -99,7 +99,11 @@ describe('AppDB migrations', () => {
       })),
     };
 
+<<<<<<< Updated upstream
     expect(mocks.versions.map(({ number }) => number)).toEqual([1, 3]);
+=======
+    expect(mocks.versions.map(({ number }) => number)).toEqual([1, 2, 3]);
+>>>>>>> Stashed changes
     expect(version?.schema).toHaveProperty('user_items');
     expect(upgrade).toBeTypeOf('function');
     await upgrade?.(transaction);
@@ -139,6 +143,37 @@ describe('AppDB migrations', () => {
     expect(transaction.table.mock.calls.map(([name]) => name)).toEqual([
       'user_items',
       'user_blocks',
+    ]);
+  });
+
+  it('adds pronunciation stores and initializes the user item flag in version 3', async () => {
+    new AppDB();
+    const version = mocks.versions.find(({ number }) => number === 3);
+    const items: Array<Record<string, unknown>> = [{ item_id: 1 }, { item_id: 2 }];
+    const transaction = {
+      table: vi.fn(() => ({
+        toCollection: () => ({
+          modify: async (callback: (value: Record<string, unknown>) => void) => {
+            items.forEach(callback);
+          },
+        }),
+      })),
+    };
+
+    expect(version?.schema).toMatchObject({
+      pronunciation_groups: 'id, sort_order',
+      pronunciation_group_items:
+        '[pronunciation_group_id+item_id], [pronunciation_group_id+sort_order], item_id',
+    });
+    expect(version?.schema?.user_items).toContain(
+      '[user_id+has_pronunciation_practice]',
+    );
+
+    await version?.upgrade?.(transaction);
+
+    expect(items).toEqual([
+      { item_id: 1, has_pronunciation_practice: 0 },
+      { item_id: 2, has_pronunciation_practice: 0 },
     ]);
   });
 });

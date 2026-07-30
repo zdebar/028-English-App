@@ -11,11 +11,14 @@ import type Metadata from '@/database/models/metadata';
 import type Lessons from '@/database/models/lessons';
 import type Levels from '@/database/models/levels';
 import type Notes from '@/database/models/notes';
+import type PronunciationGroup from '@/database/models/pronunciation-groups';
+import type PronunciationGroupItem from '@/database/models/pronunciation-group-items';
 
 const LEGACY_USER_ITEMS_SCHEMA =
   '[user_id+item_id], [user_id+grammar_chunk_id+started_at], [user_id+is_vocabulary+started_at], [user_id+is_practice_item+is_vocabulary+started_at], [user_id+started_at], [user_id+updated_at], [user_id+next_at+sort_order], [user_id+next_at+mastered_at+sort_order], [user_id+is_vocabulary+next_at+mastered_at+sort_order], [user_id+is_practice_item+is_vocabulary+next_at+mastered_at+sort_order], [user_id+lesson_id+is_vocabulary+started_at], [user_id+lesson_id+is_practice_item+is_vocabulary+started_at], [user_id+block_id], [user_id+is_practice_item+next_at+mastered_at+curriculum_sort_path]';
 const USER_ITEMS_SCHEMA =
   '[user_id+item_id], [user_id+grammar_chunk_id+started_at], [user_id+is_vocabulary+started_at], [user_id+is_practice_item+is_vocabulary+started_at], [user_id+started_at], [user_id+updated_at], [user_id+lesson_id+is_vocabulary+started_at], [user_id+lesson_id+is_practice_item+is_vocabulary+started_at], [user_id+block_id], [user_id+is_practice_item+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path], [user_id+is_practice_item+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]';
+const PRONUNCIATION_USER_ITEMS_SCHEMA = `${USER_ITEMS_SCHEMA}, [user_id+has_pronunciation_practice]`;
 
 /**
  * Application IndexedDB wrapper built on Dexie.
@@ -28,6 +31,8 @@ export default class AppDB extends Dexie {
   levels!: EntityTable<Levels, 'id'>;
   lessons!: EntityTable<Lessons, 'id'>;
   notes!: EntityTable<Notes, 'id'>;
+  pronunciation_groups!: EntityTable<PronunciationGroup, 'id'>;
+  pronunciation_group_items!: EntityTable<PronunciationGroupItem, any>;
   grammar_groups!: EntityTable<GrammarGroup, 'id'>;
   grammar_chunks!: EntityTable<GrammarChunk, 'id'>;
   user_items!: EntityTable<UserItem, any>;
@@ -106,6 +111,22 @@ export default class AppDB extends Dexie {
             delete block.progress;
             delete block.next_at;
             delete block.mastered_at;
+          });
+      });
+
+    this.version(3)
+      .stores({
+        user_items: PRONUNCIATION_USER_ITEMS_SCHEMA,
+        pronunciation_groups: 'id, sort_order',
+        pronunciation_group_items:
+          '[pronunciation_group_id+item_id], [pronunciation_group_id+sort_order], item_id',
+      })
+      .upgrade(async (transaction) => {
+        await transaction
+          .table('user_items')
+          .toCollection()
+          .modify((item) => {
+            item.has_pronunciation_practice = 0;
           });
       });
   }
