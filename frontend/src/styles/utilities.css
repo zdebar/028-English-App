@@ -12,7 +12,7 @@
   .color-button {
     @apply bg-button-light border-button-light;
     @apply dark:bg-button-dark dark:border-button-dark;
-    @apply disabled:bg-inherit disabled:text-disabled-light dark:disabled:text-disabled-dark;
+    @apply disabled:text-disabled-light dark:disabled:text-disabled-dark disabled:bg-inherit;
     @apply disabled:border-disabled-light dark:disabled:border-disabled-dark;
   }
 
@@ -36,15 +36,15 @@
     @apply bg-button-light dark:bg-button-dark;
   }
 
-  .note-control-emphasis {
+  .pronunciation-control-emphasis {
     @apply text-inherit;
   }
 
-  .note-control-emphasis:not(:disabled) svg {
+  .pronunciation-control-emphasis:not(:disabled) svg {
     @apply text-cyan-900 dark:text-cyan-300;
   }
 
-  .note-control-emphasis:not(:disabled):hover svg {
+  .pronunciation-control-emphasis:not(:disabled):hover svg {
     @apply text-cyan-950 dark:text-cyan-200;
   }
 

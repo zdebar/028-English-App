@@ -10,6 +10,8 @@ import UserBlock from '@/database/models/user-blocks';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
 import Notes from './notes';
+import PronunciationGroup from './pronunciation-groups';
+import PronunciationGroupItem from './pronunciation-group-items';
 
 let isInitialized = false;
 
@@ -21,6 +23,8 @@ export async function initDbMappings(): Promise<void> {
   db.grammar_groups.mapToClass(GrammarGroup);
   db.grammar_chunks.mapToClass(GrammarChunk);
   db.notes.mapToClass(Notes);
+  db.pronunciation_groups.mapToClass(PronunciationGroup);
+  db.pronunciation_group_items.mapToClass(PronunciationGroupItem);
   db.levels.mapToClass(Levels);
   db.lessons.mapToClass(Lessons);
   db.user_scores.mapToClass(UserScore);

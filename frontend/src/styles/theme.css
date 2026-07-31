@@ -13,11 +13,11 @@
   --color-dark: white;
 
   /** background colors **/
-  --color-background-light: #f7b740;
+  --color-background-light: #fcc555;
   --color-background-dark: #111827;
 
   /** button colors **/
-  --color-button-light: #f8c04a;
+  --color-button-light: #f7b740;
   --color-button-dark: #19202e;
   --color-button-hover: white;
   --color-signin-button: white;
@@ -47,7 +47,7 @@
   --color-progress-bg: white;
   --color-new-progress-light: #87d5e8;
   --color-old-progress-light: #42bddb;
-  --color-old-progress-dark: #f7ae25;
+  --color-old-progress-dark: #f7b740;
   --color-new-progress-dark: #f7d565;
   --color-divisions: #747474;
 

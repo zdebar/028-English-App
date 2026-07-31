@@ -12,6 +12,7 @@ import OverviewCard from '@/components/UI/OverviewCard';
 import { useToastStore } from '../toast/use-toast-store';
 import { useEffect } from 'react';
 import { useAuthStore } from '../auth/use-auth-store';
+import { ROUTES } from '@/config/routes.config';
 
 /**
  * LevelsOverview component
@@ -50,7 +51,7 @@ export default function LevelsOverview() {
   };
 
   return (
-    <OverviewCard onClose={() => navigate('/profile')} buttonTitle={TEXTS.levelsOverview}>
+    <OverviewCard onClose={() => navigate(ROUTES.overviews)} buttonTitle={TEXTS.levelsOverview}>
       <DataState
         loading={levelsLoading}
         hasData={levels.length > 0}

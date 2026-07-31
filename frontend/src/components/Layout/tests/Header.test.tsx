@@ -23,11 +23,13 @@ vi.mock('@/components/UI/buttons/HeaderButton', () => ({
 }));
 
 vi.mock('@/components/UI/icons/HomeIcon', () => ({ default: () => <span /> }));
+vi.mock('@/components/UI/icons/BookIcon', () => ({ default: () => <span /> }));
 vi.mock('@/components/UI/icons/UserIcon', () => ({ default: () => <span /> }));
 
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
     tooltipHome: 'Domu',
+    tooltipOverviews: 'Přehledy',
     tooltipProfile: 'Profil',
   },
 }));
@@ -44,6 +46,7 @@ describe('Header', () => {
 
     expect(screen.getByTestId('theme-switch')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Domu' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Přehledy' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Profil' })).toBeTruthy();
   });
 
@@ -51,6 +54,7 @@ describe('Header', () => {
     mocks.userId = null;
     render(<Header />);
 
+    expect(screen.getByRole('button', { name: 'Přehledy' }).hasAttribute('disabled')).toBe(true);
     expect(screen.getByRole('button', { name: 'Profil' }).hasAttribute('disabled')).toBe(true);
   });
 });

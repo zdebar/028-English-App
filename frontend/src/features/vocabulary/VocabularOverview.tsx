@@ -8,6 +8,7 @@ import { useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import VocabularyDetailCard from './VocabularyDetailCard';
 import VocabularyList from './VocabularyList';
+import { ROUTES } from '@/config/routes.config';
 
 /**
  * VocabularyOverview component
@@ -82,7 +83,7 @@ export default function VocabularyOverview() {
         setDisplayField={setDisplayField}
         setVisibleCount={setVisibleCount}
         onSelect={handleSelectWord}
-        onClose={() => navigate('/profile')}
+        onClose={() => navigate(ROUTES.overviews)}
       />
     );
   }

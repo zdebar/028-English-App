@@ -39,7 +39,10 @@ export const OVERVIEW_TEXTS = {
   masteredAt: 'Naučeno',
   restartItemProgress: 'Restartovat pokrok této položky',
 
-  // Profile Page
+  // Overviews Page
+  overviews: 'Přehledy',
+  progressOverviews: 'Pokrok',
+  pronunciationSettings: 'Výslovnost',
   levelsOverview: 'Přehled CEFR úrovní',
   levelsOverviewTooltip: 'Přehled CEFR úrovní s pokrokem',
   topicsOverview: 'Přehled témat',
@@ -48,4 +51,12 @@ export const OVERVIEW_TEXTS = {
   grammarOverviewTooltip: 'Přehled započaté gramatiky',
   vocabularyOverview: 'Přehled slovíček',
   vocabularyOverviewTooltip: 'Přehled započatých slovíček',
+  pronunciationGroups: 'Skupiny výslovnosti',
+  pronunciationGroupsTooltip: 'Výběr skupin podobně znějících slovíček k procvičování',
+  pronunciationStartedHelp: 'započato/celkem položek',
+  noPronunciationGroups: 'Žádné dostupné skupiny výslovnosti.',
+  noPronunciationGroupItems: 'V této skupině nejsou dostupná slovíčka.',
+  addPronunciationGroup: 'Přidat skupinu',
+  pronunciationGroupAdded: 'Přidáno',
+  pronunciationGroupAddError: 'Skupinu se nepodařilo přidat.',
 } as const;

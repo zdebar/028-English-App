@@ -63,6 +63,20 @@ BEFORE UPDATE ON public.items
 FOR EACH ROW
 EXECUTE FUNCTION public.set_updated_at();
 
+DROP TRIGGER IF EXISTS trg_set_updated_at__pronunciation_groups
+  ON public.pronunciation_groups;
+CREATE TRIGGER trg_set_updated_at__pronunciation_groups
+BEFORE UPDATE ON public.pronunciation_groups
+FOR EACH ROW
+EXECUTE FUNCTION public.set_updated_at();
+
+DROP TRIGGER IF EXISTS trg_set_updated_at__pronunciation_group_items
+  ON public.pronunciation_group_items;
+CREATE TRIGGER trg_set_updated_at__pronunciation_group_items
+BEFORE UPDATE ON public.pronunciation_group_items
+FOR EACH ROW
+EXECUTE FUNCTION public.set_updated_at();
+
 DROP TRIGGER IF EXISTS trg_set_updated_at__user_items ON public.user_items;
 CREATE TRIGGER trg_set_updated_at__user_items
 BEFORE UPDATE ON public.user_items

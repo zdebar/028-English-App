@@ -15,6 +15,7 @@ import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { DataState } from '@/components/UI/DataState';
 import GrammarDetailCard from './GrammarDetailCard';
+import { ROUTES } from '@/config/routes.config';
 
 export default function GrammarOverview(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
@@ -75,7 +76,7 @@ export default function GrammarOverview(): JSX.Element {
       <OverviewCard
         buttonTitle={TEXTS.grammarOverview}
         loading={loading}
-        onClose={() => navigate('/profile')}
+        onClose={() => navigate(ROUTES.overviews)}
       >
         <DataState loading={loading} hasData={hasData} noDataMessage={TEXTS.noGrammar}>
           {grammarList.map((item, index) => (

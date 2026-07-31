@@ -8,6 +8,8 @@ export const TableName = {
   Lessons: 'lessons',
   Blocks: 'blocks',
   Notes: 'notes',
+  PronunciationGroups: 'pronunciation_groups',
+  PronunciationGroupItems: 'pronunciation_group_items',
 } as const;
 
 export type TableName = (typeof TableName)[keyof typeof TableName];

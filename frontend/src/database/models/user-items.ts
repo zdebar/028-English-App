@@ -31,6 +31,7 @@ type UserItemAPI = Omit<
   UserItemLocal,
   | 'is_vocabulary'
   | 'is_practice_item'
+  | 'has_pronunciation_practice'
   | 'block_id'
   | 'grammar_chunk_id'
   | 'started_at'
@@ -42,6 +43,7 @@ type UserItemAPI = Omit<
 > & {
   is_vocabulary: boolean;
   is_practice_item?: boolean;
+  has_pronunciation_practice?: boolean;
   block_id: number | null;
   grammar_chunk_id: number | null;
   started_at: string | null;
@@ -59,6 +61,7 @@ type UserItemExport = Pick<
   | 'progress_cz_to_en'
   | 'progress_en_to_cz'
   | 'progress_history'
+  | 'has_pronunciation_practice'
   | 'started_at'
   | 'updated_at'
   | 'next_at_cz_to_en'
@@ -79,6 +82,7 @@ function convertLocalToExport(localItem: UserItemLocal): UserItemExport {
     next_at_en_to_cz,
     mastered_at_cz_to_en,
     mastered_at_en_to_cz,
+    has_pronunciation_practice,
   } = localItem;
   return {
     user_id,
@@ -86,6 +90,7 @@ function convertLocalToExport(localItem: UserItemLocal): UserItemExport {
     progress_history: localItem.progress_history ?? [],
     progress_cz_to_en,
     progress_en_to_cz,
+    has_pronunciation_practice: has_pronunciation_practice === 1,
     updated_at,
     started_at: started_at === NULL_DATE ? null : started_at,
     next_at_cz_to_en: next_at_cz_to_en === NULL_DATE ? null : next_at_cz_to_en,
@@ -102,6 +107,7 @@ function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
     ...apiItem,
     is_vocabulary: apiItem.is_vocabulary ? 1 : 0,
     is_practice_item: apiItem.is_practice_item === false ? 0 : 1,
+    has_pronunciation_practice: apiItem.has_pronunciation_practice ? 1 : 0,
     started_at: apiItem.started_at ?? NULL_DATE,
     next_at_cz_to_en: apiItem.next_at_cz_to_en ?? NULL_DATE,
     next_at_en_to_cz: apiItem.next_at_en_to_cz ?? NULL_DATE,
@@ -133,6 +139,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   audio!: string | null;
   is_vocabulary!: 0 | 1; // boolean represented as 0 or 1
   is_practice_item!: 0 | 1; // boolean represented as 0 or 1
+  has_pronunciation_practice!: 0 | 1;
   sort_order!: number;
   curriculum_sort_path!: CurriculumSortPath;
   note_id!: number;
@@ -338,6 +345,90 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .between([userId, 1, 1, Dexie.minKey], [userId, 1, 1, NULL_DATE], true, false)
       .toArray();
     return result;
+  }
+
+  /**
+   * Returns whether an item can be selected for pronunciation practice.
+   */
+  static isPronunciationEligible(
+    item: Pick<UserItemLocal, 'is_vocabulary' | 'audio'>,
+  ): boolean {
+    return item.is_vocabulary === 1 && Boolean(item.audio?.trim());
+  }
+
+  /**
+   * Reads the persisted pronunciation selection for one user item.
+   */
+  static async getPronunciationSelection(
+    userId: string,
+    itemId: number,
+  ): Promise<boolean> {
+    const item = await db.user_items.get([userId, itemId]);
+    return item?.has_pronunciation_practice === 1;
+  }
+
+  /**
+   * Toggles one eligible item's pronunciation selection without changing progress.
+   */
+  static async togglePronunciationPractice(
+    userId: string,
+    itemId: number,
+    dateTime: string = new Date().toISOString(),
+  ): Promise<boolean> {
+    const item = await db.user_items.get([userId, itemId]);
+    if (!item) {
+      throw new Error(`No user items found for item ID ${itemId}.`);
+    }
+    if (!this.isPronunciationEligible(item)) {
+      throw new Error(`Item ${itemId} is not eligible for pronunciation practice.`);
+    }
+
+    const enabled = item.has_pronunciation_practice !== 1;
+    await db.user_items.update([userId, itemId], {
+      has_pronunciation_practice: enabled ? 1 : 0,
+      updated_at: dateTime,
+    });
+    return enabled;
+  }
+
+  /**
+   * Counts selected pronunciation items using only the dedicated compound index.
+   */
+  static async getPronunciationPracticeCount(userId: string): Promise<number> {
+    return db.user_items
+      .where('[user_id+has_pronunciation_practice]')
+      .equals([userId, 1])
+      .count();
+  }
+
+  /**
+   * Builds a stable snapshot of every selected, eligible pronunciation item.
+   */
+  static async getPronunciationPracticeDeck(userId: string): Promise<UserItemLocal[]> {
+    const [items, memberships] = await Promise.all([
+      db.user_items
+        .where('[user_id+has_pronunciation_practice]')
+        .equals([userId, 1])
+        .toArray(),
+      db.pronunciation_group_items.toArray(),
+    ]);
+    const firstGroupByItem = new Map<number, number>();
+    for (const membership of memberships) {
+      const currentGroupId = firstGroupByItem.get(membership.item_id);
+      if (currentGroupId === undefined || membership.pronunciation_group_id < currentGroupId) {
+        firstGroupByItem.set(membership.item_id, membership.pronunciation_group_id);
+      }
+    }
+
+    return items
+      .filter((item) => this.isPronunciationEligible(item))
+      .sort(
+        (left, right) =>
+          (firstGroupByItem.get(left.item_id) ?? Number.MAX_SAFE_INTEGER) -
+            (firstGroupByItem.get(right.item_id) ?? Number.MAX_SAFE_INTEGER) ||
+          compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path) ||
+          left.item_id - right.item_id,
+      );
   }
 
   /**
@@ -858,4 +949,15 @@ function resolveMasteredAt(
 
 function isPracticeItem(item: Pick<UserItemLocal, 'is_practice_item'>): boolean {
   return item.is_practice_item !== 0;
+}
+
+function compareCurriculumPaths(
+  left: CurriculumSortPath,
+  right: CurriculumSortPath,
+): number {
+  for (let index = 0; index < left.length; index += 1) {
+    const difference = left[index] - right[index];
+    if (difference !== 0) return difference;
+  }
+  return 0;
 }

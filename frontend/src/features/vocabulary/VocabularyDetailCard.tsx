@@ -11,6 +11,8 @@ import InfoButton from '@/features/notes/InfoButton';
 import NoteDetailCard from '@/features/notes/NoteDetailCard';
 import { useNoteViewer } from '@/features/notes/use-note-viewer';
 import { useToastStore } from '@/features/toast/use-toast-store';
+import PronunciationToggleButton from '@/features/pronunciation/PronunciationToggleButton';
+import { useAuthStore } from '@/features/auth/use-auth-store';
 
 const NOT_AVAILABLE = TEXTS.notAvailable;
 
@@ -36,6 +38,7 @@ export default function VocabularyDetailCard({
   onClose,
   onReset,
 }: VocabularyDetailCardProps) {
+  const userId = useAuthStore((state) => state.userId);
   const baseProperties = [
     { label: lowercaseInitial(TEXTS.czech), value: selectedWord?.czech },
     { label: lowercaseInitial(TEXTS.english), value: selectedWord?.english },
@@ -177,6 +180,7 @@ export default function VocabularyDetailCard({
             }}
           />
         )}
+        <PronunciationToggleButton userId={userId} item={selectedWord} />
         <HelpButton />
       </div>
     </OverviewCard>
