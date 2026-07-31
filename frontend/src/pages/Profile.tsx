@@ -24,7 +24,7 @@ export default function Profile(): JSX.Element {
           {userEmail || TEXTS.notAvailable}
         </PropertyView>
       </div>
-      <SignoutButton className="mt-8" />
+      <SignoutButton />
       <DeleteUserButton />
     </div>
   );

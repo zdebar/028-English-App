@@ -11,7 +11,7 @@ export default function Overviews(): JSX.Element {
   return (
     <div className="card-width grow-0 gap-1">
       <h1 className="sr-only">{TEXTS.overviews}</h1>
-      <section aria-label={TEXTS.progressOverviews} className="mt-6">
+      <section aria-label={TEXTS.progressOverviews}>
         <div className="flex flex-col gap-1">
           <StandardButton
             className="w-full"
