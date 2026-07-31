@@ -8,6 +8,8 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import { useEffect } from 'react';
 
+const doNothing = () => undefined;
+
 export default function PronunciationPractice() {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
@@ -28,14 +30,14 @@ export default function PronunciationPractice() {
       grammarChunkId={deck.currentItem.grammar_chunk_id}
       progressLabel={deck.progressLabel}
       isCzToEn={false}
-      revealed={deck.revealed}
+      revealed
       czech={deck.czech}
       english={deck.english}
       pronunciation={deck.pronunciation}
       audioDisabled={deck.audioDisabled}
-      showDirectionChange={deck.showDirectionChange}
-      handleReveal={deck.handleReveal}
-      plusHint={deck.plusHint}
+      showDirectionChange={false}
+      handleReveal={doNothing}
+      plusHint={doNothing}
       nextRepeat={deck.next}
       nextKnown={deck.next}
       audioError={deck.audioError}

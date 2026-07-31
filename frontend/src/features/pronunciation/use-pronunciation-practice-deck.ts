@@ -1,65 +1,65 @@
+import config from '@/config/config';
 import UserItem from '@/database/models/user-items';
-import { usePracticeCardState } from '@/features/practice/hooks/use-practice-card-state';
+import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { useFetch } from '@/hooks/use-fetch';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useState } from 'react';
 
+const NBSP = '\u00A0';
+
 export function usePronunciationPracticeDeck(userId: string | null) {
-  const [items, setItems] = useState<UserItemLocal[]>([]);
   const [index, setIndex] = useState(0);
-  const [revealed, setRevealed] = useState(true);
 
   const fetchDeck = useCallback(async () => {
     if (!userId) return [];
     return UserItem.getPronunciationPracticeDeck(userId);
   }, [userId]);
-  const { data, loading, error } = useFetch<UserItemLocal[]>(fetchDeck);
+  const { data, loading, error, reload } = useFetch<UserItemLocal[]>(fetchDeck);
 
+  const items = data ?? [];
   const currentItem = items[index] ?? null;
-  const cardState = usePracticeCardState({
-    currentItem,
-    isCzToEn: false,
-    revealed,
-    setRevealed,
-  });
+  const {
+    playAudio,
+    audioError,
+    loading: audioLoading,
+  } = useAudioManager(currentItem?.audio ?? null);
+  const audioDisabled = !currentItem?.audio || audioError;
 
   useEffect(() => {
-    setItems(data ?? []);
-    setIndex(0);
-    setRevealed(true);
-    cardState.resetHint();
-    cardState.hideDirectionChange();
-  }, [cardState.hideDirectionChange, cardState.resetHint, data]);
+    if (audioDisabled || audioLoading) return;
+
+    const timeoutId = globalThis.setTimeout(() => {
+      playAudio();
+    }, config.practice.audioDelay);
+
+    return () => {
+      globalThis.clearTimeout(timeoutId);
+    };
+  }, [audioDisabled, audioLoading, currentItem, playAudio]);
 
   const next = useCallback(async () => {
     if (!currentItem) return;
 
     if (index < items.length - 1) {
-      setIndex(index + 1);
-    } else {
-      const nextRoundItems = await fetchDeck();
-      setItems(nextRoundItems);
-      setIndex(0);
+      setIndex((currentIndex) => currentIndex + 1);
+      return;
     }
 
-    setRevealed(true);
-    cardState.resetHint();
-    cardState.hideDirectionChange();
-  }, [
-    cardState.hideDirectionChange,
-    cardState.resetHint,
-    currentItem,
-    fetchDeck,
-    index,
-    items.length,
-  ]);
+    setIndex(0);
+    await reload();
+  }, [currentItem, index, items.length, reload]);
 
   return {
-    ...cardState,
     currentItem,
-    revealed,
     loading,
     error,
+    audioDisabled,
+    audioError,
+    audioLoading,
+    czech: currentItem?.czech,
+    english: currentItem?.english,
+    playAudio,
+    pronunciation: currentItem?.pronunciation || NBSP,
     progressLabel: items.length > 0 ? `${index + 1} / ${items.length}` : '0 / 0',
     next,
   };

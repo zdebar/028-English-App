@@ -5,7 +5,7 @@ interface UseFetchResult<T> {
   hasData: boolean;
   loading: boolean;
   error: Error | null;
-  reload: () => void;
+  reload: () => Promise<void>;
 }
 
 function toError(error: unknown): Error {
