@@ -42,7 +42,7 @@ export default function PronunciationGroupDetail() {
 
   useEffect(() => {
     if (validGroupId) return;
-    navigate(ROUTES.pronunciationOverview, { replace: true });
+    navigate(ROUTES.pronunciationGroups, { replace: true });
   }, [navigate, validGroupId]);
 
   useEffect(() => {
@@ -72,7 +72,7 @@ export default function PronunciationGroupDetail() {
     <OverviewCard
       buttonTitle={data?.group.name}
       loading={loading}
-      onClose={() => navigate(ROUTES.pronunciationOverview)}
+      onClose={() => navigate(ROUTES.pronunciationGroups)}
     >
       <DataState
         loading={loading}

@@ -89,7 +89,7 @@ vi.mock('@/components/UI/DataState', () => ({
 
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
-    pronunciationOverview: 'Přehled výslovnosti',
+    pronunciationGroups: 'Skupiny výslovnosti',
     noPronunciationGroups: 'No groups',
     noPronunciationGroupItems: 'No items',
     pronunciationGroupAdded: 'Přidáno',
@@ -133,6 +133,9 @@ describe('Pronunciation overview screens', () => {
     expect(screen.getByText('započato/celkem položek')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Help' })).toBeTruthy();
 
+    fireEvent.click(screen.getByTestId('close'));
+    expect(mocks.navigate).toHaveBeenCalledWith('/overviews');
+
     fireEvent.click(screen.getByRole('button', { name: /æ/ }));
     expect(mocks.navigate).toHaveBeenCalledWith('/pronunciation/1');
   });
@@ -149,6 +152,9 @@ describe('Pronunciation overview screens', () => {
     };
 
     render(<PronunciationGroupDetail />);
+
+    fireEvent.click(screen.getByTestId('close'));
+    expect(mocks.navigate).toHaveBeenCalledWith('/pronunciation');
 
     fireEvent.click(screen.getByTitle('mæn'));
     await waitFor(() => expect(mocks.playAudio).toHaveBeenCalledWith('man.opus'));

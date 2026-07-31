@@ -26,6 +26,7 @@ import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import Vocabulary from '@/pages/Vocabulary';
 import Guide from '@/pages/Guide';
 import Profile from '@/pages/Profile';
+import Overviews from '@/pages/Overviews';
 import PronunciationPractice from '@/pages/PronunciationPractice';
 import PronunciationOverviewPage from '@/pages/PronunciationOverviewPage';
 import PronunciationGroupPage from '@/pages/PronunciationGroupPage';
@@ -74,13 +75,14 @@ export default function App() {
               <Route path={ROUTES.practiceBlockTraining} element={<BlockTrainingPractice />} />
               <Route path={ROUTES.pronunciationPractice} element={<PronunciationPractice />} />
               <Route path={ROUTES.practiceOverview} element={<PracticeOverview />} />
+              <Route path={ROUTES.overviews} element={<Overviews />} />
               <Route path={ROUTES.profile} element={<Profile />} />
               <Route path={ROUTES.levels} element={<Levels />} />
               <Route path={ROUTES.topics} element={<Topics />} />
               <Route path={ROUTES.topicDetail} element={<TopicItems />} />
               <Route path={ROUTES.grammar} element={<Grammar />} />
               <Route path={ROUTES.vocabulary} element={<Vocabulary />} />
-              <Route path={ROUTES.pronunciationOverview} element={<PronunciationOverviewPage />} />
+              <Route path={ROUTES.pronunciationGroups} element={<PronunciationOverviewPage />} />
               <Route path={ROUTES.pronunciationGroup} element={<PronunciationGroupPage />} />
             </Route>
             <Route

@@ -405,14 +405,27 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Builds a stable snapshot of every selected, eligible pronunciation item.
    */
   static async getPronunciationPracticeDeck(userId: string): Promise<UserItemLocal[]> {
-    const items = await db.user_items
-      .where('[user_id+has_pronunciation_practice]')
-      .equals([userId, 1])
-      .toArray();
+    const [items, memberships] = await Promise.all([
+      db.user_items
+        .where('[user_id+has_pronunciation_practice]')
+        .equals([userId, 1])
+        .toArray(),
+      db.pronunciation_group_items.toArray(),
+    ]);
+    const firstGroupByItem = new Map<number, number>();
+    for (const membership of memberships) {
+      const currentGroupId = firstGroupByItem.get(membership.item_id);
+      if (currentGroupId === undefined || membership.pronunciation_group_id < currentGroupId) {
+        firstGroupByItem.set(membership.item_id, membership.pronunciation_group_id);
+      }
+    }
+
     return items
       .filter((item) => this.isPronunciationEligible(item))
       .sort(
         (left, right) =>
+          (firstGroupByItem.get(left.item_id) ?? Number.MAX_SAFE_INTEGER) -
+            (firstGroupByItem.get(right.item_id) ?? Number.MAX_SAFE_INTEGER) ||
           compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path) ||
           left.item_id - right.item_id,
       );

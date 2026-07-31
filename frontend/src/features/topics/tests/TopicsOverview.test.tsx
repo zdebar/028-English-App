@@ -121,11 +121,11 @@ describe('TopicsOverview', () => {
     expect(screen.getByText('Letters')).toBeTruthy();
   });
 
-  it('navigates to profile on close', () => {
+  it('navigates to overviews on close', () => {
     render(<TopicsOverview />);
 
     fireEvent.click(screen.getByTestId('close-button'));
-    expect(mocks.navigate).toHaveBeenCalledWith('/profile');
+    expect(mocks.navigate).toHaveBeenCalledWith('/overviews');
   });
 
   it('renders empty state when data loading fails', () => {

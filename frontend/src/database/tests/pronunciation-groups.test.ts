@@ -19,7 +19,10 @@ vi.mock('@/config/config', () => ({
 vi.mock('@/database/models/db', () => ({
   db: {
     pronunciation_groups: {
-      orderBy: () => ({ toArray: async () => mocks.groups }),
+      orderBy: (field: string) => ({
+        toArray: async () =>
+          field === 'id' ? [...mocks.groups].sort((left, right) => left.id - right.id) : mocks.groups,
+      }),
       get: async (id: number) => mocks.groups.find((group) => group.id === id),
     },
     pronunciation_group_items: {
@@ -111,13 +114,30 @@ describe('PronunciationGroup', () => {
     ]);
   });
 
+  it('returns groups ordered by id', async () => {
+    mocks.groups = [
+      { ...mocks.groups[0], id: 2, name: 'Second' },
+      { ...mocks.groups[0], id: 1, name: 'First' },
+    ];
+    mocks.memberships = [
+      { pronunciation_group_id: 1, item_id: 1, sort_order: 1 },
+      { pronunciation_group_id: 1, item_id: 2, sort_order: 2 },
+      { pronunciation_group_id: 2, item_id: 1, sort_order: 1 },
+      { pronunciation_group_id: 2, item_id: 2, sort_order: 2 },
+    ];
+
+    const groups = await PronunciationGroup.getOverview('u1');
+
+    expect(groups.map((group) => group.id)).toEqual([1, 2]);
+  });
+
   it('hides groups with fewer than two available items', async () => {
     mocks.items[1].started_at = '1970-01-01T00:00:00.000Z';
 
     await expect(PronunciationGroup.getOverview('u1')).resolves.toEqual([]);
   });
 
-  it('returns detail in curated membership order', async () => {
+  it('returns detail in curriculum order regardless of membership order', async () => {
     mocks.memberships = [
       { pronunciation_group_id: 1, item_id: 2, sort_order: 1 },
       { pronunciation_group_id: 1, item_id: 1, sort_order: 2 },
@@ -125,7 +145,7 @@ describe('PronunciationGroup', () => {
 
     const detail = await PronunciationGroup.getDetail('u1', 1);
 
-    expect(detail?.items.map((entry) => entry.item_id)).toEqual([2, 1]);
+    expect(detail?.items.map((entry) => entry.item_id)).toEqual([1, 2]);
     expect(detail?.selected_count).toBe(1);
   });
 

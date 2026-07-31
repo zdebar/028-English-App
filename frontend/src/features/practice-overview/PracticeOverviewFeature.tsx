@@ -136,7 +136,10 @@ export default function PracticeOverviewFeature(): JSX.Element {
   const hasMoreScores = scores.length > visibleCount;
 
   return (
-    <OverviewCard buttonTitle={TEXTS.practiceOverviewTitle} onClose={() => navigate(ROUTES.home)}>
+    <OverviewCard
+      buttonTitle={TEXTS.practiceOverviewTitle}
+      onClose={() => navigate(ROUTES.overviews)}
+    >
       <div className="flex flex-col pb-4">
         <DataState
           loading={loading}

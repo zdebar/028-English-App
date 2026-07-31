@@ -37,7 +37,7 @@ export default function TopicsOverview() {
   }, [showToast, topicsError]);
 
   return (
-    <OverviewCard buttonTitle={TEXTS.topicsOverview} onClose={() => navigate(ROUTES.profile)}>
+    <OverviewCard buttonTitle={TEXTS.topicsOverview} onClose={() => navigate(ROUTES.overviews)}>
       <DataState loading={topicsLoading} hasData={hasTopics} noDataMessage={TEXTS.noTopics}>
         {topics.map((topic) => (
           <ListButton

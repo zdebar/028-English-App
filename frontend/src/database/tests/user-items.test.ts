@@ -25,6 +25,7 @@ const mocks = vi.hoisted(() => ({
   userItemUpdate: vi.fn(),
   pronunciationCount: vi.fn(),
   pronunciationToArray: vi.fn(),
+  pronunciationMemberships: [] as Array<{ pronunciation_group_id: number; item_id: number }>,
 }));
 
 vi.mock('@/config/config', () => ({
@@ -177,6 +178,9 @@ vi.mock('@/database/models/db', () => ({
         throw new Error(`Unexpected user_items.where field: ${field}`);
       },
     },
+    pronunciation_group_items: {
+      toArray: async () => mocks.pronunciationMemberships,
+    },
     user_blocks: {
       get: (...args: unknown[]) => mocks.userBlockGet(...args),
       where: () => ({
@@ -229,6 +233,7 @@ import UserItem from '@/database/models/user-items';
 describe('UserItem', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.pronunciationMemberships = [];
     vi.useRealTimers();
 
     mocks.getNextAt.mockReturnValue('2026-03-05T00:00:00.000Z');
@@ -333,7 +338,7 @@ describe('UserItem', () => {
     expect(mocks.pronunciationCount).toHaveBeenCalledTimes(1);
   });
 
-  it('builds an eligible pronunciation deck in curriculum order', async () => {
+  it('builds an eligible pronunciation deck by group id and then curriculum order', async () => {
     mocks.pronunciationToArray.mockResolvedValue([
       {
         item_id: 3,
@@ -354,10 +359,14 @@ describe('UserItem', () => {
         curriculum_sort_path: [1, 1, 1],
       },
     ]);
+    mocks.pronunciationMemberships = [
+      { pronunciation_group_id: 1, item_id: 3 },
+      { pronunciation_group_id: 2, item_id: 1 },
+    ];
 
     const deck = await UserItem.getPronunciationPracticeDeck('u1');
 
-    expect(deck.map((item) => item.item_id)).toEqual([1, 3]);
+    expect(deck.map((item) => item.item_id)).toEqual([3, 1]);
   });
 
   it('records a correct first answer and schedules the opposite direction at zero', () => {

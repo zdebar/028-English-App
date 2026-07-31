@@ -31,8 +31,8 @@ export default function PronunciationOverview() {
 
   return (
     <OverviewCard
-      buttonTitle={TEXTS.pronunciationOverview}
-      onClose={() => navigate(ROUTES.profile)}
+      buttonTitle={TEXTS.pronunciationGroups}
+      onClose={() => navigate(ROUTES.overviews)}
     >
       <DataState loading={loading} hasData={hasData} noDataMessage={TEXTS.noPronunciationGroups}>
         {data.map((group) => (

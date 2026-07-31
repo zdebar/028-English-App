@@ -220,7 +220,7 @@ describe('LevelsOverview', () => {
     expect(screen.queryByText('Mastered')).toBeNull();
   });
 
-  it('navigates to profile when close button is clicked', () => {
+  it('navigates to overviews when close button is clicked', () => {
     mocks.levelsOverview = [
       {
         id: 1,
@@ -232,6 +232,6 @@ describe('LevelsOverview', () => {
     render(<LevelsOverview />);
     fireEvent.click(screen.getByTestId('close-button'));
 
-    expect(mocks.navigate).toHaveBeenCalledWith('/profile');
+    expect(mocks.navigate).toHaveBeenCalledWith('/overviews');
   });
 });

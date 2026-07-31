@@ -47,7 +47,7 @@ export default class PronunciationGroup extends SyncEntityModel implements Pronu
 
   static async getOverview(userId: string): Promise<PronunciationGroupOverviewType[]> {
     const [groups, memberships, userItems] = await Promise.all([
-      db.pronunciation_groups.orderBy('sort_order').toArray(),
+      db.pronunciation_groups.orderBy('id').toArray(),
       db.pronunciation_group_items.toArray(),
       db.user_items.where('user_id').equals(userId).toArray(),
     ]);
@@ -60,11 +60,15 @@ export default class PronunciationGroup extends SyncEntityModel implements Pronu
       membershipsByGroup.set(membership.pronunciation_group_id, current);
     }
 
-    return groups.flatMap((group) => {
+    return groups.sort((left, right) => left.id - right.id).flatMap((group) => {
       const eligible = (membershipsByGroup.get(group.id) ?? [])
-        .sort((left, right) => left.sort_order - right.sort_order)
         .map((membership) => itemById.get(membership.item_id))
-        .filter((item): item is UserItem => Boolean(item && isEligible(item)));
+        .filter((item): item is UserItem => Boolean(item && isEligible(item)))
+        .sort(
+          (left, right) =>
+            compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path) ||
+            left.item_id - right.item_id,
+        );
       const started = eligible.filter(isAvailable);
 
       if (started.length < 2) return [];
@@ -95,15 +99,11 @@ export default class PronunciationGroup extends SyncEntityModel implements Pronu
       .anyOf(memberships.map((membership) => [userId, membership.item_id]))
       .toArray();
     const itemById = new Map(userItems.map((item) => [item.item_id, item]));
-    const membershipOrder = new Map(
-      memberships.map((membership) => [membership.item_id, membership.sort_order]),
-    );
     const items = memberships
       .map((membership) => itemById.get(membership.item_id))
       .filter((item): item is UserItem => Boolean(item && isAvailable(item)))
       .sort(
         (left, right) =>
-          (membershipOrder.get(left.item_id) ?? 0) - (membershipOrder.get(right.item_id) ?? 0) ||
           compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path) ||
           left.item_id - right.item_id,
       );

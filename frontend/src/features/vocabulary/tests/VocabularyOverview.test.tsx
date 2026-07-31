@@ -179,7 +179,7 @@ describe('VocabularyOverview', () => {
     expect(screen.getByTestId('list-size').textContent).toBe('2');
 
     fireEvent.click(screen.getByTestId('list-close'));
-    expect(mocks.navigate).toHaveBeenCalledWith('/profile');
+    expect(mocks.navigate).toHaveBeenCalledWith('/overviews');
 
     fireEvent.click(screen.getByTestId('select-first'));
     expect(mocks.vocab.setSelectedWord).toHaveBeenCalledWith(mocks.vocab.filteredWords[0]);
