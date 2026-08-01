@@ -200,13 +200,23 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   ): Promise<void> {
     if (!items || items.length === 0) return;
 
-    const updatedItems = items.map((item) => {
-      const { practice_direction: _direction, ...persistedItem } =
-        item as PracticeDeckItem;
-      return persistedItem;
-    });
+    await db.transaction('rw', db.user_items, async () => {
+      const updatedItems = await Promise.all(
+        items.map(async (item) => {
+          const { practice_direction: _direction, ...persistedItem } = item as PracticeDeckItem;
+          const currentItem = await db.user_items.get([item.user_id, item.item_id]);
 
-    await db.user_items.bulkPut(updatedItems);
+          return currentItem
+            ? {
+                ...persistedItem,
+                has_pronunciation_practice: currentItem.has_pronunciation_practice,
+              }
+            : persistedItem;
+        }),
+      );
+
+      await db.user_items.bulkPut(updatedItems);
+    });
   }
 
   /**

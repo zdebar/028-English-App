@@ -285,6 +285,31 @@ describe('UserItem', () => {
     expect(mocks.bulkPut).toHaveBeenCalledTimes(1);
   });
 
+  it('preserves pronunciation selection when saving a stale practice item', async () => {
+    mocks.userItemGet.mockResolvedValue({
+      user_id: 'u1',
+      item_id: 1,
+      has_pronunciation_practice: 1,
+    });
+
+    await UserItem.savePracticeDeck([
+      {
+        user_id: 'u1',
+        item_id: 1,
+        progress_cz_to_en: 2,
+        has_pronunciation_practice: 0,
+      } as any,
+    ]);
+
+    expect(mocks.bulkPut).toHaveBeenCalledWith([
+      expect.objectContaining({
+        item_id: 1,
+        progress_cz_to_en: 2,
+        has_pronunciation_practice: 1,
+      }),
+    ]);
+  });
+
   it('toggles pronunciation selection without changing progress fields', async () => {
     mocks.userItemGet.mockResolvedValue({
       item_id: 7,
