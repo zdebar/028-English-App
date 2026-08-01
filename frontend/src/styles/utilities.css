@@ -42,7 +42,7 @@
   }
 
   .pronunciation-control-emphasis:not(:disabled) svg {
-    @apply text-cyan-900 dark:text-cyan-300;
+    @apply text-cyan-600 dark:text-cyan-300;
   }
 
   .pronunciation-control-emphasis:not(:disabled):hover svg {
