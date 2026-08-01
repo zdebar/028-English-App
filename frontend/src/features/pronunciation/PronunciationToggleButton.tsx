@@ -57,7 +57,7 @@ export default function PronunciationToggleButton({
       ariaLabel={TEXTS.pronunciationToggleAria}
       aria-pressed={selected}
       disabled={disabled}
-      className={selected ? 'pronunciation-control-emphasis' : ''}
+      className={`${selected ? 'pronunciation-control-emphasis' : ''} pb-1`}
       onClick={(event) => {
         void handleClick(event);
       }}

@@ -6,7 +6,7 @@ import type { JSX } from 'react';
  */
 export default function MicrophoneIcon(props: Readonly<IconProps>): JSX.Element {
   return (
-    <Icon {...props}>
+    <Icon {...props} className="pb-0.5">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
