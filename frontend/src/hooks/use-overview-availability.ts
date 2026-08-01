@@ -9,6 +9,7 @@ import { useUserStore } from '@/features/user-stats/use-user-store';
 import { TEXTS } from '@/locales/cs';
 import { liveQuery } from 'dexie';
 import { useEffect, useState } from 'react';
+import type { OverviewAvailabilityData } from '@/routing/route-data';
 
 export type OverviewAvailability = Readonly<{
   hasData: boolean;
@@ -60,12 +61,25 @@ function toError(error: unknown): Error {
 }
 
 /** Observes whether each overview currently has at least one displayable item. */
-export function useOverviewAvailability(userId: string | null): OverviewAvailabilityState {
+export function useOverviewAvailability(
+  userId: string | null,
+  initialData?: OverviewAvailabilityData,
+): OverviewAvailabilityState {
   const showToast = useToastStore((state) => state.showToast);
   const levels = useUserStore((state) => state.levels);
   const levelsLoading = useUserStore((state) => state.levelsLoading);
   const levelsError = useUserStore((state) => state.levelsError);
-  const [databaseState, setDatabaseState] = useState(INITIAL_DATABASE_STATE);
+  const [databaseState, setDatabaseState] = useState(() =>
+    initialData
+      ? {
+          practice: { hasData: initialData.practice, loading: false, error: null },
+          grammar: { hasData: initialData.grammar, loading: false, error: null },
+          topics: { hasData: initialData.topics, loading: false, error: null },
+          vocabulary: { hasData: initialData.vocabulary, loading: false, error: null },
+          pronunciation: { hasData: initialData.pronunciation, loading: false, error: null },
+        }
+      : INITIAL_DATABASE_STATE,
+  );
 
   useEffect(() => {
     if (!levelsError) return;
@@ -79,7 +93,7 @@ export function useOverviewAvailability(userId: string | null): OverviewAvailabi
     }
 
     let isActive = true;
-    setDatabaseState(LOADING_DATABASE_STATE);
+    if (!initialData) setDatabaseState(LOADING_DATABASE_STATE);
 
     const queries: ReadonlyArray<readonly [DatabaseOverviewKey, () => Promise<boolean>]> = [
       ['practice', async () => (await UserScore.getByUserId(userId)).length > 0],
@@ -115,13 +129,13 @@ export function useOverviewAvailability(userId: string | null): OverviewAvailabi
       isActive = false;
       subscriptions.forEach((subscription) => subscription.unsubscribe());
     };
-  }, [showToast, userId]);
+  }, [initialData, showToast, userId]);
 
   return {
     ...databaseState,
     levels: {
-      hasData: levels.length > 0,
-      loading: levelsLoading,
+      hasData: levelsLoading && initialData ? initialData.levels : levels.length > 0,
+      loading: levelsLoading && !initialData,
       error: levelsError,
     },
   };

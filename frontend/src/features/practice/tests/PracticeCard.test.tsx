@@ -365,6 +365,7 @@ describe('PracticeCard', () => {
     mocks.noteData = null;
     mocks.dailyCount = 5;
     mocks.practiceDeck.index = 0;
+    mocks.practiceDeck.trainingBlockId = null;
     mocks.practiceDeck.currentItem = mocks.makePracticeItem({
       item_id: 1,
       czech: 'ahoj',
@@ -438,10 +439,7 @@ describe('PracticeCard', () => {
 
     render(<PracticeCard />);
 
-    expect(mocks.navigate).toHaveBeenCalledWith('/practice/block-training', {
-      state: { blockId: 30 },
-    });
-    mocks.practiceDeck.trainingBlockId = null;
+    expect(mocks.navigate).toHaveBeenCalledWith('/practice/block-training?blockId=30');
     expect(screen.queryByText('ahoj')).toBeNull();
   });
 

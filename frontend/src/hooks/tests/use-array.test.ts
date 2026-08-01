@@ -65,6 +65,20 @@ describe('useArray', () => {
     expect(result.current.currentItem).toBe('second');
   });
 
+  it('uses initial loader data without a duplicate mount request and still reloads', async () => {
+    const fetchFunction = vi.fn().mockResolvedValue(['fresh']);
+    const initialData = ['initial'];
+    const { result } = renderHook(() => useArray(fetchFunction, { initialData }));
+
+    expect(result.current.data).toEqual(['initial']);
+    expect(result.current.loading).toBe(false);
+    expect(fetchFunction).not.toHaveBeenCalled();
+
+    await act(async () => result.current.reload());
+    expect(fetchFunction).toHaveBeenCalledTimes(1);
+    expect(result.current.data).toEqual(['fresh']);
+  });
+
   it('handles fetch error by returning empty data and exposing error', async () => {
     const error = new Error('fail');
     const fetchFunction = vi.fn().mockRejectedValue(error);

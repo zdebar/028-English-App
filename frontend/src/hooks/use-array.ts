@@ -11,6 +11,10 @@ interface UseArrayResult<T> {
   reload: () => void;
 }
 
+type UseArrayOptions<T> = Readonly<{
+  initialData?: T[];
+}>;
+
 function toError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
 }
@@ -24,16 +28,21 @@ function toError(error: unknown): Error {
  * or outside the current data bounds.
  * @throws TypeError when fetchFunction is not a function.
  */
-export function useArray<T>(fetchFunction: () => Promise<T[]>): UseArrayResult<T> {
+export function useArray<T>(
+  fetchFunction: () => Promise<T[]>,
+  options: UseArrayOptions<T> = {},
+): UseArrayResult<T> {
   if (typeof fetchFunction !== 'function') {
     throw new TypeError('fetchFunction must be a function.');
   }
 
-  const [data, setData] = useState<T[]>([]);
+  const hasInitialData = options.initialData !== undefined;
+  const [data, setData] = useState<T[]>(options.initialData ?? []);
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(!hasInitialData);
   const [error, setError] = useState<Error | null>(null);
   const isActiveRef = useRef(true);
+  const initialFetchFunctionRef = useRef(hasInitialData ? fetchFunction : null);
 
   const currentItem =
     currentIndex != null && currentIndex >= 0 && currentIndex < data.length
@@ -60,12 +69,22 @@ export function useArray<T>(fetchFunction: () => Promise<T[]>): UseArrayResult<T
 
   useEffect(() => {
     isActiveRef.current = true;
-    load();
-
     return () => {
       isActiveRef.current = false;
     };
-  }, [load]);
+  }, []);
+
+  useEffect(() => {
+    if (initialFetchFunctionRef.current === fetchFunction) return;
+    void load();
+  }, [fetchFunction, load]);
+
+  useEffect(() => {
+    if (options.initialData === undefined) return;
+    setData(options.initialData);
+    setError(null);
+    setLoading(false);
+  }, [options.initialData]);
 
   return {
     data,

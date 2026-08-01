@@ -1,4 +1,3 @@
-import StyledButton from '@/components/UI/buttons/StyledButton';
 import config from '@/config/config';
 import { ROUTES } from '@/config/routes.config';
 import { db } from '@/database/models/db';
@@ -8,7 +7,8 @@ import { TEXTS } from '@/locales/cs';
 import type { ReadyPracticeScheduleEntry } from '@/types/generic.types';
 import { liveQuery } from 'dexie';
 import { useEffect, useState, type Dispatch, type JSX, type SetStateAction } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { PrefetchButton } from '@/routing/prefetch-navigation';
+import { practiceDeckDescriptor } from '@/routing/route-data';
 
 type PracticeButtonProps = Readonly<{ userId: string }>;
 
@@ -67,7 +67,6 @@ function ReadyPracticeBadge({ count }: Readonly<{ count: number }>): JSX.Element
 export default function PracticeButton({ userId }: PracticeButtonProps): JSX.Element {
   const badgeCap = config.practice.readyPracticeBadgeCap;
 
-  const navigate = useNavigate();
   const [readyCount, setReadyCount] = useState(0);
   const [readySchedule, setReadySchedule] = useState<ReadyPracticeScheduleEntry[]>([]);
 
@@ -103,13 +102,14 @@ export default function PracticeButton({ userId }: PracticeButtonProps): JSX.Ele
   useReadyPracticeSchedule(readySchedule, setReadyCount, setReadySchedule);
 
   return (
-    <StyledButton
+    <PrefetchButton
+      to={ROUTES.practice}
+      descriptor={practiceDeckDescriptor(userId)}
       className="h-button max-h-button relative w-full px-4"
       disabled={readyCount === 0}
-      onClick={() => navigate(ROUTES.practice)}
     >
       {TEXTS.practiceButton}
       {readyCount < badgeCap && <ReadyPracticeBadge count={readyCount} />}
-    </StyledButton>
+    </PrefetchButton>
   );
 }

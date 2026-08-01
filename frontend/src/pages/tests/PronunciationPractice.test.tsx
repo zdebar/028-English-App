@@ -47,6 +47,10 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 
+vi.mock('react-router-dom', () => ({
+  useLoaderData: () => [],
+}));
+
 import PronunciationPractice from '@/pages/PronunciationPractice';
 
 describe('PronunciationPractice', () => {

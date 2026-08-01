@@ -8,6 +8,7 @@ import ThemeSwitch from '@/features/theme/ThemeSwitch';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import styles from './header.module.css';
+import { overviewAvailabilityDescriptor } from '@/routing/route-data';
 
 /**
  * Header component displaying main navigation and user controls.
@@ -25,7 +26,12 @@ export default function Header(): JSX.Element {
         <HeaderButton to={ROUTES.home} title={TEXTS.tooltipHome}>
           <HomeIcon />
         </HeaderButton>
-        <HeaderButton to={ROUTES.overviews} disabled={!userId} title={TEXTS.tooltipOverviews}>
+        <HeaderButton
+          to={ROUTES.overviews}
+          descriptor={userId ? overviewAvailabilityDescriptor(userId) : undefined}
+          disabled={!userId}
+          title={TEXTS.tooltipOverviews}
+        >
           <BookIcon />
         </HeaderButton>
       </nav>

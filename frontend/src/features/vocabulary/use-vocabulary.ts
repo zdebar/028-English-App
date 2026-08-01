@@ -15,13 +15,15 @@ const DISPLAY_FIELD_KEY = 'vocabulary_display_field';
  * @param userId - The ID of the user for whom to fetch vocabulary items.
  * @returns An object containing vocabulary state and actions.
  */
-export function useVocabulary(userId: string | null) {
+export function useVocabulary(userId: string | null, initialWords?: UserItemLocal[]) {
   const fetchVocabulary = useCallback(async () => {
     if (!userId) return [];
     return UserItem.getStartedVocabulary(userId);
   }, [userId]);
 
-  const { data: words, loading, error, reload } = useArray<UserItemLocal>(fetchVocabulary);
+  const { data: words, loading, error, reload } = useArray<UserItemLocal>(fetchVocabulary, {
+    initialData: initialWords,
+  });
 
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
   const [searchTerm, setSearchTerm] = useLocalStorageSync<string>(`${SEARCH_KEY}_${userId}`, '');

@@ -8,6 +8,10 @@ interface UseFetchResult<T> {
   reload: () => Promise<void>;
 }
 
+type UseFetchOptions<T> = Readonly<{
+  initialData?: T | null;
+}>;
+
 function toError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
 }
@@ -19,15 +23,20 @@ function toError(error: unknown): Error {
  * @returns Data, loading/error state, and a manual reload function. Failed loads set data to null.
  * @throws TypeError when fetchFunction is not a function.
  */
-export function useFetch<T>(fetchFunction: () => Promise<T | null>): UseFetchResult<T> {
+export function useFetch<T>(
+  fetchFunction: () => Promise<T | null>,
+  options: UseFetchOptions<T> = {},
+): UseFetchResult<T> {
   if (typeof fetchFunction !== 'function') {
     throw new TypeError('fetchFunction must be a function.');
   }
 
-  const [data, setData] = useState<T | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const hasInitialData = options.initialData !== undefined;
+  const [data, setData] = useState<T | null>(options.initialData ?? null);
+  const [loading, setLoading] = useState<boolean>(!hasInitialData);
   const [error, setError] = useState<Error | null>(null);
   const isActiveRef = useRef(true);
+  const initialFetchFunctionRef = useRef(hasInitialData ? fetchFunction : null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -49,12 +58,22 @@ export function useFetch<T>(fetchFunction: () => Promise<T | null>): UseFetchRes
 
   useEffect(() => {
     isActiveRef.current = true;
-    load();
-
     return () => {
       isActiveRef.current = false;
     };
-  }, [load]);
+  }, []);
+
+  useEffect(() => {
+    if (initialFetchFunctionRef.current === fetchFunction) return;
+    void load();
+  }, [fetchFunction, load]);
+
+  useEffect(() => {
+    if (options.initialData === undefined) return;
+    setData(options.initialData);
+    setError(null);
+    setLoading(false);
+  }, [options.initialData]);
 
   return {
     data,

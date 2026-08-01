@@ -10,6 +10,8 @@ import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
+import type { BlockTrainingData } from '@/routing/route-data';
+import { invalidateRouteData, routeDataKey } from '@/routing/route-data-cache';
 
 type BlockTrainingRound = 0 | 1;
 
@@ -22,24 +24,44 @@ function toError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
 }
 
-export function useBlockTrainingDeck(userId: string | null, blockId: number | null) {
-  const [block, setBlock] = useState<UserBlockType | null>(null);
-  const [items, setItems] = useState<UserItemLocal[]>([]);
-  const [grammar, setGrammar] = useState<GrammarDetail | null>(null);
+export function useBlockTrainingDeck(
+  userId: string | null,
+  blockId: number | null,
+  initialData?: BlockTrainingData,
+) {
+  const [block, setBlock] = useState<UserBlockType | null>(initialData?.block ?? null);
+  const [items, setItems] = useState<UserItemLocal[]>(initialData?.items ?? []);
+  const [grammar, setGrammar] = useState<GrammarDetail | null>(initialData?.grammar ?? null);
   const [round, setRound] = useState<BlockTrainingRound>(0);
-  const [totalItemCount, setTotalItemCount] = useState(0);
+  const [totalItemCount, setTotalItemCount] = useState(initialData?.items.length ?? 0);
   const [completedItemIds, setCompletedItemIds] = useState<Set<number>>(
     () => new Set<number>(),
   );
-  const [currentQueue, setCurrentQueue] = useState<UserItemLocal[]>([]);
+  const [currentQueue, setCurrentQueue] = useState<UserItemLocal[]>(initialData?.items ?? []);
   const [nextWaveQueue, setNextWaveQueue] = useState<UserItemLocal[]>([]);
   const [isComplete, setIsComplete] = useState(false);
   const [revealed, setRevealed] = useState(false);
-  const [loading, setLoading] = useState(userId != null);
+  const [loading, setLoading] = useState(userId != null && initialData == null);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     if (!userId) {
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
+    if (initialData) {
+      setBlock(initialData.block);
+      setItems(initialData.items);
+      setGrammar(initialData.grammar);
+      setTotalItemCount(initialData.items.length);
+      setCompletedItemIds(new Set());
+      setRound(0);
+      setCurrentQueue(initialData.items);
+      setNextWaveQueue([]);
+      setIsComplete(false);
+      setRevealed(false);
       setLoading(false);
       setError(null);
       return;
@@ -105,7 +127,7 @@ export function useBlockTrainingDeck(userId: string | null, blockId: number | nu
     return () => {
       isMounted = false;
     };
-  }, [blockId, userId]);
+  }, [blockId, initialData, userId]);
 
   const currentItem = useMemo(() => currentQueue[0] ?? null, [currentQueue]);
 
@@ -130,6 +152,8 @@ export function useBlockTrainingDeck(userId: string | null, blockId: number | nu
 
       await UserItem.saveInitialTrainingBlockCompletion(userId, block.block_id, dateTime);
       await UserBlock.completeInitialTraining(userId, block.block_id, dateTime);
+      invalidateRouteData(routeDataKey('block-training', userId, block.block_id));
+      invalidateRouteData(routeDataKey('practice', userId));
       setIsComplete(true);
       setCurrentQueue([]);
       setNextWaveQueue([]);

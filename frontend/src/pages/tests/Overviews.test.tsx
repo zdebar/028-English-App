@@ -8,6 +8,15 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
+  useLoaderData: () => ({}),
+}));
+
+vi.mock('@/routing/prefetch-navigation', () => ({
+  PrefetchButton: ({ to, children, ...props }: any) => (
+    <button type="button" {...props} onClick={() => mocks.navigate(to)}>
+      {children}
+    </button>
+  ),
 }));
 
 vi.mock('@/features/auth/use-auth-store', () => ({

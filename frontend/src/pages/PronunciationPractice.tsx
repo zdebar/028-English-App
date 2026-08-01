@@ -7,13 +7,16 @@ import { usePronunciationPracticeDeck } from '@/features/pronunciation/use-pronu
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import { useEffect } from 'react';
+import { useLoaderData } from 'react-router-dom';
+import type { UserItemLocal } from '@/types/user-item.types';
 
 const doNothing = () => undefined;
 
 export default function PronunciationPractice() {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
-  const deck = usePronunciationPracticeDeck(userId);
+  const initialDeck = useLoaderData() as UserItemLocal[];
+  const deck = usePronunciationPracticeDeck(userId, initialDeck);
 
   useEffect(() => {
     if (!deck.error) return;

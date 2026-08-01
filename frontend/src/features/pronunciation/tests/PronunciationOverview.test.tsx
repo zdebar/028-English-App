@@ -15,6 +15,22 @@ vi.mock('react-router-dom', () => ({
   useParams: () => ({ groupId: '1' }),
 }));
 
+vi.mock('@/routing/prefetch-navigation', () => ({
+  PrefetchButton: ({ to, children, ...props }: any) => (
+    <button {...props} onClick={() => mocks.navigate(to)}>
+      {children}
+    </button>
+  ),
+  usePrefetchPreparation: () => ({
+    prepareAndNavigate: () => mocks.navigate('/pronunciation'),
+  }),
+}));
+
+vi.mock('@/routing/route-data', () => ({
+  pronunciationGroupDetailDescriptor: () => ({ key: 'group', load: vi.fn() }),
+  pronunciationGroupsDescriptor: () => ({ key: 'groups', load: vi.fn() }),
+}));
+
 vi.mock('@/features/auth/use-auth-store', () => ({
   useAuthStore: (selector: (state: { userId: string }) => unknown) => selector({ userId: 'u1' }),
 }));

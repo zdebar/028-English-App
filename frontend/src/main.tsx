@@ -1,11 +1,13 @@
 import ErrorBoundary from '@/components/utils/error-boundary';
-import App from '@/App';
 import { initializeMonitoring } from '@/features/logging/monitoring-handler';
+import { startAuthLifecycle, stopAuthLifecycle } from '@/features/auth/auth-lifecycle';
+import { router } from '@/router';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { HashRouter } from 'react-router-dom';
+import { RouterProvider } from 'react-router-dom';
 
 initializeMonitoring();
+void startAuthLifecycle();
 
 if ('serviceWorker' in navigator) {
   globalThis.addEventListener('load', () => {
@@ -37,12 +39,18 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-createRoot(document.getElementById('root')!).render(
+const root = createRoot(document.getElementById('root')!);
+root.render(
   <StrictMode>
     <ErrorBoundary>
-      <HashRouter>
-        <App />
-      </HashRouter>
+      <RouterProvider router={router} />
     </ErrorBoundary>
   </StrictMode>,
 );
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    stopAuthLifecycle();
+    root.unmount();
+  });
+}

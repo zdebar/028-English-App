@@ -16,6 +16,18 @@ vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
 }));
 
+vi.mock('@/routing/prefetch-navigation', () => ({
+  PrefetchButton: ({ to, children, ...props }: any) => (
+    <button data-testid="topic-button" {...props} onClick={() => mocks.navigate(to)}>
+      {children}
+    </button>
+  ),
+}));
+
+vi.mock('@/routing/route-data', () => ({
+  topicDetailDescriptor: () => ({ key: 'topic', load: vi.fn() }),
+}));
+
 vi.mock('@/database/models/user-blocks', () => ({
   default: {
     getStartedTopicsByUserId: (...args: unknown[]) => mocks.getStartedTopicsByUserId(...args),
@@ -53,14 +65,6 @@ vi.mock('@/components/UI/DelayedNotification', () => ({
 
 vi.mock('@/components/UI/Notification', () => ({
   default: ({ children }: any) => <div>{children}</div>,
-}));
-
-vi.mock('@/components/UI/buttons/ListButton', () => ({
-  ListButton: ({ children, onClick }: any) => (
-    <button data-testid="topic-button" onClick={onClick}>
-      {children}
-    </button>
-  ),
 }));
 
 vi.mock('@/components/UI/buttons/CloseButton', () => ({

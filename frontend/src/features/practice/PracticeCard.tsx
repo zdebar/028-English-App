@@ -9,8 +9,9 @@ import { reportError } from '../logging/monitoring-handler';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/config/routes.config';
+import type { PracticeDeckItem } from '@/types/user-item.types';
 
-export default function PracticeCard() {
+export default function PracticeCard({ initialDeck }: Readonly<{ initialDeck?: PracticeDeckItem[] }>) {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ export default function PracticeCard() {
     audioLoading,
     loading,
     error,
-  } = usePracticeDeck(userId);
+  } = usePracticeDeck(userId, initialDeck);
 
   useEffect(() => {
     if (!error) return;
@@ -45,7 +46,7 @@ export default function PracticeCard() {
 
   useEffect(() => {
     if (trainingBlockId == null) return;
-    navigate(ROUTES.practiceBlockTraining, { state: { blockId: trainingBlockId } });
+    navigate(`${ROUTES.practiceBlockTraining}?blockId=${trainingBlockId}`);
   }, [navigate, trainingBlockId]);
 
   if (trainingBlockId != null) {

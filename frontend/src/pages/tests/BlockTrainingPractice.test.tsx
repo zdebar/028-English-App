@@ -60,7 +60,7 @@ vi.mock('@/features/auth/use-auth-store', () => ({
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
-  useLocation: () => ({ state: { blockId: 10 } }),
+  useLoaderData: () => ({ block: { block_id: 10 }, items: [], grammar: null }),
 }));
 
 vi.mock('@/features/toast/use-toast-store', () => ({

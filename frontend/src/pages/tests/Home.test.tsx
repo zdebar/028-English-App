@@ -97,12 +97,16 @@ vi.mock('@/features/pwa/InstallPwaButton', () => ({
   InstallPWAButton: () => <button type="button">Install</button>,
 }));
 
-vi.mock('@/components/PracticeOverviewButton', () => ({
+vi.mock('@/features/practice-overview/PracticeOverviewButton', () => ({
   default: ({ count, ariaLabel, helpText }: any) => (
-    <div data-testid="practice-overview-button">
-      {count}:{ariaLabel}:{helpText}
-    </div>
+    <button type="button" aria-label={ariaLabel} data-testid="practice-overview-button">
+      {count}:{helpText}
+    </button>
   ),
+}));
+
+vi.mock('@/routing/route-data', () => ({
+  practiceOverviewDescriptor: () => ({ key: 'practice-overview', load: vi.fn() }),
 }));
 
 vi.mock('@/features/auth/GoogleAuthButton', () => ({

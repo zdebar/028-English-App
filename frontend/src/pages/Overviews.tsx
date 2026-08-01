@@ -1,5 +1,4 @@
 import { MenuButtonText } from '@/components/UI/MenuButtonText';
-import { StandardButton } from '@/components/UI/buttons/StandardButton';
 import { ROUTES } from '@/config/routes.config';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import {
@@ -8,7 +7,17 @@ import {
 } from '@/hooks/use-overview-availability';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLoaderData } from 'react-router-dom';
+import type { OverviewAvailabilityData } from '@/routing/route-data';
+import {
+  grammarDescriptor,
+  levelsDescriptor,
+  practiceOverviewDescriptor,
+  pronunciationGroupsDescriptor,
+  topicsDescriptor,
+  vocabularyDescriptor,
+} from '@/routing/route-data';
+import { PrefetchButton } from '@/routing/prefetch-navigation';
 
 function getButtonState(
   availability: OverviewAvailability,
@@ -24,9 +33,9 @@ function getButtonState(
 }
 
 export default function Overviews(): JSX.Element {
-  const navigate = useNavigate();
   const userId = useAuthStore((state) => state.userId);
-  const availability = useOverviewAvailability(userId);
+  const initialAvailability = useLoaderData() as OverviewAvailabilityData;
+  const availability = useOverviewAvailability(userId, initialAvailability);
   const practiceButton = getButtonState(
     availability.practice,
     TEXTS.practiceOverviewTitle,
@@ -63,51 +72,57 @@ export default function Overviews(): JSX.Element {
       <h1 className="sr-only">{TEXTS.overviews}</h1>
       <section aria-label={TEXTS.progressOverviews}>
         <div className="flex flex-col gap-1">
-          <StandardButton
-            className="w-full"
-            onClick={() => navigate(ROUTES.practiceOverview)}
+          <PrefetchButton
+            className="h-button w-full"
+            to={ROUTES.practiceOverview}
+            descriptor={userId ? practiceOverviewDescriptor(userId) : undefined}
             {...practiceButton}
           >
             <MenuButtonText>{TEXTS.practiceOverviewTitle}</MenuButtonText>
-          </StandardButton>
-          <StandardButton
-            className="w-full"
-            onClick={() => navigate(ROUTES.levels)}
+          </PrefetchButton>
+          <PrefetchButton
+            className="h-button w-full"
+            to={ROUTES.levels}
+            descriptor={userId ? levelsDescriptor(userId) : undefined}
             {...levelsButton}
           >
             <MenuButtonText>{TEXTS.levelsOverview}</MenuButtonText>
-          </StandardButton>
-          <StandardButton
-            className="w-full"
-            onClick={() => navigate(ROUTES.grammar)}
+          </PrefetchButton>
+          <PrefetchButton
+            className="h-button w-full"
+            to={ROUTES.grammar}
+            descriptor={userId ? grammarDescriptor(userId) : undefined}
             {...grammarButton}
           >
             <MenuButtonText>{TEXTS.grammarOverview}</MenuButtonText>
-          </StandardButton>
-          <StandardButton
-            className="w-full"
-            onClick={() => navigate(ROUTES.topics)}
+          </PrefetchButton>
+          <PrefetchButton
+            className="h-button w-full"
+            to={ROUTES.topics}
+            descriptor={userId ? topicsDescriptor(userId) : undefined}
             {...topicsButton}
           >
             <MenuButtonText>{TEXTS.topicsOverview}</MenuButtonText>
-          </StandardButton>
-          <StandardButton
-            className="w-full"
-            onClick={() => navigate(ROUTES.vocabulary)}
+          </PrefetchButton>
+          <PrefetchButton
+            className="h-button w-full"
+            to={ROUTES.vocabulary}
+            descriptor={userId ? vocabularyDescriptor(userId) : undefined}
             {...vocabularyButton}
           >
             <MenuButtonText>{TEXTS.vocabularyOverview}</MenuButtonText>
-          </StandardButton>
+          </PrefetchButton>
         </div>
       </section>
       <section aria-label={TEXTS.pronunciationSettings} className="mt-6">
-        <StandardButton
-          className="w-full"
-          onClick={() => navigate(ROUTES.pronunciationGroups)}
+        <PrefetchButton
+          className="h-button w-full"
+          to={ROUTES.pronunciationGroups}
+          descriptor={userId ? pronunciationGroupsDescriptor(userId) : undefined}
           {...pronunciationButton}
         >
           <MenuButtonText>{TEXTS.pronunciationGroups}</MenuButtonText>
-        </StandardButton>
+        </PrefetchButton>
       </section>
     </div>
   );

@@ -51,6 +51,16 @@ vi.mock('@/features/logging/monitoring-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
 vi.mock('react-router-dom', () => ({ useNavigate: () => mocks.navigate }));
+vi.mock('@/routing/prefetch-navigation', () => ({
+  PrefetchButton: ({ to, children, ...props }: any) => (
+    <button {...props} onClick={() => mocks.navigate(to)}>
+      {children}
+    </button>
+  ),
+}));
+vi.mock('@/routing/route-data', () => ({
+  practiceDeckDescriptor: () => ({ key: 'practice', load: vi.fn() }),
+}));
 
 import PracticeButton from '@/features/practice/PracticeButton';
 

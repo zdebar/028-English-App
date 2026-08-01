@@ -1,14 +1,13 @@
-import StyledButton from '@/components/UI/buttons/StyledButton';
 import { ROUTES } from '@/config/routes.config';
 import UserItem from '@/database/models/user-items';
 import { TEXTS } from '@/locales/cs';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useNavigate } from 'react-router-dom';
+import { PrefetchButton } from '@/routing/prefetch-navigation';
+import { pronunciationPracticeDescriptor } from '@/routing/route-data';
 
 export default function PronunciationPracticeButton({
   userId,
 }: Readonly<{ userId: string }>) {
-  const navigate = useNavigate();
   const selectedCount = useLiveQuery(
     () => UserItem.getPronunciationPracticeCount(userId),
     [userId],
@@ -16,12 +15,13 @@ export default function PronunciationPracticeButton({
   );
 
   return (
-    <StyledButton
+    <PrefetchButton
+      to={ROUTES.pronunciationPractice}
+      descriptor={pronunciationPracticeDescriptor(userId)}
       className="h-button max-h-button w-full px-4"
       disabled={selectedCount === 0}
-      onClick={() => navigate(ROUTES.pronunciationPractice)}
     >
       {TEXTS.pronunciationPracticeButton}
-    </StyledButton>
+    </PrefetchButton>
   );
 }

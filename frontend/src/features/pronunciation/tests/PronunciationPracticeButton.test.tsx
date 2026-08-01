@@ -24,6 +24,18 @@ vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
 }));
 
+vi.mock('@/routing/prefetch-navigation', () => ({
+  PrefetchButton: ({ to, children, ...props }: any) => (
+    <button {...props} onClick={() => mocks.navigate(to)}>
+      {children}
+    </button>
+  ),
+}));
+
+vi.mock('@/routing/route-data', () => ({
+  pronunciationPracticeDescriptor: () => ({ key: 'pronunciation-practice', load: vi.fn() }),
+}));
+
 vi.mock('@/locales/cs', () => ({
   TEXTS: { pronunciationPracticeButton: 'Výslovnost' },
 }));

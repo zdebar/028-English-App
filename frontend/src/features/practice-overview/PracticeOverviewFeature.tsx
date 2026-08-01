@@ -7,7 +7,7 @@ import type { UserScoreType } from '@/types/generic.types';
 import { STAR_SIZE, StarRow } from '@/components/UI/StarProgress';
 import config from '@/config/config';
 import { getCompletedStarCount } from '@/utils/star-progress.utils';
-import { useEffect, useState, type JSX } from 'react';
+import { useEffect, useRef, useState, type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DataState } from '@/components/UI/DataState';
 import { useToastStore } from '@/features/toast/use-toast-store';
@@ -90,19 +90,35 @@ function PracticeOverviewRow({ score }: Readonly<{ score: PracticeDayScore }>): 
   );
 }
 
-export default function PracticeOverviewFeature(): JSX.Element {
+export default function PracticeOverviewFeature({
+  initialScores,
+}: Readonly<{ initialScores?: UserScoreType[] }>): JSX.Element {
   const navigate = useNavigate();
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
-  const [scores, setScores] = useState<PracticeDayScore[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [scores, setScores] = useState<PracticeDayScore[]>(() =>
+    initialScores ? getScoresWithMissingDays(initialScores) : [],
+  );
+  const [loading, setLoading] = useState(initialScores === undefined);
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_DAYS);
+  const skipInitialLoadRef = useRef(initialScores !== undefined);
+
+  useEffect(() => {
+    if (initialScores === undefined) return;
+    setScores(getScoresWithMissingDays(initialScores));
+    setLoading(false);
+  }, [initialScores]);
 
   useEffect(() => {
     if (!userId) {
       setScores([]);
       setVisibleCount(INITIAL_VISIBLE_DAYS);
       setLoading(false);
+      return;
+    }
+
+    if (skipInitialLoadRef.current) {
+      skipInitialLoadRef.current = false;
       return;
     }
 
