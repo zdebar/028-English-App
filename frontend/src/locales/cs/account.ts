@@ -11,7 +11,7 @@ export const ACCOUNT_TEXTS = {
   // Delete User Button
   deleteUserButtonTitle: 'Smazat účet',
   deleteUserModalText:
-    'Opravdu chcete smazat svůj uživatelský účet? Vaše data budou nenávratně smazána. Tuto akci již nelze vrátit zpět.',
+    'Opravdu chcete smazat svůj uživatelský účet? Účet a jeho data budou po 30 dnech nenávratně smazány. Do té doby můžete smazání zrušit opětovným přihlášením.',
   deleteUserSuccessToast: 'Váš uživatelský účet byl úspěšně smazán.',
   deleteUserErrorToast: 'Chyba při mazání uživatelského účtu.',
 
