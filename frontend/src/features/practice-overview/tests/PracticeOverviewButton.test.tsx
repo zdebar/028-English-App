@@ -44,7 +44,9 @@ describe('PracticeOverviewButton', () => {
       />,
     );
 
-    expect(screen.getByRole('button', { name: 'Open practice overview' })).toBeTruthy();
+    const button = screen.getByRole('button', { name: 'Open practice overview' });
+    expect(button).toBeTruthy();
+    expect(button.getAttribute('title')).toBe('Open practice overview');
     expect(screen.getByTestId('star-progress').textContent).toBe('3:50:10');
     expect(screen.getByTestId('help-text').textContent).toBe('Stars today');
   });
