@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   bulkPut: vi.fn(),
+  bulkUpdate: vi.fn(),
   bulkDelete: vi.fn(),
   equalsDelete: vi.fn(),
   blockEqualsToArray: vi.fn(),
@@ -61,6 +62,7 @@ vi.mock('@/database/models/db', () => ({
       get: (...args: unknown[]) => mocks.userItemGet(...args),
       update: (...args: unknown[]) => mocks.userItemUpdate(...args),
       bulkPut: (...args: unknown[]) => mocks.bulkPut(...args),
+      bulkUpdate: (...args: unknown[]) => mocks.bulkUpdate(...args),
       bulkDelete: (...args: unknown[]) => mocks.bulkDelete(...args),
       where: (field: string) => {
         if (field === 'user_id') {
@@ -258,6 +260,7 @@ describe('UserItem', () => {
     mocks.itemIdBetweenModify.mockResolvedValue(64);
     mocks.userItemGet.mockResolvedValue(undefined);
     mocks.userItemUpdate.mockResolvedValue(1);
+    mocks.bulkUpdate.mockResolvedValue(1);
     mocks.pronunciationCount.mockResolvedValue(0);
     mocks.pronunciationToArray.mockResolvedValue([]);
   });
@@ -267,31 +270,61 @@ describe('UserItem', () => {
     vi.restoreAllMocks();
   });
 
-  it('savePracticeDeck stores items without changing score', async () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-03-04T09:00:00.000Z'));
-
+  it('savePracticeDeck updates only practice progress fields', async () => {
     await UserItem.savePracticeDeck([
       {
         user_id: 'u1',
         item_id: 1,
-        progress: 2,
-        started_at: '1970-01-01T00:00:00.000Z',
-        mastered_at: '1970-01-01T00:00:00.000Z',
-        next_at: '1970-01-01T00:00:00.000Z',
+        czech: 'ahoj',
+        english: 'hello',
+        audio: 'hello.opus',
+        has_pronunciation_practice: 0,
+        progress_cz_to_en: 2,
+        progress_en_to_cz: 3,
+        progress_history: [
+          {
+            progress: 2,
+            created_at: '2026-03-04T09:00:00.000Z',
+            direction: 'czToEn',
+            outcome: 'correct',
+          },
+        ],
+        started_at: '2026-03-01T09:00:00.000Z',
+        updated_at: '2026-03-04T09:00:00.000Z',
+        next_at_cz_to_en: '2026-03-06T09:00:00.000Z',
+        next_at_en_to_cz: '2026-03-07T09:00:00.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        mastered_at_en_to_cz: '2026-03-04T09:00:00.000Z',
       } as any,
     ]);
 
-    expect(mocks.bulkPut).toHaveBeenCalledTimes(1);
+    expect(mocks.bulkUpdate).toHaveBeenCalledWith([
+      {
+        key: ['u1', 1],
+        changes: {
+          progress_cz_to_en: 2,
+          progress_en_to_cz: 3,
+          progress_history: [
+            {
+              progress: 2,
+              created_at: '2026-03-04T09:00:00.000Z',
+              direction: 'czToEn',
+              outcome: 'correct',
+            },
+          ],
+          started_at: '2026-03-01T09:00:00.000Z',
+          updated_at: '2026-03-04T09:00:00.000Z',
+          next_at_cz_to_en: '2026-03-06T09:00:00.000Z',
+          next_at_en_to_cz: '2026-03-07T09:00:00.000Z',
+          mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+          mastered_at_en_to_cz: '2026-03-04T09:00:00.000Z',
+        },
+      },
+    ]);
+    expect(mocks.bulkPut).not.toHaveBeenCalled();
   });
 
-  it('preserves pronunciation selection when saving a stale practice item', async () => {
-    mocks.userItemGet.mockResolvedValue({
-      user_id: 'u1',
-      item_id: 1,
-      has_pronunciation_practice: 1,
-    });
-
+  it('does not overwrite pronunciation selection from a stale practice snapshot', async () => {
     await UserItem.savePracticeDeck([
       {
         user_id: 'u1',
@@ -301,13 +334,10 @@ describe('UserItem', () => {
       } as any,
     ]);
 
-    expect(mocks.bulkPut).toHaveBeenCalledWith([
-      expect.objectContaining({
-        item_id: 1,
-        progress_cz_to_en: 2,
-        has_pronunciation_practice: 1,
-      }),
-    ]);
+    const [{ changes }] = mocks.bulkUpdate.mock.calls[0][0];
+    expect(changes).not.toHaveProperty('has_pronunciation_practice');
+    expect(changes).not.toHaveProperty('czech');
+    expect(changes).not.toHaveProperty('audio');
   });
 
   it('toggles pronunciation selection without changing progress fields', async () => {
