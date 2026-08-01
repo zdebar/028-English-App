@@ -38,7 +38,7 @@ export function usePronunciationPracticeDeck(userId: string | null) {
   }, [audioDisabled, audioLoading, currentItem, playAudio]);
 
   const next = useCallback(async () => {
-    if (!currentItem) return;
+    if (!currentItem || items.length <= 1) return;
 
     if (index < items.length - 1) {
       setIndex((currentIndex) => currentIndex + 1);
@@ -48,6 +48,15 @@ export function usePronunciationPracticeDeck(userId: string | null) {
     setIndex(0);
     await reload();
   }, [currentItem, index, items.length, reload]);
+
+  const handleSelectionChange = useCallback(
+    (selected: boolean) => {
+      if (selected) return;
+      setIndex(0);
+      void reload();
+    },
+    [reload],
+  );
 
   return {
     currentItem,
@@ -61,6 +70,8 @@ export function usePronunciationPracticeDeck(userId: string | null) {
     playAudio,
     pronunciation: currentItem?.pronunciation || NBSP,
     progressLabel: items.length > 0 ? `${index + 1} / ${items.length}` : '0 / 0',
+    canGoNext: items.length > 1,
+    handleSelectionChange,
     next,
   };
 }

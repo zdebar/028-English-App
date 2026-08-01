@@ -22,7 +22,7 @@ export default function PronunciationPractice() {
   }, [deck.error, showToast]);
 
   if (deck.loading) return <DelayedLoadingCircle />;
-  if (!deck.currentItem) return <PracticeEmptyState />;
+  if (!deck.currentItem) return <PracticeEmptyState showTryAgainLater={false} />;
 
   return (
     <PracticeSessionCard
@@ -45,7 +45,8 @@ export default function PronunciationPractice() {
       audioLoading={deck.audioLoading}
       isPronunciationPractice
       pronunciationItem={deck.currentItem}
-      nextPronunciation={deck.next}
+      nextPronunciation={deck.canGoNext ? deck.next : undefined}
+      onPronunciationSelectionChange={deck.handleSelectionChange}
     />
   );
 }

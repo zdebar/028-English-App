@@ -13,6 +13,7 @@ type PronunciationToggleButtonProps = Readonly<{
   userId: string | null;
   item: UserItemLocal | null;
   showHelpText?: boolean;
+  onSelectionChange?: (selected: boolean) => void;
 }>;
 
 function getToggleTitle(isVocabulary: boolean, hasAudio: boolean, selected: boolean) {
@@ -25,6 +26,7 @@ export default function PronunciationToggleButton({
   userId,
   item,
   showHelpText = false,
+  onSelectionChange,
 }: PronunciationToggleButtonProps) {
   const showToast = useToastStore((state) => state.showToast);
   const selected = useLiveQuery(
@@ -44,7 +46,8 @@ export default function PronunciationToggleButton({
     event.stopPropagation();
     if (disabled || !userId || !item) return;
     try {
-      await UserItem.togglePronunciationPractice(userId, item.item_id);
+      const enabled = await UserItem.togglePronunciationPractice(userId, item.item_id);
+      onSelectionChange?.(enabled);
     } catch (error) {
       reportError('Failed to toggle pronunciation practice item', error);
       showToast(TEXTS.pronunciationToggleError, 'error');

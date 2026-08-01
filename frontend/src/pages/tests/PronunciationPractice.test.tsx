@@ -20,7 +20,11 @@ vi.mock('@/features/pronunciation/use-pronunciation-practice-deck', () => ({
 
 vi.mock('@/features/practice/PracticeSessionCard', () => ({
   default: (props: any) => (
-    <div data-testid="session">
+    <div
+      data-testid="session"
+      data-next-enabled={String(Boolean(props.nextPronunciation))}
+      data-selection-handler={String(Boolean(props.onPronunciationSelectionChange))}
+    >
       {String(props.isCzToEn)}:{String(props.isPronunciationPractice)}:{String(props.revealed)}:
       {props.progressLabel}:{props.pronunciationItem?.english}
     </div>
@@ -28,7 +32,9 @@ vi.mock('@/features/practice/PracticeSessionCard', () => ({
 }));
 
 vi.mock('@/features/practice/PracticeEmptyState', () => ({
-  default: () => <div>empty</div>,
+  default: ({ showTryAgainLater }: { showTryAgainLater?: boolean }) => (
+    <div data-show-try-again={String(showTryAgainLater)}>empty</div>
+  ),
 }));
 
 vi.mock('@/components/UI/DelayedLoadingCircle', () => ({
@@ -63,6 +69,8 @@ describe('PronunciationPractice', () => {
       audioError: false,
       playAudio: vi.fn(),
       audioLoading: false,
+      canGoNext: true,
+      handleSelectionChange: vi.fn(),
     };
   });
 
@@ -70,5 +78,25 @@ describe('PronunciationPractice', () => {
     render(<PronunciationPractice />);
 
     expect(screen.getByTestId('session').textContent).toContain('false:true:true:1 / 2:man');
+    expect(screen.getByTestId('session').dataset.nextEnabled).toBe('true');
+    expect(screen.getByTestId('session').dataset.selectionHandler).toBe('true');
+  });
+
+  it('disables Next for a one-item deck', () => {
+    mocks.deck.canGoNext = false;
+    mocks.deck.progressLabel = '1 / 1';
+
+    render(<PronunciationPractice />);
+
+    expect(screen.getByTestId('session').dataset.nextEnabled).toBe('false');
+  });
+
+  it('renders the empty end screen after the deck is exhausted', () => {
+    mocks.deck.currentItem = null;
+
+    render(<PronunciationPractice />);
+
+    expect(screen.getByText('empty').dataset.showTryAgain).toBe('false');
+    expect(screen.queryByTestId('session')).toBeNull();
   });
 });

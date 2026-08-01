@@ -234,8 +234,12 @@ vi.mock('@/features/practice/hooks/use-practice-deck', () => ({
 
 vi.mock('@/features/help/HelpButton', () => ({ default: () => <div data-testid="help-button" /> }));
 vi.mock('@/features/pronunciation/PronunciationToggleButton', () => ({
-  default: ({ showHelpText }: { showHelpText?: boolean }) => (
-    <button data-testid="pronunciation-toggle" data-show-help-text={String(showHelpText)} />
+  default: ({ showHelpText, onSelectionChange }: any) => (
+    <button
+      data-testid="pronunciation-toggle"
+      data-show-help-text={String(showHelpText)}
+      onClick={() => onSelectionChange?.(false)}
+    />
   ),
 }));
 vi.mock('@/features/help/HelpText', () => ({
@@ -760,6 +764,7 @@ describe('PracticeCard', () => {
 
   it('shows only Next and hides stars after reveal in pronunciation practice', () => {
     const next = vi.fn();
+    const onSelectionChange = vi.fn();
     render(
       <PracticeSessionCard
         noteId={null}
@@ -781,6 +786,7 @@ describe('PracticeCard', () => {
         audioLoading={false}
         isPronunciationPractice
         nextPronunciation={next}
+        onPronunciationSelectionChange={onSelectionChange}
       />,
     );
 
@@ -789,6 +795,36 @@ describe('PracticeCard', () => {
     expect(screen.queryByTestId('repeat-btn')).toBeNull();
     expect(screen.queryByTestId('known-btn')).toBeNull();
     expect(screen.queryByTestId('practice-stars-row')).toBeNull();
+    fireEvent.click(screen.getByTestId('pronunciation-toggle'));
+    expect(onSelectionChange).toHaveBeenCalledWith(false);
+  });
+
+  it('disables Next when pronunciation practice has no advance handler', () => {
+    const { container } = render(
+      <PracticeSessionCard
+        noteId={null}
+        grammarChunkId={null}
+        progressLabel="1 / 1"
+        isCzToEn={false}
+        revealed
+        czech="muž"
+        english="man"
+        pronunciation="mæn"
+        audioDisabled={false}
+        showDirectionChange={false}
+        handleReveal={vi.fn()}
+        plusHint={vi.fn()}
+        nextRepeat={vi.fn()}
+        nextKnown={vi.fn()}
+        audioError={false}
+        playAudio={vi.fn()}
+        audioLoading={false}
+        isPronunciationPractice
+      />,
+    );
+
+    const nextButton = container.querySelector('#practice-controls button');
+    expect((nextButton as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('can disable the repeat control for specialized practice sessions', () => {

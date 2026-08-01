@@ -60,10 +60,13 @@ describe('PronunciationToggleButton', () => {
 
   it('toggles an eligible vocabulary item and exposes pressed state', async () => {
     mocks.selected = true;
+    mocks.toggle.mockResolvedValue(false);
+    const onSelectionChange = vi.fn();
     render(
       <PronunciationToggleButton
         userId="u1"
         item={{ item_id: 2, is_vocabulary: 1, audio: 'two.opus' } as any}
+        onSelectionChange={onSelectionChange}
       />,
     );
 
@@ -74,6 +77,7 @@ describe('PronunciationToggleButton', () => {
     fireEvent.click(button);
     await waitFor(() => {
       expect(mocks.toggle).toHaveBeenCalledWith('u1', 2);
+      expect(onSelectionChange).toHaveBeenCalledWith(false);
     });
   });
 
@@ -90,10 +94,12 @@ describe('PronunciationToggleButton', () => {
 
   it('reports a failed toggle', async () => {
     mocks.toggle.mockRejectedValue(new Error('boom'));
+    const onSelectionChange = vi.fn();
     render(
       <PronunciationToggleButton
         userId="u1"
         item={{ item_id: 5, is_vocabulary: 1, audio: 'five.opus' } as any}
+        onSelectionChange={onSelectionChange}
       />,
     );
 
@@ -102,6 +108,7 @@ describe('PronunciationToggleButton', () => {
     await waitFor(() => {
       expect(mocks.showToast).toHaveBeenCalledWith('Toggle failed', 'error');
       expect(mocks.reportError).toHaveBeenCalled();
+      expect(onSelectionChange).not.toHaveBeenCalled();
     });
   });
 
