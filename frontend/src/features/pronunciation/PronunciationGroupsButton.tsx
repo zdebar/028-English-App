@@ -11,6 +11,10 @@ export default function PronunciationGroupsButton({
   const groups = useLiveQuery(() => PronunciationGroup.getOverview(userId), [userId]);
   const loading = groups === undefined;
   const hasGroups = Boolean(groups?.length);
+  let title: string = TEXTS.loadingMessage;
+  if (!loading) {
+    title = hasGroups ? TEXTS.pronunciationGroupsTooltip : TEXTS.noPronunciationGroups;
+  }
 
   return (
     <PrefetchButton
@@ -18,13 +22,7 @@ export default function PronunciationGroupsButton({
       descriptor={pronunciationGroupsDescriptor(userId)}
       className="h-button max-h-button w-full px-4"
       disabled={!hasGroups}
-      title={
-        loading
-          ? TEXTS.loadingMessage
-          : hasGroups
-            ? TEXTS.pronunciationGroupsTooltip
-            : TEXTS.noPronunciationGroups
-      }
+      title={title}
     >
       {TEXTS.pronunciationGroupsButton}
     </PrefetchButton>

@@ -14,6 +14,12 @@ export default function PronunciationPracticeButton({
   );
   const loading = selectedCount === undefined;
   const hasSelection = Boolean(selectedCount);
+  let title: string = TEXTS.loadingMessage;
+  if (!loading) {
+    title = hasSelection
+      ? TEXTS.pronunciationPracticeTooltip
+      : TEXTS.noPronunciationPracticeSelection;
+  }
 
   return (
     <PrefetchButton
@@ -21,13 +27,7 @@ export default function PronunciationPracticeButton({
       descriptor={pronunciationPracticeDescriptor(userId)}
       className="h-button max-h-button w-full px-4"
       disabled={!hasSelection}
-      title={
-        loading
-          ? TEXTS.loadingMessage
-          : hasSelection
-            ? TEXTS.pronunciationPracticeTooltip
-            : TEXTS.noPronunciationPracticeSelection
-      }
+      title={title}
     >
       {TEXTS.pronunciationPracticeButton}
     </PrefetchButton>
