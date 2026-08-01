@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  closeOverlay: vi.fn(),
+  dismissOverlay: vi.fn(),
   useKey: vi.fn(),
   isOverlayOpen: true,
 }));
@@ -20,10 +20,10 @@ vi.mock('@/hooks/use-key', () => ({
 vi.mock('@/features/overlay/use-overlay-store', () => ({
   useOverlayStore: (
     selector: (state: {
-      closeOverlay: typeof mocks.closeOverlay;
+      dismissOverlay: typeof mocks.dismissOverlay;
       isOverlayOpen: boolean;
     }) => unknown,
-  ) => selector({ closeOverlay: mocks.closeOverlay, isOverlayOpen: mocks.isOverlayOpen }),
+  ) => selector({ dismissOverlay: mocks.dismissOverlay, isOverlayOpen: mocks.isOverlayOpen }),
 }));
 
 import OverlayMask from '@/features/overlay/OverlayMask';
@@ -41,13 +41,16 @@ describe('OverlayMask', () => {
     const arg = mocks.useKey.mock.calls[0][0];
     expect(arg.keys).toEqual(['Escape']);
     expect(typeof arg.onKeyPress).toBe('function');
+
+    arg.onKeyPress();
+    expect(mocks.dismissOverlay).toHaveBeenCalledTimes(1);
   });
 
-  it('calls closeOverlay when mask is clicked', () => {
+  it('requests overlay dismissal when mask is clicked', () => {
     render(<OverlayMask />);
 
     fireEvent.click(screen.getByRole('button'));
 
-    expect(mocks.closeOverlay).toHaveBeenCalledTimes(1);
+    expect(mocks.dismissOverlay).toHaveBeenCalledTimes(1);
   });
 });

@@ -9,7 +9,7 @@ import { useOverlayStore } from '@/features/overlay/use-overlay-store';
 describe('useOverlayStore', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    useOverlayStore.setState({ isOverlayOpen: false });
+    useOverlayStore.setState({ isOverlayOpen: false, isOverlayDismissible: true });
   });
 
   it('starts with closed overlay', () => {
@@ -31,6 +31,39 @@ describe('useOverlayStore', () => {
     useOverlayStore.getState().closeOverlay();
     useOverlayStore.getState().closeOverlay();
 
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores user dismissal while the overlay is locked', () => {
+    const onClose = vi.fn();
+
+    useOverlayStore.getState().openOverlay(onClose);
+    useOverlayStore.getState().setOverlayDismissible(false);
+    useOverlayStore.getState().dismissOverlay();
+
+    expect(useOverlayStore.getState().isOverlayOpen).toBe(true);
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('allows programmatic close while locked and resets dismissibility', () => {
+    const onClose = vi.fn();
+
+    useOverlayStore.getState().openOverlay(onClose);
+    useOverlayStore.getState().setOverlayDismissible(false);
+    useOverlayStore.getState().closeOverlay();
+
+    expect(useOverlayStore.getState().isOverlayOpen).toBe(false);
+    expect(useOverlayStore.getState().isOverlayDismissible).toBe(true);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('allows user dismissal by default', () => {
+    const onClose = vi.fn();
+
+    useOverlayStore.getState().openOverlay(onClose);
+    useOverlayStore.getState().dismissOverlay();
+
+    expect(useOverlayStore.getState().isOverlayOpen).toBe(false);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 

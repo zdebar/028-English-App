@@ -1,6 +1,6 @@
 import { useOverlayStore } from '@/features/overlay/use-overlay-store';
 import { TEXTS } from '@/locales/cs';
-import { useCallback, useEffect, useState, type JSX, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type JSX, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import StyledButton from '../../components/UI/buttons/StyledButton';
 
@@ -29,24 +29,29 @@ export function Modal({
 }: ModalProps): JSX.Element | null {
   const closeOverlay = useOverlayStore((state) => state.closeOverlay);
   const openOverlay = useOverlayStore((state) => state.openOverlay);
+  const setOverlayDismissible = useOverlayStore((state) => state.setOverlayDismissible);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmittingRef = useRef(false);
 
   const handleCancel = useCallback(() => {
-    if (isSubmitting) return;
+    if (isSubmittingRef.current) return;
     closeOverlay();
-  }, [closeOverlay, isSubmitting]);
+  }, [closeOverlay]);
 
   const handleConfirm = useCallback(async () => {
-    if (isSubmitting) return;
+    if (isSubmittingRef.current) return;
 
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
+    setOverlayDismissible(false);
     try {
       await onConfirm();
     } finally {
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
       closeOverlay();
     }
-  }, [closeOverlay, isSubmitting, onConfirm]);
+  }, [closeOverlay, onConfirm, setOverlayDismissible]);
 
   const modalRoot = document.getElementById('root');
 

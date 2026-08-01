@@ -5,9 +5,9 @@ import { useCallback, type JSX } from 'react';
 import { useOverlayStore } from './use-overlay-store';
 
 export default function OverlayMask(): JSX.Element | null {
-  const closeOverlay = useOverlayStore((state) => state.closeOverlay);
+  const dismissOverlay = useOverlayStore((state) => state.dismissOverlay);
   const isOverlayOpen = useOverlayStore((state) => state.isOverlayOpen);
-  const handleClose = useCallback(() => closeOverlay(), [closeOverlay]);
+  const handleClose = useCallback(() => dismissOverlay(), [dismissOverlay]);
 
   useKey({ onKeyPress: handleClose, keys: KEYBOARD_LISTENERS.Exit });
 
