@@ -51,6 +51,7 @@ export type PracticeSessionCardProps = Readonly<{
   isPronunciationPractice?: boolean;
   pronunciationItem?: UserItemLocal | null;
   nextPronunciation?: () => void;
+  onPronunciationSelectionChange?: (selected: boolean) => void;
 }>;
 
 type PracticeControlsProps = Pick<
@@ -156,6 +157,7 @@ export default function PracticeSessionCard({
   isPronunciationPractice = false,
   pronunciationItem = null,
   nextPronunciation,
+  onPronunciationSelectionChange,
 }: PracticeSessionCardProps) {
   const userId = useAuthStore((state) => state.userId);
   const dailyCount = useUserStore((state) => state.dailyCount);
@@ -274,7 +276,12 @@ export default function PracticeSessionCard({
         <div className="pos-bottom-left-control">
           <PlayButton onClick={playAudio} disabled={audioControlsDisabled} />
           <VolumeSlider disabled={audioControlsDisabled} />
-          <PronunciationToggleButton userId={userId} item={pronunciationItem} showHelpText />
+          <PronunciationToggleButton
+            userId={userId}
+            item={pronunciationItem}
+            showHelpText
+            onSelectionChange={onPronunciationSelectionChange}
+          />
         </div>
         <div className="pos-bottom-right-control">
           <SecondaryControlButton

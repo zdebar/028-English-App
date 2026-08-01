@@ -17,6 +17,8 @@ import { ListButton } from '@/components/UI/buttons/ListButton';
 import HelpButton from '../help/HelpButton';
 import OverviewCard from '@/components/UI/OverviewCard';
 import VolumeSlider from '../audio/VolumeSlider';
+import { invalidateRouteData, routeDataKey } from '@/routing/route-data-cache';
+import { usePrefetchPreparation } from '@/routing/prefetch-navigation';
 
 function getPronunciationTitle(pronunciation: string): string {
   return typeof TEXTS.pronunciationTitle === 'function'
@@ -24,18 +26,36 @@ function getPronunciationTitle(pronunciation: string): string {
     : `${TEXTS.pronunciation ?? 'Pronunciation'}: ${pronunciation}`;
 }
 
-export default function TopicItemsOverview() {
+export default function TopicItemsOverview({
+  initialTopic,
+  initialItems = [],
+}: Readonly<{ initialTopic?: UserBlockType | null; initialItems?: UserItemLocal[] }>) {
   const navigate = useNavigate();
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
+  const parentDescriptor =
+    userId && initialTopic
+      ? {
+          key: routeDataKey('topics', userId),
+          load: () => UserBlock.getStartedTopicsByUserId(userId),
+        }
+      : undefined;
+  const { prepareAndNavigate: prepareParent } = usePrefetchPreparation(
+    parentDescriptor,
+    ROUTES.topics,
+  );
 
   // -- Topic management --
-  const { blockId: blockIdString } = useParams<{ blockId: string }>();
-  const blockId = blockIdString ? Number(blockIdString) : null;
+  const { blockId: blockIdText } = useParams<{ blockId: string }>();
+  const parsedBlockId = Number(blockIdText);
+  const blockId =
+    initialTopic?.block_id ??
+    (Number.isSafeInteger(parsedBlockId) && parsedBlockId > 0 ? parsedBlockId : null);
 
-  if (!blockId) {
+  useEffect(() => {
+    if (blockId) return;
     navigate(ROUTES.topics);
-  }
+  }, [blockId, navigate]);
 
   const fetchTopic = useCallback(async (): Promise<UserBlockType | null> => {
     if (!userId || !blockId) return null;
@@ -46,7 +66,7 @@ export default function TopicItemsOverview() {
     data: topic,
     loading: topicLoading,
     error: topicError,
-  } = useFetch<UserBlockType>(fetchTopic);
+  } = useFetch<UserBlockType>(fetchTopic, { initialData: initialTopic });
 
   // -- Items management --
   const fetchBlockItems = useCallback(async () => {
@@ -59,7 +79,7 @@ export default function TopicItemsOverview() {
     loading: itemsLoading,
     hasData: hasItems,
     error: itemsError,
-  } = useArray<UserItemLocal>(fetchBlockItems);
+  } = useArray<UserItemLocal>(fetchBlockItems, { initialData: initialItems });
 
   useEffect(() => {
     if (!topicError) return;
@@ -86,6 +106,8 @@ export default function TopicItemsOverview() {
     try {
       const resetCount = await UserItem.resetItemsByBlockId(userId, blockId);
       await UserBlock.resetByBlockId(userId, blockId);
+      invalidateRouteData(routeDataKey('topic-detail', userId, blockId));
+      invalidateRouteData(routeDataKey('topics', userId));
       reportInfo(`Reset ${resetCount} items in topic block ${blockId}`);
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (error) {
@@ -95,8 +117,8 @@ export default function TopicItemsOverview() {
   }, [userId, blockId, showToast]);
 
   const onClose = useCallback(() => {
-    navigate(ROUTES.topics);
-  }, [navigate]);
+    void prepareParent();
+  }, [prepareParent]);
 
   const resetHandler = topic?.is_removed_from_practice ? undefined : handleReset;
 

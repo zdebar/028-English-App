@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  count: 0,
+  count: 0 as number | undefined,
   navigate: vi.fn(),
   getCount: vi.fn(),
 }));
@@ -24,8 +24,25 @@ vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
 }));
 
+vi.mock('@/routing/prefetch-navigation', () => ({
+  PrefetchButton: ({ to, children, ...props }: any) => (
+    <button {...props} onClick={() => mocks.navigate(to)}>
+      {children}
+    </button>
+  ),
+}));
+
+vi.mock('@/routing/route-data', () => ({
+  pronunciationPracticeDescriptor: () => ({ key: 'pronunciation-practice', load: vi.fn() }),
+}));
+
 vi.mock('@/locales/cs', () => ({
-  TEXTS: { pronunciationPracticeButton: 'Výslovnost' },
+  TEXTS: {
+    pronunciationPracticeButton: 'Výslovnost – slovíčka',
+    pronunciationPracticeTooltip: 'Practice selected words',
+    noPronunciationPracticeSelection: 'No selected words',
+    loadingMessage: 'Loading',
+  },
 }));
 
 import PronunciationPracticeButton from '../PronunciationPracticeButton';
@@ -39,8 +56,9 @@ describe('PronunciationPracticeButton', () => {
   it('is disabled for an empty selection', () => {
     render(<PronunciationPracticeButton userId="u1" />);
 
-    expect((screen.getByRole('button', { name: 'Výslovnost' }) as HTMLButtonElement).disabled)
-      .toBe(true);
+    const button = screen.getByRole('button', { name: 'Výslovnost – slovíčka' });
+    expect((button as HTMLButtonElement).disabled).toBe(true);
+    expect(button.title).toBe('No selected words');
     expect(mocks.getCount).toHaveBeenCalledWith('u1');
   });
 
@@ -48,8 +66,20 @@ describe('PronunciationPracticeButton', () => {
     mocks.count = 2;
     render(<PronunciationPracticeButton userId="u1" />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Výslovnost' }));
+    const button = screen.getByRole('button', { name: 'Výslovnost – slovíčka' });
+    expect(button.title).toBe('Practice selected words');
+    fireEvent.click(button);
 
     expect(mocks.navigate).toHaveBeenCalledWith('/practice/pronunciation');
+  });
+
+  it('uses a loading tooltip until the selection count is available', () => {
+    mocks.count = undefined;
+
+    render(<PronunciationPracticeButton userId="u1" />);
+
+    const button = screen.getByRole('button', { name: 'Výslovnost – slovíčka' });
+    expect((button as HTMLButtonElement).disabled).toBe(true);
+    expect(button.title).toBe('Loading');
   });
 });

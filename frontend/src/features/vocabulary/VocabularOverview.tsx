@@ -9,13 +9,17 @@ import { useNavigate } from 'react-router-dom';
 import VocabularyDetailCard from './VocabularyDetailCard';
 import VocabularyList from './VocabularyList';
 import { ROUTES } from '@/config/routes.config';
+import type { UserItemLocal } from '@/types/user-item.types';
+import { invalidateRouteData, routeDataKey } from '@/routing/route-data-cache';
 
 /**
  * VocabularyOverview component
  *
  * @returns The vocabulary overview UI with list and detail card functionality.
  */
-export default function VocabularyOverview() {
+export default function VocabularyOverview({
+  initialWords,
+}: Readonly<{ initialWords?: UserItemLocal[] }>) {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
@@ -33,7 +37,7 @@ export default function VocabularyOverview() {
     selectedWord,
     setSelectedWord,
     filteredWords,
-  } = useVocabulary(userId);
+  } = useVocabulary(userId, initialWords);
 
   useEffect(() => {
     if (!error) return;
@@ -50,6 +54,7 @@ export default function VocabularyOverview() {
 
     try {
       const resetItemId = await UserItem.resetItemById(userId, itemId);
+      invalidateRouteData(routeDataKey('vocabulary', userId));
       reportInfo(`Vocabulary item reset completed: item ${resetItemId}.`);
       showToast(TEXTS.resetProgressSuccessToast, 'success');
       setSelectedWord(null);

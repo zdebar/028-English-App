@@ -3,7 +3,7 @@ import Dashboard from '@/features/dashboard/Dashboard';
 import { useUserStore } from '@/features/user-stats/use-user-store';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Notification from '@/components/UI/Notification';
 import '@/styles/home.css';
 import { InstallPWAButton } from '@/features/pwa/InstallPwaButton';
@@ -18,6 +18,8 @@ import SimulateDataButton from '@/features/synchronization/SimulateDataButton';
 import PracticeButton from '@/features/practice/PracticeButton';
 import HelpButton from '@/features/help/HelpButton';
 import PronunciationPracticeButton from '@/features/pronunciation/PronunciationPracticeButton';
+import PronunciationGroupsButton from '@/features/pronunciation/PronunciationGroupsButton';
+import { practiceOverviewDescriptor } from '@/routing/route-data';
 
 function HomeActionLinks(): JSX.Element {
   return (
@@ -36,7 +38,6 @@ function HomeActionLinks(): JSX.Element {
  * @returns The JSX element representing the Home page.
  */
 export default function Home(): JSX.Element {
-  const navigate = useNavigate();
   const userId = useAuthStore((state) => state.userId);
   const userFullName = useAuthStore((state) => state.userFullName);
   const isAnonymousUser = useAuthStore((state) => state.isAnonymousUser);
@@ -61,12 +62,14 @@ export default function Home(): JSX.Element {
           <div className="mt-4 flex w-full flex-col gap-1 portrait:mt-8">
             <PracticeOverviewButton
               count={dailyCount}
-              onClick={() => navigate(ROUTES.practiceOverview)}
+              to={ROUTES.practiceOverview}
+              descriptor={practiceOverviewDescriptor(userId)}
               ariaLabel={TEXTS.practiceOverviewOpen}
               helpText={TEXTS.starsToday}
             />
             <PracticeButton userId={userId} />
             <PronunciationPracticeButton userId={userId} />
+            <PronunciationGroupsButton userId={userId} />
           </div>
           <div className="relative mb-12 portrait:mt-8">
             <p

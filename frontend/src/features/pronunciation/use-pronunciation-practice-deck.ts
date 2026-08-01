@@ -4,17 +4,23 @@ import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { useFetch } from '@/hooks/use-fetch';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useState } from 'react';
+import { invalidateRouteData, routeDataKey } from '@/routing/route-data-cache';
 
 const NBSP = '\u00A0';
 
-export function usePronunciationPracticeDeck(userId: string | null) {
+export function usePronunciationPracticeDeck(
+  userId: string | null,
+  initialDeck?: UserItemLocal[],
+) {
   const [index, setIndex] = useState(0);
 
   const fetchDeck = useCallback(async () => {
     if (!userId) return [];
     return UserItem.getPronunciationPracticeDeck(userId);
   }, [userId]);
-  const { data, loading, error, reload } = useFetch<UserItemLocal[]>(fetchDeck);
+  const { data, loading, error, reload } = useFetch<UserItemLocal[]>(fetchDeck, {
+    initialData: initialDeck,
+  });
 
   const items = data ?? [];
   const currentItem = items[index] ?? null;
@@ -38,7 +44,7 @@ export function usePronunciationPracticeDeck(userId: string | null) {
   }, [audioDisabled, audioLoading, currentItem, playAudio]);
 
   const next = useCallback(async () => {
-    if (!currentItem) return;
+    if (!currentItem || items.length <= 1) return;
 
     if (index < items.length - 1) {
       setIndex((currentIndex) => currentIndex + 1);
@@ -48,6 +54,16 @@ export function usePronunciationPracticeDeck(userId: string | null) {
     setIndex(0);
     await reload();
   }, [currentItem, index, items.length, reload]);
+
+  const handleSelectionChange = useCallback(
+    (selected: boolean) => {
+      if (selected) return;
+      setIndex(0);
+      if (userId) invalidateRouteData(routeDataKey('pronunciation-practice', userId));
+      void reload();
+    },
+    [reload, userId],
+  );
 
   return {
     currentItem,
@@ -61,6 +77,8 @@ export function usePronunciationPracticeDeck(userId: string | null) {
     playAudio,
     pronunciation: currentItem?.pronunciation || NBSP,
     progressLabel: items.length > 0 ? `${index + 1} / ${items.length}` : '0 / 0',
+    canGoNext: items.length > 1,
+    handleSelectionChange,
     next,
   };
 }

@@ -28,8 +28,8 @@
   --color-auth-button-text: black;
   --color-auth-danger: red;
   --color-auth-brand: green;
-  --color-disabled-light: #6b7280;
-  --color-disabled-dark: #6b7280;
+  --color-disabled-light: #727374;
+  --color-disabled-dark: #9ca3af;
 
   /** warning colors **/
   --color-warning-light: black;

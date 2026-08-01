@@ -97,12 +97,16 @@ vi.mock('@/features/pwa/InstallPwaButton', () => ({
   InstallPWAButton: () => <button type="button">Install</button>,
 }));
 
-vi.mock('@/components/PracticeOverviewButton', () => ({
+vi.mock('@/features/practice-overview/PracticeOverviewButton', () => ({
   default: ({ count, ariaLabel, helpText }: any) => (
-    <div data-testid="practice-overview-button">
-      {count}:{ariaLabel}:{helpText}
-    </div>
+    <button type="button" aria-label={ariaLabel} data-testid="practice-overview-button">
+      {count}:{helpText}
+    </button>
   ),
+}));
+
+vi.mock('@/routing/route-data', () => ({
+  practiceOverviewDescriptor: () => ({ key: 'practice-overview', load: vi.fn() }),
 }));
 
 vi.mock('@/features/auth/GoogleAuthButton', () => ({
@@ -120,6 +124,12 @@ vi.mock('@/features/practice/PracticeButton', () => ({
 vi.mock('@/features/pronunciation/PronunciationPracticeButton', () => ({
   default: ({ userId }: any) => (
     <div data-testid="pronunciation-practice-button">pronunciation:{userId}</div>
+  ),
+}));
+
+vi.mock('@/features/pronunciation/PronunciationGroupsButton', () => ({
+  default: ({ userId }: any) => (
+    <div data-testid="pronunciation-groups-button">pronunciation-groups:{userId}</div>
   ),
 }));
 
@@ -163,6 +173,9 @@ describe('Home', () => {
     expect(screen.getByTestId('home-practice-buttons').textContent).toBe('practice:u1');
     expect(screen.getByTestId('pronunciation-practice-button').parentElement?.className).toContain(
       'gap-1',
+    );
+    expect(screen.getByTestId('pronunciation-groups-button').textContent).toBe(
+      'pronunciation-groups:u1',
     );
   });
 

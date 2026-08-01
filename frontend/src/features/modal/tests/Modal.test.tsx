@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   closeOverlay: vi.fn(),
   openOverlay: vi.fn(),
+  setOverlayDismissible: vi.fn(),
 }));
 
 vi.mock('@/features/overlay/use-overlay-store', () => ({
@@ -11,6 +12,7 @@ vi.mock('@/features/overlay/use-overlay-store', () => ({
     selector({
       closeOverlay: mocks.closeOverlay,
       openOverlay: mocks.openOverlay,
+      setOverlayDismissible: mocks.setOverlayDismissible,
     }),
 }));
 
@@ -110,6 +112,7 @@ describe('Modal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
 
     expect(onConfirm).toHaveBeenCalledTimes(1);
+    expect(mocks.setOverlayDismissible).toHaveBeenCalledWith(false);
     expect(mocks.closeOverlay).not.toHaveBeenCalled();
     expect((screen.getByRole('button', { name: 'Cancel' }) as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole('button', { name: 'Confirm' }) as HTMLButtonElement).disabled).toBe(true);
@@ -119,6 +122,22 @@ describe('Modal', () => {
     await waitFor(() => {
       expect(mocks.closeOverlay).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it('prevents repeated confirmation before the component rerenders', () => {
+    const onConfirm = vi.fn(() => new Promise<void>(() => undefined));
+
+    render(
+      <Modal onConfirm={onConfirm} onClose={vi.fn()}>
+        content
+      </Modal>,
+    );
+
+    const confirmButton = screen.getByRole('button', { name: 'Confirm' });
+    fireEvent.click(confirmButton);
+    fireEvent.click(confirmButton);
+
+    expect(onConfirm).toHaveBeenCalledTimes(1);
   });
 
   it('returns null when root element is not present', () => {

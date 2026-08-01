@@ -68,6 +68,7 @@ vi.mock('@/features/logging/monitoring-handler', () => ({
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => vi.fn(),
+  useLoaderData: () => mocks.scores,
 }));
 
 import PracticeOverview from '@/pages/PracticeOverview';

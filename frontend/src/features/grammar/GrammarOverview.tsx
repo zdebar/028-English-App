@@ -16,8 +16,11 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import { DataState } from '@/components/UI/DataState';
 import GrammarDetailCard from './GrammarDetailCard';
 import { ROUTES } from '@/config/routes.config';
+import { invalidateRouteData, routeDataKey } from '@/routing/route-data-cache';
 
-export default function GrammarOverview(): JSX.Element {
+export default function GrammarOverview({
+  initialGrammar,
+}: Readonly<{ initialGrammar?: GrammarGroupWithChunks[] }>): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const navigate = useNavigate();
   const showToast = useToastStore((state) => state.showToast);
@@ -39,7 +42,7 @@ export default function GrammarOverview(): JSX.Element {
     hasData,
     error,
     reload,
-  } = useArray<GrammarGroupWithChunks>(fetchGrammar);
+  } = useArray<GrammarGroupWithChunks>(fetchGrammar, { initialData: initialGrammar });
 
   useEffect(() => {
     if (!error) return;
@@ -62,6 +65,7 @@ export default function GrammarOverview(): JSX.Element {
       reportInfo(
         `Grammar ${currentItem.id} reset completed: ${resetCount} items and ${resetBlockCount} blocks reset.`,
       );
+      invalidateRouteData(routeDataKey('grammar', userId));
       reload();
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (err) {

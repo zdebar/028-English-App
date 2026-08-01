@@ -1,8 +1,11 @@
 import type { JSX, ButtonHTMLAttributes } from 'react';
-import { Link, useMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
+import { PrefetchLink } from '@/routing/prefetch-navigation';
+import type { RouteDataDescriptor } from '@/routing/route-data-cache';
 
 type HeaderButtonProps = Readonly<{
   to: string;
+  descriptor?: RouteDataDescriptor<unknown>;
 }> &
   ButtonHTMLAttributes<HTMLButtonElement>;
 
@@ -11,7 +14,7 @@ type HeaderButtonProps = Readonly<{
  *
  * @param to Destination path for navigation.
  */
-export default function HeaderButton({ to, ...rest }: HeaderButtonProps): JSX.Element {
+export default function HeaderButton({ to, descriptor, ...rest }: HeaderButtonProps): JSX.Element {
   const isSelected = useMatch({ path: to ?? '', end: true });
 
   const sharedClasses = `${rest.className ?? ''} size-button flex items-center justify-center rounded-full`;
@@ -30,14 +33,15 @@ export default function HeaderButton({ to, ...rest }: HeaderButtonProps): JSX.El
     );
 
   return (
-    <Link
+    <PrefetchLink
       to={to}
+      descriptor={descriptor}
       title={rest.title ?? ''}
       className={`${sharedClasses} hover:bg-button-hover hover:text-light focus-visible:outline-none focus-visible:bg-button-hover focus-visible:text-light ${
         isSelected ? 'text-light bg-button-hover' : ''
       }`}
     >
       {rest.children}
-    </Link>
+    </PrefetchLink>
   );
 }

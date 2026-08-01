@@ -150,7 +150,10 @@ describe('VocabularyList', () => {
       />,
     );
 
-    fireEvent.change(screen.getByPlaceholderText('Search'), { target: { value: 'abc' } });
+    const searchInput = screen.getByPlaceholderText('Search');
+    expect(searchInput.id).toBe('vocabulary-search');
+    expect(searchInput.getAttribute('name')).toBe('vocabulary-search');
+    fireEvent.change(searchInput, { target: { value: 'abc' } });
     expect(setSearchTerm).toHaveBeenCalledWith('abc');
 
     fireEvent.click(screen.getByTestId('direction-dd'));

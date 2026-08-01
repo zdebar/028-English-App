@@ -79,6 +79,33 @@ describe('usePronunciationPracticeDeck', () => {
     expect(result.current.progressLabel).toBe('1 / 1');
   });
 
+  it('disables advancing and does not reload a one-item deck', async () => {
+    mocks.getPronunciationPracticeDeck.mockResolvedValue([items[0]]);
+    const { result } = renderHook(() => usePronunciationPracticeDeck('u1'));
+
+    await waitFor(() => expect(result.current.currentItem?.english).toBe('man'));
+    expect(result.current.canGoNext).toBe(false);
+
+    await act(() => result.current.next());
+
+    expect(mocks.getPronunciationPracticeDeck).toHaveBeenCalledTimes(1);
+    expect(result.current.currentItem?.english).toBe('man');
+  });
+
+  it('reloads from index zero after removal and reaches empty state for the last item', async () => {
+    mocks.getPronunciationPracticeDeck.mockResolvedValueOnce([items[0]]).mockResolvedValue([]);
+    const { result } = renderHook(() => usePronunciationPracticeDeck('u1'));
+
+    await waitFor(() => expect(result.current.currentItem?.english).toBe('man'));
+
+    act(() => result.current.handleSelectionChange(false));
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(mocks.getPronunciationPracticeDeck).toHaveBeenCalledTimes(2);
+    expect(result.current.currentItem).toBeNull();
+    expect(result.current.progressLabel).toBe('0 / 0');
+  });
+
   it('publishes the first item in the same render that finishes loading', async () => {
     let resolveDeck: (items: UserItemLocal[]) => void = () => undefined;
     mocks.getPronunciationPracticeDeck.mockReturnValue(

@@ -3,11 +3,19 @@ import ReturnHomeButton from '@/components/UI/buttons/ReturnHomeButton';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 
-export default function PracticeEmptyState(): JSX.Element {
+type PracticeEmptyStateProps = Readonly<{
+  showTryAgainLater?: boolean;
+}>;
+
+export default function PracticeEmptyState({
+  showTryAgainLater = true,
+}: PracticeEmptyStateProps): JSX.Element {
   return (
-    <div className="card-width w-full landscape:my-auto">
+    <div className="card-width w-full pt-24">
       <InfoNotification>{TEXTS.nothingToPractice}</InfoNotification>
-      <InfoNotification className="mb-4">{TEXTS.tryAgainLater}</InfoNotification>
+      {showTryAgainLater && (
+        <InfoNotification className="mb-4">{TEXTS.tryAgainLater}</InfoNotification>
+      )}
       <ReturnHomeButton />
     </div>
   );

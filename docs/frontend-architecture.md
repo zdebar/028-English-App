@@ -6,11 +6,12 @@ pushes/pulls Supabase changes.
 
 ## App Boot Sequence
 
-`frontend/src/App.tsx` owns app-wide initialization:
+`frontend/src/main.tsx` starts the auth lifecycle before creating route loads. The
+root layout in `frontend/src/App.tsx` owns the remaining app-wide initialization:
 
 | Step | Owner | Effect |
 | --- | --- | --- |
-| Auth initialization | `useAuthStore.initializeAuth` | Loads Supabase session, listens for auth changes, sets monitoring user. |
+| Auth initialization | `startAuthLifecycle` | Loads Supabase session before protected loaders, listens for auth changes, sets monitoring user. |
 | Audio settings load | `useAudioLoader` | Initializes per-user volume from localStorage. |
 | User stats sync | `useUserStoreSync` | Maintains active-user Dexie subscriptions and handles local-date rollover. |
 | Theme load | `useThemeLoader` | Loads per-user or guest theme and applies DOM classes/meta color. |
@@ -19,8 +20,9 @@ pushes/pulls Supabase changes.
 
 ## Routes
 
-Routes are configured in `frontend/src/config/routes.config.ts` and wired in
-`frontend/src/App.tsx`.
+Route paths are configured in `frontend/src/config/routes.config.ts` and wired as
+a hash-based React Router data router in `frontend/src/router.tsx`. `App` is the
+root layout and renders route content through `Outlet`.
 
 | Route | Page | Access |
 | --- | --- | --- |
@@ -28,7 +30,8 @@ Routes are configured in `frontend/src/config/routes.config.ts` and wired in
 | `/privacy-policy` | `PrivacyPolicy` | Public |
 | `/guide` | `Guide` | Public |
 | `/practice` | `Practice` | Protected |
-| `/practice/new-grammar` | `NewGrammarPractice` | Protected |
+| `/practice/block-training?blockId=…` | `BlockTrainingPractice` | Protected |
+| `/practice/pronunciation` | `PronunciationPractice` | Protected |
 | `/practice-overview` | `PracticeOverview` | Protected |
 | `/profile` | `Profile` | Protected |
 | `/levels` | `Levels` | Protected |
@@ -36,9 +39,29 @@ Routes are configured in `frontend/src/config/routes.config.ts` and wired in
 | `/topics/:blockId` | `TopicItems` | Protected |
 | `/grammar` | `Grammar` | Protected |
 | `/vocabulary` | `Vocabulary` | Protected |
+| `/pronunciation` | `PronunciationOverviewPage` | Protected |
+| `/pronunciation/:groupId` | `PronunciationGroupPage` | Protected |
 
-`ProtectedLayout` gates protected routes. Unknown routes render a page-not-found
-notification.
+Protected loaders await the initial authentication result and redirect guests to
+Home. Unknown routes render a page-not-found notification.
+
+## Route Data And Prefetch
+
+Route-critical IndexedDB queries are represented by typed descriptors in
+`frontend/src/routing/route-data.ts`. Data routes consume these descriptors before
+rendering their destination page. Navigation controls may start the same request
+on pointer hover, keyboard focus, or pointer-down.
+
+The cache in `route-data-cache.ts` is only a short handoff: concurrent requests are
+deduplicated, successful unconsumed results expire after ten seconds, and a route
+loader consumes an entry once. Failures are evicted immediately so a click can
+retry. Mutations invalidate matching unconsumed descriptors; IndexedDB remains the
+source of truth.
+
+`PrefetchButton` and `PrefetchLink` keep the current route visible while click-time
+loading runs. A successful request navigates; a failure leaves the user on the
+current page and reports the standard loading toast. Direct URLs, refresh, and
+history navigation run the same route loaders without relying on prefetch.
 
 ## State Categories
 
@@ -58,8 +81,8 @@ and renders `HomePracticeButtons` plus dashboard and overview links.
 Practice routes share `PracticeSessionCard` where possible:
 
 - `Practice` uses one `usePracticeDeck` for vocabulary, grammar review, and new-item discovery.
-- `NewGrammarPractice` uses `useNewGrammarPracticeDeck` for the special new
-  grammar learning flow.
+- `BlockTrainingPractice` uses a query-string block ID so refresh and direct
+  navigation can load the same mandatory initial-training flow.
 
 Overview pages are route-level shells around feature components and model queries.
 

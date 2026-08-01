@@ -9,10 +9,13 @@ import { useCallback, useEffect } from 'react';
 import { useToastStore } from '../toast/use-toast-store';
 import { reportError } from '../logging/monitoring-handler';
 import { DataState } from '@/components/UI/DataState';
-import { ListButton } from '@/components/UI/buttons/ListButton';
 import OverviewCard from '@/components/UI/OverviewCard';
+import { PrefetchButton } from '@/routing/prefetch-navigation';
+import { topicDetailDescriptor } from '@/routing/route-data';
 
-export default function TopicsOverview() {
+export default function TopicsOverview({
+  initialTopics,
+}: Readonly<{ initialTopics?: UserBlockType[] }>) {
   const navigate = useNavigate();
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
@@ -28,7 +31,7 @@ export default function TopicsOverview() {
     loading: topicsLoading,
     hasData: hasTopics,
     error: topicsError,
-  } = useArray<UserBlockType>(fetchTopics);
+  } = useArray<UserBlockType>(fetchTopics, { initialData: initialTopics });
 
   useEffect(() => {
     if (!topicsError) return;
@@ -40,14 +43,15 @@ export default function TopicsOverview() {
     <OverviewCard buttonTitle={TEXTS.topicsOverview} onClose={() => navigate(ROUTES.overviews)}>
       <DataState loading={topicsLoading} hasData={hasTopics} noDataMessage={TEXTS.noTopics}>
         {topics.map((topic) => (
-          <ListButton
+          <PrefetchButton
             key={topic.block_id}
             className="h-input flex w-full justify-start px-4 text-left"
-            onClick={() => navigate(`${ROUTES.topics}/${topic.block_id}`)}
+            to={`${ROUTES.topics}/${topic.block_id}`}
+            descriptor={userId ? topicDetailDescriptor(userId, topic.block_id) : undefined}
             title={topic.name}
           >
             <p className="overflow-hidden text-ellipsis whitespace-nowrap">{topic.name}</p>
-          </ListButton>
+          </PrefetchButton>
         ))}
       </DataState>
     </OverviewCard>

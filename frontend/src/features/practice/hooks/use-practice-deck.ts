@@ -11,13 +11,14 @@ import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
 import config from '@/config/config';
+import { invalidateRouteData, routeDataKey } from '@/routing/route-data-cache';
 
 /**
  * usePracticeDeck hook manages the practice deck and user progress for a given user.
  *
  * @param userId The unique identifier of the user.
  */
-export function usePracticeDeck(userId: string | null) {
+export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDeckItem[]) {
   // Array fetching logic
   const [array, setArray] = useState<PracticeDeckItem[]>([]);
   const [index, setIndex] = useState(0);
@@ -34,7 +35,7 @@ export function usePracticeDeck(userId: string | null) {
     loading,
     error,
     reload,
-  } = useFetch<PracticeDeckItem[]>(fetchPracticeDeck);
+  } = useFetch<PracticeDeckItem[]>(fetchPracticeDeck, { initialData: initialDeck });
 
   const activeArray = array.length > 0 ? array : (fetchedArray ?? []);
   const currentItem = activeArray[index] ?? null;
@@ -90,6 +91,7 @@ export function usePracticeDeck(userId: string | null) {
         reportInfo(`Saved practice deck ${source} with ${userProgress.length} items.`);
         userProgressRef.current = [];
         if (shouldReload) {
+          invalidateRouteData(routeDataKey('practice', userId));
           reload();
         }
       } catch (error) {

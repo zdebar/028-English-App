@@ -6,14 +6,15 @@
 
   .color-audio-disabled {
     @apply cursor-default;
-    @apply border-background-light dark:border-background-dark bg-inherit text-inherit;
+    @apply bg-inherit text-inherit;
+    @apply border-disabled-light dark:border-disabled-dark border border-dashed;
   }
 
   .color-button {
-    @apply bg-button-light border-button-light;
+    @apply bg-button-light border-button-light border;
     @apply dark:bg-button-dark dark:border-button-dark;
     @apply disabled:text-disabled-light dark:disabled:text-disabled-dark disabled:bg-inherit;
-    @apply disabled:border-disabled-light dark:disabled:border-disabled-dark;
+    @apply disabled:border-disabled-light dark:disabled:border-disabled-dark disabled:border disabled:border-dashed;
   }
 
   .color-button:not(:disabled):hover {
@@ -41,7 +42,7 @@
   }
 
   .pronunciation-control-emphasis:not(:disabled) svg {
-    @apply text-cyan-900 dark:text-cyan-300;
+    @apply text-cyan-600 dark:text-cyan-300;
   }
 
   .pronunciation-control-emphasis:not(:disabled):hover svg {

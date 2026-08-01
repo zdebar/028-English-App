@@ -195,18 +195,25 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    *
    * @param items Practice items to save. Empty or nullish arrays are ignored.
    */
-  static async savePracticeDeck(
-    items: UserItemLocal[],
-  ): Promise<void> {
+  static async savePracticeDeck(items: UserItemLocal[]): Promise<void> {
     if (!items || items.length === 0) return;
 
-    const updatedItems = items.map((item) => {
-      const { practice_direction: _direction, ...persistedItem } =
-        item as PracticeDeckItem;
-      return persistedItem;
-    });
-
-    await db.user_items.bulkPut(updatedItems);
+    await db.user_items.bulkUpdate(
+      items.map((item) => ({
+        key: [item.user_id, item.item_id],
+        changes: {
+          progress_cz_to_en: item.progress_cz_to_en,
+          progress_en_to_cz: item.progress_en_to_cz,
+          progress_history: item.progress_history,
+          started_at: item.started_at,
+          updated_at: item.updated_at,
+          next_at_cz_to_en: item.next_at_cz_to_en,
+          next_at_en_to_cz: item.next_at_en_to_cz,
+          mastered_at_cz_to_en: item.mastered_at_cz_to_en,
+          mastered_at_en_to_cz: item.mastered_at_en_to_cz,
+        },
+      })),
+    );
   }
 
   /**

@@ -73,6 +73,8 @@ export default function VocabularyList({
       </CardHeader>
       <div className="relative w-full">
         <input
+          id="vocabulary-search"
+          name="vocabulary-search"
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -104,6 +106,7 @@ export default function VocabularyList({
         ))}
         {remainingCount > 0 && (
           <button
+            type="button"
             onClick={() => setVisibleCount(visibleCount + config.vocabulary.itemsPerPage)}
             className="mt-2 w-full text-center font-bold hover:underline"
           >

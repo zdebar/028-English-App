@@ -69,6 +69,22 @@ describe('useFetch', () => {
     });
   });
 
+  it('uses initial loader data without a duplicate mount request and still reloads', async () => {
+    const fetchFunction = vi.fn().mockResolvedValue({ value: 2 });
+    const initialData = { value: 1 };
+    const { result } = renderHook(() =>
+      useFetch(fetchFunction, { initialData }),
+    );
+
+    expect(result.current.data).toEqual({ value: 1 });
+    expect(result.current.loading).toBe(false);
+    expect(fetchFunction).not.toHaveBeenCalled();
+
+    await act(async () => result.current.reload());
+    expect(fetchFunction).toHaveBeenCalledTimes(1);
+    expect(result.current.data).toEqual({ value: 2 });
+  });
+
   it('clears stale error before retrying', async () => {
     let resolveSecondLoad: ((value: { value: number }) => void) | undefined;
     const fetchFunction = vi

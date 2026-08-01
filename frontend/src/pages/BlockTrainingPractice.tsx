@@ -11,17 +11,17 @@ import { useBlockTrainingDeck } from '@/features/practice/hooks/use-block-traini
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import { useEffect, useState, type JSX } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLoaderData, useNavigate } from 'react-router-dom';
+import type { BlockTrainingData } from '@/routing/route-data';
 
 export default function BlockTrainingPractice(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const navigate = useNavigate();
-  const location = useLocation();
   const showToast = useToastStore((state) => state.showToast);
   const [showIntro, setShowIntro] = useState(true);
-  const state = location.state as { blockId?: unknown } | null;
-  const blockId = typeof state?.blockId === 'number' ? state.blockId : null;
-  const deck = useBlockTrainingDeck(userId, blockId);
+  const initialData = useLoaderData() as BlockTrainingData;
+  const blockId = initialData.block?.block_id ?? null;
+  const deck = useBlockTrainingDeck(userId, blockId, initialData);
 
   useEffect(() => {
     if (!deck.error) return;

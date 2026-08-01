@@ -13,22 +13,26 @@ import { useToastStore } from '../toast/use-toast-store';
 import { useEffect } from 'react';
 import { useAuthStore } from '../auth/use-auth-store';
 import { ROUTES } from '@/config/routes.config';
+import type { LevelOverviewType } from '@/types/generic.types';
 
 /**
  * LevelsOverview component
  *
  * @returns The levels overview UI with list and detail card functionality.
  */
-export default function LevelsOverview() {
+export default function LevelsOverview({
+  initialLevels = [],
+}: Readonly<{ initialLevels?: LevelOverviewType[] }>) {
   const unpackedLevelId = useLevelsStore((state) => state.unpackedLevelId);
   const hydrateUnpackedLevelId = useLevelsStore((state) => state.hydrateUnpackedLevelId);
   const setUnpackedLevelId = useLevelsStore((state) => state.setUnpackedLevelId);
   const userId = useAuthStore((state) => state.userId);
-  const levels = useUserStore((state) => state.levels);
+  const storedLevels = useUserStore((state) => state.levels);
   const levelsLoading = useUserStore((state) => state.levelsLoading);
   const levelsError = useUserStore((state) => state.levelsError);
   const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
+  const levels = levelsLoading ? initialLevels : storedLevels;
 
   useEffect(() => {
     if (!levelsError) return;
@@ -53,7 +57,7 @@ export default function LevelsOverview() {
   return (
     <OverviewCard onClose={() => navigate(ROUTES.overviews)} buttonTitle={TEXTS.levelsOverview}>
       <DataState
-        loading={levelsLoading}
+        loading={false}
         hasData={levels.length > 0}
         noDataMessage={TEXTS.noDashboardData}
       >
