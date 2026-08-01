@@ -6,7 +6,6 @@ const mocks = vi.hoisted(() => ({
   grammar: [] as unknown[],
   topics: [] as unknown[],
   vocabulary: [] as unknown[],
-  pronunciation: [] as unknown[],
   scoreError: null as Error | null,
   levelsState: {
     levels: [] as unknown[],
@@ -50,10 +49,6 @@ vi.mock('@/database/models/user-blocks', () => ({
 vi.mock('@/database/models/user-items', () => ({
   default: { getStartedVocabulary: vi.fn(async () => mocks.vocabulary) },
 }));
-vi.mock('@/database/models/pronunciation-groups', () => ({
-  default: { getOverview: vi.fn(async () => mocks.pronunciation) },
-}));
-
 vi.mock('@/features/user-stats/use-user-store', () => ({
   useUserStore: (selector: (state: typeof mocks.levelsState) => unknown) =>
     selector(mocks.levelsState),
@@ -78,32 +73,29 @@ describe('useOverviewAvailability', () => {
     mocks.grammar = [];
     mocks.topics = [];
     mocks.vocabulary = [];
-    mocks.pronunciation = [];
     mocks.scoreError = null;
     mocks.levelsState = { levels: [], levelsLoading: false, levelsError: null };
     mocks.observers = [];
   });
 
-  it('resolves all six overview states independently', async () => {
+  it('resolves all five overview states independently', async () => {
     mocks.scores = [{}];
     mocks.topics = [{}];
-    mocks.pronunciation = [{}];
     mocks.levelsState.levels = [{}];
 
     const { result } = renderHook(() => useOverviewAvailability('u1'));
 
-    await waitFor(() => expect(result.current.pronunciation.loading).toBe(false));
+    await waitFor(() => expect(result.current.vocabulary.loading).toBe(false));
     expect(result.current.practice.hasData).toBe(true);
     expect(result.current.levels.hasData).toBe(true);
     expect(result.current.grammar.hasData).toBe(false);
     expect(result.current.topics.hasData).toBe(true);
     expect(result.current.vocabulary.hasData).toBe(false);
-    expect(result.current.pronunciation.hasData).toBe(true);
   });
 
   it('reacts to database emissions and unsubscribes every observer', async () => {
     const { result, unmount } = renderHook(() => useOverviewAvailability('u1'));
-    await waitFor(() => expect(mocks.observers).toHaveLength(5));
+    await waitFor(() => expect(mocks.observers).toHaveLength(4));
 
     act(() => mocks.observers[0].next(true));
     expect(result.current.practice.hasData).toBe(true);

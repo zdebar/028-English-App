@@ -18,6 +18,7 @@ import SimulateDataButton from '@/features/synchronization/SimulateDataButton';
 import PracticeButton from '@/features/practice/PracticeButton';
 import HelpButton from '@/features/help/HelpButton';
 import PronunciationPracticeButton from '@/features/pronunciation/PronunciationPracticeButton';
+import PronunciationGroupsButton from '@/features/pronunciation/PronunciationGroupsButton';
 import { practiceOverviewDescriptor } from '@/routing/route-data';
 
 function HomeActionLinks(): JSX.Element {
@@ -68,6 +69,7 @@ export default function Home(): JSX.Element {
             />
             <PracticeButton userId={userId} />
             <PronunciationPracticeButton userId={userId} />
+            <PronunciationGroupsButton userId={userId} />
           </div>
           <div className="relative mb-12 portrait:mt-8">
             <p

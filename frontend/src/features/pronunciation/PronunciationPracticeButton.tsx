@@ -11,15 +11,23 @@ export default function PronunciationPracticeButton({
   const selectedCount = useLiveQuery(
     () => UserItem.getPronunciationPracticeCount(userId),
     [userId],
-    0,
   );
+  const loading = selectedCount === undefined;
+  const hasSelection = Boolean(selectedCount);
 
   return (
     <PrefetchButton
       to={ROUTES.pronunciationPractice}
       descriptor={pronunciationPracticeDescriptor(userId)}
       className="h-button max-h-button w-full px-4"
-      disabled={selectedCount === 0}
+      disabled={!hasSelection}
+      title={
+        loading
+          ? TEXTS.loadingMessage
+          : hasSelection
+            ? TEXTS.pronunciationPracticeTooltip
+            : TEXTS.noPronunciationPracticeSelection
+      }
     >
       {TEXTS.pronunciationPracticeButton}
     </PrefetchButton>

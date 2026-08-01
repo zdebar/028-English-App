@@ -1,5 +1,4 @@
 import GrammarGroup from '@/database/models/grammar-groups';
-import PronunciationGroup from '@/database/models/pronunciation-groups';
 import UserBlock from '@/database/models/user-blocks';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
@@ -23,7 +22,6 @@ export type OverviewAvailabilityState = Readonly<{
   grammar: OverviewAvailability;
   topics: OverviewAvailability;
   vocabulary: OverviewAvailability;
-  pronunciation: OverviewAvailability;
 }>;
 
 type DatabaseOverviewKey = Exclude<keyof OverviewAvailabilityState, 'levels'>;
@@ -45,7 +43,6 @@ const INITIAL_DATABASE_STATE: Omit<OverviewAvailabilityState, 'levels'> = {
   grammar: EMPTY_AVAILABILITY,
   topics: EMPTY_AVAILABILITY,
   vocabulary: EMPTY_AVAILABILITY,
-  pronunciation: EMPTY_AVAILABILITY,
 };
 
 const LOADING_DATABASE_STATE: Omit<OverviewAvailabilityState, 'levels'> = {
@@ -53,7 +50,6 @@ const LOADING_DATABASE_STATE: Omit<OverviewAvailabilityState, 'levels'> = {
   grammar: LOADING_AVAILABILITY,
   topics: LOADING_AVAILABILITY,
   vocabulary: LOADING_AVAILABILITY,
-  pronunciation: LOADING_AVAILABILITY,
 };
 
 function toError(error: unknown): Error {
@@ -76,7 +72,6 @@ export function useOverviewAvailability(
           grammar: { hasData: initialData.grammar, loading: false, error: null },
           topics: { hasData: initialData.topics, loading: false, error: null },
           vocabulary: { hasData: initialData.vocabulary, loading: false, error: null },
-          pronunciation: { hasData: initialData.pronunciation, loading: false, error: null },
         }
       : INITIAL_DATABASE_STATE,
   );
@@ -100,7 +95,6 @@ export function useOverviewAvailability(
       ['grammar', async () => (await GrammarGroup.getStarted(userId)).length > 0],
       ['topics', async () => (await UserBlock.getStartedTopicsByUserId(userId)).length > 0],
       ['vocabulary', async () => (await UserItem.getStartedVocabulary(userId)).length > 0],
-      ['pronunciation', async () => (await PronunciationGroup.getOverview(userId)).length > 0],
     ];
 
     const subscriptions = queries.map(([key, query]) =>

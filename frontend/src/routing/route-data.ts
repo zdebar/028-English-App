@@ -16,13 +16,12 @@ export function overviewAvailabilityDescriptor(userId: string) {
   return {
     key: routeDataKey('overviews', userId),
     load: async () => {
-      const [scores, levels, grammar, topics, vocabulary, pronunciation] = await Promise.all([
+      const [scores, levels, grammar, topics, vocabulary] = await Promise.all([
         UserScore.getByUserId(userId),
         Levels.getOverview(userId, getLocalDate()),
         GrammarGroup.getStarted(userId),
         UserBlock.getStartedTopicsByUserId(userId),
         UserItem.getStartedVocabulary(userId),
-        PronunciationGroup.getOverview(userId),
       ]);
       return {
         practice: scores.length > 0,
@@ -30,7 +29,6 @@ export function overviewAvailabilityDescriptor(userId: string) {
         grammar: grammar.length > 0,
         topics: topics.length > 0,
         vocabulary: vocabulary.length > 0,
-        pronunciation: pronunciation.length > 0,
       };
     },
   } satisfies RouteDataDescriptor<unknown>;

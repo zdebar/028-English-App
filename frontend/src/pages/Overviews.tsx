@@ -13,7 +13,6 @@ import {
   grammarDescriptor,
   levelsDescriptor,
   practiceOverviewDescriptor,
-  pronunciationGroupsDescriptor,
   topicsDescriptor,
   vocabularyDescriptor,
 } from '@/routing/route-data';
@@ -61,12 +60,6 @@ export default function Overviews(): JSX.Element {
     TEXTS.vocabularyOverviewTooltip,
     TEXTS.noStartedVocabulary,
   );
-  const pronunciationButton = getButtonState(
-    availability.pronunciation,
-    TEXTS.pronunciationGroupsTooltip,
-    TEXTS.noPronunciationGroups,
-  );
-
   return (
     <div className="card-width grow-0 gap-1">
       <h1 className="sr-only">{TEXTS.overviews}</h1>
@@ -113,16 +106,6 @@ export default function Overviews(): JSX.Element {
             <MenuButtonText>{TEXTS.vocabularyOverview}</MenuButtonText>
           </PrefetchButton>
         </div>
-      </section>
-      <section aria-label={TEXTS.pronunciationSettings} className="mt-6">
-        <PrefetchButton
-          className="h-button w-full"
-          to={ROUTES.pronunciationGroups}
-          descriptor={userId ? pronunciationGroupsDescriptor(userId) : undefined}
-          {...pronunciationButton}
-        >
-          <MenuButtonText>{TEXTS.pronunciationGroups}</MenuButtonText>
-        </PrefetchButton>
       </section>
     </div>
   );

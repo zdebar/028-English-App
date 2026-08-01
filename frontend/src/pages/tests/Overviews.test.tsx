@@ -31,7 +31,6 @@ vi.mock('@/locales/cs', () => ({
   TEXTS: {
     overviews: 'Přehledy',
     progressOverviews: 'Pokrok',
-    pronunciationSettings: 'Výslovnost',
     practiceOverviewTitle: 'Přehled procvičování',
     levelsOverview: 'Přehled CEFR úrovní',
     levelsOverviewTooltip: 'CEFR tooltip',
@@ -41,14 +40,11 @@ vi.mock('@/locales/cs', () => ({
     topicsOverviewTooltip: 'Topics tooltip',
     vocabularyOverview: 'Přehled slovíček',
     vocabularyOverviewTooltip: 'Vocabulary tooltip',
-    pronunciationGroups: 'Skupiny výslovnosti',
-    pronunciationGroupsTooltip: 'Pronunciation tooltip',
     practiceOverviewNone: 'No practice',
     noDashboardData: 'No levels',
     noGrammar: 'No grammar',
     noTopics: 'No topics',
     noStartedVocabulary: 'No vocabulary',
-    noPronunciationGroups: 'No pronunciation groups',
     loadingMessage: 'Loading',
     loadingError: 'Loading error',
   },
@@ -62,7 +58,6 @@ const overviewKeys = [
   'grammar',
   'topics',
   'vocabulary',
-  'pronunciation',
 ];
 
 describe('Overviews', () => {
@@ -73,19 +68,17 @@ describe('Overviews', () => {
     );
   });
 
-  it('separates progress overviews from pronunciation configuration', () => {
+  it('renders only the five progress overviews without an empty pronunciation section', () => {
     render(<Overviews />);
 
     const progress = screen.getByRole('region', { name: 'Pokrok' });
-    const pronunciation = screen.getByRole('region', { name: 'Výslovnost' });
 
     expect(within(progress).getAllByRole('button')).toHaveLength(5);
-    expect(within(pronunciation).getAllByRole('button')).toHaveLength(1);
+    expect(screen.queryByRole('region', { name: 'Výslovnost' })).toBeNull();
     expect(screen.queryByRole('heading', { name: 'Pokrok' })).toBeNull();
-    expect(screen.queryByRole('heading', { name: 'Výslovnost' })).toBeNull();
 
     const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(6);
+    expect(buttons).toHaveLength(5);
     buttons.forEach((button) => expect(button.className).toContain('w-full'));
   });
 
@@ -102,10 +95,9 @@ describe('Overviews', () => {
       'No grammar',
       'No topics',
       'No vocabulary',
-      'No pronunciation groups',
     ];
     const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(6);
+    expect(buttons).toHaveLength(5);
     buttons.forEach((button, index) => {
       expect((button as HTMLButtonElement).disabled).toBe(true);
       expect(button.title).toBe(expectedTitles[index]);
@@ -136,7 +128,6 @@ describe('Overviews', () => {
     ['Přehled gramatiky', '/grammar'],
     ['Přehled témat', '/topics'],
     ['Přehled slovíček', '/vocabulary'],
-    ['Skupiny výslovnosti', '/pronunciation'],
   ])('navigates from %s to %s', (buttonName, route) => {
     render(<Overviews />);
 
