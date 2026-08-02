@@ -13,8 +13,8 @@ python scripts/mark_words.py
 1. Add or edit a lesson source CSV in `prepare/`. Give it a leading lesson
    number, for example `05_plurals.csv`.
 2. Run `python scripts/prepare_words.py`.
-3. Review the newly created dated CSV and the `.opus` files in
-   `prepare/audio/`. Use the dated CSV as the prepared result.
+3. Review the newly created timestamped CSV and the `.opus` files in
+   `prepare/audio/`. Use the timestamped CSV as the prepared result.
 4. Only when the lesson's words should count as used, run
    `python scripts/mark_words.py`.
 
@@ -63,8 +63,8 @@ It does not create `id` when the source file has no `id` column. It assigns:
 - an `.opus` audio filename and, when missing, the matching Google Cloud TTS
   audio file.
 
-The generated output is saved beside the input using today's date, such as
-`05_plurals_20260715.csv`.
+The generated output is saved beside the input using one UTC timestamp for the
+whole run, such as `05_plurals_20260715T132045Z.csv`.
 
 ## Requirements for preparation
 
@@ -75,8 +75,10 @@ The generated output is saved beside the input using today's date, such as
 - Optional voice tuning in `.env`: `GCP_TTS_VOICE_NAME`,
   `GCP_TTS_SPEAKING_RATE`, and `GCP_TTS_PITCH`.
 
-Audio files are named from normalized English text, for example `Good morning!`
-becomes `good_morning.opus`. Existing audio files are skipped.
+Audio files are named from normalized English text plus the same UTC timestamp,
+for example `Good morning!` becomes `good_morning_20260715T132045Z.opus`. The
+timestamp changes the filename and associated CSV reference on each run, so
+clients see it as a new audio version instead of reusing a cached old file.
 
 ## What marking does
 
@@ -94,18 +96,17 @@ This operation rewrites the tracker candidate CSVs and appends to
 `already_used.csv`; make a backup or commit before running it if you may need
 to undo the selection.
 
-## Important caveat: dated output files
+## Generated output files
 
-Both scripts scan every CSV in `prepare/`. `prepare_words.py` skips only files
-whose filename already ends in _today's_ date. On a later day it can therefore
-process older dated outputs again. Before rerunning on another date, move old
-dated output CSVs out of `prepare/` (for example into `ready/`) or remove them
-after keeping the version you need. This also prevents `mark_words.py` from
-seeing the same lesson source and prepared output twice.
+Both preparation scripts ignore CSVs ending in either the legacy `_YYYYMMDD`
+suffix or the current `_YYYYMMDDTHHMMSSZ` suffix, so generated outputs are not
+processed again on later runs. Move the prepared CSV you intend to use into the
+appropriate hand-off location as usual. Note that `mark_words.py` still reads
+every CSV in `prepare/`, including generated outputs.
 
 ## Related scripts
 
-- `scripts/prepare_audio_from_IPA.py` follows the same folder/date convention,
+- `scripts/prepare_audio_from_IPA.py` follows the same folder/timestamp convention,
   but generates TTS using the IPA pronunciation in SSML. Use it when IPA-guided
   audio is desired instead of the normal text-based audio produced by
   `prepare_words.py`.
