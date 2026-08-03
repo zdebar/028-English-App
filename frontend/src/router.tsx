@@ -37,7 +37,6 @@ import {
   practiceOverviewDescriptor,
   practiceDeckDescriptor,
   pronunciationPracticeDescriptor,
-  pronunciationGroupsDescriptor,
   pronunciationGroupDetailDescriptor,
   topicDetailDescriptor,
   topicsDescriptor,
@@ -201,8 +200,6 @@ export const router = createHashRouter([
           },
           {
             path: ROUTES.pronunciationGroups,
-            loader: () =>
-              loadProtectedData('pronunciation groups', pronunciationGroupsDescriptor),
             Component: PronunciationOverviewPage,
           },
           {

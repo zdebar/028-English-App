@@ -62,8 +62,12 @@ export default class AppDB extends Dexie {
     });
 
     this.version(2).stores({
-      grammar_chunk_examples:
-        '[grammar_chunk_id+item_id], [grammar_chunk_id+sort_order], item_id',
+      grammar_chunk_examples: '[grammar_chunk_id+item_id], [grammar_chunk_id+sort_order], item_id',
+    });
+
+    this.version(3).stores({
+      pronunciation_group_items:
+        '[pronunciation_group_id+item_id], [pronunciation_group_id+sort_order], [pronunciation_group_id+contrast_set+sort_order], item_id',
     });
   }
 }

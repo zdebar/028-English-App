@@ -69,6 +69,7 @@ describe('PronunciationGroupItem sync', () => {
       {
         pronunciation_group_id: 1,
         item_id: 2,
+        contrast_set: 1,
         sort_order: 1,
         updated_at: '2026-07-20T00:00:00.000Z',
         deleted_at: null,
@@ -76,6 +77,7 @@ describe('PronunciationGroupItem sync', () => {
       {
         pronunciation_group_id: 1,
         item_id: 3,
+        contrast_set: null,
         sort_order: 2,
         updated_at: '2026-07-21T00:00:00.000Z',
         deleted_at: '2026-07-21T00:00:00.000Z',

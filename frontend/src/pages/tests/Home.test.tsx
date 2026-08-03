@@ -128,9 +128,7 @@ vi.mock('@/features/pronunciation/PronunciationPracticeButton', () => ({
 }));
 
 vi.mock('@/features/pronunciation/PronunciationGroupsButton', () => ({
-  default: ({ userId }: any) => (
-    <div data-testid="pronunciation-groups-button">pronunciation-groups:{userId}</div>
-  ),
+  default: () => <div data-testid="pronunciation-groups-button">pronunciation-groups</div>,
 }));
 
 vi.mock('react-router-dom', () => ({
@@ -175,7 +173,7 @@ describe('Home', () => {
       'gap-1',
     );
     expect(screen.getByTestId('pronunciation-groups-button').textContent).toBe(
-      'pronunciation-groups:u1',
+      'pronunciation-groups',
     );
   });
 

@@ -69,7 +69,7 @@ export default function Home(): JSX.Element {
             />
             <PracticeButton userId={userId} />
             <PronunciationPracticeButton userId={userId} />
-            <PronunciationGroupsButton userId={userId} />
+            <PronunciationGroupsButton />
           </div>
           <div className="relative mb-12 portrait:mt-8">
             <p

@@ -11,6 +11,7 @@ import { useUserStoreSync } from '@/features/user-stats/use-user-store-sync';
 import { Outlet, useLocation } from 'react-router-dom';
 import './styles/index.css';
 import { useAudioLoader } from './features/audio/use-audio-loader';
+import { usePronunciationGroupsStoreSync } from './features/pronunciation/use-pronunciation-groups-store-sync';
 
 export default function App() {
   const userId = useAuthStore((state) => state.userId);
@@ -19,6 +20,7 @@ export default function App() {
 
   useAudioLoader(userId);
   useUserStoreSync(userId);
+  usePronunciationGroupsStoreSync(userId);
   useThemeLoader(userId, authLoading);
   usePeriodicSync(userId);
 

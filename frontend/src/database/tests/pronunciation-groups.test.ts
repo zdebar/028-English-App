@@ -21,7 +21,9 @@ vi.mock('@/database/models/db', () => ({
     pronunciation_groups: {
       orderBy: (field: string) => ({
         toArray: async () =>
-          field === 'id' ? [...mocks.groups].sort((left, right) => left.id - right.id) : mocks.groups,
+          field === 'id'
+            ? [...mocks.groups].sort((left, right) => left.id - right.id)
+            : mocks.groups,
       }),
       get: async (id: number) => mocks.groups.find((group) => group.id === id),
     },
@@ -82,9 +84,9 @@ describe('PronunciationGroup', () => {
       },
     ];
     mocks.memberships = [
-      { pronunciation_group_id: 1, item_id: 1, sort_order: 1 },
-      { pronunciation_group_id: 1, item_id: 2, sort_order: 2 },
-      { pronunciation_group_id: 1, item_id: 3, sort_order: 3 },
+      { pronunciation_group_id: 1, item_id: 1, contrast_set: 1, sort_order: 1 },
+      { pronunciation_group_id: 1, item_id: 2, contrast_set: 1, sort_order: 2 },
+      { pronunciation_group_id: 1, item_id: 3, contrast_set: 2, sort_order: 3 },
     ];
     mocks.items = [
       item({ item_id: 1, english: 'man', has_pronunciation_practice: 1 }),
@@ -103,12 +105,12 @@ describe('PronunciationGroup', () => {
     });
   });
 
-  it('shows groups with at least two started eligible items and derives counts', async () => {
+  it('shows a group with a complete contrast set and derives unlocked counts', async () => {
     await expect(PronunciationGroup.getOverview('u1')).resolves.toEqual([
       expect.objectContaining({
         id: 1,
         examples: ['man', 'men'],
-        started_count: 2,
+        unlocked_count: 2,
         total_count: 3,
       }),
     ]);
@@ -120,10 +122,10 @@ describe('PronunciationGroup', () => {
       { ...mocks.groups[0], id: 1, name: 'First' },
     ];
     mocks.memberships = [
-      { pronunciation_group_id: 1, item_id: 1, sort_order: 1 },
-      { pronunciation_group_id: 1, item_id: 2, sort_order: 2 },
-      { pronunciation_group_id: 2, item_id: 1, sort_order: 1 },
-      { pronunciation_group_id: 2, item_id: 2, sort_order: 2 },
+      { pronunciation_group_id: 1, item_id: 1, contrast_set: 1, sort_order: 1 },
+      { pronunciation_group_id: 1, item_id: 2, contrast_set: 1, sort_order: 2 },
+      { pronunciation_group_id: 2, item_id: 1, contrast_set: 1, sort_order: 1 },
+      { pronunciation_group_id: 2, item_id: 2, contrast_set: 1, sort_order: 2 },
     ];
 
     const groups = await PronunciationGroup.getOverview('u1');
@@ -131,16 +133,26 @@ describe('PronunciationGroup', () => {
     expect(groups.map((group) => group.id)).toEqual([1, 2]);
   });
 
-  it('hides groups with fewer than two available items', async () => {
+  it('hides groups whose contrast sets are incomplete', async () => {
     mocks.items[1].started_at = '1970-01-01T00:00:00.000Z';
+
+    await expect(PronunciationGroup.getOverview('u1')).resolves.toEqual([]);
+  });
+
+  it('ignores started memberships without an assigned contrast set', async () => {
+    mocks.memberships = mocks.memberships.map((membership) => ({
+      ...membership,
+      contrast_set: null,
+    }));
 
     await expect(PronunciationGroup.getOverview('u1')).resolves.toEqual([]);
   });
 
   it('returns detail in curriculum order regardless of membership order', async () => {
     mocks.memberships = [
-      { pronunciation_group_id: 1, item_id: 2, sort_order: 1 },
-      { pronunciation_group_id: 1, item_id: 1, sort_order: 2 },
+      { pronunciation_group_id: 1, item_id: 2, contrast_set: 1, sort_order: 1 },
+      { pronunciation_group_id: 1, item_id: 1, contrast_set: 1, sort_order: 2 },
+      { pronunciation_group_id: 1, item_id: 3, contrast_set: 2, sort_order: 3 },
     ];
 
     const detail = await PronunciationGroup.getDetail('u1', 1);

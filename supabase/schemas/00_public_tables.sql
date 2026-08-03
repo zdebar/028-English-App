@@ -123,6 +123,7 @@ CREATE TABLE IF NOT EXISTS pronunciation_group_items (
   pronunciation_group_id INTEGER NOT NULL
     REFERENCES pronunciation_groups(id) ON DELETE CASCADE,
   item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+  contrast_set INTEGER CHECK (contrast_set >= 1),
   sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ,
@@ -217,6 +218,8 @@ CREATE INDEX IF NOT EXISTS idx_items_lesson_id ON public.items (lesson_id);
 CREATE INDEX IF NOT EXISTS idx_items_grammar_chunk_id ON public.items (grammar_chunk_id);
 CREATE INDEX IF NOT EXISTS idx_pronunciation_group_items_item_id
   ON public.pronunciation_group_items (item_id);
+CREATE INDEX IF NOT EXISTS idx_pronunciation_group_items_group_contrast_sort
+  ON public.pronunciation_group_items (pronunciation_group_id, contrast_set, sort_order);
 CREATE INDEX IF NOT EXISTS idx_grammar_chunk_examples_item_id
   ON public.grammar_chunk_examples (item_id);
 

@@ -18,7 +18,6 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { PronunciationGroupDetailType } from '@/types/pronunciation.types';
 import { invalidateRouteData, routeDataKey } from '@/routing/route-data-cache';
-import { usePrefetchPreparation } from '@/routing/prefetch-navigation';
 
 export default function PronunciationGroupDetail({
   initialData,
@@ -29,17 +28,6 @@ export default function PronunciationGroupDetail({
   const { groupId: groupIdText } = useParams<{ groupId: string }>();
   const groupId = Number(groupIdText);
   const validGroupId = Number.isSafeInteger(groupId) && groupId > 0 ? groupId : null;
-  const parentDescriptor =
-    userId && initialData
-      ? {
-          key: routeDataKey('pronunciation-groups', userId),
-          load: () => PronunciationGroup.getOverview(userId),
-        }
-      : undefined;
-  const { prepareAndNavigate: prepareParent } = usePrefetchPreparation(
-    parentDescriptor,
-    ROUTES.pronunciationGroups,
-  );
   const fetchDetail = useCallback(
     () =>
       userId && validGroupId
@@ -72,7 +60,6 @@ export default function PronunciationGroupDetail({
     try {
       await PronunciationGroup.addAvailableItems(userId, validGroupId);
       invalidateRouteData(routeDataKey('pronunciation-group-detail', userId, validGroupId));
-      invalidateRouteData(routeDataKey('pronunciation-groups', userId));
       reload();
     } catch (error) {
       reportError('Failed to add pronunciation group', error);
@@ -90,7 +77,7 @@ export default function PronunciationGroupDetail({
     <OverviewCard
       buttonTitle={data?.group.name}
       loading={loading}
-      onClose={() => void prepareParent()}
+      onClose={() => navigate(ROUTES.pronunciationGroups)}
     >
       <DataState
         loading={loading}

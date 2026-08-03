@@ -2,6 +2,7 @@ import config from '@/config/config';
 import { db } from '@/database/models/db';
 import type {
   PronunciationGroupDetailType,
+  PronunciationGroupItemType,
   PronunciationGroupOverviewType,
   PronunciationGroupType,
 } from '@/types/pronunciation.types';
@@ -9,7 +10,6 @@ import { TableName } from '@/types/table.types';
 import type { CurriculumSortPath, UserItemLocal } from '@/types/user-item.types';
 import Dexie from 'dexie';
 import SyncEntityModel from './sync-entity-model';
-import type UserItem from './user-items';
 
 const NULL_DATE = config.database.nullReplacementDate;
 
@@ -27,6 +27,46 @@ function compareCurriculumPaths(left: CurriculumSortPath, right: CurriculumSortP
     if (difference !== 0) return difference;
   }
   return 0;
+}
+
+function sortByCurriculum(items: UserItemLocal[]): UserItemLocal[] {
+  return items.sort(
+    (left, right) =>
+      compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path) ||
+      left.item_id - right.item_id,
+  );
+}
+
+function resolveGroupItems(
+  memberships: PronunciationGroupItemType[],
+  itemById: ReadonlyMap<number, UserItemLocal>,
+): { eligible: UserItemLocal[]; unlocked: UserItemLocal[] } {
+  const eligible = sortByCurriculum(
+    memberships
+      .map((membership) => itemById.get(membership.item_id))
+      .filter((item): item is UserItemLocal => Boolean(item && isEligible(item))),
+  );
+  const membershipsByContrastSet = new Map<number, PronunciationGroupItemType[]>();
+
+  for (const membership of memberships) {
+    if (membership.contrast_set == null) continue;
+    const setMemberships = membershipsByContrastSet.get(membership.contrast_set) ?? [];
+    setMemberships.push(membership);
+    membershipsByContrastSet.set(membership.contrast_set, setMemberships);
+  }
+
+  const unlocked: UserItemLocal[] = [];
+  for (const setMemberships of membershipsByContrastSet.values()) {
+    const setItems = setMemberships.map((membership) => itemById.get(membership.item_id));
+    if (
+      setItems.length > 0 &&
+      setItems.every((item): item is UserItemLocal => Boolean(item && isAvailable(item)))
+    ) {
+      unlocked.push(...setItems);
+    }
+  }
+
+  return { eligible, unlocked: sortByCurriculum(unlocked) };
 }
 
 export default class PronunciationGroup extends SyncEntityModel implements PronunciationGroupType {
@@ -51,7 +91,7 @@ export default class PronunciationGroup extends SyncEntityModel implements Pronu
       db.pronunciation_group_items.toArray(),
       db.user_items.where('user_id').equals(userId).toArray(),
     ]);
-    const itemById = new Map(userItems.map((item) => [item.item_id, item]));
+    const itemById = new Map<number, UserItemLocal>(userItems.map((item) => [item.item_id, item]));
     const membershipsByGroup = new Map<number, typeof memberships>();
 
     for (const membership of memberships) {
@@ -60,27 +100,24 @@ export default class PronunciationGroup extends SyncEntityModel implements Pronu
       membershipsByGroup.set(membership.pronunciation_group_id, current);
     }
 
-    return groups.sort((left, right) => left.id - right.id).flatMap((group) => {
-      const eligible = (membershipsByGroup.get(group.id) ?? [])
-        .map((membership) => itemById.get(membership.item_id))
-        .filter((item): item is UserItem => Boolean(item && isEligible(item)))
-        .sort(
-          (left, right) =>
-            compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path) ||
-            left.item_id - right.item_id,
+    return groups
+      .sort((left, right) => left.id - right.id)
+      .flatMap((group) => {
+        const { eligible, unlocked } = resolveGroupItems(
+          membershipsByGroup.get(group.id) ?? [],
+          itemById,
         );
-      const started = eligible.filter(isAvailable);
 
-      if (started.length < 2) return [];
-      return [
-        {
-          ...group,
-          examples: started.slice(0, 4).map((item) => item.english),
-          started_count: started.length,
-          total_count: eligible.length,
-        },
-      ];
-    });
+        if (unlocked.length === 0) return [];
+        return [
+          {
+            ...group,
+            examples: unlocked.slice(0, 4).map((item) => item.english),
+            unlocked_count: unlocked.length,
+            total_count: eligible.length,
+          },
+        ];
+      });
   }
 
   static async getDetail(
@@ -98,15 +135,8 @@ export default class PronunciationGroup extends SyncEntityModel implements Pronu
       .where('[user_id+item_id]')
       .anyOf(memberships.map((membership) => [userId, membership.item_id]))
       .toArray();
-    const itemById = new Map(userItems.map((item) => [item.item_id, item]));
-    const items = memberships
-      .map((membership) => itemById.get(membership.item_id))
-      .filter((item): item is UserItem => Boolean(item && isAvailable(item)))
-      .sort(
-        (left, right) =>
-          compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path) ||
-          left.item_id - right.item_id,
-      );
+    const itemById = new Map<number, UserItemLocal>(userItems.map((item) => [item.item_id, item]));
+    const items = resolveGroupItems(memberships, itemById).unlocked;
 
     return {
       group,

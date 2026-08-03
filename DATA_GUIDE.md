@@ -120,6 +120,9 @@ Pojmenovaná skupina pro porovnání nebo procvičení výslovnosti.
 Explicitní uspořádání položek ve výslovnostní skupině.
 
 - Primární klíč je `(pronunciation_group_id, item_id)`.
+- `contrast_set` je číslo kontrastní podskupiny v rámci jedné skupiny. Stejné číslo přiřaďte položkám, které musí být započaté společně, například `mat`–`met`.
+- `contrast_set = NULL` znamená dosud nezařazenou katalogovou položku. Taková položka skupinu neodemkne a v přehledu ani detailu se nezobrazí.
+- Skupina se odemkne po kompletním započetí alespoň jedné podskupiny; aplikace následně zobrazuje pouze položky z kompletních podskupin.
 - `sort_order` začíná od 1 a je unikátní v rámci skupiny.
 - Zařazujte položky s anglickou výslovností a funkčním audiem; bez audia nelze řádek smysluplně přehrát.
 - Pořadí volte tak, aby vedle sebe byly nejlépe porovnatelné kontrasty, ne automaticky podle ID položek.
