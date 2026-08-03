@@ -11,12 +11,24 @@ from scripts.utils.pronunciation import fill_pronunciation_espeak_ng
 from scripts.utils.audio import generate_audio_with_google_cloud_from_ipa
 
 
+def get_lesson_id(file_name: str) -> int:
+    match = re.match(r"^(\d+)", os.path.basename(file_name))
+    if not match:
+        raise ValueError(f"File name must start with a lesson number: {file_name}")
+    return int(match.group(1))
+
+
 async def prepare_audio(file_name: str, output_file: str, audio_folder: str, suffix: str = "") -> None:
     # 1. Read data
-    df = read_vocab_csv(file_name)
+    df = read_vocab_csv(file_name, columns=[
+        "id", "czech", "english", "pronunciation", "audio", "sort_order",
+        "block_id", "note_id", "grammar_chunk_id"
+    ])
     if df is None:
         print("Error: DataFrame is None after reading CSV.")
         return
+    df["is_vocabulary"] = df["grammar_chunk_id"].isna() | df["grammar_chunk_id"].astype(str).str.strip().eq("")
+    df["lesson_id"] = get_lesson_id(file_name)
 
     # 2. Ensure IPA pronunciation exists
     needs_pronunciation = "pronunciation" not in df.columns or df["pronunciation"].astype(str).str.strip().eq("").any()
@@ -30,7 +42,7 @@ async def prepare_audio(file_name: str, output_file: str, audio_folder: str, suf
     df = await generate_audio_with_google_cloud_from_ipa(df, audio_folder, suffix)
 
     # 5. Force integer columns before saving
-    for col in ["id", "sort_order", "block_id", "note_id"]:
+    for col in ["id", "sort_order", "block_id", "note_id", "grammar_chunk_id", "lesson_id"]:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
             df[col] = df[col].apply(lambda x: int(x) if pd.notna(x) and x == int(x) else "")
