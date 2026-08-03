@@ -10,11 +10,13 @@ export default function PronunciationGroupsButton() {
   const hasGroups = groups.length > 0;
   let title: string = TEXTS.loadingMessage;
   if (!loading) {
-    title = error
-      ? TEXTS.loadingError
-      : hasGroups
-        ? TEXTS.pronunciationGroupsTooltip
-        : TEXTS.noPronunciationGroups;
+    if (error) {
+      title = TEXTS.loadingError;
+    } else if (hasGroups) {
+      title = TEXTS.pronunciationGroupsTooltip;
+    } else {
+      title = TEXTS.noPronunciationGroups;
+    }
   }
 
   return (
