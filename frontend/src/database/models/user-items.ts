@@ -609,14 +609,14 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
             progress: progressCzToEn,
             created_at: dateTime,
             direction: 'czToEn',
-            outcome: 'legacy',
+            outcome: 'correct',
           },
           ...(isFirstSimulation
             ? [{
                 progress: progressEnToCz,
                 created_at: dateTime,
                 direction: 'enToCz' as const,
-                outcome: 'legacy' as const,
+                outcome: 'correct' as const,
               }]
             : []),
         ];

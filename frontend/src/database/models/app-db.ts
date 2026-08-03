@@ -50,24 +50,17 @@ export default class AppDB extends Dexie {
       notes: 'id',
       pronunciation_groups: 'id, sort_order',
       pronunciation_group_items:
-        '[pronunciation_group_id+item_id], [pronunciation_group_id+sort_order], item_id',
+        '[pronunciation_group_id+item_id], [pronunciation_group_id+sort_order], [pronunciation_group_id+contrast_set+sort_order], item_id',
       grammar_groups: 'id, sort_order',
       grammar_chunks: 'id, grammar_group_id, sort_order',
+      grammar_chunk_examples:
+        '[grammar_chunk_id+item_id], [grammar_chunk_id+sort_order], item_id',
       user_items: USER_ITEMS_SCHEMA,
       user_blocks: '[user_id+block_id], user_id, [user_id+updated_at]',
       user_scores: '[user_id+date], [user_id+updated_at]',
       audio_records: 'filename',
       audio_metadata: 'archive_name',
       metadata: '[table_name+user_id]',
-    });
-
-    this.version(2).stores({
-      grammar_chunk_examples: '[grammar_chunk_id+item_id], [grammar_chunk_id+sort_order], item_id',
-    });
-
-    this.version(3).stores({
-      pronunciation_group_items:
-        '[pronunciation_group_id+item_id], [pronunciation_group_id+sort_order], [pronunciation_group_id+contrast_set+sort_order], item_id',
     });
   }
 }

@@ -22,9 +22,11 @@ CREATE TABLE IF NOT EXISTS grammar_groups (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
   note TEXT,
-  sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 1),
+  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ
+  deleted_at TIMESTAMPTZ,
+  CONSTRAINT grammar_groups_sort_order_key
+    UNIQUE (sort_order) DEFERRABLE INITIALLY DEFERRED
 );
 
 CREATE TABLE IF NOT EXISTS grammar_chunks (
@@ -32,18 +34,22 @@ CREATE TABLE IF NOT EXISTS grammar_chunks (
   name TEXT NOT NULL UNIQUE,
   note TEXT,
   grammar_group_id INTEGER REFERENCES grammar_groups(id) ON DELETE SET NULL,
-  sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 1),
+  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ
+  deleted_at TIMESTAMPTZ,
+  CONSTRAINT grammar_chunks_sort_order_key
+    UNIQUE (sort_order) DEFERRABLE INITIALLY DEFERRED
 );
 
 CREATE TABLE IF NOT EXISTS levels (
-  id SERIAL PRIMARY KEY,  
+  id SERIAL PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
   note TEXT,
-  sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 1),
+  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ
+  deleted_at TIMESTAMPTZ,
+  CONSTRAINT levels_sort_order_key
+    UNIQUE (sort_order) DEFERRABLE INITIALLY DEFERRED
 );
 
 CREATE TABLE IF NOT EXISTS lessons (
@@ -87,9 +93,11 @@ CREATE TABLE IF NOT EXISTS notes (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
   note TEXT NOT NULL,
-  sort_order INTEGER UNIQUE CHECK (sort_order >= 1),
+  sort_order INTEGER CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ
+  deleted_at TIMESTAMPTZ,
+  CONSTRAINT notes_sort_order_key
+    UNIQUE (sort_order) DEFERRABLE INITIALLY DEFERRED
 );
 
 CREATE TABLE IF NOT EXISTS items (
@@ -102,7 +110,7 @@ CREATE TABLE IF NOT EXISTS items (
   lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE RESTRICT,
   grammar_chunk_id INTEGER REFERENCES grammar_chunks(id) ON DELETE RESTRICT,
   is_vocabulary BOOLEAN NOT NULL,
-  sort_order INTEGER NOT NULL CHECK (sort_order >= 0),
+  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
   block_id INTEGER REFERENCES blocks(id) ON DELETE RESTRICT,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ,
@@ -114,9 +122,11 @@ CREATE TABLE IF NOT EXISTS pronunciation_groups (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
   note TEXT,
-  sort_order INTEGER NOT NULL UNIQUE CHECK (sort_order >= 1),
+  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ
+  deleted_at TIMESTAMPTZ,
+  CONSTRAINT pronunciation_groups_sort_order_key
+    UNIQUE (sort_order) DEFERRABLE INITIALLY DEFERRED
 );
 
 CREATE TABLE IF NOT EXISTS pronunciation_group_items (
@@ -163,10 +173,8 @@ CREATE TABLE IF NOT EXISTS user_items_history (
   item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   progress INTEGER NOT NULL CHECK (progress >= 0),
-  direction TEXT NOT NULL DEFAULT 'legacy' -- NOSONAR: shared SQL/PLpgSQL constants are not available across these scopes
-    CHECK (direction IN ('czToEn', 'enToCz', 'legacy')),
-  outcome TEXT NOT NULL DEFAULT 'legacy'
-    CHECK (outcome IN ('correct', 'incorrect', 'skip', 'legacy')),
+  direction TEXT NOT NULL CHECK (direction IN ('czToEn', 'enToCz')),
+  outcome TEXT NOT NULL CHECK (outcome IN ('correct', 'incorrect', 'skip')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   PRIMARY KEY (user_id, item_id, created_at, direction)

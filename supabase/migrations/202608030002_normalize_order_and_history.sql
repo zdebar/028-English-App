@@ -1,3 +1,43 @@
+ALTER TABLE public.grammar_groups
+  DROP CONSTRAINT IF EXISTS grammar_groups_sort_order_key,
+  ADD CONSTRAINT grammar_groups_sort_order_key
+    UNIQUE (sort_order) DEFERRABLE INITIALLY DEFERRED;
+
+ALTER TABLE public.grammar_chunks
+  DROP CONSTRAINT IF EXISTS grammar_sort_order_key,
+  DROP CONSTRAINT IF EXISTS grammar_chunks_sort_order_key,
+  ADD CONSTRAINT grammar_chunks_sort_order_key
+    UNIQUE (sort_order) DEFERRABLE INITIALLY DEFERRED;
+
+ALTER TABLE public.levels
+  DROP CONSTRAINT IF EXISTS levels_sort_order_key,
+  ADD CONSTRAINT levels_sort_order_key
+    UNIQUE (sort_order) DEFERRABLE INITIALLY DEFERRED;
+
+ALTER TABLE public.notes
+  DROP CONSTRAINT IF EXISTS notes_sort_order_key,
+  ADD CONSTRAINT notes_sort_order_key
+    UNIQUE (sort_order) DEFERRABLE INITIALLY DEFERRED;
+
+ALTER TABLE public.items
+  DROP CONSTRAINT IF EXISTS items_sort_order_check,
+  ADD CONSTRAINT items_sort_order_check CHECK (sort_order >= 1);
+
+ALTER TABLE public.pronunciation_groups
+  DROP CONSTRAINT IF EXISTS pronunciation_groups_sort_order_key,
+  ADD CONSTRAINT pronunciation_groups_sort_order_key
+    UNIQUE (sort_order) DEFERRABLE INITIALLY DEFERRED;
+
+ALTER TABLE public.user_items_history
+  ALTER COLUMN direction DROP DEFAULT,
+  ALTER COLUMN outcome DROP DEFAULT,
+  DROP CONSTRAINT IF EXISTS user_items_history_direction_check,
+  DROP CONSTRAINT IF EXISTS user_items_history_outcome_check,
+  ADD CONSTRAINT user_items_history_direction_check
+    CHECK (direction IN ('czToEn', 'enToCz')),
+  ADD CONSTRAINT user_items_history_outcome_check
+    CHECK (outcome IN ('correct', 'incorrect', 'skip'));
+
 CREATE OR REPLACE FUNCTION public.upsert_user_items(
   p_user_items JSONB,
   p_history_enabled BOOLEAN DEFAULT FALSE
@@ -268,3 +308,5 @@ $$;
 
 REVOKE EXECUTE ON FUNCTION public.upsert_user_items(JSONB, BOOLEAN) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.upsert_user_items(JSONB, BOOLEAN) TO authenticated;
+
+

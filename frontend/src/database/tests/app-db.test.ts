@@ -33,10 +33,10 @@ describe('AppDB schema', () => {
     mocks.versions.length = 0;
   });
 
-  it('defines the base database and catalog upgrades', () => {
+  it('defines the complete database schema in version 1', () => {
     new AppDB();
 
-    expect(mocks.versions).toHaveLength(3);
+    expect(mocks.versions).toHaveLength(1);
     expect(mocks.versions[0]).toMatchObject({
       number: 1,
       schema: {
@@ -45,9 +45,11 @@ describe('AppDB schema', () => {
         notes: 'id',
         pronunciation_groups: 'id, sort_order',
         pronunciation_group_items:
-          '[pronunciation_group_id+item_id], [pronunciation_group_id+sort_order], item_id',
+          '[pronunciation_group_id+item_id], [pronunciation_group_id+sort_order], [pronunciation_group_id+contrast_set+sort_order], item_id',
         grammar_groups: 'id, sort_order',
         grammar_chunks: 'id, grammar_group_id, sort_order',
+        grammar_chunk_examples:
+          '[grammar_chunk_id+item_id], [grammar_chunk_id+sort_order], item_id',
         user_blocks: '[user_id+block_id], user_id, [user_id+updated_at]',
         user_scores: '[user_id+date], [user_id+updated_at]',
         audio_records: 'filename',
@@ -59,20 +61,6 @@ describe('AppDB schema', () => {
     expect(mocks.versions[0].schema?.user_items).toContain(
       '[user_id+is_practice_item+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]',
     );
-    expect(mocks.versions[1]).toMatchObject({
-      number: 2,
-      schema: {
-        grammar_chunk_examples:
-          '[grammar_chunk_id+item_id], [grammar_chunk_id+sort_order], item_id',
-      },
-    });
-    expect(mocks.versions[2]).toMatchObject({
-      number: 3,
-      schema: {
-        pronunciation_group_items:
-          '[pronunciation_group_id+item_id], [pronunciation_group_id+sort_order], [pronunciation_group_id+contrast_set+sort_order], item_id',
-      },
-    });
     expect(mocks.versions[0].schema?.user_items).toContain(
       '[user_id+is_practice_item+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]',
     );

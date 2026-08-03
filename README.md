@@ -170,7 +170,7 @@ Declarative database objects live in [supabase/schemas](supabase/schemas), and r
 
 Important files include:
 
-- [supabase/schemas/00_public_tables.sql](supabase/schemas/00_public_tables.sql): core tables and indexes
+- [supabase/schemas/00_tables.sql](supabase/schemas/00_tables.sql): core tables and indexes
 - [supabase/schemas/10_updated_at_triggers.sql](supabase/schemas/10_updated_at_triggers.sql): trigger wiring such as `updated_at`
 - [supabase/schemas/20_auth_helpers.sql](supabase/schemas/20_auth_helpers.sql): shared RPC auth helpers
 - [supabase/schemas/30_rpc_fetch_user_items.sql](supabase/schemas/30_rpc_fetch_user_items.sql): user item fetch RPC
