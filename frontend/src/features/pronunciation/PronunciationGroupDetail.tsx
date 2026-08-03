@@ -1,6 +1,6 @@
 import { DataState } from '@/components/UI/DataState';
 import OverviewCard from '@/components/UI/OverviewCard';
-import { ListButton } from '@/components/UI/buttons/ListButton';
+import BilingualItemButton from '@/components/UI/buttons/BilingualItemButton';
 import SecondaryControlButton from '@/components/UI/buttons/SecondaryControlButton';
 import MicrophoneIcon from '@/components/UI/icons/MicrophoneIcon';
 import { ROUTES } from '@/config/routes.config';
@@ -98,26 +98,16 @@ export default function PronunciationGroupDetail({
         noDataMessage={TEXTS.noPronunciationGroupItems}
       >
         {data?.items.map((item) => (
-          <ListButton
+          <BilingualItemButton
             key={item.item_id}
-            className="px-4"
-            title={item.pronunciation || item.english}
+            item={item}
             disabled={!item.audio || audioLoading || !isAudioReady(item.audio)}
             onClick={async () => {
               if (!item.audio) return;
               const didPlay = await playAudio(item.audio);
               if (!didPlay) showToast(TEXTS.noAudio, 'error');
             }}
-          >
-            <div className="flex w-full items-center justify-between gap-3 overflow-hidden">
-              <span className="min-w-0 flex-1 overflow-hidden text-left text-ellipsis whitespace-nowrap">
-                {item.czech}
-              </span>
-              <span className="min-w-0 flex-1 overflow-hidden text-left text-ellipsis whitespace-nowrap">
-                {item.english}
-              </span>
-            </div>
-          </ListButton>
+          />
         ))}
       </DataState>
       <div className="pos-bottom-left-control">

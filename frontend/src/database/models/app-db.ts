@@ -13,6 +13,7 @@ import type Levels from '@/database/models/levels';
 import type Notes from '@/database/models/notes';
 import type PronunciationGroup from '@/database/models/pronunciation-groups';
 import type PronunciationGroupItem from '@/database/models/pronunciation-group-items';
+import type GrammarChunkExample from '@/database/models/grammar-chunk-examples';
 
 const USER_ITEMS_SCHEMA =
   '[user_id+item_id], [user_id+grammar_chunk_id+started_at], [user_id+is_vocabulary+started_at], [user_id+is_practice_item+is_vocabulary+started_at], [user_id+started_at], [user_id+updated_at], [user_id+lesson_id+is_vocabulary+started_at], [user_id+lesson_id+is_practice_item+is_vocabulary+started_at], [user_id+block_id], [user_id+is_practice_item+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path], [user_id+is_practice_item+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path], [user_id+has_pronunciation_practice]';
@@ -32,6 +33,7 @@ export default class AppDB extends Dexie {
   pronunciation_group_items!: EntityTable<PronunciationGroupItem, any>;
   grammar_groups!: EntityTable<GrammarGroup, 'id'>;
   grammar_chunks!: EntityTable<GrammarChunk, 'id'>;
+  grammar_chunk_examples!: EntityTable<GrammarChunkExample, any>;
   user_items!: EntityTable<UserItem, any>;
   user_scores!: EntityTable<UserScore, any>;
   user_blocks!: EntityTable<UserBlock, any>;
@@ -57,6 +59,11 @@ export default class AppDB extends Dexie {
       audio_records: 'filename',
       audio_metadata: 'archive_name',
       metadata: '[table_name+user_id]',
+    });
+
+    this.version(2).stores({
+      grammar_chunk_examples:
+        '[grammar_chunk_id+item_id], [grammar_chunk_id+sort_order], item_id',
     });
   }
 }

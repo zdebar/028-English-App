@@ -131,6 +131,18 @@ CREATE TABLE IF NOT EXISTS pronunciation_group_items (
     UNIQUE (pronunciation_group_id, sort_order) DEFERRABLE INITIALLY DEFERRED
 );
 
+CREATE TABLE IF NOT EXISTS grammar_chunk_examples (
+  grammar_chunk_id INTEGER NOT NULL
+    REFERENCES grammar_chunks(id) ON DELETE CASCADE,
+  item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  deleted_at TIMESTAMPTZ,
+  PRIMARY KEY (grammar_chunk_id, item_id),
+  CONSTRAINT grammar_chunk_examples_chunk_sort_order_key
+    UNIQUE (grammar_chunk_id, sort_order) DEFERRABLE INITIALLY DEFERRED
+);
+
 CREATE TABLE IF NOT EXISTS user_items (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
@@ -205,6 +217,8 @@ CREATE INDEX IF NOT EXISTS idx_items_lesson_id ON public.items (lesson_id);
 CREATE INDEX IF NOT EXISTS idx_items_grammar_chunk_id ON public.items (grammar_chunk_id);
 CREATE INDEX IF NOT EXISTS idx_pronunciation_group_items_item_id
   ON public.pronunciation_group_items (item_id);
+CREATE INDEX IF NOT EXISTS idx_grammar_chunk_examples_item_id
+  ON public.grammar_chunk_examples (item_id);
 
 CREATE INDEX IF NOT EXISTS idx_user_items_user_updated_item
   ON public.user_items (user_id, updated_at, item_id)

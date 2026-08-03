@@ -5,10 +5,17 @@ import { TEXTS } from '@/locales/cs';
 import type { UserBlockType } from '@/types/generic.types';
 import DOMPurify from 'dompurify';
 import type { JSX } from 'react';
+import type { UserItemLocal } from '@/types/user-item.types';
+import BilingualItemButton from '@/components/UI/buttons/BilingualItemButton';
+import { useAudioManager } from '@/features/audio/use-audio-manager';
+import { useMemo } from 'react';
+import { useToastStore } from '@/features/toast/use-toast-store';
+import VolumeSlider from '@/features/audio/VolumeSlider';
 
 type BlockTrainingOverviewCardProps = Readonly<{
   block: Pick<UserBlockType, 'name' | 'note'>;
   grammar: GrammarDetail | null;
+  items?: readonly UserItemLocal[];
   onContinue: () => void;
 }>;
 
@@ -22,8 +29,16 @@ function Note({ note }: Readonly<{ note: string }>): JSX.Element {
 export default function BlockTrainingOverviewCard({
   block,
   grammar,
+  items = [],
   onContinue,
 }: BlockTrainingOverviewCardProps): JSX.Element {
+  const showToast = useToastStore((state) => state.showToast);
+  const audios = useMemo(
+    () => items.map((item) => item.audio).filter((audio): audio is string => Boolean(audio)),
+    [items],
+  );
+  const { playAudio, isAudioReady, loading } = useAudioManager(audios);
+
   return (
     <Card className="flex w-full flex-col gap-1">
       {grammar ? (
@@ -35,10 +50,25 @@ export default function BlockTrainingOverviewCard({
         </section>
       ) : (
         <>
-          <h1 className="h-button flex items-center px-4 text-left text-lg font-bold">{block.name}</h1>
+          <h1 className="h-button flex items-center px-4 text-left text-lg font-bold">
+            {block.name}
+          </h1>
           {block.note && <Note note={block.note} />}
         </>
       )}
+      {items.map((item) => (
+        <BilingualItemButton
+          key={item.item_id}
+          item={item}
+          disabled={!item.audio || loading || !isAudioReady(item.audio)}
+          onClick={async () => {
+            if (!item.audio) return;
+            const didPlay = await playAudio(item.audio);
+            if (!didPlay) showToast(TEXTS.noAudio, 'error');
+          }}
+        />
+      ))}
+      {items.length > 0 && <VolumeSlider />}
       <StyledButton className="card-width h-button w-full" onClick={onContinue}>
         {TEXTS.continuePractice}
       </StyledButton>

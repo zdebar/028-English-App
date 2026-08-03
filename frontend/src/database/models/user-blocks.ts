@@ -419,10 +419,9 @@ function compareCurriculumPaths(
 
 function getResetBlockFields(dateTime: string): Pick<
   UserBlockType,
-  'started_at' | 'updated_at'
+  'updated_at'
 > {
   return {
-    started_at: NULL_DATE,
     updated_at: dateTime,
   };
 }

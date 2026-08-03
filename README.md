@@ -182,7 +182,7 @@ Important files include:
 
 Main domain tables/entities across the project:
 
-- `levels`, `lessons`, `items`, `grammar_groups`, `grammar_chunks`, `blocks`, `notes`
+- `levels`, `lessons`, `items`, `grammar_groups`, `grammar_chunks`, `grammar_chunk_examples`, `blocks`, `notes`
 - `user_items`, `user_scores`, `user_blocks`
 - sync metadata and user-linked records
 

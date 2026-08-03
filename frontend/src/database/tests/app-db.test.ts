@@ -33,10 +33,10 @@ describe('AppDB schema', () => {
     mocks.versions.length = 0;
   });
 
-  it('defines the complete database in a single version', () => {
+  it('defines the base database and grammar-example upgrade', () => {
     new AppDB();
 
-    expect(mocks.versions).toHaveLength(1);
+    expect(mocks.versions).toHaveLength(2);
     expect(mocks.versions[0]).toMatchObject({
       number: 1,
       schema: {
@@ -59,6 +59,13 @@ describe('AppDB schema', () => {
     expect(mocks.versions[0].schema?.user_items).toContain(
       '[user_id+is_practice_item+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]',
     );
+    expect(mocks.versions[1]).toMatchObject({
+      number: 2,
+      schema: {
+        grammar_chunk_examples:
+          '[grammar_chunk_id+item_id], [grammar_chunk_id+sort_order], item_id',
+      },
+    });
     expect(mocks.versions[0].schema?.user_items).toContain(
       '[user_id+is_practice_item+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]',
     );

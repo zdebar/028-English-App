@@ -16,6 +16,7 @@ import { supabaseInstance } from '@/config/supabase.config';
 import Notes from '../models/notes';
 import PronunciationGroup from '../models/pronunciation-groups';
 import PronunciationGroupItem from '../models/pronunciation-group-items';
+import GrammarChunkExample from '../models/grammar-chunk-examples';
 
 /**
  * Synchronizes shared and user-specific tables with Supabase.
@@ -44,6 +45,7 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
     ? [
         GrammarGroup.syncFromRemote(true),
         GrammarChunk.syncFromRemote(true),
+        GrammarChunkExample.syncFromRemote(true),
         Levels.syncFromRemote(true),
         Lessons.syncFromRemote(true),
         Notes.syncFromRemote(true),
@@ -56,6 +58,7 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
     : [
         GrammarGroup.syncFromRemote(false),
         GrammarChunk.syncFromRemote(false),
+        GrammarChunkExample.syncFromRemote(false),
         Levels.syncFromRemote(false),
         Lessons.syncFromRemote(false),
         Notes.syncFromRemote(false),
@@ -70,6 +73,7 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
   const tableNames = [
     'GrammarGroups',
     'GrammarChunks',
+    'GrammarChunkExamples',
     'Levels',
     'Lessons',
     'Notes',

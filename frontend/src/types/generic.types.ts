@@ -20,6 +20,14 @@ export interface GrammarChunkType extends SyncEntityType {
   grammar_group_id: number | null;
 }
 
+export interface GrammarChunkExampleType {
+  grammar_chunk_id: number;
+  item_id: number;
+  sort_order: number;
+  updated_at: string;
+  deleted_at: string | null;
+}
+
 export interface BlockType extends Omit<SyncEntityType, 'sort_order'> {
   grammar_chunk_id: number | null;
   show_in_topics: boolean;

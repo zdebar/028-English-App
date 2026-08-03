@@ -77,6 +77,13 @@ BEFORE UPDATE ON public.pronunciation_group_items
 FOR EACH ROW
 EXECUTE FUNCTION public.set_updated_at();
 
+DROP TRIGGER IF EXISTS trg_set_updated_at__grammar_chunk_examples
+  ON public.grammar_chunk_examples;
+CREATE TRIGGER trg_set_updated_at__grammar_chunk_examples
+BEFORE UPDATE ON public.grammar_chunk_examples
+FOR EACH ROW
+EXECUTE FUNCTION public.set_updated_at();
+
 DROP TRIGGER IF EXISTS trg_set_updated_at__user_items ON public.user_items;
 CREATE TRIGGER trg_set_updated_at__user_items
 BEFORE UPDATE ON public.user_items

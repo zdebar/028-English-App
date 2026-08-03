@@ -261,11 +261,10 @@ describe('UserBlock', () => {
     expect(mocks.get).toHaveBeenCalledWith(['u1', 2]);
   });
 
-  it('resetByBlockId clears completion and updates timestamp', async () => {
+  it('resetByBlockId preserves completion and updates timestamp', async () => {
     await UserBlock.resetByBlockId('u1', 7, '2026-06-23T12:00:00.000Z');
 
     expect(mocks.update).toHaveBeenCalledWith(['u1', 7], {
-      started_at: '9999-12-31T23:59:59+00:00',
       updated_at: '2026-06-23T12:00:00.000Z',
     });
   });
@@ -382,12 +381,12 @@ describe('UserBlock', () => {
     expect(mocks.bulkPut).toHaveBeenCalledWith([
       expect.objectContaining({
         block_id: 1,
-        started_at: '9999-12-31T23:59:59+00:00',
+        started_at: '2026-06-20T00:00:00.000Z',
         updated_at: '2026-06-28T12:00:00.000Z',
       }),
       expect.objectContaining({
         block_id: 2,
-        started_at: '9999-12-31T23:59:59+00:00',
+        started_at: '2026-06-21T00:00:00.000Z',
         updated_at: '2026-06-28T12:00:00.000Z',
       }),
     ]);

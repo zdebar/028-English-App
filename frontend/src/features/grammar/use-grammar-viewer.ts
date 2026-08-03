@@ -4,18 +4,20 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import { useCallback, useState } from 'react';
 import type { GrammarDetail } from './GrammarDetailCard';
+import { useAuthStore } from '@/features/auth/use-auth-store';
 
 export function useGrammarViewer() {
+  const userId = useAuthStore((state) => state.userId);
   const [isGrammarVisible, setIsGrammarVisible] = useState(false);
   const [grammarData, setGrammarData] = useState<GrammarDetail | null>(null);
   const showToast = useToastStore((state) => state.showToast);
 
   const openGrammar = useCallback(
     async (grammarChunkId: number | null | undefined) => {
-      if (typeof grammarChunkId !== 'number') return;
+      if (typeof grammarChunkId !== 'number' || !userId) return;
 
       try {
-        const grammar = await GrammarChunk.getById(grammarChunkId);
+        const grammar = await GrammarChunk.getDetail(userId, grammarChunkId);
         if (!grammar) return;
 
         setGrammarData(grammar);
@@ -25,7 +27,7 @@ export function useGrammarViewer() {
         showToast(TEXTS.loadingError, 'error');
       }
     },
-    [showToast],
+    [showToast, userId],
   );
 
   const closeGrammar = useCallback(() => {

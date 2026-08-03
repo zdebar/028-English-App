@@ -33,6 +33,15 @@ vi.mock('@/database/models/user-items', () => ({
   },
 }));
 
+vi.mock('@/database/models/grammar-chunks', () => ({
+  default: {
+    addExamples: async (_userId: string, chunk: Record<string, unknown>) => ({
+      ...chunk,
+      items: [],
+    }),
+  },
+}));
+
 import GrammarGroup from '@/database/models/grammar-groups';
 
 describe('GrammarGroup.getStarted', () => {
@@ -62,8 +71,8 @@ describe('GrammarGroup.getStarted', () => {
         name: 'First group',
         sort_order: 1,
         chunks: [
-          { id: 11, name: 'First', grammar_group_id: 1, sort_order: 1 },
-          { id: 13, name: 'First group second', grammar_group_id: 1, sort_order: 3 },
+          { id: 11, name: 'First', grammar_group_id: 1, sort_order: 1, items: [] },
+          { id: 13, name: 'First group second', grammar_group_id: 1, sort_order: 3, items: [] },
         ],
       },
       {
@@ -71,13 +80,14 @@ describe('GrammarGroup.getStarted', () => {
         name: 'Ungrouped',
         sort_order: 1,
         chunks: [],
+        items: [],
         standalone_chunk_id: 14,
       },
       {
         id: 2,
         name: 'Second group',
         sort_order: 2,
-        chunks: [{ id: 12, name: 'Second', grammar_group_id: 2, sort_order: 2 }],
+        chunks: [{ id: 12, name: 'Second', grammar_group_id: 2, sort_order: 2, items: [] }],
       },
     ]);
 
@@ -99,6 +109,7 @@ describe('GrammarGroup.getStarted', () => {
         name: 'Ungrouped',
         sort_order: 1,
         chunks: [],
+        items: [],
         standalone_chunk_id: 14,
       },
     ]);

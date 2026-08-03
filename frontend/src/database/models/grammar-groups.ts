@@ -1,12 +1,13 @@
 import { db } from '@/database/models/db';
-import type { GrammarChunkType, GrammarGroupType } from '@/types/generic.types';
+import type { GrammarGroupType } from '@/types/generic.types';
 import { TableName } from '@/types/table.types';
 import Dexie from 'dexie';
 import SyncEntityModel from './sync-entity-model';
 import UserItem from './user-items';
+import GrammarChunk, { type GrammarChunkWithExamples } from './grammar-chunks';
 
 export type GrammarGroupWithChunks = GrammarGroupType & {
-  chunks: GrammarChunkType[];
+  chunks: GrammarChunkWithExamples[];
   standalone_chunk_id?: number;
 };
 
@@ -26,8 +27,11 @@ export default class GrammarGroup extends SyncEntityModel implements GrammarGrou
     const chunkIds = await UserItem.getStartedGrammarChunkIds(userId);
     if (chunkIds.length === 0) return [];
 
-    const startedChunks = await db.grammar_chunks.where('id').anyOf(chunkIds).toArray();
-    const chunksByGroupId = new Map<number, GrammarChunkType[]>();
+    const chunks = await db.grammar_chunks.where('id').anyOf(chunkIds).toArray();
+    const startedChunks = await Promise.all(
+      chunks.map((chunk) => GrammarChunk.addExamples(userId, chunk)),
+    );
+    const chunksByGroupId = new Map<number, GrammarChunkWithExamples[]>();
     const standaloneChunks: GrammarGroupWithChunks[] = [];
 
     for (const chunk of startedChunks) {

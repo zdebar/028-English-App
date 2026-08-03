@@ -53,7 +53,7 @@ starting point when a change crosses route, store, model, or sync boundaries.
 | Dashboard and levels | Show progress grouped by course structure. | `Dashboard`, `/levels`, levels feature | `Levels`, `Lessons`, `UserItem`, `UserBlock`, `useUserStore` | Active-user live queries refresh cached progress after relevant commits. |
 | Topics overview | List ordered blocks marked for the topics UI and allow practice-topic reset. | `/topics`, `TopicsOverview` | `UserBlock`, `UserItem`, audio playback for items | Non-practice topics are always visible without reset; practice topics appear after an item starts. |
 | Topic items | Show and reset items inside one topic. | `/topics/:blockId`, `TopicItemsOverview` | `UserBlock`, `UserItem`, audio and detail links | Route parameter retains the underlying block ID. |
-| Grammar overview | List started groups with ordered chunk sections and reset group progress. | `/grammar`, `GrammarOverview` | `GrammarGroup`, `GrammarChunk`, `UserItem`, `UserBlock` | Reset traverses every chunk in the selected group. |
+| Grammar overview | List started groups with ordered chunk sections, playable curated examples, and reset group progress. | `/grammar`, `GrammarOverview` | `GrammarGroup`, `GrammarChunk`, `grammar_chunk_examples`, `UserItem` | Reset preserves unlock history and immediately schedules reset items for regular practice. |
 | Vocabulary overview | Search and inspect started vocabulary, then reset item progress. | `/vocabulary`, `VocabularyOverview` | `UserItem`, item detail data, localStorage `vocabulary_search_term_${userId}` | Search state persists per user; reset writes local progress and syncs later. |
 
 ## Data, Sync, And Offline Behavior
