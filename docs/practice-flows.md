@@ -22,7 +22,7 @@ Progress is buffered during the session, saved at deck completion/unmount, and b
 
 Route: `/practice/new-grammar`, entered with the trigger block ID selected by the unified deck.
 
-The flow loads that exact block and the chunk referenced by `blocks.grammar_chunk_id`, displays the introduction, and runs
+The flow loads that exact block and the chunk referenced by `blocks.grammar_chunk_id`, displays the introduction with every block item, and runs
 the existing Czech-to-English and English-to-Czech rounds with repeat waves. Completion starts
 all block items at the configured grammar progress, starts and masters the block, and returns to
 `/practice` for a fresh deck. Leaving early keeps the block unstarted, so it triggers again later.
@@ -32,6 +32,6 @@ There is no vocabulary or previous-grammar unlock prerequisite.
 ## Grammar Details
 
 Regular and training practice cards resolve their detail button through the item-derived
-`user_items.grammar_chunk_id` and display only
-that chunk. The grammar overview lists started groups and composes only their started chunks in
-configured order; ungrouped chunks are omitted.
+`user_items.grammar_chunk_id` and display that chunk with every explicitly ordered
+`grammar_chunk_examples` item. The grammar overview lists started groups and composes only their
+started chunks in configured order, while showing every curated example for each visible chunk.

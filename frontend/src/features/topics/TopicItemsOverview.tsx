@@ -13,18 +13,12 @@ import { useFetch } from '@/hooks/use-fetch';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { UserBlockType } from '@/types/generic.types';
 import { DataState } from '@/components/UI/DataState';
-import { ListButton } from '@/components/UI/buttons/ListButton';
+import BilingualItemButton from '@/components/UI/buttons/BilingualItemButton';
 import HelpButton from '../help/HelpButton';
 import OverviewCard from '@/components/UI/OverviewCard';
 import VolumeSlider from '../audio/VolumeSlider';
 import { invalidateRouteData, routeDataKey } from '@/routing/route-data-cache';
 import { usePrefetchPreparation } from '@/routing/prefetch-navigation';
-
-function getPronunciationTitle(pronunciation: string): string {
-  return typeof TEXTS.pronunciationTitle === 'function'
-    ? TEXTS.pronunciationTitle(pronunciation)
-    : `${TEXTS.pronunciation ?? 'Pronunciation'}: ${pronunciation}`;
-}
 
 export default function TopicItemsOverview({
   initialTopic,
@@ -105,7 +99,6 @@ export default function TopicItemsOverview({
     if (!userId || !blockId) return;
     try {
       const resetCount = await UserItem.resetItemsByBlockId(userId, blockId);
-      await UserBlock.resetByBlockId(userId, blockId);
       invalidateRouteData(routeDataKey('topic-detail', userId, blockId));
       invalidateRouteData(routeDataKey('topics', userId));
       reportInfo(`Reset ${resetCount} items in topic block ${blockId}`);
@@ -133,10 +126,9 @@ export default function TopicItemsOverview({
     >
       <DataState loading={itemsLoading} hasData={hasItems} noDataMessage={TEXTS.noTopicItems}>
         {items.map((item) => (
-          <ListButton
+          <BilingualItemButton
             key={item.item_id}
-            className="px-4"
-            title={getPronunciationTitle(item.pronunciation)}
+            item={item}
             onClick={async () => {
               if (!item.audio) return;
               const didPlay = await playAudio(item.audio);
@@ -145,16 +137,7 @@ export default function TopicItemsOverview({
               }
             }}
             disabled={!item.audio || audioLoading || !isAudioReady(item.audio)}
-          >
-            <div className="flex w-full items-center justify-between gap-3 overflow-hidden">
-              <span className="min-w-0 flex-1 overflow-hidden text-left text-ellipsis whitespace-nowrap">
-                {item.czech}
-              </span>
-              <span className="min-w-0 flex-1 overflow-hidden text-left text-ellipsis whitespace-nowrap">
-                {item.english}
-              </span>
-            </div>
-          </ListButton>
+          />
         ))}
       </DataState>
       <div className="pos-bottom-left-control">

@@ -7,8 +7,13 @@ const errorHandlerMock = vi.fn();
 
 vi.mock('@/database/models/grammar-chunks', () => ({
   default: {
-    getById: (...args: unknown[]) => getGrammarByIdMock(...args),
+    getDetail: (...args: unknown[]) => getGrammarByIdMock(...args),
   },
+}));
+
+vi.mock('@/features/auth/use-auth-store', () => ({
+  useAuthStore: (selector: (state: { userId: string }) => unknown) =>
+    selector({ userId: 'u1' }),
 }));
 
 vi.mock('@/features/toast/use-toast-store', () => ({
@@ -61,7 +66,7 @@ describe('useGrammarViewer', () => {
     });
 
     await waitFor(() => {
-      expect(getGrammarByIdMock).toHaveBeenCalledWith(10);
+      expect(getGrammarByIdMock).toHaveBeenCalledWith('u1', 10);
       expect(result.current.isGrammarVisible).toBe(true);
       expect(result.current.grammarData).toEqual({
         id: 10,

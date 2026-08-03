@@ -1,25 +1,27 @@
 import { ROUTES } from '@/config/routes.config';
-import PronunciationGroup from '@/database/models/pronunciation-groups';
 import { TEXTS } from '@/locales/cs';
 import { PrefetchButton } from '@/routing/prefetch-navigation';
-import { pronunciationGroupsDescriptor } from '@/routing/route-data';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { usePronunciationGroupsStore } from './use-pronunciation-groups-store';
 
-export default function PronunciationGroupsButton({
-  userId,
-}: Readonly<{ userId: string }>) {
-  const groups = useLiveQuery(() => PronunciationGroup.getOverview(userId), [userId]);
-  const loading = groups === undefined;
-  const hasGroups = Boolean(groups?.length);
+export default function PronunciationGroupsButton() {
+  const groups = usePronunciationGroupsStore((state) => state.groups);
+  const loading = usePronunciationGroupsStore((state) => state.loading);
+  const error = usePronunciationGroupsStore((state) => state.error);
+  const hasGroups = groups.length > 0;
   let title: string = TEXTS.loadingMessage;
   if (!loading) {
-    title = hasGroups ? TEXTS.pronunciationGroupsTooltip : TEXTS.noPronunciationGroups;
+    if (error) {
+      title = TEXTS.loadingError;
+    } else if (hasGroups) {
+      title = TEXTS.pronunciationGroupsTooltip;
+    } else {
+      title = TEXTS.noPronunciationGroups;
+    }
   }
 
   return (
     <PrefetchButton
       to={ROUTES.pronunciationGroups}
-      descriptor={pronunciationGroupsDescriptor(userId)}
       className="h-button max-h-button w-full px-4"
       disabled={!hasGroups}
       title={title}

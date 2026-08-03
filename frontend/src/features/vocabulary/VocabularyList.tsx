@@ -5,7 +5,7 @@ import { type DisplayField } from '@/features/vocabulary/vocabulary.utils';
 import { type UserItemLocal } from '@/types/user-item.types';
 import CancelIcon from '@/components/UI/icons/CancelIcon';
 import { CardHeader } from '@/components/UI/CardHeader';
-import { ListButton } from '@/components/UI/buttons/ListButton';
+import BilingualItemButton from '@/components/UI/buttons/BilingualItemButton';
 import { DataState } from '@/components/UI/DataState';
 import Card from '@/components/UI/Card';
 
@@ -96,13 +96,11 @@ export default function VocabularyList({
       </div>
       <DataState loading={loading} hasData={hasWords} noDataMessage={TEXTS.noStartedVocabulary}>
         {visibleItems.map((item, index) => (
-          <ListButton
+          <BilingualItemButton
             key={item.item_id}
-            className="flex grow-0 justify-start p-4 text-left"
+            item={item}
             onClick={() => onSelect(index)}
-          >
-            {displayField === 'czech' ? item.czech : item.english}
-          </ListButton>
+          />
         ))}
         {remainingCount > 0 && (
           <button

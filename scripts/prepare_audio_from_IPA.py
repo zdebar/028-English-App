@@ -1,7 +1,7 @@
 import sys
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pandas as pd
 
@@ -52,7 +52,8 @@ async def prepare_audio(file_name: str, output_file: str, audio_folder: str, suf
 
 
 async def prepare_audio_in_folder(data_dir: str, audio_folder: str) -> None:
-    suffix = f"_{datetime.now().strftime('%Y%m%d')}"
+    # One UTC version identifies every CSV and audio file produced by this run.
+    suffix = datetime.now(timezone.utc).strftime("_%Y%m%dT%H%M%SZ")
     input_files = []
 
     for entry in sorted(os.listdir(data_dir)):
@@ -61,7 +62,8 @@ async def prepare_audio_in_folder(data_dir: str, audio_folder: str) -> None:
             continue
         if not entry.lower().endswith(".csv"):
             continue
-        if os.path.splitext(entry)[0].endswith(suffix):
+        # Do not process outputs from this or an earlier preparation run again.
+        if re.search(r"_\d{8}(?:T\d{6}Z)?$", os.path.splitext(entry)[0]):
             continue
         input_files.append(file_path)
 
@@ -72,7 +74,7 @@ async def prepare_audio_in_folder(data_dir: str, audio_folder: str) -> None:
     for file_path in input_files:
         base_name, extension = os.path.splitext(os.path.basename(file_path))
         output_file = os.path.join(data_dir, f"{base_name}{suffix}{extension}")
-        await prepare_audio(file_path, output_file, audio_folder)
+        await prepare_audio(file_path, output_file, audio_folder, suffix)
 
 
 if __name__ == "__main__":

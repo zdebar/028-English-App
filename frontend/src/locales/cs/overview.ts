@@ -54,7 +54,7 @@ export const OVERVIEW_TEXTS = {
   pronunciationGroups: 'Skupiny výslovnosti',
   pronunciationGroupsButton: 'Výslovnost – skupiny',
   pronunciationGroupsTooltip: 'Výběr skupin podobně znějících slovíček k procvičování',
-  pronunciationStartedHelp: 'započato/celkem položek',
+  pronunciationStartedHelp: 'odemčeno/celkem položek',
   noPronunciationGroups: 'Žádné dostupné skupiny výslovnosti.',
   noPronunciationGroupItems: 'V této skupině nejsou dostupná slovíčka.',
   addPronunciationGroup: 'Přidat skupinu',

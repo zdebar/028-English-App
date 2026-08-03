@@ -1,16 +1,26 @@
 import type { ButtonHTMLAttributes, JSX } from 'react';
 import StyledButton from './StyledButton';
 
+type ListButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  /** Lets multiline list content determine the row height. */
+  flexibleHeight?: boolean;
+};
+
 /**
  * A styled list button component.
  */
-export function ListButton(props: Readonly<ButtonHTMLAttributes<HTMLButtonElement>>): JSX.Element {
+export function ListButton({
+  flexibleHeight = false,
+  className = '',
+  children,
+  ...props
+}: Readonly<ListButtonProps>): JSX.Element {
   return (
     <StyledButton
       {...props}
-      className={`h-input w-full grow-0 preserve-disabled-text-color ${props.className}`}
+      className={`${flexibleHeight ? 'min-h-input' : 'h-input'} preserve-disabled-text-color w-full grow-0 ${className}`}
     >
-      {props.children}
+      {children}
     </StyledButton>
   );
 }

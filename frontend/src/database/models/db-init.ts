@@ -12,6 +12,7 @@ import UserScore from '@/database/models/user-scores';
 import Notes from './notes';
 import PronunciationGroup from './pronunciation-groups';
 import PronunciationGroupItem from './pronunciation-group-items';
+import GrammarChunkExample from './grammar-chunk-examples';
 
 let isInitialized = false;
 
@@ -22,6 +23,7 @@ export async function initDbMappings(): Promise<void> {
   db.user_blocks.mapToClass(UserBlock);
   db.grammar_groups.mapToClass(GrammarGroup);
   db.grammar_chunks.mapToClass(GrammarChunk);
+  db.grammar_chunk_examples.mapToClass(GrammarChunkExample);
   db.notes.mapToClass(Notes);
   db.pronunciation_groups.mapToClass(PronunciationGroup);
   db.pronunciation_group_items.mapToClass(PronunciationGroupItem);

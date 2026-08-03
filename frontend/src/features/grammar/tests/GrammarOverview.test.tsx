@@ -220,9 +220,8 @@ describe('GrammarOverview', () => {
 
     await waitFor(() => {
       expect(mocks.resetItemsByGrammarGroupId).toHaveBeenCalledWith('u1', 8);
-      expect(mocks.resetByGrammarGroupId).toHaveBeenCalledWith('u1', 8);
       expect(mocks.reportInfo).toHaveBeenCalledWith(
-        'Grammar 8 reset completed: 4 items and 2 blocks reset.',
+        'Grammar 8 reset completed: 4 items reset.',
       );
       expect(mocks.showToast).toHaveBeenCalledWith('Reset success', 'success');
     });
@@ -243,18 +242,17 @@ describe('GrammarOverview', () => {
 
     await waitFor(() => {
       expect(mocks.resetItemsByGrammarChunkId).toHaveBeenCalledWith('u1', 8);
-      expect(mocks.resetByGrammarChunkId).toHaveBeenCalledWith('u1', 8);
       expect(mocks.reportInfo).toHaveBeenCalledWith(
-        'Grammar 8 reset completed: 3 items and 1 blocks reset.',
+        'Grammar 8 reset completed: 3 items reset.',
       );
     });
     expect(mocks.resetItemsByGrammarGroupId).not.toHaveBeenCalled();
     expect(mocks.resetByGrammarGroupId).not.toHaveBeenCalled();
   });
 
-  it('shows error toast when block reset fails', async () => {
+  it('shows error toast when item reset fails', async () => {
     const error = new Error('Dexie failure');
-    mocks.resetByGrammarGroupId.mockRejectedValueOnce(error);
+    mocks.resetItemsByGrammarGroupId.mockRejectedValueOnce(error);
     mocks.arrayState.currentIndex = 0;
     mocks.arrayState.currentItem = {
       id: 8,
@@ -268,7 +266,6 @@ describe('GrammarOverview', () => {
 
     await waitFor(() => {
       expect(mocks.resetItemsByGrammarGroupId).toHaveBeenCalledWith('u1', 8);
-      expect(mocks.resetByGrammarGroupId).toHaveBeenCalledWith('u1', 8);
       expect(mocks.showToast).toHaveBeenCalledWith('Reset error', 'error');
       expect(mocks.reportError).toHaveBeenCalledWith('Failed to reset grammar progress', error);
     });

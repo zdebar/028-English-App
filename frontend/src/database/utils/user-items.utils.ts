@@ -28,17 +28,16 @@ function getRandomUnitInterval(): number {
 }
 
 /**
- * Mutates a user item back to its unstarted local state.
+ * Resets learning progress while preserving the historical start timestamp.
  *
  * @param item Local user item object to reset in place.
  */
-export function resetUserItem(item: UserItemLocal): void {
-  item.started_at = NULL_DATE;
-  item.next_at_cz_to_en = NULL_DATE;
-  item.next_at_en_to_cz = NULL_DATE;
+export function resetUserItem(item: UserItemLocal, dateTime: string = new Date().toISOString()): void {
+  item.next_at_cz_to_en = dateTime;
+  item.next_at_en_to_cz = dateTime;
   item.mastered_at_cz_to_en = NULL_DATE;
   item.mastered_at_en_to_cz = NULL_DATE;
-  item.updated_at = new Date().toISOString();
+  item.updated_at = dateTime;
   item.progress_cz_to_en = 0;
   item.progress_en_to_cz = 0;
 }

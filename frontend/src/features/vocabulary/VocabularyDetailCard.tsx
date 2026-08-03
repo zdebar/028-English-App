@@ -96,6 +96,8 @@ export default function VocabularyDetailCard({
     loading: audioLoading,
   } = useAudioManager(selectedWord?.audio || null);
   const showToast = useToastStore((state) => state.showToast);
+  const audioControlsDisabled =
+    !selectedWord?.audio || audioLoading || audioError || !isAudioReady(selectedWord.audio);
 
   const { isNoteVisible, noteData, openNote, closeNote } = useNoteViewer();
 
@@ -164,11 +166,9 @@ export default function VocabularyDetailCard({
               showToast(TEXTS.noAudio, 'error');
             }
           }}
-          disabled={
-            !selectedWord?.audio || audioLoading || audioError || !isAudioReady(selectedWord.audio)
-          }
+          disabled={audioControlsDisabled}
         />
-        <VolumeSlider />
+        <VolumeSlider disabled={audioControlsDisabled} />
       </div>
       <div className="pos-bottom-right-control">
         {noteId && (

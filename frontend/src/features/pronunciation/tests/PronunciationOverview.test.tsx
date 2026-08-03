@@ -7,6 +7,8 @@ const mocks = vi.hoisted(() => ({
   playAudio: vi.fn(),
   reload: vi.fn(),
   overviewData: [] as any[],
+  overviewLoading: false,
+  overviewError: null as Error | null,
   detailData: null as any,
 }));
 
@@ -28,7 +30,6 @@ vi.mock('@/routing/prefetch-navigation', () => ({
 
 vi.mock('@/routing/route-data', () => ({
   pronunciationGroupDetailDescriptor: () => ({ key: 'group', load: vi.fn() }),
-  pronunciationGroupsDescriptor: () => ({ key: 'groups', load: vi.fn() }),
 }));
 
 vi.mock('@/features/auth/use-auth-store', () => ({
@@ -48,13 +49,15 @@ vi.mock('@/database/models/pronunciation-groups', () => ({
   },
 }));
 
-vi.mock('@/hooks/use-array', () => ({
-  useArray: () => ({
-    data: mocks.overviewData,
-    loading: false,
-    hasData: mocks.overviewData.length > 0,
-    error: null,
-  }),
+vi.mock('../use-pronunciation-groups-store', () => ({
+  usePronunciationGroupsStore: (
+    selector: (state: { groups: any[]; loading: boolean; error: Error | null }) => unknown,
+  ) =>
+    selector({
+      groups: mocks.overviewData,
+      loading: mocks.overviewLoading,
+      error: mocks.overviewError,
+    }),
 }));
 
 vi.mock('@/hooks/use-fetch', () => ({
@@ -114,7 +117,7 @@ vi.mock('@/locales/cs', () => ({
     loadingError: 'Loading error',
     pronunciationGroupAddError: 'Add error',
     addToPronunciationHelp: 'přidat do výslovnosti',
-    pronunciationStartedHelp: 'započato/celkem položek',
+    pronunciationStartedHelp: 'odemčeno/celkem položek',
   },
 }));
 
@@ -125,18 +128,20 @@ describe('Pronunciation overview screens', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.overviewData = [];
+    mocks.overviewLoading = false;
+    mocks.overviewError = null;
     mocks.detailData = null;
     mocks.addAvailable.mockResolvedValue(2);
     mocks.playAudio.mockResolvedValue(true);
   });
 
-  it('lists visible groups with examples and started/total counts', () => {
+  it('lists visible groups with examples and unlocked/total counts', () => {
     mocks.overviewData = [
       {
         id: 1,
         name: '/æ/ × /e/',
         examples: ['man', 'men'],
-        started_count: 2,
+        unlocked_count: 2,
         total_count: 3,
       },
     ];
@@ -146,7 +151,7 @@ describe('Pronunciation overview screens', () => {
     expect(screen.getByText('/æ/ × /e/')).toBeTruthy();
     expect(screen.getByText('man, men')).toBeTruthy();
     expect(screen.getByText('2/3')).toBeTruthy();
-    expect(screen.getByText('započato/celkem položek')).toBeTruthy();
+    expect(screen.getByText('odemčeno/celkem položek')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Help' })).toBeTruthy();
 
     fireEvent.click(screen.getByTestId('close'));

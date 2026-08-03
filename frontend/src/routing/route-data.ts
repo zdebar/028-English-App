@@ -82,13 +82,6 @@ export function vocabularyDescriptor(userId: string) {
   };
 }
 
-export function pronunciationGroupsDescriptor(userId: string) {
-  return {
-    key: routeDataKey('pronunciation-groups', userId),
-    load: () => PronunciationGroup.getOverview(userId),
-  };
-}
-
 export function pronunciationGroupDetailDescriptor(userId: string, groupId: number) {
   return {
     key: routeDataKey('pronunciation-group-detail', userId, groupId),

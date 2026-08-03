@@ -487,12 +487,16 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns The reset item id.
    * @throws Error when no matching user item exists.
    */
-  static async resetItemById(userId: string, itemId: number): Promise<number> {
+  static async resetItemById(
+    userId: string,
+    itemId: number,
+    dateTime: string = new Date().toISOString(),
+  ): Promise<number> {
     const count = await db.user_items
       .where('[user_id+item_id]')
       .equals([userId, itemId])
       .modify((item: UserItemLocal) => {
-        resetUserItem(item);
+        resetUserItem(item, dateTime);
       });
 
     if (count === 0) {
@@ -509,7 +513,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param grammarChunkId Grammar chunk id whose started items should be reset.
    * @returns Number of modified rows.
    */
-  static async resetItemsByGrammarChunkId(userId: string, grammarChunkId: number): Promise<number> {
+  static async resetItemsByGrammarChunkId(
+    userId: string,
+    grammarChunkId: number,
+    dateTime: string = new Date().toISOString(),
+  ): Promise<number> {
     const count = await db.user_items
       .where('[user_id+grammar_chunk_id+started_at]')
       .between(
@@ -519,19 +527,23 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         false,
       )
       .modify((item: UserItemLocal) => {
-        resetUserItem(item);
+        resetUserItem(item, dateTime);
       });
 
     return count;
   }
 
-  static async resetItemsByGrammarGroupId(userId: string, grammarGroupId: number): Promise<number> {
+  static async resetItemsByGrammarGroupId(
+    userId: string,
+    grammarGroupId: number,
+    dateTime: string = new Date().toISOString(),
+  ): Promise<number> {
     const chunks = await db.grammar_chunks
       .where('grammar_group_id')
       .equals(grammarGroupId)
       .toArray();
     const counts = await Promise.all(
-      chunks.map((chunk) => this.resetItemsByGrammarChunkId(userId, chunk.id)),
+      chunks.map((chunk) => this.resetItemsByGrammarChunkId(userId, chunk.id, dateTime)),
     );
     return counts.reduce((total, count) => total + count, 0);
   }
@@ -543,12 +555,16 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param blockId Block id whose items should be reset.
    * @returns Number of modified rows.
    */
-  static async resetItemsByBlockId(userId: string, blockId: number): Promise<number> {
+  static async resetItemsByBlockId(
+    userId: string,
+    blockId: number,
+    dateTime: string = new Date().toISOString(),
+  ): Promise<number> {
     const count = await db.user_items
       .where('[user_id+block_id]')
       .equals([userId, blockId])
       .modify((item: UserItemLocal) => {
-        resetUserItem(item);
+        resetUserItem(item, dateTime);
       });
 
     return count;
@@ -593,14 +609,14 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
             progress: progressCzToEn,
             created_at: dateTime,
             direction: 'czToEn',
-            outcome: 'legacy',
+            outcome: 'correct',
           },
           ...(isFirstSimulation
             ? [{
                 progress: progressEnToCz,
                 created_at: dateTime,
                 direction: 'enToCz' as const,
-                outcome: 'legacy' as const,
+                outcome: 'correct' as const,
               }]
             : []),
         ];

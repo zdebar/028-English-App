@@ -14,6 +14,7 @@ export default class PronunciationGroupItem
 {
   pronunciation_group_id!: number;
   item_id!: number;
+  contrast_set!: number | null;
   sort_order!: number;
   updated_at!: string;
   deleted_at!: string | null;
@@ -25,17 +26,13 @@ export default class PronunciationGroupItem
     );
     const { data, error } = await supabaseInstance
       .from(TableName.PronunciationGroupItems)
-      .select(
-        'pronunciation_group_id, item_id, sort_order, updated_at, deleted_at',
-      )
+      .select('pronunciation_group_id, item_id, contrast_set, sort_order, updated_at, deleted_at')
       .gt('updated_at', lastSyncedAt);
 
     if (error) {
-      throw new SupabaseError(
-        'Failed to fetch pronunciation group items from supabase',
-        error,
-        { lastSyncedAt },
-      );
+      throw new SupabaseError('Failed to fetch pronunciation group items from supabase', error, {
+        lastSyncedAt,
+      });
     }
 
     const remoteItems = (data as unknown as PronunciationGroupItemType[] | null) ?? [];

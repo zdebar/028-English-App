@@ -11,6 +11,8 @@ const mocks = vi.hoisted(() => ({
   select: vi.fn(),
   gt: vi.fn(),
   grammarBulkPut: vi.fn(),
+  exampleMemberships: [] as any[],
+  userItems: [] as any[],
 }));
 
 vi.mock('@/database/models/db', () => ({
@@ -30,6 +32,16 @@ vi.mock('@/database/models/db', () => ({
       clear: vi.fn(),
       bulkDelete: vi.fn(),
       bulkPut: (...args: unknown[]) => mocks.grammarBulkPut(...args),
+    },
+    grammar_chunk_examples: {
+      where: () => ({
+        between: () => ({ toArray: async () => mocks.exampleMemberships }),
+      }),
+    },
+    user_items: {
+      where: () => ({
+        anyOf: () => ({ toArray: async () => mocks.userItems }),
+      }),
     },
   },
 }));
@@ -79,6 +91,8 @@ describe('Grammar', () => {
       newSyncedAt: '2026-03-04T00:00:00.000Z',
     });
     mocks.markAsSynced.mockResolvedValue(undefined);
+    mocks.exampleMemberships = [];
+    mocks.userItems = [];
     mocks.gt.mockResolvedValue({ data: [], error: null });
     mocks.select.mockReturnValue({
       gt: (...args: unknown[]) => mocks.gt(...args),
@@ -100,6 +114,22 @@ describe('Grammar', () => {
     mocks.grammarGet.mockResolvedValue(undefined);
 
     await expect(Grammar.getById(2)).rejects.toThrow('Grammar chunk with ID 2 not found.');
+  });
+
+  it('getDetail returns explicitly mapped examples in membership order', async () => {
+    mocks.grammarGet.mockResolvedValue({ id: 1, name: 'Articles', note: '', sort_order: 1 });
+    mocks.exampleMemberships = [
+      { grammar_chunk_id: 1, item_id: 2, sort_order: 2 },
+      { grammar_chunk_id: 1, item_id: 1, sort_order: 1 },
+    ];
+    mocks.userItems = [
+      { user_id: 'u1', item_id: 2, czech: 'druzí', english: 'second' },
+      { user_id: 'u1', item_id: 1, czech: 'první', english: 'first' },
+    ];
+
+    const detail = await Grammar.getDetail('u1', 1);
+
+    expect(detail.items.map((item) => item.item_id)).toEqual([1, 2]);
   });
 
   it('getStartedList returns grammar list for started ids', async () => {

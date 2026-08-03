@@ -15,6 +15,7 @@ const mocks = vi.hoisted(() => ({
   audioSyncFromRemote: vi.fn(),
   pronunciationGroupSyncFromRemote: vi.fn(),
   pronunciationGroupItemSyncFromRemote: vi.fn(),
+  grammarChunkExampleSyncFromRemote: vi.fn(),
   getSession: vi.fn(),
 }));
 
@@ -106,6 +107,12 @@ vi.mock('@/database/models/pronunciation-group-items', () => ({
   },
 }));
 
+vi.mock('@/database/models/grammar-chunk-examples', () => ({
+  default: {
+    syncFromRemote: (...args: unknown[]) => mocks.grammarChunkExampleSyncFromRemote(...args),
+  },
+}));
+
 vi.mock('@/database/models/db', () => ({
   db: {
     metadata: {},
@@ -142,6 +149,7 @@ describe('data-sync.utils', () => {
     mocks.audioSyncFromRemote.mockResolvedValue(undefined);
     mocks.pronunciationGroupSyncFromRemote.mockResolvedValue(undefined);
     mocks.pronunciationGroupItemSyncFromRemote.mockResolvedValue(undefined);
+    mocks.grammarChunkExampleSyncFromRemote.mockResolvedValue(undefined);
     mocks.getSession.mockResolvedValue({ data: { session: { user: { id: 'u1' } } }, error: null });
   });
 
@@ -163,6 +171,7 @@ describe('data-sync.utils', () => {
     expect(mocks.lessonsSyncFromRemote).toHaveBeenCalledWith(true);
     expect(mocks.pronunciationGroupSyncFromRemote).toHaveBeenCalledWith(true);
     expect(mocks.pronunciationGroupItemSyncFromRemote).toHaveBeenCalledWith(true);
+    expect(mocks.grammarChunkExampleSyncFromRemote).toHaveBeenCalledWith(true);
     expect(mocks.setFullSyncTime).toHaveBeenCalledWith('u1', 5000);
   });
 
@@ -180,6 +189,7 @@ describe('data-sync.utils', () => {
     expect(mocks.lessonsSyncFromRemote).toHaveBeenCalledWith(false);
     expect(mocks.pronunciationGroupSyncFromRemote).toHaveBeenCalledWith(false);
     expect(mocks.pronunciationGroupItemSyncFromRemote).toHaveBeenCalledWith(false);
+    expect(mocks.grammarChunkExampleSyncFromRemote).toHaveBeenCalledWith(false);
     expect(mocks.setFullSyncTime).not.toHaveBeenCalled();
   });
 

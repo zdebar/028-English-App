@@ -12,6 +12,7 @@ export interface PronunciationGroupType {
 export interface PronunciationGroupItemType {
   pronunciation_group_id: number;
   item_id: number;
+  contrast_set: number | null;
   sort_order: number;
   updated_at: string;
   deleted_at: string | null;
@@ -19,7 +20,7 @@ export interface PronunciationGroupItemType {
 
 export interface PronunciationGroupOverviewType extends PronunciationGroupType {
   examples: string[];
-  started_count: number;
+  unlocked_count: number;
   total_count: number;
 }
 

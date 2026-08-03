@@ -276,6 +276,7 @@ export function useBlockTrainingDeck(
 
   return {
     block,
+    items,
     grammar,
     isComplete,
     loading,

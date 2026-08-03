@@ -33,7 +33,7 @@ describe('AppDB schema', () => {
     mocks.versions.length = 0;
   });
 
-  it('defines the complete database in a single version', () => {
+  it('defines the complete database schema in version 1', () => {
     new AppDB();
 
     expect(mocks.versions).toHaveLength(1);
@@ -45,9 +45,11 @@ describe('AppDB schema', () => {
         notes: 'id',
         pronunciation_groups: 'id, sort_order',
         pronunciation_group_items:
-          '[pronunciation_group_id+item_id], [pronunciation_group_id+sort_order], item_id',
+          '[pronunciation_group_id+item_id], [pronunciation_group_id+sort_order], [pronunciation_group_id+contrast_set+sort_order], item_id',
         grammar_groups: 'id, sort_order',
         grammar_chunks: 'id, grammar_group_id, sort_order',
+        grammar_chunk_examples:
+          '[grammar_chunk_id+item_id], [grammar_chunk_id+sort_order], item_id',
         user_blocks: '[user_id+block_id], user_id, [user_id+updated_at]',
         user_scores: '[user_id+date], [user_id+updated_at]',
         audio_records: 'filename',

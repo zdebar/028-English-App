@@ -4,8 +4,8 @@ export type PracticeOutcome = 'correct' | 'incorrect' | 'skip';
 export interface ProgressHistoryEntry {
   progress: number;
   created_at: string;
-  direction?: PracticeDirection | 'legacy';
-  outcome?: PracticeOutcome | 'legacy';
+  direction: PracticeDirection;
+  outcome: PracticeOutcome;
 }
 
 export type CurriculumSortPath = readonly [

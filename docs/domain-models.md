@@ -23,7 +23,8 @@ Dexie models under `frontend/src/database/models`.
 | `lessons` | Contain items directly through `items.lesson_id`. |
 | `blocks` / `user_blocks` | Optionally group items for Topics, practice eligibility, or initial training. User blocks track unlock/mastery state. |
 | `items` / `user_items` | Individual vocabulary or grammar practice units. User items track progress and scheduling. |
-| `grammar_groups` / `grammar_chunks` | Overview pages group ordered chunks; blocks and practice items link to one relevant chunk through `grammar_chunk_id`. |
+| `grammar_groups` / `grammar_chunks` | Overview pages group ordered chunks; blocks and practice items link to one relevant hint through `grammar_chunk_id`. |
+| `grammar_chunk_examples` | Curated, ordered item examples displayed with a grammar chunk independently of block membership and item hint linkage. |
 | `notes` | Shared note/detail content, linked by `note_id`. |
 | `user_scores` | Per-user daily practice count. |
 

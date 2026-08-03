@@ -17,7 +17,7 @@ async def generate_audio_with_google_cloud(
     df: pd.DataFrame,
     audio_folder: str,
     suffix: str = "",
-    language_code: str = "en-US",
+    language_code: str = "en-GB",
 ) -> pd.DataFrame:
     if texttospeech is None:
         raise ImportError("Missing dependency: google-cloud-texttospeech. Install with 'pip install google-cloud-texttospeech'.")
@@ -27,7 +27,7 @@ async def generate_audio_with_google_cloud(
     audio_names: list[str] = []
 
     # Better defaults for language learning: clear female voice with slower pace.
-    voice_name = os.getenv("GCP_TTS_VOICE_NAME", "en-US-Neural2-F")
+    voice_name = os.getenv("GCP_TTS_VOICE_NAME", "en-GB-Chirp3-HD-Erinome")
     speaking_rate_raw = os.getenv("GCP_TTS_SPEAKING_RATE", "1")
     pitch_raw = os.getenv("GCP_TTS_PITCH", "0.0")
     try:
@@ -111,7 +111,7 @@ async def generate_audio_with_google_cloud_from_ipa(
     df: pd.DataFrame,
     audio_folder: str,
     suffix: str = "",
-    language_code: str = "en-US",
+    language_code: str = "en-GB",
 ) -> pd.DataFrame:
     if texttospeech is None:
         raise ImportError("Missing dependency: google-cloud-texttospeech. Install with 'pip install google-cloud-texttospeech'.")
@@ -120,7 +120,7 @@ async def generate_audio_with_google_cloud_from_ipa(
     audio_tasks: list[Awaitable[None]] = []
     audio_names: list[str] = []
 
-    voice_name = os.getenv("GCP_TTS_VOICE_NAME", "en-US-Neural2-F")
+    voice_name = os.getenv("GCP_TTS_VOICE_NAME", "en-GB-Chirp3-HD-Erinome")
     speaking_rate_raw = os.getenv("GCP_TTS_SPEAKING_RATE", "1")
     pitch_raw = os.getenv("GCP_TTS_PITCH", "0.0")
     try:

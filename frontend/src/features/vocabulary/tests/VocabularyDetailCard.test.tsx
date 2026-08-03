@@ -186,7 +186,7 @@ describe('VocabularyDetailCard', () => {
     expect(onReset).toHaveBeenCalledTimes(1);
   });
 
-  it('disables play button when audio is not ready', () => {
+  it('disables play and volume buttons when audio is not ready', () => {
     audioMocks.audioReady = false;
 
     render(
@@ -198,11 +198,15 @@ describe('VocabularyDetailCard', () => {
       />,
     );
 
-    const button = screen.getByRole('button', { name: 'Audio' }) as HTMLButtonElement;
+    const playButton = screen.getByRole('button', { name: 'Audio' }) as HTMLButtonElement;
+    const volumeButton = screen.getByRole('button', {
+      name: 'Nastavit hlasitost',
+    }) as HTMLButtonElement;
 
-    expect(button.disabled).toBe(true);
-    expect(button.className).toContain('disabled:text-disabled-light');
-    expect(button.className).toContain('dark:disabled:text-disabled-dark');
+    expect(playButton.disabled).toBe(true);
+    expect(volumeButton.disabled).toBe(true);
+    expect(playButton.className).toContain('disabled:text-disabled-light');
+    expect(playButton.className).toContain('dark:disabled:text-disabled-dark');
   });
 
   it('shows error toast when playback fails', async () => {

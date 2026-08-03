@@ -10,7 +10,6 @@ import GrammarGroup, {
   type GrammarGroupWithChunks,
 } from '@/database/models/grammar-groups';
 import UserItem from '@/database/models/user-items';
-import UserBlock from '@/database/models/user-blocks';
 import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { DataState } from '@/components/UI/DataState';
@@ -59,12 +58,7 @@ export default function GrammarOverview({
       const resetCount = currentItem.standalone_chunk_id != null
         ? await UserItem.resetItemsByGrammarChunkId(userId, currentItem.standalone_chunk_id)
         : await UserItem.resetItemsByGrammarGroupId(userId, currentItem.id);
-      const resetBlockCount = currentItem.standalone_chunk_id != null
-        ? await UserBlock.resetByGrammarChunkId(userId, currentItem.standalone_chunk_id)
-        : await UserBlock.resetByGrammarGroupId(userId, currentItem.id);
-      reportInfo(
-        `Grammar ${currentItem.id} reset completed: ${resetCount} items and ${resetBlockCount} blocks reset.`,
-      );
+      reportInfo(`Grammar ${currentItem.id} reset completed: ${resetCount} items reset.`);
       invalidateRouteData(routeDataKey('grammar', userId));
       reload();
       showToast(TEXTS.resetProgressSuccessToast, 'success');
