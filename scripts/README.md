@@ -5,6 +5,7 @@ maintain the word lists. Run the scripts from the repository root:
 
 ```powershell
 python scripts/prepare_words.py
+python scripts/trim_audio.py
 python scripts/mark_words.py
 ```
 
@@ -13,9 +14,12 @@ python scripts/mark_words.py
 1. Add or edit a lesson source CSV in `prepare/`. Give it a leading lesson
    number, for example `05_plurals.csv`.
 2. Run `python scripts/prepare_words.py`.
-3. Review the newly created timestamped CSV and the `.opus` files in
-   `prepare/audio/`. Use the timestamped CSV as the prepared result.
-4. Only when the lesson's words should count as used, run
+3. Optionally adjust the constants in `scripts/trim_audio.py`, then run
+   `python scripts/trim_audio.py` to write trimmed copies to `prepare/audio_trim/`.
+   The original files in `prepare/audio/` are preserved.
+4. Review the newly created timestamped CSV and the trimmed audio files in
+   `prepare/audio_trim/`. Use the timestamped CSV as the prepared result.
+5. Only when the lesson's words should count as used, run
    `python scripts/mark_words.py`.
 
 `mark_words.py` is **not** run by `prepare_words.py`. They are independent
@@ -69,16 +73,17 @@ whole run, such as `05_plurals_20260715T132045Z.csv`.
 ## Requirements for preparation
 
 - Python dependencies used by the scripts, including `pandas`,
-  `google-cloud-texttospeech`, `python-dotenv`, and eSpeak NG.
+  `google-cloud-texttospeech`, `python-dotenv`, FFmpeg, and eSpeak NG.
 - eSpeak NG installed at `C:/Program Files/eSpeak NG/espeak-ng.exe`.
 - `GOOGLE_APPLICATION_CREDENTIALS` configured in `.env` for Google Cloud TTS.
 - Optional voice tuning in `.env`: `GCP_TTS_VOICE_NAME`,
   `GCP_TTS_SPEAKING_RATE`, and `GCP_TTS_PITCH`.
 
-Audio files are named from normalized English text plus the same UTC timestamp,
-for example `Good morning!` becomes `good_morning_20260715T132045Z.opus`. The
-timestamp changes the filename and associated CSV reference on each run, so
-clients see it as a new audio version instead of reusing a cached old file.
+Audio filenames are stable by default: `Good morning!` becomes
+`good_morning.opus`. Set `include_audio_timestamp=True` when calling either
+folder preparation function to append the UTC timestamp, for example
+`good_morning_20260715T132045Z.opus`. Output CSV filenames remain timestamped
+to keep each preparation run separate.
 
 ## What marking does
 

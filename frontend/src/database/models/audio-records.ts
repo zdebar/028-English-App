@@ -100,6 +100,8 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
     const extractedFiles = await this.extractZip(zipBlob);
 
     await db.transaction('rw', db.audio_records, db.audio_metadata, async () => {
+      // bulkPut is an upsert: a newer archive intentionally replaces a blob
+      // with the same filename instead of failing on the primary-key conflict.
       await db.audio_records.bulkPut(
         Array.from(extractedFiles, ([filename, audioBlob]) => ({ filename, audioBlob })),
       );

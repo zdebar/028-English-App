@@ -163,7 +163,7 @@ describe('AudioRecord', () => {
       expect(result).toEqual({ total: 0, success: 0, failed: 0 });
     });
 
-    it('downloads, extracts, stores files, and marks archive as fetched', async () => {
+    it('downloads, extracts, replaces same-name files, and marks archive as fetched', async () => {
       const remoteTimestamp = '2026-05-10T00:00:00.000Z';
       const zipBlob = new Blob(['zip']);
       const extractedBlob = new Blob(['audio']);

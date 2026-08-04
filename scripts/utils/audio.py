@@ -1,6 +1,8 @@
 import asyncio
 import html
 import re
+import shutil
+import subprocess
 import unicodedata
 import os
 from collections.abc import Awaitable
@@ -12,6 +14,62 @@ import google.cloud.texttospeech as texttospeech
 load_dotenv()
 credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 print(f"Using credentials from: {credentials_path}")
+
+def trim_audio(
+    audio_content: bytes,
+    *,
+    trim_start: bool = True,
+    trim_end: bool = True,
+    silence_threshold_db: int = -50,
+    min_silence_ms: int = 250,
+    keep_silence_ms: int = 100,
+) -> bytes:
+    """Remove configured leading/trailing silence while preserving a margin."""
+    ffmpeg = shutil.which("ffmpeg")
+    if not ffmpeg:
+        print("Warning: ffmpeg is unavailable; saving generated audio without trimming")
+        return audio_content
+
+    try:
+        start_filter = (
+            f"start_periods=1:start_duration={min_silence_ms / 1000}:"
+            f"start_threshold={silence_threshold_db}dB:start_silence={keep_silence_ms / 1000}"
+            if trim_start
+            else "start_periods=0"
+        )
+        end_filter = (
+            f"stop_periods=1:stop_duration={min_silence_ms / 1000}:"
+            f"stop_threshold={silence_threshold_db}dB:stop_silence={keep_silence_ms / 1000}"
+            if trim_end
+            else "stop_periods=0"
+        )
+        result = subprocess.run(
+            [
+                ffmpeg,
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-i",
+                "pipe:0",
+                "-af",
+                f"silenceremove={start_filter}:{end_filter}",
+                "-c:a",
+                "libopus",
+                "-f",
+                "ogg",
+                "pipe:1",
+            ],
+            input=audio_content,
+            capture_output=True,
+            check=True,
+        )
+        if not result.stdout:
+            return audio_content
+        return result.stdout
+    except (OSError, subprocess.CalledProcessError) as error:
+        # A trim failure must not discard an otherwise valid generated recording.
+        print(f"Warning: could not trim generated audio: {error}")
+        return audio_content
 
 async def generate_audio_with_google_cloud(
     df: pd.DataFrame,
@@ -27,7 +85,7 @@ async def generate_audio_with_google_cloud(
     audio_names: list[str] = []
 
     # Better defaults for language learning: clear female voice with slower pace.
-    voice_name = os.getenv("GCP_TTS_VOICE_NAME", "en-GB-Chirp3-HD-Erinome")
+    voice_name = os.getenv("GCP_TTS_VOICE_NAME", "en-GB-Neural2-C")
     speaking_rate_raw = os.getenv("GCP_TTS_SPEAKING_RATE", "1")
     pitch_raw = os.getenv("GCP_TTS_PITCH", "0.0")
     try:
@@ -120,7 +178,7 @@ async def generate_audio_with_google_cloud_from_ipa(
     audio_tasks: list[Awaitable[None]] = []
     audio_names: list[str] = []
 
-    voice_name = os.getenv("GCP_TTS_VOICE_NAME", "en-GB-Chirp3-HD-Erinome")
+    voice_name = os.getenv("GCP_TTS_VOICE_NAME", "en-GB-Neural2-C")
     speaking_rate_raw = os.getenv("GCP_TTS_SPEAKING_RATE", "1")
     pitch_raw = os.getenv("GCP_TTS_PITCH", "0.0")
     try:
