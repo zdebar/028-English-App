@@ -99,6 +99,7 @@ export default function VocabularyList({
           <BilingualItemButton
             key={item.item_id}
             item={item}
+            leadingLanguage={displayField}
             onClick={() => onSelect(index)}
           />
         ))}

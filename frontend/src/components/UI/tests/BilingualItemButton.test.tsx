@@ -18,6 +18,19 @@ describe('BilingualItemButton', () => {
     expect(screen.getByRole('button').getAttribute('title')).toContain('həˈləʊ');
   });
 
+  it('shows the selected leading language first', () => {
+    render(
+      <BilingualItemButton
+        item={{ czech: 'ahoj', english: 'hello', pronunciation: '' }}
+        leadingLanguage="english"
+        onClick={vi.fn()}
+      />,
+    );
+
+    const languageTexts = screen.getByRole('button').querySelectorAll('span');
+    expect([...languageTexts].map((element) => element.textContent)).toEqual(['hello', 'ahoj']);
+  });
+
   it('stacks overflowing text and includes full values in its tooltip', () => {
     vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(function (
       this: HTMLElement,
