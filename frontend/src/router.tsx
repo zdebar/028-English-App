@@ -1,5 +1,5 @@
 import App from '@/App';
-import RouteDataError from '@/components/utils/RouteDataError';
+import RouteDataError from '@/components/utils/route-data-error';
 import ProtectedLayout from '@/components/utils/protected-laout';
 import { ROUTES } from '@/config/routes.config';
 import { waitForAuthReady } from '@/features/auth/auth-lifecycle';
