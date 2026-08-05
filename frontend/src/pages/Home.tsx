@@ -59,6 +59,12 @@ export default function Home(): JSX.Element {
             </PropertyView>
             <HomeActionLinks />
           </div>
+          {isAnonymousUser && (
+            <div className="mt-8 flex flex-col gap-2">
+              <ConvertAnonymousUserButton />
+              <SimulateDataButton />
+            </div>
+          )}
           <div className="mt-4 flex w-full flex-col gap-1 portrait:mt-8">
             <PracticeOverviewButton
               count={dailyCount}
@@ -82,12 +88,6 @@ export default function Home(): JSX.Element {
               <HelpButton />
             </div>
           </div>
-          {isAnonymousUser && (
-            <div className="mt-8 mb-8 flex flex-col gap-2">
-              <ConvertAnonymousUserButton />
-              <SimulateDataButton />
-            </div>
-          )}
         </div>
       ) : (
         <div className="home-body card-width w-full">

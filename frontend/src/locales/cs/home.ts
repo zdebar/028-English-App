@@ -45,9 +45,12 @@ export const HOME_TEXTS = {
   // Simulate data
   simulateDataButton: 'Simulovat data',
   simulateDataLoading: 'Simuluji data ...',
-  simulateDataTooltip: 'Nevratně změní data uživatele. Použijte pro testování aplikace.',
+  simulateDataTooltip: 'Destruktivně přepíše část pokroku. Použijte pouze pro testování.',
+  simulateDataModalTitle: 'Opravdu simulovat data?',
+  simulateDataModalText: 'Tato operace nevratně přepíše část vašich dat.',
+  simulateDataConfirm: 'Přepsat data',
   simulateDataSuccessToast: 'Data byla úspěšně simulována.',
   simulateDataErrorToast: 'Chyba při simulaci dat.',
   simulateDataExplanation:
-    'Stránka Přehledy zobrazuje pouze rozcvičené položky. Funkce "Simulovat data" přidá pokrok k prvním 1000 položkám uživatele a umožní tak přehledy testovat. Změna je nevratná.',
+    'Pro testování přepíše pokrok až 400 položek, zahájí až 8 procvičovaných bloků a vybere až 5 položek s audiem pro výslovnost. Změna je nevratná.',
 } as const;

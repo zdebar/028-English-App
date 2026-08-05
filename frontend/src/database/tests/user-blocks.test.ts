@@ -28,9 +28,7 @@ vi.mock('@/config/config', () => ({
       nullReplacementNumber: -1,
     },
     progress: {
-      simulationProgress: 2,
-      simulationCount: 10,
-      simulationMasteredTrainingBlockCount: 3,
+      simulationStartedBlockCount: 8,
     },
     practice: {
       readyPracticeScheduleGroupWindowMs: 1000,
@@ -278,76 +276,59 @@ describe('UserBlock', () => {
     });
   });
 
-  it('simulates three mastered training blocks and leaves the fourth unstarted', async () => {
+  it('starts the first eight ordered practice blocks regardless of training requirement', async () => {
     mocks.toArray.mockResolvedValueOnce([
+      ...Array.from({ length: 7 }, (_, index) => ({
+        user_id: 'u1',
+        block_id: index + 1,
+        sort_order: 7 - index,
+        is_removed_from_practice: false,
+        requires_initial_training: index % 2 === 0,
+      })),
       {
         user_id: 'u1',
-        block_id: 4,
-        sort_order: null,
-        is_removed_from_practice: false,
+        block_id: 9,
+        sort_order: 0,
+        is_removed_from_practice: true,
         requires_initial_training: true,
       },
       {
         user_id: 'u1',
-        block_id: 2,
-        sort_order: null,
-        is_removed_from_practice: false,
-        requires_initial_training: true,
-      },
-      {
-        user_id: 'u1',
-        block_id: 1,
-        sort_order: null,
-        is_removed_from_practice: false,
-        requires_initial_training: true,
-      },
-      {
-        user_id: 'u1',
-        block_id: 3,
-        sort_order: null,
-        is_removed_from_practice: false,
-        requires_initial_training: true,
-      },
-      {
-        user_id: 'u1',
-        block_id: 99,
+        block_id: 10,
         sort_order: null,
         is_removed_from_practice: false,
         requires_initial_training: false,
       },
     ]);
-    mocks.getPracticeItems.mockResolvedValueOnce([
-      { block_id: 4, curriculum_sort_path: [1, 2, 1] },
-      { block_id: 2, curriculum_sort_path: [1, 1, 2] },
-      { block_id: 1, curriculum_sort_path: [1, 1, 1] },
-      { block_id: 3, curriculum_sort_path: [1, 1, 3] },
-    ]);
+
+    const blocks = await UserBlock.getSimulationCandidates('u1');
+    expect(blocks.map((block) => block.block_id)).toEqual([7, 6, 5, 4, 3, 2, 1, 10]);
 
     await expect(
-      UserBlock.simulateInitialTrainingProgress('u1', '2026-07-17T12:00:00.000Z'),
-    ).resolves.toBe(3);
+      UserBlock.simulateStartedBlocks('u1', blocks, '2026-07-17T12:00:00.000Z'),
+    ).resolves.toBe(8);
 
-    expect(mocks.update.mock.calls).toEqual([
-      [['u1', 1], { started_at: '2026-07-17T12:00:00.000Z', updated_at: '2026-07-17T12:00:00.000Z' }],
-      [['u1', 2], { started_at: '2026-07-17T12:00:00.000Z', updated_at: '2026-07-17T12:00:00.000Z' }],
-      [['u1', 3], { started_at: '2026-07-17T12:00:00.000Z', updated_at: '2026-07-17T12:00:00.000Z' }],
-    ]);
+    expect(mocks.update).toHaveBeenCalledTimes(8);
+    expect(mocks.update).toHaveBeenNthCalledWith(1, ['u1', 7], {
+      started_at: '2026-07-17T12:00:00.000Z',
+      updated_at: '2026-07-17T12:00:00.000Z',
+    });
   });
 
-  it('rejects training simulation when four eligible blocks are unavailable', async () => {
+  it('returns every available practice block when fewer than eight exist', async () => {
     mocks.toArray.mockResolvedValueOnce([
       {
         user_id: 'u1',
         block_id: 1,
-        sort_order: null,
+        sort_order: 1,
         is_removed_from_practice: false,
         requires_initial_training: true,
       },
     ]);
 
-    await expect(
-      UserBlock.simulateInitialTrainingProgress('u1', '2026-07-17T12:00:00.000Z'),
-    ).rejects.toThrow('requires at least 4 initial-training blocks');
+    await expect(UserBlock.getSimulationCandidates('u1')).resolves.toEqual([
+      expect.objectContaining({ block_id: 1 }),
+    ]);
     expect(mocks.update).not.toHaveBeenCalled();
   });
 

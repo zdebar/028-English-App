@@ -32,7 +32,7 @@ starting point when a change crosses route, store, model, or sync boundaries.
 | Signed-in hub | Shows user name, daily count, practice buttons, dashboard, and sync warning. | `Home`, `Dashboard`, `PracticeOverviewButton`, `HomePracticeButtons` | `useAuthStore`, `useUserStore`, `useSyncStore`, IndexedDB models | Home combines global stores with local model reads; it does not read Supabase directly. |
 | Practice readiness button | Enables unified practice when local data is ready. | `HomePracticeButtons` | `UserItem`, Dexie live query | Recalculates after relevant committed writes; timers update future ready counts while Home stays mounted. |
 | Sync warning | Warns when the last periodic sync failed. | `Home` | `useSyncStore.isSyncError` | Successful sync clears the warning; failed sync does not prevent local-first practice. |
-| Simulated data | Atomically seed anonymous/test item and grammar-block progress once local sync is ready. | `SimulateDataButton`, `simulate-data-service` | `UserItem`, `UserBlock`, localStorage `simulate-data-${userId}` | Advances the first 64 items, masters three grammar blocks, and unlocks the fourth; reactive consumers refresh after commit. |
+| Simulated data | Atomically seed anonymous/test progress once local sync is ready and destructive confirmation is accepted. | `SimulateDataButton`, `simulate-data-service` | `UserItem`, `UserBlock`, localStorage `simulate-data-${userId}` | Replaces progress on up to 400 items, starts up to eight practice blocks, and selects up to five audio items for pronunciation; reactive consumers refresh after commit. |
 
 ## Practice And Learning
 

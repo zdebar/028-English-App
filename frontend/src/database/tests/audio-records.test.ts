@@ -25,8 +25,9 @@ vi.mock('@/config/config', () => ({
       epochStartDate: '1970-01-01T00:00:00.000Z',
     },
     progress: {
-      simulationProgress: 2,
-      simulationCount: 200,
+      simulationItemCount: 400,
+      simulationItemProgress: 1,
+      simulationPronunciationItemCount: 5,
     },
     audio: {
       audioBucketName: 'audio-bucket',

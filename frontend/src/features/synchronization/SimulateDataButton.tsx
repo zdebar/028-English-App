@@ -7,10 +7,12 @@ import { TEXTS } from '@/locales/cs';
 import { useAuthStore } from '../auth/use-auth-store';
 import { useLocalStorageSync } from '@/hooks/use-local-storage-sync';
 import { useSyncStore } from '@/features/synchronization/use-sync-store';
+import { Modal } from '@/features/modal/Modal';
 
 export default function SimulateDataButton(): JSX.Element | null {
   const showToast = useToastStore((s) => s.showToast);
   const [isLoading, setIsLoading] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const userId = useAuthStore((state) => state.userId);
   const authLoading = useAuthStore((state) => state.loading);
   const isSynchronizing = useSyncStore((state) => state.isSynchronizing);
@@ -42,12 +44,22 @@ export default function SimulateDataButton(): JSX.Element | null {
       <SigninButton
         disabled={isDisabled}
         isSignin={isLoading}
-        onClick={simulateData}
+        onClick={() => setShowConfirmation(true)}
         title={TEXTS.simulateDataTooltip}
         label={TEXTS.simulateDataButton}
         signinLabel={TEXTS.simulateDataLoading}
       />
       <p className="p-2 text-sm">{TEXTS.simulateDataExplanation}</p>
+      {showConfirmation && (
+        <Modal
+          onConfirm={simulateData}
+          onClose={() => setShowConfirmation(false)}
+          confirmLabel={TEXTS.simulateDataConfirm}
+        >
+          <p className="font-bold">{TEXTS.simulateDataModalTitle}</p>
+          <p>{TEXTS.simulateDataModalText}</p>
+        </Modal>
+      )}
     </>
   );
 }

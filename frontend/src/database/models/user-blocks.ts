@@ -6,7 +6,6 @@ import { getSyncTimestamps, splitDeleted } from '@/database/utils/sync-generic.u
 import { reportInfo } from '@/features/logging/monitoring-handler';
 import { SupabaseError } from '@/types/error.types';
 import type { UserBlockType } from '@/types/generic.types';
-import type { CurriculumSortPath, UserItemLocal } from '@/types/user-item.types';
 import { TableName } from '@/types/table.types';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 import { Entity } from 'dexie';
@@ -14,7 +13,6 @@ import Metadata from './metadata';
 import UserItem from './user-items';
 
 const NULL_DATE = config.database.nullReplacementDate;
-const NULL_NUMBER = config.database.nullReplacementNumber;
 
 type UserBlockAPI = Omit<UserBlockType, 'started_at' | 'deleted_at'> & {
   started_at: string | null;
@@ -149,44 +147,27 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     });
   }
 
-  /**
-   * Creates the training-block portion of the anonymous-user simulation fixture.
-   * The first configured number of training blocks are completed. The next block stays
-   * unstarted so unified practice can discover it as an initial-training trigger.
-   *
-   * @param userId Non-empty user id owning the blocks.
-   * @param dateTime Shared ISO timestamp for every simulated transition.
-   * @returns Number of training blocks changed.
-   * @throws Error when the required number of training blocks is unavailable.
-   */
-  static async simulateInitialTrainingProgress(userId: string, dateTime: string): Promise<number> {
+  /** Returns up to the configured maximum ordered blocks used by the simulation fixture. */
+  static async getSimulationCandidates(userId: string): Promise<UserBlockType[]> {
     assertNonEmptyString(userId, 'userId');
 
-    const masteredCount = config.progress.simulationMasteredTrainingBlockCount;
-    const requiredCount = masteredCount + 1;
-    const [blocks, practiceItems] = await Promise.all([
-      this.getByUserId(userId),
-      UserItem.getByUserId(userId),
-    ]);
-    const firstItemPathByBlockId = getFirstItemPathByBlockId(practiceItems);
-    const trainingBlocks = blocks
-      .filter((block) => !block.is_removed_from_practice && block.requires_initial_training)
-      .sort((left, right) =>
-        compareTrainingBlocks(left, right, firstItemPathByBlockId),
-      )
+    const requiredCount = config.progress.simulationStartedBlockCount;
+    return (await this.getByUserId(userId))
+      .filter((block) => !block.is_removed_from_practice)
       .slice(0, requiredCount);
+  }
 
-    if (trainingBlocks.length < requiredCount) {
-      throw new Error(
-        `Simulation requires at least ${requiredCount} initial-training blocks for user ${userId}.`,
-      );
-    }
-
-    for (const block of trainingBlocks.slice(0, masteredCount)) {
+  /** Starts every selected block in the simulation fixture. */
+  static async simulateStartedBlocks(
+    userId: string,
+    blocks: UserBlockType[],
+    dateTime: string,
+  ): Promise<number> {
+    for (const block of blocks) {
       await this.completeInitialTraining(userId, block.block_id, dateTime);
     }
 
-    return masteredCount;
+    return blocks.length;
   }
 
   /**
@@ -377,44 +358,6 @@ function compareNullableBlockOrder(left: UserBlockType, right: UserBlockType): n
   if (left.sort_order == null) return 1;
   if (right.sort_order == null) return -1;
   return left.sort_order - right.sort_order || left.block_id - right.block_id;
-}
-
-function getFirstItemPathByBlockId(
-  items: UserItemLocal[],
-): Map<number, CurriculumSortPath> {
-  const result = new Map<number, CurriculumSortPath>();
-  for (const item of items) {
-    if (item.block_id === NULL_NUMBER) continue;
-    const current = result.get(item.block_id);
-    if (!current || compareCurriculumPaths(item.curriculum_sort_path, current) < 0) {
-      result.set(item.block_id, item.curriculum_sort_path);
-    }
-  }
-  return result;
-}
-
-function compareTrainingBlocks(
-  left: UserBlockType,
-  right: UserBlockType,
-  firstItemPathByBlockId: Map<number, CurriculumSortPath>,
-): number {
-  const leftPath = firstItemPathByBlockId.get(left.block_id);
-  const rightPath = firstItemPathByBlockId.get(right.block_id);
-  if (!leftPath && !rightPath) return left.block_id - right.block_id;
-  if (!leftPath) return 1;
-  if (!rightPath) return -1;
-  return compareCurriculumPaths(leftPath, rightPath) || left.block_id - right.block_id;
-}
-
-function compareCurriculumPaths(
-  left: CurriculumSortPath,
-  right: CurriculumSortPath,
-): number {
-  for (let index = 0; index < left.length; index += 1) {
-    const difference = left[index] - right[index];
-    if (difference !== 0) return difference;
-  }
-  return 0;
 }
 
 function getResetBlockFields(dateTime: string): Pick<
