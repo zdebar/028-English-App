@@ -161,6 +161,14 @@ describe('PronunciationGroup', () => {
     expect(detail?.selected_count).toBe(1);
   });
 
+  it('includes non-vocabulary items when they have audio', async () => {
+    mocks.items[1].is_vocabulary = 0;
+
+    const detail = await PronunciationGroup.getDetail('u1', 1);
+
+    expect(detail?.items.map((entry) => entry.item_id)).toEqual([1, 2]);
+  });
+
   it('bulk-adds only missing visible items with a shared timestamp', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-07-30T10:00:00.000Z'));

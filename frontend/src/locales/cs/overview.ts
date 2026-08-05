@@ -53,7 +53,7 @@ export const OVERVIEW_TEXTS = {
   vocabularyOverviewTooltip: 'Přehled započatých slovíček',
   pronunciationGroups: 'Skupiny výslovnosti',
   pronunciationGroupsButton: 'Výslovnost – skupiny',
-  pronunciationGroupsTooltip: 'Výběr skupin podobně znějících slovíček k procvičování',
+  pronunciationGroupsTooltip: 'Výběr skupin podobně znějících položek k procvičování',
   pronunciationStartedHelp: 'odemčeno/celkem položek',
   noPronunciationGroups: 'Žádné dostupné skupiny výslovnosti.',
   noPronunciationGroupItems: 'V této skupině nejsou dostupná slovíčka.',

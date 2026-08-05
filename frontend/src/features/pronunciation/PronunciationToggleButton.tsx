@@ -16,8 +16,7 @@ type PronunciationToggleButtonProps = Readonly<{
   onSelectionChange?: (selected: boolean) => void;
 }>;
 
-function getToggleTitle(isVocabulary: boolean, hasAudio: boolean, selected: boolean) {
-  if (!isVocabulary) return TEXTS.pronunciationVocabularyOnly;
+function getToggleTitle(hasAudio: boolean, selected: boolean) {
   if (!hasAudio) return TEXTS.pronunciationAudioRequired;
   return selected ? TEXTS.removeFromPronunciation : TEXTS.addToPronunciation;
 }
@@ -37,10 +36,9 @@ export default function PronunciationToggleButton({
     [userId, item?.item_id],
     item?.has_pronunciation_practice === 1,
   );
-  const isVocabulary = item?.is_vocabulary === 1;
   const hasAudio = Boolean(item?.audio?.trim());
-  const disabled = !userId || !item || !isVocabulary || !hasAudio;
-  const title = getToggleTitle(isVocabulary, hasAudio, selected);
+  const disabled = !userId || !item || !hasAudio;
+  const title = getToggleTitle(hasAudio, selected);
 
   const handleClick = async (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();

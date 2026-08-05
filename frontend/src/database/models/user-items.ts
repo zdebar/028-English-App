@@ -357,10 +357,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   /**
    * Returns whether an item can be selected for pronunciation practice.
    */
-  static isPronunciationEligible(
-    item: Pick<UserItemLocal, 'is_vocabulary' | 'audio'>,
-  ): boolean {
-    return item.is_vocabulary === 1 && Boolean(item.audio?.trim());
+  static isPronunciationEligible(item: Pick<UserItemLocal, 'audio'>): boolean {
+    return Boolean(item.audio?.trim());
   }
 
   /**

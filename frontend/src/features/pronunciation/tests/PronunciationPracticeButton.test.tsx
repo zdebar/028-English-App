@@ -38,7 +38,7 @@ vi.mock('@/routing/route-data', () => ({
 
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
-    pronunciationPracticeButton: 'Výslovnost – slovíčka',
+    pronunciationPracticeButton: 'Výslovnost – položky',
     pronunciationPracticeTooltip: 'Practice selected words',
     noPronunciationPracticeSelection: 'No selected words',
     loadingMessage: 'Loading',
@@ -56,7 +56,7 @@ describe('PronunciationPracticeButton', () => {
   it('is disabled for an empty selection', () => {
     render(<PronunciationPracticeButton userId="u1" />);
 
-    const button = screen.getByRole('button', { name: 'Výslovnost – slovíčka' });
+    const button = screen.getByRole('button', { name: 'Výslovnost – položky' });
     expect((button as HTMLButtonElement).disabled).toBe(true);
     expect(button.title).toBe('No selected words');
     expect(mocks.getCount).toHaveBeenCalledWith('u1');
@@ -66,7 +66,7 @@ describe('PronunciationPracticeButton', () => {
     mocks.count = 2;
     render(<PronunciationPracticeButton userId="u1" />);
 
-    const button = screen.getByRole('button', { name: 'Výslovnost – slovíčka' });
+    const button = screen.getByRole('button', { name: 'Výslovnost – položky' });
     expect(button.title).toBe('Practice selected words');
     fireEvent.click(button);
 
@@ -78,7 +78,7 @@ describe('PronunciationPracticeButton', () => {
 
     render(<PronunciationPracticeButton userId="u1" />);
 
-    const button = screen.getByRole('button', { name: 'Výslovnost – slovíčka' });
+    const button = screen.getByRole('button', { name: 'Výslovnost – položky' });
     expect((button as HTMLButtonElement).disabled).toBe(true);
     expect(button.title).toBe('Loading');
   });

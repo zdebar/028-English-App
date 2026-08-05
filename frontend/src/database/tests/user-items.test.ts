@@ -362,7 +362,7 @@ describe('UserItem', () => {
     });
   });
 
-  it('rejects pronunciation selection for non-vocabulary and audio-less items', async () => {
+  it('allows non-vocabulary pronunciation selection and rejects audio-less items', async () => {
     mocks.userItemGet
       .mockResolvedValueOnce({
         item_id: 8,
@@ -377,13 +377,15 @@ describe('UserItem', () => {
         has_pronunciation_practice: 0,
       });
 
-    await expect(UserItem.togglePronunciationPractice('u1', 8)).rejects.toThrow(
-      'not eligible',
-    );
+    await expect(UserItem.togglePronunciationPractice('u1', 8)).resolves.toBe(true);
     await expect(UserItem.togglePronunciationPractice('u1', 9)).rejects.toThrow(
       'not eligible',
     );
-    expect(mocks.userItemUpdate).not.toHaveBeenCalled();
+    expect(mocks.userItemUpdate).toHaveBeenCalledTimes(1);
+    expect(mocks.userItemUpdate).toHaveBeenCalledWith(
+      ['u1', 8],
+      expect.objectContaining({ has_pronunciation_practice: 1 }),
+    );
   });
 
   it('counts pronunciation selections on the dedicated index', async () => {
@@ -421,7 +423,7 @@ describe('UserItem', () => {
 
     const deck = await UserItem.getPronunciationPracticeDeck('u1');
 
-    expect(deck.map((item) => item.item_id)).toEqual([3, 1]);
+    expect(deck.map((item) => item.item_id)).toEqual([3, 1, 2]);
   });
 
   it('records a correct first answer and schedules the opposite direction at zero', () => {
