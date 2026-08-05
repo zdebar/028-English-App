@@ -64,10 +64,11 @@ describe('GrammarGroup.getStarted', () => {
     });
   });
 
-  it('returns started groups and treats each ungrouped chunk as a group', async () => {
+  it('returns discriminated groups and standalone chunks', async () => {
     await expect(GrammarGroup.getStarted('u1')).resolves.toEqual([
       {
         id: 1,
+        kind: 'group',
         name: 'First group',
         sort_order: 1,
         chunks: [
@@ -77,14 +78,15 @@ describe('GrammarGroup.getStarted', () => {
       },
       {
         id: 14,
+        kind: 'chunk',
         name: 'Ungrouped',
+        grammar_group_id: null,
         sort_order: 1,
-        chunks: [],
         items: [],
-        standalone_chunk_id: 14,
       },
       {
         id: 2,
+        kind: 'group',
         name: 'Second group',
         sort_order: 2,
         chunks: [{ id: 12, name: 'Second', grammar_group_id: 2, sort_order: 2, items: [] }],
@@ -106,11 +108,11 @@ describe('GrammarGroup.getStarted', () => {
     await expect(GrammarGroup.getStarted('u1')).resolves.toEqual([
       {
         id: 14,
+        kind: 'chunk',
         name: 'Ungrouped',
+        grammar_group_id: null,
         sort_order: 1,
-        chunks: [],
         items: [],
-        standalone_chunk_id: 14,
       },
     ]);
     expect(mocks.groupsAnyOf).not.toHaveBeenCalled();

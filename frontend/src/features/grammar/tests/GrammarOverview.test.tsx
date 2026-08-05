@@ -156,8 +156,8 @@ describe('GrammarOverview', () => {
 
   it('renders list view with grammar items and opens selected grammar', () => {
     mocks.arrayState.data = [
-      { id: 1, name: 'Past tense' },
-      { id: 2, name: 'Conditionals' },
+      { id: 1, kind: 'group', name: 'Past tense', chunks: [] },
+      { id: 2, kind: 'chunk', name: 'Conditionals', items: [] },
     ] as any;
 
     render(<GrammarOverview />);
@@ -182,8 +182,10 @@ describe('GrammarOverview', () => {
     mocks.arrayState.currentIndex = 0;
     mocks.arrayState.currentItem = {
       id: 3,
+      kind: 'group',
       name: 'Articles',
       note: '<b>safe</b>',
+      chunks: [],
     };
     render(<GrammarOverview />);
 
@@ -197,8 +199,10 @@ describe('GrammarOverview', () => {
     mocks.arrayState.currentIndex = 0;
     mocks.arrayState.currentItem = {
       id: 8,
+      kind: 'group',
       name: 'Reported speech',
       note: null,
+      chunks: [],
     };
 
     render(<GrammarOverview />);
@@ -210,8 +214,10 @@ describe('GrammarOverview', () => {
     mocks.arrayState.currentIndex = 0;
     mocks.arrayState.currentItem = {
       id: 8,
+      kind: 'group',
       name: 'Reported speech',
       note: null,
+      chunks: [],
     };
 
     render(<GrammarOverview />);
@@ -231,10 +237,10 @@ describe('GrammarOverview', () => {
     mocks.arrayState.currentIndex = 0;
     mocks.arrayState.currentItem = {
       id: 8,
+      kind: 'chunk',
       name: 'Standalone grammar',
       note: null,
-      chunks: [],
-      standalone_chunk_id: 8,
+      items: [],
     };
 
     render(<GrammarOverview />);
@@ -256,8 +262,10 @@ describe('GrammarOverview', () => {
     mocks.arrayState.currentIndex = 0;
     mocks.arrayState.currentItem = {
       id: 8,
+      kind: 'group',
       name: 'Reported speech',
       note: null,
+      chunks: [],
     };
 
     render(<GrammarOverview />);

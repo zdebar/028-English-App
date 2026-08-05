@@ -86,13 +86,7 @@ enabled = true
 # Specifies an ordered list of seed files to load during db reset.
 # Supports glob patterns relative to supabase directory: "./seeds/*.sql"
 sql_paths = [
-  "./seeds/00_private_settings.sql",
-  "./seeds/02_levels_rows.sql",
-  "./seeds/03_lessons_rows.sql",
-  "./seeds/04_grammar_rows.sql",
-  "./seeds/05_notes_rows.sql",  
-  "./seeds/06_blocks_rows.sql",  
-  "./seeds/07_items_rows.sql",  
+  "./seeds/remote_data.sql",
 ]
 
 [db.network_restrictions]

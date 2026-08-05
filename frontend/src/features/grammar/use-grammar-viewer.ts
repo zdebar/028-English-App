@@ -20,7 +20,7 @@ export function useGrammarViewer() {
         const grammar = await GrammarChunk.getDetail(userId, grammarChunkId);
         if (!grammar) return;
 
-        setGrammarData(grammar);
+        setGrammarData({ ...grammar, kind: 'chunk' });
         setIsGrammarVisible(true);
       } catch (error) {
         reportError('Error fetching grammar:', error);

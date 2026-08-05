@@ -98,7 +98,7 @@ describe('GrammarDetailCard', () => {
 
     const { container } = render(
       <GrammarDetailCard
-        grammar={{ id: 1, name: 'Articles', note: '<script>x</script>' }}
+        grammar={{ kind: 'chunk', id: 1, name: 'Articles', note: '<script>x</script>' }}
         onClose={vi.fn()}
       />,
     );
@@ -110,7 +110,10 @@ describe('GrammarDetailCard', () => {
 
   it('renders fallback message when note is null', () => {
     render(
-      <GrammarDetailCard grammar={{ id: 1, name: 'Articles', note: null }} onClose={vi.fn()} />,
+      <GrammarDetailCard
+        grammar={{ kind: 'chunk', id: 1, name: 'Articles', note: null }}
+        onClose={vi.fn()}
+      />,
     );
 
     expect(screen.getByText('No notes')).toBeTruthy();
@@ -121,9 +124,15 @@ describe('GrammarDetailCard', () => {
       <GrammarDetailCard
         grammar={{
           id: 1,
+          kind: 'group',
           name: 'Present simple',
           chunks: [
-            { id: 11, name: 'Affirmative', note: '<p>affirmative note</p>' },
+            {
+              id: 11,
+              name: 'Affirmative',
+              note: '<p>affirmative note</p>',
+              items: [exampleItem],
+            },
             { id: 12, name: 'Negative', note: '<p>negative note</p>' },
           ],
         }}
@@ -137,17 +146,27 @@ describe('GrammarDetailCard', () => {
       'Negative',
     ]);
     expect(screen.queryByText('No notes')).toBeNull();
+    const groupedItemButton = screen.getByText('I am').closest('button');
+    expect(groupedItemButton).not.toBeNull();
+    expect(groupedItemButton?.parentElement?.className).toContain('gap-1');
   });
 
   it('hides help by default and renders it when explicitly enabled', () => {
     const { rerender } = render(
-      <GrammarDetailCard grammar={{ id: 1, name: 'Articles' }} onClose={vi.fn()} />,
+      <GrammarDetailCard
+        grammar={{ kind: 'chunk', id: 1, name: 'Articles' }}
+        onClose={vi.fn()}
+      />,
     );
 
     expect(screen.queryByTestId('help')).toBeNull();
 
     rerender(
-      <GrammarDetailCard grammar={{ id: 1, name: 'Articles' }} onClose={vi.fn()} showHelpButton />,
+      <GrammarDetailCard
+        grammar={{ kind: 'chunk', id: 1, name: 'Articles' }}
+        onClose={vi.fn()}
+        showHelpButton
+      />,
     );
 
     expect(screen.getByTestId('help')).toBeTruthy();
@@ -158,9 +177,9 @@ describe('GrammarDetailCard', () => {
       <GrammarDetailCard
         grammar={{
           id: 1,
+          kind: 'chunk',
           name: 'To be',
           items: [exampleItem],
-          chunks: [],
         }}
         onClose={vi.fn()}
         showHelpButton
@@ -171,6 +190,7 @@ describe('GrammarDetailCard', () => {
     expect(audioMocks.audios).toEqual(['i-am.opus']);
     expect(itemButton).not.toBeNull();
     expect(itemButton?.disabled).toBe(false);
+    expect(itemButton?.parentElement?.className).toContain('gap-1');
     fireEvent.click(itemButton!);
 
     await waitFor(() => expect(audioMocks.playAudio).toHaveBeenCalledWith('i-am.opus'));

@@ -9,13 +9,22 @@ import { useMemo } from 'react';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import VolumeSlider from '@/features/audio/VolumeSlider';
 
-export type GrammarDetail = Readonly<{
+type GrammarChunkDetail = Readonly<{
   id: number;
   name: string;
   note?: string | null;
-  chunks?: readonly GrammarDetail[];
   items?: readonly UserItemLocal[];
 }>;
+
+export type GrammarDetail =
+  | Readonly<{
+      kind: 'group';
+      id: number;
+      name: string;
+      note?: string | null;
+      chunks: readonly GrammarChunkDetail[];
+    }>
+  | (GrammarChunkDetail & Readonly<{ kind: 'chunk' }>);
 
 type GrammarDetailCardProps = Readonly<{
   grammar?: GrammarDetail | null;
@@ -32,32 +41,53 @@ export default function GrammarDetailCard({
   showHelpButton = false,
 }: GrammarDetailCardProps) {
   const showToast = useToastStore((state) => state.showToast);
-  const items = useMemo(
-    () => [
-      ...(grammar?.items ?? []),
-      ...(grammar?.chunks?.flatMap((chunk) => chunk.items ?? []) ?? []),
-    ],
-    [grammar],
-  );
+  const chunks = useMemo(() => {
+    if (!grammar) return [];
+    if (grammar.kind === 'chunk') return [grammar];
+    return grammar.chunks;
+  }, [grammar]);
+  const items = useMemo(() => chunks.flatMap((chunk) => chunk.items ?? []), [chunks]);
   const audios = useMemo(
     () => items.map((item) => item.audio).filter((audio): audio is string => Boolean(audio)),
     [items],
   );
   const { playAudio, isAudioReady, loading: audioLoading } = useAudioManager(audios);
 
-  const renderItems = (entries: readonly UserItemLocal[] | undefined) =>
-    entries?.map((item) => (
-      <BilingualItemButton
-        key={item.item_id}
-        item={item}
-        disabled={!item.audio || audioLoading || !isAudioReady(item.audio)}
-        onClick={async () => {
-          if (!item.audio) return;
-          const didPlay = await playAudio(item.audio);
-          if (!didPlay) showToast(TEXTS.noAudio, 'error');
-        }}
+  const renderItems = (entries: readonly UserItemLocal[] | undefined) => {
+    if (!entries?.length) return null;
+
+    return (
+      <div className="flex flex-col gap-1">
+        {entries.map((item) => (
+          <BilingualItemButton
+            key={item.item_id}
+            item={item}
+            disabled={!item.audio || audioLoading || !isAudioReady(item.audio)}
+            onClick={async () => {
+              if (!item.audio) return;
+              const didPlay = await playAudio(item.audio);
+              if (!didPlay) showToast(TEXTS.noAudio, 'error');
+            }}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  const renderNote = (note: string | null | undefined) => {
+    if (!note) return null;
+
+    return (
+      <div
+        className="grammar p-4"
+        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note) }}
       />
-    ));
+    );
+  };
+
+  const hasContent = Boolean(
+    grammar?.note || chunks.some((chunk) => chunk.note || chunk.items?.length),
+  );
 
   return (
     <OverviewCard
@@ -68,29 +98,25 @@ export default function GrammarDetailCard({
       onClose={onClose}
       className="relative"
     >
-      {grammar?.note && (
-        <div
-          className="grammar p-4"
-          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(grammar.note) }}
-        />
+      {grammar?.kind === 'group' && (
+        <>
+          {renderNote(grammar.note)}
+          {grammar.chunks.map((chunk) => (
+            <section key={chunk.id}>
+              <h2 className="h-button px-4 pt-4 text-left text-lg font-bold">{chunk.name}</h2>
+              {renderNote(chunk.note)}
+              {renderItems(chunk.items)}
+            </section>
+          ))}
+        </>
       )}
-      {renderItems(grammar?.items)}
-      {grammar?.chunks?.map((chunk) => (
-        <section key={chunk.id}>
-          <h2 className="h-button px-4 pt-4 text-left text-lg font-bold">{chunk.name}</h2>
-          {chunk.note && (
-            <div
-              className="grammar p-4"
-              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(chunk.note) }}
-            />
-          )}
-          {renderItems(chunk.items)}
-        </section>
-      ))}
-      {!grammar?.note &&
-        !grammar?.items?.length &&
-        !grammar?.chunks?.some((chunk) => chunk.note || chunk.items?.length) &&
-        TEXTS.noNotesToDisplay}
+      {grammar?.kind === 'chunk' && (
+        <>
+          {renderNote(grammar.note)}
+          {renderItems(grammar.items)}
+        </>
+      )}
+      {!hasContent && TEXTS.noNotesToDisplay}
       {items.length > 0 && (
         <div className="pos-bottom-left-control">
           <VolumeSlider />

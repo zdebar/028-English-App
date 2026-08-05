@@ -5,7 +5,7 @@ import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
 import type { GrammarDetail } from '@/features/grammar/GrammarDetailCard';
 import { reportError } from '@/features/logging/monitoring-handler';
-import type { UserBlockType } from '@/types/generic.types';
+import type { GrammarChunkType, UserBlockType } from '@/types/generic.types';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { NBSP } from './use-hint';
@@ -24,6 +24,11 @@ function toError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
 }
 
+function toGrammarDetail(grammar: GrammarChunkType | null | undefined): GrammarDetail | null {
+  if (!grammar) return null;
+  return { ...grammar, kind: 'chunk' };
+}
+
 export function useBlockTrainingDeck(
   userId: string | null,
   blockId: number | null,
@@ -31,7 +36,9 @@ export function useBlockTrainingDeck(
 ) {
   const [block, setBlock] = useState<UserBlockType | null>(initialData?.block ?? null);
   const [items, setItems] = useState<UserItemLocal[]>(initialData?.items ?? []);
-  const [grammar, setGrammar] = useState<GrammarDetail | null>(initialData?.grammar ?? null);
+  const [grammar, setGrammar] = useState<GrammarDetail | null>(() =>
+    toGrammarDetail(initialData?.grammar),
+  );
   const [round, setRound] = useState<BlockTrainingRound>(0);
   const [totalItemCount, setTotalItemCount] = useState(initialData?.items.length ?? 0);
   const [completedItemIds, setCompletedItemIds] = useState<Set<number>>(
@@ -54,7 +61,7 @@ export function useBlockTrainingDeck(
     if (initialData) {
       setBlock(initialData.block);
       setItems(initialData.items);
-      setGrammar(initialData.grammar);
+      setGrammar(toGrammarDetail(initialData.grammar));
       setTotalItemCount(initialData.items.length);
       setCompletedItemIds(new Set());
       setRound(0);
@@ -100,7 +107,7 @@ export function useBlockTrainingDeck(
         setItems(blockItems);
         setTotalItemCount(blockItems.length);
         setCompletedItemIds(new Set());
-        setGrammar(grammarData);
+        setGrammar(toGrammarDetail(grammarData));
         setRound(0);
         setCurrentQueue(blockItems);
         setNextWaveQueue([]);
