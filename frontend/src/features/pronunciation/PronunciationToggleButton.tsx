@@ -65,7 +65,7 @@ export default function PronunciationToggleButton({
     >
       <MicrophoneIcon />
       {showHelpText && (
-        <HelpText className="-bottom-4 left-2 flex flex-col items-start landscape:invisible">
+        <HelpText className="-bottom-4 -left-22 flex flex-col items-start landscape:invisible">
           {selected ? TEXTS.removeFromPronunciationHelp : TEXTS.addToPronunciationHelp}
         </HelpText>
       )}
