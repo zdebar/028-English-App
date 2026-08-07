@@ -41,10 +41,11 @@ export default function Guide(): JSX.Element {
         />
         <h3>Nainstalovat aplikaci</h3>
         <p>
-          Umožňuje nainstalovat PWA aplikaci na vaše zařízení. Aplikace je plně funkční offline.
+          Umožňuje nainstalovat aplikaci jako PWA na vaše zařízení. Aplikace je plně funkční
+          offline.
         </p>
         <h3>Denní cíl</h3>
-        <p>Doporučený minimální denní cíl je 10 hvězdiček, tedy 400 procvičovaných položek.</p>
+        <p>Doporučený minimální denní cíl je 10 hvězdiček, tedy 400 procvičených položek.</p>
         <h3>Procvičovat</h3>
         <p>Společné učení a procvičování slovíček a gramatiky.</p>
         <h3>Přehled lekcí</h3>
@@ -64,7 +65,7 @@ export default function Guide(): JSX.Element {
         <h3>Denní pokrok</h3>
         <p>Zobrazuje počet dosažených denních hvězdiček a číselný postup na hvězdičce.</p>
         <h3>Nápověda</h3>
-        <p>Písmeno po písmeně odhaluje slovíčko či větu.</p>
+        <p>Písmeno po písmenu odhaluje slovíčko či větu.</p>
         <h3>Gramatika</h3>
         <p>Zobrazí vysvětlení příslušné gramatiky.</p>
         <h3>Poznámka</h3>
@@ -77,8 +78,8 @@ export default function Guide(): JSX.Element {
           alt="Ukázka kartičky po odhalení"
         />
         <p>
-          Pokrok v obou směrech procvičování, z češtiny do angličtiny a z angličtiny do češtiny, je
-          zaznamenávám samostatně. Můžete tedy např. dokončit položku v jednom směru a dále ho
+          Pokrok v obou směrech procvičování, z češtiny do angličtiny a z angličtiny do češtiny, se
+          zaznamenává samostatně. Můžete tedy např. dokončit položku v jednom směru a dále ji
           procvičovat v druhém.
         </p>
         <h3>Dokončit</h3>
@@ -87,9 +88,9 @@ export default function Guide(): JSX.Element {
           směru. Stále se nabízí v opačném směru.
         </p>
         <h3>Opakovat</h3>
-        <p>Položka se nabídne k dalšímu procvičování dříve pro daný směr.</p>
+        <p>Položka se nabídne k dalšímu procvičování dříve v daném směru.</p>
         <h3>Znám</h3>
-        <p>Položka se nabídne k dalšímu procvičování později pro daný směr.</p>
+        <p>Položka se nabídne k dalšímu procvičování později v daném směru.</p>
         <h3>Zkratky položek</h3>
         <p>
           <span className="inline-block w-20">zkr.</span>zkrácená varianta
@@ -102,7 +103,7 @@ export default function Guide(): JSX.Element {
         </p>
       </section>
       <section>
-        <h2>Úvod cvičení bloku</h2>
+        <h2>Úvod do cvičení bloku</h2>
         <Screenshot
           src={`${import.meta.env.BASE_URL}screenshots/intro`}
           alt="Ukázka kartičky s úvodem bloku"
@@ -128,8 +129,8 @@ export default function Guide(): JSX.Element {
         <p>Přehled započatých slovíček.</p>
         <h3>Smazat účet</h3>
         <p>
-          Vaše údaje budou uchovány dalších 30 dní. Během této doby lze účet obnovit opětovným
-          přihlášením. Po 30 dnech je účet nenávratně smazán.
+          Vaše údaje budou uchovány po dobu dalších 30 dní. Během této doby lze účet obnovit
+          opětovným přihlášením. Po 30 dnech je účet nenávratně smazán.
         </p>
         <h3>Odhlásit se</h3>
         <p>Odhlásí vás z vašeho uživatelského účtu.</p>
@@ -148,8 +149,8 @@ export default function Guide(): JSX.Element {
           otevřenou.
         </p>
         <p>
-          Vzhledem k méně častému synchronizování není aplikace vhodná pro současné používání na
-          více zařízeních.
+          Vzhledem k méně časté synchronizaco není aplikace vhodná pro současné používání na více
+          zařízeních.
         </p>
       </section>
     </div>
