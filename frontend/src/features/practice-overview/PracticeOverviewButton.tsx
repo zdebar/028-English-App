@@ -40,7 +40,7 @@ export default function PracticeOverviewButton({
   return (
     <button
       type="button"
-      className={`home-star-button relative mx-auto inline-flex w-full cursor-pointer items-center justify-center pt-2 text-center hover:border-current focus:outline-none ${className}`}
+      className={`home-star-button relative mx-auto inline-flex w-full cursor-pointer items-center justify-center text-center hover:border-current focus:outline-none ${className}`}
       aria-label={ariaLabel}
       title={ariaLabel}
       onClick={onClick}
