@@ -76,6 +76,11 @@ export default function Guide(): JSX.Element {
           src={`${import.meta.env.BASE_URL}screenshots/revealed`}
           alt="Ukázka kartičky po odhalení"
         />
+        <p>
+          Pokrok v obou směrech procvičování, z češtiny do angličtiny a z angličtiny do češtiny, je
+          zaznamenávám samostatně. Můžete tedy např. dokončit položku v jednom směru a dále ho
+          procvičovat v druhém.
+        </p>
         <h3>Dokončit</h3>
         <p>
           Označí danou položku jako naučenou. Položka se dále nebude nabízet k procvičování v daném
