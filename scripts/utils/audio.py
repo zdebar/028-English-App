@@ -85,7 +85,7 @@ async def generate_audio_with_google_cloud(
     audio_names: list[str] = []
 
     # Better defaults for language learning: clear female voice with slower pace.
-    voice_name = os.getenv("GCP_TTS_VOICE_NAME", "en-GB-Chirp-HD-F")
+    voice_name = os.getenv("GCP_TTS_VOICE_NAME", "en-GB-Neural2-C")
     speaking_rate_raw = os.getenv("GCP_TTS_SPEAKING_RATE", "1")
     pitch_raw = os.getenv("GCP_TTS_PITCH", "0.0")
     try:
@@ -178,7 +178,7 @@ async def generate_audio_with_google_cloud_from_ipa(
     audio_tasks: list[Awaitable[None]] = []
     audio_names: list[str] = []
 
-    voice_name = os.getenv("GCP_TTS_VOICE_NAME", "en-GB-Chirp-HD-F")
+    voice_name = os.getenv("GCP_TTS_VOICE_NAME", "en-GB-Neural2-C")
     speaking_rate_raw = os.getenv("GCP_TTS_SPEAKING_RATE", "1")
     pitch_raw = os.getenv("GCP_TTS_PITCH", "0.0")
     try:

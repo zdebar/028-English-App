@@ -303,8 +303,8 @@ vi.mock('@/features/notes/InfoButton', () => ({
 }));
 
 vi.mock('@/features/practice/buttons/HintButton', () => ({
-  default: ({ onClick }: any) => (
-    <button data-testid="hint-btn" onClick={onClick}>
+  default: ({ disabled, onClick }: any) => (
+    <button data-testid="hint-btn" disabled={disabled} onClick={onClick}>
       hint
     </button>
   ),
@@ -758,6 +758,55 @@ describe('PracticeCard', () => {
     );
 
     expect((screen.getByTestId('master-btn') as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('keeps the next hint disabled until the skip pointer gesture is released', async () => {
+    const plusHint = vi.fn();
+
+    function SkipGestureHarness() {
+      const [revealed, setRevealed] = React.useState(true);
+
+      return (
+        <PracticeSessionCard
+          noteId={null}
+          grammarChunkId={null}
+          progressLabel="1 / 2"
+          isCzToEn
+          revealed={revealed}
+          czech="ahoj"
+          english="hello"
+          pronunciation="hello"
+          audioDisabled={false}
+          showDirectionChange={false}
+          handleReveal={vi.fn()}
+          plusHint={plusHint}
+          nextRepeat={vi.fn()}
+          nextKnown={vi.fn()}
+          completeCurrent={() => setRevealed(false)}
+          audioError={false}
+          playAudio={vi.fn()}
+          audioLoading={false}
+        />
+      );
+    }
+
+    render(<SkipGestureHarness />);
+    fireEvent.click(screen.getByTestId('master-btn'));
+
+    const hintButton = screen.getByTestId('hint-btn') as HTMLButtonElement;
+    expect(hintButton.disabled).toBe(true);
+
+    fireEvent.pointerUp(window);
+    fireEvent.click(hintButton);
+    expect(plusHint).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1);
+    });
+    expect(hintButton.disabled).toBe(false);
+
+    fireEvent.click(hintButton);
+    expect(plusHint).toHaveBeenCalledTimes(1);
   });
 
   it('shows only Next and hides stars after reveal in pronunciation practice', () => {
