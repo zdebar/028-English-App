@@ -62,7 +62,7 @@ export default function GrammarDetailCard({
           <BilingualItemButton
             key={item.item_id}
             item={item}
-            disabled={!item.audio || audioLoading || !isAudioReady(item.audio)}
+            disabled={!item.audio || (!audioLoading && !isAudioReady(item.audio))}
             onClick={async () => {
               if (!item.audio) return;
               const didPlay = await playAudio(item.audio);

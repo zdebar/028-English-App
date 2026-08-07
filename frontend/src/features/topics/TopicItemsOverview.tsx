@@ -136,7 +136,7 @@ export default function TopicItemsOverview({
                 showToast(TEXTS.noAudio, 'error');
               }
             }}
-            disabled={!item.audio || audioLoading || !isAudioReady(item.audio)}
+            disabled={!item.audio || (!audioLoading && !isAudioReady(item.audio))}
           />
         ))}
       </DataState>

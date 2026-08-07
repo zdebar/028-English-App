@@ -197,4 +197,32 @@ describe('GrammarDetailCard', () => {
     expect(screen.getByTestId('volume')).toBeTruthy();
     expect(screen.getByTestId('help')).toBeTruthy();
   });
+
+  it('keeps audio-backed examples enabled while audio is loading', () => {
+    audioMocks.loading = true;
+    audioMocks.isAudioReady.mockReturnValue(false);
+
+    render(
+      <GrammarDetailCard
+        grammar={{ kind: 'chunk', id: 1, name: 'To be', items: [exampleItem] }}
+        onClose={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText('I am').closest('button')?.disabled).toBe(false);
+  });
+
+  it('disables an example after its audio fails to load', () => {
+    audioMocks.loading = false;
+    audioMocks.isAudioReady.mockReturnValue(false);
+
+    render(
+      <GrammarDetailCard
+        grammar={{ kind: 'chunk', id: 1, name: 'To be', items: [exampleItem] }}
+        onClose={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText('I am').closest('button')?.disabled).toBe(true);
+  });
 });

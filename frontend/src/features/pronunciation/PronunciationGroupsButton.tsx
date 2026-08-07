@@ -8,6 +8,7 @@ export default function PronunciationGroupsButton() {
   const loading = usePronunciationGroupsStore((state) => state.loading);
   const error = usePronunciationGroupsStore((state) => state.error);
   const hasGroups = groups.length > 0;
+  const disabled = Boolean(error) || (!loading && !hasGroups);
   let title: string = TEXTS.loadingMessage;
   if (!loading) {
     if (error) {
@@ -23,7 +24,7 @@ export default function PronunciationGroupsButton() {
     <PrefetchButton
       to={ROUTES.pronunciationGroups}
       className="h-button max-h-button w-full px-4"
-      disabled={!hasGroups}
+      disabled={disabled}
       title={title}
     >
       {TEXTS.pronunciationGroupsButton}

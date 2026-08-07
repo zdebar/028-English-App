@@ -1,21 +1,21 @@
 import { ROUTES } from '@/config/routes.config';
-import UserItem from '@/database/models/user-items';
 import { TEXTS } from '@/locales/cs';
-import { useLiveQuery } from 'dexie-react-hooks';
 import { PrefetchButton } from '@/routing/prefetch-navigation';
 import { pronunciationPracticeDescriptor } from '@/routing/route-data';
+import { usePracticeAvailabilityStore } from '@/features/practice/use-practice-availability-store';
 
 export default function PronunciationPracticeButton({
   userId,
 }: Readonly<{ userId: string }>) {
-  const selectedCount = useLiveQuery(
-    () => UserItem.getPronunciationPracticeCount(userId),
-    [userId],
-  );
-  const loading = selectedCount === undefined;
-  const hasSelection = Boolean(selectedCount);
+  const selectedCount = usePracticeAvailabilityStore((state) => state.pronunciationCount);
+  const loading = usePracticeAvailabilityStore((state) => state.pronunciationLoading);
+  const error = usePracticeAvailabilityStore((state) => state.pronunciationError);
+  const hasSelection = selectedCount > 0;
+  const disabled = Boolean(error) || (!loading && !hasSelection);
   let title: string = TEXTS.loadingMessage;
-  if (!loading) {
+  if (error) {
+    title = TEXTS.loadingError;
+  } else if (!loading) {
     title = hasSelection
       ? TEXTS.pronunciationPracticeTooltip
       : TEXTS.noPronunciationPracticeSelection;
@@ -26,7 +26,7 @@ export default function PronunciationPracticeButton({
       to={ROUTES.pronunciationPractice}
       descriptor={pronunciationPracticeDescriptor(userId)}
       className="h-button max-h-button w-full px-4"
-      disabled={!hasSelection}
+      disabled={disabled}
       title={title}
     >
       {TEXTS.pronunciationPracticeButton}

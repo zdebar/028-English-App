@@ -108,6 +108,43 @@ describe('useAudioManager', () => {
     expect(result.current.isPlaying).toBe(false);
   });
 
+  it('waits for an in-flight preload before playing', async () => {
+    let resolveAudio: ((value: { audioBlob: Blob }) => void) | undefined;
+    getAudioMock.mockReturnValue(
+      new Promise<{ audioBlob: Blob }>((resolve) => {
+        resolveAudio = resolve;
+      }),
+    );
+    const { result } = renderHook(() => useAudioManager('file.opus'));
+
+    let playback: Promise<boolean> | undefined;
+    act(() => {
+      playback = result.current.playAudio('file.opus');
+    });
+    expect(audioInstances).toHaveLength(0);
+
+    let didPlay = false;
+    await act(async () => {
+      resolveAudio?.({ audioBlob: new Blob(['a']) });
+      didPlay = (await playback) ?? false;
+    });
+
+    expect(didPlay).toBe(true);
+    expect(getAudioMock).toHaveBeenCalledTimes(1);
+    expect(audioInstances[0].play).toHaveBeenCalledTimes(1);
+  });
+
+  it('deduplicates repeated filenames during preload', async () => {
+    getAudioMock.mockResolvedValue({ audioBlob: new Blob(['a']) });
+    const filenames = ['file.opus', 'file.opus'];
+    const { result } = renderHook(() => useAudioManager(filenames));
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(getAudioMock).toHaveBeenCalledTimes(1);
+    expect(result.current.filenames).toEqual(['file.opus']);
+  });
+
   it('playAudio ignores non-string arg and still plays current audio', async () => {
     getAudioMock.mockResolvedValue({ audioBlob: new Blob(['a']) });
     const { result } = renderHook(() => useAudioManager('file.opus'));
@@ -176,6 +213,52 @@ describe('useAudioManager', () => {
     unmount();
 
     expect(audioInstances[0].pause).toHaveBeenCalled();
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob://audio-url');
+  });
+
+  it('disposes an in-flight load that finishes after unmount', async () => {
+    let resolveAudio: ((value: { audioBlob: Blob }) => void) | undefined;
+    getAudioMock.mockReturnValue(
+      new Promise<{ audioBlob: Blob }>((resolve) => {
+        resolveAudio = resolve;
+      }),
+    );
+    const { unmount } = renderHook(() => useAudioManager('file.opus'));
+    unmount();
+
+    await act(async () => {
+      resolveAudio?.({ audioBlob: new Blob(['a']) });
+      await Promise.resolve();
+    });
+
+    expect(audioInstances).toHaveLength(1);
+    expect(audioInstances[0].play).not.toHaveBeenCalled();
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob://audio-url');
+  });
+
+  it('disposes a stale in-flight load after the requested filename changes', async () => {
+    let resolveOldAudio: ((value: { audioBlob: Blob }) => void) | undefined;
+    getAudioMock.mockImplementation((filename: string) => {
+      if (filename === 'old.opus') {
+        return new Promise<{ audioBlob: Blob }>((resolve) => {
+          resolveOldAudio = resolve;
+        });
+      }
+      return Promise.resolve({ audioBlob: new Blob(['new']) });
+    });
+    const { result, rerender } = renderHook(({ filename }) => useAudioManager(filename), {
+      initialProps: { filename: 'old.opus' },
+    });
+
+    rerender({ filename: 'new.opus' });
+    await waitFor(() => expect(result.current.isAudioReady('new.opus')).toBe(true));
+    await act(async () => {
+      resolveOldAudio?.({ audioBlob: new Blob(['old']) });
+      await Promise.resolve();
+    });
+
+    expect(result.current.isAudioReady('old.opus')).toBe(false);
+    expect(result.current.isAudioReady('new.opus')).toBe(true);
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob://audio-url');
   });
 });
