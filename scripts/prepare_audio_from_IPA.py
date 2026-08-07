@@ -5,6 +5,8 @@ from datetime import datetime, timezone
 
 import pandas as pd
 
+INCLUDE_AUDIO_TIMESTAMP = False
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from scripts.utils.preparation import read_vocab_csv, redo_sort_order
 from scripts.utils.pronunciation import fill_pronunciation_espeak_ng
@@ -51,9 +53,14 @@ async def prepare_audio(file_name: str, output_file: str, audio_folder: str, suf
     print(f"Processed and saved: {output_file}")
 
 
-async def prepare_audio_in_folder(data_dir: str, audio_folder: str) -> None:
-    # One UTC version identifies every CSV and audio file produced by this run.
-    suffix = datetime.now(timezone.utc).strftime("_%Y%m%dT%H%M%SZ")
+async def prepare_audio_in_folder(
+    data_dir: str,
+    audio_folder: str,
+    include_audio_timestamp: bool = INCLUDE_AUDIO_TIMESTAMP,
+) -> None:
+    # Keep output CSVs unique while allowing stable audio names by default.
+    output_suffix = datetime.now(timezone.utc).strftime("_%Y%m%dT%H%M%SZ")
+    audio_suffix = output_suffix if include_audio_timestamp else ""
     input_files = []
 
     for entry in sorted(os.listdir(data_dir)):
@@ -73,8 +80,8 @@ async def prepare_audio_in_folder(data_dir: str, audio_folder: str) -> None:
 
     for file_path in input_files:
         base_name, extension = os.path.splitext(os.path.basename(file_path))
-        output_file = os.path.join(data_dir, f"{base_name}{suffix}{extension}")
-        await prepare_audio(file_path, output_file, audio_folder, suffix)
+        output_file = os.path.join(data_dir, f"{base_name}{output_suffix}{extension}")
+        await prepare_audio(file_path, output_file, audio_folder, audio_suffix)
 
 
 if __name__ == "__main__":

@@ -15,16 +15,17 @@ const config = {
 
   progress: {
     afterInitialTrainingProgress: 2, // Progress after completing a block's initial training
-    simulationCount: 64, // Number of items in the testing queue
-    simulationProgress: 2, // Progress value for simulated data
-    simulationMasteredTrainingBlockCount: 3, // Completed training blocks in simulated data
+    simulationItemCount: 400,
+    simulationItemProgress: 1,
+    simulationStartedBlockCount: 8,
+    simulationPronunciationItemCount: 5,
   },
 
   srs: {
     // Spaced Repetition System configuration
     intervals: {
       czToEn: [0, 120, 900, 3600, 14400, 86400, 172800, 345600, 691200],
-      enToCz: [0, 120, 900, 3600, 14400, 86400, 172800, 345600, 691200],
+      enToCz: [60, 450, 1800, 7200, 43200, 128000, 260000, 520000],
     },
     randomness: 0.2, // Randomness of SRS algorithm
   },

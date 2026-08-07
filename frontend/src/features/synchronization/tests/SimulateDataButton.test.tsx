@@ -58,11 +58,25 @@ vi.mock('@/features/logging/monitoring-handler', () => ({
     (mocks.reportError as (...args: unknown[]) => unknown)(...args),
 }));
 
+vi.mock('@/features/modal/Modal', () => ({
+  Modal: ({ children, confirmLabel, onConfirm, onClose }: any) => (
+    <div role="dialog">
+      {children}
+      <button onClick={onClose}>Cancel</button>
+      <button onClick={() => void onConfirm()}>{confirmLabel}</button>
+    </div>
+  ),
+}));
+
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
     simulateDataButton: 'Simulovat data',
     simulateDataLoading: 'Simuluji data ...',
     simulateDataTooltip: 'Simulate tooltip',
+    simulateDataModalTitle: 'Destructive simulation',
+    simulateDataModalText: 'Progress will be overwritten.',
+    simulateDataConfirm: 'Overwrite data',
+    simulateDataExplanation: 'Simulation explanation',
     simulateDataSuccessToast: 'Data byla úspěšně simulována.',
     simulateDataErrorToast: 'Chyba při simulaci dat.',
   },
@@ -78,13 +92,16 @@ describe('SimulateDataButton', () => {
     mocks.authLoading = false;
     mocks.isSynchronized = true;
     mocks.isSynchronizing = false;
-    mocks.simulateData.mockResolvedValue(64);
+    mocks.simulateData.mockResolvedValue(400);
   });
 
   it('calls simulateData and stores simulated state on success', async () => {
     render(<SimulateDataButton />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Simulovat data' }));
+    expect(screen.getByRole('dialog')).toBeTruthy();
+    expect(mocks.simulateData).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Overwrite data' }));
 
     await waitFor(() => {
       expect(mocks.simulateData).toHaveBeenCalledWith('u1');
@@ -96,12 +113,23 @@ describe('SimulateDataButton', () => {
     });
   });
 
+  it('does not simulate when destructive confirmation is cancelled', () => {
+    render(<SimulateDataButton />);
+
+    fireEvent.click(getSimulateButton());
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(mocks.simulateData).not.toHaveBeenCalled();
+  });
+
   it('shows error toast and logs error when simulateData fails', async () => {
     const error = new Error('simulate failed');
     mocks.simulateData.mockRejectedValue(error);
 
     render(<SimulateDataButton />);
     fireEvent.click(screen.getByRole('button', { name: 'Simulovat data' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Overwrite data' }));
 
     await waitFor(() => {
       expect(mocks.showToast).toHaveBeenCalledWith('Chyba při simulaci dat.', 'error');

@@ -1,5 +1,6 @@
 import App from '@/App';
-import RouteDataError from '@/components/utils/RouteDataError';
+import DelayedLoadingCircle from '@/components/UI/DelayedLoadingCircle';
+import RouteDataError from '@/components/utils/route-data-error';
 import ProtectedLayout from '@/components/utils/protected-laout';
 import { ROUTES } from '@/config/routes.config';
 import { waitForAuthReady } from '@/features/auth/auth-lifecycle';
@@ -153,6 +154,7 @@ export const router = createHashRouter([
       {
         Component: ProtectedLayout,
         loader: protectedLoader,
+        HydrateFallback: DelayedLoadingCircle,
         children: [
           { path: ROUTES.practice, loader: loadPractice, Component: Practice },
           {

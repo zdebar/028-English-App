@@ -4,7 +4,7 @@ import { db } from '@/database/models/db';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 
 /**
- * Atomically creates the anonymous-user progress fixture and invalidates item-derived Home state.
+ * Atomically creates the anonymous-user progress fixture.
  *
  * @param userId Non-empty anonymous user id whose local progress should be simulated.
  * @param dateTime Shared ISO timestamp for every simulated item and block transition.
@@ -17,8 +17,12 @@ export async function simulateUserProgress(
   assertNonEmptyString(userId, 'userId');
 
   const itemCount = await db.transaction('rw', db.user_items, db.user_blocks, async () => {
-    const updatedItemCount = await UserItem.simulateData(userId, dateTime);
-    await UserBlock.simulateInitialTrainingProgress(userId, dateTime);
+    const [items, blocks] = await Promise.all([
+      UserItem.getSimulationCandidates(userId),
+      UserBlock.getSimulationCandidates(userId),
+    ]);
+    const updatedItemCount = await UserItem.simulateData(items, dateTime);
+    await UserBlock.simulateStartedBlocks(userId, blocks, dateTime);
     return updatedItemCount;
   });
 

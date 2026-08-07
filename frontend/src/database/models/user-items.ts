@@ -24,8 +24,9 @@ import { groupReadyPracticeSchedule } from '../utils/ready-practice.utils';
 
 const NULL_DATE = config.database.nullReplacementDate;
 const NULL_NUMBER = config.database.nullReplacementNumber;
-const SIM_PROGRESS = config.progress.simulationProgress;
-const SIM_COUNT = config.progress.simulationCount;
+const SIM_ITEM_COUNT = config.progress.simulationItemCount;
+const SIM_ITEM_PROGRESS = config.progress.simulationItemProgress;
+const SIM_PRONUNCIATION_ITEM_COUNT = config.progress.simulationPronunciationItemCount;
 
 type UserItemAPI = Omit<
   UserItemLocal,
@@ -357,10 +358,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   /**
    * Returns whether an item can be selected for pronunciation practice.
    */
-  static isPronunciationEligible(
-    item: Pick<UserItemLocal, 'is_vocabulary' | 'audio'>,
-  ): boolean {
-    return item.is_vocabulary === 1 && Boolean(item.audio?.trim());
+  static isPronunciationEligible(item: Pick<UserItemLocal, 'audio'>): boolean {
+    return Boolean(item.audio?.trim());
   }
 
   /**
@@ -581,54 +580,59 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return true;
   }
 
-  /**
-   * Applies simulated progress to the first configured range of user items.
-   *
-   * @param userId User id whose local rows should be modified.
-   * @param dateTime ISO timestamp used for the simulated save. Defaults to now.
-   * @returns Number of modified rows.
-   */
-  static async simulateData(
-    userId: string,
-    dateTime: string = new Date(Date.now()).toISOString(),
-  ): Promise<number> {
-    const count = await db.user_items
-      .where('[user_id+item_id]')
-      .between([userId, 1], [userId, SIM_COUNT], true, true)
-      .modify((item) => {
-        const isFirstSimulation = item.started_at === NULL_DATE;
-        const progressCzToEn = item.progress_cz_to_en + SIM_PROGRESS;
-        const progressEnToCz = isFirstSimulation
-          ? item.progress_en_to_cz + SIM_PROGRESS
-          : item.progress_en_to_cz;
-        item.progress_cz_to_en = progressCzToEn;
-        item.progress_en_to_cz = progressEnToCz;
-        item.progress_history = [
-          ...(item.progress_history ?? []),
-          {
-            progress: progressCzToEn,
-            created_at: dateTime,
-            direction: 'czToEn',
-            outcome: 'correct',
-          },
-          ...(isFirstSimulation
-            ? [{
-                progress: progressEnToCz,
-                created_at: dateTime,
-                direction: 'enToCz' as const,
-                outcome: 'correct' as const,
-              }]
-            : []),
-        ];
-        item.started_at = isFirstSimulation ? dateTime : item.started_at;
-        item.updated_at = dateTime;
-        setDirectionState(item, item, 'czToEn', progressCzToEn, dateTime);
-        if (isFirstSimulation) {
-          setDirectionState(item, item, 'enToCz', progressEnToCz, dateTime);
-        }
-      });
+  /** Returns up to the configured maximum item rows used by the simulation fixture. */
+  static async getSimulationCandidates(userId: string): Promise<UserItemLocal[]> {
+    assertNonEmptyString(userId, 'userId');
 
-    return count;
+    return db.user_items
+      .where('[user_id+item_id]')
+      .between([userId, Dexie.minKey], [userId, Dexie.maxKey])
+      .limit(SIM_ITEM_COUNT)
+      .toArray();
+  }
+
+  /** Replaces progress on simulation candidates with one deterministic fixture. */
+  static async simulateData(items: UserItemLocal[], dateTime: string): Promise<number> {
+    const pronunciationItemIds = new Set(
+      items
+        .filter((item) => Boolean(item.audio?.trim()))
+        .slice(0, SIM_PRONUNCIATION_ITEM_COUNT)
+        .map((item) => item.item_id),
+    );
+    const simulatedItems = items.map((item) => {
+      let hasPronunciationPractice = item.has_pronunciation_practice;
+      if (pronunciationItemIds.has(item.item_id)) hasPronunciationPractice = 1;
+
+      return {
+        ...item,
+        progress_cz_to_en: SIM_ITEM_PROGRESS,
+        progress_en_to_cz: SIM_ITEM_PROGRESS,
+        progress_history: [
+          {
+            progress: SIM_ITEM_PROGRESS,
+            created_at: dateTime,
+            direction: 'czToEn' as const,
+            outcome: 'correct' as const,
+          },
+          {
+            progress: SIM_ITEM_PROGRESS,
+            created_at: dateTime,
+            direction: 'enToCz' as const,
+            outcome: 'correct' as const,
+          },
+        ],
+        has_pronunciation_practice: hasPronunciationPractice,
+        started_at: dateTime,
+        updated_at: dateTime,
+        next_at_cz_to_en: dateTime,
+        next_at_en_to_cz: dateTime,
+        mastered_at_cz_to_en: NULL_DATE,
+        mastered_at_en_to_cz: NULL_DATE,
+      };
+    });
+
+    await db.user_items.bulkPut(simulatedItems);
+    return simulatedItems.length;
   }
 
   /**

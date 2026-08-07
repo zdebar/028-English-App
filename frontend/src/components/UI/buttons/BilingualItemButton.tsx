@@ -8,6 +8,7 @@ type BilingualItemButtonProps = Readonly<{
   onClick: () => void | Promise<void>;
   disabled?: boolean;
   className?: string;
+  leadingLanguage?: 'czech' | 'english';
 }>;
 
 function pronunciationTitle(pronunciation: string): string {
@@ -23,6 +24,7 @@ export default function BilingualItemButton({
   onClick,
   disabled = false,
   className = '',
+  leadingLanguage = 'czech',
 }: BilingualItemButtonProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const czechRef = useRef<HTMLSpanElement>(null);
@@ -65,6 +67,27 @@ export default function BilingualItemButton({
         .join('\n')
     : audioTitle || undefined;
 
+  const czechText = (
+    <span
+      key="czech"
+      ref={czechRef}
+      className="min-w-0 flex-1 overflow-hidden text-left text-ellipsis whitespace-nowrap"
+    >
+      {item.czech}
+    </span>
+  );
+  const englishText = (
+    <span
+      key="english"
+      ref={englishRef}
+      className="min-w-0 flex-1 overflow-hidden text-left font-bold text-ellipsis whitespace-nowrap"
+    >
+      {item.english}
+    </span>
+  );
+  const languageTexts =
+    leadingLanguage === 'english' ? [englishText, czechText] : [czechText, englishText];
+
   return (
     <ListButton
       flexibleHeight
@@ -77,18 +100,7 @@ export default function BilingualItemButton({
         ref={containerRef}
         className={`flex w-full gap-3 overflow-hidden ${stacked ? 'flex-col gap-1' : 'flex-row'}`}
       >
-        <span
-          ref={czechRef}
-          className="min-w-0 flex-1 overflow-hidden text-left text-ellipsis whitespace-nowrap"
-        >
-          {item.czech}
-        </span>
-        <span
-          ref={englishRef}
-          className="min-w-0 flex-1 overflow-hidden text-left font-bold text-ellipsis whitespace-nowrap"
-        >
-          {item.english}
-        </span>
+        {languageTexts}
       </div>
     </ListButton>
   );

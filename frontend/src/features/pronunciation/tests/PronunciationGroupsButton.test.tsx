@@ -44,11 +44,11 @@ describe('PronunciationGroupsButton', () => {
     mocks.error = null;
   });
 
-  it('is disabled while loading and when no group is available', () => {
+  it('is enabled while loading and disabled when no group is confirmed', () => {
     const { rerender } = render(<PronunciationGroupsButton />);
     let button = screen.getByRole('button', { name: 'Výslovnost – skupiny' });
 
-    expect((button as HTMLButtonElement).disabled).toBe(true);
+    expect((button as HTMLButtonElement).disabled).toBe(false);
     expect(button.title).toBe('Loading');
 
     mocks.groups = [];
@@ -57,6 +57,16 @@ describe('PronunciationGroupsButton', () => {
     button = screen.getByRole('button', { name: 'Výslovnost – skupiny' });
     expect((button as HTMLButtonElement).disabled).toBe(true);
     expect(button.title).toBe('No pronunciation groups');
+  });
+
+  it('is disabled when group availability fails', () => {
+    mocks.loading = false;
+    mocks.error = new Error('failed');
+    render(<PronunciationGroupsButton />);
+
+    const button = screen.getByRole('button', { name: /skupiny/ });
+    expect((button as HTMLButtonElement).disabled).toBe(true);
+    expect(button.title).toBe('Loading error');
   });
 
   it('opens the pronunciation groups when data exists', () => {

@@ -233,6 +233,22 @@ describe('TopicItemsOverview', () => {
     expect((screen.getByTestId('item-button') as HTMLButtonElement).disabled).toBe(true);
   });
 
+  it('keeps an audio-backed item enabled while audio is loading', () => {
+    mocks.state.items = [
+      {
+        item_id: 10,
+        czech: 'pondeli',
+        english: 'monday',
+        audio: 'a.opus',
+      },
+    ];
+    mocks.audioLoading = true;
+
+    render(<TopicItemsOverview />);
+
+    expect((screen.getByTestId('item-button') as HTMLButtonElement).disabled).toBe(false);
+  });
+
   it('shows error toast when audio playback fails', async () => {
     mocks.state.items = [
       {

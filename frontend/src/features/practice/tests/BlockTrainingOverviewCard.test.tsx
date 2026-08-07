@@ -17,7 +17,7 @@ describe('BlockTrainingOverviewCard', () => {
       <MemoryRouter>
         <BlockTrainingOverviewCard
           block={{ name: 'Block A', note: '<p>Block note</p>' }}
-          grammar={{ id: 1, name: 'Articles', note: '<p>Grammar note</p>' }}
+          grammar={{ kind: 'chunk', id: 1, name: 'Articles', note: '<p>Grammar note</p>' }}
           onContinue={vi.fn()}
         />
       </MemoryRouter>,
@@ -36,7 +36,7 @@ describe('BlockTrainingOverviewCard', () => {
       <MemoryRouter>
         <BlockTrainingOverviewCard
           block={{ name: 'Block A', note: null }}
-          grammar={{ id: 1, name: 'Articles', note: null }}
+          grammar={{ kind: 'chunk', id: 1, name: 'Articles', note: null }}
           onContinue={onContinue}
         />
       </MemoryRouter>,

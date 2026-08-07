@@ -88,21 +88,6 @@
   gap: 0;
 }
 
-/* HOME PAGE */
-.home-title {
-   @apply mb-8;
-}
-.home-body {
-  @apply my-4;
-}
 
 
 
-@media (max-height: 400px) {
-  .home-title {
-     @apply mb-6 mt-8;
-  }
-  .home-body {
-    @apply mt-8;
-  }
-}

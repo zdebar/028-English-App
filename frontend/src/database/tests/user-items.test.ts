@@ -10,7 +10,8 @@ const mocks = vi.hoisted(() => ({
   userBlockGet: vi.fn(),
   itemIdModify: vi.fn(),
   itemIdBetween: vi.fn(),
-  itemIdBetweenModify: vi.fn(),
+  itemIdLimit: vi.fn(),
+  simulationToArray: vi.fn(),
   userEqualsToArray: vi.fn(),
   indexedBetween: vi.fn(),
   indexedFilter: vi.fn(),
@@ -46,8 +47,9 @@ vi.mock('@/config/config', () => ({
     },
     progress: {
       afterInitialTrainingProgress: 2,
-      simulationProgress: 2,
-      simulationCount: 64,
+      simulationItemProgress: 1,
+      simulationItemCount: 4,
+      simulationPronunciationItemCount: 2,
     },
     practice: {
       readyPracticeBadgeCap: 99,
@@ -81,7 +83,13 @@ vi.mock('@/database/models/db', () => ({
             between: (...args: unknown[]) => {
               mocks.itemIdBetween(...args);
               return {
-                modify: (...modifyArgs: unknown[]) => mocks.itemIdBetweenModify(...modifyArgs),
+                limit: (...limitArgs: unknown[]) => {
+                  mocks.itemIdLimit(...limitArgs);
+                  return {
+                    toArray: (...toArrayArgs: unknown[]) =>
+                      mocks.simulationToArray(...toArrayArgs),
+                  };
+                },
               };
             },
           };
@@ -257,7 +265,7 @@ describe('UserItem', () => {
       return callback();
     });
     mocks.itemIdModify.mockResolvedValue(1);
-    mocks.itemIdBetweenModify.mockResolvedValue(64);
+    mocks.simulationToArray.mockResolvedValue([]);
     mocks.userItemGet.mockResolvedValue(undefined);
     mocks.userItemUpdate.mockResolvedValue(1);
     mocks.bulkUpdate.mockResolvedValue(1);
@@ -362,7 +370,7 @@ describe('UserItem', () => {
     });
   });
 
-  it('rejects pronunciation selection for non-vocabulary and audio-less items', async () => {
+  it('allows non-vocabulary pronunciation selection and rejects audio-less items', async () => {
     mocks.userItemGet
       .mockResolvedValueOnce({
         item_id: 8,
@@ -377,13 +385,15 @@ describe('UserItem', () => {
         has_pronunciation_practice: 0,
       });
 
-    await expect(UserItem.togglePronunciationPractice('u1', 8)).rejects.toThrow(
-      'not eligible',
-    );
+    await expect(UserItem.togglePronunciationPractice('u1', 8)).resolves.toBe(true);
     await expect(UserItem.togglePronunciationPractice('u1', 9)).rejects.toThrow(
       'not eligible',
     );
-    expect(mocks.userItemUpdate).not.toHaveBeenCalled();
+    expect(mocks.userItemUpdate).toHaveBeenCalledTimes(1);
+    expect(mocks.userItemUpdate).toHaveBeenCalledWith(
+      ['u1', 8],
+      expect.objectContaining({ has_pronunciation_practice: 1 }),
+    );
   });
 
   it('counts pronunciation selections on the dedicated index', async () => {
@@ -421,7 +431,7 @@ describe('UserItem', () => {
 
     const deck = await UserItem.getPronunciationPracticeDeck('u1');
 
-    expect(deck.map((item) => item.item_id)).toEqual([3, 1]);
+    expect(deck.map((item) => item.item_id)).toEqual([3, 1, 2]);
   });
 
   it('records a correct first answer and schedules the opposite direction at zero', () => {
@@ -966,62 +976,61 @@ describe('UserItem', () => {
     });
   });
 
-  it('simulateData updates first configured range using indexed between+modify', async () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-06-10T10:00:00.000Z'));
-    mocks.getNextAt.mockReturnValue('2026-06-12T00:00:00.000Z');
+  it('simulates an exact fixture and adds the first configured audio items', async () => {
+    const items = [
+      { item_id: 2, audio: null, has_pronunciation_practice: 1 },
+      { item_id: 4, audio: 'four.opus', has_pronunciation_practice: 0 },
+      { item_id: 9, audio: ' ', has_pronunciation_practice: 0 },
+      { item_id: 10, audio: 'ten.opus', has_pronunciation_practice: 0 },
+    ] as any[];
+    mocks.simulationToArray.mockResolvedValue(items);
 
-    const count = await UserItem.simulateData('u1');
+    await expect(UserItem.getSimulationCandidates('u1')).resolves.toBe(items);
+    expect(mocks.itemIdLimit).toHaveBeenCalledWith(4);
 
-    expect(count).toBe(64);
-    expect(mocks.itemIdBetween).toHaveBeenCalledWith(['u1', 1], ['u1', 64], true, true);
-    expect(mocks.itemIdBetweenModify).toHaveBeenCalledTimes(1);
+    await expect(
+      UserItem.simulateData(items as any, '2026-06-10T10:00:00.000Z'),
+    ).resolves.toBe(4);
 
-    const modifyFn = mocks.itemIdBetweenModify.mock.calls[0][0] as (item: any) => void;
-    const item = {
-      progress_cz_to_en: 0,
-      progress_en_to_cz: 0,
-      started_at: '1970-01-01T00:00:00.000Z',
-      updated_at: '1970-01-01T00:00:00.000Z',
-      next_at_cz_to_en: '1970-01-01T00:00:00.000Z',
-      next_at_en_to_cz: '1970-01-01T00:00:00.000Z',
-      mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
-      mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
-    };
-
-    modifyFn(item);
-
-    expect(item.progress_cz_to_en).toBe(2);
-    expect(item.progress_en_to_cz).toBe(2);
-    expect(item.started_at).toBe('2026-06-10T10:00:00.000Z');
-    expect(item.updated_at).toBe('2026-06-10T10:00:00.000Z');
-    expect(item.next_at_cz_to_en).toBe('2026-06-12T00:00:00.000Z');
-    expect(item.next_at_en_to_cz).toBe('2026-06-12T00:00:00.000Z');
-    expect(item.mastered_at_cz_to_en).toBe('1970-01-01T00:00:00.000Z');
-    expect(item.mastered_at_en_to_cz).toBe('1970-01-01T00:00:00.000Z');
-    expect(mocks.getNextAt).toHaveBeenCalledWith(2, 'czToEn');
-    expect(mocks.getNextAt).toHaveBeenCalledWith(2, 'enToCz');
-
-    const completingItem = {
+    const simulated = mocks.bulkPut.mock.calls[0][0] as any[];
+    expect(simulated.map((item) => item.item_id)).toEqual([2, 4, 9, 10]);
+    expect(simulated.map((item) => item.has_pronunciation_practice)).toEqual([1, 1, 0, 1]);
+    expect(simulated[0]).toMatchObject({
       progress_cz_to_en: 1,
       progress_en_to_cz: 1,
-      started_at: '2026-06-01T10:00:00.000Z',
-      updated_at: '2026-06-01T10:00:00.000Z',
-      next_at_cz_to_en: '2026-06-02T10:00:00.000Z',
-      next_at_en_to_cz: '2026-06-02T10:00:00.000Z',
+      started_at: '2026-06-10T10:00:00.000Z',
+      updated_at: '2026-06-10T10:00:00.000Z',
+      next_at_cz_to_en: '2026-06-10T10:00:00.000Z',
+      next_at_en_to_cz: '2026-06-10T10:00:00.000Z',
       mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
       mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
-    };
+    });
+    expect(simulated[0].progress_history).toEqual([
+      {
+        progress: 1,
+        created_at: '2026-06-10T10:00:00.000Z',
+        direction: 'czToEn',
+        outcome: 'correct',
+      },
+      {
+        progress: 1,
+        created_at: '2026-06-10T10:00:00.000Z',
+        direction: 'enToCz',
+        outcome: 'correct',
+      },
+    ]);
+  });
 
-    modifyFn(completingItem);
+  it('allows any number of available items and audio candidates up to configured maxima', async () => {
+    mocks.simulationToArray.mockResolvedValueOnce([]);
+    await expect(UserItem.getSimulationCandidates('u1')).resolves.toEqual([]);
 
-    expect(completingItem.progress_cz_to_en).toBe(3);
-    expect(completingItem.progress_en_to_cz).toBe(1);
-    expect(completingItem.started_at).toBe('2026-06-01T10:00:00.000Z');
-    expect(completingItem.updated_at).toBe('2026-06-10T10:00:00.000Z');
-    expect(completingItem.mastered_at_cz_to_en).toBe('2026-06-10T10:00:00.000Z');
-    expect(completingItem.mastered_at_en_to_cz).toBe('1970-01-01T00:00:00.000Z');
-    expect(mocks.getNextAt).toHaveBeenCalledWith(3, 'czToEn');
+    const availableItems = [
+      { item_id: 1, audio: 'one.opus' },
+      { item_id: 2, audio: null },
+    ];
+    mocks.simulationToArray.mockResolvedValueOnce(availableItems);
+    await expect(UserItem.getSimulationCandidates('u1')).resolves.toBe(availableItems);
   });
 
   it('syncFromRemote pushes local items, applies pull, and marks sync', async () => {

@@ -8,6 +8,7 @@ type ManagedAudio = {
   element: HTMLAudioElement;
   onEnded: () => void;
 };
+type AudioLoadPromise = Promise<boolean>;
 
 /**
  * Stop and reset an HTMLAudioElement to the start.
@@ -30,14 +31,16 @@ function stopAndResetAll(audioMap: Map<string, ManagedAudio>) {
  * Dispose managed audio elements and revoke object URLs where needed.
  */
 function disposeAudioMap(audioMap: Map<string, ManagedAudio>) {
-  audioMap.forEach(({ element, onEnded }) => {
-    stopAndReset(element);
-    element.removeEventListener('ended', onEnded);
-    if (typeof element.src === 'string' && element.src.startsWith('blob:')) {
-      URL.revokeObjectURL(element.src);
-    }
-  });
+  audioMap.forEach(disposeManagedAudio);
   audioMap.clear();
+}
+
+function disposeManagedAudio({ element, onEnded }: ManagedAudio) {
+  stopAndReset(element);
+  element.removeEventListener('ended', onEnded);
+  if (typeof element.src === 'string' && element.src.startsWith('blob:')) {
+    URL.revokeObjectURL(element.src);
+  }
 }
 
 /**
@@ -48,7 +51,7 @@ function normalizeAudioInput(audio: AudioInput): string[] {
     return [audio];
   }
   if (Array.isArray(audio)) {
-    return audio.filter(Boolean);
+    return [...new Set(audio.filter(Boolean))];
   }
   return [];
 }
@@ -57,25 +60,16 @@ function resolveFilenameToPlay(
   requestedFilename: string | undefined,
   currentFilename: string | null,
   filenames: string[],
-  audioMap: Map<string, ManagedAudio>,
 ): string | null {
-  if (requestedFilename && audioMap.has(requestedFilename)) {
-    return requestedFilename;
-  }
-  if (!requestedFilename && currentFilename && audioMap.has(currentFilename)) {
-    return currentFilename;
-  }
-  if (!requestedFilename && filenames.length > 0 && audioMap.has(filenames[0])) {
-    return filenames[0];
-  }
-  return null;
+  if (requestedFilename) return requestedFilename;
+  if (currentFilename) return currentFilename;
+  return filenames[0] ?? null;
 }
 
 async function loadSingleAudio(
   filename: string,
   onEnded: () => void,
-  audioMap: Map<string, ManagedAudio>,
-): Promise<boolean> {
+): Promise<ManagedAudio | null> {
   try {
     const audioRecord = await AudioRecord.getByFilename(filename);
     if (!audioRecord?.audioBlob) {
@@ -85,11 +79,10 @@ async function loadSingleAudio(
     const objectUrl = URL.createObjectURL(audioRecord.audioBlob);
     const audioElement = new Audio(objectUrl);
     audioElement.addEventListener('ended', onEnded);
-    audioMap.set(filename, { element: audioElement, onEnded });
-    return true;
+    return { element: audioElement, onEnded };
   } catch (error) {
     reportError('Audio Manager Error', error);
-    return false;
+    return null;
   }
 }
 
@@ -105,6 +98,8 @@ async function loadSingleAudio(
  */
 export function useAudioManager(audio: AudioInput) {
   const audioMapRef = useRef<Map<string, ManagedAudio>>(new Map());
+  const loadPromisesRef = useRef<Map<string, AudioLoadPromise>>(new Map());
+  const loadGenerationRef = useRef(0);
   const [audioError, setAudioError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -115,11 +110,14 @@ export function useAudioManager(audio: AudioInput) {
   // Load audio files
   useEffect(() => {
     let isDisposed = false;
+    const loadGeneration = loadGenerationRef.current + 1;
+    loadGenerationRef.current = loadGeneration;
     setLoading(true);
     setAudioError(false);
     setIsPlaying(false);
     setFailedFilenames(new Set());
     disposeAudioMap(audioMapRef.current);
+    loadPromisesRef.current.clear();
 
     const files = normalizeAudioInput(audio);
     setFilenames(files);
@@ -135,15 +133,25 @@ export function useAudioManager(audio: AudioInput) {
       setIsPlaying(false);
     };
 
-    const loadAllAudio = async () => {
-      const failedFiles: string[] = [];
-
-      for (const filename of files) {
-        const wasLoaded = await loadSingleAudio(filename, handleAudioEnded, audioMapRef.current);
-        if (!wasLoaded) {
-          failedFiles.push(filename);
+    const loadPromises = files.map((filename) => {
+      const loadPromise = loadSingleAudio(filename, handleAudioEnded).then((managedAudio) => {
+        const isCurrentLoad =
+          !isDisposed && loadGenerationRef.current === loadGeneration && managedAudio !== null;
+        if (!isCurrentLoad) {
+          if (managedAudio) disposeManagedAudio(managedAudio);
+          return false;
         }
-      }
+
+        audioMapRef.current.set(filename, managedAudio);
+        return true;
+      });
+      loadPromisesRef.current.set(filename, loadPromise);
+      return loadPromise;
+    });
+
+    const loadAllAudio = async () => {
+      const loadResults = await Promise.all(loadPromises);
+      const failedFiles = files.filter((_, index) => !loadResults[index]);
 
       const hasFailure = failedFiles.length > 0;
 
@@ -159,6 +167,10 @@ export function useAudioManager(audio: AudioInput) {
 
     return () => {
       isDisposed = true;
+      if (loadGenerationRef.current === loadGeneration) {
+        loadGenerationRef.current += 1;
+      }
+      loadPromisesRef.current.clear();
       disposeAudioMap(audioMapRef.current);
     };
   }, [audio]);
@@ -171,11 +183,14 @@ export function useAudioManager(audio: AudioInput) {
       stopAndResetAll(audioMapRef.current);
 
       const filename = typeof filenameOrEvent === 'string' ? filenameOrEvent : undefined;
-      const toPlay = resolveFilenameToPlay(filename, current, filenames, audioMapRef.current);
+      const toPlay = resolveFilenameToPlay(filename, current, filenames);
       if (!toPlay) {
         setIsPlaying(false);
         return false;
       }
+
+      const pendingLoad = loadPromisesRef.current.get(toPlay);
+      if (pendingLoad) await pendingLoad;
 
       const managedAudio = audioMapRef.current.get(toPlay);
       if (!managedAudio) {

@@ -7,9 +7,13 @@ import UserItem from './user-items';
 import GrammarChunk, { type GrammarChunkWithExamples } from './grammar-chunks';
 
 export type GrammarGroupWithChunks = GrammarGroupType & {
+  kind: 'group';
   chunks: GrammarChunkWithExamples[];
-  standalone_chunk_id?: number;
 };
+
+export type StandaloneGrammarChunk = GrammarChunkWithExamples & { kind: 'chunk' };
+
+export type GrammarOverviewEntry = GrammarGroupWithChunks | StandaloneGrammarChunk;
 
 export default class GrammarGroup extends SyncEntityModel implements GrammarGroupType {
   id!: number;
@@ -23,7 +27,7 @@ export default class GrammarGroup extends SyncEntityModel implements GrammarGrou
   static override readonly syncEntityName = 'grammar groups';
   static override readonly syncSelect = 'id, name, note, sort_order, deleted_at';
 
-  static async getStarted(userId: string): Promise<GrammarGroupWithChunks[]> {
+  static async getStarted(userId: string): Promise<GrammarOverviewEntry[]> {
     const chunkIds = await UserItem.getStartedGrammarChunkIds(userId);
     if (chunkIds.length === 0) return [];
 
@@ -32,15 +36,13 @@ export default class GrammarGroup extends SyncEntityModel implements GrammarGrou
       chunks.map((chunk) => GrammarChunk.addExamples(userId, chunk)),
     );
     const chunksByGroupId = new Map<number, GrammarChunkWithExamples[]>();
-    const standaloneChunks: GrammarGroupWithChunks[] = [];
+    const standaloneChunks: StandaloneGrammarChunk[] = [];
 
     for (const chunk of startedChunks) {
       if (chunk.grammar_group_id == null) {
-        const { grammar_group_id: _grammarGroupId, ...standaloneChunk } = chunk;
         standaloneChunks.push({
-          ...standaloneChunk,
-          chunks: [],
-          standalone_chunk_id: chunk.id,
+          ...chunk,
+          kind: 'chunk',
         });
         continue;
       }
@@ -60,6 +62,7 @@ export default class GrammarGroup extends SyncEntityModel implements GrammarGrou
     return [
       ...groups.map((group) => ({
         ...group,
+        kind: 'group' as const,
         chunks: (chunksByGroupId.get(group.id) ?? []).sort(
           (left, right) => left.sort_order - right.sort_order,
         ),

@@ -294,7 +294,7 @@ export default function PracticeSessionCard({
             disabled={grammarButtonDisabled}
           >
             <BookIcon />
-            <HelpText className="right-2 bottom-10 flex flex-col items-end landscape:invisible">
+            <HelpText className="-right-6 bottom-10 flex flex-col items-end landscape:invisible">
               {TEXTS.grammar}
             </HelpText>
           </SecondaryControlButton>
@@ -307,7 +307,7 @@ export default function PracticeSessionCard({
               openNote(noteId);
             }}
           >
-            <HelpText className="right-2 -bottom-4 flex flex-col items-end landscape:invisible">
+            <HelpText className="-bottom-4 left-0 flex flex-col items-end landscape:invisible">
               {TEXTS.tooltipNotes}
             </HelpText>
           </InfoButton>

@@ -14,7 +14,7 @@ import SyncEntityModel from './sync-entity-model';
 const NULL_DATE = config.database.nullReplacementDate;
 
 function isEligible(item: UserItemLocal): boolean {
-  return item.is_vocabulary === 1 && Boolean(item.audio);
+  return Boolean(item.audio?.trim());
 }
 
 function isAvailable(item: UserItemLocal): boolean {
@@ -100,24 +100,24 @@ export default class PronunciationGroup extends SyncEntityModel implements Pronu
       membershipsByGroup.set(membership.pronunciation_group_id, current);
     }
 
-    return groups
-      .sort((left, right) => left.id - right.id)
-      .flatMap((group) => {
-        const { eligible, unlocked } = resolveGroupItems(
-          membershipsByGroup.get(group.id) ?? [],
-          itemById,
-        );
+    groups.sort((left, right) => left.id - right.id);
 
-        if (unlocked.length === 0) return [];
-        return [
-          {
-            ...group,
-            examples: unlocked.slice(0, 4).map((item) => item.english),
-            unlocked_count: unlocked.length,
-            total_count: eligible.length,
-          },
-        ];
-      });
+    return groups.flatMap((group) => {
+      const { eligible, unlocked } = resolveGroupItems(
+        membershipsByGroup.get(group.id) ?? [],
+        itemById,
+      );
+
+      if (unlocked.length === 0) return [];
+      return [
+        {
+          ...group,
+          examples: unlocked.slice(0, 4).map((item) => item.english),
+          unlocked_count: unlocked.length,
+          total_count: eligible.length,
+        },
+      ];
+    });
   }
 
   static async getDetail(

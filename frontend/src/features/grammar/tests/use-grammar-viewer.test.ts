@@ -70,6 +70,7 @@ describe('useGrammarViewer', () => {
       expect(result.current.isGrammarVisible).toBe(true);
       expect(result.current.grammarData).toEqual({
         id: 10,
+        kind: 'chunk',
         name: 'Articles',
         note: 'Use a/an/the',
       });

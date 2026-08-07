@@ -25,8 +25,9 @@ vi.mock('@/config/config', () => ({
       epochStartDate: '1970-01-01T00:00:00.000Z',
     },
     progress: {
-      simulationProgress: 2,
-      simulationCount: 200,
+      simulationItemCount: 400,
+      simulationItemProgress: 1,
+      simulationPronunciationItemCount: 5,
     },
     audio: {
       audioBucketName: 'audio-bucket',
@@ -163,7 +164,7 @@ describe('AudioRecord', () => {
       expect(result).toEqual({ total: 0, success: 0, failed: 0 });
     });
 
-    it('downloads, extracts, stores files, and marks archive as fetched', async () => {
+    it('downloads, extracts, replaces same-name files, and marks archive as fetched', async () => {
       const remoteTimestamp = '2026-05-10T00:00:00.000Z';
       const zipBlob = new Blob(['zip']);
       const extractedBlob = new Blob(['audio']);

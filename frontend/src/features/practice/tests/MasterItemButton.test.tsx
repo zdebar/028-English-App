@@ -79,12 +79,17 @@ describe('MasterItemButton', () => {
     expect(mocks.showToast).toHaveBeenCalledWith('Hold to skip', 'info');
   });
 
-  it('triggers onConfirm after long press and shows success toast', async () => {
+  it('triggers onConfirm on release after a long press and shows success toast', async () => {
     const onConfirm = vi.fn().mockResolvedValue(undefined);
     render(<MasterItemButton disabled={false} onConfirm={onConfirm} />);
 
     fireEvent.pointerDown(screen.getByTestId('master-button'));
     await vi.advanceTimersByTimeAsync(HOLD_DURATION_MS);
+    await flushMicrotasks();
+
+    expect(onConfirm).not.toHaveBeenCalled();
+
+    fireEvent.pointerUp(screen.getByTestId('master-button'));
     await flushMicrotasks();
 
     expect(onConfirm).toHaveBeenCalledTimes(1);
@@ -97,6 +102,7 @@ describe('MasterItemButton', () => {
 
     fireEvent.pointerDown(screen.getByTestId('master-button'));
     await vi.advanceTimersByTimeAsync(HOLD_DURATION_MS);
+    fireEvent.pointerUp(screen.getByTestId('master-button'));
     await flushMicrotasks();
 
     expect(onConfirm).toHaveBeenCalledTimes(1);
@@ -121,12 +127,28 @@ describe('MasterItemButton', () => {
 
     fireEvent.pointerDown(screen.getByTestId('master-button'));
     await vi.advanceTimersByTimeAsync(HOLD_DURATION_MS);
-    await flushMicrotasks();
-    expect(onConfirm).toHaveBeenCalledTimes(1);
-
     fireEvent.pointerUp(screen.getByTestId('master-button'));
     fireEvent.click(screen.getByTestId('master-button'));
+    await flushMicrotasks();
 
+    expect(onConfirm).toHaveBeenCalledTimes(1);
     expect(mocks.showToast).not.toHaveBeenCalledWith('Hold to skip', 'info');
   });
+
+  it.each(['pointerLeave', 'pointerCancel'] as const)(
+    'cancels a ready long press on %s',
+    async (cancelEvent) => {
+      const onConfirm = vi.fn().mockResolvedValue(undefined);
+      render(<MasterItemButton disabled={false} onConfirm={onConfirm} />);
+
+      const button = screen.getByTestId('master-button');
+      fireEvent.pointerDown(button);
+      await vi.advanceTimersByTimeAsync(HOLD_DURATION_MS);
+      fireEvent[cancelEvent](button);
+      fireEvent.pointerUp(button);
+      await flushMicrotasks();
+
+      expect(onConfirm).not.toHaveBeenCalled();
+    },
+  );
 });

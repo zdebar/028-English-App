@@ -1,54 +1,15 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const mocks = vi.hoisted(() => ({
-  navigate: vi.fn(),
-  getReadyPracticeState: vi.fn(),
-  reportError: vi.fn(),
-  liveQueryRerun: null as null | (() => Promise<void>),
-  liveQueryUnsubscribe: vi.fn(),
-}));
+const mocks = vi.hoisted(() => ({ navigate: vi.fn() }));
 
-vi.mock('@/locales/cs', () => ({ TEXTS: { practiceButton: 'Practice' } }));
-vi.mock('@/database/models/user-items', () => ({
-  default: {
-    getReadyPracticeState: (...args: unknown[]) => mocks.getReadyPracticeState(...args),
+vi.mock('@/locales/cs', () => ({
+  TEXTS: {
+    practiceButton: 'Practice',
+    loadingMessage: 'Loading',
+    loadingError: 'Loading error',
+    nothingToPractice: 'Nothing to practice',
   },
-}));
-vi.mock('@/database/models/db', () => ({
-  db: {
-    user_items: {},
-    user_blocks: {},
-    transaction: async (...args: unknown[]) => {
-      const callback = args.at(-1) as () => Promise<unknown>;
-      return callback();
-    },
-  },
-}));
-vi.mock('dexie', () => ({
-  liveQuery: (query: () => Promise<unknown>) => ({
-    subscribe: (observer: { next: (value: any) => void; error: (error: unknown) => void }) => {
-      let active = true;
-      mocks.liveQueryRerun = async () => {
-        if (!active) return;
-        try {
-          observer.next(await query());
-        } catch (error) {
-          observer.error(error);
-        }
-      };
-      void mocks.liveQueryRerun();
-      return {
-        unsubscribe: () => {
-          active = false;
-          mocks.liveQueryUnsubscribe();
-        },
-      };
-    },
-  }),
-}));
-vi.mock('@/features/logging/monitoring-handler', () => ({
-  reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
 vi.mock('react-router-dom', () => ({ useNavigate: () => mocks.navigate }));
 vi.mock('@/routing/prefetch-navigation', () => ({
@@ -63,72 +24,66 @@ vi.mock('@/routing/route-data', () => ({
 }));
 
 import PracticeButton from '@/features/practice/PracticeButton';
+import { usePracticeAvailabilityStore } from '@/features/practice/use-practice-availability-store';
 
 describe('HomePracticeButtons', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.getReadyPracticeState.mockResolvedValue({ readyCount: 0, schedule: [] });
-    mocks.liveQueryRerun = null;
+    usePracticeAvailabilityStore.setState({
+      readyCount: 0,
+      readySchedule: [],
+      readyLoading: true,
+      readyError: null,
+    });
   });
 
-  afterEach(() => vi.useRealTimers());
-
-  it('shows one enabled unified practice button when the ready count exceeds the badge cap', async () => {
-    mocks.getReadyPracticeState.mockResolvedValue({ readyCount: 123, schedule: [] });
+  it('keeps practice optimistically enabled while availability is loading', () => {
     render(<PracticeButton userId="u1" />);
 
-    const button = await screen.findByRole('button', { name: /Practice/ });
+    const button = screen.getByRole('button', { name: 'Practice' });
     expect((button as HTMLButtonElement).disabled).toBe(false);
-    expect(screen.queryByText('99+')).toBeNull();
-    expect(mocks.getReadyPracticeState).toHaveBeenCalledWith('u1');
+    expect(button.title).toBe('Loading');
   });
 
-  it('disables practice when no item is ready', async () => {
+  it('disables practice after an empty result is confirmed', () => {
+    usePracticeAvailabilityStore.setState({ readyLoading: false });
     render(<PracticeButton userId="u1" />);
-    expect((await screen.findByRole('button', { name: 'Practice' }) as HTMLButtonElement).disabled).toBe(true);
+
+    const button = screen.getByRole('button', { name: 'Practice' });
+    expect((button as HTMLButtonElement).disabled).toBe(true);
+    expect(button.title).toBe('Nothing to practice');
   });
 
-  it('navigates to the unified practice route', async () => {
-    mocks.getReadyPracticeState.mockResolvedValue({ readyCount: 1, schedule: [] });
+  it('shows the ready badge and navigates when practice is available', () => {
+    usePracticeAvailabilityStore.setState({ readyCount: 4, readyLoading: false });
     render(<PracticeButton userId="u1" />);
-    fireEvent.click(await screen.findByRole('button', { name: /Practice/ }));
+
+    fireEvent.click(screen.getByRole('button', { name: /Practice/ }));
+    expect(screen.getByText('4')).toBeTruthy();
     expect(mocks.navigate).toHaveBeenCalledWith('/practice');
   });
 
-  it('updates readiness after a live-query rerun', async () => {
-    render(<PracticeButton userId="u1" />);
-    expect((await screen.findByRole('button', { name: 'Practice' }) as HTMLButtonElement).disabled).toBe(true);
-
-    mocks.getReadyPracticeState.mockResolvedValue({ readyCount: 4, schedule: [] });
-    await act(async () => mocks.liveQueryRerun?.());
-    expect(screen.getByText('4')).toBeTruthy();
-  });
-
-  it('moves scheduled items into the ready badge', async () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-07-21T10:00:00.000Z'));
-    mocks.getReadyPracticeState.mockResolvedValue({
-      readyCount: 1,
-      schedule: [{ date: '2026-07-21T10:00:01.000Z', count: 2 }],
+  it('disables practice when availability loading fails', () => {
+    usePracticeAvailabilityStore.setState({
+      readyLoading: false,
+      readyError: new Error('failed'),
     });
     render(<PracticeButton userId="u1" />);
-    await act(async () => Promise.resolve());
-    expect(screen.getByText('1')).toBeTruthy();
-    await act(async () => vi.advanceTimersByTimeAsync(1000));
-    expect(screen.getByText('3')).toBeTruthy();
+
+    const button = screen.getByRole('button', { name: 'Practice' });
+    expect((button as HTMLButtonElement).disabled).toBe(true);
+    expect(button.title).toBe('Loading error');
   });
 
-  it('reports readiness failures and unsubscribes on unmount', async () => {
-    const error = new Error('Dexie failure');
-    mocks.getReadyPracticeState.mockRejectedValue(error);
+  it('retains the Zustand snapshot when the button remounts', () => {
+    usePracticeAvailabilityStore.setState({ readyCount: 3, readyLoading: false });
     const { unmount } = render(<PracticeButton userId="u1" />);
-    await waitFor(() =>
-      expect(mocks.reportError).toHaveBeenCalledWith(
-        'Failed to load unified practice button state',
-        error,
-      ),
-    );
     unmount();
-    expect(mocks.liveQueryUnsubscribe).toHaveBeenCalledTimes(1);
+    render(<PracticeButton userId="u1" />);
+
+    expect(screen.getByText('3')).toBeTruthy();
+    expect((screen.getByRole('button', { name: /Practice/ }) as HTMLButtonElement).disabled).toBe(
+      false,
+    );
   });
 });

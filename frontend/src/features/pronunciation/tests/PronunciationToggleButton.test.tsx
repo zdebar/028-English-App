@@ -38,7 +38,6 @@ vi.mock('@/features/help/HelpText', () => ({
 
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
-    pronunciationVocabularyOnly: 'Vocabulary only',
     pronunciationAudioRequired: 'Audio required',
     removeFromPronunciation: 'Remove',
     addToPronunciation: 'Add',
@@ -58,7 +57,7 @@ describe('PronunciationToggleButton', () => {
     mocks.toggle.mockResolvedValue(true);
   });
 
-  it('toggles an eligible vocabulary item and exposes pressed state', async () => {
+  it('toggles an eligible item and exposes pressed state', async () => {
     mocks.selected = true;
     mocks.toggle.mockResolvedValue(false);
     const onSelectionChange = vi.fn();
@@ -81,15 +80,28 @@ describe('PronunciationToggleButton', () => {
     });
   });
 
-  it.each([
-    [{ item_id: 3, is_vocabulary: 0, audio: 'grammar.opus' }, 'Vocabulary only'],
-    [{ item_id: 4, is_vocabulary: 1, audio: null }, 'Audio required'],
-  ])('keeps ineligible items visible but disabled', (item, title) => {
+  it('allows non-vocabulary items with audio', async () => {
+    render(
+      <PronunciationToggleButton
+        userId="u1"
+        item={{ item_id: 3, is_vocabulary: 0, audio: 'grammar.opus' } as any}
+      />,
+    );
+
+    const button = screen.getByRole('button', { name: 'Pronunciation toggle' });
+    expect((button as HTMLButtonElement).disabled).toBe(false);
+    fireEvent.click(button);
+
+    await waitFor(() => expect(mocks.toggle).toHaveBeenCalledWith('u1', 3));
+  });
+
+  it('keeps audio-less items visible but disabled', () => {
+    const item = { item_id: 4, is_vocabulary: 0, audio: null };
     render(<PronunciationToggleButton userId="u1" item={item as any} />);
 
     const button = screen.getByRole('button', { name: 'Pronunciation toggle' });
     expect((button as HTMLButtonElement).disabled).toBe(true);
-    expect(button.getAttribute('title')).toBe(title);
+    expect(button.getAttribute('title')).toBe('Audio required');
   });
 
   it('reports a failed toggle', async () => {

@@ -17,7 +17,9 @@ const HOLD_DURATION_MS = config.practice.holdDuration;
 export default function MasterItemButton({ onConfirm, disabled, children }: MasterItemButtonProps) {
   const showToast = useToastStore((state) => state.showToast);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const longPressTriggeredRef = useRef(false);
+  const pressActiveRef = useRef(false);
+  const holdReadyRef = useRef(false);
+  const suppressClickRef = useRef(false);
 
   const clearHoldTimer = useCallback(() => {
     if (timeoutRef.current !== null) {
@@ -31,23 +33,45 @@ export default function MasterItemButton({ onConfirm, disabled, children }: Mast
       return;
     }
 
-    longPressTriggeredRef.current = false;
+    pressActiveRef.current = true;
+    holdReadyRef.current = false;
+    suppressClickRef.current = false;
     clearHoldTimer();
 
     timeoutRef.current = globalThis.setTimeout(() => {
-      longPressTriggeredRef.current = true;
-      void (async () => {
-        try {
-          await onConfirm();
-          showToast(TEXTS.skipSuccessToast, 'success');
-        } catch {
-          showToast(TEXTS.skipErrorToast, 'error');
-        }
-      })();
+      timeoutRef.current = null;
+      holdReadyRef.current = true;
     }, HOLD_DURATION_MS);
-  }, [clearHoldTimer, disabled, onConfirm, showToast]);
+  }, [clearHoldTimer, disabled]);
 
   const handlePressEnd = useCallback(() => {
+    if (!pressActiveRef.current) {
+      return;
+    }
+
+    pressActiveRef.current = false;
+    clearHoldTimer();
+
+    if (!holdReadyRef.current) {
+      return;
+    }
+
+    holdReadyRef.current = false;
+    suppressClickRef.current = true;
+
+    void (async () => {
+      try {
+        await onConfirm();
+        showToast(TEXTS.skipSuccessToast, 'success');
+      } catch {
+        showToast(TEXTS.skipErrorToast, 'error');
+      }
+    })();
+  }, [clearHoldTimer, onConfirm, showToast]);
+
+  const handlePressCancel = useCallback(() => {
+    pressActiveRef.current = false;
+    holdReadyRef.current = false;
     clearHoldTimer();
   }, [clearHoldTimer]);
 
@@ -59,8 +83,8 @@ export default function MasterItemButton({ onConfirm, disabled, children }: Mast
         return;
       }
 
-      if (longPressTriggeredRef.current) {
-        longPressTriggeredRef.current = false;
+      if (suppressClickRef.current) {
+        suppressClickRef.current = false;
         return;
       }
 
@@ -82,8 +106,8 @@ export default function MasterItemButton({ onConfirm, disabled, children }: Mast
       className="pos-help-top-left"
       onPointerDown={handlePressStart}
       onPointerUp={handlePressEnd}
-      onPointerLeave={handlePressEnd}
-      onPointerCancel={handlePressEnd}
+      onPointerLeave={handlePressCancel}
+      onPointerCancel={handlePressCancel}
       onClick={handleClick}
       disabled={disabled}
     >
