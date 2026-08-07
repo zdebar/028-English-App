@@ -47,8 +47,8 @@ export default function Home(): JSX.Element {
   return (
     <>
       {userId ? (
-        <div className="home-body card-width relative flex h-full w-full grow flex-col justify-start">
-          <div className="pt-0">
+        <div className="card-width relative flex h-full w-full grow flex-col justify-start sm:gap-4">
+          <div className="pt-6 pb-4">
             <PropertyView
               label={TEXTS.profileNameLabel}
               className="justify-center"
@@ -60,24 +60,24 @@ export default function Home(): JSX.Element {
             <HomeActionLinks />
           </div>
           {isAnonymousUser && (
-            <div className="mt-8 flex flex-col gap-2">
+            <div className="flex flex-col gap-2">
               <ConvertAnonymousUserButton />
               <SimulateDataButton />
             </div>
           )}
-          <div className="mt-4 flex w-full flex-col gap-1 portrait:mt-8">
-            <PracticeOverviewButton
-              count={dailyCount}
-              to={ROUTES.practiceOverview}
-              descriptor={practiceOverviewDescriptor(userId)}
-              ariaLabel={TEXTS.practiceOverviewOpen}
-              helpText={TEXTS.starsToday}
-            />
+          <PracticeOverviewButton
+            count={dailyCount}
+            to={ROUTES.practiceOverview}
+            descriptor={practiceOverviewDescriptor(userId)}
+            ariaLabel={TEXTS.practiceOverviewOpen}
+            helpText={TEXTS.starsToday}
+          />
+          <div className="flex w-full flex-col gap-1">
             <PracticeButton userId={userId} />
             <PronunciationPracticeButton userId={userId} />
             <PronunciationGroupsButton />
           </div>
-          <div className="relative mb-12 portrait:mt-8">
+          <div className="relative">
             <p
               className={`text-error-light dark:text-error-dark px-4 py-2 text-center text-sm ${isSyncError ? 'visible' : 'invisible'}`}
             >
@@ -90,8 +90,8 @@ export default function Home(): JSX.Element {
           </div>
         </div>
       ) : (
-        <div className="home-body card-width w-full">
-          <h1 className="home-title mx-auto">{TEXTS.appTitle}</h1>
+        <div className="card-width mt-8 w-full">
+          <h1 className="mx-auto mt-8">{TEXTS.appTitle}</h1>
           <p className="mx-auto my-4 landscape:hidden">{TEXTS.appDescription}</p>
           <HomeActionLinks />
           <div className="flex flex-col gap-1 pt-4">
