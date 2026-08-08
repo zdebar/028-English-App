@@ -21,7 +21,7 @@ type BlockTrainingOverviewCardProps = Readonly<{
 
 function Note({ note }: Readonly<{ note: string }>): JSX.Element {
   return (
-    <div className="grammar p-4" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note) }} />
+    <div className="grammar m-4" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note) }} />
   );
 }
 
@@ -43,14 +43,14 @@ export default function BlockTrainingOverviewCard({
     <Card className="flex w-full flex-col gap-1">
       {grammar ? (
         <section>
-          <h1 className="h-button flex items-center px-4 text-left text-lg font-bold">
+          <h1 className="h-button m-4 flex items-center text-left text-lg font-bold">
             {grammar.name}
           </h1>
           {grammar.note && <Note note={grammar.note} />}
         </section>
       ) : (
         <>
-          <h1 className="h-button flex items-center px-4 text-left text-lg font-bold">
+          <h1 className="h-button m-4 flex items-center text-left text-lg font-bold">
             {block.name}
           </h1>
           {block.note && <Note note={block.note} />}

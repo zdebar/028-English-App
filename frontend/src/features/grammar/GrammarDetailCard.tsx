@@ -100,7 +100,7 @@ export default function GrammarDetailCard({
           {renderNote(grammar.note)}
           {grammar.chunks.map((chunk) => (
             <section key={chunk.id}>
-              <h2 className="h-button m-4 text-left text-lg font-bold">{chunk.name}</h2>
+              <h2 className="m-4 text-left text-lg font-bold">{chunk.name}</h2>
               {renderNote(chunk.note)}
               {renderItems(chunk.items)}
             </section>
