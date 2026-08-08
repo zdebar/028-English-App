@@ -17,18 +17,29 @@ vi.mock('@/locales/cs', () => ({
 import {
   compareCzechStrings,
   filterSortedWords,
-  shortenDate,
+  formatVocabularyDateTime,
+  hasVocabularyDate,
 } from '@/features/vocabulary/vocabulary.utils';
 
 describe('vocabulary.utils', () => {
-  it('shortenDate returns empty for null/undefined/null-replacement date', () => {
-    expect(shortenDate(undefined)).toBe('');
-    expect(shortenDate(null)).toBe('');
-    expect(shortenDate('1970-01-01T00:00:00.000Z')).toBe('');
+  it('recognizes missing and null-replacement vocabulary dates', () => {
+    expect(hasVocabularyDate(undefined)).toBe(false);
+    expect(hasVocabularyDate(null)).toBe(false);
+    expect(hasVocabularyDate('1970-01-01T00:00:00.000Z')).toBe(false);
+    expect(hasVocabularyDate('2026-02-28T14:20:00.000Z')).toBe(true);
   });
 
-  it('shortenDate returns YYYY-MM-DD for ISO date', () => {
-    expect(shortenDate('2026-02-28T14:20:00.000Z')).toBe('2026-02-28');
+  it('formats a Czech numeric date with hours and minutes in the device timezone', () => {
+    expect(formatVocabularyDateTime('2026-02-28T14:20:00')).toMatch(
+      /^28\. 2\. 2026[, ]+14:20$/,
+    );
+  });
+
+  it('returns empty text for missing, null-replacement, and invalid dates', () => {
+    expect(formatVocabularyDateTime(undefined)).toBe('');
+    expect(formatVocabularyDateTime(null)).toBe('');
+    expect(formatVocabularyDateTime('1970-01-01T00:00:00.000Z')).toBe('');
+    expect(formatVocabularyDateTime('invalid')).toBe('');
   });
 
   it('filterSortedWords filters by prefix from pre-sorted arrays and respects visibleCount', () => {

@@ -2,14 +2,31 @@ import config from '@/config/config';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { assertPositiveInteger } from '@/utils/assertions.utils';
 
+const VOCABULARY_DATE_TIME_FORMATTER = new Intl.DateTimeFormat('cs-CZ', {
+  day: 'numeric',
+  month: 'numeric',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+});
+
+/** Returns whether a stored vocabulary date represents an actual timestamp. */
+export function hasVocabularyDate(isoDate: string | null | undefined): isoDate is string {
+  return Boolean(isoDate && isoDate !== config.database.nullReplacementDate);
+}
+
 /**
- * Returns a shortened date string (YYYY-MM-DD) from an ISO date string.
- * @param isoDate ISO date string
- * @returns Shortened date string or empty string if date is undefined or null replacement date.
+ * Formats a vocabulary timestamp in Czech using the device's current timezone.
+ * Returns an empty string when the value is missing, is the database null sentinel, or is invalid.
  */
-export function shortenDate(isoDate: string | null | undefined): string {
-  if (!isoDate || isoDate === config.database.nullReplacementDate) return '';
-  return isoDate.split('T')[0];
+export function formatVocabularyDateTime(isoDate: string | null | undefined): string {
+  if (!hasVocabularyDate(isoDate)) return '';
+
+  const date = new Date(isoDate);
+  if (Number.isNaN(date.getTime())) return '';
+
+  return VOCABULARY_DATE_TIME_FORMATTER.format(date);
 }
 
 export type DisplayField = 'czech' | 'english';

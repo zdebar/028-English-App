@@ -1,11 +1,11 @@
 @layer components {
   /** GUIDE STYLES **/
   .guide p {
-    @apply m-2 px-4 text-left;
+    @apply m-6 text-left leading-relaxed;
   }
   
   .guide ul {
-    @apply m-2;
+    @apply m-4;
   }
 
   .guide span {
@@ -13,11 +13,11 @@
   }
 
   .guide h2 {
-    @apply pt-8 text-center text-2xl font-bold;
+    @apply m-6 text-left text-2xl font-bold;
   }
 
   .guide h3 {
-    @apply pl-4 ;
+    @apply m-6 ;
   }
 
   .guide strong {
