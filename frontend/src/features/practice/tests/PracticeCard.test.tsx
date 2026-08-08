@@ -618,6 +618,7 @@ describe('PracticeCard', () => {
   it('keeps help in the right secondary control group', () => {
     const { container } = render(<PracticeCard />);
 
+    expect(container.firstElementChild?.className).toContain('bottom-controls-clearance');
     expect(
       container.querySelector('.pos-bottom-right-control [data-testid="help-button"]'),
     ).toBeTruthy();

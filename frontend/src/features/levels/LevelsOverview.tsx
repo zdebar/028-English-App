@@ -55,7 +55,11 @@ export default function LevelsOverview({
   };
 
   return (
-    <OverviewCard onClose={() => navigate(ROUTES.overviews)} buttonTitle={TEXTS.levelsOverview}>
+    <OverviewCard
+      onClose={() => navigate(ROUTES.overviews)}
+      buttonTitle={TEXTS.levelsOverview}
+      className={levels.length > 0 ? 'bottom-controls-clearance' : ''}
+    >
       <DataState loading={false} hasData={levels.length > 0} noDataMessage={TEXTS.noDashboardData}>
         <div className="pt-1">
           {levels.map((level) => (

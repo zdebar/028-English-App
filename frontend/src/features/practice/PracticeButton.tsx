@@ -8,16 +8,11 @@ import { usePracticeAvailabilityStore } from './use-practice-availability-store'
 
 type PracticeButtonProps = Readonly<{ userId: string }>;
 
-function getReadyPracticeBadgeLabel(count: number): string {
-  const badgeCap = config.practice.readyPracticeBadgeCap;
-  return count > badgeCap ? `${badgeCap}+` : String(count);
-}
-
 function ReadyPracticeBadge({ count }: Readonly<{ count: number }>): JSX.Element | null {
   if (count <= 0) return null;
   return (
     <span className="bg-button-hover text-light absolute top-1 right-2 min-w-5 rounded-full px-2 text-xs">
-      {getReadyPracticeBadgeLabel(count)}
+      {count}
     </span>
   );
 }

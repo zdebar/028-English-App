@@ -5,14 +5,21 @@ import type { ReadyPracticeScheduleEntry } from '@/types/generic.types';
  * Groups ready-practice due dates into display buckets.
  *
  * @param dates ISO date strings or other Date.parse-compatible values. Invalid dates are ignored.
+ * @param maxCount Maximum number of chronological practice opportunities to include.
  * @returns Chronological groups where entries within the configured grouping window are counted
  * together and represented by the latest date in that group.
  */
-export function groupReadyPracticeSchedule(dates: string[]): ReadyPracticeScheduleEntry[] {
+export function groupReadyPracticeSchedule(
+  dates: string[],
+  maxCount: number,
+): ReadyPracticeScheduleEntry[] {
+  if (maxCount <= 0) return [];
+
   const sortedDates = dates
     .map((date) => ({ date, time: Date.parse(date) }))
     .filter((entry) => Number.isFinite(entry.time))
-    .sort((left, right) => left.time - right.time);
+    .sort((left, right) => left.time - right.time)
+    .slice(0, maxCount);
 
   const schedule: ReadyPracticeScheduleEntry[] = [];
   let currentGroup: ReadyPracticeScheduleEntry | null = null;

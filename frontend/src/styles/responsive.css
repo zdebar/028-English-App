@@ -6,12 +6,9 @@
   min-height: var(--height-button);
 }
 
-.page-content:has(
-  .pos-bottom-right-control,
-  .pos-bottom-left-control,
-  .pos-home-dashboard-help
-) {
-  padding-bottom: var(--height-button);
+.bottom-controls-clearance,
+.home-bottom-controls-clearance {
+  margin-bottom: var(--height-button);
 }
 
 .pos-bottom-right-control {
@@ -57,12 +54,8 @@
 }
 
 @media (max-height: 400px) {
-  .page-content:has(.pos-bottom-right-control, .pos-bottom-left-control) {
-    padding-bottom: 0;
-  }
-
-  .page-content:has(.pos-home-dashboard-help) {
-    padding-bottom: var(--height-button);
+  .bottom-controls-clearance {
+    margin-bottom: 0;
   }
 
   .pos-bottom-right-control {

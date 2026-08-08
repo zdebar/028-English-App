@@ -85,24 +85,27 @@ export default function PronunciationGroupDetail({
       buttonTitle={data?.group.name}
       loading={loading}
       onClose={() => navigate(ROUTES.pronunciationGroups)}
+      className="bottom-controls-clearance"
     >
       <DataState
         loading={loading}
         hasData={Boolean(data?.items.length)}
         noDataMessage={TEXTS.noPronunciationGroupItems}
       >
-        {data?.items.map((item) => (
-          <BilingualItemButton
-            key={item.item_id}
-            item={item}
-            disabled={!item.audio || audioLoading || !isAudioReady(item.audio)}
-            onClick={async () => {
-              if (!item.audio) return;
-              const didPlay = await playAudio(item.audio);
-              if (!didPlay) showToast(TEXTS.noAudio, 'error');
-            }}
-          />
-        ))}
+        <div className="flex flex-col gap-1 pt-1">
+          {data?.items.map((item) => (
+            <BilingualItemButton
+              key={item.item_id}
+              item={item}
+              disabled={!item.audio || audioLoading || !isAudioReady(item.audio)}
+              onClick={async () => {
+                if (!item.audio) return;
+                const didPlay = await playAudio(item.audio);
+                if (!didPlay) showToast(TEXTS.noAudio, 'error');
+              }}
+            />
+          ))}
+        </div>
       </DataState>
       <div className="pos-bottom-left-control">
         <VolumeSlider />

@@ -90,7 +90,7 @@ export default function GrammarOverview({
         onClose={() => navigate(ROUTES.overviews)}
       >
         <DataState loading={loading} hasData={hasData} noDataMessage={TEXTS.noGrammar}>
-          <div className="pt-1">
+          <div className="flex flex-col gap-1 pt-1">
             {grammarList.map((item) => (
               <ListButton
                 key={`${item.kind}-${item.id}`}
