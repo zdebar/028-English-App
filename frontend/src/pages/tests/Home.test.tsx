@@ -183,7 +183,7 @@ describe('Home', () => {
     const helpButton = screen.getByRole('button', { name: 'Help' });
     expect(helpButton.closest('.pos-home-dashboard-help')).toBeTruthy();
     expect(helpButton.parentElement?.parentElement?.className).toContain('relative');
-    expect(helpButton.parentElement?.parentElement?.className).toContain('mb-12');
+    expect(helpButton.parentElement?.parentElement?.className).not.toContain('mb-12');
   });
 
   it('renders install and guide links when user is signed in', () => {

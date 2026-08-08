@@ -197,7 +197,7 @@ export default function PracticeSessionCard({
   if (isNoteVisible) return <NoteDetailCard note={noteData} onClose={closeNote} />;
 
   return (
-    <div className="help-btn-margin relative flex w-full grow flex-col items-center">
+    <div className="relative flex w-full grow flex-col items-center">
       <div className="card-width card-height relative gap-1">
         <button
           type="button"

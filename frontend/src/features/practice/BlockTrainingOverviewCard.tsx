@@ -1,5 +1,6 @@
-import Card from '@/components/UI/Card';
+import OverviewCard from '@/components/UI/OverviewCard';
 import StyledButton from '@/components/UI/buttons/StyledButton';
+import { ROUTES } from '@/config/routes.config';
 import type { GrammarDetail } from '@/features/grammar/GrammarDetailCard';
 import { TEXTS } from '@/locales/cs';
 import type { UserBlockType } from '@/types/generic.types';
@@ -11,6 +12,7 @@ import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { useMemo } from 'react';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import VolumeSlider from '@/features/audio/VolumeSlider';
+import { useNavigate } from 'react-router-dom';
 
 type BlockTrainingOverviewCardProps = Readonly<{
   block: Pick<UserBlockType, 'name' | 'note'>;
@@ -21,7 +23,7 @@ type BlockTrainingOverviewCardProps = Readonly<{
 
 function Note({ note }: Readonly<{ note: string }>): JSX.Element {
   return (
-    <div className="grammar p-4" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note) }} />
+    <div className="grammar m-4" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note) }} />
   );
 }
 
@@ -32,27 +34,27 @@ export default function BlockTrainingOverviewCard({
   items = [],
   onContinue,
 }: BlockTrainingOverviewCardProps): JSX.Element {
+  const navigate = useNavigate();
   const showToast = useToastStore((state) => state.showToast);
   const audios = useMemo(
     () => items.map((item) => item.audio).filter((audio): audio is string => Boolean(audio)),
     [items],
   );
   const { playAudio, isAudioReady, loading } = useAudioManager(audios);
+  const title = grammar?.name ?? block.name;
 
   return (
-    <Card className="flex w-full flex-col gap-1">
+    <OverviewCard
+      buttonTitle={title}
+      onClose={() => navigate(ROUTES.home)}
+      className="flex w-full flex-col gap-1"
+    >
       {grammar ? (
         <section>
-          <h1 className="h-button flex items-center px-4 text-left text-lg font-bold">
-            {grammar.name}
-          </h1>
           {grammar.note && <Note note={grammar.note} />}
         </section>
       ) : (
         <>
-          <h1 className="h-button flex items-center px-4 text-left text-lg font-bold">
-            {block.name}
-          </h1>
           {block.note && <Note note={block.note} />}
         </>
       )}
@@ -72,6 +74,6 @@ export default function BlockTrainingOverviewCard({
       <StyledButton className="card-width h-button w-full" onClick={onContinue}>
         {TEXTS.continuePractice}
       </StyledButton>
-    </Card>
+    </OverviewCard>
   );
 }

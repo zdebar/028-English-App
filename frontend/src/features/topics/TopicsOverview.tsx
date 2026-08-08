@@ -45,7 +45,7 @@ export default function TopicsOverview({
   return (
     <OverviewCard buttonTitle={TEXTS.topicsOverview} onClose={() => navigate(ROUTES.overviews)}>
       <DataState loading={topicsLoading} hasData={hasTopics} noDataMessage={TEXTS.noTopics}>
-        <div className="mt-1">
+        <div className="flex flex-col gap-1 pt-1">
           {topics.map((topic) => (
             <PrefetchButton
               key={topic.block_id}

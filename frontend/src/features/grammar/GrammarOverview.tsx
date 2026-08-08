@@ -90,16 +90,18 @@ export default function GrammarOverview({
         onClose={() => navigate(ROUTES.overviews)}
       >
         <DataState loading={loading} hasData={hasData} noDataMessage={TEXTS.noGrammar}>
-          {grammarList.map((item) => (
-            <ListButton
-              key={`${item.kind}-${item.id}`}
-              className="h-input justify-start px-4"
-              onClick={() => setSelection({ id: item.id, kind: item.kind })}
-              title={item.name}
-            >
-              {item.name}
-            </ListButton>
-          ))}
+          <div className="pt-1">
+            {grammarList.map((item) => (
+              <ListButton
+                key={`${item.kind}-${item.id}`}
+                className="h-input justify-start px-4"
+                onClick={() => setSelection({ id: item.id, kind: item.kind })}
+                title={item.name}
+              >
+                {item.name}
+              </ListButton>
+            ))}
+          </div>
         </DataState>
       </OverviewCard>
     );
