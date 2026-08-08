@@ -135,20 +135,22 @@ export default function TopicItemsOverview({
       onClose={onClose}
     >
       <DataState loading={itemsLoading} hasData={hasItems} noDataMessage={TEXTS.noTopicItems}>
-        {items.map((item) => (
-          <BilingualItemButton
-            key={item.item_id}
-            item={item}
-            onClick={async () => {
-              if (!item.audio) return;
-              const didPlay = await playAudio(item.audio);
-              if (!didPlay) {
-                showToast(TEXTS.noAudio, 'error');
-              }
-            }}
-            disabled={!item.audio || (!audioLoading && !isAudioReady(item.audio))}
-          />
-        ))}
+        <div className="mt-1 flex flex-col gap-1">
+          {items.map((item) => (
+            <BilingualItemButton
+              key={item.item_id}
+              item={item}
+              onClick={async () => {
+                if (!item.audio) return;
+                const didPlay = await playAudio(item.audio);
+                if (!didPlay) {
+                  showToast(TEXTS.noAudio, 'error');
+                }
+              }}
+              disabled={!item.audio || (!audioLoading && !isAudioReady(item.audio))}
+            />
+          ))}
+        </div>
       </DataState>
       <div className="pos-bottom-left-control">
         <VolumeSlider />

@@ -45,17 +45,19 @@ export default function TopicsOverview({
   return (
     <OverviewCard buttonTitle={TEXTS.topicsOverview} onClose={() => navigate(ROUTES.overviews)}>
       <DataState loading={topicsLoading} hasData={hasTopics} noDataMessage={TEXTS.noTopics}>
-        {topics.map((topic) => (
-          <PrefetchButton
-            key={topic.block_id}
-            className="h-input flex w-full justify-start px-4 text-left"
-            to={`${ROUTES.topics}/${topic.block_id}`}
-            descriptor={userId ? topicDetailDescriptor(userId, topic.block_id) : undefined}
-            title={topic.name}
-          >
-            <p className="overflow-hidden text-ellipsis whitespace-nowrap">{topic.name}</p>
-          </PrefetchButton>
-        ))}
+        <div className="mt-1">
+          {topics.map((topic) => (
+            <PrefetchButton
+              key={topic.block_id}
+              className="h-input flex w-full justify-start px-4 text-left"
+              to={`${ROUTES.topics}/${topic.block_id}`}
+              descriptor={userId ? topicDetailDescriptor(userId, topic.block_id) : undefined}
+              title={topic.name}
+            >
+              <p className="overflow-hidden text-ellipsis whitespace-nowrap">{topic.name}</p>
+            </PrefetchButton>
+          ))}
+        </div>
       </DataState>
     </OverviewCard>
   );
