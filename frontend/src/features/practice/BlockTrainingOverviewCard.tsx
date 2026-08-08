@@ -43,16 +43,12 @@ export default function BlockTrainingOverviewCard({
     <Card className="flex w-full flex-col gap-1">
       {grammar ? (
         <section>
-          <h1 className="h-button m-4 flex items-center text-left text-lg font-bold">
-            {grammar.name}
-          </h1>
+          <h1 className="m-4 flex items-center text-left text-lg font-bold">{grammar.name}</h1>
           {grammar.note && <Note note={grammar.note} />}
         </section>
       ) : (
         <>
-          <h1 className="h-button m-4 flex items-center text-left text-lg font-bold">
-            {block.name}
-          </h1>
+          <h1 className="m-4 flex items-center text-left text-lg font-bold">{block.name}</h1>
           {block.note && <Note note={block.note} />}
         </>
       )}
