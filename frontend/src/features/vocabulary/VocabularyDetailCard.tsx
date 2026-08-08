@@ -1,8 +1,12 @@
 import OverviewCard from '@/components/UI/OverviewCard';
 import PropertyView from '@/components/UI/PropertyView';
+import config from '@/config/config';
 import { TEXTS } from '@/locales/cs';
 import HelpButton from '@/features/help/HelpButton';
-import { shortenDate } from '@/features/vocabulary/vocabulary.utils';
+import {
+  formatVocabularyDateTime,
+  hasVocabularyDate,
+} from '@/features/vocabulary/vocabulary.utils';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
 import PlayButton from '@/features/audio/PlayButton';
@@ -50,14 +54,19 @@ export default function VocabularyDetailCard({
       direction: 'czToEn',
       title: lowercaseInitial(TEXTS.directionCzToEn),
       properties: [
-        { label: lowercaseInitial(TEXTS.progress), value: selectedWord?.progress_cz_to_en },
         {
-          label: lowercaseInitial(TEXTS.nextAt),
-          value: shortenDate(selectedWord?.next_at_cz_to_en),
+          label: lowercaseInitial(TEXTS.progress),
+          value: formatProgress(
+            selectedWord?.progress_cz_to_en,
+            config.srs.intervals.czToEn.length,
+          ),
         },
         {
-          label: lowercaseInitial(TEXTS.masteredAt),
-          value: shortenDate(selectedWord?.mastered_at_cz_to_en),
+          label: lowercaseInitial(TEXTS.practiceSchedule),
+          value: formatPracticeSchedule(
+            selectedWord?.next_at_cz_to_en,
+            selectedWord?.mastered_at_cz_to_en,
+          ),
         },
       ],
     },
@@ -65,29 +74,23 @@ export default function VocabularyDetailCard({
       direction: 'enToCz',
       title: lowercaseInitial(TEXTS.directionEnToCz),
       properties: [
-        { label: lowercaseInitial(TEXTS.progress), value: selectedWord?.progress_en_to_cz },
         {
-          label: lowercaseInitial(TEXTS.nextAt),
-          value: shortenDate(selectedWord?.next_at_en_to_cz),
+          label: lowercaseInitial(TEXTS.progress),
+          value: formatProgress(
+            selectedWord?.progress_en_to_cz,
+            config.srs.intervals.enToCz.length,
+          ),
         },
         {
-          label: lowercaseInitial(TEXTS.masteredAt),
-          value: shortenDate(selectedWord?.mastered_at_en_to_cz),
+          label: lowercaseInitial(TEXTS.practiceSchedule),
+          value: formatPracticeSchedule(
+            selectedWord?.next_at_en_to_cz,
+            selectedWord?.mastered_at_en_to_cz,
+          ),
         },
       ],
     },
   ] as const;
-
-  const dateProperties = [
-    {
-      label: lowercaseInitial(TEXTS.startedAt),
-      value: shortenDate(selectedWord?.started_at),
-    },
-    {
-      label: lowercaseInitial(TEXTS.updatedAt),
-      value: shortenDate(selectedWord?.updated_at),
-    },
-  ];
 
   const {
     playAudio,
@@ -121,19 +124,6 @@ export default function VocabularyDetailCard({
               label={property.label}
               className="grid grid-cols-2"
               classNameLabel="w-auto"
-              classNameValue="min-w-0"
-            >
-              {property.value ?? NOT_AVAILABLE}
-            </PropertyView>
-          ))}
-        </div>
-        <div>
-          {dateProperties.map((property) => (
-            <PropertyView
-              key={property.label}
-              label={property.label}
-              className="grid grid-cols-2"
-              classNameLabel="w-30 w-auto"
               classNameValue="min-w-0"
             >
               {property.value ?? NOT_AVAILABLE}
@@ -189,4 +179,21 @@ export default function VocabularyDetailCard({
 
 function lowercaseInitial(value: string): string {
   return value.charAt(0).toLocaleLowerCase('cs-CZ') + value.slice(1);
+}
+
+function formatProgress(progress: number | null | undefined, total: number): string | undefined {
+  if (progress == null) return undefined;
+  return `${progress} / ${total}`;
+}
+
+function formatPracticeSchedule(
+  nextDate: string | null | undefined,
+  masteredDate: string | null | undefined,
+): string {
+  if (hasVocabularyDate(masteredDate)) return TEXTS.completedAt;
+
+  const formattedNextDate = formatVocabularyDateTime(nextDate);
+  if (formattedNextDate) return formattedNextDate;
+
+  return lowercaseInitial(TEXTS.notScheduled);
 }

@@ -37,6 +37,8 @@ export const OVERVIEW_TEXTS = {
   completedAt: 'dokončeno',
   nextAt: 'Další',
   masteredAt: 'Naučeno',
+  practiceSchedule: 'Procvičování',
+  notScheduled: 'Nenaplánováno',
   restartItemProgress: 'Restartovat pokrok této položky',
 
   // Overviews Page

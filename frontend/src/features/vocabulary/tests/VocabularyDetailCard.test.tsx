@@ -1,7 +1,8 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const shortenDateMock = vi.fn();
+const formatVocabularyDateTimeMock = vi.fn();
+const hasVocabularyDateMock = vi.fn();
 const audioMocks = vi.hoisted(() => ({
   playAudio: vi.fn(),
   audioError: false,
@@ -22,6 +23,9 @@ vi.mock('@/locales/cs', () => ({
     completedAt: 'Completed',
     nextAt: 'Next',
     masteredAt: 'Mastered',
+    notMastered: 'Not mastered',
+    practiceSchedule: 'Practice schedule',
+    notScheduled: 'Not scheduled',
     directionCzToEn: 'CZ to EN',
     directionEnToCz: 'EN to CZ',
     restartItemProgress: 'Restart item',
@@ -50,7 +54,8 @@ vi.mock('@/features/toast/use-toast-store', () => ({
 }));
 
 vi.mock('@/features/vocabulary/vocabulary.utils', () => ({
-  shortenDate: (...args: unknown[]) => shortenDateMock(...args),
+  formatVocabularyDateTime: (...args: unknown[]) => formatVocabularyDateTimeMock(...args),
+  hasVocabularyDate: (...args: unknown[]) => hasVocabularyDateMock(...args),
 }));
 
 vi.mock('@/components/UI/OverviewCard', () => ({
@@ -90,7 +95,10 @@ import VocabularyDetailCard from '@/features/vocabulary/VocabularyDetailCard';
 describe('VocabularyDetailCard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    shortenDateMock.mockImplementation((x: string) => `short:${x}`);
+    formatVocabularyDateTimeMock.mockImplementation((x: string | null | undefined) =>
+      x ? `date:${x}` : '',
+    );
+    hasVocabularyDateMock.mockImplementation((x: string | null | undefined) => Boolean(x));
     audioMocks.playAudio.mockResolvedValue(true);
     audioMocks.audioError = false;
     audioMocks.audioLoading = false;
@@ -112,7 +120,7 @@ describe('VocabularyDetailCard', () => {
             updated_at: '2026-02-28T11:00:00.000Z',
             next_at_cz_to_en: '2026-03-01T00:00:00.000Z',
             next_at_en_to_cz: '2026-03-01T01:00:00.000Z',
-            mastered_at_cz_to_en: '2026-03-02T00:00:00.000Z',
+            mastered_at_cz_to_en: null,
             mastered_at_en_to_cz: '2026-03-03T00:00:00.000Z',
           } as any
         }
@@ -126,22 +134,24 @@ describe('VocabularyDetailCard', () => {
     expect(screen.getByText('english:hello')).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'cZ to EN' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'eN to CZ' })).toBeTruthy();
-    expect(screen.getByText('progress:2')).toBeTruthy();
-    expect(screen.getByText('progress:3')).toBeTruthy();
-    expect(screen.getByText('started:short:2026-02-28T10:00:00.000Z')).toBeTruthy();
-    expect(screen.getByText('updated:short:2026-02-28T11:00:00.000Z')).toBeTruthy();
-    expect(screen.getByText('next:short:2026-03-01T00:00:00.000Z')).toBeTruthy();
-    expect(screen.getByText('next:short:2026-03-01T01:00:00.000Z')).toBeTruthy();
-    expect(screen.getByText('mastered:short:2026-03-02T00:00:00.000Z')).toBeTruthy();
-    expect(screen.getByText('mastered:short:2026-03-03T00:00:00.000Z')).toBeTruthy();
+    expect(screen.getByText('progress:2 / 9')).toBeTruthy();
+    expect(screen.getByText('progress:3 / 8')).toBeTruthy();
+    expect(
+      screen.getByText('practice schedule:date:2026-03-01T00:00:00.000Z'),
+    ).toBeTruthy();
+    expect(screen.getByText('practice schedule:Completed')).toBeTruthy();
+    expect(screen.queryByText('practice schedule:date:2026-03-01T01:00:00.000Z')).toBeNull();
+    expect(screen.queryByText(/^status:/)).toBeNull();
+    expect(screen.queryByText(/^started:/)).toBeNull();
+    expect(screen.queryByText(/^updated:/)).toBeNull();
 
     expect(container.textContent).toMatch(
-      /czech:ahoj.*english:hello.*pronunciation:həˈloʊ.*started:.*updated:.*cZ to EN.*progress:2.*next:.*mastered:.*eN to CZ.*progress:3.*next:.*mastered:/,
+      /czech:ahoj.*english:hello.*pronunciation:həˈloʊ.*cZ to EN.*progress:2 \/ 9.*practice schedule:date:.*eN to CZ.*progress:3 \/ 8.*practice schedule:Completed/,
     );
-    expect(shortenDateMock).toHaveBeenCalled();
+    expect(formatVocabularyDateTimeMock).toHaveBeenCalledTimes(1);
   });
 
-  it('shows N/A fallback for missing base/date fields', () => {
+  it('shows an explicit fallback when practice is not scheduled', () => {
     render(
       <VocabularyDetailCard
         selectedWord={
@@ -164,7 +174,7 @@ describe('VocabularyDetailCard', () => {
     );
 
     expect(screen.getByText('pronunciation:')).toBeTruthy();
-    expect(screen.getByText('started:short:null')).toBeTruthy();
+    expect(screen.getAllByText('practice schedule:not scheduled')).toHaveLength(2);
   });
 
   it('calls onClose and onReset handlers', () => {
