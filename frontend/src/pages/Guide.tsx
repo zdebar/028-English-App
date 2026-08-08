@@ -46,8 +46,19 @@ export default function Guide(): JSX.Element {
         </p>
         <h3>Denní cíl</h3>
         <p>Doporučený minimální denní cíl je 10 hvězdiček, tedy 400 procvičených položek.</p>
-        <h3>Procvičovat</h3>
+        <h3>Studovat</h3>
         <p>Společné učení a procvičování slovíček a gramatiky.</p>
+        <h3>Výslovnost - položky</h3>
+        <p>
+          Volitelné procvičování výslovnosti individuálních položek. Lze přidat skrze tlačítko ve
+          "Studovat" či "Přehled slovíček".
+        </p>
+        <p>
+          Nemá vliv na pokrok v lekcích. Pokud tedy nějaké slovíčko či větu znáte, ale dělá Vám
+          problém výslovnost, je vhodné přidat je sem.
+        </p>
+        <h3>Výslovnost - skupiny</h3>
+        <p>Sdružuje slovíčka s podobnou výslovností např. bad / bed</p>
         <h3>Přehled lekcí</h3>
         <p>Přehled dnes dotčených lekcí. Lze přepínat mezi rozučenými a naučenými položkami.</p>
       </section>
@@ -66,6 +77,8 @@ export default function Guide(): JSX.Element {
         <p>Zobrazuje počet dosažených denních hvězdiček a číselný postup na hvězdičce.</p>
         <h3>Nápověda</h3>
         <p>Písmeno po písmenu odhaluje slovíčko či větu.</p>
+        <h3>Přidat do výslovnosti</h3>
+        <p>Přidá danou položku do "Výslovnost - položky".</p>
         <h3>Gramatika</h3>
         <p>Zobrazí vysvětlení příslušné gramatiky.</p>
         <h3>Poznámka</h3>
