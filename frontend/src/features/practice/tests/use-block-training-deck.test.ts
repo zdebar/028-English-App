@@ -354,7 +354,7 @@ describe('useBlockTrainingDeck', () => {
     expect(addItemCountMock).toHaveBeenCalledTimes(2);
   });
 
-  it('skip persists the current item immediately and removes it from later rounds', async () => {
+  it('skip persists the current direction and keeps the item for the other direction', async () => {
     getByBlockIdMock.mockResolvedValue([
       makeItem({ item_id: 1, progress_cz_to_en: 1, sort_order: 1 }),
       makeItem({ item_id: 2, sort_order: 2 }),
@@ -389,6 +389,12 @@ describe('useBlockTrainingDeck', () => {
     });
 
     expect(result.current.progressLabel).toBe('2/2 · 0/2');
+    expect(result.current.currentItem?.item_id).toBe(1);
+
+    await act(async () => {
+      await result.current.nextKnown();
+    });
+
     expect(result.current.currentItem?.item_id).toBe(2);
 
     await act(async () => {
@@ -396,10 +402,10 @@ describe('useBlockTrainingDeck', () => {
     });
 
     expect(result.current.isComplete).toBe(true);
-    expect(addItemCountMock).toHaveBeenCalledTimes(3);
+    expect(addItemCountMock).toHaveBeenCalledTimes(4);
   });
 
-  it('skipping all active items completes the block', async () => {
+  it('skipping the only item in round 1 advances to round 2', async () => {
     const { result } = renderHook(() => useBlockTrainingDeck('user-1', 10));
 
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
@@ -408,8 +414,18 @@ describe('useBlockTrainingDeck', () => {
       await result.current.completeCurrent();
     });
 
-    expect(result.current.isComplete).toBe(true);
+    expect(result.current.isComplete).toBe(false);
+    expect(result.current.currentItem?.item_id).toBe(1);
     expect(savePracticeDeckMock).toHaveBeenCalledTimes(1);
+    expect(saveInitialTrainingBlockCompletionMock).not.toHaveBeenCalled();
+    expect(completeInitialTrainingMock).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await result.current.completeCurrent();
+    });
+
+    expect(result.current.isComplete).toBe(true);
+    expect(savePracticeDeckMock).toHaveBeenCalledTimes(2);
     expect(saveInitialTrainingBlockCompletionMock).toHaveBeenCalledWith(
       'user-1',
       10,
@@ -419,6 +435,37 @@ describe('useBlockTrainingDeck', () => {
       'user-1',
       10,
       expect.any(String),
+    );
+  });
+
+  it('preserves the first-direction skip state when skipping the second direction', async () => {
+    applyPracticeProgressMock.mockImplementation(
+      (item: UserItemLocal, direction: 'czToEn' | 'enToCz') => ({
+        ...item,
+        progress_history: [...item.progress_history, direction],
+      }),
+    );
+    const { result } = renderHook(() => useBlockTrainingDeck('user-1', 10));
+
+    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+
+    await act(async () => {
+      await result.current.completeCurrent();
+    });
+    await act(async () => {
+      await result.current.completeCurrent();
+    });
+
+    expect(applyPracticeProgressMock).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ progress_history: ['czToEn'] }),
+      'enToCz',
+      'skip',
+      expect.any(String),
+    );
+    expect(savePracticeDeckMock).toHaveBeenNthCalledWith(
+      2,
+      [expect.objectContaining({ progress_history: ['czToEn', 'enToCz'] })],
     );
   });
 });
