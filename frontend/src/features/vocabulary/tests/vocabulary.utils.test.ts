@@ -61,6 +61,30 @@ describe('vocabulary.utils', () => {
     expect(limitedResult).toHaveLength(1);
   });
 
+  it('filters an extended English prefix when punctuation sorts before its matches', () => {
+    const sortedByEnglish = [
+      { english: 't-shirt' },
+      { english: 'table' },
+      { english: 'talk' },
+      { english: 'tall' },
+    ] as any;
+
+    const singleLetterResult = filterSortedWords(sortedByEnglish, 't', 'english', 10);
+    expect(singleLetterResult.map((item: any) => item.english)).toEqual([
+      't-shirt',
+      'table',
+      'talk',
+      'tall',
+    ]);
+
+    const extendedResult = filterSortedWords(sortedByEnglish, ' TA ', 'english', 10);
+    expect(extendedResult.map((item: any) => item.english)).toEqual([
+      'table',
+      'talk',
+      'tall',
+    ]);
+  });
+
   it('filterSortedWords handles Czech diacritics in search term', () => {
     const words = [
       { czech: 'čaj', english: 'tea' },
