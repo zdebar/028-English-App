@@ -30,6 +30,7 @@ export default function PronunciationOverview() {
     <OverviewCard
       buttonTitle={TEXTS.pronunciationGroups}
       onClose={() => navigate(ROUTES.overviews)}
+      className={hasData ? 'bottom-controls-clearance' : ''}
     >
       <DataState loading={loading} hasData={hasData} noDataMessage={TEXTS.noPronunciationGroups}>
         {data.map((group) => (

@@ -114,7 +114,7 @@ export default function VocabularyDetailCard({
       onClose={onClose}
       handleReset={onReset}
       modalTitle={TEXTS.restartItemProgress}
-      className="relative"
+      className="bottom-controls-clearance relative"
     >
       <div className="m-4 flex flex-col gap-4">
         <div>

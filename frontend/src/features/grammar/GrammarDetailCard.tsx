@@ -85,6 +85,7 @@ export default function GrammarDetailCard({
   const hasContent = Boolean(
     grammar?.note || chunks.some((chunk) => chunk.note || chunk.items?.length),
   );
+  const hasBottomControls = items.length > 0 || showHelpButton;
 
   return (
     <OverviewCard
@@ -93,7 +94,7 @@ export default function GrammarDetailCard({
       modalText={TEXTS.restartGrammarDescription}
       handleReset={onReset}
       onClose={onClose}
-      className="relative"
+      className={hasBottomControls ? 'bottom-controls-clearance relative' : 'relative'}
     >
       {grammar?.kind === 'group' && (
         <>

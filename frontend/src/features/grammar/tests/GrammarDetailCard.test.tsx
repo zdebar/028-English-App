@@ -45,8 +45,8 @@ vi.mock('@/features/audio/use-audio-manager', () => ({
 }));
 
 vi.mock('@/components/UI/OverviewCard', () => ({
-  default: ({ buttonTitle, children }: any) => (
-    <div>
+  default: ({ buttonTitle, children, className }: any) => (
+    <div className={className}>
       <h1>{buttonTitle}</h1>
       <div>{children}</div>
     </div>
@@ -152,7 +152,7 @@ describe('GrammarDetailCard', () => {
   });
 
   it('hides help by default and renders it when explicitly enabled', () => {
-    const { rerender } = render(
+    const { container, rerender } = render(
       <GrammarDetailCard
         grammar={{ kind: 'chunk', id: 1, name: 'Articles' }}
         onClose={vi.fn()}
@@ -160,6 +160,7 @@ describe('GrammarDetailCard', () => {
     );
 
     expect(screen.queryByTestId('help')).toBeNull();
+    expect(container.firstElementChild?.className).not.toContain('bottom-controls-clearance');
 
     rerender(
       <GrammarDetailCard
@@ -170,6 +171,7 @@ describe('GrammarDetailCard', () => {
     );
 
     expect(screen.getByTestId('help')).toBeTruthy();
+    expect(container.firstElementChild?.className).toContain('bottom-controls-clearance');
   });
 
   it('loads and plays examples of a standalone overview chunk with empty chunks', async () => {

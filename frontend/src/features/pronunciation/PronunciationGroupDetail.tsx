@@ -85,6 +85,7 @@ export default function PronunciationGroupDetail({
       buttonTitle={data?.group.name}
       loading={loading}
       onClose={() => navigate(ROUTES.pronunciationGroups)}
+      className="bottom-controls-clearance"
     >
       <DataState
         loading={loading}

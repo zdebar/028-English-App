@@ -133,6 +133,7 @@ export default function TopicItemsOverview({
       loading={topicLoading}
       handleReset={resetHandler}
       onClose={onClose}
+      className="bottom-controls-clearance"
     >
       <DataState loading={itemsLoading} hasData={hasItems} noDataMessage={TEXTS.noTopicItems}>
         <div className="mt-1 flex flex-col gap-1">
