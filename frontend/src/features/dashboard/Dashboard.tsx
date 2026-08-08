@@ -33,7 +33,7 @@ export default function Dashboard({ className = '' }: DashboardProps) {
 
   return (
     <section
-      className={`min-w-card relative mx-auto flex w-full flex-col gap-1 ${className}`}
+      className={`min-w-card relative flex w-full flex-col gap-1 ${className}`}
       aria-label={ARIA_TEXTS.dashboardRegion}
     >
       {lessonsInProgress.map((lesson) => (
