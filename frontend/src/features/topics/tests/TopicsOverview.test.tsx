@@ -39,14 +39,13 @@ vi.mock('@/features/auth/use-auth-store', () => ({
     selector({ userId: mocks.userId }),
 }));
 
-vi.mock('@/hooks/use-array', () => ({
-  useArray: (fetcher: () => Promise<unknown[]>) => {
+vi.mock('@/hooks/use-live-query-data', () => ({
+  useLiveQueryData: (fetcher: () => Promise<unknown[]>) => {
     void fetcher();
     return {
       data: mocks.state.data,
       error: mocks.state.error,
       loading: mocks.state.loading,
-      hasData: mocks.state.data.length > 0,
     };
   },
 }));

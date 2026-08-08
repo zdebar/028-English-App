@@ -5,7 +5,6 @@ const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   addAvailable: vi.fn(),
   playAudio: vi.fn(),
-  reload: vi.fn(),
   overviewData: [] as any[],
   overviewLoading: false,
   overviewError: null as Error | null,
@@ -60,12 +59,11 @@ vi.mock('../use-pronunciation-groups-store', () => ({
     }),
 }));
 
-vi.mock('@/hooks/use-fetch', () => ({
-  useFetch: () => ({
+vi.mock('@/hooks/use-live-query-data', () => ({
+  useLiveQueryData: () => ({
     data: mocks.detailData,
     loading: false,
     error: null,
-    reload: mocks.reload,
   }),
 }));
 
@@ -183,7 +181,6 @@ describe('Pronunciation overview screens', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Přidat skupinu' }));
     await waitFor(() => {
       expect(mocks.addAvailable).toHaveBeenCalledWith('u1', 1);
-      expect(mocks.reload).toHaveBeenCalled();
     });
     expect(screen.getByText('přidat do výslovnosti')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Help' })).toBeTruthy();

@@ -7,11 +7,12 @@ import type { UserScoreType } from '@/types/generic.types';
 import { STAR_SIZE, StarRow } from '@/components/UI/StarProgress';
 import config from '@/config/config';
 import { getCompletedStarCount } from '@/utils/star-progress.utils';
-import { useEffect, useRef, useState, type JSX } from 'react';
+import { useCallback, useEffect, useMemo, useState, type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DataState } from '@/components/UI/DataState';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { reportError } from '@/features/logging/monitoring-handler';
+import { useLiveQueryData } from '@/hooks/use-live-query-data';
 
 const INITIAL_VISIBLE_DAYS = 7;
 
@@ -96,57 +97,26 @@ export default function PracticeOverviewFeature({
   const navigate = useNavigate();
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
-  const [scores, setScores] = useState<PracticeDayScore[]>(() =>
-    initialScores ? getScoresWithMissingDays(initialScores) : [],
-  );
-  const [loading, setLoading] = useState(initialScores === undefined);
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_DAYS);
-  const skipInitialLoadRef = useRef(initialScores !== undefined);
+  const fetchScores = useCallback(
+    () => (userId ? UserScore.getByUserId(userId) : Promise.resolve([])),
+    [userId],
+  );
+  const { data: rawScores, loading, error } = useLiveQueryData(fetchScores, {
+    emptyData: [],
+    initialData: initialScores,
+  });
+  const scores = useMemo(() => getScoresWithMissingDays(rawScores), [rawScores]);
 
   useEffect(() => {
-    if (initialScores === undefined) return;
-    setScores(getScoresWithMissingDays(initialScores));
-    setLoading(false);
-  }, [initialScores]);
+    setVisibleCount(INITIAL_VISIBLE_DAYS);
+  }, [userId]);
 
   useEffect(() => {
-    if (!userId) {
-      setScores([]);
-      setVisibleCount(INITIAL_VISIBLE_DAYS);
-      setLoading(false);
-      return;
-    }
-
-    if (skipInitialLoadRef.current) {
-      skipInitialLoadRef.current = false;
-      return;
-    }
-
-    let isMounted = true;
-    setLoading(true);
-    const loadScores = async () => {
-      try {
-        const items = await UserScore.getByUserId(userId);
-        if (!isMounted) return;
-        setScores(getScoresWithMissingDays(items));
-      } catch (error) {
-        if (!isMounted) return;
-        setScores([]);
-        showToast(TEXTS.loadingError, 'error');
-        reportError('Failed to fetch practice overview', error);
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    void loadScores();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [showToast, userId]);
+    if (!error) return;
+    showToast(TEXTS.loadingError, 'error');
+    reportError('Failed to observe practice overview', error);
+  }, [error, showToast]);
 
   const visibleScores = scores.slice(0, visibleCount);
   const hasMoreScores = scores.length > visibleCount;

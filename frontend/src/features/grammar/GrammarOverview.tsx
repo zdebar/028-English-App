@@ -2,10 +2,9 @@ import OverviewCard from '@/components/UI/OverviewCard';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ListButton } from '@/components/UI/buttons/ListButton';
-import { useArray } from '@/hooks/use-array';
 import GrammarGroup, {
   type GrammarOverviewEntry,
 } from '@/database/models/grammar-groups';
@@ -16,6 +15,9 @@ import { DataState } from '@/components/UI/DataState';
 import GrammarDetailCard from './GrammarDetailCard';
 import { ROUTES } from '@/config/routes.config';
 import { invalidateRouteData, routeDataKey } from '@/routing/route-data-cache';
+import { useLiveQueryData } from '@/hooks/use-live-query-data';
+
+type GrammarSelection = Readonly<Pick<GrammarOverviewEntry, 'id' | 'kind'>>;
 
 export default function GrammarOverview({
   initialGrammar,
@@ -23,6 +25,7 @@ export default function GrammarOverview({
   const userId = useAuthStore((state) => state.userId);
   const navigate = useNavigate();
   const showToast = useToastStore((state) => state.showToast);
+  const [selection, setSelection] = useState<GrammarSelection | null>(null);
 
   const fetchGrammar = useCallback(async () => {
     if (!userId) {
@@ -32,16 +35,24 @@ export default function GrammarOverview({
     return GrammarGroup.getStarted(userId);
   }, [userId]);
 
-  const {
-    data: grammarList,
-    currentIndex,
-    setCurrentIndex,
-    currentItem,
-    loading,
-    hasData,
-    error,
-    reload,
-  } = useArray<GrammarOverviewEntry>(fetchGrammar, { initialData: initialGrammar });
+  const { data: grammarList, loading, error } = useLiveQueryData(fetchGrammar, {
+    emptyData: [],
+    initialData: initialGrammar,
+  });
+  const hasData = grammarList.length > 0;
+  const currentItem = useMemo(
+    () =>
+      selection
+        ? (grammarList.find(
+            (item) => item.id === selection.id && item.kind === selection.kind,
+          ) ?? null)
+        : null,
+    [grammarList, selection],
+  );
+
+  useEffect(() => {
+    if (selection && !currentItem) setSelection(null);
+  }, [currentItem, selection]);
 
   useEffect(() => {
     if (!error) return;
@@ -63,16 +74,15 @@ export default function GrammarOverview({
       }
       reportInfo(`Grammar ${currentItem.id} reset completed: ${resetCount} items reset.`);
       invalidateRouteData(routeDataKey('grammar', userId));
-      reload();
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (err) {
       showToast(TEXTS.resetProgressErrorToast, 'error');
       reportError('Failed to reset grammar progress', err);
     }
-  }, [currentItem, reload, showToast, userId]);
+  }, [currentItem, showToast, userId]);
 
   // -- List view --
-  if (currentIndex === null) {
+  if (currentItem === null) {
     return (
       <OverviewCard
         buttonTitle={TEXTS.grammarOverview}
@@ -80,11 +90,11 @@ export default function GrammarOverview({
         onClose={() => navigate(ROUTES.overviews)}
       >
         <DataState loading={loading} hasData={hasData} noDataMessage={TEXTS.noGrammar}>
-          {grammarList.map((item, index) => (
+          {grammarList.map((item) => (
             <ListButton
               key={`${item.kind}-${item.id}`}
               className="h-input justify-start px-4"
-              onClick={() => setCurrentIndex(index)}
+              onClick={() => setSelection({ id: item.id, kind: item.kind })}
               title={item.name}
             >
               {item.name}
@@ -98,7 +108,7 @@ export default function GrammarOverview({
   return (
     <GrammarDetailCard
       grammar={currentItem}
-      onClose={() => setCurrentIndex(null)}
+      onClose={() => setSelection(null)}
       onReset={handleReset}
       showHelpButton
     />

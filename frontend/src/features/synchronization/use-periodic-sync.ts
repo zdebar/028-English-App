@@ -6,6 +6,7 @@ import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { TEXTS } from '@/locales/cs';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useSyncStore } from './use-sync-store';
+import { resetRouteDataCache } from '@/routing/route-data-cache';
 
 /**
  * Runs initial, periodic, and unmount data synchronization for a signed-in user.
@@ -40,6 +41,7 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
       setSynchronizing(true);
       try {
         await dataSync(activeUserId);
+        resetRouteDataCache();
         const audioSummary = await AudioRecord.syncFromRemote();
         if (audioSummary.failed > 0) {
           reportError('Audio archive sync errors', audioSummary.sampleErrors);

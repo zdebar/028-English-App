@@ -2,7 +2,6 @@ import UserBlock from '@/database/models/user-blocks';
 import { useNavigate } from 'react-router-dom';
 import { TEXTS } from '@/locales/cs';
 import type { UserBlockType } from '@/types/generic.types';
-import { useArray } from '@/hooks/use-array';
 import { ROUTES } from '@/config/routes.config';
 import { useAuthStore } from '../auth/use-auth-store';
 import { useCallback, useEffect } from 'react';
@@ -12,6 +11,7 @@ import { DataState } from '@/components/UI/DataState';
 import OverviewCard from '@/components/UI/OverviewCard';
 import { PrefetchButton } from '@/routing/prefetch-navigation';
 import { topicDetailDescriptor } from '@/routing/route-data';
+import { useLiveQueryData } from '@/hooks/use-live-query-data';
 
 export default function TopicsOverview({
   initialTopics,
@@ -29,9 +29,12 @@ export default function TopicsOverview({
   const {
     data: topics,
     loading: topicsLoading,
-    hasData: hasTopics,
     error: topicsError,
-  } = useArray<UserBlockType>(fetchTopics, { initialData: initialTopics });
+  } = useLiveQueryData<UserBlockType[]>(fetchTopics, {
+    emptyData: [],
+    initialData: initialTopics,
+  });
+  const hasTopics = topics.length > 0;
 
   useEffect(() => {
     if (!topicsError) return;
