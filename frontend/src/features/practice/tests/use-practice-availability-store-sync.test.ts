@@ -87,13 +87,22 @@ describe('usePracticeAvailabilityStoreSync', () => {
     });
   });
 
-  it('moves scheduled items into the ready count without remounting Home', () => {
+  it('moves consecutive scheduled groups into a non-empty ready count without remounting Home', () => {
     renderHook(() => usePracticeAvailabilityStoreSync('u1'));
     act(() => {
       mocks.observers[0].next({
         readyCount: 1,
-        schedule: [{ date: '2026-07-21T10:00:01.000Z', count: 2 }],
+        schedule: [
+          { date: '2026-07-21T10:00:01.000Z', count: 1 },
+          { date: '2026-07-21T10:00:02.000Z', count: 1 },
+        ],
       });
+    });
+
+    act(() => vi.advanceTimersByTime(1000));
+    expect(usePracticeAvailabilityStore.getState()).toMatchObject({
+      readyCount: 2,
+      readySchedule: [{ date: '2026-07-21T10:00:02.000Z', count: 1 }],
     });
 
     act(() => vi.advanceTimersByTime(1000));

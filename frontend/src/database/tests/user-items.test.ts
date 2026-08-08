@@ -920,7 +920,7 @@ describe('UserItem', () => {
 
   });
 
-  it('getReadyPracticeState caps availability above the badge cap', async () => {
+  it('getReadyPracticeState caps availability at the badge cap', async () => {
     mocks.userEqualsToArray.mockResolvedValueOnce(Array.from({ length: 100 }, (_, index) => ({
       item_id: index + 1,
       is_practice_item: 1,
@@ -928,11 +928,69 @@ describe('UserItem', () => {
     })));
 
     await expect(UserItem.getReadyPracticeState('u1')).resolves.toEqual({
-      readyCount: 100,
+      readyCount: 99,
       schedule: [],
     });
 
     expect(mocks.userEqualsToArray).toHaveBeenCalledTimes(1);
+  });
+
+  it('getReadyPracticeState keeps a future schedule when some practice is already ready', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
+    mocks.userEqualsToArray.mockResolvedValueOnce([
+      {
+        item_id: 1,
+        is_practice_item: 1,
+        started_at: '1970-01-01T00:00:00.000Z',
+      },
+      {
+        item_id: 2,
+        is_practice_item: 1,
+        started_at: '1970-01-01T00:00:00.000Z',
+      },
+      {
+        item_id: 3,
+        is_practice_item: 1,
+        started_at: '2026-01-01T00:00:00.000Z',
+        next_at_cz_to_en: '2026-06-24T12:00:10.000Z',
+        next_at_en_to_cz: '2026-06-24T12:00:10.800Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+      },
+    ]);
+
+    await expect(UserItem.getReadyPracticeState('u1')).resolves.toEqual({
+      readyCount: 2,
+      schedule: [{ date: '2026-06-24T12:00:10.800Z', count: 2 }],
+    });
+  });
+
+  it('getReadyPracticeState caps ready and scheduled practice together', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
+    const readyItems = Array.from({ length: 98 }, (_, index) => ({
+      item_id: index + 1,
+      is_practice_item: 1,
+      started_at: '1970-01-01T00:00:00.000Z',
+    }));
+    mocks.userEqualsToArray.mockResolvedValueOnce([
+      ...readyItems,
+      {
+        item_id: 99,
+        is_practice_item: 1,
+        started_at: '2026-01-01T00:00:00.000Z',
+        next_at_cz_to_en: '2026-06-24T12:00:20.000Z',
+        next_at_en_to_cz: '2026-06-24T12:00:10.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+      },
+    ]);
+
+    await expect(UserItem.getReadyPracticeState('u1')).resolves.toEqual({
+      readyCount: 98,
+      schedule: [{ date: '2026-06-24T12:00:10.000Z', count: 1 }],
+    });
   });
 
   it('getReadyPracticeState schedules future vocabulary when none is ready', async () => {

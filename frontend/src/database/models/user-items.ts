@@ -441,15 +441,13 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Calculates the ready vocabulary review badge state.
    *
    * @param userId Non-empty user id whose vocabulary items should be inspected.
-   * @returns Ready count and future schedule. When ready count exceeds the badge cap, returns
-   * badgeCap + 1 and an empty schedule to indicate overflow.
+   * @returns Ready count and the nearest future schedule, capped together at the badge limit.
    * @throws Error when userId is empty.
    */
   static async getReadyPracticeState(userId: string): Promise<ReadyPracticeState> {
     assertNonEmptyString(userId, 'userId');
 
     const badgeCap = config.practice.readyPracticeBadgeCap;
-    const overflowLimit = badgeCap + 1;
     const nowIso = new Date(Date.now()).toISOString();
 
     const items = (await db.user_items.where('user_id').equals(userId).toArray()).filter(
@@ -460,21 +458,17 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
     for (const item of items) {
       const itemReadiness = getItemReadiness(item, nowIso);
-      readyCount += itemReadiness.readyCount;
+      readyCount = Math.min(badgeCap, readyCount + itemReadiness.readyCount);
       futureDates.push(...itemReadiness.futureDates);
 
-      if (readyCount > badgeCap) {
-        return { readyCount: overflowLimit, schedule: [] };
+      if (readyCount === badgeCap) {
+        return { readyCount: badgeCap, schedule: [] };
       }
     }
 
-    if (readyCount > 0) {
-      return { readyCount, schedule: [] };
-    }
-
     return {
-      readyCount: 0,
-      schedule: groupReadyPracticeSchedule(futureDates),
+      readyCount,
+      schedule: groupReadyPracticeSchedule(futureDates, badgeCap - readyCount),
     };
   }
 

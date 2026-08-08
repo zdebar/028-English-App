@@ -63,6 +63,20 @@ describe('HomePracticeButtons', () => {
     expect(mocks.navigate).toHaveBeenCalledWith('/practice');
   });
 
+  it.each([1, 39])('shows a ready badge below the cap for count %i', (readyCount) => {
+    usePracticeAvailabilityStore.setState({ readyCount, readyLoading: false });
+    render(<PracticeButton userId="u1" />);
+
+    expect(screen.getByText(String(readyCount))).toBeTruthy();
+  });
+
+  it.each([0, 40])('hides the ready badge for boundary count %i', (readyCount) => {
+    usePracticeAvailabilityStore.setState({ readyCount, readyLoading: false });
+    render(<PracticeButton userId="u1" />);
+
+    expect(screen.queryByText(String(readyCount))).toBeNull();
+  });
+
   it('disables practice when availability loading fails', () => {
     usePracticeAvailabilityStore.setState({
       readyLoading: false,
