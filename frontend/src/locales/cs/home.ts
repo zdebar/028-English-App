@@ -15,7 +15,7 @@ export const HOME_TEXTS = {
   // User
   practiceOverviewTitle: 'Přehled procvičování',
   practiceOverviewOpen: 'Otevřít přehled procvičování',
-  practiceOverviewMoreDays: '... Dalších 7 dní',
+  practiceOverviewMoreDays: '... dalších 7 dní',
   practiceOverviewNone: 'Žádné započaté dny',
   authInitErrorToast: 'Nastala chyba při přihlašování.',
 

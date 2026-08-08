@@ -71,7 +71,7 @@ export default function VocabularyList({
           className="h-button flex grow items-center border border-dashed"
         />
       </CardHeader>
-      <div className="relative w-full">
+      <div className="relative w-full py-1">
         <input
           id="vocabulary-search"
           name="vocabulary-search"
@@ -95,14 +95,16 @@ export default function VocabularyList({
         )}
       </div>
       <DataState loading={loading} hasData={hasWords} noDataMessage={TEXTS.noStartedVocabulary}>
-        {visibleItems.map((item, index) => (
-          <BilingualItemButton
-            key={item.item_id}
-            item={item}
-            leadingLanguage={displayField}
-            onClick={() => onSelect(index)}
-          />
-        ))}
+        <div className="flex flex-col gap-1">
+          {visibleItems.map((item, index) => (
+            <BilingualItemButton
+              key={item.item_id}
+              item={item}
+              leadingLanguage={displayField}
+              onClick={() => onSelect(index)}
+            />
+          ))}
+        </div>
         {remainingCount > 0 && (
           <button
             type="button"

@@ -74,12 +74,12 @@ function PracticeOverviewRow({ score }: Readonly<{ score: PracticeDayScore }>): 
 
   return (
     <div
-      className={`flex items-center justify-between gap-4 border-white px-4 pt-3 pb-1 dark:border-slate-700 ${
+      className={`h-button flex items-center justify-between gap-4 border-white px-4 dark:border-slate-700 ${
         isSunday(score.date) ? 'border-t-2 border-b' : 'border-b'
       }`}
     >
       <span
-        className={`inline-flex min-h-7 items-center ${isSunday(score.date) ? 'font-bold' : ''}`}
+        className={`my-auto inline-flex min-h-7 items-center ${isSunday(score.date) ? 'font-bold' : ''}`}
       >
         {formatPracticeDate(score.date)}
       </span>
@@ -156,7 +156,7 @@ export default function PracticeOverviewFeature({
       buttonTitle={TEXTS.practiceOverviewTitle}
       onClose={() => navigate(ROUTES.overviews)}
     >
-      <div className="flex flex-col pb-4">
+      <div className="flex flex-col">
         <DataState
           loading={loading}
           hasData={scores.length > 0}

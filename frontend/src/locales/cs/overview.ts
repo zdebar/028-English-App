@@ -20,7 +20,7 @@ export const OVERVIEW_TEXTS = {
 
   // Vocabulary Page
   translationDirection: 'Přepnout výchozí jazyk',
-  more: 'Další',
+  more: 'další',
   enterPrompt: 'Zadejte slovičko ...',
   noStartedVocabulary: 'Žádná započatá slovíčka',
   vocabularyCzechOption: 'Čeština',
@@ -35,7 +35,7 @@ export const OVERVIEW_TEXTS = {
   startedAt: 'Započato',
   updatedAt: 'Změněno',
   completedAt: 'dokončeno',
-  nextAt: 'Další',
+  nextAt: 'další',
   masteredAt: 'Naučeno',
   practiceSchedule: 'Procvičování',
   notScheduled: 'Nenaplánováno',
