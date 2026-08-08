@@ -26,11 +26,10 @@ export default function Guide(): JSX.Element {
           Aplikace přednostně vybírá procvičování. Buďte trpěliví, k novému se dostanete po
           zopakování rozučeného.
         </p>
-        <h3>Stručně:</h3>
+        <h3>Doporučení:</h3>
         <ul>
           <li>opakujte nahlas slyšené</li>
-          <li>procvičujte alespoň 400 položek denně</li>
-          <li>procvičovat můžete kdykoli a bez omezení</li>
+          <li>alespoň 400 opakování denně</li>
         </ul>
       </section>
       <section>
