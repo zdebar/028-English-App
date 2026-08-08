@@ -33,7 +33,7 @@ export default function App() {
         <OverlayMask />
         <IdentityLinkConflictModal />
         <Header />
-        <main className="max-w-card relative mx-auto flex w-full grow flex-col items-center gap-4">
+        <main className="page-content max-w-card relative mx-auto flex w-full grow flex-col items-center gap-4">
           <Outlet />
         </main>
         <Footer />

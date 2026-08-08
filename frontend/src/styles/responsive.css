@@ -6,6 +6,14 @@
   min-height: var(--height-button);
 }
 
+.page-content:has(
+  .pos-bottom-right-control,
+  .pos-bottom-left-control,
+  .pos-home-dashboard-help
+) {
+  padding-bottom: var(--height-button);
+}
+
 .pos-bottom-right-control {
   position: absolute;
   bottom: calc(-1 * var(--height-button));
@@ -22,10 +30,6 @@
   display: flex;
   align-items: center;
   gap: 0;
-}
-
-.help-btn-margin {
-  margin-bottom: 60px;
 }
 
 .pos-help-top-right {
@@ -53,6 +57,14 @@
 }
 
 @media (max-height: 400px) {
+  .page-content:has(.pos-bottom-right-control, .pos-bottom-left-control) {
+    padding-bottom: 0;
+  }
+
+  .page-content:has(.pos-home-dashboard-help) {
+    padding-bottom: var(--height-button);
+  }
+
   .pos-bottom-right-control {
     --short-card-width: max(var(--min-width-card), min(calc(100vw - 18rem), var(--max-width-card)));
     position: fixed;
@@ -66,9 +78,6 @@
     left: max(0px, calc(((100vw - var(--short-card-width)) / 2) - var(--size-button)));
     bottom: 0;
     flex-direction: column-reverse;
-  }
-  .help-btn-margin {
-    margin-bottom: 0px;
   }
 }
 
