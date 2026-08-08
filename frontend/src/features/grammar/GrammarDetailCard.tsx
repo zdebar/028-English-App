@@ -78,10 +78,7 @@ export default function GrammarDetailCard({
     if (!note) return null;
 
     return (
-      <div
-        className="grammar p-4"
-        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note) }}
-      />
+      <div className="grammar m-4" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note) }} />
     );
   };
 
@@ -103,7 +100,7 @@ export default function GrammarDetailCard({
           {renderNote(grammar.note)}
           {grammar.chunks.map((chunk) => (
             <section key={chunk.id}>
-              <h2 className="h-button mt-4 px-4 pt-4 text-left text-lg font-bold">{chunk.name}</h2>
+              <h2 className="h-button m-4 text-left text-lg font-bold">{chunk.name}</h2>
               {renderNote(chunk.note)}
               {renderItems(chunk.items)}
             </section>

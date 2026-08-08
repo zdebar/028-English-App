@@ -5,7 +5,6 @@ const mocks = vi.hoisted(() => ({
   userId: 'u1',
   navigate: vi.fn(),
   resetItemById: vi.fn(),
-  reload: vi.fn(),
   showToast: vi.fn(),
   reportInfo: vi.fn(),
   reportError: vi.fn(),
@@ -58,7 +57,6 @@ vi.mock('@/features/vocabulary/use-vocabulary', () => ({
     return {
       loading: mocks.vocab.loading,
       error: mocks.vocab.error,
-      reload: mocks.reload,
       visibleCount: mocks.vocab.visibleCount,
       setVisibleCount: (v: number) => mocks.vocab.setVisibleCount(v),
       searchTerm: mocks.vocab.searchTerm,
@@ -142,7 +140,6 @@ describe('VocabularyOverview', () => {
     mocks.vocab.displayField = 'english';
     mocks.vocab.selectedWord = null;
     mocks.vocab.filteredWords = [];
-    mocks.reload.mockResolvedValue(undefined);
     mocks.resetItemById.mockResolvedValue(3);
   });
 
@@ -195,7 +192,6 @@ describe('VocabularyOverview', () => {
     fireEvent.click(screen.getByTestId('detail-reset'));
     await waitFor(() => {
       expect(mocks.resetItemById).toHaveBeenCalledWith('u1', 3);
-      expect(mocks.reload).toHaveBeenCalledTimes(1);
       expect(mocks.vocab.setSelectedWord).toHaveBeenCalledWith(null);
       expect(mocks.showToast).toHaveBeenCalledWith('Reset success', 'success');
       expect(mocks.reportInfo).toHaveBeenCalledWith('Vocabulary item reset completed: item 3.');

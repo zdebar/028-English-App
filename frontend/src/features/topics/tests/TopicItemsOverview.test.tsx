@@ -34,19 +34,19 @@ vi.mock('@/features/toast/use-toast-store', () => ({
     selector({ showToast: mocks.showToast }),
 }));
 
-vi.mock('@/hooks/use-array', () => ({
-  useArray: () => ({
-    data: mocks.state.items,
-    loading: mocks.state.itemsLoading,
-    hasData: mocks.state.items.length > 0,
-  }),
-}));
-
-vi.mock('@/hooks/use-fetch', () => ({
-  useFetch: () => ({
-    data: mocks.state.block,
-    loading: mocks.state.blockLoading,
-  }),
+vi.mock('@/hooks/use-live-query-data', () => ({
+  useLiveQueryData: (_query: unknown, options: { emptyData: unknown }) =>
+    Array.isArray(options.emptyData)
+      ? {
+          data: mocks.state.items,
+          loading: mocks.state.itemsLoading,
+          error: null,
+        }
+      : {
+          data: mocks.state.block,
+          loading: mocks.state.blockLoading,
+          error: null,
+        },
 }));
 
 vi.mock('@/features/audio/use-audio-manager', () => ({

@@ -56,43 +56,41 @@ export default function LevelsOverview({
 
   return (
     <OverviewCard onClose={() => navigate(ROUTES.overviews)} buttonTitle={TEXTS.levelsOverview}>
-      <DataState
-        loading={false}
-        hasData={levels.length > 0}
-        noDataMessage={TEXTS.noDashboardData}
-      >
-        {levels.map((level) => (
-          <div key={level.id} className="flex flex-col gap-1">
-            <ListButton
-              className="flex justify-start p-4 text-left"
-              onClick={() => handleLevelClick(level.id)}
-              disabled={level.lessons.length === 0}
-            >
-              <div className="flex w-full items-center justify-between">
-                <p title={`${TEXTS.levelName}`}>{level.name}</p>
-                <GoalMetView
-                  current={level.startedCount}
-                  goal={level['totalCount']}
-                  title={TEXTS.levelsStartedHelp}
-                />
-              </div>
-            </ListButton>
-            {unpackedLevelId === level.id && (
-              <div className="flex flex-col gap-1">
-                {level.lessons.map((lesson) => (
-                  <BlockBar
-                    key={lesson.id}
-                    lessonName={lesson.name ?? ''}
-                    lessonNumber={lesson.sort_order}
-                    previousCount={(lesson.startedCount ?? 0) - (lesson.startedTodayCount ?? 0)}
-                    todayCount={lesson.startedTodayCount ?? 0}
-                    lessonCount={lesson.totalCount ?? 1}
+      <DataState loading={false} hasData={levels.length > 0} noDataMessage={TEXTS.noDashboardData}>
+        <div className="pt-1">
+          {levels.map((level) => (
+            <div key={level.id} className="flex flex-col gap-1">
+              <ListButton
+                className="flex justify-start p-4 text-left"
+                onClick={() => handleLevelClick(level.id)}
+                disabled={level.lessons.length === 0}
+              >
+                <div className="flex w-full items-center justify-between">
+                  <p title={`${TEXTS.levelName}`}>{level.name}</p>
+                  <GoalMetView
+                    current={level.startedCount}
+                    goal={level['totalCount']}
+                    title={TEXTS.levelsStartedHelp}
                   />
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
+                </div>
+              </ListButton>
+              {unpackedLevelId === level.id && (
+                <div className="flex flex-col gap-1">
+                  {level.lessons.map((lesson) => (
+                    <BlockBar
+                      key={lesson.id}
+                      lessonName={lesson.name ?? ''}
+                      lessonNumber={lesson.sort_order}
+                      previousCount={(lesson.startedCount ?? 0) - (lesson.startedTodayCount ?? 0)}
+                      todayCount={lesson.startedTodayCount ?? 0}
+                      lessonCount={lesson.totalCount ?? 1}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
 
         <HelpText className="top-20 right-2">{TEXTS.levelsStartedHelp}</HelpText>
         <div className="pos-bottom-right-control">

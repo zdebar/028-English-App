@@ -150,29 +150,13 @@ export function filterSortedWords(
     return sortedWords.slice(0, visibleCount);
   }
 
-  // Binary search lower bound: first item that is not smaller than search term.
-  let left = 0;
-  let right = sortedWords.length;
-
-  while (left < right) {
-    const mid = Math.floor((left + right) / 2);
-    const value = (sortedWords[mid][displayField] || '').toLowerCase();
-    if (compareCzechStrings(value, normalizedSearch) < 0) {
-      left = mid + 1;
-    } else {
-      right = mid;
-    }
-  }
-
-  const firstMatch = left;
   const result: UserItemLocal[] = [];
-  for (let i = firstMatch; i < sortedWords.length && result.length < visibleCount; i++) {
-    const value = (sortedWords[i][displayField] || '').toLowerCase();
-    if (value.startsWith(normalizedSearch)) {
-      result.push(sortedWords[i]);
-    } else {
-      break;
-    }
+  for (const word of sortedWords) {
+    const value = (word[displayField] || '').toLowerCase();
+    if (!value.startsWith(normalizedSearch)) continue;
+
+    result.push(word);
+    if (result.length === visibleCount) break;
   }
 
   return result;

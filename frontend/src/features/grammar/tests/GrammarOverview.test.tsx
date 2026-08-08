@@ -4,9 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   userId: 'u1',
   navigate: vi.fn(),
-  setCurrentIndex: vi.fn(),
   sanitize: vi.fn(),
-  reload: vi.fn(),
   resetItemsByGrammarGroupId: vi.fn(),
   resetItemsByGrammarChunkId: vi.fn(),
   resetByGrammarGroupId: vi.fn(),
@@ -16,8 +14,6 @@ const mocks = vi.hoisted(() => ({
   reportError: vi.fn(),
   arrayState: {
     data: [] as any[],
-    currentIndex: null as number | null,
-    currentItem: null as any,
   },
 }));
 
@@ -60,15 +56,11 @@ vi.mock('@/features/logging/monitoring-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
 
-vi.mock('@/hooks/use-array', () => ({
-  useArray: () => ({
+vi.mock('@/hooks/use-live-query-data', () => ({
+  useLiveQueryData: () => ({
     data: mocks.arrayState.data,
-    currentIndex: mocks.arrayState.currentIndex,
-    currentItem: mocks.arrayState.currentItem,
     loading: false,
-    hasData: mocks.arrayState.data.length > 0,
-    reload: mocks.reload,
-    setCurrentIndex: mocks.setCurrentIndex,
+    error: null,
   }),
 }));
 
@@ -144,8 +136,6 @@ describe('GrammarOverview', () => {
     mocks.userId = 'u1';
     mocks.arrayState = {
       data: [],
-      currentIndex: null,
-      currentItem: null,
     };
     mocks.sanitize.mockImplementation((value: string) => value);
     mocks.resetItemsByGrammarGroupId.mockResolvedValue(4);
@@ -167,7 +157,7 @@ describe('GrammarOverview', () => {
     expect(buttons).toHaveLength(2);
 
     fireEvent.click(buttons[1]);
-    expect(mocks.setCurrentIndex).toHaveBeenCalledWith(1);
+    expect(screen.getByText('Conditionals')).toBeTruthy();
   });
 
   it('renders empty-state message when no grammar exists', () => {
@@ -179,48 +169,67 @@ describe('GrammarOverview', () => {
   });
 
   it('renders grammar card view and can close', () => {
-    mocks.arrayState.currentIndex = 0;
-    mocks.arrayState.currentItem = {
+    mocks.arrayState.data = [{
       id: 3,
       kind: 'group',
       name: 'Articles',
       note: '<b>safe</b>',
       chunks: [],
-    };
+    }];
     render(<GrammarOverview />);
+
+    fireEvent.click(screen.getByTestId('grammar-button'));
 
     expect(screen.getByText('Articles')).toBeTruthy();
 
     fireEvent.click(screen.getByTestId('overview-close'));
-    expect(mocks.setCurrentIndex).toHaveBeenCalledWith(null);
+    expect(screen.getByText('Grammar overview')).toBeTruthy();
   });
 
   it('renders detail card view without reset side effects', async () => {
-    mocks.arrayState.currentIndex = 0;
-    mocks.arrayState.currentItem = {
+    mocks.arrayState.data = [{
       id: 8,
       kind: 'group',
       name: 'Reported speech',
       note: null,
       chunks: [],
-    };
+    }];
 
     render(<GrammarOverview />);
+    fireEvent.click(screen.getByTestId('grammar-button'));
     expect(screen.getByText('Reported speech')).toBeTruthy();
     expect(screen.getByTestId('help-button')).toBeTruthy();
   });
 
+  it('keeps selection by identity across live data updates and closes it when removed', () => {
+    mocks.arrayState.data = [
+      { id: 8, kind: 'group', name: 'Original name', note: null, chunks: [] },
+    ];
+    const { rerender } = render(<GrammarOverview />);
+    fireEvent.click(screen.getByTestId('grammar-button'));
+
+    mocks.arrayState.data = [
+      { id: 8, kind: 'group', name: 'Updated name', note: null, chunks: [] },
+    ];
+    rerender(<GrammarOverview />);
+    expect(screen.getByText('Updated name')).toBeTruthy();
+
+    mocks.arrayState.data = [];
+    rerender(<GrammarOverview />);
+    expect(screen.getByText('Grammar overview')).toBeTruthy();
+  });
+
   it('resets grammar progress and logs completion info', async () => {
-    mocks.arrayState.currentIndex = 0;
-    mocks.arrayState.currentItem = {
+    mocks.arrayState.data = [{
       id: 8,
       kind: 'group',
       name: 'Reported speech',
       note: null,
       chunks: [],
-    };
+    }];
 
     render(<GrammarOverview />);
+    fireEvent.click(screen.getByTestId('grammar-button'));
 
     fireEvent.click(screen.getByTestId('overview-reset'));
 
@@ -234,16 +243,16 @@ describe('GrammarOverview', () => {
   });
 
   it('resets an ungrouped grammar chunk directly', async () => {
-    mocks.arrayState.currentIndex = 0;
-    mocks.arrayState.currentItem = {
+    mocks.arrayState.data = [{
       id: 8,
       kind: 'chunk',
       name: 'Standalone grammar',
       note: null,
       items: [],
-    };
+    }];
 
     render(<GrammarOverview />);
+    fireEvent.click(screen.getByTestId('grammar-button'));
     fireEvent.click(screen.getByTestId('overview-reset'));
 
     await waitFor(() => {
@@ -259,16 +268,16 @@ describe('GrammarOverview', () => {
   it('shows error toast when item reset fails', async () => {
     const error = new Error('Dexie failure');
     mocks.resetItemsByGrammarGroupId.mockRejectedValueOnce(error);
-    mocks.arrayState.currentIndex = 0;
-    mocks.arrayState.currentItem = {
+    mocks.arrayState.data = [{
       id: 8,
       kind: 'group',
       name: 'Reported speech',
       note: null,
       chunks: [],
-    };
+    }];
 
     render(<GrammarOverview />);
+    fireEvent.click(screen.getByTestId('grammar-button'));
 
     fireEvent.click(screen.getByTestId('overview-reset'));
 

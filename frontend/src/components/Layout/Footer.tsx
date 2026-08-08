@@ -10,7 +10,7 @@ const currentYear = new Date().getFullYear();
  */
 export default function Footer(): JSX.Element {
   return (
-    <footer className="mx-auto p-4 text-sm landscape:hidden">
+    <footer className="m-4 mx-auto text-sm">
       <span>© {currentYear} </span>
       <PrivacyPolicyLink />
     </footer>

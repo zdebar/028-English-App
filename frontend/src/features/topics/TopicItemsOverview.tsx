@@ -4,12 +4,10 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
-import { useArray } from '@/hooks/use-array';
 import { TEXTS } from '@/locales/cs';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo } from 'react';
 import UserBlock from '@/database/models/user-blocks';
-import { useFetch } from '@/hooks/use-fetch';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { UserBlockType } from '@/types/generic.types';
 import { DataState } from '@/components/UI/DataState';
@@ -19,6 +17,7 @@ import OverviewCard from '@/components/UI/OverviewCard';
 import VolumeSlider from '../audio/VolumeSlider';
 import { invalidateRouteData, routeDataKey } from '@/routing/route-data-cache';
 import { usePrefetchPreparation } from '@/routing/prefetch-navigation';
+import { useLiveQueryData } from '@/hooks/use-live-query-data';
 
 export default function TopicItemsOverview({
   initialTopic,
@@ -60,7 +59,10 @@ export default function TopicItemsOverview({
     data: topic,
     loading: topicLoading,
     error: topicError,
-  } = useFetch<UserBlockType>(fetchTopic, { initialData: initialTopic });
+  } = useLiveQueryData<UserBlockType | null>(fetchTopic, {
+    emptyData: null,
+    initialData: initialTopic,
+  });
 
   // -- Items management --
   const fetchBlockItems = useCallback(async () => {
@@ -71,9 +73,17 @@ export default function TopicItemsOverview({
   const {
     data: items,
     loading: itemsLoading,
-    hasData: hasItems,
     error: itemsError,
-  } = useArray<UserItemLocal>(fetchBlockItems, { initialData: initialItems });
+  } = useLiveQueryData<UserItemLocal[]>(fetchBlockItems, {
+    emptyData: [],
+    initialData: initialItems,
+  });
+  const hasItems = items.length > 0;
+
+  useEffect(() => {
+    if (topicLoading || !userId || !blockId || topic !== null) return;
+    navigate(ROUTES.topics, { replace: true });
+  }, [blockId, navigate, topic, topicLoading, userId]);
 
   useEffect(() => {
     if (!topicError) return;
@@ -125,20 +135,22 @@ export default function TopicItemsOverview({
       onClose={onClose}
     >
       <DataState loading={itemsLoading} hasData={hasItems} noDataMessage={TEXTS.noTopicItems}>
-        {items.map((item) => (
-          <BilingualItemButton
-            key={item.item_id}
-            item={item}
-            onClick={async () => {
-              if (!item.audio) return;
-              const didPlay = await playAudio(item.audio);
-              if (!didPlay) {
-                showToast(TEXTS.noAudio, 'error');
-              }
-            }}
-            disabled={!item.audio || (!audioLoading && !isAudioReady(item.audio))}
-          />
-        ))}
+        <div className="mt-1 flex flex-col gap-1">
+          {items.map((item) => (
+            <BilingualItemButton
+              key={item.item_id}
+              item={item}
+              onClick={async () => {
+                if (!item.audio) return;
+                const didPlay = await playAudio(item.audio);
+                if (!didPlay) {
+                  showToast(TEXTS.noAudio, 'error');
+                }
+              }}
+              disabled={!item.audio || (!audioLoading && !isAudioReady(item.audio))}
+            />
+          ))}
+        </div>
       </DataState>
       <div className="pos-bottom-left-control">
         <VolumeSlider />

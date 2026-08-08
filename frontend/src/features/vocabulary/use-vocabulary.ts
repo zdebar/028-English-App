@@ -1,10 +1,10 @@
 import config from '@/config/config';
 import UserItem from '@/database/models/user-items';
-import { useArray } from '@/hooks/use-array';
 import type { UserItemLocal } from '@/types/user-item.types';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { compareCzechStrings, filterSortedWords, type DisplayField } from './vocabulary.utils';
 import { useLocalStorageSync } from '@/hooks/use-local-storage-sync';
+import { useLiveQueryData } from '@/hooks/use-live-query-data';
 
 const INITIAL_VISIBLE_COUNT = config.vocabulary.itemsPerPage;
 const SEARCH_KEY = 'vocabulary_search_term';
@@ -21,7 +21,8 @@ export function useVocabulary(userId: string | null, initialWords?: UserItemLoca
     return UserItem.getStartedVocabulary(userId);
   }, [userId]);
 
-  const { data: words, loading, error, reload } = useArray<UserItemLocal>(fetchVocabulary, {
+  const { data: words, loading, error } = useLiveQueryData(fetchVocabulary, {
+    emptyData: [],
     initialData: initialWords,
   });
 
@@ -31,7 +32,18 @@ export function useVocabulary(userId: string | null, initialWords?: UserItemLoca
     `${DISPLAY_FIELD_KEY}_${userId}`,
     'english',
   );
-  const [selectedWord, setSelectedWord] = useState<UserItemLocal | null>(null);
+  const [selectedWordId, setSelectedWordId] = useState<number | null>(null);
+  const selectedWord = useMemo(
+    () => words.find((word) => word.item_id === selectedWordId) ?? null,
+    [selectedWordId, words],
+  );
+  const setSelectedWord = useCallback((word: UserItemLocal | null) => {
+    setSelectedWordId(word?.item_id ?? null);
+  }, []);
+
+  useEffect(() => {
+    if (selectedWordId !== null && selectedWord === null) setSelectedWordId(null);
+  }, [selectedWord, selectedWordId]);
 
   const sortedByEnglish = useMemo(() => {
     const result = [...words];
@@ -58,7 +70,6 @@ export function useVocabulary(userId: string | null, initialWords?: UserItemLoca
   return {
     loading,
     error,
-    reload,
     visibleCount,
     setVisibleCount,
     searchTerm,

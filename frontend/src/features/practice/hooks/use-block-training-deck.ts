@@ -242,7 +242,9 @@ export function useBlockTrainingDeck(
         'skip',
         dateTime,
       );
-      const remainingItems = items.filter((item) => item.item_id !== currentItem.item_id);
+      const updatedItems = items.map((item) =>
+        item.item_id === currentItem.item_id ? skippedItem : item,
+      );
       const remainingCurrentQueue = currentQueue
         .slice(1)
         .filter((item) => item.item_id !== currentItem.item_id);
@@ -257,21 +259,15 @@ export function useBlockTrainingDeck(
         next.add(currentItem.item_id);
         return next;
       });
-      setItems(remainingItems);
+      setItems(updatedItems);
 
-      if (remainingItems.length === 0) {
-        await completeBlock(dateTime);
-        return;
-      }
-
-      await setNextQueueState(remainingCurrentQueue, remainingNextWaveQueue, remainingItems);
+      await setNextQueueState(remainingCurrentQueue, remainingNextWaveQueue, updatedItems);
     } catch (error) {
       reportError('Failed to skip block training item', error);
       throw error;
     }
   }, [
     block,
-    completeBlock,
     currentItem,
     currentQueue,
     isComplete,

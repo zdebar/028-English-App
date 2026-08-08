@@ -12,7 +12,7 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import { useToastStore } from '@/features/toast/use-toast-store';
-import { useFetch } from '@/hooks/use-fetch';
+import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { TEXTS } from '@/locales/cs';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -35,7 +35,10 @@ export default function PronunciationGroupDetail({
         : Promise.resolve(null),
     [userId, validGroupId],
   );
-  const { data, loading, error, reload } = useFetch(fetchDetail, { initialData });
+  const { data, loading, error } = useLiveQueryData(fetchDetail, {
+    emptyData: null,
+    initialData,
+  });
   const audios = useMemo(
     () =>
       data?.items.map((item) => item.audio).filter((audio): audio is string => Boolean(audio)) ??
@@ -50,6 +53,11 @@ export default function PronunciationGroupDetail({
   }, [navigate, validGroupId]);
 
   useEffect(() => {
+    if (loading || !userId || !validGroupId || data !== null) return;
+    navigate(ROUTES.pronunciationGroups, { replace: true });
+  }, [data, loading, navigate, userId, validGroupId]);
+
+  useEffect(() => {
     if (!error) return;
     showToast(TEXTS.loadingError, 'error');
     reportError('Failed to fetch pronunciation group detail', error);
@@ -60,7 +68,6 @@ export default function PronunciationGroupDetail({
     try {
       await PronunciationGroup.addAvailableItems(userId, validGroupId);
       invalidateRouteData(routeDataKey('pronunciation-group-detail', userId, validGroupId));
-      reload();
     } catch (error) {
       reportError('Failed to add pronunciation group', error);
       showToast(TEXTS.pronunciationGroupAddError, 'error');

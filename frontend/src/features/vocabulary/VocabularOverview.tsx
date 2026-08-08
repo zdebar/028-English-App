@@ -27,7 +27,6 @@ export default function VocabularyOverview({
   const {
     loading,
     error,
-    reload,
     visibleCount,
     setVisibleCount,
     searchTerm,
@@ -58,12 +57,11 @@ export default function VocabularyOverview({
       reportInfo(`Vocabulary item reset completed: item ${resetItemId}.`);
       showToast(TEXTS.resetProgressSuccessToast, 'success');
       setSelectedWord(null);
-      reload();
     } catch (error) {
       showToast(TEXTS.resetProgressErrorToast, 'error');
       reportError('Reset User Item Error', error);
     }
-  }, [selectedWord, userId, reload, showToast]);
+  }, [selectedWord, userId, showToast, setSelectedWord]);
 
   const handleSelectWord = useCallback(
     (index: number) => {

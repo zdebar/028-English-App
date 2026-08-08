@@ -10,15 +10,15 @@
   }
 
   h1 {  
-    @apply font-headings py-2 text-4xl font-thin;
+    @apply font-headings my-2 text-4xl font-thin;
   }
 
   h2 {
-    @apply font-headings py-2 text-xl font-thin;
+    @apply font-headings my-2 text-xl font-thin;
   }
 
   h3 {
-    @apply font-headings py-2 text-xl font-thin;
+    @apply font-headings my-2 text-xl font-thin;
   }
 
   ul {
@@ -32,7 +32,7 @@
   th,
   tr,
   td {
-    @apply border px-2 py-1;
+    @apply border mx-2 my-1;
   }
 
   a {

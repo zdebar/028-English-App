@@ -116,7 +116,7 @@ export default function VocabularyDetailCard({
       modalTitle={TEXTS.restartItemProgress}
       className="relative"
     >
-      <div className="flex flex-col gap-4 p-4">
+      <div className="m-4 flex flex-col gap-4">
         <div>
           {baseProperties.map((property) => (
             <PropertyView
