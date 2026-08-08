@@ -193,7 +193,7 @@ export function StarRow({
   tierCounts.reverse();
 
   if (safeStarCount === 0) {
-    return <div className="relative flex flex-wrap items-center gap-3 overflow-visible" />;
+    return <div />;
   }
 
   return (
@@ -299,6 +299,7 @@ function DetailedStarTierRow({
           <span
             key={`${state.activeTier}-${index}`}
             aria-label={getStarTierAriaLabel(state.activeTier, index + 1, starsPerRow)}
+            className="flex items-center"
           >
             {isFilledStar ? (
               <FullStar className={tierStyle.fillClassName} size={size} />
@@ -332,7 +333,10 @@ export default function StarProgressOverview({
   const showBronzeRow = state.completedTiers === 0;
 
   return (
-    <div className="flex flex-col items-center gap-2" aria-label={getDailyStarProgressLabel()}>
+    <div
+      className="flex flex-col items-center justify-center gap-2"
+      aria-label={getDailyStarProgressLabel()}
+    >
       {showBronzeRow ? (
         <DetailedStarTierRow count={count} countPerStar={chunkSize} starsPerRow={starsPerRow} />
       ) : (
