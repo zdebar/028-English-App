@@ -22,9 +22,7 @@ type BlockTrainingOverviewCardProps = Readonly<{
 }>;
 
 function Note({ note }: Readonly<{ note: string }>): JSX.Element {
-  return (
-    <div className="grammar m-4" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note) }} />
-  );
+  return <div className="m-4" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note) }} />;
 }
 
 /** Introduces the selected block and its optional grammar before initial training begins. */
