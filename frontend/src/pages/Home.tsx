@@ -48,7 +48,7 @@ export default function Home(): JSX.Element {
     <>
       {userId ? (
         <div className="card-width relative flex h-full w-full grow flex-col justify-start sm:gap-4">
-          <div className="pt-6 pb-4">
+          <div className="mt-6 mb-4">
             <PropertyView
               label={TEXTS.profileNameLabel}
               className="justify-center"
