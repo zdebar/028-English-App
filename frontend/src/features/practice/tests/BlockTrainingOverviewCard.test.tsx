@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/locales/cs', () => ({
@@ -10,6 +10,10 @@ vi.mock('@/locales/cs', () => ({
 }));
 
 import BlockTrainingOverviewCard from '@/features/practice/BlockTrainingOverviewCard';
+
+function LocationProbe() {
+  return <span data-testid="location">{useLocation().pathname}</span>;
+}
 
 describe('BlockTrainingOverviewCard', () => {
   it('renders only the grammar content when grammar is attached', () => {
@@ -23,22 +27,25 @@ describe('BlockTrainingOverviewCard', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole('heading', { name: 'Articles' })).toBeTruthy();
-    expect(screen.queryByRole('heading', { name: 'Block A' })).toBeNull();
+    expect((screen.getByRole('button', { name: 'Articles' }) as HTMLButtonElement).disabled).toBe(
+      true,
+    );
+    expect(screen.queryByRole('button', { name: 'Block A' })).toBeNull();
     expect(screen.queryByText('Block note')).toBeNull();
     expect(screen.getByText('Grammar note')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy();
   });
 
-  it('omits empty notes and calls the continue action without rendering a close action', () => {
+  it('omits empty notes, continues training, and closes to the home page', () => {
     const onContinue = vi.fn();
     render(
-      <MemoryRouter>
+      <MemoryRouter initialEntries={['/practice/block-training']}>
         <BlockTrainingOverviewCard
           block={{ name: 'Block A', note: null }}
           grammar={{ kind: 'chunk', id: 1, name: 'Articles', note: null }}
           onContinue={onContinue}
         />
+        <LocationProbe />
       </MemoryRouter>,
     );
 
@@ -46,7 +53,8 @@ describe('BlockTrainingOverviewCard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
 
     expect(onContinue).toHaveBeenCalledOnce();
-    expect(screen.queryByTitle(/Close/)).toBeNull();
+    fireEvent.click(screen.getByTitle(/Close/));
+    expect(screen.getByTestId('location').textContent).toBe('/');
   });
 
   it('shows only the block explanation when no grammar is attached', () => {
@@ -60,8 +68,10 @@ describe('BlockTrainingOverviewCard', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole('heading', { name: 'Pronouns' })).toBeTruthy();
+    expect((screen.getByRole('button', { name: 'Pronouns' }) as HTMLButtonElement).disabled).toBe(
+      true,
+    );
     expect(screen.getByText('Block explanation')).toBeTruthy();
-    expect(screen.queryByRole('heading', { level: 2 })).toBeNull();
+    expect(screen.queryByRole('heading')).toBeNull();
   });
 });
