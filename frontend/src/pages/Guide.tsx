@@ -78,7 +78,7 @@ export default function Guide(): JSX.Element {
         <h3>Nápověda</h3>
         <p>Písmeno po písmenu odhaluje slovíčko či větu.</p>
         <h3>Přidat do výslovnosti</h3>
-        <p>Přidá danou položku do "Výslovnost - položky".</p>
+        <p>Přidá / odebere danou položku do / z "Výslovnost - položky".</p>
         <h3>Gramatika</h3>
         <p>Zobrazí vysvětlení příslušné gramatiky.</p>
         <h3>Poznámka</h3>
