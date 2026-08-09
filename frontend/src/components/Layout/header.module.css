@@ -7,9 +7,9 @@
   }
 }
 
-@media (min-height: 640px) {
+@media (min-height: 768px) {
   .header-fixed {
-    margin-bottom: 80px;
+    margin-bottom: 40px;
   }
 }
 

@@ -77,7 +77,7 @@ whole run, such as `05_plurals_20260715T132045Z.csv`.
 - eSpeak NG installed at `C:/Program Files/eSpeak NG/espeak-ng.exe`.
 - `GOOGLE_APPLICATION_CREDENTIALS` configured in `.env` for Google Cloud TTS.
 - Optional voice tuning in `.env`: `GCP_TTS_VOICE_NAME`,
-  `GCP_TTS_SPEAKING_RATE`, and `GCP_TTS_PITCH`.
+  `GCP_TTS_IPA_VOICE_NAME`, `GCP_TTS_SPEAKING_RATE`, and `GCP_TTS_PITCH`.
 
 Audio filenames are stable by default: `Good morning!` becomes
 `good_morning.opus`. Set `include_audio_timestamp=True` when calling either
@@ -112,9 +112,11 @@ every CSV in `prepare/`, including generated outputs.
 ## Related scripts
 
 - `scripts/prepare_audio_from_IPA.py` follows the same folder/timestamp convention,
-  but generates TTS using the IPA pronunciation in SSML. Use it when IPA-guided
-  audio is desired instead of the normal text-based audio produced by
-  `prepare_words.py`.
+  but generates TTS from the IPA value in the `pronunciation` column using the
+  US English Neural2 voice. IPA may be written as `lɪv` or `/lɪv/`; surrounding
+  slashes are removed before creating the SSML phoneme. The script replaces
+  same-named audio files so an existing English-based recording cannot prevent
+  IPA-guided synthesis.
 - `scripts/convert_grammar.py` converts `note`/`NOTE` HTML in a grammar CSV to
   `dl.grammar-pairs` HTML. It is unrelated to the vocabulary preparation and
   marking workflow.
