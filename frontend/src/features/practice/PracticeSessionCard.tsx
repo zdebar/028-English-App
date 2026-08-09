@@ -227,9 +227,15 @@ export default function PracticeSessionCard({
               <Notification>{directionText}</Notification>
             ) : (
               <div id="item" className="flex flex-col justify-center gap-1">
-                <p className="text-center font-bold">{czech}</p>
-                <p className="text-center font-normal">{english}</p>
-                <p className="text-center font-normal">{pronunciation}</p>
+                <p lang="cs" className="text-center font-bold">
+                  {czech}
+                </p>
+                <p lang="en" translate="no" className="text-center font-normal">
+                  {english}
+                </p>
+                <p translate="no" className="text-center font-normal">
+                  {pronunciation}
+                </p>
               </div>
             )}
           </div>
