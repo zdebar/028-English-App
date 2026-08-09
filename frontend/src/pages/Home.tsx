@@ -77,7 +77,7 @@ export default function Home(): JSX.Element {
             <PronunciationPracticeButton userId={userId} />
             <PronunciationGroupsButton />
           </div>
-          <div className="relative mb-12">
+          <div className="relative">
             <p
               className={`text-error-light dark:text-error-dark px-4 py-2 text-center text-sm ${isSyncError ? 'visible' : 'invisible'}`}
             >
