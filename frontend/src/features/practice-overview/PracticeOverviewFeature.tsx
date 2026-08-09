@@ -126,7 +126,7 @@ export default function PracticeOverviewFeature({
       buttonTitle={TEXTS.practiceOverviewTitle}
       onClose={() => navigate(ROUTES.overviews)}
     >
-      <div className="flex flex-col">
+      <div className="flex flex-col pt-1">
         <DataState
           loading={loading}
           hasData={scores.length > 0}
