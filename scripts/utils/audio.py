@@ -169,7 +169,8 @@ async def generate_audio_with_google_cloud_from_ipa(
     df: pd.DataFrame,
     audio_folder: str,
     suffix: str = "",
-    language_code: str = "en-GB",
+    language_code: str = "en-US",
+    overwrite_existing: bool = False,
 ) -> pd.DataFrame:
     if texttospeech is None:
         raise ImportError("Missing dependency: google-cloud-texttospeech. Install with 'pip install google-cloud-texttospeech'.")
@@ -178,7 +179,7 @@ async def generate_audio_with_google_cloud_from_ipa(
     audio_tasks: list[Awaitable[None]] = []
     audio_names: list[str] = []
 
-    voice_name = os.getenv("GCP_TTS_VOICE_NAME", "en-GB-Neural2-C")
+    voice_name = os.getenv("GCP_TTS_IPA_VOICE_NAME", "en-US-Neural2-F")
     speaking_rate_raw = os.getenv("GCP_TTS_SPEAKING_RATE", "1")
     pitch_raw = os.getenv("GCP_TTS_PITCH", "0.0")
     try:
@@ -212,7 +213,10 @@ async def generate_audio_with_google_cloud_from_ipa(
 
     for _, row in df.iterrows():
         english = str(row.get("english", ""))
-        ipa_pron = str(row.get("pronunciation", "")).strip()
+        pronunciation_value = row.get("pronunciation", "")
+        ipa_pronunciation = "" if pd.isna(pronunciation_value) else str(pronunciation_value).strip()
+        if ipa_pronunciation.startswith("/") and ipa_pronunciation.endswith("/"):
+            ipa_pronunciation = ipa_pronunciation[1:-1].strip()
         cleaned_word = clean_filename(english)
         if not cleaned_word:
             continue
@@ -222,19 +226,19 @@ async def generate_audio_with_google_cloud_from_ipa(
         audio_names.append(extension_word)
 
         audio_path = os.path.join(audio_folder, extension_word)
-        if os.path.exists(audio_path):
+        if os.path.exists(audio_path) and not overwrite_existing:
             print(f"Skipping (audio already exists): {audio_path}")
             continue
 
-        if not ipa_pron:
-            print(f"Skipping (missing IPA): {english}")
+        if not ipa_pronunciation:
+            print(f"Skipping (missing IPA pronunciation): {english}")
             continue
 
         try:
             ssml = (
-                "<speak><phoneme alphabet=\"ipa\" ph=\""
-                + html.escape(ipa_pron, quote=True)
-                + "\">"
+                '<speak><phoneme alphabet="ipa" ph="'
+                + html.escape(ipa_pronunciation, quote=True)
+                + '">'
                 + html.escape(english)
                 + "</phoneme></speak>"
             )
@@ -259,7 +263,10 @@ async def generate_audio_with_google_cloud_from_ipa(
             audio_tasks.append(asyncio.to_thread(save_audio, response.audio_content, audio_path))
             print(f"Queued IPA audio generation with Google Cloud: {extension_word}")
         except Exception as e:
-            print(f"Error generating IPA audio for word '{english}' (IPA '{ipa_pron}'): {e}")
+            print(
+                f"Error generating IPA audio for word "
+                f"'{english}' (IPA {ascii(ipa_pronunciation)}): {e}"
+            )
 
     await asyncio.gather(*audio_tasks)
     df["audio"] = audio_names

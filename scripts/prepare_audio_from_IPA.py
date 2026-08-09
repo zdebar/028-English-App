@@ -9,7 +9,6 @@ INCLUDE_AUDIO_TIMESTAMP = False
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from scripts.utils.preparation import read_vocab_csv, redo_sort_order
-from scripts.utils.pronunciation import fill_pronunciation_espeak_ng
 from scripts.utils.audio import generate_audio_with_google_cloud_from_ipa
 
 
@@ -32,18 +31,18 @@ async def prepare_audio(file_name: str, output_file: str, audio_folder: str, suf
     df["is_vocabulary"] = df["grammar_chunk_id"].isna() | df["grammar_chunk_id"].astype(str).str.strip().eq("")
     df["lesson_id"] = get_lesson_id(file_name)
 
-    # 2. Ensure IPA pronunciation exists
-    needs_pronunciation = "pronunciation" not in df.columns or df["pronunciation"].astype(str).str.strip().eq("").any()
-    if needs_pronunciation:
-        df = await fill_pronunciation_espeak_ng(df)
-
-    # 3. Redo sort order 
+    # 2. Redo sort order
     df = redo_sort_order(df, file_name)
 
-    # 4. Generate audio files from IPA (not from English text)
-    df = await generate_audio_with_google_cloud_from_ipa(df, audio_folder, suffix)
+    # 3. Generate audio from the IPA pronunciation column.
+    df = await generate_audio_with_google_cloud_from_ipa(
+        df,
+        audio_folder,
+        suffix,
+        overwrite_existing=True,
+    )
 
-    # 5. Force integer columns before saving
+    # 4. Force integer columns before saving
     for col in ["id", "sort_order", "block_id", "note_id", "grammar_chunk_id", "lesson_id"]:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
