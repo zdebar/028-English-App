@@ -52,7 +52,7 @@ const config = {
   },
 
   vocabulary: {
-    itemsPerPage: 8, // Number of vocabulary items per page
+    itemsPerBatch: 8, // Number of vocabulary items revealed per batch
   },
 
   toast: {

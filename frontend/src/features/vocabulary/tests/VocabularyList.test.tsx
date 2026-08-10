@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('@/config/config', () => ({
   default: {
     vocabulary: {
-      itemsPerPage: 2,
+      itemsPerBatch: 2,
     },
     buttons: {
       loadingMessageDelay: 0,
