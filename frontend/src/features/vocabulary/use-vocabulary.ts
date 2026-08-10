@@ -6,7 +6,7 @@ import { compareCzechStrings, filterSortedWords, type DisplayField } from './voc
 import { useLocalStorageSync } from '@/hooks/use-local-storage-sync';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 
-const INITIAL_VISIBLE_COUNT = config.vocabulary.itemsPerPage;
+const INITIAL_VISIBLE_COUNT = config.vocabulary.itemsPerBatch;
 const SEARCH_KEY = 'vocabulary_search_term';
 const DISPLAY_FIELD_KEY = 'vocabulary_display_field';
 

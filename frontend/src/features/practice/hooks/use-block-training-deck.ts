@@ -252,7 +252,9 @@ export function useBlockTrainingDeck(
         (item) => item.item_id !== currentItem.item_id,
       );
 
-      await UserItem.savePracticeDeck([skippedItem]);
+      await UserItem.savePracticeDeck([
+        { ...skippedItem, practice_direction: ROUND_DIRECTIONS[round] },
+      ]);
       await UserScore.addItemCount(userId, 1);
       setCompletedItemIds((previous) => {
         const next = new Set(previous);

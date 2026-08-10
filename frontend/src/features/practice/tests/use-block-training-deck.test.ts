@@ -372,6 +372,7 @@ describe('useBlockTrainingDeck', () => {
       [
         expect.objectContaining({
           item_id: 1,
+          practice_direction: 'czToEn',
           progress_cz_to_en: 1,
         }),
       ],
@@ -465,7 +466,12 @@ describe('useBlockTrainingDeck', () => {
     );
     expect(savePracticeDeckMock).toHaveBeenNthCalledWith(
       2,
-      [expect.objectContaining({ progress_history: ['czToEn', 'enToCz'] })],
+      [
+        expect.objectContaining({
+          practice_direction: 'enToCz',
+          progress_history: ['czToEn', 'enToCz'],
+        }),
+      ],
     );
   });
 });

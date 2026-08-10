@@ -45,6 +45,7 @@ export default function PronunciationToggleButton({
     if (disabled || !userId || !item) return;
     try {
       const enabled = await UserItem.togglePronunciationPractice(userId, item.item_id);
+      if (enabled === null) return;
       onSelectionChange?.(enabled);
     } catch (error) {
       reportError('Failed to toggle pronunciation practice item', error);

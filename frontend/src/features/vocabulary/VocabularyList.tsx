@@ -108,7 +108,7 @@ export default function VocabularyList({
         {remainingCount > 0 && (
           <button
             type="button"
-            onClick={() => setVisibleCount(visibleCount + config.vocabulary.itemsPerPage)}
+            onClick={() => setVisibleCount(visibleCount + config.vocabulary.itemsPerBatch)}
             className="mt-2 w-full text-center font-bold hover:underline"
           >
             ... {TEXTS.more}

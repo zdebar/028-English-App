@@ -58,6 +58,9 @@ export default function Home(): JSX.Element {
               {userFullName ?? TEXTS.notAvailable}
             </PropertyView>
             <HomeActionLinks />
+            <p className={`text-error-light dark:text-error-dark px-4 py-2 text-center text-sm`}>
+              Aplikace je v testovacím a ukázkovém režimu. Nepoužívat pro skutečnou výuku!
+            </p>
           </div>
           {isAnonymousUser && (
             <div className="flex flex-col gap-2">

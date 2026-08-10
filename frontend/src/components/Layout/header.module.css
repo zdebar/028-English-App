@@ -13,7 +13,7 @@
   }
 }
 
-@media (max-height: 460px) and (max-width: 640px) {
+@media (max-height: 460px) and (max-width: 768px) {
   .header-side {
     flex-direction: column;
     height: 150px;

@@ -2,7 +2,6 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import type {
   PracticeDeckItem,
   PracticeOutcome,
-  UserItemLocal,
 } from '@/types/user-item.types';
 import { useFetch } from '@/hooks/use-fetch';
 import UserItem from '@/database/models/user-items';
@@ -64,10 +63,10 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
   }, [fetchedArray]);
 
   // Ref to track user progress changes before saving
-  const userProgressRef = useRef<UserItemLocal[]>([]);
+  const userProgressRef = useRef<PracticeDeckItem[]>([]);
 
   const persistProgressToLocalStorage = useCallback(
-    (userProgress: UserItemLocal[]) => {
+    (userProgress: PracticeDeckItem[]) => {
       if (userProgress.length === 0 || !userId) {
         return;
       }
@@ -81,7 +80,7 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
   );
 
   const saveBufferedProgress = useCallback(
-    async (userProgress: UserItemLocal[], source: string, shouldReload: boolean = false) => {
+    async (userProgress: PracticeDeckItem[], source: string, shouldReload: boolean = false) => {
       if (userProgress.length === 0 || !userId) {
         return;
       }
@@ -137,7 +136,10 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
         new Date().toISOString(),
       );
 
-      userProgressRef.current.push(updatedItem);
+      userProgressRef.current.push({
+        ...updatedItem,
+        practice_direction: currentItem.practice_direction,
+      });
 
       if (userId) {
         try {

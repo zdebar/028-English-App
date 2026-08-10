@@ -1,4 +1,8 @@
 @layer components {
+  :root {
+    --responsive-card-width: var(--max-width-card);
+  }
+
   /** GUIDE STYLES **/
   .guide p {
     @apply m-6 text-left leading-relaxed;
@@ -27,11 +31,12 @@
   /** CARD STYLES **/
   .card-height {
     @apply flex flex-col justify-start;
-    @apply max-h-card min-h-card h-full grow;
+    @apply max-h-card h-screen grow;
   }
 
   .card-width {
-    @apply min-w-card max-w-card w-full flex flex-col justify-start;
+    @apply min-w-card w-full flex flex-col justify-start;
+    max-width: var(--responsive-card-width);
   }
 
   .screenshot-figure {
@@ -41,17 +46,23 @@
   /** SCREEN SIZE
   - same as header.module.css media queries
   - short: max-height: 460px - splits header into sides, pushes main up
-  - short-narrow: max-height: 460px and max-width: 640px - orient side header vertically
+  - short-narrow: max-height: 460px and max-width: 768px - orient side header vertically
   **/
   @media (max-height: 460px)  {
-    .card-width {
-      max-width: min(calc(100vw - 18rem), var(--max-width-card));
+    :root {
+      --responsive-card-width: max(
+        var(--min-width-card),
+        min(calc(100vw - 18rem), var(--max-width-card))
+      );
     }
   }
 
-  @media (max-height: 460px) and (max-width: 640px) {
-    .card-width {
-      max-width: min(calc(100vw - 10.5rem), var(--max-width-card));
+  @media (max-height: 460px) and (max-width: 768px) {
+    :root {
+      --responsive-card-width: max(
+        var(--min-width-card),
+        min(calc(100vw - 10.5rem), var(--max-width-card))
+      );
     }
   }
 

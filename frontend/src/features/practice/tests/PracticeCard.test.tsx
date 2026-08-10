@@ -847,6 +847,39 @@ describe('PracticeCard', () => {
     expect(onSelectionChange).toHaveBeenCalledWith(false);
   });
 
+  it('preserves the language order and prevents translation of learning content', () => {
+    const { container } = render(
+      <PracticeSessionCard
+        noteId={null}
+        grammarChunkId={null}
+        progressLabel="1 / 1"
+        isCzToEn={false}
+        revealed
+        czech="muž"
+        english="man"
+        pronunciation="mæn"
+        audioDisabled={false}
+        showDirectionChange={false}
+        handleReveal={vi.fn()}
+        plusHint={vi.fn()}
+        nextRepeat={vi.fn()}
+        nextKnown={vi.fn()}
+        audioError={false}
+        playAudio={vi.fn()}
+        audioLoading={false}
+        isPronunciationPractice
+      />,
+    );
+
+    const languageRows = container.querySelectorAll('#item > p');
+
+    expect([...languageRows].map((row) => row.textContent)).toEqual(['muž', 'man', 'mæn']);
+    expect(languageRows[0]?.getAttribute('lang')).toBe('cs');
+    expect(languageRows[1]?.getAttribute('lang')).toBe('en');
+    expect(languageRows[1]?.getAttribute('translate')).toBe('no');
+    expect(languageRows[2]?.getAttribute('translate')).toBe('no');
+  });
+
   it('disables Next when pronunciation practice has no advance handler', () => {
     const { container } = render(
       <PracticeSessionCard

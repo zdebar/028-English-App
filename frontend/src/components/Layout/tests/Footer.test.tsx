@@ -15,4 +15,10 @@ describe('Footer', () => {
     expect(screen.getByText(new RegExp(String.raw`©\s*${currentYear}`))).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Privacy' })).toBeTruthy();
   });
+
+  it('hides in landscape orientation', () => {
+    const { container } = render(<Footer />);
+
+    expect(container.querySelector('footer')?.className).toContain('landscape:hidden');
+  });
 });
