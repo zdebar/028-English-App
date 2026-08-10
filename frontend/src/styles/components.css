@@ -31,7 +31,7 @@
   /** CARD STYLES **/
   .card-height {
     @apply flex flex-col justify-start;
-    @apply max-h-card min-h-card h-full grow;
+    @apply max-h-card h-screen grow;
   }
 
   .card-width {
