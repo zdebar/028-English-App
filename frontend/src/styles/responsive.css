@@ -53,23 +53,22 @@
   left: 16px;
 }
 
-@media (max-height: 400px) {
-  .bottom-controls-clearance {
-    margin-bottom: 0;
-  }
+.app-shell[data-secondary-layout='side'] .bottom-controls-clearance {
+  margin-bottom: 0;
+}
 
-  .pos-bottom-right-control {
-    position: fixed;
-    right: max(0px, calc(((100vw - var(--responsive-card-width)) / 2) - var(--size-button)));
-    bottom: 0;
-    flex-direction: column;
-  }
-  .pos-bottom-left-control {
-    position: fixed;
-    left: max(0px, calc(((100vw - var(--responsive-card-width)) / 2) - var(--size-button)));
-    bottom: 0;
-    flex-direction: column-reverse;
-  }
+.app-shell[data-secondary-layout='side'] .pos-bottom-right-control {
+  position: fixed;
+  right: max(0px, calc(((100vw - var(--responsive-card-width)) / 2) - var(--size-button)));
+  bottom: 0;
+  flex-direction: column;
+}
+
+.app-shell[data-secondary-layout='side'] .pos-bottom-left-control {
+  position: fixed;
+  left: max(0px, calc(((100vw - var(--responsive-card-width)) / 2) - var(--size-button)));
+  bottom: 0;
+  flex-direction: column-reverse;
 }
 
 .pos-home-dashboard-help {

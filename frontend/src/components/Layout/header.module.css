@@ -1,10 +1,8 @@
-@media (max-height: 460px) {
-  .header-fixed {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height:0;
-  }
+:global(.app-shell[data-header-layout='side']) .header-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 0;
 }
 
 @media (min-height: 768px) {
@@ -13,12 +11,12 @@
   }
 }
 
-@media (max-height: 460px) and (max-width: 768px) {
-  .header-side {
+@media (max-width: 768px) {
+  :global(.app-shell[data-header-layout='side']) .header-side {
     flex-direction: column;
     height: 150px;
   }
-  .header-right {
+  :global(.app-shell[data-header-layout='side']) .header-right {
     flex-direction: column-reverse;
     justify-content: start;
   }
