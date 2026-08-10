@@ -11,7 +11,7 @@ starting point when a change crosses route, store, model, or sync boundaries.
 | App shell | Initializes the app and renders global UI around routes. | `frontend/src/App.tsx`, `Header`, `Footer` | `useAuthStore`, `useToastStore`, `usePeriodicSync`, `useUserStoreSync`, `useAudioLoader`, `useThemeLoader` | Mounting `App` starts auth, sync, reactive stats, audio, theme, toasts, overlay, and analytics. |
 | Public routes | Let unsigned users read static pages or sign in from Home. | `/`, `/guide`, `/privacy-policy` | Auth store decides Home signed-in vs signed-out view. | Unknown routes render a page-not-found notification. |
 | Protected routes | Gate practice, profile, and overview pages behind a session. | `ProtectedLayout`, `ROUTES` | `useAuthStore.userId` | Protected route access depends on hydrated auth state, not direct Supabase reads in pages. |
-| Navigation | Provides Home/profile/theme navigation and Home footer content. | `Header`, `Footer`, route buttons | Router state, auth state, theme store | Footer renders only on `/`; route buttons use `ROUTES` constants. |
+| Navigation | Provides Home/profile/theme navigation and footer content. | `Header`, `Footer`, route buttons | Router state, auth state, theme store | Footer renders globally in portrait and is hidden in landscape; route buttons use `ROUTES` constants. |
 
 ## Auth And Account
 
