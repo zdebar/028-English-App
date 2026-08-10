@@ -182,6 +182,7 @@ describe('usePracticeDeck', () => {
       expect.arrayContaining([
         expect.objectContaining({
           item_id: 1,
+          practice_direction: 'czToEn',
           progress_cz_to_en: 1,
           progress_history: expect.arrayContaining([
             expect.objectContaining({
@@ -193,6 +194,7 @@ describe('usePracticeDeck', () => {
         }),
         expect.objectContaining({
           item_id: 2,
+          practice_direction: 'czToEn',
           progress_cz_to_en: 2,
           progress_history: expect.arrayContaining([
             expect.objectContaining({

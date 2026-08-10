@@ -124,6 +124,25 @@ describe('PronunciationToggleButton', () => {
     });
   });
 
+  it('silently ignores a toggle when the item disappeared', async () => {
+    mocks.toggle.mockResolvedValue(null);
+    const onSelectionChange = vi.fn();
+    render(
+      <PronunciationToggleButton
+        userId="u1"
+        item={{ item_id: 5, is_vocabulary: 1, audio: 'five.opus' } as any}
+        onSelectionChange={onSelectionChange}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Pronunciation toggle' }));
+
+    await waitFor(() => expect(mocks.toggle).toHaveBeenCalledWith('u1', 5));
+    expect(onSelectionChange).not.toHaveBeenCalled();
+    expect(mocks.showToast).not.toHaveBeenCalled();
+    expect(mocks.reportError).not.toHaveBeenCalled();
+  });
+
   it('shows contextual help below the button when requested', () => {
     render(
       <PronunciationToggleButton

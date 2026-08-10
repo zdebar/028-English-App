@@ -279,6 +279,11 @@ describe('UserItem', () => {
   });
 
   it('savePracticeDeck updates only practice progress fields', async () => {
+    mocks.userItemGet.mockResolvedValue({
+      deleted_at: '1970-01-01T00:00:00.000Z',
+      mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+      mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+    });
     await UserItem.savePracticeDeck([
       {
         user_id: 'u1',
@@ -303,6 +308,7 @@ describe('UserItem', () => {
         next_at_en_to_cz: '2026-03-07T09:00:00.000Z',
         mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
         mastered_at_en_to_cz: '2026-03-04T09:00:00.000Z',
+        practice_direction: 'czToEn',
       } as any,
     ]);
 
@@ -333,12 +339,18 @@ describe('UserItem', () => {
   });
 
   it('does not overwrite pronunciation selection from a stale practice snapshot', async () => {
+    mocks.userItemGet.mockResolvedValue({
+      deleted_at: '1970-01-01T00:00:00.000Z',
+      mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+      mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+    });
     await UserItem.savePracticeDeck([
       {
         user_id: 'u1',
         item_id: 1,
         progress_cz_to_en: 2,
         has_pronunciation_practice: 0,
+        practice_direction: 'czToEn',
       } as any,
     ]);
 
@@ -348,12 +360,63 @@ describe('UserItem', () => {
     expect(changes).not.toHaveProperty('audio');
   });
 
+  it('silently skips missing, deleted, and direction-mastered practice items', async () => {
+    const nullDate = '1970-01-01T00:00:00.000Z';
+    mocks.userItemGet
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce({
+        deleted_at: '2026-08-10T10:00:00.000Z',
+        mastered_at_cz_to_en: nullDate,
+        mastered_at_en_to_cz: nullDate,
+      })
+      .mockResolvedValueOnce({
+        deleted_at: nullDate,
+        mastered_at_cz_to_en: '2026-08-10T10:00:00.000Z',
+        mastered_at_en_to_cz: nullDate,
+      })
+      .mockResolvedValueOnce({
+        deleted_at: nullDate,
+        mastered_at_cz_to_en: nullDate,
+        mastered_at_en_to_cz: '2026-08-10T10:00:00.000Z',
+      })
+      .mockResolvedValueOnce({
+        deleted_at: nullDate,
+        mastered_at_cz_to_en: nullDate,
+        mastered_at_en_to_cz: nullDate,
+      });
+
+    const makeUpdate = (itemId: number) =>
+      ({
+        user_id: 'u1',
+        item_id: itemId,
+        practice_direction: 'czToEn',
+        progress_cz_to_en: 2,
+        progress_en_to_cz: 1,
+        progress_history: [],
+        started_at: '2026-08-10T10:00:00.000Z',
+        updated_at: '2026-08-10T10:00:00.000Z',
+        next_at_cz_to_en: '2026-08-11T10:00:00.000Z',
+        next_at_en_to_cz: '2026-08-11T10:00:00.000Z',
+        mastered_at_cz_to_en: nullDate,
+        mastered_at_en_to_cz: nullDate,
+      }) as any;
+
+    await UserItem.savePracticeDeck([1, 2, 3, 4, 5].map(makeUpdate));
+
+    expect(mocks.bulkUpdate).toHaveBeenCalledTimes(1);
+    expect(mocks.bulkUpdate.mock.calls[0][0].map((update: any) => update.key)).toEqual([
+      ['u1', 4],
+      ['u1', 5],
+    ]);
+  });
+
   it('toggles pronunciation selection without changing progress fields', async () => {
     mocks.userItemGet.mockResolvedValue({
       item_id: 7,
       is_vocabulary: 1,
       audio: 'seven.opus',
       has_pronunciation_practice: 0,
+      deleted_at: '1970-01-01T00:00:00.000Z',
     });
 
     await expect(
@@ -377,12 +440,14 @@ describe('UserItem', () => {
         is_vocabulary: 0,
         audio: 'grammar.opus',
         has_pronunciation_practice: 0,
+        deleted_at: '1970-01-01T00:00:00.000Z',
       })
       .mockResolvedValueOnce({
         item_id: 9,
         is_vocabulary: 1,
         audio: null,
         has_pronunciation_practice: 0,
+        deleted_at: '1970-01-01T00:00:00.000Z',
       });
 
     await expect(UserItem.togglePronunciationPractice('u1', 8)).resolves.toBe(true);
@@ -392,6 +457,36 @@ describe('UserItem', () => {
     expect(mocks.userItemUpdate).toHaveBeenCalledTimes(1);
     expect(mocks.userItemUpdate).toHaveBeenCalledWith(
       ['u1', 8],
+      expect.objectContaining({ has_pronunciation_practice: 1 }),
+    );
+  });
+
+  it('silently skips missing and deleted pronunciation items but allows mastered items', async () => {
+    const nullDate = '1970-01-01T00:00:00.000Z';
+    mocks.userItemGet
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce({
+        item_id: 10,
+        audio: 'ten.opus',
+        has_pronunciation_practice: 0,
+        deleted_at: '2026-08-10T10:00:00.000Z',
+      })
+      .mockResolvedValueOnce({
+        item_id: 11,
+        audio: 'eleven.opus',
+        has_pronunciation_practice: 0,
+        deleted_at: nullDate,
+        mastered_at_cz_to_en: '2026-08-10T10:00:00.000Z',
+        mastered_at_en_to_cz: '2026-08-10T10:00:00.000Z',
+      });
+
+    await expect(UserItem.togglePronunciationPractice('u1', 9)).resolves.toBeNull();
+    await expect(UserItem.togglePronunciationPractice('u1', 10)).resolves.toBeNull();
+    await expect(UserItem.togglePronunciationPractice('u1', 11)).resolves.toBe(true);
+
+    expect(mocks.userItemUpdate).toHaveBeenCalledTimes(1);
+    expect(mocks.userItemUpdate).toHaveBeenCalledWith(
+      ['u1', 11],
       expect.objectContaining({ has_pronunciation_practice: 1 }),
     );
   });

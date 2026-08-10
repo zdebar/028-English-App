@@ -194,27 +194,41 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   /**
    * Persists practice progress for all items in a completed deck.
    *
-   * @param items Practice items to save. Empty or nullish arrays are ignored.
+   * Missing, deleted, or already-mastered items for the practiced direction are silently skipped.
+   *
+   * @param items Practice items with their practiced direction. Empty arrays are ignored.
    */
-  static async savePracticeDeck(items: UserItemLocal[]): Promise<void> {
+  static async savePracticeDeck(items: PracticeDeckItem[]): Promise<void> {
     if (!items || items.length === 0) return;
 
-    await db.user_items.bulkUpdate(
-      items.map((item) => ({
-        key: [item.user_id, item.item_id],
-        changes: {
-          progress_cz_to_en: item.progress_cz_to_en,
-          progress_en_to_cz: item.progress_en_to_cz,
-          progress_history: item.progress_history,
-          started_at: item.started_at,
-          updated_at: item.updated_at,
-          next_at_cz_to_en: item.next_at_cz_to_en,
-          next_at_en_to_cz: item.next_at_en_to_cz,
-          mastered_at_cz_to_en: item.mastered_at_cz_to_en,
-          mastered_at_en_to_cz: item.mastered_at_en_to_cz,
-        },
-      })),
-    );
+    await db.transaction('rw', db.user_items, async () => {
+      const updates = [];
+
+      for (const item of items) {
+        const currentItem = await db.user_items.get([item.user_id, item.item_id]);
+        if (currentItem?.deleted_at !== NULL_DATE) continue;
+        if (getDirectionMasteredAt(currentItem, item.practice_direction) !== NULL_DATE) continue;
+
+        updates.push({
+          key: [item.user_id, item.item_id],
+          changes: {
+            progress_cz_to_en: item.progress_cz_to_en,
+            progress_en_to_cz: item.progress_en_to_cz,
+            progress_history: item.progress_history,
+            started_at: item.started_at,
+            updated_at: item.updated_at,
+            next_at_cz_to_en: item.next_at_cz_to_en,
+            next_at_en_to_cz: item.next_at_en_to_cz,
+            mastered_at_cz_to_en: item.mastered_at_cz_to_en,
+            mastered_at_en_to_cz: item.mastered_at_en_to_cz,
+          },
+        });
+      }
+
+      if (updates.length > 0) {
+        await db.user_items.bulkUpdate(updates);
+      }
+    });
   }
 
   /**
@@ -375,26 +389,28 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
   /**
    * Toggles one eligible item's pronunciation selection without changing progress.
+   *
+   * @returns The new selection, or null when the item is missing or deleted.
    */
   static async togglePronunciationPractice(
     userId: string,
     itemId: number,
     dateTime: string = new Date().toISOString(),
-  ): Promise<boolean> {
-    const item = await db.user_items.get([userId, itemId]);
-    if (!item) {
-      throw new Error(`No user items found for item ID ${itemId}.`);
-    }
-    if (!this.isPronunciationEligible(item)) {
-      throw new Error(`Item ${itemId} is not eligible for pronunciation practice.`);
-    }
+  ): Promise<boolean | null> {
+    return db.transaction('rw', db.user_items, async () => {
+      const item = await db.user_items.get([userId, itemId]);
+      if (item?.deleted_at !== NULL_DATE) return null;
+      if (!this.isPronunciationEligible(item)) {
+        throw new Error(`Item ${itemId} is not eligible for pronunciation practice.`);
+      }
 
-    const enabled = item.has_pronunciation_practice !== 1;
-    await db.user_items.update([userId, itemId], {
-      has_pronunciation_practice: enabled ? 1 : 0,
-      updated_at: dateTime,
+      const enabled = item.has_pronunciation_practice !== 1;
+      await db.user_items.update([userId, itemId], {
+        has_pronunciation_practice: enabled ? 1 : 0,
+        updated_at: dateTime,
+      });
+      return enabled;
     });
-    return enabled;
   }
 
   /**
