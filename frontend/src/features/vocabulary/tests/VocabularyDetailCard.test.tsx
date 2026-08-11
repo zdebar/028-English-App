@@ -150,7 +150,7 @@ describe('VocabularyDetailCard', () => {
     expect(screen.getByText('english:hello')).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'cZ to EN' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'eN to CZ' })).toBeTruthy();
-    expect(screen.getByText('progress:2 / 8')).toBeTruthy();
+    expect(screen.getByText('progress:2 / 9')).toBeTruthy();
     expect(screen.getByText('progress:3 / 8')).toBeTruthy();
     expect(
       screen.getByText('practice schedule:date:2026-03-01T00:00:00.000Z'),
@@ -162,7 +162,7 @@ describe('VocabularyDetailCard', () => {
     expect(screen.queryByText(/^updated:/)).toBeNull();
 
     expect(container.textContent).toMatch(
-      /czech:ahoj.*english:hello.*pronunciation:həˈloʊ.*cZ to EN.*progress:2 \/ 8.*practice schedule:date:.*eN to CZ.*progress:3 \/ 8.*practice schedule:Completed/,
+      /czech:ahoj.*english:hello.*pronunciation:həˈloʊ.*cZ to EN.*progress:2 \/ 9.*practice schedule:date:.*eN to CZ.*progress:3 \/ 8.*practice schedule:Completed/,
     );
     expect(formatVocabularyDateTimeMock).toHaveBeenCalledTimes(1);
   });
