@@ -39,6 +39,22 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 
+vi.mock('@/config/config', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@/config/config')>();
+  return {
+    default: {
+      ...original.default,
+      srs: {
+        ...original.default.srs,
+        intervals: {
+          czToEn: Array.from({ length: 9 }),
+          enToCz: Array.from({ length: 8 }),
+        },
+      },
+    },
+  };
+});
+
 vi.mock('@/features/audio/use-audio-manager', () => ({
   useAudioManager: () => ({
     playAudio: audioMocks.playAudio,
