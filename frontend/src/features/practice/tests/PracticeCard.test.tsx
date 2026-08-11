@@ -120,8 +120,8 @@ vi.mock('@/locales/cs', () => ({
     loadingError: 'Loading error',
     directionCzToEn: 'CZ to EN',
     directionEnToCz: 'EN to CZ',
-    directionCzToEnShort: 'CZ › EN',
-    directionEnToCzShort: 'EN › CZ',
+    directionCzToEnShort: 'cz › en',
+    directionEnToCzShort: 'en › cz',
     blockTrainingFinishAll: 'Finish the entire block',
     blockTrainingProgressHelp: 'Round · completed items in this round',
     next: 'Next',
@@ -495,25 +495,25 @@ describe('PracticeCard', () => {
   it('keeps the short direction label in the first top-bar row across card states', () => {
     const { container, rerender } = render(<PracticeCard />);
     const topBar = container.querySelector('#top-bar') as HTMLElement;
-    const czToEnLabel = screen.getByText('CZ › EN');
+    const czToEnLabel = screen.getByText('cz › en');
 
-    expect(topBar.children[0]?.textContent).toBe('CZ › EN');
+    expect(topBar.children[0]?.textContent).toBe('cz › en');
     expect(czToEnLabel.className).toContain('text-sm');
     expect(czToEnLabel.className).toContain('font-light');
 
     mocks.practiceDeck.revealed = true;
     rerender(<PracticeCard />);
-    expect(screen.getByText('CZ › EN')).toBeTruthy();
+    expect(screen.getByText('cz › en')).toBeTruthy();
 
     mocks.practiceDeck.showDirectionChange = true;
     rerender(<PracticeCard />);
-    expect(screen.getByText('CZ › EN')).toBeTruthy();
+    expect(screen.getByText('cz › en')).toBeTruthy();
     expect(container.querySelector('#practice-main-content')?.textContent).toContain('CZ to EN');
 
     mocks.practiceDeck.isCzToEn = false;
     mocks.practiceDeck.showDirectionChange = false;
     rerender(<PracticeCard />);
-    expect(screen.getByText('EN › CZ')).toBeTruthy();
+    expect(screen.getByText('en › cz')).toBeTruthy();
   });
 
   it('keeps audio status below the direction label', () => {
@@ -521,7 +521,7 @@ describe('PracticeCard', () => {
     const { container } = render(<PracticeCard />);
     const topBar = container.querySelector('#top-bar') as HTMLElement;
 
-    expect(topBar.children[0]?.textContent).toBe('CZ › EN');
+    expect(topBar.children[0]?.textContent).toBe('cz › en');
     expect(topBar.children[1]?.textContent).toBe('No audio');
   });
 
@@ -904,7 +904,7 @@ describe('PracticeCard', () => {
     expect(screen.queryByTestId('repeat-btn')).toBeNull();
     expect(screen.queryByTestId('known-btn')).toBeNull();
     expect(screen.queryByTestId('practice-stars-row')).toBeNull();
-    expect(screen.queryByText('EN › CZ')).toBeNull();
+    expect(screen.queryByText('en › cz')).toBeNull();
     fireEvent.click(screen.getByTestId('pronunciation-toggle'));
     expect(onSelectionChange).toHaveBeenCalledWith(false);
   });
@@ -1022,7 +1022,7 @@ describe('PracticeCard', () => {
     );
 
     expect(screen.getByText('Finish the entire block')).toBeTruthy();
-    expect(screen.queryByText('CZ › EN')).toBeNull();
+    expect(screen.queryByText('cz › en')).toBeNull();
     expect(screen.getByText('Round · completed items in this round')).toBeTruthy();
   });
 
