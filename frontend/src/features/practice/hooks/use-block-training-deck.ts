@@ -1,17 +1,20 @@
 import config from '@/config/config';
-import GrammarChunk from '@/database/models/grammar-chunks';
 import UserBlock from '@/database/models/user-blocks';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
 import type { GrammarDetail } from '@/features/grammar/GrammarDetailCard';
 import { reportError } from '@/features/logging/monitoring-handler';
 import type { GrammarChunkType, UserBlockType } from '@/types/generic.types';
-import type { UserItemLocal } from '@/types/user-item.types';
+import type { ResolvedPracticeEntry, UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
 import type { BlockTrainingData } from '@/routing/route-data';
 import { invalidateRouteData, routeDataKey } from '@/routing/route-data-cache';
+import {
+  resolvePracticeEntries,
+  resolvePracticeGrammar,
+} from '@/database/utils/practice-content.utils';
 
 type BlockTrainingRound = 0 | 1;
 
@@ -36,6 +39,9 @@ export function useBlockTrainingDeck(
 ) {
   const [block, setBlock] = useState<UserBlockType | null>(initialData?.block ?? null);
   const [items, setItems] = useState<UserItemLocal[]>(initialData?.items ?? []);
+  const [resolvedEntries, setResolvedEntries] = useState<
+    Array<ResolvedPracticeEntry<UserItemLocal>>
+  >(initialData?.entries ?? []);
   const [grammar, setGrammar] = useState<GrammarDetail | null>(() =>
     toGrammarDetail(initialData?.grammar),
   );
@@ -61,6 +67,7 @@ export function useBlockTrainingDeck(
     if (initialData) {
       setBlock(initialData.block);
       setItems(initialData.items);
+      setResolvedEntries(initialData.entries);
       setGrammar(toGrammarDetail(initialData.grammar));
       setTotalItemCount(initialData.items.length);
       setCompletedItemIds(new Set());
@@ -87,6 +94,7 @@ export function useBlockTrainingDeck(
           if (isMounted) {
             setBlock(null);
             setItems([]);
+            setResolvedEntries([]);
             setTotalItemCount(0);
             setCompletedItemIds(new Set());
             setGrammar(null);
@@ -97,14 +105,15 @@ export function useBlockTrainingDeck(
         }
 
         const blockItems = await UserItem.getByBlockId(userId, nextBlock.block_id);
-        const grammarData =
-          nextBlock.grammar_chunk_id == null
-            ? null
-            : await GrammarChunk.getById(nextBlock.grammar_chunk_id);
+        const [nextResolvedEntries, grammarData] = await Promise.all([
+          resolvePracticeEntries(userId, blockItems),
+          resolvePracticeGrammar(userId, nextBlock.grammar_chunk_id),
+        ]);
         if (!isMounted) return;
 
         setBlock(nextBlock);
         setItems(blockItems);
+        setResolvedEntries(nextResolvedEntries);
         setTotalItemCount(blockItems.length);
         setCompletedItemIds(new Set());
         setGrammar(toGrammarDetail(grammarData));
@@ -118,6 +127,7 @@ export function useBlockTrainingDeck(
         setError(toError(err));
         setBlock(null);
         setItems([]);
+        setResolvedEntries([]);
         setGrammar(null);
         setCurrentQueue([]);
         setNextWaveQueue([]);
@@ -137,6 +147,10 @@ export function useBlockTrainingDeck(
   }, [blockId, initialData, userId]);
 
   const currentItem = useMemo(() => currentQueue[0] ?? null, [currentQueue]);
+  const currentEntry = useMemo(
+    () => resolvedEntries.find((entry) => entry.item.item_id === currentItem?.item_id) ?? null,
+    [currentItem?.item_id, resolvedEntries],
+  );
 
   const isCzToEn = ROUND_DIRECTIONS[round] === 'czToEn';
   const {
@@ -287,8 +301,8 @@ export function useBlockTrainingDeck(
     loading,
     error,
     currentItem,
-    noteId: currentItem?.note_id ?? null,
-    grammarChunkId: currentItem?.grammar_chunk_id ?? null,
+    note: currentEntry?.note ?? null,
+    practiceGrammar: currentEntry?.grammar ?? null,
     progressLabel: `${round + 1}/2 · ${completedItemIds.size}/${totalItemCount}`,
     isCzToEn,
     revealed,

@@ -126,6 +126,7 @@ describe('GrammarDetailCard', () => {
           id: 1,
           kind: 'group',
           name: 'Present simple',
+          note: '<p>group note</p>',
           chunks: [
             {
               id: 11,
@@ -141,6 +142,8 @@ describe('GrammarDetailCard', () => {
     );
 
     const headings = container.querySelectorAll('h2');
+    expect(screen.getByText('Present simple')).toBeTruthy();
+    expect(screen.getByText('group note')).toBeTruthy();
     expect([...headings].map((heading) => heading.textContent)).toEqual([
       'Affirmative',
       'Negative',
@@ -174,7 +177,7 @@ describe('GrammarDetailCard', () => {
     expect(container.firstElementChild?.className).toContain('bottom-controls-clearance');
   });
 
-  it('loads and plays examples of a standalone overview chunk with empty chunks', async () => {
+  it('loads and plays examples of a chunk detail', async () => {
     render(
       <GrammarDetailCard
         grammar={{

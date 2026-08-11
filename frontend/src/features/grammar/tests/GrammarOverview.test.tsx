@@ -6,9 +6,6 @@ const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   sanitize: vi.fn(),
   resetItemsByGrammarGroupId: vi.fn(),
-  resetItemsByGrammarChunkId: vi.fn(),
-  resetByGrammarGroupId: vi.fn(),
-  resetByGrammarChunkId: vi.fn(),
   showToast: vi.fn(),
   reportInfo: vi.fn(),
   reportError: vi.fn(),
@@ -35,14 +32,6 @@ vi.mock('@/database/models/grammar-groups', () => ({
 vi.mock('@/database/models/user-items', () => ({
   default: {
     resetItemsByGrammarGroupId: (...args: unknown[]) => mocks.resetItemsByGrammarGroupId(...args),
-    resetItemsByGrammarChunkId: (...args: unknown[]) => mocks.resetItemsByGrammarChunkId(...args),
-  },
-}));
-
-vi.mock('@/database/models/user-blocks', () => ({
-  default: {
-    resetByGrammarGroupId: (...args: unknown[]) => mocks.resetByGrammarGroupId(...args),
-    resetByGrammarChunkId: (...args: unknown[]) => mocks.resetByGrammarChunkId(...args),
   },
 }));
 
@@ -139,15 +128,12 @@ describe('GrammarOverview', () => {
     };
     mocks.sanitize.mockImplementation((value: string) => value);
     mocks.resetItemsByGrammarGroupId.mockResolvedValue(4);
-    mocks.resetItemsByGrammarChunkId.mockResolvedValue(3);
-    mocks.resetByGrammarGroupId.mockResolvedValue(2);
-    mocks.resetByGrammarChunkId.mockResolvedValue(1);
   });
 
   it('renders list view with grammar items and opens selected grammar', () => {
     mocks.arrayState.data = [
       { id: 1, kind: 'group', name: 'Past tense', chunks: [] },
-      { id: 2, kind: 'chunk', name: 'Conditionals', items: [] },
+      { id: 2, kind: 'group', name: 'Conditionals', chunks: [] },
     ] as any;
 
     render(<GrammarOverview />);
@@ -240,29 +226,6 @@ describe('GrammarOverview', () => {
       );
       expect(mocks.showToast).toHaveBeenCalledWith('Reset success', 'success');
     });
-  });
-
-  it('resets an ungrouped grammar chunk directly', async () => {
-    mocks.arrayState.data = [{
-      id: 8,
-      kind: 'chunk',
-      name: 'Standalone grammar',
-      note: null,
-      items: [],
-    }];
-
-    render(<GrammarOverview />);
-    fireEvent.click(screen.getByTestId('grammar-button'));
-    fireEvent.click(screen.getByTestId('overview-reset'));
-
-    await waitFor(() => {
-      expect(mocks.resetItemsByGrammarChunkId).toHaveBeenCalledWith('u1', 8);
-      expect(mocks.reportInfo).toHaveBeenCalledWith(
-        'Grammar 8 reset completed: 3 items reset.',
-      );
-    });
-    expect(mocks.resetItemsByGrammarGroupId).not.toHaveBeenCalled();
-    expect(mocks.resetByGrammarGroupId).not.toHaveBeenCalled();
   });
 
   it('shows error toast when item reset fails', async () => {

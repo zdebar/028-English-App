@@ -9,17 +9,17 @@ import { reportError } from '../logging/monitoring-handler';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/config/routes.config';
-import type { PracticeDeckItem } from '@/types/user-item.types';
+import type { PracticeDeckEntry } from '@/types/user-item.types';
 
-export default function PracticeCard({ initialDeck }: Readonly<{ initialDeck?: PracticeDeckItem[] }>) {
+export default function PracticeCard({ initialDeck }: Readonly<{ initialDeck?: PracticeDeckEntry[] }>) {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
   const {
     currentItem,
     trainingBlockId,
-    noteId,
-    grammarChunkId,
+    note,
+    grammar,
     progress,
     isCzToEn,
     revealed,
@@ -63,8 +63,8 @@ export default function PracticeCard({ initialDeck }: Readonly<{ initialDeck?: P
 
   return (
     <PracticeSessionCard
-      noteId={noteId}
-      grammarChunkId={grammarChunkId}
+      note={note}
+      grammar={grammar}
       progressLabel={progress}
       isCzToEn={isCzToEn}
       revealed={revealed}

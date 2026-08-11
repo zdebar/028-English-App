@@ -17,7 +17,7 @@ export interface LevelType extends SyncEntityType {}
 export interface GrammarGroupType extends SyncEntityType {}
 
 export interface GrammarChunkType extends SyncEntityType {
-  grammar_group_id: number | null;
+  grammar_group_id: number;
 }
 
 export interface GrammarChunkExampleType {

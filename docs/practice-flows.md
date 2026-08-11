@@ -33,5 +33,6 @@ There is no vocabulary or previous-grammar unlock prerequisite.
 
 Regular and training practice cards resolve their detail button through the item-derived
 `user_items.grammar_chunk_id` and display that chunk with every explicitly ordered
-`grammar_chunk_examples` item. The grammar overview lists started groups and composes only their
-started chunks in configured order, while showing every curated example for each visible chunk.
+`grammar_chunk_examples` item. Every chunk belongs to a grammar group. The grammar overview uses
+the group name and note, then composes only its started chunks in group-specific order while
+showing every curated example for each visible chunk.

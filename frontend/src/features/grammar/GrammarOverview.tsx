@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ListButton } from '@/components/UI/buttons/ListButton';
 import GrammarGroup, {
-  type GrammarOverviewEntry,
+  type GrammarGroupWithChunks,
 } from '@/database/models/grammar-groups';
 import UserItem from '@/database/models/user-items';
 import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
@@ -17,11 +17,11 @@ import { ROUTES } from '@/config/routes.config';
 import { invalidateRouteData, routeDataKey } from '@/routing/route-data-cache';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 
-type GrammarSelection = Readonly<Pick<GrammarOverviewEntry, 'id' | 'kind'>>;
+type GrammarSelection = Readonly<Pick<GrammarGroupWithChunks, 'id'>>;
 
 export default function GrammarOverview({
   initialGrammar,
-}: Readonly<{ initialGrammar?: GrammarOverviewEntry[] }>): JSX.Element {
+}: Readonly<{ initialGrammar?: GrammarGroupWithChunks[] }>): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const navigate = useNavigate();
   const showToast = useToastStore((state) => state.showToast);
@@ -42,11 +42,7 @@ export default function GrammarOverview({
   const hasData = grammarList.length > 0;
   const currentItem = useMemo(
     () =>
-      selection
-        ? (grammarList.find(
-            (item) => item.id === selection.id && item.kind === selection.kind,
-          ) ?? null)
-        : null,
+      selection ? (grammarList.find((item) => item.id === selection.id) ?? null) : null,
     [grammarList, selection],
   );
 
@@ -66,12 +62,7 @@ export default function GrammarOverview({
     }
 
     try {
-      let resetCount: number;
-      if (currentItem.kind === 'chunk') {
-        resetCount = await UserItem.resetItemsByGrammarChunkId(userId, currentItem.id);
-      } else {
-        resetCount = await UserItem.resetItemsByGrammarGroupId(userId, currentItem.id);
-      }
+      const resetCount = await UserItem.resetItemsByGrammarGroupId(userId, currentItem.id);
       reportInfo(`Grammar ${currentItem.id} reset completed: ${resetCount} items reset.`);
       invalidateRouteData(routeDataKey('grammar', userId));
       showToast(TEXTS.resetProgressSuccessToast, 'success');
@@ -93,9 +84,9 @@ export default function GrammarOverview({
           <div className="flex flex-col gap-1 pt-1">
             {grammarList.map((item) => (
               <ListButton
-                key={`${item.kind}-${item.id}`}
+                key={item.id}
                 className="h-input justify-start px-4"
-                onClick={() => setSelection({ id: item.id, kind: item.kind })}
+                onClick={() => setSelection({ id: item.id })}
                 title={item.name}
               >
                 {item.name}

@@ -8,14 +8,14 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import { useEffect } from 'react';
 import { useLoaderData } from 'react-router-dom';
-import type { UserItemLocal } from '@/types/user-item.types';
+import type { ResolvedPracticeEntry, UserItemLocal } from '@/types/user-item.types';
 
 const doNothing = () => undefined;
 
 export default function PronunciationPractice() {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
-  const initialDeck = useLoaderData() as UserItemLocal[];
+  const initialDeck = useLoaderData() as Array<ResolvedPracticeEntry<UserItemLocal>>;
   const deck = usePronunciationPracticeDeck(userId, initialDeck);
 
   useEffect(() => {
@@ -29,8 +29,8 @@ export default function PronunciationPractice() {
 
   return (
     <PracticeSessionCard
-      noteId={deck.currentItem.note_id}
-      grammarChunkId={deck.currentItem.grammar_chunk_id}
+      note={deck.note}
+      grammar={deck.grammar}
       progressLabel={deck.progressLabel}
       isCzToEn={false}
       revealed

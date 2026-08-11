@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { UserItemLocal } from '@/types/user-item.types';
 
 const mocks = vi.hoisted(() => ({
-  getPronunciationPracticeDeck: vi.fn(),
+  loadPronunciationPracticeDeck: vi.fn(),
   playAudio: vi.fn(),
 }));
 
@@ -12,11 +12,10 @@ const items = [
   { item_id: 1, english: 'man', audio: 'man.opus' },
   { item_id: 2, english: 'men', audio: 'men.opus' },
 ] as UserItemLocal[];
+const entries = items.map((item) => ({ item, note: null, grammar: null }));
 
-vi.mock('@/database/models/user-items', () => ({
-  default: {
-    getPronunciationPracticeDeck: mocks.getPronunciationPracticeDeck,
-  },
+vi.mock('@/database/utils/practice-content.utils', () => ({
+  loadPronunciationPracticeDeck: mocks.loadPronunciationPracticeDeck,
 }));
 
 vi.mock('@/config/config', () => ({
@@ -39,31 +38,33 @@ describe('usePronunciationPracticeDeck', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useRealTimers();
-    mocks.getPronunciationPracticeDeck.mockResolvedValue(items);
+    mocks.loadPronunciationPracticeDeck.mockResolvedValue(entries);
   });
 
   it('loops back to a freshly loaded first item after the last one', async () => {
     const { result } = renderHook(() => usePronunciationPracticeDeck('u1'));
 
     await waitFor(() => expect(result.current.currentItem?.english).toBe('man'));
-    expect(mocks.getPronunciationPracticeDeck).toHaveBeenCalledTimes(1);
+    expect(mocks.loadPronunciationPracticeDeck).toHaveBeenCalledTimes(1);
 
     await act(() => result.current.next());
 
     expect(result.current.currentItem?.english).toBe('men');
     expect(result.current.progressLabel).toBe('2 / 2');
-    expect(mocks.getPronunciationPracticeDeck).toHaveBeenCalledTimes(1);
+    expect(mocks.loadPronunciationPracticeDeck).toHaveBeenCalledTimes(1);
 
     await act(() => result.current.next());
 
     expect(result.current.currentItem?.english).toBe('man');
     expect(result.current.progressLabel).toBe('1 / 2');
-    expect(mocks.getPronunciationPracticeDeck).toHaveBeenCalledWith('u1');
-    expect(mocks.getPronunciationPracticeDeck).toHaveBeenCalledTimes(2);
+    expect(mocks.loadPronunciationPracticeDeck).toHaveBeenCalledWith('u1');
+    expect(mocks.loadPronunciationPracticeDeck).toHaveBeenCalledTimes(2);
   });
 
   it('removes an item switched off during practice from the next round', async () => {
-    mocks.getPronunciationPracticeDeck.mockResolvedValueOnce(items).mockResolvedValue([items[1]]);
+    mocks.loadPronunciationPracticeDeck
+      .mockResolvedValueOnce(entries)
+      .mockResolvedValue([entries[1]]);
     const { result } = renderHook(() => usePronunciationPracticeDeck('u1'));
 
     await waitFor(() => expect(result.current.currentItem?.english).toBe('man'));
@@ -80,7 +81,7 @@ describe('usePronunciationPracticeDeck', () => {
   });
 
   it('disables advancing and does not reload a one-item deck', async () => {
-    mocks.getPronunciationPracticeDeck.mockResolvedValue([items[0]]);
+    mocks.loadPronunciationPracticeDeck.mockResolvedValue([entries[0]]);
     const { result } = renderHook(() => usePronunciationPracticeDeck('u1'));
 
     await waitFor(() => expect(result.current.currentItem?.english).toBe('man'));
@@ -88,12 +89,12 @@ describe('usePronunciationPracticeDeck', () => {
 
     await act(() => result.current.next());
 
-    expect(mocks.getPronunciationPracticeDeck).toHaveBeenCalledTimes(1);
+    expect(mocks.loadPronunciationPracticeDeck).toHaveBeenCalledTimes(1);
     expect(result.current.currentItem?.english).toBe('man');
   });
 
   it('reloads from index zero after removal and reaches empty state for the last item', async () => {
-    mocks.getPronunciationPracticeDeck.mockResolvedValueOnce([items[0]]).mockResolvedValue([]);
+    mocks.loadPronunciationPracticeDeck.mockResolvedValueOnce([entries[0]]).mockResolvedValue([]);
     const { result } = renderHook(() => usePronunciationPracticeDeck('u1'));
 
     await waitFor(() => expect(result.current.currentItem?.english).toBe('man'));
@@ -101,15 +102,15 @@ describe('usePronunciationPracticeDeck', () => {
     act(() => result.current.handleSelectionChange(false));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(mocks.getPronunciationPracticeDeck).toHaveBeenCalledTimes(2);
+    expect(mocks.loadPronunciationPracticeDeck).toHaveBeenCalledTimes(2);
     expect(result.current.currentItem).toBeNull();
     expect(result.current.progressLabel).toBe('0 / 0');
   });
 
   it('publishes the first item in the same render that finishes loading', async () => {
-    let resolveDeck: (items: UserItemLocal[]) => void = () => undefined;
-    mocks.getPronunciationPracticeDeck.mockReturnValue(
-      new Promise<UserItemLocal[]>((resolve) => {
+    let resolveDeck: (items: typeof entries) => void = () => undefined;
+    mocks.loadPronunciationPracticeDeck.mockReturnValue(
+      new Promise<typeof entries>((resolve) => {
         resolveDeck = resolve;
       }),
     );
@@ -125,7 +126,7 @@ describe('usePronunciationPracticeDeck', () => {
     expect(result.current.currentItem).toBeNull();
 
     await act(async () => {
-      resolveDeck(items);
+      resolveDeck(entries);
       await Promise.resolve();
     });
 

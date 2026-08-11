@@ -1,5 +1,4 @@
 import config from '@/config/config';
-import GrammarChunk from '@/database/models/grammar-chunks';
 import GrammarGroup from '@/database/models/grammar-groups';
 import Levels from '@/database/models/levels';
 import PronunciationGroup from '@/database/models/pronunciation-groups';
@@ -7,6 +6,12 @@ import UserBlock from '@/database/models/user-blocks';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
 import { routeDataKey, type RouteDataDescriptor } from './route-data-cache';
+import {
+  loadPracticeDeck,
+  loadPronunciationPracticeDeck,
+  resolvePracticeEntries,
+  resolvePracticeGrammar,
+} from '@/database/utils/practice-content.utils';
 
 function getLocalDate(): string {
   return new Date(Date.now()).toLocaleDateString('en-CA');
@@ -92,17 +97,14 @@ export function pronunciationGroupDetailDescriptor(userId: string, groupId: numb
 export function practiceDeckDescriptor(userId: string) {
   return {
     key: routeDataKey('practice', userId),
-    load: async () => {
-      const deck = await UserItem.getPracticeDeck(userId, config.lesson.deckSize);
-      return deck.filter((item) => item != null);
-    },
+    load: () => loadPracticeDeck(userId, config.lesson.deckSize),
   };
 }
 
 export function pronunciationPracticeDescriptor(userId: string) {
   return {
     key: routeDataKey('pronunciation-practice', userId),
-    load: () => UserItem.getPronunciationPracticeDeck(userId),
+    load: () => loadPronunciationPracticeDeck(userId),
   };
 }
 
@@ -115,16 +117,15 @@ export function blockTrainingDescriptor(userId: string, blockId: number) {
         !block?.requires_initial_training ||
         block.started_at !== config.database.nullReplacementDate
       ) {
-        return { block: null, items: [], grammar: null };
+        return { block: null, items: [], entries: [], grammar: null };
       }
 
-      const [items, grammar] = await Promise.all([
-        UserItem.getByBlockId(userId, block.block_id),
-        block.grammar_chunk_id == null
-          ? Promise.resolve(null)
-          : GrammarChunk.getById(block.grammar_chunk_id),
+      const items = await UserItem.getByBlockId(userId, block.block_id);
+      const [entries, grammar] = await Promise.all([
+        resolvePracticeEntries(userId, items),
+        resolvePracticeGrammar(userId, block.grammar_chunk_id),
       ]);
-      return { block, items, grammar };
+      return { block, items, entries, grammar };
     },
   };
 }

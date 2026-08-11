@@ -1,8 +1,8 @@
 import config from '@/config/config';
-import UserItem from '@/database/models/user-items';
+import { loadPronunciationPracticeDeck } from '@/database/utils/practice-content.utils';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { useFetch } from '@/hooks/use-fetch';
-import type { UserItemLocal } from '@/types/user-item.types';
+import type { ResolvedPracticeEntry, UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useState } from 'react';
 import { invalidateRouteData, routeDataKey } from '@/routing/route-data-cache';
 
@@ -10,20 +10,21 @@ const NBSP = '\u00A0';
 
 export function usePronunciationPracticeDeck(
   userId: string | null,
-  initialDeck?: UserItemLocal[],
+  initialDeck?: Array<ResolvedPracticeEntry<UserItemLocal>>,
 ) {
   const [index, setIndex] = useState(0);
 
   const fetchDeck = useCallback(async () => {
     if (!userId) return [];
-    return UserItem.getPronunciationPracticeDeck(userId);
+    return loadPronunciationPracticeDeck(userId);
   }, [userId]);
-  const { data, loading, error, reload } = useFetch<UserItemLocal[]>(fetchDeck, {
-    initialData: initialDeck,
-  });
+  const { data, loading, error, reload } = useFetch<
+    Array<ResolvedPracticeEntry<UserItemLocal>>
+  >(fetchDeck, { initialData: initialDeck });
 
-  const items = data ?? [];
-  const currentItem = items[index] ?? null;
+  const entries = data ?? [];
+  const currentEntry = entries[index] ?? null;
+  const currentItem = currentEntry?.item ?? null;
   const {
     playAudio,
     audioError,
@@ -44,16 +45,16 @@ export function usePronunciationPracticeDeck(
   }, [audioDisabled, audioLoading, currentItem, playAudio]);
 
   const next = useCallback(async () => {
-    if (!currentItem || items.length <= 1) return;
+    if (!currentItem || entries.length <= 1) return;
 
-    if (index < items.length - 1) {
+    if (index < entries.length - 1) {
       setIndex((currentIndex) => currentIndex + 1);
       return;
     }
 
     setIndex(0);
     await reload();
-  }, [currentItem, index, items.length, reload]);
+  }, [currentItem, entries.length, index, reload]);
 
   const handleSelectionChange = useCallback(
     (selected: boolean) => {
@@ -67,6 +68,8 @@ export function usePronunciationPracticeDeck(
 
   return {
     currentItem,
+    note: currentEntry?.note ?? null,
+    grammar: currentEntry?.grammar ?? null,
     loading,
     error,
     audioDisabled,
@@ -76,8 +79,8 @@ export function usePronunciationPracticeDeck(
     english: currentItem?.english,
     playAudio,
     pronunciation: currentItem?.pronunciation || NBSP,
-    progressLabel: items.length > 0 ? `${index + 1} / ${items.length}` : '0 / 0',
-    canGoNext: items.length > 1,
+    progressLabel: entries.length > 0 ? `${index + 1} / ${entries.length}` : '0 / 0',
+    canGoNext: entries.length > 1,
     handleSelectionChange,
     next,
   };

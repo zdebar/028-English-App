@@ -112,7 +112,8 @@ async function loadPractice() {
   const userId = await requireUserId();
   try {
     const deck = await consumeRouteData(practiceDeckDescriptor(userId));
-    const blockId = deck[0]?.is_initial_training_trigger ? deck[0].block_id : null;
+    const firstItem = deck[0]?.item;
+    const blockId = firstItem?.is_initial_training_trigger ? firstItem.block_id : null;
     if (blockId != null) {
       await prefetchRouteData(blockTrainingDescriptor(userId, blockId));
       throw redirect(`${ROUTES.practiceBlockTraining}?blockId=${blockId}`);

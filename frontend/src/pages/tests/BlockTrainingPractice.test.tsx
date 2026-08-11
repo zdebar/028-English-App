@@ -13,8 +13,8 @@ const mocks = vi.hoisted(() => ({
     grammar: null as { id: number; name: string } | null,
     isComplete: false,
     currentItem: null as { item_id: number } | null,
-    noteId: null,
-    grammarChunkId: null,
+    note: null,
+    practiceGrammar: null,
     progressLabel: '1/2 · 0/1',
     isCzToEn: true,
     revealed: false,
@@ -60,7 +60,7 @@ vi.mock('@/features/auth/use-auth-store', () => ({
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
-  useLoaderData: () => ({ block: { block_id: 10 }, items: [], grammar: null }),
+  useLoaderData: () => ({ block: { block_id: 10 }, items: [], entries: [], grammar: null }),
 }));
 
 vi.mock('@/features/toast/use-toast-store', () => ({

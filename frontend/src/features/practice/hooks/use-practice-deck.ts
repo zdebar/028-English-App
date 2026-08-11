@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import type {
+  PracticeDeckEntry,
   PracticeDeckItem,
   PracticeOutcome,
 } from '@/types/user-item.types';
@@ -9,24 +10,23 @@ import UserScore from '@/database/models/user-scores';
 import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
-import config from '@/config/config';
 import { invalidateRouteData, routeDataKey } from '@/routing/route-data-cache';
+import { loadPracticeDeck } from '@/database/utils/practice-content.utils';
 
 /**
  * usePracticeDeck hook manages the practice deck and user progress for a given user.
  *
  * @param userId The unique identifier of the user.
  */
-export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDeckItem[]) {
+export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDeckEntry[]) {
   // Array fetching logic
-  const [array, setArray] = useState<PracticeDeckItem[]>([]);
+  const [array, setArray] = useState<PracticeDeckEntry[]>([]);
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
 
   const fetchPracticeDeck = useCallback(async () => {
     if (!userId) return [];
-    const data = await UserItem.getPracticeDeck(userId, config.lesson.deckSize);
-    return data.filter((item) => item != null);
+    return loadPracticeDeck(userId);
   }, [userId]);
 
   const {
@@ -34,10 +34,11 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
     loading,
     error,
     reload,
-  } = useFetch<PracticeDeckItem[]>(fetchPracticeDeck, { initialData: initialDeck });
+  } = useFetch<PracticeDeckEntry[]>(fetchPracticeDeck, { initialData: initialDeck });
 
   const activeArray = array.length > 0 ? array : (fetchedArray ?? []);
-  const currentItem = activeArray[index] ?? null;
+  const currentEntry = activeArray[index] ?? null;
+  const currentItem = currentEntry?.item ?? null;
 
   const isCzToEn = currentItem?.practice_direction !== 'enToCz';
   const {
@@ -168,8 +169,8 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
     index,
     currentItem,
     trainingBlockId: currentItem?.is_initial_training_trigger ? currentItem.block_id : null,
-    noteId: currentItem?.note_id ?? null,
-    grammarChunkId: currentItem?.grammar_chunk_id ?? null,
+    note: currentEntry?.note ?? null,
+    grammar: currentEntry?.grammar ?? null,
     progress,
     isCzToEn,
     revealed,
