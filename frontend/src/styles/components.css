@@ -66,13 +66,11 @@
     );
   }
 
-  @media (max-width: 768px) {
-    .app-shell[data-header-layout='side'] {
-      --responsive-card-width: max(
-        var(--min-width-card),
-        min(calc(100vw - 10.5rem), var(--max-width-card))
-      );
-    }
+  .app-shell[data-header-layout='side'][data-side-header-orientation='vertical'] {
+    --responsive-card-width: max(
+      var(--min-width-card),
+      min(calc(100vw - 10.5rem), var(--max-width-card))
+    );
   }
 
   /** Help Text styles */

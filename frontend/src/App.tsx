@@ -14,6 +14,7 @@ import { useAudioLoader } from './features/audio/use-audio-loader';
 import { usePronunciationGroupsStoreSync } from './features/pronunciation/use-pronunciation-groups-store-sync';
 import { usePracticeAvailabilityStoreSync } from './features/practice/use-practice-availability-store-sync';
 import { useResponsiveLayout } from './components/Layout/use-responsive-layout';
+import { useSideHeaderOrientation } from './components/Layout/use-side-header-orientation';
 
 export default function App() {
   const userId = useAuthStore((state) => state.userId);
@@ -26,6 +27,7 @@ export default function App() {
   useThemeLoader(userId, authLoading);
   usePeriodicSync(userId);
   const { headerLayout, secondaryLayout } = useResponsiveLayout();
+  const sideHeaderOrientation = useSideHeaderOrientation();
 
   return (
     <>
@@ -34,6 +36,7 @@ export default function App() {
         className="app-shell max-w-container relative mx-auto flex flex-col justify-start"
         data-header-layout={headerLayout}
         data-secondary-layout={secondaryLayout}
+        data-side-header-orientation={sideHeaderOrientation}
       >
         <ToastContainer />
         <OverlayMask />
