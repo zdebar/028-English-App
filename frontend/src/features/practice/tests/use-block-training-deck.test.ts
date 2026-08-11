@@ -9,7 +9,8 @@ const completeInitialTrainingMock = vi.fn();
 const getByBlockIdMock = vi.fn();
 const savePracticeDeckMock = vi.fn();
 const saveInitialTrainingBlockCompletionMock = vi.fn();
-const getGrammarByIdMock = vi.fn();
+const resolvePracticeEntriesMock = vi.fn();
+const resolvePracticeGrammarMock = vi.fn();
 const addItemCountMock = vi.fn();
 const playAudioMock = vi.fn();
 const resetHintMock = vi.fn();
@@ -42,10 +43,9 @@ vi.mock('@/database/models/user-items', () => {
   };
 });
 
-vi.mock('@/database/models/grammar-chunks', () => ({
-  default: {
-    getById: (...args: unknown[]) => getGrammarByIdMock(...args),
-  },
+vi.mock('@/database/utils/practice-content.utils', () => ({
+  resolvePracticeEntries: (...args: unknown[]) => resolvePracticeEntriesMock(...args),
+  resolvePracticeGrammar: (...args: unknown[]) => resolvePracticeGrammarMock(...args),
 }));
 
 vi.mock('@/database/models/user-scores', () => ({
@@ -135,7 +135,34 @@ describe('useBlockTrainingDeck', () => {
 
     getUserBlockByIdMock.mockResolvedValue(makeBlock());
     getByBlockIdMock.mockResolvedValue([makeItem()]);
-    getGrammarByIdMock.mockResolvedValue({ id: 20, name: 'Articles', note: 'Grammar note' });
+    resolvePracticeEntriesMock.mockImplementation(
+      async (_userId: string, items: UserItemLocal[]) =>
+        items.map((item) => ({
+          item,
+          note: null,
+          grammar:
+            item.grammar_chunk_id > 0
+              ? {
+                  id: item.grammar_chunk_id,
+                  name: 'Articles',
+                  note: 'Grammar note',
+                  grammar_group_id: null,
+                  sort_order: 1,
+                  deleted_at: null,
+                  items: [],
+                }
+              : null,
+        })),
+    );
+    resolvePracticeGrammarMock.mockResolvedValue({
+      id: 20,
+      name: 'Articles',
+      note: 'Grammar note',
+      grammar_group_id: null,
+      sort_order: 1,
+      deleted_at: null,
+      items: [],
+    });
     addItemCountMock.mockResolvedValue(undefined);
     savePracticeDeckMock.mockResolvedValue(undefined);
     saveInitialTrainingBlockCompletionMock.mockResolvedValue(undefined);
@@ -150,10 +177,12 @@ describe('useBlockTrainingDeck', () => {
 
     expect(getUserBlockByIdMock).toHaveBeenCalledWith('user-1', 10);
     expect(getByBlockIdMock).toHaveBeenCalledWith('user-1', 10);
-    expect(getGrammarByIdMock).toHaveBeenCalledWith(20);
     expect(result.current.currentItem?.item_id).toBe(1);
     expect(result.current.grammar?.name).toBe('Articles');
-    expect(result.current.grammarChunkId).toBe(99);
+    expect(resolvePracticeEntriesMock).toHaveBeenCalledWith(
+      'user-1',
+      expect.arrayContaining([expect.objectContaining({ grammar_chunk_id: 99 })]),
+    );
     expect(result.current.progressLabel).toBe('1/2 · 0/1');
     expect('repeatDisabled' in result.current).toBe(false);
   });
@@ -163,6 +192,7 @@ describe('useBlockTrainingDeck', () => {
       makeBlock({ grammar_chunk_id: null }),
     );
     getByBlockIdMock.mockResolvedValue([makeItem({ grammar_chunk_id: 0, is_vocabulary: 1 })]);
+    resolvePracticeGrammarMock.mockResolvedValue(null);
 
     const { result } = renderHook(() => useBlockTrainingDeck('user-1', 10));
 
@@ -170,7 +200,7 @@ describe('useBlockTrainingDeck', () => {
 
     expect(result.current.grammar).toBeNull();
     expect(result.current.currentItem?.item_id).toBe(1);
-    expect(getGrammarByIdMock).not.toHaveBeenCalled();
+    expect(resolvePracticeEntriesMock).toHaveBeenCalled();
   });
 
   it('rejects a grammar-linked block that does not require initial training', async () => {
@@ -182,7 +212,7 @@ describe('useBlockTrainingDeck', () => {
 
     expect(result.current.block).toBeNull();
     expect(getByBlockIdMock).not.toHaveBeenCalled();
-    expect(getGrammarByIdMock).not.toHaveBeenCalled();
+    expect(resolvePracticeGrammarMock).not.toHaveBeenCalled();
   });
 
   it('rejects a block whose initial training is already completed', async () => {
@@ -196,7 +226,7 @@ describe('useBlockTrainingDeck', () => {
 
     expect(result.current.block).toBeNull();
     expect(getByBlockIdMock).not.toHaveBeenCalled();
-    expect(getGrammarByIdMock).not.toHaveBeenCalled();
+    expect(resolvePracticeGrammarMock).not.toHaveBeenCalled();
   });
 
   it('uses the same reveal flow, including direction confirmation before audio reveal', async () => {

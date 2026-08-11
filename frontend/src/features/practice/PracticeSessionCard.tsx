@@ -6,12 +6,10 @@ import BookIcon from '@/components/UI/icons/BookIcon';
 import PlayButton from '@/features/audio/PlayButton';
 import VolumeSlider from '@/features/audio/VolumeSlider';
 import GrammarDetailCard from '@/features/grammar/GrammarDetailCard';
-import { useGrammarViewer } from '@/features/grammar/use-grammar-viewer';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import InfoButton from '@/features/notes/InfoButton';
 import NoteDetailCard from '@/features/notes/NoteDetailCard';
-import { useNoteViewer } from '@/features/notes/use-note-viewer';
 import { useUserStore } from '@/features/user-stats/use-user-store';
 import { TEXTS } from '@/locales/cs';
 import HintButton from './buttons/HintButton';
@@ -26,10 +24,13 @@ import type { UserItemLocal } from '@/types/user-item.types';
 import RightArrowIcon from '@/components/UI/icons/RightArrowIcon';
 import ControlButton from './buttons/ControlButton';
 import { usePointerReleaseLock } from './hooks/use-pointer-release-lock';
+import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
+import type { NoteType } from '@/types/generic.types';
+import { useState } from 'react';
 
 export type PracticeSessionCardProps = Readonly<{
-  noteId: number | null;
-  grammarChunkId: number | null;
+  note: NoteType | null;
+  grammar: GrammarChunkWithExamples | null;
   progressLabel: string | number;
   isCzToEn: boolean;
   revealed: boolean;
@@ -143,8 +144,8 @@ function PracticeControls({
 }
 
 export default function PracticeSessionCard({
-  noteId,
-  grammarChunkId,
+  note,
+  grammar,
   progressLabel,
   isCzToEn,
   revealed,
@@ -171,8 +172,7 @@ export default function PracticeSessionCard({
 }: PracticeSessionCardProps) {
   const userId = useAuthStore((state) => state.userId);
   const dailyCount = useUserStore((state) => state.dailyCount);
-  const { isGrammarVisible, grammarData, openGrammar, closeGrammar } = useGrammarViewer();
-  const { isNoteVisible, noteData, openNote, closeNote } = useNoteViewer();
+  const [visibleDetail, setVisibleDetail] = useState<'grammar' | 'note' | null>(null);
 
   const { starChunk, starsPerRow, starCount, displayedChunkCount } = usePracticeStars(dailyCount);
 
@@ -180,8 +180,10 @@ export default function PracticeSessionCard({
   const cardStyle = revealed ? 'color-audio-disabled' : 'color-button';
   const directionText = isCzToEn ? TEXTS.directionCzToEn : TEXTS.directionEnToCz;
   const showAudioControls = !audioDisabled;
-  const showGrammarButton = grammarChunkId != null && grammarChunkId > 0 && revealed;
-  const showNoteButton = Boolean(noteId && revealed);
+  const showGrammarButton = Boolean(
+    revealed && (grammar?.note?.trim() || grammar?.items.length),
+  );
+  const showNoteButton = Boolean(revealed && note?.note.trim());
   const audioControlsDisabled =
     !showAudioControls || showDirectionChange || audioLoading || (isCzToEn && !revealed);
   const grammarButtonDisabled = !showGrammarButton || showDirectionChange;
@@ -189,12 +191,18 @@ export default function PracticeSessionCard({
   const practiceControlColumns =
     revealed && !isPronunciationPractice ? 'grid-cols-3' : 'grid-cols-1';
 
-  if (isGrammarVisible) {
+  if (visibleDetail === 'grammar') {
     return (
-      <GrammarDetailCard grammar={grammarData} onClose={closeGrammar} showHelpButton={false} />
+      <GrammarDetailCard
+        grammar={grammar ? { ...grammar, kind: 'chunk' } : null}
+        onClose={() => setVisibleDetail(null)}
+        showHelpButton={false}
+      />
     );
   }
-  if (isNoteVisible) return <NoteDetailCard note={noteData} onClose={closeNote} />;
+  if (visibleDetail === 'note') {
+    return <NoteDetailCard note={note} onClose={() => setVisibleDetail(null)} />;
+  }
 
   return (
     <div className="bottom-controls-clearance relative flex min-h-0 w-full grow flex-col items-center">
@@ -304,8 +312,8 @@ export default function PracticeSessionCard({
             title={TEXTS.grammar}
             ariaLabel={TEXTS.grammar}
             onClick={() => {
-              if (grammarChunkId == null || grammarButtonDisabled) return;
-              openGrammar(grammarChunkId);
+              if (!grammar || grammarButtonDisabled) return;
+              setVisibleDetail('grammar');
             }}
             disabled={grammarButtonDisabled}
           >
@@ -319,8 +327,8 @@ export default function PracticeSessionCard({
             disabled={noteButtonDisabled}
             onClick={(e) => {
               e.stopPropagation();
-              if (noteId == null || noteButtonDisabled) return;
-              openNote(noteId);
+              if (!note || noteButtonDisabled) return;
+              setVisibleDetail('note');
             }}
           >
             <HelpText className="-bottom-4 left-0 flex flex-col items-end landscape:invisible">

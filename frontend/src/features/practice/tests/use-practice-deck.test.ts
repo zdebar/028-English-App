@@ -105,8 +105,30 @@ describe('usePracticeDeck', () => {
 
     useFetchMock.mockReturnValue({
       data: [
-        { ...makeItem({ item_id: 1, progress_cz_to_en: 0 }), practice_direction: 'czToEn' },
-        { ...makeItem({ item_id: 2, progress_cz_to_en: 1 }), practice_direction: 'czToEn' },
+        {
+          item: {
+            ...makeItem({ item_id: 1, progress_cz_to_en: 0 }),
+            practice_direction: 'czToEn',
+          },
+          note: null,
+          grammar: {
+            id: 10,
+            name: 'Grammar',
+            note: 'Explanation',
+            grammar_group_id: null,
+            sort_order: 1,
+            deleted_at: null,
+            items: [],
+          },
+        },
+        {
+          item: {
+            ...makeItem({ item_id: 2, progress_cz_to_en: 1 }),
+            practice_direction: 'czToEn',
+          },
+          note: null,
+          grammar: null,
+        },
       ],
       loading: false,
       error: null,
@@ -128,7 +150,7 @@ describe('usePracticeDeck', () => {
     expect(result.current.czech).toBe('ahoj');
     expect(result.current.english).toBe('EN_HINT');
     expect(result.current.audioDisabled).toBe(true);
-    expect(result.current.grammarChunkId).toBe(10);
+    expect(result.current.grammar?.name).toBe('Grammar');
     expect(resetHintMock).toHaveBeenCalled();
   });
 
@@ -243,6 +265,8 @@ describe('usePracticeDeck', () => {
         }),
       ],
     });
+    expect(savedPayload.progress[0]).not.toHaveProperty('note');
+    expect(savedPayload.progress[0]).not.toHaveProperty('grammar');
 
     await act(async () => {
       unmount();

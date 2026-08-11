@@ -47,8 +47,8 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     index: 0,
     currentItem: null as UserItemLocal | null,
     trainingBlockId: null as number | null,
-    noteId: null,
-    grammarChunkId: 10,
+    note: null,
+    grammar: null,
     progress: 2,
     isCzToEn: true,
     revealed: false,
@@ -204,7 +204,8 @@ vi.mock('@/features/practice/hooks/use-practice-deck', () => ({
     if (!userId) {
       return {
         currentItem: null,
-        grammarChunkId: null,
+        note: null,
+        grammar: null,
         progress: 0,
         isCzToEn: true,
         revealed: false,
@@ -375,8 +376,16 @@ describe('PracticeCard', () => {
       grammar_chunk_id: 10,
       progress: 2,
     });
-    mocks.practiceDeck.noteId = null;
-    mocks.practiceDeck.grammarChunkId = 10;
+    mocks.practiceDeck.note = null;
+    mocks.practiceDeck.grammar = {
+      id: 10,
+      name: 'Grammar',
+      note: 'Explanation',
+      grammar_group_id: null,
+      sort_order: 1,
+      deleted_at: null,
+      items: [],
+    };
     mocks.practiceDeck.progress = 2;
     mocks.practiceDeck.isCzToEn = true;
     mocks.practiceDeck.revealed = false;
@@ -402,11 +411,16 @@ describe('PracticeCard', () => {
     expect(screen.getByText('Nic k procvičování.')).toBeTruthy();
   });
 
-  it('shows grammar card when grammar overlay is visible', () => {
-    mocks.grammarVisible = true;
-    mocks.grammarData = { id: 1, name: 'Articles' };
+  it('shows the resolved grammar detail after clicking its control', () => {
+    mocks.practiceDeck.revealed = true;
+    mocks.practiceDeck.grammar = {
+      ...mocks.practiceDeck.grammar,
+      id: 1,
+      name: 'Articles',
+    };
 
     render(<PracticeCard />);
+    fireEvent.click(screen.getByRole('button', { name: 'Grammar' }));
 
     expect(screen.getByTestId('grammar-detail').textContent).toContain('Articles');
     expect(screen.getByTestId('grammar-detail').dataset.helpEnabled).toBe('false');
@@ -650,7 +664,11 @@ describe('PracticeCard', () => {
 
   it('opens grammar from the right secondary control group after reveal', () => {
     mocks.practiceDeck.showDirectionChange = false;
-    mocks.practiceDeck.grammarChunkId = 42;
+    mocks.practiceDeck.grammar = {
+      ...mocks.practiceDeck.grammar,
+      id: 42,
+      name: 'Resolved grammar',
+    };
     mocks.practiceDeck.revealed = true;
 
     const { container } = render(<PracticeCard />);
@@ -662,12 +680,11 @@ describe('PracticeCard', () => {
     expect(grammarButton).toBeTruthy();
     fireEvent.click(grammarButton);
 
-    expect(mocks.handleGrammar).toHaveBeenCalledTimes(1);
-    expect(mocks.handleGrammar).toHaveBeenCalledWith(42);
+    expect(screen.getByTestId('grammar-detail').textContent).toContain('Resolved grammar');
   });
 
   it('keeps grammar disabled before reveal even when grammar data exists', () => {
-    mocks.practiceDeck.grammarChunkId = 42;
+    mocks.practiceDeck.grammar = { ...mocks.practiceDeck.grammar, id: 42 };
     mocks.practiceDeck.revealed = false;
 
     const { container } = render(<PracticeCard />);
@@ -679,22 +696,22 @@ describe('PracticeCard', () => {
     expect(grammarButton).toBeTruthy();
     expect(grammarButton.disabled).toBe(true);
     fireEvent.click(grammarButton);
-    expect(mocks.handleGrammar).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('grammar-detail')).toBeNull();
     expect(screen.queryByTestId('grammar-btn')).toBeNull();
   });
 
   it('does not open grammar automatically while direction change is shown', () => {
     mocks.practiceDeck.showDirectionChange = true;
-    mocks.practiceDeck.grammarChunkId = 42;
+    mocks.practiceDeck.grammar = { ...mocks.practiceDeck.grammar, id: 42 };
 
     render(<PracticeCard />);
 
-    expect(mocks.handleGrammar).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('grammar-detail')).toBeNull();
   });
 
   it('keeps note button disabled until item is revealed and note exists', () => {
     mocks.practiceDeck.revealed = false;
-    mocks.practiceDeck.noteId = 88;
+    mocks.practiceDeck.note = { id: 88, name: 'Note', note: 'Body' };
 
     const { container, rerender } = render(<PracticeCard />);
     expect((screen.getByRole('button', { name: 'note' }) as HTMLButtonElement).disabled).toBe(true);
@@ -714,32 +731,40 @@ describe('PracticeCard', () => {
     expect(screen.getByTestId('info-icon')).toBeTruthy();
   });
 
+  it('keeps detail controls disabled when resolved content is empty', () => {
+    mocks.practiceDeck.revealed = true;
+    mocks.practiceDeck.note = { id: 88, name: 'Empty note', note: '   ' };
+    mocks.practiceDeck.grammar = {
+      ...mocks.practiceDeck.grammar,
+      note: '   ',
+      items: [],
+    };
+
+    render(<PracticeCard />);
+
+    expect((screen.getByRole('button', { name: 'note' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: 'Grammar' }) as HTMLButtonElement).disabled).toBe(
+      true,
+    );
+  });
+
   it('opens note overview after clicking note button', () => {
     mocks.practiceDeck.revealed = true;
-    mocks.practiceDeck.noteId = 55;
+    mocks.practiceDeck.note = { id: 55, name: 'Resolved note', note: 'Body' };
 
     render(<PracticeCard />);
 
     fireEvent.click(screen.getByRole('button', { name: 'note' }));
 
-    expect(mocks.handleNote).toHaveBeenCalledWith(55);
-  });
-
-  it('shows note overview when note overlay is visible', () => {
-    mocks.noteVisible = true;
-    mocks.noteData = { id: 2, name: 'My note', note: 'Body' };
-
-    render(<PracticeCard />);
-
-    expect(screen.getByTestId('overview-title').textContent).toContain('My note');
+    expect(screen.getByTestId('overview-title').textContent).toContain('Resolved note');
     expect(screen.getByTestId('overview-body').textContent).toContain('Body');
   });
 
   it('can disable the complete control for specialized practice sessions', () => {
     render(
       <PracticeSessionCard
-        noteId={null}
-        grammarChunkId={10}
+        note={null}
+        grammar={null}
         progressLabel="Round 1/4"
         isCzToEn
         revealed
@@ -770,8 +795,8 @@ describe('PracticeCard', () => {
 
       return (
         <PracticeSessionCard
-          noteId={null}
-          grammarChunkId={null}
+          note={null}
+          grammar={null}
           progressLabel="1 / 2"
           isCzToEn
           revealed={revealed}
@@ -816,8 +841,8 @@ describe('PracticeCard', () => {
     const onSelectionChange = vi.fn();
     render(
       <PracticeSessionCard
-        noteId={null}
-        grammarChunkId={10}
+        note={null}
+        grammar={null}
         progressLabel="1 / 4"
         isCzToEn={false}
         revealed
@@ -851,8 +876,8 @@ describe('PracticeCard', () => {
   it('preserves the language order and prevents translation of learning content', () => {
     const { container } = render(
       <PracticeSessionCard
-        noteId={null}
-        grammarChunkId={null}
+        note={null}
+        grammar={null}
         progressLabel="1 / 1"
         isCzToEn={false}
         revealed
@@ -884,8 +909,8 @@ describe('PracticeCard', () => {
   it('disables Next when pronunciation practice has no advance handler', () => {
     const { container } = render(
       <PracticeSessionCard
-        noteId={null}
-        grammarChunkId={null}
+        note={null}
+        grammar={null}
         progressLabel="1 / 1"
         isCzToEn={false}
         revealed
@@ -912,8 +937,8 @@ describe('PracticeCard', () => {
   it('can disable the repeat control for specialized practice sessions', () => {
     render(
       <PracticeSessionCard
-        noteId={null}
-        grammarChunkId={10}
+        note={null}
+        grammar={null}
         progressLabel="Round 1/4"
         isCzToEn
         revealed
@@ -939,8 +964,8 @@ describe('PracticeCard', () => {
   it('shows the block training completion message and progress help', () => {
     render(
       <PracticeSessionCard
-        noteId={null}
-        grammarChunkId={10}
+        note={null}
+        grammar={null}
         progressLabel="1/2 · 7/8"
         isCzToEn
         revealed={false}
@@ -967,8 +992,8 @@ describe('PracticeCard', () => {
   it('shows an audio error above the block training completion message', () => {
     render(
       <PracticeSessionCard
-        noteId={null}
-        grammarChunkId={10}
+        note={null}
+        grammar={null}
         progressLabel="1/2 · 7/8"
         isCzToEn
         revealed

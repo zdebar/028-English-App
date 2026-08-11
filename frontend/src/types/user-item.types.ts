@@ -1,3 +1,6 @@
+import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
+import type { NoteType } from './generic.types';
+
 export type PracticeDirection = 'czToEn' | 'enToCz';
 export type PracticeOutcome = 'correct' | 'incorrect' | 'skip';
 
@@ -49,3 +52,11 @@ export interface UserItemLocal extends UserItemBase {
 export interface PracticeDeckItem extends UserItemLocal {
   practice_direction: PracticeDirection;
 }
+
+export type ResolvedPracticeEntry<T extends UserItemLocal> = Readonly<{
+  item: T;
+  note: NoteType | null;
+  grammar: GrammarChunkWithExamples | null;
+}>;
+
+export type PracticeDeckEntry = ResolvedPracticeEntry<PracticeDeckItem>;

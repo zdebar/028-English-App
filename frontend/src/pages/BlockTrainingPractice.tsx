@@ -75,8 +75,8 @@ export default function BlockTrainingPractice(): JSX.Element {
 
   return (
     <PracticeSessionCard
-      noteId={deck.noteId}
-      grammarChunkId={deck.grammarChunkId}
+      note={deck.note}
+      grammar={deck.practiceGrammar}
       progressLabel={deck.progressLabel}
       isCzToEn={deck.isCzToEn}
       revealed={deck.revealed}
