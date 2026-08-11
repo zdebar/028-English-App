@@ -18,6 +18,28 @@ function pronunciationTitle(pronunciation: string): string {
     : pronunciation;
 }
 
+function intrinsicTextWidth(element: HTMLElement): number {
+  const measurement = element.cloneNode(true) as HTMLElement;
+  const computedStyle = getComputedStyle(element);
+  measurement.setAttribute('aria-hidden', 'true');
+  measurement.style.position = 'fixed';
+  measurement.style.visibility = 'hidden';
+  measurement.style.pointerEvents = 'none';
+  measurement.style.width = 'max-content';
+  measurement.style.minWidth = '0';
+  measurement.style.maxWidth = 'none';
+  measurement.style.flex = 'none';
+  measurement.style.overflow = 'visible';
+  measurement.style.whiteSpace = 'nowrap';
+  measurement.style.font = computedStyle.font;
+  measurement.style.letterSpacing = computedStyle.letterSpacing;
+  document.body.appendChild(measurement);
+  const measuredWidth = measurement.getBoundingClientRect().width;
+  measurement.remove();
+  if (measuredWidth > 0) return measuredWidth;
+  return element.scrollWidth;
+}
+
 /** A shared, content-aware Czech/English item row used by all item lists. */
 export default function BilingualItemButton({
   item,
@@ -39,12 +61,13 @@ export default function BilingualItemButton({
     if (!container || !czech || !english) return;
 
     const gap = 12;
+    const czechWidth = intrinsicTextWidth(czech);
+    const englishWidth = intrinsicTextWidth(english);
     const horizontalWidth = Math.max(0, (container.clientWidth - gap) / 2);
-    const shouldStack =
-      czech.scrollWidth > horizontalWidth || english.scrollWidth > horizontalWidth;
+    const shouldStack = czechWidth > horizontalWidth || englishWidth > horizontalWidth;
     const finalWidth = shouldStack ? container.clientWidth : horizontalWidth;
     setStacked(shouldStack);
-    setTruncated(czech.scrollWidth > finalWidth || english.scrollWidth > finalWidth);
+    setTruncated(czechWidth > finalWidth || englishWidth > finalWidth);
   }, []);
 
   useLayoutEffect(() => {
