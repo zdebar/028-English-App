@@ -90,6 +90,7 @@
   --max-width-screenshot: 320px;
   --min-height-card: 360px;
   --max-height-card: 400px;
+  --height-header: calc(var(--height-button) + 2rem);
 
   /** COMPONENT SIZES **/
   --size-button: 3.25rem;

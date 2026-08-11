@@ -29,9 +29,19 @@
   }
 
   /** CARD STYLES **/
+  .app-shell {
+    min-height: 100vh;
+  }
+
+  @supports (min-height: 100dvh) {
+    .app-shell {
+      min-height: 100dvh;
+    }
+  }
+
   .card-height {
     @apply flex flex-col justify-start;
-    @apply max-h-card h-screen grow;
+    @apply max-h-card h-full min-h-0 grow;
   }
 
   .card-width {
@@ -43,27 +53,22 @@
     max-width: var(--max-width-screenshot);
   }
 
-  /** SCREEN SIZE
-  - same as header.module.css media queries
-  - short: max-height: 460px - splits header into sides, pushes main up
-  - short-narrow: max-height: 460px and max-width: 768px - orient side header vertically
+  /** SIDE-HEADER CARD WIDTH
+  - activated from component size tokens by useResponsiveLayout
+  - narrow screens reserve space for vertically stacked navigation
   **/
-  @media (max-height: 460px)  {
-    :root {
-      --responsive-card-width: max(
-        var(--min-width-card),
-        min(calc(100vw - 18rem), var(--max-width-card))
-      );
-    }
+  .app-shell[data-header-layout='side'] {
+    --responsive-card-width: max(
+      var(--min-width-card),
+      min(calc(100vw - 18rem), var(--max-width-card))
+    );
   }
 
-  @media (max-height: 460px) and (max-width: 768px) {
-    :root {
-      --responsive-card-width: max(
-        var(--min-width-card),
-        min(calc(100vw - 10.5rem), var(--max-width-card))
-      );
-    }
+  .app-shell[data-header-layout='side'][data-side-header-orientation='vertical'] {
+    --responsive-card-width: max(
+      var(--min-width-card),
+      min(calc(100vw - 10.5rem), var(--max-width-card))
+    );
   }
 
   /** Help Text styles */

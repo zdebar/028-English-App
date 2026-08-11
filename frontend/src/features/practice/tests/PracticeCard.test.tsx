@@ -619,6 +619,7 @@ describe('PracticeCard', () => {
     const { container } = render(<PracticeCard />);
 
     expect(container.firstElementChild?.className).toContain('bottom-controls-clearance');
+    expect(container.firstElementChild?.className).toContain('min-h-0');
     expect(
       container.querySelector('.pos-bottom-right-control [data-testid="help-button"]'),
     ).toBeTruthy();

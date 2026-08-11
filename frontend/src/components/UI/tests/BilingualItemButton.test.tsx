@@ -1,9 +1,26 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import BilingualItemButton from '../buttons/BilingualItemButton';
 
+function createRect(width: number): DOMRect {
+  return {
+    bottom: 0,
+    height: 0,
+    left: 0,
+    right: width,
+    top: 0,
+    width,
+    x: 0,
+    y: 0,
+    toJSON: () => ({}),
+  };
+}
+
 describe('BilingualItemButton', () => {
-  afterEach(() => vi.restoreAllMocks());
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
 
   it('shows both languages and emphasizes English', () => {
     render(
@@ -16,6 +33,81 @@ describe('BilingualItemButton', () => {
     expect(screen.getByText('ahoj')).toBeTruthy();
     expect(screen.getByText('hello').className).toContain('font-bold');
     expect(screen.getByRole('button').getAttribute('title')).toContain('həˈləʊ');
+  });
+
+  it('returns stacked text to a row after the container becomes wide enough', () => {
+    let containerWidth = 200;
+    let observedResize: () => void = () => undefined;
+
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      return this.tagName === 'DIV' ? containerWidth : 0;
+    });
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      const width = this.textContent?.startsWith('long') ? 150 : 40;
+      return createRect(width);
+    });
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: ResizeObserverCallback) {
+          observedResize = () => callback([], this as unknown as ResizeObserver);
+        }
+
+        observe() {}
+        disconnect() {}
+      },
+    );
+
+    render(
+      <BilingualItemButton
+        item={{ czech: 'long czech text', english: 'short', pronunciation: '' }}
+        onClick={vi.fn()}
+      />,
+    );
+
+    const row = screen.getByText('long czech text').parentElement;
+    expect(row?.className).toContain('flex-col');
+
+    containerWidth = 400;
+    act(() => observedResize());
+
+    expect(row?.className).toContain('flex-row');
+  });
+
+  it('chooses the layout independently for each button', () => {
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      return this.tagName === 'DIV' ? 200 : 0;
+    });
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      const width = this.textContent?.startsWith('long individual') ? 150 : 40;
+      return createRect(width);
+    });
+
+    render(
+      <>
+        <BilingualItemButton
+          item={{ czech: 'long individual czech text', english: 'short', pronunciation: '' }}
+          onClick={vi.fn()}
+        />
+        <BilingualItemButton
+          item={{ czech: 'brief czech', english: 'brief english', pronunciation: '' }}
+          onClick={vi.fn()}
+        />
+      </>,
+    );
+
+    expect(screen.getByText('long individual czech text').parentElement?.className).toContain(
+      'flex-col',
+    );
+    expect(screen.getByText('brief czech').parentElement?.className).toContain('flex-row');
   });
 
   it('shows the selected leading language first', () => {

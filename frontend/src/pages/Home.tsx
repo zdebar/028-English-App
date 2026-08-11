@@ -47,8 +47,8 @@ export default function Home(): JSX.Element {
   return (
     <>
       {userId ? (
-        <div className="card-width relative flex h-full w-full grow flex-col justify-start sm:gap-4">
-          <div className="mt-6 mb-4">
+        <div className="card-width relative flex h-full w-full grow flex-col justify-start gap-2 sm:gap-4">
+          <div className="mt-6">
             <PropertyView
               label={TEXTS.profileNameLabel}
               className="justify-center"
@@ -58,10 +58,10 @@ export default function Home(): JSX.Element {
               {userFullName ?? TEXTS.notAvailable}
             </PropertyView>
             <HomeActionLinks />
-            <p className={`text-error-light dark:text-error-dark px-4 py-2 text-center text-sm`}>
-              Aplikace je v testovacím a ukázkovém režimu. Nepoužívat pro skutečnou výuku!
-            </p>
           </div>
+          <p className={`text-error-light dark:text-error-dark px-4 text-center text-sm`}>
+            Aplikace je v testovacím a ukázkovém režimu. Nepoužívat pro skutečnou výuku!
+          </p>
           {isAnonymousUser && (
             <div className="flex flex-col gap-2">
               <ConvertAnonymousUserButton />
