@@ -381,7 +381,7 @@ describe('PracticeCard', () => {
       id: 10,
       name: 'Grammar',
       note: 'Explanation',
-      grammar_group_id: null,
+      grammar_group_id: 1,
       sort_order: 1,
       deleted_at: null,
       items: [],

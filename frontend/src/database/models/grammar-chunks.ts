@@ -13,7 +13,7 @@ export default class GrammarChunk extends SyncEntityModel implements GrammarChun
   id!: number;
   name!: string;
   note!: string | null;
-  grammar_group_id!: number | null;
+  grammar_group_id!: number;
   sort_order!: number;
   deleted_at!: string | null;
 
@@ -57,10 +57,12 @@ export default class GrammarChunk extends SyncEntityModel implements GrammarChun
       .anyOf(memberships.map((membership) => [userId, membership.item_id]))
       .toArray();
     const itemById = new Map(items.map((item) => [item.item_id, item]));
+    const orderedMemberships = [...memberships];
+    orderedMemberships.sort((left, right) => left.sort_order - right.sort_order);
+
     return {
       ...chunk,
-      items: memberships
-        .sort((left, right) => left.sort_order - right.sort_order)
+      items: orderedMemberships
         .map((membership) => itemById.get(membership.item_id))
         .filter((item): item is UserItem => Boolean(item)),
     };

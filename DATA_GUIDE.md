@@ -45,9 +45,11 @@ Tabulky, které nevyžadují jazyková data:
 
 ### `grammar_chunks`
 
-- `name` a `sort_order` jsou povinné a globálně unikátní
+- `name` je povinný a unikátní v rámci `grammar_group_id`
+- `sort_order` je povinný, začíná od 1 a je unikátní v rámci `grammar_group_id`
 - `note` - nepovinné, obsahuje vysvětlení
-- `grammar_group_id` - nepovinné, pokud není chunks je zobrazen v Přehledu gramatiky samostatně, pokud je sdružen s ostatními se stejným grammar_group_id
+- `grammar_group_id` - povinné, připojuje chunk ke skupině zobrazované v Přehledu gramatiky
+- Přehled gramatiky zobrazí skupinu po zahájení alespoň jednoho jejího chunku a uvnitř skupiny ukáže pouze zahájené chunky.
 
 ### `blocks`
 

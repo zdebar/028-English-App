@@ -80,7 +80,7 @@ function makeGrammar(id: number) {
     id,
     name: `Grammar ${id}`,
     note: `Explanation ${id}`,
-    grammar_group_id: null,
+    grammar_group_id: 1,
     sort_order: id,
     deleted_at: null,
   };
