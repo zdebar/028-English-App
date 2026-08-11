@@ -70,6 +70,12 @@ type PracticeControlsProps = Pick<
   | 'showDirectionChange'
 >;
 
+type TopBarPrimaryContentProps = Pick<
+  PracticeSessionCardProps,
+  'isBlockTrainingPractice' | 'isPronunciationPractice'
+> &
+  Readonly<{ shortDirectionText: string }>;
+
 function AudioStatusMessage({
   audioError,
   audioLoading,
@@ -81,6 +87,20 @@ function AudioStatusMessage({
     return <p className="font-headings color-info">{TEXTS.noAudio}</p>;
   }
   return null;
+}
+
+function TopBarPrimaryContent({
+  isBlockTrainingPractice = false,
+  isPronunciationPractice = false,
+  shortDirectionText,
+}: TopBarPrimaryContentProps) {
+  if (isBlockTrainingPractice) {
+    return <p className="color-info font-headings">{TEXTS.blockTrainingFinishAll}</p>;
+  }
+
+  if (isPronunciationPractice) return null;
+
+  return <p className="text-sm font-light">{shortDirectionText}</p>;
 }
 
 function PracticeControls({
@@ -179,6 +199,9 @@ export default function PracticeSessionCard({
   const cardText = revealed ? undefined : TEXTS.reveal;
   const cardStyle = revealed ? 'color-audio-disabled' : 'color-button';
   const directionText = isCzToEn ? TEXTS.directionCzToEn : TEXTS.directionEnToCz;
+  const shortDirectionText = isCzToEn
+    ? TEXTS.directionCzToEnShort
+    : TEXTS.directionEnToCzShort;
   const showAudioControls = !audioDisabled;
   const showGrammarButton = Boolean(
     revealed && (grammar?.note?.trim() || grammar?.items.length),
@@ -219,9 +242,11 @@ export default function PracticeSessionCard({
           )}
           <div id="top-bar" className="relative grid h-14 w-full grid-rows-2 text-center">
             <div className="flex min-h-0 items-center justify-center">
-              {isBlockTrainingPractice ? (
-                <p className="color-info font-headings">{TEXTS.blockTrainingFinishAll}</p>
-              ) : null}
+              <TopBarPrimaryContent
+                isBlockTrainingPractice={isBlockTrainingPractice}
+                isPronunciationPractice={isPronunciationPractice}
+                shortDirectionText={shortDirectionText}
+              />
             </div>
             <div className="flex min-h-0 items-center justify-center">
               <AudioStatusMessage audioError={audioError} audioLoading={audioLoading} />
