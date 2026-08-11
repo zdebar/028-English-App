@@ -9,17 +9,14 @@ import { useThemeLoader } from '@/features/theme/use-theme-loader';
 import ToastContainer from '@/features/toast/ToastContainer';
 import { useUserStoreSync } from '@/features/user-stats/use-user-store-sync';
 import { Outlet } from 'react-router-dom';
-import { useState } from 'react';
 import './styles/index.css';
 import { useAudioLoader } from './features/audio/use-audio-loader';
 import { usePronunciationGroupsStoreSync } from './features/pronunciation/use-pronunciation-groups-store-sync';
 import { usePracticeAvailabilityStoreSync } from './features/practice/use-practice-availability-store-sync';
 import { useResponsiveLayout } from './components/Layout/use-responsive-layout';
 import { useSideHeaderOrientation } from './components/Layout/use-side-header-orientation';
-import { PracticeFooterConstraintContext } from './components/Layout/practice-footer-constraint';
 
 export default function App() {
-  const [practiceSessionActive, setPracticeSessionActive] = useState(false);
   const userId = useAuthStore((state) => state.userId);
   const authLoading = useAuthStore((state) => state.loading);
 
@@ -35,27 +32,21 @@ export default function App() {
   return (
     <>
       <GoogleAnalytics />
-      <PracticeFooterConstraintContext.Provider value={setPracticeSessionActive}>
-        <div
-          className="app-shell max-w-container relative mx-auto flex flex-col justify-start"
-          data-header-layout={headerLayout}
-          data-secondary-layout={secondaryLayout}
-          data-side-header-orientation={sideHeaderOrientation}
-        >
-          <ToastContainer />
-          <OverlayMask />
-          <IdentityLinkConflictModal />
-          <Header />
-          <main className="max-w-card relative mx-auto flex min-h-0 w-full grow flex-col items-center gap-4">
-            <Outlet />
-          </main>
-          <Footer
-            constrainToPracticeSession={practiceSessionActive}
-            headerLayout={headerLayout}
-            secondaryLayout={secondaryLayout}
-          />
-        </div>
-      </PracticeFooterConstraintContext.Provider>
+      <div
+        className="app-shell max-w-container relative mx-auto flex flex-col justify-start"
+        data-header-layout={headerLayout}
+        data-secondary-layout={secondaryLayout}
+        data-side-header-orientation={sideHeaderOrientation}
+      >
+        <ToastContainer />
+        <OverlayMask />
+        <IdentityLinkConflictModal />
+        <Header />
+        <main className="max-w-card relative mx-auto flex min-h-0 w-full grow flex-col items-center gap-4">
+          <Outlet />
+        </main>
+        <Footer />
+      </div>
     </>
   );
 }

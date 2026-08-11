@@ -1,5 +1,4 @@
 import Notification from '@/components/UI/Notification';
-import { usePracticeFooterConstraint } from '@/components/Layout/practice-footer-constraint';
 import { STAR_SIZE } from '@/components/UI/StarProgress';
 import DelayedNotification from '@/components/UI/DelayedNotification';
 import SecondaryControlButton from '@/components/UI/buttons/SecondaryControlButton';
@@ -170,7 +169,6 @@ export default function PracticeSessionCard({
   nextPronunciation,
   onPronunciationSelectionChange,
 }: PracticeSessionCardProps) {
-  usePracticeFooterConstraint();
   const userId = useAuthStore((state) => state.userId);
   const dailyCount = useUserStore((state) => state.dailyCount);
   const { isGrammarVisible, grammarData, openGrammar, closeGrammar } = useGrammarViewer();
