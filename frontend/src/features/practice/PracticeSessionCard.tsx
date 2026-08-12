@@ -100,7 +100,12 @@ function TopBarPrimaryContent({
 
   if (isPronunciationPractice) return null;
 
-  return <p className="text-sm font-light">{shortDirectionText}</p>;
+  return (
+    <div className="relative">
+      <p className="text-sm font-light">{shortDirectionText}</p>
+      <HelpText className="top-4 left-1/2 -translate-x-1/2">{TEXTS.directionHelpText}</HelpText>
+    </div>
+  );
 }
 
 function PracticeControls({
@@ -119,12 +124,7 @@ function PracticeControls({
     usePointerReleaseLock();
 
   if (!revealed) {
-    return (
-      <HintButton
-        onClick={plusHint}
-        disabled={showDirectionChange || isSkipGestureLocked}
-      />
-    );
+    return <HintButton onClick={plusHint} disabled={showDirectionChange || isSkipGestureLocked} />;
   }
 
   if (isPronunciationPractice) {
@@ -199,13 +199,9 @@ export default function PracticeSessionCard({
   const cardText = revealed ? undefined : TEXTS.reveal;
   const cardStyle = revealed ? 'color-audio-disabled' : 'color-button';
   const directionText = isCzToEn ? TEXTS.directionCzToEn : TEXTS.directionEnToCz;
-  const shortDirectionText = isCzToEn
-    ? TEXTS.directionCzToEnShort
-    : TEXTS.directionEnToCzShort;
+  const shortDirectionText = isCzToEn ? TEXTS.directionCzToEnShort : TEXTS.directionEnToCzShort;
   const showAudioControls = !audioDisabled;
-  const showGrammarButton = Boolean(
-    revealed && (grammar?.note?.trim() || grammar?.items.length),
-  );
+  const showGrammarButton = Boolean(revealed && (grammar?.note?.trim() || grammar?.items.length));
   const showNoteButton = Boolean(revealed && note?.note.trim());
   const audioControlsDisabled =
     !showAudioControls || showDirectionChange || audioLoading || (isCzToEn && !revealed);
@@ -238,7 +234,7 @@ export default function PracticeSessionCard({
           aria-disabled={revealed}
         >
           {!revealed && !showDirectionChange && (
-            <HelpText className="top-17 left-1/2 -translate-x-1/2">{TEXTS.reveal}</HelpText>
+            <HelpText className="top-23 left-1/2 -translate-x-1/2">{TEXTS.reveal}</HelpText>
           )}
           <div id="top-bar" className="relative grid h-14 w-full grid-rows-2 text-center">
             <div className="flex min-h-0 items-center justify-center">

@@ -16,6 +16,7 @@ export const PRACTICE_TEXTS = {
   directionCzToEn: 'Z češtiny do angličtiny',
   directionEnToCzShort: 'en › cz',
   directionCzToEnShort: 'cz › en',
+  directionHelpText: 'směr procvičování',
   skipHoldInfoToast: 'Pro dokončení položky podržte tlačítko.',
   skipSuccessToast: 'Položka byla dokončena.',
   skipErrorToast: 'Dokončení položky se nezdařilo.',
