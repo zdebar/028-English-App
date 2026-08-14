@@ -39,7 +39,7 @@ export default function BlockTrainingOverviewCard({
     [items],
   );
   const { playAudio, isAudioReady, loading } = useAudioManager(audios);
-  const title = grammar?.name ?? block.name;
+  const title = block.name;
 
   return (
     <OverviewCard
@@ -47,15 +47,8 @@ export default function BlockTrainingOverviewCard({
       onClose={() => navigate(ROUTES.home)}
       className="flex w-full flex-col gap-1"
     >
-      {grammar ? (
-        <section>
-          {grammar.note && <Note note={grammar.note} />}
-        </section>
-      ) : (
-        <>
-          {block.note && <Note note={block.note} />}
-        </>
-      )}
+      {grammar && <section>{grammar.note && <Note note={grammar.note} />}</section>}
+      {block.note && <Note note={block.note} />}
       {items.map((item) => (
         <BilingualItemButton
           key={item.item_id}
