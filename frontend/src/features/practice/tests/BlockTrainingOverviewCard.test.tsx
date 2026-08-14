@@ -16,7 +16,7 @@ function LocationProbe() {
 }
 
 describe('BlockTrainingOverviewCard', () => {
-  it('renders only the grammar content when grammar is attached', () => {
+  it('renders the block title and both notes when grammar is attached', () => {
     render(
       <MemoryRouter>
         <BlockTrainingOverviewCard
@@ -27,11 +27,11 @@ describe('BlockTrainingOverviewCard', () => {
       </MemoryRouter>,
     );
 
-    expect((screen.getByRole('button', { name: 'Articles' }) as HTMLButtonElement).disabled).toBe(
+    expect((screen.getByRole('button', { name: 'Block A' }) as HTMLButtonElement).disabled).toBe(
       true,
     );
-    expect(screen.queryByRole('button', { name: 'Block A' })).toBeNull();
-    expect(screen.queryByText('Block note')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Articles' })).toBeNull();
+    expect(screen.getByText('Block note')).toBeTruthy();
     expect(screen.getByText('Grammar note')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy();
   });
