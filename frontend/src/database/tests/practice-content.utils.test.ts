@@ -4,6 +4,7 @@ import type { PracticeDeckItem, UserItemLocal } from '@/types/user-item.types';
 const mocks = vi.hoisted(() => ({
   notesBulkGet: vi.fn(),
   grammarBulkGet: vi.fn(),
+  grammarGroupGet: vi.fn(),
   addExamples: vi.fn(),
   getPracticeDeck: vi.fn(),
   getPronunciationPracticeDeck: vi.fn(),
@@ -14,6 +15,7 @@ vi.mock('@/database/models/db', () => ({
   db: {
     notes: { bulkGet: (...args: unknown[]) => mocks.notesBulkGet(...args) },
     grammar_chunks: { bulkGet: (...args: unknown[]) => mocks.grammarBulkGet(...args) },
+    grammar_groups: { get: (...args: unknown[]) => mocks.grammarGroupGet(...args) },
   },
 }));
 
@@ -42,6 +44,7 @@ vi.mock('@/config/config', () => ({
 import {
   loadPracticeDeck,
   resolvePracticeEntries,
+  resolvePracticeGrammarContext,
 } from '@/database/utils/practice-content.utils';
 
 function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
@@ -91,6 +94,13 @@ describe('practice content resolution', () => {
     vi.clearAllMocks();
     mocks.notesBulkGet.mockResolvedValue([{ id: 1, name: 'Note', note: 'Body' }]);
     mocks.grammarBulkGet.mockResolvedValue([makeGrammar(10)]);
+    mocks.grammarGroupGet.mockResolvedValue({
+      id: 1,
+      name: 'Basics',
+      note: 'Group explanation',
+      sort_order: 1,
+      deleted_at: null,
+    });
     mocks.addExamples.mockImplementation(async (_userId, grammar) => ({
       ...grammar,
       items: [],
@@ -159,6 +169,37 @@ describe('practice content resolution', () => {
       'Failed to resolve practice grammar examples',
       error,
       { grammarChunkId: 10 },
+    );
+  });
+
+  it('resolves the grammar group belonging to the requested chunk', async () => {
+    const context = await resolvePracticeGrammarContext('u1', 10);
+
+    expect(mocks.grammarGroupGet).toHaveBeenCalledWith(1);
+    expect(context.grammar?.id).toBe(10);
+    expect(context.grammarGroup?.note).toBe('Group explanation');
+  });
+
+  it('skips the grammar group lookup when no chunk is attached', async () => {
+    await expect(resolvePracticeGrammarContext('u1', null)).resolves.toEqual({
+      grammar: null,
+      grammarGroup: null,
+    });
+    expect(mocks.grammarGroupGet).not.toHaveBeenCalled();
+  });
+
+  it('keeps the chunk when its grammar group cannot be loaded', async () => {
+    const error = new Error('group unavailable');
+    mocks.grammarGroupGet.mockRejectedValue(error);
+
+    const context = await resolvePracticeGrammarContext('u1', 10);
+
+    expect(context.grammar?.id).toBe(10);
+    expect(context.grammarGroup).toBeNull();
+    expect(mocks.reportError).toHaveBeenCalledWith(
+      'Failed to resolve practice grammar group',
+      error,
+      { grammarGroupId: 1 },
     );
   });
 

@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
     error: null as Error | null,
     block: null as { name: string } | null,
     grammar: null as { id: number; name: string } | null,
+    grammarGroup: null as { note: string | null } | null,
     isComplete: false,
     currentItem: null as { item_id: number } | null,
     note: null,
@@ -60,7 +61,13 @@ vi.mock('@/features/auth/use-auth-store', () => ({
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
-  useLoaderData: () => ({ block: { block_id: 10 }, items: [], entries: [], grammar: null }),
+  useLoaderData: () => ({
+    block: { block_id: 10 },
+    items: [],
+    entries: [],
+    grammar: null,
+    grammarGroup: null,
+  }),
 }));
 
 vi.mock('@/features/toast/use-toast-store', () => ({
@@ -77,10 +84,10 @@ vi.mock('@/features/practice/hooks/use-block-training-deck', () => ({
 }));
 
 vi.mock('@/features/practice/BlockTrainingOverviewCard', () => ({
-  default: ({ block, grammar, onContinue }: any) => (
+  default: ({ block, grammar, grammarGroup, onContinue }: any) => (
     <div>
       <div data-testid="block-training-overview">
-        {block?.name}:{grammar?.name}
+        {block?.name}:{grammar?.name}:{grammarGroup?.note}
       </div>
       <button type="button" onClick={onContinue}>
         Continue
@@ -109,6 +116,7 @@ describe('BlockTrainingPractice', () => {
     mocks.deck.error = null;
     mocks.deck.block = null;
     mocks.deck.grammar = null;
+    mocks.deck.grammarGroup = null;
     mocks.deck.isComplete = false;
     mocks.deck.currentItem = null;
   });
@@ -146,6 +154,7 @@ describe('BlockTrainingPractice', () => {
   it('renders shared empty state when a block has no current item', () => {
     mocks.deck.block = { name: 'Block A' };
     mocks.deck.grammar = { id: 1, name: 'Articles' };
+    mocks.deck.grammarGroup = { note: 'Group note' };
 
     render(<BlockTrainingPractice />);
 
@@ -158,11 +167,14 @@ describe('BlockTrainingPractice', () => {
   it('shows the combined block and grammar overview before practice', () => {
     mocks.deck.block = { name: 'Block A' };
     mocks.deck.grammar = { id: 1, name: 'Articles' };
+    mocks.deck.grammarGroup = { note: 'Group note' };
     mocks.deck.currentItem = { item_id: 1 };
 
     render(<BlockTrainingPractice />);
 
-    expect(screen.getByTestId('block-training-overview').textContent).toBe('Block A:Articles');
+    expect(screen.getByTestId('block-training-overview').textContent).toBe(
+      'Block A:Articles:Group note',
+    );
     expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy();
     expect(screen.queryByTestId('practice-session')).toBeNull();
   });
@@ -186,7 +198,7 @@ describe('BlockTrainingPractice', () => {
 
     render(<BlockTrainingPractice />);
 
-    expect(screen.getByTestId('block-training-overview').textContent).toBe('Block A:');
+    expect(screen.getByTestId('block-training-overview').textContent).toBe('Block A::');
     expect(screen.queryByTestId('practice-session')).toBeNull();
   });
 

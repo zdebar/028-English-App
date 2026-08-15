@@ -3,7 +3,7 @@ import StyledButton from '@/components/UI/buttons/StyledButton';
 import { ROUTES } from '@/config/routes.config';
 import type { GrammarDetail } from '@/features/grammar/GrammarDetailCard';
 import { TEXTS } from '@/locales/cs';
-import type { UserBlockType } from '@/types/generic.types';
+import type { GrammarGroupType, UserBlockType } from '@/types/generic.types';
 import DOMPurify from 'dompurify';
 import type { JSX } from 'react';
 import type { UserItemLocal } from '@/types/user-item.types';
@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 type BlockTrainingOverviewCardProps = Readonly<{
   block: Pick<UserBlockType, 'name' | 'note'>;
   grammar: GrammarDetail | null;
+  grammarGroup: Pick<GrammarGroupType, 'note'> | null;
   items?: readonly UserItemLocal[];
   onContinue: () => void;
 }>;
@@ -29,6 +30,7 @@ function Note({ note }: Readonly<{ note: string }>): JSX.Element {
 export default function BlockTrainingOverviewCard({
   block,
   grammar,
+  grammarGroup,
   items = [],
   onContinue,
 }: BlockTrainingOverviewCardProps): JSX.Element {
@@ -47,6 +49,7 @@ export default function BlockTrainingOverviewCard({
       onClose={() => navigate(ROUTES.home)}
       className="flex w-full flex-col gap-1"
     >
+      {grammarGroup?.note && <Note note={grammarGroup.note} />}
       {grammar && <section>{grammar.note && <Note note={grammar.note} />}</section>}
       {block.note && <Note note={block.note} />}
       {items.map((item) => (

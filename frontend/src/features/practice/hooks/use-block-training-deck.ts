@@ -4,7 +4,11 @@ import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
 import type { GrammarDetail } from '@/features/grammar/GrammarDetailCard';
 import { reportError } from '@/features/logging/monitoring-handler';
-import type { GrammarChunkType, UserBlockType } from '@/types/generic.types';
+import type {
+  GrammarChunkType,
+  GrammarGroupType,
+  UserBlockType,
+} from '@/types/generic.types';
 import type { ResolvedPracticeEntry, UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { NBSP } from './use-hint';
@@ -13,7 +17,7 @@ import type { BlockTrainingData } from '@/routing/route-data';
 import { invalidateRouteData, routeDataKey } from '@/routing/route-data-cache';
 import {
   resolvePracticeEntries,
-  resolvePracticeGrammar,
+  resolvePracticeGrammarContext,
 } from '@/database/utils/practice-content.utils';
 
 type BlockTrainingRound = 0 | 1;
@@ -45,6 +49,9 @@ export function useBlockTrainingDeck(
   const [grammar, setGrammar] = useState<GrammarDetail | null>(() =>
     toGrammarDetail(initialData?.grammar),
   );
+  const [grammarGroup, setGrammarGroup] = useState<GrammarGroupType | null>(
+    initialData?.grammarGroup ?? null,
+  );
   const [round, setRound] = useState<BlockTrainingRound>(0);
   const [totalItemCount, setTotalItemCount] = useState(initialData?.items.length ?? 0);
   const [completedItemIds, setCompletedItemIds] = useState<Set<number>>(
@@ -69,6 +76,7 @@ export function useBlockTrainingDeck(
       setItems(initialData.items);
       setResolvedEntries(initialData.entries);
       setGrammar(toGrammarDetail(initialData.grammar));
+      setGrammarGroup(initialData.grammarGroup);
       setTotalItemCount(initialData.items.length);
       setCompletedItemIds(new Set());
       setRound(0);
@@ -98,6 +106,7 @@ export function useBlockTrainingDeck(
             setTotalItemCount(0);
             setCompletedItemIds(new Set());
             setGrammar(null);
+            setGrammarGroup(null);
             setCurrentQueue([]);
             setNextWaveQueue([]);
           }
@@ -105,9 +114,9 @@ export function useBlockTrainingDeck(
         }
 
         const blockItems = await UserItem.getByBlockId(userId, nextBlock.block_id);
-        const [nextResolvedEntries, grammarData] = await Promise.all([
+        const [nextResolvedEntries, grammarContext] = await Promise.all([
           resolvePracticeEntries(userId, blockItems),
-          resolvePracticeGrammar(userId, nextBlock.grammar_chunk_id),
+          resolvePracticeGrammarContext(userId, nextBlock.grammar_chunk_id),
         ]);
         if (!isMounted) return;
 
@@ -116,7 +125,8 @@ export function useBlockTrainingDeck(
         setResolvedEntries(nextResolvedEntries);
         setTotalItemCount(blockItems.length);
         setCompletedItemIds(new Set());
-        setGrammar(toGrammarDetail(grammarData));
+        setGrammar(toGrammarDetail(grammarContext.grammar));
+        setGrammarGroup(grammarContext.grammarGroup);
         setRound(0);
         setCurrentQueue(blockItems);
         setNextWaveQueue([]);
@@ -129,6 +139,7 @@ export function useBlockTrainingDeck(
         setItems([]);
         setResolvedEntries([]);
         setGrammar(null);
+        setGrammarGroup(null);
         setCurrentQueue([]);
         setNextWaveQueue([]);
         setTotalItemCount(0);
@@ -297,6 +308,7 @@ export function useBlockTrainingDeck(
     block,
     items,
     grammar,
+    grammarGroup,
     isComplete,
     loading,
     error,
