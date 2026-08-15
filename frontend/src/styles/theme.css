@@ -14,11 +14,11 @@
 
   /** background colors **/
   --color-background-light: #fcc555;
-  --color-background-dark: #0d0d0f;
+  --color-background-dark: #16161e;
 
   /** button colors **/
   --color-button-light: #f7b740;
-  --color-button-dark: #17171c;
+  --color-button-dark: #1c1c26;
   --color-button-hover: white;
   --color-signin-button: white;
   --color-signin-button-hover: #eaeaea;
