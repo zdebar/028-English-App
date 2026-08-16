@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { UserBlockType } from '@/types/generic.types';
 import type { UserItemLocal } from '@/types/user-item.types';
+import type { BlockTrainingData } from '@/routing/route-data';
 
 const getUserBlockByIdMock = vi.fn();
 const completeInitialTrainingMock = vi.fn();
@@ -10,7 +11,7 @@ const getByBlockIdMock = vi.fn();
 const savePracticeDeckMock = vi.fn();
 const saveInitialTrainingBlockCompletionMock = vi.fn();
 const resolvePracticeEntriesMock = vi.fn();
-const resolvePracticeGrammarMock = vi.fn();
+const resolvePracticeGrammarContextMock = vi.fn();
 const addItemCountMock = vi.fn();
 const playAudioMock = vi.fn();
 const resetHintMock = vi.fn();
@@ -45,7 +46,8 @@ vi.mock('@/database/models/user-items', () => {
 
 vi.mock('@/database/utils/practice-content.utils', () => ({
   resolvePracticeEntries: (...args: unknown[]) => resolvePracticeEntriesMock(...args),
-  resolvePracticeGrammar: (...args: unknown[]) => resolvePracticeGrammarMock(...args),
+  resolvePracticeGrammarContext: (...args: unknown[]) =>
+    resolvePracticeGrammarContextMock(...args),
 }));
 
 vi.mock('@/database/models/user-scores', () => ({
@@ -154,14 +156,23 @@ describe('useBlockTrainingDeck', () => {
               : null,
         })),
     );
-    resolvePracticeGrammarMock.mockResolvedValue({
-      id: 20,
-      name: 'Articles',
-      note: 'Grammar note',
-      grammar_group_id: 1,
-      sort_order: 1,
-      deleted_at: null,
-      items: [],
+    resolvePracticeGrammarContextMock.mockResolvedValue({
+      grammar: {
+        id: 20,
+        name: 'Articles',
+        note: 'Grammar note',
+        grammar_group_id: 1,
+        sort_order: 1,
+        deleted_at: null,
+        items: [],
+      },
+      grammarGroup: {
+        id: 1,
+        name: 'Basics',
+        note: 'Group note',
+        sort_order: 1,
+        deleted_at: null,
+      },
     });
     addItemCountMock.mockResolvedValue(undefined);
     savePracticeDeckMock.mockResolvedValue(undefined);
@@ -179,6 +190,7 @@ describe('useBlockTrainingDeck', () => {
     expect(getByBlockIdMock).toHaveBeenCalledWith('user-1', 10);
     expect(result.current.currentItem?.item_id).toBe(1);
     expect(result.current.grammar?.name).toBe('Articles');
+    expect(result.current.grammarGroup?.note).toBe('Group note');
     expect(resolvePracticeEntriesMock).toHaveBeenCalledWith(
       'user-1',
       expect.arrayContaining([expect.objectContaining({ grammar_chunk_id: 99 })]),
@@ -187,18 +199,52 @@ describe('useBlockTrainingDeck', () => {
     expect('repeatDisabled' in result.current).toBe(false);
   });
 
+  it('uses the grammar group supplied by the route loader without reloading it', async () => {
+    const item = makeItem();
+    const initialData = {
+      block: makeBlock(),
+      items: [item],
+      entries: [{ item, note: null, grammar: null }],
+      grammar: {
+        id: 20,
+        name: 'Articles',
+        note: 'Grammar note',
+        grammar_group_id: 1,
+        sort_order: 1,
+        deleted_at: null,
+        items: [],
+      },
+      grammarGroup: {
+        id: 1,
+        name: 'Basics',
+        note: 'Loader group note',
+        sort_order: 1,
+        deleted_at: null,
+      },
+    } satisfies BlockTrainingData;
+
+    const { result } = renderHook(() => useBlockTrainingDeck('user-1', 10, initialData));
+
+    await waitFor(() => expect(result.current.grammarGroup?.note).toBe('Loader group note'));
+    expect(resolvePracticeGrammarContextMock).not.toHaveBeenCalled();
+  });
+
   it('loads a grammarless block when it explicitly requires initial training', async () => {
     getUserBlockByIdMock.mockResolvedValue(
       makeBlock({ grammar_chunk_id: null }),
     );
     getByBlockIdMock.mockResolvedValue([makeItem({ grammar_chunk_id: 0, is_vocabulary: 1 })]);
-    resolvePracticeGrammarMock.mockResolvedValue(null);
+    resolvePracticeGrammarContextMock.mockResolvedValue({
+      grammar: null,
+      grammarGroup: null,
+    });
 
     const { result } = renderHook(() => useBlockTrainingDeck('user-1', 10));
 
     await waitFor(() => expect(result.current.block?.block_id).toBe(10));
 
     expect(result.current.grammar).toBeNull();
+    expect(result.current.grammarGroup).toBeNull();
     expect(result.current.currentItem?.item_id).toBe(1);
     expect(resolvePracticeEntriesMock).toHaveBeenCalled();
   });
@@ -212,7 +258,7 @@ describe('useBlockTrainingDeck', () => {
 
     expect(result.current.block).toBeNull();
     expect(getByBlockIdMock).not.toHaveBeenCalled();
-    expect(resolvePracticeGrammarMock).not.toHaveBeenCalled();
+    expect(resolvePracticeGrammarContextMock).not.toHaveBeenCalled();
   });
 
   it('rejects a block whose initial training is already completed', async () => {
@@ -226,7 +272,7 @@ describe('useBlockTrainingDeck', () => {
 
     expect(result.current.block).toBeNull();
     expect(getByBlockIdMock).not.toHaveBeenCalled();
-    expect(resolvePracticeGrammarMock).not.toHaveBeenCalled();
+    expect(resolvePracticeGrammarContextMock).not.toHaveBeenCalled();
   });
 
   it('uses the same reveal flow, including direction confirmation before audio reveal', async () => {

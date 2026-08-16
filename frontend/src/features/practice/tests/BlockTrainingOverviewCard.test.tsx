@@ -22,6 +22,7 @@ describe('BlockTrainingOverviewCard', () => {
         <BlockTrainingOverviewCard
           block={{ name: 'Block A', note: '<p>Block note</p>' }}
           grammar={{ kind: 'chunk', id: 1, name: 'Articles', note: '<p>Grammar note</p>' }}
+          grammarGroup={{ note: '<p>Group note</p>' }}
           onContinue={vi.fn()}
         />
       </MemoryRouter>,
@@ -31,8 +32,14 @@ describe('BlockTrainingOverviewCard', () => {
       true,
     );
     expect(screen.queryByRole('button', { name: 'Articles' })).toBeNull();
-    expect(screen.getByText('Block note')).toBeTruthy();
-    expect(screen.getByText('Grammar note')).toBeTruthy();
+    const groupNote = screen.getByText('Group note');
+    const grammarNote = screen.getByText('Grammar note');
+    const blockNote = screen.getByText('Block note');
+    const content = groupNote.parentElement?.parentElement?.textContent ?? '';
+    expect(content.indexOf('Group note')).toBeLessThan(content.indexOf('Grammar note'));
+    expect(content.indexOf('Grammar note')).toBeLessThan(content.indexOf('Block note'));
+    expect(grammarNote).toBeTruthy();
+    expect(blockNote).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy();
   });
 
@@ -43,6 +50,7 @@ describe('BlockTrainingOverviewCard', () => {
         <BlockTrainingOverviewCard
           block={{ name: 'Block A', note: null }}
           grammar={{ kind: 'chunk', id: 1, name: 'Articles', note: null }}
+          grammarGroup={{ note: null }}
           onContinue={onContinue}
         />
         <LocationProbe />
@@ -50,6 +58,7 @@ describe('BlockTrainingOverviewCard', () => {
     );
 
     expect(screen.queryByText('Block note')).toBeNull();
+    expect(screen.queryByText('Group note')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
 
     expect(onContinue).toHaveBeenCalledOnce();
@@ -63,6 +72,7 @@ describe('BlockTrainingOverviewCard', () => {
         <BlockTrainingOverviewCard
           block={{ name: 'Pronouns', note: '<p>Block explanation</p>' }}
           grammar={null}
+          grammarGroup={null}
           onContinue={vi.fn()}
         />
       </MemoryRouter>,

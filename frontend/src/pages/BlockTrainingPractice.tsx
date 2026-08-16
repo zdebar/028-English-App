@@ -67,6 +67,7 @@ export default function BlockTrainingPractice(): JSX.Element {
       <BlockTrainingOverviewCard
         block={deck.block}
         grammar={deck.grammar}
+        grammarGroup={deck.grammarGroup}
         items={deck.items}
         onContinue={() => setShowIntro(false)}
       />

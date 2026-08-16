@@ -5,7 +5,7 @@ import GrammarChunk, {
 } from '@/database/models/grammar-chunks';
 import UserItem from '@/database/models/user-items';
 import { reportError } from '@/features/logging/monitoring-handler';
-import type { NoteType } from '@/types/generic.types';
+import type { GrammarGroupType, NoteType } from '@/types/generic.types';
 import type {
   PracticeDeckEntry,
   ResolvedPracticeEntry,
@@ -106,6 +106,29 @@ export async function resolvePracticeGrammar(
   if (typeof grammarChunkId !== 'number' || grammarChunkId <= 0) return null;
   const grammarById = await loadGrammar(userId, [grammarChunkId]);
   return grammarById.get(grammarChunkId) ?? null;
+}
+
+export type PracticeGrammarContext = Readonly<{
+  grammar: GrammarChunkWithExamples | null;
+  grammarGroup: GrammarGroupType | null;
+}>;
+
+export async function resolvePracticeGrammarContext(
+  userId: string,
+  grammarChunkId: number | null | undefined,
+): Promise<PracticeGrammarContext> {
+  const grammar = await resolvePracticeGrammar(userId, grammarChunkId);
+  if (!grammar) return { grammar: null, grammarGroup: null };
+
+  try {
+    const grammarGroup = (await db.grammar_groups.get(grammar.grammar_group_id)) ?? null;
+    return { grammar, grammarGroup };
+  } catch (error) {
+    reportError('Failed to resolve practice grammar group', error, {
+      grammarGroupId: grammar.grammar_group_id,
+    });
+    return { grammar, grammarGroup: null };
+  }
 }
 
 export async function loadPracticeDeck(

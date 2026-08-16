@@ -10,7 +10,7 @@ import {
   loadPracticeDeck,
   loadPronunciationPracticeDeck,
   resolvePracticeEntries,
-  resolvePracticeGrammar,
+  resolvePracticeGrammarContext,
 } from '@/database/utils/practice-content.utils';
 
 function getLocalDate(): string {
@@ -117,15 +117,15 @@ export function blockTrainingDescriptor(userId: string, blockId: number) {
         !block?.requires_initial_training ||
         block.started_at !== config.database.nullReplacementDate
       ) {
-        return { block: null, items: [], entries: [], grammar: null };
+        return { block: null, items: [], entries: [], grammar: null, grammarGroup: null };
       }
 
       const items = await UserItem.getByBlockId(userId, block.block_id);
-      const [entries, grammar] = await Promise.all([
+      const [entries, grammarContext] = await Promise.all([
         resolvePracticeEntries(userId, items),
-        resolvePracticeGrammar(userId, block.grammar_chunk_id),
+        resolvePracticeGrammarContext(userId, block.grammar_chunk_id),
       ]);
-      return { block, items, entries, grammar };
+      return { block, items, entries, ...grammarContext };
     },
   };
 }
