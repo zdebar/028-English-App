@@ -10,7 +10,7 @@ import VocabularyDetailCard from './VocabularyDetailCard';
 import VocabularyList from './VocabularyList';
 import { ROUTES } from '@/config/routes.config';
 import type { UserItemLocal } from '@/types/user-item.types';
-import { invalidateRouteData, routeDataKey } from '@/routing/route-data-cache';
+import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff';
 
 /**
  * VocabularyOverview component

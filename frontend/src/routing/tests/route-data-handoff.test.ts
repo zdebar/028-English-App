@@ -1,30 +1,30 @@
 import {
-  ROUTE_PREFETCH_TTL_MS,
-  consumeRouteData,
+  ROUTE_DATA_HANDOFF_TTL_MS,
+  consumePreparedRouteData,
   invalidateRouteData,
-  prefetchRouteData,
-  resetRouteDataCache,
-} from '@/routing/route-data-cache';
+  prepareRouteData,
+  resetPreparedRouteData,
+} from '@/routing/route-data-handoff';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-describe('route data cache', () => {
+describe('route data handoff', () => {
   afterEach(() => {
-    resetRouteDataCache();
+    resetPreparedRouteData();
     vi.useRealTimers();
   });
 
-  it('deduplicates concurrent prefetch and hands the result to one loader', async () => {
+  it('deduplicates concurrent preparation and hands the result to one loader', async () => {
     const load = vi.fn().mockResolvedValue(['data']);
     const descriptor = { key: 'topics:user-1', load };
 
-    const first = prefetchRouteData(descriptor);
-    const second = prefetchRouteData(descriptor);
+    const first = prepareRouteData(descriptor);
+    const second = prepareRouteData(descriptor);
 
     expect(first).toBe(second);
-    await expect(consumeRouteData(descriptor)).resolves.toEqual(['data']);
+    await expect(consumePreparedRouteData(descriptor)).resolves.toEqual(['data']);
     expect(load).toHaveBeenCalledTimes(1);
 
-    await expect(consumeRouteData(descriptor)).resolves.toEqual(['data']);
+    await expect(consumePreparedRouteData(descriptor)).resolves.toEqual(['data']);
     expect(load).toHaveBeenCalledTimes(2);
   });
 
@@ -32,8 +32,8 @@ describe('route data cache', () => {
     const firstLoad = vi.fn().mockResolvedValue('first');
     const secondLoad = vi.fn().mockResolvedValue('second');
     await Promise.all([
-      prefetchRouteData({ key: 'topic:user-1:4', load: firstLoad }),
-      prefetchRouteData({ key: 'topic:user-2:4', load: secondLoad }),
+      prepareRouteData({ key: 'topic:user-1:4', load: firstLoad }),
+      prepareRouteData({ key: 'topic:user-2:4', load: secondLoad }),
     ]);
     expect(firstLoad).toHaveBeenCalledOnce();
     expect(secondLoad).toHaveBeenCalledOnce();
@@ -43,10 +43,10 @@ describe('route data cache', () => {
     vi.useFakeTimers();
     const load = vi.fn().mockResolvedValue('data');
     const descriptor = { key: 'levels:user-1', load };
-    await prefetchRouteData(descriptor);
+    await prepareRouteData(descriptor);
 
-    await vi.advanceTimersByTimeAsync(ROUTE_PREFETCH_TTL_MS);
-    await consumeRouteData(descriptor);
+    await vi.advanceTimersByTimeAsync(ROUTE_DATA_HANDOFF_TTL_MS);
+    await consumePreparedRouteData(descriptor);
     expect(load).toHaveBeenCalledTimes(2);
   });
 
@@ -54,8 +54,8 @@ describe('route data cache', () => {
     const load = vi.fn().mockRejectedValueOnce(new Error('offline')).mockResolvedValue('ok');
     const descriptor = { key: 'grammar:user-1', load };
 
-    await expect(prefetchRouteData(descriptor)).rejects.toThrow('offline');
-    await expect(prefetchRouteData(descriptor)).resolves.toBe('ok');
+    await expect(prepareRouteData(descriptor)).rejects.toThrow('offline');
+    await expect(prepareRouteData(descriptor)).resolves.toBe('ok');
     expect(load).toHaveBeenCalledTimes(2);
   });
 
@@ -64,10 +64,10 @@ describe('route data cache', () => {
     const levelLoad = vi.fn().mockResolvedValue('level');
     const topic = { key: 'topic:user-1:2', load: topicLoad };
     const level = { key: 'levels:user-1', load: levelLoad };
-    await Promise.all([prefetchRouteData(topic), prefetchRouteData(level)]);
+    await Promise.all([prepareRouteData(topic), prepareRouteData(level)]);
 
     invalidateRouteData('topic:user-1');
-    await Promise.all([consumeRouteData(topic), consumeRouteData(level)]);
+    await Promise.all([consumePreparedRouteData(topic), consumePreparedRouteData(level)]);
     expect(topicLoad).toHaveBeenCalledTimes(2);
     expect(levelLoad).toHaveBeenCalledTimes(1);
   });

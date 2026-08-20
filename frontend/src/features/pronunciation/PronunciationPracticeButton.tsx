@@ -1,6 +1,6 @@
 import { ROUTES } from '@/config/routes.config';
 import { TEXTS } from '@/locales/cs';
-import { PrefetchButton } from '@/routing/prefetch-navigation';
+import { DataNavigationButton } from '@/routing/data-navigation';
 import { pronunciationPracticeDescriptor } from '@/routing/route-data';
 import { usePracticeAvailabilityStore } from '@/features/practice/use-practice-availability-store';
 
@@ -22,7 +22,7 @@ export default function PronunciationPracticeButton({
   }
 
   return (
-    <PrefetchButton
+    <DataNavigationButton
       to={ROUTES.pronunciationPractice}
       descriptor={pronunciationPracticeDescriptor(userId)}
       className="h-button max-h-button w-full px-4"
@@ -30,6 +30,6 @@ export default function PronunciationPracticeButton({
       title={title}
     >
       {TEXTS.pronunciationPracticeButton}
-    </PrefetchButton>
+    </DataNavigationButton>
   );
 }

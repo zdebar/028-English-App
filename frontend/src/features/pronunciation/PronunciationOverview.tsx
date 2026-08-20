@@ -8,7 +8,7 @@ import HelpText from '@/features/help/HelpText';
 import { TEXTS } from '@/locales/cs';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PrefetchButton } from '@/routing/prefetch-navigation';
+import { DataNavigationButton } from '@/routing/data-navigation';
 import { pronunciationGroupDetailDescriptor } from '@/routing/route-data';
 import { usePronunciationGroupsStore } from './use-pronunciation-groups-store';
 
@@ -35,7 +35,7 @@ export default function PronunciationOverview() {
       <DataState loading={loading} hasData={hasData} noDataMessage={TEXTS.noPronunciationGroups}>
         <div className="flex flex-col gap-1 pt-1">
           {data.map((group) => (
-            <PrefetchButton
+            <DataNavigationButton
               key={group.id}
               className="h-input preserve-disabled-text-color w-full grow-0 px-4"
               title={group.name}
@@ -55,7 +55,7 @@ export default function PronunciationOverview() {
                   {group.unlocked_count}/{group.total_count}
                 </span>
               </div>
-            </PrefetchButton>
+            </DataNavigationButton>
           ))}
         </div>
         <HelpText className="top-20 right-2">{TEXTS.pronunciationStartedHelp}</HelpText>

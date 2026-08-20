@@ -12,8 +12,8 @@ vi.mock('../use-pronunciation-groups-store', () => ({
   usePronunciationGroupsStore: (selector: (state: typeof mocks) => unknown) => selector(mocks),
 }));
 
-vi.mock('@/routing/prefetch-navigation', () => ({
-  PrefetchButton: ({ to, children, ...props }: any) => (
+vi.mock('@/routing/data-navigation', () => ({
+  DataNavigationButton: ({ to, children, ...props }: any) => (
     <button {...props} onClick={() => mocks.navigate(to)}>
       {children}
     </button>

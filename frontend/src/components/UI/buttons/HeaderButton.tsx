@@ -1,7 +1,7 @@
 import type { JSX, ButtonHTMLAttributes } from 'react';
 import { useMatch } from 'react-router-dom';
-import { PrefetchLink } from '@/routing/prefetch-navigation';
-import type { RouteDataDescriptor } from '@/routing/route-data-cache';
+import { DataNavigationLink } from '@/routing/data-navigation';
+import type { RouteDataDescriptor } from '@/routing/route-data-handoff';
 
 type HeaderButtonProps = Readonly<{
   to: string;
@@ -33,7 +33,7 @@ export default function HeaderButton({ to, descriptor, ...rest }: HeaderButtonPr
     );
 
   return (
-    <PrefetchLink
+    <DataNavigationLink
       to={to}
       descriptor={descriptor}
       title={rest.title ?? ''}
@@ -42,6 +42,6 @@ export default function HeaderButton({ to, descriptor, ...rest }: HeaderButtonPr
       }`}
     >
       {rest.children}
-    </PrefetchLink>
+    </DataNavigationLink>
   );
 }

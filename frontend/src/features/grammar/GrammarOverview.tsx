@@ -14,7 +14,7 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import { DataState } from '@/components/UI/DataState';
 import GrammarDetailCard from './GrammarDetailCard';
 import { ROUTES } from '@/config/routes.config';
-import { invalidateRouteData, routeDataKey } from '@/routing/route-data-cache';
+import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 
 type GrammarSelection = Readonly<Pick<GrammarGroupWithChunks, 'id'>>;

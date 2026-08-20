@@ -2,7 +2,7 @@ import config from '@/config/config';
 import { ROUTES } from '@/config/routes.config';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
-import { PrefetchButton } from '@/routing/prefetch-navigation';
+import { DataNavigationButton } from '@/routing/data-navigation';
 import { practiceDeckDescriptor } from '@/routing/route-data';
 import { usePracticeAvailabilityStore } from './use-practice-availability-store';
 
@@ -29,7 +29,7 @@ export default function PracticeButton({ userId }: PracticeButtonProps): JSX.Ele
   if (!loading && !error && readyCount === 0) title = TEXTS.nothingToPractice;
 
   return (
-    <PrefetchButton
+    <DataNavigationButton
       to={ROUTES.practice}
       descriptor={practiceDeckDescriptor(userId)}
       className="h-button max-h-button relative w-full px-4"
@@ -38,6 +38,6 @@ export default function PracticeButton({ userId }: PracticeButtonProps): JSX.Ele
     >
       {TEXTS.practiceButton}
       {!loading && readyCount < badgeCap && <ReadyPracticeBadge count={readyCount} />}
-    </PrefetchButton>
+    </DataNavigationButton>
   );
 }

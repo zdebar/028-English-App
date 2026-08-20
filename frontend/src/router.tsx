@@ -26,10 +26,10 @@ import Topics from '@/pages/Topics';
 import Vocabulary from '@/pages/Vocabulary';
 import Notification from '@/components/UI/Notification';
 import {
-  consumeRouteData,
-  prefetchRouteData,
+  consumePreparedRouteData,
+  prepareRouteData,
   type RouteDataDescriptor,
-} from '@/routing/route-data-cache';
+} from '@/routing/route-data-handoff';
 import {
   blockTrainingDescriptor,
   grammarDescriptor,
@@ -63,7 +63,7 @@ async function loadProtectedData<T>(
 ): Promise<T> {
   const userId = await requireUserId();
   try {
-    return await consumeRouteData(createDescriptor(userId));
+    return await consumePreparedRouteData(createDescriptor(userId));
   } catch (error) {
     reportError(`Failed to load ${routeName} route data`, error);
     useToastStore.getState().showToast(TEXTS.loadingError, 'error');
@@ -81,7 +81,7 @@ async function loadTopicDetail({ params }: LoaderFunctionArgs) {
   if (!blockId) throw redirect(ROUTES.topics);
   const userId = await requireUserId();
   try {
-    const data = await consumeRouteData(topicDetailDescriptor(userId, blockId));
+    const data = await consumePreparedRouteData(topicDetailDescriptor(userId, blockId));
     if (!data.topic) throw redirect(ROUTES.topics);
     return data;
   } catch (error) {
@@ -97,7 +97,7 @@ async function loadPronunciationGroupDetail({ params }: LoaderFunctionArgs) {
   if (!groupId) throw redirect(ROUTES.pronunciationGroups);
   const userId = await requireUserId();
   try {
-    const data = await consumeRouteData(pronunciationGroupDetailDescriptor(userId, groupId));
+    const data = await consumePreparedRouteData(pronunciationGroupDetailDescriptor(userId, groupId));
     if (!data) throw redirect(ROUTES.pronunciationGroups);
     return data;
   } catch (error) {
@@ -111,11 +111,11 @@ async function loadPronunciationGroupDetail({ params }: LoaderFunctionArgs) {
 async function loadPractice() {
   const userId = await requireUserId();
   try {
-    const deck = await consumeRouteData(practiceDeckDescriptor(userId));
+    const deck = await consumePreparedRouteData(practiceDeckDescriptor(userId));
     const firstItem = deck[0]?.item;
     const blockId = firstItem?.is_initial_training_trigger ? firstItem.block_id : null;
     if (blockId != null) {
-      await prefetchRouteData(blockTrainingDescriptor(userId, blockId));
+      await prepareRouteData(blockTrainingDescriptor(userId, blockId));
       throw redirect(`${ROUTES.practiceBlockTraining}?blockId=${blockId}`);
     }
     return deck;
@@ -132,7 +132,7 @@ async function loadBlockTraining({ request }: LoaderFunctionArgs) {
   if (!blockId) throw redirect(ROUTES.practice);
   const userId = await requireUserId();
   try {
-    const data = await consumeRouteData(blockTrainingDescriptor(userId, blockId));
+    const data = await consumePreparedRouteData(blockTrainingDescriptor(userId, blockId));
     if (!data.block) throw redirect(ROUTES.practice);
     return data;
   } catch (error) {

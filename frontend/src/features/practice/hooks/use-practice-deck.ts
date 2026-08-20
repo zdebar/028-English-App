@@ -10,7 +10,7 @@ import UserScore from '@/database/models/user-scores';
 import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
-import { invalidateRouteData, routeDataKey } from '@/routing/route-data-cache';
+import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff';
 import { loadPracticeDeck } from '@/database/utils/practice-content.utils';
 
 /**

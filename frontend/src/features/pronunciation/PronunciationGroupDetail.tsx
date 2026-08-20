@@ -17,7 +17,7 @@ import { TEXTS } from '@/locales/cs';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { PronunciationGroupDetailType } from '@/types/pronunciation.types';
-import { invalidateRouteData, routeDataKey } from '@/routing/route-data-cache';
+import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff';
 
 export default function PronunciationGroupDetail({
   initialData,

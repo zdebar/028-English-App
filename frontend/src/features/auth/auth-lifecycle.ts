@@ -1,5 +1,5 @@
 import { useAuthStore } from './use-auth-store';
-import { resetRouteDataCache } from '@/routing/route-data-cache';
+import { resetPreparedRouteData } from '@/routing/route-data-handoff';
 
 let cleanup: (() => void) | null = null;
 let cacheCleanup: (() => void) | null = null;
@@ -15,7 +15,7 @@ export function startAuthLifecycle(): Promise<void> {
   cacheCleanup = useAuthStore.subscribe((state) => {
     if (state.userId === previousUserId) return;
     previousUserId = state.userId;
-    resetRouteDataCache();
+  resetPreparedRouteData();
   });
   readyPromise = new Promise<void>((resolve) => {
     if (!useAuthStore.getState().loading) {

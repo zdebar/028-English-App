@@ -4,7 +4,7 @@ import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { useFetch } from '@/hooks/use-fetch';
 import type { ResolvedPracticeEntry, UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useState } from 'react';
-import { invalidateRouteData, routeDataKey } from '@/routing/route-data-cache';
+import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff';
 
 const NBSP = '\u00A0';
 

@@ -15,8 +15,8 @@ import BilingualItemButton from '@/components/UI/buttons/BilingualItemButton';
 import HelpButton from '../help/HelpButton';
 import OverviewCard from '@/components/UI/OverviewCard';
 import VolumeSlider from '../audio/VolumeSlider';
-import { invalidateRouteData, routeDataKey } from '@/routing/route-data-cache';
-import { usePrefetchPreparation } from '@/routing/prefetch-navigation';
+import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff';
+import { useDataNavigation } from '@/routing/data-navigation';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 
 export default function TopicItemsOverview({
@@ -33,7 +33,7 @@ export default function TopicItemsOverview({
           load: () => UserBlock.getStartedTopicsByUserId(userId),
         }
       : undefined;
-  const { prepareAndNavigate: prepareParent } = usePrefetchPreparation(
+  const { loadAndNavigate: prepareParent } = useDataNavigation(
     parentDescriptor,
     ROUTES.topics,
   );
