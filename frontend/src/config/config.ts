@@ -15,7 +15,7 @@ const config = {
 
   progress: {
     afterInitialTrainingProgress: 2, // Progress after completing a block's initial training
-    simulationItemCount: 400,
+    simulationItemCount: 800,
     simulationItemProgress: 1,
     simulationStartedBlockCount: 8,
     simulationPronunciationItemCount: 5,
