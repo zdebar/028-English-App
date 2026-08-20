@@ -13,8 +13,10 @@ sync later pushes local changes and pulls remote deltas.
 | Daily score | `UserScore` model | Later via sync. |
 
 UI should generally read from local models and stores, not directly from Supabase.
-Route loaders may read required IndexedDB data before rendering a page; their
-short-lived prefetch cache is a transport optimization, not another source of truth.
+Route loaders may read required IndexedDB data before rendering a page. A short-lived
+navigation handoff can pass click-time prepared data to a loader, but it is a transport
+mechanism rather than another source of truth. Features opting into intent-time loading
+must invalidate their route-data key whenever the underlying IndexedDB data changes.
 
 ## Sync Lifecycle
 

@@ -2,8 +2,8 @@ import StarProgressOverview from '@/components/UI/StarProgress';
 import config from '@/config/config';
 import HelpText from '@/features/help/HelpText';
 import type { JSX } from 'react';
-import type { RouteDataDescriptor } from '@/routing/route-data-cache';
-import { usePrefetchPreparation } from '@/routing/prefetch-navigation';
+import type { RouteDataDescriptor } from '@/routing/route-data-handoff';
+import { useDataNavigation } from '@/routing/data-navigation';
 
 type Props = {
   count: number;
@@ -26,7 +26,7 @@ export default function PracticeOverviewButton({
 }: Readonly<Props>): JSX.Element {
   if (to) {
     return (
-      <PrefetchedPracticeOverviewButton
+      <DataPracticeOverviewButton
         count={count}
         ariaLabel={ariaLabel}
         helpText={helpText}
@@ -55,7 +55,7 @@ export default function PracticeOverviewButton({
   );
 }
 
-function PrefetchedPracticeOverviewButton({
+function DataPracticeOverviewButton({
   count,
   ariaLabel,
   helpText,
@@ -63,7 +63,7 @@ function PrefetchedPracticeOverviewButton({
   to,
   descriptor,
 }: Readonly<Props & { to: string }>): JSX.Element {
-  const { pending, warm, prepareAndNavigate } = usePrefetchPreparation(descriptor, to);
+  const { pending, loadAndNavigate } = useDataNavigation(descriptor, to);
   return (
     <button
       type="button"
@@ -72,10 +72,7 @@ function PrefetchedPracticeOverviewButton({
       title={ariaLabel}
       aria-busy={pending}
       disabled={pending}
-      onPointerEnter={warm}
-      onPointerDown={warm}
-      onFocus={warm}
-      onClick={() => void prepareAndNavigate()}
+      onClick={() => void loadAndNavigate()}
     >
       <StarProgressOverview
         count={count}

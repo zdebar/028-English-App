@@ -48,7 +48,7 @@ export default function Home(): JSX.Element {
     <>
       {userId ? (
         <div className="card-width relative flex h-full w-full grow flex-col justify-start gap-2 sm:gap-4">
-          <div className="mt-6">
+          <div className="landscape:mt-6">
             <PropertyView
               label={TEXTS.profileNameLabel}
               className="justify-center"
@@ -95,8 +95,8 @@ export default function Home(): JSX.Element {
           </div>
         </div>
       ) : (
-        <div className="card-width mt-8 w-full">
-          <h1 className="mx-auto mt-8">{TEXTS.appTitle}</h1>
+        <div className="card-width w-full">
+          <h1 className="mx-auto mt-4">{TEXTS.appTitle}</h1>
           <p className="mx-auto my-4 landscape:hidden">{TEXTS.appDescription}</p>
           <HomeActionLinks />
           <div className="flex flex-col gap-1 pt-4">

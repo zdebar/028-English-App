@@ -5,7 +5,7 @@ import PronunciationGroup from '@/database/models/pronunciation-groups';
 import UserBlock from '@/database/models/user-blocks';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
-import { routeDataKey, type RouteDataDescriptor } from './route-data-cache';
+import { routeDataKey, type RouteDataDescriptor } from './route-data-handoff';
 import {
   loadPracticeDeck,
   loadPronunciationPracticeDeck,

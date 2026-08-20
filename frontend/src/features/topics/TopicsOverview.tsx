@@ -9,7 +9,7 @@ import { useToastStore } from '../toast/use-toast-store';
 import { reportError } from '../logging/monitoring-handler';
 import { DataState } from '@/components/UI/DataState';
 import OverviewCard from '@/components/UI/OverviewCard';
-import { PrefetchButton } from '@/routing/prefetch-navigation';
+import { DataNavigationButton } from '@/routing/data-navigation';
 import { topicDetailDescriptor } from '@/routing/route-data';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 
@@ -47,7 +47,7 @@ export default function TopicsOverview({
       <DataState loading={topicsLoading} hasData={hasTopics} noDataMessage={TEXTS.noTopics}>
         <div className="flex flex-col gap-1 pt-1">
           {topics.map((topic) => (
-            <PrefetchButton
+            <DataNavigationButton
               key={topic.block_id}
               className="h-input flex w-full justify-start px-4 text-left"
               to={`${ROUTES.topics}/${topic.block_id}`}
@@ -55,7 +55,7 @@ export default function TopicsOverview({
               title={topic.name}
             >
               <p className="overflow-hidden text-ellipsis whitespace-nowrap">{topic.name}</p>
-            </PrefetchButton>
+            </DataNavigationButton>
           ))}
         </div>
       </DataState>

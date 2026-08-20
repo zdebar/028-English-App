@@ -45,23 +45,27 @@ root layout and renders route content through `Outlet`.
 Protected loaders await the initial authentication result and redirect guests to
 Home. Unknown routes render a page-not-found notification.
 
-## Route Data And Prefetch
+## Route Data And Navigation Handoff
 
 Route-critical IndexedDB queries are represented by typed descriptors in
 `frontend/src/routing/route-data.ts`. Data routes consume these descriptors before
-rendering their destination page. Navigation controls may start the same request
-on pointer hover, keyboard focus, or pointer-down.
+rendering their destination page. Navigation controls load required data after a
+click and navigate only when the request succeeds.
 
-The cache in `route-data-cache.ts` is only a short handoff: concurrent requests are
+The storage in `route-data-handoff.ts` is only a short handoff: concurrent requests are
 deduplicated, successful unconsumed results expire after ten seconds, and a route
 loader consumes an entry once. Failures are evicted immediately so a click can
 retry. Mutations invalidate matching unconsumed descriptors; IndexedDB remains the
 source of truth.
 
-`PrefetchButton` and `PrefetchLink` keep the current route visible while click-time
-loading runs. A successful request navigates; a failure leaves the user on the
-current page and reports the standard loading toast. Direct URLs, refresh, and
-history navigation run the same route loaders without relying on prefetch.
+`DataNavigationButton` and `DataNavigationLink` use the `click` loading strategy by
+default and keep the current route visible while loading runs. The optional `intent`
+strategy may start the same request on pointer hover, keyboard focus, or pointer-down.
+Any feature enabling `intent` must invalidate the matching route-data key whenever
+its source data mutates, otherwise navigation can consume a stale snapshot. A
+successful request navigates; a failure leaves the user on the current page and
+reports the standard loading toast. Direct URLs, refresh, and history navigation run
+the same route loaders without relying on prepared data.
 
 ## State Categories
 

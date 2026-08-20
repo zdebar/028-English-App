@@ -12,8 +12,8 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 vi.mock('react-router-dom', () => ({ useNavigate: () => mocks.navigate }));
-vi.mock('@/routing/prefetch-navigation', () => ({
-  PrefetchButton: ({ to, children, ...props }: any) => (
+vi.mock('@/routing/data-navigation', () => ({
+  DataNavigationButton: ({ to, children, ...props }: any) => (
     <button {...props} onClick={() => mocks.navigate(to)}>
       {children}
     </button>

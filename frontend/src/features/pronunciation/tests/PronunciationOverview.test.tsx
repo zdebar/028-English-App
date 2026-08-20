@@ -16,14 +16,14 @@ vi.mock('react-router-dom', () => ({
   useParams: () => ({ groupId: '1' }),
 }));
 
-vi.mock('@/routing/prefetch-navigation', () => ({
-  PrefetchButton: ({ to, children, ...props }: any) => (
+vi.mock('@/routing/data-navigation', () => ({
+  DataNavigationButton: ({ to, children, ...props }: any) => (
     <button {...props} onClick={() => mocks.navigate(to)}>
       {children}
     </button>
   ),
-  usePrefetchPreparation: () => ({
-    prepareAndNavigate: () => mocks.navigate('/pronunciation'),
+  useDataNavigation: () => ({
+    loadAndNavigate: () => mocks.navigate('/pronunciation'),
   }),
 }));
 

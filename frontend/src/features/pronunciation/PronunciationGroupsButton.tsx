@@ -1,6 +1,6 @@
 import { ROUTES } from '@/config/routes.config';
 import { TEXTS } from '@/locales/cs';
-import { PrefetchButton } from '@/routing/prefetch-navigation';
+import { DataNavigationButton } from '@/routing/data-navigation';
 import { usePronunciationGroupsStore } from './use-pronunciation-groups-store';
 
 export default function PronunciationGroupsButton() {
@@ -21,13 +21,13 @@ export default function PronunciationGroupsButton() {
   }
 
   return (
-    <PrefetchButton
+    <DataNavigationButton
       to={ROUTES.pronunciationGroups}
       className="h-button max-h-button w-full px-4"
       disabled={disabled}
       title={title}
     >
       {TEXTS.pronunciationGroupsButton}
-    </PrefetchButton>
+    </DataNavigationButton>
   );
 }

@@ -16,7 +16,7 @@ import {
   topicsDescriptor,
   vocabularyDescriptor,
 } from '@/routing/route-data';
-import { PrefetchButton } from '@/routing/prefetch-navigation';
+import { DataNavigationButton } from '@/routing/data-navigation';
 
 function getButtonState(
   availability: OverviewAvailability,
@@ -65,46 +65,46 @@ export default function Overviews(): JSX.Element {
       <h1 className="sr-only">{TEXTS.overviews}</h1>
       <section aria-label={TEXTS.progressOverviews}>
         <div className="flex flex-col gap-1">
-          <PrefetchButton
+          <DataNavigationButton
             className="h-button w-full"
             to={ROUTES.practiceOverview}
             descriptor={userId ? practiceOverviewDescriptor(userId) : undefined}
             {...practiceButton}
           >
             <MenuButtonText>{TEXTS.practiceOverviewTitle}</MenuButtonText>
-          </PrefetchButton>
-          <PrefetchButton
+          </DataNavigationButton>
+          <DataNavigationButton
             className="h-button w-full"
             to={ROUTES.levels}
             descriptor={userId ? levelsDescriptor(userId) : undefined}
             {...levelsButton}
           >
             <MenuButtonText>{TEXTS.levelsOverview}</MenuButtonText>
-          </PrefetchButton>
-          <PrefetchButton
+          </DataNavigationButton>
+          <DataNavigationButton
             className="h-button w-full"
             to={ROUTES.grammar}
             descriptor={userId ? grammarDescriptor(userId) : undefined}
             {...grammarButton}
           >
             <MenuButtonText>{TEXTS.grammarOverview}</MenuButtonText>
-          </PrefetchButton>
-          <PrefetchButton
+          </DataNavigationButton>
+          <DataNavigationButton
             className="h-button w-full"
             to={ROUTES.topics}
             descriptor={userId ? topicsDescriptor(userId) : undefined}
             {...topicsButton}
           >
             <MenuButtonText>{TEXTS.topicsOverview}</MenuButtonText>
-          </PrefetchButton>
-          <PrefetchButton
+          </DataNavigationButton>
+          <DataNavigationButton
             className="h-button w-full"
             to={ROUTES.vocabulary}
             descriptor={userId ? vocabularyDescriptor(userId) : undefined}
             {...vocabularyButton}
           >
             <MenuButtonText>{TEXTS.vocabularyOverview}</MenuButtonText>
-          </PrefetchButton>
+          </DataNavigationButton>
         </div>
       </section>
     </div>
