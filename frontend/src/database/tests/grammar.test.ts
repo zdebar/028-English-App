@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   grammarBulkPut: vi.fn(),
   exampleMemberships: [] as any[],
   userItems: [] as any[],
+  userItemsAnyOf: vi.fn(),
 }));
 
 vi.mock('@/database/models/db', () => ({
@@ -34,13 +35,16 @@ vi.mock('@/database/models/db', () => ({
       bulkPut: (...args: unknown[]) => mocks.grammarBulkPut(...args),
     },
     grammar_chunk_examples: {
-      where: () => ({
-        between: () => ({ toArray: async () => mocks.exampleMemberships }),
+      filter: (predicate: (membership: any) => boolean) => ({
+        toArray: async () => mocks.exampleMemberships.filter(predicate),
       }),
     },
     user_items: {
       where: () => ({
-        anyOf: () => ({ toArray: async () => mocks.userItems }),
+        anyOf: (...args: unknown[]) => {
+          mocks.userItemsAnyOf(...args);
+          return { toArray: async () => mocks.userItems };
+        },
       }),
     },
   },
@@ -130,6 +134,38 @@ describe('Grammar', () => {
     const detail = await Grammar.getDetail('u1', 1);
 
     expect(detail.items.map((item) => item.item_id)).toEqual([1, 2]);
+  });
+
+  it('adds examples to multiple chunks in one batch', async () => {
+    mocks.exampleMemberships = [
+      { grammar_chunk_id: 1, item_id: 2, sort_order: 2 },
+      { grammar_chunk_id: 1, item_id: 1, sort_order: 1 },
+      { grammar_chunk_id: 2, item_id: 3, sort_order: 1 },
+      { grammar_chunk_id: 2, item_id: 4, sort_order: 2 },
+      { grammar_chunk_id: 99, item_id: 99, sort_order: 1 },
+    ];
+    mocks.userItems = [
+      { user_id: 'u1', item_id: 1 },
+      { user_id: 'u1', item_id: 2 },
+      { user_id: 'u1', item_id: 3 },
+    ];
+
+    const result = await Grammar.addExamplesToMany('u1', [
+      { id: 1, name: 'First' } as any,
+      { id: 2, name: 'Second' } as any,
+    ]);
+
+    expect(result.map((chunk) => chunk.items.map((item) => item.item_id))).toEqual([
+      [1, 2],
+      [3],
+    ]);
+    expect(mocks.userItemsAnyOf).toHaveBeenCalledOnce();
+    expect(mocks.userItemsAnyOf).toHaveBeenCalledWith([
+      ['u1', 2],
+      ['u1', 1],
+      ['u1', 3],
+      ['u1', 4],
+    ]);
   });
 
   it('getStartedList returns grammar list for started ids', async () => {

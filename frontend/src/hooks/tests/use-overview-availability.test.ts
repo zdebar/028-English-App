@@ -2,7 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  grammar: [] as unknown[],
+  grammar: false,
   topics: [] as unknown[],
   vocabulary: [] as unknown[],
   grammarError: null as Error | null,
@@ -37,19 +37,17 @@ vi.mock('@/database/models/user-scores', () => ({
     getByUserId: (...args: unknown[]) => mocks.getScores(...args),
   },
 }));
-vi.mock('@/database/models/grammar-groups', () => ({
-  default: {
-    getStarted: vi.fn(async () => {
-      if (mocks.grammarError) throw mocks.grammarError;
-      return mocks.grammar;
-    }),
-  },
-}));
 vi.mock('@/database/models/user-blocks', () => ({
   default: { getStartedTopicsByUserId: vi.fn(async () => mocks.topics) },
 }));
 vi.mock('@/database/models/user-items', () => ({
-  default: { getStartedVocabulary: vi.fn(async () => mocks.vocabulary) },
+  default: {
+    hasStartedGrammar: vi.fn(async () => {
+      if (mocks.grammarError) throw mocks.grammarError;
+      return mocks.grammar;
+    }),
+    getStartedVocabulary: vi.fn(async () => mocks.vocabulary),
+  },
 }));
 vi.mock('@/features/user-stats/use-user-store', () => ({
   useUserStore: (selector: (state: typeof mocks.levelsState) => unknown) =>
@@ -71,7 +69,7 @@ import { useOverviewAvailability } from '../use-overview-availability';
 describe('useOverviewAvailability', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.grammar = [];
+    mocks.grammar = false;
     mocks.topics = [];
     mocks.vocabulary = [];
     mocks.grammarError = null;
@@ -80,7 +78,7 @@ describe('useOverviewAvailability', () => {
   });
 
   it('resolves all four overview states independently without querying scores', async () => {
-    mocks.grammar = [{}];
+    mocks.grammar = true;
     mocks.topics = [{}];
     mocks.levelsState.levels = [{}];
 

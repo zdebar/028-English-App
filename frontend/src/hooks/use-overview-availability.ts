@@ -1,4 +1,3 @@
-import GrammarGroup from '@/database/models/grammar-groups';
 import UserBlock from '@/database/models/user-blocks';
 import UserItem from '@/database/models/user-items';
 import { reportError } from '@/features/logging/monitoring-handler';
@@ -86,7 +85,7 @@ export function useOverviewAvailability(
     if (!initialData) setDatabaseState(LOADING_DATABASE_STATE);
 
     const queries: ReadonlyArray<readonly [DatabaseOverviewKey, () => Promise<boolean>]> = [
-      ['grammar', async () => (await GrammarGroup.getStarted(userId)).length > 0],
+      ['grammar', () => UserItem.hasStartedGrammar(userId)],
       ['topics', async () => (await UserBlock.getStartedTopicsByUserId(userId)).length > 0],
       ['vocabulary', async () => (await UserItem.getStartedVocabulary(userId)).length > 0],
     ];

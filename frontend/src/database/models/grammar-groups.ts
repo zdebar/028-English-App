@@ -28,9 +28,7 @@ export default class GrammarGroup extends SyncEntityModel implements GrammarGrou
     if (chunkIds.length === 0) return [];
 
     const chunks = await db.grammar_chunks.where('id').anyOf(chunkIds).toArray();
-    const startedChunks = await Promise.all(
-      chunks.map((chunk) => GrammarChunk.addExamples(userId, chunk)),
-    );
+    const startedChunks = await GrammarChunk.addExamplesToMany(userId, chunks);
     const chunksByGroupId = new Map<number, GrammarChunkWithExamples[]>();
 
     for (const chunk of startedChunks) {

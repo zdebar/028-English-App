@@ -4,6 +4,7 @@ const mocks = vi.hoisted(() => ({
   getStartedGrammarChunkIds: vi.fn(),
   chunksAnyOf: vi.fn(),
   groupsAnyOf: vi.fn(),
+  addExamplesToMany: vi.fn(),
 }));
 
 vi.mock('@/database/models/db', () => ({
@@ -35,10 +36,7 @@ vi.mock('@/database/models/user-items', () => ({
 
 vi.mock('@/database/models/grammar-chunks', () => ({
   default: {
-    addExamples: async (_userId: string, chunk: Record<string, unknown>) => ({
-      ...chunk,
-      items: [],
-    }),
+    addExamplesToMany: (...args: unknown[]) => mocks.addExamplesToMany(...args),
   },
 }));
 
@@ -61,6 +59,10 @@ describe('GrammarGroup.getStarted', () => {
         { id: 2, name: 'Second group', sort_order: 2 },
       ]),
     });
+    mocks.addExamplesToMany.mockImplementation(
+      async (_userId: string, chunks: Array<Record<string, unknown>>) =>
+        chunks.map((chunk) => ({ ...chunk, items: [] })),
+    );
   });
 
   it('returns started chunks grouped and ordered by their grammar group', async () => {
@@ -86,6 +88,11 @@ describe('GrammarGroup.getStarted', () => {
 
     expect(mocks.getStartedGrammarChunkIds).toHaveBeenCalledWith('u1');
     expect(mocks.chunksAnyOf).toHaveBeenCalledWith([11, 12, 13]);
+    expect(mocks.addExamplesToMany).toHaveBeenCalledOnce();
+    expect(mocks.addExamplesToMany).toHaveBeenCalledWith(
+      'u1',
+      expect.arrayContaining([expect.objectContaining({ id: 11 }), expect.objectContaining({ id: 12 })]),
+    );
     expect(mocks.groupsAnyOf).toHaveBeenCalledWith([2, 1]);
   });
 

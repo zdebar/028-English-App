@@ -23,13 +23,13 @@ export function overviewAvailabilityDescriptor(userId: string) {
     load: async () => {
       const [levels, grammar, topics, vocabulary] = await Promise.all([
         Levels.getOverview(userId, getLocalDate()),
-        GrammarGroup.getStarted(userId),
+        UserItem.hasStartedGrammar(userId),
         UserBlock.getStartedTopicsByUserId(userId),
         UserItem.getStartedVocabulary(userId),
       ]);
       return {
         levels: levels.length > 0,
-        grammar: grammar.length > 0,
+        grammar,
         topics: topics.length > 0,
         vocabulary: vocabulary.length > 0,
       };
