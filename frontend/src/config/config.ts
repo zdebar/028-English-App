@@ -24,8 +24,8 @@ const config = {
   srs: {
     // Spaced Repetition System configuration
     intervals: {
-      czToEn: [10, 120, 900, 3600, 14400, 86400, 172800, 345600],
-      enToCz: [15, 450, 1800, 7200, 43200, 128000, 260000, 520000],
+      czToEn: [5, 30, 120, 900, 3600, 14400, 86400, 172800, 345600],
+      enToCz: [5, 30, 120, 900, 3600, 14400, 86400, 172800, 345600],
     },
     randomness: 0.2, // Randomness of SRS algorithm
   },
