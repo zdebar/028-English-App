@@ -47,7 +47,7 @@ export default function Dashboard({ userId, className = '' }: DashboardProps) {
       descriptor={levelsDescriptor(userId)}
       aria-label={TEXTS.levelsOverviewTooltip}
       title={TEXTS.levelsOverviewTooltip}
-      className="block cursor-pointer rounded-sm hover:ring-1 hover:ring-current focus-visible:outline-2 focus-visible:outline-offset-2"
+      className="block cursor-pointer hover:ring-1 hover:ring-current focus-visible:outline-2 focus-visible:outline-offset-2"
     >
       <section
         className={`min-w-card relative flex w-full flex-col gap-1 ${className}`}
