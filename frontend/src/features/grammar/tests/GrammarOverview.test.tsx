@@ -21,6 +21,7 @@ vi.mock('@/features/auth/use-auth-store', () => ({
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
+  useLocation: () => ({ key: 'default' }),
 }));
 
 vi.mock('@/database/models/grammar-groups', () => ({
@@ -152,6 +153,14 @@ describe('GrammarOverview', () => {
     render(<GrammarOverview />);
 
     expect(screen.getByText('No grammar')).toBeTruthy();
+  });
+
+  it('uses the overviews fallback on direct entry', () => {
+    render(<GrammarOverview />);
+
+    fireEvent.click(screen.getByTestId('overview-close'));
+
+    expect(mocks.navigate).toHaveBeenCalledWith('/overviews', { replace: true });
   });
 
   it('renders grammar card view and can close', () => {

@@ -5,12 +5,12 @@ import { TEXTS } from '@/locales/cs';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useVocabulary } from './use-vocabulary';
 import { useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import VocabularyDetailCard from './VocabularyDetailCard';
 import VocabularyList from './VocabularyList';
 import { ROUTES } from '@/config/routes.config';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff';
+import { useRouteClose } from '@/routing/use-route-close';
 
 /**
  * VocabularyOverview component
@@ -22,7 +22,7 @@ export default function VocabularyOverview({
 }: Readonly<{ initialWords?: UserItemLocal[] }>) {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
-  const navigate = useNavigate();
+  const closeRoute = useRouteClose(ROUTES.overviews);
 
   const {
     loading,
@@ -86,7 +86,7 @@ export default function VocabularyOverview({
         setDisplayField={setDisplayField}
         setVisibleCount={setVisibleCount}
         onSelect={handleSelectWord}
-        onClose={() => navigate(ROUTES.overviews)}
+        onClose={closeRoute}
       />
     );
   }

@@ -60,7 +60,7 @@ export default function Home(): JSX.Element {
             <HomeActionLinks />
           </div>
           <p className={`text-error-light dark:text-error-dark px-4 text-center text-sm`}>
-            Aplikace je v testovacím a ukázkovém režimu. Nepoužívat pro skutečnou výuku!
+            Aplikace v testovacím režimu! V tuto chvíli Vaše tréninková data nebudou zachována.
           </p>
           {isAnonymousUser && (
             <div className="flex flex-col gap-2">

@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
+  useLocation: () => ({ key: 'default' }),
   useParams: () => ({ groupId: '1' }),
 }));
 
@@ -153,7 +154,7 @@ describe('Pronunciation overview screens', () => {
     expect(screen.getByRole('button', { name: 'Help' })).toBeTruthy();
 
     fireEvent.click(screen.getByTestId('close'));
-    expect(mocks.navigate).toHaveBeenCalledWith('/overviews');
+    expect(mocks.navigate).toHaveBeenCalledWith('/', { replace: true });
 
     fireEvent.click(screen.getByRole('button', { name: /æ/ }));
     expect(mocks.navigate).toHaveBeenCalledWith('/pronunciation/1');
@@ -173,7 +174,7 @@ describe('Pronunciation overview screens', () => {
     render(<PronunciationGroupDetail />);
 
     fireEvent.click(screen.getByTestId('close'));
-    expect(mocks.navigate).toHaveBeenCalledWith('/pronunciation');
+    expect(mocks.navigate).toHaveBeenCalledWith('/pronunciation', { replace: true });
 
     fireEvent.click(screen.getByTitle('mæn'));
     await waitFor(() => expect(mocks.playAudio).toHaveBeenCalledWith('man.opus'));

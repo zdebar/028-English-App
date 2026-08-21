@@ -16,28 +16,17 @@ import HelpButton from '../help/HelpButton';
 import OverviewCard from '@/components/UI/OverviewCard';
 import VolumeSlider from '../audio/VolumeSlider';
 import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff';
-import { useDataNavigation } from '@/routing/data-navigation';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
+import { useRouteClose } from '@/routing/use-route-close';
 
 export default function TopicItemsOverview({
   initialTopic,
   initialItems = [],
 }: Readonly<{ initialTopic?: UserBlockType | null; initialItems?: UserItemLocal[] }>) {
   const navigate = useNavigate();
+  const closeRoute = useRouteClose(ROUTES.topics);
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
-  const parentDescriptor =
-    userId && initialTopic
-      ? {
-          key: routeDataKey('topics', userId),
-          load: () => UserBlock.getStartedTopicsByUserId(userId),
-        }
-      : undefined;
-  const { loadAndNavigate: prepareParent } = useDataNavigation(
-    parentDescriptor,
-    ROUTES.topics,
-  );
-
   // -- Topic management --
   const { blockId: blockIdText } = useParams<{ blockId: string }>();
   const parsedBlockId = Number(blockIdText);
@@ -119,10 +108,6 @@ export default function TopicItemsOverview({
     }
   }, [userId, blockId, showToast]);
 
-  const onClose = useCallback(() => {
-    void prepareParent();
-  }, [prepareParent]);
-
   const resetHandler = topic?.is_removed_from_practice ? undefined : handleReset;
 
   return (
@@ -132,7 +117,7 @@ export default function TopicItemsOverview({
       modalText={TEXTS.resetTopicDescription}
       loading={topicLoading}
       handleReset={resetHandler}
-      onClose={onClose}
+      onClose={closeRoute}
       className="bottom-controls-clearance"
     >
       <DataState loading={itemsLoading} hasData={hasItems} noDataMessage={TEXTS.noTopicItems}>

@@ -1,7 +1,5 @@
-import GrammarGroup from '@/database/models/grammar-groups';
 import UserBlock from '@/database/models/user-blocks';
 import UserItem from '@/database/models/user-items';
-import UserScore from '@/database/models/user-scores';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useUserStore } from '@/features/user-stats/use-user-store';
@@ -17,7 +15,6 @@ export type OverviewAvailability = Readonly<{
 }>;
 
 export type OverviewAvailabilityState = Readonly<{
-  practice: OverviewAvailability;
   levels: OverviewAvailability;
   grammar: OverviewAvailability;
   topics: OverviewAvailability;
@@ -39,14 +36,12 @@ const LOADING_AVAILABILITY: OverviewAvailability = {
 };
 
 const INITIAL_DATABASE_STATE: Omit<OverviewAvailabilityState, 'levels'> = {
-  practice: EMPTY_AVAILABILITY,
   grammar: EMPTY_AVAILABILITY,
   topics: EMPTY_AVAILABILITY,
   vocabulary: EMPTY_AVAILABILITY,
 };
 
 const LOADING_DATABASE_STATE: Omit<OverviewAvailabilityState, 'levels'> = {
-  practice: LOADING_AVAILABILITY,
   grammar: LOADING_AVAILABILITY,
   topics: LOADING_AVAILABILITY,
   vocabulary: LOADING_AVAILABILITY,
@@ -68,7 +63,6 @@ export function useOverviewAvailability(
   const [databaseState, setDatabaseState] = useState(() =>
     initialData
       ? {
-          practice: { hasData: initialData.practice, loading: false, error: null },
           grammar: { hasData: initialData.grammar, loading: false, error: null },
           topics: { hasData: initialData.topics, loading: false, error: null },
           vocabulary: { hasData: initialData.vocabulary, loading: false, error: null },
@@ -91,8 +85,7 @@ export function useOverviewAvailability(
     if (!initialData) setDatabaseState(LOADING_DATABASE_STATE);
 
     const queries: ReadonlyArray<readonly [DatabaseOverviewKey, () => Promise<boolean>]> = [
-      ['practice', async () => (await UserScore.getByUserId(userId)).length > 0],
-      ['grammar', async () => (await GrammarGroup.getStarted(userId)).length > 0],
+      ['grammar', () => UserItem.hasStartedGrammar(userId)],
       ['topics', async () => (await UserBlock.getStartedTopicsByUserId(userId)).length > 0],
       ['vocabulary', async () => (await UserItem.getStartedVocabulary(userId)).length > 0],
     ];

@@ -1,9 +1,10 @@
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   userId: 'u1' as string | null,
   showToast: vi.fn(),
+  navigate: vi.fn(),
   scores: [] as Array<{
     date: string;
     item_count: number;
@@ -25,7 +26,12 @@ vi.mock('@/database/models/user-scores', () => ({
 }));
 
 vi.mock('@/components/UI/OverviewCard', () => ({
-  default: ({ children }: any) => <div>{children}</div>,
+  default: ({ children, onClose }: any) => (
+    <div>
+      <button onClick={onClose}>Close route</button>
+      {children}
+    </div>
+  ),
 }));
 
 vi.mock('@/components/UI/StarProgress', () => ({
@@ -67,7 +73,8 @@ vi.mock('@/features/logging/monitoring-handler', () => ({
 }));
 
 vi.mock('react-router-dom', () => ({
-  useNavigate: () => vi.fn(),
+  useNavigate: () => mocks.navigate,
+  useLocation: () => ({ key: 'default' }),
   useLoaderData: () => mocks.scores,
 }));
 
@@ -111,5 +118,13 @@ describe('PracticeOverview', () => {
     expect(screen.getAllByTestId('star-row')).toHaveLength(3);
     const rowCounts = screen.getAllByTestId('star-row').map((el) => el.textContent);
     expect(rowCounts).toEqual(['1', '0', '2']);
+  });
+
+  it('uses the home fallback on direct entry', () => {
+    render(<PracticeOverview />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close route' }));
+
+    expect(mocks.navigate).toHaveBeenCalledWith('/', { replace: true });
   });
 });

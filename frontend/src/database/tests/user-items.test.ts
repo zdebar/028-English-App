@@ -17,6 +17,7 @@ const mocks = vi.hoisted(() => ({
   indexedFilter: vi.fn(),
   indexedLimit: vi.fn(),
   indexedToArray: vi.fn(),
+  startedGrammarCandidates: [] as any[],
   updatedBetweenToArray: vi.fn(),
   transaction: vi.fn(),
   rpc: vi.fn(),
@@ -162,8 +163,10 @@ vi.mock('@/database/models/db', () => ({
               return {
                 filter: (...filterArgs: unknown[]) => {
                   mocks.indexedFilter(...filterArgs);
+                  const predicate = filterArgs[0] as (item: any) => boolean;
                   return {
                     toArray: (...toArrayArgs: unknown[]) => mocks.indexedToArray(...toArrayArgs),
+                    first: async () => mocks.startedGrammarCandidates.find(predicate),
                   };
                 },
               };
@@ -244,6 +247,7 @@ describe('UserItem', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.pronunciationMemberships = [];
+    mocks.startedGrammarCandidates = [];
     vi.useRealTimers();
 
     mocks.getNextAt.mockReturnValue('2026-03-05T00:00:00.000Z');
@@ -276,6 +280,29 @@ describe('UserItem', () => {
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
+  });
+
+  it.each([
+    ['no items', [], false],
+    ['a non-practice item', [{ is_practice_item: 0, grammar_chunk_id: 1 }], false],
+    ['an item without a grammar chunk', [{ is_practice_item: 1, grammar_chunk_id: 0 }], false],
+    [
+      'a reset started grammar item',
+      [
+        {
+          is_practice_item: 1,
+          grammar_chunk_id: 7,
+          started_at: '2026-03-01T00:00:00.000Z',
+          progress_cz_to_en: 0,
+          progress_en_to_cz: 0,
+        },
+      ],
+      true,
+    ],
+  ])('hasStartedGrammar returns the expected result for %s', async (_name, items, expected) => {
+    mocks.startedGrammarCandidates = items as any[];
+
+    await expect(UserItem.hasStartedGrammar('u1')).resolves.toBe(expected);
   });
 
   it('savePracticeDeck updates only practice progress fields', async () => {

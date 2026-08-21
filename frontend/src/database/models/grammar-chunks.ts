@@ -45,27 +45,49 @@ export default class GrammarChunk extends SyncEntityModel implements GrammarChun
     userId: string,
     chunk: GrammarChunkType,
   ): Promise<GrammarChunkWithExamples> {
-    const grammarChunkId = chunk.id;
-    const memberships = await db.grammar_chunk_examples
-      .where('[grammar_chunk_id+sort_order]')
-      .between([grammarChunkId, Dexie.minKey], [grammarChunkId, Dexie.maxKey])
-      .toArray();
-    if (memberships.length === 0) return { ...chunk, items: [] };
+    const [chunkWithExamples] = await this.addExamplesToMany(userId, [chunk]);
+    return chunkWithExamples ?? { ...chunk, items: [] };
+  }
 
+  static async addExamplesToMany(
+    userId: string,
+    chunks: readonly GrammarChunkType[],
+  ): Promise<GrammarChunkWithExamples[]> {
+    if (chunks.length === 0) return [];
+
+    const chunkIds = new Set(chunks.map((chunk) => chunk.id));
+    const memberships = await db.grammar_chunk_examples
+      .filter((membership) => chunkIds.has(membership.grammar_chunk_id))
+      .toArray();
+    if (memberships.length === 0) {
+      return chunks.map((chunk) => ({ ...chunk, items: [] }));
+    }
+
+    const itemIds = [...new Set(memberships.map((membership) => membership.item_id))];
     const items = await db.user_items
       .where('[user_id+item_id]')
-      .anyOf(memberships.map((membership) => [userId, membership.item_id]))
+      .anyOf(itemIds.map((itemId) => [userId, itemId]))
       .toArray();
     const itemById = new Map(items.map((item) => [item.item_id, item]));
-    const orderedMemberships = [...memberships];
-    orderedMemberships.sort((left, right) => left.sort_order - right.sort_order);
+    const membershipsByChunkId = new Map<number, typeof memberships>();
 
-    return {
-      ...chunk,
-      items: orderedMemberships
-        .map((membership) => itemById.get(membership.item_id))
-        .filter((item): item is UserItem => Boolean(item)),
-    };
+    for (const membership of memberships) {
+      const chunkMemberships = membershipsByChunkId.get(membership.grammar_chunk_id) ?? [];
+      chunkMemberships.push(membership);
+      membershipsByChunkId.set(membership.grammar_chunk_id, chunkMemberships);
+    }
+
+    return chunks.map((chunk) => {
+      const orderedMemberships = [...(membershipsByChunkId.get(chunk.id) ?? [])];
+      orderedMemberships.sort((left, right) => left.sort_order - right.sort_order);
+
+      return {
+        ...chunk,
+        items: orderedMemberships
+          .map((membership) => itemById.get(membership.item_id))
+          .filter((item): item is UserItem => Boolean(item)),
+      };
+    });
   }
 
   static async getByGroupId(grammarGroupId: number): Promise<GrammarChunkType[]> {

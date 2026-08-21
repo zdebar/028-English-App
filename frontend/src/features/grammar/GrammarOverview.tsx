@@ -3,7 +3,6 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ListButton } from '@/components/UI/buttons/ListButton';
 import GrammarGroup, {
   type GrammarGroupWithChunks,
@@ -16,6 +15,7 @@ import GrammarDetailCard from './GrammarDetailCard';
 import { ROUTES } from '@/config/routes.config';
 import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
+import { useRouteClose } from '@/routing/use-route-close';
 
 type GrammarSelection = Readonly<Pick<GrammarGroupWithChunks, 'id'>>;
 
@@ -23,7 +23,7 @@ export default function GrammarOverview({
   initialGrammar,
 }: Readonly<{ initialGrammar?: GrammarGroupWithChunks[] }>): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
-  const navigate = useNavigate();
+  const closeRoute = useRouteClose(ROUTES.overviews);
   const showToast = useToastStore((state) => state.showToast);
   const [selection, setSelection] = useState<GrammarSelection | null>(null);
 
@@ -78,7 +78,7 @@ export default function GrammarOverview({
       <OverviewCard
         buttonTitle={TEXTS.grammarOverview}
         loading={loading}
-        onClose={() => navigate(ROUTES.overviews)}
+        onClose={closeRoute}
       >
         <DataState loading={loading} hasData={hasData} noDataMessage={TEXTS.noGrammar}>
           <div className="flex flex-col gap-1 pt-1">

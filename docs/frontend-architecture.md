@@ -58,14 +58,11 @@ loader consumes an entry once. Failures are evicted immediately so a click can
 retry. Mutations invalidate matching unconsumed descriptors; IndexedDB remains the
 source of truth.
 
-`DataNavigationButton` and `DataNavigationLink` use the `click` loading strategy by
-default and keep the current route visible while loading runs. The optional `intent`
-strategy may start the same request on pointer hover, keyboard focus, or pointer-down.
-Any feature enabling `intent` must invalidate the matching route-data key whenever
-its source data mutates, otherwise navigation can consume a stale snapshot. A
-successful request navigates; a failure leaves the user on the current page and
-reports the standard loading toast. Direct URLs, refresh, and history navigation run
-the same route loaders without relying on prepared data.
+`DataNavigationButton` and `DataNavigationLink` start loading after a click and keep
+the current route visible while loading runs. A successful request navigates; a
+failure leaves the user on the current page and reports the standard loading toast.
+Direct URLs, refresh, and history navigation run the same route loaders without
+relying on prepared data.
 
 ## State Categories
 

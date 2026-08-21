@@ -1,5 +1,4 @@
 import UserBlock from '@/database/models/user-blocks';
-import { useNavigate } from 'react-router-dom';
 import { TEXTS } from '@/locales/cs';
 import type { UserBlockType } from '@/types/generic.types';
 import { ROUTES } from '@/config/routes.config';
@@ -12,11 +11,12 @@ import OverviewCard from '@/components/UI/OverviewCard';
 import { DataNavigationButton } from '@/routing/data-navigation';
 import { topicDetailDescriptor } from '@/routing/route-data';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
+import { useRouteClose } from '@/routing/use-route-close';
 
 export default function TopicsOverview({
   initialTopics,
 }: Readonly<{ initialTopics?: UserBlockType[] }>) {
-  const navigate = useNavigate();
+  const closeRoute = useRouteClose(ROUTES.overviews);
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
 
@@ -43,7 +43,7 @@ export default function TopicsOverview({
   }, [showToast, topicsError]);
 
   return (
-    <OverviewCard buttonTitle={TEXTS.topicsOverview} onClose={() => navigate(ROUTES.overviews)}>
+    <OverviewCard buttonTitle={TEXTS.topicsOverview} onClose={closeRoute}>
       <DataState loading={topicsLoading} hasData={hasTopics} noDataMessage={TEXTS.noTopics}>
         <div className="flex flex-col gap-1 pt-1">
           {topics.map((topic) => (

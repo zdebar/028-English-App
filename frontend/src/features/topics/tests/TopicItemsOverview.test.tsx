@@ -21,6 +21,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
+  useLocation: () => ({ key: 'default' }),
   useParams: () => ({ blockId: mocks.blockId }),
 }));
 
@@ -188,11 +189,11 @@ describe('TopicItemsOverview', () => {
     expect(screen.getByText('No topic items')).toBeTruthy();
   });
 
-  it('navigates back to topics overview on close', () => {
+  it('uses the topics fallback on close', () => {
     render(<TopicItemsOverview />);
 
     fireEvent.click(screen.getByTestId('close-button'));
-    expect(mocks.navigate).toHaveBeenCalledWith('/topics');
+    expect(mocks.navigate).toHaveBeenCalledWith('/topics', { replace: true });
   });
 
   it('renders czech and english values and plays audio on click', () => {

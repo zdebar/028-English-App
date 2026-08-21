@@ -324,6 +324,21 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
+   * Returns whether the user has at least one started grammar practice item.
+   *
+   * @param userId User id whose grammar availability should be checked.
+   */
+  static async hasStartedGrammar(userId: string): Promise<boolean> {
+    const startedItem = await db.user_items
+      .where('[user_id+started_at]')
+      .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
+      .filter(isStartedGrammarItem)
+      .first();
+
+    return startedItem !== undefined;
+  }
+
+  /**
    * Reads unique grammar ids from started practice items.
    *
    * @param userId User id whose started items should be inspected.
@@ -333,7 +348,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const startedItems = await db.user_items
       .where('[user_id+started_at]')
       .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
-      .filter((item) => isPracticeItem(item) && item.grammar_chunk_id !== NULL_NUMBER)
+      .filter(isStartedGrammarItem)
       .toArray();
 
     return [...new Set(startedItems.map((item) => item.grammar_chunk_id))];
@@ -986,6 +1001,12 @@ function resolveMasteredAt(
 
 function isPracticeItem(item: Pick<UserItemLocal, 'is_practice_item'>): boolean {
   return item.is_practice_item !== 0;
+}
+
+function isStartedGrammarItem(
+  item: Pick<UserItemLocal, 'is_practice_item' | 'grammar_chunk_id'>,
+): boolean {
+  return isPracticeItem(item) && item.grammar_chunk_id !== NULL_NUMBER;
 }
 
 function compareCurriculumPaths(

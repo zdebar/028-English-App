@@ -53,7 +53,6 @@ vi.mock('@/locales/cs', () => ({
 import Overviews from '@/pages/Overviews';
 
 const overviewKeys = [
-  'practice',
   'levels',
   'grammar',
   'topics',
@@ -68,17 +67,18 @@ describe('Overviews', () => {
     );
   });
 
-  it('renders only the five progress overviews without an empty pronunciation section', () => {
+  it('renders only the four progress overviews without practice or pronunciation', () => {
     render(<Overviews />);
 
     const progress = screen.getByRole('region', { name: 'Pokrok' });
 
-    expect(within(progress).getAllByRole('button')).toHaveLength(5);
+    expect(within(progress).getAllByRole('button')).toHaveLength(4);
+    expect(screen.queryByRole('button', { name: 'Přehled procvičování' })).toBeNull();
     expect(screen.queryByRole('region', { name: 'Výslovnost' })).toBeNull();
     expect(screen.queryByRole('heading', { name: 'Pokrok' })).toBeNull();
 
     const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(5);
+    expect(buttons).toHaveLength(4);
     buttons.forEach((button) => expect(button.className).toContain('w-full'));
   });
 
@@ -90,14 +90,13 @@ describe('Overviews', () => {
     render(<Overviews />);
 
     const expectedTitles = [
-      'No practice',
       'No levels',
       'No grammar',
       'No topics',
       'No vocabulary',
     ];
     const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(5);
+    expect(buttons).toHaveLength(4);
     buttons.forEach((button, index) => {
       expect((button as HTMLButtonElement).disabled).toBe(true);
       expect(button.title).toBe(expectedTitles[index]);
@@ -107,7 +106,7 @@ describe('Overviews', () => {
   });
 
   it('uses loading and error tooltips while availability is unresolved', () => {
-    mocks.availability.practice = { hasData: false, loading: true, error: null };
+    mocks.availability.topics = { hasData: false, loading: true, error: null };
     mocks.availability.grammar = {
       hasData: false,
       loading: false,
@@ -116,14 +115,13 @@ describe('Overviews', () => {
 
     render(<Overviews />);
 
-    expect(screen.getByRole('button', { name: 'Přehled procvičování' }).title).toBe('Loading');
+    expect(screen.getByRole('button', { name: 'Přehled témat' }).title).toBe('Loading');
     expect(screen.getByRole('button', { name: 'Přehled gramatiky' }).title).toBe(
       'Loading error',
     );
   });
 
   it.each([
-    ['Přehled procvičování', '/practice-overview'],
     ['Přehled CEFR úrovní', '/levels'],
     ['Přehled gramatiky', '/grammar'],
     ['Přehled témat', '/topics'],
