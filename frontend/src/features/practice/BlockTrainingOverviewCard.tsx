@@ -12,7 +12,7 @@ import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { useMemo } from 'react';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import VolumeSlider from '@/features/audio/VolumeSlider';
-import { useNavigate } from 'react-router-dom';
+import { useRouteClose } from '@/routing/use-route-close';
 
 type BlockTrainingOverviewCardProps = Readonly<{
   block: Pick<UserBlockType, 'name' | 'note'>;
@@ -34,7 +34,7 @@ export default function BlockTrainingOverviewCard({
   items = [],
   onContinue,
 }: BlockTrainingOverviewCardProps): JSX.Element {
-  const navigate = useNavigate();
+  const closeRoute = useRouteClose(ROUTES.practice);
   const showToast = useToastStore((state) => state.showToast);
   const audios = useMemo(
     () => items.map((item) => item.audio).filter((audio): audio is string => Boolean(audio)),
@@ -46,7 +46,7 @@ export default function BlockTrainingOverviewCard({
   return (
     <OverviewCard
       buttonTitle={title}
-      onClose={() => navigate(ROUTES.home)}
+      onClose={closeRoute}
       className="flex w-full flex-col gap-1"
     >
       {grammarGroup?.note && <Note note={grammarGroup.note} />}

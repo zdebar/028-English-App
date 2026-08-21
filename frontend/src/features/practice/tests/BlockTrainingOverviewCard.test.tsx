@@ -43,7 +43,7 @@ describe('BlockTrainingOverviewCard', () => {
     expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy();
   });
 
-  it('omits empty notes, continues training, and closes to the home page', () => {
+  it('omits empty notes, continues training, and uses the practice fallback', () => {
     const onContinue = vi.fn();
     render(
       <MemoryRouter initialEntries={['/practice/block-training']}>
@@ -63,7 +63,7 @@ describe('BlockTrainingOverviewCard', () => {
 
     expect(onContinue).toHaveBeenCalledOnce();
     fireEvent.click(screen.getByTitle(/Close/));
-    expect(screen.getByTestId('location').textContent).toBe('/');
+    expect(screen.getByTestId('location').textContent).toBe('/practice');
   });
 
   it('shows only the block explanation when no grammar is attached', () => {

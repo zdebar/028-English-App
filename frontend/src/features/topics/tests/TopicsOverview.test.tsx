@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
+  useLocation: () => ({ key: 'default' }),
 }));
 
 vi.mock('@/routing/data-navigation', () => ({
@@ -128,7 +129,7 @@ describe('TopicsOverview', () => {
     render(<TopicsOverview />);
 
     fireEvent.click(screen.getByTestId('close-button'));
-    expect(mocks.navigate).toHaveBeenCalledWith('/overviews');
+    expect(mocks.navigate).toHaveBeenCalledWith('/overviews', { replace: true });
   });
 
   it('renders empty state when data loading fails', () => {

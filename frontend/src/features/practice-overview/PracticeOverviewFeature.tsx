@@ -8,11 +8,11 @@ import { STAR_SIZE, StarRow } from '@/components/UI/StarProgress';
 import config from '@/config/config';
 import { getCompletedStarCount } from '@/utils/star-progress.utils';
 import { useCallback, useEffect, useMemo, useState, type JSX } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { DataState } from '@/components/UI/DataState';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
+import { useRouteClose } from '@/routing/use-route-close';
 
 const INITIAL_VISIBLE_DAYS = 7;
 
@@ -94,7 +94,7 @@ function PracticeOverviewRow({ score }: Readonly<{ score: PracticeDayScore }>): 
 export default function PracticeOverviewFeature({
   initialScores,
 }: Readonly<{ initialScores?: UserScoreType[] }>): JSX.Element {
-  const navigate = useNavigate();
+  const closeRoute = useRouteClose(ROUTES.home);
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_DAYS);
@@ -122,10 +122,7 @@ export default function PracticeOverviewFeature({
   const hasMoreScores = scores.length > visibleCount;
 
   return (
-    <OverviewCard
-      buttonTitle={TEXTS.practiceOverviewTitle}
-      onClose={() => navigate(ROUTES.overviews)}
-    >
+    <OverviewCard buttonTitle={TEXTS.practiceOverviewTitle} onClose={closeRoute}>
       <div className="flex flex-col pt-1">
         <DataState
           loading={loading}

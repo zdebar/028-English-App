@@ -18,6 +18,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { PronunciationGroupDetailType } from '@/types/pronunciation.types';
 import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff';
+import { useRouteClose } from '@/routing/use-route-close';
 
 export default function PronunciationGroupDetail({
   initialData,
@@ -25,6 +26,7 @@ export default function PronunciationGroupDetail({
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
+  const closeRoute = useRouteClose(ROUTES.pronunciationGroups);
   const { groupId: groupIdText } = useParams<{ groupId: string }>();
   const groupId = Number(groupIdText);
   const validGroupId = Number.isSafeInteger(groupId) && groupId > 0 ? groupId : null;
@@ -84,7 +86,7 @@ export default function PronunciationGroupDetail({
     <OverviewCard
       buttonTitle={data?.group.name}
       loading={loading}
-      onClose={() => navigate(ROUTES.pronunciationGroups)}
+      onClose={closeRoute}
       className="bottom-controls-clearance"
     >
       <DataState

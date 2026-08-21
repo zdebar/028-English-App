@@ -74,6 +74,7 @@ vi.mock('@/features/levels/use-levels-store', () => ({
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
+  useLocation: () => ({ key: 'default' }),
 }));
 
 vi.mock('@/components/UI/DelayedNotification', () => ({
@@ -232,6 +233,6 @@ describe('LevelsOverview', () => {
     render(<LevelsOverview />);
     fireEvent.click(screen.getByTestId('close-button'));
 
-    expect(mocks.navigate).toHaveBeenCalledWith('/overviews');
+    expect(mocks.navigate).toHaveBeenCalledWith('/overviews', { replace: true });
   });
 });

@@ -30,6 +30,7 @@ vi.mock('@/features/auth/use-auth-store', () => ({
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
+  useLocation: () => ({ key: 'default' }),
 }));
 
 vi.mock('@/database/models/user-items', () => ({
@@ -176,7 +177,7 @@ describe('VocabularyOverview', () => {
     expect(screen.getByTestId('list-size').textContent).toBe('2');
 
     fireEvent.click(screen.getByTestId('list-close'));
-    expect(mocks.navigate).toHaveBeenCalledWith('/overviews');
+    expect(mocks.navigate).toHaveBeenCalledWith('/overviews', { replace: true });
 
     fireEvent.click(screen.getByTestId('select-first'));
     expect(mocks.vocab.setSelectedWord).toHaveBeenCalledWith(mocks.vocab.filteredWords[0]);

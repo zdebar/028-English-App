@@ -2,11 +2,11 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  scores: [] as unknown[],
   grammar: [] as unknown[],
   topics: [] as unknown[],
   vocabulary: [] as unknown[],
-  scoreError: null as Error | null,
+  grammarError: null as Error | null,
+  getScores: vi.fn(),
   levelsState: {
     levels: [] as unknown[],
     levelsLoading: false,
@@ -34,14 +34,16 @@ vi.mock('dexie', () => ({
 
 vi.mock('@/database/models/user-scores', () => ({
   default: {
-    getByUserId: vi.fn(async () => {
-      if (mocks.scoreError) throw mocks.scoreError;
-      return mocks.scores;
-    }),
+    getByUserId: (...args: unknown[]) => mocks.getScores(...args),
   },
 }));
 vi.mock('@/database/models/grammar-groups', () => ({
-  default: { getStarted: vi.fn(async () => mocks.grammar) },
+  default: {
+    getStarted: vi.fn(async () => {
+      if (mocks.grammarError) throw mocks.grammarError;
+      return mocks.grammar;
+    }),
+  },
 }));
 vi.mock('@/database/models/user-blocks', () => ({
   default: { getStartedTopicsByUserId: vi.fn(async () => mocks.topics) },
@@ -69,36 +71,35 @@ import { useOverviewAvailability } from '../use-overview-availability';
 describe('useOverviewAvailability', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.scores = [];
     mocks.grammar = [];
     mocks.topics = [];
     mocks.vocabulary = [];
-    mocks.scoreError = null;
+    mocks.grammarError = null;
     mocks.levelsState = { levels: [], levelsLoading: false, levelsError: null };
     mocks.observers = [];
   });
 
-  it('resolves all five overview states independently', async () => {
-    mocks.scores = [{}];
+  it('resolves all four overview states independently without querying scores', async () => {
+    mocks.grammar = [{}];
     mocks.topics = [{}];
     mocks.levelsState.levels = [{}];
 
     const { result } = renderHook(() => useOverviewAvailability('u1'));
 
     await waitFor(() => expect(result.current.vocabulary.loading).toBe(false));
-    expect(result.current.practice.hasData).toBe(true);
     expect(result.current.levels.hasData).toBe(true);
-    expect(result.current.grammar.hasData).toBe(false);
+    expect(result.current.grammar.hasData).toBe(true);
     expect(result.current.topics.hasData).toBe(true);
     expect(result.current.vocabulary.hasData).toBe(false);
+    expect(mocks.getScores).not.toHaveBeenCalled();
   });
 
   it('reacts to database emissions and unsubscribes every observer', async () => {
     const { result, unmount } = renderHook(() => useOverviewAvailability('u1'));
-    await waitFor(() => expect(mocks.observers).toHaveLength(4));
+    await waitFor(() => expect(mocks.observers).toHaveLength(3));
 
     act(() => mocks.observers[0].next(true));
-    expect(result.current.practice.hasData).toBe(true);
+    expect(result.current.grammar.hasData).toBe(true);
 
     const unsubscribeFunctions = mocks.observers.map((observer) => observer.unsubscribe);
     unmount();
@@ -106,14 +107,14 @@ describe('useOverviewAvailability', () => {
   });
 
   it('keeps a failed overview disabled and reports the loading error', async () => {
-    mocks.scoreError = new Error('score failure');
+    mocks.grammarError = new Error('grammar failure');
     const { result } = renderHook(() => useOverviewAvailability('u1'));
 
-    await waitFor(() => expect(result.current.practice.error).toBe(mocks.scoreError));
-    expect(result.current.practice.hasData).toBe(false);
+    await waitFor(() => expect(result.current.grammar.error).toBe(mocks.grammarError));
+    expect(result.current.grammar.hasData).toBe(false);
     expect(mocks.reportError).toHaveBeenCalledWith(
-      'Failed to observe practice overview availability',
-      mocks.scoreError,
+      'Failed to observe grammar overview availability',
+      mocks.grammarError,
     );
     expect(mocks.showToast).toHaveBeenCalledWith('Loading error', 'error');
   });

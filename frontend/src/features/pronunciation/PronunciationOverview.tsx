@@ -7,15 +7,15 @@ import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import { TEXTS } from '@/locales/cs';
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { DataNavigationButton } from '@/routing/data-navigation';
 import { pronunciationGroupDetailDescriptor } from '@/routing/route-data';
 import { usePronunciationGroupsStore } from './use-pronunciation-groups-store';
+import { useRouteClose } from '@/routing/use-route-close';
 
 export default function PronunciationOverview() {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
-  const navigate = useNavigate();
+  const closeRoute = useRouteClose(ROUTES.home);
   const data = usePronunciationGroupsStore((state) => state.groups);
   const loading = usePronunciationGroupsStore((state) => state.loading);
   const error = usePronunciationGroupsStore((state) => state.error);
@@ -29,7 +29,7 @@ export default function PronunciationOverview() {
   return (
     <OverviewCard
       buttonTitle={TEXTS.pronunciationGroups}
-      onClose={() => navigate(ROUTES.overviews)}
+      onClose={closeRoute}
       className={hasData ? 'bottom-controls-clearance' : ''}
     >
       <DataState loading={loading} hasData={hasData} noDataMessage={TEXTS.noPronunciationGroups}>

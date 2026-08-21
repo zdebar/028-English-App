@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom';
 import { TEXTS } from '@/locales/cs';
 import { ListButton } from '@/components/UI/buttons/ListButton';
 import GoalMetView from '@/components/UI/GoalMetView';
@@ -14,6 +13,7 @@ import { useEffect } from 'react';
 import { useAuthStore } from '../auth/use-auth-store';
 import { ROUTES } from '@/config/routes.config';
 import type { LevelOverviewType } from '@/types/generic.types';
+import { useRouteClose } from '@/routing/use-route-close';
 
 /**
  * LevelsOverview component
@@ -31,7 +31,7 @@ export default function LevelsOverview({
   const levelsLoading = useUserStore((state) => state.levelsLoading);
   const levelsError = useUserStore((state) => state.levelsError);
   const showToast = useToastStore((state) => state.showToast);
-  const navigate = useNavigate();
+  const closeRoute = useRouteClose(ROUTES.overviews);
   const levels = levelsLoading ? initialLevels : storedLevels;
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export default function LevelsOverview({
 
   return (
     <OverviewCard
-      onClose={() => navigate(ROUTES.overviews)}
+      onClose={closeRoute}
       buttonTitle={TEXTS.levelsOverview}
       className={levels.length > 0 ? 'bottom-controls-clearance' : ''}
     >
