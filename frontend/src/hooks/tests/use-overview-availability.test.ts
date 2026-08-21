@@ -6,12 +6,6 @@ const mocks = vi.hoisted(() => ({
   topics: [] as unknown[],
   vocabulary: [] as unknown[],
   grammarError: null as Error | null,
-  getScores: vi.fn(),
-  levelsState: {
-    levels: [] as unknown[],
-    levelsLoading: false,
-    levelsError: null as Error | null,
-  },
   observers: [] as Array<{
     next: (value: boolean) => void;
     error: (error: unknown) => void;
@@ -32,11 +26,6 @@ vi.mock('dexie', () => ({
   }),
 }));
 
-vi.mock('@/database/models/user-scores', () => ({
-  default: {
-    getByUserId: (...args: unknown[]) => mocks.getScores(...args),
-  },
-}));
 vi.mock('@/database/models/user-blocks', () => ({
   default: { getStartedTopicsByUserId: vi.fn(async () => mocks.topics) },
 }));
@@ -48,10 +37,6 @@ vi.mock('@/database/models/user-items', () => ({
     }),
     getStartedVocabulary: vi.fn(async () => mocks.vocabulary),
   },
-}));
-vi.mock('@/features/user-stats/use-user-store', () => ({
-  useUserStore: (selector: (state: typeof mocks.levelsState) => unknown) =>
-    selector(mocks.levelsState),
 }));
 vi.mock('@/features/toast/use-toast-store', () => ({
   useToastStore: (selector: (state: { showToast: typeof mocks.showToast }) => unknown) =>
@@ -73,23 +58,19 @@ describe('useOverviewAvailability', () => {
     mocks.topics = [];
     mocks.vocabulary = [];
     mocks.grammarError = null;
-    mocks.levelsState = { levels: [], levelsLoading: false, levelsError: null };
     mocks.observers = [];
   });
 
-  it('resolves all four overview states independently without querying scores', async () => {
+  it('resolves all three overview states independently', async () => {
     mocks.grammar = true;
     mocks.topics = [{}];
-    mocks.levelsState.levels = [{}];
 
     const { result } = renderHook(() => useOverviewAvailability('u1'));
 
     await waitFor(() => expect(result.current.vocabulary.loading).toBe(false));
-    expect(result.current.levels.hasData).toBe(true);
     expect(result.current.grammar.hasData).toBe(true);
     expect(result.current.topics.hasData).toBe(true);
     expect(result.current.vocabulary.hasData).toBe(false);
-    expect(mocks.getScores).not.toHaveBeenCalled();
   });
 
   it('reacts to database emissions and unsubscribes every observer', async () => {
@@ -117,18 +98,9 @@ describe('useOverviewAvailability', () => {
     expect(mocks.showToast).toHaveBeenCalledWith('Loading error', 'error');
   });
 
-  it('uses the existing levels loading and error state', () => {
-    const levelsError = new Error('levels failure');
-    mocks.levelsState = { levels: [], levelsLoading: false, levelsError };
+  it('does not subscribe when there is no active user', () => {
+    renderHook(() => useOverviewAvailability(null));
 
-    const { result } = renderHook(() => useOverviewAvailability(null));
-
-    expect(result.current.levels).toEqual({
-      hasData: false,
-      loading: false,
-      error: levelsError,
-    });
-    expect(mocks.showToast).toHaveBeenCalledWith('Loading error', 'error');
     expect(mocks.observers).toHaveLength(0);
   });
 });

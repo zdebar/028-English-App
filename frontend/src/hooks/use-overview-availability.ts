@@ -2,7 +2,6 @@ import UserBlock from '@/database/models/user-blocks';
 import UserItem from '@/database/models/user-items';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
-import { useUserStore } from '@/features/user-stats/use-user-store';
 import { TEXTS } from '@/locales/cs';
 import { liveQuery } from 'dexie';
 import { useEffect, useState } from 'react';
@@ -15,13 +14,12 @@ export type OverviewAvailability = Readonly<{
 }>;
 
 export type OverviewAvailabilityState = Readonly<{
-  levels: OverviewAvailability;
   grammar: OverviewAvailability;
   topics: OverviewAvailability;
   vocabulary: OverviewAvailability;
 }>;
 
-type DatabaseOverviewKey = Exclude<keyof OverviewAvailabilityState, 'levels'>;
+type DatabaseOverviewKey = keyof OverviewAvailabilityState;
 
 const EMPTY_AVAILABILITY: OverviewAvailability = {
   hasData: false,
@@ -35,13 +33,13 @@ const LOADING_AVAILABILITY: OverviewAvailability = {
   error: null,
 };
 
-const INITIAL_DATABASE_STATE: Omit<OverviewAvailabilityState, 'levels'> = {
+const INITIAL_DATABASE_STATE: OverviewAvailabilityState = {
   grammar: EMPTY_AVAILABILITY,
   topics: EMPTY_AVAILABILITY,
   vocabulary: EMPTY_AVAILABILITY,
 };
 
-const LOADING_DATABASE_STATE: Omit<OverviewAvailabilityState, 'levels'> = {
+const LOADING_DATABASE_STATE: OverviewAvailabilityState = {
   grammar: LOADING_AVAILABILITY,
   topics: LOADING_AVAILABILITY,
   vocabulary: LOADING_AVAILABILITY,
@@ -57,9 +55,6 @@ export function useOverviewAvailability(
   initialData?: OverviewAvailabilityData,
 ): OverviewAvailabilityState {
   const showToast = useToastStore((state) => state.showToast);
-  const levels = useUserStore((state) => state.levels);
-  const levelsLoading = useUserStore((state) => state.levelsLoading);
-  const levelsError = useUserStore((state) => state.levelsError);
   const [databaseState, setDatabaseState] = useState(() =>
     initialData
       ? {
@@ -69,11 +64,6 @@ export function useOverviewAvailability(
         }
       : INITIAL_DATABASE_STATE,
   );
-
-  useEffect(() => {
-    if (!levelsError) return;
-    showToast(TEXTS.loadingError, 'error');
-  }, [levelsError, showToast]);
 
   useEffect(() => {
     if (!userId) {
@@ -118,12 +108,5 @@ export function useOverviewAvailability(
     };
   }, [initialData, showToast, userId]);
 
-  return {
-    ...databaseState,
-    levels: {
-      hasData: levelsLoading && initialData ? initialData.levels : levels.length > 0,
-      loading: levelsLoading && !initialData,
-      error: levelsError,
-    },
-  };
+  return databaseState;
 }

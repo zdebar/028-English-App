@@ -11,7 +11,6 @@ import { useLoaderData } from 'react-router-dom';
 import type { OverviewAvailabilityData } from '@/routing/route-data';
 import {
   grammarDescriptor,
-  levelsDescriptor,
   topicsDescriptor,
   vocabularyDescriptor,
 } from '@/routing/route-data';
@@ -34,11 +33,6 @@ export default function Overviews(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const initialAvailability = useLoaderData() as OverviewAvailabilityData;
   const availability = useOverviewAvailability(userId, initialAvailability);
-  const levelsButton = getButtonState(
-    availability.levels,
-    TEXTS.levelsOverviewTooltip,
-    TEXTS.noDashboardData,
-  );
   const grammarButton = getButtonState(
     availability.grammar,
     TEXTS.grammarOverviewTooltip,
@@ -59,14 +53,6 @@ export default function Overviews(): JSX.Element {
       <h1 className="sr-only">{TEXTS.overviews}</h1>
       <section aria-label={TEXTS.progressOverviews}>
         <div className="flex flex-col gap-1">
-          <DataNavigationButton
-            className="h-button w-full"
-            to={ROUTES.levels}
-            descriptor={userId ? levelsDescriptor(userId) : undefined}
-            {...levelsButton}
-          >
-            <MenuButtonText>{TEXTS.levelsOverview}</MenuButtonText>
-          </DataNavigationButton>
           <DataNavigationButton
             className="h-button w-full"
             to={ROUTES.grammar}

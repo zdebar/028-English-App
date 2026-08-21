@@ -21,14 +21,12 @@ export function overviewAvailabilityDescriptor(userId: string) {
   return {
     key: routeDataKey('overviews', userId),
     load: async () => {
-      const [levels, grammar, topics, vocabulary] = await Promise.all([
-        Levels.getOverview(userId, getLocalDate()),
+      const [grammar, topics, vocabulary] = await Promise.all([
         UserItem.hasStartedGrammar(userId),
         UserBlock.getStartedTopicsByUserId(userId),
         UserItem.getStartedVocabulary(userId),
       ]);
       return {
-        levels: levels.length > 0,
         grammar,
         topics: topics.length > 0,
         vocabulary: vocabulary.length > 0,

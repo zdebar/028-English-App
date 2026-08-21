@@ -32,8 +32,6 @@ vi.mock('@/locales/cs', () => ({
     overviews: 'Přehledy',
     progressOverviews: 'Pokrok',
     practiceOverviewTitle: 'Přehled procvičování',
-    levelsOverview: 'Přehled CEFR úrovní',
-    levelsOverviewTooltip: 'CEFR tooltip',
     grammarOverview: 'Přehled gramatiky',
     grammarOverviewTooltip: 'Grammar tooltip',
     topicsOverview: 'Přehled témat',
@@ -41,7 +39,6 @@ vi.mock('@/locales/cs', () => ({
     vocabularyOverview: 'Přehled slovíček',
     vocabularyOverviewTooltip: 'Vocabulary tooltip',
     practiceOverviewNone: 'No practice',
-    noDashboardData: 'No levels',
     noGrammar: 'No grammar',
     noTopics: 'No topics',
     noStartedVocabulary: 'No vocabulary',
@@ -52,12 +49,7 @@ vi.mock('@/locales/cs', () => ({
 
 import Overviews from '@/pages/Overviews';
 
-const overviewKeys = [
-  'levels',
-  'grammar',
-  'topics',
-  'vocabulary',
-];
+const overviewKeys = ['grammar', 'topics', 'vocabulary'];
 
 describe('Overviews', () => {
   beforeEach(() => {
@@ -67,18 +59,19 @@ describe('Overviews', () => {
     );
   });
 
-  it('renders only the four progress overviews without practice or pronunciation', () => {
+  it('renders only the three progress overviews without levels, practice, or pronunciation', () => {
     render(<Overviews />);
 
     const progress = screen.getByRole('region', { name: 'Pokrok' });
 
-    expect(within(progress).getAllByRole('button')).toHaveLength(4);
+    expect(within(progress).getAllByRole('button')).toHaveLength(3);
+    expect(screen.queryByRole('button', { name: /CEFR/ })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Přehled procvičování' })).toBeNull();
     expect(screen.queryByRole('region', { name: 'Výslovnost' })).toBeNull();
     expect(screen.queryByRole('heading', { name: 'Pokrok' })).toBeNull();
 
     const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(4);
+    expect(buttons).toHaveLength(3);
     buttons.forEach((button) => expect(button.className).toContain('w-full'));
   });
 
@@ -89,14 +82,9 @@ describe('Overviews', () => {
 
     render(<Overviews />);
 
-    const expectedTitles = [
-      'No levels',
-      'No grammar',
-      'No topics',
-      'No vocabulary',
-    ];
+    const expectedTitles = ['No grammar', 'No topics', 'No vocabulary'];
     const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(4);
+    expect(buttons).toHaveLength(3);
     buttons.forEach((button, index) => {
       expect((button as HTMLButtonElement).disabled).toBe(true);
       expect(button.title).toBe(expectedTitles[index]);
@@ -122,7 +110,6 @@ describe('Overviews', () => {
   });
 
   it.each([
-    ['Přehled CEFR úrovní', '/levels'],
     ['Přehled gramatiky', '/grammar'],
     ['Přehled témat', '/topics'],
     ['Přehled slovíček', '/vocabulary'],
