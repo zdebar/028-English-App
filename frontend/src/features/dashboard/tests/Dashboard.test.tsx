@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   levels: [] as unknown[],
   levelsLoading: false,
+  descriptorUserId: null as string | null,
   lessons: [] as Array<{
     id: number;
     name: string;
@@ -32,6 +33,21 @@ vi.mock('@/utils/dashboard.utils', () => ({
   getInProgressLessons: () => mocks.lessons,
 }));
 
+vi.mock('@/routing/route-data', () => ({
+  levelsDescriptor: (userId: string) => {
+    mocks.descriptorUserId = userId;
+    return { key: `levels:${userId}`, load: vi.fn() };
+  },
+}));
+
+vi.mock('@/routing/data-navigation', () => ({
+  DataNavigationLink: ({ to, descriptor, children, ...props }: any) => (
+    <a href={to} data-descriptor-key={descriptor?.key} {...props}>
+      {children}
+    </a>
+  ),
+}));
+
 vi.mock('@/components/UI/BlockBar', () => ({
   default: ({ lessonName, todayCount }: { lessonName: string; todayCount: number }) => (
     <div data-testid="block-bar">
@@ -49,6 +65,8 @@ vi.mock('@/locales/cs', () => ({
   TEXTS: {
     noDashboardData: 'Žádná data.',
     startedTodayHint: 'Dnes zahajeno',
+    levelsOverview: 'Přehled CEFR úrovní',
+    levelsOverviewTooltip: 'Otevřít přehled CEFR úrovní',
   },
 }));
 
@@ -60,26 +78,41 @@ describe('Dashboard', () => {
     mocks.levels = [];
     mocks.levelsLoading = false;
     mocks.lessons = [];
+    mocks.descriptorUserId = null;
   });
 
   it('does not render a no-data message while levels are loading', () => {
     mocks.levelsLoading = true;
 
-    render(<Dashboard />);
+    render(<Dashboard userId="u1" />);
 
     expect(screen.queryByText('Žádná data.')).toBeNull();
     expect(screen.queryByTestId('block-bar')).toBeNull();
     expect(screen.queryByText('Dnes zahajeno')).toBeNull();
+    expect(screen.queryByRole('link')).toBeNull();
     expect(screen.queryByRole('button', { name: 'toggle' })).toBeNull();
   });
 
-  it('renders a no-data message without dashboard controls when no lessons are in progress', () => {
-    render(<Dashboard />);
+  it('renders a non-interactive no-data message when no CEFR data exists', () => {
+    render(<Dashboard userId="u1" />);
 
     expect(screen.getByText('Žádná data.')).toBeTruthy();
     expect(screen.queryByTestId('block-bar')).toBeNull();
     expect(screen.queryByText('Dnes zahajeno')).toBeNull();
+    expect(screen.queryByRole('link')).toBeNull();
     expect(screen.queryByRole('button', { name: 'toggle' })).toBeNull();
+  });
+
+  it('links to the levels overview when CEFR data exists without started lessons', () => {
+    mocks.levels = [{ id: 1 }];
+
+    render(<Dashboard userId="u1" />);
+
+    const link = screen.getByRole('link', { name: /CEFR/ });
+    expect(link.getAttribute('href')).toBe('/levels');
+    expect(link.getAttribute('data-descriptor-key')).toBe('levels:u1');
+    expect(screen.getByText(/CEFR/)).toBeTruthy();
+    expect(mocks.descriptorUserId).toBe('u1');
   });
 
   it('renders started progress without a mastered toggle', () => {
@@ -94,10 +127,13 @@ describe('Dashboard', () => {
       },
     ];
 
-    render(<Dashboard />);
+    mocks.levels = [{ id: 1 }];
+
+    render(<Dashboard userId="u1" />);
 
     expect(screen.getByText('Dnes zahajeno')).toBeTruthy();
     expect(screen.getByText('Lesson 1:1')).toBeTruthy();
     expect(screen.queryByRole('button')).toBeNull();
+    expect(screen.getByRole('link').getAttribute('href')).toBe('/levels');
   });
 });

@@ -87,7 +87,7 @@ export default function Home(): JSX.Element {
               {TEXTS.syncWarning}
             </p>
             <div className="home-bottom-controls-clearance relative">
-              <Dashboard />
+              <Dashboard userId={userId} />
               <div className="pos-home-dashboard-help">
                 <HelpButton />
               </div>

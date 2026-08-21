@@ -31,7 +31,7 @@ export default function LevelsOverview({
   const levelsLoading = useUserStore((state) => state.levelsLoading);
   const levelsError = useUserStore((state) => state.levelsError);
   const showToast = useToastStore((state) => state.showToast);
-  const closeRoute = useRouteClose(ROUTES.overviews);
+  const closeRoute = useRouteClose(ROUTES.home);
   const levels = levelsLoading ? initialLevels : storedLevels;
 
   useEffect(() => {
