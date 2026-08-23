@@ -5,6 +5,9 @@ import type { JSX } from 'react';
 import type { RouteDataDescriptor } from '@/routing/route-data-handoff';
 import { useDataNavigation } from '@/routing/data-navigation';
 
+const BUTTON_CLASS_NAME =
+  'home-star-button relative mx-auto inline-flex w-full cursor-pointer items-center justify-center p-2 text-center focus:outline-none';
+
 type Props = {
   count: number;
   onClick?: () => void;
@@ -40,7 +43,7 @@ export default function PracticeOverviewButton({
   return (
     <button
       type="button"
-      className={`home-star-button relative mx-auto inline-flex w-full cursor-pointer items-center justify-center p-2 text-center hover:border-current focus:outline-none ${className}`}
+      className={`${BUTTON_CLASS_NAME} ${className}`}
       aria-label={ariaLabel}
       title={ariaLabel}
       onClick={onClick}
@@ -67,7 +70,7 @@ function DataPracticeOverviewButton({
   return (
     <button
       type="button"
-      className={`home-star-button relative mx-auto inline-flex w-full cursor-pointer items-center justify-center p-2 text-center hover:border-current focus:outline-none ${className}`}
+      className={`${BUTTON_CLASS_NAME} ${className}`}
       aria-label={ariaLabel}
       title={ariaLabel}
       aria-busy={pending}
