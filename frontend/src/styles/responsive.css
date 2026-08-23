@@ -80,6 +80,37 @@
   gap: 0;
 }
 
+/* Secondary controls form a segmented group attached to the card. */
+:where(.pos-bottom-right-control, .pos-bottom-left-control, .pos-home-dashboard-help) {
+  --secondary-control-outer-radius: 20%;
+}
 
+:where(.pos-bottom-right-control, .pos-bottom-left-control, .pos-home-dashboard-help)
+  .secondary-control-button {
+  border-radius: var(--secondary-control-radius-top-left, 0)
+    var(--secondary-control-radius-top-right, 0)
+    var(--secondary-control-radius-bottom-right, 0)
+    var(--secondary-control-radius-bottom-left, 0);
+}
 
+:where(.pos-bottom-right-control, .pos-bottom-left-control, .pos-home-dashboard-help)
+  > :first-child {
+  --secondary-control-radius-bottom-left: var(--secondary-control-outer-radius);
+}
+
+:where(.pos-bottom-right-control, .pos-bottom-left-control, .pos-home-dashboard-help)
+  > :last-child {
+  --secondary-control-radius-bottom-right: var(--secondary-control-outer-radius);
+}
+
+.app-shell[data-secondary-layout='side'] .pos-bottom-right-control > :first-child {
+  --secondary-control-radius-top-right: var(--secondary-control-outer-radius);
+  --secondary-control-radius-bottom-left: 0;
+}
+
+/* The left group uses column-reverse, so its last DOM child is visually first. */
+.app-shell[data-secondary-layout='side'] .pos-bottom-left-control > :last-child {
+  --secondary-control-radius-top-left: var(--secondary-control-outer-radius);
+  --secondary-control-radius-bottom-right: 0;
+}
 
