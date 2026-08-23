@@ -46,7 +46,6 @@ export interface UserItemLocal extends UserItemBase {
   mastered_at_cz_to_en: string;
   mastered_at_en_to_cz: string;
   curriculum_sort_path: CurriculumSortPath;
-  is_initial_training_trigger?: boolean;
 }
 
 export interface PracticeDeckItem extends UserItemLocal {

@@ -167,3 +167,27 @@
   }
 }
 
+@keyframes star-earned {
+  0% {
+    opacity: 0;
+    transform: translateY(0.75rem) scale(0.8);
+  }
+  45% {
+    opacity: 1;
+    transform: translateY(0) scale(1.15);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.star-celebration {
+  animation: star-earned 0.55s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .star-celebration {
+    animation: none;
+  }
+}

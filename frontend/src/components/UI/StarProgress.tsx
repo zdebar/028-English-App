@@ -282,7 +282,7 @@ type DetailedStarTierRowProps = Readonly<{
 
 function DetailedStarTierRow({
   count,
-  countPerStar = config.practice.starChunk,
+  countPerStar = 1,
   starsPerRow = config.practice.starsPerRow,
   size = STAR_SIZE,
 }: DetailedStarTierRowProps): JSX.Element {

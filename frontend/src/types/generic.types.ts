@@ -32,7 +32,6 @@ export interface BlockType extends Omit<SyncEntityType, 'sort_order'> {
   grammar_chunk_id: number | null;
   show_in_topics: boolean;
   is_removed_from_practice: boolean;
-  requires_initial_training: boolean;
   sort_order: number | null;
 }
 
@@ -56,7 +55,7 @@ export interface LevelOverviewType extends LevelType, ProgressCountsType {
 export interface UserScoreType {
   user_id: string;
   date: string;
-  item_count: number;
+  star_count: number;
   updated_at: string;
   deleted_at: string | null;
 }
@@ -70,7 +69,6 @@ export interface UserBlockType {
   sort_order: number | null;
   show_in_topics: boolean;
   is_removed_from_practice: boolean;
-  requires_initial_training: boolean;
   started_at: string;
   updated_at: string;
   deleted_at: string;

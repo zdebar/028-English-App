@@ -72,15 +72,14 @@ CREATE TABLE IF NOT EXISTS blocks (
   note TEXT,
   show_in_topics BOOLEAN NOT NULL DEFAULT TRUE,
   is_removed_from_practice BOOLEAN NOT NULL DEFAULT FALSE,
-  requires_initial_training BOOLEAN NOT NULL DEFAULT FALSE,
   grammar_chunk_id INTEGER REFERENCES grammar_chunks(id) ON DELETE RESTRICT,
   sort_order INTEGER CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ,
   CONSTRAINT blocks_sort_order_key
     UNIQUE (sort_order) DEFERRABLE INITIALLY DEFERRED,
-  CONSTRAINT blocks_training_not_removed_from_practice_check
-    CHECK (requires_initial_training = FALSE OR is_removed_from_practice = FALSE)
+  CONSTRAINT blocks_active_practice_order_check
+    CHECK (is_removed_from_practice = TRUE OR sort_order IS NOT NULL)
 );
 
 CREATE TABLE IF NOT EXISTS user_blocks (
@@ -113,7 +112,7 @@ CREATE TABLE IF NOT EXISTS items (
   grammar_chunk_id INTEGER REFERENCES grammar_chunks(id) ON DELETE RESTRICT,
   is_vocabulary BOOLEAN NOT NULL,
   sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
-  block_id INTEGER REFERENCES blocks(id) ON DELETE RESTRICT,
+  block_id INTEGER NOT NULL REFERENCES blocks(id) ON DELETE RESTRICT,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ,
   CONSTRAINT items_lesson_sort_order_key
@@ -185,7 +184,7 @@ CREATE TABLE IF NOT EXISTS user_items_history (
 CREATE TABLE IF NOT EXISTS user_scores (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   date DATE NOT NULL,
-  item_count INTEGER NOT NULL DEFAULT 0 CHECK (item_count >= 0),
+  star_count INTEGER NOT NULL DEFAULT 0 CHECK (star_count >= 0),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ,
   PRIMARY KEY (user_id, date)
@@ -264,7 +263,7 @@ CREATE INDEX IF NOT EXISTS idx_user_items_history_item_id
 
 CREATE INDEX IF NOT EXISTS idx_user_scores_user_updated_date
   ON public.user_scores (user_id, updated_at, date)
-  INCLUDE (item_count, deleted_at);
+  INCLUDE (star_count, deleted_at);
 
 CREATE INDEX IF NOT EXISTS idx_user_blocks_user_updated_block
   ON public.user_blocks (user_id, updated_at, block_id)

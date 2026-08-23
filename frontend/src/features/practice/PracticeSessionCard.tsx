@@ -1,5 +1,5 @@
 import Notification from '@/components/UI/Notification';
-import { STAR_SIZE } from '@/components/UI/StarProgress';
+import { FullStar, STAR_SIZE } from '@/components/UI/StarProgress';
 import DelayedNotification from '@/components/UI/DelayedNotification';
 import SecondaryControlButton from '@/components/UI/buttons/SecondaryControlButton';
 import BookIcon from '@/components/UI/icons/BookIcon';
@@ -54,6 +54,8 @@ export type PracticeSessionCardProps = Readonly<{
   pronunciationItem?: UserItemLocal | null;
   nextPronunciation?: () => void;
   onPronunciationSelectionChange?: (selected: boolean) => void;
+  sessionProgress?: number;
+  celebratingStar?: boolean;
 }>;
 
 type PracticeControlsProps = Pick<
@@ -189,12 +191,17 @@ export default function PracticeSessionCard({
   pronunciationItem = null,
   nextPronunciation,
   onPronunciationSelectionChange,
+  sessionProgress = 0,
+  celebratingStar = false,
 }: PracticeSessionCardProps) {
   const userId = useAuthStore((state) => state.userId);
-  const dailyCount = useUserStore((state) => state.dailyCount);
+  const dailyStarCount = useUserStore((state) => state.dailyStarCount);
   const [visibleDetail, setVisibleDetail] = useState<'grammar' | 'note' | null>(null);
 
-  const { starChunk, starsPerRow, starCount, displayedChunkCount } = usePracticeStars(dailyCount);
+  const { starChunk, starsPerRow, starCount, displayedChunkCount } = usePracticeStars(
+    dailyStarCount,
+    sessionProgress,
+  );
 
   const cardText = revealed ? undefined : TEXTS.reveal;
   const cardStyle = revealed ? 'color-audio-disabled' : 'color-button';
@@ -204,9 +211,13 @@ export default function PracticeSessionCard({
   const showGrammarButton = Boolean(revealed && (grammar?.note?.trim() || grammar?.items.length));
   const showNoteButton = Boolean(revealed && note?.note.trim());
   const audioControlsDisabled =
-    !showAudioControls || showDirectionChange || audioLoading || (isCzToEn && !revealed);
-  const grammarButtonDisabled = !showGrammarButton || showDirectionChange;
-  const noteButtonDisabled = !showNoteButton || showDirectionChange;
+    celebratingStar ||
+    !showAudioControls ||
+    showDirectionChange ||
+    audioLoading ||
+    (isCzToEn && !revealed);
+  const grammarButtonDisabled = celebratingStar || !showGrammarButton || showDirectionChange;
+  const noteButtonDisabled = celebratingStar || !showNoteButton || showDirectionChange;
   const practiceControlColumns =
     revealed && !isPronunciationPractice ? 'grid-cols-3' : 'grid-cols-1';
 
@@ -225,13 +236,30 @@ export default function PracticeSessionCard({
 
   return (
     <div className="bottom-controls-clearance relative flex min-h-0 w-full grow flex-col items-center">
-      <div className="card-width card-height relative gap-1">
+      <div
+        className="card-width card-height relative gap-1"
+        aria-busy={celebratingStar}
+        inert={celebratingStar ? true : undefined}
+      >
+        {celebratingStar && (
+          <div
+            className="color-button absolute inset-0 z-50 flex items-center justify-center"
+            role="status"
+            aria-live="polite"
+          >
+            <span className="star-celebration flex items-center gap-2 text-2xl font-bold">
+              + <FullStar size={32} />
+              <span className="sr-only">{TEXTS.starEarned}</span>
+            </span>
+          </div>
+        )}
         <button
           type="button"
           className={`relative grid h-full w-full grow cursor-pointer grid-rows-[3.5rem_minmax(0,1fr)_3.5rem] items-center p-4 text-inherit select-none ${cardStyle} `}
           onClick={handleReveal}
           title={cardText}
           aria-disabled={revealed}
+          disabled={celebratingStar}
         >
           {!revealed && !showDirectionChange && (
             <HelpText className="top-23 left-1/2 -translate-x-1/2">{TEXTS.reveal}</HelpText>
@@ -312,9 +340,9 @@ export default function PracticeSessionCard({
             nextPronunciation={nextPronunciation}
             nextRepeat={nextRepeat}
             plusHint={plusHint}
-            repeatDisabled={repeatDisabled}
+            repeatDisabled={repeatDisabled || celebratingStar}
             revealed={revealed}
-            showDirectionChange={showDirectionChange}
+            showDirectionChange={showDirectionChange || celebratingStar}
           />
         </div>
 

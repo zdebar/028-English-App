@@ -10,7 +10,9 @@ const mocks = vi.hoisted(() => ({
   observers: [] as Observer[],
   queries: [] as Array<() => Promise<unknown>>,
   unsubscribes: [] as ReturnType<typeof vi.fn>[],
-  getReadyPracticeState: vi.fn(),
+  getReadyReviewState: vi.fn(),
+  getNextUnstartedPracticeBlock: vi.fn().mockResolvedValue(null),
+  getActiveSession: vi.fn().mockResolvedValue(null),
   getPronunciationPracticeCount: vi.fn(),
   reportError: vi.fn(),
 }));
@@ -22,6 +24,7 @@ vi.mock('@/database/models/db', () => ({
   db: {
     user_items: {},
     user_blocks: {},
+    practice_sessions: {},
     transaction: async (...args: unknown[]) => {
       const callback = args.at(-1) as () => Promise<unknown>;
       return callback();
@@ -30,10 +33,19 @@ vi.mock('@/database/models/db', () => ({
 }));
 vi.mock('@/database/models/user-items', () => ({
   default: {
-    getReadyPracticeState: (...args: unknown[]) => mocks.getReadyPracticeState(...args),
+    getReadyReviewState: (...args: unknown[]) => mocks.getReadyReviewState(...args),
     getPronunciationPracticeCount: (...args: unknown[]) =>
       mocks.getPronunciationPracticeCount(...args),
   },
+}));
+vi.mock('@/database/models/user-blocks', () => ({
+  default: {
+    getNextUnstartedPracticeBlock: (...args: unknown[]) =>
+      mocks.getNextUnstartedPracticeBlock(...args),
+  },
+}));
+vi.mock('@/database/models/practice-sessions', () => ({
+  default: { getActive: (...args: unknown[]) => mocks.getActiveSession(...args) },
 }));
 vi.mock('@/features/logging/monitoring-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
@@ -72,16 +84,20 @@ describe('usePracticeAvailabilityStoreSync', () => {
     expect(mocks.queries).toHaveLength(2);
     await mocks.queries[0]();
     await mocks.queries[1]();
-    expect(mocks.getReadyPracticeState).toHaveBeenCalledWith('u1');
+    expect(mocks.getReadyReviewState).toHaveBeenCalledWith('u1');
     expect(mocks.getPronunciationPracticeCount).toHaveBeenCalledWith('u1');
 
     act(() => {
-      mocks.observers[0].next({ readyCount: 3, schedule: [] });
+      mocks.observers[0].next({
+        review: { readyCount: 3, schedule: [] },
+        nextBlockId: null,
+        activeSession: null,
+      });
       mocks.observers[1].next(2);
     });
     expect(usePracticeAvailabilityStore.getState()).toMatchObject({
-      readyCount: 3,
-      readyLoading: false,
+      reviewCount: 3,
+      practiceLoading: false,
       pronunciationCount: 2,
       pronunciationLoading: false,
     });
@@ -91,24 +107,24 @@ describe('usePracticeAvailabilityStoreSync', () => {
     renderHook(() => usePracticeAvailabilityStoreSync('u1'));
     act(() => {
       mocks.observers[0].next({
-        readyCount: 1,
+        review: { readyCount: 1,
         schedule: [
           { date: '2026-07-21T10:00:01.000Z', count: 1 },
           { date: '2026-07-21T10:00:02.000Z', count: 1 },
-        ],
+        ] }, nextBlockId: null, activeSession: null,
       });
     });
 
     act(() => vi.advanceTimersByTime(1000));
     expect(usePracticeAvailabilityStore.getState()).toMatchObject({
-      readyCount: 2,
-      readySchedule: [{ date: '2026-07-21T10:00:02.000Z', count: 1 }],
+      reviewCount: 2,
+      reviewSchedule: [{ date: '2026-07-21T10:00:02.000Z', count: 1 }],
     });
 
     act(() => vi.advanceTimersByTime(1000));
     expect(usePracticeAvailabilityStore.getState()).toMatchObject({
-      readyCount: 3,
-      readySchedule: [],
+      reviewCount: 3,
+      reviewSchedule: [],
     });
   });
 
@@ -117,7 +133,7 @@ describe('usePracticeAvailabilityStoreSync', () => {
       initialProps: { userId: 'u1' as string | null },
     });
     act(() => {
-      mocks.observers[0].next({ readyCount: 3, schedule: [] });
+      mocks.observers[0].next({ review: { readyCount: 3, schedule: [] }, nextBlockId: null, activeSession: null });
       mocks.observers[1].next(2);
     });
 
@@ -125,14 +141,14 @@ describe('usePracticeAvailabilityStoreSync', () => {
     expect(mocks.unsubscribes[0]).toHaveBeenCalledOnce();
     expect(mocks.unsubscribes[1]).toHaveBeenCalledOnce();
     expect(usePracticeAvailabilityStore.getState()).toMatchObject({
-      readyCount: 0,
-      readyLoading: true,
+      reviewCount: 0,
+      practiceLoading: true,
       pronunciationCount: 0,
       pronunciationLoading: true,
     });
 
-    act(() => mocks.observers[0].next({ readyCount: 99, schedule: [] }));
-    expect(usePracticeAvailabilityStore.getState().readyCount).toBe(0);
+    act(() => mocks.observers[0].next({ review: { readyCount: 99, schedule: [] }, nextBlockId: null, activeSession: null }));
+    expect(usePracticeAvailabilityStore.getState().reviewCount).toBe(0);
   });
 
   it('clears snapshots on sign-out and ignores emissions after unmount', () => {
@@ -141,21 +157,21 @@ describe('usePracticeAvailabilityStoreSync', () => {
       { initialProps: { userId: 'u1' as string | null } },
     );
     act(() => {
-      mocks.observers[0].next({ readyCount: 3, schedule: [] });
+      mocks.observers[0].next({ review: { readyCount: 3, schedule: [] }, nextBlockId: null, activeSession: null });
       mocks.observers[1].next(2);
     });
 
     rerender({ userId: null });
     expect(usePracticeAvailabilityStore.getState()).toMatchObject({
-      readyCount: 0,
-      readyLoading: false,
+      reviewCount: 0,
+      practiceLoading: false,
       pronunciationCount: 0,
       pronunciationLoading: false,
     });
 
     unmount();
-    act(() => mocks.observers[0].next({ readyCount: 99, schedule: [] }));
-    expect(usePracticeAvailabilityStore.getState().readyCount).toBe(0);
+    act(() => mocks.observers[0].next({ review: { readyCount: 99, schedule: [] }, nextBlockId: null, activeSession: null }));
+    expect(usePracticeAvailabilityStore.getState().reviewCount).toBe(0);
   });
 
   it('stores and reports both observer failures', () => {
@@ -169,8 +185,8 @@ describe('usePracticeAvailabilityStoreSync', () => {
     });
 
     expect(usePracticeAvailabilityStore.getState()).toMatchObject({
-      readyLoading: false,
-      readyError,
+      practiceLoading: false,
+      practiceError: readyError,
       pronunciationLoading: false,
       pronunciationError,
     });

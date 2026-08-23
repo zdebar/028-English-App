@@ -6,7 +6,7 @@ import type { UserItemLocal } from '@/types/user-item.types';
 const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => ({
   userId: 'u1',
   navigate: vi.fn(),
-  dailyCount: 5,
+  dailyStarCount: 5,
   grammarVisible: false,
   grammarData: null as any,
   noteVisible: false,
@@ -46,10 +46,12 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
   practiceDeck: {
     index: 0,
     currentItem: null as UserItemLocal | null,
-    trainingBlockId: null as number | null,
     note: null,
     grammar: null,
     progress: 2,
+    sessionCount: 0,
+    celebratingStar: false,
+    finishedReview: false,
     isCzToEn: true,
     revealed: false,
     setRevealed: vi.fn(),
@@ -82,13 +84,12 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
 }));
 
 mocks.practiceDeck.currentItem = mocks.makePracticeItem();
-mocks.practiceDeck.trainingBlockId = null;
 
 vi.mock('@/config/config', () => ({
   default: {
     practice: {
       dailyGoal: 20,
-      starChunk: 50,
+      reviewStarSize: 20,
       starsPerRow: 10,
       starFlashDuration: 300,
       audioDelay: 300,
@@ -142,8 +143,8 @@ vi.mock('react-router-dom', () => ({
 }));
 
 vi.mock('@/features/user-stats/use-user-store', () => ({
-  useUserStore: (selector: (state: { dailyCount: number }) => unknown) =>
-    selector({ dailyCount: mocks.dailyCount }),
+  useUserStore: (selector: (state: { dailyStarCount: number }) => unknown) =>
+    selector({ dailyStarCount: mocks.dailyStarCount }),
 }));
 
 vi.mock('@/features/grammar/use-grammar-viewer', () => ({
@@ -366,7 +367,7 @@ describe('PracticeCard', () => {
     mocks.grammarData = null;
     mocks.noteVisible = false;
     mocks.noteData = null;
-    mocks.dailyCount = 5;
+    mocks.dailyStarCount = 5;
     mocks.practiceDeck.index = 0;
     mocks.practiceDeck.trainingBlockId = null;
     mocks.practiceDeck.currentItem = mocks.makePracticeItem({
@@ -450,15 +451,6 @@ describe('PracticeCard', () => {
     expect(mocks.navigate).toHaveBeenCalledWith('/');
   });
 
-  it('opens initial training for the trigger block instead of rendering the item', () => {
-    mocks.practiceDeck.trainingBlockId = 30;
-
-    render(<PracticeCard />);
-
-    expect(mocks.navigate).toHaveBeenCalledWith('/practice/block-training?blockId=30');
-    expect(screen.queryByText('ahoj')).toBeNull();
-  });
-
   it('shows loading circle after configured delay instead of empty state while deck is loading', () => {
     mocks.practiceDeck.currentItem = null;
     mocks.practiceDeck.loading = true;
@@ -486,10 +478,10 @@ describe('PracticeCard', () => {
     expect(mocks.practiceDeck.setRevealed).toHaveBeenCalledWith(true);
   });
 
-  it('shows current star chunk progress instead of daily goal progress', () => {
+  it('shows completed stars and current review session progress', () => {
     render(<PracticeCard />);
 
-    expect(screen.getByTestId('practice-stars-row').textContent).toBe('0:5:50');
+    expect(screen.getByTestId('practice-stars-row').textContent).toBe('5:0:20');
   });
 
   it('keeps the short direction label in the first top-bar row across card states', () => {
@@ -674,12 +666,12 @@ describe('PracticeCard', () => {
     ).toBeTruthy();
   });
 
-  it('shows the next empty bronze star when mounted exactly on a completed chunk', () => {
-    mocks.dailyCount = 50;
+  it('uses the daily score directly as completed stars', () => {
+    mocks.dailyStarCount = 50;
 
     render(<PracticeCard />);
 
-    expect(screen.getByTestId('practice-stars-row').textContent).toBe('1:0:50');
+    expect(screen.getByTestId('practice-stars-row').textContent).toBe('50:0:20');
   });
 
   it('autoplays audio after delay in EN->CZ mode when allowed', async () => {

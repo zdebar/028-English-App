@@ -1,4 +1,5 @@
 export const COMMON_TEXTS = {
+  starEarned: 'Získána nová hvězda.',
   // Generic
   notAvailable: 'Není k dispozici',
   notMastered: 'Nenaučeno',

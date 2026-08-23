@@ -6,7 +6,7 @@ CREATE OR REPLACE FUNCTION public.upsert_fetch_user_scores(
 RETURNS TABLE (
   user_id UUID,
   date DATE,
-  item_count INTEGER,
+  star_count INTEGER,
   updated_at TIMESTAMPTZ,
   deleted_at TIMESTAMPTZ
 )
@@ -36,7 +36,7 @@ BEGIN
   SELECT
     us.user_id,
     us.date,
-    us.item_count,
+    us.star_count,
     us.updated_at,
     us.deleted_at
   FROM public.user_scores us

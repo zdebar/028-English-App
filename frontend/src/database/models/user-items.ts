@@ -45,7 +45,7 @@ type UserItemAPI = Omit<
   is_vocabulary: boolean;
   is_practice_item?: boolean;
   has_pronunciation_practice?: boolean;
-  block_id: number | null;
+  block_id: number;
   grammar_chunk_id: number | null;
   started_at: string | null;
   deleted_at: string | null;
@@ -115,7 +115,7 @@ function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
     mastered_at_cz_to_en: apiItem.mastered_at_cz_to_en ?? NULL_DATE,
     mastered_at_en_to_cz: apiItem.mastered_at_en_to_cz ?? NULL_DATE,
     deleted_at: apiItem.deleted_at ?? NULL_DATE,
-    block_id: apiItem.block_id ?? NULL_NUMBER,
+    block_id: apiItem.block_id,
     grammar_chunk_id: apiItem.grammar_chunk_id ?? NULL_NUMBER,
   };
 }
@@ -124,9 +124,9 @@ function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
  * Local Dexie model and sync API for user-specific vocabulary and grammar item progress.
  *
  * Public API:
- * - Practice flow: `getPracticeDeck`, `savePracticeDeck`, and `getReadyPracticeState`.
+ * - Review flow: `getReviewDeck`, `savePracticeDeck`, and `getReadyReviewState`.
  * - Progress lookups: `getStartedGrammarChunkIds`, `getStartedBlocksIds`, and `getStartedVocabulary`.
- * - Initial-training workflows: trigger discovery and block completion.
+ * - New-block completion.
  * - Maintenance: reset helpers, simulation data, local account deletion, and remote sync.
  *
  * Dates use the configured null replacement date locally and convert to null for remote sync.
@@ -165,7 +165,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param deckSize Maximum deck size; defaults to config.lesson.deckSize.
    * @returns Practice items ordered by readiness and curriculum position.
    */
-  static async getPracticeDeck(
+  static async getReviewDeck(
     userId: string,
     deckSize: number = config.lesson.deckSize,
   ): Promise<PracticeDeckItem[]> {
@@ -175,18 +175,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const enToCzItems = await this.getDuePracticeItems(userId, 'enToCz', deckSize, now);
     if (enToCzItems.length === deckSize) return enToCzItems;
 
-    let alternativeDeck = await this.getDuePracticeItems(userId, 'czToEn', deckSize, now);
-
-    if (alternativeDeck.length < deckSize) {
-      const remainingSize = deckSize - alternativeDeck.length;
-      const newItems = await this.getNewPracticeItems(userId, remainingSize);
-      const checkedNewItems = await this.stopAtFirstUnstartedTrainingBlock(
-        userId,
-        newItems,
-        remainingSize,
-      );
-      alternativeDeck = [...alternativeDeck, ...checkedNewItems];
-    }
+    const alternativeDeck = await this.getDuePracticeItems(userId, 'czToEn', deckSize, now);
 
     return alternativeDeck.length > 0 ? alternativeDeck : enToCzItems;
   }
@@ -276,7 +265,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param dateTime ISO timestamp used for started_at and updated_at. Defaults to now.
    * @returns Updated items that were written to IndexedDB; [] when the block has no items.
    */
-  static async saveInitialTrainingBlockCompletion(
+  static async saveNewBlockCompletion(
     userId: string,
     blockId: number,
     dateTime: string = new Date(Date.now()).toISOString(),
@@ -285,11 +274,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const updatedItems = blockItems.map((item) => {
       const progressCzToEn = Math.max(
         item.progress_cz_to_en,
-        config.progress.afterInitialTrainingProgress,
+        config.progress.afterNewBlockProgress,
       );
       const progressEnToCz = Math.max(
         item.progress_en_to_cz,
-        config.progress.afterInitialTrainingProgress,
+        config.progress.afterNewBlockProgress,
       );
 
       return {
@@ -475,10 +464,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns Ready count and the nearest future schedule, capped together at the badge limit.
    * @throws Error when userId is empty.
    */
-  static async getReadyPracticeState(userId: string): Promise<ReadyPracticeState> {
+  static async getReadyReviewState(userId: string): Promise<ReadyPracticeState> {
     assertNonEmptyString(userId, 'userId');
 
-    const badgeCap = config.practice.readyPracticeBadgeCap;
+    const countCap = config.practice.readyPracticeCountCap;
     const nowIso = new Date(Date.now()).toISOString();
 
     const items = (await db.user_items.where('user_id').equals(userId).toArray()).filter(
@@ -489,17 +478,17 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
     for (const item of items) {
       const itemReadiness = getItemReadiness(item, nowIso);
-      readyCount = Math.min(badgeCap, readyCount + itemReadiness.readyCount);
+      readyCount = Math.min(countCap, readyCount + itemReadiness.readyCount);
       futureDates.push(...itemReadiness.futureDates);
 
-      if (readyCount === badgeCap) {
-        return { readyCount: badgeCap, schedule: [] };
+      if (readyCount === countCap) {
+        return { readyCount: countCap, schedule: [] };
       }
     }
 
     return {
       readyCount,
-      schedule: groupReadyPracticeSchedule(futureDates, badgeCap - readyCount),
+      schedule: groupReadyPracticeSchedule(futureDates, countCap - readyCount),
     };
   }
 
@@ -788,53 +777,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .then((items) => items.map((item) => ({ ...item, practice_direction: direction })));
   }
 
-  /** Reads never-scheduled practice items in curriculum order. */
-  private static async getNewPracticeItems(
-    userId: string,
-    limit: number,
-  ): Promise<PracticeDeckItem[]> {
-    return db.user_items
-      .where(
-        '[user_id+is_practice_item+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]',
-      )
-      .between(
-        [userId, 1, NULL_DATE, NULL_DATE, Dexie.minKey],
-        [userId, 1, NULL_DATE, NULL_DATE, Dexie.maxKey],
-        true,
-        true,
-      )
-      .filter((item) => item.started_at === NULL_DATE)
-      .limit(limit)
-      .toArray()
-      .then((items) =>
-        items.map((item) => ({ ...item, practice_direction: 'czToEn' })),
-      );
-  }
-
-  /** Stops new-item selection at the first item belonging to an unstarted training block. */
-  private static async stopAtFirstUnstartedTrainingBlock(
-    userId: string,
-    items: PracticeDeckItem[],
-    limit: number,
-  ): Promise<PracticeDeckItem[]> {
-    const selected: PracticeDeckItem[] = [];
-
-    for (const item of items) {
-      if (item.block_id !== NULL_NUMBER) {
-        const block = await db.user_blocks.get([userId, item.block_id]);
-        if (block?.requires_initial_training && block.started_at === NULL_DATE) {
-          selected.push({ ...item, is_initial_training_trigger: true });
-          return selected;
-        }
-      }
-
-      selected.push(item);
-      if (selected.length === limit) return selected;
-    }
-
-    return selected;
-  }
-
   /**
    * Applies one explicit practice outcome to the active direction.
    *
@@ -890,7 +832,7 @@ function getItemReadiness(
   nowIso: string,
 ): { readyCount: number; futureDates: string[] } {
   if (item.started_at === NULL_DATE) {
-    return { readyCount: 1, futureDates: [] };
+    return { readyCount: 0, futureDates: [] };
   }
 
   let readyCount = 0;

@@ -1,7 +1,5 @@
 import DelayedLoadingCircle from '@/components/UI/DelayedLoadingCircle';
 import Notification from '@/components/UI/Notification';
-import ReturnHomeButton from '@/components/UI/buttons/ReturnHomeButton';
-import { ROUTES } from '@/config/routes.config';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { reportError } from '@/features/logging/monitoring-handler';
 import BlockTrainingOverviewCard from '@/features/practice/BlockTrainingOverviewCard';
@@ -11,7 +9,9 @@ import { useBlockTrainingDeck } from '@/features/practice/hooks/use-block-traini
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import { useEffect, useState, type JSX } from 'react';
-import { useLoaderData, useNavigate } from 'react-router-dom';
+import { useLoaderData } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/config/routes.config';
 import type { BlockTrainingData } from '@/routing/route-data';
 
 export default function BlockTrainingPractice(): JSX.Element {
@@ -29,6 +29,14 @@ export default function BlockTrainingPractice(): JSX.Element {
     reportError('Failed to fetch block training deck', deck.error);
   }, [deck.error, showToast]);
 
+  useEffect(() => {
+    if (deck.hasProgress) setShowIntro(false);
+  }, [deck.hasProgress]);
+
+  useEffect(() => {
+    if (deck.isComplete) navigate(ROUTES.home, { replace: true });
+  }, [deck.isComplete, navigate]);
+
   if (!userId) {
     return <Notification>{TEXTS.notAvailable}</Notification>;
   }
@@ -41,22 +49,7 @@ export default function BlockTrainingPractice(): JSX.Element {
     return <PracticeEmptyState />;
   }
 
-  if (deck.isComplete) {
-    return (
-      <div className="card-width mt-8 flex flex-col gap-4 text-center">
-        <p>{TEXTS.blockTrainingComplete}</p>
-        <Notification>{deck.block.name}</Notification>
-        <ReturnHomeButton
-          onClick={(event) => {
-            event.preventDefault();
-            navigate(ROUTES.practice, { replace: true });
-          }}
-        >
-          {TEXTS.continuePractice}
-        </ReturnHomeButton>
-      </div>
-    );
-  }
+  if (deck.isComplete) return <DelayedLoadingCircle />;
 
   if (!deck.currentItem) {
     return <PracticeEmptyState />;
@@ -79,6 +72,8 @@ export default function BlockTrainingPractice(): JSX.Element {
       note={deck.note}
       grammar={deck.practiceGrammar}
       progressLabel={deck.progressLabel}
+      sessionProgress={deck.sessionProgress}
+      celebratingStar={deck.celebratingStar}
       isCzToEn={deck.isCzToEn}
       revealed={deck.revealed}
       czech={deck.czech}

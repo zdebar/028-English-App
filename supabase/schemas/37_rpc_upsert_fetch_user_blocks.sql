@@ -12,7 +12,6 @@ RETURNS TABLE (
   sort_order INTEGER,
   show_in_topics BOOLEAN,
   is_removed_from_practice BOOLEAN,
-  requires_initial_training BOOLEAN,
   started_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ,
   deleted_at TIMESTAMPTZ

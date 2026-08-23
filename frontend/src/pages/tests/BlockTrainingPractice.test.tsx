@@ -213,17 +213,14 @@ describe('BlockTrainingPractice', () => {
     expect(mocks.navigate).not.toHaveBeenCalled();
   });
 
-  it('returns to unified practice after completion', () => {
+  it('returns Home after the completed-star animation', () => {
     mocks.deck.block = { name: 'Block A' };
     mocks.deck.grammar = { id: 1, name: 'Articles' };
     mocks.deck.isComplete = true;
 
     render(<BlockTrainingPractice />);
 
-    expect(screen.getByText('Complete')).toBeTruthy();
-    expect(screen.getByText('Block A')).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
-    expect(mocks.navigate).toHaveBeenCalledWith('/practice', { replace: true });
+    expect(mocks.navigate).toHaveBeenCalledWith('/', { replace: true });
     expect(screen.queryByTestId('block-training-overview')).toBeNull();
   });
 });

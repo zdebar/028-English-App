@@ -27,7 +27,6 @@ import Vocabulary from '@/pages/Vocabulary';
 import Notification from '@/components/UI/Notification';
 import {
   consumePreparedRouteData,
-  prepareRouteData,
   type RouteDataDescriptor,
 } from '@/routing/route-data-handoff';
 import {
@@ -111,14 +110,7 @@ async function loadPronunciationGroupDetail({ params }: LoaderFunctionArgs) {
 async function loadPractice() {
   const userId = await requireUserId();
   try {
-    const deck = await consumePreparedRouteData(practiceDeckDescriptor(userId));
-    const firstItem = deck[0]?.item;
-    const blockId = firstItem?.is_initial_training_trigger ? firstItem.block_id : null;
-    if (blockId != null) {
-      await prepareRouteData(blockTrainingDescriptor(userId, blockId));
-      throw redirect(`${ROUTES.practiceBlockTraining}?blockId=${blockId}`);
-    }
-    return deck;
+    return await consumePreparedRouteData(practiceDeckDescriptor(userId));
   } catch (error) {
     if (error instanceof Response) throw error;
     reportError('Failed to load practice route data', error);

@@ -1,103 +1,91 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-const mocks = vi.hoisted(() => ({ navigate: vi.fn() }));
 
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
-    practiceButton: 'Practice',
+    reviewButton: 'Review',
+    newButton: 'New',
     loadingMessage: 'Loading',
     loadingError: 'Loading error',
     nothingToPractice: 'Nothing to practice',
   },
 }));
-vi.mock('react-router-dom', () => ({ useNavigate: () => mocks.navigate }));
 vi.mock('@/routing/data-navigation', () => ({
-  DataNavigationButton: ({ to, children, ...props }: any) => (
-    <button {...props} onClick={() => mocks.navigate(to)}>
-      {children}
-    </button>
+  DataNavigationButton: ({ children, descriptor: _descriptor, ...props }: any) => (
+    <button {...props}>{children}</button>
   ),
 }));
 vi.mock('@/routing/route-data', () => ({
   practiceDeckDescriptor: () => ({ key: 'practice', load: vi.fn() }),
+  blockTrainingDescriptor: () => ({ key: 'new', load: vi.fn() }),
 }));
 
-import PracticeButton from '@/features/practice/PracticeButton';
+import PracticeButtons from '@/features/practice/PracticeButton';
 import { usePracticeAvailabilityStore } from '@/features/practice/use-practice-availability-store';
 
-describe('HomePracticeButtons', () => {
+describe('Home practice buttons', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
     usePracticeAvailabilityStore.setState({
-      readyCount: 0,
-      readySchedule: [],
-      readyLoading: true,
-      readyError: null,
+      reviewCount: 0,
+      reviewSchedule: [],
+      nextBlockId: 12,
+      activeSession: null,
+      practiceLoading: false,
+      practiceError: null,
     });
   });
 
-  it('keeps practice optimistically enabled while availability is loading', () => {
-    render(<PracticeButton userId="u1" />);
-
-    const button = screen.getByRole('button', { name: 'Practice' });
-    expect((button as HTMLButtonElement).disabled).toBe(false);
-    expect(button.title).toBe('Loading');
+  it('gives review priority at the twenty-direction boundary', () => {
+    usePracticeAvailabilityStore.setState({ reviewCount: 20 });
+    render(<PracticeButtons userId="u1" />);
+    expect(button('Review').disabled).toBe(false);
+    expect(button('New').disabled).toBe(true);
   });
 
-  it('disables practice after an empty result is confirmed', () => {
-    usePracticeAvailabilityStore.setState({ readyLoading: false });
-    render(<PracticeButton userId="u1" />);
-
-    const button = screen.getByRole('button', { name: 'Practice' });
-    expect((button as HTMLButtonElement).disabled).toBe(true);
-    expect(button.title).toBe('Nothing to practice');
+  it('enables new below the review boundary', () => {
+    usePracticeAvailabilityStore.setState({ reviewCount: 19 });
+    render(<PracticeButtons userId="u1" />);
+    expect(button('Review').disabled).toBe(true);
+    expect(button('New').disabled).toBe(false);
   });
 
-  it('shows the ready badge and navigates when practice is available', () => {
-    usePracticeAvailabilityStore.setState({ readyCount: 4, readyLoading: false });
-    render(<PracticeButton userId="u1" />);
-
-    fireEvent.click(screen.getByRole('button', { name: /Practice/ }));
-    expect(screen.getByText('4')).toBeTruthy();
-    expect(mocks.navigate).toHaveBeenCalledWith('/practice');
-  });
-
-  it.each([1, 39])('shows a ready badge below the cap for count %i', (readyCount) => {
-    usePracticeAvailabilityStore.setState({ readyCount, readyLoading: false });
-    render(<PracticeButton userId="u1" />);
-
-    expect(screen.getByText(String(readyCount))).toBeTruthy();
-  });
-
-  it.each([0, 40])('hides the ready badge for boundary count %i', (readyCount) => {
-    usePracticeAvailabilityStore.setState({ readyCount, readyLoading: false });
-    render(<PracticeButton userId="u1" />);
-
-    expect(screen.queryByText(String(readyCount))).toBeNull();
-  });
-
-  it('disables practice when availability loading fails', () => {
+  it('keeps only an active review session available', () => {
     usePracticeAvailabilityStore.setState({
-      readyLoading: false,
-      readyError: new Error('failed'),
+      reviewCount: 0,
+      activeSession: makeSession('review'),
     });
-    render(<PracticeButton userId="u1" />);
-
-    const button = screen.getByRole('button', { name: 'Practice' });
-    expect((button as HTMLButtonElement).disabled).toBe(true);
-    expect(button.title).toBe('Loading error');
+    render(<PracticeButtons userId="u1" />);
+    expect(button('Review').disabled).toBe(false);
+    expect(button('New').disabled).toBe(true);
   });
 
-  it('retains the Zustand snapshot when the button remounts', () => {
-    usePracticeAvailabilityStore.setState({ readyCount: 3, readyLoading: false });
-    const { unmount } = render(<PracticeButton userId="u1" />);
-    unmount();
-    render(<PracticeButton userId="u1" />);
-
-    expect(screen.getByText('3')).toBeTruthy();
-    expect((screen.getByRole('button', { name: /Practice/ }) as HTMLButtonElement).disabled).toBe(
-      false,
-    );
+  it('keeps only an active new session available', () => {
+    usePracticeAvailabilityStore.setState({
+      reviewCount: 20,
+      activeSession: makeSession('new'),
+    });
+    render(<PracticeButtons userId="u1" />);
+    expect(button('Review').disabled).toBe(true);
+    expect(button('New').disabled).toBe(false);
   });
 });
+
+function button(name: string): HTMLButtonElement {
+  return screen.getByRole('button', { name }) as HTMLButtonElement;
+}
+
+function makeSession(mode: 'review' | 'new') {
+  return {
+    user_id: 'u1',
+    mode,
+    completed_count: 4,
+    target_count: 20,
+    block_id: mode === 'new' ? 12 : null,
+    phase: mode === 'new' ? (0 as const) : null,
+    current_queue_item_ids: [],
+    retry_queue_item_ids: [],
+    completed_item_ids: [],
+    started_at: '2026-08-23T08:00:00.000Z',
+    updated_at: '2026-08-23T08:00:00.000Z',
+  };
+}

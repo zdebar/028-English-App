@@ -7,7 +7,7 @@ import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
 import { routeDataKey, type RouteDataDescriptor } from './route-data-handoff';
 import {
-  loadPracticeDeck,
+  loadReviewDeck,
   loadPronunciationPracticeDeck,
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
@@ -93,7 +93,7 @@ export function pronunciationGroupDetailDescriptor(userId: string, groupId: numb
 export function practiceDeckDescriptor(userId: string) {
   return {
     key: routeDataKey('practice', userId),
-    load: () => loadPracticeDeck(userId, config.lesson.deckSize),
+    load: () => loadReviewDeck(userId, config.lesson.deckSize),
   };
 }
 
@@ -110,7 +110,8 @@ export function blockTrainingDescriptor(userId: string, blockId: number) {
     load: async () => {
       const block = await UserBlock.getByBlockId(userId, blockId);
       if (
-        !block?.requires_initial_training ||
+        !block ||
+        block.is_removed_from_practice ||
         block.started_at !== config.database.nullReplacementDate
       ) {
         return { block: null, items: [], entries: [], grammar: null, grammarGroup: null };

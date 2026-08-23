@@ -56,7 +56,7 @@ describe('useUserStoreSync', () => {
     mocks.unsubscribes.length = 0;
     mocks.currentDate = '2026-04-15';
     vi.spyOn(Date.prototype, 'toLocaleDateString').mockImplementation(() => mocks.currentDate);
-    useUserStore.setState({ levels: [], dailyCount: 0 });
+    useUserStore.setState({ levels: [], dailyStarCount: 0 });
   });
 
   afterEach(() => {
@@ -81,8 +81,8 @@ describe('useUserStoreSync', () => {
     expect(useUserStore.getState()).toMatchObject({
       levels: [{ id: 1 }],
       levelsLoading: false,
-      dailyCount: 7,
-      dailyCountLoading: false,
+      dailyStarCount: 7,
+      dailyStarCountLoading: false,
     });
   });
 
@@ -110,7 +110,7 @@ describe('useUserStoreSync', () => {
 
     expect(mocks.unsubscribes[0]).toHaveBeenCalledOnce();
     expect(mocks.unsubscribes[1]).toHaveBeenCalledOnce();
-    expect(useUserStore.getState()).toMatchObject({ levels: [], dailyCount: 0 });
+    expect(useUserStore.getState()).toMatchObject({ levels: [], dailyStarCount: 0 });
   });
 
   it('clears stale snapshots and ignores the previous user after an account switch', () => {
@@ -126,8 +126,8 @@ describe('useUserStoreSync', () => {
     expect(useUserStore.getState()).toMatchObject({
       levels: [],
       levelsLoading: true,
-      dailyCount: 0,
-      dailyCountLoading: true,
+      dailyStarCount: 0,
+      dailyStarCountLoading: true,
     });
 
     act(() => {
@@ -137,7 +137,7 @@ describe('useUserStoreSync', () => {
       mocks.observers[3].next(8);
     });
 
-    expect(useUserStore.getState()).toMatchObject({ levels: [{ id: 2 }], dailyCount: 8 });
+    expect(useUserStore.getState()).toMatchObject({ levels: [{ id: 2 }], dailyStarCount: 8 });
   });
 
   it('records observer failures and ignores emissions after cleanup', () => {
@@ -150,6 +150,6 @@ describe('useUserStoreSync', () => {
 
     unmount();
     act(() => mocks.observers[1].next(99));
-    expect(useUserStore.getState().dailyCount).toBe(0);
+    expect(useUserStore.getState().dailyStarCount).toBe(0);
   });
 });

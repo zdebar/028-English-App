@@ -1,6 +1,8 @@
 import config from '@/config/config';
 import { db } from '@/database/models/db';
 import UserItem from '@/database/models/user-items';
+import UserBlock from '@/database/models/user-blocks';
+import PracticeSession from '@/database/models/practice-sessions';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { liveQuery } from 'dexie';
 import { useEffect } from 'react';
@@ -13,7 +15,7 @@ function toError(error: unknown): Error {
 /** Keeps Home practice availability synchronized independently of the active route. */
 export function usePracticeAvailabilityStoreSync(userId: string | null): void {
   const reset = usePracticeAvailabilityStore((state) => state.reset);
-  const readySchedule = usePracticeAvailabilityStore((state) => state.readySchedule);
+  const reviewSchedule = usePracticeAvailabilityStore((state) => state.reviewSchedule);
 
   useEffect(() => {
     if (!userId) {
@@ -23,37 +25,48 @@ export function usePracticeAvailabilityStoreSync(userId: string | null): void {
 
     let isActive = true;
     usePracticeAvailabilityStore.setState({
-      readyCount: 0,
-      readySchedule: [],
-      readyLoading: true,
-      readyError: null,
+      reviewCount: 0,
+      reviewSchedule: [],
+      nextBlockId: null,
+      activeSession: null,
+      practiceLoading: true,
+      practiceError: null,
       pronunciationCount: 0,
       pronunciationLoading: true,
       pronunciationError: null,
     });
 
     const readySubscription = liveQuery(() =>
-      db.transaction('r', db.user_items, db.user_blocks, () =>
-        UserItem.getReadyPracticeState(userId),
-      ),
+      db.transaction('r', db.user_items, db.user_blocks, db.practice_sessions, async () => {
+        const [review, nextBlock, activeSession] = await Promise.all([
+          UserItem.getReadyReviewState(userId),
+          UserBlock.getNextUnstartedPracticeBlock(userId),
+          PracticeSession.getActive(userId),
+        ]);
+        return { review, nextBlockId: nextBlock?.block_id ?? null, activeSession };
+      }),
     ).subscribe({
       next: (state) => {
         if (!isActive) return;
         usePracticeAvailabilityStore.setState({
-          readyCount: state.readyCount,
-          readySchedule: state.schedule,
-          readyLoading: false,
-          readyError: null,
+          reviewCount: state.review.readyCount,
+          reviewSchedule: state.review.schedule,
+          nextBlockId: state.nextBlockId,
+          activeSession: state.activeSession,
+          practiceLoading: false,
+          practiceError: null,
         });
       },
       error: (error) => {
         if (!isActive) return;
         const normalizedError = toError(error);
         usePracticeAvailabilityStore.setState({
-          readyCount: 0,
-          readySchedule: [],
-          readyLoading: false,
-          readyError: normalizedError,
+          reviewCount: 0,
+          reviewSchedule: [],
+          nextBlockId: null,
+          activeSession: null,
+          practiceLoading: false,
+          practiceError: normalizedError,
         });
         reportError('Failed to load unified practice button state', normalizedError);
       },
@@ -90,12 +103,12 @@ export function usePracticeAvailabilityStoreSync(userId: string | null): void {
   }, [reset, userId]);
 
   useEffect(() => {
-    if (readySchedule.length === 0) return;
+    if (reviewSchedule.length === 0) return;
 
-    const nextTime = Date.parse(readySchedule[0].date);
+    const nextTime = Date.parse(reviewSchedule[0].date);
     if (!Number.isFinite(nextTime)) {
       usePracticeAvailabilityStore.setState((state) => ({
-        readySchedule: state.readySchedule.filter((entry) =>
+        reviewSchedule: state.reviewSchedule.filter((entry) =>
           Number.isFinite(Date.parse(entry.date)),
         ),
       }));
@@ -110,7 +123,7 @@ export function usePracticeAvailabilityStoreSync(userId: string | null): void {
       const now = Date.now();
       usePracticeAvailabilityStore.setState((state) => {
         let increment = 0;
-        const nextSchedule = state.readySchedule.filter((entry) => {
+        const nextSchedule = state.reviewSchedule.filter((entry) => {
           const entryTime = Date.parse(entry.date);
           if (!Number.isFinite(entryTime)) return false;
           if (entryTime <= now) {
@@ -121,12 +134,12 @@ export function usePracticeAvailabilityStoreSync(userId: string | null): void {
         });
 
         return {
-          readyCount: state.readyCount + increment,
-          readySchedule: nextSchedule,
+          reviewCount: state.reviewCount + increment,
+          reviewSchedule: nextSchedule,
         };
       });
     }, delay);
 
     return () => globalThis.clearTimeout(timeoutId);
-  }, [readySchedule]);
+  }, [reviewSchedule]);
 }

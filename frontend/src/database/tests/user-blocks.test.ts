@@ -267,8 +267,8 @@ describe('UserBlock', () => {
     });
   });
 
-  it('completeInitialTraining sets completion and updated timestamps', async () => {
-    await UserBlock.completeInitialTraining('u1', 7, '2026-06-23T12:00:00.000Z');
+  it('completeNewBlock sets completion and updated timestamps', async () => {
+    await UserBlock.completeNewBlock('u1', 7, '2026-06-23T12:00:00.000Z');
 
     expect(mocks.update).toHaveBeenCalledWith(['u1', 7], {
       started_at: '2026-06-23T12:00:00.000Z',
@@ -283,21 +283,18 @@ describe('UserBlock', () => {
         block_id: index + 1,
         sort_order: 7 - index,
         is_removed_from_practice: false,
-        requires_initial_training: index % 2 === 0,
       })),
       {
         user_id: 'u1',
         block_id: 9,
         sort_order: 0,
         is_removed_from_practice: true,
-        requires_initial_training: true,
       },
       {
         user_id: 'u1',
         block_id: 10,
         sort_order: null,
         is_removed_from_practice: false,
-        requires_initial_training: false,
       },
     ]);
 
@@ -322,7 +319,6 @@ describe('UserBlock', () => {
         block_id: 1,
         sort_order: 1,
         is_removed_from_practice: false,
-        requires_initial_training: true,
       },
     ]);
 
@@ -409,7 +405,6 @@ describe('UserBlock', () => {
           sort_order: 1,
           show_in_topics: false,
           is_removed_from_practice: false,
-          requires_initial_training: true,
           started_at: null,
           updated_at: '2026-03-04T00:00:00.000Z',
           deleted_at: null,
@@ -445,7 +440,6 @@ describe('UserBlock', () => {
         note: null,
         show_in_topics: false,
         is_removed_from_practice: false,
-        requires_initial_training: true,
         started_at: '9999-12-31T23:59:59+00:00',
         deleted_at: '9999-12-31T23:59:59+00:00',
       }),
@@ -467,7 +461,6 @@ describe('UserBlock', () => {
           note: '',
           grammar_chunk_id: 10,
           sort_order: 1,
-          requires_initial_training: false,
           started_at: null,
           updated_at: '2026-03-04T00:00:00.000Z',
           deleted_at: null,
@@ -483,7 +476,6 @@ describe('UserBlock', () => {
         block_id: 1,
         show_in_topics: true,
         is_removed_from_practice: false,
-        requires_initial_training: false,
       }),
     ]);
   });

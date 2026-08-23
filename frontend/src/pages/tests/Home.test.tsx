@@ -8,7 +8,7 @@ const mocks = vi.hoisted(
     userFullName: string | null;
     userEmail: string | null;
     isAnonymousUser: boolean;
-    dailyCount: number;
+    dailyStarCount: number;
     isSyncError: boolean;
   } => ({
     theme: 'light',
@@ -16,7 +16,7 @@ const mocks = vi.hoisted(
     userFullName: 'User One',
     userEmail: 'u1@example.com',
     isAnonymousUser: false,
-    dailyCount: 3,
+    dailyStarCount: 3,
     isSyncError: false,
   }),
 );
@@ -52,8 +52,8 @@ vi.mock('@/features/auth/use-auth-store', () => ({
 }));
 
 vi.mock('@/features/user-stats/use-user-store', () => ({
-  useUserStore: (selector: (state: { dailyCount: number }) => unknown) =>
-    selector({ dailyCount: mocks.dailyCount }),
+  useUserStore: (selector: (state: { dailyStarCount: number }) => unknown) =>
+    selector({ dailyStarCount: mocks.dailyStarCount }),
 }));
 
 vi.mock('@/features/synchronization/use-sync-store', () => ({
@@ -145,7 +145,7 @@ describe('Home', () => {
     mocks.userFullName = 'User One';
     mocks.userEmail = 'u1@example.com';
     mocks.isAnonymousUser = false;
-    mocks.dailyCount = 3;
+    mocks.dailyStarCount = 3;
     mocks.isSyncError = false;
   });
 

@@ -1,11 +1,14 @@
 import type { ReadyPracticeScheduleEntry } from '@/types/generic.types';
+import type { PracticeSessionType } from '@/types/practice-session.types';
 import { create } from 'zustand';
 
 type PracticeAvailabilityState = {
-  readyCount: number;
-  readySchedule: ReadyPracticeScheduleEntry[];
-  readyLoading: boolean;
-  readyError: Error | null;
+  reviewCount: number;
+  reviewSchedule: ReadyPracticeScheduleEntry[];
+  nextBlockId: number | null;
+  activeSession: PracticeSessionType | null;
+  practiceLoading: boolean;
+  practiceError: Error | null;
   pronunciationCount: number;
   pronunciationLoading: boolean;
   pronunciationError: Error | null;
@@ -13,10 +16,12 @@ type PracticeAvailabilityState = {
 };
 
 const EMPTY_AVAILABILITY = {
-  readyCount: 0,
-  readySchedule: [] as ReadyPracticeScheduleEntry[],
-  readyLoading: false,
-  readyError: null,
+  reviewCount: 0,
+  reviewSchedule: [] as ReadyPracticeScheduleEntry[],
+  nextBlockId: null,
+  activeSession: null,
+  practiceLoading: false,
+  practiceError: null,
   pronunciationCount: 0,
   pronunciationLoading: false,
   pronunciationError: null,
@@ -25,7 +30,7 @@ const EMPTY_AVAILABILITY = {
 /** Route-stable availability snapshots for the practice actions shown on Home. */
 export const usePracticeAvailabilityStore = create<PracticeAvailabilityState>((set) => ({
   ...EMPTY_AVAILABILITY,
-  readyLoading: true,
+  practiceLoading: true,
   pronunciationLoading: true,
   reset: () => set(EMPTY_AVAILABILITY),
 }));

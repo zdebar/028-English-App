@@ -44,7 +44,7 @@ BEGIN
     i.pronunciation,
     i.audio,
     i.is_vocabulary,
-    COALESCE(NOT b.is_removed_from_practice, TRUE) AS is_practice_item,
+    NOT b.is_removed_from_practice AS is_practice_item,
     COALESCE(ui.has_pronunciation_practice, FALSE)
       AS has_pronunciation_practice,
     i.sort_order,
@@ -65,7 +65,7 @@ BEGIN
     ui.mastered_at_en_to_cz,
     i.lesson_id
   FROM public.items i
-  LEFT JOIN public.blocks b
+  JOIN public.blocks b
     ON b.id = i.block_id
   JOIN public.lessons le
     ON le.id = i.lesson_id

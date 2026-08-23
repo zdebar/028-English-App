@@ -11,7 +11,6 @@ RETURNS TABLE (
   sort_order INTEGER,
   show_in_topics BOOLEAN,
   is_removed_from_practice BOOLEAN,
-  requires_initial_training BOOLEAN,
   started_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ,
   deleted_at TIMESTAMPTZ
@@ -32,7 +31,6 @@ BEGIN
     b.sort_order,
     b.show_in_topics,
     b.is_removed_from_practice,
-    b.requires_initial_training,
     ub.started_at,
     GREATEST(
       COALESCE(ub.updated_at, public.rpc_min_timestamptz()),

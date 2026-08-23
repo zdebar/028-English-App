@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
   grammarBulkGet: vi.fn(),
   grammarGroupGet: vi.fn(),
   addExamples: vi.fn(),
-  getPracticeDeck: vi.fn(),
+    getReviewDeck: vi.fn(),
   getPronunciationPracticeDeck: vi.fn(),
   reportError: vi.fn(),
 }));
@@ -27,7 +27,7 @@ vi.mock('@/database/models/grammar-chunks', () => ({
 
 vi.mock('@/database/models/user-items', () => ({
   default: {
-    getPracticeDeck: (...args: unknown[]) => mocks.getPracticeDeck(...args),
+    getReviewDeck: (...args: unknown[]) => mocks.getReviewDeck(...args),
     getPronunciationPracticeDeck: (...args: unknown[]) =>
       mocks.getPronunciationPracticeDeck(...args),
   },
@@ -42,7 +42,7 @@ vi.mock('@/config/config', () => ({
 }));
 
 import {
-  loadPracticeDeck,
+  loadReviewDeck,
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
 } from '@/database/utils/practice-content.utils';
@@ -207,14 +207,14 @@ describe('practice content resolution', () => {
     mocks.notesBulkGet.mockResolvedValue([undefined]);
     mocks.grammarBulkGet.mockResolvedValue([undefined]);
     const item = { ...makeItem(), practice_direction: 'czToEn' } as PracticeDeckItem;
-    mocks.getPracticeDeck.mockResolvedValue([item]);
+    mocks.getReviewDeck.mockResolvedValue([item]);
 
-    await expect(loadPracticeDeck('u1')).resolves.toEqual([
+    await expect(loadReviewDeck('u1')).resolves.toEqual([
       { item, note: null, grammar: null },
     ]);
 
     const error = new Error('items unavailable');
-    mocks.getPracticeDeck.mockRejectedValue(error);
-    await expect(loadPracticeDeck('u1')).rejects.toBe(error);
+    mocks.getReviewDeck.mockRejectedValue(error);
+    await expect(loadReviewDeck('u1')).rejects.toBe(error);
   });
 });

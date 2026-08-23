@@ -32,7 +32,6 @@ function convertAPIToLocal(block: UserBlockAPI): UserBlockType {
     ...block,
     show_in_topics: block.show_in_topics ?? true,
     is_removed_from_practice: block.is_removed_from_practice ?? false,
-    requires_initial_training: block.requires_initial_training,
     started_at: block.started_at ?? NULL_DATE,
     deleted_at: block.deleted_at ?? NULL_DATE,
   };
@@ -66,7 +65,6 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
   sort_order!: number | null;
   show_in_topics!: boolean;
   is_removed_from_practice!: boolean;
-  requires_initial_training!: boolean;
   started_at!: string;
   updated_at!: string;
   deleted_at!: string;
@@ -126,6 +124,23 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     return (await db.user_blocks.get([userId, blockId])) ?? null;
   }
 
+  /** Returns the first ordered, active practice block that has not been started. */
+  static async getNextUnstartedPracticeBlock(userId: string): Promise<UserBlockType | null> {
+    assertNonEmptyString(userId, 'userId');
+
+    const blocks = await db.user_blocks.where('user_id').equals(userId).toArray();
+    return (
+      blocks
+        .filter(
+          (block) =>
+            !block.is_removed_from_practice &&
+            block.started_at === NULL_DATE &&
+            block.sort_order != null,
+        )
+        .sort(compareNullableBlockOrder)[0] ?? null
+    );
+  }
+
   /**
    * Marks a block's initial training as completed.
    *
@@ -134,7 +149,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
    * @param dateTime ISO completion timestamp written to started_at and updated_at.
    * @throws Error when userId is empty.
    */
-  static async completeInitialTraining(
+  static async completeNewBlock(
     userId: string,
     blockId: number,
     dateTime: string,
@@ -164,7 +179,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     dateTime: string,
   ): Promise<number> {
     for (const block of blocks) {
-      await this.completeInitialTraining(userId, block.block_id, dateTime);
+      await this.completeNewBlock(userId, block.block_id, dateTime);
     }
 
     return blocks.length;

@@ -263,32 +263,32 @@ INSERT INTO "public"."grammar_chunks" ("id", "name", "note", "sort_order", "upda
 -- Data for Name: blocks; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "public"."blocks" ("id", "name", "note", "grammar_chunk_id", "sort_order", "updated_at", "deleted_at", "show_in_topics", "is_removed_from_practice", "requires_initial_training") VALUES
-	(1, 'dny v týdnu', NULL, NULL, 1, '2026-08-02 12:14:05.115542+00', NULL, true, false, false),
-	(2, 'čísla 1  až 12', NULL, NULL, 2, '2026-08-02 12:14:31.093064+00', NULL, true, false, false),
-	(3, 'osobní zájmena', NULL, NULL, 3, '2026-08-02 12:43:15.726633+00', NULL, true, false, false),
-	(4, 'být - základní tvary', NULL, 1, NULL, '2026-08-02 12:46:58.087402+00', NULL, false, false, true),
-	(5, 'být - zkrácené tvary', NULL, 2, NULL, '2026-08-02 12:48:38.833899+00', NULL, false, false, true),
-	(6, 'měsíce v roce', NULL, NULL, 4, '2026-08-02 12:49:10.566201+00', NULL, true, false, false),
-	(7, 'být - zápor', NULL, 3, NULL, '2026-08-02 12:50:14.202037+00', NULL, false, false, true),
-	(8, 'být - zkrácený zápor', NULL, 4, NULL, '2026-08-02 12:50:38.243399+00', NULL, false, false, true),
-	(9, 'množné číslo', NULL, 8, NULL, '2026-08-06 07:32:20.251623+00', NULL, false, false, true),
-	(10, 'přivlastňování', NULL, 9, NULL, '2026-08-06 07:35:32.354282+00', NULL, false, false, true),
-	(11, 'členy', NULL, 10, NULL, '2026-08-06 07:38:35.37714+00', NULL, false, false, true),
-	(12, 'čísla 13 až 19', NULL, 11, NULL, '2026-08-06 07:40:44.534653+00', NULL, false, false, true),
-	(13, 'desítky', NULL, 12, NULL, '2026-08-06 07:41:43.396603+00', NULL, false, false, true),
-	(14, 'složená čísla', NULL, 13, NULL, '2026-08-06 07:42:29.369682+00', NULL, false, false, true),
-	(15, 'řadová čísla', NULL, 14, NULL, '2026-08-06 07:45:42.097186+00', NULL, false, false, true),
-	(16, 'zlomky', NULL, 15, NULL, '2026-08-06 07:47:12.776085+00', NULL, false, false, true),
-	(17, 'desetinná čísla', NULL, 16, NULL, '2026-08-06 07:47:50.65953+00', NULL, false, false, true),
-	(18, 'Denní časy', NULL, 17, NULL, '2026-08-06 09:31:06.34134+00', NULL, false, false, true),
-	(19, 'Datumy', NULL, 18, NULL, '2026-08-06 09:31:23.30061+00', NULL, false, false, true),
-	(20, 'Předložky času - in', NULL, 19, NULL, '2026-08-06 09:40:38.795904+00', NULL, false, false, true),
-	(21, 'Předložky času - on', NULL, 20, NULL, '2026-08-06 09:40:44.557895+00', NULL, false, false, true),
-	(22, 'Předložky času - at', NULL, 21, NULL, '2026-08-06 09:40:50.029541+00', NULL, false, false, true),
-	(23, 'Předložka místa - in', NULL, 22, NULL, '2026-08-06 10:35:29.721666+00', NULL, false, false, true),
-	(24, 'Předložka místa - on', NULL, 23, NULL, '2026-08-06 10:35:46.241107+00', NULL, false, false, true),
-	(25, 'Předložka místa - at', NULL, 24, NULL, '2026-08-06 10:36:05.713975+00', NULL, false, false, true);
+INSERT INTO "public"."blocks" ("id", "name", "note", "grammar_chunk_id", "sort_order", "updated_at", "deleted_at", "show_in_topics", "is_removed_from_practice") VALUES
+	(1, 'dny v týdnu', NULL, NULL, 1, '2026-08-02 12:14:05.115542+00', NULL, true, false),
+	(2, 'čísla 1  až 12', NULL, NULL, 2, '2026-08-02 12:14:31.093064+00', NULL, true, false),
+	(3, 'osobní zájmena', NULL, NULL, 3, '2026-08-02 12:43:15.726633+00', NULL, true, false),
+	(4, 'být - základní tvary', NULL, 1, NULL, '2026-08-02 12:46:58.087402+00', NULL, false, false),
+	(5, 'být - zkrácené tvary', NULL, 2, NULL, '2026-08-02 12:48:38.833899+00', NULL, false, false),
+	(6, 'měsíce v roce', NULL, NULL, 4, '2026-08-02 12:49:10.566201+00', NULL, true, false),
+	(7, 'být - zápor', NULL, 3, NULL, '2026-08-02 12:50:14.202037+00', NULL, false, false),
+	(8, 'být - zkrácený zápor', NULL, 4, NULL, '2026-08-02 12:50:38.243399+00', NULL, false, false),
+	(9, 'množné číslo', NULL, 8, NULL, '2026-08-06 07:32:20.251623+00', NULL, false, false),
+	(10, 'přivlastňování', NULL, 9, NULL, '2026-08-06 07:35:32.354282+00', NULL, false, false),
+	(11, 'členy', NULL, 10, NULL, '2026-08-06 07:38:35.37714+00', NULL, false, false),
+	(12, 'čísla 13 až 19', NULL, 11, NULL, '2026-08-06 07:40:44.534653+00', NULL, false, false),
+	(13, 'desítky', NULL, 12, NULL, '2026-08-06 07:41:43.396603+00', NULL, false, false),
+	(14, 'složená čísla', NULL, 13, NULL, '2026-08-06 07:42:29.369682+00', NULL, false, false),
+	(15, 'řadová čísla', NULL, 14, NULL, '2026-08-06 07:45:42.097186+00', NULL, false, false),
+	(16, 'zlomky', NULL, 15, NULL, '2026-08-06 07:47:12.776085+00', NULL, false, false),
+	(17, 'desetinná čísla', NULL, 16, NULL, '2026-08-06 07:47:50.65953+00', NULL, false, false),
+	(18, 'Denní časy', NULL, 17, NULL, '2026-08-06 09:31:06.34134+00', NULL, false, false),
+	(19, 'Datumy', NULL, 18, NULL, '2026-08-06 09:31:23.30061+00', NULL, false, false),
+	(20, 'Předložky času - in', NULL, 19, NULL, '2026-08-06 09:40:38.795904+00', NULL, false, false),
+	(21, 'Předložky času - on', NULL, 20, NULL, '2026-08-06 09:40:44.557895+00', NULL, false, false),
+	(22, 'Předložky času - at', NULL, 21, NULL, '2026-08-06 09:40:50.029541+00', NULL, false, false),
+	(23, 'Předložka místa - in', NULL, 22, NULL, '2026-08-06 10:35:29.721666+00', NULL, false, false),
+	(24, 'Předložka místa - on', NULL, 23, NULL, '2026-08-06 10:35:46.241107+00', NULL, false, false),
+	(25, 'Předložka místa - at', NULL, 24, NULL, '2026-08-06 10:36:05.713975+00', NULL, false, false);
 
 
 --
@@ -1052,7 +1052,7 @@ INSERT INTO "public"."user_items" ("user_id", "item_id", "started_at", "updated_
 -- Data for Name: user_scores; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "public"."user_scores" ("user_id", "date", "item_count", "updated_at", "deleted_at") VALUES
+INSERT INTO "public"."user_scores" ("user_id", "date", "star_count", "updated_at", "deleted_at") VALUES
 	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-07-17', 320, '2026-07-17 12:11:12.382196+00', NULL),
 	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-07-18', 427, '2026-07-19 03:35:59.63127+00', NULL),
 	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-07-19', 1241, '2026-07-20 04:02:33.286872+00', NULL),

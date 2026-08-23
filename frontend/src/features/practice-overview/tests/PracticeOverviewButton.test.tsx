@@ -4,7 +4,6 @@ import { describe, expect, it, vi } from 'vitest';
 vi.mock('@/config/config', () => ({
   default: {
     practice: {
-      starChunk: 50,
       starsPerRow: 10,
     },
   },
@@ -49,7 +48,7 @@ describe('PracticeOverviewButton', () => {
     expect(button.getAttribute('title')).toBe('Open practice overview');
     expect(button.className).toContain('home-star-button');
     expect(button.className).not.toContain('hover:ring');
-    expect(screen.getByTestId('star-progress').textContent).toBe('3:50:10');
+    expect(screen.getByTestId('star-progress').textContent).toBe('3:1:10');
     expect(screen.getByTestId('help-text').textContent).toBe('Stars today');
   });
 

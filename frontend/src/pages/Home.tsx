@@ -41,7 +41,7 @@ export default function Home(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const userFullName = useAuthStore((state) => state.userFullName);
   const isAnonymousUser = useAuthStore((state) => state.isAnonymousUser);
-  const dailyCount = useUserStore((state) => state.dailyCount);
+  const dailyStarCount = useUserStore((state) => state.dailyStarCount);
   const isSyncError = useSyncStore((state) => state.isSyncError);
 
   return (
@@ -69,7 +69,7 @@ export default function Home(): JSX.Element {
             </div>
           )}
           <PracticeOverviewButton
-            count={dailyCount}
+            count={dailyStarCount}
             to={ROUTES.practiceOverview}
             descriptor={practiceOverviewDescriptor(userId)}
             ariaLabel={TEXTS.practiceOverviewOpen}

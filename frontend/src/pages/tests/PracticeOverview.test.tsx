@@ -7,7 +7,7 @@ const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   scores: [] as Array<{
     date: string;
-    item_count: number;
+    star_count: number;
     updated_at: string;
     deleted_at: null;
     user_id: string;
@@ -90,14 +90,14 @@ describe('PracticeOverview', () => {
       {
         user_id: 'u1',
         date: '2026-05-24',
-        item_count: 40,
+        star_count: 1,
         updated_at: '2026-05-24T10:00:00.000Z',
         deleted_at: null,
       },
       {
         user_id: 'u1',
         date: '2026-05-22',
-        item_count: 80,
+        star_count: 2,
         updated_at: '2026-05-22T10:00:00.000Z',
         deleted_at: null,
       },
@@ -108,7 +108,7 @@ describe('PracticeOverview', () => {
     vi.useRealTimers();
   });
 
-  it('fills missing days with item_count 0 between known scores', async () => {
+  it('fills missing days with star_count 0 between known scores', async () => {
     render(<PracticeOverview />);
 
     await act(async () => {

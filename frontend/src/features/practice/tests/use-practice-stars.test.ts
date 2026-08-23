@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('@/config/config', () => ({
   default: {
     practice: {
-      starChunk: 50,
+      reviewStarSize: 20,
       starsPerRow: 10,
       starFlashDuration: 300,
     },
@@ -18,21 +18,22 @@ describe('usePracticeStars', () => {
     vi.clearAllMocks();
   });
 
-  it('returns normal partial progress within the current star chunk', () => {
-    const { result } = renderHook(() => usePracticeStars(5));
+  it('uses completed stars directly and displays local session progress', () => {
+    const { result } = renderHook(() => usePracticeStars(5, 7));
 
-    expect(result.current.starCount).toBe(0);
-    expect(result.current.displayedChunkCount).toBe(5);
+    expect(result.current.starCount).toBe(5);
+    expect(result.current.displayedChunkCount).toBe(7);
+    expect(result.current.starChunk).toBe(20);
   });
 
-  it('wraps to 0 progress immediately when a star chunk is completed', () => {
-    const { result, rerender } = renderHook(({ dailyCount }) => usePracticeStars(dailyCount), {
-      initialProps: { dailyCount: 49 },
+  it('does not derive stars by dividing answer counts', () => {
+    const { result, rerender } = renderHook(({ starCount }) => usePracticeStars(starCount, 0), {
+      initialProps: { starCount: 1 },
     });
 
-    rerender({ dailyCount: 50 });
+    rerender({ starCount: 2 });
 
-    expect(result.current.starCount).toBe(1);
+    expect(result.current.starCount).toBe(2);
     expect(result.current.displayedChunkCount).toBe(0);
   });
 });

@@ -6,7 +6,6 @@ import { TEXTS } from '@/locales/cs';
 import type { UserScoreType } from '@/types/generic.types';
 import { STAR_SIZE, StarRow } from '@/components/UI/StarProgress';
 import config from '@/config/config';
-import { getCompletedStarCount } from '@/utils/star-progress.utils';
 import { useCallback, useEffect, useMemo, useState, type JSX } from 'react';
 import { DataState } from '@/components/UI/DataState';
 import { useToastStore } from '@/features/toast/use-toast-store';
@@ -44,7 +43,7 @@ function formatShortDate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-type PracticeDayScore = Readonly<Pick<UserScoreType, 'date' | 'item_count'>>;
+type PracticeDayScore = Readonly<Pick<UserScoreType, 'date' | 'star_count'>>;
 
 function getScoresWithMissingDays(scores: UserScoreType[]): PracticeDayScore[] {
   if (scores.length === 0) {
@@ -52,7 +51,7 @@ function getScoresWithMissingDays(scores: UserScoreType[]): PracticeDayScore[] {
   }
 
   const sortedDesc = [...scores].sort((left, right) => right.date.localeCompare(left.date));
-  const scoreByDate = new Map(sortedDesc.map((item) => [item.date, item.item_count]));
+  const scoreByDate = new Map(sortedDesc.map((item) => [item.date, item.star_count]));
   const newestDate = parseShortDate(sortedDesc[0].date);
   const oldestDate = parseShortDate(sortedDesc.at(-1)?.date ?? '');
   const today = new Date();
@@ -63,7 +62,7 @@ function getScoresWithMissingDays(scores: UserScoreType[]): PracticeDayScore[] {
     const date = formatShortDate(cursor);
     items.push({
       date,
-      item_count: scoreByDate.get(date) ?? 0,
+      star_count: scoreByDate.get(date) ?? 0,
     });
   }
 
@@ -71,8 +70,6 @@ function getScoresWithMissingDays(scores: UserScoreType[]): PracticeDayScore[] {
 }
 
 function PracticeOverviewRow({ score }: Readonly<{ score: PracticeDayScore }>): JSX.Element {
-  const starCount = getCompletedStarCount(score.item_count, config.practice.starChunk);
-
   return (
     <div
       className={`h-button flex items-center justify-between gap-4 border-white px-4 dark:border-slate-700 ${
@@ -85,7 +82,11 @@ function PracticeOverviewRow({ score }: Readonly<{ score: PracticeDayScore }>): 
         {formatPracticeDate(score.date)}
       </span>
       <div className="mr-4 flex items-center gap-2">
-        <StarRow starCount={starCount} starsPerRow={config.practice.starsPerRow} size={STAR_SIZE} />
+        <StarRow
+          starCount={score.star_count}
+          starsPerRow={config.practice.starsPerRow}
+          size={STAR_SIZE}
+        />
       </div>
     </div>
   );

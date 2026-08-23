@@ -1,8 +1,4 @@
 import config from '@/config/config';
-import {
-  getCompletedStarCount,
-  getCurrentStarProgressCount,
-} from '@/utils/star-progress.utils';
 
 type UsePracticeStarsResult = Readonly<{
   starChunk: number;
@@ -11,12 +7,15 @@ type UsePracticeStarsResult = Readonly<{
   displayedChunkCount: number;
 }>;
 
-export function usePracticeStars(practiceCountToday: number): UsePracticeStarsResult {
-  const starChunk = config.practice.starChunk;
+export function usePracticeStars(
+  dailyStarCount: number,
+  sessionProgress: number = 0,
+): UsePracticeStarsResult {
+  const starChunk = config.practice.reviewStarSize;
   const starsPerRow = config.practice.starsPerRow;
 
-  const starCount = getCompletedStarCount(practiceCountToday, starChunk);
-  const displayedChunkCount = getCurrentStarProgressCount(practiceCountToday, starChunk);
+  const starCount = dailyStarCount;
+  const displayedChunkCount = sessionProgress;
 
   return {
     starChunk,

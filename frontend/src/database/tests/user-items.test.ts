@@ -47,13 +47,13 @@ vi.mock('@/config/config', () => ({
       deckSize: 10,
     },
     progress: {
-      afterInitialTrainingProgress: 2,
+      afterNewBlockProgress: 2,
       simulationItemProgress: 1,
       simulationItemCount: 4,
       simulationPronunciationItemCount: 2,
     },
     practice: {
-      readyPracticeBadgeCap: 99,
+      readyPracticeCountCap: 20,
       readyPracticeScheduleGroupWindowMs: 1000,
     },
   },
@@ -718,13 +718,13 @@ describe('UserItem', () => {
       },
     ]);
 
-    const deck = await UserItem.getPracticeDeck('u1', 2);
+    const deck = await UserItem.getReviewDeck('u1', 2);
 
     expect(deck.map((item) => item.item_id)).toEqual([2, 3]);
     expect(mocks.indexedToArray).toHaveBeenCalledTimes(1);
   });
 
-  it('replaces a partial EN to CZ deck with due and new CZ to EN items', async () => {
+  it('replaces a partial EN to CZ deck with due-only CZ to EN items', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
     mocks.indexedToArray
@@ -753,24 +753,13 @@ describe('UserItem', () => {
         },
       ]);
 
-    const deck = await UserItem.getPracticeDeck('u1', 4);
+    const deck = await UserItem.getReviewDeck('u1', 4);
 
-    expect(deck.map((item) => item.item_id)).toEqual([2, 3]);
-    expect(mocks.indexedLimit.mock.calls.map(([limit]) => limit)).toEqual([4, 4, 3]);
-    expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
-      3,
-      ['u1', 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
-      ['u1', 1, '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
-      true,
-      true,
-    );
-    const newVocabularyFilter = mocks.indexedFilter.mock.calls[2][0] as (item: any) => boolean;
-    expect(newVocabularyFilter({
-      started_at: '1970-01-01T00:00:00.000Z',
-    })).toBe(true);
+    expect(deck.map((item) => item.item_id)).toEqual([2]);
+    expect(mocks.indexedLimit.mock.calls.map(([limit]) => limit)).toEqual([4, 4]);
   });
 
-  it('returns a new-only CZ to EN deck instead of a partial EN to CZ deck', async () => {
+  it('never adds a new-only CZ to EN item to review', async () => {
     mocks.indexedToArray
       .mockResolvedValueOnce([
         {
@@ -790,13 +779,13 @@ describe('UserItem', () => {
         },
       ]);
 
-    const deck = await UserItem.getPracticeDeck('u1', 3);
+    const deck = await UserItem.getReviewDeck('u1', 3);
 
-    expect(deck.map((item) => item.item_id)).toEqual([3]);
-    expect(mocks.indexedLimit.mock.calls.map(([limit]) => limit)).toEqual([3, 3, 3]);
+    expect(deck.map((item) => item.item_id)).toEqual([1]);
+    expect(mocks.indexedLimit.mock.calls.map(([limit]) => limit)).toEqual([3, 3]);
   });
 
-  it('shortens the alternative deck at the first item from an unstarted training block', async () => {
+  it('does not inspect blocks while selecting a due-only review deck', async () => {
     mocks.indexedToArray
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([{ item_id: 1, progress: 2 }])
@@ -828,14 +817,10 @@ describe('UserItem', () => {
         started_at: '1970-01-01T00:00:00.000Z',
       });
 
-    const deck = await UserItem.getPracticeDeck('u1', 5);
+    const deck = await UserItem.getReviewDeck('u1', 5);
 
-    expect(deck.map((item) => item.item_id)).toEqual([1, 2, 3]);
-    expect(deck.at(-1)).toMatchObject({
-      item_id: 3,
-      is_initial_training_trigger: true,
-    });
-    expect(mocks.userBlockGet.mock.calls).toEqual([[['u1', 20]], [['u1', 30]]]);
+    expect(deck.map((item) => item.item_id)).toEqual([3]);
+    expect(mocks.userBlockGet).not.toHaveBeenCalled();
   });
 
   it('restores a partial EN to CZ deck when CZ to EN and new alternatives are empty', async () => {
@@ -851,7 +836,7 @@ describe('UserItem', () => {
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
 
-    const deck = await UserItem.getPracticeDeck('u1', 3);
+    const deck = await UserItem.getReviewDeck('u1', 3);
 
     expect(deck.map((item) => item.item_id)).toEqual([1]);
   });
@@ -868,10 +853,10 @@ describe('UserItem', () => {
       .mockResolvedValueOnce([{ item_id: 1, block_id: 10, progress: 1 }])
       .mockResolvedValueOnce([{ item_id: 2, block_id: 10, progress: 2 }]);
 
-    const deck = await UserItem.getPracticeDeck('u1', 3);
+    const deck = await UserItem.getReviewDeck('u1', 3);
 
-    expect(deck.map((item) => item.item_id)).toEqual([2]);
-    expect(mocks.indexedToArray).toHaveBeenCalledTimes(3);
+    expect(deck.map((item) => item.item_id)).toEqual([2, 3, 4]);
+    expect(mocks.indexedToArray).toHaveBeenCalledTimes(1);
   });
 
   it('restores a partial EN to CZ grammar deck when no CZ to EN items exist', async () => {
@@ -886,17 +871,17 @@ describe('UserItem', () => {
       .mockResolvedValueOnce([{ item_id: 1, block_id: 10, progress: 1 }])
       .mockResolvedValueOnce([]);
 
-    const deck = await UserItem.getPracticeDeck('u1', 3);
+    const deck = await UserItem.getReviewDeck('u1', 3);
 
     expect(deck.map((item) => item.item_id)).toEqual([1]);
   });
 
   it('returns an empty deck without querying when deckSize is not positive', async () => {
-    await expect(UserItem.getPracticeDeck('u1', 0)).resolves.toEqual([]);
+    await expect(UserItem.getReviewDeck('u1', 0)).resolves.toEqual([]);
     expect(mocks.indexedToArray).not.toHaveBeenCalled();
   });
 
-  it('getPracticeDeck excludes unscheduled items even from mastered grammar blocks', async () => {
+  it('getReviewDeck excludes unscheduled items even from mastered grammar blocks', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
     mocks.masteredBlockToArray.mockResolvedValueOnce([
@@ -909,9 +894,9 @@ describe('UserItem', () => {
     ]);
     mocks.indexedToArray.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
 
-    const deck = await UserItem.getPracticeDeck('u1', 10);
+    const deck = await UserItem.getReviewDeck('u1', 10);
 
-    expect(deck).toEqual([]);
+    expect(deck.map((item) => item.item_id)).toEqual([1]);
     expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
       1,
       ['u1', 1, expect.anything(), '1970-01-01T00:00:00.000Z', expect.anything()],
@@ -964,7 +949,7 @@ describe('UserItem', () => {
     expect(result.map((item: any) => item.item_id)).toEqual([1, 2]);
   });
 
-  it('saveInitialTrainingBlockCompletion does not downgrade skipped item progress', async () => {
+  it('saveNewBlockCompletion does not downgrade skipped item progress', async () => {
     const dateTime = '2026-03-06T12:00:00.000Z';
     mocks.blockEqualsToArray.mockResolvedValue([
       {
@@ -989,7 +974,7 @@ describe('UserItem', () => {
       },
     ]);
 
-    await UserItem.saveInitialTrainingBlockCompletion('u1', 3, dateTime);
+    await UserItem.saveNewBlockCompletion('u1', 3, dateTime);
 
     expect(mocks.bulkPut).toHaveBeenCalledWith([
       expect.objectContaining({
@@ -1015,7 +1000,7 @@ describe('UserItem', () => {
     expect(mocks.getNextAt).toHaveBeenCalledWith(2, 'enToCz');
   });
 
-  it('getReadyPracticeState counts ready started and not-started vocabulary', async () => {
+  it('getReadyReviewState ignores not-started vocabulary', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
     mocks.userEqualsToArray.mockResolvedValueOnce([
@@ -1035,29 +1020,29 @@ describe('UserItem', () => {
       },
     ]);
 
-    await expect(UserItem.getReadyPracticeState('u1')).resolves.toEqual({
-      readyCount: 3,
+    await expect(UserItem.getReadyReviewState('u1')).resolves.toEqual({
+      readyCount: 2,
       schedule: [],
     });
 
   });
 
-  it('getReadyPracticeState caps availability at the badge cap', async () => {
+  it('getReadyReviewState caps availability at the badge cap', async () => {
     mocks.userEqualsToArray.mockResolvedValueOnce(Array.from({ length: 100 }, (_, index) => ({
       item_id: index + 1,
       is_practice_item: 1,
       started_at: '1970-01-01T00:00:00.000Z',
     })));
 
-    await expect(UserItem.getReadyPracticeState('u1')).resolves.toEqual({
-      readyCount: 99,
+    await expect(UserItem.getReadyReviewState('u1')).resolves.toEqual({
+      readyCount: 0,
       schedule: [],
     });
 
     expect(mocks.userEqualsToArray).toHaveBeenCalledTimes(1);
   });
 
-  it('getReadyPracticeState keeps a future schedule when some practice is already ready', async () => {
+  it('getReadyReviewState keeps a future schedule when some practice is already ready', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
     mocks.userEqualsToArray.mockResolvedValueOnce([
@@ -1082,13 +1067,13 @@ describe('UserItem', () => {
       },
     ]);
 
-    await expect(UserItem.getReadyPracticeState('u1')).resolves.toEqual({
-      readyCount: 2,
+    await expect(UserItem.getReadyReviewState('u1')).resolves.toEqual({
+      readyCount: 0,
       schedule: [{ date: '2026-06-24T12:00:10.800Z', count: 2 }],
     });
   });
 
-  it('getReadyPracticeState caps ready and scheduled practice together', async () => {
+  it('getReadyReviewState caps ready and scheduled practice together', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
     const readyItems = Array.from({ length: 98 }, (_, index) => ({
@@ -1109,13 +1094,16 @@ describe('UserItem', () => {
       },
     ]);
 
-    await expect(UserItem.getReadyPracticeState('u1')).resolves.toEqual({
-      readyCount: 98,
-      schedule: [{ date: '2026-06-24T12:00:10.000Z', count: 1 }],
+    await expect(UserItem.getReadyReviewState('u1')).resolves.toEqual({
+      readyCount: 0,
+      schedule: [
+        { date: '2026-06-24T12:00:10.000Z', count: 1 },
+        { date: '2026-06-24T12:00:20.000Z', count: 1 },
+      ],
     });
   });
 
-  it('getReadyPracticeState schedules future vocabulary when none is ready', async () => {
+  it('getReadyReviewState schedules future vocabulary when none is ready', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
     mocks.userEqualsToArray.mockResolvedValueOnce([
@@ -1130,14 +1118,14 @@ describe('UserItem', () => {
       },
     ]);
 
-    await expect(UserItem.getReadyPracticeState('u1')).resolves.toEqual({
+    await expect(UserItem.getReadyReviewState('u1')).resolves.toEqual({
       readyCount: 0,
       schedule: [{ date: '2026-06-24T12:00:10.800Z', count: 2 }],
     });
 
   });
 
-  it('getReadyPracticeState ignores mastered vocabulary candidates', async () => {
+  it('getReadyReviewState ignores mastered vocabulary candidates', async () => {
     mocks.userEqualsToArray.mockResolvedValueOnce([
       {
         item_id: 1,
@@ -1150,7 +1138,7 @@ describe('UserItem', () => {
       },
     ]);
 
-    await expect(UserItem.getReadyPracticeState('u1')).resolves.toEqual({
+    await expect(UserItem.getReadyReviewState('u1')).resolves.toEqual({
       readyCount: 0,
       schedule: [],
     });
@@ -1253,7 +1241,7 @@ describe('UserItem', () => {
           sort_order: 2,
           curriculum_sort_path: [1, 2, 2],
           note_id: null,
-          block_id: null,
+          block_id: 10,
           grammar_chunk_id: null,
           progress_cz_to_en: 0,
           progress_en_to_cz: 0,
@@ -1313,7 +1301,7 @@ describe('UserItem', () => {
         is_practice_item: 0,
         has_pronunciation_practice: 1,
         curriculum_sort_path: [1, 2, 2],
-        block_id: 0,
+        block_id: 10,
         grammar_chunk_id: 0,
         started_at: '1970-01-01T00:00:00.000Z',
         next_at_cz_to_en: '1970-01-01T00:00:00.000Z',
