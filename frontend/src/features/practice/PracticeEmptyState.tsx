@@ -1,4 +1,4 @@
-import InfoNotification from '@/components/UI/InfoNotification';
+import Notification from '@/components/UI/Notification';
 import ReturnHomeButton from '@/components/UI/buttons/ReturnHomeButton';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
@@ -12,9 +12,9 @@ export default function PracticeEmptyState({
 }: PracticeEmptyStateProps): JSX.Element {
   return (
     <div className="card-width w-full pt-24">
-      <InfoNotification>{TEXTS.nothingToPractice}</InfoNotification>
+      <Notification>{TEXTS.nothingToPractice}</Notification>
       {showTryAgainLater && (
-        <InfoNotification className="mb-4">{TEXTS.tryAgainLater}</InfoNotification>
+        <Notification className="mb-4">{TEXTS.tryAgainLater}</Notification>
       )}
       <ReturnHomeButton />
     </div>

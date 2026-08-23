@@ -26,7 +26,7 @@ function HomeActionLinks(): JSX.Element {
     <div className="flex items-center justify-center gap-2 px-4">
       <InstallPWAButton className="pr-4" />
       <Link to="/guide">
-        <Notification className="color-link">{TEXTS.guide}</Notification>
+        <Notification className="color-info">{TEXTS.guide}</Notification>
       </Link>
     </div>
   );
@@ -38,7 +38,7 @@ function HomeButtonGroup({
 }: Readonly<{ title: string; children: ReactNode }>): JSX.Element {
   return (
     <fieldset className="flex min-w-0 flex-col gap-1">
-      <legend className="font-headings w-full pb-1 text-center">{title}</legend>
+      <legend className="font-headings w-full pb-1 text-center text-lg">{title}</legend>
       {children}
     </fieldset>
   );

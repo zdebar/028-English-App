@@ -92,7 +92,7 @@ vi.mock('@/features/help/HelpButton', () => ({
 }));
 
 vi.mock('@/components/UI/Notification', () => ({
-  default: ({ children }: any) => <div>{children}</div>,
+  default: ({ children, className }: any) => <div className={className}>{children}</div>,
 }));
 
 vi.mock('@/features/pwa/InstallPwaButton', () => ({
@@ -202,7 +202,14 @@ describe('Home', () => {
     render(<Home />);
 
     expect(screen.getByRole('button', { name: 'Install' })).toBeTruthy();
-    expect(screen.getByText('Guide')).toBeTruthy();
+    expect(screen.getByText('Guide').className).toContain('color-info');
+
+    for (const group of screen.getAllByRole('group')) {
+      const legend = group.querySelector('legend');
+      expect(legend?.className).toContain('font-headings');
+      expect(legend?.className).toContain('text-lg');
+      expect(legend?.className).not.toContain('color-info');
+    }
   });
 
   it('renders auth UI when user is signed out', () => {

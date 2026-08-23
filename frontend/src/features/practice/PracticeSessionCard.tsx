@@ -86,7 +86,7 @@ function AudioStatusMessage({
     return <DelayedNotification message={TEXTS.loadingAudio} />;
   }
   if (audioError) {
-    return <p className="font-headings color-info">{TEXTS.noAudio}</p>;
+    return <p className="font-headings text-lg">{TEXTS.noAudio}</p>;
   }
   return null;
 }
@@ -97,7 +97,7 @@ function TopBarPrimaryContent({
   shortDirectionText,
 }: TopBarPrimaryContentProps) {
   if (isBlockTrainingPractice) {
-    return <p className="color-info font-headings">{TEXTS.blockTrainingFinishAll}</p>;
+    return <p className="font-headings text-lg">{TEXTS.blockTrainingFinishAll}</p>;
   }
 
   if (isPronunciationPractice) return null;

@@ -7,7 +7,7 @@ export default function Notification(props: Readonly<HTMLAttributes<HTMLDivEleme
   const { children, className, ...rest } = props;
 
   return (
-    <div {...rest} className={`font-headings text-center text-xl ${className ?? ''}`.trim()}>
+    <div {...rest} className={`font-headings text-center text-lg ${className ?? ''}`.trim()}>
       {children}
     </div>
   );

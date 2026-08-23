@@ -39,7 +39,7 @@ export function InstallPWAButton({ className }: InstallPWAButtonProps) {
     <Notification
       title={TEXTS.installButtonTooltip}
       onClick={handleInstall}
-      className={`color-link cursor-pointer ${className}`}
+      className={`color-info cursor-pointer ${className ?? ''}`.trim()}
     >
       {TEXTS.installButton}
     </Notification>

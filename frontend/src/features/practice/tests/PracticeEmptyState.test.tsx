@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/components/UI/InfoNotification', () => ({
-  default: ({ children }: any) => <div>{children}</div>,
+vi.mock('@/components/UI/Notification', () => ({
+  default: ({ children, className }: any) => <div className={className}>{children}</div>,
 }));
 
 vi.mock('@/components/UI/buttons/ReturnHomeButton', () => ({

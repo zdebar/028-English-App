@@ -25,7 +25,11 @@ describe('DataState', () => {
       </DataState>,
     );
 
-    expect(screen.getByText('Nic tu neni')).toBeTruthy();
+    const notification = screen.getByText('Nic tu neni');
+
+    expect(notification.className).toContain('font-headings');
+    expect(notification.className).toContain('text-lg');
+    expect(notification.className).not.toContain('color-info');
   });
 
   it('renders loading circle after the configured delay when loading and no data yet', () => {

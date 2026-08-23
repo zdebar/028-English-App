@@ -7,7 +7,11 @@ describe('Notification', () => {
   it('renders passed children', () => {
     render(<Notification>Hello</Notification>);
 
-    expect(screen.getByText('Hello')).toBeTruthy();
+    const notification = screen.getByText('Hello');
+
+    expect(notification.className).toContain('font-headings');
+    expect(notification.className).toContain('text-lg');
+    expect(notification.className).not.toContain('color-info');
   });
 
   it('merges base and custom classes', () => {
