@@ -47,6 +47,8 @@ describe('PracticeOverviewButton', () => {
     const button = screen.getByRole('button', { name: 'Open practice overview' });
     expect(button).toBeTruthy();
     expect(button.getAttribute('title')).toBe('Open practice overview');
+    expect(button.className).toContain('home-star-button');
+    expect(button.className).not.toContain('hover:ring');
     expect(screen.getByTestId('star-progress').textContent).toBe('3:50:10');
     expect(screen.getByTestId('help-text').textContent).toBe('Stars today');
   });
