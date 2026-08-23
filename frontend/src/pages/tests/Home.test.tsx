@@ -78,6 +78,8 @@ vi.mock('@/locales/cs', () => ({
     syncWarning: 'Data may be stale.',
     signupHint: 'Signup hint',
     practiceButton: 'Practice',
+    studySection: 'Studium',
+    pronunciationSection: 'Výslovnost',
   },
 }));
 
@@ -174,6 +176,14 @@ describe('Home', () => {
     );
     expect(screen.getByTestId('pronunciation-groups-button').textContent).toBe(
       'pronunciation-groups',
+    );
+    expect(screen.getByRole('group', { name: 'Studium' })).toBeTruthy();
+    const pronunciationGroup = screen.getByRole('group', { name: 'Výslovnost' });
+    expect(pronunciationGroup.contains(screen.getByTestId('pronunciation-practice-button'))).toBe(
+      true,
+    );
+    expect(pronunciationGroup.contains(screen.getByTestId('pronunciation-groups-button'))).toBe(
+      true,
     );
   });
 

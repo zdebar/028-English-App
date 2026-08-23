@@ -49,6 +49,14 @@ describe('Home practice buttons', () => {
     expect(button('New').disabled).toBe(false);
   });
 
+  it('uses the shared primary disabled style when no new block exists', () => {
+    usePracticeAvailabilityStore.setState({ nextBlockId: null });
+    render(<PracticeButtons userId="u1" />);
+    const newButton = button('New');
+    expect(newButton.disabled).toBe(true);
+    expect(newButton.className).toContain('color-button');
+  });
+
   it('keeps only an active review session available', () => {
     usePracticeAvailabilityStore.setState({
       reviewCount: 0,

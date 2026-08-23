@@ -54,7 +54,7 @@ export const OVERVIEW_TEXTS = {
   vocabularyOverview: 'Přehled slovíček',
   vocabularyOverviewTooltip: 'Přehled započatých slovíček',
   pronunciationGroups: 'Skupiny výslovnosti',
-  pronunciationGroupsButton: 'Výslovnost – skupiny',
+  pronunciationGroupsButton: 'Skupiny',
   pronunciationGroupsTooltip: 'Výběr skupin podobně znějících položek k procvičování',
   pronunciationStartedHelp: 'odemčeno/celkem položek',
   noPronunciationGroups: 'Žádné dostupné skupiny výslovnosti.',

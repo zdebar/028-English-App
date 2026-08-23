@@ -12,6 +12,8 @@ export const HOME_TEXTS = {
   starsToday: 'denní cíl',
   reviewButton: 'Opakování',
   newButton: 'Nové',
+  studySection: 'Studium',
+  pronunciationSection: 'Výslovnost',
 
   // User
   practiceOverviewTitle: 'Přehled procvičování',

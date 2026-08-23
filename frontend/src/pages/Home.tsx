@@ -75,10 +75,22 @@ export default function Home(): JSX.Element {
             ariaLabel={TEXTS.practiceOverviewOpen}
             helpText={TEXTS.starsToday}
           />
-          <div className="flex w-full flex-col gap-1">
-            <PracticeButton userId={userId} />
-            <PronunciationPracticeButton userId={userId} />
-            <PronunciationGroupsButton />
+          <div className="flex w-full flex-col gap-3">
+            <fieldset className="flex min-w-0 flex-col gap-1">
+              <legend className="font-headings w-full pb-1 text-center">
+                {TEXTS.studySection}
+              </legend>
+              <PracticeButton userId={userId} />
+            </fieldset>
+            <fieldset className="flex min-w-0 flex-col gap-1">
+              <legend className="font-headings w-full pb-1 text-center">
+                {TEXTS.pronunciationSection}
+              </legend>
+              <div className="flex w-full gap-1">
+                <PronunciationPracticeButton userId={userId} />
+                <PronunciationGroupsButton />
+              </div>
+            </fieldset>
           </div>
           <div className="relative">
             <p

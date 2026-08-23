@@ -5,6 +5,7 @@ import type { JSX } from 'react';
 import { DataNavigationButton } from '@/routing/data-navigation';
 import { blockTrainingDescriptor, practiceDeckDescriptor } from '@/routing/route-data';
 import { usePracticeAvailabilityStore } from './use-practice-availability-store';
+import StyledButton from '@/components/UI/buttons/StyledButton';
 
 type PracticeButtonsProps = Readonly<{ userId: string }>;
 
@@ -36,9 +37,9 @@ export default function PracticeButtons({ userId }: PracticeButtonsProps): JSX.E
         {TEXTS.reviewButton}
       </DataNavigationButton>
       {newBlockId == null ? (
-        <button className="h-button max-h-button w-full px-4" disabled title={newTitle}>
+        <StyledButton className="h-button max-h-button w-full px-4" disabled title={newTitle}>
           {TEXTS.newButton}
-        </button>
+        </StyledButton>
       ) : (
         <DataNavigationButton
           to={`${ROUTES.practiceBlockTraining}?blockId=${newBlockId}`}

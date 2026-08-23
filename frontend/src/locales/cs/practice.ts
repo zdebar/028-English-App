@@ -26,7 +26,7 @@ export const PRACTICE_TEXTS = {
   blockTrainingProgressHelp: 'Kolo · Položky',
   blockTrainingComplete: 'dokončeno úvodní cvičení pro',
   next: 'další',
-  pronunciationPracticeButton: 'Výslovnost – položky',
+  pronunciationPracticeButton: 'Procvičování',
   pronunciationPracticeTooltip: 'Procvičit výslovnost vybraných položek',
   noPronunciationPracticeSelection: 'Žádné položky nejsou vybrány k procvičování výslovnosti.',
   pronunciationToggleAria: 'Zařazení do procvičování výslovnosti',
