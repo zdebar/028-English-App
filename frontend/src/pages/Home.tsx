@@ -2,7 +2,7 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import Dashboard from '@/features/dashboard/Dashboard';
 import { useUserStore } from '@/features/user-stats/use-user-store';
 import { TEXTS } from '@/locales/cs';
-import type { JSX } from 'react';
+import type { JSX, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import Notification from '@/components/UI/Notification';
 import '@/styles/home.css';
@@ -29,6 +29,18 @@ function HomeActionLinks(): JSX.Element {
         <Notification className="color-link">{TEXTS.guide}</Notification>
       </Link>
     </div>
+  );
+}
+
+function HomeButtonGroup({
+  title,
+  children,
+}: Readonly<{ title: string; children: ReactNode }>): JSX.Element {
+  return (
+    <fieldset className="flex min-w-0 flex-col gap-1">
+      <legend className="font-headings w-full pb-1 text-center">{title}</legend>
+      {children}
+    </fieldset>
   );
 }
 
@@ -76,21 +88,15 @@ export default function Home(): JSX.Element {
             helpText={TEXTS.starsToday}
           />
           <div className="flex w-full flex-col gap-3">
-            <fieldset className="flex min-w-0 flex-col gap-1">
-              <legend className="font-headings w-full pb-1 text-center">
-                {TEXTS.studySection}
-              </legend>
+            <HomeButtonGroup title={TEXTS.studySection}>
               <PracticeButton userId={userId} />
-            </fieldset>
-            <fieldset className="flex min-w-0 flex-col gap-1">
-              <legend className="font-headings w-full pb-1 text-center">
-                {TEXTS.pronunciationSection}
-              </legend>
+            </HomeButtonGroup>
+            <HomeButtonGroup title={TEXTS.pronunciationSection}>
               <div className="flex w-full gap-1">
                 <PronunciationPracticeButton userId={userId} />
                 <PronunciationGroupsButton />
               </div>
-            </fieldset>
+            </HomeButtonGroup>
           </div>
           <div className="relative">
             <p
