@@ -9,13 +9,14 @@ import { usePracticeCardState } from './use-practice-card-state';
 import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff';
 import { loadReviewDeck } from '@/database/utils/practice-content.utils';
 import config from '@/config/config';
+import { getStarTierForCount, type StarTier } from '@/utils/star-progress.utils';
 
 /** Manages a persisted twenty-answer review session. */
 export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDeckEntry[]) {
-  const [array, setArray] = useState<PracticeDeckEntry[]>([]);
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [celebratingStar, setCelebratingStar] = useState(false);
+  const [celebrationStarTier, setCelebrationStarTier] = useState<StarTier>('bronze');
   const [saveError, setSaveError] = useState<Error | null>(null);
   const [finishedReview, setFinishedReview] = useState(false);
   const [sessionProgress, setSessionProgress] = useState<{
@@ -34,7 +35,7 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
     fetchPracticeDeck,
     { initialData: initialDeck },
   );
-  const activeArray = array.length > 0 ? array : (fetchedArray ?? []);
+  const activeArray = fetchedArray ?? [];
   const currentEntry = activeArray[index] ?? null;
   const currentItem = currentEntry?.item ?? null;
   const isCzToEn = currentItem?.practice_direction !== 'enToCz';
@@ -42,7 +43,6 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
   const resetHint = cardState.resetHint;
 
   useEffect(() => {
-    setArray(fetchedArray ?? []);
     setIndex(0);
     setRevealed(false);
     resetHint();
@@ -60,16 +60,19 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
       const availability = await UserItem.getReadyReviewState(userId);
       if (availability.readyCount >= config.practice.reviewStarSize) {
         await PracticeSession.continueReview(userId);
+        invalidateRouteData(routeDataKey('practice', userId));
+        await reload();
         setSessionProgress((currentProgress) => {
           if (!currentProgress) {
             return { completedCount: 0, targetCount: config.practice.reviewStarSize };
           }
           return { ...currentProgress, completedCount: 0 };
         });
+        setIndex(0);
+        setRevealed(false);
+        resetHint();
         setCelebratingStar(false);
         completionPending.current = false;
-        invalidateRouteData(routeDataKey('practice', userId));
-        reload();
         return;
       }
 
@@ -82,7 +85,7 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
       setCelebratingStar(false);
       completionPending.current = false;
     }
-  }, [reload, userId]);
+  }, [reload, resetHint, userId]);
 
   useEffect(() => {
     if (!userId) {
@@ -135,6 +138,9 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
           targetCount: currentProgress?.targetCount ?? config.practice.reviewStarSize,
         }));
         if (result.earnedStar) {
+          setCelebrationStarTier(
+            getStarTierForCount(result.starCount ?? 1, config.practice.starsPerRow),
+          );
           await finalizeCompletedSession();
           return;
         }
@@ -177,6 +183,7 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
       : '',
     sessionLoading,
     celebratingStar,
+    celebrationStarTier,
     finishedReview,
     isCzToEn,
     revealed,

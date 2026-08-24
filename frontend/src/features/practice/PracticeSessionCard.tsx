@@ -24,6 +24,7 @@ import { usePointerReleaseLock } from './hooks/use-pointer-release-lock';
 import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
 import type { NoteType } from '@/types/generic.types';
 import { useState } from 'react';
+import type { StarTier } from '@/utils/star-progress.utils';
 
 export type PracticeSessionCardProps = Readonly<{
   note: NoteType | null;
@@ -53,6 +54,7 @@ export type PracticeSessionCardProps = Readonly<{
   nextPronunciation?: () => void;
   onPronunciationSelectionChange?: (selected: boolean) => void;
   celebratingStar?: boolean;
+  celebrationStarTier?: StarTier;
 }>;
 
 type PracticeControlsProps = Pick<
@@ -74,6 +76,29 @@ type TopBarPrimaryContentProps = Pick<
   'isBlockTrainingPractice' | 'isPronunciationPractice'
 > &
   Readonly<{ shortDirectionText: string }>;
+
+type VisibleDetail = 'grammar' | 'note';
+
+type PracticeDetailProps = Readonly<{
+  visibleDetail: VisibleDetail;
+  grammar: GrammarChunkWithExamples | null;
+  note: NoteType | null;
+  onClose: () => void;
+}>;
+
+function PracticeDetail({ visibleDetail, grammar, note, onClose }: PracticeDetailProps) {
+  if (visibleDetail === 'grammar') {
+    return (
+      <GrammarDetailCard
+        grammar={grammar ? { ...grammar, kind: 'chunk' } : null}
+        onClose={onClose}
+        showHelpButton={false}
+      />
+    );
+  }
+
+  return <NoteDetailCard note={note} onClose={onClose} />;
+}
 
 function AudioStatusMessage({
   audioError,
@@ -190,9 +215,10 @@ export default function PracticeSessionCard({
   nextPronunciation,
   onPronunciationSelectionChange,
   celebratingStar = false,
+  celebrationStarTier = 'bronze',
 }: PracticeSessionCardProps) {
   const userId = useAuthStore((state) => state.userId);
-  const [visibleDetail, setVisibleDetail] = useState<'grammar' | 'note' | null>(null);
+  const [visibleDetail, setVisibleDetail] = useState<VisibleDetail | null>(null);
 
   const cardText = revealed ? undefined : TEXTS.reveal;
   const cardStyle = revealed ? 'color-audio-disabled' : 'color-button';
@@ -212,17 +238,15 @@ export default function PracticeSessionCard({
   const practiceControlColumns =
     revealed && !isPronunciationPractice ? 'grid-cols-3' : 'grid-cols-1';
 
-  if (visibleDetail === 'grammar') {
+  if (visibleDetail) {
     return (
-      <GrammarDetailCard
-        grammar={grammar ? { ...grammar, kind: 'chunk' } : null}
+      <PracticeDetail
+        visibleDetail={visibleDetail}
+        grammar={grammar}
+        note={note}
         onClose={() => setVisibleDetail(null)}
-        showHelpButton={false}
       />
     );
-  }
-  if (visibleDetail === 'note') {
-    return <NoteDetailCard note={note} onClose={() => setVisibleDetail(null)} />;
   }
 
   return (
@@ -238,9 +262,9 @@ export default function PracticeSessionCard({
             role="status"
             aria-live="polite"
           >
-            <span className="star-celebration flex items-center gap-2 text-2xl font-bold">
-              + <FullStar size={32} />
-              <span className="sr-only">{TEXTS.starEarned}</span>
+            <span className="star-celebration flex -translate-y-2 flex-col items-center gap-2 text-lg leading-none font-bold">
+              <span>{TEXTS.starEarned}</span>
+              <FullStar className={`star-fill-${celebrationStarTier}`} size={32} />
             </span>
           </div>
         )}
@@ -255,7 +279,10 @@ export default function PracticeSessionCard({
           {!revealed && !showDirectionChange && (
             <HelpText className="top-23 left-1/2 -translate-x-1/2">{TEXTS.reveal}</HelpText>
           )}
-          <div id="top-bar" className="relative flex h-8 w-full items-center justify-center text-center">
+          <div
+            id="top-bar"
+            className="relative flex h-8 w-full items-center justify-center text-center"
+          >
             <TopBarPrimaryContent
               isBlockTrainingPractice={isBlockTrainingPractice}
               isPronunciationPractice={isPronunciationPractice}

@@ -51,6 +51,7 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     progressLabel: '2/20',
     sessionLoading: false,
     celebratingStar: false,
+    celebrationStarTier: 'bronze',
     finishedReview: false,
     isCzToEn: true,
     revealed: false,
@@ -114,7 +115,7 @@ vi.mock('@/locales/cs', () => ({
     tooltipNotes: 'Notes',
     progress: 'Progress',
     reviewStarProgress: 'Progress to next star',
-    starEarned: 'Star earned',
+    starEarned: 'Earned',
     currentPracticeStar: 'Current practice star',
     today: 'Today',
     dailyGoal: 'Daily goal',
@@ -263,7 +264,11 @@ vi.mock('@/components/UI/icons/NotRevealedIcon', () => ({
 }));
 
 vi.mock('@/components/UI/StarProgress', () => ({
-  FullStar: () => <span data-testid="earned-star">star</span>,
+  FullStar: ({ className }: { className?: string }) => (
+    <span data-testid="earned-star" className={className}>
+      star
+    </span>
+  ),
 }));
 
 vi.mock('@/features/practice/GrammarCard', () => ({
@@ -391,6 +396,7 @@ describe('PracticeCard', () => {
     mocks.practiceDeck.audioError = false;
     mocks.practiceDeck.audioLoading = false;
     mocks.practiceDeck.celebratingStar = false;
+    mocks.practiceDeck.celebrationStarTier = 'bronze';
   });
 
   afterEach(() => {
@@ -500,12 +506,17 @@ describe('PracticeCard', () => {
 
   it('keeps the one-time earned-star celebration', () => {
     mocks.practiceDeck.celebratingStar = true;
+    mocks.practiceDeck.celebrationStarTier = 'silver';
 
-    render(<PracticeCard />);
+    const { container } = render(<PracticeCard />);
 
     expect(screen.getByRole('status')).toBeTruthy();
-    expect(screen.getByTestId('earned-star')).toBeTruthy();
-    expect(screen.getByText('Star earned')).toBeTruthy();
+    expect(screen.getByTestId('earned-star').className).toContain('star-fill-silver');
+    expect(screen.getByText('Earned')).toBeTruthy();
+    const celebration = container.querySelector('.star-celebration') as HTMLElement;
+    expect(celebration.className).toContain('-translate-y-2');
+    expect(celebration.className).toContain('flex-col');
+    expect(celebration.className).toContain('gap-2');
   });
 
   it('keeps the short direction label in the first top-bar row across card states', () => {

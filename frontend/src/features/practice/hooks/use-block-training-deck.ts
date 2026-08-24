@@ -13,6 +13,7 @@ import { usePracticeCardState } from './use-practice-card-state';
 import type { BlockTrainingData } from '@/routing/route-data';
 import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff';
 import { resolvePracticeEntries, resolvePracticeGrammarContext } from '@/database/utils/practice-content.utils';
+import { getStarTierForCount, type StarTier } from '@/utils/star-progress.utils';
 
 const PHASE_DIRECTIONS: Record<NewPracticePhase, 'czToEn' | 'enToCz'> = {
   0: 'czToEn',
@@ -45,6 +46,7 @@ export function useBlockTrainingDeck(
   const [session, setSession] = useState<PracticeSessionType | null>(null);
   const [isComplete, setIsComplete] = useState(false);
   const [celebratingStar, setCelebratingStar] = useState(false);
+  const [celebrationStarTier, setCelebrationStarTier] = useState<StarTier>('bronze');
   const [hasProgress, setHasProgress] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [loading, setLoading] = useState(userId != null);
@@ -127,9 +129,10 @@ export function useBlockTrainingDeck(
   const finishBlock = useCallback(async () => {
     if (!userId || !block) return;
     const dateTime = new Date(Date.now()).toISOString();
-    await PracticeSession.completeNewBlock(userId, block.block_id, dateTime);
+    const starCount = await PracticeSession.completeNewBlock(userId, block.block_id, dateTime);
     invalidateRouteData(routeDataKey('block-training', userId, block.block_id));
     invalidateRouteData(routeDataKey('practice', userId));
+    setCelebrationStarTier(getStarTierForCount(starCount, config.practice.starsPerRow));
     setCelebratingStar(true);
     await new Promise<void>((resolve) => {
       globalThis.setTimeout(resolve, config.practice.starCelebrationDurationMs);
@@ -236,6 +239,7 @@ export function useBlockTrainingDeck(
     grammarGroup,
     isComplete,
     celebratingStar,
+    celebrationStarTier,
     hasProgress,
     loading,
     error,

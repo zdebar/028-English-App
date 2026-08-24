@@ -110,7 +110,7 @@ describe('UserScore', () => {
     vi.setSystemTime(new Date('2026-03-04T10:00:00.000Z'));
     mocks.get.mockResolvedValue({ star_count: 2 });
 
-    await UserScoreType.addStar('u1', 3);
+    const result = await UserScoreType.addStar('u1', 3);
 
     expect(mocks.get).toHaveBeenCalledWith(['u1', '2026-03-04']);
     expect(mocks.put).toHaveBeenCalledWith(
@@ -121,6 +121,7 @@ describe('UserScore', () => {
         deleted_at: null,
       }),
     );
+    expect(result).toBe(5);
   });
 
   it('addStar uses provided dateTime to choose score date', async () => {

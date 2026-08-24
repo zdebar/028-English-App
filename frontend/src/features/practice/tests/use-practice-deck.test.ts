@@ -14,7 +14,9 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@/config/config', () => ({
-  default: { practice: { reviewStarSize: 20, starCelebrationDurationMs: 1000 } },
+  default: {
+    practice: { reviewStarSize: 20, starsPerRow: 10, starCelebrationDurationMs: 2000 },
+  },
 }));
 vi.mock('@/hooks/use-fetch', () => ({
   useFetch: () => ({ data: mocks.fetchData, loading: false, error: null, reload: mocks.reload }),
@@ -64,10 +66,15 @@ describe('usePracticeDeck', () => {
     mocks.fetchData = [entry(1), entry(2)];
     mocks.startReview.mockResolvedValue(reviewSession(7));
     mocks.applyPracticeProgress.mockImplementation((item) => ({ ...item, updated_at: 'now' }));
-    mocks.recordReviewAnswer.mockResolvedValue({ completedCount: 8, earnedStar: false });
+    mocks.recordReviewAnswer.mockResolvedValue({
+      completedCount: 8,
+      earnedStar: false,
+      starCount: null,
+    });
     mocks.getReadyReviewState.mockResolvedValue({ readyCount: 0, schedule: [] });
     mocks.continueReview.mockResolvedValue(undefined);
     mocks.deleteByUserId.mockResolvedValue(undefined);
+    mocks.reload.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -129,8 +136,14 @@ describe('usePracticeDeck', () => {
 
   it('shows the completed target during celebration and resets the next series', async () => {
     mocks.startReview.mockResolvedValue(reviewSession(19));
-    mocks.recordReviewAnswer.mockResolvedValue({ completedCount: 20, earnedStar: true });
+    mocks.recordReviewAnswer.mockResolvedValue({ completedCount: 20, earnedStar: true, starCount: 11 });
     mocks.getReadyReviewState.mockResolvedValue({ readyCount: 20, schedule: [] });
+    let resolveReload!: () => void;
+    mocks.reload.mockReturnValue(
+      new Promise<void>((resolve) => {
+        resolveReload = resolve;
+      }),
+    );
     const { result } = renderHook(() => usePracticeDeck('u1'));
     await waitFor(() => expect(result.current.sessionLoading).toBe(false));
     vi.useFakeTimers();
@@ -146,9 +159,16 @@ describe('usePracticeDeck', () => {
 
     expect(result.current.progressLabel).toBe('20/20');
     expect(result.current.celebratingStar).toBe(true);
+    expect(result.current.celebrationStarTier).toBe('silver');
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(1000);
+      await vi.advanceTimersByTimeAsync(2000);
+    });
+
+    expect(result.current.celebratingStar).toBe(true);
+
+    await act(async () => {
+      resolveReload();
       await answerPromise;
     });
 

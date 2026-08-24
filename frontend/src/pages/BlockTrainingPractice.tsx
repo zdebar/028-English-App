@@ -70,6 +70,7 @@ export default function BlockTrainingPractice(): JSX.Element {
       grammar={deck.practiceGrammar}
       progressLabel={deck.progressLabel}
       celebratingStar={deck.celebratingStar}
+      celebrationStarTier={deck.celebrationStarTier}
       isCzToEn={deck.isCzToEn}
       revealed={deck.revealed}
       czech={deck.czech}

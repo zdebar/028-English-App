@@ -42,7 +42,7 @@ const config = {
   practice: {
     reviewStarSize: 20, // Number of review answers needed to earn one star
     starsPerRow: 10, // Number of stars shown in one tier row
-    starCelebrationDurationMs: 1000,
+    starCelebrationDurationMs: 2000,
     audioDelay: 100, // Delay in milliseconds for automatically playing audio
     holdDuration: 300, // Duration in milliseconds for which the practice card is held before moving to the next item
     readyPracticeCountCap: 20, // Only the threshold is needed; counts are not displayed

@@ -41,15 +41,16 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
     userId: string,
     count: number,
     dateTime: string = new Date(Date.now()).toISOString(),
-  ): Promise<void> {
+  ): Promise<number> {
+    const date = new Date(dateTime).toLocaleDateString('en-CA');
     if (count === 0) {
-      return;
+      return this.getScoreForDate(userId, date);
     }
 
-    const date = new Date(dateTime).toLocaleDateString('en-CA');
     const existingRecord = await db.user_scores.get([userId, date]);
     const newStarCount = (existingRecord?.star_count ?? 0) + count;
     await db.user_scores.put(this.createRecord(userId, date, newStarCount));
+    return newStarCount;
   }
 
   /**

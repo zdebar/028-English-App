@@ -24,6 +24,13 @@ export function getStarTier(tierIndex: number): StarTier {
   return 'gold';
 }
 
+/** Returns the visual tier of a one-based completed star count. */
+export function getStarTierForCount(starCount: number, starsPerRow: number): StarTier {
+  const safeStarCount = Math.max(1, Math.floor(starCount));
+  const safeStarsPerRow = Math.max(1, Math.floor(starsPerRow));
+  return getStarTier(Math.floor((safeStarCount - 1) / safeStarsPerRow));
+}
+
 /**
  * Calculates progress inside the current star chunk.
  *

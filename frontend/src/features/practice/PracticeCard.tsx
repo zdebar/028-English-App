@@ -22,6 +22,7 @@ export default function PracticeCard({ initialDeck }: Readonly<{ initialDeck?: P
     progressLabel,
     sessionLoading,
     celebratingStar,
+    celebrationStarTier,
     finishedReview,
     isCzToEn,
     revealed,
@@ -65,6 +66,7 @@ export default function PracticeCard({ initialDeck }: Readonly<{ initialDeck?: P
       progressLabel={progressLabel}
       progressHelpText={TEXTS.reviewStarProgress}
       celebratingStar={celebratingStar}
+      celebrationStarTier={celebrationStarTier}
       isCzToEn={isCzToEn}
       revealed={revealed}
       czech={czech}

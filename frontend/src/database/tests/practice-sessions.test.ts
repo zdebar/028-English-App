@@ -54,13 +54,13 @@ describe('PracticeSession review transaction', () => {
     mocks.sessionPut.mockResolvedValue(undefined);
     mocks.sessionDelete.mockResolvedValue(undefined);
     mocks.blockItems.mockResolvedValue([]);
-    mocks.addStar.mockResolvedValue(undefined);
+    mocks.addStar.mockResolvedValue(11);
   });
 
   it('persists an intermediate answer without awarding a star', async () => {
     mocks.sessionGet.mockResolvedValue(reviewSession(7));
     const result = await PracticeSession.recordReviewAnswer(item(), '2026-08-23T10:00:00.000Z');
-    expect(result).toEqual({ completedCount: 8, earnedStar: false });
+    expect(result).toEqual({ completedCount: 8, earnedStar: false, starCount: null });
     expect(mocks.itemUpdate).toHaveBeenCalledOnce();
     expect(mocks.sessionPut).toHaveBeenCalledWith(expect.objectContaining({ completed_count: 8 }));
     expect(mocks.addStar).not.toHaveBeenCalled();
@@ -69,10 +69,24 @@ describe('PracticeSession review transaction', () => {
   it('stores answer, completed session, and exactly one star in the same transaction', async () => {
     mocks.sessionGet.mockResolvedValue(reviewSession(19));
     const result = await PracticeSession.recordReviewAnswer(item(), '2026-08-23T10:00:00.000Z');
-    expect(result).toEqual({ completedCount: 20, earnedStar: true });
+    expect(result).toEqual({ completedCount: 20, earnedStar: true, starCount: 11 });
     expect(mocks.addStar).toHaveBeenCalledOnce();
     expect(mocks.addStar).toHaveBeenCalledWith('u1', 1, '2026-08-23T10:00:00.000Z');
     expect(mocks.transaction).toHaveBeenCalledOnce();
+  });
+
+  it('returns the awarded count and removes a completed new-block session', async () => {
+    mocks.sessionGet.mockResolvedValue({
+      ...reviewSession(2),
+      mode: 'new',
+      block_id: 7,
+      target_count: 2,
+    });
+
+    await expect(
+      PracticeSession.completeNewBlock('u1', 7, '2026-08-23T10:00:00.000Z'),
+    ).resolves.toBe(11);
+    expect(mocks.sessionDelete).toHaveBeenCalledWith('u1');
   });
 
   it('rejects a new-block session without items', async () => {

@@ -15,6 +15,7 @@ import UserBlock from './user-blocks';
 export type ReviewAnswerResult = {
   completedCount: number;
   earnedStar: boolean;
+  starCount: number | null;
 };
 
 export type ActivePracticeSessionState = {
@@ -193,11 +194,9 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
           completed_count: completedCount,
           updated_at: dateTime,
         });
-        if (earnedStar) {
-          await UserScore.addStar(item.user_id, 1, dateTime);
-        }
+        const starCount = earnedStar ? await UserScore.addStar(item.user_id, 1, dateTime) : null;
 
-        return { completedCount, earnedStar };
+        return { completedCount, earnedStar, starCount };
       },
     );
   }
@@ -217,8 +216,8 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
     userId: string,
     blockId: number,
     dateTime: string = new Date(Date.now()).toISOString(),
-  ): Promise<void> {
-    await db.transaction(
+  ): Promise<number> {
+    return db.transaction(
       'rw',
       db.user_items,
       db.user_blocks,
@@ -232,8 +231,9 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
 
         await UserItem.saveNewBlockCompletion(userId, blockId, dateTime);
         await UserBlock.completeNewBlock(userId, blockId, dateTime);
-        await UserScore.addStar(userId, 1, dateTime);
+        const starCount = await UserScore.addStar(userId, 1, dateTime);
         await db.practice_sessions.delete(userId);
+        return starCount;
       },
     );
   }
