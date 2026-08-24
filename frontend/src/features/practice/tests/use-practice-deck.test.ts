@@ -92,7 +92,7 @@ function entry(itemId: number) {
       is_practice_item: 1,
       has_pronunciation_practice: 0,
       sort_order: itemId,
-      curriculum_sort_path: [1, 1, itemId],
+      curriculum_sort_path: [1, 1, 1, itemId],
       note_id: null,
       block_id: 1,
       grammar_chunk_id: 0,

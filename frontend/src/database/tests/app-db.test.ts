@@ -17,11 +17,14 @@ vi.mock('dexie', () => ({
         schema?: Record<string, string>;
       } = { number };
       mocks.versions.push(definition);
-      return {
+      const versionApi = {
         stores: (schema: Record<string, string>) => {
           definition.schema = schema;
+          return versionApi;
         },
+        upgrade: vi.fn(() => versionApi),
       };
+      return versionApi;
     }
   },
 }));
@@ -33,16 +36,17 @@ describe('AppDB schema', () => {
     mocks.versions.length = 0;
   });
 
-  it('adds the local-only practice session table in version 2', () => {
+  it('adds topics and their item index in version 3', () => {
     new AppDB();
 
-    expect(mocks.versions).toHaveLength(2);
-    expect(mocks.versions[1]).toMatchObject({
-      number: 2,
+    expect(mocks.versions).toHaveLength(3);
+    expect(mocks.versions[2]).toMatchObject({
+      number: 3,
       schema: {
         levels: 'id, sort_order',
         lessons: 'id, sort_order',
         notes: 'id',
+        topics: 'id, sort_order',
         pronunciation_groups: 'id, sort_order',
         pronunciation_group_items:
           '[pronunciation_group_id+item_id], [pronunciation_group_id+sort_order], [pronunciation_group_id+contrast_set+sort_order], item_id',
@@ -58,11 +62,12 @@ describe('AppDB schema', () => {
         metadata: '[table_name+user_id]',
       },
     });
-    expect(mocks.versions[1].schema?.user_items).toContain('[user_id+has_pronunciation_practice]');
-    expect(mocks.versions[1].schema?.user_items).toContain(
+    expect(mocks.versions[2].schema?.user_items).toContain('[user_id+topic_id]');
+    expect(mocks.versions[2].schema?.user_items).toContain('[user_id+has_pronunciation_practice]');
+    expect(mocks.versions[2].schema?.user_items).toContain(
       '[user_id+is_practice_item+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]',
     );
-    expect(mocks.versions[1].schema?.user_items).toContain(
+    expect(mocks.versions[2].schema?.user_items).toContain(
       '[user_id+is_practice_item+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]',
     );
   });

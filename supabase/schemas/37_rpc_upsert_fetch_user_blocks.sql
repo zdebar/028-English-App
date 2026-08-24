@@ -8,10 +8,10 @@ RETURNS TABLE (
   block_id INTEGER,
   name TEXT,
   note TEXT,
+  lesson_id INTEGER,
   grammar_chunk_id INTEGER,
   sort_order INTEGER,
-  show_in_topics BOOLEAN,
-  is_removed_from_practice BOOLEAN,
+  is_practice_block BOOLEAN,
   started_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ,
   deleted_at TIMESTAMPTZ

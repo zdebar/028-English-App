@@ -14,6 +14,7 @@ import PronunciationGroup from './pronunciation-groups';
 import PronunciationGroupItem from './pronunciation-group-items';
 import GrammarChunkExample from './grammar-chunk-examples';
 import PracticeSession from './practice-sessions';
+import Topic from './topics';
 
 let isInitialized = false;
 
@@ -35,6 +36,7 @@ export async function initDbMappings(): Promise<void> {
   db.audio_metadata.mapToClass(AudioMetadata);
   db.metadata.mapToClass(Metadata);
   db.practice_sessions.mapToClass(PracticeSession);
+  db.topics.mapToClass(Topic);
 
   isInitialized = true;
 }

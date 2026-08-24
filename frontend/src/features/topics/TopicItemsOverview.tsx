@@ -7,9 +7,9 @@ import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { TEXTS } from '@/locales/cs';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo } from 'react';
-import UserBlock from '@/database/models/user-blocks';
+import Topic from '@/database/models/topics';
 import { useNavigate, useParams } from 'react-router-dom';
-import type { UserBlockType } from '@/types/generic.types';
+import type { TopicType } from '@/types/generic.types';
 import { DataState } from '@/components/UI/DataState';
 import BilingualItemButton from '@/components/UI/buttons/BilingualItemButton';
 import HelpButton from '../help/HelpButton';
@@ -22,57 +22,57 @@ import { useRouteClose } from '@/routing/use-route-close';
 export default function TopicItemsOverview({
   initialTopic,
   initialItems = [],
-}: Readonly<{ initialTopic?: UserBlockType | null; initialItems?: UserItemLocal[] }>) {
+}: Readonly<{ initialTopic?: TopicType | null; initialItems?: UserItemLocal[] }>) {
   const navigate = useNavigate();
   const closeRoute = useRouteClose(ROUTES.topics);
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
   // -- Topic management --
-  const { blockId: blockIdText } = useParams<{ blockId: string }>();
-  const parsedBlockId = Number(blockIdText);
-  const blockId =
-    initialTopic?.block_id ??
-    (Number.isSafeInteger(parsedBlockId) && parsedBlockId > 0 ? parsedBlockId : null);
+  const { topicId: topicIdText } = useParams<{ topicId: string }>();
+  const parsedTopicId = Number(topicIdText);
+  const topicId =
+    initialTopic?.id ??
+    (Number.isSafeInteger(parsedTopicId) && parsedTopicId > 0 ? parsedTopicId : null);
 
   useEffect(() => {
-    if (blockId) return;
+    if (topicId) return;
     navigate(ROUTES.topics);
-  }, [blockId, navigate]);
+  }, [navigate, topicId]);
 
-  const fetchTopic = useCallback(async (): Promise<UserBlockType | null> => {
-    if (!userId || !blockId) return null;
-    return UserBlock.getByBlockId(userId, blockId);
-  }, [userId, blockId]);
+  const fetchTopic = useCallback(async (): Promise<TopicType | null> => {
+    if (!userId || !topicId) return null;
+    return Topic.getById(topicId);
+  }, [topicId, userId]);
 
   const {
     data: topic,
     loading: topicLoading,
     error: topicError,
-  } = useLiveQueryData<UserBlockType | null>(fetchTopic, {
+  } = useLiveQueryData<TopicType | null>(fetchTopic, {
     emptyData: null,
     initialData: initialTopic,
   });
 
   // -- Items management --
-  const fetchBlockItems = useCallback(async () => {
-    if (!userId || !blockId) return [];
-    return UserItem.getByBlockId(userId, blockId);
-  }, [userId, blockId]);
+  const fetchTopicItems = useCallback(async () => {
+    if (!userId || !topicId) return [];
+    return UserItem.getStartedByTopicId(userId, topicId);
+  }, [topicId, userId]);
 
   const {
     data: items,
     loading: itemsLoading,
     error: itemsError,
-  } = useLiveQueryData<UserItemLocal[]>(fetchBlockItems, {
+  } = useLiveQueryData<UserItemLocal[]>(fetchTopicItems, {
     emptyData: [],
     initialData: initialItems,
   });
   const hasItems = items.length > 0;
 
   useEffect(() => {
-    if (topicLoading || !userId || !blockId || topic !== null) return;
+    if (topicLoading || !userId || !topicId || topic !== null) return;
     navigate(ROUTES.topics, { replace: true });
-  }, [blockId, navigate, topic, topicLoading, userId]);
+  }, [navigate, topic, topicId, topicLoading, userId]);
 
   useEffect(() => {
     if (!topicError) return;
@@ -95,20 +95,20 @@ export default function TopicItemsOverview({
 
   // -- Handlers --
   const handleReset = useCallback(async () => {
-    if (!userId || !blockId) return;
+    if (!userId || !topicId) return;
     try {
-      const resetCount = await UserItem.resetItemsByBlockId(userId, blockId);
-      invalidateRouteData(routeDataKey('topic-detail', userId, blockId));
+      const resetCount = await UserItem.resetItemsByTopicId(userId, topicId);
+      invalidateRouteData(routeDataKey('topic-detail', userId, topicId));
       invalidateRouteData(routeDataKey('topics', userId));
-      reportInfo(`Reset ${resetCount} items in topic block ${blockId}`);
+      reportInfo(`Reset ${resetCount} items in topic ${topicId}`);
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (error) {
       showToast(TEXTS.resetProgressErrorToast, 'error');
       reportError(TEXTS.resetProgressErrorToast, error);
     }
-  }, [userId, blockId, showToast]);
+  }, [showToast, topicId, userId]);
 
-  const resetHandler = topic?.is_removed_from_practice ? undefined : handleReset;
+  const resetHandler = topic ? handleReset : undefined;
 
   return (
     <OverviewCard

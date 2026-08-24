@@ -17,6 +17,11 @@ export type ReviewAnswerResult = {
   earnedStar: boolean;
 };
 
+export type ActivePracticeSessionState = {
+  activeSession: PracticeSessionType | null;
+  requiresReconciliation: boolean;
+};
+
 export default class PracticeSession extends Entity<AppDB> implements PracticeSessionType {
   user_id!: string;
   mode!: 'review' | 'new';
@@ -33,6 +38,62 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
   static async getActive(userId: string): Promise<PracticeSessionType | null> {
     assertNonEmptyString(userId, 'userId');
     return (await db.practice_sessions.get(userId)) ?? null;
+  }
+
+  /** Reads the active session and hides an unusable new-block session without mutating storage. */
+  static async inspectActive(userId: string): Promise<ActivePracticeSessionState> {
+    assertNonEmptyString(userId, 'userId');
+
+    const session = await this.getActive(userId);
+    if (!session || session.mode === 'review') {
+      return { activeSession: session, requiresReconciliation: false };
+    }
+
+    const blockId = session.block_id;
+    const block = blockId == null ? null : await db.user_blocks.get([userId, blockId]);
+    const items =
+      blockId == null
+        ? []
+        : await db.user_items.where('[user_id+block_id]').equals([userId, blockId]).toArray();
+    const blockItemIds = new Set(items.map((item) => item.item_id));
+    const savedItemIds = [
+      ...session.current_queue_item_ids,
+      ...session.retry_queue_item_ids,
+      ...session.completed_item_ids,
+    ];
+    const hasPendingItems =
+      session.current_queue_item_ids.length > 0 || session.retry_queue_item_ids.length > 0;
+    const referencesOnlyBlockItems = savedItemIds.every((itemId) => blockItemIds.has(itemId));
+    const isValid = Boolean(
+      block?.is_practice_block &&
+        block.started_at === config.database.nullReplacementDate &&
+        blockItemIds.size > 0 &&
+        hasPendingItems &&
+        referencesOnlyBlockItems,
+    );
+
+    return {
+      activeSession: isValid ? session : null,
+      requiresReconciliation: !isValid,
+    };
+  }
+
+  /** Removes an unusable new-block session and returns the remaining active session. */
+  static async reconcileActive(userId: string): Promise<PracticeSessionType | null> {
+    assertNonEmptyString(userId, 'userId');
+
+    return db.transaction(
+      'rw',
+      db.practice_sessions,
+      db.user_blocks,
+      db.user_items,
+      async () => {
+        const state = await this.inspectActive(userId);
+        if (!state.requiresReconciliation) return state.activeSession;
+        await db.practice_sessions.delete(userId);
+        return null;
+      },
+    );
   }
 
   static async startReview(
@@ -65,6 +126,9 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
     itemIds: number[],
     dateTime: string = new Date(Date.now()).toISOString(),
   ): Promise<PracticeSessionType> {
+    if (itemIds.length === 0) {
+      throw new Error('New-block practice requires at least one item.');
+    }
     const existing = await this.getActive(userId);
     if (existing) return existing;
 

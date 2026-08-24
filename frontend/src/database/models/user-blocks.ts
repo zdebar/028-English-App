@@ -10,7 +10,6 @@ import { TableName } from '@/types/table.types';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 import { Entity } from 'dexie';
 import Metadata from './metadata';
-import UserItem from './user-items';
 
 const NULL_DATE = config.database.nullReplacementDate;
 
@@ -30,8 +29,7 @@ type UserBlockExport = Pick<
 function convertAPIToLocal(block: UserBlockAPI): UserBlockType {
   return {
     ...block,
-    show_in_topics: block.show_in_topics ?? true,
-    is_removed_from_practice: block.is_removed_from_practice ?? false,
+    is_practice_block: block.is_practice_block ?? true,
     started_at: block.started_at ?? NULL_DATE,
     deleted_at: block.deleted_at ?? NULL_DATE,
   };
@@ -47,10 +45,10 @@ function convertLocalToExport(block: UserBlockType): UserBlockExport {
 }
 
 /**
- * Local Dexie model and sync API for user-specific block/topic progress.
+ * Local Dexie model and sync API for user-specific block progress.
  *
  * Public API:
- * - Topic views: `getByUserId`, `getStartedTopicsByUserId`, and `getByBlockId`.
+ * - Block reads: `getByUserId` and `getByBlockId`.
  * - Block transitions: completion state used by the initial-training flow.
  * - Maintenance: grammar/block resets, local account deletion, and remote sync.
  *
@@ -61,10 +59,10 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
   block_id!: number;
   name!: string;
   note!: string | null;
+  lesson_id!: number | null;
   grammar_chunk_id!: number | null;
-  sort_order!: number | null;
-  show_in_topics!: boolean;
-  is_removed_from_practice!: boolean;
+  sort_order!: number;
+  is_practice_block!: boolean;
   started_at!: string;
   updated_at!: string;
   deleted_at!: string;
@@ -73,41 +71,14 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
    * Reads all block rows for a user.
    *
    * @param userId Non-empty user id whose blocks should be read.
-   * @returns Blocks sorted by non-null sort_order, followed by unordered blocks.
+   * @returns Blocks sorted by their required global sort_order.
    * @throws Error when userId is empty.
    */
   static async getByUserId(userId: string): Promise<UserBlockType[]> {
     assertNonEmptyString(userId, 'userId');
 
     const blocks = await db.user_blocks.where('user_id').equals(userId).toArray();
-    return blocks.sort(compareNullableBlockOrder);
-  }
-
-  /**
-   * Reads blocks that should appear in the started topics overview.
-   *
-   * @param userId Non-empty user id whose topics should be read.
-   * @returns Ordered topic blocks. Non-practice topics are always visible; practice topics become
-   * visible after at least one associated item starts.
-   * @throws Error when userId is empty.
-   */
-  static async getStartedTopicsByUserId(userId: string): Promise<UserBlockType[]> {
-    assertNonEmptyString(userId, 'userId');
-
-    const [blocks, startedBlockIds] = await Promise.all([
-      db.user_blocks.where('user_id').equals(userId).toArray(),
-      UserItem.getStartedBlocksIds(userId),
-    ]);
-    const startedBlockIdSet = new Set(startedBlockIds);
-
-    return blocks
-      .filter(
-        (block) =>
-          block.show_in_topics !== false &&
-          block.sort_order != null &&
-          (block.is_removed_from_practice || startedBlockIdSet.has(block.block_id)),
-      )
-      .sort(compareNullableBlockOrder);
+    return blocks.sort(compareBlockOrder);
   }
 
   /**
@@ -124,20 +95,24 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
     return (await db.user_blocks.get([userId, blockId])) ?? null;
   }
 
-  /** Returns the first ordered, active practice block that has not been started. */
+  /** Returns the first ordered, non-empty practice block that has not been started. */
   static async getNextUnstartedPracticeBlock(userId: string): Promise<UserBlockType | null> {
     assertNonEmptyString(userId, 'userId');
 
-    const blocks = await db.user_blocks.where('user_id').equals(userId).toArray();
+    const [blocks, items] = await Promise.all([
+      db.user_blocks.where('user_id').equals(userId).toArray(),
+      db.user_items.where('user_id').equals(userId).toArray(),
+    ]);
+    const nonEmptyBlockIds = new Set(items.map((item) => item.block_id));
     return (
       blocks
         .filter(
           (block) =>
-            !block.is_removed_from_practice &&
+            block.is_practice_block &&
             block.started_at === NULL_DATE &&
-            block.sort_order != null,
+            nonEmptyBlockIds.has(block.block_id),
         )
-        .sort(compareNullableBlockOrder)[0] ?? null
+        .sort(compareBlockOrder)[0] ?? null
     );
   }
 
@@ -168,7 +143,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
 
     const requiredCount = config.progress.simulationStartedBlockCount;
     return (await this.getByUserId(userId))
-      .filter((block) => !block.is_removed_from_practice)
+      .filter((block) => block.is_practice_block)
       .slice(0, requiredCount);
   }
 
@@ -368,10 +343,7 @@ export default class UserBlock extends Entity<AppDB> implements UserBlockType {
 
 }
 
-function compareNullableBlockOrder(left: UserBlockType, right: UserBlockType): number {
-  if (left.sort_order == null && right.sort_order == null) return left.block_id - right.block_id;
-  if (left.sort_order == null) return 1;
-  if (right.sort_order == null) return -1;
+function compareBlockOrder(left: UserBlockType, right: UserBlockType): number {
   return left.sort_order - right.sort_order || left.block_id - right.block_id;
 }
 

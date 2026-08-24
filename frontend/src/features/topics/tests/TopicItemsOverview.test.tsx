@@ -10,19 +10,19 @@ const mocks = vi.hoisted(() => ({
   audioLoading: false,
   readyAudio: new Set<string>(),
   userId: 'u1',
-  blockId: '2',
+  topicId: '2',
   state: {
     items: [] as any[],
     itemsLoading: false,
-    block: { id: 2, name: 'Block 2' } as any,
-    blockLoading: false,
+    topic: { id: 2, name: 'Topic 2' } as any,
+    topicLoading: false,
   },
 }));
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
   useLocation: () => ({ key: 'default' }),
-  useParams: () => ({ blockId: mocks.blockId }),
+  useParams: () => ({ topicId: mocks.topicId }),
 }));
 
 vi.mock('@/features/auth/use-auth-store', () => ({
@@ -44,8 +44,8 @@ vi.mock('@/hooks/use-live-query-data', () => ({
           error: null,
         }
       : {
-          data: mocks.state.block,
-          loading: mocks.state.blockLoading,
+          data: mocks.state.topic,
+          loading: mocks.state.topicLoading,
           error: null,
         },
 }));
@@ -60,15 +60,14 @@ vi.mock('@/features/audio/use-audio-manager', () => ({
 
 vi.mock('@/database/models/user-items', () => ({
   default: {
-    getByBlockId: vi.fn(),
-    resetItemsByBlockId: vi.fn(),
+    getStartedByTopicId: vi.fn(),
+    resetItemsByTopicId: vi.fn(),
   },
 }));
 
-vi.mock('@/database/models/user-blocks', () => ({
+vi.mock('@/database/models/topics', () => ({
   default: {
-    getByBlockId: vi.fn(),
-    resetByBlockId: vi.fn(),
+    getById: vi.fn(),
   },
 }));
 
@@ -149,26 +148,24 @@ vi.mock('@/features/help/HelpButton', () => ({
 
 import TopicItemsOverview from '@/features/topics/TopicItemsOverview';
 import UserItem from '@/database/models/user-items';
-import UserBlock from '@/database/models/user-blocks';
 
 describe('TopicItemsOverview', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.userId = 'u1';
-    mocks.blockId = '2';
+    mocks.topicId = '2';
     mocks.state.items = [];
     mocks.state.itemsLoading = false;
-    mocks.state.block = { block_id: 2, name: 'Block 2', is_removed_from_practice: false };
-    mocks.state.blockLoading = false;
+    mocks.state.topic = { id: 2, name: 'Topic 2' };
+    mocks.state.topicLoading = false;
     mocks.playAudio.mockReset();
     mocks.playAudio.mockResolvedValue(true);
     mocks.audioLoading = false;
     mocks.readyAudio = new Set<string>();
-    vi.mocked(UserBlock.resetByBlockId).mockResolvedValue(undefined);
   });
 
-  it('renders not found state for invalid block id', () => {
-    mocks.blockId = 'x';
+  it('renders not found state for invalid topic id', () => {
+    mocks.topicId = 'x';
 
     render(<TopicItemsOverview />);
 
@@ -294,30 +291,29 @@ describe('TopicItemsOverview', () => {
   });
 
   it('resets topic items and shows success toast', async () => {
-    vi.mocked(UserItem.resetItemsByBlockId).mockResolvedValue(3);
+    vi.mocked(UserItem.resetItemsByTopicId).mockResolvedValue(3);
 
     render(<TopicItemsOverview />);
 
     fireEvent.click(screen.getByTestId('reset-button'));
 
     await waitFor(() => {
-      expect(UserItem.resetItemsByBlockId).toHaveBeenCalledWith('u1', 2);
-      expect(UserBlock.resetByBlockId).not.toHaveBeenCalled();
-      expect(mocks.reportInfo).toHaveBeenCalledWith('Reset 3 items in topic block 2');
+      expect(UserItem.resetItemsByTopicId).toHaveBeenCalledWith('u1', 2);
+      expect(mocks.reportInfo).toHaveBeenCalledWith('Reset 3 items in topic 2');
       expect(mocks.showToast).toHaveBeenCalledWith('Reset success', 'success');
     });
   });
 
-  it('disables reset for browse-only topics', () => {
-    mocks.state.block = { block_id: 2, name: 'Letters', is_removed_from_practice: true };
+  it('allows reset independently of practice blocks', () => {
+    mocks.state.topic = { id: 2, name: 'Letters' };
 
     render(<TopicItemsOverview />);
 
-    expect((screen.getByTestId('reset-button') as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByTestId('reset-button') as HTMLButtonElement).disabled).toBe(false);
   });
 
   it('shows toast and logs error when reset fails', async () => {
-    vi.mocked(UserItem.resetItemsByBlockId).mockRejectedValue(new Error('boom'));
+    vi.mocked(UserItem.resetItemsByTopicId).mockRejectedValue(new Error('boom'));
 
     render(<TopicItemsOverview />);
 

@@ -9,7 +9,7 @@ export const ROUTES = {
   profile: '/profile',
   levels: '/levels',
   topics: '/topics',
-  topicDetail: '/topics/:blockId',
+  topicDetail: '/topics/:topicId',
   grammar: '/grammar',
   vocabulary: '/vocabulary',
   pronunciationGroups: '/pronunciation',

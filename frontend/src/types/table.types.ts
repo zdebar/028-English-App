@@ -8,6 +8,7 @@ export const TableName = {
   Levels: 'levels',
   Lessons: 'lessons',
   Blocks: 'blocks',
+  Topics: 'topics',
   Notes: 'notes',
   PronunciationGroups: 'pronunciation_groups',
   PronunciationGroupItems: 'pronunciation_group_items',

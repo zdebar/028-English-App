@@ -5,6 +5,7 @@ import PronunciationGroup from '@/database/models/pronunciation-groups';
 import UserBlock from '@/database/models/user-blocks';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
+import Topic from '@/database/models/topics';
 import { routeDataKey, type RouteDataDescriptor } from './route-data-handoff';
 import {
   loadReviewDeck,
@@ -23,7 +24,7 @@ export function overviewAvailabilityDescriptor(userId: string) {
     load: async () => {
       const [grammar, topics, vocabulary] = await Promise.all([
         UserItem.hasStartedGrammar(userId),
-        UserBlock.getStartedTopicsByUserId(userId),
+        Topic.getStartedByUserId(userId),
         UserItem.getStartedVocabulary(userId),
       ]);
       return {
@@ -59,17 +60,17 @@ export function grammarDescriptor(userId: string) {
 export function topicsDescriptor(userId: string) {
   return {
     key: routeDataKey('topics', userId),
-    load: () => UserBlock.getStartedTopicsByUserId(userId),
+    load: () => Topic.getStartedByUserId(userId),
   };
 }
 
-export function topicDetailDescriptor(userId: string, blockId: number) {
+export function topicDetailDescriptor(userId: string, topicId: number) {
   return {
-    key: routeDataKey('topic-detail', userId, blockId),
+    key: routeDataKey('topic-detail', userId, topicId),
     load: async () => {
       const [topic, items] = await Promise.all([
-        UserBlock.getByBlockId(userId, blockId),
-        UserItem.getByBlockId(userId, blockId),
+        Topic.getById(topicId),
+        UserItem.getStartedByTopicId(userId, topicId),
       ]);
       return { topic, items };
     },
@@ -111,13 +112,16 @@ export function blockTrainingDescriptor(userId: string, blockId: number) {
       const block = await UserBlock.getByBlockId(userId, blockId);
       if (
         !block ||
-        block.is_removed_from_practice ||
+        !block.is_practice_block ||
         block.started_at !== config.database.nullReplacementDate
       ) {
         return { block: null, items: [], entries: [], grammar: null, grammarGroup: null };
       }
 
       const items = await UserItem.getByBlockId(userId, block.block_id);
+      if (items.length === 0) {
+        return { block: null, items: [], entries: [], grammar: null, grammarGroup: null };
+      }
       const [entries, grammarContext] = await Promise.all([
         resolvePracticeEntries(userId, items),
         resolvePracticeGrammarContext(userId, block.grammar_chunk_id),

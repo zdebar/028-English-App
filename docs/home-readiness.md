@@ -1,14 +1,15 @@
 # Home Practice Readiness
 
-`HomePracticeButtons` renders one unified Practice button.
+`PracticeButtons` renders Review and New controls from a shared live availability store.
 
 | Control | Ready condition | Badge | Refresh |
 | --- | --- | --- | --- |
-| Practice | `UserItem.getReadyPracticeState(userId).readyCount > 0` | Unified ready count, capped as `99+` by configuration | Dexie live query, user change, and future schedule timer |
+| Review | Ready review count reaches the configured star size, or a review session is active | None | Dexie live query, user change, and future schedule timer |
+| New | Review is below its boundary and the lowest ordered unstarted practice block has items, or a valid new session is active | None | Dexie live query over items, blocks, and sessions |
 
 Readiness includes all unmastered practice items regardless of vocabulary/grammar classification:
 due scheduled items plus never-scheduled items. Future `next_at` values are grouped into a timer
 schedule so the badge updates while Home remains mounted.
 
-New grammar has no separate Home button. It is discovered inside the unified deck when a new item
-belongs to a grammar block whose `started_at` is still the local null-replacement date.
+Review has priority at its boundary. Invalid new sessions are removed before availability is
+published, so a removed, started, or empty block cannot keep overriding current block ordering.

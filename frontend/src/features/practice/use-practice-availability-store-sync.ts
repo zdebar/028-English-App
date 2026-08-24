@@ -1,5 +1,4 @@
 import config from '@/config/config';
-import { db } from '@/database/models/db';
 import UserItem from '@/database/models/user-items';
 import UserBlock from '@/database/models/user-blocks';
 import PracticeSession from '@/database/models/practice-sessions';
@@ -36,16 +35,19 @@ export function usePracticeAvailabilityStoreSync(userId: string | null): void {
       pronunciationError: null,
     });
 
-    const readySubscription = liveQuery(() =>
-      db.transaction('r', db.user_items, db.user_blocks, db.practice_sessions, async () => {
-        const [review, nextBlock, activeSession] = await Promise.all([
-          UserItem.getReadyReviewState(userId),
-          UserBlock.getNextUnstartedPracticeBlock(userId),
-          PracticeSession.getActive(userId),
-        ]);
-        return { review, nextBlockId: nextBlock?.block_id ?? null, activeSession };
-      }),
-    ).subscribe({
+    const readySubscription = liveQuery(async () => {
+      const [review, nextBlock, activeSessionState] = await Promise.all([
+        UserItem.getReadyReviewState(userId),
+        UserBlock.getNextUnstartedPracticeBlock(userId),
+        PracticeSession.inspectActive(userId),
+      ]);
+      return {
+        review,
+        nextBlockId: nextBlock?.block_id ?? null,
+        activeSession: activeSessionState.activeSession,
+        requiresSessionReconciliation: activeSessionState.requiresReconciliation,
+      };
+    }).subscribe({
       next: (state) => {
         if (!isActive) return;
         usePracticeAvailabilityStore.setState({
@@ -56,6 +58,11 @@ export function usePracticeAvailabilityStoreSync(userId: string | null): void {
           practiceLoading: false,
           practiceError: null,
         });
+        if (state.requiresSessionReconciliation) {
+          void PracticeSession.reconcileActive(userId).catch((error: unknown) => {
+            reportError('Failed to remove invalid practice session', toError(error));
+          });
+        }
       },
       error: (error) => {
         if (!isActive) return;

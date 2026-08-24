@@ -73,6 +73,7 @@ const exampleItem: UserItemLocal = {
   is_practice_item: 1,
   has_pronunciation_practice: 0,
   block_id: 1,
+  topic_id: -1,
   grammar_chunk_id: 1,
   started_at: '2026-08-02T00:00:00.000Z',
   deleted_at: '',
@@ -80,7 +81,7 @@ const exampleItem: UserItemLocal = {
   next_at_en_to_cz: '',
   mastered_at_cz_to_en: '',
   mastered_at_en_to_cz: '',
-  curriculum_sort_path: [1, 1, 1],
+  curriculum_sort_path: [1, 1, 1, 1],
 };
 
 describe('GrammarDetailCard', () => {

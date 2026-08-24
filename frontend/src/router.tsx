@@ -76,11 +76,11 @@ function parsePositiveId(value: string | undefined): number | null {
 }
 
 async function loadTopicDetail({ params }: LoaderFunctionArgs) {
-  const blockId = parsePositiveId(params.blockId);
-  if (!blockId) throw redirect(ROUTES.topics);
+  const topicId = parsePositiveId(params.topicId);
+  if (!topicId) throw redirect(ROUTES.topics);
   const userId = await requireUserId();
   try {
-    const data = await consumePreparedRouteData(topicDetailDescriptor(userId, blockId));
+    const data = await consumePreparedRouteData(topicDetailDescriptor(userId, topicId));
     if (!data.topic) throw redirect(ROUTES.topics);
     return data;
   } catch (error) {

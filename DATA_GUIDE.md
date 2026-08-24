@@ -14,6 +14,7 @@ Jednotlivé tabulky jsou řazeny dle pořadí importu:
 `grammar_groups` - větší skupiny gramatiky, sdružují grammar_chunks, v Přehledu gramatiky se zobrazují celé grammar_groups
 `grammar_chunks` - malé sousto gramatiky,
 `blocks` - sdružuje položky do výukových bloků
+`topics` - pojmenované skupiny pro přehled témat; položky na ně odkazují přes `items.topic_id`
 `notes` - doplňující poznámky k položkám; např. vysvětlení použití daného slovíčka v angličtině
 `items` - jednotlivé položky učení; slovíčka, věty
 `grammar_chunks_examples` - typické položky pro dané grammar_chunks, např. všechny osoby slovesa be
@@ -54,12 +55,17 @@ Tabulky, které nevyžadují jazyková data:
 ### `blocks`
 
 - `name` - povinný, globálně unikátní.
-- `sort_order` - nepovinný, neprázdná hodnota začíná od 1 a je globálně unikátní. Bloky bez pořadí aplikace řadí až za uspořádané bloky.
-- `show_in_topics` - určuje, zda se blok může zobrazovat v přehledu témat, true pro bloky slovíček, false pro gramatické bloky
-- `is_removed_from_practice` - vyřadí položky bloku z hlavního procvičování, např. pro výslovnost hlásek
-- `requires_initial_training` - vynutí úvodní výukový průchod před pokračováním v osnově. Nesmí být současně `true` s `is_removed_from_practice`.
+- `sort_order` - povinný, začíná od 1 a je globálně unikátní. Určuje pořadí úvodních tréninků i pořadí položek v osnově.
+- `lesson_id` - může být prázdné pouze u bloku bez položek. Před vložením první položky musí blok odkazovat na lekci.
+- `is_practice_block` - určuje, zda blok absolvuje úvodní trénink a zda jeho položky patří do hlavního procvičování.
 - `grammar_chunk_id`  - připojuje gramatiku vysvětlovanou v úvodním tréninku bloku. Samotný obsah tabulky gramatických příkladů tím definován není. not null pro gramatické bloky
-- Každý blok s počátečním tréninkem musí mít smysluplnou sadu položek přes `items.block_id`; úvodní obrazovka představí všechny položky tohoto bloku.
+- Prázdný blok je platný, ale aplikace jej ignoruje v procvičování.
+
+### `topics`
+
+- `name` a `sort_order` jsou povinné a globálně unikátní.
+- Topic je nezávislý na výukových blocích. Jedno téma proto může obsahovat položky z více bloků.
+- Téma se zobrazí až po zahájení alespoň jedné položky s odpovídajícím `items.topic_id`; detail ukazuje pouze zahájené položky.
 
 ### `notes`
 
@@ -74,11 +80,12 @@ Znovupoužitelný doplňující obsah odkazovaný z `items.note_id`.
 
 Jednotlivé dvojice čeština–angličtina. Jedna položka je zdrojem pro procvičování, témata, gramatické příklady i výslovnostní skupiny.
 
-- `czech`, `english`, `lesson_id`, `is_vocabulary` a `sort_order` jsou povinné.
-- `sort_order` - celé číslo od 0, unikátní v rámci `lesson_id`. Určuje pořadí položek v lekci a spolu s pořadím levelu a lekce také pořadí v procvičování.
+- `czech`, `english`, `block_id`, `is_vocabulary` a `sort_order` jsou povinné.
+- `sort_order` - celé číslo od 1, unikátní v rámci `block_id`. Pořadí v procvičování vzniká z pořadí levelu, lekce, bloku a položky.
 - `pronunciation` - nepovinné, výslovnost anglického textu
 - `audio` - obsahuje přesný název odpovídajícího `.opus` souboru. Soubor musí být součástí audio distribuce; při změně nahrávky je vhodné změnit i název kvůli cache klientů. Běžně název souboru má obsahovat datetimestamp např. goodbye_20260802T132147Z.opus
-- `block_id` - nepovinný
+- `block_id` - povinný; lekce položky se odvozuje přes `blocks.lesson_id`
+- `topic_id` - nepovinný; jedna položka může patřit nejvýše do jednoho tématu, nezávisle na svém výukovém bloku
 - `grammar_chunk_id` - nepovinný, pouze pro zobrazení kontextové grammatiky, neurčuje zobrazení položky v grammatickém přehledu
 - `note_id` - nepovinný, připojuje doplňující poznámku k položce
 - `is_vocabulary = true` - rozlišuje slovíčka od gramatických vět, slovíčka se objeví v přehledu slovíček

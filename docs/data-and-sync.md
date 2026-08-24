@@ -8,7 +8,7 @@ sync later pushes local changes and pulls remote deltas.
 | Action type | Local write | Remote write |
 | --- | --- | --- |
 | Practice progress | `UserItem.savePracticeDeck`, `UserScore.addItemCount`, block helpers | Later via `dataSync` / `dataSyncOnUnmount`. |
-| New grammar completion | `UserItem.saveNewGrammarBlockCompletion`, `UserBlock.markBlockMastered` | Later via sync. |
+| Initial block completion | `PracticeSession.completeNewBlock`, `UserItem.saveNewBlockCompletion`, `UserBlock.completeNewBlock` | Later via sync. |
 | Reset progress | `UserItem.reset*`, `UserBlock.resetByBlockId` | Later via sync. |
 | Daily score | `UserScore` model | Later via sync. |
 
@@ -42,7 +42,7 @@ failure it sets the sync error flag and leaves local-first reads available.
 | Full sync | Explicit `fullSync` or stale full-sync timestamp | Replaces local user/shared data from remote where model supports it. |
 | Incremental sync | Normal periodic sync | Pushes local changes since last metadata timestamp and pulls remote deltas/deletes. |
 
-Shared content models include `Grammar`, `Levels`, `Lessons`, and `Notes`. User
+Shared content models include `Grammar`, `Levels`, `Lessons`, `Topics`, and `Notes`. User
 models include `UserBlock`, `UserScore`, and `UserItem`.
 
 ## Model Map
@@ -50,7 +50,8 @@ models include `UserBlock`, `UserScore`, and `UserItem`.
 | Model | Table/domain | Common readers/writers |
 | --- | --- | --- |
 | `UserItem` | Per-user item progress and scheduling | Practice decks, vocabulary/grammar readiness, resets, sync. |
-| `UserBlock` | Per-user block unlock/completion state | new grammar interruption and group overview, topics, sync. |
+| `UserBlock` | Per-user block unlock/completion state | Initial block training and sync. |
+| `Topic` | Shared topic catalog | Topic overview and detail metadata. |
 | `UserScore` | Per-user daily item count | Practice actions, daily stats, overview stars. |
 | `Levels` / `Lessons` | Shared course hierarchy | Dashboard and overview pages. |
 | `GrammarGroup` / `GrammarChunk` / `Notes` | Shared detail content | Practice detail buttons and overview pages. |

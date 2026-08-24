@@ -17,6 +17,7 @@ import Notes from '../models/notes';
 import PronunciationGroup from '../models/pronunciation-groups';
 import PronunciationGroupItem from '../models/pronunciation-group-items';
 import GrammarChunkExample from '../models/grammar-chunk-examples';
+import Topic from '../models/topics';
 
 /**
  * Synchronizes shared and user-specific tables with Supabase.
@@ -49,6 +50,7 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
         Levels.syncFromRemote(true),
         Lessons.syncFromRemote(true),
         Notes.syncFromRemote(true),
+        Topic.syncFromRemote(true),
         PronunciationGroup.syncFromRemote(true),
         PronunciationGroupItem.syncFromRemote(true),
         UserBlock.syncFromRemote(userId, true),
@@ -62,6 +64,7 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
         Levels.syncFromRemote(false),
         Lessons.syncFromRemote(false),
         Notes.syncFromRemote(false),
+        Topic.syncFromRemote(false),
         PronunciationGroup.syncFromRemote(false),
         PronunciationGroupItem.syncFromRemote(false),
         UserBlock.syncFromRemote(userId, false),
@@ -77,6 +80,7 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
     'Levels',
     'Lessons',
     'Notes',
+    'Topics',
     'PronunciationGroups',
     'PronunciationGroupItems',
     'UserBlocks',

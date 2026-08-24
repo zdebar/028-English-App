@@ -1,7 +1,6 @@
 # Practice Flows
 
-Practice uses one review route and the shared `PracticeSessionCard`. New grammar temporarily
-interrupts the unified deck and returns to it after completion.
+Practice uses separate review and initial-block routes with the shared `PracticeSessionCard`.
 
 ## Unified Practice
 
@@ -11,23 +10,21 @@ Route: `/practice`, rendered by `Practice` and `usePracticeDeck`.
 
 1. Select due, unmastered practice items with odd progress, ordered by `next_at`. Return immediately when this fills the deck.
 2. Otherwise build an alternative deck from due even-progress items, then never-scheduled items in curriculum order.
-3. While scanning new items, an item whose associated block requires initial training and has no
-   `started_at` becomes the final marked trigger item; selection stops immediately.
-4. Return the even/new alternative when non-empty, otherwise return the partial odd deck.
+3. Return the even/new alternative when non-empty, otherwise return the partial odd deck.
 
 Progress is buffered during the session, saved at deck completion/unmount, and backed up to
 `practiceDeckProgress_${userId}` on unload or save failure.
 
-## New Grammar Interruption
+## Initial Block Training
 
-Route: `/practice/new-grammar`, entered with the trigger block ID selected by the unified deck.
+Route: `/practice/block-training?blockId=...`, entered from the Home “Nové” button.
 
-The flow loads that exact block and the chunk referenced by `blocks.grammar_chunk_id`, displays the introduction with every block item, and runs
-the existing Czech-to-English and English-to-Czech rounds with repeat waves. Completion starts
-all block items at the configured grammar progress, starts and masters the block, and returns to
-`/practice` for a fresh deck. Leaving early keeps the block unstarted, so it triggers again later.
+Home selects the lowest `sort_order` block that is a practice block, unstarted, and non-empty.
+The flow loads that exact block, displays its introduction and items, and runs four staged rounds.
+Completion starts the block items, marks the block started, removes the session, and returns Home.
+Home then recalculates the next lowest eligible block. Empty blocks are ignored.
 
-There is no vocabulary or previous-grammar unlock prerequisite.
+There is no vocabulary, previous-block, or grammar unlock prerequisite.
 
 ## Grammar Details
 

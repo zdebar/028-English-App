@@ -34,6 +34,7 @@ type UserItemAPI = Omit<
   | 'is_practice_item'
   | 'has_pronunciation_practice'
   | 'block_id'
+  | 'topic_id'
   | 'grammar_chunk_id'
   | 'started_at'
   | 'deleted_at'
@@ -46,6 +47,7 @@ type UserItemAPI = Omit<
   is_practice_item?: boolean;
   has_pronunciation_practice?: boolean;
   block_id: number;
+  topic_id: number | null;
   grammar_chunk_id: number | null;
   started_at: string | null;
   deleted_at: string | null;
@@ -116,6 +118,7 @@ function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
     mastered_at_en_to_cz: apiItem.mastered_at_en_to_cz ?? NULL_DATE,
     deleted_at: apiItem.deleted_at ?? NULL_DATE,
     block_id: apiItem.block_id,
+    topic_id: apiItem.topic_id ?? NULL_NUMBER,
     grammar_chunk_id: apiItem.grammar_chunk_id ?? NULL_NUMBER,
   };
 }
@@ -125,7 +128,7 @@ function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
  *
  * Public API:
  * - Review flow: `getReviewDeck`, `savePracticeDeck`, and `getReadyReviewState`.
- * - Progress lookups: `getStartedGrammarChunkIds`, `getStartedBlocksIds`, and `getStartedVocabulary`.
+ * - Progress lookups: `getStartedGrammarChunkIds`, topic items, and started vocabulary.
  * - New-block completion.
  * - Maintenance: reset helpers, simulation data, local account deletion, and remote sync.
  *
@@ -145,6 +148,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   curriculum_sort_path!: CurriculumSortPath;
   note_id!: number;
   block_id!: number;
+  topic_id!: number;
   grammar_chunk_id!: number;
   progress_cz_to_en!: number;
   progress_en_to_cz!: number;
@@ -312,6 +316,19 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return updatedItems;
   }
 
+  /** Reads started items assigned to one topic, ordered by curriculum position. */
+  static async getStartedByTopicId(userId: string, topicId: number): Promise<UserItemLocal[]> {
+    const topicItems = await db.user_items
+      .where('[user_id+topic_id]')
+      .equals([userId, topicId])
+      .filter((item) => item.started_at !== NULL_DATE)
+      .toArray();
+
+    return topicItems.sort((left, right) =>
+      compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path),
+    );
+  }
+
   /**
    * Returns whether the user has at least one started grammar practice item.
    *
@@ -341,22 +358,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .toArray();
 
     return [...new Set(startedItems.map((item) => item.grammar_chunk_id))];
-  }
-
-  /**
-   * Reads unique block ids from all started items.
-   *
-   * @param userId User id whose started items should be inspected.
-   * @returns Unique non-null-replacement block ids, including non-practice topic items.
-   */
-  static async getStartedBlocksIds(userId: string): Promise<number[]> {
-    const startedItems = await db.user_items
-      .where('[user_id+started_at]')
-      .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
-      .filter((item) => item.block_id !== NULL_NUMBER)
-      .toArray();
-
-    return [...new Set(startedItems.map((item) => item.block_id))];
   }
 
   /**
@@ -581,6 +582,20 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       });
 
     return count;
+  }
+
+  /** Resets all user items assigned to one topic. */
+  static async resetItemsByTopicId(
+    userId: string,
+    topicId: number,
+    dateTime: string = new Date().toISOString(),
+  ): Promise<number> {
+    return db.user_items
+      .where('[user_id+topic_id]')
+      .equals([userId, topicId])
+      .modify((item: UserItemLocal) => {
+        resetUserItem(item, dateTime);
+      });
   }
 
   /**

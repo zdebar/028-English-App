@@ -36,7 +36,7 @@ root layout and renders route content through `Outlet`.
 | `/profile` | `Profile` | Protected |
 | `/levels` | `Levels` | Protected |
 | `/topics` | `Topics` | Protected |
-| `/topics/:blockId` | `TopicItems` | Protected |
+| `/topics/:topicId` | `TopicItems` | Protected |
 | `/grammar` | `Grammar` | Protected |
 | `/vocabulary` | `Vocabulary` | Protected |
 | `/pronunciation` | `PronunciationOverviewPage` | Protected |

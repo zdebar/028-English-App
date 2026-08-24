@@ -6,6 +6,8 @@ const mocks = vi.hoisted(() => ({
   bulkDelete: vi.fn(),
   equalsDelete: vi.fn(),
   blockEqualsToArray: vi.fn(),
+  topicEqualsToArray: vi.fn(),
+  topicModify: vi.fn(),
   masteredBlockToArray: vi.fn(),
   userBlockGet: vi.fn(),
   itemIdModify: vi.fn(),
@@ -177,6 +179,17 @@ vi.mock('@/database/models/db', () => ({
           return {
             equals: () => ({
               toArray: (...args: unknown[]) => mocks.blockEqualsToArray(...args),
+            }),
+          };
+        }
+        if (field === '[user_id+topic_id]') {
+          return {
+            equals: () => ({
+              filter: (predicate: (item: any) => boolean) => ({
+                toArray: async (...args: unknown[]) =>
+                  ((await mocks.topicEqualsToArray(...args)) ?? []).filter(predicate),
+              }),
+              modify: (...args: unknown[]) => mocks.topicModify(...args),
             }),
           };
         }
@@ -531,19 +544,19 @@ describe('UserItem', () => {
         item_id: 3,
         is_vocabulary: 1,
         audio: 'three.opus',
-        curriculum_sort_path: [2, 1, 1],
+        curriculum_sort_path: [2, 1, 1, 1],
       },
       {
         item_id: 2,
         is_vocabulary: 0,
         audio: 'grammar.opus',
-        curriculum_sort_path: [1, 1, 2],
+        curriculum_sort_path: [1, 1, 1, 2],
       },
       {
         item_id: 1,
         is_vocabulary: 1,
         audio: 'one.opus',
-        curriculum_sort_path: [1, 1, 1],
+        curriculum_sort_path: [1, 1, 1, 1],
       },
     ]);
     mocks.pronunciationMemberships = [
@@ -809,14 +822,6 @@ describe('UserItem', () => {
           progress: 0,
         },
       ]);
-    mocks.userBlockGet
-      .mockResolvedValueOnce({ block_id: 20, requires_initial_training: false })
-      .mockResolvedValueOnce({
-        block_id: 30,
-        requires_initial_training: true,
-        started_at: '1970-01-01T00:00:00.000Z',
-      });
-
     const deck = await UserItem.getReviewDeck('u1', 5);
 
     expect(deck.map((item) => item.item_id)).toEqual([3]);
@@ -947,6 +952,37 @@ describe('UserItem', () => {
     const result = await UserItem.getByBlockId('u1', 3);
 
     expect(result.map((item: any) => item.item_id)).toEqual([1, 2]);
+  });
+
+  it('getStartedByTopicId excludes unstarted items and preserves curriculum order', async () => {
+    mocks.topicEqualsToArray.mockResolvedValue([
+      {
+        item_id: 2,
+        started_at: '2026-08-02T00:00:00.000Z',
+        curriculum_sort_path: [1, 1, 2, 1],
+      },
+      {
+        item_id: 3,
+        started_at: '1970-01-01T00:00:00.000Z',
+        curriculum_sort_path: [1, 1, 1, 2],
+      },
+      {
+        item_id: 1,
+        started_at: '2026-08-01T00:00:00.000Z',
+        curriculum_sort_path: [1, 1, 1, 1],
+      },
+    ]);
+
+    const result = await UserItem.getStartedByTopicId('u1', 4);
+
+    expect(result.map((item) => item.item_id)).toEqual([1, 2]);
+  });
+
+  it('resetItemsByTopicId resets all items assigned to the topic', async () => {
+    mocks.topicModify.mockResolvedValue(3);
+
+    await expect(UserItem.resetItemsByTopicId('u1', 4)).resolves.toBe(3);
+    expect(mocks.topicModify).toHaveBeenCalledOnce();
   });
 
   it('saveNewBlockCompletion does not downgrade skipped item progress', async () => {
@@ -1239,9 +1275,10 @@ describe('UserItem', () => {
           is_practice_item: false,
           has_pronunciation_practice: true,
           sort_order: 2,
-          curriculum_sort_path: [1, 2, 2],
+          curriculum_sort_path: [1, 2, 1, 2],
           note_id: null,
           block_id: 10,
+          topic_id: 3,
           grammar_chunk_id: null,
           progress_cz_to_en: 0,
           progress_en_to_cz: 0,
@@ -1300,8 +1337,9 @@ describe('UserItem', () => {
         is_vocabulary: 1,
         is_practice_item: 0,
         has_pronunciation_practice: 1,
-        curriculum_sort_path: [1, 2, 2],
+        curriculum_sort_path: [1, 2, 1, 2],
         block_id: 10,
+        topic_id: 3,
         grammar_chunk_id: 0,
         started_at: '1970-01-01T00:00:00.000Z',
         next_at_cz_to_en: '1970-01-01T00:00:00.000Z',

@@ -62,7 +62,7 @@ export function useBlockTrainingDeck(
         const nextBlock = initialData?.block ?? (await UserBlock.getByBlockId(userId, blockId));
         if (
           !nextBlock ||
-          nextBlock.is_removed_from_practice ||
+          !nextBlock.is_practice_block ||
           nextBlock.started_at !== config.database.nullReplacementDate
         ) {
           if (mounted) setBlock(null);
@@ -70,11 +70,15 @@ export function useBlockTrainingDeck(
         }
 
         const blockItems = initialData?.items ?? (await UserItem.getByBlockId(userId, blockId));
+        if (blockItems.length === 0) {
+          if (mounted) setBlock(null);
+          return;
+        }
         const entries = initialData?.entries ?? (await resolvePracticeEntries(userId, blockItems));
         const grammarContext = initialData
           ? { grammar: initialData.grammar, grammarGroup: initialData.grammarGroup }
           : await resolvePracticeGrammarContext(userId, nextBlock.grammar_chunk_id);
-        const existing = await PracticeSession.getActive(userId);
+        const existing = await PracticeSession.reconcileActive(userId);
         if (existing && (existing.mode !== 'new' || existing.block_id !== blockId)) {
           throw new Error('Another practice session is already active.');
         }

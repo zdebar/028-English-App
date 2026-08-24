@@ -70,16 +70,25 @@ CREATE TABLE IF NOT EXISTS blocks (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
   note TEXT,
-  show_in_topics BOOLEAN NOT NULL DEFAULT TRUE,
-  is_removed_from_practice BOOLEAN NOT NULL DEFAULT FALSE,
+  lesson_id INTEGER REFERENCES lessons(id) ON DELETE RESTRICT,
+  is_practice_block BOOLEAN NOT NULL DEFAULT TRUE,
   grammar_chunk_id INTEGER REFERENCES grammar_chunks(id) ON DELETE RESTRICT,
-  sort_order INTEGER CHECK (sort_order >= 1),
+  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ,
   CONSTRAINT blocks_sort_order_key
-    UNIQUE (sort_order) DEFERRABLE INITIALLY DEFERRED,
-  CONSTRAINT blocks_active_practice_order_check
-    CHECK (is_removed_from_practice = TRUE OR sort_order IS NOT NULL)
+    UNIQUE (sort_order) DEFERRABLE INITIALLY DEFERRED
+);
+
+CREATE TABLE IF NOT EXISTS topics (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE,
+  note TEXT,
+  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  deleted_at TIMESTAMPTZ,
+  CONSTRAINT topics_sort_order_key
+    UNIQUE (sort_order) DEFERRABLE INITIALLY DEFERRED
 );
 
 CREATE TABLE IF NOT EXISTS user_blocks (
@@ -108,15 +117,15 @@ CREATE TABLE IF NOT EXISTS items (
   pronunciation TEXT,
   audio TEXT,
   note_id INTEGER REFERENCES notes(id) ON DELETE SET NULL,
-  lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE RESTRICT,
   grammar_chunk_id INTEGER REFERENCES grammar_chunks(id) ON DELETE RESTRICT,
   is_vocabulary BOOLEAN NOT NULL,
   sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
   block_id INTEGER NOT NULL REFERENCES blocks(id) ON DELETE RESTRICT,
+  topic_id INTEGER REFERENCES topics(id) ON DELETE SET NULL,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ,
-  CONSTRAINT items_lesson_sort_order_key
-    UNIQUE (lesson_id, sort_order) DEFERRABLE INITIALLY DEFERRED
+  CONSTRAINT items_block_sort_order_key
+    UNIQUE (block_id, sort_order) DEFERRABLE INITIALLY DEFERRED
 );
 
 CREATE TABLE IF NOT EXISTS pronunciation_groups (
@@ -221,7 +230,7 @@ CREATE INDEX IF NOT EXISTS idx_lessons_level_id ON public.lessons (level_id);
 CREATE INDEX IF NOT EXISTS idx_blocks_grammar_chunk_id ON public.blocks (grammar_chunk_id);
 CREATE INDEX IF NOT EXISTS idx_items_note_id ON public.items (note_id);
 CREATE INDEX IF NOT EXISTS idx_items_block_id ON public.items (block_id);
-CREATE INDEX IF NOT EXISTS idx_items_lesson_id ON public.items (lesson_id);
+CREATE INDEX IF NOT EXISTS idx_items_topic_id ON public.items (topic_id);
 CREATE INDEX IF NOT EXISTS idx_items_grammar_chunk_id ON public.items (grammar_chunk_id);
 CREATE INDEX IF NOT EXISTS idx_pronunciation_group_items_item_id
   ON public.pronunciation_group_items (item_id);

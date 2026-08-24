@@ -2,7 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  getActive: vi.fn(),
+  reconcileActive: vi.fn(),
   startNew: vi.fn(),
   put: vi.fn(),
   resetQuestionState: vi.fn(),
@@ -16,7 +16,7 @@ vi.mock('@/config/config', () => ({
 }));
 vi.mock('@/database/models/practice-sessions', () => ({
   default: {
-    getActive: (...args: unknown[]) => mocks.getActive(...args),
+    reconcileActive: (...args: unknown[]) => mocks.reconcileActive(...args),
     startNew: (...args: unknown[]) => mocks.startNew(...args),
     put: (...args: unknown[]) => mocks.put(...args),
     completeNewBlock: vi.fn(),
@@ -51,8 +51,8 @@ vi.mock('@/features/logging/monitoring-handler', () => ({ reportError: vi.fn() }
 import { useBlockTrainingDeck } from '../hooks/use-block-training-deck';
 
 const block = {
-  user_id: 'u1', block_id: 10, name: 'Block', note: null, grammar_chunk_id: null,
-  sort_order: 1, show_in_topics: true, is_removed_from_practice: false,
+  user_id: 'u1', block_id: 10, name: 'Block', note: null, lesson_id: 1, grammar_chunk_id: null,
+  sort_order: 1, is_practice_block: true,
   started_at: '1970-01-01T00:00:00.000Z', updated_at: '2026-01-01', deleted_at: '',
 };
 const items = [item(1), item(2)];
@@ -67,7 +67,7 @@ const initialData = {
 describe('useBlockTrainingDeck', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.getActive.mockResolvedValue(null);
+    mocks.reconcileActive.mockResolvedValue(null);
     mocks.startNew.mockResolvedValue(newSession());
     mocks.put.mockResolvedValue(undefined);
   });
@@ -86,7 +86,7 @@ describe('useBlockTrainingDeck', () => {
   });
 
   it('restores a randomized phase without reshuffling its saved queue', async () => {
-    mocks.getActive.mockResolvedValue({
+    mocks.reconcileActive.mockResolvedValue({
       ...newSession(),
       phase: 2,
       current_queue_item_ids: [2, 1],
@@ -112,8 +112,8 @@ function item(itemId: number) {
     user_id: 'u1', item_id: itemId, czech: `cz${itemId}`, english: `en${itemId}`,
     pronunciation: '', audio: null, is_vocabulary: 1 as const, is_practice_item: 1 as const,
     has_pronunciation_practice: 0 as const, sort_order: itemId,
-    curriculum_sort_path: [1, 1, itemId] as [number, number, number], note_id: null,
-    block_id: 10, grammar_chunk_id: 0, progress_cz_to_en: 0, progress_en_to_cz: 0,
+    curriculum_sort_path: [1, 1, 1, itemId] as [number, number, number, number], note_id: null,
+    block_id: 10, topic_id: -1, grammar_chunk_id: 0, progress_cz_to_en: 0, progress_en_to_cz: 0,
     progress_history: [], started_at: '1970-01-01T00:00:00.000Z', updated_at: '2026-01-01',
     deleted_at: '', next_at_cz_to_en: '1970-01-01T00:00:00.000Z',
     next_at_en_to_cz: '1970-01-01T00:00:00.000Z', mastered_at_cz_to_en: '',

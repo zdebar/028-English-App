@@ -12,7 +12,10 @@ const mocks = vi.hoisted(() => ({
   unsubscribes: [] as ReturnType<typeof vi.fn>[],
   getReadyReviewState: vi.fn(),
   getNextUnstartedPracticeBlock: vi.fn().mockResolvedValue(null),
-  getActiveSession: vi.fn().mockResolvedValue(null),
+  inspectActiveSession: vi
+    .fn()
+    .mockResolvedValue({ activeSession: null, requiresReconciliation: false }),
+  reconcileActiveSession: vi.fn().mockResolvedValue(null),
   getPronunciationPracticeCount: vi.fn(),
   reportError: vi.fn(),
 }));
@@ -45,7 +48,10 @@ vi.mock('@/database/models/user-blocks', () => ({
   },
 }));
 vi.mock('@/database/models/practice-sessions', () => ({
-  default: { getActive: (...args: unknown[]) => mocks.getActiveSession(...args) },
+  default: {
+    inspectActive: (...args: unknown[]) => mocks.inspectActiveSession(...args),
+    reconcileActive: (...args: unknown[]) => mocks.reconcileActiveSession(...args),
+  },
 }));
 vi.mock('@/features/logging/monitoring-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
@@ -85,6 +91,8 @@ describe('usePracticeAvailabilityStoreSync', () => {
     await mocks.queries[0]();
     await mocks.queries[1]();
     expect(mocks.getReadyReviewState).toHaveBeenCalledWith('u1');
+    expect(mocks.inspectActiveSession).toHaveBeenCalledWith('u1');
+    expect(mocks.reconcileActiveSession).not.toHaveBeenCalled();
     expect(mocks.getPronunciationPracticeCount).toHaveBeenCalledWith('u1');
 
     act(() => {
@@ -92,6 +100,7 @@ describe('usePracticeAvailabilityStoreSync', () => {
         review: { readyCount: 3, schedule: [] },
         nextBlockId: null,
         activeSession: null,
+        requiresSessionReconciliation: false,
       });
       mocks.observers[1].next(2);
     });
@@ -100,6 +109,23 @@ describe('usePracticeAvailabilityStoreSync', () => {
       practiceLoading: false,
       pronunciationCount: 2,
       pronunciationLoading: false,
+    });
+  });
+
+  it('reconciles an invalid stored session outside the live query', async () => {
+    renderHook(() => usePracticeAvailabilityStoreSync('u1'));
+
+    act(() => {
+      mocks.observers[0].next({
+        review: { readyCount: 0, schedule: [] },
+        nextBlockId: 1,
+        activeSession: null,
+        requiresSessionReconciliation: true,
+      });
+    });
+
+    await vi.waitFor(() => {
+      expect(mocks.reconcileActiveSession).toHaveBeenCalledWith('u1');
     });
   });
 

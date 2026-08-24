@@ -16,6 +16,7 @@ RETURNS TABLE (
   curriculum_sort_path INTEGER[],
   note_id INTEGER,
   block_id INTEGER,
+  topic_id INTEGER,
   grammar_chunk_id INTEGER,
   progress_cz_to_en INTEGER,
   progress_en_to_cz INTEGER,
@@ -44,14 +45,15 @@ BEGIN
     i.pronunciation,
     i.audio,
     i.is_vocabulary,
-    NOT b.is_removed_from_practice AS is_practice_item,
+    b.is_practice_block AS is_practice_item,
     COALESCE(ui.has_pronunciation_practice, FALSE)
       AS has_pronunciation_practice,
     i.sort_order,
-    ARRAY[lv.sort_order, le.sort_order, i.sort_order]::INTEGER[]
+    ARRAY[lv.sort_order, le.sort_order, b.sort_order, i.sort_order]::INTEGER[]
       AS curriculum_sort_path,
     i.note_id,
     i.block_id,
+    i.topic_id,
     i.grammar_chunk_id,
     COALESCE(ui.progress_cz_to_en, 0) AS progress_cz_to_en,
     COALESCE(ui.progress_en_to_cz, 0) AS progress_en_to_cz,
@@ -63,12 +65,12 @@ BEGIN
     ui.next_at_en_to_cz,
     ui.mastered_at_cz_to_en,
     ui.mastered_at_en_to_cz,
-    i.lesson_id
+    b.lesson_id
   FROM public.items i
   JOIN public.blocks b
     ON b.id = i.block_id
   JOIN public.lessons le
-    ON le.id = i.lesson_id
+    ON le.id = b.lesson_id
   JOIN public.levels lv
     ON lv.id = le.level_id
   LEFT JOIN public.user_items ui

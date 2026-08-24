@@ -7,10 +7,10 @@ RETURNS TABLE (
   block_id INTEGER,
   name TEXT,
   note TEXT,
+  lesson_id INTEGER,
   grammar_chunk_id INTEGER,
   sort_order INTEGER,
-  show_in_topics BOOLEAN,
-  is_removed_from_practice BOOLEAN,
+  is_practice_block BOOLEAN,
   started_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ,
   deleted_at TIMESTAMPTZ
@@ -27,10 +27,10 @@ BEGIN
     b.id AS block_id,
     b.name,
     b.note,
+    b.lesson_id,
     b.grammar_chunk_id,
     b.sort_order,
-    b.show_in_topics,
-    b.is_removed_from_practice,
+    b.is_practice_block,
     ub.started_at,
     GREATEST(
       COALESCE(ub.updated_at, public.rpc_min_timestamptz()),
@@ -45,7 +45,7 @@ BEGIN
       COALESCE(ub.updated_at, public.rpc_min_timestamptz()),
       b.updated_at
     ) > COALESCE(p_last_synced_at, public.rpc_min_timestamptz())
-  ORDER BY b.sort_order ASC NULLS LAST, b.id ASC;
+  ORDER BY b.sort_order ASC, b.id ASC;
 END;
 $$;
 
