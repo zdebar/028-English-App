@@ -20,7 +20,6 @@ export default function PracticeCard({ initialDeck }: Readonly<{ initialDeck?: P
     note,
     grammar,
     progress,
-    sessionCount,
     celebratingStar,
     finishedReview,
     isCzToEn,
@@ -63,7 +62,6 @@ export default function PracticeCard({ initialDeck }: Readonly<{ initialDeck?: P
       note={note}
       grammar={grammar}
       progressLabel={progress}
-      sessionProgress={sessionCount}
       celebratingStar={celebratingStar}
       isCzToEn={isCzToEn}
       revealed={revealed}

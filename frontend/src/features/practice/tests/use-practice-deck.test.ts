@@ -62,19 +62,18 @@ describe('usePracticeDeck', () => {
     mocks.recordReviewAnswer.mockResolvedValue({ completedCount: 8, earnedStar: false });
   });
 
-  it('restores review progress independently of the fetched five-item deck', async () => {
+  it('starts the persisted review independently of the fetched deck', async () => {
     const { result } = renderHook(() => usePracticeDeck('u1'));
-    await waitFor(() => expect(result.current.sessionCount).toBe(7));
+    await waitFor(() => expect(mocks.startReview).toHaveBeenCalledWith('u1'));
     expect(result.current.currentItem?.item_id).toBe(1);
     expect(result.current.progress).toBe(0);
   });
 
   it('persists every answer before advancing to the next deck item', async () => {
     const { result } = renderHook(() => usePracticeDeck('u1'));
-    await waitFor(() => expect(result.current.sessionCount).toBe(7));
+    await waitFor(() => expect(mocks.startReview).toHaveBeenCalledWith('u1'));
     await act(async () => result.current.nextItem('correct'));
     expect(mocks.recordReviewAnswer).toHaveBeenCalledOnce();
-    expect(result.current.sessionCount).toBe(8);
     expect(result.current.currentItem?.item_id).toBe(2);
   });
 });

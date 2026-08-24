@@ -243,7 +243,6 @@ export function useBlockTrainingDeck(
     note: currentEntry?.note ?? null,
     practiceGrammar: currentEntry?.grammar ?? null,
     progressLabel: `${phase + 1}/4 · ${session?.completed_count ?? 0}/${items.length}`,
-    sessionProgress: session?.completed_count ?? 0,
     isCzToEn,
     revealed,
     czech: cardState.czech,

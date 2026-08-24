@@ -15,7 +15,6 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
   const [array, setArray] = useState<PracticeDeckEntry[]>([]);
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
-  const [sessionCount, setSessionCount] = useState(0);
   const [celebratingStar, setCelebratingStar] = useState(false);
   const [saveError, setSaveError] = useState<Error | null>(null);
   const [finishedReview, setFinishedReview] = useState(false);
@@ -56,7 +55,6 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
       const availability = await UserItem.getReadyReviewState(userId);
       if (availability.readyCount >= config.practice.reviewStarSize) {
         await PracticeSession.continueReview(userId);
-        setSessionCount(0);
         setCelebratingStar(false);
         completionPending.current = false;
         invalidateRouteData(routeDataKey('practice', userId));
@@ -81,7 +79,6 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
     void PracticeSession.startReview(userId)
       .then((session) => {
         if (!active || session.mode !== 'review') return;
-        setSessionCount(session.completed_count);
         if (session.completed_count >= session.target_count) {
           void finalizeCompletedSession();
         }
@@ -107,7 +104,6 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
 
       try {
         const result = await PracticeSession.recordReviewAnswer(updatedItem, dateTime);
-        setSessionCount(result.completedCount);
         if (result.earnedStar) {
           await finalizeCompletedSession();
           return;
@@ -147,7 +143,6 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
     note: currentEntry?.note ?? null,
     grammar: currentEntry?.grammar ?? null,
     progress: getPracticeProgress(currentItem),
-    sessionCount,
     celebratingStar,
     finishedReview,
     isCzToEn,

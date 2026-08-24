@@ -1,5 +1,5 @@
 import Notification from '@/components/UI/Notification';
-import { FullStar, STAR_SIZE } from '@/components/UI/StarProgress';
+import { FullStar } from '@/components/UI/StarProgress';
 import DelayedNotification from '@/components/UI/DelayedNotification';
 import SecondaryControlButton from '@/components/UI/buttons/SecondaryControlButton';
 import BookIcon from '@/components/UI/icons/BookIcon';
@@ -10,14 +10,11 @@ import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import InfoButton from '@/features/notes/InfoButton';
 import NoteDetailCard from '@/features/notes/NoteDetailCard';
-import { useUserStore } from '@/features/user-stats/use-user-store';
 import { TEXTS } from '@/locales/cs';
 import HintButton from './buttons/HintButton';
 import KnownButton from './buttons/KnownButton';
 import MasterItemButton from './buttons/MasterItemButton';
 import RepeatButton from './buttons/RepeatButton';
-import PracticeStarsRow from './components/PracticeStarsRow';
-import { usePracticeStars } from './hooks/use-practice-stars';
 import PronunciationToggleButton from '@/features/pronunciation/PronunciationToggleButton';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import type { UserItemLocal } from '@/types/user-item.types';
@@ -54,7 +51,6 @@ export type PracticeSessionCardProps = Readonly<{
   pronunciationItem?: UserItemLocal | null;
   nextPronunciation?: () => void;
   onPronunciationSelectionChange?: (selected: boolean) => void;
-  sessionProgress?: number;
   celebratingStar?: boolean;
 }>;
 
@@ -191,17 +187,10 @@ export default function PracticeSessionCard({
   pronunciationItem = null,
   nextPronunciation,
   onPronunciationSelectionChange,
-  sessionProgress = 0,
   celebratingStar = false,
 }: PracticeSessionCardProps) {
   const userId = useAuthStore((state) => state.userId);
-  const dailyStarCount = useUserStore((state) => state.dailyStarCount);
   const [visibleDetail, setVisibleDetail] = useState<'grammar' | 'note' | null>(null);
-
-  const { starChunk, starsPerRow, starCount, displayedChunkCount } = usePracticeStars(
-    dailyStarCount,
-    sessionProgress,
-  );
 
   const cardText = revealed ? undefined : TEXTS.reveal;
   const cardStyle = revealed ? 'color-audio-disabled' : 'color-button';
@@ -255,7 +244,7 @@ export default function PracticeSessionCard({
         )}
         <button
           type="button"
-          className={`relative grid h-full w-full grow cursor-pointer grid-rows-[3.5rem_minmax(0,1fr)_3.5rem] items-center p-4 text-inherit select-none ${cardStyle} `}
+          className={`relative grid h-full w-full grow cursor-pointer grid-rows-[2rem_minmax(0,1fr)_3.5rem] items-center p-4 text-inherit select-none ${cardStyle} `}
           onClick={handleReveal}
           title={cardText}
           aria-disabled={revealed}
@@ -264,17 +253,12 @@ export default function PracticeSessionCard({
           {!revealed && !showDirectionChange && (
             <HelpText className="top-23 left-1/2 -translate-x-1/2">{TEXTS.reveal}</HelpText>
           )}
-          <div id="top-bar" className="relative grid h-14 w-full grid-rows-2 text-center">
-            <div className="flex min-h-0 items-center justify-center">
-              <TopBarPrimaryContent
-                isBlockTrainingPractice={isBlockTrainingPractice}
-                isPronunciationPractice={isPronunciationPractice}
-                shortDirectionText={shortDirectionText}
-              />
-            </div>
-            <div className="flex min-h-0 items-center justify-center">
-              <AudioStatusMessage audioError={audioError} audioLoading={audioLoading} />
-            </div>
+          <div id="top-bar" className="relative flex h-8 w-full items-center justify-center text-center">
+            <TopBarPrimaryContent
+              isBlockTrainingPractice={isBlockTrainingPractice}
+              isPronunciationPractice={isPronunciationPractice}
+              shortDirectionText={shortDirectionText}
+            />
           </div>
           <div
             id="practice-main-content"
@@ -307,25 +291,9 @@ export default function PracticeSessionCard({
             <HelpText className="bottom-7.5">
               {isBlockTrainingPractice ? TEXTS.blockTrainingProgressHelp : TEXTS.progress}
             </HelpText>
-            {!isPronunciationPractice && (
-              <>
-                <div
-                  className="relative flex items-center gap-2 px-2 font-light"
-                  title={TEXTS.nextStarProgress}
-                >
-                  <PracticeStarsRow
-                    starCount={starCount}
-                    displayedChunkCount={displayedChunkCount}
-                    starChunk={starChunk}
-                    starsPerRow={starsPerRow}
-                    size={STAR_SIZE}
-                  />
-                </div>
-                <HelpText className="right-0 bottom-7.5 flex flex-col items-end">
-                  {TEXTS.nextStarProgress}
-                </HelpText>
-              </>
-            )}
+            <div className="flex min-h-0 items-center justify-end px-2 text-right">
+              <AudioStatusMessage audioError={audioError} audioLoading={audioLoading} />
+            </div>
           </div>
         </button>
         <div

@@ -72,7 +72,6 @@ export default function BlockTrainingPractice(): JSX.Element {
       note={deck.note}
       grammar={deck.practiceGrammar}
       progressLabel={deck.progressLabel}
-      sessionProgress={deck.sessionProgress}
       celebratingStar={deck.celebratingStar}
       isCzToEn={deck.isCzToEn}
       revealed={deck.revealed}
