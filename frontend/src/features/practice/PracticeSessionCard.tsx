@@ -238,10 +238,7 @@ export default function PracticeSessionCard({
 
   return (
     <div className="bottom-controls-clearance relative flex min-h-0 w-full grow flex-col items-center">
-      <div
-        className="card-width card-height relative gap-1"
-        aria-busy={celebratingStar}
-      >
+      <div className="card-width card-height relative gap-1" aria-busy={celebratingStar}>
         {celebratingStar && (
           <button
             type="button"
@@ -257,7 +254,7 @@ export default function PracticeSessionCard({
             >
               <span>{TEXTS.starEarned}</span>
               <FullStar className={`star-fill-${celebrationStarTier}`} size={32} />
-              <span className="text-sm font-normal">{TEXTS.continueAfterStar}</span>
+              <span className="font-normal">{TEXTS.continueAfterStar}</span>
             </span>
           </button>
         )}
