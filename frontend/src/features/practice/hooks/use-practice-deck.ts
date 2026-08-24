@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { PracticeDeckEntry, PracticeOutcome } from '@/types/user-item.types';
 import { useFetch } from '@/hooks/use-fetch';
 import UserItem from '@/database/models/user-items';
@@ -48,7 +48,7 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
   const cardState = usePracticeCardState({ currentItem, isCzToEn, revealed, setRevealed });
   const resetHint = cardState.resetHint;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setIndex(0);
     setRevealed(false);
     resetHint();
