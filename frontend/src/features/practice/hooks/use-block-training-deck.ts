@@ -1,16 +1,16 @@
 import config from '@/config/config';
+import Block from '@/database/models/blocks';
 import PracticeSession from '@/database/models/practice-sessions';
-import UserBlock from '@/database/models/user-blocks';
 import UserItem from '@/database/models/user-items';
 import type { GrammarDetail } from '@/features/grammar/GrammarDetailCard';
 import { reportError } from '@/features/logging/monitoring-handler';
-import type { GrammarChunkType, GrammarGroupType, UserBlockType } from '@/types/generic.types';
+import type { BlockType, GrammarChunkType, GrammarGroupType } from '@/types/generic.types';
 import type { NewPracticePhase, PracticeSessionType } from '@/types/practice-session.types';
 import type { ResolvedPracticeEntry, UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
-import type { BlockTrainingData } from '@/routing/route-data';
+import type { InitialTrainingData } from '@/routing/route-data';
 import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff';
 import { resolvePracticeEntries, resolvePracticeGrammarContext } from '@/database/utils/practice-content.utils';
 import { getStarTierForCount, type StarTier } from '@/utils/star-progress.utils';
@@ -31,12 +31,11 @@ function toGrammarDetail(grammar: GrammarChunkType | null | undefined): GrammarD
   return { ...grammar, kind: 'chunk' };
 }
 
-export function useBlockTrainingDeck(
+export function useInitialTrainingDeck(
   userId: string | null,
-  blockId: number | null,
-  initialData?: BlockTrainingData,
+  initialData?: InitialTrainingData,
 ) {
-  const [block, setBlock] = useState<UserBlockType | null>(initialData?.block ?? null);
+  const [block, setBlock] = useState<BlockType | null>(initialData?.block ?? null);
   const [items, setItems] = useState<UserItemLocal[]>(initialData?.items ?? []);
   const [resolvedEntries, setResolvedEntries] = useState<Array<ResolvedPracticeEntry<UserItemLocal>>>(
     initialData?.entries ?? [],
@@ -53,7 +52,7 @@ export function useBlockTrainingDeck(
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (!userId || blockId == null) {
+    if (!userId) {
       setLoading(false);
       return;
     }
@@ -61,34 +60,30 @@ export function useBlockTrainingDeck(
     let mounted = true;
     const load = async () => {
       try {
-        const nextBlock = initialData?.block ?? (await UserBlock.getByBlockId(userId, blockId));
-        if (
-          !nextBlock ||
-          !nextBlock.is_practice_block ||
-          nextBlock.started_at !== config.database.nullReplacementDate
-        ) {
-          if (mounted) setBlock(null);
-          return;
-        }
-
-        const blockItems = initialData?.items ?? (await UserItem.getByBlockId(userId, blockId));
+        const selection = initialData
+          ? { blockId: initialData.block?.id ?? null, items: initialData.items }
+          : await UserItem.getNextInitialTrainingSelection(userId);
+        const nextBlock = initialData?.block ??
+          (selection?.blockId == null ? null : await Block.getById(selection.blockId));
+        const blockItems = selection?.items ?? [];
         if (blockItems.length === 0) {
-          if (mounted) setBlock(null);
+          if (mounted) setItems([]);
           return;
         }
         const entries = initialData?.entries ?? (await resolvePracticeEntries(userId, blockItems));
         const grammarContext = initialData
           ? { grammar: initialData.grammar, grammarGroup: initialData.grammarGroup }
-          : await resolvePracticeGrammarContext(userId, nextBlock.grammar_chunk_id);
+          : await resolvePracticeGrammarContext(userId, nextBlock?.grammar_chunk_id);
         const existing = await PracticeSession.reconcileActive(userId);
-        if (existing && (existing.mode !== 'new' || existing.block_id !== blockId)) {
+        const selectedBlockId = nextBlock?.id ?? null;
+        if (existing && (existing.mode !== 'new' || existing.block_id !== selectedBlockId)) {
           throw new Error('Another practice session is already active.');
         }
         const activeSession =
           existing ??
           (await PracticeSession.startNew(
             userId,
-            blockId,
+            selectedBlockId,
             blockItems.map((item) => item.item_id),
           ));
         if (!mounted) return;
@@ -109,7 +104,7 @@ export function useBlockTrainingDeck(
     return () => {
       mounted = false;
     };
-  }, [blockId, initialData, userId]);
+  }, [initialData, userId]);
 
   const itemById = useMemo(
     () => new Map(items.map((item) => [item.item_id, item])),
@@ -127,10 +122,14 @@ export function useBlockTrainingDeck(
   const resetQuestionState = cardState.resetQuestionState;
 
   const finishBlock = useCallback(async () => {
-    if (!userId || !block) return;
+    if (!userId || items.length === 0) return;
     const dateTime = new Date(Date.now()).toISOString();
-    const starCount = await PracticeSession.completeNewBlock(userId, block.block_id, dateTime);
-    invalidateRouteData(routeDataKey('block-training', userId, block.block_id));
+    const starCount = await PracticeSession.completeInitialTraining(
+      userId,
+      items.map((item) => item.item_id),
+      dateTime,
+    );
+    invalidateRouteData(routeDataKey('initial-training', userId));
     invalidateRouteData(routeDataKey('practice', userId));
     setCelebrationStarTier(getStarTierForCount(starCount, config.practice.starsPerRow));
     setCelebratingStar(true);
@@ -138,7 +137,7 @@ export function useBlockTrainingDeck(
       globalThis.setTimeout(resolve, config.practice.starCelebrationDurationMs);
     });
     setIsComplete(true);
-  }, [block, userId]);
+  }, [items, userId]);
 
   const moveToNextPhase = useCallback(
     async (currentSession: PracticeSessionType): Promise<PracticeSessionType | null> => {
@@ -235,6 +234,7 @@ export function useBlockTrainingDeck(
   return {
     block,
     items,
+    hasContent: items.length > 0,
     grammar,
     grammarGroup,
     isComplete,

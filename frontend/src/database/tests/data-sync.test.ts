@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
   withSettledSummary: vi.fn(),
   userScoreSyncFromRemote: vi.fn(),
   userItemSyncFromRemote: vi.fn(),
-  userBlockSyncFromRemote: vi.fn(),
+  blockSyncFromRemote: vi.fn(),
   grammarSyncFromRemote: vi.fn(),
   levelsSyncFromRemote: vi.fn(),
   lessonsSyncFromRemote: vi.fn(),
@@ -64,9 +64,9 @@ vi.mock('@/database/models/user-items', () => ({
   },
 }));
 
-vi.mock('@/database/models/user-blocks', () => ({
+vi.mock('@/database/models/blocks', () => ({
   default: {
-    syncFromRemote: (...args: unknown[]) => mocks.userBlockSyncFromRemote(...args),
+    syncFromRemote: (...args: unknown[]) => mocks.blockSyncFromRemote(...args),
   },
 }));
 
@@ -149,7 +149,7 @@ describe('data-sync.utils', () => {
 
     mocks.userScoreSyncFromRemote.mockResolvedValue(undefined);
     mocks.userItemSyncFromRemote.mockResolvedValue(undefined);
-    mocks.userBlockSyncFromRemote.mockResolvedValue(undefined);
+    mocks.blockSyncFromRemote.mockResolvedValue(undefined);
     mocks.grammarSyncFromRemote.mockResolvedValue(undefined);
     mocks.levelsSyncFromRemote.mockResolvedValue(undefined);
     mocks.lessonsSyncFromRemote.mockResolvedValue(undefined);
@@ -173,7 +173,7 @@ describe('data-sync.utils', () => {
 
     expect(mocks.userScoreSyncFromRemote).toHaveBeenCalledWith('u1', true);
     expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', true);
-    expect(mocks.userBlockSyncFromRemote).toHaveBeenCalledWith('u1', true);
+    expect(mocks.blockSyncFromRemote).toHaveBeenCalledWith(true);
     expect(mocks.grammarSyncFromRemote).toHaveBeenCalledWith(true);
     expect(mocks.levelsSyncFromRemote).toHaveBeenCalledWith(true);
     expect(mocks.lessonsSyncFromRemote).toHaveBeenCalledWith(true);
@@ -192,7 +192,7 @@ describe('data-sync.utils', () => {
 
     expect(mocks.userScoreSyncFromRemote).toHaveBeenCalledWith('u1', false);
     expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', false);
-    expect(mocks.userBlockSyncFromRemote).toHaveBeenCalledWith('u1', false);
+    expect(mocks.blockSyncFromRemote).toHaveBeenCalledWith(false);
     expect(mocks.grammarSyncFromRemote).toHaveBeenCalledWith(false);
     expect(mocks.levelsSyncFromRemote).toHaveBeenCalledWith(false);
     expect(mocks.lessonsSyncFromRemote).toHaveBeenCalledWith(false);
@@ -214,7 +214,6 @@ describe('data-sync.utils', () => {
 
     expect(mocks.userScoreSyncFromRemote).toHaveBeenCalledWith('u1', false);
     expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', false);
-    expect(mocks.userBlockSyncFromRemote).toHaveBeenCalledWith('u1', false);
   });
 
   it('dataSyncOnUnmount does nothing when no auth session exists', async () => {
@@ -224,7 +223,6 @@ describe('data-sync.utils', () => {
 
     expect(mocks.userScoreSyncFromRemote).not.toHaveBeenCalled();
     expect(mocks.userItemSyncFromRemote).not.toHaveBeenCalled();
-    expect(mocks.userBlockSyncFromRemote).not.toHaveBeenCalled();
   });
 
   it('splitDeleted splits records into upsert and delete groups', () => {

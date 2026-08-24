@@ -17,7 +17,7 @@ vi.mock('@/routing/data-navigation', () => ({
 }));
 vi.mock('@/routing/route-data', () => ({
   practiceDeckDescriptor: () => ({ key: 'practice', load: vi.fn() }),
-  blockTrainingDescriptor: () => ({ key: 'new', load: vi.fn() }),
+  initialTrainingDescriptor: () => ({ key: 'new', load: vi.fn() }),
 }));
 
 import PracticeButtons from '@/features/practice/PracticeButton';
@@ -28,7 +28,7 @@ describe('Home practice buttons', () => {
     usePracticeAvailabilityStore.setState({
       reviewCount: 0,
       reviewSchedule: [],
-      nextBlockId: 12,
+      initialTrainingAvailable: true,
       activeSession: null,
       practiceLoading: false,
       practiceError: null,
@@ -62,7 +62,7 @@ describe('Home practice buttons', () => {
   });
 
   it('uses the shared primary disabled style when no new block exists', () => {
-    usePracticeAvailabilityStore.setState({ nextBlockId: null });
+    usePracticeAvailabilityStore.setState({ initialTrainingAvailable: false });
     render(<PracticeButtons userId="u1" />);
     const newButton = button('New');
     expect(newButton.disabled).toBe(true);
@@ -100,7 +100,7 @@ function makeSession(mode: 'review' | 'new') {
     mode,
     completed_count: 4,
     target_count: 20,
-    block_id: mode === 'new' ? 12 : null,
+    block_id: null,
     phase: mode === 'new' ? (0 as const) : null,
     current_queue_item_ids: [],
     retry_queue_item_ids: [],

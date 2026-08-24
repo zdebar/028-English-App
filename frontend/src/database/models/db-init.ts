@@ -6,7 +6,7 @@ import GrammarGroup from '@/database/models/grammar-groups';
 import Lessons from '@/database/models/lessons';
 import Levels from '@/database/models/levels';
 import Metadata from '@/database/models/metadata';
-import UserBlock from '@/database/models/user-blocks';
+import Block from '@/database/models/blocks';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
 import Notes from './notes';
@@ -22,7 +22,7 @@ export async function initDbMappings(): Promise<void> {
   if (isInitialized) return;
 
   db.user_items.mapToClass(UserItem);
-  db.user_blocks.mapToClass(UserBlock);
+  db.blocks.mapToClass(Block);
   db.grammar_groups.mapToClass(GrammarGroup);
   db.grammar_chunks.mapToClass(GrammarChunk);
   db.grammar_chunk_examples.mapToClass(GrammarChunkExample);

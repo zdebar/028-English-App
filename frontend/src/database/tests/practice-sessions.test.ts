@@ -13,8 +13,8 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('@/config/config', () => ({
   default: {
-    database: { nullReplacementDate: '9999-12-31T23:59:59+00:00' },
-    practice: { reviewStarSize: 20 },
+    database: { nullReplacementDate: '9999-12-31T23:59:59+00:00', nullReplacementNumber: 0 },
+    practice: { reviewStarSize: 20, initialTrainingBatchSize: 8 },
   },
 }));
 vi.mock('@/database/models/db', () => ({
@@ -22,10 +22,10 @@ vi.mock('@/database/models/db', () => ({
     user_items: {
       update: (...args: unknown[]) => mocks.itemUpdate(...args),
       where: () => ({
-        equals: () => ({ toArray: (...args: unknown[]) => mocks.blockItems(...args) }),
+        anyOf: () => ({ toArray: (...args: unknown[]) => mocks.blockItems(...args) }),
       }),
     },
-    user_blocks: { get: (...args: unknown[]) => mocks.blockGet(...args) },
+    blocks: { get: (...args: unknown[]) => mocks.blockGet(...args) },
     user_scores: {},
     practice_sessions: {
       get: (...args: unknown[]) => mocks.sessionGet(...args),
@@ -41,8 +41,7 @@ vi.mock('@/database/models/db', () => ({
 vi.mock('@/database/models/user-scores', () => ({
   default: { addStar: (...args: unknown[]) => mocks.addStar(...args) },
 }));
-vi.mock('@/database/models/user-items', () => ({ default: { saveNewBlockCompletion: vi.fn() } }));
-vi.mock('@/database/models/user-blocks', () => ({ default: { completeNewBlock: vi.fn() } }));
+vi.mock('@/database/models/user-items', () => ({ default: { saveInitialTrainingCompletion: vi.fn() } }));
 vi.mock('dexie', () => ({ Entity: class Entity {} }));
 
 import PracticeSession from '@/database/models/practice-sessions';
@@ -81,17 +80,18 @@ describe('PracticeSession review transaction', () => {
       mode: 'new',
       block_id: 7,
       target_count: 2,
+      current_queue_item_ids: [1, 2],
     });
 
     await expect(
-      PracticeSession.completeNewBlock('u1', 7, '2026-08-23T10:00:00.000Z'),
+      PracticeSession.completeInitialTraining('u1', [1, 2], '2026-08-23T10:00:00.000Z'),
     ).resolves.toBe(11);
     expect(mocks.sessionDelete).toHaveBeenCalledWith('u1');
   });
 
   it('rejects a new-block session without items', async () => {
     await expect(PracticeSession.startNew('u1', 1, [])).rejects.toThrow(
-      'New-block practice requires at least one item.',
+      'Initial training requires at least one item.',
     );
     expect(mocks.sessionPut).not.toHaveBeenCalled();
   });
@@ -103,9 +103,7 @@ describe('PracticeSession review transaction', () => {
       completed_item_ids: [], started_at: '2026-08-23', updated_at: '2026-08-23',
     });
     mocks.blockGet.mockResolvedValue({
-      block_id: 1,
-      is_practice_block: true,
-      started_at: '9999-12-31T23:59:59+00:00',
+      id: 1,
     });
 
     await expect(PracticeSession.reconcileActive('u1')).resolves.toBeNull();
@@ -120,14 +118,31 @@ describe('PracticeSession review transaction', () => {
     };
     mocks.sessionGet.mockResolvedValue(session);
     mocks.blockGet.mockResolvedValue({
-      block_id: 1,
-      is_practice_block: true,
-      started_at: '9999-12-31T23:59:59+00:00',
+      id: 1,
     });
-    mocks.blockItems.mockResolvedValue([{ item_id: 1 }, { item_id: 2 }]);
+    mocks.blockItems.mockResolvedValue([
+      { item_id: 1, block_id: 1, deleted_at: '9999-12-31T23:59:59+00:00' },
+      { item_id: 2, block_id: 1, deleted_at: '9999-12-31T23:59:59+00:00' },
+    ]);
 
     await expect(PracticeSession.reconcileActive('u1')).resolves.toBe(session);
     expect(mocks.sessionDelete).not.toHaveBeenCalled();
+  });
+
+  it('removes an automatic session that mixes item types', async () => {
+    const session = {
+      user_id: 'u1', mode: 'new' as const, completed_count: 0, target_count: 2,
+      block_id: null, phase: 0 as const, current_queue_item_ids: [1, 2], retry_queue_item_ids: [],
+      completed_item_ids: [], started_at: '2026-08-23', updated_at: '2026-08-23',
+    };
+    mocks.sessionGet.mockResolvedValue(session);
+    mocks.blockItems.mockResolvedValue([
+      { item_id: 1, block_id: 0, lesson_id: 1, is_vocabulary: 1, deleted_at: '9999-12-31T23:59:59+00:00' },
+      { item_id: 2, block_id: 0, lesson_id: 1, is_vocabulary: 0, deleted_at: '9999-12-31T23:59:59+00:00' },
+    ]);
+
+    await expect(PracticeSession.reconcileActive('u1')).resolves.toBeNull();
+    expect(mocks.sessionDelete).toHaveBeenCalledWith('u1');
   });
 });
 

@@ -1,6 +1,5 @@
 import config from '@/config/config';
 import UserItem from '@/database/models/user-items';
-import UserBlock from '@/database/models/user-blocks';
 import PracticeSession from '@/database/models/practice-sessions';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { liveQuery } from 'dexie';
@@ -26,7 +25,7 @@ export function usePracticeAvailabilityStoreSync(userId: string | null): void {
     usePracticeAvailabilityStore.setState({
       reviewCount: 0,
       reviewSchedule: [],
-      nextBlockId: null,
+      initialTrainingAvailable: false,
       activeSession: null,
       practiceLoading: true,
       practiceError: null,
@@ -36,14 +35,14 @@ export function usePracticeAvailabilityStoreSync(userId: string | null): void {
     });
 
     const readySubscription = liveQuery(async () => {
-      const [review, nextBlock, activeSessionState] = await Promise.all([
+      const [review, nextSelection, activeSessionState] = await Promise.all([
         UserItem.getReadyReviewState(userId),
-        UserBlock.getNextUnstartedPracticeBlock(userId),
+        UserItem.getNextInitialTrainingSelection(userId),
         PracticeSession.inspectActive(userId),
       ]);
       return {
         review,
-        nextBlockId: nextBlock?.block_id ?? null,
+        initialTrainingAvailable: nextSelection != null,
         activeSession: activeSessionState.activeSession,
         requiresSessionReconciliation: activeSessionState.requiresReconciliation,
       };
@@ -53,7 +52,7 @@ export function usePracticeAvailabilityStoreSync(userId: string | null): void {
         usePracticeAvailabilityStore.setState({
           reviewCount: state.review.readyCount,
           reviewSchedule: state.review.schedule,
-          nextBlockId: state.nextBlockId,
+          initialTrainingAvailable: state.initialTrainingAvailable,
           activeSession: state.activeSession,
           practiceLoading: false,
           practiceError: null,
@@ -70,7 +69,7 @@ export function usePracticeAvailabilityStoreSync(userId: string | null): void {
         usePracticeAvailabilityStore.setState({
           reviewCount: 0,
           reviewSchedule: [],
-          nextBlockId: null,
+          initialTrainingAvailable: false,
           activeSession: null,
           practiceLoading: false,
           practiceError: normalizedError,

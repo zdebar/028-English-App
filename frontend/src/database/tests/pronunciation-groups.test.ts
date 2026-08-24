@@ -65,7 +65,7 @@ function item(overrides: Record<string, unknown>) {
     is_vocabulary: 1,
     started_at: '2026-07-01T00:00:00.000Z',
     has_pronunciation_practice: 0,
-    curriculum_sort_path: [1, 1, 1, 1],
+    curriculum_sort_path: [1, 1, 1],
     ...overrides,
   };
 }
@@ -90,11 +90,11 @@ describe('PronunciationGroup', () => {
     ];
     mocks.items = [
       item({ item_id: 1, english: 'man', has_pronunciation_practice: 1 }),
-      item({ item_id: 2, english: 'men', curriculum_sort_path: [1, 1, 1, 2] }),
+      item({ item_id: 2, english: 'men', curriculum_sort_path: [1, 1, 2] }),
       item({
         item_id: 3,
         english: 'mat',
-        curriculum_sort_path: [1, 1, 1, 3],
+        curriculum_sort_path: [1, 1, 3],
         started_at: '1970-01-01T00:00:00.000Z',
       }),
     ];

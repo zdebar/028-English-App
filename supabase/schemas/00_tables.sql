@@ -70,14 +70,11 @@ CREATE TABLE IF NOT EXISTS blocks (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
   note TEXT,
-  lesson_id INTEGER REFERENCES lessons(id) ON DELETE RESTRICT,
-  is_practice_block BOOLEAN NOT NULL DEFAULT TRUE,
+  lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE RESTRICT,
   grammar_chunk_id INTEGER REFERENCES grammar_chunks(id) ON DELETE RESTRICT,
-  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ,
-  CONSTRAINT blocks_sort_order_key
-    UNIQUE (sort_order) DEFERRABLE INITIALLY DEFERRED
+  CONSTRAINT blocks_id_lesson_id_key UNIQUE (id, lesson_id)
 );
 
 CREATE TABLE IF NOT EXISTS topics (
@@ -89,14 +86,6 @@ CREATE TABLE IF NOT EXISTS topics (
   deleted_at TIMESTAMPTZ,
   CONSTRAINT topics_sort_order_key
     UNIQUE (sort_order) DEFERRABLE INITIALLY DEFERRED
-);
-
-CREATE TABLE IF NOT EXISTS user_blocks (
-  block_id INTEGER NOT NULL REFERENCES blocks(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  started_at TIMESTAMPTZ,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  PRIMARY KEY (block_id, user_id)
 );
 
 CREATE TABLE IF NOT EXISTS notes (
@@ -120,12 +109,16 @@ CREATE TABLE IF NOT EXISTS items (
   grammar_chunk_id INTEGER REFERENCES grammar_chunks(id) ON DELETE RESTRICT,
   is_vocabulary BOOLEAN NOT NULL,
   sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
-  block_id INTEGER NOT NULL REFERENCES blocks(id) ON DELETE RESTRICT,
+  lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE RESTRICT,
+  block_id INTEGER,
   topic_id INTEGER REFERENCES topics(id) ON DELETE SET NULL,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ,
-  CONSTRAINT items_block_sort_order_key
-    UNIQUE (block_id, sort_order) DEFERRABLE INITIALLY DEFERRED
+  CONSTRAINT items_lesson_sort_order_key
+    UNIQUE (lesson_id, sort_order) DEFERRABLE INITIALLY DEFERRED,
+  CONSTRAINT items_block_lesson_fkey
+    FOREIGN KEY (block_id, lesson_id)
+    REFERENCES blocks(id, lesson_id) ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS pronunciation_groups (
@@ -226,6 +219,7 @@ EXECUTE FUNCTION public.handle_new_auth_user();
 
 -- CREATE optimalization indexes
 CREATE INDEX IF NOT EXISTS idx_items_updated_at ON public.items (updated_at);
+CREATE INDEX IF NOT EXISTS idx_items_lesson_id ON public.items (lesson_id);
 CREATE INDEX IF NOT EXISTS idx_lessons_level_id ON public.lessons (level_id);
 CREATE INDEX IF NOT EXISTS idx_blocks_grammar_chunk_id ON public.blocks (grammar_chunk_id);
 CREATE INDEX IF NOT EXISTS idx_items_note_id ON public.items (note_id);
@@ -273,10 +267,3 @@ CREATE INDEX IF NOT EXISTS idx_user_items_history_item_id
 CREATE INDEX IF NOT EXISTS idx_user_scores_user_updated_date
   ON public.user_scores (user_id, updated_at, date)
   INCLUDE (star_count, deleted_at);
-
-CREATE INDEX IF NOT EXISTS idx_user_blocks_user_updated_block
-  ON public.user_blocks (user_id, updated_at, block_id)
-  INCLUDE (started_at);
-
-CREATE INDEX IF NOT EXISTS idx_user_blocks_user_block
-  ON public.user_blocks (user_id, block_id);

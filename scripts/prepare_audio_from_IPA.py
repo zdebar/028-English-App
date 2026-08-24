@@ -48,7 +48,7 @@ async def prepare_audio(file_name: str, output_file: str, audio_folder: str, suf
             df[col] = pd.to_numeric(df[col], errors="coerce")
             df[col] = df[col].apply(lambda x: int(x) if pd.notna(x) and x == int(x) else "")
 
-    df.drop(columns=["lesson_id"], errors="ignore").to_csv(output_file, index=False)
+    df.to_csv(output_file, index=False)
     print(f"Processed and saved: {output_file}")
 
 

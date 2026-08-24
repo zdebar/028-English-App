@@ -1,6 +1,6 @@
 import config from '@/config/config';
 import { initDbMappings } from '@/database/models/db-init';
-import UserBlock from '@/database/models/user-blocks';
+import Block from '@/database/models/blocks';
 import UserItem from '@/database/models/user-items';
 import UserScoreType from '@/database/models/user-scores';
 import { restoreUnsavedFromLocalStorage } from '@/database/utils/database.utils';
@@ -49,11 +49,11 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
         GrammarChunkExample.syncFromRemote(true),
         Levels.syncFromRemote(true),
         Lessons.syncFromRemote(true),
+        Block.syncFromRemote(true),
         Notes.syncFromRemote(true),
         Topic.syncFromRemote(true),
         PronunciationGroup.syncFromRemote(true),
         PronunciationGroupItem.syncFromRemote(true),
-        UserBlock.syncFromRemote(userId, true),
         UserScoreType.syncFromRemote(userId, true),
         UserItem.syncFromRemote(userId, true),
       ]
@@ -63,11 +63,11 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
         GrammarChunkExample.syncFromRemote(false),
         Levels.syncFromRemote(false),
         Lessons.syncFromRemote(false),
+        Block.syncFromRemote(false),
         Notes.syncFromRemote(false),
         Topic.syncFromRemote(false),
         PronunciationGroup.syncFromRemote(false),
         PronunciationGroupItem.syncFromRemote(false),
-        UserBlock.syncFromRemote(userId, false),
         UserScoreType.syncFromRemote(userId, false),
         UserItem.syncFromRemote(userId, false),
       ];
@@ -79,11 +79,11 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
     'GrammarChunkExamples',
     'Levels',
     'Lessons',
+    'Blocks',
     'Notes',
     'Topics',
     'PronunciationGroups',
     'PronunciationGroupItems',
-    'UserBlocks',
     'UserScores',
     'UserItems',
   ];
@@ -117,7 +117,7 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
 /**
  * Performs a best-effort incremental sync for user-owned tables during unmount.
  *
- * @param userId User id whose user_blocks, user_scores, and user_items rows should sync.
+ * @param userId User id whose user_scores and user_items rows should sync.
  * @returns Resolves without syncing when there is no active Supabase session.
  * @throws Error when at least one unmount sync task rejects.
  */
@@ -128,7 +128,6 @@ export async function dataSyncOnUnmount(userId: string): Promise<void> {
   }
 
   const results = await Promise.allSettled([
-    UserBlock.syncFromRemote(userId, false),
     UserScoreType.syncFromRemote(userId, false),
     UserItem.syncFromRemote(userId, false),
   ]);

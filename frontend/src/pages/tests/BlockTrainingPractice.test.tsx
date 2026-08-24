@@ -82,7 +82,7 @@ vi.mock('@/features/logging/monitoring-handler', () => ({
 }));
 
 vi.mock('@/features/practice/hooks/use-block-training-deck', () => ({
-  useBlockTrainingDeck: () => mocks.deck,
+  useInitialTrainingDeck: () => mocks.deck,
 }));
 
 vi.mock('@/features/practice/BlockTrainingOverviewCard', () => ({
@@ -207,6 +207,16 @@ describe('BlockTrainingPractice', () => {
     expect(screen.getByTestId('practice-session').textContent).toBe('ahoj:hello');
     expect(screen.queryByTestId('block-training-overview')).toBeNull();
     expect(mocks.overviewRender).not.toHaveBeenCalled();
+  });
+
+  it('starts an automatic batch without rendering an overview', () => {
+    mocks.deck.block = null;
+    mocks.deck.currentItem = { item_id: 1 };
+
+    render(<BlockTrainingPractice />);
+
+    expect(screen.getByTestId('practice-session').textContent).toBe('ahoj:hello');
+    expect(screen.queryByTestId('block-training-overview')).toBeNull();
   });
 
   it('shows the block overview when the training block has no grammar', () => {

@@ -3,7 +3,7 @@ import { ROUTES } from '@/config/routes.config';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { DataNavigationButton } from '@/routing/data-navigation';
-import { blockTrainingDescriptor, practiceDeckDescriptor } from '@/routing/route-data';
+import { initialTrainingDescriptor, practiceDeckDescriptor } from '@/routing/route-data';
 import { usePracticeAvailabilityStore } from './use-practice-availability-store';
 import StyledButton from '@/components/UI/buttons/StyledButton';
 
@@ -11,7 +11,9 @@ type PracticeButtonsProps = Readonly<{ userId: string }>;
 
 export default function PracticeButtons({ userId }: PracticeButtonsProps): JSX.Element {
   const reviewCount = usePracticeAvailabilityStore((state) => state.reviewCount);
-  const nextBlockId = usePracticeAvailabilityStore((state) => state.nextBlockId);
+  const initialTrainingAvailable = usePracticeAvailabilityStore(
+    (state) => state.initialTrainingAvailable,
+  );
   const activeSession = usePracticeAvailabilityStore((state) => state.activeSession);
   const loading = usePracticeAvailabilityStore((state) => state.practiceLoading);
   const error = usePracticeAvailabilityStore((state) => state.practiceError);
@@ -19,8 +21,7 @@ export default function PracticeButtons({ userId }: PracticeButtonsProps): JSX.E
   const activeNew = activeSession?.mode === 'new';
   const reviewAvailable = reviewCount >= config.practice.reviewStarSize;
   const reviewDisabled = Boolean(error) || activeNew || (!loading && !activeReview && !reviewAvailable);
-  const newBlockId = activeNew ? activeSession.block_id : nextBlockId;
-  const newAvailable = !reviewAvailable && newBlockId != null;
+  const newAvailable = activeNew || (!reviewAvailable && initialTrainingAvailable);
   const newDisabled = Boolean(error) || activeReview || (!loading && !activeNew && !newAvailable);
   const reviewTitle = resolveButtonTitle(loading, error, reviewDisabled);
   const newTitle = resolveButtonTitle(loading, error, newDisabled);
@@ -36,14 +37,14 @@ export default function PracticeButtons({ userId }: PracticeButtonsProps): JSX.E
       >
         {TEXTS.reviewButton}
       </DataNavigationButton>
-      {newBlockId == null ? (
+      {!newAvailable && !loading ? (
         <StyledButton className="h-button max-h-button w-full px-4" disabled title={newTitle}>
           {TEXTS.newButton}
         </StyledButton>
       ) : (
         <DataNavigationButton
-          to={`${ROUTES.practiceBlockTraining}?blockId=${newBlockId}`}
-          descriptor={blockTrainingDescriptor(userId, newBlockId)}
+          to={ROUTES.initialTraining}
+          descriptor={initialTrainingDescriptor(userId)}
           className="h-button max-h-button w-full px-4"
           disabled={newDisabled}
           title={newTitle}

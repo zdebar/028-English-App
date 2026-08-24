@@ -131,19 +131,16 @@ CREATE POLICY users_select_own ON public.users
 
 REVOKE ALL PRIVILEGES ON TABLE
   public.user_items,
-  public.user_scores,
-  public.user_blocks
+  public.user_scores
 FROM PUBLIC, anon, authenticated;
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE
   public.user_items,
-  public.user_scores,
-  public.user_blocks
+  public.user_scores
 TO authenticated;
 
 ALTER TABLE public.user_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_scores ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.user_blocks ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Allow regular users to modify their own data" ON public.user_items;
 DROP POLICY IF EXISTS user_items_delete_own_non_demo ON public.user_items;
@@ -209,40 +206,6 @@ CREATE POLICY user_scores_update_own_non_demo ON public.user_scores
   );
 
 CREATE POLICY user_scores_delete_own_non_demo ON public.user_scores
-  FOR DELETE TO authenticated
-  USING (
-    user_id = (SELECT auth.uid())
-    AND public.is_non_demo_user()
-  );
-
-DROP POLICY IF EXISTS user_blocks_delete_own_non_demo ON public.user_blocks;
-DROP POLICY IF EXISTS user_blocks_insert_own_non_demo ON public.user_blocks;
-DROP POLICY IF EXISTS user_blocks_select_own ON public.user_blocks;
-DROP POLICY IF EXISTS user_blocks_update_own_non_demo ON public.user_blocks;
-
-CREATE POLICY user_blocks_select_own ON public.user_blocks
-  FOR SELECT TO authenticated
-  USING (user_id = (SELECT auth.uid()));
-
-CREATE POLICY user_blocks_insert_own_non_demo ON public.user_blocks
-  FOR INSERT TO authenticated
-  WITH CHECK (
-    user_id = (SELECT auth.uid())
-    AND public.is_non_demo_user()
-  );
-
-CREATE POLICY user_blocks_update_own_non_demo ON public.user_blocks
-  FOR UPDATE TO authenticated
-  USING (
-    user_id = (SELECT auth.uid())
-    AND public.is_non_demo_user()
-  )
-  WITH CHECK (
-    user_id = (SELECT auth.uid())
-    AND public.is_non_demo_user()
-  );
-
-CREATE POLICY user_blocks_delete_own_non_demo ON public.user_blocks
   FOR DELETE TO authenticated
   USING (
     user_id = (SELECT auth.uid())

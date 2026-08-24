@@ -1,4 +1,3 @@
-import UserBlock from '@/database/models/user-blocks';
 import UserItem from '@/database/models/user-items';
 import { db } from '@/database/models/db';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
@@ -16,14 +15,9 @@ export async function simulateUserProgress(
 ): Promise<number> {
   assertNonEmptyString(userId, 'userId');
 
-  const itemCount = await db.transaction('rw', db.user_items, db.user_blocks, async () => {
-    const [items, blocks] = await Promise.all([
-      UserItem.getSimulationCandidates(userId),
-      UserBlock.getSimulationCandidates(userId),
-    ]);
-    const updatedItemCount = await UserItem.simulateData(items, dateTime);
-    await UserBlock.simulateStartedBlocks(userId, blocks, dateTime);
-    return updatedItemCount;
+  const itemCount = await db.transaction('rw', db.user_items, async () => {
+    const items = await UserItem.getSimulationCandidates(userId);
+    return UserItem.simulateData(items, dateTime);
   });
 
   return itemCount;

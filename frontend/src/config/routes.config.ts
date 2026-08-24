@@ -2,7 +2,7 @@ export const ROUTES = {
   home: '/',
   privacyPolicy: '/privacy-policy',
   practice: '/practice',
-  practiceBlockTraining: '/practice/block-training',
+  initialTraining: '/practice/initial-training',
   pronunciationPractice: '/practice/pronunciation',
   practiceOverview: '/practice-overview',
   overviews: '/overviews',

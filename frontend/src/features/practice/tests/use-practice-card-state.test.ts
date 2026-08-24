@@ -28,7 +28,7 @@ const item = {
   english: 'hello',
   audio: 'hello.opus',
   pronunciation: 'hello-pron',
-  curriculum_sort_path: [1, 1, 1, 1],
+  curriculum_sort_path: [1, 1, 1],
 } as unknown as UserItemLocal;
 
 function useTestCard(isCzToEn: boolean, currentItem: UserItemLocal | null = item) {

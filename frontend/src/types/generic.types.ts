@@ -28,10 +28,14 @@ export interface GrammarChunkExampleType {
   deleted_at: string | null;
 }
 
-export interface BlockType extends SyncEntityType {
-  lesson_id: number | null;
+export interface BlockType {
+  id: number;
+  name: string;
+  note: string | null;
+  lesson_id: number;
   grammar_chunk_id: number | null;
-  is_practice_block: boolean;
+  updated_at: string;
+  deleted_at: string | null;
 }
 
 export interface TopicType extends SyncEntityType {}
@@ -59,20 +63,6 @@ export interface UserScoreType {
   star_count: number;
   updated_at: string;
   deleted_at: string | null;
-}
-
-export interface UserBlockType {
-  user_id: string;
-  block_id: number;
-  name: string;
-  note: string | null;
-  lesson_id: number | null;
-  grammar_chunk_id: number | null;
-  sort_order: number;
-  is_practice_block: boolean;
-  started_at: string;
-  updated_at: string;
-  deleted_at: string;
 }
 
 export interface ReadyPracticeScheduleEntry {

@@ -6,10 +6,9 @@ const mocks = vi.hoisted(() => ({
   bulkDelete: vi.fn(),
   equalsDelete: vi.fn(),
   blockEqualsToArray: vi.fn(),
+  itemIdsToArray: vi.fn(),
   topicEqualsToArray: vi.fn(),
   topicModify: vi.fn(),
-  masteredBlockToArray: vi.fn(),
-  userBlockGet: vi.fn(),
   itemIdModify: vi.fn(),
   itemIdBetween: vi.fn(),
   itemIdLimit: vi.fn(),
@@ -28,6 +27,7 @@ const mocks = vi.hoisted(() => ({
   markAsSynced: vi.fn(),
   userItemGet: vi.fn(),
   userItemUpdate: vi.fn(),
+  blockGet: vi.fn(),
   pronunciationCount: vi.fn(),
   pronunciationToArray: vi.fn(),
   pronunciationMemberships: [] as Array<{ pronunciation_group_id: number; item_id: number }>,
@@ -55,6 +55,7 @@ vi.mock('@/config/config', () => ({
       simulationPronunciationItemCount: 2,
     },
     practice: {
+      initialTrainingBatchSize: 8,
       readyPracticeCountCap: 20,
       readyPracticeScheduleGroupWindowMs: 1000,
     },
@@ -63,6 +64,9 @@ vi.mock('@/config/config', () => ({
 
 vi.mock('@/database/models/db', () => ({
   db: {
+    blocks: {
+      get: (...args: unknown[]) => mocks.blockGet(...args),
+    },
     user_items: {
       get: (...args: unknown[]) => mocks.userItemGet(...args),
       update: (...args: unknown[]) => mocks.userItemUpdate(...args),
@@ -80,6 +84,9 @@ vi.mock('@/database/models/db', () => ({
         }
         if (field === '[user_id+item_id]') {
           return {
+            anyOf: () => ({
+              toArray: (...args: unknown[]) => mocks.itemIdsToArray(...args),
+            }),
             equals: () => ({
               modify: (...args: unknown[]) => mocks.itemIdModify(...args),
             }),
@@ -106,9 +113,9 @@ vi.mock('@/database/models/db', () => ({
         }
         if (
           field ===
-            '[user_id+is_practice_item+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]' ||
+            '[user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]' ||
           field ===
-            '[user_id+is_practice_item+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]'
+            '[user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]'
         ) {
           return {
             between: (...args: unknown[]) => {
@@ -148,7 +155,7 @@ vi.mock('@/database/models/db', () => ({
             },
           };
         }
-        if (field === '[user_id+is_practice_item+is_vocabulary+started_at]') {
+        if (field === '[user_id+is_vocabulary+started_at]') {
           return {
             between: (...args: unknown[]) => {
               mocks.indexedBetween(...args);
@@ -207,14 +214,6 @@ vi.mock('@/database/models/db', () => ({
     pronunciation_group_items: {
       toArray: async () => mocks.pronunciationMemberships,
     },
-    user_blocks: {
-      get: (...args: unknown[]) => mocks.userBlockGet(...args),
-      where: () => ({
-        equals: () => ({
-          toArray: (...args: unknown[]) => mocks.masteredBlockToArray(...args),
-        }),
-      }),
-    },
     metadata: {},
     transaction: (...args: unknown[]) => mocks.transaction(...args),
   },
@@ -246,6 +245,21 @@ vi.mock('@/database/utils/user-items.utils', async () => {
   };
 });
 
+function initialItem(itemId: number, overrides: Record<string, unknown> = {}) {
+  return {
+    user_id: 'u1',
+    item_id: itemId,
+    lesson_id: 1,
+    is_vocabulary: 1,
+    block_id: 0,
+    grammar_chunk_id: 0,
+    started_at: '1970-01-01T00:00:00.000Z',
+    deleted_at: '1970-01-01T00:00:00.000Z',
+    curriculum_sort_path: [1, 1, itemId],
+    ...overrides,
+  } as any;
+}
+
 vi.mock('@/database/utils/sync-generic.utils', async () => {
   const actual = await vi.importActual<any>('@/database/utils/sync-generic.utils');
   return {
@@ -271,8 +285,6 @@ describe('UserItem', () => {
     mocks.equalsDelete.mockResolvedValue(0);
     mocks.userEqualsToArray.mockResolvedValue([]);
     mocks.blockEqualsToArray.mockResolvedValue([]);
-    mocks.masteredBlockToArray.mockResolvedValue([]);
-    mocks.userBlockGet.mockResolvedValue(null);
     mocks.indexedToArray.mockResolvedValue([]);
     mocks.updatedBetweenToArray.mockResolvedValue([]);
     mocks.rpc.mockResolvedValue({ data: [], error: null });
@@ -285,6 +297,7 @@ describe('UserItem', () => {
     mocks.simulationToArray.mockResolvedValue([]);
     mocks.userItemGet.mockResolvedValue(undefined);
     mocks.userItemUpdate.mockResolvedValue(1);
+    mocks.blockGet.mockResolvedValue({ id: 7 });
     mocks.bulkUpdate.mockResolvedValue(1);
     mocks.pronunciationCount.mockResolvedValue(0);
     mocks.pronunciationToArray.mockResolvedValue([]);
@@ -297,13 +310,11 @@ describe('UserItem', () => {
 
   it.each([
     ['no items', [], false],
-    ['a non-practice item', [{ is_practice_item: 0, grammar_chunk_id: 1 }], false],
-    ['an item without a grammar chunk', [{ is_practice_item: 1, grammar_chunk_id: 0 }], false],
+    ['an item without a grammar chunk', [{ grammar_chunk_id: 0 }], false],
     [
       'a reset started grammar item',
       [
         {
-          is_practice_item: 1,
           grammar_chunk_id: 7,
           started_at: '2026-03-01T00:00:00.000Z',
           progress_cz_to_en: 0,
@@ -544,19 +555,19 @@ describe('UserItem', () => {
         item_id: 3,
         is_vocabulary: 1,
         audio: 'three.opus',
-        curriculum_sort_path: [2, 1, 1, 1],
+        curriculum_sort_path: [2, 1, 1],
       },
       {
         item_id: 2,
         is_vocabulary: 0,
         audio: 'grammar.opus',
-        curriculum_sort_path: [1, 1, 1, 2],
+        curriculum_sort_path: [1, 1, 2],
       },
       {
         item_id: 1,
         is_vocabulary: 1,
         audio: 'one.opus',
-        curriculum_sort_path: [1, 1, 1, 1],
+        curriculum_sort_path: [1, 1, 1],
       },
     ]);
     mocks.pronunciationMemberships = [
@@ -703,16 +714,16 @@ describe('UserItem', () => {
     expect(mocks.equalsDelete).toHaveBeenCalled();
   });
 
-  it('getByUserId returns only practice items for user stats', async () => {
+  it('getByUserId returns all items for user stats', async () => {
     mocks.userEqualsToArray.mockResolvedValueOnce([
-      { item_id: 1, is_practice_item: 1 },
-      { item_id: 2, is_practice_item: 0 },
+      { item_id: 1 },
+      { item_id: 2 },
       { item_id: 3 },
     ]);
 
     const result = await UserItem.getByUserId('u1');
 
-    expect(result.map((item) => item.item_id)).toEqual([1, 3]);
+    expect(result.map((item) => item.item_id)).toEqual([1, 2, 3]);
   });
 
   it('returns a full EN to CZ due deck before considering CZ to EN or new items', async () => {
@@ -825,7 +836,6 @@ describe('UserItem', () => {
     const deck = await UserItem.getReviewDeck('u1', 5);
 
     expect(deck.map((item) => item.item_id)).toEqual([3]);
-    expect(mocks.userBlockGet).not.toHaveBeenCalled();
   });
 
   it('restores a partial EN to CZ deck when CZ to EN and new alternatives are empty', async () => {
@@ -847,13 +857,6 @@ describe('UserItem', () => {
   });
 
   it('uses any CZ to EN grammar deck instead of a partial EN to CZ deck', async () => {
-    mocks.masteredBlockToArray.mockResolvedValueOnce([
-      {
-        block_id: 10,
-        is_vocabulary: false,
-        mastered_at: '2026-01-01T00:00:00.000Z',
-      },
-    ]);
     mocks.indexedToArray
       .mockResolvedValueOnce([{ item_id: 1, block_id: 10, progress: 1 }])
       .mockResolvedValueOnce([{ item_id: 2, block_id: 10, progress: 2 }]);
@@ -865,13 +868,6 @@ describe('UserItem', () => {
   });
 
   it('restores a partial EN to CZ grammar deck when no CZ to EN items exist', async () => {
-    mocks.masteredBlockToArray.mockResolvedValueOnce([
-      {
-        block_id: 10,
-        is_vocabulary: false,
-        mastered_at: '2026-01-01T00:00:00.000Z',
-      },
-    ]);
     mocks.indexedToArray
       .mockResolvedValueOnce([{ item_id: 1, block_id: 10, progress: 1 }])
       .mockResolvedValueOnce([]);
@@ -889,14 +885,6 @@ describe('UserItem', () => {
   it('getReviewDeck excludes unscheduled items even from mastered grammar blocks', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
-    mocks.masteredBlockToArray.mockResolvedValueOnce([
-      {
-        block_id: 10,
-        is_vocabulary: false,
-        is_practice_item: true,
-        mastered_at: '2026-06-20T12:00:00.000Z',
-      },
-    ]);
     mocks.indexedToArray.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
 
     const deck = await UserItem.getReviewDeck('u1', 10);
@@ -904,8 +892,8 @@ describe('UserItem', () => {
     expect(deck.map((item) => item.item_id)).toEqual([1]);
     expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
       1,
-      ['u1', 1, expect.anything(), '1970-01-01T00:00:00.000Z', expect.anything()],
-      ['u1', 1, '2026-06-24T12:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', expect.anything(), '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', '2026-06-24T12:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
       true,
       false,
     );
@@ -954,22 +942,76 @@ describe('UserItem', () => {
     expect(result.map((item: any) => item.item_id)).toEqual([1, 2]);
   });
 
+  it('builds an automatic batch without crossing lesson, type, or explicit-block boundaries', async () => {
+    mocks.userEqualsToArray.mockResolvedValue([
+      initialItem(1, { curriculum_sort_path: [1, 1, 1] }),
+      initialItem(2, { curriculum_sort_path: [1, 1, 2], grammar_chunk_id: 4 }),
+      initialItem(3, { curriculum_sort_path: [1, 1, 3], block_id: 9 }),
+      initialItem(4, { curriculum_sort_path: [1, 2, 1], lesson_id: 2 }),
+    ]);
+
+    const selection = await UserItem.getNextInitialTrainingSelection('u1', 8);
+
+    expect(selection?.blockId).toBeNull();
+    expect(selection?.items.map((item) => item.item_id)).toEqual([1, 2]);
+  });
+
+  it('limits an automatic batch while allowing multiple grammar chunks', async () => {
+    mocks.userEqualsToArray.mockResolvedValue(
+      Array.from({ length: 10 }, (_, index) =>
+        initialItem(index + 1, {
+          is_vocabulary: 0,
+          grammar_chunk_id: index + 1,
+          curriculum_sort_path: [1, 1, index + 1],
+        }),
+      ),
+    );
+
+    const selection = await UserItem.getNextInitialTrainingSelection('u1', 8);
+
+    expect(selection?.items).toHaveLength(8);
+    expect(selection?.items.map((item) => item.grammar_chunk_id)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+  });
+
+  it('selects only unstarted members when an explicit block becomes available again', async () => {
+    mocks.userEqualsToArray.mockResolvedValue([
+      initialItem(1, { block_id: 7, curriculum_sort_path: [1, 1, 1], started_at: '2026-01-01' }),
+      initialItem(2, { block_id: 7, curriculum_sort_path: [1, 1, 2] }),
+      initialItem(3, { block_id: 7, curriculum_sort_path: [1, 1, 3] }),
+      initialItem(4, { curriculum_sort_path: [1, 1, 4] }),
+    ]);
+
+    const selection = await UserItem.getNextInitialTrainingSelection('u1');
+
+    expect(selection?.blockId).toBe(7);
+    expect(selection?.items.map((item) => item.item_id)).toEqual([2, 3]);
+  });
+
+  it('ignores an explicit selection whose synchronized block metadata is missing', async () => {
+    mocks.blockGet.mockResolvedValue(null);
+    mocks.userEqualsToArray.mockResolvedValue([
+      initialItem(1, { block_id: 7, curriculum_sort_path: [1, 1, 1] }),
+    ]);
+
+    await expect(UserItem.getNextInitialTrainingSelection('u1')).resolves.toBeNull();
+  });
+
   it('getStartedByTopicId excludes unstarted items and preserves curriculum order', async () => {
     mocks.topicEqualsToArray.mockResolvedValue([
       {
         item_id: 2,
         started_at: '2026-08-02T00:00:00.000Z',
-        curriculum_sort_path: [1, 1, 2, 1],
+        curriculum_sort_path: [1, 1, 2],
       },
       {
         item_id: 3,
         started_at: '1970-01-01T00:00:00.000Z',
-        curriculum_sort_path: [1, 1, 1, 2],
+        curriculum_sort_path: [1, 1, 2],
       },
       {
         item_id: 1,
         started_at: '2026-08-01T00:00:00.000Z',
-        curriculum_sort_path: [1, 1, 1, 1],
+        curriculum_sort_path: [1, 1, 1],
       },
     ]);
 
@@ -985,9 +1027,9 @@ describe('UserItem', () => {
     expect(mocks.topicModify).toHaveBeenCalledOnce();
   });
 
-  it('saveNewBlockCompletion does not downgrade skipped item progress', async () => {
+  it('saveInitialTrainingCompletion does not downgrade skipped item progress', async () => {
     const dateTime = '2026-03-06T12:00:00.000Z';
-    mocks.blockEqualsToArray.mockResolvedValue([
+    mocks.itemIdsToArray.mockResolvedValue([
       {
         item_id: 1,
         sort_order: 1,
@@ -1010,7 +1052,7 @@ describe('UserItem', () => {
       },
     ]);
 
-    await UserItem.saveNewBlockCompletion('u1', 3, dateTime);
+    await UserItem.saveInitialTrainingCompletion('u1', [1, 2], dateTime);
 
     expect(mocks.bulkPut).toHaveBeenCalledWith([
       expect.objectContaining({
@@ -1042,7 +1084,6 @@ describe('UserItem', () => {
     mocks.userEqualsToArray.mockResolvedValueOnce([
       {
         item_id: 1,
-        is_practice_item: 1,
         started_at: '2026-01-01T00:00:00.000Z',
         next_at_cz_to_en: '2026-06-20T00:00:00.000Z',
         next_at_en_to_cz: '2026-06-20T00:00:00.000Z',
@@ -1051,7 +1092,6 @@ describe('UserItem', () => {
       },
       {
         item_id: 2,
-        is_practice_item: 1,
         started_at: '1970-01-01T00:00:00.000Z',
       },
     ]);
@@ -1066,7 +1106,6 @@ describe('UserItem', () => {
   it('getReadyReviewState caps availability at the badge cap', async () => {
     mocks.userEqualsToArray.mockResolvedValueOnce(Array.from({ length: 100 }, (_, index) => ({
       item_id: index + 1,
-      is_practice_item: 1,
       started_at: '1970-01-01T00:00:00.000Z',
     })));
 
@@ -1084,17 +1123,14 @@ describe('UserItem', () => {
     mocks.userEqualsToArray.mockResolvedValueOnce([
       {
         item_id: 1,
-        is_practice_item: 1,
         started_at: '1970-01-01T00:00:00.000Z',
       },
       {
         item_id: 2,
-        is_practice_item: 1,
         started_at: '1970-01-01T00:00:00.000Z',
       },
       {
         item_id: 3,
-        is_practice_item: 1,
         started_at: '2026-01-01T00:00:00.000Z',
         next_at_cz_to_en: '2026-06-24T12:00:10.000Z',
         next_at_en_to_cz: '2026-06-24T12:00:10.800Z',
@@ -1114,14 +1150,12 @@ describe('UserItem', () => {
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
     const readyItems = Array.from({ length: 98 }, (_, index) => ({
       item_id: index + 1,
-      is_practice_item: 1,
       started_at: '1970-01-01T00:00:00.000Z',
     }));
     mocks.userEqualsToArray.mockResolvedValueOnce([
       ...readyItems,
       {
         item_id: 99,
-        is_practice_item: 1,
         started_at: '2026-01-01T00:00:00.000Z',
         next_at_cz_to_en: '2026-06-24T12:00:20.000Z',
         next_at_en_to_cz: '2026-06-24T12:00:10.000Z',
@@ -1145,7 +1179,6 @@ describe('UserItem', () => {
     mocks.userEqualsToArray.mockResolvedValueOnce([
       {
         item_id: 1,
-        is_practice_item: 1,
         started_at: '2026-01-01T00:00:00.000Z',
         next_at_cz_to_en: '2026-06-24T12:00:10.000Z',
         next_at_en_to_cz: '2026-06-24T12:00:10.800Z',
@@ -1165,7 +1198,6 @@ describe('UserItem', () => {
     mocks.userEqualsToArray.mockResolvedValueOnce([
       {
         item_id: 1,
-        is_practice_item: 1,
         started_at: '2026-01-01T00:00:00.000Z',
         next_at_cz_to_en: '2026-01-01T00:00:00.000Z',
         next_at_en_to_cz: '2026-01-01T00:00:00.000Z',
@@ -1272,10 +1304,9 @@ describe('UserItem', () => {
           pronunciation: 'two',
           audio: null,
           is_vocabulary: true,
-          is_practice_item: false,
           has_pronunciation_practice: true,
           sort_order: 2,
-          curriculum_sort_path: [1, 2, 1, 2],
+          curriculum_sort_path: [1, 2, 2],
           note_id: null,
           block_id: 10,
           topic_id: 3,
@@ -1335,9 +1366,8 @@ describe('UserItem', () => {
       expect.objectContaining({
         item_id: 2,
         is_vocabulary: 1,
-        is_practice_item: 0,
         has_pronunciation_practice: 1,
-        curriculum_sort_path: [1, 2, 1, 2],
+        curriculum_sort_path: [1, 2, 2],
         block_id: 10,
         topic_id: 3,
         grammar_chunk_id: 0,

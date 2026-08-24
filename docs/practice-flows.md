@@ -1,6 +1,6 @@
 # Practice Flows
 
-Practice uses separate review and initial-block routes with the shared `PracticeSessionCard`.
+Practice uses separate review and initial-training routes with the shared `PracticeSessionCard`.
 
 ## Unified Practice
 
@@ -15,16 +15,19 @@ Route: `/practice`, rendered by `Practice` and `usePracticeDeck`.
 Progress is buffered during the session, saved at deck completion/unmount, and backed up to
 `practiceDeckProgress_${userId}` on unload or save failure.
 
-## Initial Block Training
+## Initial Training
 
-Route: `/practice/block-training?blockId=...`, entered from the Home “Nové” button.
+Route: `/practice/initial-training`, entered from the Home “Nové” button.
 
-Home selects the lowest `sort_order` block that is a practice block, unstarted, and non-empty.
-The flow loads that exact block, displays its introduction and items, and runs four staged rounds.
-Completion starts the block items, marks the block started, removes the session, and returns Home.
-Home then recalculates the next lowest eligible block. Empty blocks are ignored.
+Home selects the first unstarted item by level, lesson, and item order. A blockless item starts an
+automatic batch of up to `config.practice.initialTrainingBatchSize` items with the same lesson and
+`is_vocabulary` value. The batch stops before an explicit block. An item with `block_id` loads all
+currently unstarted members of that explicit block and displays its introduction before the four
+training rounds. Completion starts the exact session items, removes the session, and returns Home.
+Empty blocks and blocks without unstarted items are ignored.
 
-There is no vocabulary, previous-block, or grammar unlock prerequisite.
+Saved sessions retain their exact item IDs. Newly synchronized items are offered only after the
+active session completes. There is no previous-block or grammar unlock prerequisite.
 
 ## Grammar Details
 

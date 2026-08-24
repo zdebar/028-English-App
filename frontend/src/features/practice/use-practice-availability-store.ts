@@ -5,7 +5,7 @@ import { create } from 'zustand';
 type PracticeAvailabilityState = {
   reviewCount: number;
   reviewSchedule: ReadyPracticeScheduleEntry[];
-  nextBlockId: number | null;
+  initialTrainingAvailable: boolean;
   activeSession: PracticeSessionType | null;
   practiceLoading: boolean;
   practiceError: Error | null;
@@ -18,7 +18,7 @@ type PracticeAvailabilityState = {
 const EMPTY_AVAILABILITY = {
   reviewCount: 0,
   reviewSchedule: [] as ReadyPracticeScheduleEntry[],
-  nextBlockId: null,
+  initialTrainingAvailable: false,
   activeSession: null,
   practiceLoading: false,
   practiceError: null,

@@ -9,6 +9,7 @@ import type {
   UserItemLocal,
   ProgressHistoryEntry,
   CurriculumSortPath,
+  InitialTrainingSelection,
 } from '@/types/user-item.types';
 import { TableName } from '@/types/table.types';
 import Dexie, { Entity } from 'dexie';
@@ -31,7 +32,6 @@ const SIM_PRONUNCIATION_ITEM_COUNT = config.progress.simulationPronunciationItem
 type UserItemAPI = Omit<
   UserItemLocal,
   | 'is_vocabulary'
-  | 'is_practice_item'
   | 'has_pronunciation_practice'
   | 'block_id'
   | 'topic_id'
@@ -44,9 +44,8 @@ type UserItemAPI = Omit<
   | 'mastered_at_en_to_cz'
 > & {
   is_vocabulary: boolean;
-  is_practice_item?: boolean;
   has_pronunciation_practice?: boolean;
-  block_id: number;
+  block_id: number | null;
   topic_id: number | null;
   grammar_chunk_id: number | null;
   started_at: string | null;
@@ -109,7 +108,6 @@ function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
   return {
     ...apiItem,
     is_vocabulary: apiItem.is_vocabulary ? 1 : 0,
-    is_practice_item: apiItem.is_practice_item === false ? 0 : 1,
     has_pronunciation_practice: apiItem.has_pronunciation_practice ? 1 : 0,
     started_at: apiItem.started_at ?? NULL_DATE,
     next_at_cz_to_en: apiItem.next_at_cz_to_en ?? NULL_DATE,
@@ -117,7 +115,7 @@ function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
     mastered_at_cz_to_en: apiItem.mastered_at_cz_to_en ?? NULL_DATE,
     mastered_at_en_to_cz: apiItem.mastered_at_en_to_cz ?? NULL_DATE,
     deleted_at: apiItem.deleted_at ?? NULL_DATE,
-    block_id: apiItem.block_id,
+    block_id: apiItem.block_id ?? NULL_NUMBER,
     topic_id: apiItem.topic_id ?? NULL_NUMBER,
     grammar_chunk_id: apiItem.grammar_chunk_id ?? NULL_NUMBER,
   };
@@ -142,7 +140,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   pronunciation!: string;
   audio!: string | null;
   is_vocabulary!: 0 | 1; // boolean represented as 0 or 1
-  is_practice_item!: 0 | 1; // boolean represented as 0 or 1
   has_pronunciation_practice!: 0 | 1;
   sort_order!: number;
   curriculum_sort_path!: CurriculumSortPath;
@@ -240,9 +237,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns User rows filtered to practice items.
    */
   static async getByUserId(userId: string): Promise<UserItemLocal[]> {
-    return (await db.user_items.where('user_id').equals(userId).toArray()).filter(
-      isPracticeItem,
-    );
+    return db.user_items.where('user_id').equals(userId).toArray();
   }
 
   /**
@@ -261,6 +256,55 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return blockItems.sort((a, b) => a.sort_order - b.sort_order);
   }
 
+  static async getByItemIds(userId: string, itemIds: readonly number[]): Promise<UserItemLocal[]> {
+    if (itemIds.length === 0) return [];
+    const items = await db.user_items
+      .where('[user_id+item_id]')
+      .anyOf([...new Set(itemIds)].map((itemId) => [userId, itemId]))
+      .toArray();
+    return items.sort((left, right) =>
+      compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path),
+    );
+  }
+
+  /** Builds the next initial-training queue from unstarted curriculum items. */
+  static async getNextInitialTrainingSelection(
+    userId: string,
+    batchSize: number = config.practice.initialTrainingBatchSize,
+  ): Promise<InitialTrainingSelection | null> {
+    assertNonEmptyString(userId, 'userId');
+    if (batchSize <= 0) return null;
+
+    const unstartedItems = (await db.user_items.where('user_id').equals(userId).toArray())
+      .filter((item) => item.deleted_at === NULL_DATE && item.started_at === NULL_DATE)
+      .sort((left, right) =>
+        compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path),
+      );
+    const firstItem = unstartedItems[0];
+    if (!firstItem) return null;
+
+    if (firstItem.block_id !== NULL_NUMBER) {
+      const block = await db.blocks.get(firstItem.block_id);
+      if (!block) return null;
+      return {
+        blockId: firstItem.block_id,
+        items: unstartedItems.filter((item) => item.block_id === firstItem.block_id),
+      };
+    }
+
+    const items: UserItemLocal[] = [];
+    for (const item of unstartedItems) {
+      const crossesBoundary =
+        item.lesson_id !== firstItem.lesson_id ||
+        item.is_vocabulary !== firstItem.is_vocabulary ||
+        item.block_id !== NULL_NUMBER;
+      if (crossesBoundary || items.length === batchSize) break;
+      items.push(item);
+    }
+
+    return { blockId: null, items };
+  }
+
   /**
    * Marks all items in a completed initial-training block as started.
    *
@@ -269,13 +313,21 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param dateTime ISO timestamp used for started_at and updated_at. Defaults to now.
    * @returns Updated items that were written to IndexedDB; [] when the block has no items.
    */
-  static async saveNewBlockCompletion(
+  static async saveInitialTrainingCompletion(
     userId: string,
-    blockId: number,
+    itemIds: readonly number[],
     dateTime: string = new Date(Date.now()).toISOString(),
   ): Promise<UserItemLocal[]> {
-    const blockItems = await this.getByBlockId(userId, blockId);
-    const updatedItems = blockItems.map((item) => {
+    if (itemIds.length === 0) return [];
+    const items = await db.user_items
+      .where('[user_id+item_id]')
+      .anyOf(itemIds.map((itemId) => [userId, itemId]))
+      .toArray();
+    if (items.length !== new Set(itemIds).size) {
+      throw new Error('Initial-training completion references missing items.');
+    }
+
+    const updatedItems = items.map((item) => {
       const progressCzToEn = Math.max(
         item.progress_cz_to_en,
         config.progress.afterNewBlockProgress,
@@ -368,8 +420,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    */
   static async getStartedVocabulary(userId: string): Promise<UserItemLocal[]> {
     const result = await db.user_items
-      .where('[user_id+is_practice_item+is_vocabulary+started_at]')
-      .between([userId, 1, 1, Dexie.minKey], [userId, 1, 1, NULL_DATE], true, false)
+      .where('[user_id+is_vocabulary+started_at]')
+      .between([userId, 1, Dexie.minKey], [userId, 1, NULL_DATE], true, false)
       .toArray();
     return result;
   }
@@ -471,9 +523,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const countCap = config.practice.readyPracticeCountCap;
     const nowIso = new Date(Date.now()).toISOString();
 
-    const items = (await db.user_items.where('user_id').equals(userId).toArray()).filter(
-      isPracticeItem,
-    );
+    const items = await db.user_items.where('user_id').equals(userId).toArray();
     let readyCount = 0;
     const futureDates: string[] = [];
 
@@ -775,14 +825,14 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
     const index =
       direction === 'czToEn'
-        ? '[user_id+is_practice_item+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]'
-        : '[user_id+is_practice_item+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]';
+        ? '[user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]'
+        : '[user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]';
 
     return db.user_items
       .where(index)
       .between(
-        [userId, 1, Dexie.minKey, NULL_DATE, Dexie.minKey],
-        [userId, 1, now, NULL_DATE, Dexie.maxKey],
+        [userId, Dexie.minKey, NULL_DATE, Dexie.minKey],
+        [userId, now, NULL_DATE, Dexie.maxKey],
         true,
         false,
       )
@@ -956,14 +1006,10 @@ function resolveMasteredAt(
   return dateTime;
 }
 
-function isPracticeItem(item: Pick<UserItemLocal, 'is_practice_item'>): boolean {
-  return item.is_practice_item !== 0;
-}
-
 function isStartedGrammarItem(
-  item: Pick<UserItemLocal, 'is_practice_item' | 'grammar_chunk_id'>,
+  item: Pick<UserItemLocal, 'grammar_chunk_id'>,
 ): boolean {
-  return isPracticeItem(item) && item.grammar_chunk_id !== NULL_NUMBER;
+  return item.grammar_chunk_id !== NULL_NUMBER;
 }
 
 function compareCurriculumPaths(

@@ -10,7 +10,6 @@ import { Entity } from 'dexie';
 import type { UserItemLocal } from '@/types/user-item.types';
 import UserScore from './user-scores';
 import UserItem from './user-items';
-import UserBlock from './user-blocks';
 
 export type ReviewAnswerResult = {
   completedCount: number;
@@ -41,7 +40,7 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
     return (await db.practice_sessions.get(userId)) ?? null;
   }
 
-  /** Reads the active session and hides an unusable new-block session without mutating storage. */
+  /** Reads the active session and hides an unusable initial-training session without mutating storage. */
   static async inspectActive(userId: string): Promise<ActivePracticeSessionState> {
     assertNonEmptyString(userId, 'userId');
 
@@ -50,28 +49,47 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
       return { activeSession: session, requiresReconciliation: false };
     }
 
-    const blockId = session.block_id;
-    const block = blockId == null ? null : await db.user_blocks.get([userId, blockId]);
-    const items =
-      blockId == null
-        ? []
-        : await db.user_items.where('[user_id+block_id]').equals([userId, blockId]).toArray();
-    const blockItemIds = new Set(items.map((item) => item.item_id));
     const savedItemIds = [
       ...session.current_queue_item_ids,
       ...session.retry_queue_item_ids,
       ...session.completed_item_ids,
     ];
+    const uniqueItemIds = [...new Set(savedItemIds)];
+    const items = await db.user_items
+      .where('[user_id+item_id]')
+      .anyOf(uniqueItemIds.map((itemId) => [userId, itemId]))
+      .toArray();
+    const itemById = new Map(items.map((item) => [item.item_id, item]));
+    const blockExists =
+      session.block_id == null || (await db.blocks.get(session.block_id)) !== undefined;
     const hasPendingItems =
       session.current_queue_item_ids.length > 0 || session.retry_queue_item_ids.length > 0;
-    const referencesOnlyBlockItems = savedItemIds.every((itemId) => blockItemIds.has(itemId));
-    const isValid = Boolean(
-      block?.is_practice_block &&
-        block.started_at === config.database.nullReplacementDate &&
-        blockItemIds.size > 0 &&
-        hasPendingItems &&
-        referencesOnlyBlockItems,
-    );
+    const referencesExistingItems = uniqueItemIds.every((itemId) => {
+      const item = itemById.get(itemId);
+      return item?.deleted_at === config.database.nullReplacementDate;
+    });
+    const referencesExpectedBlock = items.every((item) => {
+      const itemBlockId = item.block_id === config.database.nullReplacementNumber ? null : item.block_id;
+      return itemBlockId === session.block_id;
+    });
+    const firstItem = items[0];
+    const hasConsistentAutomaticBatch =
+      session.block_id != null ||
+      (firstItem != null &&
+        items.length <= config.practice.initialTrainingBatchSize &&
+        items.every(
+          (item) =>
+            item.lesson_id === firstItem.lesson_id &&
+            item.is_vocabulary === firstItem.is_vocabulary,
+        ));
+    const isValid =
+      uniqueItemIds.length > 0 &&
+      uniqueItemIds.length === savedItemIds.length &&
+      hasPendingItems &&
+      blockExists &&
+      referencesExistingItems &&
+      referencesExpectedBlock &&
+      hasConsistentAutomaticBatch;
 
     return {
       activeSession: isValid ? session : null,
@@ -86,7 +104,7 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
     return db.transaction(
       'rw',
       db.practice_sessions,
-      db.user_blocks,
+      db.blocks,
       db.user_items,
       async () => {
         const state = await this.inspectActive(userId);
@@ -123,12 +141,12 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
 
   static async startNew(
     userId: string,
-    blockId: number,
+    blockId: number | null,
     itemIds: number[],
     dateTime: string = new Date(Date.now()).toISOString(),
   ): Promise<PracticeSessionType> {
     if (itemIds.length === 0) {
-      throw new Error('New-block practice requires at least one item.');
+      throw new Error('Initial training requires at least one item.');
     }
     const existing = await this.getActive(userId);
     if (existing) return existing;
@@ -211,26 +229,37 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
     await db.practice_sessions.put({ ...session, completed_count: 0, updated_at: dateTime });
   }
 
-  /** Atomically completes a new block, awards its star, and removes the local session. */
-  static async completeNewBlock(
+  /** Atomically completes initial training, awards its star, and removes the local session. */
+  static async completeInitialTraining(
     userId: string,
-    blockId: number,
+    itemIds: readonly number[],
     dateTime: string = new Date(Date.now()).toISOString(),
   ): Promise<number> {
     return db.transaction(
       'rw',
       db.user_items,
-      db.user_blocks,
       db.user_scores,
       db.practice_sessions,
       async () => {
         const session = await this.getActive(userId);
-        if (session?.mode !== 'new' || session.block_id !== blockId) {
-          throw new Error('New-block completion requires its active local session.');
+        if (session?.mode !== 'new') {
+          throw new Error('Initial-training completion requires its active local session.');
         }
 
-        await UserItem.saveNewBlockCompletion(userId, blockId, dateTime);
-        await UserBlock.completeNewBlock(userId, blockId, dateTime);
+        const sessionItemIds = new Set([
+          ...session.current_queue_item_ids,
+          ...session.retry_queue_item_ids,
+          ...session.completed_item_ids,
+        ]);
+        const completionItemIds = new Set(itemIds);
+        const referencesExactSession =
+          sessionItemIds.size === completionItemIds.size &&
+          [...sessionItemIds].every((itemId) => completionItemIds.has(itemId));
+        if (!referencesExactSession) {
+          throw new Error('Initial-training completion must match its saved item queue.');
+        }
+
+        await UserItem.saveInitialTrainingCompletion(userId, itemIds, dateTime);
         const starCount = await UserScore.addStar(userId, 1, dateTime);
         await db.practice_sessions.delete(userId);
         return starCount;

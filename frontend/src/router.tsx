@@ -8,7 +8,7 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
-import BlockTrainingPractice from '@/pages/BlockTrainingPractice';
+import InitialTrainingPractice from '@/pages/BlockTrainingPractice';
 import Grammar from '@/pages/Grammar';
 import Guide from '@/pages/Guide';
 import Home from '@/pages/Home';
@@ -30,7 +30,7 @@ import {
   type RouteDataDescriptor,
 } from '@/routing/route-data-handoff';
 import {
-  blockTrainingDescriptor,
+  initialTrainingDescriptor,
   grammarDescriptor,
   levelsDescriptor,
   overviewAvailabilityDescriptor,
@@ -119,17 +119,15 @@ async function loadPractice() {
   }
 }
 
-async function loadBlockTraining({ request }: LoaderFunctionArgs) {
-  const blockId = parsePositiveId(new URL(request.url).searchParams.get('blockId') ?? undefined);
-  if (!blockId) throw redirect(ROUTES.practice);
+async function loadInitialTraining() {
   const userId = await requireUserId();
   try {
-    const data = await consumePreparedRouteData(blockTrainingDescriptor(userId, blockId));
-    if (!data.block) throw redirect(ROUTES.practice);
+    const data = await consumePreparedRouteData(initialTrainingDescriptor(userId));
+    if (data.items.length === 0) throw redirect(ROUTES.home);
     return data;
   } catch (error) {
     if (error instanceof Response) throw error;
-    reportError('Failed to load block training route data', error);
+    reportError('Failed to load initial training route data', error);
     useToastStore.getState().showToast(TEXTS.loadingError, 'error');
     throw error;
   }
@@ -151,9 +149,9 @@ export const router = createHashRouter([
         children: [
           { path: ROUTES.practice, loader: loadPractice, Component: Practice },
           {
-            path: ROUTES.practiceBlockTraining,
-            loader: loadBlockTraining,
-            Component: BlockTrainingPractice,
+            path: ROUTES.initialTraining,
+            loader: loadInitialTraining,
+            Component: InitialTrainingPractice,
           },
           {
             path: ROUTES.pronunciationPractice,

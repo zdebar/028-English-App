@@ -30,7 +30,7 @@ root layout and renders route content through `Outlet`.
 | `/privacy-policy` | `PrivacyPolicy` | Public |
 | `/guide` | `Guide` | Public |
 | `/practice` | `Practice` | Protected |
-| `/practice/block-training?blockId=…` | `BlockTrainingPractice` | Protected |
+| `/practice/initial-training` | `InitialTrainingPractice` | Protected |
 | `/practice/pronunciation` | `PronunciationPractice` | Protected |
 | `/practice-overview` | `PracticeOverview` | Protected |
 | `/profile` | `Profile` | Protected |

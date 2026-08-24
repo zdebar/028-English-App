@@ -297,7 +297,19 @@ INSERT INTO "public"."lessons" ("id", "name", "note", "level_id", "sort_order", 
 -- Data for Name: blocks; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "public"."blocks" ("id", "name", "note", "lesson_id", "grammar_chunk_id", "sort_order", "updated_at", "deleted_at", "is_practice_block") VALUES
+CREATE TEMP TABLE seed_legacy_blocks (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL,
+  note TEXT,
+  lesson_id INTEGER,
+  grammar_chunk_id INTEGER,
+  sort_order INTEGER,
+  updated_at TIMESTAMPTZ,
+  deleted_at TIMESTAMPTZ,
+  is_practice_block BOOLEAN
+);
+
+INSERT INTO seed_legacy_blocks ("id", "name", "note", "lesson_id", "grammar_chunk_id", "sort_order", "updated_at", "deleted_at", "is_practice_block") VALUES
 	(1, 'dny v týdnu', NULL, 1, NULL, 1, '2026-08-02 12:14:05.115542+00', NULL, true),
 	(2, 'čísla 1  až 12', NULL, 1, NULL, 2, '2026-08-02 12:14:31.093064+00', NULL, true),
 	(3, 'osobní zájmena', NULL, 3, NULL, 3, '2026-08-02 12:43:15.726633+00', NULL, true),
@@ -350,7 +362,22 @@ INSERT INTO "public"."notes" ("id", "name", "note", "sort_order", "updated_at", 
 -- Data for Name: items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "public"."items" ("id", "czech", "english", "pronunciation", "audio", "note_id", "sort_order", "block_id", "updated_at", "deleted_at", "grammar_chunk_id", "is_vocabulary") VALUES
+CREATE TEMP TABLE seed_legacy_items (
+  id INTEGER PRIMARY KEY,
+  czech TEXT NOT NULL,
+  english TEXT NOT NULL,
+  pronunciation TEXT,
+  audio TEXT,
+  note_id INTEGER,
+  sort_order INTEGER NOT NULL,
+  block_id INTEGER,
+  updated_at TIMESTAMPTZ,
+  deleted_at TIMESTAMPTZ,
+  grammar_chunk_id INTEGER,
+  is_vocabulary BOOLEAN NOT NULL
+);
+
+INSERT INTO seed_legacy_items ("id", "czech", "english", "pronunciation", "audio", "note_id", "sort_order", "block_id", "updated_at", "deleted_at", "grammar_chunk_id", "is_vocabulary") VALUES
 	(1, 'ahoj', 'hello', 'həlˈoʊ', 'hello.opus', NULL, 1000, 26, '2026-08-07 11:12:55.668362+00', NULL, NULL, true),
 	(2, 'čau', 'hi', 'hˈaɪ', 'hi.opus', NULL, 1001, 26, '2026-08-07 11:12:55.668362+00', NULL, NULL, true),
 	(3, 'dobrý', 'good', 'ɡˈʊd', 'good.opus', NULL, 1002, 26, '2026-08-07 11:12:55.668362+00', NULL, NULL, true),
@@ -731,10 +758,56 @@ INSERT INTO "public"."items" ("id", "czech", "english", "pronunciation", "audio"
 	(368, 'žít', 'live', 'lˈaɪv', 'live_IPA_liv.opus', NULL, 4069, 29, '2026-08-08 07:17:16.726809+00', NULL, NULL, true);
 
 
---
-UPDATE "public"."items"
-SET "topic_id" = "block_id"
-WHERE "block_id" IN (1, 2, 3, 6);
+INSERT INTO public.blocks (
+  id, name, note, lesson_id, grammar_chunk_id, updated_at, deleted_at
+)
+SELECT
+  block.id,
+  block.name,
+  block.note,
+  COALESCE(
+    block.lesson_id,
+    MIN(item.sort_order / 1000),
+    CASE
+      WHEN block.id = 9 THEN 7
+      WHEN block.id = 10 THEN 8
+      WHEN block.id = 11 THEN 9
+      WHEN block.id BETWEEN 12 AND 17 THEN 10
+      WHEN block.id BETWEEN 18 AND 19 THEN 11
+      WHEN block.id BETWEEN 20 AND 22 THEN 12
+      WHEN block.id BETWEEN 23 AND 25 THEN 13
+    END
+  ),
+  block.grammar_chunk_id,
+  block.updated_at,
+  block.deleted_at
+FROM seed_legacy_blocks AS block
+LEFT JOIN seed_legacy_items AS item ON item.block_id = block.id
+WHERE block.grammar_chunk_id IS NOT NULL
+GROUP BY block.id, block.name, block.note, block.lesson_id, block.grammar_chunk_id,
+  block.updated_at, block.deleted_at;
+
+INSERT INTO public.items (
+  id, czech, english, pronunciation, audio, note_id, sort_order, lesson_id,
+  block_id, topic_id, updated_at, deleted_at, grammar_chunk_id, is_vocabulary
+)
+SELECT
+  item.id,
+  item.czech,
+  item.english,
+  item.pronunciation,
+  item.audio,
+  item.note_id,
+  item.sort_order,
+  item.sort_order / 1000,
+  CASE WHEN block.grammar_chunk_id IS NOT NULL THEN item.block_id ELSE NULL END,
+  CASE WHEN item.block_id IN (1, 2, 3, 6) THEN item.block_id ELSE NULL END,
+  item.updated_at,
+  item.deleted_at,
+  item.grammar_chunk_id,
+  item.is_vocabulary
+FROM seed_legacy_items AS item
+LEFT JOIN seed_legacy_blocks AS block ON block.id = item.block_id;
 
 
 -- Data for Name: grammar_chunk_examples; Type: TABLE DATA; Schema: public; Owner: postgres
@@ -798,14 +871,6 @@ INSERT INTO "public"."pronunciation_group_items" ("pronunciation_group_id", "ite
 
 INSERT INTO "public"."users" ("id", "history_enabled", "created_at", "deleted_at", "updated_at") VALUES
 	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', false, '2026-07-12 14:30:09.044811+00', NULL, '2026-07-18 08:26:58.266187+00');
-
-
---
--- Data for Name: user_blocks; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-INSERT INTO "public"."user_blocks" ("block_id", "user_id", "started_at", "updated_at") VALUES
-	(4, 'afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-08-08 07:52:47.953+00', '2026-08-08 07:52:47.953+00');
 
 
 --

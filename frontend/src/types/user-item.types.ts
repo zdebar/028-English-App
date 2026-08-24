@@ -14,7 +14,6 @@ export interface ProgressHistoryEntry {
 export type CurriculumSortPath = readonly [
   levelSortOrder: number,
   lessonSortOrder: number,
-  blockSortOrder: number,
   itemSortOrder: number,
 ];
 
@@ -36,7 +35,6 @@ export interface UserItemBase {
 
 export interface UserItemLocal extends UserItemBase {
   is_vocabulary: 0 | 1;
-  is_practice_item: 0 | 1;
   has_pronunciation_practice: 0 | 1;
   block_id: number;
   topic_id: number;
@@ -61,3 +59,8 @@ export type ResolvedPracticeEntry<T extends UserItemLocal> = Readonly<{
 }>;
 
 export type PracticeDeckEntry = ResolvedPracticeEntry<PracticeDeckItem>;
+
+export type InitialTrainingSelection = Readonly<{
+  blockId: number | null;
+  items: UserItemLocal[];
+}>;

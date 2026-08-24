@@ -3,7 +3,7 @@ import StyledButton from '@/components/UI/buttons/StyledButton';
 import { ROUTES } from '@/config/routes.config';
 import type { GrammarDetail } from '@/features/grammar/GrammarDetailCard';
 import { TEXTS } from '@/locales/cs';
-import type { GrammarGroupType, UserBlockType } from '@/types/generic.types';
+import type { BlockType, GrammarGroupType } from '@/types/generic.types';
 import DOMPurify from 'dompurify';
 import type { JSX } from 'react';
 import type { UserItemLocal } from '@/types/user-item.types';
@@ -15,7 +15,7 @@ import VolumeSlider from '@/features/audio/VolumeSlider';
 import { useRouteClose } from '@/routing/use-route-close';
 
 type BlockTrainingOverviewCardProps = Readonly<{
-  block: Pick<UserBlockType, 'name' | 'note'>;
+  block: Pick<BlockType, 'name' | 'note'>;
   grammar: GrammarDetail | null;
   grammarGroup: Pick<GrammarGroupType, 'note'> | null;
   items?: readonly UserItemLocal[];

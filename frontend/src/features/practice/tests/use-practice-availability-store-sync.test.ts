@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
   queries: [] as Array<() => Promise<unknown>>,
   unsubscribes: [] as ReturnType<typeof vi.fn>[],
   getReadyReviewState: vi.fn(),
-  getNextUnstartedPracticeBlock: vi.fn().mockResolvedValue(null),
+  getNextInitialTrainingSelection: vi.fn().mockResolvedValue(null),
   inspectActiveSession: vi
     .fn()
     .mockResolvedValue({ activeSession: null, requiresReconciliation: false }),
@@ -26,7 +26,6 @@ vi.mock('@/config/config', () => ({
 vi.mock('@/database/models/db', () => ({
   db: {
     user_items: {},
-    user_blocks: {},
     practice_sessions: {},
     transaction: async (...args: unknown[]) => {
       const callback = args.at(-1) as () => Promise<unknown>;
@@ -37,14 +36,10 @@ vi.mock('@/database/models/db', () => ({
 vi.mock('@/database/models/user-items', () => ({
   default: {
     getReadyReviewState: (...args: unknown[]) => mocks.getReadyReviewState(...args),
+    getNextInitialTrainingSelection: (...args: unknown[]) =>
+      mocks.getNextInitialTrainingSelection(...args),
     getPronunciationPracticeCount: (...args: unknown[]) =>
       mocks.getPronunciationPracticeCount(...args),
-  },
-}));
-vi.mock('@/database/models/user-blocks', () => ({
-  default: {
-    getNextUnstartedPracticeBlock: (...args: unknown[]) =>
-      mocks.getNextUnstartedPracticeBlock(...args),
   },
 }));
 vi.mock('@/database/models/practice-sessions', () => ({
@@ -98,7 +93,7 @@ describe('usePracticeAvailabilityStoreSync', () => {
     act(() => {
       mocks.observers[0].next({
         review: { readyCount: 3, schedule: [] },
-        nextBlockId: null,
+        initialTrainingAvailable: false,
         activeSession: null,
         requiresSessionReconciliation: false,
       });
@@ -118,7 +113,7 @@ describe('usePracticeAvailabilityStoreSync', () => {
     act(() => {
       mocks.observers[0].next({
         review: { readyCount: 0, schedule: [] },
-        nextBlockId: 1,
+        initialTrainingAvailable: true,
         activeSession: null,
         requiresSessionReconciliation: true,
       });
@@ -137,7 +132,7 @@ describe('usePracticeAvailabilityStoreSync', () => {
         schedule: [
           { date: '2026-07-21T10:00:01.000Z', count: 1 },
           { date: '2026-07-21T10:00:02.000Z', count: 1 },
-        ] }, nextBlockId: null, activeSession: null,
+        ] }, initialTrainingAvailable: false, activeSession: null,
       });
     });
 
@@ -159,7 +154,7 @@ describe('usePracticeAvailabilityStoreSync', () => {
       initialProps: { userId: 'u1' as string | null },
     });
     act(() => {
-      mocks.observers[0].next({ review: { readyCount: 3, schedule: [] }, nextBlockId: null, activeSession: null });
+      mocks.observers[0].next({ review: { readyCount: 3, schedule: [] }, initialTrainingAvailable: false, activeSession: null });
       mocks.observers[1].next(2);
     });
 
@@ -173,7 +168,7 @@ describe('usePracticeAvailabilityStoreSync', () => {
       pronunciationLoading: true,
     });
 
-    act(() => mocks.observers[0].next({ review: { readyCount: 99, schedule: [] }, nextBlockId: null, activeSession: null }));
+    act(() => mocks.observers[0].next({ review: { readyCount: 99, schedule: [] }, initialTrainingAvailable: false, activeSession: null }));
     expect(usePracticeAvailabilityStore.getState().reviewCount).toBe(0);
   });
 
@@ -183,7 +178,7 @@ describe('usePracticeAvailabilityStoreSync', () => {
       { initialProps: { userId: 'u1' as string | null } },
     );
     act(() => {
-      mocks.observers[0].next({ review: { readyCount: 3, schedule: [] }, nextBlockId: null, activeSession: null });
+      mocks.observers[0].next({ review: { readyCount: 3, schedule: [] }, initialTrainingAvailable: false, activeSession: null });
       mocks.observers[1].next(2);
     });
 
@@ -196,7 +191,7 @@ describe('usePracticeAvailabilityStoreSync', () => {
     });
 
     unmount();
-    act(() => mocks.observers[0].next({ review: { readyCount: 99, schedule: [] }, nextBlockId: null, activeSession: null }));
+    act(() => mocks.observers[0].next({ review: { readyCount: 99, schedule: [] }, initialTrainingAvailable: false, activeSession: null }));
     expect(usePracticeAvailabilityStore.getState().reviewCount).toBe(0);
   });
 

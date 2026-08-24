@@ -40,6 +40,7 @@ const config = {
   },
 
   practice: {
+    initialTrainingBatchSize: 8, // Maximum size of an automatically assembled initial-training batch
     reviewStarSize: 20, // Number of review answers needed to earn one star
     starsPerRow: 10, // Number of stars shown in one tier row
     starCelebrationDurationMs: 2000,

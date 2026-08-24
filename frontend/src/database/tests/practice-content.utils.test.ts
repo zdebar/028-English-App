@@ -63,7 +63,6 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
     lesson_id: 1,
     updated_at: '2026-01-01',
     is_vocabulary: 1,
-    is_practice_item: 1,
     has_pronunciation_practice: 0,
     block_id: 1,
     topic_id: -1,
@@ -74,7 +73,7 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
     next_at_en_to_cz: '2026-01-01',
     mastered_at_cz_to_en: '9999-12-31',
     mastered_at_en_to_cz: '9999-12-31',
-    curriculum_sort_path: [1, 1, 1, 1],
+    curriculum_sort_path: [1, 1, 1],
     ...overrides,
   };
 }

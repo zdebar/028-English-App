@@ -5,7 +5,7 @@ import type GrammarGroup from '@/database/models/grammar-groups';
 import type AudioRecord from '@/database/models/audio-records';
 import type UserItem from '@/database/models/user-items';
 import type UserScore from '@/database/models/user-scores';
-import type UserBlock from '@/database/models/user-blocks';
+import type Block from '@/database/models/blocks';
 import type AudioMetadata from '@/database/models/audio-metadata';
 import type Metadata from '@/database/models/metadata';
 import type Lessons from '@/database/models/lessons';
@@ -18,7 +18,7 @@ import type PracticeSession from '@/database/models/practice-sessions';
 import type Topic from '@/database/models/topics';
 
 const USER_ITEMS_SCHEMA =
-  '[user_id+item_id], [user_id+grammar_chunk_id+started_at], [user_id+is_vocabulary+started_at], [user_id+is_practice_item+is_vocabulary+started_at], [user_id+started_at], [user_id+updated_at], [user_id+lesson_id+is_vocabulary+started_at], [user_id+lesson_id+is_practice_item+is_vocabulary+started_at], [user_id+block_id], [user_id+topic_id], [user_id+is_practice_item+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path], [user_id+is_practice_item+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path], [user_id+has_pronunciation_practice]';
+  '[user_id+item_id], [user_id+grammar_chunk_id+started_at], [user_id+is_vocabulary+started_at], [user_id+started_at], [user_id+updated_at], [user_id+lesson_id+is_vocabulary+started_at], [user_id+block_id], [user_id+topic_id], [user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path], [user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path], [user_id+has_pronunciation_practice]';
 
 /**
  * Application IndexedDB wrapper built on Dexie.
@@ -38,7 +38,7 @@ export default class AppDB extends Dexie {
   grammar_chunk_examples!: EntityTable<GrammarChunkExample, any>;
   user_items!: EntityTable<UserItem, any>;
   user_scores!: EntityTable<UserScore, any>;
-  user_blocks!: EntityTable<UserBlock, any>;
+  blocks!: EntityTable<Block, 'id'>;
   audio_records!: EntityTable<AudioRecord, 'filename'>;
   audio_metadata!: EntityTable<AudioMetadata, 'archive_name'>;
   metadata!: EntityTable<Metadata, any>;
@@ -51,6 +51,7 @@ export default class AppDB extends Dexie {
     this.version(1).stores({
       levels: 'id, sort_order',
       lessons: 'id, sort_order',
+      blocks: 'id, lesson_id, grammar_chunk_id',
       notes: 'id',
       topics: 'id, sort_order',
       pronunciation_groups: 'id, sort_order',
@@ -61,7 +62,6 @@ export default class AppDB extends Dexie {
       grammar_chunk_examples:
         '[grammar_chunk_id+item_id], [grammar_chunk_id+sort_order], item_id',
       user_items: USER_ITEMS_SCHEMA,
-      user_blocks: '[user_id+block_id], user_id, [user_id+updated_at]',
       user_scores: '[user_id+date], [user_id+updated_at]',
       practice_sessions: 'user_id, mode, updated_at',
       audio_records: 'filename',

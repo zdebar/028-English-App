@@ -11,7 +11,6 @@ RETURNS TABLE (
   pronunciation TEXT,
   audio TEXT,
   is_vocabulary BOOLEAN,
-  is_practice_item BOOLEAN,
   has_pronunciation_practice BOOLEAN,
   sort_order INTEGER,
   curriculum_sort_path INTEGER[],

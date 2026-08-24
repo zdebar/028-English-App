@@ -19,10 +19,10 @@ vi.mock('@/database/models/practice-sessions', () => ({
     reconcileActive: (...args: unknown[]) => mocks.reconcileActive(...args),
     startNew: (...args: unknown[]) => mocks.startNew(...args),
     put: (...args: unknown[]) => mocks.put(...args),
-    completeNewBlock: vi.fn(),
+    completeInitialTraining: vi.fn(),
   },
 }));
-vi.mock('@/database/models/user-blocks', () => ({ default: { getByBlockId: vi.fn() } }));
+vi.mock('@/database/models/blocks', () => ({ default: { getById: vi.fn() } }));
 vi.mock('@/database/models/user-items', () => ({
   default: { getByBlockId: vi.fn(), savePracticeDeck: vi.fn(), applyPracticeProgress: vi.fn() },
 }));
@@ -48,12 +48,11 @@ vi.mock('@/features/practice/hooks/use-practice-card-state', () => ({
 vi.mock('@/routing/route-data-handoff', () => ({ invalidateRouteData: vi.fn(), routeDataKey: vi.fn() }));
 vi.mock('@/features/logging/monitoring-handler', () => ({ reportError: vi.fn() }));
 
-import { useBlockTrainingDeck } from '../hooks/use-block-training-deck';
+import { useInitialTrainingDeck } from '../hooks/use-block-training-deck';
 
 const block = {
-  user_id: 'u1', block_id: 10, name: 'Block', note: null, lesson_id: 1, grammar_chunk_id: null,
-  sort_order: 1, is_practice_block: true,
-  started_at: '1970-01-01T00:00:00.000Z', updated_at: '2026-01-01', deleted_at: '',
+  id: 10, name: 'Block', note: null, lesson_id: 1, grammar_chunk_id: null,
+  updated_at: '2026-01-01', deleted_at: null,
 };
 const items = [item(1), item(2)];
 const initialData = {
@@ -64,7 +63,7 @@ const initialData = {
   grammarGroup: null,
 };
 
-describe('useBlockTrainingDeck', () => {
+describe('useInitialTrainingDeck', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.reconcileActive.mockResolvedValue(null);
@@ -73,7 +72,7 @@ describe('useBlockTrainingDeck', () => {
   });
 
   it('starts the first ordered phase and persists progress after each answer', async () => {
-    const { result } = renderHook(() => useBlockTrainingDeck('u1', 10, initialData));
+    const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
     await act(async () => result.current.nextKnown());
     expect(mocks.put).toHaveBeenCalledWith(
@@ -92,7 +91,7 @@ describe('useBlockTrainingDeck', () => {
       current_queue_item_ids: [2, 1],
       completed_item_ids: [],
     });
-    const { result } = renderHook(() => useBlockTrainingDeck('u1', 10, initialData));
+    const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(2));
     expect(result.current.isCzToEn).toBe(true);
     expect(result.current.hasProgress).toBe(true);
@@ -110,9 +109,9 @@ function newSession() {
 function item(itemId: number) {
   return {
     user_id: 'u1', item_id: itemId, czech: `cz${itemId}`, english: `en${itemId}`,
-    pronunciation: '', audio: null, is_vocabulary: 1 as const, is_practice_item: 1 as const,
+    pronunciation: '', audio: null, is_vocabulary: 1 as const,
     has_pronunciation_practice: 0 as const, sort_order: itemId,
-    curriculum_sort_path: [1, 1, 1, itemId] as [number, number, number, number], note_id: null,
+    curriculum_sort_path: [1, 1, itemId] as [number, number, number], note_id: null,
     block_id: 10, topic_id: -1, grammar_chunk_id: 0, progress_cz_to_en: 0, progress_en_to_cz: 0,
     progress_history: [], started_at: '1970-01-01T00:00:00.000Z', updated_at: '2026-01-01',
     deleted_at: '', next_at_cz_to_en: '1970-01-01T00:00:00.000Z',
