@@ -49,6 +49,18 @@ describe('Home practice buttons', () => {
     expect(button('New').disabled).toBe(false);
   });
 
+  it('stacks review before new with the shared one-unit gap', () => {
+    const { container } = render(<PracticeButtons userId="u1" />);
+    const buttonGroup = container.firstElementChild;
+
+    expect(buttonGroup?.className).toContain('flex-col');
+    expect(buttonGroup?.className).toContain('gap-1');
+    expect(screen.getAllByRole('button').map((item) => item.textContent)).toEqual([
+      'Review',
+      'New',
+    ]);
+  });
+
   it('uses the shared primary disabled style when no new block exists', () => {
     usePracticeAvailabilityStore.setState({ nextBlockId: null });
     render(<PracticeButtons userId="u1" />);

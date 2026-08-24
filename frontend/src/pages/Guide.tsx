@@ -44,20 +44,20 @@ export default function Guide(): JSX.Element {
           offline.
         </p>
         <h3>Denní cíl</h3>
-        <p>Doporučený minimální denní cíl je 10 hvězdiček, tedy 400 procvičených položek.</p>
-        <h3>Studovat</h3>
-        <p>Společné učení a procvičování slovíček a gramatiky.</p>
-        <h3>Výslovnost - položky</h3>
+        <p>Doporučený minimální denní cíl je 10 hvězdiček, tedy 200 odpovědí.</p>
+        <h3>Opakování</h3>
+        <p>Procvičování již započatých položek. Každých 20 odpovědí přidá jednu hvězdičku.</p>
+        <h3>Nové</h3>
+        <p>Učení nového bloku slovíček v obou směrech a v pevném i náhodném pořadí.</p>
+        <h3>Výslovnost</h3>
         <p>
           Volitelné procvičování výslovnosti individuálních položek. Lze přidat skrze tlačítko ve
-          "Studovat" či "Přehled slovíček".
+          cvičení či v přehledu slovíček.
         </p>
         <p>
           Nemá vliv na pokrok v lekcích. Pokud tedy nějaké slovíčko či větu znáte, ale dělá Vám
           problém výslovnost, je vhodné přidat je sem.
         </p>
-        <h3>Výslovnost - skupiny</h3>
-        <p>Sdružuje slovíčka s podobnou výslovností např. bad / bed</p>
         <h3>Přehled lekcí</h3>
         <p>Přehled dnes dotčených lekcí. Lze přepínat mezi rozučenými a naučenými položkami.</p>
       </section>
@@ -139,6 +139,8 @@ export default function Guide(): JSX.Element {
         <p>Přehled započatých tematických bloků slovíček, např. dny v týdnu, měsíce atd.</p>
         <h3>Přehled slovíček</h3>
         <p>Přehled započatých slovíček.</p>
+        <h3>Výslovnost</h3>
+        <p>Výběr skupin podobně znějících položek, například bad / bed, k procvičování.</p>
         <h3>Smazat účet</h3>
         <p>
           Vaše údaje budou uchovány po dobu dalších 30 dní. Během této doby lze účet obnovit

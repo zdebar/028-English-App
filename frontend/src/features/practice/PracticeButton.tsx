@@ -26,7 +26,7 @@ export default function PracticeButtons({ userId }: PracticeButtonsProps): JSX.E
   const newTitle = resolveButtonTitle(loading, error, newDisabled);
 
   return (
-    <div className="flex w-full gap-1">
+    <div className="flex w-full flex-col gap-1">
       <DataNavigationButton
         to={ROUTES.practice}
         descriptor={practiceDeckDescriptor(userId)}

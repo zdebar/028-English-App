@@ -2,7 +2,7 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import Dashboard from '@/features/dashboard/Dashboard';
 import { useUserStore } from '@/features/user-stats/use-user-store';
 import { TEXTS } from '@/locales/cs';
-import type { JSX, ReactNode } from 'react';
+import type { JSX } from 'react';
 import { Link } from 'react-router-dom';
 import Notification from '@/components/UI/Notification';
 import '@/styles/home.css';
@@ -18,7 +18,6 @@ import SimulateDataButton from '@/features/synchronization/SimulateDataButton';
 import PracticeButton from '@/features/practice/PracticeButton';
 import HelpButton from '@/features/help/HelpButton';
 import PronunciationPracticeButton from '@/features/pronunciation/PronunciationPracticeButton';
-import PronunciationGroupsButton from '@/features/pronunciation/PronunciationGroupsButton';
 import { practiceOverviewDescriptor } from '@/routing/route-data';
 
 function HomeActionLinks(): JSX.Element {
@@ -29,18 +28,6 @@ function HomeActionLinks(): JSX.Element {
         <Notification className="color-info">{TEXTS.guide}</Notification>
       </Link>
     </div>
-  );
-}
-
-function HomeButtonGroup({
-  title,
-  children,
-}: Readonly<{ title: string; children: ReactNode }>): JSX.Element {
-  return (
-    <fieldset className="flex min-w-0 flex-col gap-1">
-      <legend className="font-headings w-full pb-1 text-center text-lg">{title}</legend>
-      {children}
-    </fieldset>
   );
 }
 
@@ -59,7 +46,7 @@ export default function Home(): JSX.Element {
   return (
     <>
       {userId ? (
-        <div className="card-width relative flex h-full w-full grow flex-col justify-start gap-2 sm:gap-4">
+        <div className="card-width relative flex h-full w-full grow flex-col justify-start gap-1 sm:gap-4">
           <div className="landscape:mt-6">
             <PropertyView
               label={TEXTS.profileNameLabel}
@@ -75,7 +62,7 @@ export default function Home(): JSX.Element {
             Aplikace v testovacím režimu! V tuto chvíli Vaše tréninková data nebudou zachována.
           </p>
           {isAnonymousUser && (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1">
               <ConvertAnonymousUserButton />
               <SimulateDataButton />
             </div>
@@ -87,16 +74,9 @@ export default function Home(): JSX.Element {
             ariaLabel={TEXTS.practiceOverviewOpen}
             helpText={TEXTS.starsToday}
           />
-          <div className="flex w-full flex-col gap-3">
-            <HomeButtonGroup title={TEXTS.studySection}>
-              <PracticeButton userId={userId} />
-            </HomeButtonGroup>
-            <HomeButtonGroup title={TEXTS.pronunciationSection}>
-              <div className="flex w-full gap-1">
-                <PronunciationPracticeButton userId={userId} />
-                <PronunciationGroupsButton />
-              </div>
-            </HomeButtonGroup>
+          <div className="flex w-full flex-col gap-1">
+            <PracticeButton userId={userId} />
+            <PronunciationPracticeButton userId={userId} />
           </div>
           <div className="relative">
             <p

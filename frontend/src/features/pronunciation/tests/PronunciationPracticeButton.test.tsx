@@ -16,7 +16,7 @@ vi.mock('@/routing/route-data', () => ({
 }));
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
-    pronunciationPracticeButton: 'Pronunciation items',
+    pronunciationPracticeButton: 'Pronunciation',
     pronunciationPracticeTooltip: 'Practice selected words',
     noPronunciationPracticeSelection: 'No selected words',
     loadingMessage: 'Loading',
@@ -40,7 +40,7 @@ describe('PronunciationPracticeButton', () => {
   it('is optimistically enabled until the selection count is available', () => {
     render(<PronunciationPracticeButton userId="u1" />);
 
-    const button = screen.getByRole('button', { name: 'Pronunciation items' });
+    const button = screen.getByRole('button', { name: 'Pronunciation' });
     expect((button as HTMLButtonElement).disabled).toBe(false);
     expect(button.title).toBe('Loading');
   });
@@ -49,7 +49,7 @@ describe('PronunciationPracticeButton', () => {
     usePracticeAvailabilityStore.setState({ pronunciationLoading: false });
     render(<PronunciationPracticeButton userId="u1" />);
 
-    const button = screen.getByRole('button', { name: 'Pronunciation items' });
+    const button = screen.getByRole('button', { name: 'Pronunciation' });
     expect((button as HTMLButtonElement).disabled).toBe(true);
     expect(button.title).toBe('No selected words');
   });
@@ -61,7 +61,7 @@ describe('PronunciationPracticeButton', () => {
     });
     render(<PronunciationPracticeButton userId="u1" />);
 
-    const button = screen.getByRole('button', { name: 'Pronunciation items' });
+    const button = screen.getByRole('button', { name: 'Pronunciation' });
     expect(button.title).toBe('Practice selected words');
     fireEvent.click(button);
     expect(mocks.navigate).toHaveBeenCalledWith('/practice/pronunciation');
@@ -74,7 +74,7 @@ describe('PronunciationPracticeButton', () => {
     });
     render(<PronunciationPracticeButton userId="u1" />);
 
-    const button = screen.getByRole('button', { name: 'Pronunciation items' });
+    const button = screen.getByRole('button', { name: 'Pronunciation' });
     expect((button as HTMLButtonElement).disabled).toBe(true);
     expect(button.title).toBe('Loading error');
   });

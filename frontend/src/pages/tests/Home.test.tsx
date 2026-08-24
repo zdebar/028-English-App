@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(
@@ -78,8 +78,6 @@ vi.mock('@/locales/cs', () => ({
     syncWarning: 'Data may be stale.',
     signupHint: 'Signup hint',
     practiceButton: 'Practice',
-    studySection: 'Studium',
-    pronunciationSection: 'Výslovnost',
   },
 }));
 
@@ -120,17 +118,20 @@ vi.mock('@/features/synchronization/SimulateDataButton', () => ({
 }));
 
 vi.mock('@/features/practice/PracticeButton', () => ({
-  default: ({ userId }: any) => <div data-testid="home-practice-buttons">practice:{userId}</div>,
-}));
-
-vi.mock('@/features/pronunciation/PronunciationPracticeButton', () => ({
   default: ({ userId }: any) => (
-    <div data-testid="pronunciation-practice-button">pronunciation:{userId}</div>
+    <div data-testid="home-practice-buttons" className="flex flex-col gap-1">
+      <button type="button">Review {userId}</button>
+      <button type="button">New</button>
+    </div>
   ),
 }));
 
-vi.mock('@/features/pronunciation/PronunciationGroupsButton', () => ({
-  default: () => <div data-testid="pronunciation-groups-button">pronunciation-groups</div>,
+vi.mock('@/features/pronunciation/PronunciationPracticeButton', () => ({
+  default: () => (
+    <button type="button" data-testid="pronunciation-practice-button">
+      Pronunciation
+    </button>
+  ),
 }));
 
 vi.mock('react-router-dom', () => ({
@@ -170,21 +171,19 @@ describe('Home', () => {
   it('renders authenticated practice controls through the practice buttons component', () => {
     render(<Home />);
 
-    expect(screen.getByTestId('home-practice-buttons').textContent).toBe('practice:u1');
-    expect(screen.getByTestId('pronunciation-practice-button').parentElement?.className).toContain(
-      'gap-1',
-    );
-    expect(screen.getByTestId('pronunciation-groups-button').textContent).toBe(
-      'pronunciation-groups',
-    );
-    expect(screen.getByRole('group', { name: 'Studium' })).toBeTruthy();
-    const pronunciationGroup = screen.getByRole('group', { name: 'Výslovnost' });
-    expect(pronunciationGroup.contains(screen.getByTestId('pronunciation-practice-button'))).toBe(
-      true,
-    );
-    expect(pronunciationGroup.contains(screen.getByTestId('pronunciation-groups-button'))).toBe(
-      true,
-    );
+    const practiceButtons = screen.getByTestId('home-practice-buttons');
+    const actions = screen.getByTestId('pronunciation-practice-button').parentElement;
+
+    expect(practiceButtons.className).toContain('flex-col');
+    expect(practiceButtons.className).toContain('gap-1');
+    expect(actions?.className).toContain('flex-col');
+    expect(actions?.className).toContain('gap-1');
+    const actionLabels = within(actions as HTMLElement)
+      .getAllByRole('button')
+      .map((button) => button.textContent);
+    expect(actionLabels).toEqual(['Review u1', 'New', 'Pronunciation']);
+    expect(screen.queryByText('Studium')).toBeNull();
+    expect(screen.queryByRole('group')).toBeNull();
   });
 
   it('renders the dashboard help button in the page-owned dashboard wrapper', () => {
@@ -203,13 +202,6 @@ describe('Home', () => {
 
     expect(screen.getByRole('button', { name: 'Install' })).toBeTruthy();
     expect(screen.getByText('Guide').className).toContain('color-info');
-
-    for (const group of screen.getAllByRole('group')) {
-      const legend = group.querySelector('legend');
-      expect(legend?.className).toContain('font-headings');
-      expect(legend?.className).toContain('text-lg');
-      expect(legend?.className).not.toContain('color-info');
-    }
   });
 
   it('renders auth UI when user is signed out', () => {
