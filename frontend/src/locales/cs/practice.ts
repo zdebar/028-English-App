@@ -22,7 +22,6 @@ export const PRACTICE_TEXTS = {
   skipSuccessToast: 'Položka byla dokončena.',
   skipErrorToast: 'Dokončení položky se nezdařilo.',
   volume: 'Nastavení hlasitosti',
-  blockTrainingFinishAll: 'dokončete celý blok pro pokračování',
   blockTrainingProgressHelp: 'Kolo · Položky',
   blockTrainingComplete: 'dokončeno úvodní cvičení pro',
   next: 'další',

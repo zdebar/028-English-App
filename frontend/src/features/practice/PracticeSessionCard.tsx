@@ -71,12 +71,6 @@ type PracticeControlsProps = Pick<
   | 'showDirectionChange'
 >;
 
-type TopBarPrimaryContentProps = Pick<
-  PracticeSessionCardProps,
-  'isBlockTrainingPractice' | 'isPronunciationPractice'
-> &
-  Readonly<{ shortDirectionText: string }>;
-
 type VisibleDetail = 'grammar' | 'note';
 
 type PracticeDetailProps = Readonly<{
@@ -113,17 +107,7 @@ function AudioStatusMessage({
   return null;
 }
 
-function TopBarPrimaryContent({
-  isBlockTrainingPractice = false,
-  isPronunciationPractice = false,
-  shortDirectionText,
-}: TopBarPrimaryContentProps) {
-  if (isBlockTrainingPractice) {
-    return <p className="font-headings text-lg">{TEXTS.blockTrainingFinishAll}</p>;
-  }
-
-  if (isPronunciationPractice) return null;
-
+function DirectionTopBar({ shortDirectionText }: Readonly<{ shortDirectionText: string }>) {
   return (
     <div className="relative">
       <p className="text-sm font-light">{shortDirectionText}</p>
@@ -237,6 +221,10 @@ export default function PracticeSessionCard({
   const noteButtonDisabled = celebratingStar || !showNoteButton || showDirectionChange;
   const practiceControlColumns =
     revealed && !isPronunciationPractice ? 'grid-cols-3' : 'grid-cols-1';
+  const showTopBar = !isPronunciationPractice;
+  const cardGridRows = showTopBar
+    ? 'grid-rows-[2rem_minmax(0,1fr)_3.5rem]'
+    : 'grid-rows-[minmax(0,1fr)_3.5rem]';
 
   if (visibleDetail) {
     return (
@@ -270,7 +258,7 @@ export default function PracticeSessionCard({
         )}
         <button
           type="button"
-          className={`relative grid h-full w-full grow cursor-pointer grid-rows-[2rem_minmax(0,1fr)_3.5rem] items-center p-4 text-inherit select-none ${cardStyle} `}
+          className={`relative grid h-full w-full grow cursor-pointer ${cardGridRows} items-center p-4 text-inherit select-none ${cardStyle}`}
           onClick={handleReveal}
           title={cardText}
           aria-disabled={revealed}
@@ -279,16 +267,14 @@ export default function PracticeSessionCard({
           {!revealed && !showDirectionChange && (
             <HelpText className="top-23 left-1/2 -translate-x-1/2">{TEXTS.reveal}</HelpText>
           )}
-          <div
-            id="top-bar"
-            className="relative flex h-8 w-full items-center justify-center text-center"
-          >
-            <TopBarPrimaryContent
-              isBlockTrainingPractice={isBlockTrainingPractice}
-              isPronunciationPractice={isPronunciationPractice}
-              shortDirectionText={shortDirectionText}
-            />
-          </div>
+          {showTopBar && (
+            <div
+              id="top-bar"
+              className="relative flex h-8 w-full items-center justify-center text-center"
+            >
+              <DirectionTopBar shortDirectionText={shortDirectionText} />
+            </div>
+          )}
           <div
             id="practice-main-content"
             className="flex min-h-0 w-full items-center justify-center"

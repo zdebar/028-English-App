@@ -124,7 +124,6 @@ vi.mock('@/locales/cs', () => ({
     directionEnToCz: 'EN to CZ',
     directionCzToEnShort: 'cz › en',
     directionEnToCzShort: 'en › cz',
-    blockTrainingFinishAll: 'Finish the entire block',
     blockTrainingProgressHelp: 'Round · completed items in this round',
     next: 'Next',
   },
@@ -1024,7 +1023,7 @@ describe('PracticeCard', () => {
     expect((screen.getByTestId('repeat-btn') as HTMLButtonElement).disabled).toBe(true);
   });
 
-  it('shows the block training instruction and round progress at the bottom left', () => {
+  it('shows the direction in block training and keeps round progress at the bottom left', () => {
     const { container } = render(
       <PracticeSessionCard
         note={null}
@@ -1048,11 +1047,12 @@ describe('PracticeCard', () => {
       />,
     );
 
-    expect(screen.getByText('Finish the entire block')).toBeTruthy();
-    expect(screen.queryByText('cz › en')).toBeNull();
+    expect(container.querySelector('#top-bar')?.textContent).toBe('cz › en');
     expect(screen.getByText('Round · completed items in this round')).toBeTruthy();
 
+    const cardButton = container.querySelector('button[aria-disabled]') as HTMLButtonElement;
     const bottomBar = container.querySelector('#bottom-bar') as HTMLElement;
+    expect(cardButton.className).toContain('grid-rows-[2rem_minmax(0,1fr)_3.5rem]');
     expect(bottomBar.firstElementChild?.textContent).toContain('1/2 · 7/8');
   });
 
@@ -1080,14 +1080,10 @@ describe('PracticeCard', () => {
       />,
     );
 
-    expect(screen.getByText('Finish the entire block')).toBeTruthy();
     expect(screen.getByText('No audio')).toBeTruthy();
 
-    const topBar = container.querySelector('#top-bar') as HTMLElement;
     const bottomBar = container.querySelector('#bottom-bar') as HTMLElement;
-    expect(topBar.children).toHaveLength(1);
-    expect(topBar?.children[0]?.textContent).toContain('Finish the entire block');
-    expect(topBar.textContent).not.toContain('No audio');
+    expect(container.querySelector('#top-bar')?.textContent).toBe('cz › en');
     expect(bottomBar.lastElementChild?.textContent).toContain('No audio');
   });
 });
