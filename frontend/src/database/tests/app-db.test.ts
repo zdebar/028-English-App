@@ -36,12 +36,12 @@ describe('AppDB schema', () => {
     mocks.versions.length = 0;
   });
 
-  it('adds topics and their item index in version 3', () => {
+  it('declares the complete schema in version 1', () => {
     new AppDB();
 
-    expect(mocks.versions).toHaveLength(3);
-    expect(mocks.versions[2]).toMatchObject({
-      number: 3,
+    expect(mocks.versions).toHaveLength(1);
+    expect(mocks.versions[0]).toMatchObject({
+      number: 1,
       schema: {
         levels: 'id, sort_order',
         lessons: 'id, sort_order',
@@ -62,12 +62,12 @@ describe('AppDB schema', () => {
         metadata: '[table_name+user_id]',
       },
     });
-    expect(mocks.versions[2].schema?.user_items).toContain('[user_id+topic_id]');
-    expect(mocks.versions[2].schema?.user_items).toContain('[user_id+has_pronunciation_practice]');
-    expect(mocks.versions[2].schema?.user_items).toContain(
+    expect(mocks.versions[0].schema?.user_items).toContain('[user_id+topic_id]');
+    expect(mocks.versions[0].schema?.user_items).toContain('[user_id+has_pronunciation_practice]');
+    expect(mocks.versions[0].schema?.user_items).toContain(
       '[user_id+is_practice_item+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]',
     );
-    expect(mocks.versions[2].schema?.user_items).toContain(
+    expect(mocks.versions[0].schema?.user_items).toContain(
       '[user_id+is_practice_item+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]',
     );
   });

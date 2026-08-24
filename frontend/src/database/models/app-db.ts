@@ -16,7 +16,6 @@ import type PronunciationGroupItem from '@/database/models/pronunciation-group-i
 import type GrammarChunkExample from '@/database/models/grammar-chunk-examples';
 import type PracticeSession from '@/database/models/practice-sessions';
 import type Topic from '@/database/models/topics';
-import type { UserItemLocal } from '@/types/user-item.types';
 
 const USER_ITEMS_SCHEMA =
   '[user_id+item_id], [user_id+grammar_chunk_id+started_at], [user_id+is_vocabulary+started_at], [user_id+is_practice_item+is_vocabulary+started_at], [user_id+started_at], [user_id+updated_at], [user_id+lesson_id+is_vocabulary+started_at], [user_id+lesson_id+is_practice_item+is_vocabulary+started_at], [user_id+block_id], [user_id+topic_id], [user_id+is_practice_item+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path], [user_id+is_practice_item+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path], [user_id+has_pronunciation_practice]';
@@ -53,25 +52,7 @@ export default class AppDB extends Dexie {
       levels: 'id, sort_order',
       lessons: 'id, sort_order',
       notes: 'id',
-      pronunciation_groups: 'id, sort_order',
-      pronunciation_group_items:
-        '[pronunciation_group_id+item_id], [pronunciation_group_id+sort_order], [pronunciation_group_id+contrast_set+sort_order], item_id',
-      grammar_groups: 'id, sort_order',
-      grammar_chunks: 'id, grammar_group_id, sort_order',
-      grammar_chunk_examples:
-        '[grammar_chunk_id+item_id], [grammar_chunk_id+sort_order], item_id',
-      user_items: USER_ITEMS_SCHEMA,
-      user_blocks: '[user_id+block_id], user_id, [user_id+updated_at]',
-      user_scores: '[user_id+date], [user_id+updated_at]',
-      audio_records: 'filename',
-      audio_metadata: 'archive_name',
-      metadata: '[table_name+user_id]',
-    });
-
-    this.version(2).stores({
-      levels: 'id, sort_order',
-      lessons: 'id, sort_order',
-      notes: 'id',
+      topics: 'id, sort_order',
       pronunciation_groups: 'id, sort_order',
       pronunciation_group_items:
         '[pronunciation_group_id+item_id], [pronunciation_group_id+sort_order], [pronunciation_group_id+contrast_set+sort_order], item_id',
@@ -87,37 +68,5 @@ export default class AppDB extends Dexie {
       audio_metadata: 'archive_name',
       metadata: '[table_name+user_id]',
     });
-
-    this.version(3)
-      .stores({
-        levels: 'id, sort_order',
-        lessons: 'id, sort_order',
-        notes: 'id',
-        topics: 'id, sort_order',
-        pronunciation_groups: 'id, sort_order',
-        pronunciation_group_items:
-          '[pronunciation_group_id+item_id], [pronunciation_group_id+sort_order], [pronunciation_group_id+contrast_set+sort_order], item_id',
-        grammar_groups: 'id, sort_order',
-        grammar_chunks: 'id, grammar_group_id, sort_order',
-        grammar_chunk_examples:
-          '[grammar_chunk_id+item_id], [grammar_chunk_id+sort_order], item_id',
-        user_items: USER_ITEMS_SCHEMA,
-        user_blocks: '[user_id+block_id], user_id, [user_id+updated_at]',
-        user_scores: '[user_id+date], [user_id+updated_at]',
-        practice_sessions: 'user_id, mode, updated_at',
-        audio_records: 'filename',
-        audio_metadata: 'archive_name',
-        metadata: '[table_name+user_id]',
-      })
-      .upgrade((transaction) =>
-        transaction
-          .table<UserItemLocal>('user_items')
-          .toCollection()
-          .modify((item) => {
-            if (item.topic_id == null) {
-              item.topic_id = config.database.nullReplacementNumber;
-            }
-          }),
-      );
   }
 }
