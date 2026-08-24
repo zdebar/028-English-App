@@ -520,7 +520,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   static async getReadyReviewState(userId: string): Promise<ReadyPracticeState> {
     assertNonEmptyString(userId, 'userId');
 
-    const countCap = config.practice.readyPracticeCountCap;
+    const countCap = config.practice.reviewStarSize;
     const nowIso = new Date(Date.now()).toISOString();
 
     const items = await db.user_items.where('user_id').equals(userId).toArray();

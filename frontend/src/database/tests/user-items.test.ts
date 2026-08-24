@@ -56,7 +56,7 @@ vi.mock('@/config/config', () => ({
     },
     practice: {
       initialTrainingBatchSize: 8,
-      readyPracticeCountCap: 20,
+      reviewStarSize: 20,
       readyPracticeScheduleGroupWindowMs: 1000,
     },
   },

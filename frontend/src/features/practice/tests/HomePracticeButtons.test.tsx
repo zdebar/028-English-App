@@ -22,6 +22,7 @@ vi.mock('@/routing/route-data', () => ({
 
 import PracticeButtons from '@/features/practice/PracticeButton';
 import { usePracticeAvailabilityStore } from '@/features/practice/use-practice-availability-store';
+import config from '@/config/config';
 
 describe('Home practice buttons', () => {
   beforeEach(() => {
@@ -35,15 +36,15 @@ describe('Home practice buttons', () => {
     });
   });
 
-  it('gives review priority at the twenty-direction boundary', () => {
-    usePracticeAvailabilityStore.setState({ reviewCount: 20 });
+  it('gives review priority at the configured review boundary', () => {
+    usePracticeAvailabilityStore.setState({ reviewCount: config.practice.reviewStarSize });
     render(<PracticeButtons userId="u1" />);
     expect(button('Review').disabled).toBe(false);
     expect(button('New').disabled).toBe(true);
   });
 
   it('enables new below the review boundary', () => {
-    usePracticeAvailabilityStore.setState({ reviewCount: 19 });
+    usePracticeAvailabilityStore.setState({ reviewCount: config.practice.reviewStarSize - 1 });
     render(<PracticeButtons userId="u1" />);
     expect(button('Review').disabled).toBe(true);
     expect(button('New').disabled).toBe(false);
@@ -81,7 +82,7 @@ describe('Home practice buttons', () => {
 
   it('keeps only an active new session available', () => {
     usePracticeAvailabilityStore.setState({
-      reviewCount: 20,
+      reviewCount: config.practice.reviewStarSize,
       activeSession: makeSession('new'),
     });
     render(<PracticeButtons userId="u1" />);
