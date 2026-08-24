@@ -222,9 +222,6 @@ export default function PracticeSessionCard({
   const practiceControlColumns =
     revealed && !isPronunciationPractice ? 'grid-cols-3' : 'grid-cols-1';
   const showTopBar = !isPronunciationPractice;
-  const cardGridRows = showTopBar
-    ? 'grid-rows-[2rem_minmax(0,1fr)_3.5rem]'
-    : 'grid-rows-[minmax(0,1fr)_3.5rem]';
 
   if (visibleDetail) {
     return (
@@ -258,7 +255,7 @@ export default function PracticeSessionCard({
         )}
         <button
           type="button"
-          className={`relative grid h-full w-full grow cursor-pointer ${cardGridRows} items-center p-4 text-inherit select-none ${cardStyle}`}
+          className={`relative flex h-full w-full grow cursor-pointer flex-col items-center p-4 text-inherit select-none ${cardStyle}`}
           onClick={handleReveal}
           title={cardText}
           aria-disabled={revealed}
@@ -270,14 +267,14 @@ export default function PracticeSessionCard({
           {showTopBar && (
             <div
               id="top-bar"
-              className="relative flex h-8 w-full items-center justify-center text-center"
+              className="relative flex h-8 w-full shrink-0 items-center justify-center text-center"
             >
               <DirectionTopBar shortDirectionText={shortDirectionText} />
             </div>
           )}
           <div
             id="practice-main-content"
-            className="flex min-h-0 w-full items-center justify-center"
+            className="flex min-h-0 w-full grow items-center justify-center"
           >
             {showDirectionChange ? (
               <Notification>{directionText}</Notification>
@@ -297,7 +294,7 @@ export default function PracticeSessionCard({
           </div>
 
           <div
-            className="relative flex h-8 w-full items-center justify-between self-end"
+            className="relative flex h-8 w-full shrink-0 items-center justify-between"
             id="bottom-bar"
           >
             <p className="px-2 font-light" title={progressHelpText}>

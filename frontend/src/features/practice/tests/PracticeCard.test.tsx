@@ -560,11 +560,14 @@ describe('PracticeCard', () => {
     const mainContent = container.querySelector('#practice-main-content') as HTMLElement;
     const bottomBar = container.querySelector('#bottom-bar') as HTMLElement;
 
-    expect(cardButton.className).toContain('grid-rows-[2rem_minmax(0,1fr)_3.5rem]');
+    expect(cardButton.className).toContain('flex-col');
     expect(topBar.className).toContain('h-8');
+    expect(topBar.className).toContain('shrink-0');
     expect(mainContent.className).toContain('items-center');
+    expect(mainContent.className).toContain('grow');
     expect(mainContent.querySelector('#item')).toBeTruthy();
-    expect(bottomBar.className).toContain('self-end');
+    expect(bottomBar.className).toContain('h-8');
+    expect(bottomBar.className).toContain('shrink-0');
 
     mocks.practiceDeck.audioLoading = true;
     rerender(<PracticeCard />);
@@ -1052,7 +1055,7 @@ describe('PracticeCard', () => {
 
     const cardButton = container.querySelector('button[aria-disabled]') as HTMLButtonElement;
     const bottomBar = container.querySelector('#bottom-bar') as HTMLElement;
-    expect(cardButton.className).toContain('grid-rows-[2rem_minmax(0,1fr)_3.5rem]');
+    expect(cardButton.className).toContain('flex-col');
     expect(bottomBar.firstElementChild?.textContent).toContain('1/2 · 7/8');
   });
 
