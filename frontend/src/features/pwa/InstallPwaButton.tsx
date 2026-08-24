@@ -1,8 +1,6 @@
-import Notification from '@/components/UI/Notification';
 import { TEXTS } from '@/locales/cs';
 import { useEffect } from 'react';
 import { usePwaStore } from './use-pwa-store';
-
 
 type InstallPWAButtonProps = Readonly<{
   className?: string;
@@ -36,12 +34,13 @@ export function InstallPWAButton({ className }: InstallPWAButtonProps) {
   };
 
   return (
-    <Notification
+    <button
+      type="button"
       title={TEXTS.installButtonTooltip}
       onClick={handleInstall}
-      className={`color-info cursor-pointer ${className ?? ''}`.trim()}
+      className={`cursor-pointer ${className ?? ''}`.trim()}
     >
       {TEXTS.installButton}
-    </Notification>
+    </button>
   );
 }

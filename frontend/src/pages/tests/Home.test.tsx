@@ -89,12 +89,12 @@ vi.mock('@/features/help/HelpButton', () => ({
   default: () => <button type="button">Help</button>,
 }));
 
-vi.mock('@/components/UI/Notification', () => ({
-  default: ({ children, className }: any) => <div className={className}>{children}</div>,
-}));
-
 vi.mock('@/features/pwa/InstallPwaButton', () => ({
-  InstallPWAButton: () => <button type="button">Install</button>,
+  InstallPWAButton: ({ className }: any) => (
+    <button type="button" className={className}>
+      Install
+    </button>
+  ),
 }));
 
 vi.mock('@/features/practice-overview/PracticeOverviewButton', () => ({
@@ -135,7 +135,11 @@ vi.mock('@/features/pronunciation/PronunciationPracticeButton', () => ({
 }));
 
 vi.mock('react-router-dom', () => ({
-  Link: ({ children }: any) => <div>{children}</div>,
+  Link: ({ children, className, to }: any) => (
+    <a href={to} className={className}>
+      {children}
+    </a>
+  ),
   useNavigate: () => vi.fn(),
 }));
 
@@ -200,8 +204,24 @@ describe('Home', () => {
   it('renders install and guide links when user is signed in', () => {
     render(<Home />);
 
-    expect(screen.getByRole('button', { name: 'Install' })).toBeTruthy();
-    expect(screen.getByText('Guide').className).toContain('color-info');
+    const install = screen.getByRole('button', { name: 'Install' });
+    const guide = screen.getByRole('link', { name: 'Guide' });
+    const sharedClasses = [
+      'color-info',
+      'font-headings',
+      'text-lg',
+      'decoration-current',
+      'underline-offset-4',
+      'hover:underline',
+      'focus-visible:outline-2',
+      'focus-visible:outline-offset-2',
+    ];
+
+    sharedClasses.forEach((className) => {
+      expect(install.className).toContain(className);
+      expect(guide.className).toContain(className);
+    });
+    expect(guide.getAttribute('href')).toBe('/guide');
   });
 
   it('renders auth UI when user is signed out', () => {
