@@ -51,6 +51,7 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     sessionLoading: false,
     celebratingStar: false,
     celebrationStarTier: 'bronze',
+    acknowledgeCelebration: vi.fn(),
     finishedReview: false,
     isCzToEn: true,
     revealed: false,
@@ -115,6 +116,7 @@ vi.mock('@/locales/cs', () => ({
     progress: 'Progress',
     reviewStarProgress: 'Progress to next star',
     starEarned: 'Earned',
+    continueAfterStar: 'Continue by clicking',
     currentPracticeStar: 'Current practice star',
     today: 'Today',
     dailyGoal: 'Daily goal',
@@ -395,6 +397,7 @@ describe('PracticeCard', () => {
     mocks.practiceDeck.audioLoading = false;
     mocks.practiceDeck.celebratingStar = false;
     mocks.practiceDeck.celebrationStarTier = 'bronze';
+    mocks.practiceDeck.acknowledgeCelebration.mockReset();
   });
 
   afterEach(() => {
@@ -511,6 +514,9 @@ describe('PracticeCard', () => {
     expect(screen.getByRole('status')).toBeTruthy();
     expect(screen.getByTestId('earned-star').className).toContain('star-fill-silver');
     expect(screen.getByText('Earned')).toBeTruthy();
+    expect(screen.getByText('Continue by clicking')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Continue by clicking' }));
+    expect(mocks.practiceDeck.acknowledgeCelebration).toHaveBeenCalledOnce();
     const celebration = container.querySelector('.star-celebration') as HTMLElement;
     expect(celebration.className).toContain('-translate-y-2');
     expect(celebration.className).toContain('flex-col');

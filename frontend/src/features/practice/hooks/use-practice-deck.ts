@@ -10,12 +10,18 @@ import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff'
 import { loadReviewDeck } from '@/database/utils/practice-content.utils';
 import config from '@/config/config';
 import { getStarTierForCount, type StarTier } from '@/utils/star-progress.utils';
+import { useStarCelebration } from './use-star-celebration';
 
-/** Manages a persisted twenty-answer review session. */
+/** Manages a persisted, configured-length review session. */
 export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDeckEntry[]) {
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
-  const [celebratingStar, setCelebratingStar] = useState(false);
+  const {
+    celebratingStar,
+    waitForAcknowledgement,
+    acknowledgeCelebration,
+    finishCelebration,
+  } = useStarCelebration();
   const [celebrationStarTier, setCelebrationStarTier] = useState<StarTier>('bronze');
   const [saveError, setSaveError] = useState<Error | null>(null);
   const [finishedReview, setFinishedReview] = useState(false);
@@ -51,10 +57,7 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
   const finalizeCompletedSession = useCallback(async () => {
     if (!userId || completionPending.current) return;
     completionPending.current = true;
-    setCelebratingStar(true);
-    await new Promise<void>((resolve) => {
-      globalThis.setTimeout(resolve, config.practice.starCelebrationDurationMs);
-    });
+    await waitForAcknowledgement();
 
     try {
       const availability = await UserItem.getReadyReviewState(userId);
@@ -71,7 +74,7 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
         setIndex(0);
         setRevealed(false);
         resetHint();
-        setCelebratingStar(false);
+        finishCelebration();
         completionPending.current = false;
         return;
       }
@@ -82,10 +85,10 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
       const normalizedError = toError(caughtError);
       setSaveError(normalizedError);
       reportError('Failed to finish review star celebration', normalizedError);
-      setCelebratingStar(false);
+      finishCelebration();
       completionPending.current = false;
     }
-  }, [reload, resetHint, userId]);
+  }, [finishCelebration, reload, resetHint, userId, waitForAcknowledgement]);
 
   useEffect(() => {
     if (!userId) {
@@ -184,6 +187,7 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
     sessionLoading,
     celebratingStar,
     celebrationStarTier,
+    acknowledgeCelebration,
     finishedReview,
     isCzToEn,
     revealed,

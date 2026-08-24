@@ -55,6 +55,7 @@ export type PracticeSessionCardProps = Readonly<{
   onPronunciationSelectionChange?: (selected: boolean) => void;
   celebratingStar?: boolean;
   celebrationStarTier?: StarTier;
+  onStarCelebrationContinue?: () => void;
 }>;
 
 type PracticeControlsProps = Pick<
@@ -200,6 +201,7 @@ export default function PracticeSessionCard({
   onPronunciationSelectionChange,
   celebratingStar = false,
   celebrationStarTier = 'bronze',
+  onStarCelebrationContinue,
 }: PracticeSessionCardProps) {
   const userId = useAuthStore((state) => state.userId);
   const [visibleDetail, setVisibleDetail] = useState<VisibleDetail | null>(null);
@@ -239,19 +241,25 @@ export default function PracticeSessionCard({
       <div
         className="card-width card-height relative gap-1"
         aria-busy={celebratingStar}
-        inert={celebratingStar ? true : undefined}
       >
         {celebratingStar && (
-          <div
+          <button
+            type="button"
             className="color-button absolute inset-0 z-50 flex items-center justify-center"
-            role="status"
-            aria-live="polite"
+            onClick={onStarCelebrationContinue}
+            aria-label={TEXTS.continueAfterStar}
+            disabled={!onStarCelebrationContinue}
           >
-            <span className="star-celebration font-headings flex -translate-y-2 flex-col items-center gap-2 text-lg leading-none font-bold">
+            <span
+              className="star-celebration font-headings flex -translate-y-2 flex-col items-center gap-2 text-lg leading-none font-bold"
+              role="status"
+              aria-live="polite"
+            >
               <span>{TEXTS.starEarned}</span>
               <FullStar className={`star-fill-${celebrationStarTier}`} size={32} />
+              <span className="text-sm font-normal">{TEXTS.continueAfterStar}</span>
             </span>
-          </div>
+          </button>
         )}
         <button
           type="button"

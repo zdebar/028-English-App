@@ -43,7 +43,6 @@ const config = {
     initialTrainingBatchSize: 8, // Maximum size of an automatically assembled initial-training batch
     reviewStarSize: 40, // Number of review answers needed to earn one star
     starsPerRow: 10, // Number of stars shown in one tier row
-    starCelebrationDurationMs: 2000,
     audioDelay: 100, // Delay in milliseconds for automatically playing audio
     holdDuration: 300, // Duration in milliseconds for which the practice card is held before moving to the next item
     readyPracticeScheduleGroupWindowMs: 1000, // Time window for grouping future ready-practice schedule entries

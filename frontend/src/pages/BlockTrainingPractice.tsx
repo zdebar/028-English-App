@@ -70,6 +70,7 @@ export default function InitialTrainingPractice(): JSX.Element {
       progressLabel={deck.progressLabel}
       celebratingStar={deck.celebratingStar}
       celebrationStarTier={deck.celebrationStarTier}
+      onStarCelebrationContinue={deck.acknowledgeCelebration}
       isCzToEn={deck.isCzToEn}
       revealed={deck.revealed}
       czech={deck.czech}

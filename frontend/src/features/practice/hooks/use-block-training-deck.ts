@@ -14,6 +14,7 @@ import type { InitialTrainingData } from '@/routing/route-data';
 import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff';
 import { resolvePracticeEntries, resolvePracticeGrammarContext } from '@/database/utils/practice-content.utils';
 import { getStarTierForCount, type StarTier } from '@/utils/star-progress.utils';
+import { useStarCelebration } from './use-star-celebration';
 
 const PHASE_DIRECTIONS: Record<NewPracticePhase, 'czToEn' | 'enToCz'> = {
   0: 'czToEn',
@@ -44,7 +45,12 @@ export function useInitialTrainingDeck(
   const [grammarGroup, setGrammarGroup] = useState<GrammarGroupType | null>(initialData?.grammarGroup ?? null);
   const [session, setSession] = useState<PracticeSessionType | null>(null);
   const [isComplete, setIsComplete] = useState(false);
-  const [celebratingStar, setCelebratingStar] = useState(false);
+  const {
+    celebratingStar,
+    waitForAcknowledgement,
+    acknowledgeCelebration,
+    finishCelebration,
+  } = useStarCelebration();
   const [celebrationStarTier, setCelebrationStarTier] = useState<StarTier>('bronze');
   const [hasProgress, setHasProgress] = useState(false);
   const [revealed, setRevealed] = useState(false);
@@ -132,12 +138,10 @@ export function useInitialTrainingDeck(
     invalidateRouteData(routeDataKey('initial-training', userId));
     invalidateRouteData(routeDataKey('practice', userId));
     setCelebrationStarTier(getStarTierForCount(starCount, config.practice.starsPerRow));
-    setCelebratingStar(true);
-    await new Promise<void>((resolve) => {
-      globalThis.setTimeout(resolve, config.practice.starCelebrationDurationMs);
-    });
+    await waitForAcknowledgement();
+    finishCelebration();
     setIsComplete(true);
-  }, [items, userId]);
+  }, [finishCelebration, items, userId, waitForAcknowledgement]);
 
   const moveToNextPhase = useCallback(
     async (currentSession: PracticeSessionType): Promise<PracticeSessionType | null> => {
@@ -240,6 +244,7 @@ export function useInitialTrainingDeck(
     isComplete,
     celebratingStar,
     celebrationStarTier,
+    acknowledgeCelebration,
     hasProgress,
     loading,
     error,

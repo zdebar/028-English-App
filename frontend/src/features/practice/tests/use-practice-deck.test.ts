@@ -15,7 +15,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('@/config/config', () => ({
   default: {
-    practice: { reviewStarSize: 20, starsPerRow: 10, starCelebrationDurationMs: 2000 },
+    practice: { reviewStarSize: 20, starsPerRow: 10 },
   },
 }));
 vi.mock('@/hooks/use-fetch', () => ({
@@ -146,8 +146,6 @@ describe('usePracticeDeck', () => {
     );
     const { result } = renderHook(() => usePracticeDeck('u1'));
     await waitFor(() => expect(result.current.sessionLoading).toBe(false));
-    vi.useFakeTimers();
-
     let answerPromise: Promise<void> | undefined;
     act(() => {
       answerPromise = result.current.nextItem('correct');
@@ -161,11 +159,16 @@ describe('usePracticeDeck', () => {
     expect(result.current.celebratingStar).toBe(true);
     expect(result.current.celebrationStarTier).toBe('silver');
 
+    expect(mocks.getReadyReviewState).not.toHaveBeenCalled();
+    expect(result.current.celebratingStar).toBe(true);
+
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(2000);
+      result.current.acknowledgeCelebration();
+      await Promise.resolve();
     });
 
     expect(result.current.celebratingStar).toBe(true);
+    expect(mocks.getReadyReviewState).toHaveBeenCalledWith('u1');
 
     await act(async () => {
       resolveReload();

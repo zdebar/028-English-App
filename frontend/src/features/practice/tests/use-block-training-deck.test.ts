@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/config/config', () => ({
   default: {
     database: { nullReplacementDate: '1970-01-01T00:00:00.000Z' },
-    practice: { starCelebrationDurationMs: 2000, starsPerRow: 10 },
+    practice: { starsPerRow: 10 },
   },
 }));
 vi.mock('@/database/models/practice-sessions', () => ({
