@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { PracticeDeckEntry, PracticeDeckItem, PracticeOutcome } from '@/types/user-item.types';
+import type { PracticeDeckEntry, PracticeOutcome } from '@/types/user-item.types';
 import { useFetch } from '@/hooks/use-fetch';
 import UserItem from '@/database/models/user-items';
 import PracticeSession from '@/database/models/practice-sessions';
@@ -18,6 +18,11 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
   const [celebratingStar, setCelebratingStar] = useState(false);
   const [saveError, setSaveError] = useState<Error | null>(null);
   const [finishedReview, setFinishedReview] = useState(false);
+  const [sessionProgress, setSessionProgress] = useState<{
+    completedCount: number;
+    targetCount: number;
+  } | null>(null);
+  const [sessionLoading, setSessionLoading] = useState(userId != null);
   const completionPending = useRef(false);
 
   const fetchPracticeDeck = useCallback(async () => {
@@ -55,6 +60,12 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
       const availability = await UserItem.getReadyReviewState(userId);
       if (availability.readyCount >= config.practice.reviewStarSize) {
         await PracticeSession.continueReview(userId);
+        setSessionProgress((currentProgress) => {
+          if (!currentProgress) {
+            return { completedCount: 0, targetCount: config.practice.reviewStarSize };
+          }
+          return { ...currentProgress, completedCount: 0 };
+        });
         setCelebratingStar(false);
         completionPending.current = false;
         invalidateRouteData(routeDataKey('practice', userId));
@@ -74,17 +85,32 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
   }, [reload, userId]);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      setSessionProgress(null);
+      setSessionLoading(false);
+      return;
+    }
     let active = true;
+    setSessionLoading(true);
     void PracticeSession.startReview(userId)
       .then((session) => {
-        if (!active || session.mode !== 'review') return;
+        if (!active) return;
+        if (session.mode !== 'review') {
+          throw new Error('Review practice requires an active review session.');
+        }
+        setSessionProgress({
+          completedCount: session.completed_count,
+          targetCount: session.target_count,
+        });
+        setSessionLoading(false);
         if (session.completed_count >= session.target_count) {
           void finalizeCompletedSession();
         }
       })
       .catch((caughtError) => {
-        if (active) setSaveError(toError(caughtError));
+        if (!active) return;
+        setSaveError(toError(caughtError));
+        setSessionLoading(false);
       });
     return () => {
       active = false;
@@ -104,6 +130,10 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
 
       try {
         const result = await PracticeSession.recordReviewAnswer(updatedItem, dateTime);
+        setSessionProgress((currentProgress) => ({
+          completedCount: result.completedCount,
+          targetCount: currentProgress?.targetCount ?? config.practice.reviewStarSize,
+        }));
         if (result.earnedStar) {
           await finalizeCompletedSession();
           return;
@@ -142,7 +172,10 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
     currentItem,
     note: currentEntry?.note ?? null,
     grammar: currentEntry?.grammar ?? null,
-    progress: getPracticeProgress(currentItem),
+    progressLabel: sessionProgress
+      ? `${sessionProgress.completedCount}/${sessionProgress.targetCount}`
+      : '',
+    sessionLoading,
     celebratingStar,
     finishedReview,
     isCzToEn,
@@ -165,12 +198,6 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
     audioLoading: cardState.audioLoading,
     isPlaying: cardState.isPlaying,
   };
-}
-
-function getPracticeProgress(item: PracticeDeckItem | null): number {
-  if (!item) return 0;
-  if (item.practice_direction === 'czToEn') return item.progress_cz_to_en;
-  return item.progress_en_to_cz;
 }
 
 function toError(error: unknown): Error {

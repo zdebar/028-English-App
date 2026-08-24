@@ -48,7 +48,8 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     currentItem: null as UserItemLocal | null,
     note: null,
     grammar: null,
-    progress: 2,
+    progressLabel: '2/20',
+    sessionLoading: false,
     celebratingStar: false,
     finishedReview: false,
     isCzToEn: true,
@@ -112,6 +113,7 @@ vi.mock('@/locales/cs', () => ({
     grammar: 'Grammar',
     tooltipNotes: 'Notes',
     progress: 'Progress',
+    reviewStarProgress: 'Progress to next star',
     starEarned: 'Star earned',
     currentPracticeStar: 'Current practice star',
     today: 'Today',
@@ -203,7 +205,8 @@ vi.mock('@/features/practice/hooks/use-practice-deck', () => ({
         currentItem: null,
         note: null,
         grammar: null,
-        progress: 0,
+        progressLabel: '',
+        sessionLoading: false,
         isCzToEn: true,
         revealed: false,
         setRevealed: vi.fn(),
@@ -374,7 +377,8 @@ describe('PracticeCard', () => {
       deleted_at: null,
       items: [],
     };
-    mocks.practiceDeck.progress = 2;
+    mocks.practiceDeck.progressLabel = '2/20';
+    mocks.practiceDeck.sessionLoading = false;
     mocks.practiceDeck.isCzToEn = true;
     mocks.practiceDeck.revealed = false;
     mocks.practiceDeck.czech = 'ahoj';
@@ -469,6 +473,29 @@ describe('PracticeCard', () => {
 
     expect(screen.queryByTestId('practice-stars-row')).toBeNull();
     expect(screen.queryByText('Next star progress')).toBeNull();
+  });
+
+  it('shows completed review answers toward the next star at the bottom left', () => {
+    const { container } = render(<PracticeCard />);
+    const bottomBar = container.querySelector('#bottom-bar') as HTMLElement;
+
+    expect(bottomBar.firstElementChild?.textContent).toBe('2/20');
+    expect(screen.getByText('Progress to next star')).toBeTruthy();
+    expect(bottomBar.textContent).not.toContain('2 / 9');
+  });
+
+  it('waits for the persisted review session before rendering its counter', () => {
+    mocks.practiceDeck.sessionLoading = true;
+    const { container } = render(<PracticeCard />);
+
+    expect(container.querySelector('#bottom-bar')).toBeNull();
+    expect(container.firstChild).toBeNull();
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    expect(screen.getByLabelText('Loading')).toBeTruthy();
   });
 
   it('keeps the one-time earned-star celebration', () => {

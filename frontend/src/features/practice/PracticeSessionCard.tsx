@@ -29,6 +29,7 @@ export type PracticeSessionCardProps = Readonly<{
   note: NoteType | null;
   grammar: GrammarChunkWithExamples | null;
   progressLabel: string | number;
+  progressHelpText?: string;
   isCzToEn: boolean;
   revealed: boolean;
   czech: string | undefined;
@@ -165,6 +166,7 @@ export default function PracticeSessionCard({
   note,
   grammar,
   progressLabel,
+  progressHelpText = TEXTS.progress,
   isCzToEn,
   revealed,
   czech,
@@ -285,11 +287,11 @@ export default function PracticeSessionCard({
             className="relative flex h-8 w-full items-center justify-between self-end"
             id="bottom-bar"
           >
-            <p className="px-2 font-light" title={TEXTS.progress}>
+            <p className="px-2 font-light" title={progressHelpText}>
               {progressLabel}
             </p>
             <HelpText className="bottom-7.5">
-              {isBlockTrainingPractice ? TEXTS.blockTrainingProgressHelp : TEXTS.progress}
+              {isBlockTrainingPractice ? TEXTS.blockTrainingProgressHelp : progressHelpText}
             </HelpText>
             <div className="flex min-h-0 items-center justify-end px-2 text-right">
               <AudioStatusMessage audioError={audioError} audioLoading={audioLoading} />

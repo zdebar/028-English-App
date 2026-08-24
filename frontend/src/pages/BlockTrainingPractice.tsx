@@ -18,7 +18,7 @@ export default function BlockTrainingPractice(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const navigate = useNavigate();
   const showToast = useToastStore((state) => state.showToast);
-  const [showIntro, setShowIntro] = useState(true);
+  const [introDismissed, setIntroDismissed] = useState(false);
   const initialData = useLoaderData() as BlockTrainingData;
   const blockId = initialData.block?.block_id ?? null;
   const deck = useBlockTrainingDeck(userId, blockId, initialData);
@@ -28,10 +28,6 @@ export default function BlockTrainingPractice(): JSX.Element {
     showToast(TEXTS.loadingError, 'error');
     reportError('Failed to fetch block training deck', deck.error);
   }, [deck.error, showToast]);
-
-  useEffect(() => {
-    if (deck.hasProgress) setShowIntro(false);
-  }, [deck.hasProgress]);
 
   useEffect(() => {
     if (deck.isComplete) navigate(ROUTES.home, { replace: true });
@@ -55,6 +51,7 @@ export default function BlockTrainingPractice(): JSX.Element {
     return <PracticeEmptyState />;
   }
 
+  const showIntro = !deck.hasProgress && !introDismissed;
   if (showIntro) {
     return (
       <BlockTrainingOverviewCard
@@ -62,7 +59,7 @@ export default function BlockTrainingPractice(): JSX.Element {
         grammar={deck.grammar}
         grammarGroup={deck.grammarGroup}
         items={deck.items}
-        onContinue={() => setShowIntro(false)}
+        onContinue={() => setIntroDismissed(true)}
       />
     );
   }

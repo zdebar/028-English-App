@@ -19,7 +19,8 @@ export default function PracticeCard({ initialDeck }: Readonly<{ initialDeck?: P
     currentItem,
     note,
     grammar,
-    progress,
+    progressLabel,
+    sessionLoading,
     celebratingStar,
     finishedReview,
     isCzToEn,
@@ -49,7 +50,7 @@ export default function PracticeCard({ initialDeck }: Readonly<{ initialDeck?: P
     if (finishedReview) navigate(ROUTES.home, { replace: true });
   }, [finishedReview, navigate]);
 
-  if (loading && !currentItem) {
+  if (sessionLoading || (loading && !currentItem)) {
     return <DelayedLoadingCircle />;
   }
 
@@ -61,7 +62,8 @@ export default function PracticeCard({ initialDeck }: Readonly<{ initialDeck?: P
     <PracticeSessionCard
       note={note}
       grammar={grammar}
-      progressLabel={progress}
+      progressLabel={progressLabel}
+      progressHelpText={TEXTS.reviewStarProgress}
       celebratingStar={celebratingStar}
       isCzToEn={isCzToEn}
       revealed={revealed}

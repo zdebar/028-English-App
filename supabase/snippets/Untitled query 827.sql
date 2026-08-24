@@ -1,0 +1,5 @@
+TRUNCATE TABLE items RESTART IDENTITY CASCADE;
+
+UPDATE items
+SET topic_id = 1
+WHERE id between 82 AND 88;
