@@ -1,6 +1,6 @@
 export type PracticeSessionMode = 'review' | 'new';
 
-export type NewPracticePhase = 0 | 1 | 2 | 3;
+export type NewPracticePhase = 0 | 1;
 
 export interface PracticeSessionType {
   user_id: string;

@@ -828,7 +828,7 @@ describe('PracticeCard', () => {
       <PracticeSessionCard
         note={null}
         grammar={null}
-        progressLabel="Round 1/4"
+        progressLabel="Round 1/2"
         isCzToEn
         revealed
         czech="ahoj"
@@ -1010,7 +1010,7 @@ describe('PracticeCard', () => {
       <PracticeSessionCard
         note={null}
         grammar={null}
-        progressLabel="Round 1/4"
+        progressLabel="Round 1/2"
         isCzToEn
         revealed
         czech="ahoj"

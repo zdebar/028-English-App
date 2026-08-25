@@ -64,6 +64,7 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
       session.block_id == null || (await db.blocks.get(session.block_id)) !== undefined;
     const hasPendingItems =
       session.current_queue_item_ids.length > 0 || session.retry_queue_item_ids.length > 0;
+    const hasValidPhase = session.phase === 0 || session.phase === 1;
     const referencesExistingItems = uniqueItemIds.every((itemId) => {
       const item = itemById.get(itemId);
       return item?.deleted_at === config.database.nullReplacementDate;
@@ -86,6 +87,7 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
       uniqueItemIds.length > 0 &&
       uniqueItemIds.length === savedItemIds.length &&
       hasPendingItems &&
+      hasValidPhase &&
       blockExists &&
       referencesExistingItems &&
       referencesExpectedBlock &&
