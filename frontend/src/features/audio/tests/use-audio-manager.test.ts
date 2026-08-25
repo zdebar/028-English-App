@@ -10,6 +10,10 @@ class MockAudio {
   currentTime = 0;
   play = vi.fn().mockResolvedValue(undefined);
   pause = vi.fn();
+  load = vi.fn();
+  removeAttribute = vi.fn((attribute: string) => {
+    if (attribute === 'src') this.src = '';
+  });
   private listeners: Record<string, Array<() => void>> = {};
 
   addEventListener(type: string, cb: () => void) {
@@ -213,6 +217,8 @@ describe('useAudioManager', () => {
     unmount();
 
     expect(audioInstances[0].pause).toHaveBeenCalled();
+    expect(audioInstances[0].removeAttribute).toHaveBeenCalledWith('src');
+    expect(audioInstances[0].load).toHaveBeenCalled();
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob://audio-url');
   });
 

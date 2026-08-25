@@ -38,8 +38,11 @@ function disposeAudioMap(audioMap: Map<string, ManagedAudio>) {
 function disposeManagedAudio({ element, onEnded }: ManagedAudio) {
   stopAndReset(element);
   element.removeEventListener('ended', onEnded);
-  if (typeof element.src === 'string' && element.src.startsWith('blob:')) {
-    URL.revokeObjectURL(element.src);
+  const objectUrl = element.src;
+  if (objectUrl.startsWith('blob:')) {
+    element.removeAttribute('src');
+    element.load();
+    URL.revokeObjectURL(objectUrl);
   }
 }
 
