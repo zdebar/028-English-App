@@ -274,8 +274,14 @@ export function useInitialTrainingDeck(
 function shuffleOnce(ids: number[]): number[] {
   const shuffled = [...ids];
   for (let index = shuffled.length - 1; index > 0; index -= 1) {
-    const randomIndex = Math.floor(Math.random() * (index + 1));
+    const randomIndex = Math.floor(getRandomUnitInterval() * (index + 1));
     [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
   }
   return shuffled;
+}
+
+function getRandomUnitInterval(): number {
+  const randomValues = new Uint32Array(1);
+  globalThis.crypto.getRandomValues(randomValues);
+  return randomValues[0] / 2 ** 32;
 }

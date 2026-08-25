@@ -9,8 +9,7 @@ import { useInitialTrainingDeck } from '@/features/practice/hooks/use-block-trai
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import { useEffect, useState, type JSX } from 'react';
-import { useLoaderData } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { useLoaderData, useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/config/routes.config';
 import type { InitialTrainingData } from '@/routing/route-data';
 
