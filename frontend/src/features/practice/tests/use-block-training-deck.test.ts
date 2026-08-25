@@ -84,16 +84,32 @@ describe('useInitialTrainingDeck', () => {
     );
   });
 
-  it('restores a randomized phase without reshuffling its saved queue', async () => {
+  it('moves to the second ordered phase after completing the first phase', async () => {
+    const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
+    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+
+    await act(async () => result.current.nextKnown());
+    await act(async () => result.current.nextKnown());
+
+    expect(mocks.put).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        phase: 1,
+        current_queue_item_ids: [1, 2],
+        completed_item_ids: [],
+      }),
+    );
+  });
+
+  it('restores the second ordered phase without reshuffling its saved queue', async () => {
     mocks.reconcileActive.mockResolvedValue({
       ...newSession(),
-      phase: 2,
+      phase: 1,
       current_queue_item_ids: [2, 1],
       completed_item_ids: [],
     });
     const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(2));
-    expect(result.current.isCzToEn).toBe(true);
+    expect(result.current.isCzToEn).toBe(false);
     expect(result.current.hasProgress).toBe(true);
   });
 });

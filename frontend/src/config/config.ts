@@ -14,7 +14,7 @@ const config = {
   },
 
   progress: {
-    afterNewBlockProgress: 2, // Direction progress after completing a new block
+    afterNewBlockProgress: 1, // Direction progress after completing a new block
     simulationItemCount: 800,
     simulationItemProgress: 1,
     simulationStartedBlockCount: 8,
@@ -41,7 +41,7 @@ const config = {
 
   practice: {
     initialTrainingBatchSize: 8, // Maximum size of an automatically assembled initial-training batch
-    reviewStarSize: 40, // Number of review answers needed to earn one star
+    reviewStarSize: 20, // Number of review answers needed to earn one star
     starsPerRow: 10, // Number of stars shown in one tier row
     audioDelay: 100, // Delay in milliseconds for automatically playing audio
     holdDuration: 300, // Duration in milliseconds for which the practice card is held before moving to the next item

@@ -19,8 +19,6 @@ import { useStarCelebration } from './use-star-celebration';
 const PHASE_DIRECTIONS: Record<NewPracticePhase, 'czToEn' | 'enToCz'> = {
   0: 'czToEn',
   1: 'enToCz',
-  2: 'czToEn',
-  3: 'enToCz',
 };
 
 function toError(error: unknown): Error {
@@ -146,19 +144,18 @@ export function useInitialTrainingDeck(
   const moveToNextPhase = useCallback(
     async (currentSession: PracticeSessionType): Promise<PracticeSessionType | null> => {
       const currentPhase = currentSession.phase ?? 0;
-      if (currentPhase === 3) {
+      if (currentPhase === 1) {
         await finishBlock();
         return null;
       }
 
       const nextPhase = (currentPhase + 1) as NewPracticePhase;
       const orderedIds = items.map((item) => item.item_id);
-      const nextIds = nextPhase >= 2 ? shuffleOnce(orderedIds) : orderedIds;
       return {
         ...currentSession,
         phase: nextPhase,
         completed_count: 0,
-        current_queue_item_ids: nextIds,
+        current_queue_item_ids: orderedIds,
         retry_queue_item_ids: [],
         completed_item_ids: [],
         updated_at: new Date(Date.now()).toISOString(),
@@ -251,7 +248,7 @@ export function useInitialTrainingDeck(
     currentItem,
     note: currentEntry?.note ?? null,
     practiceGrammar: currentEntry?.grammar ?? null,
-    progressLabel: `${phase + 1}/4 · ${session?.completed_count ?? 0}/${items.length}`,
+    progressLabel: `${phase + 1}/2 · ${session?.completed_count ?? 0}/${items.length}`,
     isCzToEn,
     revealed,
     czech: cardState.czech,
@@ -269,19 +266,4 @@ export function useInitialTrainingDeck(
     audioLoading: cardState.audioLoading,
     isPlaying: cardState.isPlaying,
   };
-}
-
-function shuffleOnce(ids: number[]): number[] {
-  const shuffled = [...ids];
-  for (let index = shuffled.length - 1; index > 0; index -= 1) {
-    const randomIndex = Math.floor(getRandomUnitInterval() * (index + 1));
-    [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
-  }
-  return shuffled;
-}
-
-function getRandomUnitInterval(): number {
-  const randomValues = new Uint32Array(1);
-  globalThis.crypto.getRandomValues(randomValues);
-  return randomValues[0] / 2 ** 32;
 }
