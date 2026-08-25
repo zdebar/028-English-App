@@ -51,6 +51,12 @@ BEFORE UPDATE ON public.blocks
 FOR EACH ROW
 EXECUTE FUNCTION public.set_updated_at();
 
+DROP TRIGGER IF EXISTS trg_set_updated_at__topics ON public.topics;
+CREATE TRIGGER trg_set_updated_at__topics
+BEFORE UPDATE ON public.topics
+FOR EACH ROW
+EXECUTE FUNCTION public.set_updated_at();
+
 DROP TRIGGER IF EXISTS trg_set_updated_at__notes ON public.notes;
 CREATE TRIGGER trg_set_updated_at__notes
 BEFORE UPDATE ON public.notes
@@ -99,12 +105,6 @@ EXECUTE FUNCTION public.set_updated_at();
 DROP TRIGGER IF EXISTS trg_set_updated_at__user_scores ON public.user_scores;
 CREATE TRIGGER trg_set_updated_at__user_scores
 BEFORE UPDATE ON public.user_scores
-FOR EACH ROW
-EXECUTE FUNCTION public.set_updated_at();
-
-DROP TRIGGER IF EXISTS trg_set_updated_at__user_blocks ON public.user_blocks;
-CREATE TRIGGER trg_set_updated_at__user_blocks
-BEFORE UPDATE ON public.user_blocks
 FOR EACH ROW
 EXECUTE FUNCTION public.set_updated_at();
 

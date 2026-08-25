@@ -36,7 +36,7 @@ export default function Dashboard({ userId, className = '' }: DashboardProps) {
         className={`min-w-card h-attribute relative mx-auto w-full ${className}`}
         aria-label={ARIA_TEXTS.dashboardRegion}
       >
-        <Notification className="color-info">{TEXTS.noDashboardData}</Notification>
+        <Notification>{TEXTS.noDashboardData}</Notification>
       </section>
     );
   }
@@ -54,7 +54,7 @@ export default function Dashboard({ userId, className = '' }: DashboardProps) {
         aria-label={ARIA_TEXTS.dashboardRegion}
       >
         {lessonsInProgress.length === 0 ? (
-          <Notification className="color-link">{TEXTS.levelsOverview}</Notification>
+          <Notification className="color-info">{TEXTS.levelsOverview}</Notification>
         ) : (
           <>
             {lessonsInProgress.map((lesson) => (

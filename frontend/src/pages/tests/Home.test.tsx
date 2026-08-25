@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(
@@ -8,7 +8,7 @@ const mocks = vi.hoisted(
     userFullName: string | null;
     userEmail: string | null;
     isAnonymousUser: boolean;
-    dailyCount: number;
+    dailyStarCount: number;
     isSyncError: boolean;
   } => ({
     theme: 'light',
@@ -16,7 +16,7 @@ const mocks = vi.hoisted(
     userFullName: 'User One',
     userEmail: 'u1@example.com',
     isAnonymousUser: false,
-    dailyCount: 3,
+    dailyStarCount: 3,
     isSyncError: false,
   }),
 );
@@ -52,8 +52,8 @@ vi.mock('@/features/auth/use-auth-store', () => ({
 }));
 
 vi.mock('@/features/user-stats/use-user-store', () => ({
-  useUserStore: (selector: (state: { dailyCount: number }) => unknown) =>
-    selector({ dailyCount: mocks.dailyCount }),
+  useUserStore: (selector: (state: { dailyStarCount: number }) => unknown) =>
+    selector({ dailyStarCount: mocks.dailyStarCount }),
 }));
 
 vi.mock('@/features/synchronization/use-sync-store', () => ({
@@ -89,12 +89,12 @@ vi.mock('@/features/help/HelpButton', () => ({
   default: () => <button type="button">Help</button>,
 }));
 
-vi.mock('@/components/UI/Notification', () => ({
-  default: ({ children }: any) => <div>{children}</div>,
-}));
-
 vi.mock('@/features/pwa/InstallPwaButton', () => ({
-  InstallPWAButton: () => <button type="button">Install</button>,
+  InstallPWAButton: ({ className }: any) => (
+    <button type="button" className={className}>
+      Install
+    </button>
+  ),
 }));
 
 vi.mock('@/features/practice-overview/PracticeOverviewButton', () => ({
@@ -118,21 +118,28 @@ vi.mock('@/features/synchronization/SimulateDataButton', () => ({
 }));
 
 vi.mock('@/features/practice/PracticeButton', () => ({
-  default: ({ userId }: any) => <div data-testid="home-practice-buttons">practice:{userId}</div>,
-}));
-
-vi.mock('@/features/pronunciation/PronunciationPracticeButton', () => ({
   default: ({ userId }: any) => (
-    <div data-testid="pronunciation-practice-button">pronunciation:{userId}</div>
+    <div data-testid="home-practice-buttons" className="flex flex-col gap-1">
+      <button type="button">Review {userId}</button>
+      <button type="button">New</button>
+    </div>
   ),
 }));
 
-vi.mock('@/features/pronunciation/PronunciationGroupsButton', () => ({
-  default: () => <div data-testid="pronunciation-groups-button">pronunciation-groups</div>,
+vi.mock('@/features/pronunciation/PronunciationPracticeButton', () => ({
+  default: () => (
+    <button type="button" data-testid="pronunciation-practice-button">
+      Pronunciation
+    </button>
+  ),
 }));
 
 vi.mock('react-router-dom', () => ({
-  Link: ({ children }: any) => <div>{children}</div>,
+  Link: ({ children, className, to }: any) => (
+    <a href={to} className={className}>
+      {children}
+    </a>
+  ),
   useNavigate: () => vi.fn(),
 }));
 
@@ -145,7 +152,7 @@ describe('Home', () => {
     mocks.userFullName = 'User One';
     mocks.userEmail = 'u1@example.com';
     mocks.isAnonymousUser = false;
-    mocks.dailyCount = 3;
+    mocks.dailyStarCount = 3;
     mocks.isSyncError = false;
   });
 
@@ -168,13 +175,19 @@ describe('Home', () => {
   it('renders authenticated practice controls through the practice buttons component', () => {
     render(<Home />);
 
-    expect(screen.getByTestId('home-practice-buttons').textContent).toBe('practice:u1');
-    expect(screen.getByTestId('pronunciation-practice-button').parentElement?.className).toContain(
-      'gap-1',
-    );
-    expect(screen.getByTestId('pronunciation-groups-button').textContent).toBe(
-      'pronunciation-groups',
-    );
+    const practiceButtons = screen.getByTestId('home-practice-buttons');
+    const actions = screen.getByTestId('pronunciation-practice-button').parentElement;
+
+    expect(practiceButtons.className).toContain('flex-col');
+    expect(practiceButtons.className).toContain('gap-1');
+    expect(actions?.className).toContain('flex-col');
+    expect(actions?.className).toContain('gap-1');
+    const actionLabels = within(actions as HTMLElement)
+      .getAllByRole('button')
+      .map((button) => button.textContent);
+    expect(actionLabels).toEqual(['Review u1', 'New', 'Pronunciation']);
+    expect(screen.queryByText('Studium')).toBeNull();
+    expect(screen.queryByRole('group')).toBeNull();
   });
 
   it('renders the dashboard help button in the page-owned dashboard wrapper', () => {
@@ -191,8 +204,24 @@ describe('Home', () => {
   it('renders install and guide links when user is signed in', () => {
     render(<Home />);
 
-    expect(screen.getByRole('button', { name: 'Install' })).toBeTruthy();
-    expect(screen.getByText('Guide')).toBeTruthy();
+    const install = screen.getByRole('button', { name: 'Install' });
+    const guide = screen.getByRole('link', { name: 'Guide' });
+    const sharedClasses = [
+      'color-info',
+      'font-headings',
+      'text-lg',
+      'decoration-current',
+      'underline-offset-4',
+      'hover:underline',
+      'focus-visible:outline-2',
+      'focus-visible:outline-offset-2',
+    ];
+
+    sharedClasses.forEach((className) => {
+      expect(install.className).toContain(className);
+      expect(guide.className).toContain(className);
+    });
+    expect(guide.getAttribute('href')).toBe('/guide');
   });
 
   it('renders auth UI when user is signed out', () => {

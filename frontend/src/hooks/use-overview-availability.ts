@@ -1,5 +1,5 @@
-import UserBlock from '@/database/models/user-blocks';
 import UserItem from '@/database/models/user-items';
+import Topic from '@/database/models/topics';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
@@ -76,7 +76,7 @@ export function useOverviewAvailability(
 
     const queries: ReadonlyArray<readonly [DatabaseOverviewKey, () => Promise<boolean>]> = [
       ['grammar', () => UserItem.hasStartedGrammar(userId)],
-      ['topics', async () => (await UserBlock.getStartedTopicsByUserId(userId)).length > 0],
+      ['topics', async () => (await Topic.getStartedByUserId(userId)).length > 0],
       ['vocabulary', async () => (await UserItem.getStartedVocabulary(userId)).length > 0],
     ];
 

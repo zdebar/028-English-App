@@ -1,8 +1,8 @@
 import { supabaseInstance } from '@/config/supabase.config';
 import Metadata from '@/database/models/metadata';
-import UserBlock from '@/database/models/user-blocks';
 import UserItem from '@/database/models/user-items';
 import UserScoreType from '@/database/models/user-scores';
+import PracticeSession from '@/database/models/practice-sessions';
 import { clearAllLocalStorageForUser } from '@/utils/storage.utils';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { withSettledSummary } from '@/features/logging/logging.utils';
@@ -40,10 +40,9 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
         [
           UserItem.deleteByUserId(userId),
           Metadata.deleteSyncRow(TableName.UserItems, userId),
-          UserBlock.deleteByUserId(userId),
-          Metadata.deleteSyncRow(TableName.UserBlocks, userId),
           UserScoreType.deleteByUserId(userId),
           Metadata.deleteSyncRow(TableName.UserScores, userId),
+          PracticeSession.deleteByUserId(userId),
         ],
         'Operation failed during local cleanup',
       );

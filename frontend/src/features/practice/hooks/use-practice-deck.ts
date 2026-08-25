@@ -1,208 +1,216 @@
-import { useEffect, useRef, useCallback, useState } from 'react';
-import type {
-  PracticeDeckEntry,
-  PracticeDeckItem,
-  PracticeOutcome,
-} from '@/types/user-item.types';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import type { PracticeDeckEntry, PracticeOutcome } from '@/types/user-item.types';
 import { useFetch } from '@/hooks/use-fetch';
 import UserItem from '@/database/models/user-items';
-import UserScore from '@/database/models/user-scores';
-import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
+import PracticeSession from '@/database/models/practice-sessions';
+import { reportError } from '@/features/logging/monitoring-handler';
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
 import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff';
-import { loadPracticeDeck } from '@/database/utils/practice-content.utils';
+import { loadReviewDeck } from '@/database/utils/practice-content.utils';
+import config from '@/config/config';
+import { getStarTierForCount, type StarTier } from '@/utils/star-progress.utils';
+import { useStarCelebration } from './use-star-celebration';
 
-/**
- * usePracticeDeck hook manages the practice deck and user progress for a given user.
- *
- * @param userId The unique identifier of the user.
- */
+/** Manages a persisted, configured-length review session. */
 export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDeckEntry[]) {
-  // Array fetching logic
-  const [array, setArray] = useState<PracticeDeckEntry[]>([]);
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
+  const {
+    celebratingStar,
+    waitForAcknowledgement,
+    acknowledgeCelebration,
+    finishCelebration,
+  } = useStarCelebration();
+  const [celebrationStarTier, setCelebrationStarTier] = useState<StarTier>('bronze');
+  const [saveError, setSaveError] = useState<Error | null>(null);
+  const [finishedReview, setFinishedReview] = useState(false);
+  const [sessionProgress, setSessionProgress] = useState<{
+    completedCount: number;
+    targetCount: number;
+  } | null>(null);
+  const [sessionLoading, setSessionLoading] = useState(userId != null);
+  const completionPending = useRef(false);
 
   const fetchPracticeDeck = useCallback(async () => {
     if (!userId) return [];
-    return loadPracticeDeck(userId);
+    return loadReviewDeck(userId);
   }, [userId]);
 
-  const {
-    data: fetchedArray,
-    loading,
-    error,
-    reload,
-  } = useFetch<PracticeDeckEntry[]>(fetchPracticeDeck, { initialData: initialDeck });
-
-  const activeArray = array.length > 0 ? array : (fetchedArray ?? []);
+  const { data: fetchedArray, loading, error, reload } = useFetch<PracticeDeckEntry[]>(
+    fetchPracticeDeck,
+    { initialData: initialDeck },
+  );
+  const activeArray = fetchedArray ?? [];
   const currentEntry = activeArray[index] ?? null;
   const currentItem = currentEntry?.item ?? null;
-
   const isCzToEn = currentItem?.practice_direction !== 'enToCz';
-  const {
-    audioDisabled,
-    audioError,
-    audioLoading,
-    czech,
-    english,
-    handleReveal,
-    hideDirectionChange,
-    isPlaying,
-    playAudio: playAudioInternal,
-    plusHint,
-    resetHint,
-    showDirectionChange,
-  } = usePracticeCardState({ currentItem, isCzToEn, revealed, setRevealed });
+  const cardState = usePracticeCardState({ currentItem, isCzToEn, revealed, setRevealed });
+  const resetHint = cardState.resetHint;
 
-  useEffect(() => {
-    setArray(fetchedArray ?? []);
+  useLayoutEffect(() => {
     setIndex(0);
     setRevealed(false);
     resetHint();
-  }, [fetchedArray]);
+  }, [fetchedArray, resetHint]);
 
-  // Ref to track user progress changes before saving
-  const userProgressRef = useRef<PracticeDeckItem[]>([]);
+  const finalizeCompletedSession = useCallback(async () => {
+    if (!userId || completionPending.current) return;
+    completionPending.current = true;
+    await waitForAcknowledgement();
 
-  const persistProgressToLocalStorage = useCallback(
-    (userProgress: PracticeDeckItem[]) => {
-      if (userProgress.length === 0 || !userId) {
+    try {
+      const availability = await UserItem.getReadyReviewState(userId);
+      if (availability.readyCount >= config.practice.reviewStarSize) {
+        await PracticeSession.continueReview(userId);
+        invalidateRouteData(routeDataKey('practice', userId));
+        await reload();
+        setSessionProgress((currentProgress) => {
+          if (!currentProgress) {
+            return { completedCount: 0, targetCount: config.practice.reviewStarSize };
+          }
+          return { ...currentProgress, completedCount: 0 };
+        });
+        setIndex(0);
+        setRevealed(false);
+        resetHint();
+        finishCelebration();
+        completionPending.current = false;
         return;
       }
 
-      localStorage.setItem(
-        `practiceDeckProgress_${userId}`,
-        JSON.stringify({ dateTime: new Date(Date.now()).toISOString(), progress: userProgress }),
-      );
-    },
-    [userId],
-  );
+      await PracticeSession.deleteByUserId(userId);
+      setFinishedReview(true);
+    } catch (caughtError) {
+      const normalizedError = toError(caughtError);
+      setSaveError(normalizedError);
+      reportError('Failed to finish review star celebration', normalizedError);
+      finishCelebration();
+      completionPending.current = false;
+    }
+  }, [finishCelebration, reload, resetHint, userId, waitForAcknowledgement]);
 
-  const saveBufferedProgress = useCallback(
-    async (userProgress: PracticeDeckItem[], source: string, shouldReload: boolean = false) => {
-      if (userProgress.length === 0 || !userId) {
-        return;
-      }
-
-      try {
-        await UserItem.savePracticeDeck(userProgress);
-        reportInfo(`Saved practice deck ${source} with ${userProgress.length} items.`);
-        userProgressRef.current = [];
-        if (shouldReload) {
-          invalidateRouteData(routeDataKey('practice', userId));
-          reload();
-        }
-      } catch (error) {
-        reportError(`Failed to save practice deck ${source}`, error);
-        persistProgressToLocalStorage(userProgress);
-      }
-    },
-    [persistProgressToLocalStorage, reload, userId],
-  );
-
-  // Save progress on unmount
   useEffect(() => {
+    if (!userId) {
+      setSessionProgress(null);
+      setSessionLoading(false);
+      return;
+    }
+    let active = true;
+    setSessionLoading(true);
+    void PracticeSession.startReview(userId)
+      .then((session) => {
+        if (!active) return;
+        if (session.mode !== 'review') {
+          throw new Error('Review practice requires an active review session.');
+        }
+        setSessionProgress({
+          completedCount: session.completed_count,
+          targetCount: session.target_count,
+        });
+        setSessionLoading(false);
+        if (session.completed_count >= session.target_count) {
+          void finalizeCompletedSession();
+        }
+      })
+      .catch((caughtError) => {
+        if (!active) return;
+        setSaveError(toError(caughtError));
+        setSessionLoading(false);
+      });
     return () => {
-      (async () => {
-        if (userId) {
-          await saveBufferedProgress([...userProgressRef.current], 'on unmount');
-        }
-      })();
+      active = false;
     };
-  }, [saveBufferedProgress]);
+  }, [finalizeCompletedSession, userId]);
 
-  // Save progress to localStorage on page unload
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      const userProgress = [...userProgressRef.current];
-      persistProgressToLocalStorage(userProgress);
-    };
-    globalThis.addEventListener('beforeunload', handleBeforeUnload);
-    return () => globalThis.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [persistProgressToLocalStorage]);
-
-  // Advance to next item and record the explicit practice outcome.
   const nextItem = useCallback(
     async (outcome: PracticeOutcome) => {
-      if (!currentItem) {
-        return;
-      }
-
+      if (!currentItem || !userId || celebratingStar) return;
+      const dateTime = new Date(Date.now()).toISOString();
       const updatedItem = UserItem.applyPracticeProgress(
         currentItem,
         currentItem.practice_direction,
         outcome,
-        new Date().toISOString(),
+        dateTime,
       );
 
-      userProgressRef.current.push({
-        ...updatedItem,
-        practice_direction: currentItem.practice_direction,
-      });
-
-      if (userId) {
-        try {
-          await UserScore.addItemCount(userId, 1);
-        } catch (error) {
-          reportError('Failed to update user score during practice', error);
+      try {
+        const result = await PracticeSession.recordReviewAnswer(updatedItem, dateTime);
+        setSessionProgress((currentProgress) => ({
+          completedCount: result.completedCount,
+          targetCount: currentProgress?.targetCount ?? config.practice.reviewStarSize,
+        }));
+        if (result.earnedStar) {
+          setCelebrationStarTier(
+            getStarTierForCount(result.starCount ?? 1, config.practice.starsPerRow),
+          );
+          await finalizeCompletedSession();
+          return;
         }
-      }
 
-      const userProgress = [...userProgressRef.current];
-      if (userProgress.length >= activeArray.length) {
-        await saveBufferedProgress(userProgress, 'during practice', true);
-      } else {
-        setIndex((prev) => (activeArray.length ? (prev + 1) % activeArray.length : 0));
-        setRevealed(false);
-        resetHint();
+        const nextIndex = index + 1;
+        if (nextIndex < activeArray.length) {
+          setIndex(nextIndex);
+          setRevealed(false);
+          resetHint();
+          return;
+        }
+
+        invalidateRouteData(routeDataKey('practice', userId));
+        reload();
+      } catch (caughtError) {
+        const normalizedError = toError(caughtError);
+        setSaveError(normalizedError);
+        reportError('Failed to save review answer', normalizedError);
       }
     },
-    [activeArray.length, currentItem, resetHint, saveBufferedProgress, userId],
+    [
+      activeArray.length,
+      celebratingStar,
+      currentItem,
+      finalizeCompletedSession,
+      index,
+      reload,
+      resetHint,
+      userId,
+    ],
   );
 
-  const progress = getPracticeProgress(currentItem);
-
   return {
-    // Core state
     index,
     currentItem,
-    trainingBlockId: currentItem?.is_initial_training_trigger ? currentItem.block_id : null,
     note: currentEntry?.note ?? null,
     grammar: currentEntry?.grammar ?? null,
-    progress,
+    progressLabel: sessionProgress
+      ? `${sessionProgress.completedCount}/${sessionProgress.targetCount}`
+      : '',
+    sessionLoading,
+    celebratingStar,
+    celebrationStarTier,
+    acknowledgeCelebration,
+    finishedReview,
     isCzToEn,
     revealed,
     setRevealed,
-    // Display values
-    czech,
-    english,
+    czech: cardState.czech,
+    english: cardState.english,
     pronunciation: revealed ? currentItem?.pronunciation || NBSP : NBSP,
     audio: currentItem?.audio ?? null,
-    audioDisabled,
-    showDirectionChange,
-    hideDirectionChange,
-    handleReveal,
-
-    // Hinting
-    plusHint,
-
-    // Navigation & loading
+    audioDisabled: cardState.audioDisabled,
+    showDirectionChange: cardState.showDirectionChange,
+    hideDirectionChange: cardState.hideDirectionChange,
+    handleReveal: cardState.handleReveal,
+    plusHint: cardState.plusHint,
     nextItem,
     loading,
-    error,
-
-    // Audio management
-    audioError,
-    playAudio: playAudioInternal,
-    audioLoading,
-    isPlaying,
+    error: error ?? saveError,
+    audioError: cardState.audioError,
+    playAudio: cardState.playAudio,
+    audioLoading: cardState.audioLoading,
+    isPlaying: cardState.isPlaying,
   };
 }
 
-function getPracticeProgress(item: PracticeDeckItem | null): number {
-  if (!item) return 0;
-  if (item.practice_direction === 'czToEn') return item.progress_cz_to_en;
-  return item.progress_en_to_cz;
+function toError(error: unknown): Error {
+  return error instanceof Error ? error : new Error(String(error));
 }

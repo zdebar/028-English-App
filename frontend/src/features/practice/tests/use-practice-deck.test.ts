@@ -1,280 +1,232 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { UserItemLocal } from '@/types/user-item.types';
-
-const useFetchMock = vi.fn();
-const getPracticeDeckMock = vi.fn();
-const savePracticeDeckMock = vi.fn();
-const resetHintMock = vi.fn();
-const plusHintMock = vi.fn();
-const playAudioMock = vi.fn();
-const setVolumeMock = vi.fn();
-const reloadMock = vi.fn();
-const addItemCountMock = vi.fn();
-
-vi.mock('@/hooks/use-fetch', () => ({
-  useFetch: (...args: unknown[]) => useFetchMock(...args),
+const mocks = vi.hoisted(() => ({
+  reload: vi.fn(),
+  startReview: vi.fn(),
+  recordReviewAnswer: vi.fn(),
+  continueReview: vi.fn(),
+  deleteByUserId: vi.fn(),
+  applyPracticeProgress: vi.fn(),
+  getReadyReviewState: vi.fn(),
+  resetHint: vi.fn(),
+  fetchData: [] as any[],
 }));
 
-vi.mock('@/database/models/user-items', async () => {
-  const actual = await vi.importActual<typeof import('@/database/models/user-items')>(
-    '@/database/models/user-items',
-  );
-  return {
-    default: {
-    ...actual.default,
-    getPracticeDeck: (...args: unknown[]) => getPracticeDeckMock(...args),
-    savePracticeDeck: (...args: unknown[]) => savePracticeDeckMock(...args),
-    applyPracticeProgress: actual.default.applyPracticeProgress,
-    },
-  };
-});
-
-vi.mock('@/database/models/user-scores', () => ({
+vi.mock('@/config/config', () => ({
   default: {
-    addItemCount: (...args: unknown[]) => addItemCountMock(...args),
+    practice: { reviewStarSize: 20, starsPerRow: 10 },
   },
 }));
-
-vi.mock('@/features/practice/hooks/use-hint', () => ({
-  NBSP: '\u00A0',
-  useHint: () => ({
-    czechHinted: 'CZ_HINT',
-    englishHinted: 'EN_HINT',
-    resetHint: resetHintMock,
-    plusHint: plusHintMock,
-  }),
+vi.mock('@/hooks/use-fetch', () => ({
+  useFetch: () => ({ data: mocks.fetchData, loading: false, error: null, reload: mocks.reload }),
 }));
-
-vi.mock('@/features/practice/hooks/use-audio-manager', () => ({
-  useAudioManager: () => ({
-    playAudio: playAudioMock,
-    setVolume: setVolumeMock,
+vi.mock('@/database/models/user-items', () => ({
+  default: {
+    applyPracticeProgress: (...args: unknown[]) => mocks.applyPracticeProgress(...args),
+    getReadyReviewState: (...args: unknown[]) => mocks.getReadyReviewState(...args),
+  },
+}));
+vi.mock('@/database/models/practice-sessions', () => ({
+  default: {
+    startReview: (...args: unknown[]) => mocks.startReview(...args),
+    recordReviewAnswer: (...args: unknown[]) => mocks.recordReviewAnswer(...args),
+    continueReview: (...args: unknown[]) => mocks.continueReview(...args),
+    deleteByUserId: (...args: unknown[]) => mocks.deleteByUserId(...args),
+  },
+}));
+vi.mock('@/database/utils/practice-content.utils', () => ({ loadReviewDeck: vi.fn() }));
+vi.mock('@/features/practice/hooks/use-practice-card-state', () => ({
+  usePracticeCardState: () => ({
+    resetHint: mocks.resetHint,
+    czech: 'ahoj',
+    english: 'hello',
+    audioDisabled: false,
+    showDirectionChange: false,
+    hideDirectionChange: vi.fn(),
+    handleReveal: vi.fn(),
+    plusHint: vi.fn(),
     audioError: false,
-    loading: false,
+    playAudio: vi.fn(),
+    audioLoading: false,
     isPlaying: false,
   }),
 }));
-
-vi.mock('@/features/logging/monitoring-handler', () => ({
-  reportError: vi.fn(),
-  reportInfo: vi.fn(),
+vi.mock('@/routing/route-data-handoff', () => ({
+  invalidateRouteData: vi.fn(),
+  routeDataKey: vi.fn(() => 'practice'),
 }));
+vi.mock('@/features/logging/monitoring-handler', () => ({ reportError: vi.fn() }));
 
 import { usePracticeDeck } from '../hooks/use-practice-deck';
-
-function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
-  const item: UserItemLocal = {
-    item_id: 1,
-    user_id: 'u1',
-    czech: 'ahoj',
-    english: 'hello',
-    note_id: null,
-    pronunciation: 'həˈloʊ',
-    audio: 'hello.opus',
-    is_vocabulary: 0,
-    is_practice_item: 1,
-    has_pronunciation_practice: 0,
-    sort_order: 1,
-    curriculum_sort_path: [1, 1, 1],
-    block_id: 0,
-    grammar_chunk_id: 10,
-    progress_cz_to_en: 0,
-    progress_en_to_cz: 0,
-    progress_history: [],
-    started_at: '2026-01-01',
-    updated_at: '2026-01-01',
-    deleted_at: '2026-01-01',
-    next_at_cz_to_en: '2026-01-01',
-    next_at_en_to_cz: '2026-01-01',
-    mastered_at_cz_to_en: '2026-01-01',
-    mastered_at_en_to_cz: '2026-01-01',
-    lesson_id: 0,
-    ...overrides,
-  };
-
-  return {
-    ...item,
-  };
-}
 
 describe('usePracticeDeck', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-
-    useFetchMock.mockReturnValue({
-      data: [
-        {
-          item: {
-            ...makeItem({ item_id: 1, progress_cz_to_en: 0 }),
-            practice_direction: 'czToEn',
-          },
-          note: null,
-          grammar: {
-            id: 10,
-            name: 'Grammar',
-            note: 'Explanation',
-            grammar_group_id: 1,
-            sort_order: 1,
-            deleted_at: null,
-            items: [],
-          },
-        },
-        {
-          item: {
-            ...makeItem({ item_id: 2, progress_cz_to_en: 1 }),
-            practice_direction: 'czToEn',
-          },
-          note: null,
-          grammar: null,
-        },
-      ],
-      loading: false,
-      error: null,
-      reload: reloadMock,
+    mocks.fetchData = [entry(1), entry(2)];
+    mocks.startReview.mockResolvedValue(reviewSession(7));
+    mocks.applyPracticeProgress.mockImplementation((item) => ({ ...item, updated_at: 'now' }));
+    mocks.recordReviewAnswer.mockResolvedValue({
+      completedCount: 8,
+      earnedStar: false,
+      starCount: null,
     });
-
-    getPracticeDeckMock.mockResolvedValue([]);
-    savePracticeDeckMock.mockResolvedValue(undefined);
-    addItemCountMock.mockResolvedValue(undefined);
+    mocks.getReadyReviewState.mockResolvedValue({ readyCount: 0, schedule: [] });
+    mocks.continueReview.mockResolvedValue(undefined);
+    mocks.deleteByUserId.mockResolvedValue(undefined);
+    mocks.reload.mockResolvedValue(undefined);
   });
 
-  it('maps fetched data into deck state and exposes derived values', async () => {
-    const { result } = renderHook(() => usePracticeDeck('user-1'));
-
-    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
-
-    expect(result.current.index).toBe(0);
-    expect(result.current.isCzToEn).toBe(true);
-    expect(result.current.czech).toBe('ahoj');
-    expect(result.current.english).toBe('EN_HINT');
-    expect(result.current.audioDisabled).toBe(true);
-    expect(result.current.grammar?.name).toBe('Grammar');
-    expect(resetHintMock).toHaveBeenCalled();
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
-  it('exposes fetched current item before local deck state effect settles', async () => {
-    const { result } = renderHook(() => usePracticeDeck('user-1'));
-
+  it('restores the persisted answer count independently of the fetched deck', async () => {
+    const { result } = renderHook(() => usePracticeDeck('u1'));
+    await waitFor(() => expect(result.current.sessionLoading).toBe(false));
+    expect(mocks.startReview).toHaveBeenCalledWith('u1');
     expect(result.current.currentItem?.item_id).toBe(1);
-    expect(result.current.loading).toBe(false);
-
-    await act(async () => {
-      await Promise.resolve();
-    });
+    expect(result.current.progressLabel).toBe('7/20');
   });
 
-  it('nextItem advances through the deck and resets reveal/hints', async () => {
-    const { result } = renderHook(() => usePracticeDeck('user-1'));
+  it('uses zero and the configured target for a new review session', async () => {
+    mocks.startReview.mockResolvedValue(reviewSession(0));
 
-    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+    const { result } = renderHook(() => usePracticeDeck('u1'));
 
-    act(() => {
-      result.current.setRevealed(true);
-    });
-
-    await act(async () => {
-      await result.current.nextItem('correct');
-    });
-
-    expect(result.current.index).toBe(1);
-    expect(result.current.currentItem?.item_id).toBe(2);
-    expect(result.current.revealed).toBe(false);
-    expect(resetHintMock).toHaveBeenCalled();
-    expect(savePracticeDeckMock).not.toHaveBeenCalled();
-    expect(addItemCountMock).toHaveBeenCalledWith('user-1', 1);
+    await waitFor(() => expect(result.current.sessionLoading).toBe(false));
+    expect(result.current.progressLabel).toBe('0/20');
   });
 
-  it('saves and reloads when progress count reaches deck length', async () => {
-    const { result } = renderHook(() => usePracticeDeck('user-1'));
+  it('uses the persisted target when resuming an existing review session', async () => {
+    mocks.startReview.mockResolvedValue(reviewSession(2, 12));
 
-    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+    const { result } = renderHook(() => usePracticeDeck('u1'));
 
-    await act(async () => {
-      await result.current.nextItem('correct');
-    });
+    await waitFor(() => expect(result.current.sessionLoading).toBe(false));
+    expect(result.current.progressLabel).toBe('2/12');
+  });
 
-    await act(async () => {
-      await result.current.nextItem('correct');
-    });
-
-    await waitFor(() => expect(savePracticeDeckMock).toHaveBeenCalledTimes(1));
-    expect(savePracticeDeckMock).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.objectContaining({
-          item_id: 1,
-          practice_direction: 'czToEn',
-          progress_cz_to_en: 1,
-          progress_history: expect.arrayContaining([
-            expect.objectContaining({
-              progress: 1,
-              outcome: 'correct',
-              created_at: expect.any(String),
-            }),
-          ]),
-        }),
-        expect.objectContaining({
-          item_id: 2,
-          practice_direction: 'czToEn',
-          progress_cz_to_en: 2,
-          progress_history: expect.arrayContaining([
-            expect.objectContaining({
-              progress: 2,
-              outcome: 'correct',
-              created_at: expect.any(String),
-            }),
-          ]),
-        }),
-      ]),
+  it('keeps the counter hidden until the persisted session is available', async () => {
+    let resolveSession!: (session: ReturnType<typeof reviewSession>) => void;
+    mocks.startReview.mockReturnValue(
+      new Promise((resolve) => {
+        resolveSession = resolve;
+      }),
     );
-    expect(addItemCountMock).toHaveBeenCalledTimes(2);
-    expect(reloadMock).toHaveBeenCalledTimes(1);
+
+    const { result } = renderHook(() => usePracticeDeck('u1'));
+
+    expect(result.current.sessionLoading).toBe(true);
+    expect(result.current.progressLabel).toBe('');
+
+    resolveSession(reviewSession(2));
+    await waitFor(() => expect(result.current.sessionLoading).toBe(false));
+    expect(result.current.progressLabel).toBe('2/20');
   });
 
-  it('stores progress to localStorage on beforeunload and saves remaining on unmount', async () => {
-    const nowSpy = vi
-      .spyOn(Date, 'now')
-      .mockReturnValue(new Date('2026-03-04T10:00:00.000Z').getTime());
-    const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
+  it('persists every answer before advancing to the next deck item', async () => {
+    const { result } = renderHook(() => usePracticeDeck('u1'));
+    await waitFor(() => expect(result.current.sessionLoading).toBe(false));
+    await act(async () => result.current.nextItem('correct'));
+    expect(mocks.recordReviewAnswer).toHaveBeenCalledOnce();
+    expect(result.current.currentItem?.item_id).toBe(2);
+    expect(result.current.progressLabel).toBe('8/20');
+  });
 
-    const { result, unmount } = renderHook(() => usePracticeDeck('user-1'));
-    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
-
-    await act(async () => {
-      await result.current.nextItem('correct');
-    });
-
+  it('shows the completed target during celebration and resets the next series', async () => {
+    mocks.startReview.mockResolvedValue(reviewSession(19));
+    mocks.recordReviewAnswer.mockResolvedValue({ completedCount: 20, earnedStar: true, starCount: 11 });
+    mocks.getReadyReviewState.mockResolvedValue({ readyCount: 20, schedule: [] });
+    let resolveReload!: () => void;
+    mocks.reload.mockReturnValue(
+      new Promise<void>((resolve) => {
+        resolveReload = resolve;
+      }),
+    );
+    const { result } = renderHook(() => usePracticeDeck('u1'));
+    await waitFor(() => expect(result.current.sessionLoading).toBe(false));
+    let answerPromise: Promise<void> | undefined;
     act(() => {
-      globalThis.dispatchEvent(new Event('beforeunload'));
+      answerPromise = result.current.nextItem('correct');
     });
-
-    expect(setItemSpy).toHaveBeenCalled();
-    const latestCall = setItemSpy.mock.calls.at(-1)!;
-    expect(latestCall[0]).toBe('practiceDeckProgress_user-1');
-    const savedPayload = JSON.parse(latestCall[1]);
-    expect(savedPayload).toMatchObject({
-      dateTime: '2026-03-04T10:00:00.000Z',
-      progress: [
-        expect.objectContaining({
-          item_id: 1,
-          progress_cz_to_en: 1,
-          progress_history: [
-            expect.objectContaining({ outcome: 'correct', progress: 1 }),
-          ],
-        }),
-      ],
-    });
-    expect(savedPayload.progress[0]).not.toHaveProperty('note');
-    expect(savedPayload.progress[0]).not.toHaveProperty('grammar');
-
     await act(async () => {
-      unmount();
+      await Promise.resolve();
       await Promise.resolve();
     });
-    expect(savePracticeDeckMock).toHaveBeenCalledTimes(1);
 
-    setItemSpy.mockRestore();
-    nowSpy.mockRestore();
+    expect(result.current.progressLabel).toBe('20/20');
+    expect(result.current.celebratingStar).toBe(true);
+    expect(result.current.celebrationStarTier).toBe('silver');
+
+    expect(mocks.getReadyReviewState).not.toHaveBeenCalled();
+    expect(result.current.celebratingStar).toBe(true);
+
+    await act(async () => {
+      result.current.acknowledgeCelebration();
+      await Promise.resolve();
+    });
+
+    expect(result.current.celebratingStar).toBe(true);
+    expect(mocks.getReadyReviewState).toHaveBeenCalledWith('u1');
+
+    await act(async () => {
+      resolveReload();
+      await answerPromise;
+    });
+
+    expect(mocks.continueReview).toHaveBeenCalledWith('u1');
+    expect(result.current.progressLabel).toBe('0/20');
+    expect(result.current.celebratingStar).toBe(false);
   });
 });
+
+function entry(itemId: number) {
+  return {
+    item: {
+      item_id: itemId,
+      user_id: 'u1',
+      czech: 'ahoj',
+      english: 'hello',
+      pronunciation: '',
+      audio: null,
+      is_vocabulary: 1,
+      has_pronunciation_practice: 0,
+      sort_order: itemId,
+      curriculum_sort_path: [1, 1, itemId],
+      note_id: null,
+      block_id: 1,
+      grammar_chunk_id: 0,
+      progress_cz_to_en: 0,
+      progress_en_to_cz: 0,
+      progress_history: [],
+      started_at: '2026-01-01',
+      updated_at: '2026-01-01',
+      deleted_at: '9999-01-01',
+      next_at_cz_to_en: '2026-01-01',
+      next_at_en_to_cz: '2026-01-01',
+      mastered_at_cz_to_en: '9999-01-01',
+      mastered_at_en_to_cz: '9999-01-01',
+      lesson_id: 1,
+      practice_direction: 'czToEn' as const,
+    },
+    note: null,
+    grammar: null,
+  };
+}
+
+function reviewSession(completedCount: number, targetCount = 20) {
+  return {
+    user_id: 'u1',
+    mode: 'review' as const,
+    completed_count: completedCount,
+    target_count: targetCount,
+    block_id: null,
+    phase: null,
+    current_queue_item_ids: [],
+    retry_queue_item_ids: [],
+    completed_item_ids: [],
+    started_at: '2026-08-23',
+    updated_at: '2026-08-23',
+  };
+}

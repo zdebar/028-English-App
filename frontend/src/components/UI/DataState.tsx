@@ -20,5 +20,5 @@ export function DataState({
     return <DelayedLoadingCircle />;
   }
 
-  return <Notification className="color-info pt-4">{noDataMessage}</Notification>;
+  return <Notification className="pt-4">{noDataMessage}</Notification>;
 }

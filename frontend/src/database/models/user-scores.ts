@@ -15,7 +15,7 @@ import { reportInfo } from '@/features/logging/monitoring-handler';
  * Local Dexie model and sync API for daily user score rows.
  *
  * Public API:
- * - `addItemCount` updates the score for a local day.
+ * - `addStar` updates the completed-star score for a local day.
  * - `getScoreForDate` returns a day's count, falling back to 0.
  * - `getByUserId` returns visible score history newest first.
  * - `syncFromRemote` pushes local score changes and applies remote changes.
@@ -25,42 +25,43 @@ import { reportInfo } from '@/features/logging/monitoring-handler';
 export default class UserScore extends Entity<AppDB> implements UserScoreType {
   user_id!: string;
   date!: string;
-  item_count!: number;
+  star_count!: number;
   updated_at!: string;
   deleted_at!: string | null;
 
   /**
-   * Adds practiced item count to the score row for dateTime's local day.
+   * Adds completed stars to the score row for dateTime's local day.
    *
    * @param userId User id for the score row.
    * @param count Non-negative count to add; zero is ignored.
    * @param dateTime ISO timestamp whose local YYYY-MM-DD date selects the score row. Defaults to now.
    * @throws Error when the resulting count is negative or non-integer.
    */
-  static async addItemCount(
+  static async addStar(
     userId: string,
     count: number,
     dateTime: string = new Date(Date.now()).toISOString(),
-  ): Promise<void> {
+  ): Promise<number> {
+    const date = new Date(dateTime).toLocaleDateString('en-CA');
     if (count === 0) {
-      return;
+      return this.getScoreForDate(userId, date);
     }
 
-    const date = new Date(dateTime).toLocaleDateString('en-CA');
     const existingRecord = await db.user_scores.get([userId, date]);
-    const newItemCount = (existingRecord?.item_count ?? 0) + count;
-    await db.user_scores.put(this.createRecord(userId, date, newItemCount));
+    const newStarCount = (existingRecord?.star_count ?? 0) + count;
+    await db.user_scores.put(this.createRecord(userId, date, newStarCount));
+    return newStarCount;
   }
 
   /**
-   * Reads today's practiced item count.
+   * Reads today's completed star count.
    *
    * @param userId User id for the score row.
    * @param date Local date in YYYY-MM-DD format.
-   * @returns The date's item_count, or 0 when the row does not exist.
+   * @returns The date's star_count, or 0 when the row does not exist.
    */
   static async getScoreForDate(userId: string, date: string): Promise<number> {
-    return (await db.user_scores.get([userId, date]))?.item_count ?? 0;
+    return (await db.user_scores.get([userId, date]))?.star_count ?? 0;
   }
 
   /**
@@ -153,7 +154,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
    *
    * @param userId User id for the score row.
    * @param date Score date in YYYY-MM-DD format.
-   * @param count Non-negative item count.
+   * @param count Non-negative star count.
    * @throws Error when date or count is invalid.
    */
   private static createRecord(userId: string, date: string, count: number): UserScoreType {
@@ -166,7 +167,7 @@ export default class UserScore extends Entity<AppDB> implements UserScoreType {
     return {
       user_id: userId,
       date,
-      item_count: count,
+      star_count: count,
       updated_at: new Date().toISOString(),
       deleted_at: null,
     };

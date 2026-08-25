@@ -9,8 +9,8 @@ Dexie models under `frontend/src/database/models`.
 | --- | --- |
 | Directional progress | Numeric SRS level. Correct answers increment it, incorrect answers reset it, and skips preserve it while mastering the direction. |
 | `progress_history` | Array of progress snapshots with direction and explicit `correct`, `incorrect`, `skip`, or legacy outcome. |
-| `started_at` | First time the user started an item/block. Null is represented by config's null replacement date. |
-| `next_at` | When the item/block is next ready. Null replacement date means not scheduled/not started depending on context. |
+| `started_at` | First time the user started an item. Null is represented by config's null replacement date. |
+| `next_at` | When the item is next ready. Null replacement date means not scheduled/not started depending on context. |
 | `mastered_at` | Completion/mastery timestamp. Null replacement date means not mastered. |
 | `deleted_at` | Soft-delete timestamp. Null replacement date means not deleted. |
 | Null replacement date/number | IndexedDB index-friendly stand-ins from `config.database`. |
@@ -20,8 +20,9 @@ Dexie models under `frontend/src/database/models`.
 | Entity | Relationship |
 | --- | --- |
 | `levels` | Contain lessons and support dashboard/overview grouping. |
-| `lessons` | Contain items directly through `items.lesson_id`. |
-| `blocks` / `user_blocks` | Optionally group items for Topics, practice eligibility, or initial training. User blocks track unlock/mastery state. |
+| `lessons` | Own ordered items and explicit blocks. |
+| `blocks` | Optional explicit initial-training groups; progress remains item-based. |
+| `topics` | Shared overview groups linked independently through nullable `items.topic_id`; one topic may span multiple practice blocks. |
 | `items` / `user_items` | Individual vocabulary or grammar practice units. User items track progress and scheduling. |
 | `grammar_groups` / `grammar_chunks` | Overview pages group ordered chunks; blocks and practice items link to one relevant hint through `grammar_chunk_id`. |
 | `grammar_chunk_examples` | Curated, ordered item examples displayed with a grammar chunk independently of block membership and item hint linkage. |
@@ -29,16 +30,16 @@ Dexie models under `frontend/src/database/models`.
 | `user_scores` | Per-user daily practice count. |
 
 Vocabulary items have `is_vocabulary = 1`. Grammar items have `is_vocabulary = 0`. The flag
-and `grammar_chunk_id` are independent item fields. Backend blocks opt their items out through
-`is_removed_from_practice`; item RPCs invert that into `user_items.is_practice_item`. Unblocked
-items default to practice items.
+and `grammar_chunk_id` are independent item fields. Items own `lesson_id`; `block_id` is optional.
+The curriculum path contains level, lesson, and item order.
 
 ## Important Model Responsibilities
 
 | Model | Responsibility |
 | --- | --- |
 | `UserItem` | Practice deck creation, item progress saves, vocabulary readiness, item resets, user item sync. |
-| `UserBlock` | Grammar block unlocks, new grammar availability, grammar readiness, block mastery/reset, user block sync. |
+| `Block` | Shared metadata for explicit initial-training groups. |
+| `Topic` | Shared topic metadata sync and started-topic discovery. |
 | `UserScore` | Daily practice count creation, incrementing, and sync. |
 | `Levels` | Dashboard/overview progress aggregation. |
 
@@ -46,8 +47,7 @@ items default to practice items.
 
 | Model | Main readers | Main writers |
 | --- | --- | --- |
-| `UserItem` | Home readiness, practice decks, vocabulary overview, block items, grammar overview | Practice progress, new grammar completion, item/block/grammar/vocabulary resets, sync. |
-| `UserBlock` | Home new grammar readiness, grammar readiness, blocks overview, new grammar practice | Grammar unlock/mastery, block resets, sync. |
+| `UserItem` | Home readiness, practice decks, vocabulary overview, explicit block items, grammar overview | Practice progress, initial-training completion, item/block/grammar/vocabulary resets, sync. |
 | `UserScore` | Home daily count, practice overview, dashboard stars | Practice progress actions, sync. |
 | `Levels` / `Lessons` | Dashboard, levels overview, block/lesson grouping | Shared content sync. |
 | `GrammarGroup` / `GrammarChunk` / `Notes` | Grouped grammar overview and chunk-level practice details | Shared content sync. |
@@ -61,12 +61,12 @@ Declared in `frontend/src/database/models/app-db.ts`.
 | --- | --- |
 | `[user_id+item_id]` | Direct user item lookup/reset/update. |
 | `[user_id+block_id]` | Block item loading and block reset operations. |
+| `[user_id+topic_id]` | Started topic detail loading and topic reset operations. |
 | `[user_id+grammar_chunk_id+started_at]` | Grammar-chunk started-item queries and resets. |
 | `[user_id+is_vocabulary+started_at]` | Started vocabulary queries. |
-| `[user_id+started_at]` | Started block/grammar discovery. |
+| `[user_id+started_at]` | Started-item and grammar discovery. |
 | `[user_id+updated_at]` | Incremental sync push windows. |
-| `[user_id+is_practice_item+next_at+mastered_at+curriculum_sort_path]` | Unified practice deck and readiness queries. |
-| `[user_id+lesson_id+is_vocabulary+started_at]` | Checks whether lesson vocabulary is started before grammar unlock. |
+| `[user_id+next_at+mastered_at+curriculum_sort_path]` | Unified practice deck and readiness queries. |
 
 ## Readiness Meaning
 
@@ -74,7 +74,7 @@ Declared in `frontend/src/database/models/app-db.ts`.
 | --- | --- |
 | Vocabulary | Not mastered and either `next_at < now` or `next_at` equals the null replacement date. |
 | Grammar review | Not mastered, already started/scheduled, and `next_at < now`. |
-| New grammar | A grammar block is unlocked, started, and not mastered. |
+| Initial training | First unstarted curriculum item starts an automatic lesson/type batch or its explicit block. |
 
 Readiness is a UI availability concept. Actual practice deck creation still
 queries the model again when the practice route mounts.

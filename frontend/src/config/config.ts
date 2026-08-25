@@ -14,7 +14,7 @@ const config = {
   },
 
   progress: {
-    afterInitialTrainingProgress: 2, // Progress after completing a block's initial training
+    afterNewBlockProgress: 2, // Direction progress after completing a new block
     simulationItemCount: 800,
     simulationItemProgress: 1,
     simulationStartedBlockCount: 8,
@@ -24,8 +24,8 @@ const config = {
   srs: {
     // Spaced Repetition System configuration
     intervals: {
-      czToEn: [5, 30, 120, 900, 3600, 14400, 86400, 172800, 345600],
-      enToCz: [0, 60, 450, 1800, 7200, 14400, 43200, 86400, 172800],
+      czToEn: [5, 15, 30, 120, 900, 3600, 14400, 86400, 172800, 345600],
+      enToCz: [10, 20, 60, 450, 1800, 7200, 14400, 43200, 86400, 172800],
     },
     randomness: 0.2, // Randomness of SRS algorithm
   },
@@ -40,11 +40,11 @@ const config = {
   },
 
   practice: {
-    starChunk: 40, // Number of repetitions needed to fill one star
+    initialTrainingBatchSize: 8, // Maximum size of an automatically assembled initial-training batch
+    reviewStarSize: 40, // Number of review answers needed to earn one star
     starsPerRow: 10, // Number of stars shown in one tier row
     audioDelay: 100, // Delay in milliseconds for automatically playing audio
     holdDuration: 300, // Duration in milliseconds for which the practice card is held before moving to the next item
-    readyPracticeBadgeCap: 40, // Maximum exact ready-practice badge value before showing a capped label, preferable same as starChunk
     readyPracticeScheduleGroupWindowMs: 1000, // Time window for grouping future ready-practice schedule entries
     maxReadyScheduleTimerDelayMs: 2_147_483_647, // Maximum setTimeout delay supported by browsers
     CZ_TO_EN: 'czToEn',

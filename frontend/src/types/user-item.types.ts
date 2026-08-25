@@ -35,9 +35,9 @@ export interface UserItemBase {
 
 export interface UserItemLocal extends UserItemBase {
   is_vocabulary: 0 | 1;
-  is_practice_item: 0 | 1;
   has_pronunciation_practice: 0 | 1;
   block_id: number;
+  topic_id: number;
   grammar_chunk_id: number;
   started_at: string;
   deleted_at: string;
@@ -46,7 +46,6 @@ export interface UserItemLocal extends UserItemBase {
   mastered_at_cz_to_en: string;
   mastered_at_en_to_cz: string;
   curriculum_sort_path: CurriculumSortPath;
-  is_initial_training_trigger?: boolean;
 }
 
 export interface PracticeDeckItem extends UserItemLocal {
@@ -60,3 +59,8 @@ export type ResolvedPracticeEntry<T extends UserItemLocal> = Readonly<{
 }>;
 
 export type PracticeDeckEntry = ResolvedPracticeEntry<PracticeDeckItem>;
+
+export type InitialTrainingSelection = Readonly<{
+  blockId: number | null;
+  items: UserItemLocal[];
+}>;

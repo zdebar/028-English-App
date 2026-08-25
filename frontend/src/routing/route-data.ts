@@ -2,12 +2,14 @@ import config from '@/config/config';
 import GrammarGroup from '@/database/models/grammar-groups';
 import Levels from '@/database/models/levels';
 import PronunciationGroup from '@/database/models/pronunciation-groups';
-import UserBlock from '@/database/models/user-blocks';
+import Block from '@/database/models/blocks';
+import PracticeSession from '@/database/models/practice-sessions';
 import UserItem from '@/database/models/user-items';
 import UserScore from '@/database/models/user-scores';
+import Topic from '@/database/models/topics';
 import { routeDataKey, type RouteDataDescriptor } from './route-data-handoff';
 import {
-  loadPracticeDeck,
+  loadReviewDeck,
   loadPronunciationPracticeDeck,
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
@@ -23,7 +25,7 @@ export function overviewAvailabilityDescriptor(userId: string) {
     load: async () => {
       const [grammar, topics, vocabulary] = await Promise.all([
         UserItem.hasStartedGrammar(userId),
-        UserBlock.getStartedTopicsByUserId(userId),
+        Topic.getStartedByUserId(userId),
         UserItem.getStartedVocabulary(userId),
       ]);
       return {
@@ -59,17 +61,17 @@ export function grammarDescriptor(userId: string) {
 export function topicsDescriptor(userId: string) {
   return {
     key: routeDataKey('topics', userId),
-    load: () => UserBlock.getStartedTopicsByUserId(userId),
+    load: () => Topic.getStartedByUserId(userId),
   };
 }
 
-export function topicDetailDescriptor(userId: string, blockId: number) {
+export function topicDetailDescriptor(userId: string, topicId: number) {
   return {
-    key: routeDataKey('topic-detail', userId, blockId),
+    key: routeDataKey('topic-detail', userId, topicId),
     load: async () => {
       const [topic, items] = await Promise.all([
-        UserBlock.getByBlockId(userId, blockId),
-        UserItem.getByBlockId(userId, blockId),
+        Topic.getById(topicId),
+        UserItem.getStartedByTopicId(userId, topicId),
       ]);
       return { topic, items };
     },
@@ -93,7 +95,7 @@ export function pronunciationGroupDetailDescriptor(userId: string, groupId: numb
 export function practiceDeckDescriptor(userId: string) {
   return {
     key: routeDataKey('practice', userId),
-    load: () => loadPracticeDeck(userId, config.lesson.deckSize),
+    load: () => loadReviewDeck(userId, config.lesson.deckSize),
   };
 }
 
@@ -104,22 +106,39 @@ export function pronunciationPracticeDescriptor(userId: string) {
   };
 }
 
-export function blockTrainingDescriptor(userId: string, blockId: number) {
+export function initialTrainingDescriptor(userId: string) {
   return {
-    key: routeDataKey('block-training', userId, blockId),
+    key: routeDataKey('initial-training', userId),
     load: async () => {
-      const block = await UserBlock.getByBlockId(userId, blockId);
-      if (
-        !block?.requires_initial_training ||
-        block.started_at !== config.database.nullReplacementDate
-      ) {
+      const activeSession = await PracticeSession.reconcileActive(userId);
+      if (activeSession?.mode === 'review') {
+        return { block: null, items: [], entries: [], grammar: null, grammarGroup: null };
+      }
+      const savedItemIds = activeSession
+        ? [
+            ...activeSession.current_queue_item_ids,
+            ...activeSession.retry_queue_item_ids,
+            ...activeSession.completed_item_ids,
+          ]
+        : [];
+      const selection = activeSession
+        ? {
+            blockId: activeSession.block_id,
+            items: await UserItem.getByItemIds(userId, savedItemIds),
+          }
+        : await UserItem.getNextInitialTrainingSelection(userId);
+      if (!selection) {
         return { block: null, items: [], entries: [], grammar: null, grammarGroup: null };
       }
 
-      const items = await UserItem.getByBlockId(userId, block.block_id);
+      const block = selection.blockId == null ? null : await Block.getById(selection.blockId);
+      const items = selection.items;
+      if (items.length === 0 || (selection.blockId != null && !block)) {
+        return { block: null, items: [], entries: [], grammar: null, grammarGroup: null };
+      }
       const [entries, grammarContext] = await Promise.all([
         resolvePracticeEntries(userId, items),
-        resolvePracticeGrammarContext(userId, block.grammar_chunk_id),
+        resolvePracticeGrammarContext(userId, block?.grammar_chunk_id ?? null),
       ]);
       return { block, items, entries, ...grammarContext };
     },
@@ -130,6 +149,6 @@ export type OverviewAvailabilityData = Awaited<
   ReturnType<ReturnType<typeof overviewAvailabilityDescriptor>['load']>
 >;
 export type TopicDetailData = Awaited<ReturnType<ReturnType<typeof topicDetailDescriptor>['load']>>;
-export type BlockTrainingData = Awaited<
-  ReturnType<ReturnType<typeof blockTrainingDescriptor>['load']>
+export type InitialTrainingData = Awaited<
+  ReturnType<ReturnType<typeof initialTrainingDescriptor>['load']>
 >;

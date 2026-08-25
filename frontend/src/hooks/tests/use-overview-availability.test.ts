@@ -26,8 +26,8 @@ vi.mock('dexie', () => ({
   }),
 }));
 
-vi.mock('@/database/models/user-blocks', () => ({
-  default: { getStartedTopicsByUserId: vi.fn(async () => mocks.topics) },
+vi.mock('@/database/models/topics', () => ({
+  default: { getStartedByUserId: vi.fn(async () => mocks.topics) },
 }));
 vi.mock('@/database/models/user-items', () => ({
   default: {

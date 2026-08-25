@@ -44,7 +44,7 @@ export const OVERVIEW_TEXTS = {
   // Overviews Page
   overviews: 'Přehledy',
   progressOverviews: 'Pokrok',
-  pronunciationSettings: 'Výslovnost',
+  pronunciationSettings: 'Přehled výslovnosti',
   levelsOverview: 'Přehled CEFR úrovní',
   levelsOverviewTooltip: 'Přehled CEFR úrovní s pokrokem',
   topicsOverview: 'Přehled témat',
@@ -54,7 +54,6 @@ export const OVERVIEW_TEXTS = {
   vocabularyOverview: 'Přehled slovíček',
   vocabularyOverviewTooltip: 'Přehled započatých slovíček',
   pronunciationGroups: 'Skupiny výslovnosti',
-  pronunciationGroupsButton: 'Výslovnost – skupiny',
   pronunciationGroupsTooltip: 'Výběr skupin podobně znějících položek k procvičování',
   pronunciationStartedHelp: 'odemčeno/celkem položek',
   noPronunciationGroups: 'Žádné dostupné skupiny výslovnosti.',

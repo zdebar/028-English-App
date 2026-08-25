@@ -10,7 +10,8 @@ export const HOME_TEXTS = {
   installButton: 'Nainstalovat aplikaci',
   installButtonTooltip: 'Nainstalovat PWA aplikaci.',
   starsToday: 'denní cíl',
-  practiceButton: 'Studovat',
+  reviewButton: 'Opakování',
+  newButton: 'Nové',
 
   // User
   practiceOverviewTitle: 'Přehled procvičování',

@@ -15,6 +15,7 @@ import {
   vocabularyDescriptor,
 } from '@/routing/route-data';
 import { DataNavigationButton } from '@/routing/data-navigation';
+import { usePronunciationGroupsStore } from '@/features/pronunciation/use-pronunciation-groups-store';
 
 function getButtonState(
   availability: OverviewAvailability,
@@ -33,6 +34,9 @@ export default function Overviews(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const initialAvailability = useLoaderData() as OverviewAvailabilityData;
   const availability = useOverviewAvailability(userId, initialAvailability);
+  const pronunciationGroups = usePronunciationGroupsStore((state) => state.groups);
+  const pronunciationLoading = usePronunciationGroupsStore((state) => state.loading);
+  const pronunciationError = usePronunciationGroupsStore((state) => state.error);
   const grammarButton = getButtonState(
     availability.grammar,
     TEXTS.grammarOverviewTooltip,
@@ -47,6 +51,15 @@ export default function Overviews(): JSX.Element {
     availability.vocabulary,
     TEXTS.vocabularyOverviewTooltip,
     TEXTS.noStartedVocabulary,
+  );
+  const pronunciationButton = getButtonState(
+    {
+      hasData: pronunciationGroups.length > 0,
+      loading: pronunciationLoading,
+      error: pronunciationError,
+    },
+    TEXTS.pronunciationGroupsTooltip,
+    TEXTS.noPronunciationGroups,
   );
   return (
     <div className="card-width grow-0 gap-1">
@@ -76,6 +89,13 @@ export default function Overviews(): JSX.Element {
             {...vocabularyButton}
           >
             <MenuButtonText>{TEXTS.vocabularyOverview}</MenuButtonText>
+          </DataNavigationButton>
+          <DataNavigationButton
+            className="h-button w-full"
+            to={ROUTES.pronunciationGroups}
+            {...pronunciationButton}
+          >
+            <MenuButtonText>{TEXTS.pronunciationSettings}</MenuButtonText>
           </DataNavigationButton>
         </div>
       </section>

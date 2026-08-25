@@ -50,7 +50,7 @@ export default function PracticeOverviewButton({
     >
       <StarProgressOverview
         count={count}
-        chunkSize={config.practice.starChunk}
+        chunkSize={1}
         starsPerRow={config.practice.starsPerRow}
       />
       <HelpText className="-top-4 whitespace-nowrap">{helpText}</HelpText>
@@ -79,7 +79,7 @@ function DataPracticeOverviewButton({
     >
       <StarProgressOverview
         count={count}
-        chunkSize={config.practice.starChunk}
+        chunkSize={1}
         starsPerRow={config.practice.starsPerRow}
       />
       <HelpText className="-top-4 whitespace-nowrap">{helpText}</HelpText>

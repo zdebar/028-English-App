@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   showToast: vi.fn(),
   reportError: vi.fn(),
+  overviewRender: vi.fn(),
   deck: {
     loading: false,
     error: null as Error | null,
@@ -13,6 +14,7 @@ const mocks = vi.hoisted(() => ({
     grammar: null as { id: number; name: string } | null,
     grammarGroup: null as { note: string | null } | null,
     isComplete: false,
+    hasProgress: false,
     currentItem: null as { item_id: number } | null,
     note: null,
     practiceGrammar: null,
@@ -80,20 +82,23 @@ vi.mock('@/features/logging/monitoring-handler', () => ({
 }));
 
 vi.mock('@/features/practice/hooks/use-block-training-deck', () => ({
-  useBlockTrainingDeck: () => mocks.deck,
+  useInitialTrainingDeck: () => mocks.deck,
 }));
 
 vi.mock('@/features/practice/BlockTrainingOverviewCard', () => ({
-  default: ({ block, grammar, grammarGroup, onContinue }: any) => (
-    <div>
-      <div data-testid="block-training-overview">
-        {block?.name}:{grammar?.name}:{grammarGroup?.note}
+  default: ({ block, grammar, grammarGroup, onContinue }: any) => {
+    mocks.overviewRender();
+    return (
+      <div>
+        <div data-testid="block-training-overview">
+          {block?.name}:{grammar?.name}:{grammarGroup?.note}
+        </div>
+        <button type="button" onClick={onContinue}>
+          Continue
+        </button>
       </div>
-      <button type="button" onClick={onContinue}>
-        Continue
-      </button>
-    </div>
-  ),
+    );
+  },
 }));
 
 vi.mock('@/features/practice/PracticeSessionCard', () => ({
@@ -118,6 +123,7 @@ describe('BlockTrainingPractice', () => {
     mocks.deck.grammar = null;
     mocks.deck.grammarGroup = null;
     mocks.deck.isComplete = false;
+    mocks.deck.hasProgress = false;
     mocks.deck.currentItem = null;
   });
 
@@ -191,6 +197,28 @@ describe('BlockTrainingPractice', () => {
     expect(screen.getByTestId('practice-session').textContent).toBe('ahoj:hello');
   });
 
+  it('resumes a started block without rendering the overview first', () => {
+    mocks.deck.block = { name: 'Block A' };
+    mocks.deck.currentItem = { item_id: 1 };
+    mocks.deck.hasProgress = true;
+
+    render(<BlockTrainingPractice />);
+
+    expect(screen.getByTestId('practice-session').textContent).toBe('ahoj:hello');
+    expect(screen.queryByTestId('block-training-overview')).toBeNull();
+    expect(mocks.overviewRender).not.toHaveBeenCalled();
+  });
+
+  it('starts an automatic batch without rendering an overview', () => {
+    mocks.deck.block = null;
+    mocks.deck.currentItem = { item_id: 1 };
+
+    render(<BlockTrainingPractice />);
+
+    expect(screen.getByTestId('practice-session').textContent).toBe('ahoj:hello');
+    expect(screen.queryByTestId('block-training-overview')).toBeNull();
+  });
+
   it('shows the block overview when the training block has no grammar', () => {
     mocks.deck.block = { name: 'Block A' };
     mocks.deck.grammar = null;
@@ -213,17 +241,14 @@ describe('BlockTrainingPractice', () => {
     expect(mocks.navigate).not.toHaveBeenCalled();
   });
 
-  it('returns to unified practice after completion', () => {
+  it('returns Home after the completed-star animation', () => {
     mocks.deck.block = { name: 'Block A' };
     mocks.deck.grammar = { id: 1, name: 'Articles' };
     mocks.deck.isComplete = true;
 
     render(<BlockTrainingPractice />);
 
-    expect(screen.getByText('Complete')).toBeTruthy();
-    expect(screen.getByText('Block A')).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
-    expect(mocks.navigate).toHaveBeenCalledWith('/practice', { replace: true });
+    expect(mocks.navigate).toHaveBeenCalledWith('/', { replace: true });
     expect(screen.queryByTestId('block-training-overview')).toBeNull();
   });
 });

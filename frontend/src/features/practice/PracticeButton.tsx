@@ -3,41 +3,66 @@ import { ROUTES } from '@/config/routes.config';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { DataNavigationButton } from '@/routing/data-navigation';
-import { practiceDeckDescriptor } from '@/routing/route-data';
+import { initialTrainingDescriptor, practiceDeckDescriptor } from '@/routing/route-data';
 import { usePracticeAvailabilityStore } from './use-practice-availability-store';
+import StyledButton from '@/components/UI/buttons/StyledButton';
 
-type PracticeButtonProps = Readonly<{ userId: string }>;
+type PracticeButtonsProps = Readonly<{ userId: string }>;
 
-function ReadyPracticeBadge({ count }: Readonly<{ count: number }>): JSX.Element | null {
-  if (count <= 0) return null;
+export default function PracticeButtons({ userId }: PracticeButtonsProps): JSX.Element {
+  const reviewCount = usePracticeAvailabilityStore((state) => state.reviewCount);
+  const initialTrainingAvailable = usePracticeAvailabilityStore(
+    (state) => state.initialTrainingAvailable,
+  );
+  const activeSession = usePracticeAvailabilityStore((state) => state.activeSession);
+  const loading = usePracticeAvailabilityStore((state) => state.practiceLoading);
+  const error = usePracticeAvailabilityStore((state) => state.practiceError);
+  const activeReview = activeSession?.mode === 'review';
+  const activeNew = activeSession?.mode === 'new';
+  const reviewAvailable = reviewCount >= config.practice.reviewStarSize;
+  const reviewDisabled = Boolean(error) || activeNew || (!loading && !activeReview && !reviewAvailable);
+  const newAvailable = activeNew || (!reviewAvailable && initialTrainingAvailable);
+  const newDisabled = Boolean(error) || activeReview || (!loading && !activeNew && !newAvailable);
+  const reviewTitle = resolveButtonTitle(loading, error, reviewDisabled);
+  const newTitle = resolveButtonTitle(loading, error, newDisabled);
+
   return (
-    <span className="bg-button-hover text-light absolute top-1 right-2 min-w-5 rounded-full px-2 text-xs">
-      {count}
-    </span>
+    <div className="flex w-full flex-col gap-1">
+      <DataNavigationButton
+        to={ROUTES.practice}
+        descriptor={practiceDeckDescriptor(userId)}
+        className="h-button max-h-button w-full px-4"
+        disabled={reviewDisabled}
+        title={reviewTitle}
+      >
+        {TEXTS.reviewButton}
+      </DataNavigationButton>
+      {!newAvailable && !loading ? (
+        <StyledButton className="h-button max-h-button w-full px-4" disabled title={newTitle}>
+          {TEXTS.newButton}
+        </StyledButton>
+      ) : (
+        <DataNavigationButton
+          to={ROUTES.initialTraining}
+          descriptor={initialTrainingDescriptor(userId)}
+          className="h-button max-h-button w-full px-4"
+          disabled={newDisabled}
+          title={newTitle}
+        >
+          {TEXTS.newButton}
+        </DataNavigationButton>
+      )}
+    </div>
   );
 }
 
-export default function PracticeButton({ userId }: PracticeButtonProps): JSX.Element {
-  const badgeCap = config.practice.readyPracticeBadgeCap;
-  const readyCount = usePracticeAvailabilityStore((state) => state.readyCount);
-  const loading = usePracticeAvailabilityStore((state) => state.readyLoading);
-  const error = usePracticeAvailabilityStore((state) => state.readyError);
-  const disabled = Boolean(error) || (!loading && readyCount === 0);
-  let title: string | undefined;
-  if (loading) title = TEXTS.loadingMessage;
-  if (error) title = TEXTS.loadingError;
-  if (!loading && !error && readyCount === 0) title = TEXTS.nothingToPractice;
-
-  return (
-    <DataNavigationButton
-      to={ROUTES.practice}
-      descriptor={practiceDeckDescriptor(userId)}
-      className="h-button max-h-button relative w-full px-4"
-      disabled={disabled}
-      title={title}
-    >
-      {TEXTS.practiceButton}
-      {!loading && readyCount < badgeCap && <ReadyPracticeBadge count={readyCount} />}
-    </DataNavigationButton>
-  );
+function resolveButtonTitle(
+  loading: boolean,
+  error: Error | null,
+  disabled: boolean,
+): string | undefined {
+  if (loading) return TEXTS.loadingMessage;
+  if (error) return TEXTS.loadingError;
+  if (disabled) return TEXTS.nothingToPractice;
+  return undefined;
 }

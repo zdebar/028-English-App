@@ -17,10 +17,14 @@ export default function PracticeCard({ initialDeck }: Readonly<{ initialDeck?: P
   const navigate = useNavigate();
   const {
     currentItem,
-    trainingBlockId,
     note,
     grammar,
-    progress,
+    progressLabel,
+    sessionLoading,
+    celebratingStar,
+    celebrationStarTier,
+    acknowledgeCelebration,
+    finishedReview,
     isCzToEn,
     revealed,
     handleReveal,
@@ -45,15 +49,10 @@ export default function PracticeCard({ initialDeck }: Readonly<{ initialDeck?: P
   }, [error, showToast]);
 
   useEffect(() => {
-    if (trainingBlockId == null) return;
-    navigate(`${ROUTES.practiceBlockTraining}?blockId=${trainingBlockId}`);
-  }, [navigate, trainingBlockId]);
+    if (finishedReview) navigate(ROUTES.home, { replace: true });
+  }, [finishedReview, navigate]);
 
-  if (trainingBlockId != null) {
-    return <DelayedLoadingCircle />;
-  }
-
-  if (loading && !currentItem) {
+  if (sessionLoading || (loading && !currentItem)) {
     return <DelayedLoadingCircle />;
   }
 
@@ -65,7 +64,11 @@ export default function PracticeCard({ initialDeck }: Readonly<{ initialDeck?: P
     <PracticeSessionCard
       note={note}
       grammar={grammar}
-      progressLabel={progress}
+      progressLabel={progressLabel}
+      progressHelpText={TEXTS.reviewStarProgress}
+      celebratingStar={celebratingStar}
+      celebrationStarTier={celebrationStarTier}
+      onStarCelebrationContinue={acknowledgeCelebration}
       isCzToEn={isCzToEn}
       revealed={revealed}
       czech={czech}

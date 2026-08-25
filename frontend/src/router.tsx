@@ -8,7 +8,7 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
-import BlockTrainingPractice from '@/pages/BlockTrainingPractice';
+import InitialTrainingPractice from '@/pages/BlockTrainingPractice';
 import Grammar from '@/pages/Grammar';
 import Guide from '@/pages/Guide';
 import Home from '@/pages/Home';
@@ -27,11 +27,10 @@ import Vocabulary from '@/pages/Vocabulary';
 import Notification from '@/components/UI/Notification';
 import {
   consumePreparedRouteData,
-  prepareRouteData,
   type RouteDataDescriptor,
 } from '@/routing/route-data-handoff';
 import {
-  blockTrainingDescriptor,
+  initialTrainingDescriptor,
   grammarDescriptor,
   levelsDescriptor,
   overviewAvailabilityDescriptor,
@@ -77,11 +76,11 @@ function parsePositiveId(value: string | undefined): number | null {
 }
 
 async function loadTopicDetail({ params }: LoaderFunctionArgs) {
-  const blockId = parsePositiveId(params.blockId);
-  if (!blockId) throw redirect(ROUTES.topics);
+  const topicId = parsePositiveId(params.topicId);
+  if (!topicId) throw redirect(ROUTES.topics);
   const userId = await requireUserId();
   try {
-    const data = await consumePreparedRouteData(topicDetailDescriptor(userId, blockId));
+    const data = await consumePreparedRouteData(topicDetailDescriptor(userId, topicId));
     if (!data.topic) throw redirect(ROUTES.topics);
     return data;
   } catch (error) {
@@ -111,14 +110,7 @@ async function loadPronunciationGroupDetail({ params }: LoaderFunctionArgs) {
 async function loadPractice() {
   const userId = await requireUserId();
   try {
-    const deck = await consumePreparedRouteData(practiceDeckDescriptor(userId));
-    const firstItem = deck[0]?.item;
-    const blockId = firstItem?.is_initial_training_trigger ? firstItem.block_id : null;
-    if (blockId != null) {
-      await prepareRouteData(blockTrainingDescriptor(userId, blockId));
-      throw redirect(`${ROUTES.practiceBlockTraining}?blockId=${blockId}`);
-    }
-    return deck;
+    return await consumePreparedRouteData(practiceDeckDescriptor(userId));
   } catch (error) {
     if (error instanceof Response) throw error;
     reportError('Failed to load practice route data', error);
@@ -127,17 +119,15 @@ async function loadPractice() {
   }
 }
 
-async function loadBlockTraining({ request }: LoaderFunctionArgs) {
-  const blockId = parsePositiveId(new URL(request.url).searchParams.get('blockId') ?? undefined);
-  if (!blockId) throw redirect(ROUTES.practice);
+async function loadInitialTraining() {
   const userId = await requireUserId();
   try {
-    const data = await consumePreparedRouteData(blockTrainingDescriptor(userId, blockId));
-    if (!data.block) throw redirect(ROUTES.practice);
+    const data = await consumePreparedRouteData(initialTrainingDescriptor(userId));
+    if (data.items.length === 0) throw redirect(ROUTES.home);
     return data;
   } catch (error) {
     if (error instanceof Response) throw error;
-    reportError('Failed to load block training route data', error);
+    reportError('Failed to load initial training route data', error);
     useToastStore.getState().showToast(TEXTS.loadingError, 'error');
     throw error;
   }
@@ -159,9 +149,9 @@ export const router = createHashRouter([
         children: [
           { path: ROUTES.practice, loader: loadPractice, Component: Practice },
           {
-            path: ROUTES.practiceBlockTraining,
-            loader: loadBlockTraining,
-            Component: BlockTrainingPractice,
+            path: ROUTES.initialTraining,
+            loader: loadInitialTraining,
+            Component: InitialTrainingPractice,
           },
           {
             path: ROUTES.pronunciationPractice,

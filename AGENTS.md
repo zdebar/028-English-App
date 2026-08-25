@@ -7,3 +7,4 @@
 
 1. Don't nest ternary or other logical operations. Extract into independent statements.
 2. Prefer using an optional chain expression instead, as it's more concise and easier to read.
+3. Maximal allowed Cognitive Complexity is 15

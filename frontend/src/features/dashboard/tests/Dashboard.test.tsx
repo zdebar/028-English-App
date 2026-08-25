@@ -111,7 +111,7 @@ describe('Dashboard', () => {
     const link = screen.getByRole('link', { name: /CEFR/ });
     expect(link.getAttribute('href')).toBe('/levels');
     expect(link.getAttribute('data-descriptor-key')).toBe('levels:u1');
-    expect(screen.getByText(/CEFR/)).toBeTruthy();
+    expect(screen.getByText(/CEFR/).className).toContain('color-info');
     expect(mocks.descriptorUserId).toBe('u1');
   });
 

@@ -174,7 +174,6 @@ Important files include:
 - [supabase/schemas/10_updated_at_triggers.sql](supabase/schemas/10_updated_at_triggers.sql): trigger wiring such as `updated_at`
 - [supabase/schemas/20_auth_helpers.sql](supabase/schemas/20_auth_helpers.sql): shared RPC auth helpers
 - [supabase/schemas/30_rpc_fetch_user_items.sql](supabase/schemas/30_rpc_fetch_user_items.sql): user item fetch RPC
-- [supabase/schemas/35_rpc_fetch_user_blocks.sql](supabase/schemas/35_rpc_fetch_user_blocks.sql): user block fetch RPC
 - [supabase/schemas/40_user_lifecycle_functions.sql](supabase/schemas/40_user_lifecycle_functions.sql): user soft-delete/reactivation functions
 - [supabase/schemas/90_rls.sql](supabase/schemas/90_rls.sql): RLS policies and table grants
 - [supabase/seeds/00_private_settings.sql](supabase/seeds/00_private_settings.sql): private settings seed values
@@ -183,7 +182,7 @@ Important files include:
 Main domain tables/entities across the project:
 
 - `levels`, `lessons`, `items`, `grammar_groups`, `grammar_chunks`, `grammar_chunk_examples`, `blocks`, `notes`
-- `user_items`, `user_scores`, `user_blocks`
+- `user_items`, `user_scores`
 - sync metadata and user-linked records
 
 Important sync fields include:

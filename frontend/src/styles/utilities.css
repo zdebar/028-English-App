@@ -17,7 +17,8 @@
     @apply disabled:border-disabled-light dark:disabled:border-disabled-dark disabled:border disabled:border-dashed;
   }
 
-  .color-button:not(:disabled):hover {
+  .color-button:not(:disabled):hover,
+  .secondary-control-button:not(:disabled):hover {
     @apply brightness-103 saturate-98 dark:brightness-112;
   }
 

@@ -10,12 +10,12 @@ RETURNS TABLE (
   pronunciation TEXT,
   audio TEXT,
   is_vocabulary BOOLEAN,
-  is_practice_item BOOLEAN,
   has_pronunciation_practice BOOLEAN,
   sort_order INTEGER,
   curriculum_sort_path INTEGER[],
   note_id INTEGER,
   block_id INTEGER,
+  topic_id INTEGER,
   grammar_chunk_id INTEGER,
   progress_cz_to_en INTEGER,
   progress_en_to_cz INTEGER,
@@ -44,7 +44,6 @@ BEGIN
     i.pronunciation,
     i.audio,
     i.is_vocabulary,
-    COALESCE(NOT b.is_removed_from_practice, TRUE) AS is_practice_item,
     COALESCE(ui.has_pronunciation_practice, FALSE)
       AS has_pronunciation_practice,
     i.sort_order,
@@ -52,6 +51,7 @@ BEGIN
       AS curriculum_sort_path,
     i.note_id,
     i.block_id,
+    i.topic_id,
     i.grammar_chunk_id,
     COALESCE(ui.progress_cz_to_en, 0) AS progress_cz_to_en,
     COALESCE(ui.progress_en_to_cz, 0) AS progress_en_to_cz,
@@ -65,8 +65,6 @@ BEGIN
     ui.mastered_at_en_to_cz,
     i.lesson_id
   FROM public.items i
-  LEFT JOIN public.blocks b
-    ON b.id = i.block_id
   JOIN public.lessons le
     ON le.id = i.lesson_id
   JOIN public.levels lv
@@ -77,7 +75,6 @@ BEGIN
   WHERE GREATEST(
       COALESCE(ui.updated_at, public.rpc_min_timestamptz()),
       i.updated_at,
-      COALESCE(b.updated_at, public.rpc_min_timestamptz()),
       le.updated_at,
       lv.updated_at
     )

@@ -1,30 +1,26 @@
 import config from '@/config/config';
-import UserBlock from '@/database/models/user-blocks';
+import Block from '@/database/models/blocks';
+import PracticeSession from '@/database/models/practice-sessions';
 import UserItem from '@/database/models/user-items';
-import UserScore from '@/database/models/user-scores';
 import type { GrammarDetail } from '@/features/grammar/GrammarDetailCard';
 import { reportError } from '@/features/logging/monitoring-handler';
-import type {
-  GrammarChunkType,
-  GrammarGroupType,
-  UserBlockType,
-} from '@/types/generic.types';
+import type { BlockType, GrammarChunkType, GrammarGroupType } from '@/types/generic.types';
+import type { NewPracticePhase, PracticeSessionType } from '@/types/practice-session.types';
 import type { ResolvedPracticeEntry, UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
-import type { BlockTrainingData } from '@/routing/route-data';
+import type { InitialTrainingData } from '@/routing/route-data';
 import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff';
-import {
-  resolvePracticeEntries,
-  resolvePracticeGrammarContext,
-} from '@/database/utils/practice-content.utils';
+import { resolvePracticeEntries, resolvePracticeGrammarContext } from '@/database/utils/practice-content.utils';
+import { getStarTierForCount, type StarTier } from '@/utils/star-progress.utils';
+import { useStarCelebration } from './use-star-celebration';
 
-type BlockTrainingRound = 0 | 1;
-
-const ROUND_DIRECTIONS: Record<BlockTrainingRound, 'czToEn' | 'enToCz'> = {
+const PHASE_DIRECTIONS: Record<NewPracticePhase, 'czToEn' | 'enToCz'> = {
   0: 'czToEn',
   1: 'enToCz',
+  2: 'czToEn',
+  3: 'enToCz',
 };
 
 function toError(error: unknown): Error {
@@ -36,301 +32,256 @@ function toGrammarDetail(grammar: GrammarChunkType | null | undefined): GrammarD
   return { ...grammar, kind: 'chunk' };
 }
 
-export function useBlockTrainingDeck(
+export function useInitialTrainingDeck(
   userId: string | null,
-  blockId: number | null,
-  initialData?: BlockTrainingData,
+  initialData?: InitialTrainingData,
 ) {
-  const [block, setBlock] = useState<UserBlockType | null>(initialData?.block ?? null);
+  const [block, setBlock] = useState<BlockType | null>(initialData?.block ?? null);
   const [items, setItems] = useState<UserItemLocal[]>(initialData?.items ?? []);
-  const [resolvedEntries, setResolvedEntries] = useState<
-    Array<ResolvedPracticeEntry<UserItemLocal>>
-  >(initialData?.entries ?? []);
-  const [grammar, setGrammar] = useState<GrammarDetail | null>(() =>
-    toGrammarDetail(initialData?.grammar),
+  const [resolvedEntries, setResolvedEntries] = useState<Array<ResolvedPracticeEntry<UserItemLocal>>>(
+    initialData?.entries ?? [],
   );
-  const [grammarGroup, setGrammarGroup] = useState<GrammarGroupType | null>(
-    initialData?.grammarGroup ?? null,
-  );
-  const [round, setRound] = useState<BlockTrainingRound>(0);
-  const [totalItemCount, setTotalItemCount] = useState(initialData?.items.length ?? 0);
-  const [completedItemIds, setCompletedItemIds] = useState<Set<number>>(
-    () => new Set<number>(),
-  );
-  const [currentQueue, setCurrentQueue] = useState<UserItemLocal[]>(initialData?.items ?? []);
-  const [nextWaveQueue, setNextWaveQueue] = useState<UserItemLocal[]>([]);
+  const [grammar, setGrammar] = useState<GrammarDetail | null>(() => toGrammarDetail(initialData?.grammar));
+  const [grammarGroup, setGrammarGroup] = useState<GrammarGroupType | null>(initialData?.grammarGroup ?? null);
+  const [session, setSession] = useState<PracticeSessionType | null>(null);
   const [isComplete, setIsComplete] = useState(false);
+  const {
+    celebratingStar,
+    waitForAcknowledgement,
+    acknowledgeCelebration,
+    finishCelebration,
+  } = useStarCelebration();
+  const [celebrationStarTier, setCelebrationStarTier] = useState<StarTier>('bronze');
+  const [hasProgress, setHasProgress] = useState(false);
   const [revealed, setRevealed] = useState(false);
-  const [loading, setLoading] = useState(userId != null && initialData == null);
+  const [loading, setLoading] = useState(userId != null);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     if (!userId) {
       setLoading(false);
-      setError(null);
       return;
     }
 
-    if (initialData) {
-      setBlock(initialData.block);
-      setItems(initialData.items);
-      setResolvedEntries(initialData.entries);
-      setGrammar(toGrammarDetail(initialData.grammar));
-      setGrammarGroup(initialData.grammarGroup);
-      setTotalItemCount(initialData.items.length);
-      setCompletedItemIds(new Set());
-      setRound(0);
-      setCurrentQueue(initialData.items);
-      setNextWaveQueue([]);
-      setIsComplete(false);
-      setRevealed(false);
-      setLoading(false);
-      setError(null);
-      return;
-    }
-
-    let isMounted = true;
+    let mounted = true;
     const load = async () => {
-      setLoading(true);
-      setError(null);
       try {
-        const nextBlock = blockId == null ? null : await UserBlock.getByBlockId(userId, blockId);
-        if (
-          !nextBlock?.requires_initial_training ||
-          nextBlock.started_at !== config.database.nullReplacementDate
-        ) {
-          if (isMounted) {
-            setBlock(null);
-            setItems([]);
-            setResolvedEntries([]);
-            setTotalItemCount(0);
-            setCompletedItemIds(new Set());
-            setGrammar(null);
-            setGrammarGroup(null);
-            setCurrentQueue([]);
-            setNextWaveQueue([]);
-          }
+        const selection = initialData
+          ? { blockId: initialData.block?.id ?? null, items: initialData.items }
+          : await UserItem.getNextInitialTrainingSelection(userId);
+        const nextBlock = initialData?.block ??
+          (selection?.blockId == null ? null : await Block.getById(selection.blockId));
+        const blockItems = selection?.items ?? [];
+        if (blockItems.length === 0) {
+          if (mounted) setItems([]);
           return;
         }
-
-        const blockItems = await UserItem.getByBlockId(userId, nextBlock.block_id);
-        const [nextResolvedEntries, grammarContext] = await Promise.all([
-          resolvePracticeEntries(userId, blockItems),
-          resolvePracticeGrammarContext(userId, nextBlock.grammar_chunk_id),
-        ]);
-        if (!isMounted) return;
-
+        const entries = initialData?.entries ?? (await resolvePracticeEntries(userId, blockItems));
+        const grammarContext = initialData
+          ? { grammar: initialData.grammar, grammarGroup: initialData.grammarGroup }
+          : await resolvePracticeGrammarContext(userId, nextBlock?.grammar_chunk_id);
+        const existing = await PracticeSession.reconcileActive(userId);
+        const selectedBlockId = nextBlock?.id ?? null;
+        if (existing && (existing.mode !== 'new' || existing.block_id !== selectedBlockId)) {
+          throw new Error('Another practice session is already active.');
+        }
+        const activeSession =
+          existing ??
+          (await PracticeSession.startNew(
+            userId,
+            selectedBlockId,
+            blockItems.map((item) => item.item_id),
+          ));
+        if (!mounted) return;
         setBlock(nextBlock);
         setItems(blockItems);
-        setResolvedEntries(nextResolvedEntries);
-        setTotalItemCount(blockItems.length);
-        setCompletedItemIds(new Set());
+        setResolvedEntries(entries);
         setGrammar(toGrammarDetail(grammarContext.grammar));
         setGrammarGroup(grammarContext.grammarGroup);
-        setRound(0);
-        setCurrentQueue(blockItems);
-        setNextWaveQueue([]);
-        setIsComplete(false);
-        setRevealed(false);
-      } catch (err) {
-        if (!isMounted) return;
-        setError(toError(err));
-        setBlock(null);
-        setItems([]);
-        setResolvedEntries([]);
-        setGrammar(null);
-        setGrammarGroup(null);
-        setCurrentQueue([]);
-        setNextWaveQueue([]);
-        setTotalItemCount(0);
-        setCompletedItemIds(new Set());
+        setSession(activeSession);
+        setHasProgress(Boolean(existing && (existing.phase !== 0 || existing.completed_item_ids.length > 0)));
+      } catch (caughtError) {
+        if (mounted) setError(toError(caughtError));
       } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+        if (mounted) setLoading(false);
       }
     };
-
     void load();
     return () => {
-      isMounted = false;
+      mounted = false;
     };
-  }, [blockId, initialData, userId]);
+  }, [initialData, userId]);
 
-  const currentItem = useMemo(() => currentQueue[0] ?? null, [currentQueue]);
+  const itemById = useMemo(
+    () => new Map(items.map((item) => [item.item_id, item])),
+    [items],
+  );
+  const currentItemId = session?.current_queue_item_ids[0];
+  const currentItem = currentItemId == null ? null : (itemById.get(currentItemId) ?? null);
   const currentEntry = useMemo(
     () => resolvedEntries.find((entry) => entry.item.item_id === currentItem?.item_id) ?? null,
     [currentItem?.item_id, resolvedEntries],
   );
+  const phase = session?.phase ?? 0;
+  const isCzToEn = PHASE_DIRECTIONS[phase] === 'czToEn';
+  const cardState = usePracticeCardState({ currentItem, isCzToEn, revealed, setRevealed });
+  const resetQuestionState = cardState.resetQuestionState;
 
-  const isCzToEn = ROUND_DIRECTIONS[round] === 'czToEn';
-  const {
-    audioDisabled,
-    audioError,
-    audioLoading,
-    czech,
-    english,
-    handleReveal,
-    isPlaying,
-    playAudio: playAudioInternal,
-    plusHint,
-    resetQuestionState,
-    showDirectionChange,
-  } = usePracticeCardState({ currentItem, isCzToEn, revealed, setRevealed });
+  const finishBlock = useCallback(async () => {
+    if (!userId || items.length === 0) return;
+    const dateTime = new Date(Date.now()).toISOString();
+    const starCount = await PracticeSession.completeInitialTraining(
+      userId,
+      items.map((item) => item.item_id),
+      dateTime,
+    );
+    invalidateRouteData(routeDataKey('initial-training', userId));
+    invalidateRouteData(routeDataKey('practice', userId));
+    setCelebrationStarTier(getStarTierForCount(starCount, config.practice.starsPerRow));
+    await waitForAcknowledgement();
+    finishCelebration();
+    setIsComplete(true);
+  }, [finishCelebration, items, userId, waitForAcknowledgement]);
 
-  const completeBlock = useCallback(
-    async (dateTime: string = new Date().toISOString()) => {
-      if (!userId || !block) return;
+  const moveToNextPhase = useCallback(
+    async (currentSession: PracticeSessionType): Promise<PracticeSessionType | null> => {
+      const currentPhase = currentSession.phase ?? 0;
+      if (currentPhase === 3) {
+        await finishBlock();
+        return null;
+      }
 
-      await UserItem.saveInitialTrainingBlockCompletion(userId, block.block_id, dateTime);
-      await UserBlock.completeInitialTraining(userId, block.block_id, dateTime);
-      invalidateRouteData(routeDataKey('block-training', userId, block.block_id));
-      invalidateRouteData(routeDataKey('practice', userId));
-      setIsComplete(true);
-      setCurrentQueue([]);
-      setNextWaveQueue([]);
-      resetQuestionState();
+      const nextPhase = (currentPhase + 1) as NewPracticePhase;
+      const orderedIds = items.map((item) => item.item_id);
+      const nextIds = nextPhase >= 2 ? shuffleOnce(orderedIds) : orderedIds;
+      return {
+        ...currentSession,
+        phase: nextPhase,
+        completed_count: 0,
+        current_queue_item_ids: nextIds,
+        retry_queue_item_ids: [],
+        completed_item_ids: [],
+        updated_at: new Date(Date.now()).toISOString(),
+      };
     },
-    [block, resetQuestionState, userId],
-  );
-
-  const setNextQueueState = useCallback(
-    async (
-      remainingCurrentQueue: UserItemLocal[],
-      remainingNextWaveQueue: UserItemLocal[],
-      nextRoundItems: UserItemLocal[],
-    ) => {
-      if (remainingCurrentQueue.length > 0) {
-        setCurrentQueue(remainingCurrentQueue);
-        setNextWaveQueue(remainingNextWaveQueue);
-        resetQuestionState();
-        return;
-      }
-
-      if (remainingNextWaveQueue.length > 0) {
-        setCurrentQueue(remainingNextWaveQueue);
-        setNextWaveQueue([]);
-        resetQuestionState();
-        return;
-      }
-
-      if (round === 0 && nextRoundItems.length > 0) {
-        setRound(1);
-        setCompletedItemIds(new Set());
-        setCurrentQueue(nextRoundItems);
-        setNextWaveQueue([]);
-        resetQuestionState();
-        return;
-      }
-
-      await completeBlock();
-    },
-    [completeBlock, resetQuestionState, round],
+    [finishBlock, items],
   );
 
   const advance = useCallback(
     async (shouldRepeat: boolean) => {
-      if (!userId || !block || !currentItem || isComplete) return;
-
+      if (!session || !currentItem || celebratingStar || isComplete) return;
       try {
-        await UserScore.addItemCount(userId, 1);
+        const remaining = session.current_queue_item_ids.slice(1);
+        const retryIds = shouldRepeat
+          ? [...session.retry_queue_item_ids, currentItem.item_id]
+          : session.retry_queue_item_ids;
+        const completedIds = shouldRepeat
+          ? session.completed_item_ids
+          : [...session.completed_item_ids, currentItem.item_id];
+        let nextSession: PracticeSessionType = {
+          ...session,
+          completed_count: completedIds.length,
+          current_queue_item_ids: remaining,
+          retry_queue_item_ids: retryIds,
+          completed_item_ids: completedIds,
+          updated_at: new Date(Date.now()).toISOString(),
+        };
 
-        if (!shouldRepeat) {
-          setCompletedItemIds((previous) => {
-            const next = new Set(previous);
-            next.add(currentItem.item_id);
-            return next;
-          });
+        if (remaining.length === 0 && retryIds.length > 0) {
+          nextSession = {
+            ...nextSession,
+            current_queue_item_ids: retryIds,
+            retry_queue_item_ids: [],
+          };
+        } else if (remaining.length === 0) {
+          const followingPhase = await moveToNextPhase(nextSession);
+          if (!followingPhase) return;
+          nextSession = followingPhase;
         }
 
-        const remainingCurrentQueue = currentQueue.slice(1);
-        const remainingNextWaveQueue = shouldRepeat
-          ? [...nextWaveQueue, currentItem]
-          : nextWaveQueue;
-
-        await setNextQueueState(remainingCurrentQueue, remainingNextWaveQueue, items);
-      } catch (error) {
-        reportError('Failed to advance block training', error);
+        await PracticeSession.put(nextSession);
+        setSession(nextSession);
+        setHasProgress(true);
+        resetQuestionState();
+      } catch (caughtError) {
+        const normalizedError = toError(caughtError);
+        setError(normalizedError);
+        reportError('Failed to advance new-block training', normalizedError);
       }
     },
-    [block, currentItem, currentQueue, isComplete, items, nextWaveQueue, setNextQueueState, userId],
+    [celebratingStar, currentItem, isComplete, moveToNextPhase, resetQuestionState, session],
   );
 
   const completeCurrent = useCallback(async () => {
-    if (!userId || !block || !currentItem || isComplete) return;
-
+    if (!session || !currentItem) return;
+    const dateTime = new Date(Date.now()).toISOString();
+    const skippedItem = UserItem.applyPracticeProgress(
+      currentItem,
+      PHASE_DIRECTIONS[phase],
+      'skip',
+      dateTime,
+    );
     try {
-      const dateTime = new Date().toISOString();
-      const skippedItem = UserItem.applyPracticeProgress(
-        currentItem,
-        ROUND_DIRECTIONS[round],
-        'skip',
-        dateTime,
+      await UserItem.savePracticeDeck([{ ...skippedItem, practice_direction: PHASE_DIRECTIONS[phase] }]);
+      setItems((currentItems) =>
+        currentItems.map((item) => (item.item_id === skippedItem.item_id ? skippedItem : item)),
       );
-      const updatedItems = items.map((item) =>
-        item.item_id === currentItem.item_id ? skippedItem : item,
-      );
-      const remainingCurrentQueue = currentQueue
-        .slice(1)
-        .filter((item) => item.item_id !== currentItem.item_id);
-      const remainingNextWaveQueue = nextWaveQueue.filter(
-        (item) => item.item_id !== currentItem.item_id,
-      );
-
-      await UserItem.savePracticeDeck([
-        { ...skippedItem, practice_direction: ROUND_DIRECTIONS[round] },
-      ]);
-      await UserScore.addItemCount(userId, 1);
-      setCompletedItemIds((previous) => {
-        const next = new Set(previous);
-        next.add(currentItem.item_id);
-        return next;
-      });
-      setItems(updatedItems);
-
-      await setNextQueueState(remainingCurrentQueue, remainingNextWaveQueue, updatedItems);
-    } catch (error) {
-      reportError('Failed to skip block training item', error);
-      throw error;
+      await advance(false);
+    } catch (caughtError) {
+      const normalizedError = toError(caughtError);
+      setError(normalizedError);
+      reportError('Failed to skip new-block item', normalizedError);
+      throw normalizedError;
     }
-  }, [
-    block,
-    currentItem,
-    currentQueue,
-    isComplete,
-    items,
-    nextWaveQueue,
-    setNextQueueState,
-    userId,
-  ]);
+  }, [advance, currentItem, phase, session]);
 
   return {
     block,
     items,
+    hasContent: items.length > 0,
     grammar,
     grammarGroup,
     isComplete,
+    celebratingStar,
+    celebrationStarTier,
+    acknowledgeCelebration,
+    hasProgress,
     loading,
     error,
     currentItem,
     note: currentEntry?.note ?? null,
     practiceGrammar: currentEntry?.grammar ?? null,
-    progressLabel: `${round + 1}/2 · ${completedItemIds.size}/${totalItemCount}`,
+    progressLabel: `${phase + 1}/4 · ${session?.completed_count ?? 0}/${items.length}`,
     isCzToEn,
     revealed,
-    czech,
-    english,
+    czech: cardState.czech,
+    english: cardState.english,
     pronunciation: revealed ? currentItem?.pronunciation || NBSP : NBSP,
-    audioDisabled,
-    showDirectionChange,
-    handleReveal,
-    plusHint,
+    audioDisabled: cardState.audioDisabled,
+    showDirectionChange: cardState.showDirectionChange,
+    handleReveal: cardState.handleReveal,
+    plusHint: cardState.plusHint,
     nextRepeat: () => advance(true),
     nextKnown: () => advance(false),
     completeCurrent,
-    audioError,
-    playAudio: playAudioInternal,
-    audioLoading,
-    isPlaying,
+    audioError: cardState.audioError,
+    playAudio: cardState.playAudio,
+    audioLoading: cardState.audioLoading,
+    isPlaying: cardState.isPlaying,
   };
+}
+
+function shuffleOnce(ids: number[]): number[] {
+  const shuffled = [...ids];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(getRandomUnitInterval() * (index + 1));
+    [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
+  }
+  return shuffled;
+}
+
+function getRandomUnitInterval(): number {
+  const randomValues = new Uint32Array(1);
+  globalThis.crypto.getRandomValues(randomValues);
+  return randomValues[0] / 2 ** 32;
 }

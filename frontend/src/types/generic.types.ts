@@ -28,13 +28,17 @@ export interface GrammarChunkExampleType {
   deleted_at: string | null;
 }
 
-export interface BlockType extends Omit<SyncEntityType, 'sort_order'> {
+export interface BlockType {
+  id: number;
+  name: string;
+  note: string | null;
+  lesson_id: number;
   grammar_chunk_id: number | null;
-  show_in_topics: boolean;
-  is_removed_from_practice: boolean;
-  requires_initial_training: boolean;
-  sort_order: number | null;
+  updated_at: string;
+  deleted_at: string | null;
 }
+
+export interface TopicType extends SyncEntityType {}
 
 export interface NoteType extends Omit<SyncEntityType, 'sort_order'> {
   note: string;
@@ -56,24 +60,9 @@ export interface LevelOverviewType extends LevelType, ProgressCountsType {
 export interface UserScoreType {
   user_id: string;
   date: string;
-  item_count: number;
+  star_count: number;
   updated_at: string;
   deleted_at: string | null;
-}
-
-export interface UserBlockType {
-  user_id: string;
-  block_id: number;
-  name: string;
-  note: string | null;
-  grammar_chunk_id: number | null;
-  sort_order: number | null;
-  show_in_topics: boolean;
-  is_removed_from_practice: boolean;
-  requires_initial_training: boolean;
-  started_at: string;
-  updated_at: string;
-  deleted_at: string;
 }
 
 export interface ReadyPracticeScheduleEntry {

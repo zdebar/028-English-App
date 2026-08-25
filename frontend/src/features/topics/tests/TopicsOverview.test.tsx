@@ -3,10 +3,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
-  getStartedTopicsByUserId: vi.fn(),
+  getStartedByUserId: vi.fn(),
   userId: 'u1' as string | null,
   state: {
-    data: [] as Array<{ block_id: number; name: string; is_removed_from_practice?: boolean }>,
+    data: [] as Array<{ id: number; name: string }>,
     error: null as string | null,
     loading: false,
   },
@@ -29,9 +29,9 @@ vi.mock('@/routing/route-data', () => ({
   topicDetailDescriptor: () => ({ key: 'topic', load: vi.fn() }),
 }));
 
-vi.mock('@/database/models/user-blocks', () => ({
+vi.mock('@/database/models/topics', () => ({
   default: {
-    getStartedTopicsByUserId: (...args: unknown[]) => mocks.getStartedTopicsByUserId(...args),
+    getStartedByUserId: (...args: unknown[]) => mocks.getStartedByUserId(...args),
   },
 }));
 
@@ -81,7 +81,7 @@ describe('TopicsOverview', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.userId = 'u1';
-    mocks.getStartedTopicsByUserId.mockResolvedValue([]);
+    mocks.getStartedByUserId.mockResolvedValue([]);
     mocks.state.data = [];
     mocks.state.error = null;
     mocks.state.loading = false;
@@ -92,7 +92,7 @@ describe('TopicsOverview', () => {
 
     render(<TopicsOverview />);
 
-    expect(mocks.getStartedTopicsByUserId).toHaveBeenCalledWith('u1');
+    expect(mocks.getStartedByUserId).toHaveBeenCalledWith('u1');
     expect(screen.queryByText('No topics')).toBeNull();
   });
 
@@ -104,8 +104,8 @@ describe('TopicsOverview', () => {
 
   it('renders topic list and navigates to topic detail on click', () => {
     mocks.state.data = [
-      { block_id: 1, name: 'Dny v tydnu' },
-      { block_id: 2, name: 'Mesice' },
+      { id: 1, name: 'Dny v tydnu' },
+      { id: 2, name: 'Mesice' },
     ];
 
     render(<TopicsOverview />);
@@ -117,8 +117,8 @@ describe('TopicsOverview', () => {
     expect(mocks.navigate).toHaveBeenCalledWith('/topics/2');
   });
 
-  it('renders browse-only topics returned by topic query', () => {
-    mocks.state.data = [{ block_id: 3, name: 'Letters', is_removed_from_practice: true }];
+  it('renders topics independently of practice blocks', () => {
+    mocks.state.data = [{ id: 3, name: 'Letters' }];
 
     render(<TopicsOverview />);
 

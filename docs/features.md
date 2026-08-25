@@ -32,15 +32,15 @@ starting point when a change crosses route, store, model, or sync boundaries.
 | Signed-in hub | Shows user name, daily count, practice buttons, dashboard, and sync warning. | `Home`, `Dashboard`, `PracticeOverviewButton`, `HomePracticeButtons` | `useAuthStore`, `useUserStore`, `useSyncStore`, IndexedDB models | Home combines global stores with local model reads; it does not read Supabase directly. |
 | Practice readiness button | Enables unified practice when local data is ready. | `HomePracticeButtons` | `UserItem`, Dexie live query | Recalculates after relevant committed writes; timers update future ready counts while Home stays mounted. |
 | Sync warning | Warns when the last periodic sync failed. | `Home` | `useSyncStore.isSyncError` | Successful sync clears the warning; failed sync does not prevent local-first practice. |
-| Simulated data | Atomically seed anonymous/test progress once local sync is ready and destructive confirmation is accepted. | `SimulateDataButton`, `simulate-data-service` | `UserItem`, `UserBlock`, localStorage `simulate-data-${userId}` | Replaces progress on up to 400 items, starts up to eight practice blocks, and selects up to five audio items for pronunciation; reactive consumers refresh after commit. |
+| Simulated data | Atomically seed anonymous/test progress once local sync is ready and destructive confirmation is accepted. | `SimulateDataButton`, `simulate-data-service` | `UserItem`, localStorage `simulate-data-${userId}` | Replaces progress on configured items and selects available audio items for pronunciation; reactive consumers refresh after commit. |
 
 ## Practice And Learning
 
 | Feature | User purpose | Main entrypoints | Data and state | Connection points |
 | --- | --- | --- | --- | --- |
 | Shared practice card | Display a prompt, answer, controls, audio, and detail buttons. | `PracticeSessionCard`, practice buttons | Hook-provided current item, audio manager state, grammar/note IDs | Used by review practice and new grammar where behavior overlaps. |
-| Unified practice | Review vocabulary and started grammar, and introduce new items. | `/practice`, `Practice`, `usePracticeDeck` | `UserItem.getPracticeDeck` | Uses odd/even priority and stops at the first unstarted grammar-block trigger. |
-| New grammar | Learn the triggered grammar block in staged rounds. | `/practice/new-grammar`, `NewGrammarPractice`, `useNewGrammarPracticeDeck` | `UserBlock`, `UserItem`, `GrammarChunk` | Completion starts the items, masters the block, and returns to unified practice. |
+| Unified practice | Review vocabulary and started grammar. | `/practice`, `Practice`, `usePracticeDeck` | `UserItem.getPracticeDeck` | Uses due odd/even progress priority and curriculum ordering. |
+| Initial training | Learn an automatic lesson/type batch or an explicit grammar block in staged rounds. | `/practice/initial-training`, `InitialTrainingPractice`, `useInitialTrainingDeck` | `Block`, `UserItem`, `PracticeSession` | Only unstarted items enter the stable session queue; completion returns Home to recalculate availability. |
 | Progress actions | Mark an item as hint/repeat/known/skip/mastered. | `HintButton`, `RepeatButton`, `KnownButton`, `MasterItemButton` | `UserItem` progress fields, `UserScore` daily count | Progress writes refresh matching live queries and are pushed by later sync. |
 | Audio in practice | Play item audio and respect per-user volume. | `PlayAudioButton`, `useAudioManager`, `useAudioStore` | `AudioRecord`, object URLs, localStorage volume | Audio metadata/records are synchronized separately by periodic sync. |
 | Grammar and note details | Show supporting detail cards from practice and overview flows. | `GrammarDetailCard`, `VocabularyDetailCard`, note/grammar viewer hooks | `GrammarChunk`, `Notes`, linked IDs on items | Detail cards are feature-local UI over shared IndexedDB content. |
@@ -50,9 +50,9 @@ starting point when a change crosses route, store, model, or sync boundaries.
 | Feature | User purpose | Main entrypoints | Data and state | Connection points |
 | --- | --- | --- | --- | --- |
 | Practice overview | Review recent daily practice counts. | `/practice-overview`, `PracticeOverviewFeature` | `UserScore` | The overview queries score history directly; the current-day snapshot is reactive. |
-| Dashboard and levels | Show progress grouped by course structure. | `Dashboard`, `/levels`, levels feature | `Levels`, `Lessons`, `UserItem`, `UserBlock`, `useUserStore` | Active-user live queries refresh cached progress after relevant commits. |
-| Topics overview | List ordered blocks marked for the topics UI and allow practice-topic reset. | `/topics`, `TopicsOverview` | `UserBlock`, `UserItem`, audio playback for items | Non-practice topics are always visible without reset; practice topics appear after an item starts. |
-| Topic items | Show and reset items inside one topic. | `/topics/:blockId`, `TopicItemsOverview` | `UserBlock`, `UserItem`, audio and detail links | Route parameter retains the underlying block ID. |
+| Dashboard and levels | Show progress grouped by course structure. | `Dashboard`, `/levels`, levels feature | `Levels`, `Lessons`, `UserItem`, `useUserStore` | Active-user live queries refresh cached progress after relevant commits. |
+| Topics overview | List ordered topics with started corresponding items. | `/topics`, `TopicsOverview` | `Topic`, `UserItem`, audio playback for items | Topics are independent of practice blocks and require at least one started item. |
+| Topic items | Show and reset started items inside one topic. | `/topics/:topicId`, `TopicItemsOverview` | `Topic`, `UserItem`, audio and detail links | Items link directly through nullable `items.topic_id`. |
 | Grammar overview | List started groups with ordered chunk sections, playable curated examples, and reset group progress. | `/grammar`, `GrammarOverview` | `GrammarGroup`, `GrammarChunk`, `grammar_chunk_examples`, `UserItem` | Reset preserves unlock history and immediately schedules reset items for regular practice. |
 | Vocabulary overview | Search and inspect started vocabulary, then reset item progress. | `/vocabulary`, `VocabularyOverview` | `UserItem`, item detail data, localStorage `vocabulary_search_term_${userId}` | Search state persists per user; reset writes local progress and syncs later. |
 

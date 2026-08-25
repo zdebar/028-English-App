@@ -8,7 +8,6 @@ const mocks = vi.hoisted(() => ({
   clearTheme: vi.fn(),
   saveCurrentThemeAsGuest: vi.fn(),
   deleteAllByUserId: vi.fn(),
-  deleteAllUserBlocks: vi.fn(),
   deleteAllUserScores: vi.fn(),
   deleteSyncRow: vi.fn(),
   clearSyncTimes: vi.fn(),
@@ -57,12 +56,6 @@ vi.mock('@/database/models/user-scores', () => ({
   },
 }));
 
-vi.mock('@/database/models/user-blocks', () => ({
-  default: {
-    deleteByUserId: (...args: unknown[]) => mocks.deleteAllUserBlocks(...args),
-  },
-}));
-
 vi.mock('@/database/models/metadata', () => ({
   default: {
     deleteSyncRow: (...args: unknown[]) => mocks.deleteSyncRow(...args),
@@ -94,7 +87,6 @@ vi.mock('@/locales/cs', () => ({
 vi.mock('@/types/table.types', () => ({
   TableName: {
     UserItems: 'user_items',
-    UserBlocks: 'user_blocks',
     UserScores: 'user_scores',
   },
 }));
@@ -121,7 +113,6 @@ describe('DeleteUserButton', () => {
 
     mocks.rpc.mockResolvedValue({ error: null });
     mocks.deleteAllByUserId.mockResolvedValue(0);
-    mocks.deleteAllUserBlocks.mockResolvedValue(0);
     mocks.deleteAllUserScores.mockResolvedValue(0);
     mocks.deleteSyncRow.mockResolvedValue(true);
     mocks.clearTheme.mockResolvedValue(undefined);

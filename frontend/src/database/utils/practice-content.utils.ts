@@ -131,11 +131,11 @@ export async function resolvePracticeGrammarContext(
   }
 }
 
-export async function loadPracticeDeck(
+export async function loadReviewDeck(
   userId: string,
   deckSize: number = config.lesson.deckSize,
 ): Promise<PracticeDeckEntry[]> {
-  const items = await UserItem.getPracticeDeck(userId, deckSize);
+  const items = await UserItem.getReviewDeck(userId, deckSize);
   return resolvePracticeEntries(userId, items);
 }
 

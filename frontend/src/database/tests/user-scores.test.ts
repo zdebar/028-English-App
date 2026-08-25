@@ -105,42 +105,43 @@ describe('UserScore', () => {
     vi.restoreAllMocks();
   });
 
-  it('addItemCount increments and stores score for today', async () => {
+  it('addStar increments and stores score for today', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-03-04T10:00:00.000Z'));
-    mocks.get.mockResolvedValue({ item_count: 2 });
+    mocks.get.mockResolvedValue({ star_count: 2 });
 
-    await UserScoreType.addItemCount('u1', 3);
+    const result = await UserScoreType.addStar('u1', 3);
 
     expect(mocks.get).toHaveBeenCalledWith(['u1', '2026-03-04']);
     expect(mocks.put).toHaveBeenCalledWith(
       expect.objectContaining({
         user_id: 'u1',
         date: '2026-03-04',
-        item_count: 5,
+        star_count: 5,
         deleted_at: null,
       }),
     );
+    expect(result).toBe(5);
   });
 
-  it('addItemCount uses provided dateTime to choose score date', async () => {
-    mocks.get.mockResolvedValue({ item_count: 2 });
+  it('addStar uses provided dateTime to choose score date', async () => {
+    mocks.get.mockResolvedValue({ star_count: 2 });
 
-    await UserScoreType.addItemCount('u1', 3, '2026-03-06T10:00:00.000Z');
+    await UserScoreType.addStar('u1', 3, '2026-03-06T10:00:00.000Z');
 
     expect(mocks.get).toHaveBeenCalledWith(['u1', '2026-03-06']);
     expect(mocks.put).toHaveBeenCalledWith(
       expect.objectContaining({
         user_id: 'u1',
         date: '2026-03-06',
-        item_count: 5,
+        star_count: 5,
         deleted_at: null,
       }),
     );
   });
 
   it('getScoreForDate returns numeric count or zero', async () => {
-    mocks.get.mockResolvedValueOnce({ item_count: 4 }).mockResolvedValueOnce(undefined);
+    mocks.get.mockResolvedValueOnce({ star_count: 4 }).mockResolvedValueOnce(undefined);
 
     await expect(UserScoreType.getScoreForDate('u1', '2026-03-04')).resolves.toBe(4);
     await expect(UserScoreType.getScoreForDate('u1', '2026-03-05')).resolves.toBe(0);
@@ -160,7 +161,7 @@ describe('UserScore', () => {
         {
           user_id: 'u1',
           date: '2026-03-04',
-          item_count: 3,
+          star_count: 3,
           updated_at: '2026-03-04T00:00:00.000Z',
           deleted_at: null,
         },
@@ -172,14 +173,14 @@ describe('UserScore', () => {
         {
           user_id: 'u1',
           date: '2026-03-01',
-          item_count: 1,
+          star_count: 1,
           updated_at: '2026-03-04T00:00:00.000Z',
           deleted_at: '2026-03-04T00:00:00.000Z',
         },
         {
           user_id: 'u1',
           date: '2026-03-02',
-          item_count: 6,
+          star_count: 6,
           updated_at: '2026-03-04T00:00:00.000Z',
           deleted_at: null,
         },
@@ -196,7 +197,7 @@ describe('UserScore', () => {
         {
           user_id: 'u1',
           date: '2026-03-04',
-          item_count: 3,
+          star_count: 3,
           updated_at: '2026-03-04T00:00:00.000Z',
           deleted_at: null,
         },
@@ -207,7 +208,7 @@ describe('UserScore', () => {
       {
         user_id: 'u1',
         date: '2026-03-02',
-        item_count: 6,
+        star_count: 6,
         updated_at: '2026-03-04T00:00:00.000Z',
         deleted_at: null,
       },

@@ -30,13 +30,13 @@ root layout and renders route content through `Outlet`.
 | `/privacy-policy` | `PrivacyPolicy` | Public |
 | `/guide` | `Guide` | Public |
 | `/practice` | `Practice` | Protected |
-| `/practice/block-training?blockId=…` | `BlockTrainingPractice` | Protected |
+| `/practice/initial-training` | `InitialTrainingPractice` | Protected |
 | `/practice/pronunciation` | `PronunciationPractice` | Protected |
 | `/practice-overview` | `PracticeOverview` | Protected |
 | `/profile` | `Profile` | Protected |
 | `/levels` | `Levels` | Protected |
 | `/topics` | `Topics` | Protected |
-| `/topics/:blockId` | `TopicItems` | Protected |
+| `/topics/:topicId` | `TopicItems` | Protected |
 | `/grammar` | `Grammar` | Protected |
 | `/vocabulary` | `Vocabulary` | Protected |
 | `/pronunciation` | `PronunciationOverviewPage` | Protected |

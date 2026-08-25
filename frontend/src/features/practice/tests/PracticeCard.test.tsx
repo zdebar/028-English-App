@@ -6,7 +6,6 @@ import type { UserItemLocal } from '@/types/user-item.types';
 const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => ({
   userId: 'u1',
   navigate: vi.fn(),
-  dailyCount: 5,
   grammarVisible: false,
   grammarData: null as any,
   noteVisible: false,
@@ -31,9 +30,9 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     lesson_id: 1,
     updated_at: '2024-01-01T00:00:00.000Z',
     is_vocabulary: 1,
-    is_practice_item: 1,
     has_pronunciation_practice: 0,
     block_id: 1,
+    topic_id: -1,
     grammar_chunk_id: 10,
     started_at: '2024-01-01T00:00:00.000Z',
     deleted_at: '9999-12-31T00:00:00.000Z',
@@ -46,10 +45,14 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
   practiceDeck: {
     index: 0,
     currentItem: null as UserItemLocal | null,
-    trainingBlockId: null as number | null,
     note: null,
     grammar: null,
-    progress: 2,
+    progressLabel: '2/20',
+    sessionLoading: false,
+    celebratingStar: false,
+    celebrationStarTier: 'bronze',
+    acknowledgeCelebration: vi.fn(),
+    finishedReview: false,
     isCzToEn: true,
     revealed: false,
     setRevealed: vi.fn(),
@@ -82,13 +85,12 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
 }));
 
 mocks.practiceDeck.currentItem = mocks.makePracticeItem();
-mocks.practiceDeck.trainingBlockId = null;
 
 vi.mock('@/config/config', () => ({
   default: {
     practice: {
       dailyGoal: 20,
-      starChunk: 50,
+      reviewStarSize: 20,
       starsPerRow: 10,
       starFlashDuration: 300,
       audioDelay: 300,
@@ -112,7 +114,9 @@ vi.mock('@/locales/cs', () => ({
     grammar: 'Grammar',
     tooltipNotes: 'Notes',
     progress: 'Progress',
-    nextStarProgress: 'Next star progress',
+    reviewStarProgress: 'Progress to next star',
+    starEarned: 'Earned',
+    continueAfterStar: 'Continue by clicking',
     currentPracticeStar: 'Current practice star',
     today: 'Today',
     dailyGoal: 'Daily goal',
@@ -122,7 +126,6 @@ vi.mock('@/locales/cs', () => ({
     directionEnToCz: 'EN to CZ',
     directionCzToEnShort: 'cz › en',
     directionEnToCzShort: 'en › cz',
-    blockTrainingFinishAll: 'Finish the entire block',
     blockTrainingProgressHelp: 'Round · completed items in this round',
     next: 'Next',
   },
@@ -139,11 +142,6 @@ vi.mock('@/features/auth/use-auth-store', () => ({
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
-}));
-
-vi.mock('@/features/user-stats/use-user-store', () => ({
-  useUserStore: (selector: (state: { dailyCount: number }) => unknown) =>
-    selector({ dailyCount: mocks.dailyCount }),
 }));
 
 vi.mock('@/features/grammar/use-grammar-viewer', () => ({
@@ -208,7 +206,8 @@ vi.mock('@/features/practice/hooks/use-practice-deck', () => ({
         currentItem: null,
         note: null,
         grammar: null,
-        progress: 0,
+        progressLabel: '',
+        sessionLoading: false,
         isCzToEn: true,
         revealed: false,
         setRevealed: vi.fn(),
@@ -265,13 +264,9 @@ vi.mock('@/components/UI/icons/NotRevealedIcon', () => ({
 }));
 
 vi.mock('@/components/UI/StarProgress', () => ({
-  STAR_SIZE: 22,
-}));
-
-vi.mock('@/features/practice/components/PracticeStarsRow', () => ({
-  default: ({ starCount, displayedChunkCount, starChunk }: any) => (
-    <span data-testid="practice-stars-row">
-      {starCount}:{displayedChunkCount}:{starChunk}
+  FullStar: ({ className }: { className?: string }) => (
+    <span data-testid="earned-star" className={className}>
+      star
     </span>
   ),
 }));
@@ -366,7 +361,6 @@ describe('PracticeCard', () => {
     mocks.grammarData = null;
     mocks.noteVisible = false;
     mocks.noteData = null;
-    mocks.dailyCount = 5;
     mocks.practiceDeck.index = 0;
     mocks.practiceDeck.trainingBlockId = null;
     mocks.practiceDeck.currentItem = mocks.makePracticeItem({
@@ -388,7 +382,8 @@ describe('PracticeCard', () => {
       deleted_at: null,
       items: [],
     };
-    mocks.practiceDeck.progress = 2;
+    mocks.practiceDeck.progressLabel = '2/20';
+    mocks.practiceDeck.sessionLoading = false;
     mocks.practiceDeck.isCzToEn = true;
     mocks.practiceDeck.revealed = false;
     mocks.practiceDeck.czech = 'ahoj';
@@ -400,6 +395,9 @@ describe('PracticeCard', () => {
     mocks.practiceDeck.error = null;
     mocks.practiceDeck.audioError = false;
     mocks.practiceDeck.audioLoading = false;
+    mocks.practiceDeck.celebratingStar = false;
+    mocks.practiceDeck.celebrationStarTier = 'bronze';
+    mocks.practiceDeck.acknowledgeCelebration.mockReset();
   });
 
   afterEach(() => {
@@ -450,15 +448,6 @@ describe('PracticeCard', () => {
     expect(mocks.navigate).toHaveBeenCalledWith('/');
   });
 
-  it('opens initial training for the trigger block instead of rendering the item', () => {
-    mocks.practiceDeck.trainingBlockId = 30;
-
-    render(<PracticeCard />);
-
-    expect(mocks.navigate).toHaveBeenCalledWith('/practice/block-training?blockId=30');
-    expect(screen.queryByText('ahoj')).toBeNull();
-  });
-
   it('shows loading circle after configured delay instead of empty state while deck is loading', () => {
     mocks.practiceDeck.currentItem = null;
     mocks.practiceDeck.loading = true;
@@ -486,10 +475,52 @@ describe('PracticeCard', () => {
     expect(mocks.practiceDeck.setRevealed).toHaveBeenCalledWith(true);
   });
 
-  it('shows current star chunk progress instead of daily goal progress', () => {
+  it('does not show persistent daily star progress', () => {
     render(<PracticeCard />);
 
-    expect(screen.getByTestId('practice-stars-row').textContent).toBe('0:5:50');
+    expect(screen.queryByTestId('practice-stars-row')).toBeNull();
+    expect(screen.queryByText('Next star progress')).toBeNull();
+  });
+
+  it('shows completed review answers toward the next star at the bottom left', () => {
+    const { container } = render(<PracticeCard />);
+    const bottomBar = container.querySelector('#bottom-bar') as HTMLElement;
+
+    expect(bottomBar.firstElementChild?.textContent).toBe('2/20');
+    expect(screen.getByText('Progress to next star')).toBeTruthy();
+    expect(bottomBar.textContent).not.toContain('2 / 9');
+  });
+
+  it('waits for the persisted review session before rendering its counter', () => {
+    mocks.practiceDeck.sessionLoading = true;
+    const { container } = render(<PracticeCard />);
+
+    expect(container.querySelector('#bottom-bar')).toBeNull();
+    expect(container.firstChild).toBeNull();
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    expect(screen.getByLabelText('Loading')).toBeTruthy();
+  });
+
+  it('keeps the one-time earned-star celebration', () => {
+    mocks.practiceDeck.celebratingStar = true;
+    mocks.practiceDeck.celebrationStarTier = 'silver';
+
+    const { container } = render(<PracticeCard />);
+
+    expect(screen.getByRole('status')).toBeTruthy();
+    expect(screen.getByTestId('earned-star').className).toContain('star-fill-silver');
+    expect(screen.getByText('Earned')).toBeTruthy();
+    expect(screen.getByText('Continue by clicking')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Continue by clicking' }));
+    expect(mocks.practiceDeck.acknowledgeCelebration).toHaveBeenCalledOnce();
+    const celebration = container.querySelector('.star-celebration') as HTMLElement;
+    expect(celebration.className).toContain('-translate-y-2');
+    expect(celebration.className).toContain('flex-col');
+    expect(celebration.className).toContain('gap-2');
   });
 
   it('keeps the short direction label in the first top-bar row across card states', () => {
@@ -516,13 +547,15 @@ describe('PracticeCard', () => {
     expect(screen.getByText('en › cz')).toBeTruthy();
   });
 
-  it('keeps audio status below the direction label', () => {
+  it('shows audio status in the bottom-right area instead of the top bar', () => {
     mocks.practiceDeck.audioError = true;
     const { container } = render(<PracticeCard />);
     const topBar = container.querySelector('#top-bar') as HTMLElement;
+    const bottomBar = container.querySelector('#bottom-bar') as HTMLElement;
 
-    expect(topBar.children[0]?.textContent).toBe('cz › en');
-    expect(topBar.children[1]?.textContent).toBe('No audio');
+    expect(topBar.textContent).toBe('cz › en');
+    expect(topBar.textContent).not.toContain('No audio');
+    expect(bottomBar.lastElementChild?.textContent).toBe('No audio');
   });
 
   it('keeps vocabulary and direction changes centered while audio status changes', () => {
@@ -533,11 +566,14 @@ describe('PracticeCard', () => {
     const mainContent = container.querySelector('#practice-main-content') as HTMLElement;
     const bottomBar = container.querySelector('#bottom-bar') as HTMLElement;
 
-    expect(cardButton.className).toContain('grid-rows-[3.5rem_minmax(0,1fr)_3.5rem]');
-    expect(topBar.className).toContain('h-14');
+    expect(cardButton.className).toContain('flex-col');
+    expect(topBar.className).toContain('h-8');
+    expect(topBar.className).toContain('shrink-0');
     expect(mainContent.className).toContain('items-center');
+    expect(mainContent.className).toContain('grow');
     expect(mainContent.querySelector('#item')).toBeTruthy();
-    expect(bottomBar.className).toContain('self-end');
+    expect(bottomBar.className).toContain('h-8');
+    expect(bottomBar.className).toContain('shrink-0');
 
     mocks.practiceDeck.audioLoading = true;
     rerender(<PracticeCard />);
@@ -672,14 +708,6 @@ describe('PracticeCard', () => {
     expect(
       container.querySelector('.pos-bottom-right-control [data-testid="help-button"]'),
     ).toBeTruthy();
-  });
-
-  it('shows the next empty bronze star when mounted exactly on a completed chunk', () => {
-    mocks.dailyCount = 50;
-
-    render(<PracticeCard />);
-
-    expect(screen.getByTestId('practice-stars-row').textContent).toBe('1:0:50');
   });
 
   it('autoplays audio after delay in EN->CZ mode when allowed', async () => {
@@ -871,7 +899,7 @@ describe('PracticeCard', () => {
     expect(plusHint).toHaveBeenCalledTimes(1);
   });
 
-  it('shows only Next and hides stars after reveal in pronunciation practice', () => {
+  it('shows only Next and keeps audio status at bottom right in pronunciation practice', () => {
     const next = vi.fn();
     const onSelectionChange = vi.fn();
     render(
@@ -892,7 +920,7 @@ describe('PracticeCard', () => {
         nextKnown={vi.fn()}
         audioError={false}
         playAudio={vi.fn()}
-        audioLoading={false}
+        audioLoading
         isPronunciationPractice
         nextPronunciation={next}
         onPronunciationSelectionChange={onSelectionChange}
@@ -905,6 +933,13 @@ describe('PracticeCard', () => {
     expect(screen.queryByTestId('known-btn')).toBeNull();
     expect(screen.queryByTestId('practice-stars-row')).toBeNull();
     expect(screen.queryByText('en › cz')).toBeNull();
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    const bottomBar = document.querySelector('#bottom-bar') as HTMLElement;
+    expect(bottomBar.lastElementChild?.textContent).toBe('Loading audio');
     fireEvent.click(screen.getByTestId('pronunciation-toggle'));
     expect(onSelectionChange).toHaveBeenCalledWith(false);
   });
@@ -997,8 +1032,8 @@ describe('PracticeCard', () => {
     expect((screen.getByTestId('repeat-btn') as HTMLButtonElement).disabled).toBe(true);
   });
 
-  it('shows the block training completion message and progress help', () => {
-    render(
+  it('shows the direction in block training and keeps round progress at the bottom left', () => {
+    const { container } = render(
       <PracticeSessionCard
         note={null}
         grammar={null}
@@ -1021,13 +1056,17 @@ describe('PracticeCard', () => {
       />,
     );
 
-    expect(screen.getByText('Finish the entire block')).toBeTruthy();
-    expect(screen.queryByText('cz › en')).toBeNull();
+    expect(container.querySelector('#top-bar')?.textContent).toBe('cz › en');
     expect(screen.getByText('Round · completed items in this round')).toBeTruthy();
+
+    const cardButton = container.querySelector('button[aria-disabled]') as HTMLButtonElement;
+    const bottomBar = container.querySelector('#bottom-bar') as HTMLElement;
+    expect(cardButton.className).toContain('flex-col');
+    expect(bottomBar.firstElementChild?.textContent).toContain('1/2 · 7/8');
   });
 
-  it('shows an audio error above the block training completion message', () => {
-    render(
+  it('shows a block training audio error at the bottom right', () => {
+    const { container } = render(
       <PracticeSessionCard
         note={null}
         grammar={null}
@@ -1050,12 +1089,10 @@ describe('PracticeCard', () => {
       />,
     );
 
-    expect(screen.getByText('Finish the entire block')).toBeTruthy();
     expect(screen.getByText('No audio')).toBeTruthy();
 
-    const topBar = document.querySelector('#top-bar');
-    expect(topBar?.children).toHaveLength(2);
-    expect(topBar?.children[0]?.textContent).toContain('Finish the entire block');
-    expect(topBar?.children[1]?.textContent).toContain('No audio');
+    const bottomBar = container.querySelector('#bottom-bar') as HTMLElement;
+    expect(container.querySelector('#top-bar')?.textContent).toBe('cz › en');
+    expect(bottomBar.lastElementChild?.textContent).toContain('No audio');
   });
 });

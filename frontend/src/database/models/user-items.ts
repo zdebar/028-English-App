@@ -9,6 +9,7 @@ import type {
   UserItemLocal,
   ProgressHistoryEntry,
   CurriculumSortPath,
+  InitialTrainingSelection,
 } from '@/types/user-item.types';
 import { TableName } from '@/types/table.types';
 import Dexie, { Entity } from 'dexie';
@@ -31,9 +32,9 @@ const SIM_PRONUNCIATION_ITEM_COUNT = config.progress.simulationPronunciationItem
 type UserItemAPI = Omit<
   UserItemLocal,
   | 'is_vocabulary'
-  | 'is_practice_item'
   | 'has_pronunciation_practice'
   | 'block_id'
+  | 'topic_id'
   | 'grammar_chunk_id'
   | 'started_at'
   | 'deleted_at'
@@ -43,9 +44,9 @@ type UserItemAPI = Omit<
   | 'mastered_at_en_to_cz'
 > & {
   is_vocabulary: boolean;
-  is_practice_item?: boolean;
   has_pronunciation_practice?: boolean;
   block_id: number | null;
+  topic_id: number | null;
   grammar_chunk_id: number | null;
   started_at: string | null;
   deleted_at: string | null;
@@ -107,7 +108,6 @@ function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
   return {
     ...apiItem,
     is_vocabulary: apiItem.is_vocabulary ? 1 : 0,
-    is_practice_item: apiItem.is_practice_item === false ? 0 : 1,
     has_pronunciation_practice: apiItem.has_pronunciation_practice ? 1 : 0,
     started_at: apiItem.started_at ?? NULL_DATE,
     next_at_cz_to_en: apiItem.next_at_cz_to_en ?? NULL_DATE,
@@ -116,6 +116,7 @@ function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
     mastered_at_en_to_cz: apiItem.mastered_at_en_to_cz ?? NULL_DATE,
     deleted_at: apiItem.deleted_at ?? NULL_DATE,
     block_id: apiItem.block_id ?? NULL_NUMBER,
+    topic_id: apiItem.topic_id ?? NULL_NUMBER,
     grammar_chunk_id: apiItem.grammar_chunk_id ?? NULL_NUMBER,
   };
 }
@@ -124,9 +125,9 @@ function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
  * Local Dexie model and sync API for user-specific vocabulary and grammar item progress.
  *
  * Public API:
- * - Practice flow: `getPracticeDeck`, `savePracticeDeck`, and `getReadyPracticeState`.
- * - Progress lookups: `getStartedGrammarChunkIds`, `getStartedBlocksIds`, and `getStartedVocabulary`.
- * - Initial-training workflows: trigger discovery and block completion.
+ * - Review flow: `getReviewDeck`, `savePracticeDeck`, and `getReadyReviewState`.
+ * - Progress lookups: `getStartedGrammarChunkIds`, topic items, and started vocabulary.
+ * - New-block completion.
  * - Maintenance: reset helpers, simulation data, local account deletion, and remote sync.
  *
  * Dates use the configured null replacement date locally and convert to null for remote sync.
@@ -139,12 +140,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   pronunciation!: string;
   audio!: string | null;
   is_vocabulary!: 0 | 1; // boolean represented as 0 or 1
-  is_practice_item!: 0 | 1; // boolean represented as 0 or 1
   has_pronunciation_practice!: 0 | 1;
   sort_order!: number;
   curriculum_sort_path!: CurriculumSortPath;
   note_id!: number;
   block_id!: number;
+  topic_id!: number;
   grammar_chunk_id!: number;
   progress_cz_to_en!: number;
   progress_en_to_cz!: number;
@@ -165,7 +166,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param deckSize Maximum deck size; defaults to config.lesson.deckSize.
    * @returns Practice items ordered by readiness and curriculum position.
    */
-  static async getPracticeDeck(
+  static async getReviewDeck(
     userId: string,
     deckSize: number = config.lesson.deckSize,
   ): Promise<PracticeDeckItem[]> {
@@ -175,18 +176,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const enToCzItems = await this.getDuePracticeItems(userId, 'enToCz', deckSize, now);
     if (enToCzItems.length === deckSize) return enToCzItems;
 
-    let alternativeDeck = await this.getDuePracticeItems(userId, 'czToEn', deckSize, now);
-
-    if (alternativeDeck.length < deckSize) {
-      const remainingSize = deckSize - alternativeDeck.length;
-      const newItems = await this.getNewPracticeItems(userId, remainingSize);
-      const checkedNewItems = await this.stopAtFirstUnstartedTrainingBlock(
-        userId,
-        newItems,
-        remainingSize,
-      );
-      alternativeDeck = [...alternativeDeck, ...checkedNewItems];
-    }
+    const alternativeDeck = await this.getDuePracticeItems(userId, 'czToEn', deckSize, now);
 
     return alternativeDeck.length > 0 ? alternativeDeck : enToCzItems;
   }
@@ -247,9 +237,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns User rows filtered to practice items.
    */
   static async getByUserId(userId: string): Promise<UserItemLocal[]> {
-    return (await db.user_items.where('user_id').equals(userId).toArray()).filter(
-      isPracticeItem,
-    );
+    return db.user_items.where('user_id').equals(userId).toArray();
   }
 
   /**
@@ -268,6 +256,55 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return blockItems.sort((a, b) => a.sort_order - b.sort_order);
   }
 
+  static async getByItemIds(userId: string, itemIds: readonly number[]): Promise<UserItemLocal[]> {
+    if (itemIds.length === 0) return [];
+    const items = await db.user_items
+      .where('[user_id+item_id]')
+      .anyOf([...new Set(itemIds)].map((itemId) => [userId, itemId]))
+      .toArray();
+    return items.sort((left, right) =>
+      compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path),
+    );
+  }
+
+  /** Builds the next initial-training queue from unstarted curriculum items. */
+  static async getNextInitialTrainingSelection(
+    userId: string,
+    batchSize: number = config.practice.initialTrainingBatchSize,
+  ): Promise<InitialTrainingSelection | null> {
+    assertNonEmptyString(userId, 'userId');
+    if (batchSize <= 0) return null;
+
+    const unstartedItems = (await db.user_items.where('user_id').equals(userId).toArray())
+      .filter((item) => item.deleted_at === NULL_DATE && item.started_at === NULL_DATE)
+      .sort((left, right) =>
+        compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path),
+      );
+    const firstItem = unstartedItems[0];
+    if (!firstItem) return null;
+
+    if (firstItem.block_id !== NULL_NUMBER) {
+      const block = await db.blocks.get(firstItem.block_id);
+      if (!block) return null;
+      return {
+        blockId: firstItem.block_id,
+        items: unstartedItems.filter((item) => item.block_id === firstItem.block_id),
+      };
+    }
+
+    const items: UserItemLocal[] = [];
+    for (const item of unstartedItems) {
+      const crossesBoundary =
+        item.lesson_id !== firstItem.lesson_id ||
+        item.is_vocabulary !== firstItem.is_vocabulary ||
+        item.block_id !== NULL_NUMBER;
+      if (crossesBoundary || items.length === batchSize) break;
+      items.push(item);
+    }
+
+    return { blockId: null, items };
+  }
+
   /**
    * Marks all items in a completed initial-training block as started.
    *
@@ -276,20 +313,28 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param dateTime ISO timestamp used for started_at and updated_at. Defaults to now.
    * @returns Updated items that were written to IndexedDB; [] when the block has no items.
    */
-  static async saveInitialTrainingBlockCompletion(
+  static async saveInitialTrainingCompletion(
     userId: string,
-    blockId: number,
+    itemIds: readonly number[],
     dateTime: string = new Date(Date.now()).toISOString(),
   ): Promise<UserItemLocal[]> {
-    const blockItems = await this.getByBlockId(userId, blockId);
-    const updatedItems = blockItems.map((item) => {
+    if (itemIds.length === 0) return [];
+    const items = await db.user_items
+      .where('[user_id+item_id]')
+      .anyOf(itemIds.map((itemId) => [userId, itemId]))
+      .toArray();
+    if (items.length !== new Set(itemIds).size) {
+      throw new Error('Initial-training completion references missing items.');
+    }
+
+    const updatedItems = items.map((item) => {
       const progressCzToEn = Math.max(
         item.progress_cz_to_en,
-        config.progress.afterInitialTrainingProgress,
+        config.progress.afterNewBlockProgress,
       );
       const progressEnToCz = Math.max(
         item.progress_en_to_cz,
-        config.progress.afterInitialTrainingProgress,
+        config.progress.afterNewBlockProgress,
       );
 
       return {
@@ -321,6 +366,19 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     }
 
     return updatedItems;
+  }
+
+  /** Reads started items assigned to one topic, ordered by curriculum position. */
+  static async getStartedByTopicId(userId: string, topicId: number): Promise<UserItemLocal[]> {
+    const topicItems = await db.user_items
+      .where('[user_id+topic_id]')
+      .equals([userId, topicId])
+      .filter((item) => item.started_at !== NULL_DATE)
+      .toArray();
+
+    return topicItems.sort((left, right) =>
+      compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path),
+    );
   }
 
   /**
@@ -355,22 +413,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Reads unique block ids from all started items.
-   *
-   * @param userId User id whose started items should be inspected.
-   * @returns Unique non-null-replacement block ids, including non-practice topic items.
-   */
-  static async getStartedBlocksIds(userId: string): Promise<number[]> {
-    const startedItems = await db.user_items
-      .where('[user_id+started_at]')
-      .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
-      .filter((item) => item.block_id !== NULL_NUMBER)
-      .toArray();
-
-    return [...new Set(startedItems.map((item) => item.block_id))];
-  }
-
-  /**
    * Reads started vocabulary practice items for a user.
    *
    * @param userId User id whose vocabulary items should be read.
@@ -378,8 +420,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    */
   static async getStartedVocabulary(userId: string): Promise<UserItemLocal[]> {
     const result = await db.user_items
-      .where('[user_id+is_practice_item+is_vocabulary+started_at]')
-      .between([userId, 1, 1, Dexie.minKey], [userId, 1, 1, NULL_DATE], true, false)
+      .where('[user_id+is_vocabulary+started_at]')
+      .between([userId, 1, Dexie.minKey], [userId, 1, NULL_DATE], true, false)
       .toArray();
     return result;
   }
@@ -475,31 +517,29 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @returns Ready count and the nearest future schedule, capped together at the badge limit.
    * @throws Error when userId is empty.
    */
-  static async getReadyPracticeState(userId: string): Promise<ReadyPracticeState> {
+  static async getReadyReviewState(userId: string): Promise<ReadyPracticeState> {
     assertNonEmptyString(userId, 'userId');
 
-    const badgeCap = config.practice.readyPracticeBadgeCap;
+    const countCap = config.practice.reviewStarSize;
     const nowIso = new Date(Date.now()).toISOString();
 
-    const items = (await db.user_items.where('user_id').equals(userId).toArray()).filter(
-      isPracticeItem,
-    );
+    const items = await db.user_items.where('user_id').equals(userId).toArray();
     let readyCount = 0;
     const futureDates: string[] = [];
 
     for (const item of items) {
       const itemReadiness = getItemReadiness(item, nowIso);
-      readyCount = Math.min(badgeCap, readyCount + itemReadiness.readyCount);
+      readyCount = Math.min(countCap, readyCount + itemReadiness.readyCount);
       futureDates.push(...itemReadiness.futureDates);
 
-      if (readyCount === badgeCap) {
-        return { readyCount: badgeCap, schedule: [] };
+      if (readyCount === countCap) {
+        return { readyCount: countCap, schedule: [] };
       }
     }
 
     return {
       readyCount,
-      schedule: groupReadyPracticeSchedule(futureDates, badgeCap - readyCount),
+      schedule: groupReadyPracticeSchedule(futureDates, countCap - readyCount),
     };
   }
 
@@ -592,6 +632,20 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       });
 
     return count;
+  }
+
+  /** Resets all user items assigned to one topic. */
+  static async resetItemsByTopicId(
+    userId: string,
+    topicId: number,
+    dateTime: string = new Date().toISOString(),
+  ): Promise<number> {
+    return db.user_items
+      .where('[user_id+topic_id]')
+      .equals([userId, topicId])
+      .modify((item: UserItemLocal) => {
+        resetUserItem(item, dateTime);
+      });
   }
 
   /**
@@ -771,14 +825,14 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
     const index =
       direction === 'czToEn'
-        ? '[user_id+is_practice_item+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]'
-        : '[user_id+is_practice_item+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]';
+        ? '[user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]'
+        : '[user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]';
 
     return db.user_items
       .where(index)
       .between(
-        [userId, 1, Dexie.minKey, NULL_DATE, Dexie.minKey],
-        [userId, 1, now, NULL_DATE, Dexie.maxKey],
+        [userId, Dexie.minKey, NULL_DATE, Dexie.minKey],
+        [userId, now, NULL_DATE, Dexie.maxKey],
         true,
         false,
       )
@@ -786,53 +840,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .limit(limit)
       .toArray()
       .then((items) => items.map((item) => ({ ...item, practice_direction: direction })));
-  }
-
-  /** Reads never-scheduled practice items in curriculum order. */
-  private static async getNewPracticeItems(
-    userId: string,
-    limit: number,
-  ): Promise<PracticeDeckItem[]> {
-    return db.user_items
-      .where(
-        '[user_id+is_practice_item+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]',
-      )
-      .between(
-        [userId, 1, NULL_DATE, NULL_DATE, Dexie.minKey],
-        [userId, 1, NULL_DATE, NULL_DATE, Dexie.maxKey],
-        true,
-        true,
-      )
-      .filter((item) => item.started_at === NULL_DATE)
-      .limit(limit)
-      .toArray()
-      .then((items) =>
-        items.map((item) => ({ ...item, practice_direction: 'czToEn' })),
-      );
-  }
-
-  /** Stops new-item selection at the first item belonging to an unstarted training block. */
-  private static async stopAtFirstUnstartedTrainingBlock(
-    userId: string,
-    items: PracticeDeckItem[],
-    limit: number,
-  ): Promise<PracticeDeckItem[]> {
-    const selected: PracticeDeckItem[] = [];
-
-    for (const item of items) {
-      if (item.block_id !== NULL_NUMBER) {
-        const block = await db.user_blocks.get([userId, item.block_id]);
-        if (block?.requires_initial_training && block.started_at === NULL_DATE) {
-          selected.push({ ...item, is_initial_training_trigger: true });
-          return selected;
-        }
-      }
-
-      selected.push(item);
-      if (selected.length === limit) return selected;
-    }
-
-    return selected;
   }
 
   /**
@@ -890,7 +897,7 @@ function getItemReadiness(
   nowIso: string,
 ): { readyCount: number; futureDates: string[] } {
   if (item.started_at === NULL_DATE) {
-    return { readyCount: 1, futureDates: [] };
+    return { readyCount: 0, futureDates: [] };
   }
 
   let readyCount = 0;
@@ -999,14 +1006,10 @@ function resolveMasteredAt(
   return dateTime;
 }
 
-function isPracticeItem(item: Pick<UserItemLocal, 'is_practice_item'>): boolean {
-  return item.is_practice_item !== 0;
-}
-
 function isStartedGrammarItem(
-  item: Pick<UserItemLocal, 'is_practice_item' | 'grammar_chunk_id'>,
+  item: Pick<UserItemLocal, 'grammar_chunk_id'>,
 ): boolean {
-  return isPracticeItem(item) && item.grammar_chunk_id !== NULL_NUMBER;
+  return item.grammar_chunk_id !== NULL_NUMBER;
 }
 
 function compareCurriculumPaths(

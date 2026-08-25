@@ -4,7 +4,6 @@ import { useUserStore } from '@/features/user-stats/use-user-store';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { Link } from 'react-router-dom';
-import Notification from '@/components/UI/Notification';
 import '@/styles/home.css';
 import { InstallPWAButton } from '@/features/pwa/InstallPwaButton';
 import { useSyncStore } from '@/features/synchronization/use-sync-store';
@@ -18,15 +17,17 @@ import SimulateDataButton from '@/features/synchronization/SimulateDataButton';
 import PracticeButton from '@/features/practice/PracticeButton';
 import HelpButton from '@/features/help/HelpButton';
 import PronunciationPracticeButton from '@/features/pronunciation/PronunciationPracticeButton';
-import PronunciationGroupsButton from '@/features/pronunciation/PronunciationGroupsButton';
 import { practiceOverviewDescriptor } from '@/routing/route-data';
+
+const HOME_TEXT_ACTION_CLASS_NAME =
+  'color-info font-headings text-center text-lg decoration-current underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2';
 
 function HomeActionLinks(): JSX.Element {
   return (
     <div className="flex items-center justify-center gap-2 px-4">
-      <InstallPWAButton className="pr-4" />
-      <Link to="/guide">
-        <Notification className="color-link">{TEXTS.guide}</Notification>
+      <InstallPWAButton className={`pr-4 ${HOME_TEXT_ACTION_CLASS_NAME}`} />
+      <Link to="/guide" className={HOME_TEXT_ACTION_CLASS_NAME}>
+        {TEXTS.guide}
       </Link>
     </div>
   );
@@ -41,13 +42,13 @@ export default function Home(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const userFullName = useAuthStore((state) => state.userFullName);
   const isAnonymousUser = useAuthStore((state) => state.isAnonymousUser);
-  const dailyCount = useUserStore((state) => state.dailyCount);
+  const dailyStarCount = useUserStore((state) => state.dailyStarCount);
   const isSyncError = useSyncStore((state) => state.isSyncError);
 
   return (
     <>
       {userId ? (
-        <div className="card-width relative flex h-full w-full grow flex-col justify-start gap-2 sm:gap-4">
+        <div className="card-width relative flex h-full w-full grow flex-col justify-start gap-1 sm:gap-4">
           <div className="landscape:mt-6">
             <PropertyView
               label={TEXTS.profileNameLabel}
@@ -63,13 +64,13 @@ export default function Home(): JSX.Element {
             Aplikace v testovacím režimu! V tuto chvíli Vaše tréninková data nebudou zachována.
           </p>
           {isAnonymousUser && (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1">
               <ConvertAnonymousUserButton />
               <SimulateDataButton />
             </div>
           )}
           <PracticeOverviewButton
-            count={dailyCount}
+            count={dailyStarCount}
             to={ROUTES.practiceOverview}
             descriptor={practiceOverviewDescriptor(userId)}
             ariaLabel={TEXTS.practiceOverviewOpen}
@@ -78,7 +79,6 @@ export default function Home(): JSX.Element {
           <div className="flex w-full flex-col gap-1">
             <PracticeButton userId={userId} />
             <PronunciationPracticeButton userId={userId} />
-            <PronunciationGroupsButton />
           </div>
           <div className="relative">
             <p

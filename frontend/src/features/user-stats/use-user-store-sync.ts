@@ -22,7 +22,7 @@ function toError(error: unknown): Error {
 export function useUserStoreSync(userId: string | null) {
   const [localDate, setLocalDate] = useState(getLocalDate);
   const clearItemsStats = useUserStore((state) => state.clearLevels);
-  const clearScoresStats = useUserStore((state) => state.clearDailyCount);
+  const clearScoresStats = useUserStore((state) => state.clearDailyStarCount);
 
   useEffect(() => {
     const intervalId = globalThis.setInterval(() => {
@@ -47,9 +47,9 @@ export function useUserStoreSync(userId: string | null) {
       levels: [],
       levelsLoading: true,
       levelsError: null,
-      dailyCount: 0,
-      dailyCountLoading: true,
-      dailyCountError: null,
+      dailyStarCount: 0,
+      dailyStarCountLoading: true,
+      dailyStarCountError: null,
     });
 
     const levelsSubscription = liveQuery(() => Levels.getOverview(userId, localDate)).subscribe({
@@ -70,24 +70,24 @@ export function useUserStoreSync(userId: string | null) {
       },
     });
 
-    const dailyCountSubscription = liveQuery(() =>
+    const dailyStarCountSubscription = liveQuery(() =>
       UserScore.getScoreForDate(userId, localDate),
     ).subscribe({
-      next: (dailyCount) => {
+      next: (dailyStarCount) => {
         if (isActive) {
           useUserStore.setState({
-            dailyCount: dailyCount ?? 0,
-            dailyCountLoading: false,
-            dailyCountError: null,
+            dailyStarCount: dailyStarCount ?? 0,
+            dailyStarCountLoading: false,
+            dailyStarCountError: null,
           });
         }
       },
       error: (error) => {
         if (isActive) {
           useUserStore.setState({
-            dailyCount: 0,
-            dailyCountLoading: false,
-            dailyCountError: toError(error),
+            dailyStarCount: 0,
+            dailyStarCountLoading: false,
+            dailyStarCountError: toError(error),
           });
           reportError('Error observing daily count', error);
         }
@@ -97,7 +97,7 @@ export function useUserStoreSync(userId: string | null) {
     return () => {
       isActive = false;
       levelsSubscription.unsubscribe();
-      dailyCountSubscription.unsubscribe();
+      dailyStarCountSubscription.unsubscribe();
     };
   }, [userId, localDate, clearItemsStats, clearScoresStats]);
 }
