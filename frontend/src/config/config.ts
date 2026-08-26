@@ -35,18 +35,13 @@ const config = {
     archiveBucketName: 'audio-archive',
   },
 
-  lesson: {
-    deckSize: 5, // Number of items per deck
-  },
-
   practice: {
     initialTrainingBatchSize: 8, // Maximum size of an automatically assembled initial-training batch
     reviewStarSize: 20, // Number of review answers needed to earn one star
     starsPerRow: 20, // Number of stars shown in one tier row
     audioDelay: 100, // Delay in milliseconds for automatically playing audio
     holdDuration: 300, // Duration in milliseconds for which the practice card is held before moving to the next item
-    readyPracticeScheduleGroupWindowMs: 1000, // Time window for grouping future ready-practice schedule entries
-    maxReadyScheduleTimerDelayMs: 2_147_483_647, // Maximum setTimeout delay supported by browsers
+    maxReviewReadyTimerDelayMs: 2_147_483_647, // Maximum setTimeout delay supported by browsers
     CZ_TO_EN: 'czToEn',
     EN_TO_CZ: 'enToCz',
   },

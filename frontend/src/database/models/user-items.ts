@@ -21,7 +21,6 @@ import type { ReadyPracticeState } from '@/types/generic.types';
 import Metadata from './metadata';
 import { reportInfo } from '@/features/logging/monitoring-handler';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
-import { groupReadyPracticeSchedule } from '../utils/ready-practice.utils';
 
 const NULL_DATE = config.database.nullReplacementDate;
 const NULL_NUMBER = config.database.nullReplacementNumber;
@@ -163,12 +162,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Builds one unified vocabulary and grammar practice deck.
    *
    * @param userId User id whose practice items should be selected.
-   * @param deckSize Maximum deck size; defaults to config.lesson.deckSize.
+   * @param deckSize Maximum deck size; defaults to the review star size.
    * @returns Practice items ordered by readiness and curriculum position.
    */
   static async getReviewDeck(
     userId: string,
-    deckSize: number = config.lesson.deckSize,
+    deckSize: number = config.practice.reviewStarSize,
   ): Promise<PracticeDeckItem[]> {
     if (deckSize <= 0) return [];
 
@@ -178,7 +177,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
     const alternativeDeck = await this.getDuePracticeItems(userId, 'czToEn', deckSize, now);
 
-    return alternativeDeck.length > 0 ? alternativeDeck : enToCzItems;
+    return alternativeDeck.length === deckSize ? alternativeDeck : [];
   }
 
   /**
@@ -514,33 +513,21 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Calculates the ready vocabulary review badge state.
    *
    * @param userId Non-empty user id whose vocabulary items should be inspected.
-   * @returns Ready count and the nearest future schedule, capped together at the badge limit.
+   * @returns The earliest date when a complete review deck will be available.
    * @throws Error when userId is empty.
    */
   static async getReadyReviewState(userId: string): Promise<ReadyPracticeState> {
     assertNonEmptyString(userId, 'userId');
 
-    const countCap = config.practice.reviewStarSize;
+    const deckSize = config.practice.reviewStarSize;
     const nowIso = new Date(Date.now()).toISOString();
 
     const items = await db.user_items.where('user_id').equals(userId).toArray();
-    let readyCount = 0;
-    const futureDates: string[] = [];
+    const readyAtByDirection = DIRECTIONS.map((direction) =>
+      getReviewReadyAt(items, direction, deckSize, nowIso),
+    );
 
-    for (const item of items) {
-      const itemReadiness = getItemReadiness(item, nowIso);
-      readyCount = Math.min(countCap, readyCount + itemReadiness.readyCount);
-      futureDates.push(...itemReadiness.futureDates);
-
-      if (readyCount === countCap) {
-        return { readyCount: countCap, schedule: [] };
-      }
-    }
-
-    return {
-      readyCount,
-      schedule: groupReadyPracticeSchedule(futureDates, countCap - readyCount),
-    };
+    return { reviewReadyAt: getEarliestReadyAt(readyAtByDirection) };
   }
 
   /**
@@ -890,29 +877,46 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
 }
 
-const DIRECTIONS: readonly PracticeDirection[] = ['czToEn', 'enToCz'];
+const DIRECTIONS: readonly PracticeDirection[] = ['enToCz', 'czToEn'];
 
-function getItemReadiness(
-  item: UserItemLocal,
+function getReviewReadyAt(
+  items: UserItemLocal[],
+  direction: PracticeDirection,
+  deckSize: number,
   nowIso: string,
-): { readyCount: number; futureDates: string[] } {
-  if (item.started_at === NULL_DATE) {
-    return { readyCount: 0, futureDates: [] };
-  }
-
-  let readyCount = 0;
+): string | null {
   const futureDates: string[] = [];
+  let readyCount = 0;
 
-  for (const direction of DIRECTIONS) {
+  for (const item of items) {
+    if (item.started_at === NULL_DATE) continue;
     if (getDirectionMasteredAt(item, direction) !== NULL_DATE) continue;
 
     const nextAt = getDirectionNextAt(item, direction);
     if (nextAt === NULL_DATE) continue;
-    if (nextAt <= nowIso) readyCount += 1;
-    else futureDates.push(nextAt);
+    if (nextAt <= nowIso) {
+      readyCount += 1;
+      continue;
+    }
+    if (Number.isFinite(Date.parse(nextAt))) futureDates.push(nextAt);
   }
 
-  return { readyCount, futureDates };
+  if (readyCount >= deckSize) return nowIso;
+
+  futureDates.sort((left, right) => Date.parse(left) - Date.parse(right));
+  const missingCount = deckSize - readyCount;
+  return futureDates[missingCount - 1] ?? null;
+}
+
+function getEarliestReadyAt(readyDates: Array<string | null>): string | null {
+  const validDates = readyDates.filter((date): date is string => date !== null);
+  if (validDates.length === 0) return null;
+
+  const [firstDate, ...remainingDates] = validDates;
+  return remainingDates.reduce(
+    (earliest, date) => (Date.parse(date) < Date.parse(earliest) ? date : earliest),
+    firstDate,
+  );
 }
 
 function getDirectionProgress(item: UserItemLocal, direction: PracticeDirection): number {

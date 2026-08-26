@@ -21,7 +21,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@/config/config', () => ({
-  default: { practice: { maxReadyScheduleTimerDelayMs: 60_000 } },
+  default: { practice: { maxReviewReadyTimerDelayMs: 60_000 } },
 }));
 vi.mock('@/database/models/db', () => ({
   db: {
@@ -92,7 +92,7 @@ describe('usePracticeAvailabilityStoreSync', () => {
 
     act(() => {
       mocks.observers[0].next({
-        review: { readyCount: 3, schedule: [] },
+        review: { reviewReadyAt: '2026-07-21T10:00:00.000Z' },
         initialTrainingAvailable: false,
         activeSession: null,
         requiresSessionReconciliation: false,
@@ -100,7 +100,7 @@ describe('usePracticeAvailabilityStoreSync', () => {
       mocks.observers[1].next(2);
     });
     expect(usePracticeAvailabilityStore.getState()).toMatchObject({
-      reviewCount: 3,
+      reviewReadyAt: '2026-07-21T10:00:00.000Z',
       practiceLoading: false,
       pronunciationCount: 2,
       pronunciationLoading: false,
@@ -112,7 +112,7 @@ describe('usePracticeAvailabilityStoreSync', () => {
 
     act(() => {
       mocks.observers[0].next({
-        review: { readyCount: 0, schedule: [] },
+        review: { reviewReadyAt: null },
         initialTrainingAvailable: true,
         activeSession: null,
         requiresSessionReconciliation: true,
@@ -124,29 +124,22 @@ describe('usePracticeAvailabilityStoreSync', () => {
     });
   });
 
-  it('moves consecutive scheduled groups into a non-empty ready count without remounting Home', () => {
+  it('refreshes availability when the complete deck becomes ready', async () => {
+    mocks.getReadyReviewState.mockResolvedValue({ reviewReadyAt: '2026-07-21T10:00:02.000Z' });
     renderHook(() => usePracticeAvailabilityStoreSync('u1'));
     act(() => {
       mocks.observers[0].next({
-        review: { readyCount: 1,
-        schedule: [
-          { date: '2026-07-21T10:00:01.000Z', count: 1 },
-          { date: '2026-07-21T10:00:02.000Z', count: 1 },
-        ] }, initialTrainingAvailable: false, activeSession: null,
+        review: { reviewReadyAt: '2026-07-21T10:00:02.000Z' },
+        initialTrainingAvailable: false,
+        activeSession: null,
       });
     });
 
-    act(() => vi.advanceTimersByTime(1000));
-    expect(usePracticeAvailabilityStore.getState()).toMatchObject({
-      reviewCount: 2,
-      reviewSchedule: [{ date: '2026-07-21T10:00:02.000Z', count: 1 }],
-    });
-
-    act(() => vi.advanceTimersByTime(1000));
-    expect(usePracticeAvailabilityStore.getState()).toMatchObject({
-      reviewCount: 3,
-      reviewSchedule: [],
-    });
+    await act(async () => vi.advanceTimersByTimeAsync(2000));
+    expect(mocks.getReadyReviewState).toHaveBeenCalledWith('u1');
+    expect(usePracticeAvailabilityStore.getState().reviewReadyAt).toBe(
+      '2026-07-21T10:00:02.000Z',
+    );
   });
 
   it('clears stale snapshots and subscriptions when the user changes', () => {
@@ -154,7 +147,7 @@ describe('usePracticeAvailabilityStoreSync', () => {
       initialProps: { userId: 'u1' as string | null },
     });
     act(() => {
-      mocks.observers[0].next({ review: { readyCount: 3, schedule: [] }, initialTrainingAvailable: false, activeSession: null });
+      mocks.observers[0].next({ review: { reviewReadyAt: '2026-07-21T10:00:00.000Z' }, initialTrainingAvailable: false, activeSession: null });
       mocks.observers[1].next(2);
     });
 
@@ -162,14 +155,14 @@ describe('usePracticeAvailabilityStoreSync', () => {
     expect(mocks.unsubscribes[0]).toHaveBeenCalledOnce();
     expect(mocks.unsubscribes[1]).toHaveBeenCalledOnce();
     expect(usePracticeAvailabilityStore.getState()).toMatchObject({
-      reviewCount: 0,
+      reviewReadyAt: null,
       practiceLoading: true,
       pronunciationCount: 0,
       pronunciationLoading: true,
     });
 
-    act(() => mocks.observers[0].next({ review: { readyCount: 99, schedule: [] }, initialTrainingAvailable: false, activeSession: null }));
-    expect(usePracticeAvailabilityStore.getState().reviewCount).toBe(0);
+    act(() => mocks.observers[0].next({ review: { reviewReadyAt: '2026-07-21T10:00:00.000Z' }, initialTrainingAvailable: false, activeSession: null }));
+    expect(usePracticeAvailabilityStore.getState().reviewReadyAt).toBeNull();
   });
 
   it('clears snapshots on sign-out and ignores emissions after unmount', () => {
@@ -178,21 +171,21 @@ describe('usePracticeAvailabilityStoreSync', () => {
       { initialProps: { userId: 'u1' as string | null } },
     );
     act(() => {
-      mocks.observers[0].next({ review: { readyCount: 3, schedule: [] }, initialTrainingAvailable: false, activeSession: null });
+      mocks.observers[0].next({ review: { reviewReadyAt: '2026-07-21T10:00:00.000Z' }, initialTrainingAvailable: false, activeSession: null });
       mocks.observers[1].next(2);
     });
 
     rerender({ userId: null });
     expect(usePracticeAvailabilityStore.getState()).toMatchObject({
-      reviewCount: 0,
+      reviewReadyAt: null,
       practiceLoading: false,
       pronunciationCount: 0,
       pronunciationLoading: false,
     });
 
     unmount();
-    act(() => mocks.observers[0].next({ review: { readyCount: 99, schedule: [] }, initialTrainingAvailable: false, activeSession: null }));
-    expect(usePracticeAvailabilityStore.getState().reviewCount).toBe(0);
+    act(() => mocks.observers[0].next({ review: { reviewReadyAt: '2026-07-21T10:00:00.000Z' }, initialTrainingAvailable: false, activeSession: null }));
+    expect(usePracticeAvailabilityStore.getState().reviewReadyAt).toBeNull();
   });
 
   it('stores and reports both observer failures', () => {

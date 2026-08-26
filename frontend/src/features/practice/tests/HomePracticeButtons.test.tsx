@@ -22,13 +22,11 @@ vi.mock('@/routing/route-data', () => ({
 
 import PracticeButtons from '@/features/practice/PracticeButton';
 import { usePracticeAvailabilityStore } from '@/features/practice/use-practice-availability-store';
-import config from '@/config/config';
 
 describe('Home practice buttons', () => {
   beforeEach(() => {
     usePracticeAvailabilityStore.setState({
-      reviewCount: 0,
-      reviewSchedule: [],
+      reviewReadyAt: null,
       initialTrainingAvailable: true,
       activeSession: null,
       practiceLoading: false,
@@ -37,14 +35,14 @@ describe('Home practice buttons', () => {
   });
 
   it('gives review priority at the configured review boundary', () => {
-    usePracticeAvailabilityStore.setState({ reviewCount: config.practice.reviewStarSize });
+    usePracticeAvailabilityStore.setState({ reviewReadyAt: new Date().toISOString() });
     render(<PracticeButtons userId="u1" />);
     expect(button('Review').disabled).toBe(false);
     expect(button('New').disabled).toBe(true);
   });
 
   it('enables new below the review boundary', () => {
-    usePracticeAvailabilityStore.setState({ reviewCount: config.practice.reviewStarSize - 1 });
+    usePracticeAvailabilityStore.setState({ reviewReadyAt: null });
     render(<PracticeButtons userId="u1" />);
     expect(button('Review').disabled).toBe(true);
     expect(button('New').disabled).toBe(false);
@@ -57,8 +55,8 @@ describe('Home practice buttons', () => {
     expect(buttonGroup?.className).toContain('flex-col');
     expect(buttonGroup?.className).toContain('gap-1');
     expect(screen.getAllByRole('button').map((item) => item.textContent)).toEqual([
-      'Review',
       'New',
+      'Review',
     ]);
   });
 
@@ -72,7 +70,7 @@ describe('Home practice buttons', () => {
 
   it('keeps only an active review session available', () => {
     usePracticeAvailabilityStore.setState({
-      reviewCount: 0,
+      reviewReadyAt: null,
       activeSession: makeSession('review'),
     });
     render(<PracticeButtons userId="u1" />);
@@ -82,7 +80,7 @@ describe('Home practice buttons', () => {
 
   it('keeps only an active new session available', () => {
     usePracticeAvailabilityStore.setState({
-      reviewCount: config.practice.reviewStarSize,
+      reviewReadyAt: new Date().toISOString(),
       activeSession: makeSession('new'),
     });
     render(<PracticeButtons userId="u1" />);

@@ -95,7 +95,7 @@ export function pronunciationGroupDetailDescriptor(userId: string, groupId: numb
 export function practiceDeckDescriptor(userId: string) {
   return {
     key: routeDataKey('practice', userId),
-    load: () => loadReviewDeck(userId, config.lesson.deckSize),
+    load: () => loadReviewDeck(userId, config.practice.reviewStarSize),
   };
 }
 

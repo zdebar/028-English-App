@@ -38,7 +38,7 @@ vi.mock('@/features/logging/monitoring-handler', () => ({
 }));
 
 vi.mock('@/config/config', () => ({
-  default: { lesson: { deckSize: 5 } },
+  default: { practice: { reviewStarSize: 20 } },
 }));
 
 import {

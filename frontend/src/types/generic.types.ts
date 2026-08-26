@@ -65,14 +65,8 @@ export interface UserScoreType {
   deleted_at: string | null;
 }
 
-export interface ReadyPracticeScheduleEntry {
-  date: string;
-  count: number;
-}
-
 export interface ReadyPracticeState {
-  readyCount: number;
-  schedule: ReadyPracticeScheduleEntry[];
+  reviewReadyAt: string | null;
 }
 
 export interface UserInfoType {
