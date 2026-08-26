@@ -941,18 +941,28 @@ describe('UserItem', () => {
     expect(result.map((item: any) => item.item_id)).toEqual([1, 2]);
   });
 
-  it('builds an automatic batch without crossing lesson, type, or explicit-block boundaries', async () => {
+  it('allows automatic vocabulary batches to cross lesson boundaries', async () => {
     mocks.userEqualsToArray.mockResolvedValue([
       initialItem(1, { curriculum_sort_path: [1, 1, 1] }),
-      initialItem(2, { curriculum_sort_path: [1, 1, 2], grammar_chunk_id: 4 }),
-      initialItem(3, { curriculum_sort_path: [1, 1, 3], block_id: 9 }),
-      initialItem(4, { curriculum_sort_path: [1, 2, 1], lesson_id: 2 }),
+      initialItem(2, { curriculum_sort_path: [1, 2, 1], lesson_id: 2 }),
+      initialItem(3, { curriculum_sort_path: [1, 2, 2], is_vocabulary: 0, grammar_chunk_id: 4 }),
     ]);
 
     const selection = await UserItem.getNextInitialTrainingSelection('u1', 8);
 
     expect(selection?.blockId).toBeNull();
     expect(selection?.items.map((item) => item.item_id)).toEqual([1, 2]);
+  });
+
+  it('keeps automatic grammar batches within one lesson', async () => {
+    mocks.userEqualsToArray.mockResolvedValue([
+      initialItem(1, { is_vocabulary: 0, grammar_chunk_id: 1, curriculum_sort_path: [1, 1, 1] }),
+      initialItem(2, { is_vocabulary: 0, grammar_chunk_id: 2, curriculum_sort_path: [1, 2, 1], lesson_id: 2 }),
+    ]);
+
+    const selection = await UserItem.getNextInitialTrainingSelection('u1', 8);
+
+    expect(selection?.items.map((item) => item.item_id)).toEqual([1]);
   });
 
   it('limits an automatic batch while allowing multiple grammar chunks', async () => {
