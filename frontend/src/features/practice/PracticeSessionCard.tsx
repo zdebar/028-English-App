@@ -248,13 +248,13 @@ export default function PracticeSessionCard({
             disabled={!onStarCelebrationContinue}
           >
             <span
-              className="star-celebration font-headings flex -translate-y-2 flex-col items-center gap-2 text-lg leading-none font-bold"
+              className="star-celebration font-headings flex -translate-y-2 flex-col items-center gap-2 text-xl leading-none"
               role="status"
               aria-live="polite"
             >
               <span>{TEXTS.starEarned}</span>
               <FullStar className={`star-fill-${celebrationStarTier}`} size={32} />
-              <span className="font-normal">{TEXTS.continueAfterStar}</span>
+              <span>{TEXTS.continueAfterStar}</span>
             </span>
           </button>
         )}
