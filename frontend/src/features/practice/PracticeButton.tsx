@@ -28,15 +28,6 @@ export default function PracticeButtons({ userId }: PracticeButtonsProps): JSX.E
 
   return (
     <div className="flex w-full flex-col gap-1">
-      <DataNavigationButton
-        to={ROUTES.practice}
-        descriptor={practiceDeckDescriptor(userId)}
-        className="h-button max-h-button w-full px-4"
-        disabled={reviewDisabled}
-        title={reviewTitle}
-      >
-        {TEXTS.reviewButton}
-      </DataNavigationButton>
       {!newAvailable && !loading ? (
         <StyledButton className="h-button max-h-button w-full px-4" disabled title={newTitle}>
           {TEXTS.newButton}
@@ -52,6 +43,15 @@ export default function PracticeButtons({ userId }: PracticeButtonsProps): JSX.E
           {TEXTS.newButton}
         </DataNavigationButton>
       )}
+      <DataNavigationButton
+        to={ROUTES.practice}
+        descriptor={practiceDeckDescriptor(userId)}
+        className="h-button max-h-button w-full px-4"
+        disabled={reviewDisabled}
+        title={reviewTitle}
+      >
+        {TEXTS.reviewButton}
+      </DataNavigationButton>
     </div>
   );
 }
