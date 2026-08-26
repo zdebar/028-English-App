@@ -57,7 +57,6 @@ vi.mock('@/config/config', () => ({
     practice: {
       initialTrainingBatchSize: 8,
       reviewStarSize: 20,
-      readyPracticeScheduleGroupWindowMs: 1000,
     },
   },
 }));
@@ -748,7 +747,7 @@ describe('UserItem', () => {
     expect(mocks.indexedToArray).toHaveBeenCalledTimes(1);
   });
 
-  it('replaces a partial EN to CZ deck with due-only CZ to EN items', async () => {
+  it('returns an empty deck when neither direction is complete', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
     mocks.indexedToArray
@@ -779,7 +778,7 @@ describe('UserItem', () => {
 
     const deck = await UserItem.getReviewDeck('u1', 4);
 
-    expect(deck.map((item) => item.item_id)).toEqual([2]);
+    expect(deck).toEqual([]);
     expect(mocks.indexedLimit.mock.calls.map(([limit]) => limit)).toEqual([4, 4]);
   });
 
@@ -805,7 +804,7 @@ describe('UserItem', () => {
 
     const deck = await UserItem.getReviewDeck('u1', 3);
 
-    expect(deck.map((item) => item.item_id)).toEqual([1]);
+    expect(deck).toEqual([]);
     expect(mocks.indexedLimit.mock.calls.map(([limit]) => limit)).toEqual([3, 3]);
   });
 
@@ -835,7 +834,7 @@ describe('UserItem', () => {
       ]);
     const deck = await UserItem.getReviewDeck('u1', 5);
 
-    expect(deck.map((item) => item.item_id)).toEqual([3]);
+    expect(deck).toEqual([]);
   });
 
   it('restores a partial EN to CZ deck when CZ to EN and new alternatives are empty', async () => {
@@ -853,7 +852,7 @@ describe('UserItem', () => {
 
     const deck = await UserItem.getReviewDeck('u1', 3);
 
-    expect(deck.map((item) => item.item_id)).toEqual([1]);
+    expect(deck).toEqual([]);
   });
 
   it('uses any CZ to EN grammar deck instead of a partial EN to CZ deck', async () => {
@@ -874,7 +873,7 @@ describe('UserItem', () => {
 
     const deck = await UserItem.getReviewDeck('u1', 3);
 
-    expect(deck.map((item) => item.item_id)).toEqual([1]);
+    expect(deck).toEqual([]);
   });
 
   it('returns an empty deck without querying when deckSize is not positive', async () => {
@@ -889,7 +888,7 @@ describe('UserItem', () => {
 
     const deck = await UserItem.getReviewDeck('u1', 10);
 
-    expect(deck.map((item) => item.item_id)).toEqual([1]);
+    expect(deck).toEqual([]);
     expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
       1,
       ['u1', expect.anything(), '1970-01-01T00:00:00.000Z', expect.anything()],
@@ -942,18 +941,28 @@ describe('UserItem', () => {
     expect(result.map((item: any) => item.item_id)).toEqual([1, 2]);
   });
 
-  it('builds an automatic batch without crossing lesson, type, or explicit-block boundaries', async () => {
+  it('allows automatic vocabulary batches to cross lesson boundaries', async () => {
     mocks.userEqualsToArray.mockResolvedValue([
       initialItem(1, { curriculum_sort_path: [1, 1, 1] }),
-      initialItem(2, { curriculum_sort_path: [1, 1, 2], grammar_chunk_id: 4 }),
-      initialItem(3, { curriculum_sort_path: [1, 1, 3], block_id: 9 }),
-      initialItem(4, { curriculum_sort_path: [1, 2, 1], lesson_id: 2 }),
+      initialItem(2, { curriculum_sort_path: [1, 2, 1], lesson_id: 2 }),
+      initialItem(3, { curriculum_sort_path: [1, 2, 2], is_vocabulary: 0, grammar_chunk_id: 4 }),
     ]);
 
     const selection = await UserItem.getNextInitialTrainingSelection('u1', 8);
 
     expect(selection?.blockId).toBeNull();
     expect(selection?.items.map((item) => item.item_id)).toEqual([1, 2]);
+  });
+
+  it('keeps automatic grammar batches within one lesson', async () => {
+    mocks.userEqualsToArray.mockResolvedValue([
+      initialItem(1, { is_vocabulary: 0, grammar_chunk_id: 1, curriculum_sort_path: [1, 1, 1] }),
+      initialItem(2, { is_vocabulary: 0, grammar_chunk_id: 2, curriculum_sort_path: [1, 2, 1], lesson_id: 2 }),
+    ]);
+
+    const selection = await UserItem.getNextInitialTrainingSelection('u1', 8);
+
+    expect(selection?.items.map((item) => item.item_id)).toEqual([1]);
   });
 
   it('limits an automatic batch while allowing multiple grammar chunks', async () => {
@@ -1082,23 +1091,19 @@ describe('UserItem', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
     mocks.userEqualsToArray.mockResolvedValueOnce([
-      {
-        item_id: 1,
+      ...Array.from({ length: 20 }, (_, index) => ({
+        item_id: index + 1,
         started_at: '2026-01-01T00:00:00.000Z',
         next_at_cz_to_en: '2026-06-20T00:00:00.000Z',
         next_at_en_to_cz: '2026-06-20T00:00:00.000Z',
         mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
         mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
-      },
-      {
-        item_id: 2,
-        started_at: '1970-01-01T00:00:00.000Z',
-      },
+      })),
+      { item_id: 21, started_at: '1970-01-01T00:00:00.000Z' },
     ]);
 
     await expect(UserItem.getReadyReviewState('u1')).resolves.toEqual({
-      readyCount: 2,
-      schedule: [],
+      reviewReadyAt: '2026-06-24T12:00:00.000Z',
     });
 
   });
@@ -1110,8 +1115,7 @@ describe('UserItem', () => {
     })));
 
     await expect(UserItem.getReadyReviewState('u1')).resolves.toEqual({
-      readyCount: 0,
-      schedule: [],
+      reviewReadyAt: null,
     });
 
     expect(mocks.userEqualsToArray).toHaveBeenCalledTimes(1);
@@ -1140,8 +1144,35 @@ describe('UserItem', () => {
     ]);
 
     await expect(UserItem.getReadyReviewState('u1')).resolves.toEqual({
-      readyCount: 0,
-      schedule: [{ date: '2026-06-24T12:00:10.800Z', count: 2 }],
+      reviewReadyAt: null,
+    });
+  });
+
+  it('returns the date when the twentieth item becomes ready', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
+    const readyItems = Array.from({ length: 19 }, (_, index) => ({
+      item_id: index + 1,
+      started_at: '2026-01-01T00:00:00.000Z',
+      next_at_cz_to_en: '2026-06-20T00:00:00.000Z',
+      next_at_en_to_cz: '2026-06-20T00:00:00.000Z',
+      mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+      mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+    }));
+    mocks.userEqualsToArray.mockResolvedValueOnce([
+      ...readyItems,
+      {
+        item_id: 20,
+        started_at: '2026-01-01T00:00:00.000Z',
+        next_at_cz_to_en: '2026-06-24T12:00:20.000Z',
+        next_at_en_to_cz: '2026-06-24T12:00:10.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+      },
+    ]);
+
+    await expect(UserItem.getReadyReviewState('u1')).resolves.toEqual({
+      reviewReadyAt: '2026-06-24T12:00:10.000Z',
     });
   });
 
@@ -1165,11 +1196,7 @@ describe('UserItem', () => {
     ]);
 
     await expect(UserItem.getReadyReviewState('u1')).resolves.toEqual({
-      readyCount: 0,
-      schedule: [
-        { date: '2026-06-24T12:00:10.000Z', count: 1 },
-        { date: '2026-06-24T12:00:20.000Z', count: 1 },
-      ],
+      reviewReadyAt: null,
     });
   });
 
@@ -1188,8 +1215,7 @@ describe('UserItem', () => {
     ]);
 
     await expect(UserItem.getReadyReviewState('u1')).resolves.toEqual({
-      readyCount: 0,
-      schedule: [{ date: '2026-06-24T12:00:10.800Z', count: 2 }],
+      reviewReadyAt: null,
     });
 
   });
@@ -1207,8 +1233,7 @@ describe('UserItem', () => {
     ]);
 
     await expect(UserItem.getReadyReviewState('u1')).resolves.toEqual({
-      readyCount: 0,
-      schedule: [],
+      reviewReadyAt: null,
     });
   });
 

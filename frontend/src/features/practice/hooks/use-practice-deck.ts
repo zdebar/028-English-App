@@ -61,7 +61,10 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
 
     try {
       const availability = await UserItem.getReadyReviewState(userId);
-      if (availability.readyCount >= config.practice.reviewStarSize) {
+      const reviewReady =
+        availability.reviewReadyAt !== null &&
+        Date.parse(availability.reviewReadyAt) <= Date.now();
+      if (reviewReady) {
         await PracticeSession.continueReview(userId);
         invalidateRouteData(routeDataKey('practice', userId));
         await reload();

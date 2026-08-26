@@ -1,10 +1,8 @@
-import type { ReadyPracticeScheduleEntry } from '@/types/generic.types';
 import type { PracticeSessionType } from '@/types/practice-session.types';
 import { create } from 'zustand';
 
 type PracticeAvailabilityState = {
-  reviewCount: number;
-  reviewSchedule: ReadyPracticeScheduleEntry[];
+  reviewReadyAt: string | null;
   initialTrainingAvailable: boolean;
   activeSession: PracticeSessionType | null;
   practiceLoading: boolean;
@@ -16,8 +14,7 @@ type PracticeAvailabilityState = {
 };
 
 const EMPTY_AVAILABILITY = {
-  reviewCount: 0,
-  reviewSchedule: [] as ReadyPracticeScheduleEntry[],
+  reviewReadyAt: null,
   initialTrainingAvailable: false,
   activeSession: null,
   practiceLoading: false,

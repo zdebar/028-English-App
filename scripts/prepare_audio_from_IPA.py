@@ -23,7 +23,7 @@ async def prepare_audio(file_name: str, output_file: str, audio_folder: str, suf
     # 1. Read data
     df = read_vocab_csv(file_name, columns=[
         "id", "czech", "english", "pronunciation", "audio", "sort_order",
-        "block_id", "note_id", "grammar_chunk_id"
+        "block_id", "note_id", "topic_id", "grammar_chunk_id"
     ])
     if df is None:
         print("Error: DataFrame is None after reading CSV.")
@@ -43,7 +43,7 @@ async def prepare_audio(file_name: str, output_file: str, audio_folder: str, suf
     )
 
     # 4. Force integer columns before saving
-    for col in ["id", "sort_order", "block_id", "note_id", "grammar_chunk_id", "lesson_id"]:
+    for col in ["id", "sort_order", "block_id", "note_id", "topic_id", "grammar_chunk_id", "lesson_id"]:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
             df[col] = df[col].apply(lambda x: int(x) if pd.notna(x) and x == int(x) else "")

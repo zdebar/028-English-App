@@ -1,4 +1,3 @@
-import config from '@/config/config';
 import { ROUTES } from '@/config/routes.config';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
@@ -10,7 +9,7 @@ import StyledButton from '@/components/UI/buttons/StyledButton';
 type PracticeButtonsProps = Readonly<{ userId: string }>;
 
 export default function PracticeButtons({ userId }: PracticeButtonsProps): JSX.Element {
-  const reviewCount = usePracticeAvailabilityStore((state) => state.reviewCount);
+  const reviewReadyAt = usePracticeAvailabilityStore((state) => state.reviewReadyAt);
   const initialTrainingAvailable = usePracticeAvailabilityStore(
     (state) => state.initialTrainingAvailable,
   );
@@ -19,7 +18,7 @@ export default function PracticeButtons({ userId }: PracticeButtonsProps): JSX.E
   const error = usePracticeAvailabilityStore((state) => state.practiceError);
   const activeReview = activeSession?.mode === 'review';
   const activeNew = activeSession?.mode === 'new';
-  const reviewAvailable = reviewCount >= config.practice.reviewStarSize;
+  const reviewAvailable = reviewReadyAt !== null && Date.parse(reviewReadyAt) <= Date.now();
   const reviewDisabled = Boolean(error) || activeNew || (!loading && !activeReview && !reviewAvailable);
   const newAvailable = activeNew || (!reviewAvailable && initialTrainingAvailable);
   const newDisabled = Boolean(error) || activeReview || (!loading && !activeNew && !newAvailable);
@@ -28,15 +27,6 @@ export default function PracticeButtons({ userId }: PracticeButtonsProps): JSX.E
 
   return (
     <div className="flex w-full flex-col gap-1">
-      <DataNavigationButton
-        to={ROUTES.practice}
-        descriptor={practiceDeckDescriptor(userId)}
-        className="h-button max-h-button w-full px-4"
-        disabled={reviewDisabled}
-        title={reviewTitle}
-      >
-        {TEXTS.reviewButton}
-      </DataNavigationButton>
       {!newAvailable && !loading ? (
         <StyledButton className="h-button max-h-button w-full px-4" disabled title={newTitle}>
           {TEXTS.newButton}
@@ -52,6 +42,15 @@ export default function PracticeButtons({ userId }: PracticeButtonsProps): JSX.E
           {TEXTS.newButton}
         </DataNavigationButton>
       )}
+      <DataNavigationButton
+        to={ROUTES.practice}
+        descriptor={practiceDeckDescriptor(userId)}
+        className="h-button max-h-button w-full px-4"
+        disabled={reviewDisabled}
+        title={reviewTitle}
+      >
+        {TEXTS.reviewButton}
+      </DataNavigationButton>
     </div>
   );
 }

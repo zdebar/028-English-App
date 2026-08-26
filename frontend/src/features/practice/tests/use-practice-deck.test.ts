@@ -71,7 +71,7 @@ describe('usePracticeDeck', () => {
       earnedStar: false,
       starCount: null,
     });
-    mocks.getReadyReviewState.mockResolvedValue({ readyCount: 0, schedule: [] });
+    mocks.getReadyReviewState.mockResolvedValue({ reviewReadyAt: null });
     mocks.continueReview.mockResolvedValue(undefined);
     mocks.deleteByUserId.mockResolvedValue(undefined);
     mocks.reload.mockResolvedValue(undefined);
@@ -137,7 +137,7 @@ describe('usePracticeDeck', () => {
   it('shows the completed target during celebration and resets the next series', async () => {
     mocks.startReview.mockResolvedValue(reviewSession(19));
     mocks.recordReviewAnswer.mockResolvedValue({ completedCount: 20, earnedStar: true, starCount: 11 });
-    mocks.getReadyReviewState.mockResolvedValue({ readyCount: 20, schedule: [] });
+    mocks.getReadyReviewState.mockResolvedValue({ reviewReadyAt: new Date().toISOString() });
     let resolveReload!: () => void;
     mocks.reload.mockReturnValue(
       new Promise<void>((resolve) => {

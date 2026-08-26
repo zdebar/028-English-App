@@ -133,7 +133,7 @@ export async function resolvePracticeGrammarContext(
 
 export async function loadReviewDeck(
   userId: string,
-  deckSize: number = config.lesson.deckSize,
+  deckSize: number = config.practice.reviewStarSize,
 ): Promise<PracticeDeckEntry[]> {
   const items = await UserItem.getReviewDeck(userId, deckSize);
   return resolvePracticeEntries(userId, items);

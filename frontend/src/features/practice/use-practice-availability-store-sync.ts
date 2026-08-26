@@ -13,7 +13,7 @@ function toError(error: unknown): Error {
 /** Keeps Home practice availability synchronized independently of the active route. */
 export function usePracticeAvailabilityStoreSync(userId: string | null): void {
   const reset = usePracticeAvailabilityStore((state) => state.reset);
-  const reviewSchedule = usePracticeAvailabilityStore((state) => state.reviewSchedule);
+  const reviewReadyAt = usePracticeAvailabilityStore((state) => state.reviewReadyAt);
 
   useEffect(() => {
     if (!userId) {
@@ -23,8 +23,7 @@ export function usePracticeAvailabilityStoreSync(userId: string | null): void {
 
     let isActive = true;
     usePracticeAvailabilityStore.setState({
-      reviewCount: 0,
-      reviewSchedule: [],
+      reviewReadyAt: null,
       initialTrainingAvailable: false,
       activeSession: null,
       practiceLoading: true,
@@ -50,8 +49,7 @@ export function usePracticeAvailabilityStoreSync(userId: string | null): void {
       next: (state) => {
         if (!isActive) return;
         usePracticeAvailabilityStore.setState({
-          reviewCount: state.review.readyCount,
-          reviewSchedule: state.review.schedule,
+          reviewReadyAt: state.review.reviewReadyAt,
           initialTrainingAvailable: state.initialTrainingAvailable,
           activeSession: state.activeSession,
           practiceLoading: false,
@@ -67,8 +65,7 @@ export function usePracticeAvailabilityStoreSync(userId: string | null): void {
         if (!isActive) return;
         const normalizedError = toError(error);
         usePracticeAvailabilityStore.setState({
-          reviewCount: 0,
-          reviewSchedule: [],
+          reviewReadyAt: null,
           initialTrainingAvailable: false,
           activeSession: null,
           practiceLoading: false,
@@ -109,43 +106,30 @@ export function usePracticeAvailabilityStoreSync(userId: string | null): void {
   }, [reset, userId]);
 
   useEffect(() => {
-    if (reviewSchedule.length === 0) return;
+    if (!userId || reviewReadyAt === null) return;
 
-    const nextTime = Date.parse(reviewSchedule[0].date);
-    if (!Number.isFinite(nextTime)) {
-      usePracticeAvailabilityStore.setState((state) => ({
-        reviewSchedule: state.reviewSchedule.filter((entry) =>
-          Number.isFinite(Date.parse(entry.date)),
-        ),
-      }));
-      return;
-    }
+    const nextTime = Date.parse(reviewReadyAt);
+    if (!Number.isFinite(nextTime) || nextTime <= Date.now()) return;
 
     const delay = Math.min(
-      Math.max(nextTime - Date.now(), 0),
-      config.practice.maxReadyScheduleTimerDelayMs,
+      nextTime - Date.now(),
+      config.practice.maxReviewReadyTimerDelayMs,
     );
     const timeoutId = globalThis.setTimeout(() => {
-      const now = Date.now();
-      usePracticeAvailabilityStore.setState((state) => {
-        let increment = 0;
-        const nextSchedule = state.reviewSchedule.filter((entry) => {
-          const entryTime = Date.parse(entry.date);
-          if (!Number.isFinite(entryTime)) return false;
-          if (entryTime <= now) {
-            increment += entry.count;
-            return false;
-          }
-          return true;
+      void UserItem.getReadyReviewState(userId)
+        .then((state) => {
+          usePracticeAvailabilityStore.setState({ reviewReadyAt: state.reviewReadyAt });
+        })
+        .catch((error: unknown) => {
+          const normalizedError = toError(error);
+          usePracticeAvailabilityStore.setState({
+            reviewReadyAt: null,
+            practiceError: normalizedError,
+          });
+          reportError('Failed to refresh review availability', normalizedError);
         });
-
-        return {
-          reviewCount: state.reviewCount + increment,
-          reviewSchedule: nextSchedule,
-        };
-      });
     }, delay);
 
     return () => globalThis.clearTimeout(timeoutId);
-  }, [reviewSchedule]);
+  }, [reviewReadyAt, userId]);
 }
