@@ -124,6 +124,9 @@ export function useInitialTrainingDeck(
   const isCzToEn = PHASE_DIRECTIONS[phase] === 'czToEn';
   const cardState = usePracticeCardState({ currentItem, isCzToEn, revealed, setRevealed });
   const resetQuestionState = cardState.resetQuestionState;
+  const displayedCompletedCount = celebratingStar
+    ? items.length
+    : (session?.completed_count ?? 0);
 
   const finishBlock = useCallback(async (finalItem: UserItemLocal) => {
     if (!userId || items.length === 0) return;
@@ -248,7 +251,7 @@ export function useInitialTrainingDeck(
     currentItem,
     note: currentEntry?.note ?? null,
     practiceGrammar: currentEntry?.grammar ?? null,
-    progressLabel: `${phase + 1}/2 · ${session?.completed_count ?? 0}/${items.length}`,
+    progressLabel: `${phase + 1}/2 · ${displayedCompletedCount}/${items.length}`,
     isCzToEn,
     revealed,
     czech: cardState.czech,

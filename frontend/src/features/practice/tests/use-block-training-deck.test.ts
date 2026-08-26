@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   startNew: vi.fn(),
   put: vi.fn(),
   recordInitialTrainingAnswer: vi.fn(),
+  completeInitialTraining: vi.fn(),
   applyPracticeProgress: vi.fn(),
   resetQuestionState: vi.fn(),
 }));
@@ -22,7 +23,7 @@ vi.mock('@/database/models/practice-sessions', () => ({
     startNew: (...args: unknown[]) => mocks.startNew(...args),
     put: (...args: unknown[]) => mocks.put(...args),
     recordInitialTrainingAnswer: (...args: unknown[]) => mocks.recordInitialTrainingAnswer(...args),
-    completeInitialTraining: vi.fn(),
+    completeInitialTraining: (...args: unknown[]) => mocks.completeInitialTraining(...args),
   },
 }));
 vi.mock('@/database/models/blocks', () => ({ default: { getById: vi.fn() } }));
@@ -77,6 +78,7 @@ describe('useInitialTrainingDeck', () => {
     mocks.startNew.mockResolvedValue(newSession());
     mocks.put.mockResolvedValue(undefined);
     mocks.recordInitialTrainingAnswer.mockResolvedValue(undefined);
+    mocks.completeInitialTraining.mockResolvedValue(1);
     mocks.applyPracticeProgress.mockImplementation((item) => ({ ...item, started_at: '2026-08-23' }));
   });
 
@@ -122,6 +124,28 @@ describe('useInitialTrainingDeck', () => {
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(2));
     expect(result.current.isCzToEn).toBe(false);
     expect(result.current.hasProgress).toBe(true);
+  });
+
+  it('shows the completed second-phase count while celebrating its earned star', async () => {
+    mocks.reconcileActive.mockResolvedValue({
+      ...newSession(),
+      phase: 1,
+      completed_count: 1,
+      current_queue_item_ids: [1],
+      completed_item_ids: [2],
+    });
+    const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
+    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+
+    act(() => {
+      void result.current.nextKnown();
+    });
+
+    await waitFor(() => expect(result.current.celebratingStar).toBe(true));
+    expect(result.current.progressLabel).toBe('2/2 · 2/2');
+
+    act(() => result.current.acknowledgeCelebration());
+    await waitFor(() => expect(result.current.isComplete).toBe(true));
   });
 });
 
