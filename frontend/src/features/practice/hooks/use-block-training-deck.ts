@@ -125,13 +125,14 @@ export function useInitialTrainingDeck(
   const cardState = usePracticeCardState({ currentItem, isCzToEn, revealed, setRevealed });
   const resetQuestionState = cardState.resetQuestionState;
 
-  const finishBlock = useCallback(async () => {
+  const finishBlock = useCallback(async (finalItem: UserItemLocal) => {
     if (!userId || items.length === 0) return;
     const dateTime = new Date(Date.now()).toISOString();
     const starCount = await PracticeSession.completeInitialTraining(
       userId,
       items.map((item) => item.item_id),
       dateTime,
+      finalItem,
     );
     invalidateRouteData(routeDataKey('initial-training', userId));
     invalidateRouteData(routeDataKey('practice', userId));
@@ -145,7 +146,6 @@ export function useInitialTrainingDeck(
     async (currentSession: PracticeSessionType): Promise<PracticeSessionType | null> => {
       const currentPhase = currentSession.phase ?? 0;
       if (currentPhase === 1) {
-        await finishBlock();
         return null;
       }
 
@@ -161,14 +161,23 @@ export function useInitialTrainingDeck(
         updated_at: new Date(Date.now()).toISOString(),
       };
     },
-    [finishBlock, items],
+    [items],
   );
 
   const advance = useCallback(
-    async (shouldRepeat: boolean) => {
+    async (outcome: 'correct' | 'incorrect' | 'skip') => {
       if (!session || !currentItem || celebratingStar || isComplete) return;
+      const dateTime = new Date(Date.now()).toISOString();
+      const updatedItem = UserItem.applyPracticeProgress(
+        currentItem,
+        PHASE_DIRECTIONS[phase],
+        outcome,
+        dateTime,
+        phase === 0 ? { oppositeDirectionNextAt: dateTime } : undefined,
+      );
       try {
         const remaining = session.current_queue_item_ids.slice(1);
+        const shouldRepeat = outcome === 'incorrect';
         const retryIds = shouldRepeat
           ? [...session.retry_queue_item_ids, currentItem.item_id]
           : session.retry_queue_item_ids;
@@ -192,11 +201,23 @@ export function useInitialTrainingDeck(
           };
         } else if (remaining.length === 0) {
           const followingPhase = await moveToNextPhase(nextSession);
-          if (!followingPhase) return;
-          nextSession = followingPhase;
+          if (followingPhase) {
+            nextSession = followingPhase;
+          } else {
+            await finishBlock(updatedItem);
+            setItems((currentItems) =>
+              currentItems.map((item) =>
+                item.item_id === updatedItem.item_id ? updatedItem : item,
+              ),
+            );
+            return;
+          }
         }
 
-        await PracticeSession.put(nextSession);
+        await PracticeSession.recordInitialTrainingAnswer(updatedItem, nextSession);
+        setItems((currentItems) =>
+          currentItems.map((item) => (item.item_id === updatedItem.item_id ? updatedItem : item)),
+        );
         setSession(nextSession);
         setHasProgress(true);
         resetQuestionState();
@@ -206,31 +227,10 @@ export function useInitialTrainingDeck(
         reportError('Failed to advance new-block training', normalizedError);
       }
     },
-    [celebratingStar, currentItem, isComplete, moveToNextPhase, resetQuestionState, session],
+    [celebratingStar, currentItem, finishBlock, isComplete, moveToNextPhase, phase, resetQuestionState, session],
   );
 
-  const completeCurrent = useCallback(async () => {
-    if (!session || !currentItem) return;
-    const dateTime = new Date(Date.now()).toISOString();
-    const skippedItem = UserItem.applyPracticeProgress(
-      currentItem,
-      PHASE_DIRECTIONS[phase],
-      'skip',
-      dateTime,
-    );
-    try {
-      await UserItem.savePracticeDeck([{ ...skippedItem, practice_direction: PHASE_DIRECTIONS[phase] }]);
-      setItems((currentItems) =>
-        currentItems.map((item) => (item.item_id === skippedItem.item_id ? skippedItem : item)),
-      );
-      await advance(false);
-    } catch (caughtError) {
-      const normalizedError = toError(caughtError);
-      setError(normalizedError);
-      reportError('Failed to skip new-block item', normalizedError);
-      throw normalizedError;
-    }
-  }, [advance, currentItem, phase, session]);
+  const completeCurrent = useCallback(() => advance('skip'), [advance]);
 
   return {
     block,
@@ -258,8 +258,8 @@ export function useInitialTrainingDeck(
     showDirectionChange: cardState.showDirectionChange,
     handleReveal: cardState.handleReveal,
     plusHint: cardState.plusHint,
-    nextRepeat: () => advance(true),
-    nextKnown: () => advance(false),
+    nextRepeat: () => advance('incorrect'),
+    nextKnown: () => advance('correct'),
     completeCurrent,
     audioError: cardState.audioError,
     playAudio: cardState.playAudio,

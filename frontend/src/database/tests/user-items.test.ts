@@ -593,6 +593,7 @@ describe('UserItem', () => {
       'czToEn',
       'correct',
       '2026-03-04T09:00:00.000Z',
+      { oppositeDirectionNextAt: '2026-03-04T09:00:00.000Z' },
     );
 
     expect(updated).toMatchObject({
@@ -600,11 +601,33 @@ describe('UserItem', () => {
       progress_en_to_cz: 0,
       started_at: '2026-03-04T09:00:00.000Z',
       next_at_cz_to_en: '2026-03-04T09:02:00.000Z',
-      next_at_en_to_cz: '2026-03-04T09:02:00.000Z',
+      next_at_en_to_cz: '2026-03-04T09:00:00.000Z',
     });
     expect(updated.progress_history).toEqual([
       expect.objectContaining({ direction: 'czToEn', outcome: 'correct', progress: 1 }),
     ]);
+  });
+
+  it('advances the opposite direction normally in the second phase', () => {
+    mocks.getNextAt.mockReturnValue('2026-03-04T09:02:00.000Z');
+    const updated = UserItem.applyPracticeProgress(
+      {
+        progress_cz_to_en: 1,
+        progress_en_to_cz: 0,
+        progress_history: [],
+        started_at: '2026-03-04T09:00:00.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+      } as any,
+      'enToCz',
+      'correct',
+      '2026-03-04T09:01:00.000Z',
+    );
+
+    expect(updated).toMatchObject({
+      progress_en_to_cz: 1,
+      next_at_en_to_cz: '2026-03-04T09:02:00.000Z',
+    });
   });
 
   it('records an incorrect answer and resets only the displayed direction', () => {

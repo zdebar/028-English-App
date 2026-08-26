@@ -839,6 +839,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     direction: PracticeDirection,
     outcome: PracticeOutcome,
     dateTime: string,
+    options: { oppositeDirectionNextAt?: string } = {},
   ): UserItemLocal {
     const isFirstAnswer = item.started_at === NULL_DATE;
     const currentProgress = getDirectionProgress(item, direction);
@@ -850,7 +851,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     };
 
     if (isFirstAnswer) {
-      initializeDirectionState(changes, otherDirection);
+      initializeDirectionState(changes, otherDirection, options.oppositeDirectionNextAt);
     }
 
     let directionProgress = currentProgress;
@@ -959,14 +960,15 @@ function setDirectionState(
 function initializeDirectionState(
   target: Partial<UserItemLocal>,
   direction: PracticeDirection,
+  nextAt: string | undefined,
 ): void {
   if (direction === 'czToEn') {
     target.progress_cz_to_en = 0;
-    target.next_at_cz_to_en = getNextAt(0, direction);
+    target.next_at_cz_to_en = nextAt ?? getNextAt(0, direction);
     target.mastered_at_cz_to_en = NULL_DATE;
   } else {
     target.progress_en_to_cz = 0;
-    target.next_at_en_to_cz = getNextAt(0, direction);
+    target.next_at_en_to_cz = nextAt ?? getNextAt(0, direction);
     target.mastered_at_en_to_cz = NULL_DATE;
   }
 }

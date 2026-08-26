@@ -5,6 +5,8 @@ const mocks = vi.hoisted(() => ({
   reconcileActive: vi.fn(),
   startNew: vi.fn(),
   put: vi.fn(),
+  recordInitialTrainingAnswer: vi.fn(),
+  applyPracticeProgress: vi.fn(),
   resetQuestionState: vi.fn(),
 }));
 
@@ -19,12 +21,17 @@ vi.mock('@/database/models/practice-sessions', () => ({
     reconcileActive: (...args: unknown[]) => mocks.reconcileActive(...args),
     startNew: (...args: unknown[]) => mocks.startNew(...args),
     put: (...args: unknown[]) => mocks.put(...args),
+    recordInitialTrainingAnswer: (...args: unknown[]) => mocks.recordInitialTrainingAnswer(...args),
     completeInitialTraining: vi.fn(),
   },
 }));
 vi.mock('@/database/models/blocks', () => ({ default: { getById: vi.fn() } }));
 vi.mock('@/database/models/user-items', () => ({
-  default: { getByBlockId: vi.fn(), savePracticeDeck: vi.fn(), applyPracticeProgress: vi.fn() },
+  default: {
+    getByBlockId: vi.fn(),
+    savePracticeDeck: vi.fn(),
+    applyPracticeProgress: (...args: unknown[]) => mocks.applyPracticeProgress(...args),
+  },
 }));
 vi.mock('@/database/utils/practice-content.utils', () => ({
   resolvePracticeEntries: vi.fn(),
@@ -69,13 +76,16 @@ describe('useInitialTrainingDeck', () => {
     mocks.reconcileActive.mockResolvedValue(null);
     mocks.startNew.mockResolvedValue(newSession());
     mocks.put.mockResolvedValue(undefined);
+    mocks.recordInitialTrainingAnswer.mockResolvedValue(undefined);
+    mocks.applyPracticeProgress.mockImplementation((item) => ({ ...item, started_at: '2026-08-23' }));
   });
 
   it('starts the first ordered phase and persists progress after each answer', async () => {
     const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
     await act(async () => result.current.nextKnown());
-    expect(mocks.put).toHaveBeenCalledWith(
+    expect(mocks.recordInitialTrainingAnswer).toHaveBeenCalledWith(
+      expect.anything(),
       expect.objectContaining({
         phase: 0,
         current_queue_item_ids: [2],
@@ -91,7 +101,8 @@ describe('useInitialTrainingDeck', () => {
     await act(async () => result.current.nextKnown());
     await act(async () => result.current.nextKnown());
 
-    expect(mocks.put).toHaveBeenLastCalledWith(
+    expect(mocks.recordInitialTrainingAnswer).toHaveBeenLastCalledWith(
+      expect.anything(),
       expect.objectContaining({
         phase: 1,
         current_queue_item_ids: [1, 2],

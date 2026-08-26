@@ -193,17 +193,7 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
           throw new Error('The active review session is already complete.');
         }
 
-        const updatedItemCount = await db.user_items.update([item.user_id, item.item_id], {
-          progress_cz_to_en: item.progress_cz_to_en,
-          progress_en_to_cz: item.progress_en_to_cz,
-          progress_history: item.progress_history,
-          started_at: item.started_at,
-          updated_at: item.updated_at,
-          next_at_cz_to_en: item.next_at_cz_to_en,
-          next_at_en_to_cz: item.next_at_en_to_cz,
-          mastered_at_cz_to_en: item.mastered_at_cz_to_en,
-          mastered_at_en_to_cz: item.mastered_at_en_to_cz,
-        });
+        const updatedItemCount = await updateStoredPracticeItem(item);
         if (updatedItemCount !== 1) {
           throw new Error('The reviewed item no longer exists locally.');
         }
@@ -217,6 +207,33 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
         const starCount = earnedStar ? await UserScore.addStar(item.user_id, 1, dateTime) : null;
 
         return { completedCount, earnedStar, starCount };
+      },
+    );
+  }
+
+  /** Atomically stores one initial-training answer and advances its session. */
+  static async recordInitialTrainingAnswer(
+    item: UserItemLocal,
+    session: PracticeSessionType,
+  ): Promise<void> {
+    await db.transaction(
+      'rw',
+      db.user_items,
+      db.practice_sessions,
+      async () => {
+        const activeSession = await this.getActive(item.user_id);
+        if (activeSession?.mode !== 'new') {
+          throw new Error('Initial-training answer requires an active new session.');
+        }
+        if (session.user_id !== item.user_id || session.mode !== 'new') {
+          throw new Error('Initial-training answer contains an invalid session.');
+        }
+
+        const updatedItemCount = await updateStoredPracticeItem(item);
+        if (updatedItemCount !== 1) {
+          throw new Error('The trained item no longer exists locally.');
+        }
+        await db.practice_sessions.put(session);
       },
     );
   }
@@ -236,6 +253,7 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
     userId: string,
     itemIds: readonly number[],
     dateTime: string = new Date(Date.now()).toISOString(),
+    finalItem?: UserItemLocal,
   ): Promise<number> {
     return db.transaction(
       'rw',
@@ -261,6 +279,12 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
           throw new Error('Initial-training completion must match its saved item queue.');
         }
 
+        if (finalItem) {
+          const updatedItemCount = await updateStoredPracticeItem(finalItem);
+          if (updatedItemCount !== 1) {
+            throw new Error('The final trained item no longer exists locally.');
+          }
+        }
         await UserItem.saveInitialTrainingCompletion(userId, itemIds, dateTime);
         const starCount = await UserScore.addStar(userId, 1, dateTime);
         await db.practice_sessions.delete(userId);
@@ -272,4 +296,18 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
   static async deleteByUserId(userId: string): Promise<void> {
     await db.practice_sessions.delete(userId);
   }
+}
+
+async function updateStoredPracticeItem(item: UserItemLocal): Promise<number> {
+  return db.user_items.update([item.user_id, item.item_id], {
+    progress_cz_to_en: item.progress_cz_to_en,
+    progress_en_to_cz: item.progress_en_to_cz,
+    progress_history: item.progress_history,
+    started_at: item.started_at,
+    updated_at: item.updated_at,
+    next_at_cz_to_en: item.next_at_cz_to_en,
+    next_at_en_to_cz: item.next_at_en_to_cz,
+    mastered_at_cz_to_en: item.mastered_at_cz_to_en,
+    mastered_at_en_to_cz: item.mastered_at_en_to_cz,
+  });
 }
