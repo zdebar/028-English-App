@@ -37,8 +37,12 @@ vi.mock('@/database/models/practice-sessions', () => ({
 }));
 vi.mock('@/database/utils/practice-content.utils', () => ({ loadReviewDeck: vi.fn() }));
 vi.mock('@/features/practice/hooks/use-practice-card-state', () => ({
-  usePracticeCardState: () => ({
+  usePracticeCardState: ({ setRevealed }: any) => ({
     resetHint: mocks.resetHint,
+    resetQuestionState: () => {
+      setRevealed(false);
+      mocks.resetHint();
+    },
     czech: 'ahoj',
     english: 'hello',
     audioDisabled: false,
@@ -146,6 +150,8 @@ describe('usePracticeDeck', () => {
     );
     const { result } = renderHook(() => usePracticeDeck('u1'));
     await waitFor(() => expect(result.current.sessionLoading).toBe(false));
+    act(() => result.current.setRevealed(true));
+    expect(result.current.revealed).toBe(true);
     let answerPromise: Promise<void> | undefined;
     act(() => {
       answerPromise = result.current.nextItem('correct');
@@ -158,6 +164,7 @@ describe('usePracticeDeck', () => {
     expect(result.current.progressLabel).toBe('20/20');
     expect(result.current.celebratingStar).toBe(true);
     expect(result.current.celebrationStarTier).toBe('silver');
+    expect(result.current.revealed).toBe(false);
 
     expect(mocks.getReadyReviewState).not.toHaveBeenCalled();
     expect(result.current.celebratingStar).toBe(true);
