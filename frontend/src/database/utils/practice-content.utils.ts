@@ -3,7 +3,9 @@ import { db } from '@/database/models/db';
 import GrammarChunk, {
   type GrammarChunkWithExamples,
 } from '@/database/models/grammar-chunks';
+import PracticeSession from '@/database/models/practice-sessions';
 import UserItem from '@/database/models/user-items';
+import type { PracticeSessionType } from '@/types/practice-session.types';
 import { reportError } from '@/features/logging/monitoring-handler';
 import type { GrammarGroupType, NoteType } from '@/types/generic.types';
 import type {
@@ -137,6 +139,33 @@ export async function loadReviewDeck(
 ): Promise<PracticeDeckEntry[]> {
   const items = await UserItem.getReviewDeck(userId, deckSize);
   return resolvePracticeEntries(userId, items);
+}
+
+export type ReviewSessionDeck = Readonly<{
+  entries: PracticeDeckEntry[];
+  session: PracticeSessionType | null;
+  abandoned: boolean;
+}>;
+
+/** Loads the remaining current review cards, abandoning a session that can no longer finish. */
+export async function loadReviewSessionDeck(userId: string): Promise<ReviewSessionDeck> {
+  const session = await PracticeSession.startReview(userId);
+  if (session.mode !== 'review') {
+    throw new Error('Review practice requires an active review session.');
+  }
+
+  const remainingCount = session.target_count - session.completed_count;
+  if (remainingCount <= 0) {
+    return { entries: [], session, abandoned: false };
+  }
+
+  const entries = await loadReviewDeck(userId, remainingCount);
+  if (entries.length === remainingCount) {
+    return { entries, session, abandoned: false };
+  }
+
+  await PracticeSession.deleteByUserId(userId);
+  return { entries: [], session: null, abandoned: true };
 }
 
 export async function loadPronunciationPracticeDeck(

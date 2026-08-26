@@ -3,14 +3,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   reload: vi.fn(),
-  startReview: vi.fn(),
   recordReviewAnswer: vi.fn(),
   continueReview: vi.fn(),
   deleteByUserId: vi.fn(),
   applyPracticeProgress: vi.fn(),
   getReadyReviewState: vi.fn(),
   resetHint: vi.fn(),
-  fetchData: [] as any[],
+  fetchData: null as any,
 }));
 
 vi.mock('@/config/config', () => ({
@@ -29,13 +28,12 @@ vi.mock('@/database/models/user-items', () => ({
 }));
 vi.mock('@/database/models/practice-sessions', () => ({
   default: {
-    startReview: (...args: unknown[]) => mocks.startReview(...args),
     recordReviewAnswer: (...args: unknown[]) => mocks.recordReviewAnswer(...args),
     continueReview: (...args: unknown[]) => mocks.continueReview(...args),
     deleteByUserId: (...args: unknown[]) => mocks.deleteByUserId(...args),
   },
 }));
-vi.mock('@/database/utils/practice-content.utils', () => ({ loadReviewDeck: vi.fn() }));
+vi.mock('@/database/utils/practice-content.utils', () => ({ loadReviewSessionDeck: vi.fn() }));
 vi.mock('@/features/practice/hooks/use-practice-card-state', () => ({
   usePracticeCardState: ({ setRevealed }: any) => ({
     resetHint: mocks.resetHint,
@@ -67,8 +65,7 @@ import { usePracticeDeck } from '../hooks/use-practice-deck';
 describe('usePracticeDeck', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.fetchData = [entry(1), entry(2)];
-    mocks.startReview.mockResolvedValue(reviewSession(7));
+    mocks.fetchData = reviewDeckResult(reviewSession(7), [entry(1), entry(2)]);
     mocks.applyPracticeProgress.mockImplementation((item) => ({ ...item, updated_at: 'now' }));
     mocks.recordReviewAnswer.mockResolvedValue({
       completedCount: 8,
@@ -88,13 +85,12 @@ describe('usePracticeDeck', () => {
   it('restores the persisted answer count independently of the fetched deck', async () => {
     const { result } = renderHook(() => usePracticeDeck('u1'));
     await waitFor(() => expect(result.current.sessionLoading).toBe(false));
-    expect(mocks.startReview).toHaveBeenCalledWith('u1');
     expect(result.current.currentItem?.item_id).toBe(1);
     expect(result.current.progressLabel).toBe('7/20');
   });
 
   it('uses zero and the configured target for a new review session', async () => {
-    mocks.startReview.mockResolvedValue(reviewSession(0));
+    mocks.fetchData = reviewDeckResult(reviewSession(0), [entry(1), entry(2)]);
 
     const { result } = renderHook(() => usePracticeDeck('u1'));
 
@@ -103,7 +99,7 @@ describe('usePracticeDeck', () => {
   });
 
   it('uses the persisted target when resuming an existing review session', async () => {
-    mocks.startReview.mockResolvedValue(reviewSession(2, 12));
+    mocks.fetchData = reviewDeckResult(reviewSession(2, 12), [entry(1), entry(2)]);
 
     const { result } = renderHook(() => usePracticeDeck('u1'));
 
@@ -112,21 +108,14 @@ describe('usePracticeDeck', () => {
   });
 
   it('keeps the counter hidden until the persisted session is available', async () => {
-    let resolveSession!: (session: ReturnType<typeof reviewSession>) => void;
-    mocks.startReview.mockReturnValue(
-      new Promise((resolve) => {
-        resolveSession = resolve;
-      }),
-    );
+    mocks.fetchData = null;
 
     const { result } = renderHook(() => usePracticeDeck('u1'));
 
     expect(result.current.sessionLoading).toBe(true);
     expect(result.current.progressLabel).toBe('');
 
-    resolveSession(reviewSession(2));
-    await waitFor(() => expect(result.current.sessionLoading).toBe(false));
-    expect(result.current.progressLabel).toBe('2/20');
+    expect(result.current.progressLabel).toBe('');
   });
 
   it('persists every answer before advancing to the next deck item', async () => {
@@ -139,7 +128,7 @@ describe('usePracticeDeck', () => {
   });
 
   it('shows the completed target during celebration and resets the next series', async () => {
-    mocks.startReview.mockResolvedValue(reviewSession(19));
+    mocks.fetchData = reviewDeckResult(reviewSession(19), [entry(1)]);
     mocks.recordReviewAnswer.mockResolvedValue({ completedCount: 20, earnedStar: true, starCount: 11 });
     mocks.getReadyReviewState.mockResolvedValue({ reviewReadyAt: new Date().toISOString() });
     let resolveReload!: () => void;
@@ -186,7 +175,21 @@ describe('usePracticeDeck', () => {
     expect(result.current.progressLabel).toBe('0/20');
     expect(result.current.celebratingStar).toBe(false);
   });
+
+  it('ends an abandoned review session without awarding a star', async () => {
+    mocks.fetchData = { entries: [], session: null, abandoned: true };
+
+    const { result } = renderHook(() => usePracticeDeck('u1'));
+
+    await waitFor(() => expect(result.current.finishedReview).toBe(true));
+    expect(result.current.progressLabel).toBe('');
+    expect(mocks.deleteByUserId).not.toHaveBeenCalled();
+  });
 });
+
+function reviewDeckResult(session: ReturnType<typeof reviewSession>, entries: any[]) {
+  return { entries, session, abandoned: false };
+}
 
 function entry(itemId: number) {
   return {

@@ -1,4 +1,3 @@
-import config from '@/config/config';
 import GrammarGroup from '@/database/models/grammar-groups';
 import Levels from '@/database/models/levels';
 import PronunciationGroup from '@/database/models/pronunciation-groups';
@@ -9,8 +8,8 @@ import UserScore from '@/database/models/user-scores';
 import Topic from '@/database/models/topics';
 import { routeDataKey, type RouteDataDescriptor } from './route-data-handoff';
 import {
-  loadReviewDeck,
   loadPronunciationPracticeDeck,
+  loadReviewSessionDeck,
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
 } from '@/database/utils/practice-content.utils';
@@ -95,7 +94,7 @@ export function pronunciationGroupDetailDescriptor(userId: string, groupId: numb
 export function practiceDeckDescriptor(userId: string) {
   return {
     key: routeDataKey('practice', userId),
-    load: () => loadReviewDeck(userId, config.practice.reviewStarSize),
+    load: async () => (await loadReviewSessionDeck(userId)).entries,
   };
 }
 

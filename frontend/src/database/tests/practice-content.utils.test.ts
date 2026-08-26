@@ -6,8 +6,10 @@ const mocks = vi.hoisted(() => ({
   grammarBulkGet: vi.fn(),
   grammarGroupGet: vi.fn(),
   addExamples: vi.fn(),
-    getReviewDeck: vi.fn(),
+  getReviewDeck: vi.fn(),
   getPronunciationPracticeDeck: vi.fn(),
+  startReview: vi.fn(),
+  deleteByUserId: vi.fn(),
   reportError: vi.fn(),
 }));
 
@@ -33,6 +35,13 @@ vi.mock('@/database/models/user-items', () => ({
   },
 }));
 
+vi.mock('@/database/models/practice-sessions', () => ({
+  default: {
+    startReview: (...args: unknown[]) => mocks.startReview(...args),
+    deleteByUserId: (...args: unknown[]) => mocks.deleteByUserId(...args),
+  },
+}));
+
 vi.mock('@/features/logging/monitoring-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
@@ -43,6 +52,7 @@ vi.mock('@/config/config', () => ({
 
 import {
   loadReviewDeck,
+  loadReviewSessionDeck,
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
 } from '@/database/utils/practice-content.utils';
@@ -105,6 +115,8 @@ describe('practice content resolution', () => {
       ...grammar,
       items: [],
     }));
+    mocks.startReview.mockResolvedValue(reviewSession(4));
+    mocks.deleteByUserId.mockResolvedValue(undefined);
   });
 
   it('deduplicates relation ids and attaches resolved content without dropping items', async () => {
@@ -217,4 +229,37 @@ describe('practice content resolution', () => {
     mocks.getReviewDeck.mockRejectedValue(error);
     await expect(loadReviewDeck('u1')).rejects.toBe(error);
   });
+
+  it('loads only the remaining cards in an active review session', async () => {
+    const items = Array.from({ length: 16 }, (_, index) => ({
+      ...makeItem({ item_id: index + 1 }),
+      practice_direction: 'czToEn' as const,
+    }));
+    mocks.getReviewDeck.mockResolvedValue(items);
+
+    const result = await loadReviewSessionDeck('u1');
+
+    expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', 16);
+    expect(result).toMatchObject({ session: reviewSession(4), abandoned: false });
+    expect(result.entries).toHaveLength(16);
+  });
+
+  it('abandons an incomplete review session when too few cards remain', async () => {
+    mocks.getReviewDeck.mockResolvedValue([]);
+
+    await expect(loadReviewSessionDeck('u1')).resolves.toEqual({
+      entries: [],
+      session: null,
+      abandoned: true,
+    });
+    expect(mocks.deleteByUserId).toHaveBeenCalledWith('u1');
+  });
 });
+
+function reviewSession(completedCount: number) {
+  return {
+    user_id: 'u1', mode: 'review' as const, completed_count: completedCount, target_count: 20,
+    block_id: null, phase: null, current_queue_item_ids: [], retry_queue_item_ids: [],
+    completed_item_ids: [], started_at: '2026-08-23', updated_at: '2026-08-23',
+  };
+}
