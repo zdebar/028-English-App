@@ -47,6 +47,7 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
   const isCzToEn = currentItem?.practice_direction !== 'enToCz';
   const cardState = usePracticeCardState({ currentItem, isCzToEn, revealed, setRevealed });
   const resetHint = cardState.resetHint;
+  const resetQuestionState = cardState.resetQuestionState;
 
   useLayoutEffect(() => {
     setIndex(0);
@@ -147,6 +148,7 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
           setCelebrationStarTier(
             getStarTierForCount(result.starCount ?? 1, config.practice.starsPerRow),
           );
+          resetQuestionState();
           await finalizeCompletedSession();
           return;
         }
@@ -175,6 +177,7 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
       index,
       reload,
       resetHint,
+      resetQuestionState,
       userId,
     ],
   );

@@ -98,14 +98,6 @@
     color: var(--color-star-empty-border-dark);
   }
 
-  .star-empty-fill {
-    color: var(--color-star-empty-fill-light);
-  }
-
-  .dark .star-empty-fill {
-    color: var(--color-star-empty-fill-dark);
-  }
-
   .star-fill-bronze {
     color: var(--color-star-bronze-light);
   }

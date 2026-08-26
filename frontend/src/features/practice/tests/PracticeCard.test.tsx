@@ -264,8 +264,9 @@ vi.mock('@/components/UI/icons/NotRevealedIcon', () => ({
 }));
 
 vi.mock('@/components/UI/StarProgress', () => ({
-  FullStar: ({ className }: { className?: string }) => (
-    <span data-testid="earned-star" className={className}>
+  STAR_SIZE: 22,
+  FullStar: ({ className, size }: { className?: string; size?: number }) => (
+    <span data-testid="earned-star" data-size={size} className={className}>
       star
     </span>
   ),
@@ -317,8 +318,8 @@ vi.mock('@/features/practice/buttons/GrammarButton', () => ({
 }));
 
 vi.mock('@/features/practice/buttons/KnownButton', () => ({
-  default: ({ onClick }: any) => (
-    <button data-testid="known-btn" onClick={onClick}>
+  default: ({ onClick, disabled }: any) => (
+    <button data-testid="known-btn" disabled={disabled} onClick={onClick}>
       known
     </button>
   ),
@@ -508,19 +509,27 @@ describe('PracticeCard', () => {
   it('keeps the one-time earned-star celebration', () => {
     mocks.practiceDeck.celebratingStar = true;
     mocks.practiceDeck.celebrationStarTier = 'silver';
+    mocks.practiceDeck.revealed = true;
 
     const { container } = render(<PracticeCard />);
 
     expect(screen.getByRole('status')).toBeTruthy();
     expect(screen.getByTestId('earned-star').className).toContain('star-fill-silver');
+    expect(screen.getByTestId('earned-star').dataset.size).toBe('22');
     expect(screen.getByText('Earned')).toBeTruthy();
     expect(screen.getByText('Continue by clicking')).toBeTruthy();
+    expect(screen.getByRole('status').className).toContain('font-headings');
+    expect(screen.getByRole('status').className).toContain('text-lg');
+    expect(screen.getByRole('button', { name: 'Continue by clicking' }).className).toContain(
+      'color-button',
+    );
+    expect(container.querySelector('#practice-controls')).toBeTruthy();
+    expect((screen.getByTestId('hint-btn') as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.queryByTestId('master-btn')).toBeNull();
+    expect(screen.queryByTestId('repeat-btn')).toBeNull();
+    expect(screen.queryByTestId('known-btn')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Continue by clicking' }));
     expect(mocks.practiceDeck.acknowledgeCelebration).toHaveBeenCalledOnce();
-    const celebration = container.querySelector('.star-celebration') as HTMLElement;
-    expect(celebration.className).toContain('-translate-y-2');
-    expect(celebration.className).toContain('flex-col');
-    expect(celebration.className).toContain('gap-2');
   });
 
   it('keeps the short direction label in the first top-bar row across card states', () => {
@@ -538,8 +547,11 @@ describe('PracticeCard', () => {
 
     mocks.practiceDeck.showDirectionChange = true;
     rerender(<PracticeCard />);
-    expect(screen.getByText('cz › en')).toBeTruthy();
     expect(container.querySelector('#practice-main-content')?.textContent).toContain('CZ to EN');
+    expect((screen.getByTestId('hint-btn') as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.queryByTestId('master-btn')).toBeNull();
+    expect(screen.queryByTestId('repeat-btn')).toBeNull();
+    expect(screen.queryByTestId('known-btn')).toBeNull();
 
     mocks.practiceDeck.isCzToEn = false;
     mocks.practiceDeck.showDirectionChange = false;

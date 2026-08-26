@@ -74,6 +74,36 @@ describe('PracticeSession review transaction', () => {
     expect(mocks.transaction).toHaveBeenCalledOnce();
   });
 
+  it('stores an initial-training item and session in the same transaction', async () => {
+    const session = {
+      ...reviewSession(1),
+      mode: 'new' as const,
+      phase: 0 as const,
+      current_queue_item_ids: [2],
+      completed_item_ids: [1],
+    };
+    mocks.sessionGet.mockResolvedValue({ ...session, current_queue_item_ids: [1, 2] });
+
+    await PracticeSession.recordInitialTrainingAnswer(item(), session);
+
+    expect(mocks.transaction).toHaveBeenCalledOnce();
+    expect(mocks.itemUpdate).toHaveBeenCalledOnce();
+    expect(mocks.sessionPut).toHaveBeenCalledWith(session);
+  });
+
+  it('does not store the session when the initial-training item is missing', async () => {
+    mocks.sessionGet.mockResolvedValue({ ...reviewSession(1), mode: 'new' as const });
+    mocks.itemUpdate.mockResolvedValue(0);
+
+    await expect(
+      PracticeSession.recordInitialTrainingAnswer(item(), {
+        ...reviewSession(1),
+        mode: 'new',
+      }),
+    ).rejects.toThrow('The trained item no longer exists locally.');
+    expect(mocks.sessionPut).not.toHaveBeenCalled();
+  });
+
   it('returns the awarded count and removes a completed new-block session', async () => {
     mocks.sessionGet.mockResolvedValue({
       ...reviewSession(2),

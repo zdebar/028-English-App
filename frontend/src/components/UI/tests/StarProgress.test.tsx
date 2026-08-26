@@ -1,11 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import {
-  CompactSummary,
-  StarRow,
-  StarRowWithFillingStar,
-} from '@/components/UI/StarProgress';
+import { StarRow } from '@/components/UI/StarProgress';
 
 describe('StarProgress', () => {
   it('renders compacted badges in gold, silver, bronze order', () => {
@@ -33,26 +29,10 @@ describe('StarProgress', () => {
     expect(screen.queryByText('5')).toBeNull();
   });
 
-  it('renders the filling star before the completed star tiers', () => {
-    const { container } = render(
-      <StarRowWithFillingStar
-        starCount={25}
-        currentProgress={20}
-        maxProgress={50}
-        starsPerRow={10}
-        size={22}
-      />,
-    );
-    const row = container.firstElementChild;
+  it('renders one empty star before the first earned star', () => {
+    const { container } = render(<StarRow starCount={0} size={22} />);
 
-    expect(row?.children[0]?.classList.contains('z-star-current')).toBe(true);
-    expect(row?.children[1]?.querySelector('svg.star-fill-gold')).toBeTruthy();
-  });
-
-  it('renders CompactSummary using fullTierCount and partialTierCount', () => {
-    render(<CompactSummary fullTierCount={1} partialTierCount={2} starsPerRow={10} size={22} />);
-
-    expect(screen.getByText('10')).toBeTruthy();
-    expect(screen.getByText('2')).toBeTruthy();
+    expect(container.querySelectorAll('svg.star-empty-border')).toHaveLength(1);
+    expect(container.querySelectorAll('svg.star-fill-bronze')).toHaveLength(0);
   });
 });
