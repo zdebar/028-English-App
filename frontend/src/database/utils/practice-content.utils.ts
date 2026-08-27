@@ -20,6 +20,7 @@ import type {
 } from '@/types/user-item.types';
 
 const NULL_DATE = config.database.nullReplacementDate;
+const REVIEW_TARGET = config.practice.reviewStarSize;
 
 function uniquePositiveIds(values: Array<number | null | undefined>): number[] {
   return [
@@ -143,9 +144,8 @@ export async function resolvePracticeGrammarContext(
 export async function loadReviewDeck(
   userId: string,
   deckSize: number = config.practice.reviewStarSize,
-  allowPartial = false,
 ): Promise<PracticeDeckEntry[]> {
-  const items = await UserItem.getReviewDeck(userId, deckSize, allowPartial);
+  const items = await UserItem.getReviewDeck(userId, deckSize);
   return resolvePracticeEntries(userId, items);
 }
 
@@ -157,11 +157,12 @@ export type ReviewSessionDeck = Readonly<{
 
 /** Loads the remaining cards from a persisted review queue. */
 export async function loadReviewSessionDeck(userId: string): Promise<ReviewSessionDeck> {
-  const session = await PracticeSession.startReview(userId);
-  if (session.mode !== 'review') {
+  const storedSession = await PracticeSession.startReview(userId);
+  if (storedSession.mode !== 'review') {
     throw new Error('Review practice requires an active review session.');
   }
 
+  const session = normalizeReviewSession(storedSession);
   const reviewQueue = session.review_queue;
   if (reviewQueue && reviewQueue.length > 0) {
     return loadPersistedReviewQueue(userId, session, reviewQueue);
@@ -169,22 +170,11 @@ export async function loadReviewSessionDeck(userId: string): Promise<ReviewSessi
 
   const remainingCount = Math.max(session.target_count - session.completed_count, 0);
   if (remainingCount === 0) {
+    if (session !== storedSession) await PracticeSession.put(session);
     return { entries: [], session, abandoned: false };
   }
 
-  const entries = await loadReviewDeck(userId, remainingCount, true);
-  if (entries.length > 0) {
-    const initializedSession = withReviewQueue(
-      session,
-      toReviewQueue(entries),
-      session.completed_count + entries.length,
-    );
-    await PracticeSession.put(initializedSession);
-    return { entries, session: initializedSession, abandoned: false };
-  }
-
-  await PracticeSession.deleteByUserId(userId);
-  return { entries: [], session: null, abandoned: true };
+  return initializeReviewSession(userId, session, remainingCount);
 }
 
 async function loadPersistedReviewQueue(
@@ -210,22 +200,40 @@ async function loadPersistedReviewQueue(
     availableItems.push({ ...item, practice_direction: entry.direction });
   }
 
-  if (availableItems.length === 0) {
+  const remainingCount = Math.max(session.target_count - session.completed_count, 0);
+  if (availableQueue.length !== reviewQueue.length || availableQueue.length !== remainingCount) {
+    return initializeReviewSession(userId, session, remainingCount);
+  }
+
+  const entries = await resolvePracticeEntries(userId, availableItems);
+  return { entries, session, abandoned: false };
+}
+
+function normalizeReviewSession(session: PracticeSessionType): PracticeSessionType {
+  if (session.target_count === REVIEW_TARGET) return session;
+
+  return {
+    ...session,
+    target_count: REVIEW_TARGET,
+    review_queue: [],
+    updated_at: new Date(Date.now()).toISOString(),
+  };
+}
+
+async function initializeReviewSession(
+  userId: string,
+  session: PracticeSessionType,
+  remainingCount: number,
+): Promise<ReviewSessionDeck> {
+  const entries = await loadReviewDeck(userId, remainingCount);
+  if (entries.length !== remainingCount) {
     await PracticeSession.deleteByUserId(userId);
     return { entries: [], session: null, abandoned: true };
   }
 
-  const entries = await resolvePracticeEntries(userId, availableItems);
-  const targetCount = session.completed_count + availableQueue.length;
-  const queueChanged = availableQueue.length !== reviewQueue.length;
-  const targetChanged = session.target_count !== targetCount;
-  let normalizedSession = session;
-  if (queueChanged || targetChanged) {
-    normalizedSession = withReviewQueue(session, availableQueue, targetCount);
-  }
-  if (normalizedSession !== session) await PracticeSession.put(normalizedSession);
-
-  return { entries, session: normalizedSession, abandoned: false };
+  const initializedSession = withReviewQueue(session, toReviewQueue(entries));
+  await PracticeSession.put(initializedSession);
+  return { entries, session: initializedSession, abandoned: false };
 }
 
 function toReviewQueue(entries: readonly PracticeDeckEntry[]): ReviewQueueEntry[] {
@@ -238,12 +246,10 @@ function toReviewQueue(entries: readonly PracticeDeckEntry[]): ReviewQueueEntry[
 function withReviewQueue(
   session: PracticeSessionType,
   reviewQueue: ReviewQueueEntry[],
-  targetCount: number,
 ): PracticeSessionType {
   return {
     ...session,
     review_queue: reviewQueue,
-    target_count: targetCount,
     updated_at: new Date(Date.now()).toISOString(),
   };
 }

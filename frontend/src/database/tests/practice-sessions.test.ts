@@ -102,6 +102,24 @@ describe('PracticeSession review transaction', () => {
     );
   });
 
+  it('resets a completed review session to the configured star size', async () => {
+    mocks.sessionGet.mockResolvedValue({
+      ...reviewSession(5),
+      target_count: 5,
+      review_queue: [{ item_id: 1, direction: 'czToEn' as const }],
+    });
+
+    await PracticeSession.continueReview('u1', '2026-08-23T10:00:00.000Z');
+
+    expect(mocks.sessionPut).toHaveBeenCalledWith(
+      expect.objectContaining({
+        completed_count: 0,
+        target_count: 20,
+        review_queue: [],
+      }),
+    );
+  });
+
   it('stores an initial-training item and session in the same transaction', async () => {
     const session = {
       ...reviewSession(1),

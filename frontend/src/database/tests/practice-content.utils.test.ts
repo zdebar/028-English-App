@@ -248,7 +248,7 @@ describe('practice content resolution', () => {
 
     const result = await loadReviewSessionDeck('u1');
 
-    expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', 16, true);
+    expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', 16);
     expect(result).toMatchObject({
       session: expect.objectContaining({
         user_id: 'u1',
@@ -281,8 +281,7 @@ describe('practice content resolution', () => {
 
   it('resumes an active review session from its saved queue in order', async () => {
     const session = {
-      ...reviewSession(4),
-      target_count: 6,
+      ...reviewSession(18),
       review_queue: [
         { item_id: 3, direction: 'czToEn' as const },
         { item_id: 1, direction: 'enToCz' as const },
@@ -306,9 +305,9 @@ describe('practice content resolution', () => {
     expect(mocks.put).not.toHaveBeenCalled();
   });
 
-  it('shortens a saved review session when queued items are no longer available', async () => {
+  it('replaces a saved review queue when queued items are no longer available', async () => {
     const session = {
-      ...reviewSession(4),
+      ...reviewSession(18),
       review_queue: [
         { item_id: 1, direction: 'czToEn' as const },
         { item_id: 2, direction: 'czToEn' as const },
@@ -316,17 +315,55 @@ describe('practice content resolution', () => {
     };
     mocks.startReview.mockResolvedValue(session);
     mocks.getByItemIds.mockResolvedValue([makeItem({ item_id: 1 })]);
+    const replacementItems = [
+      { ...makeItem({ item_id: 3 }), practice_direction: 'enToCz' as const },
+      { ...makeItem({ item_id: 4 }), practice_direction: 'enToCz' as const },
+    ];
+    mocks.getReviewDeck.mockResolvedValue(replacementItems);
 
     const result = await loadReviewSessionDeck('u1');
 
-    expect(result.entries).toHaveLength(1);
+    expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', 2);
+    expect(result.entries).toHaveLength(2);
     expect(result.session).toMatchObject({
-      completed_count: 4,
-      target_count: 5,
-      review_queue: [{ item_id: 1, direction: 'czToEn' }],
+      completed_count: 18,
+      target_count: 20,
+      review_queue: [
+        { item_id: 3, direction: 'enToCz' },
+        { item_id: 4, direction: 'enToCz' },
+      ],
     });
     expect(mocks.put).toHaveBeenCalledOnce();
     expect(mocks.deleteByUserId).not.toHaveBeenCalled();
+  });
+
+  it('repairs a stale partial target when a full review deck is available', async () => {
+    const staleQueue = Array.from({ length: 5 }, (_, index) => ({
+      item_id: index + 1,
+      direction: 'enToCz' as const,
+    }));
+    mocks.startReview.mockResolvedValue({
+      ...reviewSession(0),
+      target_count: 5,
+      review_queue: staleQueue,
+    });
+    const fullDeck = Array.from({ length: 20 }, (_, index) => ({
+      ...makeItem({ item_id: index + 1 }),
+      practice_direction: 'enToCz' as const,
+    }));
+    mocks.getReviewDeck.mockResolvedValue(fullDeck);
+
+    const result = await loadReviewSessionDeck('u1');
+
+    expect(mocks.getByItemIds).not.toHaveBeenCalled();
+    expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', 20);
+    expect(result.entries).toHaveLength(20);
+    expect(result.session).toMatchObject({
+      completed_count: 0,
+      target_count: 20,
+      review_queue: fullDeck.map((item) => ({ item_id: item.item_id, direction: 'enToCz' })),
+    });
+    expect(mocks.put).toHaveBeenCalledOnce();
   });
 });
 

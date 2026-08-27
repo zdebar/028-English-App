@@ -163,14 +163,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    *
    * @param userId User id whose practice items should be selected.
    * @param deckSize Maximum deck size; defaults to the review star size.
-   * @param allowPartial Whether to return the larger available partial deck when neither
-   * direction fills the requested size.
    * @returns Practice items ordered by readiness and curriculum position.
    */
   static async getReviewDeck(
     userId: string,
     deckSize: number = config.practice.reviewStarSize,
-    allowPartial = false,
   ): Promise<PracticeDeckItem[]> {
     if (deckSize <= 0) return [];
 
@@ -181,8 +178,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const alternativeDeck = await this.getDuePracticeItems(userId, 'czToEn', deckSize, now);
 
     if (alternativeDeck.length === deckSize) return alternativeDeck;
-    if (!allowPartial) return [];
-    return enToCzItems.length >= alternativeDeck.length ? enToCzItems : alternativeDeck;
+    return [];
   }
 
   /**
