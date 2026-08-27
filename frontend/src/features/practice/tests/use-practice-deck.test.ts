@@ -18,7 +18,12 @@ vi.mock('@/config/config', () => ({
   },
 }));
 vi.mock('@/hooks/use-fetch', () => ({
-  useFetch: () => ({ data: mocks.fetchData, loading: false, error: null, reload: mocks.reload }),
+  useFetch: (_fetchFunction: unknown, options: { initialData?: unknown } = {}) => ({
+    data: options.initialData !== undefined ? options.initialData : mocks.fetchData,
+    loading: false,
+    error: null,
+    reload: mocks.reload,
+  }),
 }));
 vi.mock('@/database/models/user-items', () => ({
   default: {
@@ -61,6 +66,7 @@ vi.mock('@/routing/route-data-handoff', () => ({
 vi.mock('@/features/logging/monitoring-handler', () => ({ reportError: vi.fn() }));
 
 import { usePracticeDeck } from '../hooks/use-practice-deck';
+import type { PracticeDeckEntry } from '@/types/user-item.types';
 
 describe('usePracticeDeck', () => {
   beforeEach(() => {
@@ -116,6 +122,17 @@ describe('usePracticeDeck', () => {
     expect(result.current.progressLabel).toBe('');
 
     expect(result.current.progressLabel).toBe('');
+  });
+
+  it('does not reload repeatedly when rerendered with an initial route deck', () => {
+    const initialDeck = [entry(1), entry(2)];
+    const { rerender } = renderHook(() => usePracticeDeck('u1', initialDeck));
+
+    expect(mocks.reload).toHaveBeenCalledTimes(1);
+
+    rerender();
+
+    expect(mocks.reload).toHaveBeenCalledTimes(1);
   });
 
   it('persists every answer before advancing to the next deck item', async () => {
@@ -191,7 +208,7 @@ function reviewDeckResult(session: ReturnType<typeof reviewSession>, entries: an
   return { entries, session, abandoned: false };
 }
 
-function entry(itemId: number) {
+function entry(itemId: number): PracticeDeckEntry {
   return {
     item: {
       item_id: itemId,
@@ -204,6 +221,7 @@ function entry(itemId: number) {
       has_pronunciation_practice: 0,
       sort_order: itemId,
       curriculum_sort_path: [1, 1, itemId],
+      topic_id: 1,
       note_id: null,
       block_id: 1,
       grammar_chunk_id: 0,
