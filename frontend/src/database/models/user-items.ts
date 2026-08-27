@@ -172,12 +172,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     if (deckSize <= 0) return [];
 
     const now = new Date().toISOString();
+    const czToEnItems = await this.getDuePracticeItems(userId, 'czToEn', deckSize, now);
+    if (czToEnItems.length === deckSize) return czToEnItems;
+
     const enToCzItems = await this.getDuePracticeItems(userId, 'enToCz', deckSize, now);
+
     if (enToCzItems.length === deckSize) return enToCzItems;
-
-    const alternativeDeck = await this.getDuePracticeItems(userId, 'czToEn', deckSize, now);
-
-    if (alternativeDeck.length === deckSize) return alternativeDeck;
     return [];
   }
 
@@ -879,7 +879,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
 }
 
-const DIRECTIONS: readonly PracticeDirection[] = ['enToCz', 'czToEn'];
+const DIRECTIONS: readonly PracticeDirection[] = ['czToEn', 'enToCz'];
 
 function getReviewReadyAt(
   items: UserItemLocal[],
