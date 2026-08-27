@@ -256,7 +256,13 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
   ): Promise<void> {
     const session = await this.getActive(userId);
     if (session?.mode !== 'review' || session.completed_count < session.target_count) return;
-    await db.practice_sessions.put({ ...session, completed_count: 0, updated_at: dateTime });
+    await db.practice_sessions.put({
+      ...session,
+      completed_count: 0,
+      target_count: config.practice.reviewStarSize,
+      review_queue: [],
+      updated_at: dateTime,
+    });
   }
 
   /** Atomically completes initial training, awards its star, and removes the local session. */
