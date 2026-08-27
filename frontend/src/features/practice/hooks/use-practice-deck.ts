@@ -7,7 +7,10 @@ import { reportError } from '@/features/logging/monitoring-handler';
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
 import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff';
-import { loadReviewDeck } from '@/database/utils/practice-content.utils';
+import {
+  loadReviewSessionDeck,
+  type ReviewSessionDeck,
+} from '@/database/utils/practice-content.utils';
 import config from '@/config/config';
 import { getStarTierForCount, type StarTier } from '@/utils/star-progress.utils';
 import { useStarCelebration } from './use-star-celebration';
@@ -32,16 +35,19 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
   const [sessionLoading, setSessionLoading] = useState(userId != null);
   const completionPending = useRef(false);
 
-  const fetchPracticeDeck = useCallback(async () => {
-    if (!userId) return [];
-    return loadReviewDeck(userId);
+  const fetchPracticeDeck = useCallback(async (): Promise<ReviewSessionDeck> => {
+    if (!userId) return { entries: [], session: null, abandoned: false };
+    return loadReviewSessionDeck(userId);
   }, [userId]);
 
-  const { data: fetchedArray, loading, error, reload } = useFetch<PracticeDeckEntry[]>(
+  const initialResult = initialDeck
+    ? { entries: initialDeck, session: null, abandoned: false }
+    : undefined;
+  const { data: fetchedResult, loading, error, reload } = useFetch<ReviewSessionDeck>(
     fetchPracticeDeck,
-    { initialData: initialDeck },
+    { initialData: initialResult },
   );
-  const activeArray = fetchedArray ?? [];
+  const activeArray = fetchedResult?.entries ?? [];
   const currentEntry = activeArray[index] ?? null;
   const currentItem = currentEntry?.item ?? null;
   const isCzToEn = currentItem?.practice_direction !== 'enToCz';
@@ -53,7 +59,7 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
     setIndex(0);
     setRevealed(false);
     resetHint();
-  }, [fetchedArray, resetHint]);
+  }, [fetchedResult, resetHint]);
 
   const finalizeCompletedSession = useCallback(async () => {
     if (!userId || completionPending.current) return;
@@ -100,32 +106,31 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
       setSessionLoading(false);
       return;
     }
-    let active = true;
-    setSessionLoading(true);
-    void PracticeSession.startReview(userId)
-      .then((session) => {
-        if (!active) return;
-        if (session.mode !== 'review') {
-          throw new Error('Review practice requires an active review session.');
-        }
-        setSessionProgress({
-          completedCount: session.completed_count,
-          targetCount: session.target_count,
-        });
-        setSessionLoading(false);
-        if (session.completed_count >= session.target_count) {
-          void finalizeCompletedSession();
-        }
-      })
-      .catch((caughtError) => {
-        if (!active) return;
+    if (!fetchedResult || loading) return;
+    if (fetchedResult.abandoned) {
+      setSessionProgress(null);
+      setSessionLoading(false);
+      setFinishedReview(true);
+      return;
+    }
+    if (!fetchedResult.session) {
+      setSessionLoading(true);
+      void reload().catch((caughtError) => {
         setSaveError(toError(caughtError));
         setSessionLoading(false);
       });
-    return () => {
-      active = false;
-    };
-  }, [finalizeCompletedSession, userId]);
+      return;
+    }
+
+    setSessionProgress({
+      completedCount: fetchedResult.session.completed_count,
+      targetCount: fetchedResult.session.target_count,
+    });
+    setSessionLoading(false);
+    if (fetchedResult.session.completed_count >= fetchedResult.session.target_count) {
+      void finalizeCompletedSession();
+    }
+  }, [fetchedResult, finalizeCompletedSession, loading, reload, userId]);
 
   const nextItem = useCallback(
     async (outcome: PracticeOutcome) => {
