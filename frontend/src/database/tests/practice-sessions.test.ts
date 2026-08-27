@@ -58,7 +58,11 @@ describe('PracticeSession review transaction', () => {
 
   it('persists an intermediate answer without awarding a star', async () => {
     mocks.sessionGet.mockResolvedValue(reviewSession(7));
-    const result = await PracticeSession.recordReviewAnswer(item(), '2026-08-23T10:00:00.000Z');
+    const result = await PracticeSession.recordReviewAnswer(
+      item(),
+      'czToEn',
+      '2026-08-23T10:00:00.000Z',
+    );
     expect(result).toEqual({ completedCount: 8, earnedStar: false, starCount: null });
     expect(mocks.itemUpdate).toHaveBeenCalledOnce();
     expect(mocks.sessionPut).toHaveBeenCalledWith(expect.objectContaining({ completed_count: 8 }));
@@ -67,11 +71,35 @@ describe('PracticeSession review transaction', () => {
 
   it('stores answer, completed session, and exactly one star in the same transaction', async () => {
     mocks.sessionGet.mockResolvedValue(reviewSession(19));
-    const result = await PracticeSession.recordReviewAnswer(item(), '2026-08-23T10:00:00.000Z');
+    const result = await PracticeSession.recordReviewAnswer(
+      item(),
+      'czToEn',
+      '2026-08-23T10:00:00.000Z',
+    );
     expect(result).toEqual({ completedCount: 20, earnedStar: true, starCount: 11 });
     expect(mocks.addStar).toHaveBeenCalledOnce();
     expect(mocks.addStar).toHaveBeenCalledWith('u1', 1, '2026-08-23T10:00:00.000Z');
     expect(mocks.transaction).toHaveBeenCalledOnce();
+  });
+
+  it('removes the answered card from a saved review queue', async () => {
+    const session = {
+      ...reviewSession(7),
+      review_queue: [
+        { item_id: 1, direction: 'czToEn' as const },
+        { item_id: 2, direction: 'czToEn' as const },
+      ],
+    };
+    mocks.sessionGet.mockResolvedValue(session);
+
+    await PracticeSession.recordReviewAnswer(item(), 'czToEn', '2026-08-23T10:00:00.000Z');
+
+    expect(mocks.sessionPut).toHaveBeenCalledWith(
+      expect.objectContaining({
+        completed_count: 8,
+        review_queue: [{ item_id: 2, direction: 'czToEn' }],
+      }),
+    );
   });
 
   it('stores an initial-training item and session in the same transaction', async () => {

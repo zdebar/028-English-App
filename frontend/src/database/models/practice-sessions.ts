@@ -4,10 +4,11 @@ import { db } from '@/database/models/db';
 import type {
   NewPracticePhase,
   PracticeSessionType,
+  ReviewQueueEntry,
 } from '@/types/practice-session.types';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 import { Entity } from 'dexie';
-import type { UserItemLocal } from '@/types/user-item.types';
+import type { PracticeDirection, UserItemLocal } from '@/types/user-item.types';
 import UserScore from './user-scores';
 import UserItem from './user-items';
 
@@ -32,6 +33,7 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
   current_queue_item_ids!: number[];
   retry_queue_item_ids!: number[];
   completed_item_ids!: number[];
+  review_queue?: ReviewQueueEntry[];
   started_at!: string;
   updated_at!: string;
 
@@ -134,6 +136,7 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
       current_queue_item_ids: [],
       retry_queue_item_ids: [],
       completed_item_ids: [],
+      review_queue: [],
       started_at: dateTime,
       updated_at: dateTime,
     };
@@ -177,6 +180,7 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
   /** Atomically stores one review answer, advances the session, and awards its final star. */
   static async recordReviewAnswer(
     item: UserItemLocal,
+    direction: PracticeDirection,
     dateTime: string,
   ): Promise<ReviewAnswerResult> {
     return db.transaction(
@@ -199,11 +203,18 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
         }
         const completedCount = session.completed_count + 1;
         const earnedStar = completedCount === session.target_count;
-        await db.practice_sessions.put({
+        const nextSession: PracticeSessionType = {
           ...session,
           completed_count: completedCount,
           updated_at: dateTime,
-        });
+        };
+        const remainingReviewQueue = removeReviewQueueEntry(
+          session.review_queue,
+          item.item_id,
+          direction,
+        );
+        if (remainingReviewQueue) nextSession.review_queue = remainingReviewQueue;
+        await db.practice_sessions.put(nextSession);
         const starCount = earnedStar ? await UserScore.addStar(item.user_id, 1, dateTime) : null;
 
         return { completedCount, earnedStar, starCount };
@@ -296,6 +307,15 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
   static async deleteByUserId(userId: string): Promise<void> {
     await db.practice_sessions.delete(userId);
   }
+}
+
+function removeReviewQueueEntry(
+  queue: ReviewQueueEntry[] | undefined,
+  itemId: number,
+  direction: PracticeDirection,
+): ReviewQueueEntry[] | undefined {
+  if (!queue) return undefined;
+  return queue.filter((entry) => entry.item_id !== itemId || entry.direction !== direction);
 }
 
 async function updateStoredPracticeItem(item: UserItemLocal): Promise<number> {

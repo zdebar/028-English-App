@@ -5,14 +5,21 @@ import GrammarChunk, {
 } from '@/database/models/grammar-chunks';
 import PracticeSession from '@/database/models/practice-sessions';
 import UserItem from '@/database/models/user-items';
-import type { PracticeSessionType } from '@/types/practice-session.types';
+import type {
+  PracticeSessionType,
+  ReviewQueueEntry,
+} from '@/types/practice-session.types';
 import { reportError } from '@/features/logging/monitoring-handler';
 import type { GrammarGroupType, NoteType } from '@/types/generic.types';
 import type {
   PracticeDeckEntry,
+  PracticeDeckItem,
+  PracticeDirection,
   ResolvedPracticeEntry,
   UserItemLocal,
 } from '@/types/user-item.types';
+
+const NULL_DATE = config.database.nullReplacementDate;
 
 function uniquePositiveIds(values: Array<number | null | undefined>): number[] {
   return [
@@ -136,8 +143,9 @@ export async function resolvePracticeGrammarContext(
 export async function loadReviewDeck(
   userId: string,
   deckSize: number = config.practice.reviewStarSize,
+  allowPartial = false,
 ): Promise<PracticeDeckEntry[]> {
-  const items = await UserItem.getReviewDeck(userId, deckSize);
+  const items = await UserItem.getReviewDeck(userId, deckSize, allowPartial);
   return resolvePracticeEntries(userId, items);
 }
 
@@ -147,25 +155,103 @@ export type ReviewSessionDeck = Readonly<{
   abandoned: boolean;
 }>;
 
-/** Loads the remaining current review cards, abandoning a session that can no longer finish. */
+/** Loads the remaining cards from a persisted review queue. */
 export async function loadReviewSessionDeck(userId: string): Promise<ReviewSessionDeck> {
   const session = await PracticeSession.startReview(userId);
   if (session.mode !== 'review') {
     throw new Error('Review practice requires an active review session.');
   }
 
-  const remainingCount = session.target_count - session.completed_count;
-  if (remainingCount <= 0) {
+  const reviewQueue = session.review_queue;
+  if (reviewQueue && reviewQueue.length > 0) {
+    return loadPersistedReviewQueue(userId, session, reviewQueue);
+  }
+
+  const remainingCount = Math.max(session.target_count - session.completed_count, 0);
+  if (remainingCount === 0) {
     return { entries: [], session, abandoned: false };
   }
 
-  const entries = await loadReviewDeck(userId, remainingCount);
-  if (entries.length === remainingCount) {
-    return { entries, session, abandoned: false };
+  const entries = await loadReviewDeck(userId, remainingCount, true);
+  if (entries.length > 0) {
+    const initializedSession = withReviewQueue(
+      session,
+      toReviewQueue(entries),
+      session.completed_count + entries.length,
+    );
+    await PracticeSession.put(initializedSession);
+    return { entries, session: initializedSession, abandoned: false };
   }
 
   await PracticeSession.deleteByUserId(userId);
   return { entries: [], session: null, abandoned: true };
+}
+
+async function loadPersistedReviewQueue(
+  userId: string,
+  session: PracticeSessionType,
+  reviewQueue: ReviewQueueEntry[],
+): Promise<ReviewSessionDeck> {
+  const items = await UserItem.getByItemIds(
+    userId,
+    reviewQueue.map((entry) => entry.item_id),
+  );
+  const itemById = new Map(items.map((item) => [item.item_id, item]));
+  const availableQueue: ReviewQueueEntry[] = [];
+  const availableItems: PracticeDeckItem[] = [];
+
+  for (const entry of reviewQueue) {
+    const item = itemById.get(entry.item_id);
+    if (item?.deleted_at !== NULL_DATE) continue;
+    if (!item) continue;
+    if (isDirectionMastered(item, entry.direction)) continue;
+
+    availableQueue.push(entry);
+    availableItems.push({ ...item, practice_direction: entry.direction });
+  }
+
+  if (availableItems.length === 0) {
+    await PracticeSession.deleteByUserId(userId);
+    return { entries: [], session: null, abandoned: true };
+  }
+
+  const entries = await resolvePracticeEntries(userId, availableItems);
+  const targetCount = session.completed_count + availableQueue.length;
+  const queueChanged = availableQueue.length !== reviewQueue.length;
+  const targetChanged = session.target_count !== targetCount;
+  let normalizedSession = session;
+  if (queueChanged || targetChanged) {
+    normalizedSession = withReviewQueue(session, availableQueue, targetCount);
+  }
+  if (normalizedSession !== session) await PracticeSession.put(normalizedSession);
+
+  return { entries, session: normalizedSession, abandoned: false };
+}
+
+function toReviewQueue(entries: readonly PracticeDeckEntry[]): ReviewQueueEntry[] {
+  return entries.map(({ item }) => ({
+    item_id: item.item_id,
+    direction: item.practice_direction,
+  }));
+}
+
+function withReviewQueue(
+  session: PracticeSessionType,
+  reviewQueue: ReviewQueueEntry[],
+  targetCount: number,
+): PracticeSessionType {
+  return {
+    ...session,
+    review_queue: reviewQueue,
+    target_count: targetCount,
+    updated_at: new Date(Date.now()).toISOString(),
+  };
+}
+
+function isDirectionMastered(item: UserItemLocal, direction: PracticeDirection): boolean {
+  return direction === 'czToEn'
+    ? item.mastered_at_cz_to_en !== NULL_DATE
+    : item.mastered_at_en_to_cz !== NULL_DATE;
 }
 
 export async function loadPronunciationPracticeDeck(
