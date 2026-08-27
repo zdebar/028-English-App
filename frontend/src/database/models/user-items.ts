@@ -96,10 +96,8 @@ function convertLocalToExport(localItem: UserItemLocal): UserItemExport {
     started_at: started_at === NULL_DATE ? null : started_at,
     next_at_cz_to_en: next_at_cz_to_en === NULL_DATE ? null : next_at_cz_to_en,
     next_at_en_to_cz: next_at_en_to_cz === NULL_DATE ? null : next_at_en_to_cz,
-    mastered_at_cz_to_en:
-      mastered_at_cz_to_en === NULL_DATE ? null : mastered_at_cz_to_en,
-    mastered_at_en_to_cz:
-      mastered_at_en_to_cz === NULL_DATE ? null : mastered_at_en_to_cz,
+    mastered_at_cz_to_en: mastered_at_cz_to_en === NULL_DATE ? null : mastered_at_cz_to_en,
+    mastered_at_en_to_cz: mastered_at_en_to_cz === NULL_DATE ? null : mastered_at_en_to_cz,
   };
 }
 
@@ -172,7 +170,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     if (deckSize <= 0) return [];
 
     const now = new Date().toISOString();
+    const czToEnItems = await this.getDuePracticeItems(userId, 'czToEn', deckSize, now);
+    if (czToEnItems.length === deckSize) return czToEnItems;
+
     const enToCzItems = await this.getDuePracticeItems(userId, 'enToCz', deckSize, now);
+
     if (enToCzItems.length === deckSize) return enToCzItems;
 
     const alternativeDeck = await this.getDuePracticeItems(userId, 'czToEn', deckSize, now);
@@ -436,10 +438,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   /**
    * Reads the persisted pronunciation selection for one user item.
    */
-  static async getPronunciationSelection(
-    userId: string,
-    itemId: number,
-  ): Promise<boolean> {
+  static async getPronunciationSelection(userId: string, itemId: number): Promise<boolean> {
     const item = await db.user_items.get([userId, itemId]);
     return item?.has_pronunciation_practice === 1;
   }
@@ -474,10 +473,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Counts selected pronunciation items using only the dedicated compound index.
    */
   static async getPronunciationPracticeCount(userId: string): Promise<number> {
-    return db.user_items
-      .where('[user_id+has_pronunciation_practice]')
-      .equals([userId, 1])
-      .count();
+    return db.user_items.where('[user_id+has_pronunciation_practice]').equals([userId, 1]).count();
   }
 
   /**
@@ -485,10 +481,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    */
   static async getPronunciationPracticeDeck(userId: string): Promise<UserItemLocal[]> {
     const [items, memberships] = await Promise.all([
-      db.user_items
-        .where('[user_id+has_pronunciation_practice]')
-        .equals([userId, 1])
-        .toArray(),
+      db.user_items.where('[user_id+has_pronunciation_practice]').equals([userId, 1]).toArray(),
       db.pronunciation_group_items.toArray(),
     ]);
     const firstGroupByItem = new Map<number, number>();
@@ -876,10 +869,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       ],
     };
   }
-
 }
 
-const DIRECTIONS: readonly PracticeDirection[] = ['enToCz', 'czToEn'];
+const DIRECTIONS: readonly PracticeDirection[] = ['czToEn', 'enToCz'];
 
 function getReviewReadyAt(
   items: UserItemLocal[],
@@ -991,10 +983,7 @@ function setDirectionMastered(
   }
 }
 
-function clearDirectionMastery(
-  target: Partial<UserItemLocal>,
-  direction: PracticeDirection,
-): void {
+function clearDirectionMastery(target: Partial<UserItemLocal>, direction: PracticeDirection): void {
   if (direction === 'czToEn') {
     target.mastered_at_cz_to_en = NULL_DATE;
   } else {
@@ -1013,16 +1002,11 @@ function resolveMasteredAt(
   return dateTime;
 }
 
-function isStartedGrammarItem(
-  item: Pick<UserItemLocal, 'grammar_chunk_id'>,
-): boolean {
+function isStartedGrammarItem(item: Pick<UserItemLocal, 'grammar_chunk_id'>): boolean {
   return item.grammar_chunk_id !== NULL_NUMBER;
 }
 
-function compareCurriculumPaths(
-  left: CurriculumSortPath,
-  right: CurriculumSortPath,
-): number {
+function compareCurriculumPaths(left: CurriculumSortPath, right: CurriculumSortPath): number {
   for (let index = 0; index < left.length; index += 1) {
     const difference = left[index] - right[index];
     if (difference !== 0) return difference;

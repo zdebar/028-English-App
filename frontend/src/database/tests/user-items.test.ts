@@ -748,7 +748,7 @@ describe('UserItem', () => {
     expect(result.map((item) => item.item_id)).toEqual([1, 2, 3]);
   });
 
-  it('returns a full EN to CZ due deck before considering CZ to EN or new items', async () => {
+  it('returns a full CZ to EN due deck before considering EN to CZ', async () => {
     mocks.indexedToArray.mockResolvedValueOnce([
       {
         item_id: 2,
@@ -767,6 +767,7 @@ describe('UserItem', () => {
     const deck = await UserItem.getReviewDeck('u1', 2);
 
     expect(deck.map((item) => item.item_id)).toEqual([2, 3]);
+    expect(deck.every((item) => item.practice_direction === 'czToEn')).toBe(true);
     expect(mocks.indexedToArray).toHaveBeenCalledTimes(1);
   });
 
@@ -920,7 +921,7 @@ describe('UserItem', () => {
       false,
     );
 
-    const grammarFilter = mocks.indexedFilter.mock.calls[1][0] as (item: any) => boolean;
+    const grammarFilter = mocks.indexedFilter.mock.calls[0][0] as (item: any) => boolean;
     expect(grammarFilter({
       block_id: 10,
       started_at: '2026-01-01T00:00:00.000Z',
