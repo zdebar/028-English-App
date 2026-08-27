@@ -176,10 +176,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const enToCzItems = await this.getDuePracticeItems(userId, 'enToCz', deckSize, now);
 
     if (enToCzItems.length === deckSize) return enToCzItems;
-
-    const alternativeDeck = await this.getDuePracticeItems(userId, 'czToEn', deckSize, now);
-
-    if (alternativeDeck.length === deckSize) return alternativeDeck;
     return [];
   }
 

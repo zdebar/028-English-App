@@ -790,14 +790,6 @@ describe('UserItem', () => {
           next_at: '2026-06-21T00:00:00.000Z',
           mastered_at: '1970-01-01T00:00:00.000Z',
         },
-      ])
-      .mockResolvedValueOnce([
-        {
-          item_id: 3,
-          progress: 5,
-          next_at: '1970-01-01T00:00:00.000Z',
-          mastered_at: '1970-01-01T00:00:00.000Z',
-        },
       ]);
 
     const deck = await UserItem.getReviewDeck('u1', 4);
@@ -816,15 +808,7 @@ describe('UserItem', () => {
           mastered_at: '1970-01-01T00:00:00.000Z',
         },
       ])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([
-        {
-          item_id: 3,
-          progress: 0,
-          next_at: '1970-01-01T00:00:00.000Z',
-          mastered_at: '1970-01-01T00:00:00.000Z',
-        },
-      ]);
+      .mockResolvedValueOnce([]);
 
     const deck = await UserItem.getReviewDeck('u1', 3);
 
@@ -835,27 +819,7 @@ describe('UserItem', () => {
   it('does not inspect blocks while selecting a due-only review deck', async () => {
     mocks.indexedToArray
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ item_id: 1, progress: 2 }])
-      .mockResolvedValueOnce([
-        {
-          item_id: 2,
-          block_id: 20,
-          grammar_chunk_id: 7,
-          progress: 0,
-        },
-        {
-          item_id: 3,
-          block_id: 30,
-          grammar_chunk_id: 0,
-          progress: 0,
-        },
-        {
-          item_id: 4,
-          block_id: 40,
-          grammar_chunk_id: 9,
-          progress: 0,
-        },
-      ]);
+      .mockResolvedValueOnce([{ item_id: 1, progress: 2 }]);
     const deck = await UserItem.getReviewDeck('u1', 5);
 
     expect(deck).toEqual([]);
@@ -871,7 +835,6 @@ describe('UserItem', () => {
           mastered_at: '1970-01-01T00:00:00.000Z',
         },
       ])
-      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
 
     const deck = await UserItem.getReviewDeck('u1', 3);
@@ -879,15 +842,20 @@ describe('UserItem', () => {
     expect(deck).toEqual([]);
   });
 
-  it('uses any CZ to EN grammar deck instead of a partial EN to CZ deck', async () => {
+  it('uses a full EN to CZ deck when CZ to EN is partial', async () => {
     mocks.indexedToArray
       .mockResolvedValueOnce([{ item_id: 1, block_id: 10, progress: 1 }])
-      .mockResolvedValueOnce([{ item_id: 2, block_id: 10, progress: 2 }]);
+      .mockResolvedValueOnce([
+        { item_id: 2, block_id: 10, progress: 2 },
+        { item_id: 3, block_id: 10, progress: 2 },
+        { item_id: 4, block_id: 10, progress: 2 },
+      ]);
 
     const deck = await UserItem.getReviewDeck('u1', 3);
 
     expect(deck.map((item) => item.item_id)).toEqual([2, 3, 4]);
-    expect(mocks.indexedToArray).toHaveBeenCalledTimes(1);
+    expect(deck.every((item) => item.practice_direction === 'enToCz')).toBe(true);
+    expect(mocks.indexedToArray).toHaveBeenCalledTimes(2);
   });
 
   it('restores a partial EN to CZ grammar deck when no CZ to EN items exist', async () => {
