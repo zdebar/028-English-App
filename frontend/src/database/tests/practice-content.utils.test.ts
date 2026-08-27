@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   getByItemIds: vi.fn(),
   getPronunciationPracticeDeck: vi.fn(),
   startReview: vi.fn(),
+  continueReview: vi.fn(),
   put: vi.fn(),
   deleteByUserId: vi.fn(),
   reportError: vi.fn(),
@@ -41,6 +42,7 @@ vi.mock('@/database/models/user-items', () => ({
 vi.mock('@/database/models/practice-sessions', () => ({
   default: {
     startReview: (...args: unknown[]) => mocks.startReview(...args),
+    continueReview: (...args: unknown[]) => mocks.continueReview(...args),
     put: (...args: unknown[]) => mocks.put(...args),
     deleteByUserId: (...args: unknown[]) => mocks.deleteByUserId(...args),
   },
@@ -126,6 +128,7 @@ describe('practice content resolution', () => {
     mocks.getByItemIds.mockResolvedValue([]);
     mocks.put.mockResolvedValue(undefined);
     mocks.deleteByUserId.mockResolvedValue(undefined);
+    mocks.continueReview.mockResolvedValue(null);
   });
 
   it('deduplicates relation ids and attaches resolved content without dropping items', async () => {
@@ -276,6 +279,46 @@ describe('practice content resolution', () => {
       session: null,
       abandoned: true,
     });
+    expect(mocks.deleteByUserId).toHaveBeenCalledWith('u1');
+  });
+
+  it('repairs a completed review session by starting a fresh full deck', async () => {
+    mocks.startReview.mockResolvedValue(reviewSession(20));
+    const fullDeck = Array.from({ length: 20 }, (_, index) => ({
+      ...makeItem({ item_id: index + 1 }),
+      practice_direction: 'czToEn' as const,
+    }));
+    const continuedSession = { ...reviewSession(0), review_queue: [] };
+    mocks.continueReview.mockResolvedValue(continuedSession);
+    mocks.getReviewDeck.mockResolvedValue(fullDeck);
+
+    const result = await loadReviewSessionDeck('u1');
+
+    expect(mocks.continueReview).toHaveBeenCalledWith('u1');
+    expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', 20);
+    expect(result.entries).toHaveLength(20);
+    expect(result.session).toMatchObject({
+      completed_count: 0,
+      target_count: 20,
+      review_queue: fullDeck.map((item) => ({ item_id: item.item_id, direction: 'czToEn' })),
+    });
+    expect(result.abandoned).toBe(false);
+    expect(mocks.deleteByUserId).not.toHaveBeenCalled();
+  });
+
+  it('abandons a completed review session when a fresh full deck is unavailable', async () => {
+    mocks.startReview.mockResolvedValue(reviewSession(20));
+    mocks.continueReview.mockResolvedValue({ ...reviewSession(0), review_queue: [] });
+    mocks.getReviewDeck.mockResolvedValue([]);
+
+    await expect(loadReviewSessionDeck('u1')).resolves.toEqual({
+      entries: [],
+      session: null,
+      abandoned: true,
+    });
+
+    expect(mocks.continueReview).toHaveBeenCalledWith('u1');
+    expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', 20);
     expect(mocks.deleteByUserId).toHaveBeenCalledWith('u1');
   });
 
