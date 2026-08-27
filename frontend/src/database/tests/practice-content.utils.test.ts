@@ -7,8 +7,10 @@ const mocks = vi.hoisted(() => ({
   grammarGroupGet: vi.fn(),
   addExamples: vi.fn(),
   getReviewDeck: vi.fn(),
+  getByItemIds: vi.fn(),
   getPronunciationPracticeDeck: vi.fn(),
   startReview: vi.fn(),
+  put: vi.fn(),
   deleteByUserId: vi.fn(),
   reportError: vi.fn(),
 }));
@@ -30,6 +32,7 @@ vi.mock('@/database/models/grammar-chunks', () => ({
 vi.mock('@/database/models/user-items', () => ({
   default: {
     getReviewDeck: (...args: unknown[]) => mocks.getReviewDeck(...args),
+    getByItemIds: (...args: unknown[]) => mocks.getByItemIds(...args),
     getPronunciationPracticeDeck: (...args: unknown[]) =>
       mocks.getPronunciationPracticeDeck(...args),
   },
@@ -38,6 +41,7 @@ vi.mock('@/database/models/user-items', () => ({
 vi.mock('@/database/models/practice-sessions', () => ({
   default: {
     startReview: (...args: unknown[]) => mocks.startReview(...args),
+    put: (...args: unknown[]) => mocks.put(...args),
     deleteByUserId: (...args: unknown[]) => mocks.deleteByUserId(...args),
   },
 }));
@@ -47,7 +51,10 @@ vi.mock('@/features/logging/monitoring-handler', () => ({
 }));
 
 vi.mock('@/config/config', () => ({
-  default: { practice: { reviewStarSize: 20 } },
+  default: {
+    database: { nullReplacementDate: '9999-12-31' },
+    practice: { reviewStarSize: 20 },
+  },
 }));
 
 import {
@@ -116,6 +123,8 @@ describe('practice content resolution', () => {
       items: [],
     }));
     mocks.startReview.mockResolvedValue(reviewSession(4));
+    mocks.getByItemIds.mockResolvedValue([]);
+    mocks.put.mockResolvedValue(undefined);
     mocks.deleteByUserId.mockResolvedValue(undefined);
   });
 
@@ -239,9 +248,24 @@ describe('practice content resolution', () => {
 
     const result = await loadReviewSessionDeck('u1');
 
-    expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', 16);
-    expect(result).toMatchObject({ session: reviewSession(4), abandoned: false });
+    expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', 16, true);
+    expect(result).toMatchObject({
+      session: expect.objectContaining({
+        user_id: 'u1',
+        mode: 'review',
+        completed_count: 4,
+        block_id: null,
+        phase: null,
+        current_queue_item_ids: [],
+        retry_queue_item_ids: [],
+        completed_item_ids: [],
+        target_count: 20,
+        review_queue: items.map((item) => ({ item_id: item.item_id, direction: 'czToEn' })),
+      }),
+      abandoned: false,
+    });
     expect(result.entries).toHaveLength(16);
+    expect(mocks.put).toHaveBeenCalledOnce();
   });
 
   it('abandons an incomplete review session when too few cards remain', async () => {
@@ -253,6 +277,56 @@ describe('practice content resolution', () => {
       abandoned: true,
     });
     expect(mocks.deleteByUserId).toHaveBeenCalledWith('u1');
+  });
+
+  it('resumes an active review session from its saved queue in order', async () => {
+    const session = {
+      ...reviewSession(4),
+      target_count: 6,
+      review_queue: [
+        { item_id: 3, direction: 'czToEn' as const },
+        { item_id: 1, direction: 'enToCz' as const },
+      ],
+    };
+    mocks.startReview.mockResolvedValue(session);
+    mocks.getByItemIds.mockResolvedValue([
+      makeItem({ item_id: 1 }),
+      makeItem({ item_id: 3 }),
+    ]);
+
+    const result = await loadReviewSessionDeck('u1');
+
+    expect(mocks.getByItemIds).toHaveBeenCalledWith('u1', [3, 1]);
+    expect(mocks.getReviewDeck).not.toHaveBeenCalled();
+    expect(result.entries.map((entry) => entry.item.item_id)).toEqual([3, 1]);
+    expect(result.entries.map((entry) => entry.item.practice_direction)).toEqual([
+      'czToEn',
+      'enToCz',
+    ]);
+    expect(mocks.put).not.toHaveBeenCalled();
+  });
+
+  it('shortens a saved review session when queued items are no longer available', async () => {
+    const session = {
+      ...reviewSession(4),
+      review_queue: [
+        { item_id: 1, direction: 'czToEn' as const },
+        { item_id: 2, direction: 'czToEn' as const },
+      ],
+    };
+    mocks.startReview.mockResolvedValue(session);
+    mocks.getByItemIds.mockResolvedValue([makeItem({ item_id: 1 })]);
+
+    const result = await loadReviewSessionDeck('u1');
+
+    expect(result.entries).toHaveLength(1);
+    expect(result.session).toMatchObject({
+      completed_count: 4,
+      target_count: 5,
+      review_queue: [{ item_id: 1, direction: 'czToEn' }],
+    });
+    expect(mocks.put).toHaveBeenCalledOnce();
+    expect(mocks.deleteByUserId).not.toHaveBeenCalled();
   });
 });
 

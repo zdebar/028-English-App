@@ -145,7 +145,11 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
       );
 
       try {
-        const result = await PracticeSession.recordReviewAnswer(updatedItem, dateTime);
+        const result = await PracticeSession.recordReviewAnswer(
+          updatedItem,
+          currentItem.practice_direction,
+          dateTime,
+        );
         setSessionProgress((currentProgress) => ({
           completedCount: result.completedCount,
           targetCount: currentProgress?.targetCount ?? config.practice.reviewStarSize,
