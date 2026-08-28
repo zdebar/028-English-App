@@ -121,6 +121,17 @@ describe('useAuthStore', () => {
     expect(state.loading).toBe(false);
     expect(mocks.rpc).toHaveBeenCalledWith('restore_current_user_if_deleted');
 
+    mocks.authCallback?.('SIGNED_IN', {
+      user: {
+        id: 'u1',
+        email: 'u1@example.com',
+        user_metadata: { full_name: 'User One' },
+      },
+    });
+    await flushMicrotasks();
+
+    expect(mocks.rpc).toHaveBeenCalledTimes(1);
+
     cleanup();
   });
 
@@ -586,6 +597,52 @@ describe('useAuthStore', () => {
     expect(state.userEmail).toBe('u3@example.com');
     expect(state.userFullName).toBe('User Three');
     expect(mocks.rpc).not.toHaveBeenCalled();
+
+    cleanup();
+  });
+
+  it('does not synchronize user lifecycle for repeated sign-in events of the same user', async () => {
+    mocks.getSession.mockResolvedValue({ data: { session: null }, error: null });
+
+    const cleanup = useAuthStore.getState().initializeAuth();
+    await flushMicrotasks();
+
+    const signedInSession = {
+      user: {
+        id: 'u3',
+        email: 'u3@example.com',
+        user_metadata: { name: 'User Three' },
+      },
+    };
+    mocks.authCallback?.('SIGNED_IN', signedInSession);
+    mocks.authCallback?.('SIGNED_IN', signedInSession);
+    await flushMicrotasks();
+
+    expect(mocks.rpc).toHaveBeenCalledTimes(1);
+
+    cleanup();
+  });
+
+  it('synchronizes user lifecycle again after sign-out and sign-in', async () => {
+    mocks.getSession.mockResolvedValue({ data: { session: null }, error: null });
+
+    const cleanup = useAuthStore.getState().initializeAuth();
+    await flushMicrotasks();
+
+    const signedInSession = {
+      user: {
+        id: 'u3',
+        email: 'u3@example.com',
+        user_metadata: { name: 'User Three' },
+      },
+    };
+    mocks.authCallback?.('SIGNED_IN', signedInSession);
+    await flushMicrotasks();
+    mocks.authCallback?.('SIGNED_OUT', null);
+    mocks.authCallback?.('SIGNED_IN', signedInSession);
+    await flushMicrotasks();
+
+    expect(mocks.rpc).toHaveBeenCalledTimes(2);
 
     cleanup();
   });
