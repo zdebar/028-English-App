@@ -24,7 +24,9 @@ export function useStarCelebration() {
 
   useEffect(
     () => () => {
+      const acknowledge = acknowledgementRef.current;
       acknowledgementRef.current = null;
+      acknowledge?.();
     },
     [],
   );

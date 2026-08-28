@@ -193,6 +193,25 @@ describe('usePracticeDeck', () => {
     expect(result.current.celebratingStar).toBe(false);
   });
 
+  it('finalizes a completed review session when the celebration unmounts', async () => {
+    mocks.fetchData = reviewDeckResult(reviewSession(19), [entry(1)]);
+    mocks.recordReviewAnswer.mockResolvedValue({ completedCount: 20, earnedStar: true, starCount: 11 });
+    const { result, unmount } = renderHook(() => usePracticeDeck('u1'));
+    await waitFor(() => expect(result.current.sessionLoading).toBe(false));
+
+    let answerPromise: Promise<void> | undefined;
+    act(() => {
+      answerPromise = result.current.nextItem('correct');
+    });
+    await waitFor(() => expect(result.current.celebratingStar).toBe(true));
+
+    unmount();
+    await answerPromise;
+
+    expect(mocks.getReadyReviewState).toHaveBeenCalledWith('u1');
+    expect(mocks.deleteByUserId).toHaveBeenCalledWith('u1');
+  });
+
   it('ends an abandoned review session without awarding a star', async () => {
     mocks.fetchData = { entries: [], session: null, abandoned: true };
 

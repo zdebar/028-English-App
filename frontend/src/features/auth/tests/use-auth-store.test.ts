@@ -553,14 +553,41 @@ describe('useAuthStore', () => {
         user_metadata: { name: 'User Two' },
       },
     });
+    await flushMicrotasks();
 
     const state = useAuthStore.getState();
     expect(state.userId).toBe('u2');
     expect(state.userEmail).toBe('u2@example.com');
     expect(state.userFullName).toBe('User Two');
+    expect(mocks.rpc).toHaveBeenCalledWith('restore_current_user_if_deleted');
 
     cleanup();
     expect(mocks.unsubscribe).toHaveBeenCalled();
+  });
+
+  it('applies token refresh session updates without synchronizing user lifecycle', async () => {
+    mocks.getSession.mockResolvedValue({ data: { session: null }, error: null });
+
+    const cleanup = useAuthStore.getState().initializeAuth();
+    await flushMicrotasks();
+
+    expect(mocks.authCallback).not.toBeNull();
+    mocks.authCallback?.('TOKEN_REFRESHED', {
+      user: {
+        id: 'u3',
+        email: 'u3@example.com',
+        user_metadata: { name: 'User Three' },
+      },
+    });
+    await flushMicrotasks();
+
+    const state = useAuthStore.getState();
+    expect(state.userId).toBe('u3');
+    expect(state.userEmail).toBe('u3@example.com');
+    expect(state.userFullName).toBe('User Three');
+    expect(mocks.rpc).not.toHaveBeenCalled();
+
+    cleanup();
   });
 
   it('handleLogout syncs user data, signs out, and clears session', async () => {

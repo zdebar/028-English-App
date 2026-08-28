@@ -170,8 +170,11 @@ export async function loadReviewSessionDeck(userId: string): Promise<ReviewSessi
 
   const remainingCount = Math.max(session.target_count - session.completed_count, 0);
   if (remainingCount === 0) {
-    if (session !== storedSession) await PracticeSession.put(session);
-    return { entries: [], session, abandoned: false };
+    const continuedSession = await PracticeSession.continueReview(userId);
+    if (!continuedSession) {
+      return { entries: [], session: null, abandoned: true };
+    }
+    return initializeReviewSession(userId, continuedSession, REVIEW_TARGET);
   }
 
   return initializeReviewSession(userId, session, remainingCount);

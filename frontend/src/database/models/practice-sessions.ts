@@ -253,16 +253,18 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
   static async continueReview(
     userId: string,
     dateTime: string = new Date(Date.now()).toISOString(),
-  ): Promise<void> {
+  ): Promise<PracticeSessionType | null> {
     const session = await this.getActive(userId);
-    if (session?.mode !== 'review' || session.completed_count < session.target_count) return;
-    await db.practice_sessions.put({
+    if (session?.mode !== 'review' || session.completed_count < session.target_count) return null;
+    const continuedSession: PracticeSessionType = {
       ...session,
       completed_count: 0,
       target_count: config.practice.reviewStarSize,
       review_queue: [],
       updated_at: dateTime,
-    });
+    };
+    await db.practice_sessions.put(continuedSession);
+    return continuedSession;
   }
 
   /** Atomically completes initial training, awards its star, and removes the local session. */

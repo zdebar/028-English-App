@@ -147,6 +147,34 @@ describe('useInitialTrainingDeck', () => {
     act(() => result.current.acknowledgeCelebration());
     await waitFor(() => expect(result.current.isComplete).toBe(true));
   });
+
+  it('settles New completion when its celebration unmounts', async () => {
+    mocks.reconcileActive.mockResolvedValue({
+      ...newSession(),
+      phase: 1,
+      completed_count: 1,
+      current_queue_item_ids: [1],
+      completed_item_ids: [2],
+    });
+    const { result, unmount } = renderHook(() => useInitialTrainingDeck('u1', initialData));
+    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+
+    let completionPromise: Promise<void> | undefined;
+    act(() => {
+      completionPromise = result.current.nextKnown();
+    });
+    await waitFor(() => expect(result.current.celebratingStar).toBe(true));
+
+    unmount();
+    await completionPromise;
+
+    expect(mocks.completeInitialTraining).toHaveBeenCalledWith(
+      'u1',
+      [1, 2],
+      expect.any(String),
+      expect.anything(),
+    );
+  });
 });
 
 function newSession() {

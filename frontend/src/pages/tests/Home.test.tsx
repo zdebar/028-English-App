@@ -8,6 +8,7 @@ const mocks = vi.hoisted(
     userFullName: string | null;
     userEmail: string | null;
     isAnonymousUser: boolean;
+    authLoading: boolean;
     dailyStarCount: number;
     isSyncError: boolean;
   } => ({
@@ -16,6 +17,7 @@ const mocks = vi.hoisted(
     userFullName: 'User One',
     userEmail: 'u1@example.com',
     isAnonymousUser: false,
+    authLoading: false,
     dailyStarCount: 3,
     isSyncError: false,
   }),
@@ -41,6 +43,7 @@ vi.mock('@/features/auth/use-auth-store', () => ({
       userFullName: string | null;
       userEmail: string | null;
       isAnonymousUser: boolean;
+      loading: boolean;
     }) => unknown,
   ) =>
     selector({
@@ -48,6 +51,7 @@ vi.mock('@/features/auth/use-auth-store', () => ({
       userFullName: mocks.userFullName,
       userEmail: mocks.userEmail,
       isAnonymousUser: mocks.isAnonymousUser,
+      loading: mocks.authLoading,
     }),
 }));
 
@@ -75,6 +79,7 @@ vi.mock('@/locales/cs', () => ({
     starsToday: 'Stars today',
     today: 'Today',
     dailyGoal: 'Goal',
+    loadingMessage: 'Loading',
     syncWarning: 'Data may be stale.',
     signupHint: 'Signup hint',
     practiceButton: 'Practice',
@@ -111,6 +116,10 @@ vi.mock('@/routing/route-data', () => ({
 
 vi.mock('@/features/auth/GoogleAuthButton', () => ({
   default: () => <div data-testid="google-auth-button" />,
+}));
+
+vi.mock('@/features/auth/AnonymousSigninButton', () => ({
+  default: () => <div data-testid="anonymous-signin-button" />,
 }));
 
 vi.mock('@/features/synchronization/SimulateDataButton', () => ({
@@ -152,6 +161,7 @@ describe('Home', () => {
     mocks.userFullName = 'User One';
     mocks.userEmail = 'u1@example.com';
     mocks.isAnonymousUser = false;
+    mocks.authLoading = false;
     mocks.dailyStarCount = 3;
     mocks.isSyncError = false;
   });
@@ -162,6 +172,20 @@ describe('Home', () => {
     render(<Home />);
 
     expect(screen.getByText('Data may be stale.')).toBeTruthy();
+  });
+
+  it('shows only the loading indicator while auth state is unresolved', () => {
+    mocks.authLoading = true;
+    mocks.userId = null;
+
+    render(<Home />);
+
+    expect(screen.getByLabelText('Loading')).toBeTruthy();
+    expect(screen.queryByTestId('google-auth-button')).toBeNull();
+    expect(screen.queryByTestId('anonymous-signin-button')).toBeNull();
+    expect(screen.queryByTestId('home-practice-buttons')).toBeNull();
+    expect(screen.queryByTestId('practice-overview-button')).toBeNull();
+    expect(screen.queryByTestId('dashboard')).toBeNull();
   });
 
   it('does not show sync warning when sync is healthy', () => {
@@ -235,5 +259,15 @@ describe('Home', () => {
     expect(screen.getByText('Guide')).toBeTruthy();
     expect(screen.getByTestId('google-auth-button')).toBeTruthy();
     expect(screen.queryByText('Data may be stale.')).toBeNull();
+  });
+
+  it('renders authenticated controls for an anonymous user', () => {
+    mocks.isAnonymousUser = true;
+
+    render(<Home />);
+
+    expect(screen.getByTestId('home-practice-buttons')).toBeTruthy();
+    expect(screen.getByTestId('simulate-data-button')).toBeTruthy();
+    expect(screen.queryByTestId('google-auth-button')).toBeNull();
   });
 });

@@ -109,7 +109,13 @@ describe('PracticeSession review transaction', () => {
       review_queue: [{ item_id: 1, direction: 'czToEn' as const }],
     });
 
-    await PracticeSession.continueReview('u1', '2026-08-23T10:00:00.000Z');
+    await expect(
+      PracticeSession.continueReview('u1', '2026-08-23T10:00:00.000Z'),
+    ).resolves.toMatchObject({
+      completed_count: 0,
+      target_count: 20,
+      review_queue: [],
+    });
 
     expect(mocks.sessionPut).toHaveBeenCalledWith(
       expect.objectContaining({
