@@ -1,4 +1,5 @@
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import LoadingCircle from '@/components/UI/LoadingCircle';
 import Dashboard from '@/features/dashboard/Dashboard';
 import { useUserStore } from '@/features/user-stats/use-user-store';
 import { TEXTS } from '@/locales/cs';
@@ -42,8 +43,17 @@ export default function Home(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const userFullName = useAuthStore((state) => state.userFullName);
   const isAnonymousUser = useAuthStore((state) => state.isAnonymousUser);
+  const authLoading = useAuthStore((state) => state.loading);
   const dailyStarCount = useUserStore((state) => state.dailyStarCount);
   const isSyncError = useSyncStore((state) => state.isSyncError);
+
+  if (authLoading) {
+    return (
+      <div className="card-width w-full">
+        <LoadingCircle />
+      </div>
+    );
+  }
 
   return (
     <>
