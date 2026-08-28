@@ -367,7 +367,7 @@ export const useAuthStore = create<AuthState>((set) => {
 
       subscription = supabaseInstance.auth.onAuthStateChange((event, session) => {
         applySession(session);
-        if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+        if (session && event === 'SIGNED_IN') {
           queueMicrotask(() => {
             void syncAuthenticatedUserLifecycle();
           });
