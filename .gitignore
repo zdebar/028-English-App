@@ -1,9 +1,10 @@
-data/
-archive/
+*.opus
+/data/
+/archive/
 venv/
-frontend/TODO.md
+/frontend/TODO.md
 
-scripts/utils/__pycache__/
+/scripts/utils/__pycache__/
 .env
 .env.*
 

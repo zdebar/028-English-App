@@ -1,0 +1,71 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+karta,card,kˈɑːɹd,card.opus,12000,,,,,True,12
+centrální,central,sˈɛntɹəl,central.opus,12001,,,,,True,12
+směr,direction,dᵻɹˈɛkʃən,direction.opus,12002,,,,,True,12
+dolar,dollar,dˈɑːlɚ,dollar.opus,12003,,,,,True,12
+ovoce,fruit,fɹˈuːt,fruit.opus,12004,,,,,True,12
+dárek,gift,ɡˈɪft,gift.opus,12005,,,,,True,12
+vysoký,high,hˈaɪ,high.opus,12006,,,,,True,12
+nemoc,illness,ˈɪlnəs,illness.opus,12007,,,,,True,12
+kus,piece,pˈiːs,piece.opus,12008,,,,,True,12
+chránit,protect,pɹətˈɛkt,protect.opus,12009,,,,,True,12
+závod,race,ɹˈeɪs,race.opus,12010,,,,,True,12
+od,since,sˈɪns,since.opus,12011,,,,,True,12
+úsměv,smile,smˈaɪl,smile.opus,12012,,,,,True,12
+lístek,ticket,tˈɪkɪt,ticket.opus,12013,,,,,True,12
+dobře,well,wˈɛl,well.opus,12014,,,,,True,12
+nehoda,accident,ˈæksɪdənt,accident.opus,12015,,,,,True,12
+krev,blood,blˈʌd,blood.opus,12016,,,,,True,12
+obchod,business,bˈɪznəs,business.opus,12017,,,,,True,12
+během,during,dˈʊɹɹɪŋ,during.opus,12018,,,,,True,12
+dokonce,even,ˈiːvən,even.opus,12019,,,,,True,12
+podlaha,floor,flˈɔːɹ,floor.opus,12020,,,,,True,12
+obecný,general,dʒˈɛnɚɹəl,general.opus,12021,,,,,True,12
+vybrat,choose,tʃˈuːz,choose.opus,12022,,,,,True,12
+informovat,inform,ɪnfˈɔːɹm,inform.opus,12023,,,,,True,12
+schůzka,meeting,mˈiːɾɪŋ,meeting.opus,12024,,,,,True,12
+objednat,order,ˈɔːɹdɚ,order.opus,12025,,,,,True,12
+strana,party,pˈɑːɹɾi,party.opus,12026,,,,,True,12
+odpovědět,reply,ɹᵻplˈaɪ,reply.opus,12027,,,,,True,12
+cestovat,travel,tɹˈævəl,travel.opus,12028,,,,,True,12
+virus,virus,vˈaɪɹəs,virus.opus,12029,,,,,True,12
+sledovat,watch,wˈɑːtʃ,watch.opus,12030,,,,,True,12
+jiný,another,ɐnˈʌðɚ,another.opus,12031,,,,,True,12
+věřit,believe,bᵻlˈiːv,believe.opus,12032,,,,,True,12
+oba,both,bˈoʊθ,both.opus,12033,,,,,True,12
+bránit,defend,dᵻfˈɛnd,defend.opus,12034,,,,,True,12
+vždy,ever,ˈɛvɚ,ever.opus,12035,,,,,True,12
+mýt,wash,wˈɑːʃ,wash.opus,12036,,,,,True,12
+zranit,hurt,hˈɜːt,hurt.opus,12037,,,,,True,12
+holit,shave,ʃˈeɪv,shave.opus,12038,,,,,True,12
+zrcadlo,mirror,mˈɪɹɚ,mirror.opus,12039,,,,,True,12
+třináct,thirteen,θˈɜːtiːn,thirteen.opus,12040,16,,,12,False,12
+čtrnáct,fourteen,fˈɔːɹtiːn,fourteen.opus,12041,16,,,12,False,12
+patnáct,fifteen,fˈɪftiːn,fifteen.opus,12042,16,,,12,False,12
+šestnáct,sixteen,sˈɪkstiːn,sixteen.opus,12043,16,,,12,False,12
+sedmnáct,seventeen,sˈɛvəntˌiːn,seventeen.opus,12044,16,,,12,False,12
+osmnáct,eighteen,ˈeɪtiːn,eighteen.opus,12045,16,,,12,False,12
+devatenáct,nineteen,nˈaɪntiːn,nineteen.opus,12046,16,,,12,False,12
+dvacet,twenty,twˈɛnti,twenty.opus,12047,17,,,13,False,12
+třicet,thirty,θˈɜːɾi,thirty.opus,12048,17,,,13,False,12
+čtyřicet,forty,fˈɔːɹɾi,forty.opus,12049,17,,,13,False,12
+padesát,fifty,fˈɪfti,fifty.opus,12050,17,,,13,False,12
+dvacet jedna,twenty-one,twˈɛntiwˌʌn,twentyone.opus,12051,18,,,14,False,12
+dvacet dva,twenty-two,twˈɛntitˈuː,twentytwo.opus,12052,18,,,14,False,12
+sto patnáct,one hundred fifteen,wˈʌn hˈʌndɹɪd fˈɪftiːn,one_hundred_fifteen.opus,12053,18,,,14,False,12
+sto dvacet pět,one hundred twenty-five,wˈʌn hˈʌndɹɪd twˈɛntifˈaɪv,one_hundred_twentyfive.opus,12054,18,,,14,False,12
+první,first,fˈɜːst,first.opus,12055,19,,,15,False,12
+druhý,second,sˈɛkənd,second.opus,12056,19,,,15,False,12
+třetí,third,θˈɜːd,third.opus,12057,19,,,15,False,12
+čtvrtý,fourth,fˈɔːɹθ,fourth.opus,12058,19,,,15,False,12
+pátý,fifth,fˈɪfθ,fifth.opus,12059,19,,,15,False,12
+polovina,half,hˈæf,half.opus,12060,20,,,16,False,12
+třetina,third,θˈɜːd,third.opus,12061,20,,,16,False,12
+čtvrtina,quarter,kwˈɔːɹɾɚ,quarter.opus,12062,20,,,16,False,12
+pětina,fifth,fˈɪfθ,fifth.opus,12063,20,,,16,False,12
+šestina,sixth,sˈɪksθ,sixth.opus,12064,20,,,16,False,12
+dvě sedminy,two sevenths,tˈuː sˈɛvənθs,two_sevenths.opus,12065,20,,,16,False,12
+tečka,point,pˈɔɪnt,point.opus,12066,21,,,17,False,12
+dvě celé osm,two point eight,tˈuː pˈɔɪnt ˈeɪt,two_point_eight.opus,12067,21,,,17,False,12
+osm celých pět,eight point five,ˈeɪt pˈɔɪnt fˈaɪv,eight_point_five.opus,12068,21,,,17,False,12
+nula celá dva,point two,pˈɔɪnt tˈuː,point_two.opus,12069,21,,,17,False,12
