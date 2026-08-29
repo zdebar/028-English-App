@@ -192,9 +192,15 @@ async function resolveAuthRedirect(initializationError: unknown): Promise<AuthRe
  *   Throws an error if sign-out fails.
  */
 export const useAuthStore = create<AuthState>((set) => {
+  let lastLifecycleSyncUserId: string | null = null;
+
   const applySession = (session: Session | null) => {
     const nextUserId = session?.user?.id ?? null;
     setMonitoringUser(nextUserId);
+
+    if (!nextUserId) {
+      lastLifecycleSyncUserId = null;
+    }
 
     set({
       userId: nextUserId,
@@ -295,6 +301,16 @@ export const useAuthStore = create<AuthState>((set) => {
     reportError('Auth user lifecycle sync failed', error);
   };
 
+  const syncAuthenticatedUserLifecycleIfNeeded = (session: Session): void => {
+    const currentUserId = session.user.id;
+    if (lastLifecycleSyncUserId === currentUserId) {
+      return;
+    }
+
+    lastLifecycleSyncUserId = currentUserId;
+    void syncAuthenticatedUserLifecycle();
+  };
+
   const loadInitializedSession = async (
     callbackSession: Session | null | undefined,
   ): Promise<Session | null> => {
@@ -326,7 +342,7 @@ export const useAuthStore = create<AuthState>((set) => {
     }
 
     if (session) {
-      void syncAuthenticatedUserLifecycle();
+      syncAuthenticatedUserLifecycleIfNeeded(session);
     }
 
     applySession(session);
@@ -340,6 +356,7 @@ export const useAuthStore = create<AuthState>((set) => {
     loading: true,
 
     initializeAuth: () => {
+      lastLifecycleSyncUserId = null;
       let subscription: { unsubscribe: () => void } | null = null;
       let isActive = true;
 
@@ -369,7 +386,7 @@ export const useAuthStore = create<AuthState>((set) => {
         applySession(session);
         if (session && event === 'SIGNED_IN') {
           queueMicrotask(() => {
-            void syncAuthenticatedUserLifecycle();
+            syncAuthenticatedUserLifecycleIfNeeded(session);
           });
         }
       }).data.subscription;

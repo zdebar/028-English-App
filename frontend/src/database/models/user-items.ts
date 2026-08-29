@@ -290,6 +290,15 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       };
     }
 
+    if (firstItem.is_vocabulary === 1) {
+      return {
+        blockId: null,
+        items: unstartedItems
+          .filter((item) => item.is_vocabulary === 1 && item.block_id === NULL_NUMBER)
+          .slice(0, batchSize),
+      };
+    }
+
     const items: UserItemLocal[] = [];
     for (const item of unstartedItems) {
       const crossesBoundary =
