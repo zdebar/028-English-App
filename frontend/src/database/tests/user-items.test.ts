@@ -965,23 +965,78 @@ describe('UserItem', () => {
     expect(result.map((item: any) => item.item_id)).toEqual([1, 2]);
   });
 
-  it('allows automatic vocabulary batches to cross lesson boundaries', async () => {
+  it('selects only blockless vocabulary across explicit blocks and lessons', async () => {
     mocks.userEqualsToArray.mockResolvedValue([
       initialItem(1, { curriculum_sort_path: [1, 1, 1] }),
-      initialItem(2, { curriculum_sort_path: [1, 2, 1], lesson_id: 2 }),
-      initialItem(3, { curriculum_sort_path: [1, 2, 2], is_vocabulary: 0, grammar_chunk_id: 4 }),
+      initialItem(2, {
+        is_vocabulary: 0,
+        grammar_chunk_id: 4,
+        block_id: 7,
+        curriculum_sort_path: [1, 1, 2],
+      }),
+      initialItem(3, { curriculum_sort_path: [1, 2, 1], lesson_id: 2 }),
+      initialItem(4, {
+        is_vocabulary: 0,
+        grammar_chunk_id: 5,
+        curriculum_sort_path: [1, 2, 2],
+        lesson_id: 2,
+      }),
+      initialItem(5, { curriculum_sort_path: [1, 3, 1], lesson_id: 3 }),
     ]);
 
     const selection = await UserItem.getNextInitialTrainingSelection('u1', 8);
 
     expect(selection?.blockId).toBeNull();
-    expect(selection?.items.map((item) => item.item_id)).toEqual([1, 2]);
+    expect(selection?.items.map((item) => item.item_id)).toEqual([1, 3, 5]);
+  });
+
+  it('limits blockless vocabulary batches after skipping explicit blocks', async () => {
+    mocks.userEqualsToArray.mockResolvedValue([
+      initialItem(1, { curriculum_sort_path: [1, 1, 1] }),
+      initialItem(2, {
+        is_vocabulary: 0,
+        grammar_chunk_id: 4,
+        block_id: 7,
+        curriculum_sort_path: [1, 1, 2],
+      }),
+      initialItem(3, { curriculum_sort_path: [1, 2, 1], lesson_id: 2 }),
+      initialItem(4, { curriculum_sort_path: [1, 2, 2], lesson_id: 2 }),
+      initialItem(5, { curriculum_sort_path: [1, 3, 1], lesson_id: 3 }),
+    ]);
+
+    const selection = await UserItem.getNextInitialTrainingSelection('u1', 3);
+
+    expect(selection?.items.map((item) => item.item_id)).toEqual([1, 3, 4]);
   });
 
   it('keeps automatic grammar batches within one lesson', async () => {
     mocks.userEqualsToArray.mockResolvedValue([
       initialItem(1, { is_vocabulary: 0, grammar_chunk_id: 1, curriculum_sort_path: [1, 1, 1] }),
-      initialItem(2, { is_vocabulary: 0, grammar_chunk_id: 2, curriculum_sort_path: [1, 2, 1], lesson_id: 2 }),
+      initialItem(2, { is_vocabulary: 0, grammar_chunk_id: 2, curriculum_sort_path: [1, 1, 2] }),
+      initialItem(3, {
+        is_vocabulary: 0,
+        grammar_chunk_id: 3,
+        block_id: 7,
+        curriculum_sort_path: [1, 1, 3],
+      }),
+      initialItem(4, {
+        is_vocabulary: 0,
+        grammar_chunk_id: 4,
+        curriculum_sort_path: [1, 2, 1],
+        lesson_id: 2,
+      }),
+    ]);
+
+    const selection = await UserItem.getNextInitialTrainingSelection('u1', 8);
+
+    expect(selection?.items.map((item) => item.item_id)).toEqual([1, 2]);
+  });
+
+  it('stops automatic grammar batches at a vocabulary item', async () => {
+    mocks.userEqualsToArray.mockResolvedValue([
+      initialItem(1, { is_vocabulary: 0, grammar_chunk_id: 1, curriculum_sort_path: [1, 1, 1] }),
+      initialItem(2, { is_vocabulary: 1, curriculum_sort_path: [1, 1, 2] }),
+      initialItem(3, { is_vocabulary: 0, grammar_chunk_id: 2, curriculum_sort_path: [1, 1, 3] }),
     ]);
 
     const selection = await UserItem.getNextInitialTrainingSelection('u1', 8);
@@ -1008,16 +1063,74 @@ describe('UserItem', () => {
 
   it('selects only unstarted members when an explicit block becomes available again', async () => {
     mocks.userEqualsToArray.mockResolvedValue([
-      initialItem(1, { block_id: 7, curriculum_sort_path: [1, 1, 1], started_at: '2026-01-01' }),
-      initialItem(2, { block_id: 7, curriculum_sort_path: [1, 1, 2] }),
-      initialItem(3, { block_id: 7, curriculum_sort_path: [1, 1, 3] }),
-      initialItem(4, { curriculum_sort_path: [1, 1, 4] }),
+      initialItem(1, {
+        is_vocabulary: 0,
+        grammar_chunk_id: 1,
+        block_id: 7,
+        curriculum_sort_path: [1, 1, 1],
+        started_at: '2026-01-01',
+      }),
+      initialItem(2, { is_vocabulary: 0, grammar_chunk_id: 2, block_id: 7, curriculum_sort_path: [1, 1, 2] }),
+      initialItem(3, { is_vocabulary: 0, grammar_chunk_id: 3, block_id: 7, curriculum_sort_path: [1, 1, 3] }),
+      initialItem(4, {
+        is_vocabulary: 0,
+        grammar_chunk_id: 4,
+        curriculum_sort_path: [1, 1, 4],
+      }),
     ]);
 
     const selection = await UserItem.getNextInitialTrainingSelection('u1');
 
     expect(selection?.blockId).toBe(7);
     expect(selection?.items.map((item) => item.item_id)).toEqual([2, 3]);
+  });
+
+  it('selects all unstarted members when the first vocabulary item is in a block', async () => {
+    mocks.userEqualsToArray.mockResolvedValue([
+      initialItem(1, {
+        block_id: 7,
+        curriculum_sort_path: [1, 1, 1],
+        started_at: '2026-01-01',
+      }),
+      initialItem(2, { block_id: 7, curriculum_sort_path: [1, 1, 2] }),
+      initialItem(3, { block_id: 7, curriculum_sort_path: [1, 1, 3] }),
+    ]);
+
+    const selection = await UserItem.getNextInitialTrainingSelection('u1');
+
+    expect(selection?.blockId).toBe(7);
+    expect(selection?.items.map((item) => item.item_id)).toEqual([2, 3]);
+  });
+
+  it('returns the skipped explicit block after a vocabulary batch is completed', async () => {
+    const items = [
+      initialItem(1, { curriculum_sort_path: [1, 1, 1] }),
+      initialItem(2, {
+        is_vocabulary: 0,
+        grammar_chunk_id: 1,
+        block_id: 7,
+        curriculum_sort_path: [1, 1, 2],
+      }),
+      initialItem(3, {
+        is_vocabulary: 0,
+        grammar_chunk_id: 2,
+        block_id: 7,
+        curriculum_sort_path: [1, 1, 3],
+      }),
+      initialItem(4, { curriculum_sort_path: [1, 2, 1], lesson_id: 2 }),
+    ];
+    mocks.userEqualsToArray.mockImplementation(async () => items);
+
+    const vocabularySelection = await UserItem.getNextInitialTrainingSelection('u1', 8);
+    expect(vocabularySelection?.items.map((item) => item.item_id)).toEqual([1, 4]);
+
+    items[0].started_at = '2026-08-29T12:00:00.000Z';
+    items[3].started_at = '2026-08-29T12:00:00.000Z';
+
+    const nextSelection = await UserItem.getNextInitialTrainingSelection('u1', 8);
+
+    expect(nextSelection?.blockId).toBe(7);
+    expect(nextSelection?.items.map((item) => item.item_id)).toEqual([2, 3]);
   });
 
   it('ignores an explicit selection whose synchronized block metadata is missing', async () => {
