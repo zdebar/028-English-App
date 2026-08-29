@@ -1,1 +1,0 @@
-INSERT INTO "public"."notes" ("id", "name", "note", "sort_order", "updated_at", "deleted_at") VALUES (1, 'short', 'Přídavné jméno "short" se v angličtině používá označení malé (nevysoké) postavy.', 1, '2026-05-21 11:11:12.663732+00', null);
