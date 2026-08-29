@@ -1,0 +1,82 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+přístav,port,pˈɔːɹt,port.opus,5000,,,,,True,5
+datum,date,dˈeɪt,date.opus,5001,,,,,True,5
+pokoj,room,ɹˈuːm,room.opus,5002,,,,,True,5
+kuchyně,kitchen,kˈɪtʃən,kitchen.opus,5003,,,,,True,5
+koupelna,bathroom,bˈæθɹuːm,bathroom.opus,5004,,,,,True,5
+obývací pokoj,living room,lˈɪvɪŋ ɹˈuːm,living_room.opus,5005,,,,,True,5
+ložnice,bedroom,bˈɛdɹuːm,bedroom.opus,5006,,,,,True,5
+tunel,tunnel,tˈʌnəl,tunnel.opus,5007,,,,,True,5
+já jsem,I am,aɪˈæm,i_am.opus,5008,3,,,1,False,5
+ty jsi,you are,juː ˈɑːɹ,you_are.opus,5009,3,,,1,False,5
+on je,he is,hiː ˈɪz,he_is.opus,5010,3,,,1,False,5
+ona je,she is,ʃiː ˈɪz,she_is.opus,5011,3,,,1,False,5
+to je,it is,ɪɾ ˈɪz,it_is.opus,5012,3,,,1,False,5
+my jsme,we are,wiː ˈɑːɹ,we_are.opus,5013,3,,,1,False,5
+vy jste,you are,juː ˈɑːɹ,you_are.opus,5014,3,,,1,False,5
+oni jsou,they are,ðeɪ ˈɑːɹ,they_are.opus,5015,3,,,1,False,5
+tvář,face,fˈeɪs,face.opus,5016,,,,,True,5
+pokud,if,ˈɪf,if.opus,5017,,,,,True,5
+místo,place,plˈeɪs,place.opus,5018,,,,,True,5
+cesta,road,ɹˈoʊd,road.opus,5019,,,,,True,5
+zastavit,stop,stˈɑːp,stop.opus,5020,,,,,True,5
+chtít,want,wˈɔnt,want.opus,5021,,,,,True,5
+odpovědět,answer,ˈænsɚ,answer.opus,5022,,,,,True,5
+mezi,between,bᵻtwˈiːn,between.opus,5023,,,,,True,5
+já jsem (zk.),I'm,ˈaɪm,im.opus,5024,4,,,2,False,5
+ty jsi (zk.),you're,jˈʊɹ,youre.opus,5025,4,,,2,False,5
+on je (zk.),he's,hˈiːz,hes.opus,5026,4,,,2,False,5
+ona je (zk.),she's,ʃˈiːz,shes.opus,5027,4,,,2,False,5
+to je (zk.),it's,ˈɪts,its.opus,5028,4,,,2,False,5
+my jsme (zk.),we're,wˈɪɹ,were.opus,5029,4,,,2,False,5
+vy jste (zk.),you're,jˈʊɹ,youre.opus,5030,4,,,2,False,5
+oni jsou (zk.),they're,ðeɪˈɚ,theyre.opus,5031,4,,,2,False,5
+vše,all,ˈɔːl,all.opus,5032,,,,,True,5
+a,and,ˈænd,and.opus,5033,,,,,True,5
+chlapec,boy,bˈɔɪ,boy.opus,5034,,,,,True,5
+konec,end,ˈɛnd,end.opus,5035,,,,,True,5
+rodina,family,fˈæmɪli,family.opus,5036,,,,,True,5
+brzy,soon,sˈuːn,soon.opus,5037,,,,,True,5
+lidé,people,pˈiːpəl,people.opus,5038,,,,,True,5
+mluvit,speak,spˈiːk,speak.opus,5039,,,,,True,5
+Já jsem šťastný.,I'm happy.,aɪm hˈæpi,im_happy.opus,5040,,,,2,False,5
+Ty jsi smutný.,You're sad.,jʊɹ sˈæd,youre_sad.opus,5041,,,,2,False,5
+On je vysoký.,He's tall.,hiːz tˈɔːl,hes_tall.opus,5042,,,,2,False,5
+Ona je malá.,She's small.,ʃiːz smˈɔːl,shes_small.opus,5043,,,,2,False,5
+Je to špatné.,It's bad.,ɪts bˈæd,its_bad.opus,5044,,,,2,False,5
+My jsme bohatí.,We're rich.,wɪɹ ɹˈɪtʃ,were_rich.opus,5045,,,,2,False,5
+Vy jste tlustí.,You're fat.,jʊɹ fˈæt,youre_fat.opus,5046,,,,2,False,5
+Oni jsou staří.,They're old.,ðeɪɚɹ ˈoʊld,theyre_old.opus,5047,,,,2,False,5
+zeptat se,ask,ˈæsk,ask.opus,5048,,,,,True,5
+učit se,learn,lˈɜːn,learn.opus,5049,,,,,True,5
+otázka,question,kwˈɛstʃən,question.opus,5050,,,,,True,5
+říci,say,sˈeɪ,say.opus,5051,,,,,True,5
+začít,start,stˈɑːɹt,start.opus,5052,,,,,True,5
+slovo,word,wˈɜːd,word.opus,5053,,,,,True,5
+o,about,ɐbˈaʊt,about.opus,5054,,,,,True,5
+dívka,girl,ɡˈɜːl,girl.opus,5055,,,,,True,5
+měsíc (na nebi),moon,mˈuːn,moon.opus,5056,,,,,True,5
+Já jsem hladový.,I'm hungry.,aɪm hˈʌŋɡɹi,im_hungry.opus,5057,,,,2,False,5
+Ty jsi unavená.,You're tired.,jʊɹ tˈaɪɚd,youre_tired.opus,5058,,,,2,False,5
+On je přátelský.,He's friendly.,hiːz fɹˈɛndli,hes_friendly.opus,5059,,,,2,False,5
+Je jí zima.,She's cold.,ʃiːz kˈoʊld,shes_cold.opus,5060,,,,2,False,5
+Je to snadné.,It's easy.,ɪts ˈiːzi,its_easy.opus,5061,,,,2,False,5
+My jsme naštvaní.,We're angry.,wɪɹ ˈæŋɡɹi,were_angry.opus,5062,,,,2,False,5
+Vy jste oškliví.,You're ugly.,jʊɹ ˈʌɡli,youre_ugly.opus,5063,,,,2,False,5
+Oni jsou rychlí.,They're fast.,ðeɪɚ fˈæst,theyre_fast.opus,5064,,,,2,False,5
+pomoc,help,hˈɛlp,help.opus,5065,,,,,True,5
+znát,know,nˈoʊ,know.opus,5066,,,,,True,5
+nový,new,nˈuː,new.opus,5067,,,,,True,5
+papír,paper,pˈeɪpɚ,paper.opus,5068,,,,,True,5
+ukázat,show,ʃˈoʊ,show.opus,5069,,,,,True,5
+silnice,road,ɹˈoʊd,road.opus,5070,,,,,True,5
+odpověď,answer,ˈænsɚ,answer.opus,5071,,,,,True,5
+jasný,clear,klˈɪɹ,clear.opus,5072,,,,,True,5
+Já jsem chudý.,I'm poor.,aɪm pˈʊɹ,im_poor.opus,5073,,,,2,False,5
+Ty jsi krásná.,You're beautiful.,jʊɹ bjˈuːɾifəl,youre_beautiful.opus,5074,,,,2,False,5
+On je pomalý.,He's slow.,hiːz slˈoʊ,hes_slow.opus,5075,,,,2,False,5
+Ona je špinavá.,She's dirty.,ʃiːz dˈɜːɾi,shes_dirty.opus,5076,,,,2,False,5
+Je to čisté.,It's clean.,ɪts klˈiːn,its_clean.opus,5077,,,,2,False,5
+My jsme slabí.,We're weak.,wɪɹ wˈiːk,were_weak.opus,5078,,,,2,False,5
+Vy jste hubení.,You're thin.,jʊɹ θˈɪn,youre_thin.opus,5079,,,,2,False,5
+Oni jsou dobří.,They're good.,ðeɪɚ ɡˈʊd,theyre_good.opus,5080,,,,2,False,5

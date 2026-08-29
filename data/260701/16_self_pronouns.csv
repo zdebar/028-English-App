@@ -1,0 +1,18 @@
+czech,english,grammar_chunk_id,block_id
+
+já sám,myself,27,32
+ty sám,yourself,27,32
+on sám,himself,27,32
+ona sama,herself,27,32
+ono samo,itself,27,32
+my sami,ourselves,27,32
+vy sami,yourselves,27,32
+oni sami,themselves,27,32
+Vidím se v zrcadle.,I see myself in the mirror.,27,33
+Učíš se sám.,You learn by yourself.,27,33
+Holí se. (on),He shaves himself.,27,33
+Zranila se. (ona),She hurt herself.,27,33
+Kočka se myje.,The cat washes itself.,27,33
+Pomáháme si.,We help ourselves.,27,33
+Učíte se sami.,You teach yourselves.,27,33
+Brání se. (oni),They defend themselves.,27,33

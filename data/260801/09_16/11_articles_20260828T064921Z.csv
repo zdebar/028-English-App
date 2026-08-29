@@ -1,0 +1,50 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+určitý,certain,sˈɜːʔn̩,certain.opus,11000,,,,,True,11
+popsat,describe,dᵻskɹˈaɪb,describe.opus,11001,,,,,True,11
+suchý,dry,dɹˈaɪ,dry.opus,11002,,,,,True,11
+očekávat,expect,ɛkspˈɛkt,expect.opus,11003,,,,,True,11
+fakt,fact,fˈækt,fact.opus,11004,,,,,True,11
+zahrnout,include,ɪŋklˈuːd,include.opus,11005,,,,,True,11
+nechat,let,lˈɛt,let.opus,11006,,,,,True,11
+moment,moment,mˈoʊmənt,moment.opus,11007,,,,,True,11
+síla,power,pˈaʊɚ,power.opus,11008,,,,,True,11
+poskytnout,provide,pɹəvˈaɪd,provide.opus,11009,,,,,True,11
+hlásit,report,ɹᵻpˈɔːɹt,report.opus,11010,,,,,True,11
+sedadlo,seat,sˈiːt,seat.opus,11011,,,,,True,11
+jednotlivý,single,sˈɪŋɡəl,single.opus,11012,,,,,True,11
+systém,system,sˈɪstəm,system.opus,11013,,,,,True,11
+skrze,through,θɹˈuː,through.opus,11014,,,,,True,11
+barva,colour,kˈʌlɚ,colour.opus,11015,,,,,True,11
+odlišný,different,dˈɪfɹənt,different.opus,11016,,,,,True,11
+Země,Earth,ˈɜːθ,earth.opus,11017,,,,,True,11
+film,film,fˈɪlm,film.opus,11018,,,,,True,11
+rád,glad,ɡlˈæd,glad.opus,11019,,,,,True,11
+jen,just,dʒˈʌst,just.opus,11020,,,,,True,11
+láska,love,lˈʌv,love.opus,11021,,,,,True,11
+tužka,pencil,pˈɛnsəl,pencil.opus,11022,,,,,True,11
+rychlý,quick,kwˈɪk,quick.opus,11023,,,,,True,11
+jednoduchý,simple,sˈɪmpəl,simple.opus,11024,,,,,True,11
+město,town,tˈaʊn,town.opus,11025,,,,,True,11
+strom,tree,tɹˈiː,tree.opus,11026,,,,,True,11
+adresa,address,ɐdɹˈɛs,address.opus,11027,,,,,True,11
+budova,building,bˈɪldɪŋ,building.opus,11028,,,,,True,11
+překročit,cross,kɹˈɔs,cross.opus,11029,,,,,True,11
+stůl,desk,dˈɛsk,desk.opus,11030,,,,,True,11
+led,ice,ˈaɪs,ice.opus,11031,,,,,True,11
+klíč,key,kˈiː,key.opus,11032,,,,,True,11
+rodič,parent,pˈɛɹənt,parent.opus,11033,,,,,True,11
+pošta,post,pˈoʊst,post.opus,11034,,,,,True,11
+kámen,rock,ɹˈɑːk,rock.opus,11035,,,,,True,11
+hledat,search,sˈɜːtʃ,search.opus,11036,,,,,True,11
+sport,sport,spˈɔːɹt,sport.opus,11037,,,,,True,11
+údolí,valley,vˈæli,valley.opus,11038,,,,,True,11
+dítě,baby,bˈeɪbi,baby.opus,11039,,,,,True,11
+určitý člen,the,ðˈə,the.opus,11040,15,,,11,False,11
+neurčitý člen,"a, an",ɐ ˈæn,a_an.opus,11041,15,,,11,False,11
+Jsem učitel.,I'm a teacher.,aɪm ɐ tˈiːtʃɚ,im_a_teacher.opus,11042,15,,,11,False,11
+Jsem ten učitel.,I'm the teacher.,aɪm ðə tˈiːtʃɚ,im_the_teacher.opus,11043,15,,,11,False,11
+Jsou učitelé.,They're teachers.,ðeɪɚ tˈiːtʃɚz,theyre_teachers.opus,11044,15,,,11,False,11
+Jsou to ti učitelé.,They're the teachers.,ðeɪɚ ðə tˈiːtʃɚz,theyre_the_teachers.opus,11045,15,,,11,False,11
+Toto je voda.,This is water.,ðɪs ɪz wˈɔːɾɚ,this_is_water.opus,11046,15,,,11,False,11
+Toto je sklenice vody.,This is a glass of water.,ðɪs ɪz ɐ ɡlˈæs ʌv wˈɔːɾɚ,this_is_a_glass_of_water.opus,11047,15,,,11,False,11
+Toto jsou sklenice vody.,These are glasses of water.,ðiːz ɑːɹ ɡlˈæsᵻz ʌv wˈɔːɾɚ,these_are_glasses_of_water.opus,11048,15,,,11,False,11

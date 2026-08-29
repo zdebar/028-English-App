@@ -1,0 +1,77 @@
+czech,english,block_id,grammar_chunk_id
+představit,introduce,,
+méně,less,,
+značka,mark,,
+trpělivý,patient,,
+možná,perhaps,,
+vzrůst,rise,,
+smysl,sense,,
+stav,state,,
+otočit,turn,,
+bude,will,,
+jednat,act,,
+objevit,appear,,
+zlomit,break,,
+kurz,course,,
+soud,court,,
+diskutovat,discuss,,
+efekt,effect,,
+forma,form,,
+zákazník,customer,,
+hmyz,insect,,
+znamenat,mean,,
+jednou,once,,
+účel,purpose,,
+opravdu,really,,
+jezdit,ride,,
+situace,situation,,
+úspěch,success,,
+ačkoliv,though,,
+na,upon,,
+válka,war,,
+zaneprázdněný,busy,,
+detail,detail,,
+zvláště,especially,,
+dokončit,finish,,
+země,ground,,
+prázdniny,holiday,,
+volba,choice,,
+lekce,lesson,,
+hudba,music,,
+dokonalý,perfect,,
+v domě,in the house,27,23
+v pokoji,in the room,27,23
+v autě,in the car,27,23
+ve městě,in the city,27,23
+v krabici,in the box,27,23
+v tašce,in the bag,27,23
+v kuchyni,in the kitchen,27,23
+v zahradě,in the garden,27,23
+na stole,on the table,28,24
+na zdi,on the wall,28,24
+na podlaze,on the floor,28,24
+na střeše,on the roof,28,24
+na stránce,on the page,28,24
+v televizi,on TV,28,24
+na seznamu,on the list,28,24
+na obrázku,on the picture,28,24
+u dveří,at the door,29,25
+na zastávce,at the bus stop,29,25
+doma,at home,29,25
+v práci,at work,29,25
+ve škole,at school,29,25
+na letišti,at the airport,29,25
+u stolu,at the table,29,25
+u vchodu,at the entrance,29,25
+pod postelí,under the bed,,
+pod stolem,under the table,,
+vedle domu,next to the house,,
+vedle školy,next to the school,,
+do školy,to school,,
+do parku,to the park,,
+do místnosti,into the room,,
+do auta,into the car,,
+z domu,out of the house,,
+z auta,out of the car,,
+skrz okno,through the window,,
+skrz tunel,through the tunnel,,

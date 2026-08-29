@@ -1,0 +1,57 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+hračka,toy,tˈɔɪ,toy.opus,16000,,,,,True,16
+věž,tower,tˈaʊɚ,tower.opus,16001,,,,,True,16
+ručník,towel,tˈaʊəl,towel.opus,16002,,,,,True,16
+přímý,direct,dᵻɹˈɛkt,direct.opus,16003,,,,,True,16
+prohlásit,declare,dᵻklˈɛɹ,declare.opus,16004,,,,,True,16
+zavřít,shut,ʃˈʌt,shut.opus,16005,,,,,True,16
+cesta,journey,dʒˈɜːni,journey.opus,16006,,,,,True,16
+hlas,voice,vˈɔɪs,voice.opus,16007,,,,,True,16
+povýšit,elevate,ˈɛlɪvˌeɪt,elevate.opus,16008,,,,,True,16
+výtah,elevator,ˈɛlɪvˌeɪɾɚ,elevator.opus,16009,,,,,True,16
+nenávist,hate,hˈeɪt,hate.opus,16010,,,,,True,16
+řádek,line,lˈaɪn,line.opus,16011,,,,,True,16
+přes,over,ˈoʊvɚ,over.opus,16012,,,,,True,16
+táhnout,pull,pˈʊl,pull.opus,16013,,,,,True,16
+prsten,ring,ɹˈɪŋ,ring.opus,16014,,,,,True,16
+podobný,similar,sˈɪmɪlɚ,similar.opus,16015,,,,,True,16
+rychlost,speed,spˈiːd,speed.opus,16016,,,,,True,16
+než,than,ðˈɐn,than.opus,16017,,,,,True,16
+nad,above,əbˈʌv,above.opus,16018,,,,,True,16
+začít,begin,bɪɡˈɪn,begin.opus,16019,,,,,True,16
+století,century,sˈɛntʃɚɹi,century.opus,16020,,,,,True,16
+zvážit,consider,kənsˈɪdɚ,consider.opus,16021,,,,,True,16
+nebezpečný,dangerous,dˈeɪndʒɚɹəs,dangerous.opus,16022,,,,,True,16
+výměna,exchange,ɛkstʃˈeɪndʒ,exchange.opus,16023,,,,,True,16
+vláda,government,ɡˈʌvɚnmənt,government.opus,16024,,,,,True,16
+slyšet,hear,hˈɪɹ,hear.opus,16025,,,,,True,16
+skákat,jump,dʒˈʌmp,jump.opus,16026,,,,,True,16
+materiál,material,mətˈɪɹiəl,material.opus,16027,,,,,True,16
+minulost,past,pˈæst,past.opus,16028,,,,,True,16
+produkovat,produce,pɹədˈuːs,produce.opus,16029,,,,,True,16
+odstranit,remove,ɹᵻmˈuːv,remove.opus,16030,,,,,True,16
+tajemství,secret,sˈiːkɹᵻt,secret.opus,16031,,,,,True,16
+píseň,song,sˈɔŋ,song.opus,16032,,,,,True,16
+televize,television,tˈɛlᵻvˌɪʒən,television.opus,16033,,,,,True,16
+hodnota,value,vˈæljuː,value.opus,16034,,,,,True,16
+kdy,when,wˈɛn,when.opus,16035,,,,,True,16
+za,behind,bᵻhˈaɪnd,behind.opus,16036,,,,,True,16
+případ,case,kˈeɪs,case.opus,16037,,,,,True,16
+sbírat,collect,kəlˈɛkt,collect.opus,16038,,,,,True,16
+kreslit,draw,dɹˈɔː,draw.opus,16039,,,,,True,16
+já pracuji,I work,aɪ wˈɜːk,i_work.opus,16040,30,,,26,False,16
+ty pracuješ,you work,juː wˈɜːk,you_work.opus,16041,30,,,26,False,16
+on pracuje,he works,hiː wˈɜːks,he_works.opus,16042,30,,,26,False,16
+ona pracuje,she works,ʃiː wˈɜːks,she_works.opus,16043,30,,,26,False,16
+ono pracuje,it works,ɪt wˈɜːks,it_works.opus,16044,30,,,26,False,16
+my pracujeme,we work,wiː wˈɜːk,we_work.opus,16045,30,,,26,False,16
+vy pracujete,you work,juː wˈɜːk,you_work.opus,16046,30,,,26,False,16
+oni pracují,they work,ðeɪ wˈɜːk,they_work.opus,16047,30,,,26,False,16
+Jím chléb.,I eat bread.,aɪ ˈiːt bɹˈɛd,i_eat_bread.opus,16048,,,,26,False,16
+Piješ vodu.,You drink water.,juː dɹˈɪŋk wˈɔːɾɚ,you_drink_water.opus,16049,,,,26,False,16
+Čte knihu. (on),He reads a book.,hiː ɹˈiːdz ɐ bˈʊk,he_reads_a_book.opus,16050,,,,26,False,16
+Píše dopis. (ona),She writes a letter.,ʃiː ɹˈaɪts ɐ lˈɛɾɚ,she_writes_a_letter.opus,16051,,,,26,False,16
+Je to malé.,It is small.,ɪɾ ɪz smˈɔːl,it_is_small.opus,16052,,,,26,False,16
+Máme auto.,We have a car.,wiː hæv ɐ kˈɑːɹ,we_have_a_car.opus,16053,,,,26,False,16
+Učíte studenty.,You teach students.,juː tˈiːtʃ stˈuːdənts,you_teach_students.opus,16054,,,,26,False,16
+Hrají fotbal.,They play football.,ðeɪ plˈeɪ fˈʊtbɔːl,they_play_football.opus,16055,,,,26,False,16
