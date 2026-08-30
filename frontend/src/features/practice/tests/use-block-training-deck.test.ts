@@ -9,6 +9,8 @@ const mocks = vi.hoisted(() => ({
   completeInitialTraining: vi.fn(),
   applyPracticeProgress: vi.fn(),
   resetQuestionState: vi.fn(),
+  renderStates: [] as Array<{ itemId: number | null; revealed: boolean }>,
+  transitionEvents: [] as string[],
 }));
 
 vi.mock('@/config/config', () => ({
@@ -39,28 +41,43 @@ vi.mock('@/database/utils/practice-content.utils', () => ({
   resolvePracticeGrammarContext: vi.fn(),
 }));
 vi.mock('@/features/practice/hooks/use-practice-card-state', () => ({
-  usePracticeCardState: () => ({
-    resetQuestionState: mocks.resetQuestionState,
-    czech: 'ahoj',
-    english: 'hello',
-    audioDisabled: false,
-    showDirectionChange: false,
-    handleReveal: vi.fn(),
-    plusHint: vi.fn(),
-    audioError: false,
-    playAudio: vi.fn(),
-    audioLoading: false,
-    isPlaying: false,
-  }),
+  usePracticeCardState: ({ currentItem, revealed, setRevealed }: any) => {
+    mocks.renderStates.push({ itemId: currentItem?.item_id ?? null, revealed });
+    return {
+      resetQuestionState: () => {
+        mocks.transitionEvents.push('reset');
+        mocks.resetQuestionState();
+        setRevealed(false);
+      },
+      czech: currentItem?.czech,
+      english: revealed ? currentItem?.english : '\u00A0',
+      audioDisabled: false,
+      showDirectionChange: false,
+      handleReveal: () => setRevealed(true),
+      plusHint: vi.fn(),
+      audioError: false,
+      playAudio: vi.fn(),
+      audioLoading: false,
+      isPlaying: false,
+    };
+  },
 }));
-vi.mock('@/routing/route-data-handoff', () => ({ invalidateRouteData: vi.fn(), routeDataKey: vi.fn() }));
+vi.mock('@/routing/route-data-handoff', () => ({
+  invalidateRouteData: vi.fn(),
+  routeDataKey: vi.fn(),
+}));
 vi.mock('@/features/logging/monitoring-handler', () => ({ reportError: vi.fn() }));
 
 import { useInitialTrainingDeck } from '../hooks/use-block-training-deck';
 
 const block = {
-  id: 10, name: 'Block', note: null, lesson_id: 1, grammar_chunk_id: null,
-  updated_at: '2026-01-01', deleted_at: null,
+  id: 10,
+  name: 'Block',
+  note: null,
+  lesson_id: 1,
+  grammar_chunk_id: null,
+  updated_at: '2026-01-01',
+  deleted_at: null,
 };
 const items = [item(1), item(2)];
 const initialData = {
@@ -74,12 +91,17 @@ const initialData = {
 describe('useInitialTrainingDeck', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.renderStates.length = 0;
+    mocks.transitionEvents.length = 0;
     mocks.reconcileActive.mockResolvedValue(null);
     mocks.startNew.mockResolvedValue(newSession());
     mocks.put.mockResolvedValue(undefined);
     mocks.recordInitialTrainingAnswer.mockResolvedValue(undefined);
     mocks.completeInitialTraining.mockResolvedValue(1);
-    mocks.applyPracticeProgress.mockImplementation((item) => ({ ...item, started_at: '2026-08-23' }));
+    mocks.applyPracticeProgress.mockImplementation((item) => ({
+      ...item,
+      started_at: '2026-08-23',
+    }));
   });
 
   it('starts the first ordered phase and persists progress after each answer', async () => {
@@ -94,6 +116,21 @@ describe('useInitialTrainingDeck', () => {
         completed_item_ids: [1],
       }),
     );
+  });
+
+  it('resets reveal before showing the next audio-less item', async () => {
+    const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
+    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+
+    act(() => result.current.handleReveal());
+    mocks.renderStates.length = 0;
+    mocks.transitionEvents.length = 0;
+
+    await act(async () => result.current.nextKnown());
+
+    expect(result.current.currentItem?.item_id).toBe(2);
+    expect(mocks.renderStates).not.toContainEqual({ itemId: 2, revealed: true });
+    expect(mocks.transitionEvents[0]).toBe('reset');
   });
 
   it('moves to the second ordered phase after completing the first phase', async () => {
@@ -179,22 +216,46 @@ describe('useInitialTrainingDeck', () => {
 
 function newSession() {
   return {
-    user_id: 'u1', mode: 'new' as const, completed_count: 0, target_count: 2,
-    block_id: 10, phase: 0 as const, current_queue_item_ids: [1, 2],
-    retry_queue_item_ids: [], completed_item_ids: [], started_at: '2026-08-23', updated_at: '2026-08-23',
+    user_id: 'u1',
+    mode: 'new' as const,
+    completed_count: 0,
+    target_count: 2,
+    block_id: 10,
+    phase: 0 as const,
+    current_queue_item_ids: [1, 2],
+    retry_queue_item_ids: [],
+    completed_item_ids: [],
+    started_at: '2026-08-23',
+    updated_at: '2026-08-23',
   };
 }
 
 function item(itemId: number) {
   return {
-    user_id: 'u1', item_id: itemId, czech: `cz${itemId}`, english: `en${itemId}`,
-    pronunciation: '', audio: null, is_vocabulary: 1 as const,
-    has_pronunciation_practice: 0 as const, sort_order: itemId,
-    curriculum_sort_path: [1, 1, itemId] as [number, number, number], note_id: null,
-    block_id: 10, topic_id: -1, grammar_chunk_id: 0, progress_cz_to_en: 0, progress_en_to_cz: 0,
-    progress_history: [], started_at: '1970-01-01T00:00:00.000Z', updated_at: '2026-01-01',
-    deleted_at: '', next_at_cz_to_en: '1970-01-01T00:00:00.000Z',
-    next_at_en_to_cz: '1970-01-01T00:00:00.000Z', mastered_at_cz_to_en: '',
-    mastered_at_en_to_cz: '', lesson_id: 1,
+    user_id: 'u1',
+    item_id: itemId,
+    czech: `cz${itemId}`,
+    english: `en${itemId}`,
+    pronunciation: '',
+    audio: null,
+    is_vocabulary: 1 as const,
+    has_pronunciation_practice: 0 as const,
+    sort_order: itemId,
+    curriculum_sort_path: [1, 1, itemId] as [number, number, number],
+    note_id: null,
+    block_id: 10,
+    topic_id: -1,
+    grammar_chunk_id: 0,
+    progress_cz_to_en: 0,
+    progress_en_to_cz: 0,
+    progress_history: [],
+    started_at: '1970-01-01T00:00:00.000Z',
+    updated_at: '2026-01-01',
+    deleted_at: '',
+    next_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+    next_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+    mastered_at_cz_to_en: '',
+    mastered_at_en_to_cz: '',
+    lesson_id: 1,
   };
 }

@@ -13,9 +13,67 @@ import {
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
 } from '@/database/utils/practice-content.utils';
+import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
+import type { BlockType, GrammarGroupType } from '@/types/generic.types';
+import type { PracticeSessionType } from '@/types/practice-session.types';
+import type { ResolvedPracticeEntry, UserItemLocal } from '@/types/user-item.types';
+
+export type InitialTrainingData = Readonly<{
+  block: BlockType | null;
+  items: UserItemLocal[];
+  entries: Array<ResolvedPracticeEntry<UserItemLocal>>;
+  grammar: GrammarChunkWithExamples | null;
+  grammarGroup: GrammarGroupType | null;
+}>;
 
 function getLocalDate(): string {
   return new Date(Date.now()).toLocaleDateString('en-CA');
+}
+
+function emptyInitialTrainingData(): InitialTrainingData {
+  return { block: null, items: [], entries: [], grammar: null, grammarGroup: null };
+}
+
+function getSavedSessionItemIds(activeSession: PracticeSessionType | null): number[] {
+  if (!activeSession) return [];
+  return [
+    ...activeSession.current_queue_item_ids,
+    ...activeSession.retry_queue_item_ids,
+    ...activeSession.completed_item_ids,
+  ];
+}
+
+async function getInitialTrainingSelection(
+  userId: string,
+  activeSession: PracticeSessionType | null,
+) {
+  if (activeSession) {
+    const savedItemIds = getSavedSessionItemIds(activeSession);
+    return {
+      blockId: activeSession.block_id,
+      items: await UserItem.getByItemIds(userId, savedItemIds),
+    };
+  }
+  return UserItem.getNextInitialTrainingSelection(userId);
+}
+
+async function loadInitialTrainingData(userId: string): Promise<InitialTrainingData> {
+  const activeSession = await PracticeSession.reconcileActive(userId);
+  if (activeSession?.mode === 'review') return emptyInitialTrainingData();
+
+  const selection = await getInitialTrainingSelection(userId, activeSession);
+  if (!selection) return emptyInitialTrainingData();
+
+  const block = selection.blockId == null ? null : await Block.getById(selection.blockId);
+  const items = selection.items;
+  const hasInvalidSelection = items.length === 0 || (selection.blockId != null && !block);
+  if (hasInvalidSelection) return emptyInitialTrainingData();
+
+  const [entries, grammarContext] = await Promise.all([
+    resolvePracticeEntries(userId, items),
+    resolvePracticeGrammarContext(userId, block?.grammar_chunk_id ?? null),
+  ]);
+  return { block, items, entries, ...grammarContext };
 }
 
 export function overviewAvailabilityDescriptor(userId: string) {
@@ -108,39 +166,7 @@ export function pronunciationPracticeDescriptor(userId: string) {
 export function initialTrainingDescriptor(userId: string) {
   return {
     key: routeDataKey('initial-training', userId),
-    load: async () => {
-      const activeSession = await PracticeSession.reconcileActive(userId);
-      if (activeSession?.mode === 'review') {
-        return { block: null, items: [], entries: [], grammar: null, grammarGroup: null };
-      }
-      const savedItemIds = activeSession
-        ? [
-            ...activeSession.current_queue_item_ids,
-            ...activeSession.retry_queue_item_ids,
-            ...activeSession.completed_item_ids,
-          ]
-        : [];
-      const selection = activeSession
-        ? {
-            blockId: activeSession.block_id,
-            items: await UserItem.getByItemIds(userId, savedItemIds),
-          }
-        : await UserItem.getNextInitialTrainingSelection(userId);
-      if (!selection) {
-        return { block: null, items: [], entries: [], grammar: null, grammarGroup: null };
-      }
-
-      const block = selection.blockId == null ? null : await Block.getById(selection.blockId);
-      const items = selection.items;
-      if (items.length === 0 || (selection.blockId != null && !block)) {
-        return { block: null, items: [], entries: [], grammar: null, grammarGroup: null };
-      }
-      const [entries, grammarContext] = await Promise.all([
-        resolvePracticeEntries(userId, items),
-        resolvePracticeGrammarContext(userId, block?.grammar_chunk_id ?? null),
-      ]);
-      return { block, items, entries, ...grammarContext };
-    },
+    load: () => loadInitialTrainingData(userId),
   };
 }
 
@@ -148,6 +174,3 @@ export type OverviewAvailabilityData = Awaited<
   ReturnType<ReturnType<typeof overviewAvailabilityDescriptor>['load']>
 >;
 export type TopicDetailData = Awaited<ReturnType<ReturnType<typeof topicDetailDescriptor>['load']>>;
-export type InitialTrainingData = Awaited<
-  ReturnType<ReturnType<typeof initialTrainingDescriptor>['load']>
->;

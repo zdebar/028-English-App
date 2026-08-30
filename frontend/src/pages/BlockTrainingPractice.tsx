@@ -13,41 +13,37 @@ import { useLoaderData, useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/config/routes.config';
 import type { InitialTrainingData } from '@/routing/route-data';
 
-export default function InitialTrainingPractice(): JSX.Element {
-  const userId = useAuthStore((state) => state.userId);
-  const navigate = useNavigate();
-  const showToast = useToastStore((state) => state.showToast);
-  const [introDismissed, setIntroDismissed] = useState(false);
-  const initialData = useLoaderData() as InitialTrainingData;
-  const deck = useInitialTrainingDeck(userId, initialData);
+type InitialTrainingDeck = ReturnType<typeof useInitialTrainingDeck>;
 
-  useEffect(() => {
-    if (!deck.error) return;
-    showToast(TEXTS.loadingError, 'error');
-    reportError('Failed to fetch initial training deck', deck.error);
-  }, [deck.error, showToast]);
+function reportInitialTrainingError(
+  error: Error | null,
+  showToast: (message: string, type: 'error') => void,
+): void {
+  if (!error) return;
+  showToast(TEXTS.loadingError, 'error');
+  reportError('Failed to fetch initial training deck', error);
+}
 
-  useEffect(() => {
-    if (deck.isComplete) navigate(ROUTES.home, { replace: true });
-  }, [deck.isComplete, navigate]);
+function navigateAfterInitialTraining(
+  isComplete: boolean,
+  navigate: ReturnType<typeof useNavigate>,
+): void {
+  if (isComplete) navigate(ROUTES.home, { replace: true });
+}
 
-  if (!userId) {
-    return <Notification>{TEXTS.notAvailable}</Notification>;
-  }
-
-  if (deck.loading) {
-    return <DelayedLoadingCircle />;
-  }
-
-  if (!deck.hasContent && !deck.currentItem) {
-    return <PracticeEmptyState />;
-  }
-
+function InitialTrainingContent({
+  deck,
+  introDismissed,
+  dismissIntro,
+}: Readonly<{
+  deck: InitialTrainingDeck;
+  introDismissed: boolean;
+  dismissIntro: () => void;
+}>): JSX.Element {
+  if (deck.loading) return <DelayedLoadingCircle />;
+  if (!deck.hasContent && !deck.currentItem) return <PracticeEmptyState />;
   if (deck.isComplete) return <DelayedLoadingCircle />;
-
-  if (!deck.currentItem) {
-    return <PracticeEmptyState />;
-  }
+  if (!deck.currentItem) return <PracticeEmptyState />;
 
   const showIntro = Boolean(deck.block) && !deck.hasProgress && !introDismissed;
   if (showIntro && deck.block) {
@@ -57,7 +53,7 @@ export default function InitialTrainingPractice(): JSX.Element {
         grammar={deck.grammar}
         grammarGroup={deck.grammarGroup}
         items={deck.items}
-        onContinue={() => setIntroDismissed(true)}
+        onContinue={dismissIntro}
       />
     );
   }
@@ -87,6 +83,35 @@ export default function InitialTrainingPractice(): JSX.Element {
       audioLoading={deck.audioLoading}
       isBlockTrainingPractice
       pronunciationItem={deck.currentItem}
+    />
+  );
+}
+
+export default function InitialTrainingPractice(): JSX.Element {
+  const userId = useAuthStore((state) => state.userId);
+  const navigate = useNavigate();
+  const showToast = useToastStore((state) => state.showToast);
+  const [introDismissed, setIntroDismissed] = useState(false);
+  const initialData = useLoaderData() as InitialTrainingData;
+  const deck = useInitialTrainingDeck(userId, initialData);
+
+  useEffect(() => {
+    reportInitialTrainingError(deck.error, showToast);
+  }, [deck.error, showToast]);
+
+  useEffect(() => {
+    navigateAfterInitialTraining(deck.isComplete, navigate);
+  }, [deck.isComplete, navigate]);
+
+  if (!userId) {
+    return <Notification>{TEXTS.notAvailable}</Notification>;
+  }
+
+  return (
+    <InitialTrainingContent
+      deck={deck}
+      introDismissed={introDismissed}
+      dismissIntro={() => setIntroDismissed(true)}
     />
   );
 }

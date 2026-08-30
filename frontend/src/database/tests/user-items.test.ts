@@ -33,6 +33,162 @@ const mocks = vi.hoisted(() => ({
   pronunciationMemberships: [] as Array<{ pronunciation_group_id: number; item_id: number }>,
 }));
 
+function normalizeIndexedPracticeItem(item: any) {
+  return {
+    ...item,
+    progress_cz_to_en: item.progress_cz_to_en ?? item.progress ?? 0,
+    progress_en_to_cz: item.progress_en_to_cz ?? item.progress ?? 0,
+    next_at_cz_to_en: item.next_at_cz_to_en ?? item.next_at,
+    next_at_en_to_cz: item.next_at_en_to_cz ?? item.next_at,
+    mastered_at_cz_to_en: item.mastered_at_cz_to_en ?? item.mastered_at,
+    mastered_at_en_to_cz: item.mastered_at_en_to_cz ?? item.mastered_at,
+    started_at: item.started_at ?? getIndexedStartedAt(item),
+  };
+}
+
+function getIndexedStartedAt(item: any): string {
+  if (item.next_at === '1970-01-01T00:00:00.000Z') return '1970-01-01T00:00:00.000Z';
+  return '2025-01-01T00:00:00.000Z';
+}
+
+function createUserIdQuery() {
+  return {
+    equals: () => ({
+      delete: (...args: unknown[]) => mocks.equalsDelete(...args),
+      toArray: (...args: unknown[]) => mocks.userEqualsToArray(...args),
+    }),
+  };
+}
+
+function createItemIdQuery() {
+  return {
+    anyOf: () => ({
+      toArray: (...args: unknown[]) => mocks.itemIdsToArray(...args),
+    }),
+    equals: () => ({
+      modify: (...args: unknown[]) => mocks.itemIdModify(...args),
+    }),
+    between: (...args: unknown[]) => {
+      mocks.itemIdBetween(...args);
+      return {
+        limit: (...limitArgs: unknown[]) => {
+          mocks.itemIdLimit(...limitArgs);
+          return {
+            toArray: (...toArrayArgs: unknown[]) => mocks.simulationToArray(...toArrayArgs),
+          };
+        },
+      };
+    },
+  };
+}
+
+function createUpdatedAtQuery() {
+  return {
+    between: () => ({
+      toArray: (...args: unknown[]) => mocks.updatedBetweenToArray(...args),
+    }),
+  };
+}
+
+function createIndexedPracticeQuery() {
+  return {
+    between: (...args: unknown[]) => {
+      mocks.indexedBetween(...args);
+      return {
+        filter: (...filterArgs: unknown[]) => {
+          mocks.indexedFilter(...filterArgs);
+          return {
+            limit: (...limitArgs: unknown[]) => {
+              mocks.indexedLimit(...limitArgs);
+              return {
+                toArray: (...toArrayArgs: unknown[]) =>
+                  Promise.resolve(mocks.indexedToArray(...toArrayArgs)).then((items) =>
+                    (items ?? []).map(normalizeIndexedPracticeItem),
+                  ),
+              };
+            },
+            toArray: (...toArrayArgs: unknown[]) => mocks.indexedToArray(...toArrayArgs),
+          };
+        },
+      };
+    },
+  };
+}
+
+function createVocabularyStartedQuery() {
+  return {
+    between: (...args: unknown[]) => {
+      mocks.indexedBetween(...args);
+      return {
+        toArray: (...toArrayArgs: unknown[]) => mocks.indexedToArray(...toArrayArgs),
+      };
+    },
+  };
+}
+
+function createStartedGrammarQuery() {
+  return {
+    between: (...args: unknown[]) => {
+      mocks.indexedBetween(...args);
+      return {
+        filter: (predicate: (item: any) => boolean) => ({
+          toArray: (...toArrayArgs: unknown[]) => mocks.indexedToArray(...toArrayArgs),
+          first: async () => mocks.startedGrammarCandidates.find(predicate),
+        }),
+      };
+    },
+  };
+}
+
+function createBlockQuery() {
+  return {
+    equals: () => ({
+      toArray: (...args: unknown[]) => mocks.blockEqualsToArray(...args),
+    }),
+  };
+}
+
+function createTopicQuery() {
+  return {
+    equals: () => ({
+      filter: (predicate: (item: any) => boolean) => ({
+        toArray: async (...args: unknown[]) =>
+          ((await mocks.topicEqualsToArray(...args)) ?? []).filter(predicate),
+      }),
+      modify: (...args: unknown[]) => mocks.topicModify(...args),
+    }),
+  };
+}
+
+function createPronunciationQuery() {
+  return {
+    equals: () => ({
+      count: (...args: unknown[]) => mocks.pronunciationCount(...args),
+      toArray: (...args: unknown[]) => mocks.pronunciationToArray(...args),
+    }),
+  };
+}
+
+function createUserItemsWhere(field: string) {
+  const queryFactories: Record<string, () => unknown> = {
+    user_id: createUserIdQuery,
+    '[user_id+item_id]': createItemIdQuery,
+    '[user_id+updated_at]': createUpdatedAtQuery,
+    '[user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]':
+      createIndexedPracticeQuery,
+    '[user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]':
+      createIndexedPracticeQuery,
+    '[user_id+is_vocabulary+started_at]': createVocabularyStartedQuery,
+    '[user_id+started_at]': createStartedGrammarQuery,
+    '[user_id+block_id]': createBlockQuery,
+    '[user_id+topic_id]': createTopicQuery,
+    '[user_id+has_pronunciation_practice]': createPronunciationQuery,
+  };
+  const createQuery = queryFactories[field];
+  if (!createQuery) throw new Error(`Unexpected user_items.where field: ${field}`);
+  return createQuery();
+}
+
 vi.mock('@/config/config', () => ({
   default: {
     database: {
@@ -72,143 +228,7 @@ vi.mock('@/database/models/db', () => ({
       bulkPut: (...args: unknown[]) => mocks.bulkPut(...args),
       bulkUpdate: (...args: unknown[]) => mocks.bulkUpdate(...args),
       bulkDelete: (...args: unknown[]) => mocks.bulkDelete(...args),
-      where: (field: string) => {
-        if (field === 'user_id') {
-          return {
-            equals: () => ({
-              delete: (...args: unknown[]) => mocks.equalsDelete(...args),
-              toArray: (...args: unknown[]) => mocks.userEqualsToArray(...args),
-            }),
-          };
-        }
-        if (field === '[user_id+item_id]') {
-          return {
-            anyOf: () => ({
-              toArray: (...args: unknown[]) => mocks.itemIdsToArray(...args),
-            }),
-            equals: () => ({
-              modify: (...args: unknown[]) => mocks.itemIdModify(...args),
-            }),
-            between: (...args: unknown[]) => {
-              mocks.itemIdBetween(...args);
-              return {
-                limit: (...limitArgs: unknown[]) => {
-                  mocks.itemIdLimit(...limitArgs);
-                  return {
-                    toArray: (...toArrayArgs: unknown[]) =>
-                      mocks.simulationToArray(...toArrayArgs),
-                  };
-                },
-              };
-            },
-          };
-        }
-        if (field === '[user_id+updated_at]') {
-          return {
-            between: () => ({
-              toArray: (...args: unknown[]) => mocks.updatedBetweenToArray(...args),
-            }),
-          };
-        }
-        if (
-          field ===
-            '[user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]' ||
-          field ===
-            '[user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]'
-        ) {
-          return {
-            between: (...args: unknown[]) => {
-              mocks.indexedBetween(...args);
-              return {
-                filter: (...filterArgs: unknown[]) => {
-                  mocks.indexedFilter(...filterArgs);
-                  return {
-                    limit: (...limitArgs: unknown[]) => {
-                      mocks.indexedLimit(...limitArgs);
-                      return {
-                        toArray: (...toArrayArgs: unknown[]) =>
-                          Promise.resolve(mocks.indexedToArray(...toArrayArgs)).then((items) =>
-                            (items ?? []).map((item: any) => ({
-                              ...item,
-                              progress_cz_to_en: item.progress_cz_to_en ?? item.progress ?? 0,
-                              progress_en_to_cz: item.progress_en_to_cz ?? item.progress ?? 0,
-                              next_at_cz_to_en: item.next_at_cz_to_en ?? item.next_at,
-                              next_at_en_to_cz: item.next_at_en_to_cz ?? item.next_at,
-                              mastered_at_cz_to_en:
-                                item.mastered_at_cz_to_en ?? item.mastered_at,
-                              mastered_at_en_to_cz:
-                                item.mastered_at_en_to_cz ?? item.mastered_at,
-                              started_at:
-                                item.started_at ??
-                                (item.next_at === '1970-01-01T00:00:00.000Z'
-                                  ? '1970-01-01T00:00:00.000Z'
-                                  : '2025-01-01T00:00:00.000Z'),
-                            })),
-                          ),
-                      };
-                    },
-                    toArray: (...toArrayArgs: unknown[]) => mocks.indexedToArray(...toArrayArgs),
-                  };
-                },
-              };
-            },
-          };
-        }
-        if (field === '[user_id+is_vocabulary+started_at]') {
-          return {
-            between: (...args: unknown[]) => {
-              mocks.indexedBetween(...args);
-              return {
-                toArray: (...toArrayArgs: unknown[]) => mocks.indexedToArray(...toArrayArgs),
-              };
-            },
-          };
-        }
-        if (field === '[user_id+started_at]') {
-          return {
-            between: (...args: unknown[]) => {
-              mocks.indexedBetween(...args);
-              return {
-                filter: (...filterArgs: unknown[]) => {
-                  mocks.indexedFilter(...filterArgs);
-                  const predicate = filterArgs[0] as (item: any) => boolean;
-                  return {
-                    toArray: (...toArrayArgs: unknown[]) => mocks.indexedToArray(...toArrayArgs),
-                    first: async () => mocks.startedGrammarCandidates.find(predicate),
-                  };
-                },
-              };
-            },
-          };
-        }
-        if (field === '[user_id+block_id]') {
-          return {
-            equals: () => ({
-              toArray: (...args: unknown[]) => mocks.blockEqualsToArray(...args),
-            }),
-          };
-        }
-        if (field === '[user_id+topic_id]') {
-          return {
-            equals: () => ({
-              filter: (predicate: (item: any) => boolean) => ({
-                toArray: async (...args: unknown[]) =>
-                  ((await mocks.topicEqualsToArray(...args)) ?? []).filter(predicate),
-              }),
-              modify: (...args: unknown[]) => mocks.topicModify(...args),
-            }),
-          };
-        }
-        if (field === '[user_id+has_pronunciation_practice]') {
-          return {
-            equals: () => ({
-              count: (...args: unknown[]) => mocks.pronunciationCount(...args),
-              toArray: (...args: unknown[]) => mocks.pronunciationToArray(...args),
-            }),
-          };
-        }
-        throw new Error(`Unexpected user_items.where field: ${field}`);
-      },
+      where: createUserItemsWhere,
     },
     pronunciation_group_items: {
       toArray: async () => mocks.pronunciationMemberships,
@@ -470,11 +490,7 @@ describe('UserItem', () => {
     });
 
     await expect(
-      UserItem.togglePronunciationPractice(
-        'u1',
-        7,
-        '2026-07-30T10:00:00.000Z',
-      ),
+      UserItem.togglePronunciationPractice('u1', 7, '2026-07-30T10:00:00.000Z'),
     ).resolves.toBe(true);
 
     expect(mocks.userItemUpdate).toHaveBeenCalledWith(['u1', 7], {
@@ -501,9 +517,7 @@ describe('UserItem', () => {
       });
 
     await expect(UserItem.togglePronunciationPractice('u1', 8)).resolves.toBe(true);
-    await expect(UserItem.togglePronunciationPractice('u1', 9)).rejects.toThrow(
-      'not eligible',
-    );
+    await expect(UserItem.togglePronunciationPractice('u1', 9)).rejects.toThrow('not eligible');
     expect(mocks.userItemUpdate).toHaveBeenCalledTimes(1);
     expect(mocks.userItemUpdate).toHaveBeenCalledWith(
       ['u1', 8],
@@ -737,11 +751,7 @@ describe('UserItem', () => {
   });
 
   it('getByUserId returns all items for user stats', async () => {
-    mocks.userEqualsToArray.mockResolvedValueOnce([
-      { item_id: 1 },
-      { item_id: 2 },
-      { item_id: 3 },
-    ]);
+    mocks.userEqualsToArray.mockResolvedValueOnce([{ item_id: 1 }, { item_id: 2 }, { item_id: 3 }]);
 
     const result = await UserItem.getByUserId('u1');
 
@@ -890,36 +900,46 @@ describe('UserItem', () => {
     );
 
     const grammarFilter = mocks.indexedFilter.mock.calls[0][0] as (item: any) => boolean;
-    expect(grammarFilter({
-      block_id: 10,
-      started_at: '2026-01-01T00:00:00.000Z',
-      mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
-      next_at_cz_to_en: '2026-06-24T11:00:00.000Z',
-    })).toBe(true);
-    expect(grammarFilter({
-      block_id: 11,
-      started_at: '2026-01-01T00:00:00.000Z',
-      mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
-      next_at_cz_to_en: '2026-06-24T11:00:00.000Z',
-    })).toBe(true);
-    expect(grammarFilter({
-      block_id: 10,
-      started_at: '2026-01-01T00:00:00.000Z',
-      mastered_at_cz_to_en: '2026-06-20T12:00:00.000Z',
-      next_at_cz_to_en: '2026-06-24T11:00:00.000Z',
-    })).toBe(false);
-    expect(grammarFilter({
-      block_id: 10,
-      started_at: '2026-01-01T00:00:00.000Z',
-      mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
-      next_at_cz_to_en: '1970-01-01T00:00:00.000Z',
-    })).toBe(false);
-    expect(grammarFilter({
-      block_id: 10,
-      started_at: '2026-01-01T00:00:00.000Z',
-      mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
-      next_at_cz_to_en: '2026-06-24T12:00:00.000Z',
-    })).toBe(false);
+    expect(
+      grammarFilter({
+        block_id: 10,
+        started_at: '2026-01-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        next_at_cz_to_en: '2026-06-24T11:00:00.000Z',
+      }),
+    ).toBe(true);
+    expect(
+      grammarFilter({
+        block_id: 11,
+        started_at: '2026-01-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        next_at_cz_to_en: '2026-06-24T11:00:00.000Z',
+      }),
+    ).toBe(true);
+    expect(
+      grammarFilter({
+        block_id: 10,
+        started_at: '2026-01-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '2026-06-20T12:00:00.000Z',
+        next_at_cz_to_en: '2026-06-24T11:00:00.000Z',
+      }),
+    ).toBe(false);
+    expect(
+      grammarFilter({
+        block_id: 10,
+        started_at: '2026-01-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        next_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+      }),
+    ).toBe(false);
+    expect(
+      grammarFilter({
+        block_id: 10,
+        started_at: '2026-01-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        next_at_cz_to_en: '2026-06-24T12:00:00.000Z',
+      }),
+    ).toBe(false);
   });
 
   it('getByBlockId returns block items ordered by sort_order', async () => {
@@ -1038,8 +1058,18 @@ describe('UserItem', () => {
         curriculum_sort_path: [1, 1, 1],
         started_at: '2026-01-01',
       }),
-      initialItem(2, { is_vocabulary: 0, grammar_chunk_id: 2, block_id: 7, curriculum_sort_path: [1, 1, 2] }),
-      initialItem(3, { is_vocabulary: 0, grammar_chunk_id: 3, block_id: 7, curriculum_sort_path: [1, 1, 3] }),
+      initialItem(2, {
+        is_vocabulary: 0,
+        grammar_chunk_id: 2,
+        block_id: 7,
+        curriculum_sort_path: [1, 1, 2],
+      }),
+      initialItem(3, {
+        is_vocabulary: 0,
+        grammar_chunk_id: 3,
+        block_id: 7,
+        curriculum_sort_path: [1, 1, 3],
+      }),
       initialItem(4, {
         is_vocabulary: 0,
         grammar_chunk_id: 4,
@@ -1210,14 +1240,15 @@ describe('UserItem', () => {
     await expect(UserItem.getReadyReviewState('u1')).resolves.toEqual({
       reviewReadyAt: '2026-06-24T12:00:00.000Z',
     });
-
   });
 
   it('getReadyReviewState caps availability at the badge cap', async () => {
-    mocks.userEqualsToArray.mockResolvedValueOnce(Array.from({ length: 100 }, (_, index) => ({
-      item_id: index + 1,
-      started_at: '1970-01-01T00:00:00.000Z',
-    })));
+    mocks.userEqualsToArray.mockResolvedValueOnce(
+      Array.from({ length: 100 }, (_, index) => ({
+        item_id: index + 1,
+        started_at: '1970-01-01T00:00:00.000Z',
+      })),
+    );
 
     await expect(UserItem.getReadyReviewState('u1')).resolves.toEqual({
       reviewReadyAt: null,
@@ -1322,7 +1353,6 @@ describe('UserItem', () => {
     await expect(UserItem.getReadyReviewState('u1')).resolves.toEqual({
       reviewReadyAt: null,
     });
-
   });
 
   it('getReadyReviewState ignores mastered vocabulary candidates', async () => {
@@ -1354,9 +1384,7 @@ describe('UserItem', () => {
     await expect(UserItem.getSimulationCandidates('u1')).resolves.toBe(items);
     expect(mocks.itemIdLimit).toHaveBeenCalledWith(4);
 
-    await expect(
-      UserItem.simulateData(items as any, '2026-06-10T10:00:00.000Z'),
-    ).resolves.toBe(4);
+    await expect(UserItem.simulateData(items as any, '2026-06-10T10:00:00.000Z')).resolves.toBe(4);
 
     const simulated = mocks.bulkPut.mock.calls[0][0] as any[];
     expect(simulated.map((item) => item.item_id)).toEqual([2, 4, 9, 10]);

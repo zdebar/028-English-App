@@ -1,0 +1,61 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+poušť,desert,dˈɛzɚt,desert.opus,9000,,,,,True,9
+drahý,expensive,ɛkspˈɛnsɪv,expensive.opus,9001,,,,,True,9
+květina,flower,flˈaʊɚ,flower.opus,9002,,,,,True,9
+kostel,church,tʃˈɜːtʃ,church.opus,9003,,,,,True,9
+možné,possible,pˈɑːsᵻbəl,possible.opus,9004,,,,,True,9
+nemožné,impossible,ɪmpˈɑːsᵻbəl,impossible.opus,9005,,,,,True,9
+opustit,leave,lˈiːv,leave.opus,9006,,,,,True,9
+plán,plan,plˈæn,plan.opus,9007,,,,,True,9
+vrátit se,return,ɹᵻtˈɜːn,return.opus,9008,,,,,True,9
+uložit,save,sˈeɪv,save.opus,9009,,,,,True,9
+moře,sea,sˈiː,sea.opus,9010,,,,,True,9
+spolu,together,təɡˈɛðɚ,together.opus,9011,,,,,True,9
+armáda,army,ˈɑːɹmi,army.opus,9012,,,,,True,9
+kryt,cover,kˈʌvɚ,cover.opus,9013,,,,,True,9
+kultura,culture,kˈʌltʃɚ,culture.opus,9014,,,,,True,9
+rozhodnutí,decision,dᵻsˈɪʒən,decision.opus,9015,,,,,True,9
+příklad,example,ɛɡzˈæmpəl,example.opus,9016,,,,,True,9
+cítit,feel,fˈiːl,feel.opus,9017,,,,,True,9
+ostrov,island,ˈaɪlənd,island.opus,9018,,,,,True,9
+člen,member,mˈɛmbɚ,member.opus,9019,,,,,True,9
+další,next,nˈɛkst,next.opus,9020,,,,,True,9
+pozice,position,pəzˈɪʃən,position.opus,9021,,,,,True,9
+současný,present,pɹˈɛzənt,present.opus,9022,,,,,True,9
+záznam,record,ɹˈɛkɚd,record.opus,9023,,,,,True,9
+sladký,sweet,swˈiːt,sweet.opus,9024,,,,,True,9
+zkusit,try,tɹˈaɪ,try.opus,9025,,,,,True,9
+policie,police,pəlˈiːs,police.opus,9026,,,,,True,9
+svět,world,wˈɜːld,world.opus,9027,,,,,True,9
+chytit,catch,kˈætʃ,catch.opus,9028,,,,,True,9
+roh,corner,kˈɔːɹnɚ,corner.opus,9029,,,,,True,9
+vzdálenost,distance,dˈɪstəns,distance.opus,9030,,,,,True,9
+vzdělání,education,ˌɛdʒuːkˈeɪʃən,education.opus,9031,,,,,True,9
+zájem,interest,ˈɪntɹɛst,interest.opus,9032,,,,,True,9
+část,part,pˈɑːɹt,part.opus,9033,,,,,True,9
+prezident,president,pɹˈɛzɪdənt,president.opus,9034,,,,,True,9
+kolo,round,ɹˈaʊnd,round.opus,9035,,,,,True,9
+několik,several,sˈɛvɹəl,several.opus,9036,,,,,True,9
+zvuk,sound,sˈaʊnd,sound.opus,9037,,,,,True,9
+příběh,story,stˈɔːɹi,story.opus,9038,,,,,True,9
+téměř,almost,ˈɔːlmoʊst,almost.opus,9039,,,,,True,9
+kočky,cats,kˈæts,cats.opus,9040,10,,,8,False,9
+psy,dogs,dˈɑːɡz,dogs.opus,9041,10,,,8,False,9
+domy,houses,hˈaʊzᵻz,houses.opus,9042,10,,,8,False,9
+stoly,tables,tˈeɪbəlz,tables.opus,9043,10,,,8,False,9
+děti,children,tʃˈɪldɹən,children.opus,9044,10,,,8,False,9
+myši,mice,mˈaɪs,mice.opus,9045,10,,,8,False,9
+muži,men,mˈɛn,men.opus,9046,10,,,8,False,9
+ženy,women,wˈɪmɪn,women.opus,9047,10,,,8,False,9
+mnoho (nepočítatelných),much,mˈʌtʃ,much.opus,9048,11,,,8,False,9
+mnoho (počítatelných),many,mˈɛni,many.opus,9049,11,,,8,False,9
+málo (nepočítatelných),little,lˈɪɾəl,little.opus,9050,11,,,8,False,9
+málo (počítatelných),few,fjˈuː,few.opus,9051,11,,,8,False,9
+trochu (nepočítatelných),a little,ɐ lˈɪɾəl,a_little.opus,9052,11,,,8,False,9
+několik (počítatelných),a few,ɐ fjˈuː,a_few.opus,9053,11,,,8,False,9
+mnoho vody,much water,mˈʌtʃ wˈɔːɾɚ,much_water.opus,9054,12,,,8,False,9
+mnoho aut,many cars,mˈɛni kˈɑːɹz,many_cars.opus,9055,12,,,8,False,9
+málo cukru,little sugar,lˈɪɾəl ʃˈʊɡɚ,little_sugar.opus,9056,12,,,8,False,9
+málo knih,few books,fjˈuː bˈʊks,few_books.opus,9057,12,,,8,False,9
+trochu mléka,a little milk,ɐ lˈɪɾəl mˈɪlk,a_little_milk.opus,9058,12,,,8,False,9
+několik studentů,a few students,ɐ fjˈuː stˈuːdənts,a_few_students.opus,9059,12,,,8,False,9

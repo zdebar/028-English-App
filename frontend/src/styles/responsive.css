@@ -8,12 +8,12 @@
 
 .bottom-controls-clearance,
 .home-bottom-controls-clearance {
-  margin-bottom: var(--height-button);
+  margin-bottom: calc(var(--height-button) + var(--spacing));
 }
 
 .pos-bottom-right-control {
   position: absolute;
-  bottom: calc(-1 * var(--height-button));
+  bottom: calc(-1 * var(--height-button) - var(--spacing));
   right: 0;
   display: flex;
   align-items: center;
@@ -22,7 +22,7 @@
 
 .pos-bottom-left-control {
   position: absolute;
-  bottom: calc(-1 * var(--height-button));
+  bottom: calc(-1 * var(--height-button) - var(--spacing));
   left: 0;
   display: flex;
   align-items: center;
@@ -59,21 +59,27 @@
 
 .app-shell[data-secondary-layout='side'] .pos-bottom-right-control {
   position: fixed;
-  right: max(0px, calc(((100vw - var(--responsive-card-width)) / 2) - var(--size-button)));
+  right: max(
+    0px,
+    calc(((100vw - var(--responsive-card-width)) / 2) - var(--size-button) - var(--spacing))
+  );
   bottom: 0;
   flex-direction: column;
 }
 
 .app-shell[data-secondary-layout='side'] .pos-bottom-left-control {
   position: fixed;
-  left: max(0px, calc(((100vw - var(--responsive-card-width)) / 2) - var(--size-button)));
+  left: max(
+    0px,
+    calc(((100vw - var(--responsive-card-width)) / 2) - var(--size-button) - var(--spacing))
+  );
   bottom: 0;
   flex-direction: column-reverse;
 }
 
 .pos-home-dashboard-help {
   position: absolute;
-  bottom: calc(-1 * var(--height-button));
+  bottom: calc(-1 * var(--height-button) - var(--spacing));
   right: 0;
   display: flex;
   align-items: center;

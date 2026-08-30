@@ -1,0 +1,50 @@
+czech,english,block_id,grammar_chunk_id
+určitý,certain,,
+popsat,describe,,
+suchý,dry,,
+očekávat,expect,,
+fakt,fact,,
+zahrnout,include,,
+nechat,let,,
+moment,moment,,
+síla,power,,
+poskytnout,provide,,
+hlásit,report,,
+sedadlo,seat,,
+jednotlivý,single,,
+systém,system,,
+skrze,through,,
+barva,colour,,
+odlišný,different,,
+Země,Earth,,
+film,film,,
+rád,glad,,
+jen,just,,
+láska,love,,
+tužka,pencil,,
+rychlý,quick,,
+jednoduchý,simple,,
+město,town,,
+strom,tree,,
+adresa,address,,
+budova,building,,
+překročit,cross,,
+stůl,desk,,
+led,ice,,
+klíč,key,,
+rodič,parent,,
+pošta,post,,
+kámen,rock,,
+hledat,search,,
+sport,sport,,
+údolí,valley,,
+dítě,baby,,
+určitý člen,the,15,11
+neurčitý člen,"a, an",15,11
+Jsem učitel.,I'm a teacher.,15,11
+Jsem ten učitel.,I'm the teacher.,15,11
+Jsou učitelé.,They're teachers.,15,11
+Jsou to ti učitelé.,They're the teachers.,15,11
+Toto je voda.,This is water.,15,11
+Toto je sklenice vody.,This is a glass of water.,15,11
+Toto jsou sklenice vody.,These are glasses of water.,15,11

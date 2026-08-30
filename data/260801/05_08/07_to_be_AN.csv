@@ -1,0 +1,55 @@
+czech,english,grammar_chunk_id,block_id
+nápad,idea,,
+druh,kind,,
+udělat,make,,
+mír,peace,,
+důležitý,important,,
+populární,popular,,
+správně,right,,
+tak,so,,
+čekat,wait,,
+znovu,again,,
+dokument,document,,
+oheň,fire,,
+dát,give,,
+šance,chance,,
+informace,information,,
+často,often,,
+preferovat,prefer,,
+vložit,put,,
+kámen,stone,,
+takový,such,,
+myslet,think,,
+rozumět,understand,,
+navštívit,visit,,
+kolem,around,,
+volat,call,,
+řezat,cut,,
+večeře,dinner,,
+dolů,down,,
+vysvětlit,explain,,
+dostat,get,,
+zajímavý,interesting,,
+dlouhý,long,,
+pohybovat se,move,,
+ven,out,,
+stránka,page,,
+dosáhnout,reach,,
+pod,under,,
+do,into,,
+z,out of,,
+skrz,through,,
+Jsem tlustý?,Am I fat?,5,7
+Jsi smutný?,Are you sad?,5,7
+Je velký?,Is he big?,5,7
+Je malá?,Is she small?,5,7
+Je to rychlé?,Is it fast?,5,7
+Jsme mladí?,Are we young?,5,7
+Jste staří?,Are you old?,5,7
+Jsou silní?,Are they strong?,5,7
+"Ano, jsem.","Yes, I am.",6,8
+"Ano, on je.","Yes, he is.",6,8
+"Ne, nejsem.","No, I'm not.",6,8
+"Ne, on není.","No, he's not.",6,8
+
+

@@ -9,6 +9,9 @@ const mocks = vi.hoisted(() => ({
   applyPracticeProgress: vi.fn(),
   getReadyReviewState: vi.fn(),
   resetHint: vi.fn(),
+  resetQuestionState: vi.fn(),
+  renderStates: [] as Array<{ itemId: number | null; revealed: boolean }>,
+  transitionEvents: [] as string[],
   fetchData: null as any,
 }));
 
@@ -40,24 +43,29 @@ vi.mock('@/database/models/practice-sessions', () => ({
 }));
 vi.mock('@/database/utils/practice-content.utils', () => ({ loadReviewSessionDeck: vi.fn() }));
 vi.mock('@/features/practice/hooks/use-practice-card-state', () => ({
-  usePracticeCardState: ({ setRevealed }: any) => ({
-    resetHint: mocks.resetHint,
-    resetQuestionState: () => {
-      setRevealed(false);
-      mocks.resetHint();
-    },
-    czech: 'ahoj',
-    english: 'hello',
-    audioDisabled: false,
-    showDirectionChange: false,
-    hideDirectionChange: vi.fn(),
-    handleReveal: vi.fn(),
-    plusHint: vi.fn(),
-    audioError: false,
-    playAudio: vi.fn(),
-    audioLoading: false,
-    isPlaying: false,
-  }),
+  usePracticeCardState: ({ currentItem, revealed, setRevealed }: any) => {
+    mocks.renderStates.push({ itemId: currentItem?.item_id ?? null, revealed });
+    return {
+      resetHint: mocks.resetHint,
+      resetQuestionState: () => {
+        mocks.transitionEvents.push('reset');
+        mocks.resetQuestionState();
+        setRevealed(false);
+        mocks.resetHint();
+      },
+      czech: 'ahoj',
+      english: revealed ? currentItem?.english : '\u00A0',
+      audioDisabled: false,
+      showDirectionChange: false,
+      hideDirectionChange: vi.fn(),
+      handleReveal: vi.fn(),
+      plusHint: vi.fn(),
+      audioError: false,
+      playAudio: vi.fn(),
+      audioLoading: false,
+      isPlaying: false,
+    };
+  },
 }));
 vi.mock('@/routing/route-data-handoff', () => ({
   invalidateRouteData: vi.fn(),
@@ -71,6 +79,8 @@ import type { PracticeDeckEntry } from '@/types/user-item.types';
 describe('usePracticeDeck', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.renderStates.length = 0;
+    mocks.transitionEvents.length = 0;
     mocks.fetchData = reviewDeckResult(reviewSession(7), [entry(1), entry(2)]);
     mocks.applyPracticeProgress.mockImplementation((item) => ({ ...item, updated_at: 'now' }));
     mocks.recordReviewAnswer.mockResolvedValue({
@@ -144,9 +154,28 @@ describe('usePracticeDeck', () => {
     expect(result.current.progressLabel).toBe('8/20');
   });
 
+  it('resets reveal before showing the next audio-less item', async () => {
+    const { result } = renderHook(() => usePracticeDeck('u1'));
+    await waitFor(() => expect(result.current.sessionLoading).toBe(false));
+
+    act(() => result.current.setRevealed(true));
+    mocks.renderStates.length = 0;
+    mocks.transitionEvents.length = 0;
+
+    await act(async () => result.current.nextItem('correct'));
+
+    expect(result.current.currentItem?.item_id).toBe(2);
+    expect(mocks.renderStates).not.toContainEqual({ itemId: 2, revealed: true });
+    expect(mocks.transitionEvents[0]).toBe('reset');
+  });
+
   it('shows the completed target during celebration and resets the next series', async () => {
     mocks.fetchData = reviewDeckResult(reviewSession(19), [entry(1)]);
-    mocks.recordReviewAnswer.mockResolvedValue({ completedCount: 20, earnedStar: true, starCount: 11 });
+    mocks.recordReviewAnswer.mockResolvedValue({
+      completedCount: 20,
+      earnedStar: true,
+      starCount: 11,
+    });
     mocks.getReadyReviewState.mockResolvedValue({ reviewReadyAt: new Date().toISOString() });
     let resolveReload!: () => void;
     mocks.reload.mockReturnValue(
@@ -195,7 +224,11 @@ describe('usePracticeDeck', () => {
 
   it('finalizes a completed review session when the celebration unmounts', async () => {
     mocks.fetchData = reviewDeckResult(reviewSession(19), [entry(1)]);
-    mocks.recordReviewAnswer.mockResolvedValue({ completedCount: 20, earnedStar: true, starCount: 11 });
+    mocks.recordReviewAnswer.mockResolvedValue({
+      completedCount: 20,
+      earnedStar: true,
+      starCount: 11,
+    });
     const { result, unmount } = renderHook(() => usePracticeDeck('u1'));
     await waitFor(() => expect(result.current.sessionLoading).toBe(false));
 

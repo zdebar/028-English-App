@@ -1,0 +1,49 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+odpočívat,rest,ɹˈɛst,rest.opus,8000,,,,,True,8
+nastavit,set,sˈɛt,set.opus,8001,,,,,True,8
+měl by,should,ʃˈʊd,should.opus,8002,,,,,True,8
+nahoru,up,ˈʌp,up.opus,8003,,,,,True,8
+věk,age,ˈeɪdʒ,age.opus,8004,,,,,True,8
+protože,because,bɪkˈʌz,because.opus,8005,,,,,True,8
+kamera,camera,kˈæmɹə,camera.opus,8006,,,,,True,8
+šaty,dress,dɹˈɛs,dress.opus,8007,,,,,True,8
+zdarma,free,fɹˈiː,free.opus,8008,,,,,True,8
+nemocný,ill,ˈɪl,ill.opus,8009,,,,,True,8
+jako,like,lˈaɪk,like.opus,8010,,,,,True,8
+pamatovat,remember,ɹᵻmˈɛmbɚ,remember.opus,8011,,,,,True,8
+studium,study,stˈʌdi,study.opus,8012,,,,,True,8
+také,also,ˈɔːlsoʊ,also.opus,8013,,,,,True,8
+třída,class,klˈæs,class.opus,8014,,,,,True,8
+řídit,drive,dɹˈaɪv,drive.opus,8015,,,,,True,8
+velký,great,ɡɹˈeɪt,great.opus,8016,,,,,True,8
+změna,change,tʃˈeɪndʒ,change.opus,8017,,,,,True,8
+setkat se,meet,mˈiːt,meet.opus,8018,,,,,True,8
+potřebovat,need,nˈiːd,need.opus,8019,,,,,True,8
+hezký,pretty,pɹˈɪɾi,pretty.opus,8020,,,,,True,8
+docela,quite,kwˈaɪt,quite.opus,8021,,,,,True,8
+skutečný,real,ɹˈiːəl,real.opus,8022,,,,,True,8
+vzít,take,tˈeɪk,take.opus,8023,,,,,True,8
+akce,action,ˈækʃən,action.opus,8024,,,,,True,8
+sám,alone,ɐlˈoʊn,alone.opus,8025,,,,,True,8
+snídaně,breakfast,bɹˈɛkfəst,breakfast.opus,8026,,,,,True,8
+pokračovat,continue,kəntˈɪnjuː,continue.opus,8027,,,,,True,8
+mrtvý,dead,dˈɛd,dead.opus,8028,,,,,True,8
+užívat si,enjoy,ɛndʒˈɔɪ,enjoy.opus,8029,,,,,True,8
+plný,full,fˈʊl,full.opus,8030,,,,,True,8
+zahrada,garden,ɡˈɑːɹdən,garden.opus,8031,,,,,True,8
+cena,price,pɹˈaɪs,price.opus,8032,,,,,True,8
+výsledek,result,ɹɪzˈʌlt,result.opus,8033,,,,,True,8
+říct,tell,tˈɛl,tell.opus,8034,,,,,True,8
+výhled,view,vjˈuː,view.opus,8035,,,,,True,8
+s,with,wˈɪð,with.opus,8036,,,,,True,8
+proti,against,ɐɡˈɛnst,against.opus,8037,,,,,True,8
+autobus,bus,bˈʌs,bus.opus,8038,,,,,True,8
+společnost,company,kˈʌmpəni,company.opus,8039,,,,,True,8
+Kdo jsi?,Who are you?,hˈuː ɑːɹ juː,who_are_you.opus,8040,9,,,7,False,8
+Co je to?,What is it?,wˈʌt ɪz ɪt,what_is_it.opus,8041,9,,,7,False,8
+Kde to je?,Where is it?,wˈɛɹ ɪz ɪt,where_is_it.opus,8042,9,,,7,False,8
+Proč jsi smutný?,Why are you sad?,wˌaɪ ɑːɹ juː sˈæd,why_are_you_sad.opus,8043,9,,,7,False,8
+Jak se máš?,How are you?,hˈaʊ ɑːɹ juː,how_are_you.opus,8044,9,,,7,False,8
+Odkud jsi?,Where are you from?,wˈɛɹ ɑːɹ juː fɹʌm,where_are_you_from.opus,8045,9,,,7,False,8
+Co je toto?,What's this?,wˌʌts ðˈɪs,whats_this.opus,8046,9,,,7,False,8
+Co je uvnitř?,What's inside?,wˌʌts ɪnsˈaɪd,whats_inside.opus,8047,9,,,7,False,8

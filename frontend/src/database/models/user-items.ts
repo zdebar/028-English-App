@@ -106,16 +106,89 @@ function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
     ...apiItem,
     is_vocabulary: apiItem.is_vocabulary ? 1 : 0,
     has_pronunciation_practice: apiItem.has_pronunciation_practice ? 1 : 0,
-    started_at: apiItem.started_at ?? NULL_DATE,
-    next_at_cz_to_en: apiItem.next_at_cz_to_en ?? NULL_DATE,
-    next_at_en_to_cz: apiItem.next_at_en_to_cz ?? NULL_DATE,
-    mastered_at_cz_to_en: apiItem.mastered_at_cz_to_en ?? NULL_DATE,
-    mastered_at_en_to_cz: apiItem.mastered_at_en_to_cz ?? NULL_DATE,
-    deleted_at: apiItem.deleted_at ?? NULL_DATE,
-    block_id: apiItem.block_id ?? NULL_NUMBER,
-    topic_id: apiItem.topic_id ?? NULL_NUMBER,
-    grammar_chunk_id: apiItem.grammar_chunk_id ?? NULL_NUMBER,
+    started_at: replaceNullDate(apiItem.started_at),
+    next_at_cz_to_en: replaceNullDate(apiItem.next_at_cz_to_en),
+    next_at_en_to_cz: replaceNullDate(apiItem.next_at_en_to_cz),
+    mastered_at_cz_to_en: replaceNullDate(apiItem.mastered_at_cz_to_en),
+    mastered_at_en_to_cz: replaceNullDate(apiItem.mastered_at_en_to_cz),
+    deleted_at: replaceNullDate(apiItem.deleted_at),
+    block_id: replaceNullNumber(apiItem.block_id),
+    topic_id: replaceNullNumber(apiItem.topic_id),
+    grammar_chunk_id: replaceNullNumber(apiItem.grammar_chunk_id),
   };
+}
+
+function replaceNullDate(value: string | null): string {
+  return value ?? NULL_DATE;
+}
+
+function replaceNullNumber(value: number | null): number {
+  return value ?? NULL_NUMBER;
+}
+
+async function getUnstartedItems(userId: string): Promise<UserItemLocal[]> {
+  const items = await db.user_items.where('user_id').equals(userId).toArray();
+  return items
+    .filter((item) => item.deleted_at === NULL_DATE && item.started_at === NULL_DATE)
+    .sort((left, right) =>
+      compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path),
+    );
+}
+
+async function getBlockTrainingSelection(
+  firstItem: UserItemLocal,
+  unstartedItems: UserItemLocal[],
+): Promise<InitialTrainingSelection | null> {
+  const block = await db.blocks.get(firstItem.block_id);
+  if (!block) return null;
+  return {
+    blockId: firstItem.block_id,
+    items: unstartedItems.filter((item) => item.block_id === firstItem.block_id),
+  };
+}
+
+function getVocabularyTrainingSelection(
+  unstartedItems: UserItemLocal[],
+  batchSize: number,
+): InitialTrainingSelection {
+  return {
+    blockId: null,
+    items: unstartedItems
+      .filter((item) => item.is_vocabulary === 1 && item.block_id === NULL_NUMBER)
+      .slice(0, batchSize),
+  };
+}
+
+function getGrammarTrainingSelection(
+  firstItem: UserItemLocal,
+  unstartedItems: UserItemLocal[],
+  batchSize: number,
+): InitialTrainingSelection {
+  const items: UserItemLocal[] = [];
+  for (const item of unstartedItems) {
+    const crossesBoundary =
+      item.is_vocabulary !== firstItem.is_vocabulary ||
+      (item.is_vocabulary === 0 && item.lesson_id !== firstItem.lesson_id) ||
+      item.block_id !== NULL_NUMBER;
+    if (crossesBoundary || items.length === batchSize) break;
+    items.push(item);
+  }
+  return { blockId: null, items };
+}
+
+async function resolveInitialTrainingSelection(
+  unstartedItems: UserItemLocal[],
+  batchSize: number,
+): Promise<InitialTrainingSelection | null> {
+  const firstItem = unstartedItems[0];
+  if (!firstItem) return null;
+  if (firstItem.block_id !== NULL_NUMBER) {
+    return getBlockTrainingSelection(firstItem, unstartedItems);
+  }
+  if (firstItem.is_vocabulary === 1) {
+    return getVocabularyTrainingSelection(unstartedItems, batchSize);
+  }
+  return getGrammarTrainingSelection(firstItem, unstartedItems, batchSize);
 }
 
 /**
@@ -273,43 +346,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     assertNonEmptyString(userId, 'userId');
     if (batchSize <= 0) return null;
 
-    const unstartedItems = (await db.user_items.where('user_id').equals(userId).toArray())
-      .filter((item) => item.deleted_at === NULL_DATE && item.started_at === NULL_DATE)
-      .sort((left, right) =>
-        compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path),
-      );
-    const firstItem = unstartedItems[0];
-    if (!firstItem) return null;
-
-    if (firstItem.block_id !== NULL_NUMBER) {
-      const block = await db.blocks.get(firstItem.block_id);
-      if (!block) return null;
-      return {
-        blockId: firstItem.block_id,
-        items: unstartedItems.filter((item) => item.block_id === firstItem.block_id),
-      };
-    }
-
-    if (firstItem.is_vocabulary === 1) {
-      return {
-        blockId: null,
-        items: unstartedItems
-          .filter((item) => item.is_vocabulary === 1 && item.block_id === NULL_NUMBER)
-          .slice(0, batchSize),
-      };
-    }
-
-    const items: UserItemLocal[] = [];
-    for (const item of unstartedItems) {
-      const crossesBoundary =
-        item.is_vocabulary !== firstItem.is_vocabulary ||
-        (item.is_vocabulary === 0 && item.lesson_id !== firstItem.lesson_id) ||
-        item.block_id !== NULL_NUMBER;
-      if (crossesBoundary || items.length === batchSize) break;
-      items.push(item);
-    }
-
-    return { blockId: null, items };
+    const unstartedItems = await getUnstartedItems(userId);
+    return resolveInitialTrainingSelection(unstartedItems, batchSize);
   }
 
   /**

@@ -55,6 +55,15 @@ function isAnonymousSession(session: Session | null): session is Session {
   return user?.is_anonymous === true;
 }
 
+function getSessionFullName(session: Session | null): string | null {
+  const metadata = session?.user?.user_metadata;
+  const fullName = metadata?.full_name;
+  if (typeof fullName === 'string' && fullName.length > 0) return fullName;
+
+  const name = metadata?.name;
+  return typeof name === 'string' && name.length > 0 ? name : null;
+}
+
 function isJwtIssuedAtFutureError(error: unknown): boolean {
   if (typeof error !== 'object' || error === null) {
     return false;
@@ -94,6 +103,27 @@ const CONTINUE_WITH_STORED_SESSION: AuthRedirectResolution = {
 
 function showAuthErrorToast(): void {
   useToastStore.getState().showToast(TEXTS.authInitErrorToast, 'error');
+}
+
+async function syncBeforeLogout(userId: string | null, skipSync: boolean): Promise<void> {
+  if (!userId || skipSync) return;
+  try {
+    await dataSyncOnUnmount(userId);
+  } catch (error) {
+    reportError('Pre-logout synchronization failed', error);
+  }
+}
+
+async function signOutRemotely(
+  skipRemoteSignOut: boolean,
+  scope: 'global' | 'local',
+): Promise<void> {
+  if (skipRemoteSignOut) return;
+
+  const { error } = await supabaseInstance.auth.signOut({ scope });
+  if (error && error.message !== 'Auth session missing!') {
+    throw new Error(error.message);
+  }
 }
 
 async function getAnonymousSessionAfterCollision(
@@ -196,6 +226,7 @@ export const useAuthStore = create<AuthState>((set) => {
 
   const applySession = (session: Session | null) => {
     const nextUserId = session?.user?.id ?? null;
+    const anonymous = isAnonymousSession(session);
     setMonitoringUser(nextUserId);
 
     if (!nextUserId) {
@@ -205,10 +236,9 @@ export const useAuthStore = create<AuthState>((set) => {
     set({
       userId: nextUserId,
       userEmail: session?.user?.email ?? null,
-      userFullName:
-        session?.user?.user_metadata?.full_name || session?.user?.user_metadata?.name || null,
-      isAnonymousUser: isAnonymousSession(session),
-      ...(!isAnonymousSession(session) ? { hasIdentityLinkConflict: false } : {}),
+      userFullName: getSessionFullName(session),
+      isAnonymousUser: anonymous,
+      hasIdentityLinkConflict: anonymous ? useAuthStore.getState().hasIdentityLinkConflict : false,
       loading: false,
     });
   };
@@ -275,7 +305,10 @@ export const useAuthStore = create<AuthState>((set) => {
     return didRecover ? (await supabaseInstance.auth.getSession()).data.session : null;
   };
 
-  const syncAuthenticatedUserLifecycle = async (hasRecoveredJwt = false, hasRecoveredAuth = false) => {
+  const syncAuthenticatedUserLifecycle = async (
+    hasRecoveredJwt = false,
+    hasRecoveredAuth = false,
+  ) => {
     // Existing Supabase Auth users do not re-run the auth.users insert trigger on login.
     const { error } = await supabaseInstance.rpc('restore_current_user_if_deleted');
     if (!error) {
@@ -401,24 +434,8 @@ export const useAuthStore = create<AuthState>((set) => {
 
     handleLogout: async (options) => {
       const currentUserId = useAuthStore.getState().userId;
-      if (currentUserId && !options?.skipSync) {
-        try {
-          await dataSyncOnUnmount(currentUserId);
-        } catch (error) {
-          reportError('Pre-logout synchronization failed', error);
-        }
-      }
-
-      if (!options?.skipRemoteSignOut) {
-        const { error } = await supabaseInstance.auth.signOut({
-          scope: options?.scope ?? 'global',
-        });
-
-        if (error && error.message !== 'Auth session missing!') {
-          throw new Error(error.message);
-        }
-      }
-
+      await syncBeforeLogout(currentUserId, options?.skipSync ?? false);
+      await signOutRemotely(options?.skipRemoteSignOut ?? false, options?.scope ?? 'global');
       clearSession();
     },
   };

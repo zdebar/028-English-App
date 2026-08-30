@@ -8,7 +8,7 @@ import tsParser from '@typescript-eslint/parser';
 export default defineConfig([
   globalIgnores(['dist']),
   {
-    files: ['**/*.{ts,tsx}'],
+    files: ['**/*.{js,mjs,ts,tsx}'],
     // Register plugin objects so flat config accepts them
     plugins: {
       'react-hooks': reactHooks,
@@ -36,6 +36,8 @@ export default defineConfig([
         },
       },
     },
-    rules: {},
+    rules: {
+      complexity: ['error', { max: 10 }],
+    },
   },
 ]);

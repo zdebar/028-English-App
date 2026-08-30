@@ -23,7 +23,7 @@ import ControlButton from './buttons/ControlButton';
 import { usePointerReleaseLock } from './hooks/use-pointer-release-lock';
 import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
 import type { NoteType } from '@/types/generic.types';
-import { useState } from 'react';
+import { useState, type MouseEvent } from 'react';
 import type { StarTier } from '@/utils/star-progress.utils';
 
 export type PracticeSessionCardProps = Readonly<{
@@ -135,12 +135,7 @@ function PracticeControls({
     usePointerReleaseLock();
 
   if (showHintControl) {
-    return (
-      <HintButton
-        onClick={plusHint}
-        disabled={controlsLocked || isSkipGestureLocked}
-      />
-    );
+    return <HintButton onClick={plusHint} disabled={controlsLocked || isSkipGestureLocked} />;
   }
 
   if (isPronunciationPractice) {
@@ -200,11 +195,7 @@ function PracticeMainContent({
 }: PracticeMainContentProps) {
   if (celebratingStar) {
     return (
-      <Notification
-        className="flex flex-col items-center gap-2"
-        role="status"
-        aria-live="polite"
-      >
+      <Notification className="flex flex-col items-center gap-2" role="status" aria-live="polite">
         <span>{TEXTS.starEarned}</span>
         <FullStar className={`star-fill-${celebrationStarTier}`} size={STAR_SIZE} />
         <span>{TEXTS.continueAfterStar}</span>
@@ -231,185 +222,390 @@ function PracticeMainContent({
   );
 }
 
-export default function PracticeSessionCard({
-  note,
-  grammar,
-  progressLabel,
-  progressHelpText = TEXTS.progress,
-  isCzToEn,
-  revealed,
-  czech,
-  english,
-  pronunciation,
-  audioDisabled,
-  showDirectionChange,
-  handleReveal,
-  plusHint,
-  nextRepeat,
-  repeatDisabled = false,
-  nextKnown,
-  completeCurrent,
-  completeDisabled = false,
-  audioError,
-  playAudio,
-  audioLoading,
-  isBlockTrainingPractice = false,
-  isPronunciationPractice = false,
-  pronunciationItem = null,
-  nextPronunciation,
-  onPronunciationSelectionChange,
-  celebratingStar = false,
-  celebrationStarTier = 'bronze',
-  onStarCelebrationContinue,
-}: PracticeSessionCardProps) {
+type NormalizedPracticeSessionCardProps = PracticeSessionCardProps &
+  Readonly<{
+    progressHelpText: string;
+    repeatDisabled: boolean;
+    completeDisabled: boolean;
+    isBlockTrainingPractice: boolean;
+    isPronunciationPractice: boolean;
+    pronunciationItem: UserItemLocal | null;
+    celebratingStar: boolean;
+    celebrationStarTier: StarTier;
+  }>;
+
+const DEFAULT_PRACTICE_SESSION_CARD_PROPS = {
+  progressHelpText: TEXTS.progress,
+  repeatDisabled: false,
+  completeDisabled: false,
+  isBlockTrainingPractice: false,
+  isPronunciationPractice: false,
+  pronunciationItem: null,
+  celebratingStar: false,
+  celebrationStarTier: 'bronze' as StarTier,
+} as const;
+
+function normalizePracticeSessionCardProps(
+  props: PracticeSessionCardProps,
+): NormalizedPracticeSessionCardProps {
+  return { ...DEFAULT_PRACTICE_SESSION_CARD_PROPS, ...props } as NormalizedPracticeSessionCardProps;
+}
+
+type PracticeCardDisplayState = Readonly<{
+  cardText: string | undefined;
+  cardStyle: string;
+  directionText: string;
+  shortDirectionText: string;
+  showAudioControls: boolean;
+  showGrammarButton: boolean;
+  showNoteButton: boolean;
+  audioControlsDisabled: boolean;
+  grammarButtonDisabled: boolean;
+  noteButtonDisabled: boolean;
+  controlsLocked: boolean;
+  showHintControl: boolean;
+  practiceControlColumns: string;
+  showTopBar: boolean;
+  showRevealHelp: boolean;
+}>;
+
+function getPracticeCardDisplayState(
+  props: NormalizedPracticeSessionCardProps,
+): PracticeCardDisplayState {
+  const {
+    grammar,
+    note,
+    isCzToEn,
+    revealed,
+    audioDisabled,
+    showDirectionChange,
+    audioLoading,
+    celebratingStar,
+    isPronunciationPractice,
+  } = props;
+  const controlsLocked = celebratingStar || showDirectionChange;
+  const showAudioControls = !audioDisabled;
+  const showGrammarButton = hasGrammarDetails(revealed, grammar);
+  const showNoteButton = hasNoteDetails(revealed, note);
+  return {
+    cardText: getPracticeCardText(revealed),
+    cardStyle: getPracticeCardStyle(celebratingStar, revealed),
+    directionText: getDirectionText(isCzToEn),
+    shortDirectionText: getShortDirectionText(isCzToEn),
+    showAudioControls,
+    showGrammarButton,
+    showNoteButton,
+    audioControlsDisabled: isAudioControlDisabled(
+      celebratingStar,
+      showAudioControls,
+      showDirectionChange,
+      audioLoading,
+      isCzToEn,
+      revealed,
+    ),
+    grammarButtonDisabled: celebratingStar || !showGrammarButton || showDirectionChange,
+    noteButtonDisabled: celebratingStar || !showNoteButton || showDirectionChange,
+    controlsLocked,
+    showHintControl: !revealed || controlsLocked,
+    practiceControlColumns: getPracticeControlColumns(
+      !revealed || controlsLocked,
+      isPronunciationPractice,
+    ),
+    showTopBar: !isPronunciationPractice,
+    showRevealHelp: !revealed && !controlsLocked,
+  };
+}
+
+function getPracticeCardText(revealed: boolean): string | undefined {
+  if (revealed) return undefined;
+  return TEXTS.reveal;
+}
+
+function getPracticeCardStyle(celebratingStar: boolean, revealed: boolean): string {
+  if (celebratingStar || !revealed) return 'color-button';
+  return 'color-audio-disabled';
+}
+
+function getDirectionText(isCzToEn: boolean): string {
+  if (isCzToEn) return TEXTS.directionCzToEn;
+  return TEXTS.directionEnToCz;
+}
+
+function getShortDirectionText(isCzToEn: boolean): string {
+  if (isCzToEn) return TEXTS.directionCzToEnShort;
+  return TEXTS.directionEnToCzShort;
+}
+
+function hasGrammarDetails(revealed: boolean, grammar: GrammarChunkWithExamples | null): boolean {
+  if (!revealed || !grammar) return false;
+  return Boolean(grammar.note?.trim() || grammar.items.length);
+}
+
+function hasNoteDetails(revealed: boolean, note: NoteType | null): boolean {
+  if (!revealed || !note) return false;
+  return Boolean(note.note.trim());
+}
+
+function isAudioControlDisabled(
+  celebratingStar: boolean,
+  showAudioControls: boolean,
+  showDirectionChange: boolean,
+  audioLoading: boolean,
+  isCzToEn: boolean,
+  revealed: boolean,
+): boolean {
+  return [
+    celebratingStar,
+    !showAudioControls,
+    showDirectionChange,
+    audioLoading,
+    isCzToEn && !revealed,
+  ].some(Boolean);
+}
+
+function getPracticeControlColumns(
+  showHintControl: boolean,
+  isPronunciationPractice: boolean,
+): string {
+  if (!showHintControl && !isPronunciationPractice) return 'grid-cols-3';
+  return 'grid-cols-1';
+}
+
+function openGrammarDetail(
+  grammar: GrammarChunkWithExamples | null,
+  disabled: boolean,
+  setVisibleDetail: (detail: VisibleDetail) => void,
+): void {
+  if (!grammar || disabled) return;
+  setVisibleDetail('grammar');
+}
+
+function openNoteDetail(
+  event: MouseEvent,
+  note: NoteType | null,
+  disabled: boolean,
+  setVisibleDetail: (detail: VisibleDetail) => void,
+): void {
+  event.stopPropagation();
+  if (!note || disabled) return;
+  setVisibleDetail('note');
+}
+
+function PracticeCardButton({
+  props,
+  display,
+}: Readonly<{
+  props: NormalizedPracticeSessionCardProps;
+  display: PracticeCardDisplayState;
+}>) {
+  const {
+    celebratingStar,
+    onStarCelebrationContinue,
+    handleReveal,
+    revealed,
+    showDirectionChange,
+    czech,
+    english,
+    pronunciation,
+    progressLabel,
+    progressHelpText,
+    isBlockTrainingPractice,
+    audioError,
+    audioLoading,
+  } = props;
+  return (
+    <button
+      type="button"
+      className={`relative flex h-full w-full grow cursor-pointer flex-col items-center p-4 text-inherit select-none ${display.cardStyle}`}
+      onClick={celebratingStar ? onStarCelebrationContinue : handleReveal}
+      title={celebratingStar ? TEXTS.continueAfterStar : display.cardText}
+      aria-label={celebratingStar ? TEXTS.continueAfterStar : undefined}
+      aria-disabled={revealed && !celebratingStar}
+      disabled={celebratingStar && !onStarCelebrationContinue}
+    >
+      {display.showRevealHelp && (
+        <HelpText className="top-23 left-1/2 -translate-x-1/2">{TEXTS.reveal}</HelpText>
+      )}
+      {display.showTopBar && (
+        <div
+          id="top-bar"
+          className="relative flex h-8 w-full shrink-0 items-center justify-center text-center"
+        >
+          <DirectionTopBar shortDirectionText={display.shortDirectionText} />
+        </div>
+      )}
+      <div
+        id="practice-main-content"
+        className="flex min-h-0 w-full grow items-center justify-center"
+      >
+        <PracticeMainContent
+          celebratingStar={celebratingStar}
+          celebrationStarTier={props.celebrationStarTier}
+          showDirectionChange={showDirectionChange}
+          directionText={display.directionText}
+          czech={czech}
+          english={english}
+          pronunciation={pronunciation}
+        />
+      </div>
+      <div
+        className="relative flex h-8 w-full shrink-0 items-center justify-between"
+        id="bottom-bar"
+      >
+        <p className="min-w-14 px-2 text-right font-light" title={progressHelpText}>
+          {progressLabel}
+        </p>
+        <HelpText className="bottom-7.5">
+          {getPracticeProgressHelp(isBlockTrainingPractice, progressHelpText)}
+        </HelpText>
+        <div className="flex min-h-0 items-center justify-end px-2 text-right">
+          <AudioStatusMessage audioError={audioError} audioLoading={audioLoading} />
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function getPracticeProgressHelp(
+  isBlockTrainingPractice: boolean,
+  progressHelpText: string,
+): string {
+  if (isBlockTrainingPractice) return TEXTS.blockTrainingProgressHelp;
+  return progressHelpText;
+}
+
+function PracticeCardActionBar({
+  props,
+  display,
+  userId,
+  setVisibleDetail,
+}: Readonly<{
+  props: NormalizedPracticeSessionCardProps;
+  display: PracticeCardDisplayState;
+  userId: string | null;
+  setVisibleDetail: (detail: VisibleDetail) => void;
+}>) {
+  const {
+    grammar,
+    note,
+    playAudio,
+    pronunciationItem,
+    onPronunciationSelectionChange,
+    completeCurrent,
+    completeDisabled,
+    isPronunciationPractice,
+    nextKnown,
+    nextPronunciation,
+    nextRepeat,
+    plusHint,
+    repeatDisabled,
+  } = props;
+  return (
+    <>
+      <div
+        id="practice-controls"
+        className={`relative grid w-full gap-1 ${display.practiceControlColumns}`}
+      >
+        <PracticeControls
+          completeCurrent={completeCurrent}
+          completeDisabled={completeDisabled}
+          isPronunciationPractice={isPronunciationPractice}
+          nextKnown={nextKnown}
+          nextPronunciation={nextPronunciation}
+          nextRepeat={nextRepeat}
+          plusHint={plusHint}
+          repeatDisabled={repeatDisabled}
+          controlsLocked={display.controlsLocked}
+          showHintControl={display.showHintControl}
+        />
+      </div>
+      <div className="pos-bottom-left-control">
+        <PlayButton onClick={playAudio} disabled={display.audioControlsDisabled} />
+        <VolumeSlider disabled={display.audioControlsDisabled} />
+        <PronunciationToggleButton
+          userId={userId}
+          item={pronunciationItem}
+          showHelpText
+          onSelectionChange={onPronunciationSelectionChange}
+        />
+      </div>
+      <div className="pos-bottom-right-control">
+        <SecondaryControlButton
+          title={TEXTS.grammar}
+          ariaLabel={TEXTS.grammar}
+          onClick={() =>
+            openGrammarDetail(grammar, display.grammarButtonDisabled, setVisibleDetail)
+          }
+          disabled={display.grammarButtonDisabled}
+        >
+          <BookIcon />
+          <HelpText className="-right-6 bottom-10 flex flex-col items-end landscape:invisible">
+            {TEXTS.grammar}
+          </HelpText>
+        </SecondaryControlButton>
+        <InfoButton
+          title={TEXTS.tooltipNotes}
+          disabled={display.noteButtonDisabled}
+          onClick={(event) =>
+            openNoteDetail(event, note, display.noteButtonDisabled, setVisibleDetail)
+          }
+        >
+          <HelpText className="-bottom-4 left-0 flex flex-col items-end landscape:invisible">
+            {TEXTS.tooltipNotes}
+          </HelpText>
+        </InfoButton>
+        <HelpButton />
+      </div>
+    </>
+  );
+}
+
+function PracticeSessionCardView({
+  props,
+  userId,
+  setVisibleDetail,
+}: Readonly<{
+  props: NormalizedPracticeSessionCardProps;
+  userId: string | null;
+  setVisibleDetail: (detail: VisibleDetail) => void;
+}>) {
+  const display = getPracticeCardDisplayState(props);
+  return (
+    <div className="bottom-controls-clearance relative flex min-h-0 w-full grow flex-col items-center">
+      <div className="card-width card-height relative gap-1" aria-busy={props.celebratingStar}>
+        <PracticeCardButton props={props} display={display} />
+        <PracticeCardActionBar
+          props={props}
+          display={display}
+          userId={userId}
+          setVisibleDetail={setVisibleDetail}
+        />
+      </div>
+    </div>
+  );
+}
+
+export default function PracticeSessionCard(props: PracticeSessionCardProps) {
+  const normalizedProps = normalizePracticeSessionCardProps(props);
   const userId = useAuthStore((state) => state.userId);
   const [visibleDetail, setVisibleDetail] = useState<VisibleDetail | null>(null);
-
-  const cardText = revealed ? undefined : TEXTS.reveal;
-  const cardStyle = celebratingStar || !revealed ? 'color-button' : 'color-audio-disabled';
-  const directionText = isCzToEn ? TEXTS.directionCzToEn : TEXTS.directionEnToCz;
-  const shortDirectionText = isCzToEn ? TEXTS.directionCzToEnShort : TEXTS.directionEnToCzShort;
-  const showAudioControls = !audioDisabled;
-  const showGrammarButton = Boolean(revealed && (grammar?.note?.trim() || grammar?.items.length));
-  const showNoteButton = Boolean(revealed && note?.note.trim());
-  const audioControlsDisabled =
-    celebratingStar ||
-    !showAudioControls ||
-    showDirectionChange ||
-    audioLoading ||
-    (isCzToEn && !revealed);
-  const grammarButtonDisabled = celebratingStar || !showGrammarButton || showDirectionChange;
-  const noteButtonDisabled = celebratingStar || !showNoteButton || showDirectionChange;
-  const controlsLocked = celebratingStar || showDirectionChange;
-  const showHintControl = !revealed || controlsLocked;
-  const practiceControlColumns =
-    !showHintControl && !isPronunciationPractice ? 'grid-cols-3' : 'grid-cols-1';
-  const showTopBar = !isPronunciationPractice;
-  const showRevealHelp = !revealed && !controlsLocked;
 
   if (visibleDetail) {
     return (
       <PracticeDetail
         visibleDetail={visibleDetail}
-        grammar={grammar}
-        note={note}
+        grammar={normalizedProps.grammar}
+        note={normalizedProps.note}
         onClose={() => setVisibleDetail(null)}
       />
     );
   }
 
   return (
-    <div className="bottom-controls-clearance relative flex min-h-0 w-full grow flex-col items-center">
-      <div className="card-width card-height relative gap-1" aria-busy={celebratingStar}>
-        <button
-          type="button"
-          className={`relative flex h-full w-full grow cursor-pointer flex-col items-center p-4 text-inherit select-none ${cardStyle}`}
-          onClick={celebratingStar ? onStarCelebrationContinue : handleReveal}
-          title={celebratingStar ? TEXTS.continueAfterStar : cardText}
-          aria-label={celebratingStar ? TEXTS.continueAfterStar : undefined}
-          aria-disabled={revealed && !celebratingStar}
-          disabled={celebratingStar && !onStarCelebrationContinue}
-        >
-          {showRevealHelp && (
-            <HelpText className="top-23 left-1/2 -translate-x-1/2">{TEXTS.reveal}</HelpText>
-          )}
-          {showTopBar && (
-            <div
-              id="top-bar"
-              className="relative flex h-8 w-full shrink-0 items-center justify-center text-center"
-            >
-              <DirectionTopBar shortDirectionText={shortDirectionText} />
-            </div>
-          )}
-          <div
-            id="practice-main-content"
-            className="flex min-h-0 w-full grow items-center justify-center"
-          >
-            <PracticeMainContent
-              celebratingStar={celebratingStar}
-              celebrationStarTier={celebrationStarTier}
-              showDirectionChange={showDirectionChange}
-              directionText={directionText}
-              czech={czech}
-              english={english}
-              pronunciation={pronunciation}
-            />
-          </div>
-
-          <div
-            className="relative flex h-8 w-full shrink-0 items-center justify-between"
-            id="bottom-bar"
-          >
-            <p className="min-w-14 px-2 text-right font-light" title={progressHelpText}>
-              {progressLabel}
-            </p>
-            <HelpText className="bottom-7.5">
-              {isBlockTrainingPractice ? TEXTS.blockTrainingProgressHelp : progressHelpText}
-            </HelpText>
-            <div className="flex min-h-0 items-center justify-end px-2 text-right">
-              <AudioStatusMessage audioError={audioError} audioLoading={audioLoading} />
-            </div>
-          </div>
-        </button>
-        <div
-          id="practice-controls"
-          className={`relative grid w-full gap-1 ${practiceControlColumns}`}
-        >
-          <PracticeControls
-            completeCurrent={completeCurrent}
-            completeDisabled={completeDisabled}
-            isPronunciationPractice={isPronunciationPractice}
-            nextKnown={nextKnown}
-            nextPronunciation={nextPronunciation}
-            nextRepeat={nextRepeat}
-            plusHint={plusHint}
-            repeatDisabled={repeatDisabled}
-            controlsLocked={controlsLocked}
-            showHintControl={showHintControl}
-          />
-        </div>
-
-        <div className="pos-bottom-left-control">
-          <PlayButton onClick={playAudio} disabled={audioControlsDisabled} />
-          <VolumeSlider disabled={audioControlsDisabled} />
-          <PronunciationToggleButton
-            userId={userId}
-            item={pronunciationItem}
-            showHelpText
-            onSelectionChange={onPronunciationSelectionChange}
-          />
-        </div>
-        <div className="pos-bottom-right-control">
-          <SecondaryControlButton
-            title={TEXTS.grammar}
-            ariaLabel={TEXTS.grammar}
-            onClick={() => {
-              if (!grammar || grammarButtonDisabled) return;
-              setVisibleDetail('grammar');
-            }}
-            disabled={grammarButtonDisabled}
-          >
-            <BookIcon />
-            <HelpText className="-right-6 bottom-10 flex flex-col items-end landscape:invisible">
-              {TEXTS.grammar}
-            </HelpText>
-          </SecondaryControlButton>
-          <InfoButton
-            title={TEXTS.tooltipNotes}
-            disabled={noteButtonDisabled}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (!note || noteButtonDisabled) return;
-              setVisibleDetail('note');
-            }}
-          >
-            <HelpText className="-bottom-4 left-0 flex flex-col items-end landscape:invisible">
-              {TEXTS.tooltipNotes}
-            </HelpText>
-          </InfoButton>
-          <HelpButton />
-        </div>
-      </div>
-    </div>
+    <PracticeSessionCardView
+      props={normalizedProps}
+      userId={userId}
+      setVisibleDetail={(detail) => setVisibleDetail(detail)}
+    />
   );
 }
