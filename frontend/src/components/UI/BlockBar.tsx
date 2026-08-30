@@ -22,15 +22,9 @@ type BlockBarProps = Readonly<{
  * @param className {string} Additional CSS classes for custom styling.
  * @returns A styled progress bar with labels and visual representation of progress.
  */
-export default function BlockBar({
-  previousCount = 0,
-  todayCount = 0,
-  lessonName = '',
-  lessonNumber = 0,
-  lessonCount = 40,
-  widthBase = 40,
-  className = '',
-}: BlockBarProps) {
+export default function BlockBar({ ...props }: BlockBarProps) {
+  const { previousCount, todayCount, lessonName, lessonNumber, lessonCount, widthBase, className } =
+    { ...DEFAULT_BLOCK_BAR_PROPS, ...props };
   // Ensure lessonCount is at least 1
   const safeLesson = Math.max(lessonCount, 1);
   const safeWidthBase = Math.max(widthBase, 1);
@@ -42,11 +36,11 @@ export default function BlockBar({
   // Calculate progress widths
   const clampedPrevious = Math.min(Math.max(previousCount, 0), safeLesson);
   const clampedTotal = Math.min(Math.max(previousCount + todayCount, 0), safeLesson);
-  const previousWidth = safeLesson > 0 ? (clampedPrevious / safeLesson) * 100 : 0;
-  const totalWidth = safeLesson > 0 ? (clampedTotal / safeLesson) * 100 : 0;
+  const previousWidth = (clampedPrevious / safeLesson) * 100;
+  const totalWidth = (clampedTotal / safeLesson) * 100;
 
   return (
-    <div className="h-attribute bg-block-bar-empty relative w-full cursor-inherit select-none">
+    <div className="h-attribute bg-block-bar-empty cursor-inherit relative w-full select-none">
       <div className="font-body text-light absolute -top-0.5 right-0 left-0 z-20 flex items-center justify-between truncate px-2 pt-1 text-center font-bold">
         <span
           title={`${TEXTS.lessonOrder} - ${TEXTS.lessonName} `}
@@ -55,9 +49,7 @@ export default function BlockBar({
           <span className="inline-block min-w-6 text-right">{lessonNumber}</span>
           <span className="ml-1 min-w-0 truncate">{lessonName}</span>
         </span>
-        <span title={TEXTS.startedTodayHint}>
-          {todayCount > 0 && `+ ${todayCount}`}
-        </span>
+        <span title={TEXTS.startedTodayHint}>{todayCount > 0 && `+ ${todayCount}`}</span>
       </div>
       <div className={`relative h-full w-full ${className}`} style={{ width: `${barWidth}%` }}>
         {/* Native progress bar for accessibility */}
@@ -82,3 +74,13 @@ export default function BlockBar({
     </div>
   );
 }
+
+const DEFAULT_BLOCK_BAR_PROPS: Required<BlockBarProps> = {
+  previousCount: 0,
+  todayCount: 0,
+  lessonName: '',
+  lessonNumber: 0,
+  lessonCount: 40,
+  widthBase: 40,
+  className: '',
+};

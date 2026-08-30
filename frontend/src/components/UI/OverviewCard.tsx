@@ -6,6 +6,31 @@ import Card from './Card';
 import { CardHeader } from './CardHeader';
 import DelayedNotification from './DelayedNotification';
 
+const DEFAULT_OVERVIEW_CARD_PROPS = {
+  modalTitle: TEXTS.restartProgress,
+  modalText: TEXTS.restartDescription,
+  helpText: TEXTS.restartProgressHelp,
+  loading: false,
+  className: '',
+} as const;
+
+function getOverviewCardButtonContent(
+  buttonTitle: string | undefined,
+  loading: boolean,
+): ReactNode {
+  if (buttonTitle !== undefined) return buttonTitle;
+  if (loading) return '';
+  return <DelayedNotification>{TEXTS.notAvailable}</DelayedNotification>;
+}
+
+async function confirmOverviewCardAction(
+  handleReset: (() => Promise<void>) | undefined,
+  onClose: (() => void) | undefined,
+): Promise<void> {
+  if (handleReset) await handleReset();
+  if (onClose) onClose();
+}
+
 type OverviewCardProps = Readonly<{
   buttonTitle?: string;
   modalTitle?: string;
@@ -35,17 +60,18 @@ type OverviewCardProps = Readonly<{
  * @param children Content to be displayed inside the content area.
  * @returns The rendered OverviewCard component.
  */
-export default function OverviewCard({
-  buttonTitle,
-  modalTitle = TEXTS.restartProgress,
-  modalText = TEXTS.restartDescription,
-  helpText = TEXTS.restartProgressHelp,
-  loading = false,
-  handleReset,
-  onClose,
-  className = '',
-  children,
-}: OverviewCardProps): JSX.Element {
+export default function OverviewCard(props: OverviewCardProps): JSX.Element {
+  const {
+    buttonTitle,
+    modalTitle,
+    modalText,
+    helpText,
+    loading,
+    handleReset,
+    onClose,
+    className,
+    children,
+  } = { ...DEFAULT_OVERVIEW_CARD_PROPS, ...props };
   const isDisabled = !handleReset || loading;
   return (
     <Card className={className}>
@@ -54,21 +80,12 @@ export default function OverviewCard({
           modalTitle={modalTitle}
           modalText={modalText}
           title={isDisabled ? '' : TEXTS.restartProgressHelp}
-          onConfirm={async () => {
-            if (handleReset) {
-              await handleReset();
-            }
-            if (onClose) {
-              onClose();
-            }
-          }}
+          onConfirm={() => confirmOverviewCardAction(handleReset, onClose)}
           disabled={isDisabled}
           preserveEnabledTextColorWhenDisabled
           className="justify-start px-4"
         >
-          {buttonTitle ??
-            (!loading && <DelayedNotification>{TEXTS.notAvailable}</DelayedNotification>) ??
-            ''}
+          {getOverviewCardButtonContent(buttonTitle, loading)}
         </ButtonWithModal>
         <HelpText className="-bottom-2 left-2">{helpText}</HelpText>
       </CardHeader>

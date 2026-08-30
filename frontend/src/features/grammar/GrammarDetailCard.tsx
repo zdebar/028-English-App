@@ -34,6 +34,116 @@ type GrammarDetailCardProps = Readonly<{
   showHelpButton?: boolean;
 }>;
 
+function getGrammarChunks(
+  grammar: GrammarDetail | null | undefined,
+): readonly GrammarChunkDetail[] {
+  if (!grammar) return [];
+  if (grammar.kind === 'chunk') return [grammar];
+  return grammar.chunks;
+}
+
+function hasGrammarContent(
+  grammar: GrammarDetail | null | undefined,
+  chunks: readonly GrammarChunkDetail[],
+): boolean {
+  return Boolean(grammar?.note || chunks.some((chunk) => chunk.note || chunk.items?.length));
+}
+
+async function playGrammarItemAudio(
+  item: UserItemLocal,
+  playAudio: (audio: string) => Promise<boolean>,
+  showToast: (message: string, type: 'error') => void,
+): Promise<void> {
+  if (!item.audio) return;
+  const didPlay = await playAudio(item.audio);
+  if (!didPlay) showToast(TEXTS.noAudio, 'error');
+}
+
+function GrammarNote({ note }: Readonly<{ note: string | null | undefined }>) {
+  if (!note) return null;
+  return (
+    <div className="grammar m-4" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note) }} />
+  );
+}
+
+function GrammarItems({
+  entries,
+  audioLoading,
+  isAudioReady,
+  playAudio,
+  showToast,
+}: Readonly<{
+  entries: readonly UserItemLocal[] | undefined;
+  audioLoading: boolean;
+  isAudioReady: (audio: string) => boolean;
+  playAudio: (audio: string) => Promise<boolean>;
+  showToast: (message: string, type: 'error') => void;
+}>) {
+  if (!entries?.length) return null;
+  return (
+    <div className="flex flex-col gap-1">
+      {entries.map((item) => (
+        <BilingualItemButton
+          key={item.item_id}
+          item={item}
+          disabled={!item.audio || (!audioLoading && !isAudioReady(item.audio))}
+          onClick={() => playGrammarItemAudio(item, playAudio, showToast)}
+        />
+      ))}
+    </div>
+  );
+}
+
+function GrammarContent({
+  grammar,
+  itemsProps,
+}: Readonly<{
+  grammar: GrammarDetail | null | undefined;
+  itemsProps: Omit<React.ComponentProps<typeof GrammarItems>, 'entries'>;
+}>) {
+  if (!grammar) return null;
+  if (grammar.kind === 'chunk') {
+    return (
+      <>
+        <GrammarNote note={grammar.note} />
+        <GrammarItems entries={grammar.items} {...itemsProps} />
+      </>
+    );
+  }
+  return (
+    <>
+      <GrammarNote note={grammar.note} />
+      {grammar.chunks.map((chunk) => (
+        <section key={chunk.id}>
+          <h2 className="m-4 text-left text-lg font-bold">{chunk.name}</h2>
+          <GrammarNote note={chunk.note} />
+          <GrammarItems entries={chunk.items} {...itemsProps} />
+        </section>
+      ))}
+    </>
+  );
+}
+
+function GrammarBottomControls({
+  hasItems,
+  showHelpButton,
+}: Readonly<{ hasItems: boolean; showHelpButton: boolean }>) {
+  return (
+    <>
+      {hasItems && (
+        <div className="pos-bottom-left-control">
+          <VolumeSlider />
+        </div>
+      )}
+      {showHelpButton && (
+        <div className="pos-bottom-right-control">
+          <HelpButton />
+        </div>
+      )}
+    </>
+  );
+}
+
 export default function GrammarDetailCard({
   grammar,
   onClose,
@@ -41,11 +151,7 @@ export default function GrammarDetailCard({
   showHelpButton = false,
 }: GrammarDetailCardProps) {
   const showToast = useToastStore((state) => state.showToast);
-  const chunks = useMemo(() => {
-    if (!grammar) return [];
-    if (grammar.kind === 'chunk') return [grammar];
-    return grammar.chunks;
-  }, [grammar]);
+  const chunks = useMemo(() => getGrammarChunks(grammar), [grammar]);
   const items = useMemo(() => chunks.flatMap((chunk) => chunk.items ?? []), [chunks]);
   const audios = useMemo(
     () => items.map((item) => item.audio).filter((audio): audio is string => Boolean(audio)),
@@ -53,38 +159,7 @@ export default function GrammarDetailCard({
   );
   const { playAudio, isAudioReady, loading: audioLoading } = useAudioManager(audios);
 
-  const renderItems = (entries: readonly UserItemLocal[] | undefined) => {
-    if (!entries?.length) return null;
-
-    return (
-      <div className="flex flex-col gap-1">
-        {entries.map((item) => (
-          <BilingualItemButton
-            key={item.item_id}
-            item={item}
-            disabled={!item.audio || (!audioLoading && !isAudioReady(item.audio))}
-            onClick={async () => {
-              if (!item.audio) return;
-              const didPlay = await playAudio(item.audio);
-              if (!didPlay) showToast(TEXTS.noAudio, 'error');
-            }}
-          />
-        ))}
-      </div>
-    );
-  };
-
-  const renderNote = (note: string | null | undefined) => {
-    if (!note) return null;
-
-    return (
-      <div className="grammar m-4" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note) }} />
-    );
-  };
-
-  const hasContent = Boolean(
-    grammar?.note || chunks.some((chunk) => chunk.note || chunk.items?.length),
-  );
+  const hasContent = hasGrammarContent(grammar, chunks);
   const hasBottomControls = items.length > 0 || showHelpButton;
 
   return (
@@ -96,35 +171,12 @@ export default function GrammarDetailCard({
       onClose={onClose}
       className={hasBottomControls ? 'bottom-controls-clearance relative' : 'relative'}
     >
-      {grammar?.kind === 'group' && (
-        <>
-          {renderNote(grammar.note)}
-          {grammar.chunks.map((chunk) => (
-            <section key={chunk.id}>
-              <h2 className="m-4 text-left text-lg font-bold">{chunk.name}</h2>
-              {renderNote(chunk.note)}
-              {renderItems(chunk.items)}
-            </section>
-          ))}
-        </>
-      )}
-      {grammar?.kind === 'chunk' && (
-        <>
-          {renderNote(grammar.note)}
-          {renderItems(grammar.items)}
-        </>
-      )}
+      <GrammarContent
+        grammar={grammar}
+        itemsProps={{ audioLoading, isAudioReady, playAudio, showToast }}
+      />
       {!hasContent && TEXTS.noNotesToDisplay}
-      {items.length > 0 && (
-        <div className="pos-bottom-left-control">
-          <VolumeSlider />
-        </div>
-      )}
-      {showHelpButton && (
-        <div className="pos-bottom-right-control">
-          <HelpButton />
-        </div>
-      )}
+      <GrammarBottomControls hasItems={items.length > 0} showHelpButton={showHelpButton} />
     </OverviewCard>
   );
 }

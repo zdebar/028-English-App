@@ -11,6 +11,71 @@ type UsePracticeCardStateOptions = {
   setRevealed: Dispatch<SetStateAction<boolean>>;
 };
 
+function isPracticeAudioDisabled(
+  isCzToEn: boolean,
+  revealed: boolean,
+  currentItem: UserItemLocal | null,
+  audioError: boolean,
+): boolean {
+  return (isCzToEn && !revealed) || !currentItem?.audio || audioError;
+}
+
+function getCzechText(
+  currentItem: UserItemLocal | null,
+  isCzToEn: boolean,
+  revealed: boolean,
+  czechHinted: string,
+): string | undefined {
+  if (isCzToEn || revealed) return currentItem?.czech;
+  return czechHinted;
+}
+
+function getEnglishText(
+  currentItem: UserItemLocal | null,
+  isCzToEn: boolean,
+  revealed: boolean,
+  audioDisabled: boolean,
+  englishHinted: string,
+): string | undefined {
+  if (revealed || (audioDisabled && !isCzToEn)) return currentItem?.english;
+  return englishHinted;
+}
+
+function getPronunciationText(currentItem: UserItemLocal | null, revealed: boolean): string {
+  if (!revealed) return NBSP;
+  return currentItem?.pronunciation || NBSP;
+}
+
+function schedulePracticeAudio(
+  audioDisabled: boolean,
+  isCzToEn: boolean,
+  audioLoading: boolean,
+  showDirectionChange: boolean,
+  playAudio: () => void,
+): (() => void) | undefined {
+  if (audioDisabled || isCzToEn || audioLoading || showDirectionChange) return undefined;
+
+  const timeoutId = globalThis.setTimeout(playAudio, config.practice.audioDelay);
+  return () => globalThis.clearTimeout(timeoutId);
+}
+
+function revealPracticeCard(
+  showDirectionChange: boolean,
+  hideDirectionChange: () => void,
+  isCzToEn: boolean,
+  audioError: boolean,
+  revealed: boolean,
+  playAudio: () => void,
+  setRevealed: Dispatch<SetStateAction<boolean>>,
+): void {
+  if (showDirectionChange) {
+    hideDirectionChange();
+    return;
+  }
+  if (isCzToEn && !audioError && !revealed) playAudio();
+  setRevealed(true);
+}
+
 export function usePracticeCardState({
   currentItem,
   isCzToEn,
@@ -28,9 +93,9 @@ export function usePracticeCardState({
     isPlaying,
   } = useAudioManager(currentItem?.audio ?? null);
 
-  const audioDisabled = (isCzToEn && !revealed) || !currentItem?.audio || audioError;
-  const czech = isCzToEn || revealed ? currentItem?.czech : czechHinted;
-  const english = revealed || (audioDisabled && !isCzToEn) ? currentItem?.english : englishHinted;
+  const audioDisabled = isPracticeAudioDisabled(isCzToEn, revealed, currentItem, audioError);
+  const czech = getCzechText(currentItem, isCzToEn, revealed, czechHinted);
+  const english = getEnglishText(currentItem, isCzToEn, revealed, audioDisabled, englishHinted);
 
   const [wasCzToEn, setWasCzToEn] = useState<boolean | null>(null);
   const showDirectionChange = wasCzToEn !== isCzToEn;
@@ -44,30 +109,25 @@ export function usePracticeCardState({
   }, [resetHint, setRevealed]);
 
   useEffect(() => {
-    if (audioDisabled || isCzToEn || audioLoading || showDirectionChange) {
-      return;
-    }
-
-    const timeoutId = globalThis.setTimeout(() => {
-      playAudioInternal();
-    }, config.practice.audioDelay);
-
-    return () => {
-      globalThis.clearTimeout(timeoutId);
-    };
+    return schedulePracticeAudio(
+      audioDisabled,
+      isCzToEn,
+      audioLoading,
+      showDirectionChange,
+      playAudioInternal,
+    );
   }, [audioDisabled, isCzToEn, audioLoading, showDirectionChange, playAudioInternal, currentItem]);
 
   const handleReveal = useCallback(() => {
-    if (showDirectionChange) {
-      hideDirectionChange();
-      return;
-    }
-
-    if (isCzToEn && !audioError && !revealed) {
-      playAudioInternal();
-    }
-
-    setRevealed(true);
+    revealPracticeCard(
+      showDirectionChange,
+      hideDirectionChange,
+      isCzToEn,
+      audioError,
+      revealed,
+      playAudioInternal,
+      setRevealed,
+    );
   }, [
     audioError,
     hideDirectionChange,
@@ -89,7 +149,7 @@ export function usePracticeCardState({
     isPlaying,
     playAudio: playAudioInternal,
     plusHint,
-    pronunciation: revealed ? currentItem?.pronunciation || NBSP : NBSP,
+    pronunciation: getPronunciationText(currentItem, revealed),
     resetHint,
     resetQuestionState,
     showDirectionChange,

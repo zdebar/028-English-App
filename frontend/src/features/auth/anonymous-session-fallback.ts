@@ -20,27 +20,34 @@ function isAnonymousSession(session: Session | null): session is Session {
   return session?.user.is_anonymous === true;
 }
 
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.length > 0;
+}
+
+function isFallbackIntent(value: unknown): value is AnonymousSessionFallbackIntent {
+  return value === 'link-google-identity' || value === 'sign-in-existing-google-account';
+}
+
+function isFreshTimestamp(value: unknown): value is number {
+  if (typeof value !== 'number') return false;
+  const age = Date.now() - value;
+  return [age >= 0, age <= FALLBACK_MAX_AGE_MS].every(Boolean);
+}
+
 function isStoredAnonymousSession(value: unknown): value is StoredAnonymousSession {
   if (typeof value !== 'object' || value === null) {
     return false;
   }
 
   const candidate = value as Partial<StoredAnonymousSession>;
-  const age = Date.now() - (candidate.savedAt ?? 0);
-
-  return (
-    typeof candidate.accessToken === 'string' &&
-    candidate.accessToken.length > 0 &&
-    typeof candidate.refreshToken === 'string' &&
-    candidate.refreshToken.length > 0 &&
-    typeof candidate.userId === 'string' &&
-    candidate.userId.length > 0 &&
-    (candidate.intent === 'link-google-identity' ||
-      candidate.intent === 'sign-in-existing-google-account') &&
-    typeof candidate.savedAt === 'number' &&
-    age >= 0 &&
-    age <= FALLBACK_MAX_AGE_MS
-  );
+  const checks = [
+    isNonEmptyString(candidate.accessToken),
+    isNonEmptyString(candidate.refreshToken),
+    isNonEmptyString(candidate.userId),
+    isFallbackIntent(candidate.intent),
+    isFreshTimestamp(candidate.savedAt),
+  ];
+  return checks.every(Boolean);
 }
 
 function readAnonymousSessionFallback(): StoredAnonymousSession | null {

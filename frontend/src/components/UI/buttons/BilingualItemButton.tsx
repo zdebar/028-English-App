@@ -1,6 +1,6 @@
 import { TEXTS } from '@/locales/cs';
 import type { UserItemLocal } from '@/types/user-item.types';
-import { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState, type RefObject } from 'react';
 import { ListButton } from './ListButton';
 
 type BilingualItemButtonProps = Readonly<{
@@ -40,44 +40,73 @@ function intrinsicTextWidth(element: HTMLElement): number {
   return element.scrollWidth;
 }
 
-/** A shared, content-aware Czech/English item row used by all item lists. */
-export default function BilingualItemButton({
-  item,
-  onClick,
-  disabled = false,
-  className = '',
-  leadingLanguage = 'czech',
-}: BilingualItemButtonProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const czechRef = useRef<HTMLSpanElement>(null);
-  const englishRef = useRef<HTMLSpanElement>(null);
-  const [stacked, setStacked] = useState(false);
-  const [truncated, setTruncated] = useState(false);
+type BilingualItemLayout = Readonly<{ stacked: boolean; truncated: boolean }>;
 
-  const measure = useCallback(() => {
-    const container = containerRef.current;
-    const czech = czechRef.current;
-    const english = englishRef.current;
-    if (!container || !czech || !english) return;
+function measureBilingualItemLayout(
+  container: HTMLDivElement | null,
+  czech: HTMLSpanElement | null,
+  english: HTMLSpanElement | null,
+): BilingualItemLayout | null {
+  if (!container || !czech || !english) return null;
 
-    const gap = 12;
-    const czechWidth = intrinsicTextWidth(czech);
-    const englishWidth = intrinsicTextWidth(english);
-    const horizontalWidth = Math.max(0, (container.clientWidth - gap) / 2);
-    const shouldStack = czechWidth > horizontalWidth || englishWidth > horizontalWidth;
-    const finalWidth = shouldStack ? container.clientWidth : horizontalWidth;
-    setStacked(shouldStack);
-    setTruncated(czechWidth > finalWidth || englishWidth > finalWidth);
-  }, []);
+  const gap = 12;
+  const czechWidth = intrinsicTextWidth(czech);
+  const englishWidth = intrinsicTextWidth(english);
+  const horizontalWidth = Math.max(0, (container.clientWidth - gap) / 2);
+  const stacked = czechWidth > horizontalWidth || englishWidth > horizontalWidth;
+  const finalWidth = stacked ? container.clientWidth : horizontalWidth;
+
+  return { stacked, truncated: czechWidth > finalWidth || englishWidth > finalWidth };
+}
+
+function useBilingualItemLayout(
+  containerRef: RefObject<HTMLDivElement | null>,
+  czechRef: RefObject<HTMLSpanElement | null>,
+  englishRef: RefObject<HTMLSpanElement | null>,
+  czechText: string,
+  englishText: string,
+): BilingualItemLayout {
+  const [layout, setLayout] = useState<BilingualItemLayout>({ stacked: false, truncated: false });
 
   useLayoutEffect(() => {
+    const measure = () => {
+      const nextLayout = measureBilingualItemLayout(
+        containerRef.current,
+        czechRef.current,
+        englishRef.current,
+      );
+      if (nextLayout) setLayout(nextLayout);
+    };
+
     measure();
     const container = containerRef.current;
     if (!container || typeof ResizeObserver === 'undefined') return;
     const observer = new ResizeObserver(measure);
     observer.observe(container);
     return () => observer.disconnect();
-  }, [item.czech, item.english, measure]);
+  }, [containerRef, czechRef, englishRef, czechText, englishText]);
+
+  return layout;
+}
+
+/** A shared, content-aware Czech/English item row used by all item lists. */
+export default function BilingualItemButton({ ...props }: BilingualItemButtonProps) {
+  const { item, onClick, disabled, className, leadingLanguage } = {
+    disabled: false,
+    className: '',
+    leadingLanguage: 'czech' as const,
+    ...props,
+  };
+  const containerRef = useRef<HTMLDivElement>(null);
+  const czechRef = useRef<HTMLSpanElement>(null);
+  const englishRef = useRef<HTMLSpanElement>(null);
+  const { stacked, truncated } = useBilingualItemLayout(
+    containerRef,
+    czechRef,
+    englishRef,
+    item.czech,
+    item.english,
+  );
 
   const audioTitle = pronunciationTitle(item.pronunciation);
   const title = truncated

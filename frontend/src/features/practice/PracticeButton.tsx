@@ -8,6 +8,109 @@ import StyledButton from '@/components/UI/buttons/StyledButton';
 
 type PracticeButtonsProps = Readonly<{ userId: string }>;
 
+type PracticeButtonState = Readonly<{
+  reviewDisabled: boolean;
+  newDisabled: boolean;
+  newAvailable: boolean;
+  reviewTitle: string | undefined;
+  newTitle: string | undefined;
+}>;
+
+function isReviewAvailable(reviewReadyAt: string | null): boolean {
+  if (reviewReadyAt === null) return false;
+  return Date.parse(reviewReadyAt) <= Date.now();
+}
+
+function isActiveReview(activeSession: { mode: 'review' | 'new' } | null): boolean {
+  return activeSession?.mode === 'review';
+}
+
+function isActiveNew(activeSession: { mode: 'review' | 'new' } | null): boolean {
+  return activeSession?.mode === 'new';
+}
+
+function isReviewButtonDisabled(
+  error: Error | null,
+  activeNew: boolean,
+  activeReview: boolean,
+  reviewAvailable: boolean,
+  loading: boolean,
+): boolean {
+  return [Boolean(error), activeNew, !loading && !activeReview && !reviewAvailable].some(Boolean);
+}
+
+function isNewButtonDisabled(
+  error: Error | null,
+  activeReview: boolean,
+  activeNew: boolean,
+  newAvailable: boolean,
+  loading: boolean,
+): boolean {
+  return [Boolean(error), activeReview, !loading && !activeNew && !newAvailable].some(Boolean);
+}
+
+function resolvePracticeButtonState(
+  reviewReadyAt: string | null,
+  initialTrainingAvailable: boolean,
+  activeSession: { mode: 'review' | 'new' } | null,
+  loading: boolean,
+  error: Error | null,
+): PracticeButtonState {
+  const activeReview = isActiveReview(activeSession);
+  const activeNew = isActiveNew(activeSession);
+  const reviewAvailable = isReviewAvailable(reviewReadyAt);
+  const reviewDisabled = isReviewButtonDisabled(
+    error,
+    activeNew,
+    activeReview,
+    reviewAvailable,
+    loading,
+  );
+  const newAvailable = activeNew || (!reviewAvailable && initialTrainingAvailable);
+  const newDisabled = isNewButtonDisabled(error, activeReview, activeNew, newAvailable, loading);
+
+  return {
+    reviewDisabled,
+    newDisabled,
+    newAvailable,
+    reviewTitle: resolveButtonTitle(loading, error, reviewDisabled),
+    newTitle: resolveButtonTitle(loading, error, newDisabled),
+  };
+}
+
+function NewPracticeButton({
+  userId,
+  available,
+  disabled,
+  loading,
+  title,
+}: Readonly<{
+  userId: string;
+  available: boolean;
+  disabled: boolean;
+  loading: boolean;
+  title: string | undefined;
+}>): JSX.Element {
+  if (!available && !loading) {
+    return (
+      <StyledButton className="h-button max-h-button w-full px-4" disabled title={title}>
+        {TEXTS.newButton}
+      </StyledButton>
+    );
+  }
+  return (
+    <DataNavigationButton
+      to={ROUTES.initialTraining}
+      descriptor={initialTrainingDescriptor(userId)}
+      className="h-button max-h-button w-full px-4"
+      disabled={disabled}
+      title={title}
+    >
+      {TEXTS.newButton}
+    </DataNavigationButton>
+  );
+}
+
 export default function PracticeButtons({ userId }: PracticeButtonsProps): JSX.Element {
   const reviewReadyAt = usePracticeAvailabilityStore((state) => state.reviewReadyAt);
   const initialTrainingAvailable = usePracticeAvailabilityStore(
@@ -16,32 +119,24 @@ export default function PracticeButtons({ userId }: PracticeButtonsProps): JSX.E
   const activeSession = usePracticeAvailabilityStore((state) => state.activeSession);
   const loading = usePracticeAvailabilityStore((state) => state.practiceLoading);
   const error = usePracticeAvailabilityStore((state) => state.practiceError);
-  const activeReview = activeSession?.mode === 'review';
-  const activeNew = activeSession?.mode === 'new';
-  const reviewAvailable = reviewReadyAt !== null && Date.parse(reviewReadyAt) <= Date.now();
-  const reviewDisabled = Boolean(error) || activeNew || (!loading && !activeReview && !reviewAvailable);
-  const newAvailable = activeNew || (!reviewAvailable && initialTrainingAvailable);
-  const newDisabled = Boolean(error) || activeReview || (!loading && !activeNew && !newAvailable);
-  const reviewTitle = resolveButtonTitle(loading, error, reviewDisabled);
-  const newTitle = resolveButtonTitle(loading, error, newDisabled);
+  const { reviewDisabled, newDisabled, newAvailable, reviewTitle, newTitle } =
+    resolvePracticeButtonState(
+      reviewReadyAt,
+      initialTrainingAvailable,
+      activeSession,
+      loading,
+      error,
+    );
 
   return (
     <div className="flex w-full flex-col gap-1">
-      {!newAvailable && !loading ? (
-        <StyledButton className="h-button max-h-button w-full px-4" disabled title={newTitle}>
-          {TEXTS.newButton}
-        </StyledButton>
-      ) : (
-        <DataNavigationButton
-          to={ROUTES.initialTraining}
-          descriptor={initialTrainingDescriptor(userId)}
-          className="h-button max-h-button w-full px-4"
-          disabled={newDisabled}
-          title={newTitle}
-        >
-          {TEXTS.newButton}
-        </DataNavigationButton>
-      )}
+      <NewPracticeButton
+        userId={userId}
+        available={newAvailable}
+        disabled={newDisabled}
+        loading={loading}
+        title={newTitle}
+      />
       <DataNavigationButton
         to={ROUTES.practice}
         descriptor={practiceDeckDescriptor(userId)}

@@ -27,29 +27,26 @@ type VocabularyDetailCardProps = Readonly<{
   onReset: () => Promise<void>;
 }>;
 
-/**
- * VocabularyDetailCard component
- *
- * @param selectedWord - The vocabulary item to display details for.
- * @param selectedTitle - The title to display on the card. Czech or english name of the word.
- * @param onClose - Callback to close the detail card.
- * @param onReset - Callback to reset the user's progress for the word.
- * @returns The vocabulary detail card UI.
- */
-export default function VocabularyDetailCard({
-  selectedWord,
-  selectedTitle,
-  onClose,
-  onReset,
-}: VocabularyDetailCardProps) {
-  const userId = useAuthStore((state) => state.userId);
-  const baseProperties = [
+type VocabularyProperty = Readonly<{ label: string; value: string | undefined }>;
+
+type VocabularyDirectionSection = Readonly<{
+  direction: string;
+  title: string;
+  properties: readonly VocabularyProperty[];
+}>;
+
+function getBaseProperties(selectedWord: UserItemLocal | null): readonly VocabularyProperty[] {
+  return [
     { label: lowercaseInitial(TEXTS.czech), value: selectedWord?.czech },
     { label: lowercaseInitial(TEXTS.english), value: selectedWord?.english },
     { label: lowercaseInitial(TEXTS.pronunciation), value: selectedWord?.pronunciation },
   ];
+}
 
-  const directionSections = [
+function getDirectionSections(
+  selectedWord: UserItemLocal | null,
+): readonly VocabularyDirectionSection[] {
+  return [
     {
       direction: 'czToEn',
       title: lowercaseInitial(TEXTS.directionCzToEn),
@@ -90,17 +87,145 @@ export default function VocabularyDetailCard({
         },
       ],
     },
-  ] as const;
+  ];
+}
+
+function isVocabularyAudioDisabled(
+  selectedWord: UserItemLocal | null,
+  audioLoading: boolean,
+  audioError: boolean,
+  isAudioReady: (audio: string) => boolean,
+): boolean {
+  if (!selectedWord?.audio) return true;
+  return audioLoading || audioError || !isAudioReady(selectedWord.audio);
+}
+
+async function playVocabularyAudio(
+  selectedWord: UserItemLocal | null,
+  playAudio: (audio: string) => Promise<boolean>,
+  showToast: (message: string, type: 'error') => void,
+): Promise<void> {
+  if (!selectedWord?.audio) return;
+  const didPlay = await playAudio(selectedWord.audio);
+  if (!didPlay) showToast(TEXTS.noAudio, 'error');
+}
+
+function VocabularyPropertyList({
+  properties,
+  labelClassName,
+}: Readonly<{
+  properties: readonly VocabularyProperty[];
+  labelClassName: string;
+}>) {
+  return (
+    <>
+      {properties.map((property) => (
+        <PropertyView
+          key={property.label}
+          label={property.label}
+          className="grid grid-cols-2"
+          classNameLabel={labelClassName}
+          classNameValue="min-w-0"
+        >
+          {property.value ?? NOT_AVAILABLE}
+        </PropertyView>
+      ))}
+    </>
+  );
+}
+
+function VocabularyDetails({
+  baseProperties,
+  directionSections,
+}: Readonly<{
+  baseProperties: readonly VocabularyProperty[];
+  directionSections: readonly VocabularyDirectionSection[];
+}>) {
+  return (
+    <div className="m-4 flex flex-col gap-3">
+      <div>
+        <VocabularyPropertyList properties={baseProperties} labelClassName="w-auto" />
+      </div>
+      {directionSections.map((section) => (
+        <section key={section.direction}>
+          <h3 className="font-bold">{section.title}</h3>
+          <VocabularyPropertyList properties={section.properties} labelClassName="w-30 w-auto" />
+        </section>
+      ))}
+    </div>
+  );
+}
+
+function VocabularyAudioControls({
+  selectedWord,
+  audioControlsDisabled,
+  playAudio,
+  showToast,
+}: Readonly<{
+  selectedWord: UserItemLocal | null;
+  audioControlsDisabled: boolean;
+  playAudio: (audio: string) => Promise<boolean>;
+  showToast: (message: string, type: 'error') => void;
+}>) {
+  return (
+    <div className="pos-bottom-left-control">
+      <PlayButton
+        onClick={() => playVocabularyAudio(selectedWord, playAudio, showToast)}
+        disabled={audioControlsDisabled}
+      />
+      <VolumeSlider disabled={audioControlsDisabled} />
+    </div>
+  );
+}
+
+function VocabularyNoteButton({
+  noteId,
+  openNote,
+}: Readonly<{ noteId: number | null | undefined; openNote: (noteId: number) => void }>) {
+  if (noteId == null) return null;
+  return (
+    <InfoButton
+      title={TEXTS.tooltipNotes}
+      onClick={(event) => {
+        event.stopPropagation();
+        openNote(noteId);
+      }}
+    />
+  );
+}
+
+/**
+ * VocabularyDetailCard component
+ *
+ * @param selectedWord - The vocabulary item to display details for.
+ * @param selectedTitle - The title to display on the card. Czech or english name of the word.
+ * @param onClose - Callback to close the detail card.
+ * @param onReset - Callback to reset the user's progress for the word.
+ * @returns The vocabulary detail card UI.
+ */
+export default function VocabularyDetailCard({
+  selectedWord,
+  selectedTitle,
+  onClose,
+  onReset,
+}: VocabularyDetailCardProps) {
+  const userId = useAuthStore((state) => state.userId);
+  const baseProperties = getBaseProperties(selectedWord);
+  const directionSections = getDirectionSections(selectedWord);
 
   const {
     playAudio,
     audioError,
     isAudioReady,
     loading: audioLoading,
-  } = useAudioManager(selectedWord?.audio || null);
+  } = useAudioManager(selectedWord?.audio ?? null);
   const showToast = useToastStore((state) => state.showToast);
-  const audioControlsDisabled =
-    !selectedWord?.audio || audioLoading || audioError || !isAudioReady(selectedWord.audio);
+  const audioControlsDisabled = isVocabularyAudioDisabled(
+    selectedWord,
+    audioLoading,
+    audioError,
+    isAudioReady,
+  );
 
   const { isNoteVisible, noteData, openNote, closeNote } = useNoteViewer();
 
@@ -116,60 +241,15 @@ export default function VocabularyDetailCard({
       modalTitle={TEXTS.restartItemProgress}
       className="bottom-controls-clearance relative"
     >
-      <div className="m-4 flex flex-col gap-3">
-        <div>
-          {baseProperties.map((property) => (
-            <PropertyView
-              key={property.label}
-              label={property.label}
-              className="grid grid-cols-2"
-              classNameLabel="w-auto"
-              classNameValue="min-w-0"
-            >
-              {property.value ?? NOT_AVAILABLE}
-            </PropertyView>
-          ))}
-        </div>
-        {directionSections.map((section) => (
-          <section key={section.direction}>
-            <h3 className="font-bold">{section.title}</h3>
-            {section.properties.map((property) => (
-              <PropertyView
-                key={property.label}
-                label={property.label}
-                className="grid grid-cols-2"
-                classNameLabel="w-30 w-auto"
-                classNameValue="min-w-0"
-              >
-                {property.value ?? NOT_AVAILABLE}
-              </PropertyView>
-            ))}
-          </section>
-        ))}
-      </div>
-      <div className="pos-bottom-left-control">
-        <PlayButton
-          onClick={async () => {
-            if (!selectedWord?.audio) return;
-            const didPlay = await playAudio(selectedWord.audio);
-            if (!didPlay) {
-              showToast(TEXTS.noAudio, 'error');
-            }
-          }}
-          disabled={audioControlsDisabled}
-        />
-        <VolumeSlider disabled={audioControlsDisabled} />
-      </div>
+      <VocabularyDetails baseProperties={baseProperties} directionSections={directionSections} />
+      <VocabularyAudioControls
+        selectedWord={selectedWord}
+        audioControlsDisabled={audioControlsDisabled}
+        playAudio={playAudio}
+        showToast={showToast}
+      />
       <div className="pos-bottom-right-control">
-        {noteId && (
-          <InfoButton
-            title={TEXTS.tooltipNotes}
-            onClick={(e) => {
-              e.stopPropagation();
-              openNote(noteId);
-            }}
-          />
-        )}
+        <VocabularyNoteButton noteId={noteId} openNote={openNote} />
         <PronunciationToggleButton userId={userId} item={selectedWord} />
         <HelpButton />
       </div>
