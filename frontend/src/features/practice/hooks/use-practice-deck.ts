@@ -105,8 +105,6 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
           setSessionProgress,
           setCelebrationStarTier,
           setIndex,
-          setRevealed,
-          resetHint,
           reload,
           setSaveError,
         },
@@ -342,8 +340,6 @@ type SaveReviewAnswerOptions = Readonly<{
   >;
   setCelebrationStarTier: Dispatch<SetStateAction<StarTier>>;
   setIndex: Dispatch<SetStateAction<number>>;
-  setRevealed: Dispatch<SetStateAction<boolean>>;
-  resetHint: () => void;
   reload: () => Promise<unknown>;
   setSaveError: Dispatch<SetStateAction<Error | null>>;
 }>;
@@ -363,8 +359,6 @@ async function saveReviewAnswer(
     setSessionProgress,
     setCelebrationStarTier,
     setIndex,
-    setRevealed,
-    resetHint,
     reload,
     setSaveError,
   } = options;
@@ -398,9 +392,8 @@ async function saveReviewAnswer(
 
     const nextIndex = index + 1;
     if (nextIndex < entriesLength) {
+      resetQuestionState();
       setIndex(nextIndex);
-      setRevealed(false);
-      resetHint();
       return;
     }
 

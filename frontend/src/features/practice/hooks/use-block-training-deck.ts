@@ -388,10 +388,10 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
     }
 
     await PracticeSession.recordInitialTrainingAnswer(updatedItem, nextSession);
+    resetQuestionState();
     setItems((currentItems) => updateTrainingItem(currentItems, updatedItem));
     setSession(nextSession);
     setHasProgress(true);
-    resetQuestionState();
   } catch (caughtError) {
     const normalizedError = toError(caughtError);
     setError(normalizedError);
