@@ -6,7 +6,59 @@ Check audio files referenced in local CSV files against files in ./audio.
 from __future__ import annotations
 
 import csv
+from collections.abc import Sequence
 from pathlib import Path
+
+
+def find_audio_key(fieldnames: Sequence[str]) -> str | None:
+    """Find the audio column without relying on its capitalization."""
+    return next((header for header in fieldnames if header.strip().lower() == "audio"), None)
+
+
+def collect_audio_from_csv(csv_file: Path) -> set[str]:
+    """Return the non-empty audio references from one CSV file."""
+    with csv_file.open("r", encoding="utf-8-sig", newline="") as file:
+        reader = csv.DictReader(file)
+        if not reader.fieldnames:
+            return set()
+
+        audio_key = find_audio_key(reader.fieldnames)
+        if audio_key is None:
+            return set()
+
+        used_audio: set[str] = set()
+        for row in reader:
+            value = (row.get(audio_key) or "").strip()
+            if value:
+                used_audio.add(value)
+        return used_audio
+
+
+def collect_used_audio(csv_files: list[Path]) -> set[str]:
+    """Collect unique audio references from all CSV files."""
+    used_audio: set[str] = set()
+    for csv_file in csv_files:
+        used_audio.update(collect_audio_from_csv(csv_file))
+    return used_audio
+
+
+def collect_present_audio(audio_dir: Path) -> set[str]:
+    """Collect names of files present in the audio directory."""
+    present_audio: set[str] = set()
+    for path in audio_dir.iterdir():
+        if path.is_file():
+            present_audio.add(path.name)
+    return present_audio
+
+
+def print_audio_section(title: str, filenames: list[str]) -> None:
+    """Print one missing/unused audio section."""
+    print(title)
+    if filenames:
+        for name in filenames:
+            print(name)
+    else:
+        print("None")
 
 
 def main() -> int:
@@ -22,49 +74,20 @@ def main() -> int:
         print(f"No CSV files found in {script_dir}")
         return 0
 
-    used_audio: set[str] = set()
-    present_audio: set[str] = set()
-
-    # Read each CSV and extract values from its "audio" column.
-    for csv_file in csv_files:
-        with csv_file.open("r", encoding="utf-8-sig", newline="") as f:
-            reader = csv.DictReader(f)
-            if not reader.fieldnames:
-                continue
-
-            # Find "audio" column case-insensitively.
-            audio_key = next((h for h in reader.fieldnames if h and h.strip().lower() == "audio"), None)
-            if audio_key is None:
-                continue
-
-            for row in reader:
-                value = (row.get(audio_key) or "").strip()
-                if value:
-                    used_audio.add(value)
-
-    # Files present in ./audio (only files, not folders).
-    for p in audio_dir.iterdir():
-        if p.is_file():
-            present_audio.add(p.name)
-
+    used_audio = collect_used_audio(csv_files)
+    present_audio = collect_present_audio(audio_dir)
     missing = sorted(used_audio - present_audio)
     unused = sorted(present_audio - used_audio)
 
-    print("=== Missing audio files (referenced in CSV, not found in ./audio) ===")
-    if missing:
-        for name in missing:
-            print(name)
-    else:
-        print("None")
-
+    print_audio_section(
+        "=== Missing audio files (referenced in CSV, not found in ./audio) ===",
+        missing,
+    )
     print()
-    print("=== Unused audio files (present in ./audio, not referenced in CSV) ===")
-    if unused:
-        for name in unused:
-            print(name)
-    else:
-        print("None")
-
+    print_audio_section(
+        "=== Unused audio files (present in ./audio, not referenced in CSV) ===",
+        unused,
+    )
     return 0
 
 
