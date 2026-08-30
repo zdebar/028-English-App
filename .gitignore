@@ -1,5 +1,6 @@
 *.opus
-/data/*.opus
+/data/**/*.opus
+/data/**/*.zip
 /archive/
 venv/
 /frontend/TODO.md
