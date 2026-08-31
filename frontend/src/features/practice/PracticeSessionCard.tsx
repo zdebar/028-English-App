@@ -215,15 +215,12 @@ function PracticeMainContent({
   pronunciation,
 }: PracticeMainContentProps) {
   if (isCompletion) {
-    if (isBlockTrainingPractice) {
-      return (
-        <Notification role="status">
-          <span className="block">{TEXTS.blockCompleted}</span>
-          <span className="block">{TEXTS.returnToHomeByClick}</span>
-        </Notification>
-      );
-    }
-    return <Notification role="status">{TEXTS.done}</Notification>;
+    return (
+      <Notification role="status">
+        <span className="block">{getCompletionLabel(isBlockTrainingPractice)}</span>
+        <span className="block">{TEXTS.returnToHomeByClick}</span>
+      </Notification>
+    );
   }
   if (showDirectionChange) {
     return <Notification>{directionText}</Notification>;
@@ -504,7 +501,7 @@ function getPracticeProgressHelp(
 
 function getCompletionLabel(isBlockTrainingPractice: boolean): string {
   if (isBlockTrainingPractice) return TEXTS.blockCompleted;
-  return TEXTS.done;
+  return TEXTS.reviewCompleted;
 }
 
 function PracticeCardActionBar({
