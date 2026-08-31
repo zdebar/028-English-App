@@ -104,11 +104,16 @@ export default class UserItemProgressHistory
     );
     const localRecords = await db.user_item_progress_history
       .where('[user_id+updated_at]')
-      .between([userId, lastSyncedAt], [userId, newSyncedAt], true, false)
+      .between([userId, lastSyncedAt], [userId, newSyncedAt], false, true)
       .toArray();
     reportInfo(`Completed ${localRecords.length} UserItemProgressHistory push to remote`);
 
-    const updatedRecords = await this.syncWithRemote(userId, localRecords, lastSyncedAt);
+    const updatedRecords = await this.syncWithRemote(
+      userId,
+      localRecords,
+      lastSyncedAt,
+      newSyncedAt,
+    );
     const { toUpsert, toDelete } = splitDeleted(updatedRecords);
     await db.transaction('rw', db.user_item_progress_history, db.metadata, async () => {
       if (doFullSync) {
@@ -128,16 +133,19 @@ export default class UserItemProgressHistory
     userId: string,
     records: UserItemProgressHistoryType[],
     lastSyncedAt: string,
+    newSyncedAt: string,
   ): Promise<UserItemProgressHistoryType[]> {
     const { data, error } = await supabaseInstance.rpc('upsert_fetch_user_item_progress_history', {
       p_user_id: userId,
       p_last_synced_at: lastSyncedAt,
+      p_sync_until: newSyncedAt,
       p_user_item_progress_history: records,
     });
     if (error) {
       throw new SupabaseError('Error fetching user item progress history from Supabase.', error, {
         historyCount: records.length,
         lastSyncedAt,
+        newSyncedAt,
       });
     }
     return data ?? [];

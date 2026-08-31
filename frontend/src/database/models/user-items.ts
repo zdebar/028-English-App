@@ -772,7 +772,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @throws Error when sync metadata userId validation fails.
    */
   static async syncFromRemote(userId: string, doFullSync: boolean): Promise<number> {
-    // Step 1: Get the last synced timestamp for user scores
+    // Step 1: Get the last synced timestamp and establish this sync window.
     const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(
       doFullSync,
       TableName.UserItems,
@@ -783,7 +783,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const localItems = await this.getUserItemsForSync(userId, lastSyncedAt, newSyncedAt);
     reportInfo(`Completed ${localItems.length} UserItems push to remote`);
 
-    const updatedItems = await this.syncWithRemote(userId, localItems, lastSyncedAt);
+    const updatedItems = await this.syncWithRemote(userId, localItems, lastSyncedAt, newSyncedAt);
     const { toUpsert, toDelete } = splitDeleted(updatedItems);
 
     // Step 4: Update local database with fetched items and update sync metadata
@@ -806,8 +806,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Reads local item rows that changed inside a sync window.
    *
    * @param userId User id whose local item rows should be exported.
-   * @param lastSyncedAt Inclusive lower updated_at bound.
-   * @param newSyncedAt Exclusive upper updated_at bound.
+   * @param lastSyncedAt Exclusive lower updated_at bound.
+   * @param newSyncedAt Inclusive upper updated_at bound.
    * @returns Item rows converted to the remote export shape.
    */
   private static async getUserItemsForSync(
@@ -817,7 +817,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   ): Promise<UserItemExport[]> {
     const localUserItems: UserItemLocal[] = await db.user_items
       .where('[user_id+updated_at]')
-      .between([userId, lastSyncedAt], [userId, newSyncedAt], true, false)
+      .between([userId, lastSyncedAt], [userId, newSyncedAt], false, true)
       .toArray();
 
     return localUserItems.map(convertLocalToExport);
@@ -828,7 +828,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    *
    * @param userId User id passed to the RPC.
    * @param items Local item rows to upsert remotely before fetching remote changes.
-   * @param lastSyncedAt Inclusive remote change lower bound.
+   * @param lastSyncedAt Exclusive remote change lower bound.
    * @returns Remote item rows converted to local shape, or [] when none are returned.
    * @throws SupabaseError when the RPC fails.
    */
@@ -836,12 +836,14 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     userId: string,
     items: UserItemExport[],
     lastSyncedAt: string,
+    newSyncedAt: string,
   ): Promise<UserItemLocal[]> {
     const { data: updatedUserItems, error: rpcFetchError } = await supabaseInstance.rpc(
       'upsert_fetch_user_items',
       {
         p_user_id: userId,
         p_last_synced_at: lastSyncedAt,
+        p_sync_until: newSyncedAt,
         p_user_items: items,
       },
     );
@@ -850,6 +852,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       throw new SupabaseError('Error fetching user_items with Supabase.', rpcFetchError, {
         itemCount: items.length,
         lastSyncedAt,
+        newSyncedAt,
       });
     }
 

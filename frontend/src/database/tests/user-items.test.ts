@@ -19,6 +19,7 @@ const mocks = vi.hoisted(() => ({
   indexedLimit: vi.fn(),
   indexedToArray: vi.fn(),
   startedGrammarCandidates: [] as any[],
+  updatedAtBetween: vi.fn(),
   updatedBetweenToArray: vi.fn(),
   transaction: vi.fn(),
   rpc: vi.fn(),
@@ -85,9 +86,12 @@ function createItemIdQuery() {
 
 function createUpdatedAtQuery() {
   return {
-    between: () => ({
-      toArray: (...args: unknown[]) => mocks.updatedBetweenToArray(...args),
-    }),
+    between: (...args: unknown[]) => {
+      mocks.updatedAtBetween(...args);
+      return {
+        toArray: (...args: unknown[]) => mocks.updatedBetweenToArray(...args),
+      };
+    },
   };
 }
 
@@ -1459,6 +1463,7 @@ describe('UserItem', () => {
     expect(mocks.rpc).toHaveBeenCalledWith('upsert_fetch_user_items', {
       p_user_id: 'u1',
       p_last_synced_at: '2026-03-03T00:00:00.000Z',
+      p_sync_until: '2026-03-04T00:00:00.000Z',
       p_user_items: [
         expect.objectContaining({
           user_id: 'u1',
@@ -1493,5 +1498,21 @@ describe('UserItem', () => {
       }),
     ]);
     expect(mocks.markAsSynced).toHaveBeenCalledWith('user_items', '2026-03-04T00:00:00.000Z', 'u1');
+    expect(mocks.updatedAtBetween).toHaveBeenCalledWith(
+      ['u1', '2026-03-03T00:00:00.000Z'],
+      ['u1', '2026-03-04T00:00:00.000Z'],
+      false,
+      true,
+    );
+  });
+
+  it('does not advance metadata when the remote item sync fails', async () => {
+    mocks.rpc.mockResolvedValue({ data: null, error: { message: 'network error' } });
+
+    await expect(UserItem.syncFromRemote('u1', false)).rejects.toThrow(
+      'Error fetching user_items with Supabase.',
+    );
+
+    expect(mocks.markAsSynced).not.toHaveBeenCalled();
   });
 });

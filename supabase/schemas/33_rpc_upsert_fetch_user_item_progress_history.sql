@@ -71,7 +71,7 @@ BEGIN
         progress_change = EXCLUDED.progress_change,
         updated_at = EXCLUDED.updated_at,
         deleted_at = EXCLUDED.deleted_at
-      WHERE EXCLUDED.updated_at >= public.user_item_progress_history.updated_at;
+      WHERE EXCLUDED.updated_at > public.user_item_progress_history.updated_at;
     EXCEPTION
       WHEN insufficient_privilege THEN
         RAISE;
@@ -85,7 +85,8 @@ $$;
 CREATE OR REPLACE FUNCTION public.upsert_fetch_user_item_progress_history(
   p_user_id UUID,
   p_last_synced_at TIMESTAMPTZ,
-  p_user_item_progress_history JSONB DEFAULT '[]'::JSONB
+  p_user_item_progress_history JSONB DEFAULT '[]'::JSONB,
+  p_sync_until TIMESTAMPTZ DEFAULT NULL
 )
 RETURNS TABLE (
   user_id UUID,
@@ -122,14 +123,19 @@ BEGIN
     h.progress_change, h.updated_at, h.deleted_at
   FROM public.user_item_progress_history AS h
   WHERE h.user_id = p_user_id
-    AND h.updated_at >= COALESCE(p_last_synced_at, public.rpc_min_timestamptz())
+    AND h.updated_at > COALESCE(p_last_synced_at, public.rpc_min_timestamptz())
+    AND (p_sync_until IS NULL OR h.updated_at <= p_sync_until)
   ORDER BY h.date ASC, h.item_id ASC, h.direction ASC;
 END;
 $$;
 
 REVOKE EXECUTE ON FUNCTION public.upsert_user_item_progress_history(JSONB) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.upsert_user_item_progress_history(JSONB) TO authenticated;
-REVOKE EXECUTE ON FUNCTION public.upsert_fetch_user_item_progress_history(UUID, TIMESTAMPTZ, JSONB)
+REVOKE EXECUTE ON FUNCTION public.upsert_fetch_user_item_progress_history(
+  UUID, TIMESTAMPTZ, JSONB, TIMESTAMPTZ
+)
   FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.upsert_fetch_user_item_progress_history(UUID, TIMESTAMPTZ, JSONB)
+GRANT EXECUTE ON FUNCTION public.upsert_fetch_user_item_progress_history(
+  UUID, TIMESTAMPTZ, JSONB, TIMESTAMPTZ
+)
   TO authenticated;
