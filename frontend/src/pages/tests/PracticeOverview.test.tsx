@@ -30,6 +30,7 @@ vi.mock('@/components/UI/OverviewCard', () => ({
 vi.mock('@/config/config', () => ({
   default: {
     database: { nullReplacementDate: '9999-12-31' },
+    practice: { dailyProgressGoal: 200 },
     loading: { dataStateDelayMs: 0 },
   },
 }));
@@ -86,8 +87,26 @@ describe('PracticeOverview', () => {
 
     expect(screen.getAllByRole('button')).toHaveLength(4);
     expect(screen.getByText('+ 1')).toBeTruthy();
+    expect(screen.getByText('+ 1').className).toContain('text-error-light');
     expect(screen.getByText('0')).toBeTruthy();
     expect(screen.getByText('+ 2')).toBeTruthy();
+  });
+
+  it('colors each daily score against the configured progress goal', async () => {
+    mocks.history = [
+      historyEntry('2026-05-24', 1, 8, 10, 200),
+      historyEntry('2026-05-23', 2, 8, 10, 199),
+      historyEntry('2026-05-22', 3, 8, 10, -5),
+    ];
+
+    render(<PracticeOverview />);
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(screen.getByText('+ 200').className).toContain('text-success-light');
+    expect(screen.getByText('+ 199').className).toContain('text-error-light');
+    expect(screen.getByText('- 5').className).toContain('text-error-light');
   });
 
   it('expands a day into item directions and progress states', async () => {
