@@ -85,9 +85,9 @@ describe('PracticeOverview', () => {
     });
 
     expect(screen.getAllByRole('button')).toHaveLength(4);
-    expect(screen.getByText('+1')).toBeTruthy();
+    expect(screen.getByText('+ 1')).toBeTruthy();
     expect(screen.getByText('0')).toBeTruthy();
-    expect(screen.getByText('+2')).toBeTruthy();
+    expect(screen.getByText('+ 2')).toBeTruthy();
   });
 
   it('expands a day into item directions and progress states', async () => {

@@ -23,6 +23,7 @@ import { usePointerReleaseLock } from './hooks/use-pointer-release-lock';
 import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
 import type { NoteType } from '@/types/generic.types';
 import { useState, type MouseEvent } from 'react';
+import { formatProgressChange } from '@/utils/format.utils';
 
 export type PracticeSessionCardProps = Readonly<{
   note: NoteType | null;
@@ -98,12 +99,21 @@ function PracticeDetail({ visibleDetail, grammar, note, onClose }: PracticeDetai
 function AudioStatusMessage({
   audioError,
   audioLoading,
-}: Pick<PracticeSessionCardProps, 'audioError' | 'audioLoading'>) {
+  className = '',
+}: Pick<PracticeSessionCardProps, 'audioError' | 'audioLoading'> & { className?: string }) {
   if (audioLoading) {
-    return <DelayedNotification message={TEXTS.loadingAudio} />;
+    return (
+      <div className={className}>
+        <DelayedNotification message={TEXTS.loadingAudio} />
+      </div>
+    );
   }
   if (audioError) {
-    return <p className="font-headings text-lg">{TEXTS.noAudio}</p>;
+    return (
+      <div className={className}>
+        <p className="font-headings text-lg">{TEXTS.noAudio}</p>
+      </div>
+    );
   }
   return null;
 }
@@ -120,7 +130,11 @@ function DirectionTopBar({
   return (
     <div className="relative">
       <p className="text-sm font-light">{shortDirectionText}</p>
-      <AudioStatusMessage audioError={audioError} audioLoading={audioLoading} />
+      <AudioStatusMessage
+        audioError={audioError}
+        audioLoading={audioLoading}
+        className="absolute top-full left-1/2 -translate-x-1/2 whitespace-nowrap"
+      />
       <HelpText className="top-4 left-1/2 -translate-x-1/2">{TEXTS.directionHelpText}</HelpText>
     </div>
   );
@@ -184,6 +198,7 @@ function PracticeControls({
 type PracticeMainContentProps = Readonly<{
   showDirectionChange: boolean;
   isCompletion: boolean;
+  isBlockTrainingPractice: boolean;
   directionText: string;
   czech: string | undefined;
   english: string | undefined;
@@ -193,12 +208,23 @@ type PracticeMainContentProps = Readonly<{
 function PracticeMainContent({
   showDirectionChange,
   isCompletion,
+  isBlockTrainingPractice,
   directionText,
   czech,
   english,
   pronunciation,
 }: PracticeMainContentProps) {
-  if (isCompletion) return <Notification role="status">{TEXTS.done}</Notification>;
+  if (isCompletion) {
+    if (isBlockTrainingPractice) {
+      return (
+        <Notification role="status">
+          <span className="block">{TEXTS.blockCompleted}</span>
+          <span className="block">{TEXTS.returnToHomeByClick}</span>
+        </Notification>
+      );
+    }
+    return <Notification role="status">{TEXTS.done}</Notification>;
+  }
   if (showDirectionChange) {
     return <Notification>{directionText}</Notification>;
   }
@@ -411,8 +437,8 @@ function PracticeCardButton({
       type="button"
       className={`relative flex h-full w-full grow cursor-pointer flex-col items-center p-4 text-inherit select-none ${display.cardStyle}`}
       onClick={isCompletion ? onCompletionContinue : handleReveal}
-      title={isCompletion ? TEXTS.done : display.cardText}
-      aria-label={isCompletion ? TEXTS.done : undefined}
+      title={isCompletion ? getCompletionLabel(isBlockTrainingPractice) : display.cardText}
+      aria-label={isCompletion ? getCompletionLabel(isBlockTrainingPractice) : undefined}
       aria-disabled={revealed && !isCompletion}
     >
       {display.showRevealHelp && (
@@ -437,6 +463,7 @@ function PracticeCardButton({
         <PracticeMainContent
           showDirectionChange={showDirectionChange}
           isCompletion={Boolean(isCompletion)}
+          isBlockTrainingPractice={isBlockTrainingPractice}
           directionText={display.directionText}
           czech={czech}
           english={english}
@@ -458,9 +485,10 @@ function PracticeCardButton({
             {getPracticeProgressHelp(isBlockTrainingPractice, progressHelpText)}
           </HelpText>
         )}
-        <p className="min-w-14 px-2 text-right font-light" title={TEXTS.progressToday}>
-          {formatSignedNumber(dailyProgressChange)}
+        <p className="min-w-14 px-2 text-right font-light" title={TEXTS.progressTodayHint}>
+          {formatProgressChange(dailyProgressChange)}
         </p>
+        <HelpText className="right-2 bottom-14">{TEXTS.progressTodayHint}</HelpText>
       </div>
     </button>
   );
@@ -474,9 +502,9 @@ function getPracticeProgressHelp(
   return progressHelpText;
 }
 
-function formatSignedNumber(value: number): string {
-  if (value > 0) return `+${value}`;
-  return String(value);
+function getCompletionLabel(isBlockTrainingPractice: boolean): string {
+  if (isBlockTrainingPractice) return TEXTS.blockCompleted;
+  return TEXTS.done;
 }
 
 function PracticeCardActionBar({

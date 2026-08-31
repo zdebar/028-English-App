@@ -28,7 +28,7 @@ describe('BlockBar', () => {
     );
 
     expect(screen.getByText('To Be')).toBeTruthy();
-    expect(screen.getByText('+5')).toBeTruthy();
+    expect(screen.getByText('+ 5')).toBeTruthy();
 
     const progressBar = screen.getByRole('progressbar', {
       name: 'Lesson progress bar',

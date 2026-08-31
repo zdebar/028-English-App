@@ -110,6 +110,9 @@ vi.mock('@/locales/cs', () => ({
     progress: 'Progress',
     reviewProgress: 'Review progress',
     progressToday: 'Today progress',
+    progressTodayHint: 'Today progress change',
+    blockCompleted: 'Block completed',
+    returnToHomeByClick: 'Click to return home',
     today: 'Today',
     dailyGoal: 'Daily goal',
     loadingMessage: 'Loading',
@@ -468,7 +471,7 @@ describe('PracticeCard', () => {
     const bottomBar = container.querySelector('#bottom-bar') as HTMLElement;
 
     expect(bottomBar.firstElementChild?.textContent).toBe('2/20');
-    expect(bottomBar.lastElementChild?.textContent).toBe('0');
+    expect(bottomBar.querySelector('p[title="Today progress change"]')?.textContent).toBe('0');
     expect(bottomBar.textContent).not.toContain('2 / 9');
   });
 
@@ -521,7 +524,7 @@ describe('PracticeCard', () => {
 
     expect(topBar.textContent).toContain('cz › en');
     expect(topBar.textContent).toContain('No audio');
-    expect(bottomBar.lastElementChild?.textContent).toBe('0');
+    expect(bottomBar.querySelector('p[title="Today progress change"]')?.textContent).toBe('0');
   });
 
   it('keeps vocabulary and direction changes centered while audio status changes', () => {
@@ -1058,5 +1061,41 @@ describe('PracticeCard', () => {
 
     expect(container.querySelector('#top-bar')?.textContent).toContain('cz › en');
     expect(container.querySelector('#top-bar')?.textContent).toContain('No audio');
+  });
+
+  it('shows block completion copy on two lines and continues on one click', () => {
+    const onCompletionContinue = vi.fn();
+    render(
+      <PracticeSessionCard
+        note={null}
+        grammar={null}
+        progressLabel="2/2 · 8/8"
+        isCzToEn
+        revealed={false}
+        czech={undefined}
+        english={undefined}
+        pronunciation={undefined}
+        audioDisabled
+        showDirectionChange={false}
+        handleReveal={vi.fn()}
+        plusHint={vi.fn()}
+        nextRepeat={vi.fn()}
+        nextKnown={vi.fn()}
+        completeCurrent={vi.fn()}
+        audioError={false}
+        playAudio={vi.fn()}
+        audioLoading={false}
+        isBlockTrainingPractice
+        isCompletion
+        onCompletionContinue={onCompletionContinue}
+      />,
+    );
+
+    expect(screen.getByText('Block completed')).toBeTruthy();
+    expect(screen.getByText('Click to return home')).toBeTruthy();
+    expect(screen.queryByText('hotovo')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Block completed' }));
+    expect(onCompletionContinue).toHaveBeenCalledTimes(1);
   });
 });

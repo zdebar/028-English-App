@@ -10,6 +10,7 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { useRouteClose } from '@/routing/use-route-close';
+import { formatProgressChange } from '@/utils/format.utils';
 
 const INITIAL_VISIBLE_DAYS = 7;
 
@@ -40,11 +41,6 @@ function formatShortDate(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
-}
-
-function formatSignedNumber(value: number): string {
-  if (value > 0) return `+${value}`;
-  return String(value);
 }
 
 function getPracticeDays(history: UserItemProgressHistoryType[]): PracticeDay[] {
@@ -116,7 +112,7 @@ function PracticeOverviewRow({
         >
           {formatPracticeDate(day.date)}
         </span>
-        <span className="mr-4 font-bold">{formatSignedNumber(day.score)}</span>
+        <span className="mr-4 font-bold">{formatProgressChange(day.score)}</span>
       </button>
       {expanded &&
         day.entries.map((entry) => (

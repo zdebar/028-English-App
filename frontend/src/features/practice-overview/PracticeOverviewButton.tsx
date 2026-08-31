@@ -2,9 +2,10 @@ import HelpText from '@/features/help/HelpText';
 import type { JSX } from 'react';
 import type { RouteDataDescriptor } from '@/routing/route-data-handoff';
 import { useDataNavigation } from '@/routing/data-navigation';
+import { formatProgressChange } from '@/utils/format.utils';
 
 const BUTTON_CLASS_NAME =
-  'relative mx-auto inline-flex w-full cursor-pointer items-center justify-center p-2 text-center focus:outline-none';
+  'relative mx-auto inline-flex w-full cursor-pointer items-center justify-center p-2 text-center decoration-current underline-offset-4 hover:underline focus:outline-none';
 
 type Props = {
   count: number;
@@ -53,7 +54,7 @@ export default function PracticeOverviewButton({
 }
 
 function DailyProgressValue({ value }: Readonly<{ value: number }>): JSX.Element {
-  return <span className="font-headings text-2xl font-bold">{formatSignedNumber(value)}</span>;
+  return <span className="font-headings text-2xl font-bold">{formatProgressChange(value)}</span>;
 }
 
 function DataPracticeOverviewButton({
@@ -79,9 +80,4 @@ function DataPracticeOverviewButton({
       <HelpText className="-top-4 whitespace-nowrap">{helpText}</HelpText>
     </button>
   );
-}
-
-function formatSignedNumber(value: number): string {
-  if (value > 0) return `+${value}`;
-  return String(value);
 }

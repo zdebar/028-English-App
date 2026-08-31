@@ -52,7 +52,8 @@ vi.mock('@/locales/cs', () => ({
     tooltipHome: 'Home',
     loadingMessage: 'Loading',
     loadingError: 'Loading error',
-    blockTrainingComplete: 'Complete',
+    blockCompleted: 'Block completed',
+    returnToHomeByClick: 'Click to return home',
     continuePractice: 'Continue',
     done: 'hotovo',
   },
@@ -107,8 +108,9 @@ vi.mock('@/features/practice/PracticeSessionCard', () => ({
   default: ({ czech, english, isCompletion, onCompletionContinue }: any) => (
     <div data-testid="practice-session">
       {isCompletion ? (
-        <button type="button" onClick={onCompletionContinue}>
-          hotovo
+        <button type="button" aria-label="Block completed" onClick={onCompletionContinue}>
+          <span>Block completed</span>
+          <span>Click to return home</span>
         </button>
       ) : (
         `${czech}:${english}`
@@ -250,15 +252,16 @@ describe('BlockTrainingPractice', () => {
     expect(mocks.navigate).not.toHaveBeenCalled();
   });
 
-  it('returns Home after clicking the neutral completion card', () => {
+  it('returns Home after clicking the block completion card', () => {
     mocks.deck.block = { name: 'Block A' };
     mocks.deck.grammar = { id: 1, name: 'Articles' };
     mocks.deck.isComplete = true;
 
     render(<BlockTrainingPractice />);
 
-    expect(screen.getByRole('button', { name: 'hotovo' })).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'hotovo' }));
+    expect(screen.getByRole('button', { name: 'Block completed' })).toBeTruthy();
+    expect(screen.getByText('Click to return home')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Block completed' }));
     expect(mocks.navigate).toHaveBeenCalledWith('/', { replace: true });
     expect(screen.queryByTestId('block-training-overview')).toBeNull();
   });

@@ -15,6 +15,13 @@ import { ROUTES } from '@/config/routes.config';
 import type { LevelOverviewType } from '@/types/generic.types';
 import { useRouteClose } from '@/routing/use-route-close';
 
+function getCompletedLessonCount(level: LevelOverviewType): number {
+  return level.lessons.filter((lesson) => {
+    const maximumProgress = lesson.maximumProgress ?? 0;
+    return maximumProgress > 0 && (lesson.currentProgress ?? 0) >= maximumProgress;
+  }).length;
+}
+
 /**
  * LevelsOverview component
  *
@@ -72,9 +79,9 @@ export default function LevelsOverview({
                 <div className="flex w-full items-center justify-between">
                   <p title={`${TEXTS.levelName}`}>{level.name}</p>
                   <GoalMetView
-                    current={level.currentProgress ?? 0}
-                    goal={level.maximumProgress ?? 0}
-                    title={TEXTS.levelsStartedHelp}
+                    current={getCompletedLessonCount(level)}
+                    goal={level.lessons.length}
+                    title={TEXTS.levelsCompletedHelp}
                   />
                 </div>
               </ListButton>

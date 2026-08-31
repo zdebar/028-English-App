@@ -1,4 +1,5 @@
 import { TEXTS, ARIA_TEXTS } from '@/locales/cs';
+import { formatProgressChange } from '@/utils/format.utils';
 
 type BlockBarProps = Readonly<{
   currentProgress: number;
@@ -56,7 +57,9 @@ export default function BlockBar({ ...props }: BlockBarProps) {
           <span className="inline-block min-w-6 text-right">{lessonNumber}</span>
           <span className="ml-1 min-w-0 truncate">{lessonName}</span>
         </span>
-        <span title={TEXTS.progressTodayHint}>{formatSignedNumber(dailyProgressChange)}</span>
+        <span className="font-headings" title={TEXTS.progressTodayHint}>
+          {formatProgressChange(dailyProgressChange)}
+        </span>
       </div>
       <div className={`relative h-full w-full ${className}`} style={{ width: `${barWidth}%` }}>
         {/* Native progress bar for accessibility */}
@@ -91,8 +94,3 @@ const DEFAULT_BLOCK_BAR_PROPS: Required<BlockBarProps> = {
   widthBase: 40,
   className: '',
 };
-
-function formatSignedNumber(value: number): string {
-  if (value > 0) return `+${value}`;
-  return String(value);
-}

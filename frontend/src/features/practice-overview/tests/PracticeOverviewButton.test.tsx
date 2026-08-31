@@ -31,7 +31,8 @@ describe('PracticeOverviewButton', () => {
     expect(button).toBeTruthy();
     expect(button.getAttribute('title')).toBe('Open practice overview');
     expect(button.className).not.toContain('hover:ring');
-    expect(button.textContent).toBe('+3Stars today');
+    expect(button.textContent).toBe('+ 3Stars today');
+    expect(button.className).toContain('hover:underline');
     expect(screen.getByTestId('help-text').textContent).toBe('Stars today');
   });
 
