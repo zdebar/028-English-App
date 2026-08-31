@@ -4,7 +4,7 @@ export const PRACTICE_TEXTS = {
   noAudio: 'bez audia',
   loadingAudio: 'načítá se audio ...',
   progress: 'pokrok',
-  reviewStarProgress: 'postup k další hvězdě',
+  reviewProgress: 'progress v tomto směru',
   grammar: 'gramatika',
   audio: 'audio',
   complete: 'dokončit',

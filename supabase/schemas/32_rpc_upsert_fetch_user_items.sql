@@ -20,7 +20,6 @@ RETURNS TABLE (
   grammar_chunk_id INTEGER,
   progress_cz_to_en INTEGER,
   progress_en_to_cz INTEGER,
-  progress_history JSONB,
   started_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ,
   deleted_at TIMESTAMPTZ,
@@ -35,17 +34,10 @@ SET search_path TO public
 AS $$
 DECLARE
   v_empty_json CONSTANT JSONB := '[]'::JSONB;
-  v_history_enabled BOOLEAN := FALSE;
   v_key_user_id CONSTANT TEXT := private.json_key_user_id();
   v_user_id_mismatch_message CONSTANT TEXT := 'p_user_id does not match at least one user_id in p_user_items';
 BEGIN
   PERFORM public.require_auth_user_id_match(p_user_id);
-
-  SELECT COALESCE(u.history_enabled, FALSE)
-    INTO v_history_enabled
-    FROM public.users u
-   WHERE u.id = p_user_id;
-
 
   IF p_user_items IS NOT NULL AND p_user_items <> v_empty_json THEN
     -- Validate every user_id in p_user_items matches p_user_id
@@ -56,7 +48,7 @@ BEGIN
     ) THEN
       RAISE EXCEPTION '%', v_user_id_mismatch_message;
     END IF;
-    PERFORM public.upsert_user_items(p_user_items, v_history_enabled);
+    PERFORM public.upsert_user_items(p_user_items);
   END IF;
 
   RETURN QUERY

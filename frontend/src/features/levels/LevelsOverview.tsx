@@ -72,8 +72,8 @@ export default function LevelsOverview({
                 <div className="flex w-full items-center justify-between">
                   <p title={`${TEXTS.levelName}`}>{level.name}</p>
                   <GoalMetView
-                    current={level.startedCount}
-                    goal={level['totalCount']}
+                    current={level.currentProgress ?? 0}
+                    goal={level.maximumProgress ?? 0}
                     title={TEXTS.levelsStartedHelp}
                   />
                 </div>
@@ -85,9 +85,9 @@ export default function LevelsOverview({
                       key={lesson.id}
                       lessonName={lesson.name ?? ''}
                       lessonNumber={lesson.sort_order}
-                      previousCount={(lesson.startedCount ?? 0) - (lesson.startedTodayCount ?? 0)}
-                      todayCount={lesson.startedTodayCount ?? 0}
-                      lessonCount={lesson.totalCount ?? 1}
+                      currentProgress={lesson.currentProgress ?? 0}
+                      dailyProgressChange={lesson.dailyProgressChange ?? 0}
+                      maximumProgress={lesson.maximumProgress ?? 1}
                     />
                   ))}
                 </div>
@@ -96,7 +96,7 @@ export default function LevelsOverview({
           ))}
         </div>
 
-        <HelpText className="top-20 right-2">{TEXTS.levelsStartedHelp}</HelpText>
+        <HelpText className="top-20 right-2">{TEXTS.progressTodayHint}</HelpText>
         <div className="pos-bottom-right-control">
           <HelpButton />
         </div>

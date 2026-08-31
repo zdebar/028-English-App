@@ -1,5 +1,4 @@
 import Notification from '@/components/UI/Notification';
-import { FullStar, STAR_SIZE } from '@/components/UI/StarProgress';
 import DelayedNotification from '@/components/UI/DelayedNotification';
 import SecondaryControlButton from '@/components/UI/buttons/SecondaryControlButton';
 import BookIcon from '@/components/UI/icons/BookIcon';
@@ -24,7 +23,6 @@ import { usePointerReleaseLock } from './hooks/use-pointer-release-lock';
 import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
 import type { NoteType } from '@/types/generic.types';
 import { useState, type MouseEvent } from 'react';
-import type { StarTier } from '@/utils/star-progress.utils';
 
 export type PracticeSessionCardProps = Readonly<{
   note: NoteType | null;
@@ -48,15 +46,14 @@ export type PracticeSessionCardProps = Readonly<{
   audioError: boolean;
   playAudio: () => void;
   audioLoading: boolean;
+  dailyProgressChange?: number;
+  isCompletion?: boolean;
+  onCompletionContinue?: () => void;
   isBlockTrainingPractice?: boolean;
   isPronunciationPractice?: boolean;
   pronunciationItem?: UserItemLocal | null;
   nextPronunciation?: () => void;
   onPronunciationSelectionChange?: (selected: boolean) => void;
-  celebratingStar?: boolean;
-  celebrationPreparing?: boolean;
-  celebrationStarTier?: StarTier;
-  onStarCelebrationContinue?: () => void;
 }>;
 
 type PracticeControlsProps = Pick<
@@ -111,10 +108,19 @@ function AudioStatusMessage({
   return null;
 }
 
-function DirectionTopBar({ shortDirectionText }: Readonly<{ shortDirectionText: string }>) {
+function DirectionTopBar({
+  shortDirectionText,
+  audioError,
+  audioLoading,
+}: Readonly<{
+  shortDirectionText: string;
+  audioError: boolean;
+  audioLoading: boolean;
+}>) {
   return (
     <div className="relative">
       <p className="text-sm font-light">{shortDirectionText}</p>
+      <AudioStatusMessage audioError={audioError} audioLoading={audioLoading} />
       <HelpText className="top-4 left-1/2 -translate-x-1/2">{TEXTS.directionHelpText}</HelpText>
     </div>
   );
@@ -176,10 +182,8 @@ function PracticeControls({
 }
 
 type PracticeMainContentProps = Readonly<{
-  celebratingStar: boolean;
-  celebrationPreparing: boolean;
-  celebrationStarTier: StarTier;
   showDirectionChange: boolean;
+  isCompletion: boolean;
   directionText: string;
   czech: string | undefined;
   english: string | undefined;
@@ -187,29 +191,14 @@ type PracticeMainContentProps = Readonly<{
 }>;
 
 function PracticeMainContent({
-  celebratingStar,
-  celebrationPreparing,
-  celebrationStarTier,
   showDirectionChange,
+  isCompletion,
   directionText,
   czech,
   english,
   pronunciation,
 }: PracticeMainContentProps) {
-  if (celebrationPreparing) return <DelayedNotification />;
-
-  if (celebratingStar) {
-    return (
-      <Notification className="flex flex-col items-center gap-2" role="status" aria-live="polite">
-        <span>{TEXTS.starEarned}</span>
-        <FullStar className={`star-fill-${celebrationStarTier}`} size={STAR_SIZE} />
-        <span className={showDirectionChange ? undefined : 'invisible'} aria-hidden={!showDirectionChange}>
-          {directionText}
-        </span>
-      </Notification>
-    );
-  }
-
+  if (isCompletion) return <Notification role="status">{TEXTS.done}</Notification>;
   if (showDirectionChange) {
     return <Notification>{directionText}</Notification>;
   }
@@ -237,9 +226,6 @@ type NormalizedPracticeSessionCardProps = PracticeSessionCardProps &
     isBlockTrainingPractice: boolean;
     isPronunciationPractice: boolean;
     pronunciationItem: UserItemLocal | null;
-    celebratingStar: boolean;
-    celebrationPreparing: boolean;
-    celebrationStarTier: StarTier;
   }>;
 
 const DEFAULT_PRACTICE_SESSION_CARD_PROPS = {
@@ -249,9 +235,6 @@ const DEFAULT_PRACTICE_SESSION_CARD_PROPS = {
   isBlockTrainingPractice: false,
   isPronunciationPractice: false,
   pronunciationItem: null,
-  celebratingStar: false,
-  celebrationPreparing: false,
-  celebrationStarTier: 'bronze' as StarTier,
 } as const;
 
 function normalizePracticeSessionCardProps(
@@ -289,11 +272,10 @@ function getPracticeCardDisplayState(
     audioDisabled,
     showDirectionChange,
     audioLoading,
-    celebratingStar,
-    celebrationPreparing,
+    isCompletion,
     isPronunciationPractice,
   } = props;
-  const controlsLocked = celebratingStar || celebrationPreparing || showDirectionChange;
+  const controlsLocked = isCompletion || showDirectionChange;
   const showAudioControls = !audioDisabled;
   const showGrammarButton = hasGrammarDetails(revealed, grammar);
   const showNoteButton = hasNoteDetails(revealed, note);
@@ -321,7 +303,7 @@ function getPracticeCardDisplayState(
       !revealed || controlsLocked,
       isPronunciationPractice,
     ),
-    showTopBar: !isPronunciationPractice,
+    showTopBar: !isPronunciationPractice && !isCompletion,
     showRevealHelp: !revealed && !controlsLocked,
   };
 }
@@ -409,9 +391,8 @@ function PracticeCardButton({
   display: PracticeCardDisplayState;
 }>) {
   const {
-    celebratingStar,
-    celebrationPreparing,
-    onStarCelebrationContinue,
+    isCompletion,
+    onCompletionContinue,
     handleReveal,
     revealed,
     showDirectionChange,
@@ -423,17 +404,16 @@ function PracticeCardButton({
     isBlockTrainingPractice,
     audioError,
     audioLoading,
+    dailyProgressChange = 0,
   } = props;
-  const celebrationActive = celebratingStar || celebrationPreparing;
   return (
     <button
       type="button"
       className={`relative flex h-full w-full grow cursor-pointer flex-col items-center p-4 text-inherit select-none ${display.cardStyle}`}
-      onClick={celebratingStar ? onStarCelebrationContinue : handleReveal}
-      title={celebratingStar ? TEXTS.starEarned : display.cardText}
-      aria-label={celebratingStar ? TEXTS.starEarned : undefined}
-      aria-disabled={revealed && !celebrationActive}
-      disabled={celebrationPreparing || (celebratingStar && !onStarCelebrationContinue)}
+      onClick={isCompletion ? onCompletionContinue : handleReveal}
+      title={isCompletion ? TEXTS.done : display.cardText}
+      aria-label={isCompletion ? TEXTS.done : undefined}
+      aria-disabled={revealed && !isCompletion}
     >
       {display.showRevealHelp && (
         <HelpText className="top-23 left-1/2 -translate-x-1/2">{TEXTS.reveal}</HelpText>
@@ -443,7 +423,11 @@ function PracticeCardButton({
           id="top-bar"
           className="relative flex h-8 w-full shrink-0 items-center justify-center text-center"
         >
-          <DirectionTopBar shortDirectionText={display.shortDirectionText} />
+          <DirectionTopBar
+            shortDirectionText={display.shortDirectionText}
+            audioError={audioError}
+            audioLoading={audioLoading}
+          />
         </div>
       )}
       <div
@@ -451,15 +435,16 @@ function PracticeCardButton({
         className="flex min-h-0 w-full grow items-center justify-center"
       >
         <PracticeMainContent
-          celebratingStar={celebratingStar}
-          celebrationPreparing={celebrationPreparing}
-          celebrationStarTier={props.celebrationStarTier}
           showDirectionChange={showDirectionChange}
+          isCompletion={Boolean(isCompletion)}
           directionText={display.directionText}
           czech={czech}
           english={english}
           pronunciation={pronunciation}
         />
+        {!display.showTopBar && (
+          <AudioStatusMessage audioError={audioError} audioLoading={audioLoading} />
+        )}
       </div>
       <div
         className="relative flex h-8 w-full shrink-0 items-center justify-between"
@@ -468,12 +453,14 @@ function PracticeCardButton({
         <p className="min-w-14 px-2 text-right font-light" title={progressHelpText}>
           {progressLabel}
         </p>
-        <HelpText className="bottom-7.5">
-          {getPracticeProgressHelp(isBlockTrainingPractice, progressHelpText)}
-        </HelpText>
-        <div className="flex min-h-0 items-center justify-end px-2 text-right">
-          <AudioStatusMessage audioError={audioError} audioLoading={audioLoading} />
-        </div>
+        {!isCompletion && (
+          <HelpText className="bottom-7.5">
+            {getPracticeProgressHelp(isBlockTrainingPractice, progressHelpText)}
+          </HelpText>
+        )}
+        <p className="min-w-14 px-2 text-right font-light" title={TEXTS.progressToday}>
+          {formatSignedNumber(dailyProgressChange)}
+        </p>
       </div>
     </button>
   );
@@ -485,6 +472,11 @@ function getPracticeProgressHelp(
 ): string {
   if (isBlockTrainingPractice) return TEXTS.blockTrainingProgressHelp;
   return progressHelpText;
+}
+
+function formatSignedNumber(value: number): string {
+  if (value > 0) return `+${value}`;
+  return String(value);
 }
 
 function PracticeCardActionBar({
@@ -538,6 +530,7 @@ function PracticeCardActionBar({
         <PronunciationToggleButton
           userId={userId}
           item={pronunciationItem}
+          disabled={display.controlsLocked}
           showHelpText
           onSelectionChange={onPronunciationSelectionChange}
         />
@@ -585,10 +578,7 @@ function PracticeSessionCardView({
   const display = getPracticeCardDisplayState(props);
   return (
     <div className="bottom-controls-clearance relative flex min-h-0 w-full grow flex-col items-center">
-      <div
-        className="card-width card-height relative gap-1"
-        aria-busy={props.celebratingStar || props.celebrationPreparing}
-      >
+      <div className="card-width card-height relative gap-1" aria-busy={props.isCompletion}>
         <PracticeCardButton props={props} display={display} />
         <PracticeCardActionBar
           props={props}

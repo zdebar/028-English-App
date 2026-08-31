@@ -16,7 +16,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/config/config', () => ({
   default: {
     database: { nullReplacementDate: '1970-01-01T00:00:00.000Z' },
-    practice: { starsPerRow: 10 },
+    practice: { initialTrainingBatchSize: 8 },
   },
 }));
 vi.mock('@/database/models/practice-sessions', () => ({
@@ -110,6 +110,8 @@ describe('useInitialTrainingDeck', () => {
     await act(async () => result.current.nextKnown());
     expect(mocks.recordInitialTrainingAnswer).toHaveBeenCalledWith(
       expect.anything(),
+      expect.anything(),
+      'czToEn',
       expect.objectContaining({
         phase: 0,
         current_queue_item_ids: [2],
@@ -142,6 +144,8 @@ describe('useInitialTrainingDeck', () => {
 
     expect(mocks.recordInitialTrainingAnswer).toHaveBeenLastCalledWith(
       expect.anything(),
+      expect.anything(),
+      'czToEn',
       expect.objectContaining({
         phase: 1,
         current_queue_item_ids: [1, 2],
@@ -163,7 +167,7 @@ describe('useInitialTrainingDeck', () => {
     expect(result.current.hasProgress).toBe(true);
   });
 
-  it('shows the completed second-phase count while celebrating its earned star', async () => {
+  it('shows the completed second-phase count and enters neutral completion', async () => {
     mocks.reconcileActive.mockResolvedValue({
       ...newSession(),
       phase: 1,
@@ -178,14 +182,11 @@ describe('useInitialTrainingDeck', () => {
       void result.current.nextKnown();
     });
 
-    await waitFor(() => expect(result.current.celebratingStar).toBe(true));
-    expect(result.current.progressLabel).toBe('2/2 · 2/2');
-
-    act(() => result.current.acknowledgeCelebration());
     await waitFor(() => expect(result.current.isComplete).toBe(true));
+    expect(result.current.progressLabel).toBe('2/2 · 2/2');
   });
 
-  it('settles New completion when its celebration unmounts', async () => {
+  it('persists New completion before rendering the neutral completion card', async () => {
     mocks.reconcileActive.mockResolvedValue({
       ...newSession(),
       phase: 1,
@@ -200,9 +201,8 @@ describe('useInitialTrainingDeck', () => {
     act(() => {
       completionPromise = result.current.nextKnown();
     });
-    await waitFor(() => expect(result.current.celebratingStar).toBe(true));
+    await waitFor(() => expect(result.current.isComplete).toBe(true));
 
-    unmount();
     await completionPromise;
 
     expect(mocks.completeInitialTraining).toHaveBeenCalledWith(
@@ -210,7 +210,9 @@ describe('useInitialTrainingDeck', () => {
       [1, 2],
       expect.any(String),
       expect.anything(),
+      'enToCz',
     );
+    unmount();
   });
 });
 
@@ -248,7 +250,6 @@ function item(itemId: number) {
     grammar_chunk_id: 0,
     progress_cz_to_en: 0,
     progress_en_to_cz: 0,
-    progress_history: [],
     started_at: '1970-01-01T00:00:00.000Z',
     updated_at: '2026-01-01',
     deleted_at: '',

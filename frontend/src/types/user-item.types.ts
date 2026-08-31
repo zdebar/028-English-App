@@ -4,11 +4,16 @@ import type { NoteType } from './generic.types';
 export type PracticeDirection = 'czToEn' | 'enToCz';
 export type PracticeOutcome = 'correct' | 'incorrect' | 'skip';
 
-export interface ProgressHistoryEntry {
-  progress: number;
-  created_at: string;
+export interface UserItemProgressHistoryType {
+  user_id: string;
+  date: string;
+  item_id: number;
   direction: PracticeDirection;
-  outcome: PracticeOutcome;
+  progress: number;
+  max_progress: number;
+  progress_change: number;
+  updated_at: string;
+  deleted_at: string | null;
 }
 
 export type CurriculumSortPath = readonly [
@@ -27,7 +32,6 @@ export interface UserItemBase {
   sort_order: number;
   progress_cz_to_en: number;
   progress_en_to_cz: number;
-  progress_history: ProgressHistoryEntry[];
   note_id: number | null;
   lesson_id: number;
   updated_at: string;

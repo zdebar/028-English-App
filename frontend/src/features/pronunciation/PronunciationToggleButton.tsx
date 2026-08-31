@@ -12,6 +12,7 @@ import type { MouseEvent } from 'react';
 type PronunciationToggleButtonProps = Readonly<{
   userId: string | null;
   item: UserItemLocal | null;
+  disabled?: boolean;
   showHelpText?: boolean;
   onSelectionChange?: (selected: boolean) => void;
 }>;
@@ -19,6 +20,15 @@ type PronunciationToggleButtonProps = Readonly<{
 function getToggleTitle(hasAudio: boolean, selected: boolean) {
   if (!hasAudio) return TEXTS.pronunciationAudioRequired;
   return selected ? TEXTS.removeFromPronunciation : TEXTS.addToPronunciation;
+}
+
+function isToggleDisabled(
+  disabled: boolean,
+  userId: string | null,
+  item: UserItemLocal | null,
+  hasAudio: boolean,
+): boolean {
+  return disabled || !userId || !item || !hasAudio;
 }
 
 async function getPronunciationSelection(userId: string | null, itemId: number | undefined) {
@@ -47,7 +57,8 @@ async function togglePronunciationSelection(
 }
 
 export default function PronunciationToggleButton(props: PronunciationToggleButtonProps) {
-  const { userId, item, showHelpText, onSelectionChange } = {
+  const { userId, item, disabled, showHelpText, onSelectionChange } = {
+    disabled: false,
     showHelpText: false,
     ...props,
   };
@@ -58,7 +69,7 @@ export default function PronunciationToggleButton(props: PronunciationToggleButt
     item?.has_pronunciation_practice === 1,
   );
   const hasAudio = Boolean(item?.audio?.trim());
-  const disabled = !userId || !item || !hasAudio;
+  const isDisabled = isToggleDisabled(disabled, userId, item, hasAudio);
   const title = getToggleTitle(hasAudio, selected);
 
   return (
@@ -66,12 +77,12 @@ export default function PronunciationToggleButton(props: PronunciationToggleButt
       title={title}
       ariaLabel={TEXTS.pronunciationToggleAria}
       aria-pressed={selected}
-      disabled={disabled}
+      disabled={isDisabled}
       className={`${selected ? 'pronunciation-control-emphasis' : ''} pb-1`}
       onClick={(event) => {
         void togglePronunciationSelection(
           event,
-          disabled,
+          isDisabled,
           userId,
           item,
           onSelectionChange,

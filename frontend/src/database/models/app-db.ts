@@ -4,7 +4,7 @@ import type GrammarChunk from '@/database/models/grammar-chunks';
 import type GrammarGroup from '@/database/models/grammar-groups';
 import type AudioRecord from '@/database/models/audio-records';
 import type UserItem from '@/database/models/user-items';
-import type UserScore from '@/database/models/user-scores';
+import type UserItemProgressHistory from '@/database/models/user-item-progress-history';
 import type Block from '@/database/models/blocks';
 import type AudioMetadata from '@/database/models/audio-metadata';
 import type Metadata from '@/database/models/metadata';
@@ -37,7 +37,7 @@ export default class AppDB extends Dexie {
   grammar_chunks!: EntityTable<GrammarChunk, 'id'>;
   grammar_chunk_examples!: EntityTable<GrammarChunkExample, any>;
   user_items!: EntityTable<UserItem, any>;
-  user_scores!: EntityTable<UserScore, any>;
+  user_item_progress_history!: EntityTable<UserItemProgressHistory, any>;
   blocks!: EntityTable<Block, 'id'>;
   audio_records!: EntityTable<AudioRecord, 'filename'>;
   audio_metadata!: EntityTable<AudioMetadata, 'archive_name'>;
@@ -59,14 +59,21 @@ export default class AppDB extends Dexie {
         '[pronunciation_group_id+item_id], [pronunciation_group_id+sort_order], [pronunciation_group_id+contrast_set+sort_order], item_id',
       grammar_groups: 'id, sort_order',
       grammar_chunks: 'id, grammar_group_id, sort_order',
-      grammar_chunk_examples:
-        '[grammar_chunk_id+item_id], [grammar_chunk_id+sort_order], item_id',
+      grammar_chunk_examples: '[grammar_chunk_id+item_id], [grammar_chunk_id+sort_order], item_id',
       user_items: USER_ITEMS_SCHEMA,
-      user_scores: '[user_id+date], [user_id+updated_at]',
+      user_item_progress_history:
+        '[user_id+date+item_id+direction], [user_id+date], [user_id+updated_at], [user_id+item_id+direction]',
       practice_sessions: 'user_id, mode, updated_at',
       audio_records: 'filename',
       audio_metadata: 'archive_name',
       metadata: '[table_name+user_id]',
+    });
+
+    this.version(2).stores({
+      user_scores: null,
+      user_items_history: null,
+      user_item_progress_history:
+        '[user_id+date+item_id+direction], [user_id+date], [user_id+updated_at], [user_id+item_id+direction]',
     });
   }
 }

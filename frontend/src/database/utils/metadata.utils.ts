@@ -4,12 +4,10 @@ import { TableName } from '@/types/table.types';
  * Checks whether a table stores per-user rows and must be synced with a user id.
  *
  * @param tableName Table name to inspect.
- * @returns true for user_scores and user_items tables.
+ * @returns true for user-owned tables.
  */
 export function isUserSpecificTable(tableName: string): boolean {
-  return (
-    tableName === TableName.UserScores || tableName === TableName.UserItems
-  );
+  return tableName === TableName.UserItemProgressHistory || tableName === TableName.UserItems;
 }
 
 /**

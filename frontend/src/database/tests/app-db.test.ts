@@ -36,10 +36,10 @@ describe('AppDB schema', () => {
     mocks.versions.length = 0;
   });
 
-  it('declares the complete schema in version 1', () => {
+  it('declares the complete schema and removes obsolete stores', () => {
     new AppDB();
 
-    expect(mocks.versions).toHaveLength(1);
+    expect(mocks.versions).toHaveLength(2);
     expect(mocks.versions[0]).toMatchObject({
       number: 1,
       schema: {
@@ -55,7 +55,8 @@ describe('AppDB schema', () => {
         grammar_chunks: 'id, grammar_group_id, sort_order',
         grammar_chunk_examples:
           '[grammar_chunk_id+item_id], [grammar_chunk_id+sort_order], item_id',
-        user_scores: '[user_id+date], [user_id+updated_at]',
+        user_item_progress_history:
+          '[user_id+date+item_id+direction], [user_id+date], [user_id+updated_at], [user_id+item_id+direction]',
         practice_sessions: 'user_id, mode, updated_at',
         audio_records: 'filename',
         audio_metadata: 'archive_name',
@@ -70,5 +71,9 @@ describe('AppDB schema', () => {
     expect(mocks.versions[0].schema?.user_items).toContain(
       '[user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]',
     );
+    expect(mocks.versions[1]).toMatchObject({
+      number: 2,
+      schema: { user_scores: null, user_items_history: null },
+    });
   });
 });

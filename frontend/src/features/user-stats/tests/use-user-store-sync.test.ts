@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
   queries: [] as Array<() => Promise<unknown>>,
   unsubscribes: [] as ReturnType<typeof vi.fn>[],
   getOverview: vi.fn(),
-  getScoreForDate: vi.fn(),
+  getTodayProgressChange: vi.fn(),
   reportError: vi.fn(),
   currentDate: '2026-04-15',
 }));
@@ -24,8 +24,10 @@ vi.mock('@/database/models/levels', () => ({
   default: { getOverview: (...args: unknown[]) => mocks.getOverview(...args) },
 }));
 
-vi.mock('@/database/models/user-scores', () => ({
-  default: { getScoreForDate: (...args: unknown[]) => mocks.getScoreForDate(...args) },
+vi.mock('@/database/models/user-item-progress-history', () => ({
+  default: {
+    getTodayProgressChange: (...args: unknown[]) => mocks.getTodayProgressChange(...args),
+  },
 }));
 
 vi.mock('@/features/logging/monitoring-handler', () => ({
@@ -56,7 +58,7 @@ describe('useUserStoreSync', () => {
     mocks.unsubscribes.length = 0;
     mocks.currentDate = '2026-04-15';
     vi.spyOn(Date.prototype, 'toLocaleDateString').mockImplementation(() => mocks.currentDate);
-    useUserStore.setState({ levels: [], dailyStarCount: 0 });
+    useUserStore.setState({ levels: [], dailyProgressChange: 0 });
   });
 
   afterEach(() => {
@@ -71,7 +73,7 @@ describe('useUserStoreSync', () => {
     await mocks.queries[0]();
     await mocks.queries[1]();
     expect(mocks.getOverview).toHaveBeenCalledWith('u1', '2026-04-15');
-    expect(mocks.getScoreForDate).toHaveBeenCalledWith('u1', '2026-04-15');
+    expect(mocks.getTodayProgressChange).toHaveBeenCalledWith('u1', '2026-04-15');
 
     act(() => {
       mocks.observers[0].next([{ id: 1 }]);
@@ -81,8 +83,8 @@ describe('useUserStoreSync', () => {
     expect(useUserStore.getState()).toMatchObject({
       levels: [{ id: 1 }],
       levelsLoading: false,
-      dailyStarCount: 7,
-      dailyStarCountLoading: false,
+      dailyProgressChange: 7,
+      dailyProgressChangeLoading: false,
     });
   });
 
@@ -110,7 +112,7 @@ describe('useUserStoreSync', () => {
 
     expect(mocks.unsubscribes[0]).toHaveBeenCalledOnce();
     expect(mocks.unsubscribes[1]).toHaveBeenCalledOnce();
-    expect(useUserStore.getState()).toMatchObject({ levels: [], dailyStarCount: 0 });
+    expect(useUserStore.getState()).toMatchObject({ levels: [], dailyProgressChange: 0 });
   });
 
   it('clears stale snapshots and ignores the previous user after an account switch', () => {
@@ -126,8 +128,8 @@ describe('useUserStoreSync', () => {
     expect(useUserStore.getState()).toMatchObject({
       levels: [],
       levelsLoading: true,
-      dailyStarCount: 0,
-      dailyStarCountLoading: true,
+      dailyProgressChange: 0,
+      dailyProgressChangeLoading: true,
     });
 
     act(() => {
@@ -137,7 +139,7 @@ describe('useUserStoreSync', () => {
       mocks.observers[3].next(8);
     });
 
-    expect(useUserStore.getState()).toMatchObject({ levels: [{ id: 2 }], dailyStarCount: 8 });
+    expect(useUserStore.getState()).toMatchObject({ levels: [{ id: 2 }], dailyProgressChange: 8 });
   });
 
   it('records observer failures and ignores emissions after cleanup', () => {
@@ -150,6 +152,6 @@ describe('useUserStoreSync', () => {
 
     unmount();
     act(() => mocks.observers[1].next(99));
-    expect(useUserStore.getState().dailyStarCount).toBe(0);
+    expect(useUserStore.getState().dailyProgressChange).toBe(0);
   });
 });

@@ -49,20 +49,15 @@ export interface ProgressCountsType {
   startedCount: number;
   startedTodayCount: number;
   totalCount: number;
+  currentProgress?: number;
+  dailyProgressChange?: number;
+  maximumProgress?: number;
 }
 
 export interface LessonOverviewType extends LessonType, ProgressCountsType {}
 
 export interface LevelOverviewType extends LevelType, ProgressCountsType {
   lessons: LessonOverviewType[];
-}
-
-export interface UserScoreType {
-  user_id: string;
-  date: string;
-  star_count: number;
-  updated_at: string;
-  deleted_at: string | null;
 }
 
 export interface ReadyPracticeState {

@@ -19,7 +19,7 @@ FROM public.user_blocks
 GROUP BY user_id
 ORDER BY user_id;
 
-SELECT user_id, COUNT(*) AS user_score_count
-FROM public.user_scores
+SELECT user_id, COUNT(*) AS progress_history_count
+FROM public.user_item_progress_history
 GROUP BY user_id
 ORDER BY user_id;

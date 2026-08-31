@@ -9,7 +9,7 @@ const mocks = vi.hoisted(
     userEmail: string | null;
     isAnonymousUser: boolean;
     authLoading: boolean;
-    dailyStarCount: number;
+    dailyProgressChange: number;
     isSyncError: boolean;
   } => ({
     theme: 'light',
@@ -18,7 +18,7 @@ const mocks = vi.hoisted(
     userEmail: 'u1@example.com',
     isAnonymousUser: false,
     authLoading: false,
-    dailyStarCount: 3,
+    dailyProgressChange: 3,
     isSyncError: false,
   }),
 );
@@ -30,8 +30,7 @@ vi.mock('@/config/config', () => ({
     },
     practice: {
       dailyGoal: 10,
-      starChunk: 50,
-      starsPerRow: 10,
+      reviewMinimumSize: 20,
     },
   },
 }));
@@ -56,8 +55,8 @@ vi.mock('@/features/auth/use-auth-store', () => ({
 }));
 
 vi.mock('@/features/user-stats/use-user-store', () => ({
-  useUserStore: (selector: (state: { dailyStarCount: number }) => unknown) =>
-    selector({ dailyStarCount: mocks.dailyStarCount }),
+  useUserStore: (selector: (state: { dailyProgressChange: number }) => unknown) =>
+    selector({ dailyProgressChange: mocks.dailyProgressChange }),
 }));
 
 vi.mock('@/features/synchronization/use-sync-store', () => ({
@@ -76,7 +75,7 @@ vi.mock('@/locales/cs', () => ({
     userLabel: 'User',
     userStatsLabel: 'Today',
     practiceOverviewOpen: 'Open practice overview',
-    starsToday: 'Stars today',
+    progressToday: 'Progress today',
     today: 'Today',
     dailyGoal: 'Goal',
     loadingMessage: 'Loading',
@@ -162,7 +161,7 @@ describe('Home', () => {
     mocks.userEmail = 'u1@example.com';
     mocks.isAnonymousUser = false;
     mocks.authLoading = false;
-    mocks.dailyStarCount = 3;
+    mocks.dailyProgressChange = 3;
     mocks.isSyncError = false;
   });
 

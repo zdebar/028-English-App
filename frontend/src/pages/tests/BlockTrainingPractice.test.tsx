@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({
     grammar: null as { id: number; name: string } | null,
     grammarGroup: null as { note: string | null } | null,
     isComplete: false,
+    isCompletion: false,
     hasProgress: false,
     currentItem: null as { item_id: number } | null,
     note: null,
@@ -53,6 +54,7 @@ vi.mock('@/locales/cs', () => ({
     loadingError: 'Loading error',
     blockTrainingComplete: 'Complete',
     continuePractice: 'Continue',
+    done: 'hotovo',
   },
 }));
 
@@ -102,9 +104,15 @@ vi.mock('@/features/practice/BlockTrainingOverviewCard', () => ({
 }));
 
 vi.mock('@/features/practice/PracticeSessionCard', () => ({
-  default: ({ czech, english }: any) => (
+  default: ({ czech, english, isCompletion, onCompletionContinue }: any) => (
     <div data-testid="practice-session">
-      {czech}:{english}
+      {isCompletion ? (
+        <button type="button" onClick={onCompletionContinue}>
+          hotovo
+        </button>
+      ) : (
+        `${czech}:${english}`
+      )}
     </div>
   ),
 }));
@@ -123,6 +131,7 @@ describe('BlockTrainingPractice', () => {
     mocks.deck.grammar = null;
     mocks.deck.grammarGroup = null;
     mocks.deck.isComplete = false;
+    mocks.deck.isCompletion = false;
     mocks.deck.hasProgress = false;
     mocks.deck.currentItem = null;
   });
@@ -241,13 +250,15 @@ describe('BlockTrainingPractice', () => {
     expect(mocks.navigate).not.toHaveBeenCalled();
   });
 
-  it('returns Home after the completed-star animation', () => {
+  it('returns Home after clicking the neutral completion card', () => {
     mocks.deck.block = { name: 'Block A' };
     mocks.deck.grammar = { id: 1, name: 'Articles' };
     mocks.deck.isComplete = true;
 
     render(<BlockTrainingPractice />);
 
+    expect(screen.getByRole('button', { name: 'hotovo' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'hotovo' }));
     expect(mocks.navigate).toHaveBeenCalledWith('/', { replace: true });
     expect(screen.queryByTestId('block-training-overview')).toBeNull();
   });

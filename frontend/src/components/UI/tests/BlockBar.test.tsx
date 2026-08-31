@@ -15,20 +15,20 @@ vi.mock('@/locales/cs', () => ({
 import BlockBar from '@/components/UI/BlockBar';
 
 describe('BlockBar', () => {
-  it('renders lesson label, today increment, and progressbar aria values', () => {
+  it('renders lesson label, daily delta, and progressbar aria values', () => {
     render(
       <BlockBar
-        previousCount={20}
-        todayCount={5}
+        currentProgress={25}
+        dailyProgressChange={5}
         lessonName="To Be"
         lessonNumber={1}
-        lessonCount={100}
+        maximumProgress={100}
         widthBase={100}
       />,
     );
 
     expect(screen.getByText('To Be')).toBeTruthy();
-    expect(screen.getByText('+ 5')).toBeTruthy();
+    expect(screen.getByText('+5')).toBeTruthy();
 
     const progressBar = screen.getByRole('progressbar', {
       name: 'Lesson progress bar',
@@ -37,29 +37,29 @@ describe('BlockBar', () => {
     expect(progressBar.getAttribute('aria-valuemax')).toBe('100');
   });
 
-  it('hides today increment when today count is zero', () => {
+  it('renders zero daily delta', () => {
     render(
       <BlockBar
-        previousCount={20}
-        todayCount={0}
+        currentProgress={20}
+        dailyProgressChange={0}
         lessonName="To Be"
         lessonNumber={1}
-        lessonCount={100}
+        maximumProgress={100}
         widthBase={100}
       />,
     );
 
-    expect(screen.queryByText('+ 0')).toBeNull();
+    expect(screen.getByText('0')).toBeTruthy();
   });
 
   it('calculates bar widths and division markers from lesson and base values', () => {
     const { container } = render(
       <BlockBar
-        previousCount={25}
-        todayCount={15}
+        currentProgress={40}
+        dailyProgressChange={15}
         lessonName="To Be"
         lessonNumber={1}
-        lessonCount={80}
+        maximumProgress={80}
         widthBase={100}
       />,
     );

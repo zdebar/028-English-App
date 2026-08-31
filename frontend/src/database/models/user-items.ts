@@ -7,7 +7,6 @@ import type {
   PracticeDirection,
   PracticeOutcome,
   UserItemLocal,
-  ProgressHistoryEntry,
   CurriculumSortPath,
   InitialTrainingSelection,
 } from '@/types/user-item.types';
@@ -21,6 +20,8 @@ import type { ReadyPracticeState } from '@/types/generic.types';
 import Metadata from './metadata';
 import { reportInfo } from '@/features/logging/monitoring-handler';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
+import UserItemProgressHistory from './user-item-progress-history';
+import { getEffectiveProgress, getProgressChange, getSrsLength } from '@/utils/progress.utils';
 
 const NULL_DATE = config.database.nullReplacementDate;
 const NULL_NUMBER = config.database.nullReplacementNumber;
@@ -61,7 +62,6 @@ type UserItemExport = Pick<
   | 'item_id'
   | 'progress_cz_to_en'
   | 'progress_en_to_cz'
-  | 'progress_history'
   | 'has_pronunciation_practice'
   | 'started_at'
   | 'updated_at'
@@ -88,7 +88,6 @@ function convertLocalToExport(localItem: UserItemLocal): UserItemExport {
   return {
     user_id,
     item_id,
-    progress_history: localItem.progress_history ?? [],
     progress_cz_to_en,
     progress_en_to_cz,
     has_pronunciation_practice: has_pronunciation_practice === 1,
@@ -219,7 +218,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   grammar_chunk_id!: number;
   progress_cz_to_en!: number;
   progress_en_to_cz!: number;
-  progress_history!: ProgressHistoryEntry[];
   started_at!: string;
   updated_at!: string;
   deleted_at!: string;
@@ -233,12 +231,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Builds one unified vocabulary and grammar practice deck.
    *
    * @param userId User id whose practice items should be selected.
-   * @param deckSize Maximum deck size; defaults to the review star size.
+   * @param deckSize Maximum deck size; defaults to the review minimum size.
    * @returns Practice items ordered by readiness and curriculum position.
    */
   static async getReviewDeck(
     userId: string,
-    deckSize: number = config.practice.reviewStarSize,
+    deckSize: number = config.practice.reviewMinimumSize,
   ): Promise<PracticeDeckItem[]> {
     if (deckSize <= 0) return [];
 
@@ -252,6 +250,15 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return [];
   }
 
+  /** Reads every due item in one direction for the continuous review flow. */
+  static async getReviewDeckForDirection(
+    userId: string,
+    direction: PracticeDirection,
+    now: string = new Date().toISOString(),
+  ): Promise<PracticeDeckItem[]> {
+    return this.getDuePracticeItems(userId, direction, Number.MAX_SAFE_INTEGER, now);
+  }
+
   /**
    * Persists practice progress for all items in a completed deck.
    *
@@ -262,20 +269,36 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   static async savePracticeDeck(items: PracticeDeckItem[]): Promise<void> {
     if (!items || items.length === 0) return;
 
-    await db.transaction('rw', db.user_items, async () => {
-      const updates = [];
+    await db.transaction('rw', db.user_items, db.user_item_progress_history, async () => {
+      const updates: Array<{
+        key: [string, number];
+        changes: Partial<UserItemLocal>;
+        original: UserItemLocal;
+        updated: UserItemLocal;
+        direction: PracticeDirection;
+      }> = [];
 
       for (const item of items) {
         const currentItem = await db.user_items.get([item.user_id, item.item_id]);
         if (currentItem?.deleted_at !== NULL_DATE) continue;
         if (getDirectionMasteredAt(currentItem, item.practice_direction) !== NULL_DATE) continue;
 
+        const updatedItem = {
+          ...currentItem,
+          progress_cz_to_en: item.progress_cz_to_en,
+          progress_en_to_cz: item.progress_en_to_cz,
+          started_at: item.started_at,
+          updated_at: item.updated_at,
+          next_at_cz_to_en: item.next_at_cz_to_en,
+          next_at_en_to_cz: item.next_at_en_to_cz,
+          mastered_at_cz_to_en: item.mastered_at_cz_to_en,
+          mastered_at_en_to_cz: item.mastered_at_en_to_cz,
+        };
         updates.push({
           key: [item.user_id, item.item_id],
           changes: {
             progress_cz_to_en: item.progress_cz_to_en,
             progress_en_to_cz: item.progress_en_to_cz,
-            progress_history: item.progress_history,
             started_at: item.started_at,
             updated_at: item.updated_at,
             next_at_cz_to_en: item.next_at_cz_to_en,
@@ -283,11 +306,22 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
             mastered_at_cz_to_en: item.mastered_at_cz_to_en,
             mastered_at_en_to_cz: item.mastered_at_en_to_cz,
           },
+          original: currentItem,
+          updated: updatedItem,
+          direction: item.practice_direction,
         });
       }
 
       if (updates.length > 0) {
-        await db.user_items.bulkUpdate(updates);
+        await db.user_items.bulkUpdate(updates.map(({ key, changes }) => ({ key, changes })));
+        for (const update of updates) {
+          await recordProgressHistoryChange(
+            update.original,
+            update.updated,
+            update.direction,
+            update.updated.updated_at,
+          );
+        }
       }
     });
   }
@@ -363,6 +397,16 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     itemIds: readonly number[],
     dateTime: string = new Date(Date.now()).toISOString(),
   ): Promise<UserItemLocal[]> {
+    return db.transaction('rw', db.user_items, db.user_item_progress_history, async () =>
+      this.saveInitialTrainingCompletionInternal(userId, itemIds, dateTime),
+    );
+  }
+
+  private static async saveInitialTrainingCompletionInternal(
+    userId: string,
+    itemIds: readonly number[],
+    dateTime: string,
+  ): Promise<UserItemLocal[]> {
     if (itemIds.length === 0) return [];
     const items = await db.user_items
       .where('[user_id+item_id]')
@@ -386,7 +430,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         ...item,
         progress_cz_to_en: progressCzToEn,
         progress_en_to_cz: progressEnToCz,
-        progress_history: item.progress_history ?? [],
         started_at: item.started_at === NULL_DATE ? dateTime : item.started_at,
         updated_at: dateTime,
         next_at_cz_to_en: getNextAt(progressCzToEn, 'czToEn'),
@@ -408,6 +451,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
     if (updatedItems.length > 0) {
       await db.user_items.bulkPut(updatedItems);
+      for (const [index, updatedItem] of updatedItems.entries()) {
+        const originalItem = items[index];
+        await recordProgressHistoryChange(originalItem, updatedItem, 'czToEn', dateTime);
+        await recordProgressHistoryChange(originalItem, updatedItem, 'enToCz', dateTime);
+      }
     }
 
     return updatedItems;
@@ -547,7 +595,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Calculates the ready vocabulary review badge state.
+   * Calculates when the minimum review direction can be started.
    *
    * @param userId Non-empty user id whose vocabulary items should be inspected.
    * @returns The earliest date when a complete review deck will be available.
@@ -556,7 +604,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   static async getReadyReviewState(userId: string): Promise<ReadyPracticeState> {
     assertNonEmptyString(userId, 'userId');
 
-    const deckSize = config.practice.reviewStarSize;
+    const deckSize = config.practice.reviewMinimumSize;
     const nowIso = new Date(Date.now()).toISOString();
 
     const items = await db.user_items.where('user_id').equals(userId).toArray();
@@ -580,17 +628,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     itemId: number,
     dateTime: string = new Date().toISOString(),
   ): Promise<number> {
-    const count = await db.user_items
-      .where('[user_id+item_id]')
-      .equals([userId, itemId])
-      .modify((item: UserItemLocal) => {
-        resetUserItem(item, dateTime);
-      });
-
-    if (count === 0) {
+    const item = await db.user_items.where('[user_id+item_id]').equals([userId, itemId]).first();
+    if (!item) {
       throw new Error(`No user items found for item ID ${itemId}.`);
     }
-
+    await resetItemsWithHistory([item], dateTime);
     return itemId;
   }
 
@@ -606,7 +648,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     grammarChunkId: number,
     dateTime: string = new Date().toISOString(),
   ): Promise<number> {
-    const count = await db.user_items
+    const items = await db.user_items
       .where('[user_id+grammar_chunk_id+started_at]')
       .between(
         [userId, grammarChunkId, Dexie.minKey],
@@ -614,11 +656,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         true,
         false,
       )
-      .modify((item: UserItemLocal) => {
-        resetUserItem(item, dateTime);
-      });
+      .toArray();
 
-    return count;
+    return resetItemsWithHistory(items, dateTime);
   }
 
   static async resetItemsByGrammarGroupId(
@@ -648,14 +688,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     blockId: number,
     dateTime: string = new Date().toISOString(),
   ): Promise<number> {
-    const count = await db.user_items
+    const items = await db.user_items
       .where('[user_id+block_id]')
       .equals([userId, blockId])
-      .modify((item: UserItemLocal) => {
-        resetUserItem(item, dateTime);
-      });
+      .toArray();
 
-    return count;
+    return resetItemsWithHistory(items, dateTime);
   }
 
   /** Resets all user items assigned to one topic. */
@@ -664,12 +702,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     topicId: number,
     dateTime: string = new Date().toISOString(),
   ): Promise<number> {
-    return db.user_items
+    const items = await db.user_items
       .where('[user_id+topic_id]')
       .equals([userId, topicId])
-      .modify((item: UserItemLocal) => {
-        resetUserItem(item, dateTime);
-      });
+      .toArray();
+    return resetItemsWithHistory(items, dateTime);
   }
 
   /**
@@ -710,20 +747,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         ...item,
         progress_cz_to_en: SIM_ITEM_PROGRESS,
         progress_en_to_cz: SIM_ITEM_PROGRESS,
-        progress_history: [
-          {
-            progress: SIM_ITEM_PROGRESS,
-            created_at: dateTime,
-            direction: 'czToEn' as const,
-            outcome: 'correct' as const,
-          },
-          {
-            progress: SIM_ITEM_PROGRESS,
-            created_at: dateTime,
-            direction: 'enToCz' as const,
-            outcome: 'correct' as const,
-          },
-        ],
         has_pronunciation_practice: hasPronunciationPractice,
         started_at: dateTime,
         updated_at: dateTime,
@@ -842,6 +865,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     now: string,
   ): Promise<PracticeDeckItem[]> {
     const matchesItem = (item: UserItemLocal) =>
+      item.deleted_at === NULL_DATE &&
       item.started_at !== NULL_DATE &&
       getDirectionMasteredAt(item, direction) === NULL_DATE &&
       getDirectionNextAt(item, direction) !== NULL_DATE &&
@@ -858,7 +882,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         [userId, Dexie.minKey, NULL_DATE, Dexie.minKey],
         [userId, now, NULL_DATE, Dexie.maxKey],
         true,
-        false,
+        true,
       )
       .filter(matchesItem)
       .limit(limit)
@@ -879,7 +903,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     options: { oppositeDirectionNextAt?: string } = {},
   ): UserItemLocal {
     const isFirstAnswer = item.started_at === NULL_DATE;
-    const currentProgress = getDirectionProgress(item, direction);
+    const currentProgress = getEffectiveProgress(item, direction);
     const otherDirection: PracticeDirection = direction === 'czToEn' ? 'enToCz' : 'czToEn';
     const changes: Partial<UserItemLocal> = {
       ...item,
@@ -903,14 +927,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       setDirectionMastered(changes, direction, currentProgress, dateTime);
     }
 
-    return {
-      ...item,
-      ...changes,
-      progress_history: [
-        ...(item.progress_history ?? []),
-        { progress: directionProgress, created_at: dateTime, direction, outcome },
-      ],
-    };
+    return { ...item, ...changes };
   }
 }
 
@@ -926,6 +943,7 @@ function getReviewReadyAt(
   let readyCount = 0;
 
   for (const item of items) {
+    if (item.deleted_at !== NULL_DATE) continue;
     if (item.started_at === NULL_DATE) continue;
     if (getDirectionMasteredAt(item, direction) !== NULL_DATE) continue;
 
@@ -954,10 +972,6 @@ function getEarliestReadyAt(readyDates: Array<string | null>): string | null {
     (earliest, date) => (Date.parse(date) < Date.parse(earliest) ? date : earliest),
     firstDate,
   );
-}
-
-function getDirectionProgress(item: UserItemLocal, direction: PracticeDirection): number {
-  return direction === 'czToEn' ? item.progress_cz_to_en : item.progress_en_to_cz;
 }
 
 function getDirectionNextAt(item: UserItemLocal, direction: PracticeDirection): string {
@@ -1055,4 +1069,43 @@ function compareCurriculumPaths(left: CurriculumSortPath, right: CurriculumSortP
     if (difference !== 0) return difference;
   }
   return 0;
+}
+
+async function resetItemsWithHistory(items: UserItemLocal[], dateTime: string): Promise<number> {
+  if (items.length === 0) return 0;
+
+  return db.transaction('rw', db.user_items, db.user_item_progress_history, async () => {
+    const updatedItems = items.map((item) => {
+      const updatedItem = { ...item };
+      resetUserItem(updatedItem, dateTime);
+      return updatedItem;
+    });
+    await db.user_items.bulkPut(updatedItems);
+
+    for (const [index, updatedItem] of updatedItems.entries()) {
+      const originalItem = items[index];
+      await recordProgressHistoryChange(originalItem, updatedItem, 'czToEn', dateTime);
+      await recordProgressHistoryChange(originalItem, updatedItem, 'enToCz', dateTime);
+    }
+    return updatedItems.length;
+  });
+}
+
+async function recordProgressHistoryChange(
+  originalItem: UserItemLocal,
+  updatedItem: UserItemLocal,
+  direction: 'czToEn' | 'enToCz',
+  dateTime: string,
+): Promise<number> {
+  const progressChange = getProgressChange(originalItem, updatedItem, direction);
+  await UserItemProgressHistory.recordChange(
+    updatedItem.user_id,
+    updatedItem.item_id,
+    direction,
+    getEffectiveProgress(updatedItem, direction),
+    getSrsLength(direction),
+    progressChange,
+    dateTime,
+  );
+  return progressChange;
 }
