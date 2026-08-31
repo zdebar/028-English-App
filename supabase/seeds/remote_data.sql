@@ -869,8 +869,8 @@ INSERT INTO "public"."pronunciation_group_items" ("pronunciation_group_id", "ite
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "public"."users" ("id", "history_enabled", "created_at", "deleted_at", "updated_at") VALUES
-	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', false, '2026-07-12 14:30:09.044811+00', NULL, '2026-07-18 08:26:58.266187+00');
+INSERT INTO "public"."users" ("id", "created_at", "deleted_at", "updated_at") VALUES
+	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-07-12 14:30:09.044811+00', NULL, '2026-07-18 08:26:58.266187+00');
 
 
 --
@@ -1123,38 +1123,6 @@ INSERT INTO "public"."user_items" ("user_id", "item_id", "started_at", "updated_
 
 
 --
--- Data for Name: user_items_history; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- Data for Name: user_scores; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-INSERT INTO "public"."user_scores" ("user_id", "date", "star_count", "updated_at", "deleted_at") VALUES
-	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-07-17', 320, '2026-07-17 12:11:12.382196+00', NULL),
-	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-07-18', 427, '2026-07-19 03:35:59.63127+00', NULL),
-	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-07-19', 1241, '2026-07-20 04:02:33.286872+00', NULL),
-	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-07-20', 1531, '2026-07-21 03:13:49.038471+00', NULL),
-	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-07-21', 400, '2026-07-21 10:04:12.234+00', NULL),
-	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-07-25', 1432, '2026-07-26 08:06:22.749182+00', NULL),
-	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-07-26', 1244, '2026-07-27 03:41:09.173942+00', NULL),
-	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-07-27', 1921, '2026-07-28 03:19:05.360342+00', NULL),
-	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-07-28', 947, '2026-07-28 13:23:42.051509+00', NULL),
-	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-07-29', 1203, '2026-07-31 05:00:16.857565+00', NULL),
-	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-07-30', 704, '2026-07-31 05:00:16.857565+00', NULL),
-	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-07-31', 568, '2026-08-01 10:47:30.063311+00', NULL),
-	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-08-03', 1560, '2026-08-06 10:53:43.279837+00', NULL),
-	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-08-02', 204, '2026-08-02 09:05:51.208729+00', NULL),
-	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-08-04', 1720, '2026-08-06 10:53:43.279837+00', NULL),
-	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-08-01', 354, '2026-08-03 12:24:02.987293+00', NULL),
-	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-08-05', 1156, '2026-08-06 10:53:43.279837+00', NULL),
-	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-08-06', 1070, '2026-08-07 08:27:45.090365+00', NULL),
-	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-08-07', 440, '2026-08-08 03:05:07.684994+00', NULL),
-	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-08-08', 47, '2026-08-08 08:54:48.748+00', NULL);
-
-
 --
 -- Data for Name: buckets_analytics; Type: TABLE DATA; Schema: storage; Owner: supabase_storage_admin
 --

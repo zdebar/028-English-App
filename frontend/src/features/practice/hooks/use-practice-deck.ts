@@ -3,7 +3,6 @@ import {
   useEffect,
   useLayoutEffect,
   useMemo,
-  useRef,
   useState,
   type Dispatch,
   type SetStateAction,
@@ -20,28 +19,19 @@ import {
   loadReviewSessionDeck,
   type ReviewSessionDeck,
 } from '@/database/utils/practice-content.utils';
-import config from '@/config/config';
-import { getStarTierForCount, type StarTier } from '@/utils/star-progress.utils';
-import { useStarCelebration } from './use-star-celebration';
 
-/** Manages a persisted, configured-length review session. */
+type SessionProgress = Readonly<{ completedCount: number; targetCount: number }>;
+
+/** Manages a persisted, continuously replenished review session. */
 export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDeckEntry[]) {
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
-  const { celebratingStar, waitForAcknowledgement, acknowledgeCelebration, finishCelebration } =
-    useStarCelebration();
-  const [celebrationStarTier, setCelebrationStarTier] = useState<StarTier>('bronze');
   const [saveError, setSaveError] = useState<Error | null>(null);
   const [finishedReview, setFinishedReview] = useState(false);
-  const [sessionProgress, setSessionProgress] = useState<{
-    completedCount: number;
-    targetCount: number;
-  } | null>(null);
+  const [sessionProgress, setSessionProgress] = useState<SessionProgress | null>(null);
   const [sessionLoading, setSessionLoading] = useState(Boolean(userId));
-  const completionPending = useRef(false);
 
   const fetchPracticeDeck = useCallback(() => fetchReviewDeck(userId), [userId]);
-
   const initialResult = useMemo(() => createInitialReviewResult(initialDeck), [initialDeck]);
   const {
     data: fetchedResult,
@@ -53,29 +43,19 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
     () => getReviewDeckView(fetchedResult, index),
     [fetchedResult, index],
   );
-  const cardState = usePracticeCardState({ currentItem, isCzToEn, revealed, setRevealed });
+  const cardState = usePracticeCardState({
+    currentItem,
+    isCzToEn,
+    revealed,
+    isCompletion: finishedReview,
+    setRevealed,
+  });
   const resetHint = cardState.resetHint;
   const resetQuestionState = cardState.resetQuestionState;
 
   useLayoutEffect(() => {
     resetReviewCard(setIndex, setRevealed, resetHint);
   }, [fetchedResult, resetHint]);
-
-  const finalizeCompletedSession = useCallback(async () => {
-    await finalizeReviewSession({
-      userId,
-      completionPending,
-      waitForAcknowledgement,
-      finishCelebration,
-      reload,
-      resetHint,
-      setIndex,
-      setRevealed,
-      setSessionProgress,
-      setFinishedReview,
-      setSaveError,
-    });
-  }, [finishCelebration, reload, resetHint, userId, waitForAcknowledgement]);
 
   useEffect(() => {
     syncReviewSession({
@@ -87,9 +67,8 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
       setSessionLoading,
       setFinishedReview,
       setSaveError,
-      finalizeCompletedSession,
     });
-  }, [fetchedResult, finalizeCompletedSession, loading, reload, userId]);
+  }, [fetchedResult, loading, reload, userId]);
 
   const nextItem = useCallback(
     async (outcome: PracticeOutcome) => {
@@ -97,31 +76,19 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
         {
           currentItem,
           userId,
-          celebratingStar,
           index,
           entriesLength: activeArray.length,
           resetQuestionState,
-          finalizeCompletedSession,
           setSessionProgress,
-          setCelebrationStarTier,
           setIndex,
+          setSessionLoading,
           reload,
           setSaveError,
         },
         outcome,
       );
     },
-    [
-      activeArray.length,
-      celebratingStar,
-      currentItem,
-      finalizeCompletedSession,
-      index,
-      reload,
-      resetHint,
-      resetQuestionState,
-      userId,
-    ],
+    [activeArray.length, currentItem, index, reload, resetQuestionState, userId],
   );
 
   return {
@@ -131,9 +98,6 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
     grammar: currentEntry?.grammar ?? null,
     progressLabel: getReviewProgressLabel(sessionProgress),
     sessionLoading,
-    celebratingStar,
-    celebrationStarTier,
-    acknowledgeCelebration,
     finishedReview,
     isCzToEn,
     revealed,
@@ -149,7 +113,7 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
     plusHint: cardState.plusHint,
     nextItem,
     loading,
-    error: getReviewError(error, saveError),
+    error: error ?? saveError,
     audioError: cardState.audioError,
     playAudio: cardState.playAudio,
     audioLoading: cardState.audioLoading,
@@ -180,15 +144,11 @@ function getReviewDeckView(
   currentItem: PracticeDeckEntry['item'] | null;
   isCzToEn: boolean;
 }> {
-  const activeArray: PracticeDeckEntry[] = fetchedResult?.entries ?? [];
-  const currentEntry: PracticeDeckEntry | null = activeArray[index] ?? null;
-  const currentItem: PracticeDeckEntry['item'] | null = currentEntry?.item ?? null;
+  const activeArray = fetchedResult?.entries ?? [];
+  const currentEntry = activeArray[index] ?? null;
+  const currentItem = currentEntry?.item ?? null;
   const isCzToEn = currentItem?.practice_direction !== 'enToCz';
   return { activeArray, currentEntry, currentItem, isCzToEn };
-}
-
-function getReviewError(error: Error | null, saveError: Error | null): Error | null {
-  return error ?? saveError;
 }
 
 function resetReviewCard(
@@ -201,94 +161,15 @@ function resetReviewCard(
   resetHint();
 }
 
-type FinalizeReviewSessionOptions = Readonly<{
-  userId: string | null;
-  completionPending: { current: boolean };
-  waitForAcknowledgement: () => Promise<void>;
-  finishCelebration: () => void;
-  reload: () => Promise<unknown>;
-  resetHint: () => void;
-  setIndex: Dispatch<SetStateAction<number>>;
-  setRevealed: Dispatch<SetStateAction<boolean>>;
-  setSessionProgress: Dispatch<
-    SetStateAction<{ completedCount: number; targetCount: number } | null>
-  >;
-  setFinishedReview: Dispatch<SetStateAction<boolean>>;
-  setSaveError: Dispatch<SetStateAction<Error | null>>;
-}>;
-
-async function finalizeReviewSession(options: FinalizeReviewSessionOptions): Promise<void> {
-  const {
-    userId,
-    completionPending,
-    waitForAcknowledgement,
-    finishCelebration,
-    reload,
-    resetHint,
-    setIndex,
-    setRevealed,
-    setSessionProgress,
-    setFinishedReview,
-    setSaveError,
-  } = options;
-  if (!userId || completionPending.current) return;
-  completionPending.current = true;
-  await waitForAcknowledgement();
-
-  try {
-    const availability = await UserItem.getReadyReviewState(userId);
-    const reviewReady =
-      availability.reviewReadyAt !== null && Date.parse(availability.reviewReadyAt) <= Date.now();
-    if (reviewReady) {
-      await PracticeSession.continueReview(userId);
-      invalidateRouteData(routeDataKey('practice', userId));
-      await reload();
-      setSessionProgress((currentProgress) => {
-        if (!currentProgress) {
-          return { completedCount: 0, targetCount: config.practice.reviewStarSize };
-        }
-        return { ...currentProgress, completedCount: 0 };
-      });
-      resetReviewCard(setIndex, setRevealed, resetHint);
-      finishCelebration();
-      completionPending.current = false;
-      return;
-    }
-
-    await PracticeSession.deleteByUserId(userId);
-    setFinishedReview(true);
-  } catch (caughtError) {
-    const normalizedError = toError(caughtError);
-    setSaveError(normalizedError);
-    reportError('Failed to finish review star celebration', normalizedError);
-    finishCelebration();
-    completionPending.current = false;
-  }
-}
-
-function reloadReviewSession(
-  reload: () => Promise<unknown>,
-  setSaveError: Dispatch<SetStateAction<Error | null>>,
-  setSessionLoading: Dispatch<SetStateAction<boolean>>,
-): void {
-  void reload().catch((caughtError) => {
-    setSaveError(toError(caughtError));
-    setSessionLoading(false);
-  });
-}
-
 type SyncReviewSessionOptions = Readonly<{
   userId: string | null;
   fetchedResult: ReviewSessionDeck | null | undefined;
   loading: boolean;
   reload: () => Promise<unknown>;
-  setSessionProgress: Dispatch<
-    SetStateAction<{ completedCount: number; targetCount: number } | null>
-  >;
+  setSessionProgress: Dispatch<SetStateAction<SessionProgress | null>>;
   setSessionLoading: Dispatch<SetStateAction<boolean>>;
   setFinishedReview: Dispatch<SetStateAction<boolean>>;
   setSaveError: Dispatch<SetStateAction<Error | null>>;
-  finalizeCompletedSession: () => Promise<void>;
 }>;
 
 function syncReviewSession(options: SyncReviewSessionOptions): void {
@@ -301,7 +182,6 @@ function syncReviewSession(options: SyncReviewSessionOptions): void {
     setSessionLoading,
     setFinishedReview,
     setSaveError,
-    finalizeCompletedSession,
   } = options;
   if (!userId) {
     setSessionProgress(null);
@@ -317,29 +197,27 @@ function syncReviewSession(options: SyncReviewSessionOptions): void {
   }
   if (!fetchedResult.session) {
     setSessionLoading(true);
-    reloadReviewSession(reload, setSaveError, setSessionLoading);
+    void reload().catch((caughtError) => {
+      setSaveError(toError(caughtError));
+      setSessionLoading(false);
+    });
     return;
   }
 
   const { completed_count: completedCount, target_count: targetCount } = fetchedResult.session;
   setSessionProgress({ completedCount, targetCount });
   setSessionLoading(false);
-  if (completedCount >= targetCount) void finalizeCompletedSession();
 }
 
 type SaveReviewAnswerOptions = Readonly<{
   currentItem: PracticeDeckEntry['item'] | null;
   userId: string | null;
-  celebratingStar: boolean;
   index: number;
   entriesLength: number;
   resetQuestionState: () => void;
-  finalizeCompletedSession: () => Promise<void>;
-  setSessionProgress: Dispatch<
-    SetStateAction<{ completedCount: number; targetCount: number } | null>
-  >;
-  setCelebrationStarTier: Dispatch<SetStateAction<StarTier>>;
+  setSessionProgress: Dispatch<SetStateAction<SessionProgress | null>>;
   setIndex: Dispatch<SetStateAction<number>>;
+  setSessionLoading: Dispatch<SetStateAction<boolean>>;
   reload: () => Promise<unknown>;
   setSaveError: Dispatch<SetStateAction<Error | null>>;
 }>;
@@ -351,53 +229,41 @@ async function saveReviewAnswer(
   const {
     currentItem,
     userId,
-    celebratingStar,
     index,
     entriesLength,
     resetQuestionState,
-    finalizeCompletedSession,
     setSessionProgress,
-    setCelebrationStarTier,
     setIndex,
+    setSessionLoading,
     reload,
     setSaveError,
   } = options;
-  if (!currentItem || !userId || celebratingStar) return;
+  if (!currentItem || !userId) return;
+
   const dateTime = new Date(Date.now()).toISOString();
-  const updatedItem = UserItem.applyPracticeProgress(
-    currentItem,
-    currentItem.practice_direction,
-    outcome,
-    dateTime,
-  );
+  const direction = currentItem.practice_direction;
+  const updatedItem = UserItem.applyPracticeProgress(currentItem, direction, outcome, dateTime);
 
   try {
     const result = await PracticeSession.recordReviewAnswer(
+      currentItem,
       updatedItem,
-      currentItem.practice_direction,
+      direction,
       dateTime,
     );
     setSessionProgress((currentProgress) => ({
       completedCount: result.completedCount,
-      targetCount: currentProgress?.targetCount ?? config.practice.reviewStarSize,
+      targetCount: currentProgress?.targetCount ?? entriesLength,
     }));
-    if (result.earnedStar) {
-      setCelebrationStarTier(
-        getStarTierForCount(result.starCount ?? 1, config.practice.starsPerRow),
-      );
-      resetQuestionState();
-      await finalizeCompletedSession();
+
+    resetQuestionState();
+    if (index + 1 < entriesLength) {
+      setIndex(index + 1);
       return;
     }
 
-    const nextIndex = index + 1;
-    if (nextIndex < entriesLength) {
-      resetQuestionState();
-      setIndex(nextIndex);
-      return;
-    }
-
-    if (userId) invalidateRouteData(routeDataKey('practice', userId));
+    setSessionLoading(true);
+    invalidateRouteData(routeDataKey('practice', userId));
     await reload();
   } catch (caughtError) {
     const normalizedError = toError(caughtError);
@@ -406,9 +272,7 @@ async function saveReviewAnswer(
   }
 }
 
-function getReviewProgressLabel(
-  progress: { completedCount: number; targetCount: number } | null,
-): string {
+function getReviewProgressLabel(progress: SessionProgress | null): string {
   if (!progress) return '';
   return `${progress.completedCount}/${progress.targetCount}`;
 }

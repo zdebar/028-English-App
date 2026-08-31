@@ -15,6 +15,13 @@ import { ROUTES } from '@/config/routes.config';
 import type { LevelOverviewType } from '@/types/generic.types';
 import { useRouteClose } from '@/routing/use-route-close';
 
+function getCompletedLessonCount(level: LevelOverviewType): number {
+  return level.lessons.filter((lesson) => {
+    const maximumProgress = lesson.maximumProgress ?? 0;
+    return maximumProgress > 0 && (lesson.currentProgress ?? 0) >= maximumProgress;
+  }).length;
+}
+
 /**
  * LevelsOverview component
  *
@@ -72,9 +79,9 @@ export default function LevelsOverview({
                 <div className="flex w-full items-center justify-between">
                   <p title={`${TEXTS.levelName}`}>{level.name}</p>
                   <GoalMetView
-                    current={level.startedCount}
-                    goal={level['totalCount']}
-                    title={TEXTS.levelsStartedHelp}
+                    current={getCompletedLessonCount(level)}
+                    goal={level.lessons.length}
+                    title={TEXTS.levelsCompletedHelp}
                   />
                 </div>
               </ListButton>
@@ -85,9 +92,9 @@ export default function LevelsOverview({
                       key={lesson.id}
                       lessonName={lesson.name ?? ''}
                       lessonNumber={lesson.sort_order}
-                      previousCount={(lesson.startedCount ?? 0) - (lesson.startedTodayCount ?? 0)}
-                      todayCount={lesson.startedTodayCount ?? 0}
-                      lessonCount={lesson.totalCount ?? 1}
+                      currentProgress={lesson.currentProgress ?? 0}
+                      dailyProgressChange={lesson.dailyProgressChange ?? 0}
+                      maximumProgress={lesson.maximumProgress ?? 1}
                     />
                   ))}
                 </div>
@@ -96,7 +103,7 @@ export default function LevelsOverview({
           ))}
         </div>
 
-        <HelpText className="top-20 right-2">{TEXTS.levelsStartedHelp}</HelpText>
+        <HelpText className="top-20 right-2">{TEXTS.progressTodayHint}</HelpText>
         <div className="pos-bottom-right-control">
           <HelpButton />
         </div>

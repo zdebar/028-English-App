@@ -7,7 +7,7 @@
   .guide p {
     @apply m-6 text-left leading-relaxed;
   }
-  
+
   .guide ul {
     @apply m-4;
   }
@@ -21,7 +21,7 @@
   }
 
   .guide h3 {
-    @apply m-6 ;
+    @apply m-6;
   }
 
   .guide strong {
@@ -45,7 +45,7 @@
   }
 
   .card-width {
-    @apply min-w-card w-full flex flex-col justify-start;
+    @apply min-w-card flex w-full flex-col justify-start;
     max-width: var(--responsive-card-width);
   }
 
@@ -73,88 +73,21 @@
 
   /** Help Text styles */
   .help-text-span {
-    @apply w-15 inline-block;
+    @apply inline-block w-15;
   }
 
-  .profile-menu-button { /* TODO: Delete once refactored to use ModalButton */
-    @apply w-40 mx-auto;
+  .profile-menu-button {
+    /* TODO: Delete once refactored to use ModalButton */
+    @apply mx-auto w-40;
   }
 
   /** Privacy Policy styles */
-  .privacy-policy *{
+  .privacy-policy * {
     @apply font-body;
   }
 
-  .privacy-policy h1,h2{
+  .privacy-policy h1,
+  h2 {
     @apply font-bold;
-  }
-
-  /** Star progress styles */
-  .star-empty-border {
-    color: var(--color-star-empty-border-light);
-  }
-
-  .dark .star-empty-border {
-    color: var(--color-star-empty-border-dark);
-  }
-
-  .star-fill-bronze {
-    color: var(--color-star-bronze-light);
-  }
-
-  .dark .star-fill-bronze {
-    color: var(--color-star-bronze-dark);
-  }
-
-  .star-fill-silver {
-    color: var(--color-star-silver-light);
-  }
-
-  .dark .star-fill-silver {
-    color: var(--color-star-silver-dark);
-  }
-
-  .star-fill-gold {
-    color: var(--color-star-gold-light);
-  }
-
-  .dark .star-fill-gold {
-    color: var(--color-star-gold-dark);
-  }
-
-  .star-badge {
-    @apply absolute -top-1 inline-flex min-h-4 min-w-4 items-center justify-center px-1 rounded-full border border-current leading-none font-semibold shadow-sm;
-    left: var(--space-star-badge-left);
-    font-size: var(--size-star-badge-font);
-  }
-
-  .star-badge-bronze {
-    color: var(--color-star-bronze-badge-text-light);
-    background-color: var(--color-star-bronze-badge-bg-light);
-  }
-
-  .dark .star-badge-bronze {
-    color: var(--color-star-bronze-badge-text-dark);
-    background-color: var(--color-star-bronze-badge-bg-dark);
-  }
-
-  .star-badge-silver {
-    color: var(--color-star-silver-badge-text-light);
-    background-color: var(--color-star-silver-badge-bg-light);
-  }
-
-  .dark .star-badge-silver {
-    color: var(--color-star-silver-badge-text-dark);
-    background-color: var(--color-star-silver-badge-bg-dark);
-  }
-
-  .star-badge-gold {
-    color: var(--color-star-gold-badge-text-light);
-    background-color: var(--color-star-gold-badge-bg-light);
-  }
-
-  .dark .star-badge-gold {
-    color: var(--color-star-gold-badge-text-dark);
-    background-color: var(--color-star-gold-badge-bg-dark);
   }
 }

@@ -62,12 +62,12 @@ export default function Dashboard({ userId, className = '' }: DashboardProps) {
                 key={lesson.id}
                 lessonName={lesson.name ?? ''}
                 lessonNumber={lesson.sort_order}
-                previousCount={(lesson.startedCount ?? 0) - (lesson.startedTodayCount ?? 0)}
-                todayCount={lesson.startedTodayCount ?? 0}
-                lessonCount={lesson.totalCount ?? 1}
+                currentProgress={lesson.currentProgress ?? 0}
+                dailyProgressChange={lesson.dailyProgressChange ?? 0}
+                maximumProgress={lesson.maximumProgress ?? 1}
               />
             ))}
-            <HelpText className="right-2 -bottom-6">{TEXTS.startedTodayHint}</HelpText>
+            <HelpText className="right-2 -bottom-6">{TEXTS.progressTodayHint}</HelpText>
           </>
         )}
       </section>

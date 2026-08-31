@@ -1,23 +1,31 @@
-id,name,note,grammar_chunk_id,sort_order,updated_at,deleted_at,show_in_topics,is_removed_from_practice,requires_initial_training
-9,Být - zjišťovací otázky,,5,,2026-08-14 07:18:12.406961+00,,false,false,true
-10,Odpovědi na zjišťovací otázky,,6,,2026-08-14 07:19:12.61138+00,,false,false,true
-11,Být - tázací otázky,,7,,2026-08-15 04:59:08.542994+00,,false,false,true
-12,Množné číslo,,8,,2026-08-15 04:59:00.230763+00,,false,false,true
-13,Přivlastňovací zájmena,,9,,2026-08-15 05:08:43.502143+00,,false,false,true
-14,Přivlastňovací apostrof 's,,10,,2026-08-15 05:09:22.324354+00,,false,false,true
-15,Členy,,11,,2026-08-15 05:18:28.942189+00,,false,false,true
-16,Čísla 13 až 19,,12,,2026-08-15 05:23:28.567433+00,,false,false,true
-17,Desítky,,13,,2026-08-15 05:23:58.642825+00,,false,false,true
-18,Složená čísla,,14,,2026-08-15 05:24:20.299761+00,,false,false,true
-19,Řadová čísla,,15,,2026-08-15 05:24:41.948225+00,,false,false,true
-20,Zlomky,,16,,2026-08-15 05:25:02.228007+00,,false,false,true
-21,Desetinná čísla,,17,,2026-08-15 05:25:23.964261+00,,false,false,true
-22,Denní časy,,18,,2026-08-15 06:06:27.464412+00,,false,false,true
-23,Datumy,,19,,2026-08-15 06:06:47.446765+00,,false,false,true
-24,Předložka času - in,,20,,2026-08-15 06:07:19.628512+00,,false,false,true
-25,Předložka času - on,,21,,2026-08-15 06:07:40.922742+00,,false,false,true
-26,Předložka času - at,,22,,2026-08-15 06:08:08.815918+00,,false,false,true
-27,Předložka místa - in,,23,,2026-08-15 06:08:28.355018+00,,false,false,true
-28,Předložka místa - on,,24,,2026-08-15 06:10:51.353223+00,,false,false,true
-29,Předložka místa - at,,25,,2026-08-15 06:11:09.032409+00,,false,false,true
-30,Přítomný čas prostý,,26,,2026-08-15 06:11:30.566499+00,,false,false,true
+id,name,note,grammar_chunk_id,updated_at,deleted_at,lesson_id
+1,Osobní zájmena,,,2026-08-26 03:16:45.929207+00,,4
+2,Měsíce v roce,,,2026-08-26 03:16:51.794423+00,,4
+3,Být - základní tvary,,1,2026-08-27 07:31:01.008769+00,,5
+4,Být - zkrácené tvary,,2,2026-08-27 09:17:08.495874+00,,5
+5,Být - záporné tvary,,3,2026-08-27 09:17:12.833894+00,,6
+6,Být - zkrácený zápor,,4,2026-08-27 09:17:16.467703+00,,6
+7,Být - zjišťovací otázky,,5,2026-08-27 09:17:20.209949+00,,7
+8,Krátké odpovědi,,6,2026-08-27 09:17:23.489736+00,,7
+9,Být - tázací otázky,,7,2026-08-27 09:17:26.7823+00,,8
+10,Množné číslo,,5,2026-08-28 06:19:20.052068+00,,9
+11,Počítatelnost,,,2026-08-28 06:18:50.227804+00,,9
+12,Počítatelnost - příklady,,,2026-08-28 06:19:12.707136+00,,9
+13,Přivlastňovací zájmena,,9,2026-08-28 06:21:52.399443+00,,10
+14,Přivlastňovací apostrof 's,,10,2026-08-28 06:22:27.208663+00,,10
+15,Členy,,11,2026-08-28 06:23:28.462337+00,,11
+16,Čísla 13 - 19,,12,2026-08-28 06:28:28.112765+00,,12
+17,Desítky,,13,2026-08-28 06:29:03.460763+00,,12
+18,Složená čísla,,14,2026-08-28 06:29:32.808638+00,,12
+19,Řadová čísla,,15,2026-08-28 06:30:00.971921+00,,12
+20,Zlomky,,16,2026-08-28 06:30:15.564482+00,,12
+21,Desetinná čísla,,17,2026-08-28 06:30:37.932422+00,,12
+22,Denní časy,,18,2026-08-28 06:31:14.231452+00,,13
+23,Datumy,,19,2026-08-28 06:31:28.646926+00,,13
+24,Předložká času - in,,20,2026-08-28 06:33:14.159893+00,,14
+25,Předložky času - on,,21,2026-08-28 06:34:26.560761+00,,14
+26,Předložky času - at,,22,2026-08-28 06:34:44.113537+00,,14
+27,Předložky místa - in,,23,2026-08-28 06:47:08.362737+00,,15
+28,Předložky místa - on,,24,2026-08-28 06:47:31.332072+00,,15
+29,Předložky místa - at,,25,2026-08-28 06:47:52.769122+00,,15
+30,Přítomný čas prostý,,26,2026-08-28 06:48:35.081755+00,,16

@@ -7,9 +7,9 @@ describe('useUserStore', () => {
       levels: [],
       levelsLoading: true,
       levelsError: null,
-      dailyStarCount: 0,
-      dailyStarCountLoading: false,
-      dailyStarCountError: null,
+      dailyProgressChange: 0,
+      dailyProgressChangeLoading: false,
+      dailyProgressChangeError: null,
     });
   });
 
@@ -18,21 +18,21 @@ describe('useUserStore', () => {
       levels: [{ id: 1 } as any],
       levelsLoading: true,
       levelsError: new Error('levels'),
-      dailyStarCount: 2,
-      dailyStarCountLoading: true,
-      dailyStarCountError: new Error('score'),
+      dailyProgressChange: 2,
+      dailyProgressChangeLoading: true,
+      dailyProgressChangeError: new Error('score'),
     });
 
     useUserStore.getState().clearLevels();
-    useUserStore.getState().clearDailyStarCount();
+    useUserStore.getState().clearDailyProgressChange();
 
     expect(useUserStore.getState()).toMatchObject({
       levels: [],
       levelsLoading: false,
       levelsError: null,
-      dailyStarCount: 0,
-      dailyStarCountLoading: false,
-      dailyStarCountError: null,
+      dailyProgressChange: 0,
+      dailyProgressChangeLoading: false,
+      dailyProgressChangeError: null,
     });
   });
 });

@@ -1,12 +1,11 @@
-import StarProgressOverview from '@/components/UI/StarProgress';
-import config from '@/config/config';
 import HelpText from '@/features/help/HelpText';
 import type { JSX } from 'react';
 import type { RouteDataDescriptor } from '@/routing/route-data-handoff';
 import { useDataNavigation } from '@/routing/data-navigation';
+import { formatProgressChange } from '@/utils/format.utils';
 
 const BUTTON_CLASS_NAME =
-  'home-star-button relative mx-auto inline-flex w-full cursor-pointer items-center justify-center p-2 text-center focus:outline-none';
+  'relative mx-auto inline-flex w-full cursor-pointer items-center justify-center p-2 text-center decoration-current underline-offset-4 hover:underline focus:outline-none';
 
 type Props = {
   count: number;
@@ -48,14 +47,14 @@ export default function PracticeOverviewButton({
       title={ariaLabel}
       onClick={onClick}
     >
-      <StarProgressOverview
-        count={count}
-        chunkSize={1}
-        starsPerRow={config.practice.starsPerRow}
-      />
+      <DailyProgressValue value={count} />
       <HelpText className="-top-4 whitespace-nowrap">{helpText}</HelpText>
     </button>
   );
+}
+
+function DailyProgressValue({ value }: Readonly<{ value: number }>): JSX.Element {
+  return <span className="font-headings text-2xl font-bold">{formatProgressChange(value)}</span>;
 }
 
 function DataPracticeOverviewButton({
@@ -77,11 +76,7 @@ function DataPracticeOverviewButton({
       disabled={pending}
       onClick={() => void loadAndNavigate()}
     >
-      <StarProgressOverview
-        count={count}
-        chunkSize={1}
-        starsPerRow={config.practice.starsPerRow}
-      />
+      <DailyProgressValue value={count} />
       <HelpText className="-top-4 whitespace-nowrap">{helpText}</HelpText>
     </button>
   );

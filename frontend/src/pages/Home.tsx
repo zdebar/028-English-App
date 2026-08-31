@@ -5,7 +5,6 @@ import { useUserStore } from '@/features/user-stats/use-user-store';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { Link } from 'react-router-dom';
-import '@/styles/home.css';
 import { InstallPWAButton } from '@/features/pwa/InstallPwaButton';
 import { useSyncStore } from '@/features/synchronization/use-sync-store';
 import { ROUTES } from '@/config/routes.config';
@@ -44,7 +43,7 @@ export default function Home(): JSX.Element {
   const userFullName = useAuthStore((state) => state.userFullName);
   const isAnonymousUser = useAuthStore((state) => state.isAnonymousUser);
   const authLoading = useAuthStore((state) => state.loading);
-  const dailyStarCount = useUserStore((state) => state.dailyStarCount);
+  const dailyProgressChange = useUserStore((state) => state.dailyProgressChange);
   const isSyncError = useSyncStore((state) => state.isSyncError);
 
   if (authLoading) {
@@ -80,11 +79,11 @@ export default function Home(): JSX.Element {
             </div>
           )}
           <PracticeOverviewButton
-            count={dailyStarCount}
+            count={dailyProgressChange}
             to={ROUTES.practiceOverview}
             descriptor={practiceOverviewDescriptor(userId)}
             ariaLabel={TEXTS.practiceOverviewOpen}
-            helpText={TEXTS.starsToday}
+            helpText={TEXTS.progressToday}
           />
           <div className="flex w-full flex-col gap-1">
             <PracticeButton userId={userId} />

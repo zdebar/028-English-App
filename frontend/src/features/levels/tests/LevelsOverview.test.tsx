@@ -28,7 +28,8 @@ vi.mock('@/locales/cs', () => ({
   TEXTS: {
     notAvailable: 'Not available',
     levelsOverview: 'Levels overview',
-    levelsStartedHelp: 'Started help',
+    levelsCompletedHelp: 'Completed / total lessons',
+    progressTodayHint: 'Progress today help',
   },
   ARIA_TEXTS: {
     lessonProgressBar: 'Lesson progress bar',
@@ -142,6 +143,8 @@ describe('LevelsOverview', () => {
         name: 'A1',
         startedCount: 3,
         totalCount: 5,
+        currentProgress: 3,
+        maximumProgress: 5,
         lessons: [
           {
             id: 101,
@@ -149,6 +152,8 @@ describe('LevelsOverview', () => {
             startedCount: 3,
             startedTodayCount: 0,
             totalCount: 5,
+            currentProgress: 3,
+            maximumProgress: 5,
           },
         ],
       },
@@ -201,6 +206,8 @@ describe('LevelsOverview', () => {
         name: 'A1',
         startedCount: 3,
         totalCount: 5,
+        currentProgress: 3,
+        maximumProgress: 5,
         lessons: [
           {
             id: 101,
@@ -208,6 +215,14 @@ describe('LevelsOverview', () => {
             startedCount: 3,
             startedTodayCount: 0,
             totalCount: 5,
+            currentProgress: 3,
+            maximumProgress: 5,
+          },
+          {
+            id: 102,
+            name: 'Lesson 2',
+            currentProgress: 10,
+            maximumProgress: 10,
           },
         ],
       },
@@ -216,8 +231,8 @@ describe('LevelsOverview', () => {
     render(<LevelsOverview />);
 
     fireEvent.click(screen.getByText('A1'));
-    expect(mocks.goalMetCalls.some((x) => x.current === 3 && x.goal === 5)).toBe(true);
-    expect(screen.getByText('Started help')).toBeTruthy();
+    expect(mocks.goalMetCalls.some((x) => x.current === 1 && x.goal === 2)).toBe(true);
+    expect(screen.getByText('Progress today help')).toBeTruthy();
     expect(screen.queryByText('Mastered')).toBeNull();
   });
 

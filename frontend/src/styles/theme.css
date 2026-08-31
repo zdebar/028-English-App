@@ -58,28 +58,6 @@
   --color-error-dark: #ef4444;
   --color-info-dark: #3b82f6;
 
-  /** star progress colors **/
-  --color-star-empty-border-light: #475569;
-  --color-star-empty-border-dark: #64748b;
-  --color-star-bronze-light: #b87333;
-  --color-star-bronze-dark: #d8a373;
-  --color-star-bronze-badge-bg-light: #f3e0d0;
-  --color-star-bronze-badge-bg-dark: #6f4a2f;
-  --color-star-bronze-badge-text-light: #8c5224;
-  --color-star-bronze-badge-text-dark: #f6d5b5;
-  --color-star-silver-light: #e5e7eb;
-  --color-star-silver-dark: #e5e7eb;
-  --color-star-silver-badge-bg-light: #e7ecf3;
-  --color-star-silver-badge-bg-dark: #4b5563;
-  --color-star-silver-badge-text-light: #626b79;
-  --color-star-silver-badge-text-dark: #f8fafc;
-  --color-star-gold-light: #a27e08;
-  --color-star-gold-dark: #ffd36b;
-  --color-star-gold-badge-bg-light: #f8edc2;
-  --color-star-gold-badge-bg-dark: #7a5600;
-  --color-star-gold-badge-text-light: #9b6b00;
-  --color-star-gold-badge-text-dark: #fff2b3;
-
   /** LAYOUT DIMENSIONS **/
   --max-width-container: 900px;
   --min-width-card: 320px;
@@ -99,7 +77,4 @@
   --height-attribute: 1.5rem;
   --size-indicator: 0.75rem;
   --size-icon: 2.5rem;
-  --size-star: 22px;
-  --size-star-badge-font: 10px;
-  --space-star-badge-left: 15px;
 }

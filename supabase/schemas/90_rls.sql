@@ -131,16 +131,16 @@ CREATE POLICY users_select_own ON public.users
 
 REVOKE ALL PRIVILEGES ON TABLE
   public.user_items,
-  public.user_scores
+  public.user_item_progress_history
 FROM PUBLIC, anon, authenticated;
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE
   public.user_items,
-  public.user_scores
+  public.user_item_progress_history
 TO authenticated;
 
 ALTER TABLE public.user_items ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.user_scores ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_item_progress_history ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Allow regular users to modify their own data" ON public.user_items;
 DROP POLICY IF EXISTS user_items_delete_own_non_demo ON public.user_items;
@@ -158,7 +158,6 @@ CREATE POLICY user_items_insert_own_non_demo ON public.user_items
     user_id = (SELECT auth.uid())
     AND public.is_non_demo_user()
   );
-
 CREATE POLICY user_items_update_own_non_demo ON public.user_items
   FOR UPDATE TO authenticated
   USING (
@@ -177,24 +176,24 @@ CREATE POLICY user_items_delete_own_non_demo ON public.user_items
     AND public.is_non_demo_user()
   );
 
-DROP POLICY IF EXISTS "Allow regular users to modify their own data" ON public.user_scores;
-DROP POLICY IF EXISTS user_scores_delete_own_non_demo ON public.user_scores;
-DROP POLICY IF EXISTS user_scores_insert_own_non_demo ON public.user_scores;
-DROP POLICY IF EXISTS user_scores_select_own ON public.user_scores;
-DROP POLICY IF EXISTS user_scores_update_own_non_demo ON public.user_scores;
+DROP POLICY IF EXISTS "Allow regular users to modify their own data" ON public.user_item_progress_history;
+DROP POLICY IF EXISTS user_item_progress_history_delete_own_non_demo ON public.user_item_progress_history;
+DROP POLICY IF EXISTS user_item_progress_history_insert_own_non_demo ON public.user_item_progress_history;
+DROP POLICY IF EXISTS user_item_progress_history_select_own ON public.user_item_progress_history;
+DROP POLICY IF EXISTS user_item_progress_history_update_own_non_demo ON public.user_item_progress_history;
 
-CREATE POLICY user_scores_select_own ON public.user_scores
+CREATE POLICY user_item_progress_history_select_own ON public.user_item_progress_history
   FOR SELECT TO authenticated
   USING (user_id = (SELECT auth.uid()));
 
-CREATE POLICY user_scores_insert_own_non_demo ON public.user_scores
+CREATE POLICY user_item_progress_history_insert_own_non_demo ON public.user_item_progress_history
   FOR INSERT TO authenticated
   WITH CHECK (
     user_id = (SELECT auth.uid())
     AND public.is_non_demo_user()
   );
 
-CREATE POLICY user_scores_update_own_non_demo ON public.user_scores
+CREATE POLICY user_item_progress_history_update_own_non_demo ON public.user_item_progress_history
   FOR UPDATE TO authenticated
   USING (
     user_id = (SELECT auth.uid())
@@ -205,21 +204,9 @@ CREATE POLICY user_scores_update_own_non_demo ON public.user_scores
     AND public.is_non_demo_user()
   );
 
-CREATE POLICY user_scores_delete_own_non_demo ON public.user_scores
+CREATE POLICY user_item_progress_history_delete_own_non_demo ON public.user_item_progress_history
   FOR DELETE TO authenticated
   USING (
     user_id = (SELECT auth.uid())
     AND public.is_non_demo_user()
   );
-
-REVOKE ALL PRIVILEGES ON TABLE public.user_items_history FROM PUBLIC, anon, authenticated;
-GRANT INSERT ON TABLE public.user_items_history TO authenticated;
-
-ALTER TABLE public.user_items_history ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Enable insert for users based on user_id" ON public.user_items_history;
-DROP POLICY IF EXISTS user_items_history_insert_own ON public.user_items_history;
-
-CREATE POLICY user_items_history_insert_own ON public.user_items_history
-  FOR INSERT TO authenticated
-  WITH CHECK (user_id = (SELECT auth.uid()));

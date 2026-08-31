@@ -2,7 +2,7 @@ import { supabaseInstance } from '@/config/supabase.config';
 import { SupabaseError } from '@/types/error.types';
 
 /**
- * Downloads a file from a Supabase storage bucket, bypassing stale cached responses.
+ * Downloads a file from a Supabase storage bucket.
  *
  * @param bucketName Supabase storage bucket name.
  * @param dataFile File path inside the bucket; a leading slash is ignored.
@@ -10,8 +10,7 @@ import { SupabaseError } from '@/types/error.types';
  * @throws SupabaseError when storage returns an error or no data.
  */
 export async function fetchStorage(bucketName: string, dataFile: string): Promise<Blob> {
-  const cacheBuster = `?t=${Date.now()}`;
-  const filePath = dataFile.replace(/^\//, '') + cacheBuster;
+  const filePath = dataFile.replace(/^\//, '');
 
   const { data, error } = await supabaseInstance.storage.from(bucketName).download(filePath);
 

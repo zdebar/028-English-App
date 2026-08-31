@@ -25,6 +25,7 @@ const mocks = vi.hoisted(() => ({
   getNextAt: vi.fn(),
   getSyncTimestamps: vi.fn(),
   markAsSynced: vi.fn(),
+  progressHistoryRecordChange: vi.fn(),
   userItemGet: vi.fn(),
   userItemUpdate: vi.fn(),
   blockGet: vi.fn(),
@@ -151,6 +152,7 @@ function createBlockQuery() {
 function createTopicQuery() {
   return {
     equals: () => ({
+      toArray: (...args: unknown[]) => mocks.topicEqualsToArray(...args),
       filter: (predicate: (item: any) => boolean) => ({
         toArray: async (...args: unknown[]) =>
           ((await mocks.topicEqualsToArray(...args)) ?? []).filter(predicate),
@@ -212,7 +214,7 @@ vi.mock('@/config/config', () => ({
     },
     practice: {
       initialTrainingBatchSize: 8,
-      reviewStarSize: 20,
+      reviewMinimumSize: 20,
     },
   },
 }));
@@ -247,6 +249,12 @@ vi.mock('@/config/supabase.config', () => ({
 vi.mock('@/database/models/metadata', () => ({
   default: {
     markAsSynced: (...args: unknown[]) => mocks.markAsSynced(...args),
+  },
+}));
+
+vi.mock('@/database/models/user-item-progress-history', () => ({
+  default: {
+    recordChange: (...args: unknown[]) => mocks.progressHistoryRecordChange(...args),
   },
 }));
 
@@ -303,6 +311,7 @@ describe('UserItem', () => {
     });
     mocks.equalsDelete.mockResolvedValue(0);
     mocks.userEqualsToArray.mockResolvedValue([]);
+    mocks.topicEqualsToArray.mockResolvedValue([]);
     mocks.blockEqualsToArray.mockResolvedValue([]);
     mocks.indexedToArray.mockResolvedValue([]);
     mocks.updatedBetweenToArray.mockResolvedValue([]);
@@ -364,14 +373,6 @@ describe('UserItem', () => {
         has_pronunciation_practice: 0,
         progress_cz_to_en: 2,
         progress_en_to_cz: 3,
-        progress_history: [
-          {
-            progress: 2,
-            created_at: '2026-03-04T09:00:00.000Z',
-            direction: 'czToEn',
-            outcome: 'correct',
-          },
-        ],
         started_at: '2026-03-01T09:00:00.000Z',
         updated_at: '2026-03-04T09:00:00.000Z',
         next_at_cz_to_en: '2026-03-06T09:00:00.000Z',
@@ -388,14 +389,6 @@ describe('UserItem', () => {
         changes: {
           progress_cz_to_en: 2,
           progress_en_to_cz: 3,
-          progress_history: [
-            {
-              progress: 2,
-              created_at: '2026-03-04T09:00:00.000Z',
-              direction: 'czToEn',
-              outcome: 'correct',
-            },
-          ],
           started_at: '2026-03-01T09:00:00.000Z',
           updated_at: '2026-03-04T09:00:00.000Z',
           next_at_cz_to_en: '2026-03-06T09:00:00.000Z',
@@ -462,7 +455,6 @@ describe('UserItem', () => {
         practice_direction: 'czToEn',
         progress_cz_to_en: 2,
         progress_en_to_cz: 1,
-        progress_history: [],
         started_at: '2026-08-10T10:00:00.000Z',
         updated_at: '2026-08-10T10:00:00.000Z',
         next_at_cz_to_en: '2026-08-11T10:00:00.000Z',
@@ -599,7 +591,6 @@ describe('UserItem', () => {
       {
         progress_cz_to_en: 0,
         progress_en_to_cz: 0,
-        progress_history: [],
         started_at: '1970-01-01T00:00:00.000Z',
         mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
         mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
@@ -617,9 +608,7 @@ describe('UserItem', () => {
       next_at_cz_to_en: '2026-03-04T09:02:00.000Z',
       next_at_en_to_cz: '2026-03-04T09:00:00.000Z',
     });
-    expect(updated.progress_history).toEqual([
-      expect.objectContaining({ direction: 'czToEn', outcome: 'correct', progress: 1 }),
-    ]);
+    expect(updated.progress_cz_to_en).toBe(1);
   });
 
   it('advances the opposite direction normally in the second phase', () => {
@@ -628,7 +617,6 @@ describe('UserItem', () => {
       {
         progress_cz_to_en: 1,
         progress_en_to_cz: 0,
-        progress_history: [],
         started_at: '2026-03-04T09:00:00.000Z',
         mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
         mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
@@ -650,7 +638,6 @@ describe('UserItem', () => {
       {
         progress_cz_to_en: 4,
         progress_en_to_cz: 2,
-        progress_history: [],
         started_at: '2026-03-01T00:00:00.000Z',
         mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
         mastered_at_en_to_cz: '2026-03-02T00:00:00.000Z',
@@ -663,9 +650,7 @@ describe('UserItem', () => {
     expect(updated.progress_cz_to_en).toBe(4);
     expect(updated.progress_en_to_cz).toBe(0);
     expect(updated.mastered_at_en_to_cz).toBe('1970-01-01T00:00:00.000Z');
-    expect(updated.progress_history).toEqual([
-      expect.objectContaining({ direction: 'enToCz', outcome: 'incorrect', progress: 0 }),
-    ]);
+    expect(updated.progress_en_to_cz).toBe(0);
   });
 
   it('schedules the opposite direction without history on a first incorrect answer', () => {
@@ -674,7 +659,6 @@ describe('UserItem', () => {
       {
         progress_cz_to_en: 4,
         progress_en_to_cz: 2,
-        progress_history: [],
         started_at: '1970-01-01T00:00:00.000Z',
         mastered_at_cz_to_en: '2026-03-02T00:00:00.000Z',
         mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
@@ -692,9 +676,7 @@ describe('UserItem', () => {
       next_at_cz_to_en: '2026-03-04T09:02:00.000Z',
       next_at_en_to_cz: '2026-03-04T09:02:00.000Z',
     });
-    expect(updated.progress_history).toEqual([
-      expect.objectContaining({ direction: 'enToCz', outcome: 'incorrect', progress: 0 }),
-    ]);
+    expect(updated.progress_en_to_cz).toBe(0);
   });
 
   it('skip preserves progress, masters the selected direction, and clears its schedule', () => {
@@ -703,7 +685,6 @@ describe('UserItem', () => {
       {
         progress_cz_to_en: 2,
         progress_en_to_cz: 0,
-        progress_history: [],
         started_at: '1970-01-01T00:00:00.000Z',
         mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
         mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
@@ -719,9 +700,6 @@ describe('UserItem', () => {
     expect(updated.next_at_en_to_cz).toBe('2026-03-04T09:02:00.000Z');
     expect(updated.mastered_at_cz_to_en).toBe('2026-03-04T09:00:00.000Z');
     expect(updated.mastered_at_en_to_cz).toBe('1970-01-01T00:00:00.000Z');
-    expect(updated.progress_history).toEqual([
-      expect.objectContaining({ direction: 'czToEn', outcome: 'skip', progress: 2 }),
-    ]);
   });
 
   it('masters a direction naturally when a correct answer reaches the SRS limit', () => {
@@ -729,7 +707,6 @@ describe('UserItem', () => {
       {
         progress_cz_to_en: 2,
         progress_en_to_cz: 1,
-        progress_history: [],
         started_at: '2026-03-01T00:00:00.000Z',
         mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
         mastered_at_en_to_cz: '2026-03-02T00:00:00.000Z',
@@ -896,13 +873,14 @@ describe('UserItem', () => {
       ['u1', expect.anything(), '1970-01-01T00:00:00.000Z', expect.anything()],
       ['u1', '2026-06-24T12:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
       true,
-      false,
+      true,
     );
 
     const grammarFilter = mocks.indexedFilter.mock.calls[0][0] as (item: any) => boolean;
     expect(
       grammarFilter({
         block_id: 10,
+        deleted_at: '1970-01-01T00:00:00.000Z',
         started_at: '2026-01-01T00:00:00.000Z',
         mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
         next_at_cz_to_en: '2026-06-24T11:00:00.000Z',
@@ -911,6 +889,7 @@ describe('UserItem', () => {
     expect(
       grammarFilter({
         block_id: 11,
+        deleted_at: '1970-01-01T00:00:00.000Z',
         started_at: '2026-01-01T00:00:00.000Z',
         mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
         next_at_cz_to_en: '2026-06-24T11:00:00.000Z',
@@ -1165,10 +1144,10 @@ describe('UserItem', () => {
   });
 
   it('resetItemsByTopicId resets all items assigned to the topic', async () => {
-    mocks.topicModify.mockResolvedValue(3);
+    mocks.topicEqualsToArray.mockResolvedValue([initialItem(1), initialItem(2), initialItem(3)]);
 
     await expect(UserItem.resetItemsByTopicId('u1', 4)).resolves.toBe(3);
-    expect(mocks.topicModify).toHaveBeenCalledOnce();
+    expect(mocks.bulkPut).toHaveBeenCalledOnce();
   });
 
   it('saveInitialTrainingCompletion does not downgrade skipped item progress', async () => {
@@ -1179,7 +1158,6 @@ describe('UserItem', () => {
         sort_order: 1,
         progress_cz_to_en: 101,
         progress_en_to_cz: 101,
-        progress_history: [],
         started_at: '2026-03-01T00:00:00.000Z',
         mastered_at_cz_to_en: '2026-03-06T11:00:00.000Z',
         mastered_at_en_to_cz: '2026-03-06T11:00:00.000Z',
@@ -1189,7 +1167,6 @@ describe('UserItem', () => {
         sort_order: 2,
         progress_cz_to_en: 0,
         progress_en_to_cz: 0,
-        progress_history: [],
         started_at: '1970-01-01T00:00:00.000Z',
         mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
         mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
@@ -1228,13 +1205,18 @@ describe('UserItem', () => {
     mocks.userEqualsToArray.mockResolvedValueOnce([
       ...Array.from({ length: 20 }, (_, index) => ({
         item_id: index + 1,
+        deleted_at: '1970-01-01T00:00:00.000Z',
         started_at: '2026-01-01T00:00:00.000Z',
         next_at_cz_to_en: '2026-06-20T00:00:00.000Z',
         next_at_en_to_cz: '2026-06-20T00:00:00.000Z',
         mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
         mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
       })),
-      { item_id: 21, started_at: '1970-01-01T00:00:00.000Z' },
+      {
+        item_id: 21,
+        deleted_at: '1970-01-01T00:00:00.000Z',
+        started_at: '1970-01-01T00:00:00.000Z',
+      },
     ]);
 
     await expect(UserItem.getReadyReviewState('u1')).resolves.toEqual({
@@ -1263,14 +1245,17 @@ describe('UserItem', () => {
     mocks.userEqualsToArray.mockResolvedValueOnce([
       {
         item_id: 1,
+        deleted_at: '1970-01-01T00:00:00.000Z',
         started_at: '1970-01-01T00:00:00.000Z',
       },
       {
         item_id: 2,
+        deleted_at: '1970-01-01T00:00:00.000Z',
         started_at: '1970-01-01T00:00:00.000Z',
       },
       {
         item_id: 3,
+        deleted_at: '1970-01-01T00:00:00.000Z',
         started_at: '2026-01-01T00:00:00.000Z',
         next_at_cz_to_en: '2026-06-24T12:00:10.000Z',
         next_at_en_to_cz: '2026-06-24T12:00:10.800Z',
@@ -1289,6 +1274,7 @@ describe('UserItem', () => {
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
     const readyItems = Array.from({ length: 19 }, (_, index) => ({
       item_id: index + 1,
+      deleted_at: '1970-01-01T00:00:00.000Z',
       started_at: '2026-01-01T00:00:00.000Z',
       next_at_cz_to_en: '2026-06-20T00:00:00.000Z',
       next_at_en_to_cz: '2026-06-20T00:00:00.000Z',
@@ -1299,6 +1285,7 @@ describe('UserItem', () => {
       ...readyItems,
       {
         item_id: 20,
+        deleted_at: '1970-01-01T00:00:00.000Z',
         started_at: '2026-01-01T00:00:00.000Z',
         next_at_cz_to_en: '2026-06-24T12:00:20.000Z',
         next_at_en_to_cz: '2026-06-24T12:00:10.000Z',
@@ -1399,20 +1386,6 @@ describe('UserItem', () => {
       mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
       mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
     });
-    expect(simulated[0].progress_history).toEqual([
-      {
-        progress: 1,
-        created_at: '2026-06-10T10:00:00.000Z',
-        direction: 'czToEn',
-        outcome: 'correct',
-      },
-      {
-        progress: 1,
-        created_at: '2026-06-10T10:00:00.000Z',
-        direction: 'enToCz',
-        outcome: 'correct',
-      },
-    ]);
   });
 
   it('allows any number of available items and audio candidates up to configured maxima', async () => {
@@ -1432,14 +1405,6 @@ describe('UserItem', () => {
       {
         user_id: 'u1',
         item_id: 1,
-        progress_history: [
-          {
-            progress: 1,
-            direction: 'czToEn',
-            outcome: 'correct',
-            created_at: '2026-03-03T09:59:00.000Z',
-          },
-        ],
         progress_cz_to_en: 1,
         progress_en_to_cz: 1,
         has_pronunciation_practice: 1,
@@ -1471,7 +1436,6 @@ describe('UserItem', () => {
           grammar_chunk_id: null,
           progress_cz_to_en: 0,
           progress_en_to_cz: 0,
-          progress_history: [],
           started_at: null,
           updated_at: '2026-03-04T00:00:00.000Z',
           next_at_cz_to_en: null,
@@ -1499,14 +1463,6 @@ describe('UserItem', () => {
         expect.objectContaining({
           user_id: 'u1',
           item_id: 1,
-          progress_history: [
-            {
-              progress: 1,
-              direction: 'czToEn',
-              outcome: 'correct',
-              created_at: '2026-03-03T09:59:00.000Z',
-            },
-          ],
           progress_cz_to_en: 1,
           progress_en_to_cz: 1,
           has_pronunciation_practice: true,

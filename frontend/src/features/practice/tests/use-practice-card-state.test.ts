@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { UserItemLocal } from '@/types/user-item.types';
 
 const playAudioMock = vi.fn();
+const stopAudioMock = vi.fn();
 
 vi.mock('@/config/config', () => ({
   default: {
@@ -15,6 +16,7 @@ vi.mock('@/config/config', () => ({
 vi.mock('@/features/audio/use-audio-manager', () => ({
   useAudioManager: () => ({
     playAudio: playAudioMock,
+    stopAudio: stopAudioMock,
     audioError: false,
     loading: false,
     isPlaying: false,
@@ -31,9 +33,19 @@ const item = {
   curriculum_sort_path: [1, 1, 1],
 } as unknown as UserItemLocal;
 
-function useTestCard(isCzToEn: boolean, currentItem: UserItemLocal | null = item) {
+function useTestCard(
+  isCzToEn: boolean,
+  currentItem: UserItemLocal | null = item,
+  isCompletion = false,
+) {
   const [revealed, setRevealed] = useState(false);
-  const state = usePracticeCardState({ currentItem, isCzToEn, revealed, setRevealed });
+  const state = usePracticeCardState({
+    currentItem,
+    isCzToEn,
+    revealed,
+    isCompletion,
+    setRevealed,
+  });
   return { ...state, revealed };
 }
 
@@ -90,5 +102,20 @@ describe('usePracticeCardState', () => {
     act(() => result.current.handleReveal());
 
     expect(result.current.audioDisabled).toBe(true);
+  });
+
+  it('stops audio and cancels delayed autoplay on completion', () => {
+    vi.useFakeTimers();
+    const { result, rerender } = renderHook(
+      ({ isCompletion }) => useTestCard(false, item, isCompletion),
+      { initialProps: { isCompletion: false } },
+    );
+
+    act(() => result.current.handleReveal());
+    rerender({ isCompletion: true });
+    act(() => vi.advanceTimersByTime(300));
+
+    expect(stopAudioMock).toHaveBeenCalledOnce();
+    expect(playAudioMock).not.toHaveBeenCalled();
   });
 });

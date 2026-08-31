@@ -1,6 +1,5 @@
 export const COMMON_TEXTS = {
-  starEarned: 'získána',
-  continueAfterStar: 'pokračujte kliknutím',
+  done: 'hotovo',
   // Generic
   notAvailable: 'Není k dispozici',
   notMastered: 'Nenaučeno',

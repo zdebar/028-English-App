@@ -1,6 +1,6 @@
 export const OVERVIEW_TEXTS = {
   // Levels Overview Page
-  levelsStartedHelp: 'započato / celkem položek',
+  levelsCompletedHelp: 'dokončené / celkem lekcí',
 
   // Grammar Overview Page
   noGrammar: 'Žádná započatá gramatika.',

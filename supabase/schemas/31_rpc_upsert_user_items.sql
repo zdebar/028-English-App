@@ -1,6 +1,5 @@
 CREATE OR REPLACE FUNCTION public.upsert_user_items(
-  p_user_items JSONB,
-  p_history_enabled BOOLEAN DEFAULT FALSE
+  p_user_items JSONB
 )
 RETURNS VOID
 LANGUAGE plpgsql
@@ -32,17 +31,12 @@ DECLARE
   v_key_progress_cz_to_en CONSTANT TEXT := 'progress_cz_to_en';
   v_key_progress_en_to_cz CONSTANT TEXT := 'progress_en_to_cz';
   v_key_pronunciation_practice CONSTANT TEXT := 'has_pronunciation_practice';
-  v_key_progress CONSTANT TEXT := 'progress';
   v_key_started_at CONSTANT TEXT := 'started_at';
   v_key_updated_at CONSTANT TEXT := private.json_key_updated_at();
   v_key_next_at_cz_to_en CONSTANT TEXT := 'next_at_cz_to_en';
   v_key_next_at_en_to_cz CONSTANT TEXT := 'next_at_en_to_cz';
   v_key_mastered_at_cz_to_en CONSTANT TEXT := 'mastered_at_cz_to_en';
   v_key_mastered_at_en_to_cz CONSTANT TEXT := 'mastered_at_en_to_cz';
-  v_key_progress_history CONSTANT TEXT := 'progress_history';
-  v_key_created_at CONSTANT TEXT := 'created_at';
-  v_key_direction CONSTANT TEXT := 'direction';
-  v_key_outcome CONSTANT TEXT := 'outcome';
   v_total_count INT := 0;
   v_matched_count INT := 0;
   v_skipped_count INT := 0;
@@ -157,113 +151,8 @@ BEGIN
     v_skipped_count,
     v_main_error_count;
 
-  IF NOT COALESCE(p_history_enabled, FALSE) THEN
-    RAISE LOG 'user_items_history: inserted=0, skipped_invalid=0, skipped_existing=0, skipped_disabled=1, errors=0';
-    RETURN;
-  END IF;
-
-  -- Best-effort insert of progress history: validate created_at, skip invalid rows.
-  -- Do not make history insertion fatal for the whole upsert operation.
-  DECLARE
-    v_entry jsonb;
-    v_hist jsonb;
-    v_item_id INT;
-    v_hist_user_id UUID;
-    v_progress INT;
-    v_direction TEXT;
-    v_outcome TEXT;
-    v_created_at timestamptz;
-    v_inserted_count INT := 0;
-    v_skipped_invalid INT := 0;
-    v_error_count INT := 0;
-    v_skipped_existing INT := 0;
-  BEGIN
-    FOR v_entry IN SELECT * FROM jsonb_array_elements(p_user_items) LOOP
-      BEGIN
-        v_hist_user_id := (v_entry->>v_key_user_id)::UUID;
-        PERFORM public.assert_payload_user_id_matches_auth(v_hist_user_id, v_auth_user_id);
-
-        -- skip entries without numeric item_id
-        IF NOT (v_entry->>v_key_item_id) ~ v_item_id_re THEN
-          CONTINUE;
-        END IF;
-        v_item_id := (v_entry->>v_key_item_id)::INT;
-
-        -- skip history for items that no longer exist (avoid FK errors)
-        IF NOT EXISTS (SELECT 1 FROM public.items WHERE id = v_item_id) THEN
-          CONTINUE;
-        END IF;
-        FOR v_hist IN SELECT * FROM jsonb_array_elements(COALESCE(v_entry->v_key_progress_history, v_empty_json)) LOOP
-          BEGIN
-            -- validate and parse created_at; if invalid, skip this hist entry
-            IF (v_hist->>v_key_created_at) IS NULL THEN
-              v_skipped_invalid := v_skipped_invalid + 1;
-              CONTINUE;
-            END IF;
-            BEGIN
-              v_created_at := (v_hist->>v_key_created_at)::timestamptz;
-            EXCEPTION WHEN others THEN
-              v_skipped_invalid := v_skipped_invalid + 1;
-              CONTINUE;
-            END;
-
-            v_progress := (v_hist->>v_key_progress)::INT;
-            v_direction := NULLIF(v_hist->>v_key_direction, v_null_text);
-            IF v_direction IS NULL OR v_direction NOT IN ('czToEn', 'enToCz') THEN
-              v_skipped_invalid := v_skipped_invalid + 1;
-              CONTINUE;
-            END IF;
-            v_outcome := NULLIF(v_hist->>v_key_outcome, v_null_text);
-            IF v_outcome IS NULL OR v_outcome NOT IN ('correct', 'incorrect', 'skip') THEN
-              v_skipped_invalid := v_skipped_invalid + 1;
-              CONTINUE;
-            END IF;
-
-            -- Insert if not exists (avoid duplicates). Use ON CONFLICT DO NOTHING if unique constraint added.
-            BEGIN
-              INSERT INTO public.user_items_history (
-                item_id,
-                user_id,
-                progress,
-                direction,
-                outcome,
-                created_at
-              )
-              VALUES (
-                v_item_id,
-                v_hist_user_id,
-                v_progress,
-                v_direction,
-                v_outcome,
-                v_created_at
-              )
-              ON CONFLICT DO NOTHING;
-              IF FOUND THEN
-                v_inserted_count := v_inserted_count + 1;
-              ELSE
-                v_skipped_existing := v_skipped_existing + 1;
-              END IF;
-            EXCEPTION WHEN others THEN
-              v_error_count := v_error_count + 1;
-              -- continue with next history item
-            END;
-          END;
-        END LOOP;
-      EXCEPTION
-        WHEN insufficient_privilege THEN
-          RAISE;
-        WHEN others THEN
-          v_skipped_invalid := v_skipped_invalid + 1;
-          v_error_count := v_error_count + 1;
-          CONTINUE;
-      END;
-    END LOOP;
-
-    -- Log result so operator can be aware when items were skipped/failed.
-    RAISE LOG 'user_items_history: inserted=%, skipped_invalid=%, skipped_existing=%, skipped_disabled=0, errors=%', v_inserted_count, v_skipped_invalid, v_skipped_existing, v_error_count;
-  END;
 END;
 $$;
 
-REVOKE EXECUTE ON FUNCTION public.upsert_user_items(JSONB, BOOLEAN) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.upsert_user_items(JSONB, BOOLEAN) TO authenticated;
+REVOKE EXECUTE ON FUNCTION public.upsert_user_items(JSONB) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.upsert_user_items(JSONB) TO authenticated;

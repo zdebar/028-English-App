@@ -1,4 +1,3 @@
-import config from '@/config/config';
 import Block from '@/database/models/blocks';
 import PracticeSession from '@/database/models/practice-sessions';
 import UserItem from '@/database/models/user-items';
@@ -23,8 +22,6 @@ import {
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
 } from '@/database/utils/practice-content.utils';
-import { getStarTierForCount, type StarTier } from '@/utils/star-progress.utils';
-import { useStarCelebration } from './use-star-celebration';
 
 const PHASE_DIRECTIONS: Record<NewPracticePhase, 'czToEn' | 'enToCz'> = {
   0: 'czToEn',
@@ -75,14 +72,14 @@ function getInitialTrainingView(
   items: UserItemLocal[],
   itemById: Map<number, UserItemLocal>,
   resolvedEntries: Array<ResolvedPracticeEntry<UserItemLocal>>,
-  celebratingStar: boolean,
+  isComplete: boolean,
   revealed: boolean,
 ): InitialTrainingView {
   const currentItemId = session?.current_queue_item_ids[0];
   const currentItem = getCurrentTrainingItem(currentItemId, itemById);
   const currentEntry = getCurrentTrainingEntry(currentItem, resolvedEntries);
   const phase = getTrainingPhase(session);
-  const displayedCompletedCount = getDisplayedTrainingCount(celebratingStar, items, session);
+  const displayedCompletedCount = getDisplayedTrainingCount(isComplete, items, session);
   const pronunciation = getTrainingPronunciation(currentItem, revealed);
   return { currentItem, currentEntry, phase, displayedCompletedCount, pronunciation };
 }
@@ -107,11 +104,11 @@ function getTrainingPhase(session: PracticeSessionType | null): NewPracticePhase
 }
 
 function getDisplayedTrainingCount(
-  celebratingStar: boolean,
+  isComplete: boolean,
   items: UserItemLocal[],
   session: PracticeSessionType | null,
 ): number {
-  if (celebratingStar) return items.length;
+  if (isComplete) return items.length;
   return session?.completed_count ?? 0;
 }
 
@@ -336,10 +333,13 @@ type AdvanceInitialTrainingOptions = Readonly<{
   session: PracticeSessionType | null;
   currentItem: UserItemLocal | null;
   phase: NewPracticePhase;
-  celebratingStar: boolean;
   isComplete: boolean;
   moveToNextPhase: (session: PracticeSessionType) => PracticeSessionType | null;
-  finishBlock: (item: UserItemLocal) => Promise<void>;
+  finishBlock: (
+    item: UserItemLocal,
+    direction: 'czToEn' | 'enToCz',
+    session: PracticeSessionType,
+  ) => Promise<void>;
   setItems: Dispatch<SetStateAction<UserItemLocal[]>>;
   setSession: Dispatch<SetStateAction<PracticeSessionType | null>>;
   setHasProgress: Dispatch<SetStateAction<boolean>>;
@@ -353,7 +353,6 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
     session,
     currentItem,
     phase,
-    celebratingStar,
     isComplete,
     moveToNextPhase,
     finishBlock,
@@ -363,7 +362,7 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
     setError,
     resetQuestionState,
   } = options;
-  if (!session || !currentItem || celebratingStar || isComplete) return;
+  if (!session || !currentItem || isComplete) return;
 
   const dateTime = new Date(Date.now()).toISOString();
   const updatedItem = UserItem.applyPracticeProgress(
@@ -382,12 +381,17 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
       moveToNextPhase,
     );
     if (!nextSession) {
-      await finishBlock(updatedItem);
+      await finishBlock(updatedItem, PHASE_DIRECTIONS[phase], session);
       setItems((currentItems) => updateTrainingItem(currentItems, updatedItem));
       return;
     }
 
-    await PracticeSession.recordInitialTrainingAnswer(updatedItem, nextSession);
+    await PracticeSession.recordInitialTrainingAnswer(
+      currentItem,
+      updatedItem,
+      PHASE_DIRECTIONS[phase],
+      nextSession,
+    );
     resetQuestionState();
     setItems((currentItems) => updateTrainingItem(currentItems, updatedItem));
     setSession(nextSession);
@@ -412,9 +416,6 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
   );
   const [session, setSession] = useState<PracticeSessionType | null>(null);
   const [isComplete, setIsComplete] = useState(false);
-  const { celebratingStar, waitForAcknowledgement, acknowledgeCelebration, finishCelebration } =
-    useStarCelebration();
-  const [celebrationStarTier, setCelebrationStarTier] = useState<StarTier>('bronze');
   const [hasProgress, setHasProgress] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [loading, setLoading] = useState(userId != null);
@@ -440,32 +441,40 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
 
   const itemById = useMemo(() => new Map(items.map((item) => [item.item_id, item])), [items]);
   const { currentItem, currentEntry, phase, displayedCompletedCount, pronunciation } = useMemo(
-    () =>
-      getInitialTrainingView(session, items, itemById, resolvedEntries, celebratingStar, revealed),
-    [celebratingStar, itemById, items, resolvedEntries, revealed, session],
+    () => getInitialTrainingView(session, items, itemById, resolvedEntries, isComplete, revealed),
+    [isComplete, itemById, items, resolvedEntries, revealed, session],
   );
   const isCzToEn = PHASE_DIRECTIONS[phase] === 'czToEn';
-  const cardState = usePracticeCardState({ currentItem, isCzToEn, revealed, setRevealed });
+  const cardState = usePracticeCardState({
+    currentItem,
+    isCzToEn,
+    revealed,
+    isCompletion: isComplete,
+    setRevealed,
+  });
   const resetQuestionState = cardState.resetQuestionState;
 
   const finishBlock = useCallback(
-    async (finalItem: UserItemLocal) => {
+    async (
+      finalItem: UserItemLocal,
+      finalDirection: 'czToEn' | 'enToCz',
+      expectedSession: PracticeSessionType,
+    ) => {
       if (!userId || items.length === 0) return;
       const dateTime = new Date(Date.now()).toISOString();
-      const starCount = await PracticeSession.completeInitialTraining(
+      await PracticeSession.completeInitialTraining(
         userId,
         items.map((item) => item.item_id),
         dateTime,
         finalItem,
+        finalDirection,
+        expectedSession,
       );
       invalidateRouteData(routeDataKey('initial-training', userId));
       invalidateRouteData(routeDataKey('practice', userId));
-      setCelebrationStarTier(getStarTierForCount(starCount, config.practice.starsPerRow));
-      await waitForAcknowledgement();
-      finishCelebration();
       setIsComplete(true);
     },
-    [finishCelebration, items, userId, waitForAcknowledgement],
+    [items, userId],
   );
 
   const moveToNextPhase = useCallback(
@@ -480,7 +489,6 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
         session,
         currentItem,
         phase,
-        celebratingStar,
         isComplete,
         moveToNextPhase,
         finishBlock,
@@ -492,7 +500,6 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
       });
     },
     [
-      celebratingStar,
       currentItem,
       finishBlock,
       isComplete,
@@ -513,9 +520,7 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
     grammar,
     grammarGroup,
     isComplete,
-    celebratingStar,
-    celebrationStarTier,
-    acknowledgeCelebration,
+    isCompletion: isComplete,
     hasProgress,
     loading,
     error,
@@ -530,6 +535,7 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
     pronunciation,
     audioDisabled: cardState.audioDisabled,
     showDirectionChange: cardState.showDirectionChange,
+    hideDirectionChange: cardState.hideDirectionChange,
     handleReveal: cardState.handleReveal,
     plusHint: cardState.plusHint,
     nextRepeat: () => advance('incorrect'),

@@ -37,8 +37,7 @@ const config = {
 
   practice: {
     initialTrainingBatchSize: 8, // Maximum size of an automatically assembled initial-training batch
-    reviewStarSize: 20, // Number of review answers needed to earn one star
-    starsPerRow: 20, // Number of stars shown in one tier row
+    reviewMinimumSize: 20, // Minimum number of due items required to start one review direction
     audioDelay: 100, // Delay in milliseconds for automatically playing audio
     holdDuration: 300, // Duration in milliseconds for which the practice card is held before moving to the next item
     maxReviewReadyTimerDelayMs: 2_147_483_647, // Maximum setTimeout delay supported by browsers

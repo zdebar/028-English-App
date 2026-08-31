@@ -1,6 +1,6 @@
 import config from '@/config/config';
 import Levels from '@/database/models/levels';
-import UserScore from '@/database/models/user-scores';
+import UserItemProgressHistory from '@/database/models/user-item-progress-history';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { liveQuery } from 'dexie';
 import { useEffect, useState } from 'react';
@@ -22,7 +22,7 @@ function toError(error: unknown): Error {
 export function useUserStoreSync(userId: string | null) {
   const [localDate, setLocalDate] = useState(getLocalDate);
   const clearItemsStats = useUserStore((state) => state.clearLevels);
-  const clearScoresStats = useUserStore((state) => state.clearDailyStarCount);
+  const clearScoresStats = useUserStore((state) => state.clearDailyProgressChange);
 
   useEffect(() => {
     const intervalId = globalThis.setInterval(() => {
@@ -47,9 +47,9 @@ export function useUserStoreSync(userId: string | null) {
       levels: [],
       levelsLoading: true,
       levelsError: null,
-      dailyStarCount: 0,
-      dailyStarCountLoading: true,
-      dailyStarCountError: null,
+      dailyProgressChange: 0,
+      dailyProgressChangeLoading: true,
+      dailyProgressChangeError: null,
     });
 
     const levelsSubscription = liveQuery(() => Levels.getOverview(userId, localDate)).subscribe({
@@ -70,24 +70,24 @@ export function useUserStoreSync(userId: string | null) {
       },
     });
 
-    const dailyStarCountSubscription = liveQuery(() =>
-      UserScore.getScoreForDate(userId, localDate),
+    const dailyProgressChangeSubscription = liveQuery(() =>
+      UserItemProgressHistory.getTodayProgressChange(userId, localDate),
     ).subscribe({
-      next: (dailyStarCount) => {
+      next: (dailyProgressChange) => {
         if (isActive) {
           useUserStore.setState({
-            dailyStarCount: dailyStarCount ?? 0,
-            dailyStarCountLoading: false,
-            dailyStarCountError: null,
+            dailyProgressChange: dailyProgressChange ?? 0,
+            dailyProgressChangeLoading: false,
+            dailyProgressChangeError: null,
           });
         }
       },
       error: (error) => {
         if (isActive) {
           useUserStore.setState({
-            dailyStarCount: 0,
-            dailyStarCountLoading: false,
-            dailyStarCountError: toError(error),
+            dailyProgressChange: 0,
+            dailyProgressChangeLoading: false,
+            dailyProgressChangeError: toError(error),
           });
           reportError('Error observing daily count', error);
         }
@@ -97,7 +97,7 @@ export function useUserStoreSync(userId: string | null) {
     return () => {
       isActive = false;
       levelsSubscription.unsubscribe();
-      dailyStarCountSubscription.unsubscribe();
+      dailyProgressChangeSubscription.unsubscribe();
     };
   }, [userId, localDate, clearItemsStats, clearScoresStats]);
 }

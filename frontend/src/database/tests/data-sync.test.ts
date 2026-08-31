@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
   initDbMappings: vi.fn(),
   restoreUnsavedFromLocalStorage: vi.fn(),
   withSettledSummary: vi.fn(),
-  userScoreSyncFromRemote: vi.fn(),
+  progressHistorySyncFromRemote: vi.fn(),
   userItemSyncFromRemote: vi.fn(),
   blockSyncFromRemote: vi.fn(),
   grammarSyncFromRemote: vi.fn(),
@@ -52,9 +52,9 @@ vi.mock('@/features/logging/logging.utils', () => ({
   withSettledSummary: (...args: unknown[]) => mocks.withSettledSummary(...args),
 }));
 
-vi.mock('@/database/models/user-scores', () => ({
+vi.mock('@/database/models/user-item-progress-history', () => ({
   default: {
-    syncFromRemote: (...args: unknown[]) => mocks.userScoreSyncFromRemote(...args),
+    syncFromRemote: (...args: unknown[]) => mocks.progressHistorySyncFromRemote(...args),
   },
 }));
 
@@ -96,15 +96,13 @@ vi.mock('@/database/models/audio-records', () => ({
 
 vi.mock('@/database/models/pronunciation-groups', () => ({
   default: {
-    syncFromRemote: (...args: unknown[]) =>
-      mocks.pronunciationGroupSyncFromRemote(...args),
+    syncFromRemote: (...args: unknown[]) => mocks.pronunciationGroupSyncFromRemote(...args),
   },
 }));
 
 vi.mock('@/database/models/pronunciation-group-items', () => ({
   default: {
-    syncFromRemote: (...args: unknown[]) =>
-      mocks.pronunciationGroupItemSyncFromRemote(...args),
+    syncFromRemote: (...args: unknown[]) => mocks.pronunciationGroupItemSyncFromRemote(...args),
   },
 }));
 
@@ -147,7 +145,7 @@ describe('data-sync.utils', () => {
     mocks.restoreUnsavedFromLocalStorage.mockResolvedValue(undefined);
     mocks.withSettledSummary.mockResolvedValue({ total: 10, success: 10, failed: 0 });
 
-    mocks.userScoreSyncFromRemote.mockResolvedValue(undefined);
+    mocks.progressHistorySyncFromRemote.mockResolvedValue(undefined);
     mocks.userItemSyncFromRemote.mockResolvedValue(undefined);
     mocks.blockSyncFromRemote.mockResolvedValue(undefined);
     mocks.grammarSyncFromRemote.mockResolvedValue(undefined);
@@ -171,7 +169,7 @@ describe('data-sync.utils', () => {
 
     await dataSync('u1');
 
-    expect(mocks.userScoreSyncFromRemote).toHaveBeenCalledWith('u1', true);
+    expect(mocks.progressHistorySyncFromRemote).toHaveBeenCalledWith('u1', true);
     expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', true);
     expect(mocks.blockSyncFromRemote).toHaveBeenCalledWith(true);
     expect(mocks.grammarSyncFromRemote).toHaveBeenCalledWith(true);
@@ -190,7 +188,7 @@ describe('data-sync.utils', () => {
 
     await dataSync('u1');
 
-    expect(mocks.userScoreSyncFromRemote).toHaveBeenCalledWith('u1', false);
+    expect(mocks.progressHistorySyncFromRemote).toHaveBeenCalledWith('u1', false);
     expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', false);
     expect(mocks.blockSyncFromRemote).toHaveBeenCalledWith(false);
     expect(mocks.grammarSyncFromRemote).toHaveBeenCalledWith(false);
@@ -212,7 +210,7 @@ describe('data-sync.utils', () => {
   it('dataSyncOnUnmount syncs only user stores in partial mode', async () => {
     await dataSyncOnUnmount('u1');
 
-    expect(mocks.userScoreSyncFromRemote).toHaveBeenCalledWith('u1', false);
+    expect(mocks.progressHistorySyncFromRemote).toHaveBeenCalledWith('u1', false);
     expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', false);
   });
 
@@ -221,7 +219,7 @@ describe('data-sync.utils', () => {
 
     await dataSyncOnUnmount('u1');
 
-    expect(mocks.userScoreSyncFromRemote).not.toHaveBeenCalled();
+    expect(mocks.progressHistorySyncFromRemote).not.toHaveBeenCalled();
     expect(mocks.userItemSyncFromRemote).not.toHaveBeenCalled();
   });
 

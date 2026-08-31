@@ -9,13 +9,13 @@ import type {
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 import { Entity } from 'dexie';
 import type { PracticeDirection, UserItemLocal } from '@/types/user-item.types';
-import UserScore from './user-scores';
+import UserItemProgressHistory from './user-item-progress-history';
 import UserItem from './user-items';
+import { getEffectiveProgress, getProgressChange, getSrsLength } from '@/utils/progress.utils';
 
-export type ReviewAnswerResult = {
+export type PracticeAnswerResult = {
   completedCount: number;
-  earnedStar: boolean;
-  starCount: number | null;
+  progressChange: number;
 };
 
 export type ActivePracticeSessionState = {
@@ -97,6 +97,7 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
   retry_queue_item_ids!: number[];
   completed_item_ids!: number[];
   review_queue?: ReviewQueueEntry[];
+  review_direction?: PracticeDirection;
   started_at!: string;
   updated_at!: string;
 
@@ -153,7 +154,7 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
       user_id: userId,
       mode: 'review',
       completed_count: 0,
-      target_count: config.practice.reviewStarSize,
+      target_count: 0,
       block_id: null,
       phase: null,
       current_queue_item_ids: [],
@@ -200,127 +201,153 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
     await db.practice_sessions.put(session);
   }
 
-  /** Atomically stores one review answer, advances the session, and awards its final star. */
+  /** Atomically stores one review answer, advances the session, and records its progress change. */
   static async recordReviewAnswer(
+    originalItem: UserItemLocal,
     item: UserItemLocal,
     direction: PracticeDirection,
     dateTime: string,
-  ): Promise<ReviewAnswerResult> {
-    return db.transaction('rw', db.user_items, db.practice_sessions, db.user_scores, async () => {
-      const session = await this.getActive(item.user_id);
-      if (session?.mode !== 'review') {
-        throw new Error('Review answer requires an active review session.');
-      }
-      if (session.completed_count >= session.target_count) {
-        throw new Error('The active review session is already complete.');
-      }
+  ): Promise<PracticeAnswerResult> {
+    return db.transaction(
+      'rw',
+      db.user_items,
+      db.practice_sessions,
+      db.user_item_progress_history,
+      async () => {
+        const session = await this.getActive(originalItem.user_id);
+        if (session?.mode !== 'review') {
+          throw new Error('Review answer requires an active review session.');
+        }
+        if (!session.review_queue || session.review_queue.length === 0) {
+          throw new Error('The active review session is already complete.');
+        }
 
-      const updatedItemCount = await updateStoredPracticeItem(item);
-      if (updatedItemCount !== 1) {
-        throw new Error('The reviewed item no longer exists locally.');
-      }
-      const completedCount = session.completed_count + 1;
-      const earnedStar = completedCount === session.target_count;
-      const nextSession: PracticeSessionType = {
-        ...session,
-        completed_count: completedCount,
-        updated_at: dateTime,
-      };
-      const remainingReviewQueue = removeReviewQueueEntry(
-        session.review_queue,
-        item.item_id,
-        direction,
-      );
-      if (remainingReviewQueue) nextSession.review_queue = remainingReviewQueue;
-      await db.practice_sessions.put(nextSession);
-      const starCount = earnedStar ? await UserScore.addStar(item.user_id, 1, dateTime) : null;
+        const updatedItemCount = await updateStoredPracticeItem(item);
+        if (updatedItemCount !== 1) {
+          throw new Error('The reviewed item no longer exists locally.');
+        }
+        const completedCount = session.completed_count + 1;
+        const nextSession: PracticeSessionType = {
+          ...session,
+          completed_count: completedCount,
+          updated_at: dateTime,
+          review_queue: removeReviewQueueEntry(session.review_queue, item.item_id, direction),
+        };
+        await db.practice_sessions.put(nextSession);
+        const progressChange = await recordProgressChange(originalItem, item, direction, dateTime);
 
-      return { completedCount, earnedStar, starCount };
-    });
+        return { completedCount, progressChange };
+      },
+    );
   }
 
   /** Atomically stores one initial-training answer and advances its session. */
   static async recordInitialTrainingAnswer(
+    originalItem: UserItemLocal,
     item: UserItemLocal,
+    direction: PracticeDirection,
     session: PracticeSessionType,
   ): Promise<void> {
-    await db.transaction('rw', db.user_items, db.practice_sessions, async () => {
-      const activeSession = await this.getActive(item.user_id);
-      if (activeSession?.mode !== 'new') {
-        throw new Error('Initial-training answer requires an active new session.');
-      }
-      if (session.user_id !== item.user_id || session.mode !== 'new') {
-        throw new Error('Initial-training answer contains an invalid session.');
-      }
+    await db.transaction(
+      'rw',
+      db.user_items,
+      db.practice_sessions,
+      db.user_item_progress_history,
+      async () => {
+        if (session.user_id !== item.user_id || session.mode !== 'new') {
+          throw new Error('Initial-training answer contains an invalid session.');
+        }
+        // The availability observer can remove a stale-looking row while this page is open.
+        // The session held by the active deck is the authoritative continuation state.
+        const activeSession = await this.getActive(item.user_id);
+        if (activeSession && activeSession.mode !== 'new') {
+          throw new Error('Initial-training answer requires an active new session.');
+        }
 
-      const updatedItemCount = await updateStoredPracticeItem(item);
-      if (updatedItemCount !== 1) {
-        throw new Error('The trained item no longer exists locally.');
-      }
-      await db.practice_sessions.put(session);
-    });
+        const updatedItemCount = await updateStoredPracticeItem(item);
+        if (updatedItemCount !== 1) {
+          throw new Error('The trained item no longer exists locally.');
+        }
+        await db.practice_sessions.put(session);
+        await recordProgressChange(originalItem, item, direction, item.updated_at);
+      },
+    );
   }
 
-  /** Resets a completed review session for another twenty-answer star. */
-  static async continueReview(
-    userId: string,
-    dateTime: string = new Date(Date.now()).toISOString(),
-  ): Promise<PracticeSessionType | null> {
-    const session = await this.getActive(userId);
-    if (session?.mode !== 'review' || session.completed_count < session.target_count) return null;
-    const continuedSession: PracticeSessionType = {
-      ...session,
-      completed_count: 0,
-      target_count: config.practice.reviewStarSize,
-      review_queue: [],
-      updated_at: dateTime,
-    };
-    await db.practice_sessions.put(continuedSession);
-    return continuedSession;
-  }
-
-  /** Atomically completes initial training, awards its star, and removes the local session. */
+  /** Atomically completes initial training, records final progress changes, and removes the session. */
   static async completeInitialTraining(
     userId: string,
     itemIds: readonly number[],
     dateTime: string = new Date(Date.now()).toISOString(),
     finalItem?: UserItemLocal,
-  ): Promise<number> {
-    return db.transaction('rw', db.user_items, db.user_scores, db.practice_sessions, async () => {
-      const session = await this.getActive(userId);
-      if (session?.mode !== 'new') {
-        throw new Error('Initial-training completion requires its active local session.');
-      }
-
-      const sessionItemIds = new Set([
-        ...session.current_queue_item_ids,
-        ...session.retry_queue_item_ids,
-        ...session.completed_item_ids,
-      ]);
-      const completionItemIds = new Set(itemIds);
-      const referencesExactSession =
-        sessionItemIds.size === completionItemIds.size &&
-        [...sessionItemIds].every((itemId) => completionItemIds.has(itemId));
-      if (!referencesExactSession) {
-        throw new Error('Initial-training completion must match its saved item queue.');
-      }
-
-      if (finalItem) {
-        const updatedItemCount = await updateStoredPracticeItem(finalItem);
-        if (updatedItemCount !== 1) {
-          throw new Error('The final trained item no longer exists locally.');
+    finalDirection: PracticeDirection = 'enToCz',
+    expectedSession?: PracticeSessionType,
+  ): Promise<void> {
+    return db.transaction(
+      'rw',
+      db.user_items,
+      db.user_item_progress_history,
+      db.practice_sessions,
+      async () => {
+        const storedSession = await this.getActive(userId);
+        // Keep completion recoverable when the active row disappeared after the last answer.
+        const session = storedSession ?? expectedSession;
+        if (session?.mode !== 'new') {
+          throw new Error('Initial-training completion requires its active local session.');
         }
-      }
-      await UserItem.saveInitialTrainingCompletion(userId, itemIds, dateTime);
-      const starCount = await UserScore.addStar(userId, 1, dateTime);
-      await db.practice_sessions.delete(userId);
-      return starCount;
-    });
+
+        const sessionItemIds = new Set([
+          ...session.current_queue_item_ids,
+          ...session.retry_queue_item_ids,
+          ...session.completed_item_ids,
+        ]);
+        const completionItemIds = new Set(itemIds);
+        const referencesExactSession =
+          sessionItemIds.size === completionItemIds.size &&
+          [...sessionItemIds].every((itemId) => completionItemIds.has(itemId));
+        if (!referencesExactSession) {
+          throw new Error('Initial-training completion must match its saved item queue.');
+        }
+
+        if (finalItem) {
+          const originalFinalItem = await db.user_items.get([userId, finalItem.item_id]);
+          if (!originalFinalItem) {
+            throw new Error('The final trained item no longer exists locally.');
+          }
+          const updatedItemCount = await updateStoredPracticeItem(finalItem);
+          if (updatedItemCount !== 1) {
+            throw new Error('The final trained item no longer exists locally.');
+          }
+          await recordProgressChange(originalFinalItem, finalItem, finalDirection, dateTime);
+        }
+        await UserItem.saveInitialTrainingCompletion(userId, itemIds, dateTime);
+        await db.practice_sessions.delete(userId);
+      },
+    );
   }
 
   static async deleteByUserId(userId: string): Promise<void> {
     await db.practice_sessions.delete(userId);
   }
+}
+
+async function recordProgressChange(
+  originalItem: UserItemLocal,
+  updatedItem: UserItemLocal,
+  direction: PracticeDirection,
+  dateTime: string,
+): Promise<number> {
+  const progressChange = getProgressChange(originalItem, updatedItem, direction);
+  await UserItemProgressHistory.recordChange(
+    updatedItem.user_id,
+    updatedItem.item_id,
+    direction,
+    getEffectiveProgress(updatedItem, direction),
+    getSrsLength(direction),
+    progressChange,
+    dateTime,
+  );
+  return progressChange;
 }
 
 function removeReviewQueueEntry(
@@ -336,7 +363,6 @@ async function updateStoredPracticeItem(item: UserItemLocal): Promise<number> {
   return db.user_items.update([item.user_id, item.item_id], {
     progress_cz_to_en: item.progress_cz_to_en,
     progress_en_to_cz: item.progress_en_to_cz,
-    progress_history: item.progress_history,
     started_at: item.started_at,
     updated_at: item.updated_at,
     next_at_cz_to_en: item.next_at_cz_to_en,

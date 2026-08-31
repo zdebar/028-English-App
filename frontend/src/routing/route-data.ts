@@ -4,7 +4,7 @@ import PronunciationGroup from '@/database/models/pronunciation-groups';
 import Block from '@/database/models/blocks';
 import PracticeSession from '@/database/models/practice-sessions';
 import UserItem from '@/database/models/user-items';
-import UserScore from '@/database/models/user-scores';
+import UserItemProgressHistory from '@/database/models/user-item-progress-history';
 import Topic from '@/database/models/topics';
 import { routeDataKey, type RouteDataDescriptor } from './route-data-handoff';
 import {
@@ -97,7 +97,7 @@ export function overviewAvailabilityDescriptor(userId: string) {
 export function practiceOverviewDescriptor(userId: string) {
   return {
     key: routeDataKey('practice-overview', userId),
-    load: () => UserScore.getByUserId(userId),
+    load: () => UserItemProgressHistory.getByUserId(userId),
   };
 }
 

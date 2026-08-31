@@ -21,6 +21,8 @@ export interface PracticeSessionType {
   completed_item_ids: number[];
   /** Remaining review cards in their original order; absent on legacy sessions. */
   review_queue?: ReviewQueueEntry[];
+  /** Direction currently being reviewed; used to restore direction changes. */
+  review_direction?: PracticeDirection;
   started_at: string;
   updated_at: string;
 }

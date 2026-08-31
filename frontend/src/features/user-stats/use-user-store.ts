@@ -5,11 +5,11 @@ interface UserState {
   levels: LevelOverviewType[];
   levelsLoading: boolean;
   levelsError: Error | null;
-  dailyStarCount: number;
-  dailyStarCountLoading: boolean;
-  dailyStarCountError: Error | null;
+  dailyProgressChange: number;
+  dailyProgressChangeLoading: boolean;
+  dailyProgressChangeError: Error | null;
   clearLevels: () => void;
-  clearDailyStarCount: () => void;
+  clearDailyProgressChange: () => void;
 }
 
 const initialLevels: LevelOverviewType[] = [];
@@ -25,17 +25,17 @@ export const useUserStore = create<UserState>((set) => {
     levels: initialLevels,
     levelsLoading: true,
     levelsError: null,
-    dailyStarCount: initialDailyStats,
-    dailyStarCountLoading: false,
-    dailyStarCountError: null,
+    dailyProgressChange: initialDailyStats,
+    dailyProgressChangeLoading: false,
+    dailyProgressChangeError: null,
     clearLevels: () => {
       set({ levels: initialLevels, levelsLoading: false, levelsError: null });
     },
-    clearDailyStarCount: () => {
+    clearDailyProgressChange: () => {
       set({
-        dailyStarCount: initialDailyStats,
-        dailyStarCountLoading: false,
-        dailyStarCountError: null,
+        dailyProgressChange: initialDailyStats,
+        dailyProgressChangeLoading: false,
+        dailyProgressChangeError: null,
       });
     },
   };

@@ -79,14 +79,13 @@ describe('database.utils', () => {
   });
 
   describe('fetchStorage', () => {
-    it('downloads blob from storage using cache-busted path', async () => {
-      vi.spyOn(Date, 'now').mockReturnValue(123456);
+    it('downloads blob from storage using the normalized object path', async () => {
       const blob = new Blob(['ok']);
       mocks.download.mockResolvedValue({ data: blob, error: null });
 
       const result = await fetchStorage('bucket-a', '/file.json');
 
-      expect(mocks.download).toHaveBeenCalledWith('file.json?t=123456');
+      expect(mocks.download).toHaveBeenCalledWith('file.json');
       expect(result).toBe(blob);
     });
 

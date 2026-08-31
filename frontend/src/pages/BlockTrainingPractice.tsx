@@ -7,6 +7,7 @@ import PracticeEmptyState from '@/features/practice/PracticeEmptyState';
 import PracticeSessionCard from '@/features/practice/PracticeSessionCard';
 import { useInitialTrainingDeck } from '@/features/practice/hooks/use-block-training-deck';
 import { useToastStore } from '@/features/toast/use-toast-store';
+import { useUserStore } from '@/features/user-stats/use-user-store';
 import { TEXTS } from '@/locales/cs';
 import { useEffect, useState, type JSX } from 'react';
 import { useLoaderData, useNavigate } from 'react-router-dom';
@@ -24,25 +25,49 @@ function reportInitialTrainingError(
   reportError('Failed to fetch initial training deck', error);
 }
 
-function navigateAfterInitialTraining(
-  isComplete: boolean,
-  navigate: ReturnType<typeof useNavigate>,
-): void {
-  if (isComplete) navigate(ROUTES.home, { replace: true });
-}
-
 function InitialTrainingContent({
   deck,
   introDismissed,
   dismissIntro,
+  onCompletionContinue,
 }: Readonly<{
   deck: InitialTrainingDeck;
   introDismissed: boolean;
   dismissIntro: () => void;
+  onCompletionContinue: () => void;
 }>): JSX.Element {
+  const dailyProgressChange = useUserStore((state) => state.dailyProgressChange);
   if (deck.loading) return <DelayedLoadingCircle />;
+  if (deck.isComplete) {
+    return (
+      <PracticeSessionCard
+        note={null}
+        grammar={null}
+        progressLabel={deck.progressLabel}
+        progressHelpText={TEXTS.progress}
+        dailyProgressChange={dailyProgressChange}
+        isBlockTrainingPractice
+        isCompletion
+        onCompletionContinue={onCompletionContinue}
+        isCzToEn={deck.isCzToEn}
+        revealed={false}
+        czech={undefined}
+        english={undefined}
+        pronunciation={undefined}
+        audioDisabled
+        showDirectionChange={false}
+        handleReveal={() => undefined}
+        plusHint={() => undefined}
+        nextRepeat={() => undefined}
+        nextKnown={() => undefined}
+        completeCurrent={() => undefined}
+        audioError={false}
+        playAudio={() => undefined}
+        audioLoading={false}
+      />
+    );
+  }
   if (!deck.hasContent && !deck.currentItem) return <PracticeEmptyState />;
-  if (deck.isComplete) return <DelayedLoadingCircle />;
   if (!deck.currentItem) return <PracticeEmptyState />;
 
   const showIntro = Boolean(deck.block) && !deck.hasProgress && !introDismissed;
@@ -63,9 +88,7 @@ function InitialTrainingContent({
       note={deck.note}
       grammar={deck.practiceGrammar}
       progressLabel={deck.progressLabel}
-      celebratingStar={deck.celebratingStar}
-      celebrationStarTier={deck.celebrationStarTier}
-      onStarCelebrationContinue={deck.acknowledgeCelebration}
+      dailyProgressChange={dailyProgressChange}
       isCzToEn={deck.isCzToEn}
       revealed={deck.revealed}
       czech={deck.czech}
@@ -99,10 +122,6 @@ export default function InitialTrainingPractice(): JSX.Element {
     reportInitialTrainingError(deck.error, showToast);
   }, [deck.error, showToast]);
 
-  useEffect(() => {
-    navigateAfterInitialTraining(deck.isComplete, navigate);
-  }, [deck.isComplete, navigate]);
-
   if (!userId) {
     return <Notification>{TEXTS.notAvailable}</Notification>;
   }
@@ -112,6 +131,7 @@ export default function InitialTrainingPractice(): JSX.Element {
       deck={deck}
       introDismissed={introDismissed}
       dismissIntro={() => setIntroDismissed(true)}
+      onCompletionContinue={() => navigate(ROUTES.home, { replace: true })}
     />
   );
 }

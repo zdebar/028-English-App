@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
   clearTheme: vi.fn(),
   saveCurrentThemeAsGuest: vi.fn(),
   deleteAllByUserId: vi.fn(),
-  deleteAllUserScores: vi.fn(),
+  deleteAllProgressHistory: vi.fn(),
   deleteSyncRow: vi.fn(),
   clearSyncTimes: vi.fn(),
   rpc: vi.fn(),
@@ -50,9 +50,9 @@ vi.mock('@/database/models/user-items', () => ({
   },
 }));
 
-vi.mock('@/database/models/user-scores', () => ({
+vi.mock('@/database/models/user-item-progress-history', () => ({
   default: {
-    deleteByUserId: (...args: unknown[]) => mocks.deleteAllUserScores(...args),
+    deleteByUserId: (...args: unknown[]) => mocks.deleteAllProgressHistory(...args),
   },
 }));
 
@@ -87,7 +87,7 @@ vi.mock('@/locales/cs', () => ({
 vi.mock('@/types/table.types', () => ({
   TableName: {
     UserItems: 'user_items',
-    UserScores: 'user_scores',
+    UserItemProgressHistory: 'user_item_progress_history',
   },
 }));
 
@@ -113,7 +113,7 @@ describe('DeleteUserButton', () => {
 
     mocks.rpc.mockResolvedValue({ error: null });
     mocks.deleteAllByUserId.mockResolvedValue(0);
-    mocks.deleteAllUserScores.mockResolvedValue(0);
+    mocks.deleteAllProgressHistory.mockResolvedValue(0);
     mocks.deleteSyncRow.mockResolvedValue(true);
     mocks.clearTheme.mockResolvedValue(undefined);
     mocks.saveCurrentThemeAsGuest.mockReturnValue(undefined);

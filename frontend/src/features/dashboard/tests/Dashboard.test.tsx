@@ -13,16 +13,14 @@ const mocks = vi.hoisted(() => ({
     startedCount?: number;
     startedTodayCount?: number;
     totalCount?: number;
+    currentProgress?: number;
+    dailyProgressChange?: number;
+    maximumProgress?: number;
   }>,
 }));
 
 vi.mock('@/features/user-stats/use-user-store', () => ({
-  useUserStore: (
-    selector: (state: {
-      levels: unknown[];
-      levelsLoading: boolean;
-    }) => unknown,
-  ) =>
+  useUserStore: (selector: (state: { levels: unknown[]; levelsLoading: boolean }) => unknown) =>
     selector({
       levels: mocks.levels,
       levelsLoading: mocks.levelsLoading,
@@ -49,9 +47,15 @@ vi.mock('@/routing/data-navigation', () => ({
 }));
 
 vi.mock('@/components/UI/BlockBar', () => ({
-  default: ({ lessonName, todayCount }: { lessonName: string; todayCount: number }) => (
+  default: ({
+    lessonName,
+    dailyProgressChange,
+  }: {
+    lessonName: string;
+    dailyProgressChange: number;
+  }) => (
     <div data-testid="block-bar">
-      {lessonName}:{todayCount}
+      {lessonName}:{dailyProgressChange}
     </div>
   ),
 }));
@@ -64,7 +68,7 @@ vi.mock('@/locales/cs', () => ({
   ARIA_TEXTS: { dashboardRegion: 'Dashboard' },
   TEXTS: {
     noDashboardData: 'Žádná data.',
-    startedTodayHint: 'Dnes zahajeno',
+    progressTodayHint: 'Dnesní změna progressu',
     levelsOverview: 'Přehled CEFR úrovní',
     levelsOverviewTooltip: 'Otevřít přehled CEFR úrovní',
   },
@@ -88,7 +92,7 @@ describe('Dashboard', () => {
 
     expect(screen.queryByText('Žádná data.')).toBeNull();
     expect(screen.queryByTestId('block-bar')).toBeNull();
-    expect(screen.queryByText('Dnes zahajeno')).toBeNull();
+    expect(screen.queryByText('Dnesní změna progressu')).toBeNull();
     expect(screen.queryByRole('link')).toBeNull();
     expect(screen.queryByRole('button', { name: 'toggle' })).toBeNull();
   });
@@ -98,7 +102,7 @@ describe('Dashboard', () => {
 
     expect(screen.getByText('Žádná data.')).toBeTruthy();
     expect(screen.queryByTestId('block-bar')).toBeNull();
-    expect(screen.queryByText('Dnes zahajeno')).toBeNull();
+    expect(screen.queryByText('Dnesní změna progressu')).toBeNull();
     expect(screen.queryByRole('link')).toBeNull();
     expect(screen.queryByRole('button', { name: 'toggle' })).toBeNull();
   });
@@ -124,6 +128,9 @@ describe('Dashboard', () => {
         startedCount: 2,
         startedTodayCount: 1,
         totalCount: 10,
+        currentProgress: 12,
+        dailyProgressChange: 3,
+        maximumProgress: 30,
       },
     ];
 
@@ -131,8 +138,8 @@ describe('Dashboard', () => {
 
     render(<Dashboard userId="u1" />);
 
-    expect(screen.getByText('Dnes zahajeno')).toBeTruthy();
-    expect(screen.getByText('Lesson 1:1')).toBeTruthy();
+    expect(screen.getByText('Dnesní změna progressu')).toBeTruthy();
+    expect(screen.getByText('Lesson 1:3')).toBeTruthy();
     expect(screen.queryByRole('button')).toBeNull();
     expect(screen.getByRole('link').getAttribute('href')).toBe('/levels');
   });

@@ -4,25 +4,9 @@ import { describe, expect, it, vi } from 'vitest';
 vi.mock('@/config/config', () => ({
   default: {
     practice: {
-      starsPerRow: 10,
+      reviewMinimumSize: 20,
     },
   },
-}));
-
-vi.mock('@/components/UI/StarProgress', () => ({
-  default: ({
-    count,
-    chunkSize,
-    starsPerRow,
-  }: {
-    count: number;
-    chunkSize: number;
-    starsPerRow: number;
-  }) => (
-    <div data-testid="star-progress">
-      {count}:{chunkSize}:{starsPerRow}
-    </div>
-  ),
 }));
 
 vi.mock('@/features/help/HelpText', () => ({
@@ -34,7 +18,7 @@ vi.mock('@/features/help/HelpText', () => ({
 import PracticeOverviewButton from '@/features/practice-overview/PracticeOverviewButton';
 
 describe('PracticeOverviewButton', () => {
-  it('renders star progress and help text', () => {
+  it('renders numeric progress and help text', () => {
     render(
       <PracticeOverviewButton
         count={3}
@@ -46,9 +30,9 @@ describe('PracticeOverviewButton', () => {
     const button = screen.getByRole('button', { name: 'Open practice overview' });
     expect(button).toBeTruthy();
     expect(button.getAttribute('title')).toBe('Open practice overview');
-    expect(button.className).toContain('home-star-button');
     expect(button.className).not.toContain('hover:ring');
-    expect(screen.getByTestId('star-progress').textContent).toBe('3:1:10');
+    expect(button.textContent).toBe('+ 3Stars today');
+    expect(button.className).toContain('hover:underline');
     expect(screen.getByTestId('help-text').textContent).toBe('Stars today');
   });
 

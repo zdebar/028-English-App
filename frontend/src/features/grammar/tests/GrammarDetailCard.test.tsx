@@ -65,7 +65,6 @@ const exampleItem: UserItemLocal = {
   sort_order: 1,
   progress_cz_to_en: 0,
   progress_en_to_cz: 0,
-  progress_history: [],
   note_id: null,
   lesson_id: 1,
   updated_at: '2026-08-02T00:00:00.000Z',
@@ -156,10 +155,7 @@ describe('GrammarDetailCard', () => {
 
   it('hides help by default and renders it when explicitly enabled', () => {
     const { container, rerender } = render(
-      <GrammarDetailCard
-        grammar={{ kind: 'chunk', id: 1, name: 'Articles' }}
-        onClose={vi.fn()}
-      />,
+      <GrammarDetailCard grammar={{ kind: 'chunk', id: 1, name: 'Articles' }} onClose={vi.fn()} />,
     );
 
     expect(screen.queryByTestId('help')).toBeNull();

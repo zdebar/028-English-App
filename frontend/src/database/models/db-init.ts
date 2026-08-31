@@ -8,7 +8,7 @@ import Levels from '@/database/models/levels';
 import Metadata from '@/database/models/metadata';
 import Block from '@/database/models/blocks';
 import UserItem from '@/database/models/user-items';
-import UserScore from '@/database/models/user-scores';
+import UserItemProgressHistory from '@/database/models/user-item-progress-history';
 import Notes from './notes';
 import PronunciationGroup from './pronunciation-groups';
 import PronunciationGroupItem from './pronunciation-group-items';
@@ -31,7 +31,7 @@ export async function initDbMappings(): Promise<void> {
   db.pronunciation_group_items.mapToClass(PronunciationGroupItem);
   db.levels.mapToClass(Levels);
   db.lessons.mapToClass(Lessons);
-  db.user_scores.mapToClass(UserScore);
+  db.user_item_progress_history.mapToClass(UserItemProgressHistory);
   db.audio_records.mapToClass(AudioRecord);
   db.audio_metadata.mapToClass(AudioMetadata);
   db.metadata.mapToClass(Metadata);
