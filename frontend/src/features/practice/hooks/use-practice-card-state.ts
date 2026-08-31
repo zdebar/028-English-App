@@ -8,6 +8,7 @@ type UsePracticeCardStateOptions = {
   currentItem: UserItemLocal | null;
   isCzToEn: boolean;
   revealed: boolean;
+  isCompletion?: boolean;
   setRevealed: Dispatch<SetStateAction<boolean>>;
 };
 
@@ -51,9 +52,12 @@ function schedulePracticeAudio(
   isCzToEn: boolean,
   audioLoading: boolean,
   showDirectionChange: boolean,
+  isCompletion: boolean,
   playAudio: () => void,
 ): (() => void) | undefined {
-  if (audioDisabled || isCzToEn || audioLoading || showDirectionChange) return undefined;
+  if (isCompletion || audioDisabled || isCzToEn || audioLoading || showDirectionChange) {
+    return undefined;
+  }
 
   const timeoutId = globalThis.setTimeout(playAudio, config.practice.audioDelay);
   return () => globalThis.clearTimeout(timeoutId);
@@ -80,6 +84,7 @@ export function usePracticeCardState({
   currentItem,
   isCzToEn,
   revealed,
+  isCompletion = false,
   setRevealed,
 }: UsePracticeCardStateOptions) {
   const { czechHinted, englishHinted, resetHint, plusHint } = useHint(
@@ -88,6 +93,7 @@ export function usePracticeCardState({
   );
   const {
     playAudio: playAudioInternal,
+    stopAudio,
     audioError,
     loading: audioLoading,
     isPlaying,
@@ -109,14 +115,28 @@ export function usePracticeCardState({
   }, [resetHint, setRevealed]);
 
   useEffect(() => {
+    if (isCompletion) {
+      stopAudio();
+      return undefined;
+    }
     return schedulePracticeAudio(
       audioDisabled,
       isCzToEn,
       audioLoading,
       showDirectionChange,
+      isCompletion,
       playAudioInternal,
     );
-  }, [audioDisabled, isCzToEn, audioLoading, showDirectionChange, playAudioInternal, currentItem]);
+  }, [
+    audioDisabled,
+    isCzToEn,
+    audioLoading,
+    showDirectionChange,
+    isCompletion,
+    playAudioInternal,
+    stopAudio,
+    currentItem,
+  ]);
 
   const handleReveal = useCallback(() => {
     revealPracticeCard(

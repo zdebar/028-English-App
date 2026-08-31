@@ -43,7 +43,13 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
     () => getReviewDeckView(fetchedResult, index),
     [fetchedResult, index],
   );
-  const cardState = usePracticeCardState({ currentItem, isCzToEn, revealed, setRevealed });
+  const cardState = usePracticeCardState({
+    currentItem,
+    isCzToEn,
+    revealed,
+    isCompletion: finishedReview,
+    setRevealed,
+  });
   const resetHint = cardState.resetHint;
   const resetQuestionState = cardState.resetQuestionState;
 

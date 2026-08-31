@@ -445,7 +445,13 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
     [isComplete, itemById, items, resolvedEntries, revealed, session],
   );
   const isCzToEn = PHASE_DIRECTIONS[phase] === 'czToEn';
-  const cardState = usePracticeCardState({ currentItem, isCzToEn, revealed, setRevealed });
+  const cardState = usePracticeCardState({
+    currentItem,
+    isCzToEn,
+    revealed,
+    isCompletion: isComplete,
+    setRevealed,
+  });
   const resetQuestionState = cardState.resetQuestionState;
 
   const finishBlock = useCallback(
