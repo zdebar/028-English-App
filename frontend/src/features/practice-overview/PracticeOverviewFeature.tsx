@@ -1,4 +1,5 @@
 import OverviewCard from '@/components/UI/OverviewCard';
+import config from '@/config/config';
 import { ROUTES } from '@/config/routes.config';
 import UserItemProgressHistory from '@/database/models/user-item-progress-history';
 import { useAuthStore } from '@/features/auth/use-auth-store';
@@ -99,6 +100,8 @@ function PracticeOverviewRow({
   expanded,
   onToggle,
 }: Readonly<{ day: PracticeDay; expanded: boolean; onToggle: () => void }>): JSX.Element {
+  const scoreColorClass = getDailyScoreColorClass(day.score);
+
   return (
     <div className={isSunday(day.date) ? 'border-t-2 border-b' : 'border-b'}>
       <button
@@ -112,7 +115,9 @@ function PracticeOverviewRow({
         >
           {formatPracticeDate(day.date)}
         </span>
-        <span className="mr-4 font-bold">{formatProgressChange(day.score)}</span>
+        <span className={`mr-4 font-bold ${scoreColorClass}`}>
+          {formatProgressChange(day.score)}
+        </span>
       </button>
       {expanded &&
         day.entries.map((entry) => (
@@ -120,6 +125,13 @@ function PracticeOverviewRow({
         ))}
     </div>
   );
+}
+
+function getDailyScoreColorClass(score: number): string {
+  if (score >= config.practice.dailyProgressGoal) {
+    return 'text-success-light dark:text-success-dark';
+  }
+  return 'text-error-light dark:text-error-dark';
 }
 
 export default function PracticeOverviewFeature({
