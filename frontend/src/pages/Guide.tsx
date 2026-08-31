@@ -7,8 +7,6 @@ import { Screenshot } from '@/components/UI/Screenshot';
  * @returns A JSX element containing the guide page.
  */
 export default function Guide(): JSX.Element {
-
-
   return (
     <div className="guide card-width overflow-x-hidden">
       <h1 className="text-center">Návod</h1>
@@ -44,9 +42,9 @@ export default function Guide(): JSX.Element {
           offline.
         </p>
         <h3>Denní cíl</h3>
-        <p>Doporučený minimální denní cíl je 10 hvězdiček, tedy 200 odpovědí.</p>
+        <p>Denní cíl pokroku je 200.</p>
         <h3>Opakování</h3>
-        <p>Procvičování již započatých položek. Každých 20 odpovědí přidá jednu hvězdičku.</p>
+        <p>Procvičování již započatých položek, které zvyšuje nebo snižuje jejich pokrok.</p>
         <h3>Nové</h3>
         <p>Učení nového bloku slovíček v obou směrech a v pevném i náhodném pořadí.</p>
         <h3>Výslovnost</h3>
@@ -73,7 +71,7 @@ export default function Guide(): JSX.Element {
           angličtiny do češtiny.
         </p>
         <h3>Denní pokrok</h3>
-        <p>Zobrazuje počet dosažených denních hvězdiček a číselný postup na hvězdičce.</p>
+        <p>Zobrazuje dnešní změnu pokroku a její postup k dennímu cíli.</p>
         <h3>Nápověda</h3>
         <p>Písmeno po písmenu odhaluje slovíčko či větu.</p>
         <h3>Přidat do výslovnosti</h3>

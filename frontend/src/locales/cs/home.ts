@@ -11,6 +11,7 @@ export const HOME_TEXTS = {
   installButton: 'Nainstalovat aplikaci',
   installButtonTooltip: 'Nainstalovat PWA aplikaci.',
   progressToday: 'dnešní pokrok',
+  dailyProgressGoal: 'dnešní pokrok / cíl',
   reviewButton: 'Opakování',
   newButton: 'Nové',
 

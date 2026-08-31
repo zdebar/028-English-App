@@ -5,10 +5,11 @@ import { useDataNavigation } from '@/routing/data-navigation';
 import { formatProgressChange } from '@/utils/format.utils';
 
 const BUTTON_CLASS_NAME =
-  'relative mx-auto inline-flex w-full cursor-pointer items-center justify-center p-2 text-center decoration-current underline-offset-4 hover:underline focus:outline-none';
+  'relative mx-auto inline-flex w-full cursor-pointer items-center justify-center p-2 text-center underline-offset-4 hover:underline focus:outline-none';
 
 type Props = {
   count: number;
+  goal: number;
   onClick?: () => void;
   ariaLabel?: string;
   helpText?: React.ReactNode;
@@ -19,6 +20,7 @@ type Props = {
 
 export default function PracticeOverviewButton({
   count,
+  goal,
   onClick,
   ariaLabel,
   helpText,
@@ -30,6 +32,7 @@ export default function PracticeOverviewButton({
     return (
       <DataPracticeOverviewButton
         count={count}
+        goal={goal}
         ariaLabel={ariaLabel}
         helpText={helpText}
         className={className}
@@ -39,26 +42,48 @@ export default function PracticeOverviewButton({
     );
   }
 
+  const decorationColorClass = getGoalDecorationColorClass(count, goal);
+
   return (
     <button
       type="button"
-      className={`${BUTTON_CLASS_NAME} ${className}`}
+      className={`${BUTTON_CLASS_NAME} ${decorationColorClass} ${className}`}
       aria-label={ariaLabel}
       title={ariaLabel}
       onClick={onClick}
     >
-      <DailyProgressValue value={count} />
+      <DailyProgressValue value={count} goal={goal} />
       <HelpText className="-top-4 whitespace-nowrap">{helpText}</HelpText>
     </button>
   );
 }
 
-function DailyProgressValue({ value }: Readonly<{ value: number }>): JSX.Element {
-  return <span className="font-headings text-2xl font-bold">{formatProgressChange(value)}</span>;
+function DailyProgressValue({
+  value,
+  goal,
+}: Readonly<{ value: number; goal: number }>): JSX.Element {
+  const colorClass = getGoalTextColorClass(value, goal);
+
+  return (
+    <span className={`${colorClass} font-headings text-xl font-bold`}>
+      {formatProgressChange(value)} / {goal}
+    </span>
+  );
+}
+
+function getGoalTextColorClass(value: number, goal: number): string {
+  if (value >= goal) return 'text-success-light dark:text-success-dark';
+  return 'text-error-light dark:text-error-dark';
+}
+
+function getGoalDecorationColorClass(value: number, goal: number): string {
+  if (value >= goal) return 'decoration-success-light dark:decoration-success-dark';
+  return 'decoration-error-light dark:decoration-error-dark';
 }
 
 function DataPracticeOverviewButton({
   count,
+  goal,
   ariaLabel,
   helpText,
   className = '',
@@ -66,17 +91,19 @@ function DataPracticeOverviewButton({
   descriptor,
 }: Readonly<Props & { to: string }>): JSX.Element {
   const { pending, loadAndNavigate } = useDataNavigation(descriptor, to);
+  const decorationColorClass = getGoalDecorationColorClass(count, goal);
+
   return (
     <button
       type="button"
-      className={`${BUTTON_CLASS_NAME} ${className}`}
+      className={`${BUTTON_CLASS_NAME} ${decorationColorClass} ${className}`}
       aria-label={ariaLabel}
       title={ariaLabel}
       aria-busy={pending}
       disabled={pending}
       onClick={() => void loadAndNavigate()}
     >
-      <DailyProgressValue value={count} />
+      <DailyProgressValue value={count} goal={goal} />
       <HelpText className="-top-4 whitespace-nowrap">{helpText}</HelpText>
     </button>
   );

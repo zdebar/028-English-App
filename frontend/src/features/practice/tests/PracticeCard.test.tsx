@@ -115,7 +115,6 @@ vi.mock('@/locales/cs', () => ({
     reviewCompleted: 'Review completed',
     returnToHomeByClick: 'Click to return home',
     today: 'Today',
-    dailyGoal: 'Daily goal',
     loadingMessage: 'Loading',
     loadingError: 'Loading error',
     directionCzToEn: 'CZ to EN',

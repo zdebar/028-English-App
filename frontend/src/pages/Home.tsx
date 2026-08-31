@@ -18,6 +18,7 @@ import PracticeButton from '@/features/practice/PracticeButton';
 import HelpButton from '@/features/help/HelpButton';
 import PronunciationPracticeButton from '@/features/pronunciation/PronunciationPracticeButton';
 import { practiceOverviewDescriptor } from '@/routing/route-data';
+import config from '@/config/config';
 
 const HOME_TEXT_ACTION_CLASS_NAME =
   'color-info font-headings text-center text-lg decoration-current underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2';
@@ -80,10 +81,11 @@ export default function Home(): JSX.Element {
           )}
           <PracticeOverviewButton
             count={dailyProgressChange}
+            goal={config.practice.dailyProgressGoal}
             to={ROUTES.practiceOverview}
             descriptor={practiceOverviewDescriptor(userId)}
             ariaLabel={TEXTS.practiceOverviewOpen}
-            helpText={TEXTS.progressToday}
+            helpText={TEXTS.dailyProgressGoal}
           />
           <div className="flex w-full flex-col gap-1">
             <PracticeButton userId={userId} />

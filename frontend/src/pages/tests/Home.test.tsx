@@ -29,7 +29,7 @@ vi.mock('@/config/config', () => ({
       dbName: 'test-db',
     },
     practice: {
-      dailyGoal: 10,
+      dailyProgressGoal: 200,
       reviewMinimumSize: 20,
     },
   },
@@ -76,8 +76,8 @@ vi.mock('@/locales/cs', () => ({
     userStatsLabel: 'Today',
     practiceOverviewOpen: 'Open practice overview',
     progressToday: 'Progress today',
+    dailyProgressGoal: 'Progress today / goal',
     today: 'Today',
-    dailyGoal: 'Goal',
     loadingMessage: 'Loading',
     syncWarning: 'Data may be stale.',
     signupHint: 'Signup hint',
@@ -102,9 +102,15 @@ vi.mock('@/features/pwa/InstallPwaButton', () => ({
 }));
 
 vi.mock('@/features/practice-overview/PracticeOverviewButton', () => ({
-  default: ({ count, ariaLabel, helpText }: any) => (
-    <button type="button" aria-label={ariaLabel} data-testid="practice-overview-button">
-      {count}:{helpText}
+  default: ({ count, goal, ariaLabel, helpText }: any) => (
+    <button
+      type="button"
+      aria-label={ariaLabel}
+      data-testid="practice-overview-button"
+      data-count={count}
+      data-goal={goal}
+    >
+      {helpText}
     </button>
   ),
 }));
@@ -192,6 +198,10 @@ describe('Home', () => {
 
     expect(screen.getByText('Data may be stale.').className).toContain('invisible');
     expect(screen.getByRole('button', { name: 'Open practice overview' })).toBeTruthy();
+    expect(screen.getByTestId('practice-overview-button').dataset.goal).toBe('200');
+    expect(screen.getByTestId('practice-overview-button').textContent).toBe(
+      'Progress today / goal',
+    );
     expect(screen.queryByText('App')).toBeNull();
   });
 
