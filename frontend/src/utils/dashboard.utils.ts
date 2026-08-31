@@ -20,7 +20,7 @@ export function getInProgressLessons(levelsOverview: LevelOverviewType[]): Lesso
   const hasStartedLessons = sortedLessons.some(hasStartedItems);
   if (!hasStartedLessons) return [sortedLessons[0]];
 
-  const lastStartedLesson = sortedLessons.filter(hasStartedItems).at(-1);
+  const lastStartedLesson = [...sortedLessons].reverse().find(hasStartedItems);
   return lastStartedLesson == null ? [sortedLessons[0]] : [lastStartedLesson];
 }
 
