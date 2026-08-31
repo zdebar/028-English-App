@@ -19,7 +19,7 @@ export default function Dashboard({ userId, className = '' }: DashboardProps) {
   const levelsLoading = useUserStore((state) => state.levelsLoading);
   const levels = Array.isArray(levelsOverview) ? levelsOverview : [];
 
-  const lessonsInProgress = getInProgressLessons(levels);
+  const visibleLessons = getInProgressLessons(levels);
 
   if (levelsLoading) {
     return (
@@ -30,7 +30,7 @@ export default function Dashboard({ userId, className = '' }: DashboardProps) {
     );
   }
 
-  if (levels.length === 0) {
+  if (levels.length === 0 || visibleLessons.length === 0) {
     return (
       <section
         className={`min-w-card h-attribute relative mx-auto w-full ${className}`}
@@ -53,23 +53,17 @@ export default function Dashboard({ userId, className = '' }: DashboardProps) {
         className={`min-w-card relative flex w-full flex-col gap-1 ${className}`}
         aria-label={ARIA_TEXTS.dashboardRegion}
       >
-        {lessonsInProgress.length === 0 ? (
-          <Notification className="color-info">{TEXTS.levelsOverview}</Notification>
-        ) : (
-          <>
-            {lessonsInProgress.map((lesson) => (
-              <BlockBar
-                key={lesson.id}
-                lessonName={lesson.name ?? ''}
-                lessonNumber={lesson.sort_order}
-                currentProgress={lesson.currentProgress ?? 0}
-                dailyProgressChange={lesson.dailyProgressChange ?? 0}
-                maximumProgress={lesson.maximumProgress ?? 1}
-              />
-            ))}
-            <HelpText className="right-2 -bottom-6">{TEXTS.progressTodayHint}</HelpText>
-          </>
-        )}
+        {visibleLessons.map((lesson) => (
+          <BlockBar
+            key={lesson.id}
+            lessonName={lesson.name ?? ''}
+            lessonNumber={lesson.sort_order}
+            currentProgress={lesson.currentProgress ?? 0}
+            dailyProgressChange={lesson.dailyProgressChange ?? 0}
+            maximumProgress={lesson.maximumProgress ?? 1}
+          />
+        ))}
+        <HelpText className="right-2 -bottom-6">{TEXTS.progressTodayHint}</HelpText>
       </section>
     </DataNavigationLink>
   );
