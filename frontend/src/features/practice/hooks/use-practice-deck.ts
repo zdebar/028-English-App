@@ -28,8 +28,14 @@ import { useStarCelebration } from './use-star-celebration';
 export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDeckEntry[]) {
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
-  const { celebratingStar, waitForAcknowledgement, acknowledgeCelebration, finishCelebration } =
-    useStarCelebration();
+  const {
+    celebratingStar,
+    preparingCelebration,
+    prepareAcknowledgement,
+    showCelebration,
+    acknowledgeCelebration,
+    finishCelebration,
+  } = useStarCelebration();
   const [celebrationStarTier, setCelebrationStarTier] = useState<StarTier>('bronze');
   const [saveError, setSaveError] = useState<Error | null>(null);
   const [finishedReview, setFinishedReview] = useState(false);
@@ -65,7 +71,9 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
     await finalizeReviewSession({
       userId,
       completionPending,
-      waitForAcknowledgement,
+      prepareAcknowledgement,
+      showCelebration,
+      acknowledgeCelebration,
       finishCelebration,
       reload,
       resetHint,
@@ -75,7 +83,15 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
       setFinishedReview,
       setSaveError,
     });
-  }, [finishCelebration, reload, resetHint, userId, waitForAcknowledgement]);
+  }, [
+    acknowledgeCelebration,
+    finishCelebration,
+    prepareAcknowledgement,
+    reload,
+    resetHint,
+    showCelebration,
+    userId,
+  ]);
 
   useEffect(() => {
     syncReviewSession({
@@ -98,6 +114,7 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
           currentItem,
           userId,
           celebratingStar,
+          preparingCelebration,
           index,
           entriesLength: activeArray.length,
           resetQuestionState,
@@ -117,6 +134,7 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
       currentItem,
       finalizeCompletedSession,
       index,
+      preparingCelebration,
       reload,
       resetHint,
       resetQuestionState,
@@ -132,6 +150,7 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
     progressLabel: getReviewProgressLabel(sessionProgress),
     sessionLoading,
     celebratingStar,
+    celebrationPreparing: preparingCelebration,
     celebrationStarTier,
     acknowledgeCelebration,
     finishedReview,
@@ -204,7 +223,9 @@ function resetReviewCard(
 type FinalizeReviewSessionOptions = Readonly<{
   userId: string | null;
   completionPending: { current: boolean };
-  waitForAcknowledgement: () => Promise<void>;
+  prepareAcknowledgement: () => Promise<void>;
+  showCelebration: () => void;
+  acknowledgeCelebration: () => void;
   finishCelebration: () => void;
   reload: () => Promise<unknown>;
   resetHint: () => void;
@@ -221,7 +242,9 @@ async function finalizeReviewSession(options: FinalizeReviewSessionOptions): Pro
   const {
     userId,
     completionPending,
-    waitForAcknowledgement,
+    prepareAcknowledgement,
+    showCelebration,
+    acknowledgeCelebration,
     finishCelebration,
     reload,
     resetHint,
@@ -233,7 +256,7 @@ async function finalizeReviewSession(options: FinalizeReviewSessionOptions): Pro
   } = options;
   if (!userId || completionPending.current) return;
   completionPending.current = true;
-  await waitForAcknowledgement();
+  const acknowledgement = prepareAcknowledgement();
 
   try {
     const availability = await UserItem.getReadyReviewState(userId);
@@ -250,6 +273,12 @@ async function finalizeReviewSession(options: FinalizeReviewSessionOptions): Pro
         return { ...currentProgress, completedCount: 0 };
       });
       resetReviewCard(setIndex, setRevealed, resetHint);
+    }
+
+    showCelebration();
+    await acknowledgement;
+
+    if (reviewReady) {
       finishCelebration();
       completionPending.current = false;
       return;
@@ -257,10 +286,13 @@ async function finalizeReviewSession(options: FinalizeReviewSessionOptions): Pro
 
     await PracticeSession.deleteByUserId(userId);
     setFinishedReview(true);
+    finishCelebration();
+    completionPending.current = false;
   } catch (caughtError) {
     const normalizedError = toError(caughtError);
     setSaveError(normalizedError);
     reportError('Failed to finish review star celebration', normalizedError);
+    acknowledgeCelebration();
     finishCelebration();
     completionPending.current = false;
   }
@@ -331,6 +363,7 @@ type SaveReviewAnswerOptions = Readonly<{
   currentItem: PracticeDeckEntry['item'] | null;
   userId: string | null;
   celebratingStar: boolean;
+  preparingCelebration: boolean;
   index: number;
   entriesLength: number;
   resetQuestionState: () => void;
@@ -352,6 +385,7 @@ async function saveReviewAnswer(
     currentItem,
     userId,
     celebratingStar,
+    preparingCelebration,
     index,
     entriesLength,
     resetQuestionState,
@@ -362,7 +396,7 @@ async function saveReviewAnswer(
     reload,
     setSaveError,
   } = options;
-  if (!currentItem || !userId || celebratingStar) return;
+  if (!currentItem || !userId || celebratingStar || preparingCelebration) return;
   const dateTime = new Date(Date.now()).toISOString();
   const updatedItem = UserItem.applyPracticeProgress(
     currentItem,

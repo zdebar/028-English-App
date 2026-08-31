@@ -54,6 +54,7 @@ export type PracticeSessionCardProps = Readonly<{
   nextPronunciation?: () => void;
   onPronunciationSelectionChange?: (selected: boolean) => void;
   celebratingStar?: boolean;
+  celebrationPreparing?: boolean;
   celebrationStarTier?: StarTier;
   onStarCelebrationContinue?: () => void;
 }>;
@@ -176,6 +177,7 @@ function PracticeControls({
 
 type PracticeMainContentProps = Readonly<{
   celebratingStar: boolean;
+  celebrationPreparing: boolean;
   celebrationStarTier: StarTier;
   showDirectionChange: boolean;
   directionText: string;
@@ -186,6 +188,7 @@ type PracticeMainContentProps = Readonly<{
 
 function PracticeMainContent({
   celebratingStar,
+  celebrationPreparing,
   celebrationStarTier,
   showDirectionChange,
   directionText,
@@ -193,12 +196,16 @@ function PracticeMainContent({
   english,
   pronunciation,
 }: PracticeMainContentProps) {
+  if (celebrationPreparing) return <DelayedNotification />;
+
   if (celebratingStar) {
     return (
       <Notification className="flex flex-col items-center gap-2" role="status" aria-live="polite">
         <span>{TEXTS.starEarned}</span>
         <FullStar className={`star-fill-${celebrationStarTier}`} size={STAR_SIZE} />
-        <span>{TEXTS.continueAfterStar}</span>
+        <span className={showDirectionChange ? undefined : 'invisible'} aria-hidden={!showDirectionChange}>
+          {directionText}
+        </span>
       </Notification>
     );
   }
@@ -231,6 +238,7 @@ type NormalizedPracticeSessionCardProps = PracticeSessionCardProps &
     isPronunciationPractice: boolean;
     pronunciationItem: UserItemLocal | null;
     celebratingStar: boolean;
+    celebrationPreparing: boolean;
     celebrationStarTier: StarTier;
   }>;
 
@@ -242,6 +250,7 @@ const DEFAULT_PRACTICE_SESSION_CARD_PROPS = {
   isPronunciationPractice: false,
   pronunciationItem: null,
   celebratingStar: false,
+  celebrationPreparing: false,
   celebrationStarTier: 'bronze' as StarTier,
 } as const;
 
@@ -281,30 +290,31 @@ function getPracticeCardDisplayState(
     showDirectionChange,
     audioLoading,
     celebratingStar,
+    celebrationPreparing,
     isPronunciationPractice,
   } = props;
-  const controlsLocked = celebratingStar || showDirectionChange;
+  const controlsLocked = celebratingStar || celebrationPreparing || showDirectionChange;
   const showAudioControls = !audioDisabled;
   const showGrammarButton = hasGrammarDetails(revealed, grammar);
   const showNoteButton = hasNoteDetails(revealed, note);
   return {
     cardText: getPracticeCardText(revealed),
-    cardStyle: getPracticeCardStyle(celebratingStar, revealed),
+    cardStyle: getPracticeCardStyle(controlsLocked, revealed),
     directionText: getDirectionText(isCzToEn),
     shortDirectionText: getShortDirectionText(isCzToEn),
     showAudioControls,
     showGrammarButton,
     showNoteButton,
     audioControlsDisabled: isAudioControlDisabled(
-      celebratingStar,
+      controlsLocked,
       showAudioControls,
       showDirectionChange,
       audioLoading,
       isCzToEn,
       revealed,
     ),
-    grammarButtonDisabled: celebratingStar || !showGrammarButton || showDirectionChange,
-    noteButtonDisabled: celebratingStar || !showNoteButton || showDirectionChange,
+    grammarButtonDisabled: controlsLocked || !showGrammarButton,
+    noteButtonDisabled: controlsLocked || !showNoteButton,
     controlsLocked,
     showHintControl: !revealed || controlsLocked,
     practiceControlColumns: getPracticeControlColumns(
@@ -321,8 +331,8 @@ function getPracticeCardText(revealed: boolean): string | undefined {
   return TEXTS.reveal;
 }
 
-function getPracticeCardStyle(celebratingStar: boolean, revealed: boolean): string {
-  if (celebratingStar || !revealed) return 'color-button';
+function getPracticeCardStyle(controlsLocked: boolean, revealed: boolean): string {
+  if (controlsLocked || !revealed) return 'color-button';
   return 'color-audio-disabled';
 }
 
@@ -347,7 +357,7 @@ function hasNoteDetails(revealed: boolean, note: NoteType | null): boolean {
 }
 
 function isAudioControlDisabled(
-  celebratingStar: boolean,
+  celebrationLocked: boolean,
   showAudioControls: boolean,
   showDirectionChange: boolean,
   audioLoading: boolean,
@@ -355,7 +365,7 @@ function isAudioControlDisabled(
   revealed: boolean,
 ): boolean {
   return [
-    celebratingStar,
+    celebrationLocked,
     !showAudioControls,
     showDirectionChange,
     audioLoading,
@@ -400,6 +410,7 @@ function PracticeCardButton({
 }>) {
   const {
     celebratingStar,
+    celebrationPreparing,
     onStarCelebrationContinue,
     handleReveal,
     revealed,
@@ -413,15 +424,16 @@ function PracticeCardButton({
     audioError,
     audioLoading,
   } = props;
+  const celebrationActive = celebratingStar || celebrationPreparing;
   return (
     <button
       type="button"
       className={`relative flex h-full w-full grow cursor-pointer flex-col items-center p-4 text-inherit select-none ${display.cardStyle}`}
       onClick={celebratingStar ? onStarCelebrationContinue : handleReveal}
-      title={celebratingStar ? TEXTS.continueAfterStar : display.cardText}
-      aria-label={celebratingStar ? TEXTS.continueAfterStar : undefined}
-      aria-disabled={revealed && !celebratingStar}
-      disabled={celebratingStar && !onStarCelebrationContinue}
+      title={celebratingStar ? TEXTS.starEarned : display.cardText}
+      aria-label={celebratingStar ? TEXTS.starEarned : undefined}
+      aria-disabled={revealed && !celebrationActive}
+      disabled={celebrationPreparing || (celebratingStar && !onStarCelebrationContinue)}
     >
       {display.showRevealHelp && (
         <HelpText className="top-23 left-1/2 -translate-x-1/2">{TEXTS.reveal}</HelpText>
@@ -440,6 +452,7 @@ function PracticeCardButton({
       >
         <PracticeMainContent
           celebratingStar={celebratingStar}
+          celebrationPreparing={celebrationPreparing}
           celebrationStarTier={props.celebrationStarTier}
           showDirectionChange={showDirectionChange}
           directionText={display.directionText}
@@ -572,7 +585,10 @@ function PracticeSessionCardView({
   const display = getPracticeCardDisplayState(props);
   return (
     <div className="bottom-controls-clearance relative flex min-h-0 w-full grow flex-col items-center">
-      <div className="card-width card-height relative gap-1" aria-busy={props.celebratingStar}>
+      <div
+        className="card-width card-height relative gap-1"
+        aria-busy={props.celebratingStar || props.celebrationPreparing}
+      >
         <PracticeCardButton props={props} display={display} />
         <PracticeCardActionBar
           props={props}

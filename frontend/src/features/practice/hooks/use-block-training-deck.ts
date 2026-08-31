@@ -530,6 +530,7 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
     pronunciation,
     audioDisabled: cardState.audioDisabled,
     showDirectionChange: cardState.showDirectionChange,
+    hideDirectionChange: cardState.hideDirectionChange,
     handleReveal: cardState.handleReveal,
     plusHint: cardState.plusHint,
     nextRepeat: () => advance('incorrect'),

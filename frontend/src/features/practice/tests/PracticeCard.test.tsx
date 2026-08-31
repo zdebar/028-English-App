@@ -50,6 +50,7 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     progressLabel: '2/20',
     sessionLoading: false,
     celebratingStar: false,
+    celebrationPreparing: false,
     celebrationStarTier: 'bronze',
     acknowledgeCelebration: vi.fn(),
     finishedReview: false,
@@ -116,7 +117,6 @@ vi.mock('@/locales/cs', () => ({
     progress: 'Progress',
     reviewStarProgress: 'Progress to next star',
     starEarned: 'Earned',
-    continueAfterStar: 'Continue by clicking',
     currentPracticeStar: 'Current practice star',
     today: 'Today',
     dailyGoal: 'Daily goal',
@@ -506,7 +506,7 @@ describe('PracticeCard', () => {
     expect(screen.getByLabelText('Loading')).toBeTruthy();
   });
 
-  it('keeps the one-time earned-star celebration', () => {
+  it('shows the earned-star celebration without a continuation prompt', () => {
     mocks.practiceDeck.celebratingStar = true;
     mocks.practiceDeck.celebrationStarTier = 'silver';
     mocks.practiceDeck.revealed = true;
@@ -517,10 +517,11 @@ describe('PracticeCard', () => {
     expect(screen.getByTestId('earned-star').className).toContain('star-fill-silver');
     expect(screen.getByTestId('earned-star').dataset.size).toBe('22');
     expect(screen.getByText('Earned')).toBeTruthy();
-    expect(screen.getByText('Continue by clicking')).toBeTruthy();
+    expect(screen.queryByText('Continue by clicking')).toBeNull();
+    expect(screen.getByText('CZ to EN').className).toContain('invisible');
     expect(screen.getByRole('status').className).toContain('font-headings');
     expect(screen.getByRole('status').className).toContain('text-lg');
-    expect(screen.getByRole('button', { name: 'Continue by clicking' }).className).toContain(
+    expect(screen.getByRole('button', { name: 'Earned' }).className).toContain(
       'color-button',
     );
     expect(container.querySelector('#practice-controls')).toBeTruthy();
@@ -528,8 +529,59 @@ describe('PracticeCard', () => {
     expect(screen.queryByTestId('master-btn')).toBeNull();
     expect(screen.queryByTestId('repeat-btn')).toBeNull();
     expect(screen.queryByTestId('known-btn')).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Continue by clicking' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Earned' }));
     expect(mocks.practiceDeck.acknowledgeCelebration).toHaveBeenCalledOnce();
+  });
+
+  it('combines an earned star and a review direction change on one page', () => {
+    mocks.practiceDeck.celebratingStar = true;
+    mocks.practiceDeck.showDirectionChange = true;
+    mocks.practiceDeck.isCzToEn = false;
+
+    render(<PracticeCard />);
+
+    expect(screen.getByRole('status').textContent).toContain('Earned');
+    expect(screen.getByRole('status').textContent).toContain('EN to CZ');
+    expect(screen.getAllByRole('status')).toHaveLength(1);
+    expect(screen.queryByText('Continue by clicking')).toBeNull();
+    expect(screen.getByText('EN to CZ').className).not.toContain('invisible');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Earned' }));
+
+    expect(mocks.practiceDeck.hideDirectionChange).toHaveBeenCalledOnce();
+    expect(mocks.practiceDeck.acknowledgeCelebration).toHaveBeenCalledOnce();
+  });
+
+  it('shows initial-training completion as a star-only celebration', () => {
+    render(
+      <PracticeSessionCard
+        note={null}
+        grammar={null}
+        progressLabel="2/2 · 2/2"
+        isCzToEn={false}
+        revealed={false}
+        czech="ahoj"
+        english="hello"
+        pronunciation="\u00A0"
+        audioDisabled
+        showDirectionChange={false}
+        handleReveal={vi.fn()}
+        plusHint={vi.fn()}
+        nextRepeat={vi.fn()}
+        nextKnown={vi.fn()}
+        audioError={false}
+        playAudio={vi.fn()}
+        audioLoading={false}
+        isBlockTrainingPractice
+        celebratingStar
+        celebrationStarTier="gold"
+        onStarCelebrationContinue={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('status').textContent).toContain('Earned');
+    expect(screen.getByText('EN to CZ').className).toContain('invisible');
+    expect(screen.queryByText('Continue by clicking')).toBeNull();
   });
 
   it('keeps the short direction label in the first top-bar row across card states', () => {

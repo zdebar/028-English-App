@@ -197,23 +197,23 @@ describe('usePracticeDeck', () => {
     });
 
     expect(result.current.progressLabel).toBe('20/20');
-    expect(result.current.celebratingStar).toBe(true);
-    expect(result.current.celebrationStarTier).toBe('silver');
+    expect(result.current.celebrationPreparing).toBe(true);
+    expect(result.current.celebratingStar).toBe(false);
     expect(result.current.revealed).toBe(false);
 
-    expect(mocks.getReadyReviewState).not.toHaveBeenCalled();
-    expect(result.current.celebratingStar).toBe(true);
-
-    await act(async () => {
-      result.current.acknowledgeCelebration();
-      await Promise.resolve();
-    });
-
-    expect(result.current.celebratingStar).toBe(true);
     expect(mocks.getReadyReviewState).toHaveBeenCalledWith('u1');
+    expect(mocks.continueReview).toHaveBeenCalledWith('u1');
 
     await act(async () => {
       resolveReload();
+      await Promise.resolve();
+    });
+
+    await waitFor(() => expect(result.current.celebratingStar).toBe(true));
+    expect(result.current.celebrationPreparing).toBe(false);
+
+    await act(async () => {
+      result.current.acknowledgeCelebration();
       await answerPromise;
     });
 
@@ -243,6 +243,36 @@ describe('usePracticeDeck', () => {
 
     expect(mocks.getReadyReviewState).toHaveBeenCalledWith('u1');
     expect(mocks.deleteByUserId).toHaveBeenCalledWith('u1');
+  });
+
+  it('deletes a completed review session after acknowledging its final star', async () => {
+    mocks.fetchData = reviewDeckResult(reviewSession(19), [entry(1)]);
+    mocks.recordReviewAnswer.mockResolvedValue({
+      completedCount: 20,
+      earnedStar: true,
+      starCount: 11,
+    });
+
+    const { result } = renderHook(() => usePracticeDeck('u1'));
+    await waitFor(() => expect(result.current.sessionLoading).toBe(false));
+
+    let answerPromise: Promise<void> | undefined;
+    act(() => {
+      answerPromise = result.current.nextItem('correct');
+    });
+    await waitFor(() => expect(result.current.celebratingStar).toBe(true));
+
+    expect(mocks.getReadyReviewState).toHaveBeenCalledWith('u1');
+    expect(mocks.deleteByUserId).not.toHaveBeenCalled();
+
+    await act(async () => {
+      result.current.acknowledgeCelebration();
+      await answerPromise;
+    });
+
+    expect(mocks.deleteByUserId).toHaveBeenCalledWith('u1');
+    expect(result.current.finishedReview).toBe(true);
+    expect(result.current.celebratingStar).toBe(false);
   });
 
   it('ends an abandoned review session without awarding a star', async () => {
