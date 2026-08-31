@@ -49,15 +49,11 @@ export default function PracticeCard({
     reportError('Failed to fetch practice deck', error);
   }, [error, showToast]);
 
-  useEffect(() => {
-    if (finishedReview) navigate(ROUTES.home, { replace: true });
-  }, [finishedReview, navigate]);
-
   if (sessionLoading || (loading && !currentItem)) {
     return <DelayedLoadingCircle />;
   }
 
-  if (!currentItem) {
+  if (!currentItem && !finishedReview) {
     return <PracticeEmptyState />;
   }
 
@@ -68,6 +64,9 @@ export default function PracticeCard({
       progressLabel={progressLabel}
       progressHelpText={TEXTS.reviewProgress}
       dailyProgressChange={dailyProgressChange}
+      isCompletion={finishedReview}
+      onCompletionContinue={() => navigate(ROUTES.home, { replace: true })}
+      isBlockTrainingPractice={false}
       isCzToEn={isCzToEn}
       revealed={revealed}
       czech={czech}

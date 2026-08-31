@@ -1,10 +1,11 @@
 import type { LessonOverviewType, LevelOverviewType } from '@/types/generic.types';
 
 /**
- * Selects dashboard lessons that should remain visible for current progress.
+ * Selects dashboard lessons that should remain visible for today's progress.
  *
  * @param levelsOverview Level overview records; missing or non-array lesson lists are ignored.
- * @returns In-progress lessons, the first eligible next lesson, or the final lesson as a fallback.
+ * @returns Lessons changed today, the first lesson when nothing is started, or the last started
+ * lesson as a fallback.
  */
 export function getInProgressLessons(levelsOverview: LevelOverviewType[]): LessonOverviewType[] {
   const sortedLessons = sortLessons(flattenLessons(levelsOverview));
@@ -13,14 +14,14 @@ export function getInProgressLessons(levelsOverview: LevelOverviewType[]): Lesso
     return [];
   }
 
-  const result = selectVisibleLessons(sortedLessons);
+  const changedLessons = sortedLessons.filter(hasTodayProgressChange);
+  if (changedLessons.length > 0) return changedLessons;
 
-  if (result.length > 0) {
-    return result;
-  }
+  const hasStartedLessons = sortedLessons.some(hasStartedItems);
+  if (!hasStartedLessons) return [sortedLessons[0]];
 
-  const lastLesson = sortedLessons.at(-1);
-  return lastLesson == null ? [] : [lastLesson];
+  const lastStartedLesson = [...sortedLessons].reverse().find(hasStartedItems);
+  return lastStartedLesson == null ? [sortedLessons[0]] : [lastStartedLesson];
 }
 
 function flattenLessons(levelsOverview: LevelOverviewType[]): LessonOverviewType[] {
@@ -39,52 +40,10 @@ function sortLessons(lessons: LessonOverviewType[]): LessonOverviewType[] {
   return [...lessons].sort(compareLessons);
 }
 
-function isCompleted(lesson: LessonOverviewType): boolean {
-  return (lesson.startedCount ?? 0) >= (lesson.totalCount ?? 0);
+function hasTodayProgressChange(lesson: LessonOverviewType): boolean {
+  return (lesson.dailyProgressChange ?? 0) !== 0;
 }
 
-function isIncomplete(lesson: LessonOverviewType): boolean {
-  const count = lesson.startedCount ?? 0;
-  const totalCount = lesson.totalCount ?? 0;
-  return count > 0 && count < totalCount;
-}
-
-function isFirstEligibleZero(
-  lesson: LessonOverviewType,
-  previousLesson: LessonOverviewType | undefined,
-  firstEligibleZeroIncluded: boolean,
-): boolean {
-  if (firstEligibleZeroIncluded) return false;
-  if ((lesson.startedCount ?? 0) !== 0) return false;
-  return previousLesson === undefined || isCompleted(previousLesson);
-}
-
-function shouldIncludeLesson(
-  lesson: LessonOverviewType,
-  previousLesson: LessonOverviewType | undefined,
-  firstEligibleZeroIncluded: boolean,
-): boolean {
-  const todayCount = lesson.startedTodayCount ?? 0;
-  return (
-    todayCount > 0 ||
-    isIncomplete(lesson) ||
-    isFirstEligibleZero(lesson, previousLesson, firstEligibleZeroIncluded)
-  );
-}
-
-function selectVisibleLessons(lessons: LessonOverviewType[]): LessonOverviewType[] {
-  const result: LessonOverviewType[] = [];
-  let firstEligibleZeroIncluded = false;
-
-  lessons.forEach((lesson, index) => {
-    const previousLesson = lessons[index - 1];
-    if (!shouldIncludeLesson(lesson, previousLesson, firstEligibleZeroIncluded)) return;
-
-    result.push(lesson);
-    if (isFirstEligibleZero(lesson, previousLesson, firstEligibleZeroIncluded)) {
-      firstEligibleZeroIncluded = true;
-    }
-  });
-
-  return result;
+function hasStartedItems(lesson: LessonOverviewType): boolean {
+  return (lesson.startedCount ?? 0) > 0;
 }

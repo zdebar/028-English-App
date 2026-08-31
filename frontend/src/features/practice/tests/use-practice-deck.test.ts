@@ -134,12 +134,13 @@ describe('usePracticeDeck', () => {
     expect(result.current.progressLabel).toBe('');
   });
 
-  it('ends an abandoned review session without a star state', async () => {
+  it('marks review complete when there is no next direction', async () => {
     mocks.fetchData = { entries: [], session: null, abandoned: true };
 
     const { result } = renderHook(() => usePracticeDeck('u1'));
 
     await waitFor(() => expect(result.current.finishedReview).toBe(true));
+    expect(result.current.currentItem).toBeNull();
     expect(result.current.progressLabel).toBe('');
   });
 });

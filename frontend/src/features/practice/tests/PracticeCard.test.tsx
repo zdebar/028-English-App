@@ -112,9 +112,9 @@ vi.mock('@/locales/cs', () => ({
     progressToday: 'Today progress',
     progressTodayHint: 'Today progress change',
     blockCompleted: 'Block completed',
+    reviewCompleted: 'Review completed',
     returnToHomeByClick: 'Click to return home',
     today: 'Today',
-    dailyGoal: 'Daily goal',
     loadingMessage: 'Loading',
     loadingError: 'Loading error',
     directionCzToEn: 'CZ to EN',
@@ -371,6 +371,7 @@ describe('PracticeCard', () => {
     };
     mocks.practiceDeck.progressLabel = '2/20';
     mocks.practiceDeck.sessionLoading = false;
+    mocks.practiceDeck.finishedReview = false;
     mocks.practiceDeck.isCzToEn = true;
     mocks.practiceDeck.revealed = false;
     mocks.practiceDeck.czech = 'ahoj';
@@ -447,6 +448,21 @@ describe('PracticeCard', () => {
     });
 
     expect(screen.getByLabelText('Loading')).toBeTruthy();
+  });
+
+  it('waits for a click before leaving after review completion', () => {
+    mocks.practiceDeck.currentItem = null;
+    mocks.practiceDeck.finishedReview = true;
+
+    render(<PracticeCard />);
+
+    expect(screen.getByText('Review completed')).toBeTruthy();
+    expect(screen.getByText('Click to return home')).toBeTruthy();
+    expect(mocks.navigate).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Review completed' }));
+
+    expect(mocks.navigate).toHaveBeenCalledWith('/', { replace: true });
   });
 
   it('reveals item and plays audio on item click in CZ->EN mode', () => {
@@ -1096,6 +1112,41 @@ describe('PracticeCard', () => {
     expect(screen.queryByText('hotovo')).toBeNull();
 
     fireEvent.click(screen.getByRole('button', { name: 'Block completed' }));
+    expect(onCompletionContinue).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows review completion copy on two lines and locks controls', () => {
+    const onCompletionContinue = vi.fn();
+    render(
+      <PracticeSessionCard
+        note={null}
+        grammar={null}
+        progressLabel="2/2"
+        isCzToEn
+        revealed={false}
+        czech={undefined}
+        english={undefined}
+        pronunciation={undefined}
+        audioDisabled
+        showDirectionChange={false}
+        handleReveal={vi.fn()}
+        plusHint={vi.fn()}
+        nextRepeat={vi.fn()}
+        nextKnown={vi.fn()}
+        completeCurrent={vi.fn()}
+        audioError={false}
+        playAudio={vi.fn()}
+        audioLoading={false}
+        isCompletion
+        onCompletionContinue={onCompletionContinue}
+      />,
+    );
+
+    expect(screen.getByText('Review completed')).toBeTruthy();
+    expect(screen.getByText('Click to return home')).toBeTruthy();
+    expect((screen.getByTestId('hint-btn') as HTMLButtonElement).disabled).toBe(true);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Review completed' }));
     expect(onCompletionContinue).toHaveBeenCalledTimes(1);
   });
 });

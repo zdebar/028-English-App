@@ -22,8 +22,9 @@ describe('PracticeOverviewButton', () => {
     render(
       <PracticeOverviewButton
         count={3}
+        goal={200}
         ariaLabel="Open practice overview"
-        helpText="Stars today"
+        helpText="Progress today / goal"
       />,
     );
 
@@ -31,9 +32,10 @@ describe('PracticeOverviewButton', () => {
     expect(button).toBeTruthy();
     expect(button.getAttribute('title')).toBe('Open practice overview');
     expect(button.className).not.toContain('hover:ring');
-    expect(button.textContent).toBe('+ 3Stars today');
+    expect(button.textContent).toBe('+ 3 / 200Progress today / goal');
     expect(button.className).toContain('hover:underline');
-    expect(screen.getByTestId('help-text').textContent).toBe('Stars today');
+    expect(button.className).toContain('decoration-error-light');
+    expect(screen.getByTestId('help-text').textContent).toBe('Progress today / goal');
   });
 
   it('calls onClick when button is pressed', () => {
@@ -42,8 +44,9 @@ describe('PracticeOverviewButton', () => {
     render(
       <PracticeOverviewButton
         count={1}
+        goal={200}
         ariaLabel="Open practice overview"
-        helpText="Stars today"
+        helpText="Progress today / goal"
         onClick={onClick}
       />,
     );
@@ -51,5 +54,31 @@ describe('PracticeOverviewButton', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Open practice overview' }));
 
     expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses error styling until the goal is met and preserves signed values', () => {
+    const { rerender } = render(
+      <PracticeOverviewButton count={199} goal={200} ariaLabel="Progress" />,
+    );
+
+    expect(screen.getByText('+ 199 / 200').className).toContain('text-error-light');
+
+    rerender(<PracticeOverviewButton count={200} goal={200} ariaLabel="Progress" />);
+    expect(screen.getByText('+ 200 / 200').className).toContain('text-success-light');
+    expect(screen.getByRole('button', { name: 'Progress' }).className).toContain(
+      'decoration-success-light',
+    );
+
+    rerender(<PracticeOverviewButton count={235} goal={200} ariaLabel="Progress" />);
+    expect(screen.getByText('+ 235 / 200')).toBeTruthy();
+
+    rerender(<PracticeOverviewButton count={-5} goal={200} ariaLabel="Progress" />);
+    expect(screen.getByText('- 5 / 200')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Progress' }).className).toContain(
+      'decoration-error-light',
+    );
+
+    rerender(<PracticeOverviewButton count={0} goal={200} ariaLabel="Progress" />);
+    expect(screen.getByText('0 / 200')).toBeTruthy();
   });
 });

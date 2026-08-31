@@ -24,6 +24,7 @@ export const PRACTICE_TEXTS = {
   volume: 'Nastavení hlasitosti',
   blockTrainingProgressHelp: 'Kolo · Položky',
   blockCompleted: 'blok dokončen',
+  reviewCompleted: 'opakování dokončeno',
   returnToHomeByClick: 'kliknutím zpět na úvodní stránku',
   next: 'další',
   pronunciationPracticeButton: 'Výslovnost',
