@@ -150,6 +150,25 @@ describe('PracticeSession progress transactions', () => {
     expect(mocks.recordProgressChange).toHaveBeenCalledOnce();
   });
 
+  it('restores the expected initial-training session when reconciliation removed it', async () => {
+    mocks.sessionGet.mockResolvedValue(null);
+    const session = {
+      ...newSession(),
+      current_queue_item_ids: [2],
+      completed_item_ids: [1],
+      completed_count: 1,
+    };
+
+    await PracticeSession.recordInitialTrainingAnswer(
+      item(),
+      item({ progress_cz_to_en: 1 }),
+      'czToEn',
+      session,
+    );
+
+    expect(mocks.sessionPut).toHaveBeenCalledWith(session);
+  });
+
   it('does not store an initial-training session when the item is missing', async () => {
     mocks.sessionGet.mockResolvedValue(newSession());
     mocks.itemUpdate.mockResolvedValue(0);
@@ -179,6 +198,22 @@ describe('PracticeSession progress transactions', () => {
       [1, 2],
       '2026-08-23T10:00:00.000Z',
     );
+    expect(mocks.sessionDelete).toHaveBeenCalledWith('u1');
+  });
+
+  it('uses the expected session when the active session was removed before completion', async () => {
+    mocks.sessionGet.mockResolvedValue(null);
+
+    await expect(
+      PracticeSession.completeInitialTraining(
+        'u1',
+        [1, 2],
+        '2026-08-23T10:00:00.000Z',
+        undefined,
+        'enToCz',
+        newSession(),
+      ),
+    ).resolves.toBeUndefined();
     expect(mocks.sessionDelete).toHaveBeenCalledWith('u1');
   });
 

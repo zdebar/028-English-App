@@ -254,12 +254,14 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
       db.practice_sessions,
       db.user_item_progress_history,
       async () => {
-        const activeSession = await this.getActive(item.user_id);
-        if (activeSession?.mode !== 'new') {
-          throw new Error('Initial-training answer requires an active new session.');
-        }
         if (session.user_id !== item.user_id || session.mode !== 'new') {
           throw new Error('Initial-training answer contains an invalid session.');
+        }
+        // The availability observer can remove a stale-looking row while this page is open.
+        // The session held by the active deck is the authoritative continuation state.
+        const activeSession = await this.getActive(item.user_id);
+        if (activeSession && activeSession.mode !== 'new') {
+          throw new Error('Initial-training answer requires an active new session.');
         }
 
         const updatedItemCount = await updateStoredPracticeItem(item);
@@ -279,6 +281,7 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
     dateTime: string = new Date(Date.now()).toISOString(),
     finalItem?: UserItemLocal,
     finalDirection: PracticeDirection = 'enToCz',
+    expectedSession?: PracticeSessionType,
   ): Promise<void> {
     return db.transaction(
       'rw',
@@ -286,7 +289,9 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
       db.user_item_progress_history,
       db.practice_sessions,
       async () => {
-        const session = await this.getActive(userId);
+        const storedSession = await this.getActive(userId);
+        // Keep completion recoverable when the active row disappeared after the last answer.
+        const session = storedSession ?? expectedSession;
         if (session?.mode !== 'new') {
           throw new Error('Initial-training completion requires its active local session.');
         }

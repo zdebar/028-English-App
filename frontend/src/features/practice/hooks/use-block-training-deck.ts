@@ -335,7 +335,11 @@ type AdvanceInitialTrainingOptions = Readonly<{
   phase: NewPracticePhase;
   isComplete: boolean;
   moveToNextPhase: (session: PracticeSessionType) => PracticeSessionType | null;
-  finishBlock: (item: UserItemLocal, direction: 'czToEn' | 'enToCz') => Promise<void>;
+  finishBlock: (
+    item: UserItemLocal,
+    direction: 'czToEn' | 'enToCz',
+    session: PracticeSessionType,
+  ) => Promise<void>;
   setItems: Dispatch<SetStateAction<UserItemLocal[]>>;
   setSession: Dispatch<SetStateAction<PracticeSessionType | null>>;
   setHasProgress: Dispatch<SetStateAction<boolean>>;
@@ -377,7 +381,7 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
       moveToNextPhase,
     );
     if (!nextSession) {
-      await finishBlock(updatedItem, PHASE_DIRECTIONS[phase]);
+      await finishBlock(updatedItem, PHASE_DIRECTIONS[phase], session);
       setItems((currentItems) => updateTrainingItem(currentItems, updatedItem));
       return;
     }
@@ -445,7 +449,11 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
   const resetQuestionState = cardState.resetQuestionState;
 
   const finishBlock = useCallback(
-    async (finalItem: UserItemLocal, finalDirection: 'czToEn' | 'enToCz') => {
+    async (
+      finalItem: UserItemLocal,
+      finalDirection: 'czToEn' | 'enToCz',
+      expectedSession: PracticeSessionType,
+    ) => {
       if (!userId || items.length === 0) return;
       const dateTime = new Date(Date.now()).toISOString();
       await PracticeSession.completeInitialTraining(
@@ -454,6 +462,7 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
         dateTime,
         finalItem,
         finalDirection,
+        expectedSession,
       );
       invalidateRouteData(routeDataKey('initial-training', userId));
       invalidateRouteData(routeDataKey('practice', userId));

@@ -211,6 +211,7 @@ describe('useInitialTrainingDeck', () => {
       expect.any(String),
       expect.anything(),
       'enToCz',
+      expect.objectContaining({ mode: 'new', phase: 1 }),
     );
     unmount();
   });
