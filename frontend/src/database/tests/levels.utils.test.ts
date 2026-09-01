@@ -4,7 +4,7 @@ import type { LessonType, LevelType } from '@/types/generic.types';
 import type { UserItemLocal } from '@/types/user-item.types';
 
 describe('aggregateLevels', () => {
-  it('aggregates current and maximum effective progress with daily delta', () => {
+  it('aggregates started counts and excludes unstarted items', () => {
     const levels = [{ id: 1, name: 'A1', sort_order: 1 }] as LevelType[];
     const lessons = [{ id: 10, level_id: 1, name: 'Lesson 1', sort_order: 1 }] as LessonType[];
     const items = [
@@ -30,36 +30,18 @@ describe('aggregateLevels', () => {
       },
     ] as UserItemLocal[];
 
-    const result = aggregateLevels(items, lessons, levels, '2026-07-27', [
-      {
-        user_id: 'u1',
-        date: '2026-07-27',
-        item_id: 100,
-        direction: 'czToEn',
-        progress: 3,
-        max_progress: 3,
-        progress_change: -1,
-        updated_at: '2026-07-27T10:00:00.000Z',
-        deleted_at: null,
-      },
-    ]);
+    const result = aggregateLevels(items, lessons, levels, '2026-07-27');
 
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({
       startedCount: 1,
       startedTodayCount: 1,
       totalCount: 2,
-      currentProgress: 11,
-      dailyProgressChange: -1,
-      maximumProgress: 40,
     });
     expect(result[0].lessons[0]).toMatchObject({
       startedCount: 1,
       startedTodayCount: 1,
       totalCount: 2,
-      currentProgress: 11,
-      dailyProgressChange: -1,
-      maximumProgress: 40,
     });
     expect(result[0]).not.toHaveProperty('masteredCount');
     expect(result[0].lessons[0]).not.toHaveProperty('masteredTodayCount');

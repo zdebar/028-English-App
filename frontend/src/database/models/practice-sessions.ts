@@ -9,13 +9,10 @@ import type {
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 import { Entity } from 'dexie';
 import type { PracticeDirection, UserItemLocal } from '@/types/user-item.types';
-import UserItemProgressHistory from './user-item-progress-history';
 import UserItem from './user-items';
-import { getEffectiveProgress, getProgressChange, getSrsLength } from '@/utils/progress.utils';
 
 export type PracticeAnswerResult = {
   completedCount: number;
-  progressChange: number;
 };
 
 export type ActivePracticeSessionState = {
@@ -201,7 +198,7 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
     await db.practice_sessions.put(session);
   }
 
-  /** Atomically stores one review answer, advances the session, and records its progress change. */
+  /** Atomically stores one review answer and advances the session. */
   static async recordReviewAnswer(
     originalItem: UserItemLocal,
     item: UserItemLocal,
@@ -212,7 +209,6 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
       'rw',
       db.user_items,
       db.practice_sessions,
-      db.user_item_progress_history,
       async () => {
         const session = await this.getActive(originalItem.user_id);
         if (session?.mode !== 'review') {
@@ -234,25 +230,21 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
           review_queue: removeReviewQueueEntry(session.review_queue, item.item_id, direction),
         };
         await db.practice_sessions.put(nextSession);
-        const progressChange = await recordProgressChange(originalItem, item, direction, dateTime);
 
-        return { completedCount, progressChange };
+        return { completedCount };
       },
     );
   }
 
   /** Atomically stores one initial-training answer and advances its session. */
   static async recordInitialTrainingAnswer(
-    originalItem: UserItemLocal,
     item: UserItemLocal,
-    direction: PracticeDirection,
     session: PracticeSessionType,
   ): Promise<void> {
     await db.transaction(
       'rw',
       db.user_items,
       db.practice_sessions,
-      db.user_item_progress_history,
       async () => {
         if (session.user_id !== item.user_id || session.mode !== 'new') {
           throw new Error('Initial-training answer contains an invalid session.');
@@ -269,24 +261,21 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
           throw new Error('The trained item no longer exists locally.');
         }
         await db.practice_sessions.put(session);
-        await recordProgressChange(originalItem, item, direction, item.updated_at);
       },
     );
   }
 
-  /** Atomically completes initial training, records final progress changes, and removes the session. */
+  /** Atomically completes initial training and removes the session. */
   static async completeInitialTraining(
     userId: string,
     itemIds: readonly number[],
     dateTime: string = new Date(Date.now()).toISOString(),
     finalItem?: UserItemLocal,
-    finalDirection: PracticeDirection = 'enToCz',
     expectedSession?: PracticeSessionType,
   ): Promise<void> {
     return db.transaction(
       'rw',
       db.user_items,
-      db.user_item_progress_history,
       db.practice_sessions,
       async () => {
         const storedSession = await this.getActive(userId);
@@ -318,7 +307,6 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
           if (updatedItemCount !== 1) {
             throw new Error('The final trained item no longer exists locally.');
           }
-          await recordProgressChange(originalFinalItem, finalItem, finalDirection, dateTime);
         }
         await UserItem.saveInitialTrainingCompletion(userId, itemIds, dateTime);
         await db.practice_sessions.delete(userId);
@@ -329,25 +317,6 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
   static async deleteByUserId(userId: string): Promise<void> {
     await db.practice_sessions.delete(userId);
   }
-}
-
-async function recordProgressChange(
-  originalItem: UserItemLocal,
-  updatedItem: UserItemLocal,
-  direction: PracticeDirection,
-  dateTime: string,
-): Promise<number> {
-  const progressChange = getProgressChange(originalItem, updatedItem, direction);
-  await UserItemProgressHistory.recordChange(
-    updatedItem.user_id,
-    updatedItem.item_id,
-    direction,
-    getEffectiveProgress(updatedItem, direction),
-    getSrsLength(direction),
-    progressChange,
-    dateTime,
-  );
-  return progressChange;
 }
 
 function removeReviewQueueEntry(

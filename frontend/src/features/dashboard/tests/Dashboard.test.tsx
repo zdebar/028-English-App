@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
     name: string;
     sort_order: number;
     startedCount?: number;
-    dailyProgressChange?: number;
+    startedTodayCount?: number;
   }>,
 }));
 
@@ -45,13 +45,15 @@ vi.mock('@/routing/data-navigation', () => ({
 vi.mock('@/components/UI/BlockBar', () => ({
   default: ({
     lessonName,
-    dailyProgressChange,
+    previousCount,
+    todayCount,
   }: {
     lessonName: string;
-    dailyProgressChange: number;
+    previousCount: number;
+    todayCount: number;
   }) => (
     <div data-testid="block-bar">
-      {lessonName}:{dailyProgressChange}
+      {lessonName}:{previousCount}:{todayCount}
     </div>
   ),
 }));
@@ -64,7 +66,7 @@ vi.mock('@/locales/cs', () => ({
   ARIA_TEXTS: { dashboardRegion: 'Dashboard' },
   TEXTS: {
     noDashboardData: 'No data.',
-    progressTodayHint: 'Today progress change',
+    startedTodayHint: 'Started today',
     levelsOverviewTooltip: 'Open CEFR overview',
   },
 }));
@@ -87,7 +89,7 @@ describe('Dashboard', () => {
 
     expect(screen.queryByText('No data.')).toBeNull();
     expect(screen.queryByTestId('block-bar')).toBeNull();
-    expect(screen.queryByText('Today progress change')).toBeNull();
+    expect(screen.queryByText('Started today')).toBeNull();
     expect(screen.queryByRole('link')).toBeNull();
   });
 
@@ -116,13 +118,13 @@ describe('Dashboard', () => {
         name: 'First lesson',
         sort_order: 1,
         startedCount: 0,
-        dailyProgressChange: 0,
+        startedTodayCount: 0,
       },
     ];
 
     render(<Dashboard userId="u1" />);
 
-    expect(screen.getByText('First lesson:0')).toBeTruthy();
+    expect(screen.getByText('First lesson:0:0')).toBeTruthy();
     expect(screen.getByRole('link').getAttribute('href')).toBe('/levels');
     expect(mocks.descriptorUserId).toBe('u1');
   });
@@ -134,23 +136,23 @@ describe('Dashboard', () => {
         id: 1,
         name: 'Lesson 1',
         sort_order: 1,
-        startedCount: 2,
-        dailyProgressChange: 3,
+        startedCount: 5,
+        startedTodayCount: 3,
       },
       {
         id: 2,
         name: 'Lesson 2',
         sort_order: 2,
-        startedCount: 1,
-        dailyProgressChange: -2,
+        startedCount: 4,
+        startedTodayCount: 2,
       },
     ];
 
     render(<Dashboard userId="u1" />);
 
-    expect(screen.getByText('Today progress change')).toBeTruthy();
-    expect(screen.getByText('Lesson 1:3')).toBeTruthy();
-    expect(screen.getByText('Lesson 2:-2')).toBeTruthy();
+    expect(screen.getByText('Started today')).toBeTruthy();
+    expect(screen.getByText('Lesson 1:2:3')).toBeTruthy();
+    expect(screen.getByText('Lesson 2:2:2')).toBeTruthy();
     expect(screen.getByRole('link').getAttribute('href')).toBe('/levels');
   });
 });

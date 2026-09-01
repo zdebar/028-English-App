@@ -1,7 +1,7 @@
 import type { LessonOverviewType, LevelOverviewType } from '@/types/generic.types';
 
 /**
- * Selects dashboard lessons that should remain visible for today's progress.
+ * Selects dashboard lessons that should remain visible for today's started items.
  *
  * @param levelsOverview Level overview records; missing or non-array lesson lists are ignored.
  * @returns Lessons changed today, the first lesson when nothing is started, or the last started
@@ -14,7 +14,7 @@ export function getInProgressLessons(levelsOverview: LevelOverviewType[]): Lesso
     return [];
   }
 
-  const changedLessons = sortedLessons.filter(hasTodayProgressChange);
+  const changedLessons = sortedLessons.filter(hasItemsStartedToday);
   if (changedLessons.length > 0) return changedLessons;
 
   const hasStartedLessons = sortedLessons.some(hasStartedItems);
@@ -40,8 +40,8 @@ function sortLessons(lessons: LessonOverviewType[]): LessonOverviewType[] {
   return [...lessons].sort(compareLessons);
 }
 
-function hasTodayProgressChange(lesson: LessonOverviewType): boolean {
-  return (lesson.dailyProgressChange ?? 0) !== 0;
+function hasItemsStartedToday(lesson: LessonOverviewType): boolean {
+  return (lesson.startedTodayCount ?? 0) > 0;
 }
 
 function hasStartedItems(lesson: LessonOverviewType): boolean {

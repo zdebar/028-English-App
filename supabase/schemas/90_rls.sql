@@ -130,17 +130,14 @@ CREATE POLICY users_select_own ON public.users
   USING (id = (SELECT auth.uid()));
 
 REVOKE ALL PRIVILEGES ON TABLE
-  public.user_items,
-  public.user_item_progress_history
+  public.user_items
 FROM PUBLIC, anon, authenticated;
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE
-  public.user_items,
-  public.user_item_progress_history
+  public.user_items
 TO authenticated;
 
 ALTER TABLE public.user_items ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.user_item_progress_history ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Allow regular users to modify their own data" ON public.user_items;
 DROP POLICY IF EXISTS user_items_delete_own_non_demo ON public.user_items;
@@ -168,43 +165,7 @@ CREATE POLICY user_items_update_own_non_demo ON public.user_items
     user_id = (SELECT auth.uid())
     AND public.is_non_demo_user()
   );
-
 CREATE POLICY user_items_delete_own_non_demo ON public.user_items
-  FOR DELETE TO authenticated
-  USING (
-    user_id = (SELECT auth.uid())
-    AND public.is_non_demo_user()
-  );
-
-DROP POLICY IF EXISTS "Allow regular users to modify their own data" ON public.user_item_progress_history;
-DROP POLICY IF EXISTS user_item_progress_history_delete_own_non_demo ON public.user_item_progress_history;
-DROP POLICY IF EXISTS user_item_progress_history_insert_own_non_demo ON public.user_item_progress_history;
-DROP POLICY IF EXISTS user_item_progress_history_select_own ON public.user_item_progress_history;
-DROP POLICY IF EXISTS user_item_progress_history_update_own_non_demo ON public.user_item_progress_history;
-
-CREATE POLICY user_item_progress_history_select_own ON public.user_item_progress_history
-  FOR SELECT TO authenticated
-  USING (user_id = (SELECT auth.uid()));
-
-CREATE POLICY user_item_progress_history_insert_own_non_demo ON public.user_item_progress_history
-  FOR INSERT TO authenticated
-  WITH CHECK (
-    user_id = (SELECT auth.uid())
-    AND public.is_non_demo_user()
-  );
-
-CREATE POLICY user_item_progress_history_update_own_non_demo ON public.user_item_progress_history
-  FOR UPDATE TO authenticated
-  USING (
-    user_id = (SELECT auth.uid())
-    AND public.is_non_demo_user()
-  )
-  WITH CHECK (
-    user_id = (SELECT auth.uid())
-    AND public.is_non_demo_user()
-  );
-
-CREATE POLICY user_item_progress_history_delete_own_non_demo ON public.user_item_progress_history
   FOR DELETE TO authenticated
   USING (
     user_id = (SELECT auth.uid())

@@ -9,7 +9,7 @@ const mocks = vi.hoisted(
     userEmail: string | null;
     isAnonymousUser: boolean;
     authLoading: boolean;
-    dailyProgressChange: number;
+    startedTodayCount: number;
     isSyncError: boolean;
   } => ({
     theme: 'light',
@@ -18,7 +18,7 @@ const mocks = vi.hoisted(
     userEmail: 'u1@example.com',
     isAnonymousUser: false,
     authLoading: false,
-    dailyProgressChange: 3,
+    startedTodayCount: 3,
     isSyncError: false,
   }),
 );
@@ -29,7 +29,7 @@ vi.mock('@/config/config', () => ({
       dbName: 'test-db',
     },
     practice: {
-      dailyProgressGoal: 200,
+      dailyStartedGoal: 24,
       reviewMinimumSize: 20,
     },
   },
@@ -55,8 +55,8 @@ vi.mock('@/features/auth/use-auth-store', () => ({
 }));
 
 vi.mock('@/features/user-stats/use-user-store', () => ({
-  useUserStore: (selector: (state: { dailyProgressChange: number }) => unknown) =>
-    selector({ dailyProgressChange: mocks.dailyProgressChange }),
+  useUserStore: (selector: (state: { startedTodayCount: number }) => unknown) =>
+    selector({ startedTodayCount: mocks.startedTodayCount }),
 }));
 
 vi.mock('@/features/synchronization/use-sync-store', () => ({
@@ -75,8 +75,7 @@ vi.mock('@/locales/cs', () => ({
     userLabel: 'User',
     userStatsLabel: 'Today',
     practiceOverviewOpen: 'Open practice overview',
-    progressToday: 'Progress today',
-    dailyProgressGoal: 'Progress today / goal',
+    dailyStartedGoal: 'Started today / goal',
     today: 'Today',
     loadingMessage: 'Loading',
     syncWarning: 'Data may be stale.',
@@ -167,7 +166,7 @@ describe('Home', () => {
     mocks.userEmail = 'u1@example.com';
     mocks.isAnonymousUser = false;
     mocks.authLoading = false;
-    mocks.dailyProgressChange = 3;
+    mocks.startedTodayCount = 3;
     mocks.isSyncError = false;
   });
 
@@ -198,9 +197,9 @@ describe('Home', () => {
 
     expect(screen.getByText('Data may be stale.').className).toContain('invisible');
     expect(screen.getByRole('button', { name: 'Open practice overview' })).toBeTruthy();
-    expect(screen.getByTestId('practice-overview-button').dataset.goal).toBe('200');
+    expect(screen.getByTestId('practice-overview-button').dataset.goal).toBe('24');
     expect(screen.getByTestId('practice-overview-button').textContent).toBe(
-      'Progress today / goal',
+      'Started today / goal',
     );
     expect(screen.queryByText('App')).toBeNull();
   });

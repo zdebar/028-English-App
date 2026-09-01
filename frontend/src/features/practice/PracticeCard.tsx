@@ -10,14 +10,12 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/config/routes.config';
 import type { PracticeDeckEntry } from '@/types/user-item.types';
-import { useUserStore } from '@/features/user-stats/use-user-store';
 
 export default function PracticeCard({
   initialDeck,
 }: Readonly<{ initialDeck?: PracticeDeckEntry[] }>) {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
-  const dailyProgressChange = useUserStore((state) => state.dailyProgressChange);
   const navigate = useNavigate();
   const {
     currentItem,
@@ -63,7 +61,6 @@ export default function PracticeCard({
       grammar={grammar}
       progressLabel={progressLabel}
       progressHelpText={TEXTS.reviewProgress}
-      dailyProgressChange={dailyProgressChange}
       isCompletion={finishedReview}
       onCompletionContinue={() => navigate(ROUTES.home, { replace: true })}
       isBlockTrainingPractice={false}

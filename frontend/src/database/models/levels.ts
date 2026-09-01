@@ -4,7 +4,6 @@ import { TableName } from '@/types/table.types';
 import Dexie from 'dexie';
 import { aggregateLevels } from '../utils/levels.utils';
 import UserItem from './user-items';
-import UserItemProgressHistory from './user-item-progress-history';
 import Lessons from './lessons';
 import SyncEntityModel from './sync-entity-model';
 
@@ -38,17 +37,15 @@ export default class Levels extends SyncEntityModel implements LevelType {
     return db.transaction(
       'r',
       db.user_items,
-      db.user_item_progress_history,
       db.lessons,
       db.levels,
       async () => {
-        const [items, history, lessons, levels] = await Promise.all([
+        const [items, lessons, levels] = await Promise.all([
           UserItem.getByUserId(userId),
-          UserItemProgressHistory.getByDate(userId, localDate),
           Lessons.getAll(),
           db.levels.orderBy('sort_order').toArray(),
         ]);
-        return aggregateLevels(items, lessons, levels, localDate, history);
+        return aggregateLevels(items, lessons, levels, localDate);
       },
     );
   }

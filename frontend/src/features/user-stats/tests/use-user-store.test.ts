@@ -7,32 +7,25 @@ describe('useUserStore', () => {
       levels: [],
       levelsLoading: true,
       levelsError: null,
-      dailyProgressChange: 0,
-      dailyProgressChangeLoading: false,
-      dailyProgressChangeError: null,
+      startedTodayCount: 0,
     });
   });
 
-  it('clears level and daily-count snapshots including errors', () => {
+  it('clears level and started-today snapshots', () => {
     useUserStore.setState({
       levels: [{ id: 1 } as any],
       levelsLoading: true,
       levelsError: new Error('levels'),
-      dailyProgressChange: 2,
-      dailyProgressChangeLoading: true,
-      dailyProgressChangeError: new Error('score'),
+      startedTodayCount: 2,
     });
 
     useUserStore.getState().clearLevels();
-    useUserStore.getState().clearDailyProgressChange();
 
     expect(useUserStore.getState()).toMatchObject({
       levels: [],
       levelsLoading: false,
       levelsError: null,
-      dailyProgressChange: 0,
-      dailyProgressChangeLoading: false,
-      dailyProgressChangeError: null,
+      startedTodayCount: 0,
     });
   });
 });

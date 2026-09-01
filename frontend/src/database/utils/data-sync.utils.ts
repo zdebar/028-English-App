@@ -2,7 +2,6 @@ import config from '@/config/config';
 import { initDbMappings } from '@/database/models/db-init';
 import Block from '@/database/models/blocks';
 import UserItem from '@/database/models/user-items';
-import UserItemProgressHistory from '@/database/models/user-item-progress-history';
 import { restoreUnsavedFromLocalStorage } from '@/database/utils/database.utils';
 import { getFullSyncTime, setFullSyncTime } from '@/database/utils/sync-time.utils';
 import { withSettledSummary } from '@/features/logging/logging.utils';
@@ -54,7 +53,6 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
         Topic.syncFromRemote(true),
         PronunciationGroup.syncFromRemote(true),
         PronunciationGroupItem.syncFromRemote(true),
-        UserItemProgressHistory.syncFromRemote(userId, true),
         UserItem.syncFromRemote(userId, true),
       ]
     : [
@@ -68,7 +66,6 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
         Topic.syncFromRemote(false),
         PronunciationGroup.syncFromRemote(false),
         PronunciationGroupItem.syncFromRemote(false),
-        UserItemProgressHistory.syncFromRemote(userId, false),
         UserItem.syncFromRemote(userId, false),
       ];
 
@@ -84,7 +81,6 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
     'Topics',
     'PronunciationGroups',
     'PronunciationGroupItems',
-    'UserItemProgressHistory',
     'UserItems',
   ];
 
@@ -117,7 +113,7 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
 /**
  * Performs a best-effort incremental sync for user-owned tables during unmount.
  *
- * @param userId User id whose progress history and user_items rows should sync.
+ * @param userId User id whose user_items rows should sync.
  * @returns Resolves without syncing when there is no active Supabase session.
  * @throws Error when at least one unmount sync task rejects.
  */
@@ -128,7 +124,6 @@ export async function dataSyncOnUnmount(userId: string): Promise<void> {
   }
 
   const results = await Promise.allSettled([
-    UserItemProgressHistory.syncFromRemote(userId, false),
     UserItem.syncFromRemote(userId, false),
   ]);
 

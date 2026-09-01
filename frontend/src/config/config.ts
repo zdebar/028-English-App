@@ -24,8 +24,8 @@ const config = {
   srs: {
     // Spaced Repetition System configuration
     intervals: {
-      czToEn: [10, 20, 60, 240, 7200, 28800, 43200, 86400, 172800, 345600],
-      enToCz: [15, 40, 120, 480, 14400, 43200, 86400, 172800, 345600, 691200],
+      czToEn: [15, 300, 14400, 43200, 86400, 172800, 345600, 691200, 1382400, 2764800],
+      enToCz: [15, 300, 14400, 43200, 86400, 172800, 345600, 691200, 1382400, 2764800],
     },
     randomness: 0.2, // Randomness of SRS algorithm
   },
@@ -38,7 +38,7 @@ const config = {
   practice: {
     initialTrainingBatchSize: 8, // Maximum size of an automatically assembled initial-training batch
     reviewMinimumSize: 20, // Minimum number of due items required to start one review direction
-    dailyProgressGoal: 400, // Daily progress-change goal shown on the home page
+    dailyStartedGoal: 24, // Daily started-item goal shown on the home page
     audioDelay: 100, // Delay in milliseconds for automatically playing audio
     holdDuration: 300, // Duration in milliseconds for which the practice card is held before moving to the next item
     maxReviewReadyTimerDelayMs: 2_147_483_647, // Maximum setTimeout delay supported by browsers

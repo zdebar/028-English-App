@@ -1,7 +1,7 @@
 import config from '@/config/config';
 import Levels from '@/database/models/levels';
-import UserItemProgressHistory from '@/database/models/user-item-progress-history';
 import { reportError } from '@/features/logging/monitoring-handler';
+import type { LevelOverviewType } from '@/types/generic.types';
 import { liveQuery } from 'dexie';
 import { useEffect, useState } from 'react';
 import { useUserStore } from './use-user-store';
@@ -14,6 +14,10 @@ function toError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
 }
 
+function getStartedTodayCount(levels: LevelOverviewType[]): number {
+  return levels.reduce((total, level) => total + level.startedTodayCount, 0);
+}
+
 /**
  * Custom hook to automatically reset user stats on sign-off (userId becomes null).
  *
@@ -22,7 +26,6 @@ function toError(error: unknown): Error {
 export function useUserStoreSync(userId: string | null) {
   const [localDate, setLocalDate] = useState(getLocalDate);
   const clearItemsStats = useUserStore((state) => state.clearLevels);
-  const clearScoresStats = useUserStore((state) => state.clearDailyProgressChange);
 
   useEffect(() => {
     const intervalId = globalThis.setInterval(() => {
@@ -38,7 +41,6 @@ export function useUserStoreSync(userId: string | null) {
   useEffect(() => {
     if (userId == null) {
       clearItemsStats();
-      clearScoresStats();
       return;
     }
 
@@ -47,15 +49,19 @@ export function useUserStoreSync(userId: string | null) {
       levels: [],
       levelsLoading: true,
       levelsError: null,
-      dailyProgressChange: 0,
-      dailyProgressChangeLoading: true,
-      dailyProgressChangeError: null,
+      startedTodayCount: 0,
     });
 
     const levelsSubscription = liveQuery(() => Levels.getOverview(userId, localDate)).subscribe({
       next: (levels) => {
         if (isActive) {
-          useUserStore.setState({ levels: levels ?? [], levelsLoading: false, levelsError: null });
+          const nextLevels = levels ?? [];
+          useUserStore.setState({
+            levels: nextLevels,
+            levelsLoading: false,
+            levelsError: null,
+            startedTodayCount: getStartedTodayCount(nextLevels),
+          });
         }
       },
       error: (error) => {
@@ -64,32 +70,9 @@ export function useUserStoreSync(userId: string | null) {
             levels: [],
             levelsLoading: false,
             levelsError: toError(error),
+            startedTodayCount: 0,
           });
           reportError('Error observing levels', error);
-        }
-      },
-    });
-
-    const dailyProgressChangeSubscription = liveQuery(() =>
-      UserItemProgressHistory.getTodayProgressChange(userId, localDate),
-    ).subscribe({
-      next: (dailyProgressChange) => {
-        if (isActive) {
-          useUserStore.setState({
-            dailyProgressChange: dailyProgressChange ?? 0,
-            dailyProgressChangeLoading: false,
-            dailyProgressChangeError: null,
-          });
-        }
-      },
-      error: (error) => {
-        if (isActive) {
-          useUserStore.setState({
-            dailyProgressChange: 0,
-            dailyProgressChangeLoading: false,
-            dailyProgressChangeError: toError(error),
-          });
-          reportError('Error observing daily count', error);
         }
       },
     });
@@ -97,7 +80,6 @@ export function useUserStoreSync(userId: string | null) {
     return () => {
       isActive = false;
       levelsSubscription.unsubscribe();
-      dailyProgressChangeSubscription.unsubscribe();
     };
-  }, [userId, localDate, clearItemsStats, clearScoresStats]);
+  }, [userId, localDate, clearItemsStats]);
 }

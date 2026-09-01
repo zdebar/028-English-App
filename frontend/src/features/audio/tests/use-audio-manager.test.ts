@@ -191,6 +191,83 @@ describe('useAudioManager', () => {
     expect(errorHandlerMock).toHaveBeenCalledWith('Audio Manager Error', expect.any(Error));
   });
 
+  it('does not expose the previous audio error while loading a new file', async () => {
+    let resolveNewAudio: ((value: { audioBlob: Blob }) => void) | undefined;
+    getAudioMock.mockImplementation((filename: string) => {
+      if (filename === 'missing.opus') return Promise.resolve(null);
+      return new Promise<{ audioBlob: Blob }>((resolve) => {
+        resolveNewAudio = resolve;
+      });
+    });
+
+    const renders: Array<{
+      filename: string;
+      audioError: boolean;
+      loading: boolean;
+      isPlaying: boolean;
+    }> = [];
+    const { result, rerender } = renderHook(
+      ({ filename }: { filename: string }) => {
+        const state = useAudioManager(filename);
+        renders.push({
+          filename,
+          audioError: state.audioError,
+          loading: state.loading,
+          isPlaying: state.isPlaying,
+        });
+        return state;
+      },
+      { initialProps: { filename: 'missing.opus' } },
+    );
+
+    await waitFor(() => expect(result.current.audioError).toBe(true));
+    renders.length = 0;
+
+    rerender({ filename: 'new.opus' });
+
+    expect(renders[0]).toEqual({
+      filename: 'new.opus',
+      audioError: false,
+      loading: true,
+      isPlaying: false,
+    });
+    expect(result.current.isAudioReady('missing.opus')).toBe(false);
+
+    let didPlay = true;
+    await act(async () => {
+      didPlay = await result.current.playAudio('missing.opus');
+    });
+    expect(didPlay).toBe(false);
+    expect(audioInstances).toHaveLength(0);
+
+    await act(async () => {
+      resolveNewAudio?.({ audioBlob: new Blob(['new']) });
+    });
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+      expect(result.current.isAudioReady('new.opus')).toBe(true);
+    });
+    expect(result.current.audioError).toBe(false);
+  });
+
+  it('returns an immediate empty state when switching from failed audio to no audio', async () => {
+    getAudioMock.mockResolvedValue(null);
+    const { result, rerender } = renderHook(
+      ({ audio }: { audio: string | null }) => useAudioManager(audio),
+      { initialProps: { audio: 'missing.opus' as string | null } },
+    );
+
+    await waitFor(() => expect(result.current.audioError).toBe(true));
+
+    rerender({ audio: null });
+
+    expect(result.current.audioError).toBe(false);
+    expect(result.current.loading).toBe(false);
+    expect(result.current.isPlaying).toBe(false);
+    expect(result.current.isAudioReady()).toBe(false);
+  });
+
   it('marks audio as failed when playback rejects', async () => {
     getAudioMock.mockResolvedValue({ audioBlob: new Blob(['a']) });
     const { result } = renderHook(() => useAudioManager('file.opus'));

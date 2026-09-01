@@ -7,7 +7,6 @@ import PracticeEmptyState from '@/features/practice/PracticeEmptyState';
 import PracticeSessionCard from '@/features/practice/PracticeSessionCard';
 import { useInitialTrainingDeck } from '@/features/practice/hooks/use-block-training-deck';
 import { useToastStore } from '@/features/toast/use-toast-store';
-import { useUserStore } from '@/features/user-stats/use-user-store';
 import { TEXTS } from '@/locales/cs';
 import { useEffect, useState, type JSX } from 'react';
 import { useLoaderData, useNavigate } from 'react-router-dom';
@@ -36,7 +35,6 @@ function InitialTrainingContent({
   dismissIntro: () => void;
   onCompletionContinue: () => void;
 }>): JSX.Element {
-  const dailyProgressChange = useUserStore((state) => state.dailyProgressChange);
   if (deck.loading) return <DelayedLoadingCircle />;
   if (deck.isComplete) {
     return (
@@ -45,7 +43,6 @@ function InitialTrainingContent({
         grammar={null}
         progressLabel={deck.progressLabel}
         progressHelpText={TEXTS.progress}
-        dailyProgressChange={dailyProgressChange}
         isBlockTrainingPractice
         isCompletion
         onCompletionContinue={onCompletionContinue}
@@ -88,7 +85,6 @@ function InitialTrainingContent({
       note={deck.note}
       grammar={deck.practiceGrammar}
       progressLabel={deck.progressLabel}
-      dailyProgressChange={dailyProgressChange}
       isCzToEn={deck.isCzToEn}
       revealed={deck.revealed}
       czech={deck.czech}

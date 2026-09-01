@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   userId: 'u1' as string | null,
   navigate: vi.fn(),
-  history: [] as any[],
+  items: [] as any[],
 }));
 
 vi.mock('@/features/auth/use-auth-store', () => ({
@@ -12,9 +12,9 @@ vi.mock('@/features/auth/use-auth-store', () => ({
     selector({ userId: mocks.userId }),
 }));
 
-vi.mock('@/database/models/user-item-progress-history', () => ({
+vi.mock('@/database/models/user-items', () => ({
   default: {
-    getByUserId: vi.fn(async () => mocks.history),
+    getByUserId: vi.fn(async () => mocks.items),
   },
 }));
 
@@ -29,8 +29,8 @@ vi.mock('@/components/UI/OverviewCard', () => ({
 
 vi.mock('@/config/config', () => ({
   default: {
-    database: { nullReplacementDate: '9999-12-31' },
-    practice: { dailyProgressGoal: 200 },
+    database: { nullReplacementDate: '9999-12-31T23:59:59+00:00' },
+    practice: { dailyStartedGoal: 24 },
     loading: { dataStateDelayMs: 0 },
   },
 }));
@@ -42,8 +42,6 @@ vi.mock('@/locales/cs', () => ({
     practiceOverviewNone: 'No days',
     loadingError: 'Loading error',
     loadingMessage: 'Loading',
-    directionCzToEnShort: 'cz > en',
-    directionEnToCzShort: 'en > cz',
   },
 }));
 
@@ -57,7 +55,7 @@ vi.mock('@/features/logging/monitoring-handler', () => ({ reportError: vi.fn() }
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
   useLocation: () => ({ key: 'default' }),
-  useLoaderData: () => mocks.history,
+  useLoaderData: () => mocks.items,
 }));
 
 import PracticeOverview from '@/pages/PracticeOverview';
@@ -68,9 +66,12 @@ describe('PracticeOverview', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-05-24T12:00:00.000Z'));
     mocks.userId = 'u1';
-    mocks.history = [
-      historyEntry('2026-05-24', 1, 8, 10, 1),
-      historyEntry('2026-05-22', 2, 4, 10, 2),
+    mocks.items = [
+      startedItem(1, '2026-05-24T10:00:00.000Z'),
+      startedItem(2, '2026-05-24T11:00:00.000Z'),
+      startedItem(3, '2026-05-22T10:00:00.000Z'),
+      startedItem(4, '9999-12-31T23:59:59+00:00'),
+      startedItem(5, '2026-05-21T10:00:00.000Z', '2026-05-22T10:00:00.000Z'),
     ];
   });
 
@@ -78,25 +79,29 @@ describe('PracticeOverview', () => {
     vi.useRealTimers();
   });
 
-  it('fills missing days and shows daily progress score', async () => {
+  it('fills missing days and shows daily started counts', async () => {
     render(<PracticeOverview />);
 
     await act(async () => {
       await Promise.resolve();
     });
 
-    expect(screen.getAllByRole('button')).toHaveLength(4);
-    expect(screen.getByText('+ 1')).toBeTruthy();
-    expect(screen.getByText('+ 1').className).toContain('text-error-light');
-    expect(screen.getByText('0')).toBeTruthy();
+    expect(screen.getAllByRole('button')).toHaveLength(1);
     expect(screen.getByText('+ 2')).toBeTruthy();
+    expect(screen.getByText('+ 2').className).toContain('text-error-light');
+    expect(screen.getByText('0')).toBeTruthy();
+    expect(screen.getByText('+ 1')).toBeTruthy();
   });
 
-  it('colors each daily score against the configured progress goal', async () => {
-    mocks.history = [
-      historyEntry('2026-05-24', 1, 8, 10, 200),
-      historyEntry('2026-05-23', 2, 8, 10, 199),
-      historyEntry('2026-05-22', 3, 8, 10, -5),
+  it('colors each daily count against the configured started goal', async () => {
+    mocks.items = [
+      ...Array.from({ length: 24 }, (_, index) =>
+        startedItem(index + 1, '2026-05-24T12:00:00.000Z'),
+      ),
+      ...Array.from({ length: 23 }, (_, index) =>
+        startedItem(index + 25, '2026-05-23T12:00:00.000Z'),
+      ),
+      startedItem(48, '2026-05-22T10:00:00.000Z'),
     ];
 
     render(<PracticeOverview />);
@@ -104,20 +109,10 @@ describe('PracticeOverview', () => {
       await Promise.resolve();
     });
 
-    expect(screen.getByText('+ 200').className).toContain('text-success-light');
-    expect(screen.getByText('+ 199').className).toContain('text-error-light');
-    expect(screen.getByText('- 5').className).toContain('text-error-light');
-  });
-
-  it('expands a day into item directions and progress states', async () => {
-    render(<PracticeOverview />);
-    await act(async () => {
-      await Promise.resolve();
-    });
-
-    fireEvent.click(screen.getByRole('button', { name: /24/ }));
-    expect(screen.getByText('1 · cz > en')).toBeTruthy();
-    expect(screen.getByText('8 / 10')).toBeTruthy();
+    expect(screen.getByText('+ 24').className).toContain('text-success-light');
+    expect(screen.getByText('+ 23').className).toContain('text-error-light');
+    expect(screen.getByText('+ 1').className).toContain('text-error-light');
+    expect(screen.queryByText(/cz > en/)).toBeNull();
   });
 
   it('uses the home fallback on direct entry', () => {
@@ -127,22 +122,11 @@ describe('PracticeOverview', () => {
   });
 });
 
-function historyEntry(
-  date: string,
-  itemId: number,
-  progress: number,
-  maxProgress: number,
-  progressChange: number,
-) {
+function startedItem(itemId: number, startedAt: string, deletedAt = '9999-12-31T23:59:59+00:00') {
   return {
     user_id: 'u1',
-    date,
     item_id: itemId,
-    direction: 'czToEn',
-    progress,
-    max_progress: maxProgress,
-    progress_change: progressChange,
-    updated_at: `${date}T10:00:00.000Z`,
-    deleted_at: null,
+    started_at: startedAt,
+    deleted_at: deletedAt,
   };
 }

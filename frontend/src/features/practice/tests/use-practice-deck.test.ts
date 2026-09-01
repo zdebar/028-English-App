@@ -84,7 +84,7 @@ describe('usePracticeDeck', () => {
     mocks.transitionEvents.length = 0;
     mocks.fetchData = reviewDeckResult(reviewSession(7, 20), [entry(1), entry(2)]);
     mocks.applyPracticeProgress.mockImplementation((item) => ({ ...item, updated_at: 'now' }));
-    mocks.recordReviewAnswer.mockResolvedValue({ completedCount: 8, progressChange: 1 });
+    mocks.recordReviewAnswer.mockResolvedValue({ completedCount: 8 });
   });
 
   afterEach(() => {

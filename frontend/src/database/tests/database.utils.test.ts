@@ -119,8 +119,8 @@ describe('database.utils', () => {
       expect(item.progress_cz_to_en).toBe(0);
       expect(item.progress_en_to_cz).toBe(0);
       expect(item.started_at).toBe('x');
-      expect(item.next_at_cz_to_en).toBe('2026-02-28T08:00:00.000Z');
-      expect(item.next_at_en_to_cz).toBe('2026-02-28T08:00:00.000Z');
+      expect(item.next_at_cz_to_en).toBe('1970-01-01T00:00:00.000Z');
+      expect(item.next_at_en_to_cz).toBe('1970-01-01T00:00:00.000Z');
       expect(item.mastered_at_cz_to_en).toBe('1970-01-01T00:00:00.000Z');
       expect(item.mastered_at_en_to_cz).toBe('1970-01-01T00:00:00.000Z');
       expect(item.updated_at).toBe('2026-02-28T08:00:00.000Z');

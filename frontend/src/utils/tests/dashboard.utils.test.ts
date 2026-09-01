@@ -16,18 +16,18 @@ describe('dashboard.utils', () => {
   });
 
   describe('getInProgressLessons', () => {
-    it('returns every lesson with a positive or negative daily change across levels', () => {
+    it('returns every lesson started today across levels', () => {
       const levelsOverview = [
         {
           lessons: [
-            { id: 1, sort_order: 1, startedCount: 0, dailyProgressChange: 0 },
-            { id: 3, sort_order: 3, startedCount: 2, dailyProgressChange: -2 },
+            { id: 1, sort_order: 1, startedCount: 0, startedTodayCount: 0 },
+            { id: 3, sort_order: 3, startedCount: 2, startedTodayCount: 1 },
           ],
         },
         {
           lessons: [
-            { id: 2, sort_order: 2, startedCount: 1, dailyProgressChange: 4 },
-            { id: 4, sort_order: 4, startedCount: 10, dailyProgressChange: 0 },
+            { id: 2, sort_order: 2, startedCount: 1, startedTodayCount: 1 },
+            { id: 4, sort_order: 4, startedCount: 10, startedTodayCount: 0 },
           ],
         },
       ] as any;
@@ -40,12 +40,12 @@ describe('dashboard.utils', () => {
       expect(getInProgressLessons([])).toEqual([]);
     });
 
-    it('returns the first lesson when nothing has been started and there is no daily change', () => {
+    it('returns the first lesson when nothing has been started today', () => {
       const nothingStarted = [
         {
           lessons: [
-            { id: 1, sort_order: 1, startedCount: 0, dailyProgressChange: 0 },
-            { id: 2, sort_order: 2, startedCount: 0, dailyProgressChange: 0 },
+            { id: 1, sort_order: 1, startedCount: 0, startedTodayCount: 0 },
+            { id: 2, sort_order: 2, startedCount: 0, startedTodayCount: 0 },
           ],
         },
       ] as any;
@@ -53,13 +53,13 @@ describe('dashboard.utils', () => {
       expect(getInProgressLessons(nothingStarted).map((lesson) => lesson.id)).toEqual([1]);
     });
 
-    it('returns the last started lesson when there is no daily change', () => {
+    it('returns the last started lesson when nothing was started today', () => {
       const startedWithoutTodayData = [
         {
           lessons: [
-            { id: 1, sort_order: 1, startedCount: 4, dailyProgressChange: 0 },
-            { id: 2, sort_order: 2, startedCount: 0, dailyProgressChange: 0 },
-            { id: 3, sort_order: 3, startedCount: 8, dailyProgressChange: 0 },
+            { id: 1, sort_order: 1, startedCount: 4, startedTodayCount: 0 },
+            { id: 2, sort_order: 2, startedCount: 0, startedTodayCount: 0 },
+            { id: 3, sort_order: 3, startedCount: 8, startedTodayCount: 0 },
           ],
         },
       ] as any;
