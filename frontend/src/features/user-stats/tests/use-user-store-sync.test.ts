@@ -11,7 +11,6 @@ const mocks = vi.hoisted(() => ({
   queries: [] as Array<() => Promise<unknown>>,
   unsubscribes: [] as ReturnType<typeof vi.fn>[],
   getOverview: vi.fn(),
-  getTodayProgressChange: vi.fn(),
   reportError: vi.fn(),
   currentDate: '2026-04-15',
 }));
@@ -22,12 +21,6 @@ vi.mock('@/config/config', () => ({
 
 vi.mock('@/database/models/levels', () => ({
   default: { getOverview: (...args: unknown[]) => mocks.getOverview(...args) },
-}));
-
-vi.mock('@/database/models/user-item-progress-history', () => ({
-  default: {
-    getTodayProgressChange: (...args: unknown[]) => mocks.getTodayProgressChange(...args),
-  },
 }));
 
 vi.mock('@/features/logging/monitoring-handler', () => ({
@@ -58,7 +51,7 @@ describe('useUserStoreSync', () => {
     mocks.unsubscribes.length = 0;
     mocks.currentDate = '2026-04-15';
     vi.spyOn(Date.prototype, 'toLocaleDateString').mockImplementation(() => mocks.currentDate);
-    useUserStore.setState({ levels: [], dailyProgressChange: 0 });
+    useUserStore.setState({ levels: [], startedTodayCount: 0 });
   });
 
   afterEach(() => {
@@ -69,34 +62,29 @@ describe('useUserStoreSync', () => {
   it('subscribes for the active user and stores emitted snapshots', async () => {
     renderHook(() => useUserStoreSync('u1'));
 
-    expect(mocks.queries).toHaveLength(2);
+    expect(mocks.queries).toHaveLength(1);
     await mocks.queries[0]();
-    await mocks.queries[1]();
     expect(mocks.getOverview).toHaveBeenCalledWith('u1', '2026-04-15');
-    expect(mocks.getTodayProgressChange).toHaveBeenCalledWith('u1', '2026-04-15');
 
     act(() => {
-      mocks.observers[0].next([{ id: 1 }]);
-      mocks.observers[1].next(7);
+      mocks.observers[0].next([{ id: 1, startedTodayCount: 7 }]);
     });
 
     expect(useUserStore.getState()).toMatchObject({
       levels: [{ id: 1 }],
       levelsLoading: false,
-      dailyProgressChange: 7,
-      dailyProgressChangeLoading: false,
+      startedTodayCount: 7,
     });
   });
 
-  it('recreates both subscriptions when the local date changes', () => {
+  it('recreates the subscription when the local date changes', () => {
     renderHook(() => useUserStoreSync('u1'));
     mocks.currentDate = '2026-04-16';
 
     act(() => vi.advanceTimersByTime(1000));
 
-    expect(mocks.queries).toHaveLength(4);
+    expect(mocks.queries).toHaveLength(2);
     expect(mocks.unsubscribes[0]).toHaveBeenCalledOnce();
-    expect(mocks.unsubscribes[1]).toHaveBeenCalledOnce();
   });
 
   it('unsubscribes and clears snapshots on sign-out', () => {
@@ -104,15 +92,13 @@ describe('useUserStoreSync', () => {
       initialProps: { userId: 'u1' as string | null },
     });
     act(() => {
-      mocks.observers[0].next([{ id: 1 }]);
-      mocks.observers[1].next(4);
+      mocks.observers[0].next([{ id: 1, startedTodayCount: 4 }]);
     });
 
     rerender({ userId: null });
 
     expect(mocks.unsubscribes[0]).toHaveBeenCalledOnce();
-    expect(mocks.unsubscribes[1]).toHaveBeenCalledOnce();
-    expect(useUserStore.getState()).toMatchObject({ levels: [], dailyProgressChange: 0 });
+    expect(useUserStore.getState()).toMatchObject({ levels: [], startedTodayCount: 0 });
   });
 
   it('clears stale snapshots and ignores the previous user after an account switch', () => {
@@ -120,26 +106,25 @@ describe('useUserStoreSync', () => {
       initialProps: { userId: 'u1' },
     });
     act(() => {
-      mocks.observers[0].next([{ id: 1 }]);
-      mocks.observers[1].next(4);
+      mocks.observers[0].next([{ id: 1, startedTodayCount: 4 }]);
     });
 
     rerender({ userId: 'u2' });
     expect(useUserStore.getState()).toMatchObject({
       levels: [],
       levelsLoading: true,
-      dailyProgressChange: 0,
-      dailyProgressChangeLoading: true,
+      startedTodayCount: 0,
     });
 
     act(() => {
-      mocks.observers[0].next([{ id: 99 }]);
-      mocks.observers[1].next(99);
-      mocks.observers[2].next([{ id: 2 }]);
-      mocks.observers[3].next(8);
+      mocks.observers[0].next([{ id: 99, startedTodayCount: 99 }]);
+      mocks.observers[1].next([{ id: 2, startedTodayCount: 8 }]);
     });
 
-    expect(useUserStore.getState()).toMatchObject({ levels: [{ id: 2 }], dailyProgressChange: 8 });
+    expect(useUserStore.getState()).toMatchObject({
+      levels: [{ id: 2, startedTodayCount: 8 }],
+      startedTodayCount: 8,
+    });
   });
 
   it('records observer failures and ignores emissions after cleanup', () => {
@@ -151,7 +136,7 @@ describe('useUserStoreSync', () => {
     expect(mocks.reportError).toHaveBeenCalledWith('Error observing levels', levelsError);
 
     unmount();
-    act(() => mocks.observers[1].next(99));
-    expect(useUserStore.getState().dailyProgressChange).toBe(0);
+    act(() => mocks.observers[0].next([{ id: 99, startedTodayCount: 99 }]));
+    expect(useUserStore.getState().startedTodayCount).toBe(0);
   });
 });

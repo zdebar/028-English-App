@@ -7,7 +7,6 @@ const mocks = vi.hoisted(() => ({
   blockGet: vi.fn(),
   blockItems: vi.fn(),
   itemUpdate: vi.fn(),
-  recordProgressChange: vi.fn(),
   saveInitialTrainingCompletion: vi.fn(),
   transaction: vi.fn(),
 }));
@@ -30,7 +29,6 @@ vi.mock('@/database/models/db', () => ({
         anyOf: () => ({ toArray: (...args: unknown[]) => mocks.blockItems(...args) }),
       }),
     },
-    user_item_progress_history: {},
     blocks: { get: (...args: unknown[]) => mocks.blockGet(...args) },
     practice_sessions: {
       get: (...args: unknown[]) => mocks.sessionGet(...args),
@@ -41,12 +39,6 @@ vi.mock('@/database/models/db', () => ({
       mocks.transaction(...args.slice(0, -1));
       return (args.at(-1) as () => Promise<unknown>)();
     },
-  },
-}));
-
-vi.mock('@/database/models/user-item-progress-history', () => ({
-  default: {
-    recordChange: (...args: unknown[]) => mocks.recordProgressChange(...args),
   },
 }));
 
@@ -68,11 +60,10 @@ describe('PracticeSession progress transactions', () => {
     mocks.sessionPut.mockResolvedValue(undefined);
     mocks.sessionDelete.mockResolvedValue(undefined);
     mocks.blockItems.mockResolvedValue([]);
-    mocks.recordProgressChange.mockResolvedValue(undefined);
     mocks.saveInitialTrainingCompletion.mockResolvedValue([]);
   });
 
-  it('persists a review answer and records its effective progress delta atomically', async () => {
+  it('persists a review answer atomically', async () => {
     mocks.sessionGet.mockResolvedValue(reviewSession(7));
     const original = item({ progress_cz_to_en: 1 });
     const updated = item({ progress_cz_to_en: 2, updated_at: '2026-08-23T10:00:00.000Z' });
@@ -84,24 +75,15 @@ describe('PracticeSession progress transactions', () => {
       '2026-08-23T10:00:00.000Z',
     );
 
-    expect(result).toEqual({ completedCount: 8, progressChange: 1 });
+    expect(result).toEqual({ completedCount: 8 });
     expect(mocks.itemUpdate).toHaveBeenCalledOnce();
     expect(mocks.sessionPut).toHaveBeenCalledWith(
       expect.objectContaining({ completed_count: 8, review_queue: [] }),
     );
-    expect(mocks.recordProgressChange).toHaveBeenCalledWith(
-      'u1',
-      1,
-      'czToEn',
-      2,
-      3,
-      1,
-      '2026-08-23T10:00:00.000Z',
-    );
     expect(mocks.transaction).toHaveBeenCalledOnce();
   });
 
-  it('records skip as the remaining distance to the mastered SRS maximum', async () => {
+  it('persists a skipped review answer atomically', async () => {
     mocks.sessionGet.mockResolvedValue(reviewSession(0));
     const original = item({ progress_cz_to_en: 1 });
     const updated = item({
@@ -117,15 +99,7 @@ describe('PracticeSession progress transactions', () => {
       '2026-08-23T10:00:00.000Z',
     );
 
-    expect(mocks.recordProgressChange).toHaveBeenCalledWith(
-      'u1',
-      1,
-      'czToEn',
-      3,
-      3,
-      2,
-      '2026-08-23T10:00:00.000Z',
-    );
+    expect(mocks.itemUpdate).toHaveBeenCalledOnce();
   });
 
   it('stores an initial-training answer and session in the same transaction', async () => {
@@ -138,16 +112,13 @@ describe('PracticeSession progress transactions', () => {
     mocks.sessionGet.mockResolvedValue(newSession());
 
     await PracticeSession.recordInitialTrainingAnswer(
-      item(),
       item({ progress_cz_to_en: 1 }),
-      'czToEn',
       session,
     );
 
     expect(mocks.transaction).toHaveBeenCalledOnce();
     expect(mocks.itemUpdate).toHaveBeenCalledOnce();
     expect(mocks.sessionPut).toHaveBeenCalledWith(session);
-    expect(mocks.recordProgressChange).toHaveBeenCalledOnce();
   });
 
   it('restores the expected initial-training session when reconciliation removed it', async () => {
@@ -160,9 +131,7 @@ describe('PracticeSession progress transactions', () => {
     };
 
     await PracticeSession.recordInitialTrainingAnswer(
-      item(),
       item({ progress_cz_to_en: 1 }),
-      'czToEn',
       session,
     );
 
@@ -175,9 +144,7 @@ describe('PracticeSession progress transactions', () => {
 
     await expect(
       PracticeSession.recordInitialTrainingAnswer(
-        item(),
         item({ progress_cz_to_en: 1 }),
-        'czToEn',
         newSession(),
       ),
     ).rejects.toThrow('The trained item no longer exists locally.');
@@ -210,7 +177,6 @@ describe('PracticeSession progress transactions', () => {
         [1, 2],
         '2026-08-23T10:00:00.000Z',
         undefined,
-        'enToCz',
         newSession(),
       ),
     ).resolves.toBeUndefined();

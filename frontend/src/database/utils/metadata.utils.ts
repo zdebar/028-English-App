@@ -7,7 +7,7 @@ import { TableName } from '@/types/table.types';
  * @returns true for user-owned tables.
  */
 export function isUserSpecificTable(tableName: string): boolean {
-  return tableName === TableName.UserItemProgressHistory || tableName === TableName.UserItems;
+  return tableName === TableName.UserItems;
 }
 
 /**

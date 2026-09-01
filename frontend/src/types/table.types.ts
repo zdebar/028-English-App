@@ -2,7 +2,6 @@ export const TableName = {
   GrammarGroups: 'grammar_groups',
   GrammarChunks: 'grammar_chunks',
   GrammarChunkExamples: 'grammar_chunk_examples',
-  UserItemProgressHistory: 'user_item_progress_history',
   UserItems: 'user_items',
   Levels: 'levels',
   Lessons: 'lessons',

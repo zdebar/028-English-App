@@ -110,7 +110,6 @@ vi.mock('@/locales/cs', () => ({
     progress: 'Progress',
     reviewProgress: 'Review progress',
     progressToday: 'Today progress',
-    progressTodayHint: 'Today progress change',
     blockCompleted: 'Block completed',
     reviewCompleted: 'Review completed',
     returnToHomeByClick: 'Click to return home',
@@ -482,12 +481,11 @@ describe('PracticeCard', () => {
     expect(screen.queryByText('Next star progress')).toBeNull();
   });
 
-  it('shows review progress and numeric daily score on the card', () => {
+  it('shows review progress on the card', () => {
     const { container } = render(<PracticeCard />);
     const bottomBar = container.querySelector('#bottom-bar') as HTMLElement;
 
     expect(bottomBar.firstElementChild?.textContent).toBe('2/20');
-    expect(bottomBar.querySelector('p[title="Today progress change"]')?.textContent).toBe('0');
     expect(bottomBar.textContent).not.toContain('2 / 9');
   });
 
@@ -536,11 +534,9 @@ describe('PracticeCard', () => {
     mocks.practiceDeck.audioError = true;
     const { container } = render(<PracticeCard />);
     const topBar = container.querySelector('#top-bar') as HTMLElement;
-    const bottomBar = container.querySelector('#bottom-bar') as HTMLElement;
 
     expect(topBar.textContent).toContain('cz › en');
     expect(topBar.textContent).toContain('No audio');
-    expect(bottomBar.querySelector('p[title="Today progress change"]')?.textContent).toBe('0');
   });
 
   it('keeps vocabulary and direction changes centered while audio status changes', () => {

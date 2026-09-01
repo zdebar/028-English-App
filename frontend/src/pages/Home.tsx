@@ -44,7 +44,7 @@ export default function Home(): JSX.Element {
   const userFullName = useAuthStore((state) => state.userFullName);
   const isAnonymousUser = useAuthStore((state) => state.isAnonymousUser);
   const authLoading = useAuthStore((state) => state.loading);
-  const dailyProgressChange = useUserStore((state) => state.dailyProgressChange);
+  const startedTodayCount = useUserStore((state) => state.startedTodayCount);
   const isSyncError = useSyncStore((state) => state.isSyncError);
 
   if (authLoading) {
@@ -80,12 +80,12 @@ export default function Home(): JSX.Element {
             </div>
           )}
           <PracticeOverviewButton
-            count={dailyProgressChange}
-            goal={config.practice.dailyProgressGoal}
+            count={startedTodayCount}
+            goal={config.practice.dailyStartedGoal}
             to={ROUTES.practiceOverview}
             descriptor={practiceOverviewDescriptor(userId)}
             ariaLabel={TEXTS.practiceOverviewOpen}
-            helpText={TEXTS.dailyProgressGoal}
+            helpText={TEXTS.dailyStartedGoal}
           />
           <div className="flex w-full flex-col gap-1">
             <PracticeButton userId={userId} />

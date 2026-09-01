@@ -171,19 +171,6 @@ CREATE TABLE IF NOT EXISTS user_items (
   PRIMARY KEY (user_id, item_id)
 );
 
-CREATE TABLE IF NOT EXISTS user_item_progress_history (
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  date DATE NOT NULL,
-  item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
-  direction TEXT NOT NULL CHECK (direction IN ('czToEn', 'enToCz')),
-  progress INTEGER NOT NULL CHECK (progress >= 0),
-  max_progress INTEGER NOT NULL CHECK (max_progress >= 0),
-  progress_change INTEGER NOT NULL,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ,
-  PRIMARY KEY (user_id, date, item_id, direction)
-);
-
 -- CREATE user for new supabase.auth.user
 CREATE OR REPLACE FUNCTION public.handle_new_auth_user()
 RETURNS trigger
@@ -252,6 +239,3 @@ CREATE INDEX IF NOT EXISTS idx_user_items_item_user
 
 CREATE INDEX IF NOT EXISTS idx_user_items_user_pronunciation_practice
   ON public.user_items (user_id, has_pronunciation_practice);
-
-CREATE INDEX IF NOT EXISTS idx_user_item_progress_history_user_updated
-  ON public.user_item_progress_history (user_id, updated_at, date);

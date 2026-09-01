@@ -5,10 +5,9 @@ import type {
   LevelType,
   ProgressCountsType,
 } from '@/types/generic.types';
-import type { UserItemLocal, UserItemProgressHistoryType } from '@/types/user-item.types';
+import type { UserItemLocal } from '@/types/user-item.types';
 import { getTodayShortDate, getLocalDateFromUTC } from './database.utils';
 import config from '@/config/config';
-import { getItemEffectiveProgress, getItemMaximumProgress } from '@/utils/progress.utils';
 
 const NULL_DATE = config.database.nullReplacementDate;
 
@@ -19,41 +18,24 @@ const NULL_DATE = config.database.nullReplacementDate;
  * @param lessons Lesson records used as aggregation buckets.
  * @param levels Level records used to group lesson summaries.
  * @returns Levels that contain at least one lesson with items, sorted by level sort_order. Lesson
- * summaries include counts, current effective progress, maximum progress, and today's delta.
+ * summaries include total, started, and started-today counts.
  */
 export function aggregateLevels(
   items: UserItemLocal[],
   lessons: LessonType[],
   levels: LevelType[],
   today: string = getTodayShortDate(),
-  history: UserItemProgressHistoryType[] = [],
 ): LevelOverviewType[] {
-  const progressKeys: (keyof ProgressCountsType)[] = [
+  const countKeys: (keyof ProgressCountsType)[] = [
     'startedCount',
     'startedTodayCount',
     'totalCount',
-    'currentProgress',
-    'dailyProgressChange',
-    'maximumProgress',
   ];
 
   const createEmptyCounts = (): ProgressCountsType => ({
     startedCount: 0,
     startedTodayCount: 0,
     totalCount: 0,
-    currentProgress: 0,
-    dailyProgressChange: 0,
-    maximumProgress: 0,
-  });
-
-  const dailyChangeByItem = new Map<number, number>();
-  history.forEach((entry) => {
-    if (entry.date !== today) return;
-    if (entry.deleted_at !== null && entry.deleted_at !== NULL_DATE) return;
-    dailyChangeByItem.set(
-      entry.item_id,
-      (dailyChangeByItem.get(entry.item_id) ?? 0) + entry.progress_change,
-    );
   });
 
   const lessonCounts: ProgressCountsType[] = lessons.map(() => createEmptyCounts());
@@ -70,13 +52,9 @@ export function aggregateLevels(
       if (idx === undefined) return;
       const counts = lessonCounts[idx];
       if (item.started_at !== NULL_DATE) counts.startedCount++;
-      if (item.started_at !== NULL_DATE && getLocalDateFromUTC(item.started_at).startsWith(today))
+      if (item.started_at !== NULL_DATE && getLocalDateFromUTC(item.started_at) === today)
         counts.startedTodayCount++;
       counts.totalCount++;
-      counts.currentProgress = (counts.currentProgress ?? 0) + getItemEffectiveProgress(item);
-      counts.dailyProgressChange =
-        (counts.dailyProgressChange ?? 0) + (dailyChangeByItem.get(item.item_id) ?? 0);
-      counts.maximumProgress = (counts.maximumProgress ?? 0) + getItemMaximumProgress();
     });
 
   // Build LessonOverview[]
@@ -102,8 +80,8 @@ export function aggregateLevels(
     const level = levelOverviews.get(lesson.level_id);
     if (level) {
       level.lessons.push(lesson);
-      for (const key of progressKeys) {
-        level[key] += lesson[key] ?? 0;
+      for (const key of countKeys) {
+        level[key] += lesson[key];
       }
     }
   });

@@ -33,8 +33,8 @@ function getRandomUnitInterval(): number {
  * @param item Local user item object to reset in place.
  */
 export function resetUserItem(item: UserItemLocal, dateTime: string = new Date().toISOString()): void {
-  item.next_at_cz_to_en = dateTime;
-  item.next_at_en_to_cz = dateTime;
+  item.next_at_cz_to_en = NULL_DATE;
+  item.next_at_en_to_cz = NULL_DATE;
   item.mastered_at_cz_to_en = NULL_DATE;
   item.mastered_at_en_to_cz = NULL_DATE;
   item.updated_at = dateTime;

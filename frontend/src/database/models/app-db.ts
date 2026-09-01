@@ -4,7 +4,6 @@ import type GrammarChunk from '@/database/models/grammar-chunks';
 import type GrammarGroup from '@/database/models/grammar-groups';
 import type AudioRecord from '@/database/models/audio-records';
 import type UserItem from '@/database/models/user-items';
-import type UserItemProgressHistory from '@/database/models/user-item-progress-history';
 import type Block from '@/database/models/blocks';
 import type AudioMetadata from '@/database/models/audio-metadata';
 import type Metadata from '@/database/models/metadata';
@@ -37,7 +36,6 @@ export default class AppDB extends Dexie {
   grammar_chunks!: EntityTable<GrammarChunk, 'id'>;
   grammar_chunk_examples!: EntityTable<GrammarChunkExample, any>;
   user_items!: EntityTable<UserItem, any>;
-  user_item_progress_history!: EntityTable<UserItemProgressHistory, any>;
   blocks!: EntityTable<Block, 'id'>;
   audio_records!: EntityTable<AudioRecord, 'filename'>;
   audio_metadata!: EntityTable<AudioMetadata, 'archive_name'>;
@@ -75,5 +73,18 @@ export default class AppDB extends Dexie {
       user_item_progress_history:
         '[user_id+date+item_id+direction], [user_id+date], [user_id+updated_at], [user_id+item_id+direction]',
     });
+
+    this.version(3)
+      .stores({ user_item_progress_history: null })
+      .upgrade(async (transaction) => {
+        await transaction
+          .table('metadata')
+          .where('[table_name+user_id]')
+          .between(
+            ['user_item_progress_history', Dexie.minKey],
+            ['user_item_progress_history', Dexie.maxKey],
+          )
+          .delete();
+      });
   }
 }

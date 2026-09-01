@@ -31,25 +31,6 @@ export function getEffectiveProgress(
   return Math.min(Math.max(rawProgress, 0), maxProgress);
 }
 
-export function getItemEffectiveProgress(item: EffectiveProgressItem): number {
-  return PRACTICE_DIRECTIONS.reduce(
-    (total, direction) => total + getEffectiveProgress(item, direction),
-    0,
-  );
-}
-
-export function getItemMaximumProgress(): number {
-  return PRACTICE_DIRECTIONS.reduce((total, direction) => total + getSrsLength(direction), 0);
-}
-
-export function getProgressChange(
-  before: EffectiveProgressItem,
-  after: EffectiveProgressItem,
-  direction: PracticeDirection,
-): number {
-  return getEffectiveProgress(after, direction) - getEffectiveProgress(before, direction);
-}
-
 function getDirectionProgress(item: DirectionProgressItem, direction: PracticeDirection): number {
   return direction === 'czToEn' ? (item.progress_cz_to_en ?? 0) : (item.progress_en_to_cz ?? 0);
 }

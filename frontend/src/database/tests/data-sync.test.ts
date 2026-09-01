@@ -6,7 +6,6 @@ const mocks = vi.hoisted(() => ({
   initDbMappings: vi.fn(),
   restoreUnsavedFromLocalStorage: vi.fn(),
   withSettledSummary: vi.fn(),
-  progressHistorySyncFromRemote: vi.fn(),
   userItemSyncFromRemote: vi.fn(),
   blockSyncFromRemote: vi.fn(),
   grammarSyncFromRemote: vi.fn(),
@@ -50,12 +49,6 @@ vi.mock('@/database/utils/database.utils', () => ({
 
 vi.mock('@/features/logging/logging.utils', () => ({
   withSettledSummary: (...args: unknown[]) => mocks.withSettledSummary(...args),
-}));
-
-vi.mock('@/database/models/user-item-progress-history', () => ({
-  default: {
-    syncFromRemote: (...args: unknown[]) => mocks.progressHistorySyncFromRemote(...args),
-  },
 }));
 
 vi.mock('@/database/models/user-items', () => ({
@@ -145,7 +138,6 @@ describe('data-sync.utils', () => {
     mocks.restoreUnsavedFromLocalStorage.mockResolvedValue(undefined);
     mocks.withSettledSummary.mockResolvedValue({ total: 10, success: 10, failed: 0 });
 
-    mocks.progressHistorySyncFromRemote.mockResolvedValue(undefined);
     mocks.userItemSyncFromRemote.mockResolvedValue(undefined);
     mocks.blockSyncFromRemote.mockResolvedValue(undefined);
     mocks.grammarSyncFromRemote.mockResolvedValue(undefined);
@@ -169,7 +161,6 @@ describe('data-sync.utils', () => {
 
     await dataSync('u1');
 
-    expect(mocks.progressHistorySyncFromRemote).toHaveBeenCalledWith('u1', true);
     expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', true);
     expect(mocks.blockSyncFromRemote).toHaveBeenCalledWith(true);
     expect(mocks.grammarSyncFromRemote).toHaveBeenCalledWith(true);
@@ -188,7 +179,6 @@ describe('data-sync.utils', () => {
 
     await dataSync('u1');
 
-    expect(mocks.progressHistorySyncFromRemote).toHaveBeenCalledWith('u1', false);
     expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', false);
     expect(mocks.blockSyncFromRemote).toHaveBeenCalledWith(false);
     expect(mocks.grammarSyncFromRemote).toHaveBeenCalledWith(false);
@@ -210,7 +200,6 @@ describe('data-sync.utils', () => {
   it('dataSyncOnUnmount syncs only user stores in partial mode', async () => {
     await dataSyncOnUnmount('u1');
 
-    expect(mocks.progressHistorySyncFromRemote).toHaveBeenCalledWith('u1', false);
     expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', false);
   });
 
@@ -219,7 +208,6 @@ describe('data-sync.utils', () => {
 
     await dataSyncOnUnmount('u1');
 
-    expect(mocks.progressHistorySyncFromRemote).not.toHaveBeenCalled();
     expect(mocks.userItemSyncFromRemote).not.toHaveBeenCalled();
   });
 

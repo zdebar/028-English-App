@@ -39,7 +39,7 @@ describe('AppDB schema', () => {
   it('declares the complete schema and removes obsolete stores', () => {
     new AppDB();
 
-    expect(mocks.versions).toHaveLength(2);
+    expect(mocks.versions).toHaveLength(3);
     expect(mocks.versions[0]).toMatchObject({
       number: 1,
       schema: {
@@ -74,6 +74,10 @@ describe('AppDB schema', () => {
     expect(mocks.versions[1]).toMatchObject({
       number: 2,
       schema: { user_scores: null, user_items_history: null },
+    });
+    expect(mocks.versions[2]).toMatchObject({
+      number: 3,
+      schema: { user_item_progress_history: null },
     });
   });
 });

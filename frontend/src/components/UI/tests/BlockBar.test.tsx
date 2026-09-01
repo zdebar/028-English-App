@@ -15,14 +15,14 @@ vi.mock('@/locales/cs', () => ({
 import BlockBar from '@/components/UI/BlockBar';
 
 describe('BlockBar', () => {
-  it('renders lesson label, daily delta, and progressbar aria values', () => {
+  it('renders lesson label, today count, and progressbar aria values', () => {
     render(
       <BlockBar
-        currentProgress={25}
-        dailyProgressChange={5}
+        previousCount={20}
+        todayCount={5}
         lessonName="To Be"
         lessonNumber={1}
-        maximumProgress={100}
+        lessonCount={100}
         widthBase={100}
       />,
     );
@@ -37,29 +37,29 @@ describe('BlockBar', () => {
     expect(progressBar.getAttribute('aria-valuemax')).toBe('100');
   });
 
-  it('renders zero daily delta', () => {
+  it('renders a lesson without a today count', () => {
     render(
       <BlockBar
-        currentProgress={20}
-        dailyProgressChange={0}
+        previousCount={20}
+        todayCount={0}
         lessonName="To Be"
         lessonNumber={1}
-        maximumProgress={100}
+        lessonCount={100}
         widthBase={100}
       />,
     );
 
-    expect(screen.getByText('0')).toBeTruthy();
+    expect(screen.queryByText('+ 0')).toBeNull();
   });
 
   it('calculates bar widths and division markers from lesson and base values', () => {
     const { container } = render(
       <BlockBar
-        currentProgress={40}
-        dailyProgressChange={15}
+        previousCount={25}
+        todayCount={15}
         lessonName="To Be"
         lessonNumber={1}
-        maximumProgress={80}
+        lessonCount={80}
         widthBase={100}
       />,
     );

@@ -5,15 +5,12 @@ interface UserState {
   levels: LevelOverviewType[];
   levelsLoading: boolean;
   levelsError: Error | null;
-  dailyProgressChange: number;
-  dailyProgressChangeLoading: boolean;
-  dailyProgressChangeError: Error | null;
+  startedTodayCount: number;
   clearLevels: () => void;
-  clearDailyProgressChange: () => void;
 }
 
 const initialLevels: LevelOverviewType[] = [];
-const initialDailyStats = 0;
+const initialStartedTodayCount = 0;
 
 /**
  * Stores user dashboard progress snapshots populated by the active Dexie subscriptions.
@@ -25,17 +22,13 @@ export const useUserStore = create<UserState>((set) => {
     levels: initialLevels,
     levelsLoading: true,
     levelsError: null,
-    dailyProgressChange: initialDailyStats,
-    dailyProgressChangeLoading: false,
-    dailyProgressChangeError: null,
+    startedTodayCount: initialStartedTodayCount,
     clearLevels: () => {
-      set({ levels: initialLevels, levelsLoading: false, levelsError: null });
-    },
-    clearDailyProgressChange: () => {
       set({
-        dailyProgressChange: initialDailyStats,
-        dailyProgressChangeLoading: false,
-        dailyProgressChangeError: null,
+        levels: initialLevels,
+        levelsLoading: false,
+        levelsError: null,
+        startedTodayCount: initialStartedTodayCount,
       });
     },
   };

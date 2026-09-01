@@ -110,8 +110,6 @@ describe('useInitialTrainingDeck', () => {
     await act(async () => result.current.nextKnown());
     expect(mocks.recordInitialTrainingAnswer).toHaveBeenCalledWith(
       expect.anything(),
-      expect.anything(),
-      'czToEn',
       expect.objectContaining({
         phase: 0,
         current_queue_item_ids: [2],
@@ -144,8 +142,6 @@ describe('useInitialTrainingDeck', () => {
 
     expect(mocks.recordInitialTrainingAnswer).toHaveBeenLastCalledWith(
       expect.anything(),
-      expect.anything(),
-      'czToEn',
       expect.objectContaining({
         phase: 1,
         current_queue_item_ids: [1, 2],
@@ -210,7 +206,6 @@ describe('useInitialTrainingDeck', () => {
       [1, 2],
       expect.any(String),
       expect.anything(),
-      'enToCz',
       expect.objectContaining({ mode: 'new', phase: 1 }),
     );
     unmount();

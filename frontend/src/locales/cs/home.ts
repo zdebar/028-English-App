@@ -4,14 +4,12 @@ export const HOME_TEXTS = {
   appDescription: 'Bez stresu. Bez přemýšlení. Jen dril.',
   guide: 'Návod',
   startedTodayHint: 'dnes započato',
-  progressTodayHint: 'dnešní pokrok',
   noDashboardData: 'Žádná dostupná data.',
   signupHint:
     'Aplikace po přihlášení ukládá cvičební data do úložiště Vašeho prohlížeče (7.8MB). Účet je možno kdykoliv smazat, včetně všech dat.',
   installButton: 'Nainstalovat aplikaci',
   installButtonTooltip: 'Nainstalovat PWA aplikaci.',
-  progressToday: 'dnešní pokrok',
-  dailyProgressGoal: 'dnešní pokrok / cíl',
+  dailyStartedGoal: 'dnes započato / cíl',
   reviewButton: 'Opakování',
   newButton: 'Nové',
 

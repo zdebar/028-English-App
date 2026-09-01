@@ -23,7 +23,6 @@ import { usePointerReleaseLock } from './hooks/use-pointer-release-lock';
 import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
 import type { NoteType } from '@/types/generic.types';
 import { useState, type MouseEvent } from 'react';
-import { formatProgressChange } from '@/utils/format.utils';
 
 export type PracticeSessionCardProps = Readonly<{
   note: NoteType | null;
@@ -47,7 +46,6 @@ export type PracticeSessionCardProps = Readonly<{
   audioError: boolean;
   playAudio: () => void;
   audioLoading: boolean;
-  dailyProgressChange?: number;
   isCompletion?: boolean;
   onCompletionContinue?: () => void;
   isBlockTrainingPractice?: boolean;
@@ -427,7 +425,6 @@ function PracticeCardButton({
     isBlockTrainingPractice,
     audioError,
     audioLoading,
-    dailyProgressChange = 0,
   } = props;
   return (
     <button
@@ -482,10 +479,6 @@ function PracticeCardButton({
             {getPracticeProgressHelp(isBlockTrainingPractice, progressHelpText)}
           </HelpText>
         )}
-        <p className="min-w-14 px-2 text-right font-light" title={TEXTS.progressTodayHint}>
-          {formatProgressChange(dailyProgressChange)}
-        </p>
-        <HelpText className="right-2 bottom-14">{TEXTS.progressTodayHint}</HelpText>
       </div>
     </button>
   );

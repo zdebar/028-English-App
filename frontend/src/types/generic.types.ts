@@ -49,9 +49,6 @@ export interface ProgressCountsType {
   startedCount: number;
   startedTodayCount: number;
   totalCount: number;
-  currentProgress?: number;
-  dailyProgressChange?: number;
-  maximumProgress?: number;
 }
 
 export interface LessonOverviewType extends LessonType, ProgressCountsType {}

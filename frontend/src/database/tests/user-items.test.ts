@@ -25,7 +25,6 @@ const mocks = vi.hoisted(() => ({
   getNextAt: vi.fn(),
   getSyncTimestamps: vi.fn(),
   markAsSynced: vi.fn(),
-  progressHistoryRecordChange: vi.fn(),
   userItemGet: vi.fn(),
   userItemUpdate: vi.fn(),
   blockGet: vi.fn(),
@@ -249,12 +248,6 @@ vi.mock('@/config/supabase.config', () => ({
 vi.mock('@/database/models/metadata', () => ({
   default: {
     markAsSynced: (...args: unknown[]) => mocks.markAsSynced(...args),
-  },
-}));
-
-vi.mock('@/database/models/user-item-progress-history', () => ({
-  default: {
-    recordChange: (...args: unknown[]) => mocks.progressHistoryRecordChange(...args),
   },
 }));
 
@@ -653,7 +646,7 @@ describe('UserItem', () => {
     expect(updated.progress_en_to_cz).toBe(0);
   });
 
-  it('schedules the opposite direction without history on a first incorrect answer', () => {
+  it('schedules the opposite direction on a first incorrect answer', () => {
     mocks.getNextAt.mockReturnValue('2026-03-04T09:02:00.000Z');
     const updated = UserItem.applyPracticeProgress(
       {
@@ -892,7 +885,7 @@ describe('UserItem', () => {
     expect(mocks.indexedToArray).not.toHaveBeenCalled();
   });
 
-  it('getReviewDeck excludes unscheduled items even from mastered grammar blocks', async () => {
+  it('includes reset items and excludes other unscheduled grammar items', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
     mocks.indexedToArray.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
@@ -902,8 +895,8 @@ describe('UserItem', () => {
     expect(deck).toEqual([]);
     expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
       1,
-      ['u1', expect.anything(), '1970-01-01T00:00:00.000Z', expect.anything()],
-      ['u1', '2026-06-24T12:00:00.000Z', '1970-01-01T00:00:00.000Z', expect.anything()],
+      ['u1', expect.anything(), expect.anything(), expect.anything()],
+      ['u1', expect.anything(), expect.anything(), expect.anything()],
       true,
       true,
     );
@@ -939,6 +932,18 @@ describe('UserItem', () => {
       grammarFilter({
         block_id: 10,
         started_at: '2026-01-01T00:00:00.000Z',
+        deleted_at: '1970-01-01T00:00:00.000Z',
+        progress_cz_to_en: 0,
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        next_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+      }),
+    ).toBe(true);
+    expect(
+      grammarFilter({
+        block_id: 10,
+        started_at: '2026-01-01T00:00:00.000Z',
+        deleted_at: '1970-01-01T00:00:00.000Z',
+        progress_cz_to_en: 1,
         mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
         next_at_cz_to_en: '1970-01-01T00:00:00.000Z',
       }),
@@ -1250,6 +1255,28 @@ describe('UserItem', () => {
         started_at: '1970-01-01T00:00:00.000Z',
       },
     ]);
+
+    await expect(UserItem.getReadyReviewState('u1')).resolves.toEqual({
+      reviewReadyAt: '2026-06-24T12:00:00.000Z',
+    });
+  });
+
+  it('counts reset items as ready review candidates', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
+    mocks.userEqualsToArray.mockResolvedValueOnce(
+      Array.from({ length: 20 }, (_, index) => ({
+        item_id: index + 1,
+        deleted_at: '1970-01-01T00:00:00.000Z',
+        started_at: '2026-01-01T00:00:00.000Z',
+        progress_cz_to_en: 0,
+        progress_en_to_cz: 0,
+        next_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        next_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+      })),
+    );
 
     await expect(UserItem.getReadyReviewState('u1')).resolves.toEqual({
       reviewReadyAt: '2026-06-24T12:00:00.000Z',
