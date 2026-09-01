@@ -1,0 +1,81 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+nápad,idea,aɪdˈiə,idea.opus,7000,,,,,True,7
+druh,kind,kˈaɪnd,kind.opus,7001,,,,,True,7
+udělat,make,mˈeɪk,make.opus,7002,,,,,True,7
+mír,peace,pˈiːs,peace.opus,7003,,,,,True,7
+důležitý,important,ɪmpˈɔːɹtənt,important.opus,7004,,,,,True,7
+populární,popular,pˈɑːpjʊlɚ,popular.opus,7005,,,,,True,7
+správně,right,ɹˈaɪt,right.opus,7006,,,,,True,7
+tak,so,sˈoʊ,so.opus,7007,,,,,True,7
+čekat,wait,wˈeɪt,wait.opus,7008,,,,,True,7
+znovu,again,ɐɡˈɛn,again.opus,7009,,,,,True,7
+dokument,document,dˈɑːkjuːmənt,document.opus,7010,,,,,True,7
+oheň,fire,fˈaɪɚ,fire.opus,7011,,,,,True,7
+dát,give,ɡˈɪv,give.opus,7012,,,,,True,7
+šance,chance,tʃˈæns,chance.opus,7013,,,,,True,7
+informace,information,ˌɪnfɚmˈeɪʃən,information.opus,7014,,,,,True,7
+často,often,ˈɔfən,often.opus,7015,,,,,True,7
+preferovat,prefer,pɹɪfˈɜː,prefer.opus,7016,,,,,True,7
+vložit,put,pˈʊt,put.opus,7017,,,,,True,7
+kámen,stone,stˈoʊn,stone.opus,7018,,,,,True,7
+takový,such,sˈʌtʃ,such.opus,7019,,,,,True,7
+myslet,think,θˈɪŋk,think.opus,7020,,,,,True,7
+rozumět,understand,ˌʌndɚstˈænd,understand.opus,7021,,,,,True,7
+navštívit,visit,vˈɪzɪt,visit.opus,7022,,,,,True,7
+kolem,around,ɚɹˈaʊnd,around.opus,7023,,,,,True,7
+volat,call,kˈɔːl,call.opus,7024,,,,,True,7
+řezat,cut,kˈʌt,cut.opus,7025,,,,,True,7
+večeře,dinner,dˈɪnɚ,dinner.opus,7026,,,,,True,7
+dolů,down,dˈaʊn,down.opus,7027,,,,,True,7
+vysvětlit,explain,ɛksplˈeɪn,explain.opus,7028,,,,,True,7
+dostat,get,ɡˈɛt,get.opus,7029,,,,,True,7
+zajímavý,interesting,ˈɪntɹɛstɪŋ,interesting.opus,7030,,,,,True,7
+dlouhý,long,lˈɔŋ,long.opus,7031,,,,,True,7
+pohybovat se,move,mˈuːv,move.opus,7032,,,,,True,7
+ven,out,ˈaʊt,out.opus,7033,,,,,True,7
+stránka,page,pˈeɪdʒ,page.opus,7034,,,,,True,7
+dosáhnout,reach,ɹˈiːtʃ,reach.opus,7035,,,,,True,7
+pod,under,ˈʌndɚ,under.opus,7036,,,,,True,7
+do,into,ˈɪntʊ,into.opus,7037,,,,,True,7
+z,out of,ˈaʊɾəv,out_of.opus,7038,,,,,True,7
+skrz,through,θɹˈuː,through.opus,7039,,,,,True,7
+Já jsem?,Am I?,æm ˈaɪ,am_i.opus,7040,10,,,5,False,7
+Ty jsi?,Are you?,ɑːɹ jˈuː,are_you.opus,7041,10,,,5,False,7
+On je?,Is he?,ɪz hˈiː,is_he.opus,7042,10,,,5,False,7
+Ona je?,Is she?,ɪz ʃˈiː,is_she.opus,7043,10,,,5,False,7
+Ono je?,Is it?,ɪz ˈɪt,is_it.opus,7044,10,,,5,False,7
+My jsme?,Are we?,ɑːɹ wˈiː,are_we.opus,7045,10,,,5,False,7
+Vy jste?,Are you?,ɑːɹ jˈuː,are_you.opus,7046,10,,,5,False,7
+Oni jsou?,Are they?,ɑːɹ ðˈeɪ,are_they.opus,7047,10,,,5,False,7
+"Ano, jsem.","Yes, I am.",jˈɛs aɪˈæm,yes_i_am.opus,7048,11,,,6,False,7
+"Ano, on je.","Yes, he is.",jˈɛs hiː ɪz,yes_he_is.opus,7049,11,,,6,False,7
+"Ano, ona je.","Yes, she is.",jˈɛs ʃiː ɪz,yes_she_is.opus,7050,11,,,6,False,7
+"Ano, my jsme.","Yes, we are.",jˈɛs wiː ɑːɹ,yes_we_are.opus,7051,11,,,6,False,7
+"Ne, nejsem.","No, I'm not.",nˈoʊ aɪm nˈɑːt,no_im_not.opus,7052,11,,,6,False,7
+"Ne, on není.","No, he's not.",nˈoʊ hiːz nˈɑːt,no_hes_not.opus,7053,11,,,6,False,7
+"Ne, ona není.","No, she's not.",nˈoʊ ʃiːz nˈɑːt,no_shes_not.opus,7054,11,,,6,False,7
+"Ne, my nejsme.","No, we're not.",nˈoʊ wɪɹ nˈɑːt,no_were_not.opus,7055,11,,,6,False,7
+Jsem tlustý?,Am I fat?,æm aɪ fˈæt,am_i_fat.opus,7056,,,,5,False,7
+Jsi smutný?,Are you sad?,ɑːɹ juː sˈæd,are_you_sad.opus,7057,,,,5,False,7
+Je velký?,Is he big?,ɪz hiː bˈɪɡ,is_he_big.opus,7058,,,,5,False,7
+Je malá?,Is she small?,ɪz ʃiː smˈɔːl,is_she_small.opus,7059,,,,5,False,7
+Je to rychlé?,Is it fast?,ɪz ɪt fˈæst,is_it_fast.opus,7060,,,,5,False,7
+Jsme mladí?,Are we young?,ɑːɹ wiː jˈʌŋ,are_we_young.opus,7061,,,,5,False,7
+Jste staří?,Are you old?,ɑːɹ juː ˈoʊld,are_you_old.opus,7062,,,,5,False,7
+Jsou silní?,Are they strong?,ɑːɹ ðeɪ stɹˈɔŋ,are_they_strong.opus,7063,,,,5,False,7
+Jsem hladový?,Am I hungry?,æm aɪ hˈʌŋɡɹi,am_i_hungry.opus,7064,,,,5,False,7
+Jsi unavený?,Are you tired?,ɑːɹ juː tˈaɪɚd,are_you_tired.opus,7065,,,,5,False,7
+Je přátelský?,Is he friendly?,ɪz hiː fɹˈɛndli,is_he_friendly.opus,7066,,,,5,False,7
+Je naštvaná?,Is she angry?,ɪz ʃiː ˈæŋɡɹi,is_she_angry.opus,7067,,,,5,False,7
+Je to snadné?,Is it easy?,ɪz ɪɾ ˈiːzi,is_it_easy.opus,7068,,,,5,False,7
+Jsme chudí?,Are we poor?,ɑːɹ wiː pˈʊɹ,are_we_poor.opus,7069,,,,5,False,7
+Jste krásní?,Are you beautiful?,ɑːɹ juː bjˈuːɾifəl,are_you_beautiful.opus,7070,,,,5,False,7
+Jsou pomalí?,Are they slow?,ɑːɹ ðeɪ slˈoʊ,are_they_slow.opus,7071,,,,5,False,7
+Jsem čistý?,Am I clean?,æm aɪ klˈiːn,am_i_clean.opus,7072,,,,5,False,7
+Jsi hubený?,Are you thin?,ɑːɹ juː θˈɪn,are_you_thin.opus,7073,,,,5,False,7
+Je dobrý?,Is he good?,ɪz hiː ɡˈʊd,is_he_good.opus,7074,,,,5,False,7
+Je připravená?,Is she ready?,ɪz ʃiː ɹˈɛdi,is_she_ready.opus,7075,,,,5,False,7
+Je to obtížné?,Is it difficult?,ɪz ɪt dˈɪfɪkəlt,is_it_difficult.opus,7076,,,,5,False,7
+Jsme opatrní?,Are we careful?,ɑːɹ wiː kˈɛɹfəl,are_we_careful.opus,7077,,,,5,False,7
+Jste schopní?,Are you able?,ɑːɹ juː ˈeɪbəl,are_you_able.opus,7078,,,,5,False,7
+Jsou noví?,Are they new?,ɑːɹ ðeɪ nˈuː,are_they_new.opus,7079,,,,5,False,7

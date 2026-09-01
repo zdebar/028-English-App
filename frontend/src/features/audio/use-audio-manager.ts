@@ -59,6 +59,14 @@ function normalizeAudioInput(audio: AudioInput): string[] {
   return [];
 }
 
+function getAudioInputKey(audio: AudioInput): string {
+  return JSON.stringify(normalizeAudioInput(audio));
+}
+
+function getAudioFilesFromInputKey(inputKey: string): string[] {
+  return JSON.parse(inputKey) as string[];
+}
+
 function resolveFilenameToPlay(
   requestedFilename: string | undefined,
   currentFilename: string | null,
@@ -103,18 +111,26 @@ export function useAudioManager(audio: AudioInput) {
   const audioMapRef = useRef<Map<string, ManagedAudio>>(new Map());
   const loadPromisesRef = useRef<Map<string, AudioLoadPromise>>(new Map());
   const loadGenerationRef = useRef(0);
+  const audioInputKey = getAudioInputKey(audio);
+  const requestedFilenames = getAudioFilesFromInputKey(audioInputKey);
+  const audioInputKeyRef = useRef(audioInputKey);
+  audioInputKeyRef.current = audioInputKey;
+  const [audioStateInputKey, setAudioStateInputKey] = useState(audioInputKey);
   const [audioError, setAudioError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [filenames, setFilenames] = useState<string[]>([]);
   const [current, setCurrent] = useState<string | null>(null);
   const [failedFilenames, setFailedFilenames] = useState<Set<string>>(new Set());
+  const audioStateMatchesInput = audioStateInputKey === audioInputKey;
 
   // Load audio files
   useEffect(() => {
     let isDisposed = false;
+    const files = getAudioFilesFromInputKey(audioInputKey);
     const loadGeneration = loadGenerationRef.current + 1;
     loadGenerationRef.current = loadGeneration;
+    setAudioStateInputKey(audioInputKey);
     setLoading(true);
     setAudioError(false);
     setIsPlaying(false);
@@ -122,7 +138,6 @@ export function useAudioManager(audio: AudioInput) {
     disposeAudioMap(audioMapRef.current);
     loadPromisesRef.current.clear();
 
-    const files = normalizeAudioInput(audio);
     setFilenames(files);
     setCurrent(files[0] ?? null);
 
@@ -176,13 +191,17 @@ export function useAudioManager(audio: AudioInput) {
       loadPromisesRef.current.clear();
       disposeAudioMap(audioMapRef.current);
     };
-  }, [audio]);
+  }, [audioInputKey]);
 
   // Play audio: ignore non-string args (e.g., React click events),
   // then play current by default or a specific filename when provided.
 
   const playAudio = useCallback(
     async (filenameOrEvent?: unknown): Promise<boolean> => {
+      if (audioInputKeyRef.current !== audioInputKey || !audioStateMatchesInput) {
+        return false;
+      }
+
       stopAndResetAll(audioMapRef.current);
 
       const filename = typeof filenameOrEvent === 'string' ? filenameOrEvent : undefined;
@@ -194,6 +213,11 @@ export function useAudioManager(audio: AudioInput) {
 
       const pendingLoad = loadPromisesRef.current.get(toPlay);
       if (pendingLoad) await pendingLoad;
+
+      if (audioInputKeyRef.current !== audioInputKey) {
+        setIsPlaying(false);
+        return false;
+      }
 
       const managedAudio = audioMapRef.current.get(toPlay);
       if (!managedAudio) {
@@ -222,7 +246,7 @@ export function useAudioManager(audio: AudioInput) {
         return false;
       }
     },
-    [current, filenames],
+    [audioInputKey, audioStateMatchesInput, current, filenames],
   );
 
   const stopAudio = useCallback(() => {
@@ -232,23 +256,33 @@ export function useAudioManager(audio: AudioInput) {
 
   const isAudioReady = useCallback(
     (filename?: string) => {
+      if (audioInputKeyRef.current !== audioInputKey || !audioStateMatchesInput) {
+        return false;
+      }
+
       if (filename) {
         return audioMapRef.current.has(filename) && !failedFilenames.has(filename);
       }
 
       return audioMapRef.current.size > 0;
     },
-    [failedFilenames],
+    [audioInputKey, audioStateMatchesInput, failedFilenames],
   );
+
+  const effectiveAudioError = audioStateMatchesInput ? audioError : false;
+  const effectiveLoading = audioStateMatchesInput ? loading : requestedFilenames.length > 0;
+  const effectiveIsPlaying = audioStateMatchesInput ? isPlaying : false;
+  const effectiveCurrent = audioStateMatchesInput ? current : null;
+  const effectiveFilenames = audioStateMatchesInput ? filenames : [];
 
   return {
     playAudio, // playAudio() or playAudio(filename)
     stopAudio,
-    audioError,
+    audioError: effectiveAudioError,
     isAudioReady,
-    loading,
-    isPlaying,
-    current,
-    filenames,
+    loading: effectiveLoading,
+    isPlaying: effectiveIsPlaying,
+    current: effectiveCurrent,
+    filenames: effectiveFilenames,
   };
 }

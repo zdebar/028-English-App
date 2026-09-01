@@ -17,7 +17,6 @@ vítejte,welcome
 víkend,weekend
 nosit (oblečení),wear
 zoo,zoo
-tvůj,your
 ty sám,yourself
 jogurt,yoghurt
 ještě,yet
@@ -58,7 +57,6 @@ video,video
 zeleniny,vegetable
 váza,vase
 dovolená,vacation
-použít,use
 nás,us
 vyřešit,solve
 pohovka,sofa
@@ -112,15 +110,12 @@ strana,page
 odpoledne,PM
 vlastnit,own
 majitel,owner
-strana,side
 venku,outside
-náš,our
 naše,ours
 objednávka,order
 pomerančový,orange
 opera,opera
 otevřeno,open
-pouze,only
 olympiády,Olympics
 okej,okay
 program,programme
@@ -168,7 +163,6 @@ jízda,ride
 jezdit,ride
 vědec,scientist
 pila,saw
-uložit,save
 sendvič,sandwich
 prodej,sale
 salát,salad
@@ -245,7 +239,6 @@ vědro,bucket
 kost,bone
 jakmile,as
 tyč,bar
-dort,cake
 pod,below
 letoun,aeroplane
 může,can
@@ -276,7 +269,6 @@ role (např. papíru),roll
 křupavý,crisp
 souprava,kit
 opékat,roast
-sám,alone
 pár,couple
 naznačit,indicate
 klepání,knock
@@ -308,7 +300,6 @@ kilogram,kilogramme
 krém,cream
 šílený,crazy
 silně,strongly
-druh,kind
 stávka,strike
 krytý,indoor
 zločin,crime
@@ -346,7 +337,6 @@ bytost,being
 vymyslet,invent
 vynález,invention
 návrat,return
-hluboký,deep
 hluboce,deeply
 ukrást,steal
 vykročit,step
@@ -405,7 +395,6 @@ džem,jam
 znamenat,signify
 významný,significant
 úspěšně,successfully
-náklady,cost
 ztracený,lost
 úděl,lot
 hlasitý,loud
@@ -595,7 +584,6 @@ slunečnice,sunflower
 sluneční brýle,sunglasses
 levá ruka,left-hand
 opravdu,indeed
-nemožné,impossible
 obtížnost,difficulty
 gram,gramme
 blondýnka,blonde
@@ -836,7 +824,6 @@ výkres,drawing
 výstavce,drawer
 stejně,anyway
 zdroj,source
-jih,south
 ochutnat,sample
 kromě,besides
 však,however
@@ -1018,7 +1005,6 @@ dálnice,motorway
 osobnost,personality
 Pacifik,pacific
 nepříjemný,uncomfortable
-preferovat,prefer
 tip,tip
 předpovědět,predict
 předpověď,prediction
@@ -1062,7 +1048,6 @@ pronásledovat,pursue
 produkovat,produce
 punčocháče,tights
 další,additional
-spíše,rather
 fyzicky,physically
 výroba,production
 upéct,bake
@@ -1154,7 +1139,6 @@ skutečně,truly
 vyhnout se,avoid
 zprůměrovat,average
 hlavní,principal
-kolem,around
 akt,act
 napříč,across
 problémy,trouble
@@ -1166,7 +1150,6 @@ královna,queen
 cena,award
 peněženka,wallet
 bloudit,wander
-zkusit,try
 přihrávka,pass
 přejít,pass
 průchod,passage
@@ -1281,14 +1264,12 @@ příjemný,pleasing
 správné,proper
 roztrhnout,tear
 horší,worse
-z,out of
 nejhorší,worst
 neznámý,unknown
 publikum,audience
 potěšen,pleased
 lékařský,medical
 medaile,medal
-možné,possible
 organizovat,organise
 organizovaný,organised
 cereálie,cereal
@@ -1304,10 +1285,8 @@ bankovnictví,banking
 mistr,champion
 mistrovství,championship
 velké písmeno,capital letter
-šance,chance
 kapitál,capital
 odkazovat,refer
-populární,popular
 objednat,order
 portrét,portrait
 populace,population
@@ -1321,7 +1300,6 @@ zbytečné,unnecessary
 jo,yeah
 nepříjemný,unpleasant
 provozovat,operate
-způsobit,cause
 policejní důstojník,police officer
 policejní stanici,police station
 policista,policeman
@@ -1711,7 +1689,6 @@ záruka,guarantee
 arašíd,peanut
 stlačit,press
 tisk,press
-sezóna,season
 vyhledávat,search
 vedení,guidance
 asociate,associate
@@ -1727,7 +1704,6 @@ prezentace,presentation
 zachovat,preserve
 zachování,preservation
 zvláštní,peculiar
-prezident,president
 antikvární,second-hand
 střední škola,secondary school
 ženich,groom
@@ -2367,7 +2343,6 @@ fronta,queue
 pozvání,invitation
 vzniknout,arise
 nedobrovolně,involuntarily
-odpočívat,rest
 odpočinek,rest
 běhání,jogging
 nacionalista,nationalist
@@ -2977,7 +2952,6 @@ na západ,westward
 dobře oblečený,well-dressed
 zpráva,account
 účetní,accountant
-vítat,welcome
 podivný,weird
 přesnost,accuracy
 přesný,accurate
