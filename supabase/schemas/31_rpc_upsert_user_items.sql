@@ -131,7 +131,7 @@ BEGIN
         mastered_at_cz_to_en = EXCLUDED.mastered_at_cz_to_en,
         mastered_at_en_to_cz = EXCLUDED.mastered_at_en_to_cz
       WHERE COALESCE(EXCLUDED.updated_at, public.rpc_min_timestamptz())
-        >= COALESCE(public.user_items.updated_at, public.rpc_min_timestamptz());
+        > COALESCE(public.user_items.updated_at, public.rpc_min_timestamptz());
 
       GET DIAGNOSTICS v_row_count = ROW_COUNT;
       v_matched_count := v_matched_count + COALESCE(v_row_count, 0);

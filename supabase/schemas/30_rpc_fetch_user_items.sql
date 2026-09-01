@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION public.fetch_user_items(
   p_user_id UUID,
-  p_last_synced_at TIMESTAMPTZ
+  p_last_synced_at TIMESTAMPTZ,
+  p_sync_until TIMESTAMPTZ DEFAULT NULL
 )
 RETURNS TABLE (
   item_id INTEGER,
@@ -76,9 +77,20 @@ BEGIN
       le.updated_at,
       lv.updated_at
     )
-    > COALESCE(p_last_synced_at, public.rpc_min_timestamptz());
+    > COALESCE(p_last_synced_at, public.rpc_min_timestamptz())
+    AND (
+      p_sync_until IS NULL
+      OR GREATEST(
+        COALESCE(ui.updated_at, public.rpc_min_timestamptz()),
+        i.updated_at,
+        le.updated_at,
+        lv.updated_at
+      ) <= p_sync_until
+    );
 END;
 $$;
 
-REVOKE EXECUTE ON FUNCTION public.fetch_user_items(UUID, TIMESTAMPTZ) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.fetch_user_items(UUID, TIMESTAMPTZ) TO authenticated;
+REVOKE EXECUTE ON FUNCTION public.fetch_user_items(UUID, TIMESTAMPTZ, TIMESTAMPTZ)
+  FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.fetch_user_items(UUID, TIMESTAMPTZ, TIMESTAMPTZ)
+  TO authenticated;

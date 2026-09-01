@@ -1,7 +1,8 @@
 CREATE OR REPLACE FUNCTION public.upsert_fetch_user_items(
   p_user_id UUID,
   p_last_synced_at TIMESTAMPTZ,
-  p_user_items JSONB DEFAULT '[]'::JSONB
+  p_user_items JSONB DEFAULT '[]'::JSONB,
+  p_sync_until TIMESTAMPTZ DEFAULT NULL
 )
 RETURNS TABLE (
   item_id INTEGER,
@@ -53,9 +54,13 @@ BEGIN
 
   RETURN QUERY
   SELECT *
-  FROM public.fetch_user_items(p_user_id, p_last_synced_at);
+  FROM public.fetch_user_items(p_user_id, p_last_synced_at, p_sync_until);
 END;
 $$;
 
-REVOKE EXECUTE ON FUNCTION public.upsert_fetch_user_items(UUID, TIMESTAMPTZ, JSONB) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.upsert_fetch_user_items(UUID, TIMESTAMPTZ, JSONB) TO authenticated;
+REVOKE EXECUTE ON FUNCTION public.upsert_fetch_user_items(
+  UUID, TIMESTAMPTZ, JSONB, TIMESTAMPTZ
+) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.upsert_fetch_user_items(
+  UUID, TIMESTAMPTZ, JSONB, TIMESTAMPTZ
+) TO authenticated;

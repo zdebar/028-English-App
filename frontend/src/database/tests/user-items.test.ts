@@ -19,6 +19,7 @@ const mocks = vi.hoisted(() => ({
   indexedLimit: vi.fn(),
   indexedToArray: vi.fn(),
   startedGrammarCandidates: [] as any[],
+  updatedAtBetween: vi.fn(),
   updatedBetweenToArray: vi.fn(),
   transaction: vi.fn(),
   rpc: vi.fn(),
@@ -84,9 +85,12 @@ function createItemIdQuery() {
 
 function createUpdatedAtQuery() {
   return {
-    between: () => ({
-      toArray: (...args: unknown[]) => mocks.updatedBetweenToArray(...args),
-    }),
+    between: (...args: unknown[]) => {
+      mocks.updatedAtBetween(...args);
+      return {
+        toArray: (...args: unknown[]) => mocks.updatedBetweenToArray(...args),
+      };
+    },
   };
 }
 
@@ -770,14 +774,6 @@ describe('UserItem', () => {
           next_at: '2026-06-21T00:00:00.000Z',
           mastered_at: '1970-01-01T00:00:00.000Z',
         },
-      ])
-      .mockResolvedValueOnce([
-        {
-          item_id: 3,
-          progress: 5,
-          next_at: '1970-01-01T00:00:00.000Z',
-          mastered_at: '1970-01-01T00:00:00.000Z',
-        },
       ]);
 
     const deck = await UserItem.getReviewDeck('u1', 4);
@@ -796,15 +792,7 @@ describe('UserItem', () => {
           mastered_at: '1970-01-01T00:00:00.000Z',
         },
       ])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([
-        {
-          item_id: 3,
-          progress: 0,
-          next_at: '1970-01-01T00:00:00.000Z',
-          mastered_at: '1970-01-01T00:00:00.000Z',
-        },
-      ]);
+      .mockResolvedValueOnce([]);
 
     const deck = await UserItem.getReviewDeck('u1', 3);
 
@@ -815,27 +803,7 @@ describe('UserItem', () => {
   it('does not inspect blocks while selecting a due-only review deck', async () => {
     mocks.indexedToArray
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ item_id: 1, progress: 2 }])
-      .mockResolvedValueOnce([
-        {
-          item_id: 2,
-          block_id: 20,
-          grammar_chunk_id: 7,
-          progress: 0,
-        },
-        {
-          item_id: 3,
-          block_id: 30,
-          grammar_chunk_id: 0,
-          progress: 0,
-        },
-        {
-          item_id: 4,
-          block_id: 40,
-          grammar_chunk_id: 9,
-          progress: 0,
-        },
-      ]);
+      .mockResolvedValueOnce([{ item_id: 1, progress: 2 }]);
     const deck = await UserItem.getReviewDeck('u1', 5);
 
     expect(deck).toEqual([]);
@@ -851,7 +819,6 @@ describe('UserItem', () => {
           mastered_at: '1970-01-01T00:00:00.000Z',
         },
       ])
-      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
 
     const deck = await UserItem.getReviewDeck('u1', 3);
@@ -859,15 +826,20 @@ describe('UserItem', () => {
     expect(deck).toEqual([]);
   });
 
-  it('uses any CZ to EN grammar deck instead of a partial EN to CZ deck', async () => {
+  it('uses a full EN to CZ deck when CZ to EN is partial', async () => {
     mocks.indexedToArray
       .mockResolvedValueOnce([{ item_id: 1, block_id: 10, progress: 1 }])
-      .mockResolvedValueOnce([{ item_id: 2, block_id: 10, progress: 2 }]);
+      .mockResolvedValueOnce([
+        { item_id: 2, block_id: 10, progress: 2 },
+        { item_id: 3, block_id: 10, progress: 2 },
+        { item_id: 4, block_id: 10, progress: 2 },
+      ]);
 
     const deck = await UserItem.getReviewDeck('u1', 3);
 
     expect(deck.map((item) => item.item_id)).toEqual([2, 3, 4]);
-    expect(mocks.indexedToArray).toHaveBeenCalledTimes(1);
+    expect(deck.every((item) => item.practice_direction === 'enToCz')).toBe(true);
+    expect(mocks.indexedToArray).toHaveBeenCalledTimes(2);
   });
 
   it('restores a partial EN to CZ grammar deck when no CZ to EN items exist', async () => {
@@ -1518,6 +1490,7 @@ describe('UserItem', () => {
     expect(mocks.rpc).toHaveBeenCalledWith('upsert_fetch_user_items', {
       p_user_id: 'u1',
       p_last_synced_at: '2026-03-03T00:00:00.000Z',
+      p_sync_until: '2026-03-04T00:00:00.000Z',
       p_user_items: [
         expect.objectContaining({
           user_id: 'u1',
@@ -1552,5 +1525,21 @@ describe('UserItem', () => {
       }),
     ]);
     expect(mocks.markAsSynced).toHaveBeenCalledWith('user_items', '2026-03-04T00:00:00.000Z', 'u1');
+    expect(mocks.updatedAtBetween).toHaveBeenCalledWith(
+      ['u1', '2026-03-03T00:00:00.000Z'],
+      ['u1', '2026-03-04T00:00:00.000Z'],
+      false,
+      true,
+    );
+  });
+
+  it('does not advance metadata when the remote item sync fails', async () => {
+    mocks.rpc.mockResolvedValue({ data: null, error: { message: 'network error' } });
+
+    await expect(UserItem.syncFromRemote('u1', false)).rejects.toThrow(
+      'Error fetching user_items with Supabase.',
+    );
+
+    expect(mocks.markAsSynced).not.toHaveBeenCalled();
   });
 });
