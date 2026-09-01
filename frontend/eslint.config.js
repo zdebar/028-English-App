@@ -4,6 +4,7 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
+import sonarjs from 'eslint-plugin-sonarjs';
 
 export default defineConfig([
   globalIgnores(['dist']),
@@ -14,6 +15,7 @@ export default defineConfig([
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
       '@typescript-eslint': tsPlugin,
+      sonarjs: sonarjs,
     },
     languageOptions: {
       parser: tsParser,
@@ -38,6 +40,7 @@ export default defineConfig([
     },
     rules: {
       complexity: ['error', { max: 10 }],
+      'sonarjs/cognitive-complexity': ['error', 15],
     },
   },
 ]);
