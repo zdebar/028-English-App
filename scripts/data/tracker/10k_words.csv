@@ -17,6 +17,7 @@ vítejte,welcome
 víkend,weekend
 nosit (oblečení),wear
 zoo,zoo
+tvůj,your
 ty sám,yourself
 jogurt,yoghurt
 ještě,yet
@@ -57,6 +58,7 @@ video,video
 zeleniny,vegetable
 váza,vase
 dovolená,vacation
+použít,use
 nás,us
 vyřešit,solve
 pohovka,sofa
@@ -95,6 +97,7 @@ palác,palace
 nátěr,paint
 malování,painting
 obraz,painting
+z,of
 hodin,o'clock
 zdravotní sestra,nurse
 poznamenat,note
@@ -110,12 +113,15 @@ strana,page
 odpoledne,PM
 vlastnit,own
 majitel,owner
+strana,side
 venku,outside
+náš,our
 naše,ours
 objednávka,order
 pomerančový,orange
 opera,opera
 otevřeno,open
+pouze,only
 olympiády,Olympics
 okej,okay
 program,programme
@@ -162,7 +168,9 @@ vydatný,rich
 jízda,ride
 jezdit,ride
 vědec,scientist
+říci,say
 pila,saw
+uložit,save
 sendvič,sandwich
 prodej,sale
 salát,salad
@@ -191,6 +199,7 @@ košík,basket
 basketball,basketball
 netopýr,bat
 podnikání,business
+mezi,between
 přítel,boyfriend
 narození,birth
 obě,both
@@ -227,9 +236,12 @@ hovězí,beef
 jediný,alone
 včela,bee
 kolo,bicycle
+vše,all
 tlačítko,button
 celý,all
 v pořádku,all right
+koupelna,bathroom
+ložnice,bedroom
 prázdný,blank
 přibližně,around
 dítě,baby
@@ -239,24 +251,28 @@ vědro,bucket
 kost,bone
 jakmile,as
 tyč,bar
+dort,cake
 pod,below
 letoun,aeroplane
 může,can
 bonbón,candy
 skladovat,store
 knihkupectví,bookstore
+o,about
 kapela,band
 probudit,awake
 volání,call
 více než,above
 výše,above
 okolo,about
+přístav,port
 nudný,boring
 podle,by
 sbohem,bye
 požádat,ask
 tábor,camp
 dopoledne,AM
+odpovědět,answer
 kartáčovat,brush
 stadión,stadium
 přejít,cross
@@ -269,6 +285,7 @@ role (např. papíru),roll
 křupavý,crisp
 souprava,kit
 opékat,roast
+sám,alone
 pár,couple
 naznačit,indicate
 klepání,knock
@@ -300,6 +317,7 @@ kilogram,kilogramme
 krém,cream
 šílený,crazy
 silně,strongly
+druh,kind
 stávka,strike
 krytý,indoor
 zločin,crime
@@ -337,6 +355,7 @@ bytost,being
 vymyslet,invent
 vynález,invention
 návrat,return
+hluboký,deep
 hluboce,deeply
 ukrást,steal
 vykročit,step
@@ -395,6 +414,7 @@ džem,jam
 znamenat,signify
 významný,significant
 úspěšně,successfully
+náklady,cost
 ztracený,lost
 úděl,lot
 hlasitý,loud
@@ -584,6 +604,7 @@ slunečnice,sunflower
 sluneční brýle,sunglasses
 levá ruka,left-hand
 opravdu,indeed
+nemožné,impossible
 obtížnost,difficulty
 gram,gramme
 blondýnka,blonde
@@ -824,6 +845,7 @@ výkres,drawing
 výstavce,drawer
 stejně,anyway
 zdroj,source
+jih,south
 ochutnat,sample
 kromě,besides
 však,however
@@ -1005,6 +1027,7 @@ dálnice,motorway
 osobnost,personality
 Pacifik,pacific
 nepříjemný,uncomfortable
+preferovat,prefer
 tip,tip
 předpovědět,predict
 předpověď,prediction
@@ -1048,6 +1071,7 @@ pronásledovat,pursue
 produkovat,produce
 punčocháče,tights
 další,additional
+spíše,rather
 fyzicky,physically
 výroba,production
 upéct,bake
@@ -1139,7 +1163,9 @@ skutečně,truly
 vyhnout se,avoid
 zprůměrovat,average
 hlavní,principal
+kolem,around
 akt,act
+vedle,next to
 napříč,across
 problémy,trouble
 pravda,truth
@@ -1150,6 +1176,7 @@ královna,queen
 cena,award
 peněženka,wallet
 bloudit,wander
+zkusit,try
 přihrávka,pass
 přejít,pass
 průchod,passage
@@ -1264,12 +1291,14 @@ příjemný,pleasing
 správné,proper
 roztrhnout,tear
 horší,worse
+z,out of
 nejhorší,worst
 neznámý,unknown
 publikum,audience
 potěšen,pleased
 lékařský,medical
 medaile,medal
+možné,possible
 organizovat,organise
 organizovaný,organised
 cereálie,cereal
@@ -1285,8 +1314,10 @@ bankovnictví,banking
 mistr,champion
 mistrovství,championship
 velké písmeno,capital letter
+šance,chance
 kapitál,capital
 odkazovat,refer
+populární,popular
 objednat,order
 portrét,portrait
 populace,population
@@ -1300,6 +1331,7 @@ zbytečné,unnecessary
 jo,yeah
 nepříjemný,unpleasant
 provozovat,operate
+způsobit,cause
 policejní důstojník,police officer
 policejní stanici,police station
 policista,policeman
@@ -1689,6 +1721,7 @@ záruka,guarantee
 arašíd,peanut
 stlačit,press
 tisk,press
+sezóna,season
 vyhledávat,search
 vedení,guidance
 asociate,associate
@@ -1704,6 +1737,7 @@ prezentace,presentation
 zachovat,preserve
 zachování,preservation
 zvláštní,peculiar
+prezident,president
 antikvární,second-hand
 střední škola,secondary school
 ženich,groom
@@ -2343,6 +2377,7 @@ fronta,queue
 pozvání,invitation
 vzniknout,arise
 nedobrovolně,involuntarily
+odpočívat,rest
 odpočinek,rest
 běhání,jogging
 nacionalista,nationalist
@@ -2931,6 +2966,7 @@ zachytit,capture
 zajmout,capture
 opustit,abandon
 konzervované,canned
+schopný,able
 kariéra,career
 abnormální,abnormal
 svíčka,candle
@@ -2952,6 +2988,7 @@ na západ,westward
 dobře oblečený,well-dressed
 zpráva,account
 účetní,accountant
+vítat,welcome
 podivný,weird
 přesnost,accuracy
 přesný,accurate
@@ -4097,6 +4134,7 @@ unavený,weary
 moderátorka,presenter
 krátkost,shortness
 nesnesitelný,unbearable
+tunel,tunnel
 nedostupný,unavailable
 napomínat,reprove
 školačka,schoolgirl
@@ -5930,6 +5968,7 @@ vázat,bind
 pomocník,helper
 konopí,hemp
 bylina,herb
+miliarda,billion
 dědictví,heritage
 váhání,hesitation
 bikiny,bikini
