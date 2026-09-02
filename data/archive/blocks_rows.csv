@@ -1,17 +1,29 @@
-id,name,note,grammar_chunk_id,updated_at,deleted_at,lesson_id
-15,Členy,,11,2026-08-28 06:23:28.462337+00,,11
-16,Čísla 13 - 19,,12,2026-08-28 06:28:28.112765+00,,12
-17,Desítky,,13,2026-08-28 06:29:03.460763+00,,12
-18,Složená čísla,,14,2026-08-28 06:29:32.808638+00,,12
-19,Řadová čísla,,15,2026-08-28 06:30:00.971921+00,,12
-20,Zlomky,,16,2026-08-28 06:30:15.564482+00,,12
-21,Desetinná čísla,,17,2026-08-28 06:30:37.932422+00,,12
-22,Denní časy,,18,2026-08-28 06:31:14.231452+00,,13
-23,Datumy,,19,2026-08-28 06:31:28.646926+00,,13
-24,Předložká času - in,,20,2026-08-28 06:33:14.159893+00,,14
-25,Předložky času - on,,21,2026-08-28 06:34:26.560761+00,,14
-26,Předložky času - at,,22,2026-08-28 06:34:44.113537+00,,14
-27,Předložky místa - in,,23,2026-08-28 06:47:08.362737+00,,15
-28,Předložky místa - on,,24,2026-08-28 06:47:31.332072+00,,15
-29,Předložky místa - at,,25,2026-08-28 06:47:52.769122+00,,15
-30,Přítomný čas prostý,,26,2026-08-28 06:48:35.081755+00,,16
+name,note,grammar_chunk_id,lesson_id
+Být - základní tvary,,1,9
+Být - zkrácené tvary,,2,9
+Být - záporné tvary,,3,10
+Být - zkrácený zápor,,4,10
+Být - zjišťovací otázky,,5,11
+Krátké odpovědi,,6,11
+Být - tázací otázky,,7,12
+Množné číslo,,8,13
+Počítatelnost,,8,13
+Počítatelnost - příklady,,8,13
+Přivlastňovací zájmena,,9,14
+Přivlastňovací apostrof 's,,10,14
+Členy,,11,15
+Čísla 13 - 19,,12,16
+Desítky,,13,16
+Složená čísla,,14,16
+Řadová čísla,,15,16
+Zlomky,,16,16
+Desetinná čísla,,17,16
+Denní časy,,18,17
+Datumy,,19,17
+Předložká času - in,,20,18
+Předložky času - on,,21,18
+Předložky času - at,,22,18
+Předložky místa - in,,23,19
+Předložky místa - on,,24,19
+Předložky místa - at,,25,19
+Přítomný čas prostý,,26,20

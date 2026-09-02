@@ -1,0 +1,49 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+ale,but,bˈʌt,but.opus,12000,,,,,True,12
+sen,dream,dɹˈiːm,dream.opus,12001,,,,,True,12
+pro,for,fˈɔːɹ,for.opus,12002,,,,,True,12
+uvnitř,inside,ɪnsˈaɪd,inside.opus,12003,,,,,True,12
+nyní,now,nˈaʊ,now.opus,12004,,,,,True,12
+nebo,or,ˈɔːɹ,or.opus,12005,,,,,True,12
+obrázek,picture,pˈɪktʃɚ,picture.opus,12006,,,,,True,12
+před,before,bᵻfˈɔːɹ,before.opus,12007,,,,,True,12
+řeka,river,ɹˈɪvɚ,river.opus,12008,,,,,True,12
+loď,ship,ʃˈɪp,ship.opus,12009,,,,,True,12
+země (pozemek),land,lˈænd,land.opus,12010,,,,,True,12
+velmi,very,vˈɛɹi,very.opus,12011,,,,,True,12
+kino,cinema,sˈɪnəmə,cinema.opus,12012,,,,,True,12
+odkud,from where,fɹʌm wˈɛɹ,from_where.opus,12013,,,,,True,12
+učit,teach,tˈiːtʃ,teach.opus,12014,,,,,True,12
+fotbal,football,fˈʊtbɔːl,football.opus,12015,,,,,True,12
+čekat,wait,wˈeɪt,wait.opus,12016,,,,,True,12
+znovu,again,ɐɡˈɛn,again.opus,12017,,,,,True,12
+dokument,document,dˈɑːkjuːmənt,document.opus,12018,,,,,True,12
+oheň,fire,fˈaɪɚ,fire.opus,12019,,,,,True,12
+dát,give,ɡˈɪv,give.opus,12020,,,,,True,12
+šance,chance,tʃˈæns,chance.opus,12021,,,,,True,12
+informace,information,ˌɪnfɚmˈeɪʃən,information.opus,12022,,,,,True,12
+často,often,ˈɔfən,often.opus,12023,,,,,True,12
+Kdo jsem?,Who am I?,hˌuː æm ˈaɪ,who_am_i.opus,12024,13,,,7,False,12
+Kdo jsi?,Who are you?,hˈuː ɑːɹ juː,who_are_you.opus,12025,13,,,7,False,12
+Kdo je tady?,Who's here?,hˌuːz hˈɪɹ,whos_here.opus,12026,13,,,7,False,12
+Kdo je tam?,Who's there?,hˌuːz ðˈɛɹ,whos_there.opus,12027,13,,,7,False,12
+Kdo je doma?,Who's at home?,hˌuːz æt hˈoʊm,whos_at_home.opus,12028,13,,,7,False,12
+Kdo je uvnitř?,Who's inside?,hˌuːz ɪnsˈaɪd,whos_inside.opus,12029,13,,,7,False,12
+Kdo je připravený?,Who's ready?,hˌuːz ɹˈɛdi,whos_ready.opus,12030,13,,,7,False,12
+Kdo jsme?,Who are we?,hˈuː ɑːɹ wiː,who_are_we.opus,12031,13,,,7,False,12
+Co je to?,What is it?,wˈʌt ɪz ɪt,what_is_it.opus,12032,,,,7,False,12
+Co je toto?,What's this?,wˌʌts ðˈɪs,whats_this.opus,12033,,,,7,False,12
+Co je tam?,What's there?,wˌʌts ðˈɛɹ,whats_there.opus,12034,,,,7,False,12
+Co je uvnitř?,What's inside?,wˌʌts ɪnsˈaɪd,whats_inside.opus,12035,,,,7,False,12
+Co je špatně?,What's wrong?,wˌʌts ɹˈɔŋ,whats_wrong.opus,12036,,,,7,False,12
+Co je nové?,What's new?,wˌʌts nˈuː,whats_new.opus,12037,,,,7,False,12
+Kde jsi?,Where are you?,wˈɛɹ ɑːɹ juː,where_are_you.opus,12038,,,,7,False,12
+Kde je on?,Where's he?,wˈɛɹz hiː,wheres_he.opus,12039,,,,7,False,12
+Kde je ona?,Where's she?,wˈɛɹz ʃiː,wheres_she.opus,12040,,,,7,False,12
+Kde jsme?,Where are we?,wˈɛɹ ɑːɹ wiː,where_are_we.opus,12041,,,,7,False,12
+Odkud jsi?,Where are you from?,wˈɛɹ ɑːɹ juː fɹʌm,where_are_you_from.opus,12042,,,,7,False,12
+Proč je naštvaný?,Why's he angry?,wˌaɪz hiː ˈæŋɡɹi,whys_he_angry.opus,12043,,,,7,False,12
+Jak se máš?,How are you?,hˈaʊ ɑːɹ juː,how_are_you.opus,12044,,,,7,False,12
+Kdo je tento chlapec?,Who's this boy?,hˌuːz ðɪs bˈɔɪ,whos_this_boy.opus,12045,,,,7,False,12
+Jaká je škola?,How's school?,hˌaʊz skˈuːl,hows_school.opus,12046,,,,7,False,12
+Jaký je život?,How's life?,hˌaʊz lˈaɪf,hows_life.opus,12047,,,,7,False,12
