@@ -61,7 +61,7 @@ export default function LevelsOverview({
       className={levels.length > 0 ? 'bottom-controls-clearance' : ''}
     >
       <DataState loading={false} hasData={levels.length > 0} noDataMessage={TEXTS.noDashboardData}>
-        <div className="pt-1">
+        <div className="flex flex-col gap-1 pt-1">
           {levels.map((level) => (
             <div key={level.id} className="flex flex-col gap-1">
               <ListButton
