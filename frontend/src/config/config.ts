@@ -14,7 +14,7 @@ const config = {
   },
 
   progress: {
-    afterNewBlockProgress: 1, // Direction progress after completing a new block
+    afterNewBlockProgress: 0, // Direction progress after completing a new block
     simulationItemCount: 800,
     simulationItemProgress: 1,
     simulationStartedBlockCount: 8,
