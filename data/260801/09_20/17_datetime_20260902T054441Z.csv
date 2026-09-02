@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+zájem,interest,ˈɪntɹɛst,interest.opus,17000,,,,,True,17
+část,part,pˈɑːɹt,part.opus,17001,,,,,True,17
+prezident,president,pɹˈɛzɪdənt,president.opus,17002,,,,,True,17
+kolo,round,ɹˈaʊnd,round.opus,17003,,,,,True,17
+několik,several,sˈɛvɹəl,several.opus,17004,,,,,True,17
+zvuk,sound,sˈaʊnd,sound.opus,17005,,,,,True,17
+příběh,story,stˈɔːɹi,story.opus,17006,,,,,True,17
+téměř,almost,ˈɔːlmoʊst,almost.opus,17007,,,,,True,17
+ovládat,control,kəntɹˈoʊl,control.opus,17008,,,,,True,17
+milý,dear,dˈɪɹ,dear.opus,17009,,,,,True,17
+šéf,chief,tʃˈiːf,chief.opus,17010,,,,,True,17
+pozvat,invite,ɪnvˈaɪt,invite.opus,17011,,,,,True,17
+pozdní,late,lˈeɪt,late.opus,17012,,,,,True,17
+většina,most,mˈoʊst,most.opus,17013,,,,,True,17
+pouze,only,ˈoʊnli,only.opus,17014,,,,,True,17
+produkt,product,pɹˈɑːdʌkt,product.opus,17015,,,,,True,17
+služba,service,sˈɜːvɪs,service.opus,17016,,,,,True,17
+měl by,shall,ʃˈæl,shall.opus,17017,,,,,True,17
+zůstat,stay,stˈeɪ,stay.opus,17018,,,,,True,17
+manželka,wife,wˈaɪf,wife.opus,17019,,,,,True,17
+daleko,away,ɐwˈeɪ,away.opus,17020,,,,,True,17
+péče,care,kˈɛɹ,care.opus,17021,,,,,True,17
+náklady,cost,kˈɔst,cost.opus,17022,,,,,True,17
+hluboký,deep,dˈiːp,deep.opus,17023,,,,,True,17
+deset hodin dopoledne,ten AM,tˈɛn æm,ten_am.opus,17024,26,,,18,False,17
+pět hodin odpoledne,five PM,fˈaɪv pˌiːˈɛm,five_pm.opus,17025,26,,,18,False,17
+deset hodin,ten o'clock,tˈɛn əklˈɑːk,ten_oclock.opus,17026,26,,,18,False,17
+osm hodin 10 minut,eight ten,ˈeɪt tˈɛn,eight_ten.opus,17027,26,,,18,False,17
+třetího února,February 3rd,fˈɛbɹuːˌɛɹi θˈɜːd,february_3rd.opus,17028,27,,,19,False,17
+dvacátého osmého března,March 28th,mˈɑːɹtʃ twˈɛnti ˈeɪtθ,march_28th.opus,17029,27,,,19,False,17
+prvního ledna 2026,January 1st 2026,dʒˈænjuːˌɛɹi fˈɜːst tˈuː θˈaʊzənd twˈɛnti sˈɪks,january_1st_2026.opus,17030,27,,,19,False,17
+patnáctého března 1975,March 15th 1975,mˈɑːɹtʃ fˈɪftiːnθ nˈaɪntiːnhˈʌndɹɪd sˈɛvənti fˈaɪv,march_15th_1975.opus,17031,27,,,19,False,17

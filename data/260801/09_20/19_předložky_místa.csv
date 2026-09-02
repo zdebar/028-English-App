@@ -1,0 +1,49 @@
+czech,english,block_id,grammar_chunk_id
+určitý,certain,,
+popsat,describe,,
+suchý,dry,,
+očekávat,expect,,
+fakt,fact,,
+zahrnout,include,,
+nechat,let,,
+moment,moment,,
+síla,power,,
+poskytnout,provide,,
+hlásit,report,,
+sedadlo,seat,,
+jednotlivý,single,,
+systém,system,,
+skrze,through,,
+barva,colour,,
+odlišný,different,,
+Země,Earth,,
+film,film,,
+rád,glad,,
+jen,just,,
+láska,love,,
+tužka,pencil,,
+rychlý,quick,,
+v domě,in the house,31,23
+v pokoji,in the room,31,23
+v autě,in the car,31,23
+ve městě,in the city,31,23
+v krabici,in the box,31,23
+v tašce,in the bag,31,23
+v kuchyni,in the kitchen,31,23
+v zahradě,in the garden,31,23
+na stole,on the table,32,24
+na zdi,on the wall,32,24
+na podlaze,on the floor,32,24
+na střeše,on the roof,32,24
+na stránce,on the page,32,24
+v televizi,on TV,32,24
+na seznamu,on the list,32,24
+na obrázku,on the picture,32,24
+u dveří,at the door,33,25
+na zastávce,at the bus stop,33,25
+doma,at home,33,25
+v práci,at work,33,25
+ve škole,at school,33,25
+na letišti,at the airport,33,25
+u stolu,at the table,33,25
+u vchodu,at the entrance,33,25

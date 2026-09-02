@@ -1,17 +1,17 @@
-id,name,note,sort_order,updated_at,deleted_at,grammar_group_id
-11,členy,"<p>V angličtině rozlišujeme <b>neurčitý člen</b> (<b>a / an</b>) a <b>určitý člen</b> (<b>the</b>).</p><br /><p><b>A / an</b> používáme u počitatelného podstatného jména v jednotném čísle, když o něm mluvíme poprvé nebo obecně.</p><br /><p><b>An</b> píšeme před výslovností začínající samohláskou (an apple, an hour), jinak používáme <b>a</b>.</p><br /><p><b>The</b> používáme, když je věc konkrétní, známá z kontextu nebo už byla zmíněna:</p><br /><p>U množného čísla a u nepočitatelných podstatných jmen často člen nepoužíváme, pokud mluvíme obecně.</p>",11,2026-08-28 06:11:36.730194+00,,7
-12,čísla 13 až 19,<p><b>Čísla 13 až 19</b> se tvoří příponou <b>-teen</b></p>,12,2026-08-28 06:11:36.730194+00,,8
-13,desítky,<p><b>Desítky</b> od 30 výše se obvykle tvoří příponou <b>-ty</b></p>,13,2026-08-28 06:11:36.730194+00,,8
-14,složená čísla,<p><b>Složená čísla</b> se tvoří spojením stovek desítek číslic atd.</p>,14,2026-08-28 06:11:36.730194+00,,8
-15,řadová čísla,"<p><b>Řadová čísla</b> vyjadřují pořadí. U first, second, third jde o nepravidelné tvary, od 4 výše se obvykle tvoří příponou <b>-th</b></p>",15,2026-08-28 06:11:36.730194+00,,8
-16,zlomky,<p><b>Zlomky</b> od 3 dále se obvykle tvoří jako <b>číslo + příslušná řadová číslovka</b></p>,16,2026-08-28 06:11:36.730194+00,,8
-17,desetinná čísla,<p><b>Desetinná čísla</b> čteme s výrazem <b>point</b>.</p>,17,2026-08-28 06:11:36.730194+00,,8
-18,denní časy,<p><b>Čas</b> se v angličtině často uvádí ve 12hodinovém formátu s označením AM (ante meridiem) pro dopoledne a PM (post meridiem) pro odpoledne. Například 3:00 PM znamená 15:00.</p>,18,2026-08-28 06:11:36.730194+00,,9
-19,datumy,"<p><b>Datumy</b> v angličtině se obvykle píší ve formátu měsíc-den-rok (January 1, 2020). Pro zkrácenou formu se používá číslo měsíce a dne (1/1/2020).</p>",19,2026-08-28 06:11:36.730194+00,,9
-20,in,"<p><b>In</b> používáme pro delší časové úseky jako měsíce, roky, roční období a delší části dne.</p>",20,2026-08-28 06:11:36.730194+00,,10
-21,on,"<p><b>On</b> používáme pro delší časové úseky jako měsíce, roky, roční období a delší části dne.</p>",21,2026-08-28 06:11:36.730194+00,,10
-22,at,<p><b>At</b> používáme pro konkrétní časy a některé výrazy jako at night.</p>,22,2026-08-28 06:11:36.730194+00,,10
-23,in,<p><b>In</b> používáme pro označení umístění uvnitř něčeho.</p>,23,2026-08-28 06:11:36.730194+00,,11
-24,on,<p><b>On</b> používáme pro označení umístění na povrchu něčeho.</p>,24,2026-08-28 06:11:36.730194+00,,11
-25,at,<p><b>At</b> používáme pro označení konkrétního místa nebo bodu.</p>,25,2026-08-28 06:11:36.730194+00,,11
-26,základní tvary,"<p>Tvoří se přidáním -s nebo -es u třetí osoby jednotného čísla (he, she, it) a základním tvarem slovesa pro ostatní osoby.</p>",26,2026-08-28 06:11:36.730194+00,,12
+name,note,sort_order,grammar_group_id
+členy,"<p>V angličtině rozlišujeme <b>neurčitý člen</b> (<b>a / an</b>) a <b>určitý člen</b> (<b>the</b>).</p><br /><p><b>A / an</b> používáme u počitatelného podstatného jména v jednotném čísle, když o něm mluvíme poprvé nebo obecně.</p><br /><p><b>An</b> píšeme před výslovností začínající samohláskou (an apple, an hour), jinak používáme <b>a</b>.</p><br /><p><b>The</b> používáme, když je věc konkrétní, známá z kontextu nebo už byla zmíněna:</p><br /><p>U množného čísla a u nepočitatelných podstatných jmen často člen nepoužíváme, pokud mluvíme obecně.</p>",11,7
+čísla 13 až 19,<p><b>Čísla 13 až 19</b> se tvoří příponou <b>-teen</b></p>,12,8
+desítky,<p><b>Desítky</b> od 30 výše se obvykle tvoří příponou <b>-ty</b></p>,13,8
+složená čísla,<p><b>Složená čísla</b> se tvoří spojením stovek desítek číslic atd.</p>,14,8
+řadová čísla,"<p><b>Řadová čísla</b> vyjadřují pořadí. U first, second, third jde o nepravidelné tvary, od 4 výše se obvykle tvoří příponou <b>-th</b></p>",15,8
+zlomky,<p><b>Zlomky</b> od 3 dále se obvykle tvoří jako <b>číslo + příslušná řadová číslovka</b></p>,16,8
+desetinná čísla,<p><b>Desetinná čísla</b> čteme s výrazem <b>point</b>.</p>,17,8
+denní časy,<p><b>Čas</b> se v angličtině často uvádí ve 12hodinovém formátu s označením AM (ante meridiem) pro dopoledne a PM (post meridiem) pro odpoledne. Například 3:00 PM znamená 15:00.</p>,18,9
+datumy,"<p><b>Datumy</b> v angličtině se obvykle píší ve formátu měsíc-den-rok (January 1, 2020). Pro zkrácenou formu se používá číslo měsíce a dne (1/1/2020).</p>",19,9
+in,"<p><b>In</b> používáme pro delší časové úseky jako měsíce, roky, roční období a delší části dne.</p>",20,10
+on,"<p><b>On</b> používáme pro delší časové úseky jako měsíce, roky, roční období a delší části dne.</p>",21,10
+at,<p><b>At</b> používáme pro konkrétní časy a některé výrazy jako at night.</p>,22,10
+in,<p><b>In</b> používáme pro označení umístění uvnitř něčeho.</p>,23,11
+on,<p><b>On</b> používáme pro označení umístění na povrchu něčeho.</p>,24,11
+at,<p><b>At</b> používáme pro označení konkrétního místa nebo bodu.</p>,25,11
+základní tvary,"<p>Tvoří se přidáním -s nebo -es u třetí osoby jednotného čísla (he, she, it) a základním tvarem slovesa pro ostatní osoby.</p>",26,12

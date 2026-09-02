@@ -1,0 +1,49 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+jednoduchý,simple,sˈɪmpəl,simple.opus,20000,,,,,True,20
+město,town,tˈaʊn,town.opus,20001,,,,,True,20
+strom,tree,tɹˈiː,tree.opus,20002,,,,,True,20
+adresa,address,ɐdɹˈɛs,address.opus,20003,,,,,True,20
+budova,building,bˈɪldɪŋ,building.opus,20004,,,,,True,20
+překročit,cross,kɹˈɔs,cross.opus,20005,,,,,True,20
+stůl,desk,dˈɛsk,desk.opus,20006,,,,,True,20
+led,ice,ˈaɪs,ice.opus,20007,,,,,True,20
+klíč,key,kˈiː,key.opus,20008,,,,,True,20
+rodič,parent,pˈɛɹənt,parent.opus,20009,,,,,True,20
+pošta,post,pˈoʊst,post.opus,20010,,,,,True,20
+kámen,rock,ɹˈɑːk,rock.opus,20011,,,,,True,20
+hledat,search,sˈɜːtʃ,search.opus,20012,,,,,True,20
+sport,sport,spˈɔːɹt,sport.opus,20013,,,,,True,20
+údolí,valley,vˈæli,valley.opus,20014,,,,,True,20
+dítě,baby,bˈeɪbi,baby.opus,20015,,,,,True,20
+karta,card,kˈɑːɹd,card.opus,20016,,,,,True,20
+centrální,central,sˈɛntɹəl,central.opus,20017,,,,,True,20
+směr,direction,dᵻɹˈɛkʃən,direction.opus,20018,,,,,True,20
+dolar,dollar,dˈɑːlɚ,dollar.opus,20019,,,,,True,20
+ovoce,fruit,fɹˈuːt,fruit.opus,20020,,,,,True,20
+dárek,gift,ɡˈɪft,gift.opus,20021,,,,,True,20
+vysoký,high,hˈaɪ,high.opus,20022,,,,,True,20
+nemoc,illness,ˈɪlnəs,illness.opus,20023,,,,,True,20
+já pracuji,I work,aɪ wˈɜːk,i_work.opus,20024,34,,,26,False,20
+ty pracuješ,you work,juː wˈɜːk,you_work.opus,20025,34,,,26,False,20
+on pracuje,he works,hiː wˈɜːks,he_works.opus,20026,34,,,26,False,20
+ona pracuje,she works,ʃiː wˈɜːks,she_works.opus,20027,34,,,26,False,20
+ono pracuje,it works,ɪt wˈɜːks,it_works.opus,20028,34,,,26,False,20
+my pracujeme,we work,wiː wˈɜːk,we_work.opus,20029,34,,,26,False,20
+vy pracujete,you work,juː wˈɜːk,you_work.opus,20030,34,,,26,False,20
+oni pracují,they work,ðeɪ wˈɜːk,they_work.opus,20031,34,,,26,False,20
+Jím chléb.,I eat bread.,aɪ ˈiːt bɹˈɛd,i_eat_bread.opus,20032,,,,26,False,20
+Piješ vodu.,You drink water.,juː dɹˈɪŋk wˈɔːɾɚ,you_drink_water.opus,20033,,,,26,False,20
+On čte knihu.,He reads a book.,hiː ɹˈiːdz ɐ bˈʊk,he_reads_a_book.opus,20034,,,,26,False,20
+Ona píše dopis.,She writes a letter.,ʃiː ɹˈaɪts ɐ lˈɛɾɚ,she_writes_a_letter.opus,20035,,,,26,False,20
+Je to malé.,It is small.,ɪɾ ɪz smˈɔːl,it_is_small.opus,20036,,,,26,False,20
+Máme auto.,We have a car.,wiː hæv ɐ kˈɑːɹ,we_have_a_car.opus,20037,,,,26,False,20
+Učíte studenty.,You teach students.,juː tˈiːtʃ stˈuːdənts,you_teach_students.opus,20038,,,,26,False,20
+Hrají fotbal.,They play football.,ðeɪ plˈeɪ fˈʊtbɔːl,they_play_football.opus,20039,,,,26,False,20
+Kočka běhá v parku.,The cat runs in the park.,ðə kˈæt ɹˈʌnz ɪnðə pˈɑːɹk,the_cat_runs_in_the_park.opus,20040,,,,26,False,20
+Pes spí na posteli.,The dog sleeps on a bed.,ðə dˈɑːɡ slˈiːps ˌɔn ɐ bˈɛd,the_dog_sleeps_on_a_bed.opus,20041,,,,26,False,20
+Anna vaří rýži.,Anna cooks rice.,ˈænə kˈʊks ɹˈaɪs,anna_cooks_rice.opus,20042,,,,26,False,20
+Můj bratr žije v domě.,My brother lives in a house.,maɪ bɹˈʌðɚ lˈaɪvz ɪn ɐ hˈaʊs,my_brother_lives_in_a_house.opus,20043,,,,26,False,20
+Děti otevírají dveře.,Children open doors.,tʃˈɪldɹən ˈoʊpən dˈɔːɹz,children_open_doors.opus,20044,,,,26,False,20
+Pták létá.,A bird flies.,ɐ bˈɜːd flˈaɪz,a_bird_flies.opus,20045,,,,26,False,20
+Matka zpívá píseň.,Mother sings a song.,mˈʌðɚ sˈɪŋz ɐ sˈɔŋ,mother_sings_a_song.opus,20046,,,,26,False,20
+Slunce svítí ráno.,The sun shines in the morning.,ðə sˈʌn ʃˈaɪnz ɪnðə mˈɔːɹnɪŋ,the_sun_shines_in_the_morning.opus,20047,,,,26,False,20

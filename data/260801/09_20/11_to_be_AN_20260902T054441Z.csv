@@ -1,0 +1,49 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+měsíc (na nebi),moon,mˈuːn,moon.opus,11000,,,,,True,11
+pomoc,help,hˈɛlp,help.opus,11001,,,,,True,11
+znát,know,nˈoʊ,know.opus,11002,,,,,True,11
+nový,new,nˈuː,new.opus,11003,,,,,True,11
+papír,paper,pˈeɪpɚ,paper.opus,11004,,,,,True,11
+ukázat,show,ʃˈoʊ,show.opus,11005,,,,,True,11
+silnice,road,ɹˈoʊd,road.opus,11006,,,,,True,11
+odpověď,answer,ˈænsɚ,answer.opus,11007,,,,,True,11
+tancovat,dance,dˈæns,dance.opus,11008,,,,,True,11
+dělat,do,dˈuː,do.opus,11009,,,,,True,11
+každý,each,ˈiːtʃ,each.opus,11010,,,,,True,11
+povolání,job,dʒˈɑːb,job.opus,11011,,,,,True,11
+život,life,lˈaɪf,life.opus,11012,,,,,True,11
+osoba,person,pˈɜːsən,person.opus,11013,,,,,True,11
+připravený,ready,ɹˈɛdi,ready.opus,11014,,,,,True,11
+schopný,able,ˈeɪbəl,able.opus,11015,,,,,True,11
+nápad,idea,aɪdˈiə,idea.opus,11016,,,,,True,11
+druh,kind,kˈaɪnd,kind.opus,11017,,,,,True,11
+udělat,make,mˈeɪk,make.opus,11018,,,,,True,11
+mír,peace,pˈiːs,peace.opus,11019,,,,,True,11
+důležitý,important,ɪmpˈɔːɹtənt,important.opus,11020,,,,,True,11
+populární,popular,pˈɑːpjʊlɚ,popular.opus,11021,,,,,True,11
+správně,right,ɹˈaɪt,right.opus,11022,,,,,True,11
+tak,so,sˈoʊ,so.opus,11023,,,,,True,11
+Já jsem?,Am I?,æm ˈaɪ,am_i.opus,11024,11,,,5,False,11
+Ty jsi?,Are you?,ɑːɹ jˈuː,are_you.opus,11025,11,,,5,False,11
+On je?,Is he?,ɪz hˈiː,is_he.opus,11026,11,,,5,False,11
+Ona je?,Is she?,ɪz ʃˈiː,is_she.opus,11027,11,,,5,False,11
+Ono je?,Is it?,ɪz ˈɪt,is_it.opus,11028,11,,,5,False,11
+My jsme?,Are we?,ɑːɹ wˈiː,are_we.opus,11029,11,,,5,False,11
+Vy jste?,Are you?,ɑːɹ jˈuː,are_you.opus,11030,11,,,5,False,11
+Oni jsou?,Are they?,ɑːɹ ðˈeɪ,are_they.opus,11031,11,,,5,False,11
+"Ano, jsem.","Yes, I am.",jˈɛs aɪˈæm,yes_i_am.opus,11032,12,,,6,False,11
+"Ano, on je.","Yes, he is.",jˈɛs hiː ɪz,yes_he_is.opus,11033,12,,,6,False,11
+"Ano, ona je.","Yes, she is.",jˈɛs ʃiː ɪz,yes_she_is.opus,11034,12,,,6,False,11
+"Ano, my jsme.","Yes, we are.",jˈɛs wiː ɑːɹ,yes_we_are.opus,11035,12,,,6,False,11
+"Ne, nejsem.","No, I'm not.",nˈoʊ aɪm nˈɑːt,no_im_not.opus,11036,12,,,6,False,11
+"Ne, on není.","No, he's not.",nˈoʊ hiːz nˈɑːt,no_hes_not.opus,11037,12,,,6,False,11
+"Ne, ona není.","No, she's not.",nˈoʊ ʃiːz nˈɑːt,no_shes_not.opus,11038,12,,,6,False,11
+"Ne, my nejsme.","No, we're not.",nˈoʊ wɪɹ nˈɑːt,no_were_not.opus,11039,12,,,6,False,11
+Jsem tlustý?,Am I fat?,æm aɪ fˈæt,am_i_fat.opus,11040,,,,5,False,11
+Jsi smutný?,Are you sad?,ɑːɹ juː sˈæd,are_you_sad.opus,11041,,,,5,False,11
+Je velký?,Is he big?,ɪz hiː bˈɪɡ,is_he_big.opus,11042,,,,5,False,11
+Je malá?,Is she small?,ɪz ʃiː smˈɔːl,is_she_small.opus,11043,,,,5,False,11
+Je to rychlé?,Is it fast?,ɪz ɪt fˈæst,is_it_fast.opus,11044,,,,5,False,11
+Jsme mladí?,Are we young?,ɑːɹ wiː jˈʌŋ,are_we_young.opus,11045,,,,5,False,11
+Jste staří?,Are you old?,ɑːɹ juː ˈoʊld,are_you_old.opus,11046,,,,5,False,11
+Jsou silní?,Are they strong?,ɑːɹ ðeɪ stɹˈɔŋ,are_they_strong.opus,11047,,,,5,False,11
