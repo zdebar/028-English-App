@@ -286,3 +286,405 @@ nějaký,some
 něco,something
 jakýkoliv,any
 cokoliv,anything
+Am I?,5.0
+Are you?,5.0
+Is he?,5.0
+Is she?,5.0
+Is it?,5.0
+Are we?,5.0
+Are they?,5.0
+"Yes, I am.",6.0
+"Yes, he is.",6.0
+"Yes, she is.",6.0
+"Yes, we are.",6.0
+"No, I'm not.",6.0
+"No, he's not.",6.0
+"No, she's not.",6.0
+"No, we're not.",6.0
+Am I fat?,5.0
+Are you sad?,5.0
+Is he big?,5.0
+Is she small?,5.0
+Is it fast?,5.0
+Are we young?,5.0
+Are you old?,5.0
+Are they strong?,5.0
+všichni,everyone
+nikdo,no one
+opatrný,careful
+krabice,box
+okno,window
+dveře,door
+měsíc (na nebi),moon
+pomoc,help
+znát,know
+nový,new
+papír,paper
+ukázat,show
+silnice,road
+odpověď,answer
+tancovat,dance
+dělat,do
+každý,each
+práce,job
+život,life
+osoba,person
+připravený,ready
+schopný,able
+nápad,idea
+druh,kind
+Kdo jsem?,Who am I?
+Kdo jsi?,Who are you?
+Kdo je tady?,Who's here?
+Kdo je tam?,Who's there?
+Kdo je doma?,Who's at home?
+Kdo je uvnitř?,Who's inside?
+Kdo je připravený?,Who's ready?
+Kdo jsme?,Who are we?
+Co je to?,What is it?
+Co je toto?,What's this?
+Co je tam?,What's there?
+Co je uvnitř?,What's inside?
+Co je špatně?,What's wrong?
+Co je nové?,What's new?
+Kde jsi?,Where are you?
+Kde je on?,Where's he?
+Kde je ona?,Where's she?
+Kde jsme?,Where are we?
+Odkud jsi?,Where are you from?
+Proč je naštvaný?,Why's he angry?
+Jak se máš?,How are you?
+Kdo je tento chlapec?,Who's this boy?
+Jaká je škola?,How's school?
+Jaký je život?,How's life?
+udělat,make
+mír,peace
+důležitý,important
+populární,popular
+správně,right
+tak,so
+ale,but
+sen,dream
+pro,for
+uvnitř,inside
+nyní,now
+nebo,or
+obrázek,picture
+před,before
+řeka,river
+loď,ship
+země,land
+velmi,very
+kino,cinema
+odkud,from where
+učit,teach
+fotbal,football
+čekat,wait
+znovu,again
+kočky,cats
+psy,dogs
+domy,houses
+stoly,tables
+děti,children
+myši,mice
+muži,men
+ženy,women
+mnoho (nepočítatelných),much
+mnoho (počítatelných),many
+málo (nepočítatelných),little
+málo (počítatelných),few
+trochu (nepočítatelných),a little
+několik (počítatelných),a few
+mnoho vody,much water
+mnoho aut,many cars
+málo cukru,little sugar
+málo knih,few books
+trochu mléka,a little milk
+několik studentů,a few students
+ovce (pl.),sheep
+ryby (pl.),fish
+chodidla,feet
+zub,tooth
+dokument,document
+oheň,fire
+dát,give
+šance,chance
+informace,information
+často,often
+preferovat,prefer
+vložit,put
+kámen,stone
+takový,such
+myslet,think
+rozumět,understand
+navštívit,visit
+kolem,around
+volat,call
+řezat,cut
+večeře,dinner
+dolů,down
+vysvětlit,explain
+dostat,get
+můj,my
+tvůj,your
+jeho (on),his
+její,her
+jeho (ono),its
+náš,our
+váš,your
+jejich,their
+Tomovo,Tom's
+Annina,Anna's
+lidí,people's
+studentů,students'
+Tomův pes,Tom's dog
+Annina kočka,Anna's cat
+domy lidí,people's houses
+mužovo auto,man's car
+můj otec,my father
+tvůj bratr,your brother
+jeho sestra,his sister
+její auto,her car
+jeho (ono) jídlo,its food
+naše škola,our school
+vaše kniha,your book
+jejich dům,their house
+zajímavý,interesting
+dlouhý,long
+pohybovat se,move
+ven,out
+stránka,page
+dosáhnout,reach
+pod,under
+do,into
+z,out of
+skrz,through
+odpočívat,rest
+nastavit,set
+měl by,should
+nahoru,up
+věk,age
+protože,because
+kamera,camera
+šaty,dress
+zdarma,free
+nemocný,ill
+jako,like
+pamatovat,remember
+studium,study
+také,also
+určitý člen,the
+neurčitý člen,"a, an"
+Jsem učitel.,I'm a teacher.
+Jsem ten učitel.,I'm the teacher.
+Jsou učitelé.,They're teachers.
+Jsou to ti učitelé.,They're the teachers.
+Toto je voda.,This is water.
+Toto je sklenice vody.,This is a glass of water.
+Toto jsou sklenice vody.,These are glasses of water.
+třída,class
+řídit,drive
+velký,great
+změna,change
+setkat se,meet
+potřebovat,need
+hezký,pretty
+docela,quite
+skutečný,real
+vzít,take
+akce,action
+sám,alone
+snídaně,breakfast
+pokračovat,continue
+mrtvý,dead
+užívat si,enjoy
+plný,full
+zahrada,garden
+cena,price
+výsledek,result
+říct,tell
+výhled,view
+s,with
+proti,against
+třináct,thirteen
+čtrnáct,fourteen
+patnáct,fifteen
+šestnáct,sixteen
+sedmnáct,seventeen
+osmnáct,eighteen
+devatenáct,nineteen
+dvacet,twenty
+třicet,thirty
+čtyřicet,forty
+padesát,fifty
+dvacet jedna,twenty-one
+dvacet dva,twenty-two
+sto patnáct,one hundred fifteen
+sto dvacet pět,one hundred twenty-five
+první,first
+druhý,second
+třetí,third
+čtvrtý,fourth
+pátý,fifth
+polovina,half
+třetina,third
+čtvrtina,quarter
+pětina,fifth
+šestina,sixth
+dvě sedminy,two sevenths
+tečka,point
+dvě celé osm,two point eight
+osm celých pět,eight point five
+nula celá dva,point two
+vzdálenost,distance
+vzdělání,education
+autobus,bus
+společnost,company
+poušť,desert
+drahý (cenově),expensive
+květina,flower
+kostel,church
+možné,possible
+nemožné,impossible
+opustit,leave
+plán,plan
+vrátit se,return
+uložit,save
+moře,sea
+spolu,together
+armáda,army
+kryt,cover
+kultura,culture
+rozhodnutí,decision
+příklad,example
+cítit,feel
+ostrov,island
+člen,member
+deset hodin dopoledne,ten AM
+pět hodin odpoledne,five PM
+deset hodin,ten o'clock
+osm hodin 10 minut,eight ten
+třetího února,February 3rd
+dvacátého osmého března,March 28th
+prvního ledna 2026,January 1st 2026
+patnáctého března 1975,March 15th 1975
+další,next
+pozice,position
+současný,present
+záznam,record
+sladký,sweet
+zkusit,try
+policie,police
+svět,world
+chytit,catch
+roh,corner
+zájem,interest
+část,part
+prezident,president
+kolo,round
+několik,several
+zvuk,sound
+příběh,story
+téměř,almost
+ovládat,control
+milý,dear
+šéf,chief
+pozvat,invite
+pozdní,late
+většina,most
+ráno,in the morning
+odpoledne,in the afternoon
+večer,in the evening
+v lednu,in January
+v létě,in summer
+v zimě,in winter
+v roce 2020,in 2020
+v 19. století,in the 19th century
+v pondělí,on Monday
+v úterý,on Tuesday
+v pátek ráno,on Friday morning
+1. ledna,on January 1st
+na moje narozeniny,on my birthday
+na Štědrý den,on Christmas Eve
+o víkendu,on the weekend
+ve všední dny,on weekdays
+v 7 hodin,at seven o’clock
+v 8:30,at 8:30
+v poledne,at noon
+o půlnoci,at midnight
+v noci,at night
+za úsvitu,at dawn
+za soumraku,at dusk
+v době oběda,at lunchtime
+in the house,31.0
+in the room,31.0
+in the car,31.0
+in the city,31.0
+in the box,31.0
+in the bag,31.0
+in the kitchen,31.0
+in the garden,31.0
+on the table,32.0
+on the wall,32.0
+on the floor,32.0
+on the roof,32.0
+on the page,32.0
+on TV,32.0
+on the list,32.0
+on the picture,32.0
+at the door,33.0
+at the bus stop,33.0
+at home,33.0
+at work,33.0
+at school,33.0
+at the airport,33.0
+at the table,33.0
+at the entrance,33.0
+hráč,player
+spíše,rather
+zůstat,remain
+strana,side
+jih,south
+pravda,true
+použít,use
+již,already
+stát se,become
+způsobit,cause
+určitý,certain
+popsat,describe
+suchý,dry
+očekávat,expect
+fakt,fact
+zahrnout,include
+nechat,let
+moment,moment
+síla,power
+poskytnout,provide
+hlásit,report
+sedadlo,seat
+jednotlivý,single
+systém,system
+já pracuji,I work
+ty pracuješ,you work
+on pracuje,he works
+ona pracuje,she works
+ono pracuje,it works
+my pracujeme,we work
+vy pracujete,you work
+oni pracují,they work
+Jím chléb.,I eat bread.
+Piješ vodu.,You drink water.
+On čte knihu.,He reads a book.
+Ona píše dopis.,She writes a letter.
+Je to malé.,It is small.
+Máme auto.,We have a car.
+Učíte studenty.,You teach students.
+Hrají fotbal.,They play football.
+Kočka běhá v parku.,The cat runs in the park.
+Pes spí na posteli.,The dog sleeps on a bed.
+Anna vaří rýži.,Anna cooks rice.
+Můj bratr žije v domě.,My brother lives in a house.
+Děti otevírají dveře.,Children open doors.
+Pták létá.,A bird flies.
+Matka zpívá píseň.,Mother sings a song.
+Slunce svítí ráno.,The sun shines in the morning.

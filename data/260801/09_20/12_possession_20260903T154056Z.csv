@@ -1,0 +1,49 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+ovce (pl.),sheep,ʃˈiːp,sheep.opus,12000,,,,,True,12
+ryby (pl.),fish,fˈɪʃ,fish.opus,12001,,,,,True,12
+chodidla,feet,fˈiːt,feet.opus,12002,,,,,True,12
+zub,tooth,tˈuːθ,tooth.opus,12003,,,,,True,12
+dokument,document,dˈɑːkjuːmənt,document.opus,12004,,,,,True,12
+oheň,fire,fˈaɪɚ,fire.opus,12005,,,,,True,12
+dát,give,ɡˈɪv,give.opus,12006,,,,,True,12
+šance,chance,tʃˈæns,chance.opus,12007,,,,,True,12
+informace,information,ˌɪnfɚmˈeɪʃən,information.opus,12008,,,,,True,12
+často,often,ˈɔfən,often.opus,12009,,,,,True,12
+preferovat,prefer,pɹɪfˈɜː,prefer.opus,12010,,,,,True,12
+vložit,put,pˈʊt,put.opus,12011,,,,,True,12
+kámen,stone,stˈoʊn,stone.opus,12012,,,,,True,12
+takový,such,sˈʌtʃ,such.opus,12013,,,,,True,12
+myslet,think,θˈɪŋk,think.opus,12014,,,,,True,12
+rozumět,understand,ˌʌndɚstˈænd,understand.opus,12015,,,,,True,12
+navštívit,visit,vˈɪzɪt,visit.opus,12016,,,,,True,12
+kolem,around,ɚɹˈaʊnd,around.opus,12017,,,,,True,12
+volat,call,kˈɔːl,call.opus,12018,,,,,True,12
+řezat,cut,kˈʌt,cut.opus,12019,,,,,True,12
+večeře,dinner,dˈɪnɚ,dinner.opus,12020,,,,,True,12
+dolů,down,dˈaʊn,down.opus,12021,,,,,True,12
+vysvětlit,explain,ɛksplˈeɪn,explain.opus,12022,,,,,True,12
+dostat,get,ɡˈɛt,get.opus,12023,,,,,True,12
+můj,my,mˈaɪ,my.opus,12024,17,,,9,False,12
+tvůj,your,jˈʊɹ,your.opus,12025,17,,,9,False,12
+jeho (on),his,hˈɪz,his.opus,12026,17,,,9,False,12
+její,her,hˈɜː,her.opus,12027,17,,,9,False,12
+jeho (ono),its,ˈɪts,its.opus,12028,17,,,9,False,12
+náš,our,ˈaʊɚ,our.opus,12029,17,,,9,False,12
+váš,your,jˈʊɹ,your.opus,12030,17,,,9,False,12
+jejich,their,ðˈɛɹ,their.opus,12031,17,,,9,False,12
+Tomovo,Tom's,tˈɑːmz,toms.opus,12032,18,,,10,False,12
+Annina,Anna's,ˈænəz,annas.opus,12033,18,,,10,False,12
+lidí,people's,pˈiːpəlz,peoples.opus,12034,18,,,10,False,12
+studentů,students',stˈuːdənts,students.opus,12035,18,,,10,False,12
+Tomův pes,Tom's dog,tˈɑːmz dˈɑːɡ,toms_dog.opus,12036,18,,,10,False,12
+Annina kočka,Anna's cat,ˈænəz kˈæt,annas_cat.opus,12037,18,,,10,False,12
+domy lidí,people's houses,pˈiːpəlz hˈaʊzᵻz,peoples_houses.opus,12038,18,,,10,False,12
+mužovo auto,man's car,mˈænz kˈɑːɹ,mans_car.opus,12039,18,,,10,False,12
+můj otec,my father,maɪ fˈɑːðɚ,my_father.opus,12040,,,,9,False,12
+tvůj bratr,your brother,jʊɹ bɹˈʌðɚ,your_brother.opus,12041,,,,9,False,12
+jeho sestra,his sister,hɪz sˈɪstɚ,his_sister.opus,12042,,,,9,False,12
+její auto,her car,hɜː kˈɑːɹ,her_car.opus,12043,,,,9,False,12
+jeho (ono) jídlo,its food,ɪts fˈuːd,its_food.opus,12044,,,,9,False,12
+naše škola,our school,ˌaʊɚ skˈuːl,our_school.opus,12045,,,,9,False,12
+vaše kniha,your book,jʊɹ bˈʊk,your_book.opus,12046,,,,9,False,12
+jejich dům,their house,ðɛɹ hˈaʊs,their_house.opus,12047,,,,9,False,12

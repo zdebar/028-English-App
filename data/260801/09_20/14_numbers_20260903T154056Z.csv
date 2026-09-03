@@ -1,0 +1,55 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+třída,class,klˈæs,class.opus,14000,,,,,True,14
+řídit,drive,dɹˈaɪv,drive.opus,14001,,,,,True,14
+velký,great,ɡɹˈeɪt,great.opus,14002,,,,,True,14
+změna,change,tʃˈeɪndʒ,change.opus,14003,,,,,True,14
+setkat se,meet,mˈiːt,meet.opus,14004,,,,,True,14
+potřebovat,need,nˈiːd,need.opus,14005,,,,,True,14
+hezký,pretty,pɹˈɪɾi,pretty.opus,14006,,,,,True,14
+docela,quite,kwˈaɪt,quite.opus,14007,,,,,True,14
+skutečný,real,ɹˈiːəl,real.opus,14008,,,,,True,14
+vzít,take,tˈeɪk,take.opus,14009,,,,,True,14
+akce,action,ˈækʃən,action.opus,14010,,,,,True,14
+sám,alone,ɐlˈoʊn,alone.opus,14011,,,,,True,14
+snídaně,breakfast,bɹˈɛkfəst,breakfast.opus,14012,,,,,True,14
+pokračovat,continue,kəntˈɪnjuː,continue.opus,14013,,,,,True,14
+mrtvý,dead,dˈɛd,dead.opus,14014,,,,,True,14
+užívat si,enjoy,ɛndʒˈɔɪ,enjoy.opus,14015,,,,,True,14
+plný,full,fˈʊl,full.opus,14016,,,,,True,14
+zahrada,garden,ɡˈɑːɹdən,garden.opus,14017,,,,,True,14
+cena,price,pɹˈaɪs,price.opus,14018,,,,,True,14
+výsledek,result,ɹɪzˈʌlt,result.opus,14019,,,,,True,14
+říct,tell,tˈɛl,tell.opus,14020,,,,,True,14
+výhled,view,vjˈuː,view.opus,14021,,,,,True,14
+s,with,wˈɪð,with.opus,14022,,,,,True,14
+proti,against,ɐɡˈɛnst,against.opus,14023,,,,,True,14
+třináct,thirteen,θˈɜːtiːn,thirteen.opus,14024,20,,,12,False,14
+čtrnáct,fourteen,fˈɔːɹtiːn,fourteen.opus,14025,20,,,12,False,14
+patnáct,fifteen,fˈɪftiːn,fifteen.opus,14026,20,,,12,False,14
+šestnáct,sixteen,sˈɪkstiːn,sixteen.opus,14027,20,,,12,False,14
+sedmnáct,seventeen,sˈɛvəntˌiːn,seventeen.opus,14028,20,,,12,False,14
+osmnáct,eighteen,ˈeɪtiːn,eighteen.opus,14029,20,,,12,False,14
+devatenáct,nineteen,nˈaɪntiːn,nineteen.opus,14030,20,,,12,False,14
+dvacet,twenty,twˈɛnti,twenty.opus,14031,21,,,13,False,14
+třicet,thirty,θˈɜːɾi,thirty.opus,14032,21,,,13,False,14
+čtyřicet,forty,fˈɔːɹɾi,forty.opus,14033,21,,,13,False,14
+padesát,fifty,fˈɪfti,fifty.opus,14034,21,,,13,False,14
+dvacet jedna,twenty-one,twˈɛntiwˌʌn,twentyone.opus,14035,22,,,14,False,14
+dvacet dva,twenty-two,twˈɛntitˈuː,twentytwo.opus,14036,22,,,14,False,14
+sto patnáct,one hundred fifteen,wˈʌn hˈʌndɹɪd fˈɪftiːn,one_hundred_fifteen.opus,14037,22,,,14,False,14
+sto dvacet pět,one hundred twenty-five,wˈʌn hˈʌndɹɪd twˈɛntifˈaɪv,one_hundred_twentyfive.opus,14038,22,,,14,False,14
+první,first,fˈɜːst,first.opus,14039,23,,,15,False,14
+druhý,second,sˈɛkənd,second.opus,14040,23,,,15,False,14
+třetí,third,θˈɜːd,third.opus,14041,23,,,15,False,14
+čtvrtý,fourth,fˈɔːɹθ,fourth.opus,14042,23,,,15,False,14
+pátý,fifth,fˈɪfθ,fifth.opus,14043,23,,,15,False,14
+polovina,half,hˈæf,half.opus,14044,24,,,16,False,14
+třetina,third,θˈɜːd,third.opus,14045,24,,,16,False,14
+čtvrtina,quarter,kwˈɔːɹɾɚ,quarter.opus,14046,24,,,16,False,14
+pětina,fifth,fˈɪfθ,fifth.opus,14047,24,,,16,False,14
+šestina,sixth,sˈɪksθ,sixth.opus,14048,24,,,16,False,14
+dvě sedminy,two sevenths,tˈuː sˈɛvənθs,two_sevenths.opus,14049,24,,,16,False,14
+tečka,point,pˈɔɪnt,point.opus,14050,25,,,17,False,14
+dvě celé osm,two point eight,tˈuː pˈɔɪnt ˈeɪt,two_point_eight.opus,14051,25,,,17,False,14
+osm celých pět,eight point five,ˈeɪt pˈɔɪnt fˈaɪv,eight_point_five.opus,14052,25,,,17,False,14
+nula celá dva,point two,pˈɔɪnt tˈuː,point_two.opus,14053,25,,,17,False,14

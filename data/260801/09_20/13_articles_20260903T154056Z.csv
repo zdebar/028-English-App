@@ -1,0 +1,34 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+zajímavý,interesting,ˈɪntɹɛstɪŋ,interesting.opus,13000,,,,,True,13
+dlouhý,long,lˈɔŋ,long.opus,13001,,,,,True,13
+pohybovat se,move,mˈuːv,move.opus,13002,,,,,True,13
+ven,out,ˈaʊt,out.opus,13003,,,,,True,13
+stránka,page,pˈeɪdʒ,page.opus,13004,,,,,True,13
+dosáhnout,reach,ɹˈiːtʃ,reach.opus,13005,,,,,True,13
+pod,under,ˈʌndɚ,under.opus,13006,,,,,True,13
+do,into,ˈɪntʊ,into.opus,13007,,,,,True,13
+z,out of,ˈaʊɾəv,out_of.opus,13008,,,,,True,13
+skrz,through,θɹˈuː,through.opus,13009,,,,,True,13
+odpočívat,rest,ɹˈɛst,rest.opus,13010,,,,,True,13
+nastavit,set,sˈɛt,set.opus,13011,,,,,True,13
+měl by,should,ʃˈʊd,should.opus,13012,,,,,True,13
+nahoru,up,ˈʌp,up.opus,13013,,,,,True,13
+věk,age,ˈeɪdʒ,age.opus,13014,,,,,True,13
+protože,because,bɪkˈʌz,because.opus,13015,,,,,True,13
+kamera,camera,kˈæmɹə,camera.opus,13016,,,,,True,13
+šaty,dress,dɹˈɛs,dress.opus,13017,,,,,True,13
+zdarma,free,fɹˈiː,free.opus,13018,,,,,True,13
+nemocný,ill,ˈɪl,ill.opus,13019,,,,,True,13
+jako,like,lˈaɪk,like.opus,13020,,,,,True,13
+pamatovat,remember,ɹᵻmˈɛmbɚ,remember.opus,13021,,,,,True,13
+studium,study,stˈʌdi,study.opus,13022,,,,,True,13
+také,also,ˈɔːlsoʊ,also.opus,13023,,,,,True,13
+určitý člen,the,ðˈə,the.opus,13024,19,,,11,False,13
+neurčitý člen,"a, an",ɐ ˈæn,a_an.opus,13025,19,,,11,False,13
+Jsem učitel.,I'm a teacher.,aɪm ɐ tˈiːtʃɚ,im_a_teacher.opus,13026,19,,,11,False,13
+Jsem ten učitel.,I'm the teacher.,aɪm ðə tˈiːtʃɚ,im_the_teacher.opus,13027,19,,,11,False,13
+Jsou učitelé.,They're teachers.,ðeɪɚ tˈiːtʃɚz,theyre_teachers.opus,13028,19,,,11,False,13
+Jsou to ti učitelé.,They're the teachers.,ðeɪɚ ðə tˈiːtʃɚz,theyre_the_teachers.opus,13029,19,,,11,False,13
+Toto je voda.,This is water.,ðɪs ɪz wˈɔːɾɚ,this_is_water.opus,13030,19,,,11,False,13
+Toto je sklenice vody.,This is a glass of water.,ðɪs ɪz ɐ ɡlˈæs ʌv wˈɔːɾɚ,this_is_a_glass_of_water.opus,13031,19,,,11,False,13
+Toto jsou sklenice vody.,These are glasses of water.,ðiːz ɑːɹ ɡlˈæsᵻz ʌv wˈɔːɾɚ,these_are_glasses_of_water.opus,13032,19,,,11,False,13
