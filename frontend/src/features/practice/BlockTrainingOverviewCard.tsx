@@ -26,6 +26,33 @@ function Note({ note }: Readonly<{ note: string }>): JSX.Element {
   return <div className="m-4" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note) }} />;
 }
 
+type OverviewNotesProps = Readonly<{
+  blockNote: string | null;
+  grammarNote: string | null | undefined;
+  grammarGroupNote: string | null;
+}>;
+
+function OverviewNotes({
+  blockNote,
+  grammarNote,
+  grammarGroupNote,
+}: OverviewNotesProps): JSX.Element {
+  const hasNotes = Boolean(grammarGroupNote || grammarNote || blockNote);
+
+  return (
+    <>
+      {grammarGroupNote && <Note note={grammarGroupNote} />}
+      {grammarNote && (
+        <section>
+          <Note note={grammarNote} />
+        </section>
+      )}
+      {blockNote && <Note note={blockNote} />}
+      {!hasNotes && <div className="h-4" aria-hidden="true" />}
+    </>
+  );
+}
+
 /** Introduces the selected block and its optional grammar before initial training begins. */
 export default function BlockTrainingOverviewCard({
   block,
@@ -49,9 +76,11 @@ export default function BlockTrainingOverviewCard({
       onClose={closeRoute}
       className="flex w-full flex-col gap-1"
     >
-      {grammarGroup?.note && <Note note={grammarGroup.note} />}
-      {grammar && <section>{grammar.note && <Note note={grammar.note} />}</section>}
-      {block.note && <Note note={block.note} />}
+      <OverviewNotes
+        blockNote={block.note}
+        grammarNote={grammar?.note}
+        grammarGroupNote={grammarGroup?.note ?? null}
+      />
       {items.map((item) => (
         <BilingualItemButton
           key={item.item_id}
