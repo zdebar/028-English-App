@@ -1,0 +1,49 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+přístav,port,pˈɔːɹt,port.opus,7000,,,,,True,7
+datum,date,dˈeɪt,date.opus,7001,,,,,True,7
+pokoj,room,ɹˈuːm,room.opus,7002,,,,,True,7
+kuchyně,kitchen,kˈɪtʃən,kitchen.opus,7003,,,,,True,7
+koupelna,bathroom,bˈæθɹuːm,bathroom.opus,7004,,,,,True,7
+obývací pokoj,living room,lˈɪvɪŋ ɹˈuːm,living_room.opus,7005,,,,,True,7
+ložnice,bedroom,bˈɛdɹuːm,bedroom.opus,7006,,,,,True,7
+tunel,tunnel,tˈʌnəl,tunnel.opus,7007,,,,,True,7
+tvář,face,fˈeɪs,face.opus,7008,,,,,True,7
+pokud,if,ˈɪf,if.opus,7009,,,,,True,7
+místo,place,plˈeɪs,place.opus,7010,,,,,True,7
+cesta,road,ɹˈoʊd,road.opus,7011,,,,,True,7
+zastavit,stop,stˈɑːp,stop.opus,7012,,,,,True,7
+chtít,want,wˈɔnt,want.opus,7013,,,,,True,7
+odpovědět,answer,ˈænsɚ,answer.opus,7014,,,,,True,7
+mezi,between,bᵻtwˈiːn,between.opus,7015,,,,,True,7
+z,of,ˈʌv,of.opus,7016,,,,,True,7
+vědět,know,nˈoʊ,know.opus,7017,,,,,True,7
+vedle,next to,nˈɛkst tuː,next_to.opus,7018,,,,,True,7
+tablet,tablet,tˈæblət,tablet.opus,7019,,,,,True,7
+čepice,cap,kˈæp,cap.opus,7020,,,,,True,7
+moci,can,kˈæn,can.opus,7021,,,,,True,7
+peníze,money,mˈʌni,money.opus,7022,,,,,True,7
+platit,pay,pˈeɪ,pay.opus,7023,,,,,True,7
+já jsem,I am,aɪˈæm,i_am.opus,7024,7,,,1,False,7
+ty jsi,you are,juː ˈɑːɹ,you_are.opus,7025,7,,,1,False,7
+on je,he is,hiː ˈɪz,he_is.opus,7026,7,,,1,False,7
+ona je,she is,ʃiː ˈɪz,she_is.opus,7027,7,,,1,False,7
+to je,it is,ɪɾ ˈɪz,it_is.opus,7028,7,,,1,False,7
+my jsme,we are,wiː ˈɑːɹ,we_are.opus,7029,7,,,1,False,7
+vy jste,you are,juː ˈɑːɹ,you_are.opus,7030,7,,,1,False,7
+oni jsou,they are,ðeɪ ˈɑːɹ,they_are.opus,7031,7,,,1,False,7
+já jsem (zk.),I'm,ˈaɪm,im.opus,7032,8,,,2,False,7
+ty jsi (zk.),you're,jˈʊɹ,youre.opus,7033,8,,,2,False,7
+on je (zk.),he's,hˈiːz,hes.opus,7034,8,,,2,False,7
+ona je (zk.),she's,ʃˈiːz,shes.opus,7035,8,,,2,False,7
+to je (zk.),it's,ˈɪts,its.opus,7036,8,,,2,False,7
+my jsme (zk.),we're,wˈɪɹ,were.opus,7037,8,,,2,False,7
+vy jste (zk.),you're,jˈʊɹ,youre.opus,7038,8,,,2,False,7
+oni jsou (zk.),they're,ðeɪˈɚ,theyre.opus,7039,8,,,2,False,7
+Já jsem šťastný.,I'm happy.,aɪm hˈæpi,im_happy.opus,7040,,,,2,False,7
+Ty jsi smutný.,You're sad.,jʊɹ sˈæd,youre_sad.opus,7041,,,,2,False,7
+On je vysoký.,He's tall.,hiːz tˈɔːl,hes_tall.opus,7042,,,,2,False,7
+Ona je malá.,She's small.,ʃiːz smˈɔːl,shes_small.opus,7043,,,,2,False,7
+Je to špatné.,It's bad.,ɪts bˈæd,its_bad.opus,7044,,,,2,False,7
+My jsme bohatí.,We're rich.,wɪɹ ɹˈɪtʃ,were_rich.opus,7045,,,,2,False,7
+Vy jste tlustí.,You're fat.,jʊɹ fˈæt,youre_fat.opus,7046,,,,2,False,7
+Oni jsou staří.,They're old.,ðeɪɚɹ ˈoʊld,theyre_old.opus,7047,,,,2,False,7
