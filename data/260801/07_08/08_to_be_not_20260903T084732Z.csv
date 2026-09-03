@@ -1,0 +1,49 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+vše,all,ˈɔːl,all.opus,8000,,,,,True,8
+a,and,ˈænd,and.opus,8001,,,,,True,8
+chlapec,boy,bˈɔɪ,boy.opus,8002,,,,,True,8
+konec,end,ˈɛnd,end.opus,8003,,,,,True,8
+rodina,family,fˈæmɪli,family.opus,8004,,,,,True,8
+brzy,soon,sˈuːn,soon.opus,8005,,,,,True,8
+lidé,people,pˈiːpəl,people.opus,8006,,,,,True,8
+mluvit,speak,spˈiːk,speak.opus,8007,,,,,True,8
+zeptat se,ask,ˈæsk,ask.opus,8008,,,,,True,8
+učit se,learn,lˈɜːn,learn.opus,8009,,,,,True,8
+otázka,question,kwˈɛstʃən,question.opus,8010,,,,,True,8
+říci,say,sˈeɪ,say.opus,8011,,,,,True,8
+začít,start,stˈɑːɹt,start.opus,8012,,,,,True,8
+slovo,word,wˈɜːd,word.opus,8013,,,,,True,8
+o,about,ɐbˈaʊt,about.opus,8014,,,,,True,8
+dívka,girl,ɡˈɜːl,girl.opus,8015,,,,,True,8
+problém,problem,pɹˈɑːbləm,problem.opus,8016,,,,,True,8
+stejný,same,sˈeɪm,same.opus,8017,,,,,True,8
+vidět,see,sˈiː,see.opus,8018,,,,,True,8
+poslat,send,sˈɛnd,send.opus,8019,,,,,True,8
+jako,as,ˈæz,as.opus,8020,,,,,True,8
+lékař,doctor,dˈɑːktɚ,doctor.opus,8021,,,,,True,8
+najít,find,fˈaɪnd,find.opus,8022,,,,,True,8
+hra,game,ɡˈeɪm,game.opus,8023,,,,,True,8
+já nejsem,I am not,aɪɐm nˈɑːt,i_am_not.opus,8024,9,,,3,False,8
+ty nejsi,you are not,juː ɑːɹ nˈɑːt,you_are_not.opus,8025,9,,,3,False,8
+on není,he is not,hiː ɪz nˈɑːt,he_is_not.opus,8026,9,,,3,False,8
+ona není,she is not,ʃiː ɪz nˈɑːt,she_is_not.opus,8027,9,,,3,False,8
+to není,it is not,ɪɾ ɪz nˈɑːt,it_is_not.opus,8028,9,,,3,False,8
+my nejsme,we are not,wiː ɑːɹ nˈɑːt,we_are_not.opus,8029,9,,,3,False,8
+vy nejste,you are not,juː ɑːɹ nˈɑːt,you_are_not.opus,8030,9,,,3,False,8
+oni nejsou,they are not,ðeɪ ɑːɹ nˈɑːt,they_are_not.opus,8031,9,,,3,False,8
+já nejsem (zk.),I'm not,aɪm nˈɑːt,im_not.opus,8032,10,,,4,False,8
+ty nejsi (zk.),you aren't,juː ˈɑːɹnt,you_arent.opus,8033,10,,,4,False,8
+on není (zk.),he isn't,hiː ˈɪzənt,he_isnt.opus,8034,10,,,4,False,8
+ona není (zk.),she isn't,ʃiː ˈɪzənt,she_isnt.opus,8035,10,,,4,False,8
+to není (zk.),it isn't,ɪɾ ˈɪzənt,it_isnt.opus,8036,10,,,4,False,8
+my nejsme (zk.),we aren't,wiː ˈɑːɹnt,we_arent.opus,8037,10,,,4,False,8
+vy nejste (zk.),you aren't,juː ˈɑːɹnt,you_arent.opus,8038,10,,,4,False,8
+oni nejsou (zk.),they aren't,ðeɪ ˈɑːɹnt,they_arent.opus,8039,10,,,4,False,8
+Já nejsem šťastný.,I'm not happy.,aɪm nˌɑːt hˈæpi,im_not_happy.opus,8040,,,,4,False,8
+Ty nejsi smutný.,You aren't sad.,juː ˌɑːɹnt sˈæd,you_arent_sad.opus,8041,,,,4,False,8
+On není velký.,He isn't big.,hiː ˌɪzənt bˈɪɡ,he_isnt_big.opus,8042,,,,4,False,8
+Ona není malá.,She isn't small.,ʃiː ˌɪzənt smˈɔːl,she_isnt_small.opus,8043,,,,4,False,8
+To není špatné.,It isn't bad.,ɪɾ ˌɪzənt bˈæd,it_isnt_bad.opus,8044,,,,4,False,8
+My nejsme mladí.,We aren't young.,wiː ˌɑːɹnt jˈʌŋ,we_arent_young.opus,8045,,,,4,False,8
+Vy nejste staří.,You aren't old.,juː ˌɑːɹnt ˈoʊld,you_arent_old.opus,8046,,,,4,False,8
+Oni nejsou vysocí.,They aren't tall.,ðeɪ ˌɑːɹnt tˈɔːl,they_arent_tall.opus,8047,,,,4,False,8

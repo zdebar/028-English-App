@@ -1,12 +1,12 @@
 import ErrorBoundary from '@/components/utils/error-boundary';
-import { initializeMonitoring } from '@/features/logging/monitoring-handler';
+// import { initializeMonitoring } from '@/features/logging/monitoring-handler';
 import { startAuthLifecycle, stopAuthLifecycle } from '@/features/auth/auth-lifecycle';
 import { router } from '@/router';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 
-initializeMonitoring();
+// initializeMonitoring();
 void startAuthLifecycle();
 
 if ('serviceWorker' in navigator) {
