@@ -1,12 +1,5 @@
 czech,english,block_id,grammar_chunk_id,note_id,topic_id
-dopis,letter,,,,
-věc,thing,,,,
-žádný,none,,,,
-nic,nothing,,,,
-nějaký,some,,,,
-něco,something,,,,
-jakýkoliv,any,,,,
-cokoliv,anything,,,,
+
 který,which,,,,
 čí,whose,,,,
 z,from,,,,
