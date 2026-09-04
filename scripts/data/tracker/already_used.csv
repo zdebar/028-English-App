@@ -47,6 +47,7 @@ matka,mother
 otec,father
 bratr,brother
 sestra,sister
+syn,son
 dcera,daughter
 rodiče,parents
 strýc,uncle
@@ -286,29 +287,150 @@ nějaký,some
 něco,something
 jakýkoliv,any
 cokoliv,anything
-Am I?,5.0
-Are you?,5.0
-Is he?,5.0
-Is she?,5.0
-Is it?,5.0
-Are we?,5.0
-Are they?,5.0
-"Yes, I am.",6.0
-"Yes, he is.",6.0
-"Yes, she is.",6.0
-"Yes, we are.",6.0
-"No, I'm not.",6.0
-"No, he's not.",6.0
-"No, she's not.",6.0
-"No, we're not.",6.0
-Am I fat?,5.0
-Are you sad?,5.0
-Is he big?,5.0
-Is she small?,5.0
-Is it fast?,5.0
-Are we young?,5.0
-Are you old?,5.0
-Are they strong?,5.0
+přístav,port
+datum,date
+pokoj,room
+kuchyně,kitchen
+koupelna,bathroom
+obývací pokoj,living room
+ložnice,bedroom
+tunel,tunnel
+tvář,face
+pokud,if
+místo,place
+cesta,road
+zastavit,stop
+chtít,want
+odpovědět,answer
+mezi,between
+z,of
+vědět,know
+vedle,next to
+tablet,tablet
+čepice,cap
+moci,can
+peníze,money
+platit,pay
+já jsem,I am
+ty jsi,you are
+on je,he is
+ona je,she is
+to je,it is
+my jsme,we are
+vy jste,you are
+oni jsou,they are
+já jsem (zk.),I'm
+ty jsi (zk.),you're
+on je (zk.),he's
+ona je (zk.),she's
+to je (zk.),it's
+my jsme (zk.),we're
+vy jste (zk.),you're
+oni jsou (zk.),they're
+Já jsem šťastný.,I'm happy.
+Ty jsi smutný.,You're sad.
+On je vysoký.,He's tall.
+Ona je malá.,She's small.
+Je to špatné.,It's bad.
+My jsme bohatí.,We're rich.
+Vy jste tlustí.,You're fat.
+Oni jsou staří.,They're old.
+vše,all
+a,and
+chlapec,boy
+konec,end
+rodina,family
+brzy,soon
+lidé,people
+mluvit,speak
+zeptat se,ask
+učit se,learn
+otázka,question
+říci,say
+začít,start
+slovo,word
+o,about
+dívka,girl
+problém,problem
+stejný,same
+vidět,see
+poslat,send
+jako,as
+lékař,doctor
+najít,find
+hra,game
+já nejsem,I am not
+ty nejsi,you are not
+on není,he is not
+ona není,she is not
+to není,it is not
+my nejsme,we are not
+vy nejste,you are not
+oni nejsou,they are not
+já nejsem (zk.),I'm not
+ty nejsi (zk.),you aren't
+on není (zk.),he isn't
+ona není (zk.),she isn't
+to není (zk.),it isn't
+my nejsme (zk.),we aren't
+vy nejste (zk.),you aren't
+oni nejsou (zk.),they aren't
+Já nejsem šťastný.,I'm not happy.
+Ty nejsi smutný.,You aren't sad.
+On není velký.,He isn't big.
+Ona není malá.,She isn't small.
+To není špatné.,It isn't bad.
+My nejsme mladí.,We aren't young.
+Vy nejste staří.,You aren't old.
+Oni nejsou vysocí.,They aren't tall.
+který,which
+čí,whose
+z,from
+jméno,name
+špatně,wrong
+čas,time
+toto,this
+tamto,that
+tyto,these
+ti,those
+student,student
+žít,live
+vzduch,air
+sklad,store
+v,in
+na,on
+na,at
+k,to
+plakat,cry
+vždy,always
+každý,every
+nikdy,never
+všechno,everything
+tělo,body
+Já jsem?,Am I?
+Ty jsi?,Are you?
+On je?,Is he?
+Ona je?,Is she?
+Ono je?,Is it?
+My jsme?,Are we?
+Vy jste?,Are you?
+Oni jsou?,Are they?
+"Ano, jsem.","Yes, I am."
+"Ano, on je.","Yes, he is."
+"Ano, ona je.","Yes, she is."
+"Ano, my jsme.","Yes, we are."
+"Ne, nejsem.","No, I'm not."
+"Ne, on není.","No, he's not."
+"Ne, ona není.","No, she's not."
+"Ne, my nejsme.","No, we're not."
+Jsem tlustý?,Am I fat?
+Jsi smutný?,Are you sad?
+Je velký?,Is he big?
+Je malá?,Is she small?
+Je to rychlé?,Is it fast?
+Jsme mladí?,Are we young?
+Jste staří?,Are you old?
+Jsou silní?,Are they strong?
 všichni,everyone
 nikdo,no one
 opatrný,careful
@@ -616,30 +738,54 @@ v noci,at night
 za úsvitu,at dawn
 za soumraku,at dusk
 v době oběda,at lunchtime
-in the house,31.0
-in the room,31.0
-in the car,31.0
-in the city,31.0
-in the box,31.0
-in the bag,31.0
-in the kitchen,31.0
-in the garden,31.0
-on the table,32.0
-on the wall,32.0
-on the floor,32.0
-on the roof,32.0
-on the page,32.0
-on TV,32.0
-on the list,32.0
-on the picture,32.0
-at the door,33.0
-at the bus stop,33.0
-at home,33.0
-at work,33.0
-at school,33.0
-at the airport,33.0
-at the table,33.0
-at the entrance,33.0
+pouze,only
+produkt,product
+služba,service
+měl by,shall
+zůstat,stay
+manželka,wife
+daleko,away
+péče,care
+náklady,cost
+hluboký,deep
+dost,enough
+bojovat,fight
+garáž,garage
+hvězda,star
+ponechat,keep
+chybět,miss
+žádost,request
+sezóna,season
+nemocný,sick
+vítat,welcome
+souhlasit,agree
+most,bridge
+dort,cake
+jiný,other
+v domě,in the house
+v pokoji,in the room
+v autě,in the car
+ve městě,in the city
+v krabici,in the box
+v tašce,in the bag
+v kuchyni,in the kitchen
+v zahradě,in the garden
+na stole,on the table
+na zdi,on the wall
+na podlaze,on the floor
+na střeše,on the roof
+na stránce,on the page
+v televizi,on TV
+na seznamu,on the list
+na obrázku,on the picture
+u dveří,at the door
+na zastávce,at the bus stop
+doma,at home
+v práci,at work
+ve škole,at school
+na letišti,at the airport
+u stolu,at the table
+u vchodu,at the entrance
 hráč,player
 spíše,rather
 zůstat,remain
@@ -688,1283 +834,3 @@ Děti otevírají dveře.,Children open doors.
 Pták létá.,A bird flies.
 Matka zpívá píseň.,Mother sings a song.
 Slunce svítí ráno.,The sun shines in the morning.
-skrze,through
-barva,colour
-odlišný,different
-Země,Earth
-film,film
-rád,glad
-jen,just
-láska,love
-tužka,pencil
-rychlý,quick
-jednoduchý,simple
-město,town
-strom,tree
-adresa,address
-budova,building
-překročit,cross
-stůl,desk
-led,ice
-klíč,key
-rodič,parent
-pošta,post
-kámen,rock
-hledat,search
-sport,sport
-půjčit,borrow
-pobřeží,coast
-smetana,cream
-návrh,design
-zoo,zoo
-bomba,bomb
-jogurt,yoghurt
-ještě,yet
-yard,yard
-pokročit,advance
-spisovatel,writer
-by dělal,would
-starost,worry
-pracovník,worker
-úžasné,wonderful
-deštník,umbrella
-škaredý,ugly
-televize,TV
-zatočit,turn
-obrat,turn
-krocan,turkey
-roura,tube
-pokus,try
-věrný,true
-veřejný,public
-obdržet,receive
-nákladní auto,truck
-pak,then
-také,too
-způsob,way
-napříč,across
-umění,art
-přinést,bring
-nést,carry
-potvrdit,confirm
-zemřít,die
-východ,east
-údolí,valley
-dítě,baby
-karta,card
-centrální,central
-směr,direction
-dolar,dollar
-ovoce,fruit
-dárek,gift
-vysoký,high
-nemoc,illness
-kus,piece
-skupina,group
-naděje,hope
-průmysl,industry
-dívat se,look
-muset,must
-vlastní,own
-osobní,personal
-důvod,reason
-představit,imagine
-srdce,heart
-pole,field
-rozhodnout,decide
-šílený,crazy
-obvyklý,usual
-zatímco,while
-před,ago
-podél,along
-medvěd,bear
-podmínka,condition
-držet,hold
-okraj,edge
-jemný,fine
-zvýšit,increase
-časopis,magazine
-chránit,protect
-závod,race
-od,since
-úsměv,smile
-lístek,ticket
-dobře,well
-nehoda,accident
-krev,blood
-obchod,business
-během,during
-dokonce,even
-podlaha,floor
-společnost,society
-náměstí,square
-krok,step
-teplota,temperature
-univerzita,university
-přijmout,accept
-potěšení,pleasure
-kapitán,captain
-centrum,centre
-požadovat,demand
-nepřítel,enemy
-továrna,factory
-nelegální,illegal
-zákon,law
-benzín,petrol
-pyšný,proud
-zodpovědný,responsible
-úspěšný,successful
-plavat,swim
-vrchol,top
-vyhrát,win
-dostupný,available
-loď,boat
-vybrat,choose
-informovat,inform
-schůzka,meeting
-objednat,order
-strana,party
-odpovědět,reply
-cestovat,travel
-virus,virus
-sledovat,watch
-jiný,another
-věřit,believe
-oba,both
-bránit,defend
-vždy,ever
-mýt,wash
-zranit,hurt
-holit,shave
-zrcadlo,mirror
-jaký,what
-studna,well
-vítejte,welcome
-víkend,weekend
-toaleta,toilet
-příroda,nature
-talíř,plate
-jehož,whose
-ostrý,sharp
-někdy,sometimes
-stále,still
-by,would
-přidat,add
-mezi,among
-postavený,built
-běžný,common
-záviset,depend
-časný,early
-letět,fly
-stát se,happen
-zkontrolovat,check
-představit,introduce
-méně,less
-značka,mark
-trpělivý,patient
-možná,perhaps
-vzrůst,rise
-smysl,sense
-stav,state
-otočit,turn
-bude,will
-jednat,act
-objevit,appear
-zlomit,break
-kurz,course
-soud,court
-diskutovat,discuss
-efekt,effect
-forma,form
-zákazník,customer
-hmyz,insect
-znamenat,mean
-jednou,once
-účel,purpose
-opravdu,really
-jezdit,ride
-situace,situation
-úspěch,success
-ačkoliv,though
-na,upon
-válka,war
-zaneprázdněný,busy
-detail,detail
-zvláště,especially
-dokončit,finish
-země,ground
-prázdniny,holiday
-volba,choice
-lekce,lesson
-hudba,music
-dokonalý,perfect
-hračka,toy
-věž,tower
-ručník,towel
-přímý,direct
-prohlásit,declare
-zavřít,shut
-cesta,journey
-hlas,voice
-povýšit,elevate
-výtah,elevator
-nenávist,hate
-řádek,line
-přes,over
-táhnout,pull
-prsten,ring
-podobný,similar
-rychlost,speed
-než,than
-nad,above
-začít,begin
-století,century
-zvážit,consider
-nebezpečný,dangerous
-výměna,exchange
-vláda,government
-slyšet,hear
-skákat,jump
-materiál,material
-minulost,past
-produkovat,produce
-odstranit,remove
-tajemství,secret
-píseň,song
-televize,television
-hodnota,value
-kdy,when
-za,behind
-případ,case
-sbírat,collect
-kreslit,draw
-vstoupit,enter
-budoucnost,future
-gentleman,gentleman
-obraz,image
-jazyk,language
-letadlo,plane
-soukromý,private
-velikost,size
-nebe,sky
-děkovat,thank
-počasí,weather
-herec,actor
-láhev,bottle
-tkanina,cloth
-zničit,destroy
-všude,everywhere
-průvodce,guide
-zlepšit,improve
-obrovský,enormous
-nůž,knife
-velký,large
-chyba,mistake
-oceán,ocean
-chytrý,clever
-brzy,early
-rostlina,plant
-zpívat,sing
-opakovat,repeat
-speciální,special
-rozlobený,angry
-článek,article
-stavět,build
-kromě,except
-slavný,famous
-plyn,gas
-hotel,hotel
-levný,cheap
-rozhovor,interview
-pěkný,nice
-připravit,prepare
-vězení,prison
-zdát se,seem
-divný,strange
-vlak,train
-účet,account
-pohodlný,comfortable
-poškození,damage
-prach,dust
-cvičení,exercise
-oblíbený,favourite
-vtip,joke
-zpráva,message
-malovat,paint
-věda,science
-vážný,serious
-utrácet,spend
-špatný,wrong
-množství,amount
-dav,crowd
-obchod,deal
-motor,engine
-sledovat,follow
-čokoláda,chocolate
-jedinečný,individual
-levý,left
-jídlo,meal
-olej,oil
-bolest,pain
-pravděpodobně,probably
-nahradit,replace
-tenký,thin
-hlasovat,vote
-téma,topic
-dotek,touch
-výhra,win
-bílit,white
-bílý,white
-jaký,which
-když,when
-kolo,wheel
-byli,were
-nosit (oblečení),wear
-ty sám,yourself
-žlutý,yellow
-napsat,write
-podtrhnout,underline
-hodinky,watch
-praní,wash
-teplo,warm
-probudit,wake
-číšník,waiter
-servírka,waitress
-hlasování,vote
-volejbal,volleyball
-návštívit,visit
-návštěva,visit
-video,video
-zeleniny,vegetable
-váza,vase
-dovolená,vacation
-nás,us
-vyřešit,solve
-pohovka,sofa
-sociální,social
-piknik,picnic
-vybrat,pick
-klavír,piano
-fotografie,photo
-mazlíček,pet
-období,period
-prase,pig
-platba,pay
-večírek,party
-partner,partner
-pardon,pardon
-odstavec,paragraph
-kalhoty,pants
-princ,prince
-princezna,princess
-pěkný,pretty
-současnost,present
-modlit se,pray
-trénovat,practise
-trénink,practice
-zveřejnit,post
-plakát,poster
-pizza,pizza
-bouchnout,pop
-znečištění,pollution
-bod,point
-báseň,poem
-kapsa,pocket
-rovina,plane
-palác,palace
-nátěr,paint
-malování,painting
-obraz,painting
-zdravotní sestra,nurse
-poznamenat,note
-poznámka,note
-notebook,notebook
-vypnuto,off
-zprávy,news
-soused,neighbour
-důstojník,officer
-strana,page
-odpoledne,PM
-vlastnit,own
-majitel,owner
-venku,outside
-naše,ours
-objednávka,order
-pomerančový,orange
-opera,opera
-otevřeno,open
-pouze,only
-na,on
-olympiády,Olympics
-okej,okay
-program,programme
-dát,put
-plachý,shy
-sprcha,shower
-šou,show
-by měl,should
-krátit,short
-nakupování,shopping
-bota,shoe
-třepat,shake
-sestavit,set
-věta,sentence
-já,self
-pohled,sight
-fotbal,soccer
-zasněžený,snowy
-had,snake
-kouř,smoke
-kouření,smoking
-kovář,smith
-vůně,smell
-dovednost,skill
-místo,site
-Pane,sir
-zpěvák,singer
-sekce,section
-stuha,ribbon
-recenze,review
-zpravodaj,reporter
-nemovitý,real
-připraveno,ready
-čtenář,reader
-krysa,rat
-deštivý,rainy
-králičí,rabbit
-klid,quiet
-rychle,quickly
-zpochybňovat,question
-čtvrtletí,quarter
-čtení,reading
-vydatný,rich
-jízda,ride
-vědec,scientist
-říci,say
-pila,saw
-sendvič,sandwich
-prodej,sale
-salát,salad
-plachta,sail
-námořník,sailor
-pravítko,ruler
-hrubý,rude
-řádek,row
-růže,rose
-úloha,role
-správný,right
-právo,right
-tlačit,push
-víčko,cap
-album,album
-stát za něčím,behind
-základna,base
-baseball,baseball
-jasný,bright
-rozzlobený,angry
-zástěra,apron
-blok,block
-nic,anything
-košík,basket
-basketball,basketball
-netopýr,bat
-podnikání,business
-mezi,between
-přítel,boyfriend
-narození,birth
-obě,both
-zlomený,broken
-zvonek,bell
-motýl,butterfly
-hovězí,beef
-jediný,alone
-včela,bee
-kolo,bicycle
-vše,all
-tlačítko,button
-celý,all
-v pořádku,all right
-koupelna,bathroom
-ložnice,bedroom
-prázdný,blank
-přibližně,around
-kolo,bike
-nakoupit,buy
-vědro,bucket
-kost,bone
-jakmile,as
-tyč,bar
-dort,cake
-pod,below
-letoun,aeroplane
-může,can
-bonbón,candy
-skladovat,store
-knihkupectví,bookstore
-kapela,band
-probudit,awake
-volání,call
-více než,above
-výše,above
-okolo,about
-přístav,port
-nudný,boring
-podle,by
-sbohem,bye
-požádat,ask
-tábor,camp
-dopoledne,AM
-odpovědět,answer
-kartáčovat,brush
-stadión,stadium
-přejít,cross
-práce,labour
-schodiště,stair
-kříž,cross
-levný,inexpensive
-kritizovat,criticise
-role (např. papíru),roll
-křupavý,crisp
-souprava,kit
-opékat,roast
-pár,couple
-naznačit,indicate
-klepání,knock
-haraburdí,junk
-plavba,cruise
-razítko,stamp
-juniorský,junior
-strategie,strategy
-strava,diet
-koruna,crown
-poklop,cover
-nést,bear
-nedostatek,lack
-přeplněný,crowded
-kilometr,kilometre
-řetězec,string
-pevnost,strength
-znalost,knowledge
-tvůrčí,creative
-nezávislost,independence
-deník,diary
-vytvořit,create
-cizinec,stranger
-laskavě,kindly
-personál,staff
-kilo,kilo
-kilogram,kilogramme
-krém,cream
-silně,strongly
-stávka,strike
-krytý,indoor
-zločin,crime
-okrást,rob
-rozvíjet,develop
-kriket,cricket
-rozvinutý,developed
-loupež,robbery
-zabiják,killer
-království,kingdom
-červenka,robin
-venkov,countryside
-struktura,structure
-stvoření,creature
-krása,beauty
-tvořivost,creativity
-diamant,diamond
-hlubina,deep
-socha,statue
-rozprava,debate
-brouk,bug
-odejít do důchodu,retire
-v důchodu,retired
-dohoda,deal
-rytmus,rhythm
-denní světlo,daylight
-ocenit,appreciate
-místo toho,instead
-jmenovat (do funkce),appoint
-jmenování,appointment
-okamžitý,instant
-žaludek,stomach
-bolest břicha,stomachache
-bytost,being
-vymyslet,invent
-vynález,invention
-návrat,return
-hluboký,deep
-hluboce,deeply
-ukrást,steal
-vykročit,step
-v pořádku,alright
-zajímat,interest
-břicho,belly
-steak,steak
-uvést,state
-prohlášení,statement
-odhalit,reveal
-inteligence,intelligence
-unie,union
-shledání,reunion
-napadnout,invade
-dobře,alright
-naplánovat,budget
-vrátit,return
-žárovka,bulb
-nebezpečí,danger
-inspirovat,inspire
-inspirace,inspiration
-žebrat,beg
-sporák,stove
-popis,description
-prokletí,curse
-narovnat,right
-kari,curry
-dříve než,before
-vnitřní,inner
-přímý,straight
-kroužek,ring
-skříň,cupboard
-radost,joy
-byl,been
-dezert,dessert
-aplikovat,apply
-problém,issue
-tanečník,dancer
-stát,state
-chovat se,behave
-chování,behaviour
-zubař,dentist
-přehrada,dam
-sám,itself
-denní,daily
-zvyk,custom
-jezdit na kole,cycle
-cyklistika,cycling
-začátek,beginning
-s sebou,along
-odpověď,response
-obchodní dům,department store
-začátečník,beginner
-želé,jelly
-džem,jam
-znamenat,signify
-významný,significant
-úspěšně,successfully
-náklady,cost
-ztracený,lost
-úděl,lot
-hlasitý,loud
-hlasitě,loudly
-polykat,swallow
-vodítko,clue
-klaun,clown
-potit,sweat
-kabina,cab
-výhodná dohoda,bargain
-naštěstí,luckily
-pravidelně,regularly
-ulička,aisle
-cvaknutí,click
-milý,sweet
-miláček,sweetheart
-úředník,clerk
-klon,clone
-volný,loose
-přežít,survive
-spáchat,commit
-závazek,commitment
-litr,litre
-surfovat,surf
-surfování,surfing
-propuštění,release
-relaxovat,relax
-uvolněný,relaxed
-vtipný,comic
-komik,comic
-příjmení,surname
-pohodlí,comfort
-komfortní,comfortable
-živý,lively
-podnikatelka,businesswoman
-zatížení,load
-hřeben,comb
-místní,local
-sloupec,column
-barvitý,colourful
-překvapení,surprise
-překvapený,surprised
-překvapující,surprising
-zámek,lock
-logika,logic
-logický,logical
-cola,cola
-poplach,alarm
-litovat,regret
-výbor,committee
-jasně,clearly
-nákupní centrum,mall
-spravovat,manage
-manažer,manager
-truhla,chest
-šachy,chess
-symfonie,symphony
-způsob,manner
-kontrola,cheque
-lednička,refrigerator
-šéfkuchař,chef
-dětství,childhood
-jásot,cheer
-šek,check
-označit,mark
-stolní tenis,table tennis
-povídání,chat
-graf,chart
-lžíce,spoon
-polévková lžíce,tablespoon
-oženit,marry
-ženatý,married
-tvář,cheek
-muž,male
-chilli,chilli
-symbol,symbol
-čistič,cleaner
-jídelna,cafeteria
-šílený,mad
-klasický,classic
-klasická hudba,classical music
-plavky,swimming costume
-plavky,swimsuit
-požadovat,claim
-holič,barber
-kouzlo,magic
-občan,citizen
-hlavní chod,main course
-hlavně,mainly
-kalendář,calendar
-hlavní,major
-grilování,barbecue
-výrobce,maker
-make-up,make-up
-výběr,choice
-cvrlikání,chirp
-brada,chin
-šimpanz,chimpanzee
-lyrika,lyric
-stát (peníze),cost
-budík,alarm clock
-odpověď,reply
-advokát,lawyer
-kontrast,contrast
-lenost,laziness
-záliv,bay
-kontinent,continent
-kontext,context
-keř,bush
-řízení,control
-kontejner,container
-kontaktovat,contact
-kontakt,contact
-přivlastnit si,appropriate
-baterie,battery
-opravit,repair
-nejméně,least
-kůže,leather
-náhlý,sudden
-uspět,succeed
-pohodlí,convenience
-výzkum,research
-svítilna,lamp
-studie,study
-povolit,allow
-věc,stuff
-krajina,landscape
-styl,style
-pruh,lane
-hořet,burn
-pohřbít,bury
-sporák,cooker
-autobusové nádraží,bus station
-nejnovější,latest
-zastupovat,represent
-poslední,latter
-autobusová zastávka,bus stop
-pohodlné,convenient
-levice,left
-licence,licence
-lež,lie
-podnikatel,businessman
-superlativ,superlative
-životní styl,lifestyle
-superstar,superstar
-komponovat,compose
-skladatel,composer
-večeře,supper
-v podstatě,basically
-soustředit se,concentrate
-kompletní,complete
-stěžovat si,complain
-stížnost,complaint
-soutěžit,compete
-soutěž,competition
-ret,lip
-porovnat,compare
-srovnávací,comparative
-komunikovat,communicate
-sdělení,communication
-základní,basic
-svoboda,liberty
-znepokojení,concern
-sluneční světlo,sunlight
-pronajmout,rent
-následek,consequence
-vyhovovat,suit
-vhodný,suitable
-vzdálený,remote
-připomenout,remind
-volný čas,leisure
-citrón,lemon
-zmást,confuse
-zmatený,confused
-kufr,suitcase
-limonáda,lemonade
-půjčovat,lend
-sebevědomý,confident
-shrnutí,summary
-naživu,alive
-dávka,batch
-stav,condition
-úroveň,level
-slunečnice,sunflower
-sluneční brýle,sunglasses
-levá ruka,left-hand
-opravdu,indeed
-obtížnost,difficulty
-gram,gramme
-blondýnka,blonde
-rozzlobeně,angrily
-vnouče,grandchild
-dědeček,granddad
-velmi,extremely
-obývací pokoj,sitting room
-navíc,extra
-zdát,seem
-anděl,angel
-babička,granny
-starověké,ancient
-brusle,skate
-výraz,expression
-hledat,seek
-rychlík,express
-semínko,seed
-skateboarding,skateboarding
-prozkoumat,explore
-vděčný,grateful
-bruslení,skating
-dřez,sink
-jednotného čísla,singular
-absolvovat,graduate
-móda,fashion
-fascinovat,fascinate
-fascinující,fascinating
-semestr,semester
-zlatý,golden
-golf,golf
-květ,bloom
-jízdné,fare
-dobře vypadající,good-looking
-fantastický,fantastic
-módní,fancy
-vysvětlení,explanation
-jednoduše,simply
-pád,fall
-spravedlivě,fairly
-podprsenka,bra
-milost,grace
-selhat,fail
-postupně,gradually
-zpěv,singing
-jedinný,single
-známý,familiar
-expert,expert
-zažít,experience
-skluzavka,slide
-mořské plody,seafood
-přesně,exactly
-pistole,gun
-štíhlý,slim
-deka,blanket
-důkaz,evidence
-značka,brand
-statečný,brave
-vina,blame
-skript,script
-vůbec,ever
-zkouška,exam
-přerušení,break
-rozpůlit,half
-tabule,blackboard
-poloviční cenu,half-price
-pomalu,slowly
-euro,euro
-šunka,ham
-šroub,screw
-podat,hand
-kabelka,handbag
-obrazovka,screen
-založit,establish
-handicap,handicap
-handicapované,handicapped
-sudý,even
-udeřit,blow
-plátek,slice
-provádět,guide
-průvodce,guidebook
-lyže,ski
-velmi,greatly
-lyžování,skiing
-chamtivý,greedy
-existovat,exist
-vystavit,exhibit
-výstava,exhibition
-tajemník,secretary
-gril,grill
-grilovat,grill
-grilovaný,grilled
-brainstorm,brainstorm
-vyhledávání,search
-brzda,brake
-úzkostné,anxious
-hlídat,guard
-otrok,slave
-pobřeží,seaside
-předek,ancestor
-bezesný,sleepless
-vyjmout,except
-větev,branch
-ospalý,sleepy
-obchod s potravinami,grocery store
-rychlé občerstvení,fast food
-rukavice,glove
-knihovna,bookcase
-potěr,fry
-složku,folder
-šok,shock
-plně,fully
-stín,shadow
-vařený,boiled
-fungovat,function
-odstín,shade
-blázen,fool
-regál,bookshelf
-mouka,flour
-knihkupectví,bookshop
-zaplavit,flood
-šít,sew
-plovák,float
-let,flight
-nábytek,furniture
-prodavač,shop assistant
-další,further
-blecha,flea
-pobřeží,shore
-vařit,boil
-nepříjemný,annoying
-fotbalista,footballer
-upřímný,frank
-podíl,share
-šampon,shampoo
-vpřed,forward
-štěstí,fortune
-naštěstí,fortunately
-svoboda,freedom
-zmrazit,freeze
-skořápka,shell
-zděšení,fright
-děsivý,frightening
-vidlice,fork
-navždy,forever
-smažený,fried
-les,forest
-bonus,bonus
-přátelství,friendship
-vystrašit,frighten
-síla,force
-vystrašený,frightened
-zakázat,forbid
-lednička,fridge
-držadlo,handle
-šortky,shorts
-galerie,gallery
-vážně,seriously
-bojovník,fighter
-dát si námahu,bother
-beletrie,fiction
-prohlídka památek,sightseeing
-pár,few
-plot,fence
-žena,female
-daný,given
-samostatný,separate
-poplatek,fee
-postava,figure
-umlčet,silence
-peří,feather
-tichý,silent
-tiše,silently
-hloupý,silly
-strach,fear
-zeměkoule,globe
-chyba,fault
-stříbrný,silver
-senior,senior
-funkce,feature
-opravit,fix
-kotník,ankle
-rybář,fisherman
-shot,shot
-desková hra,board game
-otravovat,annoy
-křestní jméno,first name
-výkřik,shout
-česnek,garlic
-pohlaví,gender
-znuděný,bored
-soubor,set
-generace,generation
-odkončit,final
-konečně,finally
-finále,final
-šéf,boss
-výročí,anniversary
-shromáždit,gather
-jinak,differently
-esej,essay
-únik,escape
-špagety,spaghetti
-pochyba,doubt
-dvojnásobek,double
-od sebe,apart
-reproduktor,speaker
-hotovo,done
-lov,hunt
-lovit,hunt
-lovec,hunter
-byt,apartment
-ochutnat,sample
-kromě,besides
-však,however
-kdekoli,anywhere
-v centru města,downtown
-dole,downstairs
-obejmout,hug
-stáhnout,download
-lidský,human
-remíza,draw
-ilegální,illegal
-běh,running
-zklamaný,disappointed
-zmizet,disappear
-nesouhlasit,disagree
-nevýhoda,disadvantage
-pás,belt
-lano,rope
-šíření,spread
-vykořenit,root
-ředitel,director
-vzhled,appearance
-zklamáním,disappointing
-palec,inch
-diskuse,discussion
-význam,importance
-lavice,bench
-důležité,importantly
-královský,royal
-žasnout,marvel
-úžasné,marvellous
-zapůsobit,impress
-disko,disco
-sportovní centrum,sports centre
-kolotoč,roundabout
-ragby,rugby
-lék,drug
-lékárna,drugstore
-snowboard,snowboard
-snowboarding,snowboarding
-energický,energetic
-školní práce,schoolwork
-konec,ending
-ohrozit,endanger
-ohrožený,endangered
-mýdlo,soap
-sluchátka,headphone
-ředitel školy,headteacher
-podporovat,encourage
-školák,schoolchild
-vědecký,scientific
-prázdný,empty
-vytápět,heat
-teplo,heat
-topení,heating
-vynořit se,emerge
-stav nouze,emergency
-těžce,heavily
-trapný,embarrassing
-rozpis,schedule
-e-mail,email
-jinde,elsewhere
-ponožka,sock
-užitečný,helpful
-eskalátor,escalator
-bavit,amuse
-pobavení,amusement
-chyba,error
-výkřik,scream
-pobavený,amused
-hladce,smoothly
-epizoda,episode
-snack,snack
-závist,envy
-šťastně,happily
-sněžení,snow
-štěstí,happiness
-kousat,bite
-bit,bit
-vjezd,entrance
-sotva,hardly
-újma,harm
-škodlivý,harmful
-bavit,entertain
-zábava,entertainment
-harmonie,harmony
-sklidit,harvest
-obálka,envelope
-zejména,especially
-soda,soda
-udeřit,hit
-hokej,hockey
-snadno,easily
-ctižádost,ambition
-za,beyond
-zemětřesení,earthquake
-náušnice,earring
-už,anymore
-měřítko,scale
-zlepšit se,better
-klobása,sausage
-med,honey
-čest,honour
-omáčka,sauce
-uspokojit,satisfy
-nevěsta,bride
-vánek,breeze
-jednoho dne,someday
-hiphop,hiphop
-nealkoholický nápoj,soft drink
-měkce,softly
-scenérie,scenery
-software,software
-scéna,scene
-elektrický,electric
-sebe,herself
-starší,elderly
-Hej,hey
-účet,bill
-někdo,somebody
-střední škola,high school
-vzdělávat,educate
-školství,education
-vzdělávací,educational
-řešení,solution
-upravit,edit
-editor,editor
-redakční,editorial
-dálnice,highway
-trampovat,hike
-turistika,hiking
-sám,himself
-odrážet,reflect
-nájemné,rent
-rám,frame
-prst na noze,toe
-autor,author
-povolení,permit
-povolení,permission
-toast,toast
-křeslo,armchair
-dnes,nowadays
-titul,title
-nejistý,uncertain
-balit,pack
-balíček,pack
-dálnice,motorway
-osobnost,personality
-Pacifik,pacific
-nepříjemný,uncomfortable
-tip,tip
-předpovědět,predict
-předpověď,prediction
-atom,atom
-rozsah,range
-jízdní řád,timetable
-většinou,mostly
-čerpací stanice,petrol station
-inzerovat,advertise
-inzerát,advertisement
-až do,till
-vlastně,actually
-pozadí,background
-invalidní vozík,wheelchair
-plocha,area
-vražda,murder
-pokročilý,advanced
-pláštěnka,raincoat
-zubní kartáček,toothbrush
-pepř,pepper
-dobře známý,well-known
-bolest zubů,toothache
-džbánek,mug
-podstatné jméno,noun
-západ,west
-pohled,view
-tón,tone
-videohra,video game
-paní,Ms
-perfektní,perfect
-dokonale,perfectly
-mokré,wet
-provést,perform
-výkon,performance
-román,novel
-parfém,perfume
-pronásledovat,pursue
-punčocháče,tights
-další,additional
-fyzicky,physically
-výroba,production
-upéct,bake
-pod vodou,underwater
-myšlení,thought
-ačkoli,though
-hodnotit,rate
-hodnocení,rating
-profesionální,professional
-zámoří,overseas
-syrový,raw
-ozbrojit,arm
-ozbrojený,armed
-povolání,occupation
-nadváha,overweight
-model,model
-nepříjemný,uneasy
-paprsek,ray
-větrný,windy
-víno,wine
-poutník,pilgrim
-vítěz,winner
-pilulka,pill
-mobilní,mobile
-tahat,pull
-žíznivý,thirsty
-architektura,architecture

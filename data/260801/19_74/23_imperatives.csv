@@ -1,25 +1,18 @@
 czech,english,block_id,grammar_chunk_id
-skupina,group,,
-naděje,hope,,
-průmysl,industry,,
-dívat se,look,,
-muset,must,,
-vlastní,own,,
-osobní,personal,,
-důvod,reason,,
-představit,imagine,,
-srdce,heart,,
-pole,field,,
-rozhodnout,decide,,
-šílený,crazy,,
-obvyklý,usual,,
-zatímco,while,,
-před,ago,,
-podél,along,,
-medvěd,bear,,
-podmínka,condition,,
-držet,hold,,
-okraj,edge,,
-jemný,fine,,
-zvýšit,increase,,
-časopis,magazine,,
+
+otevři dveře,Open the door,40,34
+zavři okno,Close the window,40,34
+sedni si,Sit down,40,34
+vstaň,Stand up,40,34
+počítej do deseti,Count to ten,40,34
+poslouchej,Listen,40,34
+počkej,Wait,40,34
+podívej se,Look,40,34
+Prosím otevři dveře.,Please open the door.,,34
+Zavři okno před odchodem.,Close the window before you leave.,,34
+Sedni si vedle mě.,Sit down next to me.,,34
+Vstaň a pojď sem.,Stand up and come here.,,34
+Počítej do deseti.,Count to ten.,,34
+Poslouchej učitele.,Listen to the teacher.,,34
+Počkej na mě.,Wait for me.,,34
+Podívej se na tabuli.,Look at the board.,,34

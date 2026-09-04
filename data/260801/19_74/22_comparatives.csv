@@ -1,25 +1,18 @@
 czech,english,block_id,grammar_chunk_id
-vybrat,choose,,
-informovat,inform,,
-schůzka,meeting,,
-objednat,order,,
-strana,party,,
-odpovědět,reply,,
-cestovat,travel,,
-virus,virus,,
-sledovat,watch,,
-jiný,another,,
-věřit,believe,,
-oba,both,,
-bránit,defend,,
-vždy,ever,,
-mýt,wash,,
-zranit,hurt,,
-holit,shave,,
-zrcadlo,mirror,,
-jaký,what,,
-studna,well,,
-vítejte,welcome,,
-víkend,weekend,,
-toaleta,toilet,,
-loď,boat,
+
+já jsem vyšší,I'm taller,39,31
+ty jsi rychlejší,you're faster,39,31
+on je silnější,he's stronger,39,31
+ona je mladší,she's younger,39,31
+ono je menší,it's smaller,39,31
+my jsme starší,we're older,39,31
+vy jste chytřejší,you're smarter,39,31
+oni jsou šťastnější,they're happier,39,31
+Jsem nejvyšší v týmu.,I'm the tallest in the team.,,32
+Jsi nejrychlejší ve třídě.,You're the fastest in the class.,,32
+On je nejsilnější v rodině.,He's the strongest in the family.,,32
+Ona je nejmladší v týmu.,She's the youngest in the team.,,32
+Je to nejmenší pokoj.,It's the smallest room.,,32
+Jsme nejstarší v domě.,We're the oldest in the house.,,32
+Jste nejchytřejší studenti.,You're the smartest students.,,32
+Oni jsou nejšťastnější lidé.,They're the happiest people.,,32

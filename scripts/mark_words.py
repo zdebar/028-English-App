@@ -328,6 +328,7 @@ def main() -> None:
 	target_folder = script_dir / "data" / "tracker"
 	target_files = [
 		target_folder / "1k_words.csv",
+		target_folder / "10k_words.csv",
 	]
 
 	source_bilingual_keys, source_english_only_keys, source_all_english_keys = collect_source_match_keys(source_folder)

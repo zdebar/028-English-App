@@ -1,22 +1,21 @@
 czech,english,block_id,grammar_chunk_id
-chránit,protect,,
-závod,race,,
-od,since,,
-úsměv,smile,,
-lístek,ticket,,
-dobře,well,,
-nehoda,accident,,
-krev,blood,,
-obchod,business,,
-během,during,,
-dokonce,even,,
-podlaha,floor,,
-společnost,society,,
-náměstí,square,,
-krok,step,,
-teplota,temperature,,
-univerzita,university,,
-přijmout,accept,,
+
+já chodím,I go,38,30
+ty čteš,you read,38,30
+on píše,he writes,38,30
+ona vaří,she cooks,38,30
+ono funguje,it works,38,30
+my cestujeme,we travel,38,30
+vy čekáte,you wait,38,30
+oni hrají,they play,38,30
+Kde bydlím?,Where do I live?,,30
+Co čteš?,What do you read?,,30
+Kdy pracuje?,When does he work?,,30
+Proč vaří?,Why does she cook?,,30
+Jak to funguje?,How does it work?,,30
+Kam cestujeme?,Where do we travel?,,30
+Co potřebujete?,What do you need?,,30
+Kdy hrají?,When do they play?,,30
 potěšení,pleasure,,
 kapitán,captain,,
 centrum,centre,,

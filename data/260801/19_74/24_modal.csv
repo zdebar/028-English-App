@@ -1,25 +1,18 @@
 czech,english,block_id,grammar_chunk_id
-příroda,nature,,
-talíř,plate,,
-jehož,whose,,
-ostrý,sharp,,
-někdy,sometimes,,
-stále,still,,
-by,would,,
-přidat,add,,
-mezi,among,,
-postavený,built,,
-běžný,common,,
-záviset,depend,,
-časný,early,,
-letět,fly,,
-stát se,happen,,
-zkontrolovat,check,,
-představit,introduce,,
-méně,less,,
-značka,mark,,
-trpělivý,patient,,
-možná,perhaps,,
-vzrůst,rise,,
-smysl,sense,,
-stav,state,,
+
+já mohu pomoci,I can help,41,35
+ty musíš odejít,you must leave,41,35
+on by měl studovat,he should study,41,35
+ona může přijít,she may come,41,35
+ono nemůže spadnout,it can't fall,41,35
+my musíme počkat,we must wait,41,35
+vy můžete začít,you can start,41,35
+oni by měli poslouchat,they should listen,41,35
+Mohu řídit auto.,I can drive a car.,,35
+Musíš mít zapnutý bezpečnostní pás.,You must wear a seat belt.,,35
+Měl by zavolat své matce.,He should call his mother.,,35
+Možná přijde pozdě.,She may be late.,,35
+Nemůže otevřít dveře.,It can't open the door.,,35
+Musíme to dnes dokončit.,We must finish today.,,35
+Můžete použít můj telefon.,You can use my phone.,,35
+Neměli by dělat hluk.,They shouldn't make noise.,,35

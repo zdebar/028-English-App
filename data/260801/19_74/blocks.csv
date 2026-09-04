@@ -1,5 +1,8 @@
 id,name,note,grammar_chunk_id,lesson_id
-35,PS - zápor,27,19
-36,PS - zjišťovací otázky,28,20
-37,PS - krátké odpovědi,29,20
-38,PS - tázací otázky,30,21
+35,PS - zápor,,27,19
+36,PS - zjišťovací otázky,,28,20
+37,PS - krátké odpovědi,,29,20
+38,tvorba tázacích otázek,,30,21
+39,druhý stupeň,,31,22
+40,rozkaz a zákaz,,34,23
+41,modální slovesa,,35,24
