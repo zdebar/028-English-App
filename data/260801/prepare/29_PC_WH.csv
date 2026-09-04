@@ -1,4 +1,4 @@
-czech,english,grammar_chunk_id,block_id
+czech,english,block_id,grammar_chunk_id
 knihkupectví,bookstore,,
 kapela,band,,
 probudit,awake,,
@@ -23,3 +23,19 @@ kritizovat,criticise,,
 role (např. papíru),roll,,
 křupavý,crisp,,
 souprava,kit,,
+Co dělám?,What am I doing?,46,42
+Kde bydlíš?,Where are you living?,46,42
+Proč běží?,Why is he running?,46,42
+Co píše?,What is she writing?,46,42
+Proč prší?,Why is it raining?,46,42
+Kam jedeme?,Where are we going?,46,42
+Co hledáte?,What are you looking for?,46,42
+Kdy přijíždějí?,When are they arriving?,46,42
+Co právě dělám v kuchyni?,What am I doing in the kitchen?,,42
+Kde teď bydlíš během studia?,Where are you living during your studies?,,42
+Proč běží na autobus?,Why is he running for the bus?,,42
+Co píše do svého deníku?,What is she writing in her diary?,,42
+Proč dnes tolik prší?,Why is it raining so much today?,,42
+Kam jedeme po práci?,Where are we going after work?,,42
+Co hledáte v tašce?,What are you looking for in the bag?,,42
+Kdy přijíždějí na nádraží?,When are they arriving at the station?,,42
