@@ -1,15 +1,4 @@
 ﻿id,name,note,sort_order,grammar_group_id
-36,let's,"<p>Návrh společné činnosti tvoříme pomocí <b>Let's + základní tvar slovesa</b>: <b>Let's go home.</b></p><p>Záporný návrh má tvar <b>Let's not + sloveso</b>.</p>",36,25
-37,shall we,"<p>Zdvořilý návrh nebo nabídku můžeme vytvořit pomocí <b>Shall we + základní tvar slovesa?</b></p><p>Například: <b>Shall we start?</b></p>",37,25
-38,what about / how about,"<p>Návrh tvoří také vazby <b>What about</b> a <b>How about</b>.</p><p>Po nich obvykle následuje podstatné jméno nebo sloveso s koncovkou <b>-ing</b>: <b>How about going by bus?</b></p>",38,25
-39,tvorba a použití,"<p>Přítomný čas průběhový tvoříme jako <b>am / is / are + sloveso-ing</b>.</p><p>Používáme ho hlavně pro děje probíhající právě teď a pro dočasné situace: <b>She is working now.</b></p>",39,26
-40,tvorba záporu,"<p>Zápor tvoříme přidáním <b>not</b> za am, is nebo are: <b>She is not working.</b></p><p>Běžné zkrácené tvary jsou <b>isn't</b> a <b>aren't</b>. U první osoby se používá <b>I'm not</b>.</p>",40,27
-41,tvorba zjišťovacích otázek,"<p>Zjišťovací otázku tvoříme obrácením pořadí slovesa být a podmětu: <b>Am / Is / Are + podmět + sloveso-ing?</b></p><p>Například: <b>Are they waiting?</b> Krátká odpověď je <b>Yes, they are.</b> nebo <b>No, they aren't.</b></p>",41,28
-42,tvorba tázacích otázek,"<p>Tázací otázku tvoříme jako <b>tázací výraz + am / is / are + podmět + sloveso-ing</b>.</p><p>Například: <b>What are you doing?</b> nebo <b>Where is she going?</b></p>",42,29
-43,základní tvary,"<p>Minulý čas slovesa být má dva tvary: <b>was</b> pro I, he, she a it a <b>were</b> pro you, we a they.</p><p>Například: <b>I was tired.</b> a <b>They were at home.</b></p>",43,30
-44,tvorba záporu,"<p>Zápor tvoříme přidáním <b>not</b> za was nebo were: <b>was not</b>, <b>were not</b>.</p><p>Běžné zkrácené tvary jsou <b>wasn't</b> a <b>weren't</b>.</p>",44,31
-45,tvorba zjišťovacích otázek,"<p>Zjišťovací otázku tvoříme obrácením pořadí was nebo were a podmětu: <b>Was / Were + podmět?</b></p><p>Například: <b>Were you tired?</b> Krátká odpověď je <b>Yes, I was.</b> nebo <b>No, I wasn't.</b></p>",45,32
-46,tvorba tázacích otázek,"<p>Tázací otázku tvoříme jako <b>tázací výraz + was / were + podmět</b>.</p><p>Například: <b>Where were you yesterday?</b> nebo <b>Why was she late?</b></p>",46,33
 47,pravidelná slovesa,"<p>U pravidelných sloves tvoříme minulý čas obvykle přidáním koncovky <b>-ed</b>: <b>work – worked</b>.</p><p>U sloves zakončených na -e přidáváme jen -d. Souhláska + y se mění na -ied a u některých krátkých sloves se zdvojuje koncová souhláska.</p>",47,34
 48,nepravidelná slovesa,"<p>Nepravidelná slovesa netvoří minulý čas pomocí -ed a jejich tvary je nutné se naučit.</p><p>Například: <b>go – went</b>, <b>see – saw</b>, <b>have – had</b>.</p>",48,34
 49,tvorba záporu,"<p>Zápor v minulém čase prostém tvoříme pomocí <b>did not + základní tvar slovesa</b>.</p><p>Například: <b>She did not go.</b> Běžný zkrácený tvar je <b>didn't</b>.</p>",49,35

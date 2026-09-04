@@ -1,0 +1,41 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+pravítko,ruler,ɹˈuːlɚ,ruler.opus,26000,,,,,True,26
+hrubý,rude,ɹˈuːd,rude.opus,26001,,,,,True,26
+řádek,row,ɹˈoʊ,row.opus,26002,,,,,True,26
+růže,rose,ɹˈoʊz,rose.opus,26003,,,,,True,26
+úloha,role,ɹˈoʊl,role.opus,26004,,,,,True,26
+správný,right,ɹˈaɪt,right.opus,26005,,,,,True,26
+právo,right,ɹˈaɪt,right.opus,26006,,,,,True,26
+tlačit,push,pˈʊʃ,push.opus,26007,,,,,True,26
+víčko,cap,kˈæp,cap.opus,26008,,,,,True,26
+album,album,ˈælbəm,album.opus,26009,,,,,True,26
+přinést,bring,bɹˈɪŋ,bring.opus,26010,,,,,True,26
+stát za něčím,behind,bᵻhˈaɪnd,behind.opus,26011,,,,,True,26
+základna,base,bˈeɪs,base.opus,26012,,,,,True,26
+baseball,baseball,bˈeɪsbɔːl,baseball.opus,26013,,,,,True,26
+jasný,bright,bɹˈaɪt,bright.opus,26014,,,,,True,26
+rozzlobený,angry,ˈæŋɡɹi,angry.opus,26015,,,,,True,26
+zástěra,apron,ˈeɪpɹən,apron.opus,26016,,,,,True,26
+blok,block,blˈɑːk,block.opus,26017,,,,,True,26
+nic,anything,ˈɛnɪθˌɪŋ,anything.opus,26018,,,,,True,26
+košík,basket,bˈæskɪt,basket.opus,26019,,,,,True,26
+basketball,basketball,bˈæskɪtbˌɔːl,basketball.opus,26020,,,,,True,26
+netopýr,bat,bˈæt,bat.opus,26021,,,,,True,26
+podnikání,business,bˈɪznəs,business.opus,26022,,,,,True,26
+přítel,boyfriend,bˈɔɪfɹɛnd,boyfriend.opus,26023,,,,,True,26
+já čtu,I'm reading,aɪm ɹˈiːdɪŋ,im_reading.opus,26024,48,,,38,False,26
+ty vaříš,you're cooking,jʊɹ kˈʊkɪŋ,youre_cooking.opus,26025,48,,,38,False,26
+on řídí,he's driving,hiːz dɹˈaɪvɪŋ,hes_driving.opus,26026,48,,,38,False,26
+ona píše,she's writing,ʃiːz ɹˈaɪɾɪŋ,shes_writing.opus,26027,48,,,38,False,26
+ono prší,it's raining,ɪts ɹˈeɪnɪŋ,its_raining.opus,26028,48,,,38,False,26
+my čekáme,we're waiting,wɪɹ wˈeɪɾɪŋ,were_waiting.opus,26029,48,,,38,False,26
+vy se učíte,you're learning,jʊɹ lˈɜːnɪŋ,youre_learning.opus,26030,48,,,38,False,26
+oni běží,they're running,ðeɪɚ ɹˈʌnɪŋ,theyre_running.opus,26031,48,,,38,False,26
+Čtu novou knihu.,I'm reading a new book.,aɪm ɹˈiːdɪŋ ɐ nˈuː bˈʊk,im_reading_a_new_book.opus,26032,,,,38,False,26
+Vaříš večeři.,You're cooking dinner.,jʊɹ kˈʊkɪŋ dˈɪnɚ,youre_cooking_dinner.opus,26033,,,,38,False,26
+Řídí do práce.,He's driving to work.,hiːz dɹˈaɪvɪŋ tə wˈɜːk,hes_driving_to_work.opus,26034,,,,38,False,26
+Píše e-mail.,She's writing an email.,ʃiːz ɹˈaɪɾɪŋ ɐn ˈiːmeɪl,shes_writing_an_email.opus,26035,,,,38,False,26
+Prší.,It's raining.,ɪts ɹˈeɪnɪŋ,its_raining.opus,26036,,,,38,False,26
+Čekáme na autobus.,We're waiting for the bus.,wɪɹ wˈeɪɾɪŋ fɚðə bˈʌs,were_waiting_for_the_bus.opus,26037,,,,38,False,26
+Učíte se.,You're studying.,jʊɹ stˈʌdiɪŋ,youre_studying.opus,26038,,,,38,False,26
+Běží.,They're running.,ðeɪɚ ɹˈʌnɪŋ,theyre_running.opus,26039,,,,38,False,26

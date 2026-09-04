@@ -1,0 +1,49 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+stuha,ribbon,ɹˈɪbən,ribbon.opus,25000,,,,,True,25
+recenze,review,ɹᵻvjˈuː,review.opus,25001,,,,,True,25
+zpravodaj,reporter,ɹᵻpˈɔːɹɾɚ,reporter.opus,25002,,,,,True,25
+nemovitý,real,ɹˈiːəl,real.opus,25003,,,,,True,25
+připraveno,ready,ɹˈɛdi,ready.opus,25004,,,,,True,25
+čtenář,reader,ɹˈiːdɚ,reader.opus,25005,,,,,True,25
+krysa,rat,ɹˈæt,rat.opus,25006,,,,,True,25
+deštivý,rainy,ɹˈeɪni,rainy.opus,25007,,,,,True,25
+králičí,rabbit,ɹˈæbɪt,rabbit.opus,25008,,,,,True,25
+klid,quiet,kwˈaɪət,quiet.opus,25009,,,,,True,25
+rychle,quickly,kwˈɪkli,quickly.opus,25010,,,,,True,25
+zpochybňovat,question,kwˈɛstʃən,question.opus,25011,,,,,True,25
+čtvrtletí,quarter,kwˈɔːɹɾɚ,quarter.opus,25012,,,,,True,25
+čtení,reading,ɹˈiːdɪŋ,reading.opus,25013,,,,,True,25
+vydatný,rich,ɹˈɪtʃ,rich.opus,25014,,,,,True,25
+jízda,ride,ɹˈaɪd,ride.opus,25015,,,,,True,25
+jezdit,ride,ɹˈaɪd,ride.opus,25016,,,,,True,25
+vědec,scientist,sˈaɪəntɪst,scientist.opus,25017,,,,,True,25
+pila,saw,sˈɔː,saw.opus,25018,,,,,True,25
+sendvič,sandwich,sˈændwɪtʃ,sandwich.opus,25019,,,,,True,25
+prodej,sale,sˈeɪl,sale.opus,25020,,,,,True,25
+salát,salad,sˈæləd,salad.opus,25021,,,,,True,25
+plachta,sail,sˈeɪl,sail.opus,25022,,,,,True,25
+námořník,sailor,sˈeɪlɚ,sailor.opus,25023,,,,,True,25
+Pojďme domů.,Let's go home.,lˈɛts ɡˌoʊ hˈoʊm,lets_go_home.opus,25024,45,,,35,False,25
+Pojďme začít.,Let's start.,lˈɛts stˈɑːɹt,lets_start.opus,25025,45,,,35,False,25
+Pojďme počkat.,Let's wait.,lˈɛts wˈeɪt,lets_wait.opus,25026,45,,,35,False,25
+Pojďme to zkusit.,Let's try it.,lˈɛts tɹˈaɪ ɪt,lets_try_it.opus,25027,45,,,35,False,25
+Neodcházejme.,Let's not leave.,lˈɛts nˌɑːt lˈiːv,lets_not_leave.opus,25028,45,,,35,False,25
+Nečekejme.,Let's not wait.,lˈɛts nˌɑːt wˈeɪt,lets_not_wait.opus,25029,45,,,35,False,25
+Nezačínejme.,Let's not start.,lˈɛts nˌɑːt stˈɑːɹt,lets_not_start.opus,25030,45,,,35,False,25
+Nedělejme hluk.,Let's not make noise.,lˈɛts nˌɑːt mˌeɪk nˈɔɪz,lets_not_make_noise.opus,25031,45,,,35,False,25
+Mám otevřít okno?,Shall I open the window?,ʃˌæl aɪ ˈoʊpən ðə wˈɪndoʊ,shall_i_open_the_window.opus,25032,46,,,36,False,25
+Máme začít?,Shall we start?,ʃˌæl wiː stˈɑːɹt,shall_we_start.opus,25033,46,,,36,False,25
+Mám zavolat taxi?,Shall I call a taxi?,ʃˌæl aɪ kˈɔːl ɐ tˈæksi,shall_i_call_a_taxi.opus,25034,46,,,36,False,25
+Počkáme tady?,Shall we wait here?,ʃˌæl wiː wˈeɪt hˈɪɹ,shall_we_wait_here.opus,25035,46,,,36,False,25
+Mám udělat čaj?,Shall I make some tea?,ʃˌæl aɪ mˌeɪk sˌʌm tˈiː,shall_i_make_some_tea.opus,25036,46,,,36,False,25
+Objednáme večeři?,Shall we order dinner?,ʃˌæl wiː ˈɔːɹdɚ dˈɪnɚ,shall_we_order_dinner.opus,25037,46,,,36,False,25
+Mám ti pomoct?,Shall I help you?,ʃˌæl aɪ hˈɛlp juː,shall_i_help_you.opus,25038,46,,,36,False,25
+Půjdeme domů?,Shall we go home?,ʃˌæl wiː ɡˌoʊ hˈoʊm,shall_we_go_home.opus,25039,46,,,36,False,25
+A co krátká pauza?,What about a short break?,wˌʌt ɐbˌaʊt ɐ ʃˈɔːɹt bɹˈeɪk,what_about_a_short_break.opus,25040,47,,,37,False,25
+A co objednat pizzu?,What about ordering pizza?,wˌʌt ɐbˌaʊt ˈɔːɹdɚɹɪŋ pˈiːtsə,what_about_ordering_pizza.opus,25041,47,,,37,False,25
+A co zítra?,What about tomorrow?,wˌʌt ɐbˌaʊt təmˈɑːɹoʊ,what_about_tomorrow.opus,25042,47,,,37,False,25
+A co jet vlakem?,What about going by train?,wˌʌt ɐbˌaʊt ɡˌoʊɪŋ baɪ tɹˈeɪn,what_about_going_by_train.opus,25043,47,,,37,False,25
+Co takhle kávu?,How about some coffee?,hˌaʊ ɐbˌaʊt sˌʌm kˈɔfi,how_about_some_coffee.opus,25044,47,,,37,False,25
+Co takhle začít znovu?,How about starting again?,hˌaʊ ɐbˌaʊt stˈɑːɹɾɪŋ ɐɡˈɛn,how_about_starting_again.opus,25045,47,,,37,False,25
+Co takhle film?,How about a film?,hˌaʊ ɐbˌaʊt ɐ fˈɪlm,how_about_a_film.opus,25046,47,,,37,False,25
+Co takhle zůstat doma?,How about staying home?,hˌaʊ ɐbˌaʊt stˈeɪɪŋ hˈoʊm,how_about_staying_home.opus,25047,47,,,37,False,25

@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+servírka,waitress,wˈeɪtɹəs,waitress.opus,21000,,,,,True,21
+hlasování,vote,vˈoʊt,vote.opus,21001,,,,,True,21
+volejbal,volleyball,vˈɑːlɪbˌɔːl,volleyball.opus,21002,,,,,True,21
+návštívit,visit,vˈɪzɪt,visit.opus,21003,,,,,True,21
+návštěva,visit,vˈɪzɪt,visit.opus,21004,,,,,True,21
+video,video,vˈɪdɪoʊ,video.opus,21005,,,,,True,21
+zeleniny,vegetable,vˈɛdʒɪɾəbəl,vegetable.opus,21006,,,,,True,21
+váza,vase,vˈeɪs,vase.opus,21007,,,,,True,21
+dovolená,vacation,veɪkˈeɪʃən,vacation.opus,21008,,,,,True,21
+nás,us,ˈʌs,us.opus,21009,,,,,True,21
+vyřešit,solve,sˈɑːlv,solve.opus,21010,,,,,True,21
+pohovka,sofa,sˈoʊfə,sofa.opus,21011,,,,,True,21
+sociální,social,sˈoʊʃəl,social.opus,21012,,,,,True,21
+piknik,picnic,pˈɪknɪk,picnic.opus,21013,,,,,True,21
+vybrat,pick,pˈɪk,pick.opus,21014,,,,,True,21
+klavír,piano,piˈænoʊ,piano.opus,21015,,,,,True,21
+fotografie,photo,fˈoʊɾoʊ,photo.opus,21016,,,,,True,21
+mazlíček,pet,pˈɛt,pet.opus,21017,,,,,True,21
+období,period,pˈiəɹɪəd,period.opus,21018,,,,,True,21
+prase,pig,pˈɪɡ,pig.opus,21019,,,,,True,21
+platba,pay,pˈeɪ,pay.opus,21020,,,,,True,21
+večírek,party,pˈɑːɹɾi,party.opus,21021,,,,,True,21
+partner,partner,pˈɑːɹtnɚ,partner.opus,21022,,,,,True,21
+pardon,pardon,pˈɑːɹdən,pardon.opus,21023,,,,,True,21
+Kde bydlím?,Where do I live?,wˌɛɹ dˈuː aɪ lˈɪv,where_do_i_live.opus,21024,38,,,30,False,21
+Co čteš?,What do you read?,wˌʌt dˈuː juː ɹˈiːd,what_do_you_read.opus,21025,38,,,30,False,21
+Kdy pracuje?,When does he work?,wˌɛn dˈʌz hiː wˈɜːk,when_does_he_work.opus,21026,38,,,30,False,21
+Proč vaří?,Why does she cook?,wˌaɪ dˈʌz ʃiː kˈʊk,why_does_she_cook.opus,21027,38,,,30,False,21
+Jak to funguje?,How does it work?,hˌaʊ dˈʌz ɪt wˈɜːk,how_does_it_work.opus,21028,38,,,30,False,21
+Kam cestujeme?,Where do we travel?,wˌɛɹ dˈuː wiː tɹˈævəl,where_do_we_travel.opus,21029,38,,,30,False,21
+Co potřebujete?,What do you need?,wˌʌt dˈuː juː nˈiːd,what_do_you_need.opus,21030,38,,,30,False,21
+Kdy hrají?,When do they play?,wˌɛn dˈuː ðeɪ plˈeɪ,when_do_they_play.opus,21031,38,,,30,False,21

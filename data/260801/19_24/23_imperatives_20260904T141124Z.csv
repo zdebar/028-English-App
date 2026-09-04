@@ -1,0 +1,41 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+zdravotní sestra,nurse,nˈɜːs,nurse.opus,23000,,,,,True,23
+poznamenat,note,nˈoʊt,note.opus,23001,,,,,True,23
+poznámka,note,nˈoʊt,note.opus,23002,,,,,True,23
+notebook,notebook,nˈoʊtbʊk,notebook.opus,23003,,,,,True,23
+vypnuto,off,ˈɔf,off.opus,23004,,,,,True,23
+žádný,no,nˈoʊ,no.opus,23005,,,,,True,23
+pěkný,nice,nˈaɪs,nice.opus,23006,,,,,True,23
+zprávy,news,nˈuːz,news.opus,23007,,,,,True,23
+soused,neighbour,nˈeɪbɚ,neighbour.opus,23008,,,,,True,23
+důstojník,officer,ˈɑːfɪsɚ,officer.opus,23009,,,,,True,23
+strana,page,pˈeɪdʒ,page.opus,23010,,,,,True,23
+odpoledne,PM,pˌiːˈɛm,pm.opus,23011,,,,,True,23
+vlastnit,own,ˈoʊn,own.opus,23012,,,,,True,23
+majitel,owner,ˈoʊnɚ,owner.opus,23013,,,,,True,23
+venku,outside,aʊtsˈaɪd,outside.opus,23014,,,,,True,23
+naše,ours,aʊˈɚz,ours.opus,23015,,,,,True,23
+objednávka,order,ˈɔːɹdɚ,order.opus,23016,,,,,True,23
+pomerančový,orange,ˈɔɹɪndʒ,orange.opus,23017,,,,,True,23
+opera,opera,ˈɑːpɚɹə,opera.opus,23018,,,,,True,23
+otevřeno,open,ˈoʊpən,open.opus,23019,,,,,True,23
+olympiády,Olympics,əlˈɪmpɪks,olympics.opus,23020,,,,,True,23
+okej,okay,oʊkˈeɪ,okay.opus,23021,,,,,True,23
+program,programme,pɹˈoʊɡɹæm,programme.opus,23022,,,,,True,23
+dát,put,pˈʊt,put.opus,23023,,,,,True,23
+Otevři dveře.,Open the door.,ˈoʊpən ðə dˈɔːɹ,open_the_door.opus,23024,41,,,33,False,23
+Zavři okno.,Close the window.,klˈoʊs ðə wˈɪndoʊ,close_the_window.opus,23025,41,,,33,False,23
+Sedni si.,Sit down.,sˈɪt dˈaʊn,sit_down.opus,23026,41,,,33,False,23
+Vstaň.,Stand up.,stˈænd ˈʌp,stand_up.opus,23027,41,,,33,False,23
+Počítej do deseti.,Count to ten.,kˈaʊnt tə tˈɛn,count_to_ten.opus,23028,41,,,33,False,23
+Poslouchej.,Listen.,lˈɪsən,listen.opus,23029,41,,,33,False,23
+Počkej.,Wait.,wˈeɪt,wait.opus,23030,41,,,33,False,23
+Podívej se.,Look.,lˈʊk,look.opus,23031,41,,,33,False,23
+Prosím otevři dveře.,Please open the door.,plˈiːz ˈoʊpən ðə dˈɔːɹ,please_open_the_door.opus,23032,,,,33,False,23
+Zavři okno před odchodem.,Close the window before you leave.,klˈoʊs ðə wˈɪndoʊ bᵻfˌɔːɹ juː lˈiːv,close_the_window_before_you_leave.opus,23033,,,,33,False,23
+Sedni si vedle mě.,Sit down next to me.,sˈɪt dˌaʊn nˈɛkst tə mˌiː,sit_down_next_to_me.opus,23034,,,,33,False,23
+Vstaň a pojď sem.,Stand up and come here.,stˈænd ˌʌp ænd kˈʌm hˈɪɹ,stand_up_and_come_here.opus,23035,,,,33,False,23
+Počítej do deseti.,Count to ten.,kˈaʊnt tə tˈɛn,count_to_ten.opus,23036,,,,33,False,23
+Poslouchej učitele.,Listen to the teacher.,lˈɪsən tə ðə tˈiːtʃɚ,listen_to_the_teacher.opus,23037,,,,33,False,23
+Počkej na mě.,Wait for me.,wˈeɪt fɔːɹ mˌiː,wait_for_me.opus,23038,,,,33,False,23
+Podívej se na tabuli.,Look at the board.,lˈʊk æt ðə bˈɔːɹd,look_at_the_board.opus,23039,,,,33,False,23

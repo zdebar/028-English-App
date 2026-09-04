@@ -1,0 +1,41 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+očernit,black,blˈæk,black.opus,28000,,,,,True,28
+kdokoliv,anyone,ˈɛnɪwˌʌn,anyone.opus,28001,,,,,True,28
+bojí se,afraid,ɐfɹˈeɪd,afraid.opus,28002,,,,,True,28
+hovězí,beef,bˈiːf,beef.opus,28003,,,,,True,28
+jediný,alone,ɐlˈoʊn,alone.opus,28004,,,,,True,28
+včela,bee,bˈiː,bee.opus,28005,,,,,True,28
+kolo,bicycle,bˈaɪsɪkəl,bicycle.opus,28006,,,,,True,28
+tlačítko,button,bˈʌʔn̩,button.opus,28007,,,,,True,28
+celý,all,ˈɔːl,all.opus,28008,,,,,True,28
+v pořádku,all right,ˈɔːl ɹˈaɪt,all_right.opus,28009,,,,,True,28
+prázdný,blank,blˈæŋk,blank.opus,28010,,,,,True,28
+přibližně,around,ɚɹˈaʊnd,around.opus,28011,,,,,True,28
+dítě,baby,bˈeɪbi,baby.opus,28012,,,,,True,28
+kolo,bike,bˈaɪk,bike.opus,28013,,,,,True,28
+nakoupit,buy,bˈaɪ,buy.opus,28014,,,,,True,28
+vědro,bucket,bˈʌkɪt,bucket.opus,28015,,,,,True,28
+kost,bone,bˈoʊn,bone.opus,28016,,,,,True,28
+jakmile,as,ˈæz,as.opus,28017,,,,,True,28
+tyč,bar,bˈɑːɹ,bar.opus,28018,,,,,True,28
+pod,below,bᵻlˈoʊ,below.opus,28019,,,,,True,28
+letoun,aeroplane,ˈɛɹəplˌeɪn,aeroplane.opus,28020,,,,,True,28
+může,can,kˈæn,can.opus,28021,,,,,True,28
+bonbón,candy,kˈændi,candy.opus,28022,,,,,True,28
+skladovat,store,stˈɔːɹ,store.opus,28023,,,,,True,28
+Pracuji?,Am I working?,æm aɪ wˈɜːkɪŋ,am_i_working.opus,28024,50,,,40,False,28
+Vaříš?,Are you cooking?,ɑːɹ juː kˈʊkɪŋ,are_you_cooking.opus,28025,50,,,40,False,28
+Řídí?,Is he driving?,ɪz hiː dɹˈaɪvɪŋ,is_he_driving.opus,28026,50,,,40,False,28
+Píše?,Is she writing?,ɪz ʃiː ɹˈaɪɾɪŋ,is_she_writing.opus,28027,50,,,40,False,28
+Prší?,Is it raining?,ɪz ɪt ɹˈeɪnɪŋ,is_it_raining.opus,28028,50,,,40,False,28
+Čekáme?,Are we waiting?,ɑːɹ wiː wˈeɪɾɪŋ,are_we_waiting.opus,28029,50,,,40,False,28
+Učíte se?,Are you studying?,ɑːɹ juː stˈʌdiɪŋ,are_you_studying.opus,28030,50,,,40,False,28
+Běží?,Are they running?,ɑːɹ ðeɪ ɹˈʌnɪŋ,are_they_running.opus,28031,50,,,40,False,28
+Pracuji na správném úkolu?,Am I working on the right task?,æm aɪ wˈɜːkɪŋ ɔnðə ɹˈaɪt tˈæsk,am_i_working_on_the_right_task.opus,28032,,,,40,False,28
+Vaříš dnes večer večeři?,Are you cooking dinner tonight?,ɑːɹ juː kˈʊkɪŋ dˈɪnɚ tənˈaɪt,are_you_cooking_dinner_tonight.opus,28033,,,,40,False,28
+Řídí on do kanceláře?,Is he driving to the office?,ɪz hiː dɹˈaɪvɪŋ tə ðɪ ˈɑːfɪs,is_he_driving_to_the_office.opus,28034,,,,40,False,28
+Píše ona zprávu?,Is she writing a message?,ɪz ʃiː ɹˈaɪɾɪŋ ɐ mˈɛsɪdʒ,is_she_writing_a_message.opus,28035,,,,40,False,28
+Prší tam pořád?,Is it still raining there?,ɪz ɪt stˈɪl ɹˈeɪnɪŋ ðˈɛɹ,is_it_still_raining_there.opus,28036,,,,40,False,28
+Čekáme na správný autobus?,Are we waiting for the right bus?,ɑːɹ wiː wˈeɪɾɪŋ fɚðə ɹˈaɪt bˈʌs,are_we_waiting_for_the_right_bus.opus,28037,,,,40,False,28
+Učíte se na zkoušku?,Are you studying for the exam?,ɑːɹ juː stˈʌdiɪŋ fɚðɪ ɛɡzˈæm,are_you_studying_for_the_exam.opus,28038,,,,40,False,28
+Běží oni každý den?,Are they running every day?,ɑːɹ ðeɪ ɹˈʌnɪŋ ˈɛvɹi dˈeɪ,are_they_running_every_day.opus,28039,,,,40,False,28

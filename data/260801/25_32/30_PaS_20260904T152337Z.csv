@@ -1,0 +1,41 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+opékat,roast,ɹˈoʊst,roast.opus,30000,,,,,True,30
+pár,couple,kˈʌpəl,couple.opus,30001,,,,,True,30
+naznačit,indicate,ˈɪndᵻkˌeɪt,indicate.opus,30002,,,,,True,30
+klepání,knock,nˈɑːk,knock.opus,30003,,,,,True,30
+haraburdí,junk,dʒˈʌŋk,junk.opus,30004,,,,,True,30
+plavba,cruise,kɹˈuːz,cruise.opus,30005,,,,,True,30
+razítko,stamp,stˈæmp,stamp.opus,30006,,,,,True,30
+juniorský,junior,dʒˈuːnjɚ,junior.opus,30007,,,,,True,30
+strategie,strategy,stɹˈæɾədʒi,strategy.opus,30008,,,,,True,30
+strava,diet,dˈaɪət,diet.opus,30009,,,,,True,30
+koruna,crown,kɹˈaʊn,crown.opus,30010,,,,,True,30
+poklop,cover,kˈʌvɚ,cover.opus,30011,,,,,True,30
+zemřít,die,dˈaɪ,die.opus,30012,,,,,True,30
+nést,bear,bˈɛɹ,bear.opus,30013,,,,,True,30
+nedostatek,lack,lˈæk,lack.opus,30014,,,,,True,30
+přeplněný,crowded,kɹˈaʊdᵻd,crowded.opus,30015,,,,,True,30
+kilometr,kilometre,kˈɪləmˌiːɾɚ,kilometre.opus,30016,,,,,True,30
+řetězec,string,stɹˈɪŋ,string.opus,30017,,,,,True,30
+pevnost,strength,stɹˈɛŋθ,strength.opus,30018,,,,,True,30
+znalost,knowledge,nˈɑːlɪdʒ,knowledge.opus,30019,,,,,True,30
+tvůrčí,creative,kɹiːˈeɪɾɪv,creative.opus,30020,,,,,True,30
+nezávislost,independence,ˌɪndᵻpˈɛndəns,independence.opus,30021,,,,,True,30
+deník,diary,dˈaɪɚɹi,diary.opus,30022,,,,,True,30
+vytvořit,create,kɹiːˈeɪt,create.opus,30023,,,,,True,30
+já byl,I was,aɪ wˈʌz,i_was.opus,30024,52,,,42,False,30
+ty jsi byl,you were,juː wˈɜː,you_were.opus,30025,52,,,42,False,30
+on byl,he was,hiː wˈʌz,he_was.opus,30026,52,,,42,False,30
+ona byla,she was,ʃiː wˈʌz,she_was.opus,30027,52,,,42,False,30
+ono bylo,it was,ɪt wˈʌz,it_was.opus,30028,52,,,42,False,30
+my jsme byli,we were,wiː wˈɜː,we_were.opus,30029,52,,,42,False,30
+vy jste byli,you were,juː wˈɜː,you_were.opus,30030,52,,,42,False,30
+oni byli,they were,ðeɪ wˈɜː,they_were.opus,30031,52,,,42,False,30
+Včera jsem byl připravený začít lekci.,I was ready to start the lesson yesterday.,aɪ wʌz ɹˈɛdi tə stˈɑːɹt ðə lˈɛsən jˈɛstɚdˌeɪ,i_was_ready_to_start_the_lesson_yesterday.opus,30032,,,,42,False,30
+Po práci jsi byl unavený.,You were tired after work.,juː wɜː tˈaɪɚd ˈæftɚ wˈɜːk,you_were_tired_after_work.opus,30033,,,,42,False,30
+On byl doma se svým bratrem.,He was at home with his brother.,hiː wʌz æt hˈoʊm wɪð hɪz bɹˈʌðɚ,he_was_at_home_with_his_brother.opus,30034,,,,42,False,30
+Ona byla šťastná kvůli výsledku.,She was happy about the result.,ʃiː wʌz hˈæpi ɐbˌaʊt ðə ɹɪzˈʌlt,she_was_happy_about_the_result.opus,30035,,,,42,False,30
+Včera bylo venku opravdu chladno.,It was really cold outside yesterday.,ɪt wʌz ɹˈiəli kˈoʊld aʊtsˈaɪd jˈɛstɚdˌeɪ,it_was_really_cold_outside_yesterday.opus,30036,,,,42,False,30
+Na schůzku jsme přišli pozdě.,We were late for the meeting.,wiː wɜː lˈeɪt fɚðə mˈiːɾɪŋ,we_were_late_for_the_meeting.opus,30037,,,,42,False,30
+Minulý týden jste byli velmi zaneprázdnění.,You were very busy last week.,juː wɜː vˈɛɹi bˈɪzi lˈæst wˈiːk,you_were_very_busy_last_week.opus,30038,,,,42,False,30
+Byli venku před restaurací.,They were outside the restaurant.,ðeɪ wɜːɹ aʊtsˈaɪd ðə ɹˈɛstɹɑːnt,they_were_outside_the_restaurant.opus,30039,,,,42,False,30

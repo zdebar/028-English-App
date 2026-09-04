@@ -1,0 +1,41 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+knihkupectví,bookstore,bˈʊkstɔːɹ,bookstore.opus,29000,,,,,True,29
+kapela,band,bˈænd,band.opus,29001,,,,,True,29
+probudit,awake,ɐwˈeɪk,awake.opus,29002,,,,,True,29
+volání,call,kˈɔːl,call.opus,29003,,,,,True,29
+více než,above,əbˈʌv,above.opus,29004,,,,,True,29
+výše,above,əbˈʌv,above.opus,29005,,,,,True,29
+okolo,about,ɐbˈaʊt,about.opus,29006,,,,,True,29
+nudný,boring,bˈɔːɹɪŋ,boring.opus,29007,,,,,True,29
+podle,by,bˈaɪ,by.opus,29008,,,,,True,29
+sbohem,bye,bˈaɪ,bye.opus,29009,,,,,True,29
+požádat,ask,ˈæsk,ask.opus,29010,,,,,True,29
+tábor,camp,kˈæmp,camp.opus,29011,,,,,True,29
+dopoledne,AM,ˈæm,am.opus,29012,,,,,True,29
+kartáčovat,brush,bɹˈʌʃ,brush.opus,29013,,,,,True,29
+stadión,stadium,stˈeɪdiəm,stadium.opus,29014,,,,,True,29
+přejít,cross,kɹˈɔs,cross.opus,29015,,,,,True,29
+práce,labour,lˈeɪbɚ,labour.opus,29016,,,,,True,29
+schodiště,stair,stˈɛɹ,stair.opus,29017,,,,,True,29
+kříž,cross,kɹˈɔs,cross.opus,29018,,,,,True,29
+levný,inexpensive,ˌɪnɛkspˈɛnsɪv,inexpensive.opus,29019,,,,,True,29
+kritizovat,criticise,kɹˈɪɾɪsˌaɪz,criticise.opus,29020,,,,,True,29
+role (např. papíru),roll,ɹˈoʊl,roll.opus,29021,,,,,True,29
+křupavý,crisp,kɹˈɪsp,crisp.opus,29022,,,,,True,29
+souprava,kit,kˈɪt,kit.opus,29023,,,,,True,29
+Co dělám?,What am I doing?,wˌʌt æm aɪ dˈuːɪŋ,what_am_i_doing.opus,29024,46,,,42,False,29
+Kde bydlíš?,Where are you living?,wˌɛɹ ɑːɹ juː lˈɪvɪŋ,where_are_you_living.opus,29025,46,,,42,False,29
+Proč běží?,Why is he running?,wˌaɪ ɪz hiː ɹˈʌnɪŋ,why_is_he_running.opus,29026,46,,,42,False,29
+Co píše?,What is she writing?,wˌʌt ɪz ʃiː ɹˈaɪɾɪŋ,what_is_she_writing.opus,29027,46,,,42,False,29
+Proč prší?,Why is it raining?,wˌaɪ ɪz ɪt ɹˈeɪnɪŋ,why_is_it_raining.opus,29028,46,,,42,False,29
+Kam jedeme?,Where are we going?,wˌɛɹ ɑːɹ wiː ɡˈoʊɪŋ,where_are_we_going.opus,29029,46,,,42,False,29
+Co hledáte?,What are you looking for?,wˌʌt ɑːɹ juː lˈʊkɪŋ fɔːɹ,what_are_you_looking_for.opus,29030,46,,,42,False,29
+Kdy přijíždějí?,When are they arriving?,wˌɛn ɑːɹ ðeɪ ɚɹˈaɪvɪŋ,when_are_they_arriving.opus,29031,46,,,42,False,29
+Co právě dělám v kuchyni?,What am I doing in the kitchen?,wˌʌt æm aɪ dˌuːɪŋ ɪnðə kˈɪtʃən,what_am_i_doing_in_the_kitchen.opus,29032,,,,42,False,29
+Kde teď bydlíš během studia?,Where are you living during your studies?,wˌɛɹ ɑːɹ juː lˈɪvɪŋ dˈʊɹɹɪŋ jʊɹ stˈʌdiz,where_are_you_living_during_your_studies.opus,29033,,,,42,False,29
+Proč běží na autobus?,Why is he running for the bus?,wˌaɪ ɪz hiː ɹˈʌnɪŋ fɚðə bˈʌs,why_is_he_running_for_the_bus.opus,29034,,,,42,False,29
+Co píše do svého deníku?,What is she writing in her diary?,wˌʌt ɪz ʃiː ɹˈaɪɾɪŋ ɪn hɜː dˈaɪɚɹi,what_is_she_writing_in_her_diary.opus,29035,,,,42,False,29
+Proč dnes tolik prší?,Why is it raining so much today?,wˌaɪ ɪz ɪt ɹˈeɪnɪŋ sˈoʊ mˌʌtʃ tədˈeɪ,why_is_it_raining_so_much_today.opus,29036,,,,42,False,29
+Kam jedeme po práci?,Where are we going after work?,wˌɛɹ ɑːɹ wiː ɡˌoʊɪŋ ˈæftɚ wˈɜːk,where_are_we_going_after_work.opus,29037,,,,42,False,29
+Co hledáte v tašce?,What are you looking for in the bag?,wˌʌt ɑːɹ juː lˈʊkɪŋ fɔːɹ ɪnðə bˈæɡ,what_are_you_looking_for_in_the_bag.opus,29038,,,,42,False,29
+Kdy přijíždějí na nádraží?,When are they arriving at the station?,wˌɛn ɑːɹ ðeɪ ɚɹˈaɪvɪŋ æt ðə stˈeɪʃən,when_are_they_arriving_at_the_station.opus,29039,,,,42,False,29

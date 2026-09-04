@@ -1,0 +1,42 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+narození,birth,bˈɜːθ,birth.opus,27000,,,,,True,27
+obě,both,bˈoʊθ,both.opus,27001,,,,,True,27
+zlomit,break,bɹˈeɪk,break.opus,27002,,,,,True,27
+zlomený,broken,bɹˈoʊkən,broken.opus,27003,,,,,True,27
+zvonek,bell,bˈɛl,bell.opus,27004,,,,,True,27
+motýl,butterfly,bˈʌɾɚflˌaɪ,butterfly.opus,27005,,,,,True,27
+smutný,blue,blˈuː,blue.opus,27006,,,,,True,27
+láhev,bottle,bˈɑːɾəl,bottle.opus,27007,,,,,True,27
+rána,blow,blˈoʊ,blow.opus,27008,,,,,True,27
+pryč,away,ɐwˈeɪ,away.opus,27009,,,,,True,27
+vytvořit,build,bˈɪld,build.opus,27010,,,,,True,27
+miska,bowl,bˈoʊl,bowl.opus,27011,,,,,True,27
+nejlepší způsob,best,bˈɛst,best.opus,27012,,,,,True,27
+mozek,brain,bɹˈeɪn,brain.opus,27013,,,,,True,27
+štětec,brush,bɹˈʌʃ,brush.opus,27014,,,,,True,27
+hamburger,burger,bˈɜːɡɚ,burger.opus,27015,,,,,True,27
+pláž,beach,bˈiːtʃ,beach.opus,27016,,,,,True,27
+aktivita,activity,æktˈɪvᵻɾi,activity.opus,27017,,,,,True,27
+fazole,bean,bˈiːn,bean.opus,27018,,,,,True,27
+někdo,anybody,ˈɛnɪbˌɑːdi,anybody.opus,27019,,,,,True,27
+zadní,back,bˈæk,back.opus,27020,,,,,True,27
+podpořit,back,bˈæk,back.opus,27021,,,,,True,27
+sušenka,biscuit,bˈɪskɪt,biscuit.opus,27022,,,,,True,27
+narozeniny,birthday,bˈɜːθdeɪ,birthday.opus,27023,,,,,True,27
+já nespím,I'm not sleeping,aɪm nˌɑːt slˈiːpɪŋ,im_not_sleeping.opus,27024,49,,,39,False,27
+ty neposloucháš,you aren't listening,juː ˌɑːɹnt lˈɪsənɪŋ,you_arent_listening.opus,27025,49,,,39,False,27
+on nepracuje,he isn't working,hiː ˌɪzənt wˈɜːkɪŋ,he_isnt_working.opus,27026,49,,,39,False,27
+ona neřídí,she isn't driving,ʃiː ˌɪzənt dɹˈaɪvɪŋ,she_isnt_driving.opus,27027,49,,,39,False,27
+ono neprší,it isn't raining,ɪɾ ˌɪzənt ɹˈeɪnɪŋ,it_isnt_raining.opus,27028,49,,,39,False,27
+my nečekáme,we aren't waiting,wiː ˌɑːɹnt wˈeɪɾɪŋ,we_arent_waiting.opus,27029,49,,,39,False,27
+vy neplatíte,you aren't paying,juː ˌɑːɹnt pˈeɪɪŋ,you_arent_paying.opus,27030,49,,,39,False,27
+oni nepřicházejí,they aren't coming,ðeɪ ˌɑːɹnt kˈʌmɪŋ,they_arent_coming.opus,27031,49,,,39,False,27
+"Teď nespím, jen odpočívám.",I'm not sleeping; I'm just resting.,"aɪm nˌɑːt slˈiːpɪŋ
+aɪm dʒˈʌst ɹˈɛstɪŋ",im_not_sleeping_im_just_resting.opus,27032,,,,39,False,27
+Neposloucháš moje pokyny.,You aren't listening to my instructions.,juː ˌɑːɹnt lˈɪsənɪŋ tə maɪ ɪnstɹˈʌkʃənz,you_arent_listening_to_my_instructions.opus,27033,,,,39,False,27
+Dnes nepracuje z domova.,He isn't working from home today.,hiː ˌɪzənt wˈɜːkɪŋ fɹʌm hˈoʊm tədˈeɪ,he_isnt_working_from_home_today.opus,27034,,,,39,False,27
+Ona teď neřídí auto.,She isn't driving the car right now.,ʃiː ˌɪzənt dɹˈaɪvɪŋ ðə kˈɑːɹ ɹˈaɪt nˈaʊ,she_isnt_driving_the_car_right_now.opus,27035,,,,39,False,27
+Venku už neprší.,It isn't raining outside anymore.,ɪɾ ˌɪzənt ɹˈeɪnɪŋ aʊtsˈaɪd ˌɛnɪmˈɔːɹ,it_isnt_raining_outside_anymore.opus,27036,,,,39,False,27
+Nečekáme na vlak.,We're not waiting for the train.,wɪɹ nˌɑːt wˈeɪɾɪŋ fɚðə tɹˈeɪn,were_not_waiting_for_the_train.opus,27037,,,,39,False,27
+Neplatíte za objednávku.,You aren't paying for the order.,juː ˌɑːɹnt pˈeɪɪŋ fɚðɪ ˈɔːɹdɚ,you_arent_paying_for_the_order.opus,27038,,,,39,False,27
+Dnes večer nepřicházejí.,They aren't coming tonight.,ðeɪ ˌɑːɹnt kˈʌmɪŋ tənˈaɪt,they_arent_coming_tonight.opus,27039,,,,39,False,27
