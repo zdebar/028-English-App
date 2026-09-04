@@ -10,26 +10,26 @@ id,name,note,sort_order
 27,PC - zápor,,27
 28,PC - zjišťovací otázky,,28
 29,PC - tázací otázky,,29
-30,PaS - be - Minulý čas prostý,"""Minulý čas prostý slovesa být"" se v angličtině označuje ""Past Simple - be"" se zkratkou ""PaS - be"".",30
+30,PaS - be - Minulý čas prostý,"""Minulý čas prostý"" se v angličtině označuje ""Past Simple"" se zkratkou ""PaS"".",30
 31,PaS - be - zápor,,31
 32,PaS - be - zjišťovací otázky,,32
 33,PaS - be - tázací otázky,,33
-34,PaS - Minulý čas prostý,"""Minulý čas prostý"" se v angličtině nazývá ""Past Simple"" se zkratkou ""PaS"".",34
-35,PaS - zápor,,35
-36,PaS - zjišťovací otázky,,36
-37,PaS - tázací otázky,,37
-38,FS - will - Budoucí čas s will,"""Budoucí čas prostý s will"" se v angličtině označuje ""FS - will"".",38
+34,PaS - going to - Minulý čas prostý,,34
+35,PaS - going to - zápor,,35
+36,PaS - going to - zjišťovací otázky,,36
+37,PaS - going to - tázací otázky,,37
+38,FS - will - Budoucí čas s will,"""Budoucí čas prostý"" se v angličtině označuje ""Future Simple"" se zkratkou ""FS"".",38
 39,FS - will - zápor,,39
 40,FS - will - zjišťovací otázky,,40
 41,FS - will - tázací otázky,,41
-42,FS - be going to - Budoucí čas s be going to,"""Budoucí čas prostý s be going to"" se v angličtině označuje ""FS - be going to"".",42
-43,FS - be going to - zápor,,43
-44,FS - be going to - zjišťovací otázky,,44
-45,FS - be going to - tázací otázky,,45
+42,FS - going to - Budoucí čas s be going to,,42
+43,FS - going to - zápor,,43
+44,FS - going to - zjišťovací otázky,,44
+45,FS - going to - tázací otázky,,45
 46,Nultá podmínka,"""Nultá podmínka"" se v angličtině nazývá ""Zero Conditional"".",46
 47,První podmínka,"""První podmínka"" se v angličtině nazývá ""First Conditional"".",47
 48,Druhá podmínka,"""Druhá podmínka"" se v angličtině nazývá ""Second Conditional"".",48
-49,PP - Předpřítomný čas,"""Předpřítomný čas"" se v angličtině nazývá ""Present Perfect"" se zkratkou ""PP"".",49
+49,PP - Předpřítomný čas prostý,"""Předpřítomný čas prostý"" se v angličtině nazývá ""Present Perfect"" se zkratkou ""PP"".",49
 50,PP - zápor,,50
 51,PP - zjišťovací otázky,,51
 52,PP - tázací otázky,,52
@@ -54,4 +54,4 @@ id,name,note,sort_order
 71,Vztažné věty,,71
 72,Tázací dovětky,,72
 73,Nepřímá řeč,,73
-74,Used to - dříve,,74
+74,Used to,,74

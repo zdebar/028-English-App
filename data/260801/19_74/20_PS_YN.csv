@@ -23,14 +23,22 @@ dárek,gift,,
 vysoký,high,,
 nemoc,illness,,
 kus,piece,,
-Já pracuji?,Do I work?,,28
-Ty pracuješ?,Do you work?,,28
-On pracuje?,Does he work?,,28
-Ona pracuje?,Does she work?,,28
-Ono funguje?,Does it work?,,28
-My pracujeme?,Do we work?,,28
-Vy pracujete?,Do you work?,,28
-Oni pracují?,Do they work?,,28
+Já jím?,Do I eat?,36,28
+Ty čteš?,Do you read?,36,28
+On běhá?,Does he run?,36,28
+Ona vaří?,Does she cook?,36,28
+Ono funguje?,Does it work?,36,28
+My zpíváme?,Do we sing?,36,28
+Vy čekáte?,Do you wait?,36,28
+Oni cestují?,Do they travel?,36,28
+"Ano, jím.","Yes, I do.",37,29
+"Ne, nečteš.","No, you don't.",37,29
+"Ano, běhá.","Yes, he does.",37,29
+"Ne, nevaří.","No, she doesn't.",37,28
+"Ano, funguje.","Yes, it does.",37,28
+"Ne, nezpíváme.","No, we don't.",37,28
+"Ano, čekáte.","Yes, you do.",37,28
+"Ne, necestují.","No, they don't.",37,28
 Jím doma?,Do I eat at home?,,28
 Čteš knihy?,Do you read books?,,28
 On řídí auto?,Does he drive a car?,,28
@@ -39,11 +47,3 @@ Bolí to?,Does it hurt?,,28
 My bydlíme tady?,Do we live here?,,28
 Vy potřebujete pomoc?,Do you need help?,,28
 Oni hrají fotbal?,Do they play football?,,28
-"Ano, pracuji.","Yes, I do.",,28
-"Ne, nepracuješ.","No, you don't.",,28
-"Ano, pracuje.","Yes, he does.",,28
-"Ne, nepracuje.","No, she doesn't.",,28
-"Ano, funguje.","Yes, it does.",,28
-"Ne, nepracujeme.","No, we don't.",,28
-"Ano, pracujete.","Yes, you do.",,28
-"Ne, nepracují.","No, they don't.",,28
