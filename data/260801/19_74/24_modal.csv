@@ -23,19 +23,51 @@ místo,site,,
 Pane,sir,,
 zpěvák,singer,,
 sekce,section,,
-já mohu pomoci,I can help,41,35
-ty musíš odejít,you must leave,41,35
-on by měl studovat,he should study,41,35
-ona může přijít,she may come,41,35
-ono nemůže spadnout,it can't fall,41,35
-my musíme počkat,we must wait,41,35
-vy můžete začít,you can start,41,35
-oni by měli poslouchat,they should listen,41,35
-Mohu řídit auto.,I can drive a car.,,35
-Musíš mít zapnutý bezpečnostní pás.,You must wear a seat belt.,,35
-Měl by zavolat své matce.,He should call his mother.,,35
-Možná přijde pozdě.,She may be late.,,35
-Nemůže otevřít dveře.,It can't open the door.,,35
-Musíme to dnes dokončit.,We must finish today.,,35
-Můžete použít můj telefon.,You can use my phone.,,35
-Neměli by dělat hluk.,They shouldn't make noise.,,35
+"moci, umět",can,42,34
+"moci, umět v minulosti",could,42,34
+"smět, mít povolení, možná",may,42,34
+"možná, mohl by",might,42,34
+muset,must,42,34
+"budu, budeme",shall,42,34
+"měl by, měla by",should,43,34
+"budu, bude",will,43,34
+"chtěl by, udělal by",would,43,34
+"nemoci, neumět",can't,43,34
+"nemoci, neumět v minulosti",couldn't,43,34
+"možná ne, nesmět",may not,43,34
+"možná ne",might not,44,34
+"nesmět, mít zákaz",mustn't,44,34
+"nesmět, nebude",shall not,44,34
+"neměl by, neměla by",shouldn't,44,34
+"nebude, odmítne",won't,44,34
+"nechtěl by, neudělal by",wouldn't,44,34
+Já mohu pomoci.,I can help.,,34
+Ty musíš odejít.,You must leave.,,34
+On by měl studovat.,He should study.,,34
+Ona může přijít.,She may come.,,34
+ono nemůže spadnout.,It can't fall.,,34
+my musíme počkat.,We must wait.,,34
+vy můžete začít.,You can start.,,34
+oni by měli poslouchat.,They should listen.,,34
+Mohu řídit auto.,I can drive a car.,,34
+Musíš mít zapnutý bezpečnostní pás.,You must wear a seat belt.,,34
+Měl by zavolat své matce.,He should call his mother.,,34
+Možná přijde pozdě.,She may be late.,,34
+Nemůže otevřít dveře.,It can't open the door.,,34
+Musíme to dnes dokončit.,We must finish today.,,34
+Můžete použít můj telefon.,You can use my phone.,,34
+Neměli by dělat hluk.,They shouldn't make noise.,,34
+Umíš plavat?,Can You swim?,,34
+Mohl bys mi pomoci?,Could you help me?,,34
+Smím vstoupit?,May I come in?,,34
+Mohl by být pozdě?,Might he be late?,,34
+Musím teď odejít?,Must I leave now?,,34
+Máme začít?,Shall we start?,,34
+Měl bych jí zavolat?,Should I call her?,,34
+Pomůžeš mi?,Will you help me?,,34
+Dáš si čaj?,Would you like some tea?,,34
+Nemůžeš zůstat?,Can't you stay?,,34
+Nemohl bys počkat?,Couldn't you wait?,,34
+Neměl bych jí zavolat?,Shouldn't I call her?,,34
+Nepřijdeš s námi?,Won't you come with us?,,34
+Nechtěl bys čaj?,Wouldn't you like some tea?,,34

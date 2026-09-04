@@ -23,19 +23,25 @@ nátěr,paint,,
 malování,painting,,
 obraz,painting,,
 hodin,o'clock,,
-já jsem vyšší,I'm taller,39,31
-ty jsi rychlejší,you're faster,39,31
-on je silnější,he's stronger,39,31
-ona je mladší,she's younger,39,31
-ono je menší,it's smaller,39,31
-my jsme starší,we're older,39,31
-vy jste chytřejší,you're smarter,39,31
-oni jsou šťastnější,they're happier,39,31
-Jsem nejvyšší v týmu.,I'm the tallest in the team.,,32
-Jsi nejrychlejší ve třídě.,You're the fastest in the class.,,32
-On je nejsilnější v rodině.,He's the strongest in the family.,,32
-Ona je nejmladší v týmu.,She's the youngest in the team.,,32
-Je to nejmenší pokoj.,It's the smallest room.,,32
-Jsme nejstarší v domě.,We're the oldest in the house.,,32
-Jste nejchytřejší studenti.,You're the smartest students.,,32
-Oni jsou nejšťastnější lidé.,They're the happiest people.,,32
+Já jsem vyšší.,I'm taller.,39,31
+Ty jsi rychlejší.,You're faster.,39,31
+On je silnější.,He's stronger.,39,31
+Ona je mladší.,She's younger.,39,31
+Je to dražší.,It's more expensive.,39,31
+My jsme starší.,We're older.,39,31
+Vy jste chytřejší.,You're smarter.,39,31
+Oni jsou šťastnější.,They're happier.,39,31
+Jsem nejvyšší v týmu.,I'm the tallest in the team.,40,32
+Jsi nejrychlejší ve třídě.,You're the fastest in the class.,40,32
+On je nejsilnější v rodině.,He's the strongest in the family.,40,32
+Ona je nejmladší v týmu.,She's the youngest in the team.,40,32
+Je to nejdražší pokoj.,It's the most expensive room.,40,32
+Jsme nejstarší v domě.,We're the oldest in the house.,40,32
+Jste nejchytřejší studenti.,You're the smartest students.,40,32
+Oni jsou nejšťastnější lidé.,They're the happiest people.,40,32
+lepší,better,,
+nejlepší,best,,
+horší,worse,,
+nejhorší,worst,,
+dále,further,,
+nejdále,farthest,,
