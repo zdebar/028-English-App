@@ -1,0 +1,57 @@
+name,sort_order,level_id
+PS - zápor,19,2
+PS - zjišťovací otázky,20,2
+PS - tázací otázky,21,2
+Stupňování,22,2
+Rozkazovací způsob,23,2
+Modální slovesa,24,2
+Návrhy,25,2
+PC - Přítomný čas průběhový,26,2
+PC - zápor,27,2
+PC - zjišťovací otázky,28,2
+PC - tázací otázky,29,2
+PS - be - Minulý čas prostý,30,2
+PS - be - zápor,31,2
+PS - be - zjišťovací otázky,32,2
+PS - be - tázací otázky,33,3
+PaS - Minulý čas prostý,34,3
+PaS - zápor,35,3
+PaS - zjišťovací otázky,36,3
+PaS - tázací otázky,37,3
+will - Budoucí čas prostý s will,38,3
+will - zápor,39,3
+will - zjišťovací otázky,40,3
+will - tázací otázky,41,3
+be going to - Budoucí čas prostý s be going to,42,3
+be going to - zápor,43,3
+be going to - zjišťovací otázky,44,3
+be going to - tázací otázky,45,3
+Nultá podmínka,46,3
+První podmínka,47,3
+Druhá podmínka,48,3
+PP - Předpřítomný čas prostý,49,4
+PP - zápor,50,4
+PP - zjišťovací otázky,51,4
+PP - tázací otázky,52,4
+PPC - Předpřítomný čas průběhový,53,4
+PPC - zápor,54,4
+PPC - zjišťovací otázky,55,4
+PPC - tázací otázky,56,4
+PaP - Předminulý čas prostý,57,4
+PaP - zápor,58,4
+PaP - zjišťovací otázky,59,4
+PaP - tázací otázky,60,4
+FC - Budoucí čas průběhový,61,4
+FC - zápor,62,4
+FC - zjišťovací otázky,63,4
+FC - tázací otázky,64,4
+Třetí podmínka,65,5
+Trpný rod - přítomnost,66,5
+Trpný rod - minulost,67,5
+Trpný rod - předpřítomný čas,68,5
+Trpný rod - budoucnost,69,5
+Trpný rod - přítomný průběhový čas,70,5
+Vztažné věty,71,5
+Tázací dovětky,72,5
+Nepřímá řeč,73,5
+Used to - dříve,74,5
