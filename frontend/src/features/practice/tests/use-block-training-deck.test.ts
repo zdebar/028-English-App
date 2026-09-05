@@ -116,6 +116,13 @@ describe('useInitialTrainingDeck', () => {
         completed_item_ids: [1],
       }),
     );
+    expect(mocks.applyPracticeProgress).toHaveBeenCalledWith(
+      expect.anything(),
+      'czToEn',
+      'correct',
+      expect.any(String),
+      { oppositeDirectionNextAt: expect.any(String) },
+    );
   });
 
   it('resets reveal before showing the next audio-less item', async () => {
@@ -133,40 +140,50 @@ describe('useInitialTrainingDeck', () => {
     expect(mocks.transitionEvents[0]).toBe('reset');
   });
 
-  it('moves to the second ordered phase after completing the first phase', async () => {
+  it('completes after the single ordered phase', async () => {
     const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
 
     await act(async () => result.current.nextKnown());
     await act(async () => result.current.nextKnown());
 
-    expect(mocks.recordInitialTrainingAnswer).toHaveBeenLastCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        phase: 1,
-        current_queue_item_ids: [1, 2],
-        completed_item_ids: [],
-      }),
-    );
+    await waitFor(() => expect(result.current.isComplete).toBe(true));
+    expect(result.current.isCzToEn).toBe(true);
+    expect(result.current.progressLabel).toBe('2/2');
+    expect(mocks.recordInitialTrainingAnswer).toHaveBeenCalledTimes(1);
+    expect(mocks.completeInitialTraining).toHaveBeenCalledOnce();
   });
 
-  it('restores the second ordered phase without reshuffling its saved queue', async () => {
+  it('retries incorrect items before completing the phase', async () => {
+    const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
+    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+
+    await act(async () => result.current.nextRepeat());
+    expect(result.current.currentItem?.item_id).toBe(2);
+
+    await act(async () => result.current.nextKnown());
+    expect(result.current.currentItem?.item_id).toBe(1);
+
+    await act(async () => result.current.nextKnown());
+    await waitFor(() => expect(result.current.isComplete).toBe(true));
+    expect(mocks.recordInitialTrainingAnswer).toHaveBeenCalledTimes(2);
+  });
+
+  it('restores the active phase without changing its saved queue', async () => {
     mocks.reconcileActive.mockResolvedValue({
       ...newSession(),
-      phase: 1,
       current_queue_item_ids: [2, 1],
       completed_item_ids: [],
     });
     const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(2));
-    expect(result.current.isCzToEn).toBe(false);
-    expect(result.current.hasProgress).toBe(true);
+    expect(result.current.isCzToEn).toBe(true);
+    expect(result.current.hasProgress).toBe(false);
   });
 
-  it('shows the completed second-phase count and enters neutral completion', async () => {
+  it('shows the single-phase count and enters neutral completion', async () => {
     mocks.reconcileActive.mockResolvedValue({
       ...newSession(),
-      phase: 1,
       completed_count: 1,
       current_queue_item_ids: [1],
       completed_item_ids: [2],
@@ -179,13 +196,27 @@ describe('useInitialTrainingDeck', () => {
     });
 
     await waitFor(() => expect(result.current.isComplete).toBe(true));
-    expect(result.current.progressLabel).toBe('2/2 · 2/2');
+    expect(result.current.progressLabel).toBe('2/2');
+  });
+
+  it('passes the initial-training skip option for both directions', async () => {
+    const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
+    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+
+    await act(async () => result.current.completeCurrent());
+
+    expect(mocks.applyPracticeProgress).toHaveBeenCalledWith(
+      expect.anything(),
+      'czToEn',
+      'skip',
+      expect.any(String),
+      { masterBothDirectionsOnSkip: true },
+    );
   });
 
   it('persists New completion before rendering the neutral completion card', async () => {
     mocks.reconcileActive.mockResolvedValue({
       ...newSession(),
-      phase: 1,
       completed_count: 1,
       current_queue_item_ids: [1],
       completed_item_ids: [2],
@@ -206,7 +237,7 @@ describe('useInitialTrainingDeck', () => {
       [1, 2],
       expect.any(String),
       expect.anything(),
-      expect.objectContaining({ mode: 'new', phase: 1 }),
+      expect.objectContaining({ mode: 'new', phase: 0 }),
     );
     unmount();
   });

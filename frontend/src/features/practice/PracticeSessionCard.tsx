@@ -471,7 +471,7 @@ function PracticeCardButton({
         className="relative flex h-8 w-full shrink-0 items-center justify-between"
         id="bottom-bar"
       >
-        <p className="min-w-14 px-2 text-right font-light" title={progressHelpText}>
+        <p className="min-w-12 text-right font-light" title={progressHelpText}>
           {progressLabel}
         </p>
         {!isCompletion && (

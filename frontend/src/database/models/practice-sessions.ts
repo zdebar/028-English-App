@@ -69,7 +69,7 @@ function isValidInitialTrainingSession(
   const uniqueItemIds = [...new Set(savedItemIds)];
   const hasPendingItems =
     session.current_queue_item_ids.length > 0 || session.retry_queue_item_ids.length > 0;
-  const hasValidPhase = session.phase === 0 || session.phase === 1;
+  const hasValidPhase = session.phase === 0;
   const checks = [
     uniqueItemIds.length > 0,
     uniqueItemIds.length === savedItemIds.length,
@@ -246,7 +246,7 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
       db.user_items,
       db.practice_sessions,
       async () => {
-        if (session.user_id !== item.user_id || session.mode !== 'new') {
+        if (session.user_id !== item.user_id || session.mode !== 'new' || session.phase !== 0) {
           throw new Error('Initial-training answer contains an invalid session.');
         }
         // The availability observer can remove a stale-looking row while this page is open.
@@ -281,7 +281,7 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
         const storedSession = await this.getActive(userId);
         // Keep completion recoverable when the active row disappeared after the last answer.
         const session = storedSession ?? expectedSession;
-        if (session?.mode !== 'new') {
+        if (session?.mode !== 'new' || session.phase !== 0) {
           throw new Error('Initial-training completion requires its active local session.');
         }
 
