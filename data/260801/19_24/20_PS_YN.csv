@@ -1,0 +1,49 @@
+czech,english,block_id,grammar_chunk_id
+spisovatel,writer,,
+starost,worry,,
+pracovník,worker,,
+úžasné,wonderful,,
+deštník,umbrella,,
+škaredý,ugly,,
+televize,TV,,
+zatočit,turn,,
+obrat,turn,,
+krocan,turkey,,
+roura,tube,,
+pokus,try,,
+věrný,true,,
+nákladní auto,truck,,
+hračka,toy,,
+věž,tower,,
+ručník,towel,,
+podtrhnout,underline,,
+sledovat,watch,,
+hodinky,watch,,
+praní,wash,,
+teplo,warm,,
+probudit,wake,,
+číšník,waiter,,
+Já jím?,Do I eat?,36,28
+Ty čteš?,Do you read?,36,28
+On běhá?,Does he run?,36,28
+Ona vaří?,Does she cook?,36,28
+Ono funguje?,Does it work?,36,28
+My zpíváme?,Do we sing?,36,28
+Vy čekáte?,Do you wait?,36,28
+Oni cestují?,Do they travel?,36,28
+"Ano, jím.","Yes, I do.",37,29
+"Ne, nečteš.","No, you don't.",37,29
+"Ano, běhá.","Yes, he does.",37,29
+"Ne, nevaří.","No, she doesn't.",37,28
+"Ano, funguje.","Yes, it does.",37,28
+"Ne, nezpíváme.","No, we don't.",37,28
+"Ano, čekáte.","Yes, you do.",37,28
+"Ne, necestují.","No, they don't.",37,28
+Jím doma?,Do I eat at home?,,28
+Čteš knihy?,Do you read books?,,28
+On řídí auto?,Does he drive a car?,,28
+Ona učí angličtinu?,Does she teach English?,,28
+Bolí to?,Does it hurt?,,28
+My bydlíme tady?,Do we live here?,,28
+Vy potřebujete pomoc?,Do you need help?,,28
+Oni hrají fotbal?,Do they play football?,,28

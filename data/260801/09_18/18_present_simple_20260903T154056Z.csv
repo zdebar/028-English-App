@@ -1,0 +1,49 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+hráč,player,plˈeɪɚ,player.opus,18000,,,,,True,18
+spíše,rather,ɹˈæðɚ,rather.opus,18001,,,,,True,18
+zůstat,remain,ɹᵻmˈeɪn,remain.opus,18002,,,,,True,18
+strana,side,sˈaɪd,side.opus,18003,,,,,True,18
+jih,south,sˈaʊθ,south.opus,18004,,,,,True,18
+pravda,true,tɹˈuː,true.opus,18005,,,,,True,18
+použít,use,jˈuːs,use.opus,18006,,,,,True,18
+již,already,ɔːlɹˈɛdi,already.opus,18007,,,,,True,18
+stát se,become,bɪkˈʌm,become.opus,18008,,,,,True,18
+způsobit,cause,kˈɔːz,cause.opus,18009,,,,,True,18
+určitý,certain,sˈɜːʔn̩,certain.opus,18010,,,,,True,18
+popsat,describe,dᵻskɹˈaɪb,describe.opus,18011,,,,,True,18
+suchý,dry,dɹˈaɪ,dry.opus,18012,,,,,True,18
+očekávat,expect,ɛkspˈɛkt,expect.opus,18013,,,,,True,18
+fakt,fact,fˈækt,fact.opus,18014,,,,,True,18
+zahrnout,include,ɪŋklˈuːd,include.opus,18015,,,,,True,18
+nechat,let,lˈɛt,let.opus,18016,,,,,True,18
+moment,moment,mˈoʊmənt,moment.opus,18017,,,,,True,18
+síla,power,pˈaʊɚ,power.opus,18018,,,,,True,18
+poskytnout,provide,pɹəvˈaɪd,provide.opus,18019,,,,,True,18
+hlásit,report,ɹᵻpˈɔːɹt,report.opus,18020,,,,,True,18
+sedadlo,seat,sˈiːt,seat.opus,18021,,,,,True,18
+jednotlivý,single,sˈɪŋɡəl,single.opus,18022,,,,,True,18
+systém,system,sˈɪstəm,system.opus,18023,,,,,True,18
+já pracuji,I work,aɪ wˈɜːk,i_work.opus,18024,34,,,26,False,18
+ty pracuješ,you work,juː wˈɜːk,you_work.opus,18025,34,,,26,False,18
+on pracuje,he works,hiː wˈɜːks,he_works.opus,18026,34,,,26,False,18
+ona pracuje,she works,ʃiː wˈɜːks,she_works.opus,18027,34,,,26,False,18
+ono pracuje,it works,ɪt wˈɜːks,it_works.opus,18028,34,,,26,False,18
+my pracujeme,we work,wiː wˈɜːk,we_work.opus,18029,34,,,26,False,18
+vy pracujete,you work,juː wˈɜːk,you_work.opus,18030,34,,,26,False,18
+oni pracují,they work,ðeɪ wˈɜːk,they_work.opus,18031,34,,,26,False,18
+Jím chléb.,I eat bread.,aɪ ˈiːt bɹˈɛd,i_eat_bread.opus,18032,,,,26,False,18
+Piješ vodu.,You drink water.,juː dɹˈɪŋk wˈɔːɾɚ,you_drink_water.opus,18033,,,,26,False,18
+On čte knihu.,He reads a book.,hiː ɹˈiːdz ɐ bˈʊk,he_reads_a_book.opus,18034,,,,26,False,18
+Ona píše dopis.,She writes a letter.,ʃiː ɹˈaɪts ɐ lˈɛɾɚ,she_writes_a_letter.opus,18035,,,,26,False,18
+Je to malé.,It is small.,ɪɾ ɪz smˈɔːl,it_is_small.opus,18036,,,,26,False,18
+Máme auto.,We have a car.,wiː hæv ɐ kˈɑːɹ,we_have_a_car.opus,18037,,,,26,False,18
+Učíte studenty.,You teach students.,juː tˈiːtʃ stˈuːdənts,you_teach_students.opus,18038,,,,26,False,18
+Hrají fotbal.,They play football.,ðeɪ plˈeɪ fˈʊtbɔːl,they_play_football.opus,18039,,,,26,False,18
+Kočka běhá v parku.,The cat runs in the park.,ðə kˈæt ɹˈʌnz ɪnðə pˈɑːɹk,the_cat_runs_in_the_park.opus,18040,,,,26,False,18
+Pes spí na posteli.,The dog sleeps on a bed.,ðə dˈɑːɡ slˈiːps ˌɔn ɐ bˈɛd,the_dog_sleeps_on_a_bed.opus,18041,,,,26,False,18
+Anna vaří rýži.,Anna cooks rice.,ˈænə kˈʊks ɹˈaɪs,anna_cooks_rice.opus,18042,,,,26,False,18
+Můj bratr žije v domě.,My brother lives in a house.,maɪ bɹˈʌðɚ lˈaɪvz ɪn ɐ hˈaʊs,my_brother_lives_in_a_house.opus,18043,,,,26,False,18
+Děti otevírají dveře.,Children open doors.,tʃˈɪldɹən ˈoʊpən dˈɔːɹz,children_open_doors.opus,18044,,,,26,False,18
+Pták létá.,A bird flies.,ɐ bˈɜːd flˈaɪz,a_bird_flies.opus,18045,,,,26,False,18
+Matka zpívá píseň.,Mother sings a song.,mˈʌðɚ sˈɪŋz ɐ sˈɔŋ,mother_sings_a_song.opus,18046,,,,26,False,18
+Slunce svítí ráno.,The sun shines in the morning.,ðə sˈʌn ʃˈaɪnz ɪnðə mˈɔːɹnɪŋ,the_sun_shines_in_the_morning.opus,18047,,,,26,False,18

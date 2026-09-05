@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+vzdálenost,distance,dˈɪstəns,distance.opus,15000,,,,,True,15
+vzdělání,education,ˌɛdʒuːkˈeɪʃən,education.opus,15001,,,,,True,15
+autobus,bus,bˈʌs,bus.opus,15002,,,,,True,15
+společnost,company,kˈʌmpəni,company.opus,15003,,,,,True,15
+poušť,desert,dˈɛzɚt,desert.opus,15004,,,,,True,15
+drahý (cenově),expensive,ɛkspˈɛnsɪv,expensive.opus,15005,,,,,True,15
+květina,flower,flˈaʊɚ,flower.opus,15006,,,,,True,15
+kostel,church,tʃˈɜːtʃ,church.opus,15007,,,,,True,15
+možné,possible,pˈɑːsᵻbəl,possible.opus,15008,,,,,True,15
+nemožné,impossible,ɪmpˈɑːsᵻbəl,impossible.opus,15009,,,,,True,15
+opustit,leave,lˈiːv,leave.opus,15010,,,,,True,15
+plán,plan,plˈæn,plan.opus,15011,,,,,True,15
+vrátit se,return,ɹᵻtˈɜːn,return.opus,15012,,,,,True,15
+uložit,save,sˈeɪv,save.opus,15013,,,,,True,15
+moře,sea,sˈiː,sea.opus,15014,,,,,True,15
+spolu,together,təɡˈɛðɚ,together.opus,15015,,,,,True,15
+armáda,army,ˈɑːɹmi,army.opus,15016,,,,,True,15
+kryt,cover,kˈʌvɚ,cover.opus,15017,,,,,True,15
+kultura,culture,kˈʌltʃɚ,culture.opus,15018,,,,,True,15
+rozhodnutí,decision,dᵻsˈɪʒən,decision.opus,15019,,,,,True,15
+příklad,example,ɛɡzˈæmpəl,example.opus,15020,,,,,True,15
+cítit,feel,fˈiːl,feel.opus,15021,,,,,True,15
+ostrov,island,ˈaɪlənd,island.opus,15022,,,,,True,15
+člen,member,mˈɛmbɚ,member.opus,15023,,,,,True,15
+deset hodin dopoledne,ten AM,tˈɛn æm,ten_am.opus,15024,26,,,18,False,15
+pět hodin odpoledne,five PM,fˈaɪv pˌiːˈɛm,five_pm.opus,15025,26,,,18,False,15
+deset hodin,ten o'clock,tˈɛn əklˈɑːk,ten_oclock.opus,15026,26,,,18,False,15
+osm hodin 10 minut,eight ten,ˈeɪt tˈɛn,eight_ten.opus,15027,26,,,18,False,15
+třetího února,February 3rd,fˈɛbɹuːˌɛɹi θˈɜːd,february_3rd.opus,15028,27,,,19,False,15
+dvacátého osmého března,March 28th,mˈɑːɹtʃ twˈɛnti ˈeɪtθ,march_28th.opus,15029,27,,,19,False,15
+prvního ledna 2026,January 1st 2026,dʒˈænjuːˌɛɹi fˈɜːst tˈuː θˈaʊzənd twˈɛnti sˈɪks,january_1st_2026.opus,15030,27,,,19,False,15
+patnáctého března 1975,March 15th 1975,mˈɑːɹtʃ fˈɪftiːnθ nˈaɪntiːnhˈʌndɹɪd sˈɛvənti fˈaɪv,march_15th_1975.opus,15031,27,,,19,False,15

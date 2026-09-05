@@ -699,6 +699,33 @@ describe('UserItem', () => {
     expect(updated.mastered_at_en_to_cz).toBe('1970-01-01T00:00:00.000Z');
   });
 
+  it('initial-training skip masters both directions and clears both schedules', () => {
+    const dateTime = '2026-03-04T09:00:00.000Z';
+    const updated = UserItem.applyPracticeProgress(
+      {
+        progress_cz_to_en: 2,
+        progress_en_to_cz: 1,
+        started_at: '1970-01-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+      } as any,
+      'czToEn',
+      'skip',
+      dateTime,
+      { masterBothDirectionsOnSkip: true },
+    );
+
+    expect(updated).toMatchObject({
+      progress_cz_to_en: 2,
+      progress_en_to_cz: 1,
+      started_at: dateTime,
+      next_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+      next_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+      mastered_at_cz_to_en: dateTime,
+      mastered_at_en_to_cz: dateTime,
+    });
+  });
+
   it('masters a direction naturally when a correct answer reaches the SRS limit', () => {
     const updated = UserItem.applyPracticeProgress(
       {

@@ -1,0 +1,41 @@
+czech,english,block_id,grammar_chunk_id
+euro,euro,,
+šunka,ham,,
+šroub,screw,,
+podat,hand,,
+kabelka,handbag,,
+obrazovka,screen,,
+založit,establish,,
+handicap,handicap,,
+handicapované,handicapped,,
+sudý,even,,
+udeřit,blow,,
+plátek,slice,,
+provádět,guide,,
+průvodce,guidebook,,
+lyže,ski,,
+velmi,greatly,,
+lyžování,skiing,,
+chamtivý,greedy,,
+existovat,exist,,
+vystavit,exhibit,,
+výstava,exhibition,,
+tajemník,secretary,,
+gril,grill,,
+grilovat,grill,,
+"Když zahřívám led, taje","If I heat ice, it melts",63,60
+"Když se dotkneš ohně, pálí","If you touch fire, it burns",63,60
+"Když jí příliš rychle, je mu špatně","If he eats too fast, he feels sick",63,60
+"Když smíchá barvy, vznikne zelená","If she mixes the colours, it turns green",63,60
+"Když se ochladí, voda zmrzne","If it gets cold, water freezes",63,60
+"Když necháme mléko venku, zkazí se","If we leave milk out, it spoils",63,60
+"Když stisknete tlačítko, světlo se rozsvítí","If you press the button, the light comes on",63,60
+"Když nezalévají rostliny, zemřou","If they don't water the plants, they die",63,60
+"Když zahřívám led, vždycky roztaje.","If I heat ice, it always melts.",,60
+"Když se dotkneš této rostliny, začne tě svědit kůže.","If you touch this plant, your skin itches.",,60
+"Když jí příliš rychle, často ho bolí břicho.","If he eats too fast, his stomach often hurts.",,60
+"Když smíchá modrou a žlutou, vznikne zelená.","If she mixes blue and yellow, it makes green.",,60
+"Když se ochladí pod nulu, voda zmrzne.","If it gets below zero, water freezes.",,60
+"Když necháme jídlo venku, rychle se zkazí.","If we leave food out, it goes bad quickly.",,60
+"Když stisknete toto tlačítko, počítač se vypne.","If you press this button, the computer turns off.",,60
+"Když nezalévají květiny, uschnou.","If they don't water the flowers, they dry out.",,60

@@ -227,6 +227,27 @@ describe('PracticeSession progress transactions', () => {
     await expect(PracticeSession.reconcileActive('u1')).resolves.toBe(session);
     expect(mocks.sessionDelete).not.toHaveBeenCalled();
   });
+
+  it('rejects a phase-1 initial-training session as invalid', async () => {
+    const session = {
+      ...newSession(),
+      phase: 1 as const,
+      current_queue_item_ids: [2],
+      completed_item_ids: [1],
+      completed_count: 1,
+    };
+    mocks.sessionGet.mockResolvedValue(session);
+    mocks.blockGet.mockResolvedValue({ id: 10 });
+    mocks.blockItems.mockResolvedValue([
+      { item_id: 1, block_id: 10, deleted_at: '9999-12-31T23:59:59+00:00' },
+      { item_id: 2, block_id: 10, deleted_at: '9999-12-31T23:59:59+00:00' },
+    ]);
+
+    await expect(PracticeSession.inspectActive('u1')).resolves.toEqual({
+      activeSession: null,
+      requiresReconciliation: true,
+    });
+  });
 });
 
 function reviewSession(completedCount: number) {

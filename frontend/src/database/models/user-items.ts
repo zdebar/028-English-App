@@ -399,6 +399,20 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         item.progress_en_to_cz,
         config.progress.afterNewBlockProgress,
       );
+      const nextAtCzToEn = getNextAt(progressCzToEn, 'czToEn');
+      const nextAtEnToCz = getNextAt(progressEnToCz, 'enToCz');
+      const masteredAtCzToEn = resolveMasteredAt(
+        progressCzToEn,
+        'czToEn',
+        item.mastered_at_cz_to_en,
+        dateTime,
+      );
+      const masteredAtEnToCz = resolveMasteredAt(
+        progressEnToCz,
+        'enToCz',
+        item.mastered_at_en_to_cz,
+        dateTime,
+      );
 
       return {
         ...item,
@@ -406,20 +420,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         progress_en_to_cz: progressEnToCz,
         started_at: item.started_at === NULL_DATE ? dateTime : item.started_at,
         updated_at: dateTime,
-        next_at_cz_to_en: getNextAt(progressCzToEn, 'czToEn'),
-        next_at_en_to_cz: getNextAt(progressEnToCz, 'enToCz'),
-        mastered_at_cz_to_en: resolveMasteredAt(
-          progressCzToEn,
-          'czToEn',
-          item.mastered_at_cz_to_en,
-          dateTime,
-        ),
-        mastered_at_en_to_cz: resolveMasteredAt(
-          progressEnToCz,
-          'enToCz',
-          item.mastered_at_en_to_cz,
-          dateTime,
-        ),
+        next_at_cz_to_en: getNextAtForMastery(nextAtCzToEn, masteredAtCzToEn),
+        next_at_en_to_cz: getNextAtForMastery(nextAtEnToCz, masteredAtEnToCz),
+        mastered_at_cz_to_en: masteredAtCzToEn,
+        mastered_at_en_to_cz: masteredAtEnToCz,
       };
     });
 
@@ -869,16 +873,20 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   /**
    * Applies one explicit practice outcome to the active direction.
    *
-   * The first answer schedules the opposite direction at zero progress.
+   * The first non-skip answer schedules the opposite direction at zero progress.
    */
   static applyPracticeProgress(
     item: UserItemLocal,
     direction: PracticeDirection,
     outcome: PracticeOutcome,
     dateTime: string,
-    options: { oppositeDirectionNextAt?: string } = {},
+    options: {
+      oppositeDirectionNextAt?: string;
+      masterBothDirectionsOnSkip?: boolean;
+    } = {},
   ): UserItemLocal {
     const isFirstAnswer = item.started_at === NULL_DATE;
+    const shouldMasterBothDirections = outcome === 'skip' && options.masterBothDirectionsOnSkip;
     const currentProgress = getEffectiveProgress(item, direction);
     const otherDirection: PracticeDirection = direction === 'czToEn' ? 'enToCz' : 'czToEn';
     const changes: Partial<UserItemLocal> = {
@@ -887,8 +895,13 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       updated_at: dateTime,
     };
 
-    if (isFirstAnswer) {
+    if (isFirstAnswer && !shouldMasterBothDirections) {
       initializeDirectionState(changes, otherDirection, options.oppositeDirectionNextAt);
+    }
+
+    if (shouldMasterBothDirections) {
+      setBothDirectionsMastered(changes, item, dateTime);
+      return { ...item, ...changes };
     }
 
     let directionProgress = currentProgress;
@@ -1019,12 +1032,36 @@ function setDirectionMastered(
   }
 }
 
+function setBothDirectionsMastered(
+  target: Partial<UserItemLocal>,
+  original: UserItemLocal,
+  dateTime: string,
+): void {
+  setDirectionMastered(
+    target,
+    'czToEn',
+    getEffectiveProgress(original, 'czToEn'),
+    dateTime,
+  );
+  setDirectionMastered(
+    target,
+    'enToCz',
+    getEffectiveProgress(original, 'enToCz'),
+    dateTime,
+  );
+}
+
 function clearDirectionMastery(target: Partial<UserItemLocal>, direction: PracticeDirection): void {
   if (direction === 'czToEn') {
     target.mastered_at_cz_to_en = NULL_DATE;
   } else {
     target.mastered_at_en_to_cz = NULL_DATE;
   }
+}
+
+function getNextAtForMastery(nextAt: string, masteredAt: string): string {
+  if (masteredAt !== NULL_DATE) return NULL_DATE;
+  return nextAt;
 }
 
 function resolveMasteredAt(

@@ -1,0 +1,49 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+další,next,nˈɛkst,next.opus,16000,,,,,True,16
+pozice,position,pəzˈɪʃən,position.opus,16001,,,,,True,16
+současný,present,pɹˈɛzənt,present.opus,16002,,,,,True,16
+záznam,record,ɹˈɛkɚd,record.opus,16003,,,,,True,16
+sladký,sweet,swˈiːt,sweet.opus,16004,,,,,True,16
+zkusit,try,tɹˈaɪ,try.opus,16005,,,,,True,16
+policie,police,pəlˈiːs,police.opus,16006,,,,,True,16
+svět,world,wˈɜːld,world.opus,16007,,,,,True,16
+chytit,catch,kˈætʃ,catch.opus,16008,,,,,True,16
+roh,corner,kˈɔːɹnɚ,corner.opus,16009,,,,,True,16
+zájem,interest,ˈɪntɹɛst,interest.opus,16010,,,,,True,16
+část,part,pˈɑːɹt,part.opus,16011,,,,,True,16
+prezident,president,pɹˈɛzɪdənt,president.opus,16012,,,,,True,16
+kolo,round,ɹˈaʊnd,round.opus,16013,,,,,True,16
+několik,several,sˈɛvɹəl,several.opus,16014,,,,,True,16
+zvuk,sound,sˈaʊnd,sound.opus,16015,,,,,True,16
+příběh,story,stˈɔːɹi,story.opus,16016,,,,,True,16
+téměř,almost,ˈɔːlmoʊst,almost.opus,16017,,,,,True,16
+ovládat,control,kəntɹˈoʊl,control.opus,16018,,,,,True,16
+milý,dear,dˈɪɹ,dear.opus,16019,,,,,True,16
+šéf,chief,tʃˈiːf,chief.opus,16020,,,,,True,16
+pozvat,invite,ɪnvˈaɪt,invite.opus,16021,,,,,True,16
+pozdní,late,lˈeɪt,late.opus,16022,,,,,True,16
+většina,most,mˈoʊst,most.opus,16023,,,,,True,16
+ráno,in the morning,ɪnðə mˈɔːɹnɪŋ,in_the_morning.opus,16024,28,,,20,False,16
+odpoledne,in the afternoon,ɪnðɪ ˌæftɚnˈuːn,in_the_afternoon.opus,16025,28,,,20,False,16
+večer,in the evening,ɪnðɪ ˈiːvnɪŋ,in_the_evening.opus,16026,28,,,20,False,16
+v lednu,in January,ɪn dʒˈænjuːˌɛɹi,in_january.opus,16027,28,,,20,False,16
+v létě,in summer,ɪn sˈʌmɚ,in_summer.opus,16028,28,,,20,False,16
+v zimě,in winter,ɪn wˈɪntɚ,in_winter.opus,16029,28,,,20,False,16
+v roce 2020,in 2020,ɪn tˈuː θˈaʊzənd twˈɛnti,in_2020.opus,16030,28,,,20,False,16
+v 19. století,in the 19th century,ɪnðə nˈaɪntiːnθ sˈɛntʃɚɹi,in_the_19th_century.opus,16031,28,,,20,False,16
+v pondělí,on Monday,ˌɔn mˈʌndeɪ,on_monday.opus,16032,29,,,21,False,16
+v úterý,on Tuesday,ˌɔn tˈuːzdeɪ,on_tuesday.opus,16033,29,,,21,False,16
+v pátek ráno,on Friday morning,ˌɔn fɹˈaɪdeɪ mˈɔːɹnɪŋ,on_friday_morning.opus,16034,29,,,21,False,16
+1. ledna,on January 1st,ˌɔn dʒˈænjuːˌɛɹi fˈɜːst,on_january_1st.opus,16035,29,,,21,False,16
+na moje narozeniny,on my birthday,ˌɔn maɪ bˈɜːθdeɪ,on_my_birthday.opus,16036,29,,,21,False,16
+na Štědrý den,on Christmas Eve,ˌɔn kɹˈɪsməs ˈiːv,on_christmas_eve.opus,16037,29,,,21,False,16
+o víkendu,on the weekend,ɔnðə wˈiːkɛnd,on_the_weekend.opus,16038,29,,,21,False,16
+ve všední dny,on weekdays,ˌɔn wˈiːkdeɪz,on_weekdays.opus,16039,29,,,21,False,16
+v 7 hodin,at seven o’clock,æt sˈɛvən əklˈɑːk,at_seven_oclock.opus,16040,30,,,22,False,16
+v 8:30,at 8:30,æɾ ˈeɪt θˈɜːɾi,at_830.opus,16041,30,,,22,False,16
+v poledne,at noon,æt nˈuːn,at_noon.opus,16042,30,,,22,False,16
+o půlnoci,at midnight,æt mˈɪdnaɪt,at_midnight.opus,16043,30,,,22,False,16
+v noci,at night,æt nˈaɪt,at_night.opus,16044,30,,,22,False,16
+za úsvitu,at dawn,æt dˈɔːn,at_dawn.opus,16045,30,,,22,False,16
+za soumraku,at dusk,æt dˈʌsk,at_dusk.opus,16046,30,,,22,False,16
+v době oběda,at lunchtime,æt lˈʌntʃtaɪm,at_lunchtime.opus,16047,30,,,22,False,16

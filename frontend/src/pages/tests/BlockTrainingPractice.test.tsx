@@ -19,7 +19,7 @@ const mocks = vi.hoisted(() => ({
     currentItem: null as { item_id: number } | null,
     note: null,
     practiceGrammar: null,
-    progressLabel: '1/2 · 0/1',
+    progressLabel: '0/1',
     isCzToEn: true,
     revealed: false,
     czech: 'ahoj',

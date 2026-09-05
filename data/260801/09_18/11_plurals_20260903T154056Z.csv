@@ -1,0 +1,45 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+udělat,make,mˈeɪk,make.opus,11000,,,,,True,11
+mír,peace,pˈiːs,peace.opus,11001,,,,,True,11
+důležitý,important,ɪmpˈɔːɹtənt,important.opus,11002,,,,,True,11
+populární,popular,pˈɑːpjʊlɚ,popular.opus,11003,,,,,True,11
+správně,right,ɹˈaɪt,right.opus,11004,,,,,True,11
+tak,so,sˈoʊ,so.opus,11005,,,,,True,11
+ale,but,bˈʌt,but.opus,11006,,,,,True,11
+sen,dream,dɹˈiːm,dream.opus,11007,,,,,True,11
+pro,for,fˈɔːɹ,for.opus,11008,,,,,True,11
+uvnitř,inside,ɪnsˈaɪd,inside.opus,11009,,,,,True,11
+nyní,now,nˈaʊ,now.opus,11010,,,,,True,11
+nebo,or,ˈɔːɹ,or.opus,11011,,,,,True,11
+obrázek,picture,pˈɪktʃɚ,picture.opus,11012,,,,,True,11
+před,before,bᵻfˈɔːɹ,before.opus,11013,,,,,True,11
+řeka,river,ɹˈɪvɚ,river.opus,11014,,,,,True,11
+loď,ship,ʃˈɪp,ship.opus,11015,,,,,True,11
+země,land,lˈænd,land.opus,11016,,,,,True,11
+velmi,very,vˈɛɹi,very.opus,11017,,,,,True,11
+kino,cinema,sˈɪnəmə,cinema.opus,11018,,,,,True,11
+odkud,from where,fɹʌm wˈɛɹ,from_where.opus,11019,,,,,True,11
+učit,teach,tˈiːtʃ,teach.opus,11020,,,,,True,11
+fotbal,football,fˈʊtbɔːl,football.opus,11021,,,,,True,11
+čekat,wait,wˈeɪt,wait.opus,11022,,,,,True,11
+znovu,again,ɐɡˈɛn,again.opus,11023,,,,,True,11
+kočky,cats,kˈæts,cats.opus,11024,14,,,8,False,11
+psy,dogs,dˈɑːɡz,dogs.opus,11025,14,,,8,False,11
+domy,houses,hˈaʊzᵻz,houses.opus,11026,14,,,8,False,11
+stoly,tables,tˈeɪbəlz,tables.opus,11027,14,,,8,False,11
+děti,children,tʃˈɪldɹən,children.opus,11028,14,,,8,False,11
+myši,mice,mˈaɪs,mice.opus,11029,14,,,8,False,11
+muži,men,mˈɛn,men.opus,11030,14,,,8,False,11
+ženy,women,wˈɪmɪn,women.opus,11031,14,,,8,False,11
+mnoho (nepočítatelných),much,mˈʌtʃ,much.opus,11032,15,,,8,False,11
+mnoho (počítatelných),many,mˈɛni,many.opus,11033,15,,,8,False,11
+málo (nepočítatelných),little,lˈɪɾəl,little.opus,11034,15,,,8,False,11
+málo (počítatelných),few,fjˈuː,few.opus,11035,15,,,8,False,11
+trochu (nepočítatelných),a little,ɐ lˈɪɾəl,a_little.opus,11036,15,,,8,False,11
+několik (počítatelných),a few,ɐ fjˈuː,a_few.opus,11037,15,,,8,False,11
+mnoho vody,much water,mˈʌtʃ wˈɔːɾɚ,much_water.opus,11038,16,,,8,False,11
+mnoho aut,many cars,mˈɛni kˈɑːɹz,many_cars.opus,11039,16,,,8,False,11
+málo cukru,little sugar,lˈɪɾəl ʃˈʊɡɚ,little_sugar.opus,11040,16,,,8,False,11
+málo knih,few books,fjˈuː bˈʊks,few_books.opus,11041,16,,,8,False,11
+trochu mléka,a little milk,ɐ lˈɪɾəl mˈɪlk,a_little_milk.opus,11042,16,,,8,False,11
+několik studentů,a few students,ɐ fjˈuː stˈuːdənts,a_few_students.opus,11043,16,,,8,False,11

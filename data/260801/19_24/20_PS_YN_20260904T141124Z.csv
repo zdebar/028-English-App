@@ -1,0 +1,49 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+spisovatel,writer,ɹˈaɪɾɚ,writer.opus,20000,,,,,True,20
+starost,worry,wˈʌɹi,worry.opus,20001,,,,,True,20
+pracovník,worker,wˈɜːkɚ,worker.opus,20002,,,,,True,20
+úžasné,wonderful,wˈʌndɚfəl,wonderful.opus,20003,,,,,True,20
+deštník,umbrella,ʌmbɹˈɛlə,umbrella.opus,20004,,,,,True,20
+škaredý,ugly,ˈʌɡli,ugly.opus,20005,,,,,True,20
+televize,TV,tˌiːvˈiː,tv.opus,20006,,,,,True,20
+zatočit,turn,tˈɜːn,turn.opus,20007,,,,,True,20
+obrat,turn,tˈɜːn,turn.opus,20008,,,,,True,20
+krocan,turkey,tˈɜːki,turkey.opus,20009,,,,,True,20
+roura,tube,tˈuːb,tube.opus,20010,,,,,True,20
+pokus,try,tɹˈaɪ,try.opus,20011,,,,,True,20
+věrný,true,tɹˈuː,true.opus,20012,,,,,True,20
+nákladní auto,truck,tɹˈʌk,truck.opus,20013,,,,,True,20
+hračka,toy,tˈɔɪ,toy.opus,20014,,,,,True,20
+věž,tower,tˈaʊɚ,tower.opus,20015,,,,,True,20
+ručník,towel,tˈaʊəl,towel.opus,20016,,,,,True,20
+podtrhnout,underline,ˌʌndɚlˈaɪn,underline.opus,20017,,,,,True,20
+sledovat,watch,wˈɑːtʃ,watch.opus,20018,,,,,True,20
+hodinky,watch,wˈɑːtʃ,watch.opus,20019,,,,,True,20
+praní,wash,wˈɑːʃ,wash.opus,20020,,,,,True,20
+teplo,warm,wˈɔːɹm,warm.opus,20021,,,,,True,20
+probudit,wake,wˈeɪk,wake.opus,20022,,,,,True,20
+číšník,waiter,wˈeɪɾɚ,waiter.opus,20023,,,,,True,20
+Já jím?,Do I eat?,dˈuː aɪ ˈiːt,do_i_eat.opus,20024,36,,,28,False,20
+Ty čteš?,Do you read?,dˈuː juː ɹˈiːd,do_you_read.opus,20025,36,,,28,False,20
+On běhá?,Does he run?,dˈʌz hiː ɹˈʌn,does_he_run.opus,20026,36,,,28,False,20
+Ona vaří?,Does she cook?,dˈʌz ʃiː kˈʊk,does_she_cook.opus,20027,36,,,28,False,20
+Ono funguje?,Does it work?,dˈʌz ɪt wˈɜːk,does_it_work.opus,20028,36,,,28,False,20
+My zpíváme?,Do we sing?,dˈuː wiː sˈɪŋ,do_we_sing.opus,20029,36,,,28,False,20
+Vy čekáte?,Do you wait?,dˈuː juː wˈeɪt,do_you_wait.opus,20030,36,,,28,False,20
+Oni cestují?,Do they travel?,dˈuː ðeɪ tɹˈævəl,do_they_travel.opus,20031,36,,,28,False,20
+"Ano, jím.","Yes, I do.",jˈɛs aɪ dˈuː,yes_i_do.opus,20032,37,,,29,False,20
+"Ne, nečteš.","No, you don't.",nˈoʊ juː dˈoʊnt,no_you_dont.opus,20033,37,,,29,False,20
+"Ano, běhá.","Yes, he does.",jˈɛs hiː dˈʌz,yes_he_does.opus,20034,37,,,29,False,20
+"Ne, nevaří.","No, she doesn't.",nˈoʊ ʃiː dˈʌzənt,no_she_doesnt.opus,20035,37,,,28,False,20
+"Ano, funguje.","Yes, it does.",jˈɛs ɪt dˈʌz,yes_it_does.opus,20036,37,,,28,False,20
+"Ne, nezpíváme.","No, we don't.",nˈoʊ wiː dˈoʊnt,no_we_dont.opus,20037,37,,,28,False,20
+"Ano, čekáte.","Yes, you do.",jˈɛs juː dˈuː,yes_you_do.opus,20038,37,,,28,False,20
+"Ne, necestují.","No, they don't.",nˈoʊ ðeɪ dˈoʊnt,no_they_dont.opus,20039,37,,,28,False,20
+Jím doma?,Do I eat at home?,dˈuː aɪ ˈiːt æt hˈoʊm,do_i_eat_at_home.opus,20040,,,,28,False,20
+Čteš knihy?,Do you read books?,dˈuː juː ɹˈiːd bˈʊks,do_you_read_books.opus,20041,,,,28,False,20
+On řídí auto?,Does he drive a car?,dˈʌz hiː dɹˈaɪv ɐ kˈɑːɹ,does_he_drive_a_car.opus,20042,,,,28,False,20
+Ona učí angličtinu?,Does she teach English?,dˈʌz ʃiː tˈiːtʃ ˈɪŋɡlɪʃ,does_she_teach_english.opus,20043,,,,28,False,20
+Bolí to?,Does it hurt?,dˈʌz ɪt hˈɜːt,does_it_hurt.opus,20044,,,,28,False,20
+My bydlíme tady?,Do we live here?,dˈuː wiː lˈɪv hˈɪɹ,do_we_live_here.opus,20045,,,,28,False,20
+Vy potřebujete pomoc?,Do you need help?,dˈuː juː nˈiːd hˈɛlp,do_you_need_help.opus,20046,,,,28,False,20
+Oni hrají fotbal?,Do they play football?,dˈuː ðeɪ plˈeɪ fˈʊtbɔːl,do_they_play_football.opus,20047,,,,28,False,20

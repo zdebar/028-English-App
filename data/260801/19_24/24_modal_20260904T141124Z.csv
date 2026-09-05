@@ -1,0 +1,73 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+plachý,shy,ʃˈaɪ,shy.opus,24000,,,,,True,24
+sprcha,shower,ʃˈaʊɚ,shower.opus,24001,,,,,True,24
+šou,show,ʃˈoʊ,show.opus,24002,,,,,True,24
+by měl,should,ʃˈʊd,should.opus,24003,,,,,True,24
+krátit,short,ʃˈɔːɹt,short.opus,24004,,,,,True,24
+nakupování,shopping,ʃˈɑːpɪŋ,shopping.opus,24005,,,,,True,24
+bota,shoe,ʃˈuː,shoe.opus,24006,,,,,True,24
+třepat,shake,ʃˈeɪk,shake.opus,24007,,,,,True,24
+sestavit,set,sˈɛt,set.opus,24008,,,,,True,24
+věta,sentence,sˈɛntəns,sentence.opus,24009,,,,,True,24
+já,self,sˈɛlf,self.opus,24010,,,,,True,24
+pohled,sight,sˈaɪt,sight.opus,24011,,,,,True,24
+fotbal,soccer,sˈɑːkɚ,soccer.opus,24012,,,,,True,24
+zasněžený,snowy,snˈoʊi,snowy.opus,24013,,,,,True,24
+had,snake,snˈeɪk,snake.opus,24014,,,,,True,24
+kouř,smoke,smˈoʊk,smoke.opus,24015,,,,,True,24
+kouření,smoking,smˈoʊkɪŋ,smoking.opus,24016,,,,,True,24
+kovář,smith,smˈɪθ,smith.opus,24017,,,,,True,24
+vůně,smell,smˈɛl,smell.opus,24018,,,,,True,24
+dovednost,skill,skˈɪl,skill.opus,24019,,,,,True,24
+místo,site,sˈaɪt,site.opus,24020,,,,,True,24
+Pane,sir,sˈɜː,sir.opus,24021,,,,,True,24
+zpěvák,singer,sˈɪŋɚ,singer.opus,24022,,,,,True,24
+sekce,section,sˈɛkʃən,section.opus,24023,,,,,True,24
+"moci, umět",can,kˈæn,can.opus,24024,42,,,34,False,24
+"moci, umět v minulosti",could,kˈʊd,could.opus,24025,42,,,34,False,24
+"smět, mít povolení, možná",may,mˈeɪ,may.opus,24026,42,,,34,False,24
+"možná, mohl by",might,mˈaɪt,might.opus,24027,42,,,34,False,24
+muset,must,mˈʌst,must.opus,24028,42,,,34,False,24
+"budu, budeme",shall,ʃˈæl,shall.opus,24029,42,,,34,False,24
+"měl by, měla by",should,ʃˈʊd,should.opus,24030,43,,,34,False,24
+"budu, bude",will,wˈɪl,will.opus,24031,43,,,34,False,24
+"chtěl by, udělal by",would,wˈʊd,would.opus,24032,43,,,34,False,24
+"nemoci, neumět",can't,kˈænt,cant.opus,24033,43,,,34,False,24
+"nemoci, neumět v minulosti",couldn't,kˈʊdənt,couldnt.opus,24034,43,,,34,False,24
+"možná ne, nesmět",may not,mˈeɪ nˈɑːt,may_not.opus,24035,43,,,34,False,24
+možná ne,might not,mˌaɪt nˈɑːt,might_not.opus,24036,44,,,34,False,24
+"nesmět, mít zákaz",mustn't,mˈʌsənt,mustnt.opus,24037,44,,,34,False,24
+"nesmět, nebude",shall not,ʃˌæl nˈɑːt,shall_not.opus,24038,44,,,34,False,24
+"neměl by, neměla by",shouldn't,ʃˈʊdənt,shouldnt.opus,24039,44,,,34,False,24
+"nebude, odmítne",won't,wˈoʊnt,wont.opus,24040,44,,,34,False,24
+"nechtěl by, neudělal by",wouldn't,wˈʊdənt,wouldnt.opus,24041,44,,,34,False,24
+Já mohu pomoci.,I can help.,aɪ kæn hˈɛlp,i_can_help.opus,24042,,,,34,False,24
+Ty musíš odejít.,You must leave.,juː mˈʌst lˈiːv,you_must_leave.opus,24043,,,,34,False,24
+On by měl studovat.,He should study.,hiː ʃˌʊd stˈʌdi,he_should_study.opus,24044,,,,34,False,24
+Ona může přijít.,She may come.,ʃiː mˈeɪ kˈʌm,she_may_come.opus,24045,,,,34,False,24
+ono nemůže spadnout.,It can't fall.,ɪt kˈænt fˈɔːl,it_cant_fall.opus,24046,,,,34,False,24
+my musíme počkat.,We must wait.,wiː mˈʌst wˈeɪt,we_must_wait.opus,24047,,,,34,False,24
+vy můžete začít.,You can start.,juː kæn stˈɑːɹt,you_can_start.opus,24048,,,,34,False,24
+oni by měli poslouchat.,They should listen.,ðeɪ ʃˌʊd lˈɪsən,they_should_listen.opus,24049,,,,34,False,24
+Mohu řídit auto.,I can drive a car.,aɪ kæn dɹˈaɪv ɐ kˈɑːɹ,i_can_drive_a_car.opus,24050,,,,34,False,24
+Musíš mít zapnutý bezpečnostní pás.,You must wear a seat belt.,juː mˈʌst wˈɛɹ ɐ sˈiːt bˈɛlt,you_must_wear_a_seat_belt.opus,24051,,,,34,False,24
+Měl by zavolat své matce.,He should call his mother.,hiː ʃˌʊd kˈɔːl hɪz mˈʌðɚ,he_should_call_his_mother.opus,24052,,,,34,False,24
+Možná přijde pozdě.,She may be late.,ʃiː mˈeɪ biː lˈeɪt,she_may_be_late.opus,24053,,,,34,False,24
+Nemůže otevřít dveře.,It can't open the door.,ɪt kˈænt ˈoʊpən ðə dˈɔːɹ,it_cant_open_the_door.opus,24054,,,,34,False,24
+Musíme to dnes dokončit.,We must finish today.,wiː mˈʌst fˈɪnɪʃ tədˈeɪ,we_must_finish_today.opus,24055,,,,34,False,24
+Můžete použít můj telefon.,You can use my phone.,juː kæn jˈuːz maɪ fˈoʊn,you_can_use_my_phone.opus,24056,,,,34,False,24
+Neměli by dělat hluk.,They shouldn't make noise.,ðeɪ ʃˌʊdənt mˌeɪk nˈɔɪz,they_shouldnt_make_noise.opus,24057,,,,34,False,24
+Umíš plavat?,Can You swim?,kæn juː swˈɪm,can_you_swim.opus,24058,,,,34,False,24
+Mohl bys mi pomoci?,Could you help me?,kʊd juː hˈɛlp mˌiː,could_you_help_me.opus,24059,,,,34,False,24
+Smím vstoupit?,May I come in?,mˈeɪ aɪ kˈʌm ˈɪn,may_i_come_in.opus,24060,,,,34,False,24
+Mohl by být pozdě?,Might he be late?,mˌaɪt hiː biː lˈeɪt,might_he_be_late.opus,24061,,,,34,False,24
+Musím teď odejít?,Must I leave now?,mˈʌst aɪ lˈiːv nˈaʊ,must_i_leave_now.opus,24062,,,,34,False,24
+Máme začít?,Shall we start?,ʃˌæl wiː stˈɑːɹt,shall_we_start.opus,24063,,,,34,False,24
+Měl bych jí zavolat?,Should I call her?,ʃˌʊd aɪ kˈɔːl hɜː,should_i_call_her.opus,24064,,,,34,False,24
+Pomůžeš mi?,Will you help me?,wɪl juː hˈɛlp mˌiː,will_you_help_me.opus,24065,,,,34,False,24
+Dáš si čaj?,Would you like some tea?,wʊd juː lˈaɪk sˌʌm tˈiː,would_you_like_some_tea.opus,24066,,,,34,False,24
+Nemůžeš zůstat?,Can't you stay?,kˈænt juː stˈeɪ,cant_you_stay.opus,24067,,,,34,False,24
+Nemohl bys počkat?,Couldn't you wait?,kˌʊdənt juː wˈeɪt,couldnt_you_wait.opus,24068,,,,34,False,24
+Neměl bych jí zavolat?,Shouldn't I call her?,ʃˌʊdənt aɪ kˈɔːl hɜː,shouldnt_i_call_her.opus,24069,,,,34,False,24
+Nepřijdeš s námi?,Won't you come with us?,woʊnt juː kˈʌm wɪð ˌʌs,wont_you_come_with_us.opus,24070,,,,34,False,24
+Nechtěl bys čaj?,Wouldn't you like some tea?,wˈʊdənt juː lˈaɪk sˌʌm tˈiː,wouldnt_you_like_some_tea.opus,24071,,,,34,False,24
