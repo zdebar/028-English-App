@@ -8,4 +8,5 @@
 1. Don't nest ternary or other logical operations. Extract into independent statements.
 2. Prefer using an optional chain expression, as it's more concise and easier to read.
 3. Maximal allowed Cognitive Complexity is 15
+4. Use <progress> instead of the \"progressbar\" role to ensure accessibility across all devices.
 

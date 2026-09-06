@@ -15,7 +15,7 @@ vi.mock('@/locales/cs', () => ({
 import BlockBar from '@/components/UI/BlockBar';
 
 describe('BlockBar', () => {
-  it('renders lesson label, today count, and progressbar aria values', () => {
+  it('renders lesson label, today count, and native progress values', () => {
     render(
       <BlockBar
         previousCount={20}
@@ -33,8 +33,8 @@ describe('BlockBar', () => {
     const progressBar = screen.getByRole('progressbar', {
       name: 'Lesson progress bar',
     });
-    expect(progressBar.getAttribute('aria-valuenow')).toBe('25');
-    expect(progressBar.getAttribute('aria-valuemax')).toBe('100');
+    expect(progressBar.getAttribute('value')).toBe('25');
+    expect(progressBar.getAttribute('max')).toBe('100');
   });
 
   it('renders a lesson without a today count', () => {

@@ -141,12 +141,14 @@ describe('LevelsOverview', () => {
       {
         id: 1,
         name: 'A1',
+        initiatedCount: 3,
         startedCount: 3,
         totalCount: 5,
         lessons: [
           {
             id: 101,
             name: 'Lesson 1',
+            initiatedCount: 3,
             startedCount: 3,
             startedTodayCount: 0,
             totalCount: 5,
@@ -176,16 +178,18 @@ describe('LevelsOverview', () => {
       {
         id: 1,
         name: 'A1',
+        initiatedCount: 1,
         startedCount: 1,
         totalCount: 1,
-        lessons: [{ id: 101, name: 'Lesson A1', sort_order: 1, totalCount: 1 }],
+        lessons: [{ id: 101, name: 'Lesson A1', sort_order: 1, initiatedCount: 1, totalCount: 1 }],
       },
       {
         id: 2,
         name: 'A2',
+        initiatedCount: 1,
         startedCount: 1,
         totalCount: 1,
-        lessons: [{ id: 201, name: 'Lesson A2', sort_order: 1, totalCount: 1 }],
+        lessons: [{ id: 201, name: 'Lesson A2', sort_order: 1, initiatedCount: 1, totalCount: 1 }],
       },
     ];
 
@@ -195,24 +199,27 @@ describe('LevelsOverview', () => {
     expect(screen.getByText('Lesson A2')).toBeTruthy();
   });
 
-  it('renders started progress without a mastered toggle', () => {
+  it('renders initiated progress without counting initial skips as started today', () => {
     mocks.levelsOverview = [
       {
         id: 1,
         name: 'A1',
+        initiatedCount: 4,
         startedCount: 3,
         totalCount: 5,
         lessons: [
           {
             id: 101,
             name: 'Lesson 1',
+            initiatedCount: 4,
             startedCount: 3,
-            startedTodayCount: 0,
+            startedTodayCount: 1,
             totalCount: 5,
           },
           {
             id: 102,
             name: 'Lesson 2',
+            initiatedCount: 0,
             startedCount: 0,
             startedTodayCount: 0,
             totalCount: 5,
@@ -224,7 +231,7 @@ describe('LevelsOverview', () => {
     render(<LevelsOverview />);
 
     fireEvent.click(screen.getByText('A1'));
-    expect(mocks.goalMetCalls.some((x) => x.current === 3 && x.goal === 5)).toBe(true);
+    expect(mocks.goalMetCalls.some((x) => x.current === 4 && x.goal === 5)).toBe(true);
     expect(screen.getByText('Started today help')).toBeTruthy();
     expect(screen.queryByText('Mastered')).toBeNull();
   });

@@ -58,7 +58,7 @@ export default function Dashboard({ userId, className = '' }: DashboardProps) {
             key={lesson.id}
             lessonName={lesson.name ?? ''}
             lessonNumber={lesson.sort_order}
-            previousCount={(lesson.startedCount ?? 0) - (lesson.startedTodayCount ?? 0)}
+            previousCount={(lesson.initiatedCount ?? 0) - (lesson.startedTodayCount ?? 0)}
             todayCount={lesson.startedTodayCount ?? 0}
             lessonCount={lesson.totalCount ?? 1}
           />

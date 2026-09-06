@@ -11,10 +11,12 @@ type BlockBarProps = Readonly<{
 }>;
 
 /**
- * BlockBar component displays a lesson's started items split between previous days and today.
+ * BlockBar component displays initiated items split between previous days and today.
  *
- * @param previousCount {number} Number of items started before today.
- * @param todayCount {number} Number of items started today.
+ * @param previousCount {number} Number of items initiated before today, including initial-training
+ * skips.
+ * @param todayCount {number} Number of items actually started today. Initial-training skips are
+ * intentionally excluded.
  * @param lessonName {string} The name of the current lesson block.
  * @param lessonNumber {number} The number of the lesson the block belongs to.
  * @param lessonCount {number} Total number of items in the lesson.
@@ -58,15 +60,15 @@ export default function BlockBar({ ...props }: BlockBarProps) {
         <span title={TEXTS.startedTodayHint}>{todayCount > 0 && `+ ${todayCount}`}</span>
       </div>
       <div className={`relative h-full w-full ${className}`} style={{ width: `${barWidth}%` }}>
-        {/* Native progress bar for accessibility */}
-        <div
-          className="bg-progress-bg relative block h-full w-full"
-          role="progressbar"
-          aria-valuenow={previousCount + todayCount}
-          aria-valuemin={0}
-          aria-valuemax={lessonCount}
+        {/* Native progress element for accessibility */}
+        <progress
+          className="bg-progress-bg relative block h-full w-full appearance-none"
+          value={clampedTotal}
+          max={safeLesson}
           aria-label={ARIA_TEXTS.lessonProgressBar}
-        ></div>
+        >
+          {clampedTotal} / {safeLesson}
+        </progress>
         {/* Visual overlays for today/previous progress */}
         <div
           className="bg-new-progress-light dark:bg-new-progress-dark pointer-events-none absolute top-0 left-0 h-full"
