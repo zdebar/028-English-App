@@ -16,7 +16,7 @@ import BlockBar from '@/components/UI/BlockBar';
 
 describe('BlockBar', () => {
   it('renders lesson label, today count, and native progress values', () => {
-    render(
+    const { container } = render(
       <BlockBar
         previousCount={20}
         todayCount={5}
@@ -35,6 +35,8 @@ describe('BlockBar', () => {
     });
     expect(progressBar.getAttribute('value')).toBe('25');
     expect(progressBar.getAttribute('max')).toBe('100');
+    expect(progressBar.classList.contains('bg-progress-bg')).toBe(true);
+    expect(container.querySelector('.bg-block-bar-empty')).toBeTruthy();
   });
 
   it('renders a lesson without a today count', () => {

@@ -14,7 +14,6 @@ const mocks = vi.hoisted(() => ({
     grammar: null as { id: number; name: string } | null,
     grammarGroup: null as { note: string | null } | null,
     isComplete: false,
-    isCompletion: false,
     hasProgress: false,
     currentItem: null as { item_id: number } | null,
     note: null,
@@ -53,7 +52,7 @@ vi.mock('@/locales/cs', () => ({
     loadingMessage: 'Loading',
     loadingError: 'Loading error',
     blockCompleted: 'Block completed',
-    returnToHomeByClick: 'Click to return home',
+    blockCompletedWithName: (blockName: string) => `Block completed: ${blockName}`,
     continuePractice: 'Continue',
     done: 'hotovo',
   },
@@ -105,16 +104,9 @@ vi.mock('@/features/practice/BlockTrainingOverviewCard', () => ({
 }));
 
 vi.mock('@/features/practice/PracticeSessionCard', () => ({
-  default: ({ czech, english, isCompletion, onCompletionContinue }: any) => (
+  default: ({ czech, english }: any) => (
     <div data-testid="practice-session">
-      {isCompletion ? (
-        <button type="button" aria-label="Block completed" onClick={onCompletionContinue}>
-          <span>Block completed</span>
-          <span>Click to return home</span>
-        </button>
-      ) : (
-        `${czech}:${english}`
-      )}
+      {`${czech}:${english}`}
     </div>
   ),
 }));
@@ -133,7 +125,6 @@ describe('BlockTrainingPractice', () => {
     mocks.deck.grammar = null;
     mocks.deck.grammarGroup = null;
     mocks.deck.isComplete = false;
-    mocks.deck.isCompletion = false;
     mocks.deck.hasProgress = false;
     mocks.deck.currentItem = null;
   });
@@ -252,17 +243,27 @@ describe('BlockTrainingPractice', () => {
     expect(mocks.navigate).not.toHaveBeenCalled();
   });
 
-  it('returns Home after clicking the block completion card', () => {
+  it('shows a named block completion page with an explicit home button', () => {
     mocks.deck.block = { name: 'Block A' };
     mocks.deck.grammar = { id: 1, name: 'Articles' };
     mocks.deck.isComplete = true;
 
     render(<BlockTrainingPractice />);
 
-    expect(screen.getByRole('button', { name: 'Block completed' })).toBeTruthy();
-    expect(screen.getByText('Click to return home')).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'Block completed' }));
-    expect(mocks.navigate).toHaveBeenCalledWith('/', { replace: true });
+    expect(screen.getByText('Block completed: Block A')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Home' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Home' }));
+    expect(mocks.navigate).toHaveBeenCalledWith('/');
     expect(screen.queryByTestId('block-training-overview')).toBeNull();
+  });
+
+  it('shows generic block completion text when the block has no name', () => {
+    mocks.deck.block = null;
+    mocks.deck.isComplete = true;
+
+    render(<BlockTrainingPractice />);
+
+    expect(screen.getByText('Block completed')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Home' })).toBeTruthy();
   });
 });
