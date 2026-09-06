@@ -121,7 +121,7 @@ describe('useInitialTrainingDeck', () => {
       'czToEn',
       'correct',
       expect.any(String),
-      { oppositeDirectionNextAt: expect.any(String) },
+      { initialTraining: true },
     );
   });
 
@@ -210,7 +210,7 @@ describe('useInitialTrainingDeck', () => {
       'czToEn',
       'skip',
       expect.any(String),
-      { masterBothDirectionsOnSkip: true },
+      { initialTraining: true },
     );
   });
 

@@ -210,7 +210,6 @@ vi.mock('@/config/config', () => ({
       deckSize: 10,
     },
     progress: {
-      afterNewBlockProgress: 2,
       simulationItemProgress: 1,
       simulationItemCount: 4,
       simulationPronunciationItemCount: 2,
@@ -608,6 +607,37 @@ describe('UserItem', () => {
     expect(updated.progress_cz_to_en).toBe(1);
   });
 
+  it('records an initial-training known answer at zero progress in both directions', () => {
+    mocks.getNextAt.mockImplementation(
+      (progress: number, direction: string) => `${direction}-${progress}`,
+    );
+    const dateTime = '2026-03-04T09:00:00.000Z';
+    const updated = UserItem.applyPracticeProgress(
+      {
+        progress_cz_to_en: 0,
+        progress_en_to_cz: 0,
+        started_at: '1970-01-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+      } as any,
+      'czToEn',
+      'correct',
+      dateTime,
+      { initialTraining: true },
+    );
+
+    expect(updated).toMatchObject({
+      progress_cz_to_en: 0,
+      progress_en_to_cz: 0,
+      started_at: dateTime,
+      updated_at: dateTime,
+      next_at_cz_to_en: 'czToEn-0',
+      next_at_en_to_cz: 'enToCz-0',
+      mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+      mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+    });
+  });
+
   it('advances the opposite direction normally in the second phase', () => {
     mocks.getNextAt.mockReturnValue('2026-03-04T09:02:00.000Z');
     const updated = UserItem.applyPracticeProgress(
@@ -699,7 +729,7 @@ describe('UserItem', () => {
     expect(updated.mastered_at_en_to_cz).toBe('1970-01-01T00:00:00.000Z');
   });
 
-  it('initial-training skip masters both directions and clears both schedules', () => {
+  it('initial-training skip leaves the item unstarted and masters both directions', () => {
     const dateTime = '2026-03-04T09:00:00.000Z';
     const updated = UserItem.applyPracticeProgress(
       {
@@ -712,18 +742,42 @@ describe('UserItem', () => {
       'czToEn',
       'skip',
       dateTime,
-      { masterBothDirectionsOnSkip: true },
+      { initialTraining: true },
     );
 
     expect(updated).toMatchObject({
-      progress_cz_to_en: 2,
-      progress_en_to_cz: 1,
-      started_at: dateTime,
+      progress_cz_to_en: 0,
+      progress_en_to_cz: 0,
+      started_at: '1970-01-01T00:00:00.000Z',
       next_at_cz_to_en: '1970-01-01T00:00:00.000Z',
       next_at_en_to_cz: '1970-01-01T00:00:00.000Z',
       mastered_at_cz_to_en: dateTime,
       mastered_at_en_to_cz: dateTime,
     });
+  });
+
+  it('initial-training skip clears a start created by an earlier incorrect answer', () => {
+    const dateTime = '2026-03-04T09:00:00.000Z';
+    const updated = UserItem.applyPracticeProgress(
+      {
+        progress_cz_to_en: 0,
+        progress_en_to_cz: 0,
+        started_at: '2026-03-04T08:59:00.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+      } as any,
+      'czToEn',
+      'skip',
+      dateTime,
+      { initialTraining: true },
+    );
+
+    expect(updated.started_at).toBe('1970-01-01T00:00:00.000Z');
+    expect(updated.updated_at).toBe(dateTime);
+    expect(updated.progress_cz_to_en).toBe(0);
+    expect(updated.progress_en_to_cz).toBe(0);
+    expect(updated.mastered_at_cz_to_en).toBe(dateTime);
+    expect(updated.mastered_at_en_to_cz).toBe(dateTime);
   });
 
   it('masters a direction naturally when a correct answer reaches the SRS limit', () => {
@@ -1155,6 +1209,26 @@ describe('UserItem', () => {
     await expect(UserItem.getNextInitialTrainingSelection('u1')).resolves.toBeNull();
   });
 
+  it('does not select an initial-training item skipped in both directions', async () => {
+    mocks.userEqualsToArray.mockResolvedValue([
+      initialItem(1, {
+        block_id: 7,
+        curriculum_sort_path: [1, 1, 1],
+        mastered_at_cz_to_en: '2026-08-29T12:00:00.000Z',
+        mastered_at_en_to_cz: '2026-08-29T12:00:00.000Z',
+      }),
+      initialItem(2, {
+        block_id: 7,
+        curriculum_sort_path: [1, 1, 2],
+      }),
+    ]);
+
+    const selection = await UserItem.getNextInitialTrainingSelection('u1');
+
+    expect(selection?.blockId).toBe(7);
+    expect(selection?.items.map((item) => item.item_id)).toEqual([2]);
+  });
+
   it('getStartedByTopicId excludes unstarted items and preserves curriculum order', async () => {
     mocks.topicEqualsToArray.mockResolvedValue([
       {
@@ -1186,15 +1260,15 @@ describe('UserItem', () => {
     expect(mocks.bulkPut).toHaveBeenCalledOnce();
   });
 
-  it('saveInitialTrainingCompletion does not downgrade skipped item progress', async () => {
+  it('saveInitialTrainingCompletion preserves skipped items as unstarted', async () => {
     const dateTime = '2026-03-06T12:00:00.000Z';
     mocks.itemIdsToArray.mockResolvedValue([
       {
         item_id: 1,
         sort_order: 1,
-        progress_cz_to_en: 101,
-        progress_en_to_cz: 101,
-        started_at: '2026-03-01T00:00:00.000Z',
+        progress_cz_to_en: 0,
+        progress_en_to_cz: 0,
+        started_at: '1970-01-01T00:00:00.000Z',
         mastered_at_cz_to_en: '2026-03-06T11:00:00.000Z',
         mastered_at_en_to_cz: '2026-03-06T11:00:00.000Z',
       },
@@ -1214,25 +1288,23 @@ describe('UserItem', () => {
     expect(mocks.bulkPut).toHaveBeenCalledWith([
       expect.objectContaining({
         item_id: 1,
-        progress_cz_to_en: 101,
-        progress_en_to_cz: 101,
-        started_at: '2026-03-01T00:00:00.000Z',
+        progress_cz_to_en: 0,
+        progress_en_to_cz: 0,
+        started_at: '1970-01-01T00:00:00.000Z',
         updated_at: dateTime,
         mastered_at_cz_to_en: '2026-03-06T11:00:00.000Z',
         mastered_at_en_to_cz: '2026-03-06T11:00:00.000Z',
       }),
       expect.objectContaining({
         item_id: 2,
-        progress_cz_to_en: 2,
-        progress_en_to_cz: 2,
+        progress_cz_to_en: 0,
+        progress_en_to_cz: 0,
         started_at: dateTime,
         updated_at: dateTime,
       }),
     ]);
-    expect(mocks.getNextAt).toHaveBeenCalledWith(101, 'czToEn');
-    expect(mocks.getNextAt).toHaveBeenCalledWith(101, 'enToCz');
-    expect(mocks.getNextAt).toHaveBeenCalledWith(2, 'czToEn');
-    expect(mocks.getNextAt).toHaveBeenCalledWith(2, 'enToCz');
+    expect(mocks.getNextAt).toHaveBeenCalledWith(0, 'czToEn');
+    expect(mocks.getNextAt).toHaveBeenCalledWith(0, 'enToCz');
   });
 
   it('getReadyReviewState ignores not-started vocabulary', async () => {

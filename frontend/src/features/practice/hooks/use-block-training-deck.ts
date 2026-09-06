@@ -328,10 +328,7 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
   if (!session || !currentItem || isComplete) return;
 
   const dateTime = new Date(Date.now()).toISOString();
-  const progressOptions =
-    outcome === 'skip'
-      ? { masterBothDirectionsOnSkip: true }
-      : { oppositeDirectionNextAt: dateTime };
+  const progressOptions = { initialTraining: true };
   const updatedItem = UserItem.applyPracticeProgress(
     currentItem,
     'czToEn',
