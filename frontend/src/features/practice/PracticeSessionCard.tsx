@@ -46,8 +46,6 @@ export type PracticeSessionCardProps = Readonly<{
   audioError: boolean;
   playAudio: () => void;
   audioLoading: boolean;
-  isCompletion?: boolean;
-  onCompletionContinue?: () => void;
   isBlockTrainingPractice?: boolean;
   isPronunciationPractice?: boolean;
   pronunciationItem?: UserItemLocal | null;
@@ -195,8 +193,6 @@ function PracticeControls({
 
 type PracticeMainContentProps = Readonly<{
   showDirectionChange: boolean;
-  isCompletion: boolean;
-  isBlockTrainingPractice: boolean;
   directionText: string;
   czech: string | undefined;
   english: string | undefined;
@@ -205,21 +201,11 @@ type PracticeMainContentProps = Readonly<{
 
 function PracticeMainContent({
   showDirectionChange,
-  isCompletion,
-  isBlockTrainingPractice,
   directionText,
   czech,
   english,
   pronunciation,
 }: PracticeMainContentProps) {
-  if (isCompletion) {
-    return (
-      <Notification role="status">
-        <span className="block">{getCompletionLabel(isBlockTrainingPractice)}</span>
-        <span className="block">{TEXTS.returnToHomeByClick}</span>
-      </Notification>
-    );
-  }
   if (showDirectionChange) {
     return <Notification>{directionText}</Notification>;
   }
@@ -293,10 +279,9 @@ function getPracticeCardDisplayState(
     audioDisabled,
     showDirectionChange,
     audioLoading,
-    isCompletion,
     isPronunciationPractice,
   } = props;
-  const controlsLocked = isCompletion || showDirectionChange;
+  const controlsLocked = showDirectionChange;
   const showAudioControls = !audioDisabled;
   const showGrammarButton = hasGrammarDetails(revealed, grammar);
   const showNoteButton = hasNoteDetails(revealed, note);
@@ -324,7 +309,7 @@ function getPracticeCardDisplayState(
       !revealed || controlsLocked,
       isPronunciationPractice,
     ),
-    showTopBar: !isPronunciationPractice && !isCompletion,
+    showTopBar: !isPronunciationPractice,
     showRevealHelp: !revealed && !controlsLocked,
   };
 }
@@ -412,17 +397,15 @@ function PracticeCardButton({
   display: PracticeCardDisplayState;
 }>) {
   const {
-    isCompletion,
-    onCompletionContinue,
     handleReveal,
     revealed,
     showDirectionChange,
     czech,
     english,
     pronunciation,
+    isBlockTrainingPractice,
     progressLabel,
     progressHelpText,
-    isBlockTrainingPractice,
     audioError,
     audioLoading,
   } = props;
@@ -430,10 +413,9 @@ function PracticeCardButton({
     <button
       type="button"
       className={`relative flex h-full w-full grow cursor-pointer flex-col items-center p-4 text-inherit select-none ${display.cardStyle}`}
-      onClick={isCompletion ? onCompletionContinue : handleReveal}
-      title={isCompletion ? getCompletionLabel(isBlockTrainingPractice) : display.cardText}
-      aria-label={isCompletion ? getCompletionLabel(isBlockTrainingPractice) : undefined}
-      aria-disabled={revealed && !isCompletion}
+      onClick={handleReveal}
+      title={display.cardText}
+      aria-disabled={revealed}
     >
       {display.showRevealHelp && (
         <HelpText className="top-23 left-1/2 -translate-x-1/2">{TEXTS.reveal}</HelpText>
@@ -456,8 +438,6 @@ function PracticeCardButton({
       >
         <PracticeMainContent
           showDirectionChange={showDirectionChange}
-          isCompletion={Boolean(isCompletion)}
-          isBlockTrainingPractice={isBlockTrainingPractice}
           directionText={display.directionText}
           czech={czech}
           english={english}
@@ -474,11 +454,9 @@ function PracticeCardButton({
         <p className="min-w-12 text-right font-light" title={progressHelpText}>
           {progressLabel}
         </p>
-        {!isCompletion && (
-          <HelpText className="bottom-7.5">
-            {getPracticeProgressHelp(isBlockTrainingPractice, progressHelpText)}
-          </HelpText>
-        )}
+        <HelpText className="bottom-7.5">
+          {getPracticeProgressHelp(isBlockTrainingPractice, progressHelpText)}
+        </HelpText>
       </div>
     </button>
   );
@@ -490,11 +468,6 @@ function getPracticeProgressHelp(
 ): string {
   if (isBlockTrainingPractice) return TEXTS.blockTrainingProgressHelp;
   return progressHelpText;
-}
-
-function getCompletionLabel(isBlockTrainingPractice: boolean): string {
-  if (isBlockTrainingPractice) return TEXTS.blockCompleted;
-  return TEXTS.reviewCompleted;
 }
 
 function PracticeCardActionBar({
@@ -596,7 +569,7 @@ function PracticeSessionCardView({
   const display = getPracticeCardDisplayState(props);
   return (
     <div className="bottom-controls-clearance relative flex min-h-0 w-full grow flex-col items-center">
-      <div className="card-width card-height relative gap-1" aria-busy={props.isCompletion}>
+      <div className="card-width card-height relative gap-1">
         <PracticeCardButton props={props} display={display} />
         <PracticeCardActionBar
           props={props}

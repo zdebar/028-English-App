@@ -53,6 +53,24 @@
     max-width: var(--max-width-screenshot);
   }
 
+  /** DASHBOARD PROGRESS BAR **/
+  progress.bg-progress-bg {
+    background-color: var(--color-progress-bg);
+    border: 0;
+  }
+
+  progress.bg-progress-bg::-webkit-progress-bar {
+    background-color: var(--color-progress-bg);
+  }
+
+  progress.bg-progress-bg::-webkit-progress-value {
+    background-color: transparent;
+  }
+
+  progress.bg-progress-bg::-moz-progress-bar {
+    background-color: transparent;
+  }
+
   /** SIDE-HEADER CARD WIDTH
   - activated from component size tokens by useResponsiveLayout
   - narrow screens reserve space for vertically stacked navigation
