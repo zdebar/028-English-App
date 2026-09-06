@@ -72,7 +72,7 @@ export default function LevelsOverview({
                 <div className="flex w-full items-center justify-between">
                   <p title={`${TEXTS.levelName}`}>{level.name}</p>
                   <GoalMetView
-                    current={level.startedCount}
+                    current={level.initiatedCount}
                     goal={level.totalCount}
                     title={TEXTS.levelsStartedHelp}
                   />
@@ -85,7 +85,9 @@ export default function LevelsOverview({
                       key={lesson.id}
                       lessonName={lesson.name ?? ''}
                       lessonNumber={lesson.sort_order}
-                      previousCount={(lesson.startedCount ?? 0) - (lesson.startedTodayCount ?? 0)}
+                      previousCount={
+                        (lesson.initiatedCount ?? 0) - (lesson.startedTodayCount ?? 0)
+                      }
                       todayCount={lesson.startedTodayCount ?? 0}
                       lessonCount={lesson.totalCount ?? 1}
                     />

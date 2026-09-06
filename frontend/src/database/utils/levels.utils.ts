@@ -18,7 +18,8 @@ const NULL_DATE = config.database.nullReplacementDate;
  * @param lessons Lesson records used as aggregation buckets.
  * @param levels Level records used to group lesson summaries.
  * @returns Levels that contain at least one lesson with items, sorted by level sort_order. Lesson
- * summaries include total, started, and started-today counts.
+ * summaries include total, initiated, started, and started-today counts. Initial-training skips
+ * are initiated for curriculum progress, but are not included in started counts.
  */
 export function aggregateLevels(
   items: UserItemLocal[],
@@ -27,12 +28,14 @@ export function aggregateLevels(
   today: string = getTodayShortDate(),
 ): LevelOverviewType[] {
   const countKeys: (keyof ProgressCountsType)[] = [
+    'initiatedCount',
     'startedCount',
     'startedTodayCount',
     'totalCount',
   ];
 
   const createEmptyCounts = (): ProgressCountsType => ({
+    initiatedCount: 0,
     startedCount: 0,
     startedTodayCount: 0,
     totalCount: 0,
@@ -51,8 +54,12 @@ export function aggregateLevels(
       const idx = lessonIdToIndex.get(item.lesson_id);
       if (idx === undefined) return;
       const counts = lessonCounts[idx];
-      if (item.started_at !== NULL_DATE) counts.startedCount++;
-      if (item.started_at !== NULL_DATE && getLocalDateFromUTC(item.started_at) === today)
+      const isStarted = item.started_at !== NULL_DATE;
+      const isInitialTrainingSkipped = isUnstartedAndMasteredInBothDirections(item);
+
+      if (isStarted || isInitialTrainingSkipped) counts.initiatedCount++;
+      if (isStarted) counts.startedCount++;
+      if (isStarted && getLocalDateFromUTC(item.started_at) === today)
         counts.startedTodayCount++;
       counts.totalCount++;
     });
@@ -89,4 +96,12 @@ export function aggregateLevels(
   return Array.from(levelOverviews.values())
     .filter((level) => level.lessons.length > 0)
     .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+}
+
+function isUnstartedAndMasteredInBothDirections(item: UserItemLocal): boolean {
+  return (
+    item.started_at === NULL_DATE &&
+    item.mastered_at_cz_to_en !== NULL_DATE &&
+    item.mastered_at_en_to_cz !== NULL_DATE
+  );
 }

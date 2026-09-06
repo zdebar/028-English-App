@@ -4,7 +4,7 @@ import type { LessonType, LevelType } from '@/types/generic.types';
 import type { UserItemLocal } from '@/types/user-item.types';
 
 describe('aggregateLevels', () => {
-  it('aggregates started counts and excludes unstarted or skipped items', () => {
+  it('aggregates initiated counts while excluding unstarted items from started counts', () => {
     const levels = [{ id: 1, name: 'A1', sort_order: 1 }] as LevelType[];
     const lessons = [{ id: 10, level_id: 1, name: 'Lesson 1', sort_order: 1 }] as LessonType[];
     const items = [
@@ -44,11 +44,13 @@ describe('aggregateLevels', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({
+      initiatedCount: 2,
       startedCount: 1,
       startedTodayCount: 1,
       totalCount: 3,
     });
     expect(result[0].lessons[0]).toMatchObject({
+      initiatedCount: 2,
       startedCount: 1,
       startedTodayCount: 1,
       totalCount: 3,

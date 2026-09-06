@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
     id: number;
     name: string;
     sort_order: number;
+    initiatedCount?: number;
     startedCount?: number;
     startedTodayCount?: number;
   }>,
@@ -117,6 +118,7 @@ describe('Dashboard', () => {
         id: 1,
         name: 'First lesson',
         sort_order: 1,
+        initiatedCount: 0,
         startedCount: 0,
         startedTodayCount: 0,
       },
@@ -136,6 +138,7 @@ describe('Dashboard', () => {
         id: 1,
         name: 'Lesson 1',
         sort_order: 1,
+        initiatedCount: 6,
         startedCount: 5,
         startedTodayCount: 3,
       },
@@ -143,6 +146,7 @@ describe('Dashboard', () => {
         id: 2,
         name: 'Lesson 2',
         sort_order: 2,
+        initiatedCount: 4,
         startedCount: 4,
         startedTodayCount: 2,
       },
@@ -151,7 +155,7 @@ describe('Dashboard', () => {
     render(<Dashboard userId="u1" />);
 
     expect(screen.getByText('Started today')).toBeTruthy();
-    expect(screen.getByText('Lesson 1:2:3')).toBeTruthy();
+    expect(screen.getByText('Lesson 1:3:3')).toBeTruthy();
     expect(screen.getByText('Lesson 2:2:2')).toBeTruthy();
     expect(screen.getByRole('link').getAttribute('href')).toBe('/levels');
   });
