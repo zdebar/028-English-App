@@ -25,3 +25,22 @@ id,name,note,sort_order,updated_at,deleted_at,grammar_group_id
 24,on,<p><b>On</b> používáme pro označení umístění na povrchu něčeho.</p>,24,2026-09-02 05:03:20.341387+00,,11
 25,at,<p><b>At</b> používáme pro označení konkrétního místa nebo bodu.</p>,25,2026-09-02 05:03:20.341387+00,,11
 26,základní tvary,"<p>Tvoří se přidáním -s nebo -es u třetí osoby jednotného čísla (he, she, it) a základním tvarem slovesa pro ostatní osoby.</p>",26,2026-09-02 05:03:20.341387+00,,12
+27,zkrácené tvary,"<p>V přítomném čase prostém tvoříme zápor pomocí <b>do not</b> nebo <b>does not</b> a základního tvaru slovesa.</p></br><p><b>Does not</b> používáme pro he, she a it. Významové sloveso potom nemá koncovku -s: <b>He does not work.</b></p></br><p>Běžné zkrácené tvary jsou <b>don't</b> a <b>doesn't</b>.</p>",27,2026-09-04 12:30:47.665871+00,,13
+28,zjišťovací otázky,"<p>Zjišťovací otázku tvoříme pomocí <b>Do / Does + podmět + základní tvar slovesa</b>.</p></br><p><b>Does</b> používáme pro he, she a it: <b>Does she work?</b></p>",28,2026-09-04 12:32:49.547138+00,,14
+29,krátké odpovědi,"<p>Krátké odpovědi mají tvar <b>Yes, I do.</b> nebo <b>No, I don't.</b></p>",29,2026-09-04 12:33:19.386885+00,,14
+30,tázací otázky,"<p>Tázací otázku tvoříme jako <b>tázací výraz + do / does + podmět + základní tvar slovesa</b>.</p></br><p>Například: <b>Where do you live?</b> nebo <b>What does he want?</b></p></br><p>Pokud je tázací výraz podmětem, pomocné do se nepoužívá: <b>Who lives here?</b></p>",30,2026-09-04 12:36:33.729337+00,,15
+31,druhý stupeň,<p>Druhý stupeň porovnává dvě věci. Krátká přídavná jména obvykle dostávají koncovku <b>-er</b> a dlouhá používají <b>more</b>.</p>,31,2026-09-04 12:45:02.539995+00,,16
+32,třetí stupeň,"<p>Třetí stupeň vyjadřuje nejvyšší míru vlastnosti ve skupině. Krátká přídavná jména obvykle dostávají <b>-est</b> a dlouhá používají <b>most</b>.</p></br><p>Před třetím stupněm zpravidla stojí člen <b> the </b>: <b> the oldest </b>, <b> the most interesting </b>.</p>",32,2026-09-04 12:48:15.099901+00,,16
+33,tvorba rozkazů,<p>Rozkaz tvoříme základním tvarem slovesa bez podmětu: <b>Open the door.</b></p><p>Zákaz tvoříme pomocí <b>Don't + základní tvar slovesa</b>: <b>Don't open the door.</b></p><p>Zdvořilejší pokyn může obsahovat <b>please</b>.</p>,33,2026-09-04 12:58:11.916819+00,,17
+34,modální slovesa,<p>Po modálním slovese stojí základní tvar bez <b>to</b>. Ve třetí osobě se nepřidává -s.</p></br><p>Zápor tvoříme přidáním <b>not</b> a otázku obrácením pořadí modálního slovesa a podmětu.</p>,34,2026-09-04 13:01:02.348613+00,,18
+35,let's,<p>Návrh společné činnosti tvoříme pomocí <b>Let's + základní tvar slovesa</b>: <b>Let's go home.</b></p></br><p>Záporný návrh má tvar <b>Let's not + sloveso</b>.</p>,35,2026-09-04 14:38:36.887509+00,,19
+36,shall,<p>Zdvořilý návrh nebo nabídku můžeme vytvořit pomocí <b>Shall we + základní tvar slovesa?</b></p>,36,2026-09-04 14:44:18.391989+00,,19
+37,what about / how about,<p>Návrh tvoří také vazby <b>What about</b> a <b>How about</b>. Po nich obvykle následuje podstatné jméno nebo sloveso s koncovkou <b>-ing</b>: <b>How about going by bus?</b></p>,37,2026-09-04 14:48:34.080694+00,,19
+38,PC - Přítomný čas průběhový,<p>Přítomný čas průběhový tvoříme jako <b>am / is / are + sloveso-ing</b>.</p></br><p>Používáme ho hlavně pro děje probíhající právě teď a pro dočasné situace: <b>She is working now.</b></p>,38,2026-09-04 14:53:38.624157+00,,20
+39,PC - zápor,"<p>Zápor tvoříme přidáním <b>not</b> za am, is nebo are: <b>She is not working.</b> Běžné se používají zkrácené tvary.</p>
+",39,2026-09-04 14:56:45.702442+00,,21
+40,PC - zjišťovací otázky,<p>Zjišťovací otázku tvoříme obrácením pořadí slovesa být a podmětu: <b>Am / Is / Are + podmět + sloveso-ing?</b></p>,40,2026-09-04 15:02:06.041149+00,,22
+41,PC - tázací otázky,<p>Tázací otázku tvoříme jako <b>tázací výraz + am / is / are + podmět + sloveso-ing</b>.</p>,41,2026-09-04 15:07:27.316388+00,,23
+42,PaS - be - Minulý čas prostý,"<p>Minulý čas slovesa být má dva tvary: <b>was</b> pro I, he, she a it a <b>were</b> pro you, we a they.</p>",42,2026-09-04 15:11:40.300333+00,,24
+43,PaS - be - zápor,"<p>Zápor tvoříme přidáním <b>not</b> za was nebo were: <b>was not</b>, <b>were not</b>. Běžné zkrácené tvary jsou <b>wasn't</b> a <b>weren't</b>.</p>",43,2026-09-04 15:11:49.862294+00,,25
+44,PaS - be - zjišťovací otázky,<p>Zjišťovací otázku tvoříme obrácením pořadí was nebo were a podmětu: <b>Was / Were + podmět?</b></p>,44,2026-09-04 15:14:41.700713+00,,26

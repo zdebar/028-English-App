@@ -127,7 +127,12 @@ function replaceNullNumber(value: number | null): number {
 async function getUnstartedItems(userId: string): Promise<UserItemLocal[]> {
   const items = await db.user_items.where('user_id').equals(userId).toArray();
   return items
-    .filter((item) => item.deleted_at === NULL_DATE && item.started_at === NULL_DATE)
+    .filter(
+      (item) =>
+        item.deleted_at === NULL_DATE &&
+        item.started_at === NULL_DATE &&
+        !isInitialTrainingSkipped(item),
+    )
     .sort((left, right) =>
       compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path),
     );
@@ -359,10 +364,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Marks all items in a completed initial-training block as started.
+   * Finalizes progress for all items in a completed initial-training batch.
    *
    * @param userId User id whose block items should be updated.
-   * @param blockId Block id whose items should receive grammar-completion progress.
+   * @param itemIds Item ids whose initial-training state should be finalized.
    * @param dateTime ISO timestamp used for started_at and updated_at. Defaults to now.
    * @returns Updated items that were written to IndexedDB; [] when the block has no items.
    */
@@ -391,14 +396,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     }
 
     const updatedItems = items.map((item) => {
-      const progressCzToEn = Math.max(
-        item.progress_cz_to_en,
-        config.progress.afterNewBlockProgress,
-      );
-      const progressEnToCz = Math.max(
-        item.progress_en_to_cz,
-        config.progress.afterNewBlockProgress,
-      );
+      const progressCzToEn = item.progress_cz_to_en;
+      const progressEnToCz = item.progress_en_to_cz;
       const nextAtCzToEn = getNextAt(progressCzToEn, 'czToEn');
       const nextAtEnToCz = getNextAt(progressEnToCz, 'enToCz');
       const masteredAtCzToEn = resolveMasteredAt(
@@ -418,7 +417,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         ...item,
         progress_cz_to_en: progressCzToEn,
         progress_en_to_cz: progressEnToCz,
-        started_at: item.started_at === NULL_DATE ? dateTime : item.started_at,
+        started_at: getCompletionStartedAt(item, dateTime),
         updated_at: dateTime,
         next_at_cz_to_en: getNextAtForMastery(nextAtCzToEn, masteredAtCzToEn),
         next_at_en_to_cz: getNextAtForMastery(nextAtEnToCz, masteredAtEnToCz),
@@ -873,7 +872,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   /**
    * Applies one explicit practice outcome to the active direction.
    *
-   * The first non-skip answer schedules the opposite direction at zero progress.
+   * Initial-training answers use a separate state policy from normal review:
+   * known items start at zero progress in both directions, while skipped items
+   * remain unstarted and are mastered in both directions.
    */
   static applyPracticeProgress(
     item: UserItemLocal,
@@ -882,41 +883,13 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     dateTime: string,
     options: {
       oppositeDirectionNextAt?: string;
-      masterBothDirectionsOnSkip?: boolean;
+      initialTraining?: boolean;
     } = {},
   ): UserItemLocal {
-    const isFirstAnswer = item.started_at === NULL_DATE;
-    const shouldMasterBothDirections = outcome === 'skip' && options.masterBothDirectionsOnSkip;
-    const currentProgress = getEffectiveProgress(item, direction);
-    const otherDirection: PracticeDirection = direction === 'czToEn' ? 'enToCz' : 'czToEn';
-    const changes: Partial<UserItemLocal> = {
-      ...item,
-      started_at: item.started_at === NULL_DATE ? dateTime : item.started_at,
-      updated_at: dateTime,
-    };
-
-    if (isFirstAnswer && !shouldMasterBothDirections) {
-      initializeDirectionState(changes, otherDirection, options.oppositeDirectionNextAt);
+    if (options.initialTraining === true) {
+      return applyInitialTrainingProgress(item, direction, outcome, dateTime);
     }
-
-    if (shouldMasterBothDirections) {
-      setBothDirectionsMastered(changes, item, dateTime);
-      return { ...item, ...changes };
-    }
-
-    let directionProgress = currentProgress;
-    if (outcome === 'correct') {
-      directionProgress += 1;
-      setDirectionState(changes, item, direction, directionProgress, dateTime);
-    } else if (outcome === 'incorrect') {
-      directionProgress = 0;
-      setDirectionState(changes, item, direction, directionProgress, dateTime);
-      clearDirectionMastery(changes, direction);
-    } else {
-      setDirectionMastered(changes, direction, currentProgress, dateTime);
-    }
-
-    return { ...item, ...changes };
+    return applyReviewProgress(item, direction, outcome, dateTime, options.oppositeDirectionNextAt);
   }
 }
 
@@ -974,6 +947,90 @@ function getDirectionMasteredAt(item: UserItemLocal, direction: PracticeDirectio
   return direction === 'czToEn' ? item.mastered_at_cz_to_en : item.mastered_at_en_to_cz;
 }
 
+function isInitialTrainingSkipped(
+  item: Pick<
+    UserItemLocal,
+    'started_at' | 'mastered_at_cz_to_en' | 'mastered_at_en_to_cz'
+  >,
+): boolean {
+  return (
+    item.started_at === NULL_DATE &&
+    (item.mastered_at_cz_to_en ?? NULL_DATE) !== NULL_DATE &&
+    (item.mastered_at_en_to_cz ?? NULL_DATE) !== NULL_DATE
+  );
+}
+
+function applyInitialTrainingProgress(
+  item: UserItemLocal,
+  direction: PracticeDirection,
+  outcome: PracticeOutcome,
+  dateTime: string,
+): UserItemLocal {
+  const changes: Partial<UserItemLocal> = {
+    ...item,
+    started_at: outcome === 'skip' ? NULL_DATE : getStartedAt(item, dateTime),
+    updated_at: dateTime,
+  };
+
+  if (outcome === 'correct') {
+    setInitialTrainingKnown(changes);
+  } else if (outcome === 'skip') {
+    setBothDirectionsMastered(changes, dateTime);
+  } else {
+    initializeDirectionState(changes, getOppositeDirection(direction));
+    setDirectionState(changes, item, direction, 0, dateTime);
+    clearDirectionMastery(changes, direction);
+  }
+
+  return { ...item, ...changes };
+}
+
+function applyReviewProgress(
+  item: UserItemLocal,
+  direction: PracticeDirection,
+  outcome: PracticeOutcome,
+  dateTime: string,
+  oppositeDirectionNextAt: string | undefined,
+): UserItemLocal {
+  const isFirstAnswer = item.started_at === NULL_DATE;
+  const currentProgress = getEffectiveProgress(item, direction);
+  const changes: Partial<UserItemLocal> = {
+    ...item,
+    started_at: getStartedAt(item, dateTime),
+    updated_at: dateTime,
+  };
+
+  if (isFirstAnswer) {
+    initializeDirectionState(changes, getOppositeDirection(direction), oppositeDirectionNextAt);
+  }
+
+  if (outcome === 'correct') {
+    setDirectionState(changes, item, direction, currentProgress + 1, dateTime);
+  } else if (outcome === 'incorrect') {
+    setDirectionState(changes, item, direction, 0, dateTime);
+    clearDirectionMastery(changes, direction);
+  } else {
+    setDirectionMastered(changes, direction, currentProgress, dateTime);
+  }
+
+  return { ...item, ...changes };
+}
+
+function getOppositeDirection(direction: PracticeDirection): PracticeDirection {
+  return direction === 'czToEn' ? 'enToCz' : 'czToEn';
+}
+
+function getStartedAt(item: UserItemLocal, dateTime: string): string {
+  if (item.started_at === NULL_DATE) return dateTime;
+  return item.started_at;
+}
+
+function getCompletionStartedAt(item: UserItemLocal, dateTime: string): string {
+  if (isInitialTrainingSkipped(item)) return NULL_DATE;
+  if (item.started_at === NULL_DATE) return dateTime;
+  return item.started_at;
+}
+
 function setDirectionState(
   target: Partial<UserItemLocal>,
   original: UserItemLocal,
@@ -1002,7 +1059,7 @@ function setDirectionState(
 function initializeDirectionState(
   target: Partial<UserItemLocal>,
   direction: PracticeDirection,
-  nextAt: string | undefined,
+  nextAt?: string,
 ): void {
   if (direction === 'czToEn') {
     target.progress_cz_to_en = 0;
@@ -1034,21 +1091,29 @@ function setDirectionMastered(
 
 function setBothDirectionsMastered(
   target: Partial<UserItemLocal>,
-  original: UserItemLocal,
   dateTime: string,
 ): void {
   setDirectionMastered(
     target,
     'czToEn',
-    getEffectiveProgress(original, 'czToEn'),
+    0,
     dateTime,
   );
   setDirectionMastered(
     target,
     'enToCz',
-    getEffectiveProgress(original, 'enToCz'),
+    0,
     dateTime,
   );
+}
+
+function setInitialTrainingKnown(target: Partial<UserItemLocal>): void {
+  target.progress_cz_to_en = 0;
+  target.progress_en_to_cz = 0;
+  target.next_at_cz_to_en = getNextAt(0, 'czToEn');
+  target.next_at_en_to_cz = getNextAt(0, 'enToCz');
+  target.mastered_at_cz_to_en = NULL_DATE;
+  target.mastered_at_en_to_cz = NULL_DATE;
 }
 
 function clearDirectionMastery(target: Partial<UserItemLocal>, direction: PracticeDirection): void {
