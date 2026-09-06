@@ -37,7 +37,7 @@ const config = {
 
   practice: {
     initialTrainingBatchSize: 8, // Maximum size of an automatically assembled initial-training batch
-    reviewMinimumSize: 20, // Minimum number of due items required to start one review direction
+    reviewMinimumSize: 10, // Minimum number of due items required to start one review direction
     dailyStartedGoal: 48, // Daily started-item goal shown on the home page
     audioDelay: 100, // Delay in milliseconds for automatically playing audio
     holdDuration: 300, // Duration in milliseconds for which the practice card is held before moving to the next item
