@@ -10,11 +10,17 @@ import { RouterProvider } from 'react-router-dom';
 void startAuthLifecycle();
 
 if ('serviceWorker' in navigator) {
+  const scope = new URL(import.meta.env.BASE_URL, globalThis.location.origin).href;
+  const cachePrefix = `english-app:${encodeURIComponent(scope)}:`;
   globalThis.addEventListener('load', () => {
     if (import.meta.env.PROD) {
-      navigator.serviceWorker.register(`${import.meta.env.BASE_URL}service-worker.js`);
+      void navigator.serviceWorker
+        .register(`${scope}service-worker.js`, { scope })
+        .catch((error) => {
+          console.warn('Service worker registration failed:', error);
+        });
       navigator.serviceWorker.addEventListener('message', (event) => {
-        if (event.data?.type === 'refresh') {
+        if (event.source === navigator.serviceWorker.controller && event.data?.type === 'refresh') {
           globalThis.location.reload();
         }
       });
@@ -25,12 +31,20 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker
       .getRegistrations()
       .then((registrations) =>
-        Promise.all(registrations.map((registration) => registration.unregister())),
+        Promise.all(
+          registrations
+            .filter((registration) => registration.scope === scope)
+            .map((registration) => registration.unregister()),
+        ),
       )
       .then(async () => {
         if ('caches' in globalThis) {
           const cacheKeys = await caches.keys();
-          await Promise.all(cacheKeys.map((cacheKey) => caches.delete(cacheKey)));
+          await Promise.all(
+            cacheKeys
+              .filter((key) => key.startsWith(cachePrefix))
+              .map((cacheKey) => caches.delete(cacheKey)),
+          );
         }
       })
       .catch(() => {
