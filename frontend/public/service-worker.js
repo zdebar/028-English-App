@@ -1,199 +1,110 @@
-const BUILD_HASH = globalThis.__APP_BUILD_HASH__ || `ts-${Date.now()}`;
-const APP_SHELL_CACHE = `app-shell-${BUILD_HASH}`;
-const STATIC_CACHE = `static-assets-${BUILD_HASH}`;
-
-const BASE_PATH = new URL(globalThis.registration.scope).pathname.replace(/\/$/, '');
-
-function withBase(path) {
-  return `${BASE_PATH}${path}`;
-}
-
-const APP_SHELL_URLS = [
-  withBase('/'),
-  withBase('/index.html'),
-];
-const INJECTED_PRECACHE_URLS = (globalThis.__WB_MANIFEST || []).map((entry) => entry.url);
+const BUILD_HASH = '__APP_BUILD_HASH__';
+const SCOPE_URL = new URL(globalThis.registration.scope);
+const CACHE_PREFIX = `english-app:${encodeURIComponent(SCOPE_URL.href)}:`;
+const APP_SHELL_CACHE = `${CACHE_PREFIX}shell:${BUILD_HASH}`;
+const STATIC_CACHE = `${CACHE_PREFIX}static:${BUILD_HASH}`;
+const SHELL_URL = new URL('index.html', SCOPE_URL).href;
+const PRECACHE_URLS = (globalThis.__WB_MANIFEST || []).map((entry) =>
+  new URL(entry.url, SCOPE_URL).href,
+);
 const STATIC_DESTINATIONS = new Set(['style', 'script', 'worker', 'font', 'image']);
-const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif', '.svg', '.ico']);
 
-function hasImageExtension(pathname) {
-  const lowerPath = pathname.toLowerCase();
-  for (const ext of IMAGE_EXTENSIONS) {
-    if (lowerPath.endsWith(ext)) return true;
-  }
-  return false;
+function isInScope(url) {
+  return url.origin === SCOPE_URL.origin && url.pathname.startsWith(SCOPE_URL.pathname);
 }
-
-function normalizeCacheUrl(url) {
-  const resolved = new URL(url, globalThis.location.origin);
-
-  // Treat root and index as a single app-shell entry.
-  if (resolved.pathname === `${BASE_PATH}/` || resolved.pathname === BASE_PATH) {
-    resolved.pathname = withBase('/index.html');
-  }
-
-  return resolved.href;
-}
-
-self.addEventListener('install', (event) => {
-  const normalizedToOriginal = new Map();
-
-  [...APP_SHELL_URLS, ...INJECTED_PRECACHE_URLS].forEach((url) => {
-    const normalized = normalizeCacheUrl(url);
-
-    if (!normalizedToOriginal.has(normalized)) {
-      normalizedToOriginal.set(normalized, url);
-    }
-  });
-
-  const urlsToCache = [...normalizedToOriginal.values()];
-
-  event.waitUntil(
-    caches.open(APP_SHELL_CACHE).then((cache) =>
-      cache.addAll(urlsToCache).catch((error) => {
-        console.warn('Failed to precache app shell resources:', error);
-      }),
-    ),
-  );
-
-  globalThis.skipWaiting();
-});
-
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches
-      .keys()
-      .then((cacheNames) =>
-        Promise.all(
-          cacheNames
-            .filter((cacheName) => ![APP_SHELL_CACHE, STATIC_CACHE].includes(cacheName))
-            .map((cacheName) => caches.delete(cacheName)),
-        ),
-      )
-      .then(() => globalThis.clients.claim())
-      .then(() => {
-        return globalThis.clients.matchAll({ type: 'window' }).then((clients) => {
-          clients.forEach((client) => {
-            client.postMessage({ type: 'refresh', version: BUILD_HASH });
-          });
-        });
-      }),
-  );
-});
 
 function shouldHandleRequest(request) {
-  if (request.method !== 'GET') {
-    return false;
-  }
-
+  if (request.method !== 'GET') return false;
   const url = new URL(request.url);
-  const isImageByPath = hasImageExtension(url.pathname);
-
-  if (url.origin !== globalThis.location.origin) {
-    return STATIC_DESTINATIONS.has(request.destination) || isImageByPath;
-  }
-
-  if (url.pathname.startsWith(withBase('/data/'))) {
-    return false;
-  }
-
-  if (
-    url.pathname.startsWith(withBase('/api/')) ||
-    url.pathname.startsWith(withBase('/rest/')) ||
-    url.pathname.startsWith(withBase('/rpc/'))
-  ) {
-    return false;
-  }
-
-  if (request.mode === 'navigate') {
-    return true;
-  }
-
-  return STATIC_DESTINATIONS.has(request.destination) || isImageByPath;
+  if (!isInScope(url)) return false;
+  const path = url.pathname.slice(SCOPE_URL.pathname.length);
+  if (/^(data|api|rest|rpc)(\/|$)/.test(path)) return false;
+  return request.mode === 'navigate' || STATIC_DESTINATIONS.has(request.destination);
 }
 
-function createOfflineResponse(request) {
-  if (request.destination === 'image') {
-    return new Response('', { status: 503, statusText: 'Offline image unavailable' });
-  }
+async function install() {
+  const cache = await caches.open(APP_SHELL_CACHE);
+  await cache.addAll([...new Set([SHELL_URL, ...PRECACHE_URLS])]);
+  await globalThis.skipWaiting();
+}
 
-  if (request.destination === 'style') {
-    return new Response('/* offline */', {
-      status: 503,
-      statusText: 'Offline stylesheet unavailable',
-      headers: { 'Content-Type': 'text/css; charset=utf-8' },
-    });
-  }
+globalThis.addEventListener('install', (event) => {
+  event.waitUntil(install());
+});
 
-  if (request.destination === 'script' || request.destination === 'worker') {
-    return new Response('// offline', {
-      status: 503,
-      statusText: 'Offline script unavailable',
-      headers: { 'Content-Type': 'application/javascript; charset=utf-8' },
-    });
+async function activate() {
+  const names = await caches.keys();
+  const obsolete = names.filter(
+    (name) => name.startsWith(CACHE_PREFIX) && ![APP_SHELL_CACHE, STATIC_CACHE].includes(name),
+  );
+  await Promise.all(obsolete.map((name) => caches.delete(name)));
+  await globalThis.clients.claim();
+  const clients = await globalThis.clients.matchAll({ type: 'window' });
+  for (const client of clients) {
+    if (isInScope(new URL(client.url))) {
+      client.postMessage({ type: 'refresh', version: BUILD_HASH });
+    }
   }
+}
 
+globalThis.addEventListener('activate', (event) => {
+  event.waitUntil(activate());
+});
+
+function offlineResponse() {
   return new Response('Offline resource unavailable', {
     status: 503,
-    statusText: 'Offline resource unavailable',
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },
   });
 }
 
-self.addEventListener('fetch', (event) => {
-  const { request } = event;
-
-  if (!shouldHandleRequest(request)) {
-    return;
+async function storeResponse(cacheName, key, response) {
+  try {
+    const cache = await caches.open(cacheName);
+    await cache.put(key, response);
+  } catch (error) {
+    console.warn('Failed to cache resource:', error);
   }
+}
 
-  if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const responseClone = response.clone();
-          caches
-            .open(APP_SHELL_CACHE)
-            .then((cache) => cache.put(withBase('/index.html'), responseClone));
-          return response;
-        })
-        .catch(async () => {
-          const cache = await caches.open(APP_SHELL_CACHE);
-          return cache.match(withBase('/index.html'));
-        }),
-    );
-
-    return;
+async function navigate(request, writes) {
+  try {
+    const response = await fetch(request);
+    const isHtml = response.headers.get('Content-Type')?.includes('text/html');
+    if (response.ok && isHtml) {
+      writes.push(storeResponse(APP_SHELL_CACHE, SHELL_URL, response.clone()));
+    }
+    return response;
+  } catch {
+    const cache = await caches.open(APP_SHELL_CACHE);
+    return (await cache.match(SHELL_URL)) || offlineResponse();
   }
+}
 
-  event.respondWith(
-    (async () => {
-      try {
-        const normalizedKey = normalizeCacheUrl(request.url);
+async function staticResource(request, writes) {
+  const runtime = await caches.open(STATIC_CACHE);
+  const cached = await runtime.match(request);
+  if (cached) return cached;
+  const precache = await caches.open(APP_SHELL_CACHE);
+  const precached = await precache.match(request);
+  if (precached) return precached;
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      writes.push(storeResponse(STATIC_CACHE, request, response.clone()));
+    }
+    return response;
+  } catch {
+    return offlineResponse();
+  }
+}
 
-        const cache = await caches.open(STATIC_CACHE);
-        const cachedNormalized = await cache.match(normalizedKey);
-        if (cachedNormalized) return cachedNormalized;
-
-        const cachedRaw = await caches.match(request);
-        if (cachedRaw) return cachedRaw;
-
-        const response = await fetch(request);
-        const shouldCacheResponse =
-          response.ok ||
-          (request.destination === 'image' && response.type === 'opaque') ||
-          (response.type === 'opaque' && hasImageExtension(new URL(request.url).pathname));
-
-        if (shouldCacheResponse) {
-          const responseClone = response.clone();
-          cache.put(normalizedKey, responseClone).catch(() => {});
-        }
-
-        return response;
-      } catch (e) {
-        console.warn('Failed to serve request from cache/network:', e);
-        return createOfflineResponse(request);
-      }
-    })(),
-  );
+globalThis.addEventListener('fetch', (event) => {
+  if (!shouldHandleRequest(event.request)) return;
+  const writes = [];
+  const response = event.request.mode === 'navigate'
+    ? navigate(event.request, writes)
+    : staticResource(event.request, writes);
+  event.respondWith(response);
+  event.waitUntil(response.then(() => Promise.all(writes)));
 });
