@@ -53,18 +53,33 @@ describe('dashboard.utils', () => {
       expect(getInProgressLessons(nothingStarted).map((lesson) => lesson.id)).toEqual([1]);
     });
 
-    it('returns the last started lesson when nothing was started today', () => {
+    it('returns the last initiated lesson when nothing was started today', () => {
       const startedWithoutTodayData = [
         {
           lessons: [
-            { id: 1, sort_order: 1, startedCount: 4, startedTodayCount: 0 },
-            { id: 2, sort_order: 2, startedCount: 0, startedTodayCount: 0 },
-            { id: 3, sort_order: 3, startedCount: 8, startedTodayCount: 0 },
+            { id: 1, sort_order: 1, initiatedCount: 4, startedCount: 4, startedTodayCount: 0 },
+            { id: 2, sort_order: 2, initiatedCount: 2, startedCount: 0, startedTodayCount: 0 },
+            { id: 3, sort_order: 3, initiatedCount: 8, startedCount: 8, startedTodayCount: 0 },
           ],
         },
       ] as any;
 
       expect(getInProgressLessons(startedWithoutTodayData).map((lesson) => lesson.id)).toEqual([3]);
+    });
+
+    it('shows a later initiated lesson even when its items were mastered without starting them', () => {
+      const skippedLessonAfterStartedLesson = [
+        {
+          lessons: [
+            { id: 1, sort_order: 1, initiatedCount: 5, startedCount: 5, startedTodayCount: 0 },
+            { id: 2, sort_order: 2, initiatedCount: 3, startedCount: 0, startedTodayCount: 0 },
+          ],
+        },
+      ] as any;
+
+      expect(
+        getInProgressLessons(skippedLessonAfterStartedLesson).map((lesson) => lesson.id),
+      ).toEqual([2]);
     });
   });
 });
