@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { UserItemLocal } from '@/types/user-item.types';
-import { getEffectiveProgress } from '@/utils/progress.utils';
+import { getEffectiveProgress, isInitiated } from '@/utils/progress.utils';
 
 const NULL_DATE = '9999-12-31T23:59:59+00:00';
 
@@ -33,5 +33,21 @@ describe('progress utilities', () => {
     });
 
     expect(getEffectiveProgress(skipped, 'czToEn')).toBe(10);
+  });
+
+  it.each([
+    ['a started item', { started_at: '2026-08-31T10:00:00.000Z' }, true],
+    [
+      'an initial-training skip',
+      {
+        started_at: NULL_DATE,
+        mastered_at_cz_to_en: '2026-08-31T10:00:00.000Z',
+        mastered_at_en_to_cz: '2026-08-31T10:00:00.000Z',
+      },
+      true,
+    ],
+    ['an untouched item', { started_at: NULL_DATE }, false],
+  ])('identifies %s as initiated=%s', (_name, overrides, expected) => {
+    expect(isInitiated(makeItem(overrides))).toBe(expected);
   });
 });

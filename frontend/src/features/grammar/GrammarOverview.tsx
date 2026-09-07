@@ -32,7 +32,7 @@ export default function GrammarOverview({
       return [];
     }
 
-    return GrammarGroup.getStarted(userId);
+    return GrammarGroup.getInitiated(userId);
   }, [userId]);
 
   const { data: grammarList, loading, error } = useLiveQueryData(fetchGrammar, {

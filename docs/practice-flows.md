@@ -43,5 +43,6 @@ active session completes. There is no previous-block or grammar unlock prerequis
 Regular and training practice cards resolve their detail button through the item-derived
 `user_items.grammar_chunk_id` and display that chunk with every explicitly ordered
 `grammar_chunk_examples` item. Every chunk belongs to a grammar group. The grammar overview uses
-the group name and note, then composes only its started chunks in group-specific order while
-showing every curated example for each visible chunk.
+the group name and note, then composes only its initiated chunks in group-specific order while
+showing every curated example for each visible chunk. An initial-training skip counts as
+initiated even though it has no `started_at` timestamp.

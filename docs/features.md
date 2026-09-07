@@ -51,10 +51,10 @@ starting point when a change crosses route, store, model, or sync boundaries.
 | --- | --- | --- | --- | --- |
 | Practice overview | Review recent daily practice counts. | `/practice-overview`, `PracticeOverviewFeature` | `UserScore` | The overview queries score history directly; the current-day snapshot is reactive. |
 | Dashboard and levels | Show progress grouped by course structure. | `Dashboard`, `/levels`, levels feature | `Levels`, `Lessons`, `UserItem`, `useUserStore` | Active-user live queries refresh cached progress after relevant commits. |
-| Topics overview | List ordered topics with started corresponding items. | `/topics`, `TopicsOverview` | `Topic`, `UserItem`, audio playback for items | Topics are independent of practice blocks and require at least one started item. |
-| Topic items | Show and reset started items inside one topic. | `/topics/:topicId`, `TopicItemsOverview` | `Topic`, `UserItem`, audio and detail links | Items link directly through nullable `items.topic_id`. |
-| Grammar overview | List started groups with ordered chunk sections, playable curated examples, and reset group progress. | `/grammar`, `GrammarOverview` | `GrammarGroup`, `GrammarChunk`, `grammar_chunk_examples`, `UserItem` | Reset preserves unlock history and immediately schedules reset items for regular practice. |
-| Vocabulary overview | Search and inspect started vocabulary, then reset item progress. | `/vocabulary`, `VocabularyOverview` | `UserItem`, item detail data, localStorage `vocabulary_search_term_${userId}` | Search state persists per user; reset writes local progress and syncs later. |
+| Topics overview | List ordered topics with initiated corresponding items. | `/topics`, `TopicsOverview` | `Topic`, `UserItem`, audio playback for items | Topics are independent of practice blocks and require at least one initiated item. |
+| Topic items | Show and reset initiated items inside one topic. | `/topics/:topicId`, `TopicItemsOverview` | `Topic`, `UserItem`, audio and detail links | Items link directly through nullable `items.topic_id`; initial-training skips are included. |
+| Grammar overview | List initiated groups with ordered chunk sections, playable curated examples, and reset group progress. | `/grammar`, `GrammarOverview` | `GrammarGroup`, `GrammarChunk`, `grammar_chunk_examples`, `UserItem` | Reset preserves unlock history and includes initial-training skips. |
+| Vocabulary overview | Search and inspect initiated vocabulary, then reset item progress. | `/vocabulary`, `VocabularyOverview` | `UserItem`, item detail data, localStorage `vocabulary_search_term_${userId}` | Search state persists per user; initial-training skips are included. |
 
 ## Data, Sync, And Offline Behavior
 

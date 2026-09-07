@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   grammarGet: vi.fn(),
   grammarAnyOf: vi.fn(),
-  getStartedGrammarChunkIds: vi.fn(),
+  getInitiatedGrammarChunkIds: vi.fn(),
   transaction: vi.fn(),
   getSyncTimestamps: vi.fn(),
   markAsSynced: vi.fn(),
@@ -52,7 +52,7 @@ vi.mock('@/database/models/db', () => ({
 
 vi.mock('@/database/models/user-items', () => ({
   default: {
-    getStartedGrammarChunkIds: (...args: unknown[]) => mocks.getStartedGrammarChunkIds(...args),
+    getInitiatedGrammarChunkIds: (...args: unknown[]) => mocks.getInitiatedGrammarChunkIds(...args),
   },
 }));
 
@@ -82,7 +82,7 @@ describe('Grammar', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mocks.getStartedGrammarChunkIds.mockResolvedValue([]);
+    mocks.getInitiatedGrammarChunkIds.mockResolvedValue([]);
     mocks.grammarAnyOf.mockReturnValue({
       sortBy: vi.fn().mockResolvedValue([]),
     });
@@ -168,8 +168,8 @@ describe('Grammar', () => {
     ]);
   });
 
-  it('getStartedList returns grammar list for started ids', async () => {
-    mocks.getStartedGrammarChunkIds.mockResolvedValue([1, 2]);
+  it('getInitiatedList returns grammar list for initiated ids', async () => {
+    mocks.getInitiatedGrammarChunkIds.mockResolvedValue([1, 2]);
     mocks.grammarAnyOf.mockReturnValue({
       sortBy: vi.fn().mockResolvedValue([
         { id: 1, name: 'A', note: '', sort_order: 1, deleted_at: null },
@@ -177,7 +177,7 @@ describe('Grammar', () => {
       ]),
     });
 
-    await expect(Grammar.getStarted('u1')).resolves.toHaveLength(2);
+    await expect(Grammar.getInitiated('u1')).resolves.toHaveLength(2);
     expect(mocks.grammarAnyOf).toHaveBeenCalledWith([1, 2]);
   });
 

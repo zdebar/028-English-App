@@ -39,7 +39,7 @@ The curriculum path contains level, lesson, and item order.
 | --- | --- |
 | `UserItem` | Practice deck creation, item progress saves, vocabulary readiness, item resets, user item sync. |
 | `Block` | Shared metadata for explicit initial-training groups. |
-| `Topic` | Shared topic metadata sync and started-topic discovery. |
+| `Topic` | Shared topic metadata sync and initiated-topic discovery. |
 | `UserScore` | Daily practice count creation, incrementing, and sync. |
 | `Levels` | Dashboard/overview progress aggregation. |
 
@@ -61,10 +61,10 @@ Declared in `frontend/src/database/models/app-db.ts`.
 | --- | --- |
 | `[user_id+item_id]` | Direct user item lookup/reset/update. |
 | `[user_id+block_id]` | Block item loading and block reset operations. |
-| `[user_id+topic_id]` | Started topic detail loading and topic reset operations. |
-| `[user_id+grammar_chunk_id+started_at]` | Grammar-chunk started-item queries and resets. |
-| `[user_id+is_vocabulary+started_at]` | Started vocabulary queries. |
-| `[user_id+started_at]` | Started-item and grammar discovery. |
+| `[user_id+topic_id]` | Initiated topic detail loading and topic reset operations. |
+| `[user_id+grammar_chunk_id+started_at]` | Grammar-chunk initiated-item queries and resets. |
+| `[user_id+is_vocabulary+started_at]` | Initiated vocabulary queries. |
+| `[user_id+started_at]` | Initiated-item and grammar discovery. |
 | `[user_id+updated_at]` | Incremental sync push windows. |
 | `[user_id+next_at+mastered_at+curriculum_sort_path]` | Unified practice deck and readiness queries. |
 

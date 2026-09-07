@@ -23,7 +23,7 @@ export default function TopicsOverview({
   // Topics management
   const fetchTopics = useCallback(async (): Promise<TopicType[]> => {
     if (!userId) return [];
-    return Topic.getStartedByUserId(userId);
+    return Topic.getInitiatedByUserId(userId);
   }, [userId]);
 
   const {

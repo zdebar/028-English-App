@@ -80,9 +80,9 @@ export function overviewAvailabilityDescriptor(userId: string) {
     key: routeDataKey('overviews', userId),
     load: async () => {
       const [grammar, topics, vocabulary] = await Promise.all([
-        UserItem.hasStartedGrammar(userId),
-        Topic.getStartedByUserId(userId),
-        UserItem.getStartedVocabulary(userId),
+        UserItem.hasInitiatedGrammar(userId),
+        Topic.getInitiatedByUserId(userId),
+        UserItem.getInitiatedVocabulary(userId),
       ]);
       return {
         grammar,
@@ -110,14 +110,14 @@ export function levelsDescriptor(userId: string) {
 export function grammarDescriptor(userId: string) {
   return {
     key: routeDataKey('grammar', userId),
-    load: () => GrammarGroup.getStarted(userId),
+    load: () => GrammarGroup.getInitiated(userId),
   };
 }
 
 export function topicsDescriptor(userId: string) {
   return {
     key: routeDataKey('topics', userId),
-    load: () => Topic.getStartedByUserId(userId),
+    load: () => Topic.getInitiatedByUserId(userId),
   };
 }
 
@@ -127,7 +127,7 @@ export function topicDetailDescriptor(userId: string, topicId: number) {
     load: async () => {
       const [topic, items] = await Promise.all([
         Topic.getById(topicId),
-        UserItem.getStartedByTopicId(userId, topicId),
+        UserItem.getInitiatedByTopicId(userId, topicId),
       ]);
       return { topic, items };
     },
@@ -137,7 +137,7 @@ export function topicDetailDescriptor(userId: string, topicId: number) {
 export function vocabularyDescriptor(userId: string) {
   return {
     key: routeDataKey('vocabulary', userId),
-    load: () => UserItem.getStartedVocabulary(userId),
+    load: () => UserItem.getInitiatedVocabulary(userId),
   };
 }
 

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
-  getStartedByUserId: vi.fn(),
+  getInitiatedByUserId: vi.fn(),
   userId: 'u1' as string | null,
   state: {
     data: [] as Array<{ id: number; name: string }>,
@@ -31,7 +31,7 @@ vi.mock('@/routing/route-data', () => ({
 
 vi.mock('@/database/models/topics', () => ({
   default: {
-    getStartedByUserId: (...args: unknown[]) => mocks.getStartedByUserId(...args),
+    getInitiatedByUserId: (...args: unknown[]) => mocks.getInitiatedByUserId(...args),
   },
 }));
 
@@ -81,7 +81,7 @@ describe('TopicsOverview', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.userId = 'u1';
-    mocks.getStartedByUserId.mockResolvedValue([]);
+    mocks.getInitiatedByUserId.mockResolvedValue([]);
     mocks.state.data = [];
     mocks.state.error = null;
     mocks.state.loading = false;
@@ -92,7 +92,7 @@ describe('TopicsOverview', () => {
 
     render(<TopicsOverview />);
 
-    expect(mocks.getStartedByUserId).toHaveBeenCalledWith('u1');
+    expect(mocks.getInitiatedByUserId).toHaveBeenCalledWith('u1');
     expect(screen.queryByText('No topics')).toBeNull();
   });
 

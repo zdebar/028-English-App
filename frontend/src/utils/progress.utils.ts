@@ -6,6 +6,10 @@ const NULL_DATE = config.database.nullReplacementDate;
 type DirectionMasteryItem = Pick<UserItemLocal, 'mastered_at_cz_to_en' | 'mastered_at_en_to_cz'>;
 type DirectionProgressItem = Pick<UserItemLocal, 'progress_cz_to_en' | 'progress_en_to_cz'>;
 type EffectiveProgressItem = DirectionMasteryItem & DirectionProgressItem;
+type InitiatedItem = Pick<
+  UserItemLocal,
+  'started_at' | 'mastered_at_cz_to_en' | 'mastered_at_en_to_cz'
+>;
 
 export const PRACTICE_DIRECTIONS: readonly PracticeDirection[] = ['czToEn', 'enToCz'];
 
@@ -18,6 +22,15 @@ export function isDirectionMastered(
   direction: PracticeDirection,
 ): boolean {
   return getDirectionMasteredAt(item, direction) !== NULL_DATE;
+}
+
+/** Returns whether an item has been initiated, including initial-training skips. */
+export function isInitiated(item: InitiatedItem): boolean {
+  return (
+    (item.started_at ?? NULL_DATE) !== NULL_DATE ||
+    ((item.mastered_at_cz_to_en ?? NULL_DATE) !== NULL_DATE &&
+      (item.mastered_at_en_to_cz ?? NULL_DATE) !== NULL_DATE)
+  );
 }
 
 export function getEffectiveProgress(

@@ -75,9 +75,9 @@ export function useOverviewAvailability(
     if (!initialData) setDatabaseState(LOADING_DATABASE_STATE);
 
     const queries: ReadonlyArray<readonly [DatabaseOverviewKey, () => Promise<boolean>]> = [
-      ['grammar', () => UserItem.hasStartedGrammar(userId)],
-      ['topics', async () => (await Topic.getStartedByUserId(userId)).length > 0],
-      ['vocabulary', async () => (await UserItem.getStartedVocabulary(userId)).length > 0],
+      ['grammar', () => UserItem.hasInitiatedGrammar(userId)],
+      ['topics', async () => (await Topic.getInitiatedByUserId(userId)).length > 0],
+      ['vocabulary', async () => (await UserItem.getInitiatedVocabulary(userId)).length > 0],
     ];
 
     const subscriptions = queries.map(([key, query]) =>

@@ -97,8 +97,8 @@ export default class GrammarChunk extends SyncEntityModel implements GrammarChun
       .sortBy('sort_order');
   }
 
-  static async getStarted(userId: string): Promise<GrammarChunkType[]> {
-    const chunkIds = await UserItem.getStartedGrammarChunkIds(userId);
+  static async getInitiated(userId: string): Promise<GrammarChunkType[]> {
+    const chunkIds = await UserItem.getInitiatedGrammarChunkIds(userId);
     if (chunkIds.length === 0) return [];
     return db.grammar_chunks.where('id').anyOf(chunkIds).sortBy('sort_order');
   }

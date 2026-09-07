@@ -27,15 +27,15 @@ vi.mock('dexie', () => ({
 }));
 
 vi.mock('@/database/models/topics', () => ({
-  default: { getStartedByUserId: vi.fn(async () => mocks.topics) },
+  default: { getInitiatedByUserId: vi.fn(async () => mocks.topics) },
 }));
 vi.mock('@/database/models/user-items', () => ({
   default: {
-    hasStartedGrammar: vi.fn(async () => {
+    hasInitiatedGrammar: vi.fn(async () => {
       if (mocks.grammarError) throw mocks.grammarError;
       return mocks.grammar;
     }),
-    getStartedVocabulary: vi.fn(async () => mocks.vocabulary),
+    getInitiatedVocabulary: vi.fn(async () => mocks.vocabulary),
   },
 }));
 vi.mock('@/features/toast/use-toast-store', () => ({
