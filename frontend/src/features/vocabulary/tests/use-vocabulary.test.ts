@@ -10,7 +10,7 @@ vi.mock('@/hooks/use-live-query-data', () => ({
 }));
 
 vi.mock('@/database/models/user-items', () => ({
-  default: { getStartedVocabulary: vi.fn() },
+  default: { getInitiatedVocabulary: vi.fn() },
 }));
 
 import { useVocabulary } from '../use-vocabulary';

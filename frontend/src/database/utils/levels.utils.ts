@@ -8,6 +8,7 @@ import type {
 import type { UserItemLocal } from '@/types/user-item.types';
 import { getTodayShortDate, getLocalDateFromUTC } from './database.utils';
 import config from '@/config/config';
+import { isInitiated } from '@/utils/progress.utils';
 
 const NULL_DATE = config.database.nullReplacementDate;
 
@@ -55,9 +56,8 @@ export function aggregateLevels(
       if (idx === undefined) return;
       const counts = lessonCounts[idx];
       const isStarted = item.started_at !== NULL_DATE;
-      const isInitialTrainingSkipped = isUnstartedAndMasteredInBothDirections(item);
 
-      if (isStarted || isInitialTrainingSkipped) counts.initiatedCount++;
+      if (isInitiated(item)) counts.initiatedCount++;
       if (isStarted) counts.startedCount++;
       if (isStarted && getLocalDateFromUTC(item.started_at) === today)
         counts.startedTodayCount++;
@@ -96,12 +96,4 @@ export function aggregateLevels(
   return Array.from(levelOverviews.values())
     .filter((level) => level.lessons.length > 0)
     .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
-}
-
-function isUnstartedAndMasteredInBothDirections(item: UserItemLocal): boolean {
-  return (
-    item.started_at === NULL_DATE &&
-    item.mastered_at_cz_to_en !== NULL_DATE &&
-    item.mastered_at_en_to_cz !== NULL_DATE
-  );
 }

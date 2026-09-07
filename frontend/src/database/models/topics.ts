@@ -5,11 +5,12 @@ import { TableName } from '@/types/table.types';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 import config from '@/config/config';
 import Dexie from 'dexie';
+import { isInitiated } from '@/utils/progress.utils';
 
 const NULL_DATE = config.database.nullReplacementDate;
 const NULL_NUMBER = config.database.nullReplacementNumber;
 
-/** Shared topic metadata and user-specific started-topic queries. */
+/** Shared topic metadata and user-specific initiated-topic queries. */
 export default class Topic extends SyncEntityModel implements TopicType {
   id!: number;
   name!: string;
@@ -27,19 +28,24 @@ export default class Topic extends SyncEntityModel implements TopicType {
     return (await db.topics.get(topicId)) ?? null;
   }
 
-  static async getStartedByUserId(userId: string): Promise<TopicType[]> {
+  static async getInitiatedByUserId(userId: string): Promise<TopicType[]> {
     assertNonEmptyString(userId, 'userId');
 
-    const startedItems = await db.user_items
+    const initiatedItems = await db.user_items
       .where('[user_id+started_at]')
-      .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
-      .filter((item) => item.topic_id !== NULL_NUMBER)
+      .between([userId, Dexie.minKey], [userId, NULL_DATE], true, true)
+      .filter(
+        (item) =>
+          item.deleted_at === NULL_DATE &&
+          item.topic_id !== NULL_NUMBER &&
+          isInitiated(item),
+      )
       .toArray();
-    const startedTopicIds = new Set(startedItems.map((item) => item.topic_id));
+    const initiatedTopicIds = new Set(initiatedItems.map((item) => item.topic_id));
     const topics = await db.topics.toArray();
 
     return topics
-      .filter((topic) => startedTopicIds.has(topic.id))
+      .filter((topic) => initiatedTopicIds.has(topic.id))
       .sort((left, right) => left.sort_order - right.sort_order || left.id - right.id);
   }
 }

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  getStartedGrammarChunkIds: vi.fn(),
+  getInitiatedGrammarChunkIds: vi.fn(),
   chunksAnyOf: vi.fn(),
   groupsAnyOf: vi.fn(),
   addExamplesToMany: vi.fn(),
@@ -30,7 +30,7 @@ vi.mock('@/database/models/db', () => ({
 
 vi.mock('@/database/models/user-items', () => ({
   default: {
-    getStartedGrammarChunkIds: (...args: unknown[]) => mocks.getStartedGrammarChunkIds(...args),
+    getInitiatedGrammarChunkIds: (...args: unknown[]) => mocks.getInitiatedGrammarChunkIds(...args),
   },
 }));
 
@@ -42,10 +42,10 @@ vi.mock('@/database/models/grammar-chunks', () => ({
 
 import GrammarGroup from '@/database/models/grammar-groups';
 
-describe('GrammarGroup.getStarted', () => {
+describe('GrammarGroup.getInitiated', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.getStartedGrammarChunkIds.mockResolvedValue([11, 12, 13]);
+    mocks.getInitiatedGrammarChunkIds.mockResolvedValue([11, 12, 13]);
     mocks.chunksAnyOf.mockReturnValue({
       toArray: vi.fn().mockResolvedValue([
         { id: 12, name: 'Second', grammar_group_id: 2, sort_order: 2 },
@@ -65,8 +65,8 @@ describe('GrammarGroup.getStarted', () => {
     );
   });
 
-  it('returns started chunks grouped and ordered by their grammar group', async () => {
-    await expect(GrammarGroup.getStarted('u1')).resolves.toEqual([
+  it('returns initiated chunks grouped and ordered by their grammar group', async () => {
+    await expect(GrammarGroup.getInitiated('u1')).resolves.toEqual([
       {
         id: 1,
         kind: 'group',
@@ -86,7 +86,7 @@ describe('GrammarGroup.getStarted', () => {
       },
     ]);
 
-    expect(mocks.getStartedGrammarChunkIds).toHaveBeenCalledWith('u1');
+    expect(mocks.getInitiatedGrammarChunkIds).toHaveBeenCalledWith('u1');
     expect(mocks.chunksAnyOf).toHaveBeenCalledWith([11, 12, 13]);
     expect(mocks.addExamplesToMany).toHaveBeenCalledOnce();
     expect(mocks.addExamplesToMany).toHaveBeenCalledWith(
@@ -97,9 +97,9 @@ describe('GrammarGroup.getStarted', () => {
   });
 
   it('returns no groups when there are no started chunks', async () => {
-    mocks.getStartedGrammarChunkIds.mockResolvedValue([]);
+    mocks.getInitiatedGrammarChunkIds.mockResolvedValue([]);
 
-    await expect(GrammarGroup.getStarted('u1')).resolves.toEqual([]);
+    await expect(GrammarGroup.getInitiated('u1')).resolves.toEqual([]);
     expect(mocks.chunksAnyOf).not.toHaveBeenCalled();
   });
 });

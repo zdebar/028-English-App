@@ -60,7 +60,7 @@ vi.mock('@/features/audio/use-audio-manager', () => ({
 
 vi.mock('@/database/models/user-items', () => ({
   default: {
-    getStartedByTopicId: vi.fn(),
+    getInitiatedByTopicId: vi.fn(),
     resetItemsByTopicId: vi.fn(),
   },
 }));

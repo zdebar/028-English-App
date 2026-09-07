@@ -124,6 +124,10 @@ function createVocabularyStartedQuery() {
     between: (...args: unknown[]) => {
       mocks.indexedBetween(...args);
       return {
+        filter: (predicate: (item: any) => boolean) => ({
+          toArray: async (...toArrayArgs: unknown[]) =>
+            ((await mocks.indexedToArray(...toArrayArgs)) ?? []).filter(predicate),
+        }),
         toArray: (...toArrayArgs: unknown[]) => mocks.indexedToArray(...toArrayArgs),
       };
     },
@@ -136,7 +140,8 @@ function createStartedGrammarQuery() {
       mocks.indexedBetween(...args);
       return {
         filter: (predicate: (item: any) => boolean) => ({
-          toArray: (...toArrayArgs: unknown[]) => mocks.indexedToArray(...toArrayArgs),
+          toArray: async (...toArrayArgs: unknown[]) =>
+            ((await mocks.indexedToArray(...toArrayArgs)) ?? []).filter(predicate),
           first: async () => mocks.startedGrammarCandidates.find(predicate),
         }),
       };
@@ -336,21 +341,80 @@ describe('UserItem', () => {
     ['no items', [], false],
     ['an item without a grammar chunk', [{ grammar_chunk_id: 0 }], false],
     [
-      'a reset started grammar item',
+      'an initiated grammar item',
       [
         {
           grammar_chunk_id: 7,
           started_at: '2026-03-01T00:00:00.000Z',
+          deleted_at: '1970-01-01T00:00:00.000Z',
           progress_cz_to_en: 0,
           progress_en_to_cz: 0,
         },
       ],
       true,
     ],
-  ])('hasStartedGrammar returns the expected result for %s', async (_name, items, expected) => {
+    [
+      'an initial-training skip',
+      [
+        {
+          grammar_chunk_id: 7,
+          started_at: '1970-01-01T00:00:00.000Z',
+          deleted_at: '1970-01-01T00:00:00.000Z',
+          mastered_at_cz_to_en: '2026-03-01T00:00:00.000Z',
+          mastered_at_en_to_cz: '2026-03-01T00:00:00.000Z',
+        },
+      ],
+      true,
+    ],
+  ])('hasInitiatedGrammar returns the expected result for %s', async (_name, items, expected) => {
     mocks.startedGrammarCandidates = items as any[];
 
-    await expect(UserItem.hasStartedGrammar('u1')).resolves.toBe(expected);
+    await expect(UserItem.hasInitiatedGrammar('u1')).resolves.toBe(expected);
+  });
+
+  it('getInitiatedGrammarChunkIds includes skipped grammar items and excludes untouched items', async () => {
+    mocks.indexedToArray.mockResolvedValue([
+      {
+        grammar_chunk_id: 7,
+        started_at: '1970-01-01T00:00:00.000Z',
+        deleted_at: '1970-01-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '2026-03-01T00:00:00.000Z',
+        mastered_at_en_to_cz: '2026-03-01T00:00:00.000Z',
+      },
+      {
+        grammar_chunk_id: 8,
+        started_at: '1970-01-01T00:00:00.000Z',
+        deleted_at: '1970-01-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+      },
+      {
+        grammar_chunk_id: 9,
+        started_at: '2026-03-01T00:00:00.000Z',
+        deleted_at: '2026-03-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+      },
+    ]);
+
+    await expect(UserItem.getInitiatedGrammarChunkIds('u1')).resolves.toEqual([7]);
+  });
+
+  it('getInitiatedVocabulary includes started and skipped vocabulary items', async () => {
+    mocks.indexedToArray.mockResolvedValue([
+      initialItem(1, {
+        started_at: '2026-03-01T00:00:00.000Z',
+      }),
+      initialItem(2, {
+        started_at: '1970-01-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '2026-03-01T00:00:00.000Z',
+        mastered_at_en_to_cz: '2026-03-01T00:00:00.000Z',
+      }),
+      initialItem(3),
+    ]);
+
+    const result = await UserItem.getInitiatedVocabulary('u1');
+    expect(result.map((item) => item.item_id)).toEqual([1, 2]);
   });
 
   it('savePracticeDeck updates only practice progress fields', async () => {
@@ -1229,28 +1293,45 @@ describe('UserItem', () => {
     expect(selection?.items.map((item) => item.item_id)).toEqual([2]);
   });
 
-  it('getStartedByTopicId excludes unstarted items and preserves curriculum order', async () => {
+  it('getInitiatedByTopicId excludes uninitiated items and preserves curriculum order', async () => {
     mocks.topicEqualsToArray.mockResolvedValue([
       {
         item_id: 2,
         started_at: '2026-08-02T00:00:00.000Z',
+        deleted_at: '1970-01-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
         curriculum_sort_path: [1, 1, 2],
       },
       {
         item_id: 3,
         started_at: '1970-01-01T00:00:00.000Z',
+        deleted_at: '1970-01-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '2026-08-02T00:00:00.000Z',
+        mastered_at_en_to_cz: '2026-08-02T00:00:00.000Z',
         curriculum_sort_path: [1, 1, 2],
       },
       {
         item_id: 1,
         started_at: '2026-08-01T00:00:00.000Z',
+        deleted_at: '1970-01-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
         curriculum_sort_path: [1, 1, 1],
+      },
+      {
+        item_id: 4,
+        started_at: '1970-01-01T00:00:00.000Z',
+        deleted_at: '1970-01-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+        curriculum_sort_path: [1, 1, 4],
       },
     ]);
 
-    const result = await UserItem.getStartedByTopicId('u1', 4);
+    const result = await UserItem.getInitiatedByTopicId('u1', 4);
 
-    expect(result.map((item) => item.item_id)).toEqual([1, 2]);
+    expect(result.map((item) => item.item_id)).toEqual([1, 2, 3]);
   });
 
   it('resetItemsByTopicId resets all items assigned to the topic', async () => {

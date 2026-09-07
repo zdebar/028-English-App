@@ -116,6 +116,16 @@ describe('PronunciationGroup', () => {
     ]);
   });
 
+  it('unlocks a contrast set containing an initial-training skip', async () => {
+    mocks.items[1].started_at = '1970-01-01T00:00:00.000Z';
+    mocks.items[1].mastered_at_cz_to_en = '2026-07-01T00:00:00.000Z';
+    mocks.items[1].mastered_at_en_to_cz = '2026-07-01T00:00:00.000Z';
+
+    const overview = await PronunciationGroup.getOverview('u1');
+
+    expect(overview[0]).toMatchObject({ unlocked_count: 2 });
+  });
+
   it('returns groups ordered by id', async () => {
     mocks.groups = [
       { ...mocks.groups[0], id: 2, name: 'Second' },

@@ -10,6 +10,7 @@ import { TableName } from '@/types/table.types';
 import type { CurriculumSortPath, UserItemLocal } from '@/types/user-item.types';
 import Dexie from 'dexie';
 import SyncEntityModel from './sync-entity-model';
+import { isInitiated } from '@/utils/progress.utils';
 
 const NULL_DATE = config.database.nullReplacementDate;
 
@@ -18,7 +19,7 @@ function isEligible(item: UserItemLocal): boolean {
 }
 
 function isAvailable(item: UserItemLocal): boolean {
-  return isEligible(item) && item.started_at !== NULL_DATE;
+  return isEligible(item) && isInitiated(item);
 }
 
 function compareCurriculumPaths(left: CurriculumSortPath, right: CurriculumSortPath): number {

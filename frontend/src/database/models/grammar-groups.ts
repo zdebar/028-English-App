@@ -23,8 +23,8 @@ export default class GrammarGroup extends SyncEntityModel implements GrammarGrou
   static override readonly syncEntityName = 'grammar groups';
   static override readonly syncSelect = 'id, name, note, sort_order, deleted_at';
 
-  static async getStarted(userId: string): Promise<GrammarGroupWithChunks[]> {
-    const chunkIds = await UserItem.getStartedGrammarChunkIds(userId);
+  static async getInitiated(userId: string): Promise<GrammarGroupWithChunks[]> {
+    const chunkIds = await UserItem.getInitiatedGrammarChunkIds(userId);
     if (chunkIds.length === 0) return [];
 
     const chunks = await db.grammar_chunks.where('id').anyOf(chunkIds).toArray();

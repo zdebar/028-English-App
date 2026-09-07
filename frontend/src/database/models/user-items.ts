@@ -20,7 +20,7 @@ import type { ReadyPracticeState } from '@/types/generic.types';
 import Metadata from './metadata';
 import { reportInfo } from '@/features/logging/monitoring-handler';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
-import { getEffectiveProgress } from '@/utils/progress.utils';
+import { getEffectiveProgress, isInitiated } from '@/utils/progress.utils';
 
 const NULL_DATE = config.database.nullReplacementDate;
 const NULL_NUMBER = config.database.nullReplacementNumber;
@@ -199,7 +199,7 @@ async function resolveInitialTrainingSelection(
  *
  * Public API:
  * - Review flow: `getReviewDeck`, `savePracticeDeck`, and `getReadyReviewState`.
- * - Progress lookups: `getStartedGrammarChunkIds`, topic items, and started vocabulary.
+ * - Progress lookups: initiated grammar chunks, topic items, and vocabulary.
  * - New-block completion.
  * - Maintenance: reset helpers, simulation data, local account deletion, and remote sync.
  *
@@ -433,12 +433,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return updatedItems;
   }
 
-  /** Reads started items assigned to one topic, ordered by curriculum position. */
-  static async getStartedByTopicId(userId: string, topicId: number): Promise<UserItemLocal[]> {
+  /** Reads initiated items assigned to one topic, ordered by curriculum position. */
+  static async getInitiatedByTopicId(userId: string, topicId: number): Promise<UserItemLocal[]> {
     const topicItems = await db.user_items
       .where('[user_id+topic_id]')
       .equals([userId, topicId])
-      .filter((item) => item.started_at !== NULL_DATE)
+      .filter((item) => item.deleted_at === NULL_DATE && isInitiated(item))
       .toArray();
 
     return topicItems.sort((left, right) =>
@@ -447,46 +447,51 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Returns whether the user has at least one started grammar practice item.
+   * Returns whether the user has at least one initiated grammar practice item.
    *
    * @param userId User id whose grammar availability should be checked.
    */
-  static async hasStartedGrammar(userId: string): Promise<boolean> {
-    const startedItem = await db.user_items
+  static async hasInitiatedGrammar(userId: string): Promise<boolean> {
+    const initiatedItem = await db.user_items
       .where('[user_id+started_at]')
-      .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
-      .filter(isStartedGrammarItem)
+      .between([userId, Dexie.minKey], [userId, NULL_DATE], true, true)
+      .filter(
+        (item) => item.deleted_at === NULL_DATE && isInitiated(item) && hasGrammarChunk(item),
+      )
       .first();
 
-    return startedItem !== undefined;
+    return initiatedItem !== undefined;
   }
 
   /**
-   * Reads unique grammar ids from started practice items.
+   * Reads unique grammar ids from initiated practice items.
    *
    * @param userId User id whose started items should be inspected.
    * @returns Unique non-null-replacement grammar ids.
    */
-  static async getStartedGrammarChunkIds(userId: string): Promise<number[]> {
-    const startedItems = await db.user_items
+  static async getInitiatedGrammarChunkIds(userId: string): Promise<number[]> {
+    const initiatedItems = await db.user_items
       .where('[user_id+started_at]')
-      .between([userId, Dexie.minKey], [userId, NULL_DATE], true, false)
-      .filter(isStartedGrammarItem)
+      .between([userId, Dexie.minKey], [userId, NULL_DATE], true, true)
+      .filter(
+        (item) => item.deleted_at === NULL_DATE && isInitiated(item) && hasGrammarChunk(item),
+      )
       .toArray();
 
-    return [...new Set(startedItems.map((item) => item.grammar_chunk_id))];
+    return [...new Set(initiatedItems.map((item) => item.grammar_chunk_id))];
   }
 
   /**
-   * Reads started vocabulary practice items for a user.
+   * Reads initiated vocabulary practice items for a user.
    *
    * @param userId User id whose vocabulary items should be read.
-   * @returns Vocabulary practice items with started_at earlier than the null replacement date.
+   * @returns Vocabulary practice items that have been initiated.
    */
-  static async getStartedVocabulary(userId: string): Promise<UserItemLocal[]> {
+  static async getInitiatedVocabulary(userId: string): Promise<UserItemLocal[]> {
     const result = await db.user_items
       .where('[user_id+is_vocabulary+started_at]')
-      .between([userId, 1, Dexie.minKey], [userId, 1, NULL_DATE], true, false)
+      .between([userId, 1, Dexie.minKey], [userId, 1, NULL_DATE], true, true)
+      .filter((item) => item.deleted_at === NULL_DATE && isInitiated(item))
       .toArray();
     return result;
   }
@@ -609,10 +614,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Resets started user items for one grammar topic.
+   * Resets initiated user items for one grammar topic.
    *
    * @param userId User id owning the items.
-   * @param grammarChunkId Grammar chunk id whose started items should be reset.
+   * @param grammarChunkId Grammar chunk id whose initiated items should be reset.
    * @returns Number of modified rows.
    */
   static async resetItemsByGrammarChunkId(
@@ -626,8 +631,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         [userId, grammarChunkId, Dexie.minKey],
         [userId, grammarChunkId, NULL_DATE],
         true,
-        false,
+        true,
       )
+      .filter((item) => item.deleted_at === NULL_DATE && isInitiated(item))
       .toArray();
 
     return resetItems(items, dateTime);
@@ -1140,7 +1146,7 @@ function resolveMasteredAt(
   return dateTime;
 }
 
-function isStartedGrammarItem(item: Pick<UserItemLocal, 'grammar_chunk_id'>): boolean {
+function hasGrammarChunk(item: Pick<UserItemLocal, 'grammar_chunk_id'>): boolean {
   return item.grammar_chunk_id !== NULL_NUMBER;
 }
 

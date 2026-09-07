@@ -18,7 +18,7 @@ const DISPLAY_FIELD_KEY = 'vocabulary_display_field';
 export function useVocabulary(userId: string | null, initialWords?: UserItemLocal[]) {
   const fetchVocabulary = useCallback(async () => {
     if (!userId) return [];
-    return UserItem.getStartedVocabulary(userId);
+    return UserItem.getInitiatedVocabulary(userId);
   }, [userId]);
 
   const { data: words, loading, error } = useLiveQueryData(fetchVocabulary, {

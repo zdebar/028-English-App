@@ -56,7 +56,7 @@ export default function TopicItemsOverview({
   // -- Items management --
   const fetchTopicItems = useCallback(async () => {
     if (!userId || !topicId) return [];
-    return UserItem.getStartedByTopicId(userId, topicId);
+    return UserItem.getInitiatedByTopicId(userId, topicId);
   }, [topicId, userId]);
 
   const {
