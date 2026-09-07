@@ -52,7 +52,6 @@ vi.mock('@/locales/cs', () => ({
     loadingMessage: 'Loading',
     loadingError: 'Loading error',
     blockCompleted: 'Block completed',
-    blockCompletedWithName: (blockName: string) => `Block completed: ${blockName}`,
     continuePractice: 'Continue',
     done: 'hotovo',
   },
@@ -250,7 +249,10 @@ describe('BlockTrainingPractice', () => {
 
     render(<BlockTrainingPractice />);
 
-    expect(screen.getByText('Block completed: Block A')).toBeTruthy();
+    expect(screen.getByText('Block completed')).toBeTruthy();
+    expect(screen.getByText('Block A')).toBeTruthy();
+    expect(screen.queryByText('Block completed: Block A')).toBeNull();
+    expect(screen.getByText('Block completed').className).toContain('text-center');
     expect(screen.getByRole('button', { name: 'Home' })).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Home' }));
     expect(mocks.navigate).toHaveBeenCalledWith('/');

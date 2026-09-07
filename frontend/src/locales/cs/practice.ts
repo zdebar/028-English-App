@@ -24,7 +24,6 @@ export const PRACTICE_TEXTS = {
   volume: 'Nastavení hlasitosti',
   blockTrainingProgressHelp: 'Kolo · Položky',
   blockCompleted: 'Dokončen nový blok',
-  blockCompletedWithName: (blockName: string) => `Dokončen nový blok: ${blockName}`,
   reviewCompleted: 'Dokončeno opakování',
   next: 'další',
   pronunciationPracticeButton: 'Výslovnost',

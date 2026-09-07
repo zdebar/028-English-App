@@ -24,10 +24,13 @@ function reportInitialTrainingError(
   reportError('Failed to fetch initial training deck', error);
 }
 
-function getInitialTrainingCompletionMessage(blockName: string | null | undefined): string {
+function getInitialTrainingCompletionMessages(blockName: string | null | undefined): {
+  message: string;
+  secondaryMessage?: string;
+} {
   const trimmedBlockName = blockName?.trim();
-  if (!trimmedBlockName) return TEXTS.blockCompleted;
-  return TEXTS.blockCompletedWithName(trimmedBlockName);
+  if (!trimmedBlockName) return { message: TEXTS.blockCompleted };
+  return { message: TEXTS.blockCompleted, secondaryMessage: trimmedBlockName };
 }
 
 function InitialTrainingContent({
@@ -41,7 +44,7 @@ function InitialTrainingContent({
 }>): JSX.Element {
   if (deck.loading) return <DelayedLoadingCircle />;
   if (deck.isComplete) {
-    return <PracticeEndState message={getInitialTrainingCompletionMessage(deck.block?.name)} />;
+    return <PracticeEndState {...getInitialTrainingCompletionMessages(deck.block?.name)} />;
   }
   if (!deck.hasContent && !deck.currentItem) return <PracticeEmptyState />;
   if (!deck.currentItem) return <PracticeEmptyState />;
