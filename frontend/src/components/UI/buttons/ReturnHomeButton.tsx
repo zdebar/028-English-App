@@ -16,7 +16,7 @@ export default function ReturnHomeButton(
   return (
     <StyledButton
       {...rest}
-      className={`h-button mt-2 w-full ${className ?? ''}`.trim()}
+      className={`h-controls mt-2 w-full grow-0 ${className ?? ''}`.trim()}
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) {
