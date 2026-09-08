@@ -1,0 +1,51 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+odstavec,paragraph,pˈæɹəɡɹˌæf,paragraph.opus,22000,,,,,True,22
+kalhoty,pants,pˈænts,pants.opus,22001,,,,,True,22
+princ,prince,pɹˈɪns,prince.opus,22002,,,,,True,22
+princezna,princess,pɹˈɪnsɛs,princess.opus,22003,,,,,True,22
+pěkný,pretty,pɹˈɪɾi,pretty.opus,22004,,,,,True,22
+současnost,present,pɹˈɛzənt,present.opus,22005,,,,,True,22
+modlit se,pray,pɹˈeɪ,pray.opus,22006,,,,,True,22
+trénovat,practise,pɹˈæktɪs,practise.opus,22007,,,,,True,22
+trénink,practice,pɹˈæktɪs,practice.opus,22008,,,,,True,22
+zveřejnit,post,pˈoʊst,post.opus,22009,,,,,True,22
+plakát,poster,pˈoʊstɚ,poster.opus,22010,,,,,True,22
+pizza,pizza,pˈiːtsə,pizza.opus,22011,,,,,True,22
+bouchnout,pop,pˈɑːp,pop.opus,22012,,,,,True,22
+znečištění,pollution,pəlˈuːʃən,pollution.opus,22013,,,,,True,22
+bod,point,pˈɔɪnt,point.opus,22014,,,,,True,22
+báseň,poem,pˈoʊᵻm,poem.opus,22015,,,,,True,22
+kapsa,pocket,pˈɑːkɪt,pocket.opus,22016,,,,,True,22
+potěšení,pleasure,plˈɛʒɚ,pleasure.opus,22017,,,,,True,22
+rovina,plane,plˈeɪn,plane.opus,22018,,,,,True,22
+palác,palace,pˈælɪs,palace.opus,22019,,,,,True,22
+nátěr,paint,pˈeɪnt,paint.opus,22020,,,,,True,22
+malování,painting,pˈeɪntɪŋ,painting.opus,22021,,,,,True,22
+obraz,painting,pˈeɪntɪŋ,painting.opus,22022,,,,,True,22
+hodin,o'clock,əklˈɑːk,oclock.opus,22023,,,,,True,22
+více,more,mˈɔːɹ,more.opus,22024,,,,,True,22
+nejvíce,most,mˈoʊst,most.opus,22025,,,,,True,22
+méně,less,lˈɛs,less.opus,22026,,,,,True,22
+nejméně,least,lˈiːst,least.opus,22027,,,,,True,22
+lepší,better,bˈɛɾɚ,better.opus,22028,,,,,True,22
+nejlepší,best,bˈɛst,best.opus,22029,,,,,True,22
+horší,worse,wˈɜːs,worse.opus,22030,,,,,True,22
+nejhorší,worst,wˈɜːst,worst.opus,22031,,,,,True,22
+dále,further,fˈɜːðɚ,further.opus,22032,,,,,True,22
+nejdále,farthest,fˈɑːɹðɪst,farthest.opus,22033,,,,,True,22
+Já jsem vyšší.,I'm taller.,aɪm tˈɔːlɚ,im_taller.opus,22034,39,,,31,False,22
+Ty jsi rychlejší.,You're faster.,jʊɹ fˈæstɚ,youre_faster.opus,22035,39,,,31,False,22
+On je silnější.,He's stronger.,hiːz stɹˈɔŋɡɚ,hes_stronger.opus,22036,39,,,31,False,22
+Ona je méně důležitá.,She's the less important.,ʃiːz ðə lˈɛs ɪmpˈɔːɹtənt,shes_the_less_important.opus,22037,39,,,31,False,22
+Je to dražší.,It's more expensive.,ɪts mˈɔːɹ ɛkspˈɛnsɪv,its_more_expensive.opus,22038,39,,,31,False,22
+My jsme starší.,We're older.,wɪɹ ˈoʊldɚ,were_older.opus,22039,39,,,31,False,22
+Vy jste chytřejší.,You're smarter.,jʊɹ smˈɑːɹɾɚ,youre_smarter.opus,22040,39,,,31,False,22
+Oni jsou šťastnější.,They're happier.,ðeɪɚ hˈæpɪɚ,theyre_happier.opus,22041,39,,,31,False,22
+Jsem nejvyšší v týmu.,I'm the tallest in the team.,aɪm ðə tˈɔːlɪst ɪnðə tˈiːm,im_the_tallest_in_the_team.opus,22042,40,,,32,False,22
+Jsi nejrychlejší ve třídě.,You're the fastest in the class.,jʊɹ ðə fˈæstɪst ɪnðə klˈæs,youre_the_fastest_in_the_class.opus,22043,40,,,32,False,22
+On je nejsilnější v rodině.,He's the strongest in the family.,hiːz ðə stɹˈɔŋɡɪst ɪnðə fˈæmɪli,hes_the_strongest_in_the_family.opus,22044,40,,,32,False,22
+Ona je nejméně důležitá.,She's the least important.,ʃiːz ðə lˈiːst ɪmpˈɔːɹtənt,shes_the_least_important.opus,22045,40,,,32,False,22
+Je to nejdražší pokoj.,It's the most expensive room.,ɪts ðə mˈoʊst ɛkspˈɛnsɪv ɹˈuːm,its_the_most_expensive_room.opus,22046,40,,,32,False,22
+Jsme nejstarší v domě.,We're the oldest in the house.,wɪɹ ðɪ ˈoʊldɪst ɪnðə hˈaʊs,were_the_oldest_in_the_house.opus,22047,40,,,32,False,22
+Jste nejchytřejší studenti.,You're the smartest students.,jʊɹ ðə smˈɑːɹɾɪst stˈuːdənts,youre_the_smartest_students.opus,22048,40,,,32,False,22
+Oni jsou nejšťastnější lidé.,They're the happiest people.,ðeɪɚ ðə hˈæpɪɪst pˈiːpəl,theyre_the_happiest_people.opus,22049,40,,,32,False,22

@@ -25,21 +25,21 @@ zpěvák,singer,,
 sekce,section,,
 "moci, umět",can,42,34
 "moci, umět v minulosti",could,42,34
-"smět, mít povolení, možná",may,42,34
-"možná, mohl by",might,42,34
+smět,may,42,34
+mohl by,might,42,34
 muset,must,42,34
-"budu, budeme",shall,42,34
-"měl by, měla by",should,43,34
-"budu, bude",will,43,34
+bude,shall,42,34
+měl by,should,43,34
+bude,will,43,34
 "chtěl by, udělal by",would,43,34
 "nemoci, neumět",can't,43,34
 "nemoci, neumět v minulosti",couldn't,43,34
-"možná ne, nesmět",may not,43,34
-"možná ne",might not,44,34
-"nesmět, mít zákaz",mustn't,44,34
-"nesmět, nebude",shall not,44,34
-"neměl by, neměla by",shouldn't,44,34
-"nebude, odmítne",won't,44,34
+nesmět,may not,43,34
+možná ne,might not,44,34
+nesmět,mustn't,44,34
+nebude,shall not,44,34
+neměl by,shouldn't,44,34
+odmítne,won't,44,34
 "nechtěl by, neudělal by",wouldn't,44,34
 Já mohu pomoci.,I can help.,,34
 Ty musíš odejít.,You must leave.,,34

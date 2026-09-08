@@ -25,21 +25,21 @@ zpěvák,singer,sˈɪŋɚ,singer.opus,24022,,,,,True,24
 sekce,section,sˈɛkʃən,section.opus,24023,,,,,True,24
 "moci, umět",can,kˈæn,can.opus,24024,42,,,34,False,24
 "moci, umět v minulosti",could,kˈʊd,could.opus,24025,42,,,34,False,24
-"smět, mít povolení, možná",may,mˈeɪ,may.opus,24026,42,,,34,False,24
-"možná, mohl by",might,mˈaɪt,might.opus,24027,42,,,34,False,24
+smět,may,mˈeɪ,may.opus,24026,42,,,34,False,24
+mohl by,might,mˈaɪt,might.opus,24027,42,,,34,False,24
 muset,must,mˈʌst,must.opus,24028,42,,,34,False,24
-"budu, budeme",shall,ʃˈæl,shall.opus,24029,42,,,34,False,24
-"měl by, měla by",should,ʃˈʊd,should.opus,24030,43,,,34,False,24
-"budu, bude",will,wˈɪl,will.opus,24031,43,,,34,False,24
+bude,shall,ʃˈæl,shall.opus,24029,42,,,34,False,24
+měl by,should,ʃˈʊd,should.opus,24030,43,,,34,False,24
+bude,will,wˈɪl,will.opus,24031,43,,,34,False,24
 "chtěl by, udělal by",would,wˈʊd,would.opus,24032,43,,,34,False,24
 "nemoci, neumět",can't,kˈænt,cant.opus,24033,43,,,34,False,24
 "nemoci, neumět v minulosti",couldn't,kˈʊdənt,couldnt.opus,24034,43,,,34,False,24
-"možná ne, nesmět",may not,mˈeɪ nˈɑːt,may_not.opus,24035,43,,,34,False,24
+nesmět,may not,mˈeɪ nˈɑːt,may_not.opus,24035,43,,,34,False,24
 možná ne,might not,mˌaɪt nˈɑːt,might_not.opus,24036,44,,,34,False,24
-"nesmět, mít zákaz",mustn't,mˈʌsənt,mustnt.opus,24037,44,,,34,False,24
-"nesmět, nebude",shall not,ʃˌæl nˈɑːt,shall_not.opus,24038,44,,,34,False,24
-"neměl by, neměla by",shouldn't,ʃˈʊdənt,shouldnt.opus,24039,44,,,34,False,24
-"nebude, odmítne",won't,wˈoʊnt,wont.opus,24040,44,,,34,False,24
+nesmět,mustn't,mˈʌsənt,mustnt.opus,24037,44,,,34,False,24
+nebude,shall not,ʃˌæl nˈɑːt,shall_not.opus,24038,44,,,34,False,24
+neměl by,shouldn't,ʃˈʊdənt,shouldnt.opus,24039,44,,,34,False,24
+odmítne,won't,wˈoʊnt,wont.opus,24040,44,,,34,False,24
 "nechtěl by, neudělal by",wouldn't,wˈʊdənt,wouldnt.opus,24041,44,,,34,False,24
 Já mohu pomoci.,I can help.,aɪ kæn hˈɛlp,i_can_help.opus,24042,,,,34,False,24
 Ty musíš odejít.,You must leave.,juː mˈʌst lˈiːv,you_must_leave.opus,24043,,,,34,False,24
