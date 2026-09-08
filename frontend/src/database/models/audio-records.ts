@@ -9,6 +9,21 @@ import type { AudioRecordLocal } from '@/types/audio.types';
 import { Entity } from 'dexie';
 import UserItem from './user-items';
 
+const AUDIO_DOWNLOAD_MAX_ATTEMPTS = 2;
+const AUDIO_DOWNLOAD_RETRY_DELAY_MS = 100;
+
+function isValidAudioBlob(audioBlob: unknown): audioBlob is Blob {
+  return audioBlob instanceof Blob && audioBlob.size > 0;
+}
+
+function isValidAudioRecord(audioRecord: AudioRecordLocal | undefined): audioRecord is AudioRecordLocal {
+  return Boolean(audioRecord && isValidAudioBlob(audioRecord.audioBlob));
+}
+
+function waitForAudioRetry(): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, AUDIO_DOWNLOAD_RETRY_DELAY_MS));
+}
+
 /**
  * Local audio blob cache backed by IndexedDB and Supabase Storage.
  *
@@ -29,7 +44,17 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    * @throws SupabaseError when the fallback storage download fails.
    */
   static async getByFilename(audioName: string): Promise<AudioRecordLocal> {
-    return (await db.audio_records.get(audioName)) ?? this.fetchAudioRecord(audioName);
+    const localRecord = await db.audio_records.get(audioName);
+
+    if (isValidAudioRecord(localRecord)) {
+      return localRecord;
+    }
+
+    if (localRecord) {
+      await db.audio_records.delete(audioName);
+    }
+
+    return this.fetchAudioRecord(audioName);
   }
 
   /**
@@ -149,9 +174,39 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    * @throws SupabaseError when storage download fails.
    */
   private static async fetchAudioRecord(audioName: string): Promise<AudioRecordLocal> {
-    const audioBlob = await fetchStorage(config.audio.audioBucketName, audioName);
-    await db.audio_records.put({ filename: audioName, audioBlob });
+    const audioBlob = await this.downloadAudioWithRetry(audioName);
+    const audioRecord = { filename: audioName, audioBlob };
+    await db.audio_records.put(audioRecord);
 
-    return { filename: audioName, audioBlob };
+    return audioRecord;
+  }
+
+  /**
+   * Downloads one non-empty audio blob, retrying one time for transient storage failures.
+   *
+   * @param audioName Filename/path in the configured audio bucket.
+   * @returns Downloaded audio blob.
+   * @throws SupabaseError when all storage download attempts fail.
+   */
+  private static async downloadAudioWithRetry(audioName: string): Promise<Blob> {
+    let lastError: unknown;
+
+    for (let attempt = 1; attempt <= AUDIO_DOWNLOAD_MAX_ATTEMPTS; attempt += 1) {
+      try {
+        const audioBlob = await fetchStorage(config.audio.audioBucketName, audioName);
+        if (!isValidAudioBlob(audioBlob)) {
+          throw new Error(`Downloaded audio file is empty: ${audioName}`);
+        }
+
+        return audioBlob;
+      } catch (error) {
+        lastError = error;
+        if (attempt < AUDIO_DOWNLOAD_MAX_ATTEMPTS) {
+          await waitForAudioRetry();
+        }
+      }
+    }
+
+    throw lastError;
   }
 }
