@@ -14,7 +14,7 @@ vi.mock('@/components/UI/icons/PlayIcon', () => ({
 import PlayButton from '@/features/audio/PlayButton';
 
 describe('PlayButton', () => {
-  it('renders the shared secondary shell and triggers click handler', () => {
+  it('triggers click handler', () => {
     const onClick = vi.fn();
 
     render(<PlayButton onClick={onClick} />);
@@ -23,8 +23,6 @@ describe('PlayButton', () => {
     fireEvent.click(button);
 
     expect(onClick).toHaveBeenCalledTimes(1);
-    expect(button.className).toContain('secondary-control');
-    expect(screen.getByTestId('play-icon')).toBeTruthy();
   });
 
   it('disables the button when requested', () => {

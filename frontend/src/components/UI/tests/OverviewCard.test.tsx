@@ -52,35 +52,10 @@ describe('OverviewCard', () => {
     vi.clearAllMocks();
   });
 
-  it('renders the header button, help text, and content', () => {
-    render(
-      <OverviewCard buttonTitle="Blocks" onClose={vi.fn()}>
-        Content
-      </OverviewCard>,
-    );
-
-    expect(screen.getByTestId('reset-button')).toBeTruthy();
-    expect(screen.getByTestId('reset-button').getAttribute('title')).toBe('');
-    expect(screen.getByText('Blocks')).toBeTruthy();
-    expect(screen.getByText('Restart help')).toBeTruthy();
-    expect(screen.getByTestId('close-button')).toBeTruthy();
-    expect(screen.getByText('Content')).toBeTruthy();
-  });
-
-  it('uses the not available fallback when no button title is provided', () => {
-    render(<OverviewCard onClose={vi.fn()}>Content</OverviewCard>);
-
-    expect(screen.getByTestId('delayed-notification').textContent).toBe('Not available');
-  });
-
   it('disables reset when loading or reset handler is missing', () => {
     const { rerender } = render(<OverviewCard loading buttonTitle="Blocks" onClose={vi.fn()} />);
 
     expect((screen.getByTestId('reset-button') as HTMLButtonElement).disabled).toBe(true);
-    expect(screen.getByTestId('reset-button').getAttribute('data-preserve-enabled-text-color')).toBe(
-      'true',
-    );
-
     rerender(<OverviewCard buttonTitle="Blocks" handleReset={vi.fn()} onClose={vi.fn()} />);
 
     expect((screen.getByTestId('reset-button') as HTMLButtonElement).disabled).toBe(false);

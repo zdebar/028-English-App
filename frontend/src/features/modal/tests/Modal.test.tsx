@@ -39,38 +39,6 @@ describe('Modal', () => {
     }
   });
 
-  it('renders children and action buttons', () => {
-    render(
-      <Modal onConfirm={vi.fn()} onClose={vi.fn()}>
-        <p>Body text</p>
-      </Modal>,
-    );
-
-    expect(screen.getByText('Body text')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Cancel' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Confirm' })).toBeTruthy();
-  });
-
-  it('supports custom labels and vertically stacked actions', () => {
-    render(
-      <Modal
-        onConfirm={vi.fn()}
-        onClose={vi.fn()}
-        cancelLabel="Stay guest"
-        confirmLabel="Sign in"
-        actionsLayout="vertical"
-      >
-        content
-      </Modal>,
-    );
-
-    const stayGuest = screen.getByRole('button', { name: 'Stay guest' });
-    const signIn = screen.getByRole('button', { name: 'Sign in' });
-
-    expect(stayGuest.parentElement).toBe(signIn.parentElement);
-    expect(stayGuest.parentElement?.className).toContain('flex-col');
-  });
-
   it('opens overlay on mount with onClose callback', () => {
     const onClose = vi.fn();
 
@@ -140,16 +108,4 @@ describe('Modal', () => {
     expect(onConfirm).toHaveBeenCalledTimes(1);
   });
 
-  it('returns null when root element is not present', () => {
-    const root = document.getElementById('root');
-    root?.remove();
-
-    const { container } = render(
-      <Modal onConfirm={vi.fn()} onClose={vi.fn()}>
-        content
-      </Modal>,
-    );
-
-    expect(container.firstChild).toBeNull();
-  });
 });

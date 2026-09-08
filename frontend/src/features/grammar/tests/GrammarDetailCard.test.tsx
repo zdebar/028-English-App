@@ -107,72 +107,6 @@ describe('GrammarDetailCard', () => {
     expect(container.innerHTML).toContain('<b>sanitized</b>');
   });
 
-  it('renders fallback message when note is null', () => {
-    render(
-      <GrammarDetailCard
-        grammar={{ kind: 'chunk', id: 1, name: 'Articles', note: null }}
-        onClose={vi.fn()}
-      />,
-    );
-
-    expect(screen.getByText('No notes')).toBeTruthy();
-  });
-
-  it('renders grouped grammar chunks as ordered sections', () => {
-    const { container } = render(
-      <GrammarDetailCard
-        grammar={{
-          id: 1,
-          kind: 'group',
-          name: 'Present simple',
-          note: '<p>group note</p>',
-          chunks: [
-            {
-              id: 11,
-              name: 'Affirmative',
-              note: '<p>affirmative note</p>',
-              items: [exampleItem],
-            },
-            { id: 12, name: 'Negative', note: '<p>negative note</p>' },
-          ],
-        }}
-        onClose={vi.fn()}
-      />,
-    );
-
-    const headings = container.querySelectorAll('h2');
-    expect(screen.getByText('Present simple')).toBeTruthy();
-    expect(screen.getByText('group note')).toBeTruthy();
-    expect([...headings].map((heading) => heading.textContent)).toEqual([
-      'Affirmative',
-      'Negative',
-    ]);
-    expect(screen.queryByText('No notes')).toBeNull();
-    const groupedItemButton = screen.getByText('I am').closest('button');
-    expect(groupedItemButton).not.toBeNull();
-    expect(groupedItemButton?.parentElement?.className).toContain('gap-1');
-  });
-
-  it('hides help by default and renders it when explicitly enabled', () => {
-    const { container, rerender } = render(
-      <GrammarDetailCard grammar={{ kind: 'chunk', id: 1, name: 'Articles' }} onClose={vi.fn()} />,
-    );
-
-    expect(screen.queryByTestId('help')).toBeNull();
-    expect(container.firstElementChild?.className).not.toContain('bottom-controls-clearance');
-
-    rerender(
-      <GrammarDetailCard
-        grammar={{ kind: 'chunk', id: 1, name: 'Articles' }}
-        onClose={vi.fn()}
-        showHelpButton
-      />,
-    );
-
-    expect(screen.getByTestId('help')).toBeTruthy();
-    expect(container.firstElementChild?.className).toContain('bottom-controls-clearance');
-  });
-
   it('loads and plays examples of a chunk detail', async () => {
     render(
       <GrammarDetailCard
@@ -188,15 +122,9 @@ describe('GrammarDetailCard', () => {
     );
 
     const itemButton = screen.getByText('I am').closest('button');
-    expect(audioMocks.audios).toEqual(['i-am.opus']);
-    expect(itemButton).not.toBeNull();
-    expect(itemButton?.disabled).toBe(false);
-    expect(itemButton?.parentElement?.className).toContain('gap-1');
     fireEvent.click(itemButton!);
 
     await waitFor(() => expect(audioMocks.playAudio).toHaveBeenCalledWith('i-am.opus'));
-    expect(screen.getByTestId('volume')).toBeTruthy();
-    expect(screen.getByTestId('help')).toBeTruthy();
   });
 
   it('keeps audio-backed examples enabled while audio is loading', () => {

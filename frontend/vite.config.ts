@@ -22,6 +22,13 @@ export default defineConfig({
     },
   },
   build: {
+    modulePreload: {
+      // HTML preload hints can conflict with service-worker cached module responses in Chrome.
+      resolveDependencies: (_filename, dependencies, { hostType }) => {
+        if (hostType === 'html') return [];
+        return dependencies;
+      },
+    },
     rollupOptions: {
       output: {
         manualChunks(id) {

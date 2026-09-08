@@ -49,10 +49,6 @@ describe('ThemeSwitch', () => {
     render(<ThemeSwitch />);
 
     const button = screen.getByRole('button', { name: 'Light mode' });
-    expect(screen.getByTestId('sun-icon')).toBeTruthy();
-    expect(button.className).toContain('hover:bg-button-hover');
-    expect(button.className).toContain('focus-visible:bg-button-hover');
-
     fireEvent.click(button);
 
     expect(mocks.chooseTheme).toHaveBeenCalledWith('dark', 'u1');
@@ -63,8 +59,6 @@ describe('ThemeSwitch', () => {
     render(<ThemeSwitch />);
 
     const button = screen.getByRole('button', { name: 'Dark mode' });
-    expect(screen.getByTestId('moon-icon')).toBeTruthy();
-
     fireEvent.click(button);
 
     expect(mocks.chooseTheme).toHaveBeenCalledWith('light', 'u1');

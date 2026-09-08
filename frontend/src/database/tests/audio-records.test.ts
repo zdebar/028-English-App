@@ -108,7 +108,7 @@ describe('AudioRecord', () => {
 
       await expect(AudioRecord.getByFilename('')).rejects.toThrow('Data file name is required');
       expect(mocks.audioGet).toHaveBeenCalledWith('');
-      expect(mocks.fetchStorage).toHaveBeenCalled();
+      expect(mocks.fetchStorage).toHaveBeenCalledTimes(2);
     });
 
     it('returns existing local record when present', async () => {
@@ -132,6 +132,32 @@ describe('AudioRecord', () => {
       expect(mocks.fetchStorage).toHaveBeenCalledWith('audio-bucket', 'b.opus');
       expect(mocks.audioPut).toHaveBeenCalledWith({ filename: 'b.opus', audioBlob: blob });
       expect(result).toEqual({ filename: 'b.opus', audioBlob: blob });
+    });
+
+    it('refreshes an invalid cached record from storage', async () => {
+      const freshBlob = new Blob(['fresh']);
+      mocks.audioGet.mockResolvedValue({ filename: 'stale.opus', audioBlob: new Blob() });
+      mocks.fetchStorage.mockResolvedValue(freshBlob);
+
+      const result = await AudioRecord.getByFilename('stale.opus');
+
+      expect(mocks.audioDelete).toHaveBeenCalledWith('stale.opus');
+      expect(mocks.fetchStorage).toHaveBeenCalledWith('audio-bucket', 'stale.opus');
+      expect(mocks.audioPut).toHaveBeenCalledWith({ filename: 'stale.opus', audioBlob: freshBlob });
+      expect(result).toEqual({ filename: 'stale.opus', audioBlob: freshBlob });
+    });
+
+    it('retries a failed storage download once before succeeding', async () => {
+      const freshBlob = new Blob(['fresh']);
+      mocks.audioGet.mockResolvedValue(undefined);
+      mocks.fetchStorage.mockRejectedValueOnce(new Error('temporary network error'));
+      mocks.fetchStorage.mockResolvedValueOnce(freshBlob);
+
+      const result = await AudioRecord.getByFilename('retry.opus');
+
+      expect(mocks.fetchStorage).toHaveBeenCalledTimes(2);
+      expect(mocks.audioPut).toHaveBeenCalledWith({ filename: 'retry.opus', audioBlob: freshBlob });
+      expect(result).toEqual({ filename: 'retry.opus', audioBlob: freshBlob });
     });
   });
 

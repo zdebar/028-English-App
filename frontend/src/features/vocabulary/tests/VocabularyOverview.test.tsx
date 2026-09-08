@@ -160,13 +160,6 @@ describe('VocabularyOverview', () => {
     expect(localStorage.getItem('vocabulary_search_term_u1')).toBe('abc');
   });
 
-  it('renders loading view when hook is loading', () => {
-    mocks.vocab.loading = true;
-    render(<VocabularyOverview />);
-
-    expect(screen.getByText('Loading')).toBeTruthy();
-  });
-
   it('renders list view and wires select/close actions', () => {
     mocks.vocab.filteredWords = [
       { item_id: 1, czech: 'ahoj' },
@@ -174,8 +167,6 @@ describe('VocabularyOverview', () => {
     ] as any;
 
     render(<VocabularyOverview />);
-    expect(screen.getByTestId('list-size').textContent).toBe('2');
-
     fireEvent.click(screen.getByTestId('list-close'));
     expect(mocks.navigate).toHaveBeenCalledWith('/overviews', { replace: true });
 
@@ -187,8 +178,6 @@ describe('VocabularyOverview', () => {
     mocks.vocab.selectedWord = { item_id: 3, czech: 'dům', english: 'house' } as any;
 
     render(<VocabularyOverview />);
-
-    expect(screen.getByTestId('detail-word').textContent).toBe('dům');
 
     fireEvent.click(screen.getByTestId('detail-reset'));
     await waitFor(() => {

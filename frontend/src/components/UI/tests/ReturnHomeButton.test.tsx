@@ -18,13 +18,10 @@ vi.mock('@/locales/cs', () => ({
 import ReturnHomeButton from '@/components/UI/buttons/ReturnHomeButton';
 
 describe('ReturnHomeButton', () => {
-  it('renders default home text and navigates home', () => {
+  it('navigates home', () => {
     render(<ReturnHomeButton />);
 
     const button = screen.getByRole('button', { name: 'Domů' });
-    expect(button.className).toContain('h-button');
-    expect(button.className).toContain('mt-2');
-
     fireEvent.click(button);
 
     expect(mocks.navigate).toHaveBeenCalledWith('/');

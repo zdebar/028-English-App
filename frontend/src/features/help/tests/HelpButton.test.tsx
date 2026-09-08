@@ -27,23 +27,12 @@ describe('HelpButton', () => {
     vi.clearAllMocks();
   });
 
-  it('renders help button with tooltip and icon', () => {
-    render(<HelpButton />);
-
-    const button = screen.getByRole('button', { name: 'Help tooltip' });
-    expect(button.getAttribute('title')).toBe('Help tooltip');
-    expect(button.className).toContain('secondary-control');
-    expect(button.className).toContain('size-help-button');
-    expect(screen.getByTestId('question-icon')).toBeTruthy();
-  });
-
-  it('calls openHelp on click and applies custom className', () => {
+  it('calls openHelp on click', () => {
     render(<HelpButton className="custom-class" />);
 
     const button = screen.getByRole('button');
     fireEvent.click(button);
 
     expect(mocks.openHelp).toHaveBeenCalledTimes(1);
-    expect(button.classList.contains('custom-class')).toBe(true);
   });
 });

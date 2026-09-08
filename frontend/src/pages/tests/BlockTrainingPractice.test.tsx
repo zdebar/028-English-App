@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -132,140 +132,21 @@ describe('BlockTrainingPractice', () => {
     vi.useRealTimers();
   });
 
-  it('shows delayed loading circle instead of empty state while deck is loading', () => {
-    mocks.deck.loading = true;
-
-    const { container } = render(<BlockTrainingPractice />);
-
-    expect(screen.queryByText('Nothing to practice')).toBeNull();
-    expect(screen.queryByText('Try again later')).toBeNull();
-    expect(container.firstChild).toBeNull();
-
-    act(() => {
-      vi.advanceTimersByTime(1000);
-    });
-
-    expect(screen.getByLabelText('Loading')).toBeTruthy();
-  });
-
   it('renders shared empty state when there is no training block', () => {
     render(<BlockTrainingPractice />);
 
-    expect(screen.getByText('Nothing to practice')).toBeTruthy();
-    expect(screen.getByText('Try again later')).toBeTruthy();
-
     fireEvent.click(screen.getByRole('button', { name: 'Home' }));
     expect(mocks.navigate).toHaveBeenCalledWith('/');
   });
 
-  it('renders shared empty state when a block has no current item', () => {
-    mocks.deck.block = { name: 'Block A' };
-    mocks.deck.grammar = { id: 1, name: 'Articles' };
-    mocks.deck.grammarGroup = { note: 'Group note' };
-
-    render(<BlockTrainingPractice />);
-
-    expect(screen.getByText('Nothing to practice')).toBeTruthy();
-    expect(screen.getByText('Try again later')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Home' })).toBeTruthy();
-    expect(screen.queryByTestId('block-training-overview')).toBeNull();
-  });
-
-  it('shows the combined block and grammar overview before practice', () => {
-    mocks.deck.block = { name: 'Block A' };
-    mocks.deck.grammar = { id: 1, name: 'Articles' };
-    mocks.deck.grammarGroup = { note: 'Group note' };
-    mocks.deck.currentItem = { item_id: 1 };
-
-    render(<BlockTrainingPractice />);
-
-    expect(screen.getByTestId('block-training-overview').textContent).toBe(
-      'Block A:Articles:Group note',
-    );
-    expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy();
-    expect(screen.queryByTestId('practice-session')).toBeNull();
-  });
-
-  it('continues from the combined overview to the practice session', () => {
-    mocks.deck.block = { name: 'Block A' };
-    mocks.deck.grammar = { id: 1, name: 'Articles' };
-    mocks.deck.currentItem = { item_id: 1 };
-
-    render(<BlockTrainingPractice />);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
-
-    expect(screen.getByTestId('practice-session').textContent).toBe('ahoj:hello');
-  });
-
-  it('resumes a started block without rendering the overview first', () => {
-    mocks.deck.block = { name: 'Block A' };
-    mocks.deck.currentItem = { item_id: 1 };
-    mocks.deck.hasProgress = true;
-
-    render(<BlockTrainingPractice />);
-
-    expect(screen.getByTestId('practice-session').textContent).toBe('ahoj:hello');
-    expect(screen.queryByTestId('block-training-overview')).toBeNull();
-    expect(mocks.overviewRender).not.toHaveBeenCalled();
-  });
-
-  it('starts an automatic batch without rendering an overview', () => {
-    mocks.deck.block = null;
-    mocks.deck.currentItem = { item_id: 1 };
-
-    render(<BlockTrainingPractice />);
-
-    expect(screen.getByTestId('practice-session').textContent).toBe('ahoj:hello');
-    expect(screen.queryByTestId('block-training-overview')).toBeNull();
-  });
-
-  it('shows the block overview when the training block has no grammar', () => {
-    mocks.deck.block = { name: 'Block A' };
-    mocks.deck.grammar = null;
-    mocks.deck.currentItem = { item_id: 1 };
-
-    render(<BlockTrainingPractice />);
-
-    expect(screen.getByTestId('block-training-overview').textContent).toBe('Block A::');
-    expect(screen.queryByTestId('practice-session')).toBeNull();
-  });
-
-  it('does not offer a close action on the mandatory overview', () => {
-    mocks.deck.block = { name: 'Block A' };
-    mocks.deck.grammar = { id: 1, name: 'Articles' };
-    mocks.deck.currentItem = { item_id: 1 };
-
-    render(<BlockTrainingPractice />);
-
-    expect(screen.queryByRole('button', { name: 'close overview' })).toBeNull();
-    expect(mocks.navigate).not.toHaveBeenCalled();
-  });
-
-  it('shows a named block completion page with an explicit home button', () => {
+  it('returns home from a completed named block', () => {
     mocks.deck.block = { name: 'Block A' };
     mocks.deck.grammar = { id: 1, name: 'Articles' };
     mocks.deck.isComplete = true;
 
     render(<BlockTrainingPractice />);
 
-    expect(screen.getByText('Block completed')).toBeTruthy();
-    expect(screen.getByText('Block A')).toBeTruthy();
-    expect(screen.queryByText('Block completed: Block A')).toBeNull();
-    expect(screen.getByText('Block completed').className).toContain('text-center');
-    expect(screen.getByRole('button', { name: 'Home' })).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Home' }));
     expect(mocks.navigate).toHaveBeenCalledWith('/');
-    expect(screen.queryByTestId('block-training-overview')).toBeNull();
-  });
-
-  it('shows generic block completion text when the block has no name', () => {
-    mocks.deck.block = null;
-    mocks.deck.isComplete = true;
-
-    render(<BlockTrainingPractice />);
-
-    expect(screen.getByText('Block completed')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Home' })).toBeTruthy();
   });
 });

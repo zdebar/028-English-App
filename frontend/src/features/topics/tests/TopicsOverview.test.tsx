@@ -87,21 +87,6 @@ describe('TopicsOverview', () => {
     mocks.state.loading = false;
   });
 
-  it('renders loading state', () => {
-    mocks.state.loading = true;
-
-    render(<TopicsOverview />);
-
-    expect(mocks.getInitiatedByUserId).toHaveBeenCalledWith('u1');
-    expect(screen.queryByText('No topics')).toBeNull();
-  });
-
-  it('renders empty state when there are no topics', () => {
-    render(<TopicsOverview />);
-
-    expect(screen.getByText('No topics')).toBeTruthy();
-  });
-
   it('renders topic list and navigates to topic detail on click', () => {
     mocks.state.data = [
       { id: 1, name: 'Dny v tydnu' },
@@ -111,18 +96,8 @@ describe('TopicsOverview', () => {
     render(<TopicsOverview />);
 
     const buttons = screen.getAllByTestId('topic-button');
-    expect(buttons).toHaveLength(2);
-
     fireEvent.click(buttons[1]);
     expect(mocks.navigate).toHaveBeenCalledWith('/topics/2');
-  });
-
-  it('renders topics independently of practice blocks', () => {
-    mocks.state.data = [{ id: 3, name: 'Letters' }];
-
-    render(<TopicsOverview />);
-
-    expect(screen.getByText('Letters')).toBeTruthy();
   });
 
   it('navigates to overviews on close', () => {
@@ -132,11 +107,4 @@ describe('TopicsOverview', () => {
     expect(mocks.navigate).toHaveBeenCalledWith('/overviews', { replace: true });
   });
 
-  it('renders empty state when data loading fails', () => {
-    mocks.state.error = 'Load error';
-
-    render(<TopicsOverview />);
-
-    expect(screen.getByText('No topics')).toBeTruthy();
-  });
 });

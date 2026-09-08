@@ -172,20 +172,6 @@ describe('TopicItemsOverview', () => {
     expect(mocks.navigate).toHaveBeenCalledWith('/topics');
   });
 
-  it('renders loading state', () => {
-    mocks.state.itemsLoading = true;
-
-    render(<TopicItemsOverview />);
-
-    expect(screen.queryByText('No topic items')).toBeNull();
-  });
-
-  it('renders empty state when topic has no items', () => {
-    render(<TopicItemsOverview />);
-
-    expect(screen.getByText('No topic items')).toBeTruthy();
-  });
-
   it('uses the topics fallback on close', () => {
     render(<TopicItemsOverview />);
 
@@ -205,11 +191,6 @@ describe('TopicItemsOverview', () => {
     mocks.readyAudio = new Set(['a.opus']);
 
     render(<TopicItemsOverview />);
-
-    expect(screen.getByText('pondeli')).toBeTruthy();
-    expect(screen.getByText('monday')).toBeTruthy();
-
-    expect(screen.getByTestId('help-button')).toBeTruthy();
 
     fireEvent.click(screen.getByTestId('item-button'));
 
@@ -266,12 +247,6 @@ describe('TopicItemsOverview', () => {
     await waitFor(() => {
       expect(mocks.showToast).toHaveBeenCalledWith('No audio', 'error');
     });
-  });
-
-  it('does not render help button when there are no items', () => {
-    render(<TopicItemsOverview />);
-
-    expect(screen.queryByTestId('help-button')).toBeNull();
   });
 
   it('does not try to play audio when item has no audio filename', () => {

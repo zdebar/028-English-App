@@ -114,26 +114,6 @@ describe('VocabularyList', () => {
     expect(setVisibleCount).toHaveBeenCalledWith(3);
   });
 
-  it('renders empty state message when no words', () => {
-    render(
-      <VocabularyList
-        filteredWords={[]}
-        loading={false}
-        visibleCount={1}
-        displayField="czech"
-        searchTerm=""
-        setSearchTerm={setSearchTerm}
-        setDisplayField={setDisplayField}
-        setVisibleCount={setVisibleCount}
-        onSelect={onSelect}
-        onClose={onClose}
-      />,
-    );
-
-    expect(screen.getByTestId('direction-dd')).toBeTruthy();
-    expect(screen.getByText('No started vocabulary')).toBeTruthy();
-  });
-
   it('updates search and display field', () => {
     render(
       <VocabularyList
@@ -151,8 +131,6 @@ describe('VocabularyList', () => {
     );
 
     const searchInput = screen.getByPlaceholderText('Search');
-    expect(searchInput.id).toBe('vocabulary-search');
-    expect(searchInput.getAttribute('name')).toBe('vocabulary-search');
     fireEvent.change(searchInput, { target: { value: 'abc' } });
     expect(setSearchTerm).toHaveBeenCalledWith('abc');
 

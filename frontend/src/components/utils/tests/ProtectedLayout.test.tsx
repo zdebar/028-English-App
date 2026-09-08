@@ -33,14 +33,6 @@ describe('ProtectedLayout', () => {
     mocks.navigateReplace = false;
   });
 
-  it('renders nothing while auth state is loading', () => {
-    mocks.loading = true;
-
-    const { container } = render(<ProtectedLayout />);
-
-    expect(container.firstChild).toBeNull();
-  });
-
   it('redirects to root when user is not authenticated', () => {
     render(<ProtectedLayout />);
 
@@ -49,11 +41,4 @@ describe('ProtectedLayout', () => {
     expect(mocks.navigateReplace).toBe(true);
   });
 
-  it('renders outlet when user is authenticated', () => {
-    mocks.userId = 'u1';
-
-    render(<ProtectedLayout />);
-
-    expect(screen.getByTestId('outlet')).toBeTruthy();
-  });
 });

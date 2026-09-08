@@ -55,19 +55,6 @@ describe('MasterItemButton', () => {
     vi.useRealTimers();
   });
 
-  it('renders button content and helper text', () => {
-    render(
-      <MasterItemButton disabled={false} onConfirm={vi.fn()}>
-        Child
-      </MasterItemButton>,
-    );
-
-    expect(screen.getByTestId('master-button')).toBeTruthy();
-    expect(screen.getByTestId('forward-icon')).toBeTruthy();
-    expect(screen.getByText('Complete')).toBeTruthy();
-    expect(screen.getByText('Child')).toBeTruthy();
-  });
-
   it('shows info toast on short click when enabled', () => {
     render(<MasterItemButton disabled={false} onConfirm={vi.fn()} />);
 

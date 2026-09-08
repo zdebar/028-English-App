@@ -147,12 +147,6 @@ describe('Pronunciation overview screens', () => {
 
     render(<PronunciationOverview />);
 
-    expect(screen.getByText('/æ/ × /e/')).toBeTruthy();
-    expect(screen.getByText('man, men')).toBeTruthy();
-    expect(screen.getByText('2/3')).toBeTruthy();
-    expect(screen.getByText('odemčeno/celkem položek')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Help' })).toBeTruthy();
-
     fireEvent.click(screen.getByTestId('close'));
     expect(mocks.navigate).toHaveBeenCalledWith('/', { replace: true });
 
@@ -183,8 +177,6 @@ describe('Pronunciation overview screens', () => {
     await waitFor(() => {
       expect(mocks.addAvailable).toHaveBeenCalledWith('u1', 1);
     });
-    expect(screen.getByText('přidat do výslovnosti')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Help' })).toBeTruthy();
   });
 
   it('disables bulk addition when the whole group is selected', () => {

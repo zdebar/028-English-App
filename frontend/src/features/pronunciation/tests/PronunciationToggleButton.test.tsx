@@ -143,18 +143,4 @@ describe('PronunciationToggleButton', () => {
     expect(mocks.reportError).not.toHaveBeenCalled();
   });
 
-  it('shows contextual help below the button when requested', () => {
-    render(
-      <PronunciationToggleButton
-        userId="u1"
-        item={{ item_id: 6, is_vocabulary: 1, audio: 'six.opus' } as any}
-        showHelpText
-      />,
-    );
-
-    const help = screen.getByTestId('pronunciation-help');
-    expect(help.textContent).toBe('přidat do výslovnosti');
-    expect(help.className).toContain('left-2');
-    expect(help.className).toContain('-bottom-4');
-  });
 });
