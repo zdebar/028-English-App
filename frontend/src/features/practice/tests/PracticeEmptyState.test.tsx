@@ -19,11 +19,13 @@ vi.mock('@/locales/cs', () => ({
 import PracticeEmptyState from '../PracticeEmptyState';
 
 describe('PracticeEmptyState', () => {
-  it('uses the standard card top position without desktop vertical centering', () => {
+  it('centers the messages in the space above the home button', () => {
     const { container } = render(<PracticeEmptyState />);
     const card = container.firstElementChild;
+    const messageArea = card?.firstElementChild;
 
-    expect(card?.className).toBe('card-width w-full pt-24');
+    expect(card?.className).toBe('card-width min-h-0 w-full grow');
+    expect(messageArea?.className).toBe('flex min-h-0 grow flex-col justify-center');
     expect(screen.getByText('Nothing to practice')).toBeTruthy();
     expect(screen.getByText('Try again later')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Home' })).toBeTruthy();

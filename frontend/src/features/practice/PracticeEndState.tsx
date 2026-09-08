@@ -13,9 +13,11 @@ export default function PracticeEndState({
   secondaryMessage,
 }: PracticeEndStateProps): JSX.Element {
   return (
-    <div className="card-width w-full pt-24">
-      <Notification>{message}</Notification>
-      {secondaryMessage && <Notification className="mb-4">{secondaryMessage}</Notification>}
+    <div className="card-width min-h-0 w-full grow">
+      <div className="flex min-h-0 grow flex-col justify-center">
+        <Notification>{message}</Notification>
+        {secondaryMessage && <Notification className="mb-4">{secondaryMessage}</Notification>}
+      </div>
       <ReturnHomeButton />
     </div>
   );
