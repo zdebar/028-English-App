@@ -1,4 +1,3 @@
-import config from '@/config/config';
 import { db } from '@/database/models/db';
 import type {
   PronunciationGroupDetailType,
@@ -11,8 +10,6 @@ import type { CurriculumSortPath, UserItemLocal } from '@/types/user-item.types'
 import Dexie from 'dexie';
 import SyncEntityModel from './sync-entity-model';
 import { isInitiated } from '@/utils/progress.utils';
-
-const NULL_DATE = config.database.nullReplacementDate;
 
 function isEligible(item: UserItemLocal): boolean {
   return Boolean(item.audio?.trim());
