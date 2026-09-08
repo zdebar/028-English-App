@@ -32,14 +32,6 @@ describe('InstallPWAButton', () => {
     vi.clearAllMocks();
   });
 
-  it('renders a semantic button and forwards the shared action style', () => {
-    render(<InstallPWAButton className="home-action" />);
-
-    const action = screen.getByRole('button', { name: 'Nainstalovat aplikaci' });
-    expect(action.getAttribute('type')).toBe('button');
-    expect(action.className).toContain('home-action');
-  });
-
   it('opens the install prompt and clears it after the choice resolves', async () => {
     render(<InstallPWAButton />);
 

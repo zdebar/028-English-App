@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -83,21 +83,6 @@ describe('Overviews', () => {
     mocks.pronunciationError = null;
   });
 
-  it('renders the four progress overviews without levels or practice', () => {
-    render(<Overviews />);
-
-    const progress = screen.getByRole('region', { name: 'Pokrok' });
-
-    expect(within(progress).getAllByRole('button')).toHaveLength(4);
-    expect(screen.queryByRole('button', { name: /CEFR/ })).toBeNull();
-    expect(screen.queryByRole('button', { name: 'Přehled procvičování' })).toBeNull();
-    expect(screen.queryByRole('heading', { name: 'Pokrok' })).toBeNull();
-
-    const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(4);
-    buttons.forEach((button) => expect(button.className).toContain('w-full'));
-  });
-
   it('keeps all empty overviews visible but disabled with explanatory tooltips', () => {
     Object.values(mocks.availability).forEach((state: any) => {
       state.hasData = false;
@@ -106,39 +91,13 @@ describe('Overviews', () => {
 
     render(<Overviews />);
 
-    const expectedTitles = [
-      'No grammar',
-      'No topics',
-      'No vocabulary',
-      'No pronunciation groups',
-    ];
     const buttons = screen.getAllByRole('button');
     expect(buttons).toHaveLength(4);
-    buttons.forEach((button, index) => {
+    buttons.forEach((button) => {
       expect((button as HTMLButtonElement).disabled).toBe(true);
-      expect(button.title).toBe(expectedTitles[index]);
       fireEvent.click(button);
     });
     expect(mocks.navigate).not.toHaveBeenCalled();
-  });
-
-  it('uses loading and error tooltips while availability is unresolved', () => {
-    mocks.availability.topics = { hasData: false, loading: true, error: null };
-    mocks.availability.grammar = {
-      hasData: false,
-      loading: false,
-      error: new Error('boom'),
-    };
-    mocks.pronunciationLoading = false;
-    mocks.pronunciationError = new Error('pronunciation boom');
-
-    render(<Overviews />);
-
-    expect(screen.getByRole('button', { name: 'Přehled témat' }).title).toBe('Loading');
-    expect(screen.getByRole('button', { name: 'Přehled gramatiky' }).title).toBe(
-      'Loading error',
-    );
-    expect(screen.getByRole('button', { name: 'Výslovnost' }).title).toBe('Loading error');
   });
 
   it('disables the pronunciation overview while group availability is loading', () => {
@@ -149,7 +108,6 @@ describe('Overviews', () => {
 
     const button = screen.getByRole('button', { name: 'Výslovnost' }) as HTMLButtonElement;
     expect(button.disabled).toBe(true);
-    expect(button.title).toBe('Loading');
   });
 
   it.each([

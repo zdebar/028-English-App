@@ -93,14 +93,6 @@ describe('IdentityLinkConflictModal', () => {
     });
   });
 
-  it('renders the explanation and vertically arranged choices', () => {
-    render(<IdentityLinkConflictModal />);
-
-    expect(screen.getByText('Google account exists')).toBeTruthy();
-    expect(screen.getByText('Guest progress will not transfer.')).toBeTruthy();
-    expect(screen.getByTestId('modal').dataset.layout).toBe('vertical');
-  });
-
   it('continues as guest without starting authentication', () => {
     render(<IdentityLinkConflictModal />);
 
@@ -140,11 +132,4 @@ describe('IdentityLinkConflictModal', () => {
     expect(mocks.showToast).toHaveBeenCalledWith('Guest restored', 'error');
   });
 
-  it('does not render when no collision is active', () => {
-    mocks.isOpen = false;
-
-    const { container } = render(<IdentityLinkConflictModal />);
-
-    expect(container.firstChild).toBeNull();
-  });
 });

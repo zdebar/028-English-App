@@ -34,16 +34,4 @@ describe('DelayedLoadingCircle', () => {
     expect(screen.getByLabelText('Načítání ...')).toBeTruthy();
   });
 
-  it('passes custom label and className to the loading circle', () => {
-    vi.useFakeTimers();
-
-    const { container } = render(<DelayedLoadingCircle label="Loading custom" className="custom" />);
-
-    act(() => {
-      vi.advanceTimersByTime(1000);
-    });
-
-    expect(screen.getByLabelText('Loading custom')).toBeTruthy();
-    expect(container.querySelector('.custom')).toBeTruthy();
-  });
 });

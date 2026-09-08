@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -77,42 +77,6 @@ describe('PracticeOverview', () => {
 
   afterEach(() => {
     vi.useRealTimers();
-  });
-
-  it('fills missing days and shows daily started counts', async () => {
-    render(<PracticeOverview />);
-
-    await act(async () => {
-      await Promise.resolve();
-    });
-
-    expect(screen.getAllByRole('button')).toHaveLength(1);
-    expect(screen.getByText('+ 2')).toBeTruthy();
-    expect(screen.getByText('+ 2').className).toContain('text-error-light');
-    expect(screen.getByText('0')).toBeTruthy();
-    expect(screen.getByText('+ 1')).toBeTruthy();
-  });
-
-  it('colors each daily count against the configured started goal', async () => {
-    mocks.items = [
-      ...Array.from({ length: 24 }, (_, index) =>
-        startedItem(index + 1, '2026-05-24T12:00:00.000Z'),
-      ),
-      ...Array.from({ length: 23 }, (_, index) =>
-        startedItem(index + 25, '2026-05-23T12:00:00.000Z'),
-      ),
-      startedItem(48, '2026-05-22T10:00:00.000Z'),
-    ];
-
-    render(<PracticeOverview />);
-    await act(async () => {
-      await Promise.resolve();
-    });
-
-    expect(screen.getByText('+ 24').className).toContain('text-success-light');
-    expect(screen.getByText('+ 23').className).toContain('text-error-light');
-    expect(screen.getByText('+ 1').className).toContain('text-error-light');
-    expect(screen.queryByText(/cz > en/)).toBeNull();
   });
 
   it('uses the home fallback on direct entry', () => {

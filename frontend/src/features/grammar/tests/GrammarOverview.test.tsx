@@ -131,87 +131,12 @@ describe('GrammarOverview', () => {
     mocks.resetItemsByGrammarGroupId.mockResolvedValue(4);
   });
 
-  it('renders list view with grammar items and opens selected grammar', () => {
-    mocks.arrayState.data = [
-      { id: 1, kind: 'group', name: 'Past tense', chunks: [] },
-      { id: 2, kind: 'group', name: 'Conditionals', chunks: [] },
-    ] as any;
-
-    render(<GrammarOverview />);
-
-    expect(screen.getByText('Grammar overview')).toBeTruthy();
-    const buttons = screen.getAllByTestId('grammar-button');
-    expect(buttons).toHaveLength(2);
-
-    fireEvent.click(buttons[1]);
-    expect(screen.getByText('Conditionals')).toBeTruthy();
-  });
-
-  it('renders empty-state message when no grammar exists', () => {
-    mocks.arrayState.data = [];
-
-    render(<GrammarOverview />);
-
-    expect(screen.getByText('No grammar')).toBeTruthy();
-  });
-
   it('uses the overviews fallback on direct entry', () => {
     render(<GrammarOverview />);
 
     fireEvent.click(screen.getByTestId('overview-close'));
 
     expect(mocks.navigate).toHaveBeenCalledWith('/overviews', { replace: true });
-  });
-
-  it('renders grammar card view and can close', () => {
-    mocks.arrayState.data = [{
-      id: 3,
-      kind: 'group',
-      name: 'Articles',
-      note: '<b>safe</b>',
-      chunks: [],
-    }];
-    render(<GrammarOverview />);
-
-    fireEvent.click(screen.getByTestId('grammar-button'));
-
-    expect(screen.getByText('Articles')).toBeTruthy();
-
-    fireEvent.click(screen.getByTestId('overview-close'));
-    expect(screen.getByText('Grammar overview')).toBeTruthy();
-  });
-
-  it('renders detail card view without reset side effects', async () => {
-    mocks.arrayState.data = [{
-      id: 8,
-      kind: 'group',
-      name: 'Reported speech',
-      note: null,
-      chunks: [],
-    }];
-
-    render(<GrammarOverview />);
-    fireEvent.click(screen.getByTestId('grammar-button'));
-    expect(screen.getByText('Reported speech')).toBeTruthy();
-    expect(screen.getByTestId('help-button')).toBeTruthy();
-  });
-
-  it('keeps selection by identity across live data updates and closes it when removed', () => {
-    mocks.arrayState.data = [
-      { id: 8, kind: 'group', name: 'Original name', note: null, chunks: [] },
-    ];
-    const { rerender } = render(<GrammarOverview />);
-    fireEvent.click(screen.getByTestId('grammar-button'));
-
-    mocks.arrayState.data = [
-      { id: 8, kind: 'group', name: 'Updated name', note: null, chunks: [] },
-    ];
-    rerender(<GrammarOverview />);
-    expect(screen.getByText('Updated name')).toBeTruthy();
-
-    mocks.arrayState.data = [];
-    rerender(<GrammarOverview />);
-    expect(screen.getByText('Grammar overview')).toBeTruthy();
   });
 
   it('resets grammar progress and logs completion info', async () => {

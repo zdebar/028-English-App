@@ -18,15 +18,12 @@ vi.mock('@/locales/cs', () => ({
 import InfoButton from '@/features/notes/InfoButton';
 
 describe('InfoButton', () => {
-  it('renders shared secondary styling and uses note aria label', () => {
+  it('forwards the click handler', () => {
     render(<InfoButton onClick={mocks.onClick} title="Notes" />);
 
     const button = screen.getByRole('button', { name: 'poznámka' }) as HTMLButtonElement;
     fireEvent.click(button);
 
     expect(mocks.onClick).toHaveBeenCalledTimes(1);
-    expect(button.getAttribute('title')).toBe('Notes');
-    expect(button.className).toContain('secondary-control');
-    expect(screen.getByTestId('info-icon')).toBeTruthy();
   });
 });

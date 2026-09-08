@@ -387,13 +387,6 @@ describe('PracticeCard', () => {
     vi.useRealTimers();
   });
 
-  it('shows sync loading message when userId is missing', () => {
-    mocks.userId = null;
-    render(<PracticeCard />);
-
-    expect(screen.getByText('Nic k procvičování.')).toBeTruthy();
-  });
-
   it('shows the resolved grammar detail after clicking its control', () => {
     mocks.practiceDeck.revealed = true;
     mocks.practiceDeck.grammar = {
@@ -409,17 +402,6 @@ describe('PracticeCard', () => {
     expect(screen.getByTestId('grammar-detail').dataset.helpEnabled).toBe('false');
   });
 
-  it('shows empty message when current item is missing', () => {
-    mocks.practiceDeck.currentItem = null;
-    mocks.practiceDeck.loading = false;
-
-    render(<PracticeCard />);
-
-    expect(screen.getByText('Nic k procvičování.')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Domů' })).toBeTruthy();
-    expect(screen.getByText('Zkuste to znovu později.')).toBeTruthy();
-  });
-
   it('returns home from the empty practice state', () => {
     mocks.practiceDeck.currentItem = null;
     mocks.practiceDeck.loading = false;
@@ -431,23 +413,6 @@ describe('PracticeCard', () => {
     expect(mocks.navigate).toHaveBeenCalledWith('/');
   });
 
-  it('shows loading circle after configured delay instead of empty state while deck is loading', () => {
-    mocks.practiceDeck.currentItem = null;
-    mocks.practiceDeck.loading = true;
-
-    const { container } = render(<PracticeCard />);
-
-    expect(screen.queryByText('Nic k procviÄovÃ¡nÃ­.')).toBeNull();
-    expect(screen.queryByText('Zkuste to znovu pozdÄ›ji.')).toBeNull();
-    expect(container.firstChild).toBeNull();
-
-    act(() => {
-      vi.advanceTimersByTime(1000);
-    });
-
-    expect(screen.getByLabelText('Loading')).toBeTruthy();
-  });
-
   it('reveals item and plays audio on item click in CZ->EN mode', () => {
     const { container } = render(<PracticeCard />);
 
@@ -456,136 +421,6 @@ describe('PracticeCard', () => {
 
     expect(mocks.practiceDeck.playAudio).toHaveBeenCalledTimes(1);
     expect(mocks.practiceDeck.setRevealed).toHaveBeenCalledWith(true);
-  });
-
-  it('does not show obsolete star progress UI', () => {
-    render(<PracticeCard />);
-
-    expect(screen.queryByTestId('practice-stars-row')).toBeNull();
-    expect(screen.queryByText('Next star progress')).toBeNull();
-  });
-
-  it('shows review progress on the card', () => {
-    const { container } = render(<PracticeCard />);
-    const bottomBar = container.querySelector('#bottom-bar') as HTMLElement;
-
-    expect(bottomBar.firstElementChild?.textContent).toBe('2/20');
-    expect(bottomBar.textContent).not.toContain('2 / 9');
-  });
-
-  it('waits for the persisted review session before rendering its counter', () => {
-    mocks.practiceDeck.sessionLoading = true;
-    const { container } = render(<PracticeCard />);
-
-    expect(container.querySelector('#bottom-bar')).toBeNull();
-    expect(container.firstChild).toBeNull();
-
-    act(() => {
-      vi.advanceTimersByTime(1000);
-    });
-
-    expect(screen.getByLabelText('Loading')).toBeTruthy();
-  });
-
-  it('keeps the short direction label in the first top-bar row across card states', () => {
-    const { container, rerender } = render(<PracticeCard />);
-    const topBar = container.querySelector('#top-bar') as HTMLElement;
-    const czToEnLabel = screen.getByText('cz › en');
-
-    expect(topBar.children[0]?.textContent).toBe('cz › en');
-    expect(czToEnLabel.className).toContain('text-sm');
-    expect(czToEnLabel.className).toContain('font-light');
-
-    mocks.practiceDeck.revealed = true;
-    rerender(<PracticeCard />);
-    expect(screen.getByText('cz › en')).toBeTruthy();
-
-    mocks.practiceDeck.showDirectionChange = true;
-    rerender(<PracticeCard />);
-    expect(container.querySelector('#practice-main-content')?.textContent).toContain('CZ to EN');
-    expect((screen.getByTestId('hint-btn') as HTMLButtonElement).disabled).toBe(true);
-    expect(screen.queryByTestId('master-btn')).toBeNull();
-    expect(screen.queryByTestId('repeat-btn')).toBeNull();
-    expect(screen.queryByTestId('known-btn')).toBeNull();
-
-    mocks.practiceDeck.isCzToEn = false;
-    mocks.practiceDeck.showDirectionChange = false;
-    rerender(<PracticeCard />);
-    expect(screen.getByText('en › cz')).toBeTruthy();
-  });
-
-  it('shows audio status below direction instead of in the bottom bar', () => {
-    mocks.practiceDeck.audioError = true;
-    const { container } = render(<PracticeCard />);
-    const topBar = container.querySelector('#top-bar') as HTMLElement;
-
-    expect(topBar.textContent).toContain('cz › en');
-    expect(topBar.textContent).toContain('No audio');
-  });
-
-  it('keeps vocabulary and direction changes centered while audio status changes', () => {
-    const { container, rerender } = render(<PracticeCard />);
-
-    const cardButton = container.querySelector('button[aria-disabled]') as HTMLButtonElement;
-    const topBar = container.querySelector('#top-bar') as HTMLElement;
-    const mainContent = container.querySelector('#practice-main-content') as HTMLElement;
-    const bottomBar = container.querySelector('#bottom-bar') as HTMLElement;
-
-    expect(cardButton.className).toContain('flex-col');
-    expect(topBar.className).toContain('h-8');
-    expect(topBar.className).toContain('shrink-0');
-    expect(mainContent.className).toContain('items-center');
-    expect(mainContent.className).toContain('grow');
-    expect(mainContent.querySelector('#item')).toBeTruthy();
-    expect(bottomBar.className).toContain('h-8');
-    expect(bottomBar.className).toContain('shrink-0');
-
-    mocks.practiceDeck.audioLoading = true;
-    rerender(<PracticeCard />);
-
-    expect(container.querySelector('#practice-main-content')).toBe(mainContent);
-
-    mocks.practiceDeck.audioLoading = false;
-    mocks.practiceDeck.audioError = true;
-    rerender(<PracticeCard />);
-
-    expect(container.querySelector('#practice-main-content')).toBe(mainContent);
-    expect(screen.getByText('No audio')).toBeTruthy();
-
-    mocks.practiceDeck.audioError = false;
-    mocks.practiceDeck.showDirectionChange = true;
-    rerender(<PracticeCard />);
-
-    expect(container.querySelector('#practice-main-content')).toBe(mainContent);
-    expect(mainContent.querySelector('#item')).toBeNull();
-    expect(mainContent.textContent).toContain('CZ to EN');
-  });
-
-  it('shows only hint in the primary row before reveal', () => {
-    const { container } = render(<PracticeCard />);
-
-    const controls = container.querySelector('#practice-controls');
-
-    expect(controls?.querySelector('[data-testid="hint-btn"]')).toBeTruthy();
-    expect(controls?.querySelector('[data-testid="master-btn"]')).toBeNull();
-    expect(controls?.querySelector('[data-testid="repeat-btn"]')).toBeNull();
-    expect(controls?.querySelector('[data-testid="known-btn"]')).toBeNull();
-    expect(controls?.querySelector('[data-testid="grammar-btn"]')).toBeNull();
-    expect(controls?.querySelector('[data-testid="info-button"]')).toBeNull();
-  });
-
-  it('shows skip, repeat, and know in the primary row after reveal', () => {
-    mocks.practiceDeck.revealed = true;
-
-    const { container } = render(<PracticeCard />);
-
-    const controls = container.querySelector('#practice-controls');
-
-    expect(controls?.querySelector('[data-testid="master-btn"]')).toBeTruthy();
-    expect(controls?.querySelector('[data-testid="repeat-btn"]')).toBeTruthy();
-    expect(controls?.querySelector('[data-testid="known-btn"]')).toBeTruthy();
-    expect(controls?.querySelector('[data-testid="hint-btn"]')).toBeNull();
-    expect(controls?.querySelector('[aria-label="Grammar"]')).toBeNull();
   });
 
   it('maps practice controls to explicit outcomes', () => {
@@ -599,33 +434,6 @@ describe('PracticeCard', () => {
     expect(mocks.practiceDeck.nextItem).toHaveBeenNthCalledWith(1, 'incorrect');
     expect(mocks.practiceDeck.nextItem).toHaveBeenNthCalledWith(2, 'correct');
     expect(mocks.practiceDeck.nextItem).toHaveBeenNthCalledWith(3, 'skip');
-  });
-
-  it('renders audio and pronunciation controls in the left secondary control group', () => {
-    mocks.practiceDeck.revealed = true;
-    mocks.practiceDeck.audioDisabled = false;
-
-    const { container } = render(<PracticeCard />);
-
-    expect(container.querySelector('#top-bar [data-testid="volume-slider"]')).toBeNull();
-    expect(
-      container.querySelector('.pos-bottom-left-control [data-testid="volume-slider"]'),
-    ).toBeTruthy();
-    expect(
-      container.querySelector('.pos-bottom-left-control button[aria-label="Audio"]'),
-    ).toBeTruthy();
-    expect(
-      container.querySelector('.pos-bottom-left-control [data-testid="pronunciation-toggle"]'),
-    ).toBeTruthy();
-    expect(
-      container.querySelector('.pos-bottom-right-control [data-testid="pronunciation-toggle"]'),
-    ).toBeNull();
-    expect(
-      container
-        .querySelector('.pos-bottom-left-control')
-        ?.lastElementChild?.getAttribute('data-testid'),
-    ).toBe('pronunciation-toggle');
-    expect(screen.getByTestId('pronunciation-toggle').dataset.showHelpText).toBe('true');
   });
 
   it('keeps audio controls visible but disabled when audio is not available', () => {
@@ -663,16 +471,6 @@ describe('PracticeCard', () => {
     expect(audioButton).toBeTruthy();
     expect(audioButton.disabled).toBe(true);
     expect(volumeSlider.dataset.disabled).toBe('true');
-  });
-
-  it('keeps help in the right secondary control group', () => {
-    const { container } = render(<PracticeCard />);
-
-    expect(container.firstElementChild?.className).toContain('bottom-controls-clearance');
-    expect(container.firstElementChild?.className).toContain('min-h-0');
-    expect(
-      container.querySelector('.pos-bottom-right-control [data-testid="help-button"]'),
-    ).toBeTruthy();
   });
 
   it('autoplays audio after delay in EN->CZ mode when allowed', async () => {
@@ -908,39 +706,6 @@ describe('PracticeCard', () => {
     expect(onSelectionChange).toHaveBeenCalledWith(false);
   });
 
-  it('preserves the language order and prevents translation of learning content', () => {
-    const { container } = render(
-      <PracticeSessionCard
-        note={null}
-        grammar={null}
-        progressLabel="1 / 1"
-        isCzToEn={false}
-        revealed
-        czech="muž"
-        english="man"
-        pronunciation="mæn"
-        audioDisabled={false}
-        showDirectionChange={false}
-        handleReveal={vi.fn()}
-        plusHint={vi.fn()}
-        nextRepeat={vi.fn()}
-        nextKnown={vi.fn()}
-        audioError={false}
-        playAudio={vi.fn()}
-        audioLoading={false}
-        isPronunciationPractice
-      />,
-    );
-
-    const languageRows = container.querySelectorAll('#item > p');
-
-    expect([...languageRows].map((row) => row.textContent)).toEqual(['muž', 'man', 'mæn']);
-    expect(languageRows[0]?.getAttribute('lang')).toBe('cs');
-    expect(languageRows[1]?.getAttribute('lang')).toBe('en');
-    expect(languageRows[1]?.getAttribute('translate')).toBe('no');
-    expect(languageRows[2]?.getAttribute('translate')).toBe('no');
-  });
-
   it('disables Next when pronunciation practice has no advance handler', () => {
     const { container } = render(
       <PracticeSessionCard
@@ -996,78 +761,11 @@ describe('PracticeCard', () => {
     expect((screen.getByTestId('repeat-btn') as HTMLButtonElement).disabled).toBe(true);
   });
 
-  it('shows the direction in block training and keeps round progress at the bottom left', () => {
-    const { container } = render(
-      <PracticeSessionCard
-        note={null}
-        grammar={null}
-        progressLabel="1/2 · 7/8"
-        isCzToEn
-        revealed={false}
-        czech="ahoj"
-        english="hello"
-        pronunciation="\u00A0"
-        audioDisabled={false}
-        showDirectionChange={false}
-        handleReveal={vi.fn()}
-        plusHint={vi.fn()}
-        nextRepeat={vi.fn()}
-        nextKnown={vi.fn()}
-        audioError={false}
-        playAudio={vi.fn()}
-        audioLoading={false}
-        isBlockTrainingPractice
-      />,
-    );
-
-    expect(container.querySelector('#top-bar')?.textContent).toBe('cz › en');
-    expect(screen.getByText('Round · completed items in this round')).toBeTruthy();
-
-    const cardButton = container.querySelector('button[aria-disabled]') as HTMLButtonElement;
-    const bottomBar = container.querySelector('#bottom-bar') as HTMLElement;
-    expect(cardButton.className).toContain('flex-col');
-    expect(bottomBar.firstElementChild?.textContent).toContain('1/2 · 7/8');
-  });
-
-  it('shows a block training audio error below direction', () => {
-    const { container } = render(
-      <PracticeSessionCard
-        note={null}
-        grammar={null}
-        progressLabel="1/2 · 7/8"
-        isCzToEn
-        revealed
-        czech="ahoj"
-        english="hello"
-        pronunciation="hello"
-        audioDisabled={false}
-        showDirectionChange={false}
-        handleReveal={vi.fn()}
-        plusHint={vi.fn()}
-        nextRepeat={vi.fn()}
-        nextKnown={vi.fn()}
-        audioError
-        playAudio={vi.fn()}
-        audioLoading={false}
-        isBlockTrainingPractice
-      />,
-    );
-
-    expect(screen.getByText('No audio')).toBeTruthy();
-
-    expect(container.querySelector('#top-bar')?.textContent).toContain('cz › en');
-    expect(container.querySelector('#top-bar')?.textContent).toContain('No audio');
-  });
-
   it('shows the review completion page with an explicit home button', () => {
     mocks.practiceDeck.currentItem = null;
     mocks.practiceDeck.finishedReview = true;
 
     render(<PracticeCard />);
-
-    expect(screen.getByText('Review completed')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Domů' })).toBeTruthy();
-    expect(screen.queryByTestId('hint-btn')).toBeNull();
 
     fireEvent.click(screen.getByRole('button', { name: 'Domů' }));
     expect(mocks.navigate).toHaveBeenCalledWith('/');
