@@ -23,6 +23,7 @@ letoun,aeroplane,,
 může,can,,
 bonbón,candy,,
 skladovat,store,,
+
 Pracuji?,Am I working?,50,40
 Vaříš?,Are you cooking?,50,40
 Řídí?,Is he driving?,50,40
@@ -31,6 +32,7 @@ Prší?,Is it raining?,50,40
 Čekáme?,Are we waiting?,50,40
 Učíte se?,Are you studying?,50,40
 Běží?,Are they running?,50,40
+
 Pracuji na správném úkolu?,Am I working on the right task?,,40
 Vaříš dnes večer večeři?,Are you cooking dinner tonight?,,40
 Řídí on do kanceláře?,Is he driving to the office?,,40
@@ -38,4 +40,4 @@ Píše ona zprávu?,Is she writing a message?,,40
 Prší tam pořád?,Is it still raining there?,,40
 Čekáme na správný autobus?,Are we waiting for the right bus?,,40
 Učíte se na zkoušku?,Are you studying for the exam?,,40
-Běží oni každý den?,Are they running every day?,,40
+Běží už?,Are they running already?,,40

@@ -1,0 +1,41 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+diamant,diamond,dˈaɪəmənd,diamond.opus,32000,,,,,True,32
+hlubina,deep,dˈiːp,deep.opus,32001,,,,,True,32
+socha,statue,stˈætʃuː,statue.opus,32002,,,,,True,32
+rozprava,debate,dᵻbˈeɪt,debate.opus,32003,,,,,True,32
+brouk,bug,bˈʌɡ,bug.opus,32004,,,,,True,32
+odejít do důchodu,retire,ɹᵻtˈaɪɚ,retire.opus,32005,,,,,True,32
+v důchodu,retired,ɹᵻtˈaɪɚd,retired.opus,32006,,,,,True,32
+dohoda,deal,dˈiːl,deal.opus,32007,,,,,True,32
+rytmus,rhythm,ɹˈɪðəm,rhythm.opus,32008,,,,,True,32
+denní světlo,daylight,dˈeɪlaɪt,daylight.opus,32009,,,,,True,32
+ocenit,appreciate,ɐpɹˈiːʃɪˌeɪt,appreciate.opus,32010,,,,,True,32
+místo toho,instead,ɪnstˈɛd,instead.opus,32011,,,,,True,32
+jmenovat (do funkce),appoint,ɐpˈɔɪnt,appoint.opus,32012,,,,,True,32
+jmenování,appointment,ɐpˈɔɪntmənt,appointment.opus,32013,,,,,True,32
+okamžitý,instant,ˈɪnstənt,instant.opus,32014,,,,,True,32
+žaludek,stomach,stˈʌmək,stomach.opus,32015,,,,,True,32
+bolest břicha,stomachache,stˈʌməkˌeɪk,stomachache.opus,32016,,,,,True,32
+bytost,being,bˈiːɪŋ,being.opus,32017,,,,,True,32
+vymyslet,invent,ɪnvˈɛnt,invent.opus,32018,,,,,True,32
+vynález,invention,ɪnvˈɛnʃən,invention.opus,32019,,,,,True,32
+návrat,return,ɹᵻtˈɜːn,return.opus,32020,,,,,True,32
+hluboce,deeply,dˈiːpli,deeply.opus,32021,,,,,True,32
+ukrást,steal,stˈiːl,steal.opus,32022,,,,,True,32
+vykročit,step,stˈɛp,step.opus,32023,,,,,True,32
+Byl jsem připravený?,Was I ready?,wʌz aɪ ɹˈɛdi,was_i_ready.opus,32024,54,,,44,False,32
+Byl jsi unavený?,Were you tired?,wɜː juː tˈaɪɚd,were_you_tired.opus,32025,54,,,44,False,32
+Byl doma?,Was he at home?,wʌz hiː æt hˈoʊm,was_he_at_home.opus,32026,54,,,44,False,32
+Byla šťastná?,Was she happy?,wʌz ʃiː hˈæpi,was_she_happy.opus,32027,54,,,44,False,32
+Byla zima?,Was it cold?,wʌz ɪt kˈoʊld,was_it_cold.opus,32028,54,,,44,False,32
+Byli jsme hluční?,Were we noisy?,wɜː wiː nˈɔɪzi,were_we_noisy.opus,32029,54,,,44,False,32
+Byli jste zaneprázdnění?,Were you busy?,wɜː juː bˈɪzi,were_you_busy.opus,32030,54,,,44,False,32
+Byli venku?,Were they outside?,wɜː ðeɪ aʊtsˈaɪd,were_they_outside.opus,32031,54,,,44,False,32
+Byl jsem připravený na včerejší zkoušku?,Was I ready for yesterday's exam?,wʌz aɪ ɹˈɛdi fɔːɹ jˈɛstɚdˌeɪz ɛɡzˈæm,was_i_ready_for_yesterdays_exam.opus,32032,,,,44,False,32
+Byl jsi po cestě unavený?,Were you tired after the journey?,wɜː juː tˈaɪɚd ˈæftɚ ðə dʒˈɜːni,were_you_tired_after_the_journey.opus,32033,,,,44,False,32
+Byl on včera doma?,Was he at home yesterday?,wʌz hiː æt hˈoʊm jˈɛstɚdˌeɪ,was_he_at_home_yesterday.opus,32034,,,,44,False,32
+Byla ona šťastná s novou prací?,Was she happy with the new job?,wʌz ʃiː hˈæpi wɪððə nˈuː dʒˈɑːb,was_she_happy_with_the_new_job.opus,32035,,,,44,False,32
+Byla venku opravdu zima?,Was it really cold outside?,wʌz ɪt ɹˈiəli kˈoʊld aʊtsˈaɪd,was_it_really_cold_outside.opus,32036,,,,44,False,32
+Přišli jsme na schůzku pozdě?,Were we late for the meeting?,wɜː wiː lˈeɪt fɚðə mˈiːɾɪŋ,were_we_late_for_the_meeting.opus,32037,,,,44,False,32
+Byli jste tehdy příliš zaneprázdnění?,Were you too busy then?,wɜː juː tˈuː bˈɪzi ðˈɛn,were_you_too_busy_then.opus,32038,,,,44,False,32
+Byli oni stále venku?,Were they still outside?,wɜː ðeɪ stˈɪl aʊtsˈaɪd,were_they_still_outside.opus,32039,,,,44,False,32

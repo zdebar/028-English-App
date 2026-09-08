@@ -1,0 +1,127 @@
+czech,english,block_id,grammar_chunk_id
+plachý,shy,,
+sprcha,shower,,
+šou,show,,
+by měl,should,,
+krátit,short,,
+nakupování,shopping,,
+bota,shoe,,
+třepat,shake,,
+sestavit,set,,
+věta,sentence,,
+já,self,,
+pohled,sight,,
+fotbal,soccer,,
+zasněžený,snowy,,
+had,snake,,
+kouř,smoke,,
+kouření,smoking,,
+kovář,smith,,
+vůně,smell,,
+dovednost,skill,,
+místo,site,,
+Pane,sir,,
+zpěvák,singer,,
+sekce,section,,
+
+"moci, umět",can,42,34
+"nemoci, neumět",can't,42,34
+"mohl, uměl by",could,42,34
+"nemohl, neuměl by",couldn't,42,34
+smět,may,42,34
+nesmět,may not,42,34
+
+mohl by,might,43,34
+nemohl by,might not,43,34
+muset,must,43,34
+nesmět,mustn't,43,34
+bude,will,43,34
+nebude,won't,43,34
+
+bude (návrh),shall,44,34
+nebude (návrh),shall not,44,34
+měl by,should,44,34
+neměl by,shouldn't,44,34
+chtěl by,would,44,34
+nechtěl by,wouldn't,44,34
+
+Já mohu pomoci.,I can help.,,34
+Umíš plavat?,Can you swim?,,34
+On umí vařit.,He can cook.,,34
+Umí řídit?,Can she drive?,,34
+
+Nemůže to fungovat.,It can't work.,,34
+Nemůžeme teď odejít?,Can't we leave now?,,34
+Oni neumějí plavat.,They can't swim.,,34
+Nemohu ti pomoci?,Can't I help you?,,34
+
+Ty bys mohl pomoci.,You could help.,,34
+Mohl by on přijít?,Could he come?,,34
+Ona by mohla vyhrát.,She could win.,,34
+Mohlo by to fungovat?,Could it work?,,34
+
+Nemohli jsme zůstat.,We couldn't stay.,,34
+Nemohli přijít?,Couldn't they come?,,34
+Nemohl jsem spát.,I couldn't sleep.,,34
+Nemohl jsi to slyšet?,Couldn't you hear it?,,34
+
+On možná přijde.,He may come.,,34
+Smí přijít?,May she come?,,34
+Možná to bude pravda.,It may be true.,,34
+Smíme začít?,May we start?,,34
+
+Oni možná nepřijdou.,They may not come.,,34
+Proč zde nesmím zůstat?,Why may I not stay here?,,34
+Ty možná neznáš odpověď.,You may not know the answer.,,34
+Proč možná není doma?,Why may he not be at home?,,34
+
+Ona možná přijde.,She might come.,,34
+Mohlo by to bolet?,Might it hurt?,,34
+My možná zůstaneme.,We might stay.,,34
+Mohli by přijít?,Might they come?,,34
+
+Já možná nepřijdu.,I might not come.,,34
+Proč možná nepřijdeš?,Why might you not come?,,34
+On možná nebude vědět.,He might not know.,,34
+Proč možná nepřijde?,Why might she not come?,,34
+
+To musí být pravda.,It must be true.,,34
+Musíme teď odejít?,Must we leave now?,,34
+Oni musí studovat.,They must study.,,34
+Musím začít?,Must I start?,,34
+
+Ty tady nesmíš kouřit.,You mustn't smoke here.,,34
+Proč on nesmí odejít?,Why mustn't he leave?,,34
+Ona nesmí řídit.,She mustn't drive.,,34
+Proč to nesmí zůstat tady?,Why mustn't it stay here?,,34
+
+My pomůžeme.,We will help.,,34
+Přijdou zítra?,Will they come tomorrow?,,34
+Zavolám ti.,I will call you.,,34
+Pomůžeš mi?,Will you help me?,,34
+
+On neposlechne.,He won't listen.,,34
+Nepřijde?,Won't she come?,,34
+Auto nenastartuje.,It won't start.,,34
+Nezůstaneme?,Won't we stay?,,34
+
+Měl bych studovat.,I should study.,,34
+Měl bys odpočívat?,Should you rest?,,34
+On by měl být tady.,He should be here.,,34
+Měla by zavolat?,Should she call?,,34
+
+Nemělo by to být těžké.,It shouldn't be difficult.,,34
+Neměli bychom odejít?,Shouldn't we leave?,,34
+Oni by neměli čekat.,They shouldn't wait.,,34
+Neměl bych zavolat?,Shouldn't I call?,,34
+
+Ty bys pomohl.,You would help.,,34
+Pomohl by on?,Would he help?,,34
+Ona by si dala čaj.,She would like tea.,,34
+Fungovalo by to?,Would it work?,,34
+
+My bychom to neudělali.,We wouldn't do that.,,34
+Nesouhlasili by?,Wouldn't they agree?,,34
+Já bych nelhal.,I wouldn't lie.,,34
+Nezůstal bys?,Wouldn't you stay?,,34
+
