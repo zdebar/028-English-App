@@ -88,7 +88,7 @@ const DEFAULT_BLOCK_BAR_PROPS: Required<BlockBarProps> = {
   todayCount: 0,
   lessonName: '',
   lessonNumber: 0,
-  lessonCount: 40,
-  widthBase: 40,
+  lessonCount: 48,
+  widthBase: 48,
   className: '',
 };
