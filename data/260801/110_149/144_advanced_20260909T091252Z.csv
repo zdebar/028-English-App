@@ -1,0 +1,25 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+ani,nor,nˈɔːɹ,nor.opus,144000,,,,,True,144
+nesmysl,nonsense,nˈɑːnsəns,nonsense.opus,144001,,,,,True,144
+zemětřesení,quake,kwˈeɪk,quake.opus,144002,,,,,True,144
+nicméně,nonetheless,nˌʌnðəlˈɛs,nonetheless.opus,144003,,,,,True,144
+obyvatel,inhabitant,ɪnhˈæbɪtənt,inhabitant.opus,144004,,,,,True,144
+severní,northern,nˈɔːɹðɚn,northern.opus,144005,,,,,True,144
+instalovat,instal,ɪnstˈɔːl,instal.opus,144006,,,,,True,144
+milovaný,beloved,bᵻlˈʌvd,beloved.opus,144007,,,,,True,144
+střední,intermediate,ˌɪntɚmˈiːdiət,intermediate.opus,144008,,,,,True,144
+aritmetický,arithmetic,ɚɹˈɪθmətˌɪk,arithmetic.opus,144009,,,,,True,144
+přestávka,intermission,ˌɪntɚmˈɪʃən,intermission.opus,144010,,,,,True,144
+vnitřní,internal,ɪntˈɜːnəl,internal.opus,144011,,,,,True,144
+mezinárodně,internationally,ˌɪntɚnˈæʃənəli,internationally.opus,144012,,,,,True,144
+vedle,next door,nˈɛkst dˈɔːɹ,next_door.opus,144013,,,,,True,144
+popravit,revise,ɹᵻvˈaɪz,revise.opus,144014,,,,,True,144
+revize,revision,ɹᵻvˈɪʒən,revision.opus,144015,,,,,True,144
+uznání,appreciation,ɐpɹˌiːʃɪˈeɪʃən,appreciation.opus,144016,,,,,True,144
+přerušit,interrupt,ˈɪntɚɹˌʌpt,interrupt.opus,144017,,,,,True,144
+interval,interval,ˈɪntɚvəl,interval.opus,144018,,,,,True,144
+dotazovaný,interviewee,ˈɪntɚvjˌuːiː,interviewee.opus,144019,,,,,True,144
+ocenit,award,ɐwˈɔːɹd,award.opus,144020,,,,,True,144
+nově,newly,nˈuːli,newly.opus,144021,,,,,True,144
+nováček,newcomer,nˈuːkʌmɚ,newcomer.opus,144022,,,,,True,144
+zavedení,introduction,ˌɪntɹədˈʌkʃən,introduction.opus,144023,,,,,True,144
