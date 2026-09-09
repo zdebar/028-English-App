@@ -1,0 +1,43 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+cizinec,stranger,stɹˈeɪndʒɚ,stranger.opus,31000,,,,,True,31
+laskavě,kindly,kˈaɪndli,kindly.opus,31001,,,,,True,31
+personál,staff,stˈæf,staff.opus,31002,,,,,True,31
+kilo,kilo,kˈiːloʊ,kilo.opus,31003,,,,,True,31
+kilogram,kilogramme,kˈɪləɡɹˌæm,kilogramme.opus,31004,,,,,True,31
+krém,cream,kɹˈiːm,cream.opus,31005,,,,,True,31
+šílený,crazy,kɹˈeɪzi,crazy.opus,31006,,,,,True,31
+silně,strongly,stɹˈɔŋli,strongly.opus,31007,,,,,True,31
+stávka,strike,stɹˈaɪk,strike.opus,31008,,,,,True,31
+krytý,indoor,ˈɪndɔːɹ,indoor.opus,31009,,,,,True,31
+zločin,crime,kɹˈaɪm,crime.opus,31010,,,,,True,31
+okrást,rob,ɹˈɑːb,rob.opus,31011,,,,,True,31
+rozvíjet,develop,dɪvˈɛləp,develop.opus,31012,,,,,True,31
+kriket,cricket,kɹˈɪkɪt,cricket.opus,31013,,,,,True,31
+rozvinutý,developed,dɪvˈɛləpt,developed.opus,31014,,,,,True,31
+loupež,robbery,ɹˈɑːbɚɹi,robbery.opus,31015,,,,,True,31
+zabiják,killer,kˈɪlɚ,killer.opus,31016,,,,,True,31
+království,kingdom,kˈɪŋdəm,kingdom.opus,31017,,,,,True,31
+červenka,robin,ɹˈɑːbɪn,robin.opus,31018,,,,,True,31
+venkov,countryside,kˈʌntɹɪsˌaɪd,countryside.opus,31019,,,,,True,31
+struktura,structure,stɹˈʌktʃɚ,structure.opus,31020,,,,,True,31
+stvoření,creature,kɹˈiːtʃɚ,creature.opus,31021,,,,,True,31
+krása,beauty,bjˈuːɾi,beauty.opus,31022,,,,,True,31
+tvořivost,creativity,kɹiːˌeɪtˈɪvᵻɾi,creativity.opus,31023,,,,,True,31
+já nebyl,I wasn't,aɪ wˈʌzn̩t,i_wasnt.opus,31024,53,,,43,False,31
+ty jsi nebyl,you weren't,juː wˈɜːnt,you_werent.opus,31025,53,,,43,False,31
+on nebyl,he wasn't,hiː wˈʌzn̩t,he_wasnt.opus,31026,53,,,43,False,31
+ona nebyla,she wasn't,ʃiː wˈʌzn̩t,she_wasnt.opus,31027,53,,,43,False,31
+ono nebylo,it wasn't,ɪt wˈʌzn̩t,it_wasnt.opus,31028,53,,,43,False,31
+my jsme nebyli,we weren't,wiː wˈɜːnt,we_werent.opus,31029,53,,,43,False,31
+vy jste nebyli,you weren't,juː wˈɜːnt,you_werent.opus,31030,53,,,43,False,31
+oni nebyli,they weren't,ðeɪ wˈɜːnt,they_werent.opus,31031,53,,,43,False,31
+Včera jsem nebyl připravený na test.,I wasn't ready for the test yesterday.,aɪ wˈʌzn̩t ɹˈɛdi fɚðə tˈɛst jˈɛstɚdˌeɪ,i_wasnt_ready_for_the_test_yesterday.opus,31032,,,,43,False,31
+Po cestě jsi nebyl unavený.,You weren't tired after the journey.,juː wˌɜːnt tˈaɪɚd ˈæftɚ ðə dʒˈɜːni,you_werent_tired_after_the_journey.opus,31033,,,,43,False,31
+"On nebyl doma, byl v práci.",He wasn't at home; he was at work.,"hiː wˈʌzn̩t æt hˈoʊm
+hiː wʌz æt wˈɜːk",he_wasnt_at_home_he_was_at_work.opus,31034,,,,43,False,31
+Ona nebyla šťastná z té zprávy.,She wasn't happy about the news.,ʃiː wˈʌzn̩t hˈæpi ɐbˌaʊt ðə nˈuːz,she_wasnt_happy_about_the_news.opus,31035,,,,43,False,31
+Včera venku nebyla taková zima.,It wasn't that cold outside yesterday.,ɪt wˈʌzn̩t ðæt kˈoʊld aʊtsˈaɪd jˈɛstɚdˌeɪ,it_wasnt_that_cold_outside_yesterday.opus,31036,,,,43,False,31
+Na schůzku jsme nepřišli pozdě.,We weren't late for the meeting.,wiː wˌɜːnt lˈeɪt fɚðə mˈiːɾɪŋ,we_werent_late_for_the_meeting.opus,31037,,,,43,False,31
+Minulý týden jste nebyli zaneprázdnění.,You weren't busy last week.,juː wˌɜːnt bˈɪzi lˈæst wˈiːk,you_werent_busy_last_week.opus,31038,,,,43,False,31
+"Nebyli venku, byli uvnitř.",They weren't outside; they were inside.,"ðeɪ wˌɜːnt aʊtsˈaɪd
+ðeɪ wɜːɹ ɪnsˈaɪd",they_werent_outside_they_were_inside.opus,31039,,,,43,False,31
