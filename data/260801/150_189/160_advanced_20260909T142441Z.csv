@@ -1,0 +1,25 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+úsek,stretch,stɹˈɛtʃ,stretch.opus,160000,,,,,True,160
+stres,stress,stɹˈɛs,stress.opus,160001,,,,,True,160
+stresovaný,stressed,stɹˈɛst,stressed.opus,160002,,,,,True,160
+stresující,stressful,stɹˈɛsfəl,stressful.opus,160003,,,,,True,160
+tvůrce,creator,kɹiːˈeɪɾɚ,creator.opus,160004,,,,,True,160
+břemeno,burden,bˈɜːdən,burden.opus,160005,,,,,True,160
+vyrobit,craft,kɹˈæft,craft.opus,160006,,,,,True,160
+jeskyně,cave,kˈeɪv,cave.opus,160007,,,,,True,160
+dávat pozor,caution,kˈɔːʃən,caution.opus,160008,,,,,True,160
+opatrný,cautious,kˈɔːʃəs,cautious.opus,160009,,,,,True,160
+vůz,wagon,wˈæɡən,wagon.opus,160010,,,,,True,160
+cesta,voyage,vˈɔɪɪdʒ,voyage.opus,160011,,,,,True,160
+samohláska,vowel,vˈaʊəl,vowel.opus,160012,,,,,True,160
+volební hlas,vote,vˈoʊt,vote.opus,160013,,,,,True,160
+dobrovolničit,volunteer,vˌɑːləntˈɪɹ,volunteer.opus,160014,,,,,True,160
+objem,volume,vˈɑːljuːm,volume.opus,160015,,,,,True,160
+sopka,volcano,vɑːlkˈeɪnoʊ,volcano.opus,160016,,,,,True,160
+živý,vivid,vˈɪvɪd,vivid.opus,160017,,,,,True,160
+živě,vividly,vˈɪvɪdli,vividly.opus,160018,,,,,True,160
+vizuální,visual,vˈɪʒuːəl,visual.opus,160019,,,,,True,160
+vizuálně,visually,vˈɪʒuːəli,visually.opus,160020,,,,,True,160
+herečka,actress,ˈæktɹəs,actress.opus,160021,,,,,True,160
+vidění,vision,vˈɪʒən,vision.opus,160022,,,,,True,160
+viditelné,visible,vˈɪzᵻbəl,visible.opus,160023,,,,,True,160
