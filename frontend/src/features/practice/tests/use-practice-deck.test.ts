@@ -99,8 +99,8 @@ describe('usePracticeDeck', () => {
     expect(result.current.progressLabel).toBe('7/20');
   });
 
-  it('loads and displays a complete 150-item review direction', async () => {
-    const entries = Array.from({ length: 150 }, (_, index) => entry(index + 1));
+  it('loads and displays one item from a review direction', async () => {
+    const entries = [entry(1)];
     mocks.fetchData = reviewDeckResult(reviewSession(0, 150), entries);
 
     const { result } = renderHook(() => usePracticeDeck('u1'));
@@ -110,7 +110,7 @@ describe('usePracticeDeck', () => {
     expect(result.current.currentItem?.item_id).toBe(1);
   });
 
-  it('persists every answer before advancing and resets the question', async () => {
+  it('persists one answer before loading the next item and resets the question', async () => {
     const { result } = renderHook(() => usePracticeDeck('u1'));
     await waitFor(() => expect(result.current.sessionLoading).toBe(false));
     act(() => result.current.setRevealed(true));
@@ -120,7 +120,8 @@ describe('usePracticeDeck', () => {
     await act(async () => result.current.nextItem('correct'));
 
     expect(mocks.recordReviewAnswer).toHaveBeenCalledOnce();
-    expect(result.current.currentItem?.item_id).toBe(2);
+    expect(mocks.reload).toHaveBeenCalledOnce();
+    expect(result.current.currentItem?.item_id).toBe(1);
     expect(result.current.progressLabel).toBe('8/20');
     expect(mocks.transitionEvents[0]).toBe('reset');
     expect(mocks.renderStates).not.toContainEqual({ itemId: 2, revealed: true });

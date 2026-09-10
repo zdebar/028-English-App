@@ -22,7 +22,7 @@ import {
 
 type SessionProgress = Readonly<{ completedCount: number; targetCount: number }>;
 
-/** Manages a persisted, continuously replenished review session. */
+/** Manages a persisted review session that loads and saves one card at a time. */
 export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDeckEntry[]) {
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
@@ -39,7 +39,7 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
     error,
     reload,
   } = useFetch<ReviewSessionDeck>(fetchPracticeDeck, { initialData: initialResult });
-  const { activeArray, currentEntry, currentItem, isCzToEn } = useMemo(
+  const { currentEntry, currentItem, isCzToEn } = useMemo(
     () => getReviewDeckView(fetchedResult, index),
     [fetchedResult, index],
   );
@@ -76,11 +76,8 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
         {
           currentItem,
           userId,
-          index,
-          entriesLength: activeArray.length,
           resetQuestionState,
           setSessionProgress,
-          setIndex,
           setSessionLoading,
           reload,
           setSaveError,
@@ -88,7 +85,7 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
         outcome,
       );
     },
-    [activeArray.length, currentItem, index, reload, resetQuestionState, userId],
+    [currentItem, reload, resetQuestionState, userId],
   );
 
   return {
@@ -132,14 +129,13 @@ function fetchReviewDeck(userId: string | null): Promise<ReviewSessionDeck> {
 
 function createInitialReviewResult(initialDeck: PracticeDeckEntry[] | undefined) {
   if (!initialDeck) return undefined;
-  return { entries: initialDeck, session: null, abandoned: false };
+  return { entries: initialDeck.slice(0, 1), session: null, abandoned: false };
 }
 
 function getReviewDeckView(
   fetchedResult: ReviewSessionDeck | null | undefined,
   index: number,
 ): Readonly<{
-  activeArray: PracticeDeckEntry[];
   currentEntry: PracticeDeckEntry | null;
   currentItem: PracticeDeckEntry['item'] | null;
   isCzToEn: boolean;
@@ -148,7 +144,7 @@ function getReviewDeckView(
   const currentEntry = activeArray[index] ?? null;
   const currentItem = currentEntry?.item ?? null;
   const isCzToEn = currentItem?.practice_direction !== 'enToCz';
-  return { activeArray, currentEntry, currentItem, isCzToEn };
+  return { currentEntry, currentItem, isCzToEn };
 }
 
 function resetReviewCard(
@@ -212,11 +208,8 @@ function syncReviewSession(options: SyncReviewSessionOptions): void {
 type SaveReviewAnswerOptions = Readonly<{
   currentItem: PracticeDeckEntry['item'] | null;
   userId: string | null;
-  index: number;
-  entriesLength: number;
   resetQuestionState: () => void;
   setSessionProgress: Dispatch<SetStateAction<SessionProgress | null>>;
-  setIndex: Dispatch<SetStateAction<number>>;
   setSessionLoading: Dispatch<SetStateAction<boolean>>;
   reload: () => Promise<unknown>;
   setSaveError: Dispatch<SetStateAction<Error | null>>;
@@ -229,11 +222,8 @@ async function saveReviewAnswer(
   const {
     currentItem,
     userId,
-    index,
-    entriesLength,
     resetQuestionState,
     setSessionProgress,
-    setIndex,
     setSessionLoading,
     reload,
     setSaveError,
@@ -253,15 +243,10 @@ async function saveReviewAnswer(
     );
     setSessionProgress((currentProgress) => ({
       completedCount: result.completedCount,
-      targetCount: currentProgress?.targetCount ?? entriesLength,
+      targetCount: currentProgress?.targetCount ?? 1,
     }));
 
     resetQuestionState();
-    if (index + 1 < entriesLength) {
-      setIndex(index + 1);
-      return;
-    }
-
     setSessionLoading(true);
     invalidateRouteData(routeDataKey('practice', userId));
     await reload();

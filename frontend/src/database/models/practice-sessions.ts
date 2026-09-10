@@ -214,7 +214,10 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
         if (session?.mode !== 'review') {
           throw new Error('Review answer requires an active review session.');
         }
-        if (!session.review_queue || session.review_queue.length === 0) {
+        const isCurrentItem = session.review_queue?.some(
+          (entry) => entry.item_id === item.item_id && entry.direction === direction,
+        );
+        if (!isCurrentItem) {
           throw new Error('The active review session is already complete.');
         }
 
@@ -227,7 +230,7 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
           ...session,
           completed_count: completedCount,
           updated_at: dateTime,
-          review_queue: removeReviewQueueEntry(session.review_queue, item.item_id, direction),
+          review_queue: [],
         };
         await db.practice_sessions.put(nextSession);
 
@@ -319,14 +322,6 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
   }
 }
 
-function removeReviewQueueEntry(
-  queue: ReviewQueueEntry[] | undefined,
-  itemId: number,
-  direction: PracticeDirection,
-): ReviewQueueEntry[] | undefined {
-  if (!queue) return undefined;
-  return queue.filter((entry) => entry.item_id !== itemId || entry.direction !== direction);
-}
 
 async function updateStoredPracticeItem(item: UserItemLocal): Promise<number> {
   return db.user_items.update([item.user_id, item.item_id], {

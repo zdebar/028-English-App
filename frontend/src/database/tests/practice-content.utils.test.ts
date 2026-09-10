@@ -7,6 +7,8 @@ const mocks = vi.hoisted(() => ({
   grammarGroupGet: vi.fn(),
   addExamples: vi.fn(),
   getReviewDeck: vi.fn(),
+  getNextReviewItemForDirection: vi.fn(),
+  getReviewItemCountForDirection: vi.fn(),
   getReviewDeckForDirection: vi.fn(),
   getByItemIds: vi.fn(),
   startReview: vi.fn(),
@@ -30,6 +32,10 @@ vi.mock('@/database/models/grammar-chunks', () => ({
 vi.mock('@/database/models/user-items', () => ({
   default: {
     getReviewDeck: (...args: unknown[]) => mocks.getReviewDeck(...args),
+    getNextReviewItemForDirection: (...args: unknown[]) =>
+      mocks.getNextReviewItemForDirection(...args),
+    getReviewItemCountForDirection: (...args: unknown[]) =>
+      mocks.getReviewItemCountForDirection(...args),
     getReviewDeckForDirection: (...args: unknown[]) => mocks.getReviewDeckForDirection(...args),
     getByItemIds: (...args: unknown[]) => mocks.getByItemIds(...args),
   },
@@ -118,6 +124,7 @@ describe('practice content resolution', () => {
     mocks.getByItemIds.mockResolvedValue([]);
     mocks.put.mockResolvedValue(undefined);
     mocks.deleteByUserId.mockResolvedValue(undefined);
+    mocks.getReviewItemCountForDirection.mockResolvedValue(1);
   });
 
   it('deduplicates relation ids and attaches resolved content without dropping items', async () => {
@@ -170,54 +177,55 @@ describe('practice content resolution', () => {
     await expect(loadReviewDeck('u1')).rejects.toBe(error);
   });
 
-  it('loads every available item in a direction once the twenty-item minimum is met', async () => {
+  it('loads one item and stores the available count for the current direction', async () => {
     const items = Array.from({ length: 150 }, (_, index) => makeReviewItem(index + 1));
-    mocks.getReviewDeckForDirection.mockResolvedValue(items);
+    mocks.getNextReviewItemForDirection.mockResolvedValue(items[0]);
+    mocks.getReviewItemCountForDirection.mockResolvedValue(150);
 
     const result = await loadReviewSessionDeck('u1');
 
-    expect(mocks.getReviewDeckForDirection).toHaveBeenCalledWith('u1', 'czToEn');
-    expect(result.entries).toHaveLength(150);
+    expect(mocks.getNextReviewItemForDirection).toHaveBeenCalledWith('u1', 'czToEn');
+    expect(result.entries).toHaveLength(1);
+    expect(result.entries[0]?.item.item_id).toBe(1);
     expect(result.session).toMatchObject({
       completed_count: 0,
       target_count: 150,
       review_direction: 'czToEn',
-      review_queue: items.map((item) => ({ item_id: item.item_id, direction: 'czToEn' })),
+      review_queue: [{ item_id: 1, direction: 'czToEn' }],
     });
     expect(mocks.put).toHaveBeenCalledOnce();
   });
 
-  it('uses the other direction when the first direction has fewer than twenty items', async () => {
-    mocks.getReviewDeckForDirection
-      .mockResolvedValueOnce(Array.from({ length: 19 }, (_, index) => makeReviewItem(index + 1)))
-      .mockResolvedValueOnce(
-        Array.from({ length: 20 }, (_, index) => makeReviewItem(index + 101, 'enToCz')),
-      );
+  it('keeps using CZ to EN even when fewer than twenty items remain', async () => {
+    const item = makeReviewItem(1);
+    mocks.getNextReviewItemForDirection.mockResolvedValue(item);
+    mocks.getReviewItemCountForDirection.mockResolvedValue(1);
 
     const result = await loadReviewSessionDeck('u1');
 
-    expect(mocks.getReviewDeckForDirection.mock.calls.map(([_, direction]) => direction)).toEqual([
+    expect(mocks.getNextReviewItemForDirection).toHaveBeenCalledWith('u1', 'czToEn');
+    expect(mocks.getNextReviewItemForDirection).toHaveBeenCalledTimes(1);
+    expect(result.entries).toHaveLength(1);
+    expect(result.entries[0]?.item.practice_direction).toBe('czToEn');
+  });
+
+  it('switches to EN to CZ only after CZ to EN is exhausted', async () => {
+    mocks.startReview.mockResolvedValue(reviewSession('czToEn'));
+    mocks.getNextReviewItemForDirection
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(makeReviewItem(1, 'enToCz'));
+
+    const result = await loadReviewSessionDeck('u1');
+
+    expect(mocks.getNextReviewItemForDirection.mock.calls.map(([_, direction]) => direction)).toEqual([
       'czToEn',
       'enToCz',
     ]);
-    expect(result.entries).toHaveLength(20);
-    expect(result.entries.every((entry) => entry.item.practice_direction === 'enToCz')).toBe(true);
+    expect(result.entries[0]?.item.practice_direction).toBe('enToCz');
   });
 
-  it('checks the opposite direction first after a direction is exhausted', async () => {
-    mocks.startReview.mockResolvedValue(reviewSession('czToEn'));
-    mocks.getReviewDeckForDirection.mockResolvedValueOnce(
-      Array.from({ length: 20 }, (_, index) => makeReviewItem(index + 1, 'enToCz')),
-    );
-
-    const result = await loadReviewSessionDeck('u1');
-
-    expect(mocks.getReviewDeckForDirection).toHaveBeenCalledWith('u1', 'enToCz');
-    expect(result.entries.every((entry) => entry.item.practice_direction === 'enToCz')).toBe(true);
-  });
-
-  it('abandons review when neither direction reaches the minimum', async () => {
-    mocks.getReviewDeckForDirection.mockResolvedValue([]);
+  it('abandons review when neither direction has a due item', async () => {
+    mocks.getNextReviewItemForDirection.mockResolvedValue(null);
 
     await expect(loadReviewSessionDeck('u1')).resolves.toEqual({
       entries: [],
@@ -242,9 +250,9 @@ describe('practice content resolution', () => {
 
     const result = await loadReviewSessionDeck('u1');
 
-    expect(mocks.getByItemIds).toHaveBeenCalledWith('u1', [3, 1]);
-    expect(mocks.getReviewDeckForDirection).not.toHaveBeenCalled();
-    expect(result.entries.map((entry) => entry.item.item_id)).toEqual([3, 1]);
+    expect(mocks.getByItemIds).toHaveBeenCalledWith('u1', [3]);
+    expect(mocks.getNextReviewItemForDirection).not.toHaveBeenCalled();
+    expect(result.entries.map((entry) => entry.item.item_id)).toEqual([3]);
   });
 
   it('resolves the grammar group belonging to the requested chunk', async () => {

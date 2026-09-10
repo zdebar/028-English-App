@@ -223,13 +223,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   mastered_at_en_to_cz!: string;
   lesson_id!: number;
 
-  /**
-   * Builds one unified vocabulary and grammar practice deck.
-   *
-   * @param userId User id whose practice items should be selected.
-   * @param deckSize Maximum deck size; defaults to the review minimum size.
-   * @returns Practice items ordered by readiness and curriculum position.
-   */
+  /** Returns the next due review item, preferring CZ to EN over EN to CZ. */
   static async getReviewDeck(
     userId: string,
     deckSize: number = config.practice.reviewMinimumSize,
@@ -237,13 +231,30 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     if (deckSize <= 0) return [];
 
     const now = new Date().toISOString();
-    const czToEnItems = await this.getDuePracticeItems(userId, 'czToEn', deckSize, now);
-    if (czToEnItems.length === deckSize) return czToEnItems;
+    const czToEnItem = await this.getNextReviewItemForDirection(userId, 'czToEn', now);
+    if (czToEnItem) return [czToEnItem];
 
-    const enToCzItems = await this.getDuePracticeItems(userId, 'enToCz', deckSize, now);
+    const enToCzItem = await this.getNextReviewItemForDirection(userId, 'enToCz', now);
+    return enToCzItem ? [enToCzItem] : [];
+  }
 
-    if (enToCzItems.length === deckSize) return enToCzItems;
-    return [];
+  /** Reads the oldest due item in one explicit direction. */
+  static async getNextReviewItemForDirection(
+    userId: string,
+    direction: PracticeDirection,
+    now: string = new Date().toISOString(),
+  ): Promise<PracticeDeckItem | null> {
+    const [item] = await this.getDuePracticeItems(userId, direction, 1, now);
+    return item ?? null;
+  }
+
+  /** Counts due, unmastered items in one explicit direction without loading them. */
+  static async getReviewItemCountForDirection(
+    userId: string,
+    direction: PracticeDirection,
+    now: string = new Date().toISOString(),
+  ): Promise<number> {
+    return this.getDuePracticeCollection(userId, direction, now).count();
   }
 
   /** Reads every due item in one direction for the continuous review flow. */
@@ -752,6 +763,17 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     limit: number,
     now: string,
   ): Promise<PracticeDeckItem[]> {
+    return this.getDuePracticeCollection(userId, direction, now)
+      .limit(limit)
+      .toArray()
+      .then((items) => items.map((item) => ({ ...item, practice_direction: direction })));
+  }
+
+  private static getDuePracticeCollection(
+    userId: string,
+    direction: PracticeDirection,
+    now: string,
+  ) {
     const matchesItem = (item: UserItemLocal) => {
       if (item.deleted_at !== NULL_DATE || item.started_at === NULL_DATE) return false;
       if (getDirectionMasteredAt(item, direction) !== NULL_DATE) return false;
@@ -776,10 +798,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         true,
         true,
       )
-      .filter(matchesItem)
-      .limit(limit)
-      .toArray()
-      .then((items) => items.map((item) => ({ ...item, practice_direction: direction })));
+      .filter(matchesItem);
   }
 
   /**

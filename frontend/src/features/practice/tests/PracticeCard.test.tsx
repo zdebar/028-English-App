@@ -392,6 +392,12 @@ describe('PracticeCard', () => {
     expect(screen.getByTestId('grammar-detail').dataset.helpEnabled).toBe('false');
   });
 
+  it('does not show the review progress label on the card', () => {
+    render(<PracticeCard />);
+
+    expect(screen.queryByText('2/20')).toBeNull();
+  });
+
   it('returns home from the empty practice state', () => {
     mocks.practiceDeck.currentItem = null;
     mocks.practiceDeck.loading = false;
@@ -594,6 +600,7 @@ describe('PracticeCard', () => {
         nextRepeat={vi.fn()}
         nextKnown={vi.fn()}
         completeDisabled
+        isBlockTrainingPractice
         audioError={false}
         playAudio={vi.fn()}
         audioLoading={false}
@@ -601,6 +608,7 @@ describe('PracticeCard', () => {
     );
 
     expect((screen.getByTestId('master-btn') as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByText('Round 1/2')).not.toBeNull();
   });
 
   it('keeps the next hint disabled until the skip pointer gesture is released', async () => {

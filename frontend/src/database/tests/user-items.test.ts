@@ -738,7 +738,7 @@ describe('UserItem', () => {
     expect(result.map((item) => item.item_id)).toEqual([1, 2, 3]);
   });
 
-  it('returns a full CZ to EN due deck before considering EN to CZ', async () => {
+  it('returns the oldest CZ to EN item before considering EN to CZ', async () => {
     mocks.indexedToArray.mockResolvedValueOnce([
       {
         item_id: 2,
@@ -756,106 +756,24 @@ describe('UserItem', () => {
 
     const deck = await UserItem.getReviewDeck('u1', 2);
 
-    expect(deck.map((item) => item.item_id)).toEqual([2, 3]);
+    expect(deck.map((item) => item.item_id)).toEqual([2]);
     expect(deck.every((item) => item.practice_direction === 'czToEn')).toBe(true);
     expect(mocks.indexedToArray).toHaveBeenCalledTimes(1);
+    expect(mocks.indexedLimit).toHaveBeenCalledWith(1);
   });
 
-  it('returns an empty deck when neither direction is complete', async () => {
+  it('uses EN to CZ after CZ to EN has no due item', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
     mocks.indexedToArray
-      .mockResolvedValueOnce([
-        {
-          item_id: 1,
-          progress: 1,
-          next_at: '2026-06-20T00:00:00.000Z',
-          mastered_at: '1970-01-01T00:00:00.000Z',
-        },
-      ])
-      .mockResolvedValueOnce([
-        {
-          item_id: 2,
-          progress: 2,
-          next_at: '2026-06-21T00:00:00.000Z',
-          mastered_at: '1970-01-01T00:00:00.000Z',
-        },
-      ]);
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ item_id: 2, progress: 2, next_at: '2026-06-21T00:00:00.000Z' }]);
 
     const deck = await UserItem.getReviewDeck('u1', 4);
 
-    expect(deck).toEqual([]);
-    expect(mocks.indexedLimit.mock.calls.map(([limit]) => limit)).toEqual([4, 4]);
-  });
-
-  it('never adds a new-only CZ to EN item to review', async () => {
-    mocks.indexedToArray
-      .mockResolvedValueOnce([
-        {
-          item_id: 1,
-          progress: 1,
-          next_at: '2026-01-01T00:00:00.000Z',
-          mastered_at: '1970-01-01T00:00:00.000Z',
-        },
-      ])
-      .mockResolvedValueOnce([]);
-
-    const deck = await UserItem.getReviewDeck('u1', 3);
-
-    expect(deck).toEqual([]);
-    expect(mocks.indexedLimit.mock.calls.map(([limit]) => limit)).toEqual([3, 3]);
-  });
-
-  it('does not inspect blocks while selecting a due-only review deck', async () => {
-    mocks.indexedToArray
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ item_id: 1, progress: 2 }]);
-    const deck = await UserItem.getReviewDeck('u1', 5);
-
-    expect(deck).toEqual([]);
-  });
-
-  it('restores a partial EN to CZ deck when CZ to EN and new alternatives are empty', async () => {
-    mocks.indexedToArray
-      .mockResolvedValueOnce([
-        {
-          item_id: 1,
-          progress: 1,
-          next_at: '2026-01-01T00:00:00.000Z',
-          mastered_at: '1970-01-01T00:00:00.000Z',
-        },
-      ])
-      .mockResolvedValueOnce([]);
-
-    const deck = await UserItem.getReviewDeck('u1', 3);
-
-    expect(deck).toEqual([]);
-  });
-
-  it('uses a full EN to CZ deck when CZ to EN is partial', async () => {
-    mocks.indexedToArray
-      .mockResolvedValueOnce([{ item_id: 1, block_id: 10, progress: 1 }])
-      .mockResolvedValueOnce([
-        { item_id: 2, block_id: 10, progress: 2 },
-        { item_id: 3, block_id: 10, progress: 2 },
-        { item_id: 4, block_id: 10, progress: 2 },
-      ]);
-
-    const deck = await UserItem.getReviewDeck('u1', 3);
-
-    expect(deck.map((item) => item.item_id)).toEqual([2, 3, 4]);
-    expect(deck.every((item) => item.practice_direction === 'enToCz')).toBe(true);
-    expect(mocks.indexedToArray).toHaveBeenCalledTimes(2);
-  });
-
-  it('restores a partial EN to CZ grammar deck when no CZ to EN items exist', async () => {
-    mocks.indexedToArray
-      .mockResolvedValueOnce([{ item_id: 1, block_id: 10, progress: 1 }])
-      .mockResolvedValueOnce([]);
-
-    const deck = await UserItem.getReviewDeck('u1', 3);
-
-    expect(deck).toEqual([]);
+    expect(deck.map((item) => item.item_id)).toEqual([2]);
+    expect(deck[0]?.practice_direction).toBe('enToCz');
+    expect(mocks.indexedLimit.mock.calls.map(([limit]) => limit)).toEqual([1, 1]);
   });
 
   it('returns an empty deck without querying when deckSize is not positive', async () => {
@@ -863,10 +781,10 @@ describe('UserItem', () => {
     expect(mocks.indexedToArray).not.toHaveBeenCalled();
   });
 
-  it('includes reset items and excludes other unscheduled grammar items', async () => {
+  it('filters deleted, unstarted, and mastered items from the one-item selection', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
-    mocks.indexedToArray.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+    mocks.indexedToArray.mockResolvedValueOnce([]);
 
     const deck = await UserItem.getReviewDeck('u1', 10);
 
@@ -901,6 +819,7 @@ describe('UserItem', () => {
     expect(
       grammarFilter({
         block_id: 10,
+        deleted_at: '9999-12-31T00:00:00.000Z',
         started_at: '2026-01-01T00:00:00.000Z',
         mastered_at_cz_to_en: '2026-06-20T12:00:00.000Z',
         next_at_cz_to_en: '2026-06-24T11:00:00.000Z',
@@ -910,17 +829,17 @@ describe('UserItem', () => {
       grammarFilter({
         block_id: 10,
         started_at: '2026-01-01T00:00:00.000Z',
-        deleted_at: '1970-01-01T00:00:00.000Z',
+        deleted_at: '9999-12-31T00:00:00.000Z',
         progress_cz_to_en: 0,
         mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
         next_at_cz_to_en: '1970-01-01T00:00:00.000Z',
       }),
-    ).toBe(true);
+    ).toBe(false);
     expect(
       grammarFilter({
         block_id: 10,
-        started_at: '2026-01-01T00:00:00.000Z',
-        deleted_at: '1970-01-01T00:00:00.000Z',
+        deleted_at: '9999-12-31T00:00:00.000Z',
+        started_at: '1970-01-01T00:00:00.000Z',
         progress_cz_to_en: 1,
         mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
         next_at_cz_to_en: '1970-01-01T00:00:00.000Z',
@@ -929,6 +848,7 @@ describe('UserItem', () => {
     expect(
       grammarFilter({
         block_id: 10,
+        deleted_at: '9999-12-31T00:00:00.000Z',
         started_at: '2026-01-01T00:00:00.000Z',
         mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
         next_at_cz_to_en: '2026-06-24T12:00:00.000Z',

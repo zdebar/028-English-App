@@ -15,7 +15,6 @@ import type {
 } from '@/types/user-item.types';
 
 const NULL_DATE = config.database.nullReplacementDate;
-const REVIEW_MINIMUM = config.practice.reviewMinimumSize;
 
 function uniquePositiveIds(values: Array<number | null | undefined>): number[] {
   return [
@@ -143,7 +142,7 @@ export type ReviewSessionDeck = Readonly<{
   abandoned: boolean;
 }>;
 
-/** Loads the remaining cards from a persisted review queue. */
+/** Loads one current card from the persisted review session. */
 export async function loadReviewSessionDeck(userId: string): Promise<ReviewSessionDeck> {
   const storedSession = await PracticeSession.startReview(userId);
   if (storedSession.mode !== 'review') {
@@ -163,28 +162,23 @@ async function loadPersistedReviewQueue(
   session: PracticeSessionType,
   reviewQueue: ReviewQueueEntry[],
 ): Promise<ReviewSessionDeck> {
+  const currentEntry = reviewQueue[0];
+  if (!currentEntry) return initializeNextReviewDirection(userId, session);
+
   const items = await UserItem.getByItemIds(
     userId,
-    reviewQueue.map((entry) => entry.item_id),
+    [currentEntry.item_id],
   );
   const itemById = new Map(items.map((item) => [item.item_id, item]));
-  const availableQueue: ReviewQueueEntry[] = [];
-  const availableItems: PracticeDeckItem[] = [];
-
-  for (const entry of reviewQueue) {
-    const item = itemById.get(entry.item_id);
-    if (item?.deleted_at !== NULL_DATE) continue;
-    if (!item) continue;
-    if (isDirectionMastered(item, entry.direction)) continue;
-
-    availableQueue.push(entry);
-    availableItems.push({ ...item, practice_direction: entry.direction });
+  const item = itemById.get(currentEntry.item_id);
+  if (item?.deleted_at !== NULL_DATE) {
+    return initializeNextReviewDirection(userId, session);
   }
-
-  if (availableQueue.length !== reviewQueue.length) {
+  if (!item || isDirectionMastered(item, currentEntry.direction)) {
     return initializeNextReviewDirection(userId, session);
   }
 
+  const availableItems: PracticeDeckItem[] = [{ ...item, practice_direction: currentEntry.direction }];
   const entries = await resolvePracticeEntries(userId, availableItems);
   return { entries, session, abandoned: false };
 }
@@ -207,11 +201,17 @@ async function initializeNextReviewDirection(
 ): Promise<ReviewSessionDeck> {
   const directions = getReviewDirectionOrder(session.review_direction);
   for (const direction of directions) {
-    const entries = await UserItem.getReviewDeckForDirection(userId, direction);
-    if (entries.length < REVIEW_MINIMUM) continue;
+    const item = await UserItem.getNextReviewItemForDirection(userId, direction);
+    if (!item) continue;
 
-    const resolvedEntries = await resolvePracticeEntries(userId, entries);
-    const initializedSession = withReviewQueue(session, toReviewQueue(resolvedEntries), direction);
+    const itemCount = await UserItem.getReviewItemCountForDirection(userId, direction);
+    const resolvedEntries = await resolvePracticeEntries(userId, [item]);
+    const initializedSession = withReviewQueue(
+      session,
+      toReviewQueue(resolvedEntries),
+      direction,
+      itemCount,
+    );
     await PracticeSession.put(initializedSession);
     return { entries: resolvedEntries, session: initializedSession, abandoned: false };
   }
@@ -231,11 +231,12 @@ function withReviewQueue(
   session: PracticeSessionType,
   reviewQueue: ReviewQueueEntry[],
   direction: PracticeDirection,
+  targetCount: number,
 ): PracticeSessionType {
   return {
     ...session,
     completed_count: 0,
-    target_count: reviewQueue.length,
+    target_count: targetCount,
     review_queue: reviewQueue,
     review_direction: direction,
     updated_at: new Date(Date.now()).toISOString(),
@@ -243,8 +244,8 @@ function withReviewQueue(
 }
 
 function getReviewDirectionOrder(previousDirection?: PracticeDirection): PracticeDirection[] {
-  if (previousDirection === 'czToEn') return ['enToCz', 'czToEn'];
-  if (previousDirection === 'enToCz') return ['czToEn', 'enToCz'];
+  if (previousDirection === 'czToEn') return ['czToEn', 'enToCz'];
+  if (previousDirection === 'enToCz') return ['enToCz', 'czToEn'];
   return ['czToEn', 'enToCz'];
 }
 

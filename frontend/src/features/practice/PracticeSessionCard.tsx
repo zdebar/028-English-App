@@ -230,6 +230,7 @@ type PracticeCardDisplayState = Readonly<{
   showAudioControls: boolean;
   showGrammarButton: boolean;
   showNoteButton: boolean;
+  showProgressLabel: boolean;
   audioControlsDisabled: boolean;
   grammarButtonDisabled: boolean;
   noteButtonDisabled: boolean;
@@ -264,6 +265,7 @@ function getPracticeCardDisplayState(
     showAudioControls,
     showGrammarButton,
     showNoteButton,
+    showProgressLabel: props.isBlockTrainingPractice,
     audioControlsDisabled: isAudioControlDisabled(
       controlsLocked,
       showAudioControls,
@@ -372,7 +374,6 @@ function PracticeCardButton({
     czech,
     english,
     pronunciation,
-    isBlockTrainingPractice,
     progressLabel,
     progressHelpText,
     audioError,
@@ -416,27 +417,20 @@ function PracticeCardButton({
           <AudioStatusMessage audioError={audioError} audioLoading={audioLoading} />
         )}
       </div>
-      <div
-        className="relative flex h-8 w-full shrink-0 items-center justify-between"
-        id="bottom-bar"
-      >
-        <p className="min-w-12 text-right font-light" title={progressHelpText}>
-          {progressLabel}
-        </p>
-        <HelpText className="bottom-7.5">
-          {getPracticeProgressHelp(isBlockTrainingPractice, progressHelpText)}
-        </HelpText>
+      <div className="relative flex h-8 w-full shrink-0 items-center justify-between" id="bottom-bar">
+        {display.showProgressLabel && (
+          <>
+            <p className="min-w-12 text-right font-light" title={progressHelpText}>
+              {progressLabel}
+            </p>
+            <HelpText className="bottom-7.5">
+              {TEXTS.blockTrainingProgressHelp}
+            </HelpText>
+          </>
+        )}
       </div>
     </button>
   );
-}
-
-function getPracticeProgressHelp(
-  isBlockTrainingPractice: boolean,
-  progressHelpText: string,
-): string {
-  if (isBlockTrainingPractice) return TEXTS.blockTrainingProgressHelp;
-  return progressHelpText;
 }
 
 function PracticeCardActionBar({
