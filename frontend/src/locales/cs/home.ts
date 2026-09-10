@@ -53,5 +53,5 @@ export const HOME_TEXTS = {
   simulateDataSuccessToast: 'Data byla úspěšně simulována.',
   simulateDataErrorToast: 'Chyba při simulaci dat.',
   simulateDataExplanation:
-    'Pro testování přepíše pokrok až 400 položek, zahájí až 8 procvičovaných bloků a vybere až 5 položek s audiem pro výslovnost. Změna je nevratná.',
+    'Pro testování přepíše pokrok až 400 položek a zahájí až 8 procvičovaných bloků. Změna je nevratná.',
 } as const;

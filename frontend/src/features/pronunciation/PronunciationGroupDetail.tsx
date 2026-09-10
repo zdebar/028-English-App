@@ -1,8 +1,6 @@
 import { DataState } from '@/components/UI/DataState';
 import OverviewCard from '@/components/UI/OverviewCard';
 import BilingualItemButton from '@/components/UI/buttons/BilingualItemButton';
-import SecondaryControlButton from '@/components/UI/buttons/SecondaryControlButton';
-import MicrophoneIcon from '@/components/UI/icons/MicrophoneIcon';
 import { ROUTES } from '@/config/routes.config';
 import PronunciationGroup from '@/database/models/pronunciation-groups';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
@@ -10,14 +8,12 @@ import VolumeSlider from '@/features/audio/VolumeSlider';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import HelpButton from '@/features/help/HelpButton';
-import HelpText from '@/features/help/HelpText';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { TEXTS } from '@/locales/cs';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { PronunciationGroupDetailType } from '@/types/pronunciation.types';
-import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff';
 import { useRouteClose } from '@/routing/use-route-close';
 
 function parseGroupId(value: string | undefined): number | null {
@@ -81,21 +77,6 @@ function showPronunciationGroupError(
   reportError('Failed to fetch pronunciation group detail', error);
 }
 
-async function addPronunciationGroup(
-  userId: string | null,
-  groupId: number | null,
-  showToast: (message: string, type: 'error') => void,
-): Promise<void> {
-  if (!userId || !groupId) return;
-  try {
-    await PronunciationGroup.addAvailableItems(userId, groupId);
-    invalidateRouteData(routeDataKey('pronunciation-group-detail', userId, groupId));
-  } catch (error) {
-    reportError('Failed to add pronunciation group', error);
-    showToast(TEXTS.pronunciationGroupAddError, 'error');
-  }
-}
-
 function usePronunciationGroupNavigation(
   validGroupId: number | null,
   loading: boolean,
@@ -112,39 +93,6 @@ function usePronunciationGroupNavigation(
     if (loading || !userId || !validGroupId || data !== null) return;
     redirectToPronunciationGroups(navigate);
   }, [data, loading, navigate, userId, validGroupId]);
-}
-
-function PronunciationGroupControls({
-  data,
-  allSelected,
-  groupActionLabel,
-  addGroup,
-}: Readonly<{
-  data: PronunciationGroupDetailType | null;
-  allSelected: boolean;
-  groupActionLabel: string;
-  addGroup: () => Promise<void>;
-}>) {
-  if (!data?.items.length) return null;
-  return (
-    <div className="pos-bottom-right-control">
-      <SecondaryControlButton
-        ariaLabel={groupActionLabel}
-        title={groupActionLabel}
-        aria-pressed={allSelected}
-        disabled={allSelected || !data.available_count}
-        onClick={() => {
-          void addGroup();
-        }}
-      >
-        <MicrophoneIcon />
-        <HelpText className="right-2 -bottom-4 flex flex-col items-end landscape:invisible">
-          {TEXTS.addToPronunciationHelp}
-        </HelpText>
-      </SecondaryControlButton>
-      <HelpButton />
-    </div>
-  );
 }
 
 export default function PronunciationGroupDetail({
@@ -177,16 +125,6 @@ export default function PronunciationGroupDetail({
     showPronunciationGroupError(error, showToast);
   }, [error, showToast]);
 
-  const addGroup = async () => {
-    await addPronunciationGroup(userId, validGroupId, showToast);
-  };
-
-  const allSelected =
-    Boolean(data?.available_count) && data?.selected_count === data?.available_count;
-  const groupActionLabel = allSelected
-    ? TEXTS.pronunciationGroupAdded
-    : TEXTS.addPronunciationGroup;
-
   return (
     <OverviewCard
       buttonTitle={data?.group.name}
@@ -210,12 +148,9 @@ export default function PronunciationGroupDetail({
       <div className="pos-bottom-left-control">
         <VolumeSlider />
       </div>
-      <PronunciationGroupControls
-        data={data}
-        allSelected={allSelected}
-        groupActionLabel={groupActionLabel}
-        addGroup={addGroup}
-      />
+      <div className="pos-bottom-right-control">
+        <HelpButton />
+      </div>
     </OverviewCard>
   );
 }

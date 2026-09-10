@@ -253,10 +253,3 @@ function isDirectionMastered(item: UserItemLocal, direction: PracticeDirection):
     ? item.mastered_at_cz_to_en !== NULL_DATE
     : item.mastered_at_en_to_cz !== NULL_DATE;
 }
-
-export async function loadPronunciationPracticeDeck(
-  userId: string,
-): Promise<Array<ResolvedPracticeEntry<UserItemLocal>>> {
-  const items = await UserItem.getPronunciationPracticeDeck(userId);
-  return resolvePracticeEntries(userId, items);
-}

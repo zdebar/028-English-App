@@ -54,11 +54,8 @@ export const OVERVIEW_TEXTS = {
   vocabularyOverview: 'Přehled slovíček',
   vocabularyOverviewTooltip: 'Přehled započatých slovíček',
   pronunciationGroups: 'Skupiny výslovnosti',
-  pronunciationGroupsTooltip: 'Výběr skupin podobně znějících položek k procvičování',
+  pronunciationGroupsTooltip: 'Skupiny podobně znějících položek',
   pronunciationStartedHelp: 'odemčeno/celkem položek',
   noPronunciationGroups: 'Žádné dostupné skupiny výslovnosti.',
   noPronunciationGroupItems: 'V této skupině nejsou dostupná slovíčka.',
-  addPronunciationGroup: 'Přidat skupinu do procvičování výslovnosti',
-  pronunciationGroupAdded: 'Přidáno',
-  pronunciationGroupAddError: 'Skupinu se nepodařilo přidat.',
 } as const;

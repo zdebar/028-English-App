@@ -27,11 +27,7 @@ const mocks = vi.hoisted(() => ({
   getSyncTimestamps: vi.fn(),
   markAsSynced: vi.fn(),
   userItemGet: vi.fn(),
-  userItemUpdate: vi.fn(),
   blockGet: vi.fn(),
-  pronunciationCount: vi.fn(),
-  pronunciationToArray: vi.fn(),
-  pronunciationMemberships: [] as Array<{ pronunciation_group_id: number; item_id: number }>,
 }));
 
 function normalizeIndexedPracticeItem(item: any) {
@@ -170,15 +166,6 @@ function createTopicQuery() {
   };
 }
 
-function createPronunciationQuery() {
-  return {
-    equals: () => ({
-      count: (...args: unknown[]) => mocks.pronunciationCount(...args),
-      toArray: (...args: unknown[]) => mocks.pronunciationToArray(...args),
-    }),
-  };
-}
-
 function createUserItemsWhere(field: string) {
   const queryFactories: Record<string, () => unknown> = {
     user_id: createUserIdQuery,
@@ -192,7 +179,6 @@ function createUserItemsWhere(field: string) {
     '[user_id+started_at]': createStartedGrammarQuery,
     '[user_id+block_id]': createBlockQuery,
     '[user_id+topic_id]': createTopicQuery,
-    '[user_id+has_pronunciation_practice]': createPronunciationQuery,
   };
   const createQuery = queryFactories[field];
   if (!createQuery) throw new Error(`Unexpected user_items.where field: ${field}`);
@@ -217,7 +203,6 @@ vi.mock('@/config/config', () => ({
     progress: {
       simulationItemProgress: 1,
       simulationItemCount: 4,
-      simulationPronunciationItemCount: 2,
     },
     practice: {
       initialTrainingBatchSize: 8,
@@ -233,14 +218,10 @@ vi.mock('@/database/models/db', () => ({
     },
     user_items: {
       get: (...args: unknown[]) => mocks.userItemGet(...args),
-      update: (...args: unknown[]) => mocks.userItemUpdate(...args),
       bulkPut: (...args: unknown[]) => mocks.bulkPut(...args),
       bulkUpdate: (...args: unknown[]) => mocks.bulkUpdate(...args),
       bulkDelete: (...args: unknown[]) => mocks.bulkDelete(...args),
       where: createUserItemsWhere,
-    },
-    pronunciation_group_items: {
-      toArray: async () => mocks.pronunciationMemberships,
     },
     metadata: {},
     transaction: (...args: unknown[]) => mocks.transaction(...args),
@@ -301,7 +282,6 @@ import UserItem from '@/database/models/user-items';
 describe('UserItem', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.pronunciationMemberships = [];
     mocks.startedGrammarCandidates = [];
     vi.useRealTimers();
 
@@ -325,11 +305,8 @@ describe('UserItem', () => {
     mocks.itemIdModify.mockResolvedValue(1);
     mocks.simulationToArray.mockResolvedValue([]);
     mocks.userItemGet.mockResolvedValue(undefined);
-    mocks.userItemUpdate.mockResolvedValue(1);
     mocks.blockGet.mockResolvedValue({ id: 7 });
     mocks.bulkUpdate.mockResolvedValue(1);
-    mocks.pronunciationCount.mockResolvedValue(0);
-    mocks.pronunciationToArray.mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -430,7 +407,6 @@ describe('UserItem', () => {
         czech: 'ahoj',
         english: 'hello',
         audio: 'hello.opus',
-        has_pronunciation_practice: 0,
         progress_cz_to_en: 2,
         progress_en_to_cz: 3,
         started_at: '2026-03-01T09:00:00.000Z',
@@ -472,13 +448,11 @@ describe('UserItem', () => {
         user_id: 'u1',
         item_id: 1,
         progress_cz_to_en: 2,
-        has_pronunciation_practice: 0,
         practice_direction: 'czToEn',
       } as any,
     ]);
 
     const [{ changes }] = mocks.bulkUpdate.mock.calls[0][0];
-    expect(changes).not.toHaveProperty('has_pronunciation_practice');
     expect(changes).not.toHaveProperty('czech');
     expect(changes).not.toHaveProperty('audio');
   });
@@ -530,119 +504,6 @@ describe('UserItem', () => {
       ['u1', 4],
       ['u1', 5],
     ]);
-  });
-
-  it('toggles pronunciation selection without changing progress fields', async () => {
-    mocks.userItemGet.mockResolvedValue({
-      item_id: 7,
-      is_vocabulary: 1,
-      audio: 'seven.opus',
-      has_pronunciation_practice: 0,
-      deleted_at: '1970-01-01T00:00:00.000Z',
-    });
-
-    await expect(
-      UserItem.togglePronunciationPractice('u1', 7, '2026-07-30T10:00:00.000Z'),
-    ).resolves.toBe(true);
-
-    expect(mocks.userItemUpdate).toHaveBeenCalledWith(['u1', 7], {
-      has_pronunciation_practice: 1,
-      updated_at: '2026-07-30T10:00:00.000Z',
-    });
-  });
-
-  it('allows non-vocabulary pronunciation selection and rejects audio-less items', async () => {
-    mocks.userItemGet
-      .mockResolvedValueOnce({
-        item_id: 8,
-        is_vocabulary: 0,
-        audio: 'grammar.opus',
-        has_pronunciation_practice: 0,
-        deleted_at: '1970-01-01T00:00:00.000Z',
-      })
-      .mockResolvedValueOnce({
-        item_id: 9,
-        is_vocabulary: 1,
-        audio: null,
-        has_pronunciation_practice: 0,
-        deleted_at: '1970-01-01T00:00:00.000Z',
-      });
-
-    await expect(UserItem.togglePronunciationPractice('u1', 8)).resolves.toBe(true);
-    await expect(UserItem.togglePronunciationPractice('u1', 9)).rejects.toThrow('not eligible');
-    expect(mocks.userItemUpdate).toHaveBeenCalledTimes(1);
-    expect(mocks.userItemUpdate).toHaveBeenCalledWith(
-      ['u1', 8],
-      expect.objectContaining({ has_pronunciation_practice: 1 }),
-    );
-  });
-
-  it('silently skips missing and deleted pronunciation items but allows mastered items', async () => {
-    const nullDate = '1970-01-01T00:00:00.000Z';
-    mocks.userItemGet
-      .mockResolvedValueOnce(undefined)
-      .mockResolvedValueOnce({
-        item_id: 10,
-        audio: 'ten.opus',
-        has_pronunciation_practice: 0,
-        deleted_at: '2026-08-10T10:00:00.000Z',
-      })
-      .mockResolvedValueOnce({
-        item_id: 11,
-        audio: 'eleven.opus',
-        has_pronunciation_practice: 0,
-        deleted_at: nullDate,
-        mastered_at_cz_to_en: '2026-08-10T10:00:00.000Z',
-        mastered_at_en_to_cz: '2026-08-10T10:00:00.000Z',
-      });
-
-    await expect(UserItem.togglePronunciationPractice('u1', 9)).resolves.toBeNull();
-    await expect(UserItem.togglePronunciationPractice('u1', 10)).resolves.toBeNull();
-    await expect(UserItem.togglePronunciationPractice('u1', 11)).resolves.toBe(true);
-
-    expect(mocks.userItemUpdate).toHaveBeenCalledTimes(1);
-    expect(mocks.userItemUpdate).toHaveBeenCalledWith(
-      ['u1', 11],
-      expect.objectContaining({ has_pronunciation_practice: 1 }),
-    );
-  });
-
-  it('counts pronunciation selections on the dedicated index', async () => {
-    mocks.pronunciationCount.mockResolvedValue(3);
-
-    await expect(UserItem.getPronunciationPracticeCount('u1')).resolves.toBe(3);
-    expect(mocks.pronunciationCount).toHaveBeenCalledTimes(1);
-  });
-
-  it('builds an eligible pronunciation deck by group id and then curriculum order', async () => {
-    mocks.pronunciationToArray.mockResolvedValue([
-      {
-        item_id: 3,
-        is_vocabulary: 1,
-        audio: 'three.opus',
-        curriculum_sort_path: [2, 1, 1],
-      },
-      {
-        item_id: 2,
-        is_vocabulary: 0,
-        audio: 'grammar.opus',
-        curriculum_sort_path: [1, 1, 2],
-      },
-      {
-        item_id: 1,
-        is_vocabulary: 1,
-        audio: 'one.opus',
-        curriculum_sort_path: [1, 1, 1],
-      },
-    ]);
-    mocks.pronunciationMemberships = [
-      { pronunciation_group_id: 1, item_id: 3 },
-      { pronunciation_group_id: 2, item_id: 1 },
-    ];
-
-    const deck = await UserItem.getPronunciationPracticeDeck('u1');
-
-    expect(deck.map((item) => item.item_id)).toEqual([3, 1, 2]);
   });
 
   it('records a correct first answer and schedules the opposite direction at zero', () => {
@@ -1570,12 +1431,12 @@ describe('UserItem', () => {
     });
   });
 
-  it('simulates an exact fixture and adds the first configured audio items', async () => {
+  it('simulates an exact fixture', async () => {
     const items = [
-      { item_id: 2, audio: null, has_pronunciation_practice: 1 },
-      { item_id: 4, audio: 'four.opus', has_pronunciation_practice: 0 },
-      { item_id: 9, audio: ' ', has_pronunciation_practice: 0 },
-      { item_id: 10, audio: 'ten.opus', has_pronunciation_practice: 0 },
+      { item_id: 2, audio: null },
+      { item_id: 4, audio: 'four.opus' },
+      { item_id: 9, audio: ' ' },
+      { item_id: 10, audio: 'ten.opus' },
     ] as any[];
     mocks.simulationToArray.mockResolvedValue(items);
 
@@ -1586,7 +1447,6 @@ describe('UserItem', () => {
 
     const simulated = mocks.bulkPut.mock.calls[0][0] as any[];
     expect(simulated.map((item) => item.item_id)).toEqual([2, 4, 9, 10]);
-    expect(simulated.map((item) => item.has_pronunciation_practice)).toEqual([1, 1, 0, 1]);
     expect(simulated[0]).toMatchObject({
       progress_cz_to_en: 1,
       progress_en_to_cz: 1,
@@ -1618,7 +1478,6 @@ describe('UserItem', () => {
         item_id: 1,
         progress_cz_to_en: 1,
         progress_en_to_cz: 1,
-        has_pronunciation_practice: 1,
         started_at: '1970-01-01T00:00:00.000Z',
         updated_at: '2026-03-03T10:00:00.000Z',
         next_at_cz_to_en: '1970-01-01T00:00:00.000Z',
@@ -1638,7 +1497,6 @@ describe('UserItem', () => {
           pronunciation: 'two',
           audio: null,
           is_vocabulary: true,
-          has_pronunciation_practice: true,
           sort_order: 2,
           curriculum_sort_path: [1, 2, 2],
           note_id: null,
@@ -1677,7 +1535,6 @@ describe('UserItem', () => {
           item_id: 1,
           progress_cz_to_en: 1,
           progress_en_to_cz: 1,
-          has_pronunciation_practice: true,
           updated_at: '2026-03-03T10:00:00.000Z',
           started_at: null,
           next_at_cz_to_en: null,
@@ -1692,7 +1549,6 @@ describe('UserItem', () => {
       expect.objectContaining({
         item_id: 2,
         is_vocabulary: 1,
-        has_pronunciation_practice: 1,
         curriculum_sort_path: [1, 2, 2],
         block_id: 10,
         topic_id: 3,

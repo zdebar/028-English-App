@@ -20,7 +20,6 @@ import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import Profile from '@/pages/Profile';
 import PronunciationGroupPage from '@/pages/PronunciationGroupPage';
 import PronunciationOverviewPage from '@/pages/PronunciationOverviewPage';
-import PronunciationPractice from '@/pages/PronunciationPractice';
 import TopicItems from '@/pages/TopicItems';
 import Topics from '@/pages/Topics';
 import Vocabulary from '@/pages/Vocabulary';
@@ -36,7 +35,6 @@ import {
   overviewAvailabilityDescriptor,
   practiceOverviewDescriptor,
   practiceDeckDescriptor,
-  pronunciationPracticeDescriptor,
   pronunciationGroupDetailDescriptor,
   topicDetailDescriptor,
   topicsDescriptor,
@@ -152,12 +150,6 @@ export const router = createHashRouter([
             path: ROUTES.initialTraining,
             loader: loadInitialTraining,
             Component: InitialTrainingPractice,
-          },
-          {
-            path: ROUTES.pronunciationPractice,
-            loader: () =>
-              loadProtectedData('pronunciation practice', pronunciationPracticeDescriptor),
-            Component: PronunciationPractice,
           },
           {
             path: ROUTES.practiceOverview,

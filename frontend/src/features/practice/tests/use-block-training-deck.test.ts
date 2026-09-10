@@ -268,7 +268,6 @@ function item(itemId: number) {
     pronunciation: '',
     audio: null,
     is_vocabulary: 1 as const,
-    has_pronunciation_practice: 0 as const,
     sort_order: itemId,
     curriculum_sort_path: [1, 1, itemId] as [number, number, number],
     note_id: null,

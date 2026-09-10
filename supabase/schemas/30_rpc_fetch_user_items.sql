@@ -11,7 +11,6 @@ RETURNS TABLE (
   pronunciation TEXT,
   audio TEXT,
   is_vocabulary BOOLEAN,
-  has_pronunciation_practice BOOLEAN,
   sort_order INTEGER,
   curriculum_sort_path INTEGER[],
   note_id INTEGER,
@@ -44,8 +43,6 @@ BEGIN
     i.pronunciation,
     i.audio,
     i.is_vocabulary,
-    COALESCE(ui.has_pronunciation_practice, FALSE)
-      AS has_pronunciation_practice,
     i.sort_order,
     ARRAY[lv.sort_order, le.sort_order, i.sort_order]::INTEGER[]
       AS curriculum_sort_path,

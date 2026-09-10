@@ -28,9 +28,6 @@ export function usePracticeAvailabilityStoreSync(userId: string | null): void {
       activeSession: null,
       practiceLoading: true,
       practiceError: null,
-      pronunciationCount: 0,
-      pronunciationLoading: true,
-      pronunciationError: null,
     });
 
     const readySubscription = liveQuery(async () => {
@@ -75,33 +72,9 @@ export function usePracticeAvailabilityStoreSync(userId: string | null): void {
       },
     });
 
-    const pronunciationSubscription = liveQuery(() =>
-      UserItem.getPronunciationPracticeCount(userId),
-    ).subscribe({
-      next: (count) => {
-        if (!isActive) return;
-        usePracticeAvailabilityStore.setState({
-          pronunciationCount: count,
-          pronunciationLoading: false,
-          pronunciationError: null,
-        });
-      },
-      error: (error) => {
-        if (!isActive) return;
-        const normalizedError = toError(error);
-        usePracticeAvailabilityStore.setState({
-          pronunciationCount: 0,
-          pronunciationLoading: false,
-          pronunciationError: normalizedError,
-        });
-        reportError('Failed to load pronunciation practice button state', normalizedError);
-      },
-    });
-
     return () => {
       isActive = false;
       readySubscription.unsubscribe();
-      pronunciationSubscription.unsubscribe();
     };
   }, [reset, userId]);
 

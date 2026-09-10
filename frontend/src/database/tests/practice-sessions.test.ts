@@ -293,7 +293,6 @@ function item(overrides: Record<string, unknown> = {}) {
     pronunciation: '',
     audio: null,
     is_vocabulary: 1 as const,
-    has_pronunciation_practice: 0 as const,
     sort_order: 1,
     curriculum_sort_path: [1, 1, 1] as [number, number, number],
     note_id: null,

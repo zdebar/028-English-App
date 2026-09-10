@@ -4,8 +4,6 @@ const mocks = vi.hoisted(() => ({
   groups: [] as any[],
   memberships: [] as any[],
   items: [] as any[],
-  updates: vi.fn(),
-  transaction: vi.fn(),
 }));
 
 vi.mock('@/config/config', () => ({
@@ -42,10 +40,8 @@ vi.mock('@/database/models/db', () => ({
         }
         return { anyOf: () => ({ toArray: async () => mocks.items }) };
       },
-      update: (...args: unknown[]) => mocks.updates(...args),
     },
     metadata: {},
-    transaction: (...args: unknown[]) => mocks.transaction(...args),
   },
 }));
 
@@ -64,7 +60,6 @@ function item(overrides: Record<string, unknown>) {
     audio: 'man.opus',
     is_vocabulary: 1,
     started_at: '2026-07-01T00:00:00.000Z',
-    has_pronunciation_practice: 0,
     curriculum_sort_path: [1, 1, 1],
     ...overrides,
   };
@@ -89,7 +84,7 @@ describe('PronunciationGroup', () => {
       { pronunciation_group_id: 1, item_id: 3, contrast_set: 2, sort_order: 3 },
     ];
     mocks.items = [
-      item({ item_id: 1, english: 'man', has_pronunciation_practice: 1 }),
+      item({ item_id: 1, english: 'man' }),
       item({ item_id: 2, english: 'men', curriculum_sort_path: [1, 1, 2] }),
       item({
         item_id: 3,
@@ -98,11 +93,6 @@ describe('PronunciationGroup', () => {
         started_at: '1970-01-01T00:00:00.000Z',
       }),
     ];
-    mocks.updates.mockResolvedValue(1);
-    mocks.transaction.mockImplementation(async (...args: unknown[]) => {
-      const callback = args.at(-1) as () => Promise<unknown>;
-      return callback();
-    });
   });
 
   it('shows a group with a complete contrast set and derives unlocked counts', async () => {
@@ -168,7 +158,6 @@ describe('PronunciationGroup', () => {
     const detail = await PronunciationGroup.getDetail('u1', 1);
 
     expect(detail?.items.map((entry) => entry.item_id)).toEqual([1, 2]);
-    expect(detail?.selected_count).toBe(1);
   });
 
   it('includes non-vocabulary items when they have audio', async () => {
@@ -179,17 +168,4 @@ describe('PronunciationGroup', () => {
     expect(detail?.items.map((entry) => entry.item_id)).toEqual([1, 2]);
   });
 
-  it('bulk-adds only missing visible items with a shared timestamp', async () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-07-30T10:00:00.000Z'));
-
-    await expect(PronunciationGroup.addAvailableItems('u1', 1)).resolves.toBe(1);
-
-    expect(mocks.updates).toHaveBeenCalledTimes(1);
-    expect(mocks.updates).toHaveBeenCalledWith(['u1', 2], {
-      has_pronunciation_practice: 1,
-      updated_at: '2026-07-30T10:00:00.000Z',
-    });
-    vi.useRealTimers();
-  });
 });

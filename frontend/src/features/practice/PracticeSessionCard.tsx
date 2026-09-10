@@ -14,11 +14,6 @@ import HintButton from './buttons/HintButton';
 import KnownButton from './buttons/KnownButton';
 import MasterItemButton from './buttons/MasterItemButton';
 import RepeatButton from './buttons/RepeatButton';
-import PronunciationToggleButton from '@/features/pronunciation/PronunciationToggleButton';
-import { useAuthStore } from '@/features/auth/use-auth-store';
-import type { UserItemLocal } from '@/types/user-item.types';
-import RightArrowIcon from '@/components/UI/icons/RightArrowIcon';
-import ControlButton from './buttons/ControlButton';
 import { usePointerReleaseLock } from './hooks/use-pointer-release-lock';
 import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
 import type { NoteType } from '@/types/generic.types';
@@ -47,19 +42,13 @@ export type PracticeSessionCardProps = Readonly<{
   playAudio: () => void;
   audioLoading: boolean;
   isBlockTrainingPractice?: boolean;
-  isPronunciationPractice?: boolean;
-  pronunciationItem?: UserItemLocal | null;
-  nextPronunciation?: () => void;
-  onPronunciationSelectionChange?: (selected: boolean) => void;
 }>;
 
 type PracticeControlsProps = Pick<
   PracticeSessionCardProps,
   | 'completeCurrent'
   | 'completeDisabled'
-  | 'isPronunciationPractice'
   | 'nextKnown'
-  | 'nextPronunciation'
   | 'nextRepeat'
   | 'plusHint'
   | 'repeatDisabled'
@@ -139,9 +128,7 @@ function DirectionTopBar({
 function PracticeControls({
   completeCurrent,
   completeDisabled = false,
-  isPronunciationPractice = false,
   nextKnown,
-  nextPronunciation,
   nextRepeat,
   plusHint,
   repeatDisabled = false,
@@ -153,17 +140,6 @@ function PracticeControls({
 
   if (showHintControl) {
     return <HintButton onClick={plusHint} disabled={controlsLocked || isSkipGestureLocked} />;
-  }
-
-  if (isPronunciationPractice) {
-    return (
-      <ControlButton
-        icon={<RightArrowIcon />}
-        label={TEXTS.next}
-        onClick={nextPronunciation}
-        disabled={!nextPronunciation}
-      />
-    );
   }
 
   return (
@@ -231,8 +207,6 @@ type NormalizedPracticeSessionCardProps = PracticeSessionCardProps &
     repeatDisabled: boolean;
     completeDisabled: boolean;
     isBlockTrainingPractice: boolean;
-    isPronunciationPractice: boolean;
-    pronunciationItem: UserItemLocal | null;
   }>;
 
 const DEFAULT_PRACTICE_SESSION_CARD_PROPS = {
@@ -240,8 +214,6 @@ const DEFAULT_PRACTICE_SESSION_CARD_PROPS = {
   repeatDisabled: false,
   completeDisabled: false,
   isBlockTrainingPractice: false,
-  isPronunciationPractice: false,
-  pronunciationItem: null,
 } as const;
 
 function normalizePracticeSessionCardProps(
@@ -279,7 +251,6 @@ function getPracticeCardDisplayState(
     audioDisabled,
     showDirectionChange,
     audioLoading,
-    isPronunciationPractice,
   } = props;
   const controlsLocked = showDirectionChange;
   const showAudioControls = !audioDisabled;
@@ -307,9 +278,8 @@ function getPracticeCardDisplayState(
     showHintControl: !revealed || controlsLocked,
     practiceControlColumns: getPracticeControlColumns(
       !revealed || controlsLocked,
-      isPronunciationPractice,
     ),
-    showTopBar: !isPronunciationPractice,
+    showTopBar: true,
     showRevealHelp: !revealed && !controlsLocked,
   };
 }
@@ -363,9 +333,8 @@ function isAudioControlDisabled(
 
 function getPracticeControlColumns(
   showHintControl: boolean,
-  isPronunciationPractice: boolean,
 ): string {
-  if (!showHintControl && !isPronunciationPractice) return 'grid-cols-3';
+  if (!showHintControl) return 'grid-cols-3';
   return 'grid-cols-1';
 }
 
@@ -473,25 +442,19 @@ function getPracticeProgressHelp(
 function PracticeCardActionBar({
   props,
   display,
-  userId,
   setVisibleDetail,
 }: Readonly<{
   props: NormalizedPracticeSessionCardProps;
   display: PracticeCardDisplayState;
-  userId: string | null;
   setVisibleDetail: (detail: VisibleDetail) => void;
 }>) {
   const {
     grammar,
     note,
     playAudio,
-    pronunciationItem,
-    onPronunciationSelectionChange,
     completeCurrent,
     completeDisabled,
-    isPronunciationPractice,
     nextKnown,
-    nextPronunciation,
     nextRepeat,
     plusHint,
     repeatDisabled,
@@ -505,9 +468,7 @@ function PracticeCardActionBar({
         <PracticeControls
           completeCurrent={completeCurrent}
           completeDisabled={completeDisabled}
-          isPronunciationPractice={isPronunciationPractice}
           nextKnown={nextKnown}
-          nextPronunciation={nextPronunciation}
           nextRepeat={nextRepeat}
           plusHint={plusHint}
           repeatDisabled={repeatDisabled}
@@ -518,13 +479,6 @@ function PracticeCardActionBar({
       <div className="pos-bottom-left-control">
         <PlayButton onClick={playAudio} disabled={display.audioControlsDisabled} />
         <VolumeSlider disabled={display.audioControlsDisabled} />
-        <PronunciationToggleButton
-          userId={userId}
-          item={pronunciationItem}
-          disabled={display.controlsLocked}
-          showHelpText
-          onSelectionChange={onPronunciationSelectionChange}
-        />
       </div>
       <div className="pos-bottom-right-control">
         <SecondaryControlButton
@@ -559,11 +513,9 @@ function PracticeCardActionBar({
 
 function PracticeSessionCardView({
   props,
-  userId,
   setVisibleDetail,
 }: Readonly<{
   props: NormalizedPracticeSessionCardProps;
-  userId: string | null;
   setVisibleDetail: (detail: VisibleDetail) => void;
 }>) {
   const display = getPracticeCardDisplayState(props);
@@ -574,7 +526,6 @@ function PracticeSessionCardView({
         <PracticeCardActionBar
           props={props}
           display={display}
-          userId={userId}
           setVisibleDetail={setVisibleDetail}
         />
       </div>
@@ -584,7 +535,6 @@ function PracticeSessionCardView({
 
 export default function PracticeSessionCard(props: PracticeSessionCardProps) {
   const normalizedProps = normalizePracticeSessionCardProps(props);
-  const userId = useAuthStore((state) => state.userId);
   const [visibleDetail, setVisibleDetail] = useState<VisibleDetail | null>(null);
 
   if (visibleDetail) {
@@ -601,7 +551,6 @@ export default function PracticeSessionCard(props: PracticeSessionCardProps) {
   return (
     <PracticeSessionCardView
       props={normalizedProps}
-      userId={userId}
       setVisibleDetail={(detail) => setVisibleDetail(detail)}
     />
   );

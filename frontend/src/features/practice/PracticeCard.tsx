@@ -79,7 +79,6 @@ export default function PracticeCard({
       audioError={audioError}
       playAudio={playAudio}
       audioLoading={audioLoading}
-      pronunciationItem={currentItem}
     />
   );
 }

@@ -26,12 +26,10 @@ const NULL_DATE = config.database.nullReplacementDate;
 const NULL_NUMBER = config.database.nullReplacementNumber;
 const SIM_ITEM_COUNT = config.progress.simulationItemCount;
 const SIM_ITEM_PROGRESS = config.progress.simulationItemProgress;
-const SIM_PRONUNCIATION_ITEM_COUNT = config.progress.simulationPronunciationItemCount;
 
 type UserItemAPI = Omit<
   UserItemLocal,
   | 'is_vocabulary'
-  | 'has_pronunciation_practice'
   | 'block_id'
   | 'topic_id'
   | 'grammar_chunk_id'
@@ -43,7 +41,6 @@ type UserItemAPI = Omit<
   | 'mastered_at_en_to_cz'
 > & {
   is_vocabulary: boolean;
-  has_pronunciation_practice?: boolean;
   block_id: number | null;
   topic_id: number | null;
   grammar_chunk_id: number | null;
@@ -61,7 +58,6 @@ type UserItemExport = Pick<
   | 'item_id'
   | 'progress_cz_to_en'
   | 'progress_en_to_cz'
-  | 'has_pronunciation_practice'
   | 'started_at'
   | 'updated_at'
   | 'next_at_cz_to_en'
@@ -82,14 +78,12 @@ function convertLocalToExport(localItem: UserItemLocal): UserItemExport {
     next_at_en_to_cz,
     mastered_at_cz_to_en,
     mastered_at_en_to_cz,
-    has_pronunciation_practice,
   } = localItem;
   return {
     user_id,
     item_id,
     progress_cz_to_en,
     progress_en_to_cz,
-    has_pronunciation_practice: has_pronunciation_practice === 1,
     updated_at,
     started_at: started_at === NULL_DATE ? null : started_at,
     next_at_cz_to_en: next_at_cz_to_en === NULL_DATE ? null : next_at_cz_to_en,
@@ -103,7 +97,6 @@ function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
   return {
     ...apiItem,
     is_vocabulary: apiItem.is_vocabulary ? 1 : 0,
-    has_pronunciation_practice: apiItem.has_pronunciation_practice ? 1 : 0,
     started_at: replaceNullDate(apiItem.started_at),
     next_at_cz_to_en: replaceNullDate(apiItem.next_at_cz_to_en),
     next_at_en_to_cz: replaceNullDate(apiItem.next_at_en_to_cz),
@@ -213,7 +206,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   pronunciation!: string;
   audio!: string | null;
   is_vocabulary!: 0 | 1; // boolean represented as 0 or 1
-  has_pronunciation_practice!: 0 | 1;
   sort_order!: number;
   curriculum_sort_path!: CurriculumSortPath;
   note_id!: number;
@@ -497,81 +489,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Returns whether an item can be selected for pronunciation practice.
-   */
-  static isPronunciationEligible(item: Pick<UserItemLocal, 'audio'>): boolean {
-    return Boolean(item.audio?.trim());
-  }
-
-  /**
-   * Reads the persisted pronunciation selection for one user item.
-   */
-  static async getPronunciationSelection(userId: string, itemId: number): Promise<boolean> {
-    const item = await db.user_items.get([userId, itemId]);
-    return item?.has_pronunciation_practice === 1;
-  }
-
-  /**
-   * Toggles one eligible item's pronunciation selection without changing progress.
-   *
-   * @returns The new selection, or null when the item is missing or deleted.
-   */
-  static async togglePronunciationPractice(
-    userId: string,
-    itemId: number,
-    dateTime: string = new Date().toISOString(),
-  ): Promise<boolean | null> {
-    return db.transaction('rw', db.user_items, async () => {
-      const item = await db.user_items.get([userId, itemId]);
-      if (item?.deleted_at !== NULL_DATE) return null;
-      if (!this.isPronunciationEligible(item)) {
-        throw new Error(`Item ${itemId} is not eligible for pronunciation practice.`);
-      }
-
-      const enabled = item.has_pronunciation_practice !== 1;
-      await db.user_items.update([userId, itemId], {
-        has_pronunciation_practice: enabled ? 1 : 0,
-        updated_at: dateTime,
-      });
-      return enabled;
-    });
-  }
-
-  /**
-   * Counts selected pronunciation items using only the dedicated compound index.
-   */
-  static async getPronunciationPracticeCount(userId: string): Promise<number> {
-    return db.user_items.where('[user_id+has_pronunciation_practice]').equals([userId, 1]).count();
-  }
-
-  /**
-   * Builds a stable snapshot of every selected, eligible pronunciation item.
-   */
-  static async getPronunciationPracticeDeck(userId: string): Promise<UserItemLocal[]> {
-    const [items, memberships] = await Promise.all([
-      db.user_items.where('[user_id+has_pronunciation_practice]').equals([userId, 1]).toArray(),
-      db.pronunciation_group_items.toArray(),
-    ]);
-    const firstGroupByItem = new Map<number, number>();
-    for (const membership of memberships) {
-      const currentGroupId = firstGroupByItem.get(membership.item_id);
-      if (currentGroupId === undefined || membership.pronunciation_group_id < currentGroupId) {
-        firstGroupByItem.set(membership.item_id, membership.pronunciation_group_id);
-      }
-    }
-
-    return items
-      .filter((item) => this.isPronunciationEligible(item))
-      .sort(
-        (left, right) =>
-          (firstGroupByItem.get(left.item_id) ?? Number.MAX_SAFE_INTEGER) -
-            (firstGroupByItem.get(right.item_id) ?? Number.MAX_SAFE_INTEGER) ||
-          compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path) ||
-          left.item_id - right.item_id,
-      );
-  }
-
-  /**
    * Calculates when the minimum review direction can be started.
    *
    * @param userId Non-empty user id whose vocabulary items should be inspected.
@@ -711,21 +628,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
   /** Replaces progress on simulation candidates with one deterministic fixture. */
   static async simulateData(items: UserItemLocal[], dateTime: string): Promise<number> {
-    const pronunciationItemIds = new Set(
-      items
-        .filter((item) => Boolean(item.audio?.trim()))
-        .slice(0, SIM_PRONUNCIATION_ITEM_COUNT)
-        .map((item) => item.item_id),
-    );
     const simulatedItems = items.map((item) => {
-      let hasPronunciationPractice = item.has_pronunciation_practice;
-      if (pronunciationItemIds.has(item.item_id)) hasPronunciationPractice = 1;
-
       return {
         ...item,
         progress_cz_to_en: SIM_ITEM_PROGRESS,
         progress_en_to_cz: SIM_ITEM_PROGRESS,
-        has_pronunciation_practice: hasPronunciationPractice,
         started_at: dateTime,
         updated_at: dateTime,
         next_at_cz_to_en: dateTime,

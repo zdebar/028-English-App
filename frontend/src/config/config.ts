@@ -17,7 +17,6 @@ const config = {
     simulationItemCount: 400,
     simulationItemProgress: 1,
     simulationStartedBlockCount: 8,
-    simulationPronunciationItemCount: 5,
   },
 
   srs: {

@@ -159,7 +159,6 @@ function entry(itemId: number): PracticeDeckEntry {
       pronunciation: '',
       audio: null,
       is_vocabulary: 1,
-      has_pronunciation_practice: 0,
       sort_order: itemId,
       curriculum_sort_path: [1, 1, itemId],
       topic_id: 1,

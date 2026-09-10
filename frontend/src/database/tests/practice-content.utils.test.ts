@@ -9,7 +9,6 @@ const mocks = vi.hoisted(() => ({
   getReviewDeck: vi.fn(),
   getReviewDeckForDirection: vi.fn(),
   getByItemIds: vi.fn(),
-  getPronunciationPracticeDeck: vi.fn(),
   startReview: vi.fn(),
   put: vi.fn(),
   deleteByUserId: vi.fn(),
@@ -33,8 +32,6 @@ vi.mock('@/database/models/user-items', () => ({
     getReviewDeck: (...args: unknown[]) => mocks.getReviewDeck(...args),
     getReviewDeckForDirection: (...args: unknown[]) => mocks.getReviewDeckForDirection(...args),
     getByItemIds: (...args: unknown[]) => mocks.getByItemIds(...args),
-    getPronunciationPracticeDeck: (...args: unknown[]) =>
-      mocks.getPronunciationPracticeDeck(...args),
   },
 }));
 
@@ -79,7 +76,6 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
     lesson_id: 1,
     updated_at: '2026-01-01',
     is_vocabulary: 1,
-    has_pronunciation_practice: 0,
     block_id: 1,
     topic_id: -1,
     grammar_chunk_id: 10,

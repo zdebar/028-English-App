@@ -18,8 +18,6 @@ DECLARE
   v_next_at_en_to_cz TIMESTAMPTZ;
   v_mastered_at_cz_to_en TIMESTAMPTZ;
   v_mastered_at_en_to_cz TIMESTAMPTZ;
-  v_requested_pronunciation BOOLEAN;
-  v_eligible_pronunciation BOOLEAN;
   v_row_count INT := 0;
   v_main_error_count INT := 0;
   -- constants to avoid duplicated literals
@@ -30,7 +28,6 @@ DECLARE
   v_key_item_id CONSTANT TEXT := 'item_id';
   v_key_progress_cz_to_en CONSTANT TEXT := 'progress_cz_to_en';
   v_key_progress_en_to_cz CONSTANT TEXT := 'progress_en_to_cz';
-  v_key_pronunciation_practice CONSTANT TEXT := 'has_pronunciation_practice';
   v_key_started_at CONSTANT TEXT := 'started_at';
   v_key_updated_at CONSTANT TEXT := private.json_key_updated_at();
   v_key_next_at_cz_to_en CONSTANT TEXT := 'next_at_cz_to_en';
@@ -60,9 +57,7 @@ BEGIN
 
       v_item_id := (v_entry->>v_key_item_id)::INT;
 
-      SELECT
-        NULLIF(BTRIM(i.audio), '') IS NOT NULL
-      INTO v_eligible_pronunciation
+      PERFORM 1
       FROM public.items i
       WHERE i.id = v_item_id;
 
@@ -74,14 +69,6 @@ BEGIN
 
       v_progress_cz_to_en := GREATEST((v_entry->>v_key_progress_cz_to_en)::INT, 0);
       v_progress_en_to_cz := GREATEST((v_entry->>v_key_progress_en_to_cz)::INT, 0);
-      v_requested_pronunciation := CASE
-        WHEN v_entry ? v_key_pronunciation_practice
-          THEN COALESCE(
-            (v_entry->>v_key_pronunciation_practice)::BOOLEAN,
-            FALSE
-          )
-        ELSE FALSE
-      END;
       v_started_at := NULLIF(v_entry->>v_key_started_at, v_null_text)::TIMESTAMPTZ;
       v_updated_at := (v_entry->>v_key_updated_at)::TIMESTAMPTZ;
       v_next_at_cz_to_en := NULLIF(v_entry->>v_key_next_at_cz_to_en, v_null_text)::TIMESTAMPTZ;
@@ -94,7 +81,6 @@ BEGIN
         item_id,
         progress_cz_to_en,
         progress_en_to_cz,
-        has_pronunciation_practice,
         started_at,
         updated_at,
         next_at_cz_to_en,
@@ -107,7 +93,6 @@ BEGIN
         v_item_id,
         v_progress_cz_to_en,
         v_progress_en_to_cz,
-        v_requested_pronunciation AND v_eligible_pronunciation,
         v_started_at,
         v_updated_at,
         v_next_at_cz_to_en,
@@ -119,11 +104,6 @@ BEGIN
       DO UPDATE SET
         progress_cz_to_en = EXCLUDED.progress_cz_to_en,
         progress_en_to_cz = EXCLUDED.progress_en_to_cz,
-        has_pronunciation_practice = CASE
-          WHEN v_entry ? v_key_pronunciation_practice
-            THEN EXCLUDED.has_pronunciation_practice
-          ELSE public.user_items.has_pronunciation_practice
-        END,
         started_at = EXCLUDED.started_at,
         updated_at = EXCLUDED.updated_at,
         next_at_cz_to_en = EXCLUDED.next_at_cz_to_en,
