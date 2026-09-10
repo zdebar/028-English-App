@@ -20,7 +20,6 @@ export default function PracticeCard({
     note,
     grammar,
     progressLabel,
-    sessionLoading,
     finishedReview,
     isCzToEn,
     revealed,
@@ -79,7 +78,7 @@ export default function PracticeCard({
       audioError={audioError}
       playAudio={playAudio}
       audioLoading={audioLoading}
-      isContentLoading={sessionLoading}
+      isContentLoading={loading}
     />
   );
 }

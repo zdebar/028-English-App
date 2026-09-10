@@ -3,18 +3,13 @@ import { db } from '@/database/models/db';
 import GrammarChunk, { type GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
 import PracticeSession from '@/database/models/practice-sessions';
 import UserItem from '@/database/models/user-items';
-import type { PracticeSessionType, ReviewQueueEntry } from '@/types/practice-session.types';
 import { reportError } from '@/features/logging/monitoring-handler';
 import type { GrammarGroupType, NoteType } from '@/types/generic.types';
 import type {
   PracticeDeckEntry,
-  PracticeDeckItem,
-  PracticeDirection,
   ResolvedPracticeEntry,
   UserItemLocal,
 } from '@/types/user-item.types';
-
-const NULL_DATE = config.database.nullReplacementDate;
 
 function uniquePositiveIds(values: Array<number | null | undefined>): number[] {
   return [
@@ -136,121 +131,18 @@ export async function loadReviewDeck(
   return resolvePracticeEntries(userId, items);
 }
 
-export type ReviewSessionDeck = Readonly<{
+export type ReviewDeckData = Readonly<{
   entries: PracticeDeckEntry[];
-  session: PracticeSessionType | null;
   abandoned: boolean;
 }>;
 
-/** Loads one current card from the persisted review session. */
-export async function loadReviewSessionDeck(userId: string): Promise<ReviewSessionDeck> {
-  const storedSession = await PracticeSession.startReview(userId);
-  if (storedSession.mode !== 'review') {
-    throw new Error('Review practice requires an active review session.');
+/** Loads the next review card without creating or restoring a review session. */
+export async function loadReviewDeckData(userId: string): Promise<ReviewDeckData> {
+  const activeSession = await PracticeSession.reconcileActive(userId);
+  if (activeSession?.mode === 'new') {
+    throw new Error('Review practice is unavailable during initial block practice.');
   }
 
-  const session = normalizeReviewSession(storedSession);
-  const reviewQueue = session.review_queue;
-  if (reviewQueue && reviewQueue.length > 0) {
-    return loadPersistedReviewQueue(userId, session, reviewQueue);
-  }
-  return initializeNextReviewDirection(userId, session);
-}
-
-async function loadPersistedReviewQueue(
-  userId: string,
-  session: PracticeSessionType,
-  reviewQueue: ReviewQueueEntry[],
-): Promise<ReviewSessionDeck> {
-  const currentEntry = reviewQueue[0];
-  if (!currentEntry) return initializeNextReviewDirection(userId, session);
-
-  const items = await UserItem.getByItemIds(
-    userId,
-    [currentEntry.item_id],
-  );
-  const itemById = new Map(items.map((item) => [item.item_id, item]));
-  const item = itemById.get(currentEntry.item_id);
-  if (item?.deleted_at !== NULL_DATE) {
-    return initializeNextReviewDirection(userId, session);
-  }
-  if (!item || isDirectionMastered(item, currentEntry.direction)) {
-    return initializeNextReviewDirection(userId, session);
-  }
-
-  const availableItems: PracticeDeckItem[] = [{ ...item, practice_direction: currentEntry.direction }];
-  const entries = await resolvePracticeEntries(userId, availableItems);
-  return { entries, session, abandoned: false };
-}
-
-function normalizeReviewSession(session: PracticeSessionType): PracticeSessionType {
-  if (session.review_direction && session.target_count > 0) return session;
-
-  return {
-    ...session,
-    target_count: 0,
-    completed_count: 0,
-    review_queue: session.review_queue ?? [],
-    updated_at: new Date(Date.now()).toISOString(),
-  };
-}
-
-async function initializeNextReviewDirection(
-  userId: string,
-  session: PracticeSessionType,
-): Promise<ReviewSessionDeck> {
-  const directions = getReviewDirectionOrder(session.review_direction);
-  for (const direction of directions) {
-    const item = await UserItem.getNextReviewItemForDirection(userId, direction);
-    if (!item) continue;
-
-    const itemCount = await UserItem.getReviewItemCountForDirection(userId, direction);
-    const resolvedEntries = await resolvePracticeEntries(userId, [item]);
-    const initializedSession = withReviewQueue(
-      session,
-      toReviewQueue(resolvedEntries),
-      direction,
-      itemCount,
-    );
-    await PracticeSession.put(initializedSession);
-    return { entries: resolvedEntries, session: initializedSession, abandoned: false };
-  }
-
-  await PracticeSession.deleteByUserId(userId);
-  return { entries: [], session: null, abandoned: true };
-}
-
-function toReviewQueue(entries: readonly PracticeDeckEntry[]): ReviewQueueEntry[] {
-  return entries.map(({ item }) => ({
-    item_id: item.item_id,
-    direction: item.practice_direction,
-  }));
-}
-
-function withReviewQueue(
-  session: PracticeSessionType,
-  reviewQueue: ReviewQueueEntry[],
-  direction: PracticeDirection,
-  targetCount: number,
-): PracticeSessionType {
-  return {
-    ...session,
-    completed_count: 0,
-    target_count: targetCount,
-    review_queue: reviewQueue,
-    review_direction: direction,
-    updated_at: new Date(Date.now()).toISOString(),
-  };
-}
-
-function getReviewDirectionOrder(previousDirection?: PracticeDirection): PracticeDirection[] {
-  if (previousDirection === 'czToEn') return ['czToEn', 'enToCz'];
-  if (previousDirection === 'enToCz') return ['enToCz', 'czToEn'];
-  return ['czToEn', 'enToCz'];
-}
-
-function isDirectionMastered(item: UserItemLocal, direction: PracticeDirection): boolean {
-  return direction === 'czToEn'
-    ? item.mastered_at_cz_to_en !== NULL_DATE
-    : item.mastered_at_en_to_cz !== NULL_DATE;
+  const entries = await loadReviewDeck(userId);
+  return { entries, abandoned: entries.length === 0 };
 }

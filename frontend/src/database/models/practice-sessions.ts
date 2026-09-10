@@ -4,16 +4,11 @@ import { db } from '@/database/models/db';
 import type {
   NewPracticePhase,
   PracticeSessionType,
-  ReviewQueueEntry,
 } from '@/types/practice-session.types';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 import { Entity } from 'dexie';
-import type { PracticeDirection, UserItemLocal } from '@/types/user-item.types';
+import type { UserItemLocal } from '@/types/user-item.types';
 import UserItem from './user-items';
-
-export type PracticeAnswerResult = {
-  completedCount: number;
-};
 
 export type ActivePracticeSessionState = {
   activeSession: PracticeSessionType | null;
@@ -93,8 +88,6 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
   current_queue_item_ids!: number[];
   retry_queue_item_ids!: number[];
   completed_item_ids!: number[];
-  review_queue?: ReviewQueueEntry[];
-  review_direction?: PracticeDirection;
   started_at!: string;
   updated_at!: string;
 
@@ -108,8 +101,9 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
     assertNonEmptyString(userId, 'userId');
 
     const session = await this.getActive(userId);
-    if (!session || session.mode === 'review') {
-      return { activeSession: session, requiresReconciliation: false };
+    if (!session) return { activeSession: null, requiresReconciliation: false };
+    if (session.mode === 'review') {
+      return { activeSession: null, requiresReconciliation: true };
     }
 
     const savedItemIds = getSavedItemIds(session);
@@ -140,31 +134,6 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
     });
   }
 
-  static async startReview(
-    userId: string,
-    dateTime: string = new Date(Date.now()).toISOString(),
-  ): Promise<PracticeSessionType> {
-    const existing = await this.getActive(userId);
-    if (existing) return existing;
-
-    const session: PracticeSessionType = {
-      user_id: userId,
-      mode: 'review',
-      completed_count: 0,
-      target_count: 0,
-      block_id: null,
-      phase: null,
-      current_queue_item_ids: [],
-      retry_queue_item_ids: [],
-      completed_item_ids: [],
-      review_queue: [],
-      started_at: dateTime,
-      updated_at: dateTime,
-    };
-    await db.practice_sessions.put(session);
-    return session;
-  }
-
   static async startNew(
     userId: string,
     blockId: number | null,
@@ -192,51 +161,6 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
     };
     await db.practice_sessions.put(session);
     return session;
-  }
-
-  static async put(session: PracticeSessionType): Promise<void> {
-    await db.practice_sessions.put(session);
-  }
-
-  /** Atomically stores one review answer and advances the session. */
-  static async recordReviewAnswer(
-    originalItem: UserItemLocal,
-    item: UserItemLocal,
-    direction: PracticeDirection,
-    dateTime: string,
-  ): Promise<PracticeAnswerResult> {
-    return db.transaction(
-      'rw',
-      db.user_items,
-      db.practice_sessions,
-      async () => {
-        const session = await this.getActive(originalItem.user_id);
-        if (session?.mode !== 'review') {
-          throw new Error('Review answer requires an active review session.');
-        }
-        const isCurrentItem = session.review_queue?.some(
-          (entry) => entry.item_id === item.item_id && entry.direction === direction,
-        );
-        if (!isCurrentItem) {
-          throw new Error('The active review session is already complete.');
-        }
-
-        const updatedItemCount = await updateStoredPracticeItem(item);
-        if (updatedItemCount !== 1) {
-          throw new Error('The reviewed item no longer exists locally.');
-        }
-        const completedCount = session.completed_count + 1;
-        const nextSession: PracticeSessionType = {
-          ...session,
-          completed_count: completedCount,
-          updated_at: dateTime,
-          review_queue: [],
-        };
-        await db.practice_sessions.put(nextSession);
-
-        return { completedCount };
-      },
-    );
   }
 
   /** Atomically stores one initial-training answer and advances its session. */

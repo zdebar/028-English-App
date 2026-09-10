@@ -1,13 +1,6 @@
-import type { PracticeDirection } from './user-item.types';
-
 export type PracticeSessionMode = 'review' | 'new';
 
 export type NewPracticePhase = 0 | 1;
-
-export interface ReviewQueueEntry {
-  item_id: number;
-  direction: PracticeDirection;
-}
 
 export interface PracticeSessionType {
   user_id: string;
@@ -19,10 +12,6 @@ export interface PracticeSessionType {
   current_queue_item_ids: number[];
   retry_queue_item_ids: number[];
   completed_item_ids: number[];
-  /** Current review card; absent on legacy sessions. */
-  review_queue?: ReviewQueueEntry[];
-  /** Direction currently being reviewed; used to restore direction changes. */
-  review_direction?: PracticeDirection;
   started_at: string;
   updated_at: string;
 }

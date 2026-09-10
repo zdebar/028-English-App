@@ -7,7 +7,7 @@ import UserItem from '@/database/models/user-items';
 import Topic from '@/database/models/topics';
 import { routeDataKey, type RouteDataDescriptor } from './route-data-handoff';
 import {
-  loadReviewSessionDeck,
+  loadReviewDeckData,
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
 } from '@/database/utils/practice-content.utils';
@@ -150,7 +150,7 @@ export function pronunciationGroupDetailDescriptor(userId: string, groupId: numb
 export function practiceDeckDescriptor(userId: string) {
   return {
     key: routeDataKey('practice', userId),
-    load: async () => (await loadReviewSessionDeck(userId)).entries,
+    load: async () => (await loadReviewDeckData(userId)).entries,
   };
 }
 

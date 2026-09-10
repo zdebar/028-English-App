@@ -11,9 +11,7 @@ const mocks = vi.hoisted(() => ({
   getReviewItemCountForDirection: vi.fn(),
   getReviewDeckForDirection: vi.fn(),
   getByItemIds: vi.fn(),
-  startReview: vi.fn(),
-  put: vi.fn(),
-  deleteByUserId: vi.fn(),
+  reconcileActive: vi.fn(),
   reportError: vi.fn(),
 }));
 
@@ -43,9 +41,7 @@ vi.mock('@/database/models/user-items', () => ({
 
 vi.mock('@/database/models/practice-sessions', () => ({
   default: {
-    startReview: (...args: unknown[]) => mocks.startReview(...args),
-    put: (...args: unknown[]) => mocks.put(...args),
-    deleteByUserId: (...args: unknown[]) => mocks.deleteByUserId(...args),
+    reconcileActive: (...args: unknown[]) => mocks.reconcileActive(...args),
   },
 }));
 
@@ -62,7 +58,7 @@ vi.mock('@/config/config', () => ({
 
 import {
   loadReviewDeck,
-  loadReviewSessionDeck,
+  loadReviewDeckData,
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
 } from '@/database/utils/practice-content.utils';
@@ -120,11 +116,7 @@ describe('practice content resolution', () => {
       deleted_at: null,
     });
     mocks.addExamples.mockImplementation(async (_userId, grammar) => ({ ...grammar, items: [] }));
-    mocks.startReview.mockResolvedValue(reviewSession());
-    mocks.getByItemIds.mockResolvedValue([]);
-    mocks.put.mockResolvedValue(undefined);
-    mocks.deleteByUserId.mockResolvedValue(undefined);
-    mocks.getReviewItemCountForDirection.mockResolvedValue(1);
+    mocks.reconcileActive.mockResolvedValue(null);
   });
 
   it('deduplicates relation ids and attaches resolved content without dropping items', async () => {
@@ -177,82 +169,35 @@ describe('practice content resolution', () => {
     await expect(loadReviewDeck('u1')).rejects.toBe(error);
   });
 
-  it('loads one item and stores the available count for the current direction', async () => {
-    const items = Array.from({ length: 150 }, (_, index) => makeReviewItem(index + 1));
-    mocks.getNextReviewItemForDirection.mockResolvedValue(items[0]);
-    mocks.getReviewItemCountForDirection.mockResolvedValue(150);
-
-    const result = await loadReviewSessionDeck('u1');
-
-    expect(mocks.getNextReviewItemForDirection).toHaveBeenCalledWith('u1', 'czToEn');
-    expect(result.entries).toHaveLength(1);
-    expect(result.entries[0]?.item.item_id).toBe(1);
-    expect(result.session).toMatchObject({
-      completed_count: 0,
-      target_count: 150,
-      review_direction: 'czToEn',
-      review_queue: [{ item_id: 1, direction: 'czToEn' }],
-    });
-    expect(mocks.put).toHaveBeenCalledOnce();
-  });
-
-  it('keeps using CZ to EN even when fewer than twenty items remain', async () => {
+  it('loads one review item without storing a review session', async () => {
     const item = makeReviewItem(1);
-    mocks.getNextReviewItemForDirection.mockResolvedValue(item);
-    mocks.getReviewItemCountForDirection.mockResolvedValue(1);
+    mocks.getReviewDeck.mockResolvedValue([item]);
 
-    const result = await loadReviewSessionDeck('u1');
+    const result = await loadReviewDeckData('u1');
 
-    expect(mocks.getNextReviewItemForDirection).toHaveBeenCalledWith('u1', 'czToEn');
-    expect(mocks.getNextReviewItemForDirection).toHaveBeenCalledTimes(1);
     expect(result.entries).toHaveLength(1);
-    expect(result.entries[0]?.item.practice_direction).toBe('czToEn');
+    expect(result.entries[0]?.item).toBe(item);
+    expect(result.abandoned).toBe(false);
+    expect(mocks.reconcileActive).toHaveBeenCalledWith('u1');
+    expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', 20);
   });
 
-  it('switches to EN to CZ only after CZ to EN is exhausted', async () => {
-    mocks.startReview.mockResolvedValue(reviewSession('czToEn'));
-    mocks.getNextReviewItemForDirection
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce(makeReviewItem(1, 'enToCz'));
+  it('does not start review while initial block practice is active', async () => {
+    mocks.reconcileActive.mockResolvedValue({ mode: 'new' });
 
-    const result = await loadReviewSessionDeck('u1');
-
-    expect(mocks.getNextReviewItemForDirection.mock.calls.map(([_, direction]) => direction)).toEqual([
-      'czToEn',
-      'enToCz',
-    ]);
-    expect(result.entries[0]?.item.practice_direction).toBe('enToCz');
+    await expect(loadReviewDeckData('u1')).rejects.toThrow(
+      'Review practice is unavailable during initial block practice.',
+    );
+    expect(mocks.getReviewDeck).not.toHaveBeenCalled();
   });
 
-  it('abandons review when neither direction has a due item', async () => {
-    mocks.getNextReviewItemForDirection.mockResolvedValue(null);
+  it('marks review abandoned when no due item is available', async () => {
+    mocks.getReviewDeck.mockResolvedValue([]);
 
-    await expect(loadReviewSessionDeck('u1')).resolves.toEqual({
+    await expect(loadReviewDeckData('u1')).resolves.toEqual({
       entries: [],
-      session: null,
       abandoned: true,
     });
-    expect(mocks.deleteByUserId).toHaveBeenCalledWith('u1');
-  });
-
-  it('resumes a persisted review queue in its saved order', async () => {
-    const session = {
-      ...reviewSession('czToEn'),
-      completed_count: 18,
-      target_count: 20,
-      review_queue: [
-        { item_id: 3, direction: 'czToEn' as const },
-        { item_id: 1, direction: 'czToEn' as const },
-      ],
-    };
-    mocks.startReview.mockResolvedValue(session);
-    mocks.getByItemIds.mockResolvedValue([makeItem({ item_id: 1 }), makeItem({ item_id: 3 })]);
-
-    const result = await loadReviewSessionDeck('u1');
-
-    expect(mocks.getByItemIds).toHaveBeenCalledWith('u1', [3]);
-    expect(mocks.getNextReviewItemForDirection).not.toHaveBeenCalled();
-    expect(result.entries.map((entry) => entry.item.item_id)).toEqual([3]);
   });
 
   it('resolves the grammar group belonging to the requested chunk', async () => {
@@ -268,22 +213,4 @@ function makeReviewItem(
   direction: 'czToEn' | 'enToCz' = 'czToEn',
 ): PracticeDeckItem {
   return { ...makeItem({ item_id: itemId }), practice_direction: direction };
-}
-
-function reviewSession(direction?: 'czToEn' | 'enToCz') {
-  return {
-    user_id: 'u1',
-    mode: 'review' as const,
-    completed_count: 0,
-    target_count: 0,
-    block_id: null,
-    phase: null,
-    current_queue_item_ids: [],
-    retry_queue_item_ids: [],
-    completed_item_ids: [],
-    review_queue: [],
-    review_direction: direction,
-    started_at: '2026-08-23',
-    updated_at: '2026-08-23',
-  };
 }

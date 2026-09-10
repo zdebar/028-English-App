@@ -63,45 +63,6 @@ describe('PracticeSession progress transactions', () => {
     mocks.saveInitialTrainingCompletion.mockResolvedValue([]);
   });
 
-  it('persists a review answer atomically', async () => {
-    mocks.sessionGet.mockResolvedValue(reviewSession(7));
-    const original = item({ progress_cz_to_en: 1 });
-    const updated = item({ progress_cz_to_en: 2, updated_at: '2026-08-23T10:00:00.000Z' });
-
-    const result = await PracticeSession.recordReviewAnswer(
-      original,
-      updated,
-      'czToEn',
-      '2026-08-23T10:00:00.000Z',
-    );
-
-    expect(result).toEqual({ completedCount: 8 });
-    expect(mocks.itemUpdate).toHaveBeenCalledOnce();
-    expect(mocks.sessionPut).toHaveBeenCalledWith(
-      expect.objectContaining({ completed_count: 8, review_queue: [] }),
-    );
-    expect(mocks.transaction).toHaveBeenCalledOnce();
-  });
-
-  it('persists a skipped review answer atomically', async () => {
-    mocks.sessionGet.mockResolvedValue(reviewSession(0));
-    const original = item({ progress_cz_to_en: 1 });
-    const updated = item({
-      progress_cz_to_en: 1,
-      mastered_at_cz_to_en: '2026-08-23T10:00:00.000Z',
-      updated_at: '2026-08-23T10:00:00.000Z',
-    });
-
-    await PracticeSession.recordReviewAnswer(
-      original,
-      updated,
-      'czToEn',
-      '2026-08-23T10:00:00.000Z',
-    );
-
-    expect(mocks.itemUpdate).toHaveBeenCalledOnce();
-  });
-
   it('stores an initial-training answer and session in the same transaction', async () => {
     const session = {
       ...newSession(),
@@ -249,24 +210,6 @@ describe('PracticeSession progress transactions', () => {
     });
   });
 });
-
-function reviewSession(completedCount: number) {
-  return {
-    user_id: 'u1',
-    mode: 'review' as const,
-    completed_count: completedCount,
-    target_count: 20,
-    block_id: null,
-    phase: null,
-    current_queue_item_ids: [],
-    retry_queue_item_ids: [],
-    completed_item_ids: [],
-    review_queue: [{ item_id: 1, direction: 'czToEn' as const }],
-    review_direction: 'czToEn' as const,
-    started_at: '2026-08-23T09:00:00.000Z',
-    updated_at: '2026-08-23T09:00:00.000Z',
-  };
-}
 
 function newSession() {
   return {

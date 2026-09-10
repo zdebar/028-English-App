@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   reload: vi.fn(),
-  recordReviewAnswer: vi.fn(),
+  savePracticeDeck: vi.fn(),
   applyPracticeProgress: vi.fn(),
   resetHint: vi.fn(),
   resetQuestionState: vi.fn(),
@@ -28,17 +28,12 @@ vi.mock('@/hooks/use-fetch', () => ({
 vi.mock('@/database/models/user-items', () => ({
   default: {
     applyPracticeProgress: (...args: unknown[]) => mocks.applyPracticeProgress(...args),
-  },
-}));
-
-vi.mock('@/database/models/practice-sessions', () => ({
-  default: {
-    recordReviewAnswer: (...args: unknown[]) => mocks.recordReviewAnswer(...args),
+    savePracticeDeck: (...args: unknown[]) => mocks.savePracticeDeck(...args),
   },
 }));
 
 vi.mock('@/database/utils/practice-content.utils', () => ({
-  loadReviewSessionDeck: vi.fn(),
+  loadReviewDeckData: vi.fn(),
 }));
 
 vi.mock('@/features/practice/hooks/use-practice-card-state', () => ({
@@ -82,9 +77,9 @@ describe('usePracticeDeck', () => {
     mocks.reload.mockResolvedValue(undefined);
     mocks.renderStates.length = 0;
     mocks.transitionEvents.length = 0;
-    mocks.fetchData = reviewDeckResult(reviewSession(7, 20), [entry(1), entry(2)]);
+    mocks.fetchData = reviewDeckResult([entry(1), entry(2)]);
     mocks.applyPracticeProgress.mockImplementation((item) => ({ ...item, updated_at: 'now' }));
-    mocks.recordReviewAnswer.mockResolvedValue({ completedCount: 8 });
+    mocks.savePracticeDeck.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -93,50 +88,50 @@ describe('usePracticeDeck', () => {
 
   it('restores the persisted answer count and current item', async () => {
     const { result } = renderHook(() => usePracticeDeck('u1'));
-    await waitFor(() => expect(result.current.sessionLoading).toBe(false));
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.currentItem?.item_id).toBe(1);
-    expect(result.current.progressLabel).toBe('7/20');
+    expect(result.current.progressLabel).toBe('');
   });
 
   it('loads and displays one item from a review direction', async () => {
     const entries = [entry(1)];
-    mocks.fetchData = reviewDeckResult(reviewSession(0, 150), entries);
+    mocks.fetchData = reviewDeckResult(entries);
 
     const { result } = renderHook(() => usePracticeDeck('u1'));
-    await waitFor(() => expect(result.current.sessionLoading).toBe(false));
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
-    expect(result.current.progressLabel).toBe('0/150');
+    expect(result.current.progressLabel).toBe('');
     expect(result.current.currentItem?.item_id).toBe(1);
   });
 
   it('persists one answer before loading the next item and resets the question', async () => {
     const { result } = renderHook(() => usePracticeDeck('u1'));
-    await waitFor(() => expect(result.current.sessionLoading).toBe(false));
+    await waitFor(() => expect(result.current.loading).toBe(false));
     act(() => result.current.setRevealed(true));
     mocks.renderStates.length = 0;
     mocks.transitionEvents.length = 0;
 
     await act(async () => result.current.nextItem('correct'));
 
-    expect(mocks.recordReviewAnswer).toHaveBeenCalledOnce();
+    expect(mocks.savePracticeDeck).toHaveBeenCalledOnce();
     expect(mocks.reload).toHaveBeenCalledOnce();
     expect(result.current.currentItem?.item_id).toBe(1);
-    expect(result.current.progressLabel).toBe('8/20');
+    expect(result.current.progressLabel).toBe('');
     expect(mocks.transitionEvents[0]).toBe('reset');
     expect(mocks.renderStates).not.toContainEqual({ itemId: 2, revealed: true });
   });
 
-  it('keeps the counter hidden until a persisted session is available', () => {
+  it('keeps the review view empty until review data is available', () => {
     mocks.fetchData = null;
     const { result } = renderHook(() => usePracticeDeck('u1'));
 
-    expect(result.current.sessionLoading).toBe(true);
+    expect(result.current.currentItem).toBeNull();
     expect(result.current.progressLabel).toBe('');
   });
 
   it('marks review complete when there is no next direction', async () => {
-    mocks.fetchData = { entries: [], session: null, abandoned: true };
+    mocks.fetchData = { entries: [], abandoned: true };
 
     const { result } = renderHook(() => usePracticeDeck('u1'));
 
@@ -146,8 +141,8 @@ describe('usePracticeDeck', () => {
   });
 });
 
-function reviewDeckResult(session: ReturnType<typeof reviewSession>, entries: PracticeDeckEntry[]) {
-  return { entries, session, abandoned: false };
+function reviewDeckResult(entries: PracticeDeckEntry[]) {
+  return { entries, abandoned: false };
 }
 
 function entry(itemId: number): PracticeDeckEntry {
@@ -180,21 +175,5 @@ function entry(itemId: number): PracticeDeckEntry {
     },
     note: null,
     grammar: null,
-  };
-}
-
-function reviewSession(completedCount: number, targetCount: number) {
-  return {
-    user_id: 'u1',
-    mode: 'review' as const,
-    completed_count: completedCount,
-    target_count: targetCount,
-    block_id: null,
-    phase: null,
-    current_queue_item_ids: [],
-    retry_queue_item_ids: [],
-    completed_item_ids: [],
-    started_at: '2026-08-23',
-    updated_at: '2026-08-23',
   };
 }
