@@ -64,15 +64,6 @@ function getSessionFullName(session: Session | null): string | null {
   return typeof name === 'string' && name.length > 0 ? name : null;
 }
 
-function isJwtIssuedAtFutureError(error: unknown): boolean {
-  if (typeof error !== 'object' || error === null) {
-    return false;
-  }
-
-  const { code, message } = error as { code?: unknown; message?: unknown };
-  return code === 'PGRST303' && message === 'JWT issued at future';
-}
-
 function isAuthRejectedError(error: unknown): boolean {
   if (typeof error !== 'object' || error === null) {
     return false;
@@ -222,16 +213,10 @@ async function resolveAuthRedirect(initializationError: unknown): Promise<AuthRe
  *   Throws an error if sign-out fails.
  */
 export const useAuthStore = create<AuthState>((set) => {
-  let lastLifecycleSyncUserId: string | null = null;
-
   const applySession = (session: Session | null) => {
     const nextUserId = session?.user?.id ?? null;
     const anonymous = isAnonymousSession(session);
     setMonitoringUser(nextUserId);
-
-    if (!nextUserId) {
-      lastLifecycleSyncUserId = null;
-    }
 
     set({
       userId: nextUserId,
@@ -246,26 +231,6 @@ export const useAuthStore = create<AuthState>((set) => {
   const clearSession = () => {
     setMonitoringUser(null);
     set({ ...INITIAL_AUTH_STATE, loading: false });
-  };
-
-  const recoverJwtIssuedAtFutureSession = async (): Promise<boolean> => {
-    reportInfo('Refreshing auth session because Supabase rejected its JWT timestamp.');
-
-    const { data, error } = await supabaseInstance.auth.refreshSession();
-    if (!error && data.session) {
-      applySession(data.session);
-      return true;
-    }
-
-    reportInfo('Clearing local auth session because Supabase rejected its JWT timestamp.');
-
-    const { error: signOutError } = await supabaseInstance.auth.signOut({ scope: 'local' });
-    if (signOutError && signOutError.message !== 'Auth session missing!') {
-      reportError('Invalid auth session cleanup failed', signOutError);
-    }
-
-    clearSession();
-    return false;
   };
 
   const recoverRejectedAuthSession = async (): Promise<boolean> => {
@@ -305,45 +270,6 @@ export const useAuthStore = create<AuthState>((set) => {
     return didRecover ? (await supabaseInstance.auth.getSession()).data.session : null;
   };
 
-  const syncAuthenticatedUserLifecycle = async (
-    hasRecoveredJwt = false,
-    hasRecoveredAuth = false,
-  ) => {
-    // Existing Supabase Auth users do not re-run the auth.users insert trigger on login.
-    const { error } = await supabaseInstance.rpc('restore_current_user_if_deleted');
-    if (!error) {
-      return;
-    }
-
-    if (isJwtIssuedAtFutureError(error) && !hasRecoveredJwt) {
-      const didRecover = await recoverJwtIssuedAtFutureSession();
-      if (didRecover) {
-        await syncAuthenticatedUserLifecycle(true);
-      }
-      return;
-    }
-
-    if (isAuthRejectedError(error) && !hasRecoveredAuth) {
-      const didRecover = await recoverRejectedAuthSession();
-      if (didRecover) {
-        await syncAuthenticatedUserLifecycle(hasRecoveredJwt, true);
-      }
-      return;
-    }
-
-    reportError('Auth user lifecycle sync failed', error);
-  };
-
-  const syncAuthenticatedUserLifecycleIfNeeded = (session: Session): void => {
-    const currentUserId = session.user.id;
-    if (lastLifecycleSyncUserId === currentUserId) {
-      return;
-    }
-
-    lastLifecycleSyncUserId = currentUserId;
-    void syncAuthenticatedUserLifecycle();
-  };
-
   const loadInitializedSession = async (
     callbackSession: Session | null | undefined,
   ): Promise<Session | null> => {
@@ -374,10 +300,6 @@ export const useAuthStore = create<AuthState>((set) => {
       shouldOpenConflict = false;
     }
 
-    if (session) {
-      syncAuthenticatedUserLifecycleIfNeeded(session);
-    }
-
     applySession(session);
     if (shouldOpenConflict) {
       set({ hasIdentityLinkConflict: true });
@@ -389,7 +311,6 @@ export const useAuthStore = create<AuthState>((set) => {
     loading: true,
 
     initializeAuth: () => {
-      lastLifecycleSyncUserId = null;
       let subscription: { unsubscribe: () => void } | null = null;
       let isActive = true;
 
@@ -415,13 +336,8 @@ export const useAuthStore = create<AuthState>((set) => {
 
       fetchSession();
 
-      subscription = supabaseInstance.auth.onAuthStateChange((event, session) => {
+      subscription = supabaseInstance.auth.onAuthStateChange((_event, session) => {
         applySession(session);
-        if (session && event === 'SIGNED_IN') {
-          queueMicrotask(() => {
-            syncAuthenticatedUserLifecycleIfNeeded(session);
-          });
-        }
       }).data.subscription;
 
       return () => {

@@ -129,10 +129,7 @@ export default function Guide(): JSX.Element {
         <h3>Přehled výslovnosti</h3>
         <p>Přehled skupin podobně znějících položek, například bad / bed, s možností přehrát audio.</p>
         <h3>Smazat účet</h3>
-        <p>
-          Vaše údaje budou uchovány po dobu dalších 30 dní. Během této doby lze účet obnovit
-          opětovným přihlášením. Po 30 dnech je účet nenávratně smazán.
-        </p>
+        <p>Účet a všechna jeho data budou po potvrzení okamžitě a nenávratně smazána.</p>
         <h3>Odhlásit se</h3>
         <p>Odhlásí vás z vašeho uživatelského účtu.</p>
       </section>

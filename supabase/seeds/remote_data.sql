@@ -869,8 +869,8 @@ INSERT INTO "public"."pronunciation_group_items" ("pronunciation_group_id", "ite
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "public"."users" ("id", "created_at", "deleted_at", "updated_at") VALUES
-	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-07-12 14:30:09.044811+00', NULL, '2026-07-18 08:26:58.266187+00');
+INSERT INTO "public"."users" ("id", "created_at", "updated_at") VALUES
+	('afde0966-74ea-4b04-8bc3-ee903f7e2d77', '2026-07-12 14:30:09.044811+00', '2026-07-18 08:26:58.266187+00');
 
 
 --

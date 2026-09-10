@@ -22,7 +22,7 @@ starting point when a change crosses route, store, model, or sync boundaries.
 | Google sign-in | Sign in or convert to a durable account. | `GoogleAuthButton`, `ConvertAnonymousUserButton`, `IdentityLinkConflictModal` | Supabase Auth provider flow, intent-scoped one-time `sessionStorage` guest fallback | Conversion backs up the verified guest before redirect. If the Google identity belongs to another account, callback handling restores the same guest before offering stay-guest or explicit existing-account sign-in; no progress is merged or transferred. |
 | Profile page | Show account email and account actions. | `/profile`, `Profile` | `useAuthStore.userEmail` | Links to overview pages and exposes sign-out/delete actions. |
 | Sign-out | End the session after best-effort user-data sync. | `SignoutButton`, `useAuthStore.handleLogout` | Supabase Auth, `dataSyncOnUnmount`, theme cleanup | Logout normally syncs user tables before clearing local auth state. |
-| Account deletion/reactivation | Soft-delete a user and restore on later sign-in where supported. | `DeleteUserButton`, `useAuthStore` reactivation flow | Supabase user lifecycle RPCs, local auth/session state | Delete clears local state after remote delete; initialization attempts reactivation before finalizing session state. |
+| Account deletion | Permanently delete the current user and their data immediately after confirmation. | `DeleteUserButton`, `useAuthStore` | Supabase Auth user lifecycle RPC, local auth/session state | Delete clears local state after remote hard delete; no reactivation window remains. |
 
 ## Home
 

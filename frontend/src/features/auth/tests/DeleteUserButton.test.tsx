@@ -128,7 +128,7 @@ describe('DeleteUserButton', () => {
 
     await waitFor(() => {
       expect(mocks.saveCurrentThemeAsGuest).toHaveBeenCalled();
-      expect(mocks.rpc).toHaveBeenCalledWith('soft_delete_user');
+      expect(mocks.rpc).toHaveBeenCalledWith('hard_delete_user');
       expect(mocks.handleLogout).toHaveBeenCalledWith({
         skipSync: true,
         skipRemoteSignOut: true,
