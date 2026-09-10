@@ -3,6 +3,7 @@ import {
   useEffect,
   useLayoutEffect,
   useMemo,
+  useRef,
   useState,
   type Dispatch,
   type SetStateAction,
@@ -30,6 +31,7 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
   const [finishedReview, setFinishedReview] = useState(false);
   const [sessionProgress, setSessionProgress] = useState<SessionProgress | null>(null);
   const [sessionLoading, setSessionLoading] = useState(Boolean(userId));
+  const isTransitioningRef = useRef(false);
 
   const fetchPracticeDeck = useCallback(() => fetchReviewDeck(userId), [userId]);
   const initialResult = useMemo(() => createInitialReviewResult(initialDeck), [initialDeck]);
@@ -72,18 +74,25 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
 
   const nextItem = useCallback(
     async (outcome: PracticeOutcome) => {
-      await saveReviewAnswer(
-        {
-          currentItem,
-          userId,
-          resetQuestionState,
-          setSessionProgress,
-          setSessionLoading,
-          reload,
-          setSaveError,
-        },
-        outcome,
-      );
+      if (isTransitioningRef.current) return;
+      isTransitioningRef.current = true;
+
+      try {
+        await saveReviewAnswer(
+          {
+            currentItem,
+            userId,
+            resetQuestionState,
+            setSessionProgress,
+            setSessionLoading,
+            reload,
+            setSaveError,
+          },
+          outcome,
+        );
+      } finally {
+        isTransitioningRef.current = false;
+      }
     },
     [currentItem, reload, resetQuestionState, userId],
   );
@@ -246,13 +255,14 @@ async function saveReviewAnswer(
       targetCount: currentProgress?.targetCount ?? 1,
     }));
 
-    resetQuestionState();
     setSessionLoading(true);
     invalidateRouteData(routeDataKey('practice', userId));
     await reload();
+    resetQuestionState();
   } catch (caughtError) {
     const normalizedError = toError(caughtError);
     setSaveError(normalizedError);
+    setSessionLoading(false);
     reportError('Failed to save review answer', normalizedError);
   }
 }

@@ -398,6 +398,24 @@ describe('PracticeCard', () => {
     expect(screen.queryByText('2/20')).toBeNull();
   });
 
+  it('keeps the current review card while the next item loads', () => {
+    mocks.practiceDeck.sessionLoading = true;
+    mocks.practiceDeck.loading = true;
+    mocks.practiceDeck.revealed = true;
+
+    render(<PracticeCard />);
+
+    expect(screen.getByText('ahoj')).toBeTruthy();
+    expect(screen.queryByText('Loading')).toBeNull();
+
+    act(() => vi.advanceTimersByTime(999));
+    expect(screen.queryByText('Loading')).toBeNull();
+
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.getByText('Loading')).toBeTruthy();
+    expect((screen.getByTestId('known-btn') as HTMLButtonElement).disabled).toBe(false);
+  });
+
   it('returns home from the empty practice state', () => {
     mocks.practiceDeck.currentItem = null;
     mocks.practiceDeck.loading = false;

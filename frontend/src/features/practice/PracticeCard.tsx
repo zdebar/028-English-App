@@ -45,7 +45,7 @@ export default function PracticeCard({
     reportError('Failed to fetch practice deck', error);
   }, [error, showToast]);
 
-  if (sessionLoading || (loading && !currentItem)) {
+  if (loading && !currentItem) {
     return <DelayedLoadingCircle />;
   }
 
@@ -79,6 +79,7 @@ export default function PracticeCard({
       audioError={audioError}
       playAudio={playAudio}
       audioLoading={audioLoading}
+      isContentLoading={sessionLoading}
     />
   );
 }

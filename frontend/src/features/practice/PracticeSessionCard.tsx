@@ -1,5 +1,6 @@
 import Notification from '@/components/UI/Notification';
 import DelayedNotification from '@/components/UI/DelayedNotification';
+import config from '@/config/config';
 import SecondaryControlButton from '@/components/UI/buttons/SecondaryControlButton';
 import BookIcon from '@/components/UI/icons/BookIcon';
 import PlayButton from '@/features/audio/PlayButton';
@@ -17,7 +18,7 @@ import RepeatButton from './buttons/RepeatButton';
 import { usePointerReleaseLock } from './hooks/use-pointer-release-lock';
 import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
 import type { NoteType } from '@/types/generic.types';
-import { useState, type MouseEvent } from 'react';
+import { useEffect, useState, type MouseEvent } from 'react';
 
 export type PracticeSessionCardProps = Readonly<{
   note: NoteType | null;
@@ -42,6 +43,7 @@ export type PracticeSessionCardProps = Readonly<{
   playAudio: () => void;
   audioLoading: boolean;
   isBlockTrainingPractice?: boolean;
+  isContentLoading?: boolean;
 }>;
 
 type PracticeControlsProps = Pick<
@@ -173,6 +175,7 @@ type PracticeMainContentProps = Readonly<{
   czech: string | undefined;
   english: string | undefined;
   pronunciation: string | undefined;
+  isContentLoading: boolean;
 }>;
 
 function PracticeMainContent({
@@ -181,9 +184,33 @@ function PracticeMainContent({
   czech,
   english,
   pronunciation,
+  isContentLoading,
 }: PracticeMainContentProps) {
+  const [showLoadingMessage, setShowLoadingMessage] = useState(false);
+
+  useEffect(() => {
+    if (!isContentLoading) {
+      setShowLoadingMessage(false);
+      return undefined;
+    }
+
+    const timeoutId = globalThis.setTimeout(
+      () => setShowLoadingMessage(true),
+      config.loading.dataStateDelayMs,
+    );
+    return () => globalThis.clearTimeout(timeoutId);
+  }, [isContentLoading]);
+
   if (showDirectionChange) {
     return <Notification>{directionText}</Notification>;
+  }
+
+  if (isContentLoading && showLoadingMessage) {
+    return (
+      <p className="text-center font-normal" aria-live="polite">
+        {TEXTS.loadingMessage}
+      </p>
+    );
   }
 
   return (
@@ -412,6 +439,7 @@ function PracticeCardButton({
           czech={czech}
           english={english}
           pronunciation={pronunciation}
+          isContentLoading={props.isContentLoading ?? false}
         />
         {!display.showTopBar && (
           <AudioStatusMessage audioError={audioError} audioLoading={audioLoading} />
