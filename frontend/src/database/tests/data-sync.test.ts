@@ -48,7 +48,10 @@ vi.mock('@/database/utils/database.utils', () => ({
 }));
 
 vi.mock('@/features/logging/logging.utils', () => ({
-  withSettledSummary: (...args: unknown[]) => mocks.withSettledSummary(...args),
+  withSettledSummary: async (promises: Promise<unknown>[], ...args: unknown[]) => {
+    await Promise.allSettled(promises);
+    return mocks.withSettledSummary(promises, ...args);
+  },
 }));
 
 vi.mock('@/database/models/user-items', () => ({

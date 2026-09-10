@@ -8,7 +8,6 @@ const mocks = vi.hoisted(() => ({
   setSession: vi.fn(),
   signOut: vi.fn(),
   onAuthStateChange: vi.fn(),
-  rpc: vi.fn(),
   unsubscribe: vi.fn(),
   dataSyncOnUnmount: vi.fn(),
   setMonitoringUser: vi.fn(),
@@ -29,7 +28,6 @@ vi.mock('@/config/supabase.config', () => ({
       signOut: (...args: unknown[]) => mocks.signOut(...args),
       onAuthStateChange: (...args: unknown[]) => mocks.onAuthStateChange(...args),
     },
-    rpc: (...args: unknown[]) => mocks.rpc(...args),
   },
 }));
 
@@ -93,7 +91,6 @@ describe('useAuthStore', () => {
       error: null,
     });
     mocks.refreshSession.mockResolvedValue({ data: { session: null }, error: null });
-    mocks.rpc.mockResolvedValue({ error: null });
     mocks.dataSyncOnUnmount.mockResolvedValue(undefined);
   });
 
@@ -119,7 +116,6 @@ describe('useAuthStore', () => {
     expect(state.userEmail).toBe('u1@example.com');
     expect(state.userFullName).toBe('User One');
     expect(state.loading).toBe(false);
-    expect(mocks.rpc).toHaveBeenCalledWith('restore_current_user_if_deleted');
 
     mocks.authCallback?.('SIGNED_IN', {
       user: {
@@ -130,7 +126,6 @@ describe('useAuthStore', () => {
     });
     await flushMicrotasks();
 
-    expect(mocks.rpc).toHaveBeenCalledTimes(1);
 
     cleanup();
   });
@@ -358,177 +353,6 @@ describe('useAuthStore', () => {
 
     expect(mocks.refreshSession).toHaveBeenCalled();
     expect(mocks.signOut).toHaveBeenCalledWith({ scope: 'local' });
-    expect(mocks.rpc).not.toHaveBeenCalled();
-
-    const state = useAuthStore.getState();
-    expect(state.userId).toBeNull();
-    expect(state.userEmail).toBeNull();
-    expect(state.userFullName).toBeNull();
-    expect(state.loading).toBe(false);
-  });
-
-  it('initializeAuth refreshes and retries lifecycle sync when the RPC rejects auth', async () => {
-    const originalSession = {
-      user: {
-        id: 'u1',
-        email: 'u1@example.com',
-        user_metadata: { full_name: 'User One' },
-      },
-    };
-    const refreshedSession = {
-      user: {
-        id: 'u1',
-        email: 'u1@example.com',
-        user_metadata: { full_name: 'User One' },
-      },
-    };
-    mocks.getSession.mockResolvedValue({
-      data: { session: originalSession },
-      error: null,
-    });
-    mocks.rpc
-      .mockResolvedValueOnce({
-        data: null,
-        error: { message: 'JWSError JWSInvalidSignature', status: 401 },
-      })
-      .mockResolvedValueOnce({ data: false, error: null });
-    mocks.refreshSession.mockResolvedValue({
-      data: { session: refreshedSession },
-      error: null,
-    });
-
-    useAuthStore.getState().initializeAuth();
-    await flushMicrotasks();
-
-    expect(mocks.refreshSession).toHaveBeenCalled();
-    expect(mocks.rpc).toHaveBeenCalledTimes(2);
-    expect(mocks.signOut).not.toHaveBeenCalled();
-    expect(mocks.reportInfo).toHaveBeenCalledWith(
-      'Refreshing auth session because Supabase rejected the stored session.',
-    );
-
-    const state = useAuthStore.getState();
-    expect(state.userId).toBe('u1');
-    expect(state.loading).toBe(false);
-  });
-
-  it('initializeAuth keeps session hydration working when user lifecycle sync fails', async () => {
-    mocks.getSession.mockResolvedValue({
-      data: {
-        session: {
-          user: {
-            id: 'u1',
-            email: 'u1@example.com',
-            user_metadata: { full_name: 'User One' },
-          },
-        },
-      },
-      error: null,
-    });
-    mocks.rpc.mockResolvedValue({
-      data: null,
-      error: { message: 'permission denied for function restore_current_user_if_deleted' },
-    });
-
-    useAuthStore.getState().initializeAuth();
-    await flushMicrotasks();
-
-    const state = useAuthStore.getState();
-    expect(state.userId).toBe('u1');
-    expect(state.userEmail).toBe('u1@example.com');
-    expect(state.userFullName).toBe('User One');
-    expect(state.loading).toBe(false);
-    expect(mocks.reportError).toHaveBeenCalledWith(
-      'Auth user lifecycle sync failed',
-      expect.objectContaining({
-        message: 'permission denied for function restore_current_user_if_deleted',
-      }),
-    );
-  });
-
-  it('initializeAuth refreshes the local session when Supabase rejects a future JWT', async () => {
-    mocks.getSession.mockResolvedValue({
-      data: {
-        session: {
-          user: {
-            id: 'u1',
-            email: 'u1@example.com',
-            user_metadata: { full_name: 'User One' },
-          },
-        },
-      },
-      error: null,
-    });
-    mocks.rpc
-      .mockResolvedValueOnce({
-        data: null,
-        error: { code: 'PGRST303', message: 'JWT issued at future' },
-      })
-      .mockResolvedValueOnce({ data: false, error: null });
-    mocks.refreshSession.mockResolvedValue({
-      data: {
-        session: {
-          user: {
-            id: 'u1',
-            email: 'u1@example.com',
-            user_metadata: { full_name: 'User One' },
-          },
-        },
-      },
-      error: null,
-    });
-
-    useAuthStore.getState().initializeAuth();
-    await flushMicrotasks();
-
-    expect(mocks.refreshSession).toHaveBeenCalled();
-    expect(mocks.rpc).toHaveBeenCalledTimes(2);
-    expect(mocks.signOut).not.toHaveBeenCalled();
-    expect(mocks.reportInfo).toHaveBeenCalledWith(
-      'Refreshing auth session because Supabase rejected its JWT timestamp.',
-    );
-    expect(mocks.reportError).not.toHaveBeenCalledWith(
-      'Auth user lifecycle sync failed',
-      expect.anything(),
-    );
-
-    const state = useAuthStore.getState();
-    expect(state.userId).toBe('u1');
-    expect(state.userEmail).toBe('u1@example.com');
-    expect(state.userFullName).toBe('User One');
-    expect(state.loading).toBe(false);
-  });
-
-  it('initializeAuth clears the local session when future JWT recovery fails', async () => {
-    mocks.getSession.mockResolvedValue({
-      data: {
-        session: {
-          user: {
-            id: 'u1',
-            email: 'u1@example.com',
-            user_metadata: { full_name: 'User One' },
-          },
-        },
-      },
-      error: null,
-    });
-    mocks.rpc.mockResolvedValue({
-      data: null,
-      error: { code: 'PGRST303', message: 'JWT issued at future' },
-    });
-    mocks.refreshSession.mockResolvedValue({
-      data: { session: null },
-      error: { message: 'refresh failed' },
-    });
-
-    useAuthStore.getState().initializeAuth();
-    await flushMicrotasks();
-
-    expect(mocks.refreshSession).toHaveBeenCalled();
-    expect(mocks.signOut).toHaveBeenCalledWith({ scope: 'local' });
-    expect(mocks.reportInfo).toHaveBeenCalledWith(
-      'Clearing local auth session because Supabase rejected its JWT timestamp.',
-    );
 
     const state = useAuthStore.getState();
     expect(state.userId).toBeNull();
@@ -570,13 +394,12 @@ describe('useAuthStore', () => {
     expect(state.userId).toBe('u2');
     expect(state.userEmail).toBe('u2@example.com');
     expect(state.userFullName).toBe('User Two');
-    expect(mocks.rpc).toHaveBeenCalledWith('restore_current_user_if_deleted');
 
     cleanup();
     expect(mocks.unsubscribe).toHaveBeenCalled();
   });
 
-  it('applies token refresh session updates without synchronizing user lifecycle', async () => {
+  it('applies token refresh session updates', async () => {
     mocks.getSession.mockResolvedValue({ data: { session: null }, error: null });
 
     const cleanup = useAuthStore.getState().initializeAuth();
@@ -596,53 +419,6 @@ describe('useAuthStore', () => {
     expect(state.userId).toBe('u3');
     expect(state.userEmail).toBe('u3@example.com');
     expect(state.userFullName).toBe('User Three');
-    expect(mocks.rpc).not.toHaveBeenCalled();
-
-    cleanup();
-  });
-
-  it('does not synchronize user lifecycle for repeated sign-in events of the same user', async () => {
-    mocks.getSession.mockResolvedValue({ data: { session: null }, error: null });
-
-    const cleanup = useAuthStore.getState().initializeAuth();
-    await flushMicrotasks();
-
-    const signedInSession = {
-      user: {
-        id: 'u3',
-        email: 'u3@example.com',
-        user_metadata: { name: 'User Three' },
-      },
-    };
-    mocks.authCallback?.('SIGNED_IN', signedInSession);
-    mocks.authCallback?.('SIGNED_IN', signedInSession);
-    await flushMicrotasks();
-
-    expect(mocks.rpc).toHaveBeenCalledTimes(1);
-
-    cleanup();
-  });
-
-  it('synchronizes user lifecycle again after sign-out and sign-in', async () => {
-    mocks.getSession.mockResolvedValue({ data: { session: null }, error: null });
-
-    const cleanup = useAuthStore.getState().initializeAuth();
-    await flushMicrotasks();
-
-    const signedInSession = {
-      user: {
-        id: 'u3',
-        email: 'u3@example.com',
-        user_metadata: { name: 'User Three' },
-      },
-    };
-    mocks.authCallback?.('SIGNED_IN', signedInSession);
-    await flushMicrotasks();
-    mocks.authCallback?.('SIGNED_OUT', null);
-    mocks.authCallback?.('SIGNED_IN', signedInSession);
-    await flushMicrotasks();
-
-    expect(mocks.rpc).toHaveBeenCalledTimes(2);
 
     cleanup();
   });

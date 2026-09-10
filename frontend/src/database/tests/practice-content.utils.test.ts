@@ -7,12 +7,11 @@ const mocks = vi.hoisted(() => ({
   grammarGroupGet: vi.fn(),
   addExamples: vi.fn(),
   getReviewDeck: vi.fn(),
+  getNextReviewItemForDirection: vi.fn(),
+  getReviewItemCountForDirection: vi.fn(),
   getReviewDeckForDirection: vi.fn(),
   getByItemIds: vi.fn(),
-  getPronunciationPracticeDeck: vi.fn(),
-  startReview: vi.fn(),
-  put: vi.fn(),
-  deleteByUserId: vi.fn(),
+  reconcileActive: vi.fn(),
   reportError: vi.fn(),
 }));
 
@@ -31,18 +30,18 @@ vi.mock('@/database/models/grammar-chunks', () => ({
 vi.mock('@/database/models/user-items', () => ({
   default: {
     getReviewDeck: (...args: unknown[]) => mocks.getReviewDeck(...args),
+    getNextReviewItemForDirection: (...args: unknown[]) =>
+      mocks.getNextReviewItemForDirection(...args),
+    getReviewItemCountForDirection: (...args: unknown[]) =>
+      mocks.getReviewItemCountForDirection(...args),
     getReviewDeckForDirection: (...args: unknown[]) => mocks.getReviewDeckForDirection(...args),
     getByItemIds: (...args: unknown[]) => mocks.getByItemIds(...args),
-    getPronunciationPracticeDeck: (...args: unknown[]) =>
-      mocks.getPronunciationPracticeDeck(...args),
   },
 }));
 
 vi.mock('@/database/models/practice-sessions', () => ({
   default: {
-    startReview: (...args: unknown[]) => mocks.startReview(...args),
-    put: (...args: unknown[]) => mocks.put(...args),
-    deleteByUserId: (...args: unknown[]) => mocks.deleteByUserId(...args),
+    reconcileActive: (...args: unknown[]) => mocks.reconcileActive(...args),
   },
 }));
 
@@ -59,7 +58,7 @@ vi.mock('@/config/config', () => ({
 
 import {
   loadReviewDeck,
-  loadReviewSessionDeck,
+  loadReviewDeckData,
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
 } from '@/database/utils/practice-content.utils';
@@ -79,7 +78,6 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
     lesson_id: 1,
     updated_at: '2026-01-01',
     is_vocabulary: 1,
-    has_pronunciation_practice: 0,
     block_id: 1,
     topic_id: -1,
     grammar_chunk_id: 10,
@@ -118,10 +116,7 @@ describe('practice content resolution', () => {
       deleted_at: null,
     });
     mocks.addExamples.mockImplementation(async (_userId, grammar) => ({ ...grammar, items: [] }));
-    mocks.startReview.mockResolvedValue(reviewSession());
-    mocks.getByItemIds.mockResolvedValue([]);
-    mocks.put.mockResolvedValue(undefined);
-    mocks.deleteByUserId.mockResolvedValue(undefined);
+    mocks.reconcileActive.mockResolvedValue(null);
   });
 
   it('deduplicates relation ids and attaches resolved content without dropping items', async () => {
@@ -174,81 +169,35 @@ describe('practice content resolution', () => {
     await expect(loadReviewDeck('u1')).rejects.toBe(error);
   });
 
-  it('loads every available item in a direction once the twenty-item minimum is met', async () => {
-    const items = Array.from({ length: 150 }, (_, index) => makeReviewItem(index + 1));
-    mocks.getReviewDeckForDirection.mockResolvedValue(items);
+  it('loads one review item without storing a review session', async () => {
+    const item = makeReviewItem(1);
+    mocks.getReviewDeck.mockResolvedValue([item]);
 
-    const result = await loadReviewSessionDeck('u1');
+    const result = await loadReviewDeckData('u1');
 
-    expect(mocks.getReviewDeckForDirection).toHaveBeenCalledWith('u1', 'czToEn');
-    expect(result.entries).toHaveLength(150);
-    expect(result.session).toMatchObject({
-      completed_count: 0,
-      target_count: 150,
-      review_direction: 'czToEn',
-      review_queue: items.map((item) => ({ item_id: item.item_id, direction: 'czToEn' })),
-    });
-    expect(mocks.put).toHaveBeenCalledOnce();
+    expect(result.entries).toHaveLength(1);
+    expect(result.entries[0]?.item).toBe(item);
+    expect(result.abandoned).toBe(false);
+    expect(mocks.reconcileActive).toHaveBeenCalledWith('u1');
+    expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', 20);
   });
 
-  it('uses the other direction when the first direction has fewer than twenty items', async () => {
-    mocks.getReviewDeckForDirection
-      .mockResolvedValueOnce(Array.from({ length: 19 }, (_, index) => makeReviewItem(index + 1)))
-      .mockResolvedValueOnce(
-        Array.from({ length: 20 }, (_, index) => makeReviewItem(index + 101, 'enToCz')),
-      );
+  it('does not start review while initial block practice is active', async () => {
+    mocks.reconcileActive.mockResolvedValue({ mode: 'new' });
 
-    const result = await loadReviewSessionDeck('u1');
-
-    expect(mocks.getReviewDeckForDirection.mock.calls.map(([_, direction]) => direction)).toEqual([
-      'czToEn',
-      'enToCz',
-    ]);
-    expect(result.entries).toHaveLength(20);
-    expect(result.entries.every((entry) => entry.item.practice_direction === 'enToCz')).toBe(true);
-  });
-
-  it('checks the opposite direction first after a direction is exhausted', async () => {
-    mocks.startReview.mockResolvedValue(reviewSession('czToEn'));
-    mocks.getReviewDeckForDirection.mockResolvedValueOnce(
-      Array.from({ length: 20 }, (_, index) => makeReviewItem(index + 1, 'enToCz')),
+    await expect(loadReviewDeckData('u1')).rejects.toThrow(
+      'Review practice is unavailable during initial block practice.',
     );
-
-    const result = await loadReviewSessionDeck('u1');
-
-    expect(mocks.getReviewDeckForDirection).toHaveBeenCalledWith('u1', 'enToCz');
-    expect(result.entries.every((entry) => entry.item.practice_direction === 'enToCz')).toBe(true);
+    expect(mocks.getReviewDeck).not.toHaveBeenCalled();
   });
 
-  it('abandons review when neither direction reaches the minimum', async () => {
-    mocks.getReviewDeckForDirection.mockResolvedValue([]);
+  it('marks review abandoned when no due item is available', async () => {
+    mocks.getReviewDeck.mockResolvedValue([]);
 
-    await expect(loadReviewSessionDeck('u1')).resolves.toEqual({
+    await expect(loadReviewDeckData('u1')).resolves.toEqual({
       entries: [],
-      session: null,
       abandoned: true,
     });
-    expect(mocks.deleteByUserId).toHaveBeenCalledWith('u1');
-  });
-
-  it('resumes a persisted review queue in its saved order', async () => {
-    const session = {
-      ...reviewSession('czToEn'),
-      completed_count: 18,
-      target_count: 20,
-      review_queue: [
-        { item_id: 3, direction: 'czToEn' as const },
-        { item_id: 1, direction: 'czToEn' as const },
-      ],
-    };
-    mocks.startReview.mockResolvedValue(session);
-    mocks.getByItemIds.mockResolvedValue([makeItem({ item_id: 1 }), makeItem({ item_id: 3 })]);
-
-    const result = await loadReviewSessionDeck('u1');
-
-    expect(mocks.getByItemIds).toHaveBeenCalledWith('u1', [3, 1]);
-    expect(mocks.getReviewDeckForDirection).not.toHaveBeenCalled();
-    expect(result.entries.map((entry) => entry.item.item_id)).toEqual([3, 1]);
   });
 
   it('resolves the grammar group belonging to the requested chunk', async () => {
@@ -264,22 +213,4 @@ function makeReviewItem(
   direction: 'czToEn' | 'enToCz' = 'czToEn',
 ): PracticeDeckItem {
   return { ...makeItem({ item_id: itemId }), practice_direction: direction };
-}
-
-function reviewSession(direction?: 'czToEn' | 'enToCz') {
-  return {
-    user_id: 'u1',
-    mode: 'review' as const,
-    completed_count: 0,
-    target_count: 0,
-    block_id: null,
-    phase: null,
-    current_queue_item_ids: [],
-    retry_queue_item_ids: [],
-    completed_item_ids: [],
-    review_queue: [],
-    review_direction: direction,
-    started_at: '2026-08-23',
-    updated_at: '2026-08-23',
-  };
 }

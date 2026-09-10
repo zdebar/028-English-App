@@ -20,7 +20,6 @@ export default function PracticeCard({
     note,
     grammar,
     progressLabel,
-    sessionLoading,
     finishedReview,
     isCzToEn,
     revealed,
@@ -45,7 +44,7 @@ export default function PracticeCard({
     reportError('Failed to fetch practice deck', error);
   }, [error, showToast]);
 
-  if (sessionLoading || (loading && !currentItem)) {
+  if (loading && !currentItem) {
     return <DelayedLoadingCircle />;
   }
 
@@ -79,7 +78,7 @@ export default function PracticeCard({
       audioError={audioError}
       playAudio={playAudio}
       audioLoading={audioLoading}
-      pronunciationItem={currentItem}
+      isContentLoading={loading}
     />
   );
 }

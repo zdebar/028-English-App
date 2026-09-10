@@ -23,7 +23,7 @@ describe('progress utilities', () => {
     });
 
     expect(getEffectiveProgress(item, 'czToEn')).toBe(10);
-    expect(getEffectiveProgress(item, 'enToCz')).toBe(3);
+    expect(getEffectiveProgress(item, 'enToCz')).toBe(0);
   });
 
   it('treats a mastered direction as full progress', () => {

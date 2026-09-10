@@ -110,7 +110,6 @@ function createItem(itemId: number, audio: string, english: string): UserItemLoc
     pronunciation: '',
     audio,
     is_vocabulary: 1,
-    has_pronunciation_practice: 0,
     sort_order: itemId,
     curriculum_sort_path: [1, 1, itemId],
     topic_id: 1,

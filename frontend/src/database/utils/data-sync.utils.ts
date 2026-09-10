@@ -17,6 +17,7 @@ import PronunciationGroup from '../models/pronunciation-groups';
 import PronunciationGroupItem from '../models/pronunciation-group-items';
 import GrammarChunkExample from '../models/grammar-chunk-examples';
 import Topic from '../models/topics';
+import { settleSyncWithAuthRecovery } from './sync-auth-recovery.utils';
 
 /**
  * Synchronizes shared and user-specific tables with Supabase.
@@ -41,33 +42,19 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
   }
 
   // Step 2: Perform shared stores data synchronization (grammar and audio metadata)
-  const allPromises = doFullSync
-    ? [
-        GrammarGroup.syncFromRemote(true),
-        GrammarChunk.syncFromRemote(true),
-        GrammarChunkExample.syncFromRemote(true),
-        Levels.syncFromRemote(true),
-        Lessons.syncFromRemote(true),
-        Block.syncFromRemote(true),
-        Notes.syncFromRemote(true),
-        Topic.syncFromRemote(true),
-        PronunciationGroup.syncFromRemote(true),
-        PronunciationGroupItem.syncFromRemote(true),
-        UserItem.syncFromRemote(userId, true),
-      ]
-    : [
-        GrammarGroup.syncFromRemote(false),
-        GrammarChunk.syncFromRemote(false),
-        GrammarChunkExample.syncFromRemote(false),
-        Levels.syncFromRemote(false),
-        Lessons.syncFromRemote(false),
-        Block.syncFromRemote(false),
-        Notes.syncFromRemote(false),
-        Topic.syncFromRemote(false),
-        PronunciationGroup.syncFromRemote(false),
-        PronunciationGroupItem.syncFromRemote(false),
-        UserItem.syncFromRemote(userId, false),
-      ];
+  const tasks = [
+    () => GrammarGroup.syncFromRemote(doFullSync),
+    () => GrammarChunk.syncFromRemote(doFullSync),
+    () => GrammarChunkExample.syncFromRemote(doFullSync),
+    () => Levels.syncFromRemote(doFullSync),
+    () => Lessons.syncFromRemote(doFullSync),
+    () => Block.syncFromRemote(doFullSync),
+    () => Notes.syncFromRemote(doFullSync),
+    () => Topic.syncFromRemote(doFullSync),
+    () => PronunciationGroup.syncFromRemote(doFullSync),
+    () => PronunciationGroupItem.syncFromRemote(doFullSync),
+    () => UserItem.syncFromRemote(userId, doFullSync),
+  ];
 
   // Keep a parallel list of human-readable table names to report per-table completions.
   const tableNames = [
@@ -84,7 +71,7 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
     'UserItems',
   ];
 
-  const results = await Promise.allSettled(allPromises);
+  const results = await settleSyncWithAuthRecovery(userId, tasks);
 
   // Report per-table completion counts when available (most syncFromRemote return number of items)
   results.forEach((r, idx) => {
@@ -100,7 +87,11 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
     }
   });
 
-  const summary = await withSettledSummary(allPromises, 'Data sync', 3, false);
+  const finalPromises = results.map((result) => {
+    if (result.status === 'fulfilled') return Promise.resolve(result.value);
+    return Promise.reject(result.reason);
+  });
+  const summary = await withSettledSummary(finalPromises, 'Data sync', 3, false);
 
   if (summary.failed > 0) {
     throw new Error('Data synchronization error');
@@ -123,8 +114,8 @@ export async function dataSyncOnUnmount(userId: string): Promise<void> {
     return;
   }
 
-  const results = await Promise.allSettled([
-    UserItem.syncFromRemote(userId, false),
+  const results = await settleSyncWithAuthRecovery(userId, [
+    () => UserItem.syncFromRemote(userId, false),
   ]);
 
   if (results.some((r) => r.status === 'rejected')) {

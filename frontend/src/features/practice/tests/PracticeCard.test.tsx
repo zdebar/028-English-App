@@ -29,7 +29,6 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     lesson_id: 1,
     updated_at: '2024-01-01T00:00:00.000Z',
     is_vocabulary: 1,
-    has_pronunciation_practice: 0,
     block_id: 1,
     topic_id: -1,
     grammar_chunk_id: 10,
@@ -228,15 +227,6 @@ vi.mock('@/features/practice/hooks/use-practice-deck', () => ({
 }));
 
 vi.mock('@/features/help/HelpButton', () => ({ default: () => <div data-testid="help-button" /> }));
-vi.mock('@/features/pronunciation/PronunciationToggleButton', () => ({
-  default: ({ showHelpText, onSelectionChange }: any) => (
-    <button
-      data-testid="pronunciation-toggle"
-      data-show-help-text={String(showHelpText)}
-      onClick={() => onSelectionChange?.(false)}
-    />
-  ),
-}));
 vi.mock('@/features/help/HelpText', () => ({
   default: ({ children }: any) => <span>{children}</span>,
 }));
@@ -400,6 +390,30 @@ describe('PracticeCard', () => {
 
     expect(screen.getByTestId('grammar-detail').textContent).toContain('Articles');
     expect(screen.getByTestId('grammar-detail').dataset.helpEnabled).toBe('false');
+  });
+
+  it('does not show the review progress label on the card', () => {
+    render(<PracticeCard />);
+
+    expect(screen.queryByText('2/20')).toBeNull();
+  });
+
+  it('keeps the current review card while the next item loads', () => {
+    mocks.practiceDeck.sessionLoading = true;
+    mocks.practiceDeck.loading = true;
+    mocks.practiceDeck.revealed = true;
+
+    render(<PracticeCard />);
+
+    expect(screen.getByText('ahoj')).toBeTruthy();
+    expect(screen.queryByText('Loading')).toBeNull();
+
+    act(() => vi.advanceTimersByTime(999));
+    expect(screen.queryByText('Loading')).toBeNull();
+
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.getByText('Loading')).toBeTruthy();
+    expect((screen.getByTestId('known-btn') as HTMLButtonElement).disabled).toBe(false);
   });
 
   it('returns home from the empty practice state', () => {
@@ -604,6 +618,7 @@ describe('PracticeCard', () => {
         nextRepeat={vi.fn()}
         nextKnown={vi.fn()}
         completeDisabled
+        isBlockTrainingPractice
         audioError={false}
         playAudio={vi.fn()}
         audioLoading={false}
@@ -611,6 +626,7 @@ describe('PracticeCard', () => {
     );
 
     expect((screen.getByTestId('master-btn') as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByText('Round 1/2')).not.toBeNull();
   });
 
   it('keeps the next hint disabled until the skip pointer gesture is released', async () => {
@@ -660,78 +676,6 @@ describe('PracticeCard', () => {
 
     fireEvent.click(hintButton);
     expect(plusHint).toHaveBeenCalledTimes(1);
-  });
-
-  it('shows only Next and keeps audio status below direction in pronunciation practice', () => {
-    const next = vi.fn();
-    const onSelectionChange = vi.fn();
-    render(
-      <PracticeSessionCard
-        note={null}
-        grammar={null}
-        progressLabel="1 / 4"
-        isCzToEn={false}
-        revealed
-        czech="muž"
-        english="man"
-        pronunciation="mæn"
-        audioDisabled={false}
-        showDirectionChange={false}
-        handleReveal={vi.fn()}
-        plusHint={vi.fn()}
-        nextRepeat={vi.fn()}
-        nextKnown={vi.fn()}
-        audioError={false}
-        playAudio={vi.fn()}
-        audioLoading
-        isPronunciationPractice
-        nextPronunciation={next}
-        onPronunciationSelectionChange={onSelectionChange}
-      />,
-    );
-
-    expect(screen.getByTitle('Next')).toBeTruthy();
-    expect(screen.queryByTestId('master-btn')).toBeNull();
-    expect(screen.queryByTestId('repeat-btn')).toBeNull();
-    expect(screen.queryByTestId('known-btn')).toBeNull();
-    expect(screen.queryByTestId('practice-stars-row')).toBeNull();
-    expect(screen.queryByText('en › cz')).toBeNull();
-
-    act(() => {
-      vi.advanceTimersByTime(1000);
-    });
-
-    expect(screen.getByText('Loading audio')).toBeTruthy();
-    fireEvent.click(screen.getByTestId('pronunciation-toggle'));
-    expect(onSelectionChange).toHaveBeenCalledWith(false);
-  });
-
-  it('disables Next when pronunciation practice has no advance handler', () => {
-    const { container } = render(
-      <PracticeSessionCard
-        note={null}
-        grammar={null}
-        progressLabel="1 / 1"
-        isCzToEn={false}
-        revealed
-        czech="muž"
-        english="man"
-        pronunciation="mæn"
-        audioDisabled={false}
-        showDirectionChange={false}
-        handleReveal={vi.fn()}
-        plusHint={vi.fn()}
-        nextRepeat={vi.fn()}
-        nextKnown={vi.fn()}
-        audioError={false}
-        playAudio={vi.fn()}
-        audioLoading={false}
-        isPronunciationPractice
-      />,
-    );
-
-    const nextButton = container.querySelector('#practice-controls button');
-    expect((nextButton as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('can disable the repeat control for specialized practice sessions', () => {

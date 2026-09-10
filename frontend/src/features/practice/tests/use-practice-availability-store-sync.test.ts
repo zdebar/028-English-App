@@ -16,7 +16,6 @@ const mocks = vi.hoisted(() => ({
     .fn()
     .mockResolvedValue({ activeSession: null, requiresReconciliation: false }),
   reconcileActiveSession: vi.fn().mockResolvedValue(null),
-  getPronunciationPracticeCount: vi.fn(),
   reportError: vi.fn(),
 }));
 
@@ -38,8 +37,6 @@ vi.mock('@/database/models/user-items', () => ({
     getReadyReviewState: (...args: unknown[]) => mocks.getReadyReviewState(...args),
     getNextInitialTrainingSelection: (...args: unknown[]) =>
       mocks.getNextInitialTrainingSelection(...args),
-    getPronunciationPracticeCount: (...args: unknown[]) =>
-      mocks.getPronunciationPracticeCount(...args),
   },
 }));
 vi.mock('@/database/models/practice-sessions', () => ({
@@ -79,16 +76,14 @@ describe('usePracticeAvailabilityStoreSync', () => {
 
   afterEach(() => vi.useRealTimers());
 
-  it('subscribes once per availability source and stores emitted snapshots', async () => {
+  it('subscribes to availability and stores emitted snapshots', async () => {
     renderHook(() => usePracticeAvailabilityStoreSync('u1'));
 
-    expect(mocks.queries).toHaveLength(2);
+    expect(mocks.queries).toHaveLength(1);
     await mocks.queries[0]();
-    await mocks.queries[1]();
     expect(mocks.getReadyReviewState).toHaveBeenCalledWith('u1');
     expect(mocks.inspectActiveSession).toHaveBeenCalledWith('u1');
     expect(mocks.reconcileActiveSession).not.toHaveBeenCalled();
-    expect(mocks.getPronunciationPracticeCount).toHaveBeenCalledWith('u1');
 
     act(() => {
       mocks.observers[0].next({
@@ -97,13 +92,10 @@ describe('usePracticeAvailabilityStoreSync', () => {
         activeSession: null,
         requiresSessionReconciliation: false,
       });
-      mocks.observers[1].next(2);
     });
     expect(usePracticeAvailabilityStore.getState()).toMatchObject({
       reviewReadyAt: '2026-07-21T10:00:00.000Z',
       practiceLoading: false,
-      pronunciationCount: 2,
-      pronunciationLoading: false,
     });
   });
 
@@ -148,17 +140,13 @@ describe('usePracticeAvailabilityStoreSync', () => {
     });
     act(() => {
       mocks.observers[0].next({ review: { reviewReadyAt: '2026-07-21T10:00:00.000Z' }, initialTrainingAvailable: false, activeSession: null });
-      mocks.observers[1].next(2);
     });
 
     rerender({ userId: 'u2' });
     expect(mocks.unsubscribes[0]).toHaveBeenCalledOnce();
-    expect(mocks.unsubscribes[1]).toHaveBeenCalledOnce();
     expect(usePracticeAvailabilityStore.getState()).toMatchObject({
       reviewReadyAt: null,
       practiceLoading: true,
-      pronunciationCount: 0,
-      pronunciationLoading: true,
     });
 
     act(() => mocks.observers[0].next({ review: { reviewReadyAt: '2026-07-21T10:00:00.000Z' }, initialTrainingAvailable: false, activeSession: null }));
@@ -172,15 +160,12 @@ describe('usePracticeAvailabilityStoreSync', () => {
     );
     act(() => {
       mocks.observers[0].next({ review: { reviewReadyAt: '2026-07-21T10:00:00.000Z' }, initialTrainingAvailable: false, activeSession: null });
-      mocks.observers[1].next(2);
     });
 
     rerender({ userId: null });
     expect(usePracticeAvailabilityStore.getState()).toMatchObject({
       reviewReadyAt: null,
       practiceLoading: false,
-      pronunciationCount: 0,
-      pronunciationLoading: false,
     });
 
     unmount();
@@ -188,22 +173,18 @@ describe('usePracticeAvailabilityStoreSync', () => {
     expect(usePracticeAvailabilityStore.getState().reviewReadyAt).toBeNull();
   });
 
-  it('stores and reports both observer failures', () => {
+  it('stores and reports observer failures', () => {
     renderHook(() => usePracticeAvailabilityStoreSync('u1'));
     const readyError = new Error('ready failed');
-    const pronunciationError = new Error('pronunciation failed');
 
     act(() => {
       mocks.observers[0].error(readyError);
-      mocks.observers[1].error(pronunciationError);
     });
 
     expect(usePracticeAvailabilityStore.getState()).toMatchObject({
       practiceLoading: false,
       practiceError: readyError,
-      pronunciationLoading: false,
-      pronunciationError,
     });
-    expect(mocks.reportError).toHaveBeenCalledTimes(2);
+    expect(mocks.reportError).toHaveBeenCalledTimes(1);
   });
 });

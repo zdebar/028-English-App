@@ -83,7 +83,6 @@ function InitialTrainingContent({
       playAudio={deck.playAudio}
       audioLoading={deck.audioLoading}
       isBlockTrainingPractice
-      pronunciationItem={deck.currentItem}
     />
   );
 }

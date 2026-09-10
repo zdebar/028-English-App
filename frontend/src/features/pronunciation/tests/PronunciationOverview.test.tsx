@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
-  addAvailable: vi.fn(),
   playAudio: vi.fn(),
   overviewData: [] as any[],
   overviewLoading: false,
@@ -45,7 +44,6 @@ vi.mock('@/database/models/pronunciation-groups', () => ({
   default: {
     getOverview: vi.fn(),
     getDetail: vi.fn(),
-    addAvailableItems: (...args: unknown[]) => mocks.addAvailable(...args),
   },
 }));
 
@@ -110,12 +108,8 @@ vi.mock('@/locales/cs', () => ({
     pronunciationGroups: 'Skupiny výslovnosti',
     noPronunciationGroups: 'No groups',
     noPronunciationGroupItems: 'No items',
-    pronunciationGroupAdded: 'Přidáno',
-    addPronunciationGroup: 'Přidat skupinu',
     noAudio: 'No audio',
     loadingError: 'Loading error',
-    pronunciationGroupAddError: 'Add error',
-    addToPronunciationHelp: 'přidat do výslovnosti',
     pronunciationStartedHelp: 'odemčeno/celkem položek',
   },
 }));
@@ -130,7 +124,6 @@ describe('Pronunciation overview screens', () => {
     mocks.overviewLoading = false;
     mocks.overviewError = null;
     mocks.detailData = null;
-    mocks.addAvailable.mockResolvedValue(2);
     mocks.playAudio.mockResolvedValue(true);
   });
 
@@ -154,15 +147,13 @@ describe('Pronunciation overview screens', () => {
     expect(mocks.navigate).toHaveBeenCalledWith('/pronunciation/1');
   });
 
-  it('plays group items and bulk-adds missing selections', async () => {
+  it('plays group items', async () => {
     mocks.detailData = {
       group: { id: 1, name: '/æ/ × /e/' },
       items: [
         { item_id: 1, czech: 'muž', english: 'man', pronunciation: 'mæn', audio: 'man.opus' },
         { item_id: 2, czech: 'muži', english: 'men', pronunciation: 'men', audio: 'men.opus' },
       ],
-      selected_count: 1,
-      available_count: 2,
     };
 
     render(<PronunciationGroupDetail />);
@@ -173,24 +164,5 @@ describe('Pronunciation overview screens', () => {
     fireEvent.click(screen.getByTitle('mæn'));
     await waitFor(() => expect(mocks.playAudio).toHaveBeenCalledWith('man.opus'));
 
-    fireEvent.click(screen.getByRole('button', { name: 'Přidat skupinu' }));
-    await waitFor(() => {
-      expect(mocks.addAvailable).toHaveBeenCalledWith('u1', 1);
-    });
-  });
-
-  it('disables bulk addition when the whole group is selected', () => {
-    mocks.detailData = {
-      group: { id: 1, name: '/æ/ × /e/' },
-      items: [{ item_id: 1, czech: 'muž', english: 'man', audio: 'man.opus' }],
-      selected_count: 1,
-      available_count: 1,
-    };
-
-    render(<PronunciationGroupDetail />);
-
-    expect((screen.getByRole('button', { name: 'Přidáno' }) as HTMLButtonElement).disabled).toBe(
-      true,
-    );
   });
 });

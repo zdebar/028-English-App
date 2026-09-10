@@ -13,8 +13,7 @@ SET search_path TO public;
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS grammar_groups (
@@ -161,7 +160,6 @@ CREATE TABLE IF NOT EXISTS user_items (
   item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
   progress_cz_to_en INTEGER NOT NULL DEFAULT 0 CHECK (progress_cz_to_en >= 0),
   progress_en_to_cz INTEGER NOT NULL DEFAULT 0 CHECK (progress_en_to_cz >= 0),
-  has_pronunciation_practice BOOLEAN NOT NULL DEFAULT FALSE,
   started_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   next_at_cz_to_en TIMESTAMPTZ,
@@ -223,7 +221,6 @@ CREATE INDEX IF NOT EXISTS idx_user_items_user_updated_item
     mastered_at_cz_to_en,
     mastered_at_en_to_cz
   );
-
 CREATE INDEX IF NOT EXISTS idx_user_items_item_user
   ON public.user_items (item_id, user_id)
   INCLUDE (
@@ -236,6 +233,3 @@ CREATE INDEX IF NOT EXISTS idx_user_items_item_user
     mastered_at_cz_to_en,
     mastered_at_en_to_cz
   );
-
-CREATE INDEX IF NOT EXISTS idx_user_items_user_pronunciation_practice
-  ON public.user_items (user_id, has_pronunciation_practice);

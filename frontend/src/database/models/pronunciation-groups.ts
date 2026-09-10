@@ -139,28 +139,6 @@ export default class PronunciationGroup extends SyncEntityModel implements Pronu
     return {
       group,
       items,
-      selected_count: items.filter((item) => item.has_pronunciation_practice === 1).length,
-      available_count: items.length,
     };
-  }
-
-  static async addAvailableItems(userId: string, groupId: number): Promise<number> {
-    const detail = await this.getDetail(userId, groupId);
-    if (!detail) return 0;
-    const missing = detail.items.filter((item) => item.has_pronunciation_practice !== 1);
-    if (missing.length === 0) return 0;
-
-    const updatedAt = new Date().toISOString();
-    await db.transaction('rw', db.user_items, async () => {
-      await Promise.all(
-        missing.map((item) =>
-          db.user_items.update([userId, item.item_id], {
-            has_pronunciation_practice: 1,
-            updated_at: updatedAt,
-          }),
-        ),
-      );
-    });
-    return missing.length;
   }
 }

@@ -69,7 +69,6 @@ const exampleItem: UserItemLocal = {
   lesson_id: 1,
   updated_at: '2026-08-02T00:00:00.000Z',
   is_vocabulary: 0,
-  has_pronunciation_practice: 0,
   block_id: 1,
   topic_id: -1,
   grammar_chunk_id: 1,

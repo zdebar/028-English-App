@@ -27,6 +27,4 @@ export interface PronunciationGroupOverviewType extends PronunciationGroupType {
 export interface PronunciationGroupDetailType {
   group: PronunciationGroupType;
   items: UserItemLocal[];
-  selected_count: number;
-  available_count: number;
 }

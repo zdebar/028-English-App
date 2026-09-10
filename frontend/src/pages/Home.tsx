@@ -16,7 +16,6 @@ import PracticeOverviewButton from '@/features/practice-overview/PracticeOvervie
 import SimulateDataButton from '@/features/synchronization/SimulateDataButton';
 import PracticeButton from '@/features/practice/PracticeButton';
 import HelpButton from '@/features/help/HelpButton';
-import PronunciationPracticeButton from '@/features/pronunciation/PronunciationPracticeButton';
 import { practiceOverviewDescriptor } from '@/routing/route-data';
 import config from '@/config/config';
 
@@ -89,7 +88,6 @@ export default function Home(): JSX.Element {
           />
           <div className="flex w-full flex-col gap-1">
             <PracticeButton userId={userId} />
-            <PronunciationPracticeButton userId={userId} />
           </div>
           <div className="relative">
             <p

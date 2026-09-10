@@ -12,7 +12,7 @@ Dexie models under `frontend/src/database/models`.
 | `started_at` | First time the user started an item. Null is represented by config's null replacement date. |
 | `next_at` | When the item is next ready. Null replacement date means not scheduled/not started depending on context. |
 | `mastered_at` | Completion/mastery timestamp. Null replacement date means not mastered. |
-| `deleted_at` | Soft-delete timestamp. Null replacement date means not deleted. |
+| `deleted_at` | Synchronization tombstone for content/progress rows. User accounts are deleted immediately and do not use this field. |
 | Null replacement date/number | IndexedDB index-friendly stand-ins from `config.database`. |
 
 ## Main Relationships

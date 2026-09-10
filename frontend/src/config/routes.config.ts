@@ -3,7 +3,6 @@ export const ROUTES = {
   privacyPolicy: '/privacy-policy',
   practice: '/practice',
   initialTraining: '/practice/initial-training',
-  pronunciationPractice: '/practice/pronunciation',
   practiceOverview: '/practice-overview',
   overviews: '/overviews',
   profile: '/profile',

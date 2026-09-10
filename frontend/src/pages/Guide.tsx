@@ -47,15 +47,6 @@ export default function Guide(): JSX.Element {
         <p>Procvičování již započatých položek, které zvyšuje nebo snižuje jejich pokrok.</p>
         <h3>Nové</h3>
         <p>Učení nového bloku slovíček v obou směrech a v pevném i náhodném pořadí.</p>
-        <h3>Výslovnost</h3>
-        <p>
-          Volitelné procvičování výslovnosti individuálních položek. Lze přidat skrze tlačítko ve
-          cvičení či v přehledu slovíček.
-        </p>
-        <p>
-          Nemá vliv na pokrok v lekcích. Pokud tedy nějaké slovíčko či větu znáte, ale dělá Vám
-          problém výslovnost, je vhodné přidat je sem.
-        </p>
         <h3>Přehled lekcí</h3>
         <p>Přehled dnes dotčených lekcí. Lze přepínat mezi rozučenými a naučenými položkami.</p>
       </section>
@@ -74,8 +65,6 @@ export default function Guide(): JSX.Element {
         <p>Zobrazuje dnešní změnu pokroku a její postup k dennímu cíli.</p>
         <h3>Nápověda</h3>
         <p>Písmeno po písmenu odhaluje slovíčko či větu.</p>
-        <h3>Přidat do výslovnosti</h3>
-        <p>Přidá / odebere danou položku do / z "Výslovnost - položky".</p>
         <h3>Gramatika</h3>
         <p>Zobrazí vysvětlení příslušné gramatiky.</p>
         <h3>Poznámka</h3>
@@ -137,13 +126,10 @@ export default function Guide(): JSX.Element {
         <p>Přehled započatých tematických bloků slovíček, např. dny v týdnu, měsíce atd.</p>
         <h3>Přehled slovíček</h3>
         <p>Přehled započatých slovíček.</p>
-        <h3>Výslovnost</h3>
-        <p>Výběr skupin podobně znějících položek, například bad / bed, k procvičování.</p>
+        <h3>Přehled výslovnosti</h3>
+        <p>Přehled skupin podobně znějících položek, například bad / bed, s možností přehrát audio.</p>
         <h3>Smazat účet</h3>
-        <p>
-          Vaše údaje budou uchovány po dobu dalších 30 dní. Během této doby lze účet obnovit
-          opětovným přihlášením. Po 30 dnech je účet nenávratně smazán.
-        </p>
+        <p>Účet a všechna jeho data budou po potvrzení okamžitě a nenávratně smazána.</p>
         <h3>Odhlásit se</h3>
         <p>Odhlásí vás z vašeho uživatelského účtu.</p>
       </section>

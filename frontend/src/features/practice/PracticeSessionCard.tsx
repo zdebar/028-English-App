@@ -1,5 +1,6 @@
 import Notification from '@/components/UI/Notification';
 import DelayedNotification from '@/components/UI/DelayedNotification';
+import config from '@/config/config';
 import SecondaryControlButton from '@/components/UI/buttons/SecondaryControlButton';
 import BookIcon from '@/components/UI/icons/BookIcon';
 import PlayButton from '@/features/audio/PlayButton';
@@ -14,15 +15,10 @@ import HintButton from './buttons/HintButton';
 import KnownButton from './buttons/KnownButton';
 import MasterItemButton from './buttons/MasterItemButton';
 import RepeatButton from './buttons/RepeatButton';
-import PronunciationToggleButton from '@/features/pronunciation/PronunciationToggleButton';
-import { useAuthStore } from '@/features/auth/use-auth-store';
-import type { UserItemLocal } from '@/types/user-item.types';
-import RightArrowIcon from '@/components/UI/icons/RightArrowIcon';
-import ControlButton from './buttons/ControlButton';
 import { usePointerReleaseLock } from './hooks/use-pointer-release-lock';
 import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
 import type { NoteType } from '@/types/generic.types';
-import { useState, type MouseEvent } from 'react';
+import { useEffect, useState, type MouseEvent } from 'react';
 
 export type PracticeSessionCardProps = Readonly<{
   note: NoteType | null;
@@ -47,19 +43,14 @@ export type PracticeSessionCardProps = Readonly<{
   playAudio: () => void;
   audioLoading: boolean;
   isBlockTrainingPractice?: boolean;
-  isPronunciationPractice?: boolean;
-  pronunciationItem?: UserItemLocal | null;
-  nextPronunciation?: () => void;
-  onPronunciationSelectionChange?: (selected: boolean) => void;
+  isContentLoading?: boolean;
 }>;
 
 type PracticeControlsProps = Pick<
   PracticeSessionCardProps,
   | 'completeCurrent'
   | 'completeDisabled'
-  | 'isPronunciationPractice'
   | 'nextKnown'
-  | 'nextPronunciation'
   | 'nextRepeat'
   | 'plusHint'
   | 'repeatDisabled'
@@ -139,9 +130,7 @@ function DirectionTopBar({
 function PracticeControls({
   completeCurrent,
   completeDisabled = false,
-  isPronunciationPractice = false,
   nextKnown,
-  nextPronunciation,
   nextRepeat,
   plusHint,
   repeatDisabled = false,
@@ -153,17 +142,6 @@ function PracticeControls({
 
   if (showHintControl) {
     return <HintButton onClick={plusHint} disabled={controlsLocked || isSkipGestureLocked} />;
-  }
-
-  if (isPronunciationPractice) {
-    return (
-      <ControlButton
-        icon={<RightArrowIcon />}
-        label={TEXTS.next}
-        onClick={nextPronunciation}
-        disabled={!nextPronunciation}
-      />
-    );
   }
 
   return (
@@ -197,6 +175,7 @@ type PracticeMainContentProps = Readonly<{
   czech: string | undefined;
   english: string | undefined;
   pronunciation: string | undefined;
+  isContentLoading: boolean;
 }>;
 
 function PracticeMainContent({
@@ -205,9 +184,33 @@ function PracticeMainContent({
   czech,
   english,
   pronunciation,
+  isContentLoading,
 }: PracticeMainContentProps) {
+  const [showLoadingMessage, setShowLoadingMessage] = useState(false);
+
+  useEffect(() => {
+    if (!isContentLoading) {
+      setShowLoadingMessage(false);
+      return undefined;
+    }
+
+    const timeoutId = globalThis.setTimeout(
+      () => setShowLoadingMessage(true),
+      config.loading.dataStateDelayMs,
+    );
+    return () => globalThis.clearTimeout(timeoutId);
+  }, [isContentLoading]);
+
   if (showDirectionChange) {
     return <Notification>{directionText}</Notification>;
+  }
+
+  if (isContentLoading && showLoadingMessage) {
+    return (
+      <p className="text-center font-normal" aria-live="polite">
+        {TEXTS.loadingMessage}
+      </p>
+    );
   }
 
   return (
@@ -231,8 +234,6 @@ type NormalizedPracticeSessionCardProps = PracticeSessionCardProps &
     repeatDisabled: boolean;
     completeDisabled: boolean;
     isBlockTrainingPractice: boolean;
-    isPronunciationPractice: boolean;
-    pronunciationItem: UserItemLocal | null;
   }>;
 
 const DEFAULT_PRACTICE_SESSION_CARD_PROPS = {
@@ -240,8 +241,6 @@ const DEFAULT_PRACTICE_SESSION_CARD_PROPS = {
   repeatDisabled: false,
   completeDisabled: false,
   isBlockTrainingPractice: false,
-  isPronunciationPractice: false,
-  pronunciationItem: null,
 } as const;
 
 function normalizePracticeSessionCardProps(
@@ -258,6 +257,7 @@ type PracticeCardDisplayState = Readonly<{
   showAudioControls: boolean;
   showGrammarButton: boolean;
   showNoteButton: boolean;
+  showProgressLabel: boolean;
   audioControlsDisabled: boolean;
   grammarButtonDisabled: boolean;
   noteButtonDisabled: boolean;
@@ -279,7 +279,6 @@ function getPracticeCardDisplayState(
     audioDisabled,
     showDirectionChange,
     audioLoading,
-    isPronunciationPractice,
   } = props;
   const controlsLocked = showDirectionChange;
   const showAudioControls = !audioDisabled;
@@ -293,6 +292,7 @@ function getPracticeCardDisplayState(
     showAudioControls,
     showGrammarButton,
     showNoteButton,
+    showProgressLabel: props.isBlockTrainingPractice,
     audioControlsDisabled: isAudioControlDisabled(
       controlsLocked,
       showAudioControls,
@@ -307,9 +307,8 @@ function getPracticeCardDisplayState(
     showHintControl: !revealed || controlsLocked,
     practiceControlColumns: getPracticeControlColumns(
       !revealed || controlsLocked,
-      isPronunciationPractice,
     ),
-    showTopBar: !isPronunciationPractice,
+    showTopBar: true,
     showRevealHelp: !revealed && !controlsLocked,
   };
 }
@@ -363,9 +362,8 @@ function isAudioControlDisabled(
 
 function getPracticeControlColumns(
   showHintControl: boolean,
-  isPronunciationPractice: boolean,
 ): string {
-  if (!showHintControl && !isPronunciationPractice) return 'grid-cols-3';
+  if (!showHintControl) return 'grid-cols-3';
   return 'grid-cols-1';
 }
 
@@ -403,7 +401,6 @@ function PracticeCardButton({
     czech,
     english,
     pronunciation,
-    isBlockTrainingPractice,
     progressLabel,
     progressHelpText,
     audioError,
@@ -442,56 +439,44 @@ function PracticeCardButton({
           czech={czech}
           english={english}
           pronunciation={pronunciation}
+          isContentLoading={props.isContentLoading ?? false}
         />
         {!display.showTopBar && (
           <AudioStatusMessage audioError={audioError} audioLoading={audioLoading} />
         )}
       </div>
-      <div
-        className="relative flex h-8 w-full shrink-0 items-center justify-between"
-        id="bottom-bar"
-      >
-        <p className="min-w-12 text-right font-light" title={progressHelpText}>
-          {progressLabel}
-        </p>
-        <HelpText className="bottom-7.5">
-          {getPracticeProgressHelp(isBlockTrainingPractice, progressHelpText)}
-        </HelpText>
+      <div className="relative flex h-8 w-full shrink-0 items-center justify-between" id="bottom-bar">
+        {display.showProgressLabel && (
+          <>
+            <p className="min-w-12 text-right font-light" title={progressHelpText}>
+              {progressLabel}
+            </p>
+            <HelpText className="bottom-7.5">
+              {TEXTS.blockTrainingProgressHelp}
+            </HelpText>
+          </>
+        )}
       </div>
     </button>
   );
 }
 
-function getPracticeProgressHelp(
-  isBlockTrainingPractice: boolean,
-  progressHelpText: string,
-): string {
-  if (isBlockTrainingPractice) return TEXTS.blockTrainingProgressHelp;
-  return progressHelpText;
-}
-
 function PracticeCardActionBar({
   props,
   display,
-  userId,
   setVisibleDetail,
 }: Readonly<{
   props: NormalizedPracticeSessionCardProps;
   display: PracticeCardDisplayState;
-  userId: string | null;
   setVisibleDetail: (detail: VisibleDetail) => void;
 }>) {
   const {
     grammar,
     note,
     playAudio,
-    pronunciationItem,
-    onPronunciationSelectionChange,
     completeCurrent,
     completeDisabled,
-    isPronunciationPractice,
     nextKnown,
-    nextPronunciation,
     nextRepeat,
     plusHint,
     repeatDisabled,
@@ -505,9 +490,7 @@ function PracticeCardActionBar({
         <PracticeControls
           completeCurrent={completeCurrent}
           completeDisabled={completeDisabled}
-          isPronunciationPractice={isPronunciationPractice}
           nextKnown={nextKnown}
-          nextPronunciation={nextPronunciation}
           nextRepeat={nextRepeat}
           plusHint={plusHint}
           repeatDisabled={repeatDisabled}
@@ -518,13 +501,6 @@ function PracticeCardActionBar({
       <div className="pos-bottom-left-control">
         <PlayButton onClick={playAudio} disabled={display.audioControlsDisabled} />
         <VolumeSlider disabled={display.audioControlsDisabled} />
-        <PronunciationToggleButton
-          userId={userId}
-          item={pronunciationItem}
-          disabled={display.controlsLocked}
-          showHelpText
-          onSelectionChange={onPronunciationSelectionChange}
-        />
       </div>
       <div className="pos-bottom-right-control">
         <SecondaryControlButton
@@ -559,11 +535,9 @@ function PracticeCardActionBar({
 
 function PracticeSessionCardView({
   props,
-  userId,
   setVisibleDetail,
 }: Readonly<{
   props: NormalizedPracticeSessionCardProps;
-  userId: string | null;
   setVisibleDetail: (detail: VisibleDetail) => void;
 }>) {
   const display = getPracticeCardDisplayState(props);
@@ -574,7 +548,6 @@ function PracticeSessionCardView({
         <PracticeCardActionBar
           props={props}
           display={display}
-          userId={userId}
           setVisibleDetail={setVisibleDetail}
         />
       </div>
@@ -584,7 +557,6 @@ function PracticeSessionCardView({
 
 export default function PracticeSessionCard(props: PracticeSessionCardProps) {
   const normalizedProps = normalizePracticeSessionCardProps(props);
-  const userId = useAuthStore((state) => state.userId);
   const [visibleDetail, setVisibleDetail] = useState<VisibleDetail | null>(null);
 
   if (visibleDetail) {
@@ -601,7 +573,6 @@ export default function PracticeSessionCard(props: PracticeSessionCardProps) {
   return (
     <PracticeSessionCardView
       props={normalizedProps}
-      userId={userId}
       setVisibleDetail={(detail) => setVisibleDetail(detail)}
     />
   );

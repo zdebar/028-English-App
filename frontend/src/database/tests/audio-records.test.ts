@@ -27,7 +27,6 @@ vi.mock('@/config/config', () => ({
     progress: {
       simulationItemCount: 400,
       simulationItemProgress: 1,
-      simulationPronunciationItemCount: 5,
     },
     audio: {
       audioBucketName: 'audio-bucket',
