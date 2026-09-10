@@ -4,7 +4,7 @@ import PracticeSessionCard from './PracticeSessionCard';
 import PracticeEmptyState from './PracticeEmptyState';
 import PracticeEndState from './PracticeEndState';
 import { TEXTS } from '@/locales/cs';
-import DelayedLoadingCircle from '@/components/UI/DelayedLoadingCircle';
+import DelayedMessage from '@/components/UI/DelayedMessage';
 import { useToastStore } from '../toast/use-toast-store';
 import { reportError } from '../logging/monitoring-handler';
 import { useEffect } from 'react';
@@ -45,7 +45,7 @@ export default function PracticeCard({
   }, [error, showToast]);
 
   if (loading && !currentItem) {
-    return <DelayedLoadingCircle />;
+    return <DelayedMessage />;
   }
 
   if (finishedReview) {

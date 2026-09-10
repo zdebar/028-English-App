@@ -1,7 +1,7 @@
 import { act, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import DelayedLoadingCircle from '@/components/UI/DelayedLoadingCircle';
+import DelayedMessage from '@/components/UI/DelayedMessage';
 
 vi.mock('@/config/config', () => ({
   default: {
@@ -9,7 +9,7 @@ vi.mock('@/config/config', () => ({
   },
 }));
 
-describe('DelayedLoadingCircle', () => {
+describe('DelayedMessage', () => {
   afterEach(() => {
     vi.useRealTimers();
   });
@@ -17,21 +17,20 @@ describe('DelayedLoadingCircle', () => {
   it('renders nothing before the configured delay', () => {
     vi.useFakeTimers();
 
-    const { container } = render(<DelayedLoadingCircle />);
+    const { container } = render(<DelayedMessage />);
 
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders loading circle after the configured delay', () => {
+  it('renders the loading message after the configured delay', () => {
     vi.useFakeTimers();
 
-    render(<DelayedLoadingCircle />);
+    render(<DelayedMessage />);
 
     act(() => {
       vi.advanceTimersByTime(1000);
     });
 
-    expect(screen.getByLabelText('Načítání ...')).toBeTruthy();
+    expect(screen.getByText('Načítání ...')).toBeTruthy();
   });
-
 });
