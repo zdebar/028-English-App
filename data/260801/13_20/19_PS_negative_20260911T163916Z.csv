@@ -1,0 +1,41 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+tenký,thin,θˈɪn,thin.opus,19000,,,,,True,19
+hlasovat,vote,vˈoʊt,vote.opus,19001,,,,,True,19
+téma,topic,tˈɑːpɪk,topic.opus,19002,,,,,True,19
+dotek,touch,tˈʌtʃ,touch.opus,19003,,,,,True,19
+výhra,win,wˈɪn,win.opus,19004,,,,,True,19
+jehož,whose,hˈuːz,whose.opus,19005,,,,,True,19
+bílit,white,wˈaɪt,white.opus,19006,,,,,True,19
+bílý,white,wˈaɪt,white.opus,19007,,,,,True,19
+jaký,which,wˈɪtʃ,which.opus,19008,,,,,True,19
+když,when,wˈɛn,when.opus,19009,,,,,True,19
+kolo,wheel,wˈiːl,wheel.opus,19010,,,,,True,19
+jaký,what,wˈʌt,what.opus,19011,,,,,True,19
+byli,were,wˈɜː,were.opus,19012,,,,,True,19
+studna,well,wˈɛl,well.opus,19013,,,,,True,19
+vítejte,welcome,wˈɛlkʌm,welcome.opus,19014,,,,,True,19
+víkend,weekend,wˈiːkɛnd,weekend.opus,19015,,,,,True,19
+nosit (oblečení),wear,wˈɛɹ,wear.opus,19016,,,,,True,19
+zoo,zoo,zˈuː,zoo.opus,19017,,,,,True,19
+ty sám,yourself,jɔːɹsˈɛlf,yourself.opus,19018,,,,,True,19
+jogurt,yoghurt,jˈoʊɡɚt,yoghurt.opus,19019,,,,,True,19
+ještě,yet,jˈɛt,yet.opus,19020,,,,,True,19
+žlutý,yellow,jˈɛloʊ,yellow.opus,19021,,,,,True,19
+yard,yard,jˈɑːɹd,yard.opus,19022,,,,,True,19
+napsat,write,ɹˈaɪt,write.opus,19023,,,,,True,19
+já nepiji (běžně),I don't drink,aɪ dˈoʊnt dɹˈɪŋk,i_dont_drink.opus,19024,35,,,27,False,19
+ty nehraješ (běžně),you don't play,juː dˈoʊnt plˈeɪ,you_dont_play.opus,19025,35,,,27,False,19
+on nemá (běžně),he doesn't have,hiː dˈʌzənt hˈæv,he_doesnt_have.opus,19026,35,,,27,False,19
+ona nemluví (běžně),she doesn't speak,ʃiː dˈʌzənt spˈiːk,she_doesnt_speak.opus,19027,35,,,27,False,19
+ono neběží (běžně),it doesn't run,ɪt dˈʌzənt ɹˈʌn,it_doesnt_run.opus,19028,35,,,27,False,19
+my nebydlíme (běžně),we don't live,wiː dˈoʊnt lˈɪv,we_dont_live.opus,19029,35,,,27,False,19
+vy nepomáháte (běžně),you don't help,juː dˈoʊnt hˈɛlp,you_dont_help.opus,19030,35,,,27,False,19
+oni neznají (běžně),they don't know,ðeɪ dˈoʊnt nˈoʊ,they_dont_know.opus,19031,35,,,27,False,19
+Já nepracuji v pondělí. (běžně),I don't work on Monday.,aɪ dˈoʊnt wˈɜːk ˌɔn mˈʌndeɪ,i_dont_work_on_monday.opus,19032,,,,27,False,19
+Ty nesnídáváš. (běžně),You don't eat breakfast.,juː dˈoʊnt ˈiːt bɹˈɛkfəst,you_dont_eat_breakfast.opus,19033,,,,27,False,19
+On nepije kávu. (běžně),He doesn't drink coffee.,hiː dˈʌzənt dɹˈɪŋk kˈɔfi,he_doesnt_drink_coffee.opus,19034,,,,27,False,19
+Ona nesleduje televizi. (běžně),She doesn't watch TV.,ʃiː dˈʌzənt wˈɑːtʃ tˌiːvˈiː,she_doesnt_watch_tv.opus,19035,,,,27,False,19
+V zimě neprší. (běžně),It doesn't rain in winter.,ɪt dˈʌzənt ɹˈeɪn ɪn wˈɪntɚ,it_doesnt_rain_in_winter.opus,19036,,,,27,False,19
+My o víkendech nenakupujeme. (běžně),We don't shop on weekends.,wiː dˈoʊnt ʃˈɑːp ˌɔn wˈiːkɛndz,we_dont_shop_on_weekends.opus,19037,,,,27,False,19
+Vy se po obědě nevracíte. (běžně),You don't return after lunch.,juː dˈoʊnt ɹᵻtˈɜːn ˈæftɚ lˈʌntʃ,you_dont_return_after_lunch.opus,19038,,,,27,False,19
+Oni si nehrají venku. (běžně),They don't play outside.,ðeɪ dˈoʊnt plˈeɪ aʊtsˈaɪd,they_dont_play_outside.opus,19039,,,,27,False,19
