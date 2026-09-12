@@ -97,6 +97,7 @@ function createIndexedPracticeQuery() {
       return {
         filter: (...filterArgs: unknown[]) => {
           mocks.indexedFilter(...filterArgs);
+          const predicate = filterArgs[0] as (item: any) => boolean;
           return {
             limit: (...limitArgs: unknown[]) => {
               mocks.indexedLimit(...limitArgs);
@@ -108,6 +109,10 @@ function createIndexedPracticeQuery() {
               };
             },
             toArray: (...toArrayArgs: unknown[]) => mocks.indexedToArray(...toArrayArgs),
+            count: async (...countArgs: unknown[]) =>
+              ((await mocks.indexedToArray(...countArgs)) ?? [])
+                .map(normalizeIndexedPracticeItem)
+                .filter(predicate).length,
           };
         },
       };
@@ -779,6 +784,101 @@ describe('UserItem', () => {
   it('returns an empty deck without querying when deckSize is not positive', async () => {
     await expect(UserItem.getReviewDeck('u1', 0)).resolves.toEqual([]);
     expect(mocks.indexedToArray).not.toHaveBeenCalled();
+  });
+
+  it('counts eligible items in one direction using the supplied current time', async () => {
+    const now = '2026-06-24T12:00:00.000Z';
+    mocks.indexedToArray.mockResolvedValueOnce([
+      {
+        item_id: 1,
+        deleted_at: '1970-01-01T00:00:00.000Z',
+        started_at: '2026-01-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        next_at_cz_to_en: '2026-06-24T11:00:00.000Z',
+      },
+      {
+        item_id: 2,
+        deleted_at: '1970-01-01T00:00:00.000Z',
+        started_at: '2026-01-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+        next_at_cz_to_en: '2026-06-24T13:00:00.000Z',
+      },
+      {
+        item_id: 3,
+        deleted_at: '1970-01-01T00:00:00.000Z',
+        started_at: '2026-01-01T00:00:00.000Z',
+        mastered_at_cz_to_en: '2026-06-20T12:00:00.000Z',
+        next_at_cz_to_en: '2026-06-24T11:00:00.000Z',
+      },
+    ]);
+
+    await expect(UserItem.getReviewItemCountForDirection('u1', 'czToEn', now)).resolves.toBe(1);
+    expect(mocks.indexedBetween).toHaveBeenCalledWith(
+      ['u1', expect.anything(), expect.anything(), expect.anything()],
+      ['u1', expect.anything(), expect.anything(), expect.anything()],
+      true,
+      true,
+    );
+  });
+
+  it('counts newly due directional items once between availability checks', async () => {
+    mocks.indexedToArray
+      .mockResolvedValueOnce([
+        {
+          item_id: 1,
+          deleted_at: '1970-01-01T00:00:00.000Z',
+          started_at: '2026-01-01T00:00:00.000Z',
+          mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+          next_at_cz_to_en: '2026-06-24T10:00:00.000Z',
+        },
+        {
+          item_id: 2,
+          deleted_at: '1970-01-01T00:00:00.000Z',
+          started_at: '2026-01-01T00:00:00.000Z',
+          mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
+          next_at_cz_to_en: '2026-06-24T09:00:00.000Z',
+        },
+        {
+          item_id: 3,
+          deleted_at: '1970-01-01T00:00:00.000Z',
+          started_at: '2026-01-01T00:00:00.000Z',
+          mastered_at_cz_to_en: '2026-06-20T12:00:00.000Z',
+          next_at_cz_to_en: '2026-06-24T11:00:00.000Z',
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          item_id: 4,
+          deleted_at: '1970-01-01T00:00:00.000Z',
+          started_at: '2026-01-01T00:00:00.000Z',
+          mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+          next_at_en_to_cz: '2026-06-24T11:30:00.000Z',
+        },
+      ]);
+
+    const count = await UserItem.getNewlyAvailableReviewItemCount(
+      'u1',
+      '2026-06-24T10:00:00.000Z',
+      '2026-06-24T12:00:00.000Z',
+    );
+
+    expect(count).toBe(2);
+    expect(mocks.transaction).toHaveBeenCalledWith('r', expect.anything(), expect.any(Function));
+    expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
+      1,
+      ['u1', '2026-06-24T10:00:00.000Z', expect.anything(), expect.anything()],
+      ['u1', '2026-06-24T12:00:00.000Z', expect.anything(), expect.anything()],
+      true,
+      true,
+    );
+    expect(mocks.indexedBetween).toHaveBeenNthCalledWith(
+      2,
+      ['u1', '2026-06-24T10:00:00.000Z', expect.anything(), expect.anything()],
+      ['u1', '2026-06-24T12:00:00.000Z', expect.anything(), expect.anything()],
+      true,
+      true,
+    );
+    expect(mocks.indexedToArray).toHaveBeenCalledTimes(2);
   });
 
   it('filters deleted, unstarted, and mastered items from the one-item selection', async () => {

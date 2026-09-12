@@ -150,7 +150,7 @@ export function pronunciationGroupDetailDescriptor(userId: string, groupId: numb
 export function practiceDeckDescriptor(userId: string) {
   return {
     key: routeDataKey('practice', userId),
-    load: async () => (await loadReviewDeckData(userId)).entries,
+    load: () => loadReviewDeckData(userId),
   };
 }
 

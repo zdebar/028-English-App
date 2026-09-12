@@ -1,5 +1,5 @@
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import LoadingCircle from '@/components/UI/LoadingCircle';
+import DelayedMessage from '@/components/UI/DelayedMessage';
 import Dashboard from '@/features/dashboard/Dashboard';
 import { useUserStore } from '@/features/user-stats/use-user-store';
 import { TEXTS } from '@/locales/cs';
@@ -49,7 +49,7 @@ export default function Home(): JSX.Element {
   if (authLoading) {
     return (
       <div className="card-width w-full">
-        <LoadingCircle />
+        <DelayedMessage />
       </div>
     );
   }

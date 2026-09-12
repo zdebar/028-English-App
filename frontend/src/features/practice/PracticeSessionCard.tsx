@@ -43,6 +43,7 @@ export type PracticeSessionCardProps = Readonly<{
   playAudio: () => void;
   audioLoading: boolean;
   isBlockTrainingPractice?: boolean;
+  showProgressLabel?: boolean;
   isContentLoading?: boolean;
 }>;
 
@@ -234,6 +235,7 @@ type NormalizedPracticeSessionCardProps = PracticeSessionCardProps &
     repeatDisabled: boolean;
     completeDisabled: boolean;
     isBlockTrainingPractice: boolean;
+    showProgressLabel: boolean;
   }>;
 
 const DEFAULT_PRACTICE_SESSION_CARD_PROPS = {
@@ -241,6 +243,7 @@ const DEFAULT_PRACTICE_SESSION_CARD_PROPS = {
   repeatDisabled: false,
   completeDisabled: false,
   isBlockTrainingPractice: false,
+  showProgressLabel: false,
 } as const;
 
 function normalizePracticeSessionCardProps(
@@ -292,7 +295,7 @@ function getPracticeCardDisplayState(
     showAudioControls,
     showGrammarButton,
     showNoteButton,
-    showProgressLabel: props.isBlockTrainingPractice,
+    showProgressLabel: props.isBlockTrainingPractice || props.showProgressLabel,
     audioControlsDisabled: isAudioControlDisabled(
       controlsLocked,
       showAudioControls,
@@ -451,9 +454,9 @@ function PracticeCardButton({
             <p className="min-w-12 text-right font-light" title={progressHelpText}>
               {progressLabel}
             </p>
-            <HelpText className="bottom-7.5">
-              {TEXTS.blockTrainingProgressHelp}
-            </HelpText>
+            {props.isBlockTrainingPractice && (
+              <HelpText className="bottom-7.5">{TEXTS.blockTrainingProgressHelp}</HelpText>
+            )}
           </>
         )}
       </div>

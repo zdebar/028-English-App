@@ -1,0 +1,44 @@
+czech,english,block_id,grammar_chunk_id
+spisovatel,writer,,
+starost,worry,,
+pracovník,worker,,
+úžasné,wonderful,,
+deštník,umbrella,,
+škaredý,ugly,,
+televize,TV,,
+zatočit,turn,,
+obrat,turn,,
+krocan,turkey,,
+roura,tube,,
+pokus,try,,
+věrný,true,,
+nákladní auto,truck,,
+hračka,toy,,
+věž,tower,,
+ručník,towel,,
+podtrhnout,underline,,
+sledovat,watch,,
+hodinky,watch,,
+praní,wash,,
+teplo,warm,,
+probudit,wake,,
+číšník,waiter,,
+Já jím? (běžně),Do I eat?,36,28
+Ty čteš? (běžně),Do you read?,36,28
+On běhá? (běžně),Does he run?,36,28
+Ona vaří? (běžně),Does she cook?,36,28
+Funguje to? (běžně),Does it work?,36,28
+My zpíváme? (běžně),Do we sing?,36,28
+Vy čekáte? (běžně),Do you wait?,36,28
+Oni cestují? (běžně),Do they travel?,36,28
+"Ano, běhá. (běžně)","Yes, he does.",37,29
+"Ne, nečteš. (běžně)","No, you don't.",37,29
+"Ne, nevaří. (běžně)","No, she doesn't.",37,29
+Já jím doma? (běžně),Do I eat at home?,,28
+Ty čteš knihy? (běžně),Do you read books?,,28
+On řídí auto? (běžně),Does he drive a car?,,28
+Ona učí angličtinu? (běžně),Does she teach English?,,28
+Bolí to? (běžně),Does it hurt?,,28
+My bydlíme tady? (běžně),Do we live here?,,28
+Vy potřebujete pomoc? (běžně),Do you need help?,,28
+Oni hrají fotbal? (běžně),Do they play football?,,28

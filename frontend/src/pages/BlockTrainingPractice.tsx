@@ -1,4 +1,4 @@
-import DelayedLoadingCircle from '@/components/UI/DelayedLoadingCircle';
+import DelayedMessage from '@/components/UI/DelayedMessage';
 import Notification from '@/components/UI/Notification';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { reportError } from '@/features/logging/monitoring-handler';
@@ -42,7 +42,7 @@ function InitialTrainingContent({
   introDismissed: boolean;
   dismissIntro: () => void;
 }>): JSX.Element {
-  if (deck.loading) return <DelayedLoadingCircle />;
+  if (deck.loading) return <DelayedMessage />;
   if (deck.isComplete) {
     return <PracticeEndState {...getInitialTrainingCompletionMessages(deck.block?.name)} />;
   }

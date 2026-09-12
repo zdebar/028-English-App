@@ -1,5 +1,5 @@
 import { TEXTS } from '@/locales/cs';
-import DelayedLoadingCircle from './DelayedLoadingCircle';
+import DelayedMessage from './DelayedMessage';
 import Notification from './Notification';
 
 type DataStateProps = Readonly<{
@@ -17,7 +17,7 @@ export function DataState({
 }: DataStateProps) {
   if (hasData) return <>{children}</>;
   if (loading) {
-    return <DelayedLoadingCircle />;
+    return <DelayedMessage />;
   }
 
   return <Notification className="pt-4">{noDataMessage}</Notification>;

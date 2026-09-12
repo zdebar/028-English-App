@@ -1,5 +1,5 @@
 import App from '@/App';
-import DelayedLoadingCircle from '@/components/UI/DelayedLoadingCircle';
+import DelayedMessage from '@/components/UI/DelayedMessage';
 import RouteDataError from '@/components/utils/route-data-error';
 import ProtectedLayout from '@/components/utils/protected-laout';
 import { ROUTES } from '@/config/routes.config';
@@ -143,7 +143,7 @@ export const router = createHashRouter([
       {
         Component: ProtectedLayout,
         loader: protectedLoader,
-        HydrateFallback: DelayedLoadingCircle,
+        HydrateFallback: DelayedMessage,
         children: [
           { path: ROUTES.practice, loader: loadPractice, Component: Practice },
           {
