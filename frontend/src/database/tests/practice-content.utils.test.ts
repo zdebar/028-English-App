@@ -20,6 +20,8 @@ vi.mock('@/database/models/db', () => ({
     notes: { bulkGet: (...args: unknown[]) => mocks.notesBulkGet(...args) },
     grammar_chunks: { bulkGet: (...args: unknown[]) => mocks.grammarBulkGet(...args) },
     grammar_groups: { get: (...args: unknown[]) => mocks.grammarGroupGet(...args) },
+    user_items: {},
+    transaction: (_mode: string, _table: unknown, callback: () => Promise<unknown>) => callback(),
   },
 }));
 
@@ -117,6 +119,7 @@ describe('practice content resolution', () => {
     });
     mocks.addExamples.mockImplementation(async (_userId, grammar) => ({ ...grammar, items: [] }));
     mocks.reconcileActive.mockResolvedValue(null);
+    mocks.getReviewItemCountForDirection.mockResolvedValue(0);
   });
 
   it('deduplicates relation ids and attaches resolved content without dropping items', async () => {
@@ -172,14 +175,23 @@ describe('practice content resolution', () => {
   it('loads one review item without storing a review session', async () => {
     const item = makeReviewItem(1);
     mocks.getReviewDeck.mockResolvedValue([item]);
+    mocks.getReviewItemCountForDirection
+      .mockResolvedValueOnce(2)
+      .mockResolvedValueOnce(3);
 
     const result = await loadReviewDeckData('u1');
+    const [userId, deckSize, now] = mocks.getReviewDeck.mock.calls[0];
 
     expect(result.entries).toHaveLength(1);
     expect(result.entries[0]?.item).toBe(item);
+    expect(result.availableCount).toBe(5);
+    expect(result.availabilityCheckedAt).toBe(now);
     expect(result.abandoned).toBe(false);
     expect(mocks.reconcileActive).toHaveBeenCalledWith('u1');
-    expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', 20);
+    expect([userId, deckSize]).toEqual(['u1', 20]);
+    expect(now).toEqual(expect.any(String));
+    expect(mocks.getReviewItemCountForDirection).toHaveBeenNthCalledWith(1, 'u1', 'czToEn', now);
+    expect(mocks.getReviewItemCountForDirection).toHaveBeenNthCalledWith(2, 'u1', 'enToCz', now);
   });
 
   it('does not start review while initial block practice is active', async () => {
@@ -194,10 +206,21 @@ describe('practice content resolution', () => {
   it('marks review abandoned when no due item is available', async () => {
     mocks.getReviewDeck.mockResolvedValue([]);
 
-    await expect(loadReviewDeckData('u1')).resolves.toEqual({
-      entries: [],
-      abandoned: true,
-    });
+    const result = await loadReviewDeckData('u1');
+
+    expect(result).toMatchObject({ entries: [], availableCount: 0, abandoned: true });
+    expect(result.availabilityCheckedAt).toEqual(expect.any(String));
+  });
+
+  it('skips recounting availability while loading the next review card', async () => {
+    mocks.getReviewDeck.mockResolvedValue([makeReviewItem(1)]);
+
+    const result = await loadReviewDeckData('u1', false);
+
+    expect(result.entries).toHaveLength(1);
+    expect(result.availableCount).toBe(0);
+    expect(result.availabilityCheckedAt).toEqual(expect.any(String));
+    expect(mocks.getReviewItemCountForDirection).not.toHaveBeenCalled();
   });
 
   it('resolves the grammar group belonging to the requested chunk', async () => {

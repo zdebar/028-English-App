@@ -21,15 +21,28 @@ import {
 } from '@/database/utils/practice-content.utils';
 
 /** Loads and saves one review card at a time without persisting a review session. */
-export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDeckEntry[]) {
+export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckData) {
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [saveError, setSaveError] = useState<Error | null>(null);
   const [finishedReview, setFinishedReview] = useState(false);
+  const [completedCount, setCompletedCount] = useState(0);
+  const [totalCount, setTotalCount] = useState(getInitialReviewTotalCount(initialData));
   const isTransitioningRef = useRef(false);
+  const availabilityInitializedRef = useRef(hasInitialReviewData(initialData));
+  const availabilityCheckedAtRef = useRef(initialData?.availabilityCheckedAt ?? null);
 
-  const fetchPracticeDeck = useCallback(() => fetchReviewDeck(userId), [userId]);
-  const initialResult = useMemo(() => createInitialReviewResult(initialDeck), [initialDeck]);
+  const fetchPracticeDeck = useCallback(async () => {
+    const includeAvailabilityCount = !availabilityInitializedRef.current;
+    const result = await fetchReviewDeck(userId, includeAvailabilityCount);
+    if (includeAvailabilityCount) {
+      availabilityInitializedRef.current = true;
+      availabilityCheckedAtRef.current = result.availabilityCheckedAt;
+      setTotalCount(result.availableCount);
+    }
+    return result;
+  }, [userId]);
+  const initialResult = useMemo(() => createInitialReviewResult(initialData), [initialData]);
   const {
     data: fetchedResult,
     loading,
@@ -72,6 +85,9 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
             resetQuestionState,
             reload,
             setSaveError,
+            setCompletedCount,
+            setTotalCount,
+            availabilityCheckedAtRef,
           },
           outcome,
         );
@@ -87,7 +103,7 @@ export function usePracticeDeck(userId: string | null, initialDeck?: PracticeDec
     currentItem,
     note: currentEntry?.note ?? null,
     grammar: currentEntry?.grammar ?? null,
-    progressLabel: '',
+    progressLabel: getReviewProgressLabel(completedCount, totalCount),
     finishedReview,
     isCzToEn,
     revealed,
@@ -115,14 +131,36 @@ function toError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
 }
 
-function fetchReviewDeck(userId: string | null): Promise<ReviewDeckData> {
-  if (!userId) return Promise.resolve({ entries: [], abandoned: true });
-  return loadReviewDeckData(userId);
+function fetchReviewDeck(
+  userId: string | null,
+  includeAvailabilityCount: boolean,
+): Promise<ReviewDeckData> {
+  if (!userId) {
+    return Promise.resolve({
+      entries: [],
+      availableCount: 0,
+      availabilityCheckedAt: new Date().toISOString(),
+      abandoned: true,
+    });
+  }
+  return loadReviewDeckData(userId, includeAvailabilityCount);
 }
 
-function createInitialReviewResult(initialDeck: PracticeDeckEntry[] | undefined) {
-  if (!initialDeck) return undefined;
-  return { entries: initialDeck.slice(0, 1), abandoned: false };
+function createInitialReviewResult(initialData: ReviewDeckData | undefined) {
+  if (!initialData) return undefined;
+  return { ...initialData, entries: initialData.entries.slice(0, 1) };
+}
+
+function hasInitialReviewData(initialData: ReviewDeckData | undefined): boolean {
+  return initialData !== undefined;
+}
+
+function getInitialReviewTotalCount(initialData: ReviewDeckData | undefined): number {
+  return initialData?.availableCount ?? 0;
+}
+
+function getReviewProgressLabel(completedCount: number, totalCount: number): string {
+  return `${completedCount} / ${totalCount}`;
 }
 
 function getReviewDeckView(
@@ -156,6 +194,9 @@ type SaveReviewAnswerOptions = Readonly<{
   resetQuestionState: () => void;
   reload: () => Promise<unknown>;
   setSaveError: Dispatch<SetStateAction<Error | null>>;
+  setCompletedCount: Dispatch<SetStateAction<number>>;
+  setTotalCount: Dispatch<SetStateAction<number>>;
+  availabilityCheckedAtRef: { current: string | null };
 }>;
 
 async function saveReviewAnswer(
@@ -168,22 +209,61 @@ async function saveReviewAnswer(
     resetQuestionState,
     reload,
     setSaveError,
+    setCompletedCount,
+    setTotalCount,
+    availabilityCheckedAtRef,
   } = options;
   if (!currentItem || !userId) return;
 
   const dateTime = new Date(Date.now()).toISOString();
   const direction = currentItem.practice_direction;
   const updatedItem = UserItem.applyPracticeProgress(currentItem, direction, outcome, dateTime);
+  const checkedAt = availabilityCheckedAtRef.current ?? dateTime;
+
+  let newlyAvailableCount = 0;
+  try {
+    newlyAvailableCount = await UserItem.getNewlyAvailableReviewItemCount(
+      userId,
+      checkedAt,
+      dateTime,
+    );
+  } catch (caughtError) {
+    const normalizedError = toError(caughtError);
+    setSaveError(normalizedError);
+    reportError('Failed to refresh review availability count', normalizedError);
+    return;
+  }
 
   try {
     await UserItem.savePracticeDeck([{ ...updatedItem, practice_direction: direction }]);
-    invalidateRouteData(routeDataKey('practice', userId));
+  } catch (caughtError) {
+    const normalizedError = toError(caughtError);
+    setSaveError(normalizedError);
+    reportError('Failed to save review answer', normalizedError);
+    return;
+  }
+
+  setSaveError(null);
+  setCompletedCount((count) => count + 1);
+  setTotalCount((count) => count + newlyAvailableCount);
+  availabilityCheckedAtRef.current = dateTime;
+  await refreshAfterReviewSave(userId, reload, resetQuestionState, setSaveError);
+}
+
+async function refreshAfterReviewSave(
+  userId: string,
+  reload: () => Promise<unknown>,
+  resetQuestionState: () => void,
+  setSaveError: Dispatch<SetStateAction<Error | null>>,
+): Promise<void> {
+  invalidateRouteData(routeDataKey('practice', userId));
+  try {
     await reload();
     resetQuestionState();
   } catch (caughtError) {
     const normalizedError = toError(caughtError);
     setSaveError(normalizedError);
-    reportError('Failed to save review answer', normalizedError);
+    reportError('Failed to refresh review deck', normalizedError);
   }
 }
 

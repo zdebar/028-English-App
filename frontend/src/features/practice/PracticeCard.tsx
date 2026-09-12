@@ -8,11 +8,11 @@ import DelayedMessage from '@/components/UI/DelayedMessage';
 import { useToastStore } from '../toast/use-toast-store';
 import { reportError } from '../logging/monitoring-handler';
 import { useEffect } from 'react';
-import type { PracticeDeckEntry } from '@/types/user-item.types';
+import type { ReviewDeckData } from '@/database/utils/practice-content.utils';
 
 export default function PracticeCard({
-  initialDeck,
-}: Readonly<{ initialDeck?: PracticeDeckEntry[] }>) {
+  initialReviewData,
+}: Readonly<{ initialReviewData?: ReviewDeckData }>) {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
   const {
@@ -36,7 +36,7 @@ export default function PracticeCard({
     audioLoading,
     loading,
     error,
-  } = usePracticeDeck(userId, initialDeck);
+  } = usePracticeDeck(userId, initialReviewData);
 
   useEffect(() => {
     if (!error) return;
@@ -62,6 +62,7 @@ export default function PracticeCard({
       grammar={grammar}
       progressLabel={progressLabel}
       progressHelpText={TEXTS.reviewProgress}
+      showProgressLabel
       isBlockTrainingPractice={false}
       isCzToEn={isCzToEn}
       revealed={revealed}

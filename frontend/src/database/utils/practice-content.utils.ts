@@ -133,16 +133,36 @@ export async function loadReviewDeck(
 
 export type ReviewDeckData = Readonly<{
   entries: PracticeDeckEntry[];
+  availableCount: number;
+  availabilityCheckedAt: string;
   abandoned: boolean;
 }>;
 
 /** Loads the next review card without creating or restoring a review session. */
-export async function loadReviewDeckData(userId: string): Promise<ReviewDeckData> {
+export async function loadReviewDeckData(
+  userId: string,
+  includeAvailabilityCount = true,
+): Promise<ReviewDeckData> {
   const activeSession = await PracticeSession.reconcileActive(userId);
   if (activeSession?.mode === 'new') {
     throw new Error('Review practice is unavailable during initial block practice.');
   }
 
-  const entries = await loadReviewDeck(userId);
-  return { entries, abandoned: entries.length === 0 };
+  const now = new Date().toISOString();
+  const { items, availableCount } = await db.transaction('r', db.user_items, async () => {
+    if (!includeAvailabilityCount) {
+      const items = await UserItem.getReviewDeck(userId, config.practice.reviewMinimumSize, now);
+      return { items, availableCount: 0 };
+    }
+
+    const [items, czToEnCount, enToCzCount] = await Promise.all([
+      UserItem.getReviewDeck(userId, config.practice.reviewMinimumSize, now),
+      UserItem.getReviewItemCountForDirection(userId, 'czToEn', now),
+      UserItem.getReviewItemCountForDirection(userId, 'enToCz', now),
+    ]);
+
+    return { items, availableCount: czToEnCount + enToCzCount };
+  });
+  const entries = await resolvePracticeEntries(userId, items);
+  return { entries, availableCount, availabilityCheckedAt: now, abandoned: entries.length === 0 };
 }

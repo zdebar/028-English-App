@@ -223,14 +223,17 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   mastered_at_en_to_cz!: string;
   lesson_id!: number;
 
-  /** Returns the next due review item, preferring CZ to EN over EN to CZ. */
+  /**
+   * Returns the next due review item, preferring CZ to EN over EN to CZ.
+   * @param now Fixed current time shared with directional availability counts.
+   */
   static async getReviewDeck(
     userId: string,
     deckSize: number = config.practice.reviewMinimumSize,
+    now: string = new Date().toISOString(),
   ): Promise<PracticeDeckItem[]> {
     if (deckSize <= 0) return [];
 
-    const now = new Date().toISOString();
     const czToEnItem = await this.getNextReviewItemForDirection(userId, 'czToEn', now);
     if (czToEnItem) return [czToEnItem];
 
@@ -255,6 +258,22 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     now: string = new Date().toISOString(),
   ): Promise<number> {
     return this.getDuePracticeCollection(userId, direction, now).count();
+  }
+
+  /** Counts newly due review directions whose next_at entered the requested time window. */
+  static async getNewlyAvailableReviewItemCount(
+    userId: string,
+    checkedAt: string,
+    now: string,
+  ): Promise<number> {
+    return db.transaction('r', db.user_items, async () => {
+      const [czToEnCount, enToCzCount] = await Promise.all([
+        this.getNewlyAvailableReviewItemCountForDirection(userId, 'czToEn', checkedAt, now),
+        this.getNewlyAvailableReviewItemCountForDirection(userId, 'enToCz', checkedAt, now),
+      ]);
+
+      return czToEnCount + enToCzCount;
+    });
   }
 
   /** Reads every due item in one direction for the continuous review flow. */
@@ -799,6 +818,37 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         true,
       )
       .filter(matchesItem);
+  }
+
+  private static getNewlyAvailableReviewItemCountForDirection(
+    userId: string,
+    direction: PracticeDirection,
+    checkedAt: string,
+    now: string,
+  ): Promise<number> {
+    const matchesNewlyAvailableItem = (item: UserItemLocal) => {
+      if (item.deleted_at !== NULL_DATE || item.started_at === NULL_DATE) return false;
+      if (getDirectionMasteredAt(item, direction) !== NULL_DATE) return false;
+
+      const nextAt = getDirectionNextAt(item, direction);
+      return nextAt !== NULL_DATE && nextAt >= checkedAt && nextAt < now;
+    };
+
+    const index =
+      direction === 'czToEn'
+        ? '[user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]'
+        : '[user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]';
+
+    return db.user_items
+      .where(index)
+      .between(
+        [userId, checkedAt, Dexie.minKey, Dexie.minKey],
+        [userId, now, Dexie.maxKey, Dexie.maxKey],
+        true,
+        true,
+      )
+      .filter(matchesNewlyAvailableItem)
+      .count();
   }
 
   /**

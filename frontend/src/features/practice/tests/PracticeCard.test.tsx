@@ -392,10 +392,10 @@ describe('PracticeCard', () => {
     expect(screen.getByTestId('grammar-detail').dataset.helpEnabled).toBe('false');
   });
 
-  it('does not show the review progress label on the card', () => {
+  it('shows the review progress label on the card', () => {
     render(<PracticeCard />);
 
-    expect(screen.queryByText('2/20')).toBeNull();
+    expect(screen.getByText('2/20')).toBeTruthy();
   });
 
   it('keeps the current review card while the next item loads', () => {
