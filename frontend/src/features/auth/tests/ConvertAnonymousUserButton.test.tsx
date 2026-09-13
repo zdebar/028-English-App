@@ -79,6 +79,7 @@ describe('ConvertAnonymousUserButton', () => {
         provider: 'google',
         options: {
           redirectTo: expect.any(String),
+          queryParams: { prompt: 'select_account' },
           skipBrowserRedirect: true,
         },
       });

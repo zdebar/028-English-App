@@ -113,4 +113,17 @@ describe('anonymous session fallback', () => {
     expect(location.hash).toBe('#part');
     expect(history.state).toEqual({ retained: true });
   });
+
+  it('returns the hash router to home when OAuth errors are in the URL fragment', () => {
+    history.replaceState(
+      null,
+      '',
+      '/?keep=yes#error=access_denied&error_code=identity_already_exists&error_description=exists',
+    );
+
+    clearAuthErrorParameters();
+
+    expect(location.search).toBe('?keep=yes');
+    expect(location.hash).toBe('#/');
+  });
 });

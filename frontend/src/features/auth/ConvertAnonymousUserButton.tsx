@@ -7,13 +7,12 @@ import {
   clearAnonymousSessionFallback,
   saveAnonymousSessionFallback,
 } from '@/features/auth/anonymous-session-fallback';
+import { AUTH_REDIRECT_TO } from '@/features/auth/auth-redirect';
 import { TEXTS } from '@/locales/cs';
 
 type ConvertButtonProps = Readonly<{
   className?: string;
 }>;
-
-const AUTH_REDIRECT_TO = new URL(import.meta.env.BASE_URL, globalThis.location.origin).toString();
 
 export default function ConvertAnonymousUserButton({ className }: ConvertButtonProps): JSX.Element {
   const showToast = useToastStore((state) => state.showToast);
@@ -38,7 +37,11 @@ export default function ConvertAnonymousUserButton({ className }: ConvertButtonP
 
       const { data, error } = await supabaseInstance.auth.linkIdentity({
         provider: 'google',
-        options: { redirectTo: AUTH_REDIRECT_TO, skipBrowserRedirect: true },
+        options: {
+          redirectTo: AUTH_REDIRECT_TO,
+          queryParams: { prompt: 'select_account' },
+          skipBrowserRedirect: true,
+        },
       });
       if (error) {
         throw error;

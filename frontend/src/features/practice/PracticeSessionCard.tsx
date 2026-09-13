@@ -448,10 +448,13 @@ function PracticeCardButton({
           <AudioStatusMessage audioError={audioError} audioLoading={audioLoading} />
         )}
       </div>
-      <div className="relative flex h-8 w-full shrink-0 items-center justify-between" id="bottom-bar">
+      <div
+        className="relative flex h-8 w-full shrink-0 items-center justify-between"
+        id="bottom-bar"
+      >
         {display.showProgressLabel && (
           <>
-            <p className="min-w-12 text-right font-light" title={progressHelpText}>
+            <p className="min-w-12 pl-2 text-right font-light" title={progressHelpText}>
               {progressLabel}
             </p>
             {props.isBlockTrainingPractice && (
