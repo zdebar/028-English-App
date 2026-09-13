@@ -17,16 +17,16 @@ type HeaderButtonProps = Readonly<{
 export default function HeaderButton({ to, descriptor, ...rest }: HeaderButtonProps): JSX.Element {
   const isSelected = useMatch({ path: to ?? '', end: true });
 
-  const sharedClasses = `${rest.className ?? ''} size-button flex items-center justify-center rounded-full`;
+  const sharedClasses = `${rest.className ?? ''} size-button flex items-center justify-center rounded-full grow-0 shrink-0`;
 
   if (rest.disabled)
     return (
       <button
         type="button"
-      disabled
-      aria-disabled="true"
-      tabIndex={-1}
-      className={`${sharedClasses} cursor-default text-disabled-light dark:text-disabled-dark hover:bg-inherit`}
+        disabled
+        aria-disabled="true"
+        tabIndex={-1}
+        className={`${sharedClasses} text-disabled-light dark:text-disabled-dark cursor-default hover:bg-inherit`}
       >
         {rest.children}
       </button>
