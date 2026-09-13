@@ -4,6 +4,7 @@
 /archive/
 venv/
 /frontend/TODO.md
+/data/german
 
 /scripts/utils/__pycache__/
 .env
@@ -11,6 +12,7 @@ venv/
 
 node_modules/
 test_result.txt
+Nemcina.pdf
 
 */__pycache__/
 
