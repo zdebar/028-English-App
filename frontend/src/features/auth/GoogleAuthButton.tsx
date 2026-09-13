@@ -2,6 +2,7 @@ import { supabaseInstance } from '@/config/supabase.config';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { type JSX } from 'react';
+import { AUTH_REDIRECT_TO } from '@/features/auth/auth-redirect';
 import * as cs from '@/locales/cs.json';
 
 const GOOGLE_AUTH_APPEARANCE = {
@@ -38,8 +39,6 @@ const GOOGLE_AUTH_APPEARANCE = {
     },
   },
 };
-
-const AUTH_REDIRECT_TO = new URL(import.meta.env.BASE_URL, globalThis.location.origin).toString();
 
 export default function GoogleAuthButton(): JSX.Element {
   return (

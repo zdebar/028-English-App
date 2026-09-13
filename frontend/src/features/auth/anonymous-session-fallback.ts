@@ -133,6 +133,11 @@ export async function restoreAnonymousSessionFallback(
 
 export function clearAuthErrorParameters(): void {
   const url = new URL(globalThis.location.href);
+  const hashParameters = new URLSearchParams(url.hash.slice(1));
+  const hashHasAuthError = ['error', 'error_code', 'error_description'].some((parameter) =>
+    hashParameters.has(parameter),
+  );
+
   url.searchParams.delete('error');
   url.searchParams.delete('error_code');
   url.searchParams.delete('error_description');
@@ -142,4 +147,8 @@ export function clearAuthErrorParameters(): void {
     '',
     `${url.pathname}${url.search}${url.hash}`,
   );
+
+  if (hashHasAuthError) {
+    globalThis.location.hash = '/';
+  }
 }

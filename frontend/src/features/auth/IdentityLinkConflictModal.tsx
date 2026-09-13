@@ -7,10 +7,9 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { Modal } from '@/features/modal/Modal';
 import { useToastStore } from '@/features/toast/use-toast-store';
+import { AUTH_REDIRECT_TO } from '@/features/auth/auth-redirect';
 import { TEXTS } from '@/locales/cs';
 import { useCallback, type JSX } from 'react';
-
-const AUTH_REDIRECT_TO = new URL(import.meta.env.BASE_URL, globalThis.location.origin).toString();
 
 export default function IdentityLinkConflictModal(): JSX.Element | null {
   const isOpen = useAuthStore((state) => state.hasIdentityLinkConflict);
