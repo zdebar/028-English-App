@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+výstavce,drawer,dɹˈɔːɹ,drawer.opus,53000,,,,,True,53
+stejně,anyway,ˈɛnɪwˌeɪ,anyway.opus,53001,,,,,True,53
+zdroj,source,sˈɔːɹs,source.opus,53002,,,,,True,53
+ochutnat,sample,sˈæmpəl,sample.opus,53003,,,,,True,53
+kromě,besides,bᵻsˈaɪdz,besides.opus,53004,,,,,True,53
+však,however,haʊˈɛvɚ,however.opus,53005,,,,,True,53
+kdekoli,anywhere,ˈɛnɪwˌɛɹ,anywhere.opus,53006,,,,,True,53
+v centru města,downtown,dˈaʊntaʊn,downtown.opus,53007,,,,,True,53
+dole,downstairs,dˈaʊnstɛɹz,downstairs.opus,53008,,,,,True,53
+obejmout,hug,hˈʌɡ,hug.opus,53009,,,,,True,53
+stáhnout,download,dˈaʊnloʊd,download.opus,53010,,,,,True,53
+lidský,human,hjˈuːmən,human.opus,53011,,,,,True,53
+remíza,draw,dɹˈɔː,draw.opus,53012,,,,,True,53
+ilegální,illegal,ɪlˈiːɡəl,illegal.opus,53013,,,,,True,53
+běh,running,ɹˈʌnɪŋ,running.opus,53014,,,,,True,53
+zklamaný,disappointed,dˌɪsɐpˈɔɪntᵻd,disappointed.opus,53015,,,,,True,53
+zmizet,disappear,dˌɪsɐpˈɪɹ,disappear.opus,53016,,,,,True,53
+nesouhlasit,disagree,dˌɪsɐɡɹˈiː,disagree.opus,53017,,,,,True,53
+nevýhoda,disadvantage,dˌɪsɐdvˈæntɪdʒ,disadvantage.opus,53018,,,,,True,53
+pás,belt,bˈɛlt,belt.opus,53019,,,,,True,53
+lano,rope,ɹˈoʊp,rope.opus,53020,,,,,True,53
+šíření,spread,spɹˈɛd,spread.opus,53021,,,,,True,53
+vykořenit,root,ɹˈuːt,root.opus,53022,,,,,True,53
+ředitel,director,dᵻɹˈɛktɚ,director.opus,53023,,,,,True,53
+Já pracuji už dvě hodiny.,I've been working for two hours.,aɪv bˌɪn wˈɜːkɪŋ fɔːɹ tˈuː ˈaʊɚz,ive_been_working_for_two_hours.opus,53024,75,,,65,False,53
+Ty čteš od rána.,You've been reading since this morning.,juːv bˌɪn ɹˈiːdɪŋ sˈɪns ðɪs mˈɔːɹnɪŋ,youve_been_reading_since_this_morning.opus,53025,75,,,65,False,53
+On čeká celý den.,He's been waiting all day.,hiːz bˌɪn wˈeɪɾɪŋ ˈɔːl dˈeɪ,hes_been_waiting_all_day.opus,53026,75,,,65,False,53
+Ona běhá už hodinu.,She's been running for an hour.,ʃiːz bˌɪn ɹˈʌnɪŋ fɚɹən ˈaʊɚ,shes_been_running_for_an_hour.opus,53027,75,,,65,False,53
+Prší od včerejška.,It's been raining since yesterday.,ɪts bˌɪn ɹˈeɪnɪŋ sˈɪns jˈɛstɚdˌeɪ,its_been_raining_since_yesterday.opus,53028,75,,,65,False,53
+My se učíme celý večer.,We've been studying all evening.,wiːv bˌɪn stˈʌdiɪŋ ˈɔːl ˈiːvnɪŋ,weve_been_studying_all_evening.opus,53029,75,,,65,False,53
+Vy cestujete celý týden.,You've been travelling all week.,juːv bˌɪn tɹˈævəlɪŋ ˈɔːl wˈiːk,youve_been_travelling_all_week.opus,53030,75,,,65,False,53
+Oni hrají od oběda.,They've been playing since lunch.,ðeɪv bˌɪn plˈeɪɪŋ sˈɪns lˈʌntʃ,theyve_been_playing_since_lunch.opus,53031,75,,,65,False,53

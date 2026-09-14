@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+zničit,ruin,ɹˈuːɪn,ruin.opus,55000,,,,,True,55
+zhruba,roughly,ɹˈʌfli,roughly.opus,55001,,,,,True,55
+upřímný,honest,ˈɑːnɪst,honest.opus,55002,,,,,True,55
+nečestný,dishonest,dɪsˈɑːnɪst,dishonest.opus,55003,,,,,True,55
+diskuse,discussion,dɪskˈʌʃən,discussion.opus,55004,,,,,True,55
+význam,importance,ɪmpˈɔːɹtəns,importance.opus,55005,,,,,True,55
+lavice,bench,bˈɛntʃ,bench.opus,55006,,,,,True,55
+důležité,importantly,ɪmpˈɔːɹtəntli,importantly.opus,55007,,,,,True,55
+královský,royal,ɹˈɔɪəl,royal.opus,55008,,,,,True,55
+žasnout,marvel,mˈɑːɹvəl,marvel.opus,55009,,,,,True,55
+úžasné,marvellous,mˈɑːɹvələs,marvellous.opus,55010,,,,,True,55
+zapůsobit,impress,ɪmpɹˈɛs,impress.opus,55011,,,,,True,55
+disko,disco,dˈɪskoʊ,disco.opus,55012,,,,,True,55
+sportovní centrum,sports centre,spˈɔːɹts sˈɛntɚ,sports_centre.opus,55013,,,,,True,55
+kolotoč,roundabout,ɹˈaʊndɐbˌaʊt,roundabout.opus,55014,,,,,True,55
+ragby,rugby,ɹˈʌɡbi,rugby.opus,55015,,,,,True,55
+lék,drug,dɹˈʌɡ,drug.opus,55016,,,,,True,55
+lékárna,drugstore,dɹˈʌɡstɔːɹ,drugstore.opus,55017,,,,,True,55
+snowboard,snowboard,snˈoʊbɔːɹd,snowboard.opus,55018,,,,,True,55
+snowboarding,snowboarding,snˈoʊbɔːɹdɪŋ,snowboarding.opus,55019,,,,,True,55
+energický,energetic,ˌɛnɚdʒˈɛɾɪk,energetic.opus,55020,,,,,True,55
+školní práce,schoolwork,skˈuːlwɜːk,schoolwork.opus,55021,,,,,True,55
+konec,ending,ˈɛndɪŋ,ending.opus,55022,,,,,True,55
+ohrozit,endanger,ɛndˈeɪndʒɚ,endanger.opus,55023,,,,,True,55
+Už pracuji dvě hodiny?,Have I been working for two hours?,hæv aɪ bˌɪn wˈɜːkɪŋ fɔːɹ tˈuː ˈaʊɚz,have_i_been_working_for_two_hours.opus,55024,77,,,67,False,55
+Čteš už od rána?,Have you been reading since this morning?,hæv juː bˌɪn ɹˈiːdɪŋ sˈɪns ðɪs mˈɔːɹnɪŋ,have_you_been_reading_since_this_morning.opus,55025,77,,,67,False,55
+Čeká už celý den?,Has he been waiting all day?,hɐz hiː bˌɪn wˈeɪɾɪŋ ˈɔːl dˈeɪ,has_he_been_waiting_all_day.opus,55026,77,,,67,False,55
+Běhá poslední dobou každé ráno?,Has she been running every morning lately?,hɐz ʃiː bˌɪn ɹˈʌnɪŋ ˈɛvɹi mˈɔːɹnɪŋ lˈeɪtli,has_she_been_running_every_morning_lately.opus,55027,77,,,67,False,55
+Prší už od včerejška?,Has it been raining since yesterday?,hɐz ɪt bˌɪn ɹˈeɪnɪŋ sˈɪns jˈɛstɚdˌeɪ,has_it_been_raining_since_yesterday.opus,55028,77,,,67,False,55
+Učíme se už celý večer?,Have we been studying all evening?,hæv wiː bˌɪn stˈʌdiɪŋ ˈɔːl ˈiːvnɪŋ,have_we_been_studying_all_evening.opus,55029,77,,,67,False,55
+Cestujete už celý týden?,Have you been travelling all week?,hæv juː bˌɪn tɹˈævəlɪŋ ˈɔːl wˈiːk,have_you_been_travelling_all_week.opus,55030,77,,,67,False,55
+Hrají už od oběda?,Have they been playing since lunch?,hæv ðeɪ bˌɪn plˈeɪɪŋ sˈɪns lˈʌntʃ,have_they_been_playing_since_lunch.opus,55031,77,,,67,False,55

@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+eskalátor,escalator,ˈɛskɐlˌeɪɾɚ,escalator.opus,57000,,,,,True,57
+bavit,amuse,ɐmjˈuːz,amuse.opus,57001,,,,,True,57
+pobavení,amusement,ɐmjˈuːzmənt,amusement.opus,57002,,,,,True,57
+chyba,error,ˈɛɹɚ,error.opus,57003,,,,,True,57
+výkřik,scream,skɹˈiːm,scream.opus,57004,,,,,True,57
+pobavený,amused,ɐmjˈuːzd,amused.opus,57005,,,,,True,57
+hladce,smoothly,smˈuːðli,smoothly.opus,57006,,,,,True,57
+epizoda,episode,ˈɛpɪsˌoʊd,episode.opus,57007,,,,,True,57
+snack,snack,snˈæk,snack.opus,57008,,,,,True,57
+závist,envy,ˈɛnvi,envy.opus,57009,,,,,True,57
+šťastně,happily,hˈæpɪli,happily.opus,57010,,,,,True,57
+sněžení,snow,snˈoʊ,snow.opus,57011,,,,,True,57
+štěstí,happiness,hˈæpɪnəs,happiness.opus,57012,,,,,True,57
+kousat,bite,bˈaɪt,bite.opus,57013,,,,,True,57
+bit,bit,bˈɪt,bit.opus,57014,,,,,True,57
+vjezd,entrance,ˈɛntɹəns,entrance.opus,57015,,,,,True,57
+sotva,hardly,hˈɑːɹdli,hardly.opus,57016,,,,,True,57
+újma,harm,hˈɑːɹm,harm.opus,57017,,,,,True,57
+škodlivý,harmful,hˈɑːɹmfəl,harmful.opus,57018,,,,,True,57
+bavit,entertain,ˌɛntɚtˈeɪn,entertain.opus,57019,,,,,True,57
+zábava,entertainment,ˌɛntɚtˈeɪnmənt,entertainment.opus,57020,,,,,True,57
+harmonie,harmony,hˈɑːɹməni,harmony.opus,57021,,,,,True,57
+sklidit,harvest,hˈɑːɹvɪst,harvest.opus,57022,,,,,True,57
+obálka,envelope,ˈɑːnvəlˌoʊp,envelope.opus,57023,,,,,True,57
+"Už jsem odešel, když zavolala.",I'd already left when she called.,aɪd ɔːlɹˌɛdi lˈɛft wɛn ʃiː kˈɔːld,id_already_left_when_she_called.opus,57024,79,,,69,False,57
+"Ty jsi skončil dřív, než začalo pršet.",You'd finished before it started raining.,juːd fˈɪnɪʃt bᵻfˌɔːɹ ɪt stˈɑːɹɾᵻd ɹˈeɪnɪŋ,youd_finished_before_it_started_raining.opus,57025,79,,,69,False,57
+"On už jedl, když jsme dorazili.",He'd already eaten when we arrived.,hiːd ɔːlɹˌɛdi ˈiːʔn̩ wɛn wiː ɚɹˈaɪvd,hed_already_eaten_when_we_arrived.opus,57026,79,,,69,False,57
+"Ona už přijela, když jsme zavolali.",She'd already arrived when we called.,ʃiːd ɔːlɹˌɛdi ɚɹˈaɪvd wɛn wiː kˈɔːld,shed_already_arrived_when_we_called.opus,57027,79,,,69,False,57
+"To se rozbilo, než jsme to našli.",It had broken before we found it.,ɪt hæd bɹˈoʊkən bᵻfˌɔːɹ wiː fˈaʊnd ɪt,it_had_broken_before_we_found_it.opus,57028,79,,,69,False,57
+"My jsme zapomněli heslo, než jsme se přihlásili.",We'd forgotten the password before we logged in.,wiːd fɚɡˈɑːʔn̩ ðə pˈæswɜːd bᵻfˌɔːɹ wiː lˈɔɡd ˈɪn,wed_forgotten_the_password_before_we_logged_in.opus,57029,79,,,69,False,57
+Vy jste ten film viděli před naší schůzkou.,You'd seen the movie before our meeting.,juːd sˈiːn ðə mˈuːvi bᵻfˌɔːɹ ˌaʊɚ mˈiːɾɪŋ,youd_seen_the_movie_before_our_meeting.opus,57030,79,,,69,False,57
+"Oni odešli, než jsme dorazili.",They'd left before we arrived.,ðeɪd lˈɛft bᵻfˌɔːɹ wiː ɚɹˈaɪvd,theyd_left_before_we_arrived.opus,57031,79,,,69,False,57

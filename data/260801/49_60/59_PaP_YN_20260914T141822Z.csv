@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+scenérie,scenery,sˈiːnɚɹi,scenery.opus,59000,,,,,True,59
+software,software,sˈɔftwɛɹ,software.opus,59001,,,,,True,59
+scéna,scene,sˈiːn,scene.opus,59002,,,,,True,59
+elektrický,electric,ᵻlˈɛktɹɪk,electric.opus,59003,,,,,True,59
+sebe,herself,hɜːsˈɛlf,herself.opus,59004,,,,,True,59
+starší,elderly,ˈɛldɚli,elderly.opus,59005,,,,,True,59
+Hej,hey,hˈeɪ,hey.opus,59006,,,,,True,59
+účet,bill,bˈɪl,bill.opus,59007,,,,,True,59
+někdo,somebody,sˈʌmbɑːdi,somebody.opus,59008,,,,,True,59
+střední škola,high school,hˈaɪ skˈuːl,high_school.opus,59009,,,,,True,59
+vzdělávat,educate,ˈɛdʒuːkˌeɪt,educate.opus,59010,,,,,True,59
+školství,education,ˌɛdʒuːkˈeɪʃən,education.opus,59011,,,,,True,59
+vzdělávací,educational,ˌɛdʒuːkˈeɪʃənəl,educational.opus,59012,,,,,True,59
+řešení,solution,səlˈuːʃən,solution.opus,59013,,,,,True,59
+upravit,edit,ˈɛdɪt,edit.opus,59014,,,,,True,59
+editor,editor,ˈɛdɪɾɚ,editor.opus,59015,,,,,True,59
+redakční,editorial,ˌɛdɪtˈɔːɹɪəl,editorial.opus,59016,,,,,True,59
+dálnice,highway,hˈaɪweɪ,highway.opus,59017,,,,,True,59
+trampovat,hike,hˈaɪk,hike.opus,59018,,,,,True,59
+turistika,hiking,hˈaɪkɪŋ,hiking.opus,59019,,,,,True,59
+sám,himself,hɪmsˈɛlf,himself.opus,59020,,,,,True,59
+odrážet,reflect,ɹᵻflˈɛkt,reflect.opus,59021,,,,,True,59
+nájemné,rent,ɹˈɛnt,rent.opus,59022,,,,,True,59
+rám,frame,fɹˈeɪm,frame.opus,59023,,,,,True,59
+"Já už jsem odešel, když zavolala?",Had I already left when she called?,hæd aɪ ɔːlɹˌɛdi lˈɛft wɛn ʃiː kˈɔːld,had_i_already_left_when_she_called.opus,59024,81,,,71,False,59
+"Ty jsi skončil, než začalo pršet?",Had you finished before it started raining?,hæd juː fˈɪnɪʃt bᵻfˌɔːɹ ɪt stˈɑːɹɾᵻd ɹˈeɪnɪŋ,had_you_finished_before_it_started_raining.opus,59025,81,,,71,False,59
+"On už jedl, když jsme dorazili?",Had he eaten by the time we arrived?,hæd hiː ˈiːʔn̩ baɪ ðə tˈaɪm wiː ɚɹˈaɪvd,had_he_eaten_by_the_time_we_arrived.opus,59026,81,,,71,False,59
+Ona přijela před začátkem schůzky?,Had she arrived before the meeting started?,hæd ʃiː ɚɹˈaɪvd bᵻfˌɔːɹ ðə mˈiːɾɪŋ stˈɑːɹɾᵻd,had_she_arrived_before_the_meeting_started.opus,59027,81,,,71,False,59
+"To se rozbilo, než jsme to zkontrolovali?",Had it broken before we checked it?,hˌædɪt bɹˈoʊkən bᵻfˌɔːɹ wiː tʃˈɛkt ɪt,had_it_broken_before_we_checked_it.opus,59028,81,,,71,False,59
+"My jsme už zapomněli heslo, když jsme ho potřebovali?",Had we already forgotten the password when we needed it?,hæd wiː ɔːlɹˌɛdi fɚɡˈɑːʔn̩ ðə pˈæswɜːd wɛn wiː nˈiːdᵻd ɪt,had_we_already_forgotten_the_password_when_we_needed_it.opus,59029,81,,,71,False,59
+Vy jste ten film viděli před naším setkáním?,Had you seen the movie before our meeting?,hæd juː sˈiːn ðə mˈuːvi bᵻfˌɔːɹ ˌaʊɚ mˈiːɾɪŋ,had_you_seen_the_movie_before_our_meeting.opus,59030,81,,,71,False,59
+"Oni už odešli, když jsme dorazili?",Had they already left when we arrived?,hæd ðeɪ ɔːlɹˌɛdi lˈɛft wɛn wiː ɚɹˈaɪvd,had_they_already_left_when_we_arrived.opus,59031,81,,,71,False,59

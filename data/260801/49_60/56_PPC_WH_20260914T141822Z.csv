@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+ohrožený,endangered,ɛndˈeɪndʒɚd,endangered.opus,56000,,,,,True,56
+mýdlo,soap,sˈoʊp,soap.opus,56001,,,,,True,56
+sluchátka,headphone,hˈɛdfoʊn,headphone.opus,56002,,,,,True,56
+ředitel školy,headteacher,hˈɛdtiːtʃɚ,headteacher.opus,56003,,,,,True,56
+podporovat,encourage,ɛŋkˈɜːɹɪdʒ,encourage.opus,56004,,,,,True,56
+školák,schoolchild,skˈuːltʃaɪld,schoolchild.opus,56005,,,,,True,56
+vědecký,scientific,saɪəntˈɪfɪk,scientific.opus,56006,,,,,True,56
+prázdný,empty,ˈɛmpti,empty.opus,56007,,,,,True,56
+vytápět,heat,hˈiːt,heat.opus,56008,,,,,True,56
+teplo,heat,hˈiːt,heat.opus,56009,,,,,True,56
+topení,heating,hˈiːɾɪŋ,heating.opus,56010,,,,,True,56
+vynořit se,emerge,ɪmˈɜːdʒ,emerge.opus,56011,,,,,True,56
+stav nouze,emergency,ɪmˈɜːdʒənsi,emergency.opus,56012,,,,,True,56
+těžce,heavily,hˈɛvili,heavily.opus,56013,,,,,True,56
+trapný,embarrassing,ɛmbˈæɹəsɪŋ,embarrassing.opus,56014,,,,,True,56
+rozpis,schedule,skˈɛdʒuːl,schedule.opus,56015,,,,,True,56
+e-mail,email,ˈiːmeɪl,email.opus,56016,,,,,True,56
+jinde,elsewhere,ˈɛlswɛɹ,elsewhere.opus,56017,,,,,True,56
+ponožka,sock,sˈɑːk,sock.opus,56018,,,,,True,56
+užitečný,helpful,hˈɛlpfəl,helpful.opus,56019,,,,,True,56
+povýšit,elevate,ˈɛlɪvˌeɪt,elevate.opus,56020,,,,,True,56
+výtah,elevator,ˈɛlɪvˌeɪɾɚ,elevator.opus,56021,,,,,True,56
+nenávist,hate,hˈeɪt,hate.opus,56022,,,,,True,56
+obrovský,enormous,ɪnˈɔːɹməs,enormous.opus,56023,,,,,True,56
+Na čem poslední dobou pracuji?,What have I been working on lately?,wˌʌt hæv aɪ bˌɪn wˈɜːkɪŋ ˌɔn lˈeɪtli,what_have_i_been_working_on_lately.opus,56024,78,,,68,False,56
+Co poslední dobou čteš?,What have you been reading lately?,wˌʌt hæv juː bˌɪn ɹˈiːdɪŋ lˈeɪtli,what_have_you_been_reading_lately.opus,56025,78,,,68,False,56
+Na koho on čeká od rána?,Who has he been waiting for since this morning?,hˌuː hɐz hiː bˌɪn wˈeɪɾɪŋ fɔːɹ sˈɪns ðɪs mˈɔːɹnɪŋ,who_has_he_been_waiting_for_since_this_morning.opus,56026,78,,,68,False,56
+Kde ona poslední dobou běhá?,Where has she been running lately?,wˌɛɹ hɐz ʃiː bˌɪn ɹˈʌnɪŋ lˈeɪtli,where_has_she_been_running_lately.opus,56027,78,,,68,False,56
+Jak dlouho už prší?,How long has it been raining?,hˌaʊ lˈɔŋ hɐz ɪt bˌɪn ɹˈeɪnɪŋ,how_long_has_it_been_raining.opus,56028,78,,,68,False,56
+Co my poslední dobou studujeme?,What have we been studying lately?,wˌʌt hæv wiː bˌɪn stˈʌdiɪŋ lˈeɪtli,what_have_we_been_studying_lately.opus,56029,78,,,68,False,56
+Kam vy poslední dobou cestujete?,Where have you been travelling lately?,wˌɛɹ hæv juː bˌɪn tɹˈævəlɪŋ lˈeɪtli,where_have_you_been_travelling_lately.opus,56030,78,,,68,False,56
+Co oni poslední dobou hrají?,What have they been playing lately?,wˌʌt hæv ðeɪ bˌɪn plˈeɪɪŋ lˈeɪtli,what_have_they_been_playing_lately.opus,56031,78,,,68,False,56

@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+lovit,hunt,hˈʌnt,hunt.opus,52000,,,,,True,52
+lovec,hunter,hˈʌntɚ,hunter.opus,52001,,,,,True,52
+byt,apartment,ɐpˈɑːɹtmənt,apartment.opus,52002,,,,,True,52
+konkrétní,specific,spəsˈɪfɪk,specific.opus,52003,,,,,True,52
+saké,sake,sˈeɪk,sake.opus,52004,,,,,True,52
+plachtění,sailing,sˈeɪlɪŋ,sailing.opus,52005,,,,,True,52
+závratě,dizzy,dˈɪzi,dizzy.opus,52006,,,,,True,52
+zabezpečit,safe,sˈeɪf,safe.opus,52007,,,,,True,52
+ID,ID,aɪdˈiː,id.opus,52008,,,,,True,52
+průkaz totožnosti,ID card,aɪdˈiː kˈɑːɹd,id_card.opus,52009,,,,,True,52
+bohužel,sadly,sˈædli,sadly.opus,52010,,,,,True,52
+omlouvám se,apologise,ɐpˈɑːlədʒˌaɪz,apologise.opus,52011,,,,,True,52
+rušit,disturb,dɪstˈɜːb,disturb.opus,52012,,,,,True,52
+ohnout,bend,bˈɛnd,bend.opus,52013,,,,,True,52
+kouzlit,spell,spˈɛl,spell.opus,52014,,,,,True,52
+spěch,rush,ɹˈʌʃ,rush.opus,52015,,,,,True,52
+plocha,space,spˈeɪs,space.opus,52016,,,,,True,52
+kosmická loď,spaceship,spˈeɪsʃɪp,spaceship.opus,52017,,,,,True,52
+řidičský průkaz,driving licence,dɹˈaɪvɪŋ lˈaɪsəns,driving_licence.opus,52018,,,,,True,52
+brilantní,brilliant,bɹˈɪliənt,brilliant.opus,52019,,,,,True,52
+hostitel,host,hˈoʊst,host.opus,52020,,,,,True,52
+oblečený,dressed,dɹˈɛst,dressed.opus,52021,,,,,True,52
+písčitý,sandy,sˈændi,sandy.opus,52022,,,,,True,52
+výkres,drawing,dɹˈɔːɪŋ,drawing.opus,52023,,,,,True,52
+Co už jsem dokončil?,What have I finished so far?,wˌʌt hæv aɪ fˈɪnɪʃt sˈoʊ fˌɑːɹ,what_have_i_finished_so_far.opus,52024,74,,,64,False,52
+Co už jsi viděl?,What have you seen so far?,wˌʌt hæv juː sˈiːn sˈoʊ fˌɑːɹ,what_have_you_seen_so_far.opus,52025,74,,,64,False,52
+Co všechno už ztratil?,What has he lost so far?,wˌʌt hɐz hiː lˈɔst sˈoʊ fˌɑːɹ,what_has_he_lost_so_far.opus,52026,74,,,64,False,52
+Proč se rozhodla tak rychle?,Why has she decided so quickly?,wˌaɪ hɐz ʃiː dᵻsˈaɪdᵻd sˌoʊ kwˈɪkli,why_has_she_decided_so_quickly.opus,52027,74,,,64,False,52
+Co se od minula změnilo?,What has changed since last time?,wˌʌt hɐz tʃˈeɪndʒd sˈɪns lˈæst tˈaɪm,what_has_changed_since_last_time.opus,52028,74,,,64,False,52
+Do kterého města jsme dnes přijeli?,Which city have we arrived in today?,wˌɪtʃ sˈɪɾi hæv wiː ɚɹˈaɪvd ɪn tədˈeɪ,which_city_have_we_arrived_in_today.opus,52029,74,,,64,False,52
+Co jste dnes zapomněli?,What have you forgotten today?,wˌʌt hæv juː fɚɡˈɑːʔn̩ tədˈeɪ,what_have_you_forgotten_today.opus,52030,74,,,64,False,52
+Co už jedli?,What have they eaten so far?,wˌʌt hæv ðeɪ ˈiːʔn̩ sˈoʊ fˌɑːɹ,what_have_they_eaten_so_far.opus,52031,74,,,64,False,52

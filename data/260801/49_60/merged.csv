@@ -1,0 +1,353 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+svoboda,freedom,fɹˈiːdəm,freedom.opus,49000,,,,,True,49
+zmrazit,freeze,fɹˈiːz,freeze.opus,49001,,,,,True,49
+skořápka,shell,ʃˈɛl,shell.opus,49002,,,,,True,49
+zděšení,fright,fɹˈaɪt,fright.opus,49003,,,,,True,49
+děsivý,frightening,fɹˈaɪʔn̩ɪŋ,frightening.opus,49004,,,,,True,49
+vidlice,fork,fˈɔːɹk,fork.opus,49005,,,,,True,49
+navždy,forever,fɚɹˈɛvɚ,forever.opus,49006,,,,,True,49
+smažený,fried,fɹˈaɪd,fried.opus,49007,,,,,True,49
+les,forest,fˈɔːɹɪst,forest.opus,49008,,,,,True,49
+bonus,bonus,bˈoʊnəs,bonus.opus,49009,,,,,True,49
+přátelství,friendship,fɹˈɛndʃɪp,friendship.opus,49010,,,,,True,49
+vystrašit,frighten,fɹˈaɪʔn̩,frighten.opus,49011,,,,,True,49
+síla,force,fˈɔːɹs,force.opus,49012,,,,,True,49
+vystrašený,frightened,fɹˈaɪʔn̩d,frightened.opus,49013,,,,,True,49
+zakázat,forbid,fɚbˈɪd,forbid.opus,49014,,,,,True,49
+lednička,fridge,fɹˈɪdʒ,fridge.opus,49015,,,,,True,49
+držadlo,handle,hˈændəl,handle.opus,49016,,,,,True,49
+šortky,shorts,ʃˈɔːɹts,shorts.opus,49017,,,,,True,49
+galerie,gallery,ɡˈælɚɹi,gallery.opus,49018,,,,,True,49
+vážně,seriously,sˈɪɹiəsli,seriously.opus,49019,,,,,True,49
+bojovník,fighter,fˈaɪɾɚ,fighter.opus,49020,,,,,True,49
+dát si námahu,bother,bˈɑːðɚ,bother.opus,49021,,,,,True,49
+beletrie,fiction,fˈɪkʃən,fiction.opus,49022,,,,,True,49
+prohlídka památek,sightseeing,sˈaɪtsiːɪŋ,sightseeing.opus,49023,,,,,True,49
+Já jsem už skončil,I've already finished,aɪv ɔːlɹˌɛdi fˈɪnɪʃt,ive_already_finished.opus,49024,71,,,61,False,49
+Ty jsi už viděl ten film.,You've already seen the movie.,juːv ɔːlɹˌɛdi sˈiːn ðə mˈuːvi,youve_already_seen_the_movie.opus,49025,71,,,61,False,49
+On ztratil své klíče.,He's lost his keys.,hiːz lˈɔst hɪz kˈiːz,hes_lost_his_keys.opus,49026,71,,,61,False,49
+Ona se už rozhodla.,She's already decided.,ʃiːz ɔːlɹˌɛdi dᵻsˈaɪdᵻd,shes_already_decided.opus,49027,71,,,61,False,49
+To se změnilo od minula.,It's changed since last time.,ɪts tʃˈeɪndʒd sˈɪns lˈæst tˈaɪm,its_changed_since_last_time.opus,49028,71,,,61,False,49
+My jsme právě přijeli,We've just arrived,wiːv dʒˈʌst ɚɹˈaɪvd,weve_just_arrived.opus,49029,71,,,61,False,49
+Vy jste zapomněli adresu,You've forgotten the address.,juːv fɚɡˈɑːʔn̩ ðɪ ɐdɹˈɛs,youve_forgotten_the_address.opus,49030,71,,,61,False,49
+Oni už jedli.,They've already eaten.,ðeɪv ɔːlɹˌɛdi ˈiːʔn̩,theyve_already_eaten.opus,49031,71,,,61,False,49
+pár,few,fjˈuː,few.opus,50000,,,,,True,50
+plot,fence,fˈɛns,fence.opus,50001,,,,,True,50
+žena,female,fˈiːmeɪl,female.opus,50002,,,,,True,50
+daný,given,ɡˈɪvən,given.opus,50003,,,,,True,50
+samostatný,separate,sˈɛpɹət,separate.opus,50004,,,,,True,50
+poplatek,fee,fˈiː,fee.opus,50005,,,,,True,50
+postava,figure,fˈɪɡjɚ,figure.opus,50006,,,,,True,50
+umlčet,silence,sˈaɪləns,silence.opus,50007,,,,,True,50
+peří,feather,fˈɛðɚ,feather.opus,50008,,,,,True,50
+tichý,silent,sˈaɪlənt,silent.opus,50009,,,,,True,50
+tiše,silently,sˈaɪləntli,silently.opus,50010,,,,,True,50
+hloupý,silly,sˈɪli,silly.opus,50011,,,,,True,50
+strach,fear,fˈɪɹ,fear.opus,50012,,,,,True,50
+zeměkoule,globe,ɡlˈoʊb,globe.opus,50013,,,,,True,50
+chyba,fault,fˈɔlt,fault.opus,50014,,,,,True,50
+stříbrný,silver,sˈɪlvɚ,silver.opus,50015,,,,,True,50
+senior,senior,sˈiːnjɚ,senior.opus,50016,,,,,True,50
+funkce,feature,fˈiːtʃɚ,feature.opus,50017,,,,,True,50
+opravit,fix,fˈɪks,fix.opus,50018,,,,,True,50
+kotník,ankle,ˈæŋkəl,ankle.opus,50019,,,,,True,50
+rybář,fisherman,fˈɪʃɚmən,fisherman.opus,50020,,,,,True,50
+shot,shot,ʃˈɑːt,shot.opus,50021,,,,,True,50
+desková hra,board game,bˈɔːɹd ɡˈeɪm,board_game.opus,50022,,,,,True,50
+otravovat,annoy,ɐnˈɔɪ,annoy.opus,50023,,,,,True,50
+Já jsem ještě neskončil.,I haven't finished yet.,aɪ hˈævənt fˈɪnɪʃt jˈɛt,i_havent_finished_yet.opus,50024,72,,,62,False,50
+Ty jsi ten film ještě neviděl.,You haven't seen the movie yet.,juː hˈævənt sˈiːn ðə mˈuːvi jˈɛt,you_havent_seen_the_movie_yet.opus,50025,72,,,62,False,50
+On své klíče zatím neztratil.,He hasn't lost his keys yet.,hiː hˈæzənt lˈɔst hɪz kˈiːz jˈɛt,he_hasnt_lost_his_keys_yet.opus,50026,72,,,62,False,50
+Ona se ještě nerozhodla.,She hasn't decided yet.,ʃiː hˈæzənt dᵻsˈaɪdᵻd jˈɛt,she_hasnt_decided_yet.opus,50027,72,,,62,False,50
+To se zatím nerozbilo.,It hasn't broken yet.,ɪt hˈæzənt bɹˈoʊkən jˈɛt,it_hasnt_broken_yet.opus,50028,72,,,62,False,50
+My jsme ještě nepřijeli.,We haven't arrived yet.,wiː hˈævənt ɚɹˈaɪvd jˈɛt,we_havent_arrived_yet.opus,50029,72,,,62,False,50
+Vy jste tu adresu ještě nezapomněli.,You haven't forgotten the address yet.,juː hˈævənt fɚɡˈɑːʔn̩ ðɪ ɐdɹˈɛs jˈɛt,you_havent_forgotten_the_address_yet.opus,50030,72,,,62,False,50
+Oni ještě nejedli.,They haven't eaten yet.,ðeɪ hˈævənt ˈiːʔn̩ jˈɛt,they_havent_eaten_yet.opus,50031,72,,,62,False,50
+křestní jméno,first name,fˈɜːst nˈeɪm,first_name.opus,51000,,,,,True,51
+výkřik,shout,ʃˈaʊt,shout.opus,51001,,,,,True,51
+česnek,garlic,ɡˈɑːɹlɪk,garlic.opus,51002,,,,,True,51
+plyn,gas,ɡˈæs,gas.opus,51003,,,,,True,51
+pohlaví,gender,dʒˈɛndɚ,gender.opus,51004,,,,,True,51
+znuděný,bored,bˈɔːɹd,bored.opus,51005,,,,,True,51
+soubor,set,sˈɛt,set.opus,51006,,,,,True,51
+generace,generation,dʒˌɛnɚɹˈeɪʃən,generation.opus,51007,,,,,True,51
+odkončit,final,fˈaɪnəl,final.opus,51008,,,,,True,51
+konečně,finally,fˈaɪnəli,finally.opus,51009,,,,,True,51
+finále,final,fˈaɪnəl,final.opus,51010,,,,,True,51
+šéf,boss,bˈɔs,boss.opus,51011,,,,,True,51
+výročí,anniversary,ˌænɪvˈɜːsɚɹi,anniversary.opus,51012,,,,,True,51
+shromáždit,gather,ɡˈæðɚ,gather.opus,51013,,,,,True,51
+jinak,differently,dˈɪfɹəntli,differently.opus,51014,,,,,True,51
+esej,essay,ˈɛseɪ,essay.opus,51015,,,,,True,51
+únik,escape,ɛskˈeɪp,escape.opus,51016,,,,,True,51
+špagety,spaghetti,spɐɡˈɛɾi,spaghetti.opus,51017,,,,,True,51
+pochyba,doubt,dˈaʊt,doubt.opus,51018,,,,,True,51
+dvojnásobek,double,dˈʌbəl,double.opus,51019,,,,,True,51
+od sebe,apart,ɐpˈɑːɹt,apart.opus,51020,,,,,True,51
+reproduktor,speaker,spˈiːkɚ,speaker.opus,51021,,,,,True,51
+hotovo,done,dˈʌn,done.opus,51022,,,,,True,51
+lov,hunt,hˈʌnt,hunt.opus,51023,,,,,True,51
+Skončil jsem už?,Have I finished yet?,hæv aɪ fˈɪnɪʃt jˈɛt,have_i_finished_yet.opus,51024,73,,,63,False,51
+Už jsi viděl ten film?,Have you seen the movie yet?,hæv juː sˈiːn ðə mˈuːvi jˈɛt,have_you_seen_the_movie_yet.opus,51025,73,,,63,False,51
+Ztratil už klíče?,Has he lost his keys yet?,hɐz hiː lˈɔst hɪz kˈiːz jˈɛt,has_he_lost_his_keys_yet.opus,51026,73,,,63,False,51
+Už se rozhodla?,Has she decided yet?,hɐz ʃiː dᵻsˈaɪdᵻd jˈɛt,has_she_decided_yet.opus,51027,73,,,63,False,51
+Už se to rozbilo?,Has it broken yet?,hɐz ɪt bɹˈoʊkən jˈɛt,has_it_broken_yet.opus,51028,73,,,63,False,51
+Už jsme přijeli?,Have we arrived yet?,hæv wiː ɚɹˈaɪvd jˈɛt,have_we_arrived_yet.opus,51029,73,,,63,False,51
+Už jste zapomněli adresu?,Have you forgotten the address yet?,hæv juː fɚɡˈɑːʔn̩ ðɪ ɐdɹˈɛs jˈɛt,have_you_forgotten_the_address_yet.opus,51030,73,,,63,False,51
+Už jedli?,Have they eaten yet?,hæv ðeɪ ˈiːʔn̩ jˈɛt,have_they_eaten_yet.opus,51031,73,,,63,False,51
+lovit,hunt,hˈʌnt,hunt.opus,52000,,,,,True,52
+lovec,hunter,hˈʌntɚ,hunter.opus,52001,,,,,True,52
+byt,apartment,ɐpˈɑːɹtmənt,apartment.opus,52002,,,,,True,52
+konkrétní,specific,spəsˈɪfɪk,specific.opus,52003,,,,,True,52
+saké,sake,sˈeɪk,sake.opus,52004,,,,,True,52
+plachtění,sailing,sˈeɪlɪŋ,sailing.opus,52005,,,,,True,52
+závratě,dizzy,dˈɪzi,dizzy.opus,52006,,,,,True,52
+zabezpečit,safe,sˈeɪf,safe.opus,52007,,,,,True,52
+ID,ID,aɪdˈiː,id.opus,52008,,,,,True,52
+průkaz totožnosti,ID card,aɪdˈiː kˈɑːɹd,id_card.opus,52009,,,,,True,52
+bohužel,sadly,sˈædli,sadly.opus,52010,,,,,True,52
+omlouvám se,apologise,ɐpˈɑːlədʒˌaɪz,apologise.opus,52011,,,,,True,52
+rušit,disturb,dɪstˈɜːb,disturb.opus,52012,,,,,True,52
+ohnout,bend,bˈɛnd,bend.opus,52013,,,,,True,52
+kouzlit,spell,spˈɛl,spell.opus,52014,,,,,True,52
+spěch,rush,ɹˈʌʃ,rush.opus,52015,,,,,True,52
+plocha,space,spˈeɪs,space.opus,52016,,,,,True,52
+kosmická loď,spaceship,spˈeɪsʃɪp,spaceship.opus,52017,,,,,True,52
+řidičský průkaz,driving licence,dɹˈaɪvɪŋ lˈaɪsəns,driving_licence.opus,52018,,,,,True,52
+brilantní,brilliant,bɹˈɪliənt,brilliant.opus,52019,,,,,True,52
+hostitel,host,hˈoʊst,host.opus,52020,,,,,True,52
+oblečený,dressed,dɹˈɛst,dressed.opus,52021,,,,,True,52
+písčitý,sandy,sˈændi,sandy.opus,52022,,,,,True,52
+výkres,drawing,dɹˈɔːɪŋ,drawing.opus,52023,,,,,True,52
+Co už jsem dokončil?,What have I finished so far?,wˌʌt hæv aɪ fˈɪnɪʃt sˈoʊ fˌɑːɹ,what_have_i_finished_so_far.opus,52024,74,,,64,False,52
+Co už jsi viděl?,What have you seen so far?,wˌʌt hæv juː sˈiːn sˈoʊ fˌɑːɹ,what_have_you_seen_so_far.opus,52025,74,,,64,False,52
+Co všechno už ztratil?,What has he lost so far?,wˌʌt hɐz hiː lˈɔst sˈoʊ fˌɑːɹ,what_has_he_lost_so_far.opus,52026,74,,,64,False,52
+Proč se rozhodla tak rychle?,Why has she decided so quickly?,wˌaɪ hɐz ʃiː dᵻsˈaɪdᵻd sˌoʊ kwˈɪkli,why_has_she_decided_so_quickly.opus,52027,74,,,64,False,52
+Co se od minula změnilo?,What has changed since last time?,wˌʌt hɐz tʃˈeɪndʒd sˈɪns lˈæst tˈaɪm,what_has_changed_since_last_time.opus,52028,74,,,64,False,52
+Do kterého města jsme dnes přijeli?,Which city have we arrived in today?,wˌɪtʃ sˈɪɾi hæv wiː ɚɹˈaɪvd ɪn tədˈeɪ,which_city_have_we_arrived_in_today.opus,52029,74,,,64,False,52
+Co jste dnes zapomněli?,What have you forgotten today?,wˌʌt hæv juː fɚɡˈɑːʔn̩ tədˈeɪ,what_have_you_forgotten_today.opus,52030,74,,,64,False,52
+Co už jedli?,What have they eaten so far?,wˌʌt hæv ðeɪ ˈiːʔn̩ sˈoʊ fˌɑːɹ,what_have_they_eaten_so_far.opus,52031,74,,,64,False,52
+výstavce,drawer,dɹˈɔːɹ,drawer.opus,53000,,,,,True,53
+stejně,anyway,ˈɛnɪwˌeɪ,anyway.opus,53001,,,,,True,53
+zdroj,source,sˈɔːɹs,source.opus,53002,,,,,True,53
+ochutnat,sample,sˈæmpəl,sample.opus,53003,,,,,True,53
+kromě,besides,bᵻsˈaɪdz,besides.opus,53004,,,,,True,53
+však,however,haʊˈɛvɚ,however.opus,53005,,,,,True,53
+kdekoli,anywhere,ˈɛnɪwˌɛɹ,anywhere.opus,53006,,,,,True,53
+v centru města,downtown,dˈaʊntaʊn,downtown.opus,53007,,,,,True,53
+dole,downstairs,dˈaʊnstɛɹz,downstairs.opus,53008,,,,,True,53
+obejmout,hug,hˈʌɡ,hug.opus,53009,,,,,True,53
+stáhnout,download,dˈaʊnloʊd,download.opus,53010,,,,,True,53
+lidský,human,hjˈuːmən,human.opus,53011,,,,,True,53
+remíza,draw,dɹˈɔː,draw.opus,53012,,,,,True,53
+ilegální,illegal,ɪlˈiːɡəl,illegal.opus,53013,,,,,True,53
+běh,running,ɹˈʌnɪŋ,running.opus,53014,,,,,True,53
+zklamaný,disappointed,dˌɪsɐpˈɔɪntᵻd,disappointed.opus,53015,,,,,True,53
+zmizet,disappear,dˌɪsɐpˈɪɹ,disappear.opus,53016,,,,,True,53
+nesouhlasit,disagree,dˌɪsɐɡɹˈiː,disagree.opus,53017,,,,,True,53
+nevýhoda,disadvantage,dˌɪsɐdvˈæntɪdʒ,disadvantage.opus,53018,,,,,True,53
+pás,belt,bˈɛlt,belt.opus,53019,,,,,True,53
+lano,rope,ɹˈoʊp,rope.opus,53020,,,,,True,53
+šíření,spread,spɹˈɛd,spread.opus,53021,,,,,True,53
+vykořenit,root,ɹˈuːt,root.opus,53022,,,,,True,53
+ředitel,director,dᵻɹˈɛktɚ,director.opus,53023,,,,,True,53
+Já pracuji už dvě hodiny.,I've been working for two hours.,aɪv bˌɪn wˈɜːkɪŋ fɔːɹ tˈuː ˈaʊɚz,ive_been_working_for_two_hours.opus,53024,75,,,65,False,53
+Ty čteš od rána.,You've been reading since this morning.,juːv bˌɪn ɹˈiːdɪŋ sˈɪns ðɪs mˈɔːɹnɪŋ,youve_been_reading_since_this_morning.opus,53025,75,,,65,False,53
+On čeká celý den.,He's been waiting all day.,hiːz bˌɪn wˈeɪɾɪŋ ˈɔːl dˈeɪ,hes_been_waiting_all_day.opus,53026,75,,,65,False,53
+Ona běhá už hodinu.,She's been running for an hour.,ʃiːz bˌɪn ɹˈʌnɪŋ fɚɹən ˈaʊɚ,shes_been_running_for_an_hour.opus,53027,75,,,65,False,53
+Prší od včerejška.,It's been raining since yesterday.,ɪts bˌɪn ɹˈeɪnɪŋ sˈɪns jˈɛstɚdˌeɪ,its_been_raining_since_yesterday.opus,53028,75,,,65,False,53
+My se učíme celý večer.,We've been studying all evening.,wiːv bˌɪn stˈʌdiɪŋ ˈɔːl ˈiːvnɪŋ,weve_been_studying_all_evening.opus,53029,75,,,65,False,53
+Vy cestujete celý týden.,You've been travelling all week.,juːv bˌɪn tɹˈævəlɪŋ ˈɔːl wˈiːk,youve_been_travelling_all_week.opus,53030,75,,,65,False,53
+Oni hrají od oběda.,They've been playing since lunch.,ðeɪv bˌɪn plˈeɪɪŋ sˈɪns lˈʌntʃ,theyve_been_playing_since_lunch.opus,53031,75,,,65,False,53
+vzhled,appearance,ɐpˈɪɹəns,appearance.opus,54000,,,,,True,54
+zklamáním,disappointing,dˌɪsɐpˈɔɪntɪŋ,disappointing.opus,54001,,,,,True,54
+palec,inch,ˈɪntʃ,inch.opus,54002,,,,,True,54
+dinosaurus,dinosaur,dˈaɪnəsˌɔːɹ,dinosaur.opus,54003,,,,,True,54
+hnědnout,brown,bɹˈaʊn,brown.opus,54004,,,,,True,54
+ačkoli,although,ɔːlðˈoʊ,although.opus,54005,,,,,True,54
+zvýšení,increase,ˈɪŋkɹiːs,increase.opus,54006,,,,,True,54
+čtverec,square,skwˈɛɹ,square.opus,54007,,,,,True,54
+digitální fotoaparát,digital camera,dˈɪdʒɪɾəl kˈæmɹə,digital_camera.opus,54008,,,,,True,54
+romantika,romance,ɹoʊmˈæns,romance.opus,54009,,,,,True,54
+romantický,romantic,ɹoʊmˈæntɪk,romantic.opus,54010,,,,,True,54
+hrůza,horror,hˈɔɹɚ,horror.opus,54011,,,,,True,54
+běžec,runner,ɹˈʌnɚ,runner.opus,54012,,,,,True,54
+rozlít,spill,spˈɪl,spill.opus,54013,,,,,True,54
+představivost,imagination,ɪmˌædʒᵻnˈeɪʃən,imagination.opus,54014,,,,,True,54
+pověst,rumour,ɹˈuːmɚ,rumour.opus,54015,,,,,True,54
+displej,display,dɪsplˈeɪ,display.opus,54016,,,,,True,54
+šplouchat,splash,splˈæʃ,splash.opus,54017,,,,,True,54
+podíl,split,splˈɪt,split.opus,54018,,,,,True,54
+zřejmě,apparently,ɐpˈæɹəntli,apparently.opus,54019,,,,,True,54
+dopad,impact,ˈɪmpækt,impact.opus,54020,,,,,True,54
+nechuť,dislike,dɪslˈaɪk,dislike.opus,54021,,,,,True,54
+trpělivý,patient,pˈeɪʃənt,patient.opus,54022,,,,,True,54
+netrpělivý,impatient,ɪmpˈeɪʃənt,impatient.opus,54023,,,,,True,54
+Já poslední dobou moc nespím.,I haven't been sleeping much lately.,aɪ hˈævənt bˌɪn slˈiːpɪŋ mˈʌtʃ lˈeɪtli,i_havent_been_sleeping_much_lately.opus,54024,76,,,66,False,54
+Ty poslední dobou moc nečteš.,You haven't been reading much lately.,juː hˈævənt bˌɪn ɹˈiːdɪŋ mˈʌtʃ lˈeɪtli,you_havent_been_reading_much_lately.opus,54025,76,,,66,False,54
+On tam zatím nečeká dlouho.,He hasn't been waiting there long yet.,hiː hˈæzənt bˌɪn wˈeɪɾɪŋ ðɛɹ lˈɔŋ jˈɛt,he_hasnt_been_waiting_there_long_yet.opus,54026,76,,,66,False,54
+Ona už nějakou dobu neběhá.,She hasn't been running for a while.,ʃiː hˈæzənt bˌɪn ɹˈʌnɪŋ fɚɹə wˈaɪl,she_hasnt_been_running_for_a_while.opus,54027,76,,,66,False,54
+Už několik dní neprší.,It hasn't been raining for several days.,ɪt hˈæzənt bˌɪn ɹˈeɪnɪŋ fɔːɹ sˈɛvɹəl dˈeɪz,it_hasnt_been_raining_for_several_days.opus,54028,76,,,66,False,54
+My se tento týden moc neučíme.,We haven't been studying much this week.,wiː hˈævənt bˌɪn stˈʌdiɪŋ mˈʌtʃ ðɪs wˈiːk,we_havent_been_studying_much_this_week.opus,54029,76,,,66,False,54
+Vy letos moc necestujete.,You haven't been travelling much this year.,juː hˈævənt bˌɪn tɹˈævəlɪŋ mˈʌtʃ ðɪs jˈɪɹ,you_havent_been_travelling_much_this_year.opus,54030,76,,,66,False,54
+Oni spolu poslední dobou nehrají.,They haven't been playing together lately.,ðeɪ hˈævənt bˌɪn plˈeɪɪŋ təɡˌɛðɚ lˈeɪtli,they_havent_been_playing_together_lately.opus,54031,76,,,66,False,54
+zničit,ruin,ɹˈuːɪn,ruin.opus,55000,,,,,True,55
+zhruba,roughly,ɹˈʌfli,roughly.opus,55001,,,,,True,55
+upřímný,honest,ˈɑːnɪst,honest.opus,55002,,,,,True,55
+nečestný,dishonest,dɪsˈɑːnɪst,dishonest.opus,55003,,,,,True,55
+diskuse,discussion,dɪskˈʌʃən,discussion.opus,55004,,,,,True,55
+význam,importance,ɪmpˈɔːɹtəns,importance.opus,55005,,,,,True,55
+lavice,bench,bˈɛntʃ,bench.opus,55006,,,,,True,55
+důležité,importantly,ɪmpˈɔːɹtəntli,importantly.opus,55007,,,,,True,55
+královský,royal,ɹˈɔɪəl,royal.opus,55008,,,,,True,55
+žasnout,marvel,mˈɑːɹvəl,marvel.opus,55009,,,,,True,55
+úžasné,marvellous,mˈɑːɹvələs,marvellous.opus,55010,,,,,True,55
+zapůsobit,impress,ɪmpɹˈɛs,impress.opus,55011,,,,,True,55
+disko,disco,dˈɪskoʊ,disco.opus,55012,,,,,True,55
+sportovní centrum,sports centre,spˈɔːɹts sˈɛntɚ,sports_centre.opus,55013,,,,,True,55
+kolotoč,roundabout,ɹˈaʊndɐbˌaʊt,roundabout.opus,55014,,,,,True,55
+ragby,rugby,ɹˈʌɡbi,rugby.opus,55015,,,,,True,55
+lék,drug,dɹˈʌɡ,drug.opus,55016,,,,,True,55
+lékárna,drugstore,dɹˈʌɡstɔːɹ,drugstore.opus,55017,,,,,True,55
+snowboard,snowboard,snˈoʊbɔːɹd,snowboard.opus,55018,,,,,True,55
+snowboarding,snowboarding,snˈoʊbɔːɹdɪŋ,snowboarding.opus,55019,,,,,True,55
+energický,energetic,ˌɛnɚdʒˈɛɾɪk,energetic.opus,55020,,,,,True,55
+školní práce,schoolwork,skˈuːlwɜːk,schoolwork.opus,55021,,,,,True,55
+konec,ending,ˈɛndɪŋ,ending.opus,55022,,,,,True,55
+ohrozit,endanger,ɛndˈeɪndʒɚ,endanger.opus,55023,,,,,True,55
+Už pracuji dvě hodiny?,Have I been working for two hours?,hæv aɪ bˌɪn wˈɜːkɪŋ fɔːɹ tˈuː ˈaʊɚz,have_i_been_working_for_two_hours.opus,55024,77,,,67,False,55
+Čteš už od rána?,Have you been reading since this morning?,hæv juː bˌɪn ɹˈiːdɪŋ sˈɪns ðɪs mˈɔːɹnɪŋ,have_you_been_reading_since_this_morning.opus,55025,77,,,67,False,55
+Čeká už celý den?,Has he been waiting all day?,hɐz hiː bˌɪn wˈeɪɾɪŋ ˈɔːl dˈeɪ,has_he_been_waiting_all_day.opus,55026,77,,,67,False,55
+Běhá poslední dobou každé ráno?,Has she been running every morning lately?,hɐz ʃiː bˌɪn ɹˈʌnɪŋ ˈɛvɹi mˈɔːɹnɪŋ lˈeɪtli,has_she_been_running_every_morning_lately.opus,55027,77,,,67,False,55
+Prší už od včerejška?,Has it been raining since yesterday?,hɐz ɪt bˌɪn ɹˈeɪnɪŋ sˈɪns jˈɛstɚdˌeɪ,has_it_been_raining_since_yesterday.opus,55028,77,,,67,False,55
+Učíme se už celý večer?,Have we been studying all evening?,hæv wiː bˌɪn stˈʌdiɪŋ ˈɔːl ˈiːvnɪŋ,have_we_been_studying_all_evening.opus,55029,77,,,67,False,55
+Cestujete už celý týden?,Have you been travelling all week?,hæv juː bˌɪn tɹˈævəlɪŋ ˈɔːl wˈiːk,have_you_been_travelling_all_week.opus,55030,77,,,67,False,55
+Hrají už od oběda?,Have they been playing since lunch?,hæv ðeɪ bˌɪn plˈeɪɪŋ sˈɪns lˈʌntʃ,have_they_been_playing_since_lunch.opus,55031,77,,,67,False,55
+ohrožený,endangered,ɛndˈeɪndʒɚd,endangered.opus,56000,,,,,True,56
+mýdlo,soap,sˈoʊp,soap.opus,56001,,,,,True,56
+sluchátka,headphone,hˈɛdfoʊn,headphone.opus,56002,,,,,True,56
+ředitel školy,headteacher,hˈɛdtiːtʃɚ,headteacher.opus,56003,,,,,True,56
+podporovat,encourage,ɛŋkˈɜːɹɪdʒ,encourage.opus,56004,,,,,True,56
+školák,schoolchild,skˈuːltʃaɪld,schoolchild.opus,56005,,,,,True,56
+vědecký,scientific,saɪəntˈɪfɪk,scientific.opus,56006,,,,,True,56
+prázdný,empty,ˈɛmpti,empty.opus,56007,,,,,True,56
+vytápět,heat,hˈiːt,heat.opus,56008,,,,,True,56
+teplo,heat,hˈiːt,heat.opus,56009,,,,,True,56
+topení,heating,hˈiːɾɪŋ,heating.opus,56010,,,,,True,56
+vynořit se,emerge,ɪmˈɜːdʒ,emerge.opus,56011,,,,,True,56
+stav nouze,emergency,ɪmˈɜːdʒənsi,emergency.opus,56012,,,,,True,56
+těžce,heavily,hˈɛvili,heavily.opus,56013,,,,,True,56
+trapný,embarrassing,ɛmbˈæɹəsɪŋ,embarrassing.opus,56014,,,,,True,56
+rozpis,schedule,skˈɛdʒuːl,schedule.opus,56015,,,,,True,56
+e-mail,email,ˈiːmeɪl,email.opus,56016,,,,,True,56
+jinde,elsewhere,ˈɛlswɛɹ,elsewhere.opus,56017,,,,,True,56
+ponožka,sock,sˈɑːk,sock.opus,56018,,,,,True,56
+užitečný,helpful,hˈɛlpfəl,helpful.opus,56019,,,,,True,56
+povýšit,elevate,ˈɛlɪvˌeɪt,elevate.opus,56020,,,,,True,56
+výtah,elevator,ˈɛlɪvˌeɪɾɚ,elevator.opus,56021,,,,,True,56
+nenávist,hate,hˈeɪt,hate.opus,56022,,,,,True,56
+obrovský,enormous,ɪnˈɔːɹməs,enormous.opus,56023,,,,,True,56
+Na čem poslední dobou pracuji?,What have I been working on lately?,wˌʌt hæv aɪ bˌɪn wˈɜːkɪŋ ˌɔn lˈeɪtli,what_have_i_been_working_on_lately.opus,56024,78,,,68,False,56
+Co poslední dobou čteš?,What have you been reading lately?,wˌʌt hæv juː bˌɪn ɹˈiːdɪŋ lˈeɪtli,what_have_you_been_reading_lately.opus,56025,78,,,68,False,56
+Na koho on čeká od rána?,Who has he been waiting for since this morning?,hˌuː hɐz hiː bˌɪn wˈeɪɾɪŋ fɔːɹ sˈɪns ðɪs mˈɔːɹnɪŋ,who_has_he_been_waiting_for_since_this_morning.opus,56026,78,,,68,False,56
+Kde ona poslední dobou běhá?,Where has she been running lately?,wˌɛɹ hɐz ʃiː bˌɪn ɹˈʌnɪŋ lˈeɪtli,where_has_she_been_running_lately.opus,56027,78,,,68,False,56
+Jak dlouho už prší?,How long has it been raining?,hˌaʊ lˈɔŋ hɐz ɪt bˌɪn ɹˈeɪnɪŋ,how_long_has_it_been_raining.opus,56028,78,,,68,False,56
+Co my poslední dobou studujeme?,What have we been studying lately?,wˌʌt hæv wiː bˌɪn stˈʌdiɪŋ lˈeɪtli,what_have_we_been_studying_lately.opus,56029,78,,,68,False,56
+Kam vy poslední dobou cestujete?,Where have you been travelling lately?,wˌɛɹ hæv juː bˌɪn tɹˈævəlɪŋ lˈeɪtli,where_have_you_been_travelling_lately.opus,56030,78,,,68,False,56
+Co oni poslední dobou hrají?,What have they been playing lately?,wˌʌt hæv ðeɪ bˌɪn plˈeɪɪŋ lˈeɪtli,what_have_they_been_playing_lately.opus,56031,78,,,68,False,56
+eskalátor,escalator,ˈɛskɐlˌeɪɾɚ,escalator.opus,57000,,,,,True,57
+bavit,amuse,ɐmjˈuːz,amuse.opus,57001,,,,,True,57
+pobavení,amusement,ɐmjˈuːzmənt,amusement.opus,57002,,,,,True,57
+chyba,error,ˈɛɹɚ,error.opus,57003,,,,,True,57
+výkřik,scream,skɹˈiːm,scream.opus,57004,,,,,True,57
+pobavený,amused,ɐmjˈuːzd,amused.opus,57005,,,,,True,57
+hladce,smoothly,smˈuːðli,smoothly.opus,57006,,,,,True,57
+epizoda,episode,ˈɛpɪsˌoʊd,episode.opus,57007,,,,,True,57
+snack,snack,snˈæk,snack.opus,57008,,,,,True,57
+závist,envy,ˈɛnvi,envy.opus,57009,,,,,True,57
+šťastně,happily,hˈæpɪli,happily.opus,57010,,,,,True,57
+sněžení,snow,snˈoʊ,snow.opus,57011,,,,,True,57
+štěstí,happiness,hˈæpɪnəs,happiness.opus,57012,,,,,True,57
+kousat,bite,bˈaɪt,bite.opus,57013,,,,,True,57
+bit,bit,bˈɪt,bit.opus,57014,,,,,True,57
+vjezd,entrance,ˈɛntɹəns,entrance.opus,57015,,,,,True,57
+sotva,hardly,hˈɑːɹdli,hardly.opus,57016,,,,,True,57
+újma,harm,hˈɑːɹm,harm.opus,57017,,,,,True,57
+škodlivý,harmful,hˈɑːɹmfəl,harmful.opus,57018,,,,,True,57
+bavit,entertain,ˌɛntɚtˈeɪn,entertain.opus,57019,,,,,True,57
+zábava,entertainment,ˌɛntɚtˈeɪnmənt,entertainment.opus,57020,,,,,True,57
+harmonie,harmony,hˈɑːɹməni,harmony.opus,57021,,,,,True,57
+sklidit,harvest,hˈɑːɹvɪst,harvest.opus,57022,,,,,True,57
+obálka,envelope,ˈɑːnvəlˌoʊp,envelope.opus,57023,,,,,True,57
+"Už jsem odešel, když zavolala.",I'd already left when she called.,aɪd ɔːlɹˌɛdi lˈɛft wɛn ʃiː kˈɔːld,id_already_left_when_she_called.opus,57024,79,,,69,False,57
+"Ty jsi skončil dřív, než začalo pršet.",You'd finished before it started raining.,juːd fˈɪnɪʃt bᵻfˌɔːɹ ɪt stˈɑːɹɾᵻd ɹˈeɪnɪŋ,youd_finished_before_it_started_raining.opus,57025,79,,,69,False,57
+"On už jedl, když jsme dorazili.",He'd already eaten when we arrived.,hiːd ɔːlɹˌɛdi ˈiːʔn̩ wɛn wiː ɚɹˈaɪvd,hed_already_eaten_when_we_arrived.opus,57026,79,,,69,False,57
+"Ona už přijela, když jsme zavolali.",She'd already arrived when we called.,ʃiːd ɔːlɹˌɛdi ɚɹˈaɪvd wɛn wiː kˈɔːld,shed_already_arrived_when_we_called.opus,57027,79,,,69,False,57
+"To se rozbilo, než jsme to našli.",It had broken before we found it.,ɪt hæd bɹˈoʊkən bᵻfˌɔːɹ wiː fˈaʊnd ɪt,it_had_broken_before_we_found_it.opus,57028,79,,,69,False,57
+"My jsme zapomněli heslo, než jsme se přihlásili.",We'd forgotten the password before we logged in.,wiːd fɚɡˈɑːʔn̩ ðə pˈæswɜːd bᵻfˌɔːɹ wiː lˈɔɡd ˈɪn,wed_forgotten_the_password_before_we_logged_in.opus,57029,79,,,69,False,57
+Vy jste ten film viděli před naší schůzkou.,You'd seen the movie before our meeting.,juːd sˈiːn ðə mˈuːvi bᵻfˌɔːɹ ˌaʊɚ mˈiːɾɪŋ,youd_seen_the_movie_before_our_meeting.opus,57030,79,,,69,False,57
+"Oni odešli, než jsme dorazili.",They'd left before we arrived.,ðeɪd lˈɛft bᵻfˌɔːɹ wiː ɚɹˈaɪvd,theyd_left_before_we_arrived.opus,57031,79,,,69,False,57
+zejména,especially,ɪspˈɛʃəli,especially.opus,58000,,,,,True,58
+limonáda,soda,sˈoʊdə,soda.opus,58001,,,,,True,58
+udeřit,hit,hˈɪt,hit.opus,58002,,,,,True,58
+hokej,hockey,hˈɑːki,hockey.opus,58003,,,,,True,58
+východ,east,ˈiːst,east.opus,58004,,,,,True,58
+snadno,easily,ˈiːzili,easily.opus,58005,,,,,True,58
+ctižádost,ambition,æmbˈɪʃən,ambition.opus,58006,,,,,True,58
+za,beyond,bᵻjˈɔnd,beyond.opus,58007,,,,,True,58
+zemětřesení,earthquake,ˈɜːθkweɪk,earthquake.opus,58008,,,,,True,58
+náušnice,earring,ˈɪɹɪŋ,earring.opus,58009,,,,,True,58
+už,anymore,ˌɛnɪmˈɔːɹ,anymore.opus,58010,,,,,True,58
+měřítko,scale,skˈeɪl,scale.opus,58011,,,,,True,58
+zlepšit se,better,bˈɛɾɚ,better.opus,58012,,,,,True,58
+klobása,sausage,sˈɔːsɪdʒ,sausage.opus,58013,,,,,True,58
+med,honey,hˈʌni,honey.opus,58014,,,,,True,58
+čest,honour,ˈɑːnɚ,honour.opus,58015,,,,,True,58
+omáčka,sauce,sˈɔːs,sauce.opus,58016,,,,,True,58
+uspokojit,satisfy,sˈæɾɪsfˌaɪ,satisfy.opus,58017,,,,,True,58
+nevěsta,bride,bɹˈaɪd,bride.opus,58018,,,,,True,58
+vánek,breeze,bɹˈiːz,breeze.opus,58019,,,,,True,58
+jednoho dne,someday,sˈʌmdeɪ,someday.opus,58020,,,,,True,58
+hiphop,hiphop,hˈɪphɑːp,hiphop.opus,58021,,,,,True,58
+nealkoholický nápoj,soft drink,sˈɔft dɹˈɪŋk,soft_drink.opus,58022,,,,,True,58
+měkce,softly,sˈɔftli,softly.opus,58023,,,,,True,58
+"Já jsem ještě neodešel, když zavolala.",I hadn't left yet when she called.,aɪ hˈædənt lˈɛft jˈɛt wɛn ʃiː kˈɔːld,i_hadnt_left_yet_when_she_called.opus,58024,80,,,70,False,58
+"Ty jsi ještě neskončil, když začalo pršet.",You hadn't finished yet when it started raining.,juː hˈædənt fˈɪnɪʃt jˈɛt wɛn ɪt stˈɑːɹɾᵻd ɹˈeɪnɪŋ,you_hadnt_finished_yet_when_it_started_raining.opus,58025,80,,,70,False,58
+"On ještě nejedl, když jsme dorazili.",He hadn't eaten yet when we arrived.,hiː hˈædənt ˈiːʔn̩ jˈɛt wɛn wiː ɚɹˈaɪvd,he_hadnt_eaten_yet_when_we_arrived.opus,58026,80,,,70,False,58
+"Ona ještě nepřijela, když schůzka začala.",She hadn't arrived yet when the meeting started.,ʃiː hˈædənt ɚɹˈaɪvd jˈɛt wɛn ðə mˈiːɾɪŋ stˈɑːɹɾᵻd,she_hadnt_arrived_yet_when_the_meeting_started.opus,58027,80,,,70,False,58
+"To se ještě nerozbilo, když jsme to zkontrolovali.",It hadn't broken yet when we checked it.,ɪt hˈædənt bɹˈoʊkən jˈɛt wɛn wiː tʃˈɛkt ɪt,it_hadnt_broken_yet_when_we_checked_it.opus,58028,80,,,70,False,58
+My jsme do té doby nezapomněli heslo.,We hadn't forgotten the password by then.,wiː hˈædənt fɚɡˈɑːʔn̩ ðə pˈæswɜːd baɪ ðˈɛn,we_hadnt_forgotten_the_password_by_then.opus,58029,80,,,70,False,58
+"Vy jste ten film neviděli, než jsme se setkali.",You hadn't seen the movie before we met.,juː hˈædənt sˈiːn ðə mˈuːvi bᵻfˌɔːɹ wiː mˈɛt,you_hadnt_seen_the_movie_before_we_met.opus,58030,80,,,70,False,58
+"Oni ještě neodešli, když jsme dorazili.",They hadn't left yet when we arrived.,ðeɪ hˈædənt lˈɛft jˈɛt wɛn wiː ɚɹˈaɪvd,they_hadnt_left_yet_when_we_arrived.opus,58031,80,,,70,False,58
+autor,author,ˈɔːθɚ,author.opus,60000,,,,,True,60
+povolení,permit,pˈɜːmɪt,permit.opus,60001,,,,,True,60
+povolení,permission,pɚmˈɪʃən,permission.opus,60002,,,,,True,60
+toast,toast,tˈoʊst,toast.opus,60003,,,,,True,60
+křeslo,armchair,ˈɑːɹmtʃɛɹ,armchair.opus,60004,,,,,True,60
+dnes,nowadays,nˈaʊədˌeɪz,nowadays.opus,60005,,,,,True,60
+titul,title,tˈaɪɾəl,title.opus,60006,,,,,True,60
+nejistý,uncertain,ʌnsˈɜːʔn̩,uncertain.opus,60007,,,,,True,60
+balit,pack,pˈæk,pack.opus,60008,,,,,True,60
+balíček,pack,pˈæk,pack.opus,60009,,,,,True,60
+dálnice,motorway,mˈoʊɾɚwˌeɪ,motorway.opus,60010,,,,,True,60
+osobnost,personality,pˌɜːsənˈælᵻɾi,personality.opus,60011,,,,,True,60
+Pacifik,pacific,pɐsˈɪfɪk,pacific.opus,60012,,,,,True,60
+nepříjemný,uncomfortable,ʌŋkˈʌmftəbəl,uncomfortable.opus,60013,,,,,True,60
+tip,tip,tˈɪp,tip.opus,60014,,,,,True,60
+předpovědět,predict,pɹɪdˈɪkt,predict.opus,60015,,,,,True,60
+předpověď,prediction,pɹɪdˈɪkʃən,prediction.opus,60016,,,,,True,60
+atom,atom,ˈæɾəm,atom.opus,60017,,,,,True,60
+rozsah,range,ɹˈeɪndʒ,range.opus,60018,,,,,True,60
+jízdní řád,timetable,tˈaɪmteɪbəl,timetable.opus,60019,,,,,True,60
+většinou,mostly,mˈoʊstli,mostly.opus,60020,,,,,True,60
+benzín,petrol,pˈɛtɹəl,petrol.opus,60021,,,,,True,60
+čerpací stanice,petrol station,pˈɛtɹəl stˈeɪʃən,petrol_station.opus,60022,,,,,True,60
+inzerovat,advertise,ˈædvɚtˌaɪz,advertise.opus,60023,,,,,True,60
+Co jsem zabalil před odjezdem?,What had I packed before I left?,wˌʌt hæd aɪ pˈækt bᵻfˌɔːɹ aɪ lˈɛft,what_had_i_packed_before_i_left.opus,60024,82,,,72,False,60
+"Co jsi dokončil, než jsi odešel?",What had you finished before you left?,wˌʌt hæd juː fˈɪnɪʃt bᵻfˌɔːɹ juː lˈɛft,what_had_you_finished_before_you_left.opus,60025,82,,,72,False,60
+"Co už snědl, než jsme dorazili?",What had he eaten before we arrived?,wˌʌt hæd hiː ˈiːʔn̩ bᵻfˌɔːɹ wiː ɚɹˈaɪvd,what_had_he_eaten_before_we_arrived.opus,60026,82,,,72,False,60
+Komu zavolala před odjezdem?,Who had she called before she left?,hˌuː hæd ʃiː kˈɔːld bᵻfˌɔːɹ ʃiː lˈɛft,who_had_she_called_before_she_left.opus,60027,82,,,72,False,60
+"Co požár poškodil, než ho uhasili?",What had the fire damaged before they put it out?,wˌʌt hæd ðə fˈaɪɚ dˈæmɪdʒd bᵻfˌɔːɹ ðeɪ pˌʊt ɪɾ ˈaʊt,what_had_the_fire_damaged_before_they_put_it_out.opus,60028,82,,,72,False,60
+"Na co jsme zapomněli, než jsme odjeli?",What had we forgotten before we left?,wˌʌt hæd wiː fɚɡˈɑːʔn̩ bᵻfˌɔːɹ wiː lˈɛft,what_had_we_forgotten_before_we_left.opus,60029,82,,,72,False,60
+Co jste viděli před příjezdem?,What had you seen before you arrived?,wˌʌt hæd juː sˈiːn bᵻfˌɔːɹ juː ɚɹˈaɪvd,what_had_you_seen_before_you_arrived.opus,60030,82,,,72,False,60
+"Kam už odešli, když jsem jim zavolal?",Where had they gone by the time I called them?,wˌɛɹ hæd ðeɪ ɡɔn baɪ ðə tˈaɪm aɪ kˈɔːld ðˌɛm,where_had_they_gone_by_the_time_i_called_them.opus,60031,82,,,72,False,60
