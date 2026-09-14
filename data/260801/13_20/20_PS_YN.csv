@@ -23,22 +23,22 @@ praní,wash,,
 teplo,warm,,
 probudit,wake,,
 číšník,waiter,,
-Já jím? (běžně),Do I eat?,36,28
-Ty čteš? (běžně),Do you read?,36,28
-On běhá? (běžně),Does he run?,36,28
-Ona vaří? (běžně),Does she cook?,36,28
-Funguje to? (běžně),Does it work?,36,28
-My zpíváme? (běžně),Do we sing?,36,28
-Vy čekáte? (běžně),Do you wait?,36,28
-Oni cestují? (běžně),Do they travel?,36,28
-"Ano, běhá. (běžně)","Yes, he does.",37,29
-"Ne, nečteš. (běžně)","No, you don't.",37,29
-"Ne, nevaří. (běžně)","No, she doesn't.",37,29
-Já jím doma? (běžně),Do I eat at home?,,28
-Ty čteš knihy? (běžně),Do you read books?,,28
-On řídí auto? (běžně),Does he drive a car?,,28
-Ona učí angličtinu? (běžně),Does she teach English?,,28
-Bolí to? (běžně),Does it hurt?,,28
-My bydlíme tady? (běžně),Do we live here?,,28
-Vy potřebujete pomoc? (běžně),Do you need help?,,28
-Oni hrají fotbal? (běžně),Do they play football?,,28
+Já jím často?,Do I eat often?,36,28
+Čteš ty beletrii?,Do you read beletry?,36,28
+Běhá on každé ráno?,Does he run every morning?,36,28
+Vaří ona snídani pokaždé?,Does she cook breakfast everytime?,36,28
+Funguje to?,Does it work?,36,28
+My zpíváme dobře?,Do we sing well?,36,28
+Vy čekáte běžně?,Do you wait commonly?,36,28
+Oni cestují každý rok?,Do they travel every year?,36,28
+"Ano, běhá.","Yes, he does.",37,29
+"Ne, nečteš.","No, you don't.",37,29
+"Ne, nevaří.","No, she doesn't.",37,29
+Já jím doma?,Do I eat at home?,,28
+Ty čteš knihy?,Do you read books?,,28
+On řídí auto?,Does he drive a car?,,28
+Ona učí angličtinu?,Does she teach English?,,28
+Bolí to?,Does it hurt?,,28
+My bydlíme tady?,Do we live here?,,28
+Vy potřebujete pomoc?),Do you need help?,,28
+Oni hrají fotbal?,Do they play football?,,28
