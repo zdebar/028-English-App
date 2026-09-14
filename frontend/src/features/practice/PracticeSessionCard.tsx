@@ -261,7 +261,8 @@ type PracticeCardDisplayState = Readonly<{
   showGrammarButton: boolean;
   showNoteButton: boolean;
   showProgressLabel: boolean;
-  audioControlsDisabled: boolean;
+  audioButtonDisabled: boolean;
+  volumeSliderDisabled: boolean;
   grammarButtonDisabled: boolean;
   noteButtonDisabled: boolean;
   controlsLocked: boolean;
@@ -285,6 +286,11 @@ function getPracticeCardDisplayState(
   } = props;
   const controlsLocked = showDirectionChange;
   const showAudioControls = !audioDisabled;
+  const audioControlsDisabled = isAudioControlDisabled(
+    controlsLocked,
+    showAudioControls,
+    audioLoading,
+  );
   const showGrammarButton = hasGrammarDetails(revealed, grammar);
   const showNoteButton = hasNoteDetails(revealed, note);
   return {
@@ -296,14 +302,8 @@ function getPracticeCardDisplayState(
     showGrammarButton,
     showNoteButton,
     showProgressLabel: props.isBlockTrainingPractice || props.showProgressLabel,
-    audioControlsDisabled: isAudioControlDisabled(
-      controlsLocked,
-      showAudioControls,
-      showDirectionChange,
-      audioLoading,
-      isCzToEn,
-      revealed,
-    ),
+    audioButtonDisabled: audioControlsDisabled || (isCzToEn && !revealed),
+    volumeSliderDisabled: audioControlsDisabled,
     grammarButtonDisabled: controlsLocked || !showGrammarButton,
     noteButtonDisabled: controlsLocked || !showNoteButton,
     controlsLocked,
@@ -349,18 +349,9 @@ function hasNoteDetails(revealed: boolean, note: NoteType | null): boolean {
 function isAudioControlDisabled(
   celebrationLocked: boolean,
   showAudioControls: boolean,
-  showDirectionChange: boolean,
   audioLoading: boolean,
-  isCzToEn: boolean,
-  revealed: boolean,
 ): boolean {
-  return [
-    celebrationLocked,
-    !showAudioControls,
-    showDirectionChange,
-    audioLoading,
-    isCzToEn && !revealed,
-  ].some(Boolean);
+  return celebrationLocked || !showAudioControls || audioLoading;
 }
 
 function getPracticeControlColumns(
@@ -505,8 +496,8 @@ function PracticeCardActionBar({
         />
       </div>
       <div className="pos-bottom-left-control">
-        <PlayButton onClick={playAudio} disabled={display.audioControlsDisabled} />
-        <VolumeSlider disabled={display.audioControlsDisabled} />
+        <PlayButton onClick={playAudio} disabled={display.audioButtonDisabled} />
+        <VolumeSlider disabled={display.volumeSliderDisabled} />
       </div>
       <div className="pos-bottom-right-control">
         <SecondaryControlButton
