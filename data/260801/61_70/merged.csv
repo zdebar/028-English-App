@@ -1,0 +1,321 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+inzerát,advertisement,ˌædvɚtˈaɪzmənt,advertisement.opus,61000,,,,,True,61
+až do,till,tˈɪl,till.opus,61001,,,,,True,61
+zatímco,while,wˈaɪl,while.opus,61002,,,,,True,61
+vlastně,actually,ˈæktʃuːəli,actually.opus,61003,,,,,True,61
+pozadí,background,bˈækɡɹaʊnd,background.opus,61004,,,,,True,61
+invalidní vozík,wheelchair,wˈiːltʃɛɹ,wheelchair.opus,61005,,,,,True,61
+plocha,area,ˈɛɹiə,area.opus,61006,,,,,True,61
+vražda,murder,mˈɜːdɚ,murder.opus,61007,,,,,True,61
+pokročit,advance,ɐdvˈæns,advance.opus,61008,,,,,True,61
+pokročilý,advanced,ɐdvˈænst,advanced.opus,61009,,,,,True,61
+pláštěnka,raincoat,ɹˈeɪŋkoʊt,raincoat.opus,61010,,,,,True,61
+zubní kartáček,toothbrush,tˈuːθbɹʌʃ,toothbrush.opus,61011,,,,,True,61
+pepř,pepper,pˈɛpɚ,pepper.opus,61012,,,,,True,61
+dobře známý,well-known,wˈɛlnˈoʊn,wellknown.opus,61013,,,,,True,61
+bolest zubů,toothache,tˈuːθeɪk,toothache.opus,61014,,,,,True,61
+džbánek,mug,mˈʌɡ,mug.opus,61015,,,,,True,61
+podstatné jméno,noun,nˈaʊn,noun.opus,61016,,,,,True,61
+západ,west,wˈɛst,west.opus,61017,,,,,True,61
+pohled,view,vjˈuː,view.opus,61018,,,,,True,61
+tón,tone,tˈoʊn,tone.opus,61019,,,,,True,61
+videohra,video game,vˈɪdɪoʊ ɡˈeɪm,video_game.opus,61020,,,,,True,61
+paní,Ms,ˌɛmˈɛs,ms.opus,61021,,,,,True,61
+perfektní,perfect,pˈɜːfɛkt,perfect.opus,61022,,,,,True,61
+dokonale,perfectly,pˈɜːfɛktli,perfectly.opus,61023,,,,,True,61
+Zítra v osm budu pracovat.,I'll be working at eight tomorrow.,aɪl biː wˈɜːkɪŋ æɾ ˈeɪt təmˈɑːɹoʊ,ill_be_working_at_eight_tomorrow.opus,61024,83,,,73,False,61
+V šest budeš ještě řídit.,You'll still be driving at six.,juːl stˈɪl biː dɹˈaɪvɪŋ æt sˈɪks,youll_still_be_driving_at_six.opus,61025,83,,,73,False,61
+"On bude spát, až dorazíme.",He'll be sleeping when we arrive.,hiːl biː slˈiːpɪŋ wɛn wiː ɚɹˈaɪv,hell_be_sleeping_when_we_arrive.opus,61026,83,,,73,False,61
+Ona bude studovat zítra večer.,She'll be studying tomorrow evening.,ʃiːl biː stˈʌdiɪŋ təmˈɑːɹoʊ ˈiːvnɪŋ,shell_be_studying_tomorrow_evening.opus,61027,83,,,73,False,61
+Zítra touto dobou bude pršet.,It'll be raining at this time tomorrow.,ˌɪɾəl biː ɹˈeɪnɪŋ æt ðɪs tˈaɪm təmˈɑːɹoʊ,itll_be_raining_at_this_time_tomorrow.opus,61028,83,,,73,False,61
+V létě budeme cestovat po Evropě.,We'll be travelling around Europe this summer.,wiːl biː tɹˈævəlɪŋ ɚɹˈaʊnd jˈʊɹɹəp ðɪs sˈʌmɚ,well_be_travelling_around_europe_this_summer.opus,61029,83,,,73,False,61
+V osm budete čekat před hotelem.,You'll be waiting outside the hotel at eight.,juːl biː wˈeɪɾɪŋ aʊtsˈaɪd ðə hoʊtˈɛl æɾ ˈeɪt,youll_be_waiting_outside_the_hotel_at_eight.opus,61030,83,,,73,False,61
+"Oni budou hrát, až přijdeme.",They'll be playing when we arrive.,ðeɪl biː plˈeɪɪŋ wɛn wiː ɚɹˈaɪv,theyll_be_playing_when_we_arrive.opus,61031,83,,,73,False,61
+mokré,wet,wˈɛt,wet.opus,62000,,,,,True,62
+provést,perform,pɚfˈɔːɹm,perform.opus,62001,,,,,True,62
+výkon,performance,pɚfˈɔːɹməns,performance.opus,62002,,,,,True,62
+román,novel,nˈɑːvəl,novel.opus,62003,,,,,True,62
+parfém,perfume,pˈɜːfjuːm,perfume.opus,62004,,,,,True,62
+pronásledovat,pursue,pɚsˈuː,pursue.opus,62005,,,,,True,62
+produkovat,produce,pɹədˈuːs,produce.opus,62006,,,,,True,62
+punčocháče,tights,tˈaɪts,tights.opus,62007,,,,,True,62
+další,additional,ɐdˈɪʃənəl,additional.opus,62008,,,,,True,62
+fyzicky,physically,fˈɪzɪkli,physically.opus,62009,,,,,True,62
+výroba,production,pɹədˈʌkʃən,production.opus,62010,,,,,True,62
+upéct,bake,bˈeɪk,bake.opus,62011,,,,,True,62
+pod vodou,underwater,ˌʌndɚwˈɔːɾɚ,underwater.opus,62012,,,,,True,62
+myšlení,thought,θˈɔːt,thought.opus,62013,,,,,True,62
+ačkoli,though,ðˈoʊ,though.opus,62014,,,,,True,62
+hodnotit,rate,ɹˈeɪt,rate.opus,62015,,,,,True,62
+hodnocení,rating,ɹˈeɪɾɪŋ,rating.opus,62016,,,,,True,62
+profesionální,professional,pɹəfˈɛʃənəl,professional.opus,62017,,,,,True,62
+zámoří,overseas,ˌoʊvɚsˈiːz,overseas.opus,62018,,,,,True,62
+syrový,raw,ɹˈɔː,raw.opus,62019,,,,,True,62
+ozbrojit,arm,ˈɑːɹm,arm.opus,62020,,,,,True,62
+ozbrojený,armed,ˈɑːɹmd,armed.opus,62021,,,,,True,62
+povolání,occupation,ˌɑːkjʊpˈeɪʃən,occupation.opus,62022,,,,,True,62
+nadváha,overweight,ˌoʊvɚwˈeɪt,overweight.opus,62023,,,,,True,62
+Zítra v osm nebudu pracovat.,I won't be working at eight tomorrow.,aɪ woʊnt biː wˈɜːkɪŋ æɾ ˈeɪt təmˈɑːɹoʊ,i_wont_be_working_at_eight_tomorrow.opus,62024,84,,,74,False,62
+Ty zítra v šest nebudeš řídit.,You won't be driving at six tomorrow.,juː woʊnt biː dɹˈaɪvɪŋ æt sˈɪks təmˈɑːɹoʊ,you_wont_be_driving_at_six_tomorrow.opus,62025,84,,,74,False,62
+"On nebude spát, až dorazíme.",He won't be sleeping when we arrive.,hiː woʊnt biː slˈiːpɪŋ wɛn wiː ɚɹˈaɪv,he_wont_be_sleeping_when_we_arrive.opus,62026,84,,,74,False,62
+Ona zítra večer nebude studovat.,She won't be studying tomorrow evening.,ʃiː woʊnt biː stˈʌdiɪŋ təmˈɑːɹoʊ ˈiːvnɪŋ,she_wont_be_studying_tomorrow_evening.opus,62027,84,,,74,False,62
+Zítra touto dobou nebude pršet.,It won't be raining at this time tomorrow.,ɪt woʊnt biː ɹˈeɪnɪŋ æt ðɪs tˈaɪm təmˈɑːɹoʊ,it_wont_be_raining_at_this_time_tomorrow.opus,62028,84,,,74,False,62
+My v sobotu touto dobou nebudeme cestovat.,We won't be travelling at this time on Saturday.,wiː woʊnt biː tɹˈævəlɪŋ æt ðɪs tˈaɪm ˌɔn sˈæɾɚdˌeɪ,we_wont_be_travelling_at_this_time_on_saturday.opus,62029,84,,,74,False,62
+Vy v osm nebudete čekat před hotelem.,You won't be waiting outside the hotel at eight.,juː woʊnt biː wˈeɪɾɪŋ aʊtsˈaɪd ðə hoʊtˈɛl æɾ ˈeɪt,you_wont_be_waiting_outside_the_hotel_at_eight.opus,62030,84,,,74,False,62
+"Oni nebudou hrát, až přijdeme.",They won't be playing when we arrive.,ðeɪ woʊnt biː plˈeɪɪŋ wɛn wiː ɚɹˈaɪv,they_wont_be_playing_when_we_arrive.opus,62031,84,,,74,False,62
+model,model,mˈɑːdəl,model.opus,63000,,,,,True,63
+nepříjemný,uneasy,ʌnˈiːzi,uneasy.opus,63001,,,,,True,63
+paprsek,ray,ɹˈeɪ,ray.opus,63002,,,,,True,63
+větrný,windy,wˈɪndi,windy.opus,63003,,,,,True,63
+víno,wine,wˈaɪn,wine.opus,63004,,,,,True,63
+poutník,pilgrim,pˈɪlɡɹɪm,pilgrim.opus,63005,,,,,True,63
+vítěz,winner,wˈɪnɚ,winner.opus,63006,,,,,True,63
+pilulka,pill,pˈɪl,pill.opus,63007,,,,,True,63
+mobilní,mobile,mˈoʊbəl,mobile.opus,63008,,,,,True,63
+tahat,pull,pˈʊl,pull.opus,63009,,,,,True,63
+žíznivý,thirsty,θˈɜːsti,thirsty.opus,63010,,,,,True,63
+architektura,architecture,ˈɑːɹkɪtˌɛktʃɚ,architecture.opus,63011,,,,,True,63
+badminton,badminton,bˈædmɪntən,badminton.opus,63012,,,,,True,63
+mešita,mosque,mˈɑːsk,mosque.opus,63013,,,,,True,63
+rap,rap,ɹˈæp,rap.opus,63014,,,,,True,63
+dub,oak,ˈoʊk,oak.opus,63015,,,,,True,63
+inzerce,advertising,ˈædvɚtˌaɪzɪŋ,advertising.opus,63016,,,,,True,63
+rada,advice,ɐdvˈaɪs,advice.opus,63017,,,,,True,63
+celý,whole,hˈoʊl,whole.opus,63018,,,,,True,63
+uvázat,tie,tˈaɪ,tie.opus,63019,,,,,True,63
+uklizeno,tidy,tˈaɪdi,tidy.opus,63020,,,,,True,63
+uklidit,tidy,tˈaɪdi,tidy.opus,63021,,,,,True,63
+přesný,precise,pɹɪsˈaɪs,precise.opus,63022,,,,,True,63
+koho,whom,hˈuːm,whom.opus,63023,,,,,True,63
+Budu zítra v osm pracovat?,Will I be working at eight tomorrow?,wɪl aɪ biː wˈɜːkɪŋ æɾ ˈeɪt təmˈɑːɹoʊ,will_i_be_working_at_eight_tomorrow.opus,63024,85,,,75,False,63
+Budeš zítra ráno řídit?,Will you be driving tomorrow morning?,wɪl juː biː dɹˈaɪvɪŋ təmˈɑːɹoʊ mˈɔːɹnɪŋ,will_you_be_driving_tomorrow_morning.opus,63025,85,,,75,False,63
+On bude zítra v tu dobu spát?,Will he be sleeping then?,wɪl hiː biː slˈiːpɪŋ ðˈɛn,will_he_be_sleeping_then.opus,63026,85,,,75,False,63
+Ona bude zítra večer studovat?,Will she be studying tomorrow evening?,wɪl ʃiː biː stˈʌdiɪŋ təmˈɑːɹoʊ ˈiːvnɪŋ,will_she_be_studying_tomorrow_evening.opus,63027,85,,,75,False,63
+Bude zítra touto dobou pršet?,Will it be raining at this time tomorrow?,wɪl ɪt biː ɹˈeɪnɪŋ æt ðɪs tˈaɪm təmˈɑːɹoʊ,will_it_be_raining_at_this_time_tomorrow.opus,63028,85,,,75,False,63
+Budeme v sobotu touhle dobou cestovat?,Will we be travelling at this time on Saturday?,wɪl wiː biː tɹˈævəlɪŋ æt ðɪs tˈaɪm ˌɔn sˈæɾɚdˌeɪ,will_we_be_travelling_at_this_time_on_saturday.opus,63029,85,,,75,False,63
+Budete zítra v osm čekat před hotelem?,Will you be waiting outside the hotel at eight tomorrow?,wɪl juː biː wˈeɪɾɪŋ aʊtsˈaɪd ðə hoʊtˈɛl æɾ ˈeɪt təmˈɑːɹoʊ,will_you_be_waiting_outside_the_hotel_at_eight_tomorrow.opus,63030,85,,,75,False,63
+"Oni budou hrát, až dorazíme?",Will they be playing when we arrive?,wɪl ðeɪ biː plˈeɪɪŋ wɛn wiː ɚɹˈaɪv,will_they_be_playing_when_we_arrive.opus,63031,85,,,75,False,63
+radit,advise,ɐdvˈaɪz,advise.opus,64000,,,,,True,64
+interpunkce,punctuation,pˌʌŋktʃuːˈeɪʃən,punctuation.opus,64001,,,,,True,64
+přijatelný,acceptable,ɐksˈɛptəbəl,acceptable.opus,64002,,,,,True,64
+přidání,addition,ɐdˈɪʃən,addition.opus,64003,,,,,True,64
+široký,wide,wˈaɪd,wide.opus,64004,,,,,True,64
+fyzikální,physical,fˈɪzɪkəl,physical.opus,64005,,,,,True,64
+fotografování,photography,fətˈɑːɡɹəfi,photography.opus,64006,,,,,True,64
+fotograf,photographer,fətˈɑːɡɹəfɚ,photographer.opus,64007,,,,,True,64
+špatně,badly,bˈædli,badly.opus,64008,,,,,True,64
+záležitost,affair,ɐfˈɛɹ,affair.opus,64009,,,,,True,64
+hmotnost,weight,wˈeɪt,weight.opus,64010,,,,,True,64
+pochopit,understand,ˌʌndɚstˈænd,understand.opus,64011,,,,,True,64
+fotografie,photograph,fˈoʊɾəɡɹˌæf,photograph.opus,64012,,,,,True,64
+sloveso,verb,vˈɜːb,verb.opus,64013,,,,,True,64
+nálada,mood,mˈuːd,mood.opus,64014,,,,,True,64
+hrom,thunder,θˈʌndɚ,thunder.opus,64015,,,,,True,64
+bouřka,thunderstorm,θˈʌndɚstˌɔːɹm,thunderstorm.opus,64016,,,,,True,64
+široce,widely,wˈaɪdli,widely.opus,64017,,,,,True,64
+zvuk,audio,ˈɔːdɪˌoʊ,audio.opus,64018,,,,,True,64
+muzeum,museum,mjuːzˈiəm,museum.opus,64019,,,,,True,64
+oznámení,notice,nˈoʊɾɪs,notice.opus,64020,,,,,True,64
+vytisknout,print,pɹˈɪnt,print.opus,64021,,,,,True,64
+tiskárna,printer,pɹˈɪntɚ,printer.opus,64022,,,,,True,64
+těstoviny,pasta,pˈɑːstə,pasta.opus,64023,,,,,True,64
+Kdy budu zítra pracovat?,When will I be working tomorrow?,wˌɛn wɪl aɪ biː wˈɜːkɪŋ təmˈɑːɹoʊ,when_will_i_be_working_tomorrow.opus,64024,86,,,76,False,64
+Kde budeš zítra řídit?,Where will you be driving tomorrow?,wˌɛɹ wɪl juː biː dɹˈaɪvɪŋ təmˈɑːɹoʊ,where_will_you_be_driving_tomorrow.opus,64025,86,,,76,False,64
+Kdy bude on během cesty spát?,When will he be sleeping during the trip?,wˌɛn wɪl hiː biː slˈiːpɪŋ dˈʊɹɹɪŋ ðə tɹˈɪp,when_will_he_be_sleeping_during_the_trip.opus,64026,86,,,76,False,64
+Co bude ona studovat příští semestr?,What will she be studying next semester?,wˌʌt wɪl ʃiː biː stˈʌdiɪŋ nˈɛkst səmˈɛstɚ,what_will_she_be_studying_next_semester.opus,64027,86,,,76,False,64
+Kdy bude o víkendu pršet?,When will it be raining this weekend?,wˌɛn wɪl ɪt biː ɹˈeɪnɪŋ ðɪs wˈiːkɛnd,when_will_it_be_raining_this_weekend.opus,64028,86,,,76,False,64
+Kde budeme příští měsíc cestovat?,Where will we be travelling next month?,wˌɛɹ wɪl wiː biː tɹˈævəlɪŋ nˈɛkst mˈʌnθ,where_will_we_be_travelling_next_month.opus,64029,86,,,76,False,64
+"Na koho budete čekat, až přijedete?",Who will you be waiting for when you arrive?,hˌuː wɪl juː biː wˈeɪɾɪŋ fɔːɹ wɛn juː ɚɹˈaɪv,who_will_you_be_waiting_for_when_you_arrive.opus,64030,86,,,76,False,64
+Co budou hrát na koncertě?,What will they be playing at the concert?,wˌʌt wɪl ðeɪ biː plˈeɪɪŋ æt ðə kˈɑːnsɚt,what_will_they_be_playing_at_the_concert.opus,64031,86,,,76,False,64
+kvalita,quality,kwˈɔlᵻɾi,quality.opus,65000,,,,,True,65
+pračka,washing machine,wˈɑːʃɪŋ məʃˈiːn,washing_machine.opus,65001,,,,,True,65
+slovník,vocabulary,voʊkˈæbjʊlˌɛɹi,vocabulary.opus,65002,,,,,True,65
+mytí nádobí,washing-up,wˈɑːʃɪŋˈʌp,washingup.opus,65003,,,,,True,65
+hlučný,noisy,nˈɔɪzi,noisy.opus,65004,,,,,True,65
+zabránit,prevent,pɹɪvˈɛnt,prevent.opus,65005,,,,,True,65
+dosáhnout,achieve,ɐtʃˈiːv,achieve.opus,65006,,,,,True,65
+nervový,nervous,nˈɜːvəs,nervous.opus,65007,,,,,True,65
+poklad,treasure,tɹˈɛʒɚ,treasure.opus,65008,,,,,True,65
+negativní,negative,nˈɛɡətˌɪv,negative.opus,65009,,,,,True,65
+tiše,quietly,kwˈaɪətli,quietly.opus,65010,,,,,True,65
+předstírat,pretend,pɹɪtˈɛnd,pretend.opus,65011,,,,,True,65
+cestovatel,traveller,tɹˈævəlɚ,traveller.opus,65012,,,,,True,65
+soukromé,private,pɹˈaɪvət,private.opus,65013,,,,,True,65
+cestování,travel,tɹˈævəl,travel.opus,65014,,,,,True,65
+astronaut,astronaut,ˈæstɹənˌɔːt,astronaut.opus,65015,,,,,True,65
+přestat,quit,kwˈɪt,quit.opus,65016,,,,,True,65
+sdružení,association,ɐsˌoʊsɪˈeɪʃən,association.opus,65017,,,,,True,65
+PC,PC,pˌiːsˈiː,pc.opus,65018,,,,,True,65
+past,trap,tɹˈæp,trap.opus,65019,,,,,True,65
+vlna,wave,wˈeɪv,wave.opus,65020,,,,,True,65
+argument,argument,ˈɑːɹɡjuːmənt,argument.opus,65021,,,,,True,65
+hrášek,pea,pˈiː,pea.opus,65022,,,,,True,65
+nikdo,nobody,nˈoʊbɑːdi,nobody.opus,65023,,,,,True,65
+"Kdybych to věděl, zavolal bych","If I'd known, I'd have called",ɪf aɪd nˈoʊn aɪd hæv kˈɔːld,if_id_known_id_have_called.opus,65024,87,,,77,False,65
+"Kdybys přišel, pomohl bys","If you'd come, you'd have helped",ɪf juːd kˈʌm juːd hæv hˈɛlpt,if_youd_come_youd_have_helped.opus,65025,87,,,77,False,65
+"Kdyby studoval, uspěl by","If he'd studied, he'd have succeeded",ɪf hiːd stˈʌdid hiːd hæv səksˈiːdᵻd,if_hed_studied_hed_have_succeeded.opus,65026,87,,,77,False,65
+"Kdyby se připravila, vyhrála by","If she'd prepared, she'd have won",ɪf ʃiːd pɹɪpˈɛɹd ʃiːd hæv wˈʌn,if_shed_prepared_shed_have_won.opus,65027,87,,,77,False,65
+"Kdyby se to rozbilo, opravili bychom to","If it had broken, we'd have fixed it",ɪf ɪt hæd bɹˈoʊkən wiːd hæv fˈɪkst ɪt,if_it_had_broken_wed_have_fixed_it.opus,65028,87,,,77,False,65
+"Kdybychom odešli dřív, stihli bychom vlak","If we'd left earlier, we'd have caught the train",ɪf wiːd lˈɛft ˈɜːlɪɚ wiːd hæv kˈɔːt ðə tɹˈeɪn,if_wed_left_earlier_wed_have_caught_the_train.opus,65029,87,,,77,False,65
+"Kdybyste poslouchali, rozuměli byste","If you'd listened, you'd have understood",ɪf juːd lˈɪsənd juːd hæv ˌʌndɚstˈʊd,if_youd_listened_youd_have_understood.opus,65030,87,,,77,False,65
+"Kdyby odešli dřív, viděli by začátek","If they'd left earlier, they'd have seen the beginning",ɪf ðeɪd lˈɛft ˈɜːlɪɚ ðeɪd hæv sˈiːn ðə bɪɡˈɪnɪŋ,if_theyd_left_earlier_theyd_have_seen_the_beginning.opus,65031,87,,,77,False,65
+klam,trick,tɹˈɪk,trick.opus,66000,,,,,True,66
+skutečně,truly,tɹˈuːli,truly.opus,66001,,,,,True,66
+vyhnout se,avoid,ɐvˈɔɪd,avoid.opus,66002,,,,,True,66
+zprůměrovat,average,ˈævɹɪdʒ,average.opus,66003,,,,,True,66
+hlavní,principal,pɹˈɪnsɪpəl,principal.opus,66004,,,,,True,66
+akt,act,ˈækt,act.opus,66005,,,,,True,66
+napříč,across,əkɹˈɑːs,across.opus,66006,,,,,True,66
+problémy,trouble,tɹˈʌbəl,trouble.opus,66007,,,,,True,66
+pravda,truth,tɹˈuːθ,truth.opus,66008,,,,,True,66
+síť,net,nˈɛt,net.opus,66009,,,,,True,66
+zaparkovat,park,pˈɑːɹk,park.opus,66010,,,,,True,66
+částečně,partly,pˈɑːɹtli,partly.opus,66011,,,,,True,66
+královna,queen,kwˈiːn,queen.opus,66012,,,,,True,66
+cena,award,ɐwˈɔːɹd,award.opus,66013,,,,,True,66
+peněženka,wallet,wˈɔlɪt,wallet.opus,66014,,,,,True,66
+bloudit,wander,wˈɔndɚ,wander.opus,66015,,,,,True,66
+přihrávka,pass,pˈæs,pass.opus,66016,,,,,True,66
+přejít,pass,pˈæs,pass.opus,66017,,,,,True,66
+průchod,passage,pˈæsɪdʒ,passage.opus,66018,,,,,True,66
+hrdost,pride,pɹˈaɪd,pride.opus,66019,,,,,True,66
+chůze,walking,wˈɔːkɪŋ,walking.opus,66020,,,,,True,66
+návštěvník,visitor,vˈɪzɪɾɚ,visitor.opus,66021,,,,,True,66
+naladit,tune,tˈuːn,tune.opus,66022,,,,,True,66
+klidný,peaceful,pˈiːsfəl,peaceful.opus,66023,,,,,True,66
+Jsem zván na oslavu každý rok.,I'm invited to the party every year.,aɪm ɪnvˈaɪɾᵻd tə ðə pˈɑːɹɾi ˈɛvɹi jˈɪɹ,im_invited_to_the_party_every_year.opus,66024,88,,,78,False,66
+Jsi vybrán do týmu.,You're chosen for the team after the test.,jʊɹ tʃˈoʊzən fɚðə tˈiːm ˈæftɚ ðə tˈɛst,youre_chosen_for_the_team_after_the_test.opus,66025,88,,,78,False,66
+V práci je respektován svými kolegy.,He's respected by his colleagues at work.,hiːz ɹᵻspˈɛktᵻd baɪ hɪz kˈɑːliːɡz æt wˈɜːk,hes_respected_by_his_colleagues_at_work.opus,66026,88,,,78,False,66
+Ona je každý týden informována o změnách.,She's informed about the changes every week.,ʃiːz ɪnfˈɔːɹmd ɐbˌaʊt ðə tʃˈeɪndʒᵻz ˈɛvɹi wˈiːk,shes_informed_about_the_changes_every_week.opus,66027,88,,,78,False,66
+To se čistí každý den.,It's cleaned every day.,ɪts klˈiːnd ˈɛvɹi dˈeɪ,its_cleaned_every_day.opus,66028,88,,,78,False,66
+My jsme očekáváni na nádraží v poledne.,We're expected at the station at noon.,wɪɹ ɛkspˈɛktᵻd æt ðə stˈeɪʃən æt nˈuːn,were_expected_at_the_station_at_noon.opus,66029,88,,,78,False,66
+Vy jste placeni každý pátek.,You're paid every Friday.,jʊɹ pˈeɪd ˈɛvɹi fɹˈaɪdeɪ,youre_paid_every_friday.opus,66030,88,,,78,False,66
+Oni jsou kontrolováni u vchodu.,They're checked at the entrance.,ðeɪɚ tʃˈɛkt æt ðɪ ˈɛntɹəns,theyre_checked_at_the_entrance.opus,66031,88,,,78,False,66
+web,web,wˈɛb,web.opus,67000,,,,,True,67
+webová stránka,web page,wˈɛb pˈeɪdʒ,web_page.opus,67001,,,,,True,67
+provoz,traffic,tɹˈæfɪk,traffic.opus,67002,,,,,True,67
+semafor,traffic light,tɹˈæfɪk lˈaɪt,traffic_light.opus,67003,,,,,True,67
+webové stránky,website,wˈɛbsaɪt,website.opus,67004,,,,,True,67
+tradice,tradition,tɹɐdˈɪʃən,tradition.opus,67005,,,,,True,67
+tradiční,traditional,tɹɐdˈɪʃənəl,traditional.opus,67006,,,,,True,67
+svatba,wedding,wˈɛdɪŋ,wedding.opus,67007,,,,,True,67
+tajemství,mystery,mˈɪstɚɹi,mystery.opus,67008,,,,,True,67
+tajemný,mysterious,mɪstˈɪɹiəs,mysterious.opus,67009,,,,,True,67
+automaticky,automatically,ˌɔːɾəmˈæɾɪkli,automatically.opus,67010,,,,,True,67
+já sám,myself,maɪsˈɛlf,myself.opus,67011,,,,,True,67
+obec,village,vˈɪlɪdʒ,village.opus,67012,,,,,True,67
+dráha,track,tɹˈæk,track.opus,67013,,,,,True,67
+neobvyklý,unusual,ʌnjˈuːʒuːəl,unusual.opus,67014,,,,,True,67
+automatizovat,automate,ˈɔːɾəmˌeɪt,automate.opus,67015,,,,,True,67
+automatický,automatic,ˌɔːɾəmˈæɾɪk,automatic.opus,67016,,,,,True,67
+všední den,weekday,wˈiːkdeɪ,weekday.opus,67017,,,,,True,67
+dospělý,adult,ɐdˈʌlt,adult.opus,67018,,,,,True,67
+týdně,weekly,wˈiːkli,weekly.opus,67019,,,,,True,67
+plakat,weep,wˈiːp,weep.opus,67020,,,,,True,67
+k,towards,təwˈɔːɹdz,towards.opus,67021,,,,,True,67
+turista,tourist,tˈʊɹɹɪst,tourist.opus,67022,,,,,True,67
+vážit,weigh,wˈeɪ,weigh.opus,67023,,,,,True,67
+Já jsem byl včera pozván na oslavu.,I was invited to a party yesterday.,aɪ wʌz ɪnvˈaɪɾᵻd tʊ ɐ pˈɑːɹɾi jˈɛstɚdˌeɪ,i_was_invited_to_a_party_yesterday.opus,67024,89,,,79,False,67
+Ty jsi byl včera vybrán do týmu.,You were chosen for the team yesterday.,juː wɜː tʃˈoʊzən fɚðə tˈiːm jˈɛstɚdˌeɪ,you_were_chosen_for_the_team_yesterday.opus,67025,89,,,79,False,67
+On byl respektován svými kolegy.,He was respected by his colleagues.,hiː wʌz ɹᵻspˈɛktᵻd baɪ hɪz kˈɑːliːɡz,he_was_respected_by_his_colleagues.opus,67026,89,,,79,False,67
+Ona byla informována o změně po poradě.,She was informed about the change after the meeting.,ʃiː wʌz ɪnfˈɔːɹmd ɐbˌaʊt ðə tʃˈeɪndʒ ˈæftɚ ðə mˈiːɾɪŋ,she_was_informed_about_the_change_after_the_meeting.opus,67027,89,,,79,False,67
+To bylo opraveno minulý týden.,It was repaired last week.,ɪt wʌz ɹᵻpˈɛɹd lˈæst wˈiːk,it_was_repaired_last_week.opus,67028,89,,,79,False,67
+My jsme byli včera požádáni o pomoc.,We were asked for help yesterday.,wiː wɜːɹ ˈæskt fɔːɹ hˈɛlp jˈɛstɚdˌeɪ,we_were_asked_for_help_yesterday.opus,67029,89,,,79,False,67
+Vy jste byli placeni každý pátek.,You were paid every Friday.,juː wɜː pˈeɪd ˈɛvɹi fɹˈaɪdeɪ,you_were_paid_every_friday.opus,67030,89,,,79,False,67
+Oni byli kontrolováni u vchodu.,They were checked at the entrance.,ðeɪ wɜː tʃˈɛkt æt ðɪ ˈɛntɹəns,they_were_checked_at_the_entrance.opus,67031,89,,,79,False,67
+turné,tour,tˈʊɹ,tour.opus,68000,,,,,True,68
+průvodce,tour guide,tˈʊɹ ɡˈaɪd,tour_guide.opus,68001,,,,,True,68
+hudební,musical,mjˈuːzɪkəl,musical.opus,68002,,,,,True,68
+pomáhat,assist,ɐsˈɪst,assist.opus,68003,,,,,True,68
+asistent,assistant,ɐsˈɪstənt,assistant.opus,68004,,,,,True,68
+ubrousek,napkin,nˈæpkɪn,napkin.opus,68005,,,,,True,68
+malíř,painter,pˈeɪntɚ,painter.opus,68006,,,,,True,68
+dvakrát,twice,twˈaɪs,twice.opus,68007,,,,,True,68
+tlak,pressure,pɹˈɛʃɚ,pressure.opus,68008,,,,,True,68
+kvíz,quiz,kwˈɪz,quiz.opus,68009,,,,,True,68
+nutné,necessary,nˈɛsᵻsɚɹi,necessary.opus,68010,,,,,True,68
+téměř,nearly,nˈɪɹli,nearly.opus,68011,,,,,True,68
+panika,panic,pˈænɪk,panic.opus,68012,,,,,True,68
+hrozné,awful,ˈɔːfəl,awful.opus,68013,,,,,True,68
+pro,pro,pɹˈoʊ,pro.opus,68014,,,,,True,68
+argumentovat,argue,ˈɑːɹɡjuː,argue.opus,68015,,,,,True,68
+normální,normal,nˈɔːɹməl,normal.opus,68016,,,,,True,68
+pánev,pan,pˈæn,pan.opus,68017,,,,,True,68
+přírodní,natural,nˈætʃɚɹəl,natural.opus,68018,,,,,True,68
+rodák,native,nˈeɪɾɪv,native.opus,68019,,,,,True,68
+hruška,pear,pˈɛɹ,pear.opus,68020,,,,,True,68
+sever,north,nˈɔːɹθ,north.opus,68021,,,,,True,68
+sportovec,athlete,ˈæθliːt,athlete.opus,68022,,,,,True,68
+trénovat,train,tɹˈeɪn,train.opus,68023,,,,,True,68
+Já už jsem byl pozván na schůzku.,I've already been invited to the meeting.,aɪv ɔːlɹˌɛdi bˌɪn ɪnvˈaɪɾᵻd tə ðə mˈiːɾɪŋ,ive_already_been_invited_to_the_meeting.opus,68024,90,,,80,False,68
+Ty už jsi byl vybrán do týmu.,You've already been chosen for the team.,juːv ɔːlɹˌɛdi bˌɪn tʃˈoʊzən fɚðə tˈiːm,youve_already_been_chosen_for_the_team.opus,68025,90,,,80,False,68
+On byl nedávno povýšen.,He's recently been promoted.,hiːz ɹˈiːsəntli bˌɪn pɹəmˈoʊɾᵻd,hes_recently_been_promoted.opus,68026,90,,,80,False,68
+Ona už byla informována o změně.,She's already been informed about the change.,ʃiːz ɔːlɹˌɛdi bˌɪn ɪnfˈɔːɹmd ɐbˌaʊt ðə tʃˈeɪndʒ,shes_already_been_informed_about_the_change.opus,68027,90,,,80,False,68
+To už bylo opraveno.,It's already been repaired.,ɪts ɔːlɹˌɛdi bˌɪn ɹᵻpˈɛɹd,its_already_been_repaired.opus,68028,90,,,80,False,68
+My jsme už byli požádáni o pomoc.,We've already been asked for help.,wiːv ɔːlɹˌɛdi bˌɪn ˈæskt fɔːɹ hˈɛlp,weve_already_been_asked_for_help.opus,68029,90,,,80,False,68
+Vy už jste byli obslouženi.,You've already been served.,juːv ɔːlɹˌɛdi bˌɪn sˈɜːvd,youve_already_been_served.opus,68030,90,,,80,False,68
+Oni už byli zaplaceni.,They've already been paid.,ðeɪv ɔːlɹˌɛdi bˌɪn pˈeɪd,theyve_already_been_paid.opus,68031,90,,,80,False,68
+přídavné jméno,adjective,ˈædʒɪktˌɪv,adjective.opus,69000,,,,,True,69
+násilný,violent,vˈaɪələnt,violent.opus,69001,,,,,True,69
+raketa,racket,ɹˈækɪt,racket.opus,69002,,,,,True,69
+housle,violin,vaɪəlˈɪn,violin.opus,69003,,,,,True,69
+houba,mushroom,mˈʌʃɹuːm,mushroom.opus,69004,,,,,True,69
+upravit,adjust,ɐdʒˈʌst,adjust.opus,69005,,,,,True,69
+kamarád,pal,pˈæl,pal.opus,69006,,,,,True,69
+bohatství,wealth,wˈɛlθ,wealth.opus,69007,,,,,True,69
+tramvaj,tram,tɹˈæm,tram.opus,69008,,,,,True,69
+výcvik,training,tɹˈeɪnɪŋ,training.opus,69009,,,,,True,69
+proto,therefore,ðˈɛɹfɔːɹ,therefore.opus,69010,,,,,True,69
+směs,mix,mˈɪks,mix.opus,69011,,,,,True,69
+na rozdíl od,unlike,ʌnlˈaɪk,unlike.opus,69012,,,,,True,69
+cibule,onion,ˈʌniən,onion.opus,69013,,,,,True,69
+množný,plural,plˈʊɹɹəl,plural.opus,69014,,,,,True,69
+plus,plus,plˈʌs,plus.opus,69015,,,,,True,69
+balón,balloon,bəlˈuːn,balloon.opus,69016,,,,,True,69
+pošta,post office,pˈoʊst ˈɑːfɪs,post_office.opus,69017,,,,,True,69
+online,online,ˈɑːnlaɪn,online.opus,69018,,,,,True,69
+umělý,artificial,ˌɑːɹɾɪfˈɪʃəl,artificial.opus,69019,,,,,True,69
+patro,upstairs,ʌpstˈɛɹz,upstairs.opus,69020,,,,,True,69
+meloun,melon,mˈɛlən,melon.opus,69021,,,,,True,69
+Pozor,attention,ɐtˈɛnʃən,attention.opus,69022,,,,,True,69
+mrkev,carrot,kˈæɹət,carrot.opus,69023,,,,,True,69
+Zítra budu pozván na oslavu.,I'll be invited to the party tomorrow.,aɪl biː ɪnvˈaɪɾᵻd tə ðə pˈɑːɹɾi təmˈɑːɹoʊ,ill_be_invited_to_the_party_tomorrow.opus,69024,91,,,81,False,69
+Ty budeš vybrán do týmu po zkoušce.,You'll be chosen for the team after the test.,juːl biː tʃˈoʊzən fɚðə tˈiːm ˈæftɚ ðə tˈɛst,youll_be_chosen_for_the_team_after_the_test.opus,69025,91,,,81,False,69
+On bude příští měsíc povýšen.,He'll be promoted next month.,hiːl biː pɹəmˈoʊɾᵻd nˈɛkst mˈʌnθ,hell_be_promoted_next_month.opus,69026,91,,,81,False,69
+Ona bude zítra informována o změně.,She'll be informed about the change tomorrow.,ʃiːl biː ɪnfˈɔːɹmd ɐbˌaʊt ðə tʃˈeɪndʒ təmˈɑːɹoʊ,shell_be_informed_about_the_change_tomorrow.opus,69027,91,,,81,False,69
+To bude opraveno do pátku.,It'll be repaired by Friday.,ˌɪɾəl biː ɹᵻpˈɛɹd baɪ fɹˈaɪdeɪ,itll_be_repaired_by_friday.opus,69028,91,,,81,False,69
+My budeme požádáni o pomoc během schůzky.,We'll be asked for help during the meeting.,wiːl biː ˈæskt fɔːɹ hˈɛlp dˈʊɹɹɪŋ ðə mˈiːɾɪŋ,well_be_asked_for_help_during_the_meeting.opus,69029,91,,,81,False,69
+Vy budete placeni každý pátek.,You'll be paid every Friday.,juːl biː pˈeɪd ˈɛvɹi fɹˈaɪdeɪ,youll_be_paid_every_friday.opus,69030,91,,,81,False,69
+Oni budou zítra kontrolováni u vchodu.,They'll be checked at the entrance tomorrow.,ðeɪl biː tʃˈɛkt æt ðɪ ˈɛntɹəns təmˈɑːɹoʊ,theyll_be_checked_at_the_entrance_tomorrow.opus,69031,91,,,81,False,69
+psaní,writing,ɹˈaɪɾɪŋ,writing.opus,70000,,,,,True,70
+zaznamenat,record,ɹˈɛkɚd,record.opus,70001,,,,,True,70
+úkol,task,tˈæsk,task.opus,70002,,,,,True,70
+ukázat,point,pˈɔɪnt,point.opus,70003,,,,,True,70
+hotovost,cash,kˈæʃ,cash.opus,70004,,,,,True,70
+křivdit,wrong,ɹˈɔŋ,wrong.opus,70005,,,,,True,70
+kazeta,cassette,kɐsˈɛt,cassette.opus,70006,,,,,True,70
+útočit,attack,ɐtˈæk,attack.opus,70007,,,,,True,70
+cíl,target,tˈɑːɹɡɪt,target.opus,70008,,,,,True,70
+hrad,castle,kˈæsəl,castle.opus,70009,,,,,True,70
+naštvaný,upset,ʌpsˈɛt,upset.opus,70010,,,,,True,70
+páska,tape,tˈeɪp,tape.opus,70011,,,,,True,70
+možná,possibly,pˈɑːsᵻbli,possibly.opus,70012,,,,,True,70
+zmínka,mention,mˈɛnʃən,mention.opus,70013,,,,,True,70
+v zahraničí,abroad,ɐbɹˈɔːd,abroad.opus,70014,,,,,True,70
+menu,menu,mˈɛnjuː,menu.opus,70015,,,,,True,70
+dostávat,receive,ɹᵻsˈiːv,receive.opus,70016,,,,,True,70
+nedávné,recent,ɹˈiːsənt,recent.opus,70017,,,,,True,70
+jednotka,unit,jˈuːnɪt,unit.opus,70018,,,,,True,70
+dospívající,teenager,tˈiːneɪdʒɚ,teenager.opus,70019,,,,,True,70
+omeleta,omelette,ˈɑːmlət,omelette.opus,70020,,,,,True,70
+použitý,used,jˈuːzd,used.opus,70021,,,,,True,70
+recepce,reception,ɹᵻsˈɛpʃən,reception.opus,70022,,,,,True,70
+recepční,receptionist,ɹᵻsˈɛpʃənˌɪst,receptionist.opus,70023,,,,,True,70
+Já jsem právě sledován policií.,I'm being watched by the police right now.,aɪm bˌiːɪŋ wˈɑːtʃt baɪ ðə pəlˈiːs ɹˈaɪt nˈaʊ,im_being_watched_by_the_police_right_now.opus,70024,92,,,82,False,70
+Ty jsi právě testován na covid.,You're being tested for COVID right now.,jʊɹ bˌiːɪŋ tˈɛstᵻd fɔːɹ kˈɑːvɪd ɹˈaɪt nˈaʊ,youre_being_tested_for_covid_right_now.opus,70025,92,,,82,False,70
+On je právě fotografován novinářem.,He's being photographed by a journalist right now.,hiːz bˌiːɪŋ fˈoʊɾəɡɹˌæft baɪ ɐ dʒˈɜːnəlˌɪst ɹˈaɪt nˈaʊ,hes_being_photographed_by_a_journalist_right_now.opus,70026,92,,,82,False,70
+Ona je během rozhovoru nahrávána.,She's being recorded during the interview.,ʃiːz bˌiːɪŋ ɹᵻkˈɔːɹdᵻd dˈʊɹɹɪŋ ðɪ ˈɪntɚvjˌuː,shes_being_recorded_during_the_interview.opus,70027,92,,,82,False,70
+To se právě opravuje v dílně.,It's being repaired in the workshop right now.,ɪts bˌiːɪŋ ɹᵻpˈɛɹd ɪnðə wˈɜːkʃɑːp ɹˈaɪt nˈaʊ,its_being_repaired_in_the_workshop_right_now.opus,70028,92,,,82,False,70
+My jsme právě kontrolováni u vstupu.,We're being checked at the entrance right now.,wɪɹ bˌiːɪŋ tʃˈɛkt æt ðɪ ˈɛntɹəns ɹˈaɪt nˈaʊ,were_being_checked_at_the_entrance_right_now.opus,70029,92,,,82,False,70
+Vy jste právě vyslýcháni policií.,You're being questioned by the police right now.,jʊɹ bˌiːɪŋ kwˈɛstʃənd baɪ ðə pəlˈiːs ɹˈaɪt nˈaʊ,youre_being_questioned_by_the_police_right_now.opus,70030,92,,,82,False,70
+Oni jsou tento týden školeni novým vedoucím.,They're being trained by the new manager this week.,ðeɪɚ bˌiːɪŋ tɹˈeɪnd baɪ ðə nˈuː mˈænɪdʒɚ ðɪs wˈiːk,theyre_being_trained_by_the_new_manager_this_week.opus,70031,92,,,82,False,70

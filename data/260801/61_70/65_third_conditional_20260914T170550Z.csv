@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+kvalita,quality,kwˈɔlᵻɾi,quality.opus,65000,,,,,True,65
+pračka,washing machine,wˈɑːʃɪŋ məʃˈiːn,washing_machine.opus,65001,,,,,True,65
+slovník,vocabulary,voʊkˈæbjʊlˌɛɹi,vocabulary.opus,65002,,,,,True,65
+mytí nádobí,washing-up,wˈɑːʃɪŋˈʌp,washingup.opus,65003,,,,,True,65
+hlučný,noisy,nˈɔɪzi,noisy.opus,65004,,,,,True,65
+zabránit,prevent,pɹɪvˈɛnt,prevent.opus,65005,,,,,True,65
+dosáhnout,achieve,ɐtʃˈiːv,achieve.opus,65006,,,,,True,65
+nervový,nervous,nˈɜːvəs,nervous.opus,65007,,,,,True,65
+poklad,treasure,tɹˈɛʒɚ,treasure.opus,65008,,,,,True,65
+negativní,negative,nˈɛɡətˌɪv,negative.opus,65009,,,,,True,65
+tiše,quietly,kwˈaɪətli,quietly.opus,65010,,,,,True,65
+předstírat,pretend,pɹɪtˈɛnd,pretend.opus,65011,,,,,True,65
+cestovatel,traveller,tɹˈævəlɚ,traveller.opus,65012,,,,,True,65
+soukromé,private,pɹˈaɪvət,private.opus,65013,,,,,True,65
+cestování,travel,tɹˈævəl,travel.opus,65014,,,,,True,65
+astronaut,astronaut,ˈæstɹənˌɔːt,astronaut.opus,65015,,,,,True,65
+přestat,quit,kwˈɪt,quit.opus,65016,,,,,True,65
+sdružení,association,ɐsˌoʊsɪˈeɪʃən,association.opus,65017,,,,,True,65
+PC,PC,pˌiːsˈiː,pc.opus,65018,,,,,True,65
+past,trap,tɹˈæp,trap.opus,65019,,,,,True,65
+vlna,wave,wˈeɪv,wave.opus,65020,,,,,True,65
+argument,argument,ˈɑːɹɡjuːmənt,argument.opus,65021,,,,,True,65
+hrášek,pea,pˈiː,pea.opus,65022,,,,,True,65
+nikdo,nobody,nˈoʊbɑːdi,nobody.opus,65023,,,,,True,65
+"Kdybych to věděl, zavolal bych","If I'd known, I'd have called",ɪf aɪd nˈoʊn aɪd hæv kˈɔːld,if_id_known_id_have_called.opus,65024,87,,,77,False,65
+"Kdybys přišel, pomohl bys","If you'd come, you'd have helped",ɪf juːd kˈʌm juːd hæv hˈɛlpt,if_youd_come_youd_have_helped.opus,65025,87,,,77,False,65
+"Kdyby studoval, uspěl by","If he'd studied, he'd have succeeded",ɪf hiːd stˈʌdid hiːd hæv səksˈiːdᵻd,if_hed_studied_hed_have_succeeded.opus,65026,87,,,77,False,65
+"Kdyby se připravila, vyhrála by","If she'd prepared, she'd have won",ɪf ʃiːd pɹɪpˈɛɹd ʃiːd hæv wˈʌn,if_shed_prepared_shed_have_won.opus,65027,87,,,77,False,65
+"Kdyby se to rozbilo, opravili bychom to","If it had broken, we'd have fixed it",ɪf ɪt hæd bɹˈoʊkən wiːd hæv fˈɪkst ɪt,if_it_had_broken_wed_have_fixed_it.opus,65028,87,,,77,False,65
+"Kdybychom odešli dřív, stihli bychom vlak","If we'd left earlier, we'd have caught the train",ɪf wiːd lˈɛft ˈɜːlɪɚ wiːd hæv kˈɔːt ðə tɹˈeɪn,if_wed_left_earlier_wed_have_caught_the_train.opus,65029,87,,,77,False,65
+"Kdybyste poslouchali, rozuměli byste","If you'd listened, you'd have understood",ɪf juːd lˈɪsənd juːd hæv ˌʌndɚstˈʊd,if_youd_listened_youd_have_understood.opus,65030,87,,,77,False,65
+"Kdyby odešli dřív, viděli by začátek","If they'd left earlier, they'd have seen the beginning",ɪf ðeɪd lˈɛft ˈɜːlɪɚ ðeɪd hæv sˈiːn ðə bɪɡˈɪnɪŋ,if_theyd_left_earlier_theyd_have_seen_the_beginning.opus,65031,87,,,77,False,65

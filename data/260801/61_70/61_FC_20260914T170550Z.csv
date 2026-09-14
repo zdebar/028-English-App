@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+inzerát,advertisement,ˌædvɚtˈaɪzmənt,advertisement.opus,61000,,,,,True,61
+až do,till,tˈɪl,till.opus,61001,,,,,True,61
+zatímco,while,wˈaɪl,while.opus,61002,,,,,True,61
+vlastně,actually,ˈæktʃuːəli,actually.opus,61003,,,,,True,61
+pozadí,background,bˈækɡɹaʊnd,background.opus,61004,,,,,True,61
+invalidní vozík,wheelchair,wˈiːltʃɛɹ,wheelchair.opus,61005,,,,,True,61
+plocha,area,ˈɛɹiə,area.opus,61006,,,,,True,61
+vražda,murder,mˈɜːdɚ,murder.opus,61007,,,,,True,61
+pokročit,advance,ɐdvˈæns,advance.opus,61008,,,,,True,61
+pokročilý,advanced,ɐdvˈænst,advanced.opus,61009,,,,,True,61
+pláštěnka,raincoat,ɹˈeɪŋkoʊt,raincoat.opus,61010,,,,,True,61
+zubní kartáček,toothbrush,tˈuːθbɹʌʃ,toothbrush.opus,61011,,,,,True,61
+pepř,pepper,pˈɛpɚ,pepper.opus,61012,,,,,True,61
+dobře známý,well-known,wˈɛlnˈoʊn,wellknown.opus,61013,,,,,True,61
+bolest zubů,toothache,tˈuːθeɪk,toothache.opus,61014,,,,,True,61
+džbánek,mug,mˈʌɡ,mug.opus,61015,,,,,True,61
+podstatné jméno,noun,nˈaʊn,noun.opus,61016,,,,,True,61
+západ,west,wˈɛst,west.opus,61017,,,,,True,61
+pohled,view,vjˈuː,view.opus,61018,,,,,True,61
+tón,tone,tˈoʊn,tone.opus,61019,,,,,True,61
+videohra,video game,vˈɪdɪoʊ ɡˈeɪm,video_game.opus,61020,,,,,True,61
+paní,Ms,ˌɛmˈɛs,ms.opus,61021,,,,,True,61
+perfektní,perfect,pˈɜːfɛkt,perfect.opus,61022,,,,,True,61
+dokonale,perfectly,pˈɜːfɛktli,perfectly.opus,61023,,,,,True,61
+Zítra v osm budu pracovat.,I'll be working at eight tomorrow.,aɪl biː wˈɜːkɪŋ æɾ ˈeɪt təmˈɑːɹoʊ,ill_be_working_at_eight_tomorrow.opus,61024,83,,,73,False,61
+V šest budeš ještě řídit.,You'll still be driving at six.,juːl stˈɪl biː dɹˈaɪvɪŋ æt sˈɪks,youll_still_be_driving_at_six.opus,61025,83,,,73,False,61
+"On bude spát, až dorazíme.",He'll be sleeping when we arrive.,hiːl biː slˈiːpɪŋ wɛn wiː ɚɹˈaɪv,hell_be_sleeping_when_we_arrive.opus,61026,83,,,73,False,61
+Ona bude studovat zítra večer.,She'll be studying tomorrow evening.,ʃiːl biː stˈʌdiɪŋ təmˈɑːɹoʊ ˈiːvnɪŋ,shell_be_studying_tomorrow_evening.opus,61027,83,,,73,False,61
+Zítra touto dobou bude pršet.,It'll be raining at this time tomorrow.,ˌɪɾəl biː ɹˈeɪnɪŋ æt ðɪs tˈaɪm təmˈɑːɹoʊ,itll_be_raining_at_this_time_tomorrow.opus,61028,83,,,73,False,61
+V létě budeme cestovat po Evropě.,We'll be travelling around Europe this summer.,wiːl biː tɹˈævəlɪŋ ɚɹˈaʊnd jˈʊɹɹəp ðɪs sˈʌmɚ,well_be_travelling_around_europe_this_summer.opus,61029,83,,,73,False,61
+V osm budete čekat před hotelem.,You'll be waiting outside the hotel at eight.,juːl biː wˈeɪɾɪŋ aʊtsˈaɪd ðə hoʊtˈɛl æɾ ˈeɪt,youll_be_waiting_outside_the_hotel_at_eight.opus,61030,83,,,73,False,61
+"Oni budou hrát, až přijdeme.",They'll be playing when we arrive.,ðeɪl biː plˈeɪɪŋ wɛn wiː ɚɹˈaɪv,theyll_be_playing_when_we_arrive.opus,61031,83,,,73,False,61

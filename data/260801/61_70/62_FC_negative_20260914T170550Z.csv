@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+mokré,wet,wˈɛt,wet.opus,62000,,,,,True,62
+provést,perform,pɚfˈɔːɹm,perform.opus,62001,,,,,True,62
+výkon,performance,pɚfˈɔːɹməns,performance.opus,62002,,,,,True,62
+román,novel,nˈɑːvəl,novel.opus,62003,,,,,True,62
+parfém,perfume,pˈɜːfjuːm,perfume.opus,62004,,,,,True,62
+pronásledovat,pursue,pɚsˈuː,pursue.opus,62005,,,,,True,62
+produkovat,produce,pɹədˈuːs,produce.opus,62006,,,,,True,62
+punčocháče,tights,tˈaɪts,tights.opus,62007,,,,,True,62
+další,additional,ɐdˈɪʃənəl,additional.opus,62008,,,,,True,62
+fyzicky,physically,fˈɪzɪkli,physically.opus,62009,,,,,True,62
+výroba,production,pɹədˈʌkʃən,production.opus,62010,,,,,True,62
+upéct,bake,bˈeɪk,bake.opus,62011,,,,,True,62
+pod vodou,underwater,ˌʌndɚwˈɔːɾɚ,underwater.opus,62012,,,,,True,62
+myšlení,thought,θˈɔːt,thought.opus,62013,,,,,True,62
+ačkoli,though,ðˈoʊ,though.opus,62014,,,,,True,62
+hodnotit,rate,ɹˈeɪt,rate.opus,62015,,,,,True,62
+hodnocení,rating,ɹˈeɪɾɪŋ,rating.opus,62016,,,,,True,62
+profesionální,professional,pɹəfˈɛʃənəl,professional.opus,62017,,,,,True,62
+zámoří,overseas,ˌoʊvɚsˈiːz,overseas.opus,62018,,,,,True,62
+syrový,raw,ɹˈɔː,raw.opus,62019,,,,,True,62
+ozbrojit,arm,ˈɑːɹm,arm.opus,62020,,,,,True,62
+ozbrojený,armed,ˈɑːɹmd,armed.opus,62021,,,,,True,62
+povolání,occupation,ˌɑːkjʊpˈeɪʃən,occupation.opus,62022,,,,,True,62
+nadváha,overweight,ˌoʊvɚwˈeɪt,overweight.opus,62023,,,,,True,62
+Zítra v osm nebudu pracovat.,I won't be working at eight tomorrow.,aɪ woʊnt biː wˈɜːkɪŋ æɾ ˈeɪt təmˈɑːɹoʊ,i_wont_be_working_at_eight_tomorrow.opus,62024,84,,,74,False,62
+Ty zítra v šest nebudeš řídit.,You won't be driving at six tomorrow.,juː woʊnt biː dɹˈaɪvɪŋ æt sˈɪks təmˈɑːɹoʊ,you_wont_be_driving_at_six_tomorrow.opus,62025,84,,,74,False,62
+"On nebude spát, až dorazíme.",He won't be sleeping when we arrive.,hiː woʊnt biː slˈiːpɪŋ wɛn wiː ɚɹˈaɪv,he_wont_be_sleeping_when_we_arrive.opus,62026,84,,,74,False,62
+Ona zítra večer nebude studovat.,She won't be studying tomorrow evening.,ʃiː woʊnt biː stˈʌdiɪŋ təmˈɑːɹoʊ ˈiːvnɪŋ,she_wont_be_studying_tomorrow_evening.opus,62027,84,,,74,False,62
+Zítra touto dobou nebude pršet.,It won't be raining at this time tomorrow.,ɪt woʊnt biː ɹˈeɪnɪŋ æt ðɪs tˈaɪm təmˈɑːɹoʊ,it_wont_be_raining_at_this_time_tomorrow.opus,62028,84,,,74,False,62
+My v sobotu touto dobou nebudeme cestovat.,We won't be travelling at this time on Saturday.,wiː woʊnt biː tɹˈævəlɪŋ æt ðɪs tˈaɪm ˌɔn sˈæɾɚdˌeɪ,we_wont_be_travelling_at_this_time_on_saturday.opus,62029,84,,,74,False,62
+Vy v osm nebudete čekat před hotelem.,You won't be waiting outside the hotel at eight.,juː woʊnt biː wˈeɪɾɪŋ aʊtsˈaɪd ðə hoʊtˈɛl æɾ ˈeɪt,you_wont_be_waiting_outside_the_hotel_at_eight.opus,62030,84,,,74,False,62
+"Oni nebudou hrát, až přijdeme.",They won't be playing when we arrive.,ðeɪ woʊnt biː plˈeɪɪŋ wɛn wiː ɚɹˈaɪv,they_wont_be_playing_when_we_arrive.opus,62031,84,,,74,False,62

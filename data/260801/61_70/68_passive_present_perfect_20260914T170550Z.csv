@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+turné,tour,tˈʊɹ,tour.opus,68000,,,,,True,68
+průvodce,tour guide,tˈʊɹ ɡˈaɪd,tour_guide.opus,68001,,,,,True,68
+hudební,musical,mjˈuːzɪkəl,musical.opus,68002,,,,,True,68
+pomáhat,assist,ɐsˈɪst,assist.opus,68003,,,,,True,68
+asistent,assistant,ɐsˈɪstənt,assistant.opus,68004,,,,,True,68
+ubrousek,napkin,nˈæpkɪn,napkin.opus,68005,,,,,True,68
+malíř,painter,pˈeɪntɚ,painter.opus,68006,,,,,True,68
+dvakrát,twice,twˈaɪs,twice.opus,68007,,,,,True,68
+tlak,pressure,pɹˈɛʃɚ,pressure.opus,68008,,,,,True,68
+kvíz,quiz,kwˈɪz,quiz.opus,68009,,,,,True,68
+nutné,necessary,nˈɛsᵻsɚɹi,necessary.opus,68010,,,,,True,68
+téměř,nearly,nˈɪɹli,nearly.opus,68011,,,,,True,68
+panika,panic,pˈænɪk,panic.opus,68012,,,,,True,68
+hrozné,awful,ˈɔːfəl,awful.opus,68013,,,,,True,68
+pro,pro,pɹˈoʊ,pro.opus,68014,,,,,True,68
+argumentovat,argue,ˈɑːɹɡjuː,argue.opus,68015,,,,,True,68
+normální,normal,nˈɔːɹməl,normal.opus,68016,,,,,True,68
+pánev,pan,pˈæn,pan.opus,68017,,,,,True,68
+přírodní,natural,nˈætʃɚɹəl,natural.opus,68018,,,,,True,68
+rodák,native,nˈeɪɾɪv,native.opus,68019,,,,,True,68
+hruška,pear,pˈɛɹ,pear.opus,68020,,,,,True,68
+sever,north,nˈɔːɹθ,north.opus,68021,,,,,True,68
+sportovec,athlete,ˈæθliːt,athlete.opus,68022,,,,,True,68
+trénovat,train,tɹˈeɪn,train.opus,68023,,,,,True,68
+Já už jsem byl pozván na schůzku.,I've already been invited to the meeting.,aɪv ɔːlɹˌɛdi bˌɪn ɪnvˈaɪɾᵻd tə ðə mˈiːɾɪŋ,ive_already_been_invited_to_the_meeting.opus,68024,90,,,80,False,68
+Ty už jsi byl vybrán do týmu.,You've already been chosen for the team.,juːv ɔːlɹˌɛdi bˌɪn tʃˈoʊzən fɚðə tˈiːm,youve_already_been_chosen_for_the_team.opus,68025,90,,,80,False,68
+On byl nedávno povýšen.,He's recently been promoted.,hiːz ɹˈiːsəntli bˌɪn pɹəmˈoʊɾᵻd,hes_recently_been_promoted.opus,68026,90,,,80,False,68
+Ona už byla informována o změně.,She's already been informed about the change.,ʃiːz ɔːlɹˌɛdi bˌɪn ɪnfˈɔːɹmd ɐbˌaʊt ðə tʃˈeɪndʒ,shes_already_been_informed_about_the_change.opus,68027,90,,,80,False,68
+To už bylo opraveno.,It's already been repaired.,ɪts ɔːlɹˌɛdi bˌɪn ɹᵻpˈɛɹd,its_already_been_repaired.opus,68028,90,,,80,False,68
+My jsme už byli požádáni o pomoc.,We've already been asked for help.,wiːv ɔːlɹˌɛdi bˌɪn ˈæskt fɔːɹ hˈɛlp,weve_already_been_asked_for_help.opus,68029,90,,,80,False,68
+Vy už jste byli obslouženi.,You've already been served.,juːv ɔːlɹˌɛdi bˌɪn sˈɜːvd,youve_already_been_served.opus,68030,90,,,80,False,68
+Oni už byli zaplaceni.,They've already been paid.,ðeɪv ɔːlɹˌɛdi bˌɪn pˈeɪd,theyve_already_been_paid.opus,68031,90,,,80,False,68

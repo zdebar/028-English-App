@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+psaní,writing,ɹˈaɪɾɪŋ,writing.opus,70000,,,,,True,70
+zaznamenat,record,ɹˈɛkɚd,record.opus,70001,,,,,True,70
+úkol,task,tˈæsk,task.opus,70002,,,,,True,70
+ukázat,point,pˈɔɪnt,point.opus,70003,,,,,True,70
+hotovost,cash,kˈæʃ,cash.opus,70004,,,,,True,70
+křivdit,wrong,ɹˈɔŋ,wrong.opus,70005,,,,,True,70
+kazeta,cassette,kɐsˈɛt,cassette.opus,70006,,,,,True,70
+útočit,attack,ɐtˈæk,attack.opus,70007,,,,,True,70
+cíl,target,tˈɑːɹɡɪt,target.opus,70008,,,,,True,70
+hrad,castle,kˈæsəl,castle.opus,70009,,,,,True,70
+naštvaný,upset,ʌpsˈɛt,upset.opus,70010,,,,,True,70
+páska,tape,tˈeɪp,tape.opus,70011,,,,,True,70
+možná,possibly,pˈɑːsᵻbli,possibly.opus,70012,,,,,True,70
+zmínka,mention,mˈɛnʃən,mention.opus,70013,,,,,True,70
+v zahraničí,abroad,ɐbɹˈɔːd,abroad.opus,70014,,,,,True,70
+menu,menu,mˈɛnjuː,menu.opus,70015,,,,,True,70
+dostávat,receive,ɹᵻsˈiːv,receive.opus,70016,,,,,True,70
+nedávné,recent,ɹˈiːsənt,recent.opus,70017,,,,,True,70
+jednotka,unit,jˈuːnɪt,unit.opus,70018,,,,,True,70
+dospívající,teenager,tˈiːneɪdʒɚ,teenager.opus,70019,,,,,True,70
+omeleta,omelette,ˈɑːmlət,omelette.opus,70020,,,,,True,70
+použitý,used,jˈuːzd,used.opus,70021,,,,,True,70
+recepce,reception,ɹᵻsˈɛpʃən,reception.opus,70022,,,,,True,70
+recepční,receptionist,ɹᵻsˈɛpʃənˌɪst,receptionist.opus,70023,,,,,True,70
+Já jsem právě sledován policií.,I'm being watched by the police right now.,aɪm bˌiːɪŋ wˈɑːtʃt baɪ ðə pəlˈiːs ɹˈaɪt nˈaʊ,im_being_watched_by_the_police_right_now.opus,70024,92,,,82,False,70
+Ty jsi právě testován na covid.,You're being tested for COVID right now.,jʊɹ bˌiːɪŋ tˈɛstᵻd fɔːɹ kˈɑːvɪd ɹˈaɪt nˈaʊ,youre_being_tested_for_covid_right_now.opus,70025,92,,,82,False,70
+On je právě fotografován novinářem.,He's being photographed by a journalist right now.,hiːz bˌiːɪŋ fˈoʊɾəɡɹˌæft baɪ ɐ dʒˈɜːnəlˌɪst ɹˈaɪt nˈaʊ,hes_being_photographed_by_a_journalist_right_now.opus,70026,92,,,82,False,70
+Ona je během rozhovoru nahrávána.,She's being recorded during the interview.,ʃiːz bˌiːɪŋ ɹᵻkˈɔːɹdᵻd dˈʊɹɹɪŋ ðɪ ˈɪntɚvjˌuː,shes_being_recorded_during_the_interview.opus,70027,92,,,82,False,70
+To se právě opravuje v dílně.,It's being repaired in the workshop right now.,ɪts bˌiːɪŋ ɹᵻpˈɛɹd ɪnðə wˈɜːkʃɑːp ɹˈaɪt nˈaʊ,its_being_repaired_in_the_workshop_right_now.opus,70028,92,,,82,False,70
+My jsme právě kontrolováni u vstupu.,We're being checked at the entrance right now.,wɪɹ bˌiːɪŋ tʃˈɛkt æt ðɪ ˈɛntɹəns ɹˈaɪt nˈaʊ,were_being_checked_at_the_entrance_right_now.opus,70029,92,,,82,False,70
+Vy jste právě vyslýcháni policií.,You're being questioned by the police right now.,jʊɹ bˌiːɪŋ kwˈɛstʃənd baɪ ðə pəlˈiːs ɹˈaɪt nˈaʊ,youre_being_questioned_by_the_police_right_now.opus,70030,92,,,82,False,70
+Oni jsou tento týden školeni novým vedoucím.,They're being trained by the new manager this week.,ðeɪɚ bˌiːɪŋ tɹˈeɪnd baɪ ðə nˈuː mˈænɪdʒɚ ðɪs wˈiːk,theyre_being_trained_by_the_new_manager_this_week.opus,70031,92,,,82,False,70
