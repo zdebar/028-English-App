@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+postupně,gradually,ɡɹˈædʒuːəli,gradually.opus,45000,,,,,True,45
+zpěv,singing,sˈɪŋɪŋ,singing.opus,45001,,,,,True,45
+jedinný,single,sˈɪŋɡəl,single.opus,45002,,,,,True,45
+známý,familiar,fəmˈɪlɪɹ,familiar.opus,45003,,,,,True,45
+expert,expert,ˈɛkspɜːt,expert.opus,45004,,,,,True,45
+zažít,experience,ɛkspˈiəɹɪəns,experience.opus,45005,,,,,True,45
+skluzavka,slide,slˈaɪd,slide.opus,45006,,,,,True,45
+mořské plody,seafood,sˈiːfuːd,seafood.opus,45007,,,,,True,45
+přesně,exactly,ɛɡzˈæktli,exactly.opus,45008,,,,,True,45
+pistole,gun,ɡˈʌn,gun.opus,45009,,,,,True,45
+štíhlý,slim,slˈɪm,slim.opus,45010,,,,,True,45
+deka,blanket,blˈæŋkɪt,blanket.opus,45011,,,,,True,45
+důkaz,evidence,ˈɛvɪdəns,evidence.opus,45012,,,,,True,45
+značka,brand,bɹˈænd,brand.opus,45013,,,,,True,45
+statečný,brave,bɹˈeɪv,brave.opus,45014,,,,,True,45
+vina,blame,blˈeɪm,blame.opus,45015,,,,,True,45
+skript,script,skɹˈɪpt,script.opus,45016,,,,,True,45
+vůbec,ever,ˈɛvɚ,ever.opus,45017,,,,,True,45
+zkouška,exam,ɛɡzˈæm,exam.opus,45018,,,,,True,45
+přerušení,break,bɹˈeɪk,break.opus,45019,,,,,True,45
+rozpůlit,half,hˈæf,half.opus,45020,,,,,True,45
+tabule,blackboard,blˈækbɔːɹd,blackboard.opus,45021,,,,,True,45
+poloviční cenu,half-price,hˈæfpɹˈaɪs,halfprice.opus,45022,,,,,True,45
+pomalu,slowly,slˈoʊli,slowly.opus,45023,,,,,True,45
+Kdy mu zavolám?,When am I going to call him?,wˌɛn æm aɪ ɡˌoʊɪŋ tə kˈɔːl hˌɪm,when_am_i_going_to_call_him.opus,45024,67,,,57,False,45
+Co budeš vařit?,What are you going to cook?,wˌʌt ɑːɹ juː ɡˌoʊɪŋ tə kˈʊk,what_are_you_going_to_cook.opus,45025,67,,,57,False,45
+Kdy začne?,When is she going to start?,wˌɛn ɪz ʃiː ɡˌoʊɪŋ tə stˈɑːɹt,when_is_she_going_to_start.opus,45026,67,,,57,False,45
+Kam odjede?,Where is she going to go?,wˌɛɹ ɪz ʃiː ɡˌoʊɪŋ tə ɡˈoʊ,where_is_she_going_to_go.opus,45027,67,,,57,False,45
+Kdy to spadne?,When is it going to fall?,wˌɛn ɪz ɪt ɡˌoʊɪŋ tə fˈɔːl,when_is_it_going_to_fall.opus,45028,67,,,57,False,45
+Kde zůstaneme?,Where are we going to stay?,wˌɛɹ ɑːɹ wiː ɡˌoʊɪŋ tə stˈeɪ,where_are_we_going_to_stay.opus,45029,67,,,57,False,45
+Co vyhrajete?,What are you going to win?,wˌʌt ɑːɹ juː ɡˌoʊɪŋ tə wˈɪn,what_are_you_going_to_win.opus,45030,67,,,57,False,45
+Kdy přijedou?,When are they going to arrive?,wˌɛn ɑːɹ ðeɪ ɡˌoʊɪŋ tʊ ɚɹˈaɪv,when_are_they_going_to_arrive.opus,45031,67,,,57,False,45

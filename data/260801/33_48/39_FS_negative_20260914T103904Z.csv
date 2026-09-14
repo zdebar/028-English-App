@@ -1,0 +1,41 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+hlavně,mainly,mˈeɪnli,mainly.opus,39000,,,,,True,39
+kalendář,calendar,kˈæləndɚ,calendar.opus,39001,,,,,True,39
+hlavní,major,mˈeɪdʒɚ,major.opus,39002,,,,,True,39
+grilování,barbecue,bˈɑːɹbɪkjˌuː,barbecue.opus,39003,,,,,True,39
+výrobce,maker,mˈeɪkɚ,maker.opus,39004,,,,,True,39
+make-up,make-up,mˌeɪkˈʌp,makeup.opus,39005,,,,,True,39
+výběr,choice,tʃˈɔɪs,choice.opus,39006,,,,,True,39
+cvrlikání,chirp,tʃˈɜːp,chirp.opus,39007,,,,,True,39
+brada,chin,tʃˈɪn,chin.opus,39008,,,,,True,39
+šimpanz,chimpanzee,tʃˌɪmpɐnzˈiː,chimpanzee.opus,39009,,,,,True,39
+lyrika,lyric,lˈɪɹɪk,lyric.opus,39010,,,,,True,39
+stát (peníze),cost,kˈɔst,cost.opus,39011,,,,,True,39
+budík,alarm clock,ɐlˈɑːɹm klˈɑːk,alarm_clock.opus,39012,,,,,True,39
+odpověď,reply,ɹᵻplˈaɪ,reply.opus,39013,,,,,True,39
+zákon,law,lˈɔː,law.opus,39014,,,,,True,39
+advokát,lawyer,lˈɔɪɚ,lawyer.opus,39015,,,,,True,39
+kontrast,contrast,kˈɑːntɹæst,contrast.opus,39016,,,,,True,39
+lenost,laziness,lˈeɪzinəs,laziness.opus,39017,,,,,True,39
+záliv,bay,bˈeɪ,bay.opus,39018,,,,,True,39
+kontinent,continent,kˈɑːntɪnənt,continent.opus,39019,,,,,True,39
+kontext,context,kˈɑːntɛkst,context.opus,39020,,,,,True,39
+keř,bush,bˈʊʃ,bush.opus,39021,,,,,True,39
+řízení,control,kəntɹˈoʊl,control.opus,39022,,,,,True,39
+kontejner,container,kəntˈeɪnɚ,container.opus,39023,,,,,True,39
+já nezavolám,I won't call,aɪ woʊnt kˈɔːl,i_wont_call.opus,39024,61,,,51,False,39
+ty nepřijdeš,you won't come,juː woʊnt kˈʌm,you_wont_come.opus,39025,61,,,51,False,39
+on nepomůže,he won't help,hiː woʊnt hˈɛlp,he_wont_help.opus,39026,61,,,51,False,39
+ona nezačne,she won't start,ʃiː woʊnt stˈɑːɹt,she_wont_start.opus,39027,61,,,51,False,39
+ono nespadne,it won't fall,ɪt woʊnt fˈɔːl,it_wont_fall.opus,39028,61,,,51,False,39
+my nepočkáme,we won't wait,wiː woʊnt wˈeɪt,we_wont_wait.opus,39029,61,,,51,False,39
+vy neprohrajete,you won't lose,juː woʊnt lˈuːz,you_wont_lose.opus,39030,61,,,51,False,39
+oni nedorazí,they won't arrive,ðeɪ woʊnt ɚɹˈaɪv,they_wont_arrive.opus,39031,61,,,51,False,39
+"Dobře, nezavolám mu.","All right, I won't call him.",ˈɔːl ɹˈaɪt aɪ woʊnt kˈɔːl hˌɪm,all_right_i_wont_call_him.opus,39032,,,,51,False,39
+"Ne, zítra nepřijdu.","No, I won't come tomorrow.",nˈoʊ aɪ woʊnt kˈʌm təmˈɑːɹoʊ,no_i_wont_come_tomorrow.opus,39033,,,,51,False,39
+"On nám nepomůže."",He won't help us.""",,,nan.opus,39034,,,,51,True,39
+Ona bez nás nezačne.,She won't start without us.,ʃiː woʊnt stˈɑːɹt wɪðˈaʊt ˌʌs,she_wont_start_without_us.opus,39035,,,,51,False,39
+To nespadne.,It won't fall.,ɪt woʊnt fˈɔːl,it_wont_fall.opus,39036,,,,51,False,39
+Nebudeme čekat celou noc.,We won't wait all night.,wiː woʊnt wˈeɪt ˈɔːl nˈaɪt,we_wont_wait_all_night.opus,39037,,,,51,False,39
+Neprohrajete.,You won't lose.,juː woʊnt lˈuːz,you_wont_lose.opus,39038,,,,51,False,39
+Asi dnes nedorazí.,They probably won't arrive today.,ðeɪ pɹˈɑːbəbli woʊnt ɚɹˈaɪv tədˈeɪ,they_probably_wont_arrive_today.opus,39039,,,,51,False,39

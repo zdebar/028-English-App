@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+euro,euro,jˈʊɹɹoʊ,euro.opus,46000,,,,,True,46
+šunka,ham,hˈæm,ham.opus,46001,,,,,True,46
+šroub,screw,skɹˈuː,screw.opus,46002,,,,,True,46
+podat,hand,hˈænd,hand.opus,46003,,,,,True,46
+kabelka,handbag,hˈændbæɡ,handbag.opus,46004,,,,,True,46
+obrazovka,screen,skɹˈiːn,screen.opus,46005,,,,,True,46
+založit,establish,ɪstˈæblɪʃ,establish.opus,46006,,,,,True,46
+handicap,handicap,hˈændɪkˌæp,handicap.opus,46007,,,,,True,46
+handicapované,handicapped,hˈændɪkˌæpt,handicapped.opus,46008,,,,,True,46
+sudý,even,ˈiːvən,even.opus,46009,,,,,True,46
+udeřit,blow,blˈoʊ,blow.opus,46010,,,,,True,46
+plátek,slice,slˈaɪs,slice.opus,46011,,,,,True,46
+provádět,guide,ɡˈaɪd,guide.opus,46012,,,,,True,46
+průvodce,guidebook,ɡˈaɪdbʊk,guidebook.opus,46013,,,,,True,46
+lyže,ski,skˈiː,ski.opus,46014,,,,,True,46
+velmi,greatly,ɡɹˈeɪtli,greatly.opus,46015,,,,,True,46
+lyžování,skiing,skˈiːɪŋ,skiing.opus,46016,,,,,True,46
+chamtivý,greedy,ɡɹˈiːdi,greedy.opus,46017,,,,,True,46
+existovat,exist,ɛɡzˈɪst,exist.opus,46018,,,,,True,46
+vystavit,exhibit,ɛɡzˈɪbɪt,exhibit.opus,46019,,,,,True,46
+výstava,exhibition,ɛksɪbˈɪʃən,exhibition.opus,46020,,,,,True,46
+tajemník,secretary,sˈɛkɹətɹi,secretary.opus,46021,,,,,True,46
+gril,grill,ɡɹˈɪl,grill.opus,46022,,,,,True,46
+grilovat,grill,ɡɹˈɪl,grill.opus,46023,,,,,True,46
+"Když zahřívám led, taje","If I heat ice, it melts",ɪf aɪ hˈiːt ˈaɪs ɪt mˈɛlts,if_i_heat_ice_it_melts.opus,46024,68,,,58,False,46
+"Když se dotkneš ohně, pálí","If you touch fire, it burns",ɪf juː tˈʌtʃ fˈaɪɚɹ ɪt bˈɜːnz,if_you_touch_fire_it_burns.opus,46025,68,,,58,False,46
+"Když jí příliš rychle, je mu špatně","If he eats too fast, he feels sick",ɪf hiː ˈiːts tˈuː fˈæst hiː fˈiːlz sˈɪk,if_he_eats_too_fast_he_feels_sick.opus,46026,68,,,58,False,46
+"Když smíchá barvy, vznikne zelená","If she mixes the colours, it turns green",ɪf ʃiː mˈɪksᵻz ðə kˈʌlɚz ɪt tˈɜːnz ɡɹˈiːn,if_she_mixes_the_colours_it_turns_green.opus,46027,68,,,58,False,46
+"Když se ochladí, voda zmrzne","If it gets cold, water freezes",ɪf ɪt ɡˈɛts kˈoʊld wˈɔːɾɚ fɹˈiːzᵻz,if_it_gets_cold_water_freezes.opus,46028,68,,,58,False,46
+"Když necháme mléko venku, zkazí se","If we leave milk out, it spoils",ɪf wiː lˈiːv mˈɪlk ˈaʊt ɪt spˈɔɪlz,if_we_leave_milk_out_it_spoils.opus,46029,68,,,58,False,46
+"Když stisknete tlačítko, světlo se rozsvítí","If you press the button, the light comes on",ɪf juː pɹˈɛs ðə bˈʌʔn̩ ðə lˈaɪt kˈʌmz ˈɔn,if_you_press_the_button_the_light_comes_on.opus,46030,68,,,58,False,46
+"Když nezalévají rostliny, zemřou","If they don't water the plants, they die",ɪf ðeɪ dˈoʊnt wˈɔːɾɚ ðə plˈænts ðeɪ dˈaɪ,if_they_dont_water_the_plants_they_die.opus,46031,68,,,58,False,46

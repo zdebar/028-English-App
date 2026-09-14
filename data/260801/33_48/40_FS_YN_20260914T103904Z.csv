@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+kontaktovat,contact,kˈɑːntækt,contact.opus,40000,,,,,True,40
+kontakt,contact,kˈɑːntækt,contact.opus,40001,,,,,True,40
+přivlastnit si,appropriate,ɐpɹˈoʊpɹɪət,appropriate.opus,40002,,,,,True,40
+baterie,battery,bˈæɾɚɹi,battery.opus,40003,,,,,True,40
+opravit,repair,ɹᵻpˈɛɹ,repair.opus,40004,,,,,True,40
+nejméně,least,lˈiːst,least.opus,40005,,,,,True,40
+kůže,leather,lˈɛðɚ,leather.opus,40006,,,,,True,40
+náhlý,sudden,sˈʌdən,sudden.opus,40007,,,,,True,40
+uspět,succeed,səksˈiːd,succeed.opus,40008,,,,,True,40
+pohodlí,convenience,kənvˈiːnɪəns,convenience.opus,40009,,,,,True,40
+výzkum,research,ɹᵻsˈɜːtʃ,research.opus,40010,,,,,True,40
+svítilna,lamp,lˈæmp,lamp.opus,40011,,,,,True,40
+studie,study,stˈʌdi,study.opus,40012,,,,,True,40
+povolit,allow,ɐlˈaʊ,allow.opus,40013,,,,,True,40
+věc,stuff,stˈʌf,stuff.opus,40014,,,,,True,40
+krajina,landscape,lˈændskeɪp,landscape.opus,40015,,,,,True,40
+styl,style,stˈaɪl,style.opus,40016,,,,,True,40
+pruh,lane,lˈeɪn,lane.opus,40017,,,,,True,40
+hořet,burn,bˈɜːn,burn.opus,40018,,,,,True,40
+pohřbít,bury,bˈɛɹi,bury.opus,40019,,,,,True,40
+sporák,cooker,kˈʊkɚ,cooker.opus,40020,,,,,True,40
+autobusové nádraží,bus station,bˈʌs stˈeɪʃən,bus_station.opus,40021,,,,,True,40
+nejnovější,latest,lˈeɪɾɪst,latest.opus,40022,,,,,True,40
+zastupovat,represent,ɹˌɛpɹᵻzˈɛnt,represent.opus,40023,,,,,True,40
+Zavoláš mi zítra?,Will you call me tomorrow?,wɪl juː kˈɔːl mˌiː təmˈɑːɹoʊ,will_you_call_me_tomorrow.opus,40024,62,,,52,False,40
+Přijde dnes večer?,Will he come tonight?,wɪl hiː kˈʌm tənˈaɪt,will_he_come_tonight.opus,40025,62,,,52,False,40
+Pomůžeš mi?,Will you help me?,wɪl juː hˈɛlp mˌiː,will_you_help_me.opus,40026,62,,,52,False,40
+Začne film brzy?,Will the film start soon?,wɪl ðə fˈɪlm stˈɑːɹt sˈuːn,will_the_film_start_soon.opus,40027,62,,,52,False,40
+Spadne to?,Will it fall?,wɪl ɪt fˈɔːl,will_it_fall.opus,40028,62,,,52,False,40
+Budeme mít dost času?,Will we have enough time?,wɪl wiː hæv ɪnˈʌf tˈaɪm,will_we_have_enough_time.opus,40029,62,,,52,False,40
+Vyhrajete?,Will you win?,wɪl juː wˈɪn,will_you_win.opus,40030,62,,,52,False,40
+Dorazí včas?,Will they arrive on time?,wɪl ðeɪ ɚɹˈaɪv ˌɔn tˈaɪm,will_they_arrive_on_time.opus,40031,62,,,52,False,40

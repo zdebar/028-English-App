@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+poslední,latter,lˈæɾɚ,latter.opus,41000,,,,,True,41
+autobusová zastávka,bus stop,bˈʌs stˈɑːp,bus_stop.opus,41001,,,,,True,41
+pohodlné,convenient,kənvˈiːnɪənt,convenient.opus,41002,,,,,True,41
+levice,left,lˈɛft,left.opus,41003,,,,,True,41
+licence,licence,lˈaɪsəns,licence.opus,41004,,,,,True,41
+lež,lie,lˈaɪ,lie.opus,41005,,,,,True,41
+podnikatel,businessman,bˈɪznəsmən,businessman.opus,41006,,,,,True,41
+superlativ,superlative,suːpˈɜːlətˌɪv,superlative.opus,41007,,,,,True,41
+životní styl,lifestyle,lˈaɪfstaɪl,lifestyle.opus,41008,,,,,True,41
+superstar,superstar,sˈuːpɚstˌɑːɹ,superstar.opus,41009,,,,,True,41
+komponovat,compose,kəmpˈoʊz,compose.opus,41010,,,,,True,41
+skladatel,composer,kəmpˈoʊzɚ,composer.opus,41011,,,,,True,41
+večeře,supper,sˈʌpɚ,supper.opus,41012,,,,,True,41
+v podstatě,basically,bˈeɪsɪkli,basically.opus,41013,,,,,True,41
+soustředit se,concentrate,kˈɑːnsəntɹˌeɪt,concentrate.opus,41014,,,,,True,41
+kompletní,complete,kəmplˈiːt,complete.opus,41015,,,,,True,41
+stěžovat si,complain,kəmplˈeɪn,complain.opus,41016,,,,,True,41
+stížnost,complaint,kəmplˈeɪnt,complaint.opus,41017,,,,,True,41
+soutěžit,compete,kəmpˈiːt,compete.opus,41018,,,,,True,41
+soutěž,competition,kˌɑːmpətˈɪʃən,competition.opus,41019,,,,,True,41
+ret,lip,lˈɪp,lip.opus,41020,,,,,True,41
+porovnat,compare,kəmpˈɛɹ,compare.opus,41021,,,,,True,41
+srovnávací,comparative,kəmpˈæɹətˌɪv,comparative.opus,41022,,,,,True,41
+komunikovat,communicate,kəmjˈuːnᵻkˌeɪt,communicate.opus,41023,,,,,True,41
+Kdy mi zavoláš?,When will you call me?,wˌɛn wɪl juː kˈɔːl mˌiː,when_will_you_call_me.opus,41024,63,,,53,False,41
+Kdy přijdeš?,When will you come?,wˌɛn wɪl juː kˈʌm,when_will_you_come.opus,41025,63,,,53,False,41
+Jak nám pomůže?,How will he help us?,hˌaʊ wɪl hiː hˈɛlp ˌʌs,how_will_he_help_us.opus,41026,63,,,53,False,41
+Kdy začne kurz?,When will the course start?,wˌɛn wɪl ðə kˈɔːɹs stˈɑːɹt,when_will_the_course_start.opus,41027,63,,,53,False,41
+Kdy to spadne?,When will it fall?,wˌɛn wɪl ɪt fˈɔːl,when_will_it_fall.opus,41028,63,,,53,False,41
+Kde počkáme?,Where will we wait?,wˌɛɹ wɪl wiː wˈeɪt,where_will_we_wait.opus,41029,63,,,53,False,41
+Co vyhrajete?,What will you win?,wˌʌt wɪl juː wˈɪn,what_will_you_win.opus,41030,63,,,53,False,41
+Kdy dorazí?,When will they arrive?,wˌɛn wɪl ðeɪ ɚɹˈaɪv,when_will_they_arrive.opus,41031,63,,,53,False,41

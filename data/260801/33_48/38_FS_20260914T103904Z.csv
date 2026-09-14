@@ -1,0 +1,41 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+stolní tenis,table tennis,tˈeɪbəl tˈɛnɪs,table_tennis.opus,38000,,,,,True,38
+značka,mark,mˈɑːɹk,mark.opus,38001,,,,,True,38
+povídání,chat,tʃˈæt,chat.opus,38002,,,,,True,38
+graf,chart,tʃˈɑːɹt,chart.opus,38003,,,,,True,38
+lžíce,spoon,spˈuːn,spoon.opus,38004,,,,,True,38
+polévková lžíce,tablespoon,tˈeɪbəlspˌuːn,tablespoon.opus,38005,,,,,True,38
+oženit,marry,mˈæɹi,marry.opus,38006,,,,,True,38
+ženatý,married,mˈæɹid,married.opus,38007,,,,,True,38
+tvář,cheek,tʃˈiːk,cheek.opus,38008,,,,,True,38
+muž,male,mˈeɪl,male.opus,38009,,,,,True,38
+chilli,chilli,tʃˈɪli,chilli.opus,38010,,,,,True,38
+symbol,symbol,sˈɪmbəl,symbol.opus,38011,,,,,True,38
+čistič,cleaner,klˈiːnɚ,cleaner.opus,38012,,,,,True,38
+jídelna,cafeteria,kˌæfɪtˈɪɹiə,cafeteria.opus,38013,,,,,True,38
+šílený,mad,mˈæd,mad.opus,38014,,,,,True,38
+klasický,classic,klˈæsɪk,classic.opus,38015,,,,,True,38
+klasická hudba,classical music,klˈæsɪkəl mjˈuːzɪk,classical_music.opus,38016,,,,,True,38
+plavky,swimming costume,swˈɪmɪŋ kˈɔstuːm,swimming_costume.opus,38017,,,,,True,38
+plavky,swimsuit,swˈɪmsuːt,swimsuit.opus,38018,,,,,True,38
+požadovat,claim,klˈeɪm,claim.opus,38019,,,,,True,38
+holič,barber,bˈɑːɹbɚ,barber.opus,38020,,,,,True,38
+kouzlo,magic,mˈædʒɪk,magic.opus,38021,,,,,True,38
+občan,citizen,sˈɪɾɪzən,citizen.opus,38022,,,,,True,38
+hlavní chod,main course,mˈeɪn kˈɔːɹs,main_course.opus,38023,,,,,True,38
+já zavolám,I'll call,aɪl kˈɔːl,ill_call.opus,38024,60,,,50,False,38
+ty přijdeš,you'll come,juːl kˈʌm,youll_come.opus,38025,60,,,50,False,38
+on pomůže,he'll help,hiːl hˈɛlp,hell_help.opus,38026,60,,,50,False,38
+ona začne,she'll start,ʃiːl stˈɑːɹt,shell_start.opus,38027,60,,,50,False,38
+ono spadne,it'll fall,ˌɪɾəl fˈɔːl,itll_fall.opus,38028,60,,,50,False,38
+my počkáme,we'll wait,wiːl wˈeɪt,well_wait.opus,38029,60,,,50,False,38
+vy vyhrajete,you'll win,juːl wˈɪn,youll_win.opus,38030,60,,,50,False,38
+oni dorazí,they'll arrive,ðeɪl ɚɹˈaɪv,theyll_arrive.opus,38031,60,,,50,False,38
+Zavolám ti.,I'll call you.,aɪl kˈɔːl juː,ill_call_you.opus,38032,,,,50,False,38
+Přijdeš zítra.,You'll come tomorrow.,juːl kˈʌm təmˈɑːɹoʊ,youll_come_tomorrow.opus,38033,,,,50,False,38
+On ti pomůže s taškami.,He'll help you with the bags.,hiːl hˈɛlp juː wɪððə bˈæɡz,hell_help_you_with_the_bags.opus,38034,,,,50,False,38
+Ona začne schůzku v devět.,She'll start the meeting at nine.,ʃiːl stˈɑːɹt ðə mˈiːɾɪŋ æt nˈaɪn,shell_start_the_meeting_at_nine.opus,38035,,,,50,False,38
+"Sklenice spadne, když do ní strčíš.",It'll fall if you push it.,ˌɪɾəl fˈɔːl ɪf juː pˈʊʃ ɪt,itll_fall_if_you_push_it.opus,38036,,,,50,False,38
+Počkáme na další autobus.,We'll wait for the next bus.,wiːl wˈeɪt fɚðə nˈɛkst bˈʌs,well_wait_for_the_next_bus.opus,38037,,,,50,False,38
+Vy ten zápas vyhrajete.,You'll win the match.,juːl wˈɪn ðə mˈætʃ,youll_win_the_match.opus,38038,,,,50,False,38
+Dorazí před obědem.,They'll arrive before lunch.,ðeɪl ɚɹˈaɪv bᵻfˌɔːɹ lˈʌntʃ,theyll_arrive_before_lunch.opus,38039,,,,50,False,38

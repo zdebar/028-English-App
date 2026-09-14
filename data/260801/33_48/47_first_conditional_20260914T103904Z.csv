@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+grilovaný,grilled,ɡɹˈɪld,grilled.opus,47000,,,,,True,47
+brainstorm,brainstorm,bɹˈeɪnstɔːɹm,brainstorm.opus,47001,,,,,True,47
+vyhledávání,search,sˈɜːtʃ,search.opus,47002,,,,,True,47
+brzda,brake,bɹˈeɪk,brake.opus,47003,,,,,True,47
+úzkostné,anxious,ˈæŋʃəs,anxious.opus,47004,,,,,True,47
+hlídat,guard,ɡˈɑːɹd,guard.opus,47005,,,,,True,47
+otrok,slave,slˈeɪv,slave.opus,47006,,,,,True,47
+pobřeží,seaside,sˈiːsaɪd,seaside.opus,47007,,,,,True,47
+předek,ancestor,ˈænsɛstɚ,ancestor.opus,47008,,,,,True,47
+bezesný,sleepless,slˈiːpləs,sleepless.opus,47009,,,,,True,47
+vyjmout,except,ɛksˈɛpt,except.opus,47010,,,,,True,47
+větev,branch,bɹˈæntʃ,branch.opus,47011,,,,,True,47
+ospalý,sleepy,slˈiːpi,sleepy.opus,47012,,,,,True,47
+obchod s potravinami,grocery store,ɡɹˈoʊsɚɹi stˈɔːɹ,grocery_store.opus,47013,,,,,True,47
+rychlé občerstvení,fast food,fˈæst fˈuːd,fast_food.opus,47014,,,,,True,47
+rukavice,glove,ɡlˈʌv,glove.opus,47015,,,,,True,47
+knihovna,bookcase,bˈʊkkeɪs,bookcase.opus,47016,,,,,True,47
+jiný,another,ɐnˈʌðɚ,another.opus,47017,,,,,True,47
+potěr,fry,fɹˈaɪ,fry.opus,47018,,,,,True,47
+složku,folder,fˈoʊldɚ,folder.opus,47019,,,,,True,47
+šok,shock,ʃˈɑːk,shock.opus,47020,,,,,True,47
+plně,fully,fˈʊli,fully.opus,47021,,,,,True,47
+stín,shadow,ʃˈædoʊ,shadow.opus,47022,,,,,True,47
+vařený,boiled,bˈɔɪld,boiled.opus,47023,,,,,True,47
+"Když skončím brzy, zavolám ti","If I finish early, I'll call you",ɪf aɪ fˈɪnɪʃ ˈɜːli aɪl kˈɔːl juː,if_i_finish_early_ill_call_you.opus,47024,69,,,59,False,47
+"Když přijdeš včas, začneme","If you arrive on time, we'll start",ɪf juː ɚɹˈaɪv ˌɔn tˈaɪm wiːl stˈɑːɹt,if_you_arrive_on_time_well_start.opus,47025,69,,,59,False,47
+"Když bude pracovat, vydělá peníze","If he works, he'll earn money",ɪf hiː wˈɜːks hiːl ˈɜːn mˈʌni,if_he_works_hell_earn_money.opus,47026,69,,,59,False,47
+"Když bude studovat, složí zkoušku","If she studies, she'll pass the exam",ɪf ʃiː stˈʌdiz ʃiːl pˈæs ðɪ ɛɡzˈæm,if_she_studies_shell_pass_the_exam.opus,47027,69,,,59,False,47
+"Když bude pršet, zápas se zruší","If it rains, the match will be cancelled",ɪf ɪt ɹˈeɪnz ðə mˈætʃ wɪl biː kˈænsəld,if_it_rains_the_match_will_be_cancelled.opus,47028,69,,,59,False,47
+"Když budeme mít čas, navštívíme muzeum","If we have time, we'll visit the museum",ɪf wiː hæv tˈaɪm wiːl vˈɪzɪt ðə mjuːzˈiəm,if_we_have_time_well_visit_the_museum.opus,47029,69,,,59,False,47
+"Když si pospíšíte, stihnete vlak","If you hurry, you'll catch the train",ɪf juː hˈɜːɹi juːl kˈætʃ ðə tɹˈeɪn,if_you_hurry_youll_catch_the_train.opus,47030,69,,,59,False,47
+"Když budou šetřit, koupí si dům","If they save money, they'll buy a house",ɪf ðeɪ sˈeɪv mˈʌni ðeɪl bˈaɪ ɐ hˈaʊs,if_they_save_money_theyll_buy_a_house.opus,47031,69,,,59,False,47

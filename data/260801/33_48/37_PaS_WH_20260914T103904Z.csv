@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+překvapený,surprised,sɚpɹˈaɪzd,surprised.opus,37000,,,,,True,37
+překvapující,surprising,sɚpɹˈaɪzɪŋ,surprising.opus,37001,,,,,True,37
+zámek,lock,lˈɑːk,lock.opus,37002,,,,,True,37
+logika,logic,lˈɑːdʒɪk,logic.opus,37003,,,,,True,37
+logický,logical,lˈɑːdʒɪkəl,logical.opus,37004,,,,,True,37
+cola,cola,kˈoʊlə,cola.opus,37005,,,,,True,37
+poplach,alarm,ɐlˈɑːɹm,alarm.opus,37006,,,,,True,37
+litovat,regret,ɹᵻɡɹˈɛt,regret.opus,37007,,,,,True,37
+výbor,committee,kəmˈɪɾi,committee.opus,37008,,,,,True,37
+jasně,clearly,klˈɪɹli,clearly.opus,37009,,,,,True,37
+nákupní centrum,mall,mˈɔːl,mall.opus,37010,,,,,True,37
+spravovat,manage,mˈænɪdʒ,manage.opus,37011,,,,,True,37
+manažer,manager,mˈænɪdʒɚ,manager.opus,37012,,,,,True,37
+truhla,chest,tʃˈɛst,chest.opus,37013,,,,,True,37
+šachy,chess,tʃˈɛs,chess.opus,37014,,,,,True,37
+symfonie,symphony,sˈɪmfəni,symphony.opus,37015,,,,,True,37
+způsob,manner,mˈænɚ,manner.opus,37016,,,,,True,37
+kontrola,cheque,tʃˈɛk,cheque.opus,37017,,,,,True,37
+lednička,refrigerator,ɹᵻfɹˈɪdʒɚɹˌeɪɾɚ,refrigerator.opus,37018,,,,,True,37
+šéfkuchař,chef,ʃˈɛf,chef.opus,37019,,,,,True,37
+dětství,childhood,tʃˈaɪldhʊd,childhood.opus,37020,,,,,True,37
+jásot,cheer,tʃˈɪɹ,cheer.opus,37021,,,,,True,37
+šek,check,tʃˈɛk,check.opus,37022,,,,,True,37
+označit,mark,mˈɑːɹk,mark.opus,37023,,,,,True,37
+Kde jsem pracoval?,Where did I work?,wˌɛɹ dˈɪd aɪ wˈɜːk,where_did_i_work.opus,37024,59,,,49,False,37
+Co ses díval?,What did you watch?,wˌʌt dˈɪd juː wˈɑːtʃ,what_did_you_watch.opus,37025,59,,,49,False,37
+Kdy uklízel?,When did he clean?,wˌɛn dˈɪd hiː klˈiːn,when_did_he_clean.opus,37026,59,,,49,False,37
+Co otevřela?,What did she open?,wˌʌt dˈɪd ʃiː ˈoʊpən,what_did_she_open.opus,37027,59,,,49,False,37
+Kdy to začalo?,When did it start?,wˌɛn dˈɪd ɪt stˈɑːɹt,when_did_it_start.opus,37028,59,,,49,False,37
+Kde jsme hráli?,Where did we play?,wˌɛɹ dˈɪd wiː plˈeɪ,where_did_we_play.opus,37029,59,,,49,False,37
+Komu jste pomohli?,Who did you help?,hˌuː dˈɪd juː hˈɛlp,who_did_you_help.opus,37030,59,,,49,False,37
+Co navštívili?,What did they visit?,wˌʌt dˈɪd ðeɪ vˈɪzɪt,what_did_they_visit.opus,37031,59,,,49,False,37

@@ -1,0 +1,545 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+v pořádku,alright,ɔːlɹˈaɪt,alright.opus,33000,,,,,True,33
+zajímat,interest,ˈɪntɹɛst,interest.opus,33001,,,,,True,33
+břicho,belly,bˈɛli,belly.opus,33002,,,,,True,33
+steak,steak,stˈeɪk,steak.opus,33003,,,,,True,33
+uvést,state,stˈeɪt,state.opus,33004,,,,,True,33
+prohlášení,statement,stˈeɪtmənt,statement.opus,33005,,,,,True,33
+odhalit,reveal,ɹᵻvˈiːl,reveal.opus,33006,,,,,True,33
+inteligence,intelligence,ɪntˈɛlɪdʒəns,intelligence.opus,33007,,,,,True,33
+unie,union,jˈuːniən,union.opus,33008,,,,,True,33
+shledání,reunion,ɹˌiːjˈuːniən,reunion.opus,33009,,,,,True,33
+napadnout,invade,ɪnvˈeɪd,invade.opus,33010,,,,,True,33
+dobře,alright,ɔːlɹˈaɪt,alright.opus,33011,,,,,True,33
+naplánovat,budget,bˈʌdʒɪt,budget.opus,33012,,,,,True,33
+vrátit,return,ɹᵻtˈɜːn,return.opus,33013,,,,,True,33
+žárovka,bulb,bˈʌlb,bulb.opus,33014,,,,,True,33
+nebezpečí,danger,dˈeɪndʒɚ,danger.opus,33015,,,,,True,33
+inspirovat,inspire,ɪnspˈaɪɚ,inspire.opus,33016,,,,,True,33
+inspirace,inspiration,ˌɪnspɚɹˈeɪʃən,inspiration.opus,33017,,,,,True,33
+žebrat,beg,bˈɛɡ,beg.opus,33018,,,,,True,33
+sporák,stove,stˈoʊv,stove.opus,33019,,,,,True,33
+popis,description,dᵻskɹˈɪpʃən,description.opus,33020,,,,,True,33
+prokletí,curse,kˈɜːs,curse.opus,33021,,,,,True,33
+narovnat,right,ɹˈaɪt,right.opus,33022,,,,,True,33
+kari,curry,kˈɜːɹi,curry.opus,33023,,,,,True,33
+Jaký jsem byl?,What was I like?,wˌʌt wʌz aɪ lˈaɪk,what_was_i_like.opus,33024,55,,,45,False,33
+Kde jsi byl?,Where were you?,wˈɛɹ wɜː juː,where_were_you.opus,33025,55,,,45,False,33
+Proč byl doma?,Why was he at home?,wˌaɪ wʌz hiː æt hˈoʊm,why_was_he_at_home.opus,33026,55,,,45,False,33
+Jak se cítila?,How was she feeling?,hˌaʊ wʌz ʃiː fˈiːlɪŋ,how_was_she_feeling.opus,33027,55,,,45,False,33
+Jaké to bylo?,What was it like?,wˌʌt wʌz ɪt lˈaɪk,what_was_it_like.opus,33028,55,,,45,False,33
+Kde jsme byli?,Where were we?,wˈɛɹ wɜː wiː,where_were_we.opus,33029,55,,,45,False,33
+Kdy jste byli volní?,When were you free?,wˌɛn wɜː juː fɹˈiː,when_were_you_free.opus,33030,55,,,45,False,33
+Kde byli?,Where were they?,wˈɛɹ wɜː ðeɪ,where_were_they.opus,33031,55,,,45,False,33
+dříve než,before,bᵻfˈɔːɹ,before.opus,34000,,,,,True,34
+vnitřní,inner,ˈɪnɚ,inner.opus,34001,,,,,True,34
+přímý,straight,stɹˈeɪt,straight.opus,34002,,,,,True,34
+kroužek,ring,ɹˈɪŋ,ring.opus,34003,,,,,True,34
+skříň,cupboard,kˈʌbəd,cupboard.opus,34004,,,,,True,34
+radost,joy,dʒˈɔɪ,joy.opus,34005,,,,,True,34
+byl,been,bˈɪn,been.opus,34006,,,,,True,34
+dezert,dessert,dɪzˈɜːt,dessert.opus,34007,,,,,True,34
+aplikovat,apply,ɐplˈaɪ,apply.opus,34008,,,,,True,34
+problém,issue,ˈɪʃuː,issue.opus,34009,,,,,True,34
+tanečník,dancer,dˈænsɚ,dancer.opus,34010,,,,,True,34
+stát,state,stˈeɪt,state.opus,34011,,,,,True,34
+chovat se,behave,bᵻhˈeɪv,behave.opus,34012,,,,,True,34
+chování,behaviour,bᵻhˈeɪvjɚ,behaviour.opus,34013,,,,,True,34
+zubař,dentist,dˈɛntɪst,dentist.opus,34014,,,,,True,34
+přehrada,dam,dˈæm,dam.opus,34015,,,,,True,34
+sám,itself,ɪtsˈɛlf,itself.opus,34016,,,,,True,34
+denní,daily,dˈeɪli,daily.opus,34017,,,,,True,34
+zvyk,custom,kˈʌstəm,custom.opus,34018,,,,,True,34
+jezdit na kole,cycle,sˈaɪkəl,cycle.opus,34019,,,,,True,34
+cyklistika,cycling,sˈaɪklɪŋ,cycling.opus,34020,,,,,True,34
+začátek,beginning,bɪɡˈɪnɪŋ,beginning.opus,34021,,,,,True,34
+s sebou,along,ɐlˈɔŋ,along.opus,34022,,,,,True,34
+odpověď,response,ɹᵻspˈɑːns,response.opus,34023,,,,,True,34
+já pracoval,I worked,aɪ wˈɜːkt,i_worked.opus,34024,56,,,46,False,34
+ty ses díval,you watched,juː wˈɑːtʃt,you_watched.opus,34025,56,,,46,False,34
+on uklízel,he cleaned,hiː klˈiːnd,he_cleaned.opus,34026,56,,,46,False,34
+ona otevřela,she opened,ʃiː ˈoʊpənd,she_opened.opus,34027,56,,,46,False,34
+ono začalo,it started,ɪt stˈɑːɹɾᵻd,it_started.opus,34028,56,,,46,False,34
+my jsme hráli,we played,wiː plˈeɪd,we_played.opus,34029,56,,,46,False,34
+vy jste pomohli,you helped,juː hˈɛlpt,you_helped.opus,34030,56,,,46,False,34
+oni navštívili,they visited,ðeɪ vˈɪzɪɾᵻd,they_visited.opus,34031,56,,,46,False,34
+Včera jsem šel domů.,I went home yesterday.,aɪ wɛnt hˈoʊm jˈɛstɚdˌeɪ,i_went_home_yesterday.opus,34032,,,,46,False,34
+Viděl jsi film.,You saw a film.,juː sˈɔː ɐ fˈɪlm,you_saw_a_film.opus,34033,,,,46,False,34
+On koupil telefon.,He bought a phone.,hiː bˈɔːt ɐ fˈoʊn,he_bought_a_phone.opus,34034,,,,46,False,34
+Ona napsala e-mail.,She wrote an email.,ʃiː ɹˈoʊt ɐn ˈiːmeɪl,she_wrote_an_email.opus,34035,,,,46,False,34
+Rozbilo se to.,It broke.,ɪt bɹˈoʊk,it_broke.opus,34036,,,,46,False,34
+My jsem jeli vlakem.,We went by train.,wiː wɛnt baɪ tɹˈeɪn,we_went_by_train.opus,34037,,,,46,False,34
+Vy jste mu dali adresu.,You gave him an address.,juː ɡˈeɪv hˌɪm ɐn ɐdɹˈɛs,you_gave_him_an_address.opus,34038,,,,46,False,34
+Oni našli klíče.,They found the keys.,ðeɪ fˈaʊnd ðə kˈiːz,they_found_the_keys.opus,34039,,,,46,False,34
+obchodní dům,department store,dᵻpˈɑːɹtmənt stˈɔːɹ,department_store.opus,35000,,,,,True,35
+začátečník,beginner,bɪɡˈɪnɚ,beginner.opus,35001,,,,,True,35
+želé,jelly,dʒˈɛli,jelly.opus,35002,,,,,True,35
+džem,jam,dʒˈæm,jam.opus,35003,,,,,True,35
+znamenat,signify,sˈɪɡnᵻfˌaɪ,signify.opus,35004,,,,,True,35
+významný,significant,sɪɡnˈɪfɪkənt,significant.opus,35005,,,,,True,35
+úspěšně,successfully,səksˈɛsfəli,successfully.opus,35006,,,,,True,35
+ztracený,lost,lˈɔst,lost.opus,35007,,,,,True,35
+úděl,lot,lˈɑːt,lot.opus,35008,,,,,True,35
+hlasitý,loud,lˈaʊd,loud.opus,35009,,,,,True,35
+hlasitě,loudly,lˈaʊdli,loudly.opus,35010,,,,,True,35
+polykat,swallow,swˈɔloʊ,swallow.opus,35011,,,,,True,35
+vodítko,clue,klˈuː,clue.opus,35012,,,,,True,35
+klaun,clown,klˈaʊn,clown.opus,35013,,,,,True,35
+potit,sweat,swˈɛt,sweat.opus,35014,,,,,True,35
+kabina,cab,kˈæb,cab.opus,35015,,,,,True,35
+výhodná dohoda,bargain,bˈɑːɹɡɪn,bargain.opus,35016,,,,,True,35
+naštěstí,luckily,lˈʌkili,luckily.opus,35017,,,,,True,35
+pravidelně,regularly,ɹˈɛɡjʊlɚli,regularly.opus,35018,,,,,True,35
+ulička,aisle,ˈaɪəl,aisle.opus,35019,,,,,True,35
+cvaknutí,click,klˈɪk,click.opus,35020,,,,,True,35
+milý,sweet,swˈiːt,sweet.opus,35021,,,,,True,35
+miláček,sweetheart,swˈiːthɑːɹt,sweetheart.opus,35022,,,,,True,35
+úředník,clerk,klˈɜːk,clerk.opus,35023,,,,,True,35
+já jsem nepracoval,I didn't work,aɪ dˈɪdnt wˈɜːk,i_didnt_work.opus,35024,57,,,47,False,35
+ty ses nedíval,you didn't watch,juː dˈɪdnt wˈɑːtʃ,you_didnt_watch.opus,35025,57,,,47,False,35
+on neuklízel,he didn't clean,hiː dˈɪdnt klˈiːn,he_didnt_clean.opus,35026,57,,,47,False,35
+ona neotevřela,she didn't open,ʃiː dˈɪdnt ˈoʊpən,she_didnt_open.opus,35027,57,,,47,False,35
+ono nezačalo,it didn't start,ɪt dˈɪdnt stˈɑːɹt,it_didnt_start.opus,35028,57,,,47,False,35
+my jsme nehráli,we didn't play,wiː dˈɪdnt plˈeɪ,we_didnt_play.opus,35029,57,,,47,False,35
+vy jste nepomohli,you didn't help,juː dˈɪdnt hˈɛlp,you_didnt_help.opus,35030,57,,,47,False,35
+oni nenavštívili,they didn't visit,ðeɪ dˈɪdnt vˈɪzɪt,they_didnt_visit.opus,35031,57,,,47,False,35
+Já jsem nešel do práce.,I didn't go to work.,aɪ dˈɪdnt ɡˌoʊ tə wˈɜːk,i_didnt_go_to_work.opus,35032,,,,47,False,35
+Nedíval ses na ten film.,You didn't watch the film.,juː dˈɪdnt wˈɑːtʃ ðə fˈɪlm,you_didnt_watch_the_film.opus,35033,,,,47,False,35
+On si nekoupil lístek.,He didn't buy a ticket.,hiː dˈɪdnt bˈaɪ ɐ tˈɪkɪt,he_didnt_buy_a_ticket.opus,35034,,,,47,False,35
+Ona nenapsala odpověď.,She didn't write a reply.,ʃiː dˈɪdnt ɹˈaɪt ɐ ɹᵻplˈaɪ,she_didnt_write_a_reply.opus,35035,,,,47,False,35
+Počítač se nespustil.,Computer didn't start.,kəmpjˈuːɾɚ dˈɪdnt stˈɑːɹt,computer_didnt_start.opus,35036,,,,47,False,35
+My jsme nejeli pryč.,We didn't go away.,wiː dˈɪdnt ɡˌoʊ ɐwˈeɪ,we_didnt_go_away.opus,35037,,,,47,False,35
+Vy jste nám nepomohli.,You didn't help us.,juː dˈɪdnt hˈɛlp ˌʌs,you_didnt_help_us.opus,35038,,,,47,False,35
+Oni nenavštívili své rodiče.,They didn't visit their parents.,ðeɪ dˈɪdnt vˈɪzɪt ðɛɹ pˈɛɹənts,they_didnt_visit_their_parents.opus,35039,,,,47,False,35
+klon,clone,klˈoʊn,clone.opus,36000,,,,,True,36
+volný,loose,lˈuːs,loose.opus,36001,,,,,True,36
+přežít,survive,sɚvˈaɪv,survive.opus,36002,,,,,True,36
+spáchat,commit,kəmˈɪt,commit.opus,36003,,,,,True,36
+závazek,commitment,kəmˈɪtmənt,commitment.opus,36004,,,,,True,36
+litr,litre,lˈiːɾɚ,litre.opus,36005,,,,,True,36
+surfovat,surf,sˈɜːf,surf.opus,36006,,,,,True,36
+surfování,surfing,sˈɜːfɪŋ,surfing.opus,36007,,,,,True,36
+propuštění,release,ɹᵻlˈiːs,release.opus,36008,,,,,True,36
+relaxovat,relax,ɹᵻlˈæks,relax.opus,36009,,,,,True,36
+uvolněný,relaxed,ɹᵻlˈækst,relaxed.opus,36010,,,,,True,36
+vtipný,comic,kˈɑːmɪk,comic.opus,36011,,,,,True,36
+komik,comic,kˈɑːmɪk,comic.opus,36012,,,,,True,36
+příjmení,surname,sˈɜːneɪm,surname.opus,36013,,,,,True,36
+pohodlí,comfort,kˈʌmfɚt,comfort.opus,36014,,,,,True,36
+komfortní,comfortable,kˈʌmftəbəl,comfortable.opus,36015,,,,,True,36
+živý,lively,lˈaɪvli,lively.opus,36016,,,,,True,36
+podnikatelka,businesswoman,bˈɪznəswˌʊmən,businesswoman.opus,36017,,,,,True,36
+zatížení,load,lˈoʊd,load.opus,36018,,,,,True,36
+hřeben,comb,kˈoʊm,comb.opus,36019,,,,,True,36
+místní,local,lˈoʊkəl,local.opus,36020,,,,,True,36
+sloupec,column,kˈɑːlʌm,column.opus,36021,,,,,True,36
+barvitý,colourful,kˈʌlɚfəl,colourful.opus,36022,,,,,True,36
+překvapení,surprise,sɚpɹˈaɪz,surprise.opus,36023,,,,,True,36
+Pracoval jsem?,Did I work?,dˈɪd aɪ wˈɜːk,did_i_work.opus,36024,58,,,48,False,36
+Díval ses?,Did you watch?,dˈɪd juː wˈɑːtʃ,did_you_watch.opus,36025,58,,,48,False,36
+Uklízel?,Did he clean?,dˈɪd hiː klˈiːn,did_he_clean.opus,36026,58,,,48,False,36
+Otevřela?,Did she open?,dˈɪd ʃiː ˈoʊpən,did_she_open.opus,36027,58,,,48,False,36
+Začalo?,Did it start?,dˈɪd ɪt stˈɑːɹt,did_it_start.opus,36028,58,,,48,False,36
+Hráli jsme?,Did we play?,dˈɪd wiː plˈeɪ,did_we_play.opus,36029,58,,,48,False,36
+Pomohli jste?,Did you help?,dˈɪd juː hˈɛlp,did_you_help.opus,36030,58,,,48,False,36
+Navštívili?,Did they visit?,dˈɪd ðeɪ vˈɪzɪt,did_they_visit.opus,36031,58,,,48,False,36
+překvapený,surprised,sɚpɹˈaɪzd,surprised.opus,37000,,,,,True,37
+překvapující,surprising,sɚpɹˈaɪzɪŋ,surprising.opus,37001,,,,,True,37
+zámek,lock,lˈɑːk,lock.opus,37002,,,,,True,37
+logika,logic,lˈɑːdʒɪk,logic.opus,37003,,,,,True,37
+logický,logical,lˈɑːdʒɪkəl,logical.opus,37004,,,,,True,37
+cola,cola,kˈoʊlə,cola.opus,37005,,,,,True,37
+poplach,alarm,ɐlˈɑːɹm,alarm.opus,37006,,,,,True,37
+litovat,regret,ɹᵻɡɹˈɛt,regret.opus,37007,,,,,True,37
+výbor,committee,kəmˈɪɾi,committee.opus,37008,,,,,True,37
+jasně,clearly,klˈɪɹli,clearly.opus,37009,,,,,True,37
+nákupní centrum,mall,mˈɔːl,mall.opus,37010,,,,,True,37
+spravovat,manage,mˈænɪdʒ,manage.opus,37011,,,,,True,37
+manažer,manager,mˈænɪdʒɚ,manager.opus,37012,,,,,True,37
+truhla,chest,tʃˈɛst,chest.opus,37013,,,,,True,37
+šachy,chess,tʃˈɛs,chess.opus,37014,,,,,True,37
+symfonie,symphony,sˈɪmfəni,symphony.opus,37015,,,,,True,37
+způsob,manner,mˈænɚ,manner.opus,37016,,,,,True,37
+kontrola,cheque,tʃˈɛk,cheque.opus,37017,,,,,True,37
+lednička,refrigerator,ɹᵻfɹˈɪdʒɚɹˌeɪɾɚ,refrigerator.opus,37018,,,,,True,37
+šéfkuchař,chef,ʃˈɛf,chef.opus,37019,,,,,True,37
+dětství,childhood,tʃˈaɪldhʊd,childhood.opus,37020,,,,,True,37
+jásot,cheer,tʃˈɪɹ,cheer.opus,37021,,,,,True,37
+šek,check,tʃˈɛk,check.opus,37022,,,,,True,37
+označit,mark,mˈɑːɹk,mark.opus,37023,,,,,True,37
+Kde jsem pracoval?,Where did I work?,wˌɛɹ dˈɪd aɪ wˈɜːk,where_did_i_work.opus,37024,59,,,49,False,37
+Co ses díval?,What did you watch?,wˌʌt dˈɪd juː wˈɑːtʃ,what_did_you_watch.opus,37025,59,,,49,False,37
+Kdy uklízel?,When did he clean?,wˌɛn dˈɪd hiː klˈiːn,when_did_he_clean.opus,37026,59,,,49,False,37
+Co otevřela?,What did she open?,wˌʌt dˈɪd ʃiː ˈoʊpən,what_did_she_open.opus,37027,59,,,49,False,37
+Kdy to začalo?,When did it start?,wˌɛn dˈɪd ɪt stˈɑːɹt,when_did_it_start.opus,37028,59,,,49,False,37
+Kde jsme hráli?,Where did we play?,wˌɛɹ dˈɪd wiː plˈeɪ,where_did_we_play.opus,37029,59,,,49,False,37
+Komu jste pomohli?,Who did you help?,hˌuː dˈɪd juː hˈɛlp,who_did_you_help.opus,37030,59,,,49,False,37
+Co navštívili?,What did they visit?,wˌʌt dˈɪd ðeɪ vˈɪzɪt,what_did_they_visit.opus,37031,59,,,49,False,37
+stolní tenis,table tennis,tˈeɪbəl tˈɛnɪs,table_tennis.opus,38000,,,,,True,38
+značka,mark,mˈɑːɹk,mark.opus,38001,,,,,True,38
+povídání,chat,tʃˈæt,chat.opus,38002,,,,,True,38
+graf,chart,tʃˈɑːɹt,chart.opus,38003,,,,,True,38
+lžíce,spoon,spˈuːn,spoon.opus,38004,,,,,True,38
+polévková lžíce,tablespoon,tˈeɪbəlspˌuːn,tablespoon.opus,38005,,,,,True,38
+oženit,marry,mˈæɹi,marry.opus,38006,,,,,True,38
+ženatý,married,mˈæɹid,married.opus,38007,,,,,True,38
+tvář,cheek,tʃˈiːk,cheek.opus,38008,,,,,True,38
+muž,male,mˈeɪl,male.opus,38009,,,,,True,38
+chilli,chilli,tʃˈɪli,chilli.opus,38010,,,,,True,38
+symbol,symbol,sˈɪmbəl,symbol.opus,38011,,,,,True,38
+čistič,cleaner,klˈiːnɚ,cleaner.opus,38012,,,,,True,38
+jídelna,cafeteria,kˌæfɪtˈɪɹiə,cafeteria.opus,38013,,,,,True,38
+šílený,mad,mˈæd,mad.opus,38014,,,,,True,38
+klasický,classic,klˈæsɪk,classic.opus,38015,,,,,True,38
+klasická hudba,classical music,klˈæsɪkəl mjˈuːzɪk,classical_music.opus,38016,,,,,True,38
+plavky,swimming costume,swˈɪmɪŋ kˈɔstuːm,swimming_costume.opus,38017,,,,,True,38
+plavky,swimsuit,swˈɪmsuːt,swimsuit.opus,38018,,,,,True,38
+požadovat,claim,klˈeɪm,claim.opus,38019,,,,,True,38
+holič,barber,bˈɑːɹbɚ,barber.opus,38020,,,,,True,38
+kouzlo,magic,mˈædʒɪk,magic.opus,38021,,,,,True,38
+občan,citizen,sˈɪɾɪzən,citizen.opus,38022,,,,,True,38
+hlavní chod,main course,mˈeɪn kˈɔːɹs,main_course.opus,38023,,,,,True,38
+já zavolám,I'll call,aɪl kˈɔːl,ill_call.opus,38024,60,,,50,False,38
+ty přijdeš,you'll come,juːl kˈʌm,youll_come.opus,38025,60,,,50,False,38
+on pomůže,he'll help,hiːl hˈɛlp,hell_help.opus,38026,60,,,50,False,38
+ona začne,she'll start,ʃiːl stˈɑːɹt,shell_start.opus,38027,60,,,50,False,38
+ono spadne,it'll fall,ˌɪɾəl fˈɔːl,itll_fall.opus,38028,60,,,50,False,38
+my počkáme,we'll wait,wiːl wˈeɪt,well_wait.opus,38029,60,,,50,False,38
+vy vyhrajete,you'll win,juːl wˈɪn,youll_win.opus,38030,60,,,50,False,38
+oni dorazí,they'll arrive,ðeɪl ɚɹˈaɪv,theyll_arrive.opus,38031,60,,,50,False,38
+Zavolám ti.,I'll call you.,aɪl kˈɔːl juː,ill_call_you.opus,38032,,,,50,False,38
+Přijdeš zítra.,You'll come tomorrow.,juːl kˈʌm təmˈɑːɹoʊ,youll_come_tomorrow.opus,38033,,,,50,False,38
+On ti pomůže s taškami.,He'll help you with the bags.,hiːl hˈɛlp juː wɪððə bˈæɡz,hell_help_you_with_the_bags.opus,38034,,,,50,False,38
+Ona začne schůzku v devět.,She'll start the meeting at nine.,ʃiːl stˈɑːɹt ðə mˈiːɾɪŋ æt nˈaɪn,shell_start_the_meeting_at_nine.opus,38035,,,,50,False,38
+"Sklenice spadne, když do ní strčíš.",It'll fall if you push it.,ˌɪɾəl fˈɔːl ɪf juː pˈʊʃ ɪt,itll_fall_if_you_push_it.opus,38036,,,,50,False,38
+Počkáme na další autobus.,We'll wait for the next bus.,wiːl wˈeɪt fɚðə nˈɛkst bˈʌs,well_wait_for_the_next_bus.opus,38037,,,,50,False,38
+Vy ten zápas vyhrajete.,You'll win the match.,juːl wˈɪn ðə mˈætʃ,youll_win_the_match.opus,38038,,,,50,False,38
+Dorazí před obědem.,They'll arrive before lunch.,ðeɪl ɚɹˈaɪv bᵻfˌɔːɹ lˈʌntʃ,theyll_arrive_before_lunch.opus,38039,,,,50,False,38
+hlavně,mainly,mˈeɪnli,mainly.opus,39000,,,,,True,39
+kalendář,calendar,kˈæləndɚ,calendar.opus,39001,,,,,True,39
+hlavní,major,mˈeɪdʒɚ,major.opus,39002,,,,,True,39
+grilování,barbecue,bˈɑːɹbɪkjˌuː,barbecue.opus,39003,,,,,True,39
+výrobce,maker,mˈeɪkɚ,maker.opus,39004,,,,,True,39
+make-up,make-up,mˌeɪkˈʌp,makeup.opus,39005,,,,,True,39
+výběr,choice,tʃˈɔɪs,choice.opus,39006,,,,,True,39
+cvrlikání,chirp,tʃˈɜːp,chirp.opus,39007,,,,,True,39
+brada,chin,tʃˈɪn,chin.opus,39008,,,,,True,39
+šimpanz,chimpanzee,tʃˌɪmpɐnzˈiː,chimpanzee.opus,39009,,,,,True,39
+lyrika,lyric,lˈɪɹɪk,lyric.opus,39010,,,,,True,39
+stát (peníze),cost,kˈɔst,cost.opus,39011,,,,,True,39
+budík,alarm clock,ɐlˈɑːɹm klˈɑːk,alarm_clock.opus,39012,,,,,True,39
+odpověď,reply,ɹᵻplˈaɪ,reply.opus,39013,,,,,True,39
+zákon,law,lˈɔː,law.opus,39014,,,,,True,39
+advokát,lawyer,lˈɔɪɚ,lawyer.opus,39015,,,,,True,39
+kontrast,contrast,kˈɑːntɹæst,contrast.opus,39016,,,,,True,39
+lenost,laziness,lˈeɪzinəs,laziness.opus,39017,,,,,True,39
+záliv,bay,bˈeɪ,bay.opus,39018,,,,,True,39
+kontinent,continent,kˈɑːntɪnənt,continent.opus,39019,,,,,True,39
+kontext,context,kˈɑːntɛkst,context.opus,39020,,,,,True,39
+keř,bush,bˈʊʃ,bush.opus,39021,,,,,True,39
+řízení,control,kəntɹˈoʊl,control.opus,39022,,,,,True,39
+kontejner,container,kəntˈeɪnɚ,container.opus,39023,,,,,True,39
+já nezavolám,I won't call,aɪ woʊnt kˈɔːl,i_wont_call.opus,39024,61,,,51,False,39
+ty nepřijdeš,you won't come,juː woʊnt kˈʌm,you_wont_come.opus,39025,61,,,51,False,39
+on nepomůže,he won't help,hiː woʊnt hˈɛlp,he_wont_help.opus,39026,61,,,51,False,39
+ona nezačne,she won't start,ʃiː woʊnt stˈɑːɹt,she_wont_start.opus,39027,61,,,51,False,39
+ono nespadne,it won't fall,ɪt woʊnt fˈɔːl,it_wont_fall.opus,39028,61,,,51,False,39
+my nepočkáme,we won't wait,wiː woʊnt wˈeɪt,we_wont_wait.opus,39029,61,,,51,False,39
+vy neprohrajete,you won't lose,juː woʊnt lˈuːz,you_wont_lose.opus,39030,61,,,51,False,39
+oni nedorazí,they won't arrive,ðeɪ woʊnt ɚɹˈaɪv,they_wont_arrive.opus,39031,61,,,51,False,39
+"Dobře, nezavolám mu.","All right, I won't call him.",ˈɔːl ɹˈaɪt aɪ woʊnt kˈɔːl hˌɪm,all_right_i_wont_call_him.opus,39032,,,,51,False,39
+"Ne, zítra nepřijdu.","No, I won't come tomorrow.",nˈoʊ aɪ woʊnt kˈʌm təmˈɑːɹoʊ,no_i_wont_come_tomorrow.opus,39033,,,,51,False,39
+"On nám nepomůže."",He won't help us.""",,,nan.opus,39034,,,,51,True,39
+Ona bez nás nezačne.,She won't start without us.,ʃiː woʊnt stˈɑːɹt wɪðˈaʊt ˌʌs,she_wont_start_without_us.opus,39035,,,,51,False,39
+To nespadne.,It won't fall.,ɪt woʊnt fˈɔːl,it_wont_fall.opus,39036,,,,51,False,39
+Nebudeme čekat celou noc.,We won't wait all night.,wiː woʊnt wˈeɪt ˈɔːl nˈaɪt,we_wont_wait_all_night.opus,39037,,,,51,False,39
+Neprohrajete.,You won't lose.,juː woʊnt lˈuːz,you_wont_lose.opus,39038,,,,51,False,39
+Asi dnes nedorazí.,They probably won't arrive today.,ðeɪ pɹˈɑːbəbli woʊnt ɚɹˈaɪv tədˈeɪ,they_probably_wont_arrive_today.opus,39039,,,,51,False,39
+kontaktovat,contact,kˈɑːntækt,contact.opus,40000,,,,,True,40
+kontakt,contact,kˈɑːntækt,contact.opus,40001,,,,,True,40
+přivlastnit si,appropriate,ɐpɹˈoʊpɹɪət,appropriate.opus,40002,,,,,True,40
+baterie,battery,bˈæɾɚɹi,battery.opus,40003,,,,,True,40
+opravit,repair,ɹᵻpˈɛɹ,repair.opus,40004,,,,,True,40
+nejméně,least,lˈiːst,least.opus,40005,,,,,True,40
+kůže,leather,lˈɛðɚ,leather.opus,40006,,,,,True,40
+náhlý,sudden,sˈʌdən,sudden.opus,40007,,,,,True,40
+uspět,succeed,səksˈiːd,succeed.opus,40008,,,,,True,40
+pohodlí,convenience,kənvˈiːnɪəns,convenience.opus,40009,,,,,True,40
+výzkum,research,ɹᵻsˈɜːtʃ,research.opus,40010,,,,,True,40
+svítilna,lamp,lˈæmp,lamp.opus,40011,,,,,True,40
+studie,study,stˈʌdi,study.opus,40012,,,,,True,40
+povolit,allow,ɐlˈaʊ,allow.opus,40013,,,,,True,40
+věc,stuff,stˈʌf,stuff.opus,40014,,,,,True,40
+krajina,landscape,lˈændskeɪp,landscape.opus,40015,,,,,True,40
+styl,style,stˈaɪl,style.opus,40016,,,,,True,40
+pruh,lane,lˈeɪn,lane.opus,40017,,,,,True,40
+hořet,burn,bˈɜːn,burn.opus,40018,,,,,True,40
+pohřbít,bury,bˈɛɹi,bury.opus,40019,,,,,True,40
+sporák,cooker,kˈʊkɚ,cooker.opus,40020,,,,,True,40
+autobusové nádraží,bus station,bˈʌs stˈeɪʃən,bus_station.opus,40021,,,,,True,40
+nejnovější,latest,lˈeɪɾɪst,latest.opus,40022,,,,,True,40
+zastupovat,represent,ɹˌɛpɹᵻzˈɛnt,represent.opus,40023,,,,,True,40
+Zavoláš mi zítra?,Will you call me tomorrow?,wɪl juː kˈɔːl mˌiː təmˈɑːɹoʊ,will_you_call_me_tomorrow.opus,40024,62,,,52,False,40
+Přijde dnes večer?,Will he come tonight?,wɪl hiː kˈʌm tənˈaɪt,will_he_come_tonight.opus,40025,62,,,52,False,40
+Pomůžeš mi?,Will you help me?,wɪl juː hˈɛlp mˌiː,will_you_help_me.opus,40026,62,,,52,False,40
+Začne film brzy?,Will the film start soon?,wɪl ðə fˈɪlm stˈɑːɹt sˈuːn,will_the_film_start_soon.opus,40027,62,,,52,False,40
+Spadne to?,Will it fall?,wɪl ɪt fˈɔːl,will_it_fall.opus,40028,62,,,52,False,40
+Budeme mít dost času?,Will we have enough time?,wɪl wiː hæv ɪnˈʌf tˈaɪm,will_we_have_enough_time.opus,40029,62,,,52,False,40
+Vyhrajete?,Will you win?,wɪl juː wˈɪn,will_you_win.opus,40030,62,,,52,False,40
+Dorazí včas?,Will they arrive on time?,wɪl ðeɪ ɚɹˈaɪv ˌɔn tˈaɪm,will_they_arrive_on_time.opus,40031,62,,,52,False,40
+poslední,latter,lˈæɾɚ,latter.opus,41000,,,,,True,41
+autobusová zastávka,bus stop,bˈʌs stˈɑːp,bus_stop.opus,41001,,,,,True,41
+pohodlné,convenient,kənvˈiːnɪənt,convenient.opus,41002,,,,,True,41
+levice,left,lˈɛft,left.opus,41003,,,,,True,41
+licence,licence,lˈaɪsəns,licence.opus,41004,,,,,True,41
+lež,lie,lˈaɪ,lie.opus,41005,,,,,True,41
+podnikatel,businessman,bˈɪznəsmən,businessman.opus,41006,,,,,True,41
+superlativ,superlative,suːpˈɜːlətˌɪv,superlative.opus,41007,,,,,True,41
+životní styl,lifestyle,lˈaɪfstaɪl,lifestyle.opus,41008,,,,,True,41
+superstar,superstar,sˈuːpɚstˌɑːɹ,superstar.opus,41009,,,,,True,41
+komponovat,compose,kəmpˈoʊz,compose.opus,41010,,,,,True,41
+skladatel,composer,kəmpˈoʊzɚ,composer.opus,41011,,,,,True,41
+večeře,supper,sˈʌpɚ,supper.opus,41012,,,,,True,41
+v podstatě,basically,bˈeɪsɪkli,basically.opus,41013,,,,,True,41
+soustředit se,concentrate,kˈɑːnsəntɹˌeɪt,concentrate.opus,41014,,,,,True,41
+kompletní,complete,kəmplˈiːt,complete.opus,41015,,,,,True,41
+stěžovat si,complain,kəmplˈeɪn,complain.opus,41016,,,,,True,41
+stížnost,complaint,kəmplˈeɪnt,complaint.opus,41017,,,,,True,41
+soutěžit,compete,kəmpˈiːt,compete.opus,41018,,,,,True,41
+soutěž,competition,kˌɑːmpətˈɪʃən,competition.opus,41019,,,,,True,41
+ret,lip,lˈɪp,lip.opus,41020,,,,,True,41
+porovnat,compare,kəmpˈɛɹ,compare.opus,41021,,,,,True,41
+srovnávací,comparative,kəmpˈæɹətˌɪv,comparative.opus,41022,,,,,True,41
+komunikovat,communicate,kəmjˈuːnᵻkˌeɪt,communicate.opus,41023,,,,,True,41
+Kdy mi zavoláš?,When will you call me?,wˌɛn wɪl juː kˈɔːl mˌiː,when_will_you_call_me.opus,41024,63,,,53,False,41
+Kdy přijdeš?,When will you come?,wˌɛn wɪl juː kˈʌm,when_will_you_come.opus,41025,63,,,53,False,41
+Jak nám pomůže?,How will he help us?,hˌaʊ wɪl hiː hˈɛlp ˌʌs,how_will_he_help_us.opus,41026,63,,,53,False,41
+Kdy začne kurz?,When will the course start?,wˌɛn wɪl ðə kˈɔːɹs stˈɑːɹt,when_will_the_course_start.opus,41027,63,,,53,False,41
+Kdy to spadne?,When will it fall?,wˌɛn wɪl ɪt fˈɔːl,when_will_it_fall.opus,41028,63,,,53,False,41
+Kde počkáme?,Where will we wait?,wˌɛɹ wɪl wiː wˈeɪt,where_will_we_wait.opus,41029,63,,,53,False,41
+Co vyhrajete?,What will you win?,wˌʌt wɪl juː wˈɪn,what_will_you_win.opus,41030,63,,,53,False,41
+Kdy dorazí?,When will they arrive?,wˌɛn wɪl ðeɪ ɚɹˈaɪv,when_will_they_arrive.opus,41031,63,,,53,False,41
+sdělení,communication,kəmjˌuːnɪkˈeɪʃən,communication.opus,42000,,,,,True,42
+základní,basic,bˈeɪsɪk,basic.opus,42001,,,,,True,42
+svoboda,liberty,lˈɪbɚɾi,liberty.opus,42002,,,,,True,42
+znepokojení,concern,kənsˈɜːn,concern.opus,42003,,,,,True,42
+sluneční světlo,sunlight,sˈʌnlaɪt,sunlight.opus,42004,,,,,True,42
+pronajmout,rent,ɹˈɛnt,rent.opus,42005,,,,,True,42
+následek,consequence,kˈɑːnsɪkwəns,consequence.opus,42006,,,,,True,42
+vyhovovat,suit,sˈuːt,suit.opus,42007,,,,,True,42
+vhodný,suitable,sˈuːɾəbəl,suitable.opus,42008,,,,,True,42
+vzdálený,remote,ɹᵻmˈoʊt,remote.opus,42009,,,,,True,42
+připomenout,remind,ɹᵻmˈaɪnd,remind.opus,42010,,,,,True,42
+volný čas,leisure,lˈiːʒɚ,leisure.opus,42011,,,,,True,42
+citrón,lemon,lˈɛmən,lemon.opus,42012,,,,,True,42
+zmást,confuse,kənfjˈuːz,confuse.opus,42013,,,,,True,42
+zmatený,confused,kənfjˈuːzd,confused.opus,42014,,,,,True,42
+kufr,suitcase,sˈuːtkeɪs,suitcase.opus,42015,,,,,True,42
+limonáda,lemonade,lˌɛmənˈeɪd,lemonade.opus,42016,,,,,True,42
+půjčovat,lend,lˈɛnd,lend.opus,42017,,,,,True,42
+sebevědomý,confident,kˈɑːnfɪdənt,confident.opus,42018,,,,,True,42
+shrnutí,summary,sˈʌmɚɹi,summary.opus,42019,,,,,True,42
+naživu,alive,ɐlˈaɪv,alive.opus,42020,,,,,True,42
+dávka,batch,bˈætʃ,batch.opus,42021,,,,,True,42
+stav,condition,kəndˈɪʃən,condition.opus,42022,,,,,True,42
+úroveň,level,lˈɛvəl,level.opus,42023,,,,,True,42
+Zavolám mu.,I'm going to call him.,aɪm ɡˌoʊɪŋ tə kˈɔːl hˌɪm,im_going_to_call_him.opus,42024,64,,,54,False,42
+Budeš dnes vařit.,You're going to cook today.,jʊɹ ɡˌoʊɪŋ tə kˈʊk tədˈeɪ,youre_going_to_cook_today.opus,42025,64,,,54,False,42
+On začne nový projekt.,He's going to start a new project.,hiːz ɡˌoʊɪŋ tə stˈɑːɹt ɐ nˈuː pɹˈɑːdʒɛkt,hes_going_to_start_a_new_project.opus,42026,64,,,54,False,42
+Ona odjede příští týden.,She's going to leave next week.,ʃiːz ɡˌoʊɪŋ tə lˈiːv nˈɛkst wˈiːk,shes_going_to_leave_next_week.opus,42027,64,,,54,False,42
+Ten strom brzy spadne.,The tree is going to fall soon.,ðə tɹˈiː ɪz ɡˌoʊɪŋ tə fˈɔːl sˈuːn,the_tree_is_going_to_fall_soon.opus,42028,64,,,54,False,42
+My zůstaneme doma.,We're going to stay home.,wɪɹ ɡˌoʊɪŋ tə stˈeɪ hˈoʊm,were_going_to_stay_home.opus,42029,64,,,54,False,42
+Vy vyhrajete.,You're going to win.,jʊɹ ɡˌoʊɪŋ tə wˈɪn,youre_going_to_win.opus,42030,64,,,54,False,42
+Oni přijedou večer.,They're going to arrive tonight.,ðeɪɚ ɡˌoʊɪŋ tʊ ɚɹˈaɪv tənˈaɪt,theyre_going_to_arrive_tonight.opus,42031,64,,,54,False,42
+slunečnice,sunflower,sˈʌnflaʊɚ,sunflower.opus,43000,,,,,True,43
+sluneční brýle,sunglasses,sˈʌŋɡlæsᵻz,sunglasses.opus,43001,,,,,True,43
+levá ruka,left-hand,lˈɛfthˈænd,lefthand.opus,43002,,,,,True,43
+opravdu,indeed,ˌɪndˈiːd,indeed.opus,43003,,,,,True,43
+obtížnost,difficulty,dˈɪfɪkˌʌlti,difficulty.opus,43004,,,,,True,43
+gram,gramme,ɡɹˈæm,gramme.opus,43005,,,,,True,43
+blondýnka,blonde,blˈɑːnd,blonde.opus,43006,,,,,True,43
+rozzlobeně,angrily,ˈæŋɡɹili,angrily.opus,43007,,,,,True,43
+vnouče,grandchild,ɡɹˈændtʃaɪld,grandchild.opus,43008,,,,,True,43
+dědeček,granddad,ɡɹˈændæd,granddad.opus,43009,,,,,True,43
+velmi,extremely,ɛkstɹˈiːmli,extremely.opus,43010,,,,,True,43
+obývací pokoj,sitting room,sˈɪɾɪŋ ɹˈuːm,sitting_room.opus,43011,,,,,True,43
+navíc,extra,ˈɛkstɹə,extra.opus,43012,,,,,True,43
+zdát,seem,sˈiːm,seem.opus,43013,,,,,True,43
+anděl,angel,ˈeɪndʒəl,angel.opus,43014,,,,,True,43
+babička,granny,ɡɹˈæni,granny.opus,43015,,,,,True,43
+starověké,ancient,ˈeɪntʃənt,ancient.opus,43016,,,,,True,43
+brusle,skate,skˈeɪt,skate.opus,43017,,,,,True,43
+výraz,expression,ɛkspɹˈɛʃən,expression.opus,43018,,,,,True,43
+hledat,seek,sˈiːk,seek.opus,43019,,,,,True,43
+rychlík,express,ɛkspɹˈɛs,express.opus,43020,,,,,True,43
+semínko,seed,sˈiːd,seed.opus,43021,,,,,True,43
+skateboarding,skateboarding,skˈeɪtbɔːɹdɪŋ,skateboarding.opus,43022,,,,,True,43
+prozkoumat,explore,ɛksplˈɔːɹ,explore.opus,43023,,,,,True,43
+já nebudu volat,I'm not going to call,aɪm nˌɑːt ɡˌoʊɪŋ tə kˈɔːl,im_not_going_to_call.opus,43024,65,,,55,False,43
+ty nebudeš vařit,you aren't going to cook,juː ˌɑːɹnt ɡˌoʊɪŋ tə kˈʊk,you_arent_going_to_cook.opus,43025,65,,,55,False,43
+on nezačne,he isn't going to start,hiː ˌɪzənt ɡˌoʊɪŋ tə stˈɑːɹt,he_isnt_going_to_start.opus,43026,65,,,55,False,43
+ona neodjede,she isn't going to leave,ʃiː ˌɪzənt ɡˌoʊɪŋ tə lˈiːv,she_isnt_going_to_leave.opus,43027,65,,,55,False,43
+ono nespadne,it isn't going to fall,ɪɾ ˌɪzənt ɡˌoʊɪŋ tə fˈɔːl,it_isnt_going_to_fall.opus,43028,65,,,55,False,43
+my nezůstaneme,we aren't going to stay,wiː ˌɑːɹnt ɡˌoʊɪŋ tə stˈeɪ,we_arent_going_to_stay.opus,43029,65,,,55,False,43
+vy nevyhrajete,you aren't going to win,juː ˌɑːɹnt ɡˌoʊɪŋ tə wˈɪn,you_arent_going_to_win.opus,43030,65,,,55,False,43
+oni nepřijedou,they aren't going to arrive,ðeɪ ˌɑːɹnt ɡˌoʊɪŋ tʊ ɚɹˈaɪv,they_arent_going_to_arrive.opus,43031,65,,,55,False,43
+vděčný,grateful,ɡɹˈeɪtfəl,grateful.opus,44000,,,,,True,44
+bruslení,skating,skˈeɪɾɪŋ,skating.opus,44001,,,,,True,44
+dřez,sink,sˈɪŋk,sink.opus,44002,,,,,True,44
+jednotného čísla,singular,sˈɪŋɡjʊlɚ,singular.opus,44003,,,,,True,44
+absolvovat,graduate,ɡɹˈædʒuːət,graduate.opus,44004,,,,,True,44
+móda,fashion,fˈæʃən,fashion.opus,44005,,,,,True,44
+fascinovat,fascinate,fˈæsᵻnˌeɪt,fascinate.opus,44006,,,,,True,44
+fascinující,fascinating,fˈæsᵻnˌeɪɾɪŋ,fascinating.opus,44007,,,,,True,44
+semestr,semester,səmˈɛstɚ,semester.opus,44008,,,,,True,44
+zlatý,golden,ɡˈoʊldən,golden.opus,44009,,,,,True,44
+golf,golf,ɡˈɑːlf,golf.opus,44010,,,,,True,44
+květ,bloom,blˈuːm,bloom.opus,44011,,,,,True,44
+jízdné,fare,fˈɛɹ,fare.opus,44012,,,,,True,44
+dobře vypadající,good-looking,ɡˈʊdlˈʊkɪŋ,goodlooking.opus,44013,,,,,True,44
+fantastický,fantastic,fæntˈæstɪk,fantastic.opus,44014,,,,,True,44
+módní,fancy,fˈænsi,fancy.opus,44015,,,,,True,44
+vysvětlení,explanation,ɛksplɐnˈeɪʃən,explanation.opus,44016,,,,,True,44
+jednoduše,simply,sˈɪmpli,simply.opus,44017,,,,,True,44
+pád,fall,fˈɔːl,fall.opus,44018,,,,,True,44
+spravedlivě,fairly,fˈɛɹli,fairly.opus,44019,,,,,True,44
+podprsenka,bra,bɹˈɑː,bra.opus,44020,,,,,True,44
+milost,grace,ɡɹˈeɪs,grace.opus,44021,,,,,True,44
+selhat,fail,fˈeɪl,fail.opus,44022,,,,,True,44
+krev,blood,blˈʌd,blood.opus,44023,,,,,True,44
+Budu volat?,Am I going to call?,æm aɪ ɡˌoʊɪŋ tə kˈɔːl,am_i_going_to_call.opus,44024,66,,,56,False,44
+Budeš vařit?,Are you going to cook?,ɑːɹ juː ɡˌoʊɪŋ tə kˈʊk,are_you_going_to_cook.opus,44025,66,,,56,False,44
+On začne?,Is he going to start?,ɪz hiː ɡˌoʊɪŋ tə stˈɑːɹt,is_he_going_to_start.opus,44026,66,,,56,False,44
+Ona odjede?,Is she going to leave?,ɪz ʃiː ɡˌoʊɪŋ tə lˈiːv,is_she_going_to_leave.opus,44027,66,,,56,False,44
+Spadne to?,Is it going to fall?,ɪz ɪt ɡˌoʊɪŋ tə fˈɔːl,is_it_going_to_fall.opus,44028,66,,,56,False,44
+My zůstaneme?,Are we going to stay?,ɑːɹ wiː ɡˌoʊɪŋ tə stˈeɪ,are_we_going_to_stay.opus,44029,66,,,56,False,44
+Vy vyhrajete?,Are you going to win?,ɑːɹ juː ɡˌoʊɪŋ tə wˈɪn,are_you_going_to_win.opus,44030,66,,,56,False,44
+Oni přijedou?,Are they going to arrive?,ɑːɹ ðeɪ ɡˌoʊɪŋ tʊ ɚɹˈaɪv,are_they_going_to_arrive.opus,44031,66,,,56,False,44
+postupně,gradually,ɡɹˈædʒuːəli,gradually.opus,45000,,,,,True,45
+zpěv,singing,sˈɪŋɪŋ,singing.opus,45001,,,,,True,45
+jedinný,single,sˈɪŋɡəl,single.opus,45002,,,,,True,45
+známý,familiar,fəmˈɪlɪɹ,familiar.opus,45003,,,,,True,45
+expert,expert,ˈɛkspɜːt,expert.opus,45004,,,,,True,45
+zažít,experience,ɛkspˈiəɹɪəns,experience.opus,45005,,,,,True,45
+skluzavka,slide,slˈaɪd,slide.opus,45006,,,,,True,45
+mořské plody,seafood,sˈiːfuːd,seafood.opus,45007,,,,,True,45
+přesně,exactly,ɛɡzˈæktli,exactly.opus,45008,,,,,True,45
+pistole,gun,ɡˈʌn,gun.opus,45009,,,,,True,45
+štíhlý,slim,slˈɪm,slim.opus,45010,,,,,True,45
+deka,blanket,blˈæŋkɪt,blanket.opus,45011,,,,,True,45
+důkaz,evidence,ˈɛvɪdəns,evidence.opus,45012,,,,,True,45
+značka,brand,bɹˈænd,brand.opus,45013,,,,,True,45
+statečný,brave,bɹˈeɪv,brave.opus,45014,,,,,True,45
+vina,blame,blˈeɪm,blame.opus,45015,,,,,True,45
+skript,script,skɹˈɪpt,script.opus,45016,,,,,True,45
+vůbec,ever,ˈɛvɚ,ever.opus,45017,,,,,True,45
+zkouška,exam,ɛɡzˈæm,exam.opus,45018,,,,,True,45
+přerušení,break,bɹˈeɪk,break.opus,45019,,,,,True,45
+rozpůlit,half,hˈæf,half.opus,45020,,,,,True,45
+tabule,blackboard,blˈækbɔːɹd,blackboard.opus,45021,,,,,True,45
+poloviční cenu,half-price,hˈæfpɹˈaɪs,halfprice.opus,45022,,,,,True,45
+pomalu,slowly,slˈoʊli,slowly.opus,45023,,,,,True,45
+Kdy mu zavolám?,When am I going to call him?,wˌɛn æm aɪ ɡˌoʊɪŋ tə kˈɔːl hˌɪm,when_am_i_going_to_call_him.opus,45024,67,,,57,False,45
+Co budeš vařit?,What are you going to cook?,wˌʌt ɑːɹ juː ɡˌoʊɪŋ tə kˈʊk,what_are_you_going_to_cook.opus,45025,67,,,57,False,45
+Kdy začne?,When is she going to start?,wˌɛn ɪz ʃiː ɡˌoʊɪŋ tə stˈɑːɹt,when_is_she_going_to_start.opus,45026,67,,,57,False,45
+Kam odjede?,Where is she going to go?,wˌɛɹ ɪz ʃiː ɡˌoʊɪŋ tə ɡˈoʊ,where_is_she_going_to_go.opus,45027,67,,,57,False,45
+Kdy to spadne?,When is it going to fall?,wˌɛn ɪz ɪt ɡˌoʊɪŋ tə fˈɔːl,when_is_it_going_to_fall.opus,45028,67,,,57,False,45
+Kde zůstaneme?,Where are we going to stay?,wˌɛɹ ɑːɹ wiː ɡˌoʊɪŋ tə stˈeɪ,where_are_we_going_to_stay.opus,45029,67,,,57,False,45
+Co vyhrajete?,What are you going to win?,wˌʌt ɑːɹ juː ɡˌoʊɪŋ tə wˈɪn,what_are_you_going_to_win.opus,45030,67,,,57,False,45
+Kdy přijedou?,When are they going to arrive?,wˌɛn ɑːɹ ðeɪ ɡˌoʊɪŋ tʊ ɚɹˈaɪv,when_are_they_going_to_arrive.opus,45031,67,,,57,False,45
+euro,euro,jˈʊɹɹoʊ,euro.opus,46000,,,,,True,46
+šunka,ham,hˈæm,ham.opus,46001,,,,,True,46
+šroub,screw,skɹˈuː,screw.opus,46002,,,,,True,46
+podat,hand,hˈænd,hand.opus,46003,,,,,True,46
+kabelka,handbag,hˈændbæɡ,handbag.opus,46004,,,,,True,46
+obrazovka,screen,skɹˈiːn,screen.opus,46005,,,,,True,46
+založit,establish,ɪstˈæblɪʃ,establish.opus,46006,,,,,True,46
+handicap,handicap,hˈændɪkˌæp,handicap.opus,46007,,,,,True,46
+handicapované,handicapped,hˈændɪkˌæpt,handicapped.opus,46008,,,,,True,46
+sudý,even,ˈiːvən,even.opus,46009,,,,,True,46
+udeřit,blow,blˈoʊ,blow.opus,46010,,,,,True,46
+plátek,slice,slˈaɪs,slice.opus,46011,,,,,True,46
+provádět,guide,ɡˈaɪd,guide.opus,46012,,,,,True,46
+průvodce,guidebook,ɡˈaɪdbʊk,guidebook.opus,46013,,,,,True,46
+lyže,ski,skˈiː,ski.opus,46014,,,,,True,46
+velmi,greatly,ɡɹˈeɪtli,greatly.opus,46015,,,,,True,46
+lyžování,skiing,skˈiːɪŋ,skiing.opus,46016,,,,,True,46
+chamtivý,greedy,ɡɹˈiːdi,greedy.opus,46017,,,,,True,46
+existovat,exist,ɛɡzˈɪst,exist.opus,46018,,,,,True,46
+vystavit,exhibit,ɛɡzˈɪbɪt,exhibit.opus,46019,,,,,True,46
+výstava,exhibition,ɛksɪbˈɪʃən,exhibition.opus,46020,,,,,True,46
+tajemník,secretary,sˈɛkɹətɹi,secretary.opus,46021,,,,,True,46
+gril,grill,ɡɹˈɪl,grill.opus,46022,,,,,True,46
+grilovat,grill,ɡɹˈɪl,grill.opus,46023,,,,,True,46
+"Když zahřívám led, taje","If I heat ice, it melts",ɪf aɪ hˈiːt ˈaɪs ɪt mˈɛlts,if_i_heat_ice_it_melts.opus,46024,68,,,58,False,46
+"Když se dotkneš ohně, pálí","If you touch fire, it burns",ɪf juː tˈʌtʃ fˈaɪɚɹ ɪt bˈɜːnz,if_you_touch_fire_it_burns.opus,46025,68,,,58,False,46
+"Když jí příliš rychle, je mu špatně","If he eats too fast, he feels sick",ɪf hiː ˈiːts tˈuː fˈæst hiː fˈiːlz sˈɪk,if_he_eats_too_fast_he_feels_sick.opus,46026,68,,,58,False,46
+"Když smíchá barvy, vznikne zelená","If she mixes the colours, it turns green",ɪf ʃiː mˈɪksᵻz ðə kˈʌlɚz ɪt tˈɜːnz ɡɹˈiːn,if_she_mixes_the_colours_it_turns_green.opus,46027,68,,,58,False,46
+"Když se ochladí, voda zmrzne","If it gets cold, water freezes",ɪf ɪt ɡˈɛts kˈoʊld wˈɔːɾɚ fɹˈiːzᵻz,if_it_gets_cold_water_freezes.opus,46028,68,,,58,False,46
+"Když necháme mléko venku, zkazí se","If we leave milk out, it spoils",ɪf wiː lˈiːv mˈɪlk ˈaʊt ɪt spˈɔɪlz,if_we_leave_milk_out_it_spoils.opus,46029,68,,,58,False,46
+"Když stisknete tlačítko, světlo se rozsvítí","If you press the button, the light comes on",ɪf juː pɹˈɛs ðə bˈʌʔn̩ ðə lˈaɪt kˈʌmz ˈɔn,if_you_press_the_button_the_light_comes_on.opus,46030,68,,,58,False,46
+"Když nezalévají rostliny, zemřou","If they don't water the plants, they die",ɪf ðeɪ dˈoʊnt wˈɔːɾɚ ðə plˈænts ðeɪ dˈaɪ,if_they_dont_water_the_plants_they_die.opus,46031,68,,,58,False,46
+grilovaný,grilled,ɡɹˈɪld,grilled.opus,47000,,,,,True,47
+brainstorm,brainstorm,bɹˈeɪnstɔːɹm,brainstorm.opus,47001,,,,,True,47
+vyhledávání,search,sˈɜːtʃ,search.opus,47002,,,,,True,47
+brzda,brake,bɹˈeɪk,brake.opus,47003,,,,,True,47
+úzkostné,anxious,ˈæŋʃəs,anxious.opus,47004,,,,,True,47
+hlídat,guard,ɡˈɑːɹd,guard.opus,47005,,,,,True,47
+otrok,slave,slˈeɪv,slave.opus,47006,,,,,True,47
+pobřeží,seaside,sˈiːsaɪd,seaside.opus,47007,,,,,True,47
+předek,ancestor,ˈænsɛstɚ,ancestor.opus,47008,,,,,True,47
+bezesný,sleepless,slˈiːpləs,sleepless.opus,47009,,,,,True,47
+vyjmout,except,ɛksˈɛpt,except.opus,47010,,,,,True,47
+větev,branch,bɹˈæntʃ,branch.opus,47011,,,,,True,47
+ospalý,sleepy,slˈiːpi,sleepy.opus,47012,,,,,True,47
+obchod s potravinami,grocery store,ɡɹˈoʊsɚɹi stˈɔːɹ,grocery_store.opus,47013,,,,,True,47
+rychlé občerstvení,fast food,fˈæst fˈuːd,fast_food.opus,47014,,,,,True,47
+rukavice,glove,ɡlˈʌv,glove.opus,47015,,,,,True,47
+knihovna,bookcase,bˈʊkkeɪs,bookcase.opus,47016,,,,,True,47
+jiný,another,ɐnˈʌðɚ,another.opus,47017,,,,,True,47
+potěr,fry,fɹˈaɪ,fry.opus,47018,,,,,True,47
+složku,folder,fˈoʊldɚ,folder.opus,47019,,,,,True,47
+šok,shock,ʃˈɑːk,shock.opus,47020,,,,,True,47
+plně,fully,fˈʊli,fully.opus,47021,,,,,True,47
+stín,shadow,ʃˈædoʊ,shadow.opus,47022,,,,,True,47
+vařený,boiled,bˈɔɪld,boiled.opus,47023,,,,,True,47
+"Když skončím brzy, zavolám ti","If I finish early, I'll call you",ɪf aɪ fˈɪnɪʃ ˈɜːli aɪl kˈɔːl juː,if_i_finish_early_ill_call_you.opus,47024,69,,,59,False,47
+"Když přijdeš včas, začneme","If you arrive on time, we'll start",ɪf juː ɚɹˈaɪv ˌɔn tˈaɪm wiːl stˈɑːɹt,if_you_arrive_on_time_well_start.opus,47025,69,,,59,False,47
+"Když bude pracovat, vydělá peníze","If he works, he'll earn money",ɪf hiː wˈɜːks hiːl ˈɜːn mˈʌni,if_he_works_hell_earn_money.opus,47026,69,,,59,False,47
+"Když bude studovat, složí zkoušku","If she studies, she'll pass the exam",ɪf ʃiː stˈʌdiz ʃiːl pˈæs ðɪ ɛɡzˈæm,if_she_studies_shell_pass_the_exam.opus,47027,69,,,59,False,47
+"Když bude pršet, zápas se zruší","If it rains, the match will be cancelled",ɪf ɪt ɹˈeɪnz ðə mˈætʃ wɪl biː kˈænsəld,if_it_rains_the_match_will_be_cancelled.opus,47028,69,,,59,False,47
+"Když budeme mít čas, navštívíme muzeum","If we have time, we'll visit the museum",ɪf wiː hæv tˈaɪm wiːl vˈɪzɪt ðə mjuːzˈiəm,if_we_have_time_well_visit_the_museum.opus,47029,69,,,59,False,47
+"Když si pospíšíte, stihnete vlak","If you hurry, you'll catch the train",ɪf juː hˈɜːɹi juːl kˈætʃ ðə tɹˈeɪn,if_you_hurry_youll_catch_the_train.opus,47030,69,,,59,False,47
+"Když budou šetřit, koupí si dům","If they save money, they'll buy a house",ɪf ðeɪ sˈeɪv mˈʌni ðeɪl bˈaɪ ɐ hˈaʊs,if_they_save_money_theyll_buy_a_house.opus,47031,69,,,59,False,47
+fungovat,function,fˈʌŋkʃən,function.opus,48000,,,,,True,48
+odstín,shade,ʃˈeɪd,shade.opus,48001,,,,,True,48
+blázen,fool,fˈuːl,fool.opus,48002,,,,,True,48
+regál,bookshelf,bˈʊkʃɛlf,bookshelf.opus,48003,,,,,True,48
+mouka,flour,flˈaʊɚ,flour.opus,48004,,,,,True,48
+knihkupectví,bookshop,bˈʊkʃɑːp,bookshop.opus,48005,,,,,True,48
+zaplavit,flood,flˈʌd,flood.opus,48006,,,,,True,48
+šít,sew,sˈoʊ,sew.opus,48007,,,,,True,48
+plovák,float,flˈoʊt,float.opus,48008,,,,,True,48
+let,flight,flˈaɪt,flight.opus,48009,,,,,True,48
+nábytek,furniture,fˈɜːnɪtʃɚ,furniture.opus,48010,,,,,True,48
+prodavač,shop assistant,ʃˈɑːp ɐsˈɪstənt,shop_assistant.opus,48011,,,,,True,48
+další,further,fˈɜːðɚ,further.opus,48012,,,,,True,48
+blecha,flea,flˈiː,flea.opus,48013,,,,,True,48
+pobřeží,shore,ʃˈɔːɹ,shore.opus,48014,,,,,True,48
+vařit,boil,bˈɔɪl,boil.opus,48015,,,,,True,48
+nepříjemný,annoying,ɐnˈɔɪɪŋ,annoying.opus,48016,,,,,True,48
+fotbalista,footballer,fˈʊtbɔːlɚ,footballer.opus,48017,,,,,True,48
+upřímný,frank,fɹˈæŋk,frank.opus,48018,,,,,True,48
+podíl,share,ʃˈɛɹ,share.opus,48019,,,,,True,48
+šampon,shampoo,ʃæmpˈuː,shampoo.opus,48020,,,,,True,48
+vpřed,forward,fˈɔːɹwɚd,forward.opus,48021,,,,,True,48
+štěstí,fortune,fˈɔːɹtʃʊn,fortune.opus,48022,,,,,True,48
+naštěstí,fortunately,fˈɔːɹtʃənətli,fortunately.opus,48023,,,,,True,48
+"Kdybych měl čas, cestoval bych","If I had time, I'd travel",ɪf aɪ hæd tˈaɪm aɪd tɹˈævəl,if_i_had_time_id_travel.opus,48024,70,,,60,False,48
+"Kdybys znal odpověď, řekl bys ji","If you knew the answer, you'd say it",ɪf juː nˈuː ðɪ ˈænsɚ juːd sˈeɪ ɪt,if_you_knew_the_answer_youd_say_it.opus,48025,70,,,60,False,48
+"Kdyby měl peníze, koupil by auto","If he had the money, he'd buy a car",ɪf hiː hæd ðə mˈʌni hiːd bˈaɪ ɐ kˈɑːɹ,if_he_had_the_money_hed_buy_a_car.opus,48026,70,,,60,False,48
+"Kdyby měla volno, odpočívala by","If she had a day off, she'd rest",ɪf ʃiː hæd ɐ dˈeɪ ˈɔf ʃiːd ɹˈɛst,if_she_had_a_day_off_shed_rest.opus,48027,70,,,60,False,48
+"Kdyby bylo tepleji, fungovalo by to","If it were warmer, it'd work",ɪf ɪt wɜː wˈɔːɹmɚɹ ɪɾəd wˈɜːk,if_it_were_warmer_itd_work.opus,48028,70,,,60,False,48
+"Kdybychom bydleli blíž, chodili bychom pěšky","If we lived closer, we'd walk",ɪf wiː lˈɪvd klˈoʊsɚ wiːd wˈɔːk,if_we_lived_closer_wed_walk.opus,48029,70,,,60,False,48
+"Kdybyste měli více času, pomohli byste","If you had more time, you'd help",ɪf juː hæd mˈɔːɹ tˈaɪm juːd hˈɛlp,if_you_had_more_time_youd_help.opus,48030,70,,,60,False,48
+"Kdyby měli mapu, neztratili by se","If they had a map, they wouldn't get lost",ɪf ðeɪ hæd ɐ mˈæp ðeɪ wˈʊdənt ɡɛt lˈɔst,if_they_had_a_map_they_wouldnt_get_lost.opus,48031,70,,,60,False,48
