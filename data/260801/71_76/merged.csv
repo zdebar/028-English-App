@@ -1,0 +1,153 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+napřed,ahead,ɐhˈɛd,ahead.opus,71000,,,,,True,71
+metoda,method,mˈɛθəd,method.opus,71001,,,,,True,71
+klepnout,tap,tˈæp,tap.opus,71002,,,,,True,71
+metr,metre,mˈiːɾɚ,metre.opus,71003,,,,,True,71
+strachovat se,worry,wˈʌɹi,worry.opus,71004,,,,,True,71
+ustaraný,worried,wˈʌɹid,worried.opus,71005,,,,,True,71
+příjemný,pleasing,plˈiːzɪŋ,pleasing.opus,71006,,,,,True,71
+správné,proper,pɹˈɑːpɚ,proper.opus,71007,,,,,True,71
+roztrhnout,tear,tˈɪɹ,tear.opus,71008,,,,,True,71
+horší,worse,wˈɜːs,worse.opus,71009,,,,,True,71
+nejhorší,worst,wˈɜːst,worst.opus,71010,,,,,True,71
+neznámý,unknown,ʌnnˈoʊn,unknown.opus,71011,,,,,True,71
+publikum,audience,ˈɔːdiəns,audience.opus,71012,,,,,True,71
+potěšen,pleased,plˈiːzd,pleased.opus,71013,,,,,True,71
+lékařský,medical,mˈɛdɪkəl,medical.opus,71014,,,,,True,71
+medaile,medal,mˈɛdəl,medal.opus,71015,,,,,True,71
+organizovat,organise,ˈɔːɹɡɐnˌaɪz,organise.opus,71016,,,,,True,71
+organizovaný,organised,ˈɔːɹɡɐnˌaɪzd,organised.opus,71017,,,,,True,71
+cereálie,cereal,sˈiəɹɪəl,cereal.opus,71018,,,,,True,71
+mládí,youth,jˈuːθ,youth.opus,71019,,,,,True,71
+pokus,attempt,ɐtˈɛmpt,attempt.opus,71020,,,,,True,71
+parkoviště,car park,kˈɑːɹ pˈɑːɹk,car_park.opus,71021,,,,,True,71
+tábořit,camp,kˈæmp,camp.opus,71022,,,,,True,71
+předseda,chairman,tʃˈɛɹmən,chairman.opus,71023,,,,,True,71
+"Znám muže, který zpívá v kapele.",I know a man who sings in a band.,aɪ nˈoʊ ɐ mˈæn hˌuː sˈɪŋz ɪn ɐ bˈænd,i_know_a_man_who_sings_in_a_band.opus,71024,93,,,83,False,71
+"Máš knihu, která mi pomáhá učit se anglicky.",You have a book that helps me learn English.,juː hæv ɐ bˈʊk ðæt hˈɛlps mˌiː lˈɜːn ˈɪŋɡlɪʃ,you_have_a_book_that_helps_me_learn_english.opus,71025,93,,,83,False,71
+"On hledá práci, která dobře platí.",He's looking for a job that pays well.,hiːz lˈʊkɪŋ fɚɹə dʒˈɑːb ðæt pˈeɪz wˈɛl,hes_looking_for_a_job_that_pays_well.opus,71026,93,,,83,False,71
+"Ona zná ženu, která peče dorty.",She knows a woman who bakes cakes.,ʃiː nˈoʊz ɐ wˈʊmən hˌuː bˈeɪks kˈeɪks,she_knows_a_woman_who_bakes_cakes.opus,71027,93,,,83,False,71
+"To je telefon, který pořád funguje.",It's a phone that still works.,ɪts ɐ fˈoʊn ðæt stˈɪl wˈɜːks,its_a_phone_that_still_works.opus,71028,93,,,83,False,71
+"Bydlíme v domě, který stojí u řeky.",We live in a house that sits by the river.,wiː lˈɪv ɪn ɐ hˈaʊs ðæt sˈɪts baɪ ðə ɹˈɪvɚ,we_live_in_a_house_that_sits_by_the_river.opus,71029,93,,,83,False,71
+"Znáte restauraci, která vaří dobré jídlo?",Do you know a restaurant that serves good food?,dˈuː juː nˈoʊ ɐ ɹˈɛstɹɑːnt ðæt sˈɜːvz ɡˈʊd fˈuːd,do_you_know_a_restaurant_that_serves_good_food.opus,71030,93,,,83,False,71
+"Mají psa, který rád běhá.",They have a dog that likes to run.,ðeɪ hæv ɐ dˈɑːɡ ðæt lˈaɪks tə ɹˈʌn,they_have_a_dog_that_likes_to_run.opus,71031,93,,,83,False,71
+zóna,zone,zˈoʊn,zone.opus,72000,,,,,True,72
+výzva,challenge,tʃˈælɪndʒ,challenge.opus,72001,,,,,True,72
+šampaňské,champagne,ʃæmpˈeɪn,champagne.opus,72002,,,,,True,72
+bankovnictví,banking,bˈæŋkɪŋ,banking.opus,72003,,,,,True,72
+mistr,champion,tʃˈæmpiən,champion.opus,72004,,,,,True,72
+mistrovství,championship,tʃˈæmpiənʃˌɪp,championship.opus,72005,,,,,True,72
+velké písmeno,capital letter,kˈæpɪɾəl lˈɛɾɚ,capital_letter.opus,72006,,,,,True,72
+kapitál,capital,kˈæpɪɾəl,capital.opus,72007,,,,,True,72
+odkazovat,refer,ɹᵻfˈɜː,refer.opus,72008,,,,,True,72
+objednat,order,ˈɔːɹdɚ,order.opus,72009,,,,,True,72
+portrét,portrait,pˈɔːɹtɹɪt,portrait.opus,72010,,,,,True,72
+populace,population,pˌɑːpjʊlˈeɪʃən,population.opus,72011,,,,,True,72
+kapitola,chapter,tʃˈæptɚ,chapter.opus,72012,,,,,True,72
+příjem,receipt,ɹᵻsˈiːt,receipt.opus,72013,,,,,True,72
+znečišťovat,pollute,pəlˈuːt,pollute.opus,72014,,,,,True,72
+max,max,mˈæks,max.opus,72015,,,,,True,72
+plechovka,can,kˈæn,can.opus,72016,,,,,True,72
+recyklovat,recycle,ɹᵻsˈaɪkəl,recycle.opus,72017,,,,,True,72
+zbytečné,unnecessary,ʌnnˈɛsᵻsɚɹi,unnecessary.opus,72018,,,,,True,72
+jo,yeah,jˈɛh,yeah.opus,72019,,,,,True,72
+nepříjemný,unpleasant,ʌnplˈɛzənt,unpleasant.opus,72020,,,,,True,72
+provozovat,operate,ˈɑːpɚɹˌeɪt,operate.opus,72021,,,,,True,72
+policejní důstojník,police officer,pəlˈiːs ˈɑːfɪsɚ,police_officer.opus,72022,,,,,True,72
+policejní stanici,police station,pəlˈiːs stˈeɪʃən,police_station.opus,72023,,,,,True,72
+"Mám zpoždění, že ano?","I'm late, aren't I?",aɪm lˈeɪt ˌɑːɹnt ˈaɪ,im_late_arent_i.opus,72024,94,,,84,False,72
+"Jsi připravený, že ano?","You're ready, aren't you?",jʊɹ ɹˈɛdi ˈɑːɹnt juː,youre_ready_arent_you.opus,72025,94,,,84,False,72
+"On přichází, že ano?","He's coming, isn't he?",hiːz kˈʌmɪŋ ˈɪzənt hiː,hes_coming_isnt_he.opus,72026,94,,,84,False,72
+"Ona už skončila, že ano?","She's finished, hasn't she?",ʃiːz fˈɪnɪʃt hˈæzənt ʃiː,shes_finished_hasnt_she.opus,72027,94,,,84,False,72
+"Je zima, že ano?","It's cold, isn't it?",ɪts kˈoʊld ˈɪzənt ɪt,its_cold_isnt_it.opus,72028,94,,,84,False,72
+"Jsme tu brzy, že ano?","We're early, aren't we?",wɪɹ ˈɜːli ˈɑːɹnt wiː,were_early_arent_we.opus,72029,94,,,84,False,72
+"Jste unavení, že ano?","You're tired, aren't you?",jʊɹ tˈaɪɚd ˈɑːɹnt juː,youre_tired_arent_you.opus,72030,94,,,84,False,72
+"Jsou tady, že ano?","They're here, aren't they?",ðeɪɚ hˈɪɹ ˈɑːɹnt ðeɪ,theyre_here_arent_they.opus,72031,94,,,84,False,72
+policista,policeman,pəlˈiːsmən,policeman.opus,73000,,,,,True,73
+policistka,policewoman,pəlˈiːswʊmən,policewoman.opus,73001,,,,,True,73
+sirotek,orphan,ˈɔːɹfən,orphan.opus,73002,,,,,True,73
+centimetr,centimetre,sˈɛntɪmˌiːɾɚ,centimetre.opus,73003,,,,,True,73
+kampus,campus,kˈæmpəs,campus.opus,73004,,,,,True,73
+zdvořilý,polite,pəlˈaɪt,polite.opus,73005,,,,,True,73
+příležitost,opportunity,ɑːpɚtˈuːnᵻɾi,opportunity.opus,73006,,,,,True,73
+politický,political,pəlˈɪɾɪkəl,political.opus,73007,,,,,True,73
+zamýšlet,mean,mˈiːn,mean.opus,73008,,,,,True,73
+oponovat,oppose,əpˈoʊz,oppose.opus,73009,,,,,True,73
+kempování,camping,kˈæmpɪŋ,camping.opus,73010,,,,,True,73
+talent,talent,tˈælənt,talent.opus,73011,,,,,True,73
+naproti,opposite,ˈɑːpəzˌɪt,opposite.opus,73012,,,,,True,73
+původní,original,ɚɹˈɪdʒɪnəl,original.opus,73013,,,,,True,73
+břeh řeky,bank,bˈæŋk,bank.opus,73014,,,,,True,73
+schopnost,ability,ɐbˈɪləɾi,ability.opus,73015,,,,,True,73
+cent,cent,sˈɛnt,cent.opus,73016,,,,,True,73
+význam,meaning,mˈiːnɪŋ,meaning.opus,73017,,,,,True,73
+dětské hřiště,playground,plˈeɪɡɹaʊnd,playground.opus,73018,,,,,True,73
+sebe,ourselves,aʊɚsˈɛlvz,ourselves.opus,73019,,,,,True,73
+hravý,playful,plˈeɪfəl,playful.opus,73020,,,,,True,73
+realizovat,realise,ɹˈiːəlaɪz,realise.opus,73021,,,,,True,73
+psycholog,psychologist,saɪkˈɑːlədʒˌɪst,psychologist.opus,73022,,,,,True,73
+chybějící,missing,mˈɪsɪŋ,missing.opus,73023,,,,,True,73
+"Řekl jsem, že jsem unavený",I said I was tired,aɪ sˈɛd aɪ wʌz tˈaɪɚd,i_said_i_was_tired.opus,73024,95,,,85,False,73
+"Řekl jsi, že jsi připravený",You said you were ready,juː sˈɛd juː wɜː ɹˈɛdi,you_said_you_were_ready.opus,73025,95,,,85,False,73
+"Řekl, že potřebuje pomoc",He said he needed help,hiː sˈɛd hiː nˈiːdᵻd hˈɛlp,he_said_he_needed_help.opus,73026,95,,,85,False,73
+"Řekla, že už skončila",She said she had already finished,ʃiː sˈɛd ʃiː hæd ɔːlɹˌɛdi fˈɪnɪʃt,she_said_she_had_already_finished.opus,73027,95,,,85,False,73
+"Říkalo se, že telefon funguje",It was said that the phone worked,ɪt wʌz sˈɛd ðætðə fˈoʊn wˈɜːkt,it_was_said_that_the_phone_worked.opus,73028,95,,,85,False,73
+"Řekli jsme, že odcházíme",We said we were leaving,wiː sˈɛd wiː wɜː lˈiːvɪŋ,we_said_we_were_leaving.opus,73029,95,,,85,False,73
+"Řekli jste, že přijdete",You said you would come,juː sˈɛd juː wʊd kˈʌm,you_said_you_would_come.opus,73030,95,,,85,False,73
+"Řekli, že to viděli",They said they had seen it,ðeɪ sˈɛd ðeɪ hæd sˈiːn ɪt,they_said_they_had_seen_it.opus,73031,95,,,85,False,73
+činidlo,agent,ˈeɪdʒənt,agent.opus,74000,,,,,True,74
+divit se,wonder,wˈʌndɚ,wonder.opus,74001,,,,,True,74
+balkón,balcony,bˈælkəni,balcony.opus,74002,,,,,True,74
+nedůležité,unimportant,ˌʌnɪmpˈɔːɹtənt,unimportant.opus,74003,,,,,True,74
+učebnice,textbook,tˈɛkstbʊk,textbook.opus,74004,,,,,True,74
+textovou zprávu,text message,tˈɛkst mˈɛsɪdʒ,text_message.opus,74005,,,,,True,74
+nezapomenutelný,unforgettable,ʌnfɚɡˈɛɾəbəl,unforgettable.opus,74006,,,,,True,74
+planeta,planet,plˈænɪt,planet.opus,74007,,,,,True,74
+v,within,wɪðˈɪn,within.opus,74008,,,,,True,74
+zrcadlo,mirror,mˈɪɹɚ,mirror.opus,74009,,,,,True,74
+trouba,oven,ˈʌvən,oven.opus,74010,,,,,True,74
+nešťastný,unhappy,ʌnhˈæpi,unhappy.opus,74011,,,,,True,74
+vyděsit,terrify,tˈɛɹᵻfˌaɪ,terrify.opus,74012,,,,,True,74
+dřevěný,wooden,wˈʊdən,wooden.opus,74013,,,,,True,74
+nad,over,ˈoʊvɚ,over.opus,74014,,,,,True,74
+jednotný,uniform,jˈuːnɪfˌɔːɹm,uniform.opus,74015,,,,,True,74
+nabízet,offer,ˈɔfɚ,offer.opus,74016,,,,,True,74
+vlna,wool,wˈʊl,wool.opus,74017,,,,,True,74
+minerální voda,mineral water,mˈɪnɚɹəl wˈɔːɾɚ,mineral_water.opus,74018,,,,,True,74
+nalít,pour,pˈɔːɹ,pour.opus,74019,,,,,True,74
+přání,wish,wˈɪʃ,wish.opus,74020,,,,,True,74
+ve věku,aged,ˈeɪdʒd,aged.opus,74021,,,,,True,74
+nezdravý,unhealthy,ʌnhˈɛlθi,unhealthy.opus,74022,,,,,True,74
+jejich,theirs,ðˈɛɹz,theirs.opus,74023,,,,,True,74
+Já jsem dřív plaval,I used to swim,aɪ jˈuːzd tə swˈɪm,i_used_to_swim.opus,74024,96,,,86,False,74
+Ty jsi dřív kouřil,You used to smoke,juː jˈuːzd tə smˈoʊk,you_used_to_smoke.opus,74025,96,,,86,False,74
+On dřív pracoval v bance,He used to work in a bank,hiː jˈuːzd tə wˈɜːk ɪn ɐ bˈæŋk,he_used_to_work_in_a_bank.opus,74026,96,,,86,False,74
+Ona dřív tančila,She used to dance,ʃiː jˈuːzd tə dˈæns,she_used_to_dance.opus,74027,96,,,86,False,74
+Dřív to fungovalo,It used to work,ɪt jˈuːzd tə wˈɜːk,it_used_to_work.opus,74028,96,,,86,False,74
+My jsme dřív bydleli v Brně,We used to live in Brno,wiː jˈuːzd tə lˈɪv ɪn bˌiːˌɑːɹɹˌɛnˈoʊ,we_used_to_live_in_brno.opus,74029,96,,,86,False,74
+Vy jste dřív jezdili vlakem,You used to travel by train,juː jˈuːzd tə tɹˈævəl baɪ tɹˈeɪn,you_used_to_travel_by_train.opus,74030,96,,,86,False,74
+Oni dřív hráli spolu,They used to play together,ðeɪ jˈuːzd tə plˈeɪ təɡˈɛðɚ,they_used_to_play_together.opus,74031,96,,,86,False,74
+Já jsem zvyklý vstávat brzy.,I'm used to getting up early.,aɪm jˈuːzd tə ɡˌɛɾɪŋ ˌʌp ˈɜːli,im_used_to_getting_up_early.opus,75000,97,,,87,False,75
+Ty jsi zvyklý pracovat v noci.,You're used to working at night.,jʊɹ jˈuːzd tə wˈɜːkɪŋ æt nˈaɪt,youre_used_to_working_at_night.opus,75001,97,,,87,False,75
+On je zvyklý řídit v provozu.,He's used to driving in traffic.,hiːz jˈuːzd tə dɹˈaɪvɪŋ ɪn tɹˈæfɪk,hes_used_to_driving_in_traffic.opus,75002,97,,,87,False,75
+Ona je zvyklá mluvit anglicky.,She's used to speaking English.,ʃiːz jˈuːzd tə spˈiːkɪŋ ˈɪŋɡlɪʃ,shes_used_to_speaking_english.opus,75003,97,,,87,False,75
+To zvíře je zvyklé být samo.,It's used to being alone.,ɪts jˈuːzd tə bˌiːɪŋ ɐlˈoʊn,its_used_to_being_alone.opus,75004,97,,,87,False,75
+My jsme zvyklí učit se spolu.,We're used to studying together.,wɪɹ jˈuːzd tə stˈʌdiɪŋ təɡˈɛðɚ,were_used_to_studying_together.opus,75005,97,,,87,False,75
+Vy jste zvyklí cestovat vlakem.,You're used to travelling by train.,jʊɹ jˈuːzd tə tɹˈævəlɪŋ baɪ tɹˈeɪn,youre_used_to_travelling_by_train.opus,75006,97,,,87,False,75
+Oni jsou zvyklí žít v zahraničí.,They're used to living abroad.,ðeɪɚ jˈuːzd tə lˈɪvɪŋ ɐbɹˈɔːd,theyre_used_to_living_abroad.opus,75007,97,,,87,False,75
+Včera v osm jsem pracoval.,I was working at eight yesterday.,aɪ wʌz wˈɜːkɪŋ æɾ ˈeɪt jˈɛstɚdˌeɪ,i_was_working_at_eight_yesterday.opus,76000,98,,,,True,76
+Včera večer jsi četl.,You were reading last night.,juː wɜː ɹˈiːdɪŋ lˈæst nˈaɪt,you_were_reading_last_night.opus,76001,98,,,,True,76
+"On zrovna spal, když jsme dorazili.",He was sleeping when we arrived.,hiː wʌz slˈiːpɪŋ wɛn wiː ɚɹˈaɪvd,he_was_sleeping_when_we_arrived.opus,76002,98,,,,True,76
+"Ona vařila, když zazvonil telefon.",She was cooking when the phone rang.,ʃiː wʌz kˈʊkɪŋ wɛn ðə fˈoʊn ɹˈæŋ,she_was_cooking_when_the_phone_rang.opus,76003,98,,,,True,76
+V tu chvíli pršelo.,It was raining at that moment.,ɪt wʌz ɹˈeɪnɪŋ æt ðæt mˈoʊmənt,it_was_raining_at_that_moment.opus,76004,98,,,,True,76
+My jsme v osm sledovali film.,We were watching a movie at eight.,wiː wɜː wˈɑːtʃɪŋ ɐ mˈuːvi æɾ ˈeɪt,we_were_watching_a_movie_at_eight.opus,76005,98,,,,True,76
+"Vy jste čekali na autobus, když začalo pršet.",You were waiting for the bus when it started raining.,juː wɜː wˈeɪɾɪŋ fɚðə bˈʌs wɛn ɪt stˈɑːɹɾᵻd ɹˈeɪnɪŋ,you_were_waiting_for_the_bus_when_it_started_raining.opus,76006,98,,,,True,76
+"Oni hráli fotbal, zatímco my jsme pracovali.",They were playing football while we were working.,ðeɪ wɜː plˈeɪɪŋ fˈʊtbɔːl wˌaɪl wiː wɜː wˈɜːkɪŋ,they_were_playing_football_while_we_were_working.opus,76007,98,,,,True,76
+Včera v osm jsem nepracoval.,I wasn't working at eight yesterday.,aɪ wˈʌzn̩t wˈɜːkɪŋ æɾ ˈeɪt jˈɛstɚdˌeɪ,i_wasnt_working_at_eight_yesterday.opus,77000,99,,,,True,77
+Včera večer jsi nečetl.,You weren't reading last night.,juː wˌɜːnt ɹˈiːdɪŋ lˈæst nˈaɪt,you_werent_reading_last_night.opus,77001,99,,,,True,77
+"On nespal, když jsme dorazili.",He wasn't sleeping when we arrived.,hiː wˈʌzn̩t slˈiːpɪŋ wɛn wiː ɚɹˈaɪvd,he_wasnt_sleeping_when_we_arrived.opus,77002,99,,,,True,77
+"Ona nevařila, když zazvonil telefon.",She wasn't cooking when the phone rang.,ʃiː wˈʌzn̩t kˈʊkɪŋ wɛn ðə fˈoʊn ɹˈæŋ,she_wasnt_cooking_when_the_phone_rang.opus,77003,99,,,,True,77
+V tu chvíli nepršelo.,It wasn't raining at that moment.,ɪt wˈʌzn̩t ɹˈeɪnɪŋ æt ðæt mˈoʊmənt,it_wasnt_raining_at_that_moment.opus,77004,99,,,,True,77
+My jsme v osm nesledovali film.,We weren't watching a movie at eight.,wiː wˌɜːnt wˈɑːtʃɪŋ ɐ mˈuːvi æɾ ˈeɪt,we_werent_watching_a_movie_at_eight.opus,77005,99,,,,True,77
+"Vy jste nečekali na autobus, když začalo pršet.",You weren't waiting for the bus when it started raining.,juː wˌɜːnt wˈeɪɾɪŋ fɚðə bˈʌs wɛn ɪt stˈɑːɹɾᵻd ɹˈeɪnɪŋ,you_werent_waiting_for_the_bus_when_it_started_raining.opus,77006,99,,,,True,77
+"Oni nehráli fotbal, zatímco my jsme pracovali.",They weren't playing football while we were working.,ðeɪ wˌɜːnt plˈeɪɪŋ fˈʊtbɔːl wˌaɪl wiː wɜː wˈɜːkɪŋ,they_werent_playing_football_while_we_were_working.opus,77007,99,,,,True,77

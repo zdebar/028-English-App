@@ -1,0 +1,34 @@
+czech,english,block_id,grammar_chunk_id
+zóna,zone,,
+výzva,challenge,,
+šampaňské,champagne,,
+bankovnictví,banking,,
+mistr,champion,,
+mistrovství,championship,,
+velké písmeno,capital letter,,
+kapitál,capital,,
+odkazovat,refer,,
+objednat,order,,
+portrét,portrait,,
+populace,population,,
+kapitola,chapter,,
+příjem,receipt,,
+znečišťovat,pollute,,
+max,max,,
+plechovka,can,,
+recyklovat,recycle,,
+zbytečné,unnecessary,,
+jo,yeah,,
+nepříjemný,unpleasant,,
+provozovat,operate,,
+policejní důstojník,police officer,,
+policejní stanici,police station,,
+
+"Mám zpoždění, že ano?","I'm late, aren't I?",94,84
+"Jsi připravený, že ano?","You're ready, aren't you?",94,84
+"On přichází, že ano?","He's coming, isn't he?",94,84
+"Ona už skončila, že ano?","She's finished, hasn't she?",94,84
+"Je zima, že ano?","It's cold, isn't it?",94,84
+"Jsme tu brzy, že ano?","We're early, aren't we?",94,84
+"Jste unavení, že ano?","You're tired, aren't you?",94,84
+"Jsou tady, že ano?","They're here, aren't they?",94,84
