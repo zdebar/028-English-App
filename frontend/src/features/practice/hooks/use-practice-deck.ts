@@ -8,6 +8,7 @@ import {
   type Dispatch,
   type SetStateAction,
 } from 'react';
+import config from '@/config/config';
 import type { PracticeDeckEntry, PracticeOutcome } from '@/types/user-item.types';
 import { useFetch } from '@/hooks/use-fetch';
 import UserItem from '@/database/models/user-items';
@@ -16,6 +17,7 @@ import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
 import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff';
 import {
+  loadReviewCount,
   loadReviewDeckData,
   type ReviewDeckData,
 } from '@/database/utils/practice-content.utils';
@@ -27,19 +29,15 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
   const [saveError, setSaveError] = useState<Error | null>(null);
   const [finishedReview, setFinishedReview] = useState(false);
   const [completedCount, setCompletedCount] = useState(0);
-  const [totalCount, setTotalCount] = useState(getInitialReviewTotalCount(initialData));
+  const [totalCount, setTotalCount] = useState(config.practice.reviewMinimumSize);
   const isTransitioningRef = useRef(false);
-  const availabilityInitializedRef = useRef(hasInitialReviewData(initialData));
   const availabilityCheckedAtRef = useRef(initialData?.availabilityCheckedAt ?? null);
+  const counterRefreshStartedRef = useRef(false);
+  const counterRequestIdRef = useRef(0);
 
   const fetchPracticeDeck = useCallback(async () => {
-    const includeAvailabilityCount = !availabilityInitializedRef.current;
-    const result = await fetchReviewDeck(userId, includeAvailabilityCount);
-    if (includeAvailabilityCount) {
-      availabilityInitializedRef.current = true;
-      availabilityCheckedAtRef.current = result.availabilityCheckedAt;
-      setTotalCount(result.availableCount);
-    }
+    const result = await fetchReviewDeck(userId);
+    availabilityCheckedAtRef.current = result.availabilityCheckedAt;
     return result;
   }, [userId]);
   const initialResult = useMemo(() => createInitialReviewResult(initialData), [initialData]);
@@ -71,6 +69,29 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
     if (loading || !fetchedResult) return;
     setFinishedReview(fetchedResult.abandoned);
   }, [fetchedResult, loading]);
+
+  useEffect(() => {
+    if (loading || !userId || !currentItem || counterRefreshStartedRef.current) return undefined;
+
+    counterRefreshStartedRef.current = true;
+    const requestId = ++counterRequestIdRef.current;
+    let isActive = true;
+
+    void loadReviewCount(userId)
+      .then((count) => {
+        if (!isActive || requestId !== counterRequestIdRef.current) return;
+        setTotalCount(count);
+      })
+      .catch((caughtError: unknown) => {
+        if (!isActive || requestId !== counterRequestIdRef.current) return;
+        reportError('Failed to refresh review counter', toError(caughtError));
+      });
+
+    return () => {
+      isActive = false;
+      if (requestId === counterRequestIdRef.current) counterRequestIdRef.current += 1;
+    };
+  }, [currentItem, loading, userId]);
 
   const nextItem = useCallback(
     async (outcome: PracticeOutcome) => {
@@ -133,30 +154,20 @@ function toError(error: unknown): Error {
 
 function fetchReviewDeck(
   userId: string | null,
-  includeAvailabilityCount: boolean,
 ): Promise<ReviewDeckData> {
   if (!userId) {
     return Promise.resolve({
       entries: [],
-      availableCount: 0,
       availabilityCheckedAt: new Date().toISOString(),
       abandoned: true,
     });
   }
-  return loadReviewDeckData(userId, includeAvailabilityCount);
+  return loadReviewDeckData(userId);
 }
 
 function createInitialReviewResult(initialData: ReviewDeckData | undefined) {
   if (!initialData) return undefined;
   return { ...initialData, entries: initialData.entries.slice(0, 1) };
-}
-
-function hasInitialReviewData(initialData: ReviewDeckData | undefined): boolean {
-  return initialData !== undefined;
-}
-
-function getInitialReviewTotalCount(initialData: ReviewDeckData | undefined): number {
-  return initialData?.availableCount ?? 0;
 }
 
 function getReviewProgressLabel(completedCount: number, totalCount: number): string {

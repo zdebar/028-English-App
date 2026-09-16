@@ -33,12 +33,15 @@ const mocks = vi.hoisted(() => ({
 function normalizeIndexedPracticeItem(item: any) {
   return {
     ...item,
+    deleted_at: item.deleted_at ?? '1970-01-01T00:00:00.000Z',
     progress_cz_to_en: item.progress_cz_to_en ?? item.progress ?? 0,
     progress_en_to_cz: item.progress_en_to_cz ?? item.progress ?? 0,
     next_at_cz_to_en: item.next_at_cz_to_en ?? item.next_at,
     next_at_en_to_cz: item.next_at_en_to_cz ?? item.next_at,
-    mastered_at_cz_to_en: item.mastered_at_cz_to_en ?? item.mastered_at,
-    mastered_at_en_to_cz: item.mastered_at_en_to_cz ?? item.mastered_at,
+    mastered_at_cz_to_en:
+      item.mastered_at_cz_to_en ?? item.mastered_at ?? '1970-01-01T00:00:00.000Z',
+    mastered_at_en_to_cz:
+      item.mastered_at_en_to_cz ?? item.mastered_at ?? '1970-01-01T00:00:00.000Z',
     started_at: item.started_at ?? getIndexedStartedAt(item),
   };
 }
@@ -90,34 +93,84 @@ function createUpdatedAtQuery() {
   };
 }
 
-function createIndexedPracticeQuery() {
+function createIndexedPracticeQuery(index: string) {
   return {
     between: (...args: unknown[]) => {
       mocks.indexedBetween(...args);
+      const lower = args[0] as unknown[];
+      const upper = args[1] as unknown[];
+      const lowerInclusive = Boolean(args[2]);
+      const upperInclusive = Boolean(args[3]);
+      const getBoundedItems = async () => {
+        const items = (await mocks.indexedToArray()) ?? [];
+        return items
+          .map(normalizeIndexedPracticeItem)
+          .filter((item) =>
+            isWithinNextAtRange(
+              item,
+              index,
+              lower[1],
+              upper[1],
+              lowerInclusive,
+              upperInclusive,
+            ),
+          );
+      };
       return {
         filter: (...filterArgs: unknown[]) => {
           mocks.indexedFilter(...filterArgs);
           const predicate = filterArgs[0] as (item: any) => boolean;
+          const getFilteredItems = async () => {
+            const items = await getBoundedItems();
+            return items.filter(predicate);
+          };
           return {
             limit: (...limitArgs: unknown[]) => {
               mocks.indexedLimit(...limitArgs);
               return {
                 toArray: (...toArrayArgs: unknown[]) =>
-                  Promise.resolve(mocks.indexedToArray(...toArrayArgs)).then((items) =>
-                    (items ?? []).map(normalizeIndexedPracticeItem),
+                  getFilteredItems(...toArrayArgs).then((items) =>
+                    items.slice(0, Number(limitArgs[0])),
                   ),
               };
             },
-            toArray: (...toArrayArgs: unknown[]) => mocks.indexedToArray(...toArrayArgs),
+            toArray: (...toArrayArgs: unknown[]) => getFilteredItems(...toArrayArgs),
             count: async (...countArgs: unknown[]) =>
-              ((await mocks.indexedToArray(...countArgs)) ?? [])
-                .map(normalizeIndexedPracticeItem)
-                .filter(predicate).length,
+              (await getFilteredItems(...countArgs)).length,
           };
         },
       };
     },
   };
+}
+
+function isWithinNextAtRange(
+  item: any,
+  index: string,
+  lowerBound: unknown,
+  upperBound: unknown,
+  lowerInclusive: boolean,
+  upperInclusive: boolean,
+): boolean {
+  const nextAt = index.includes('cz_to_en')
+    ? item.next_at_cz_to_en
+    : item.next_at_en_to_cz;
+  return isWithinBound(nextAt, lowerBound, lowerInclusive, true) &&
+    isWithinBound(nextAt, upperBound, upperInclusive, false);
+}
+
+function isWithinBound(
+  value: unknown,
+  bound: unknown,
+  inclusive: boolean,
+  isLowerBound: boolean,
+): boolean {
+  if (typeof bound !== 'string') return true;
+  if (typeof value !== 'string') return false;
+  if (isLowerBound) {
+    return inclusive ? value >= bound : value > bound;
+  }
+  return inclusive ? value <= bound : value < bound;
 }
 
 function createVocabularyStartedQuery() {
@@ -176,10 +229,14 @@ function createUserItemsWhere(field: string) {
     user_id: createUserIdQuery,
     '[user_id+item_id]': createItemIdQuery,
     '[user_id+updated_at]': createUpdatedAtQuery,
-    '[user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]':
-      createIndexedPracticeQuery,
-    '[user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]':
-      createIndexedPracticeQuery,
+    '[user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]': () =>
+      createIndexedPracticeQuery(
+        '[user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]',
+      ),
+    '[user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]': () =>
+      createIndexedPracticeQuery(
+        '[user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]',
+      ),
     '[user_id+is_vocabulary+started_at]': createVocabularyStartedQuery,
     '[user_id+started_at]': createStartedGrammarQuery,
     '[user_id+block_id]': createBlockQuery,
@@ -1272,7 +1329,7 @@ describe('UserItem', () => {
   it('getReadyReviewState ignores not-started vocabulary', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
-    mocks.userEqualsToArray.mockResolvedValueOnce([
+    mocks.indexedToArray.mockResolvedValue([
       ...Array.from({ length: 20 }, (_, index) => ({
         item_id: index + 1,
         deleted_at: '1970-01-01T00:00:00.000Z',
@@ -1292,12 +1349,15 @@ describe('UserItem', () => {
     await expect(UserItem.getReadyReviewState('u1')).resolves.toEqual({
       reviewReadyAt: '2026-06-24T12:00:00.000Z',
     });
+
+    expect(mocks.indexedBetween).toHaveBeenCalledTimes(2);
+    expect(mocks.indexedLimit.mock.calls.map(([limit]) => limit)).toEqual([20, 20]);
   });
 
   it('counts reset items as ready review candidates', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
-    mocks.userEqualsToArray.mockResolvedValueOnce(
+    mocks.indexedToArray.mockResolvedValue(
       Array.from({ length: 20 }, (_, index) => ({
         item_id: index + 1,
         deleted_at: '1970-01-01T00:00:00.000Z',
@@ -1317,7 +1377,7 @@ describe('UserItem', () => {
   });
 
   it('getReadyReviewState caps availability at the badge cap', async () => {
-    mocks.userEqualsToArray.mockResolvedValueOnce(
+    mocks.indexedToArray.mockResolvedValue(
       Array.from({ length: 100 }, (_, index) => ({
         item_id: index + 1,
         started_at: '1970-01-01T00:00:00.000Z',
@@ -1328,13 +1388,13 @@ describe('UserItem', () => {
       reviewReadyAt: null,
     });
 
-    expect(mocks.userEqualsToArray).toHaveBeenCalledTimes(1);
+    expect(mocks.indexedToArray).toHaveBeenCalled();
   });
 
   it('getReadyReviewState keeps a future schedule when some practice is already ready', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
-    mocks.userEqualsToArray.mockResolvedValueOnce([
+    mocks.indexedToArray.mockResolvedValue([
       {
         item_id: 1,
         deleted_at: '1970-01-01T00:00:00.000Z',
@@ -1373,7 +1433,7 @@ describe('UserItem', () => {
       mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
       mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
     }));
-    mocks.userEqualsToArray.mockResolvedValueOnce([
+    mocks.indexedToArray.mockResolvedValue([
       ...readyItems,
       {
         item_id: 20,
@@ -1398,7 +1458,7 @@ describe('UserItem', () => {
       item_id: index + 1,
       started_at: '1970-01-01T00:00:00.000Z',
     }));
-    mocks.userEqualsToArray.mockResolvedValueOnce([
+    mocks.indexedToArray.mockResolvedValue([
       ...readyItems,
       {
         item_id: 99,
@@ -1418,7 +1478,7 @@ describe('UserItem', () => {
   it('getReadyReviewState schedules future vocabulary when none is ready', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-24T12:00:00.000Z'));
-    mocks.userEqualsToArray.mockResolvedValueOnce([
+    mocks.indexedToArray.mockResolvedValue([
       {
         item_id: 1,
         started_at: '2026-01-01T00:00:00.000Z',
@@ -1435,7 +1495,7 @@ describe('UserItem', () => {
   });
 
   it('getReadyReviewState ignores mastered vocabulary candidates', async () => {
-    mocks.userEqualsToArray.mockResolvedValueOnce([
+    mocks.indexedToArray.mockResolvedValueOnce([
       {
         item_id: 1,
         started_at: '2026-01-01T00:00:00.000Z',
@@ -1449,6 +1509,8 @@ describe('UserItem', () => {
     await expect(UserItem.getReadyReviewState('u1')).resolves.toEqual({
       reviewReadyAt: null,
     });
+
+    expect(mocks.userEqualsToArray).not.toHaveBeenCalled();
   });
 
   it('simulates an exact fixture', async () => {

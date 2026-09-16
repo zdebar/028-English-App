@@ -1,22 +1,26 @@
 import config from '@/config/config';
+import { ROUTES } from '@/config/routes.config';
 import UserItem from '@/database/models/user-items';
 import PracticeSession from '@/database/models/practice-sessions';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { liveQuery } from 'dexie';
-import { useEffect } from 'react';
+import { useLayoutEffect, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { usePracticeAvailabilityStore } from './use-practice-availability-store';
 
 function toError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
 }
 
-/** Keeps Home practice availability synchronized independently of the active route. */
+/** Keeps Home practice availability synchronized while Home is active. */
 export function usePracticeAvailabilityStoreSync(userId: string | null): void {
   const reset = usePracticeAvailabilityStore((state) => state.reset);
   const reviewReadyAt = usePracticeAvailabilityStore((state) => state.reviewReadyAt);
+  const { pathname } = useLocation();
+  const isHomeRoute = pathname === ROUTES.home;
 
-  useEffect(() => {
-    if (!userId) {
+  useLayoutEffect(() => {
+    if (!userId || !isHomeRoute) {
       reset();
       return;
     }
@@ -76,10 +80,10 @@ export function usePracticeAvailabilityStoreSync(userId: string | null): void {
       isActive = false;
       readySubscription.unsubscribe();
     };
-  }, [reset, userId]);
+  }, [isHomeRoute, reset, userId]);
 
   useEffect(() => {
-    if (!userId || reviewReadyAt === null) return;
+    if (!userId || !isHomeRoute || reviewReadyAt === null) return;
 
     const nextTime = Date.parse(reviewReadyAt);
     if (!Number.isFinite(nextTime) || nextTime <= Date.now()) return;
@@ -104,5 +108,5 @@ export function usePracticeAvailabilityStoreSync(userId: string | null): void {
     }, delay);
 
     return () => globalThis.clearTimeout(timeoutId);
-  }, [reviewReadyAt, userId]);
+  }, [isHomeRoute, reviewReadyAt, userId]);
 }

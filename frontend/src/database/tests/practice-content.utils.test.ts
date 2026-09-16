@@ -59,6 +59,7 @@ vi.mock('@/config/config', () => ({
 }));
 
 import {
+  loadReviewCount,
   loadReviewDeck,
   loadReviewDeckData,
   resolvePracticeEntries,
@@ -175,23 +176,27 @@ describe('practice content resolution', () => {
   it('loads one review item without storing a review session', async () => {
     const item = makeReviewItem(1);
     mocks.getReviewDeck.mockResolvedValue([item]);
-    mocks.getReviewItemCountForDirection
-      .mockResolvedValueOnce(2)
-      .mockResolvedValueOnce(3);
 
     const result = await loadReviewDeckData('u1');
     const [userId, deckSize, now] = mocks.getReviewDeck.mock.calls[0];
 
     expect(result.entries).toHaveLength(1);
     expect(result.entries[0]?.item).toBe(item);
-    expect(result.availableCount).toBe(5);
     expect(result.availabilityCheckedAt).toBe(now);
     expect(result.abandoned).toBe(false);
     expect(mocks.reconcileActive).toHaveBeenCalledWith('u1');
     expect([userId, deckSize]).toEqual(['u1', 20]);
     expect(now).toEqual(expect.any(String));
-    expect(mocks.getReviewItemCountForDirection).toHaveBeenNthCalledWith(1, 'u1', 'czToEn', now);
-    expect(mocks.getReviewItemCountForDirection).toHaveBeenNthCalledWith(2, 'u1', 'enToCz', now);
+    expect(mocks.getReviewItemCountForDirection).not.toHaveBeenCalled();
+  });
+
+  it('loads the exact review count separately from the first card', async () => {
+    mocks.getReviewItemCountForDirection
+      .mockResolvedValueOnce(2)
+      .mockResolvedValueOnce(3);
+
+    await expect(loadReviewCount('u1')).resolves.toBe(5);
+    expect(mocks.getReviewItemCountForDirection).toHaveBeenCalledTimes(2);
   });
 
   it('does not start review while initial block practice is active', async () => {
@@ -208,17 +213,16 @@ describe('practice content resolution', () => {
 
     const result = await loadReviewDeckData('u1');
 
-    expect(result).toMatchObject({ entries: [], availableCount: 0, abandoned: true });
+    expect(result).toMatchObject({ entries: [], abandoned: true });
     expect(result.availabilityCheckedAt).toEqual(expect.any(String));
   });
 
-  it('skips recounting availability while loading the next review card', async () => {
+  it('does not recount availability while loading the next review card', async () => {
     mocks.getReviewDeck.mockResolvedValue([makeReviewItem(1)]);
 
-    const result = await loadReviewDeckData('u1', false);
+    const result = await loadReviewDeckData('u1');
 
     expect(result.entries).toHaveLength(1);
-    expect(result.availableCount).toBe(0);
     expect(result.availabilityCheckedAt).toEqual(expect.any(String));
     expect(mocks.getReviewItemCountForDirection).not.toHaveBeenCalled();
   });

@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   savePracticeDeck: vi.fn(),
   applyPracticeProgress: vi.fn(),
   getNewlyAvailableReviewItemCount: vi.fn(),
+  loadReviewCount: vi.fn(),
   resetHint: vi.fn(),
   resetQuestionState: vi.fn(),
   renderStates: [] as Array<{ itemId: number | null; revealed: boolean }>,
@@ -15,7 +16,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@/config/config', () => ({
-  default: { practice: { reviewMinimumSize: 20 } },
+  default: { practice: { reviewMinimumSize: 10 } },
 }));
 
 vi.mock('@/hooks/use-fetch', () => ({
@@ -46,6 +47,7 @@ vi.mock('@/database/models/user-items', () => ({
 
 vi.mock('@/database/utils/practice-content.utils', () => ({
   loadReviewDeckData: vi.fn(),
+  loadReviewCount: (...args: unknown[]) => mocks.loadReviewCount(...args),
 }));
 
 vi.mock('@/features/practice/hooks/use-practice-card-state', () => ({
@@ -89,9 +91,10 @@ describe('usePracticeDeck', () => {
     mocks.reload.mockResolvedValue(undefined);
     mocks.renderStates.length = 0;
     mocks.transitionEvents.length = 0;
-    mocks.fetchData = reviewDeckResult([entry(1), entry(2)], 20);
+    mocks.fetchData = reviewDeckResult([entry(1), entry(2)]);
     mocks.applyPracticeProgress.mockImplementation((item) => ({ ...item, updated_at: 'now' }));
     mocks.getNewlyAvailableReviewItemCount.mockResolvedValue(0);
+    mocks.loadReviewCount.mockResolvedValue(20);
     mocks.savePracticeDeck.mockResolvedValue(undefined);
   });
 
@@ -99,7 +102,7 @@ describe('usePracticeDeck', () => {
     vi.useRealTimers();
   });
 
-  it('starts the review counter at zero against the available directional review items', async () => {
+  it('updates the review counter after the exact count is available', async () => {
     const { result } = renderHook(() => usePracticeDeck('u1', mocks.fetchData));
     await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -109,18 +112,73 @@ describe('usePracticeDeck', () => {
 
   it('loads and displays one item from a review direction', async () => {
     const entries = [entry(1)];
-    mocks.fetchData = reviewDeckResult(entries, 2);
+    mocks.fetchData = reviewDeckResult(entries);
+    mocks.loadReviewCount.mockResolvedValue(2);
 
     const { result } = renderHook(() => usePracticeDeck('u1', mocks.fetchData));
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    expect(result.current.progressLabel).toBe('0 / 2');
+    await waitFor(() => expect(result.current.progressLabel).toBe('0 / 2'));
     expect(result.current.currentItem?.item_id).toBe(1);
+  });
+
+  it('updates the review counter asynchronously after the first item is rendered', async () => {
+    let resolveCount!: (count: number) => void;
+    mocks.loadReviewCount.mockReturnValueOnce(
+      new Promise<number>((resolve) => {
+        resolveCount = resolve;
+      }),
+    );
+
+    const { result } = renderHook(() => usePracticeDeck('u1', mocks.fetchData));
+
+    expect(result.current.currentItem?.item_id).toBe(1);
+    expect(result.current.progressLabel).toBe('0 / 10');
+
+    await act(async () => resolveCount(25));
+    expect(result.current.progressLabel).toBe('0 / 25');
+  });
+
+  it('ignores a stale counter refresh after the practice card changes', async () => {
+    let resolveCount!: (count: number) => void;
+    mocks.loadReviewCount.mockReturnValueOnce(
+      new Promise<number>((resolve) => {
+        resolveCount = resolve;
+      }),
+    );
+    mocks.savePracticeDeck.mockImplementationOnce(async () => {
+      mocks.fetchData = reviewDeckResult([entry(2)]);
+    });
+
+    const { result } = renderHook(() => usePracticeDeck('u1', mocks.fetchData));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await act(async () => result.current.nextItem('correct'));
+    expect(result.current.progressLabel).toBe('1 / 10');
+
+    await act(async () => resolveCount(25));
+    expect(result.current.progressLabel).toBe('1 / 10');
+  });
+
+  it('ignores a counter refresh after the practice hook unmounts', async () => {
+    let resolveCount!: (count: number) => void;
+    mocks.loadReviewCount.mockReturnValueOnce(
+      new Promise<number>((resolve) => {
+        resolveCount = resolve;
+      }),
+    );
+
+    const { result, unmount } = renderHook(() => usePracticeDeck('u1', mocks.fetchData));
+    expect(result.current.progressLabel).toBe('0 / 10');
+
+    unmount();
+    await act(async () => resolveCount(25));
+    expect(result.current.progressLabel).toBe('0 / 10');
   });
 
   it('keeps the count across direction changes and refreshes available items after saving', async () => {
     mocks.savePracticeDeck.mockImplementationOnce(async () => {
-      mocks.fetchData = reviewDeckResult([entry(2, 'enToCz')], 19);
+      mocks.fetchData = reviewDeckResult([entry(2, 'enToCz')]);
     });
     const { result } = renderHook(() => usePracticeDeck('u1', mocks.fetchData));
     await waitFor(() => expect(result.current.loading).toBe(false));
@@ -147,7 +205,7 @@ describe('usePracticeDeck', () => {
     'counts a successfully saved %s response as one practice',
     async (outcome) => {
       mocks.savePracticeDeck.mockImplementationOnce(async () => {
-        mocks.fetchData = reviewDeckResult([entry(2)], 19);
+        mocks.fetchData = reviewDeckResult([entry(2)]);
       });
       const { result } = renderHook(() => usePracticeDeck('u1', mocks.fetchData));
       await waitFor(() => expect(result.current.loading).toBe(false));
@@ -161,7 +219,7 @@ describe('usePracticeDeck', () => {
   it('adds newly available review items to the running denominator', async () => {
     mocks.getNewlyAvailableReviewItemCount.mockResolvedValueOnce(1);
     mocks.savePracticeDeck.mockImplementationOnce(async () => {
-      mocks.fetchData = reviewDeckResult([entry(2)], 500);
+      mocks.fetchData = reviewDeckResult([entry(2)]);
     });
     const { result } = renderHook(() => usePracticeDeck('u1', mocks.fetchData));
     await waitFor(() => expect(result.current.loading).toBe(false));
@@ -176,7 +234,7 @@ describe('usePracticeDeck', () => {
     const { result } = renderHook(() => usePracticeDeck('u1', mocks.fetchData));
 
     expect(result.current.currentItem).toBeNull();
-    expect(result.current.progressLabel).toBe('0 / 0');
+    expect(result.current.progressLabel).toBe('0 / 10');
   });
 
   it('does not increment the review counter when saving an answer fails', async () => {
@@ -192,7 +250,6 @@ describe('usePracticeDeck', () => {
   it('marks review complete when there is no next direction', async () => {
     mocks.fetchData = {
       entries: [],
-      availableCount: 0,
       availabilityCheckedAt: '2026-06-24T10:00:00.000Z',
       abandoned: true,
     };
@@ -201,14 +258,13 @@ describe('usePracticeDeck', () => {
 
     await waitFor(() => expect(result.current.finishedReview).toBe(true));
     expect(result.current.currentItem).toBeNull();
-    expect(result.current.progressLabel).toBe('0 / 0');
+    expect(result.current.progressLabel).toBe('0 / 10');
   });
 });
 
-function reviewDeckResult(entries: PracticeDeckEntry[], availableCount: number) {
+function reviewDeckResult(entries: PracticeDeckEntry[]) {
   return {
     entries,
-    availableCount,
     availabilityCheckedAt: '2026-06-24T10:00:00.000Z',
     abandoned: false,
   };

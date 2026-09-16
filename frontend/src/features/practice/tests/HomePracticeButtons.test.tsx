@@ -48,6 +48,16 @@ describe('Home practice buttons', () => {
     expect(button('New').disabled).toBe(false);
   });
 
+  it('disables both actions while availability is recalculated', () => {
+    usePracticeAvailabilityStore.setState({
+      reviewReadyAt: new Date().toISOString(),
+      practiceLoading: true,
+    });
+    render(<PracticeButtons userId="u1" />);
+    expect(button('Review').disabled).toBe(true);
+    expect(button('New').disabled).toBe(true);
+  });
+
   it('stacks review before new with the shared one-unit gap', () => {
     const { container } = render(<PracticeButtons userId="u1" />);
     const buttonGroup = container.firstElementChild;
