@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+model,model,mˈɑːdəl,model.opus,63000,,,,,True,63
+nepříjemný,uneasy,ʌnˈiːzi,uneasy.opus,63001,,,,,True,63
+paprsek,ray,ɹˈeɪ,ray.opus,63002,,,,,True,63
+větrný,windy,wˈɪndi,windy.opus,63003,,,,,True,63
+víno,wine,wˈaɪn,wine.opus,63004,,,,,True,63
+poutník,pilgrim,pˈɪlɡɹɪm,pilgrim.opus,63005,,,,,True,63
+vítěz,winner,wˈɪnɚ,winner.opus,63006,,,,,True,63
+pilulka,pill,pˈɪl,pill.opus,63007,,,,,True,63
+mobilní,mobile,mˈoʊbəl,mobile.opus,63008,,,,,True,63
+tahat,pull,pˈʊl,pull.opus,63009,,,,,True,63
+žíznivý,thirsty,θˈɜːsti,thirsty.opus,63010,,,,,True,63
+architektura,architecture,ˈɑːɹkɪtˌɛktʃɚ,architecture.opus,63011,,,,,True,63
+badminton,badminton,bˈædmɪntən,badminton.opus,63012,,,,,True,63
+mešita,mosque,mˈɑːsk,mosque.opus,63013,,,,,True,63
+rap,rap,ɹˈæp,rap.opus,63014,,,,,True,63
+dub,oak,ˈoʊk,oak.opus,63015,,,,,True,63
+inzerce,advertising,ˈædvɚtˌaɪzɪŋ,advertising.opus,63016,,,,,True,63
+rada,advice,ɐdvˈaɪs,advice.opus,63017,,,,,True,63
+celý,whole,hˈoʊl,whole.opus,63018,,,,,True,63
+uvázat,tie,tˈaɪ,tie.opus,63019,,,,,True,63
+uklizeno,tidy,tˈaɪdi,tidy.opus,63020,,,,,True,63
+uklidit,tidy,tˈaɪdi,tidy.opus,63021,,,,,True,63
+přesný,precise,pɹɪsˈaɪs,precise.opus,63022,,,,,True,63
+koho,whom,hˈuːm,whom.opus,63023,,,,,True,63
+Budu zítra v osm pracovat?,Will I be working at eight tomorrow?,wɪl aɪ biː wˈɜːkɪŋ æɾ ˈeɪt təmˈɑːɹoʊ,will_i_be_working_at_eight_tomorrow.opus,63024,85,,,75,False,63
+Budeš zítra ráno řídit?,Will you be driving tomorrow morning?,wɪl juː biː dɹˈaɪvɪŋ təmˈɑːɹoʊ mˈɔːɹnɪŋ,will_you_be_driving_tomorrow_morning.opus,63025,85,,,75,False,63
+On bude zítra v tu dobu spát?,Will he be sleeping then?,wɪl hiː biː slˈiːpɪŋ ðˈɛn,will_he_be_sleeping_then.opus,63026,85,,,75,False,63
+Ona bude zítra večer studovat?,Will she be studying tomorrow evening?,wɪl ʃiː biː stˈʌdiɪŋ təmˈɑːɹoʊ ˈiːvnɪŋ,will_she_be_studying_tomorrow_evening.opus,63027,85,,,75,False,63
+Bude zítra touto dobou pršet?,Will it be raining at this time tomorrow?,wɪl ɪt biː ɹˈeɪnɪŋ æt ðɪs tˈaɪm təmˈɑːɹoʊ,will_it_be_raining_at_this_time_tomorrow.opus,63028,85,,,75,False,63
+Budeme v sobotu touhle dobou cestovat?,Will we be travelling at this time on Saturday?,wɪl wiː biː tɹˈævəlɪŋ æt ðɪs tˈaɪm ˌɔn sˈæɾɚdˌeɪ,will_we_be_travelling_at_this_time_on_saturday.opus,63029,85,,,75,False,63
+Budete zítra v osm čekat před hotelem?,Will you be waiting outside the hotel at eight tomorrow?,wɪl juː biː wˈeɪɾɪŋ aʊtsˈaɪd ðə hoʊtˈɛl æɾ ˈeɪt təmˈɑːɹoʊ,will_you_be_waiting_outside_the_hotel_at_eight_tomorrow.opus,63030,85,,,75,False,63
+"Oni budou hrát, až dorazíme?",Will they be playing when we arrive?,wɪl ðeɪ biː plˈeɪɪŋ wɛn wiː ɚɹˈaɪv,will_they_be_playing_when_we_arrive.opus,63031,85,,,75,False,63

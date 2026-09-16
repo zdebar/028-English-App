@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+vděčný,grateful,ɡɹˈeɪtfəl,grateful.opus,44000,,,,,True,44
+bruslení,skating,skˈeɪɾɪŋ,skating.opus,44001,,,,,True,44
+dřez,sink,sˈɪŋk,sink.opus,44002,,,,,True,44
+jednotného čísla,singular,sˈɪŋɡjʊlɚ,singular.opus,44003,,,,,True,44
+absolvovat,graduate,ɡɹˈædʒuːət,graduate.opus,44004,,,,,True,44
+móda,fashion,fˈæʃən,fashion.opus,44005,,,,,True,44
+fascinovat,fascinate,fˈæsᵻnˌeɪt,fascinate.opus,44006,,,,,True,44
+fascinující,fascinating,fˈæsᵻnˌeɪɾɪŋ,fascinating.opus,44007,,,,,True,44
+semestr,semester,səmˈɛstɚ,semester.opus,44008,,,,,True,44
+zlatý,golden,ɡˈoʊldən,golden.opus,44009,,,,,True,44
+golf,golf,ɡˈɑːlf,golf.opus,44010,,,,,True,44
+květ,bloom,blˈuːm,bloom.opus,44011,,,,,True,44
+jízdné,fare,fˈɛɹ,fare.opus,44012,,,,,True,44
+dobře vypadající,good-looking,ɡˈʊdlˈʊkɪŋ,goodlooking.opus,44013,,,,,True,44
+fantastický,fantastic,fæntˈæstɪk,fantastic.opus,44014,,,,,True,44
+módní,fancy,fˈænsi,fancy.opus,44015,,,,,True,44
+vysvětlení,explanation,ɛksplɐnˈeɪʃən,explanation.opus,44016,,,,,True,44
+jednoduše,simply,sˈɪmpli,simply.opus,44017,,,,,True,44
+pád,fall,fˈɔːl,fall.opus,44018,,,,,True,44
+spravedlivě,fairly,fˈɛɹli,fairly.opus,44019,,,,,True,44
+podprsenka,bra,bɹˈɑː,bra.opus,44020,,,,,True,44
+milost,grace,ɡɹˈeɪs,grace.opus,44021,,,,,True,44
+selhat,fail,fˈeɪl,fail.opus,44022,,,,,True,44
+krev,blood,blˈʌd,blood.opus,44023,,,,,True,44
+Budu volat?,Am I going to call?,æm aɪ ɡˌoʊɪŋ tə kˈɔːl,am_i_going_to_call.opus,44024,66,,,56,False,44
+Budeš vařit?,Are you going to cook?,ɑːɹ juː ɡˌoʊɪŋ tə kˈʊk,are_you_going_to_cook.opus,44025,66,,,56,False,44
+On začne?,Is he going to start?,ɪz hiː ɡˌoʊɪŋ tə stˈɑːɹt,is_he_going_to_start.opus,44026,66,,,56,False,44
+Ona odjede?,Is she going to leave?,ɪz ʃiː ɡˌoʊɪŋ tə lˈiːv,is_she_going_to_leave.opus,44027,66,,,56,False,44
+Spadne to?,Is it going to fall?,ɪz ɪt ɡˌoʊɪŋ tə fˈɔːl,is_it_going_to_fall.opus,44028,66,,,56,False,44
+My zůstaneme?,Are we going to stay?,ɑːɹ wiː ɡˌoʊɪŋ tə stˈeɪ,are_we_going_to_stay.opus,44029,66,,,56,False,44
+Vy vyhrajete?,Are you going to win?,ɑːɹ juː ɡˌoʊɪŋ tə wˈɪn,are_you_going_to_win.opus,44030,66,,,56,False,44
+Oni přijedou?,Are they going to arrive?,ɑːɹ ðeɪ ɡˌoʊɪŋ tʊ ɚɹˈaɪv,are_they_going_to_arrive.opus,44031,66,,,56,False,44

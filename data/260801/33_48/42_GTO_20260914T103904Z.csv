@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+sdělení,communication,kəmjˌuːnɪkˈeɪʃən,communication.opus,42000,,,,,True,42
+základní,basic,bˈeɪsɪk,basic.opus,42001,,,,,True,42
+svoboda,liberty,lˈɪbɚɾi,liberty.opus,42002,,,,,True,42
+znepokojení,concern,kənsˈɜːn,concern.opus,42003,,,,,True,42
+sluneční světlo,sunlight,sˈʌnlaɪt,sunlight.opus,42004,,,,,True,42
+pronajmout,rent,ɹˈɛnt,rent.opus,42005,,,,,True,42
+následek,consequence,kˈɑːnsɪkwəns,consequence.opus,42006,,,,,True,42
+vyhovovat,suit,sˈuːt,suit.opus,42007,,,,,True,42
+vhodný,suitable,sˈuːɾəbəl,suitable.opus,42008,,,,,True,42
+vzdálený,remote,ɹᵻmˈoʊt,remote.opus,42009,,,,,True,42
+připomenout,remind,ɹᵻmˈaɪnd,remind.opus,42010,,,,,True,42
+volný čas,leisure,lˈiːʒɚ,leisure.opus,42011,,,,,True,42
+citrón,lemon,lˈɛmən,lemon.opus,42012,,,,,True,42
+zmást,confuse,kənfjˈuːz,confuse.opus,42013,,,,,True,42
+zmatený,confused,kənfjˈuːzd,confused.opus,42014,,,,,True,42
+kufr,suitcase,sˈuːtkeɪs,suitcase.opus,42015,,,,,True,42
+limonáda,lemonade,lˌɛmənˈeɪd,lemonade.opus,42016,,,,,True,42
+půjčovat,lend,lˈɛnd,lend.opus,42017,,,,,True,42
+sebevědomý,confident,kˈɑːnfɪdənt,confident.opus,42018,,,,,True,42
+shrnutí,summary,sˈʌmɚɹi,summary.opus,42019,,,,,True,42
+naživu,alive,ɐlˈaɪv,alive.opus,42020,,,,,True,42
+dávka,batch,bˈætʃ,batch.opus,42021,,,,,True,42
+stav,condition,kəndˈɪʃən,condition.opus,42022,,,,,True,42
+úroveň,level,lˈɛvəl,level.opus,42023,,,,,True,42
+Zavolám mu.,I'm going to call him.,aɪm ɡˌoʊɪŋ tə kˈɔːl hˌɪm,im_going_to_call_him.opus,42024,64,,,54,False,42
+Budeš dnes vařit.,You're going to cook today.,jʊɹ ɡˌoʊɪŋ tə kˈʊk tədˈeɪ,youre_going_to_cook_today.opus,42025,64,,,54,False,42
+On začne nový projekt.,He's going to start a new project.,hiːz ɡˌoʊɪŋ tə stˈɑːɹt ɐ nˈuː pɹˈɑːdʒɛkt,hes_going_to_start_a_new_project.opus,42026,64,,,54,False,42
+Ona odjede příští týden.,She's going to leave next week.,ʃiːz ɡˌoʊɪŋ tə lˈiːv nˈɛkst wˈiːk,shes_going_to_leave_next_week.opus,42027,64,,,54,False,42
+Ten strom brzy spadne.,The tree is going to fall soon.,ðə tɹˈiː ɪz ɡˌoʊɪŋ tə fˈɔːl sˈuːn,the_tree_is_going_to_fall_soon.opus,42028,64,,,54,False,42
+My zůstaneme doma.,We're going to stay home.,wɪɹ ɡˌoʊɪŋ tə stˈeɪ hˈoʊm,were_going_to_stay_home.opus,42029,64,,,54,False,42
+Vy vyhrajete.,You're going to win.,jʊɹ ɡˌoʊɪŋ tə wˈɪn,youre_going_to_win.opus,42030,64,,,54,False,42
+Oni přijedou večer.,They're going to arrive tonight.,ðeɪɚ ɡˌoʊɪŋ tʊ ɚɹˈaɪv tənˈaɪt,theyre_going_to_arrive_tonight.opus,42031,64,,,54,False,42

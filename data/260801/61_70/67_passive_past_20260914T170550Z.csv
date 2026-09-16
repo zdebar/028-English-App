@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+web,web,wˈɛb,web.opus,67000,,,,,True,67
+webová stránka,web page,wˈɛb pˈeɪdʒ,web_page.opus,67001,,,,,True,67
+provoz,traffic,tɹˈæfɪk,traffic.opus,67002,,,,,True,67
+semafor,traffic light,tɹˈæfɪk lˈaɪt,traffic_light.opus,67003,,,,,True,67
+webové stránky,website,wˈɛbsaɪt,website.opus,67004,,,,,True,67
+tradice,tradition,tɹɐdˈɪʃən,tradition.opus,67005,,,,,True,67
+tradiční,traditional,tɹɐdˈɪʃənəl,traditional.opus,67006,,,,,True,67
+svatba,wedding,wˈɛdɪŋ,wedding.opus,67007,,,,,True,67
+tajemství,mystery,mˈɪstɚɹi,mystery.opus,67008,,,,,True,67
+tajemný,mysterious,mɪstˈɪɹiəs,mysterious.opus,67009,,,,,True,67
+automaticky,automatically,ˌɔːɾəmˈæɾɪkli,automatically.opus,67010,,,,,True,67
+já sám,myself,maɪsˈɛlf,myself.opus,67011,,,,,True,67
+obec,village,vˈɪlɪdʒ,village.opus,67012,,,,,True,67
+dráha,track,tɹˈæk,track.opus,67013,,,,,True,67
+neobvyklý,unusual,ʌnjˈuːʒuːəl,unusual.opus,67014,,,,,True,67
+automatizovat,automate,ˈɔːɾəmˌeɪt,automate.opus,67015,,,,,True,67
+automatický,automatic,ˌɔːɾəmˈæɾɪk,automatic.opus,67016,,,,,True,67
+všední den,weekday,wˈiːkdeɪ,weekday.opus,67017,,,,,True,67
+dospělý,adult,ɐdˈʌlt,adult.opus,67018,,,,,True,67
+týdně,weekly,wˈiːkli,weekly.opus,67019,,,,,True,67
+plakat,weep,wˈiːp,weep.opus,67020,,,,,True,67
+k,towards,təwˈɔːɹdz,towards.opus,67021,,,,,True,67
+turista,tourist,tˈʊɹɹɪst,tourist.opus,67022,,,,,True,67
+vážit,weigh,wˈeɪ,weigh.opus,67023,,,,,True,67
+Já jsem byl včera pozván na oslavu.,I was invited to a party yesterday.,aɪ wʌz ɪnvˈaɪɾᵻd tʊ ɐ pˈɑːɹɾi jˈɛstɚdˌeɪ,i_was_invited_to_a_party_yesterday.opus,67024,89,,,79,False,67
+Ty jsi byl včera vybrán do týmu.,You were chosen for the team yesterday.,juː wɜː tʃˈoʊzən fɚðə tˈiːm jˈɛstɚdˌeɪ,you_were_chosen_for_the_team_yesterday.opus,67025,89,,,79,False,67
+On byl respektován svými kolegy.,He was respected by his colleagues.,hiː wʌz ɹᵻspˈɛktᵻd baɪ hɪz kˈɑːliːɡz,he_was_respected_by_his_colleagues.opus,67026,89,,,79,False,67
+Ona byla informována o změně po poradě.,She was informed about the change after the meeting.,ʃiː wʌz ɪnfˈɔːɹmd ɐbˌaʊt ðə tʃˈeɪndʒ ˈæftɚ ðə mˈiːɾɪŋ,she_was_informed_about_the_change_after_the_meeting.opus,67027,89,,,79,False,67
+To bylo opraveno minulý týden.,It was repaired last week.,ɪt wʌz ɹᵻpˈɛɹd lˈæst wˈiːk,it_was_repaired_last_week.opus,67028,89,,,79,False,67
+My jsme byli včera požádáni o pomoc.,We were asked for help yesterday.,wiː wɜːɹ ˈæskt fɔːɹ hˈɛlp jˈɛstɚdˌeɪ,we_were_asked_for_help_yesterday.opus,67029,89,,,79,False,67
+Vy jste byli placeni každý pátek.,You were paid every Friday.,juː wɜː pˈeɪd ˈɛvɹi fɹˈaɪdeɪ,you_were_paid_every_friday.opus,67030,89,,,79,False,67
+Oni byli kontrolováni u vchodu.,They were checked at the entrance.,ðeɪ wɜː tʃˈɛkt æt ðɪ ˈɛntɹəns,they_were_checked_at_the_entrance.opus,67031,89,,,79,False,67

@@ -531,9 +531,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const deckSize = config.practice.reviewMinimumSize;
     const nowIso = new Date(Date.now()).toISOString();
 
-    const items = await db.user_items.where('user_id').equals(userId).toArray();
-    const readyAtByDirection = DIRECTIONS.map((direction) =>
-      getReviewReadyAt(items, direction, deckSize, nowIso),
+    const readyAtByDirection = await Promise.all(
+      DIRECTIONS.map((direction) =>
+        getReviewReadyAtForDirection(userId, direction, deckSize, nowIso),
+      ),
     );
 
     return { reviewReadyAt: getEarliestReadyAt(readyAtByDirection) };
@@ -804,13 +805,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       return nextAt < now;
     };
 
-    const index =
-      direction === 'czToEn'
-        ? '[user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]'
-        : '[user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]';
-
     return db.user_items
-      .where(index)
+      .where(getPracticeIndex(direction))
       .between(
         [userId, Dexie.minKey, Dexie.minKey, Dexie.minKey],
         [userId, Dexie.maxKey, Dexie.maxKey, Dexie.maxKey],
@@ -834,13 +830,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       return nextAt !== NULL_DATE && nextAt >= checkedAt && nextAt < now;
     };
 
-    const index =
-      direction === 'czToEn'
-        ? '[user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]'
-        : '[user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]';
-
     return db.user_items
-      .where(index)
+      .where(getPracticeIndex(direction))
       .between(
         [userId, checkedAt, Dexie.minKey, Dexie.minKey],
         [userId, now, Dexie.maxKey, Dexie.maxKey],
@@ -877,37 +868,120 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
 const DIRECTIONS: readonly PracticeDirection[] = ['czToEn', 'enToCz'];
 
-function getReviewReadyAt(
-  items: UserItemLocal[],
+async function getReviewReadyAtForDirection(
+  userId: string,
   direction: PracticeDirection,
   deckSize: number,
   nowIso: string,
-): string | null {
-  const futureDates: string[] = [];
-  let readyCount = 0;
+): Promise<string | null> {
+  const scheduledReadyItems = await getScheduledReadyPracticeCollection(
+    userId,
+    direction,
+    nowIso,
+  )
+    .limit(deckSize)
+    .toArray();
+  let readyCount = scheduledReadyItems.length;
 
-  for (const item of items) {
-    if (item.deleted_at !== NULL_DATE) continue;
-    if (item.started_at === NULL_DATE) continue;
-    if (getDirectionMasteredAt(item, direction) !== NULL_DATE) continue;
-
-    const nextAt = getDirectionNextAt(item, direction);
-    if (nextAt === NULL_DATE) {
-      readyCount += Number(getEffectiveProgress(item, direction) === 0);
-      continue;
-    }
-    if (nextAt <= nowIso) {
-      readyCount += 1;
-      continue;
-    }
-    if (Number.isFinite(Date.parse(nextAt))) futureDates.push(nextAt);
+  if (readyCount < deckSize) {
+    const resetReadyItems = await getResetReadyPracticeCollection(userId, direction)
+      .limit(deckSize - readyCount)
+      .toArray();
+    readyCount += resetReadyItems.length;
   }
 
   if (readyCount >= deckSize) return nowIso;
 
-  futureDates.sort((left, right) => Date.parse(left) - Date.parse(right));
   const missingCount = deckSize - readyCount;
-  return futureDates[missingCount - 1] ?? null;
+  const futureItems = await getFuturePracticeCollection(userId, direction, nowIso)
+    .limit(missingCount)
+    .toArray();
+  const thresholdItem = futureItems[missingCount - 1];
+  if (!thresholdItem) return null;
+  return getDirectionNextAt(thresholdItem, direction);
+}
+
+function getPracticeIndex(direction: PracticeDirection): string {
+  if (direction === 'czToEn') {
+    return '[user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]';
+  }
+  return '[user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]';
+}
+
+function getPracticeIndexCollection(direction: PracticeDirection) {
+  return db.user_items.where(getPracticeIndex(direction));
+}
+
+function isReadyPracticeItem(item: UserItemLocal, direction: PracticeDirection): boolean {
+  if (item.deleted_at !== NULL_DATE) return false;
+  if (item.started_at === NULL_DATE) return false;
+  return getDirectionMasteredAt(item, direction) === NULL_DATE;
+}
+
+function isScheduledReadyPracticeItem(
+  item: UserItemLocal,
+  direction: PracticeDirection,
+  nowIso: string,
+): boolean {
+  if (!isReadyPracticeItem(item, direction)) return false;
+  const nextAt = getDirectionNextAt(item, direction);
+  return nextAt !== NULL_DATE && nextAt <= nowIso && Number.isFinite(Date.parse(nextAt));
+}
+
+function isResetReadyPracticeItem(item: UserItemLocal, direction: PracticeDirection): boolean {
+  if (!isReadyPracticeItem(item, direction)) return false;
+  return getEffectiveProgress(item, direction) === 0;
+}
+
+function isFuturePracticeItem(
+  item: UserItemLocal,
+  direction: PracticeDirection,
+  nowIso: string,
+): boolean {
+  if (!isReadyPracticeItem(item, direction)) return false;
+  const nextAt = getDirectionNextAt(item, direction);
+  return nextAt !== NULL_DATE && nextAt > nowIso && Number.isFinite(Date.parse(nextAt));
+}
+
+function getScheduledReadyPracticeCollection(
+  userId: string,
+  direction: PracticeDirection,
+  nowIso: string,
+) {
+  return getPracticeIndexCollection(direction)
+    .between(
+      [userId, Dexie.minKey, Dexie.minKey, Dexie.minKey],
+      [userId, nowIso, Dexie.maxKey, Dexie.maxKey],
+      true,
+      true,
+    )
+    .filter((item) => isScheduledReadyPracticeItem(item, direction, nowIso));
+}
+
+function getResetReadyPracticeCollection(userId: string, direction: PracticeDirection) {
+  return getPracticeIndexCollection(direction)
+    .between(
+      [userId, NULL_DATE, Dexie.minKey, Dexie.minKey],
+      [userId, NULL_DATE, Dexie.maxKey, Dexie.maxKey],
+      true,
+      true,
+    )
+    .filter((item) => isResetReadyPracticeItem(item, direction));
+}
+
+function getFuturePracticeCollection(
+  userId: string,
+  direction: PracticeDirection,
+  nowIso: string,
+) {
+  return getPracticeIndexCollection(direction)
+    .between(
+      [userId, nowIso, Dexie.minKey, Dexie.minKey],
+      [userId, Dexie.maxKey, Dexie.maxKey, Dexie.maxKey],
+      false,
+      true,
+    )
+    .filter((item) => isFuturePracticeItem(item, direction, nowIso));
 }
 
 function getEarliestReadyAt(readyDates: Array<string | null>): string | null {

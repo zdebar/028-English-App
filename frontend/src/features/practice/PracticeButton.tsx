@@ -36,7 +36,7 @@ function isReviewButtonDisabled(
   reviewAvailable: boolean,
   loading: boolean,
 ): boolean {
-  return [Boolean(error), activeNew, !loading && !activeReview && !reviewAvailable].some(Boolean);
+  return [Boolean(error), loading, activeNew, !activeReview && !reviewAvailable].some(Boolean);
 }
 
 function isNewButtonDisabled(
@@ -46,7 +46,7 @@ function isNewButtonDisabled(
   newAvailable: boolean,
   loading: boolean,
 ): boolean {
-  return [Boolean(error), activeReview, !loading && !activeNew && !newAvailable].some(Boolean);
+  return [Boolean(error), loading, activeReview, !activeNew && !newAvailable].some(Boolean);
 }
 
 function resolvePracticeButtonState(

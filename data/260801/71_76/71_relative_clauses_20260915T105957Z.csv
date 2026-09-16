@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+napřed,ahead,ɐhˈɛd,ahead.opus,71000,,,,,True,71
+metoda,method,mˈɛθəd,method.opus,71001,,,,,True,71
+klepnout,tap,tˈæp,tap.opus,71002,,,,,True,71
+metr,metre,mˈiːɾɚ,metre.opus,71003,,,,,True,71
+strachovat se,worry,wˈʌɹi,worry.opus,71004,,,,,True,71
+ustaraný,worried,wˈʌɹid,worried.opus,71005,,,,,True,71
+příjemný,pleasing,plˈiːzɪŋ,pleasing.opus,71006,,,,,True,71
+správné,proper,pɹˈɑːpɚ,proper.opus,71007,,,,,True,71
+roztrhnout,tear,tˈɪɹ,tear.opus,71008,,,,,True,71
+horší,worse,wˈɜːs,worse.opus,71009,,,,,True,71
+nejhorší,worst,wˈɜːst,worst.opus,71010,,,,,True,71
+neznámý,unknown,ʌnnˈoʊn,unknown.opus,71011,,,,,True,71
+publikum,audience,ˈɔːdiəns,audience.opus,71012,,,,,True,71
+potěšen,pleased,plˈiːzd,pleased.opus,71013,,,,,True,71
+lékařský,medical,mˈɛdɪkəl,medical.opus,71014,,,,,True,71
+medaile,medal,mˈɛdəl,medal.opus,71015,,,,,True,71
+organizovat,organise,ˈɔːɹɡɐnˌaɪz,organise.opus,71016,,,,,True,71
+organizovaný,organised,ˈɔːɹɡɐnˌaɪzd,organised.opus,71017,,,,,True,71
+cereálie,cereal,sˈiəɹɪəl,cereal.opus,71018,,,,,True,71
+mládí,youth,jˈuːθ,youth.opus,71019,,,,,True,71
+pokus,attempt,ɐtˈɛmpt,attempt.opus,71020,,,,,True,71
+parkoviště,car park,kˈɑːɹ pˈɑːɹk,car_park.opus,71021,,,,,True,71
+tábořit,camp,kˈæmp,camp.opus,71022,,,,,True,71
+předseda,chairman,tʃˈɛɹmən,chairman.opus,71023,,,,,True,71
+"Znám muže, který zpívá v kapele.",I know a man who sings in a band.,aɪ nˈoʊ ɐ mˈæn hˌuː sˈɪŋz ɪn ɐ bˈænd,i_know_a_man_who_sings_in_a_band.opus,71024,93,,,83,False,71
+"Máš knihu, která mi pomáhá učit se anglicky.",You have a book that helps me learn English.,juː hæv ɐ bˈʊk ðæt hˈɛlps mˌiː lˈɜːn ˈɪŋɡlɪʃ,you_have_a_book_that_helps_me_learn_english.opus,71025,93,,,83,False,71
+"On hledá práci, která dobře platí.",He's looking for a job that pays well.,hiːz lˈʊkɪŋ fɚɹə dʒˈɑːb ðæt pˈeɪz wˈɛl,hes_looking_for_a_job_that_pays_well.opus,71026,93,,,83,False,71
+"Ona zná ženu, která peče dorty.",She knows a woman who bakes cakes.,ʃiː nˈoʊz ɐ wˈʊmən hˌuː bˈeɪks kˈeɪks,she_knows_a_woman_who_bakes_cakes.opus,71027,93,,,83,False,71
+"To je telefon, který pořád funguje.",It's a phone that still works.,ɪts ɐ fˈoʊn ðæt stˈɪl wˈɜːks,its_a_phone_that_still_works.opus,71028,93,,,83,False,71
+"Bydlíme v domě, který stojí u řeky.",We live in a house that sits by the river.,wiː lˈɪv ɪn ɐ hˈaʊs ðæt sˈɪts baɪ ðə ɹˈɪvɚ,we_live_in_a_house_that_sits_by_the_river.opus,71029,93,,,83,False,71
+"Znáte restauraci, která vaří dobré jídlo?",Do you know a restaurant that serves good food?,dˈuː juː nˈoʊ ɐ ɹˈɛstɹɑːnt ðæt sˈɜːvz ɡˈʊd fˈuːd,do_you_know_a_restaurant_that_serves_good_food.opus,71030,93,,,83,False,71
+"Mají psa, který rád běhá.",They have a dog that likes to run.,ðeɪ hæv ɐ dˈɑːɡ ðæt lˈaɪks tə ɹˈʌn,they_have_a_dog_that_likes_to_run.opus,71031,93,,,83,False,71

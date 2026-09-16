@@ -1,0 +1,34 @@
+czech,english,block_id,grammar_chunk_id
+model,model,,
+nepříjemný,uneasy,,
+paprsek,ray,,
+větrný,windy,,
+víno,wine,,
+poutník,pilgrim,,
+vítěz,winner,,
+pilulka,pill,,
+mobilní,mobile,,
+tahat,pull,,
+žíznivý,thirsty,,
+architektura,architecture,,
+badminton,badminton,,
+mešita,mosque,,
+rap,rap,,
+dub,oak,,
+inzerce,advertising,,
+rada,advice,,
+celý,whole,,
+uvázat,tie,,
+uklizeno,tidy,,
+uklidit,tidy,,
+přesný,precise,,
+koho,whom,,
+
+Budu zítra v osm pracovat?,Will I be working at eight tomorrow?,85,75
+Budeš zítra ráno řídit?,Will you be driving tomorrow morning?,85,75
+On bude zítra v tu dobu spát?,Will he be sleeping then?,85,75
+Ona bude zítra večer studovat?,Will she be studying tomorrow evening?,85,75
+Bude zítra touto dobou pršet?,Will it be raining at this time tomorrow?,85,75
+Budeme v sobotu touhle dobou cestovat?,Will we be travelling at this time on Saturday?,85,75
+Budete zítra v osm čekat před hotelem?,Will you be waiting outside the hotel at eight tomorrow?,85,75
+"Oni budou hrát, až dorazíme?",Will they be playing when we arrive?,85,75

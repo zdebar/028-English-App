@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+autor,author,ˈɔːθɚ,author.opus,60000,,,,,True,60
+povolení,permit,pˈɜːmɪt,permit.opus,60001,,,,,True,60
+povolení,permission,pɚmˈɪʃən,permission.opus,60002,,,,,True,60
+toast,toast,tˈoʊst,toast.opus,60003,,,,,True,60
+křeslo,armchair,ˈɑːɹmtʃɛɹ,armchair.opus,60004,,,,,True,60
+dnes,nowadays,nˈaʊədˌeɪz,nowadays.opus,60005,,,,,True,60
+titul,title,tˈaɪɾəl,title.opus,60006,,,,,True,60
+nejistý,uncertain,ʌnsˈɜːʔn̩,uncertain.opus,60007,,,,,True,60
+balit,pack,pˈæk,pack.opus,60008,,,,,True,60
+balíček,pack,pˈæk,pack.opus,60009,,,,,True,60
+dálnice,motorway,mˈoʊɾɚwˌeɪ,motorway.opus,60010,,,,,True,60
+osobnost,personality,pˌɜːsənˈælᵻɾi,personality.opus,60011,,,,,True,60
+Pacifik,pacific,pɐsˈɪfɪk,pacific.opus,60012,,,,,True,60
+nepříjemný,uncomfortable,ʌŋkˈʌmftəbəl,uncomfortable.opus,60013,,,,,True,60
+tip,tip,tˈɪp,tip.opus,60014,,,,,True,60
+předpovědět,predict,pɹɪdˈɪkt,predict.opus,60015,,,,,True,60
+předpověď,prediction,pɹɪdˈɪkʃən,prediction.opus,60016,,,,,True,60
+atom,atom,ˈæɾəm,atom.opus,60017,,,,,True,60
+rozsah,range,ɹˈeɪndʒ,range.opus,60018,,,,,True,60
+jízdní řád,timetable,tˈaɪmteɪbəl,timetable.opus,60019,,,,,True,60
+většinou,mostly,mˈoʊstli,mostly.opus,60020,,,,,True,60
+benzín,petrol,pˈɛtɹəl,petrol.opus,60021,,,,,True,60
+čerpací stanice,petrol station,pˈɛtɹəl stˈeɪʃən,petrol_station.opus,60022,,,,,True,60
+inzerovat,advertise,ˈædvɚtˌaɪz,advertise.opus,60023,,,,,True,60
+Co jsem zabalil před odjezdem?,What had I packed before I left?,wˌʌt hæd aɪ pˈækt bᵻfˌɔːɹ aɪ lˈɛft,what_had_i_packed_before_i_left.opus,60024,82,,,72,False,60
+"Co jsi dokončil, než jsi odešel?",What had you finished before you left?,wˌʌt hæd juː fˈɪnɪʃt bᵻfˌɔːɹ juː lˈɛft,what_had_you_finished_before_you_left.opus,60025,82,,,72,False,60
+"Co už snědl, než jsme dorazili?",What had he eaten before we arrived?,wˌʌt hæd hiː ˈiːʔn̩ bᵻfˌɔːɹ wiː ɚɹˈaɪvd,what_had_he_eaten_before_we_arrived.opus,60026,82,,,72,False,60
+Komu zavolala před odjezdem?,Who had she called before she left?,hˌuː hæd ʃiː kˈɔːld bᵻfˌɔːɹ ʃiː lˈɛft,who_had_she_called_before_she_left.opus,60027,82,,,72,False,60
+"Co požár poškodil, než ho uhasili?",What had the fire damaged before they put it out?,wˌʌt hæd ðə fˈaɪɚ dˈæmɪdʒd bᵻfˌɔːɹ ðeɪ pˌʊt ɪɾ ˈaʊt,what_had_the_fire_damaged_before_they_put_it_out.opus,60028,82,,,72,False,60
+"Na co jsme zapomněli, než jsme odjeli?",What had we forgotten before we left?,wˌʌt hæd wiː fɚɡˈɑːʔn̩ bᵻfˌɔːɹ wiː lˈɛft,what_had_we_forgotten_before_we_left.opus,60029,82,,,72,False,60
+Co jste viděli před příjezdem?,What had you seen before you arrived?,wˌʌt hæd juː sˈiːn bᵻfˌɔːɹ juː ɚɹˈaɪvd,what_had_you_seen_before_you_arrived.opus,60030,82,,,72,False,60
+"Kam už odešli, když jsem jim zavolal?",Where had they gone by the time I called them?,wˌɛɹ hæd ðeɪ ɡɔn baɪ ðə tˈaɪm aɪ kˈɔːld ðˌɛm,where_had_they_gone_by_the_time_i_called_them.opus,60031,82,,,72,False,60

@@ -1,0 +1,41 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+obchodní dům,department store,dᵻpˈɑːɹtmənt stˈɔːɹ,department_store.opus,35000,,,,,True,35
+začátečník,beginner,bɪɡˈɪnɚ,beginner.opus,35001,,,,,True,35
+želé,jelly,dʒˈɛli,jelly.opus,35002,,,,,True,35
+džem,jam,dʒˈæm,jam.opus,35003,,,,,True,35
+znamenat,signify,sˈɪɡnᵻfˌaɪ,signify.opus,35004,,,,,True,35
+významný,significant,sɪɡnˈɪfɪkənt,significant.opus,35005,,,,,True,35
+úspěšně,successfully,səksˈɛsfəli,successfully.opus,35006,,,,,True,35
+ztracený,lost,lˈɔst,lost.opus,35007,,,,,True,35
+úděl,lot,lˈɑːt,lot.opus,35008,,,,,True,35
+hlasitý,loud,lˈaʊd,loud.opus,35009,,,,,True,35
+hlasitě,loudly,lˈaʊdli,loudly.opus,35010,,,,,True,35
+polykat,swallow,swˈɔloʊ,swallow.opus,35011,,,,,True,35
+vodítko,clue,klˈuː,clue.opus,35012,,,,,True,35
+klaun,clown,klˈaʊn,clown.opus,35013,,,,,True,35
+potit,sweat,swˈɛt,sweat.opus,35014,,,,,True,35
+kabina,cab,kˈæb,cab.opus,35015,,,,,True,35
+výhodná dohoda,bargain,bˈɑːɹɡɪn,bargain.opus,35016,,,,,True,35
+naštěstí,luckily,lˈʌkili,luckily.opus,35017,,,,,True,35
+pravidelně,regularly,ɹˈɛɡjʊlɚli,regularly.opus,35018,,,,,True,35
+ulička,aisle,ˈaɪəl,aisle.opus,35019,,,,,True,35
+cvaknutí,click,klˈɪk,click.opus,35020,,,,,True,35
+milý,sweet,swˈiːt,sweet.opus,35021,,,,,True,35
+miláček,sweetheart,swˈiːthɑːɹt,sweetheart.opus,35022,,,,,True,35
+úředník,clerk,klˈɜːk,clerk.opus,35023,,,,,True,35
+já jsem nepracoval,I didn't work,aɪ dˈɪdnt wˈɜːk,i_didnt_work.opus,35024,57,,,47,False,35
+ty ses nedíval,you didn't watch,juː dˈɪdnt wˈɑːtʃ,you_didnt_watch.opus,35025,57,,,47,False,35
+on neuklízel,he didn't clean,hiː dˈɪdnt klˈiːn,he_didnt_clean.opus,35026,57,,,47,False,35
+ona neotevřela,she didn't open,ʃiː dˈɪdnt ˈoʊpən,she_didnt_open.opus,35027,57,,,47,False,35
+ono nezačalo,it didn't start,ɪt dˈɪdnt stˈɑːɹt,it_didnt_start.opus,35028,57,,,47,False,35
+my jsme nehráli,we didn't play,wiː dˈɪdnt plˈeɪ,we_didnt_play.opus,35029,57,,,47,False,35
+vy jste nepomohli,you didn't help,juː dˈɪdnt hˈɛlp,you_didnt_help.opus,35030,57,,,47,False,35
+oni nenavštívili,they didn't visit,ðeɪ dˈɪdnt vˈɪzɪt,they_didnt_visit.opus,35031,57,,,47,False,35
+Já jsem nešel do práce.,I didn't go to work.,aɪ dˈɪdnt ɡˌoʊ tə wˈɜːk,i_didnt_go_to_work.opus,35032,,,,47,False,35
+Nedíval ses na ten film.,You didn't watch the film.,juː dˈɪdnt wˈɑːtʃ ðə fˈɪlm,you_didnt_watch_the_film.opus,35033,,,,47,False,35
+On si nekoupil lístek.,He didn't buy a ticket.,hiː dˈɪdnt bˈaɪ ɐ tˈɪkɪt,he_didnt_buy_a_ticket.opus,35034,,,,47,False,35
+Ona nenapsala odpověď.,She didn't write a reply.,ʃiː dˈɪdnt ɹˈaɪt ɐ ɹᵻplˈaɪ,she_didnt_write_a_reply.opus,35035,,,,47,False,35
+Počítač se nespustil.,Computer didn't start.,kəmpjˈuːɾɚ dˈɪdnt stˈɑːɹt,computer_didnt_start.opus,35036,,,,47,False,35
+My jsme nejeli pryč.,We didn't go away.,wiː dˈɪdnt ɡˌoʊ ɐwˈeɪ,we_didnt_go_away.opus,35037,,,,47,False,35
+Vy jste nám nepomohli.,You didn't help us.,juː dˈɪdnt hˈɛlp ˌʌs,you_didnt_help_us.opus,35038,,,,47,False,35
+Oni nenavštívili své rodiče.,They didn't visit their parents.,ðeɪ dˈɪdnt vˈɪzɪt ðɛɹ pˈɛɹənts,they_didnt_visit_their_parents.opus,35039,,,,47,False,35

@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+křestní jméno,first name,fˈɜːst nˈeɪm,first_name.opus,51000,,,,,True,51
+výkřik,shout,ʃˈaʊt,shout.opus,51001,,,,,True,51
+česnek,garlic,ɡˈɑːɹlɪk,garlic.opus,51002,,,,,True,51
+plyn,gas,ɡˈæs,gas.opus,51003,,,,,True,51
+pohlaví,gender,dʒˈɛndɚ,gender.opus,51004,,,,,True,51
+znuděný,bored,bˈɔːɹd,bored.opus,51005,,,,,True,51
+soubor,set,sˈɛt,set.opus,51006,,,,,True,51
+generace,generation,dʒˌɛnɚɹˈeɪʃən,generation.opus,51007,,,,,True,51
+odkončit,final,fˈaɪnəl,final.opus,51008,,,,,True,51
+konečně,finally,fˈaɪnəli,finally.opus,51009,,,,,True,51
+finále,final,fˈaɪnəl,final.opus,51010,,,,,True,51
+šéf,boss,bˈɔs,boss.opus,51011,,,,,True,51
+výročí,anniversary,ˌænɪvˈɜːsɚɹi,anniversary.opus,51012,,,,,True,51
+shromáždit,gather,ɡˈæðɚ,gather.opus,51013,,,,,True,51
+jinak,differently,dˈɪfɹəntli,differently.opus,51014,,,,,True,51
+esej,essay,ˈɛseɪ,essay.opus,51015,,,,,True,51
+únik,escape,ɛskˈeɪp,escape.opus,51016,,,,,True,51
+špagety,spaghetti,spɐɡˈɛɾi,spaghetti.opus,51017,,,,,True,51
+pochyba,doubt,dˈaʊt,doubt.opus,51018,,,,,True,51
+dvojnásobek,double,dˈʌbəl,double.opus,51019,,,,,True,51
+od sebe,apart,ɐpˈɑːɹt,apart.opus,51020,,,,,True,51
+reproduktor,speaker,spˈiːkɚ,speaker.opus,51021,,,,,True,51
+hotovo,done,dˈʌn,done.opus,51022,,,,,True,51
+lov,hunt,hˈʌnt,hunt.opus,51023,,,,,True,51
+Skončil jsem už?,Have I finished yet?,hæv aɪ fˈɪnɪʃt jˈɛt,have_i_finished_yet.opus,51024,73,,,63,False,51
+Už jsi viděl ten film?,Have you seen the movie yet?,hæv juː sˈiːn ðə mˈuːvi jˈɛt,have_you_seen_the_movie_yet.opus,51025,73,,,63,False,51
+Ztratil už klíče?,Has he lost his keys yet?,hɐz hiː lˈɔst hɪz kˈiːz jˈɛt,has_he_lost_his_keys_yet.opus,51026,73,,,63,False,51
+Už se rozhodla?,Has she decided yet?,hɐz ʃiː dᵻsˈaɪdᵻd jˈɛt,has_she_decided_yet.opus,51027,73,,,63,False,51
+Už se to rozbilo?,Has it broken yet?,hɐz ɪt bɹˈoʊkən jˈɛt,has_it_broken_yet.opus,51028,73,,,63,False,51
+Už jsme přijeli?,Have we arrived yet?,hæv wiː ɚɹˈaɪvd jˈɛt,have_we_arrived_yet.opus,51029,73,,,63,False,51
+Už jste zapomněli adresu?,Have you forgotten the address yet?,hæv juː fɚɡˈɑːʔn̩ ðɪ ɐdɹˈɛs jˈɛt,have_you_forgotten_the_address_yet.opus,51030,73,,,63,False,51
+Už jedli?,Have they eaten yet?,hæv ðeɪ ˈiːʔn̩ jˈɛt,have_they_eaten_yet.opus,51031,73,,,63,False,51

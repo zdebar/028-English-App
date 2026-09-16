@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+fungovat,function,fˈʌŋkʃən,function.opus,48000,,,,,True,48
+odstín,shade,ʃˈeɪd,shade.opus,48001,,,,,True,48
+blázen,fool,fˈuːl,fool.opus,48002,,,,,True,48
+regál,bookshelf,bˈʊkʃɛlf,bookshelf.opus,48003,,,,,True,48
+mouka,flour,flˈaʊɚ,flour.opus,48004,,,,,True,48
+knihkupectví,bookshop,bˈʊkʃɑːp,bookshop.opus,48005,,,,,True,48
+zaplavit,flood,flˈʌd,flood.opus,48006,,,,,True,48
+šít,sew,sˈoʊ,sew.opus,48007,,,,,True,48
+plovák,float,flˈoʊt,float.opus,48008,,,,,True,48
+let,flight,flˈaɪt,flight.opus,48009,,,,,True,48
+nábytek,furniture,fˈɜːnɪtʃɚ,furniture.opus,48010,,,,,True,48
+prodavač,shop assistant,ʃˈɑːp ɐsˈɪstənt,shop_assistant.opus,48011,,,,,True,48
+další,further,fˈɜːðɚ,further.opus,48012,,,,,True,48
+blecha,flea,flˈiː,flea.opus,48013,,,,,True,48
+pobřeží,shore,ʃˈɔːɹ,shore.opus,48014,,,,,True,48
+vařit,boil,bˈɔɪl,boil.opus,48015,,,,,True,48
+nepříjemný,annoying,ɐnˈɔɪɪŋ,annoying.opus,48016,,,,,True,48
+fotbalista,footballer,fˈʊtbɔːlɚ,footballer.opus,48017,,,,,True,48
+upřímný,frank,fɹˈæŋk,frank.opus,48018,,,,,True,48
+podíl,share,ʃˈɛɹ,share.opus,48019,,,,,True,48
+šampon,shampoo,ʃæmpˈuː,shampoo.opus,48020,,,,,True,48
+vpřed,forward,fˈɔːɹwɚd,forward.opus,48021,,,,,True,48
+štěstí,fortune,fˈɔːɹtʃʊn,fortune.opus,48022,,,,,True,48
+naštěstí,fortunately,fˈɔːɹtʃənətli,fortunately.opus,48023,,,,,True,48
+"Kdybych měl čas, cestoval bych","If I had time, I'd travel",ɪf aɪ hæd tˈaɪm aɪd tɹˈævəl,if_i_had_time_id_travel.opus,48024,70,,,60,False,48
+"Kdybys znal odpověď, řekl bys ji","If you knew the answer, you'd say it",ɪf juː nˈuː ðɪ ˈænsɚ juːd sˈeɪ ɪt,if_you_knew_the_answer_youd_say_it.opus,48025,70,,,60,False,48
+"Kdyby měl peníze, koupil by auto","If he had the money, he'd buy a car",ɪf hiː hæd ðə mˈʌni hiːd bˈaɪ ɐ kˈɑːɹ,if_he_had_the_money_hed_buy_a_car.opus,48026,70,,,60,False,48
+"Kdyby měla volno, odpočívala by","If she had a day off, she'd rest",ɪf ʃiː hæd ɐ dˈeɪ ˈɔf ʃiːd ɹˈɛst,if_she_had_a_day_off_shed_rest.opus,48027,70,,,60,False,48
+"Kdyby bylo tepleji, fungovalo by to","If it were warmer, it'd work",ɪf ɪt wɜː wˈɔːɹmɚɹ ɪɾəd wˈɜːk,if_it_were_warmer_itd_work.opus,48028,70,,,60,False,48
+"Kdybychom bydleli blíž, chodili bychom pěšky","If we lived closer, we'd walk",ɪf wiː lˈɪvd klˈoʊsɚ wiːd wˈɔːk,if_we_lived_closer_wed_walk.opus,48029,70,,,60,False,48
+"Kdybyste měli více času, pomohli byste","If you had more time, you'd help",ɪf juː hæd mˈɔːɹ tˈaɪm juːd hˈɛlp,if_you_had_more_time_youd_help.opus,48030,70,,,60,False,48
+"Kdyby měli mapu, neztratili by se","If they had a map, they wouldn't get lost",ɪf ðeɪ hæd ɐ mˈæp ðeɪ wˈʊdənt ɡɛt lˈɔst,if_they_had_a_map_they_wouldnt_get_lost.opus,48031,70,,,60,False,48

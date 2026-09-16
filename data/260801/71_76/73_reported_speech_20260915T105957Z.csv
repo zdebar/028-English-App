@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+policista,policeman,pəlˈiːsmən,policeman.opus,73000,,,,,True,73
+policistka,policewoman,pəlˈiːswʊmən,policewoman.opus,73001,,,,,True,73
+sirotek,orphan,ˈɔːɹfən,orphan.opus,73002,,,,,True,73
+centimetr,centimetre,sˈɛntɪmˌiːɾɚ,centimetre.opus,73003,,,,,True,73
+kampus,campus,kˈæmpəs,campus.opus,73004,,,,,True,73
+zdvořilý,polite,pəlˈaɪt,polite.opus,73005,,,,,True,73
+příležitost,opportunity,ɑːpɚtˈuːnᵻɾi,opportunity.opus,73006,,,,,True,73
+politický,political,pəlˈɪɾɪkəl,political.opus,73007,,,,,True,73
+zamýšlet,mean,mˈiːn,mean.opus,73008,,,,,True,73
+oponovat,oppose,əpˈoʊz,oppose.opus,73009,,,,,True,73
+kempování,camping,kˈæmpɪŋ,camping.opus,73010,,,,,True,73
+talent,talent,tˈælənt,talent.opus,73011,,,,,True,73
+naproti,opposite,ˈɑːpəzˌɪt,opposite.opus,73012,,,,,True,73
+původní,original,ɚɹˈɪdʒɪnəl,original.opus,73013,,,,,True,73
+břeh řeky,bank,bˈæŋk,bank.opus,73014,,,,,True,73
+schopnost,ability,ɐbˈɪləɾi,ability.opus,73015,,,,,True,73
+cent,cent,sˈɛnt,cent.opus,73016,,,,,True,73
+význam,meaning,mˈiːnɪŋ,meaning.opus,73017,,,,,True,73
+dětské hřiště,playground,plˈeɪɡɹaʊnd,playground.opus,73018,,,,,True,73
+sebe,ourselves,aʊɚsˈɛlvz,ourselves.opus,73019,,,,,True,73
+hravý,playful,plˈeɪfəl,playful.opus,73020,,,,,True,73
+realizovat,realise,ɹˈiːəlaɪz,realise.opus,73021,,,,,True,73
+psycholog,psychologist,saɪkˈɑːlədʒˌɪst,psychologist.opus,73022,,,,,True,73
+chybějící,missing,mˈɪsɪŋ,missing.opus,73023,,,,,True,73
+"Řekl jsem, že jsem unavený",I said I was tired,aɪ sˈɛd aɪ wʌz tˈaɪɚd,i_said_i_was_tired.opus,73024,95,,,85,False,73
+"Řekl jsi, že jsi připravený",You said you were ready,juː sˈɛd juː wɜː ɹˈɛdi,you_said_you_were_ready.opus,73025,95,,,85,False,73
+"Řekl, že potřebuje pomoc",He said he needed help,hiː sˈɛd hiː nˈiːdᵻd hˈɛlp,he_said_he_needed_help.opus,73026,95,,,85,False,73
+"Řekla, že už skončila",She said she had already finished,ʃiː sˈɛd ʃiː hæd ɔːlɹˌɛdi fˈɪnɪʃt,she_said_she_had_already_finished.opus,73027,95,,,85,False,73
+"Říkalo se, že telefon funguje",It was said that the phone worked,ɪt wʌz sˈɛd ðætðə fˈoʊn wˈɜːkt,it_was_said_that_the_phone_worked.opus,73028,95,,,85,False,73
+"Řekli jsme, že odcházíme",We said we were leaving,wiː sˈɛd wiː wɜː lˈiːvɪŋ,we_said_we_were_leaving.opus,73029,95,,,85,False,73
+"Řekli jste, že přijdete",You said you would come,juː sˈɛd juː wʊd kˈʌm,you_said_you_would_come.opus,73030,95,,,85,False,73
+"Řekli, že to viděli",They said they had seen it,ðeɪ sˈɛd ðeɪ hæd sˈiːn ɪt,they_said_they_had_seen_it.opus,73031,95,,,85,False,73

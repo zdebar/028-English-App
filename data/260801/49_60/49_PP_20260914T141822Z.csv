@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+svoboda,freedom,fɹˈiːdəm,freedom.opus,49000,,,,,True,49
+zmrazit,freeze,fɹˈiːz,freeze.opus,49001,,,,,True,49
+skořápka,shell,ʃˈɛl,shell.opus,49002,,,,,True,49
+zděšení,fright,fɹˈaɪt,fright.opus,49003,,,,,True,49
+děsivý,frightening,fɹˈaɪʔn̩ɪŋ,frightening.opus,49004,,,,,True,49
+vidlice,fork,fˈɔːɹk,fork.opus,49005,,,,,True,49
+navždy,forever,fɚɹˈɛvɚ,forever.opus,49006,,,,,True,49
+smažený,fried,fɹˈaɪd,fried.opus,49007,,,,,True,49
+les,forest,fˈɔːɹɪst,forest.opus,49008,,,,,True,49
+bonus,bonus,bˈoʊnəs,bonus.opus,49009,,,,,True,49
+přátelství,friendship,fɹˈɛndʃɪp,friendship.opus,49010,,,,,True,49
+vystrašit,frighten,fɹˈaɪʔn̩,frighten.opus,49011,,,,,True,49
+síla,force,fˈɔːɹs,force.opus,49012,,,,,True,49
+vystrašený,frightened,fɹˈaɪʔn̩d,frightened.opus,49013,,,,,True,49
+zakázat,forbid,fɚbˈɪd,forbid.opus,49014,,,,,True,49
+lednička,fridge,fɹˈɪdʒ,fridge.opus,49015,,,,,True,49
+držadlo,handle,hˈændəl,handle.opus,49016,,,,,True,49
+šortky,shorts,ʃˈɔːɹts,shorts.opus,49017,,,,,True,49
+galerie,gallery,ɡˈælɚɹi,gallery.opus,49018,,,,,True,49
+vážně,seriously,sˈɪɹiəsli,seriously.opus,49019,,,,,True,49
+bojovník,fighter,fˈaɪɾɚ,fighter.opus,49020,,,,,True,49
+dát si námahu,bother,bˈɑːðɚ,bother.opus,49021,,,,,True,49
+beletrie,fiction,fˈɪkʃən,fiction.opus,49022,,,,,True,49
+prohlídka památek,sightseeing,sˈaɪtsiːɪŋ,sightseeing.opus,49023,,,,,True,49
+Já jsem už skončil,I've already finished,aɪv ɔːlɹˌɛdi fˈɪnɪʃt,ive_already_finished.opus,49024,71,,,61,False,49
+Ty jsi už viděl ten film.,You've already seen the movie.,juːv ɔːlɹˌɛdi sˈiːn ðə mˈuːvi,youve_already_seen_the_movie.opus,49025,71,,,61,False,49
+On ztratil své klíče.,He's lost his keys.,hiːz lˈɔst hɪz kˈiːz,hes_lost_his_keys.opus,49026,71,,,61,False,49
+Ona se už rozhodla.,She's already decided.,ʃiːz ɔːlɹˌɛdi dᵻsˈaɪdᵻd,shes_already_decided.opus,49027,71,,,61,False,49
+To se změnilo od minula.,It's changed since last time.,ɪts tʃˈeɪndʒd sˈɪns lˈæst tˈaɪm,its_changed_since_last_time.opus,49028,71,,,61,False,49
+My jsme právě přijeli,We've just arrived,wiːv dʒˈʌst ɚɹˈaɪvd,weve_just_arrived.opus,49029,71,,,61,False,49
+Vy jste zapomněli adresu,You've forgotten the address.,juːv fɚɡˈɑːʔn̩ ðɪ ɐdɹˈɛs,youve_forgotten_the_address.opus,49030,71,,,61,False,49
+Oni už jedli.,They've already eaten.,ðeɪv ɔːlɹˌɛdi ˈiːʔn̩,theyve_already_eaten.opus,49031,71,,,61,False,49

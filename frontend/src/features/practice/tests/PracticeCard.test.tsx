@@ -468,7 +468,7 @@ describe('PracticeCard', () => {
     expect(volumeSlider.dataset.disabled).toBe('true');
   });
 
-  it('keeps audio controls disabled before reveal in CZ->EN mode', () => {
+  it('keeps playback disabled but volume adjustable before reveal in CZ->EN mode', () => {
     mocks.practiceDeck.isCzToEn = true;
     mocks.practiceDeck.revealed = false;
     mocks.practiceDeck.audioDisabled = false;
@@ -484,7 +484,7 @@ describe('PracticeCard', () => {
 
     expect(audioButton).toBeTruthy();
     expect(audioButton.disabled).toBe(true);
-    expect(volumeSlider.dataset.disabled).toBe('true');
+    expect(volumeSlider.dataset.disabled).toBe('false');
   });
 
   it('autoplays audio after delay in EN->CZ mode when allowed', async () => {

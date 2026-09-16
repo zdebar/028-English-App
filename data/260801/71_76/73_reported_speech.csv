@@ -1,0 +1,35 @@
+czech,english,block_id,grammar_chunk_id
+policista,policeman,,
+policistka,policewoman,,
+sirotek,orphan,,
+centimetr,centimetre,,
+kampus,campus,,
+zdvořilý,polite,,
+příležitost,opportunity,,
+politický,political,,
+zamýšlet,mean,,
+oponovat,oppose,,
+kempování,camping,,
+talent,talent,,
+naproti,opposite,,
+původní,original,,
+břeh řeky,bank,,
+schopnost,ability,,
+cent,cent,,
+význam,meaning,,
+dětské hřiště,playground,,
+sebe,ourselves,,
+hravý,playful,,
+realizovat,realise,,
+psycholog,psychologist,,
+chybějící,missing,,
+
+"Řekl jsem, že jsem unavený","I said I was tired",95,85
+"Řekl jsi, že jsi připravený","You said you were ready",95,85
+"Řekl, že potřebuje pomoc","He said he needed help",95,85
+"Řekla, že už skončila","She said she had already finished",95,85
+"Říkalo se, že telefon funguje","It was said that the phone worked",95,85
+"Řekli jsme, že odcházíme","We said we were leaving",95,85
+"Řekli jste, že přijdete","You said you would come",95,85
+"Řekli, že to viděli","They said they had seen it",95,85
+

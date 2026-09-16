@@ -1,0 +1,41 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+dříve než,before,bᵻfˈɔːɹ,before.opus,34000,,,,,True,34
+vnitřní,inner,ˈɪnɚ,inner.opus,34001,,,,,True,34
+přímý,straight,stɹˈeɪt,straight.opus,34002,,,,,True,34
+kroužek,ring,ɹˈɪŋ,ring.opus,34003,,,,,True,34
+skříň,cupboard,kˈʌbəd,cupboard.opus,34004,,,,,True,34
+radost,joy,dʒˈɔɪ,joy.opus,34005,,,,,True,34
+byl,been,bˈɪn,been.opus,34006,,,,,True,34
+dezert,dessert,dɪzˈɜːt,dessert.opus,34007,,,,,True,34
+aplikovat,apply,ɐplˈaɪ,apply.opus,34008,,,,,True,34
+problém,issue,ˈɪʃuː,issue.opus,34009,,,,,True,34
+tanečník,dancer,dˈænsɚ,dancer.opus,34010,,,,,True,34
+stát,state,stˈeɪt,state.opus,34011,,,,,True,34
+chovat se,behave,bᵻhˈeɪv,behave.opus,34012,,,,,True,34
+chování,behaviour,bᵻhˈeɪvjɚ,behaviour.opus,34013,,,,,True,34
+zubař,dentist,dˈɛntɪst,dentist.opus,34014,,,,,True,34
+přehrada,dam,dˈæm,dam.opus,34015,,,,,True,34
+sám,itself,ɪtsˈɛlf,itself.opus,34016,,,,,True,34
+denní,daily,dˈeɪli,daily.opus,34017,,,,,True,34
+zvyk,custom,kˈʌstəm,custom.opus,34018,,,,,True,34
+jezdit na kole,cycle,sˈaɪkəl,cycle.opus,34019,,,,,True,34
+cyklistika,cycling,sˈaɪklɪŋ,cycling.opus,34020,,,,,True,34
+začátek,beginning,bɪɡˈɪnɪŋ,beginning.opus,34021,,,,,True,34
+s sebou,along,ɐlˈɔŋ,along.opus,34022,,,,,True,34
+odpověď,response,ɹᵻspˈɑːns,response.opus,34023,,,,,True,34
+já pracoval,I worked,aɪ wˈɜːkt,i_worked.opus,34024,56,,,46,False,34
+ty ses díval,you watched,juː wˈɑːtʃt,you_watched.opus,34025,56,,,46,False,34
+on uklízel,he cleaned,hiː klˈiːnd,he_cleaned.opus,34026,56,,,46,False,34
+ona otevřela,she opened,ʃiː ˈoʊpənd,she_opened.opus,34027,56,,,46,False,34
+ono začalo,it started,ɪt stˈɑːɹɾᵻd,it_started.opus,34028,56,,,46,False,34
+my jsme hráli,we played,wiː plˈeɪd,we_played.opus,34029,56,,,46,False,34
+vy jste pomohli,you helped,juː hˈɛlpt,you_helped.opus,34030,56,,,46,False,34
+oni navštívili,they visited,ðeɪ vˈɪzɪɾᵻd,they_visited.opus,34031,56,,,46,False,34
+Včera jsem šel domů.,I went home yesterday.,aɪ wɛnt hˈoʊm jˈɛstɚdˌeɪ,i_went_home_yesterday.opus,34032,,,,46,False,34
+Viděl jsi film.,You saw a film.,juː sˈɔː ɐ fˈɪlm,you_saw_a_film.opus,34033,,,,46,False,34
+On koupil telefon.,He bought a phone.,hiː bˈɔːt ɐ fˈoʊn,he_bought_a_phone.opus,34034,,,,46,False,34
+Ona napsala e-mail.,She wrote an email.,ʃiː ɹˈoʊt ɐn ˈiːmeɪl,she_wrote_an_email.opus,34035,,,,46,False,34
+Rozbilo se to.,It broke.,ɪt bɹˈoʊk,it_broke.opus,34036,,,,46,False,34
+My jsem jeli vlakem.,We went by train.,wiː wɛnt baɪ tɹˈeɪn,we_went_by_train.opus,34037,,,,46,False,34
+Vy jste mu dali adresu.,You gave him an address.,juː ɡˈeɪv hˌɪm ɐn ɐdɹˈɛs,you_gave_him_an_address.opus,34038,,,,46,False,34
+Oni našli klíče.,They found the keys.,ðeɪ fˈaʊnd ðə kˈiːz,they_found_the_keys.opus,34039,,,,46,False,34

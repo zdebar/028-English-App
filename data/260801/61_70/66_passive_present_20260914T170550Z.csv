@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+klam,trick,tɹˈɪk,trick.opus,66000,,,,,True,66
+skutečně,truly,tɹˈuːli,truly.opus,66001,,,,,True,66
+vyhnout se,avoid,ɐvˈɔɪd,avoid.opus,66002,,,,,True,66
+zprůměrovat,average,ˈævɹɪdʒ,average.opus,66003,,,,,True,66
+hlavní,principal,pɹˈɪnsɪpəl,principal.opus,66004,,,,,True,66
+akt,act,ˈækt,act.opus,66005,,,,,True,66
+napříč,across,əkɹˈɑːs,across.opus,66006,,,,,True,66
+problémy,trouble,tɹˈʌbəl,trouble.opus,66007,,,,,True,66
+pravda,truth,tɹˈuːθ,truth.opus,66008,,,,,True,66
+síť,net,nˈɛt,net.opus,66009,,,,,True,66
+zaparkovat,park,pˈɑːɹk,park.opus,66010,,,,,True,66
+částečně,partly,pˈɑːɹtli,partly.opus,66011,,,,,True,66
+královna,queen,kwˈiːn,queen.opus,66012,,,,,True,66
+cena,award,ɐwˈɔːɹd,award.opus,66013,,,,,True,66
+peněženka,wallet,wˈɔlɪt,wallet.opus,66014,,,,,True,66
+bloudit,wander,wˈɔndɚ,wander.opus,66015,,,,,True,66
+přihrávka,pass,pˈæs,pass.opus,66016,,,,,True,66
+přejít,pass,pˈæs,pass.opus,66017,,,,,True,66
+průchod,passage,pˈæsɪdʒ,passage.opus,66018,,,,,True,66
+hrdost,pride,pɹˈaɪd,pride.opus,66019,,,,,True,66
+chůze,walking,wˈɔːkɪŋ,walking.opus,66020,,,,,True,66
+návštěvník,visitor,vˈɪzɪɾɚ,visitor.opus,66021,,,,,True,66
+naladit,tune,tˈuːn,tune.opus,66022,,,,,True,66
+klidný,peaceful,pˈiːsfəl,peaceful.opus,66023,,,,,True,66
+Jsem zván na oslavu každý rok.,I'm invited to the party every year.,aɪm ɪnvˈaɪɾᵻd tə ðə pˈɑːɹɾi ˈɛvɹi jˈɪɹ,im_invited_to_the_party_every_year.opus,66024,88,,,78,False,66
+Jsi vybrán do týmu.,You're chosen for the team after the test.,jʊɹ tʃˈoʊzən fɚðə tˈiːm ˈæftɚ ðə tˈɛst,youre_chosen_for_the_team_after_the_test.opus,66025,88,,,78,False,66
+V práci je respektován svými kolegy.,He's respected by his colleagues at work.,hiːz ɹᵻspˈɛktᵻd baɪ hɪz kˈɑːliːɡz æt wˈɜːk,hes_respected_by_his_colleagues_at_work.opus,66026,88,,,78,False,66
+Ona je každý týden informována o změnách.,She's informed about the changes every week.,ʃiːz ɪnfˈɔːɹmd ɐbˌaʊt ðə tʃˈeɪndʒᵻz ˈɛvɹi wˈiːk,shes_informed_about_the_changes_every_week.opus,66027,88,,,78,False,66
+To se čistí každý den.,It's cleaned every day.,ɪts klˈiːnd ˈɛvɹi dˈeɪ,its_cleaned_every_day.opus,66028,88,,,78,False,66
+My jsme očekáváni na nádraží v poledne.,We're expected at the station at noon.,wɪɹ ɛkspˈɛktᵻd æt ðə stˈeɪʃən æt nˈuːn,were_expected_at_the_station_at_noon.opus,66029,88,,,78,False,66
+Vy jste placeni každý pátek.,You're paid every Friday.,jʊɹ pˈeɪd ˈɛvɹi fɹˈaɪdeɪ,youre_paid_every_friday.opus,66030,88,,,78,False,66
+Oni jsou kontrolováni u vchodu.,They're checked at the entrance.,ðeɪɚ tʃˈɛkt æt ðɪ ˈɛntɹəns,theyre_checked_at_the_entrance.opus,66031,88,,,78,False,66

@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+zóna,zone,zˈoʊn,zone.opus,72000,,,,,True,72
+výzva,challenge,tʃˈælɪndʒ,challenge.opus,72001,,,,,True,72
+šampaňské,champagne,ʃæmpˈeɪn,champagne.opus,72002,,,,,True,72
+bankovnictví,banking,bˈæŋkɪŋ,banking.opus,72003,,,,,True,72
+mistr,champion,tʃˈæmpiən,champion.opus,72004,,,,,True,72
+mistrovství,championship,tʃˈæmpiənʃˌɪp,championship.opus,72005,,,,,True,72
+velké písmeno,capital letter,kˈæpɪɾəl lˈɛɾɚ,capital_letter.opus,72006,,,,,True,72
+kapitál,capital,kˈæpɪɾəl,capital.opus,72007,,,,,True,72
+odkazovat,refer,ɹᵻfˈɜː,refer.opus,72008,,,,,True,72
+objednat,order,ˈɔːɹdɚ,order.opus,72009,,,,,True,72
+portrét,portrait,pˈɔːɹtɹɪt,portrait.opus,72010,,,,,True,72
+populace,population,pˌɑːpjʊlˈeɪʃən,population.opus,72011,,,,,True,72
+kapitola,chapter,tʃˈæptɚ,chapter.opus,72012,,,,,True,72
+příjem,receipt,ɹᵻsˈiːt,receipt.opus,72013,,,,,True,72
+znečišťovat,pollute,pəlˈuːt,pollute.opus,72014,,,,,True,72
+max,max,mˈæks,max.opus,72015,,,,,True,72
+plechovka,can,kˈæn,can.opus,72016,,,,,True,72
+recyklovat,recycle,ɹᵻsˈaɪkəl,recycle.opus,72017,,,,,True,72
+zbytečné,unnecessary,ʌnnˈɛsᵻsɚɹi,unnecessary.opus,72018,,,,,True,72
+jo,yeah,jˈɛh,yeah.opus,72019,,,,,True,72
+nepříjemný,unpleasant,ʌnplˈɛzənt,unpleasant.opus,72020,,,,,True,72
+provozovat,operate,ˈɑːpɚɹˌeɪt,operate.opus,72021,,,,,True,72
+policejní důstojník,police officer,pəlˈiːs ˈɑːfɪsɚ,police_officer.opus,72022,,,,,True,72
+policejní stanici,police station,pəlˈiːs stˈeɪʃən,police_station.opus,72023,,,,,True,72
+"Mám zpoždění, že ano?","I'm late, aren't I?",aɪm lˈeɪt ˌɑːɹnt ˈaɪ,im_late_arent_i.opus,72024,94,,,84,False,72
+"Jsi připravený, že ano?","You're ready, aren't you?",jʊɹ ɹˈɛdi ˈɑːɹnt juː,youre_ready_arent_you.opus,72025,94,,,84,False,72
+"On přichází, že ano?","He's coming, isn't he?",hiːz kˈʌmɪŋ ˈɪzənt hiː,hes_coming_isnt_he.opus,72026,94,,,84,False,72
+"Ona už skončila, že ano?","She's finished, hasn't she?",ʃiːz fˈɪnɪʃt hˈæzənt ʃiː,shes_finished_hasnt_she.opus,72027,94,,,84,False,72
+"Je zima, že ano?","It's cold, isn't it?",ɪts kˈoʊld ˈɪzənt ɪt,its_cold_isnt_it.opus,72028,94,,,84,False,72
+"Jsme tu brzy, že ano?","We're early, aren't we?",wɪɹ ˈɜːli ˈɑːɹnt wiː,were_early_arent_we.opus,72029,94,,,84,False,72
+"Jste unavení, že ano?","You're tired, aren't you?",jʊɹ tˈaɪɚd ˈɑːɹnt juː,youre_tired_arent_you.opus,72030,94,,,84,False,72
+"Jsou tady, že ano?","They're here, aren't they?",ðeɪɚ hˈɪɹ ˈɑːɹnt ðeɪ,theyre_here_arent_they.opus,72031,94,,,84,False,72

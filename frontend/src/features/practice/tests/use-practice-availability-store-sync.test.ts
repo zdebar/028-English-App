@@ -17,6 +17,7 @@ const mocks = vi.hoisted(() => ({
     .mockResolvedValue({ activeSession: null, requiresReconciliation: false }),
   reconcileActiveSession: vi.fn().mockResolvedValue(null),
   reportError: vi.fn(),
+  pathname: '/',
 }));
 
 vi.mock('@/config/config', () => ({
@@ -48,6 +49,9 @@ vi.mock('@/database/models/practice-sessions', () => ({
 vi.mock('@/features/logging/monitoring-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
+vi.mock('react-router-dom', () => ({
+  useLocation: () => ({ pathname: mocks.pathname }),
+}));
 vi.mock('dexie', () => ({
   liveQuery: (query: () => Promise<unknown>) => ({
     subscribe: (observer: Observer) => {
@@ -71,6 +75,7 @@ describe('usePracticeAvailabilityStoreSync', () => {
     mocks.observers.length = 0;
     mocks.queries.length = 0;
     mocks.unsubscribes.length = 0;
+    mocks.pathname = '/';
     usePracticeAvailabilityStore.getState().reset();
   });
 
@@ -151,6 +156,50 @@ describe('usePracticeAvailabilityStoreSync', () => {
 
     act(() => mocks.observers[0].next({ review: { reviewReadyAt: '2026-07-21T10:00:00.000Z' }, initialTrainingAvailable: false, activeSession: null }));
     expect(usePracticeAvailabilityStore.getState().reviewReadyAt).toBeNull();
+  });
+
+  it('stops on Practice and recalculates from a disabled state on Home', () => {
+    const { rerender } = renderHook(() => usePracticeAvailabilityStoreSync('u1'));
+    act(() => {
+      mocks.observers[0].next({
+        review: { reviewReadyAt: '2026-07-21T10:00:00.000Z' },
+        initialTrainingAvailable: true,
+        activeSession: null,
+      });
+    });
+
+    act(() => {
+      mocks.pathname = '/practice';
+      rerender();
+    });
+    expect(mocks.unsubscribes[0]).toHaveBeenCalledOnce();
+    expect(usePracticeAvailabilityStore.getState()).toMatchObject({
+      reviewReadyAt: null,
+      practiceLoading: false,
+    });
+
+    act(() => {
+      mocks.pathname = '/';
+      rerender();
+    });
+    expect(mocks.queries).toHaveLength(2);
+    expect(usePracticeAvailabilityStore.getState()).toMatchObject({
+      reviewReadyAt: null,
+      initialTrainingAvailable: false,
+      practiceLoading: true,
+    });
+
+    act(() => {
+      mocks.observers[1].next({
+        review: { reviewReadyAt: '2026-07-21T10:00:00.000Z' },
+        initialTrainingAvailable: true,
+        activeSession: null,
+      });
+    });
+    expect(usePracticeAvailabilityStore.getState()).toMatchObject({
+      reviewReadyAt: '2026-07-21T10:00:00.000Z',
+      practiceLoading: false,
+    });
   });
 
   it('clears snapshots on sign-out and ignores emissions after unmount', () => {

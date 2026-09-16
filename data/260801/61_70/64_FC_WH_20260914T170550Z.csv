@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+radit,advise,ɐdvˈaɪz,advise.opus,64000,,,,,True,64
+interpunkce,punctuation,pˌʌŋktʃuːˈeɪʃən,punctuation.opus,64001,,,,,True,64
+přijatelný,acceptable,ɐksˈɛptəbəl,acceptable.opus,64002,,,,,True,64
+přidání,addition,ɐdˈɪʃən,addition.opus,64003,,,,,True,64
+široký,wide,wˈaɪd,wide.opus,64004,,,,,True,64
+fyzikální,physical,fˈɪzɪkəl,physical.opus,64005,,,,,True,64
+fotografování,photography,fətˈɑːɡɹəfi,photography.opus,64006,,,,,True,64
+fotograf,photographer,fətˈɑːɡɹəfɚ,photographer.opus,64007,,,,,True,64
+špatně,badly,bˈædli,badly.opus,64008,,,,,True,64
+záležitost,affair,ɐfˈɛɹ,affair.opus,64009,,,,,True,64
+hmotnost,weight,wˈeɪt,weight.opus,64010,,,,,True,64
+pochopit,understand,ˌʌndɚstˈænd,understand.opus,64011,,,,,True,64
+fotografie,photograph,fˈoʊɾəɡɹˌæf,photograph.opus,64012,,,,,True,64
+sloveso,verb,vˈɜːb,verb.opus,64013,,,,,True,64
+nálada,mood,mˈuːd,mood.opus,64014,,,,,True,64
+hrom,thunder,θˈʌndɚ,thunder.opus,64015,,,,,True,64
+bouřka,thunderstorm,θˈʌndɚstˌɔːɹm,thunderstorm.opus,64016,,,,,True,64
+široce,widely,wˈaɪdli,widely.opus,64017,,,,,True,64
+zvuk,audio,ˈɔːdɪˌoʊ,audio.opus,64018,,,,,True,64
+muzeum,museum,mjuːzˈiəm,museum.opus,64019,,,,,True,64
+oznámení,notice,nˈoʊɾɪs,notice.opus,64020,,,,,True,64
+vytisknout,print,pɹˈɪnt,print.opus,64021,,,,,True,64
+tiskárna,printer,pɹˈɪntɚ,printer.opus,64022,,,,,True,64
+těstoviny,pasta,pˈɑːstə,pasta.opus,64023,,,,,True,64
+Kdy budu zítra pracovat?,When will I be working tomorrow?,wˌɛn wɪl aɪ biː wˈɜːkɪŋ təmˈɑːɹoʊ,when_will_i_be_working_tomorrow.opus,64024,86,,,76,False,64
+Kde budeš zítra řídit?,Where will you be driving tomorrow?,wˌɛɹ wɪl juː biː dɹˈaɪvɪŋ təmˈɑːɹoʊ,where_will_you_be_driving_tomorrow.opus,64025,86,,,76,False,64
+Kdy bude on během cesty spát?,When will he be sleeping during the trip?,wˌɛn wɪl hiː biː slˈiːpɪŋ dˈʊɹɹɪŋ ðə tɹˈɪp,when_will_he_be_sleeping_during_the_trip.opus,64026,86,,,76,False,64
+Co bude ona studovat příští semestr?,What will she be studying next semester?,wˌʌt wɪl ʃiː biː stˈʌdiɪŋ nˈɛkst səmˈɛstɚ,what_will_she_be_studying_next_semester.opus,64027,86,,,76,False,64
+Kdy bude o víkendu pršet?,When will it be raining this weekend?,wˌɛn wɪl ɪt biː ɹˈeɪnɪŋ ðɪs wˈiːkɛnd,when_will_it_be_raining_this_weekend.opus,64028,86,,,76,False,64
+Kde budeme příští měsíc cestovat?,Where will we be travelling next month?,wˌɛɹ wɪl wiː biː tɹˈævəlɪŋ nˈɛkst mˈʌnθ,where_will_we_be_travelling_next_month.opus,64029,86,,,76,False,64
+"Na koho budete čekat, až přijedete?",Who will you be waiting for when you arrive?,hˌuː wɪl juː biː wˈeɪɾɪŋ fɔːɹ wɛn juː ɚɹˈaɪv,who_will_you_be_waiting_for_when_you_arrive.opus,64030,86,,,76,False,64
+Co budou hrát na koncertě?,What will they be playing at the concert?,wˌʌt wɪl ðeɪ biː plˈeɪɪŋ æt ðə kˈɑːnsɚt,what_will_they_be_playing_at_the_concert.opus,64031,86,,,76,False,64

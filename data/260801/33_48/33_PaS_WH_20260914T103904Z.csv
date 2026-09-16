@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+v pořádku,alright,ɔːlɹˈaɪt,alright.opus,33000,,,,,True,33
+zajímat,interest,ˈɪntɹɛst,interest.opus,33001,,,,,True,33
+břicho,belly,bˈɛli,belly.opus,33002,,,,,True,33
+steak,steak,stˈeɪk,steak.opus,33003,,,,,True,33
+uvést,state,stˈeɪt,state.opus,33004,,,,,True,33
+prohlášení,statement,stˈeɪtmənt,statement.opus,33005,,,,,True,33
+odhalit,reveal,ɹᵻvˈiːl,reveal.opus,33006,,,,,True,33
+inteligence,intelligence,ɪntˈɛlɪdʒəns,intelligence.opus,33007,,,,,True,33
+unie,union,jˈuːniən,union.opus,33008,,,,,True,33
+shledání,reunion,ɹˌiːjˈuːniən,reunion.opus,33009,,,,,True,33
+napadnout,invade,ɪnvˈeɪd,invade.opus,33010,,,,,True,33
+dobře,alright,ɔːlɹˈaɪt,alright.opus,33011,,,,,True,33
+naplánovat,budget,bˈʌdʒɪt,budget.opus,33012,,,,,True,33
+vrátit,return,ɹᵻtˈɜːn,return.opus,33013,,,,,True,33
+žárovka,bulb,bˈʌlb,bulb.opus,33014,,,,,True,33
+nebezpečí,danger,dˈeɪndʒɚ,danger.opus,33015,,,,,True,33
+inspirovat,inspire,ɪnspˈaɪɚ,inspire.opus,33016,,,,,True,33
+inspirace,inspiration,ˌɪnspɚɹˈeɪʃən,inspiration.opus,33017,,,,,True,33
+žebrat,beg,bˈɛɡ,beg.opus,33018,,,,,True,33
+sporák,stove,stˈoʊv,stove.opus,33019,,,,,True,33
+popis,description,dᵻskɹˈɪpʃən,description.opus,33020,,,,,True,33
+prokletí,curse,kˈɜːs,curse.opus,33021,,,,,True,33
+narovnat,right,ɹˈaɪt,right.opus,33022,,,,,True,33
+kari,curry,kˈɜːɹi,curry.opus,33023,,,,,True,33
+Jaký jsem byl?,What was I like?,wˌʌt wʌz aɪ lˈaɪk,what_was_i_like.opus,33024,55,,,45,False,33
+Kde jsi byl?,Where were you?,wˈɛɹ wɜː juː,where_were_you.opus,33025,55,,,45,False,33
+Proč byl doma?,Why was he at home?,wˌaɪ wʌz hiː æt hˈoʊm,why_was_he_at_home.opus,33026,55,,,45,False,33
+Jak se cítila?,How was she feeling?,hˌaʊ wʌz ʃiː fˈiːlɪŋ,how_was_she_feeling.opus,33027,55,,,45,False,33
+Jaké to bylo?,What was it like?,wˌʌt wʌz ɪt lˈaɪk,what_was_it_like.opus,33028,55,,,45,False,33
+Kde jsme byli?,Where were we?,wˈɛɹ wɜː wiː,where_were_we.opus,33029,55,,,45,False,33
+Kdy jste byli volní?,When were you free?,wˌɛn wɜː juː fɹˈiː,when_were_you_free.opus,33030,55,,,45,False,33
+Kde byli?,Where were they?,wˈɛɹ wɜː ðeɪ,where_were_they.opus,33031,55,,,45,False,33

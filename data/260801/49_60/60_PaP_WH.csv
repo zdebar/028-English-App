@@ -1,0 +1,34 @@
+czech,english,block_id,grammar_chunk_id
+autor,author,,
+povolení,permit,,
+povolení,permission,,
+toast,toast,,
+křeslo,armchair,,
+dnes,nowadays,,
+titul,title,,
+nejistý,uncertain,,
+balit,pack,,
+balíček,pack,,
+dálnice,motorway,,
+osobnost,personality,,
+Pacifik,pacific,,
+nepříjemný,uncomfortable,,
+tip,tip,,
+předpovědět,predict,,
+předpověď,prediction,,
+atom,atom,,
+rozsah,range,,
+jízdní řád,timetable,,
+většinou,mostly,,
+benzín,petrol,,
+čerpací stanice,petrol station,,
+inzerovat,advertise,,
+
+Co jsem zabalil před odjezdem?,What had I packed before I left?,82,72
+"Co jsi dokončil, než jsi odešel?",What had you finished before you left?,82,72
+"Co už snědl, než jsme dorazili?",What had he eaten before we arrived?,82,72
+Komu zavolala před odjezdem?,Who had she called before she left?,82,72
+"Co požár poškodil, než ho uhasili?",What had the fire damaged before they put it out?,82,72
+"Na co jsme zapomněli, než jsme odjeli?",What had we forgotten before we left?,82,72
+Co jste viděli před příjezdem?,What had you seen before you arrived?,82,72
+"Kam už odešli, když jsem jim zavolal?",Where had they gone by the time I called them?,82,72

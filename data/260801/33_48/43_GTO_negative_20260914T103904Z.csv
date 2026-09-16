@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+slunečnice,sunflower,sˈʌnflaʊɚ,sunflower.opus,43000,,,,,True,43
+sluneční brýle,sunglasses,sˈʌŋɡlæsᵻz,sunglasses.opus,43001,,,,,True,43
+levá ruka,left-hand,lˈɛfthˈænd,lefthand.opus,43002,,,,,True,43
+opravdu,indeed,ˌɪndˈiːd,indeed.opus,43003,,,,,True,43
+obtížnost,difficulty,dˈɪfɪkˌʌlti,difficulty.opus,43004,,,,,True,43
+gram,gramme,ɡɹˈæm,gramme.opus,43005,,,,,True,43
+blondýnka,blonde,blˈɑːnd,blonde.opus,43006,,,,,True,43
+rozzlobeně,angrily,ˈæŋɡɹili,angrily.opus,43007,,,,,True,43
+vnouče,grandchild,ɡɹˈændtʃaɪld,grandchild.opus,43008,,,,,True,43
+dědeček,granddad,ɡɹˈændæd,granddad.opus,43009,,,,,True,43
+velmi,extremely,ɛkstɹˈiːmli,extremely.opus,43010,,,,,True,43
+obývací pokoj,sitting room,sˈɪɾɪŋ ɹˈuːm,sitting_room.opus,43011,,,,,True,43
+navíc,extra,ˈɛkstɹə,extra.opus,43012,,,,,True,43
+zdát,seem,sˈiːm,seem.opus,43013,,,,,True,43
+anděl,angel,ˈeɪndʒəl,angel.opus,43014,,,,,True,43
+babička,granny,ɡɹˈæni,granny.opus,43015,,,,,True,43
+starověké,ancient,ˈeɪntʃənt,ancient.opus,43016,,,,,True,43
+brusle,skate,skˈeɪt,skate.opus,43017,,,,,True,43
+výraz,expression,ɛkspɹˈɛʃən,expression.opus,43018,,,,,True,43
+hledat,seek,sˈiːk,seek.opus,43019,,,,,True,43
+rychlík,express,ɛkspɹˈɛs,express.opus,43020,,,,,True,43
+semínko,seed,sˈiːd,seed.opus,43021,,,,,True,43
+skateboarding,skateboarding,skˈeɪtbɔːɹdɪŋ,skateboarding.opus,43022,,,,,True,43
+prozkoumat,explore,ɛksplˈɔːɹ,explore.opus,43023,,,,,True,43
+já nebudu volat,I'm not going to call,aɪm nˌɑːt ɡˌoʊɪŋ tə kˈɔːl,im_not_going_to_call.opus,43024,65,,,55,False,43
+ty nebudeš vařit,you aren't going to cook,juː ˌɑːɹnt ɡˌoʊɪŋ tə kˈʊk,you_arent_going_to_cook.opus,43025,65,,,55,False,43
+on nezačne,he isn't going to start,hiː ˌɪzənt ɡˌoʊɪŋ tə stˈɑːɹt,he_isnt_going_to_start.opus,43026,65,,,55,False,43
+ona neodjede,she isn't going to leave,ʃiː ˌɪzənt ɡˌoʊɪŋ tə lˈiːv,she_isnt_going_to_leave.opus,43027,65,,,55,False,43
+ono nespadne,it isn't going to fall,ɪɾ ˌɪzənt ɡˌoʊɪŋ tə fˈɔːl,it_isnt_going_to_fall.opus,43028,65,,,55,False,43
+my nezůstaneme,we aren't going to stay,wiː ˌɑːɹnt ɡˌoʊɪŋ tə stˈeɪ,we_arent_going_to_stay.opus,43029,65,,,55,False,43
+vy nevyhrajete,you aren't going to win,juː ˌɑːɹnt ɡˌoʊɪŋ tə wˈɪn,you_arent_going_to_win.opus,43030,65,,,55,False,43
+oni nepřijedou,they aren't going to arrive,ðeɪ ˌɑːɹnt ɡˌoʊɪŋ tʊ ɚɹˈaɪv,they_arent_going_to_arrive.opus,43031,65,,,55,False,43

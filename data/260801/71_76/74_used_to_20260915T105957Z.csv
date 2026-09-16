@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+činidlo,agent,ˈeɪdʒənt,agent.opus,74000,,,,,True,74
+divit se,wonder,wˈʌndɚ,wonder.opus,74001,,,,,True,74
+balkón,balcony,bˈælkəni,balcony.opus,74002,,,,,True,74
+nedůležité,unimportant,ˌʌnɪmpˈɔːɹtənt,unimportant.opus,74003,,,,,True,74
+učebnice,textbook,tˈɛkstbʊk,textbook.opus,74004,,,,,True,74
+textovou zprávu,text message,tˈɛkst mˈɛsɪdʒ,text_message.opus,74005,,,,,True,74
+nezapomenutelný,unforgettable,ʌnfɚɡˈɛɾəbəl,unforgettable.opus,74006,,,,,True,74
+planeta,planet,plˈænɪt,planet.opus,74007,,,,,True,74
+v,within,wɪðˈɪn,within.opus,74008,,,,,True,74
+zrcadlo,mirror,mˈɪɹɚ,mirror.opus,74009,,,,,True,74
+trouba,oven,ˈʌvən,oven.opus,74010,,,,,True,74
+nešťastný,unhappy,ʌnhˈæpi,unhappy.opus,74011,,,,,True,74
+vyděsit,terrify,tˈɛɹᵻfˌaɪ,terrify.opus,74012,,,,,True,74
+dřevěný,wooden,wˈʊdən,wooden.opus,74013,,,,,True,74
+nad,over,ˈoʊvɚ,over.opus,74014,,,,,True,74
+jednotný,uniform,jˈuːnɪfˌɔːɹm,uniform.opus,74015,,,,,True,74
+nabízet,offer,ˈɔfɚ,offer.opus,74016,,,,,True,74
+vlna,wool,wˈʊl,wool.opus,74017,,,,,True,74
+minerální voda,mineral water,mˈɪnɚɹəl wˈɔːɾɚ,mineral_water.opus,74018,,,,,True,74
+nalít,pour,pˈɔːɹ,pour.opus,74019,,,,,True,74
+přání,wish,wˈɪʃ,wish.opus,74020,,,,,True,74
+ve věku,aged,ˈeɪdʒd,aged.opus,74021,,,,,True,74
+nezdravý,unhealthy,ʌnhˈɛlθi,unhealthy.opus,74022,,,,,True,74
+jejich,theirs,ðˈɛɹz,theirs.opus,74023,,,,,True,74
+Já jsem dřív plaval,I used to swim,aɪ jˈuːzd tə swˈɪm,i_used_to_swim.opus,74024,96,,,86,False,74
+Ty jsi dřív kouřil,You used to smoke,juː jˈuːzd tə smˈoʊk,you_used_to_smoke.opus,74025,96,,,86,False,74
+On dřív pracoval v bance,He used to work in a bank,hiː jˈuːzd tə wˈɜːk ɪn ɐ bˈæŋk,he_used_to_work_in_a_bank.opus,74026,96,,,86,False,74
+Ona dřív tančila,She used to dance,ʃiː jˈuːzd tə dˈæns,she_used_to_dance.opus,74027,96,,,86,False,74
+Dřív to fungovalo,It used to work,ɪt jˈuːzd tə wˈɜːk,it_used_to_work.opus,74028,96,,,86,False,74
+My jsme dřív bydleli v Brně,We used to live in Brno,wiː jˈuːzd tə lˈɪv ɪn bˌiːˌɑːɹɹˌɛnˈoʊ,we_used_to_live_in_brno.opus,74029,96,,,86,False,74
+Vy jste dřív jezdili vlakem,You used to travel by train,juː jˈuːzd tə tɹˈævəl baɪ tɹˈeɪn,you_used_to_travel_by_train.opus,74030,96,,,86,False,74
+Oni dřív hráli spolu,They used to play together,ðeɪ jˈuːzd tə plˈeɪ təɡˈɛðɚ,they_used_to_play_together.opus,74031,96,,,86,False,74

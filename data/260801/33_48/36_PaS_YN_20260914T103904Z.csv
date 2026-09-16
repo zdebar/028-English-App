@@ -1,0 +1,33 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+klon,clone,klˈoʊn,clone.opus,36000,,,,,True,36
+volný,loose,lˈuːs,loose.opus,36001,,,,,True,36
+přežít,survive,sɚvˈaɪv,survive.opus,36002,,,,,True,36
+spáchat,commit,kəmˈɪt,commit.opus,36003,,,,,True,36
+závazek,commitment,kəmˈɪtmənt,commitment.opus,36004,,,,,True,36
+litr,litre,lˈiːɾɚ,litre.opus,36005,,,,,True,36
+surfovat,surf,sˈɜːf,surf.opus,36006,,,,,True,36
+surfování,surfing,sˈɜːfɪŋ,surfing.opus,36007,,,,,True,36
+propuštění,release,ɹᵻlˈiːs,release.opus,36008,,,,,True,36
+relaxovat,relax,ɹᵻlˈæks,relax.opus,36009,,,,,True,36
+uvolněný,relaxed,ɹᵻlˈækst,relaxed.opus,36010,,,,,True,36
+vtipný,comic,kˈɑːmɪk,comic.opus,36011,,,,,True,36
+komik,comic,kˈɑːmɪk,comic.opus,36012,,,,,True,36
+příjmení,surname,sˈɜːneɪm,surname.opus,36013,,,,,True,36
+pohodlí,comfort,kˈʌmfɚt,comfort.opus,36014,,,,,True,36
+komfortní,comfortable,kˈʌmftəbəl,comfortable.opus,36015,,,,,True,36
+živý,lively,lˈaɪvli,lively.opus,36016,,,,,True,36
+podnikatelka,businesswoman,bˈɪznəswˌʊmən,businesswoman.opus,36017,,,,,True,36
+zatížení,load,lˈoʊd,load.opus,36018,,,,,True,36
+hřeben,comb,kˈoʊm,comb.opus,36019,,,,,True,36
+místní,local,lˈoʊkəl,local.opus,36020,,,,,True,36
+sloupec,column,kˈɑːlʌm,column.opus,36021,,,,,True,36
+barvitý,colourful,kˈʌlɚfəl,colourful.opus,36022,,,,,True,36
+překvapení,surprise,sɚpɹˈaɪz,surprise.opus,36023,,,,,True,36
+Pracoval jsem?,Did I work?,dˈɪd aɪ wˈɜːk,did_i_work.opus,36024,58,,,48,False,36
+Díval ses?,Did you watch?,dˈɪd juː wˈɑːtʃ,did_you_watch.opus,36025,58,,,48,False,36
+Uklízel?,Did he clean?,dˈɪd hiː klˈiːn,did_he_clean.opus,36026,58,,,48,False,36
+Otevřela?,Did she open?,dˈɪd ʃiː ˈoʊpən,did_she_open.opus,36027,58,,,48,False,36
+Začalo?,Did it start?,dˈɪd ɪt stˈɑːɹt,did_it_start.opus,36028,58,,,48,False,36
+Hráli jsme?,Did we play?,dˈɪd wiː plˈeɪ,did_we_play.opus,36029,58,,,48,False,36
+Pomohli jste?,Did you help?,dˈɪd juː hˈɛlp,did_you_help.opus,36030,58,,,48,False,36
+Navštívili?,Did they visit?,dˈɪd ðeɪ vˈɪzɪt,did_they_visit.opus,36031,58,,,48,False,36
