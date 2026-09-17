@@ -8,7 +8,6 @@ import {
   type Dispatch,
   type SetStateAction,
 } from 'react';
-import config from '@/config/config';
 import type { PracticeDeckEntry, PracticeOutcome } from '@/types/user-item.types';
 import { useFetch } from '@/hooks/use-fetch';
 import UserItem from '@/database/models/user-items';
@@ -29,7 +28,7 @@ export function usePracticeDeck(userId: string | null) {
   const [saveError, setSaveError] = useState<Error | null>(null);
   const [finishedReview, setFinishedReview] = useState(false);
   const [completedCount, setCompletedCount] = useState(0);
-  const [totalCount, setTotalCount] = useState(config.practice.reviewMinimumSize);
+  const [totalCount, setTotalCount] = useState<number | null>(null);
   const isTransitioningRef = useRef(false);
   const availabilityCheckedAtRef = useRef<string | null>(null);
   const counterRefreshStartedRef = useRef(false);
@@ -72,6 +71,15 @@ export function usePracticeDeck(userId: string | null) {
   }, [fetchedResult, loading]);
 
   useEffect(() => {
+    if (!userId) return undefined;
+
+    return () => {
+      counterRequestIdRef.current += 1;
+      counterRefreshStartedRef.current = false;
+    };
+  }, [userId]);
+
+  useEffect(() => {
     if (loading || !userId || !currentItem || counterRefreshStartedRef.current) return undefined;
 
     counterRefreshStartedRef.current = true;
@@ -88,10 +96,7 @@ export function usePracticeDeck(userId: string | null) {
         reportError('Failed to refresh review counter', toError(caughtError));
       });
 
-    return () => {
-      isActive = false;
-      if (requestId === counterRequestIdRef.current) counterRequestIdRef.current += 1;
-    };
+    return undefined;
   }, [currentItem, loading, userId]);
 
   useEffect(() => {
@@ -194,7 +199,8 @@ function fetchReviewDeck(
   return loadReviewDeckData(userId);
 }
 
-function getReviewProgressLabel(completedCount: number, totalCount: number): string {
+function getReviewProgressLabel(completedCount: number, totalCount: number | null): string {
+  if (totalCount === null) return String(completedCount);
   return `${completedCount} / ${totalCount}`;
 }
 
@@ -230,7 +236,7 @@ type SaveReviewAnswerOptions = Readonly<{
   reload: () => Promise<unknown>;
   setSaveError: Dispatch<SetStateAction<Error | null>>;
   setCompletedCount: Dispatch<SetStateAction<number>>;
-  setTotalCount: Dispatch<SetStateAction<number>>;
+  setTotalCount: Dispatch<SetStateAction<number | null>>;
   availabilityCheckedAtRef: { current: string | null };
 }>;
 
@@ -280,7 +286,7 @@ async function saveReviewAnswer(
 
   setSaveError(null);
   setCompletedCount((count) => count + 1);
-  setTotalCount((count) => count + newlyAvailableCount);
+  setTotalCount((count) => (count === null ? null : count + newlyAvailableCount));
   availabilityCheckedAtRef.current = dateTime;
   await refreshAfterReviewSave(reload, resetQuestionState, setSaveError);
 }

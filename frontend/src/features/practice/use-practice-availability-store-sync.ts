@@ -4,6 +4,7 @@ import PracticeSession from '@/database/models/practice-sessions';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { liveQuery } from 'dexie';
 import { useLayoutEffect, useEffect } from 'react';
+import { loadPracticeAvailabilitySnapshot } from './practice-availability';
 import { usePracticeAvailabilityStore } from './use-practice-availability-store';
 
 function toError(error: unknown): Error {
@@ -14,6 +15,9 @@ function toError(error: unknown): Error {
 export function usePracticeAvailabilityStoreSync(userId: string | null): void {
   const reset = usePracticeAvailabilityStore((state) => state.reset);
   const reviewReadyAt = usePracticeAvailabilityStore((state) => state.reviewReadyAt);
+  const setLoading = usePracticeAvailabilityStore((state) => state.setLoading);
+  const setSnapshot = usePracticeAvailabilityStore((state) => state.setSnapshot);
+  const setError = usePracticeAvailabilityStore((state) => state.setError);
 
   useLayoutEffect(() => {
     if (!userId) {
@@ -22,36 +26,15 @@ export function usePracticeAvailabilityStoreSync(userId: string | null): void {
     }
 
     let isActive = true;
-    usePracticeAvailabilityStore.setState({
-      reviewReadyAt: null,
-      initialTrainingAvailable: false,
-      activeSession: null,
-      practiceLoading: true,
-      practiceError: null,
-    });
+    const currentState = usePracticeAvailabilityStore.getState();
+    const hasReadySnapshot =
+      currentState.availabilityUserId === userId && !currentState.practiceLoading;
+    if (!hasReadySnapshot) setLoading(userId);
 
-    const readySubscription = liveQuery(async () => {
-      const [review, nextSelection, activeSessionState] = await Promise.all([
-        UserItem.getReadyReviewState(userId),
-        UserItem.getNextInitialTrainingSelection(userId),
-        PracticeSession.inspectActive(userId),
-      ]);
-      return {
-        review,
-        initialTrainingAvailable: nextSelection != null,
-        activeSession: activeSessionState.activeSession,
-        requiresSessionReconciliation: activeSessionState.requiresReconciliation,
-      };
-    }).subscribe({
+    const readySubscription = liveQuery(() => loadPracticeAvailabilitySnapshot(userId)).subscribe({
       next: (state) => {
         if (!isActive) return;
-        usePracticeAvailabilityStore.setState({
-          reviewReadyAt: state.review.reviewReadyAt,
-          initialTrainingAvailable: state.initialTrainingAvailable,
-          activeSession: state.activeSession,
-          practiceLoading: false,
-          practiceError: null,
-        });
+        setSnapshot(userId, state);
         if (state.requiresSessionReconciliation) {
           void PracticeSession.reconcileActive(userId).catch((error: unknown) => {
             reportError('Failed to remove invalid practice session', toError(error));
@@ -61,13 +44,7 @@ export function usePracticeAvailabilityStoreSync(userId: string | null): void {
       error: (error) => {
         if (!isActive) return;
         const normalizedError = toError(error);
-        usePracticeAvailabilityStore.setState({
-          reviewReadyAt: null,
-          initialTrainingAvailable: false,
-          activeSession: null,
-          practiceLoading: false,
-          practiceError: normalizedError,
-        });
+        setError(userId, normalizedError);
         reportError('Failed to load unified practice button state', normalizedError);
       },
     });
@@ -75,7 +52,6 @@ export function usePracticeAvailabilityStoreSync(userId: string | null): void {
     return () => {
       isActive = false;
       readySubscription.unsubscribe();
-      reset();
     };
   }, [reset, userId]);
 

@@ -71,6 +71,7 @@ describe('usePracticeAvailabilityStoreSync', () => {
     mocks.observers.length = 0;
     mocks.queries.length = 0;
     mocks.unsubscribes.length = 0;
+    mocks.getReadyReviewState.mockResolvedValue({ reviewReadyAt: null });
     usePracticeAvailabilityStore.getState().reset();
   });
 
@@ -87,7 +88,7 @@ describe('usePracticeAvailabilityStoreSync', () => {
 
     act(() => {
       mocks.observers[0].next({
-        review: { reviewReadyAt: '2026-07-21T10:00:00.000Z' },
+        reviewReadyAt: '2026-07-21T10:00:00.000Z',
         initialTrainingAvailable: false,
         activeSession: null,
         requiresSessionReconciliation: false,
@@ -104,7 +105,7 @@ describe('usePracticeAvailabilityStoreSync', () => {
 
     act(() => {
       mocks.observers[0].next({
-        review: { reviewReadyAt: null },
+        reviewReadyAt: null,
         initialTrainingAvailable: true,
         activeSession: null,
         requiresSessionReconciliation: true,
@@ -121,7 +122,7 @@ describe('usePracticeAvailabilityStoreSync', () => {
     renderHook(() => usePracticeAvailabilityStoreSync('u1'));
     act(() => {
       mocks.observers[0].next({
-        review: { reviewReadyAt: '2026-07-21T10:00:02.000Z' },
+        reviewReadyAt: '2026-07-21T10:00:02.000Z',
         initialTrainingAvailable: false,
         activeSession: null,
       });
@@ -139,25 +140,26 @@ describe('usePracticeAvailabilityStoreSync', () => {
       initialProps: { userId: 'u1' as string | null },
     });
     act(() => {
-      mocks.observers[0].next({ review: { reviewReadyAt: '2026-07-21T10:00:00.000Z' }, initialTrainingAvailable: false, activeSession: null });
+      mocks.observers[0].next({ reviewReadyAt: '2026-07-21T10:00:00.000Z', initialTrainingAvailable: false, activeSession: null });
     });
 
     rerender({ userId: 'u2' });
     expect(mocks.unsubscribes[0]).toHaveBeenCalledOnce();
     expect(usePracticeAvailabilityStore.getState()).toMatchObject({
       reviewReadyAt: null,
+      availabilityUserId: 'u2',
       practiceLoading: true,
     });
 
-    act(() => mocks.observers[0].next({ review: { reviewReadyAt: '2026-07-21T10:00:00.000Z' }, initialTrainingAvailable: false, activeSession: null }));
+    act(() => mocks.observers[0].next({ reviewReadyAt: '2026-07-21T10:00:00.000Z', initialTrainingAvailable: false, activeSession: null }));
     expect(usePracticeAvailabilityStore.getState().reviewReadyAt).toBeNull();
   });
 
-  it('unsubscribes on Home unmount and resets to loading state', () => {
+  it('unsubscribes on Home unmount without clearing the prepared snapshot', () => {
     const { unmount } = renderHook(() => usePracticeAvailabilityStoreSync('u1'));
     act(() => {
       mocks.observers[0].next({
-        review: { reviewReadyAt: '2026-07-21T10:00:00.000Z' },
+        reviewReadyAt: '2026-07-21T10:00:00.000Z',
         initialTrainingAvailable: true,
         activeSession: null,
       });
@@ -166,9 +168,10 @@ describe('usePracticeAvailabilityStoreSync', () => {
     unmount();
     expect(mocks.unsubscribes[0]).toHaveBeenCalledOnce();
     expect(usePracticeAvailabilityStore.getState()).toMatchObject({
-      reviewReadyAt: null,
-      initialTrainingAvailable: false,
-      practiceLoading: true,
+      reviewReadyAt: '2026-07-21T10:00:00.000Z',
+      availabilityUserId: 'u1',
+      initialTrainingAvailable: true,
+      practiceLoading: false,
     });
   });
 
@@ -178,7 +181,7 @@ describe('usePracticeAvailabilityStoreSync', () => {
       { initialProps: { userId: 'u1' as string | null } },
     );
     act(() => {
-      mocks.observers[0].next({ review: { reviewReadyAt: '2026-07-21T10:00:00.000Z' }, initialTrainingAvailable: false, activeSession: null });
+      mocks.observers[0].next({ reviewReadyAt: '2026-07-21T10:00:00.000Z', initialTrainingAvailable: false, activeSession: null });
     });
 
     rerender({ userId: null });
@@ -188,7 +191,7 @@ describe('usePracticeAvailabilityStoreSync', () => {
     });
 
     unmount();
-    act(() => mocks.observers[0].next({ review: { reviewReadyAt: '2026-07-21T10:00:00.000Z' }, initialTrainingAvailable: false, activeSession: null }));
+    act(() => mocks.observers[0].next({ reviewReadyAt: '2026-07-21T10:00:00.000Z', initialTrainingAvailable: false, activeSession: null }));
     expect(usePracticeAvailabilityStore.getState().reviewReadyAt).toBeNull();
   });
 

@@ -5,6 +5,7 @@ import ProtectedLayout from '@/components/utils/protected-laout';
 import { ROUTES } from '@/config/routes.config';
 import { waitForAuthReady } from '@/features/auth/auth-lifecycle';
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import { loadHome } from '@/routing/home-loader';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
@@ -121,7 +122,7 @@ export const router = createHashRouter([
     Component: App,
     errorElement: <RouteDataError />,
     children: [
-      { index: true, Component: Home },
+      { index: true, loader: loadHome, Component: Home },
       { path: ROUTES.privacyPolicy, Component: PrivacyPolicy },
       { path: ROUTES.guide, Component: Guide },
       {
