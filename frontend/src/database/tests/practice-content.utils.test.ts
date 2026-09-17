@@ -184,9 +184,13 @@ describe('practice content resolution', () => {
     expect(result.entries[0]?.item).toBe(item);
     expect(result.availabilityCheckedAt).toBe(now);
     expect(result.abandoned).toBe(false);
+    expect(result.entries[0]?.note).toBeNull();
+    expect(result.entries[0]?.grammar).toBeNull();
     expect(mocks.reconcileActive).toHaveBeenCalledWith('u1');
     expect([userId, deckSize]).toEqual(['u1', 20]);
     expect(now).toEqual(expect.any(String));
+    expect(mocks.notesBulkGet).not.toHaveBeenCalled();
+    expect(mocks.grammarBulkGet).not.toHaveBeenCalled();
     expect(mocks.getReviewItemCountForDirection).not.toHaveBeenCalled();
   });
 

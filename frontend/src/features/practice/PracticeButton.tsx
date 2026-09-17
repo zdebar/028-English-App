@@ -1,12 +1,9 @@
 import { ROUTES } from '@/config/routes.config';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
-import { DataNavigationButton } from '@/routing/data-navigation';
-import { initialTrainingDescriptor, practiceDeckDescriptor } from '@/routing/route-data';
+import { NavigationButton } from '@/routing/data-navigation';
 import { usePracticeAvailabilityStore } from './use-practice-availability-store';
 import StyledButton from '@/components/UI/buttons/StyledButton';
-
-type PracticeButtonsProps = Readonly<{ userId: string }>;
 
 type PracticeButtonState = Readonly<{
   reviewDisabled: boolean;
@@ -79,13 +76,11 @@ function resolvePracticeButtonState(
 }
 
 function NewPracticeButton({
-  userId,
   available,
   disabled,
   loading,
   title,
 }: Readonly<{
-  userId: string;
   available: boolean;
   disabled: boolean;
   loading: boolean;
@@ -99,19 +94,18 @@ function NewPracticeButton({
     );
   }
   return (
-    <DataNavigationButton
+    <NavigationButton
       to={ROUTES.initialTraining}
-      descriptor={initialTrainingDescriptor(userId)}
       className="h-button max-h-button w-full px-4"
       disabled={disabled}
       title={title}
     >
       {TEXTS.newButton}
-    </DataNavigationButton>
+    </NavigationButton>
   );
 }
 
-export default function PracticeButtons({ userId }: PracticeButtonsProps): JSX.Element {
+export default function PracticeButtons(): JSX.Element {
   const reviewReadyAt = usePracticeAvailabilityStore((state) => state.reviewReadyAt);
   const initialTrainingAvailable = usePracticeAvailabilityStore(
     (state) => state.initialTrainingAvailable,
@@ -131,21 +125,19 @@ export default function PracticeButtons({ userId }: PracticeButtonsProps): JSX.E
   return (
     <div className="flex w-full flex-col gap-1">
       <NewPracticeButton
-        userId={userId}
         available={newAvailable}
         disabled={newDisabled}
         loading={loading}
         title={newTitle}
       />
-      <DataNavigationButton
+      <NavigationButton
         to={ROUTES.practice}
-        descriptor={practiceDeckDescriptor(userId)}
         className="h-button max-h-button w-full px-4"
         disabled={reviewDisabled}
         title={reviewTitle}
       >
         {TEXTS.reviewButton}
-      </DataNavigationButton>
+      </NavigationButton>
     </div>
   );
 }

@@ -4,17 +4,15 @@ import HelpText from '@/features/help/HelpText';
 import { useUserStore } from '@/features/user-stats/use-user-store';
 import { getInProgressLessons } from '@/utils/dashboard.utils';
 import Notification from '@/components/UI/Notification';
-import { DataNavigationLink } from '@/routing/data-navigation';
+import { NavigationLink } from '@/routing/data-navigation';
 import { ROUTES } from '@/config/routes.config';
-import { levelsDescriptor } from '@/routing/route-data';
 
 type DashboardProps = Readonly<{
-  userId: string;
   /** Extra classes appended to the dashboard section wrapper. */
   className?: string;
 }>;
 
-export default function Dashboard({ userId, className = '' }: DashboardProps) {
+export default function Dashboard({ className = '' }: DashboardProps) {
   const levelsOverview = useUserStore((state) => state.levels);
   const levelsLoading = useUserStore((state) => state.levelsLoading);
   const levels = Array.isArray(levelsOverview) ? levelsOverview : [];
@@ -42,9 +40,8 @@ export default function Dashboard({ userId, className = '' }: DashboardProps) {
   }
 
   return (
-    <DataNavigationLink
+    <NavigationLink
       to={ROUTES.levels}
-      descriptor={levelsDescriptor(userId)}
       aria-label={TEXTS.levelsOverviewTooltip}
       title={TEXTS.levelsOverviewTooltip}
       className="block cursor-pointer hover:ring-1 hover:ring-current focus-visible:outline-2 focus-visible:outline-offset-2"
@@ -65,6 +62,6 @@ export default function Dashboard({ userId, className = '' }: DashboardProps) {
         ))}
         <HelpText className="right-2 -bottom-6">{TEXTS.startedTodayHint}</HelpText>
       </section>
-    </DataNavigationLink>
+    </NavigationLink>
   );
 }

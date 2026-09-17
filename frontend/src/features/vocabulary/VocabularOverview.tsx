@@ -9,7 +9,6 @@ import VocabularyDetailCard from './VocabularyDetailCard';
 import VocabularyList from './VocabularyList';
 import { ROUTES } from '@/config/routes.config';
 import type { UserItemLocal } from '@/types/user-item.types';
-import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff';
 import { useRouteClose } from '@/routing/use-route-close';
 
 /**
@@ -53,7 +52,6 @@ export default function VocabularyOverview({
 
     try {
       const resetItemId = await UserItem.resetItemById(userId, itemId);
-      invalidateRouteData(routeDataKey('vocabulary', userId));
       reportInfo(`Vocabulary item reset completed: item ${resetItemId}.`);
       showToast(TEXTS.resetProgressSuccessToast, 'success');
       setSelectedWord(null);

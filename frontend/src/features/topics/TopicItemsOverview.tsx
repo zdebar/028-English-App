@@ -15,7 +15,6 @@ import BilingualItemButton from '@/components/UI/buttons/BilingualItemButton';
 import HelpButton from '../help/HelpButton';
 import OverviewCard from '@/components/UI/OverviewCard';
 import VolumeSlider from '../audio/VolumeSlider';
-import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { useRouteClose } from '@/routing/use-route-close';
 
@@ -98,8 +97,6 @@ export default function TopicItemsOverview({
     if (!userId || !topicId) return;
     try {
       const resetCount = await UserItem.resetItemsByTopicId(userId, topicId);
-      invalidateRouteData(routeDataKey('topic-detail', userId, topicId));
-      invalidateRouteData(routeDataKey('topics', userId));
       reportInfo(`Reset ${resetCount} items in topic ${topicId}`);
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (error) {

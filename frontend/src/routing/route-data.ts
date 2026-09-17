@@ -5,9 +5,7 @@ import Block from '@/database/models/blocks';
 import PracticeSession from '@/database/models/practice-sessions';
 import UserItem from '@/database/models/user-items';
 import Topic from '@/database/models/topics';
-import { routeDataKey, type RouteDataDescriptor } from './route-data-handoff';
 import {
-  loadReviewDeckData,
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
 } from '@/database/utils/practice-content.utils';
@@ -15,6 +13,10 @@ import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks'
 import type { BlockType, GrammarGroupType } from '@/types/generic.types';
 import type { PracticeSessionType } from '@/types/practice-session.types';
 import type { ResolvedPracticeEntry, UserItemLocal } from '@/types/user-item.types';
+
+export type RouteDataDescriptor<T> = Readonly<{
+  load: () => Promise<T>;
+}>;
 
 export type InitialTrainingData = Readonly<{
   block: BlockType | null;
@@ -76,7 +78,6 @@ async function loadInitialTrainingData(userId: string): Promise<InitialTrainingD
 
 export function overviewAvailabilityDescriptor(userId: string) {
   return {
-    key: routeDataKey('overviews', userId),
     load: async () => {
       const [grammar, topics, vocabulary] = await Promise.all([
         UserItem.hasInitiatedGrammar(userId),
@@ -94,35 +95,30 @@ export function overviewAvailabilityDescriptor(userId: string) {
 
 export function practiceOverviewDescriptor(userId: string) {
   return {
-    key: routeDataKey('practice-overview', userId),
     load: () => UserItem.getByUserId(userId),
   };
 }
 
 export function levelsDescriptor(userId: string) {
   return {
-    key: routeDataKey('levels', userId),
     load: () => Levels.getOverview(userId, getLocalDate()),
   };
 }
 
 export function grammarDescriptor(userId: string) {
   return {
-    key: routeDataKey('grammar', userId),
     load: () => GrammarGroup.getInitiated(userId),
   };
 }
 
 export function topicsDescriptor(userId: string) {
   return {
-    key: routeDataKey('topics', userId),
     load: () => Topic.getInitiatedByUserId(userId),
   };
 }
 
 export function topicDetailDescriptor(userId: string, topicId: number) {
   return {
-    key: routeDataKey('topic-detail', userId, topicId),
     load: async () => {
       const [topic, items] = await Promise.all([
         Topic.getById(topicId),
@@ -135,28 +131,18 @@ export function topicDetailDescriptor(userId: string, topicId: number) {
 
 export function vocabularyDescriptor(userId: string) {
   return {
-    key: routeDataKey('vocabulary', userId),
     load: () => UserItem.getInitiatedVocabulary(userId),
   };
 }
 
 export function pronunciationGroupDetailDescriptor(userId: string, groupId: number) {
   return {
-    key: routeDataKey('pronunciation-group-detail', userId, groupId),
     load: () => PronunciationGroup.getDetail(userId, groupId),
-  };
-}
-
-export function practiceDeckDescriptor(userId: string) {
-  return {
-    key: routeDataKey('practice', userId),
-    load: () => loadReviewDeckData(userId),
   };
 }
 
 export function initialTrainingDescriptor(userId: string) {
   return {
-    key: routeDataKey('initial-training', userId),
     load: () => loadInitialTrainingData(userId),
   };
 }

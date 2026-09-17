@@ -62,10 +62,6 @@ vi.mock('@/features/practice/hooks/use-practice-card-state', () => ({
     };
   },
 }));
-vi.mock('@/routing/route-data-handoff', () => ({
-  invalidateRouteData: vi.fn(),
-  routeDataKey: vi.fn(),
-}));
 vi.mock('@/features/logging/monitoring-handler', () => ({ reportError: vi.fn() }));
 
 import { useInitialTrainingDeck } from '../hooks/use-block-training-deck';

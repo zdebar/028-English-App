@@ -44,24 +44,17 @@ root layout and renders route content through `Outlet`.
 Protected loaders await the initial authentication result and redirect guests to
 Home. Unknown routes render a page-not-found notification.
 
-## Route Data And Navigation Handoff
+## Route Data And Navigation
 
-Route-critical IndexedDB queries are represented by typed descriptors in
-`frontend/src/routing/route-data.ts`. Data routes consume these descriptors before
-rendering their destination page. Navigation controls load required data after a
-click and navigate only when the request succeeds.
+Typed route descriptors in `frontend/src/routing/route-data.ts` are owned by route
+loaders. Navigation controls are ordinary links/buttons and never preload, cache, or
+hand off route data. This keeps route loading behavior identical for clicks, direct
+URLs, refreshes, and history navigation.
 
-The storage in `route-data-handoff.ts` is only a short handoff: concurrent requests are
-deduplicated, successful unconsumed results expire after ten seconds, and a route
-loader consumes an entry once. Failures are evicted immediately so a click can
-retry. Mutations invalidate matching unconsumed descriptors; IndexedDB remains the
-source of truth.
-
-`DataNavigationButton` and `DataNavigationLink` start loading after a click and keep
-the current route visible while loading runs. A successful request navigates; a
-failure leaves the user on the current page and reports the standard loading toast.
-Direct URLs, refresh, and history navigation run the same route loaders without
-relying on prepared data.
+Practice is intentionally mount-driven: entering `/practice` renders the page shell
+immediately, `usePracticeDeck` selects the first core item after mount, and optional
+note/grammar/example content plus the exact progress count are refreshed in cancellable
+background requests. The card remains usable if optional content fails.
 
 ## State Categories
 

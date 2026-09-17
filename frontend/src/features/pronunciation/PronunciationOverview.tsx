@@ -1,19 +1,16 @@
 import { DataState } from '@/components/UI/DataState';
 import OverviewCard from '@/components/UI/OverviewCard';
 import { ROUTES } from '@/config/routes.config';
-import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import { TEXTS } from '@/locales/cs';
 import { useEffect } from 'react';
-import { DataNavigationButton } from '@/routing/data-navigation';
-import { pronunciationGroupDetailDescriptor } from '@/routing/route-data';
+import { NavigationButton } from '@/routing/data-navigation';
 import { usePronunciationGroupsStore } from './use-pronunciation-groups-store';
 import { useRouteClose } from '@/routing/use-route-close';
 
 export default function PronunciationOverview() {
-  const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
   const closeRoute = useRouteClose(ROUTES.home);
   const data = usePronunciationGroupsStore((state) => state.groups);
@@ -35,12 +32,11 @@ export default function PronunciationOverview() {
       <DataState loading={loading} hasData={hasData} noDataMessage={TEXTS.noPronunciationGroups}>
         <div className="flex flex-col gap-1 pt-1">
           {data.map((group) => (
-            <DataNavigationButton
+            <NavigationButton
               key={group.id}
               className="h-input preserve-disabled-text-color w-full grow-0 px-4"
               title={group.name}
               to={ROUTES.pronunciationGroup.replace(':groupId', String(group.id))}
-              descriptor={userId ? pronunciationGroupDetailDescriptor(userId, group.id) : undefined}
             >
               <div className="flex w-full min-w-0 items-center justify-between gap-3">
                 <div className="min-w-0 text-left">
@@ -55,7 +51,7 @@ export default function PronunciationOverview() {
                   {group.unlocked_count}/{group.total_count}
                 </span>
               </div>
-            </DataNavigationButton>
+            </NavigationButton>
           ))}
         </div>
         <HelpText className="top-20 right-2">{TEXTS.pronunciationStartedHelp}</HelpText>
