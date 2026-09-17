@@ -1,0 +1,9 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+Byl jsem tam včas?,Was I there on time?,wʌz aɪ ðɛɹ ˌɔn tˈaɪm,was_i_there_on_time.opus,32000,,,,44,False,32
+Byl jsi doma?,Were you at home?,wɜː juː æt hˈoʊm,were_you_at_home.opus,32001,,,,44,False,32
+Byl on v práci?,Was he at work?,wʌz hiː æt wˈɜːk,was_he_at_work.opus,32002,,,,44,False,32
+Byla on v kuchyni?,Was she in the kitchen?,wʌz ʃiː ɪnðə kˈɪtʃən,was_she_in_the_kitchen.opus,32003,,,,44,False,32
+Bylo to důležité?,Was it important?,wʌz ɪɾ ɪmpˈɔːɹtənt,was_it_important.opus,32004,,,,44,False,32
+Byli jsme sami?,Were we alone?,wɜː wiː ɐlˈoʊn,were_we_alone.opus,32005,,,,44,False,32
+Byli jste připravení?,Were you ready?,wɜː juː ɹˈɛdi,were_you_ready.opus,32006,,,,44,False,32
+Byli spokojení?,Were they satisfied?,wɜː ðeɪ sˈæɾɪsfˌaɪd,were_they_satisfied.opus,32007,,,,44,False,32
