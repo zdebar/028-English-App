@@ -1,127 +1,53 @@
-import { DataNavigationButton, DataNavigationLink } from '@/routing/data-navigation';
-import { resetPreparedRouteData } from '@/routing/route-data-handoff';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { Link, MemoryRouter, useLocation } from 'react-router-dom';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-
-const { showToast, reportError } = vi.hoisted(() => ({
-  showToast: vi.fn(),
-  reportError: vi.fn(),
-}));
-
-vi.mock('@/features/toast/use-toast-store', () => ({
-  useToastStore: (selector: (state: { showToast: typeof showToast }) => unknown) =>
-    selector({ showToast }),
-}));
-
-vi.mock('@/features/logging/monitoring-handler', () => ({ reportError }));
+import { NavigationButton, NavigationLink } from '@/routing/data-navigation';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { MemoryRouter, useLocation } from 'react-router-dom';
+import { describe, expect, it, vi } from 'vitest';
 
 function LocationView() {
   return <output data-testid="location">{useLocation().pathname}</output>;
 }
 
-function deferred<T>() {
-  let resolve!: (value: T) => void;
-  let reject!: (reason: unknown) => void;
-  const promise = new Promise<T>((resolvePromise, rejectPromise) => {
-    resolve = resolvePromise;
-    reject = rejectPromise;
-  });
-  return { promise, resolve, reject };
-}
-
-describe('data navigation controls', () => {
-  afterEach(() => {
-    resetPreparedRouteData();
-    vi.clearAllMocks();
-  });
-
-  it('loads only after click by default and waits before navigating', async () => {
-    const request = deferred<string>();
-    const load = vi.fn(() => request.promise);
+describe('navigation controls', () => {
+  it('navigates immediately without loading route data', () => {
     render(
       <MemoryRouter initialEntries={['/current']}>
-        <DataNavigationButton to="/next" descriptor={{ key: 'next:user', load }}>
-          Next
-        </DataNavigationButton>
+        <NavigationButton to="/next">Next</NavigationButton>
         <LocationView />
       </MemoryRouter>,
     );
 
-    const button = screen.getByRole('button', { name: 'Next' });
-    fireEvent.pointerEnter(button);
-    fireEvent.pointerDown(button);
-    fireEvent.focus(button);
-    expect(load).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
 
-    fireEvent.click(button);
-    await waitFor(() => expect(load).toHaveBeenCalledOnce());
-    expect(button.getAttribute('aria-busy')).toBe('true');
+    expect(screen.getByTestId('location').textContent).toBe('/next');
+  });
+
+  it('does not navigate when the button handler prevents the default action', () => {
+    const onClick = vi.fn((event: React.MouseEvent<HTMLButtonElement>) => event.preventDefault());
+    render(
+      <MemoryRouter initialEntries={['/current']}>
+        <NavigationButton to="/next" onClick={onClick}>
+          Next
+        </NavigationButton>
+        <LocationView />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+
+    expect(onClick).toHaveBeenCalledOnce();
     expect(screen.getByTestId('location').textContent).toBe('/current');
-
-    request.resolve('ready');
-    await waitFor(() => expect(screen.getByTestId('location').textContent).toBe('/next'));
   });
 
-  it('ignores repeated clicks while loading', async () => {
-    const request = deferred<string>();
-    const load = vi.fn(() => request.promise);
+  it('preserves normal link navigation behavior', () => {
     render(
       <MemoryRouter initialEntries={['/current']}>
-        <DataNavigationButton to="/next" descriptor={{ key: 'next:user', load }}>
-          Next
-        </DataNavigationButton>
+        <NavigationLink to="/next">Next link</NavigationLink>
         <LocationView />
       </MemoryRouter>,
     );
 
-    const button = screen.getByRole('button', { name: 'Next' });
-    fireEvent.click(button);
-    fireEvent.click(button);
-    await waitFor(() => expect(load).toHaveBeenCalledOnce());
-    request.resolve('ready');
-    await waitFor(() => expect(screen.getByTestId('location').textContent).toBe('/next'));
-  });
+    fireEvent.click(screen.getByRole('link', { name: 'Next link' }));
 
-  it('stays on the current route and reports a click loading failure', async () => {
-    const load = vi.fn().mockRejectedValue(new Error('click failed'));
-    render(
-      <MemoryRouter initialEntries={['/current']}>
-        <DataNavigationButton to="/next" descriptor={{ key: 'next:user', load }}>
-          Next
-        </DataNavigationButton>
-        <LocationView />
-      </MemoryRouter>,
-    );
-
-    const button = screen.getByRole('button', { name: 'Next' });
-    fireEvent.click(button);
-    await waitFor(() => expect(showToast).toHaveBeenCalledTimes(1));
-    expect(reportError).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId('location').textContent).toBe('/current');
-    expect(button.getAttribute('aria-busy')).toBe('false');
-  });
-
-  it('preserves modified-link navigation without starting click-time loading', () => {
-    const load = vi.fn().mockResolvedValue('ready');
-    render(
-      <MemoryRouter initialEntries={['/current']}>
-        <DataNavigationLink to="/next" descriptor={{ key: 'next:user', load }}>
-          Next link
-        </DataNavigationLink>
-        <Link to="/current">Current</Link>
-        <LocationView />
-      </MemoryRouter>,
-    );
-
-    const preventDocumentNavigation = (event: MouseEvent) => event.preventDefault();
-    globalThis.addEventListener('click', preventDocumentNavigation);
-    try {
-      fireEvent.click(screen.getByRole('link', { name: 'Next link' }), { ctrlKey: true });
-      expect(load).not.toHaveBeenCalled();
-      expect(screen.getByTestId('location').textContent).toBe('/current');
-    } finally {
-      globalThis.removeEventListener('click', preventDocumentNavigation);
-    }
+    expect(screen.getByTestId('location').textContent).toBe('/next');
   });
 });

@@ -13,7 +13,6 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import { DataState } from '@/components/UI/DataState';
 import GrammarDetailCard from './GrammarDetailCard';
 import { ROUTES } from '@/config/routes.config';
-import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { useRouteClose } from '@/routing/use-route-close';
 
@@ -64,7 +63,6 @@ export default function GrammarOverview({
     try {
       const resetCount = await UserItem.resetItemsByGrammarGroupId(userId, currentItem.id);
       reportInfo(`Grammar ${currentItem.id} reset completed: ${resetCount} items reset.`);
-      invalidateRouteData(routeDataKey('grammar', userId));
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (err) {
       showToast(TEXTS.resetProgressErrorToast, 'error');

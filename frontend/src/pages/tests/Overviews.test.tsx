@@ -15,7 +15,7 @@ vi.mock('react-router-dom', () => ({
 }));
 
 vi.mock('@/routing/data-navigation', () => ({
-  DataNavigationButton: ({ to, children, ...props }: any) => (
+  NavigationButton: ({ to, children, ...props }: any) => (
     <button type="button" {...props} onClick={() => mocks.navigate(to)}>
       {children}
     </button>

@@ -1,11 +1,9 @@
 import config from '@/config/config';
-import { ROUTES } from '@/config/routes.config';
 import UserItem from '@/database/models/user-items';
 import PracticeSession from '@/database/models/practice-sessions';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { liveQuery } from 'dexie';
 import { useLayoutEffect, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
 import { usePracticeAvailabilityStore } from './use-practice-availability-store';
 
 function toError(error: unknown): Error {
@@ -16,11 +14,9 @@ function toError(error: unknown): Error {
 export function usePracticeAvailabilityStoreSync(userId: string | null): void {
   const reset = usePracticeAvailabilityStore((state) => state.reset);
   const reviewReadyAt = usePracticeAvailabilityStore((state) => state.reviewReadyAt);
-  const { pathname } = useLocation();
-  const isHomeRoute = pathname === ROUTES.home;
 
   useLayoutEffect(() => {
-    if (!userId || !isHomeRoute) {
+    if (!userId) {
       reset();
       return;
     }
@@ -79,11 +75,12 @@ export function usePracticeAvailabilityStoreSync(userId: string | null): void {
     return () => {
       isActive = false;
       readySubscription.unsubscribe();
+      reset();
     };
-  }, [isHomeRoute, reset, userId]);
+  }, [reset, userId]);
 
   useEffect(() => {
-    if (!userId || !isHomeRoute || reviewReadyAt === null) return;
+    if (!userId || reviewReadyAt === null) return;
 
     const nextTime = Date.parse(reviewReadyAt);
     if (!Number.isFinite(nextTime) || nextTime <= Date.now()) return;
@@ -108,5 +105,5 @@ export function usePracticeAvailabilityStoreSync(userId: string | null): void {
     }, delay);
 
     return () => globalThis.clearTimeout(timeoutId);
-  }, [isHomeRoute, reviewReadyAt, userId]);
+  }, [reviewReadyAt, userId]);
 }

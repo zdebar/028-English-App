@@ -1,8 +1,7 @@
 import HelpText from '@/features/help/HelpText';
 import type { JSX } from 'react';
-import type { RouteDataDescriptor } from '@/routing/route-data-handoff';
-import { useDataNavigation } from '@/routing/data-navigation';
 import { formatProgressChange } from '@/utils/format.utils';
+import { useNavigate } from 'react-router-dom';
 
 const BUTTON_CLASS_NAME =
   'relative mx-auto inline-flex w-full cursor-pointer items-center justify-center p-2 text-center underline-offset-4 hover:underline focus:outline-none';
@@ -15,7 +14,6 @@ type Props = {
   helpText?: React.ReactNode;
   className?: string;
   to?: string;
-  descriptor?: RouteDataDescriptor<unknown>;
 };
 
 export default function PracticeOverviewButton({
@@ -26,18 +24,16 @@ export default function PracticeOverviewButton({
   helpText,
   className = '',
   to,
-  descriptor,
 }: Readonly<Props>): JSX.Element {
   if (to) {
     return (
-      <DataPracticeOverviewButton
+      <PracticeOverviewNavigationButton
         count={count}
         goal={goal}
         ariaLabel={ariaLabel}
         helpText={helpText}
         className={className}
         to={to}
-        descriptor={descriptor}
       />
     );
   }
@@ -81,16 +77,15 @@ function getGoalDecorationColorClass(value: number, goal: number): string {
   return 'decoration-error-light dark:decoration-error-dark';
 }
 
-function DataPracticeOverviewButton({
+function PracticeOverviewNavigationButton({
   count,
   goal,
   ariaLabel,
   helpText,
   className = '',
   to,
-  descriptor,
 }: Readonly<Props & { to: string }>): JSX.Element {
-  const { pending, loadAndNavigate } = useDataNavigation(descriptor, to);
+  const navigate = useNavigate();
   const decorationColorClass = getGoalDecorationColorClass(count, goal);
 
   return (
@@ -99,9 +94,7 @@ function DataPracticeOverviewButton({
       className={`${BUTTON_CLASS_NAME} ${decorationColorClass} ${className}`}
       aria-label={ariaLabel}
       title={ariaLabel}
-      aria-busy={pending}
-      disabled={pending}
-      onClick={() => void loadAndNavigate()}
+      onClick={() => navigate(to)}
     >
       <DailyProgressValue value={count} goal={goal} />
       <HelpText className="-top-4 whitespace-nowrap">{helpText}</HelpText>

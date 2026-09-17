@@ -15,15 +15,15 @@ import UserItem from '@/database/models/user-items';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
-import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff';
 import {
+  loadReviewEntryDetails,
   loadReviewCount,
   loadReviewDeckData,
   type ReviewDeckData,
 } from '@/database/utils/practice-content.utils';
 
 /** Loads and saves one review card at a time without persisting a review session. */
-export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckData) {
+export function usePracticeDeck(userId: string | null) {
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [saveError, setSaveError] = useState<Error | null>(null);
@@ -31,22 +31,23 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
   const [completedCount, setCompletedCount] = useState(0);
   const [totalCount, setTotalCount] = useState(config.practice.reviewMinimumSize);
   const isTransitioningRef = useRef(false);
-  const availabilityCheckedAtRef = useRef(initialData?.availabilityCheckedAt ?? null);
+  const availabilityCheckedAtRef = useRef<string | null>(null);
   const counterRefreshStartedRef = useRef(false);
   const counterRequestIdRef = useRef(0);
+  const [secondaryContent, setSecondaryContent] = useState<SecondaryContent | null>(null);
+  const secondaryContentRequestIdRef = useRef(0);
 
   const fetchPracticeDeck = useCallback(async () => {
     const result = await fetchReviewDeck(userId);
     availabilityCheckedAtRef.current = result.availabilityCheckedAt;
     return result;
   }, [userId]);
-  const initialResult = useMemo(() => createInitialReviewResult(initialData), [initialData]);
   const {
     data: fetchedResult,
     loading,
     error,
     reload,
-  } = useFetch<ReviewDeckData>(fetchPracticeDeck, { initialData: initialResult });
+  } = useFetch<ReviewDeckData>(fetchPracticeDeck);
   const { currentEntry, currentItem, isCzToEn } = useMemo(
     () => getReviewDeckView(fetchedResult, index),
     [fetchedResult, index],
@@ -93,6 +94,34 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
     };
   }, [currentItem, loading, userId]);
 
+  useEffect(() => {
+    if (!userId || !currentItem) {
+      setSecondaryContent(null);
+      return undefined;
+    }
+
+    const requestId = ++secondaryContentRequestIdRef.current;
+    let isActive = true;
+    const itemKey = getReviewItemKey(currentItem);
+
+    void loadReviewEntryDetails(userId, currentItem)
+      .then((details) => {
+        if (!isActive || requestId !== secondaryContentRequestIdRef.current) return;
+        setSecondaryContent({ itemKey, ...details });
+      })
+      .catch((caughtError: unknown) => {
+        if (!isActive || requestId !== secondaryContentRequestIdRef.current) return;
+        reportError('Failed to load practice card details', toError(caughtError));
+      });
+
+    return () => {
+      isActive = false;
+      if (requestId === secondaryContentRequestIdRef.current) {
+        secondaryContentRequestIdRef.current += 1;
+      }
+    };
+  }, [currentItem, userId]);
+
   const nextItem = useCallback(
     async (outcome: PracticeOutcome) => {
       if (isTransitioningRef.current) return;
@@ -122,8 +151,8 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
   return {
     index,
     currentItem,
-    note: currentEntry?.note ?? null,
-    grammar: currentEntry?.grammar ?? null,
+    note: getSecondaryNote(currentEntry, secondaryContent),
+    grammar: getSecondaryGrammar(currentEntry, secondaryContent),
     progressLabel: getReviewProgressLabel(completedCount, totalCount),
     finishedReview,
     isCzToEn,
@@ -163,11 +192,6 @@ function fetchReviewDeck(
     });
   }
   return loadReviewDeckData(userId);
-}
-
-function createInitialReviewResult(initialData: ReviewDeckData | undefined) {
-  if (!initialData) return undefined;
-  return { ...initialData, entries: initialData.entries.slice(0, 1) };
 }
 
 function getReviewProgressLabel(completedCount: number, totalCount: number): string {
@@ -258,16 +282,14 @@ async function saveReviewAnswer(
   setCompletedCount((count) => count + 1);
   setTotalCount((count) => count + newlyAvailableCount);
   availabilityCheckedAtRef.current = dateTime;
-  await refreshAfterReviewSave(userId, reload, resetQuestionState, setSaveError);
+  await refreshAfterReviewSave(reload, resetQuestionState, setSaveError);
 }
 
 async function refreshAfterReviewSave(
-  userId: string,
   reload: () => Promise<unknown>,
   resetQuestionState: () => void,
   setSaveError: Dispatch<SetStateAction<Error | null>>,
 ): Promise<void> {
-  invalidateRouteData(routeDataKey('practice', userId));
   try {
     await reload();
     resetQuestionState();
@@ -276,6 +298,38 @@ async function refreshAfterReviewSave(
     setSaveError(normalizedError);
     reportError('Failed to refresh review deck', normalizedError);
   }
+}
+
+type SecondaryContent = Readonly<{
+  itemKey: string;
+  note: PracticeDeckEntry['note'];
+  grammar: PracticeDeckEntry['grammar'];
+}>;
+
+function getReviewItemKey(item: PracticeDeckEntry['item']): string {
+  return `${item.item_id}:${item.practice_direction}`;
+}
+
+function getSecondaryNote(
+  entry: PracticeDeckEntry | null,
+  secondaryContent: SecondaryContent | null,
+): PracticeDeckEntry['note'] | null {
+  if (!entry) return null;
+  if (secondaryContent?.itemKey === getReviewItemKey(entry.item)) {
+    return secondaryContent.note;
+  }
+  return entry.note ?? null;
+}
+
+function getSecondaryGrammar(
+  entry: PracticeDeckEntry | null,
+  secondaryContent: SecondaryContent | null,
+): PracticeDeckEntry['grammar'] | null {
+  if (!entry) return null;
+  if (secondaryContent?.itemKey === getReviewItemKey(entry.item)) {
+    return secondaryContent.grammar;
+  }
+  return entry.grammar ?? null;
 }
 
 function getReviewPronunciation(

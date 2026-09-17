@@ -10,7 +10,6 @@ const mocks = vi.hoisted(() => ({
   showToast: vi.fn(),
   reportError: vi.fn(),
   reportInfo: vi.fn(),
-  resetPreparedRouteData: vi.fn(),
 }));
 
 vi.mock('@/config/config', () => ({
@@ -50,10 +49,6 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 
-vi.mock('@/routing/route-data-handoff', () => ({
-  resetPreparedRouteData: () => mocks.resetPreparedRouteData(),
-}));
-
 import { usePeriodicSync } from '@/features/synchronization/use-periodic-sync';
 
 describe('usePeriodicSync', () => {
@@ -91,7 +86,6 @@ describe('usePeriodicSync', () => {
     });
 
     expect(mocks.dataSync).toHaveBeenCalledWith('u1');
-    expect(mocks.resetPreparedRouteData).toHaveBeenCalledTimes(1);
     expect(mocks.syncFromRemote).toHaveBeenCalled();
     expect(mocks.showToast).toHaveBeenCalledWith('Sync success', 'success');
     expect(mocks.removeOrphaned).toHaveBeenCalled();
@@ -112,7 +106,6 @@ describe('usePeriodicSync', () => {
     });
 
     expect(mocks.showToast).toHaveBeenCalledWith('Sync error', 'error');
-    expect(mocks.resetPreparedRouteData).not.toHaveBeenCalled();
     expect(mocks.reportError).toHaveBeenCalledWith(
       'Data synchronization failed',
       expect.any(Error),

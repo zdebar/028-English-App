@@ -148,8 +148,17 @@ export async function loadReviewDeckData(userId: string): Promise<ReviewDeckData
   const items = await db.transaction('r', db.user_items, () =>
     UserItem.getReviewDeck(userId, config.practice.reviewMinimumSize, now),
   );
-  const entries = await resolvePracticeEntries(userId, items);
+  const entries = items.map((item) => ({ item, note: null, grammar: null }));
   return { entries, availabilityCheckedAt: now, abandoned: entries.length === 0 };
+}
+
+/** Loads optional note and grammar content for one already-selected review card. */
+export async function loadReviewEntryDetails(
+  userId: string,
+  item: UserItemLocal,
+): Promise<Pick<PracticeDeckEntry, 'note' | 'grammar'>> {
+  const [entry] = await resolvePracticeEntries(userId, [item]);
+  return { note: entry?.note ?? null, grammar: entry?.grammar ?? null };
 }
 
 /** Loads the exact current review count for the Practice progress indicator. */

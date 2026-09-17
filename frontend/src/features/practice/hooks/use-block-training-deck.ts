@@ -17,7 +17,6 @@ import {
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
 import type { InitialTrainingData } from '@/routing/route-data';
-import { invalidateRouteData, routeDataKey } from '@/routing/route-data-handoff';
 import {
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
@@ -429,8 +428,6 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
         finalItem,
         expectedSession,
       );
-      invalidateRouteData(routeDataKey('initial-training', userId));
-      invalidateRouteData(routeDataKey('practice', userId));
       setIsComplete(true);
     },
     [items, userId],

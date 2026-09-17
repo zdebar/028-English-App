@@ -11,13 +11,9 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 vi.mock('@/routing/data-navigation', () => ({
-  DataNavigationButton: ({ children, descriptor: _descriptor, ...props }: any) => (
+  NavigationButton: ({ children, ...props }: any) => (
     <button {...props}>{children}</button>
   ),
-}));
-vi.mock('@/routing/route-data', () => ({
-  practiceDeckDescriptor: () => ({ key: 'practice', load: vi.fn() }),
-  initialTrainingDescriptor: () => ({ key: 'new', load: vi.fn() }),
 }));
 
 import PracticeButtons from '@/features/practice/PracticeButton';
@@ -36,14 +32,14 @@ describe('Home practice buttons', () => {
 
   it('gives review priority at the configured review boundary', () => {
     usePracticeAvailabilityStore.setState({ reviewReadyAt: new Date().toISOString() });
-    render(<PracticeButtons userId="u1" />);
+    render(<PracticeButtons />);
     expect(button('Review').disabled).toBe(false);
     expect(button('New').disabled).toBe(true);
   });
 
   it('enables new below the review boundary', () => {
     usePracticeAvailabilityStore.setState({ reviewReadyAt: null });
-    render(<PracticeButtons userId="u1" />);
+    render(<PracticeButtons />);
     expect(button('Review').disabled).toBe(true);
     expect(button('New').disabled).toBe(false);
   });
@@ -53,13 +49,13 @@ describe('Home practice buttons', () => {
       reviewReadyAt: new Date().toISOString(),
       practiceLoading: true,
     });
-    render(<PracticeButtons userId="u1" />);
+    render(<PracticeButtons />);
     expect(button('Review').disabled).toBe(true);
     expect(button('New').disabled).toBe(true);
   });
 
   it('stacks review before new with the shared one-unit gap', () => {
-    const { container } = render(<PracticeButtons userId="u1" />);
+    const { container } = render(<PracticeButtons />);
     const buttonGroup = container.firstElementChild;
 
     expect(buttonGroup?.className).toContain('flex-col');
@@ -72,7 +68,7 @@ describe('Home practice buttons', () => {
 
   it('uses the shared primary disabled style when no new block exists', () => {
     usePracticeAvailabilityStore.setState({ initialTrainingAvailable: false });
-    render(<PracticeButtons userId="u1" />);
+    render(<PracticeButtons />);
     const newButton = button('New');
     expect(newButton.disabled).toBe(true);
     expect(newButton.className).toContain('color-button');
@@ -83,7 +79,7 @@ describe('Home practice buttons', () => {
       reviewReadyAt: null,
       activeSession: makeSession('review'),
     });
-    render(<PracticeButtons userId="u1" />);
+    render(<PracticeButtons />);
     expect(button('Review').disabled).toBe(false);
     expect(button('New').disabled).toBe(true);
   });
@@ -93,7 +89,7 @@ describe('Home practice buttons', () => {
       reviewReadyAt: new Date().toISOString(),
       activeSession: makeSession('new'),
     });
-    render(<PracticeButtons userId="u1" />);
+    render(<PracticeButtons />);
     expect(button('Review').disabled).toBe(true);
     expect(button('New').disabled).toBe(false);
   });

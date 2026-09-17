@@ -46,7 +46,6 @@ function InitialTrainingContent({
   if (deck.isComplete) {
     return <PracticeEndState {...getInitialTrainingCompletionMessages(deck.block?.name)} />;
   }
-  if (!deck.hasContent && !deck.currentItem) return <PracticeEmptyState />;
   if (!deck.currentItem) return <PracticeEmptyState />;
 
   const showIntro = Boolean(deck.block) && !deck.hasProgress && !introDismissed;

@@ -1,11 +1,9 @@
 import type { JSX, ButtonHTMLAttributes } from 'react';
 import { useMatch } from 'react-router-dom';
-import { DataNavigationLink } from '@/routing/data-navigation';
-import type { RouteDataDescriptor } from '@/routing/route-data-handoff';
+import { NavigationLink } from '@/routing/data-navigation';
 
 type HeaderButtonProps = Readonly<{
   to: string;
-  descriptor?: RouteDataDescriptor<unknown>;
 }> &
   ButtonHTMLAttributes<HTMLButtonElement>;
 
@@ -14,7 +12,7 @@ type HeaderButtonProps = Readonly<{
  *
  * @param to Destination path for navigation.
  */
-export default function HeaderButton({ to, descriptor, ...rest }: HeaderButtonProps): JSX.Element {
+export default function HeaderButton({ to, ...rest }: HeaderButtonProps): JSX.Element {
   const isSelected = useMatch({ path: to ?? '', end: true });
 
   const sharedClasses = `${rest.className ?? ''} size-button flex items-center justify-center rounded-full grow-0 shrink-0`;
@@ -33,15 +31,14 @@ export default function HeaderButton({ to, descriptor, ...rest }: HeaderButtonPr
     );
 
   return (
-    <DataNavigationLink
+    <NavigationLink
       to={to}
-      descriptor={descriptor}
       title={rest.title ?? ''}
       className={`${sharedClasses} hover:bg-button-hover hover:text-light focus-visible:outline-none focus-visible:bg-button-hover focus-visible:text-light ${
         isSelected ? 'text-light bg-button-hover' : ''
       }`}
     >
       {rest.children}
-    </DataNavigationLink>
+    </NavigationLink>
   );
 }

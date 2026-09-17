@@ -14,13 +14,12 @@ const EMPTY_AVAILABILITY = {
   reviewReadyAt: null,
   initialTrainingAvailable: false,
   activeSession: null,
-  practiceLoading: false,
+  practiceLoading: true,
   practiceError: null,
 };
 
-/** Route-stable availability snapshots for the practice actions shown on Home. */
+/** Home-scoped availability snapshot for the practice actions shown on Home. */
 export const usePracticeAvailabilityStore = create<PracticeAvailabilityState>((set) => ({
   ...EMPTY_AVAILABILITY,
-  practiceLoading: true,
   reset: () => set(EMPTY_AVAILABILITY),
 }));

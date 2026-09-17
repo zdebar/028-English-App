@@ -30,19 +30,23 @@ const mocks = vi.hoisted(() => ({
   blockGet: vi.fn(),
 }));
 
+function valueOrFallback<T>(value: T | null | undefined, fallback: T): T {
+  return value ?? fallback;
+}
+
 function normalizeIndexedPracticeItem(item: any) {
+  const nullDate = '1970-01-01T00:00:00.000Z';
+  const masteredAt = valueOrFallback(item.mastered_at, nullDate);
   return {
     ...item,
-    deleted_at: item.deleted_at ?? '1970-01-01T00:00:00.000Z',
-    progress_cz_to_en: item.progress_cz_to_en ?? item.progress ?? 0,
-    progress_en_to_cz: item.progress_en_to_cz ?? item.progress ?? 0,
-    next_at_cz_to_en: item.next_at_cz_to_en ?? item.next_at,
-    next_at_en_to_cz: item.next_at_en_to_cz ?? item.next_at,
-    mastered_at_cz_to_en:
-      item.mastered_at_cz_to_en ?? item.mastered_at ?? '1970-01-01T00:00:00.000Z',
-    mastered_at_en_to_cz:
-      item.mastered_at_en_to_cz ?? item.mastered_at ?? '1970-01-01T00:00:00.000Z',
-    started_at: item.started_at ?? getIndexedStartedAt(item),
+    deleted_at: valueOrFallback(item.deleted_at, nullDate),
+    progress_cz_to_en: valueOrFallback(item.progress_cz_to_en, valueOrFallback(item.progress, 0)),
+    progress_en_to_cz: valueOrFallback(item.progress_en_to_cz, valueOrFallback(item.progress, 0)),
+    next_at_cz_to_en: valueOrFallback(item.next_at_cz_to_en, item.next_at),
+    next_at_en_to_cz: valueOrFallback(item.next_at_en_to_cz, item.next_at),
+    mastered_at_cz_to_en: valueOrFallback(item.mastered_at_cz_to_en, masteredAt),
+    mastered_at_en_to_cz: valueOrFallback(item.mastered_at_en_to_cz, masteredAt),
+    started_at: valueOrFallback(item.started_at, getIndexedStartedAt(item)),
   };
 }
 
@@ -105,7 +109,7 @@ function createIndexedPracticeQuery(index: string) {
         const items = (await mocks.indexedToArray()) ?? [];
         return items
           .map(normalizeIndexedPracticeItem)
-          .filter((item) =>
+          .filter((item: any) =>
             isWithinNextAtRange(
               item,
               index,
@@ -128,15 +132,14 @@ function createIndexedPracticeQuery(index: string) {
             limit: (...limitArgs: unknown[]) => {
               mocks.indexedLimit(...limitArgs);
               return {
-                toArray: (...toArrayArgs: unknown[]) =>
-                  getFilteredItems(...toArrayArgs).then((items) =>
+                toArray: () =>
+                  getFilteredItems().then((items) =>
                     items.slice(0, Number(limitArgs[0])),
                   ),
               };
             },
-            toArray: (...toArrayArgs: unknown[]) => getFilteredItems(...toArrayArgs),
-            count: async (...countArgs: unknown[]) =>
-              (await getFilteredItems(...countArgs)).length,
+            toArray: () => getFilteredItems(),
+            count: async () => (await getFilteredItems()).length,
           };
         },
       };

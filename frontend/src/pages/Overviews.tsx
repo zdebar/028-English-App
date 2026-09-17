@@ -9,12 +9,7 @@ import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { useLoaderData } from 'react-router-dom';
 import type { OverviewAvailabilityData } from '@/routing/route-data';
-import {
-  grammarDescriptor,
-  topicsDescriptor,
-  vocabularyDescriptor,
-} from '@/routing/route-data';
-import { DataNavigationButton } from '@/routing/data-navigation';
+import { NavigationButton } from '@/routing/data-navigation';
 import { usePronunciationGroupsStore } from '@/features/pronunciation/use-pronunciation-groups-store';
 
 function getButtonState(
@@ -66,37 +61,34 @@ export default function Overviews(): JSX.Element {
       <h1 className="sr-only">{TEXTS.overviews}</h1>
       <section aria-label={TEXTS.progressOverviews}>
         <div className="flex flex-col gap-1">
-          <DataNavigationButton
+          <NavigationButton
             className="h-button w-full"
             to={ROUTES.grammar}
-            descriptor={userId ? grammarDescriptor(userId) : undefined}
             {...grammarButton}
           >
             <MenuButtonText>{TEXTS.grammarOverview}</MenuButtonText>
-          </DataNavigationButton>
-          <DataNavigationButton
+          </NavigationButton>
+          <NavigationButton
             className="h-button w-full"
             to={ROUTES.topics}
-            descriptor={userId ? topicsDescriptor(userId) : undefined}
             {...topicsButton}
           >
             <MenuButtonText>{TEXTS.topicsOverview}</MenuButtonText>
-          </DataNavigationButton>
-          <DataNavigationButton
+          </NavigationButton>
+          <NavigationButton
             className="h-button w-full"
             to={ROUTES.vocabulary}
-            descriptor={userId ? vocabularyDescriptor(userId) : undefined}
             {...vocabularyButton}
           >
             <MenuButtonText>{TEXTS.vocabularyOverview}</MenuButtonText>
-          </DataNavigationButton>
-          <DataNavigationButton
+          </NavigationButton>
+          <NavigationButton
             className="h-button w-full"
             to={ROUTES.pronunciationGroups}
             {...pronunciationButton}
           >
             <MenuButtonText>{TEXTS.pronunciationSettings}</MenuButtonText>
-          </DataNavigationButton>
+          </NavigationButton>
         </div>
       </section>
     </div>

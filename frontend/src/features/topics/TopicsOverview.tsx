@@ -8,8 +8,7 @@ import { useToastStore } from '../toast/use-toast-store';
 import { reportError } from '../logging/monitoring-handler';
 import { DataState } from '@/components/UI/DataState';
 import OverviewCard from '@/components/UI/OverviewCard';
-import { DataNavigationButton } from '@/routing/data-navigation';
-import { topicDetailDescriptor } from '@/routing/route-data';
+import { NavigationButton } from '@/routing/data-navigation';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { useRouteClose } from '@/routing/use-route-close';
 
@@ -47,15 +46,14 @@ export default function TopicsOverview({
       <DataState loading={topicsLoading} hasData={hasTopics} noDataMessage={TEXTS.noTopics}>
         <div className="flex flex-col gap-1 pt-1">
           {topics.map((topic) => (
-            <DataNavigationButton
+            <NavigationButton
               key={topic.id}
               className="h-input flex w-full justify-start px-4 text-left"
               to={`${ROUTES.topics}/${topic.id}`}
-              descriptor={userId ? topicDetailDescriptor(userId, topic.id) : undefined}
               title={topic.name}
             >
               <p className="overflow-hidden text-ellipsis whitespace-nowrap">{topic.name}</p>
-            </DataNavigationButton>
+            </NavigationButton>
           ))}
         </div>
       </DataState>

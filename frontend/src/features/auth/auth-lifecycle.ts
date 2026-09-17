@@ -1,8 +1,6 @@
 import { useAuthStore } from './use-auth-store';
-import { resetPreparedRouteData } from '@/routing/route-data-handoff';
 
 let cleanup: (() => void) | null = null;
-let cacheCleanup: (() => void) | null = null;
 let readyCleanup: (() => void) | null = null;
 let readyPromise: Promise<void> | null = null;
 
@@ -11,12 +9,6 @@ export function startAuthLifecycle(): Promise<void> {
   if (readyPromise !== null) return readyPromise;
 
   cleanup = useAuthStore.getState().initializeAuth();
-  let previousUserId = useAuthStore.getState().userId;
-  cacheCleanup = useAuthStore.subscribe((state) => {
-    if (state.userId === previousUserId) return;
-    previousUserId = state.userId;
-  resetPreparedRouteData();
-  });
   readyPromise = new Promise<void>((resolve) => {
     if (!useAuthStore.getState().loading) {
       resolve();
@@ -43,10 +35,8 @@ export function waitForAuthReady(): Promise<void> {
 /** Test/HMR cleanup for the singleton auth listener. */
 export function stopAuthLifecycle(): void {
   cleanup?.();
-  cacheCleanup?.();
   readyCleanup?.();
   cleanup = null;
-  cacheCleanup = null;
   readyCleanup = null;
   readyPromise = null;
 }

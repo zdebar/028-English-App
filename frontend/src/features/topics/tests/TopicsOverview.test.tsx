@@ -18,15 +18,11 @@ vi.mock('react-router-dom', () => ({
 }));
 
 vi.mock('@/routing/data-navigation', () => ({
-  DataNavigationButton: ({ to, children, ...props }: any) => (
+  NavigationButton: ({ to, children, ...props }: any) => (
     <button data-testid="topic-button" {...props} onClick={() => mocks.navigate(to)}>
       {children}
     </button>
   ),
-}));
-
-vi.mock('@/routing/route-data', () => ({
-  topicDetailDescriptor: () => ({ key: 'topic', load: vi.fn() }),
 }));
 
 vi.mock('@/database/models/topics', () => ({
