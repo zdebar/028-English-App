@@ -1,0 +1,9 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+"Mám pravdu, že ano?","I'm right, aren't I?",aɪm ɹˈaɪt ˌɑːɹnt ˈaɪ,im_right_arent_i.opus,72000,,,,84,False,72
+"Jsi doma, že ano?","You're at home, aren't you?",jʊɹ æt hˈoʊm ˈɑːɹnt juː,youre_at_home_arent_you.opus,72001,,,,84,False,72
+"On dnes pracuje, že ano?","He's working today, isn't he?",hiːz wˈɜːkɪŋ tədˈeɪ ˈɪzənt hiː,hes_working_today_isnt_he.opus,72002,,,,84,False,72
+"Ona umí plavat, že ano?","She can swim, can't she?",ʃiː kæn swˈɪm kˈænt ʃiː,she_can_swim_cant_she.opus,72003,,,,84,False,72
+"To není daleko, že ano?","It's not far, is it?",ɪts nˌɑːt fˈɑːɹ ɪz ɪt,its_not_far_is_it.opus,72004,,,,84,False,72
+"Máme dost času, že ano?","We have enough time, don't we?",wiː hæv ɪnˈʌf tˈaɪm dˈoʊnt wiː,we_have_enough_time_dont_we.opus,72005,,,,84,False,72
+"Znáte ho, že ano?","You know him, don't you?",juː nˈoʊ hˌɪm dˈoʊnt juː,you_know_him_dont_you.opus,72006,,,,84,False,72
+"Mají auto, že ano?","They have a car, don't they?",ðeɪ hæv ɐ kˈɑːɹ dˈoʊnt ðeɪ,they_have_a_car_dont_they.opus,72007,,,,84,False,72

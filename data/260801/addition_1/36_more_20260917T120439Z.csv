@@ -1,0 +1,9 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+Volal jsem ti?,Did I call you?,dˈɪd aɪ kˈɔːl juː,did_i_call_you.opus,36000,,,,48,False,36
+Odpověděl jsi?,Did you answer?,dˈɪd juː ˈænsɚ,did_you_answer.opus,36001,,,,48,False,36
+Přišel?,Did he come?,dˈɪd hiː kˈʌm,did_he_come.opus,36002,,,,48,False,36
+Koupila?,Did she buy it?,dˈɪd ʃiː bˈaɪ ɪt,did_she_buy_it.opus,36003,,,,48,False,36
+Spadlo to?,Did it fall?,dˈɪd ɪt fˈɔːl,did_it_fall.opus,36004,,,,48,False,36
+Viděli jsme ho?,Did we see him?,dˈɪd wiː sˈiː hˌɪm,did_we_see_him.opus,36005,,,,48,False,36
+Přinesli jste jídlo?,Did you bring the food?,dˈɪd juː bɹˈɪŋ ðə fˈuːd,did_you_bring_the_food.opus,36006,,,,48,False,36
+Našli to?,Did they find it?,dˈɪd ðeɪ fˈaɪnd ɪt,did_they_find_it.opus,36007,,,,48,False,36

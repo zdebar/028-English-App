@@ -1,8 +1,8 @@
 # Home Practice Readiness
 
-`PracticeButtons` renders Review and New controls from a shared availability store. The store is
-Home-scoped: its Dexie subscription is stopped while Practice is active and restarted when Home is
-entered.
+`PracticeButtons` renders Review and New controls from a shared availability store. The Home route
+waits for the first availability snapshot before rendering. After Home is mounted, its Dexie
+subscription keeps the store current and is stopped while Practice is active.
 
 | Control | Ready condition | Badge | Refresh |
 | --- | --- | --- | --- |
@@ -17,5 +17,6 @@ refresh for that date.
 
 Review has priority at its boundary. Invalid new sessions are removed before availability is
 published, so a removed, started, or empty block cannot keep overriding current block ordering.
-While the Home calculation is pending, both practice controls remain disabled so stale availability
-cannot be used.
+The Home route does not render while its initial availability calculation is pending, so users do
+not see a default-disabled practice state. If a later refresh fails, both practice controls use the
+safe disabled/error state from the store.

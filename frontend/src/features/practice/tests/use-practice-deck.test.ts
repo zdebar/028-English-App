@@ -106,7 +106,7 @@ describe('usePracticeDeck', () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.currentItem?.item_id).toBe(1);
-    expect(result.current.progressLabel).toBe('0 / 20');
+    await waitFor(() => expect(result.current.progressLabel).toBe('0 / 20'));
   });
 
   it('loads and displays one item from a review direction', async () => {
@@ -132,7 +132,7 @@ describe('usePracticeDeck', () => {
     const { result } = renderHook(() => usePracticeDeck('u1'));
 
     expect(result.current.currentItem?.item_id).toBe(1);
-    expect(result.current.progressLabel).toBe('0 / 10');
+    expect(result.current.progressLabel).toBe('0');
 
     await act(async () => resolveCount(25));
     expect(result.current.progressLabel).toBe('0 / 25');
@@ -162,7 +162,7 @@ describe('usePracticeDeck', () => {
     });
   });
 
-  it('ignores a stale counter refresh after the practice card changes', async () => {
+  it('keeps the counter request alive when the practice card changes', async () => {
     let resolveCount!: (count: number) => void;
     mocks.loadReviewCount.mockReturnValueOnce(
       new Promise<number>((resolve) => {
@@ -177,10 +177,40 @@ describe('usePracticeDeck', () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     await act(async () => result.current.nextItem('correct'));
-    expect(result.current.progressLabel).toBe('1 / 10');
+    expect(result.current.progressLabel).toBe('1');
 
     await act(async () => resolveCount(25));
-    expect(result.current.progressLabel).toBe('1 / 10');
+    expect(result.current.progressLabel).toBe('1 / 25');
+  });
+
+  it('shows completed items without a denominator until the counter resolves', async () => {
+    let resolveCount!: (count: number) => void;
+    mocks.loadReviewCount.mockReturnValueOnce(
+      new Promise<number>((resolve) => {
+        resolveCount = resolve;
+      }),
+    );
+    mocks.savePracticeDeck.mockImplementationOnce(async () => {
+      mocks.fetchData = reviewDeckResult([entry(2)]);
+    });
+
+    const { result } = renderHook(() => usePracticeDeck('u1'));
+    await act(async () => result.current.nextItem('correct'));
+
+    expect(result.current.progressLabel).toBe('1');
+
+    await act(async () => resolveCount(25));
+    expect(result.current.progressLabel).toBe('1 / 25');
+  });
+
+  it('keeps only the completed count when the counter fails', async () => {
+    mocks.loadReviewCount.mockRejectedValueOnce(new Error('counter failed'));
+    const { result } = renderHook(() => usePracticeDeck('u1'));
+
+    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+    await waitFor(() => expect(mocks.loadReviewCount).toHaveBeenCalledOnce());
+
+    expect(result.current.progressLabel).toBe('0');
   });
 
   it('ignores a counter refresh after the practice hook unmounts', async () => {
@@ -192,11 +222,11 @@ describe('usePracticeDeck', () => {
     );
 
     const { result, unmount } = renderHook(() => usePracticeDeck('u1'));
-    expect(result.current.progressLabel).toBe('0 / 10');
+    expect(result.current.progressLabel).toBe('0');
 
     unmount();
     await act(async () => resolveCount(25));
-    expect(result.current.progressLabel).toBe('0 / 10');
+    expect(result.current.progressLabel).toBe('0');
   });
 
   it('keeps the count across direction changes and refreshes available items after saving', async () => {
@@ -257,7 +287,7 @@ describe('usePracticeDeck', () => {
     const { result } = renderHook(() => usePracticeDeck('u1'));
 
     expect(result.current.currentItem).toBeNull();
-    expect(result.current.progressLabel).toBe('0 / 10');
+    expect(result.current.progressLabel).toBe('0');
   });
 
   it('does not increment the review counter when saving an answer fails', async () => {
@@ -281,7 +311,7 @@ describe('usePracticeDeck', () => {
 
     await waitFor(() => expect(result.current.finishedReview).toBe(true));
     expect(result.current.currentItem).toBeNull();
-    expect(result.current.progressLabel).toBe('0 / 10');
+    expect(result.current.progressLabel).toBe('0');
   });
 });
 

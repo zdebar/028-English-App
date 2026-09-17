@@ -1,0 +1,459 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+Já nečtu noviny.,I don't read newspapers.,aɪ dˈoʊnt ɹˈiːd nˈuːzpeɪpɚz,i_dont_read_newspapers.opus,19100,,,,27,False,19
+Ty neřídíš do práce.,You don't drive to work.,juː dˈoʊnt dɹˈaɪv tə wˈɜːk,you_dont_drive_to_work.opus,19101,,,,27,False,19
+On se neučí francouzsky.,He doesn't study French.,hiː dˈʌzənt stˈʌdi fɹˈɛntʃ,he_doesnt_study_french.opus,19102,,,,27,False,19
+Ona často nenavštěvuje své prarodiče.,She doesn't visit often her grandparents.,ʃiː dˈʌzənt vˈɪzɪt ˈɔfən hɜː ɡɹˈændpɛɹənts,she_doesnt_visit_often_her_grandparents.opus,19103,,,,27,False,19
+V létě nesněží.,It doesn't snow in summer.,ɪt dˈʌzənt snˈoʊ ɪn sˈʌmɚ,it_doesnt_snow_in_summer.opus,19104,,,,27,False,19
+My nepotřebujeme auto.,We don't need a car.,wiː dˈoʊnt nˈiːd ɐ kˈɑːɹ,we_dont_need_a_car.opus,19105,,,,27,False,19
+Vy doma nemluvíte španělsky.,You don't speak Spanish at home.,juː dˈoʊnt spˈiːk spˈænɪʃ æt hˈoʊm,you_dont_speak_spanish_at_home.opus,19106,,,,27,False,19
+Oni v pátek nechodí do posilovny.,They don't go to the gym on Fridays.,ðeɪ dˈoʊnt ɡˌoʊ tə ðə dʒˈɪm ˌɔn fɹˈaɪdeɪz,they_dont_go_to_the_gym_on_fridays.opus,19107,,,,27,False,19
+Co já kupuji?,What do I buy?,wˌʌt dˈuː aɪ bˈaɪ,what_do_i_buy.opus,21100,,,,30,False,21
+Kde ty studuješ?,Where do you study?,wˌɛɹ dˈuː juː stˈʌdi,where_do_you_study.opus,21101,,,,30,False,21
+Jak často on běhá?,How often does he run?,hˌaʊ ˈɔfən dˈʌz hiː ɹˈʌn,how_often_does_he_run.opus,21102,,,,30,False,21
+Kdy ona vstává?,When does she get up?,wˌɛn dˈʌz ʃiː ɡɛt ˈʌp,when_does_she_get_up.opus,21103,,,,30,False,21
+Proč to začíná?,Why does it start?,wˌaɪ dˈʌz ɪt stˈɑːɹt,why_does_it_start.opus,21104,,,,30,False,21
+Kam my chodíme po práci?,Where do we go after work?,wˌɛɹ dˈuː wiː ɡˌoʊ ˈæftɚ wˈɜːk,where_do_we_go_after_work.opus,21105,,,,30,False,21
+Jakými jazyky vy mluvíte?,What languages do you speak?,wˌʌt lˈæŋɡwɪdʒᵻz dˈuː juː spˈiːk,what_languages_do_you_speak.opus,21106,,,,30,False,21
+Kdy oni přijíždějí?,When do they arrive?,wˌɛn dˈuː ðeɪ ɚɹˈaɪv,when_do_they_arrive.opus,21107,,,,30,False,21
+Já mohu počkat.,I can wait.,aɪ kæn wˈeɪt,i_can_wait.opus,24100,,,,34,False,24
+Umíš lyžovat?,Can you ski?,kæn juː skˈiː,can_you_ski.opus,24101,,,,34,False,24
+On umí opravit kolo.,He can fix a bike.,hiː kæn fˈɪks ɐ bˈaɪk,he_can_fix_a_bike.opus,24102,,,,34,False,24
+Ona umí zpívat?,Can she sing?,kæn ʃiː sˈɪŋ,can_she_sing.opus,24103,,,,34,False,24
+Nemůže to být pravda.,It can't be true.,ɪt kˈænt biː tɹˈuː,it_cant_be_true.opus,24104,,,,34,False,24
+Oni neumějí tančit.,They can't dance.,ðeɪ kˈænt dˈæns,they_cant_dance.opus,24105,,,,34,False,24
+Ty bys mohl zavolat později.,You could call later.,juː kʊd kˈɔːl lˈeɪɾɚ,you_could_call_later.opus,24106,,,,34,False,24
+Mohl by on zůstat déle?,Could he stay longer?,kʊd hiː stˈeɪ lˈɔŋɡɚ,could_he_stay_longer.opus,24107,,,,34,False,24
+On možná zůstane doma.,He may stay at home.,hiː mˈeɪ stˈeɪ æt hˈoʊm,he_may_stay_at_home.opus,24108,,,,34,False,24
+Smí ona použít můj telefon?,May she use my phone?,mˈeɪ ʃiː jˈuːs maɪ fˈoʊn,may_she_use_my_phone.opus,24109,,,,34,False,24
+Možná bude pršet.,It may rain.,ɪt mˈeɪ ɹˈeɪn,it_may_rain.opus,24110,,,,34,False,24
+Smíme otevřít okno?,May we open the window?,mˈeɪ wiː ˈoʊpən ðə wˈɪndoʊ,may_we_open_the_window.opus,24111,,,,34,False,24
+Ona možná zapomene.,She might forget.,ʃiː mˌaɪt fɚɡˈɛt,she_might_forget.opus,24112,,,,34,False,24
+Mohlo by to trvat déle?,Might it take longer?,mˌaɪt ɪt tˈeɪk lˈɔŋɡɚ,might_it_take_longer.opus,24113,,,,34,False,24
+To musí být omyl.,It must be a mistake.,ɪt mˈʌst biː ɐ mɪstˈeɪk,it_must_be_a_mistake.opus,24114,,,,34,False,24
+Musíme to udělat dnes?,Must we do it today?,mˈʌst wiː dˈuː ɪt tədˈeɪ,must_we_do_it_today.opus,24115,,,,34,False,24
+Ty tady nesmíš parkovat.,You mustn't park here.,juː mˈʌsənt pˈɑːɹk hˈɪɹ,you_mustnt_park_here.opus,24116,,,,34,False,24
+Ona nesmí vstoupit.,She mustn't enter.,ʃiː mˈʌsənt ˈɛntɚ,she_mustnt_enter.opus,24117,,,,34,False,24
+Měl bych cestovat.,I should travel.,aɪ ʃˌʊd tɹˈævəl,i_should_travel.opus,24118,,,,34,False,24
+Měl bys zavolat rodičům?,Should you call your parents?,ʃˌʊd juː kˈɔːl jʊɹ pˈɛɹənts,should_you_call_your_parents.opus,24119,,,,34,False,24
+Nemělo by to trvat dlouho.,It shouldn't take long.,ɪt ʃˌʊdənt tˈeɪk lˈɔŋ,it_shouldnt_take_long.opus,24120,,,,34,False,24
+Měli bychom počkat?,Should we wait?,ʃˌʊd wiː wˈeɪt,should_we_wait.opus,24121,,,,34,False,24
+Ty bys počkal.,You would wait.,juː wʊd wˈeɪt,you_would_wait.opus,24122,,,,34,False,24
+Pomohl bys mi?,Would you help me?,wʊd juː hˈɛlp mˌiː,would_you_help_me.opus,24123,,,,34,False,24
+Já bych neutekl.,I wouldn't run away.,aɪ wˈʊdənt ɹˈʌn ɐwˈeɪ,i_wouldnt_run_away.opus,24124,,,,34,False,24
+Odešel bys?,Would you leave?,wʊd juː lˈiːv,would_you_leave.opus,24125,,,,34,False,24
+Já poslouchám hudbu.,I'm listening to music.,aɪm lˈɪsənɪŋ tə mjˈuːzɪk,im_listening_to_music.opus,26100,,,,38,False,26
+Ty uklízíš pokoj.,You're cleaning your room.,jʊɹ klˈiːnɪŋ jʊɹ ɹˈuːm,youre_cleaning_your_room.opus,26101,,,,38,False,26
+On opravuje kolo.,He's fixing a bike.,hiːz fˈɪksɪŋ ɐ bˈaɪk,hes_fixing_a_bike.opus,26102,,,,38,False,26
+Ona mluví po telefonu.,She's talking on the phone.,ʃiːz tˈɔːkɪŋ ɔnðə fˈoʊn,shes_talking_on_the_phone.opus,26103,,,,38,False,26
+Venku sněží.,It's snowing outside.,ɪts snˈoʊɪŋ aʊtsˈaɪd,its_snowing_outside.opus,26104,,,,38,False,26
+My plánujeme výlet.,We're planning a trip.,wɪɹ plˈænɪŋ ɐ tɹˈɪp,were_planning_a_trip.opus,26105,,,,38,False,26
+Vy pracujete na projektu.,You're working on a project.,jʊɹ wˈɜːkɪŋ ˌɔn ɐ pɹˈɑːdʒɛkt,youre_working_on_a_project.opus,26106,,,,38,False,26
+Oni tančí v obýváku.,They're dancing in the living room.,ðeɪɚ dˈænsɪŋ ɪnðə lˈɪvɪŋ ɹˈuːm,theyre_dancing_in_the_living_room.opus,26107,,,,38,False,26
+Já teď nečtu.,I'm not reading now.,aɪm nˌɑːt ɹˈiːdɪŋ nˈaʊ,im_not_reading_now.opus,27100,,,,39,False,27
+Ty se nedíváš na televizi.,You aren't watching TV.,juː ˌɑːɹnt wˈɑːtʃɪŋ tˌiːvˈiː,you_arent_watching_tv.opus,27101,,,,39,False,27
+On dnes nevaří.,He isn't cooking today.,hiː ˌɪzənt kˈʊkɪŋ tədˈeɪ,he_isnt_cooking_today.opus,27102,,,,39,False,27
+Ona teď nepíše zprávu.,She isn't writing a message right now.,ʃiː ˌɪzənt ɹˈaɪɾɪŋ ɐ mˈɛsɪdʒ ɹˈaɪt nˈaʊ,she_isnt_writing_a_message_right_now.opus,27103,,,,39,False,27
+Venku nesněží.,It isn't snowing outside.,ɪɾ ˌɪzənt snˈoʊɪŋ aʊtsˈaɪd,it_isnt_snowing_outside.opus,27104,,,,39,False,27
+My nehledáme hotel.,We aren't looking for a hotel.,wiː ˌɑːɹnt lˈʊkɪŋ fɚɹə hoʊtˈɛl,we_arent_looking_for_a_hotel.opus,27105,,,,39,False,27
+Vy neposíláte e-mail.,You aren't sending an email.,juː ˌɑːɹnt sˈɛndɪŋ ɐn ˈiːmeɪl,you_arent_sending_an_email.opus,27106,,,,39,False,27
+Dnes večer oni neodpočívají.,They aren't relaxing tonight.,ðeɪ ˌɑːɹnt ɹᵻlˈæksɪŋ tənˈaɪt,they_arent_relaxing_tonight.opus,27107,,,,39,False,27
+Poslouchám správnou nahrávku?,Am I listening to the right recording?,æm aɪ lˈɪsənɪŋ tə ðə ɹˈaɪt ɹᵻkˈɔːɹdɪŋ,am_i_listening_to_the_right_recording.opus,28100,,,,40,False,28
+Čteš ten nový článek?,Are you reading the new article?,ɑːɹ juː ɹˈiːdɪŋ ðə nˈuː ˈɑːɹɾɪkəl,are_you_reading_the_new_article.opus,28101,,,,40,False,28
+Opravuje on počítač?,Is he fixing the computer?,ɪz hiː fˈɪksɪŋ ðə kəmpjˈuːɾɚ,is_he_fixing_the_computer.opus,28102,,,,40,False,28
+Telefonuje ona své matce?,Is she calling her mother?,ɪz ʃiː kˈɔːlɪŋ hɜː mˈʌðɚ,is_she_calling_her_mother.opus,28103,,,,40,False,28
+Sněží tam právě teď?,Is it snowing there right now?,ɪz ɪt snˈoʊɪŋ ðɛɹ ɹˈaɪt nˈaʊ,is_it_snowing_there_right_now.opus,28104,,,,40,False,28
+Hledáme my správnou adresu?,Are we looking for the right address?,ɑːɹ wiː lˈʊkɪŋ fɚðə ɹˈaɪt ɐdɹˈɛs,are_we_looking_for_the_right_address.opus,28105,,,,40,False,28
+Pracujete vy na novém projektu?,Are you working on a new project?,ɑːɹ juː wˈɜːkɪŋ ˌɔn ɐ nˈuː pɹˈɑːdʒɛkt,are_you_working_on_a_new_project.opus,28106,,,,40,False,28
+Přijíždějí oni právě teď?,Are they arriving now?,ɑːɹ ðeɪ ɚɹˈaɪvɪŋ nˈaʊ,are_they_arriving_now.opus,28107,,,,40,False,28
+Co já poslouchám?,What am I listening to?,wˌʌt æm aɪ lˈɪsənɪŋ tuː,what_am_i_listening_to.opus,29100,,,,41,False,29
+Co ty právě čteš?,What are you reading right now?,wˌʌt ɑːɹ juː ɹˈiːdɪŋ ɹˈaɪt nˈaʊ,what_are_you_reading_right_now.opus,29101,,,,41,False,29
+S kým on mluví?,Who is he talking to?,hˌuː ɪz hiː tˈɔːkɪŋ tuː,who_is_he_talking_to.opus,29102,,,,41,False,29
+Proč se ona směje?,Why is she laughing?,wˌaɪ ɪz ʃiː lˈæfɪŋ,why_is_she_laughing.opus,29103,,,,41,False,29
+Co to dělá?,What is it doing?,wˌʌt ɪz ɪt dˈuːɪŋ,what_is_it_doing.opus,29104,,,,41,False,29
+Co my vaříme?,What are we cooking?,wˌʌt ɑːɹ wiː kˈʊkɪŋ,what_are_we_cooking.opus,29105,,,,41,False,29
+Na koho vy čekáte?,Who are you waiting for?,hˌuː ɑːɹ juː wˈeɪɾɪŋ fɔːɹ,who_are_you_waiting_for.opus,29106,,,,41,False,29
+Co oni nesou?,What are they carrying?,wˌʌt ɑːɹ ðeɪ kˈæɹiɪŋ,what_are_they_carrying.opus,29107,,,,41,False,29
+Já jsem byl dnes ráno doma.,I was at home this morning.,aɪ wʌz æt hˈoʊm ðɪs mˈɔːɹnɪŋ,i_was_at_home_this_morning.opus,30100,,,,42,False,30
+Ty jsi včera byl ve škole.,You were at school yesterday.,juː wɜːɹ æt skˈuːl jˈɛstɚdˌeɪ,you_were_at_school_yesterday.opus,30101,,,,42,False,30
+On byl nemocný celý den.,He was ill all day.,hiː wʌz ˈɪl ˈɔːl dˈeɪ,he_was_ill_all_day.opus,30102,,,,42,False,30
+Ona byla u své babičky.,She was at her grandmother's.,ʃiː wʌz æt hɜː ɡɹˈændmʌðɚz,she_was_at_her_grandmothers.opus,30103,,,,42,False,30
+O víkendu bylo město úplně prázdné.,The city was completely empty at the weekend.,ðə sˈɪɾi wʌz kəmplˈiːtli ˈɛmpti æt ðə wˈiːkɛnd,the_city_was_completely_empty_at_the_weekend.opus,30104,,,,42,False,30
+My všichni jsme byli překvapeni tou zprávou.,We were surprised by the news.,wiː wɜː sɚpɹˈaɪzd baɪ ðə nˈuːz,we_were_surprised_by_the_news.opus,30105,,,,42,False,30
+Vy jste byli v Londýně minulý měsíc.,You were in London last month.,juː wɜːɹ ɪn lˈʌndən lˈæst mˈʌnθ,you_were_in_london_last_month.opus,30106,,,,42,False,30
+Oni byli v kuchyni po večeři.,They were in the kitchen after dinner.,ðeɪ wɜːɹ ɪnðə kˈɪtʃən ˈæftɚ dˈɪnɚ,they_were_in_the_kitchen_after_dinner.opus,30107,,,,42,False,30
+Já jsem včera nebyl doma.,I wasn't at home yesterday.,aɪ wˈʌzn̩t æt hˈoʊm jˈɛstɚdˌeɪ,i_wasnt_at_home_yesterday.opus,31100,,,,43,False,31
+Ty jsi ráno nebyl ve škole.,You weren't at school in the morning.,juː wˌɜːnt æt skˈuːl ɪnðə mˈɔːɹnɪŋ,you_werent_at_school_in_the_morning.opus,31101,,,,43,False,31
+On nebyl připravený na schůzku.,He wasn't ready for the meeting.,hiː wˈʌzn̩t ɹˈɛdi fɚðə mˈiːɾɪŋ,he_wasnt_ready_for_the_meeting.opus,31102,,,,43,False,31
+Ona nebyla v kanceláři.,She wasn't in the office.,ʃiː wˈʌzn̩t ɪnðɪ ˈɑːfɪs,she_wasnt_in_the_office.opus,31103,,,,43,False,31
+To bebyla to moje chyba.,It wasn't my fault.,ɪt wˈʌzn̩t maɪ fˈɔlt,it_wasnt_my_fault.opus,31104,,,,43,False,31
+My jsme na dovolené nebyli sami.,We weren't alone on holiday.,wiː wˌɜːnt ɐlˈoʊn ˌɔn hˈɑːlɪdˌeɪ,we_werent_alone_on_holiday.opus,31105,,,,43,False,31
+Vy jste minulý měsíc nebyli v Praze.,You weren't in Prague last month.,juː wˌɜːnt ɪn pɹˈɑːɡ lˈæst mˈʌnθ,you_werent_in_prague_last_month.opus,31106,,,,43,False,31
+Oni nebyli spokojeni s výsledkem.,They weren't happy with the result.,ðeɪ wˌɜːnt hˈæpi wɪððə ɹɪzˈʌlt,they_werent_happy_with_the_result.opus,31107,,,,43,False,31
+Byl jsem tam včas?,Was I there on time?,wʌz aɪ ðɛɹ ˌɔn tˈaɪm,was_i_there_on_time.opus,32100,,,,44,False,32
+Byl jsi doma?,Were you at home?,wɜː juː æt hˈoʊm,were_you_at_home.opus,32101,,,,44,False,32
+Byl on v práci?,Was he at work?,wʌz hiː æt wˈɜːk,was_he_at_work.opus,32102,,,,44,False,32
+Byla on v kuchyni?,Was she in the kitchen?,wʌz ʃiː ɪnðə kˈɪtʃən,was_she_in_the_kitchen.opus,32103,,,,44,False,32
+Bylo to důležité?,Was it important?,wʌz ɪɾ ɪmpˈɔːɹtənt,was_it_important.opus,32104,,,,44,False,32
+Byli jsme sami?,Were we alone?,wɜː wiː ɐlˈoʊn,were_we_alone.opus,32105,,,,44,False,32
+Byli jste připravení?,Were you ready?,wɜː juː ɹˈɛdi,were_you_ready.opus,32106,,,,44,False,32
+Byli spokojení?,Were they satisfied?,wɜː ðeɪ sˈæɾɪsfˌaɪd,were_they_satisfied.opus,32107,,,,44,False,32
+Kdy jsem byl naposledy v Londýně?,When was I last in London?,wˌɛn wʌz aɪ lˈæst ɪn lˈʌndən,when_was_i_last_in_london.opus,33100,,,,45,False,33
+Jaký jsi byl jako dítě?,What were you like as a child?,wˌʌt wɜː juː lˈaɪk æz ɐ tʃˈaɪld,what_were_you_like_as_a_child.opus,33101,,,,45,False,33
+Kde byl včera?,Where was he yesterday?,wˌɛɹ wʌz hiː jˈɛstɚdˌeɪ,where_was_he_yesterday.opus,33102,,,,45,False,33
+Proč byla naštvaná?,Why was she angry?,wˌaɪ wʌz ʃiː ˈæŋɡɹi,why_was_she_angry.opus,33103,,,,45,False,33
+Jaký byl ten film?,What was the film like?,wˌʌt wʌzðə fˈɪlm lˈaɪk,what_was_the_film_like.opus,33104,,,,45,False,33
+Kdy jsme byli naposledy spolu?,When were we last together?,wˌɛn wɜː wiː lˈæst təɡˈɛðɚ,when_were_we_last_together.opus,33105,,,,45,False,33
+Proč jste byli tak unavení?,Why were you so tired?,wˌaɪ wɜː juː sˌoʊ tˈaɪɚd,why_were_you_so_tired.opus,33106,,,,45,False,33
+Kde byli po práci?,Where were they after work?,wˌɛɹ wɜː ðeɪ ˈæftɚ wˈɜːk,where_were_they_after_work.opus,33107,,,,45,False,33
+Včera jsem přišel domů pozdě.,I got home late yesterday.,aɪ ɡɑːt hˈoʊm lˈeɪt jˈɛstɚdˌeɪ,i_got_home_late_yesterday.opus,34100,,,,46,False,34
+Zapomněl jsi na schůzku.,You forgot about the meeting.,juː fɚɡˈɑːt ɐbˌaʊt ðə mˈiːɾɪŋ,you_forgot_about_the_meeting.opus,34101,,,,46,False,34
+On ztratil peněženku.,He lost his wallet.,hiː lˈɔst hɪz wˈɔlɪt,he_lost_his_wallet.opus,34102,,,,46,False,34
+Ona poslala zprávu.,She sent a message.,ʃiː sˈɛnt ɐ mˈɛsɪdʒ,she_sent_a_message.opus,34103,,,,46,False,34
+Stroj se zastavil.,The machine stopped.,ðə məʃˈiːn stˈɑːpt,the_machine_stopped.opus,34104,,,,46,False,34
+My jsme dostali dobrou zprávu.,We got good news.,wiː ɡɑːt ɡˈʊd nˈuːz,we_got_good_news.opus,34105,,,,46,False,34
+Vy jste řekli pravdu.,You told the truth.,juː tˈoʊld ðə tɹˈuːθ,you_told_the_truth.opus,34106,,,,46,False,34
+Oni začali bez nás.,They started without us.,ðeɪ stˈɑːɹɾᵻd wɪðˈaʊt ˌʌs,they_started_without_us.opus,34107,,,,46,False,34
+Já jsem mu včera nezavolal.,I didn't call him yesterday.,aɪ dˈɪdnt kˈɔːl hˌɪm jˈɛstɚdˌeɪ,i_didnt_call_him_yesterday.opus,35100,,,,47,False,35
+Ty jsi mi neodpověděl na mou otázku.,You didn't answer my question.,juː dˈɪdnt ˈænsɚ maɪ kwˈɛstʃən,you_didnt_answer_my_question.opus,35101,,,,47,False,35
+On si nepřinesl pas.,He didn't bring his passport.,hiː dˈɪdnt bɹˈɪŋ hɪz pˈæspɔːɹt,he_didnt_bring_his_passport.opus,35102,,,,47,False,35
+Ona nerozuměla pokynům.,She didn't understand the instructions.,ʃiː dˈɪdnt ˌʌndɚstˈænd ðɪ ɪnstɹˈʌkʃənz,she_didnt_understand_the_instructions.opus,35103,,,,47,False,35
+Vlak nepřijel včas.,The train didn't arrive on time.,ðə tɹˈeɪn dˈɪdnt ɚɹˈaɪv ˌɔn tˈaɪm,the_train_didnt_arrive_on_time.opus,35104,,,,47,False,35
+My jsme neviděli nic neobvyklého.,We didn't see anything unusual.,wiː dˈɪdnt sˈiː ˈɛnɪθˌɪŋ ʌnjˈuːʒuːəl,we_didnt_see_anything_unusual.opus,35105,,,,47,False,35
+Vy jste mi neřekli pravdu.,You didn't tell me the truth.,juː dˈɪdnt tˈɛl mˌiː ðə tɹˈuːθ,you_didnt_tell_me_the_truth.opus,35106,,,,47,False,35
+Oni nedokončili projekt.,They didn't finish the project.,ðeɪ dˈɪdnt fˈɪnɪʃ ðə pɹˈɑːdʒɛkt,they_didnt_finish_the_project.opus,35107,,,,47,False,35
+Volal jsem ti?,Did I call you?,dˈɪd aɪ kˈɔːl juː,did_i_call_you.opus,36100,,,,48,False,36
+Odpověděl jsi?,Did you answer?,dˈɪd juː ˈænsɚ,did_you_answer.opus,36101,,,,48,False,36
+Přišel?,Did he come?,dˈɪd hiː kˈʌm,did_he_come.opus,36102,,,,48,False,36
+Koupila?,Did she buy it?,dˈɪd ʃiː bˈaɪ ɪt,did_she_buy_it.opus,36103,,,,48,False,36
+Spadlo to?,Did it fall?,dˈɪd ɪt fˈɔːl,did_it_fall.opus,36104,,,,48,False,36
+Viděli jsme ho?,Did we see him?,dˈɪd wiː sˈiː hˌɪm,did_we_see_him.opus,36105,,,,48,False,36
+Přinesli jste jídlo?,Did you bring the food?,dˈɪd juː bɹˈɪŋ ðə fˈuːd,did_you_bring_the_food.opus,36106,,,,48,False,36
+Našli to?,Did they find it?,dˈɪd ðeɪ fˈaɪnd ɪt,did_they_find_it.opus,36107,,,,48,False,36
+Kdy jsem přišel domů?,When did I get home?,wˌɛn dˈɪd aɪ ɡɛt hˈoʊm,when_did_i_get_home.opus,37100,,,,49,False,37
+Komu jsi zavolal?,Who did you call?,hˌuː dˈɪd juː kˈɔːl,who_did_you_call.opus,37101,,,,49,False,37
+Co koupil?,What did he buy?,wˌʌt dˈɪd hiː bˈaɪ,what_did_he_buy.opus,37102,,,,49,False,37
+Kdy odešla?,When did she leave?,wˌɛn dˈɪd ʃiː lˈiːv,when_did_she_leave.opus,37103,,,,49,False,37
+Proč to spadlo?,Why did it fall?,wˌaɪ dˈɪd ɪt fˈɔːl,why_did_it_fall.opus,37104,,,,49,False,37
+Koho jsme viděli?,Who did we see?,hˌuː dˈɪd wiː sˈiː,who_did_we_see.opus,37105,,,,49,False,37
+Co jste přinesli?,What did you bring?,wˌʌt dˈɪd juː bɹˈɪŋ,what_did_you_bring.opus,37106,,,,49,False,37
+Kde našli peněženku?,Where did they find the wallet?,wˌɛɹ dˈɪd ðeɪ fˈaɪnd ðə wˈɔlɪt,where_did_they_find_the_wallet.opus,37107,,,,49,False,37
+Já ti pošlu dokument e-mailem.,I'll email you the document.,aɪl ˈiːmeɪl juː ðə dˈɑːkjuːmənt,ill_email_you_the_document.opus,38100,,,,50,False,38
+Ty si to zapamatuješ.,You'll remember this.,juːl ɹᵻmˈɛmbɚ ðˈɪs,youll_remember_this.opus,38101,,,,50,False,38
+On opraví tiskárnu.,He'll fix the printer.,hiːl fˈɪks ðə pɹˈɪntɚ,hell_fix_the_printer.opus,38102,,,,50,False,38
+Ona vysvětlí situaci.,She'll explain the situation.,ʃiːl ɛksplˈeɪn ðə sˌɪtʃuːˈeɪʃən,shell_explain_the_situation.opus,38103,,,,50,False,38
+"Rozbije se to, když to upustíš.",It'll break if you drop it.,ˌɪɾəl bɹˈeɪk ɪf juː dɹˈɑːp ɪt,itll_break_if_you_drop_it.opus,38104,,,,50,False,38
+My zarezervujeme stůl.,We'll book a table.,wiːl bˈʊk ɐ tˈeɪbəl,well_book_a_table.opus,38105,,,,50,False,38
+Vy tu zkoušku uděláte.,You'll pass the test.,juːl pˈæs ðə tˈɛst,youll_pass_the_test.opus,38106,,,,50,False,38
+Oni přinesou klíče.,They'll bring the keys.,ðeɪl bɹˈɪŋ ðə kˈiːz,theyll_bring_the_keys.opus,38107,,,,50,False,38
+Dobře nezapomenu na to.,All right I won't forget about it.,ˈɔːl ɹˈaɪt aɪ woʊnt fɚɡˈɛt ɐbˈaʊt ɪt,all_right_i_wont_forget_about_it.opus,39100,,,,51,False,39
+Ne příští týden neodjedu.,No I won't leave next week.,nˈoʊ aɪ woʊnt lˈiːv nˈɛkst wˈiːk,no_i_wont_leave_next_week.opus,39101,,,,51,False,39
+On ti neřekne pravdu.,He won't tell you the truth.,hiː woʊnt tˈɛl juː ðə tɹˈuːθ,he_wont_tell_you_the_truth.opus,39102,,,,51,False,39
+Ona ten e-mail nepošle.,She won't send the email.,ʃiː woʊnt sˈɛnd ðɪ ˈiːmeɪl,she_wont_send_the_email.opus,39103,,,,51,False,39
+"To se nezmění, pokud nic neuděláš.",It won't change if you don't do anything.,ɪt woʊnt tʃˈeɪndʒ ɪf juː dˈoʊnt dˈuː ˈɛnɪθˌɪŋ,it_wont_change_if_you_dont_do_anything.opus,39104,,,,51,False,39
+My nebudeme riskovat.,We won't take the risk.,wiː woʊnt tˈeɪk ðə ɹˈɪsk,we_wont_take_the_risk.opus,39105,,,,51,False,39
+Vy zkoušku neuděláte.,You won't pass the exam.,juː woʊnt pˈæs ðɪ ɛɡzˈæm,you_wont_pass_the_exam.opus,39106,,,,51,False,39
+Oni dnes večer nezůstanou doma.,They won't stay at home tonight.,ðeɪ woʊnt stˈeɪ æt hˈoʊm tənˈaɪt,they_wont_stay_at_home_tonight.opus,39107,,,,51,False,39
+Najdu správnou adresu?,Will I find the right address?,wɪl aɪ fˈaɪnd ðə ɹˈaɪt ɐdɹˈɛs,will_i_find_the_right_address.opus,40100,,,,52,False,40
+Pošleš mi adresu?,Will you send me the address?,wɪl juː sˈɛnd mˌiː ðɪ ɐdɹˈɛs,will_you_send_me_the_address.opus,40101,,,,52,False,40
+On zůstane doma?,Will he stay at home?,wɪl hiː stˈeɪ æt hˈoʊm,will_he_stay_at_home.opus,40102,,,,52,False,40
+Ona otevře okno?,Will she open the window?,wɪl ʃiː ˈoʊpən ðə wˈɪndoʊ,will_she_open_the_window.opus,40103,,,,52,False,40
+Bude zítra sněžit?,Will it snow tomorrow?,wɪl ɪt snˈoʊ təmˈɑːɹoʊ,will_it_snow_tomorrow.opus,40104,,,,52,False,40
+My najdeme  řešení?,Will we find a solution?,wɪl wiː fˈaɪnd ɐ səlˈuːʃən,will_we_find_a_solution.opus,40105,,,,52,False,40
+Vy jim pomůžete?,Will you help them?,wɪl juː hˈɛlp ðˌɛm,will_you_help_them.opus,40106,,,,52,False,40
+Oni to dokončí včas?,Will they finish it on time?,wɪl ðeɪ fˈɪnɪʃ ɪɾ ˌɔn tˈaɪm,will_they_finish_it_on_time.opus,40107,,,,52,False,40
+Co si koupím?,What will I buy?,wˌʌt wɪl aɪ bˈaɪ,what_will_i_buy.opus,41100,,,,53,False,41
+Komu pošleš zprávu?,Who will you send the message to?,hˌuː wɪl juː sˈɛnd ðə mˈɛsɪdʒ tuː,who_will_you_send_the_message_to.opus,41101,,,,53,False,41
+Kde on zůstane?,Where will he stay?,wˌɛɹ wɪl hiː stˈeɪ,where_will_he_stay.opus,41102,,,,53,False,41
+Co ona uvaří?,What will she cook?,wˌʌt wɪl ʃiː kˈʊk,what_will_she_cook.opus,41103,,,,53,False,41
+Kdy to skončí?,When will it end?,wˌɛn wɪl ɪɾ ˈɛnd,when_will_it_end.opus,41104,,,,53,False,41
+Jak se tam my dostaneme?,How will we get there?,hˌaʊ wɪl wiː ɡɛt ðˈɛɹ,how_will_we_get_there.opus,41105,,,,53,False,41
+Co si vy objednáte?,What will you order?,wˌʌt wɪl juː ˈɔːɹdɚ,what_will_you_order.opus,41106,,,,53,False,41
+Proč to oni udělají?,Why will they do it?,wˌaɪ wɪl ðeɪ dˈuː ɪt,why_will_they_do_it.opus,41107,,,,53,False,41
+Já si zítra koupím nové boty.,I'm going to buy new shoes tomorrow.,aɪm ɡˌoʊɪŋ tə bˈaɪ nˈuː ʃˈuːz təmˈɑːɹoʊ,im_going_to_buy_new_shoes_tomorrow.opus,42100,,,,54,False,42
+Ty si objednáš pizzu.,You're going to order a pizza.,jʊɹ ɡˌoʊɪŋ tʊ ˈɔːɹdɚɹ ɐ pˈiːtsə,youre_going_to_order_a_pizza.opus,42101,,,,54,False,42
+On opraví auto.,He's going to repair the car.,hiːz ɡˌoʊɪŋ tə ɹᵻpˈɛɹ ðə kˈɑːɹ,hes_going_to_repair_the_car.opus,42102,,,,54,False,42
+Ona začne kurz v pondělí.,She's going to start the course on Monday.,ʃiːz ɡˌoʊɪŋ tə stˈɑːɹt ðə kˈɔːɹs ˌɔn mˈʌndeɪ,shes_going_to_start_the_course_on_monday.opus,42103,,,,54,False,42
+Ten balón brzy praskne.,The balloon is going to burst soon.,ðə bəlˈuːn ɪz ɡˌoʊɪŋ tə bˈɜːst sˈuːn,the_balloon_is_going_to_burst_soon.opus,42104,,,,54,False,42
+My navštívíme muzeum.,We're going to visit the museum.,wɪɹ ɡˌoʊɪŋ tə vˈɪzɪt ðə mjuːzˈiəm,were_going_to_visit_the_museum.opus,42105,,,,54,False,42
+Vy se přestěhujete příští měsíc.,You're going to move next month.,jʊɹ ɡˌoʊɪŋ tə mˈuːv nˈɛkst mˈʌnθ,youre_going_to_move_next_month.opus,42106,,,,54,False,42
+Oni prodají svůj dům.,They're going to sell their house.,ðeɪɚ ɡˌoʊɪŋ tə sˈɛl ðɛɹ hˈaʊs,theyre_going_to_sell_their_house.opus,42107,,,,54,False,42
+Já nebudu řídit do práce.,I'm not going to drive to work.,aɪm nˌɑːt ɡˌoʊɪŋ tə dɹˈaɪv tə wˈɜːk,im_not_going_to_drive_to_work.opus,43100,,,,55,False,43
+Ty se nebudeš dívat na film.,You aren't going to watch the film.,juː ˌɑːɹnt ɡˌoʊɪŋ tə wˈɑːtʃ ðə fˈɪlm,you_arent_going_to_watch_the_film.opus,43101,,,,55,False,43
+On nepozve své přátele.,He isn't going to invite his friends.,hiː ˌɪzənt ɡˌoʊɪŋ tʊ ɪnvˈaɪt hɪz fɹˈɛndz,he_isnt_going_to_invite_his_friends.opus,43102,,,,55,False,43
+Ona neotevře obchod.,She isn't going to open the shop.,ʃiː ˌɪzənt ɡˌoʊɪŋ tʊ ˈoʊpən ðə ʃˈɑːp,she_isnt_going_to_open_the_shop.opus,43103,,,,55,False,43
+To se nezmění.,It isn't going to change.,ɪɾ ˌɪzənt ɡˌoʊɪŋ tə tʃˈeɪndʒ,it_isnt_going_to_change.opus,43104,,,,55,False,43
+My nebudeme utrácet tolik.,We aren't going to spend that much.,wiː ˌɑːɹnt ɡˌoʊɪŋ tə spˈɛnd ðæt mˈʌtʃ,we_arent_going_to_spend_that_much.opus,43105,,,,55,False,43
+Vy neodmítnete tuto nabídku.,You aren't going to reject this offer.,juː ˌɑːɹnt ɡˌoʊɪŋ tə ɹᵻdʒˈɛkt ðɪs ˈɔfɚ,you_arent_going_to_reject_this_offer.opus,43106,,,,55,False,43
+Oni nebudou čekat dlouho.,They aren't going to wait long.,ðeɪ ˌɑːɹnt ɡˌoʊɪŋ tə wˈeɪt lˈɔŋ,they_arent_going_to_wait_long.opus,43107,,,,55,False,43
+Zítra pojedu vlakem?,Am I going to take the train tomorrow?,æm aɪ ɡˌoʊɪŋ tə tˈeɪk ðə tɹˈeɪn təmˈɑːɹoʊ,am_i_going_to_take_the_train_tomorrow.opus,44100,,,,56,False,44
+Budeš si brát dovolenou?,Are you going to take a holiday?,ɑːɹ juː ɡˌoʊɪŋ tə tˈeɪk ɐ hˈɑːlɪdˌeɪ,are_you_going_to_take_a_holiday.opus,44101,,,,56,False,44
+Připojí se on k týmu?,Is he going to join the team?,ɪz hiː ɡˌoʊɪŋ tə dʒˈɔɪn ðə tˈiːm,is_he_going_to_join_the_team.opus,44102,,,,56,False,44
+Naučí se ona řídit?,Is she going to learn to drive?,ɪz ʃiː ɡˌoʊɪŋ tə lˈɜːn tə dɹˈaɪv,is_she_going_to_learn_to_drive.opus,44103,,,,56,False,44
+Bude to fungovat?,Is it going to work?,ɪz ɪt ɡˌoʊɪŋ tə wˈɜːk,is_it_going_to_work.opus,44104,,,,56,False,44
+Budeme my potřebovat pomoc?,Are we going to need help?,ɑːɹ wiː ɡˌoʊɪŋ tə nˈiːd hˈɛlp,are_we_going_to_need_help.opus,44105,,,,56,False,44
+Změníte vy plán?,Are you going to change the plan?,ɑːɹ juː ɡˌoʊɪŋ tə tʃˈeɪndʒ ðə plˈæn,are_you_going_to_change_the_plan.opus,44106,,,,56,False,44
+Přidají se oni k nám?,Are they going to join us?,ɑːɹ ðeɪ ɡˌoʊɪŋ tə dʒˈɔɪn ˌʌs,are_they_going_to_join_us.opus,44107,,,,56,False,44
+Co si koupím?,What am I going to buy?,wˌʌt æm aɪ ɡˌoʊɪŋ tə bˈaɪ,what_am_i_going_to_buy.opus,45100,,,,57,False,45
+Komu zavoláš?,Who are you going to call?,hˌuː ɑːɹ juː ɡˌoʊɪŋ tə kˈɔːl,who_are_you_going_to_call.opus,45101,,,,57,False,45
+Kde zůstane?,Where is he going to stay?,wˌɛɹ ɪz hiː ɡˌoʊɪŋ tə stˈeɪ,where_is_he_going_to_stay.opus,45102,,,,57,False,45
+Co opraví?,What is she going to repair?,wˌʌt ɪz ʃiː ɡˌoʊɪŋ tə ɹᵻpˈɛɹ,what_is_she_going_to_repair.opus,45103,,,,57,False,45
+Proč se to změní?,Why is it going to change?,wˌaɪ ɪz ɪt ɡˌoʊɪŋ tə tʃˈeɪndʒ,why_is_it_going_to_change.opus,45104,,,,57,False,45
+Koho navštívíme?,Who are we going to visit?,hˌuː ɑːɹ wiː ɡˌoʊɪŋ tə vˈɪzɪt,who_are_we_going_to_visit.opus,45105,,,,57,False,45
+Kdy se vrátíte?,When are you going to come back?,wˌɛn ɑːɹ juː ɡˌoʊɪŋ tə kˈʌm bˈæk,when_are_you_going_to_come_back.opus,45106,,,,57,False,45
+Jak to udělají?,How are they going to do it?,hˌaʊ ɑːɹ ðeɪ ɡˌoʊɪŋ tə dˈuː ɪt,how_are_they_going_to_do_it.opus,45107,,,,57,False,45
+"Když zapomenu klíče, nemohu se dostat domů.","If I forget my keys, I can't get into the house.",ɪf aɪ fɚɡˈɛt maɪ kˈiːz aɪ kˈænt ɡɛt ˌɪntʊ ðə hˈaʊs,if_i_forget_my_keys_i_cant_get_into_the_house.opus,46100,,,,58,False,46
+"Když piješ dost vody, cítíš se lépe.","If you drink enough water, you feel better.",ɪf juː dɹˈɪŋk ɪnˈʌf wˈɔːɾɚ juː fˈiːl bˈɛɾɚ,if_you_drink_enough_water_you_feel_better.opus,46101,,,,58,False,46
+"Když položí telefon na stůl, zůstane tam.","If he puts his phone on the table, it stays there.",ɪf hiː pˌʊts hɪz fˈoʊn ɔnðə tˈeɪbəl ɪt stˈeɪz ðˈɛɹ,if_he_puts_his_phone_on_the_table_it_stays_there.opus,46102,,,,58,False,46
+"Když přidá cukr, čaj chutná sladce.","If she adds sugar, the tea tastes sweet.",ɪf ʃiː ˈædz ʃˈʊɡɚ ðə tˈiː tˈeɪsts swˈiːt,if_she_adds_sugar_the_tea_tastes_sweet.opus,46103,,,,58,False,46
+"Když voda dosáhne sta stupňů, začne vařit.","If water reaches 100 degrees, it boils.",ɪf wˈɔːɾɚ ɹˈiːtʃᵻz wˈʌnhˈʌndɹɪd dᵻɡɹˈiːz ɪt bˈɔɪlz,if_water_reaches_100_degrees_it_boils.opus,46104,,,,58,False,46
+"Když otevřeme okno, dovnitř proudí čerstvý vzduch.","If we open the window, fresh air comes in.",ɪf wiː ˈoʊpən ðə wˈɪndoʊ fɹˈɛʃ ˈɛɹ kˈʌmz ˈɪn,if_we_open_the_window_fresh_air_comes_in.opus,46105,,,,58,False,46
+"Když stisknete tuto klávesu, počítač se vypne.","If you press this key, the computer shuts down.",ɪf juː pɹˈɛs ðɪs kˈiː ðə kəmpjˈuːɾɚ ʃˈʌts dˈaʊn,if_you_press_this_key_the_computer_shuts_down.opus,46106,,,,58,False,46
+"Když pravidelně cvičí, mají více energie.","If they exercise regularly, they have more energy.",ɪf ðeɪ ˈɛksɚsˌaɪz ɹˈɛɡjʊlɚli ðeɪ hæv mˈɔːɹ ˈɛnɚdʒi,if_they_exercise_regularly_they_have_more_energy.opus,46107,,,,58,False,46
+"Když budu mít čas, dokončím to dnes","If I have time, I'll finish it today",ɪf aɪ hæv tˈaɪm aɪl fˈɪnɪʃ ɪt tədˈeɪ,if_i_have_time_ill_finish_it_today.opus,47100,,,,59,False,47
+"Když mi pomůžeš, zvládnu to rychleji","If you help me, I'll manage it faster",ɪf juː hˈɛlp mˌiː aɪl mˈænɪdʒ ɪt fˈæstɚ,if_you_help_me_ill_manage_it_faster.opus,47101,,,,59,False,47
+"Když on bude opatrný, on nic nerozbije","If he's careful, he won't break anything",ɪf hiːz kˈɛɹfəl hiː woʊnt bɹˈeɪk ˈɛnɪθˌɪŋ,if_hes_careful_he_wont_break_anything.opus,47102,,,,59,False,47
+"Když ona si vezme deštník, ona nezmokne","If she takes an umbrella, she won't get wet",ɪf ʃiː tˈeɪks ɐn ʌmbɹˈɛlə ʃiː woʊnt ɡɛt wˈɛt,if_she_takes_an_umbrella_she_wont_get_wet.opus,47103,,,,59,False,47
+"Když se ochladí, my zapneme topení","If it gets colder, we'll turn on the heating",ɪf ɪt ɡˈɛts kˈoʊldɚ wiːl tˈɜːn ɔnðə hˈiːɾɪŋ,if_it_gets_colder_well_turn_on_the_heating.opus,47104,,,,59,False,47
+"Když vy budete poslouchat pokyny, vy se vyhnete problémům","If you follow the instructions, you'll avoid problems",ɪf juː fˈɑːloʊ ðɪ ɪnstɹˈʌkʃənz juːl ɐvˈɔɪd pɹˈɑːbləmz,if_you_follow_the_instructions_youll_avoid_problems.opus,47105,,,,59,False,47
+"Když to oni vysvětlí, my pochopíme situaci","If they explain it, we'll understand the situation",ɪf ðeɪ ɛksplˈeɪn ɪt wiːl ˌʌndɚstˈænd ðə sˌɪtʃuːˈeɪʃən,if_they_explain_it_well_understand_the_situation.opus,47106,,,,59,False,47
+"Když ty odejdeš teď, ty přijdeš včas","If you leave now, you'll arrive on time",ɪf juː lˈiːv nˈaʊ juːl ɚɹˈaɪv ˌɔn tˈaɪm,if_you_leave_now_youll_arrive_on_time.opus,47107,,,,59,False,47
+"Kdybych věděl o problému, pomohl bych","If I knew about the problem, I'd help",ɪf aɪ nˈuː ɐbˌaʊt ðə pɹˈɑːbləm aɪd hˈɛlp,if_i_knew_about_the_problem_id_help.opus,48100,,,,60,False,48
+"Kdybys měl více zkušeností, zvládl bys to","If you had more experience, you'd manage it",ɪf juː hæd mˈɔːɹ ɛkspˈiəɹɪəns juːd mˈænɪdʒ ɪt,if_you_had_more_experience_youd_manage_it.opus,48101,,,,60,False,48
+"Kdyby byl doma, otevřel by dveře","If he were at home, he'd open the door",ɪf hiː wɜːɹ æt hˈoʊm hiːd ˈoʊpən ðə dˈɔːɹ,if_he_were_at_home_hed_open_the_door.opus,48102,,,,60,False,48
+"Kdyby měla auto, jezdila by do práce","If she had a car, she'd drive to work",ɪf ʃiː hæd ɐ kˈɑːɹ ʃiːd dɹˈaɪv tə wˈɜːk,if_she_had_a_car_shed_drive_to_work.opus,48103,,,,60,False,48
+"Kdyby to bylo levnější, koupili bychom to","If it were cheaper, we'd buy it",ɪf ɪt wɜː tʃˈiːpɚ wiːd bˈaɪ ɪt,if_it_were_cheaper_wed_buy_it.opus,48104,,,,60,False,48
+"Kdybychom znali adresu, našli bychom ho","If we knew the address, we'd find him",ɪf wiː nˈuː ðɪ ɐdɹˈɛs wiːd fˈaɪnd hˌɪm,if_we_knew_the_address_wed_find_him.opus,48105,,,,60,False,48
+"Kdybyste se zeptali dříve, dostali byste odpověď","If you asked earlier, you'd get an answer",ɪf juː ˈæskt ˈɜːlɪɚ juːd ɡɛt ɐn ˈænsɚ,if_you_asked_earlier_youd_get_an_answer.opus,48106,,,,60,False,48
+"Kdyby měli více informací, rozhodli by se jinak","If they had more information, they'd decide differently",ɪf ðeɪ hæd mˈɔːɹ ˌɪnfɚmˈeɪʃən ðeɪd dᵻsˈaɪd dˈɪfɹəntli,if_they_had_more_information_theyd_decide_differently.opus,48107,,,,60,False,48
+Už jsem poslal zprávu.,I've already sent the message.,aɪv ɔːlɹˌɛdi sˈɛnt ðə mˈɛsɪdʒ,ive_already_sent_the_message.opus,49100,,,,61,False,49
+Ty jsi ztratil peněženku.,You've lost your wallet.,juːv lˈɔst jʊɹ wˈɔlɪt,youve_lost_your_wallet.opus,49101,,,,61,False,49
+On právě odešel.,He's just left.,hiːz dʒˈʌst lˈɛft,hes_just_left.opus,49102,,,,61,False,49
+Ona si koupila nové boty.,She's bought new shoes.,ʃiːz bˈɔːt nˈuː ʃˈuːz,shes_bought_new_shoes.opus,49103,,,,61,False,49
+To se stalo několikrát.,It's happened several times.,ɪts hˈæpənd sˈɛvɹəl tˈaɪmz,its_happened_several_times.opus,49104,,,,61,False,49
+My jsme dokončili práci.,We've finished the work.,wiːv fˈɪnɪʃt ðə wˈɜːk,weve_finished_the_work.opus,49105,,,,61,False,49
+Vy jste se naučili novou frázi.,You've learned a new phrase.,juːv lˈɜːnd ɐ nˈuː fɹˈeɪz,youve_learned_a_new_phrase.opus,49106,,,,61,False,49
+Oni našli řešení.,They've found a solution.,ðeɪv fˈaʊnd ɐ səlˈuːʃən,theyve_found_a_solution.opus,49107,,,,61,False,49
+Ještě jsem neposlal e-mail.,I haven't sent the email yet.,aɪ hˈævənt sˈɛnt ðɪ ˈiːmeɪl jˈɛt,i_havent_sent_the_email_yet.opus,50100,,,,62,False,50
+Ty jsi ještě nečetl tu knihu.,You haven't read the book yet.,juː hˈævənt ɹˈɛd ðə bˈʊk jˈɛt,you_havent_read_the_book_yet.opus,50101,,,,62,False,50
+On zatím neodpověděl.,He hasn't replied yet.,hiː hˈæzənt ɹᵻplˈaɪd jˈɛt,he_hasnt_replied_yet.opus,50102,,,,62,False,50
+Ona ještě neotevřela dopis.,She hasn't opened the letter yet.,ʃiː hˈæzənt ˈoʊpənd ðə lˈɛɾɚ jˈɛt,she_hasnt_opened_the_letter_yet.opus,50103,,,,62,False,50
+To se zatím nezměnilo.,It hasn't changed yet.,ɪt hˈæzənt tʃˈeɪndʒd jˈɛt,it_hasnt_changed_yet.opus,50104,,,,62,False,50
+My jsme ještě nezačali.,We haven't started yet.,wiː hˈævənt stˈɑːɹɾᵻd jˈɛt,we_havent_started_yet.opus,50105,,,,62,False,50
+Vy jste ještě nevyřešili problém.,You haven't solved the problem yet.,juː hˈævənt sˈɑːlvd ðə pɹˈɑːbləm jˈɛt,you_havent_solved_the_problem_yet.opus,50106,,,,62,False,50
+Oni ještě nezaplatili účet.,They haven't paid the bill yet.,ðeɪ hˈævənt pˈeɪd ðə bˈɪl jˈɛt,they_havent_paid_the_bill_yet.opus,50107,,,,62,False,50
+Už jsi umyl nádobí?,Have you washed the dishes yet?,hæv juː wˈɑːʃt ðə dˈɪʃᵻz jˈɛt,have_you_washed_the_dishes_yet.opus,51100,,,,63,False,51
+Už zavolal doktorovi?,Has he called the doctor yet?,hɐz hiː kˈɔːld ðə dˈɑːktɚ jˈɛt,has_he_called_the_doctor_yet.opus,51101,,,,63,False,51
+Už koupila lístky?,Has she bought the tickets yet?,hɐz ʃiː bˈɔːt ðə tˈɪkɪts jˈɛt,has_she_bought_the_tickets_yet.opus,51102,,,,63,False,51
+Už to začalo?,Has it started yet?,hɐz ɪt stˈɑːɹɾᵻd jˈɛt,has_it_started_yet.opus,51103,,,,63,False,51
+Už jsme zahájili schůzku?,Have we started the meeting yet?,hæv wiː stˈɑːɹɾᵻd ðə mˈiːɾɪŋ jˈɛt,have_we_started_the_meeting_yet.opus,51104,,,,63,False,51
+Už jste našli řešení?,Have you found a solution yet?,hæv juː fˈaʊnd ɐ səlˈuːʃən jˈɛt,have_you_found_a_solution_yet.opus,51105,,,,63,False,51
+Už se vrátili domů?,Have they come home yet?,hæv ðeɪ kˈʌm hˈoʊm jˈɛt,have_they_come_home_yet.opus,51106,,,,63,False,51
+Už opravil auto?,Has he repaired the car yet?,hɐz hiː ɹᵻpˈɛɹd ðə kˈɑːɹ jˈɛt,has_he_repaired_the_car_yet.opus,51107,,,,63,False,51
+Co už jsem napsal?,What have I written so far?,wˌʌt hæv aɪ ɹˈɪʔn̩ sˈoʊ fˌɑːɹ,what_have_i_written_so_far.opus,52100,,,,64,False,52
+Co už jsi slyšel?,What have you heard so far?,wˌʌt hæv juː hˈɜːd sˈoʊ fˌɑːɹ,what_have_you_heard_so_far.opus,52101,,,,64,False,52
+Kolik knih už přečetl?,How many books has he read so far?,hˌaʊ mˈɛni bˈʊks hɐz hiː ɹˈiːd sˈoʊ fˌɑːɹ,how_many_books_has_he_read_so_far.opus,52102,,,,64,False,52
+Proč odešla tak brzy?,Why has she left so early?,wˌaɪ hɐz ʃiː lˈɛft sˌoʊ ˈɜːli,why_has_she_left_so_early.opus,52103,,,,64,False,52
+Co se od včerejška zlepšilo?,What has improved since yesterday?,wˌʌt hɐz ɪmpɹˈuːvd sˈɪns jˈɛstɚdˌeɪ,what_has_improved_since_yesterday.opus,52104,,,,64,False,52
+Která města jsme letos navštívili?,Which cities have we visited this year?,wˌɪtʃ sˈɪɾiz hæv wiː vˈɪzɪɾᵻd ðɪs jˈɪɹ,which_cities_have_we_visited_this_year.opus,52105,,,,64,False,52
+Co jste dnes koupili?,What have you bought today?,wˌʌt hæv juː bˈɔːt tədˈeɪ,what_have_you_bought_today.opus,52106,,,,64,False,52
+Kolik zpráv už poslali?,How many messages have they sent so far?,hˌaʊ mˈɛni mˈɛsɪdʒᵻz hæv ðeɪ sˈɛnt sˈoʊ fˌɑːɹ,how_many_messages_have_they_sent_so_far.opus,52107,,,,64,False,52
+Já vařím už třicet minut.,I've been cooking for thirty minutes.,aɪv bˌɪn kˈʊkɪŋ fɔːɹ θˈɜːɾi mˈɪnɪts,ive_been_cooking_for_thirty_minutes.opus,53100,,,,65,False,53
+Ty uklízíš od rána.,You've been cleaning since this morning.,juːv bˌɪn klˈiːnɪŋ sˈɪns ðɪs mˈɔːɹnɪŋ,youve_been_cleaning_since_this_morning.opus,53101,,,,65,False,53
+On opravuje kolo celý den.,He's been repairing the bike all day.,hiːz bˌɪn ɹᵻpˈɛɹɪŋ ðə bˈaɪk ˈɔːl dˈeɪ,hes_been_repairing_the_bike_all_day.opus,53102,,,,65,False,53
+Ona zpívá už hodinu.,She's been singing for an hour.,ʃiːz bˌɪn sˈɪŋɪŋ fɚɹən ˈaʊɚ,shes_been_singing_for_an_hour.opus,53103,,,,65,False,53
+Sněží od noci.,It's been snowing since last night.,ɪts bˌɪn snˈoʊɪŋ sˈɪns lˈæst nˈaɪt,its_been_snowing_since_last_night.opus,53104,,,,65,False,53
+My si povídáme celý večer.,We've been talking all evening.,wiːv bˌɪn tˈɔːkɪŋ ˈɔːl ˈiːvnɪŋ,weve_been_talking_all_evening.opus,53105,,,,65,False,53
+Vy malujete dům celý týden.,You've been painting the house all week.,juːv bˌɪn pˈeɪntɪŋ ðə hˈaʊs ˈɔːl wˈiːk,youve_been_painting_the_house_all_week.opus,53106,,,,65,False,53
+Oni staví dům od ledna.,They've been building a house since January.,ðeɪv bˌɪn bˈɪldɪŋ ɐ hˈaʊs sˈɪns dʒˈænjuːˌɛɹi,theyve_been_building_a_house_since_january.opus,53107,,,,65,False,53
+Já poslední dobou moc necvičím.,I haven't been exercising much lately.,aɪ hˈævənt bˌɪn ˈɛksɚsˌaɪzɪŋ mˈʌtʃ lˈeɪtli,i_havent_been_exercising_much_lately.opus,54100,,,,66,False,54
+Ty poslední dobou moc nevaříš.,You haven't been cooking much lately.,juː hˈævənt bˌɪn kˈʊkɪŋ mˈʌtʃ lˈeɪtli,you_havent_been_cooking_much_lately.opus,54101,,,,66,False,54
+On tam dlouho nepracuje.,He hasn't been working there long.,hiː hˈæzənt bˌɪn wˈɜːkɪŋ ðɛɹ lˈɔŋ,he_hasnt_been_working_there_long.opus,54102,,,,66,False,54
+Ona už nějakou dobu nezpívá.,She hasn't been singing for a while.,ʃiː hˈæzənt bˌɪn sˈɪŋɪŋ fɚɹə wˈaɪl,she_hasnt_been_singing_for_a_while.opus,54103,,,,66,False,54
+Už několik dní nesněží.,It hasn't been snowing for several days.,ɪt hˈæzənt bˌɪn snˈoʊɪŋ fɔːɹ sˈɛvɹəl dˈeɪz,it_hasnt_been_snowing_for_several_days.opus,54104,,,,66,False,54
+My tento měsíc moc nemluvíme.,We haven't been talking much this month.,wiː hˈævənt bˌɪn tˈɔːkɪŋ mˈʌtʃ ðɪs mˈʌnθ,we_havent_been_talking_much_this_month.opus,54105,,,,66,False,54
+Vy letos moc nemalujete.,You haven't been painting much this year.,juː hˈævənt bˌɪn pˈeɪntɪŋ mˈʌtʃ ðɪs jˈɪɹ,you_havent_been_painting_much_this_year.opus,54106,,,,66,False,54
+Oni poslední dobou nic nestaví.,They haven't been building anything lately.,ðeɪ hˈævənt bˌɪn bˈɪldɪŋ ˈɛnɪθˌɪŋ lˈeɪtli,they_havent_been_building_anything_lately.opus,54107,,,,66,False,54
+Už vařím půl hodiny?,Have I been cooking for half an hour?,hæv aɪ bˌɪn kˈʊkɪŋ fɔːɹ hˈæf ɐn ˈaʊɚ,have_i_been_cooking_for_half_an_hour.opus,55100,,,,67,False,55
+Uklízíš už od rána?,Have you been cleaning since this morning?,hæv juː bˌɪn klˈiːnɪŋ sˈɪns ðɪs mˈɔːɹnɪŋ,have_you_been_cleaning_since_this_morning.opus,55101,,,,67,False,55
+Opravuje on kolo už celé dopoledne?,Has he been repairing the bike all morning?,hɐz hiː bˌɪn ɹᵻpˈɛɹɪŋ ðə bˈaɪk ˈɔːl mˈɔːɹnɪŋ,has_he_been_repairing_the_bike_all_morning.opus,55102,,,,67,False,55
+Zpívá ona poslední dobou každý večer?,Has she been singing every evening lately?,hɐz ʃiː bˌɪn sˈɪŋɪŋ ˈɛvɹi ˈiːvnɪŋ lˈeɪtli,has_she_been_singing_every_evening_lately.opus,55103,,,,67,False,55
+Sněží už od noci?,Has it been snowing since last night?,hɐz ɪt bˌɪn snˈoʊɪŋ sˈɪns lˈæst nˈaɪt,has_it_been_snowing_since_last_night.opus,55104,,,,67,False,55
+Povídáme si už celý večer?,Have we been talking all evening?,hæv wiː bˌɪn tˈɔːkɪŋ ˈɔːl ˈiːvnɪŋ,have_we_been_talking_all_evening.opus,55105,,,,67,False,55
+Malujete dům už celý týden?,Have you been painting the house all week?,hæv juː bˌɪn pˈeɪntɪŋ ðə hˈaʊs ˈɔːl wˈiːk,have_you_been_painting_the_house_all_week.opus,55106,,,,67,False,55
+Staví ten dům už od ledna?,Have they been building the house since January?,hæv ðeɪ bˌɪn bˈɪldɪŋ ðə hˈaʊs sˈɪns dʒˈænjuːˌɛɹi,have_they_been_building_the_house_since_january.opus,55107,,,,67,False,55
+Co poslední dobou vařím?,What have I been cooking lately?,wˌʌt hæv aɪ bˌɪn kˈʊkɪŋ lˈeɪtli,what_have_i_been_cooking_lately.opus,56100,,,,68,False,56
+Co poslední dobou uklízíš?,What have you been cleaning lately?,wˌʌt hæv juː bˌɪn klˈiːnɪŋ lˈeɪtli,what_have_you_been_cleaning_lately.opus,56101,,,,68,False,56
+Co on opravuje od rána?,What has he been repairing since this morning?,wˌʌt hɐz hiː bˌɪn ɹᵻpˈɛɹɪŋ sˈɪns ðɪs mˈɔːɹnɪŋ,what_has_he_been_repairing_since_this_morning.opus,56102,,,,68,False,56
+Kde ona poslední dobou zpívá?,Where has she been singing lately?,wˌɛɹ hɐz ʃiː bˌɪn sˈɪŋɪŋ lˈeɪtli,where_has_she_been_singing_lately.opus,56103,,,,68,False,56
+Jak dlouho už sněží?,How long has it been snowing?,hˌaʊ lˈɔŋ hɐz ɪt bˌɪn snˈoʊɪŋ,how_long_has_it_been_snowing.opus,56104,,,,68,False,56
+O čem si poslední dobou povídáme?,What have we been talking about lately?,wˌʌt hæv wiː bˌɪn tˈɔːkɪŋ ɐbˌaʊt lˈeɪtli,what_have_we_been_talking_about_lately.opus,56105,,,,68,False,56
+Co vy poslední dobou malujete?,What have you been painting lately?,wˌʌt hæv juː bˌɪn pˈeɪntɪŋ lˈeɪtli,what_have_you_been_painting_lately.opus,56106,,,,68,False,56
+Co oni poslední dobou staví?,What have they been building lately?,wˌʌt hæv ðeɪ bˌɪn bˈɪldɪŋ lˈeɪtli,what_have_they_been_building_lately.opus,56107,,,,68,False,56
+"Už jsem uklidil pokoj, když přišli.",I'd already cleaned the room when they arrived.,aɪd ɔːlɹˌɛdi klˈiːnd ðə ɹˈuːm wɛn ðeɪ ɚɹˈaɪvd,id_already_cleaned_the_room_when_they_arrived.opus,57100,,,,69,False,57
+"Ty jsi usnul, než jsem zavolal.",You'd fallen asleep before I called.,juːd fˈɔːlən ɐslˈiːp bᵻfˌɔːɹ aɪ kˈɔːld,youd_fallen_asleep_before_i_called.opus,57101,,,,69,False,57
+"On už napsal zprávu, když jsem ho potkal.",He'd already written the message when I met him.,hiːd ɔːlɹˌɛdi ɹˈɪʔn̩ ðə mˈɛsɪdʒ wɛn aɪ mˈɛt hˌɪm,hed_already_written_the_message_when_i_met_him.opus,57102,,,,69,False,57
+"Ona koupila lístky, než koncert začal.",She'd bought the tickets before the concert started.,ʃiːd bˈɔːt ðə tˈɪkɪts bᵻfˌɔːɹ ðə kˈɑːnsɚt stˈɑːɹɾᵻd,shed_bought_the_tickets_before_the_concert_started.opus,57103,,,,69,False,57
+"Obchod už zavřel, než jsme tam dorazili.",The shop had already closed before we got there.,ðə ʃˈɑːp hæd ɔːlɹˌɛdi klˈoʊzd bᵻfˌɔːɹ wiː ɡɑːt ðˈɛɹ,the_shop_had_already_closed_before_we_got_there.opus,57104,,,,69,False,57
+My jsme se setkali před večeří.,We'd met before dinner.,wiːd mˈɛt bᵻfˌɔːɹ dˈɪnɚ,wed_met_before_dinner.opus,57105,,,,69,False,57
+"Vy jste ztratili mapu, než jste dorazili.",You'd lost the map before you arrived.,juːd lˈɔst ðə mˈæp bᵻfˌɔːɹ juː ɚɹˈaɪvd,youd_lost_the_map_before_you_arrived.opus,57106,,,,69,False,57
+Oni postavili dům před zimou.,They'd built the house before winter.,ðeɪd bˈɪlt ðə hˈaʊs bᵻfˌɔːɹ wˈɪntɚ,theyd_built_the_house_before_winter.opus,57107,,,,69,False,57
+"Ještě jsem nenapsal e-mail, když přišla.",I hadn't written the email yet when she arrived.,aɪ hˈædənt ɹˈɪʔn̩ ðɪ ˈiːmeɪl jˈɛt wɛn ʃiː ɚɹˈaɪvd,i_hadnt_written_the_email_yet_when_she_arrived.opus,58100,,,,70,False,58
+"Ty jsi ještě neusnul, když jsem odešel.",You hadn't fallen asleep yet when I left.,juː hˈædənt fˈɔːlən ɐslˈiːp jˈɛt wɛn aɪ lˈɛft,you_hadnt_fallen_asleep_yet_when_i_left.opus,58101,,,,70,False,58
+"On ještě neuklidil pokoj, když přišli hosté.",He hadn't cleaned the room yet when the guests arrived.,hiː hˈædənt klˈiːnd ðə ɹˈuːm jˈɛt wɛn ðə ɡˈɛsts ɚɹˈaɪvd,he_hadnt_cleaned_the_room_yet_when_the_guests_arrived.opus,58102,,,,70,False,58
+"Ona ještě nekoupila lístky, než koncert začal.",She hadn't bought the tickets before the concert started.,ʃiː hˈædənt bˈɔːt ðə tˈɪkɪts bᵻfˌɔːɹ ðə kˈɑːnsɚt stˈɑːɹɾᵻd,she_hadnt_bought_the_tickets_before_the_concert_started.opus,58103,,,,70,False,58
+"Obchod ještě nezavřel, když jsme tam dorazili.",The shop hadn't closed yet when we got there.,ðə ʃˈɑːp hˈædənt klˈoʊzd jˈɛt wɛn wiː ɡɑːt ðˈɛɹ,the_shop_hadnt_closed_yet_when_we_got_there.opus,58104,,,,70,False,58
+My jsme se do té doby nesetkali.,We hadn't met by then.,wiː hˈædənt mˈɛt baɪ ðˈɛn,we_hadnt_met_by_then.opus,58105,,,,70,False,58
+"Vy jste ještě nepostavili plot, když přišla zima.",You hadn't built the fence yet when winter came.,juː hˈædənt bˈɪlt ðə fˈɛns jˈɛt wɛn wˈɪntɚ kˈeɪm,you_hadnt_built_the_fence_yet_when_winter_came.opus,58106,,,,70,False,58
+Oni se do té doby nepřestěhovali.,They hadn't moved by then.,ðeɪ hˈædənt mˈuːvd baɪ ðˈɛn,they_hadnt_moved_by_then.opus,58107,,,,70,False,58
+"Už jsem uklidil pokoj, když přišli?",Had I cleaned the room before they arrived?,hæd aɪ klˈiːnd ðə ɹˈuːm bᵻfˌɔːɹ ðeɪ ɚɹˈaɪvd,had_i_cleaned_the_room_before_they_arrived.opus,59100,,,,71,False,59
+"Usnul jsi, než jsem zavolal?",Had you fallen asleep before I called?,hæd juː fˈɔːlən ɐslˈiːp bᵻfˌɔːɹ aɪ kˈɔːld,had_you_fallen_asleep_before_i_called.opus,59101,,,,71,False,59
+"Už napsal zprávu, když jsem ho potkal?",Had he already written the message when I met him?,hæd hiː ɔːlɹˌɛdi ɹˈɪʔn̩ ðə mˈɛsɪdʒ wɛn aɪ mˈɛt hˌɪm,had_he_already_written_the_message_when_i_met_him.opus,59102,,,,71,False,59
+Koupila lístky před začátkem koncertu?,Had she bought the tickets before the concert started?,hæd ʃiː bˈɔːt ðə tˈɪkɪts bᵻfˌɔːɹ ðə kˈɑːnsɚt stˈɑːɹɾᵻd,had_she_bought_the_tickets_before_the_concert_started.opus,59103,,,,71,False,59
+"Obchod zavřel, než jsme tam dorazili?",Had the shop closed before we got there?,hæd ðə ʃˈɑːp klˈoʊzd bᵻfˌɔːɹ wiː ɡɑːt ðˈɛɹ,had_the_shop_closed_before_we_got_there.opus,59104,,,,71,False,59
+Setkali jsme se už před večeří?,Had we met before dinner?,hæd wiː mˈɛt bᵻfˌɔːɹ dˈɪnɚ,had_we_met_before_dinner.opus,59105,,,,71,False,59
+Postavili jste plot před zimou?,Had you built the fence before winter?,hæd juː bˈɪlt ðə fˈɛns bᵻfˌɔːɹ wˈɪntɚ,had_you_built_the_fence_before_winter.opus,59106,,,,71,False,59
+"Oni se už přestěhovali, když začala škola?",Had they already moved when school started?,hæd ðeɪ ɔːlɹˌɛdi mˈuːvd wɛn skˈuːl stˈɑːɹɾᵻd,had_they_already_moved_when_school_started.opus,59107,,,,71,False,59
+Co jsem koupil před cestou?,What had I bought before the trip?,wˌʌt hæd aɪ bˈɔːt bᵻfˌɔːɹ ðə tɹˈɪp,what_had_i_bought_before_the_trip.opus,60100,,,,72,False,60
+"Co jsi napsal, než jsi usnul?",What had you written before you fell asleep?,wˌʌt hæd juː ɹˈɪʔn̩ bᵻfˌɔːɹ juː fˈɛl ɐslˈiːp,what_had_you_written_before_you_fell_asleep.opus,60101,,,,72,False,60
+"Co už opravil, než jsme přišli?",What had he repaired before we arrived?,wˌʌt hæd hiː ɹᵻpˈɛɹd bᵻfˌɔːɹ wiː ɚɹˈaɪvd,what_had_he_repaired_before_we_arrived.opus,60102,,,,72,False,60
+Koho pozvala před začátkem večírku?,Who had she invited before the party started?,hˌuː hæd ʃiː ɪnvˈaɪɾᵻd bᵻfˌɔːɹ ðə pˈɑːɹɾi stˈɑːɹɾᵻd,who_had_she_invited_before_the_party_started.opus,60103,,,,72,False,60
+"Co déšť zničil, než přestal?",What had the rain destroyed before it stopped?,wˌʌt hæd ðə ɹˈeɪn dᵻstɹˈɔɪd bᵻfˌɔːɹ ɪt stˈɑːpt,what_had_the_rain_destroyed_before_it_stopped.opus,60104,,,,72,False,60
+Co jsme připravili před schůzkou?,What had we prepared before the meeting?,wˌʌt hæd wiː pɹɪpˈɛɹd bᵻfˌɔːɹ ðə mˈiːɾɪŋ,what_had_we_prepared_before_the_meeting.opus,60105,,,,72,False,60
+Koho jste potkali před koncertem?,Who had you met before the concert?,hˌuː hæd juː mˈɛt bᵻfˌɔːɹ ðə kˈɑːnsɚt,who_had_you_met_before_the_concert.opus,60106,,,,72,False,60
+"Co už postavili, když začala zima?",What had they built by the time winter started?,wˌʌt hæd ðeɪ bˈɪlt baɪ ðə tˈaɪm wˈɪntɚ stˈɑːɹɾᵻd,what_had_they_built_by_the_time_winter_started.opus,60107,,,,72,False,60
+Zítra v deset budu vařit.,I'll be cooking at ten tomorrow.,aɪl biː kˈʊkɪŋ æt tˈɛn təmˈɑːɹoʊ,ill_be_cooking_at_ten_tomorrow.opus,61100,,,,73,False,61
+V pět budeš uklízet kuchyň.,You'll be cleaning the kitchen at five.,juːl biː klˈiːnɪŋ ðə kˈɪtʃən æt fˈaɪv,youll_be_cleaning_the_kitchen_at_five.opus,61101,,,,73,False,61
+"On bude opravovat auto, až přijedeme.",He'll be repairing the car when we arrive.,hiːl biː ɹᵻpˈɛɹɪŋ ðə kˈɑːɹ wɛn wiː ɚɹˈaɪv,hell_be_repairing_the_car_when_we_arrive.opus,61102,,,,73,False,61
+Ona bude zpívat zítra večer.,She'll be singing tomorrow evening.,ʃiːl biː sˈɪŋɪŋ təmˈɑːɹoʊ ˈiːvnɪŋ,shell_be_singing_tomorrow_evening.opus,61103,,,,73,False,61
+Zítra touto dobou bude sněžit.,It'll be snowing at this time tomorrow.,ˌɪɾəl biː snˈoʊɪŋ æt ðɪs tˈaɪm təmˈɑːɹoʊ,itll_be_snowing_at_this_time_tomorrow.opus,61104,,,,73,False,61
+V sobotu budeme malovat dům.,We'll be painting the house on Saturday.,wiːl biː pˈeɪntɪŋ ðə hˈaʊs ˌɔn sˈæɾɚdˌeɪ,well_be_painting_the_house_on_saturday.opus,61105,,,,73,False,61
+V devět budete nakupovat.,You'll be shopping at nine.,juːl biː ʃˈɑːpɪŋ æt nˈaɪn,youll_be_shopping_at_nine.opus,61106,,,,73,False,61
+"Oni budou stavět garáž, až se vrátíme.",They'll be building a garage when we return.,ðeɪl biː bˈɪldɪŋ ɐ ɡɚɹˈɑːʒ wɛn wiː ɹᵻtˈɜːn,theyll_be_building_a_garage_when_we_return.opus,61107,,,,73,False,61
+Zítra v deset nebudu vařit.,I won't be cooking at ten tomorrow.,aɪ woʊnt biː kˈʊkɪŋ æt tˈɛn təmˈɑːɹoʊ,i_wont_be_cooking_at_ten_tomorrow.opus,62100,,,,74,False,62
+Ty zítra odpoledne nebudeš uklízet.,You won't be cleaning tomorrow afternoon.,juː woʊnt biː klˈiːnɪŋ təmˈɑːɹoʊ ˌæftɚnˈuːn,you_wont_be_cleaning_tomorrow_afternoon.opus,62101,,,,74,False,62
+On zítra ráno nebude opravovat auto.,He won't be repairing the car tomorrow morning.,hiː woʊnt biː ɹᵻpˈɛɹɪŋ ðə kˈɑːɹ təmˈɑːɹoʊ mˈɔːɹnɪŋ,he_wont_be_repairing_the_car_tomorrow_morning.opus,62102,,,,74,False,62
+Ona zítra večer nebude zpívat.,She won't be singing tomorrow evening.,ʃiː woʊnt biː sˈɪŋɪŋ təmˈɑːɹoʊ ˈiːvnɪŋ,she_wont_be_singing_tomorrow_evening.opus,62103,,,,74,False,62
+Zítra touto dobou nebude sněžit.,It won't be snowing at this time tomorrow.,ɪt woʊnt biː snˈoʊɪŋ æt ðɪs tˈaɪm təmˈɑːɹoʊ,it_wont_be_snowing_at_this_time_tomorrow.opus,62104,,,,74,False,62
+My v neděli nebudeme malovat dům.,We won't be painting the house on Sunday.,wiː woʊnt biː pˈeɪntɪŋ ðə hˈaʊs ˌɔn sˈʌndeɪ,we_wont_be_painting_the_house_on_sunday.opus,62105,,,,74,False,62
+Vy zítra v devět nebudete nakupovat.,You won't be shopping at nine tomorrow.,juː woʊnt biː ʃˈɑːpɪŋ æt nˈaɪn təmˈɑːɹoʊ,you_wont_be_shopping_at_nine_tomorrow.opus,62106,,,,74,False,62
+"Oni nebudou stavět garáž, až se vrátíme.",They won't be building a garage when we return.,ðeɪ woʊnt biː bˈɪldɪŋ ɐ ɡɚɹˈɑːʒ wɛn wiː ɹᵻtˈɜːn,they_wont_be_building_a_garage_when_we_return.opus,62107,,,,74,False,62
+Budu zítra v deset vařit?,Will I be cooking at ten tomorrow?,wɪl aɪ biː kˈʊkɪŋ æt tˈɛn təmˈɑːɹoʊ,will_i_be_cooking_at_ten_tomorrow.opus,63100,,,,75,False,63
+Budeš zítra odpoledne uklízet?,Will you be cleaning tomorrow afternoon?,wɪl juː biː klˈiːnɪŋ təmˈɑːɹoʊ ˌæftɚnˈuːn,will_you_be_cleaning_tomorrow_afternoon.opus,63101,,,,75,False,63
+On bude zítra ráno opravovat auto?,Will he be repairing the car tomorrow morning?,wɪl hiː biː ɹᵻpˈɛɹɪŋ ðə kˈɑːɹ təmˈɑːɹoʊ mˈɔːɹnɪŋ,will_he_be_repairing_the_car_tomorrow_morning.opus,63102,,,,75,False,63
+Ona bude zítra večer zpívat?,Will she be singing tomorrow evening?,wɪl ʃiː biː sˈɪŋɪŋ təmˈɑːɹoʊ ˈiːvnɪŋ,will_she_be_singing_tomorrow_evening.opus,63103,,,,75,False,63
+Bude zítra touto dobou sněžit?,Will it be snowing at this time tomorrow?,wɪl ɪt biː snˈoʊɪŋ æt ðɪs tˈaɪm təmˈɑːɹoʊ,will_it_be_snowing_at_this_time_tomorrow.opus,63104,,,,75,False,63
+Budeme v neděli malovat dům?,Will we be painting the house on Sunday?,wɪl wiː biː pˈeɪntɪŋ ðə hˈaʊs ˌɔn sˈʌndeɪ,will_we_be_painting_the_house_on_sunday.opus,63105,,,,75,False,63
+Budete zítra v devět nakupovat?,Will you be shopping at nine tomorrow?,wɪl juː biː ʃˈɑːpɪŋ æt nˈaɪn təmˈɑːɹoʊ,will_you_be_shopping_at_nine_tomorrow.opus,63106,,,,75,False,63
+"Oni budou stavět garáž, až se vrátíme?",Will they be building a garage when we return?,wɪl ðeɪ biː bˈɪldɪŋ ɐ ɡɚɹˈɑːʒ wɛn wiː ɹᵻtˈɜːn,will_they_be_building_a_garage_when_we_return.opus,63107,,,,75,False,63
+Kdy budu zítra vařit?,When will I be cooking tomorrow?,wˌɛn wɪl aɪ biː kˈʊkɪŋ təmˈɑːɹoʊ,when_will_i_be_cooking_tomorrow.opus,64100,,,,76,False,64
+Kde budeš zítra uklízet?,Where will you be cleaning tomorrow?,wˌɛɹ wɪl juː biː klˈiːnɪŋ təmˈɑːɹoʊ,where_will_you_be_cleaning_tomorrow.opus,64101,,,,76,False,64
+Co bude on zítra opravovat?,What will he be repairing tomorrow?,wˌʌt wɪl hiː biː ɹᵻpˈɛɹɪŋ təmˈɑːɹoʊ,what_will_he_be_repairing_tomorrow.opus,64102,,,,76,False,64
+Kde bude ona zítra zpívat?,Where will she be singing tomorrow?,wˌɛɹ wɪl ʃiː biː sˈɪŋɪŋ təmˈɑːɹoʊ,where_will_she_be_singing_tomorrow.opus,64103,,,,76,False,64
+Kdy bude zítra sněžit?,When will it be snowing tomorrow?,wˌɛn wɪl ɪt biː snˈoʊɪŋ təmˈɑːɹoʊ,when_will_it_be_snowing_tomorrow.opus,64104,,,,76,False,64
+Co budeme v neděli malovat?,What will we be painting on Sunday?,wˌʌt wɪl wiː biː pˈeɪntɪŋ ˌɔn sˈʌndeɪ,what_will_we_be_painting_on_sunday.opus,64105,,,,76,False,64
+Kde budete zítra nakupovat?,Where will you be shopping tomorrow?,wˌɛɹ wɪl juː biː ʃˈɑːpɪŋ təmˈɑːɹoʊ,where_will_you_be_shopping_tomorrow.opus,64106,,,,76,False,64
+Co budou stavět příští rok?,What will they be building next year?,wˌʌt wɪl ðeɪ biː bˈɪldɪŋ nˈɛkst jˈɪɹ,what_will_they_be_building_next_year.opus,64107,,,,76,False,64
+,"If I'd bought a ticket, I'd have gone inside",ɪf aɪd bˈɔːt ɐ tˈɪkɪt aɪd hæv ɡɔn ɪnsˈaɪd,if_id_bought_a_ticket_id_have_gone_inside.opus,65100,,,,77,False,65
+,"If you'd got up earlier, you wouldn't have been late",ɪf juːd ɡɑːt ˌʌp ˈɜːlɪɚ juː wˌʊdəntəv bˌɪn lˈeɪt,if_youd_got_up_earlier_you_wouldnt_have_been_late.opus,65101,,,,77,False,65
+,"If he'd booked a table, we'd have had a seat",ɪf hiːd bˈʊkt ɐ tˈeɪbəl wiːd hæv hæd ɐ sˈiːt,if_hed_booked_a_table_wed_have_had_a_seat.opus,65102,,,,77,False,65
+,"If she'd taken an umbrella, she wouldn't have got wet",ɪf ʃiːd tˈeɪkən ɐn ʌmbɹˈɛlə ʃiː wˌʊdəntəv ɡɑːt wˈɛt,if_shed_taken_an_umbrella_she_wouldnt_have_got_wet.opus,65103,,,,77,False,65
+,"If it had started earlier, we'd have finished on time",ɪf ɪt hæd stˈɑːɹɾᵻd ˈɜːlɪɚ wiːd hæv fˈɪnɪʃt ˌɔn tˈaɪm,if_it_had_started_earlier_wed_have_finished_on_time.opus,65104,,,,77,False,65
+,"If we'd turned left, we'd have found the hotel",ɪf wiːd tˈɜːnd lˈɛft wiːd hæv fˈaʊnd ðə hoʊtˈɛl,if_wed_turned_left_wed_have_found_the_hotel.opus,65105,,,,77,False,65
+,"If you'd asked, he would have answered you",ɪf juːd ˈæskt hiː wʊdhɐv ˈænsɚd juː,if_youd_asked_he_would_have_answered_you.opus,65106,,,,77,False,65
+,"If they'd sold the car, they'd have bought a new one",ɪf ðeɪd sˈoʊld ðə kˈɑːɹ ðeɪd hæv bˈɔːt ɐ nˈuː wˌʌn,if_theyd_sold_the_car_theyd_have_bought_a_new_one.opus,65107,,,,77,False,65
+Jsem chválen za svou práci.,I'm praised for my work.,aɪm pɹˈeɪzd fɔːɹ maɪ wˈɜːk,im_praised_for_my_work.opus,66100,,,,78,False,66
+Jsi testován před přijetím.,You're tested before admission.,jʊɹ tˈɛstᵻd bᵻfˌɔːɹ ɐdmˈɪʃən,youre_tested_before_admission.opus,66101,,,,78,False,66
+On je každý měsíc hodnocen.,He's evaluated every month.,hiːz ɪvˈæljuːˌeɪɾᵻd ˈɛvɹi mˈʌnθ,hes_evaluated_every_month.opus,66102,,,,78,False,66
+Ona je často podporována svým týmem.,She's supported by her team.,ʃiːz səpˈɔːɹɾᵻd baɪ hɜː tˈiːm,shes_supported_by_her_team.opus,66103,,,,78,False,66
+To se prodává v mnoha obchodech.,It's sold in many shops.,ɪts sˈoʊld ɪn mˈɛni ʃˈɑːps,its_sold_in_many_shops.opus,66104,,,,78,False,66
+My jsme vítáni v tomto hotelu.,We're welcomed at this hotel.,wɪɹ wˈɛlkʌmd æt ðɪs hoʊtˈɛl,were_welcomed_at_this_hotel.opus,66105,,,,78,False,66
+Vy jste chráněni zákonem.,You're protected by the law.,jʊɹ pɹətˈɛktᵻd baɪ ðə lˈɔː,youre_protected_by_the_law.opus,66106,,,,78,False,66
+Oni jsou sledováni kamerami.,They're monitored by cameras.,ðeɪɚ mˈɑːnɪɾɚd baɪ kˈæmɹəz,theyre_monitored_by_cameras.opus,66107,,,,78,False,66
+Já jsem byl včera pochválen za svou práci.,I was praised for my work yesterday.,aɪ wʌz pɹˈeɪzd fɔːɹ maɪ wˈɜːk jˈɛstɚdˌeɪ,i_was_praised_for_my_work_yesterday.opus,67100,,,,79,False,67
+Ty jsi byl testován před přijetím.,You were tested before admission.,juː wɜː tˈɛstᵻd bᵻfˌɔːɹ ɐdmˈɪʃən,you_were_tested_before_admission.opus,67101,,,,79,False,67
+On byl hodnocen každý měsíc.,He was evaluated every month.,hiː wʌz ɪvˈæljuːˌeɪɾᵻd ˈɛvɹi mˈʌnθ,he_was_evaluated_every_month.opus,67102,,,,79,False,67
+Ona byla podporována svým týmem.,She was supported by her team.,ʃiː wʌz səpˈɔːɹɾᵻd baɪ hɜː tˈiːm,she_was_supported_by_her_team.opus,67103,,,,79,False,67
+To bylo prodáno v mnoha obchodech.,It was sold in many shops.,ɪt wʌz sˈoʊld ɪn mˈɛni ʃˈɑːps,it_was_sold_in_many_shops.opus,67104,,,,79,False,67
+My jsme byli přivítáni v hotelu.,We were welcomed at the hotel.,wiː wɜː wˈɛlkʌmd æt ðə hoʊtˈɛl,we_were_welcomed_at_the_hotel.opus,67105,,,,79,False,67
+Vy jste byli chráněni zákonem.,You were protected by law.,juː wɜː pɹətˈɛktᵻd baɪ lˈɔː,you_were_protected_by_law.opus,67106,,,,79,False,67
+Oni byli sledováni kamerami.,They were monitored by cameras.,ðeɪ wɜː mˈɑːnɪɾɚd baɪ kˈæmɹəz,they_were_monitored_by_cameras.opus,67107,,,,79,False,67
+Já už jsem byl pochválen za svou práci.,I've already been praised for my work.,aɪv ɔːlɹˌɛdi bˌɪn pɹˈeɪzd fɔːɹ maɪ wˈɜːk,ive_already_been_praised_for_my_work.opus,68100,,,,80,False,68
+Ty už jsi byl testován před zkouškou.,You've already been tested before the exam.,juːv ɔːlɹˌɛdi bˌɪn tˈɛstᵻd bᵻfˌɔːɹ ðɪ ɛɡzˈæm,youve_already_been_tested_before_the_exam.opus,68101,,,,80,False,68
+On už byl varován před nebezpečím.,He's already been warned about the danger.,hiːz ɔːlɹˌɛdi bˌɪn wˈɔːɹnd ɐbˌaʊt ðə dˈeɪndʒɚ,hes_already_been_warned_about_the_danger.opus,68102,,,,80,False,68
+Ona už byla podporována svými přáteli.,She's already been supported by her friends.,ʃiːz ɔːlɹˌɛdi bˌɪn səpˈɔːɹɾᵻd baɪ hɜː fɹˈɛndz,shes_already_been_supported_by_her_friends.opus,68103,,,,80,False,68
+To už bylo prodáno.,It's already been sold.,ɪts ɔːlɹˌɛdi bˌɪn sˈoʊld,its_already_been_sold.opus,68104,,,,80,False,68
+My už jsme byli přivítáni hostitelem.,We've already been welcomed by the host.,wiːv ɔːlɹˌɛdi bˌɪn wˈɛlkʌmd baɪ ðə hˈoʊst,weve_already_been_welcomed_by_the_host.opus,68105,,,,80,False,68
+Vy už jste byli chráněni zákonem.,You've already been protected by the law.,juːv ɔːlɹˌɛdi bˌɪn pɹətˈɛktᵻd baɪ ðə lˈɔː,youve_already_been_protected_by_the_law.opus,68106,,,,80,False,68
+Oni už byli sledováni policií.,They've already been monitored by the police.,ðeɪv ɔːlɹˌɛdi bˌɪn mˈɑːnɪɾɚd baɪ ðə pəlˈiːs,theyve_already_been_monitored_by_the_police.opus,68107,,,,80,False,68
+Zítra budu pochválen za svou práci.,I'll be praised for my work tomorrow.,aɪl biː pɹˈeɪzd fɔːɹ maɪ wˈɜːk təmˈɑːɹoʊ,ill_be_praised_for_my_work_tomorrow.opus,69100,,,,81,False,69
+Ty budeš testován před přijetím.,You'll be tested before admission.,juːl biː tˈɛstᵻd bᵻfˌɔːɹ ɐdmˈɪʃən,youll_be_tested_before_admission.opus,69101,,,,81,False,69
+On bude varován před nebezpečím.,He'll be warned about the danger.,hiːl biː wˈɔːɹnd ɐbˌaʊt ðə dˈeɪndʒɚ,hell_be_warned_about_the_danger.opus,69102,,,,81,False,69
+Ona bude podporována svými přáteli.,She'll be supported by her friends.,ʃiːl biː səpˈɔːɹɾᵻd baɪ hɜː fɹˈɛndz,shell_be_supported_by_her_friends.opus,69103,,,,81,False,69
+To bude prodáno online.,It'll be sold online.,ˌɪɾəl biː sˈoʊld ˈɑːnlaɪn,itll_be_sold_online.opus,69104,,,,81,False,69
+My budeme přivítáni hostitelem.,We'll be welcomed by the host.,wiːl biː wˈɛlkʌmd baɪ ðə hˈoʊst,well_be_welcomed_by_the_host.opus,69105,,,,81,False,69
+Vy budete chráněni zákonem.,You'll be protected by the law.,juːl biː pɹətˈɛktᵻd baɪ ðə lˈɔː,youll_be_protected_by_the_law.opus,69106,,,,81,False,69
+Oni budou sledováni policií.,They'll be monitored by the police.,ðeɪl biː mˈɑːnɪɾɚd baɪ ðə pəlˈiːs,theyll_be_monitored_by_the_police.opus,69107,,,,81,False,69
+Já jsem právě chválen učitelem.,I'm being praised by the teacher right now.,aɪm bˌiːɪŋ pɹˈeɪzd baɪ ðə tˈiːtʃɚ ɹˈaɪt nˈaʊ,im_being_praised_by_the_teacher_right_now.opus,70100,,,,82,False,70
+Ty jsi právě informován o změně.,You're being informed about the change right now.,jʊɹ bˌiːɪŋ ɪnfˈɔːɹmd ɐbˌaʊt ðə tʃˈeɪndʒ ɹˈaɪt nˈaʊ,youre_being_informed_about_the_change_right_now.opus,70101,,,,82,False,70
+On je právě varován před nebezpečím.,He's being warned about the danger right now.,hiːz bˌiːɪŋ wˈɔːɹnd ɐbˌaʊt ðə dˈeɪndʒɚ ɹˈaɪt nˈaʊ,hes_being_warned_about_the_danger_right_now.opus,70102,,,,82,False,70
+Ona je právě podporována svým týmem.,She's being supported by her team right now.,ʃiːz bˌiːɪŋ səpˈɔːɹɾᵻd baɪ hɜː tˈiːm ɹˈaɪt nˈaʊ,shes_being_supported_by_her_team_right_now.opus,70103,,,,82,False,70
+To se právě prodává online.,It's being sold online right now.,ɪts bˌiːɪŋ sˈoʊld ˈɑːnlaɪn ɹˈaɪt nˈaʊ,its_being_sold_online_right_now.opus,70104,,,,82,False,70
+My jsme právě vítáni hostitelem.,We're being welcomed by the host right now.,wɪɹ bˌiːɪŋ wˈɛlkʌmd baɪ ðə hˈoʊst ɹˈaɪt nˈaʊ,were_being_welcomed_by_the_host_right_now.opus,70105,,,,82,False,70
+Vy jste právě chráněni ochrankou.,You're being protected by security right now.,jʊɹ bˌiːɪŋ pɹətˈɛktᵻd baɪ sᵻkjˈʊɹɹᵻɾi ɹˈaɪt nˈaʊ,youre_being_protected_by_security_right_now.opus,70106,,,,82,False,70
+Oni jsou právě sledováni kamerami.,They're being monitored by cameras right now.,ðeɪɚ bˌiːɪŋ mˈɑːnɪɾɚd baɪ kˈæmɹəz ɹˈaɪt nˈaʊ,theyre_being_monitored_by_cameras_right_now.opus,70107,,,,82,False,70
+"Znám dívku, která hraje na klavír.",I know a girl who plays the piano.,aɪ nˈoʊ ɐ ɡˈɜːl hˌuː plˈeɪz ðə piˈænoʊ,i_know_a_girl_who_plays_the_piano.opus,71100,,,,83,False,71
+"Máš auto, které jezdí rychle.",You have a car that goes fast.,juː hæv ɐ kˈɑːɹ ðæt ɡoʊz fˈæst,you_have_a_car_that_goes_fast.opus,71101,,,,83,False,71
+"On hledá hotel, který má bazén.",He's looking for a hotel that has a pool.,hiːz lˈʊkɪŋ fɚɹə hoʊtˈɛl ðæt hɐz ɐ pˈuːl,hes_looking_for_a_hotel_that_has_a_pool.opus,71102,,,,83,False,71
+"Ona pracuje s mužem, který píše knihy.",She works with a man who writes books.,ʃiː wˈɜːks wɪð ɐ mˈæn hˌuː ɹˈaɪts bˈʊks,she_works_with_a_man_who_writes_books.opus,71103,,,,83,False,71
+"To je dům, který má velkou zahradu.",It's a house that has a big garden.,ɪts ɐ hˈaʊs ðæt hɐz ɐ bˈɪɡ ɡˈɑːɹdən,its_a_house_that_has_a_big_garden.opus,71104,,,,83,False,71
+"Bydlíme v ulici, která vede do centra.",We live on a street that leads to the centre.,wiː lˈɪv ˌɔn ɐ stɹˈiːt ðæt lˈiːdz tə ðə sˈɛntɚ,we_live_on_a_street_that_leads_to_the_centre.opus,71105,,,,83,False,71
+"Znáte obchod, který prodává čerstvý chléb?",Do you know a shop that sells fresh bread?,dˈuː juː nˈoʊ ɐ ʃˈɑːp ðæt sˈɛlz fɹˈɛʃ bɹˈɛd,do_you_know_a_shop_that_sells_fresh_bread.opus,71106,,,,83,False,71
+"Mají kočku, která ráda spí na gauči.",They have a cat that likes to sleep on the sofa.,ðeɪ hæv ɐ kˈæt ðæt lˈaɪks tə slˈiːp ɔnðə sˈoʊfə,they_have_a_cat_that_likes_to_sleep_on_the_sofa.opus,71107,,,,83,False,71
+"Mám pravdu, že ano?","I'm right, aren't I?",aɪm ɹˈaɪt ˌɑːɹnt ˈaɪ,im_right_arent_i.opus,72100,,,,84,False,72
+"Jsi doma, že ano?","You're at home, aren't you?",jʊɹ æt hˈoʊm ˈɑːɹnt juː,youre_at_home_arent_you.opus,72101,,,,84,False,72
+"On dnes pracuje, že ano?","He's working today, isn't he?",hiːz wˈɜːkɪŋ tədˈeɪ ˈɪzənt hiː,hes_working_today_isnt_he.opus,72102,,,,84,False,72
+"Ona umí plavat, že ano?","She can swim, can't she?",ʃiː kæn swˈɪm kˈænt ʃiː,she_can_swim_cant_she.opus,72103,,,,84,False,72
+"To není daleko, že ano?","It's not far, is it?",ɪts nˌɑːt fˈɑːɹ ɪz ɪt,its_not_far_is_it.opus,72104,,,,84,False,72
+"Máme dost času, že ano?","We have enough time, don't we?",wiː hæv ɪnˈʌf tˈaɪm dˈoʊnt wiː,we_have_enough_time_dont_we.opus,72105,,,,84,False,72
+"Znáte ho, že ano?","You know him, don't you?",juː nˈoʊ hˌɪm dˈoʊnt juː,you_know_him_dont_you.opus,72106,,,,84,False,72
+"Mají auto, že ano?","They have a car, don't they?",ðeɪ hæv ɐ kˈɑːɹ dˈoʊnt ðeɪ,they_have_a_car_dont_they.opus,72107,,,,84,False,72
+"Řekl jsem, že mám hlad",I said I was hungry,aɪ sˈɛd aɪ wʌz hˈʌŋɡɹi,i_said_i_was_hungry.opus,73100,,,,85,False,73
+"Řekl jsi, že pracuješ doma",You said you worked from home,juː sˈɛd juː wˈɜːkt fɹʌm hˈoʊm,you_said_you_worked_from_home.opus,73101,,,,85,False,73
+"Řekl, že koupil lístky",He said he had bought the tickets,hiː sˈɛd hiː hæd bˈɔːt ðə tˈɪkɪts,he_said_he_had_bought_the_tickets.opus,73102,,,,85,False,73
+"Řekla, že přijde později",She said she would come later,ʃiː sˈɛd ʃiː wʊd kˈʌm lˈeɪɾɚ,she_said_she_would_come_later.opus,73103,,,,85,False,73
+"Říkalo se, že obchod zavřel",It was said that the shop had closed,ɪt wʌz sˈɛd ðætðə ʃˈɑːp hæd klˈoʊzd,it_was_said_that_the_shop_had_closed.opus,73104,,,,85,False,73
+"Řekli jsme, že čekáme venku",We said we were waiting outside,wiː sˈɛd wiː wɜː wˈeɪɾɪŋ aʊtsˈaɪd,we_said_we_were_waiting_outside.opus,73105,,,,85,False,73
+"Řekli jste, že znáte cestu",You said you knew the way,juː sˈɛd juː nˈuː ðə wˈeɪ,you_said_you_knew_the_way.opus,73106,,,,85,False,73
+"Řekli, že se přestěhují příští rok",They said they would move next year,ðeɪ sˈɛd ðeɪ wʊd mˈuːv nˈɛkst jˈɪɹ,they_said_they_would_move_next_year.opus,73107,,,,85,False,73
+Já jsem dřív běhal každé ráno,I used to run every morning,aɪ jˈuːzd tə ɹˈʌn ˈɛvɹi mˈɔːɹnɪŋ,i_used_to_run_every_morning.opus,74100,,,,86,False,74
+Ty jsi dřív vařil doma,You used to cook at home,juː jˈuːzd tə kˈʊk æt hˈoʊm,you_used_to_cook_at_home.opus,74101,,,,86,False,74
+On dřív četl noviny,He used to read the newspapers,hiː jˈuːzd tə ɹˈiːd ðə nˈuːzpeɪpɚz,he_used_to_read_the_newspapers.opus,74102,,,,86,False,74
+Ona dřív zpívala ve sboru,She used to sing in a choir,ʃiː jˈuːzd tə sˈɪŋ ɪn ɐ kwˈaɪɚ,she_used_to_sing_in_a_choir.opus,74103,,,,86,False,74
+Dřív to stálo méně,It used to cost less,ɪt jˈuːzd tə kˈɔst lˈɛs,it_used_to_cost_less.opus,74104,,,,86,False,74
+My jsme dřív chodili do školy pěšky,We used to walk to school,wiː jˈuːzd tə wˈɔːk tə skˈuːl,we_used_to_walk_to_school.opus,74105,,,,86,False,74
+Vy jste nás dřív navštěvovali každé léto,You used to visit us every summer,juː jˈuːzd tə vˈɪzɪt ˌʌs ˈɛvɹi sˈʌmɚ,you_used_to_visit_us_every_summer.opus,74106,,,,86,False,74
+Oni dřív jezdili na kole,They used to ride bikes,ðeɪ jˈuːzd tə ɹˈaɪd bˈaɪks,they_used_to_ride_bikes.opus,74107,,,,86,False,74
+Já jsem zvyklý vařit pro rodinu.,I'm used to cooking for my family.,aɪm jˈuːzd tə kˈʊkɪŋ fɔːɹ maɪ fˈæmɪli,im_used_to_cooking_for_my_family.opus,75100,,,,87,False,75
+Ty jsi zvyklý dlouho čekat.,You're used to waiting a long time.,jʊɹ jˈuːzd tə wˈeɪɾɪŋ ɐ lˈɔŋ tˈaɪm,youre_used_to_waiting_a_long_time.opus,75101,,,,87,False,75
+On je zvyklý opravovat věci doma.,He's used to fixing things at home.,hiːz jˈuːzd tə fˈɪksɪŋ θˈɪŋz æt hˈoʊm,hes_used_to_fixing_things_at_home.opus,75102,,,,87,False,75
+Ona je zvyklá nakupovat online.,She's used to shopping online.,ʃiːz jˈuːzd tə ʃˈɑːpɪŋ ˈɑːnlaɪn,shes_used_to_shopping_online.opus,75103,,,,87,False,75
+To zařízení je zvyklé fungovat celý den.,It's used to running all day.,ɪts jˈuːzd tə ɹˈʌnɪŋ ˈɔːl dˈeɪ,its_used_to_running_all_day.opus,75104,,,,87,False,75
+My jsme zvyklí chodit pěšky.,We're used to walking.,wɪɹ jˈuːzd tə wˈɔːkɪŋ,were_used_to_walking.opus,75105,,,,87,False,75
+Vy jste zvyklí spát jen pár hodin.,You're used to sleeping only a few hours.,jʊɹ jˈuːzd tə slˈiːpɪŋ ˈoʊnli ɐ fjˈuː ˈaʊɚz,youre_used_to_sleeping_only_a_few_hours.opus,75106,,,,87,False,75
+Oni jsou zvyklí mluvit před lidmi.,They're used to speaking in public.,ðeɪɚ jˈuːzd tə spˈiːkɪŋ ɪn pˈʌblɪk,theyre_used_to_speaking_in_public.opus,75107,,,,87,False,75
+Včera v deset jsem vařil.,I was cooking at ten yesterday.,aɪ wʌz kˈʊkɪŋ æt tˈɛn jˈɛstɚdˌeɪ,i_was_cooking_at_ten_yesterday.opus,76100,,,,88,False,76
+Včera odpoledne jsi uklízel.,You were cleaning yesterday afternoon.,juː wɜː klˈiːnɪŋ jˈɛstɚdˌeɪ ˌæftɚnˈuːn,you_were_cleaning_yesterday_afternoon.opus,76101,,,,88,False,76
+"On opravoval auto, když jsme přišli.",He was repairing the car when we arrived.,hiː wʌz ɹᵻpˈɛɹɪŋ ðə kˈɑːɹ wɛn wiː ɚɹˈaɪvd,he_was_repairing_the_car_when_we_arrived.opus,76102,,,,88,False,76
+"Ona zpívala, když jsem jí zavolal.",She was singing when I called her.,ʃiː wʌz sˈɪŋɪŋ wɛn aɪ kˈɔːld hɜː,she_was_singing_when_i_called_her.opus,76103,,,,88,False,76
+V tu chvíli sněžilo.,It was snowing at that moment.,ɪt wʌz snˈoʊɪŋ æt ðæt mˈoʊmənt,it_was_snowing_at_that_moment.opus,76104,,,,88,False,76
+My jsme malovali dům celý den.,We were painting the house all day.,wiː wɜː pˈeɪntɪŋ ðə hˈaʊs ˈɔːl dˈeɪ,we_were_painting_the_house_all_day.opus,76105,,,,88,False,76
+"Vy jste nakupovali, když se obchod zavřel.",You were shopping when the shop closed.,juː wɜː ʃˈɑːpɪŋ wɛn ðə ʃˈɑːp klˈoʊzd,you_were_shopping_when_the_shop_closed.opus,76106,,,,88,False,76
+"Oni stavěli garáž, zatímco my jsme odpočívali.",They were building a garage while we were resting.,ðeɪ wɜː bˈɪldɪŋ ɐ ɡɚɹˈɑːʒ wˌaɪl wiː wɜː ɹˈɛstɪŋ,they_were_building_a_garage_while_we_were_resting.opus,76107,,,,88,False,76
+Včera v deset jsem nevařil.,I wasn't cooking at ten yesterday.,aɪ wˈʌzn̩t kˈʊkɪŋ æt tˈɛn jˈɛstɚdˌeɪ,i_wasnt_cooking_at_ten_yesterday.opus,77100,,,,89,False,77
+Včera odpoledne jsi neuklízel.,You weren't cleaning yesterday afternoon.,juː wˌɜːnt klˈiːnɪŋ jˈɛstɚdˌeɪ ˌæftɚnˈuːn,you_werent_cleaning_yesterday_afternoon.opus,77101,,,,89,False,77
+"On neopravoval auto, když jsme přišli.",He wasn't repairing the car when we arrived.,hiː wˈʌzn̩t ɹᵻpˈɛɹɪŋ ðə kˈɑːɹ wɛn wiː ɚɹˈaɪvd,he_wasnt_repairing_the_car_when_we_arrived.opus,77102,,,,89,False,77
+"Ona nezpívala, když jsem jí zavolal.",She wasn't singing when I called her.,ʃiː wˈʌzn̩t sˈɪŋɪŋ wɛn aɪ kˈɔːld hɜː,she_wasnt_singing_when_i_called_her.opus,77103,,,,89,False,77
+V tu chvíli nesněžilo.,It wasn't snowing at that moment.,ɪt wˈʌzn̩t snˈoʊɪŋ æt ðæt mˈoʊmənt,it_wasnt_snowing_at_that_moment.opus,77104,,,,89,False,77
+My jsme celý den nemalovali dům.,We weren't painting the house all day.,wiː wˌɜːnt pˈeɪntɪŋ ðə hˈaʊs ˈɔːl dˈeɪ,we_werent_painting_the_house_all_day.opus,77105,,,,89,False,77
+"Vy jste nenakupovali, když se obchod zavřel.",You weren't shopping when the shop closed.,juː wˌɜːnt ʃˈɑːpɪŋ wɛn ðə ʃˈɑːp klˈoʊzd,you_werent_shopping_when_the_shop_closed.opus,77106,,,,89,False,77
+"Oni nestavěli garáž, zatímco my jsme odpočívali.",They weren't building a garage while we were resting.,ðeɪ wˌɜːnt bˈɪldɪŋ ɐ ɡɚɹˈɑːʒ wˌaɪl wiː wɜː ɹˈɛstɪŋ,they_werent_building_a_garage_while_we_were_resting.opus,77107,,,,89,False,77

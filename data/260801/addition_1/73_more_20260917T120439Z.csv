@@ -1,0 +1,9 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+"Řekl jsem, že mám hlad",I said I was hungry,aɪ sˈɛd aɪ wʌz hˈʌŋɡɹi,i_said_i_was_hungry.opus,73000,,,,85,False,73
+"Řekl jsi, že pracuješ doma",You said you worked from home,juː sˈɛd juː wˈɜːkt fɹʌm hˈoʊm,you_said_you_worked_from_home.opus,73001,,,,85,False,73
+"Řekl, že koupil lístky",He said he had bought the tickets,hiː sˈɛd hiː hæd bˈɔːt ðə tˈɪkɪts,he_said_he_had_bought_the_tickets.opus,73002,,,,85,False,73
+"Řekla, že přijde později",She said she would come later,ʃiː sˈɛd ʃiː wʊd kˈʌm lˈeɪɾɚ,she_said_she_would_come_later.opus,73003,,,,85,False,73
+"Říkalo se, že obchod zavřel",It was said that the shop had closed,ɪt wʌz sˈɛd ðætðə ʃˈɑːp hæd klˈoʊzd,it_was_said_that_the_shop_had_closed.opus,73004,,,,85,False,73
+"Řekli jsme, že čekáme venku",We said we were waiting outside,wiː sˈɛd wiː wɜː wˈeɪɾɪŋ aʊtsˈaɪd,we_said_we_were_waiting_outside.opus,73005,,,,85,False,73
+"Řekli jste, že znáte cestu",You said you knew the way,juː sˈɛd juː nˈuː ðə wˈeɪ,you_said_you_knew_the_way.opus,73006,,,,85,False,73
+"Řekli, že se přestěhují příští rok",They said they would move next year,ðeɪ sˈɛd ðeɪ wʊd mˈuːv nˈɛkst jˈɪɹ,they_said_they_would_move_next_year.opus,73007,,,,85,False,73
