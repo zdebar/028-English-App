@@ -199,7 +199,10 @@ describe('practice content resolution', () => {
       .mockResolvedValueOnce(2)
       .mockResolvedValueOnce(3);
 
-    await expect(loadReviewCount('u1')).resolves.toBe(5);
+    await expect(loadReviewCount('u1')).resolves.toEqual({
+      count: 5,
+      countedThrough: expect.any(String),
+    });
     expect(mocks.getReviewItemCountForDirection).toHaveBeenCalledTimes(2);
   });
 

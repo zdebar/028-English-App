@@ -161,12 +161,17 @@ export async function loadReviewEntryDetails(
   return { note: entry?.note ?? null, grammar: entry?.grammar ?? null };
 }
 
-/** Loads the exact current review count for the Practice progress indicator. */
-export async function loadReviewCount(userId: string): Promise<number> {
-  const now = new Date().toISOString();
+export type ReviewCountData = Readonly<{
+  count: number;
+  countedThrough: string;
+}>;
+
+/** Loads the exact current review count and the timestamp covered by that count. */
+export async function loadReviewCount(userId: string): Promise<ReviewCountData> {
+  const countedThrough = new Date().toISOString();
   const [czToEnCount, enToCzCount] = await Promise.all([
-    UserItem.getReviewItemCountForDirection(userId, 'czToEn', now),
-    UserItem.getReviewItemCountForDirection(userId, 'enToCz', now),
+    UserItem.getReviewItemCountForDirection(userId, 'czToEn', countedThrough),
+    UserItem.getReviewItemCountForDirection(userId, 'enToCz', countedThrough),
   ]);
-  return czToEnCount + enToCzCount;
+  return { count: czToEnCount + enToCzCount, countedThrough };
 }
