@@ -1063,7 +1063,7 @@ function applyReviewProgress(
   if (outcome === 'correct') {
     setDirectionState(changes, item, direction, currentProgress + 1, dateTime);
   } else if (outcome === 'incorrect') {
-    setDirectionState(changes, item, direction, 0, dateTime);
+    setDirectionState(changes, item, direction, Math.max(0, currentProgress - 1), dateTime);
     clearDirectionMastery(changes, direction);
   } else {
     setDirectionMastered(changes, direction, currentProgress, dateTime);
