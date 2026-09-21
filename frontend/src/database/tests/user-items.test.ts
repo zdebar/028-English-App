@@ -649,7 +649,7 @@ describe('UserItem', () => {
     });
   });
 
-  it('records an incorrect answer and resets only the displayed direction', () => {
+  it('records an incorrect answer and lowers only the displayed direction', () => {
     mocks.getNextAt.mockReturnValue('2026-03-04T09:02:00.000Z');
     const updated = UserItem.applyPracticeProgress(
       {
@@ -665,9 +665,8 @@ describe('UserItem', () => {
     );
 
     expect(updated.progress_cz_to_en).toBe(4);
-    expect(updated.progress_en_to_cz).toBe(0);
+    expect(updated.progress_en_to_cz).toBe(2);
     expect(updated.mastered_at_en_to_cz).toBe('1970-01-01T00:00:00.000Z');
-    expect(updated.progress_en_to_cz).toBe(0);
   });
 
   it('schedules the opposite direction on a first incorrect answer', () => {
@@ -687,13 +686,13 @@ describe('UserItem', () => {
 
     expect(updated).toMatchObject({
       progress_cz_to_en: 0,
-      progress_en_to_cz: 0,
+      progress_en_to_cz: 1,
       mastered_at_cz_to_en: '1970-01-01T00:00:00.000Z',
       mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
       next_at_cz_to_en: '2026-03-04T09:02:00.000Z',
       next_at_en_to_cz: '2026-03-04T09:02:00.000Z',
     });
-    expect(updated.progress_en_to_cz).toBe(0);
+    expect(updated.progress_en_to_cz).toBe(1);
   });
 
   it('skip preserves progress, masters the selected direction, and clears its schedule', () => {
