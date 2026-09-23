@@ -459,7 +459,7 @@ Kdo jsem?,Who am I?
 Kdo jsi?,Who are you?
 Kdo je tady?,Who's here?
 Kdo je tam?,Who's there?
-Kdo je doma?,Who's at home?
+Kdo je doma?,Who's home?
 Kdo je uvnitř?,Who's inside?
 Kdo je připravený?,Who's ready?
 Kdo jsme?,Who are we?
@@ -523,6 +523,8 @@ málo cukru,little sugar
 málo knih,few books
 trochu mléka,a little milk
 několik studentů,a few students
+Kolik mléka?,How much milk?
+Kolik studentů?,How many students?
 ovce (pl.),sheep
 ryby (pl.),fish
 chodidla,feet
@@ -652,8 +654,6 @@ polovina,half
 třetina,third
 čtvrtina,quarter
 pětina,fifth
-šestina,sixth
-dvě sedminy,two sevenths
 tečka,point
 dvě celé osm,two point eight
 osm celých pět,eight point five
@@ -811,13 +811,13 @@ sedadlo,seat
 jednotlivý,single
 systém,system
 já pracuji,I work
-ty pracuješ,you work
-on pracuje,he works
-ona pracuje,she works
-ono pracuje,it works
-my pracujeme,we work
-vy pracujete,you work
-oni pracují,they work
+ty vidíš,you see
+on chce,he wants
+ona potřebuje,she needs
+ono dělá,it makes
+my víme,we know
+vy jdete,you go
+oni kupují,they buy
 Jím chléb.,I eat bread.
 Piješ vodu.,You drink water.
 On čte knihu.,He reads a book.
@@ -866,14 +866,14 @@ ono neběží,it doesn't run
 my nebydlíme,we don't live
 vy nepomáháte,you don't help
 oni neznají,they don't know
-V pondělí nepracuji.,I don't work on Mondays.
-Obvykle nesnídáš doma.,You don't usually eat breakfast at home.
-On nechodí do školy autobusem.,He doesn't go to school by bus.
-Ona večer nesleduje televizi.,She doesn't watch TV in the evening.
-V zimě zde často neprší.,It doesn't often rain here in winter.
-O víkendech nenakupujeme.,We don't shop at weekends.
-Po obědě se nevracíte do kanceláře.,You don't return to the office after lunch.
-Oni si po škole nehrají venku.,They don't play outside after school.
+Já nepracuji v pondělí.,I don't work on Monday.
+Ty nesnídáváš.,You don't eat breakfast.
+On nepije kávu.,He doesn't drink coffee.
+Ona nesleduje televizi.,She doesn't watch TV.
+V zimě neprší.,It doesn't rain in winter.
+My o víkendech nenakupujeme.,We don't shop on weekends.
+Vy se po obědě nevracíte.,You don't return after lunch.
+Oni si nehrají venku.,They don't play outside.
 spisovatel,writer
 starost,worry
 pracovník,worker
@@ -898,29 +898,24 @@ praní,wash
 teplo,warm
 probudit,wake
 číšník,waiter
-Já jím?,Do I eat?
-Ty čteš?,Do you read?
-On běhá?,Does he run?
-Ona vaří?,Does she cook?
-Ono funguje?,Does it work?
-My zpíváme?,Do we sing?
-Vy čekáte?,Do you wait?
-Oni cestují?,Do they travel?
-"Ano, jím.","Yes, I do."
-"Ne, nečteš.","No, you don't."
+Já jím často?,Do I eat often?
+Čteš ty beletrii?,Do you read beletry?
+Běhá on každé ráno?,Does he run every morning?
+Vaří ona snídani pokaždé?,Does she cook breakfast everytime?
+Funguje to?,Does it work?
+My zpíváme dobře?,Do we sing well?
+Vy čekáte běžně?,Do you wait commonly?
+Oni cestují každý rok?,Do they travel every year?
 "Ano, běhá.","Yes, he does."
+"Ne, nečteš.","No, you don't."
 "Ne, nevaří.","No, she doesn't."
-"Ano, funguje.","Yes, it does."
-"Ne, nezpíváme.","No, we don't."
-"Ano, čekáte.","Yes, you do."
-"Ne, necestují.","No, they don't."
-Jím doma?,Do I eat at home?
-Čteš knihy?,Do you read books?
+Já jím doma?,Do I eat at home?
+Ty čteš knihy?,Do you read books?
 On řídí auto?,Does he drive a car?
 Ona učí angličtinu?,Does she teach English?
 Bolí to?,Does it hurt?
 My bydlíme tady?,Do we live here?
-Vy potřebujete pomoc?,Do you need help?
+Vy potřebujete pomoc?),Do you need help?
 Oni hrají fotbal?,Do they play football?
 servírka,waitress
 hlasování,vote
@@ -946,14 +941,22 @@ platba,pay
 večírek,party
 partner,partner
 pardon,pardon
-Kde bydlím?,Where do I live?
-Co čteš?,What do you read?
-Kdy pracuje?,When does he work?
-Proč vaří?,Why does she cook?
+Kde já bydlím?,Where do I live?
+Co ty čteš?,What do you read?
+Kdy on pracuje?,When does he work?
+Proč ona vaří?,Why does she cook?
 Jak to funguje?,How does it work?
-Kam cestujeme?,Where do we travel?
-Co potřebujete?,What do you need?
-Kdy hrají?,When do they play?
+Kam my cestujeme?,Where do we travel?
+Co ty potřebuješ?,What do you need?
+Kdy oni hrají?,When do they play?
+Kdo kupuje mléko?,Who buys the milk?
+Kdo vaří večeři?,Who cooks dinner?
+Kdo bydlí nahoře?,Who lives upstairs?
+Kdo volá v noci?,Who calls at night?
+Kdo platí účet?,Who pays the bill?
+Kdo nosí klobouk?,Who wears a hat?
+Co svítí v noci?,What shines at night?
+Co dělá ten zvuk?,What makes that sound?
 odstavec,paragraph
 kalhoty,pants
 princ,prince
@@ -978,28 +981,32 @@ nátěr,paint
 malování,painting
 obraz,painting
 hodin,o'clock
-Já jsem vyšší.,I'm taller.
-Ty jsi rychlejší.,You're faster.
-On je silnější.,He's stronger.
-Ona je mladší.,She's younger.
-Je to dražší.,It's more expensive.
-My jsme starší.,We're older.
-Vy jste chytřejší.,You're smarter.
-Oni jsou šťastnější.,They're happier.
-Jsem nejvyšší v týmu.,I'm the tallest in the team.
-Jsi nejrychlejší ve třídě.,You're the fastest in the class.
-On je nejsilnější v rodině.,He's the strongest in the family.
-Ona je nejmladší v týmu.,She's the youngest in the team.
-Je to nejdražší pokoj.,It's the most expensive room.
-Jsme nejstarší v domě.,We're the oldest in the house.
-Jste nejchytřejší studenti.,You're the smartest students.
-Oni jsou nejšťastnější lidé.,They're the happiest people.
+více,more
+nejvíce,most
+méně,less
+nejméně,least
 lepší,better
 nejlepší,best
 horší,worse
 nejhorší,worst
 dále,further
 nejdále,farthest
+Já jsem vyšší.,I'm taller.
+Ty jsi rychlejší.,You're faster.
+On je silnější.,He's stronger.
+Ona je méně důležitá.,She's less important.
+Je to dražší.,It's more expensive.
+My jsme starší.,We're older.
+Vy jste chytřejší.,You're smarter.
+Oni jsou šťastnější.,They're happier.
+Jsem nejvyšší v týmu.,I'm the tallest on the team.
+Jsi nejrychlejší ve třídě.,You're the fastest in the class.
+On je nejsilnější v rodině.,He's the strongest in the family.
+Ona je nejméně důležitá.,She's the least important.
+Je to nejdražší pokoj.,It's the most expensive room.
+Jsme nejstarší v domě.,We're the oldest in the house.
+Jste nejchytřejší studenti.,You're the smartest students.
+Oni jsou nejšťastnější lidé.,They're the happiest people.
 zdravotní sestra,nurse
 poznamenat,note
 poznámka,note
@@ -1036,6 +1043,7 @@ Prosím otevři dveře.,Please open the door.
 Zavři okno před odchodem.,Close the window before you leave.
 Sedni si vedle mě.,Sit down next to me.
 Vstaň a pojď sem.,Stand up and come here.
+Napiš své jméno.,Write your name.
 Poslouchej učitele.,Listen to the teacher.
 Počkej na mě.,Wait for me.
 Podívej se na tabuli.,Look at the board.
@@ -1064,53 +1072,46 @@ Pane,sir
 zpěvák,singer
 sekce,section
 "moci, umět",can
-"moci, umět v minulosti",could
-"smět, mít povolení, možná",may
-"možná, mohl by",might
-muset,must
-"budu, budeme",shall
-"měl by, měla by",should
-"budu, bude",will
-"chtěl by, udělal by",would
 "nemoci, neumět",can't
-"nemoci, neumět v minulosti",couldn't
-"možná ne, nesmět",may not
-možná ne,might not
-"nesmět, mít zákaz",mustn't
-"nesmět, nebude",shall not
-"neměl by, neměla by",shouldn't
-"nebude, odmítne",won't
-"nechtěl by, neudělal by",wouldn't
+"mohl, uměl; zdvořilejší can",could
+"nemohl, neuměl; zdvořilejší can",couldn't
+"smět, možná",may
+"nesmět, možná ne",may not
+"moci, možná",might
+"nemoci, možná ne",might not
+muset,must
+nesmět,mustn't
+bude (návrh),shall
+nebude (návrh),shall not
+neměl by,shouldn't
+chtěl by,would
+nechtěl by,wouldn't
 Já mohu pomoci.,I can help.
-Ty musíš odejít.,You must leave.
-On by měl studovat.,He should study.
-Ona může přijít.,She may come.
-ono nemůže spadnout.,It can't fall.
-my musíme počkat.,We must wait.
-vy můžete začít.,You can start.
-oni by měli poslouchat.,They should listen.
-Mohu řídit auto.,I can drive a car.
-Musíš mít zapnutý bezpečnostní pás.,You must wear a seat belt.
-Měl by zavolat své matce.,He should call his mother.
-Možná přijde pozdě.,She may be late.
-Nemůže otevřít dveře.,It can't open the door.
-Musíme to dnes dokončit.,We must finish today.
-Můžete použít můj telefon.,You can use my phone.
-Neměli by dělat hluk.,They shouldn't make noise.
-Umíš plavat?,Can You swim?
-Mohl bys mi pomoci?,Could you help me?
-Smím vstoupit?,May I come in?
-Mohl by být pozdě?,Might he be late?
-Musím teď odejít?,Must I leave now?
-Máme začít?,Shall we start?
-Měl bych jí zavolat?,Should I call her?
-Pomůžeš mi?,Will you help me?
-Dáš si čaj?,Would you like some tea?
-Nemůžeš zůstat?,Can't you stay?
-Nemohl bys počkat?,Couldn't you wait?
-Neměl bych jí zavolat?,Shouldn't I call her?
-Nepřijdeš s námi?,Won't you come with us?
-Nechtěl bys čaj?,Wouldn't you like some tea?
+Umíš plavat?,Can you swim?
+On umí vařit.,He can cook.
+Ona umí řídit?,Can she drive?
+Nemůže to fungovat.,It can't work.
+Oni neumějí plavat.,They can't swim.
+Ty bys mohl pomoci.,You could help.
+Mohl by on přijít?,Could he come?
+On možná přijde.,He may come.
+Smí ona přijít?,May she come?
+Možná to bude pravda.,It may be true.
+Smíme začít?,May we start?
+Ona možná přijde.,She might come.
+Mohlo by to bolet?,Might it hurt?
+To musí být pravda.,It must be true.
+Musíme teď odejít?,Must we leave now?
+Ty tady nesmíš kouřit.,You mustn't smoke here.
+Ona nesmí řídit.,She mustn't drive.
+Měl bych studovat.,I should study.
+Měl bys odpočívat?,Should you rest?
+Nemělo by to být těžké.,It shouldn't be difficult.
+Měli bychom odejít?,Shoul we leave?
+Ty bys pomohl.,You would help.
+Pomohl by jsi?,Would you help?
+Já bych nelhal.,I wouldn't lie.
+Zůstal by jsi?,Would you stay?
 stuha,ribbon
 recenze,review
 zpravodaj,reporter
@@ -1144,6 +1145,7 @@ Nečekejme.,Let's not wait.
 Nezačínejme.,Let's not start.
 Nedělejme hluk.,Let's not make noise.
 Mám otevřít okno?,Shall I open the window?
+Máme začít?,Shall we start?
 Mám zavolat taxi?,Shall I call a taxi?
 Počkáme tady?,Shall we wait here?
 Mám udělat čaj?,Shall I make some tea?
@@ -1156,7 +1158,7 @@ A co zítra?,What about tomorrow?
 A co jet vlakem?,What about going by train?
 Co takhle kávu?,How about some coffee?
 Co takhle začít znovu?,How about starting again?
-Co takhle film?,How about a film?
+Co takhle film?,How about a movie?
 Co takhle zůstat doma?,How about staying home?
 pravítko,ruler
 hrubý,rude
@@ -1188,16 +1190,16 @@ on řídí,he's driving
 ona píše,she's writing
 ono prší,it's raining
 my čekáme,we're waiting
-vy se učíte,you're learning
+vy se učíte,you're studying
 oni běží,they're running
 Čtu novou knihu.,I'm reading a new book.
-Vaříš večeři.,You're cooking dinner.
-Řídí do práce.,He's driving to work.
-Píše e-mail.,She's writing an email.
-Prší.,It's raining.
-Čekáme na autobus.,We're waiting for the bus.
-Učíte se.,You're studying.
-Běží.,They're running.
+Ty vaříš večeři.,You're cooking dinner.
+On řídí do práce.,He's driving to work.
+Ona píše e-mail.,She's writing an email.
+Venku prší.,It's raining outside.
+My čekáme na autobus.,We're waiting for the bus.
+Vy se učíte se na zkoušku.,You're studying for the exam.
+Oní běží spolu.,They're running together.
 narození,birth
 obě,both
 zlomit,break
@@ -1230,14 +1232,14 @@ ono neprší,it isn't raining
 my nečekáme,we aren't waiting
 vy neplatíte,you aren't paying
 oni nepřicházejí,they aren't coming
-"Teď nespím, jen odpočívám.",I'm not sleeping; I'm just resting.
-Neposloucháš moje pokyny.,You aren't listening to my instructions.
-Dnes nepracuje z domova.,He isn't working from home today.
+Já teď nespím.,I'm not sleeping now.
+Neposloucháš mě.,You aren't listening to me.
+Dnes nepracuje.,He isn't working today.
 Ona teď neřídí auto.,She isn't driving the car right now.
-Venku už neprší.,It isn't raining outside anymore.
-Nečekáme na vlak.,We're not waiting for the train.
+Venku neprší.,It isn't raining outside.
+Nečekáme na vlak.,We aren't waiting for the train.
 Neplatíte za objednávku.,You aren't paying for the order.
-Dnes večer nepřicházejí.,They aren't coming tonight.
+Dnes večer nepracují.,They aren't working tonight.
 očernit,black
 kdokoliv,anyone
 bojí se,afraid
@@ -1277,7 +1279,7 @@ Píše ona zprávu?,Is she writing a message?
 Prší tam pořád?,Is it still raining there?
 Čekáme na správný autobus?,Are we waiting for the right bus?
 Učíte se na zkoušku?,Are you studying for the exam?
-Běží oni každý den?,Are they running every day?
+Běží už?,Are they running already?
 knihkupectví,bookstore
 kapela,band
 probudit,awake
@@ -1303,21 +1305,21 @@ role (např. papíru),roll
 křupavý,crisp
 souprava,kit
 Co dělám?,What am I doing?
-Kde bydlíš?,Where are you living?
+Kam jdeš?,Where are you going?
 Proč běží?,Why is he running?
 Co píše?,What is she writing?
 Proč prší?,Why is it raining?
-Kam jedeme?,Where are we going?
+Kam jdeme?,Where are we walking?
 Co hledáte?,What are you looking for?
 Kdy přijíždějí?,When are they arriving?
-Co právě dělám v kuchyni?,What am I doing in the kitchen?
-Kde teď bydlíš během studia?,Where are you living during your studies?
-Proč běží na autobus?,Why is he running for the bus?
-Co píše do svého deníku?,What is she writing in her diary?
-Proč dnes tolik prší?,Why is it raining so much today?
-Kam jedeme po práci?,Where are we going after work?
-Co hledáte v tašce?,What are you looking for in the bag?
-Kdy přijíždějí na nádraží?,When are they arriving at the station?
+Co vařím v kuchyni?,What am I cooking in the kitchen?
+Kde bydlíš během studia?,Where are you staying during your studies?
+Proč čeká na autobus?,Why is he waiting for the bus?
+Co kreslí do svého sešitu?,What is she drawing in her notebook?
+Proč se dnes ochlazuje?,Why is it getting colder today?
+Co si objednáváme po práci?,What are we ordering after work?
+Co nesete v tašce?,What are you carrying in the bag?
+Kdy odjíždějí z nádraží?,When are they leaving the station?
 opékat,roast
 pár,couple
 naznačit,indicate
@@ -1350,7 +1352,7 @@ ono bylo,it was
 my jsme byli,we were
 vy jste byli,you were
 oni byli,they were
-Včera jsem byl připravený začít lekci.,I was ready to start the lesson yesterday.
+Včera jsem byl připravený.,I was ready yesterday.
 Po práci jsi byl unavený.,You were tired after work.
 On byl doma se svým bratrem.,He was at home with his brother.
 Ona byla šťastná kvůli výsledku.,She was happy about the result.
@@ -1390,7 +1392,7 @@ ono nebylo,it wasn't
 my jsme nebyli,we weren't
 vy jste nebyli,you weren't
 oni nebyli,they weren't
-Včera jsem nebyl připravený na test.,I wasn't ready for the test yesterday.
+Včera jsem nebyl připravený na test.,I wasn't ready for the test.
 Po cestě jsi nebyl unavený.,You weren't tired after the journey.
 "On nebyl doma, byl v práci.",He wasn't at home; he was at work.
 Ona nebyla šťastná z té zprávy.,She wasn't happy about the news.
@@ -1411,7 +1413,7 @@ denní světlo,daylight
 ocenit,appreciate
 místo toho,instead
 jmenovat (do funkce),appoint
-jmenování,appointment
+jmenování (do funkce),appointment
 okamžitý,instant
 žaludek,stomach
 bolest břicha,stomachache
@@ -1438,3 +1440,1399 @@ Byla venku opravdu zima?,Was it really cold outside?
 Přišli jsme na schůzku pozdě?,Were we late for the meeting?
 Byli jste tehdy příliš zaneprázdnění?,Were you too busy then?
 Byli oni stále venku?,Were they still outside?
+v pořádku,alright
+zajímat,interest
+břicho,belly
+steak,steak
+uvést,state
+prohlášení,statement
+odhalit,reveal
+inteligence,intelligence
+unie,union
+shledání,reunion
+napadnout,invade
+dobře,alright
+naplánovat,budget
+vrátit,return
+žárovka,bulb
+nebezpečí,danger
+inspirovat,inspire
+inspirace,inspiration
+žebrat,beg
+sporák,stove
+popis,description
+prokletí,curse
+narovnat,right
+kari,curry
+Jaký jsem byl?,What was I like?
+Kde jsi byl?,Where were you?
+Proč byl doma?,Why was he at home?
+Jak se cítila?,How was she feeling?
+Jaké to bylo?,What was it like?
+Kde jsme byli?,Where were we?
+Kdy jste byli volní?,When were you free?
+Kde byli?,Where were they?
+dříve než,before
+vnitřní,inner
+přímý,straight
+kroužek,ring
+skříň,cupboard
+radost,joy
+byl,been
+dezert,dessert
+aplikovat,apply
+problém,issue
+tanečník,dancer
+stát,state
+chovat se,behave
+chování,behaviour
+zubař,dentist
+přehrada,dam
+sám,itself
+denní,daily
+zvyk,custom
+jezdit na kole,cycle
+cyklistika,cycling
+začátek,beginning
+s sebou,along
+odpověď,response
+já pracoval,I worked
+ty ses díval,you watched
+on uklízel,he cleaned
+ona otevřela,she opened
+ono začalo,it started
+my jsme hráli,we played
+vy jste pomohli,you helped
+oni navštívili,they visited
+Včera jsem šel domů.,I went home yesterday.
+Viděl jsi film.,You saw a film.
+On koupil telefon.,He bought a phone.
+Ona napsala e-mail.,She wrote an email.
+Rozbilo se to.,It broke.
+My jsem jeli vlakem.,We went by train.
+Vy jste mu dali adresu.,You gave him an address.
+Oni našli klíče.,They found the keys.
+obchodní dům,department store
+začátečník,beginner
+želé,jelly
+džem,jam
+znamenat,signify
+významný,significant
+úspěšně,successfully
+ztracený,lost
+úděl,lot
+hlasitý,loud
+hlasitě,loudly
+polykat,swallow
+vodítko,clue
+klaun,clown
+potit,sweat
+kabina,cab
+výhodná dohoda,bargain
+naštěstí,luckily
+pravidelně,regularly
+ulička,aisle
+cvaknutí,click
+milý,sweet
+miláček,sweetheart
+úředník,clerk
+já jsem nepracoval,I didn't work
+ty ses nedíval,you didn't watch
+on neuklízel,he didn't clean
+ona neotevřela,she didn't open
+ono nezačalo,it didn't start
+my jsme nehráli,we didn't play
+vy jste nepomohli,you didn't help
+oni nenavštívili,they didn't visit
+Já jsem nešel do práce.,I didn't go to work.
+Nedíval ses na ten film.,You didn't watch the film.
+On si nekoupil lístek.,He didn't buy a ticket.
+Ona nenapsala odpověď.,She didn't write a reply.
+Počítač se nespustil.,Computer didn't start.
+My jsme nejeli pryč.,We didn't go away.
+Vy jste nám nepomohli.,You didn't help us.
+Oni nenavštívili své rodiče.,They didn't visit their parents.
+klon,clone
+volný,loose
+přežít,survive
+spáchat,commit
+závazek,commitment
+litr,litre
+surfovat,surf
+surfování,surfing
+propuštění,release
+relaxovat,relax
+uvolněný,relaxed
+vtipný,comic
+komik,comic
+příjmení,surname
+pohodlí,comfort
+komfortní,comfortable
+živý,lively
+podnikatelka,businesswoman
+zatížení,load
+hřeben,comb
+místní,local
+sloupec,column
+barvitý,colourful
+překvapení,surprise
+Pracoval jsem?,Did I work?
+Díval ses?,Did you watch?
+Uklízel?,Did he clean?
+Otevřela?,Did she open?
+Začalo?,Did it start?
+Hráli jsme?,Did we play?
+Pomohli jste?,Did you help?
+Navštívili?,Did they visit?
+překvapený,surprised
+překvapující,surprising
+zámek,lock
+logika,logic
+logický,logical
+cola,cola
+poplach,alarm
+litovat,regret
+výbor,committee
+jasně,clearly
+nákupní centrum,mall
+spravovat,manage
+manažer,manager
+truhla,chest
+šachy,chess
+symfonie,symphony
+způsob,manner
+kontrola,cheque
+lednička,refrigerator
+šéfkuchař,chef
+dětství,childhood
+jásot,cheer
+šek,check
+označit,mark
+Kde jsem pracoval?,Where did I work?
+Co ses díval?,What did you watch?
+Kdy uklízel?,When did he clean?
+Co otevřela?,What did she open?
+Kdy to začalo?,When did it start?
+Kde jsme hráli?,Where did we play?
+Komu jste pomohli?,Who did you help?
+Co navštívili?,What did they visit?
+stolní tenis,table tennis
+značka,mark
+povídání,chat
+graf,chart
+lžíce,spoon
+polévková lžíce,tablespoon
+oženit,marry
+ženatý,married
+tvář,cheek
+muž,male
+chilli,chilli
+symbol,symbol
+čistič,cleaner
+jídelna,cafeteria
+šílený,mad
+klasický,classic
+klasická hudba,classical music
+plavky,swimming costume
+plavky,swimsuit
+požadovat,claim
+holič,barber
+kouzlo,magic
+občan,citizen
+hlavní chod,main course
+já zavolám,I'll call
+ty přijdeš,you'll come
+on pomůže,he'll help
+ona začne,she'll start
+ono spadne,it'll fall
+my počkáme,we'll wait
+vy vyhrajete,you'll win
+oni dorazí,they'll arrive
+Zavolám ti.,I'll call you.
+Přijdeš zítra.,You'll come tomorrow.
+On ti pomůže s taškami.,He'll help you with the bags.
+Ona začne schůzku v devět.,She'll start the meeting at nine.
+"Sklenice spadne, když do ní strčíš.",It'll fall if you push it.
+Počkáme na další autobus.,We'll wait for the next bus.
+Vy ten zápas vyhrajete.,You'll win the match.
+Dorazí před obědem.,They'll arrive before lunch.
+hlavně,mainly
+kalendář,calendar
+hlavní,major
+grilování,barbecue
+výrobce,maker
+make-up,make-up
+výběr,choice
+cvrlikání,chirp
+brada,chin
+šimpanz,chimpanzee
+lyrika,lyric
+stát (peníze),cost
+budík,alarm clock
+odpověď,reply
+zákon,law
+advokát,lawyer
+kontrast,contrast
+lenost,laziness
+záliv,bay
+kontinent,continent
+kontext,context
+keř,bush
+řízení,control
+kontejner,container
+já nezavolám,I won't call
+ty nepřijdeš,you won't come
+on nepomůže,he won't help
+ona nezačne,she won't start
+ono nespadne,it won't fall
+my nepočkáme,we won't wait
+vy neprohrajete,you won't lose
+oni nedorazí,they won't arrive
+"Dobře, nezavolám mu.","All right, I won't call him."
+"Ne, zítra nepřijdu.","No, I won't come tomorrow."
+Ona bez nás nezačne.,She won't start without us.
+To nespadne.,It won't fall.
+Nebudeme čekat celou noc.,We won't wait all night.
+Neprohrajete.,You won't lose.
+Asi dnes nedorazí.,They probably won't arrive today.
+kontaktovat,contact
+kontakt,contact
+přivlastnit si,appropriate
+baterie,battery
+opravit,repair
+kůže,leather
+náhlý,sudden
+uspět,succeed
+pohodlí,convenience
+výzkum,research
+svítilna,lamp
+studie,study
+povolit,allow
+věc,stuff
+krajina,landscape
+styl,style
+pruh,lane
+hořet,burn
+pohřbít,bury
+sporák,cooker
+autobusové nádraží,bus station
+nejnovější,latest
+zastupovat,represent
+Zavoláš mi zítra?,Will you call me tomorrow?
+Přijde dnes večer?,Will he come tonight?
+Pomůžeš mi?,Will you help me?
+Začne film brzy?,Will the film start soon?
+Spadne to?,Will it fall?
+Budeme mít dost času?,Will we have enough time?
+Vyhrajete?,Will you win?
+Dorazí včas?,Will they arrive on time?
+poslední,latter
+autobusová zastávka,bus stop
+pohodlné,convenient
+levice,left
+licence,licence
+lež,lie
+podnikatel,businessman
+superlativ,superlative
+životní styl,lifestyle
+superstar,superstar
+komponovat,compose
+skladatel,composer
+večeře,supper
+v podstatě,basically
+soustředit se,concentrate
+kompletní,complete
+stěžovat si,complain
+stížnost,complaint
+soutěžit,compete
+soutěž,competition
+ret,lip
+porovnat,compare
+srovnávací,comparative
+komunikovat,communicate
+Kdy mi zavoláš?,When will you call me?
+Kdy přijdeš?,When will you come?
+Jak nám pomůže?,How will he help us?
+Kdy začne kurz?,When will the course start?
+Kdy to spadne?,When will it fall?
+Kde počkáme?,Where will we wait?
+Co vyhrajete?,What will you win?
+Kdy dorazí?,When will they arrive?
+sdělení,communication
+základní,basic
+svoboda,liberty
+znepokojení,concern
+sluneční světlo,sunlight
+pronajmout,rent
+následek,consequence
+vyhovovat,suit
+vhodný,suitable
+vzdálený,remote
+připomenout,remind
+volný čas,leisure
+citrón,lemon
+zmást,confuse
+zmatený,confused
+kufr,suitcase
+limonáda,lemonade
+půjčovat,lend
+sebevědomý,confident
+shrnutí,summary
+naživu,alive
+dávka,batch
+stav,condition
+úroveň,level
+Zavolám mu.,I'm going to call him.
+Budeš dnes vařit.,You're going to cook today.
+On začne nový projekt.,He's going to start a new project.
+Ona odjede příští týden.,She's going to leave next week.
+Ten strom brzy spadne.,The tree is going to fall soon.
+My zůstaneme doma.,We're going to stay home.
+Vy vyhrajete.,You're going to win.
+Oni přijedou večer.,They're going to arrive tonight.
+slunečnice,sunflower
+sluneční brýle,sunglasses
+levá ruka,left-hand
+opravdu,indeed
+obtížnost,difficulty
+gram,gramme
+blondýnka,blonde
+rozzlobeně,angrily
+vnouče,grandchild
+dědeček,granddad
+velmi,extremely
+obývací pokoj,sitting room
+navíc,extra
+zdát,seem
+anděl,angel
+babička,granny
+starověké,ancient
+brusle,skate
+výraz,expression
+hledat,seek
+rychlík,express
+semínko,seed
+skateboarding,skateboarding
+prozkoumat,explore
+já nebudu volat,I'm not going to call
+ty nebudeš vařit,you aren't going to cook
+on nezačne,he isn't going to start
+ona neodjede,she isn't going to leave
+ono nespadne,it isn't going to fall
+my nezůstaneme,we aren't going to stay
+vy nevyhrajete,you aren't going to win
+oni nepřijedou,they aren't going to arrive
+vděčný,grateful
+bruslení,skating
+dřez,sink
+jednotného čísla,singular
+absolvovat,graduate
+móda,fashion
+fascinovat,fascinate
+fascinující,fascinating
+semestr,semester
+zlatý,golden
+golf,golf
+květ,bloom
+jízdné,fare
+dobře vypadající,good-looking
+fantastický,fantastic
+módní,fancy
+vysvětlení,explanation
+jednoduše,simply
+pád,fall
+spravedlivě,fairly
+podprsenka,bra
+milost,grace
+selhat,fail
+krev,blood
+Budu volat?,Am I going to call?
+Budeš vařit?,Are you going to cook?
+On začne?,Is he going to start?
+Ona odjede?,Is she going to leave?
+Spadne to?,Is it going to fall?
+My zůstaneme?,Are we going to stay?
+Vy vyhrajete?,Are you going to win?
+Oni přijedou?,Are they going to arrive?
+postupně,gradually
+zpěv,singing
+jedinný,single
+známý,familiar
+expert,expert
+zažít,experience
+skluzavka,slide
+mořské plody,seafood
+přesně,exactly
+pistole,gun
+štíhlý,slim
+deka,blanket
+důkaz,evidence
+značka,brand
+statečný,brave
+vina,blame
+skript,script
+vůbec,ever
+zkouška,exam
+přerušení,break
+rozpůlit,half
+tabule,blackboard
+poloviční cenu,half-price
+pomalu,slowly
+Kdy mu zavolám?,When am I going to call him?
+Co budeš vařit?,What are you going to cook?
+Kdy začne?,When is she going to start?
+Kam odjede?,Where is she going to go?
+Kdy to spadne?,When is it going to fall?
+Kde zůstaneme?,Where are we going to stay?
+Co vyhrajete?,What are you going to win?
+Kdy přijedou?,When are they going to arrive?
+euro,euro
+šunka,ham
+šroub,screw
+podat,hand
+kabelka,handbag
+obrazovka,screen
+založit,establish
+handicap,handicap
+handicapované,handicapped
+sudý,even
+udeřit,blow
+plátek,slice
+provádět,guide
+průvodce,guidebook
+lyže,ski
+velmi,greatly
+lyžování,skiing
+chamtivý,greedy
+existovat,exist
+vystavit,exhibit
+výstava,exhibition
+tajemník,secretary
+gril,grill
+grilovat,grill
+"Když zahřívám led, taje","If I heat ice, it melts"
+"Když se dotkneš ohně, pálí","If you touch fire, it burns"
+"Když jí příliš rychle, je mu špatně","If he eats too fast, he feels sick"
+"Když smíchá barvy, vznikne zelená","If she mixes the colours, it turns green"
+"Když se ochladí, voda zmrzne","If it gets cold, water freezes"
+"Když necháme mléko venku, zkazí se","If we leave milk out, it spoils"
+"Když stisknete tlačítko, světlo se rozsvítí","If you press the button, the light comes on"
+"Když nezalévají rostliny, zemřou","If they don't water the plants, they die"
+grilovaný,grilled
+brainstorm,brainstorm
+vyhledávání,search
+brzda,brake
+úzkostné,anxious
+hlídat,guard
+otrok,slave
+pobřeží,seaside
+předek,ancestor
+bezesný,sleepless
+vyjmout,except
+větev,branch
+ospalý,sleepy
+obchod s potravinami,grocery store
+rychlé občerstvení,fast food
+rukavice,glove
+knihovna,bookcase
+jiný,another
+potěr,fry
+složku,folder
+šok,shock
+plně,fully
+stín,shadow
+vařený,boiled
+"Když skončím brzy, zavolám ti","If I finish early, I'll call you"
+"Když přijdeš včas, začneme","If you arrive on time, we'll start"
+"Když bude pracovat, vydělá peníze","If he works, he'll earn money"
+"Když bude studovat, složí zkoušku","If she studies, she'll pass the exam"
+"Když bude pršet, zápas se zruší","If it rains, the match will be cancelled"
+"Když budeme mít čas, navštívíme muzeum","If we have time, we'll visit the museum"
+"Když si pospíšíte, stihnete vlak","If you hurry, you'll catch the train"
+"Když budou šetřit, koupí si dům","If they save money, they'll buy a house"
+fungovat,function
+odstín,shade
+blázen,fool
+regál,bookshelf
+mouka,flour
+knihkupectví,bookshop
+zaplavit,flood
+šít,sew
+plovák,float
+let,flight
+nábytek,furniture
+prodavač,shop assistant
+další,further
+blecha,flea
+pobřeží,shore
+vařit,boil
+nepříjemný,annoying
+fotbalista,footballer
+upřímný,frank
+podíl,share
+šampon,shampoo
+vpřed,forward
+štěstí,fortune
+naštěstí,fortunately
+"Kdybych měl čas, cestoval bych","If I had time, I'd travel"
+"Kdybys znal odpověď, řekl bys ji","If you knew the answer, you'd say it"
+"Kdyby měl peníze, koupil by auto","If he had the money, he'd buy a car"
+"Kdyby měla volno, odpočívala by","If she had a day off, she'd rest"
+"Kdyby bylo tepleji, fungovalo by to","If it were warmer, it'd work"
+"Kdybychom bydleli blíž, chodili bychom pěšky","If we lived closer, we'd walk"
+"Kdybyste měli více času, pomohli byste","If you had more time, you'd help"
+"Kdyby měli mapu, neztratili by se","If they had a map, they wouldn't get lost"
+svoboda,freedom
+zmrazit,freeze
+skořápka,shell
+zděšení,fright
+děsivý,frightening
+vidlice,fork
+navždy,forever
+smažený,fried
+les,forest
+bonus,bonus
+přátelství,friendship
+vystrašit,frighten
+síla,force
+vystrašený,frightened
+zakázat,forbid
+lednička,fridge
+držadlo,handle
+šortky,shorts
+galerie,gallery
+vážně,seriously
+bojovník,fighter
+dát si námahu,bother
+beletrie,fiction
+prohlídka památek,sightseeing
+Já jsem už skončil,I've already finished
+Ty jsi už viděl ten film.,You've already seen the movie.
+On ztratil své klíče.,He's lost his keys.
+Ona se už rozhodla.,She's already decided.
+To se změnilo od minula.,It's changed since last time.
+My jsme právě přijeli,We've just arrived
+Vy jste zapomněli adresu,You've forgotten the address.
+Oni už jedli.,They've already eaten.
+pár,few
+plot,fence
+žena,female
+daný,given
+samostatný,separate
+poplatek,fee
+postava,figure
+umlčet,silence
+peří,feather
+tichý,silent
+tiše,silently
+hloupý,silly
+strach,fear
+zeměkoule,globe
+chyba,fault
+stříbrný,silver
+senior,senior
+funkce,feature
+opravit,fix
+kotník,ankle
+rybář,fisherman
+shot,shot
+desková hra,board game
+otravovat,annoy
+Já jsem ještě neskončil.,I haven't finished yet.
+Ty jsi ten film ještě neviděl.,You haven't seen the movie yet.
+On své klíče zatím neztratil.,He hasn't lost his keys yet.
+Ona se ještě nerozhodla.,She hasn't decided yet.
+To se zatím nerozbilo.,It hasn't broken yet.
+My jsme ještě nepřijeli.,We haven't arrived yet.
+Vy jste tu adresu ještě nezapomněli.,You haven't forgotten the address yet.
+Oni ještě nejedli.,They haven't eaten yet.
+křestní jméno,first name
+výkřik,shout
+česnek,garlic
+plyn,gas
+pohlaví,gender
+znuděný,bored
+soubor,set
+generace,generation
+odkončit,final
+konečně,finally
+finále,final
+šéf,boss
+výročí,anniversary
+shromáždit,gather
+jinak,differently
+esej,essay
+únik,escape
+špagety,spaghetti
+pochyba,doubt
+dvojnásobek,double
+od sebe,apart
+reproduktor,speaker
+hotovo,done
+lov,hunt
+Skončil jsem už?,Have I finished yet?
+Už jsi viděl ten film?,Have you seen the movie yet?
+Ztratil už klíče?,Has he lost his keys yet?
+Už se rozhodla?,Has she decided yet?
+Už se to rozbilo?,Has it broken yet?
+Už jsme přijeli?,Have we arrived yet?
+Už jste zapomněli adresu?,Have you forgotten the address yet?
+Už jedli?,Have they eaten yet?
+lovit,hunt
+lovec,hunter
+byt,apartment
+konkrétní,specific
+saké,sake
+plachtění,sailing
+závratě,dizzy
+zabezpečit,safe
+ID,ID
+průkaz totožnosti,ID card
+bohužel,sadly
+omlouvám se,apologise
+rušit,disturb
+ohnout,bend
+kouzlit,spell
+spěch,rush
+plocha,space
+kosmická loď,spaceship
+řidičský průkaz,driving licence
+brilantní,brilliant
+hostitel,host
+oblečený,dressed
+písčitý,sandy
+výkres,drawing
+Co už jsem dokončil?,What have I finished so far?
+Co už jsi viděl?,What have you seen so far?
+Co všechno už ztratil?,What has he lost so far?
+Proč se rozhodla tak rychle?,Why has she decided so quickly?
+Co se od minula změnilo?,What has changed since last time?
+Do kterého města jsme dnes přijeli?,Which city have we arrived in today?
+Co jste dnes zapomněli?,What have you forgotten today?
+Co už jedli?,What have they eaten so far?
+výstavce,drawer
+stejně,anyway
+zdroj,source
+ochutnat,sample
+kromě,besides
+však,however
+kdekoli,anywhere
+v centru města,downtown
+dole,downstairs
+obejmout,hug
+stáhnout,download
+lidský,human
+remíza,draw
+ilegální,illegal
+běh,running
+zklamaný,disappointed
+zmizet,disappear
+nesouhlasit,disagree
+nevýhoda,disadvantage
+pás,belt
+lano,rope
+šíření,spread
+vykořenit,root
+ředitel,director
+Já pracuji už dvě hodiny.,I've been working for two hours.
+Ty čteš od rána.,You've been reading since this morning.
+On čeká celý den.,He's been waiting all day.
+Ona běhá už hodinu.,She's been running for an hour.
+Prší od včerejška.,It's been raining since yesterday.
+My se učíme celý večer.,We've been studying all evening.
+Vy cestujete celý týden.,You've been travelling all week.
+Oni hrají od oběda.,They've been playing since lunch.
+vzhled,appearance
+zklamáním,disappointing
+palec,inch
+dinosaurus,dinosaur
+hnědnout,brown
+ačkoli,although
+zvýšení,increase
+čtverec,square
+digitální fotoaparát,digital camera
+romantika,romance
+romantický,romantic
+hrůza,horror
+běžec,runner
+rozlít,spill
+představivost,imagination
+pověst,rumour
+displej,display
+šplouchat,splash
+podíl,split
+zřejmě,apparently
+dopad,impact
+nechuť,dislike
+trpělivý,patient
+netrpělivý,impatient
+Já poslední dobou moc nespím.,I haven't been sleeping much lately.
+Ty poslední dobou moc nečteš.,You haven't been reading much lately.
+On tam zatím nečeká dlouho.,He hasn't been waiting there long yet.
+Ona už nějakou dobu neběhá.,She hasn't been running for a while.
+Už několik dní neprší.,It hasn't been raining for several days.
+My se tento týden moc neučíme.,We haven't been studying much this week.
+Vy letos moc necestujete.,You haven't been travelling much this year.
+Oni spolu poslední dobou nehrají.,They haven't been playing together lately.
+zničit,ruin
+zhruba,roughly
+upřímný,honest
+nečestný,dishonest
+diskuse,discussion
+význam,importance
+lavice,bench
+důležité,importantly
+královský,royal
+žasnout,marvel
+úžasné,marvellous
+zapůsobit,impress
+disko,disco
+sportovní centrum,sports centre
+kolotoč,roundabout
+ragby,rugby
+lék,drug
+lékárna,drugstore
+snowboard,snowboard
+snowboarding,snowboarding
+energický,energetic
+školní práce,schoolwork
+konec,ending
+ohrozit,endanger
+Už pracuji dvě hodiny?,Have I been working for two hours?
+Čteš už od rána?,Have you been reading since this morning?
+Čeká už celý den?,Has he been waiting all day?
+Běhá poslední dobou každé ráno?,Has she been running every morning lately?
+Prší už od včerejška?,Has it been raining since yesterday?
+Učíme se už celý večer?,Have we been studying all evening?
+Cestujete už celý týden?,Have you been travelling all week?
+Hrají už od oběda?,Have they been playing since lunch?
+ohrožený,endangered
+mýdlo,soap
+sluchátka,headphone
+ředitel školy,headteacher
+podporovat,encourage
+školák,schoolchild
+vědecký,scientific
+prázdný,empty
+vytápět,heat
+teplo,heat
+topení,heating
+vynořit se,emerge
+stav nouze,emergency
+těžce,heavily
+trapný,embarrassing
+rozpis,schedule
+e-mail,email
+jinde,elsewhere
+ponožka,sock
+užitečný,helpful
+povýšit,elevate
+výtah,elevator
+nenávist,hate
+obrovský,enormous
+Na čem poslední dobou pracuji?,What have I been working on lately?
+Co poslední dobou čteš?,What have you been reading lately?
+Na koho on čeká od rána?,Who has he been waiting for since this morning?
+Kde ona poslední dobou běhá?,Where has she been running lately?
+Jak dlouho už prší?,How long has it been raining?
+Co my poslední dobou studujeme?,What have we been studying lately?
+Kam vy poslední dobou cestujete?,Where have you been travelling lately?
+Co oni poslední dobou hrají?,What have they been playing lately?
+eskalátor,escalator
+bavit,amuse
+pobavení,amusement
+chyba,error
+výkřik,scream
+pobavený,amused
+hladce,smoothly
+epizoda,episode
+snack,snack
+závist,envy
+šťastně,happily
+sněžení,snow
+štěstí,happiness
+kousat,bite
+bit,bit
+vjezd,entrance
+sotva,hardly
+újma,harm
+škodlivý,harmful
+bavit,entertain
+zábava,entertainment
+harmonie,harmony
+sklidit,harvest
+obálka,envelope
+"Už jsem odešel, když zavolala.",I'd already left when she called.
+"Ty jsi skončil dřív, než začalo pršet.",You'd finished before it started raining.
+"On už jedl, když jsme dorazili.",He'd already eaten when we arrived.
+"Ona už přijela, když jsme zavolali.",She'd already arrived when we called.
+"To se rozbilo, než jsme to našli.",It had broken before we found it.
+"My jsme zapomněli heslo, než jsme se přihlásili.",We'd forgotten the password before we logged in.
+Vy jste ten film viděli před naší schůzkou.,You'd seen the movie before our meeting.
+"Oni odešli, než jsme dorazili.",They'd left before we arrived.
+zejména,especially
+limonáda,soda
+udeřit,hit
+hokej,hockey
+východ,east
+snadno,easily
+ctižádost,ambition
+za,beyond
+zemětřesení,earthquake
+náušnice,earring
+už,anymore
+měřítko,scale
+zlepšit se,better
+klobása,sausage
+med,honey
+čest,honour
+omáčka,sauce
+uspokojit,satisfy
+nevěsta,bride
+vánek,breeze
+jednoho dne,someday
+hiphop,hiphop
+nealkoholický nápoj,soft drink
+měkce,softly
+"Já jsem ještě neodešel, když zavolala.",I hadn't left yet when she called.
+"Ty jsi ještě neskončil, když začalo pršet.",You hadn't finished yet when it started raining.
+"On ještě nejedl, když jsme dorazili.",He hadn't eaten yet when we arrived.
+"Ona ještě nepřijela, když schůzka začala.",She hadn't arrived yet when the meeting started.
+"To se ještě nerozbilo, když jsme to zkontrolovali.",It hadn't broken yet when we checked it.
+My jsme do té doby nezapomněli heslo.,We hadn't forgotten the password by then.
+"Vy jste ten film neviděli, než jsme se setkali.",You hadn't seen the movie before we met.
+"Oni ještě neodešli, když jsme dorazili.",They hadn't left yet when we arrived.
+scenérie,scenery
+software,software
+scéna,scene
+elektrický,electric
+sebe,herself
+starší,elderly
+Hej,hey
+účet,bill
+někdo,somebody
+střední škola,high school
+vzdělávat,educate
+školství,education
+vzdělávací,educational
+řešení,solution
+upravit,edit
+editor,editor
+redakční,editorial
+dálnice,highway
+trampovat,hike
+turistika,hiking
+sám,himself
+odrážet,reflect
+nájemné,rent
+rám,frame
+"Já už jsem odešel, když zavolala?",Had I already left when she called?
+"Ty jsi skončil, než začalo pršet?",Had you finished before it started raining?
+"On už jedl, když jsme dorazili?",Had he eaten by the time we arrived?
+Ona přijela před začátkem schůzky?,Had she arrived before the meeting started?
+"To se rozbilo, než jsme to zkontrolovali?",Had it broken before we checked it?
+"My jsme už zapomněli heslo, když jsme ho potřebovali?",Had we already forgotten the password when we needed it?
+Vy jste ten film viděli před naším setkáním?,Had you seen the movie before our meeting?
+"Oni už odešli, když jsme dorazili?",Had they already left when we arrived?
+autor,author
+povolení,permit
+povolení,permission
+toast,toast
+křeslo,armchair
+dnes,nowadays
+titul,title
+nejistý,uncertain
+balit,pack
+balíček,pack
+dálnice,motorway
+osobnost,personality
+Pacifik,pacific
+nepříjemný,uncomfortable
+tip,tip
+předpovědět,predict
+předpověď,prediction
+atom,atom
+rozsah,range
+jízdní řád,timetable
+většinou,mostly
+benzín,petrol
+čerpací stanice,petrol station
+inzerovat,advertise
+Co jsem zabalil před odjezdem?,What had I packed before I left?
+"Co jsi dokončil, než jsi odešel?",What had you finished before you left?
+"Co už snědl, než jsme dorazili?",What had he eaten before we arrived?
+Komu zavolala před odjezdem?,Who had she called before she left?
+"Co požár poškodil, než ho uhasili?",What had the fire damaged before they put it out?
+"Na co jsme zapomněli, než jsme odjeli?",What had we forgotten before we left?
+Co jste viděli před příjezdem?,What had you seen before you arrived?
+"Kam už odešli, když jsem jim zavolal?",Where had they gone by the time I called them?
+inzerát,advertisement
+až do,till
+zatímco,while
+vlastně,actually
+pozadí,background
+invalidní vozík,wheelchair
+plocha,area
+vražda,murder
+pokročit,advance
+pokročilý,advanced
+pláštěnka,raincoat
+zubní kartáček,toothbrush
+pepř,pepper
+dobře známý,well-known
+bolest zubů,toothache
+džbánek,mug
+podstatné jméno,noun
+západ,west
+pohled,view
+tón,tone
+videohra,video game
+paní,Ms
+perfektní,perfect
+dokonale,perfectly
+Zítra v osm budu pracovat.,I'll be working at eight tomorrow.
+V šest budeš ještě řídit.,You'll still be driving at six.
+"On bude spát, až dorazíme.",He'll be sleeping when we arrive.
+Ona bude studovat zítra večer.,She'll be studying tomorrow evening.
+Zítra touto dobou bude pršet.,It'll be raining at this time tomorrow.
+V létě budeme cestovat po Evropě.,We'll be travelling around Europe this summer.
+V osm budete čekat před hotelem.,You'll be waiting outside the hotel at eight.
+"Oni budou hrát, až přijdeme.",They'll be playing when we arrive.
+mokré,wet
+provést,perform
+výkon,performance
+román,novel
+parfém,perfume
+pronásledovat,pursue
+produkovat,produce
+punčocháče,tights
+další,additional
+fyzicky,physically
+výroba,production
+upéct,bake
+pod vodou,underwater
+myšlení,thought
+ačkoli,though
+hodnotit,rate
+hodnocení,rating
+profesionální,professional
+zámoří,overseas
+syrový,raw
+ozbrojit,arm
+ozbrojený,armed
+povolání,occupation
+nadváha,overweight
+Zítra v osm nebudu pracovat.,I won't be working at eight tomorrow.
+Ty zítra v šest nebudeš řídit.,You won't be driving at six tomorrow.
+"On nebude spát, až dorazíme.",He won't be sleeping when we arrive.
+Ona zítra večer nebude studovat.,She won't be studying tomorrow evening.
+Zítra touto dobou nebude pršet.,It won't be raining at this time tomorrow.
+My v sobotu touto dobou nebudeme cestovat.,We won't be travelling at this time on Saturday.
+Vy v osm nebudete čekat před hotelem.,You won't be waiting outside the hotel at eight.
+"Oni nebudou hrát, až přijdeme.",They won't be playing when we arrive.
+model,model
+nepříjemný,uneasy
+paprsek,ray
+větrný,windy
+víno,wine
+poutník,pilgrim
+vítěz,winner
+pilulka,pill
+mobilní,mobile
+tahat,pull
+žíznivý,thirsty
+architektura,architecture
+badminton,badminton
+mešita,mosque
+rap,rap
+dub,oak
+inzerce,advertising
+rada,advice
+celý,whole
+uvázat,tie
+uklizeno,tidy
+uklidit,tidy
+přesný,precise
+koho,whom
+Budu zítra v osm pracovat?,Will I be working at eight tomorrow?
+Budeš zítra ráno řídit?,Will you be driving tomorrow morning?
+On bude zítra v tu dobu spát?,Will he be sleeping then?
+Ona bude zítra večer studovat?,Will she be studying tomorrow evening?
+Bude zítra touto dobou pršet?,Will it be raining at this time tomorrow?
+Budeme v sobotu touhle dobou cestovat?,Will we be travelling at this time on Saturday?
+Budete zítra v osm čekat před hotelem?,Will you be waiting outside the hotel at eight tomorrow?
+"Oni budou hrát, až dorazíme?",Will they be playing when we arrive?
+radit,advise
+interpunkce,punctuation
+přijatelný,acceptable
+přidání,addition
+široký,wide
+fyzikální,physical
+fotografování,photography
+fotograf,photographer
+špatně,badly
+záležitost,affair
+hmotnost,weight
+pochopit,understand
+fotografie,photograph
+sloveso,verb
+nálada,mood
+hrom,thunder
+bouřka,thunderstorm
+široce,widely
+zvuk,audio
+muzeum,museum
+oznámení,notice
+vytisknout,print
+tiskárna,printer
+těstoviny,pasta
+Kdy budu zítra pracovat?,When will I be working tomorrow?
+Kde budeš zítra řídit?,Where will you be driving tomorrow?
+Kdy bude on během cesty spát?,When will he be sleeping during the trip?
+Co bude ona studovat příští semestr?,What will she be studying next semester?
+Kdy bude o víkendu pršet?,When will it be raining this weekend?
+Kde budeme příští měsíc cestovat?,Where will we be travelling next month?
+"Na koho budete čekat, až přijedete?",Who will you be waiting for when you arrive?
+Co budou hrát na koncertě?,What will they be playing at the concert?
+kvalita,quality
+pračka,washing machine
+slovník,vocabulary
+mytí nádobí,washing-up
+hlučný,noisy
+zabránit,prevent
+dosáhnout,achieve
+nervový,nervous
+poklad,treasure
+negativní,negative
+tiše,quietly
+předstírat,pretend
+cestovatel,traveller
+soukromé,private
+cestování,travel
+astronaut,astronaut
+přestat,quit
+sdružení,association
+PC,PC
+past,trap
+vlna,wave
+argument,argument
+hrášek,pea
+nikdo,nobody
+"Kdybych to věděl, zavolal bych","If I'd known, I'd have called"
+"Kdybys přišel, pomohl bys","If you'd come, you'd have helped"
+"Kdyby studoval, uspěl by","If he'd studied, he'd have succeeded"
+"Kdyby se připravila, vyhrála by","If she'd prepared, she'd have won"
+"Kdyby se to rozbilo, opravili bychom to","If it had broken, we'd have fixed it"
+"Kdybychom odešli dřív, stihli bychom vlak","If we'd left earlier, we'd have caught the train"
+"Kdybyste poslouchali, rozuměli byste","If you'd listened, you'd have understood"
+"Kdyby odešli dřív, viděli by začátek","If they'd left earlier, they'd have seen the beginning"
+klam,trick
+skutečně,truly
+vyhnout se,avoid
+zprůměrovat,average
+hlavní,principal
+akt,act
+napříč,across
+problémy,trouble
+pravda,truth
+síť,net
+zaparkovat,park
+částečně,partly
+královna,queen
+cena,award
+peněženka,wallet
+bloudit,wander
+přihrávka,pass
+přejít,pass
+průchod,passage
+hrdost,pride
+chůze,walking
+návštěvník,visitor
+naladit,tune
+klidný,peaceful
+Jsem zván na oslavu každý rok.,I'm invited to the party every year.
+Jsi vybrán do týmu.,You're chosen for the team after the test.
+V práci je respektován svými kolegy.,He's respected by his colleagues at work.
+Ona je každý týden informována o změnách.,She's informed about the changes every week.
+To se čistí každý den.,It's cleaned every day.
+My jsme očekáváni na nádraží v poledne.,We're expected at the station at noon.
+Vy jste placeni každý pátek.,You're paid every Friday.
+Oni jsou kontrolováni u vchodu.,They're checked at the entrance.
+web,web
+webová stránka,web page
+provoz,traffic
+semafor,traffic light
+webové stránky,website
+tradice,tradition
+tradiční,traditional
+svatba,wedding
+tajemství,mystery
+tajemný,mysterious
+automaticky,automatically
+já sám,myself
+obec,village
+dráha,track
+neobvyklý,unusual
+automatizovat,automate
+automatický,automatic
+všední den,weekday
+dospělý,adult
+týdně,weekly
+plakat,weep
+k,towards
+turista,tourist
+vážit,weigh
+Já jsem byl včera pozván na oslavu.,I was invited to a party yesterday.
+Ty jsi byl včera vybrán do týmu.,You were chosen for the team yesterday.
+On byl respektován svými kolegy.,He was respected by his colleagues.
+Ona byla informována o změně po poradě.,She was informed about the change after the meeting.
+To bylo opraveno minulý týden.,It was repaired last week.
+My jsme byli včera požádáni o pomoc.,We were asked for help yesterday.
+Vy jste byli placeni každý pátek.,You were paid every Friday.
+Oni byli kontrolováni u vchodu.,They were checked at the entrance.
+turné,tour
+průvodce,tour guide
+hudební,musical
+pomáhat,assist
+asistent,assistant
+ubrousek,napkin
+malíř,painter
+dvakrát,twice
+tlak,pressure
+kvíz,quiz
+nutné,necessary
+téměř,nearly
+panika,panic
+hrozné,awful
+pro,pro
+argumentovat,argue
+normální,normal
+pánev,pan
+přírodní,natural
+rodák,native
+hruška,pear
+sever,north
+sportovec,athlete
+trénovat,train
+Já už jsem byl pozván na schůzku.,I've already been invited to the meeting.
+Ty už jsi byl vybrán do týmu.,You've already been chosen for the team.
+On byl nedávno povýšen.,He's recently been promoted.
+Ona už byla informována o změně.,She's already been informed about the change.
+To už bylo opraveno.,It's already been repaired.
+My jsme už byli požádáni o pomoc.,We've already been asked for help.
+Vy už jste byli obslouženi.,You've already been served.
+Oni už byli zaplaceni.,They've already been paid.
+přídavné jméno,adjective
+násilný,violent
+raketa,racket
+housle,violin
+houba,mushroom
+upravit,adjust
+kamarád,pal
+bohatství,wealth
+tramvaj,tram
+výcvik,training
+proto,therefore
+směs,mix
+na rozdíl od,unlike
+cibule,onion
+množný,plural
+plus,plus
+balón,balloon
+pošta,post office
+online,online
+umělý,artificial
+patro,upstairs
+meloun,melon
+Pozor,attention
+mrkev,carrot
+Zítra budu pozván na oslavu.,I'll be invited to the party tomorrow.
+Ty budeš vybrán do týmu po zkoušce.,You'll be chosen for the team after the test.
+On bude příští měsíc povýšen.,He'll be promoted next month.
+Ona bude zítra informována o změně.,She'll be informed about the change tomorrow.
+To bude opraveno do pátku.,It'll be repaired by Friday.
+My budeme požádáni o pomoc během schůzky.,We'll be asked for help during the meeting.
+Vy budete placeni každý pátek.,You'll be paid every Friday.
+Oni budou zítra kontrolováni u vchodu.,They'll be checked at the entrance tomorrow.
+psaní,writing
+zaznamenat,record
+úkol,task
+ukázat,point
+hotovost,cash
+křivdit,wrong
+kazeta,cassette
+útočit,attack
+cíl,target
+hrad,castle
+naštvaný,upset
+páska,tape
+možná,possibly
+zmínka,mention
+v zahraničí,abroad
+menu,menu
+dostávat,receive
+nedávné,recent
+jednotka,unit
+dospívající,teenager
+omeleta,omelette
+použitý,used
+recepce,reception
+recepční,receptionist
+Já jsem právě sledován policií.,I'm being watched by the police right now.
+Ty jsi právě testován na covid.,You're being tested for COVID right now.
+On je právě fotografován novinářem.,He's being photographed by a journalist right now.
+Ona je během rozhovoru nahrávána.,She's being recorded during the interview.
+To se právě opravuje v dílně.,It's being repaired in the workshop right now.
+My jsme právě kontrolováni u vstupu.,We're being checked at the entrance right now.
+Vy jste právě vyslýcháni policií.,You're being questioned by the police right now.
+Oni jsou tento týden školeni novým vedoucím.,They're being trained by the new manager this week.
+napřed,ahead
+metoda,method
+klepnout,tap
+metr,metre
+strachovat se,worry
+ustaraný,worried
+příjemný,pleasing
+správné,proper
+roztrhnout,tear
+neznámý,unknown
+publikum,audience
+potěšen,pleased
+lékařský,medical
+medaile,medal
+organizovat,organise
+organizovaný,organised
+cereálie,cereal
+mládí,youth
+pokus,attempt
+parkoviště,car park
+tábořit,camp
+předseda,chairman
+"Znám muže, který zpívá v kapele.",I know a man who sings in a band.
+"Máš knihu, která mi pomáhá učit se anglicky.",You have a book that helps me learn English.
+"On hledá práci, která dobře platí.",He's looking for a job that pays well.
+"Ona zná ženu, která peče dorty.",She knows a woman who bakes cakes.
+"To je telefon, který pořád funguje.",It's a phone that still works.
+"Bydlíme v domě, který stojí u řeky.",We live in a house that sits by the river.
+"Znáte restauraci, která vaří dobré jídlo?",Do you know a restaurant that serves good food?
+"Mají psa, který rád běhá.",They have a dog that likes to run.
+zóna,zone
+výzva,challenge
+šampaňské,champagne
+bankovnictví,banking
+mistr,champion
+mistrovství,championship
+velké písmeno,capital letter
+kapitál,capital
+odkazovat,refer
+objednat,order
+portrét,portrait
+populace,population
+kapitola,chapter
+příjem,receipt
+znečišťovat,pollute
+max,max
+plechovka,can
+recyklovat,recycle
+zbytečné,unnecessary
+jo,yeah
+nepříjemný,unpleasant
+provozovat,operate
+policejní důstojník,police officer
+policejní stanici,police station
+"Mám zpoždění, že ano?","I'm late, aren't I?"
+"Jsi připravený, že ano?","You're ready, aren't you?"
+"On přichází, že ano?","He's coming, isn't he?"
+"Ona už skončila, že ano?","She's finished, hasn't she?"
+"Je zima, že ano?","It's cold, isn't it?"
+"Jsme tu brzy, že ano?","We're early, aren't we?"
+"Jste unavení, že ano?","You're tired, aren't you?"
+"Jsou tady, že ano?","They're here, aren't they?"
+policista,policeman
+policistka,policewoman
+sirotek,orphan
+centimetr,centimetre
+kampus,campus
+zdvořilý,polite
+příležitost,opportunity
+politický,political
+zamýšlet,mean
+oponovat,oppose
+kempování,camping
+talent,talent
+naproti,opposite
+původní,original
+břeh řeky,bank
+schopnost,ability
+cent,cent
+význam,meaning
+dětské hřiště,playground
+sebe,ourselves
+hravý,playful
+realizovat,realise
+psycholog,psychologist
+chybějící,missing
+"Řekl jsem, že jsem unavený",I said I was tired
+"Řekl jsi, že jsi připravený",You said you were ready
+"Řekl, že potřebuje pomoc",He said he needed help
+"Řekla, že už skončila",She said she had already finished
+"Říkalo se, že telefon funguje",It was said that the phone worked
+"Řekli jsme, že odcházíme",We said we were leaving
+"Řekli jste, že přijdete",You said you would come
+"Řekli, že to viděli",They said they had seen it
+činidlo,agent
+divit se,wonder
+balkón,balcony
+nedůležité,unimportant
+učebnice,textbook
+textovou zprávu,text message
+nezapomenutelný,unforgettable
+planeta,planet
+v,within
+zrcadlo,mirror
+trouba,oven
+nešťastný,unhappy
+vyděsit,terrify
+dřevěný,wooden
+nad,over
+jednotný,uniform
+nabízet,offer
+vlna,wool
+minerální voda,mineral water
+nalít,pour
+přání,wish
+ve věku,aged
+nezdravý,unhealthy
+jejich,theirs
+Já jsem dřív plaval,I used to swim
+Ty jsi dřív kouřil,You used to smoke
+On dřív pracoval v bance,He used to work in a bank
+Ona dřív tančila,She used to dance
+Dřív to fungovalo,It used to work
+My jsme dřív bydleli v Brně,We used to live in Brno
+Vy jste dřív jezdili vlakem,You used to travel by train
+Oni dřív hráli spolu,They used to play together
+Já jsem zvyklý vstávat brzy.,I'm used to getting up early.
+Ty jsi zvyklý pracovat v noci.,You're used to working at night.
+On je zvyklý řídit v provozu.,He's used to driving in traffic.
+Ona je zvyklá mluvit anglicky.,She's used to speaking English.
+To zvíře je zvyklé být samo.,It's used to being alone.
+My jsme zvyklí učit se spolu.,We're used to studying together.
+Vy jste zvyklí cestovat vlakem.,You're used to travelling by train.
+Oni jsou zvyklí žít v zahraničí.,They're used to living abroad.
+Včera v osm jsem pracoval.,I was working at eight yesterday.
+Včera večer jsi četl.,You were reading last night.
+"On zrovna spal, když jsme dorazili.",He was sleeping when we arrived.
+"Ona vařila, když zazvonil telefon.",She was cooking when the phone rang.
+V tu chvíli pršelo.,It was raining at that moment.
+My jsme v osm sledovali film.,We were watching a movie at eight.
+"Vy jste čekali na autobus, když začalo pršet.",You were waiting for the bus when it started raining.
+"Oni hráli fotbal, zatímco my jsme pracovali.",They were playing football while we were working.
+Včera v osm jsem nepracoval.,I wasn't working at eight yesterday.
+Včera večer jsi nečetl.,You weren't reading last night.
+"On nespal, když jsme dorazili.",He wasn't sleeping when we arrived.
+"Ona nevařila, když zazvonil telefon.",She wasn't cooking when the phone rang.
+V tu chvíli nepršelo.,It wasn't raining at that moment.
+My jsme v osm nesledovali film.,We weren't watching a movie at eight.
+"Vy jste nečekali na autobus, když začalo pršet.",You weren't waiting for the bus when it started raining.
+"Oni nehráli fotbal, zatímco my jsme pracovali.",They weren't playing football while we were working.
