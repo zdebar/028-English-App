@@ -22,6 +22,10 @@ import { useEffect, useState, type MouseEvent } from 'react';
 export type PracticeSessionCardProps = Readonly<{
   note: NoteType | null;
   grammar: GrammarChunkWithExamples | null;
+  noteAvailable?: boolean;
+  grammarAvailable?: boolean;
+  noteLoadFailed?: boolean;
+  grammarLoadFailed?: boolean;
   progressLabel: string | number;
   progressHelpText?: string;
   revealed: boolean;
@@ -259,6 +263,10 @@ function getPracticeCardDisplayState(
   const {
     grammar,
     note,
+    grammarAvailable,
+    grammarLoadFailed = false,
+    noteAvailable,
+    noteLoadFailed = false,
     revealed,
     audioDisabled,
     audioLoading,
@@ -270,8 +278,8 @@ function getPracticeCardDisplayState(
     showAudioControls,
     audioLoading,
   );
-  const showGrammarButton = hasGrammarDetails(revealed, grammar);
-  const showNoteButton = hasNoteDetails(revealed, note);
+  const showGrammarButton = hasGrammarReference(revealed, grammar, grammarAvailable);
+  const showNoteButton = hasNoteReference(revealed, note, noteAvailable);
   return {
     cardText: getPracticeCardText(revealed),
     cardStyle: getPracticeCardStyle(controlsLocked, revealed),
@@ -279,8 +287,8 @@ function getPracticeCardDisplayState(
     showNoteButton,
     showProgressLabel: props.isBlockTrainingPractice || props.showProgressLabel,
     audioButtonDisabled: audioControlsDisabled || !revealed,
-    grammarButtonDisabled: controlsLocked || !showGrammarButton,
-    noteButtonDisabled: controlsLocked || !showNoteButton,
+    grammarButtonDisabled: controlsLocked || grammarLoadFailed || !showGrammarButton,
+    noteButtonDisabled: controlsLocked || noteLoadFailed || !showNoteButton,
     controlsLocked,
     showHintControl: !revealed,
     practiceControlColumns: getPracticeControlColumns(!revealed),
@@ -299,13 +307,33 @@ function getPracticeCardStyle(controlsLocked: boolean, revealed: boolean): strin
   return 'color-audio-disabled';
 }
 
-function hasGrammarDetails(revealed: boolean, grammar: GrammarChunkWithExamples | null): boolean {
-  if (!revealed || !grammar) return false;
+function hasGrammarReference(
+  revealed: boolean,
+  grammar: GrammarChunkWithExamples | null,
+  grammarAvailable: boolean | undefined,
+): boolean {
+  if (!revealed) return false;
+  if (grammarAvailable !== undefined) return grammarAvailable;
+  return hasGrammarDetails(grammar);
+}
+
+function hasGrammarDetails(grammar: GrammarChunkWithExamples | null): boolean {
+  if (!grammar) return false;
   return Boolean(grammar.note?.trim() || grammar.items.length);
 }
 
-function hasNoteDetails(revealed: boolean, note: NoteType | null): boolean {
-  if (!revealed || !note) return false;
+function hasNoteReference(
+  revealed: boolean,
+  note: NoteType | null,
+  noteAvailable: boolean | undefined,
+): boolean {
+  if (!revealed) return false;
+  if (noteAvailable !== undefined) return noteAvailable;
+  return hasNoteDetails(note);
+}
+
+function hasNoteDetails(note: NoteType | null): boolean {
+  if (!note) return false;
   return Boolean(note.note.trim());
 }
 

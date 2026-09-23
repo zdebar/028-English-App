@@ -26,7 +26,7 @@ import {
 } from '@/database/utils/practice-content.utils';
 
 /** Loads complete review batches and saves each batch once at its boundary. */
-export function usePracticeDeck(userId: string | null) {
+export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckData) {
   const trackPracticeWrite = usePracticeAvailabilityBoundary(userId);
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
@@ -40,7 +40,7 @@ export function usePracticeDeck(userId: string | null) {
   const [secondaryContent, setSecondaryContent] = useState<SecondaryContent | null>(null);
   const secondaryContentRequestIdRef = useRef(0);
 
-  const initialReviewDeck = userId ? getCachedReviewDeck(userId) : undefined;
+  const initialReviewDeck = initialData ?? (userId ? getCachedReviewDeck(userId) : undefined);
   const fetchPracticeDeck = useCallback(
     () => (userId ? loadCachedReviewDeck(userId) : Promise.resolve(createEmptyReviewDeck())),
     [userId],
@@ -111,6 +111,13 @@ export function usePracticeDeck(userId: string | null) {
       .catch((caughtError: unknown) => {
         if (!isActive || requestId !== secondaryContentRequestIdRef.current) return;
         reportError('Failed to load practice card details', toError(caughtError));
+        setSecondaryContent({
+          itemKey,
+          note: null,
+          grammar: null,
+          noteLoadFailed: hasPositiveReference(currentItem.note_id),
+          grammarLoadFailed: hasPositiveReference(currentItem.grammar_chunk_id),
+        });
       });
 
     return () => {
@@ -161,6 +168,10 @@ export function usePracticeDeck(userId: string | null) {
     currentItem,
     note: getSecondaryNote(currentEntry, secondaryContent),
     grammar: getSecondaryGrammar(currentEntry, secondaryContent),
+    noteAvailable: hasPositiveReference(currentItem?.note_id),
+    grammarAvailable: hasPositiveReference(currentItem?.grammar_chunk_id),
+    noteLoadFailed: getSecondaryNoteLoadFailed(currentEntry, secondaryContent),
+    grammarLoadFailed: getSecondaryGrammarLoadFailed(currentEntry, secondaryContent),
     progressLabel: getReviewProgressLabel(completedCount, totalCount),
     finishedReview,
     revealed,
@@ -295,7 +306,13 @@ type SecondaryContent = Readonly<{
   itemKey: string;
   note: PracticeDeckEntry['note'];
   grammar: PracticeDeckEntry['grammar'];
+  noteLoadFailed: boolean;
+  grammarLoadFailed: boolean;
 }>;
+
+function hasPositiveReference(value: number | null | undefined): boolean {
+  return typeof value === 'number' && value > 0;
+}
 
 function getReviewItemKey(item: PracticeDeckEntry['item']): string {
   return String(item.item_id);
@@ -321,6 +338,22 @@ function getSecondaryGrammar(
     return secondaryContent.grammar;
   }
   return entry.grammar ?? null;
+}
+
+function getSecondaryNoteLoadFailed(
+  entry: PracticeDeckEntry | null,
+  secondaryContent: SecondaryContent | null,
+): boolean {
+  if (!entry || secondaryContent?.itemKey !== getReviewItemKey(entry.item)) return false;
+  return secondaryContent.noteLoadFailed ?? false;
+}
+
+function getSecondaryGrammarLoadFailed(
+  entry: PracticeDeckEntry | null,
+  secondaryContent: SecondaryContent | null,
+): boolean {
+  if (!entry || secondaryContent?.itemKey !== getReviewItemKey(entry.item)) return false;
+  return secondaryContent.grammarLoadFailed ?? false;
 }
 
 function getReviewPronunciation(

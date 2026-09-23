@@ -16,8 +16,13 @@ function uniquePositiveIds(values: Array<number | null | undefined>): number[] {
   ];
 }
 
-async function loadNotes(noteIds: number[]): Promise<Map<number, NoteType>> {
-  if (noteIds.length === 0) return new Map();
+type DetailLoadResult<T> = Readonly<{
+  data: Map<number, T>;
+  failed: boolean;
+}>;
+
+async function loadNotes(noteIds: number[]): Promise<DetailLoadResult<NoteType>> {
+  if (noteIds.length === 0) return { data: new Map(), failed: false };
 
   try {
     const notes = await db.notes.bulkGet(noteIds);
@@ -25,20 +30,20 @@ async function loadNotes(noteIds: number[]): Promise<Map<number, NoteType>> {
     notes.forEach((note, index) => {
       if (note) noteById.set(noteIds[index], note);
     });
-    return noteById;
+    return { data: noteById, failed: false };
   } catch (error) {
     reportError('Failed to resolve practice notes', error, {
       noteIds: noteIds.join(','),
     });
-    return new Map();
+    return { data: new Map(), failed: true };
   }
 }
 
 async function loadGrammar(
   userId: string,
   grammarChunkIds: number[],
-): Promise<Map<number, GrammarChunkWithExamples>> {
-  if (grammarChunkIds.length === 0) return new Map();
+): Promise<DetailLoadResult<GrammarChunkWithExamples>> {
+  if (grammarChunkIds.length === 0) return { data: new Map(), failed: false };
 
   let chunks;
   try {
@@ -47,9 +52,10 @@ async function loadGrammar(
     reportError('Failed to resolve practice grammar chunks', error, {
       grammarChunkIds: grammarChunkIds.join(','),
     });
-    return new Map();
+    return { data: new Map(), failed: true };
   }
 
+  let failed = false;
   const resolvedChunks = await Promise.all(
     chunks.map(async (chunk, index) => {
       if (!chunk) return null;
@@ -57,6 +63,7 @@ async function loadGrammar(
       try {
         return await GrammarChunk.addExamples(userId, chunk);
       } catch (error) {
+        failed = true;
         const grammarChunkId = grammarChunkIds[index];
         reportError('Failed to resolve practice grammar examples', error, {
           grammarChunkId,
@@ -69,7 +76,7 @@ async function loadGrammar(
   resolvedChunks.forEach((grammar, index) => {
     if (grammar) grammarById.set(grammarChunkIds[index], grammar);
   });
-  return grammarById;
+  return { data: grammarById, failed };
 }
 
 export async function resolvePracticeEntries<T extends UserItemLocal>(
@@ -78,15 +85,15 @@ export async function resolvePracticeEntries<T extends UserItemLocal>(
 ): Promise<Array<ResolvedPracticeEntry<T>>> {
   const noteIds = uniquePositiveIds(items.map((item) => item.note_id));
   const grammarChunkIds = uniquePositiveIds(items.map((item) => item.grammar_chunk_id));
-  const [noteById, grammarById] = await Promise.all([
+  const [notes, grammar] = await Promise.all([
     loadNotes(noteIds),
     loadGrammar(userId, grammarChunkIds),
   ]);
 
   return items.map((item) => ({
     item,
-    note: item.note_id == null ? null : (noteById.get(item.note_id) ?? null),
-    grammar: item.grammar_chunk_id <= 0 ? null : (grammarById.get(item.grammar_chunk_id) ?? null),
+    note: item.note_id == null ? null : (notes.data.get(item.note_id) ?? null),
+    grammar: item.grammar_chunk_id <= 0 ? null : (grammar.data.get(item.grammar_chunk_id) ?? null),
   }));
 }
 
@@ -95,8 +102,8 @@ export async function resolvePracticeGrammar(
   grammarChunkId: number | null | undefined,
 ): Promise<GrammarChunkWithExamples | null> {
   if (typeof grammarChunkId !== 'number' || grammarChunkId <= 0) return null;
-  const grammarById = await loadGrammar(userId, [grammarChunkId]);
-  return grammarById.get(grammarChunkId) ?? null;
+  const grammar = await loadGrammar(userId, [grammarChunkId]);
+  return grammar.data.get(grammarChunkId) ?? null;
 }
 
 export type PracticeGrammarContext = Readonly<{
@@ -150,11 +157,28 @@ export async function loadReviewDeckData(userId: string): Promise<ReviewDeckData
   return { entries, availabilityCheckedAt: now, abandoned: entries.length === 0 };
 }
 
+export type ReviewEntryDetails = Readonly<{
+  note: PracticeDeckEntry['note'];
+  grammar: PracticeDeckEntry['grammar'];
+  noteLoadFailed: boolean;
+  grammarLoadFailed: boolean;
+}>;
+
 /** Loads optional note and grammar content for one already-selected review card. */
 export async function loadReviewEntryDetails(
   userId: string,
   item: UserItemLocal,
-): Promise<Pick<PracticeDeckEntry, 'note' | 'grammar'>> {
-  const [entry] = await resolvePracticeEntries(userId, [item]);
-  return { note: entry?.note ?? null, grammar: entry?.grammar ?? null };
+): Promise<ReviewEntryDetails> {
+  const noteIds = uniquePositiveIds([item.note_id]);
+  const grammarChunkIds = uniquePositiveIds([item.grammar_chunk_id]);
+  const [notes, grammar] = await Promise.all([
+    loadNotes(noteIds),
+    loadGrammar(userId, grammarChunkIds),
+  ]);
+  return {
+    note: item.note_id == null ? null : (notes.data.get(item.note_id) ?? null),
+    grammar: item.grammar_chunk_id <= 0 ? null : (grammar.data.get(item.grammar_chunk_id) ?? null),
+    noteLoadFailed: notes.failed,
+    grammarLoadFailed: grammar.failed,
+  };
 }

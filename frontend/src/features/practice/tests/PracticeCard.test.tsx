@@ -582,6 +582,67 @@ describe('PracticeCard', () => {
     expect(screen.getByText('Round 1/2')).not.toBeNull();
   });
 
+  it('keeps referenced detail controls enabled while details are loading', () => {
+    render(
+      <PracticeSessionCard
+        note={null}
+        grammar={null}
+        noteAvailable
+        grammarAvailable
+        progressLabel="1 / 2"
+        revealed
+        czech="ahoj"
+        english="hello"
+        pronunciation="hello"
+        audioDisabled={false}
+        handleReveal={vi.fn()}
+        plusHint={vi.fn()}
+        nextRepeat={vi.fn()}
+        nextKnown={vi.fn()}
+        audioError={false}
+        playAudio={vi.fn()}
+        audioLoading={false}
+      />,
+    );
+
+    expect((screen.getByRole('button', { name: 'Grammar' }) as HTMLButtonElement).disabled).toBe(
+      false,
+    );
+    expect((screen.getByRole('button', { name: 'note' }) as HTMLButtonElement).disabled).toBe(
+      false,
+    );
+  });
+
+  it('disables only the detail control whose load failed', () => {
+    render(
+      <PracticeSessionCard
+        note={null}
+        grammar={null}
+        noteAvailable
+        grammarAvailable
+        noteLoadFailed
+        progressLabel="1 / 2"
+        revealed
+        czech="ahoj"
+        english="hello"
+        pronunciation="hello"
+        audioDisabled={false}
+        handleReveal={vi.fn()}
+        plusHint={vi.fn()}
+        nextRepeat={vi.fn()}
+        nextKnown={vi.fn()}
+        audioError={false}
+        playAudio={vi.fn()}
+        audioLoading={false}
+      />,
+    );
+
+    expect((screen.getByRole('button', { name: 'note' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: 'Grammar' }) as HTMLButtonElement).disabled).toBe(
+      false,
+    );
+  });
+
   it('keeps the next hint disabled until the skip pointer gesture is released', async () => {
     const plusHint = vi.fn();
 

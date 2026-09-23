@@ -53,6 +53,7 @@ vi.mock('@/config/config', () => ({
 import {
   loadReviewDeck,
   loadReviewDeckData,
+  loadReviewEntryDetails,
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
 } from '@/database/utils/practice-content.utils';
@@ -146,6 +147,29 @@ describe('practice content resolution', () => {
       error,
       { grammarChunkIds: '10' },
     );
+  });
+
+  it('reports note and grammar failures independently for review details', async () => {
+    const noteError = new Error('notes unavailable');
+    mocks.notesBulkGet.mockRejectedValue(noteError);
+
+    await expect(loadReviewEntryDetails('u1', makeItem())).resolves.toMatchObject({
+      note: null,
+      grammar: { id: 10 },
+      noteLoadFailed: true,
+      grammarLoadFailed: false,
+    });
+
+    vi.clearAllMocks();
+    mocks.notesBulkGet.mockResolvedValue([{ id: 1, name: 'Note', note: 'Body' }]);
+    mocks.grammarBulkGet.mockRejectedValue(new Error('grammar unavailable'));
+
+    await expect(loadReviewEntryDetails('u1', makeItem())).resolves.toMatchObject({
+      note: { id: 1 },
+      grammar: null,
+      noteLoadFailed: false,
+      grammarLoadFailed: true,
+    });
   });
 
   it('keeps missing relations null and propagates a core deck failure', async () => {

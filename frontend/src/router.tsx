@@ -31,6 +31,7 @@ import {
   grammarDescriptor,
   overviewAvailabilityDescriptor,
   practiceOverviewDescriptor,
+  reviewPracticeDescriptor,
   pronunciationGroupDetailDescriptor,
   topicDetailDescriptor,
   topicsDescriptor,
@@ -130,7 +131,11 @@ export const router = createHashRouter([
         loader: protectedLoader,
         HydrateFallback: DelayedMessage,
         children: [
-          { path: ROUTES.practice, Component: Practice },
+          {
+            path: ROUTES.practice,
+            loader: () => loadProtectedData('review practice', reviewPracticeDescriptor),
+            Component: Practice,
+          },
           {
             path: ROUTES.initialTraining,
             loader: loadInitialTraining,
