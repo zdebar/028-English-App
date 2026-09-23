@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   savePracticeDeck: vi.fn(),
   applyPracticeProgress: vi.fn(),
   loadReviewEntryDetails: vi.fn(),
+  invalidateReviewDeck: vi.fn(),
   resetHint: vi.fn(),
   fetchData: null as ReviewDeckData | null,
 }));
@@ -47,6 +48,12 @@ vi.mock('@/database/models/user-items', () => ({
 vi.mock('@/database/utils/practice-content.utils', () => ({
   loadReviewDeckData: vi.fn(),
   loadReviewEntryDetails: (...args: unknown[]) => mocks.loadReviewEntryDetails(...args),
+}));
+
+vi.mock('../review-deck-cache', () => ({
+  getCachedReviewDeck: vi.fn(),
+  invalidateReviewDeck: (...args: unknown[]) => mocks.invalidateReviewDeck(...args),
+  loadCachedReviewDeck: vi.fn(),
 }));
 
 vi.mock('@/features/practice/hooks/use-practice-card-state', () => ({
@@ -104,6 +111,7 @@ describe('usePracticeDeck', () => {
     expect(mocks.savePracticeDeck).toHaveBeenCalledWith([
       expect.objectContaining({ item_id: 1, updated_at: 'now' }),
     ]);
+    expect(mocks.invalidateReviewDeck).toHaveBeenCalledWith('u1');
     expect(mocks.reload).not.toHaveBeenCalled();
   });
 
