@@ -300,7 +300,7 @@ async function saveReviewAnswer(
 
   setSaveError(null);
   setCompletedCount((count) => count + 1);
-  await refreshReviewAvailabilityCount({
+  refreshReviewAvailabilityCount({
     userId,
     setSaveError,
     setTotalCount,
