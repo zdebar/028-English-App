@@ -365,7 +365,7 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
 }
 
 export function useInitialTrainingDeck(userId: string | null, initialData?: InitialTrainingData) {
-  const trackPracticeWrite = usePracticeAvailabilityBoundary(userId);
+  const { trackPracticeWrite, finishPractice } = usePracticeAvailabilityBoundary(userId);
   const initialState = getInitialTrainingState(initialData);
   const [block, setBlock] = useState<BlockType | null>(initialState.block);
   const [items, setItems] = useState<UserItemLocal[]>(initialState.items);
@@ -414,6 +414,11 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
   });
   const resetQuestionState = cardState.resetQuestionState;
 
+  useEffect(() => {
+    if (!isComplete) return;
+    void finishPractice();
+  }, [finishPractice, isComplete]);
+
   const finishBlock = useCallback(
     async (
       finalItem: UserItemLocal,
@@ -421,6 +426,7 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
     ) => {
       if (!userId || items.length === 0) return;
       const dateTime = new Date(Date.now()).toISOString();
+      setIsComplete(true);
       await PracticeSession.completeInitialTraining(
         userId,
         items.map((item) => item.item_id),
@@ -428,7 +434,6 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
         finalItem,
         expectedSession,
       );
-      setIsComplete(true);
     },
     [items, userId],
   );

@@ -35,7 +35,7 @@ type SecondaryContentRequest = Readonly<{
 
 /** Loads complete review batches and saves each batch once at its boundary. */
 export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckData) {
-  const trackPracticeWrite = usePracticeAvailabilityBoundary(userId);
+  const { trackPracticeWrite, finishPractice } = usePracticeAvailabilityBoundary(userId);
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [saveError, setSaveError] = useState<Error | null>(null);
@@ -118,6 +118,11 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
   }, [fetchedResult, loading]);
 
   useEffect(() => {
+    if (!finishedReview || !fetchedResult?.abandoned) return;
+    void finishPractice();
+  }, [fetchedResult?.abandoned, finishPractice, finishedReview]);
+
+  useEffect(() => {
     if (!userId || !currentItem) {
       setSecondaryContent(null);
       return undefined;
@@ -193,6 +198,7 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
             setSaveError,
             setCompletedCount,
             setIndex,
+            setFinishedReview,
           }, outcome),
         );
       } finally {
@@ -291,6 +297,7 @@ type AnswerReviewCardOptions = Readonly<{
   setSaveError: Dispatch<SetStateAction<Error | null>>;
   setCompletedCount: Dispatch<SetStateAction<number>>;
   setIndex: Dispatch<SetStateAction<number>>;
+  setFinishedReview: Dispatch<SetStateAction<boolean>>;
 }>;
 
 async function answerReviewCard(
@@ -315,6 +322,7 @@ async function answerReviewCard(
     return;
   }
 
+  options.setFinishedReview(true);
   await saveReviewBatch(options);
 }
 

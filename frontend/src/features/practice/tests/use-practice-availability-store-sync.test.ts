@@ -69,13 +69,13 @@ describe('availability refresh lifecycle', () => {
   it('does not refresh after answers; defers sync until exit and pending saves finish', async () => {
     await ensurePracticeAvailability('u1');
     const { result, unmount } = renderHook(() => usePracticeAvailabilityBoundary('u1'));
-    await result.current(Promise.resolve());
+    await result.current.trackPracticeWrite(Promise.resolve());
     await refreshPracticeAvailability('u1');
     await refreshPracticeAvailability('u1');
     expect(mocks.load).toHaveBeenCalledOnce();
 
     const save = deferred<void>();
-    result.current(save.promise);
+    result.current.trackPracticeWrite(save.promise);
     unmount();
     await Promise.resolve();
     expect(mocks.load).toHaveBeenCalledOnce();
@@ -86,7 +86,7 @@ describe('availability refresh lifecycle', () => {
   it('refreshes on practice exit even when a pending save fails', async () => {
     await ensurePracticeAvailability('u1');
     const { result, unmount } = renderHook(() => usePracticeAvailabilityBoundary('u1'));
-    const failure = result.current(Promise.reject(new Error('write failed')));
+    const failure = result.current.trackPracticeWrite(Promise.reject(new Error('write failed')));
     unmount();
     await expect(failure).rejects.toThrow('write failed');
     await waitFor(() => expect(mocks.load).toHaveBeenCalledTimes(2));
