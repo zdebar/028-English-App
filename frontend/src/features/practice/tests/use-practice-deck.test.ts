@@ -178,6 +178,38 @@ describe('usePracticeDeck', () => {
     await waitFor(() => expect(result.current.finishedReview).toBe(true));
     expect(result.current.currentItem).toBeNull();
   });
+
+  it('shows review completion while the final batch is being saved', async () => {
+    mocks.fetchData = reviewDeckResult([entry(1)]);
+    let resolveSave!: () => void;
+    mocks.savePracticeDeck.mockReturnValue(
+      new Promise<void>((resolve) => {
+        resolveSave = resolve;
+      }),
+    );
+    const { result } = renderHook(() => usePracticeDeck('u1'));
+    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+
+    let answerPromise: Promise<void> | undefined;
+    act(() => {
+      answerPromise = result.current.nextItem('skip');
+    });
+    await waitFor(() => expect(result.current.finishedReview).toBe(true));
+    expect(mocks.savePracticeDeck).toHaveBeenCalledOnce();
+    expect(mocks.reload).not.toHaveBeenCalled();
+
+    mocks.fetchData = {
+      entries: [],
+      availabilityCheckedAt: '2026-06-24T11:00:00.000Z',
+      abandoned: true,
+    };
+    await act(async () => {
+      resolveSave();
+      await answerPromise;
+    });
+
+    expect(mocks.reload).toHaveBeenCalledOnce();
+  });
 });
 
 function reviewDeckResult(entries: PracticeDeckEntry[]): ReviewDeckData {

@@ -209,13 +209,19 @@ describe('useInitialTrainingDeck', () => {
     );
   });
 
-  it('persists New completion before rendering the neutral completion card', async () => {
+  it('renders the neutral completion card while New completion is being persisted', async () => {
     mocks.reconcileActive.mockResolvedValue({
       ...newSession(),
       completed_count: 1,
       current_queue_item_ids: [1],
       completed_item_ids: [2],
     });
+    let resolveCompletion!: (value: number) => void;
+    mocks.completeInitialTraining.mockReturnValue(
+      new Promise((resolve) => {
+        resolveCompletion = resolve;
+      }),
+    );
     const { result, unmount } = renderHook(() => useInitialTrainingDeck('u1', initialData));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
 
@@ -224,8 +230,18 @@ describe('useInitialTrainingDeck', () => {
       completionPromise = result.current.nextKnown();
     });
     await waitFor(() => expect(result.current.isComplete).toBe(true));
+    expect(mocks.completeInitialTraining).toHaveBeenCalledWith(
+      'u1',
+      [1, 2],
+      expect.any(String),
+      expect.anything(),
+      expect.objectContaining({ mode: 'new', phase: 0 }),
+    );
 
-    await completionPromise;
+    await act(async () => {
+      resolveCompletion(1);
+      await completionPromise;
+    });
 
     expect(mocks.completeInitialTraining).toHaveBeenCalledWith(
       'u1',
