@@ -21,6 +21,10 @@ type ReviewCountResult = Readonly<{
   countedThrough: string;
 }>;
 
+vi.mock('../practice-availability-controller', () => ({
+  beginPracticeAvailabilityBoundary: () => async () => {},
+}));
+
 vi.mock('@/config/config', () => ({
   default: { practice: { reviewMinimumSize: 10 } },
 }));

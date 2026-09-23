@@ -28,6 +28,23 @@ export default class Topic extends SyncEntityModel implements TopicType {
     return (await db.topics.get(topicId)) ?? null;
   }
 
+  /** Matches the overview's metadata join, stopping at the first available topic. */
+  static async hasInitiatedByUserId(userId: string): Promise<boolean> {
+    const topicIds = new Set(await db.topics.toCollection().primaryKeys());
+    if (topicIds.size === 0) return false;
+    const item = await db.user_items
+      .where('[user_id+started_at]')
+      .between([userId, Dexie.minKey], [userId, NULL_DATE], true, true)
+      .filter((candidate) =>
+        candidate.deleted_at === NULL_DATE &&
+        candidate.topic_id !== NULL_NUMBER &&
+        topicIds.has(candidate.topic_id) &&
+        isInitiated(candidate),
+      )
+      .first();
+    return item !== undefined;
+  }
+
   static async getInitiatedByUserId(userId: string): Promise<TopicType[]> {
     assertNonEmptyString(userId, 'userId');
 

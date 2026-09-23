@@ -1,3 +1,4 @@
+import { refreshPracticeAvailability } from '@/features/practice/practice-availability-controller';
 import UserItem from '@/database/models/user-items';
 import { db } from '@/database/models/db';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
@@ -20,5 +21,6 @@ export async function simulateUserProgress(
     return UserItem.simulateData(items, dateTime);
   });
 
+  void refreshPracticeAvailability(userId);
   return itemCount;
 }

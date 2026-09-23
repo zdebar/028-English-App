@@ -29,7 +29,6 @@ import type { RouteDataDescriptor } from '@/routing/route-data';
 import {
   initialTrainingDescriptor,
   grammarDescriptor,
-  levelsDescriptor,
   overviewAvailabilityDescriptor,
   practiceOverviewDescriptor,
   pronunciationGroupDetailDescriptor,
@@ -149,7 +148,6 @@ export const router = createHashRouter([
           { path: ROUTES.profile, Component: Profile },
           {
             path: ROUTES.levels,
-            loader: () => loadProtectedData('levels', levelsDescriptor),
             Component: Levels,
           },
           {

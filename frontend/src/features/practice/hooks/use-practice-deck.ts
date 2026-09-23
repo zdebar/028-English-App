@@ -1,3 +1,4 @@
+import { usePracticeAvailabilityBoundary } from './use-practice-availability-boundary';
 import {
   useCallback,
   useEffect,
@@ -23,6 +24,7 @@ import {
 
 /** Loads and saves one review card at a time without persisting a review session. */
 export function usePracticeDeck(userId: string | null) {
+  const trackPracticeWrite = usePracticeAvailabilityBoundary(userId);
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [saveError, setSaveError] = useState<Error | null>(null);
@@ -154,7 +156,7 @@ export function usePracticeDeck(userId: string | null) {
       isTransitioningRef.current = true;
 
       try {
-        await saveReviewAnswer(
+        await trackPracticeWrite(saveReviewAnswer(
           {
             currentItem,
             userId,
@@ -168,12 +170,12 @@ export function usePracticeDeck(userId: string | null) {
             counterResolvedRef,
           },
           outcome,
-        );
+        ));
       } finally {
         isTransitioningRef.current = false;
       }
     },
-    [currentItem, reload, resetQuestionState, userId],
+    [currentItem, reload, resetQuestionState, userId, trackPracticeWrite],
   );
 
   return {

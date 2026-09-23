@@ -1,3 +1,4 @@
+import { refreshPracticeAvailability } from '@/features/practice/practice-availability-controller';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
@@ -52,6 +53,7 @@ export default function VocabularyOverview({
 
     try {
       const resetItemId = await UserItem.resetItemById(userId, itemId);
+      void refreshPracticeAvailability(userId);
       reportInfo(`Vocabulary item reset completed: item ${resetItemId}.`);
       showToast(TEXTS.resetProgressSuccessToast, 'success');
       setSelectedWord(null);

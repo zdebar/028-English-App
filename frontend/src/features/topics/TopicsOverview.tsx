@@ -1,3 +1,4 @@
+import { sharedQueryKey } from '@/hooks/shared-query-store';
 import Topic from '@/database/models/topics';
 import { TEXTS } from '@/locales/cs';
 import type { TopicType } from '@/types/generic.types';
@@ -32,6 +33,7 @@ export default function TopicsOverview({
   } = useLiveQueryData<TopicType[]>(fetchTopics, {
     emptyData: [],
     initialData: initialTopics,
+    sharedKey: sharedQueryKey(userId, 'topics'),
   });
   const hasTopics = topics.length > 0;
 

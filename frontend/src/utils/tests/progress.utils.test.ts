@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import type { UserItemLocal } from '@/types/user-item.types';
-import { getEffectiveProgress, isInitiated } from '@/utils/progress.utils';
+import { getEffectiveProgress, getSrsLength, isInitiated } from '@/utils/progress.utils';
 
 const NULL_DATE = '9999-12-31T23:59:59+00:00';
+const CZ_TO_EN_MAX_PROGRESS = getSrsLength('czToEn');
 
 function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
   return {
@@ -22,7 +23,7 @@ describe('progress utilities', () => {
       mastered_at_cz_to_en: '2026-08-31T10:00:00.000Z',
     });
 
-    expect(getEffectiveProgress(item, 'czToEn')).toBe(10);
+    expect(getEffectiveProgress(item, 'czToEn')).toBe(CZ_TO_EN_MAX_PROGRESS);
     expect(getEffectiveProgress(item, 'enToCz')).toBe(0);
   });
 
@@ -32,7 +33,7 @@ describe('progress utilities', () => {
       mastered_at_cz_to_en: '2026-08-31T10:00:00.000Z',
     });
 
-    expect(getEffectiveProgress(skipped, 'czToEn')).toBe(10);
+    expect(getEffectiveProgress(skipped, 'czToEn')).toBe(CZ_TO_EN_MAX_PROGRESS);
   });
 
   it.each([

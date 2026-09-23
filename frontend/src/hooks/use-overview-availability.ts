@@ -3,7 +3,7 @@ import Topic from '@/database/models/topics';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
-import { liveQuery } from 'dexie';
+import { getSharedQuery, sharedQueryKey } from './shared-query-store';
 import { useEffect, useState } from 'react';
 import type { OverviewAvailabilityData } from '@/routing/route-data';
 
@@ -45,10 +45,6 @@ const LOADING_DATABASE_STATE: OverviewAvailabilityState = {
   vocabulary: LOADING_AVAILABILITY,
 };
 
-function toError(error: unknown): Error {
-  return error instanceof Error ? error : new Error(String(error));
-}
-
 /** Observes whether each overview currently has at least one displayable item. */
 export function useOverviewAvailability(
   userId: string | null,
@@ -76,35 +72,34 @@ export function useOverviewAvailability(
 
     const queries: ReadonlyArray<readonly [DatabaseOverviewKey, () => Promise<boolean>]> = [
       ['grammar', () => UserItem.hasInitiatedGrammar(userId)],
-      ['topics', async () => (await Topic.getInitiatedByUserId(userId)).length > 0],
-      ['vocabulary', async () => (await UserItem.getInitiatedVocabulary(userId)).length > 0],
+      ['topics', () => Topic.hasInitiatedByUserId(userId)],
+      ['vocabulary', () => UserItem.hasInitiatedVocabulary(userId)],
     ];
 
-    const subscriptions = queries.map(([key, query]) =>
-      liveQuery(query).subscribe({
-        next: (hasData) => {
-          if (!isActive) return;
-          setDatabaseState((current) => ({
-            ...current,
-            [key]: { hasData, loading: false, error: null },
-          }));
-        },
-        error: (error) => {
-          if (!isActive) return;
-          const normalizedError = toError(error);
-          setDatabaseState((current) => ({
-            ...current,
-            [key]: { hasData: false, loading: false, error: normalizedError },
-          }));
-          reportError(`Failed to observe ${key} overview availability`, normalizedError);
+    const subscriptions = queries.map(([key, query]) => {
+      const sharedKey = sharedQueryKey(userId, `has-${key}`)!;
+      const { store } = getSharedQuery(sharedKey, query);
+      const update = () => {
+        if (!isActive) return;
+        const { data, loading, error } = store.getState();
+        if (loading) return;
+        setDatabaseState((current) => ({
+          ...current,
+          [key]: { hasData: data ?? false, loading: false, error },
+        }));
+        if (error) {
+          reportError(`Failed to observe ${key} overview availability`, error);
           showToast(TEXTS.loadingError, 'error');
-        },
-      }),
-    );
+        }
+      };
+      const unsubscribe = store.subscribe(update);
+      update();
+      return unsubscribe;
+    });
 
     return () => {
       isActive = false;
-      subscriptions.forEach((subscription) => subscription.unsubscribe());
+      subscriptions.forEach((unsubscribe) => unsubscribe());
     };
   }, [initialData, showToast, userId]);
 

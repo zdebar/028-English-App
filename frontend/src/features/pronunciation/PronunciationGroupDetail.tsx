@@ -1,3 +1,4 @@
+import { sharedQueryKey } from '@/hooks/shared-query-store';
 import { DataState } from '@/components/UI/DataState';
 import OverviewCard from '@/components/UI/OverviewCard';
 import BilingualItemButton from '@/components/UI/buttons/BilingualItemButton';
@@ -111,6 +112,7 @@ export default function PronunciationGroupDetail({
   const { data, loading, error } = useLiveQueryData(fetchDetail, {
     emptyData: null,
     initialData,
+    sharedKey: sharedQueryKey(userId, `pronunciation:${validGroupId}`),
   });
   const audios = useMemo(
     () =>

@@ -1,5 +1,5 @@
+import { loadSharedQuery } from '@/hooks/shared-query-store';
 import GrammarGroup from '@/database/models/grammar-groups';
-import Levels from '@/database/models/levels';
 import PronunciationGroup from '@/database/models/pronunciation-groups';
 import Block from '@/database/models/blocks';
 import PracticeSession from '@/database/models/practice-sessions';
@@ -25,10 +25,6 @@ export type InitialTrainingData = Readonly<{
   grammar: GrammarChunkWithExamples | null;
   grammarGroup: GrammarGroupType | null;
 }>;
-
-function getLocalDate(): string {
-  return new Date(Date.now()).toLocaleDateString('en-CA');
-}
 
 function emptyInitialTrainingData(): InitialTrainingData {
   return { block: null, items: [], entries: [], grammar: null, grammarGroup: null };
@@ -80,14 +76,14 @@ export function overviewAvailabilityDescriptor(userId: string) {
   return {
     load: async () => {
       const [grammar, topics, vocabulary] = await Promise.all([
-        UserItem.hasInitiatedGrammar(userId),
-        Topic.getInitiatedByUserId(userId),
-        UserItem.getInitiatedVocabulary(userId),
+        loadSharedQuery(userId, 'has-grammar', () => UserItem.hasInitiatedGrammar(userId)),
+        loadSharedQuery(userId, 'has-topics', () => Topic.hasInitiatedByUserId(userId)),
+        loadSharedQuery(userId, 'has-vocabulary', () => UserItem.hasInitiatedVocabulary(userId)),
       ]);
       return {
         grammar,
-        topics: topics.length > 0,
-        vocabulary: vocabulary.length > 0,
+        topics,
+        vocabulary,
       };
     },
   } satisfies RouteDataDescriptor<unknown>;
@@ -95,25 +91,19 @@ export function overviewAvailabilityDescriptor(userId: string) {
 
 export function practiceOverviewDescriptor(userId: string) {
   return {
-    load: () => UserItem.getByUserId(userId),
-  };
-}
-
-export function levelsDescriptor(userId: string) {
-  return {
-    load: () => Levels.getOverview(userId, getLocalDate()),
+    load: () => loadSharedQuery(userId, 'practice-overview', () => UserItem.getByUserId(userId)),
   };
 }
 
 export function grammarDescriptor(userId: string) {
   return {
-    load: () => GrammarGroup.getInitiated(userId),
+    load: () => loadSharedQuery(userId, 'grammar', () => GrammarGroup.getInitiated(userId)),
   };
 }
 
 export function topicsDescriptor(userId: string) {
   return {
-    load: () => Topic.getInitiatedByUserId(userId),
+    load: () => loadSharedQuery(userId, 'topics', () => Topic.getInitiatedByUserId(userId)),
   };
 }
 
@@ -121,8 +111,8 @@ export function topicDetailDescriptor(userId: string, topicId: number) {
   return {
     load: async () => {
       const [topic, items] = await Promise.all([
-        Topic.getById(topicId),
-        UserItem.getInitiatedByTopicId(userId, topicId),
+        loadSharedQuery(userId, `topic:${topicId}`, () => Topic.getById(topicId)),
+        loadSharedQuery(userId, `topic-items:${topicId}`, () => UserItem.getInitiatedByTopicId(userId, topicId)),
       ]);
       return { topic, items };
     },
@@ -131,13 +121,13 @@ export function topicDetailDescriptor(userId: string, topicId: number) {
 
 export function vocabularyDescriptor(userId: string) {
   return {
-    load: () => UserItem.getInitiatedVocabulary(userId),
+    load: () => loadSharedQuery(userId, 'vocabulary', () => UserItem.getInitiatedVocabulary(userId)),
   };
 }
 
 export function pronunciationGroupDetailDescriptor(userId: string, groupId: number) {
   return {
-    load: () => PronunciationGroup.getDetail(userId, groupId),
+    load: () => loadSharedQuery(userId, `pronunciation:${groupId}`, () => PronunciationGroup.getDetail(userId, groupId)),
   };
 }
 

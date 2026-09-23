@@ -1,3 +1,4 @@
+import { sharedQueryKey } from '@/hooks/shared-query-store';
 import config from '@/config/config';
 import UserItem from '@/database/models/user-items';
 import type { UserItemLocal } from '@/types/user-item.types';
@@ -24,6 +25,7 @@ export function useVocabulary(userId: string | null, initialWords?: UserItemLoca
   const { data: words, loading, error } = useLiveQueryData(fetchVocabulary, {
     emptyData: [],
     initialData: initialWords,
+    sharedKey: sharedQueryKey(userId, 'vocabulary'),
   });
 
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);

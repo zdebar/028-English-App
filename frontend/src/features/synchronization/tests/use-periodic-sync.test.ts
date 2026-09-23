@@ -4,12 +4,17 @@ import { useSyncStore } from '@/features/synchronization/use-sync-store';
 
 const mocks = vi.hoisted(() => ({
   dataSync: vi.fn(),
+  refreshAvailability: vi.fn().mockResolvedValue(undefined),
   dataSyncOnUnmount: vi.fn(),
   syncFromRemote: vi.fn(),
   removeOrphaned: vi.fn(),
   showToast: vi.fn(),
   reportError: vi.fn(),
   reportInfo: vi.fn(),
+}));
+
+vi.mock('@/features/practice/practice-availability-controller', () => ({
+  refreshPracticeAvailability: (...args: unknown[]) => mocks.refreshAvailability(...args),
 }));
 
 vi.mock('@/config/config', () => ({
@@ -86,6 +91,7 @@ describe('usePeriodicSync', () => {
     });
 
     expect(mocks.dataSync).toHaveBeenCalledWith('u1');
+    expect(mocks.refreshAvailability).toHaveBeenCalledWith('u1');
     expect(mocks.syncFromRemote).toHaveBeenCalled();
     expect(mocks.showToast).toHaveBeenCalledWith('Sync success', 'success');
     expect(mocks.removeOrphaned).toHaveBeenCalled();
@@ -105,6 +111,7 @@ describe('usePeriodicSync', () => {
       await vi.advanceTimersByTimeAsync(3000);
     });
 
+    expect(mocks.refreshAvailability).toHaveBeenCalledWith('u1');
     expect(mocks.showToast).toHaveBeenCalledWith('Sync error', 'error');
     expect(mocks.reportError).toHaveBeenCalledWith(
       'Data synchronization failed',

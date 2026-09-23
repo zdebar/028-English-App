@@ -1,9 +1,11 @@
 import { liveQuery } from 'dexie';
 import { useEffect, useRef, useState } from 'react';
+import { getSharedQuery } from './shared-query-store';
 
 type UseLiveQueryDataOptions<T> = Readonly<{
   emptyData: T;
   initialData?: T;
+  sharedKey?: string;
 }>;
 
 type UseLiveQueryDataResult<T> = Readonly<{
@@ -40,26 +42,43 @@ export function useLiveQueryData<T>(
     setError(null);
     if (!hasDataRef.current) setLoading(true);
 
-    const subscription = liveQuery(query).subscribe({
-      next: (nextData) => {
+    const observer = {
+      next: (nextData: T) => {
         if (!isActive) return;
         hasDataRef.current = true;
         setData(nextData);
         setError(null);
         setLoading(false);
       },
-      error: (queryError) => {
+      error: (queryError: unknown) => {
         if (!isActive) return;
         setError(toError(queryError));
         setLoading(false);
       },
-    });
+    };
+
+    if (options.sharedKey) {
+      const { store } = getSharedQuery(options.sharedKey, query);
+      const update = () => {
+        const state = store.getState();
+        if (state.error) observer.error(state.error);
+        else if (!state.loading) observer.next(state.data as T);
+      };
+      const unsubscribe = store.subscribe(update);
+      update();
+      return () => {
+        isActive = false;
+        unsubscribe();
+      };
+    }
+
+    const subscription = liveQuery(query).subscribe(observer);
 
     return () => {
       isActive = false;
       subscription.unsubscribe();
     };
-  }, [query]);
+  }, [query, options.sharedKey]);
 
   return { data, loading, error };
 }

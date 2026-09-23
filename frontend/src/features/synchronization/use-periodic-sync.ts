@@ -1,3 +1,4 @@
+import { refreshPracticeAvailability } from '@/features/practice/practice-availability-controller';
 import { useEffect, useRef } from 'react';
 import config from '@/config/config';
 import AudioRecord from '@/database/models/audio-records';
@@ -39,7 +40,12 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
     const performSync = async () => {
       setSynchronizing(true);
       try {
-        await dataSync(activeUserId);
+        try {
+          await dataSync(activeUserId);
+        } finally {
+          // A partially failed sync may still have committed updated item data.
+          void refreshPracticeAvailability(activeUserId);
+        }
         const audioSummary = await AudioRecord.syncFromRemote();
         if (audioSummary.failed > 0) {
           reportError('Audio archive sync errors', audioSummary.sampleErrors);

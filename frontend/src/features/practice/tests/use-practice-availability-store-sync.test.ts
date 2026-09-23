@@ -1,212 +1,140 @@
-import { act, renderHook } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-type Observer = {
-  next: (value: any) => void;
-  error: (error: unknown) => void;
-};
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  observers: [] as Observer[],
-  queries: [] as Array<() => Promise<unknown>>,
-  unsubscribes: [] as ReturnType<typeof vi.fn>[],
-  getReadyReviewState: vi.fn(),
-  getNextInitialTrainingSelection: vi.fn().mockResolvedValue(null),
-  inspectActiveSession: vi
-    .fn()
-    .mockResolvedValue({ activeSession: null, requiresReconciliation: false }),
-  reconcileActiveSession: vi.fn().mockResolvedValue(null),
+  load: vi.fn(),
+  reconcile: vi.fn().mockResolvedValue(null),
   reportError: vi.fn(),
+  showToast: vi.fn(),
 }));
-
-vi.mock('@/config/config', () => ({
-  default: { practice: { maxReviewReadyTimerDelayMs: 60_000 } },
-}));
-vi.mock('@/database/models/db', () => ({
-  db: {
-    user_items: {},
-    practice_sessions: {},
-    transaction: async (...args: unknown[]) => {
-      const callback = args.at(-1) as () => Promise<unknown>;
-      return callback();
-    },
-  },
-}));
-vi.mock('@/database/models/user-items', () => ({
-  default: {
-    getReadyReviewState: (...args: unknown[]) => mocks.getReadyReviewState(...args),
-    getNextInitialTrainingSelection: (...args: unknown[]) =>
-      mocks.getNextInitialTrainingSelection(...args),
-  },
+vi.mock('../practice-availability', () => ({
+  loadPracticeAvailabilitySnapshot: (...args: unknown[]) => mocks.load(...args),
 }));
 vi.mock('@/database/models/practice-sessions', () => ({
-  default: {
-    inspectActive: (...args: unknown[]) => mocks.inspectActiveSession(...args),
-    reconcileActive: (...args: unknown[]) => mocks.reconcileActiveSession(...args),
-  },
+  default: { reconcileActive: (...args: unknown[]) => mocks.reconcile(...args) },
 }));
 vi.mock('@/features/logging/monitoring-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
-vi.mock('dexie', () => ({
-  liveQuery: (query: () => Promise<unknown>) => ({
-    subscribe: (observer: Observer) => {
-      const unsubscribe = vi.fn();
-      mocks.queries.push(query);
-      mocks.observers.push(observer);
-      mocks.unsubscribes.push(unsubscribe);
-      return { unsubscribe };
-    },
-  }),
+vi.mock('@/features/toast/use-toast-store', () => ({
+  useToastStore: { getState: () => ({ showToast: mocks.showToast }) },
 }));
 
-import { usePracticeAvailabilityStore } from '../use-practice-availability-store';
 import { usePracticeAvailabilityStoreSync } from '../use-practice-availability-store-sync';
+import { usePracticeAvailabilityStore } from '../use-practice-availability-store';
+import { usePracticeAvailabilityBoundary } from '../hooks/use-practice-availability-boundary';
+import {
+  ensurePracticeAvailability,
+  refreshPracticeAvailability,
+  resetPracticeAvailability,
+} from '../practice-availability-controller';
 
-describe('usePracticeAvailabilityStoreSync', () => {
+const snapshot: import('../practice-availability').PracticeAvailabilitySnapshot = {
+  reviewReadyAt: '2026-07-21T10:00:00.000Z',
+  initialTrainingAvailable: true,
+  activeSession: null,
+  requiresSessionReconciliation: false,
+};
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((done) => { resolve = done; });
+  return { promise, resolve };
+}
+
+describe('availability refresh lifecycle', () => {
   beforeEach(() => {
+    resetPracticeAvailability();
     vi.clearAllMocks();
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-07-21T10:00:00.000Z'));
-    mocks.observers.length = 0;
-    mocks.queries.length = 0;
-    mocks.unsubscribes.length = 0;
-    mocks.getReadyReviewState.mockResolvedValue({ reviewReadyAt: null });
-    usePracticeAvailabilityStore.getState().reset();
+    mocks.load.mockResolvedValue(snapshot);
   });
 
-  afterEach(() => vi.useRealTimers());
-
-  it('subscribes to availability and stores emitted snapshots', async () => {
+  it('loads once and reuses the date across mounts and navigation', async () => {
+    const first = renderHook(() => usePracticeAvailabilityStoreSync('u1'));
+    await waitFor(() => expect(usePracticeAvailabilityStore.getState().practiceLoading).toBe(false));
+    first.unmount();
     renderHook(() => usePracticeAvailabilityStoreSync('u1'));
-
-    expect(mocks.queries).toHaveLength(1);
-    await mocks.queries[0]();
-    expect(mocks.getReadyReviewState).toHaveBeenCalledWith('u1');
-    expect(mocks.inspectActiveSession).toHaveBeenCalledWith('u1');
-    expect(mocks.reconcileActiveSession).not.toHaveBeenCalled();
-
-    act(() => {
-      mocks.observers[0].next({
-        reviewReadyAt: '2026-07-21T10:00:00.000Z',
-        initialTrainingAvailable: false,
-        activeSession: null,
-        requiresSessionReconciliation: false,
-      });
-    });
-    expect(usePracticeAvailabilityStore.getState()).toMatchObject({
-      reviewReadyAt: '2026-07-21T10:00:00.000Z',
-      practiceLoading: false,
-    });
+    await ensurePracticeAvailability('u1');
+    expect(mocks.load).toHaveBeenCalledOnce();
+    expect(usePracticeAvailabilityStore.getState().reviewReadyAt).toBe(snapshot.reviewReadyAt);
   });
 
-  it('reconciles an invalid stored session outside the live query', async () => {
-    renderHook(() => usePracticeAvailabilityStoreSync('u1'));
-
-    act(() => {
-      mocks.observers[0].next({
-        reviewReadyAt: null,
-        initialTrainingAvailable: true,
-        activeSession: null,
-        requiresSessionReconciliation: true,
-      });
-    });
-
-    await vi.waitFor(() => {
-      expect(mocks.reconcileActiveSession).toHaveBeenCalledWith('u1');
-    });
+  it('refreshes after explicit synchronization and reset notifications', async () => {
+    await ensurePracticeAvailability('u1');
+    await refreshPracticeAvailability('u1');
+    await refreshPracticeAvailability('u1');
+    expect(mocks.load).toHaveBeenCalledTimes(3);
   });
 
-  it('refreshes availability when the complete deck becomes ready', async () => {
-    mocks.getReadyReviewState.mockResolvedValue({ reviewReadyAt: '2026-07-21T10:00:02.000Z' });
-    renderHook(() => usePracticeAvailabilityStoreSync('u1'));
-    act(() => {
-      mocks.observers[0].next({
-        reviewReadyAt: '2026-07-21T10:00:02.000Z',
-        initialTrainingAvailable: false,
-        activeSession: null,
-      });
-    });
+  it('does not refresh after answers; defers sync until exit and pending saves finish', async () => {
+    await ensurePracticeAvailability('u1');
+    const { result, unmount } = renderHook(() => usePracticeAvailabilityBoundary('u1'));
+    await result.current(Promise.resolve());
+    await refreshPracticeAvailability('u1');
+    await refreshPracticeAvailability('u1');
+    expect(mocks.load).toHaveBeenCalledOnce();
 
-    await act(async () => vi.advanceTimersByTimeAsync(2000));
-    expect(mocks.getReadyReviewState).toHaveBeenCalledWith('u1');
-    expect(usePracticeAvailabilityStore.getState().reviewReadyAt).toBe(
-      '2026-07-21T10:00:02.000Z',
-    );
+    const save = deferred<void>();
+    result.current(save.promise);
+    unmount();
+    await Promise.resolve();
+    expect(mocks.load).toHaveBeenCalledOnce();
+    save.resolve();
+    await waitFor(() => expect(mocks.load).toHaveBeenCalledTimes(2));
   });
 
-  it('clears stale snapshots and subscriptions when the user changes', () => {
+  it('refreshes on practice exit even when a pending save fails', async () => {
+    await ensurePracticeAvailability('u1');
+    const { result, unmount } = renderHook(() => usePracticeAvailabilityBoundary('u1'));
+    const failure = result.current(Promise.reject(new Error('write failed')));
+    unmount();
+    await expect(failure).rejects.toThrow('write failed');
+    await waitFor(() => expect(mocks.load).toHaveBeenCalledTimes(2));
+  });
+
+  it('ignores old account results and late refresh requests after sign-out', async () => {
+    const oldLoad = deferred<typeof snapshot>();
+    mocks.load.mockReturnValueOnce(oldLoad.promise);
+    const oldRequest = ensurePracticeAvailability('u1');
+    await ensurePracticeAvailability('u2');
+    oldLoad.resolve({ ...snapshot, reviewReadyAt: null });
+    await oldRequest;
+    expect(usePracticeAvailabilityStore.getState().availabilityUserId).toBe('u2');
+    expect(usePracticeAvailabilityStore.getState().reviewReadyAt).toBe(snapshot.reviewReadyAt);
+    resetPracticeAvailability();
+    await refreshPracticeAvailability('u1');
+    expect(usePracticeAvailabilityStore.getState().availabilityUserId).toBeNull();
+    expect(mocks.load).toHaveBeenCalledTimes(2);
+  });
+
+  it('coalesces concurrent changes and retains the newest snapshot', async () => {
+    await ensurePracticeAvailability('u1');
+    const syncLoad = deferred<typeof snapshot>();
+    mocks.load.mockReturnValueOnce(syncLoad.promise);
+    const sync = refreshPracticeAvailability('u1');
+    const reset = refreshPracticeAvailability('u1');
+    syncLoad.resolve({ ...snapshot, reviewReadyAt: null });
+    await Promise.all([sync, reset]);
+    expect(mocks.load).toHaveBeenCalledTimes(3);
+    expect(usePracticeAvailabilityStore.getState().reviewReadyAt).toBe(snapshot.reviewReadyAt);
+  });
+
+  it('reconciles invalid sessions and then reads a consistent snapshot', async () => {
+    mocks.load.mockResolvedValueOnce({ ...snapshot, requiresSessionReconciliation: true });
+    await ensurePracticeAvailability('u1');
+    expect(mocks.reconcile).toHaveBeenCalledWith('u1');
+    expect(mocks.load).toHaveBeenCalledTimes(2);
+  });
+
+  it('clears account data on sign-out and reports loading failures', async () => {
+    mocks.load.mockRejectedValueOnce(new Error('failed'));
     const { rerender } = renderHook(({ userId }) => usePracticeAvailabilityStoreSync(userId), {
       initialProps: { userId: 'u1' as string | null },
     });
-    act(() => {
-      mocks.observers[0].next({ reviewReadyAt: '2026-07-21T10:00:00.000Z', initialTrainingAvailable: false, activeSession: null });
-    });
-
-    rerender({ userId: 'u2' });
-    expect(mocks.unsubscribes[0]).toHaveBeenCalledOnce();
-    expect(usePracticeAvailabilityStore.getState()).toMatchObject({
-      reviewReadyAt: null,
-      availabilityUserId: 'u2',
-      practiceLoading: true,
-    });
-
-    act(() => mocks.observers[0].next({ reviewReadyAt: '2026-07-21T10:00:00.000Z', initialTrainingAvailable: false, activeSession: null }));
-    expect(usePracticeAvailabilityStore.getState().reviewReadyAt).toBeNull();
-  });
-
-  it('unsubscribes on Home unmount without clearing the prepared snapshot', () => {
-    const { unmount } = renderHook(() => usePracticeAvailabilityStoreSync('u1'));
-    act(() => {
-      mocks.observers[0].next({
-        reviewReadyAt: '2026-07-21T10:00:00.000Z',
-        initialTrainingAvailable: true,
-        activeSession: null,
-      });
-    });
-
-    unmount();
-    expect(mocks.unsubscribes[0]).toHaveBeenCalledOnce();
-    expect(usePracticeAvailabilityStore.getState()).toMatchObject({
-      reviewReadyAt: '2026-07-21T10:00:00.000Z',
-      availabilityUserId: 'u1',
-      initialTrainingAvailable: true,
-      practiceLoading: false,
-    });
-  });
-
-  it('clears snapshots on sign-out and ignores emissions after unmount', () => {
-    const { rerender, unmount } = renderHook(
-      ({ userId }) => usePracticeAvailabilityStoreSync(userId),
-      { initialProps: { userId: 'u1' as string | null } },
-    );
-    act(() => {
-      mocks.observers[0].next({ reviewReadyAt: '2026-07-21T10:00:00.000Z', initialTrainingAvailable: false, activeSession: null });
-    });
-
-    rerender({ userId: null });
-    expect(usePracticeAvailabilityStore.getState()).toMatchObject({
-      reviewReadyAt: null,
-      practiceLoading: true,
-    });
-
-    unmount();
-    act(() => mocks.observers[0].next({ reviewReadyAt: '2026-07-21T10:00:00.000Z', initialTrainingAvailable: false, activeSession: null }));
-    expect(usePracticeAvailabilityStore.getState().reviewReadyAt).toBeNull();
-  });
-
-  it('stores and reports observer failures', () => {
-    renderHook(() => usePracticeAvailabilityStoreSync('u1'));
-    const readyError = new Error('ready failed');
-
-    act(() => {
-      mocks.observers[0].error(readyError);
-    });
-
-    expect(usePracticeAvailabilityStore.getState()).toMatchObject({
-      practiceLoading: false,
-      practiceError: readyError,
-    });
-    expect(mocks.reportError).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(usePracticeAvailabilityStore.getState().practiceError?.message).toBe('failed'));
+    expect(mocks.reportError).toHaveBeenCalledOnce();
+    expect(mocks.showToast).toHaveBeenCalledOnce();
+    act(() => rerender({ userId: null }));
+    expect(usePracticeAvailabilityStore.getState().availabilityUserId).toBeNull();
   });
 });

@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   topicGet: vi.fn(),
   topicsToArray: vi.fn(),
+  topicKeys: vi.fn(),
   startedItems: [] as Array<{
     topic_id: number;
     started_at: string;
@@ -24,6 +25,7 @@ vi.mock('@/config/config', () => ({
 vi.mock('@/database/models/db', () => ({
   db: {
     topics: {
+      toCollection: () => ({ primaryKeys: () => mocks.topicKeys() }),
       get: (...args: unknown[]) => mocks.topicGet(...args),
       toArray: (...args: unknown[]) => mocks.topicsToArray(...args),
     },
@@ -32,6 +34,7 @@ vi.mock('@/database/models/db', () => ({
         between: vi.fn(() => ({
           filter: (predicate: (item: (typeof mocks.startedItems)[number]) => boolean) => ({
             toArray: async () => mocks.startedItems.filter(predicate),
+            first: async () => mocks.startedItems.find(predicate),
           }),
         })),
       })),
@@ -45,8 +48,28 @@ describe('Topic', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.startedItems = [];
+    mocks.topicKeys.mockResolvedValue([]);
     mocks.topicGet.mockResolvedValue(undefined);
     mocks.topicsToArray.mockResolvedValue([]);
+  });
+
+
+  it('checks existence while excluding missing topics, deleted and uninitiated items', async () => {
+    const nullDate = '9999-12-31T23:59:59+00:00';
+    const item = {
+      topic_id: 2, started_at: nullDate, deleted_at: nullDate,
+      mastered_at_cz_to_en: nullDate, mastered_at_en_to_cz: nullDate,
+    };
+    mocks.topicKeys.mockResolvedValue([2]);
+    mocks.startedItems = [item];
+    await expect(Topic.hasInitiatedByUserId('u1')).resolves.toBe(false);
+    mocks.startedItems = [{ ...item, started_at: '2026-08-01T00:00:00Z', topic_id: 3 }];
+    await expect(Topic.hasInitiatedByUserId('u1')).resolves.toBe(false);
+    mocks.startedItems = [{ ...item, started_at: '2026-08-01T00:00:00Z', deleted_at: '2026-08-02T00:00:00Z' }];
+    await expect(Topic.hasInitiatedByUserId('u1')).resolves.toBe(false);
+    mocks.startedItems = [{ ...item, mastered_at_cz_to_en: '2026-08-01T00:00:00Z', mastered_at_en_to_cz: '2026-08-01T00:00:00Z' }];
+    await expect(Topic.hasInitiatedByUserId('u1')).resolves.toBe(true);
+    expect(mocks.topicsToArray).not.toHaveBeenCalled();
   });
 
   it('gets topic metadata by id', async () => {
