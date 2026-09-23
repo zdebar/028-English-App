@@ -91,6 +91,38 @@ describe('usePracticeDeck', () => {
     expect(result.current.progressLabel).toBe('1 / 2');
   });
 
+  it('reuses the background detail request when detail is requested early', async () => {
+    mocks.fetchData = reviewDeckResult([entry(1, 10)]);
+    let resolveDetails!: (details: unknown) => void;
+    mocks.loadReviewEntryDetails.mockReturnValue(
+      new Promise((resolve) => {
+        resolveDetails = resolve;
+      }),
+    );
+
+    const { result } = renderHook(() => usePracticeDeck('u1'));
+    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+
+    let ensurePromise!: Promise<boolean>;
+    act(() => {
+      ensurePromise = result.current.ensureDetailLoaded('grammar');
+    });
+
+    expect(mocks.loadReviewEntryDetails).toHaveBeenCalledOnce();
+
+    await act(async () => {
+      resolveDetails({
+        note: null,
+        grammar: { id: 10 },
+        noteLoadFailed: false,
+        grammarLoadFailed: false,
+      });
+      await ensurePromise;
+    });
+
+    await expect(ensurePromise).resolves.toBe(true);
+  });
+
   it('bulk-saves once at the end of a batch and loads the next batch', async () => {
     mocks.savePracticeDeck.mockImplementationOnce(async (items: PracticeDeckEntry['item'][]) => {
       expect(items).toHaveLength(2);
@@ -156,7 +188,7 @@ function reviewDeckResult(entries: PracticeDeckEntry[]): ReviewDeckData {
   };
 }
 
-function entry(itemId: number): PracticeDeckEntry {
+function entry(itemId: number, grammarChunkId = 0): PracticeDeckEntry {
   return {
     item: {
       user_id: 'u1',
@@ -171,7 +203,7 @@ function entry(itemId: number): PracticeDeckEntry {
       topic_id: 1,
       note_id: null,
       block_id: 1,
-      grammar_chunk_id: 0,
+      grammar_chunk_id: grammarChunkId,
       progress_cz_to_en: 0,
       started_at: '2026-01-01',
       updated_at: '2026-01-01',

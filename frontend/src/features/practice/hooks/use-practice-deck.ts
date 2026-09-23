@@ -22,8 +22,16 @@ import {
 } from '../review-deck-cache';
 import {
   loadReviewEntryDetails,
+  type ReviewEntryDetails,
   type ReviewDeckData,
 } from '@/database/utils/practice-content.utils';
+import type { PracticeDetail } from '../PracticeSessionCard';
+
+type SecondaryContentRequest = Readonly<{
+  userId: string;
+  itemKey: string;
+  promise: Promise<ReviewEntryDetails>;
+}>;
 
 /** Loads complete review batches and saves each batch once at its boundary. */
 export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckData) {
@@ -39,6 +47,22 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
   const countedDeckRef = useRef<ReviewDeckData | null>(null);
   const [secondaryContent, setSecondaryContent] = useState<SecondaryContent | null>(null);
   const secondaryContentRequestIdRef = useRef(0);
+  const secondaryContentRequestRef = useRef<SecondaryContentRequest | null>(null);
+
+  const getSecondaryContentPromise = useCallback(
+    (requestedUserId: string, item: PracticeDeckEntry['item']): Promise<ReviewEntryDetails> => {
+      const itemKey = getReviewItemKey(item);
+      const existingRequest = secondaryContentRequestRef.current;
+      if (existingRequest?.userId === requestedUserId && existingRequest.itemKey === itemKey) {
+        return existingRequest.promise;
+      }
+
+      const promise = loadReviewEntryDetails(requestedUserId, item);
+      secondaryContentRequestRef.current = { userId: requestedUserId, itemKey, promise };
+      return promise;
+    },
+    [],
+  );
 
   const initialReviewDeck = initialData ?? (userId ? getCachedReviewDeck(userId) : undefined);
   const fetchPracticeDeck = useCallback(
@@ -102,8 +126,9 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
     const requestId = ++secondaryContentRequestIdRef.current;
     let isActive = true;
     const itemKey = getReviewItemKey(currentItem);
+    const detailPromise = getSecondaryContentPromise(userId, currentItem);
 
-    void loadReviewEntryDetails(userId, currentItem)
+    void detailPromise
       .then((details) => {
         if (!isActive || requestId !== secondaryContentRequestIdRef.current) return;
         setSecondaryContent({ itemKey, ...details });
@@ -125,8 +150,30 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
       if (requestId === secondaryContentRequestIdRef.current) {
         secondaryContentRequestIdRef.current += 1;
       }
+      if (secondaryContentRequestRef.current?.promise === detailPromise) {
+        secondaryContentRequestRef.current = null;
+      }
     };
-  }, [currentItem, userId]);
+  }, [currentItem, getSecondaryContentPromise, userId]);
+
+  const ensureDetailLoaded = useCallback(
+    async (detail: PracticeDetail): Promise<boolean> => {
+      if (!userId || !currentItem) return false;
+
+      const itemKey = getReviewItemKey(currentItem);
+      if (secondaryContent?.itemKey === itemKey) {
+        return !getDetailLoadFailed(secondaryContent, detail);
+      }
+
+      try {
+        const details = await getSecondaryContentPromise(userId, currentItem);
+        return !getDetailLoadFailed(details, detail);
+      } catch {
+        return false;
+      }
+    },
+    [currentItem, getSecondaryContentPromise, secondaryContent, userId],
+  );
 
   const nextItem = useCallback(
     async (outcome: PracticeOutcome) => {
@@ -172,6 +219,7 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
     grammarAvailable: hasPositiveReference(currentItem?.grammar_chunk_id),
     noteLoadFailed: getSecondaryNoteLoadFailed(currentEntry, secondaryContent),
     grammarLoadFailed: getSecondaryGrammarLoadFailed(currentEntry, secondaryContent),
+    ensureDetailLoaded,
     progressLabel: getReviewProgressLabel(completedCount, totalCount),
     finishedReview,
     revealed,
@@ -316,6 +364,14 @@ function hasPositiveReference(value: number | null | undefined): boolean {
 
 function getReviewItemKey(item: PracticeDeckEntry['item']): string {
   return String(item.item_id);
+}
+
+function getDetailLoadFailed(
+  details: Pick<SecondaryContent, 'noteLoadFailed' | 'grammarLoadFailed'>,
+  detail: PracticeDetail,
+): boolean {
+  if (detail === 'note') return details.noteLoadFailed;
+  return details.grammarLoadFailed;
 }
 
 function getSecondaryNote(
