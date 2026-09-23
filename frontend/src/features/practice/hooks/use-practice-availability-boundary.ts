@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { beginPracticeAvailabilityBoundary } from '../practice-availability-controller';
 
 type PracticeWrite = <T>(operation: Promise<T>) => Promise<T>;
+type PracticeFlush = () => Promise<void>;
 
 export type PracticeAvailabilityBoundary = Readonly<{
   trackPracticeWrite: PracticeWrite;
@@ -11,6 +12,7 @@ export type PracticeAvailabilityBoundary = Readonly<{
 /** Keeps per-answer persistence independent from Home's availability snapshot. */
 export function usePracticeAvailabilityBoundary(
   userId: string | null,
+  flushPractice?: PracticeFlush,
 ): PracticeAvailabilityBoundary {
   const pending = useRef(new Set<Promise<unknown>>());
   const finishRef = useRef<(() => Promise<void>) | null>(null);
@@ -22,7 +24,10 @@ export function usePracticeAvailabilityBoundary(
     let finishPromise: Promise<void> | null = null;
     const finishPractice = (): Promise<void> => {
       if (finishPromise) return finishPromise;
-      finishPromise = Promise.allSettled(writes).then(endPractice);
+      finishPromise = Promise.resolve(flushPractice?.())
+        .catch(() => undefined)
+        .then(() => Promise.allSettled(writes))
+        .then(endPractice);
       return finishPromise;
     };
     finishRef.current = finishPractice;
@@ -31,7 +36,7 @@ export function usePracticeAvailabilityBoundary(
       void finishPractice();
       if (finishRef.current === finishPractice) finishRef.current = null;
     };
-  }, [userId]);
+  }, [flushPractice, userId]);
 
   const trackPracticeWrite = useCallback<PracticeWrite>((operation) => {
     pending.current.add(operation);

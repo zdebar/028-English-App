@@ -91,6 +91,22 @@ describe('usePracticeDeck', () => {
     expect(result.current.progressLabel).toBe('1 / 2');
   });
 
+  it('saves only changed items when leaving in the middle of a batch', async () => {
+    const { result } = renderHook(() => usePracticeDeck('u1'));
+    await waitFor(() => expect(result.current.progressLabel).toBe('0 / 2'));
+
+    await act(async () => result.current.nextItem('correct'));
+    expect(mocks.savePracticeDeck).not.toHaveBeenCalled();
+
+    await act(async () => result.current.finishPractice());
+
+    expect(mocks.savePracticeDeck).toHaveBeenCalledOnce();
+    expect(mocks.savePracticeDeck).toHaveBeenCalledWith([
+      expect.objectContaining({ item_id: 1, updated_at: 'now' }),
+    ]);
+    expect(mocks.reload).not.toHaveBeenCalled();
+  });
+
   it('reuses the background detail request when detail is requested early', async () => {
     mocks.fetchData = reviewDeckResult([entry(1, 10)]);
     let resolveDetails!: (details: unknown) => void;
