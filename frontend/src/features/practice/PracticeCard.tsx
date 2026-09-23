@@ -9,6 +9,7 @@ import { useToastStore } from '../toast/use-toast-store';
 import { reportError } from '../logging/monitoring-handler';
 import { useCallback, useEffect, useRef } from 'react';
 import type { ReviewDeckData } from '@/database/utils/practice-content.utils';
+import { usePracticeExitBlocker } from './hooks/use-practice-exit-blocker';
 
 type PracticeCardProps = Readonly<{
   initialData?: ReviewDeckData;
@@ -42,7 +43,10 @@ export default function PracticeCard({ initialData }: PracticeCardProps) {
     audioLoading,
     loading,
     error,
+    finishPractice,
   } = usePracticeDeck(userId, initialData);
+
+  usePracticeExitBlocker(finishPractice);
 
   const notifyDetailLoadFailure = useCallback(
     (detail: PracticeDetail): void => {
