@@ -119,6 +119,7 @@ export const router = createHashRouter([
   {
     path: ROUTES.home,
     Component: App,
+    HydrateFallback: DelayedMessage,
     errorElement: <RouteDataError />,
     children: [
       { index: true, loader: loadHome, Component: Home },
