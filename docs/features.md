@@ -64,7 +64,6 @@ starting point when a change crosses route, store, model, or sync boundaries.
 | Periodic sync | Push local changes and pull remote updates. | `usePeriodicSync`, `dataSync` | Supabase PostgreSQL, sync metadata, `useSyncStore` | Successful sync sets status flags; committed writes refresh live queries and audio archives sync separately. |
 | Full sync | Recover or refresh local content/user rows from remote data. | `dataSync(userId, true)` or stale full-sync timestamp | `last-full-sync-at_${userId}`, model `syncFromRemote` methods | Full sync timing is stored in localStorage; model support determines replace behavior. |
 | Unmount/logout sync | Try to save user data before leaving or signing out. | `dataSyncOnUnmount`, `handleLogout` | User-scoped models | Runs user-table sync only; failures are reported but should not trap the user in the app. |
-| Unsaved practice fallback | Recover buffered review progress after unload or save failure. | `usePracticeDeck`, `restoreUnsavedFromLocalStorage` | localStorage `practiceDeckProgress_${userId}` | The fallback is a crash/unload guard; normal durable progress belongs in IndexedDB. |
 | Audio archive sync | Keep local audio records aligned with remote storage metadata. | `AudioRecord.syncFromRemote`, `AudioRecord.removeOrphaned` | Supabase Storage, IndexedDB audio records | Runs after data sync and reports archive errors separately. |
 
 ## Global State, Events, And UI Infrastructure

@@ -63,7 +63,7 @@ describe('usePracticeCardState audio transitions', () => {
     });
   });
 
-  it('keeps the next enToCz item hidden after the previous audio failed', async () => {
+  it('keeps the next CZ-to-EN item hidden after the previous audio failed', async () => {
     getAudioMock.mockImplementation((filename: string) => {
       if (filename === failedAudioItem.audio) return Promise.resolve(null);
       return Promise.resolve({ audioBlob: new Blob(['next']) });
@@ -75,7 +75,6 @@ describe('usePracticeCardState audio transitions', () => {
       ({ item, revealed }: { item: UserItemLocal; revealed: boolean }) => {
         const state = usePracticeCardState({
           currentItem: item,
-          isCzToEn: false,
           revealed,
           setRevealed,
         });
@@ -117,14 +116,11 @@ function createItem(itemId: number, audio: string, english: string): UserItemLoc
     block_id: 1,
     grammar_chunk_id: 0,
     progress_cz_to_en: 0,
-    progress_en_to_cz: 0,
     started_at: '2026-01-01',
     updated_at: '2026-01-01',
     deleted_at: '9999-01-01',
     next_at_cz_to_en: '2026-01-01',
-    next_at_en_to_cz: '2026-01-01',
     mastered_at_cz_to_en: '9999-01-01',
-    mastered_at_en_to_cz: '9999-01-01',
     lesson_id: 1,
   };
 }

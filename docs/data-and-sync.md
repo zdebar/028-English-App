@@ -61,7 +61,6 @@ User models include `UserScore` and `UserItem`.
 
 | Key pattern | Owner | Purpose |
 | --- | --- | --- |
-| `practiceDeckProgress_${userId}` | `usePracticeDeck`, `restoreUnsavedFromLocalStorage` | Recover unsaved practice progress after unload/save failure. |
 | `last-full-sync-at_${userId}` | `sync-time.utils` | Decide when the next full sync is needed. |
 | `theme_${userId}` / guest key | `theme-utils`, `useThemeStore` | Persist selected theme. |
 | `volume-${userId}` | `useAudioStore` | Persist audio volume. |

@@ -12,8 +12,8 @@ Route: `/practice`, rendered by `Practice` and `usePracticeDeck`.
 2. Otherwise build an alternative deck from due even-progress items, then never-scheduled items in curriculum order.
 3. Return the even/new alternative when non-empty, otherwise return the partial odd deck.
 
-Progress is buffered during the session, saved at deck completion/unmount, and backed up to
-`practiceDeckProgress_${userId}` on unload or save failure.
+Review progress is buffered in memory during the current batch and bulk-saved when that batch
+finishes. Unfinished in-memory answers are intentionally discarded if practice is interrupted.
 
 ## Initial Training
 

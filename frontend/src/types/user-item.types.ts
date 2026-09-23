@@ -1,7 +1,6 @@
 import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
 import type { NoteType } from './generic.types';
 
-export type PracticeDirection = 'czToEn' | 'enToCz';
 export type PracticeOutcome = 'correct' | 'incorrect' | 'skip';
 
 export type CurriculumSortPath = readonly [
@@ -19,7 +18,6 @@ export interface UserItemBase {
   audio: string | null;
   sort_order: number;
   progress_cz_to_en: number;
-  progress_en_to_cz: number;
   note_id: number | null;
   lesson_id: number;
   updated_at: string;
@@ -33,15 +31,11 @@ export interface UserItemLocal extends UserItemBase {
   started_at: string;
   deleted_at: string;
   next_at_cz_to_en: string;
-  next_at_en_to_cz: string;
   mastered_at_cz_to_en: string;
-  mastered_at_en_to_cz: string;
   curriculum_sort_path: CurriculumSortPath;
 }
 
-export interface PracticeDeckItem extends UserItemLocal {
-  practice_direction: PracticeDirection;
-}
+export type PracticeDeckItem = UserItemLocal;
 
 export type ResolvedPracticeEntry<T extends UserItemLocal> = Readonly<{
   item: T;

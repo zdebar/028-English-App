@@ -4,7 +4,6 @@ const mocks = vi.hoisted(() => ({
   getFullSyncTime: vi.fn(),
   setFullSyncTime: vi.fn(),
   initDbMappings: vi.fn(),
-  restoreUnsavedFromLocalStorage: vi.fn(),
   withSettledSummary: vi.fn(),
   userItemSyncFromRemote: vi.fn(),
   blockSyncFromRemote: vi.fn(),
@@ -40,11 +39,6 @@ vi.mock('@/database/utils/sync-time.utils', () => ({
 
 vi.mock('@/database/models/db-init', () => ({
   initDbMappings: (...args: unknown[]) => mocks.initDbMappings(...args),
-}));
-
-vi.mock('@/database/utils/database.utils', () => ({
-  restoreUnsavedFromLocalStorage: (...args: unknown[]) =>
-    mocks.restoreUnsavedFromLocalStorage(...args),
 }));
 
 vi.mock('@/features/logging/logging.utils', () => ({
@@ -138,7 +132,6 @@ describe('data-sync.utils', () => {
 
     mocks.getFullSyncTime.mockReturnValue(0);
     mocks.initDbMappings.mockResolvedValue(undefined);
-    mocks.restoreUnsavedFromLocalStorage.mockResolvedValue(undefined);
     mocks.withSettledSummary.mockResolvedValue({ total: 10, success: 10, failed: 0 });
 
     mocks.userItemSyncFromRemote.mockResolvedValue(undefined);

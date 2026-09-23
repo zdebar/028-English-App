@@ -24,7 +24,6 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     sort_order: 1,
     curriculum_sort_path: [1, 1, 1],
     progress_cz_to_en: 2,
-    progress_en_to_cz: 2,
     note_id: null,
     lesson_id: 1,
     updated_at: '2024-01-01T00:00:00.000Z',
@@ -35,9 +34,7 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     started_at: '2024-01-01T00:00:00.000Z',
     deleted_at: '9999-12-31T00:00:00.000Z',
     next_at_cz_to_en: '2024-01-01T00:00:00.000Z',
-    next_at_en_to_cz: '2024-01-01T00:00:00.000Z',
     mastered_at_cz_to_en: '9999-12-31T00:00:00.000Z',
-    mastered_at_en_to_cz: '9999-12-31T00:00:00.000Z',
     ...overrides,
   }),
   practiceDeck: {
@@ -48,15 +45,12 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     progressLabel: '2/20',
     sessionLoading: false,
     finishedReview: false,
-    isCzToEn: true,
     revealed: false,
     setRevealed: vi.fn(),
     czech: 'ahoj',
     english: 'hello-hint',
     pronunciation: '\u00A0',
     audioDisabled: false,
-    showDirectionChange: false,
-    hideDirectionChange: vi.fn(),
     plusHint: vi.fn(),
     nextItem: vi.fn(),
     loading: false,
@@ -68,7 +62,6 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     isPlaying: false,
     handleReveal: vi.fn(() => {
       if (
-        mocks.practiceDeck.isCzToEn &&
         !mocks.practiceDeck.audioError &&
         !mocks.practiceDeck.revealed
       ) {
@@ -115,9 +108,6 @@ vi.mock('@/locales/cs', () => ({
     loadingMessage: 'Loading',
     loadingError: 'Loading error',
     directionCzToEn: 'CZ to EN',
-    directionEnToCz: 'EN to CZ',
-    directionCzToEnShort: 'cz › en',
-    directionEnToCzShort: 'en › cz',
     blockTrainingProgressHelp: 'Round · completed items in this round',
     next: 'Next',
   },
@@ -171,10 +161,8 @@ vi.mock('@/features/practice/hooks/use-practice-deck', () => ({
       if (
         !userId ||
         !mocks.practiceDeck.currentItem ||
-        mocks.practiceDeck.isCzToEn ||
         mocks.practiceDeck.audioDisabled ||
-        mocks.practiceDeck.audioLoading ||
-        mocks.practiceDeck.showDirectionChange
+        mocks.practiceDeck.audioLoading
       ) {
         return;
       }
@@ -189,8 +177,6 @@ vi.mock('@/features/practice/hooks/use-practice-deck', () => ({
       mocks.practiceDeck.audioDisabled,
       mocks.practiceDeck.audioLoading,
       mocks.practiceDeck.currentItem,
-      mocks.practiceDeck.isCzToEn,
-      mocks.practiceDeck.showDirectionChange,
     ]);
 
     if (!userId) {
@@ -200,15 +186,12 @@ vi.mock('@/features/practice/hooks/use-practice-deck', () => ({
         grammar: null,
         progressLabel: '',
         sessionLoading: false,
-        isCzToEn: true,
         revealed: false,
         setRevealed: vi.fn(),
         czech: '',
         english: '',
         pronunciation: '\u00A0',
         audioDisabled: true,
-        showDirectionChange: false,
-        hideDirectionChange: vi.fn(),
         handleReveal: vi.fn(),
         plusHint: vi.fn(),
         nextItem: vi.fn(),
@@ -360,13 +343,11 @@ describe('PracticeCard', () => {
     mocks.practiceDeck.progressLabel = '2/20';
     mocks.practiceDeck.sessionLoading = false;
     mocks.practiceDeck.finishedReview = false;
-    mocks.practiceDeck.isCzToEn = true;
     mocks.practiceDeck.revealed = false;
     mocks.practiceDeck.czech = 'ahoj';
     mocks.practiceDeck.english = 'hello-hint';
     mocks.practiceDeck.pronunciation = '\u00A0';
     mocks.practiceDeck.audioDisabled = false;
-    mocks.practiceDeck.showDirectionChange = false;
     mocks.practiceDeck.loading = false;
     mocks.practiceDeck.error = null;
     mocks.practiceDeck.audioError = false;
@@ -469,7 +450,6 @@ describe('PracticeCard', () => {
   });
 
   it('keeps playback disabled but volume adjustable before reveal in CZ->EN mode', () => {
-    mocks.practiceDeck.isCzToEn = true;
     mocks.practiceDeck.revealed = false;
     mocks.practiceDeck.audioDisabled = false;
 
@@ -487,23 +467,7 @@ describe('PracticeCard', () => {
     expect(volumeSlider.dataset.disabled).toBe('false');
   });
 
-  it('autoplays audio after delay in EN->CZ mode when allowed', async () => {
-    mocks.practiceDeck.isCzToEn = false;
-    mocks.practiceDeck.audioDisabled = false;
-    mocks.practiceDeck.audioLoading = false;
-    mocks.practiceDeck.showDirectionChange = false;
-
-    render(<PracticeCard />);
-
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(400);
-    });
-
-    expect(mocks.practiceDeck.playAudio).toHaveBeenCalledTimes(1);
-  });
-
   it('opens grammar from the right secondary control group after reveal', () => {
-    mocks.practiceDeck.showDirectionChange = false;
     mocks.practiceDeck.grammar = {
       ...mocks.practiceDeck.grammar,
       id: 42,
@@ -538,15 +502,6 @@ describe('PracticeCard', () => {
     fireEvent.click(grammarButton);
     expect(screen.queryByTestId('grammar-detail')).toBeNull();
     expect(screen.queryByTestId('grammar-btn')).toBeNull();
-  });
-
-  it('does not open grammar automatically while direction change is shown', () => {
-    mocks.practiceDeck.showDirectionChange = true;
-    mocks.practiceDeck.grammar = { ...mocks.practiceDeck.grammar, id: 42 };
-
-    render(<PracticeCard />);
-
-    expect(screen.queryByTestId('grammar-detail')).toBeNull();
   });
 
   it('keeps note button disabled until item is revealed and note exists', () => {
@@ -606,13 +561,11 @@ describe('PracticeCard', () => {
         note={null}
         grammar={null}
         progressLabel="Round 1/2"
-        isCzToEn
         revealed
         czech="ahoj"
         english="hello"
         pronunciation="hello"
         audioDisabled={false}
-        showDirectionChange={false}
         handleReveal={vi.fn()}
         plusHint={vi.fn()}
         nextRepeat={vi.fn()}
@@ -640,13 +593,11 @@ describe('PracticeCard', () => {
           note={null}
           grammar={null}
           progressLabel="1 / 2"
-          isCzToEn
           revealed={revealed}
           czech="ahoj"
           english="hello"
           pronunciation="hello"
           audioDisabled={false}
-          showDirectionChange={false}
           handleReveal={vi.fn()}
           plusHint={plusHint}
           nextRepeat={vi.fn()}
@@ -684,13 +635,11 @@ describe('PracticeCard', () => {
         note={null}
         grammar={null}
         progressLabel="Round 1/2"
-        isCzToEn
         revealed
         czech="ahoj"
         english="hello"
         pronunciation="hello"
         audioDisabled={false}
-        showDirectionChange={false}
         handleReveal={vi.fn()}
         plusHint={vi.fn()}
         nextRepeat={vi.fn()}

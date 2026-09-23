@@ -1,4 +1,3 @@
-import config from '@/config/config';
 import { db } from '@/database/models/db';
 import GrammarChunk, { type GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
 import PracticeSession from '@/database/models/practice-sessions';
@@ -125,10 +124,9 @@ export async function resolvePracticeGrammarContext(
 
 export async function loadReviewDeck(
   userId: string,
-  deckSize: number = config.practice.reviewMinimumSize,
 ): Promise<PracticeDeckEntry[]> {
-  const items = await UserItem.getReviewDeck(userId, deckSize);
-  return resolvePracticeEntries(userId, items);
+  const items = await UserItem.getReviewDeck(userId);
+  return items.map((item) => ({ item, note: null, grammar: null }));
 }
 
 export type ReviewDeckData = Readonly<{
@@ -146,7 +144,7 @@ export async function loadReviewDeckData(userId: string): Promise<ReviewDeckData
 
   const now = new Date().toISOString();
   const items = await db.transaction('r', db.user_items, () =>
-    UserItem.getReviewDeck(userId, config.practice.reviewMinimumSize, now),
+    UserItem.getReviewDeck(userId, now),
   );
   const entries = items.map((item) => ({ item, note: null, grammar: null }));
   return { entries, availabilityCheckedAt: now, abandoned: entries.length === 0 };
@@ -169,9 +167,6 @@ export type ReviewCountData = Readonly<{
 /** Loads the exact current review count and the timestamp covered by that count. */
 export async function loadReviewCount(userId: string): Promise<ReviewCountData> {
   const countedThrough = new Date().toISOString();
-  const [czToEnCount, enToCzCount] = await Promise.all([
-    UserItem.getReviewItemCountForDirection(userId, 'czToEn', countedThrough),
-    UserItem.getReviewItemCountForDirection(userId, 'enToCz', countedThrough),
-  ]);
-  return { count: czToEnCount + enToCzCount, countedThrough };
+  const count = await UserItem.getReviewItemCount(userId, countedThrough);
+  return { count, countedThrough };
 }

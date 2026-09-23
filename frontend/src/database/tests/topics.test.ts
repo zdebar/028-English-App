@@ -9,7 +9,6 @@ const mocks = vi.hoisted(() => ({
     started_at: string;
     deleted_at: string;
     mastered_at_cz_to_en: string;
-    mastered_at_en_to_cz: string;
   }>,
 }));
 
@@ -58,7 +57,7 @@ describe('Topic', () => {
     const nullDate = '9999-12-31T23:59:59+00:00';
     const item = {
       topic_id: 2, started_at: nullDate, deleted_at: nullDate,
-      mastered_at_cz_to_en: nullDate, mastered_at_en_to_cz: nullDate,
+      mastered_at_cz_to_en: nullDate,
     };
     mocks.topicKeys.mockResolvedValue([2]);
     mocks.startedItems = [item];
@@ -67,7 +66,7 @@ describe('Topic', () => {
     await expect(Topic.hasInitiatedByUserId('u1')).resolves.toBe(false);
     mocks.startedItems = [{ ...item, started_at: '2026-08-01T00:00:00Z', deleted_at: '2026-08-02T00:00:00Z' }];
     await expect(Topic.hasInitiatedByUserId('u1')).resolves.toBe(false);
-    mocks.startedItems = [{ ...item, mastered_at_cz_to_en: '2026-08-01T00:00:00Z', mastered_at_en_to_cz: '2026-08-01T00:00:00Z' }];
+    mocks.startedItems = [{ ...item, mastered_at_cz_to_en: '2026-08-01T00:00:00Z' }];
     await expect(Topic.hasInitiatedByUserId('u1')).resolves.toBe(true);
     expect(mocks.topicsToArray).not.toHaveBeenCalled();
   });
@@ -87,28 +86,24 @@ describe('Topic', () => {
         started_at: '2026-08-01T00:00:00+00:00',
         deleted_at: '9999-12-31T23:59:59+00:00',
         mastered_at_cz_to_en: '9999-12-31T23:59:59+00:00',
-        mastered_at_en_to_cz: '9999-12-31T23:59:59+00:00',
       },
       {
         topic_id: -1,
         started_at: '2026-08-01T00:00:00+00:00',
         deleted_at: '9999-12-31T23:59:59+00:00',
         mastered_at_cz_to_en: '9999-12-31T23:59:59+00:00',
-        mastered_at_en_to_cz: '9999-12-31T23:59:59+00:00',
       },
       {
         topic_id: 1,
         started_at: '9999-12-31T23:59:59+00:00',
         deleted_at: '9999-12-31T23:59:59+00:00',
         mastered_at_cz_to_en: '2026-08-01T00:00:00+00:00',
-        mastered_at_en_to_cz: '2026-08-01T00:00:00+00:00',
       },
       {
         topic_id: 2,
         started_at: '9999-12-31T23:59:59+00:00',
         deleted_at: '9999-12-31T23:59:59+00:00',
         mastered_at_cz_to_en: '9999-12-31T23:59:59+00:00',
-        mastered_at_en_to_cz: '9999-12-31T23:59:59+00:00',
       },
     ];
     mocks.topicsToArray.mockResolvedValue([
