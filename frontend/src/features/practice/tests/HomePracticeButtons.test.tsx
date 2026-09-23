@@ -22,6 +22,16 @@ import { usePracticeAvailabilityStore } from '@/features/practice/use-practice-a
 describe('Home practice buttons', () => {
   afterEach(() => vi.useRealTimers());
 
+  beforeEach(() => {
+    usePracticeAvailabilityStore.setState({
+      reviewReadyAt: null,
+      initialTrainingAvailable: true,
+      activeSession: null,
+      practiceLoading: false,
+      practiceError: null,
+    });
+  });
+
   it('enables review at the stored date without changing the availability snapshot', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-09-23T10:00:00Z'));
@@ -34,16 +44,6 @@ describe('Home practice buttons', () => {
     expect(button('Review').disabled).toBe(false);
     expect(usePracticeAvailabilityStore.getState()).toBe(snapshot);
   });
-  beforeEach(() => {
-    usePracticeAvailabilityStore.setState({
-      reviewReadyAt: null,
-      initialTrainingAvailable: true,
-      activeSession: null,
-      practiceLoading: false,
-      practiceError: null,
-    });
-  });
-
   it('gives review priority at the configured review boundary', () => {
     usePracticeAvailabilityStore.setState({ reviewReadyAt: new Date().toISOString() });
     render(<PracticeButtons />);

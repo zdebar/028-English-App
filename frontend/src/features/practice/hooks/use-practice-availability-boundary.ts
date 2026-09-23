@@ -10,7 +10,7 @@ export function usePracticeAvailabilityBoundary(userId: string | null) {
     const endPractice = beginPracticeAvailabilityBoundary(userId);
     const writes = pending.current;
     return () => {
-      void Promise.allSettled([...writes]).then(endPractice);
+      void Promise.allSettled(writes).then(endPractice);
     };
   }, [userId]);
 
