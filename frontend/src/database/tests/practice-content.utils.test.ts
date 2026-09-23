@@ -164,15 +164,15 @@ describe('practice content resolution', () => {
     await expect(loadReviewDeck('u1')).rejects.toBe(error);
   });
 
-  it('loads one review item without storing a review session', async () => {
-    const item = makeReviewItem(1);
-    mocks.getReviewDeck.mockResolvedValue([item]);
+  it('loads the complete review batch without storing a review session', async () => {
+    const items = [makeReviewItem(1), makeReviewItem(2)];
+    mocks.getReviewDeck.mockResolvedValue(items);
 
     const result = await loadReviewDeckData('u1');
     const [userId, now] = mocks.getReviewDeck.mock.calls[0];
 
-    expect(result.entries).toHaveLength(1);
-    expect(result.entries[0]?.item).toBe(item);
+    expect(result.entries).toHaveLength(2);
+    expect(result.entries.map((entry) => entry.item)).toEqual(items);
     expect(result.availabilityCheckedAt).toBe(now);
     expect(result.abandoned).toBe(false);
     expect(result.entries[0]?.note).toBeNull();
@@ -185,7 +185,7 @@ describe('practice content resolution', () => {
     expect(mocks.getReviewItemCount).not.toHaveBeenCalled();
   });
 
-  it('loads the exact review count separately from the first card', async () => {
+  it('loads the exact review count separately from the review batch', async () => {
     mocks.getReviewItemCount.mockResolvedValue(5);
 
     await expect(loadReviewCount('u1')).resolves.toEqual({
@@ -213,7 +213,7 @@ describe('practice content resolution', () => {
     expect(result.availabilityCheckedAt).toEqual(expect.any(String));
   });
 
-  it('does not recount availability while loading the next review card', async () => {
+  it('does not recount availability while loading the next review batch', async () => {
     mocks.getReviewDeck.mockResolvedValue([makeReviewItem(1)]);
 
     const result = await loadReviewDeckData('u1');

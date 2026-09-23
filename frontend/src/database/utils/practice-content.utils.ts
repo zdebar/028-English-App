@@ -135,7 +135,7 @@ export type ReviewDeckData = Readonly<{
   abandoned: boolean;
 }>;
 
-/** Loads the next review card without creating or restoring a review session. */
+/** Loads the next complete CZ-to-EN review batch without creating a review session. */
 export async function loadReviewDeckData(userId: string): Promise<ReviewDeckData> {
   const activeSession = await PracticeSession.reconcileActive(userId);
   if (activeSession?.mode === 'new') {
