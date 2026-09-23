@@ -32,7 +32,7 @@ function getContext(userId: string): AvailabilityContext {
 export async function ensurePracticeAvailability(userId: string): Promise<void> {
   const context = getContext(userId);
   const state = usePracticeAvailabilityStore.getState();
-  if (context.pending) return context.pending;
+  if (context.pending !== null) return context.pending;
   if (!state.practiceLoading) return;
   return refreshPracticeAvailability(userId);
 }
@@ -44,7 +44,7 @@ export function refreshPracticeAvailability(userId: string): Promise<void> {
   const context = current;
   context.dirty = true;
   if (context.practiceDepth > 0) return Promise.resolve();
-  if (context.pending) return context.pending;
+  if (context.pending !== null) return context.pending;
   context.pending = refreshContext(context).finally(() => {
     context.pending = null;
   });
