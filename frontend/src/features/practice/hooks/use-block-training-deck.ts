@@ -476,6 +476,7 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
     hasProgress,
     loading,
     error,
+    finishPractice,
     currentItem,
     note: currentEntry?.note ?? null,
     practiceGrammar: currentEntry?.grammar ?? null,

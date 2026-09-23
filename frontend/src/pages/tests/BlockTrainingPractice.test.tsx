@@ -62,6 +62,7 @@ vi.mock('@/features/auth/use-auth-store', () => ({
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
+  useBlocker: () => ({ state: 'unblocked' }),
   useLoaderData: () => ({
     block: { block_id: 10 },
     items: [],

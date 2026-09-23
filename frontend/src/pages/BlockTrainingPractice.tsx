@@ -7,6 +7,7 @@ import PracticeEmptyState from '@/features/practice/PracticeEmptyState';
 import PracticeEndState from '@/features/practice/PracticeEndState';
 import PracticeSessionCard from '@/features/practice/PracticeSessionCard';
 import { useInitialTrainingDeck } from '@/features/practice/hooks/use-block-training-deck';
+import { usePracticeExitBlocker } from '@/features/practice/hooks/use-practice-exit-blocker';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import { useEffect, useState, type JSX } from 'react';
@@ -90,6 +91,7 @@ export default function InitialTrainingPractice(): JSX.Element {
   const [introDismissed, setIntroDismissed] = useState(false);
   const initialData = useLoaderData() as InitialTrainingData;
   const deck = useInitialTrainingDeck(userId, initialData);
+  usePracticeExitBlocker(deck.finishPractice);
 
   useEffect(() => {
     reportInitialTrainingError(deck.error, showToast);

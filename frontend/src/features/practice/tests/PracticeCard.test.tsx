@@ -132,6 +132,7 @@ vi.mock('@/features/toast/use-toast-store', () => ({
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
+  useBlocker: () => ({ state: 'unblocked' }),
 }));
 
 vi.mock('@/features/grammar/use-grammar-viewer', () => ({

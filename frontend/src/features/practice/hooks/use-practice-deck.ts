@@ -240,6 +240,7 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
     nextItem,
     loading,
     error: error ?? saveError,
+    finishPractice,
     audioError: cardState.audioError,
     playAudio: cardState.playAudio,
     audioLoading: cardState.audioLoading,
