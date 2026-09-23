@@ -1,3 +1,4 @@
+import { usePracticeAvailabilityStoreSync } from '@/features/practice/use-practice-availability-store-sync';
 import Footer from '@/components/Layout/Footer';
 import Header from '@/components/Layout/Header';
 import { usePeriodicSync } from '@/features/synchronization/use-periodic-sync';
@@ -19,6 +20,7 @@ export default function App() {
   const userId = useAuthStore((state) => state.userId);
   const authLoading = useAuthStore((state) => state.loading);
 
+  usePracticeAvailabilityStoreSync(userId);
   useAudioLoader(userId);
   useUserStoreSync(userId);
   usePronunciationGroupsStoreSync(userId);

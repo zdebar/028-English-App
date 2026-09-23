@@ -1,3 +1,4 @@
+import { usePracticeAvailabilityBoundary } from './use-practice-availability-boundary';
 import Block from '@/database/models/blocks';
 import PracticeSession from '@/database/models/practice-sessions';
 import UserItem from '@/database/models/user-items';
@@ -225,9 +226,10 @@ function startInitialTrainingLoad(
   userId: string,
   initialData: InitialTrainingData | undefined,
   setters: InitialTrainingLoadSetters,
+  trackPracticeWrite: <T>(operation: Promise<T>) => Promise<T>,
 ): () => void {
   let mounted = true;
-  void loadInitialTrainingData(userId, initialData)
+  void trackPracticeWrite(loadInitialTrainingData(userId, initialData))
     .then((result) => {
       if (!mounted) return;
       if (!result) {
@@ -364,6 +366,7 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
 }
 
 export function useInitialTrainingDeck(userId: string | null, initialData?: InitialTrainingData) {
+  const trackPracticeWrite = usePracticeAvailabilityBoundary(userId);
   const initialState = getInitialTrainingState(initialData);
   const [block, setBlock] = useState<BlockType | null>(initialState.block);
   const [items, setItems] = useState<UserItemLocal[]>(initialState.items);
@@ -396,8 +399,8 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
       setHasProgress,
       setLoading,
       setError,
-    });
-  }, [initialData, userId]);
+    }, trackPracticeWrite);
+  }, [initialData, userId, trackPracticeWrite]);
 
   const itemById = useMemo(() => new Map(items.map((item) => [item.item_id, item])), [items]);
   const { currentItem, currentEntry, displayedCompletedCount, pronunciation } = useMemo(
@@ -435,7 +438,7 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
 
   const advance = useCallback(
     async (outcome: TrainingOutcome) => {
-      await advanceInitialTraining({
+      await trackPracticeWrite(advanceInitialTraining({
         outcome,
         session,
         currentItem,
@@ -446,7 +449,7 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
         setHasProgress,
         setError,
         resetQuestionState,
-      });
+      }));
     },
     [
       currentItem,
@@ -454,6 +457,7 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
       isComplete,
       resetQuestionState,
       session,
+      trackPracticeWrite,
     ],
   );
 

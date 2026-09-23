@@ -1,6 +1,7 @@
 import { ROUTES } from '@/config/routes.config';
 import { TEXTS } from '@/locales/cs';
-import type { JSX } from 'react';
+import { useEffect, useState, type JSX } from 'react';
+import config from '@/config/config';
 import { NavigationButton } from '@/routing/data-navigation';
 import { usePracticeAvailabilityStore } from './use-practice-availability-store';
 import StyledButton from '@/components/UI/buttons/StyledButton';
@@ -13,9 +14,25 @@ type PracticeButtonState = Readonly<{
   newTitle: string | undefined;
 }>;
 
-function isReviewAvailable(reviewReadyAt: string | null): boolean {
+function isReviewAvailable(reviewReadyAt: string | null, checkedAt: number): boolean {
   if (reviewReadyAt === null) return false;
-  return Date.parse(reviewReadyAt) <= Date.now();
+  return Date.parse(reviewReadyAt) <= Math.max(checkedAt, Date.now());
+}
+
+/** Re-renders at the stored deadline without reading or changing availability data. */
+function useReviewDeadline(reviewReadyAt: string | null): number {
+  const [checkedAt, setCheckedAt] = useState(Date.now);
+  useEffect(() => {
+    if (!reviewReadyAt) return;
+    const remaining = Date.parse(reviewReadyAt) - Date.now();
+    if (!Number.isFinite(remaining) || remaining <= 0) return;
+    const timeout = globalThis.setTimeout(
+      () => setCheckedAt(Date.now()),
+      Math.min(remaining, config.practice.maxReviewReadyTimerDelayMs),
+    );
+    return () => globalThis.clearTimeout(timeout);
+  }, [reviewReadyAt, checkedAt]);
+  return checkedAt;
 }
 
 function isActiveReview(activeSession: { mode: 'review' | 'new' } | null): boolean {
@@ -48,6 +65,7 @@ function isNewButtonDisabled(
 
 function resolvePracticeButtonState(
   reviewReadyAt: string | null,
+  checkedAt: number,
   initialTrainingAvailable: boolean,
   activeSession: { mode: 'review' | 'new' } | null,
   loading: boolean,
@@ -55,7 +73,7 @@ function resolvePracticeButtonState(
 ): PracticeButtonState {
   const activeReview = isActiveReview(activeSession);
   const activeNew = isActiveNew(activeSession);
-  const reviewAvailable = isReviewAvailable(reviewReadyAt);
+  const reviewAvailable = isReviewAvailable(reviewReadyAt, checkedAt);
   const reviewDisabled = isReviewButtonDisabled(
     error,
     activeNew,
@@ -107,6 +125,7 @@ function NewPracticeButton({
 
 export default function PracticeButtons(): JSX.Element {
   const reviewReadyAt = usePracticeAvailabilityStore((state) => state.reviewReadyAt);
+  const checkedAt = useReviewDeadline(reviewReadyAt);
   const initialTrainingAvailable = usePracticeAvailabilityStore(
     (state) => state.initialTrainingAvailable,
   );
@@ -116,6 +135,7 @@ export default function PracticeButtons(): JSX.Element {
   const { reviewDisabled, newDisabled, newAvailable, reviewTitle, newTitle } =
     resolvePracticeButtonState(
       reviewReadyAt,
+      checkedAt,
       initialTrainingAvailable,
       activeSession,
       loading,

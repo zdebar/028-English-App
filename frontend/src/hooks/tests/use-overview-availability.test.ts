@@ -27,7 +27,7 @@ vi.mock('dexie', () => ({
 }));
 
 vi.mock('@/database/models/topics', () => ({
-  default: { getInitiatedByUserId: vi.fn(async () => mocks.topics) },
+  default: { hasInitiatedByUserId: vi.fn(async () => mocks.topics.length > 0) },
 }));
 vi.mock('@/database/models/user-items', () => ({
   default: {
@@ -35,7 +35,7 @@ vi.mock('@/database/models/user-items', () => ({
       if (mocks.grammarError) throw mocks.grammarError;
       return mocks.grammar;
     }),
-    getInitiatedVocabulary: vi.fn(async () => mocks.vocabulary),
+    hasInitiatedVocabulary: vi.fn(async () => mocks.vocabulary.length > 0),
   },
 }));
 vi.mock('@/features/toast/use-toast-store', () => ({
@@ -50,9 +50,11 @@ vi.mock('@/locales/cs', () => ({
 }));
 
 import { useOverviewAvailability } from '../use-overview-availability';
+import { clearSharedQueriesExcept } from '../shared-query-store';
 
 describe('useOverviewAvailability', () => {
   beforeEach(() => {
+    clearSharedQueriesExcept(null);
     vi.clearAllMocks();
     mocks.grammar = false;
     mocks.topics = [];
@@ -73,7 +75,7 @@ describe('useOverviewAvailability', () => {
     expect(result.current.vocabulary.hasData).toBe(false);
   });
 
-  it('reacts to database emissions and unsubscribes every observer', async () => {
+  it('retains live queries after the page unmounts and disposes them on sign-out', async () => {
     const { result, unmount } = renderHook(() => useOverviewAvailability('u1'));
     await waitFor(() => expect(mocks.observers).toHaveLength(3));
 
@@ -82,6 +84,8 @@ describe('useOverviewAvailability', () => {
 
     const unsubscribeFunctions = mocks.observers.map((observer) => observer.unsubscribe);
     unmount();
+    unsubscribeFunctions.forEach((unsubscribe) => expect(unsubscribe).not.toHaveBeenCalled());
+    clearSharedQueriesExcept(null);
     unsubscribeFunctions.forEach((unsubscribe) => expect(unsubscribe).toHaveBeenCalledOnce());
   });
 

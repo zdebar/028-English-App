@@ -1,3 +1,5 @@
+import { refreshPracticeAvailability } from '@/features/practice/practice-availability-controller';
+import { sharedQueryKey } from '@/hooks/shared-query-store';
 import { ROUTES } from '@/config/routes.config';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
@@ -50,6 +52,7 @@ export default function TopicItemsOverview({
   } = useLiveQueryData<TopicType | null>(fetchTopic, {
     emptyData: null,
     initialData: initialTopic,
+    sharedKey: sharedQueryKey(userId, `topic:${topicId}`),
   });
 
   // -- Items management --
@@ -65,6 +68,7 @@ export default function TopicItemsOverview({
   } = useLiveQueryData<UserItemLocal[]>(fetchTopicItems, {
     emptyData: [],
     initialData: initialItems,
+    sharedKey: sharedQueryKey(userId, `topic-items:${topicId}`),
   });
   const hasItems = items.length > 0;
 
@@ -97,6 +101,7 @@ export default function TopicItemsOverview({
     if (!userId || !topicId) return;
     try {
       const resetCount = await UserItem.resetItemsByTopicId(userId, topicId);
+      void refreshPracticeAvailability(userId);
       reportInfo(`Reset ${resetCount} items in topic ${topicId}`);
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (error) {

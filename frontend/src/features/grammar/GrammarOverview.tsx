@@ -1,3 +1,5 @@
+import { refreshPracticeAvailability } from '@/features/practice/practice-availability-controller';
+import { sharedQueryKey } from '@/hooks/shared-query-store';
 import OverviewCard from '@/components/UI/OverviewCard';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { TEXTS } from '@/locales/cs';
@@ -37,6 +39,7 @@ export default function GrammarOverview({
   const { data: grammarList, loading, error } = useLiveQueryData(fetchGrammar, {
     emptyData: [],
     initialData: initialGrammar,
+    sharedKey: sharedQueryKey(userId, 'grammar'),
   });
   const hasData = grammarList.length > 0;
   const currentItem = useMemo(
@@ -62,6 +65,7 @@ export default function GrammarOverview({
 
     try {
       const resetCount = await UserItem.resetItemsByGrammarGroupId(userId, currentItem.id);
+      void refreshPracticeAvailability(userId);
       reportInfo(`Grammar ${currentItem.id} reset completed: ${resetCount} items reset.`);
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (err) {

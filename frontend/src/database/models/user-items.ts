@@ -518,6 +518,16 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return result;
   }
 
+  /** Checks availability without materializing the vocabulary list. */
+  static async hasInitiatedVocabulary(userId: string): Promise<boolean> {
+    const item = await db.user_items
+      .where('[user_id+is_vocabulary+started_at]')
+      .between([userId, 1, Dexie.minKey], [userId, 1, NULL_DATE], true, true)
+      .filter((candidate) => candidate.deleted_at === NULL_DATE && isInitiated(candidate))
+      .first();
+    return item !== undefined;
+  }
+
   /**
    * Calculates when the minimum review direction can be started.
    *

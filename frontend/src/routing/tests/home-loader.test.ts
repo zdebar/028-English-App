@@ -29,6 +29,7 @@ vi.mock('@/features/toast/use-toast-store', () => ({
   },
 }));
 
+import { resetPracticeAvailability } from '@/features/practice/practice-availability-controller';
 import { loadHome } from '@/routing/home-loader';
 import { usePracticeAvailabilityStore } from '@/features/practice/use-practice-availability-store';
 
@@ -36,7 +37,7 @@ describe('loadHome', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.userId = 'u1';
-    usePracticeAvailabilityStore.getState().reset();
+    resetPracticeAvailability();
   });
 
   it('waits for and stores the availability snapshot before completing', async () => {
@@ -74,6 +75,13 @@ describe('loadHome', () => {
       practiceLoading: false,
       practiceError: null,
     });
+  });
+
+  it('reuses the snapshot when returning Home', async () => {
+    mocks.loadPracticeAvailabilitySnapshot.mockResolvedValue({ reviewReadyAt: null, initialTrainingAvailable: true, activeSession: null, requiresSessionReconciliation: false });
+    await loadHome();
+    await loadHome();
+    expect(mocks.loadPracticeAvailabilitySnapshot).toHaveBeenCalledOnce();
   });
 
   it('resets availability for a signed-out user', async () => {

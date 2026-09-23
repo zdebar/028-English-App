@@ -60,7 +60,7 @@ export default function LevelsOverview({
       buttonTitle={TEXTS.levelsOverview}
       className={levels.length > 0 ? 'bottom-controls-clearance' : ''}
     >
-      <DataState loading={false} hasData={levels.length > 0} noDataMessage={TEXTS.noDashboardData}>
+      <DataState loading={levelsLoading && levels.length === 0} hasData={levels.length > 0} noDataMessage={TEXTS.noDashboardData}>
         <div className="flex flex-col gap-1 pt-1">
           {levels.map((level) => (
             <div key={level.id} className="flex flex-col gap-1">

@@ -182,6 +182,7 @@ function createVocabularyStartedQuery() {
       mocks.indexedBetween(...args);
       return {
         filter: (predicate: (item: any) => boolean) => ({
+          first: async () => mocks.startedGrammarCandidates.find(predicate),
           toArray: async (...toArrayArgs: unknown[]) =>
             ((await mocks.indexedToArray(...toArrayArgs)) ?? []).filter(predicate),
         }),
@@ -440,6 +441,20 @@ describe('UserItem', () => {
     ]);
 
     await expect(UserItem.getInitiatedGrammarChunkIds('u1')).resolves.toEqual([7]);
+  });
+
+  it('checks vocabulary availability without materializing a list', async () => {
+    const nullDate = '1970-01-01T00:00:00.000Z';
+    const item = { started_at: nullDate, deleted_at: nullDate, mastered_at_cz_to_en: nullDate, mastered_at_en_to_cz: nullDate };
+    mocks.startedGrammarCandidates = [item];
+    await expect(UserItem.hasInitiatedVocabulary('u1')).resolves.toBe(false);
+    mocks.startedGrammarCandidates = [{ ...item, started_at: '2025-01-01T00:00:00Z' }];
+    await expect(UserItem.hasInitiatedVocabulary('u1')).resolves.toBe(true);
+    mocks.startedGrammarCandidates = [{ ...item, started_at: '2025-01-01T00:00:00Z', deleted_at: '2025-01-02T00:00:00Z' }];
+    await expect(UserItem.hasInitiatedVocabulary('u1')).resolves.toBe(false);
+    mocks.startedGrammarCandidates = [{ ...item, mastered_at_cz_to_en: '2025-01-01T00:00:00Z', mastered_at_en_to_cz: '2025-01-01T00:00:00Z' }];
+    await expect(UserItem.hasInitiatedVocabulary('u1')).resolves.toBe(true);
+    expect(mocks.indexedToArray).not.toHaveBeenCalled();
   });
 
   it('getInitiatedVocabulary includes started and skipped vocabulary items', async () => {

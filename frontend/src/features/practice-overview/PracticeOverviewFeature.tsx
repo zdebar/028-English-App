@@ -1,3 +1,4 @@
+import { sharedQueryKey } from '@/hooks/shared-query-store';
 import OverviewCard from '@/components/UI/OverviewCard';
 import config from '@/config/config';
 import { ROUTES } from '@/config/routes.config';
@@ -115,6 +116,7 @@ export default function PracticeOverviewFeature({
   const { data: rawItems, loading, error } = useLiveQueryData(fetchItems, {
     emptyData: [],
     initialData: initialItems,
+    sharedKey: sharedQueryKey(userId, 'practice-overview'),
   });
   const days = useMemo(() => getPracticeDays(rawItems), [rawItems]);
 

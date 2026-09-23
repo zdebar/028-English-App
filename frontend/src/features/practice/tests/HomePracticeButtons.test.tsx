@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
@@ -20,6 +20,20 @@ import PracticeButtons from '@/features/practice/PracticeButton';
 import { usePracticeAvailabilityStore } from '@/features/practice/use-practice-availability-store';
 
 describe('Home practice buttons', () => {
+  afterEach(() => vi.useRealTimers());
+
+  it('enables review at the stored date without changing the availability snapshot', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-23T10:00:00Z'));
+    const readyAt = '2026-09-23T10:00:02Z';
+    usePracticeAvailabilityStore.setState({ reviewReadyAt: readyAt });
+    const snapshot = usePracticeAvailabilityStore.getState();
+    render(<PracticeButtons />);
+    expect(button('Review').disabled).toBe(true);
+    await act(async () => vi.advanceTimersByTimeAsync(2000));
+    expect(button('Review').disabled).toBe(false);
+    expect(usePracticeAvailabilityStore.getState()).toBe(snapshot);
+  });
   beforeEach(() => {
     usePracticeAvailabilityStore.setState({
       reviewReadyAt: null,

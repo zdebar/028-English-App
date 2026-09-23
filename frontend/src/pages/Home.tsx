@@ -17,7 +17,6 @@ import SimulateDataButton from '@/features/synchronization/SimulateDataButton';
 import PracticeButton from '@/features/practice/PracticeButton';
 import HelpButton from '@/features/help/HelpButton';
 import config from '@/config/config';
-import { usePracticeAvailabilityStoreSync } from '@/features/practice/use-practice-availability-store-sync';
 
 const HOME_TEXT_ACTION_CLASS_NAME =
   'color-info font-headings text-center text-lg decoration-current underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2';
@@ -46,7 +45,6 @@ export default function Home(): JSX.Element {
   const startedTodayCount = useUserStore((state) => state.startedTodayCount);
   const isSyncError = useSyncStore((state) => state.isSyncError);
 
-  usePracticeAvailabilityStoreSync(userId);
 
   if (authLoading) {
     return (

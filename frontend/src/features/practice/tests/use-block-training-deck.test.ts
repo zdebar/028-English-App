@@ -13,6 +13,10 @@ const mocks = vi.hoisted(() => ({
   transitionEvents: [] as string[],
 }));
 
+vi.mock('../practice-availability-controller', () => ({
+  beginPracticeAvailabilityBoundary: () => async () => {},
+}));
+
 vi.mock('@/config/config', () => ({
   default: {
     database: { nullReplacementDate: '1970-01-01T00:00:00.000Z' },
