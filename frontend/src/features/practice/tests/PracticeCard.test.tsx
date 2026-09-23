@@ -14,6 +14,7 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
   closeGrammar: vi.fn(),
   handleNote: vi.fn(),
   closeNote: vi.fn(),
+  showToast: vi.fn(),
   makePracticeItem: (overrides: Partial<UserItemLocal> = {}): UserItemLocal => ({
     user_id: 'u1',
     item_id: 1,
@@ -59,8 +60,10 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     setVolume: vi.fn(),
     playAudio: vi.fn(),
     audioLoading: false,
-    isPlaying: false,
-    handleReveal: vi.fn(() => {
+  isPlaying: false,
+  noteLoadFailed: false,
+  grammarLoadFailed: false,
+  handleReveal: vi.fn(() => {
       if (
         !mocks.practiceDeck.audioError &&
         !mocks.practiceDeck.revealed
@@ -120,6 +123,11 @@ vi.mock('@/locales/cs', () => ({
 vi.mock('@/features/auth/use-auth-store', () => ({
   useAuthStore: (selector: (state: { userId: string | null }) => unknown) =>
     selector({ userId: mocks.userId }),
+}));
+
+vi.mock('@/features/toast/use-toast-store', () => ({
+  useToastStore: (selector: (state: { showToast: typeof mocks.showToast }) => unknown) =>
+    selector({ showToast: mocks.showToast }),
 }));
 
 vi.mock('react-router-dom', () => ({
@@ -352,6 +360,8 @@ describe('PracticeCard', () => {
     mocks.practiceDeck.error = null;
     mocks.practiceDeck.audioError = false;
     mocks.practiceDeck.audioLoading = false;
+    mocks.practiceDeck.noteLoadFailed = false;
+    mocks.practiceDeck.grammarLoadFailed = false;
   });
 
   afterEach(() => {
@@ -487,6 +497,101 @@ describe('PracticeCard', () => {
     expect(screen.getByTestId('grammar-detail').textContent).toContain('Resolved grammar');
   });
 
+  it('opens detail after a pending detail request finishes', async () => {
+    let resolveLoad!: (loaded: boolean) => void;
+    const ensureDetailLoaded = vi.fn(
+      () => new Promise<boolean>((resolve) => {
+        resolveLoad = resolve;
+      }),
+    );
+
+    render(
+      <PracticeSessionCard
+        note={null}
+        grammar={null}
+        grammarAvailable
+        progressLabel="1 / 2"
+        revealed
+        czech="ahoj"
+        english="hello"
+        pronunciation="hello"
+        audioDisabled={false}
+        handleReveal={vi.fn()}
+        plusHint={vi.fn()}
+        nextRepeat={vi.fn()}
+        nextKnown={vi.fn()}
+        ensureDetailLoaded={ensureDetailLoaded}
+        audioError={false}
+        playAudio={vi.fn()}
+        audioLoading={false}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Grammar' }));
+    expect(ensureDetailLoaded).toHaveBeenCalledWith('grammar');
+    expect(screen.queryByTestId('grammar-detail')).toBeNull();
+
+    await act(async () => {
+      resolveLoad(true);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(screen.getByTestId('grammar-detail')).toBeTruthy();
+  });
+
+  it('reports a failed requested detail only once', async () => {
+    const ensureDetailLoaded = vi.fn().mockResolvedValue(false);
+    const onDetailLoadError = vi.fn();
+
+    render(
+      <PracticeSessionCard
+        note={null}
+        grammar={null}
+        grammarAvailable
+        itemKey="1"
+        progressLabel="1 / 2"
+        revealed
+        czech="ahoj"
+        english="hello"
+        pronunciation="hello"
+        audioDisabled={false}
+        handleReveal={vi.fn()}
+        plusHint={vi.fn()}
+        nextRepeat={vi.fn()}
+        nextKnown={vi.fn()}
+        ensureDetailLoaded={ensureDetailLoaded}
+        onDetailLoadError={onDetailLoadError}
+        audioError={false}
+        playAudio={vi.fn()}
+        audioLoading={false}
+      />,
+    );
+
+    const grammarButton = screen.getByRole('button', { name: 'Grammar' });
+    await act(async () => {
+      fireEvent.click(grammarButton);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(onDetailLoadError).toHaveBeenCalledWith('grammar');
+    await act(async () => {
+      fireEvent.click(grammarButton);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(onDetailLoadError).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows an error toast when background detail loading fails', () => {
+    mocks.practiceDeck.revealed = true;
+    mocks.practiceDeck.grammarLoadFailed = true;
+
+    render(<PracticeCard />);
+
+    expect(mocks.showToast).toHaveBeenCalledWith('Loading error', 'error');
+  });
+
   it('keeps grammar disabled before reveal even when grammar data exists', () => {
     mocks.practiceDeck.grammar = { ...mocks.practiceDeck.grammar, id: 42 };
     mocks.practiceDeck.revealed = false;
@@ -580,6 +685,67 @@ describe('PracticeCard', () => {
 
     expect((screen.getByTestId('master-btn') as HTMLButtonElement).disabled).toBe(true);
     expect(screen.getByText('Round 1/2')).not.toBeNull();
+  });
+
+  it('keeps referenced detail controls enabled while details are loading', () => {
+    render(
+      <PracticeSessionCard
+        note={null}
+        grammar={null}
+        noteAvailable
+        grammarAvailable
+        progressLabel="1 / 2"
+        revealed
+        czech="ahoj"
+        english="hello"
+        pronunciation="hello"
+        audioDisabled={false}
+        handleReveal={vi.fn()}
+        plusHint={vi.fn()}
+        nextRepeat={vi.fn()}
+        nextKnown={vi.fn()}
+        audioError={false}
+        playAudio={vi.fn()}
+        audioLoading={false}
+      />,
+    );
+
+    expect((screen.getByRole('button', { name: 'Grammar' }) as HTMLButtonElement).disabled).toBe(
+      false,
+    );
+    expect((screen.getByRole('button', { name: 'note' }) as HTMLButtonElement).disabled).toBe(
+      false,
+    );
+  });
+
+  it('disables only the detail control whose load failed', () => {
+    render(
+      <PracticeSessionCard
+        note={null}
+        grammar={null}
+        noteAvailable
+        grammarAvailable
+        noteLoadFailed
+        progressLabel="1 / 2"
+        revealed
+        czech="ahoj"
+        english="hello"
+        pronunciation="hello"
+        audioDisabled={false}
+        handleReveal={vi.fn()}
+        plusHint={vi.fn()}
+        nextRepeat={vi.fn()}
+        nextKnown={vi.fn()}
+        audioError={false}
+        playAudio={vi.fn()}
+        audioLoading={false}
+      />,
+    );
+
+    expect((screen.getByRole('button', { name: 'note' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: 'Grammar' }) as HTMLButtonElement).disabled).toBe(
+      false,
+    );
   });
 
   it('keeps the next hint disabled until the skip pointer gesture is released', async () => {

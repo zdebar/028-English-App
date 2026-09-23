@@ -16,14 +16,25 @@ import { reportError } from '@/features/logging/monitoring-handler';
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
 import {
+  getCachedReviewDeck,
+  invalidateReviewDeck,
+  loadCachedReviewDeck,
+} from '../review-deck-cache';
+import {
   loadReviewEntryDetails,
-  loadReviewCount,
-  loadReviewDeckData,
+  type ReviewEntryDetails,
   type ReviewDeckData,
 } from '@/database/utils/practice-content.utils';
+import type { PracticeDetail } from '../PracticeSessionCard';
+
+type SecondaryContentRequest = Readonly<{
+  userId: string;
+  itemKey: string;
+  promise: Promise<ReviewEntryDetails>;
+}>;
 
 /** Loads complete review batches and saves each batch once at its boundary. */
-export function usePracticeDeck(userId: string | null) {
+export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckData) {
   const trackPracticeWrite = usePracticeAvailabilityBoundary(userId);
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
@@ -33,24 +44,41 @@ export function usePracticeDeck(userId: string | null) {
   const [totalCount, setTotalCount] = useState<number | null>(null);
   const isTransitioningRef = useRef(false);
   const pendingProgressRef = useRef(new Map<number, UserItemLocal>());
-  const availabilityCheckpointRef = useRef<string | null>(null);
-  const counterRefreshStartedRef = useRef(false);
-  const counterResolvedRef = useRef(false);
-  const counterRequestIdRef = useRef(0);
+  const countedDeckRef = useRef<ReviewDeckData | null>(null);
   const [secondaryContent, setSecondaryContent] = useState<SecondaryContent | null>(null);
   const secondaryContentRequestIdRef = useRef(0);
+  const secondaryContentRequestRef = useRef<SecondaryContentRequest | null>(null);
 
-  const fetchPracticeDeck = useCallback(async () => {
-    const result = await fetchReviewDeck(userId);
-    availabilityCheckpointRef.current ??= result.availabilityCheckedAt;
-    return result;
-  }, [userId]);
+  const getSecondaryContentPromise = useCallback(
+    (requestedUserId: string, item: PracticeDeckEntry['item']): Promise<ReviewEntryDetails> => {
+      const itemKey = getReviewItemKey(item);
+      const existingRequest = secondaryContentRequestRef.current;
+      if (existingRequest?.userId === requestedUserId && existingRequest.itemKey === itemKey) {
+        return existingRequest.promise;
+      }
+
+      const promise = loadReviewEntryDetails(requestedUserId, item);
+      secondaryContentRequestRef.current = { userId: requestedUserId, itemKey, promise };
+      return promise;
+    },
+    [],
+  );
+
+  const initialReviewDeck = initialData ?? (userId ? getCachedReviewDeck(userId) : undefined);
+  const fetchPracticeDeck = useCallback(
+    () => (userId ? loadCachedReviewDeck(userId) : Promise.resolve(createEmptyReviewDeck())),
+    [userId],
+  );
   const {
     data: fetchedResult,
     loading,
     error,
     reload,
-  } = useFetch<ReviewDeckData>(fetchPracticeDeck);
+  } = useFetch<ReviewDeckData>(fetchPracticeDeck, { initialData: initialReviewDeck });
+  const reloadPracticeDeck = useCallback(async () => {
+    if (userId) invalidateReviewDeck(userId);
+    await reload();
+  }, [reload, userId]);
   const { currentEntry, currentItem } = useMemo(
     () => getReviewDeckView(fetchedResult, index),
     [fetchedResult, index],
@@ -64,20 +92,8 @@ export function usePracticeDeck(userId: string | null) {
   const resetHint = cardState.resetHint;
   const resetQuestionState = cardState.resetQuestionState;
 
-  useLayoutEffect(() => {
-    resetReviewCard(setIndex, setRevealed, resetHint);
-  }, [fetchedResult, resetHint]);
-
   useEffect(() => {
-    if (loading || !fetchedResult) return;
-    setFinishedReview(fetchedResult.abandoned);
-  }, [fetchedResult, loading]);
-
-  useEffect(() => {
-    counterRequestIdRef.current += 1;
-    counterRefreshStartedRef.current = false;
-    counterResolvedRef.current = false;
-    availabilityCheckpointRef.current = null;
+    countedDeckRef.current = null;
     pendingProgressRef.current.clear();
     setCompletedCount(0);
     setTotalCount(null);
@@ -85,34 +101,21 @@ export function usePracticeDeck(userId: string | null) {
     if (!userId) return undefined;
 
     return () => {
-      counterRequestIdRef.current += 1;
-      counterRefreshStartedRef.current = false;
-      counterResolvedRef.current = false;
+      countedDeckRef.current = null;
     };
   }, [userId]);
 
+  useLayoutEffect(() => {
+    resetReviewCard(setIndex, setRevealed, resetHint);
+  }, [fetchedResult, resetHint]);
+
   useEffect(() => {
-    if (loading || !userId || !fetchedResult || counterRefreshStartedRef.current) return undefined;
+    if (loading || !fetchedResult || countedDeckRef.current === fetchedResult) return;
 
-    counterRefreshStartedRef.current = true;
-    const requestId = ++counterRequestIdRef.current;
-    let isActive = true;
-
-    void loadReviewCount(userId)
-      .then(({ count, countedThrough }) => {
-        if (!isActive || requestId !== counterRequestIdRef.current) return;
-        setTotalCount(count);
-        advanceAvailabilityCheckpoint(availabilityCheckpointRef, countedThrough);
-        counterResolvedRef.current = true;
-      })
-      .catch((caughtError: unknown) => {
-        if (!isActive || requestId !== counterRequestIdRef.current) return;
-        counterRefreshStartedRef.current = false;
-        reportError('Failed to refresh review counter', toError(caughtError));
-      });
-
-    return undefined;
-  }, [fetchedResult, loading, userId]);
+    countedDeckRef.current = fetchedResult;
+    setFinishedReview(fetchedResult.abandoned);
+    setTotalCount((count) => (count ?? 0) + fetchedResult.entries.length);
+  }, [fetchedResult, loading]);
 
   useEffect(() => {
     if (!userId || !currentItem) {
@@ -123,8 +126,9 @@ export function usePracticeDeck(userId: string | null) {
     const requestId = ++secondaryContentRequestIdRef.current;
     let isActive = true;
     const itemKey = getReviewItemKey(currentItem);
+    const detailPromise = getSecondaryContentPromise(userId, currentItem);
 
-    void loadReviewEntryDetails(userId, currentItem)
+    void detailPromise
       .then((details) => {
         if (!isActive || requestId !== secondaryContentRequestIdRef.current) return;
         setSecondaryContent({ itemKey, ...details });
@@ -132,6 +136,13 @@ export function usePracticeDeck(userId: string | null) {
       .catch((caughtError: unknown) => {
         if (!isActive || requestId !== secondaryContentRequestIdRef.current) return;
         reportError('Failed to load practice card details', toError(caughtError));
+        setSecondaryContent({
+          itemKey,
+          note: null,
+          grammar: null,
+          noteLoadFailed: hasPositiveReference(currentItem.note_id),
+          grammarLoadFailed: hasPositiveReference(currentItem.grammar_chunk_id),
+        });
       });
 
     return () => {
@@ -139,8 +150,30 @@ export function usePracticeDeck(userId: string | null) {
       if (requestId === secondaryContentRequestIdRef.current) {
         secondaryContentRequestIdRef.current += 1;
       }
+      if (secondaryContentRequestRef.current?.promise === detailPromise) {
+        secondaryContentRequestRef.current = null;
+      }
     };
-  }, [currentItem, userId]);
+  }, [currentItem, getSecondaryContentPromise, userId]);
+
+  const ensureDetailLoaded = useCallback(
+    async (detail: PracticeDetail): Promise<boolean> => {
+      if (!userId || !currentItem) return false;
+
+      const itemKey = getReviewItemKey(currentItem);
+      if (secondaryContent?.itemKey === itemKey) {
+        return !getDetailLoadFailed(secondaryContent, detail);
+      }
+
+      try {
+        const details = await getSecondaryContentPromise(userId, currentItem);
+        return !getDetailLoadFailed(details, detail);
+      } catch {
+        return false;
+      }
+    },
+    [currentItem, getSecondaryContentPromise, secondaryContent, userId],
+  );
 
   const nextItem = useCallback(
     async (outcome: PracticeOutcome) => {
@@ -156,12 +189,9 @@ export function usePracticeDeck(userId: string | null) {
             userId,
             pendingProgress: pendingProgressRef,
             resetQuestionState,
-            reload,
+            reload: reloadPracticeDeck,
             setSaveError,
             setCompletedCount,
-            setTotalCount,
-            availabilityCheckpointRef,
-            counterResolvedRef,
             setIndex,
           }, outcome),
         );
@@ -173,7 +203,7 @@ export function usePracticeDeck(userId: string | null) {
       currentItem,
       fetchedResult?.entries.length,
       index,
-      reload,
+      reloadPracticeDeck,
       resetQuestionState,
       trackPracticeWrite,
       userId,
@@ -185,6 +215,11 @@ export function usePracticeDeck(userId: string | null) {
     currentItem,
     note: getSecondaryNote(currentEntry, secondaryContent),
     grammar: getSecondaryGrammar(currentEntry, secondaryContent),
+    noteAvailable: hasPositiveReference(currentItem?.note_id),
+    grammarAvailable: hasPositiveReference(currentItem?.grammar_chunk_id),
+    noteLoadFailed: getSecondaryNoteLoadFailed(currentEntry, secondaryContent),
+    grammarLoadFailed: getSecondaryGrammarLoadFailed(currentEntry, secondaryContent),
+    ensureDetailLoaded,
     progressLabel: getReviewProgressLabel(completedCount, totalCount),
     finishedReview,
     revealed,
@@ -210,15 +245,12 @@ function toError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
 }
 
-function fetchReviewDeck(userId: string | null): Promise<ReviewDeckData> {
-  if (!userId) {
-    return Promise.resolve({
-      entries: [],
-      availabilityCheckedAt: new Date().toISOString(),
-      abandoned: true,
-    });
-  }
-  return loadReviewDeckData(userId);
+function createEmptyReviewDeck(): ReviewDeckData {
+  return {
+    entries: [],
+    availabilityCheckedAt: new Date().toISOString(),
+    abandoned: true,
+  };
 }
 
 function getReviewProgressLabel(completedCount: number, totalCount: number | null): string {
@@ -258,9 +290,6 @@ type AnswerReviewCardOptions = Readonly<{
   reload: () => Promise<unknown>;
   setSaveError: Dispatch<SetStateAction<Error | null>>;
   setCompletedCount: Dispatch<SetStateAction<number>>;
-  setTotalCount: Dispatch<SetStateAction<number | null>>;
-  availabilityCheckpointRef: { current: string | null };
-  counterResolvedRef: { current: boolean };
   setIndex: Dispatch<SetStateAction<number>>;
 }>;
 
@@ -298,57 +327,11 @@ async function saveReviewBatch(options: AnswerReviewCardOptions): Promise<void> 
     await UserItem.savePracticeDeck(pendingItems);
     options.pendingProgress.current.clear();
     options.setSaveError(null);
-    await refreshReviewAvailabilityCount({
-      userId,
-      setSaveError: options.setSaveError,
-      setTotalCount: options.setTotalCount,
-      availabilityCheckpointRef: options.availabilityCheckpointRef,
-      counterResolvedRef: options.counterResolvedRef,
-    });
     await refreshAfterReviewSave(options.reload, options.resetQuestionState, options.setSaveError);
   } catch (caughtError) {
     const normalizedError = toError(caughtError);
     options.setSaveError(normalizedError);
     reportError('Failed to save review batch', normalizedError);
-  }
-}
-
-type RefreshReviewAvailabilityCountOptions = Readonly<{
-  userId: string;
-  setSaveError: Dispatch<SetStateAction<Error | null>>;
-  setTotalCount: Dispatch<SetStateAction<number | null>>;
-  availabilityCheckpointRef: { current: string | null };
-  counterResolvedRef: { current: boolean };
-}>;
-
-async function refreshReviewAvailabilityCount(
-  options: RefreshReviewAvailabilityCountOptions,
-): Promise<void> {
-  const countedThrough = new Date(Date.now()).toISOString();
-  if (!options.counterResolvedRef.current) return;
-
-  const checkedAt = options.availabilityCheckpointRef.current ?? countedThrough;
-  try {
-    const newlyAvailableCount = await UserItem.getNewlyAvailableReviewItemCount(
-      options.userId,
-      checkedAt,
-      countedThrough,
-    );
-    options.setTotalCount((count) => (count === null ? null : count + newlyAvailableCount));
-    advanceAvailabilityCheckpoint(options.availabilityCheckpointRef, countedThrough);
-  } catch (caughtError) {
-    const normalizedError = toError(caughtError);
-    options.setSaveError(normalizedError);
-    reportError('Failed to refresh review availability count', normalizedError);
-  }
-}
-
-function advanceAvailabilityCheckpoint(
-  checkpointRef: { current: string | null },
-  candidate: string,
-): void {
-  if (checkpointRef.current === null || candidate > checkpointRef.current) {
-    checkpointRef.current = candidate;
   }
 }
 
@@ -371,10 +354,24 @@ type SecondaryContent = Readonly<{
   itemKey: string;
   note: PracticeDeckEntry['note'];
   grammar: PracticeDeckEntry['grammar'];
+  noteLoadFailed: boolean;
+  grammarLoadFailed: boolean;
 }>;
+
+function hasPositiveReference(value: number | null | undefined): boolean {
+  return typeof value === 'number' && value > 0;
+}
 
 function getReviewItemKey(item: PracticeDeckEntry['item']): string {
   return String(item.item_id);
+}
+
+function getDetailLoadFailed(
+  details: Pick<SecondaryContent, 'noteLoadFailed' | 'grammarLoadFailed'>,
+  detail: PracticeDetail,
+): boolean {
+  if (detail === 'note') return details.noteLoadFailed;
+  return details.grammarLoadFailed;
 }
 
 function getSecondaryNote(
@@ -397,6 +394,22 @@ function getSecondaryGrammar(
     return secondaryContent.grammar;
   }
   return entry.grammar ?? null;
+}
+
+function getSecondaryNoteLoadFailed(
+  entry: PracticeDeckEntry | null,
+  secondaryContent: SecondaryContent | null,
+): boolean {
+  if (!entry || secondaryContent?.itemKey !== getReviewItemKey(entry.item)) return false;
+  return secondaryContent.noteLoadFailed ?? false;
+}
+
+function getSecondaryGrammarLoadFailed(
+  entry: PracticeDeckEntry | null,
+  secondaryContent: SecondaryContent | null,
+): boolean {
+  if (!entry || secondaryContent?.itemKey !== getReviewItemKey(entry.item)) return false;
+  return secondaryContent.grammarLoadFailed ?? false;
 }
 
 function getReviewPronunciation(

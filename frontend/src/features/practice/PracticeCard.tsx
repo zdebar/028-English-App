@@ -1,21 +1,32 @@
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { usePracticeDeck } from './hooks/use-practice-deck';
-import PracticeSessionCard from './PracticeSessionCard';
+import PracticeSessionCard, { type PracticeDetail } from './PracticeSessionCard';
 import PracticeEmptyState from './PracticeEmptyState';
 import PracticeEndState from './PracticeEndState';
 import { TEXTS } from '@/locales/cs';
 import DelayedMessage from '@/components/UI/DelayedMessage';
 import { useToastStore } from '../toast/use-toast-store';
 import { reportError } from '../logging/monitoring-handler';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
+import type { ReviewDeckData } from '@/database/utils/practice-content.utils';
 
-export default function PracticeCard() {
+type PracticeCardProps = Readonly<{
+  initialData?: ReviewDeckData;
+}>;
+
+export default function PracticeCard({ initialData }: PracticeCardProps) {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
+  const notifiedDetailFailuresRef = useRef(new Set<string>());
   const {
     currentItem,
     note,
     grammar,
+    noteAvailable,
+    grammarAvailable,
+    noteLoadFailed,
+    grammarLoadFailed,
+    ensureDetailLoaded,
     progressLabel,
     finishedReview,
     revealed,
@@ -31,7 +42,23 @@ export default function PracticeCard() {
     audioLoading,
     loading,
     error,
-  } = usePracticeDeck(userId);
+  } = usePracticeDeck(userId, initialData);
+
+  const notifyDetailLoadFailure = useCallback(
+    (detail: PracticeDetail): void => {
+      if (!currentItem) return;
+      const failureKey = `${currentItem.item_id}:${detail}`;
+      if (notifiedDetailFailuresRef.current.has(failureKey)) return;
+      notifiedDetailFailuresRef.current.add(failureKey);
+      showToast(TEXTS.loadingError, 'error');
+    },
+    [currentItem, showToast],
+  );
+
+  useEffect(() => {
+    if (noteLoadFailed) notifyDetailLoadFailure('note');
+    if (grammarLoadFailed) notifyDetailLoadFailure('grammar');
+  }, [grammarLoadFailed, noteLoadFailed, notifyDetailLoadFailure]);
 
   useEffect(() => {
     if (!error) return;
@@ -55,6 +82,13 @@ export default function PracticeCard() {
     <PracticeSessionCard
       note={note}
       grammar={grammar}
+      noteAvailable={noteAvailable}
+      grammarAvailable={grammarAvailable}
+      noteLoadFailed={noteLoadFailed}
+      grammarLoadFailed={grammarLoadFailed}
+      itemKey={currentItem ? String(currentItem.item_id) : undefined}
+      ensureDetailLoaded={ensureDetailLoaded}
+      onDetailLoadError={notifyDetailLoadFailure}
       progressLabel={progressLabel}
       progressHelpText={TEXTS.reviewProgress}
       showProgressLabel

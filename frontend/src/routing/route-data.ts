@@ -5,9 +5,11 @@ import Block from '@/database/models/blocks';
 import PracticeSession from '@/database/models/practice-sessions';
 import UserItem from '@/database/models/user-items';
 import Topic from '@/database/models/topics';
+import { loadCachedReviewDeck } from '@/features/practice/review-deck-cache';
 import {
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
+  type ReviewDeckData,
 } from '@/database/utils/practice-content.utils';
 import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
 import type { BlockType, GrammarGroupType } from '@/types/generic.types';
@@ -93,6 +95,12 @@ export function practiceOverviewDescriptor(userId: string) {
   return {
     load: () => loadSharedQuery(userId, 'practice-overview', () => UserItem.getByUserId(userId)),
   };
+}
+
+export function reviewPracticeDescriptor(userId: string) {
+  return {
+    load: () => loadCachedReviewDeck(userId),
+  } satisfies RouteDataDescriptor<ReviewDeckData>;
 }
 
 export function grammarDescriptor(userId: string) {

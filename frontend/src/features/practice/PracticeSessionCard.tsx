@@ -17,11 +17,20 @@ import RepeatButton from './buttons/RepeatButton';
 import { usePointerReleaseLock } from './hooks/use-pointer-release-lock';
 import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
 import type { NoteType } from '@/types/generic.types';
-import { useEffect, useState, type MouseEvent } from 'react';
+import { useEffect, useRef, useState, type MouseEvent } from 'react';
+
+export type PracticeDetail = 'grammar' | 'note';
 
 export type PracticeSessionCardProps = Readonly<{
   note: NoteType | null;
   grammar: GrammarChunkWithExamples | null;
+  noteAvailable?: boolean;
+  grammarAvailable?: boolean;
+  noteLoadFailed?: boolean;
+  grammarLoadFailed?: boolean;
+  itemKey?: string;
+  ensureDetailLoaded?: (detail: PracticeDetail) => Promise<boolean>;
+  onDetailLoadError?: (detail: PracticeDetail) => void;
   progressLabel: string | number;
   progressHelpText?: string;
   revealed: boolean;
@@ -58,10 +67,8 @@ type PracticeControlsProps = Pick<
     showHintControl: boolean;
   }>;
 
-type VisibleDetail = 'grammar' | 'note';
-
 type PracticeDetailProps = Readonly<{
-  visibleDetail: VisibleDetail;
+  visibleDetail: PracticeDetail;
   grammar: GrammarChunkWithExamples | null;
   note: NoteType | null;
   onClose: () => void;
@@ -259,6 +266,10 @@ function getPracticeCardDisplayState(
   const {
     grammar,
     note,
+    grammarAvailable,
+    grammarLoadFailed = false,
+    noteAvailable,
+    noteLoadFailed = false,
     revealed,
     audioDisabled,
     audioLoading,
@@ -270,8 +281,8 @@ function getPracticeCardDisplayState(
     showAudioControls,
     audioLoading,
   );
-  const showGrammarButton = hasGrammarDetails(revealed, grammar);
-  const showNoteButton = hasNoteDetails(revealed, note);
+  const showGrammarButton = hasGrammarReference(revealed, grammar, grammarAvailable);
+  const showNoteButton = hasNoteReference(revealed, note, noteAvailable);
   return {
     cardText: getPracticeCardText(revealed),
     cardStyle: getPracticeCardStyle(controlsLocked, revealed),
@@ -279,8 +290,8 @@ function getPracticeCardDisplayState(
     showNoteButton,
     showProgressLabel: props.isBlockTrainingPractice || props.showProgressLabel,
     audioButtonDisabled: audioControlsDisabled || !revealed,
-    grammarButtonDisabled: controlsLocked || !showGrammarButton,
-    noteButtonDisabled: controlsLocked || !showNoteButton,
+    grammarButtonDisabled: controlsLocked || grammarLoadFailed || !showGrammarButton,
+    noteButtonDisabled: controlsLocked || noteLoadFailed || !showNoteButton,
     controlsLocked,
     showHintControl: !revealed,
     practiceControlColumns: getPracticeControlColumns(!revealed),
@@ -299,13 +310,33 @@ function getPracticeCardStyle(controlsLocked: boolean, revealed: boolean): strin
   return 'color-audio-disabled';
 }
 
-function hasGrammarDetails(revealed: boolean, grammar: GrammarChunkWithExamples | null): boolean {
-  if (!revealed || !grammar) return false;
+function hasGrammarReference(
+  revealed: boolean,
+  grammar: GrammarChunkWithExamples | null,
+  grammarAvailable: boolean | undefined,
+): boolean {
+  if (!revealed) return false;
+  if (grammarAvailable !== undefined) return grammarAvailable;
+  return hasGrammarDetails(grammar);
+}
+
+function hasGrammarDetails(grammar: GrammarChunkWithExamples | null): boolean {
+  if (!grammar) return false;
   return Boolean(grammar.note?.trim() || grammar.items.length);
 }
 
-function hasNoteDetails(revealed: boolean, note: NoteType | null): boolean {
-  if (!revealed || !note) return false;
+function hasNoteReference(
+  revealed: boolean,
+  note: NoteType | null,
+  noteAvailable: boolean | undefined,
+): boolean {
+  if (!revealed) return false;
+  if (noteAvailable !== undefined) return noteAvailable;
+  return hasNoteDetails(note);
+}
+
+function hasNoteDetails(note: NoteType | null): boolean {
+  if (!note) return false;
   return Boolean(note.note.trim());
 }
 
@@ -324,24 +355,50 @@ function getPracticeControlColumns(
   return 'grid-cols-1';
 }
 
-function openGrammarDetail(
+async function openGrammarDetail(
   grammar: GrammarChunkWithExamples | null,
   disabled: boolean,
-  setVisibleDetail: (detail: VisibleDetail) => void,
-): void {
-  if (!grammar || disabled) return;
-  setVisibleDetail('grammar');
+  ensureDetailLoaded: PracticeSessionCardProps['ensureDetailLoaded'],
+  onDetailLoadError: PracticeSessionCardProps['onDetailLoadError'],
+  setVisibleDetail: (detail: PracticeDetail) => void,
+): Promise<void> {
+  if (disabled) return;
+  if (grammar) {
+    setVisibleDetail('grammar');
+    return;
+  }
+  if (!ensureDetailLoaded) return;
+
+  const loaded = await ensureDetailLoaded('grammar');
+  if (loaded) {
+    setVisibleDetail('grammar');
+    return;
+  }
+  onDetailLoadError?.('grammar');
 }
 
-function openNoteDetail(
+async function openNoteDetail(
   event: MouseEvent,
   note: NoteType | null,
   disabled: boolean,
-  setVisibleDetail: (detail: VisibleDetail) => void,
-): void {
+  ensureDetailLoaded: PracticeSessionCardProps['ensureDetailLoaded'],
+  onDetailLoadError: PracticeSessionCardProps['onDetailLoadError'],
+  setVisibleDetail: (detail: PracticeDetail) => void,
+): Promise<void> {
   event.stopPropagation();
-  if (!note || disabled) return;
-  setVisibleDetail('note');
+  if (disabled) return;
+  if (note) {
+    setVisibleDetail('note');
+    return;
+  }
+  if (!ensureDetailLoaded) return;
+
+  const loaded = await ensureDetailLoaded('note');
+  if (loaded) {
+    setVisibleDetail('note');
+    return;
+  }
+  onDetailLoadError?.('note');
 }
 
 function PracticeCardButton({
@@ -421,14 +478,17 @@ function PracticeCardActionBar({
   props,
   display,
   setVisibleDetail,
+  onDetailLoadError,
 }: Readonly<{
   props: NormalizedPracticeSessionCardProps;
   display: PracticeCardDisplayState;
-  setVisibleDetail: (detail: VisibleDetail) => void;
+  setVisibleDetail: (detail: PracticeDetail) => void;
+  onDetailLoadError: (detail: PracticeDetail) => void;
 }>) {
   const {
     grammar,
     note,
+    ensureDetailLoaded,
     playAudio,
     completeCurrent,
     completeDisabled,
@@ -463,7 +523,13 @@ function PracticeCardActionBar({
           title={TEXTS.grammar}
           ariaLabel={TEXTS.grammar}
           onClick={() =>
-            openGrammarDetail(grammar, display.grammarButtonDisabled, setVisibleDetail)
+            void openGrammarDetail(
+              grammar,
+              display.grammarButtonDisabled,
+              ensureDetailLoaded,
+              onDetailLoadError,
+              setVisibleDetail,
+            )
           }
           disabled={display.grammarButtonDisabled}
         >
@@ -476,7 +542,14 @@ function PracticeCardActionBar({
           title={TEXTS.tooltipNotes}
           disabled={display.noteButtonDisabled}
           onClick={(event) =>
-            openNoteDetail(event, note, display.noteButtonDisabled, setVisibleDetail)
+            void openNoteDetail(
+              event,
+              note,
+              display.noteButtonDisabled,
+              ensureDetailLoaded,
+              onDetailLoadError,
+              setVisibleDetail,
+            )
           }
         >
           <HelpText className="-bottom-4 left-0 flex flex-col items-end landscape:invisible">
@@ -492,9 +565,11 @@ function PracticeCardActionBar({
 function PracticeSessionCardView({
   props,
   setVisibleDetail,
+  onDetailLoadError,
 }: Readonly<{
   props: NormalizedPracticeSessionCardProps;
-  setVisibleDetail: (detail: VisibleDetail) => void;
+  setVisibleDetail: (detail: PracticeDetail) => void;
+  onDetailLoadError: (detail: PracticeDetail) => void;
 }>) {
   const display = getPracticeCardDisplayState(props);
   return (
@@ -505,6 +580,7 @@ function PracticeSessionCardView({
           props={props}
           display={display}
           setVisibleDetail={setVisibleDetail}
+          onDetailLoadError={onDetailLoadError}
         />
       </div>
     </div>
@@ -513,7 +589,19 @@ function PracticeSessionCardView({
 
 export default function PracticeSessionCard(props: PracticeSessionCardProps) {
   const normalizedProps = normalizePracticeSessionCardProps(props);
-  const [visibleDetail, setVisibleDetail] = useState<VisibleDetail | null>(null);
+  const [visibleDetail, setVisibleDetail] = useState<PracticeDetail | null>(null);
+  const reportedDetailFailuresRef = useRef(new Set<string>());
+
+  useEffect(() => {
+    reportedDetailFailuresRef.current.clear();
+  }, [normalizedProps.itemKey]);
+
+  const handleDetailLoadError = (detail: PracticeDetail): void => {
+    const failureKey = `${normalizedProps.itemKey ?? 'current'}:${detail}`;
+    if (reportedDetailFailuresRef.current.has(failureKey)) return;
+    reportedDetailFailuresRef.current.add(failureKey);
+    normalizedProps.onDetailLoadError?.(detail);
+  };
 
   if (visibleDetail) {
     return (
@@ -530,6 +618,7 @@ export default function PracticeSessionCard(props: PracticeSessionCardProps) {
     <PracticeSessionCardView
       props={normalizedProps}
       setVisibleDetail={(detail) => setVisibleDetail(detail)}
+      onDetailLoadError={handleDetailLoadError}
     />
   );
 }
