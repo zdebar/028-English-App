@@ -55,6 +55,7 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
           }
         }
         setSaveError(null);
+        invalidateReviewDeck(userId);
         return true;
       })
       .catch((caughtError: unknown) => {
