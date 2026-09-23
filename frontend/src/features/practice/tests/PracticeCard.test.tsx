@@ -431,7 +431,7 @@ describe('PracticeCard', () => {
     expect(mocks.practiceDeck.nextItem).toHaveBeenNthCalledWith(3, 'skip');
   });
 
-  it('keeps audio controls visible but disabled when audio is not available', () => {
+  it('keeps playback disabled but volume available when audio is not available', () => {
     mocks.practiceDeck.audioDisabled = true;
 
     const { container } = render(<PracticeCard />);
@@ -446,7 +446,7 @@ describe('PracticeCard', () => {
     expect(audioButton).toBeTruthy();
     expect(audioButton.disabled).toBe(true);
     expect(volumeSlider).toBeTruthy();
-    expect(volumeSlider.dataset.disabled).toBe('true');
+    expect(volumeSlider.dataset.disabled).toBe('false');
   });
 
   it('keeps playback disabled but volume adjustable before reveal in CZ->EN mode', () => {

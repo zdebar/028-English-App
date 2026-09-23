@@ -240,12 +240,10 @@ function normalizePracticeSessionCardProps(
 type PracticeCardDisplayState = Readonly<{
   cardText: string | undefined;
   cardStyle: string;
-  showAudioControls: boolean;
   showGrammarButton: boolean;
   showNoteButton: boolean;
   showProgressLabel: boolean;
   audioButtonDisabled: boolean;
-  volumeSliderDisabled: boolean;
   grammarButtonDisabled: boolean;
   noteButtonDisabled: boolean;
   controlsLocked: boolean;
@@ -277,12 +275,10 @@ function getPracticeCardDisplayState(
   return {
     cardText: getPracticeCardText(revealed),
     cardStyle: getPracticeCardStyle(controlsLocked, revealed),
-    showAudioControls,
     showGrammarButton,
     showNoteButton,
     showProgressLabel: props.isBlockTrainingPractice || props.showProgressLabel,
     audioButtonDisabled: audioControlsDisabled || !revealed,
-    volumeSliderDisabled: audioControlsDisabled,
     grammarButtonDisabled: controlsLocked || !showGrammarButton,
     noteButtonDisabled: controlsLocked || !showNoteButton,
     controlsLocked,
@@ -460,7 +456,7 @@ function PracticeCardActionBar({
       </div>
       <div className="pos-bottom-left-control">
         <PlayButton onClick={playAudio} disabled={display.audioButtonDisabled} />
-        <VolumeSlider disabled={display.volumeSliderDisabled} />
+        <VolumeSlider />
       </div>
       <div className="pos-bottom-right-control">
         <SecondaryControlButton
