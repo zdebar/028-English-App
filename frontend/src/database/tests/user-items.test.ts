@@ -19,7 +19,6 @@ function createDueQuery() {
           toArray: async () => mocks.dueItems.filter(predicate).slice(0, limit),
         }),
         toArray: async () => mocks.dueItems.filter(predicate),
-        count: async () => mocks.dueItems.filter(predicate).length,
       }),
     }),
   };
@@ -127,21 +126,6 @@ describe('UserItem', () => {
     const deck = await UserItem.getReviewDeck('u1', '2026-02-01T00:00:00.000Z');
 
     expect(deck.map((item) => item.item_id)).toEqual([1, 2]);
-  });
-
-  it('counts newly available CZ-to-EN items once per availability window', async () => {
-    mocks.dueItems = [
-      makeItem({ next_at_cz_to_en: '2026-01-15T00:00:00.000Z' }),
-      makeItem({ item_id: 2, next_at_cz_to_en: '2026-02-15T00:00:00.000Z' }),
-    ];
-
-    await expect(
-      UserItem.getNewlyAvailableReviewItemCount(
-        'u1',
-        '2026-01-01T00:00:00.000Z',
-        '2026-02-01T00:00:00.000Z',
-      ),
-    ).resolves.toBe(1);
   });
 
   it('applies review outcomes without reverse-direction state', () => {

@@ -215,23 +215,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return this.getDuePracticeItems(userId, Number.MAX_SAFE_INTEGER, now);
   }
 
-  /** Counts due, unmastered CZ-to-EN items without loading them. */
-  static async getReviewItemCount(
-    userId: string,
-    now: string = new Date().toISOString(),
-  ): Promise<number> {
-    return this.getDuePracticeCollection(userId, now).count();
-  }
-
-  /** Counts newly due CZ-to-EN items whose next_at entered the requested time window. */
-  static async getNewlyAvailableReviewItemCount(
-    userId: string,
-    checkedAt: string,
-    now: string,
-  ): Promise<number> {
-    return this.getNewlyAvailableReviewItemCountInternal(userId, checkedAt, now);
-  }
-
   /**
    * Persists practice progress for all items in a completed deck.
    *
@@ -740,31 +723,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         true,
       )
       .filter(matchesItem);
-  }
-
-  private static getNewlyAvailableReviewItemCountInternal(
-    userId: string,
-    checkedAt: string,
-    now: string,
-  ): Promise<number> {
-    const matchesNewlyAvailableItem = (item: UserItemLocal) => {
-      if (item.deleted_at !== NULL_DATE || item.started_at === NULL_DATE) return false;
-      if (item.mastered_at_cz_to_en !== NULL_DATE) return false;
-
-      const nextAt = item.next_at_cz_to_en;
-      return nextAt !== NULL_DATE && nextAt >= checkedAt && nextAt < now;
-    };
-
-    return db.user_items
-      .where(getPracticeIndex())
-      .between(
-        [userId, checkedAt, Dexie.minKey, Dexie.minKey],
-        [userId, now, Dexie.maxKey, Dexie.maxKey],
-        true,
-        true,
-      )
-      .filter(matchesNewlyAvailableItem)
-      .count();
   }
 
   /** Applies one CZ-to-EN practice outcome. */

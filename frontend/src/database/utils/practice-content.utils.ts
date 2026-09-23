@@ -158,15 +158,3 @@ export async function loadReviewEntryDetails(
   const [entry] = await resolvePracticeEntries(userId, [item]);
   return { note: entry?.note ?? null, grammar: entry?.grammar ?? null };
 }
-
-export type ReviewCountData = Readonly<{
-  count: number;
-  countedThrough: string;
-}>;
-
-/** Loads the exact current review count and the timestamp covered by that count. */
-export async function loadReviewCount(userId: string): Promise<ReviewCountData> {
-  const countedThrough = new Date().toISOString();
-  const count = await UserItem.getReviewItemCount(userId, countedThrough);
-  return { count, countedThrough };
-}

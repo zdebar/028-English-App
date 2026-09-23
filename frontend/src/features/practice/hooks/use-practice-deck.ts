@@ -16,9 +16,12 @@ import { reportError } from '@/features/logging/monitoring-handler';
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
 import {
+  getCachedReviewDeck,
+  invalidateReviewDeck,
+  loadCachedReviewDeck,
+} from '../review-deck-cache';
+import {
   loadReviewEntryDetails,
-  loadReviewCount,
-  loadReviewDeckData,
   type ReviewDeckData,
 } from '@/database/utils/practice-content.utils';
 
@@ -33,24 +36,25 @@ export function usePracticeDeck(userId: string | null) {
   const [totalCount, setTotalCount] = useState<number | null>(null);
   const isTransitioningRef = useRef(false);
   const pendingProgressRef = useRef(new Map<number, UserItemLocal>());
-  const availabilityCheckpointRef = useRef<string | null>(null);
-  const counterRefreshStartedRef = useRef(false);
-  const counterResolvedRef = useRef(false);
-  const counterRequestIdRef = useRef(0);
+  const countedDeckRef = useRef<ReviewDeckData | null>(null);
   const [secondaryContent, setSecondaryContent] = useState<SecondaryContent | null>(null);
   const secondaryContentRequestIdRef = useRef(0);
 
-  const fetchPracticeDeck = useCallback(async () => {
-    const result = await fetchReviewDeck(userId);
-    availabilityCheckpointRef.current ??= result.availabilityCheckedAt;
-    return result;
-  }, [userId]);
+  const initialReviewDeck = userId ? getCachedReviewDeck(userId) : undefined;
+  const fetchPracticeDeck = useCallback(
+    () => (userId ? loadCachedReviewDeck(userId) : Promise.resolve(createEmptyReviewDeck())),
+    [userId],
+  );
   const {
     data: fetchedResult,
     loading,
     error,
     reload,
-  } = useFetch<ReviewDeckData>(fetchPracticeDeck);
+  } = useFetch<ReviewDeckData>(fetchPracticeDeck, { initialData: initialReviewDeck });
+  const reloadPracticeDeck = useCallback(async () => {
+    if (userId) invalidateReviewDeck(userId);
+    await reload();
+  }, [reload, userId]);
   const { currentEntry, currentItem } = useMemo(
     () => getReviewDeckView(fetchedResult, index),
     [fetchedResult, index],
@@ -64,20 +68,8 @@ export function usePracticeDeck(userId: string | null) {
   const resetHint = cardState.resetHint;
   const resetQuestionState = cardState.resetQuestionState;
 
-  useLayoutEffect(() => {
-    resetReviewCard(setIndex, setRevealed, resetHint);
-  }, [fetchedResult, resetHint]);
-
   useEffect(() => {
-    if (loading || !fetchedResult) return;
-    setFinishedReview(fetchedResult.abandoned);
-  }, [fetchedResult, loading]);
-
-  useEffect(() => {
-    counterRequestIdRef.current += 1;
-    counterRefreshStartedRef.current = false;
-    counterResolvedRef.current = false;
-    availabilityCheckpointRef.current = null;
+    countedDeckRef.current = null;
     pendingProgressRef.current.clear();
     setCompletedCount(0);
     setTotalCount(null);
@@ -85,34 +77,21 @@ export function usePracticeDeck(userId: string | null) {
     if (!userId) return undefined;
 
     return () => {
-      counterRequestIdRef.current += 1;
-      counterRefreshStartedRef.current = false;
-      counterResolvedRef.current = false;
+      countedDeckRef.current = null;
     };
   }, [userId]);
 
+  useLayoutEffect(() => {
+    resetReviewCard(setIndex, setRevealed, resetHint);
+  }, [fetchedResult, resetHint]);
+
   useEffect(() => {
-    if (loading || !userId || !fetchedResult || counterRefreshStartedRef.current) return undefined;
+    if (loading || !fetchedResult || countedDeckRef.current === fetchedResult) return;
 
-    counterRefreshStartedRef.current = true;
-    const requestId = ++counterRequestIdRef.current;
-    let isActive = true;
-
-    void loadReviewCount(userId)
-      .then(({ count, countedThrough }) => {
-        if (!isActive || requestId !== counterRequestIdRef.current) return;
-        setTotalCount(count);
-        advanceAvailabilityCheckpoint(availabilityCheckpointRef, countedThrough);
-        counterResolvedRef.current = true;
-      })
-      .catch((caughtError: unknown) => {
-        if (!isActive || requestId !== counterRequestIdRef.current) return;
-        counterRefreshStartedRef.current = false;
-        reportError('Failed to refresh review counter', toError(caughtError));
-      });
-
-    return undefined;
-  }, [fetchedResult, loading, userId]);
+    countedDeckRef.current = fetchedResult;
+    setFinishedReview(fetchedResult.abandoned);
+    setTotalCount((count) => (count ?? 0) + fetchedResult.entries.length);
+  }, [fetchedResult, loading]);
 
   useEffect(() => {
     if (!userId || !currentItem) {
@@ -156,12 +135,9 @@ export function usePracticeDeck(userId: string | null) {
             userId,
             pendingProgress: pendingProgressRef,
             resetQuestionState,
-            reload,
+            reload: reloadPracticeDeck,
             setSaveError,
             setCompletedCount,
-            setTotalCount,
-            availabilityCheckpointRef,
-            counterResolvedRef,
             setIndex,
           }, outcome),
         );
@@ -173,7 +149,7 @@ export function usePracticeDeck(userId: string | null) {
       currentItem,
       fetchedResult?.entries.length,
       index,
-      reload,
+      reloadPracticeDeck,
       resetQuestionState,
       trackPracticeWrite,
       userId,
@@ -210,15 +186,12 @@ function toError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
 }
 
-function fetchReviewDeck(userId: string | null): Promise<ReviewDeckData> {
-  if (!userId) {
-    return Promise.resolve({
-      entries: [],
-      availabilityCheckedAt: new Date().toISOString(),
-      abandoned: true,
-    });
-  }
-  return loadReviewDeckData(userId);
+function createEmptyReviewDeck(): ReviewDeckData {
+  return {
+    entries: [],
+    availabilityCheckedAt: new Date().toISOString(),
+    abandoned: true,
+  };
 }
 
 function getReviewProgressLabel(completedCount: number, totalCount: number | null): string {
@@ -258,9 +231,6 @@ type AnswerReviewCardOptions = Readonly<{
   reload: () => Promise<unknown>;
   setSaveError: Dispatch<SetStateAction<Error | null>>;
   setCompletedCount: Dispatch<SetStateAction<number>>;
-  setTotalCount: Dispatch<SetStateAction<number | null>>;
-  availabilityCheckpointRef: { current: string | null };
-  counterResolvedRef: { current: boolean };
   setIndex: Dispatch<SetStateAction<number>>;
 }>;
 
@@ -298,57 +268,11 @@ async function saveReviewBatch(options: AnswerReviewCardOptions): Promise<void> 
     await UserItem.savePracticeDeck(pendingItems);
     options.pendingProgress.current.clear();
     options.setSaveError(null);
-    await refreshReviewAvailabilityCount({
-      userId,
-      setSaveError: options.setSaveError,
-      setTotalCount: options.setTotalCount,
-      availabilityCheckpointRef: options.availabilityCheckpointRef,
-      counterResolvedRef: options.counterResolvedRef,
-    });
     await refreshAfterReviewSave(options.reload, options.resetQuestionState, options.setSaveError);
   } catch (caughtError) {
     const normalizedError = toError(caughtError);
     options.setSaveError(normalizedError);
     reportError('Failed to save review batch', normalizedError);
-  }
-}
-
-type RefreshReviewAvailabilityCountOptions = Readonly<{
-  userId: string;
-  setSaveError: Dispatch<SetStateAction<Error | null>>;
-  setTotalCount: Dispatch<SetStateAction<number | null>>;
-  availabilityCheckpointRef: { current: string | null };
-  counterResolvedRef: { current: boolean };
-}>;
-
-async function refreshReviewAvailabilityCount(
-  options: RefreshReviewAvailabilityCountOptions,
-): Promise<void> {
-  const countedThrough = new Date(Date.now()).toISOString();
-  if (!options.counterResolvedRef.current) return;
-
-  const checkedAt = options.availabilityCheckpointRef.current ?? countedThrough;
-  try {
-    const newlyAvailableCount = await UserItem.getNewlyAvailableReviewItemCount(
-      options.userId,
-      checkedAt,
-      countedThrough,
-    );
-    options.setTotalCount((count) => (count === null ? null : count + newlyAvailableCount));
-    advanceAvailabilityCheckpoint(options.availabilityCheckpointRef, countedThrough);
-  } catch (caughtError) {
-    const normalizedError = toError(caughtError);
-    options.setSaveError(normalizedError);
-    reportError('Failed to refresh review availability count', normalizedError);
-  }
-}
-
-function advanceAvailabilityCheckpoint(
-  checkpointRef: { current: string | null },
-  candidate: string,
-): void {
-  if (checkpointRef.current === null || candidate > checkpointRef.current) {
-    checkpointRef.current = candidate;
   }
 }
 

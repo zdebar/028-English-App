@@ -7,7 +7,6 @@ const mocks = vi.hoisted(() => ({
   grammarGroupGet: vi.fn(),
   addExamples: vi.fn(),
   getReviewDeck: vi.fn(),
-  getReviewItemCount: vi.fn(),
   getByItemIds: vi.fn(),
   reconcileActive: vi.fn(),
   reportError: vi.fn(),
@@ -30,7 +29,6 @@ vi.mock('@/database/models/grammar-chunks', () => ({
 vi.mock('@/database/models/user-items', () => ({
   default: {
     getReviewDeck: (...args: unknown[]) => mocks.getReviewDeck(...args),
-    getReviewItemCount: (...args: unknown[]) => mocks.getReviewItemCount(...args),
     getByItemIds: (...args: unknown[]) => mocks.getByItemIds(...args),
   },
 }));
@@ -53,7 +51,6 @@ vi.mock('@/config/config', () => ({
 }));
 
 import {
-  loadReviewCount,
   loadReviewDeck,
   loadReviewDeckData,
   resolvePracticeEntries,
@@ -111,7 +108,6 @@ describe('practice content resolution', () => {
     });
     mocks.addExamples.mockImplementation(async (_userId, grammar) => ({ ...grammar, items: [] }));
     mocks.reconcileActive.mockResolvedValue(null);
-    mocks.getReviewItemCount.mockResolvedValue(0);
   });
 
   it('deduplicates relation ids and attaches resolved content without dropping items', async () => {
@@ -182,17 +178,6 @@ describe('practice content resolution', () => {
     expect(now).toEqual(expect.any(String));
     expect(mocks.notesBulkGet).not.toHaveBeenCalled();
     expect(mocks.grammarBulkGet).not.toHaveBeenCalled();
-    expect(mocks.getReviewItemCount).not.toHaveBeenCalled();
-  });
-
-  it('loads the exact review count separately from the review batch', async () => {
-    mocks.getReviewItemCount.mockResolvedValue(5);
-
-    await expect(loadReviewCount('u1')).resolves.toEqual({
-      count: 5,
-      countedThrough: expect.any(String),
-    });
-    expect(mocks.getReviewItemCount).toHaveBeenCalledTimes(1);
   });
 
   it('does not start review while initial block practice is active', async () => {
@@ -213,14 +198,13 @@ describe('practice content resolution', () => {
     expect(result.availabilityCheckedAt).toEqual(expect.any(String));
   });
 
-  it('does not recount availability while loading the next review batch', async () => {
+  it('loads a review batch without a separate count query', async () => {
     mocks.getReviewDeck.mockResolvedValue([makeReviewItem(1)]);
 
     const result = await loadReviewDeckData('u1');
 
     expect(result.entries).toHaveLength(1);
     expect(result.availabilityCheckedAt).toEqual(expect.any(String));
-    expect(mocks.getReviewItemCount).not.toHaveBeenCalled();
   });
 
   it('resolves the grammar group belonging to the requested chunk', async () => {
