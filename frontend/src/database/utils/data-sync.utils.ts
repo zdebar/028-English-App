@@ -2,7 +2,6 @@ import config from '@/config/config';
 import { initDbMappings } from '@/database/models/db-init';
 import Block from '@/database/models/blocks';
 import UserItem from '@/database/models/user-items';
-import { restoreUnsavedFromLocalStorage } from '@/database/utils/database.utils';
 import { getFullSyncTime, setFullSyncTime } from '@/database/utils/sync-time.utils';
 import { withSettledSummary } from '@/features/logging/logging.utils';
 import Lessons from '@/database/models/lessons';
@@ -22,7 +21,7 @@ import { settleSyncWithAuthRecovery } from './sync-auth-recovery.utils';
 /**
  * Synchronizes shared and user-specific tables with Supabase.
  *
- * @param userId Non-empty user id used for user-specific tables and pending local progress restore.
+ * @param userId Non-empty user id used for user-specific tables.
  * @param fullSync When true, forces all sync tasks to use the epoch start timestamp and refresh local rows.
  * When false, a full sync is selected only after the configured full-sync interval expires.
  * @throws Error when userId is empty or any table sync task fails.
@@ -31,8 +30,6 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
   assertNonEmptyString(userId, 'userId');
 
   await initDbMappings();
-  await restoreUnsavedFromLocalStorage(userId);
-
   // Step 1: Determine if a full sync is needed
   const now = Date.now();
   let doFullSync = fullSync;

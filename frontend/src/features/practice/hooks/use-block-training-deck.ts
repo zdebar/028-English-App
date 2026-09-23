@@ -332,7 +332,6 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
   const progressOptions = { initialTraining: true };
   const updatedItem = UserItem.applyPracticeProgress(
     currentItem,
-    'czToEn',
     outcome,
     dateTime,
     progressOptions,
@@ -407,10 +406,8 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
     () => getInitialTrainingView(session, items, itemById, resolvedEntries, isComplete, revealed),
     [isComplete, itemById, items, resolvedEntries, revealed, session],
   );
-  const isCzToEn = true;
   const cardState = usePracticeCardState({
     currentItem,
-    isCzToEn,
     revealed,
     isCompletion: isComplete,
     setRevealed,
@@ -478,14 +475,11 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
     note: currentEntry?.note ?? null,
     practiceGrammar: currentEntry?.grammar ?? null,
     progressLabel: `${displayedCompletedCount}/${items.length}`,
-    isCzToEn,
     revealed,
     czech: cardState.czech,
     english: cardState.english,
     pronunciation,
     audioDisabled: cardState.audioDisabled,
-    showDirectionChange: cardState.showDirectionChange,
-    hideDirectionChange: cardState.hideDirectionChange,
     handleReveal: cardState.handleReveal,
     plusHint: cardState.plusHint,
     nextRepeat: () => advance('incorrect'),

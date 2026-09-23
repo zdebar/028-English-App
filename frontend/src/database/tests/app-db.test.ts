@@ -39,7 +39,7 @@ describe('AppDB schema', () => {
   it('declares the complete schema and removes obsolete stores', () => {
     new AppDB();
 
-    expect(mocks.versions).toHaveLength(4);
+    expect(mocks.versions).toHaveLength(5);
     expect(mocks.versions[0]).toMatchObject({
       number: 1,
       schema: {
@@ -68,9 +68,6 @@ describe('AppDB schema', () => {
     expect(mocks.versions[0].schema?.user_items).toContain(
       '[user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]',
     );
-    expect(mocks.versions[0].schema?.user_items).toContain(
-      '[user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]',
-    );
     expect(mocks.versions[1]).toMatchObject({
       number: 2,
       schema: { user_scores: null, user_items_history: null },
@@ -81,6 +78,10 @@ describe('AppDB schema', () => {
     });
     expect(mocks.versions[3]).toMatchObject({
       number: 4,
+      schema: { user_items: expect.any(String) },
+    });
+    expect(mocks.versions[4]).toMatchObject({
+      number: 5,
       schema: { user_items: expect.any(String) },
     });
   });

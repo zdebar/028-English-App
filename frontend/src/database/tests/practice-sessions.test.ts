@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/config/config', () => ({
   default: {
     database: { nullReplacementDate: '9999-12-31T23:59:59+00:00', nullReplacementNumber: 0 },
-    srs: { intervals: { czToEn: [1, 2, 3], enToCz: [1, 2, 3] } },
+    srs: { intervals: [1, 2, 3] },
     progress: {},
     practice: { initialTrainingBatchSize: 8, reviewMinimumSize: 20 },
   },
@@ -244,14 +244,11 @@ function item(overrides: Record<string, unknown> = {}) {
     topic_id: 0,
     grammar_chunk_id: 0,
     progress_cz_to_en: 0,
-    progress_en_to_cz: 0,
     started_at: '2026-01-01',
     updated_at: '2026-01-01',
     deleted_at: '9999-12-31T23:59:59+00:00',
     next_at_cz_to_en: '2026-01-01',
-    next_at_en_to_cz: '2026-01-01',
     mastered_at_cz_to_en: '9999-12-31T23:59:59+00:00',
-    mastered_at_en_to_cz: '9999-12-31T23:59:59+00:00',
     ...overrides,
   };
 }

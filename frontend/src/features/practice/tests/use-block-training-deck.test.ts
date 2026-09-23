@@ -56,7 +56,6 @@ vi.mock('@/features/practice/hooks/use-practice-card-state', () => ({
       czech: currentItem?.czech,
       english: revealed ? currentItem?.english : '\u00A0',
       audioDisabled: false,
-      showDirectionChange: false,
       handleReveal: () => setRevealed(true),
       plusHint: vi.fn(),
       audioError: false,
@@ -118,7 +117,6 @@ describe('useInitialTrainingDeck', () => {
     );
     expect(mocks.applyPracticeProgress).toHaveBeenCalledWith(
       expect.anything(),
-      'czToEn',
       'correct',
       expect.any(String),
       { initialTraining: true },
@@ -148,7 +146,6 @@ describe('useInitialTrainingDeck', () => {
     await act(async () => result.current.nextKnown());
 
     await waitFor(() => expect(result.current.isComplete).toBe(true));
-    expect(result.current.isCzToEn).toBe(true);
     expect(result.current.progressLabel).toBe('2/2');
     expect(mocks.recordInitialTrainingAnswer).toHaveBeenCalledTimes(1);
     expect(mocks.completeInitialTraining).toHaveBeenCalledOnce();
@@ -177,7 +174,6 @@ describe('useInitialTrainingDeck', () => {
     });
     const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(2));
-    expect(result.current.isCzToEn).toBe(true);
     expect(result.current.hasProgress).toBe(false);
   });
 
@@ -199,7 +195,7 @@ describe('useInitialTrainingDeck', () => {
     expect(result.current.progressLabel).toBe('2/2');
   });
 
-  it('passes the initial-training skip option for both directions', async () => {
+  it('passes the initial-training skip option for CZ-to-EN', async () => {
     const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
 
@@ -207,7 +203,6 @@ describe('useInitialTrainingDeck', () => {
 
     expect(mocks.applyPracticeProgress).toHaveBeenCalledWith(
       expect.anything(),
-      'czToEn',
       'skip',
       expect.any(String),
       { initialTraining: true },
@@ -275,14 +270,11 @@ function item(itemId: number) {
     topic_id: -1,
     grammar_chunk_id: 0,
     progress_cz_to_en: 0,
-    progress_en_to_cz: 0,
     started_at: '1970-01-01T00:00:00.000Z',
     updated_at: '2026-01-01',
     deleted_at: '',
     next_at_cz_to_en: '1970-01-01T00:00:00.000Z',
-    next_at_en_to_cz: '1970-01-01T00:00:00.000Z',
     mastered_at_cz_to_en: '',
-    mastered_at_en_to_cz: '',
     lesson_id: 1,
   };
 }

@@ -1,55 +1,31 @@
 import config from '@/config/config';
-import type { PracticeDirection, UserItemLocal } from '@/types/user-item.types';
+import type { UserItemLocal } from '@/types/user-item.types';
 
 const NULL_DATE = config.database.nullReplacementDate;
 
-type DirectionMasteryItem = Pick<UserItemLocal, 'mastered_at_cz_to_en' | 'mastered_at_en_to_cz'>;
-type DirectionProgressItem = Pick<UserItemLocal, 'progress_cz_to_en' | 'progress_en_to_cz'>;
-type EffectiveProgressItem = DirectionMasteryItem & DirectionProgressItem;
-type InitiatedItem = Pick<
-  UserItemLocal,
-  'started_at' | 'mastered_at_cz_to_en' | 'mastered_at_en_to_cz'
->;
+type EffectiveProgressItem = Pick<UserItemLocal, 'mastered_at_cz_to_en' | 'progress_cz_to_en'>;
+type InitiatedItem = Pick<UserItemLocal, 'started_at' | 'mastered_at_cz_to_en'>;
 
-export const PRACTICE_DIRECTIONS: readonly PracticeDirection[] = ['czToEn', 'enToCz'];
-
-export function getSrsLength(direction: PracticeDirection): number {
-  return config.srs.intervals[direction].length;
+export function getSrsLength(): number {
+  return config.srs.intervals.length;
 }
 
-export function isDirectionMastered(
-  item: DirectionMasteryItem,
-  direction: PracticeDirection,
-): boolean {
-  return getDirectionMasteredAt(item, direction) !== NULL_DATE;
+export function isMastered(item: Pick<UserItemLocal, 'mastered_at_cz_to_en'>): boolean {
+  return (item.mastered_at_cz_to_en ?? NULL_DATE) !== NULL_DATE;
 }
 
 /** Returns whether an item has been initiated, including initial-training skips. */
 export function isInitiated(item: InitiatedItem): boolean {
   return (
     (item.started_at ?? NULL_DATE) !== NULL_DATE ||
-    ((item.mastered_at_cz_to_en ?? NULL_DATE) !== NULL_DATE &&
-      (item.mastered_at_en_to_cz ?? NULL_DATE) !== NULL_DATE)
+    (item.mastered_at_cz_to_en ?? NULL_DATE) !== NULL_DATE
   );
 }
 
-export function getEffectiveProgress(
-  item: EffectiveProgressItem,
-  direction: PracticeDirection,
-): number {
-  const maxProgress = getSrsLength(direction);
-  if (isDirectionMastered(item, direction)) return maxProgress;
+export function getEffectiveProgress(item: EffectiveProgressItem): number {
+  const maxProgress = getSrsLength();
+  if (isMastered(item)) return maxProgress;
 
-  const rawProgress = getDirectionProgress(item, direction);
+  const rawProgress = item.progress_cz_to_en ?? 0;
   return Math.min(Math.max(rawProgress, 0), maxProgress);
-}
-
-function getDirectionProgress(item: DirectionProgressItem, direction: PracticeDirection): number {
-  return direction === 'czToEn' ? (item.progress_cz_to_en ?? 0) : (item.progress_en_to_cz ?? 0);
-}
-
-function getDirectionMasteredAt(item: DirectionMasteryItem, direction: PracticeDirection): string {
-  return direction === 'czToEn'
-    ? (item.mastered_at_cz_to_en ?? NULL_DATE)
-    : (item.mastered_at_en_to_cz ?? NULL_DATE);
 }

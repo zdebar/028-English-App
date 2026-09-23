@@ -250,12 +250,9 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
 async function updateStoredPracticeItem(item: UserItemLocal): Promise<number> {
   return db.user_items.update([item.user_id, item.item_id], {
     progress_cz_to_en: item.progress_cz_to_en,
-    progress_en_to_cz: item.progress_en_to_cz,
     started_at: item.started_at,
     updated_at: item.updated_at,
     next_at_cz_to_en: item.next_at_cz_to_en,
-    next_at_en_to_cz: item.next_at_en_to_cz,
     mastered_at_cz_to_en: item.mastered_at_cz_to_en,
-    mastered_at_en_to_cz: item.mastered_at_en_to_cz,
   });
 }

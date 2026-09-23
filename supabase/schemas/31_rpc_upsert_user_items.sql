@@ -11,13 +11,10 @@ DECLARE
   v_user_id UUID;
   v_item_id INT;
   v_progress_cz_to_en INT;
-  v_progress_en_to_cz INT;
   v_started_at TIMESTAMPTZ;
   v_updated_at TIMESTAMPTZ;
   v_next_at_cz_to_en TIMESTAMPTZ;
-  v_next_at_en_to_cz TIMESTAMPTZ;
   v_mastered_at_cz_to_en TIMESTAMPTZ;
-  v_mastered_at_en_to_cz TIMESTAMPTZ;
   v_row_count INT := 0;
   v_main_error_count INT := 0;
   -- constants to avoid duplicated literals
@@ -27,13 +24,10 @@ DECLARE
   v_key_user_id CONSTANT TEXT := private.json_key_user_id();
   v_key_item_id CONSTANT TEXT := 'item_id';
   v_key_progress_cz_to_en CONSTANT TEXT := 'progress_cz_to_en';
-  v_key_progress_en_to_cz CONSTANT TEXT := 'progress_en_to_cz';
   v_key_started_at CONSTANT TEXT := 'started_at';
   v_key_updated_at CONSTANT TEXT := private.json_key_updated_at();
   v_key_next_at_cz_to_en CONSTANT TEXT := 'next_at_cz_to_en';
-  v_key_next_at_en_to_cz CONSTANT TEXT := 'next_at_en_to_cz';
   v_key_mastered_at_cz_to_en CONSTANT TEXT := 'mastered_at_cz_to_en';
-  v_key_mastered_at_en_to_cz CONSTANT TEXT := 'mastered_at_en_to_cz';
   v_total_count INT := 0;
   v_matched_count INT := 0;
   v_skipped_count INT := 0;
@@ -68,48 +62,36 @@ BEGIN
       END IF;
 
       v_progress_cz_to_en := GREATEST((v_entry->>v_key_progress_cz_to_en)::INT, 0);
-      v_progress_en_to_cz := GREATEST((v_entry->>v_key_progress_en_to_cz)::INT, 0);
       v_started_at := NULLIF(v_entry->>v_key_started_at, v_null_text)::TIMESTAMPTZ;
       v_updated_at := (v_entry->>v_key_updated_at)::TIMESTAMPTZ;
       v_next_at_cz_to_en := NULLIF(v_entry->>v_key_next_at_cz_to_en, v_null_text)::TIMESTAMPTZ;
-      v_next_at_en_to_cz := NULLIF(v_entry->>v_key_next_at_en_to_cz, v_null_text)::TIMESTAMPTZ;
       v_mastered_at_cz_to_en := NULLIF(v_entry->>v_key_mastered_at_cz_to_en, v_null_text)::TIMESTAMPTZ;
-      v_mastered_at_en_to_cz := NULLIF(v_entry->>v_key_mastered_at_en_to_cz, v_null_text)::TIMESTAMPTZ;
 
       INSERT INTO public.user_items (
         user_id,
         item_id,
         progress_cz_to_en,
-        progress_en_to_cz,
         started_at,
         updated_at,
         next_at_cz_to_en,
-        next_at_en_to_cz,
-        mastered_at_cz_to_en,
-        mastered_at_en_to_cz
+        mastered_at_cz_to_en
       )
       VALUES (
         v_user_id,
         v_item_id,
         v_progress_cz_to_en,
-        v_progress_en_to_cz,
         v_started_at,
         v_updated_at,
         v_next_at_cz_to_en,
-        v_next_at_en_to_cz,
-        v_mastered_at_cz_to_en,
-        v_mastered_at_en_to_cz
+        v_mastered_at_cz_to_en
       )
       ON CONFLICT (user_id, item_id)
       DO UPDATE SET
         progress_cz_to_en = EXCLUDED.progress_cz_to_en,
-        progress_en_to_cz = EXCLUDED.progress_en_to_cz,
         started_at = EXCLUDED.started_at,
         updated_at = EXCLUDED.updated_at,
         next_at_cz_to_en = EXCLUDED.next_at_cz_to_en,
-        next_at_en_to_cz = EXCLUDED.next_at_en_to_cz,
-        mastered_at_cz_to_en = EXCLUDED.mastered_at_cz_to_en,
-        mastered_at_en_to_cz = EXCLUDED.mastered_at_en_to_cz
+        mastered_at_cz_to_en = EXCLUDED.mastered_at_cz_to_en
       WHERE COALESCE(EXCLUDED.updated_at, public.rpc_min_timestamptz())
         > COALESCE(public.user_items.updated_at, public.rpc_min_timestamptz());
 

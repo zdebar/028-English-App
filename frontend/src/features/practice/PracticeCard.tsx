@@ -18,14 +18,12 @@ export default function PracticeCard() {
     grammar,
     progressLabel,
     finishedReview,
-    isCzToEn,
     revealed,
     handleReveal,
     czech,
     english,
     pronunciation,
     audioDisabled,
-    showDirectionChange,
     plusHint,
     nextItem,
     audioError,
@@ -61,13 +59,11 @@ export default function PracticeCard() {
       progressHelpText={TEXTS.reviewProgress}
       showProgressLabel
       isBlockTrainingPractice={false}
-      isCzToEn={isCzToEn}
       revealed={revealed}
       czech={czech}
       english={english}
       pronunciation={pronunciation}
       audioDisabled={audioDisabled}
-      showDirectionChange={showDirectionChange}
       handleReveal={handleReveal}
       plusHint={plusHint}
       nextRepeat={() => nextItem('incorrect')}

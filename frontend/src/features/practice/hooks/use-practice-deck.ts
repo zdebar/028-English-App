@@ -9,7 +9,7 @@ import {
   type Dispatch,
   type SetStateAction,
 } from 'react';
-import type { PracticeDeckEntry, PracticeOutcome } from '@/types/user-item.types';
+import type { PracticeDeckEntry, PracticeOutcome, UserItemLocal } from '@/types/user-item.types';
 import { useFetch } from '@/hooks/use-fetch';
 import UserItem from '@/database/models/user-items';
 import { reportError } from '@/features/logging/monitoring-handler';
@@ -22,7 +22,7 @@ import {
   type ReviewDeckData,
 } from '@/database/utils/practice-content.utils';
 
-/** Loads and saves one review card at a time without persisting a review session. */
+/** Loads complete review batches and saves each batch once at its boundary. */
 export function usePracticeDeck(userId: string | null) {
   const trackPracticeWrite = usePracticeAvailabilityBoundary(userId);
   const [index, setIndex] = useState(0);
@@ -32,8 +32,8 @@ export function usePracticeDeck(userId: string | null) {
   const [completedCount, setCompletedCount] = useState(0);
   const [totalCount, setTotalCount] = useState<number | null>(null);
   const isTransitioningRef = useRef(false);
+  const pendingProgressRef = useRef(new Map<number, UserItemLocal>());
   const availabilityCheckpointRef = useRef<string | null>(null);
-  const pendingAvailabilityBoundaryRef = useRef<string | null>(null);
   const counterRefreshStartedRef = useRef(false);
   const counterResolvedRef = useRef(false);
   const counterRequestIdRef = useRef(0);
@@ -51,13 +51,12 @@ export function usePracticeDeck(userId: string | null) {
     error,
     reload,
   } = useFetch<ReviewDeckData>(fetchPracticeDeck);
-  const { currentEntry, currentItem, isCzToEn } = useMemo(
+  const { currentEntry, currentItem } = useMemo(
     () => getReviewDeckView(fetchedResult, index),
     [fetchedResult, index],
   );
   const cardState = usePracticeCardState({
     currentItem,
-    isCzToEn,
     revealed,
     isCompletion: finishedReview,
     setRevealed,
@@ -79,7 +78,7 @@ export function usePracticeDeck(userId: string | null) {
     counterRefreshStartedRef.current = false;
     counterResolvedRef.current = false;
     availabilityCheckpointRef.current = null;
-    pendingAvailabilityBoundaryRef.current = null;
+    pendingProgressRef.current.clear();
     setCompletedCount(0);
     setTotalCount(null);
 
@@ -93,24 +92,17 @@ export function usePracticeDeck(userId: string | null) {
   }, [userId]);
 
   useEffect(() => {
-    if (loading || !userId || !currentItem || counterRefreshStartedRef.current) return undefined;
+    if (loading || !userId || !fetchedResult || counterRefreshStartedRef.current) return undefined;
 
     counterRefreshStartedRef.current = true;
     const requestId = ++counterRequestIdRef.current;
     let isActive = true;
 
     void loadReviewCount(userId)
-      .then(async ({ count, countedThrough }) => {
+      .then(({ count, countedThrough }) => {
         if (!isActive || requestId !== counterRequestIdRef.current) return;
         setTotalCount(count);
         advanceAvailabilityCheckpoint(availabilityCheckpointRef, countedThrough);
-        await reconcilePendingAvailability({
-          userId,
-          setSaveError: undefined,
-          setTotalCount,
-          availabilityCheckpointRef,
-          pendingAvailabilityBoundaryRef,
-        });
         counterResolvedRef.current = true;
       })
       .catch((caughtError: unknown) => {
@@ -120,7 +112,7 @@ export function usePracticeDeck(userId: string | null) {
       });
 
     return undefined;
-  }, [currentItem, loading, userId]);
+  }, [fetchedResult, loading, userId]);
 
   useEffect(() => {
     if (!userId || !currentItem) {
@@ -156,26 +148,36 @@ export function usePracticeDeck(userId: string | null) {
       isTransitioningRef.current = true;
 
       try {
-        await trackPracticeWrite(saveReviewAnswer(
-          {
+        await trackPracticeWrite(
+          answerReviewCard({
             currentItem,
+            currentIndex: index,
+            batchSize: fetchedResult?.entries.length ?? 0,
             userId,
+            pendingProgress: pendingProgressRef,
             resetQuestionState,
             reload,
             setSaveError,
             setCompletedCount,
             setTotalCount,
             availabilityCheckpointRef,
-            pendingAvailabilityBoundaryRef,
             counterResolvedRef,
-          },
-          outcome,
-        ));
+            setIndex,
+          }, outcome),
+        );
       } finally {
         isTransitioningRef.current = false;
       }
     },
-    [currentItem, reload, resetQuestionState, userId, trackPracticeWrite],
+    [
+      currentItem,
+      fetchedResult?.entries.length,
+      index,
+      reload,
+      resetQuestionState,
+      trackPracticeWrite,
+      userId,
+    ],
   );
 
   return {
@@ -185,7 +187,6 @@ export function usePracticeDeck(userId: string | null) {
     grammar: getSecondaryGrammar(currentEntry, secondaryContent),
     progressLabel: getReviewProgressLabel(completedCount, totalCount),
     finishedReview,
-    isCzToEn,
     revealed,
     setRevealed,
     czech: cardState.czech,
@@ -193,8 +194,6 @@ export function usePracticeDeck(userId: string | null) {
     pronunciation: getReviewPronunciation(currentItem, revealed),
     audio: currentItem?.audio ?? null,
     audioDisabled: cardState.audioDisabled,
-    showDirectionChange: cardState.showDirectionChange,
-    hideDirectionChange: cardState.hideDirectionChange,
     handleReveal: cardState.handleReveal,
     plusHint: cardState.plusHint,
     nextItem,
@@ -211,9 +210,7 @@ function toError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
 }
 
-function fetchReviewDeck(
-  userId: string | null,
-): Promise<ReviewDeckData> {
+function fetchReviewDeck(userId: string | null): Promise<ReviewDeckData> {
   if (!userId) {
     return Promise.resolve({
       entries: [],
@@ -235,13 +232,10 @@ function getReviewDeckView(
 ): Readonly<{
   currentEntry: PracticeDeckEntry | null;
   currentItem: PracticeDeckEntry['item'] | null;
-  isCzToEn: boolean;
 }> {
   const activeArray = fetchedResult?.entries ?? [];
   const currentEntry = activeArray[index] ?? null;
-  const currentItem = currentEntry?.item ?? null;
-  const isCzToEn = currentItem?.practice_direction !== 'enToCz';
-  return { currentEntry, currentItem, isCzToEn };
+  return { currentEntry, currentItem: currentEntry?.item ?? null };
 }
 
 function resetReviewCard(
@@ -254,61 +248,69 @@ function resetReviewCard(
   resetHint();
 }
 
-type SaveReviewAnswerOptions = Readonly<{
+type AnswerReviewCardOptions = Readonly<{
   currentItem: PracticeDeckEntry['item'] | null;
+  currentIndex: number;
+  batchSize: number;
   userId: string | null;
+  pendingProgress: { current: Map<number, UserItemLocal> };
   resetQuestionState: () => void;
   reload: () => Promise<unknown>;
   setSaveError: Dispatch<SetStateAction<Error | null>>;
   setCompletedCount: Dispatch<SetStateAction<number>>;
   setTotalCount: Dispatch<SetStateAction<number | null>>;
   availabilityCheckpointRef: { current: string | null };
-  pendingAvailabilityBoundaryRef: { current: string | null };
   counterResolvedRef: { current: boolean };
+  setIndex: Dispatch<SetStateAction<number>>;
 }>;
 
-async function saveReviewAnswer(
-  options: SaveReviewAnswerOptions,
+async function answerReviewCard(
+  options: AnswerReviewCardOptions,
   outcome: PracticeOutcome,
 ): Promise<void> {
-  const {
-    currentItem,
-    userId,
-    resetQuestionState,
-    reload,
-    setSaveError,
-    setCompletedCount,
-    setTotalCount,
-    availabilityCheckpointRef,
-    pendingAvailabilityBoundaryRef,
-    counterResolvedRef,
-  } = options;
+  const { currentItem, userId, pendingProgress } = options;
   if (!currentItem || !userId) return;
 
-  const dateTime = new Date(Date.now()).toISOString();
-  const direction = currentItem.practice_direction;
-  const updatedItem = UserItem.applyPracticeProgress(currentItem, direction, outcome, dateTime);
+  const updatedItem = UserItem.applyPracticeProgress(
+    currentItem,
+    outcome,
+    new Date(Date.now()).toISOString(),
+  );
+  pendingProgress.current.set(updatedItem.item_id, updatedItem);
+  options.setCompletedCount((count) => count + 1);
 
-  try {
-    await UserItem.savePracticeDeck([{ ...updatedItem, practice_direction: direction }]);
-  } catch (caughtError) {
-    const normalizedError = toError(caughtError);
-    setSaveError(normalizedError);
-    reportError('Failed to save review answer', normalizedError);
+  const isBatchEnd = options.currentIndex + 1 >= options.batchSize;
+  if (!isBatchEnd) {
+    options.setIndex((currentIndex) => currentIndex + 1);
+    options.resetQuestionState();
     return;
   }
 
-  setSaveError(null);
-  setCompletedCount((count) => count + 1);
-  refreshReviewAvailabilityCount({
-    userId,
-    setSaveError,
-    setTotalCount,
-    availabilityCheckpointRef,
-    pendingAvailabilityBoundaryRef,
-    counterResolvedRef,
-  });
-  await refreshAfterReviewSave(reload, resetQuestionState, setSaveError);
+  await saveReviewBatch(options);
+}
+
+async function saveReviewBatch(options: AnswerReviewCardOptions): Promise<void> {
+  const pendingItems = [...options.pendingProgress.current.values()];
+  const userId = options.userId;
+  if (pendingItems.length === 0 || !userId) return;
+
+  try {
+    await UserItem.savePracticeDeck(pendingItems);
+    options.pendingProgress.current.clear();
+    options.setSaveError(null);
+    await refreshReviewAvailabilityCount({
+      userId,
+      setSaveError: options.setSaveError,
+      setTotalCount: options.setTotalCount,
+      availabilityCheckpointRef: options.availabilityCheckpointRef,
+      counterResolvedRef: options.counterResolvedRef,
+    });
+    await refreshAfterReviewSave(options.reload, options.resetQuestionState, options.setSaveError);
+  } catch (caughtError) {
+    const normalizedError = toError(caughtError);
+    options.setSaveError(normalizedError);
+    reportError('Failed to save review batch', normalizedError);
+  }
 }
 
 type RefreshReviewAvailabilityCountOptions = Readonly<{
@@ -316,7 +318,6 @@ type RefreshReviewAvailabilityCountOptions = Readonly<{
   setSaveError: Dispatch<SetStateAction<Error | null>>;
   setTotalCount: Dispatch<SetStateAction<number | null>>;
   availabilityCheckpointRef: { current: string | null };
-  pendingAvailabilityBoundaryRef: { current: string | null };
   counterResolvedRef: { current: boolean };
 }>;
 
@@ -324,68 +325,21 @@ async function refreshReviewAvailabilityCount(
   options: RefreshReviewAvailabilityCountOptions,
 ): Promise<void> {
   const countedThrough = new Date(Date.now()).toISOString();
-  if (!options.counterResolvedRef.current) {
-    advanceAvailabilityCheckpoint(options.pendingAvailabilityBoundaryRef, countedThrough);
-    return;
-  }
+  if (!options.counterResolvedRef.current) return;
 
-  await countReviewAvailability({
-    ...options,
-    countedThrough,
-    checkedAt: options.availabilityCheckpointRef.current ?? countedThrough,
-  });
-}
-
-type CountReviewAvailabilityOptions = Readonly<{
-  userId: string;
-  setSaveError: Dispatch<SetStateAction<Error | null>> | undefined;
-  setTotalCount: Dispatch<SetStateAction<number | null>>;
-  availabilityCheckpointRef: { current: string | null };
-  countedThrough: string;
-  checkedAt: string;
-}>;
-
-async function countReviewAvailability(options: CountReviewAvailabilityOptions): Promise<void> {
+  const checkedAt = options.availabilityCheckpointRef.current ?? countedThrough;
   try {
     const newlyAvailableCount = await UserItem.getNewlyAvailableReviewItemCount(
       options.userId,
-      options.checkedAt,
-      options.countedThrough,
+      checkedAt,
+      countedThrough,
     );
     options.setTotalCount((count) => (count === null ? null : count + newlyAvailableCount));
-    advanceAvailabilityCheckpoint(options.availabilityCheckpointRef, options.countedThrough);
+    advanceAvailabilityCheckpoint(options.availabilityCheckpointRef, countedThrough);
   } catch (caughtError) {
     const normalizedError = toError(caughtError);
-    options.setSaveError?.(normalizedError);
+    options.setSaveError(normalizedError);
     reportError('Failed to refresh review availability count', normalizedError);
-  }
-}
-
-type ReconcilePendingAvailabilityOptions = Readonly<{
-  userId: string;
-  setSaveError: Dispatch<SetStateAction<Error | null>> | undefined;
-  setTotalCount: Dispatch<SetStateAction<number | null>>;
-  availabilityCheckpointRef: { current: string | null };
-  pendingAvailabilityBoundaryRef: { current: string | null };
-}>;
-
-async function reconcilePendingAvailability(
-  options: ReconcilePendingAvailabilityOptions,
-): Promise<void> {
-  const countedThrough = options.pendingAvailabilityBoundaryRef.current;
-  const checkedAt = options.availabilityCheckpointRef.current;
-  if (!countedThrough || !checkedAt || countedThrough <= checkedAt) return;
-
-  await countReviewAvailability({
-    userId: options.userId,
-    setSaveError: options.setSaveError,
-    setTotalCount: options.setTotalCount,
-    availabilityCheckpointRef: options.availabilityCheckpointRef,
-    countedThrough,
-    checkedAt,
-  });
-  if (options.pendingAvailabilityBoundaryRef.current === countedThrough) {
-    options.pendingAvailabilityBoundaryRef.current = null;
   }
 }
 
@@ -420,7 +374,7 @@ type SecondaryContent = Readonly<{
 }>;
 
 function getReviewItemKey(item: PracticeDeckEntry['item']): string {
-  return `${item.item_id}:${item.practice_direction}`;
+  return String(item.item_id);
 }
 
 function getSecondaryNote(

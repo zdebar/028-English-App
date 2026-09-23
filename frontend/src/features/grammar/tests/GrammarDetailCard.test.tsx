@@ -64,7 +64,6 @@ const exampleItem: UserItemLocal = {
   audio: 'i-am.opus',
   sort_order: 1,
   progress_cz_to_en: 0,
-  progress_en_to_cz: 0,
   note_id: null,
   lesson_id: 1,
   updated_at: '2026-08-02T00:00:00.000Z',
@@ -75,9 +74,7 @@ const exampleItem: UserItemLocal = {
   started_at: '2026-08-02T00:00:00.000Z',
   deleted_at: '',
   next_at_cz_to_en: '',
-  next_at_en_to_cz: '',
   mastered_at_cz_to_en: '',
-  mastered_at_en_to_cz: '',
   curriculum_sort_path: [1, 1, 1],
 };
 

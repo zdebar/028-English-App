@@ -1,4 +1,3 @@
-import Notification from '@/components/UI/Notification';
 import DelayedNotification from '@/components/UI/DelayedNotification';
 import config from '@/config/config';
 import SecondaryControlButton from '@/components/UI/buttons/SecondaryControlButton';
@@ -25,13 +24,11 @@ export type PracticeSessionCardProps = Readonly<{
   grammar: GrammarChunkWithExamples | null;
   progressLabel: string | number;
   progressHelpText?: string;
-  isCzToEn: boolean;
   revealed: boolean;
   czech: string | undefined;
   english: string | undefined;
   pronunciation: string | undefined;
   audioDisabled: boolean;
-  showDirectionChange: boolean;
   handleReveal: () => void;
   plusHint: () => void;
   nextRepeat: () => void | Promise<void>;
@@ -107,23 +104,19 @@ function AudioStatusMessage({
 }
 
 function DirectionTopBar({
-  shortDirectionText,
   audioError,
   audioLoading,
 }: Readonly<{
-  shortDirectionText: string;
   audioError: boolean;
   audioLoading: boolean;
 }>) {
   return (
     <div className="relative">
-      <p className="text-sm font-light">{shortDirectionText}</p>
       <AudioStatusMessage
         audioError={audioError}
         audioLoading={audioLoading}
         className="absolute top-full left-1/2 -translate-x-1/2 whitespace-nowrap"
       />
-      <HelpText className="top-4 left-1/2 -translate-x-1/2">{TEXTS.directionHelpText}</HelpText>
     </div>
   );
 }
@@ -171,8 +164,6 @@ function PracticeControls({
 }
 
 type PracticeMainContentProps = Readonly<{
-  showDirectionChange: boolean;
-  directionText: string;
   czech: string | undefined;
   english: string | undefined;
   pronunciation: string | undefined;
@@ -180,8 +171,6 @@ type PracticeMainContentProps = Readonly<{
 }>;
 
 function PracticeMainContent({
-  showDirectionChange,
-  directionText,
   czech,
   english,
   pronunciation,
@@ -201,10 +190,6 @@ function PracticeMainContent({
     );
     return () => globalThis.clearTimeout(timeoutId);
   }, [isContentLoading]);
-
-  if (showDirectionChange) {
-    return <Notification>{directionText}</Notification>;
-  }
 
   if (isContentLoading && showLoadingMessage) {
     return (
@@ -255,14 +240,10 @@ function normalizePracticeSessionCardProps(
 type PracticeCardDisplayState = Readonly<{
   cardText: string | undefined;
   cardStyle: string;
-  directionText: string;
-  shortDirectionText: string;
-  showAudioControls: boolean;
   showGrammarButton: boolean;
   showNoteButton: boolean;
   showProgressLabel: boolean;
   audioButtonDisabled: boolean;
-  volumeSliderDisabled: boolean;
   grammarButtonDisabled: boolean;
   noteButtonDisabled: boolean;
   controlsLocked: boolean;
@@ -278,13 +259,11 @@ function getPracticeCardDisplayState(
   const {
     grammar,
     note,
-    isCzToEn,
     revealed,
     audioDisabled,
-    showDirectionChange,
     audioLoading,
   } = props;
-  const controlsLocked = showDirectionChange;
+  const controlsLocked = false;
   const showAudioControls = !audioDisabled;
   const audioControlsDisabled = isAudioControlDisabled(
     controlsLocked,
@@ -296,21 +275,15 @@ function getPracticeCardDisplayState(
   return {
     cardText: getPracticeCardText(revealed),
     cardStyle: getPracticeCardStyle(controlsLocked, revealed),
-    directionText: getDirectionText(isCzToEn),
-    shortDirectionText: getShortDirectionText(isCzToEn),
-    showAudioControls,
     showGrammarButton,
     showNoteButton,
     showProgressLabel: props.isBlockTrainingPractice || props.showProgressLabel,
-    audioButtonDisabled: audioControlsDisabled || (isCzToEn && !revealed),
-    volumeSliderDisabled: audioControlsDisabled,
+    audioButtonDisabled: audioControlsDisabled || !revealed,
     grammarButtonDisabled: controlsLocked || !showGrammarButton,
     noteButtonDisabled: controlsLocked || !showNoteButton,
     controlsLocked,
-    showHintControl: !revealed || controlsLocked,
-    practiceControlColumns: getPracticeControlColumns(
-      !revealed || controlsLocked,
-    ),
+    showHintControl: !revealed,
+    practiceControlColumns: getPracticeControlColumns(!revealed),
     showTopBar: true,
     showRevealHelp: !revealed && !controlsLocked,
   };
@@ -324,16 +297,6 @@ function getPracticeCardText(revealed: boolean): string | undefined {
 function getPracticeCardStyle(controlsLocked: boolean, revealed: boolean): string {
   if (controlsLocked || !revealed) return 'color-button';
   return 'color-audio-disabled';
-}
-
-function getDirectionText(isCzToEn: boolean): string {
-  if (isCzToEn) return TEXTS.directionCzToEn;
-  return TEXTS.directionEnToCz;
-}
-
-function getShortDirectionText(isCzToEn: boolean): string {
-  if (isCzToEn) return TEXTS.directionCzToEnShort;
-  return TEXTS.directionEnToCzShort;
 }
 
 function hasGrammarDetails(revealed: boolean, grammar: GrammarChunkWithExamples | null): boolean {
@@ -391,7 +354,6 @@ function PracticeCardButton({
   const {
     handleReveal,
     revealed,
-    showDirectionChange,
     czech,
     english,
     pronunciation,
@@ -417,7 +379,6 @@ function PracticeCardButton({
           className="relative flex h-8 w-full shrink-0 items-center justify-center text-center"
         >
           <DirectionTopBar
-            shortDirectionText={display.shortDirectionText}
             audioError={audioError}
             audioLoading={audioLoading}
           />
@@ -428,8 +389,6 @@ function PracticeCardButton({
         className="flex min-h-0 w-full grow items-center justify-center"
       >
         <PracticeMainContent
-          showDirectionChange={showDirectionChange}
-          directionText={display.directionText}
           czech={czech}
           english={english}
           pronunciation={pronunciation}
@@ -497,7 +456,7 @@ function PracticeCardActionBar({
       </div>
       <div className="pos-bottom-left-control">
         <PlayButton onClick={playAudio} disabled={display.audioButtonDisabled} />
-        <VolumeSlider disabled={display.volumeSliderDisabled} />
+        <VolumeSlider />
       </div>
       <div className="pos-bottom-right-control">
         <SecondaryControlButton

@@ -66,13 +66,11 @@ function InitialTrainingContent({
       note={deck.note}
       grammar={deck.practiceGrammar}
       progressLabel={deck.progressLabel}
-      isCzToEn={deck.isCzToEn}
       revealed={deck.revealed}
       czech={deck.czech}
       english={deck.english}
       pronunciation={deck.pronunciation}
       audioDisabled={deck.audioDisabled}
-      showDirectionChange={deck.showDirectionChange}
       handleReveal={deck.handleReveal}
       plusHint={deck.plusHint}
       nextRepeat={deck.nextRepeat}

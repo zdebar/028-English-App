@@ -28,7 +28,6 @@ type VocabularyDetailCardProps = Readonly<{
 type VocabularyProperty = Readonly<{ label: string; value: string | undefined }>;
 
 type VocabularyDirectionSection = Readonly<{
-  direction: string;
   title: string;
   properties: readonly VocabularyProperty[];
 }>;
@@ -46,14 +45,13 @@ function getDirectionSections(
 ): readonly VocabularyDirectionSection[] {
   return [
     {
-      direction: 'czToEn',
       title: lowercaseInitial(TEXTS.directionCzToEn),
       properties: [
         {
           label: lowercaseInitial(TEXTS.progress),
           value: formatProgress(
             selectedWord?.progress_cz_to_en,
-            config.srs.intervals.czToEn.length,
+            config.srs.intervals.length,
           ),
         },
         {
@@ -61,26 +59,6 @@ function getDirectionSections(
           value: formatPracticeSchedule(
             selectedWord?.next_at_cz_to_en,
             selectedWord?.mastered_at_cz_to_en,
-          ),
-        },
-      ],
-    },
-    {
-      direction: 'enToCz',
-      title: lowercaseInitial(TEXTS.directionEnToCz),
-      properties: [
-        {
-          label: lowercaseInitial(TEXTS.progress),
-          value: formatProgress(
-            selectedWord?.progress_en_to_cz,
-            config.srs.intervals.enToCz.length,
-          ),
-        },
-        {
-          label: lowercaseInitial(TEXTS.practiceSchedule),
-          value: formatPracticeSchedule(
-            selectedWord?.next_at_en_to_cz,
-            selectedWord?.mastered_at_en_to_cz,
           ),
         },
       ],
@@ -145,7 +123,7 @@ function VocabularyDetails({
         <VocabularyPropertyList properties={baseProperties} labelClassName="w-auto" />
       </div>
       {directionSections.map((section) => (
-        <section key={section.direction}>
+        <section key={section.title}>
           <h3 className="font-bold">{section.title}</h3>
           <VocabularyPropertyList properties={section.properties} labelClassName="w-30 w-auto" />
         </section>

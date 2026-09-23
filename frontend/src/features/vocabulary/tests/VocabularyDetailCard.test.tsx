@@ -27,7 +27,6 @@ vi.mock('@/locales/cs', () => ({
     practiceSchedule: 'Practice schedule',
     notScheduled: 'Not scheduled',
     directionCzToEn: 'CZ to EN',
-    directionEnToCz: 'EN to CZ',
     restartItemProgress: 'Restart item',
     audio: 'Audio',
     noAudio: 'No audio',
@@ -46,10 +45,7 @@ vi.mock('@/config/config', async (importOriginal) => {
       ...original.default,
       srs: {
         ...original.default.srs,
-        intervals: {
-          czToEn: Array.from({ length: 9 }),
-          enToCz: Array.from({ length: 8 }),
-        },
+        intervals: Array.from({ length: 9 }),
       },
     },
   };

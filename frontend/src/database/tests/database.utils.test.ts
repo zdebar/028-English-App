@@ -2,9 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   download: vi.fn(),
-  savePracticeDeck: vi.fn(),
-  reportInfo: vi.fn(),
-  reportError: vi.fn(),
 }));
 
 vi.mock('@/config/config', () => ({
@@ -14,10 +11,7 @@ vi.mock('@/config/config', () => ({
       nullReplacementNumber: 0,
     },
     srs: {
-      intervals: {
-        czToEn: [10, 20, 30],
-        enToCz: [10, 20, 30],
-      },
+      intervals: [10, 20, 30],
       randomness: 0.1,
     },
   },
@@ -33,21 +27,9 @@ vi.mock('@/config/supabase.config', () => ({
   },
 }));
 
-vi.mock('@/features/logging/monitoring-handler', () => ({
-  reportInfo: (...args: unknown[]) => mocks.reportInfo(...args),
-  reportError: (...args: unknown[]) => mocks.reportError(...args),
-}));
-
-vi.mock('@/database/models/user-items', () => ({
-  default: {
-    savePracticeDeck: (...args: unknown[]) => mocks.savePracticeDeck(...args),
-  },
-}));
-
 import {
   getLocalDateFromUTC,
   getTodayShortDate,
-  restoreUnsavedFromLocalStorage,
 } from '@/database/utils/database.utils';
 import { getNextAt, resetUserItem } from '@/database/utils/user-items.utils';
 import { fetchStorage } from '@/database/utils/audio-records.utils';
@@ -57,7 +39,6 @@ describe('database.utils', () => {
     vi.clearAllMocks();
     vi.useRealTimers();
     localStorage.clear();
-    mocks.savePracticeDeck.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -105,31 +86,25 @@ describe('database.utils', () => {
 
       const item = {
         progress_cz_to_en: 4,
-        progress_en_to_cz: 4,
         started_at: 'x',
         next_at_cz_to_en: 'x',
-        next_at_en_to_cz: 'x',
         mastered_at_cz_to_en: 'x',
-        mastered_at_en_to_cz: 'x',
         updated_at: 'x',
       } as any;
 
       resetUserItem(item);
 
       expect(item.progress_cz_to_en).toBe(0);
-      expect(item.progress_en_to_cz).toBe(0);
       expect(item.started_at).toBe('x');
       expect(item.next_at_cz_to_en).toBe('1970-01-01T00:00:00.000Z');
-      expect(item.next_at_en_to_cz).toBe('1970-01-01T00:00:00.000Z');
       expect(item.mastered_at_cz_to_en).toBe('1970-01-01T00:00:00.000Z');
-      expect(item.mastered_at_en_to_cz).toBe('1970-01-01T00:00:00.000Z');
       expect(item.updated_at).toBe('2026-02-28T08:00:00.000Z');
     });
   });
 
   describe('getNextAt', () => {
     it('returns null replacement date when interval is missing', () => {
-      expect(getNextAt(99, 'czToEn')).toBe('1970-01-01T00:00:00.000Z');
+      expect(getNextAt(99)).toBe('1970-01-01T00:00:00.000Z');
     });
 
     it('returns randomized future ISO date from interval', () => {
@@ -141,88 +116,10 @@ describe('database.utils', () => {
         }) as typeof globalThis.crypto.getRandomValues,
       );
 
-      const result = getNextAt(1, 'enToCz');
+      const result = getNextAt(1);
 
       expect(result).toBe(new Date(21000).toISOString());
     });
   });
 
-  describe('restoreUnsavedFromLocalStorage', () => {
-    it('awaits savePracticeDeck before removing key and logging info', async () => {
-      localStorage.setItem(
-        'practiceDeckProgress_u1',
-        JSON.stringify({
-          dateTime: '2026-03-04T10:00:00.000Z',
-          progress: [{ item_id: 1, progress: 2 }],
-        }),
-      );
-
-      let resolveSave: (() => void) | undefined;
-      mocks.savePracticeDeck.mockImplementation(
-        () =>
-          new Promise<void>((resolve) => {
-            resolveSave = resolve;
-          }),
-      );
-
-      const restorePromise = restoreUnsavedFromLocalStorage('u1');
-
-      expect(localStorage.getItem('practiceDeckProgress_u1')).not.toBeNull();
-      expect(mocks.reportInfo).not.toHaveBeenCalled();
-
-      resolveSave?.();
-      await restorePromise;
-
-      expect(localStorage.getItem('practiceDeckProgress_u1')).toBeNull();
-      expect(mocks.reportInfo).toHaveBeenCalled();
-    });
-
-    it('restores saved progress, removes key, and logs info', async () => {
-      localStorage.setItem(
-        'practiceDeckProgress_u1',
-        JSON.stringify({
-          dateTime: '2026-03-04T10:00:00.000Z',
-          progress: [{ item_id: 1, progress: 2 }],
-        }),
-      );
-
-      await restoreUnsavedFromLocalStorage('u1');
-
-      expect(mocks.savePracticeDeck).toHaveBeenCalledWith(
-        [{ item_id: 1, progress: 2 }],
-      );
-      expect(localStorage.getItem('practiceDeckProgress_u1')).toBeNull();
-      expect(mocks.reportInfo).toHaveBeenCalled();
-    });
-
-    it('handles non-array progress payload without saving and still cleans up', async () => {
-      localStorage.setItem(
-        'practiceDeckProgress_u1',
-        JSON.stringify({
-          dateTime: '2026-03-04T10:00:00.000Z',
-          progress: { item_id: 1, progress: 2 },
-        }),
-      );
-
-      await restoreUnsavedFromLocalStorage('u1');
-
-      expect(mocks.savePracticeDeck).not.toHaveBeenCalled();
-      expect(localStorage.getItem('practiceDeckProgress_u1')).toBeNull();
-      expect(mocks.reportInfo).toHaveBeenCalledWith(
-        'Restored unsaved practice deck progress with 0 items.',
-      );
-    });
-
-    it('handles parse error by logging and removing invalid key', async () => {
-      localStorage.setItem('practiceDeckProgress_u1', '{bad json');
-
-      await restoreUnsavedFromLocalStorage('u1');
-
-      expect(mocks.reportError).toHaveBeenCalledWith(
-        'Error parsing practice deck progress from localStorage',
-        expect.anything(),
-      );
-      expect(localStorage.getItem('practiceDeckProgress_u1')).toBeNull();
-    });
-  });
 });
