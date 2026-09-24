@@ -1,7 +1,6 @@
 import { ROUTES } from '@/config/routes.config';
 import { TEXTS } from '@/locales/cs';
 import { useEffect, useState, type JSX } from 'react';
-import config from '@/config/config';
 import { NavigationButton } from '@/routing/data-navigation';
 import { usePracticeAvailabilityStore } from './use-practice-availability-store';
 import StyledButton from '@/components/UI/buttons/StyledButton';
@@ -12,6 +11,7 @@ type PracticeButtonState = Readonly<{
   newAvailable: boolean;
   reviewTitle: string | undefined;
   newTitle: string | undefined;
+  reviewCountdown: string | null;
 }>;
 
 function isReviewAvailable(reviewReadyAt: string | null, checkedAt: number): boolean {
@@ -19,19 +19,16 @@ function isReviewAvailable(reviewReadyAt: string | null, checkedAt: number): boo
   return Date.parse(reviewReadyAt) <= Math.max(checkedAt, Date.now());
 }
 
-/** Re-renders at the stored deadline without reading or changing availability data. */
-function useReviewDeadline(reviewReadyAt: string | null): number {
+/** Re-renders once per second until the stored review deadline. */
+function useReviewClock(reviewReadyAt: string | null): number {
   const [checkedAt, setCheckedAt] = useState(Date.now);
   useEffect(() => {
     if (!reviewReadyAt) return;
     const remaining = Date.parse(reviewReadyAt) - Date.now();
     if (!Number.isFinite(remaining) || remaining <= 0) return;
-    const timeout = globalThis.setTimeout(
-      () => setCheckedAt(Date.now()),
-      Math.min(remaining, config.practice.maxReviewReadyTimerDelayMs),
-    );
+    const timeout = globalThis.setTimeout(() => setCheckedAt(Date.now()), Math.min(remaining, 1000));
     return () => globalThis.clearTimeout(timeout);
-  }, [reviewReadyAt, checkedAt]);
+  }, [checkedAt, reviewReadyAt]);
   return checkedAt;
 }
 
@@ -90,6 +87,14 @@ function resolvePracticeButtonState(
     newAvailable,
     reviewTitle: resolveButtonTitle(loading, error, reviewDisabled),
     newTitle: resolveButtonTitle(loading, error, newDisabled),
+    reviewCountdown: resolveReviewCountdown(
+      reviewReadyAt,
+      checkedAt,
+      reviewDisabled,
+      loading,
+      error,
+      activeNew,
+    ),
   };
 }
 
@@ -125,14 +130,14 @@ function NewPracticeButton({
 
 export default function PracticeButtons(): JSX.Element {
   const reviewReadyAt = usePracticeAvailabilityStore((state) => state.reviewReadyAt);
-  const checkedAt = useReviewDeadline(reviewReadyAt);
+  const checkedAt = useReviewClock(reviewReadyAt);
   const initialTrainingAvailable = usePracticeAvailabilityStore(
     (state) => state.initialTrainingAvailable,
   );
   const activeSession = usePracticeAvailabilityStore((state) => state.activeSession);
   const loading = usePracticeAvailabilityStore((state) => state.practiceLoading);
   const error = usePracticeAvailabilityStore((state) => state.practiceError);
-  const { reviewDisabled, newDisabled, newAvailable, reviewTitle, newTitle } =
+  const { reviewDisabled, newDisabled, newAvailable, reviewTitle, newTitle, reviewCountdown } =
     resolvePracticeButtonState(
       reviewReadyAt,
       checkedAt,
@@ -152,14 +157,54 @@ export default function PracticeButtons(): JSX.Element {
       />
       <NavigationButton
         to={ROUTES.practice}
-        className="h-button max-h-button w-full px-4"
+        className="relative h-button max-h-button w-full px-4"
         disabled={reviewDisabled}
         title={reviewTitle}
       >
+        {reviewCountdown ? (
+          <span
+            aria-hidden="true"
+            className="text-disabled-light dark:text-disabled-dark pointer-events-none absolute top-1 right-2 text-xs leading-none"
+          >
+            {reviewCountdown}
+          </span>
+        ) : null}
         {TEXTS.reviewButton}
       </NavigationButton>
     </div>
   );
+}
+
+function resolveReviewCountdown(
+  reviewReadyAt: string | null,
+  checkedAt: number,
+  reviewDisabled: boolean,
+  loading: boolean,
+  error: Error | null,
+  activeNew: boolean,
+): string | null {
+  if (!reviewDisabled || loading || error || activeNew) return null;
+  return formatReviewCountdown(reviewReadyAt, checkedAt);
+}
+
+function formatReviewCountdown(reviewReadyAt: string | null, checkedAt: number): string | null {
+  if (!reviewReadyAt) return null;
+  const remainingSeconds = Math.ceil((Date.parse(reviewReadyAt) - checkedAt) / 1000);
+  if (!Number.isFinite(remainingSeconds) || remainingSeconds <= 0) return null;
+
+  const days = Math.floor(remainingSeconds / 86_400);
+  const hours = Math.floor((remainingSeconds % 86_400) / 3_600);
+  const minutes = Math.floor((remainingSeconds % 3_600) / 60);
+  const seconds = remainingSeconds % 60;
+
+  if (days > 0) return `${days}d ${padTime(hours)}:${padTime(minutes)}:${padTime(seconds)}`;
+  if (hours > 0) return `${padTime(hours)}:${padTime(minutes)}:${padTime(seconds)}`;
+  if (minutes > 0) return `${padTime(minutes)}:${padTime(seconds)}`;
+  return String(seconds).padStart(2, '0');
+}
+
+function padTime(value: number): string {
+  return String(value).padStart(2, '0');
 }
 
 function resolveButtonTitle(

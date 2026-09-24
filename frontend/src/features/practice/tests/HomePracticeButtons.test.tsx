@@ -40,9 +40,33 @@ describe('Home practice buttons', () => {
     const snapshot = usePracticeAvailabilityStore.getState();
     render(<PracticeButtons />);
     expect(button('Review').disabled).toBe(true);
+    expect(screen.getByText('02')).toBeTruthy();
     await act(async () => vi.advanceTimersByTimeAsync(2000));
     expect(button('Review').disabled).toBe(false);
+    expect(screen.queryByText('02')).toBeNull();
     expect(usePracticeAvailabilityStore.getState()).toBe(snapshot);
+  });
+
+  it('formats the disabled review countdown by remaining duration', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-23T10:00:00Z'));
+    usePracticeAvailabilityStore.setState({
+      reviewReadyAt: '2026-09-25T13:04:05Z',
+    });
+
+    render(<PracticeButtons />);
+    expect(screen.getByText('2d 03:04:05')).toBeTruthy();
+  });
+
+  it('shows only seconds near the review boundary', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-23T10:00:00Z'));
+    usePracticeAvailabilityStore.setState({
+      reviewReadyAt: '2026-09-23T10:00:05Z',
+    });
+
+    render(<PracticeButtons />);
+    expect(screen.getByText('05')).toBeTruthy();
   });
   it('gives review priority at the configured review boundary', () => {
     usePracticeAvailabilityStore.setState({ reviewReadyAt: new Date().toISOString() });
