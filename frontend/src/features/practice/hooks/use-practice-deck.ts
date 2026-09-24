@@ -16,11 +16,7 @@ import { reportError } from '@/features/logging/monitoring-handler';
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
 import {
-  getCachedReviewDeck,
-  invalidateReviewDeck,
-  loadCachedReviewDeck,
-} from '../review-deck-cache';
-import {
+  loadReviewDeckData,
   loadReviewEntryDetails,
   type ReviewEntryDetails,
   type ReviewDeckData,
@@ -55,7 +51,6 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
           }
         }
         setSaveError(null);
-        invalidateReviewDeck(userId);
         return true;
       })
       .catch((caughtError: unknown) => {
@@ -103,9 +98,9 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
     [],
   );
 
-  const initialReviewDeck = initialData ?? (userId ? getCachedReviewDeck(userId) : undefined);
+  const initialReviewDeck = initialData;
   const fetchPracticeDeck = useCallback(
-    () => (userId ? loadCachedReviewDeck(userId) : Promise.resolve(createEmptyReviewDeck())),
+    () => (userId ? loadReviewDeckData(userId) : Promise.resolve(createEmptyReviewDeck())),
     [userId],
   );
   const {
@@ -115,9 +110,8 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
     reload,
   } = useFetch<ReviewDeckData>(fetchPracticeDeck, { initialData: initialReviewDeck });
   const reloadPracticeDeck = useCallback(async () => {
-    if (userId) invalidateReviewDeck(userId);
     await reload();
-  }, [reload, userId]);
+  }, [reload]);
   const { currentEntry, currentItem } = useMemo(
     () => getReviewDeckView(fetchedResult, index),
     [fetchedResult, index],
@@ -238,7 +232,6 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
             setSaveError,
             setCompletedCount,
             setIndex,
-            setFinishedReview,
           }, outcome),
         );
       } finally {
@@ -340,7 +333,6 @@ type AnswerReviewCardOptions = Readonly<{
   setSaveError: Dispatch<SetStateAction<Error | null>>;
   setCompletedCount: Dispatch<SetStateAction<number>>;
   setIndex: Dispatch<SetStateAction<number>>;
-  setFinishedReview: Dispatch<SetStateAction<boolean>>;
 }>;
 
 async function answerReviewCard(
@@ -365,7 +357,6 @@ async function answerReviewCard(
     return;
   }
 
-  options.setFinishedReview(true);
   await saveReviewBatch(options);
 }
 

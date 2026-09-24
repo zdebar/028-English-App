@@ -1,5 +1,4 @@
 import { usePracticeAvailabilityStoreSync } from '@/features/practice/use-practice-availability-store-sync';
-import { useReviewDeckPrefetch } from '@/features/practice/use-review-deck-prefetch';
 import Footer from '@/components/Layout/Footer';
 import Header from '@/components/Layout/Header';
 import { usePeriodicSync } from '@/features/synchronization/use-periodic-sync';
@@ -22,7 +21,6 @@ export default function App() {
   const authLoading = useAuthStore((state) => state.loading);
 
   usePracticeAvailabilityStoreSync(userId);
-  useReviewDeckPrefetch(userId);
   useAudioLoader(userId);
   useUserStoreSync(userId);
   usePronunciationGroupsStoreSync(userId);
