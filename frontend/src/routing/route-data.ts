@@ -5,8 +5,8 @@ import Block from '@/database/models/blocks';
 import PracticeSession from '@/database/models/practice-sessions';
 import UserItem from '@/database/models/user-items';
 import Topic from '@/database/models/topics';
-import { loadCachedReviewDeck } from '@/features/practice/review-deck-cache';
 import {
+  loadReviewDeckData,
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
   type ReviewDeckData,
@@ -99,7 +99,7 @@ export function practiceOverviewDescriptor(userId: string) {
 
 export function reviewPracticeDescriptor(userId: string) {
   return {
-    load: () => loadCachedReviewDeck(userId),
+    load: () => loadReviewDeckData(userId),
   } satisfies RouteDataDescriptor<ReviewDeckData>;
 }
 

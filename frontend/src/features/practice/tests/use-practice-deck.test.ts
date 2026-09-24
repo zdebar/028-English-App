@@ -8,7 +8,6 @@ const mocks = vi.hoisted(() => ({
   savePracticeDeck: vi.fn(),
   applyPracticeProgress: vi.fn(),
   loadReviewEntryDetails: vi.fn(),
-  invalidateReviewDeck: vi.fn(),
   resetHint: vi.fn(),
   fetchData: null as ReviewDeckData | null,
 }));
@@ -48,12 +47,6 @@ vi.mock('@/database/models/user-items', () => ({
 vi.mock('@/database/utils/practice-content.utils', () => ({
   loadReviewDeckData: vi.fn(),
   loadReviewEntryDetails: (...args: unknown[]) => mocks.loadReviewEntryDetails(...args),
-}));
-
-vi.mock('../review-deck-cache', () => ({
-  getCachedReviewDeck: vi.fn(),
-  invalidateReviewDeck: (...args: unknown[]) => mocks.invalidateReviewDeck(...args),
-  loadCachedReviewDeck: vi.fn(),
 }));
 
 vi.mock('@/features/practice/hooks/use-practice-card-state', () => ({
@@ -111,7 +104,6 @@ describe('usePracticeDeck', () => {
     expect(mocks.savePracticeDeck).toHaveBeenCalledWith([
       expect.objectContaining({ item_id: 1, updated_at: 'now' }),
     ]);
-    expect(mocks.invalidateReviewDeck).toHaveBeenCalledWith('u1');
     expect(mocks.reload).not.toHaveBeenCalled();
   });
 
@@ -203,7 +195,7 @@ describe('usePracticeDeck', () => {
     expect(result.current.currentItem).toBeNull();
   });
 
-  it('shows review completion while the final batch is being saved', async () => {
+  it('keeps the last card visible while the final batch is being saved', async () => {
     mocks.fetchData = reviewDeckResult([entry(1)]);
     let resolveSave!: () => void;
     mocks.savePracticeDeck.mockReturnValue(
@@ -218,8 +210,9 @@ describe('usePracticeDeck', () => {
     act(() => {
       answerPromise = result.current.nextItem('skip');
     });
-    await waitFor(() => expect(result.current.finishedReview).toBe(true));
-    expect(mocks.savePracticeDeck).toHaveBeenCalledOnce();
+    await waitFor(() => expect(mocks.savePracticeDeck).toHaveBeenCalledOnce());
+    expect(result.current.finishedReview).toBe(false);
+    expect(result.current.currentItem?.item_id).toBe(1);
     expect(mocks.reload).not.toHaveBeenCalled();
 
     mocks.fetchData = {
@@ -233,6 +226,8 @@ describe('usePracticeDeck', () => {
     });
 
     expect(mocks.reload).toHaveBeenCalledOnce();
+    expect(result.current.finishedReview).toBe(true);
+    expect(result.current.currentItem).toBeNull();
   });
 });
 
