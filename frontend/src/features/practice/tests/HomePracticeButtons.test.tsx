@@ -122,14 +122,14 @@ describe('Home practice buttons', () => {
     expect(button('New').disabled).toBe(true);
   });
 
-  it('keeps only an active new session available', () => {
+  it('gives review priority over an active new session', () => {
     usePracticeAvailabilityStore.setState({
       reviewReadyAt: new Date().toISOString(),
       activeSession: makeSession('new'),
     });
     render(<PracticeButtons />);
-    expect(button('Review').disabled).toBe(true);
-    expect(button('New').disabled).toBe(false);
+    expect(button('Review').disabled).toBe(false);
+    expect(button('New').disabled).toBe(true);
   });
 });
 

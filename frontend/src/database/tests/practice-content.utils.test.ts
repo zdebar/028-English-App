@@ -204,13 +204,15 @@ describe('practice content resolution', () => {
     expect(mocks.grammarBulkGet).not.toHaveBeenCalled();
   });
 
-  it('does not start review while initial block practice is active', async () => {
+  it('loads review while preserving an active initial-training session', async () => {
     mocks.reconcileActive.mockResolvedValue({ mode: 'new' });
+    mocks.getReviewDeck.mockResolvedValue([makeReviewItem(1)]);
 
-    await expect(loadReviewDeckData('u1')).rejects.toThrow(
-      'Review practice is unavailable during initial block practice.',
-    );
-    expect(mocks.getReviewDeck).not.toHaveBeenCalled();
+    const result = await loadReviewDeckData('u1');
+
+    expect(result.entries).toHaveLength(1);
+    expect(mocks.reconcileActive).toHaveBeenCalledWith('u1');
+    expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', expect.any(String));
   });
 
   it('marks review abandoned when no due item is available', async () => {

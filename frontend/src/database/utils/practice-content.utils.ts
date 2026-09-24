@@ -144,10 +144,7 @@ export type ReviewDeckData = Readonly<{
 
 /** Loads the next complete CZ-to-EN review batch without creating a review session. */
 export async function loadReviewDeckData(userId: string): Promise<ReviewDeckData> {
-  const activeSession = await PracticeSession.reconcileActive(userId);
-  if (activeSession?.mode === 'new') {
-    throw new Error('Review practice is unavailable during initial block practice.');
-  }
+  await PracticeSession.reconcileActive(userId);
 
   const now = new Date().toISOString();
   const items = await db.transaction('r', db.user_items, () =>
