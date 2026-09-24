@@ -42,22 +42,21 @@ function isActiveNew(activeSession: { mode: 'review' | 'new' } | null): boolean 
 
 function isReviewButtonDisabled(
   error: Error | null,
-  activeNew: boolean,
   activeReview: boolean,
   reviewAvailable: boolean,
   loading: boolean,
 ): boolean {
-  return [Boolean(error), loading, activeNew, !activeReview && !reviewAvailable].some(Boolean);
+  return [Boolean(error), loading, !activeReview && !reviewAvailable].some(Boolean);
 }
 
 function isNewButtonDisabled(
   error: Error | null,
   activeReview: boolean,
-  activeNew: boolean,
+  reviewAvailable: boolean,
   newAvailable: boolean,
   loading: boolean,
 ): boolean {
-  return [Boolean(error), loading, activeReview, !activeNew && !newAvailable].some(Boolean);
+  return [Boolean(error), loading, activeReview, reviewAvailable, !newAvailable].some(Boolean);
 }
 
 function resolvePracticeButtonState(
@@ -73,13 +72,18 @@ function resolvePracticeButtonState(
   const reviewAvailable = isReviewAvailable(reviewReadyAt, checkedAt);
   const reviewDisabled = isReviewButtonDisabled(
     error,
-    activeNew,
     activeReview,
     reviewAvailable,
     loading,
   );
   const newAvailable = activeNew || (!reviewAvailable && initialTrainingAvailable);
-  const newDisabled = isNewButtonDisabled(error, activeReview, activeNew, newAvailable, loading);
+  const newDisabled = isNewButtonDisabled(
+    error,
+    activeReview,
+    reviewAvailable,
+    newAvailable,
+    loading,
+  );
 
   return {
     reviewDisabled,
@@ -93,7 +97,6 @@ function resolvePracticeButtonState(
       reviewDisabled,
       loading,
       error,
-      activeNew,
     ),
   };
 }
@@ -181,9 +184,8 @@ function resolveReviewCountdown(
   reviewDisabled: boolean,
   loading: boolean,
   error: Error | null,
-  activeNew: boolean,
 ): string | null {
-  if (!reviewDisabled || loading || error || activeNew) return null;
+  if (!reviewDisabled || loading || error) return null;
   return formatReviewCountdown(reviewReadyAt, checkedAt);
 }
 
