@@ -38,6 +38,7 @@ export default function PracticeCard({ initialData }: PracticeCardProps) {
     audioDisabled,
     plusHint,
     nextItem,
+    retryPractice,
     audioError,
     playAudio,
     audioLoading,
@@ -107,6 +108,7 @@ export default function PracticeCard({ initialData }: PracticeCardProps) {
       nextRepeat={() => nextItem('incorrect')}
       nextKnown={() => nextItem('correct')}
       completeCurrent={() => nextItem('skip')}
+      retryAction={retryPractice}
       audioError={audioError}
       playAudio={playAudio}
       audioLoading={audioLoading}

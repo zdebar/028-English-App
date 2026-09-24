@@ -29,52 +29,71 @@ type SecondaryContentRequest = Readonly<{
   promise: Promise<ReviewEntryDetails>;
 }>;
 
-/** Loads complete review batches and saves changes at their boundary or on exit. */
+type ReviewRetryAction = 'save' | 'reload';
+
+/** Loads complete review batches and persists each answer without blocking card changes. */
 export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckData) {
   const [saveError, setSaveError] = useState<Error | null>(null);
   const pendingProgressRef = useRef(new Map<number, UserItemLocal>());
-  const pendingSaveRef = useRef<Promise<boolean> | null>(null);
-  const savePendingReviewItems = useCallback(async (): Promise<boolean> => {
-    const existingSave = pendingSaveRef.current;
-    if (existingSave) return existingSave;
+  const pendingSaveRef = useRef(new Map<number, Promise<boolean>>());
+  const saveReviewItem = useCallback(
+    (item: UserItemLocal): Promise<boolean> => {
+      if (!userId) return Promise.resolve(false);
 
-    const pendingEntries = [...pendingProgressRef.current.entries()];
-    if (pendingEntries.length === 0 || !userId) return false;
+      const existingSave = pendingSaveRef.current.get(item.item_id);
+      if (existingSave) return existingSave;
 
-    const pendingItems = pendingEntries.map(([, item]) => item);
-    const savePromise = Promise.resolve()
-      .then(() => UserItem.savePracticeDeck(pendingItems))
-      .then(() => {
-        for (const [itemId, item] of pendingEntries) {
-          if (pendingProgressRef.current.get(itemId) === item) {
-            pendingProgressRef.current.delete(itemId);
+      const savePromise = Promise.resolve()
+        .then(() => UserItem.savePracticeDeck([item]))
+        .then(() => {
+          if (pendingProgressRef.current.get(item.item_id) === item) {
+            pendingProgressRef.current.delete(item.item_id);
           }
+          if (pendingProgressRef.current.size === 0) setSaveError(null);
+          return true;
+        })
+        .catch((caughtError: unknown) => {
+          const normalizedError = toError(caughtError);
+          setSaveError(normalizedError);
+          reportError('Failed to save review progress', normalizedError);
+          return false;
+        });
+
+      pendingSaveRef.current.set(item.item_id, savePromise);
+      const removeSave = () => {
+        if (pendingSaveRef.current.get(item.item_id) === savePromise) {
+          pendingSaveRef.current.delete(item.item_id);
         }
-        setSaveError(null);
-        return true;
-      })
-      .catch((caughtError: unknown) => {
-        const normalizedError = toError(caughtError);
-        setSaveError(normalizedError);
-        reportError('Failed to save review progress', normalizedError);
-        return false;
-      })
-      .finally(() => {
-        if (pendingSaveRef.current === savePromise) pendingSaveRef.current = null;
-      });
-    pendingSaveRef.current = savePromise;
-    return savePromise;
-  }, [userId]);
-  const flushPendingReviewItems = useCallback(async (): Promise<void> => {
-    await savePendingReviewItems();
-  }, [savePendingReviewItems]);
+      };
+      void savePromise.then(removeSave, removeSave);
+      return savePromise;
+    },
+    [userId],
+  );
+  const flushPendingReviewItems = useCallback(async (): Promise<boolean> => {
+    if (!userId) return false;
+
+    for (const item of pendingProgressRef.current.values()) {
+      void saveReviewItem(item);
+    }
+
+    const saves = [...pendingSaveRef.current.values()];
+    if (saves.length === 0) return pendingProgressRef.current.size === 0;
+
+    const results = await Promise.all(saves);
+    return results.every(Boolean) && pendingProgressRef.current.size === 0;
+  }, [saveReviewItem, userId]);
+  const flushPracticeForBoundary = useCallback(async (): Promise<void> => {
+    await flushPendingReviewItems();
+  }, [flushPendingReviewItems]);
   const { trackPracticeWrite, finishPractice } = usePracticeAvailabilityBoundary(
     userId,
-    flushPendingReviewItems,
+    flushPracticeForBoundary,
   );
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [finishedReview, setFinishedReview] = useState(false);
+  const [retryAction, setRetryAction] = useState<ReviewRetryAction | null>(null);
   const [completedCount, setCompletedCount] = useState(0);
   const [totalCount, setTotalCount] = useState<number | null>(null);
   const isTransitioningRef = useRef(false);
@@ -128,6 +147,7 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
   useEffect(() => {
     countedDeckRef.current = null;
     pendingProgressRef.current.clear();
+    pendingSaveRef.current.clear();
     setCompletedCount(0);
     setTotalCount(null);
 
@@ -228,7 +248,9 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
             pendingProgress: pendingProgressRef,
             resetQuestionState,
             reload: reloadPracticeDeck,
-            savePendingReviewItems,
+            saveReviewItem,
+            flushPendingReviewItems,
+            setRetryAction,
             setSaveError,
             setCompletedCount,
             setIndex,
@@ -241,14 +263,37 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
     [
       currentItem,
       fetchedResult?.entries.length,
+      flushPendingReviewItems,
       index,
       reloadPracticeDeck,
       resetQuestionState,
-      savePendingReviewItems,
+      saveReviewItem,
+      setRetryAction,
       trackPracticeWrite,
       userId,
     ],
   );
+  const retryPractice = useCallback(async () => {
+    if (!retryAction || isTransitioningRef.current) return;
+    isTransitioningRef.current = true;
+
+    try {
+      if (retryAction === 'save') {
+        const didSave = await flushPendingReviewItems();
+        if (!didSave) return;
+      }
+
+      const didReload = await refreshAfterReviewSave(
+        reloadPracticeDeck,
+        resetQuestionState,
+        setSaveError,
+      );
+      if (didReload) setRetryAction(null);
+      else setRetryAction('reload');
+    } finally {
+      isTransitioningRef.current = false;
+    }
+  }, [flushPendingReviewItems, reloadPracticeDeck, resetQuestionState, retryAction]);
 
   return {
     index,
@@ -272,6 +317,7 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
     handleReveal: cardState.handleReveal,
     plusHint: cardState.plusHint,
     nextItem,
+    retryPractice: retryAction ? retryPractice : undefined,
     loading,
     error: error ?? saveError,
     finishPractice,
@@ -329,7 +375,9 @@ type AnswerReviewCardOptions = Readonly<{
   pendingProgress: { current: Map<number, UserItemLocal> };
   resetQuestionState: () => void;
   reload: () => Promise<unknown>;
-  savePendingReviewItems: () => Promise<boolean>;
+  saveReviewItem: (item: UserItemLocal) => Promise<boolean>;
+  flushPendingReviewItems: () => Promise<boolean>;
+  setRetryAction: Dispatch<SetStateAction<ReviewRetryAction | null>>;
   setSaveError: Dispatch<SetStateAction<Error | null>>;
   setCompletedCount: Dispatch<SetStateAction<number>>;
   setIndex: Dispatch<SetStateAction<number>>;
@@ -348,6 +396,7 @@ async function answerReviewCard(
     new Date(Date.now()).toISOString(),
   );
   pendingProgress.current.set(updatedItem.item_id, updatedItem);
+  void options.saveReviewItem(updatedItem);
   options.setCompletedCount((count) => count + 1);
 
   const isBatchEnd = options.currentIndex + 1 >= options.batchSize;
@@ -361,23 +410,35 @@ async function answerReviewCard(
 }
 
 async function saveReviewBatch(options: AnswerReviewCardOptions): Promise<void> {
-  const didSave = await options.savePendingReviewItems();
-  if (!didSave) return;
-  await refreshAfterReviewSave(options.reload, options.resetQuestionState, options.setSaveError);
+  const didSave = await options.flushPendingReviewItems();
+  if (!didSave) {
+    options.setRetryAction('save');
+    return;
+  }
+
+  const didReload = await refreshAfterReviewSave(
+    options.reload,
+    options.resetQuestionState,
+    options.setSaveError,
+  );
+  options.setRetryAction(didReload ? null : 'reload');
 }
 
 async function refreshAfterReviewSave(
   reload: () => Promise<unknown>,
   resetQuestionState: () => void,
   setSaveError: Dispatch<SetStateAction<Error | null>>,
-): Promise<void> {
+): Promise<boolean> {
   try {
     await reload();
     resetQuestionState();
+    setSaveError(null);
+    return true;
   } catch (caughtError) {
     const normalizedError = toError(caughtError);
     setSaveError(normalizedError);
     reportError('Failed to refresh review deck', normalizedError);
+    return false;
   }
 }
 

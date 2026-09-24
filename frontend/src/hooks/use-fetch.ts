@@ -16,7 +16,8 @@ type UseFetchOptions<T> = Readonly<{
  * Fetches nullable async data and exposes loading, error, and reload state.
  *
  * @param fetchFunction Async loader returning data or null when no record is available.
- * @returns Data, loading/error state, and a manual reload function. Failed loads set data to null.
+ * @returns Data, loading/error state, and a manual reload function. Failed initial loads set
+ * data to null; failed reloads preserve previously resolved data for retry.
  * @throws TypeError when fetchFunction is not a function.
  */
 export function useFetch<T>(

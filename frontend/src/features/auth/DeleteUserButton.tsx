@@ -32,33 +32,46 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
 
   const handleDelete = async () => {
     if (!userId) return;
+    const deletingUserId = userId;
+
     try {
-      saveCurrentThemeAsGuest();
-
-      await withSettledSummary(
-        [
-          UserItem.deleteByUserId(userId),
-          Metadata.deleteSyncRow(TableName.UserItems, userId),
-          PracticeSession.deleteByUserId(userId),
-        ],
-        'Operation failed during local cleanup',
-      );
-
       const { error: deleteError } = await supabaseInstance.rpc('hard_delete_user');
-
       if (deleteError) {
         throw new Error(deleteError.message);
       }
-
-      showToast(TEXTS.deleteUserSuccessToast, 'success');
-      reportInfo(`User ${userId} hard deleted their account`);
     } catch (err) {
       reportError('Error deleting user', err);
       showToast(TEXTS.deleteUserErrorToast, 'error');
-    } finally {
-      clearAllLocalStorageForUser(userId);
-      handleLogout({ skipSync: true, skipRemoteSignOut: true });
+      return;
     }
+
+    saveCurrentThemeAsGuest();
+    const cleanupSummary = await withSettledSummary(
+      [
+        UserItem.deleteByUserId(deletingUserId),
+        Metadata.deleteSyncRow(TableName.UserItems, deletingUserId),
+        PracticeSession.deleteByUserId(deletingUserId),
+      ],
+      'Operation failed during local cleanup',
+    );
+    if (cleanupSummary.failed > 0) {
+      reportError('Local account cleanup was incomplete', cleanupSummary.sampleErrors);
+    }
+
+    try {
+      clearAllLocalStorageForUser(deletingUserId);
+    } catch (err) {
+      reportError('Failed to clear local account storage', err);
+    }
+
+    try {
+      await handleLogout({ skipSync: true, skipRemoteSignOut: true });
+    } catch (err) {
+      reportError('Failed to finish account logout after deletion', err);
+    }
+
+    showToast(TEXTS.deleteUserSuccessToast, 'success');
+    reportInfo(`User ${deletingUserId} hard deleted their account`);
   };
 
   return (

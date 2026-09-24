@@ -79,24 +79,27 @@ describe('usePracticeDeck', () => {
     mocks.savePracticeDeck.mockResolvedValue(undefined);
   });
 
-  it('loads the full batch and advances without saving each card', async () => {
+  it('saves each answered card while advancing to the next card', async () => {
     const { result } = renderHook(() => usePracticeDeck('u1'));
     await waitFor(() => expect(result.current.progressLabel).toBe('0 / 2'));
 
     await act(async () => result.current.nextItem('correct'));
 
     expect(result.current.currentItem?.item_id).toBe(2);
-    expect(mocks.savePracticeDeck).not.toHaveBeenCalled();
+    expect(mocks.savePracticeDeck).toHaveBeenCalledOnce();
+    expect(mocks.savePracticeDeck).toHaveBeenCalledWith([
+      expect.objectContaining({ item_id: 1, updated_at: 'now' }),
+    ]);
     expect(mocks.reload).not.toHaveBeenCalled();
     expect(result.current.progressLabel).toBe('1 / 2');
   });
 
-  it('saves only changed items when leaving in the middle of a batch', async () => {
+  it('does not save an answered card again when leaving in the middle of a batch', async () => {
     const { result } = renderHook(() => usePracticeDeck('u1'));
     await waitFor(() => expect(result.current.progressLabel).toBe('0 / 2'));
 
     await act(async () => result.current.nextItem('correct'));
-    expect(mocks.savePracticeDeck).not.toHaveBeenCalled();
+    expect(mocks.savePracticeDeck).toHaveBeenCalledOnce();
 
     await act(async () => result.current.finishPractice());
 
@@ -139,10 +142,10 @@ describe('usePracticeDeck', () => {
     await expect(ensurePromise).resolves.toBe(true);
   });
 
-  it('bulk-saves once at the end of a batch and loads the next batch', async () => {
-    mocks.savePracticeDeck.mockImplementationOnce(async (items: PracticeDeckEntry['item'][]) => {
-      expect(items).toHaveLength(2);
-      mocks.fetchData = reviewDeckResult([entry(3)]);
+  it('saves each card and loads the next batch after the final save', async () => {
+    mocks.savePracticeDeck.mockImplementation(async (items: PracticeDeckEntry['item'][]) => {
+      expect(items).toHaveLength(1);
+      if (items[0].item_id === 2) mocks.fetchData = reviewDeckResult([entry(3)]);
     });
     const { result } = renderHook(() => usePracticeDeck('u1'));
     await waitFor(() => expect(result.current.progressLabel).toBe('0 / 2'));
@@ -150,7 +153,15 @@ describe('usePracticeDeck', () => {
     await act(async () => result.current.nextItem('correct'));
     await act(async () => result.current.nextItem('incorrect'));
 
-    expect(mocks.savePracticeDeck).toHaveBeenCalledOnce();
+    expect(mocks.savePracticeDeck).toHaveBeenCalledTimes(2);
+    expect(mocks.savePracticeDeck).toHaveBeenNthCalledWith(
+      1,
+      [expect.objectContaining({ item_id: 1, updated_at: 'now' })],
+    );
+    expect(mocks.savePracticeDeck).toHaveBeenNthCalledWith(
+      2,
+      [expect.objectContaining({ item_id: 2, updated_at: 'now' })],
+    );
     expect(mocks.reload).toHaveBeenCalledOnce();
     expect(result.current.currentItem?.item_id).toBe(3);
     expect(result.current.progressLabel).toBe('2 / 3');
@@ -158,7 +169,7 @@ describe('usePracticeDeck', () => {
 
   it('adds the next batch length to the running counter', async () => {
     mocks.fetchData = reviewDeckResult([entry(1)]);
-    mocks.savePracticeDeck.mockImplementationOnce(async () => {
+    mocks.savePracticeDeck.mockImplementation(async () => {
       mocks.fetchData = reviewDeckResult([entry(2)]);
     });
     const { result } = renderHook(() => usePracticeDeck('u1'));
@@ -169,21 +180,21 @@ describe('usePracticeDeck', () => {
     expect(result.current.progressLabel).toBe('1 / 2');
   });
 
-  it('keeps the batch in memory when the bulk save fails', async () => {
-    mocks.savePracticeDeck.mockRejectedValueOnce(new Error('save failed'));
+  it('keeps the batch in memory when an item save fails', async () => {
+    mocks.savePracticeDeck.mockRejectedValue(new Error('save failed'));
     const { result } = renderHook(() => usePracticeDeck('u1'));
     await waitFor(() => expect(result.current.progressLabel).toBe('0 / 2'));
 
     await act(async () => result.current.nextItem('correct'));
     await act(async () => result.current.nextItem('correct'));
 
-    expect(result.current.error?.message).toBe('save failed');
+    await waitFor(() => expect(result.current.error?.message).toBe('save failed'));
     expect(mocks.reload).not.toHaveBeenCalled();
   });
 
   it('finishes when the next batch is empty', async () => {
     mocks.fetchData = reviewDeckResult([entry(1)]);
-    mocks.savePracticeDeck.mockImplementationOnce(async () => {
+    mocks.savePracticeDeck.mockImplementation(async () => {
       mocks.fetchData = { entries: [], availabilityCheckedAt: '2026-06-24T11:00:00.000Z', abandoned: true };
     });
     const { result } = renderHook(() => usePracticeDeck('u1'));
@@ -228,6 +239,49 @@ describe('usePracticeDeck', () => {
     expect(mocks.reload).toHaveBeenCalledOnce();
     expect(result.current.finishedReview).toBe(true);
     expect(result.current.currentItem).toBeNull();
+  });
+
+  it('retries a failed final save without counting the answer twice', async () => {
+    mocks.fetchData = reviewDeckResult([entry(1)]);
+    mocks.savePracticeDeck.mockRejectedValueOnce(new Error('save failed'));
+    const { result } = renderHook(() => usePracticeDeck('u1'));
+    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+
+    await act(async () => result.current.nextItem('correct'));
+
+    await waitFor(() => expect(result.current.error?.message).toBe('save failed'));
+    await waitFor(() => expect(result.current.retryPractice).toBeDefined());
+    mocks.fetchData = reviewDeckResult([entry(2)]);
+    mocks.savePracticeDeck.mockResolvedValue(undefined);
+
+    await act(async () => result.current.retryPractice?.());
+
+    expect(mocks.savePracticeDeck).toHaveBeenCalledTimes(2);
+    expect(mocks.reload).toHaveBeenCalledOnce();
+    expect(result.current.currentItem?.item_id).toBe(2);
+    expect(result.current.progressLabel).toBe('1 / 2');
+  });
+
+  it('retries only loading after a successful final save', async () => {
+    mocks.fetchData = reviewDeckResult([entry(1)]);
+    mocks.reload.mockRejectedValueOnce(new Error('reload failed'));
+    const { result } = renderHook(() => usePracticeDeck('u1'));
+    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+
+    await act(async () => result.current.nextItem('correct'));
+
+    expect(mocks.savePracticeDeck).toHaveBeenCalledOnce();
+    await waitFor(() => expect(result.current.error?.message).toBe('reload failed'));
+    await waitFor(() => expect(result.current.retryPractice).toBeDefined());
+    mocks.fetchData = reviewDeckResult([entry(2)]);
+    mocks.reload.mockResolvedValueOnce(undefined);
+
+    await act(async () => result.current.retryPractice?.());
+
+    expect(mocks.savePracticeDeck).toHaveBeenCalledOnce();
+    expect(mocks.reload).toHaveBeenCalledTimes(2);
+    expect(result.current.currentItem?.item_id).toBe(2);
+    expect(result.current.progressLabel).toBe('1 / 2');
   });
 });
 

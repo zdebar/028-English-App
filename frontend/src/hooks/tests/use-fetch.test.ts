@@ -120,4 +120,78 @@ describe('useFetch', () => {
       expect(result.current.data).toEqual({ value: 2 });
     });
   });
+
+  it('ignores stale results and errors from an older request', async () => {
+    let resolveFirst: ((value: { value: number }) => void) | undefined;
+    let rejectFirst: ((reason: Error) => void) | undefined;
+    let resolveSecond: ((value: { value: number }) => void) | undefined;
+    const fetchFunction = vi
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise<{ value: number }>((resolve, reject) => {
+            resolveFirst = resolve;
+            rejectFirst = reject;
+          }),
+      )
+      .mockImplementationOnce(
+        () =>
+          new Promise<{ value: number }>((resolve) => {
+            resolveSecond = resolve;
+          }),
+      );
+
+    const { result } = renderHook(() => useFetch(fetchFunction));
+    await waitFor(() => expect(fetchFunction).toHaveBeenCalledTimes(1));
+
+    act(() => {
+      void result.current.reload();
+    });
+    await waitFor(() => expect(fetchFunction).toHaveBeenCalledTimes(2));
+
+    act(() => {
+      resolveSecond?.({ value: 2 });
+    });
+    await waitFor(() => expect(result.current.data).toEqual({ value: 2 }));
+
+    act(() => {
+      rejectFirst?.(new Error('stale failure'));
+      resolveFirst?.({ value: 1 });
+    });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.data).toEqual({ value: 2 });
+    expect(result.current.error).toBeNull();
+  });
+
+  it('invalidates an older request when replacement initial data arrives', async () => {
+    let resolveRequest: ((value: string) => void) | undefined;
+    const fetchFunction = vi.fn().mockImplementation(
+      () =>
+        new Promise<string>((resolve) => {
+          resolveRequest = resolve;
+        }),
+    );
+    const { result, rerender } = renderHook(
+      ({ initialData }: { initialData: string }) =>
+        useFetch(fetchFunction, { initialData }),
+      { initialProps: { initialData: 'initial' } },
+    );
+
+    act(() => {
+      void result.current.reload();
+    });
+    await waitFor(() => expect(result.current.loading).toBe(true));
+
+    rerender({ initialData: 'replacement' });
+    expect(result.current.data).toBe('replacement');
+    expect(result.current.loading).toBe(false);
+
+    act(() => {
+      resolveRequest?.('stale response');
+    });
+
+    await waitFor(() => expect(result.current.data).toBe('replacement'));
+    expect(result.current.error).toBeNull();
+  });
 });

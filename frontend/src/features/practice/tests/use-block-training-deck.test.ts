@@ -209,7 +209,7 @@ describe('useInitialTrainingDeck', () => {
     );
   });
 
-  it('renders the neutral completion card while New completion is being persisted', async () => {
+  it('keeps the final card visible while completion is being persisted', async () => {
     mocks.reconcileActive.mockResolvedValue({
       ...newSession(),
       completed_count: 1,
@@ -229,7 +229,11 @@ describe('useInitialTrainingDeck', () => {
     act(() => {
       completionPromise = result.current.nextKnown();
     });
-    await waitFor(() => expect(result.current.isComplete).toBe(true));
+    act(() => {
+      void result.current.nextKnown();
+    });
+    expect(result.current.isComplete).toBe(false);
+    expect(result.current.currentItem?.item_id).toBe(1);
     expect(mocks.completeInitialTraining).toHaveBeenCalledWith(
       'u1',
       [1, 2],
@@ -243,6 +247,7 @@ describe('useInitialTrainingDeck', () => {
       await completionPromise;
     });
 
+    await waitFor(() => expect(result.current.isComplete).toBe(true));
     expect(mocks.completeInitialTraining).toHaveBeenCalledWith(
       'u1',
       [1, 2],
@@ -251,6 +256,31 @@ describe('useInitialTrainingDeck', () => {
       expect.objectContaining({ mode: 'new', phase: 0 }),
     );
     unmount();
+  });
+
+  it('keeps the final card and allows retry when completion persistence fails', async () => {
+    mocks.reconcileActive.mockResolvedValue({
+      ...newSession(),
+      completed_count: 1,
+      current_queue_item_ids: [1],
+      completed_item_ids: [2],
+    });
+    mocks.completeInitialTraining
+      .mockRejectedValueOnce(new Error('completion failed'))
+      .mockResolvedValueOnce(1);
+    const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
+    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+
+    await act(async () => result.current.nextKnown());
+
+    expect(result.current.isComplete).toBe(false);
+    expect(result.current.currentItem?.item_id).toBe(1);
+    expect(result.current.error?.message).toBe('completion failed');
+
+    await act(async () => result.current.nextKnown());
+
+    await waitFor(() => expect(result.current.isComplete).toBe(true));
+    expect(mocks.completeInitialTraining).toHaveBeenCalledTimes(2);
   });
 });
 

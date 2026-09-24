@@ -1,6 +1,7 @@
 import DelayedNotification from '@/components/UI/DelayedNotification';
 import config from '@/config/config';
 import SecondaryControlButton from '@/components/UI/buttons/SecondaryControlButton';
+import StyledButton from '@/components/UI/buttons/StyledButton';
 import BookIcon from '@/components/UI/icons/BookIcon';
 import PlayButton from '@/features/audio/PlayButton';
 import VolumeSlider from '@/features/audio/VolumeSlider';
@@ -45,6 +46,7 @@ export type PracticeSessionCardProps = Readonly<{
   nextKnown: () => void | Promise<void>;
   completeCurrent?: () => void | Promise<void>;
   completeDisabled?: boolean;
+  retryAction?: () => void | Promise<void>;
   audioError: boolean;
   playAudio: () => void;
   audioLoading: boolean;
@@ -61,6 +63,7 @@ type PracticeControlsProps = Pick<
   | 'nextRepeat'
   | 'plusHint'
   | 'repeatDisabled'
+  | 'retryAction'
 > &
   Readonly<{
     controlsLocked: boolean;
@@ -135,6 +138,7 @@ function PracticeControls({
   nextRepeat,
   plusHint,
   repeatDisabled = false,
+  retryAction,
   controlsLocked,
   showHintControl,
 }: PracticeControlsProps) {
@@ -143,6 +147,17 @@ function PracticeControls({
 
   if (showHintControl) {
     return <HintButton onClick={plusHint} disabled={controlsLocked || isSkipGestureLocked} />;
+  }
+
+  if (retryAction) {
+    return (
+      <StyledButton
+        className="h-button max-h-button w-full px-4 col-span-full"
+        onClick={() => void retryAction()}
+      >
+        {TEXTS.retry}
+      </StyledButton>
+    );
   }
 
   return (
@@ -496,6 +511,7 @@ function PracticeCardActionBar({
     nextRepeat,
     plusHint,
     repeatDisabled,
+    retryAction,
   } = props;
   return (
     <>
@@ -510,6 +526,7 @@ function PracticeCardActionBar({
           nextRepeat={nextRepeat}
           plusHint={plusHint}
           repeatDisabled={repeatDisabled}
+          retryAction={retryAction}
           controlsLocked={display.controlsLocked}
           showHintControl={display.showHintControl}
         />
