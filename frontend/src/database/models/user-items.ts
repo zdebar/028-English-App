@@ -216,7 +216,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /**
-   * Persists practice progress for all items in a completed deck.
+   * Persists practice progress for the provided items in one transaction.
    *
    * Missing, deleted, or already-mastered items are silently skipped.
    * Empty arrays are ignored.
