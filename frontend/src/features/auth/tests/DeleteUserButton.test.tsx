@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   clearTheme: vi.fn(),
   saveCurrentThemeAsGuest: vi.fn(),
   deleteAllByUserId: vi.fn(),
+  deletePracticeSession: vi.fn(),
   deleteSyncRow: vi.fn(),
   clearSyncTimes: vi.fn(),
   rpc: vi.fn(),
@@ -52,6 +53,12 @@ vi.mock('@/database/models/user-items', () => ({
 vi.mock('@/database/models/metadata', () => ({
   default: {
     deleteSyncRow: (...args: unknown[]) => mocks.deleteSyncRow(...args),
+  },
+}));
+
+vi.mock('@/database/models/practice-sessions', () => ({
+  default: {
+    deleteByUserId: (...args: unknown[]) => mocks.deletePracticeSession(...args),
   },
 }));
 
@@ -105,6 +112,7 @@ describe('DeleteUserButton', () => {
 
     mocks.rpc.mockResolvedValue({ error: null });
     mocks.deleteAllByUserId.mockResolvedValue(0);
+    mocks.deletePracticeSession.mockResolvedValue(undefined);
     mocks.deleteSyncRow.mockResolvedValue(true);
     mocks.clearTheme.mockResolvedValue(undefined);
     mocks.saveCurrentThemeAsGuest.mockReturnValue(undefined);
@@ -146,6 +154,30 @@ describe('DeleteUserButton', () => {
     await waitFor(() => {
       expect(mocks.showToast).toHaveBeenCalledWith('Delete error', 'error');
       expect(mocks.reportError).toHaveBeenCalledWith('Error deleting user', expect.any(Error));
+    });
+    expect(mocks.deleteAllByUserId).not.toHaveBeenCalled();
+    expect(mocks.deleteSyncRow).not.toHaveBeenCalled();
+    expect(mocks.deletePracticeSession).not.toHaveBeenCalled();
+    expect(mocks.handleLogout).not.toHaveBeenCalled();
+    expect(mocks.saveCurrentThemeAsGuest).not.toHaveBeenCalled();
+  });
+
+  it('logs local cleanup failures but completes the confirmed remote deletion flow', async () => {
+    mocks.deleteAllByUserId.mockRejectedValue(new Error('local cleanup failed'));
+
+    render(<DeleteUserButton />);
+    fireEvent.click(screen.getByTestId('button-with-modal'));
+
+    await waitFor(() => {
+      expect(mocks.showToast).toHaveBeenCalledWith('Delete success', 'success');
+    });
+    expect(mocks.reportError).toHaveBeenCalledWith(
+      'Local account cleanup was incomplete',
+      expect.anything(),
+    );
+    expect(mocks.handleLogout).toHaveBeenCalledWith({
+      skipSync: true,
+      skipRemoteSignOut: true,
     });
   });
 });

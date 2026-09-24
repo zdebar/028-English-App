@@ -93,6 +93,26 @@ function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
   };
 }
 
+function getUserItemKey(item: Pick<UserItemLocal, 'user_id' | 'item_id'>): string {
+  return `${item.user_id}:${item.item_id}`;
+}
+
+function isWithinSyncWindow(
+  item: Pick<UserItemLocal, 'updated_at'>,
+  lastSyncedAt: string,
+  newSyncedAt: string,
+): boolean {
+  return item.updated_at > lastSyncedAt && item.updated_at <= newSyncedAt;
+}
+
+function hasChangedSinceSnapshot(
+  item: UserItemLocal,
+  snapshotByKey: ReadonlyMap<string, UserItemLocal>,
+): boolean {
+  const snapshot = snapshotByKey.get(getUserItemKey(item));
+  return snapshot?.updated_at !== item.updated_at;
+}
+
 function replaceNullDate(value: string | null): string {
   return value ?? NULL_DATE;
 }
@@ -596,8 +616,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Pushes local item changes and applies remote item changes.
    *
    * @param userId User id whose item rows should sync.
-   * @param doFullSync When true, local rows are cleared before applying remote rows from the epoch.
-   * When false, only remote tombstones are deleted locally.
+   * @param doFullSync When true, local rows are refreshed from the epoch while preserving
+   * changes made locally during the sync.
+   * When false, only remote tombstones are deleted locally when the row was not changed locally.
    * @returns Number of item rows returned by the remote sync RPC.
    * @throws SupabaseError when the sync RPC fails.
    * @throws Error when sync metadata userId validation fails.
@@ -610,48 +631,58 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       userId,
     );
 
-    // Step 2: Push local changes and pull updates in a single RPC call
-    const localItems = await this.getUserItemsForSync(userId, lastSyncedAt, newSyncedAt);
+    // Step 2: Capture the local snapshot before pushing and pulling remote changes.
+    const localSnapshot = await this.getByUserId(userId);
+    const localItemsToPush = localSnapshot.filter((item) =>
+      isWithinSyncWindow(item, lastSyncedAt, newSyncedAt),
+    );
+    const localItems = localItemsToPush.map(convertLocalToExport);
     reportInfo(`Completed ${localItems.length} UserItems push to remote`);
 
     const updatedItems = await this.syncWithRemote(userId, localItems, lastSyncedAt, newSyncedAt);
     const { toUpsert, toDelete } = splitDeleted(updatedItems);
 
-    // Step 4: Update local database with fetched items and update sync metadata
+    // Step 4: Merge only into rows that did not change after the snapshot.
+    let preservedConcurrentChanges = false;
     await db.transaction('rw', db.user_items, db.metadata, async () => {
+      const currentItems = await this.getByUserId(userId);
+      const snapshotByKey = new Map(
+        localSnapshot.map((item) => [getUserItemKey(item), item]),
+      );
+      const concurrentKeys = new Set(
+        currentItems
+          .filter((item) => hasChangedSinceSnapshot(item, snapshotByKey))
+          .map(getUserItemKey),
+      );
+      preservedConcurrentChanges = concurrentKeys.size > 0;
+
       if (doFullSync) {
-        await this.deleteByUserId(userId);
+        const keysToDelete = currentItems
+          .filter((item) => !concurrentKeys.has(getUserItemKey(item)))
+          .map((item) => [item.user_id, item.item_id] as [string, number]);
+        if (keysToDelete.length > 0) await db.user_items.bulkDelete(keysToDelete);
       } else if (toDelete.length > 0) {
-        await db.user_items.bulkDelete(toDelete.map((item) => [item.user_id, item.item_id]));
+        const keysToDelete = toDelete
+          .filter((item) => !concurrentKeys.has(getUserItemKey(item)))
+          .map((item) => [item.user_id, item.item_id] as [string, number]);
+        if (keysToDelete.length > 0) await db.user_items.bulkDelete(keysToDelete);
       }
-      if (toUpsert.length > 0) {
-        await db.user_items.bulkPut(toUpsert);
+      const rowsToUpsert = toUpsert.filter(
+        (item) => !concurrentKeys.has(getUserItemKey(item)),
+      );
+      if (rowsToUpsert.length > 0) {
+        await db.user_items.bulkPut(rowsToUpsert);
       }
-      await Metadata.markAsSynced(TableName.UserItems, newSyncedAt, userId);
+      if (!preservedConcurrentChanges) {
+        await Metadata.markAsSynced(TableName.UserItems, newSyncedAt, userId);
+      }
     });
 
+    if (preservedConcurrentChanges) {
+      reportInfo('Preserved local UserItems changes made during synchronization.');
+    }
+
     return updatedItems.length;
-  }
-
-  /**
-   * Reads local item rows that changed inside a sync window.
-   *
-   * @param userId User id whose local item rows should be exported.
-   * @param lastSyncedAt Exclusive lower updated_at bound.
-   * @param newSyncedAt Inclusive upper updated_at bound.
-   * @returns Item rows converted to the remote export shape.
-   */
-  private static async getUserItemsForSync(
-    userId: string,
-    lastSyncedAt: string,
-    newSyncedAt: string,
-  ): Promise<UserItemExport[]> {
-    const localUserItems: UserItemLocal[] = await db.user_items
-      .where('[user_id+updated_at]')
-      .between([userId, lastSyncedAt], [userId, newSyncedAt], false, true)
-      .toArray();
-
-    return localUserItems.map(convertLocalToExport);
   }
 
   /**

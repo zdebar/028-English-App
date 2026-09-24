@@ -29,6 +29,8 @@ type SecondaryContentRequest = Readonly<{
   promise: Promise<ReviewEntryDetails>;
 }>;
 
+type ReviewRetryAction = 'save' | 'reload';
+
 /** Loads complete review batches and persists each answer without blocking card changes. */
 export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckData) {
   const [saveError, setSaveError] = useState<Error | null>(null);
@@ -91,6 +93,7 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [finishedReview, setFinishedReview] = useState(false);
+  const [retryAction, setRetryAction] = useState<ReviewRetryAction | null>(null);
   const [completedCount, setCompletedCount] = useState(0);
   const [totalCount, setTotalCount] = useState<number | null>(null);
   const isTransitioningRef = useRef(false);
@@ -247,6 +250,7 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
             reload: reloadPracticeDeck,
             saveReviewItem,
             flushPendingReviewItems,
+            setRetryAction,
             setSaveError,
             setCompletedCount,
             setIndex,
@@ -264,10 +268,32 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
       reloadPracticeDeck,
       resetQuestionState,
       saveReviewItem,
+      setRetryAction,
       trackPracticeWrite,
       userId,
     ],
   );
+  const retryPractice = useCallback(async () => {
+    if (!retryAction || isTransitioningRef.current) return;
+    isTransitioningRef.current = true;
+
+    try {
+      if (retryAction === 'save') {
+        const didSave = await flushPendingReviewItems();
+        if (!didSave) return;
+      }
+
+      const didReload = await refreshAfterReviewSave(
+        reloadPracticeDeck,
+        resetQuestionState,
+        setSaveError,
+      );
+      if (didReload) setRetryAction(null);
+      else setRetryAction('reload');
+    } finally {
+      isTransitioningRef.current = false;
+    }
+  }, [flushPendingReviewItems, reloadPracticeDeck, resetQuestionState, retryAction]);
 
   return {
     index,
@@ -291,6 +317,7 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
     handleReveal: cardState.handleReveal,
     plusHint: cardState.plusHint,
     nextItem,
+    retryPractice: retryAction ? retryPractice : undefined,
     loading,
     error: error ?? saveError,
     finishPractice,
@@ -350,6 +377,7 @@ type AnswerReviewCardOptions = Readonly<{
   reload: () => Promise<unknown>;
   saveReviewItem: (item: UserItemLocal) => Promise<boolean>;
   flushPendingReviewItems: () => Promise<boolean>;
+  setRetryAction: Dispatch<SetStateAction<ReviewRetryAction | null>>;
   setSaveError: Dispatch<SetStateAction<Error | null>>;
   setCompletedCount: Dispatch<SetStateAction<number>>;
   setIndex: Dispatch<SetStateAction<number>>;
@@ -383,22 +411,34 @@ async function answerReviewCard(
 
 async function saveReviewBatch(options: AnswerReviewCardOptions): Promise<void> {
   const didSave = await options.flushPendingReviewItems();
-  if (!didSave) return;
-  await refreshAfterReviewSave(options.reload, options.resetQuestionState, options.setSaveError);
+  if (!didSave) {
+    options.setRetryAction('save');
+    return;
+  }
+
+  const didReload = await refreshAfterReviewSave(
+    options.reload,
+    options.resetQuestionState,
+    options.setSaveError,
+  );
+  options.setRetryAction(didReload ? null : 'reload');
 }
 
 async function refreshAfterReviewSave(
   reload: () => Promise<unknown>,
   resetQuestionState: () => void,
   setSaveError: Dispatch<SetStateAction<Error | null>>,
-): Promise<void> {
+): Promise<boolean> {
   try {
     await reload();
     resetQuestionState();
+    setSaveError(null);
+    return true;
   } catch (caughtError) {
     const normalizedError = toError(caughtError);
     setSaveError(normalizedError);
     reportError('Failed to refresh review deck', normalizedError);
+    return false;
   }
 }
 

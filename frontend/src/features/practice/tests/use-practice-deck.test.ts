@@ -240,6 +240,49 @@ describe('usePracticeDeck', () => {
     expect(result.current.finishedReview).toBe(true);
     expect(result.current.currentItem).toBeNull();
   });
+
+  it('retries a failed final save without counting the answer twice', async () => {
+    mocks.fetchData = reviewDeckResult([entry(1)]);
+    mocks.savePracticeDeck.mockRejectedValueOnce(new Error('save failed'));
+    const { result } = renderHook(() => usePracticeDeck('u1'));
+    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+
+    await act(async () => result.current.nextItem('correct'));
+
+    await waitFor(() => expect(result.current.error?.message).toBe('save failed'));
+    await waitFor(() => expect(result.current.retryPractice).toBeDefined());
+    mocks.fetchData = reviewDeckResult([entry(2)]);
+    mocks.savePracticeDeck.mockResolvedValue(undefined);
+
+    await act(async () => result.current.retryPractice?.());
+
+    expect(mocks.savePracticeDeck).toHaveBeenCalledTimes(2);
+    expect(mocks.reload).toHaveBeenCalledOnce();
+    expect(result.current.currentItem?.item_id).toBe(2);
+    expect(result.current.progressLabel).toBe('1 / 2');
+  });
+
+  it('retries only loading after a successful final save', async () => {
+    mocks.fetchData = reviewDeckResult([entry(1)]);
+    mocks.reload.mockRejectedValueOnce(new Error('reload failed'));
+    const { result } = renderHook(() => usePracticeDeck('u1'));
+    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+
+    await act(async () => result.current.nextItem('correct'));
+
+    expect(mocks.savePracticeDeck).toHaveBeenCalledOnce();
+    await waitFor(() => expect(result.current.error?.message).toBe('reload failed'));
+    await waitFor(() => expect(result.current.retryPractice).toBeDefined());
+    mocks.fetchData = reviewDeckResult([entry(2)]);
+    mocks.reload.mockResolvedValueOnce(undefined);
+
+    await act(async () => result.current.retryPractice?.());
+
+    expect(mocks.savePracticeDeck).toHaveBeenCalledOnce();
+    expect(mocks.reload).toHaveBeenCalledTimes(2);
+    expect(result.current.currentItem?.item_id).toBe(2);
+    expect(result.current.progressLabel).toBe('1 / 2');
+  });
 });
 
 function reviewDeckResult(entries: PracticeDeckEntry[]): ReviewDeckData {

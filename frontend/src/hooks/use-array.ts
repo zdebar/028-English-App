@@ -21,8 +21,8 @@ type UseArrayOptions<T> = Readonly<{
  *
  * @param fetchFunction Async loader returning the full item array.
  * @returns Data, loading/error state, a manual reload function, and the selected item.
- * `data` falls back to [] after failures, and `currentItem` is null when currentIndex is null
- * or outside the current data bounds.
+ * `data` falls back to [] after initial failures and preserves previously resolved data after
+ * reload failures. `currentItem` is null when currentIndex is null or outside the data bounds.
  * @throws TypeError when fetchFunction is not a function.
  */
 export function useArray<T>(

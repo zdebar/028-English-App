@@ -11,6 +11,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type Dispatch,
   type SetStateAction,
@@ -345,7 +346,7 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
     );
     if (!nextSession) {
       await finishBlock(updatedItem, session);
-      setItems((currentItems) => updateTrainingItem(currentItems, updatedItem));
+      setError(null);
       return;
     }
 
@@ -357,6 +358,7 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
     setItems((currentItems) => updateTrainingItem(currentItems, updatedItem));
     setSession(nextSession);
     setHasProgress(true);
+    setError(null);
   } catch (caughtError) {
     const normalizedError = toError(caughtError);
     setError(normalizedError);
@@ -382,6 +384,7 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
   const [revealed, setRevealed] = useState(false);
   const [loading, setLoading] = useState(userId != null);
   const [error, setError] = useState<Error | null>(null);
+  const isTransitioningRef = useRef(false);
 
   useEffect(() => {
     if (!userId) {
@@ -426,7 +429,6 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
     ) => {
       if (!userId || items.length === 0) return;
       const dateTime = new Date(Date.now()).toISOString();
-      setIsComplete(true);
       await PracticeSession.completeInitialTraining(
         userId,
         items.map((item) => item.item_id),
@@ -434,24 +436,32 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
         finalItem,
         expectedSession,
       );
+      setItems((currentItems) => updateTrainingItem(currentItems, finalItem));
+      setIsComplete(true);
     },
     [items, userId],
   );
 
   const advance = useCallback(
     async (outcome: TrainingOutcome) => {
-      await trackPracticeWrite(advanceInitialTraining({
-        outcome,
-        session,
-        currentItem,
-        isComplete,
-        finishBlock,
-        setItems,
-        setSession,
-        setHasProgress,
-        setError,
-        resetQuestionState,
-      }));
+      if (isTransitioningRef.current) return;
+      isTransitioningRef.current = true;
+      try {
+        await trackPracticeWrite(advanceInitialTraining({
+          outcome,
+          session,
+          currentItem,
+          isComplete,
+          finishBlock,
+          setItems,
+          setSession,
+          setHasProgress,
+          setError,
+          resetQuestionState,
+        }));
+      } finally {
+        isTransitioningRef.current = false;
+      }
     },
     [
       currentItem,

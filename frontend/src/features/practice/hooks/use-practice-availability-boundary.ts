@@ -24,9 +24,9 @@ export function usePracticeAvailabilityBoundary(
     let finishPromise: Promise<void> | null = null;
     const finishPractice = (): Promise<void> => {
       if (finishPromise) return finishPromise;
-      finishPromise = Promise.resolve(flushPractice?.())
+      finishPromise = Promise.allSettled(writes)
+        .then(() => flushPractice?.())
         .catch(() => undefined)
-        .then(() => Promise.allSettled(writes))
         .then(endPractice);
       return finishPromise;
     };

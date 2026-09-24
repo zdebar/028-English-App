@@ -31,22 +31,42 @@ export function useAsyncData<T>(
   const [error, setError] = useState<Error | null>(null);
   const emptyDataRef = useRef(options.emptyData);
   const isActiveRef = useRef(true);
+  const requestGenerationRef = useRef(0);
+  const hasResolvedDataRef = useRef(hasInitialData);
   const initialFetchFunctionRef = useRef(hasInitialData ? fetchFunction : null);
 
+  useEffect(() => {
+    requestGenerationRef.current += 1;
+    if (options.initialData === undefined) return;
+    setData(options.initialData);
+    hasResolvedDataRef.current = true;
+    setError(null);
+    setLoading(false);
+  }, [options.initialData]);
+
   const load = useCallback(async () => {
+    if (!isActiveRef.current) return;
+    const requestGeneration = ++requestGenerationRef.current;
     setLoading(true);
     setError(null);
 
     try {
       const result = await fetchFunction();
-      if (!isActiveRef.current) return;
+      if (!isCurrentRequest(isActiveRef.current, requestGeneration, requestGenerationRef.current)) {
+        return;
+      }
       setData(result);
+      hasResolvedDataRef.current = true;
     } catch (loadError) {
-      if (!isActiveRef.current) return;
+      if (!isCurrentRequest(isActiveRef.current, requestGeneration, requestGenerationRef.current)) {
+        return;
+      }
       setError(toError(loadError));
-      setData(emptyDataRef.current);
+      if (!hasResolvedDataRef.current) setData(emptyDataRef.current);
     } finally {
-      if (!isActiveRef.current) return;
+      if (!isCurrentRequest(isActiveRef.current, requestGeneration, requestGenerationRef.current)) {
+        return;
+      }
       setLoading(false);
     }
   }, [fetchFunction]);
@@ -55,6 +75,7 @@ export function useAsyncData<T>(
     isActiveRef.current = true;
     return () => {
       isActiveRef.current = false;
+      requestGenerationRef.current += 1;
     };
   }, []);
 
@@ -63,12 +84,13 @@ export function useAsyncData<T>(
     void load();
   }, [fetchFunction, load]);
 
-  useEffect(() => {
-    if (options.initialData === undefined) return;
-    setData(options.initialData);
-    setError(null);
-    setLoading(false);
-  }, [options.initialData]);
-
   return { data, loading, error, reload: load };
+}
+
+function isCurrentRequest(
+  isActive: boolean,
+  requestGeneration: number,
+  currentGeneration: number,
+): boolean {
+  return isActive && requestGeneration === currentGeneration;
 }
