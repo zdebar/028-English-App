@@ -40,10 +40,10 @@ describe('Home practice buttons', () => {
     const snapshot = usePracticeAvailabilityStore.getState();
     render(<PracticeButtons />);
     expect(button('Review').disabled).toBe(true);
-    expect(screen.getByText('02')).toBeTruthy();
+    expect(screen.getByText('2')).toBeTruthy();
     await act(async () => vi.advanceTimersByTimeAsync(2000));
     expect(button('Review').disabled).toBe(false);
-    expect(screen.queryByText('02')).toBeNull();
+    expect(screen.queryByText('2')).toBeNull();
     expect(usePracticeAvailabilityStore.getState()).toBe(snapshot);
   });
 
@@ -66,7 +66,7 @@ describe('Home practice buttons', () => {
     });
 
     render(<PracticeButtons />);
-    expect(screen.getByText('05')).toBeTruthy();
+    expect(screen.getByText('5')).toBeTruthy();
   });
   it('gives review priority at the configured review boundary', () => {
     usePracticeAvailabilityStore.setState({ reviewReadyAt: new Date().toISOString() });

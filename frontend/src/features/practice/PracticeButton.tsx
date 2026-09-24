@@ -164,7 +164,7 @@ export default function PracticeButtons(): JSX.Element {
         {reviewCountdown ? (
           <span
             aria-hidden="true"
-            className="text-disabled-light dark:text-disabled-dark pointer-events-none absolute top-1 right-2 text-xs leading-none"
+            className="text-disabled-light dark:text-disabled-dark pointer-events-none absolute top-1 right-1 text-xs leading-none"
           >
             {reviewCountdown}
           </span>
@@ -200,7 +200,7 @@ function formatReviewCountdown(reviewReadyAt: string | null, checkedAt: number):
   if (days > 0) return `${days}d ${padTime(hours)}:${padTime(minutes)}:${padTime(seconds)}`;
   if (hours > 0) return `${padTime(hours)}:${padTime(minutes)}:${padTime(seconds)}`;
   if (minutes > 0) return `${padTime(minutes)}:${padTime(seconds)}`;
-  return String(seconds).padStart(2, '0');
+  return String(seconds);
 }
 
 function padTime(value: number): string {
