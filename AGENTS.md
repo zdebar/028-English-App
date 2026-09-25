@@ -9,4 +9,5 @@
 2. Prefer using an optional chain expression, as it's more concise and easier to read.
 3. Maximal allowed Cognitive Complexity is 15
 4. Use <progress> instead of the \"progressbar\" role to ensure accessibility across all devices.
+5. Utilize Javascript's more advanced options for ex. nullish operator, optional chaining etc.
 
