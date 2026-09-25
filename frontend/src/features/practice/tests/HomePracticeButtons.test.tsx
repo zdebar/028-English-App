@@ -55,7 +55,51 @@ describe('Home practice buttons', () => {
     });
 
     render(<PracticeButtons />);
-    expect(screen.getByText('2d 03:04:05')).toBeTruthy();
+    expect(screen.getByText('2 dny + 3:04:05')).toBeTruthy();
+  });
+
+  it('does not pad countdown components and uses the singular Czech day form', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-23T10:00:00Z'));
+    usePracticeAvailabilityStore.setState({
+      reviewReadyAt: '2026-09-24T22:25:37Z',
+    });
+
+    render(<PracticeButtons />);
+    expect(screen.getByText('1 den + 12:25:37')).toBeTruthy();
+  });
+
+  it('uses the plural Czech day form for five or more days', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-23T10:00:00Z'));
+    usePracticeAvailabilityStore.setState({
+      reviewReadyAt: '2026-09-28T10:00:01Z',
+    });
+
+    render(<PracticeButtons />);
+    expect(screen.getByText('5 dní + 0:00:01')).toBeTruthy();
+  });
+
+  it('does not pad minute countdowns', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-23T10:00:00Z'));
+    usePracticeAvailabilityStore.setState({
+      reviewReadyAt: '2026-09-23T10:07:30Z',
+    });
+
+    render(<PracticeButtons />);
+    expect(screen.getByText('7:30')).toBeTruthy();
+  });
+
+  it('keeps leading zeroes on the following clock components', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-23T10:00:00Z'));
+    usePracticeAvailabilityStore.setState({
+      reviewReadyAt: '2026-09-23T11:02:03Z',
+    });
+
+    render(<PracticeButtons />);
+    expect(screen.getByText('1:02:03')).toBeTruthy();
   });
 
   it('shows only seconds near the review boundary', () => {
