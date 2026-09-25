@@ -198,15 +198,32 @@ function formatReviewCountdown(reviewReadyAt: string | null, checkedAt: number):
   const hours = Math.floor((remainingSeconds % 86_400) / 3_600);
   const minutes = Math.floor((remainingSeconds % 3_600) / 60);
   const seconds = remainingSeconds % 60;
+  const clock = formatClock(days, hours, minutes, seconds);
 
-  if (days > 0) return `${days}d ${padTime(hours)}:${padTime(minutes)}:${padTime(seconds)}`;
-  if (hours > 0) return `${padTime(hours)}:${padTime(minutes)}:${padTime(seconds)}`;
-  if (minutes > 0) return `${padTime(minutes)}:${padTime(seconds)}`;
+  if (days > 0) return `${days} ${getDayLabel(days)} + ${clock}`;
+  return clock;
+}
+
+function formatClock(days: number, hours: number, minutes: number, seconds: number): string {
+  if (days > 0 || hours > 0) {
+    return `${hours}:${padTime(minutes)}:${padTime(seconds)}`;
+  }
+  if (minutes > 0) return `${minutes}:${padTime(seconds)}`;
   return String(seconds);
 }
 
 function padTime(value: number): string {
   return String(value).padStart(2, '0');
+}
+
+function getDayLabel(days: number): string {
+  const lastTwoDigits = days % 100;
+  if (lastTwoDigits >= 11 && lastTwoDigits <= 14) return 'dní';
+
+  const lastDigit = days % 10;
+  if (lastDigit === 1) return 'den';
+  if (lastDigit >= 2 && lastDigit <= 4) return 'dny';
+  return 'dní';
 }
 
 function resolveButtonTitle(

@@ -1,5 +1,4 @@
 import { TEXTS } from '@/locales/cs';
-import { useEffect } from 'react';
 import { usePwaStore } from './use-pwa-store';
 
 type InstallPWAButtonProps = Readonly<{
@@ -8,19 +7,7 @@ type InstallPWAButtonProps = Readonly<{
 
 export function InstallPWAButton({ className }: InstallPWAButtonProps) {
   const promptEvent = usePwaStore((state) => state.promptEvent);
-  const setPromptEvent = usePwaStore((state) => state.setPromptEvent);
   const clearPromptEvent = usePwaStore((state) => state.clearPromptEvent);
-
-  useEffect(() => {
-    const handler = (e: Event) => {
-      e.preventDefault();
-      setPromptEvent(e as any);
-    };
-    globalThis.addEventListener('beforeinstallprompt', handler);
-    return () => {
-      globalThis.removeEventListener('beforeinstallprompt', handler);
-    };
-  }, [setPromptEvent]);
 
   if (!promptEvent) {
     return null;

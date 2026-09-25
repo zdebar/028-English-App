@@ -13,21 +13,21 @@ export default function Guide(): JSX.Element {
       <section>
         <h2>Úvod</h2>
         <p>
-          Učení je zde jednoduché jako mobilní hra: stačí stisknout jediné tlačítko a procvičovat.
-          Slovíčka i gramatika se vám nabídnou automaticky ve správném pořadí.
+          Jednoduchá aplikace pro učení angličtiny, ve které nemusíte přemýšlet, co dál. Slovíčka i
+          gramatika se vám automaticky nabídnou ve správném pořadí.
         </p>
         <p>
-          Každé slovíčko i věta mají audio se správnou výslovností. Vždy opakujte nahlas, ideálně
-          několikrát.
+          Aplikace nejprve nabízí procvičování. Buďte proto trpěliví, k novým položkám se dostanete
+          až po zopakování těch rozpracovaných.
         </p>
         <p>
-          Aplikace přednostně vybírá procvičování. Buďte trpěliví, k novému se dostanete po
-          zopakování rozučeného.
+          Každé slovíčko i věta jsou doplněny audiem se správnou výslovností. Vždy je opakujte
+          nahlas, ideálně několikrát.
         </p>
-        <h3>Doporučení:</h3>
+        <h3>Doporučení</h3>
         <ul>
-          <li>opakujte nahlas slyšené</li>
-          <li>alespoň 400 opakování denně</li>
+          <li>Slyšené výrazy vždy několikrát zopakujte nahlas.</li>
+          <li>Každý den přidejte alespoň 48 nových položek.</li>
         </ul>
       </section>
       <section>
@@ -38,17 +38,15 @@ export default function Guide(): JSX.Element {
         />
         <h3>Nainstalovat aplikaci</h3>
         <p>
-          Umožňuje nainstalovat aplikaci jako PWA na vaše zařízení. Aplikace je plně funkční
-          offline.
+          Tato možnost vám umožní nainstalovat aplikaci jako PWA na vaše zařízení, kde pak bude plně
+          funkční i offline.
         </p>
-        <h3>Denní cíl</h3>
-        <p>Denní cíl pokroku je 200.</p>
-        <h3>Opakování</h3>
-        <p>Procvičování již započatých položek, které zvyšuje nebo snižuje jejich pokrok.</p>
         <h3>Nové</h3>
-        <p>Učení nového bloku slovíček v obou směrech a v pevném i náhodném pořadí.</p>
+        <p>Umožňuje učit se nový blok slovíček v obou směrech, a to v pevném i náhodném pořadí.</p>
+        <h3>Opakování</h3>
+        <p>Slouží k procvičování již započatých položek a podle výsledku upravuje jejich pokrok.</p>
         <h3>Přehled lekcí</h3>
-        <p>Přehled dnes dotčených lekcí. Lze přepínat mezi rozučenými a naučenými položkami.</p>
+        <p>Zobrazuje přehled lekcí, kterým jste se dnes věnovali.</p>
       </section>
       <section>
         <h2>Neodhalená kartička</h2>
@@ -56,19 +54,12 @@ export default function Guide(): JSX.Element {
           src={`${import.meta.env.BASE_URL}screenshots/not-revealed`}
           alt="Ukázka kartičky před odhalením"
         />
-        <h3>Pokrok</h3>
-        <p>
-          Učební skóre dané položky. Je oddělené skóre pro směr z češtiny do angličiny, a z
-          angličtiny do češtiny.
-        </p>
-        <h3>Denní pokrok</h3>
-        <p>Zobrazuje dnešní změnu pokroku a její postup k dennímu cíli.</p>
         <h3>Nápověda</h3>
-        <p>Písmeno po písmenu odhaluje slovíčko či větu.</p>
+        <p>Postupně odhaluje slovíčko či větu písmeno po písmenu.</p>
         <h3>Gramatika</h3>
-        <p>Zobrazí vysvětlení příslušné gramatiky.</p>
+        <p>Zobrazí vysvětlení gramatiky, která se k dané položce vztahuje.</p>
         <h3>Poznámka</h3>
-        <p>Zobrazí dodatečné informace k položce.</p>
+        <p>Zobrazí další informace, které se k dané položce vztahují.</p>
       </section>
       <section>
         <h2>Odhalená kartička</h2>
@@ -76,20 +67,12 @@ export default function Guide(): JSX.Element {
           src={`${import.meta.env.BASE_URL}screenshots/revealed`}
           alt="Ukázka kartičky po odhalení"
         />
-        <p>
-          Pokrok v obou směrech procvičování, z češtiny do angličtiny a z angličtiny do češtiny, se
-          zaznamenává samostatně. Můžete tedy např. dokončit položku v jednom směru a dále ji
-          procvičovat v druhém.
-        </p>
         <h3>Dokončit</h3>
-        <p>
-          Označí danou položku jako naučenou. Položka se dále nebude nabízet k procvičování v daném
-          směru. Stále se nabízí v opačném směru.
-        </p>
+        <p>Označí danou položku jako naučenou, takže se už nebude nabízet k procvičování.</p>
         <h3>Opakovat</h3>
-        <p>Položka se nabídne k dalšímu procvičování dříve v daném směru.</p>
+        <p>Položka se v daném směru nabídne k dalšímu procvičování dříve.</p>
         <h3>Znám</h3>
-        <p>Položka se nabídne k dalšímu procvičování později v daném směru.</p>
+        <p>Položka se v daném směru nabídne k dalšímu procvičování později.</p>
         <h3>Zkratky položek</h3>
         <p>
           <span className="inline-block w-20">zkr.</span>zkrácená varianta
@@ -102,52 +85,20 @@ export default function Guide(): JSX.Element {
         </p>
       </section>
       <section>
-        <h2>Úvod do cvičení bloku</h2>
-        <Screenshot
-          src={`${import.meta.env.BASE_URL}screenshots/intro`}
-          alt="Ukázka kartičky s úvodem bloku"
-        />
-        <p>
-          Některé položky jsou sdruženy do tematických bloků. Bez dokončení celého bloku vás
-          aplikace nepustí dále.
-        </p>
-      </section>
-      <section>
-        <h2>Profil</h2>
-        <Screenshot
-          src={`${import.meta.env.BASE_URL}screenshots/profile`}
-          alt="Ukázka profilu uživatele"
-        />
-        <h3>Přehled CEFR úrovní</h3>
-        <p>Přehled postupu na jednotlivých CEFR úrovních a na jednotlivých lekcích.</p>
-        <h3>Přehled gramatiky</h3>
-        <p>Přehled započaté gramatiky.</p>
-        <h3>Přehled témat</h3>
-        <p>Přehled započatých tematických bloků slovíček, např. dny v týdnu, měsíce atd.</p>
-        <h3>Přehled slovíček</h3>
-        <p>Přehled započatých slovíček.</p>
-        <h3>Přehled výslovnosti</h3>
-        <p>Přehled skupin podobně znějících položek, například bad / bed, s možností přehrát audio.</p>
-        <h3>Smazat účet</h3>
-        <p>Účet a všechna jeho data budou po potvrzení okamžitě a nenávratně smazána.</p>
-        <h3>Odhlásit se</h3>
-        <p>Odhlásí vás z vašeho uživatelského účtu.</p>
-      </section>
-      <section>
         <h2>Offline</h2>
         <p>
-          Aplikace je plně funkční offline. Data se ukládají do prohlížeče a synchronizují se s
-          cloudem.
+          Aplikace je plně funkční i offline. Data se ukládají do prohlížeče a následně se
+          synchronizují s cloudem.
         </p>
       </section>
       <section>
         <h2>Synchronizace</h2>
         <p>
-          Data se synchronizují pouze při startu aplikace či jednou denně, pokud aplikaci necháváte
-          otevřenou.
+          Data se synchronizují při spuštění aplikace. Pokud ji necháváte otevřenou, proběhne
+          synchronizace nejvýše jednou denně.
         </p>
         <p>
-          Vzhledem k méně časté synchronizaco není aplikace vhodná pro současné používání na více
+          Protože synchronizace neprobíhá často, není aplikace vhodná pro současné používání na více
           zařízeních.
         </p>
       </section>

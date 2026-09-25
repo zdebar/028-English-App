@@ -47,26 +47,46 @@ describe('Home practice buttons', () => {
     expect(usePracticeAvailabilityStore.getState()).toBe(snapshot);
   });
 
-  it('formats the disabled review countdown by remaining duration', () => {
+  it.each([
+    {
+      description: 'formats the disabled review countdown by remaining duration',
+      readyAt: '2026-09-25T13:04:05Z',
+      expected: '2 dny + 3:04:05',
+    },
+    {
+      description: 'does not pad countdown components and uses the singular Czech day form',
+      readyAt: '2026-09-24T22:25:37Z',
+      expected: '1 den + 12:25:37',
+    },
+    {
+      description: 'uses the plural Czech day form for five or more days',
+      readyAt: '2026-09-28T10:00:01Z',
+      expected: '5 dní + 0:00:01',
+    },
+    {
+      description: 'does not pad minute countdowns',
+      readyAt: '2026-09-23T10:07:30Z',
+      expected: '7:30',
+    },
+    {
+      description: 'keeps leading zeroes on the following clock components',
+      readyAt: '2026-09-23T11:02:03Z',
+      expected: '1:02:03',
+    },
+    {
+      description: 'shows only seconds near the review boundary',
+      readyAt: '2026-09-23T10:00:05Z',
+      expected: '5',
+    },
+  ])('$description', ({ readyAt, expected }) => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-09-23T10:00:00Z'));
     usePracticeAvailabilityStore.setState({
-      reviewReadyAt: '2026-09-25T13:04:05Z',
+      reviewReadyAt: readyAt,
     });
 
     render(<PracticeButtons />);
-    expect(screen.getByText('2d 03:04:05')).toBeTruthy();
-  });
-
-  it('shows only seconds near the review boundary', () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-09-23T10:00:00Z'));
-    usePracticeAvailabilityStore.setState({
-      reviewReadyAt: '2026-09-23T10:00:05Z',
-    });
-
-    render(<PracticeButtons />);
-    expect(screen.getByText('5')).toBeTruthy();
+    expect(screen.getByText(expected)).toBeTruthy();
   });
   it('gives review priority at the configured review boundary', () => {
     usePracticeAvailabilityStore.setState({ reviewReadyAt: new Date().toISOString() });
