@@ -183,12 +183,14 @@ function ReviewPracticeButton({
   disabled,
   title,
   to,
+  labelClassName = '',
   children,
 }: Readonly<{
   countdown: string | null;
   disabled: boolean;
   title: string | undefined;
   to: string;
+  labelClassName?: string;
   children: string;
 }>): JSX.Element {
   return (
@@ -206,7 +208,7 @@ function ReviewPracticeButton({
           {countdown}
         </span>
       ) : null}
-      {children}
+      <span className={`inline-block ${labelClassName}`}>{children}</span>
     </NavigationButton>
   );
 }
@@ -264,6 +266,7 @@ export default function PracticeButtons(): JSX.Element {
       <ReviewPracticeButton
         countdown={vocabularyReviewCountdown}
         disabled={vocabularyReviewDisabled}
+        labelClassName="-translate-x-1.5"
         title={vocabularyReviewTitle}
         to={ROUTES.vocabularyPractice}
       >
