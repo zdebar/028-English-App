@@ -16,7 +16,11 @@ vi.mock('@/config/config', () => ({
     database: { nullReplacementDate: '9999-12-31T23:59:59+00:00', nullReplacementNumber: 0 },
     srs: { intervals: [1, 2, 3] },
     progress: {},
-    practice: { initialTrainingBatchSize: 8, reviewMinimumSize: 20 },
+    practice: {
+      initialTrainingBatchSize: 8,
+      grammarReviewMinimumSize: 20,
+      vocabularyReviewMinimumSize: 20,
+    },
   },
 }));
 

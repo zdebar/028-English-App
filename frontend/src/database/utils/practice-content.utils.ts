@@ -9,6 +9,7 @@ import type {
   ResolvedPracticeEntry,
   UserItemLocal,
 } from '@/types/user-item.types';
+import type { ReviewKind } from '@/types/practice.types';
 
 function uniquePositiveIds(values: Array<number | null | undefined>): number[] {
   return [
@@ -131,8 +132,9 @@ export async function resolvePracticeGrammarContext(
 
 export async function loadReviewDeck(
   userId: string,
+  reviewKind: ReviewKind,
 ): Promise<PracticeDeckEntry[]> {
-  const items = await UserItem.getReviewDeck(userId);
+  const items = await UserItem.getReviewDeck(userId, reviewKind);
   return items.map((item) => ({ item, note: null, grammar: null }));
 }
 
@@ -140,18 +142,27 @@ export type ReviewDeckData = Readonly<{
   entries: PracticeDeckEntry[];
   availabilityCheckedAt: string;
   abandoned: boolean;
+  reviewKind: ReviewKind;
 }>;
 
 /** Loads the next complete CZ-to-EN review batch without creating a review session. */
-export async function loadReviewDeckData(userId: string): Promise<ReviewDeckData> {
+export async function loadReviewDeckData(
+  userId: string,
+  reviewKind: ReviewKind,
+): Promise<ReviewDeckData> {
   await PracticeSession.reconcileActive(userId);
 
   const now = new Date().toISOString();
   const items = await db.transaction('r', db.user_items, () =>
-    UserItem.getReviewDeck(userId, now),
+    UserItem.getReviewDeck(userId, reviewKind, now),
   );
   const entries = items.map((item) => ({ item, note: null, grammar: null }));
-  return { entries, availabilityCheckedAt: now, abandoned: entries.length === 0 };
+  return {
+    entries,
+    availabilityCheckedAt: now,
+    abandoned: entries.length === 0,
+    reviewKind,
+  };
 }
 
 export type ReviewEntryDetails = Readonly<{

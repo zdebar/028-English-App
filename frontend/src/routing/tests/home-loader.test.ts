@@ -61,7 +61,8 @@ describe('loadHome', () => {
     });
 
     resolveSnapshot({
-      reviewReadyAt: '2026-07-21T10:00:00.000Z',
+      grammarReviewReadyAt: '2026-07-21T10:00:00.000Z',
+      vocabularyReviewReadyAt: '2026-07-21T11:00:00.000Z',
       initialTrainingAvailable: true,
       activeSession: null,
       requiresSessionReconciliation: false,
@@ -70,7 +71,8 @@ describe('loadHome', () => {
 
     expect(usePracticeAvailabilityStore.getState()).toMatchObject({
       availabilityUserId: 'u1',
-      reviewReadyAt: '2026-07-21T10:00:00.000Z',
+      grammarReviewReadyAt: '2026-07-21T10:00:00.000Z',
+      vocabularyReviewReadyAt: '2026-07-21T11:00:00.000Z',
       initialTrainingAvailable: true,
       practiceLoading: false,
       practiceError: null,
@@ -78,7 +80,7 @@ describe('loadHome', () => {
   });
 
   it('reuses the snapshot when returning Home', async () => {
-    mocks.loadPracticeAvailabilitySnapshot.mockResolvedValue({ reviewReadyAt: null, initialTrainingAvailable: true, activeSession: null, requiresSessionReconciliation: false });
+    mocks.loadPracticeAvailabilitySnapshot.mockResolvedValue({ grammarReviewReadyAt: null, vocabularyReviewReadyAt: null, initialTrainingAvailable: true, activeSession: null, requiresSessionReconciliation: false });
     await loadHome();
     await loadHome();
     expect(mocks.loadPracticeAvailabilitySnapshot).toHaveBeenCalledOnce();
@@ -87,7 +89,8 @@ describe('loadHome', () => {
   it('resets availability for a signed-out user', async () => {
     usePracticeAvailabilityStore.setState({
       availabilityUserId: 'u1',
-      reviewReadyAt: '2026-07-21T10:00:00.000Z',
+      grammarReviewReadyAt: '2026-07-21T10:00:00.000Z',
+      vocabularyReviewReadyAt: '2026-07-21T11:00:00.000Z',
       practiceLoading: false,
     });
     mocks.userId = null;
@@ -96,7 +99,8 @@ describe('loadHome', () => {
 
     expect(usePracticeAvailabilityStore.getState()).toMatchObject({
       availabilityUserId: null,
-      reviewReadyAt: null,
+      grammarReviewReadyAt: null,
+      vocabularyReviewReadyAt: null,
       practiceLoading: true,
     });
     expect(mocks.loadPracticeAvailabilitySnapshot).not.toHaveBeenCalled();
@@ -112,7 +116,8 @@ describe('loadHome', () => {
       availabilityUserId: 'u1',
       practiceLoading: false,
       practiceError: loadError,
-      reviewReadyAt: null,
+      grammarReviewReadyAt: null,
+      vocabularyReviewReadyAt: null,
       initialTrainingAvailable: false,
     });
     expect(mocks.reportError).toHaveBeenCalledWith(

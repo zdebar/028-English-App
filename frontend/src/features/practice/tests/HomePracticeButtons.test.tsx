@@ -3,7 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
-    reviewButton: 'Review',
+    grammarReviewButton: 'Grammar review',
+    vocabularyReviewButton: 'Vocabulary review',
     newButton: 'New',
     loadingMessage: 'Loading',
     loadingError: 'Loading error',
@@ -24,7 +25,8 @@ describe('Home practice buttons', () => {
 
   beforeEach(() => {
     usePracticeAvailabilityStore.setState({
-      reviewReadyAt: null,
+      grammarReviewReadyAt: null,
+      vocabularyReviewReadyAt: null,
       initialTrainingAvailable: true,
       activeSession: null,
       practiceLoading: false,
@@ -36,13 +38,13 @@ describe('Home practice buttons', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-09-23T10:00:00Z'));
     const readyAt = '2026-09-23T10:00:02Z';
-    usePracticeAvailabilityStore.setState({ reviewReadyAt: readyAt });
+    usePracticeAvailabilityStore.setState({ grammarReviewReadyAt: readyAt });
     const snapshot = usePracticeAvailabilityStore.getState();
     render(<PracticeButtons />);
-    expect(button('Review').disabled).toBe(true);
+    expect(button('Grammar review').disabled).toBe(true);
     expect(screen.getByText('2')).toBeTruthy();
     await act(async () => vi.advanceTimersByTimeAsync(2000));
-    expect(button('Review').disabled).toBe(false);
+    expect(button('Grammar review').disabled).toBe(false);
     expect(screen.queryByText('2')).toBeNull();
     expect(usePracticeAvailabilityStore.getState()).toBe(snapshot);
   });
@@ -82,33 +84,69 @@ describe('Home practice buttons', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-09-23T10:00:00Z'));
     usePracticeAvailabilityStore.setState({
-      reviewReadyAt: readyAt,
+      grammarReviewReadyAt: readyAt,
     });
 
     render(<PracticeButtons />);
     expect(screen.getByText(expected)).toBeTruthy();
   });
-  it('gives review priority at the configured review boundary', () => {
-    usePracticeAvailabilityStore.setState({ reviewReadyAt: new Date().toISOString() });
+
+  it('shows the vocabulary countdown independently', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-23T10:00:00Z'));
+    usePracticeAvailabilityStore.setState({
+      vocabularyReviewReadyAt: '2026-09-23T10:07:30Z',
+    });
+
     render(<PracticeButtons />);
-    expect(button('Review').disabled).toBe(false);
+
+    expect(button('Vocabulary review').disabled).toBe(true);
+    expect(screen.getByText('7:30')).toBeTruthy();
+  });
+
+  it('gives review priority at the configured review boundary', () => {
+    usePracticeAvailabilityStore.setState({
+      grammarReviewReadyAt: new Date().toISOString(),
+      vocabularyReviewReadyAt: new Date().toISOString(),
+    });
+    render(<PracticeButtons />);
+    expect(button('Grammar review').disabled).toBe(false);
+    expect(button('Vocabulary review').disabled).toBe(true);
+    expect(button('New').disabled).toBe(true);
+  });
+
+  it('enables vocabulary review when grammar is not ready', () => {
+    usePracticeAvailabilityStore.setState({
+      grammarReviewReadyAt: new Date(Date.now() + 86_400_000).toISOString(),
+      vocabularyReviewReadyAt: new Date().toISOString(),
+    });
+    render(<PracticeButtons />);
+
+    expect(button('Grammar review').disabled).toBe(true);
+    expect(button('Vocabulary review').disabled).toBe(false);
     expect(button('New').disabled).toBe(true);
   });
 
   it('enables new below the review boundary', () => {
-    usePracticeAvailabilityStore.setState({ reviewReadyAt: null });
+    usePracticeAvailabilityStore.setState({
+      grammarReviewReadyAt: null,
+      vocabularyReviewReadyAt: null,
+    });
     render(<PracticeButtons />);
-    expect(button('Review').disabled).toBe(true);
+    expect(button('Grammar review').disabled).toBe(true);
+    expect(button('Vocabulary review').disabled).toBe(true);
     expect(button('New').disabled).toBe(false);
   });
 
   it('disables both actions while availability is recalculated', () => {
     usePracticeAvailabilityStore.setState({
-      reviewReadyAt: new Date().toISOString(),
+      grammarReviewReadyAt: new Date().toISOString(),
+      vocabularyReviewReadyAt: new Date().toISOString(),
       practiceLoading: true,
     });
     render(<PracticeButtons />);
-    expect(button('Review').disabled).toBe(true);
+    expect(button('Grammar review').disabled).toBe(true);
+    expect(button('Vocabulary review').disabled).toBe(true);
     expect(button('New').disabled).toBe(true);
   });
 
@@ -120,7 +158,8 @@ describe('Home practice buttons', () => {
     expect(buttonGroup?.className).toContain('gap-1');
     expect(screen.getAllByRole('button').map((item) => item.textContent)).toEqual([
       'New',
-      'Review',
+      'Grammar review',
+      'Vocabulary review',
     ]);
   });
 
@@ -134,21 +173,25 @@ describe('Home practice buttons', () => {
 
   it('keeps only an active review session available', () => {
     usePracticeAvailabilityStore.setState({
-      reviewReadyAt: null,
+      grammarReviewReadyAt: null,
+      vocabularyReviewReadyAt: null,
       activeSession: makeSession('review'),
     });
     render(<PracticeButtons />);
-    expect(button('Review').disabled).toBe(false);
+    expect(button('Grammar review').disabled).toBe(false);
+    expect(button('Vocabulary review').disabled).toBe(true);
     expect(button('New').disabled).toBe(true);
   });
 
   it('gives review priority over an active new session', () => {
     usePracticeAvailabilityStore.setState({
-      reviewReadyAt: new Date().toISOString(),
+      grammarReviewReadyAt: new Date().toISOString(),
+      vocabularyReviewReadyAt: null,
       activeSession: makeSession('new'),
     });
     render(<PracticeButtons />);
-    expect(button('Review').disabled).toBe(false);
+    expect(button('Grammar review').disabled).toBe(false);
+    expect(button('Vocabulary review').disabled).toBe(true);
     expect(button('New').disabled).toBe(true);
   });
 });

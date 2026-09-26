@@ -15,6 +15,7 @@ import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks'
 import type { BlockType, GrammarGroupType } from '@/types/generic.types';
 import type { PracticeSessionType } from '@/types/practice-session.types';
 import type { ResolvedPracticeEntry, UserItemLocal } from '@/types/user-item.types';
+import type { ReviewKind } from '@/types/practice.types';
 
 export type RouteDataDescriptor<T> = Readonly<{
   load: () => Promise<T>;
@@ -97,9 +98,9 @@ export function practiceOverviewDescriptor(userId: string) {
   };
 }
 
-export function reviewPracticeDescriptor(userId: string) {
+export function reviewPracticeDescriptor(userId: string, reviewKind: ReviewKind) {
   return {
-    load: () => loadReviewDeckData(userId),
+    load: () => loadReviewDeckData(userId, reviewKind),
   } satisfies RouteDataDescriptor<ReviewDeckData>;
 }
 
