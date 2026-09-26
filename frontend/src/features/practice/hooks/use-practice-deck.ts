@@ -10,6 +10,7 @@ import {
   type SetStateAction,
 } from 'react';
 import type { PracticeDeckEntry, PracticeOutcome, UserItemLocal } from '@/types/user-item.types';
+import type { ReviewKind } from '@/types/practice.types';
 import { useFetch } from '@/hooks/use-fetch';
 import UserItem from '@/database/models/user-items';
 import { reportError } from '@/features/logging/monitoring-handler';
@@ -118,9 +119,10 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
   );
 
   const initialReviewDeck = initialData;
+  const reviewKind = getReviewKind(initialData);
   const fetchPracticeDeck = useCallback(
-    () => (userId ? loadReviewDeckData(userId) : Promise.resolve(createEmptyReviewDeck())),
-    [userId],
+    () => (userId ? loadReviewDeckData(userId, reviewKind) : Promise.resolve(createEmptyReviewDeck(reviewKind))),
+    [reviewKind, userId],
   );
   const {
     data: fetchedResult,
@@ -332,12 +334,17 @@ function toError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
 }
 
-function createEmptyReviewDeck(): ReviewDeckData {
+function createEmptyReviewDeck(reviewKind: ReviewKind): ReviewDeckData {
   return {
     entries: [],
     availabilityCheckedAt: new Date().toISOString(),
     abandoned: true,
+    reviewKind,
   };
+}
+
+function getReviewKind(initialData: ReviewDeckData | undefined): ReviewKind {
+  return initialData?.reviewKind ?? 'grammar';
 }
 
 function getReviewProgressLabel(completedCount: number, totalCount: number | null): string {

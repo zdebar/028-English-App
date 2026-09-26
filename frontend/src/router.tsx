@@ -133,7 +133,26 @@ export const router = createHashRouter([
         children: [
           {
             path: ROUTES.practice,
-            loader: () => loadProtectedData('review practice', reviewPracticeDescriptor),
+            loader: () =>
+              loadProtectedData('grammar review', (userId) =>
+                reviewPracticeDescriptor(userId, 'grammar'),
+              ),
+            Component: Practice,
+          },
+          {
+            path: ROUTES.grammarPractice,
+            loader: () =>
+              loadProtectedData('grammar review', (userId) =>
+                reviewPracticeDescriptor(userId, 'grammar'),
+              ),
+            Component: Practice,
+          },
+          {
+            path: ROUTES.vocabularyPractice,
+            loader: () =>
+              loadProtectedData('vocabulary review', (userId) =>
+                reviewPracticeDescriptor(userId, 'vocabulary'),
+              ),
             Component: Practice,
           },
           {

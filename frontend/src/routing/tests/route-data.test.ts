@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   hasGrammar: vi.fn(), hasTopics: vi.fn(), hasVocabulary: vi.fn(),
   topics: vi.fn(), vocabulary: vi.fn(),
+  loadReviewDeckData: vi.fn(),
 }));
 vi.mock('@/hooks/shared-query-store', () => ({
   loadSharedQuery: (_userId: string, _name: string, query: () => Promise<unknown>) => query(),
@@ -20,9 +21,16 @@ vi.mock('@/database/models/grammar-groups', () => ({ default: {} }));
 vi.mock('@/database/models/pronunciation-groups', () => ({ default: {} }));
 vi.mock('@/database/models/blocks', () => ({ default: {} }));
 vi.mock('@/database/models/practice-sessions', () => ({ default: {} }));
-vi.mock('@/database/utils/practice-content.utils', () => ({}));
+vi.mock('@/database/utils/practice-content.utils', () => ({
+  loadReviewDeckData: (...args: unknown[]) => mocks.loadReviewDeckData(...args),
+}));
 
-import { overviewAvailabilityDescriptor, topicsDescriptor, vocabularyDescriptor } from '../route-data';
+import {
+  overviewAvailabilityDescriptor,
+  reviewPracticeDescriptor,
+  topicsDescriptor,
+  vocabularyDescriptor,
+} from '../route-data';
 
 describe('route data queries', () => {
   beforeEach(() => vi.clearAllMocks());
@@ -47,5 +55,14 @@ describe('route data queries', () => {
     await expect(vocabularyDescriptor('u1').load()).resolves.toBe(vocabulary);
     expect(mocks.hasTopics).not.toHaveBeenCalled();
     expect(mocks.hasVocabulary).not.toHaveBeenCalled();
+  });
+
+  it('passes the explicit review kind to the review route loader', async () => {
+    const reviewData = { entries: [], reviewKind: 'vocabulary' };
+    mocks.loadReviewDeckData.mockResolvedValue(reviewData);
+
+    await expect(reviewPracticeDescriptor('u1', 'vocabulary').load()).resolves.toBe(reviewData);
+
+    expect(mocks.loadReviewDeckData).toHaveBeenCalledWith('u1', 'vocabulary');
   });
 });

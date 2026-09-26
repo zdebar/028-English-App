@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { UserItemLocal } from '@/types/user-item.types';
+import config from '@/config/config';
 
 const NULL_DATE = '9999-12-31T23:59:59+00:00';
 
@@ -149,9 +150,62 @@ describe('UserItem', () => {
       makeItem({ item_id: 2, next_at_cz_to_en: '2026-01-02T00:00:00.000Z' }),
     ];
 
-    const deck = await UserItem.getReviewDeck('u1', '2026-02-01T00:00:00.000Z');
+    const deck = await UserItem.getReviewDeck(
+      'u1',
+      'vocabulary',
+      '2026-02-01T00:00:00.000Z',
+    );
 
     expect(deck.map((item) => item.item_id)).toEqual([1, 2]);
+  });
+
+  it('filters review decks by explicit vocabulary state', async () => {
+    mocks.dueItems = [
+      makeItem({ item_id: 1, is_vocabulary: 1, grammar_chunk_id: 10 }),
+      makeItem({ item_id: 2, is_vocabulary: 0, grammar_chunk_id: 10 }),
+    ];
+
+    const vocabularyDeck = await UserItem.getReviewDeck('u1', 'vocabulary');
+    const grammarDeck = await UserItem.getReviewDeck('u1', 'grammar');
+
+    expect(vocabularyDeck.map((item) => item.item_id)).toEqual([1]);
+    expect(grammarDeck.map((item) => item.item_id)).toEqual([2]);
+  });
+
+  it('calculates grammar and vocabulary readiness independently', async () => {
+    const dueAt = new Date(Date.now() - 86_400_000).toISOString();
+    const grammarFuture = new Date(Date.now() + 86_400_000).toISOString();
+    mocks.dueItems = [
+      ...Array.from({ length: config.practice.grammarReviewMinimumSize - 1 }, (_, index) =>
+        makeItem({
+          item_id: index + 1,
+          is_vocabulary: 0,
+          grammar_chunk_id: 10,
+          progress_cz_to_en: 1,
+          next_at_cz_to_en: dueAt,
+        }),
+      ),
+      makeItem({
+        item_id: 48,
+        is_vocabulary: 0,
+        grammar_chunk_id: 10,
+        progress_cz_to_en: 1,
+        next_at_cz_to_en: grammarFuture,
+      }),
+      ...Array.from({ length: config.practice.vocabularyReviewMinimumSize - 1 }, (_, index) =>
+        makeItem({
+          item_id: index + 101,
+          is_vocabulary: 1,
+          progress_cz_to_en: 1,
+          next_at_cz_to_en: dueAt,
+        }),
+      ),
+    ];
+
+    const state = await UserItem.getReadyReviewState('u1');
+
+    expect(state.grammarReviewReadyAt).toBe(grammarFuture);
+    expect(state.vocabularyReviewReadyAt).toBeNull();
   });
 
   it('applies review outcomes without reverse-direction state', () => {

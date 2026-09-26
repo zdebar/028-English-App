@@ -4,7 +4,8 @@ import { describe, expect, it, vi } from 'vitest';
 vi.mock('@/config/config', () => ({
   default: {
     practice: {
-      reviewMinimumSize: 20,
+      grammarReviewMinimumSize: 20,
+      vocabularyReviewMinimumSize: 20,
     },
   },
 }));

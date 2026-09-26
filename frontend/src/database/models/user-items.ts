@@ -9,6 +9,7 @@ import type {
   CurriculumSortPath,
   InitialTrainingSelection,
 } from '@/types/user-item.types';
+import type { ReviewKind } from '@/types/practice.types';
 import { TableName } from '@/types/table.types';
 import Dexie, { Entity } from 'dexie';
 import { getSyncTimestamps, splitDeleted } from '../utils/sync-generic.utils';
@@ -230,9 +231,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    */
   static async getReviewDeck(
     userId: string,
+    reviewKind: ReviewKind,
     now: string = new Date().toISOString(),
   ): Promise<PracticeDeckItem[]> {
-    return this.getDuePracticeItems(userId, Number.MAX_SAFE_INTEGER, now);
+    return this.getDuePracticeItems(userId, Number.MAX_SAFE_INTEGER, now, reviewKind);
   }
 
   /**
@@ -472,10 +474,13 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   static async getReadyReviewState(userId: string): Promise<ReadyPracticeState> {
     assertNonEmptyString(userId, 'userId');
 
-    const deckSize = config.practice.reviewMinimumSize;
     const nowIso = new Date(Date.now()).toISOString();
+    const [grammarReviewReadyAt, vocabularyReviewReadyAt] = await Promise.all([
+      getReviewReadyAt(userId, config.practice.grammarReviewMinimumSize, nowIso, 'grammar'),
+      getReviewReadyAt(userId, config.practice.vocabularyReviewMinimumSize, nowIso, 'vocabulary'),
+    ]);
 
-    return { reviewReadyAt: await getReviewReadyAt(userId, deckSize, nowIso) };
+    return { grammarReviewReadyAt, vocabularyReviewReadyAt };
   }
 
   /**
@@ -727,16 +732,18 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     userId: string,
     limit: number,
     now: string,
+    reviewKind: ReviewKind,
   ): Promise<PracticeDeckItem[]> {
-    return this.getDuePracticeCollection(userId, now)
+    return this.getDuePracticeCollection(userId, now, reviewKind)
       .limit(limit)
       .toArray();
   }
 
-  private static getDuePracticeCollection(userId: string, now: string) {
+  private static getDuePracticeCollection(userId: string, now: string, reviewKind: ReviewKind) {
     const matchesItem = (item: UserItemLocal) => {
       if (item.deleted_at !== NULL_DATE || item.started_at === NULL_DATE) return false;
       if (item.mastered_at_cz_to_en !== NULL_DATE) return false;
+      if (!isReviewKind(item, reviewKind)) return false;
 
       const nextAt = item.next_at_cz_to_en;
       if (nextAt === NULL_DATE) {
@@ -776,14 +783,15 @@ async function getReviewReadyAt(
   userId: string,
   deckSize: number,
   nowIso: string,
+  reviewKind: ReviewKind,
 ): Promise<string | null> {
-  const scheduledReadyItems = await getScheduledReadyPracticeCollection(userId, nowIso)
+  const scheduledReadyItems = await getScheduledReadyPracticeCollection(userId, nowIso, reviewKind)
     .limit(deckSize)
     .toArray();
   let readyCount = scheduledReadyItems.length;
 
   if (readyCount < deckSize) {
-    const resetReadyItems = await getResetReadyPracticeCollection(userId)
+    const resetReadyItems = await getResetReadyPracticeCollection(userId, reviewKind)
       .limit(deckSize - readyCount)
       .toArray();
     readyCount += resetReadyItems.length;
@@ -792,7 +800,7 @@ async function getReviewReadyAt(
   if (readyCount >= deckSize) return nowIso;
 
   const missingCount = deckSize - readyCount;
-  const futureItems = await getFuturePracticeCollection(userId, nowIso)
+  const futureItems = await getFuturePracticeCollection(userId, nowIso, reviewKind)
     .limit(missingCount)
     .toArray();
   const thresholdItem = futureItems[missingCount - 1];
@@ -822,6 +830,7 @@ function isScheduledReadyPracticeItem(item: UserItemLocal, nowIso: string): bool
 
 function isResetReadyPracticeItem(item: UserItemLocal): boolean {
   if (!isReadyPracticeItem(item)) return false;
+  if (item.next_at_cz_to_en !== NULL_DATE) return false;
   return getEffectiveProgress(item) === 0;
 }
 
@@ -831,7 +840,11 @@ function isFuturePracticeItem(item: UserItemLocal, nowIso: string): boolean {
   return nextAt !== NULL_DATE && nextAt > nowIso && Number.isFinite(Date.parse(nextAt));
 }
 
-function getScheduledReadyPracticeCollection(userId: string, nowIso: string) {
+function getScheduledReadyPracticeCollection(
+  userId: string,
+  nowIso: string,
+  reviewKind: ReviewKind,
+) {
   return getPracticeIndexCollection()
     .between(
       [userId, Dexie.minKey, Dexie.minKey, Dexie.minKey],
@@ -839,10 +852,10 @@ function getScheduledReadyPracticeCollection(userId: string, nowIso: string) {
       true,
       true,
     )
-    .filter((item) => isScheduledReadyPracticeItem(item, nowIso));
+    .filter((item) => isReviewKind(item, reviewKind) && isScheduledReadyPracticeItem(item, nowIso));
 }
 
-function getResetReadyPracticeCollection(userId: string) {
+function getResetReadyPracticeCollection(userId: string, reviewKind: ReviewKind) {
   return getPracticeIndexCollection()
     .between(
       [userId, NULL_DATE, Dexie.minKey, Dexie.minKey],
@@ -850,10 +863,10 @@ function getResetReadyPracticeCollection(userId: string) {
       true,
       true,
     )
-    .filter((item) => isResetReadyPracticeItem(item));
+    .filter((item) => isReviewKind(item, reviewKind) && isResetReadyPracticeItem(item));
 }
 
-function getFuturePracticeCollection(userId: string, nowIso: string) {
+function getFuturePracticeCollection(userId: string, nowIso: string, reviewKind: ReviewKind) {
   return getPracticeIndexCollection()
     .between(
       [userId, nowIso, Dexie.minKey, Dexie.minKey],
@@ -861,7 +874,7 @@ function getFuturePracticeCollection(userId: string, nowIso: string) {
       false,
       true,
     )
-    .filter((item) => isFuturePracticeItem(item, nowIso));
+    .filter((item) => isReviewKind(item, reviewKind) && isFuturePracticeItem(item, nowIso));
 }
 
 function isInitialTrainingSkipped(
@@ -979,6 +992,11 @@ function resolveMasteredAt(
 
 function hasGrammarChunk(item: Pick<UserItemLocal, 'grammar_chunk_id'>): boolean {
   return item.grammar_chunk_id !== NULL_NUMBER;
+}
+
+function isReviewKind(item: Pick<UserItemLocal, 'is_vocabulary'>, reviewKind: ReviewKind): boolean {
+  if (reviewKind === 'vocabulary') return item.is_vocabulary === 1;
+  return item.is_vocabulary === 0;
 }
 
 function compareCurriculumPaths(left: CurriculumSortPath, right: CurriculumSortPath): number {

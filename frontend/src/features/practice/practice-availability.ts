@@ -3,7 +3,8 @@ import UserItem from '@/database/models/user-items';
 import type { PracticeSessionType } from '@/types/practice-session.types';
 
 export type PracticeAvailabilitySnapshot = Readonly<{
-  reviewReadyAt: string | null;
+  grammarReviewReadyAt: string | null;
+  vocabularyReviewReadyAt: string | null;
   initialTrainingAvailable: boolean;
   activeSession: PracticeSessionType | null;
   requiresSessionReconciliation: boolean;
@@ -20,7 +21,8 @@ export async function loadPracticeAvailabilitySnapshot(
   ]);
 
   return {
-    reviewReadyAt: review.reviewReadyAt,
+    grammarReviewReadyAt: review.grammarReviewReadyAt,
+    vocabularyReviewReadyAt: review.vocabularyReviewReadyAt,
     initialTrainingAvailable: nextSelection != null,
     activeSession: activeSessionState.activeSession,
     requiresSessionReconciliation: activeSessionState.requiresReconciliation,

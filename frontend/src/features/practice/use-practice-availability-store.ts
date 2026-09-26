@@ -4,12 +4,13 @@ import type { PracticeAvailabilitySnapshot } from './practice-availability';
 
 type PracticeAvailabilityValues = Pick<
   PracticeAvailabilitySnapshot,
-  'reviewReadyAt' | 'initialTrainingAvailable' | 'activeSession'
+  'grammarReviewReadyAt' | 'vocabularyReviewReadyAt' | 'initialTrainingAvailable' | 'activeSession'
 >;
 
 type PracticeAvailabilityState = {
   availabilityUserId: string | null;
-  reviewReadyAt: string | null;
+  grammarReviewReadyAt: string | null;
+  vocabularyReviewReadyAt: string | null;
   initialTrainingAvailable: boolean;
   activeSession: PracticeSessionType | null;
   practiceLoading: boolean;
@@ -22,7 +23,8 @@ type PracticeAvailabilityState = {
 
 const EMPTY_AVAILABILITY = {
   availabilityUserId: null,
-  reviewReadyAt: null,
+  grammarReviewReadyAt: null,
+  vocabularyReviewReadyAt: null,
   initialTrainingAvailable: false,
   activeSession: null,
   practiceLoading: true,
@@ -35,7 +37,8 @@ export const usePracticeAvailabilityStore = create<PracticeAvailabilityState>((s
   setLoading: (userId) =>
     set({
       availabilityUserId: userId,
-      reviewReadyAt: null,
+      grammarReviewReadyAt: null,
+      vocabularyReviewReadyAt: null,
       initialTrainingAvailable: false,
       activeSession: null,
       practiceLoading: true,
@@ -44,7 +47,8 @@ export const usePracticeAvailabilityStore = create<PracticeAvailabilityState>((s
   setSnapshot: (userId, values) =>
     set({
       availabilityUserId: userId,
-      reviewReadyAt: values.reviewReadyAt,
+      grammarReviewReadyAt: values.grammarReviewReadyAt,
+      vocabularyReviewReadyAt: values.vocabularyReviewReadyAt,
       initialTrainingAvailable: values.initialTrainingAvailable,
       activeSession: values.activeSession,
       practiceLoading: false,
@@ -53,7 +57,8 @@ export const usePracticeAvailabilityStore = create<PracticeAvailabilityState>((s
   setError: (userId, error) =>
     set({
       availabilityUserId: userId,
-      reviewReadyAt: null,
+      grammarReviewReadyAt: null,
+      vocabularyReviewReadyAt: null,
       initialTrainingAvailable: false,
       activeSession: null,
       practiceLoading: false,

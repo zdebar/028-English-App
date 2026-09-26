@@ -30,7 +30,8 @@ import {
 } from '../practice-availability-controller';
 
 const snapshot: import('../practice-availability').PracticeAvailabilitySnapshot = {
-  reviewReadyAt: '2026-07-21T10:00:00.000Z',
+  grammarReviewReadyAt: '2026-07-21T10:00:00.000Z',
+  vocabularyReviewReadyAt: '2026-07-21T11:00:00.000Z',
   initialTrainingAvailable: true,
   activeSession: null,
   requiresSessionReconciliation: false,
@@ -56,7 +57,8 @@ describe('availability refresh lifecycle', () => {
     renderHook(() => usePracticeAvailabilityStoreSync('u1'));
     await ensurePracticeAvailability('u1');
     expect(mocks.load).toHaveBeenCalledOnce();
-    expect(usePracticeAvailabilityStore.getState().reviewReadyAt).toBe(snapshot.reviewReadyAt);
+    expect(usePracticeAvailabilityStore.getState().grammarReviewReadyAt).toBe(snapshot.grammarReviewReadyAt);
+    expect(usePracticeAvailabilityStore.getState().vocabularyReviewReadyAt).toBe(snapshot.vocabularyReviewReadyAt);
   });
 
   it('refreshes after explicit synchronization and reset notifications', async () => {
@@ -97,10 +99,10 @@ describe('availability refresh lifecycle', () => {
     mocks.load.mockReturnValueOnce(oldLoad.promise);
     const oldRequest = ensurePracticeAvailability('u1');
     await ensurePracticeAvailability('u2');
-    oldLoad.resolve({ ...snapshot, reviewReadyAt: null });
+    oldLoad.resolve({ ...snapshot, grammarReviewReadyAt: null });
     await oldRequest;
     expect(usePracticeAvailabilityStore.getState().availabilityUserId).toBe('u2');
-    expect(usePracticeAvailabilityStore.getState().reviewReadyAt).toBe(snapshot.reviewReadyAt);
+    expect(usePracticeAvailabilityStore.getState().grammarReviewReadyAt).toBe(snapshot.grammarReviewReadyAt);
     resetPracticeAvailability();
     await refreshPracticeAvailability('u1');
     expect(usePracticeAvailabilityStore.getState().availabilityUserId).toBeNull();
@@ -113,10 +115,10 @@ describe('availability refresh lifecycle', () => {
     mocks.load.mockReturnValueOnce(syncLoad.promise);
     const sync = refreshPracticeAvailability('u1');
     const reset = refreshPracticeAvailability('u1');
-    syncLoad.resolve({ ...snapshot, reviewReadyAt: null });
+    syncLoad.resolve({ ...snapshot, grammarReviewReadyAt: null });
     await Promise.all([sync, reset]);
     expect(mocks.load).toHaveBeenCalledTimes(3);
-    expect(usePracticeAvailabilityStore.getState().reviewReadyAt).toBe(snapshot.reviewReadyAt);
+    expect(usePracticeAvailabilityStore.getState().grammarReviewReadyAt).toBe(snapshot.grammarReviewReadyAt);
   });
 
   it('reconciles invalid sessions and then reads a consistent snapshot', async () => {

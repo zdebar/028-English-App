@@ -6,29 +6,41 @@ import { usePracticeAvailabilityStore } from './use-practice-availability-store'
 import StyledButton from '@/components/UI/buttons/StyledButton';
 
 type PracticeButtonState = Readonly<{
-  reviewDisabled: boolean;
+  grammarReviewDisabled: boolean;
+  vocabularyReviewDisabled: boolean;
   newDisabled: boolean;
   newAvailable: boolean;
-  reviewTitle: string | undefined;
+  grammarReviewTitle: string | undefined;
+  vocabularyReviewTitle: string | undefined;
   newTitle: string | undefined;
-  reviewCountdown: string | null;
+  grammarReviewCountdown: string | null;
+  vocabularyReviewCountdown: string | null;
 }>;
 
-function isReviewAvailable(reviewReadyAt: string | null, checkedAt: number): boolean {
-  if (reviewReadyAt === null) return false;
-  return Date.parse(reviewReadyAt) <= Math.max(checkedAt, Date.now());
+function isReviewAvailable(readyAt: string | null, checkedAt: number): boolean {
+  if (readyAt === null) return false;
+  return Date.parse(readyAt) <= Math.max(checkedAt, Date.now());
 }
 
-/** Re-renders once per second until the stored review deadline. */
-function useReviewClock(reviewReadyAt: string | null): number {
+/** Re-renders once per second until the nearest stored review deadline. */
+function useReviewClock(
+  grammarReviewReadyAt: string | null,
+  vocabularyReviewReadyAt: string | null,
+): number {
   const [checkedAt, setCheckedAt] = useState(Date.now);
   useEffect(() => {
-    if (!reviewReadyAt) return;
-    const remaining = Date.parse(reviewReadyAt) - Date.now();
-    if (!Number.isFinite(remaining) || remaining <= 0) return;
-    const timeout = globalThis.setTimeout(() => setCheckedAt(Date.now()), Math.min(remaining, 1000));
+    const remainingTimes = [grammarReviewReadyAt, vocabularyReviewReadyAt]
+      .filter((readyAt): readyAt is string => readyAt !== null)
+      .map((readyAt) => Date.parse(readyAt) - Date.now())
+      .filter((remaining) => Number.isFinite(remaining) && remaining > 0);
+    if (remainingTimes.length === 0) return;
+
+    const timeout = globalThis.setTimeout(
+      () => setCheckedAt(Date.now()),
+      Math.min(Math.min(...remainingTimes), 1000),
+    );
     return () => globalThis.clearTimeout(timeout);
-  }, [checkedAt, reviewReadyAt]);
+  }, [checkedAt, grammarReviewReadyAt, vocabularyReviewReadyAt]);
   return checkedAt;
 }
 
@@ -40,27 +52,54 @@ function isActiveNew(activeSession: { mode: 'review' | 'new' } | null): boolean 
   return activeSession?.mode === 'new';
 }
 
-function isReviewButtonDisabled(
-  error: Error | null,
+type ReviewAvailability = Readonly<{
+  grammar: boolean;
+  vocabulary: boolean;
+  any: boolean;
+}>;
+
+function resolveReviewAvailability(
+  grammarReviewReadyAt: string | null,
+  vocabularyReviewReadyAt: string | null,
+  checkedAt: number,
   activeReview: boolean,
-  reviewAvailable: boolean,
-  loading: boolean,
-): boolean {
-  return [Boolean(error), loading, !activeReview && !reviewAvailable].some(Boolean);
+): ReviewAvailability {
+  const grammar = activeReview || isReviewAvailable(grammarReviewReadyAt, checkedAt);
+  const vocabulary = isReviewAvailable(vocabularyReviewReadyAt, checkedAt);
+  return { grammar, vocabulary, any: grammar || vocabulary };
 }
 
-function isNewButtonDisabled(
-  error: Error | null,
-  activeReview: boolean,
-  reviewAvailable: boolean,
-  newAvailable: boolean,
+type PracticeButtonFlags = Readonly<{
+  grammarReviewDisabled: boolean;
+  vocabularyReviewDisabled: boolean;
+  newDisabled: boolean;
+  newAvailable: boolean;
+}>;
+
+function resolvePracticeButtonFlags(
+  reviewAvailability: ReviewAvailability,
+  initialTrainingAvailable: boolean,
+  activeNew: boolean,
   loading: boolean,
-): boolean {
-  return [Boolean(error), loading, activeReview, reviewAvailable, !newAvailable].some(Boolean);
+  error: Error | null,
+): PracticeButtonFlags {
+  const blocked = Boolean(error) || loading;
+  const grammarReviewDisabled = blocked || !reviewAvailability.grammar;
+  const vocabularyReviewDisabled =
+    blocked || reviewAvailability.grammar || !reviewAvailability.vocabulary;
+  const newAvailable = activeNew || (!reviewAvailability.any && initialTrainingAvailable);
+  const newDisabled = blocked || reviewAvailability.any || !newAvailable;
+  return {
+    grammarReviewDisabled,
+    vocabularyReviewDisabled,
+    newDisabled,
+    newAvailable,
+  };
 }
 
 function resolvePracticeButtonState(
-  reviewReadyAt: string | null,
+  grammarReviewReadyAt: string | null,
+  vocabularyReviewReadyAt: string | null,
   checkedAt: number,
   initialTrainingAvailable: boolean,
   activeSession: { mode: 'review' | 'new' } | null,
@@ -69,32 +108,40 @@ function resolvePracticeButtonState(
 ): PracticeButtonState {
   const activeReview = isActiveReview(activeSession);
   const activeNew = isActiveNew(activeSession);
-  const reviewAvailable = isReviewAvailable(reviewReadyAt, checkedAt);
-  const reviewDisabled = isReviewButtonDisabled(
-    error,
+  const reviewAvailability = resolveReviewAvailability(
+    grammarReviewReadyAt,
+    vocabularyReviewReadyAt,
+    checkedAt,
     activeReview,
-    reviewAvailable,
-    loading,
   );
-  const newAvailable = activeNew || (!reviewAvailable && initialTrainingAvailable);
-  const newDisabled = isNewButtonDisabled(
-    error,
-    activeReview,
-    reviewAvailable,
-    newAvailable,
+  const buttonFlags = resolvePracticeButtonFlags(
+    reviewAvailability,
+    initialTrainingAvailable,
+    activeNew,
     loading,
+    error,
   );
 
   return {
-    reviewDisabled,
-    newDisabled,
-    newAvailable,
-    reviewTitle: resolveButtonTitle(loading, error, reviewDisabled),
-    newTitle: resolveButtonTitle(loading, error, newDisabled),
-    reviewCountdown: resolveReviewCountdown(
-      reviewReadyAt,
+    ...buttonFlags,
+    grammarReviewTitle: resolveButtonTitle(loading, error, buttonFlags.grammarReviewDisabled),
+    vocabularyReviewTitle: resolveButtonTitle(
+      loading,
+      error,
+      buttonFlags.vocabularyReviewDisabled,
+    ),
+    newTitle: resolveButtonTitle(loading, error, buttonFlags.newDisabled),
+    grammarReviewCountdown: resolveReviewCountdown(
+      grammarReviewReadyAt,
       checkedAt,
-      reviewDisabled,
+      buttonFlags.grammarReviewDisabled,
+      loading,
+      error,
+    ),
+    vocabularyReviewCountdown: resolveReviewCountdown(
+      vocabularyReviewReadyAt,
+      checkedAt,
+      buttonFlags.vocabularyReviewDisabled,
       loading,
       error,
     ),
@@ -131,24 +178,74 @@ function NewPracticeButton({
   );
 }
 
+function ReviewPracticeButton({
+  countdown,
+  disabled,
+  title,
+  to,
+  labelClassName = '',
+  children,
+}: Readonly<{
+  countdown: string | null;
+  disabled: boolean;
+  title: string | undefined;
+  to: string;
+  labelClassName?: string;
+  children: string;
+}>): JSX.Element {
+  return (
+    <NavigationButton
+      to={to}
+      className="relative h-button max-h-button w-full px-4"
+      disabled={disabled}
+      title={title}
+    >
+      {countdown ? (
+        <span
+          aria-hidden="true"
+          className="text-disabled-light dark:text-disabled-dark pointer-events-none absolute top-1 right-1 text-xs leading-none"
+        >
+          {countdown}
+        </span>
+      ) : null}
+      <span className={`inline-block ${labelClassName}`}>{children}</span>
+    </NavigationButton>
+  );
+}
+
 export default function PracticeButtons(): JSX.Element {
-  const reviewReadyAt = usePracticeAvailabilityStore((state) => state.reviewReadyAt);
-  const checkedAt = useReviewClock(reviewReadyAt);
+  const grammarReviewReadyAt = usePracticeAvailabilityStore(
+    (state) => state.grammarReviewReadyAt,
+  );
+  const vocabularyReviewReadyAt = usePracticeAvailabilityStore(
+    (state) => state.vocabularyReviewReadyAt,
+  );
+  const checkedAt = useReviewClock(grammarReviewReadyAt, vocabularyReviewReadyAt);
   const initialTrainingAvailable = usePracticeAvailabilityStore(
     (state) => state.initialTrainingAvailable,
   );
   const activeSession = usePracticeAvailabilityStore((state) => state.activeSession);
   const loading = usePracticeAvailabilityStore((state) => state.practiceLoading);
   const error = usePracticeAvailabilityStore((state) => state.practiceError);
-  const { reviewDisabled, newDisabled, newAvailable, reviewTitle, newTitle, reviewCountdown } =
-    resolvePracticeButtonState(
-      reviewReadyAt,
-      checkedAt,
-      initialTrainingAvailable,
-      activeSession,
-      loading,
-      error,
-    );
+  const {
+    grammarReviewDisabled,
+    vocabularyReviewDisabled,
+    newDisabled,
+    newAvailable,
+    grammarReviewTitle,
+    vocabularyReviewTitle,
+    newTitle,
+    grammarReviewCountdown,
+    vocabularyReviewCountdown,
+  } = resolvePracticeButtonState(
+    grammarReviewReadyAt,
+    vocabularyReviewReadyAt,
+    checkedAt,
+    initialTrainingAvailable,
+    activeSession,
+    loading,
+    error,
+  );
 
   return (
     <div className="flex w-full flex-col gap-1">
@@ -158,40 +255,41 @@ export default function PracticeButtons(): JSX.Element {
         loading={loading}
         title={newTitle}
       />
-      <NavigationButton
-        to={ROUTES.practice}
-        className="relative h-button max-h-button w-full px-4"
-        disabled={reviewDisabled}
-        title={reviewTitle}
+      <ReviewPracticeButton
+        countdown={grammarReviewCountdown}
+        disabled={grammarReviewDisabled}
+        title={grammarReviewTitle}
+        to={ROUTES.grammarPractice}
       >
-        {reviewCountdown ? (
-          <span
-            aria-hidden="true"
-            className="text-disabled-light dark:text-disabled-dark pointer-events-none absolute top-1 right-1 text-xs leading-none"
-          >
-            {reviewCountdown}
-          </span>
-        ) : null}
-        {TEXTS.reviewButton}
-      </NavigationButton>
+        {TEXTS.grammarReviewButton}
+      </ReviewPracticeButton>
+      <ReviewPracticeButton
+        countdown={vocabularyReviewCountdown}
+        disabled={vocabularyReviewDisabled}
+        labelClassName="-translate-x-1.5"
+        title={vocabularyReviewTitle}
+        to={ROUTES.vocabularyPractice}
+      >
+        {TEXTS.vocabularyReviewButton}
+      </ReviewPracticeButton>
     </div>
   );
 }
 
 function resolveReviewCountdown(
-  reviewReadyAt: string | null,
+  readyAt: string | null,
   checkedAt: number,
   reviewDisabled: boolean,
   loading: boolean,
   error: Error | null,
 ): string | null {
   if (!reviewDisabled || loading || error) return null;
-  return formatReviewCountdown(reviewReadyAt, checkedAt);
+  return formatReviewCountdown(readyAt, checkedAt);
 }
 
-function formatReviewCountdown(reviewReadyAt: string | null, checkedAt: number): string | null {
-  if (!reviewReadyAt) return null;
-  const remainingSeconds = Math.ceil((Date.parse(reviewReadyAt) - checkedAt) / 1000);
+function formatReviewCountdown(readyAt: string | null, checkedAt: number): string | null {
+  if (!readyAt) return null;
+  const remainingSeconds = Math.ceil((Date.parse(readyAt) - checkedAt) / 1000);
   if (!Number.isFinite(remainingSeconds) || remainingSeconds <= 0) return null;
 
   const days = Math.floor(remainingSeconds / 86_400);

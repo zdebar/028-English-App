@@ -10,7 +10,8 @@ export const HOME_TEXTS = {
   installButton: 'Nainstalovat aplikaci',
   installButtonTooltip: 'Nainstalovat PWA aplikaci.',
   dailyStartedGoal: 'dnes započato / cíl',
-  reviewButton: 'Opakování',
+  grammarReviewButton: 'Opakování gramatiky',
+  vocabularyReviewButton: 'Opakování slovíček',
   newButton: 'Nové',
 
   // User

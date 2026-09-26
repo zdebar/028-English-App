@@ -46,7 +46,7 @@ vi.mock('@/features/logging/monitoring-handler', () => ({
 vi.mock('@/config/config', () => ({
   default: {
     database: { nullReplacementDate: '9999-12-31' },
-    practice: { reviewMinimumSize: 20 },
+    practice: { grammarReviewMinimumSize: 20, vocabularyReviewMinimumSize: 20 },
   },
 }));
 
@@ -178,27 +178,29 @@ describe('practice content resolution', () => {
     const item = makeItem() as PracticeDeckItem;
     mocks.getReviewDeck.mockResolvedValue([item]);
 
-    await expect(loadReviewDeck('u1')).resolves.toEqual([{ item, note: null, grammar: null }]);
+    await expect(loadReviewDeck('u1', 'grammar')).resolves.toEqual([{ item, note: null, grammar: null }]);
     const error = new Error('items unavailable');
     mocks.getReviewDeck.mockRejectedValue(error);
-    await expect(loadReviewDeck('u1')).rejects.toBe(error);
+    await expect(loadReviewDeck('u1', 'grammar')).rejects.toBe(error);
   });
 
   it('loads the complete review batch without storing a review session', async () => {
     const items = [makeReviewItem(1), makeReviewItem(2)];
     mocks.getReviewDeck.mockResolvedValue(items);
 
-    const result = await loadReviewDeckData('u1');
-    const [userId, now] = mocks.getReviewDeck.mock.calls[0];
+    const result = await loadReviewDeckData('u1', 'grammar');
+    const [userId, reviewKind, now] = mocks.getReviewDeck.mock.calls[0];
 
     expect(result.entries).toHaveLength(2);
     expect(result.entries.map((entry) => entry.item)).toEqual(items);
     expect(result.availabilityCheckedAt).toBe(now);
     expect(result.abandoned).toBe(false);
+    expect(result.reviewKind).toBe('grammar');
     expect(result.entries[0]?.note).toBeNull();
     expect(result.entries[0]?.grammar).toBeNull();
     expect(mocks.reconcileActive).toHaveBeenCalledWith('u1');
     expect(userId).toBe('u1');
+    expect(reviewKind).toBe('grammar');
     expect(now).toEqual(expect.any(String));
     expect(mocks.notesBulkGet).not.toHaveBeenCalled();
     expect(mocks.grammarBulkGet).not.toHaveBeenCalled();
@@ -208,17 +210,17 @@ describe('practice content resolution', () => {
     mocks.reconcileActive.mockResolvedValue({ mode: 'new' });
     mocks.getReviewDeck.mockResolvedValue([makeReviewItem(1)]);
 
-    const result = await loadReviewDeckData('u1');
+    const result = await loadReviewDeckData('u1', 'vocabulary');
 
     expect(result.entries).toHaveLength(1);
     expect(mocks.reconcileActive).toHaveBeenCalledWith('u1');
-    expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', expect.any(String));
+    expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', 'vocabulary', expect.any(String));
   });
 
   it('marks review abandoned when no due item is available', async () => {
     mocks.getReviewDeck.mockResolvedValue([]);
 
-    const result = await loadReviewDeckData('u1');
+    const result = await loadReviewDeckData('u1', 'grammar');
 
     expect(result).toMatchObject({ entries: [], abandoned: true });
     expect(result.availabilityCheckedAt).toEqual(expect.any(String));
@@ -227,7 +229,7 @@ describe('practice content resolution', () => {
   it('loads a review batch without a separate count query', async () => {
     mocks.getReviewDeck.mockResolvedValue([makeReviewItem(1)]);
 
-    const result = await loadReviewDeckData('u1');
+    const result = await loadReviewDeckData('u1', 'grammar');
 
     expect(result.entries).toHaveLength(1);
     expect(result.availabilityCheckedAt).toEqual(expect.any(String));

@@ -81,7 +81,8 @@ vi.mock('@/config/config', () => ({
   default: {
     practice: {
       dailyGoal: 20,
-      reviewMinimumSize: 20,
+      grammarReviewMinimumSize: 20,
+      vocabularyReviewMinimumSize: 20,
       audioDelay: 300,
     },
     buttons: { loadingMessageDelay: 300 },
