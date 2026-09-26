@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { UserItemLocal } from '@/types/user-item.types';
+import config from '@/config/config';
 
 const NULL_DATE = '9999-12-31T23:59:59+00:00';
 
@@ -172,11 +173,17 @@ describe('UserItem', () => {
   });
 
   it('calculates grammar and vocabulary readiness independently', async () => {
-    const now = new Date(Date.now()).toISOString();
+    const dueAt = new Date(Date.now() - 86_400_000).toISOString();
     const grammarFuture = new Date(Date.now() + 86_400_000).toISOString();
     mocks.dueItems = [
-      ...Array.from({ length: 47 }, (_, index) =>
-        makeItem({ item_id: index + 1, is_vocabulary: 0, grammar_chunk_id: 10, next_at_cz_to_en: now }),
+      ...Array.from({ length: config.practice.grammarReviewMinimumSize - 1 }, (_, index) =>
+        makeItem({
+          item_id: index + 1,
+          is_vocabulary: 0,
+          grammar_chunk_id: 10,
+          progress_cz_to_en: 1,
+          next_at_cz_to_en: dueAt,
+        }),
       ),
       makeItem({
         item_id: 48,
@@ -185,8 +192,13 @@ describe('UserItem', () => {
         progress_cz_to_en: 1,
         next_at_cz_to_en: grammarFuture,
       }),
-      ...Array.from({ length: 47 }, (_, index) =>
-        makeItem({ item_id: index + 101, is_vocabulary: 1, next_at_cz_to_en: now }),
+      ...Array.from({ length: config.practice.vocabularyReviewMinimumSize - 1 }, (_, index) =>
+        makeItem({
+          item_id: index + 101,
+          is_vocabulary: 1,
+          progress_cz_to_en: 1,
+          next_at_cz_to_en: dueAt,
+        }),
       ),
     ];
 
