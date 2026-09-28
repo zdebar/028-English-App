@@ -74,6 +74,21 @@ def read_vocab_csv(
         df[col] = df[col].map(lambda v, col=col: _clean_and_convert_col(col, v))
     return df
 
+
+def fill_is_vocabulary(df: pd.DataFrame) -> pd.DataFrame:
+    """Preserve explicit values and derive missing ones from grammar_chunk_id."""
+    df = df.copy()
+    if "is_vocabulary" not in df.columns:
+        df["is_vocabulary"] = ""
+
+    explicit_values = df["is_vocabulary"].astype("string").str.strip()
+    missing_values = explicit_values.isna() | explicit_values.eq("")
+    grammar_chunk_values = df["grammar_chunk_id"].astype("string").str.strip()
+    derived_values = grammar_chunk_values.isna() | grammar_chunk_values.eq("")
+
+    df.loc[missing_values, "is_vocabulary"] = derived_values.loc[missing_values]
+    return df
+
 def redo_id(df, start_id=1):
     """Return a copy with sequential id values starting at start_id."""
     df = df.copy()

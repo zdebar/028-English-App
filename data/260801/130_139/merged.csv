@@ -1,0 +1,481 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+aktivní,active,ˈæktɪv,active.opus,130000,,,,,True,130
+hledisko,viewpoint,vjˈuːpɔɪnt,viewpoint.opus,130001,,,,,True,130
+jednat,act,ˈækt,act.opus,130002,,,,,True,130
+získat,acquire,ɐkwˈaɪɚ,acquire.opus,130003,,,,,True,130
+mávat,wave,wˈeɪv,wave.opus,130004,,,,,True,130
+vodopád,waterfall,wˈɔːɾɚfˌɔːl,waterfall.opus,130005,,,,,True,130
+plýtvat,waste,wˈeɪst,waste.opus,130006,,,,,True,130
+plýtvání,wasteful,wˈeɪstfəl,wasteful.opus,130007,,,,,True,130
+odpad,waste,wˈeɪst,waste.opus,130008,,,,,True,130
+umyvadlo,washbowl,wˈɑːʃboʊl,washbowl.opus,130009,,,,,True,130
+úspěch,achievement,ɐtʃˈiːvmənt,achievement.opus,130010,,,,,True,130
+uznat,acknowledge,ɐknˈɑːlɪdʒ,acknowledge.opus,130011,,,,,True,130
+bojovník,warrior,wˈɔːɹɪɚ,warrior.opus,130012,,,,,True,130
+záruka,warranty,wˈɔːɹənti,warranty.opus,130013,,,,,True,130
+varovat,warn,wˈɔːɹn,warn.opus,130014,,,,,True,130
+varování,warning,wˈɔːɹnɪŋ,warning.opus,130015,,,,,True,130
+ohřát,warm,wˈɔːɹm,warm.opus,130016,,,,,True,130
+teplo,warmth,wˈɔːɹmθ,warmth.opus,130017,,,,,True,130
+vřele,warmly,wˈɔːɹmli,warmly.opus,130018,,,,,True,130
+potvrzení,acknowledgement,ɐknˈɑːlɪdʒmənt,acknowledgement.opus,130019,,,,,True,130
+šatník,wardrobe,wˈɔːɹdɹoʊb,wardrobe.opus,130020,,,,,True,130
+oddělení,ward,wˈɔːɹd,ward.opus,130021,,,,,True,130
+známost,acquaintance,ɐkwˈeɪntəns,acquaintance.opus,130022,,,,,True,130
+probudit,wake,wˈeɪk,wake.opus,130023,,,,,True,130
+Měj hezký den.,Have a nice day.,hæv ɐ nˈaɪs dˈeɪ,have_a_nice_day.opus,130024,,,,,False,130
+Uvidíme se zítra.,See you tomorrow.,sˈiː juː təmˈɑːɹoʊ,see_you_tomorrow.opus,130025,,,,,False,130
+Co se děje?,What's happening?,wˌʌts hˈæpənɪŋ,whats_happening.opus,130026,,,,,False,130
+To dává smysl.,That makes sense.,ðæt mˌeɪks sˈɛns,that_makes_sense.opus,130027,,,,,False,130
+To je dobrý nápad.,That's a good idea.,ðæts ɐ ɡˈʊd aɪdˈiə,thats_a_good_idea.opus,130028,,,,,False,130
+Máš pravdu.,You are right.,juː ɑːɹ ɹˈaɪt,you_are_right.opus,130029,,,,,False,130
+To není problém.,It's not a problem.,ɪts nˌɑːɾə pɹˈɑːbləm,its_not_a_problem.opus,130030,,,,,False,130
+Prosím o pomoc.,I need help.,aɪ nˈiːd hˈɛlp,i_need_help.opus,130031,,,,,False,130
+Můžeš mi poradit?,Can you give me some advice?,kæn juː ɡˈɪv mˌiː sˌʌm ɐdvˈaɪs,can_you_give_me_some_advice.opus,130032,,,,,False,130
+Chvíli počkej.,Wait a moment.,wˈeɪt ɐ mˈoʊmənt,wait_a_moment.opus,130033,,,,,False,130
+Hned jsem zpátky.,I'll be right back.,aɪl biː ɹˈaɪt bˈæk,ill_be_right_back.opus,130034,,,,,False,130
+To je moje chyba.,It's my fault.,ɪts maɪ fˈɔlt,its_my_fault.opus,130035,,,,,False,130
+Nevím co říct.,I don't know what to say.,aɪ dˈoʊnt nˈoʊ wʌt tə sˈeɪ,i_dont_know_what_to_say.opus,130036,,,,,False,130
+Nejsem si jistý.,I'm not sure.,aɪm nˌɑːt ʃˈʊɹ,im_not_sure.opus,130037,,,,,False,130
+Můžeme začít.,We can start.,wiː kæn stˈɑːɹt,we_can_start.opus,130038,,,,,False,130
+Je čas jít.,It's time to go.,ɪts tˈaɪm tə ɡˈoʊ,its_time_to_go.opus,130039,,,,,False,130
+Zapomněl jsem na to.,I forgot about it.,aɪ fɚɡˈɑːt ɐbˈaʊt ɪt,i_forgot_about_it.opus,130040,,,,,False,130
+Pamatuj na to.,Keep that in mind.,kˈiːp ðæt ɪn mˈaɪnd,keep_that_in_mind.opus,130041,,,,,False,130
+Nech to na mně.,Leave it to me.,lˈiːv ɪt tə mˌiː,leave_it_to_me.opus,130042,,,,,False,130
+Drž mi palce.,Keep your fingers crossed for me.,kˈiːp jʊɹ fˈɪŋɡɚz kɹˈɔst fɔːɹ mˌiː,keep_your_fingers_crossed_for_me.opus,130043,,,,,False,130
+To se může stát.,It can happen.,ɪt kæn hˈæpən,it_can_happen.opus,130044,,,,,False,130
+Nic se neděje.,Nothing is happening.,nˈʌθɪŋ ɪz hˈæpənɪŋ,nothing_is_happening.opus,130045,,,,,False,130
+Dej mi vědět.,Let me know.,lˈɛt mˌiː nˈoʊ,let_me_know.opus,130046,,,,,False,130
+Už tomu rozumím.,I understand it now.,aɪ ˌʌndɚstˈænd ɪt nˈaʊ,i_understand_it_now.opus,130047,,,,,False,130
+vidět,view,vjˈuː,view.opus,131000,,,,,True,131
+videoklip,video clip,vˈɪdɪoʊ klˈɪp,video_clip.opus,131001,,,,,True,131
+vítězství,victory,vˈɪktɚɹi,victory.opus,131002,,,,,True,131
+nutkání,urge,ˈɜːdʒ,urge.opus,131003,,,,,True,131
+nahoru,upward,ˈʌpwɚd,upward.opus,131004,,,,,True,131
+aktuální,up-to-date,ˌʌptədˈeɪt,uptodate.opus,131005,,,,,True,131
+nahoru,upstairs,ʌpstˈɛɹz,upstairs.opus,131006,,,,,True,131
+horní,upper,ˈʌpɚ,upper.opus,131007,,,,,True,131
+nahrát,upload,ˈʌploʊd,upload.opus,131008,,,,,True,131
+povznesený,uplifted,ʌplˈɪftᵻd,uplifted.opus,131009,,,,,True,131
+aktualizovat,update,ˈʌpdeɪt,update.opus,131010,,,,,True,131
+indisponovaný,unwell,ʌnwˈɛl,unwell.opus,131011,,,,,True,131
+nežádoucí,unwanted,ʌnwˈɔntᵻd,unwanted.opus,131012,,,,,True,131
+neobvykle,unusually,ʌnjˈuːʒuːəli,unusually.opus,131013,,,,,True,131
+neuklizený,untidy,ʌntˈaɪdi,untidy.opus,131014,,,,,True,131
+nesouvisející,unrelated,ˌʌnɹᵻlˈeɪɾᵻd,unrelated.opus,131015,,,,,True,131
+nepředvídatelné,unpredictable,ʌnpɹɪdˈɪktəbəl,unpredictable.opus,131016,,,,,True,131
+rozbalit,unpack,ʌnpˈæk,unpack.opus,131017,,,,,True,131
+nešťastný,unlucky,ʌnlˈʌki,unlucky.opus,131018,,,,,True,131
+nepravděpodobné,unlikely,ʌnlˈaɪkli,unlikely.opus,131019,,,,,True,131
+ledaže,unless,ʌnlˈɛs,unless.opus,131020,,,,,True,131
+vesmír,universe,jˈuːnɪvˌɜːs,universe.opus,131021,,,,,True,131
+naléhavé,urgent,ˈɜːdʒənt,urgent.opus,131022,,,,,True,131
+používání,usage,jˈuːsɪdʒ,usage.opus,131023,,,,,True,131
+Kde je nejbližší zastávka?,Where is the nearest stop?,wˌɛɹ ɪz ðə nˌɪɹɪst stˈɑːp,where_is_the_nearest_stop.opus,131024,,,,,False,131
+V kolik odjíždí vlak?,What time does the train leave?,wˌʌt tˈaɪm dˈʌz ðə tɹˈeɪn lˈiːv,what_time_does_the_train_leave.opus,131025,,,,,False,131
+Potřebuji jednosměrnou jízdenku.,I need a one-way ticket.,aɪ nˈiːd ɐ wˈʌnwˈeɪ tˈɪkɪt,i_need_a_oneway_ticket.opus,131026,,,,,False,131
+Je toto místo volné?,Is this seat free?,ɪz ðɪs sˈiːt fɹˈiː,is_this_seat_free.opus,131027,,,,,False,131
+Kde si můžu koupit lístek?,Where can I buy a ticket?,wˌɛɹ kæn aɪ bˈaɪ ɐ tˈɪkɪt,where_can_i_buy_a_ticket.opus,131028,,,,,False,131
+Prosím jednu kávu.,One coffee please.,wˈʌn kˈɔfi plˈiːz,one_coffee_please.opus,131029,,,,,False,131
+Máte volný pokoj?,Do you have a vacant room?,dˈuː juː hæv ɐ vˈeɪkənt ɹˈuːm,do_you_have_a_vacant_room.opus,131030,,,,,False,131
+Mám rezervaci na dnešní noc.,I have a reservation for tonight.,aɪ hæv ɐ ɹˌɛzɚvˈeɪʃən fɔːɹ tənˈaɪt,i_have_a_reservation_for_tonight.opus,131031,,,,,False,131
+Jak dlouho cesta trvá?,How long does the journey take?,hˌaʊ lˈɔŋ dˈʌz ðə dʒˈɜːni tˈeɪk,how_long_does_the_journey_take.opus,131032,,,,,False,131
+Ztratili jsme se.,We have lost our way.,wiː hæv lˈɔst ˌaʊɚ wˈeɪ,we_have_lost_our_way.opus,131033,,,,,False,131
+Můžete to ukázat na mapě?,Can you show it on the map?,kæn juː ʃˈoʊ ɪɾ ɔnðə mˈæp,can_you_show_it_on_the_map.opus,131034,,,,,False,131
+Odbočte doleva na křižovatce.,Turn left at the intersection.,tˈɜːn lˈɛft æt ðɪ ˌɪntɚsˈɛkʃən,turn_left_at_the_intersection.opus,131035,,,,,False,131
+Je to daleko pěšky?,Is it far on foot?,ɪz ɪt fˈɑːɹ ˌɔn fˈʊt,is_it_far_on_foot.opus,131036,,,,,False,131
+Potřebuji zavolat taxi.,I need to call a taxi.,aɪ nˈiːd tə kˈɔːl ɐ tˈæksi,i_need_to_call_a_taxi.opus,131037,,,,,False,131
+Kde je toaleta?,Where is the restroom?,wˌɛɹ ɪz ðə ɹˈɛstɹuːm,where_is_the_restroom.opus,131038,,,,,False,131
+Můžu zaplatit kartou?,Can I pay by card?,kæn aɪ pˈeɪ baɪ kˈɑːɹd,can_i_pay_by_card.opus,131039,,,,,False,131
+Účet prosím.,The bill please.,ðə bˈɪl plˈiːz,the_bill_please.opus,131040,,,,,False,131
+Tohle není moje zavazadlo.,This is not my luggage.,ðɪs ɪz nˌɑːt maɪ lˈʌɡɪdʒ,this_is_not_my_luggage.opus,131041,,,,,False,131
+Let je zpožděný.,The flight is delayed.,ðə flˈaɪt ɪz dᵻlˈeɪd,the_flight_is_delayed.opus,131042,,,,,False,131
+Kdy nastupujeme do letadla?,When do we board the plane?,wˌɛn dˈuː wiː bˈɔːɹd ðə plˈeɪn,when_do_we_board_the_plane.opus,131043,,,,,False,131
+Musíme změnit vlak.,We have to change trains.,wiː hæv tə tʃˈeɪndʒ tɹˈeɪnz,we_have_to_change_trains.opus,131044,,,,,False,131
+Kde je výdej zavazadel?,Where is baggage claim?,wˌɛɹ ɪz bˈæɡɪdʒ klˈeɪm,where_is_baggage_claim.opus,131045,,,,,False,131
+Prosím mluvte pomaleji.,Please speak more slowly.,plˈiːz spˈiːk mˈɔːɹ slˈoʊli,please_speak_more_slowly.opus,131046,,,,,False,131
+Nerozumím této adrese.,I don't understand this address.,aɪ dˈoʊnt ˌʌndɚstˈænd ðɪs ɐdɹˈɛs,i_dont_understand_this_address.opus,131047,,,,,False,131
+k ničemu,useless,jˈuːsləs,useless.opus,132000,,,,,True,132
+oběť,victim,vˈɪktɪm,victim.opus,132001,,,,,True,132
+svěrák,vice,vˈaɪs,vice.opus,132002,,,,,True,132
+viceprezidenta,vice president,vˈaɪs pɹˈɛzɪdənt,vice_president.opus,132003,,,,,True,132
+přes,via,vˈaɪə,via.opus,132004,,,,,True,132
+veterinář,vet,vˈɛt,vet.opus,132005,,,,,True,132
+plavidlo,vessel,vˈɛsəl,vessel.opus,132006,,,,,True,132
+žíla,vein,vˈeɪn,vein.opus,132007,,,,,True,132
+vozidlo,vehicle,vˈiəkəl,vehicle.opus,132008,,,,,True,132
+vegetariánský,vegetarian,vˌɛdʒɪtˈɛɹiən,vegetarian.opus,132009,,,,,True,132
+rozlehlý,vast,vˈæst,vast.opus,132010,,,,,True,132
+lišit,vary,vˈɛɹi,vary.opus,132011,,,,,True,132
+odrůda,variety,vɚɹˈaɪəɾi,variety.opus,132012,,,,,True,132
+dodávka,van,vˈæn,van.opus,132013,,,,,True,132
+cenný,valuable,vˈæljuːəbəl,valuable.opus,132014,,,,,True,132
+marný,vain,vˈeɪn,vain.opus,132015,,,,,True,132
+vágní,vague,vˈeɪɡ,vague.opus,132016,,,,,True,132
+přizpůsobit,adapt,ɐdˈæpt,adapt.opus,132017,,,,,True,132
+volné místo,vacancy,vˈeɪkənsi,vacancy.opus,132018,,,,,True,132
+inzerát,ad,ˈæd,ad.opus,132019,,,,,True,132
+sjednotit,unite,juːnˈaɪt,unite.opus,132020,,,,,True,132
+voskovat,wax,wˈæks,wax.opus,132021,,,,,True,132
+navyknout,accustom,ɐkˈʌstəm,accustom.opus,132022,,,,,True,132
+zranění,wound,wˈuːnd,wound.opus,132023,,,,,True,132
+Kolik to stojí?,How much does it cost?,hˌaʊ mˈʌtʃ dˈʌz ɪt kˈɔst,how_much_does_it_cost.opus,132024,,,,,False,132
+Máte to v jiné velikosti?,Do you have it in another size?,dˈuː juː hæv ɪɾ ɪn ɐnˈʌðɚ sˈaɪz,do_you_have_it_in_another_size.opus,132025,,,,,False,132
+Jen se dívám.,I'm just looking.,aɪm dʒˈʌst lˈʊkɪŋ,im_just_looking.opus,132026,,,,,False,132
+Vezmu si to.,I'll take it.,aɪl tˈeɪk ɪt,ill_take_it.opus,132027,,,,,False,132
+Mohu si to vyzkoušet?,Can I try it on?,kæn aɪ tɹˈaɪ ɪɾ ˈɔn,can_i_try_it_on.opus,132028,,,,,False,132
+Máte otevřeno v neděli?,Are you open on Sunday?,ɑːɹ juː ˈoʊpən ˌɔn sˈʌndeɪ,are_you_open_on_sunday.opus,132029,,,,,False,132
+Hledám něco levnějšího.,I'm looking for something cheaper.,aɪm lˈʊkɪŋ fɔːɹ sˈʌmθɪŋ tʃˈiːpɚ,im_looking_for_something_cheaper.opus,132030,,,,,False,132
+Kde jsou pokladny?,Where are the cash registers?,wˌɛɹ ɑːɹ ðə kˈæʃ ɹˈɛdʒɪstɚz,where_are_the_cash_registers.opus,132031,,,,,False,132
+Potřebuji účtenku.,I need a receipt.,aɪ nˈiːd ɐ ɹᵻsˈiːt,i_need_a_receipt.opus,132032,,,,,False,132
+Mohu to vrátit?,Can I return it?,kæn aɪ ɹᵻtˈɜːn ɪt,can_i_return_it.opus,132033,,,,,False,132
+Je v ceně snídaně?,Is breakfast included?,ɪz bɹˈɛkfəst ɪŋklˈuːdᵻd,is_breakfast_included.opus,132034,,,,,False,132
+Stůl pro dva prosím.,A table for two please.,ɐ tˈeɪbəl fɔːɹ tˈuː plˈiːz,a_table_for_two_please.opus,132035,,,,,False,132
+Máte jídelní lístek v angličtině?,Do you have an English menu?,dˈuː juː hæv ɐn ˈɪŋɡlɪʃ mˈɛnjuː,do_you_have_an_english_menu.opus,132036,,,,,False,132
+Co doporučujete?,What do you recommend?,wˌʌt dˈuː juː ɹˌɛkəmˈɛnd,what_do_you_recommend.opus,132037,,,,,False,132
+Dám si polévku.,I'll have soup.,aɪl hæv sˈuːp,ill_have_soup.opus,132038,,,,,False,132
+Bez cibule prosím.,No onion please.,nˈoʊ ˈʌniən plˈiːz,no_onion_please.opus,132039,,,,,False,132
+Je toto jídlo pikantní?,Is this dish spicy?,ɪz ðɪs dˈɪʃ spˈaɪsi,is_this_dish_spicy.opus,132040,,,,,False,132
+Mohu dostat sklenici vody?,Can I have a glass of water?,kæn aɪ hæv ɐ ɡlˈæs ʌv wˈɔːɾɚ,can_i_have_a_glass_of_water.opus,132041,,,,,False,132
+Jídlo bylo výborné.,The food was excellent.,ðə fˈuːd wʌz ˈɛksələnt,the_food_was_excellent.opus,132042,,,,,False,132
+Tohle není to co jsem objednal.,This isn't what I ordered.,ðɪs ˌɪzənt wʌt aɪ ˈɔːɹdɚd,this_isnt_what_i_ordered.opus,132043,,,,,False,132
+Zaplatíme zvlášť.,We'll pay separately.,wiːl pˈeɪ sˈɛpɹətli,well_pay_separately.opus,132044,,,,,False,132
+Můžete uklidit stůl?,Can you clear the table?,kæn juː klˈɪɹ ðə tˈeɪbəl,can_you_clear_the_table.opus,132045,,,,,False,132
+Mám alergii na ořechy.,I am allergic to nuts.,aɪɐm ɐlˈɜːdʒɪk tə nˈʌts,i_am_allergic_to_nuts.opus,132046,,,,,False,132
+Máte něco bez masa?,Do you have anything without meat?,dˈuː juː hæv ˈɛnɪθˌɪŋ wɪðˌaʊt mˈiːt,do_you_have_anything_without_meat.opus,132047,,,,,False,132
+hodnota,worth,wˈɜːθ,worth.opus,133000,,,,,True,133
+hodný,worthy,wˈɜːði,worthy.opus,133001,,,,,True,133
+stojí za to,worthwhile,wɜːθwˈaɪl,worthwhile.opus,133002,,,,,True,133
+opotřebované,worn,wˈɔːɹn,worn.opus,133003,,,,,True,133
+absence,absence,ˈæbsəns,absence.opus,133004,,,,,True,133
+dílna,workshop,wˈɜːkʃɑːp,workshop.opus,133005,,,,,True,133
+pracoviště,workplace,wˈɜːkpleɪs,workplace.opus,133006,,,,,True,133
+cvičení,workout,wˈɜːkaʊt,workout.opus,133007,,,,,True,133
+pracovní,working,wˈɜːkɪŋ,working.opus,133008,,,,,True,133
+chybí,absent,ˈæbsənt,absent.opus,133009,,,,,True,133
+absolutní,absolute,ˈæbsəlˌuːt,absolute.opus,133010,,,,,True,133
+absolutně,absolutely,ˌæbsəlˈuːtli,absolutely.opus,133011,,,,,True,133
+absorbovat,absorb,ɐbsˈɔːɹb,absorb.opus,133012,,,,,True,133
+zázrak,wonder,wˈʌndɚ,wonder.opus,133013,,,,,True,133
+abstraktní,abstract,ˈæbstɹækt,abstract.opus,133014,,,,,True,133
+čaroděj,wizard,wˈɪzɚd,wizard.opus,133015,,,,,True,133
+svědčit,witness,wˈɪtnəs,witness.opus,133016,,,,,True,133
+vadnout,wither,wˈɪðɚ,wither.opus,133017,,,,,True,133
+balíček,wrap,ɹˈæp,wrap.opus,133018,,,,,True,133
+hojnost,abundance,ɐbˈʌndəns,abundance.opus,133019,,,,,True,133
+zabalit,wrap,ɹˈæp,wrap.opus,133020,,,,,True,133
+zápěstí,wrist,ɹˈɪst,wrist.opus,133021,,,,,True,133
+schopný,capable,kˈeɪpəbəl,capable.opus,133022,,,,,True,133
+kapacita,capacity,kəpˈæsᵻɾi,capacity.opus,133023,,,,,True,133
+Jdu pozdě do práce.,I'm late for work.,aɪm lˈeɪt fɔːɹ wˈɜːk,im_late_for_work.opus,133024,,,,,False,133
+Začneme v devět hodin.,We'll start at nine o'clock.,wiːl stˈɑːɹt æt nˈaɪn əklˈɑːk,well_start_at_nine_oclock.opus,133025,,,,,False,133
+Pošlu ti zprávu.,I'll send you a message.,aɪl sˈɛnd juː ɐ mˈɛsɪdʒ,ill_send_you_a_message.opus,133026,,,,,False,133
+Můžeme to probrat později?,Can we discuss it later?,kæn wiː dɪskˈʌs ɪt lˈeɪɾɚ,can_we_discuss_it_later.opus,133027,,,,,False,133
+Potřebuji více času.,I need more time.,aɪ nˈiːd mˈɔːɹ tˈaɪm,i_need_more_time.opus,133028,,,,,False,133
+Termín se blíží.,The deadline is approaching.,ðə dˈɛdlaɪn ɪz ɐpɹˈoʊtʃɪŋ,the_deadline_is_approaching.opus,133029,,,,,False,133
+Dokončil jsem úkol.,I have finished the task.,aɪ hæv fˈɪnɪʃt ðə tˈæsk,i_have_finished_the_task.opus,133030,,,,,False,133
+Ještě na tom pracuji.,I'm still working on it.,aɪm stˈɪl wˈɜːkɪŋ ˈɔn ɪt,im_still_working_on_it.opus,133031,,,,,False,133
+Můžeš mi poslat soubor?,Can you send me the file?,kæn juː sˈɛnd mˌiː ðə fˈaɪl,can_you_send_me_the_file.opus,133032,,,,,False,133
+Otevři prosím dokument.,Please open the document.,plˈiːz ˈoʊpən ðə dˈɑːkjuːmənt,please_open_the_document.opus,133033,,,,,False,133
+Něco není v pořádku.,Something is wrong.,sˈʌmθɪŋ ɪz ɹˈɔŋ,something_is_wrong.opus,133034,,,,,False,133
+Schůzka byla zrušena.,The meeting was canceled.,ðə mˈiːɾɪŋ wʌz kˈænsəld,the_meeting_was_canceled.opus,133035,,,,,False,133
+Připojím se za pět minut.,I'll join in five minutes.,aɪl dʒˈɔɪn ɪn fˈaɪv mˈɪnɪts,ill_join_in_five_minutes.opus,133036,,,,,False,133
+Máš nějaké otázky?,Do you have any questions?,dˈuː juː hæv ˌɛni kwˈɛstʃənz,do_you_have_any_questions.opus,133037,,,,,False,133
+Musíme najít řešení.,We have to find a solution.,wiː hæv tə fˈaɪnd ɐ səlˈuːʃən,we_have_to_find_a_solution.opus,133038,,,,,False,133
+To je důležitý bod.,That is an important point.,ðæt ɪz ɐn ɪmpˈɔːɹtənt pˈɔɪnt,that_is_an_important_point.opus,133039,,,,,False,133
+Podívej se na tuto tabulku.,Look at this table.,lˈʊk æt ðɪs tˈeɪbəl,look_at_this_table.opus,133040,,,,,False,133
+Zapíšu si to.,I'll write it down.,aɪl ɹˈaɪt ɪt dˈaʊn,ill_write_it_down.opus,133041,,,,,False,133
+Můžeme si dát přestávku?,Can we take a break?,kæn wiː tˈeɪk ɐ bɹˈeɪk,can_we_take_a_break.opus,133042,,,,,False,133
+Zopakuj to prosím.,Please repeat that.,plˈiːz ɹᵻpˈiːt ðˈæt,please_repeat_that.opus,133043,,,,,False,133
+Jak se to vyslovuje?,How is it pronounced?,hˌaʊ ɪz ɪt pɹənˈaʊnst,how_is_it_pronounced.opus,133044,,,,,False,133
+Co toto slovo znamená?,What does this word mean?,wˌʌt dˈʌz ðɪs wˈɜːd mˈiːn,what_does_this_word_mean.opus,133045,,,,,False,133
+Přečti větu nahlas.,Read the sentence aloud.,ɹˈiːd ðə sˈɛntəns ɐlˈaʊd,read_the_sentence_aloud.opus,133046,,,,,False,133
+Učím se každý den.,I study every day.,aɪ stˈʌdi ˈɛvɹi dˈeɪ,i_study_every_day.opus,133047,,,,,False,133
+kapsle,capsule,kˈæpsjuːl,capsule.opus,134000,,,,,True,134
+zachytit,capture,kˈæptʃɚ,capture.opus,134001,,,,,True,134
+zajmout,capture,kˈæptʃɚ,capture.opus,134002,,,,,True,134
+opustit,abandon,ɐbˈændən,abandon.opus,134003,,,,,True,134
+konzervované,canned,kˈænd,canned.opus,134004,,,,,True,134
+kariéra,career,kɚɹˈɪɹ,career.opus,134005,,,,,True,134
+abnormální,abnormal,ɐbnˈɔːɹməl,abnormal.opus,134006,,,,,True,134
+svíčka,candle,kˈændəl,candle.opus,134007,,,,,True,134
+jóga,yoga,jˈoʊɡə,yoga.opus,134008,,,,,True,134
+na palubě,aboard,ɐbˈɔːɹd,aboard.opus,134009,,,,,True,134
+domorodec,aborigine,ˌæbɚɹˈɪdʒəni,aborigine.opus,134010,,,,,True,134
+výkřik,yell,jˈɛl,yell.opus,134011,,,,,True,134
+napsáno,written,ɹˈɪʔn̩,written.opus,134012,,,,,True,134
+náramkové hodinky,wristwatch,ɹˈɪstwɑːtʃ,wristwatch.opus,134013,,,,,True,134
+obal,wrapping,ɹˈæpɪŋ,wrapping.opus,134014,,,,,True,134
+drát,wire,wˈaɪɚ,wire.opus,134015,,,,,True,134
+hojné,abundant,ɐbˈʌndənt,abundant.opus,134016,,,,,True,134
+doprovázet,accompany,ɐkˈʌmpəni,accompany.opus,134017,,,,,True,134
+dosáhnout,accomplish,ɐkˈɑːmplɪʃ,accomplish.opus,134018,,,,,True,134
+podle,according to,ɐkˈɔːɹdɪŋ tuː,according_to.opus,134019,,,,,True,134
+velryba,whale,wˈeɪl,whale.opus,134020,,,,,True,134
+mokřad,wetland,wˈɛtlənd,wetland.opus,134021,,,,,True,134
+na západ,westward,wˈɛstwɚd,westward.opus,134022,,,,,True,134
+dobře oblečený,well-dressed,wˈɛldɹˈɛst,welldressed.opus,134023,,,,,True,134
+Necítím se dobře.,I don't feel well.,aɪ dˈoʊnt fˈiːl wˈɛl,i_dont_feel_well.opus,134024,,,,,False,134
+Bolí mě hlava.,I have a headache.,aɪ hæv ɐ hˈɛdeɪk,i_have_a_headache.opus,134025,,,,,False,134
+Mám horečku.,I have a fever.,aɪ hæv ɐ fˈiːvɚ,i_have_a_fever.opus,134026,,,,,False,134
+Potřebuji lékaře.,I need a doctor.,aɪ nˈiːd ɐ dˈɑːktɚ,i_need_a_doctor.opus,134027,,,,,False,134
+Kde je nejbližší nemocnice?,Where is the nearest hospital?,wˌɛɹ ɪz ðə nˌɪɹɪst hˈɑːspɪɾəl,where_is_the_nearest_hospital.opus,134028,,,,,False,134
+Zavolejte záchranku.,Call an ambulance.,kˈɔːl ɐn ˈæmbjʊləns,call_an_ambulance.opus,134029,,,,,False,134
+Je to naléhavé.,It's urgent.,ɪts ˈɜːdʒənt,its_urgent.opus,134030,,,,,False,134
+Zranil jsem si ruku.,I injured my hand.,aɪ ˈɪndʒɚd maɪ hˈænd,i_injured_my_hand.opus,134031,,,,,False,134
+Nemohu hýbat nohou.,I can't move my leg.,aɪ kˈænt mˈuːv maɪ lˈɛɡ,i_cant_move_my_leg.opus,134032,,,,,False,134
+Jsem alergický na penicilin.,I'm allergic to penicillin.,aɪm ɐlˈɜːdʒɪk tə pˌɛnɪsˈɪlᵻn,im_allergic_to_penicillin.opus,134033,,,,,False,134
+Mám potíže s dýcháním.,I have trouble breathing.,aɪ hæv tɹˈʌbəl bɹˈiːðɪŋ,i_have_trouble_breathing.opus,134034,,,,,False,134
+Potřebuji si sednout.,I need to sit down.,aɪ nˈiːd tə sˈɪt dˈaʊn,i_need_to_sit_down.opus,134035,,,,,False,134
+Prosím zůstaňte v klidu.,Please stay calm.,plˈiːz stˈeɪ kˈɑːm,please_stay_calm.opus,134036,,,,,False,134
+Kde to bolí?,Where does it hurt?,wˌɛɹ dˈʌz ɪt hˈɜːt,where_does_it_hurt.opus,134037,,,,,False,134
+Jak dlouho to trvá?,How long has it been going on?,hˌaʊ lˈɔŋ hɐz ɪt bˌɪn ɡˌoʊɪŋ ˈɔn,how_long_has_it_been_going_on.opus,134038,,,,,False,134
+Vezměte si tento lék.,Take this medicine.,tˈeɪk ðɪs mˈɛdəsən,take_this_medicine.opus,134039,,,,,False,134
+Měl byste odpočívat.,You should rest.,juː ʃˌʊd ɹˈɛst,you_should_rest.opus,134040,,,,,False,134
+Musím si objednat kontrolu.,I need to schedule a check-up.,aɪ nˈiːd tə skˈɛdʒuːl ɐ tʃˈɛkˈʌp,i_need_to_schedule_a_checkup.opus,134041,,,,,False,134
+Zavolejte mi zítra.,Call me tomorrow.,kˈɔːl mˌiː təmˈɑːɹoʊ,call_me_tomorrow.opus,134042,,,,,False,134
+Pijte hodně vody.,Drink plenty of water.,dɹˈɪŋk plˈɛnti ʌv wˈɔːɾɚ,drink_plenty_of_water.opus,134043,,,,,False,134
+Nezapomeňte na léky.,Don't forget the medicine.,dˈoʊnt fɚɡˈɛt ðə mˈɛdəsən,dont_forget_the_medicine.opus,134044,,,,,False,134
+Potřebuji náplast.,I need a plaster.,aɪ nˈiːd ɐ plˈæstɚ,i_need_a_plaster.opus,134045,,,,,False,134
+Mám schůzku u zubaře.,I have a dentist appointment.,aɪ hæv ɐ dˈɛntɪst ɐpˈɔɪntmənt,i_have_a_dentist_appointment.opus,134046,,,,,False,134
+Už je mi lépe.,I feel better now.,aɪ fˈiːl bˈɛɾɚ nˈaʊ,i_feel_better_now.opus,134047,,,,,False,134
+zpráva,account,ɐkˈaʊnt,account.opus,135000,,,,,True,135
+účetní,accountant,ɐkˈaʊntənt,accountant.opus,135001,,,,,True,135
+podivný,weird,wˈɪɹd,weird.opus,135002,,,,,True,135
+přesnost,accuracy,ˈækjʊɹəsi,accuracy.opus,135003,,,,,True,135
+přesný,accurate,ˈækjʊɹət,accurate.opus,135004,,,,,True,135
+přesně,accurately,ˈækjʊɹətli,accurately.opus,135005,,,,,True,135
+webkamera,webcam,wˈɛbkæm,webcam.opus,135006,,,,,True,135
+předpověď počasí,weather forecast,wˈɛðɚ fˈɔːɹkæst,weather_forecast.opus,135007,,,,,True,135
+obvinit,accuse,ɐkjˈuːz,accuse.opus,135008,,,,,True,135
+zbraň,weapon,wˈɛpən,weapon.opus,135009,,,,,True,135
+slabost,weakness,wˈiːknəs,weakness.opus,135010,,,,,True,135
+kdykoli,whenever,wɛnˈɛvɚ,whenever.opus,135011,,,,,True,135
+náhodné,accidental,ˌæksɪdˈɛntəl,accidental.opus,135012,,,,,True,135
+náhodou,accidentally,ˌæksɪdˈɛntəli,accidentally.opus,135013,,,,,True,135
+kdekoli,wherever,wɛɹˈɛvɚ,wherever.opus,135014,,,,,True,135
+surfování,windsurfing,wˈɪndsɜːfɪŋ,windsurfing.opus,135015,,,,,True,135
+čelní sklo,windscreen,wˈɪndskɹiːn,windscreen.opus,135016,,,,,True,135
+akademie,academy,ɐkˈædəmi,academy.opus,135017,,,,,True,135
+akademický,academic,ˌækədˈɛmɪk,academic.opus,135018,,,,,True,135
+ochota,willingness,wˈɪlɪŋnəs,willingness.opus,135019,,,,,True,135
+přízvuk,accent,ˈæksənt,accent.opus,135020,,,,,True,135
+divoce,wildly,wˈaɪldli,wildly.opus,135021,,,,,True,135
+divoká zvěř,wildlife,wˈaɪldlaɪf,wildlife.opus,135022,,,,,True,135
+rozšířený,widespread,wˈaɪdspɹɛd,widespread.opus,135023,,,,,True,135
+Jsem doma.,I'm at home.,aɪm æt hˈoʊm,im_at_home.opus,135024,,,,,False,135
+Přijdu za chvíli.,I'll come in a moment.,aɪl kˈʌm ɪn ɐ mˈoʊmənt,ill_come_in_a_moment.opus,135025,,,,,False,135
+Zamkni prosím dveře.,Please lock the door.,plˈiːz lˈɑːk ðə dˈɔːɹ,please_lock_the_door.opus,135026,,,,,False,135
+Nech rozsvíceno.,Leave the light on.,lˈiːv ðə lˈaɪt ˈɔn,leave_the_light_on.opus,135027,,,,,False,135
+Vypni televizi.,Turn off the TV.,tˈɜːn ˈɔf ðə tˌiːvˈiː,turn_off_the_tv.opus,135028,,,,,False,135
+Kde jsou klíče?,Where are the keys?,wˌɛɹ ɑːɹ ðə kˈiːz,where_are_the_keys.opus,135029,,,,,False,135
+Nechal jsem je na stole.,I left them on the table.,aɪ lˈɛft ðˌɛm ɔnðə tˈeɪbəl,i_left_them_on_the_table.opus,135030,,,,,False,135
+Musíme uklidit kuchyň.,We need to clean the kitchen.,wiː nˈiːd tə klˈiːn ðə kˈɪtʃən,we_need_to_clean_the_kitchen.opus,135031,,,,,False,135
+Prádlo je v pračce.,The laundry is in the washing machine.,ðə lˈɔːndɹi ɪz ɪnðə wˈɑːʃɪŋ məʃˈiːn,the_laundry_is_in_the_washing_machine.opus,135032,,,,,False,135
+Pověs prádlo ven.,Hang the laundry outside.,hˈæŋ ðə lˈɔːndɹi aʊtsˈaɪd,hang_the_laundry_outside.opus,135033,,,,,False,135
+Večeře je hotová.,Dinner is ready.,dˈɪnɚɹ ɪz ɹˈɛdi,dinner_is_ready.opus,135034,,,,,False,135
+Co si dáme k večeři?,What shall we have for dinner?,wˌʌt ʃˌæl wiː hæv fɔːɹ dˈɪnɚ,what_shall_we_have_for_dinner.opus,135035,,,,,False,135
+Chybí nám mléko.,We are out of milk.,wiː ɑːɹ ˌaʊɾəv mˈɪlk,we_are_out_of_milk.opus,135036,,,,,False,135
+Půjdu nakoupit.,I'll go shopping.,aɪl ɡˌoʊ ʃˈɑːpɪŋ,ill_go_shopping.opus,135037,,,,,False,135
+Můžeš vynést odpadky?,Can you take out the rubbish?,kæn juː tˈeɪk ˈaʊt ðə ɹˈʌbɪʃ,can_you_take_out_the_rubbish.opus,135038,,,,,False,135
+Děti už spí.,The children are already asleep.,ðə tʃˈɪldɹən ɑːɹ ɔːlɹˌɛdi ɐslˈiːp,the_children_are_already_asleep.opus,135039,,,,,False,135
+Nezapomeň zavřít okno.,Don't forget to close the window.,dˈoʊnt fɚɡˈɛt tə klˈoʊz ðə wˈɪndoʊ,dont_forget_to_close_the_window.opus,135040,,,,,False,135
+Je tu příliš zima.,It's too cold here.,ɪts tˈuː kˈoʊld hˈɪɹ,its_too_cold_here.opus,135041,,,,,False,135
+Můžeš zvýšit topení?,Can you turn up the heating?,kæn juː tˈɜːn ˌʌp ðə hˈiːɾɪŋ,can_you_turn_up_the_heating.opus,135042,,,,,False,135
+Ráno vstávám brzy.,I get up early in the morning.,aɪ ɡɛt ˌʌp ˈɜːli ɪnðə mˈɔːɹnɪŋ,i_get_up_early_in_the_morning.opus,135043,,,,,False,135
+Dnes nemám čas vařit.,I don't have time to cook today.,aɪ dˈoʊnt hæv tˈaɪm tə kˈʊk tədˈeɪ,i_dont_have_time_to_cook_today.opus,135044,,,,,False,135
+Udělej si pohodlí.,Make yourself comfortable.,mˌeɪk jɔːɹsˈɛlf kˈʌmftəbəl,make_yourself_comfortable.opus,135045,,,,,False,135
+Pejsek čeká u dveří.,The dog is waiting by the door.,ðə dˈɑːɡ ɪz wˈeɪɾɪŋ baɪ ðə dˈɔːɹ,the_dog_is_waiting_by_the_door.opus,135046,,,,,False,135
+Zítra uklidím koupelnu.,I'll clean the bathroom tomorrow.,aɪl klˈiːn ðə bˈæθɹuːm təmˈɑːɹoʊ,ill_clean_the_bathroom_tomorrow.opus,135047,,,,,False,135
+přijetí,acceptance,ɐksˈɛptəns,acceptance.opus,136000,,,,,True,136
+celek,whole,hˈoʊl,whole.opus,136001,,,,,True,136
+kdokoliv,whoever,huːˈɛvɚ,whoever.opus,136002,,,,,True,136
+přístupný,accessible,æksˈɛsəbəl,accessible.opus,136003,,,,,True,136
+pískat,whistle,wˈɪsəl,whistle.opus,136004,,,,,True,136
+šepot,whisper,wˈɪspɚ,whisper.opus,136005,,,,,True,136
+když,while,wˈaɪl,while.opus,136006,,,,,True,136
+podle toho,whichever,wɪtʃˈɛvɚ,whichever.opus,136007,,,,,True,136
+přístup,access,ˈæksɛs,access.opus,136008,,,,,True,136
+příslušenství,accessory,ɐksˈɛsɚɹi,accessory.opus,136009,,,,,True,136
+zda,whether,wˈɛðɚ,whether.opus,136010,,,,,True,136
+vklad,deposit,dᵻpˈɑːzɪt,deposit.opus,136011,,,,,True,136
+unikátní,unique,juːnˈiːk,unique.opus,136012,,,,,True,136
+nezajímavý,uninteresting,ʌnˈɪntɚɹəstɪŋ,uninteresting.opus,136013,,,,,True,136
+dovolit si,afford,ɐfˈɔːɹd,afford.opus,136014,,,,,True,136
+žízeň,thirst,θˈɜːst,thirst.opus,136015,,,,,True,136
+poté,afterward,ˈæftɚwɚd,afterward.opus,136016,,,,,True,136
+teorie,theory,θˈiəɹi,theory.opus,136017,,,,,True,136
+poté,afterwards,ˈæftɚwɚdz,afterwards.opus,136018,,,,,True,136
+krádež,theft,θˈɛft,theft.opus,136019,,,,,True,136
+agenda,agenda,ɐdʒˈɛndə,agenda.opus,136020,,,,,True,136
+vděčný,thankful,θˈæŋkfəl,thankful.opus,136021,,,,,True,136
+agresivní,aggressive,ɐɡɹˈɛsɪv,aggressive.opus,136022,,,,,True,136
+teror,terror,tˈɛɹɚ,terror.opus,136023,,,,,True,136
+Jaké je dnes počasí?,What is the weather like today?,wˌʌt ɪz ðə wˈɛðɚ lˈaɪk tədˈeɪ,what_is_the_weather_like_today.opus,136024,,,,,False,136
+Dnes prší celý den.,It's raining all day today.,ɪts ɹˈeɪnɪŋ ˈɔːl dˈeɪ tədˈeɪ,its_raining_all_day_today.opus,136025,,,,,False,136
+Vezmi si deštník.,Take an umbrella.,tˈeɪk ɐn ʌmbɹˈɛlə,take_an_umbrella.opus,136026,,,,,False,136
+Je jasno a teplo.,It's clear and warm.,ɪts klˈɪɹ ænd wˈɔːɹm,its_clear_and_warm.opus,136027,,,,,False,136
+Dnes fouká silný vítr.,There is strong wind today.,ðɛɹ ɪz stɹˈɔŋ wˈɪnd tədˈeɪ,there_is_strong_wind_today.opus,136028,,,,,False,136
+Zítra bude sněžit.,It will snow tomorrow.,ɪt wɪl snˈoʊ təmˈɑːɹoʊ,it_will_snow_tomorrow.opus,136029,,,,,False,136
+Teplota klesla pod nulu.,The temperature fell below zero.,ðə tˈɛmpɹɪtʃɚ fˈɛl bᵻlˌoʊ zˈiəɹoʊ,the_temperature_fell_below_zero.opus,136030,,,,,False,136
+Zapadá slunce.,The sun is setting.,ðə sˈʌn ɪz sˈɛɾɪŋ,the_sun_is_setting.opus,136031,,,,,False,136
+Ráno byla mlha.,It was foggy in the morning.,ɪt wʌz fˈɑːɡi ɪnðə mˈɔːɹnɪŋ,it_was_foggy_in_the_morning.opus,136032,,,,,False,136
+Uvidíme se příští týden.,See you next week.,sˈiː juː nˈɛkst wˈiːk,see_you_next_week.opus,136033,,,,,False,136
+Dnes je pondělí.,Today is Monday.,tədˈeɪ ɪz mˈʌndeɪ,today_is_monday.opus,136034,,,,,False,136
+Kolik je hodin?,What time is it?,wˌʌt tˈaɪm ɪz ɪt,what_time_is_it.opus,136035,,,,,False,136
+Ještě je brzy.,It's still early.,ɪts stˈɪl ˈɜːli,its_still_early.opus,136036,,,,,False,136
+Už je pozdě.,It's already late.,ɪts ɔːlɹˌɛdi lˈeɪt,its_already_late.opus,136037,,,,,False,136
+Přijdu přesně v šest.,I'll come at exactly six.,aɪl kˈʌm æɾ ɛɡzˈæktli sˈɪks,ill_come_at_exactly_six.opus,136038,,,,,False,136
+Počkej pět minut.,Wait five minutes.,wˈeɪt fˈaɪv mˈɪnɪts,wait_five_minutes.opus,136039,,,,,False,136
+Začneme za hodinu.,We'll start in an hour.,wiːl stˈɑːɹt ɪn ɐn ˈaʊɚ,well_start_in_an_hour.opus,136040,,,,,False,136
+Včera jsem byl unavený.,I was tired yesterday.,aɪ wʌz tˈaɪɚd jˈɛstɚdˌeɪ,i_was_tired_yesterday.opus,136041,,,,,False,136
+Dnes se cítím lépe.,I feel better today.,aɪ fˈiːl bˈɛɾɚ tədˈeɪ,i_feel_better_today.opus,136042,,,,,False,136
+O víkendu zůstanu doma.,I'll stay home at the weekend.,aɪl stˈeɪ hˈoʊm æt ðə wˈiːkɛnd,ill_stay_home_at_the_weekend.opus,136043,,,,,False,136
+Jaký je dnes den?,What day is it today?,wˌʌt dˈeɪ ɪz ɪt tədˈeɪ,what_day_is_it_today.opus,136044,,,,,False,136
+Kolik dní to potrvá?,How many days will it take?,hˌaʊ mˈɛni dˈeɪz wɪl ɪt tˈeɪk,how_many_days_will_it_take.opus,136045,,,,,False,136
+Setkáme se příští měsíc.,We'll meet next month.,wiːl mˈiːt nˈɛkst mˈʌnθ,well_meet_next_month.opus,136046,,,,,False,136
+Čas rychle utíká.,Time goes quickly.,tˈaɪm ɡoʊz kwˈɪkli,time_goes_quickly.opus,136047,,,,,False,136
+terorismus,terrorism,tˈɛɹɚɹˌɪzəm,terrorism.opus,137000,,,,,True,137
+vyděšený,terrified,tˈɛɹᵻfˌaɪd,terrified.opus,137001,,,,,True,137
+úžasný,terrific,tɚɹˈɪfɪk,terrific.opus,137002,,,,,True,137
+strašně,terribly,tˈɛɹᵻbli,terribly.opus,137003,,,,,True,137
+období,term,tˈɜːm,term.opus,137004,,,,,True,137
+terminál,terminal,tˈɜːmɪnəl,terminal.opus,137005,,,,,True,137
+stan,tent,tˈɛnt,tent.opus,137006,,,,,True,137
+napětí,tension,tˈɛnʃən,tension.opus,137007,,,,,True,137
+důkladný,thorough,θˈʌɹoʊ,thorough.opus,137008,,,,,True,137
+napjatý,tense,tˈɛns,tense.opus,137009,,,,,True,137
+náklonnost,affection,ɐfˈɛkʃən,affection.opus,137010,,,,,True,137
+hrozivý,threatening,θɹˈɛʔn̩ɪŋ,threatening.opus,137011,,,,,True,137
+cín,tin,tˈɪn,tin.opus,137012,,,,,True,137
+včasné,timely,tˈaɪmli,timely.opus,137013,,,,,True,137
+dlaždice,tile,tˈaɪl,tile.opus,137014,,,,,True,137
+těsně,tightly,tˈaɪtli,tightly.opus,137015,,,,,True,137
+utáhnout,tighten,tˈaɪʔn̩,tighten.opus,137016,,,,,True,137
+kravat,tie,tˈaɪ,tie.opus,137017,,,,,True,137
+slapy,tide,tˈaɪd,tide.opus,137018,,,,,True,137
+tikat,tick,tˈɪk,tick.opus,137019,,,,,True,137
+klíště,tick,tˈɪk,tick.opus,137020,,,,,True,137
+tedy,thus,ðˈʌs,thus.opus,137021,,,,,True,137
+poradce,advisor,ɐdvˈaɪzɚ,advisor.opus,137022,,,,,True,137
+hromový,thunderous,θˈʌndɚɹəs,thunderous.opus,137023,,,,,True,137
+Mám radost že tě vidím.,I'm glad to see you.,aɪm ɡlˈæd tə sˈiː juː,im_glad_to_see_you.opus,137024,,,,,False,137
+Rád tě poznávám.,Nice to meet you.,nˈaɪs tə mˈiːt juː,nice_to_meet_you.opus,137025,,,,,False,137
+Děkuji za pozvání.,Thank you for the invitation.,θˈæŋk juː fɚðɪ ɪnvɪtˈeɪʃən,thank_you_for_the_invitation.opus,137026,,,,,False,137
+To je od tebe milé.,That's kind of you.,ðæts kˈaɪnd ʌv juː,thats_kind_of_you.opus,137027,,,,,False,137
+Omlouvám se za zpoždění.,I'm sorry for being late.,aɪm sˈɑːɹi fɔːɹ bˌiːɪŋ lˈeɪt,im_sorry_for_being_late.opus,137028,,,,,False,137
+Promiň neslyšel jsem tě.,Sorry I didn't hear you.,sˈɑːɹi aɪ dˈɪdnt hˈɪɹ juː,sorry_i_didnt_hear_you.opus,137029,,,,,False,137
+To nevadí.,That's all right.,ðæts ˈɔːl ɹˈaɪt,thats_all_right.opus,137030,,,,,False,137
+Neber si to osobně.,Don't take it personally.,dˈoʊnt tˈeɪk ɪt pˈɜːsənəli,dont_take_it_personally.opus,137031,,,,,False,137
+Jsem na tebe pyšný.,I'm proud of you.,aɪm pɹˈaʊd ʌv juː,im_proud_of_you.opus,137032,,,,,False,137
+Všechno bude v pořádku.,Everything will be all right.,ˈɛvɹɪθˌɪŋ wɪl biː ˈɔːl ɹˈaɪt,everything_will_be_all_right.opus,137033,,,,,False,137
+Mám o tebe starost.,I am worried about you.,aɪɐm wˈʌɹid ɐbˈaʊt juː,i_am_worried_about_you.opus,137034,,,,,False,137
+Chybíš mi.,I miss you.,aɪ mˈɪs juː,i_miss_you.opus,137035,,,,,False,137
+Držím ti palce.,I'm keeping my fingers crossed for you.,aɪm kˈiːpɪŋ maɪ fˈɪŋɡɚz kɹˈɔst fɔːɹ juː,im_keeping_my_fingers_crossed_for_you.opus,137036,,,,,False,137
+To mě mrzí.,I'm sorry to hear that.,aɪm sˈɑːɹi tə hˈɪɹ ðˈæt,im_sorry_to_hear_that.opus,137037,,,,,False,137
+Máš krásný úsměv.,You have a beautiful smile.,juː hæv ɐ bjˈuːɾifəl smˈaɪl,you_have_a_beautiful_smile.opus,137038,,,,,False,137
+Co si o tom myslíš?,What do you think about it?,wˌʌt dˈuː juː θˈɪŋk ɐbˈaʊt ɪt,what_do_you_think_about_it.opus,137039,,,,,False,137
+Souhlasím s tebou.,I agree with you.,aɪ ɐɡɹˈiː wɪð juː,i_agree_with_you.opus,137040,,,,,False,137
+Nesouhlasím úplně.,I don't completely agree.,aɪ dˈoʊnt kəmplˈiːtli ɐɡɹˈiː,i_dont_completely_agree.opus,137041,,,,,False,137
+Máš pravdu v tomhle bodě.,You are right about this point.,juː ɑːɹ ɹˈaɪt ɐbˌaʊt ðɪs pˈɔɪnt,you_are_right_about_this_point.opus,137042,,,,,False,137
+Můžeme zůstat v kontaktu?,Can we stay in touch?,kæn wiː stˈeɪ ɪn tˈʌtʃ,can_we_stay_in_touch.opus,137043,,,,,False,137
+Ozvi se mi večer.,Call me in the evening.,kˈɔːl mˌiː ɪnðɪ ˈiːvnɪŋ,call_me_in_the_evening.opus,137044,,,,,False,137
+Užij si večer.,Enjoy your evening.,ɛndʒˈɔɪ jʊɹ ˈiːvnɪŋ,enjoy_your_evening.opus,137045,,,,,False,137
+Pozdravuj ode mě rodinu.,Give my regards to your family.,ɡˈɪv maɪ ɹᵻɡˈɑːɹdz tə jʊɹ fˈæmɪli,give_my_regards_to_your_family.opus,137046,,,,,False,137
+Šťastnou cestu.,Have a safe journey.,hæv ɐ sˈeɪf dʒˈɜːni,have_a_safe_journey.opus,137047,,,,,False,137
+bouchnout,thump,θˈʌmp,thump.opus,138000,,,,,True,138
+palec,thumb,θˈʌm,thumb.opus,138001,,,,,True,138
+aerobik,aerobics,ɛɹˈoʊbɪks,aerobics.opus,138002,,,,,True,138
+po celou dobu,throughout,θɹuːˈaʊt,throughout.opus,138003,,,,,True,138
+thriller,thriller,θɹˈɪlɚ,thriller.opus,138004,,,,,True,138
+ovlivnit,affect,ɐfˈɛkt,affect.opus,138005,,,,,True,138
+ohrožení,threat,θɹˈɛt,threat.opus,138006,,,,,True,138
+tendence,tendency,tˈɛndənsi,tendency.opus,138007,,,,,True,138
+inklinovat,tend,tˈɛnd,tend.opus,138008,,,,,True,138
+pokoušet,tempt,tˈɛmpt,tempt.opus,138009,,,,,True,138
+koberec,carpet,kˈɑːɹpɪt,carpet.opus,138010,,,,,True,138
+chuť,taste,tˈeɪst,taste.opus,138011,,,,,True,138
+bez chuti,tasteless,tˈeɪstləs,tasteless.opus,138012,,,,,True,138
+kočár,carriage,kˈæɹɪdʒ,carriage.opus,138013,,,,,True,138
+lepenková krabice,carton,kˈɑːɹtən,carton.opus,138014,,,,,True,138
+rakovina,cancer,kˈænsɚ,cancer.opus,138015,,,,,True,138
+zrušit,cancel,kˈænsəl,cancel.opus,138016,,,,,True,138
+pokladna,cashpoint,kˈæʃpɔɪnt,cashpoint.opus,138017,,,,,True,138
+nahrát,tape,tˈeɪp,tape.opus,138018,,,,,True,138
+neformální,casual,kˈæʒuːəl,casual.opus,138019,,,,,True,138
+kanál,canal,kənˈæl,canal.opus,138020,,,,,True,138
+nádrž,tank,tˈæŋk,tank.opus,138021,,,,,True,138
+kategorie,category,kˈæɾɪɡɚɹi,category.opus,138022,,,,,True,138
+kategorizovat,categorise,kˈæɾɪɡɚɹˌaɪz,categorise.opus,138023,,,,,True,138
+Nemám signál.,I have no signal.,aɪ hæv nˈoʊ sˈɪɡnəl,i_have_no_signal.opus,138024,,,,,False,138
+Baterie je skoro vybitá.,The battery is almost dead.,ðə bˈæɾɚɹi ɪz ˈɔːlmoʊst dˈɛd,the_battery_is_almost_dead.opus,138025,,,,,False,138
+Nabíječka je v tašce.,The charger is in the bag.,ðə tʃˈɑːɹdʒɚɹ ɪz ɪnðə bˈæɡ,the_charger_is_in_the_bag.opus,138026,,,,,False,138
+Pošli mi odkaz.,Send me the link.,sˈɛnd mˌiː ðə lˈɪŋk,send_me_the_link.opus,138027,,,,,False,138
+Připoj se k síti.,Connect to the network.,kənˈɛkt tə ðə nˈɛtwɜːk,connect_to_the_network.opus,138028,,,,,False,138
+Jaké je heslo k Wi-Fi?,What is the Wi-Fi password?,wˌʌt ɪz ðə wˈaɪfˌaɪ pˈæswɜːd,what_is_the_wifi_password.opus,138029,,,,,False,138
+Počítač se zasekl.,The computer has frozen.,ðə kəmpjˈuːɾɚ hɐz fɹˈoʊzən,the_computer_has_frozen.opus,138030,,,,,False,138
+Restartuj prosím telefon.,Please restart the phone.,plˈiːz ɹᵻstˈɑːɹt ðə fˈoʊn,please_restart_the_phone.opus,138031,,,,,False,138
+Obrazovka je prasklá.,The screen is cracked.,ðə skɹˈiːn ɪz kɹˈækt,the_screen_is_cracked.opus,138032,,,,,False,138
+Neslyším tě dobře.,I can't hear you well.,aɪ kˈænt hˈɪɹ juː wˈɛl,i_cant_hear_you_well.opus,138033,,,,,False,138
+Máš zapnutý mikrofon?,Is your microphone on?,ɪz jʊɹ mˈaɪkɹəfˌoʊn ˈɔn,is_your_microphone_on.opus,138034,,,,,False,138
+Pošlu ti fotografii.,I'll send you a photo.,aɪl sˈɛnd juː ɐ fˈoʊɾoʊ,ill_send_you_a_photo.opus,138035,,,,,False,138
+Otevři aplikaci.,Open the app.,ˈoʊpən ðɪ ˈæp,open_the_app.opus,138036,,,,,False,138
+Klikni na toto tlačítko.,Click this button.,klˈɪk ðɪs bˈʌʔn̩,click_this_button.opus,138037,,,,,False,138
+Ulož změny.,Save the changes.,sˈeɪv ðə tʃˈeɪndʒᵻz,save_the_changes.opus,138038,,,,,False,138
+Zapomněl jsem heslo.,I forgot the password.,aɪ fɚɡˈɑːt ðə pˈæswɜːd,i_forgot_the_password.opus,138039,,,,,False,138
+Vytvoř nový účet.,Create a new account.,kɹiːˈeɪt ɐ nˈuː ɐkˈaʊnt,create_a_new_account.opus,138040,,,,,False,138
+Stránka se nenačítá.,The page is not loading.,ðə pˈeɪdʒ ɪz nˌɑːt lˈoʊdɪŋ,the_page_is_not_loading.opus,138041,,,,,False,138
+Zkontroluj e-mail.,Check your email.,tʃˈɛk jʊɹ ˈiːmeɪl,check_your_email.opus,138042,,,,,False,138
+Přijde ti moje zpráva?,Did my message arrive?,dˈɪd maɪ mˈɛsɪdʒ ɚɹˈaɪv,did_my_message_arrive.opus,138043,,,,,False,138
+Můžeme si zavolat později?,Can we call later?,kæn wiː kˈɔːl lˈeɪɾɚ,can_we_call_later.opus,138044,,,,,False,138
+Internet je dnes pomalý.,The internet is slow today.,ðɪ ˈɪntɚnˌɛt ɪz slˈoʊ tədˈeɪ,the_internet_is_slow_today.opus,138045,,,,,False,138
+Soubor je příliš velký.,The file is too large.,ðə fˈaɪl ɪz tˈuː lˈɑːɹdʒ,the_file_is_too_large.opus,138046,,,,,False,138
+Přepošli mi ten e-mail.,Forward that email to me.,fˈɔːɹwɚd ðæt ˈiːmeɪl tə mˌiː,forward_that_email_to_me.opus,138047,,,,,False,138
+klimatizace,air conditioning,ˈɛɹ kəndˈɪʃənɪŋ,air_conditioning.opus,139000,,,,,True,139
+hovorný,talkative,tˈɔːkətˌɪv,talkative.opus,139001,,,,,True,139
+letectvo,air force,ˈɛɹ fˈɔːɹs,air_force.opus,139002,,,,,True,139
+chutný,tasty,tˈeɪsti,tasty.opus,139003,,,,,True,139
+neopatrný,careless,kˈɛɹləs,careless.opus,139004,,,,,True,139
+nedbale,carelessly,kˈɛɹləsli,carelessly.opus,139005,,,,,True,139
+neopatrnost,carelessness,kˈɛɹləsnəs,carelessness.opus,139006,,,,,True,139
+dočasný,temporary,tˈɛmpɚɹˌɛɹi,temporary.opus,139007,,,,,True,139
+zmírnit,temper,tˈɛmpɚ,temper.opus,139008,,,,,True,139
+pokladník,teller,tˈɛlɚ,teller.opus,139009,,,,,True,139
+dohoda,agreement,ɐɡɹˈiːmənt,agreement.opus,139010,,,,,True,139
+zemědělství,agriculture,ˈæɡɹɪkˌʌltʃɚ,agriculture.opus,139011,,,,,True,139
+zemědělský,agricultural,ˌæɡɹɪkˈʌltʃɚɹəl,agricultural.opus,139012,,,,,True,139
+telegram,telegram,tˈɛlᵻɡɹˌæm,telegram.opus,139013,,,,,True,139
+telekomunikace,telecommunications,tˌɛlᵻkəmjˌuːnɪkˈeɪʃənz,telecommunications.opus,139014,,,,,True,139
+maličký,tiny,tˈaɪni,tiny.opus,139015,,,,,True,139
+technologický,technological,tˌɛknəlˈɑːdʒɪkəl,technological.opus,139016,,,,,True,139
+vtipálek,tease,tˈiːz,tease.opus,139017,,,,,True,139
+slza,tear,tˈɪɹ,tear.opus,139018,,,,,True,139
+týmová práce,teamwork,tˈiːmwɜːk,teamwork.opus,139019,,,,,True,139
+spoluhráč,teammate,tˈiːmeɪt,teammate.opus,139020,,,,,True,139
+pomáhat,aid,ˈeɪd,aid.opus,139021,,,,,True,139
+pomoc,aid,ˈeɪd,aid.opus,139022,,,,,True,139
+výuka,teaching,tˈiːtʃɪŋ,teaching.opus,139023,,,,,True,139
+Co navrhuješ?,What do you suggest?,wˌʌt dˈuː juː sədʒˈɛst,what_do_you_suggest.opus,139024,,,,,False,139
+Měli bychom to zkusit.,We should try it.,wiː ʃˌʊd tɹˈaɪ ɪt,we_should_try_it.opus,139025,,,,,False,139
+Rozhodnu se zítra.,I'll decide tomorrow.,aɪl dᵻsˈaɪd təmˈɑːɹoʊ,ill_decide_tomorrow.opus,139026,,,,,False,139
+Nejsem proti tomu.,I'm not against it.,aɪm nˌɑːt ɐɡˈɛnst ɪt,im_not_against_it.opus,139027,,,,,False,139
+To záleží na situaci.,It depends on the situation.,ɪt dᵻpˈɛndz ɔnðə sˌɪtʃuːˈeɪʃən,it_depends_on_the_situation.opus,139028,,,,,False,139
+Musíme se dohodnout.,We need to agree.,wiː nˈiːd tʊ ɐɡɹˈiː,we_need_to_agree.opus,139029,,,,,False,139
+Jaký máš plán?,What is your plan?,wˌʌt ɪz jʊɹ plˈæn,what_is_your_plan.opus,139030,,,,,False,139
+Začneme od začátku.,We'll start from the beginning.,wiːl stˈɑːɹt fɹʌmðə bɪɡˈɪnɪŋ,well_start_from_the_beginning.opus,139031,,,,,False,139
+Pojďme krok za krokem.,Let's go step by step.,lˈɛts ɡˌoʊ stˈɛp baɪ stˈɛp,lets_go_step_by_step.opus,139032,,,,,False,139
+To může počkat.,That can wait.,ðæt kæn wˈeɪt,that_can_wait.opus,139033,,,,,False,139
+Nemá to smysl.,It doesn't make sense.,ɪt dˈʌzənt mˌeɪk sˈɛns,it_doesnt_make_sense.opus,139034,,,,,False,139
+Nedělej si starosti.,Don't worry.,dˈoʊnt wˈʌɹi,dont_worry.opus,139035,,,,,False,139
+Raději bych zůstal doma.,I would rather stay home.,aɪ wʊd ɹˈæðɚ stˈeɪ hˈoʊm,i_would_rather_stay_home.opus,139036,,,,,False,139
+Můžeme to odložit?,Can we postpone it?,kæn wiː poʊstpˈoʊn ɪt,can_we_postpone_it.opus,139037,,,,,False,139
+Změnil jsem názor.,I changed my mind.,aɪ tʃˈeɪndʒd maɪ mˈaɪnd,i_changed_my_mind.opus,139038,,,,,False,139
+To je dobrá otázka.,That's a good question.,ðæts ɐ ɡˈʊd kwˈɛstʃən,thats_a_good_question.opus,139039,,,,,False,139
+Potřebuji si to promyslet.,I need to think it over.,aɪ nˈiːd tə θˈɪŋk ɪɾ ˈoʊvɚ,i_need_to_think_it_over.opus,139040,,,,,False,139
+Máš na výběr.,You have a choice.,juː hæv ɐ tʃˈɔɪs,you_have_a_choice.opus,139041,,,,,False,139
+Vyber si jednu možnost.,Choose one option.,tʃˈuːz wˈʌn ˈɑːpʃən,choose_one_option.opus,139042,,,,,False,139
+Nechme to na zítra.,Let's leave it until tomorrow.,lˈɛts lˈiːv ɪɾ ʌntˈɪl təmˈɑːɹoʊ,lets_leave_it_until_tomorrow.opus,139043,,,,,False,139
+Bude to stát za to.,It will be worth it.,ɪt wɪl biː wˈɜːθ ɪt,it_will_be_worth_it.opus,139044,,,,,False,139
+Nechci riskovat.,I don't want to take a risk.,aɪ dˈoʊnt wˈɔnt tə tˈeɪk ɐ ɹˈɪsk,i_dont_want_to_take_a_risk.opus,139045,,,,,False,139
+Připravme se na nejhorší.,Let's prepare for the worst.,lˈɛts pɹɪpˈɛɹ fɚðə wˈɜːst,lets_prepare_for_the_worst.opus,139046,,,,,False,139
+Všechno je připravené.,Everything is ready.,ˈɛvɹɪθˌɪŋ ɪz ɹˈɛdi,everything_is_ready.opus,139047,,,,,False,139

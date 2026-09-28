@@ -1,0 +1,49 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+k ničemu,useless,jˈuːsləs,useless.opus,132000,,,,,True,132
+oběť,victim,vˈɪktɪm,victim.opus,132001,,,,,True,132
+svěrák,vice,vˈaɪs,vice.opus,132002,,,,,True,132
+viceprezidenta,vice president,vˈaɪs pɹˈɛzɪdənt,vice_president.opus,132003,,,,,True,132
+přes,via,vˈaɪə,via.opus,132004,,,,,True,132
+veterinář,vet,vˈɛt,vet.opus,132005,,,,,True,132
+plavidlo,vessel,vˈɛsəl,vessel.opus,132006,,,,,True,132
+žíla,vein,vˈeɪn,vein.opus,132007,,,,,True,132
+vozidlo,vehicle,vˈiəkəl,vehicle.opus,132008,,,,,True,132
+vegetariánský,vegetarian,vˌɛdʒɪtˈɛɹiən,vegetarian.opus,132009,,,,,True,132
+rozlehlý,vast,vˈæst,vast.opus,132010,,,,,True,132
+lišit,vary,vˈɛɹi,vary.opus,132011,,,,,True,132
+odrůda,variety,vɚɹˈaɪəɾi,variety.opus,132012,,,,,True,132
+dodávka,van,vˈæn,van.opus,132013,,,,,True,132
+cenný,valuable,vˈæljuːəbəl,valuable.opus,132014,,,,,True,132
+marný,vain,vˈeɪn,vain.opus,132015,,,,,True,132
+vágní,vague,vˈeɪɡ,vague.opus,132016,,,,,True,132
+přizpůsobit,adapt,ɐdˈæpt,adapt.opus,132017,,,,,True,132
+volné místo,vacancy,vˈeɪkənsi,vacancy.opus,132018,,,,,True,132
+inzerát,ad,ˈæd,ad.opus,132019,,,,,True,132
+sjednotit,unite,juːnˈaɪt,unite.opus,132020,,,,,True,132
+voskovat,wax,wˈæks,wax.opus,132021,,,,,True,132
+navyknout,accustom,ɐkˈʌstəm,accustom.opus,132022,,,,,True,132
+zranění,wound,wˈuːnd,wound.opus,132023,,,,,True,132
+Kolik to stojí?,How much does it cost?,hˌaʊ mˈʌtʃ dˈʌz ɪt kˈɔst,how_much_does_it_cost.opus,132024,,,,,False,132
+Máte to v jiné velikosti?,Do you have it in another size?,dˈuː juː hæv ɪɾ ɪn ɐnˈʌðɚ sˈaɪz,do_you_have_it_in_another_size.opus,132025,,,,,False,132
+Jen se dívám.,I'm just looking.,aɪm dʒˈʌst lˈʊkɪŋ,im_just_looking.opus,132026,,,,,False,132
+Vezmu si to.,I'll take it.,aɪl tˈeɪk ɪt,ill_take_it.opus,132027,,,,,False,132
+Mohu si to vyzkoušet?,Can I try it on?,kæn aɪ tɹˈaɪ ɪɾ ˈɔn,can_i_try_it_on.opus,132028,,,,,False,132
+Máte otevřeno v neděli?,Are you open on Sunday?,ɑːɹ juː ˈoʊpən ˌɔn sˈʌndeɪ,are_you_open_on_sunday.opus,132029,,,,,False,132
+Hledám něco levnějšího.,I'm looking for something cheaper.,aɪm lˈʊkɪŋ fɔːɹ sˈʌmθɪŋ tʃˈiːpɚ,im_looking_for_something_cheaper.opus,132030,,,,,False,132
+Kde jsou pokladny?,Where are the cash registers?,wˌɛɹ ɑːɹ ðə kˈæʃ ɹˈɛdʒɪstɚz,where_are_the_cash_registers.opus,132031,,,,,False,132
+Potřebuji účtenku.,I need a receipt.,aɪ nˈiːd ɐ ɹᵻsˈiːt,i_need_a_receipt.opus,132032,,,,,False,132
+Mohu to vrátit?,Can I return it?,kæn aɪ ɹᵻtˈɜːn ɪt,can_i_return_it.opus,132033,,,,,False,132
+Je v ceně snídaně?,Is breakfast included?,ɪz bɹˈɛkfəst ɪŋklˈuːdᵻd,is_breakfast_included.opus,132034,,,,,False,132
+Stůl pro dva prosím.,A table for two please.,ɐ tˈeɪbəl fɔːɹ tˈuː plˈiːz,a_table_for_two_please.opus,132035,,,,,False,132
+Máte jídelní lístek v angličtině?,Do you have an English menu?,dˈuː juː hæv ɐn ˈɪŋɡlɪʃ mˈɛnjuː,do_you_have_an_english_menu.opus,132036,,,,,False,132
+Co doporučujete?,What do you recommend?,wˌʌt dˈuː juː ɹˌɛkəmˈɛnd,what_do_you_recommend.opus,132037,,,,,False,132
+Dám si polévku.,I'll have soup.,aɪl hæv sˈuːp,ill_have_soup.opus,132038,,,,,False,132
+Bez cibule prosím.,No onion please.,nˈoʊ ˈʌniən plˈiːz,no_onion_please.opus,132039,,,,,False,132
+Je toto jídlo pikantní?,Is this dish spicy?,ɪz ðɪs dˈɪʃ spˈaɪsi,is_this_dish_spicy.opus,132040,,,,,False,132
+Mohu dostat sklenici vody?,Can I have a glass of water?,kæn aɪ hæv ɐ ɡlˈæs ʌv wˈɔːɾɚ,can_i_have_a_glass_of_water.opus,132041,,,,,False,132
+Jídlo bylo výborné.,The food was excellent.,ðə fˈuːd wʌz ˈɛksələnt,the_food_was_excellent.opus,132042,,,,,False,132
+Tohle není to co jsem objednal.,This isn't what I ordered.,ðɪs ˌɪzənt wʌt aɪ ˈɔːɹdɚd,this_isnt_what_i_ordered.opus,132043,,,,,False,132
+Zaplatíme zvlášť.,We'll pay separately.,wiːl pˈeɪ sˈɛpɹətli,well_pay_separately.opus,132044,,,,,False,132
+Můžete uklidit stůl?,Can you clear the table?,kæn juː klˈɪɹ ðə tˈeɪbəl,can_you_clear_the_table.opus,132045,,,,,False,132
+Mám alergii na ořechy.,I am allergic to nuts.,aɪɐm ɐlˈɜːdʒɪk tə nˈʌts,i_am_allergic_to_nuts.opus,132046,,,,,False,132
+Máte něco bez masa?,Do you have anything without meat?,dˈuː juː hæv ˈɛnɪθˌɪŋ wɪðˌaʊt mˈiːt,do_you_have_anything_without_meat.opus,132047,,,,,False,132

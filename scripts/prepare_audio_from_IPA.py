@@ -8,7 +8,7 @@ import pandas as pd
 INCLUDE_AUDIO_TIMESTAMP = False
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from scripts.utils.preparation import read_vocab_csv, redo_sort_order
+from scripts.utils.preparation import fill_is_vocabulary, read_vocab_csv, redo_sort_order
 from scripts.utils.audio import generate_audio_with_google_cloud_from_ipa
 
 
@@ -23,12 +23,12 @@ async def prepare_audio(file_name: str, output_file: str, audio_folder: str, suf
     # 1. Read data
     df = read_vocab_csv(file_name, columns=[
         "id", "czech", "english", "pronunciation", "audio", "sort_order",
-        "block_id", "note_id", "topic_id", "grammar_chunk_id"
+        "block_id", "note_id", "topic_id", "grammar_chunk_id", "is_vocabulary"
     ])
     if df is None:
         print("Error: DataFrame is None after reading CSV.")
         return
-    df["is_vocabulary"] = df["grammar_chunk_id"].isna() | df["grammar_chunk_id"].astype(str).str.strip().eq("")
+    df = fill_is_vocabulary(df)
     df["lesson_id"] = get_lesson_id(file_name)
 
     # 2. Redo sort order

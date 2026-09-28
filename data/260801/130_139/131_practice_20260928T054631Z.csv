@@ -1,0 +1,49 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+vidět,view,vjˈuː,view.opus,131000,,,,,True,131
+videoklip,video clip,vˈɪdɪoʊ klˈɪp,video_clip.opus,131001,,,,,True,131
+vítězství,victory,vˈɪktɚɹi,victory.opus,131002,,,,,True,131
+nutkání,urge,ˈɜːdʒ,urge.opus,131003,,,,,True,131
+nahoru,upward,ˈʌpwɚd,upward.opus,131004,,,,,True,131
+aktuální,up-to-date,ˌʌptədˈeɪt,uptodate.opus,131005,,,,,True,131
+nahoru,upstairs,ʌpstˈɛɹz,upstairs.opus,131006,,,,,True,131
+horní,upper,ˈʌpɚ,upper.opus,131007,,,,,True,131
+nahrát,upload,ˈʌploʊd,upload.opus,131008,,,,,True,131
+povznesený,uplifted,ʌplˈɪftᵻd,uplifted.opus,131009,,,,,True,131
+aktualizovat,update,ˈʌpdeɪt,update.opus,131010,,,,,True,131
+indisponovaný,unwell,ʌnwˈɛl,unwell.opus,131011,,,,,True,131
+nežádoucí,unwanted,ʌnwˈɔntᵻd,unwanted.opus,131012,,,,,True,131
+neobvykle,unusually,ʌnjˈuːʒuːəli,unusually.opus,131013,,,,,True,131
+neuklizený,untidy,ʌntˈaɪdi,untidy.opus,131014,,,,,True,131
+nesouvisející,unrelated,ˌʌnɹᵻlˈeɪɾᵻd,unrelated.opus,131015,,,,,True,131
+nepředvídatelné,unpredictable,ʌnpɹɪdˈɪktəbəl,unpredictable.opus,131016,,,,,True,131
+rozbalit,unpack,ʌnpˈæk,unpack.opus,131017,,,,,True,131
+nešťastný,unlucky,ʌnlˈʌki,unlucky.opus,131018,,,,,True,131
+nepravděpodobné,unlikely,ʌnlˈaɪkli,unlikely.opus,131019,,,,,True,131
+ledaže,unless,ʌnlˈɛs,unless.opus,131020,,,,,True,131
+vesmír,universe,jˈuːnɪvˌɜːs,universe.opus,131021,,,,,True,131
+naléhavé,urgent,ˈɜːdʒənt,urgent.opus,131022,,,,,True,131
+používání,usage,jˈuːsɪdʒ,usage.opus,131023,,,,,True,131
+Kde je nejbližší zastávka?,Where is the nearest stop?,wˌɛɹ ɪz ðə nˌɪɹɪst stˈɑːp,where_is_the_nearest_stop.opus,131024,,,,,False,131
+V kolik odjíždí vlak?,What time does the train leave?,wˌʌt tˈaɪm dˈʌz ðə tɹˈeɪn lˈiːv,what_time_does_the_train_leave.opus,131025,,,,,False,131
+Potřebuji jednosměrnou jízdenku.,I need a one-way ticket.,aɪ nˈiːd ɐ wˈʌnwˈeɪ tˈɪkɪt,i_need_a_oneway_ticket.opus,131026,,,,,False,131
+Je toto místo volné?,Is this seat free?,ɪz ðɪs sˈiːt fɹˈiː,is_this_seat_free.opus,131027,,,,,False,131
+Kde si můžu koupit lístek?,Where can I buy a ticket?,wˌɛɹ kæn aɪ bˈaɪ ɐ tˈɪkɪt,where_can_i_buy_a_ticket.opus,131028,,,,,False,131
+Prosím jednu kávu.,One coffee please.,wˈʌn kˈɔfi plˈiːz,one_coffee_please.opus,131029,,,,,False,131
+Máte volný pokoj?,Do you have a vacant room?,dˈuː juː hæv ɐ vˈeɪkənt ɹˈuːm,do_you_have_a_vacant_room.opus,131030,,,,,False,131
+Mám rezervaci na dnešní noc.,I have a reservation for tonight.,aɪ hæv ɐ ɹˌɛzɚvˈeɪʃən fɔːɹ tənˈaɪt,i_have_a_reservation_for_tonight.opus,131031,,,,,False,131
+Jak dlouho cesta trvá?,How long does the journey take?,hˌaʊ lˈɔŋ dˈʌz ðə dʒˈɜːni tˈeɪk,how_long_does_the_journey_take.opus,131032,,,,,False,131
+Ztratili jsme se.,We have lost our way.,wiː hæv lˈɔst ˌaʊɚ wˈeɪ,we_have_lost_our_way.opus,131033,,,,,False,131
+Můžete to ukázat na mapě?,Can you show it on the map?,kæn juː ʃˈoʊ ɪɾ ɔnðə mˈæp,can_you_show_it_on_the_map.opus,131034,,,,,False,131
+Odbočte doleva na křižovatce.,Turn left at the intersection.,tˈɜːn lˈɛft æt ðɪ ˌɪntɚsˈɛkʃən,turn_left_at_the_intersection.opus,131035,,,,,False,131
+Je to daleko pěšky?,Is it far on foot?,ɪz ɪt fˈɑːɹ ˌɔn fˈʊt,is_it_far_on_foot.opus,131036,,,,,False,131
+Potřebuji zavolat taxi.,I need to call a taxi.,aɪ nˈiːd tə kˈɔːl ɐ tˈæksi,i_need_to_call_a_taxi.opus,131037,,,,,False,131
+Kde je toaleta?,Where is the restroom?,wˌɛɹ ɪz ðə ɹˈɛstɹuːm,where_is_the_restroom.opus,131038,,,,,False,131
+Můžu zaplatit kartou?,Can I pay by card?,kæn aɪ pˈeɪ baɪ kˈɑːɹd,can_i_pay_by_card.opus,131039,,,,,False,131
+Účet prosím.,The bill please.,ðə bˈɪl plˈiːz,the_bill_please.opus,131040,,,,,False,131
+Tohle není moje zavazadlo.,This is not my luggage.,ðɪs ɪz nˌɑːt maɪ lˈʌɡɪdʒ,this_is_not_my_luggage.opus,131041,,,,,False,131
+Let je zpožděný.,The flight is delayed.,ðə flˈaɪt ɪz dᵻlˈeɪd,the_flight_is_delayed.opus,131042,,,,,False,131
+Kdy nastupujeme do letadla?,When do we board the plane?,wˌɛn dˈuː wiː bˈɔːɹd ðə plˈeɪn,when_do_we_board_the_plane.opus,131043,,,,,False,131
+Musíme změnit vlak.,We have to change trains.,wiː hæv tə tʃˈeɪndʒ tɹˈeɪnz,we_have_to_change_trains.opus,131044,,,,,False,131
+Kde je výdej zavazadel?,Where is baggage claim?,wˌɛɹ ɪz bˈæɡɪdʒ klˈeɪm,where_is_baggage_claim.opus,131045,,,,,False,131
+Prosím mluvte pomaleji.,Please speak more slowly.,plˈiːz spˈiːk mˈɔːɹ slˈoʊli,please_speak_more_slowly.opus,131046,,,,,False,131
+Nerozumím této adrese.,I don't understand this address.,aɪ dˈoʊnt ˌʌndɚstˈænd ðɪs ɐdɹˈɛs,i_dont_understand_this_address.opus,131047,,,,,False,131
