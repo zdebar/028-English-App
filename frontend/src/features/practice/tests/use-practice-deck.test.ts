@@ -18,6 +18,7 @@ type ReviewDeckData = {
   prefetchedEntries?: PracticeDeckEntry[];
   availabilityCheckedAt: string;
   abandoned: boolean;
+  reviewKind: 'grammar' | 'vocabulary';
 };
 
 vi.mock('../practice-availability-controller', () => ({
@@ -25,8 +26,11 @@ vi.mock('../practice-availability-controller', () => ({
 }));
 
 vi.mock('@/hooks/use-fetch', () => ({
-  useFetch: (_fetchFunction: unknown) => {
-    const [data, setData] = React.useState(mocks.fetchData);
+  useFetch: (
+    _fetchFunction: unknown,
+    options: { initialData?: ReviewDeckData } = {},
+  ) => {
+    const [data, setData] = React.useState(options.initialData ?? mocks.fetchData);
     return {
       data,
       loading: false,
@@ -101,6 +105,26 @@ describe('usePracticeDeck', () => {
     ]);
     expect(mocks.reload).not.toHaveBeenCalled();
     expect(result.current.progressLabel).toBe('1 / 2');
+  });
+
+  it('initializes the review queue from initial data before the first render', async () => {
+    const initialData = reviewDeckResult([entry(7)]);
+    const { result } = renderHook(() => usePracticeDeck('u1', initialData));
+
+    expect(result.current.currentItem?.item_id).toBe(7);
+    expect(result.current.progressLabel).toBe('0 / 1');
+    await act(async () => {
+      await Promise.resolve();
+    });
+  });
+
+  it('marks an empty initial review queue as finished before the first render', () => {
+    const initialData = reviewDeckResult([]);
+    const { result } = renderHook(() => usePracticeDeck('u1', initialData));
+
+    expect(result.current.currentItem).toBeNull();
+    expect(result.current.finishedReview).toBe(true);
+    expect(result.current.progressLabel).toBe('0 / 0');
   });
 
   it('does not save an answered card again when leaving in the middle of a batch', async () => {
@@ -206,7 +230,12 @@ describe('usePracticeDeck', () => {
   it('finishes when the next batch is empty', async () => {
     mocks.fetchData = reviewDeckResult([entry(1)]);
     mocks.savePracticeDeck.mockImplementation(async () => {
-      mocks.fetchData = { entries: [], availabilityCheckedAt: '2026-06-24T11:00:00.000Z', abandoned: true };
+      mocks.fetchData = {
+        entries: [],
+        availabilityCheckedAt: '2026-06-24T11:00:00.000Z',
+        abandoned: true,
+        reviewKind: 'vocabulary',
+      };
     });
     const { result } = renderHook(() => usePracticeDeck('u1'));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
@@ -241,6 +270,7 @@ describe('usePracticeDeck', () => {
       entries: [],
       availabilityCheckedAt: '2026-06-24T11:00:00.000Z',
       abandoned: true,
+      reviewKind: 'vocabulary',
     };
     await act(async () => {
       resolveSave();
@@ -295,6 +325,7 @@ function reviewDeckResult(entries: PracticeDeckEntry[]): ReviewDeckData {
     entries,
     availabilityCheckedAt: '2026-06-24T10:00:00.000Z',
     abandoned: false,
+    reviewKind: 'vocabulary',
   };
 }
 
