@@ -12,6 +12,7 @@ import {
   invalidateReviewArrays,
   warmReviewArrays,
 } from '@/features/practice/review-prefetch';
+import { warmOverviewQueries } from '@/hooks/overview-query-store';
 
 /**
  * Runs initial, periodic, and unmount data synchronization for a signed-in user.
@@ -107,6 +108,9 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
     }, 3000);
     void warmReviewArrays(activeUserId).catch((error) => {
       reportError('Failed to prefetch review arrays', error);
+    });
+    void warmOverviewQueries(activeUserId).catch((error) => {
+      reportError('Failed to prefetch overview queries', error);
     });
     intervalId.current = setInterval(() => {
       runSync();

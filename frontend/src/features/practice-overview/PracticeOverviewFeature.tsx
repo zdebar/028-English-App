@@ -1,8 +1,7 @@
-import { sharedQueryKey } from '@/hooks/shared-query-store';
+import { getOverviewQuery, overviewQueryKey } from '@/hooks/overview-query-store';
 import OverviewCard from '@/components/UI/OverviewCard';
 import config from '@/config/config';
 import { ROUTES } from '@/config/routes.config';
-import UserItem from '@/database/models/user-items';
 import { getLocalDateFromUTC } from '@/database/utils/database.utils';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { reportError } from '@/features/logging/monitoring-handler';
@@ -110,13 +109,13 @@ export default function PracticeOverviewFeature({
   const showToast = useToastStore((state) => state.showToast);
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_DAYS);
   const fetchItems = useCallback(
-    () => (userId ? UserItem.getByUserId(userId) : Promise.resolve([])),
+    () => (userId ? getOverviewQuery(userId, 'practice-overview')() : Promise.resolve([])),
     [userId],
   );
   const { data: rawItems, loading, error } = useLiveQueryData(fetchItems, {
     emptyData: [],
     initialData: initialItems,
-    sharedKey: sharedQueryKey(userId, 'practice-overview'),
+    sharedKey: userId ? overviewQueryKey(userId, 'practice-overview') : undefined,
   });
   const days = useMemo(() => getPracticeDays(rawItems), [rawItems]);
 

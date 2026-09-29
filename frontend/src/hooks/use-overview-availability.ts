@@ -1,11 +1,12 @@
-import UserItem from '@/database/models/user-items';
-import Topic from '@/database/models/topics';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
-import { getSharedQuery, sharedQueryKey } from './shared-query-store';
+import {
+  getOverviewSharedQuery,
+  type OverviewAvailabilityData,
+  type OverviewQueryName,
+} from './overview-query-store';
 import { useEffect, useState } from 'react';
-import type { OverviewAvailabilityData } from '@/routing/route-data';
 
 export type OverviewAvailability = Readonly<{
   hasData: boolean;
@@ -20,6 +21,7 @@ export type OverviewAvailabilityState = Readonly<{
 }>;
 
 type DatabaseOverviewKey = keyof OverviewAvailabilityState;
+type OverviewAvailabilityQueryName = Extract<OverviewQueryName, `has-${string}`>;
 
 const EMPTY_AVAILABILITY: OverviewAvailability = {
   hasData: false,
@@ -70,15 +72,14 @@ export function useOverviewAvailability(
     let isActive = true;
     if (!initialData) setDatabaseState(LOADING_DATABASE_STATE);
 
-    const queries: ReadonlyArray<readonly [DatabaseOverviewKey, () => Promise<boolean>]> = [
-      ['grammar', () => UserItem.hasInitiatedGrammar(userId)],
-      ['topics', () => Topic.hasInitiatedByUserId(userId)],
-      ['vocabulary', () => UserItem.hasInitiatedVocabulary(userId)],
+    const queries: ReadonlyArray<readonly [DatabaseOverviewKey, OverviewAvailabilityQueryName]> = [
+      ['grammar', 'has-grammar'],
+      ['topics', 'has-topics'],
+      ['vocabulary', 'has-vocabulary'],
     ];
 
-    const subscriptions = queries.map(([key, query]) => {
-      const sharedKey = sharedQueryKey(userId, `has-${key}`)!;
-      const { store } = getSharedQuery(sharedKey, query);
+    const subscriptions = queries.map(([key, queryName]) => {
+      const { store } = getOverviewSharedQuery(userId, queryName);
       const update = () => {
         if (!isActive) return;
         const { data, loading, error } = store.getState();

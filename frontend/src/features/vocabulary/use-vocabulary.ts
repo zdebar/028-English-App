@@ -1,6 +1,5 @@
-import { sharedQueryKey } from '@/hooks/shared-query-store';
+import { getOverviewQuery, overviewQueryKey } from '@/hooks/overview-query-store';
 import config from '@/config/config';
-import UserItem from '@/database/models/user-items';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { compareCzechStrings, filterSortedWords, type DisplayField } from './vocabulary.utils';
@@ -19,13 +18,13 @@ const DISPLAY_FIELD_KEY = 'vocabulary_display_field';
 export function useVocabulary(userId: string | null, initialWords?: UserItemLocal[]) {
   const fetchVocabulary = useCallback(async () => {
     if (!userId) return [];
-    return UserItem.getInitiatedVocabulary(userId);
+    return getOverviewQuery(userId, 'vocabulary')();
   }, [userId]);
 
   const { data: words, loading, error } = useLiveQueryData(fetchVocabulary, {
     emptyData: [],
     initialData: initialWords,
-    sharedKey: sharedQueryKey(userId, 'vocabulary'),
+    sharedKey: userId ? overviewQueryKey(userId, 'vocabulary') : undefined,
   });
 
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
