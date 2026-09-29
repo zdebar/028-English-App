@@ -450,10 +450,7 @@ function PracticeCardButton({
           id="top-bar"
           className="relative flex h-8 w-full shrink-0 items-center justify-center text-center"
         >
-          <DirectionTopBar
-            audioError={audioError}
-            audioLoading={audioLoading}
-          />
+          <DirectionTopBar audioError={audioError} audioLoading={audioLoading} />
         </div>
       )}
       <div
@@ -475,14 +472,9 @@ function PracticeCardButton({
         id="bottom-bar"
       >
         {display.showProgressLabel && (
-          <>
-            <p className="min-w-12 pl-2 text-right font-light" title={progressHelpText}>
-              {progressLabel}
-            </p>
-            {props.isBlockTrainingPractice && (
-              <HelpText className="bottom-7.5">{TEXTS.blockTrainingProgressHelp}</HelpText>
-            )}
-          </>
+          <p className="min-w-12 pl-2 text-right font-light" title={progressHelpText}>
+            {progressLabel}
+          </p>
         )}
       </div>
     </button>

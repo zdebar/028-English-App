@@ -1,0 +1,49 @@
+czech,english,block_id,is_vocabulary
+zpráva,account,,
+účetní,accountant,,
+podivný,weird,,
+přesnost,accuracy,,
+přesný,accurate,,
+přesně,accurately,,
+webkamera,webcam,,
+předpověď počasí,weather forecast,,
+obvinit,accuse,,
+zbraň,weapon,,
+slabost,weakness,,
+kdykoli,whenever,,
+náhodné,accidental,,
+náhodou,accidentally,,
+kdekoli,wherever,,
+surfování,windsurfing,,
+čelní sklo,windscreen,,
+akademie,academy,,
+akademický,academic,,
+ochota,willingness,,
+přízvuk,accent,,
+divoce,wildly,,
+divoká zvěř,wildlife,,
+rozšířený,widespread,,
+Jsem doma.,I'm at home.,,False
+Přijdu za chvíli.,I'll come in a moment.,,False
+Zamkni prosím dveře.,Please lock the door.,,False
+Nech rozsvíceno.,Leave the light on.,,False
+Vypni televizi.,Turn off the TV.,,False
+Kde jsou klíče?,Where are the keys?,,False
+Nechal jsem je na stole.,I left them on the table.,,False
+Musíme uklidit kuchyň.,We need to clean the kitchen.,,False
+Prádlo je v pračce.,The laundry is in the washing machine.,,False
+Pověs prádlo ven.,Hang the laundry outside.,,False
+Večeře je hotová.,Dinner is ready.,,False
+Co si dáme k večeři?,What shall we have for dinner?,,False
+Chybí nám mléko.,We are out of milk.,,False
+Půjdu nakoupit.,I'll go shopping.,,False
+Můžeš vynést odpadky?,Can you take out the rubbish?,,False
+Děti už spí.,The children are already asleep.,,False
+Nezapomeň zavřít okno.,Don't forget to close the window.,,False
+Je tu příliš zima.,It's too cold here.,,False
+Můžeš zvýšit topení?,Can you turn up the heating?,,False
+Ráno vstávám brzy.,I get up early in the morning.,,False
+Dnes nemám čas vařit.,I don't have time to cook today.,,False
+Udělej si pohodlí.,Make yourself comfortable.,,False
+Pejsek čeká u dveří.,The dog is waiting by the door.,,False
+Zítra uklidím koupelnu.,I'll clean the bathroom tomorrow.,,False

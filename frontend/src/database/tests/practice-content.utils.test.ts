@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   grammarGroupGet: vi.fn(),
   addExamples: vi.fn(),
   getReviewDeck: vi.fn(),
+  getAllReviewItems: vi.fn(),
   getByItemIds: vi.fn(),
   reconcileActive: vi.fn(),
   reportError: vi.fn(),
@@ -29,6 +30,7 @@ vi.mock('@/database/models/grammar-chunks', () => ({
 vi.mock('@/database/models/user-items', () => ({
   default: {
     getReviewDeck: (...args: unknown[]) => mocks.getReviewDeck(...args),
+    getAllReviewItems: (...args: unknown[]) => mocks.getAllReviewItems(...args),
     getByItemIds: (...args: unknown[]) => mocks.getByItemIds(...args),
   },
 }));
@@ -57,6 +59,7 @@ import {
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
 } from '@/database/utils/practice-content.utils';
+import { clearReviewArrays } from '@/features/practice/review-prefetch';
 
 function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
   return {
@@ -98,6 +101,8 @@ function makeGrammar(id: number) {
 describe('practice content resolution', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    clearReviewArrays(null);
+    mocks.getAllReviewItems.mockRejectedValue(new Error('prefetch unavailable'));
     mocks.notesBulkGet.mockResolvedValue([{ id: 1, name: 'Note', note: 'Body' }]);
     mocks.grammarBulkGet.mockResolvedValue([makeGrammar(10)]);
     mocks.grammarGroupGet.mockResolvedValue({
@@ -206,6 +211,32 @@ describe('practice content resolution', () => {
     expect(mocks.grammarBulkGet).not.toHaveBeenCalled();
   });
 
+  it('uses all prefetched rows while exposing only currently due entries', async () => {
+    const dueItem = makeReviewItem(1);
+    const futureItem = makeReviewItem(2, {
+      next_at_cz_to_en: '2999-01-01T00:00:00.000Z',
+    });
+    mocks.getAllReviewItems.mockImplementation(async (_userId: string, reviewKind: string) =>
+      reviewKind === 'grammar' ? [dueItem, futureItem] : [],
+    );
+
+    const result = await loadReviewDeckData('u1', 'grammar');
+
+    expect(result.entries.map((entry) => entry.item.item_id)).toEqual([1]);
+    expect(result.prefetchedEntries?.map((entry) => entry.item.item_id)).toEqual([1, 2]);
+    expect(mocks.getReviewDeck).not.toHaveBeenCalled();
+  });
+
+  it('falls back to the direct review query when prefetch fails', async () => {
+    const dueItem = makeReviewItem(1);
+    mocks.getReviewDeck.mockResolvedValue([dueItem]);
+
+    const result = await loadReviewDeckData('u1', 'grammar');
+
+    expect(result.entries.map((entry) => entry.item.item_id)).toEqual([1]);
+    expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', 'grammar', expect.any(String));
+  });
+
   it('loads review while preserving an active initial-training session', async () => {
     mocks.reconcileActive.mockResolvedValue({ mode: 'new' });
     mocks.getReviewDeck.mockResolvedValue([makeReviewItem(1)]);
@@ -243,6 +274,6 @@ describe('practice content resolution', () => {
   });
 });
 
-function makeReviewItem(itemId: number): PracticeDeckItem {
-  return makeItem({ item_id: itemId });
+function makeReviewItem(itemId: number, overrides: Partial<PracticeDeckItem> = {}): PracticeDeckItem {
+  return makeItem({ item_id: itemId, ...overrides });
 }

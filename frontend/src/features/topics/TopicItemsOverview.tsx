@@ -19,6 +19,7 @@ import OverviewCard from '@/components/UI/OverviewCard';
 import VolumeSlider from '../audio/VolumeSlider';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { useRouteClose } from '@/routing/use-route-close';
+import { invalidateReviewArrays } from '@/features/practice/review-prefetch';
 
 export default function TopicItemsOverview({
   initialTopic,
@@ -101,6 +102,7 @@ export default function TopicItemsOverview({
     if (!userId || !topicId) return;
     try {
       const resetCount = await UserItem.resetItemsByTopicId(userId, topicId);
+      invalidateReviewArrays(userId);
       void refreshPracticeAvailability(userId);
       reportInfo(`Reset ${resetCount} items in topic ${topicId}`);
       showToast(TEXTS.resetProgressSuccessToast, 'success');

@@ -2,12 +2,9 @@ import { usePracticeAvailabilityBoundary } from './use-practice-availability-bou
 import {
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
-  type Dispatch,
-  type SetStateAction,
 } from 'react';
 import type { PracticeDeckEntry, PracticeOutcome, UserItemLocal } from '@/types/user-item.types';
 import type { ReviewKind } from '@/types/practice.types';
@@ -16,6 +13,18 @@ import UserItem from '@/database/models/user-items';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
+import {
+  answerCurrentReviewItem,
+  createReviewQueue,
+  getCurrentReviewEntry,
+  getRemainingReviewEntries,
+  type ReviewQueue,
+} from '../review-queue';
+import {
+  invalidateReviewArrays,
+  publishReviewItems,
+  rebuildReviewArrays,
+} from '../review-prefetch';
 import {
   loadReviewDeckData,
   loadReviewEntryDetails,
@@ -30,9 +39,64 @@ type SecondaryContentRequest = Readonly<{
   promise: Promise<ReviewEntryDetails>;
 }>;
 
-type ReviewRetryAction = 'save' | 'reload';
+type ReviewRetryAction = 'save';
 
-/** Loads complete review batches and persists each answer without blocking card changes. */
+type MutableRef<T> = { current: T };
+
+function getReviewQueueEntries(reviewDeck: ReviewDeckData): readonly PracticeDeckEntry[] {
+  return reviewDeck.prefetchedEntries ?? reviewDeck.entries;
+}
+
+function isReviewQueueFinished(queue: ReviewQueue | null): boolean {
+  if (!queue) return false;
+  return getCurrentReviewEntry(queue) === null;
+}
+
+function getInitialCompletedCount(queue: ReviewQueue | null): number {
+  return queue ? queue.completedCount : 0;
+}
+
+function getInitialActiveItemCount(queue: ReviewQueue | null): number | null {
+  return queue ? queue.activeItemCount : null;
+}
+
+function initializeReviewQueue(
+  initialData: ReviewDeckData | undefined,
+  queueRef: MutableRef<ReviewQueue | null>,
+  dataRef: MutableRef<ReviewDeckData | null>,
+): ReviewQueue | null {
+  if (initialData && dataRef.current === null) {
+    dataRef.current = initialData;
+    queueRef.current = createReviewQueue(getReviewQueueEntries(initialData));
+  }
+  return queueRef.current;
+}
+
+function resetReviewDeckOnUserChange(
+  previousUserIdRef: MutableRef<string | null>,
+  userId: string | null,
+  reset: () => void,
+): void {
+  if (previousUserIdRef.current === userId) return;
+  previousUserIdRef.current = userId;
+  reset();
+}
+
+function getReviewDeckCleanup(
+  userId: string | null,
+  queueRef: MutableRef<ReviewQueue | null>,
+  finalEntryRef: MutableRef<PracticeDeckEntry | null>,
+  dataRef: MutableRef<ReviewDeckData | null>,
+): (() => void) | undefined {
+  if (!userId) return undefined;
+  return () => {
+    queueRef.current = null;
+    finalEntryRef.current = null;
+    dataRef.current = null;
+  };
+}
+
+/** Uses the prefetched review queue and persists each answer without blocking card changes. */
 export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckData) {
   const [saveError, setSaveError] = useState<Error | null>(null);
   const pendingProgressRef = useRef(new Map<number, UserItemLocal>());
@@ -47,6 +111,7 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
       const savePromise = Promise.resolve()
         .then(() => UserItem.savePracticeDeck([item]))
         .then(() => {
+          invalidateReviewArrays(item.user_id);
           if (pendingProgressRef.current.get(item.item_id) === item) {
             pendingProgressRef.current.delete(item.item_id);
           }
@@ -84,21 +149,42 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
     const results = await Promise.all(saves);
     return results.every(Boolean) && pendingProgressRef.current.size === 0;
   }, [saveReviewItem, userId]);
+
+  const [queueVersion, setQueueVersion] = useState(0);
+  const initialReviewDeck = initialData;
+  const reviewQueueRef = useRef<ReviewQueue | null>(null);
+  const finalEntryRef = useRef<PracticeDeckEntry | null>(null);
+  const queueDataRef = useRef<ReviewDeckData | null>(null);
+  const initialQueue = initializeReviewQueue(initialReviewDeck, reviewQueueRef, queueDataRef);
   const flushPracticeForBoundary = useCallback(async (): Promise<void> => {
-    await flushPendingReviewItems();
-  }, [flushPendingReviewItems]);
-  const { trackPracticeWrite, finishPractice } = usePracticeAvailabilityBoundary(
-    userId,
-    flushPracticeForBoundary,
-  );
-  const [index, setIndex] = useState(0);
+    const didSave = await flushPendingReviewItems();
+    if (!userId) return;
+    if (!didSave) {
+      invalidateReviewArrays(userId);
+      return;
+    }
+
+    const queue = reviewQueueRef.current;
+    if (queue) {
+      publishReviewItems(
+        userId,
+        getReviewKind(queueDataRef.current),
+        getRemainingReviewEntries(queue).map((entry) => entry.item),
+      );
+    }
+    globalThis.setTimeout(() => {
+      void rebuildReviewArrays(userId).catch((error) => {
+        reportError('Failed to rebuild review arrays', error);
+      });
+    }, 0);
+  }, [flushPendingReviewItems, userId]);
+  const { finishPractice } = usePracticeAvailabilityBoundary(userId, flushPracticeForBoundary);
   const [revealed, setRevealed] = useState(false);
-  const [finishedReview, setFinishedReview] = useState(false);
+  const [finishedReview, setFinishedReview] = useState(() => isReviewQueueFinished(initialQueue));
   const [retryAction, setRetryAction] = useState<ReviewRetryAction | null>(null);
-  const [completedCount, setCompletedCount] = useState(0);
-  const [totalCount, setTotalCount] = useState<number | null>(null);
+  const [completedCount, setCompletedCount] = useState(getInitialCompletedCount(initialQueue));
+  const [totalCount, setTotalCount] = useState(getInitialActiveItemCount(initialQueue));
   const isTransitioningRef = useRef(false);
-  const countedDeckRef = useRef<ReviewDeckData | null>(null);
   const [secondaryContent, setSecondaryContent] = useState<SecondaryContent | null>(null);
   const secondaryContentRequestIdRef = useRef(0);
   const secondaryContentRequestRef = useRef<SecondaryContentRequest | null>(null);
@@ -118,24 +204,21 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
     [],
   );
 
-  const initialReviewDeck = initialData;
   const reviewKind = getReviewKind(initialData);
   const fetchPracticeDeck = useCallback(
     () => (userId ? loadReviewDeckData(userId, reviewKind) : Promise.resolve(createEmptyReviewDeck(reviewKind))),
     [reviewKind, userId],
   );
-  const {
-    data: fetchedResult,
-    loading,
-    error,
-    reload,
-  } = useFetch<ReviewDeckData>(fetchPracticeDeck, { initialData: initialReviewDeck });
-  const reloadPracticeDeck = useCallback(async () => {
-    await reload();
-  }, [reload]);
+  const { data: fetchedResult, loading, error } = useFetch<ReviewDeckData>(fetchPracticeDeck, {
+    initialData: initialReviewDeck,
+  });
   const { currentEntry, currentItem } = useMemo(
-    () => getReviewDeckView(fetchedResult, index),
-    [fetchedResult, index],
+    () => {
+      const queueEntry = getCurrentReviewEntry(reviewQueueRef.current);
+      const entry = finishedReview ? null : queueEntry ?? finalEntryRef.current;
+      return { currentEntry: entry, currentItem: entry?.item ?? null };
+    },
+    [finishedReview, queueVersion],
   );
   const cardState = usePracticeCardState({
     currentItem,
@@ -143,39 +226,44 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
     isCompletion: finishedReview,
     setRevealed,
   });
-  const resetHint = cardState.resetHint;
   const resetQuestionState = cardState.resetQuestionState;
 
+  const previousUserIdRef = useRef(userId);
   useEffect(() => {
-    countedDeckRef.current = null;
-    pendingProgressRef.current.clear();
-    pendingSaveRef.current.clear();
-    setCompletedCount(0);
-    setTotalCount(null);
+    resetReviewDeckOnUserChange(previousUserIdRef, userId, () => {
+      pendingProgressRef.current.clear();
+      pendingSaveRef.current.clear();
+      reviewQueueRef.current = null;
+      finalEntryRef.current = null;
+      queueDataRef.current = null;
+      setQueueVersion(0);
+      setCompletedCount(0);
+      setTotalCount(null);
+      setFinishedReview(false);
+    });
 
-    if (!userId) return undefined;
-
-    return () => {
-      countedDeckRef.current = null;
-    };
+    return getReviewDeckCleanup(userId, reviewQueueRef, finalEntryRef, queueDataRef);
   }, [userId]);
 
-  useLayoutEffect(() => {
-    resetReviewCard(setIndex, setRevealed, resetHint);
-  }, [fetchedResult, resetHint]);
+  useEffect(() => {
+    if (loading || !fetchedResult || queueDataRef.current === fetchedResult) return;
+
+    const queue = createReviewQueue(getReviewQueueEntries(fetchedResult));
+    queueDataRef.current = fetchedResult;
+    reviewQueueRef.current = queue;
+    finalEntryRef.current = null;
+    setCompletedCount(queue.completedCount);
+    setTotalCount(queue.activeItemCount);
+    setFinishedReview(getCurrentReviewEntry(queue) === null);
+    setRetryAction(null);
+    resetQuestionState();
+    setQueueVersion((version) => version + 1);
+  }, [fetchedResult, loading, resetQuestionState]);
 
   useEffect(() => {
-    if (loading || !fetchedResult || countedDeckRef.current === fetchedResult) return;
-
-    countedDeckRef.current = fetchedResult;
-    setFinishedReview(fetchedResult.abandoned);
-    setTotalCount((count) => (count ?? 0) + fetchedResult.entries.length);
-  }, [fetchedResult, loading]);
-
-  useEffect(() => {
-    if (!finishedReview || !fetchedResult?.abandoned) return;
+    if (!finishedReview || !reviewQueueRef.current) return;
     void finishPractice();
-  }, [fetchedResult?.abandoned, finishPractice, finishedReview]);
+  }, [finishPractice, finishedReview, queueVersion]);
 
   useEffect(() => {
     if (!userId || !currentItem) {
@@ -241,37 +329,48 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
       isTransitioningRef.current = true;
 
       try {
-        await trackPracticeWrite(
-          answerReviewCard({
-            currentItem,
-            currentIndex: index,
-            batchSize: fetchedResult?.entries.length ?? 0,
-            userId,
-            pendingProgress: pendingProgressRef,
-            resetQuestionState,
-            reload: reloadPracticeDeck,
-            saveReviewItem,
-            flushPendingReviewItems,
-            setRetryAction,
-            setSaveError,
-            setCompletedCount,
-            setIndex,
-          }, outcome),
+        if (!currentItem || !userId || !reviewQueueRef.current) return;
+
+        const updatedItem = UserItem.applyPracticeProgress(
+          currentItem,
+          outcome,
+          new Date(Date.now()).toISOString(),
         );
+        pendingProgressRef.current.set(updatedItem.item_id, updatedItem);
+        void saveReviewItem(updatedItem);
+
+        const answerResult = answerCurrentReviewItem(reviewQueueRef.current, updatedItem);
+        if (!answerResult) return;
+
+        setCompletedCount(reviewQueueRef.current.completedCount);
+        setTotalCount(reviewQueueRef.current.activeItemCount);
+        setQueueVersion((version) => version + 1);
+
+        if (answerResult.hasNextItem) {
+          resetQuestionState();
+          return;
+        }
+
+        finalEntryRef.current = answerResult.answeredEntry;
+        setQueueVersion((version) => version + 1);
+        const didSave = await flushPendingReviewItems();
+        if (!didSave) {
+          setRetryAction('save');
+          return;
+        }
+
+        finalEntryRef.current = null;
+        setFinishedReview(true);
+        setRetryAction(null);
       } finally {
         isTransitioningRef.current = false;
       }
     },
     [
       currentItem,
-      fetchedResult?.entries.length,
       flushPendingReviewItems,
-      index,
-      reloadPracticeDeck,
       resetQuestionState,
       saveReviewItem,
-      setRetryAction,
-      trackPracticeWrite,
       userId,
     ],
   );
@@ -280,25 +379,18 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
     isTransitioningRef.current = true;
 
     try {
-      if (retryAction === 'save') {
-        const didSave = await flushPendingReviewItems();
-        if (!didSave) return;
-      }
+      const didSave = await flushPendingReviewItems();
+      if (!didSave) return;
 
-      const didReload = await refreshAfterReviewSave(
-        reloadPracticeDeck,
-        resetQuestionState,
-        setSaveError,
-      );
-      if (didReload) setRetryAction(null);
-      else setRetryAction('reload');
+      finalEntryRef.current = null;
+      setFinishedReview(true);
+      setRetryAction(null);
     } finally {
       isTransitioningRef.current = false;
     }
-  }, [flushPendingReviewItems, reloadPracticeDeck, resetQuestionState, retryAction]);
+  }, [flushPendingReviewItems, retryAction]);
 
   return {
-    index,
     currentItem,
     note: getSecondaryNote(currentEntry, secondaryContent),
     grammar: getSecondaryGrammar(currentEntry, secondaryContent),
@@ -343,110 +435,13 @@ function createEmptyReviewDeck(reviewKind: ReviewKind): ReviewDeckData {
   };
 }
 
-function getReviewKind(initialData: ReviewDeckData | undefined): ReviewKind {
+function getReviewKind(initialData: ReviewDeckData | null | undefined): ReviewKind {
   return initialData?.reviewKind ?? 'grammar';
 }
 
 function getReviewProgressLabel(completedCount: number, totalCount: number | null): string {
   if (totalCount === null) return String(completedCount);
   return `${completedCount} / ${totalCount}`;
-}
-
-function getReviewDeckView(
-  fetchedResult: ReviewDeckData | null | undefined,
-  index: number,
-): Readonly<{
-  currentEntry: PracticeDeckEntry | null;
-  currentItem: PracticeDeckEntry['item'] | null;
-}> {
-  const activeArray = fetchedResult?.entries ?? [];
-  const currentEntry = activeArray[index] ?? null;
-  return { currentEntry, currentItem: currentEntry?.item ?? null };
-}
-
-function resetReviewCard(
-  setIndex: Dispatch<SetStateAction<number>>,
-  setRevealed: Dispatch<SetStateAction<boolean>>,
-  resetHint: () => void,
-): void {
-  setIndex(0);
-  setRevealed(false);
-  resetHint();
-}
-
-type AnswerReviewCardOptions = Readonly<{
-  currentItem: PracticeDeckEntry['item'] | null;
-  currentIndex: number;
-  batchSize: number;
-  userId: string | null;
-  pendingProgress: { current: Map<number, UserItemLocal> };
-  resetQuestionState: () => void;
-  reload: () => Promise<unknown>;
-  saveReviewItem: (item: UserItemLocal) => Promise<boolean>;
-  flushPendingReviewItems: () => Promise<boolean>;
-  setRetryAction: Dispatch<SetStateAction<ReviewRetryAction | null>>;
-  setSaveError: Dispatch<SetStateAction<Error | null>>;
-  setCompletedCount: Dispatch<SetStateAction<number>>;
-  setIndex: Dispatch<SetStateAction<number>>;
-}>;
-
-async function answerReviewCard(
-  options: AnswerReviewCardOptions,
-  outcome: PracticeOutcome,
-): Promise<void> {
-  const { currentItem, userId, pendingProgress } = options;
-  if (!currentItem || !userId) return;
-
-  const updatedItem = UserItem.applyPracticeProgress(
-    currentItem,
-    outcome,
-    new Date(Date.now()).toISOString(),
-  );
-  pendingProgress.current.set(updatedItem.item_id, updatedItem);
-  void options.saveReviewItem(updatedItem);
-  options.setCompletedCount((count) => count + 1);
-
-  const isBatchEnd = options.currentIndex + 1 >= options.batchSize;
-  if (!isBatchEnd) {
-    options.setIndex((currentIndex) => currentIndex + 1);
-    options.resetQuestionState();
-    return;
-  }
-
-  await saveReviewBatch(options);
-}
-
-async function saveReviewBatch(options: AnswerReviewCardOptions): Promise<void> {
-  const didSave = await options.flushPendingReviewItems();
-  if (!didSave) {
-    options.setRetryAction('save');
-    return;
-  }
-
-  const didReload = await refreshAfterReviewSave(
-    options.reload,
-    options.resetQuestionState,
-    options.setSaveError,
-  );
-  options.setRetryAction(didReload ? null : 'reload');
-}
-
-async function refreshAfterReviewSave(
-  reload: () => Promise<unknown>,
-  resetQuestionState: () => void,
-  setSaveError: Dispatch<SetStateAction<Error | null>>,
-): Promise<boolean> {
-  try {
-    await reload();
-    resetQuestionState();
-    setSaveError(null);
-    return true;
-  } catch (caughtError) {
-    const normalizedError = toError(caughtError);
-    setSaveError(normalizedError);
-    reportError('Failed to refresh review deck', normalizedError);
-    return false;
-  }
 }
 
 type SecondaryContent = Readonly<{

@@ -29,6 +29,9 @@ vi.mock('dexie', () => ({
 vi.mock('@/database/models/topics', () => ({
   default: { hasInitiatedByUserId: vi.fn(async () => mocks.topics.length > 0) },
 }));
+vi.mock('@/database/models/grammar-groups', () => ({
+  default: { getInitiated: vi.fn(async () => []) },
+}));
 vi.mock('@/database/models/user-items', () => ({
   default: {
     hasInitiatedGrammar: vi.fn(async () => {

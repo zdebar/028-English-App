@@ -1,0 +1,49 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+hodnota,worth,wˈɜːθ,worth.opus,133000,,,,,True,133
+hodný,worthy,wˈɜːði,worthy.opus,133001,,,,,True,133
+stojí za to,worthwhile,wɜːθwˈaɪl,worthwhile.opus,133002,,,,,True,133
+opotřebované,worn,wˈɔːɹn,worn.opus,133003,,,,,True,133
+absence,absence,ˈæbsəns,absence.opus,133004,,,,,True,133
+dílna,workshop,wˈɜːkʃɑːp,workshop.opus,133005,,,,,True,133
+pracoviště,workplace,wˈɜːkpleɪs,workplace.opus,133006,,,,,True,133
+cvičení,workout,wˈɜːkaʊt,workout.opus,133007,,,,,True,133
+pracovní,working,wˈɜːkɪŋ,working.opus,133008,,,,,True,133
+chybí,absent,ˈæbsənt,absent.opus,133009,,,,,True,133
+absolutní,absolute,ˈæbsəlˌuːt,absolute.opus,133010,,,,,True,133
+absolutně,absolutely,ˌæbsəlˈuːtli,absolutely.opus,133011,,,,,True,133
+absorbovat,absorb,ɐbsˈɔːɹb,absorb.opus,133012,,,,,True,133
+zázrak,wonder,wˈʌndɚ,wonder.opus,133013,,,,,True,133
+abstraktní,abstract,ˈæbstɹækt,abstract.opus,133014,,,,,True,133
+čaroděj,wizard,wˈɪzɚd,wizard.opus,133015,,,,,True,133
+svědčit,witness,wˈɪtnəs,witness.opus,133016,,,,,True,133
+vadnout,wither,wˈɪðɚ,wither.opus,133017,,,,,True,133
+balíček,wrap,ɹˈæp,wrap.opus,133018,,,,,True,133
+hojnost,abundance,ɐbˈʌndəns,abundance.opus,133019,,,,,True,133
+zabalit,wrap,ɹˈæp,wrap.opus,133020,,,,,True,133
+zápěstí,wrist,ɹˈɪst,wrist.opus,133021,,,,,True,133
+schopný,capable,kˈeɪpəbəl,capable.opus,133022,,,,,True,133
+kapacita,capacity,kəpˈæsᵻɾi,capacity.opus,133023,,,,,True,133
+Jdu pozdě do práce.,I'm late for work.,aɪm lˈeɪt fɔːɹ wˈɜːk,im_late_for_work.opus,133024,,,,,False,133
+Začneme v devět hodin.,We'll start at nine o'clock.,wiːl stˈɑːɹt æt nˈaɪn əklˈɑːk,well_start_at_nine_oclock.opus,133025,,,,,False,133
+Pošlu ti zprávu.,I'll send you a message.,aɪl sˈɛnd juː ɐ mˈɛsɪdʒ,ill_send_you_a_message.opus,133026,,,,,False,133
+Můžeme to probrat později?,Can we discuss it later?,kæn wiː dɪskˈʌs ɪt lˈeɪɾɚ,can_we_discuss_it_later.opus,133027,,,,,False,133
+Potřebuji více času.,I need more time.,aɪ nˈiːd mˈɔːɹ tˈaɪm,i_need_more_time.opus,133028,,,,,False,133
+Termín se blíží.,The deadline is approaching.,ðə dˈɛdlaɪn ɪz ɐpɹˈoʊtʃɪŋ,the_deadline_is_approaching.opus,133029,,,,,False,133
+Dokončil jsem úkol.,I have finished the task.,aɪ hæv fˈɪnɪʃt ðə tˈæsk,i_have_finished_the_task.opus,133030,,,,,False,133
+Ještě na tom pracuji.,I'm still working on it.,aɪm stˈɪl wˈɜːkɪŋ ˈɔn ɪt,im_still_working_on_it.opus,133031,,,,,False,133
+Můžeš mi poslat soubor?,Can you send me the file?,kæn juː sˈɛnd mˌiː ðə fˈaɪl,can_you_send_me_the_file.opus,133032,,,,,False,133
+Otevři prosím dokument.,Please open the document.,plˈiːz ˈoʊpən ðə dˈɑːkjuːmənt,please_open_the_document.opus,133033,,,,,False,133
+Něco není v pořádku.,Something is wrong.,sˈʌmθɪŋ ɪz ɹˈɔŋ,something_is_wrong.opus,133034,,,,,False,133
+Schůzka byla zrušena.,The meeting was canceled.,ðə mˈiːɾɪŋ wʌz kˈænsəld,the_meeting_was_canceled.opus,133035,,,,,False,133
+Připojím se za pět minut.,I'll join in five minutes.,aɪl dʒˈɔɪn ɪn fˈaɪv mˈɪnɪts,ill_join_in_five_minutes.opus,133036,,,,,False,133
+Máš nějaké otázky?,Do you have any questions?,dˈuː juː hæv ˌɛni kwˈɛstʃənz,do_you_have_any_questions.opus,133037,,,,,False,133
+Musíme najít řešení.,We have to find a solution.,wiː hæv tə fˈaɪnd ɐ səlˈuːʃən,we_have_to_find_a_solution.opus,133038,,,,,False,133
+To je důležitý bod.,That is an important point.,ðæt ɪz ɐn ɪmpˈɔːɹtənt pˈɔɪnt,that_is_an_important_point.opus,133039,,,,,False,133
+Podívej se na tuto tabulku.,Look at this table.,lˈʊk æt ðɪs tˈeɪbəl,look_at_this_table.opus,133040,,,,,False,133
+Zapíšu si to.,I'll write it down.,aɪl ɹˈaɪt ɪt dˈaʊn,ill_write_it_down.opus,133041,,,,,False,133
+Můžeme si dát přestávku?,Can we take a break?,kæn wiː tˈeɪk ɐ bɹˈeɪk,can_we_take_a_break.opus,133042,,,,,False,133
+Zopakuj to prosím.,Please repeat that.,plˈiːz ɹᵻpˈiːt ðˈæt,please_repeat_that.opus,133043,,,,,False,133
+Jak se to vyslovuje?,How is it pronounced?,hˌaʊ ɪz ɪt pɹənˈaʊnst,how_is_it_pronounced.opus,133044,,,,,False,133
+Co toto slovo znamená?,What does this word mean?,wˌʌt dˈʌz ðɪs wˈɜːd mˈiːn,what_does_this_word_mean.opus,133045,,,,,False,133
+Přečti větu nahlas.,Read the sentence aloud.,ɹˈiːd ðə sˈɛntəns ɐlˈaʊd,read_the_sentence_aloud.opus,133046,,,,,False,133
+Učím se každý den.,I study every day.,aɪ stˈʌdi ˈɛvɹi dˈeɪ,i_study_every_day.opus,133047,,,,,False,133

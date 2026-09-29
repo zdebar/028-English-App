@@ -1,6 +1,7 @@
 import PracticeSession from '@/database/models/practice-sessions';
 import UserItem from '@/database/models/user-items';
 import type { PracticeSessionType } from '@/types/practice-session.types';
+import { loadReviewAvailabilityFromArrays } from './review-prefetch';
 
 export type PracticeAvailabilitySnapshot = Readonly<{
   grammarReviewReadyAt: string | null;
@@ -15,7 +16,7 @@ export async function loadPracticeAvailabilitySnapshot(
   userId: string,
 ): Promise<PracticeAvailabilitySnapshot> {
   const [review, nextSelection, activeSessionState] = await Promise.all([
-    UserItem.getReadyReviewState(userId),
+    loadReviewAvailability(userId),
     UserItem.getNextInitialTrainingSelection(userId),
     PracticeSession.inspectActive(userId),
   ]);
@@ -27,4 +28,12 @@ export async function loadPracticeAvailabilitySnapshot(
     activeSession: activeSessionState.activeSession,
     requiresSessionReconciliation: activeSessionState.requiresReconciliation,
   };
+}
+
+async function loadReviewAvailability(userId: string) {
+  try {
+    return await loadReviewAvailabilityFromArrays(userId);
+  } catch {
+    return UserItem.getReadyReviewState(userId);
+  }
 }

@@ -10,6 +10,8 @@ import type {
   UserItemLocal,
 } from '@/types/user-item.types';
 import type { ReviewKind } from '@/types/practice.types';
+import { isReviewItemDue } from './review-items.utils';
+import { getPrefetchedReviewItems } from '@/features/practice/review-prefetch';
 
 function uniquePositiveIds(values: Array<number | null | undefined>): number[] {
   return [
@@ -140,6 +142,7 @@ export async function loadReviewDeck(
 
 export type ReviewDeckData = Readonly<{
   entries: PracticeDeckEntry[];
+  prefetchedEntries?: PracticeDeckEntry[];
   availabilityCheckedAt: string;
   abandoned: boolean;
   reviewKind: ReviewKind;
@@ -153,16 +156,35 @@ export async function loadReviewDeckData(
   await PracticeSession.reconcileActive(userId);
 
   const now = new Date().toISOString();
-  const items = await db.transaction('r', db.user_items, () =>
-    UserItem.getReviewDeck(userId, reviewKind, now),
-  );
-  const entries = items.map((item) => ({ item, note: null, grammar: null }));
-  return {
-    entries,
-    availabilityCheckedAt: now,
-    abandoned: entries.length === 0,
-    reviewKind,
-  };
+  try {
+    const prefetchedItems = await getPrefetchedReviewItems(userId, reviewKind);
+    const entries = prefetchedItems
+      .filter((item) => isReviewItemDue(item, now))
+      .map(toPracticeDeckEntry);
+    return {
+      entries,
+      prefetchedEntries: prefetchedItems.map(toPracticeDeckEntry),
+      availabilityCheckedAt: now,
+      abandoned: entries.length === 0,
+      reviewKind,
+    };
+  } catch {
+    const items = await db.transaction('r', db.user_items, () =>
+      UserItem.getReviewDeck(userId, reviewKind, now),
+    );
+    const entries = items.map(toPracticeDeckEntry);
+    return {
+      entries,
+      prefetchedEntries: entries,
+      availabilityCheckedAt: now,
+      abandoned: entries.length === 0,
+      reviewKind,
+    };
+  }
+}
+
+function toPracticeDeckEntry(item: UserItemLocal): PracticeDeckEntry {
+  return { item, note: null, grammar: null };
 }
 
 export type ReviewEntryDetails = Readonly<{

@@ -159,6 +159,19 @@ describe('UserItem', () => {
     expect(deck.map((item) => item.item_id)).toEqual([1, 2]);
   });
 
+  it('loads all eligible review items, including future rows, without a cutoff', async () => {
+    mocks.dueItems = [
+      makeItem({ item_id: 1, next_at_cz_to_en: '2026-01-01T00:00:00.000Z' }),
+      makeItem({ item_id: 2, next_at_cz_to_en: '2099-01-01T00:00:00.000Z' }),
+      makeItem({ item_id: 3, started_at: NULL_DATE }),
+      makeItem({ item_id: 4, mastered_at_cz_to_en: '2026-01-01T00:00:00.000Z' }),
+    ];
+
+    const items = await UserItem.getAllReviewItems('u1', 'vocabulary');
+
+    expect(items.map((item) => item.item_id)).toEqual([1, 2]);
+  });
+
   it('filters review decks by explicit vocabulary state', async () => {
     mocks.dueItems = [
       makeItem({ item_id: 1, is_vocabulary: 1, grammar_chunk_id: 10 }),

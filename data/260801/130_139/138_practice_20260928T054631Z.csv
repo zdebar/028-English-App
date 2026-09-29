@@ -1,0 +1,49 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+bouchnout,thump,θˈʌmp,thump.opus,138000,,,,,True,138
+palec,thumb,θˈʌm,thumb.opus,138001,,,,,True,138
+aerobik,aerobics,ɛɹˈoʊbɪks,aerobics.opus,138002,,,,,True,138
+po celou dobu,throughout,θɹuːˈaʊt,throughout.opus,138003,,,,,True,138
+thriller,thriller,θɹˈɪlɚ,thriller.opus,138004,,,,,True,138
+ovlivnit,affect,ɐfˈɛkt,affect.opus,138005,,,,,True,138
+ohrožení,threat,θɹˈɛt,threat.opus,138006,,,,,True,138
+tendence,tendency,tˈɛndənsi,tendency.opus,138007,,,,,True,138
+inklinovat,tend,tˈɛnd,tend.opus,138008,,,,,True,138
+pokoušet,tempt,tˈɛmpt,tempt.opus,138009,,,,,True,138
+koberec,carpet,kˈɑːɹpɪt,carpet.opus,138010,,,,,True,138
+chuť,taste,tˈeɪst,taste.opus,138011,,,,,True,138
+bez chuti,tasteless,tˈeɪstləs,tasteless.opus,138012,,,,,True,138
+kočár,carriage,kˈæɹɪdʒ,carriage.opus,138013,,,,,True,138
+lepenková krabice,carton,kˈɑːɹtən,carton.opus,138014,,,,,True,138
+rakovina,cancer,kˈænsɚ,cancer.opus,138015,,,,,True,138
+zrušit,cancel,kˈænsəl,cancel.opus,138016,,,,,True,138
+pokladna,cashpoint,kˈæʃpɔɪnt,cashpoint.opus,138017,,,,,True,138
+nahrát,tape,tˈeɪp,tape.opus,138018,,,,,True,138
+neformální,casual,kˈæʒuːəl,casual.opus,138019,,,,,True,138
+kanál,canal,kənˈæl,canal.opus,138020,,,,,True,138
+nádrž,tank,tˈæŋk,tank.opus,138021,,,,,True,138
+kategorie,category,kˈæɾɪɡɚɹi,category.opus,138022,,,,,True,138
+kategorizovat,categorise,kˈæɾɪɡɚɹˌaɪz,categorise.opus,138023,,,,,True,138
+Nemám signál.,I have no signal.,aɪ hæv nˈoʊ sˈɪɡnəl,i_have_no_signal.opus,138024,,,,,False,138
+Baterie je skoro vybitá.,The battery is almost dead.,ðə bˈæɾɚɹi ɪz ˈɔːlmoʊst dˈɛd,the_battery_is_almost_dead.opus,138025,,,,,False,138
+Nabíječka je v tašce.,The charger is in the bag.,ðə tʃˈɑːɹdʒɚɹ ɪz ɪnðə bˈæɡ,the_charger_is_in_the_bag.opus,138026,,,,,False,138
+Pošli mi odkaz.,Send me the link.,sˈɛnd mˌiː ðə lˈɪŋk,send_me_the_link.opus,138027,,,,,False,138
+Připoj se k síti.,Connect to the network.,kənˈɛkt tə ðə nˈɛtwɜːk,connect_to_the_network.opus,138028,,,,,False,138
+Jaké je heslo k Wi-Fi?,What is the Wi-Fi password?,wˌʌt ɪz ðə wˈaɪfˌaɪ pˈæswɜːd,what_is_the_wifi_password.opus,138029,,,,,False,138
+Počítač se zasekl.,The computer has frozen.,ðə kəmpjˈuːɾɚ hɐz fɹˈoʊzən,the_computer_has_frozen.opus,138030,,,,,False,138
+Restartuj prosím telefon.,Please restart the phone.,plˈiːz ɹᵻstˈɑːɹt ðə fˈoʊn,please_restart_the_phone.opus,138031,,,,,False,138
+Obrazovka je prasklá.,The screen is cracked.,ðə skɹˈiːn ɪz kɹˈækt,the_screen_is_cracked.opus,138032,,,,,False,138
+Neslyším tě dobře.,I can't hear you well.,aɪ kˈænt hˈɪɹ juː wˈɛl,i_cant_hear_you_well.opus,138033,,,,,False,138
+Máš zapnutý mikrofon?,Is your microphone on?,ɪz jʊɹ mˈaɪkɹəfˌoʊn ˈɔn,is_your_microphone_on.opus,138034,,,,,False,138
+Pošlu ti fotografii.,I'll send you a photo.,aɪl sˈɛnd juː ɐ fˈoʊɾoʊ,ill_send_you_a_photo.opus,138035,,,,,False,138
+Otevři aplikaci.,Open the app.,ˈoʊpən ðɪ ˈæp,open_the_app.opus,138036,,,,,False,138
+Klikni na toto tlačítko.,Click this button.,klˈɪk ðɪs bˈʌʔn̩,click_this_button.opus,138037,,,,,False,138
+Ulož změny.,Save the changes.,sˈeɪv ðə tʃˈeɪndʒᵻz,save_the_changes.opus,138038,,,,,False,138
+Zapomněl jsem heslo.,I forgot the password.,aɪ fɚɡˈɑːt ðə pˈæswɜːd,i_forgot_the_password.opus,138039,,,,,False,138
+Vytvoř nový účet.,Create a new account.,kɹiːˈeɪt ɐ nˈuː ɐkˈaʊnt,create_a_new_account.opus,138040,,,,,False,138
+Stránka se nenačítá.,The page is not loading.,ðə pˈeɪdʒ ɪz nˌɑːt lˈoʊdɪŋ,the_page_is_not_loading.opus,138041,,,,,False,138
+Zkontroluj e-mail.,Check your email.,tʃˈɛk jʊɹ ˈiːmeɪl,check_your_email.opus,138042,,,,,False,138
+Přijde ti moje zpráva?,Did my message arrive?,dˈɪd maɪ mˈɛsɪdʒ ɚɹˈaɪv,did_my_message_arrive.opus,138043,,,,,False,138
+Můžeme si zavolat později?,Can we call later?,kæn wiː kˈɔːl lˈeɪɾɚ,can_we_call_later.opus,138044,,,,,False,138
+Internet je dnes pomalý.,The internet is slow today.,ðɪ ˈɪntɚnˌɛt ɪz slˈoʊ tədˈeɪ,the_internet_is_slow_today.opus,138045,,,,,False,138
+Soubor je příliš velký.,The file is too large.,ðə fˈaɪl ɪz tˈuː lˈɑːɹdʒ,the_file_is_too_large.opus,138046,,,,,False,138
+Přepošli mi ten e-mail.,Forward that email to me.,fˈɔːɹwɚd ðæt ˈiːmeɪl tə mˌiː,forward_that_email_to_me.opus,138047,,,,,False,138

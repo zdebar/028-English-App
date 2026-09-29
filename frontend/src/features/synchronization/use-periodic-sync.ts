@@ -7,6 +7,12 @@ import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { TEXTS } from '@/locales/cs';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useSyncStore } from './use-sync-store';
+import {
+  clearReviewArrays,
+  invalidateReviewArrays,
+  warmReviewArrays,
+} from '@/features/practice/review-prefetch';
+import { warmOverviewQueries } from '@/hooks/overview-query-store';
 
 /**
  * Runs initial, periodic, and unmount data synchronization for a signed-in user.
@@ -30,6 +36,7 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
   useEffect(() => {
     if (!userId) {
       resetSyncState();
+      clearReviewArrays(null);
       return;
     }
 
@@ -44,6 +51,10 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
           await dataSync(activeUserId);
         } finally {
           // A partially failed sync may still have committed updated item data.
+          invalidateReviewArrays(activeUserId);
+          void warmReviewArrays(activeUserId).catch((error) => {
+            reportError('Failed to prefetch review arrays', error);
+          });
           void refreshPracticeAvailability(activeUserId);
         }
         const audioSummary = await AudioRecord.syncFromRemote();
@@ -95,6 +106,12 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
     initialSyncTimeoutId.current = globalThis.setTimeout(() => {
       runSync();
     }, 3000);
+    void warmReviewArrays(activeUserId).catch((error) => {
+      reportError('Failed to prefetch review arrays', error);
+    });
+    void warmOverviewQueries(activeUserId).catch((error) => {
+      reportError('Failed to prefetch overview queries', error);
+    });
     intervalId.current = setInterval(() => {
       runSync();
     }, config.sync.periodicSyncInterval);

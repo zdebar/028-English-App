@@ -1,14 +1,12 @@
 import { refreshPracticeAvailability } from '@/features/practice/practice-availability-controller';
-import { sharedQueryKey } from '@/hooks/shared-query-store';
+import { getOverviewQuery, overviewQueryKey } from '@/hooks/overview-query-store';
 import OverviewCard from '@/components/UI/OverviewCard';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ListButton } from '@/components/UI/buttons/ListButton';
-import GrammarGroup, {
-  type GrammarGroupWithChunks,
-} from '@/database/models/grammar-groups';
+import type { GrammarGroupWithChunks } from '@/database/models/grammar-groups';
 import UserItem from '@/database/models/user-items';
 import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
@@ -17,6 +15,7 @@ import GrammarDetailCard from './GrammarDetailCard';
 import { ROUTES } from '@/config/routes.config';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { useRouteClose } from '@/routing/use-route-close';
+import { invalidateReviewArrays } from '@/features/practice/review-prefetch';
 
 type GrammarSelection = Readonly<Pick<GrammarGroupWithChunks, 'id'>>;
 
@@ -33,13 +32,13 @@ export default function GrammarOverview({
       return [];
     }
 
-    return GrammarGroup.getInitiated(userId);
+    return getOverviewQuery(userId, 'grammar')();
   }, [userId]);
 
   const { data: grammarList, loading, error } = useLiveQueryData(fetchGrammar, {
     emptyData: [],
     initialData: initialGrammar,
-    sharedKey: sharedQueryKey(userId, 'grammar'),
+    sharedKey: userId ? overviewQueryKey(userId, 'grammar') : undefined,
   });
   const hasData = grammarList.length > 0;
   const currentItem = useMemo(
@@ -65,6 +64,7 @@ export default function GrammarOverview({
 
     try {
       const resetCount = await UserItem.resetItemsByGrammarGroupId(userId, currentItem.id);
+      invalidateReviewArrays(userId);
       void refreshPracticeAvailability(userId);
       reportInfo(`Grammar ${currentItem.id} reset completed: ${resetCount} items reset.`);
       showToast(TEXTS.resetProgressSuccessToast, 'success');

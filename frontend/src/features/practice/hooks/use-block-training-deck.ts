@@ -23,6 +23,7 @@ import {
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
 } from '@/database/utils/practice-content.utils';
+import { invalidateReviewArrays } from '../review-prefetch';
 
 type TrainingOutcome = 'correct' | 'incorrect' | 'skip';
 
@@ -354,6 +355,7 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
       updatedItem,
       nextSession,
     );
+    invalidateReviewArrays(updatedItem.user_id);
     resetQuestionState();
     setItems((currentItems) => updateTrainingItem(currentItems, updatedItem));
     setSession(nextSession);
@@ -436,6 +438,7 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
         finalItem,
         expectedSession,
       );
+      invalidateReviewArrays(userId);
       setItems((currentItems) => updateTrainingItem(currentItems, finalItem));
       setIsComplete(true);
     },

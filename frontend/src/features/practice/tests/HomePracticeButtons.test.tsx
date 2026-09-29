@@ -104,14 +104,14 @@ describe('Home practice buttons', () => {
     expect(screen.getByText('7:30')).toBeTruthy();
   });
 
-  it('gives review priority at the configured review boundary', () => {
+  it('enables both reviews independently at the configured review boundary', () => {
     usePracticeAvailabilityStore.setState({
       grammarReviewReadyAt: new Date().toISOString(),
       vocabularyReviewReadyAt: new Date().toISOString(),
     });
     render(<PracticeButtons />);
     expect(button('Grammar review').disabled).toBe(false);
-    expect(button('Vocabulary review').disabled).toBe(true);
+    expect(button('Vocabulary review').disabled).toBe(false);
     expect(button('New').disabled).toBe(true);
   });
 
@@ -171,16 +171,16 @@ describe('Home practice buttons', () => {
     expect(newButton.className).toContain('color-button');
   });
 
-  it('keeps only an active review session available', () => {
+  it('does not give a legacy active review session special availability', () => {
     usePracticeAvailabilityStore.setState({
       grammarReviewReadyAt: null,
       vocabularyReviewReadyAt: null,
       activeSession: makeSession('review'),
     });
     render(<PracticeButtons />);
-    expect(button('Grammar review').disabled).toBe(false);
+    expect(button('Grammar review').disabled).toBe(true);
     expect(button('Vocabulary review').disabled).toBe(true);
-    expect(button('New').disabled).toBe(true);
+    expect(button('New').disabled).toBe(false);
   });
 
   it('gives review priority over an active new session', () => {

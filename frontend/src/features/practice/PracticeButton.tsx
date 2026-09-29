@@ -44,10 +44,6 @@ function useReviewClock(
   return checkedAt;
 }
 
-function isActiveReview(activeSession: { mode: 'review' | 'new' } | null): boolean {
-  return activeSession?.mode === 'review';
-}
-
 function isActiveNew(activeSession: { mode: 'review' | 'new' } | null): boolean {
   return activeSession?.mode === 'new';
 }
@@ -62,9 +58,8 @@ function resolveReviewAvailability(
   grammarReviewReadyAt: string | null,
   vocabularyReviewReadyAt: string | null,
   checkedAt: number,
-  activeReview: boolean,
 ): ReviewAvailability {
-  const grammar = activeReview || isReviewAvailable(grammarReviewReadyAt, checkedAt);
+  const grammar = isReviewAvailable(grammarReviewReadyAt, checkedAt);
   const vocabulary = isReviewAvailable(vocabularyReviewReadyAt, checkedAt);
   return { grammar, vocabulary, any: grammar || vocabulary };
 }
@@ -85,8 +80,7 @@ function resolvePracticeButtonFlags(
 ): PracticeButtonFlags {
   const blocked = Boolean(error) || loading;
   const grammarReviewDisabled = blocked || !reviewAvailability.grammar;
-  const vocabularyReviewDisabled =
-    blocked || reviewAvailability.grammar || !reviewAvailability.vocabulary;
+  const vocabularyReviewDisabled = blocked || !reviewAvailability.vocabulary;
   const newAvailable = activeNew || (!reviewAvailability.any && initialTrainingAvailable);
   const newDisabled = blocked || reviewAvailability.any || !newAvailable;
   return {
@@ -106,13 +100,11 @@ function resolvePracticeButtonState(
   loading: boolean,
   error: Error | null,
 ): PracticeButtonState {
-  const activeReview = isActiveReview(activeSession);
   const activeNew = isActiveNew(activeSession);
   const reviewAvailability = resolveReviewAvailability(
     grammarReviewReadyAt,
     vocabularyReviewReadyAt,
     checkedAt,
-    activeReview,
   );
   const buttonFlags = resolvePracticeButtonFlags(
     reviewAvailability,

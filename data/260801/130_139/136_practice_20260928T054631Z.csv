@@ -1,0 +1,49 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+přijetí,acceptance,ɐksˈɛptəns,acceptance.opus,136000,,,,,True,136
+celek,whole,hˈoʊl,whole.opus,136001,,,,,True,136
+kdokoliv,whoever,huːˈɛvɚ,whoever.opus,136002,,,,,True,136
+přístupný,accessible,æksˈɛsəbəl,accessible.opus,136003,,,,,True,136
+pískat,whistle,wˈɪsəl,whistle.opus,136004,,,,,True,136
+šepot,whisper,wˈɪspɚ,whisper.opus,136005,,,,,True,136
+když,while,wˈaɪl,while.opus,136006,,,,,True,136
+podle toho,whichever,wɪtʃˈɛvɚ,whichever.opus,136007,,,,,True,136
+přístup,access,ˈæksɛs,access.opus,136008,,,,,True,136
+příslušenství,accessory,ɐksˈɛsɚɹi,accessory.opus,136009,,,,,True,136
+zda,whether,wˈɛðɚ,whether.opus,136010,,,,,True,136
+vklad,deposit,dᵻpˈɑːzɪt,deposit.opus,136011,,,,,True,136
+unikátní,unique,juːnˈiːk,unique.opus,136012,,,,,True,136
+nezajímavý,uninteresting,ʌnˈɪntɚɹəstɪŋ,uninteresting.opus,136013,,,,,True,136
+dovolit si,afford,ɐfˈɔːɹd,afford.opus,136014,,,,,True,136
+žízeň,thirst,θˈɜːst,thirst.opus,136015,,,,,True,136
+poté,afterward,ˈæftɚwɚd,afterward.opus,136016,,,,,True,136
+teorie,theory,θˈiəɹi,theory.opus,136017,,,,,True,136
+poté,afterwards,ˈæftɚwɚdz,afterwards.opus,136018,,,,,True,136
+krádež,theft,θˈɛft,theft.opus,136019,,,,,True,136
+agenda,agenda,ɐdʒˈɛndə,agenda.opus,136020,,,,,True,136
+vděčný,thankful,θˈæŋkfəl,thankful.opus,136021,,,,,True,136
+agresivní,aggressive,ɐɡɹˈɛsɪv,aggressive.opus,136022,,,,,True,136
+teror,terror,tˈɛɹɚ,terror.opus,136023,,,,,True,136
+Jaké je dnes počasí?,What is the weather like today?,wˌʌt ɪz ðə wˈɛðɚ lˈaɪk tədˈeɪ,what_is_the_weather_like_today.opus,136024,,,,,False,136
+Dnes prší celý den.,It's raining all day today.,ɪts ɹˈeɪnɪŋ ˈɔːl dˈeɪ tədˈeɪ,its_raining_all_day_today.opus,136025,,,,,False,136
+Vezmi si deštník.,Take an umbrella.,tˈeɪk ɐn ʌmbɹˈɛlə,take_an_umbrella.opus,136026,,,,,False,136
+Je jasno a teplo.,It's clear and warm.,ɪts klˈɪɹ ænd wˈɔːɹm,its_clear_and_warm.opus,136027,,,,,False,136
+Dnes fouká silný vítr.,There is strong wind today.,ðɛɹ ɪz stɹˈɔŋ wˈɪnd tədˈeɪ,there_is_strong_wind_today.opus,136028,,,,,False,136
+Zítra bude sněžit.,It will snow tomorrow.,ɪt wɪl snˈoʊ təmˈɑːɹoʊ,it_will_snow_tomorrow.opus,136029,,,,,False,136
+Teplota klesla pod nulu.,The temperature fell below zero.,ðə tˈɛmpɹɪtʃɚ fˈɛl bᵻlˌoʊ zˈiəɹoʊ,the_temperature_fell_below_zero.opus,136030,,,,,False,136
+Zapadá slunce.,The sun is setting.,ðə sˈʌn ɪz sˈɛɾɪŋ,the_sun_is_setting.opus,136031,,,,,False,136
+Ráno byla mlha.,It was foggy in the morning.,ɪt wʌz fˈɑːɡi ɪnðə mˈɔːɹnɪŋ,it_was_foggy_in_the_morning.opus,136032,,,,,False,136
+Uvidíme se příští týden.,See you next week.,sˈiː juː nˈɛkst wˈiːk,see_you_next_week.opus,136033,,,,,False,136
+Dnes je pondělí.,Today is Monday.,tədˈeɪ ɪz mˈʌndeɪ,today_is_monday.opus,136034,,,,,False,136
+Kolik je hodin?,What time is it?,wˌʌt tˈaɪm ɪz ɪt,what_time_is_it.opus,136035,,,,,False,136
+Ještě je brzy.,It's still early.,ɪts stˈɪl ˈɜːli,its_still_early.opus,136036,,,,,False,136
+Už je pozdě.,It's already late.,ɪts ɔːlɹˌɛdi lˈeɪt,its_already_late.opus,136037,,,,,False,136
+Přijdu přesně v šest.,I'll come at exactly six.,aɪl kˈʌm æɾ ɛɡzˈæktli sˈɪks,ill_come_at_exactly_six.opus,136038,,,,,False,136
+Počkej pět minut.,Wait five minutes.,wˈeɪt fˈaɪv mˈɪnɪts,wait_five_minutes.opus,136039,,,,,False,136
+Začneme za hodinu.,We'll start in an hour.,wiːl stˈɑːɹt ɪn ɐn ˈaʊɚ,well_start_in_an_hour.opus,136040,,,,,False,136
+Včera jsem byl unavený.,I was tired yesterday.,aɪ wʌz tˈaɪɚd jˈɛstɚdˌeɪ,i_was_tired_yesterday.opus,136041,,,,,False,136
+Dnes se cítím lépe.,I feel better today.,aɪ fˈiːl bˈɛɾɚ tədˈeɪ,i_feel_better_today.opus,136042,,,,,False,136
+O víkendu zůstanu doma.,I'll stay home at the weekend.,aɪl stˈeɪ hˈoʊm æt ðə wˈiːkɛnd,ill_stay_home_at_the_weekend.opus,136043,,,,,False,136
+Jaký je dnes den?,What day is it today?,wˌʌt dˈeɪ ɪz ɪt tədˈeɪ,what_day_is_it_today.opus,136044,,,,,False,136
+Kolik dní to potrvá?,How many days will it take?,hˌaʊ mˈɛni dˈeɪz wɪl ɪt tˈeɪk,how_many_days_will_it_take.opus,136045,,,,,False,136
+Setkáme se příští měsíc.,We'll meet next month.,wiːl mˈiːt nˈɛkst mˈʌnθ,well_meet_next_month.opus,136046,,,,,False,136
+Čas rychle utíká.,Time goes quickly.,tˈaɪm ɡoʊz kwˈɪkli,time_goes_quickly.opus,136047,,,,,False,136

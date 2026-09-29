@@ -1,0 +1,49 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+klimatizace,air conditioning,ˈɛɹ kəndˈɪʃənɪŋ,air_conditioning.opus,139000,,,,,True,139
+hovorný,talkative,tˈɔːkətˌɪv,talkative.opus,139001,,,,,True,139
+letectvo,air force,ˈɛɹ fˈɔːɹs,air_force.opus,139002,,,,,True,139
+chutný,tasty,tˈeɪsti,tasty.opus,139003,,,,,True,139
+neopatrný,careless,kˈɛɹləs,careless.opus,139004,,,,,True,139
+nedbale,carelessly,kˈɛɹləsli,carelessly.opus,139005,,,,,True,139
+neopatrnost,carelessness,kˈɛɹləsnəs,carelessness.opus,139006,,,,,True,139
+dočasný,temporary,tˈɛmpɚɹˌɛɹi,temporary.opus,139007,,,,,True,139
+zmírnit,temper,tˈɛmpɚ,temper.opus,139008,,,,,True,139
+pokladník,teller,tˈɛlɚ,teller.opus,139009,,,,,True,139
+dohoda,agreement,ɐɡɹˈiːmənt,agreement.opus,139010,,,,,True,139
+zemědělství,agriculture,ˈæɡɹɪkˌʌltʃɚ,agriculture.opus,139011,,,,,True,139
+zemědělský,agricultural,ˌæɡɹɪkˈʌltʃɚɹəl,agricultural.opus,139012,,,,,True,139
+telegram,telegram,tˈɛlᵻɡɹˌæm,telegram.opus,139013,,,,,True,139
+telekomunikace,telecommunications,tˌɛlᵻkəmjˌuːnɪkˈeɪʃənz,telecommunications.opus,139014,,,,,True,139
+maličký,tiny,tˈaɪni,tiny.opus,139015,,,,,True,139
+technologický,technological,tˌɛknəlˈɑːdʒɪkəl,technological.opus,139016,,,,,True,139
+vtipálek,tease,tˈiːz,tease.opus,139017,,,,,True,139
+slza,tear,tˈɪɹ,tear.opus,139018,,,,,True,139
+týmová práce,teamwork,tˈiːmwɜːk,teamwork.opus,139019,,,,,True,139
+spoluhráč,teammate,tˈiːmeɪt,teammate.opus,139020,,,,,True,139
+pomáhat,aid,ˈeɪd,aid.opus,139021,,,,,True,139
+pomoc,aid,ˈeɪd,aid.opus,139022,,,,,True,139
+výuka,teaching,tˈiːtʃɪŋ,teaching.opus,139023,,,,,True,139
+Co navrhuješ?,What do you suggest?,wˌʌt dˈuː juː sədʒˈɛst,what_do_you_suggest.opus,139024,,,,,False,139
+Měli bychom to zkusit.,We should try it.,wiː ʃˌʊd tɹˈaɪ ɪt,we_should_try_it.opus,139025,,,,,False,139
+Rozhodnu se zítra.,I'll decide tomorrow.,aɪl dᵻsˈaɪd təmˈɑːɹoʊ,ill_decide_tomorrow.opus,139026,,,,,False,139
+Nejsem proti tomu.,I'm not against it.,aɪm nˌɑːt ɐɡˈɛnst ɪt,im_not_against_it.opus,139027,,,,,False,139
+To záleží na situaci.,It depends on the situation.,ɪt dᵻpˈɛndz ɔnðə sˌɪtʃuːˈeɪʃən,it_depends_on_the_situation.opus,139028,,,,,False,139
+Musíme se dohodnout.,We need to agree.,wiː nˈiːd tʊ ɐɡɹˈiː,we_need_to_agree.opus,139029,,,,,False,139
+Jaký máš plán?,What is your plan?,wˌʌt ɪz jʊɹ plˈæn,what_is_your_plan.opus,139030,,,,,False,139
+Začneme od začátku.,We'll start from the beginning.,wiːl stˈɑːɹt fɹʌmðə bɪɡˈɪnɪŋ,well_start_from_the_beginning.opus,139031,,,,,False,139
+Pojďme krok za krokem.,Let's go step by step.,lˈɛts ɡˌoʊ stˈɛp baɪ stˈɛp,lets_go_step_by_step.opus,139032,,,,,False,139
+To může počkat.,That can wait.,ðæt kæn wˈeɪt,that_can_wait.opus,139033,,,,,False,139
+Nemá to smysl.,It doesn't make sense.,ɪt dˈʌzənt mˌeɪk sˈɛns,it_doesnt_make_sense.opus,139034,,,,,False,139
+Nedělej si starosti.,Don't worry.,dˈoʊnt wˈʌɹi,dont_worry.opus,139035,,,,,False,139
+Raději bych zůstal doma.,I would rather stay home.,aɪ wʊd ɹˈæðɚ stˈeɪ hˈoʊm,i_would_rather_stay_home.opus,139036,,,,,False,139
+Můžeme to odložit?,Can we postpone it?,kæn wiː poʊstpˈoʊn ɪt,can_we_postpone_it.opus,139037,,,,,False,139
+Změnil jsem názor.,I changed my mind.,aɪ tʃˈeɪndʒd maɪ mˈaɪnd,i_changed_my_mind.opus,139038,,,,,False,139
+To je dobrá otázka.,That's a good question.,ðæts ɐ ɡˈʊd kwˈɛstʃən,thats_a_good_question.opus,139039,,,,,False,139
+Potřebuji si to promyslet.,I need to think it over.,aɪ nˈiːd tə θˈɪŋk ɪɾ ˈoʊvɚ,i_need_to_think_it_over.opus,139040,,,,,False,139
+Máš na výběr.,You have a choice.,juː hæv ɐ tʃˈɔɪs,you_have_a_choice.opus,139041,,,,,False,139
+Vyber si jednu možnost.,Choose one option.,tʃˈuːz wˈʌn ˈɑːpʃən,choose_one_option.opus,139042,,,,,False,139
+Nechme to na zítra.,Let's leave it until tomorrow.,lˈɛts lˈiːv ɪɾ ʌntˈɪl təmˈɑːɹoʊ,lets_leave_it_until_tomorrow.opus,139043,,,,,False,139
+Bude to stát za to.,It will be worth it.,ɪt wɪl biː wˈɜːθ ɪt,it_will_be_worth_it.opus,139044,,,,,False,139
+Nechci riskovat.,I don't want to take a risk.,aɪ dˈoʊnt wˈɔnt tə tˈeɪk ɐ ɹˈɪsk,i_dont_want_to_take_a_risk.opus,139045,,,,,False,139
+Připravme se na nejhorší.,Let's prepare for the worst.,lˈɛts pɹɪpˈɛɹ fɚðə wˈɜːst,lets_prepare_for_the_worst.opus,139046,,,,,False,139
+Všechno je připravené.,Everything is ready.,ˈɛvɹɪθˌɪŋ ɪz ɹˈɛdi,everything_is_ready.opus,139047,,,,,False,139

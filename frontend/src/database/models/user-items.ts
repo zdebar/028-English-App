@@ -15,6 +15,7 @@ import Dexie, { Entity } from 'dexie';
 import { getSyncTimestamps, splitDeleted } from '../utils/sync-generic.utils';
 
 import { getNextAt, resetUserItem } from '@/database/utils/user-items.utils';
+import { isReviewItemCandidate, isReviewItemDue, isReviewItemFuture, isReviewItemReadyAt } from '@/database/utils/review-items.utils';
 import { SupabaseError } from '@/types/error.types';
 import type { ReadyPracticeState } from '@/types/generic.types';
 import Metadata from './metadata';
@@ -235,6 +236,23 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     now: string = new Date().toISOString(),
   ): Promise<PracticeDeckItem[]> {
     return this.getDuePracticeItems(userId, Number.MAX_SAFE_INTEGER, now, reviewKind);
+  }
+
+  /** Reads every non-mastered review item for one review direction without a time cutoff. */
+  static async getAllReviewItems(
+    userId: string,
+    reviewKind: ReviewKind,
+  ): Promise<PracticeDeckItem[]> {
+    return db.user_items
+      .where(getPracticeIndex())
+      .between(
+        [userId, Dexie.minKey, Dexie.minKey, Dexie.minKey],
+        [userId, Dexie.maxKey, Dexie.maxKey, Dexie.maxKey],
+        true,
+        true,
+      )
+      .filter((item) => isReviewItemCandidate(item, reviewKind))
+      .toArray();
   }
 
   /**
@@ -741,15 +759,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
   private static getDuePracticeCollection(userId: string, now: string, reviewKind: ReviewKind) {
     const matchesItem = (item: UserItemLocal) => {
-      if (item.deleted_at !== NULL_DATE || item.started_at === NULL_DATE) return false;
-      if (item.mastered_at_cz_to_en !== NULL_DATE) return false;
-      if (!isReviewKind(item, reviewKind)) return false;
-
-      const nextAt = item.next_at_cz_to_en;
-      if (nextAt === NULL_DATE) {
-        return getEffectiveProgress(item) === 0;
-      }
-      return nextAt < now;
+      return isReviewItemCandidate(item, reviewKind) && isReviewItemDue(item, now);
     };
 
     return db.user_items
@@ -823,9 +833,9 @@ function isReadyPracticeItem(item: UserItemLocal): boolean {
 }
 
 function isScheduledReadyPracticeItem(item: UserItemLocal, nowIso: string): boolean {
-  if (!isReadyPracticeItem(item)) return false;
-  const nextAt = item.next_at_cz_to_en;
-  return nextAt !== NULL_DATE && nextAt <= nowIso && Number.isFinite(Date.parse(nextAt));
+  return isReadyPracticeItem(item) &&
+    item.next_at_cz_to_en !== NULL_DATE &&
+    isReviewItemReadyAt(item, nowIso);
 }
 
 function isResetReadyPracticeItem(item: UserItemLocal): boolean {
@@ -835,9 +845,7 @@ function isResetReadyPracticeItem(item: UserItemLocal): boolean {
 }
 
 function isFuturePracticeItem(item: UserItemLocal, nowIso: string): boolean {
-  if (!isReadyPracticeItem(item)) return false;
-  const nextAt = item.next_at_cz_to_en;
-  return nextAt !== NULL_DATE && nextAt > nowIso && Number.isFinite(Date.parse(nextAt));
+  return isReadyPracticeItem(item) && isReviewItemFuture(item, nowIso);
 }
 
 function getScheduledReadyPracticeCollection(

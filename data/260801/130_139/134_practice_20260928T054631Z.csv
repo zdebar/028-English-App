@@ -1,0 +1,49 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+kapsle,capsule,kˈæpsjuːl,capsule.opus,134000,,,,,True,134
+zachytit,capture,kˈæptʃɚ,capture.opus,134001,,,,,True,134
+zajmout,capture,kˈæptʃɚ,capture.opus,134002,,,,,True,134
+opustit,abandon,ɐbˈændən,abandon.opus,134003,,,,,True,134
+konzervované,canned,kˈænd,canned.opus,134004,,,,,True,134
+kariéra,career,kɚɹˈɪɹ,career.opus,134005,,,,,True,134
+abnormální,abnormal,ɐbnˈɔːɹməl,abnormal.opus,134006,,,,,True,134
+svíčka,candle,kˈændəl,candle.opus,134007,,,,,True,134
+jóga,yoga,jˈoʊɡə,yoga.opus,134008,,,,,True,134
+na palubě,aboard,ɐbˈɔːɹd,aboard.opus,134009,,,,,True,134
+domorodec,aborigine,ˌæbɚɹˈɪdʒəni,aborigine.opus,134010,,,,,True,134
+výkřik,yell,jˈɛl,yell.opus,134011,,,,,True,134
+napsáno,written,ɹˈɪʔn̩,written.opus,134012,,,,,True,134
+náramkové hodinky,wristwatch,ɹˈɪstwɑːtʃ,wristwatch.opus,134013,,,,,True,134
+obal,wrapping,ɹˈæpɪŋ,wrapping.opus,134014,,,,,True,134
+drát,wire,wˈaɪɚ,wire.opus,134015,,,,,True,134
+hojné,abundant,ɐbˈʌndənt,abundant.opus,134016,,,,,True,134
+doprovázet,accompany,ɐkˈʌmpəni,accompany.opus,134017,,,,,True,134
+dosáhnout,accomplish,ɐkˈɑːmplɪʃ,accomplish.opus,134018,,,,,True,134
+podle,according to,ɐkˈɔːɹdɪŋ tuː,according_to.opus,134019,,,,,True,134
+velryba,whale,wˈeɪl,whale.opus,134020,,,,,True,134
+mokřad,wetland,wˈɛtlənd,wetland.opus,134021,,,,,True,134
+na západ,westward,wˈɛstwɚd,westward.opus,134022,,,,,True,134
+dobře oblečený,well-dressed,wˈɛldɹˈɛst,welldressed.opus,134023,,,,,True,134
+Necítím se dobře.,I don't feel well.,aɪ dˈoʊnt fˈiːl wˈɛl,i_dont_feel_well.opus,134024,,,,,False,134
+Bolí mě hlava.,I have a headache.,aɪ hæv ɐ hˈɛdeɪk,i_have_a_headache.opus,134025,,,,,False,134
+Mám horečku.,I have a fever.,aɪ hæv ɐ fˈiːvɚ,i_have_a_fever.opus,134026,,,,,False,134
+Potřebuji lékaře.,I need a doctor.,aɪ nˈiːd ɐ dˈɑːktɚ,i_need_a_doctor.opus,134027,,,,,False,134
+Kde je nejbližší nemocnice?,Where is the nearest hospital?,wˌɛɹ ɪz ðə nˌɪɹɪst hˈɑːspɪɾəl,where_is_the_nearest_hospital.opus,134028,,,,,False,134
+Zavolejte záchranku.,Call an ambulance.,kˈɔːl ɐn ˈæmbjʊləns,call_an_ambulance.opus,134029,,,,,False,134
+Je to naléhavé.,It's urgent.,ɪts ˈɜːdʒənt,its_urgent.opus,134030,,,,,False,134
+Zranil jsem si ruku.,I injured my hand.,aɪ ˈɪndʒɚd maɪ hˈænd,i_injured_my_hand.opus,134031,,,,,False,134
+Nemohu hýbat nohou.,I can't move my leg.,aɪ kˈænt mˈuːv maɪ lˈɛɡ,i_cant_move_my_leg.opus,134032,,,,,False,134
+Jsem alergický na penicilin.,I'm allergic to penicillin.,aɪm ɐlˈɜːdʒɪk tə pˌɛnɪsˈɪlᵻn,im_allergic_to_penicillin.opus,134033,,,,,False,134
+Mám potíže s dýcháním.,I have trouble breathing.,aɪ hæv tɹˈʌbəl bɹˈiːðɪŋ,i_have_trouble_breathing.opus,134034,,,,,False,134
+Potřebuji si sednout.,I need to sit down.,aɪ nˈiːd tə sˈɪt dˈaʊn,i_need_to_sit_down.opus,134035,,,,,False,134
+Prosím zůstaňte v klidu.,Please stay calm.,plˈiːz stˈeɪ kˈɑːm,please_stay_calm.opus,134036,,,,,False,134
+Kde to bolí?,Where does it hurt?,wˌɛɹ dˈʌz ɪt hˈɜːt,where_does_it_hurt.opus,134037,,,,,False,134
+Jak dlouho to trvá?,How long has it been going on?,hˌaʊ lˈɔŋ hɐz ɪt bˌɪn ɡˌoʊɪŋ ˈɔn,how_long_has_it_been_going_on.opus,134038,,,,,False,134
+Vezměte si tento lék.,Take this medicine.,tˈeɪk ðɪs mˈɛdəsən,take_this_medicine.opus,134039,,,,,False,134
+Měl byste odpočívat.,You should rest.,juː ʃˌʊd ɹˈɛst,you_should_rest.opus,134040,,,,,False,134
+Musím si objednat kontrolu.,I need to schedule a check-up.,aɪ nˈiːd tə skˈɛdʒuːl ɐ tʃˈɛkˈʌp,i_need_to_schedule_a_checkup.opus,134041,,,,,False,134
+Zavolejte mi zítra.,Call me tomorrow.,kˈɔːl mˌiː təmˈɑːɹoʊ,call_me_tomorrow.opus,134042,,,,,False,134
+Pijte hodně vody.,Drink plenty of water.,dɹˈɪŋk plˈɛnti ʌv wˈɔːɾɚ,drink_plenty_of_water.opus,134043,,,,,False,134
+Nezapomeňte na léky.,Don't forget the medicine.,dˈoʊnt fɚɡˈɛt ðə mˈɛdəsən,dont_forget_the_medicine.opus,134044,,,,,False,134
+Potřebuji náplast.,I need a plaster.,aɪ nˈiːd ɐ plˈæstɚ,i_need_a_plaster.opus,134045,,,,,False,134
+Mám schůzku u zubaře.,I have a dentist appointment.,aɪ hæv ɐ dˈɛntɪst ɐpˈɔɪntmənt,i_have_a_dentist_appointment.opus,134046,,,,,False,134
+Už je mi lépe.,I feel better now.,aɪ fˈiːl bˈɛɾɚ nˈaʊ,i_feel_better_now.opus,134047,,,,,False,134

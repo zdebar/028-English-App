@@ -1,0 +1,49 @@
+czech,english,block_id,is_vocabulary
+vidět,view,,
+videoklip,video clip,,
+vítězství,victory,,
+nutkání,urge,,
+nahoru,upward,,
+aktuální,up-to-date,,
+nahoru,upstairs,,
+horní,upper,,
+nahrát,upload,,
+povznesený,uplifted,,
+aktualizovat,update,,
+indisponovaný,unwell,,
+nežádoucí,unwanted,,
+neobvykle,unusually,,
+neuklizený,untidy,,
+nesouvisející,unrelated,,
+nepředvídatelné,unpredictable,,
+rozbalit,unpack,,
+nešťastný,unlucky,,
+nepravděpodobné,unlikely,,
+ledaže,unless,,
+vesmír,universe,,
+naléhavé,urgent,,
+používání,usage,,
+Kde je nejbližší zastávka?,Where is the nearest stop?,,False
+V kolik odjíždí vlak?,What time does the train leave?,,False
+Potřebuji jednosměrnou jízdenku.,I need a one-way ticket.,,False
+Je toto místo volné?,Is this seat free?,,False
+Kde si můžu koupit lístek?,Where can I buy a ticket?,,False
+Prosím jednu kávu.,One coffee please.,,False
+Máte volný pokoj?,Do you have a vacant room?,,False
+Mám rezervaci na dnešní noc.,I have a reservation for tonight.,,False
+Jak dlouho cesta trvá?,How long does the journey take?,,False
+Ztratili jsme se.,We have lost our way.,,False
+Můžete to ukázat na mapě?,Can you show it on the map?,,False
+Odbočte doleva na křižovatce.,Turn left at the intersection.,,False
+Je to daleko pěšky?,Is it far on foot?,,False
+Potřebuji zavolat taxi.,I need to call a taxi.,,False
+Kde je toaleta?,Where is the restroom?,,False
+Můžu zaplatit kartou?,Can I pay by card?,,False
+Účet prosím.,The bill please.,,False
+Tohle není moje zavazadlo.,This is not my luggage.,,False
+Let je zpožděný.,The flight is delayed.,,False
+Kdy nastupujeme do letadla?,When do we board the plane?,,False
+Musíme změnit vlak.,We have to change trains.,,False
+Kde je výdej zavazadel?,Where is baggage claim?,,False
+Prosím mluvte pomaleji.,Please speak more slowly.,,False
+Nerozumím této adrese.,I don't understand this address.,,False

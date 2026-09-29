@@ -1,0 +1,49 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+zpráva,account,ɐkˈaʊnt,account.opus,135000,,,,,True,135
+účetní,accountant,ɐkˈaʊntənt,accountant.opus,135001,,,,,True,135
+podivný,weird,wˈɪɹd,weird.opus,135002,,,,,True,135
+přesnost,accuracy,ˈækjʊɹəsi,accuracy.opus,135003,,,,,True,135
+přesný,accurate,ˈækjʊɹət,accurate.opus,135004,,,,,True,135
+přesně,accurately,ˈækjʊɹətli,accurately.opus,135005,,,,,True,135
+webkamera,webcam,wˈɛbkæm,webcam.opus,135006,,,,,True,135
+předpověď počasí,weather forecast,wˈɛðɚ fˈɔːɹkæst,weather_forecast.opus,135007,,,,,True,135
+obvinit,accuse,ɐkjˈuːz,accuse.opus,135008,,,,,True,135
+zbraň,weapon,wˈɛpən,weapon.opus,135009,,,,,True,135
+slabost,weakness,wˈiːknəs,weakness.opus,135010,,,,,True,135
+kdykoli,whenever,wɛnˈɛvɚ,whenever.opus,135011,,,,,True,135
+náhodné,accidental,ˌæksɪdˈɛntəl,accidental.opus,135012,,,,,True,135
+náhodou,accidentally,ˌæksɪdˈɛntəli,accidentally.opus,135013,,,,,True,135
+kdekoli,wherever,wɛɹˈɛvɚ,wherever.opus,135014,,,,,True,135
+surfování,windsurfing,wˈɪndsɜːfɪŋ,windsurfing.opus,135015,,,,,True,135
+čelní sklo,windscreen,wˈɪndskɹiːn,windscreen.opus,135016,,,,,True,135
+akademie,academy,ɐkˈædəmi,academy.opus,135017,,,,,True,135
+akademický,academic,ˌækədˈɛmɪk,academic.opus,135018,,,,,True,135
+ochota,willingness,wˈɪlɪŋnəs,willingness.opus,135019,,,,,True,135
+přízvuk,accent,ˈæksənt,accent.opus,135020,,,,,True,135
+divoce,wildly,wˈaɪldli,wildly.opus,135021,,,,,True,135
+divoká zvěř,wildlife,wˈaɪldlaɪf,wildlife.opus,135022,,,,,True,135
+rozšířený,widespread,wˈaɪdspɹɛd,widespread.opus,135023,,,,,True,135
+Jsem doma.,I'm at home.,aɪm æt hˈoʊm,im_at_home.opus,135024,,,,,False,135
+Přijdu za chvíli.,I'll come in a moment.,aɪl kˈʌm ɪn ɐ mˈoʊmənt,ill_come_in_a_moment.opus,135025,,,,,False,135
+Zamkni prosím dveře.,Please lock the door.,plˈiːz lˈɑːk ðə dˈɔːɹ,please_lock_the_door.opus,135026,,,,,False,135
+Nech rozsvíceno.,Leave the light on.,lˈiːv ðə lˈaɪt ˈɔn,leave_the_light_on.opus,135027,,,,,False,135
+Vypni televizi.,Turn off the TV.,tˈɜːn ˈɔf ðə tˌiːvˈiː,turn_off_the_tv.opus,135028,,,,,False,135
+Kde jsou klíče?,Where are the keys?,wˌɛɹ ɑːɹ ðə kˈiːz,where_are_the_keys.opus,135029,,,,,False,135
+Nechal jsem je na stole.,I left them on the table.,aɪ lˈɛft ðˌɛm ɔnðə tˈeɪbəl,i_left_them_on_the_table.opus,135030,,,,,False,135
+Musíme uklidit kuchyň.,We need to clean the kitchen.,wiː nˈiːd tə klˈiːn ðə kˈɪtʃən,we_need_to_clean_the_kitchen.opus,135031,,,,,False,135
+Prádlo je v pračce.,The laundry is in the washing machine.,ðə lˈɔːndɹi ɪz ɪnðə wˈɑːʃɪŋ məʃˈiːn,the_laundry_is_in_the_washing_machine.opus,135032,,,,,False,135
+Pověs prádlo ven.,Hang the laundry outside.,hˈæŋ ðə lˈɔːndɹi aʊtsˈaɪd,hang_the_laundry_outside.opus,135033,,,,,False,135
+Večeře je hotová.,Dinner is ready.,dˈɪnɚɹ ɪz ɹˈɛdi,dinner_is_ready.opus,135034,,,,,False,135
+Co si dáme k večeři?,What shall we have for dinner?,wˌʌt ʃˌæl wiː hæv fɔːɹ dˈɪnɚ,what_shall_we_have_for_dinner.opus,135035,,,,,False,135
+Chybí nám mléko.,We are out of milk.,wiː ɑːɹ ˌaʊɾəv mˈɪlk,we_are_out_of_milk.opus,135036,,,,,False,135
+Půjdu nakoupit.,I'll go shopping.,aɪl ɡˌoʊ ʃˈɑːpɪŋ,ill_go_shopping.opus,135037,,,,,False,135
+Můžeš vynést odpadky?,Can you take out the rubbish?,kæn juː tˈeɪk ˈaʊt ðə ɹˈʌbɪʃ,can_you_take_out_the_rubbish.opus,135038,,,,,False,135
+Děti už spí.,The children are already asleep.,ðə tʃˈɪldɹən ɑːɹ ɔːlɹˌɛdi ɐslˈiːp,the_children_are_already_asleep.opus,135039,,,,,False,135
+Nezapomeň zavřít okno.,Don't forget to close the window.,dˈoʊnt fɚɡˈɛt tə klˈoʊz ðə wˈɪndoʊ,dont_forget_to_close_the_window.opus,135040,,,,,False,135
+Je tu příliš zima.,It's too cold here.,ɪts tˈuː kˈoʊld hˈɪɹ,its_too_cold_here.opus,135041,,,,,False,135
+Můžeš zvýšit topení?,Can you turn up the heating?,kæn juː tˈɜːn ˌʌp ðə hˈiːɾɪŋ,can_you_turn_up_the_heating.opus,135042,,,,,False,135
+Ráno vstávám brzy.,I get up early in the morning.,aɪ ɡɛt ˌʌp ˈɜːli ɪnðə mˈɔːɹnɪŋ,i_get_up_early_in_the_morning.opus,135043,,,,,False,135
+Dnes nemám čas vařit.,I don't have time to cook today.,aɪ dˈoʊnt hæv tˈaɪm tə kˈʊk tədˈeɪ,i_dont_have_time_to_cook_today.opus,135044,,,,,False,135
+Udělej si pohodlí.,Make yourself comfortable.,mˌeɪk jɔːɹsˈɛlf kˈʌmftəbəl,make_yourself_comfortable.opus,135045,,,,,False,135
+Pejsek čeká u dveří.,The dog is waiting by the door.,ðə dˈɑːɡ ɪz wˈeɪɾɪŋ baɪ ðə dˈɔːɹ,the_dog_is_waiting_by_the_door.opus,135046,,,,,False,135
+Zítra uklidím koupelnu.,I'll clean the bathroom tomorrow.,aɪl klˈiːn ðə bˈæθɹuːm təmˈɑːɹoʊ,ill_clean_the_bathroom_tomorrow.opus,135047,,,,,False,135

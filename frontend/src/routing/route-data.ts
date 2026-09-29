@@ -1,5 +1,4 @@
 import { loadSharedQuery } from '@/hooks/shared-query-store';
-import GrammarGroup from '@/database/models/grammar-groups';
 import PronunciationGroup from '@/database/models/pronunciation-groups';
 import Block from '@/database/models/blocks';
 import PracticeSession from '@/database/models/practice-sessions';
@@ -16,6 +15,10 @@ import type { BlockType, GrammarGroupType } from '@/types/generic.types';
 import type { PracticeSessionType } from '@/types/practice-session.types';
 import type { ResolvedPracticeEntry, UserItemLocal } from '@/types/user-item.types';
 import type { ReviewKind } from '@/types/practice.types';
+import {
+  loadOverviewAvailability,
+  loadOverviewQuery,
+} from '@/hooks/overview-query-store';
 
 export type RouteDataDescriptor<T> = Readonly<{
   load: () => Promise<T>;
@@ -77,25 +80,12 @@ async function loadInitialTrainingData(userId: string): Promise<InitialTrainingD
 
 export function overviewAvailabilityDescriptor(userId: string) {
   return {
-    load: async () => {
-      const [grammar, topics, vocabulary] = await Promise.all([
-        loadSharedQuery(userId, 'has-grammar', () => UserItem.hasInitiatedGrammar(userId)),
-        loadSharedQuery(userId, 'has-topics', () => Topic.hasInitiatedByUserId(userId)),
-        loadSharedQuery(userId, 'has-vocabulary', () => UserItem.hasInitiatedVocabulary(userId)),
-      ]);
-      return {
-        grammar,
-        topics,
-        vocabulary,
-      };
-    },
+    load: () => loadOverviewAvailability(userId),
   } satisfies RouteDataDescriptor<unknown>;
 }
 
 export function practiceOverviewDescriptor(userId: string) {
-  return {
-    load: () => loadSharedQuery(userId, 'practice-overview', () => UserItem.getByUserId(userId)),
-  };
+  return { load: () => loadOverviewQuery(userId, 'practice-overview') };
 }
 
 export function reviewPracticeDescriptor(userId: string, reviewKind: ReviewKind) {
@@ -105,15 +95,11 @@ export function reviewPracticeDescriptor(userId: string, reviewKind: ReviewKind)
 }
 
 export function grammarDescriptor(userId: string) {
-  return {
-    load: () => loadSharedQuery(userId, 'grammar', () => GrammarGroup.getInitiated(userId)),
-  };
+  return { load: () => loadOverviewQuery(userId, 'grammar') };
 }
 
 export function topicsDescriptor(userId: string) {
-  return {
-    load: () => loadSharedQuery(userId, 'topics', () => Topic.getInitiatedByUserId(userId)),
-  };
+  return { load: () => loadOverviewQuery(userId, 'topics') };
 }
 
 export function topicDetailDescriptor(userId: string, topicId: number) {
@@ -129,9 +115,7 @@ export function topicDetailDescriptor(userId: string, topicId: number) {
 }
 
 export function vocabularyDescriptor(userId: string) {
-  return {
-    load: () => loadSharedQuery(userId, 'vocabulary', () => UserItem.getInitiatedVocabulary(userId)),
-  };
+  return { load: () => loadOverviewQuery(userId, 'vocabulary') };
 }
 
 export function pronunciationGroupDetailDescriptor(userId: string, groupId: number) {
@@ -146,7 +130,5 @@ export function initialTrainingDescriptor(userId: string) {
   };
 }
 
-export type OverviewAvailabilityData = Awaited<
-  ReturnType<ReturnType<typeof overviewAvailabilityDescriptor>['load']>
->;
+export type { OverviewAvailabilityData } from '@/hooks/overview-query-store';
 export type TopicDetailData = Awaited<ReturnType<ReturnType<typeof topicDetailDescriptor>['load']>>;

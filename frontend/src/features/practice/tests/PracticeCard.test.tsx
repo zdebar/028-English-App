@@ -112,7 +112,6 @@ vi.mock('@/locales/cs', () => ({
     loadingMessage: 'Loading',
     loadingError: 'Loading error',
     directionCzToEn: 'CZ to EN',
-    blockTrainingProgressHelp: 'Round · completed items in this round',
     next: 'Next',
   },
   ARIA_TEXTS: {

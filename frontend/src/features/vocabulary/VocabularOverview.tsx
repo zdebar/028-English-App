@@ -11,6 +11,7 @@ import VocabularyList from './VocabularyList';
 import { ROUTES } from '@/config/routes.config';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useRouteClose } from '@/routing/use-route-close';
+import { invalidateReviewArrays } from '@/features/practice/review-prefetch';
 
 /**
  * VocabularyOverview component
@@ -53,6 +54,7 @@ export default function VocabularyOverview({
 
     try {
       const resetItemId = await UserItem.resetItemById(userId, itemId);
+      invalidateReviewArrays(userId);
       void refreshPracticeAvailability(userId);
       reportInfo(`Vocabulary item reset completed: item ${resetItemId}.`);
       showToast(TEXTS.resetProgressSuccessToast, 'success');

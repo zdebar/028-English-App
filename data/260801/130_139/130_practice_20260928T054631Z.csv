@@ -1,0 +1,49 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+aktivní,active,ˈæktɪv,active.opus,130000,,,,,True,130
+hledisko,viewpoint,vjˈuːpɔɪnt,viewpoint.opus,130001,,,,,True,130
+jednat,act,ˈækt,act.opus,130002,,,,,True,130
+získat,acquire,ɐkwˈaɪɚ,acquire.opus,130003,,,,,True,130
+mávat,wave,wˈeɪv,wave.opus,130004,,,,,True,130
+vodopád,waterfall,wˈɔːɾɚfˌɔːl,waterfall.opus,130005,,,,,True,130
+plýtvat,waste,wˈeɪst,waste.opus,130006,,,,,True,130
+plýtvání,wasteful,wˈeɪstfəl,wasteful.opus,130007,,,,,True,130
+odpad,waste,wˈeɪst,waste.opus,130008,,,,,True,130
+umyvadlo,washbowl,wˈɑːʃboʊl,washbowl.opus,130009,,,,,True,130
+úspěch,achievement,ɐtʃˈiːvmənt,achievement.opus,130010,,,,,True,130
+uznat,acknowledge,ɐknˈɑːlɪdʒ,acknowledge.opus,130011,,,,,True,130
+bojovník,warrior,wˈɔːɹɪɚ,warrior.opus,130012,,,,,True,130
+záruka,warranty,wˈɔːɹənti,warranty.opus,130013,,,,,True,130
+varovat,warn,wˈɔːɹn,warn.opus,130014,,,,,True,130
+varování,warning,wˈɔːɹnɪŋ,warning.opus,130015,,,,,True,130
+ohřát,warm,wˈɔːɹm,warm.opus,130016,,,,,True,130
+teplo,warmth,wˈɔːɹmθ,warmth.opus,130017,,,,,True,130
+vřele,warmly,wˈɔːɹmli,warmly.opus,130018,,,,,True,130
+potvrzení,acknowledgement,ɐknˈɑːlɪdʒmənt,acknowledgement.opus,130019,,,,,True,130
+šatník,wardrobe,wˈɔːɹdɹoʊb,wardrobe.opus,130020,,,,,True,130
+oddělení,ward,wˈɔːɹd,ward.opus,130021,,,,,True,130
+známost,acquaintance,ɐkwˈeɪntəns,acquaintance.opus,130022,,,,,True,130
+probudit,wake,wˈeɪk,wake.opus,130023,,,,,True,130
+Měj hezký den.,Have a nice day.,hæv ɐ nˈaɪs dˈeɪ,have_a_nice_day.opus,130024,,,,,False,130
+Uvidíme se zítra.,See you tomorrow.,sˈiː juː təmˈɑːɹoʊ,see_you_tomorrow.opus,130025,,,,,False,130
+Co se děje?,What's happening?,wˌʌts hˈæpənɪŋ,whats_happening.opus,130026,,,,,False,130
+To dává smysl.,That makes sense.,ðæt mˌeɪks sˈɛns,that_makes_sense.opus,130027,,,,,False,130
+To je dobrý nápad.,That's a good idea.,ðæts ɐ ɡˈʊd aɪdˈiə,thats_a_good_idea.opus,130028,,,,,False,130
+Máš pravdu.,You are right.,juː ɑːɹ ɹˈaɪt,you_are_right.opus,130029,,,,,False,130
+To není problém.,It's not a problem.,ɪts nˌɑːɾə pɹˈɑːbləm,its_not_a_problem.opus,130030,,,,,False,130
+Prosím o pomoc.,I need help.,aɪ nˈiːd hˈɛlp,i_need_help.opus,130031,,,,,False,130
+Můžeš mi poradit?,Can you give me some advice?,kæn juː ɡˈɪv mˌiː sˌʌm ɐdvˈaɪs,can_you_give_me_some_advice.opus,130032,,,,,False,130
+Chvíli počkej.,Wait a moment.,wˈeɪt ɐ mˈoʊmənt,wait_a_moment.opus,130033,,,,,False,130
+Hned jsem zpátky.,I'll be right back.,aɪl biː ɹˈaɪt bˈæk,ill_be_right_back.opus,130034,,,,,False,130
+To je moje chyba.,It's my fault.,ɪts maɪ fˈɔlt,its_my_fault.opus,130035,,,,,False,130
+Nevím co říct.,I don't know what to say.,aɪ dˈoʊnt nˈoʊ wʌt tə sˈeɪ,i_dont_know_what_to_say.opus,130036,,,,,False,130
+Nejsem si jistý.,I'm not sure.,aɪm nˌɑːt ʃˈʊɹ,im_not_sure.opus,130037,,,,,False,130
+Můžeme začít.,We can start.,wiː kæn stˈɑːɹt,we_can_start.opus,130038,,,,,False,130
+Je čas jít.,It's time to go.,ɪts tˈaɪm tə ɡˈoʊ,its_time_to_go.opus,130039,,,,,False,130
+Zapomněl jsem na to.,I forgot about it.,aɪ fɚɡˈɑːt ɐbˈaʊt ɪt,i_forgot_about_it.opus,130040,,,,,False,130
+Pamatuj na to.,Keep that in mind.,kˈiːp ðæt ɪn mˈaɪnd,keep_that_in_mind.opus,130041,,,,,False,130
+Nech to na mně.,Leave it to me.,lˈiːv ɪt tə mˌiː,leave_it_to_me.opus,130042,,,,,False,130
+Drž mi palce.,Keep your fingers crossed for me.,kˈiːp jʊɹ fˈɪŋɡɚz kɹˈɔst fɔːɹ mˌiː,keep_your_fingers_crossed_for_me.opus,130043,,,,,False,130
+To se může stát.,It can happen.,ɪt kæn hˈæpən,it_can_happen.opus,130044,,,,,False,130
+Nic se neděje.,Nothing is happening.,nˈʌθɪŋ ɪz hˈæpənɪŋ,nothing_is_happening.opus,130045,,,,,False,130
+Dej mi vědět.,Let me know.,lˈɛt mˌiː nˈoʊ,let_me_know.opus,130046,,,,,False,130
+Už tomu rozumím.,I understand it now.,aɪ ˌʌndɚstˈænd ɪt nˈaʊ,i_understand_it_now.opus,130047,,,,,False,130

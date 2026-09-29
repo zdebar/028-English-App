@@ -1,5 +1,4 @@
-import { sharedQueryKey } from '@/hooks/shared-query-store';
-import Topic from '@/database/models/topics';
+import { getOverviewQuery, overviewQueryKey } from '@/hooks/overview-query-store';
 import { TEXTS } from '@/locales/cs';
 import type { TopicType } from '@/types/generic.types';
 import { ROUTES } from '@/config/routes.config';
@@ -23,7 +22,7 @@ export default function TopicsOverview({
   // Topics management
   const fetchTopics = useCallback(async (): Promise<TopicType[]> => {
     if (!userId) return [];
-    return Topic.getInitiatedByUserId(userId);
+    return getOverviewQuery(userId, 'topics')();
   }, [userId]);
 
   const {
@@ -33,7 +32,7 @@ export default function TopicsOverview({
   } = useLiveQueryData<TopicType[]>(fetchTopics, {
     emptyData: [],
     initialData: initialTopics,
-    sharedKey: sharedQueryKey(userId, 'topics'),
+    sharedKey: userId ? overviewQueryKey(userId, 'topics') : undefined,
   });
   const hasTopics = topics.length > 0;
 
