@@ -17,6 +17,7 @@ import GrammarDetailCard from './GrammarDetailCard';
 import { ROUTES } from '@/config/routes.config';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { useRouteClose } from '@/routing/use-route-close';
+import { invalidateReviewArrays } from '@/features/practice/review-prefetch';
 
 type GrammarSelection = Readonly<Pick<GrammarGroupWithChunks, 'id'>>;
 
@@ -65,6 +66,7 @@ export default function GrammarOverview({
 
     try {
       const resetCount = await UserItem.resetItemsByGrammarGroupId(userId, currentItem.id);
+      invalidateReviewArrays(userId);
       void refreshPracticeAvailability(userId);
       reportInfo(`Grammar ${currentItem.id} reset completed: ${resetCount} items reset.`);
       showToast(TEXTS.resetProgressSuccessToast, 'success');

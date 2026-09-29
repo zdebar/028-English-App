@@ -11,10 +11,19 @@ const mocks = vi.hoisted(() => ({
   showToast: vi.fn(),
   reportError: vi.fn(),
   reportInfo: vi.fn(),
+  warmReviewArrays: vi.fn().mockResolvedValue(undefined),
+  invalidateReviewArrays: vi.fn(),
+  clearReviewArrays: vi.fn(),
 }));
 
 vi.mock('@/features/practice/practice-availability-controller', () => ({
   refreshPracticeAvailability: (...args: unknown[]) => mocks.refreshAvailability(...args),
+}));
+
+vi.mock('@/features/practice/review-prefetch', () => ({
+  warmReviewArrays: (...args: unknown[]) => mocks.warmReviewArrays(...args),
+  invalidateReviewArrays: (...args: unknown[]) => mocks.invalidateReviewArrays(...args),
+  clearReviewArrays: (...args: unknown[]) => mocks.clearReviewArrays(...args),
 }));
 
 vi.mock('@/config/config', () => ({
@@ -85,12 +94,15 @@ describe('usePeriodicSync', () => {
     const { unmount } = renderHook(() => usePeriodicSync('u1'));
 
     expect(useSyncStore.getState().isSynchronizing).toBe(true);
+    expect(mocks.warmReviewArrays).toHaveBeenCalledWith('u1');
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(3000);
     });
 
     expect(mocks.dataSync).toHaveBeenCalledWith('u1');
+    expect(mocks.warmReviewArrays).toHaveBeenCalledTimes(2);
+    expect(mocks.invalidateReviewArrays).toHaveBeenCalledWith('u1');
     expect(mocks.refreshAvailability).toHaveBeenCalledWith('u1');
     expect(mocks.syncFromRemote).toHaveBeenCalled();
     expect(mocks.showToast).toHaveBeenCalledWith('Sync success', 'success');
@@ -107,11 +119,15 @@ describe('usePeriodicSync', () => {
 
     const { unmount } = renderHook(() => usePeriodicSync('u1'));
 
+    expect(mocks.warmReviewArrays).toHaveBeenCalledWith('u1');
+
     await act(async () => {
       await vi.advanceTimersByTimeAsync(3000);
     });
 
     expect(mocks.refreshAvailability).toHaveBeenCalledWith('u1');
+    expect(mocks.warmReviewArrays).toHaveBeenCalledTimes(2);
+    expect(mocks.invalidateReviewArrays).toHaveBeenCalledWith('u1');
     expect(mocks.showToast).toHaveBeenCalledWith('Sync error', 'error');
     expect(mocks.reportError).toHaveBeenCalledWith(
       'Data synchronization failed',
