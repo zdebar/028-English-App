@@ -1,10 +1,11 @@
 export const PRACTICE_TEXTS = {
+  itemProgress: 'pokrok položky',
   // Practice Page
   noNotesToDisplay: 'Žádné poznámky k zobrazení',
   noAudio: 'bez audia',
   loadingAudio: 'načítá se audio ...',
   progress: 'pokrok',
-  reviewProgress: 'počet procvičení v tomto opakování',
+  reviewProgress: 'počet položek',
   grammar: 'gramatika',
   audio: 'audio',
   complete: 'dokončit',

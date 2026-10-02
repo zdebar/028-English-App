@@ -10,6 +10,7 @@ import { useInitialTrainingDeck } from '@/features/practice/hooks/use-block-trai
 import { usePracticeExitBlocker } from '@/features/practice/hooks/use-practice-exit-blocker';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
+import { formatProgress } from '@/utils/progress.utils';
 import { useEffect, useState, type JSX } from 'react';
 import { useLoaderData } from 'react-router-dom';
 import type { InitialTrainingData } from '@/routing/route-data';
@@ -66,6 +67,7 @@ function InitialTrainingContent({
     <PracticeSessionCard
       note={deck.note}
       grammar={deck.practiceGrammar}
+      itemProgressLabel={formatProgress(deck.currentItem.progress_cz_to_en) ?? ''}
       progressLabel={deck.progressLabel}
       revealed={deck.revealed}
       czech={deck.czech}

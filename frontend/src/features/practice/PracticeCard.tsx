@@ -10,6 +10,7 @@ import { reportError } from '../logging/monitoring-handler';
 import { useCallback, useEffect, useRef } from 'react';
 import type { ReviewDeckData } from '@/database/utils/practice-content.utils';
 import { usePracticeExitBlocker } from './hooks/use-practice-exit-blocker';
+import { formatProgress } from '@/utils/progress.utils';
 
 type PracticeCardProps = Readonly<{
   initialData?: ReviewDeckData;
@@ -94,6 +95,7 @@ export default function PracticeCard({ initialData }: PracticeCardProps) {
       itemKey={currentItem ? String(currentItem.item_id) : undefined}
       ensureDetailLoaded={ensureDetailLoaded}
       onDetailLoadError={notifyDetailLoadFailure}
+      itemProgressLabel={formatProgress(currentItem.progress_cz_to_en) ?? ''}
       progressLabel={progressLabel}
       progressHelpText={TEXTS.reviewProgress}
       showProgressLabel

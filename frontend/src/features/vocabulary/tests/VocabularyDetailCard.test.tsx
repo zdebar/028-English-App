@@ -136,6 +136,19 @@ describe('VocabularyDetailCard', () => {
     expect(onReset).toHaveBeenCalledTimes(1);
   });
 
+  it('formats item progress with the configured SRS length', () => {
+    render(
+      <VocabularyDetailCard
+        selectedWord={{ item_id: 1, czech: 'ahoj', progress_cz_to_en: 2 } as any}
+        selectedTitle="ahoj"
+        onClose={vi.fn()}
+        onReset={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText('progress:2 / 9')).toBeTruthy();
+  });
+
   it('disables play and volume buttons when audio is not ready', () => {
     audioMocks.audioReady = false;
 

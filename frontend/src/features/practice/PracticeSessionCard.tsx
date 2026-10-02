@@ -32,7 +32,9 @@ export type PracticeSessionCardProps = Readonly<{
   itemKey?: string;
   ensureDetailLoaded?: (detail: PracticeDetail) => Promise<boolean>;
   onDetailLoadError?: (detail: PracticeDetail) => void;
+  itemProgressLabel: string;
   progressLabel: string | number;
+  itemProgressHelpText?: string;
   progressHelpText?: string;
   revealed: boolean;
   czech: string | undefined;
@@ -238,6 +240,7 @@ function PracticeMainContent({
 
 type NormalizedPracticeSessionCardProps = PracticeSessionCardProps &
   Readonly<{
+    itemProgressHelpText: string;
     progressHelpText: string;
     repeatDisabled: boolean;
     completeDisabled: boolean;
@@ -246,7 +249,8 @@ type NormalizedPracticeSessionCardProps = PracticeSessionCardProps &
   }>;
 
 const DEFAULT_PRACTICE_SESSION_CARD_PROPS = {
-  progressHelpText: TEXTS.progress,
+  itemProgressHelpText: TEXTS.itemProgress,
+  progressHelpText: TEXTS.reviewProgress,
   repeatDisabled: false,
   completeDisabled: false,
   isBlockTrainingPractice: false,
@@ -429,7 +433,9 @@ function PracticeCardButton({
     czech,
     english,
     pronunciation,
+    itemProgressLabel,
     progressLabel,
+    itemProgressHelpText,
     progressHelpText,
     audioError,
     audioLoading,
@@ -471,10 +477,19 @@ function PracticeCardButton({
         className="relative flex h-8 w-full shrink-0 items-center justify-between"
         id="bottom-bar"
       >
-        {display.showProgressLabel && (
-          <p className="min-w-12 pl-2 text-right font-light" title={progressHelpText}>
-            {progressLabel}
+        <div className="relative min-w-12 pl-2">
+          <p className="font-light" title={itemProgressHelpText}>
+            {itemProgressLabel}
           </p>
+          <HelpText className="-top-6 left-0 whitespace-nowrap">{itemProgressHelpText}</HelpText>
+        </div>
+        {display.showProgressLabel && (
+          <div className="relative min-w-12 pr-2 text-right">
+            <p className="font-light" title={progressHelpText}>
+              {progressLabel}
+            </p>
+            <HelpText className="-top-6 right-0 whitespace-nowrap">{progressHelpText}</HelpText>
+          </div>
         )}
       </div>
     </button>

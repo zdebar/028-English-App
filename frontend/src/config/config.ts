@@ -1,6 +1,6 @@
 const config = {
   sync: {
-    fullSyncInterval: 7 * 24 * 60 * 60 * 1000, // Interval for performing a full sync in milliseconds (30 days)
+    fullSyncInterval: 7 * 24 * 60 * 60 * 1000, // Interval for performing a full sync in milliseconds (7 days)
     periodicSyncInterval: 24 * 60 * 60 * 1000, // Interval for periodic sync in milliseconds (1 day)
     scoreResetCheckInterval: 60 * 1000, // Interval for resetting daily scores in milliseconds (1 minute)
   },
@@ -21,7 +21,7 @@ const config = {
 
   srs: {
     // Spaced Repetition System configuration
-    intervals: [120, 14400, 28800, 86400, 172800, 345600, 691200, 1382400],
+    intervals: [300, 14400, 28800, 86400, 172800, 345600, 691200, 1382400],
     randomness: 0.2, // Randomness of SRS algorithm
   },
 
