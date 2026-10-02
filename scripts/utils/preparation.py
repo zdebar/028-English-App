@@ -2,7 +2,7 @@ import asyncio
 import os
 
 import pandas as pd
-from typing import Any, List, Union
+from typing import Any, List
 
 INT_COLUMNS = {"id", "sort_order", "block_id", "note_id", "topic_id", "grammar_chunks_id", "lesson_id"}
 
@@ -14,11 +14,11 @@ def clean_data_frame(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def _convert_float_for_int_column(value: float) -> Union[int, float]:
+def _convert_float_for_int_column(value: float) -> int | float:
     return int(value) if value.is_integer() else value
 
 
-def _parse_int_from_string(stripped: str) -> Union[int, str]:
+def _parse_int_from_string(stripped: str) -> int | str:
     if stripped.lstrip("+-").isdigit():
         return int(stripped)
 
@@ -80,6 +80,9 @@ def fill_is_vocabulary(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     if "is_vocabulary" not in df.columns:
         df["is_vocabulary"] = ""
+    # Empty CSV columns may be inferred as float64; object accepts derived booleans
+    # while preserving any explicit values already present in the column.
+    df["is_vocabulary"] = df["is_vocabulary"].astype("object")
 
     explicit_values = df["is_vocabulary"].astype("string").str.strip()
     missing_values = explicit_values.isna() | explicit_values.eq("")
