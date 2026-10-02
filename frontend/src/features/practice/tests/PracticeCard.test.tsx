@@ -389,13 +389,15 @@ describe('PracticeCard', () => {
 
   it('shows item progress on the left and review progress on the right', () => {
     const { container } = render(<PracticeCard />);
-    const progressLabels = container.querySelectorAll('#bottom-bar > p');
+    const progressLabels = container.querySelectorAll('#bottom-bar > div > p');
 
     expect(progressLabels).toHaveLength(2);
     expect(progressLabels[0].textContent).toBe('2 / 8');
     expect(progressLabels[0].getAttribute('title')).toBe('Item progress');
     expect(progressLabels[1].textContent).toBe('2/20');
     expect(progressLabels[1].getAttribute('title')).toBe('Item count');
+    expect(screen.getByText('Item progress')).toBeTruthy();
+    expect(screen.getByText('Item count')).toBeTruthy();
   });
 
   it('keeps the current review card while the next item loads', () => {

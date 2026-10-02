@@ -477,13 +477,19 @@ function PracticeCardButton({
         className="relative flex h-8 w-full shrink-0 items-center justify-between"
         id="bottom-bar"
       >
-        <p className="min-w-12 pl-2 font-light" title={itemProgressHelpText}>
-          {itemProgressLabel}
-        </p>
-        {display.showProgressLabel && (
-          <p className="min-w-12 pr-2 text-right font-light" title={progressHelpText}>
-            {progressLabel}
+        <div className="relative min-w-12 pl-2">
+          <p className="font-light" title={itemProgressHelpText}>
+            {itemProgressLabel}
           </p>
+          <HelpText className="-top-6 left-0 whitespace-nowrap">{itemProgressHelpText}</HelpText>
+        </div>
+        {display.showProgressLabel && (
+          <div className="relative min-w-12 pr-2 text-right">
+            <p className="font-light" title={progressHelpText}>
+              {progressLabel}
+            </p>
+            <HelpText className="-top-6 right-0 whitespace-nowrap">{progressHelpText}</HelpText>
+          </div>
         )}
       </div>
     </button>
