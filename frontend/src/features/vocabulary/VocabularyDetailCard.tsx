@@ -1,6 +1,5 @@
 import OverviewCard from '@/components/UI/OverviewCard';
 import PropertyView from '@/components/UI/PropertyView';
-import config from '@/config/config';
 import { TEXTS } from '@/locales/cs';
 import HelpButton from '@/features/help/HelpButton';
 import {
@@ -15,6 +14,7 @@ import InfoButton from '@/features/notes/InfoButton';
 import NoteDetailCard from '@/features/notes/NoteDetailCard';
 import { useNoteViewer } from '@/features/notes/use-note-viewer';
 import { useToastStore } from '@/features/toast/use-toast-store';
+import { formatProgress } from '@/utils/progress.utils';
 
 const NOT_AVAILABLE = TEXTS.notAvailable;
 
@@ -49,10 +49,7 @@ function getDirectionSections(
       properties: [
         {
           label: lowercaseInitial(TEXTS.progress),
-          value: formatProgress(
-            selectedWord?.progress_cz_to_en,
-            config.srs.intervals.length,
-          ),
+          value: formatProgress(selectedWord?.progress_cz_to_en),
         },
         {
           label: lowercaseInitial(TEXTS.practiceSchedule),
@@ -233,11 +230,6 @@ export default function VocabularyDetailCard({
 
 function lowercaseInitial(value: string): string {
   return value.charAt(0).toLocaleLowerCase('cs-CZ') + value.slice(1);
-}
-
-function formatProgress(progress: number | null | undefined, total: number): string | undefined {
-  if (progress == null) return undefined;
-  return `${progress} / ${total}`;
 }
 
 function formatPracticeSchedule(

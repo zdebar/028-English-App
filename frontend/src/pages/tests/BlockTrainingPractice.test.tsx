@@ -15,7 +15,7 @@ const mocks = vi.hoisted(() => ({
     grammarGroup: null as { note: string | null } | null,
     isComplete: false,
     hasProgress: false,
-    currentItem: null as { item_id: number } | null,
+    currentItem: null as { item_id: number; progress_cz_to_en: number } | null,
     note: null,
     practiceGrammar: null,
     progressLabel: '0/1',
@@ -37,7 +37,9 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('@/config/config', () => ({
   default: {
+    database: { nullReplacementDate: '9999-12-31T23:59:59+00:00' },
     loading: { dataStateDelayMs: 1000 },
+    srs: { intervals: Array.from({ length: 8 }) },
   },
 }));
 
@@ -102,9 +104,9 @@ vi.mock('@/features/practice/BlockTrainingOverviewCard', () => ({
 }));
 
 vi.mock('@/features/practice/PracticeSessionCard', () => ({
-  default: ({ czech, english }: any) => (
+  default: ({ czech, english, itemProgressLabel }: any) => (
     <div data-testid="practice-session">
-      {`${czech}:${english}`}
+      {`${czech}:${english}:${itemProgressLabel}`}
     </div>
   ),
 }));
@@ -147,5 +149,13 @@ describe('BlockTrainingPractice', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Home' }));
     expect(mocks.navigate).toHaveBeenCalledWith('/');
+  });
+
+  it('passes current item progress to the practice card', () => {
+    mocks.deck.currentItem = { item_id: 1, progress_cz_to_en: 3 };
+
+    render(<BlockTrainingPractice />);
+
+    expect(screen.getByTestId('practice-session').textContent).toBe('ahoj:hello:3 / 8');
   });
 });

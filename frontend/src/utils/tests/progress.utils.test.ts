@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { UserItemLocal } from '@/types/user-item.types';
-import { getEffectiveProgress, getSrsLength, isInitiated } from '@/utils/progress.utils';
+import {
+  formatProgress,
+  getEffectiveProgress,
+  getSrsLength,
+  isInitiated,
+} from '@/utils/progress.utils';
 
 const NULL_DATE = '9999-12-31T23:59:59+00:00';
 const MAX_PROGRESS = getSrsLength();
@@ -14,6 +19,11 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
 }
 
 describe('progress utilities', () => {
+  it('formats progress using the configured SRS length', () => {
+    expect(formatProgress(0)).toBe(`0 / ${MAX_PROGRESS}`);
+    expect(formatProgress(null)).toBeUndefined();
+  });
+
   it('clamps unfinished progress and treats mastered directions as full', () => {
     const item = makeItem({
       progress_cz_to_en: 999,

@@ -10,6 +10,11 @@ export function getSrsLength(): number {
   return config.srs.intervals.length;
 }
 
+export function formatProgress(progress: number | null | undefined): string | undefined {
+  if (progress == null) return undefined;
+  return `${progress} / ${getSrsLength()}`;
+}
+
 export function isMastered(item: Pick<UserItemLocal, 'mastered_at_cz_to_en'>): boolean {
   return (item.mastered_at_cz_to_en ?? NULL_DATE) !== NULL_DATE;
 }

@@ -79,12 +79,14 @@ mocks.practiceDeck.currentItem = mocks.makePracticeItem();
 
 vi.mock('@/config/config', () => ({
   default: {
+    database: { nullReplacementDate: '9999-12-31T23:59:59+00:00' },
     practice: {
       dailyGoal: 20,
       grammarReviewMinimumSize: 20,
       vocabularyReviewMinimumSize: 20,
       audioDelay: 300,
     },
+    srs: { intervals: Array.from({ length: 8 }) },
     buttons: { loadingMessageDelay: 300 },
     loading: { dataStateDelayMs: 1000 },
   },
@@ -103,8 +105,9 @@ vi.mock('@/locales/cs', () => ({
     audio: 'Audio',
     grammar: 'Grammar',
     tooltipNotes: 'Notes',
+    itemProgress: 'Item progress',
     progress: 'Progress',
-    reviewProgress: 'Review progress',
+    reviewProgress: 'Item count',
     progressToday: 'Today progress',
     blockCompleted: 'Block completed',
     reviewCompleted: 'Review completed',
@@ -384,10 +387,15 @@ describe('PracticeCard', () => {
     expect(screen.getByTestId('grammar-detail').dataset.helpEnabled).toBe('false');
   });
 
-  it('shows the review progress label on the card', () => {
-    render(<PracticeCard />);
+  it('shows item progress on the left and review progress on the right', () => {
+    const { container } = render(<PracticeCard />);
+    const progressLabels = container.querySelectorAll('#bottom-bar > p');
 
-    expect(screen.getByText('2/20')).toBeTruthy();
+    expect(progressLabels).toHaveLength(2);
+    expect(progressLabels[0].textContent).toBe('2 / 8');
+    expect(progressLabels[0].getAttribute('title')).toBe('Item progress');
+    expect(progressLabels[1].textContent).toBe('2/20');
+    expect(progressLabels[1].getAttribute('title')).toBe('Item count');
   });
 
   it('keeps the current review card while the next item loads', () => {
@@ -511,6 +519,7 @@ describe('PracticeCard', () => {
         note={null}
         grammar={null}
         grammarAvailable
+        itemProgressLabel="2 / 8"
         progressLabel="1 / 2"
         revealed
         czech="ahoj"
@@ -550,6 +559,7 @@ describe('PracticeCard', () => {
         grammar={null}
         grammarAvailable
         itemKey="1"
+        itemProgressLabel="2 / 8"
         progressLabel="1 / 2"
         revealed
         czech="ahoj"
@@ -666,6 +676,7 @@ describe('PracticeCard', () => {
       <PracticeSessionCard
         note={null}
         grammar={null}
+        itemProgressLabel="2 / 8"
         progressLabel="Round 1/2"
         revealed
         czech="ahoj"
@@ -695,6 +706,7 @@ describe('PracticeCard', () => {
         grammar={null}
         noteAvailable
         grammarAvailable
+        itemProgressLabel="2 / 8"
         progressLabel="1 / 2"
         revealed
         czech="ahoj"
@@ -727,6 +739,7 @@ describe('PracticeCard', () => {
         noteAvailable
         grammarAvailable
         noteLoadFailed
+        itemProgressLabel="2 / 8"
         progressLabel="1 / 2"
         revealed
         czech="ahoj"
@@ -759,6 +772,7 @@ describe('PracticeCard', () => {
         <PracticeSessionCard
           note={null}
           grammar={null}
+          itemProgressLabel="2 / 8"
           progressLabel="1 / 2"
           revealed={revealed}
           czech="ahoj"
@@ -801,6 +815,7 @@ describe('PracticeCard', () => {
       <PracticeSessionCard
         note={null}
         grammar={null}
+        itemProgressLabel="2 / 8"
         progressLabel="Round 1/2"
         revealed
         czech="ahoj"
