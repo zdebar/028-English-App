@@ -226,7 +226,7 @@ function ReviewPracticeButton({
   return (
     <NavigationButton
       to={to}
-      className="relative h-button max-h-button w-full px-4"
+      className="h-button max-h-button relative w-full px-4"
       disabled={disabled}
       title={title}
     >
@@ -241,7 +241,7 @@ function ReviewPracticeButton({
       {dueCount > 0 ? (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute top-1 right-1 z-10 rounded-full bg-light py-0.5 pr-1.5 pl-2 text-center font-body text-xs leading-none font-bold text-dark dark:bg-dark dark:text-light"
+          className="bg-light font-body text-dark dark:bg-dark dark:text-light pointer-events-none absolute top-1 right-1 z-10 rounded-full py-0.5 pr-1.5 pl-2 text-center text-xs leading-none"
         >
           {dueCount}
         </span>
