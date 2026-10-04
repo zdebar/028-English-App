@@ -1,5 +1,5 @@
-import { act, render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
@@ -22,8 +22,6 @@ import { usePracticeAvailabilityStore } from '@/features/practice/use-practice-a
 import config from '@/config/config';
 
 describe('Home practice buttons', () => {
-  afterEach(() => vi.useRealTimers());
-
   beforeEach(() => {
     usePracticeAvailabilityStore.setState({
       grammarReviewReadyAt: null,
@@ -38,74 +36,14 @@ describe('Home practice buttons', () => {
     });
   });
 
-  it('enables review at the stored date without changing the availability snapshot', async () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-09-23T10:00:00Z'));
-    const readyAt = '2026-09-23T10:00:02Z';
+  it('keeps review disabled before the stored date without rendering a time value', () => {
+    const readyAt = new Date(Date.now() + 2_000).toISOString();
     usePracticeAvailabilityStore.setState({ grammarReviewReadyAt: readyAt });
     const snapshot = usePracticeAvailabilityStore.getState();
     render(<PracticeButtons />);
     expect(button('Grammar review').disabled).toBe(true);
-    expect(screen.getByText('2')).toBeTruthy();
-    await act(async () => vi.advanceTimersByTimeAsync(2000));
-    expect(button('Grammar review').disabled).toBe(false);
     expect(screen.queryByText('2')).toBeNull();
     expect(usePracticeAvailabilityStore.getState()).toBe(snapshot);
-  });
-
-  it.each([
-    {
-      description: 'formats the disabled review countdown by remaining duration',
-      readyAt: '2026-09-25T13:04:05Z',
-      expected: '2 dny + 3:04:05',
-    },
-    {
-      description: 'does not pad countdown components and uses the singular Czech day form',
-      readyAt: '2026-09-24T22:25:37Z',
-      expected: '1 den + 12:25:37',
-    },
-    {
-      description: 'uses the plural Czech day form for five or more days',
-      readyAt: '2026-09-28T10:00:01Z',
-      expected: '5 dní + 0:00:01',
-    },
-    {
-      description: 'does not pad minute countdowns',
-      readyAt: '2026-09-23T10:07:30Z',
-      expected: '7:30',
-    },
-    {
-      description: 'keeps leading zeroes on the following clock components',
-      readyAt: '2026-09-23T11:02:03Z',
-      expected: '1:02:03',
-    },
-    {
-      description: 'shows only seconds near the review boundary',
-      readyAt: '2026-09-23T10:00:05Z',
-      expected: '5',
-    },
-  ])('$description', ({ readyAt, expected }) => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-09-23T10:00:00Z'));
-    usePracticeAvailabilityStore.setState({
-      grammarReviewReadyAt: readyAt,
-    });
-
-    render(<PracticeButtons />);
-    expect(screen.getByText(expected)).toBeTruthy();
-  });
-
-  it('shows the vocabulary countdown independently', () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-09-23T10:00:00Z'));
-    usePracticeAvailabilityStore.setState({
-      vocabularyReviewReadyAt: '2026-09-23T10:07:30Z',
-    });
-
-    render(<PracticeButtons />);
-
-    expect(button('Vocabulary review').disabled).toBe(true);
-    expect(screen.getByText('7:30')).toBeTruthy();
   });
 
   it('enables both reviews independently at the configured review boundary', () => {
