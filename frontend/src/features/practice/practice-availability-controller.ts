@@ -1,4 +1,5 @@
 import PracticeSession from '@/database/models/practice-sessions';
+import config from '@/config/config';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
@@ -10,11 +11,13 @@ type AvailabilityContext = {
   practiceDepth: number;
   dirty: boolean;
   pending: Promise<void> | null;
+  reviewTimer: ReturnType<typeof setTimeout> | null;
 };
 
 let current: AvailabilityContext | null = null;
 
 export function resetPracticeAvailability(): void {
+  if (current) clearReviewAvailabilityTimer(current);
   current = null;
   usePracticeAvailabilityStore.getState().reset();
 }
@@ -23,7 +26,13 @@ function getContext(userId: string): AvailabilityContext {
   if (current?.userId === userId && usePracticeAvailabilityStore.getState().availabilityUserId === userId) {
     return current;
   }
-  current = { userId, practiceDepth: 0, dirty: false, pending: null };
+  current = {
+    userId,
+    practiceDepth: 0,
+    dirty: false,
+    pending: null,
+    reviewTimer: null,
+  };
   usePracticeAvailabilityStore.getState().setLoading(userId);
   return current;
 }
@@ -43,6 +52,7 @@ export function refreshPracticeAvailability(userId: string): Promise<void> {
   if (current?.userId !== userId) return Promise.resolve();
   const context = current;
   context.dirty = true;
+  clearReviewAvailabilityTimer(context);
   if (context.practiceDepth > 0) return Promise.resolve();
   if (context.pending !== null) return context.pending;
   context.pending = refreshContext(context).finally(() => {
@@ -81,7 +91,35 @@ async function updateSnapshot(context: AvailabilityContext): Promise<void> {
   }
   if (!context.dirty) {
     usePracticeAvailabilityStore.getState().setSnapshot(context.userId, snapshot);
+    scheduleReviewAvailabilityRefresh(context, snapshot.nextReviewAt);
   }
+}
+
+function scheduleReviewAvailabilityRefresh(
+  context: AvailabilityContext,
+  nextReviewAt: string | null,
+): void {
+  clearReviewAvailabilityTimer(context);
+  if (nextReviewAt === null) return;
+
+  const nextReviewTime = Date.parse(nextReviewAt);
+  if (!Number.isFinite(nextReviewTime) || nextReviewTime <= Date.now()) return;
+
+  const delay = Math.min(
+    config.practice.maxReviewReadyTimerDelayMs,
+    Math.max(1, nextReviewTime - Date.now() + 1),
+  );
+  context.reviewTimer = globalThis.setTimeout(() => {
+    context.reviewTimer = null;
+    if (current !== context) return;
+    void refreshPracticeAvailability(context.userId);
+  }, delay);
+}
+
+function clearReviewAvailabilityTimer(context: AvailabilityContext): void {
+  if (context.reviewTimer === null) return;
+  globalThis.clearTimeout(context.reviewTimer);
+  context.reviewTimer = null;
 }
 
 /** The returned exit action runs only after the caller has settled its pending writes. */

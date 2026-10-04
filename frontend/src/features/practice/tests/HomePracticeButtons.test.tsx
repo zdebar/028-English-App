@@ -27,6 +27,9 @@ describe('Home practice buttons', () => {
     usePracticeAvailabilityStore.setState({
       grammarReviewReadyAt: null,
       vocabularyReviewReadyAt: null,
+      grammarReviewDueCount: 0,
+      vocabularyReviewDueCount: 0,
+      nextReviewAt: null,
       initialTrainingAvailable: true,
       activeSession: null,
       practiceLoading: false,
@@ -127,6 +130,22 @@ describe('Home practice buttons', () => {
     expect(button('New').disabled).toBe(true);
   });
 
+  it('uses due counts for review availability and displays the count badge', () => {
+    usePracticeAvailabilityStore.setState({
+      grammarReviewReadyAt: null,
+      grammarReviewDueCount: 24,
+      vocabularyReviewDueCount: 3,
+    });
+
+    render(<PracticeButtons />);
+
+    expect(button('Grammar review').disabled).toBe(false);
+    expect(button('Vocabulary review').disabled).toBe(true);
+    expect(button('New').disabled).toBe(true);
+    expect(screen.getByText('24')).toBeTruthy();
+    expect(screen.getByText('3')).toBeTruthy();
+  });
+
   it('enables new below the review boundary', () => {
     usePracticeAvailabilityStore.setState({
       grammarReviewReadyAt: null,
@@ -183,7 +202,7 @@ describe('Home practice buttons', () => {
     expect(button('New').disabled).toBe(false);
   });
 
-  it('gives review priority over an active new session', () => {
+  it('keeps an active new session available alongside review', () => {
     usePracticeAvailabilityStore.setState({
       grammarReviewReadyAt: new Date().toISOString(),
       vocabularyReviewReadyAt: null,
@@ -192,7 +211,7 @@ describe('Home practice buttons', () => {
     render(<PracticeButtons />);
     expect(button('Grammar review').disabled).toBe(false);
     expect(button('Vocabulary review').disabled).toBe(true);
-    expect(button('New').disabled).toBe(true);
+    expect(button('New').disabled).toBe(false);
   });
 });
 

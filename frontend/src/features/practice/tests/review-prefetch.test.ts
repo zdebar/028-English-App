@@ -84,20 +84,24 @@ describe('review prefetch', () => {
     expect(getReviewReadyAtFromItems([dueGrammar, futureGrammar], 2, NOW)).toBe(
       futureGrammar.next_at_cz_to_en,
     );
-    expect(
-      getReviewAvailabilityFromArrays(
-        {
-          grammar: [
-            ...Array.from({ length: config.practice.grammarReviewMinimumSize - 1 }, (_, index) =>
-              item(index + 10, 'grammar'),
-            ),
-            futureGrammar,
-          ],
-          vocabulary: [],
-        },
-        NOW,
-      ).grammarReviewReadyAt,
-    ).toBe(futureGrammar.next_at_cz_to_en);
+    const availability = getReviewAvailabilityFromArrays(
+      {
+        grammar: [
+          ...Array.from({ length: config.practice.grammarReviewMinimumSize - 1 }, (_, index) =>
+            item(index + 10, 'grammar'),
+          ),
+          futureGrammar,
+        ],
+        vocabulary: [],
+      },
+      NOW,
+    );
+
+    expect(availability.grammarReviewReadyAt).toBe(futureGrammar.next_at_cz_to_en);
+    expect(availability.grammarReviewDueCount).toBe(
+      config.practice.grammarReviewMinimumSize - 1,
+    );
+    expect(availability.nextReviewAt).toBe(futureGrammar.next_at_cz_to_en);
   });
 
   it('merges a persisted item into the refreshed arrays without duplication', async () => {

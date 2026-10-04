@@ -14,6 +14,14 @@ const RESET_SORT_DATE = '0000-01-01T00:00:00.000Z';
 
 export type ReviewArrays = Readonly<Record<ReviewKind, readonly PracticeDeckItem[]>>;
 
+export type ReviewAvailability = Readonly<{
+  grammarReviewReadyAt: string | null;
+  vocabularyReviewReadyAt: string | null;
+  grammarReviewDueCount: number;
+  vocabularyReviewDueCount: number;
+  nextReviewAt: string | null;
+}>;
+
 type MutableReviewArrays = Record<ReviewKind, PracticeDeckItem[]>;
 
 type ReviewPrefetchState = {
@@ -155,7 +163,7 @@ export function getReviewReadyAtFromItems(
   deckSize: number,
   nowIso: string,
 ): string | null {
-  const readyCount = items.filter((item) => isReviewItemReadyAt(item, nowIso)).length;
+  const readyCount = getReviewDueCount(items, nowIso);
   if (readyCount >= deckSize) return nowIso;
 
   const missingCount = deckSize - readyCount;
@@ -166,10 +174,14 @@ export function getReviewReadyAtFromItems(
 export function getReviewAvailabilityFromArrays(
   arrays: ReviewArrays,
   nowIso: string,
-): Readonly<{
-  grammarReviewReadyAt: string | null;
-  vocabularyReviewReadyAt: string | null;
-}> {
+): ReviewAvailability {
+  const grammarReviewDueCount = getReviewDueCount(arrays.grammar, nowIso);
+  const vocabularyReviewDueCount = getReviewDueCount(arrays.vocabulary, nowIso);
+  const nextReviewAt = getEarlierReviewAt(
+    getNextReviewAtFromItems(arrays.grammar, nowIso),
+    getNextReviewAtFromItems(arrays.vocabulary, nowIso),
+  );
+
   return {
     grammarReviewReadyAt: getReviewReadyAtFromItems(
       arrays.grammar,
@@ -181,14 +193,39 @@ export function getReviewAvailabilityFromArrays(
       config.practice.vocabularyReviewMinimumSize,
       nowIso,
     ),
+    grammarReviewDueCount,
+    vocabularyReviewDueCount,
+    nextReviewAt,
   };
 }
 
-export async function loadReviewAvailabilityFromArrays(userId: string) {
+export async function loadReviewAvailabilityFromArrays(
+  userId: string,
+): Promise<ReviewAvailability> {
   await warmReviewArrays(userId);
   const arrays = getState(userId).arrays;
   if (!arrays) throw new Error('Review arrays are unavailable');
   return getReviewAvailabilityFromArrays(arrays, new Date().toISOString());
+}
+
+function getReviewDueCount(items: readonly PracticeDeckItem[], nowIso: string): number {
+  return items.filter((item) => isReviewItemReadyAt(item, nowIso)).length;
+}
+
+function getNextReviewAtFromItems(
+  items: readonly PracticeDeckItem[],
+  nowIso: string,
+): string | null {
+  return items.find((item) => isReviewItemFuture(item, nowIso))?.next_at_cz_to_en ?? null;
+}
+
+function getEarlierReviewAt(
+  left: string | null,
+  right: string | null,
+): string | null {
+  if (left === null) return right;
+  if (right === null) return left;
+  return left < right ? left : right;
 }
 
 function sortReviewItems(items: readonly PracticeDeckItem[]): PracticeDeckItem[] {

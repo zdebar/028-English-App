@@ -438,12 +438,29 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     assertNonEmptyString(userId, 'userId');
 
     const nowIso = new Date(Date.now()).toISOString();
-    const [grammarReviewReadyAt, vocabularyReviewReadyAt] = await Promise.all([
+    const [
+      grammarReviewReadyAt,
+      vocabularyReviewReadyAt,
+      grammarReviewDueCount,
+      vocabularyReviewDueCount,
+      grammarNextReviewAt,
+      vocabularyNextReviewAt,
+    ] = await Promise.all([
       getReviewReadyAt(userId, config.practice.grammarReviewMinimumSize, nowIso, 'grammar'),
       getReviewReadyAt(userId, config.practice.vocabularyReviewMinimumSize, nowIso, 'vocabulary'),
+      getReviewDueCount(userId, nowIso, 'grammar'),
+      getReviewDueCount(userId, nowIso, 'vocabulary'),
+      getNextReviewAt(userId, nowIso, 'grammar'),
+      getNextReviewAt(userId, nowIso, 'vocabulary'),
     ]);
 
-    return { grammarReviewReadyAt, vocabularyReviewReadyAt };
+    return {
+      grammarReviewReadyAt,
+      vocabularyReviewReadyAt,
+      grammarReviewDueCount,
+      vocabularyReviewDueCount,
+      nextReviewAt: getEarlierDate(grammarNextReviewAt, vocabularyNextReviewAt),
+    };
   }
 
   /**
@@ -761,6 +778,35 @@ async function getReviewReadyAt(
   const thresholdItem = futureItems[missingCount - 1];
   if (!thresholdItem) return null;
   return thresholdItem.next_at_cz_to_en;
+}
+
+async function getReviewDueCount(
+  userId: string,
+  nowIso: string,
+  reviewKind: ReviewKind,
+): Promise<number> {
+  const [scheduledItems, resetItems] = await Promise.all([
+    getScheduledReadyPracticeCollection(userId, nowIso, reviewKind).toArray(),
+    getResetReadyPracticeCollection(userId, reviewKind).toArray(),
+  ]);
+  return scheduledItems.length + resetItems.length;
+}
+
+async function getNextReviewAt(
+  userId: string,
+  nowIso: string,
+  reviewKind: ReviewKind,
+): Promise<string | null> {
+  const [nextItem] = await getFuturePracticeCollection(userId, nowIso, reviewKind)
+    .limit(1)
+    .toArray();
+  return nextItem?.next_at_cz_to_en ?? null;
+}
+
+function getEarlierDate(left: string | null, right: string | null): string | null {
+  if (left === null) return right;
+  if (right === null) return left;
+  return left < right ? left : right;
 }
 
 function getPracticeIndex(): string {

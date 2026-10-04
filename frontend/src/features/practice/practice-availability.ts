@@ -1,11 +1,15 @@
 import PracticeSession from '@/database/models/practice-sessions';
 import UserItem from '@/database/models/user-items';
+import config from '@/config/config';
 import type { PracticeSessionType } from '@/types/practice-session.types';
 import { loadReviewAvailabilityFromArrays } from './review-prefetch';
 
 export type PracticeAvailabilitySnapshot = Readonly<{
   grammarReviewReadyAt: string | null;
   vocabularyReviewReadyAt: string | null;
+  grammarReviewDueCount: number;
+  vocabularyReviewDueCount: number;
+  nextReviewAt: string | null;
   initialTrainingAvailable: boolean;
   activeSession: PracticeSessionType | null;
   requiresSessionReconciliation: boolean;
@@ -24,6 +28,9 @@ export async function loadPracticeAvailabilitySnapshot(
   return {
     grammarReviewReadyAt: review.grammarReviewReadyAt,
     vocabularyReviewReadyAt: review.vocabularyReviewReadyAt,
+    grammarReviewDueCount: review.grammarReviewDueCount,
+    vocabularyReviewDueCount: review.vocabularyReviewDueCount,
+    nextReviewAt: review.nextReviewAt,
     initialTrainingAvailable: nextSelection != null,
     activeSession: activeSessionState.activeSession,
     requiresSessionReconciliation: activeSessionState.requiresReconciliation,
@@ -36,4 +43,41 @@ async function loadReviewAvailability(userId: string) {
   } catch {
     return UserItem.getReadyReviewState(userId);
   }
+}
+
+export function isReviewThresholdReached(
+  dueCount: number,
+  readyAt: string | null,
+  minimumSize: number,
+  now: number = Date.now(),
+): boolean {
+  if (dueCount >= minimumSize) return true;
+  if (readyAt === null) return false;
+  return Date.parse(readyAt) <= now;
+}
+
+export function hasAvailableReview(
+  availability: Pick<
+    PracticeAvailabilitySnapshot,
+    | 'grammarReviewReadyAt'
+    | 'vocabularyReviewReadyAt'
+    | 'grammarReviewDueCount'
+    | 'vocabularyReviewDueCount'
+  >,
+  now: number = Date.now(),
+): boolean {
+  return (
+    isReviewThresholdReached(
+      availability.grammarReviewDueCount,
+      availability.grammarReviewReadyAt,
+      config.practice.grammarReviewMinimumSize,
+      now,
+    ) ||
+    isReviewThresholdReached(
+      availability.vocabularyReviewDueCount,
+      availability.vocabularyReviewReadyAt,
+      config.practice.vocabularyReviewMinimumSize,
+      now,
+    )
+  );
 }

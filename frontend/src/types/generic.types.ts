@@ -61,6 +61,9 @@ export interface LevelOverviewType extends LevelType, ProgressCountsType {
 export interface ReadyPracticeState {
   grammarReviewReadyAt: string | null;
   vocabularyReviewReadyAt: string | null;
+  grammarReviewDueCount: number;
+  vocabularyReviewDueCount: number;
+  nextReviewAt: string | null;
 }
 
 export interface UserInfoType {

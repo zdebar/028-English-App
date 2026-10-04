@@ -1,4 +1,7 @@
 import { loadSharedQuery } from '@/hooks/shared-query-store';
+import { hasAvailableReview } from '@/features/practice/practice-availability';
+import { loadReviewAvailabilityFromArrays } from '@/features/practice/review-prefetch';
+import { usePracticeAvailabilityStore } from '@/features/practice/use-practice-availability-store';
 import PronunciationGroup from '@/database/models/pronunciation-groups';
 import Block from '@/database/models/blocks';
 import PracticeSession from '@/database/models/practice-sessions';
@@ -61,7 +64,9 @@ async function getInitialTrainingSelection(
 
 async function loadInitialTrainingData(userId: string): Promise<InitialTrainingData> {
   const activeSession = await PracticeSession.reconcileActive(userId);
-  if (activeSession?.mode === 'review') return emptyInitialTrainingData();
+  if (!(await canLoadInitialTraining(userId, activeSession))) {
+    return emptyInitialTrainingData();
+  }
 
   const selection = await getInitialTrainingSelection(userId, activeSession);
   if (!selection) return emptyInitialTrainingData();
@@ -76,6 +81,32 @@ async function loadInitialTrainingData(userId: string): Promise<InitialTrainingD
     resolvePracticeGrammarContext(userId, block?.grammar_chunk_id ?? null),
   ]);
   return { block, items, entries, ...grammarContext };
+}
+
+async function canLoadInitialTraining(
+  userId: string,
+  activeSession: PracticeSessionType | null,
+): Promise<boolean> {
+  if (activeSession?.mode === 'review') return false;
+  if (activeSession?.mode === 'new') return true;
+  return !(await shouldBlockInitialTraining(userId));
+}
+
+async function shouldBlockInitialTraining(userId: string): Promise<boolean> {
+  const cachedAvailability = usePracticeAvailabilityStore.getState();
+  const hasUsableCache =
+    cachedAvailability.availabilityUserId === userId &&
+    !cachedAvailability.practiceLoading &&
+    cachedAvailability.practiceError === null;
+
+  if (hasUsableCache) return hasAvailableReview(cachedAvailability);
+
+  try {
+    const reviewAvailability = await loadReviewAvailabilityFromArrays(userId);
+    return hasAvailableReview(reviewAvailability);
+  } catch {
+    return false;
+  }
 }
 
 export function overviewAvailabilityDescriptor(userId: string) {
