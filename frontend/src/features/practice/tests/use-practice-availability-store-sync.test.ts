@@ -73,6 +73,20 @@ describe('availability refresh lifecycle', () => {
     expect(mocks.load).toHaveBeenCalledTimes(3);
   });
 
+  it('keeps the current availability active while a background refresh is pending', async () => {
+    await ensurePracticeAvailability('u1');
+    const nextSnapshot = deferred<typeof snapshot>();
+    mocks.load.mockReturnValueOnce(nextSnapshot.promise);
+
+    const refresh = refreshPracticeAvailability('u1');
+
+    expect(usePracticeAvailabilityStore.getState().practiceLoading).toBe(false);
+
+    nextSnapshot.resolve({ ...snapshot, grammarReviewDueCount: 25 });
+    await refresh;
+    expect(usePracticeAvailabilityStore.getState().grammarReviewDueCount).toBe(25);
+  });
+
   it('refreshes at the next review item boundary', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-07-21T09:59:59.000Z'));

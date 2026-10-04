@@ -64,7 +64,6 @@ export function refreshPracticeAvailability(userId: string): Promise<void> {
 async function refreshContext(context: AvailabilityContext): Promise<void> {
   while (current === context && context.dirty && context.practiceDepth === 0) {
     context.dirty = false;
-    usePracticeAvailabilityStore.setState({ practiceLoading: true });
     try {
       await updateSnapshot(context);
     } catch (error) {
