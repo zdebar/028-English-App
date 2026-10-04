@@ -13,7 +13,7 @@ type PracticeAvailabilityValues = Pick<
   | 'activeSession'
 >;
 
-type PracticeAvailabilityState = {
+export type PracticeAvailabilityState = {
   availabilityUserId: string | null;
   grammarReviewReadyAt: string | null;
   vocabularyReviewReadyAt: string | null;

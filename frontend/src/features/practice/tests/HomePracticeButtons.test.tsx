@@ -1,5 +1,9 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+const mocks = vi.hoisted(() => ({
+  navigationButtonRender: vi.fn(),
+}));
 
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
@@ -12,9 +16,10 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 vi.mock('@/routing/data-navigation', () => ({
-  NavigationButton: ({ children, ...props }: any) => (
-    <button {...props}>{children}</button>
-  ),
+  NavigationButton: ({ children, ...props }: any) => {
+    mocks.navigationButtonRender();
+    return <button {...props}>{children}</button>;
+  },
 }));
 
 import PracticeButtons from '@/features/practice/PracticeButton';
@@ -23,6 +28,7 @@ import config from '@/config/config';
 
 describe('Home practice buttons', () => {
   beforeEach(() => {
+    mocks.navigationButtonRender.mockClear();
     usePracticeAvailabilityStore.setState({
       grammarReviewReadyAt: null,
       vocabularyReviewReadyAt: null,
@@ -44,6 +50,18 @@ describe('Home practice buttons', () => {
     expect(button('Grammar review').disabled).toBe(true);
     expect(screen.queryByText('2')).toBeNull();
     expect(usePracticeAvailabilityStore.getState()).toBe(snapshot);
+  });
+
+  it('updates only the matching badge for an ordinary review count change', () => {
+    render(<PracticeButtons />);
+    mocks.navigationButtonRender.mockClear();
+
+    act(() => {
+      usePracticeAvailabilityStore.setState({ grammarReviewDueCount: 1 });
+    });
+
+    expect(screen.getByText('1')).toBeTruthy();
+    expect(mocks.navigationButtonRender).not.toHaveBeenCalled();
   });
 
   it('enables both reviews independently at the configured review boundary', () => {

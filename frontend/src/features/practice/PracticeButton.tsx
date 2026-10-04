@@ -1,163 +1,102 @@
 import { ROUTES } from '@/config/routes.config';
 import { TEXTS } from '@/locales/cs';
-import type { JSX } from 'react';
+import { memo, type JSX } from 'react';
 import { NavigationButton } from '@/routing/data-navigation';
-import { usePracticeAvailabilityStore } from './use-practice-availability-store';
+import {
+  usePracticeAvailabilityStore,
+  type PracticeAvailabilityState,
+} from './use-practice-availability-store';
 import StyledButton from '@/components/UI/buttons/StyledButton';
 import config from '@/config/config';
 import {
-  isReviewLimitExceeded,
+  hasExceededReviewLimit,
   isReviewThresholdReached,
 } from './practice-availability';
 
-type PracticeButtonState = Readonly<{
-  grammarReviewDisabled: boolean;
-  vocabularyReviewDisabled: boolean;
-  newDisabled: boolean;
-  newAvailable: boolean;
-  grammarReviewTitle: string | undefined;
-  vocabularyReviewTitle: string | undefined;
-  newTitle: string | undefined;
-}>;
+type ReviewKind = 'grammar' | 'vocabulary';
 
-function isActiveNew(activeSession: { mode: 'review' | 'new' } | null): boolean {
+function isActiveNew(activeSession: PracticeAvailabilityState['activeSession']): boolean {
   return activeSession?.mode === 'new';
 }
 
-type ReviewAvailability = Readonly<{
-  grammar: boolean;
-  vocabulary: boolean;
-  any: boolean;
-  limitExceeded: boolean;
-}>;
-
-function resolveReviewAvailability(
-  grammarReviewReadyAt: string | null,
-  vocabularyReviewReadyAt: string | null,
-  grammarReviewDueCount: number,
-  vocabularyReviewDueCount: number,
-): ReviewAvailability {
-  const grammar = isReviewAvailable(
-    grammarReviewReadyAt,
-    grammarReviewDueCount,
-    config.practice.grammarReviewLimitSize,
-  );
-  const vocabulary = isReviewAvailable(
-    vocabularyReviewReadyAt,
-    vocabularyReviewDueCount,
-    config.practice.vocabularyReviewLimitSize,
-  );
-  const grammarLimitExceeded = isReviewLimitExceeded(
-    grammarReviewDueCount,
-    config.practice.grammarReviewLimitSize,
-  );
-  const vocabularyLimitExceeded = isReviewLimitExceeded(
-    vocabularyReviewDueCount,
-    config.practice.vocabularyReviewLimitSize,
-  );
-  return {
-    grammar,
-    vocabulary,
-    any: grammar || vocabulary,
-    limitExceeded: grammarLimitExceeded || vocabularyLimitExceeded,
-  };
+function selectReviewDueCount(
+  state: PracticeAvailabilityState,
+  reviewKind: ReviewKind,
+): number {
+  if (reviewKind === 'grammar') return state.grammarReviewDueCount;
+  return state.vocabularyReviewDueCount;
 }
 
-function isReviewAvailable(
-  readyAt: string | null,
-  dueCount: number,
-  limitSize: number,
+function selectReviewReadyAt(
+  state: PracticeAvailabilityState,
+  reviewKind: ReviewKind,
+): string | null {
+  if (reviewKind === 'grammar') return state.grammarReviewReadyAt;
+  return state.vocabularyReviewReadyAt;
+}
+
+function selectReviewLimit(reviewKind: ReviewKind): number {
+  if (reviewKind === 'grammar') return config.practice.grammarReviewLimitSize;
+  return config.practice.vocabularyReviewLimitSize;
+}
+
+function selectReviewDisabled(
+  state: PracticeAvailabilityState,
+  reviewKind: ReviewKind,
 ): boolean {
-  return isReviewThresholdReached(dueCount, readyAt, limitSize);
+  if (state.practiceLoading || state.practiceError) return true;
+
+  const dueCount = selectReviewDueCount(state, reviewKind);
+  const readyAt = selectReviewReadyAt(state, reviewKind);
+  const limit = selectReviewLimit(reviewKind);
+  return !isReviewThresholdReached(dueCount, readyAt, limit);
 }
 
-type PracticeButtonFlags = Readonly<{
-  grammarReviewDisabled: boolean;
-  vocabularyReviewDisabled: boolean;
-  newDisabled: boolean;
-  newAvailable: boolean;
-}>;
-
-function resolvePracticeButtonFlags(
-  reviewAvailability: ReviewAvailability,
-  initialTrainingAvailable: boolean,
-  activeNew: boolean,
+function resolveButtonTitle(
   loading: boolean,
   error: Error | null,
-): PracticeButtonFlags {
-  const blocked = Boolean(error) || loading;
-  const grammarReviewDisabled = blocked || !reviewAvailability.grammar;
-  const vocabularyReviewDisabled = blocked || !reviewAvailability.vocabulary;
-  const newAvailable = activeNew || initialTrainingAvailable;
-  const newBlockedByReview = !activeNew && reviewAvailability.limitExceeded;
-  const newDisabled = blocked || newBlockedByReview || !newAvailable;
-  return {
-    grammarReviewDisabled,
-    vocabularyReviewDisabled,
-    newDisabled,
-    newAvailable,
-  };
+  disabled: boolean,
+): string | undefined {
+  if (loading) return TEXTS.loadingMessage;
+  if (error) return TEXTS.loadingError;
+  if (disabled) return TEXTS.nothingToPractice;
+  return undefined;
 }
 
-type PracticeButtonInputs = Readonly<{
-  grammarReviewReadyAt: string | null;
-  vocabularyReviewReadyAt: string | null;
-  grammarReviewDueCount: number;
-  vocabularyReviewDueCount: number;
-  initialTrainingAvailable: boolean;
-  activeSession: { mode: 'review' | 'new' } | null;
-  loading: boolean;
-  error: Error | null;
-}>;
-
-function resolvePracticeButtonState({
-  grammarReviewReadyAt,
-  vocabularyReviewReadyAt,
-  grammarReviewDueCount,
-  vocabularyReviewDueCount,
-  initialTrainingAvailable,
-  activeSession,
-  loading,
-  error,
-}: PracticeButtonInputs): PracticeButtonState {
-  const activeNew = isActiveNew(activeSession);
-  const reviewAvailability = resolveReviewAvailability(
-    grammarReviewReadyAt,
-    vocabularyReviewReadyAt,
-    grammarReviewDueCount,
-    vocabularyReviewDueCount,
-  );
-  const buttonFlags = resolvePracticeButtonFlags(
-    reviewAvailability,
-    initialTrainingAvailable,
-    activeNew,
-    loading,
-    error,
-  );
-
-  return {
-    ...buttonFlags,
-    grammarReviewTitle: resolveButtonTitle(loading, error, buttonFlags.grammarReviewDisabled),
-    vocabularyReviewTitle: resolveButtonTitle(
-      loading,
-      error,
-      buttonFlags.vocabularyReviewDisabled,
-    ),
-    newTitle: resolveButtonTitle(loading, error, buttonFlags.newDisabled),
-  };
+function selectReviewTitle(
+  state: PracticeAvailabilityState,
+  reviewKind: ReviewKind,
+): string | undefined {
+  const disabled = selectReviewDisabled(state, reviewKind);
+  return resolveButtonTitle(state.practiceLoading, state.practiceError, disabled);
 }
 
-function NewPracticeButton({
-  available,
-  disabled,
-  loading,
-  title,
-}: Readonly<{
-  available: boolean;
-  disabled: boolean;
-  loading: boolean;
-  title: string | undefined;
-}>): JSX.Element {
+function selectNewAvailable(state: PracticeAvailabilityState): boolean {
+  if (isActiveNew(state.activeSession)) return true;
+  return state.initialTrainingAvailable;
+}
+
+function selectNewDisabled(state: PracticeAvailabilityState): boolean {
+  if (state.practiceLoading || state.practiceError) return true;
+  if (!selectNewAvailable(state)) return true;
+  if (isActiveNew(state.activeSession)) return false;
+  return hasExceededReviewLimit(state);
+}
+
+function selectNewTitle(state: PracticeAvailabilityState): string | undefined {
+  return resolveButtonTitle(
+    state.practiceLoading,
+    state.practiceError,
+    selectNewDisabled(state),
+  );
+}
+
+const NewPracticeButton = memo(function NewPracticeButton(): JSX.Element {
+  const available = usePracticeAvailabilityStore(selectNewAvailable);
+  const disabled = usePracticeAvailabilityStore(selectNewDisabled);
+  const loading = usePracticeAvailabilityStore((state) => state.practiceLoading);
+  const title = usePracticeAvailabilityStore(selectNewTitle);
+
   if (!available && !loading) {
     return (
       <StyledButton className="h-button max-h-button w-full px-4" disabled title={title}>
@@ -175,23 +114,51 @@ function NewPracticeButton({
       {TEXTS.newButton}
     </NavigationButton>
   );
-}
+});
 
-function ReviewPracticeButton({
-  dueCount,
-  disabled,
-  title,
-  to,
-  labelClassName = '',
-  children,
-}: Readonly<{
-  dueCount: number;
-  disabled: boolean;
-  title: string | undefined;
+type ReviewCountBadgeProps = Readonly<{
+  reviewKind: ReviewKind;
+}>;
+
+const ReviewCountBadge = memo(function ReviewCountBadge({
+  reviewKind,
+}: ReviewCountBadgeProps): JSX.Element | null {
+  const dueCount = usePracticeAvailabilityStore((state) =>
+    selectReviewDueCount(state, reviewKind),
+  );
+
+  if (dueCount <= 0) return null;
+
+  return (
+    <span
+      aria-hidden="true"
+      className="bg-light font-body text-dark dark:bg-dark dark:text-light pointer-events-none absolute top-1 right-1 z-10 rounded-full py-0.5 pr-1.5 pl-2 text-center text-xs leading-none"
+    >
+      {dueCount}
+    </span>
+  );
+});
+
+type ReviewPracticeButtonProps = Readonly<{
+  reviewKind: ReviewKind;
   to: string;
   labelClassName?: string;
   children: string;
-}>): JSX.Element {
+}>;
+
+const ReviewPracticeButton = memo(function ReviewPracticeButton({
+  reviewKind,
+  to,
+  labelClassName = '',
+  children,
+}: ReviewPracticeButtonProps): JSX.Element {
+  const disabled = usePracticeAvailabilityStore((state) =>
+    selectReviewDisabled(state, reviewKind),
+  );
+  const title = usePracticeAvailabilityStore((state) =>
+    selectReviewTitle(state, reviewKind),
+  );
+
   return (
     <NavigationButton
       to={to}
@@ -199,93 +166,26 @@ function ReviewPracticeButton({
       disabled={disabled}
       title={title}
     >
-      {dueCount > 0 ? (
-        <span
-          aria-hidden="true"
-          className="bg-light font-body text-dark dark:bg-dark dark:text-light pointer-events-none absolute top-1 right-1 z-10 rounded-full py-0.5 pr-1.5 pl-2 text-center text-xs leading-none"
-        >
-          {dueCount}
-        </span>
-      ) : null}
+      <ReviewCountBadge reviewKind={reviewKind} />
       <span className={`inline-block ${labelClassName}`}>{children}</span>
     </NavigationButton>
   );
-}
+});
 
 export default function PracticeButtons(): JSX.Element {
-  const grammarReviewReadyAt = usePracticeAvailabilityStore(
-    (state) => state.grammarReviewReadyAt,
-  );
-  const vocabularyReviewReadyAt = usePracticeAvailabilityStore(
-    (state) => state.vocabularyReviewReadyAt,
-  );
-  const grammarReviewDueCount = usePracticeAvailabilityStore(
-    (state) => state.grammarReviewDueCount,
-  );
-  const vocabularyReviewDueCount = usePracticeAvailabilityStore(
-    (state) => state.vocabularyReviewDueCount,
-  );
-  const initialTrainingAvailable = usePracticeAvailabilityStore(
-    (state) => state.initialTrainingAvailable,
-  );
-  const activeSession = usePracticeAvailabilityStore((state) => state.activeSession);
-  const loading = usePracticeAvailabilityStore((state) => state.practiceLoading);
-  const error = usePracticeAvailabilityStore((state) => state.practiceError);
-  const {
-    grammarReviewDisabled,
-    vocabularyReviewDisabled,
-    newDisabled,
-    newAvailable,
-    grammarReviewTitle,
-    vocabularyReviewTitle,
-    newTitle,
-  } = resolvePracticeButtonState({
-    grammarReviewReadyAt,
-    vocabularyReviewReadyAt,
-    grammarReviewDueCount,
-    vocabularyReviewDueCount,
-    initialTrainingAvailable,
-    activeSession,
-    loading,
-    error,
-  });
-
   return (
     <div className="flex w-full flex-col gap-1">
-      <NewPracticeButton
-        available={newAvailable}
-        disabled={newDisabled}
-        loading={loading}
-        title={newTitle}
-      />
-      <ReviewPracticeButton
-        dueCount={grammarReviewDueCount}
-        disabled={grammarReviewDisabled}
-        title={grammarReviewTitle}
-        to={ROUTES.grammarPractice}
-      >
+      <NewPracticeButton />
+      <ReviewPracticeButton reviewKind="grammar" to={ROUTES.grammarPractice}>
         {TEXTS.grammarReviewButton}
       </ReviewPracticeButton>
       <ReviewPracticeButton
-        dueCount={vocabularyReviewDueCount}
-        disabled={vocabularyReviewDisabled}
+        reviewKind="vocabulary"
         labelClassName="-translate-x-1.5"
-        title={vocabularyReviewTitle}
         to={ROUTES.vocabularyPractice}
       >
         {TEXTS.vocabularyReviewButton}
       </ReviewPracticeButton>
     </div>
   );
-}
-
-function resolveButtonTitle(
-  loading: boolean,
-  error: Error | null,
-  disabled: boolean,
-): string | undefined {
-  if (loading) return TEXTS.loadingMessage;
-  if (error) return TEXTS.loadingError;
-  if (disabled) return TEXTS.nothingToPractice;
-  return undefined;
 }
