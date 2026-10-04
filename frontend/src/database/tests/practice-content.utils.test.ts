@@ -48,7 +48,7 @@ vi.mock('@/features/logging/monitoring-handler', () => ({
 vi.mock('@/config/config', () => ({
   default: {
     database: { nullReplacementDate: '9999-12-31' },
-    practice: { grammarReviewMinimumSize: 20, vocabularyReviewMinimumSize: 20 },
+    practice: { grammarReviewLimitSize: 20, vocabularyReviewLimitSize: 20 },
   },
 }));
 

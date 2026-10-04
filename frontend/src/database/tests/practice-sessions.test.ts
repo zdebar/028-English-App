@@ -7,7 +7,6 @@ const mocks = vi.hoisted(() => ({
   blockGet: vi.fn(),
   blockItems: vi.fn(),
   itemUpdate: vi.fn(),
-  saveInitialTrainingCompletion: vi.fn(),
   transaction: vi.fn(),
 }));
 
@@ -18,8 +17,8 @@ vi.mock('@/config/config', () => ({
     progress: {},
     practice: {
       initialTrainingBatchSize: 8,
-      grammarReviewMinimumSize: 20,
-      vocabularyReviewMinimumSize: 20,
+      grammarReviewLimitSize: 20,
+      vocabularyReviewLimitSize: 20,
     },
   },
 }));
@@ -46,13 +45,6 @@ vi.mock('@/database/models/db', () => ({
   },
 }));
 
-vi.mock('@/database/models/user-items', () => ({
-  default: {
-    saveInitialTrainingCompletion: (...args: unknown[]) =>
-      mocks.saveInitialTrainingCompletion(...args),
-  },
-}));
-
 vi.mock('dexie', () => ({ Entity: class Entity {} }));
 
 import PracticeSession from '@/database/models/practice-sessions';
@@ -64,7 +56,6 @@ describe('PracticeSession progress transactions', () => {
     mocks.sessionPut.mockResolvedValue(undefined);
     mocks.sessionDelete.mockResolvedValue(undefined);
     mocks.blockItems.mockResolvedValue([]);
-    mocks.saveInitialTrainingCompletion.mockResolvedValue([]);
   });
 
   it('stores an initial-training answer and session in the same transaction', async () => {
@@ -116,34 +107,22 @@ describe('PracticeSession progress transactions', () => {
     expect(mocks.sessionPut).not.toHaveBeenCalled();
   });
 
-  it('records final completion and removes the active initial-training session', async () => {
-    mocks.sessionGet.mockResolvedValue({
-      ...newSession(),
-      current_queue_item_ids: [1, 2],
-    });
+  it('records the final answer and removes the active initial-training session', async () => {
+    const session = { ...newSession(), current_queue_item_ids: [1] };
+    mocks.sessionGet.mockResolvedValue(session);
 
     await expect(
-      PracticeSession.completeInitialTraining('u1', [1, 2], '2026-08-23T10:00:00.000Z'),
+      PracticeSession.recordInitialTrainingAnswer(item(), null, session),
     ).resolves.toBeUndefined();
-    expect(mocks.saveInitialTrainingCompletion).toHaveBeenCalledWith(
-      'u1',
-      [1, 2],
-      '2026-08-23T10:00:00.000Z',
-    );
+    expect(mocks.itemUpdate).toHaveBeenCalledOnce();
     expect(mocks.sessionDelete).toHaveBeenCalledWith('u1');
   });
 
-  it('uses the expected session when the active session was removed before completion', async () => {
+  it('uses the expected session when it was removed before the final answer', async () => {
     mocks.sessionGet.mockResolvedValue(null);
 
     await expect(
-      PracticeSession.completeInitialTraining(
-        'u1',
-        [1, 2],
-        '2026-08-23T10:00:00.000Z',
-        undefined,
-        newSession(),
-      ),
+      PracticeSession.recordInitialTrainingAnswer(item(), null, newSession()),
     ).resolves.toBeUndefined();
     expect(mocks.sessionDelete).toHaveBeenCalledWith('u1');
   });

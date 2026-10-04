@@ -189,7 +189,7 @@ describe('UserItem', () => {
     const dueAt = new Date(Date.now() - 86_400_000).toISOString();
     const grammarFuture = new Date(Date.now() + 86_400_000).toISOString();
     mocks.dueItems = [
-      ...Array.from({ length: config.practice.grammarReviewMinimumSize - 1 }, (_, index) =>
+      ...Array.from({ length: config.practice.grammarReviewLimitSize - 1 }, (_, index) =>
         makeItem({
           item_id: index + 1,
           is_vocabulary: 0,
@@ -205,7 +205,7 @@ describe('UserItem', () => {
         progress_cz_to_en: 1,
         next_at_cz_to_en: grammarFuture,
       }),
-      ...Array.from({ length: config.practice.vocabularyReviewMinimumSize - 1 }, (_, index) =>
+      ...Array.from({ length: config.practice.vocabularyReviewLimitSize - 1 }, (_, index) =>
         makeItem({
           item_id: index + 101,
           is_vocabulary: 1,

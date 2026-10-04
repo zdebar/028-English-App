@@ -4,13 +4,22 @@ import type { PracticeAvailabilitySnapshot } from './practice-availability';
 
 type PracticeAvailabilityValues = Pick<
   PracticeAvailabilitySnapshot,
-  'grammarReviewReadyAt' | 'vocabularyReviewReadyAt' | 'initialTrainingAvailable' | 'activeSession'
+  | 'grammarReviewReadyAt'
+  | 'vocabularyReviewReadyAt'
+  | 'grammarReviewDueCount'
+  | 'vocabularyReviewDueCount'
+  | 'nextReviewAt'
+  | 'initialTrainingAvailable'
+  | 'activeSession'
 >;
 
 type PracticeAvailabilityState = {
   availabilityUserId: string | null;
   grammarReviewReadyAt: string | null;
   vocabularyReviewReadyAt: string | null;
+  grammarReviewDueCount: number;
+  vocabularyReviewDueCount: number;
+  nextReviewAt: string | null;
   initialTrainingAvailable: boolean;
   activeSession: PracticeSessionType | null;
   practiceLoading: boolean;
@@ -25,6 +34,9 @@ const EMPTY_AVAILABILITY = {
   availabilityUserId: null,
   grammarReviewReadyAt: null,
   vocabularyReviewReadyAt: null,
+  grammarReviewDueCount: 0,
+  vocabularyReviewDueCount: 0,
+  nextReviewAt: null,
   initialTrainingAvailable: false,
   activeSession: null,
   practiceLoading: true,
@@ -39,6 +51,9 @@ export const usePracticeAvailabilityStore = create<PracticeAvailabilityState>((s
       availabilityUserId: userId,
       grammarReviewReadyAt: null,
       vocabularyReviewReadyAt: null,
+      grammarReviewDueCount: 0,
+      vocabularyReviewDueCount: 0,
+      nextReviewAt: null,
       initialTrainingAvailable: false,
       activeSession: null,
       practiceLoading: true,
@@ -49,6 +64,9 @@ export const usePracticeAvailabilityStore = create<PracticeAvailabilityState>((s
       availabilityUserId: userId,
       grammarReviewReadyAt: values.grammarReviewReadyAt,
       vocabularyReviewReadyAt: values.vocabularyReviewReadyAt,
+      grammarReviewDueCount: values.grammarReviewDueCount,
+      vocabularyReviewDueCount: values.vocabularyReviewDueCount,
+      nextReviewAt: values.nextReviewAt,
       initialTrainingAvailable: values.initialTrainingAvailable,
       activeSession: values.activeSession,
       practiceLoading: false,
@@ -59,6 +77,9 @@ export const usePracticeAvailabilityStore = create<PracticeAvailabilityState>((s
       availabilityUserId: userId,
       grammarReviewReadyAt: null,
       vocabularyReviewReadyAt: null,
+      grammarReviewDueCount: 0,
+      vocabularyReviewDueCount: 0,
+      nextReviewAt: null,
       initialTrainingAvailable: false,
       activeSession: null,
       practiceLoading: false,

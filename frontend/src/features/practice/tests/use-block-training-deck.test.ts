@@ -6,8 +6,8 @@ const mocks = vi.hoisted(() => ({
   startNew: vi.fn(),
   put: vi.fn(),
   recordInitialTrainingAnswer: vi.fn(),
-  completeInitialTraining: vi.fn(),
   applyPracticeProgress: vi.fn(),
+  syncReviewItemToCache: vi.fn(),
   resetQuestionState: vi.fn(),
   renderStates: [] as Array<{ itemId: number | null; revealed: boolean }>,
   transitionEvents: [] as string[],
@@ -29,7 +29,6 @@ vi.mock('@/database/models/practice-sessions', () => ({
     startNew: (...args: unknown[]) => mocks.startNew(...args),
     put: (...args: unknown[]) => mocks.put(...args),
     recordInitialTrainingAnswer: (...args: unknown[]) => mocks.recordInitialTrainingAnswer(...args),
-    completeInitialTraining: (...args: unknown[]) => mocks.completeInitialTraining(...args),
   },
 }));
 vi.mock('@/database/models/blocks', () => ({ default: { getById: vi.fn() } }));
@@ -66,6 +65,11 @@ vi.mock('@/features/practice/hooks/use-practice-card-state', () => ({
   },
 }));
 vi.mock('@/features/logging/monitoring-handler', () => ({ reportError: vi.fn() }));
+vi.mock('../review-prefetch', () => ({
+  invalidateReviewArrays: vi.fn(),
+  rebuildReviewArrays: vi.fn().mockResolvedValue(undefined),
+  syncReviewItemToCache: (...args: unknown[]) => mocks.syncReviewItemToCache(...args),
+}));
 
 import { useInitialTrainingDeck } from '../hooks/use-block-training-deck';
 
@@ -96,7 +100,7 @@ describe('useInitialTrainingDeck', () => {
     mocks.startNew.mockResolvedValue(newSession());
     mocks.put.mockResolvedValue(undefined);
     mocks.recordInitialTrainingAnswer.mockResolvedValue(undefined);
-    mocks.completeInitialTraining.mockResolvedValue(1);
+    mocks.syncReviewItemToCache.mockResolvedValue(undefined);
     mocks.applyPracticeProgress.mockImplementation((item) => ({
       ...item,
       started_at: '2026-08-23',
@@ -120,6 +124,10 @@ describe('useInitialTrainingDeck', () => {
       'correct',
       expect.any(String),
       { initialTraining: true },
+    );
+    expect(mocks.syncReviewItemToCache).toHaveBeenCalledWith(
+      'u1',
+      expect.objectContaining({ item_id: 1 }),
     );
   });
 
@@ -147,8 +155,7 @@ describe('useInitialTrainingDeck', () => {
 
     await waitFor(() => expect(result.current.isComplete).toBe(true));
     expect(result.current.progressLabel).toBe('2/2');
-    expect(mocks.recordInitialTrainingAnswer).toHaveBeenCalledTimes(1);
-    expect(mocks.completeInitialTraining).toHaveBeenCalledOnce();
+    expect(mocks.recordInitialTrainingAnswer).toHaveBeenCalledTimes(2);
   });
 
   it('retries incorrect items before completing the phase', async () => {
@@ -163,7 +170,7 @@ describe('useInitialTrainingDeck', () => {
 
     await act(async () => result.current.nextKnown());
     await waitFor(() => expect(result.current.isComplete).toBe(true));
-    expect(mocks.recordInitialTrainingAnswer).toHaveBeenCalledTimes(2);
+    expect(mocks.recordInitialTrainingAnswer).toHaveBeenCalledTimes(3);
   });
 
   it('restores the active phase without changing its saved queue', async () => {
@@ -217,7 +224,7 @@ describe('useInitialTrainingDeck', () => {
       completed_item_ids: [2],
     });
     let resolveCompletion!: (value: number) => void;
-    mocks.completeInitialTraining.mockReturnValue(
+    mocks.recordInitialTrainingAnswer.mockReturnValue(
       new Promise((resolve) => {
         resolveCompletion = resolve;
       }),
@@ -234,11 +241,9 @@ describe('useInitialTrainingDeck', () => {
     });
     expect(result.current.isComplete).toBe(false);
     expect(result.current.currentItem?.item_id).toBe(1);
-    expect(mocks.completeInitialTraining).toHaveBeenCalledWith(
-      'u1',
-      [1, 2],
-      expect.any(String),
+    expect(mocks.recordInitialTrainingAnswer).toHaveBeenCalledWith(
       expect.anything(),
+      null,
       expect.objectContaining({ mode: 'new', phase: 0 }),
     );
 
@@ -248,11 +253,9 @@ describe('useInitialTrainingDeck', () => {
     });
 
     await waitFor(() => expect(result.current.isComplete).toBe(true));
-    expect(mocks.completeInitialTraining).toHaveBeenCalledWith(
-      'u1',
-      [1, 2],
-      expect.any(String),
+    expect(mocks.recordInitialTrainingAnswer).toHaveBeenCalledWith(
       expect.anything(),
+      null,
       expect.objectContaining({ mode: 'new', phase: 0 }),
     );
     unmount();
@@ -265,9 +268,9 @@ describe('useInitialTrainingDeck', () => {
       current_queue_item_ids: [1],
       completed_item_ids: [2],
     });
-    mocks.completeInitialTraining
+    mocks.recordInitialTrainingAnswer
       .mockRejectedValueOnce(new Error('completion failed'))
-      .mockResolvedValueOnce(1);
+      .mockResolvedValueOnce(undefined);
     const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
 
@@ -276,11 +279,13 @@ describe('useInitialTrainingDeck', () => {
     expect(result.current.isComplete).toBe(false);
     expect(result.current.currentItem?.item_id).toBe(1);
     expect(result.current.error?.message).toBe('completion failed');
+    expect(mocks.syncReviewItemToCache).not.toHaveBeenCalled();
 
     await act(async () => result.current.nextKnown());
 
     await waitFor(() => expect(result.current.isComplete).toBe(true));
-    expect(mocks.completeInitialTraining).toHaveBeenCalledTimes(2);
+    expect(mocks.recordInitialTrainingAnswer).toHaveBeenCalledTimes(2);
+    expect(mocks.syncReviewItemToCache).toHaveBeenCalledOnce();
   });
 });
 

@@ -17,13 +17,12 @@ import {
   answerCurrentReviewItem,
   createReviewQueue,
   getCurrentReviewEntry,
-  getRemainingReviewEntries,
   type ReviewQueue,
 } from '../review-queue';
 import {
   invalidateReviewArrays,
-  publishReviewItems,
   rebuildReviewArrays,
+  syncReviewItemToCache,
 } from '../review-prefetch';
 import {
   loadReviewDeckData,
@@ -56,18 +55,19 @@ function getInitialCompletedCount(queue: ReviewQueue | null): number {
   return queue ? queue.completedCount : 0;
 }
 
-function getInitialActiveItemCount(queue: ReviewQueue | null): number | null {
-  return queue ? queue.activeItemCount : null;
+function getInitialSessionTotalCount(queue: ReviewQueue | null): number | null {
+  return queue ? queue.sessionTotalCount : null;
 }
 
 function initializeReviewQueue(
   initialData: ReviewDeckData | undefined,
+  reviewKind: ReviewKind,
   queueRef: MutableRef<ReviewQueue | null>,
   dataRef: MutableRef<ReviewDeckData | null>,
 ): ReviewQueue | null {
   if (initialData && dataRef.current === null) {
     dataRef.current = initialData;
-    queueRef.current = createReviewQueue(getReviewQueueEntries(initialData));
+    queueRef.current = createReviewQueue(getReviewQueueEntries(initialData), reviewKind);
   }
   return queueRef.current;
 }
@@ -85,105 +85,65 @@ function resetReviewDeckOnUserChange(
 function getReviewDeckCleanup(
   userId: string | null,
   queueRef: MutableRef<ReviewQueue | null>,
-  finalEntryRef: MutableRef<PracticeDeckEntry | null>,
   dataRef: MutableRef<ReviewDeckData | null>,
 ): (() => void) | undefined {
   if (!userId) return undefined;
   return () => {
     queueRef.current = null;
-    finalEntryRef.current = null;
     dataRef.current = null;
   };
 }
 
-/** Uses the prefetched review queue and persists each answer without blocking card changes. */
+/** Uses the prefetched review queue and persists each answer before advancing. */
 export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckData) {
   const [saveError, setSaveError] = useState<Error | null>(null);
-  const pendingProgressRef = useRef(new Map<number, UserItemLocal>());
-  const pendingSaveRef = useRef(new Map<number, Promise<boolean>>());
   const saveReviewItem = useCallback(
-    (item: UserItemLocal): Promise<boolean> => {
-      if (!userId) return Promise.resolve(false);
+    async (item: UserItemLocal): Promise<boolean> => {
+      if (!userId) return false;
 
-      const existingSave = pendingSaveRef.current.get(item.item_id);
-      if (existingSave) return existingSave;
+      try {
+        await UserItem.savePracticeDeck([item]);
+      } catch (caughtError: unknown) {
+        const normalizedError = toError(caughtError);
+        setSaveError(normalizedError);
+        reportError('Failed to save review progress', normalizedError);
+        return false;
+      }
 
-      const savePromise = Promise.resolve()
-        .then(() => UserItem.savePracticeDeck([item]))
-        .then(() => {
-          invalidateReviewArrays(item.user_id);
-          if (pendingProgressRef.current.get(item.item_id) === item) {
-            pendingProgressRef.current.delete(item.item_id);
-          }
-          if (pendingProgressRef.current.size === 0) setSaveError(null);
-          return true;
-        })
-        .catch((caughtError: unknown) => {
-          const normalizedError = toError(caughtError);
-          setSaveError(normalizedError);
-          reportError('Failed to save review progress', normalizedError);
-          return false;
+      try {
+        await syncReviewItemToCache(userId, item);
+      } catch (caughtError: unknown) {
+        invalidateReviewArrays(userId);
+        void rebuildReviewArrays(userId).catch((rebuildError: unknown) => {
+          reportError('Failed to rebuild review arrays', rebuildError);
         });
+        reportError('Failed to update review cache', caughtError);
+      }
 
-      pendingSaveRef.current.set(item.item_id, savePromise);
-      const removeSave = () => {
-        if (pendingSaveRef.current.get(item.item_id) === savePromise) {
-          pendingSaveRef.current.delete(item.item_id);
-        }
-      };
-      void savePromise.then(removeSave, removeSave);
-      return savePromise;
+      setSaveError(null);
+      return true;
     },
     [userId],
   );
-  const flushPendingReviewItems = useCallback(async (): Promise<boolean> => {
-    if (!userId) return false;
-
-    for (const item of pendingProgressRef.current.values()) {
-      void saveReviewItem(item);
-    }
-
-    const saves = [...pendingSaveRef.current.values()];
-    if (saves.length === 0) return pendingProgressRef.current.size === 0;
-
-    const results = await Promise.all(saves);
-    return results.every(Boolean) && pendingProgressRef.current.size === 0;
-  }, [saveReviewItem, userId]);
 
   const [queueVersion, setQueueVersion] = useState(0);
   const initialReviewDeck = initialData;
+  const reviewKind = getReviewKind(initialData);
   const reviewQueueRef = useRef<ReviewQueue | null>(null);
-  const finalEntryRef = useRef<PracticeDeckEntry | null>(null);
   const queueDataRef = useRef<ReviewDeckData | null>(null);
-  const initialQueue = initializeReviewQueue(initialReviewDeck, reviewQueueRef, queueDataRef);
-  const flushPracticeForBoundary = useCallback(async (): Promise<void> => {
-    const didSave = await flushPendingReviewItems();
-    if (!userId) return;
-    if (!didSave) {
-      invalidateReviewArrays(userId);
-      return;
-    }
-
-    const queue = reviewQueueRef.current;
-    if (queue) {
-      publishReviewItems(
-        userId,
-        getReviewKind(queueDataRef.current),
-        getRemainingReviewEntries(queue).map((entry) => entry.item),
-      );
-    }
-    globalThis.setTimeout(() => {
-      void rebuildReviewArrays(userId).catch((error) => {
-        reportError('Failed to rebuild review arrays', error);
-      });
-    }, 0);
-  }, [flushPendingReviewItems, userId]);
-  const { finishPractice } = usePracticeAvailabilityBoundary(userId, flushPracticeForBoundary);
+  const pendingAnswerRef = useRef<UserItemLocal | null>(null);
+  const initialQueue = initializeReviewQueue(
+    initialReviewDeck,
+    reviewKind,
+    reviewQueueRef,
+    queueDataRef,
+  );
+  const { finishPractice } = usePracticeAvailabilityBoundary(userId);
   const [revealed, setRevealed] = useState(false);
   const [finishedReview, setFinishedReview] = useState(() => isReviewQueueFinished(initialQueue));
   const [retryAction, setRetryAction] = useState<ReviewRetryAction | null>(null);
   const [completedCount, setCompletedCount] = useState(getInitialCompletedCount(initialQueue));
-  const [totalCount, setTotalCount] = useState(getInitialActiveItemCount(initialQueue));
+  const [totalCount, setTotalCount] = useState(getInitialSessionTotalCount(initialQueue));
   const isTransitioningRef = useRef(false);
   const [secondaryContent, setSecondaryContent] = useState<SecondaryContent | null>(null);
   const secondaryContentRequestIdRef = useRef(0);
@@ -204,7 +164,6 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
     [],
   );
 
-  const reviewKind = getReviewKind(initialData);
   const fetchPracticeDeck = useCallback(
     () => (userId ? loadReviewDeckData(userId, reviewKind) : Promise.resolve(createEmptyReviewDeck(reviewKind))),
     [reviewKind, userId],
@@ -215,7 +174,7 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
   const { currentEntry, currentItem } = useMemo(
     () => {
       const queueEntry = getCurrentReviewEntry(reviewQueueRef.current);
-      const entry = finishedReview ? null : queueEntry ?? finalEntryRef.current;
+      const entry = finishedReview ? null : queueEntry;
       return { currentEntry: entry, currentItem: entry?.item ?? null };
     },
     [finishedReview, queueVersion],
@@ -231,10 +190,8 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
   const previousUserIdRef = useRef(userId);
   useEffect(() => {
     resetReviewDeckOnUserChange(previousUserIdRef, userId, () => {
-      pendingProgressRef.current.clear();
-      pendingSaveRef.current.clear();
+      pendingAnswerRef.current = null;
       reviewQueueRef.current = null;
-      finalEntryRef.current = null;
       queueDataRef.current = null;
       setQueueVersion(0);
       setCompletedCount(0);
@@ -242,23 +199,22 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
       setFinishedReview(false);
     });
 
-    return getReviewDeckCleanup(userId, reviewQueueRef, finalEntryRef, queueDataRef);
+    return getReviewDeckCleanup(userId, reviewQueueRef, queueDataRef);
   }, [userId]);
 
   useEffect(() => {
     if (loading || !fetchedResult || queueDataRef.current === fetchedResult) return;
 
-    const queue = createReviewQueue(getReviewQueueEntries(fetchedResult));
+    const queue = createReviewQueue(getReviewQueueEntries(fetchedResult), reviewKind);
     queueDataRef.current = fetchedResult;
     reviewQueueRef.current = queue;
-    finalEntryRef.current = null;
     setCompletedCount(queue.completedCount);
-    setTotalCount(queue.activeItemCount);
+    setTotalCount(queue.sessionTotalCount);
     setFinishedReview(getCurrentReviewEntry(queue) === null);
     setRetryAction(null);
     resetQuestionState();
     setQueueVersion((version) => version + 1);
-  }, [fetchedResult, loading, resetQuestionState]);
+  }, [fetchedResult, loading, resetQuestionState, reviewKind]);
 
   useEffect(() => {
     if (!finishedReview || !reviewQueueRef.current) return;
@@ -323,6 +279,37 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
     [currentItem, getSecondaryContentPromise, secondaryContent, userId],
   );
 
+  const persistAndAdvance = useCallback(
+    async (updatedItem: UserItemLocal): Promise<void> => {
+      const queue = reviewQueueRef.current;
+      if (!queue) return;
+
+      const didSave = await saveReviewItem(updatedItem);
+      if (!didSave) {
+        pendingAnswerRef.current = updatedItem;
+        setRetryAction('save');
+        return;
+      }
+
+      const answerResult = answerCurrentReviewItem(queue, updatedItem);
+      if (!answerResult) return;
+
+      pendingAnswerRef.current = null;
+      setRetryAction(null);
+
+      if (answerResult.hasNextItem) {
+        setCompletedCount(queue.completedCount);
+        setTotalCount(queue.sessionTotalCount);
+        setQueueVersion((version) => version + 1);
+        resetQuestionState();
+        return;
+      }
+
+      setFinishedReview(true);
+    },
+    [resetQuestionState, saveReviewItem],
+  );
+
   const nextItem = useCallback(
     async (outcome: PracticeOutcome) => {
       if (isTransitioningRef.current) return;
@@ -336,59 +323,28 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
           outcome,
           new Date(Date.now()).toISOString(),
         );
-        pendingProgressRef.current.set(updatedItem.item_id, updatedItem);
-        void saveReviewItem(updatedItem);
-
-        const answerResult = answerCurrentReviewItem(reviewQueueRef.current, updatedItem);
-        if (!answerResult) return;
-
-        setCompletedCount(reviewQueueRef.current.completedCount);
-        setTotalCount(reviewQueueRef.current.activeItemCount);
-        setQueueVersion((version) => version + 1);
-
-        if (answerResult.hasNextItem) {
-          resetQuestionState();
-          return;
-        }
-
-        finalEntryRef.current = answerResult.answeredEntry;
-        setQueueVersion((version) => version + 1);
-        const didSave = await flushPendingReviewItems();
-        if (!didSave) {
-          setRetryAction('save');
-          return;
-        }
-
-        finalEntryRef.current = null;
-        setFinishedReview(true);
-        setRetryAction(null);
+        await persistAndAdvance(updatedItem);
       } finally {
         isTransitioningRef.current = false;
       }
     },
     [
       currentItem,
-      flushPendingReviewItems,
-      resetQuestionState,
-      saveReviewItem,
+      persistAndAdvance,
       userId,
     ],
   );
   const retryPractice = useCallback(async () => {
-    if (!retryAction || isTransitioningRef.current) return;
+    const pendingItem = pendingAnswerRef.current;
+    if (!retryAction || !pendingItem || isTransitioningRef.current) return;
     isTransitioningRef.current = true;
 
     try {
-      const didSave = await flushPendingReviewItems();
-      if (!didSave) return;
-
-      finalEntryRef.current = null;
-      setFinishedReview(true);
-      setRetryAction(null);
+      await persistAndAdvance(pendingItem);
     } finally {
       isTransitioningRef.current = false;
     }
-  }, [flushPendingReviewItems, retryAction]);
+  }, [persistAndAdvance, retryAction]);
 
   return {
     currentItem,

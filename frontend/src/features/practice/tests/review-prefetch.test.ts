@@ -19,8 +19,8 @@ import {
   getReviewAvailabilityFromArrays,
   getReviewReadyAtFromItems,
   invalidateReviewArrays,
-  publishReviewItems,
   rebuildReviewArrays,
+  syncReviewItemToCache,
   warmReviewArrays,
 } from '../review-prefetch';
 
@@ -84,23 +84,25 @@ describe('review prefetch', () => {
     expect(getReviewReadyAtFromItems([dueGrammar, futureGrammar], 2, NOW)).toBe(
       futureGrammar.next_at_cz_to_en,
     );
-    expect(
-      getReviewAvailabilityFromArrays(
-        {
-          grammar: [
-            ...Array.from({ length: config.practice.grammarReviewMinimumSize - 1 }, (_, index) =>
-              item(index + 10, 'grammar'),
-            ),
-            futureGrammar,
-          ],
-          vocabulary: [],
-        },
-        NOW,
-      ).grammarReviewReadyAt,
-    ).toBe(futureGrammar.next_at_cz_to_en);
+    const availability = getReviewAvailabilityFromArrays(
+      {
+        grammar: [
+          ...Array.from({ length: config.practice.grammarReviewLimitSize - 1 }, (_, index) =>
+            item(index + 10, 'grammar'),
+          ),
+          futureGrammar,
+        ],
+        vocabulary: [],
+      },
+      NOW,
+    );
+
+    expect(availability.grammarReviewReadyAt).toBe(futureGrammar.next_at_cz_to_en);
+    expect(availability.grammarReviewDueCount).toBe(config.practice.grammarReviewLimitSize - 1);
+    expect(availability.nextReviewAt).toBe(futureGrammar.next_at_cz_to_en);
   });
 
-  it('keeps a published queue snapshot when an older rebuild is still pending', async () => {
+  it('merges a persisted item into the refreshed arrays without duplication', async () => {
     await warmReviewArrays('u1');
 
     let resolveQuery!: () => void;
@@ -113,16 +115,46 @@ describe('review prefetch', () => {
     });
 
     const rebuild = rebuildReviewArrays('u1');
-    const publishedGrammar = item(4, 'grammar');
-    publishReviewItems('u1', 'grammar', [publishedGrammar]);
+    const persistedGrammar = item(4, 'grammar', '2026-01-01T11:00:00.000Z');
+    const sync = syncReviewItemToCache('u1', persistedGrammar);
     resolveQuery();
     await rebuild;
+    await sync;
 
-    await expect(getPrefetchedReviewItems('u1', 'grammar')).resolves.toEqual([publishedGrammar]);
+    await expect(getPrefetchedReviewItems('u1', 'grammar')).resolves.toEqual([
+      item(2, 'grammar'),
+      persistedGrammar,
+    ]);
+  });
+
+  it('replaces and removes items while preserving sorted unique arrays', async () => {
+    const original = item(1, 'grammar', '2026-01-01T10:00:00.000Z');
+    const other = item(2, 'grammar', '2026-01-01T12:00:00.000Z');
+    mocks.getAllReviewItems.mockImplementation(async (_userId: string, reviewKind: ReviewKind) =>
+      reviewKind === 'grammar' ? [original, other] : [],
+    );
+
+    await warmReviewArrays('u1');
+    const updated = item(1, 'grammar', '2026-01-01T13:00:00.000Z');
+    await syncReviewItemToCache('u1', updated);
+
+    expect(await getPrefetchedReviewItems('u1', 'grammar')).toEqual([other, updated]);
+
+    await syncReviewItemToCache(
+      'u1',
+      item(1, 'grammar', NULL_DATE, { progress_cz_to_en: 0, mastered_at_cz_to_en: NOW }),
+    );
+
+    expect(await getPrefetchedReviewItems('u1', 'grammar')).toEqual([other]);
   });
 });
 
-function item(itemId: number, _reviewKind: ReviewKind, nextAt = '2026-01-01T10:00:00.000Z'): PracticeDeckItem {
+function item(
+  itemId: number,
+  _reviewKind: ReviewKind,
+  nextAt = '2026-01-01T10:00:00.000Z',
+  overrides: Partial<PracticeDeckItem> = {},
+): PracticeDeckItem {
   return {
     user_id: 'u1',
     item_id: itemId,
@@ -134,7 +166,7 @@ function item(itemId: number, _reviewKind: ReviewKind, nextAt = '2026-01-01T10:0
     progress_cz_to_en: 1,
     note_id: null,
     lesson_id: 1,
-    is_vocabulary: 1,
+    is_vocabulary: _reviewKind === 'vocabulary' ? 1 : 0,
     block_id: 1,
     topic_id: 1,
     grammar_chunk_id: 0,
@@ -144,5 +176,6 @@ function item(itemId: number, _reviewKind: ReviewKind, nextAt = '2026-01-01T10:0
     next_at_cz_to_en: nextAt,
     mastered_at_cz_to_en: NULL_DATE,
     curriculum_sort_path: [1, 1, itemId],
+    ...overrides,
   };
 }

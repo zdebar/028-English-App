@@ -61,7 +61,7 @@ function DailyProgressValue({
   const colorClass = getGoalTextColorClass(value, goal);
 
   return (
-    <span className={`${colorClass} font-headings text-xl font-bold`}>
+    <span className={`${colorClass} font-body text-base font-bold`}>
       {formatProgressChange(value)} / {goal}
     </span>
   );

@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   load: vi.fn(),
@@ -32,6 +32,9 @@ import {
 const snapshot: import('../practice-availability').PracticeAvailabilitySnapshot = {
   grammarReviewReadyAt: '2026-07-21T10:00:00.000Z',
   vocabularyReviewReadyAt: '2026-07-21T11:00:00.000Z',
+  grammarReviewDueCount: 24,
+  vocabularyReviewDueCount: 0,
+  nextReviewAt: '2026-07-21T10:00:00.000Z',
   initialTrainingAvailable: true,
   activeSession: null,
   requiresSessionReconciliation: false,
@@ -44,6 +47,8 @@ function deferred<T>() {
 }
 
 describe('availability refresh lifecycle', () => {
+  afterEach(() => vi.useRealTimers());
+
   beforeEach(() => {
     resetPracticeAvailability();
     vi.clearAllMocks();
@@ -66,6 +71,24 @@ describe('availability refresh lifecycle', () => {
     await refreshPracticeAvailability('u1');
     await refreshPracticeAvailability('u1');
     expect(mocks.load).toHaveBeenCalledTimes(3);
+  });
+
+  it('refreshes at the next review item boundary', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-07-21T09:59:59.000Z'));
+    mocks.load
+      .mockResolvedValueOnce({
+        ...snapshot,
+        nextReviewAt: '2026-07-21T10:00:00.000Z',
+      })
+      .mockResolvedValueOnce({ ...snapshot, nextReviewAt: null });
+
+    await ensurePracticeAvailability('u1');
+    expect(mocks.load).toHaveBeenCalledOnce();
+
+    await act(async () => vi.advanceTimersByTimeAsync(1001));
+
+    expect(mocks.load).toHaveBeenCalledTimes(2);
   });
 
   it('does not refresh after answers; defers sync until exit and pending saves finish', async () => {
