@@ -296,11 +296,11 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
 
       pendingAnswerRef.current = null;
       setRetryAction(null);
-      setCompletedCount(queue.completedCount);
-      setTotalCount(queue.sessionTotalCount);
-      setQueueVersion((version) => version + 1);
 
       if (answerResult.hasNextItem) {
+        setCompletedCount(queue.completedCount);
+        setTotalCount(queue.sessionTotalCount);
+        setQueueVersion((version) => version + 1);
         resetQuestionState();
         return;
       }

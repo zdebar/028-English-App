@@ -391,16 +391,21 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
       await PracticeSession.recordInitialTrainingAnswer(updatedItem, null, session);
     }
     await syncPersistedItemToReviewCache(updatedItem);
+
+    if (!nextSession) {
+      setHasProgress(true);
+      setIsComplete(true);
+      setError(null);
+      return;
+    }
+
     resetQuestionState();
     setItems((currentItems) => updateTrainingItem(currentItems, updatedItem));
     setActiveItems((currentItems) =>
-      nextSession
-        ? getActiveTrainingItems(updateTrainingItem(currentItems, updatedItem), nextSession)
-        : [],
+      getActiveTrainingItems(updateTrainingItem(currentItems, updatedItem), nextSession),
     );
     setSession(nextSession);
     setHasProgress(true);
-    setIsComplete(nextSession === null);
     setError(null);
   } catch (caughtError) {
     const normalizedError = toError(caughtError);

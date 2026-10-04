@@ -181,7 +181,7 @@ describe('usePracticeDeck', () => {
     await expect(ensurePromise).resolves.toBe(true);
   });
 
-  it('finishes the prefetched queue after the final save without reloading', async () => {
+  it('finishes the prefetched queue without publishing a final counter update', async () => {
     mocks.savePracticeDeck.mockImplementation(async (items: PracticeDeckEntry['item'][]) => {
       expect(items).toHaveLength(1);
       if (items[0].item_id === 2) mocks.fetchData = reviewDeckResult([entry(3)]);
@@ -204,11 +204,11 @@ describe('usePracticeDeck', () => {
     expect(mocks.reload).not.toHaveBeenCalled();
     expect(result.current.currentItem).toBeNull();
     expect(result.current.finishedReview).toBe(true);
-    expect(result.current.progressLabel).toBe('2 / 2');
+    expect(result.current.progressLabel).toBe('1 / 2');
     expect(mocks.syncReviewItemToCache).toHaveBeenCalledTimes(2);
   });
 
-  it('does not add a nonexistent next batch to the running counter', async () => {
+  it('does not add a nonexistent next batch or final answer to the visible counter', async () => {
     mocks.fetchData = reviewDeckResult([entry(1)]);
     mocks.savePracticeDeck.mockImplementation(async () => {
       mocks.fetchData = reviewDeckResult([entry(2)]);
@@ -218,7 +218,7 @@ describe('usePracticeDeck', () => {
 
     await act(async () => result.current.nextItem('correct'));
 
-    expect(result.current.progressLabel).toBe('1 / 1');
+    expect(result.current.progressLabel).toBe('0 / 1');
   });
 
   it('keeps the batch in memory when an item save fails', async () => {
@@ -320,7 +320,7 @@ describe('usePracticeDeck', () => {
     expect(mocks.reload).not.toHaveBeenCalled();
     expect(result.current.currentItem).toBeNull();
     expect(result.current.finishedReview).toBe(true);
-    expect(result.current.progressLabel).toBe('1 / 1');
+    expect(result.current.progressLabel).toBe('0 / 1');
   });
 
   it('does not reload after a successful final save', async () => {
@@ -335,7 +335,7 @@ describe('usePracticeDeck', () => {
     expect(mocks.savePracticeDeck).toHaveBeenCalledOnce();
     expect(mocks.reload).not.toHaveBeenCalled();
     expect(result.current.currentItem).toBeNull();
-    expect(result.current.progressLabel).toBe('1 / 1');
+    expect(result.current.progressLabel).toBe('0 / 1');
   });
 });
 
