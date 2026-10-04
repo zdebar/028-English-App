@@ -48,36 +48,33 @@ async function loadReviewAvailability(userId: string) {
 export function isReviewThresholdReached(
   dueCount: number,
   readyAt: string | null,
-  minimumSize: number,
+  limitSize: number,
   now: number = Date.now(),
 ): boolean {
-  if (dueCount >= minimumSize) return true;
+  if (dueCount >= limitSize) return true;
   if (readyAt === null) return false;
   return Date.parse(readyAt) <= now;
 }
 
-export function hasAvailableReview(
+export function isReviewLimitExceeded(dueCount: number, limitSize: number): boolean {
+  return dueCount > limitSize;
+}
+
+export function hasExceededReviewLimit(
   availability: Pick<
     PracticeAvailabilitySnapshot,
-    | 'grammarReviewReadyAt'
-    | 'vocabularyReviewReadyAt'
     | 'grammarReviewDueCount'
     | 'vocabularyReviewDueCount'
   >,
-  now: number = Date.now(),
 ): boolean {
   return (
-    isReviewThresholdReached(
+    isReviewLimitExceeded(
       availability.grammarReviewDueCount,
-      availability.grammarReviewReadyAt,
-      config.practice.grammarReviewMinimumSize,
-      now,
+      config.practice.grammarReviewLimitSize,
     ) ||
-    isReviewThresholdReached(
+    isReviewLimitExceeded(
       availability.vocabularyReviewDueCount,
-      availability.vocabularyReviewReadyAt,
-      config.practice.vocabularyReviewMinimumSize,
-      now,
+      config.practice.vocabularyReviewLimitSize,
     )
   );
 }

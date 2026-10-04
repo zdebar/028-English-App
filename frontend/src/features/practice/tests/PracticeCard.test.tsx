@@ -82,8 +82,8 @@ vi.mock('@/config/config', () => ({
     database: { nullReplacementDate: '9999-12-31T23:59:59+00:00' },
     practice: {
       dailyGoal: 20,
-      grammarReviewMinimumSize: 20,
-      vocabularyReviewMinimumSize: 20,
+      grammarReviewLimitSize: 20,
+      vocabularyReviewLimitSize: 20,
       audioDelay: 300,
     },
     srs: { intervals: Array.from({ length: 8 }) },

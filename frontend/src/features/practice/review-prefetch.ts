@@ -185,12 +185,12 @@ export function getReviewAvailabilityFromArrays(
   return {
     grammarReviewReadyAt: getReviewReadyAtFromItems(
       arrays.grammar,
-      config.practice.grammarReviewMinimumSize,
+      config.practice.grammarReviewLimitSize,
       nowIso,
     ),
     vocabularyReviewReadyAt: getReviewReadyAtFromItems(
       arrays.vocabulary,
-      config.practice.vocabularyReviewMinimumSize,
+      config.practice.vocabularyReviewLimitSize,
       nowIso,
     ),
     grammarReviewDueCount,

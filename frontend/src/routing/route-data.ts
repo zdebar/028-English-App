@@ -1,5 +1,5 @@
 import { loadSharedQuery } from '@/hooks/shared-query-store';
-import { hasAvailableReview } from '@/features/practice/practice-availability';
+import { hasExceededReviewLimit } from '@/features/practice/practice-availability';
 import { loadReviewAvailabilityFromArrays } from '@/features/practice/review-prefetch';
 import { usePracticeAvailabilityStore } from '@/features/practice/use-practice-availability-store';
 import PronunciationGroup from '@/database/models/pronunciation-groups';
@@ -99,11 +99,11 @@ async function shouldBlockInitialTraining(userId: string): Promise<boolean> {
     !cachedAvailability.practiceLoading &&
     cachedAvailability.practiceError === null;
 
-  if (hasUsableCache) return hasAvailableReview(cachedAvailability);
+  if (hasUsableCache) return hasExceededReviewLimit(cachedAvailability);
 
   try {
     const reviewAvailability = await loadReviewAvailabilityFromArrays(userId);
-    return hasAvailableReview(reviewAvailability);
+    return hasExceededReviewLimit(reviewAvailability);
   } catch {
     return false;
   }

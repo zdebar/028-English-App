@@ -5,7 +5,10 @@ import { NavigationButton } from '@/routing/data-navigation';
 import { usePracticeAvailabilityStore } from './use-practice-availability-store';
 import StyledButton from '@/components/UI/buttons/StyledButton';
 import config from '@/config/config';
-import { isReviewThresholdReached } from './practice-availability';
+import {
+  isReviewLimitExceeded,
+  isReviewThresholdReached,
+} from './practice-availability';
 
 type PracticeButtonState = Readonly<{
   grammarReviewDisabled: boolean;
@@ -49,6 +52,7 @@ type ReviewAvailability = Readonly<{
   grammar: boolean;
   vocabulary: boolean;
   any: boolean;
+  limitExceeded: boolean;
 }>;
 
 function resolveReviewAvailability(
@@ -61,26 +65,39 @@ function resolveReviewAvailability(
   const grammar = isReviewAvailable(
     grammarReviewReadyAt,
     grammarReviewDueCount,
-    config.practice.grammarReviewMinimumSize,
+    config.practice.grammarReviewLimitSize,
     checkedAt,
   );
   const vocabulary = isReviewAvailable(
     vocabularyReviewReadyAt,
     vocabularyReviewDueCount,
-    config.practice.vocabularyReviewMinimumSize,
+    config.practice.vocabularyReviewLimitSize,
     checkedAt,
   );
-  return { grammar, vocabulary, any: grammar || vocabulary };
+  const grammarLimitExceeded = isReviewLimitExceeded(
+    grammarReviewDueCount,
+    config.practice.grammarReviewLimitSize,
+  );
+  const vocabularyLimitExceeded = isReviewLimitExceeded(
+    vocabularyReviewDueCount,
+    config.practice.vocabularyReviewLimitSize,
+  );
+  return {
+    grammar,
+    vocabulary,
+    any: grammar || vocabulary,
+    limitExceeded: grammarLimitExceeded || vocabularyLimitExceeded,
+  };
 }
 
 function isReviewAvailable(
   readyAt: string | null,
   dueCount: number,
-  minimumSize: number,
+  limitSize: number,
   checkedAt: number,
 ): boolean {
   const effectiveCheckedAt = Math.max(checkedAt, Date.now());
-  return isReviewThresholdReached(dueCount, readyAt, minimumSize, effectiveCheckedAt);
+  return isReviewThresholdReached(dueCount, readyAt, limitSize, effectiveCheckedAt);
 }
 
 type PracticeButtonFlags = Readonly<{
@@ -101,7 +118,7 @@ function resolvePracticeButtonFlags(
   const grammarReviewDisabled = blocked || !reviewAvailability.grammar;
   const vocabularyReviewDisabled = blocked || !reviewAvailability.vocabulary;
   const newAvailable = activeNew || initialTrainingAvailable;
-  const newBlockedByReview = !activeNew && reviewAvailability.any;
+  const newBlockedByReview = !activeNew && reviewAvailability.limitExceeded;
   const newDisabled = blocked || newBlockedByReview || !newAvailable;
   return {
     grammarReviewDisabled,

@@ -446,8 +446,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       grammarNextReviewAt,
       vocabularyNextReviewAt,
     ] = await Promise.all([
-      getReviewReadyAt(userId, config.practice.grammarReviewMinimumSize, nowIso, 'grammar'),
-      getReviewReadyAt(userId, config.practice.vocabularyReviewMinimumSize, nowIso, 'vocabulary'),
+      getReviewReadyAt(userId, config.practice.grammarReviewLimitSize, nowIso, 'grammar'),
+      getReviewReadyAt(userId, config.practice.vocabularyReviewLimitSize, nowIso, 'vocabulary'),
       getReviewDueCount(userId, nowIso, 'grammar'),
       getReviewDueCount(userId, nowIso, 'vocabulary'),
       getNextReviewAt(userId, nowIso, 'grammar'),

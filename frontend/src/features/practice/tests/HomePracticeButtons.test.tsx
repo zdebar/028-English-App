@@ -19,6 +19,7 @@ vi.mock('@/routing/data-navigation', () => ({
 
 import PracticeButtons from '@/features/practice/PracticeButton';
 import { usePracticeAvailabilityStore } from '@/features/practice/use-practice-availability-store';
+import config from '@/config/config';
 
 describe('Home practice buttons', () => {
   afterEach(() => vi.useRealTimers());
@@ -111,29 +112,47 @@ describe('Home practice buttons', () => {
     usePracticeAvailabilityStore.setState({
       grammarReviewReadyAt: new Date().toISOString(),
       vocabularyReviewReadyAt: new Date().toISOString(),
+      grammarReviewDueCount: config.practice.grammarReviewLimitSize,
+      vocabularyReviewDueCount: config.practice.vocabularyReviewLimitSize,
     });
     render(<PracticeButtons />);
     expect(button('Grammar review').disabled).toBe(false);
     expect(button('Vocabulary review').disabled).toBe(false);
-    expect(button('New').disabled).toBe(true);
+    expect(button('New').disabled).toBe(false);
   });
 
   it('enables vocabulary review when grammar is not ready', () => {
     usePracticeAvailabilityStore.setState({
       grammarReviewReadyAt: new Date(Date.now() + 86_400_000).toISOString(),
       vocabularyReviewReadyAt: new Date().toISOString(),
+      vocabularyReviewDueCount: config.practice.vocabularyReviewLimitSize,
     });
     render(<PracticeButtons />);
 
     expect(button('Grammar review').disabled).toBe(true);
     expect(button('Vocabulary review').disabled).toBe(false);
-    expect(button('New').disabled).toBe(true);
+    expect(button('New').disabled).toBe(false);
   });
 
-  it('uses due counts for review availability and displays the count badge', () => {
+  it('keeps new available at the review limit', () => {
     usePracticeAvailabilityStore.setState({
       grammarReviewReadyAt: null,
-      grammarReviewDueCount: 24,
+      grammarReviewDueCount: config.practice.grammarReviewLimitSize,
+      vocabularyReviewDueCount: 3,
+    });
+
+    render(<PracticeButtons />);
+
+    expect(button('Grammar review').disabled).toBe(false);
+    expect(button('Vocabulary review').disabled).toBe(true);
+    expect(button('New').disabled).toBe(false);
+  });
+
+  it('locks new when a review count exceeds its limit', () => {
+    const grammarReviewCount = config.practice.grammarReviewLimitSize + 1;
+    usePracticeAvailabilityStore.setState({
+      grammarReviewReadyAt: null,
+      grammarReviewDueCount: grammarReviewCount,
       vocabularyReviewDueCount: 3,
     });
 
@@ -142,7 +161,7 @@ describe('Home practice buttons', () => {
     expect(button('Grammar review').disabled).toBe(false);
     expect(button('Vocabulary review').disabled).toBe(true);
     expect(button('New').disabled).toBe(true);
-    expect(screen.getByText('24')).toBeTruthy();
+    expect(screen.getByText(String(grammarReviewCount))).toBeTruthy();
     expect(screen.getByText('3')).toBeTruthy();
   });
 

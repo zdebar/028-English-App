@@ -87,7 +87,7 @@ describe('review prefetch', () => {
     const availability = getReviewAvailabilityFromArrays(
       {
         grammar: [
-          ...Array.from({ length: config.practice.grammarReviewMinimumSize - 1 }, (_, index) =>
+          ...Array.from({ length: config.practice.grammarReviewLimitSize - 1 }, (_, index) =>
             item(index + 10, 'grammar'),
           ),
           futureGrammar,
@@ -98,9 +98,7 @@ describe('review prefetch', () => {
     );
 
     expect(availability.grammarReviewReadyAt).toBe(futureGrammar.next_at_cz_to_en);
-    expect(availability.grammarReviewDueCount).toBe(
-      config.practice.grammarReviewMinimumSize - 1,
-    );
+    expect(availability.grammarReviewDueCount).toBe(config.practice.grammarReviewLimitSize - 1);
     expect(availability.nextReviewAt).toBe(futureGrammar.next_at_cz_to_en);
   });
 

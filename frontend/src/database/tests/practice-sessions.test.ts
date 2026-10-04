@@ -17,8 +17,8 @@ vi.mock('@/config/config', () => ({
     progress: {},
     practice: {
       initialTrainingBatchSize: 8,
-      grammarReviewMinimumSize: 20,
-      vocabularyReviewMinimumSize: 20,
+      grammarReviewLimitSize: 20,
+      vocabularyReviewLimitSize: 20,
     },
   },
 }));
