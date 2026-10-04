@@ -23,7 +23,11 @@ import {
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
 } from '@/database/utils/practice-content.utils';
-import { invalidateReviewArrays } from '../review-prefetch';
+import {
+  invalidateReviewArrays,
+  rebuildReviewArrays,
+  syncReviewItemToCache,
+} from '../review-prefetch';
 
 type TrainingOutcome = 'correct' | 'incorrect' | 'skip';
 
@@ -65,16 +69,16 @@ function getInitialTrainingState(initialData: InitialTrainingData | undefined) {
 
 function getInitialTrainingView(
   session: PracticeSessionType | null,
-  items: UserItemLocal[],
   itemById: Map<number, UserItemLocal>,
   resolvedEntries: Array<ResolvedPracticeEntry<UserItemLocal>>,
   isComplete: boolean,
   revealed: boolean,
+  initialItemCount: number,
 ): InitialTrainingView {
   const currentItemId = session?.current_queue_item_ids[0];
   const currentItem = getCurrentTrainingItem(currentItemId, itemById);
   const currentEntry = getCurrentTrainingEntry(currentItem, resolvedEntries);
-  const displayedCompletedCount = getDisplayedTrainingCount(isComplete, items, session);
+  const displayedCompletedCount = getDisplayedTrainingCount(isComplete, initialItemCount, session);
   const pronunciation = getTrainingPronunciation(currentItem, revealed);
   return { currentItem, currentEntry, displayedCompletedCount, pronunciation };
 }
@@ -96,11 +100,27 @@ function getCurrentTrainingEntry(
 
 function getDisplayedTrainingCount(
   isComplete: boolean,
-  items: UserItemLocal[],
+  initialItemCount: number,
   session: PracticeSessionType | null,
 ): number {
-  if (isComplete) return items.length;
+  if (isComplete) return initialItemCount;
   return session?.completed_count ?? 0;
+}
+
+function getActiveTrainingItems(
+  items: UserItemLocal[],
+  session: PracticeSessionType | null,
+): UserItemLocal[] {
+  if (!session) return [];
+
+  const itemById = new Map(items.map((item) => [item.item_id, item]));
+  const activeItemIds = [
+    ...session.current_queue_item_ids,
+    ...session.retry_queue_item_ids,
+  ];
+  return activeItemIds
+    .map((itemId) => itemById.get(itemId))
+    .filter((item): item is UserItemLocal => item !== undefined);
 }
 
 function getTrainingPronunciation(currentItem: UserItemLocal | null, revealed: boolean): string {
@@ -215,6 +235,8 @@ function hasTrainingProgress(existing: PracticeSessionType | null): boolean {
 type InitialTrainingLoadSetters = Readonly<{
   setBlock: Dispatch<SetStateAction<BlockType | null>>;
   setItems: Dispatch<SetStateAction<UserItemLocal[]>>;
+  setActiveItems: Dispatch<SetStateAction<UserItemLocal[]>>;
+  setInitialItemCount: Dispatch<SetStateAction<number>>;
   setResolvedEntries: Dispatch<SetStateAction<Array<ResolvedPracticeEntry<UserItemLocal>>>>;
   setGrammar: Dispatch<SetStateAction<GrammarDetail | null>>;
   setGrammarGroup: Dispatch<SetStateAction<GrammarGroupType | null>>;
@@ -236,10 +258,14 @@ function startInitialTrainingLoad(
       if (!mounted) return;
       if (!result) {
         setters.setItems([]);
+        setters.setActiveItems([]);
+        setters.setInitialItemCount(0);
         return;
       }
       setters.setBlock(result.block);
       setters.setItems(result.items);
+      setters.setActiveItems(getActiveTrainingItems(result.items, result.session));
+      setters.setInitialItemCount(result.items.length);
       setters.setResolvedEntries(result.entries);
       setters.setGrammar(toGrammarDetail(result.grammar));
       setters.setGrammarGroup(result.grammarGroup);
@@ -302,15 +328,28 @@ function updateTrainingItem(items: UserItemLocal[], updatedItem: UserItemLocal):
   return items.map((item) => (item.item_id === updatedItem.item_id ? updatedItem : item));
 }
 
+async function syncPersistedItemToReviewCache(item: UserItemLocal): Promise<void> {
+  try {
+    await syncReviewItemToCache(item.user_id, item);
+  } catch (caughtError) {
+    invalidateReviewArrays(item.user_id);
+    void rebuildReviewArrays(item.user_id).catch((rebuildError: unknown) => {
+      reportError('Failed to rebuild review arrays', rebuildError);
+    });
+    reportError('Failed to update review cache', caughtError);
+  }
+}
+
 type AdvanceInitialTrainingOptions = Readonly<{
   outcome: TrainingOutcome;
   session: PracticeSessionType | null;
   currentItem: UserItemLocal | null;
   isComplete: boolean;
-  finishBlock: (item: UserItemLocal, session: PracticeSessionType) => Promise<void>;
   setItems: Dispatch<SetStateAction<UserItemLocal[]>>;
+  setActiveItems: Dispatch<SetStateAction<UserItemLocal[]>>;
   setSession: Dispatch<SetStateAction<PracticeSessionType | null>>;
   setHasProgress: Dispatch<SetStateAction<boolean>>;
+  setIsComplete: Dispatch<SetStateAction<boolean>>;
   setError: Dispatch<SetStateAction<Error | null>>;
   resetQuestionState: () => void;
 }>;
@@ -321,10 +360,11 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
     session,
     currentItem,
     isComplete,
-    finishBlock,
     setItems,
+    setActiveItems,
     setSession,
     setHasProgress,
+    setIsComplete,
     setError,
     resetQuestionState,
   } = options;
@@ -345,21 +385,22 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
       currentItem.item_id,
       outcome,
     );
-    if (!nextSession) {
-      await finishBlock(updatedItem, session);
-      setError(null);
-      return;
+    if (nextSession) {
+      await PracticeSession.recordInitialTrainingAnswer(updatedItem, nextSession);
+    } else {
+      await PracticeSession.recordInitialTrainingAnswer(updatedItem, null, session);
     }
-
-    await PracticeSession.recordInitialTrainingAnswer(
-      updatedItem,
-      nextSession,
-    );
-    invalidateReviewArrays(updatedItem.user_id);
+    await syncPersistedItemToReviewCache(updatedItem);
     resetQuestionState();
     setItems((currentItems) => updateTrainingItem(currentItems, updatedItem));
+    setActiveItems((currentItems) =>
+      nextSession
+        ? getActiveTrainingItems(updateTrainingItem(currentItems, updatedItem), nextSession)
+        : [],
+    );
     setSession(nextSession);
     setHasProgress(true);
+    setIsComplete(nextSession === null);
     setError(null);
   } catch (caughtError) {
     const normalizedError = toError(caughtError);
@@ -373,6 +414,8 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
   const initialState = getInitialTrainingState(initialData);
   const [block, setBlock] = useState<BlockType | null>(initialState.block);
   const [items, setItems] = useState<UserItemLocal[]>(initialState.items);
+  const [activeItems, setActiveItems] = useState<UserItemLocal[]>(initialState.items);
+  const [initialItemCount, setInitialItemCount] = useState(initialState.items.length);
   const [resolvedEntries, setResolvedEntries] = useState<
     Array<ResolvedPracticeEntry<UserItemLocal>>
   >(initialState.entries);
@@ -396,6 +439,8 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
     return startInitialTrainingLoad(userId, initialData, {
       setBlock,
       setItems,
+      setActiveItems,
+      setInitialItemCount,
       setResolvedEntries,
       setGrammar,
       setGrammarGroup,
@@ -406,10 +451,21 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
     }, trackPracticeWrite);
   }, [initialData, userId, trackPracticeWrite]);
 
-  const itemById = useMemo(() => new Map(items.map((item) => [item.item_id, item])), [items]);
+  const itemById = useMemo(
+    () => new Map(activeItems.map((item) => [item.item_id, item])),
+    [activeItems],
+  );
   const { currentItem, currentEntry, displayedCompletedCount, pronunciation } = useMemo(
-    () => getInitialTrainingView(session, items, itemById, resolvedEntries, isComplete, revealed),
-    [isComplete, itemById, items, resolvedEntries, revealed, session],
+    () =>
+      getInitialTrainingView(
+        session,
+        itemById,
+        resolvedEntries,
+        isComplete,
+        revealed,
+        initialItemCount,
+      ),
+    [activeItems, initialItemCount, isComplete, itemById, resolvedEntries, revealed, session],
   );
   const cardState = usePracticeCardState({
     currentItem,
@@ -424,51 +480,32 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
     void finishPractice();
   }, [finishPractice, isComplete]);
 
-  const finishBlock = useCallback(
-    async (
-      finalItem: UserItemLocal,
-      expectedSession: PracticeSessionType,
-    ) => {
-      if (!userId || items.length === 0) return;
-      const dateTime = new Date(Date.now()).toISOString();
-      await PracticeSession.completeInitialTraining(
-        userId,
-        items.map((item) => item.item_id),
-        dateTime,
-        finalItem,
-        expectedSession,
-      );
-      invalidateReviewArrays(userId);
-      setItems((currentItems) => updateTrainingItem(currentItems, finalItem));
-      setIsComplete(true);
-    },
-    [items, userId],
-  );
-
   const advance = useCallback(
     async (outcome: TrainingOutcome) => {
       if (isTransitioningRef.current) return;
       isTransitioningRef.current = true;
       try {
-        await trackPracticeWrite(advanceInitialTraining({
-          outcome,
-          session,
-          currentItem,
-          isComplete,
-          finishBlock,
-          setItems,
-          setSession,
-          setHasProgress,
-          setError,
-          resetQuestionState,
-        }));
+        await trackPracticeWrite(
+          advanceInitialTraining({
+            outcome,
+            session,
+            currentItem,
+            isComplete,
+            setItems,
+            setActiveItems,
+            setSession,
+            setHasProgress,
+            setIsComplete,
+            setError,
+            resetQuestionState,
+          }),
+        );
       } finally {
         isTransitioningRef.current = false;
       }
     },
     [
       currentItem,
-      finishBlock,
       isComplete,
       resetQuestionState,
       session,
@@ -481,7 +518,7 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
   return {
     block,
     items,
-    hasContent: items.length > 0,
+    hasContent: initialItemCount > 0,
     grammar,
     grammarGroup,
     isComplete,
@@ -493,7 +530,7 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
     currentItem,
     note: currentEntry?.note ?? null,
     practiceGrammar: currentEntry?.grammar ?? null,
-    progressLabel: `${displayedCompletedCount}/${items.length}`,
+    progressLabel: `${displayedCompletedCount}/${initialItemCount}`,
     revealed,
     czech: cardState.czech,
     english: cardState.english,

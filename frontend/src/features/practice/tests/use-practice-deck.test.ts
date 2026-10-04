@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   loadReviewEntryDetails: vi.fn(),
   resetHint: vi.fn(),
   rebuildReviewArrays: vi.fn(),
+  syncReviewItemToCache: vi.fn(),
   fetchData: null as ReviewDeckData | null,
 }));
 
@@ -74,9 +75,13 @@ vi.mock('@/features/practice/hooks/use-practice-card-state', () => ({
 vi.mock('@/features/logging/monitoring-handler', () => ({ reportError: vi.fn() }));
 
 vi.mock('../review-prefetch', () => ({
+  compareReviewItems: (
+    left: PracticeDeckEntry['item'],
+    right: PracticeDeckEntry['item'],
+  ) => left.next_at_cz_to_en.localeCompare(right.next_at_cz_to_en),
   invalidateReviewArrays: vi.fn(),
-  publishReviewItems: vi.fn(),
   rebuildReviewArrays: (...args: unknown[]) => mocks.rebuildReviewArrays(...args),
+  syncReviewItemToCache: (...args: unknown[]) => mocks.syncReviewItemToCache(...args),
 }));
 
 import { usePracticeDeck } from '../hooks/use-practice-deck';
@@ -90,6 +95,7 @@ describe('usePracticeDeck', () => {
     mocks.loadReviewEntryDetails.mockResolvedValue({ note: null, grammar: null });
     mocks.savePracticeDeck.mockResolvedValue(undefined);
     mocks.rebuildReviewArrays.mockResolvedValue(undefined);
+    mocks.syncReviewItemToCache.mockResolvedValue(undefined);
   });
 
   it('saves each answered card while advancing to the next card', async () => {
@@ -199,7 +205,7 @@ describe('usePracticeDeck', () => {
     expect(result.current.currentItem).toBeNull();
     expect(result.current.finishedReview).toBe(true);
     expect(result.current.progressLabel).toBe('2 / 2');
-    await waitFor(() => expect(mocks.rebuildReviewArrays).toHaveBeenCalledWith('u1'));
+    expect(mocks.syncReviewItemToCache).toHaveBeenCalledTimes(2);
   });
 
   it('does not add a nonexistent next batch to the running counter', async () => {
@@ -225,6 +231,19 @@ describe('usePracticeDeck', () => {
 
     await waitFor(() => expect(result.current.error?.message).toBe('save failed'));
     expect(mocks.reload).not.toHaveBeenCalled();
+    expect(result.current.currentItem?.item_id).toBe(1);
+    expect(mocks.syncReviewItemToCache).not.toHaveBeenCalled();
+  });
+
+  it('rebuilds the cache after persistence succeeds but cache synchronization fails', async () => {
+    mocks.syncReviewItemToCache.mockRejectedValueOnce(new Error('cache update failed'));
+    const { result } = renderHook(() => usePracticeDeck('u1'));
+    await waitFor(() => expect(result.current.progressLabel).toBe('0 / 2'));
+
+    await act(async () => result.current.nextItem('correct'));
+
+    expect(result.current.currentItem?.item_id).toBe(2);
+    expect(mocks.rebuildReviewArrays).toHaveBeenCalledWith('u1');
   });
 
   it('finishes when the next batch is empty', async () => {

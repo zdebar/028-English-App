@@ -199,7 +199,7 @@ async function resolveInitialTrainingSelection(
  * Public API:
  * - Review flow: `getReviewDeck`, `savePracticeDeck`, and `getReadyReviewState`.
  * - Progress lookups: initiated grammar chunks, topic items, and vocabulary.
- * - New-block completion.
+ * - Initial-training selection and progress.
  * - Maintenance: reset helpers, simulation data, local account deletion, and remote sync.
  *
  * Dates use the configured null replacement date locally and convert to null for remote sync.
@@ -269,9 +269,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         key: [string, number];
         changes: Partial<UserItemLocal>;
       }> = [];
+      const currentItems = await Promise.all(
+        items.map((item) => db.user_items.get([item.user_id, item.item_id])),
+      );
 
-      for (const item of items) {
-        const currentItem = await db.user_items.get([item.user_id, item.item_id]);
+      for (const [index, item] of items.entries()) {
+        const currentItem = currentItems[index];
         if (currentItem?.deleted_at !== NULL_DATE) continue;
         if (currentItem.mastered_at_cz_to_en !== NULL_DATE) continue;
 
@@ -349,64 +352,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
     const unstartedItems = await getUnstartedItems(userId);
     return resolveInitialTrainingSelection(unstartedItems, batchSize);
-  }
-
-  /**
-   * Finalizes progress for all items in a completed initial-training batch.
-   *
-   * @param userId User id whose block items should be updated.
-   * @param itemIds Item ids whose initial-training state should be finalized.
-   * @param dateTime ISO timestamp used for started_at and updated_at. Defaults to now.
-   * @returns Updated items that were written to IndexedDB; [] when the block has no items.
-   */
-  static async saveInitialTrainingCompletion(
-    userId: string,
-    itemIds: readonly number[],
-    dateTime: string = new Date(Date.now()).toISOString(),
-  ): Promise<UserItemLocal[]> {
-    return db.transaction('rw', db.user_items, async () =>
-      this.saveInitialTrainingCompletionInternal(userId, itemIds, dateTime),
-    );
-  }
-
-  private static async saveInitialTrainingCompletionInternal(
-    userId: string,
-    itemIds: readonly number[],
-    dateTime: string,
-  ): Promise<UserItemLocal[]> {
-    if (itemIds.length === 0) return [];
-    const items = await db.user_items
-      .where('[user_id+item_id]')
-      .anyOf(itemIds.map((itemId) => [userId, itemId]))
-      .toArray();
-    if (items.length !== new Set(itemIds).size) {
-      throw new Error('Initial-training completion references missing items.');
-    }
-
-    const updatedItems = items.map((item) => {
-      const progressCzToEn = item.progress_cz_to_en;
-      const nextAtCzToEn = getNextAt(progressCzToEn);
-      const masteredAtCzToEn = resolveMasteredAt(
-        progressCzToEn,
-        item.mastered_at_cz_to_en,
-        dateTime,
-      );
-
-      return {
-        ...item,
-        progress_cz_to_en: progressCzToEn,
-        started_at: getCompletionStartedAt(item, dateTime),
-        updated_at: dateTime,
-        next_at_cz_to_en: getNextAtForMastery(nextAtCzToEn, masteredAtCzToEn),
-        mastered_at_cz_to_en: masteredAtCzToEn,
-      };
-    });
-
-    if (updatedItems.length > 0) {
-      await db.user_items.bulkPut(updatedItems);
-    }
-
-    return updatedItems;
   }
 
   /** Reads initiated items assigned to one topic, ordered by curriculum position. */
@@ -940,12 +885,6 @@ function applyReviewProgress(
 }
 
 function getStartedAt(item: UserItemLocal, dateTime: string): string {
-  if (item.started_at === NULL_DATE) return dateTime;
-  return item.started_at;
-}
-
-function getCompletionStartedAt(item: UserItemLocal, dateTime: string): string {
-  if (isInitialTrainingSkipped(item)) return NULL_DATE;
   if (item.started_at === NULL_DATE) return dateTime;
   return item.started_at;
 }

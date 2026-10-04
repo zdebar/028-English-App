@@ -23,28 +23,27 @@ describe('review queue', () => {
       entry(1, '2026-01-01T10:00:00.000Z'),
       entry(2, '2026-01-01T13:00:00.000Z'),
       entry(3, NULL_DATE, { progress_cz_to_en: 0 }),
-    ]);
+    ], 'vocabulary');
 
-    expect(queue.validEndIndex).toBe(2);
-    expect(queue.activeItemCount).toBe(2);
-    expect(getCurrentReviewEntry(queue)?.item.item_id).toBe(1);
+    expect(queue.dueCount).toBe(2);
+    expect(queue.sessionTotalCount).toBe(2);
+    expect(getCurrentReviewEntry(queue)?.item.item_id).toBe(3);
   });
 
-  it('advances without removing entries and retains duplicate item ids', () => {
-    const queue = createReviewQueue([entry(1, '2026-01-01T10:00:00.000Z')]);
+  it('replaces the answered item without creating a duplicate', () => {
+    const queue = createReviewQueue([entry(1, '2026-01-01T10:00:00.000Z')], 'vocabulary');
     const updated = item(1, '2026-01-01T14:00:00.000Z');
 
     const result = answerCurrentReviewItem(queue, updated);
 
     expect(result?.hasNextItem).toBe(false);
-    expect(queue.activeIndex).toBe(1);
-    expect(queue.entries).toHaveLength(2);
-    expect(queue.entries.map((entry) => entry.item.item_id)).toEqual([1, 1]);
+    expect(queue.items).toHaveLength(1);
+    expect(queue.items.map((entry) => entry.item.item_id)).toEqual([1]);
     expect(queue.completedCount).toBe(1);
   });
 
   it('does not reinsert mastered items', () => {
-    const queue = createReviewQueue([entry(1, '2026-01-01T10:00:00.000Z')]);
+    const queue = createReviewQueue([entry(1, '2026-01-01T10:00:00.000Z')], 'vocabulary');
     const mastered = item(1, NULL_DATE, {
       progress_cz_to_en: 0,
       mastered_at_cz_to_en: NOW,
@@ -52,7 +51,7 @@ describe('review queue', () => {
 
     answerCurrentReviewItem(queue, mastered);
 
-    expect(queue.entries).toHaveLength(1);
+    expect(queue.items).toHaveLength(0);
     expect(getRemainingReviewEntries(queue)).toEqual([]);
   });
 
@@ -60,28 +59,38 @@ describe('review queue', () => {
     const queue = createReviewQueue([
       entry(1, '2026-01-01T10:00:00.000Z'),
       entry(2, '2026-01-01T16:00:00.000Z'),
-    ]);
+    ], 'vocabulary');
     const updated = item(1, '2026-01-01T14:00:00.000Z');
 
     answerCurrentReviewItem(queue, updated);
 
     expect(getRemainingReviewEntries(queue).map((entry) => entry.item.item_id)).toEqual([1, 2]);
-    expect(queue.entries).toHaveLength(3);
+    expect(queue.items).toHaveLength(2);
   });
 
   it('admits newly valid items and updates the active progress count', () => {
     const queue = createReviewQueue([
       entry(1, '2026-01-01T10:00:00.000Z'),
       entry(2, '2026-01-01T13:00:00.000Z'),
-    ]);
+    ], 'vocabulary');
 
-    expect(queue.activeItemCount).toBe(1);
+    expect(queue.sessionTotalCount).toBe(1);
     vi.setSystemTime(new Date('2026-01-01T14:00:00.000Z'));
     extendReviewQueue(queue);
 
-    expect(queue.validEndIndex).toBe(2);
-    expect(queue.activeItemCount).toBe(2);
+    expect(queue.dueCount).toBe(2);
+    expect(queue.sessionTotalCount).toBe(2);
     expect(getCurrentReviewEntry(queue)?.item.item_id).toBe(1);
+  });
+
+  it('reinserts a due answer exactly once and increases the session total', () => {
+    const queue = createReviewQueue([entry(1, '2026-01-01T10:00:00.000Z')], 'vocabulary');
+
+    answerCurrentReviewItem(queue, item(1, '2026-01-01T11:00:00.000Z'));
+
+    expect(queue.items.map((entry) => entry.item.item_id)).toEqual([1]);
+    expect(queue.dueCount).toBe(1);
+    expect(queue.sessionTotalCount).toBe(2);
   });
 });
 

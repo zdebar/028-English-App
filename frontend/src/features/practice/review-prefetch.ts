@@ -1,5 +1,6 @@
 import UserItem from '@/database/models/user-items';
 import {
+  isReviewItemCandidate,
   isReviewItemFuture,
   isReviewItemReadyAt,
 } from '@/database/utils/review-items.utils';
@@ -8,11 +9,15 @@ import type { ReviewKind } from '@/types/practice.types';
 import type { PracticeDeckItem } from '@/types/user-item.types';
 
 const REVIEW_KINDS: readonly ReviewKind[] = ['grammar', 'vocabulary'];
+const NULL_DATE = config.database.nullReplacementDate;
+const RESET_SORT_DATE = '0000-01-01T00:00:00.000Z';
 
-type ReviewArrays = Readonly<Record<ReviewKind, readonly PracticeDeckItem[]>>;
+export type ReviewArrays = Readonly<Record<ReviewKind, readonly PracticeDeckItem[]>>;
+
+type MutableReviewArrays = Record<ReviewKind, PracticeDeckItem[]>;
 
 type ReviewPrefetchState = {
-  arrays: ReviewArrays | null;
+  arrays: MutableReviewArrays | null;
   dirty: boolean;
   version: number;
   pending: Promise<void> | null;
@@ -49,8 +54,12 @@ export function warmReviewArrays(userId: string): Promise<void> {
   )
     .then((results) => {
       if (states.get(userId) !== state || state.version !== version) return;
-      const grammar = results.find(([reviewKind]) => reviewKind === 'grammar')?.[1] ?? [];
-      const vocabulary = results.find(([reviewKind]) => reviewKind === 'vocabulary')?.[1] ?? [];
+      const grammar = sortReviewItems(
+        results.find(([reviewKind]) => reviewKind === 'grammar')?.[1] ?? [],
+      );
+      const vocabulary = sortReviewItems(
+        results.find(([reviewKind]) => reviewKind === 'vocabulary')?.[1] ?? [],
+      );
       state.arrays = { grammar, vocabulary };
       state.dirty = false;
     })
@@ -73,16 +82,42 @@ export function invalidateReviewArrays(userId: string): void {
   state.dirty = true;
 }
 
-export function publishReviewItems(
+/** Applies one or more successfully persisted items to the in-memory review arrays. */
+export async function syncReviewItemsToCache(
   userId: string,
-  reviewKind: ReviewKind,
   items: readonly PracticeDeckItem[],
-): void {
+): Promise<void> {
+  if (items.length === 0) return;
+  await warmReviewArrays(userId);
+
   const state = getState(userId);
   if (!state.arrays) return;
+
+  const itemsById = new Map(items.map((item) => [item.item_id, item]));
+  const updatedItems = [...itemsById.values()];
+  const updatedItemIds = new Set(itemsById.keys());
+  const nextArrays = {} as MutableReviewArrays;
+
+  for (const reviewKind of REVIEW_KINDS) {
+    const remainingItems = state.arrays[reviewKind].filter(
+      (item) => !updatedItemIds.has(item.item_id),
+    );
+    const matchingItems = updatedItems.filter((item) =>
+      isReviewItemCandidate(item, reviewKind),
+    );
+    nextArrays[reviewKind] = sortReviewItems([...remainingItems, ...matchingItems]);
+  }
+
   state.version += 1;
-  state.arrays = { ...state.arrays, [reviewKind]: [...items] };
+  state.arrays = nextArrays;
   state.dirty = false;
+}
+
+export async function syncReviewItemToCache(
+  userId: string,
+  item: PracticeDeckItem,
+): Promise<void> {
+  return syncReviewItemsToCache(userId, [item]);
 }
 
 export function rebuildReviewArrays(userId: string): Promise<void> {
@@ -101,6 +136,18 @@ export async function getPrefetchedReviewItems(
 ): Promise<readonly PracticeDeckItem[]> {
   await warmReviewArrays(userId);
   return getState(userId).arrays?.[reviewKind] ?? [];
+}
+
+export function compareReviewItems(left: PracticeDeckItem, right: PracticeDeckItem): number {
+  const nextAtComparison = getReviewSortDate(left).localeCompare(getReviewSortDate(right));
+  if (nextAtComparison !== 0) return nextAtComparison;
+
+  const pathComparison = compareCurriculumPaths(
+    left.curriculum_sort_path,
+    right.curriculum_sort_path,
+  );
+  if (pathComparison !== 0) return pathComparison;
+  return left.item_id - right.item_id;
 }
 
 export function getReviewReadyAtFromItems(
@@ -142,4 +189,25 @@ export async function loadReviewAvailabilityFromArrays(userId: string) {
   const arrays = getState(userId).arrays;
   if (!arrays) throw new Error('Review arrays are unavailable');
   return getReviewAvailabilityFromArrays(arrays, new Date().toISOString());
+}
+
+function sortReviewItems(items: readonly PracticeDeckItem[]): PracticeDeckItem[] {
+  return [...items].sort(compareReviewItems);
+}
+
+function getReviewSortDate(item: PracticeDeckItem): string {
+  if (item.next_at_cz_to_en === NULL_DATE) return RESET_SORT_DATE;
+  return item.next_at_cz_to_en;
+}
+
+function compareCurriculumPaths(
+  left: readonly number[],
+  right: readonly number[],
+): number {
+  const length = Math.min(left.length, right.length);
+  for (let index = 0; index < length; index += 1) {
+    const difference = (left[index] ?? 0) - (right[index] ?? 0);
+    if (difference !== 0) return difference;
+  }
+  return left.length - right.length;
 }

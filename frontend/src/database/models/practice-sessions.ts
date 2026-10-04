@@ -8,12 +8,37 @@ import type {
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 import { Entity } from 'dexie';
 import type { UserItemLocal } from '@/types/user-item.types';
-import UserItem from './user-items';
 
 export type ActivePracticeSessionState = {
   activeSession: PracticeSessionType | null;
   requiresReconciliation: boolean;
 };
+
+function isValidInitialTrainingAnswerSession(
+  session: PracticeSessionType | null,
+  item: UserItemLocal,
+): boolean {
+  return (
+    session?.user_id === item.user_id &&
+    session.mode === 'new' &&
+    session.phase === 0
+  );
+}
+
+function assertValidInitialTrainingSession(
+  session: PracticeSessionType | null,
+  item: UserItemLocal,
+): void {
+  if (!isValidInitialTrainingAnswerSession(session, item)) {
+    throw new Error('Initial-training answer contains an invalid session.');
+  }
+}
+
+function assertActiveInitialTrainingSession(session: PracticeSessionType | null): void {
+  if (session && session.mode !== 'new') {
+    throw new Error('Initial-training answer requires an active new session.');
+  }
+}
 
 function getSavedItemIds(session: PracticeSessionType): number[] {
   return [
@@ -166,77 +191,29 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
   /** Atomically stores one initial-training answer and advances its session. */
   static async recordInitialTrainingAnswer(
     item: UserItemLocal,
-    session: PracticeSessionType,
+    session: PracticeSessionType | null,
+    expectedSession: PracticeSessionType | null = session,
   ): Promise<void> {
     await db.transaction(
       'rw',
       db.user_items,
       db.practice_sessions,
       async () => {
-        if (session.user_id !== item.user_id || session.mode !== 'new' || session.phase !== 0) {
-          throw new Error('Initial-training answer contains an invalid session.');
-        }
+        assertValidInitialTrainingSession(expectedSession, item);
         // The availability observer can remove a stale-looking row while this page is open.
         // The session held by the active deck is the authoritative continuation state.
         const activeSession = await this.getActive(item.user_id);
-        if (activeSession && activeSession.mode !== 'new') {
-          throw new Error('Initial-training answer requires an active new session.');
-        }
+        assertActiveInitialTrainingSession(activeSession);
 
         const updatedItemCount = await updateStoredPracticeItem(item);
         if (updatedItemCount !== 1) {
           throw new Error('The trained item no longer exists locally.');
         }
-        await db.practice_sessions.put(session);
-      },
-    );
-  }
-
-  /** Atomically completes initial training and removes the session. */
-  static async completeInitialTraining(
-    userId: string,
-    itemIds: readonly number[],
-    dateTime: string = new Date(Date.now()).toISOString(),
-    finalItem?: UserItemLocal,
-    expectedSession?: PracticeSessionType,
-  ): Promise<void> {
-    return db.transaction(
-      'rw',
-      db.user_items,
-      db.practice_sessions,
-      async () => {
-        const storedSession = await this.getActive(userId);
-        // Keep completion recoverable when the active row disappeared after the last answer.
-        const session = storedSession ?? expectedSession;
-        if (session?.mode !== 'new' || session.phase !== 0) {
-          throw new Error('Initial-training completion requires its active local session.');
+        if (session) {
+          await db.practice_sessions.put(session);
+        } else {
+          await db.practice_sessions.delete(item.user_id);
         }
-
-        const sessionItemIds = new Set([
-          ...session.current_queue_item_ids,
-          ...session.retry_queue_item_ids,
-          ...session.completed_item_ids,
-        ]);
-        const completionItemIds = new Set(itemIds);
-        const referencesExactSession =
-          sessionItemIds.size === completionItemIds.size &&
-          [...sessionItemIds].every((itemId) => completionItemIds.has(itemId));
-        if (!referencesExactSession) {
-          throw new Error('Initial-training completion must match its saved item queue.');
-        }
-
-        if (finalItem) {
-          const originalFinalItem = await db.user_items.get([userId, finalItem.item_id]);
-          if (!originalFinalItem) {
-            throw new Error('The final trained item no longer exists locally.');
-          }
-          const updatedItemCount = await updateStoredPracticeItem(finalItem);
-          if (updatedItemCount !== 1) {
-            throw new Error('The final trained item no longer exists locally.');
-          }
-        }
-        await UserItem.saveInitialTrainingCompletion(userId, itemIds, dateTime);
-        await db.practice_sessions.delete(userId);
       },
     );
   }
