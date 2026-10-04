@@ -241,7 +241,7 @@ function ReviewPracticeButton({
       {dueCount > 0 ? (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute top-1 right-1 rounded-full bg-button-light px-1.5 text-xs leading-none text-white dark:bg-button-dark"
+          className="pointer-events-none absolute top-1 right-1 z-10 rounded-full bg-light py-0.5 pr-1.5 pl-2 text-center font-body text-xs leading-none font-bold text-dark dark:bg-dark dark:text-light"
         >
           {dueCount}
         </span>
