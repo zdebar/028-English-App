@@ -42,8 +42,8 @@ describe('Home practice buttons', () => {
     });
   });
 
-  it('keeps review disabled before the stored date without rendering a time value', () => {
-    const readyAt = new Date(Date.now() + 2_000).toISOString();
+  it('keeps review disabled when no item is due, even with a stored date', () => {
+    const readyAt = new Date().toISOString();
     usePracticeAvailabilityStore.setState({ grammarReviewReadyAt: readyAt });
     const snapshot = usePracticeAvailabilityStore.getState();
     render(<PracticeButtons />);
@@ -53,23 +53,22 @@ describe('Home practice buttons', () => {
   });
 
   it('updates only the matching badge for an ordinary review count change', () => {
+    usePracticeAvailabilityStore.setState({ grammarReviewDueCount: 1 });
     render(<PracticeButtons />);
     mocks.navigationButtonRender.mockClear();
 
     act(() => {
-      usePracticeAvailabilityStore.setState({ grammarReviewDueCount: 1 });
+      usePracticeAvailabilityStore.setState({ grammarReviewDueCount: 2 });
     });
 
-    expect(screen.getByText('1')).toBeTruthy();
+    expect(screen.getByText('2')).toBeTruthy();
     expect(mocks.navigationButtonRender).not.toHaveBeenCalled();
   });
 
-  it('enables both reviews independently at the configured review boundary', () => {
+  it('enables both reviews when each has one due item', () => {
     usePracticeAvailabilityStore.setState({
-      grammarReviewReadyAt: new Date().toISOString(),
-      vocabularyReviewReadyAt: new Date().toISOString(),
-      grammarReviewDueCount: config.practice.grammarReviewLimitSize,
-      vocabularyReviewDueCount: config.practice.vocabularyReviewLimitSize,
+      grammarReviewDueCount: 1,
+      vocabularyReviewDueCount: 1,
     });
     render(<PracticeButtons />);
     expect(button('Grammar review').disabled).toBe(false);
@@ -80,8 +79,7 @@ describe('Home practice buttons', () => {
   it('enables vocabulary review when grammar is not ready', () => {
     usePracticeAvailabilityStore.setState({
       grammarReviewReadyAt: new Date(Date.now() + 86_400_000).toISOString(),
-      vocabularyReviewReadyAt: new Date().toISOString(),
-      vocabularyReviewDueCount: config.practice.vocabularyReviewLimitSize,
+      vocabularyReviewDueCount: 1,
     });
     render(<PracticeButtons />);
 
@@ -90,7 +88,7 @@ describe('Home practice buttons', () => {
     expect(button('New').disabled).toBe(false);
   });
 
-  it('keeps new available at the review limit', () => {
+  it('locks new at the review limit', () => {
     usePracticeAvailabilityStore.setState({
       grammarReviewReadyAt: null,
       grammarReviewDueCount: config.practice.grammarReviewLimitSize,
@@ -100,11 +98,11 @@ describe('Home practice buttons', () => {
     render(<PracticeButtons />);
 
     expect(button('Grammar review').disabled).toBe(false);
-    expect(button('Vocabulary review').disabled).toBe(true);
-    expect(button('New').disabled).toBe(false);
+    expect(button('Vocabulary review').disabled).toBe(false);
+    expect(button('New').disabled).toBe(true);
   });
 
-  it('locks new when a review count exceeds its limit', () => {
+  it('keeps review available when a review count exceeds its limit', () => {
     const grammarReviewCount = config.practice.grammarReviewLimitSize + 1;
     usePracticeAvailabilityStore.setState({
       grammarReviewReadyAt: null,
@@ -115,7 +113,7 @@ describe('Home practice buttons', () => {
     render(<PracticeButtons />);
 
     expect(button('Grammar review').disabled).toBe(false);
-    expect(button('Vocabulary review').disabled).toBe(true);
+    expect(button('Vocabulary review').disabled).toBe(false);
     expect(button('New').disabled).toBe(true);
     expect(screen.getByText(String(grammarReviewCount))).toBeTruthy();
     expect(screen.getByText('3')).toBeTruthy();
@@ -179,12 +177,11 @@ describe('Home practice buttons', () => {
 
   it('keeps an active new session available alongside review', () => {
     usePracticeAvailabilityStore.setState({
-      grammarReviewReadyAt: new Date().toISOString(),
       vocabularyReviewReadyAt: null,
       activeSession: makeSession('new'),
     });
     render(<PracticeButtons />);
-    expect(button('Grammar review').disabled).toBe(false);
+    expect(button('Grammar review').disabled).toBe(true);
     expect(button('Vocabulary review').disabled).toBe(true);
     expect(button('New').disabled).toBe(false);
   });

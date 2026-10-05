@@ -7,11 +7,7 @@ import {
   type PracticeAvailabilityState,
 } from './use-practice-availability-store';
 import StyledButton from '@/components/UI/buttons/StyledButton';
-import config from '@/config/config';
-import {
-  hasExceededReviewLimit,
-  isReviewThresholdReached,
-} from './practice-availability';
+import { hasReachedReviewLimit } from './practice-availability';
 
 type ReviewKind = 'grammar' | 'vocabulary';
 
@@ -27,29 +23,12 @@ function selectReviewDueCount(
   return state.vocabularyReviewDueCount;
 }
 
-function selectReviewReadyAt(
-  state: PracticeAvailabilityState,
-  reviewKind: ReviewKind,
-): string | null {
-  if (reviewKind === 'grammar') return state.grammarReviewReadyAt;
-  return state.vocabularyReviewReadyAt;
-}
-
-function selectReviewLimit(reviewKind: ReviewKind): number {
-  if (reviewKind === 'grammar') return config.practice.grammarReviewLimitSize;
-  return config.practice.vocabularyReviewLimitSize;
-}
-
 function selectReviewDisabled(
   state: PracticeAvailabilityState,
   reviewKind: ReviewKind,
 ): boolean {
   if (state.practiceLoading || state.practiceError) return true;
-
-  const dueCount = selectReviewDueCount(state, reviewKind);
-  const readyAt = selectReviewReadyAt(state, reviewKind);
-  const limit = selectReviewLimit(reviewKind);
-  return !isReviewThresholdReached(dueCount, readyAt, limit);
+  return selectReviewDueCount(state, reviewKind) === 0;
 }
 
 function resolveButtonTitle(
@@ -80,7 +59,7 @@ function selectNewDisabled(state: PracticeAvailabilityState): boolean {
   if (state.practiceLoading || state.practiceError) return true;
   if (!selectNewAvailable(state)) return true;
   if (isActiveNew(state.activeSession)) return false;
-  return hasExceededReviewLimit(state);
+  return hasReachedReviewLimit(state);
 }
 
 function selectNewTitle(state: PracticeAvailabilityState): string | undefined {
