@@ -45,22 +45,11 @@ async function loadReviewAvailability(userId: string) {
   }
 }
 
-export function isReviewThresholdReached(
-  dueCount: number,
-  readyAt: string | null,
-  limitSize: number,
-  now: number = Date.now(),
-): boolean {
-  if (dueCount >= limitSize) return true;
-  if (readyAt === null) return false;
-  return Date.parse(readyAt) <= now;
+export function isReviewLimitReached(dueCount: number, limitSize: number): boolean {
+  return dueCount >= limitSize;
 }
 
-export function isReviewLimitExceeded(dueCount: number, limitSize: number): boolean {
-  return dueCount > limitSize;
-}
-
-export function hasExceededReviewLimit(
+export function hasReachedReviewLimit(
   availability: Pick<
     PracticeAvailabilitySnapshot,
     | 'grammarReviewDueCount'
@@ -68,11 +57,11 @@ export function hasExceededReviewLimit(
   >,
 ): boolean {
   return (
-    isReviewLimitExceeded(
+    isReviewLimitReached(
       availability.grammarReviewDueCount,
       config.practice.grammarReviewLimitSize,
     ) ||
-    isReviewLimitExceeded(
+    isReviewLimitReached(
       availability.vocabularyReviewDueCount,
       config.practice.vocabularyReviewLimitSize,
     )
