@@ -21,7 +21,7 @@ const config = {
 
   srs: {
     // Spaced Repetition System configuration
-    intervals: [300, 14400, 28800, 86400, 172800, 345600, 691200, 1382400],
+    intervals: [150, 14400, 28800, 86400, 172800, 345600, 691200, 1382400],
     randomness: 0.2, // Randomness of SRS algorithm
   },
 
