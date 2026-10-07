@@ -202,8 +202,8 @@ describe('usePracticeDeck', () => {
       [expect.objectContaining({ item_id: 2, updated_at: 'now' })],
     );
     expect(mocks.reload).not.toHaveBeenCalled();
-    expect(result.current.currentItem).toBeNull();
-    expect(result.current.finishedReview).toBe(true);
+    expect(result.current.currentItem?.item_id).toBe(2);
+    expect(result.current.finishedReview).toBe(false);
     expect(result.current.progressLabel).toBe('1 / 2');
     expect(mocks.syncReviewItemToCache).toHaveBeenCalledTimes(2);
   });
@@ -261,8 +261,8 @@ describe('usePracticeDeck', () => {
 
     await act(async () => result.current.nextItem('skip'));
 
-    await waitFor(() => expect(result.current.finishedReview).toBe(true));
-    expect(result.current.currentItem).toBeNull();
+    expect(result.current.finishedReview).toBe(false);
+    expect(result.current.currentItem?.item_id).toBe(1);
   });
 
   it('keeps the last card visible while the final batch is being saved', async () => {
@@ -297,8 +297,8 @@ describe('usePracticeDeck', () => {
     });
 
     expect(mocks.reload).not.toHaveBeenCalled();
-    expect(result.current.finishedReview).toBe(true);
-    expect(result.current.currentItem).toBeNull();
+    expect(result.current.finishedReview).toBe(false);
+    expect(result.current.currentItem?.item_id).toBe(1);
   });
 
   it('retries a failed final save without counting the answer twice', async () => {
@@ -318,8 +318,8 @@ describe('usePracticeDeck', () => {
 
     expect(mocks.savePracticeDeck).toHaveBeenCalledTimes(2);
     expect(mocks.reload).not.toHaveBeenCalled();
-    expect(result.current.currentItem).toBeNull();
-    expect(result.current.finishedReview).toBe(true);
+    expect(result.current.currentItem?.item_id).toBe(1);
+    expect(result.current.finishedReview).toBe(false);
     expect(result.current.progressLabel).toBe('0 / 1');
   });
 
@@ -331,10 +331,10 @@ describe('usePracticeDeck', () => {
     await act(async () => result.current.nextItem('correct'));
 
     expect(mocks.savePracticeDeck).toHaveBeenCalledOnce();
-    expect(result.current.finishedReview).toBe(true);
+    expect(result.current.finishedReview).toBe(false);
     expect(mocks.savePracticeDeck).toHaveBeenCalledOnce();
     expect(mocks.reload).not.toHaveBeenCalled();
-    expect(result.current.currentItem).toBeNull();
+    expect(result.current.currentItem?.item_id).toBe(1);
     expect(result.current.progressLabel).toBe('0 / 1');
   });
 });
