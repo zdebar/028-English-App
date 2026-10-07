@@ -4,6 +4,7 @@ const mocks = vi.hoisted(() => ({
   getInitiatedGrammarChunkIds: vi.fn(),
   chunksAnyOf: vi.fn(),
   groupsAnyOf: vi.fn(),
+  topicsAnyOf: vi.fn(),
   addExamplesToMany: vi.fn(),
 }));
 
@@ -25,6 +26,14 @@ vi.mock('@/database/models/db', () => ({
         throw new Error(`Unexpected grammar_groups.where field: ${field}`);
       },
     },
+    grammar_topics: {
+      where: (field: string) => {
+        if (field === 'id') {
+          return { anyOf: (...args: unknown[]) => mocks.topicsAnyOf(...args) };
+        }
+        throw new Error(`Unexpected grammar_topics.where field: ${field}`);
+      },
+    },
   },
 }));
 
@@ -40,9 +49,9 @@ vi.mock('@/database/models/grammar-chunks', () => ({
   },
 }));
 
-import GrammarGroup from '@/database/models/grammar-groups';
+import GrammarTopic from '@/database/models/grammar-topics';
 
-describe('GrammarGroup.getInitiated', () => {
+describe('GrammarTopic.getInitiated', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.getInitiatedGrammarChunkIds.mockResolvedValue([11, 12, 13]);
@@ -55,8 +64,13 @@ describe('GrammarGroup.getInitiated', () => {
     });
     mocks.groupsAnyOf.mockReturnValue({
       sortBy: vi.fn().mockResolvedValue([
-        { id: 1, name: 'First group', sort_order: 1 },
-        { id: 2, name: 'Second group', sort_order: 2 },
+        { id: 1, name: 'First group', grammar_topic_id: 1, sort_order: 2 },
+        { id: 2, name: 'Second group', grammar_topic_id: 1, sort_order: 3 },
+      ]),
+    });
+    mocks.topicsAnyOf.mockReturnValue({
+      sortBy: vi.fn().mockResolvedValue([
+        { id: 1, name: 'Present Simple', sort_order: 1 },
       ]),
     });
     mocks.addExamplesToMany.mockImplementation(
@@ -65,41 +79,51 @@ describe('GrammarGroup.getInitiated', () => {
     );
   });
 
-  it('returns initiated chunks grouped and ordered by their grammar group', async () => {
-    await expect(GrammarGroup.getInitiated('u1')).resolves.toEqual([
+  it('returns initiated groups nested under their ordered topic', async () => {
+    await expect(GrammarTopic.getInitiated('u1')).resolves.toEqual([
       {
         id: 1,
-        kind: 'group',
-        name: 'First group',
+        name: 'Present Simple',
         sort_order: 1,
-        chunks: [
-          { id: 11, name: 'First', grammar_group_id: 1, sort_order: 1, items: [] },
-          { id: 13, name: 'First group second', grammar_group_id: 1, sort_order: 3, items: [] },
+        groups: [
+          {
+            id: 1,
+            kind: 'group',
+            name: 'First group',
+            grammar_topic_id: 1,
+            sort_order: 2,
+            chunks: [
+              { id: 11, name: 'First', grammar_group_id: 1, sort_order: 1, items: [] },
+              { id: 13, name: 'First group second', grammar_group_id: 1, sort_order: 3, items: [] },
+            ],
+          },
+          {
+            id: 2,
+            kind: 'group',
+            name: 'Second group',
+            grammar_topic_id: 1,
+            sort_order: 3,
+            chunks: [{ id: 12, name: 'Second', grammar_group_id: 2, sort_order: 2, items: [] }],
+          },
         ],
-      },
-      {
-        id: 2,
-        kind: 'group',
-        name: 'Second group',
-        sort_order: 2,
-        chunks: [{ id: 12, name: 'Second', grammar_group_id: 2, sort_order: 2, items: [] }],
       },
     ]);
 
     expect(mocks.getInitiatedGrammarChunkIds).toHaveBeenCalledWith('u1');
     expect(mocks.chunksAnyOf).toHaveBeenCalledWith([11, 12, 13]);
-    expect(mocks.addExamplesToMany).toHaveBeenCalledOnce();
     expect(mocks.addExamplesToMany).toHaveBeenCalledWith(
       'u1',
       expect.arrayContaining([expect.objectContaining({ id: 11 }), expect.objectContaining({ id: 12 })]),
     );
     expect(mocks.groupsAnyOf).toHaveBeenCalledWith([2, 1]);
+    expect(mocks.topicsAnyOf).toHaveBeenCalledWith([1]);
   });
 
-  it('returns no groups when there are no started chunks', async () => {
+  it('returns no topics when there are no started chunks', async () => {
     mocks.getInitiatedGrammarChunkIds.mockResolvedValue([]);
 
-    await expect(GrammarGroup.getInitiated('u1')).resolves.toEqual([]);
+    await expect(GrammarTopic.getInitiated('u1')).resolves.toEqual([]);
     expect(mocks.chunksAnyOf).not.toHaveBeenCalled();
+    expect(mocks.topicsAnyOf).not.toHaveBeenCalled();
   });
 });

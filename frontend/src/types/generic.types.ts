@@ -14,7 +14,11 @@ export interface LessonType extends SyncEntityType {
 }
 export interface LevelType extends SyncEntityType {}
 
-export interface GrammarGroupType extends SyncEntityType {}
+export interface GrammarTopicType extends SyncEntityType {}
+
+export interface GrammarGroupType extends SyncEntityType {
+  grammar_topic_id: number;
+}
 
 export interface GrammarChunkType extends SyncEntityType {
   grammar_group_id: number;

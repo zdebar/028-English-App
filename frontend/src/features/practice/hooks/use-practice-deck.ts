@@ -318,9 +318,9 @@ export function usePracticeDeck(
         return;
       }
 
-      setFinishedReview(true);
+      await completePractice();
     },
-    [resetQuestionState, saveReviewItem],
+    [completePractice, resetQuestionState, saveReviewItem],
   );
 
   const nextItem = useCallback(

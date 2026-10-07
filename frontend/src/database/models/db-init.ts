@@ -14,15 +14,17 @@ import PronunciationGroupItem from './pronunciation-group-items';
 import GrammarChunkExample from './grammar-chunk-examples';
 import PracticeSession from './practice-sessions';
 import Topic from './topics';
+import GrammarTopic from './grammar-topics';
 
 let isInitialized = false;
 
-export async function initDbMappings(): Promise<void> {
+export function initDbMappings(): void {
   if (isInitialized) return;
 
   db.user_items.mapToClass(UserItem);
   db.blocks.mapToClass(Block);
   db.grammar_groups.mapToClass(GrammarGroup);
+  db.grammar_topics.mapToClass(GrammarTopic);
   db.grammar_chunks.mapToClass(GrammarChunk);
   db.grammar_chunk_examples.mapToClass(GrammarChunkExample);
   db.notes.mapToClass(Notes);

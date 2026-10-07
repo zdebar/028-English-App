@@ -1,4 +1,4 @@
-import GrammarGroup, { type GrammarGroupWithChunks } from '@/database/models/grammar-groups';
+import GrammarTopic, { type GrammarTopicWithGroups } from '@/database/models/grammar-topics';
 import Topic from '@/database/models/topics';
 import UserItem from '@/database/models/user-items';
 import type { UserItemLocal } from '@/types/user-item.types';
@@ -17,7 +17,7 @@ export type OverviewQueryData = {
   'has-grammar': boolean;
   'has-topics': boolean;
   'has-vocabulary': boolean;
-  grammar: GrammarGroupWithChunks[];
+  grammar: GrammarTopicWithGroups[];
   topics: Awaited<ReturnType<typeof Topic.getInitiatedByUserId>>;
   vocabulary: UserItemLocal[];
   'practice-overview': UserItemLocal[];
@@ -52,7 +52,7 @@ export function getOverviewQuery<T extends OverviewQueryName>(
       case 'has-vocabulary':
         return UserItem.hasInitiatedVocabulary(userId) as Promise<OverviewQueryData[T]>;
       case 'grammar':
-        return GrammarGroup.getInitiated(userId) as Promise<OverviewQueryData[T]>;
+        return GrammarTopic.getInitiated(userId) as Promise<OverviewQueryData[T]>;
       case 'topics':
         return Topic.getInitiatedByUserId(userId) as Promise<OverviewQueryData[T]>;
       case 'vocabulary':

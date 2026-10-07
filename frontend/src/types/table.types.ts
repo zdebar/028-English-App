@@ -1,4 +1,5 @@
 export const TableName = {
+  GrammarTopics: 'grammar_topics',
   GrammarGroups: 'grammar_groups',
   GrammarChunks: 'grammar_chunks',
   GrammarChunkExamples: 'grammar_chunk_examples',

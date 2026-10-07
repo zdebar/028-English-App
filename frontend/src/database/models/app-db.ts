@@ -2,6 +2,7 @@ import config from '@/config/config';
 import Dexie, { type EntityTable } from 'dexie';
 import type GrammarChunk from '@/database/models/grammar-chunks';
 import type GrammarGroup from '@/database/models/grammar-groups';
+import type GrammarTopic from '@/database/models/grammar-topics';
 import type AudioRecord from '@/database/models/audio-records';
 import type UserItem from '@/database/models/user-items';
 import type Block from '@/database/models/blocks';
@@ -33,6 +34,7 @@ export default class AppDB extends Dexie {
   pronunciation_groups!: EntityTable<PronunciationGroup, 'id'>;
   pronunciation_group_items!: EntityTable<PronunciationGroupItem, any>;
   grammar_groups!: EntityTable<GrammarGroup, 'id'>;
+  grammar_topics!: EntityTable<GrammarTopic, 'id'>;
   grammar_chunks!: EntityTable<GrammarChunk, 'id'>;
   grammar_chunk_examples!: EntityTable<GrammarChunkExample, any>;
   user_items!: EntityTable<UserItem, any>;
@@ -105,5 +107,9 @@ export default class AppDB extends Dexie {
           delete localItem['mastered_at_' + 'en_to_cz'];
         });
       });
+    this.version(6).stores({
+      grammar_topics: 'id, sort_order',
+      grammar_groups: 'id, grammar_topic_id, sort_order',
+    });
   }
 }

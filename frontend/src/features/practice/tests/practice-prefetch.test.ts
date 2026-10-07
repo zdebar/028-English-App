@@ -106,6 +106,14 @@ describe('practice prefetch', () => {
     );
   });
 
+  it('reuses the prepared block after the active Initial session is removed', async () => {
+    const activeSession = activeSessionFixture();
+    const prepared = await getPrefetchedNextInitialBlock('u1', activeSession);
+
+    await expect(getPrefetchedNextInitialBlock('u1', null)).resolves.toBe(prepared);
+    expect(mocks.getSelection).toHaveBeenCalledOnce();
+  });
+
   it('returns null for an invalid block and reloads after invalidation', async () => {
     mocks.getBlock.mockResolvedValueOnce(null);
     await expect(getPrefetchedNextInitialBlock('u1', null)).resolves.toBeNull();

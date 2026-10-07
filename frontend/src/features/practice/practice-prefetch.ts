@@ -29,7 +29,6 @@ export type PreparedInitialBlock = Readonly<{
 
 type PracticePrefetchState = {
   nextInitialBlock: PreparedInitialBlock | null;
-  nextInitialBlockKey: string | null;
   dirty: boolean;
   version: number;
   pending: Promise<void> | null;
@@ -40,7 +39,6 @@ const states = new Map<string, PracticePrefetchState>();
 function createState(): PracticePrefetchState {
   return {
     nextInitialBlock: null,
-    nextInitialBlockKey: null,
     dirty: true,
     version: 0,
     pending: null,
@@ -63,12 +61,6 @@ function getSavedSessionItemIds(session: PracticeSessionType | null): number[] {
     ...session.retry_queue_item_ids,
     ...session.completed_item_ids,
   ];
-}
-
-function getInitialBlockKey(session: PracticeSessionType | null): string {
-  if (!session) return 'no-active-session';
-  const itemIds = getSavedSessionItemIds(session).sort((left, right) => left - right);
-  return JSON.stringify({ blockId: session.block_id, itemIds });
 }
 
 function getSelectionOptions(session: PracticeSessionType | null) {
@@ -115,40 +107,37 @@ async function resolveActiveSession(
   return (await PracticeSession.inspectActive(userId)).activeSession;
 }
 
-/** Loads review arrays and the next initial block through one per-user request. */
+/** Loads review arrays and prepares the next initial block until explicit invalidation. */
 export async function warmPracticeCache(
   userId: string,
   activeSession?: PracticeSessionType | null,
 ): Promise<void> {
   const state = getState(userId);
-  const resolvedSession = await resolveActiveSession(userId, activeSession);
-  const cacheKey = getInitialBlockKey(resolvedSession);
   if (state.pending) {
     await state.pending;
-    return warmPracticeCache(userId, resolvedSession);
+    return warmPracticeCache(userId, activeSession);
   }
-  if (!state.dirty && state.nextInitialBlockKey === cacheKey) return;
+  if (!state.dirty) return;
 
   const version = state.version;
   let pending: Promise<void>;
-  pending = Promise.all([
-    warmReviewArrays(userId),
-    loadPreparedInitialBlock(userId, resolvedSession),
-  ])
-    .then(([, nextInitialBlock]) => {
-      if (states.get(userId) !== state || state.version !== version) return;
-      state.nextInitialBlock = nextInitialBlock;
-      state.nextInitialBlockKey = cacheKey;
-      state.dirty = false;
-    })
-    .finally(() => {
-      if (state.pending === pending) state.pending = null;
-    });
+  pending = (async () => {
+    const resolvedSession = await resolveActiveSession(userId, activeSession);
+    const [, nextInitialBlock] = await Promise.all([
+      warmReviewArrays(userId),
+      loadPreparedInitialBlock(userId, resolvedSession),
+    ]);
+    if (states.get(userId) !== state || state.version !== version) return;
+    state.nextInitialBlock = nextInitialBlock;
+    state.dirty = false;
+  })().finally(() => {
+    if (state.pending === pending) state.pending = null;
+  });
 
   state.pending = pending;
   await pending;
   if (states.get(userId) === state && state.version !== version) {
-    return warmPracticeCache(userId, resolvedSession);
+    return warmPracticeCache(userId, activeSession);
   }
 }
 

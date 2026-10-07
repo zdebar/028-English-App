@@ -405,7 +405,6 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
       await PracticeSession.recordInitialTrainingAnswer(updatedItem, null, session);
     }
     await syncPersistedItemToReviewCache(updatedItem);
-    invalidateNextInitialBlock(updatedItem.user_id);
 
     if (!nextSession) {
       setHasProgress(true);
