@@ -30,7 +30,7 @@ import { settleSyncWithAuthRecovery } from './sync-auth-recovery.utils';
 export async function dataSync(userId: string, fullSync: boolean = false): Promise<void> {
   assertNonEmptyString(userId, 'userId');
 
-  await initDbMappings();
+  initDbMappings();
   // Step 1: Determine if a full sync is needed
   const now = Date.now();
   let doFullSync = fullSync;
