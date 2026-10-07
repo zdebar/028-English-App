@@ -16,6 +16,7 @@ GRANT EXECUTE ON FUNCTION public.is_non_demo_user() TO authenticated;
 -- through Supabase Auth, so the direct table grants target authenticated only.
 REVOKE ALL PRIVILEGES ON TABLE
   public.blocks,
+  public.grammar_topics,
   public.grammar_groups,
   public.grammar_chunks,
   public.grammar_chunk_examples,
@@ -30,6 +31,7 @@ FROM PUBLIC, anon, authenticated;
 
 GRANT SELECT ON TABLE
   public.blocks,
+  public.grammar_topics,
   public.grammar_groups,
   public.grammar_chunks,
   public.grammar_chunk_examples,
@@ -43,6 +45,7 @@ GRANT SELECT ON TABLE
 TO authenticated;
 
 ALTER TABLE public.blocks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.grammar_topics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.grammar_groups ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.grammar_chunks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.grammar_chunk_examples ENABLE ROW LEVEL SECURITY;
@@ -55,6 +58,7 @@ ALTER TABLE public.pronunciation_group_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.topics ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Enable read access for all users" ON public.blocks;
+DROP POLICY IF EXISTS "Enable read access for all users" ON public.grammar_topics;
 DROP POLICY IF EXISTS "Enable read access for all users" ON public.grammar_groups;
 DROP POLICY IF EXISTS "Enable read access for all users" ON public.grammar_chunks;
 DROP POLICY IF EXISTS "Enable read access for all users" ON public.items;
@@ -62,6 +66,7 @@ DROP POLICY IF EXISTS "Enable read access for all users" ON public.lessons;
 DROP POLICY IF EXISTS "Enable read access for all users" ON public.levels;
 DROP POLICY IF EXISTS "Enable read access for all users" ON public.notes;
 DROP POLICY IF EXISTS catalog_select_authenticated ON public.blocks;
+DROP POLICY IF EXISTS catalog_select_authenticated ON public.grammar_topics;
 DROP POLICY IF EXISTS catalog_select_authenticated ON public.grammar_groups;
 DROP POLICY IF EXISTS catalog_select_authenticated ON public.grammar_chunks;
 DROP POLICY IF EXISTS catalog_select_authenticated ON public.grammar_chunk_examples;
@@ -72,6 +77,10 @@ DROP POLICY IF EXISTS catalog_select_authenticated ON public.notes;
 DROP POLICY IF EXISTS catalog_select_authenticated ON public.pronunciation_groups;
 DROP POLICY IF EXISTS catalog_select_authenticated ON public.pronunciation_group_items;
 DROP POLICY IF EXISTS catalog_select_authenticated ON public.topics;
+
+CREATE POLICY catalog_select_authenticated ON public.grammar_topics
+  FOR SELECT TO authenticated
+  USING (TRUE);
 
 CREATE POLICY catalog_select_authenticated ON public.blocks
   FOR SELECT TO authenticated

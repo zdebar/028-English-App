@@ -9,6 +9,7 @@ import Levels from '@/database/models/levels';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 import GrammarChunk from '@/database/models/grammar-chunks';
 import GrammarGroup from '@/database/models/grammar-groups';
+import GrammarTopic from '@/database/models/grammar-topics';
 import { reportInfo } from '@/features/logging/monitoring-handler';
 import { supabaseInstance } from '@/config/supabase.config';
 import Notes from '../models/notes';
@@ -40,6 +41,7 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
 
   // Step 2: Perform shared stores data synchronization (grammar and audio metadata)
   const tasks = [
+    () => GrammarTopic.syncFromRemote(doFullSync),
     () => GrammarGroup.syncFromRemote(doFullSync),
     () => GrammarChunk.syncFromRemote(doFullSync),
     () => GrammarChunkExample.syncFromRemote(doFullSync),
@@ -55,6 +57,7 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
 
   // Keep a parallel list of human-readable table names to report per-table completions.
   const tableNames = [
+    'GrammarTopics',
     'GrammarGroups',
     'GrammarChunks',
     'GrammarChunkExamples',

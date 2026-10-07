@@ -24,7 +24,7 @@ vi.mock('react-router-dom', () => ({
   useLocation: () => ({ key: 'default' }),
 }));
 
-vi.mock('@/database/models/grammar-groups', () => ({
+vi.mock('@/database/models/grammar-topics', () => ({
   default: {
     getStarted: vi.fn(),
   },
@@ -141,15 +141,24 @@ describe('GrammarOverview', () => {
 
   it('resets grammar progress and logs completion info', async () => {
     mocks.arrayState.data = [{
-      id: 8,
-      kind: 'group',
-      name: 'Reported speech',
+      id: 1,
+      name: 'Present Simple',
       note: null,
-      chunks: [],
+      sort_order: 1,
+      groups: [{
+        id: 8,
+        kind: 'group',
+        name: 'Reported speech',
+        note: null,
+        grammar_topic_id: 1,
+        sort_order: 1,
+        chunks: [],
+      }],
     }];
 
     render(<GrammarOverview />);
-    fireEvent.click(screen.getByTestId('grammar-button'));
+    fireEvent.click(screen.getByText('Present Simple'));
+    fireEvent.click(screen.getByText('Reported speech'));
 
     fireEvent.click(screen.getByTestId('overview-reset'));
 
@@ -166,15 +175,24 @@ describe('GrammarOverview', () => {
     const error = new Error('Dexie failure');
     mocks.resetItemsByGrammarGroupId.mockRejectedValueOnce(error);
     mocks.arrayState.data = [{
-      id: 8,
-      kind: 'group',
-      name: 'Reported speech',
+      id: 1,
+      name: 'Present Simple',
       note: null,
-      chunks: [],
+      sort_order: 1,
+      groups: [{
+        id: 8,
+        kind: 'group',
+        name: 'Reported speech',
+        note: null,
+        grammar_topic_id: 1,
+        sort_order: 1,
+        chunks: [],
+      }],
     }];
 
     render(<GrammarOverview />);
-    fireEvent.click(screen.getByTestId('grammar-button'));
+    fireEvent.click(screen.getByText('Present Simple'));
+    fireEvent.click(screen.getByText('Reported speech'));
 
     fireEvent.click(screen.getByTestId('overview-reset'));
 

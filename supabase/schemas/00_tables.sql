@@ -16,15 +16,29 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS grammar_groups (
+CREATE TABLE IF NOT EXISTS grammar_topics (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
   note TEXT,
   sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ,
-  CONSTRAINT grammar_groups_sort_order_key
+  CONSTRAINT grammar_topics_sort_order_key
     UNIQUE (sort_order) DEFERRABLE INITIALLY DEFERRED
+);
+
+CREATE TABLE IF NOT EXISTS grammar_groups (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  note TEXT,
+  grammar_topic_id INTEGER NOT NULL REFERENCES grammar_topics(id) ON DELETE RESTRICT,
+  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  deleted_at TIMESTAMPTZ,
+  CONSTRAINT grammar_groups_topic_name_key
+    UNIQUE (grammar_topic_id, name),
+  CONSTRAINT grammar_groups_topic_sort_order_key
+    UNIQUE (grammar_topic_id, sort_order) DEFERRABLE INITIALLY DEFERRED
 );
 
 CREATE TABLE IF NOT EXISTS grammar_chunks (

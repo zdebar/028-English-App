@@ -208,22 +208,36 @@ INSERT INTO "auth"."refresh_tokens" ("instance_id", "id", "token", "user_id", "r
 
 
 --
--- Data for Name: grammar_groups; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: grammar_topics; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "public"."grammar_groups" ("id", "name", "note", "sort_order", "updated_at", "deleted_at") VALUES
-	(1, 'Být', NULL, 1, '2026-08-05 09:14:51.035048+00', NULL),
-	(2, 'Být - zápor', NULL, 2, '2026-08-05 09:14:54.153023+00', NULL),
-	(3, 'Být - zjišťovací otázky', NULL, 3, '2026-08-05 09:15:17.211688+00', NULL),
-	(4, 'Být - tázací otázky', NULL, 4, '2026-08-05 09:15:29.720409+00', NULL),
-	(5, 'Množné číslo', NULL, 5, '2026-08-06 06:36:49.845629+00', NULL),
-	(6, 'Přivlastňování', NULL, 6, '2026-08-06 06:37:03.733087+00', NULL),
-	(7, 'Členy', NULL, 7, '2026-08-06 06:37:32.365688+00', NULL),
-	(8, 'Čísla', NULL, 8, '2026-08-06 06:37:52.046818+00', NULL),
-	(9, 'Časy a datumy', NULL, 9, '2026-08-06 09:09:48.964105+00', NULL),
-	(10, 'Předložky časy - in, on, at', NULL, 10, '2026-08-06 09:10:08.332428+00', NULL),
-	(11, 'Předložky místa - in, on, at', NULL, 11, '2026-08-06 09:10:25.182383+00', NULL),
-	(12, 'Přítomný čas prostý', NULL, 12, '2026-08-06 09:11:03.250864+00', NULL);
+INSERT INTO "public"."grammar_topics" ("id", "name", "note", "sort_order", "updated_at", "deleted_at") VALUES
+	(1, 'Present Simple', NULL, 1, '2026-10-07 00:00:00+00', NULL),
+	(2, 'Množné číslo', NULL, 2, '2026-10-07 00:00:00+00', NULL),
+	(3, 'Přivlastňování', NULL, 3, '2026-10-07 00:00:00+00', NULL),
+	(4, 'Členy', NULL, 4, '2026-10-07 00:00:00+00', NULL),
+	(5, 'Čísla', NULL, 5, '2026-10-07 00:00:00+00', NULL),
+	(6, 'Časy a datumy', NULL, 6, '2026-10-07 00:00:00+00', NULL),
+	(7, 'Předložky času', NULL, 7, '2026-10-07 00:00:00+00', NULL),
+	(8, 'Předložky místa', NULL, 8, '2026-10-07 00:00:00+00', NULL);
+
+
+--
+-- Data for Name: grammar_groups; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+INSERT INTO "public"."grammar_groups" ("id", "name", "note", "grammar_topic_id", "sort_order", "updated_at", "deleted_at") VALUES
+	(1, 'Být', NULL, 1, 1, '2026-08-05 09:14:51.035048+00', NULL),
+	(2, 'Být - zápor', NULL, 1, 2, '2026-08-05 09:14:54.153023+00', NULL),
+	(3, 'Být - zjišťovací otázky', NULL, 1, 3, '2026-08-05 09:15:17.211688+00', NULL),
+	(4, 'Být - tázací otázky', NULL, 1, 4, '2026-08-05 09:15:29.720409+00', NULL),
+	(5, 'Množné číslo', NULL, 2, 1, '2026-08-06 06:36:49.845629+00', NULL),
+	(6, 'Přivlastňování', NULL, 3, 1, '2026-08-06 06:37:03.733087+00', NULL),
+	(7, 'Členy', NULL, 4, 1, '2026-08-06 06:37:32.365688+00', NULL),
+	(8, 'Čísla', NULL, 5, 1, '2026-08-06 06:37:52.046818+00', NULL),
+	(9, 'Časy a datumy', NULL, 6, 1, '2026-08-06 09:09:48.964105+00', NULL),
+	(10, 'Předložky časy - in, on, at', NULL, 7, 1, '2026-08-06 09:10:08.332428+00', NULL),
+	(11, 'Předložky místa - in, on, at', NULL, 8, 1, '2026-08-06 09:10:25.182383+00', NULL),
+	(12, 'Přítomný čas prostý', NULL, 1, 5, '2026-08-06 09:11:03.250864+00', NULL);
 
 
 --
@@ -1192,10 +1206,17 @@ SELECT pg_catalog.setval('"public"."grammar_chunks_id_seq"', 4, true);
 
 
 --
+-- Name: grammar_topics_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('"public"."grammar_topics_id_seq"', 8, true);
+
+
+--
 -- Name: grammar_groups_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('"public"."grammar_groups_id_seq"', 1, false);
+SELECT pg_catalog.setval('"public"."grammar_groups_id_seq"', 12, true);
 
 
 --

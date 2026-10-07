@@ -19,7 +19,7 @@ vi.mock('@/hooks/shared-query-store', () => ({
   sharedQueryKey: (userId: string, name: string) => JSON.stringify([userId, name]),
 }));
 
-vi.mock('@/database/models/grammar-groups', () => ({
+vi.mock('@/database/models/grammar-topics', () => ({
   default: { getInitiated: (...args: unknown[]) => mocks.getInitiatedGrammar(...args) },
 }));
 

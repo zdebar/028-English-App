@@ -7,6 +7,7 @@ import type { JSX } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ListButton } from '@/components/UI/buttons/ListButton';
 import type { GrammarGroupWithChunks } from '@/database/models/grammar-groups';
+import type { GrammarTopicWithGroups } from '@/database/models/grammar-topics';
 import UserItem from '@/database/models/user-items';
 import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
@@ -21,11 +22,12 @@ type GrammarSelection = Readonly<Pick<GrammarGroupWithChunks, 'id'>>;
 
 export default function GrammarOverview({
   initialGrammar,
-}: Readonly<{ initialGrammar?: GrammarGroupWithChunks[] }>): JSX.Element {
+}: Readonly<{ initialGrammar?: GrammarTopicWithGroups[] }>): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const closeRoute = useRouteClose(ROUTES.overviews);
   const showToast = useToastStore((state) => state.showToast);
   const [selection, setSelection] = useState<GrammarSelection | null>(null);
+  const [unpackedTopicId, setUnpackedTopicId] = useState<number | null>(null);
 
   const fetchGrammar = useCallback(async () => {
     if (!userId) {
@@ -41,11 +43,16 @@ export default function GrammarOverview({
     sharedKey: userId ? overviewQueryKey(userId, 'grammar') : undefined,
   });
   const hasData = grammarList.length > 0;
-  const currentItem = useMemo(
-    () =>
-      selection ? (grammarList.find((item) => item.id === selection.id) ?? null) : null,
-    [grammarList, selection],
-  );
+  const currentItem = useMemo(() => {
+    if (!selection) return null;
+
+    for (const topic of grammarList) {
+      const group = topic.groups.find((candidate) => candidate.id === selection.id);
+      if (group) return group;
+    }
+
+    return null;
+  }, [grammarList, selection]);
 
   useEffect(() => {
     if (selection && !currentItem) setSelection(null);
@@ -56,6 +63,15 @@ export default function GrammarOverview({
     showToast(TEXTS.loadingError, 'error');
     reportError('Failed to fetch grammar overview', error);
   }, [error, showToast]);
+
+  const handleTopicClick = useCallback((topicId: number) => {
+    setUnpackedTopicId((currentId) => (currentId === topicId ? null : topicId));
+  }, []);
+
+  const handleGroupClick = useCallback((topicId: number, groupId: number) => {
+    setUnpackedTopicId(topicId);
+    setSelection({ id: groupId });
+  }, []);
 
   const handleReset = useCallback(async () => {
     if (!currentItem || !userId) {
@@ -84,16 +100,38 @@ export default function GrammarOverview({
       >
         <DataState loading={loading} hasData={hasData} noDataMessage={TEXTS.noGrammar}>
           <div className="flex flex-col gap-1 pt-1">
-            {grammarList.map((item) => (
-              <ListButton
-                key={item.id}
-                className="h-input justify-start px-4"
-                onClick={() => setSelection({ id: item.id })}
-                title={item.name}
-              >
-                {item.name}
-              </ListButton>
-            ))}
+            {grammarList.map((topic) => {
+              const isUnpacked = unpackedTopicId === topic.id;
+
+              return (
+                <div key={topic.id} className="flex flex-col gap-1">
+                  <ListButton
+                    className="flex justify-start p-4 text-left"
+                    onClick={() => handleTopicClick(topic.id)}
+                    aria-expanded={isUnpacked}
+                    title={topic.name}
+                  >
+                    <p className="overflow-hidden text-ellipsis whitespace-nowrap">{topic.name}</p>
+                  </ListButton>
+                  {isUnpacked && (
+                    <div className="flex flex-col gap-1">
+                      {topic.groups.map((group) => (
+                        <ListButton
+                          key={group.id}
+                          className="flex justify-start px-8 text-left"
+                          onClick={() => handleGroupClick(topic.id, group.id)}
+                          title={group.name}
+                        >
+                          <p className="overflow-hidden text-ellipsis whitespace-nowrap">
+                            {group.name}
+                          </p>
+                        </ListButton>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </DataState>
       </OverviewCard>

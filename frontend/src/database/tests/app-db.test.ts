@@ -39,7 +39,7 @@ describe('AppDB schema', () => {
   it('declares the complete schema and removes obsolete stores', () => {
     new AppDB();
 
-    expect(mocks.versions).toHaveLength(5);
+    expect(mocks.versions).toHaveLength(6);
     expect(mocks.versions[0]).toMatchObject({
       number: 1,
       schema: {
@@ -83,6 +83,13 @@ describe('AppDB schema', () => {
     expect(mocks.versions[4]).toMatchObject({
       number: 5,
       schema: { user_items: expect.any(String) },
+    });
+    expect(mocks.versions[5]).toMatchObject({
+      number: 6,
+      schema: {
+        grammar_topics: 'id, sort_order',
+        grammar_groups: 'id, grammar_topic_id, sort_order',
+      },
     });
   });
 });
