@@ -8,10 +8,10 @@ import { TEXTS } from '@/locales/cs';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useSyncStore } from './use-sync-store';
 import {
-  clearReviewArrays,
-  invalidateReviewArrays,
-  warmReviewArrays,
-} from '@/features/practice/review-prefetch';
+  clearPracticeCache,
+  invalidatePracticeCache,
+  warmPracticeCache,
+} from '@/features/practice/practice-prefetch';
 import { warmOverviewQueries } from '@/hooks/overview-query-store';
 
 /**
@@ -36,7 +36,7 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
   useEffect(() => {
     if (!userId) {
       resetSyncState();
-      clearReviewArrays(null);
+      clearPracticeCache(null);
       return;
     }
 
@@ -51,9 +51,9 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
           await dataSync(activeUserId);
         } finally {
           // A partially failed sync may still have committed updated item data.
-          invalidateReviewArrays(activeUserId);
-          void warmReviewArrays(activeUserId).catch((error) => {
-            reportError('Failed to prefetch review arrays', error);
+          invalidatePracticeCache(activeUserId);
+          void warmPracticeCache(activeUserId).catch((error) => {
+            reportError('Failed to prefetch practice cache', error);
           });
           void refreshPracticeAvailability(activeUserId);
         }
@@ -104,16 +104,16 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
     };
 
     initialSyncTimeoutId.current = globalThis.setTimeout(() => {
-      runSync();
+      void runSync();
     }, 3000);
-    void warmReviewArrays(activeUserId).catch((error) => {
-      reportError('Failed to prefetch review arrays', error);
+    void warmPracticeCache(activeUserId).catch((error) => {
+      reportError('Failed to prefetch practice cache', error);
     });
     void warmOverviewQueries(activeUserId).catch((error) => {
       reportError('Failed to prefetch overview queries', error);
     });
     intervalId.current = setInterval(() => {
-      runSync();
+      void runSync();
     }, config.sync.periodicSyncInterval);
 
     return () => {

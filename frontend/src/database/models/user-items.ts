@@ -8,6 +8,7 @@ import type {
   UserItemLocal,
   CurriculumSortPath,
   InitialTrainingSelection,
+  InitialTrainingSelectionOptions,
 } from '@/types/user-item.types';
 import type { ReviewKind } from '@/types/practice.types';
 import { TableName } from '@/types/table.types';
@@ -123,14 +124,20 @@ function replaceNullNumber(value: number | null): number {
   return value ?? NULL_NUMBER;
 }
 
-async function getUnstartedItems(userId: string): Promise<UserItemLocal[]> {
+async function getUnstartedItems(
+  userId: string,
+  options: InitialTrainingSelectionOptions,
+): Promise<UserItemLocal[]> {
+  const excludedItemIds = new Set(options.excludeItemIds ?? []);
   const items = await db.user_items.where('user_id').equals(userId).toArray();
   return items
     .filter(
       (item) =>
         item.deleted_at === NULL_DATE &&
         item.started_at === NULL_DATE &&
-        !isInitialTrainingSkipped(item),
+        !isInitialTrainingSkipped(item) &&
+        item.block_id !== options.excludeBlockId &&
+        !excludedItemIds.has(item.item_id),
     )
     .sort((left, right) =>
       compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path),
@@ -346,11 +353,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   static async getNextInitialTrainingSelection(
     userId: string,
     batchSize: number = config.practice.initialTrainingBatchSize,
+    options: InitialTrainingSelectionOptions = {},
   ): Promise<InitialTrainingSelection | null> {
     assertNonEmptyString(userId, 'userId');
     if (batchSize <= 0) return null;
 
-    const unstartedItems = await getUnstartedItems(userId);
+    const unstartedItems = await getUnstartedItems(userId, options);
     return resolveInitialTrainingSelection(unstartedItems, batchSize);
   }
 

@@ -8,6 +8,8 @@ const mocks = vi.hoisted(() => ({
   recordInitialTrainingAnswer: vi.fn(),
   applyPracticeProgress: vi.fn(),
   syncReviewItemToCache: vi.fn(),
+  invalidateNextInitialBlock: vi.fn(),
+  warmPracticeCache: vi.fn().mockResolvedValue(undefined),
   resetQuestionState: vi.fn(),
   renderStates: [] as Array<{ itemId: number | null; revealed: boolean }>,
   transitionEvents: [] as string[],
@@ -69,6 +71,10 @@ vi.mock('../review-prefetch', () => ({
   invalidateReviewArrays: vi.fn(),
   rebuildReviewArrays: vi.fn().mockResolvedValue(undefined),
   syncReviewItemToCache: (...args: unknown[]) => mocks.syncReviewItemToCache(...args),
+}));vi.mock('../practice-prefetch', () => ({
+  getPrefetchedNextInitialBlock: vi.fn(),
+  invalidateNextInitialBlock: (...args: unknown[]) => mocks.invalidateNextInitialBlock(...args),
+  warmPracticeCache: (...args: unknown[]) => mocks.warmPracticeCache(...args),
 }));
 
 import { useInitialTrainingDeck } from '../hooks/use-block-training-deck';

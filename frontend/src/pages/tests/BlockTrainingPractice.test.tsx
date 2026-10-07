@@ -140,15 +140,14 @@ describe('BlockTrainingPractice', () => {
     expect(mocks.navigate).toHaveBeenCalledWith('/');
   });
 
-  it('returns home from a completed named block', () => {
+  it('does not render a completion page after a block is completed', () => {
     mocks.deck.block = { name: 'Block A' };
     mocks.deck.grammar = { id: 1, name: 'Articles' };
     mocks.deck.isComplete = true;
 
     render(<BlockTrainingPractice />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Home' }));
-    expect(mocks.navigate).toHaveBeenCalledWith('/');
+    expect(screen.queryByText('Block completed')).toBeNull();
   });
 
   it('passes current item progress to the practice card', () => {

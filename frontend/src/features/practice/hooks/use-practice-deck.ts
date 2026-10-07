@@ -40,6 +40,8 @@ type SecondaryContentRequest = Readonly<{
 
 type ReviewRetryAction = 'save';
 
+type PracticeCompletionHandler = () => void;
+
 type MutableRef<T> = { current: T };
 
 function getReviewQueueEntries(reviewDeck: ReviewDeckData): readonly PracticeDeckEntry[] {
@@ -95,7 +97,11 @@ function getReviewDeckCleanup(
 }
 
 /** Uses the prefetched review queue and persists each answer before advancing. */
-export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckData) {
+export function usePracticeDeck(
+  userId: string | null,
+  initialData?: ReviewDeckData,
+  onComplete?: PracticeCompletionHandler,
+) {
   const [saveError, setSaveError] = useState<Error | null>(null);
   const saveReviewItem = useCallback(
     async (item: UserItemLocal): Promise<boolean> => {
@@ -139,6 +145,13 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
     queueDataRef,
   );
   const { finishPractice } = usePracticeAvailabilityBoundary(userId);
+  const completionHandledRef = useRef(false);
+  const completePractice = useCallback(async () => {
+    if (completionHandledRef.current) return;
+    completionHandledRef.current = true;
+    await finishPractice();
+    onComplete?.();
+  }, [finishPractice, onComplete]);
   const [revealed, setRevealed] = useState(false);
   const [finishedReview, setFinishedReview] = useState(() => isReviewQueueFinished(initialQueue));
   const [retryAction, setRetryAction] = useState<ReviewRetryAction | null>(null);
@@ -218,8 +231,8 @@ export function usePracticeDeck(userId: string | null, initialData?: ReviewDeckD
 
   useEffect(() => {
     if (!finishedReview || !reviewQueueRef.current) return;
-    void finishPractice();
-  }, [finishPractice, finishedReview, queueVersion]);
+    void completePractice();
+  }, [completePractice, finishedReview, queueVersion]);
 
   useEffect(() => {
     if (!userId || !currentItem) {

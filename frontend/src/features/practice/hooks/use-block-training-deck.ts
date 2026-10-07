@@ -28,8 +28,15 @@ import {
   rebuildReviewArrays,
   syncReviewItemToCache,
 } from '../review-prefetch';
+import {
+  getPrefetchedNextInitialBlock,
+  invalidateNextInitialBlock,
+  warmPracticeCache,
+} from '../practice-prefetch';
 
 type TrainingOutcome = 'correct' | 'incorrect' | 'skip';
+
+type PracticeCompletionHandler = () => void;
 
 function toError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
@@ -135,7 +142,9 @@ async function resolveTrainingSelection(
   if (initialData) {
     return { blockId: initialData.block?.id ?? null, items: initialData.items };
   }
-  return UserItem.getNextInitialTrainingSelection(userId);
+  const preparedBlock = await getPrefetchedNextInitialBlock(userId, null);
+  if (!preparedBlock) return null;
+  return { blockId: preparedBlock.block?.id ?? null, items: preparedBlock.items };
 }
 
 async function resolveTrainingBlock(
@@ -220,11 +229,16 @@ async function getTrainingSession(
   items: UserItemLocal[],
 ): Promise<PracticeSessionType> {
   if (existing) return existing;
-  return PracticeSession.startNew(
+  const session = await PracticeSession.startNew(
     userId,
     blockId,
     items.map((item) => item.item_id),
   );
+  invalidateNextInitialBlock(userId);
+  void warmPracticeCache(userId, session).catch((error: unknown) => {
+    reportError('Failed to prefetch next initial block', error);
+  });
+  return session;
 }
 
 function hasTrainingProgress(existing: PracticeSessionType | null): boolean {
@@ -391,6 +405,7 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
       await PracticeSession.recordInitialTrainingAnswer(updatedItem, null, session);
     }
     await syncPersistedItemToReviewCache(updatedItem);
+    invalidateNextInitialBlock(updatedItem.user_id);
 
     if (!nextSession) {
       setHasProgress(true);
@@ -414,7 +429,11 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
   }
 }
 
-export function useInitialTrainingDeck(userId: string | null, initialData?: InitialTrainingData) {
+export function useInitialTrainingDeck(
+  userId: string | null,
+  initialData?: InitialTrainingData,
+  onComplete?: PracticeCompletionHandler,
+) {
   const { trackPracticeWrite, finishPractice } = usePracticeAvailabilityBoundary(userId);
   const initialState = getInitialTrainingState(initialData);
   const [block, setBlock] = useState<BlockType | null>(initialState.block);
@@ -435,6 +454,7 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
   const [loading, setLoading] = useState(userId != null);
   const [error, setError] = useState<Error | null>(null);
   const isTransitioningRef = useRef(false);
+  const completionHandledRef = useRef(false);
 
   useEffect(() => {
     if (!userId) {
@@ -479,11 +499,17 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
     setRevealed,
   });
   const resetQuestionState = cardState.resetQuestionState;
+  const completePractice = useCallback(async () => {
+    if (completionHandledRef.current) return;
+    completionHandledRef.current = true;
+    await finishPractice();
+    onComplete?.();
+  }, [finishPractice, onComplete]);
 
   useEffect(() => {
     if (!isComplete) return;
-    void finishPractice();
-  }, [finishPractice, isComplete]);
+    void completePractice();
+  }, [completePractice, isComplete]);
 
   const advance = useCallback(
     async (outcome: TrainingOutcome) => {

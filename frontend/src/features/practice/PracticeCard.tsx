@@ -2,15 +2,16 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import { usePracticeDeck } from './hooks/use-practice-deck';
 import PracticeSessionCard, { type PracticeDetail } from './PracticeSessionCard';
 import PracticeEmptyState from './PracticeEmptyState';
-import PracticeEndState from './PracticeEndState';
 import { TEXTS } from '@/locales/cs';
 import DelayedMessage from '@/components/UI/DelayedMessage';
 import { useToastStore } from '../toast/use-toast-store';
 import { reportError } from '../logging/monitoring-handler';
 import { useCallback, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { ReviewDeckData } from '@/database/utils/practice-content.utils';
 import { usePracticeExitBlocker } from './hooks/use-practice-exit-blocker';
 import { formatProgress } from '@/utils/progress.utils';
+import { ROUTES } from '@/config/routes.config';
 
 type PracticeCardProps = Readonly<{
   initialData?: ReviewDeckData;
@@ -19,7 +20,11 @@ type PracticeCardProps = Readonly<{
 export default function PracticeCard({ initialData }: PracticeCardProps) {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
+  const navigate = useNavigate();
   const notifiedDetailFailuresRef = useRef(new Set<string>());
+  const handlePracticeComplete = useCallback(() => {
+    navigate(ROUTES.home, { replace: true });
+  }, [navigate]);
   const {
     currentItem,
     note,
@@ -46,7 +51,7 @@ export default function PracticeCard({ initialData }: PracticeCardProps) {
     loading,
     error,
     finishPractice,
-  } = usePracticeDeck(userId, initialData);
+  } = usePracticeDeck(userId, initialData, handlePracticeComplete);
 
   usePracticeExitBlocker(finishPractice);
 
@@ -76,9 +81,7 @@ export default function PracticeCard({ initialData }: PracticeCardProps) {
     return <DelayedMessage />;
   }
 
-  if (finishedReview) {
-    return <PracticeEndState message={TEXTS.reviewCompleted} />;
-  }
+  if (finishedReview) return null;
 
   if (!currentItem) {
     return <PracticeEmptyState />;
