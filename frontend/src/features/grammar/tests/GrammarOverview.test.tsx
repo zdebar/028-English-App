@@ -1,6 +1,30 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+function createGrammarTopicData() {
+  return [{
+    id: 1,
+    name: 'Present Simple',
+    note: null,
+    sort_order: 1,
+    groups: [{
+      id: 8,
+      kind: 'group',
+      name: 'Reported speech',
+      note: null,
+      grammar_topic_id: 1,
+      sort_order: 1,
+      chunks: [],
+    }],
+  }];
+}
+
+function openReportedSpeechReset(): void {
+  fireEvent.click(screen.getByText('Present Simple'));
+  fireEvent.click(screen.getByText('Reported speech'));
+  fireEvent.click(screen.getByTestId('overview-reset'));
+}
+
 const mocks = vi.hoisted(() => ({
   userId: 'u1',
   navigate: vi.fn(),
@@ -140,27 +164,10 @@ describe('GrammarOverview', () => {
   });
 
   it('resets grammar progress and logs completion info', async () => {
-    mocks.arrayState.data = [{
-      id: 1,
-      name: 'Present Simple',
-      note: null,
-      sort_order: 1,
-      groups: [{
-        id: 8,
-        kind: 'group',
-        name: 'Reported speech',
-        note: null,
-        grammar_topic_id: 1,
-        sort_order: 1,
-        chunks: [],
-      }],
-    }];
+    mocks.arrayState.data = createGrammarTopicData();
 
     render(<GrammarOverview />);
-    fireEvent.click(screen.getByText('Present Simple'));
-    fireEvent.click(screen.getByText('Reported speech'));
-
-    fireEvent.click(screen.getByTestId('overview-reset'));
+    openReportedSpeechReset();
 
     await waitFor(() => {
       expect(mocks.resetItemsByGrammarGroupId).toHaveBeenCalledWith('u1', 8);
@@ -174,27 +181,10 @@ describe('GrammarOverview', () => {
   it('shows error toast when item reset fails', async () => {
     const error = new Error('Dexie failure');
     mocks.resetItemsByGrammarGroupId.mockRejectedValueOnce(error);
-    mocks.arrayState.data = [{
-      id: 1,
-      name: 'Present Simple',
-      note: null,
-      sort_order: 1,
-      groups: [{
-        id: 8,
-        kind: 'group',
-        name: 'Reported speech',
-        note: null,
-        grammar_topic_id: 1,
-        sort_order: 1,
-        chunks: [],
-      }],
-    }];
+    mocks.arrayState.data = createGrammarTopicData();
 
     render(<GrammarOverview />);
-    fireEvent.click(screen.getByText('Present Simple'));
-    fireEvent.click(screen.getByText('Reported speech'));
-
-    fireEvent.click(screen.getByTestId('overview-reset'));
+    openReportedSpeechReset();
 
     await waitFor(() => {
       expect(mocks.resetItemsByGrammarGroupId).toHaveBeenCalledWith('u1', 8);
