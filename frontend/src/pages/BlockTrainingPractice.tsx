@@ -4,15 +4,15 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import { reportError } from '@/features/logging/monitoring-handler';
 import BlockTrainingOverviewCard from '@/features/practice/BlockTrainingOverviewCard';
 import PracticeEmptyState from '@/features/practice/PracticeEmptyState';
-import PracticeEndState from '@/features/practice/PracticeEndState';
 import PracticeSessionCard from '@/features/practice/PracticeSessionCard';
 import { useInitialTrainingDeck } from '@/features/practice/hooks/use-block-training-deck';
 import { usePracticeExitBlocker } from '@/features/practice/hooks/use-practice-exit-blocker';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import { formatProgress } from '@/utils/progress.utils';
-import { useEffect, useState, type JSX } from 'react';
-import { useLoaderData } from 'react-router-dom';
+import { useCallback, useEffect, useState, type JSX } from 'react';
+import { useLoaderData, useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/config/routes.config';
 import type { InitialTrainingData } from '@/routing/route-data';
 
 type InitialTrainingDeck = ReturnType<typeof useInitialTrainingDeck>;
@@ -26,14 +26,6 @@ function reportInitialTrainingError(
   reportError('Failed to fetch initial training deck', error);
 }
 
-function getInitialTrainingCompletionMessages(blockName: string | null | undefined): {
-  message: string;
-  secondaryMessage?: string;
-} {
-  const trimmedBlockName = blockName?.trim();
-  if (!trimmedBlockName) return { message: TEXTS.blockCompleted };
-  return { message: TEXTS.blockCompleted, secondaryMessage: trimmedBlockName };
-}
 
 function InitialTrainingContent({
   deck,
@@ -43,11 +35,9 @@ function InitialTrainingContent({
   deck: InitialTrainingDeck;
   introDismissed: boolean;
   dismissIntro: () => void;
-}>): JSX.Element {
+}>): JSX.Element | null {
   if (deck.loading) return <DelayedMessage />;
-  if (deck.isComplete) {
-    return <PracticeEndState {...getInitialTrainingCompletionMessages(deck.block?.name)} />;
-  }
+  if (deck.isComplete) return null;
   if (!deck.currentItem) return <PracticeEmptyState />;
 
   const showIntro = Boolean(deck.block) && !deck.hasProgress && !introDismissed;
@@ -90,9 +80,13 @@ function InitialTrainingContent({
 export default function InitialTrainingPractice(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
+  const navigate = useNavigate();
   const [introDismissed, setIntroDismissed] = useState(false);
   const initialData = useLoaderData() as InitialTrainingData;
-  const deck = useInitialTrainingDeck(userId, initialData);
+  const handlePracticeComplete = useCallback(() => {
+    navigate(ROUTES.home, { replace: true });
+  }, [navigate]);
+  const deck = useInitialTrainingDeck(userId, initialData, handlePracticeComplete);
   usePracticeExitBlocker(deck.finishPractice);
 
   useEffect(() => {

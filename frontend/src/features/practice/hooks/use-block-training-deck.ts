@@ -36,6 +36,8 @@ import {
 
 type TrainingOutcome = 'correct' | 'incorrect' | 'skip';
 
+type PracticeCompletionHandler = () => void;
+
 function toError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
 }
@@ -427,7 +429,11 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
   }
 }
 
-export function useInitialTrainingDeck(userId: string | null, initialData?: InitialTrainingData) {
+export function useInitialTrainingDeck(
+  userId: string | null,
+  initialData?: InitialTrainingData,
+  onComplete?: PracticeCompletionHandler,
+) {
   const { trackPracticeWrite, finishPractice } = usePracticeAvailabilityBoundary(userId);
   const initialState = getInitialTrainingState(initialData);
   const [block, setBlock] = useState<BlockType | null>(initialState.block);
@@ -448,6 +454,7 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
   const [loading, setLoading] = useState(userId != null);
   const [error, setError] = useState<Error | null>(null);
   const isTransitioningRef = useRef(false);
+  const completionHandledRef = useRef(false);
 
   useEffect(() => {
     if (!userId) {
@@ -492,11 +499,17 @@ export function useInitialTrainingDeck(userId: string | null, initialData?: Init
     setRevealed,
   });
   const resetQuestionState = cardState.resetQuestionState;
+  const completePractice = useCallback(async () => {
+    if (completionHandledRef.current) return;
+    completionHandledRef.current = true;
+    await finishPractice();
+    onComplete?.();
+  }, [finishPractice, onComplete]);
 
   useEffect(() => {
     if (!isComplete) return;
-    void finishPractice();
-  }, [finishPractice, isComplete]);
+    void completePractice();
+  }, [completePractice, isComplete]);
 
   const advance = useCallback(
     async (outcome: TrainingOutcome) => {

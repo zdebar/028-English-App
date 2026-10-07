@@ -838,13 +838,12 @@ describe('PracticeCard', () => {
     expect((screen.getByTestId('repeat-btn') as HTMLButtonElement).disabled).toBe(true);
   });
 
-  it('shows the review completion page with an explicit home button', () => {
+  it('does not render a completion page after review is finished', () => {
     mocks.practiceDeck.currentItem = null;
     mocks.practiceDeck.finishedReview = true;
 
     render(<PracticeCard />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Domů' }));
-    expect(mocks.navigate).toHaveBeenCalledWith('/');
+    expect(screen.queryByText('Review completed')).toBeNull();
   });
 });
