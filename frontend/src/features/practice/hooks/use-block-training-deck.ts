@@ -28,6 +28,11 @@ import {
   rebuildReviewArrays,
   syncReviewItemToCache,
 } from '../review-prefetch';
+import {
+  getPrefetchedNextInitialBlock,
+  invalidateNextInitialBlock,
+  warmPracticeCache,
+} from '../practice-prefetch';
 
 type TrainingOutcome = 'correct' | 'incorrect' | 'skip';
 
@@ -135,7 +140,9 @@ async function resolveTrainingSelection(
   if (initialData) {
     return { blockId: initialData.block?.id ?? null, items: initialData.items };
   }
-  return UserItem.getNextInitialTrainingSelection(userId);
+  const preparedBlock = await getPrefetchedNextInitialBlock(userId, null);
+  if (!preparedBlock) return null;
+  return { blockId: preparedBlock.block?.id ?? null, items: preparedBlock.items };
 }
 
 async function resolveTrainingBlock(
@@ -220,11 +227,16 @@ async function getTrainingSession(
   items: UserItemLocal[],
 ): Promise<PracticeSessionType> {
   if (existing) return existing;
-  return PracticeSession.startNew(
+  const session = await PracticeSession.startNew(
     userId,
     blockId,
     items.map((item) => item.item_id),
   );
+  invalidateNextInitialBlock(userId);
+  void warmPracticeCache(userId, session).catch((error: unknown) => {
+    reportError('Failed to prefetch next initial block', error);
+  });
+  return session;
 }
 
 function hasTrainingProgress(existing: PracticeSessionType | null): boolean {
@@ -391,6 +403,7 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
       await PracticeSession.recordInitialTrainingAnswer(updatedItem, null, session);
     }
     await syncPersistedItemToReviewCache(updatedItem);
+    invalidateNextInitialBlock(updatedItem.user_id);
 
     if (!nextSession) {
       setHasProgress(true);

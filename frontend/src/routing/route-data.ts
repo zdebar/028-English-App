@@ -1,6 +1,10 @@
 import { loadSharedQuery } from '@/hooks/shared-query-store';
 import { hasReachedReviewLimit } from '@/features/practice/practice-availability';
 import { loadReviewAvailabilityFromArrays } from '@/features/practice/review-prefetch';
+import {
+  getPrefetchedNextInitialBlock,
+  type PreparedInitialBlock,
+} from '@/features/practice/practice-prefetch';
 import { usePracticeAvailabilityStore } from '@/features/practice/use-practice-availability-store';
 import PronunciationGroup from '@/database/models/pronunciation-groups';
 import Block from '@/database/models/blocks';
@@ -13,10 +17,7 @@ import {
   resolvePracticeGrammarContext,
   type ReviewDeckData,
 } from '@/database/utils/practice-content.utils';
-import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
-import type { BlockType, GrammarGroupType } from '@/types/generic.types';
 import type { PracticeSessionType } from '@/types/practice-session.types';
-import type { ResolvedPracticeEntry, UserItemLocal } from '@/types/user-item.types';
 import type { ReviewKind } from '@/types/practice.types';
 import {
   loadOverviewAvailability,
@@ -27,13 +28,7 @@ export type RouteDataDescriptor<T> = Readonly<{
   load: () => Promise<T>;
 }>;
 
-export type InitialTrainingData = Readonly<{
-  block: BlockType | null;
-  items: UserItemLocal[];
-  entries: Array<ResolvedPracticeEntry<UserItemLocal>>;
-  grammar: GrammarChunkWithExamples | null;
-  grammarGroup: GrammarGroupType | null;
-}>;
+export type InitialTrainingData = PreparedInitialBlock;
 
 function emptyInitialTrainingData(): InitialTrainingData {
   return { block: null, items: [], entries: [], grammar: null, grammarGroup: null };
@@ -48,18 +43,15 @@ function getSavedSessionItemIds(activeSession: PracticeSessionType | null): numb
   ];
 }
 
-async function getInitialTrainingSelection(
+async function getActiveInitialTrainingSelection(
   userId: string,
-  activeSession: PracticeSessionType | null,
+  activeSession: PracticeSessionType,
 ) {
-  if (activeSession) {
-    const savedItemIds = getSavedSessionItemIds(activeSession);
-    return {
-      blockId: activeSession.block_id,
-      items: await UserItem.getByItemIds(userId, savedItemIds),
-    };
-  }
-  return UserItem.getNextInitialTrainingSelection(userId);
+  const savedItemIds = getSavedSessionItemIds(activeSession);
+  return {
+    blockId: activeSession.block_id,
+    items: await UserItem.getByItemIds(userId, savedItemIds),
+  };
 }
 
 async function loadInitialTrainingData(userId: string): Promise<InitialTrainingData> {
@@ -68,9 +60,14 @@ async function loadInitialTrainingData(userId: string): Promise<InitialTrainingD
     return emptyInitialTrainingData();
   }
 
-  const selection = await getInitialTrainingSelection(userId, activeSession);
-  if (!selection) return emptyInitialTrainingData();
+  if (!activeSession) {
+    return (
+      (await getPrefetchedNextInitialBlock(userId, null)) ??
+      emptyInitialTrainingData()
+    );
+  }
 
+  const selection = await getActiveInitialTrainingSelection(userId, activeSession);
   const block = selection.blockId == null ? null : await Block.getById(selection.blockId);
   const items = selection.items;
   const hasInvalidSelection = items.length === 0 || (selection.blockId != null && !block);

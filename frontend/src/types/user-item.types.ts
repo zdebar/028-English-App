@@ -49,3 +49,8 @@ export type InitialTrainingSelection = Readonly<{
   blockId: number | null;
   items: UserItemLocal[];
 }>;
+
+export type InitialTrainingSelectionOptions = Readonly<{
+  excludeBlockId?: number;
+  excludeItemIds?: readonly number[];
+}>;
