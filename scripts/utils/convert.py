@@ -1,6 +1,5 @@
 import os
 from pydub import AudioSegment  
-from typing import Union
 import pandas as pd
 
 # This script converts MP3 files to Opus format with a lower bitrate.
@@ -8,7 +7,7 @@ import pandas as pd
 output_format = "opus"
 
 # Function to convert MP3 to Opus with a lower bitrate
-def convert_mp3_to_opus(input_path: Union[str, os.PathLike[str]], output_path: Union[str, os.PathLike[str]], bitrate: str = "64k") -> None:
+def convert_mp3_to_opus(input_path: str | os.PathLike[str], output_path: str | os.PathLike[str], bitrate: str = "64k") -> None:
     try:
         audio = AudioSegment.from_mp3(input_path) 
 
