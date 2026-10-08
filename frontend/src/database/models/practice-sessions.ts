@@ -148,7 +148,7 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
   }
 
   /** Removes an unusable new-block session and returns the remaining active session. */
-  static async reconcileActive(userId: string): Promise<PracticeSessionType | null> {
+  static reconcileActive(userId: string): Promise<PracticeSessionType | null> {
     assertNonEmptyString(userId, 'userId');
 
     return db.transaction('rw', db.practice_sessions, db.blocks, db.user_items, async () => {
@@ -194,28 +194,23 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
     session: PracticeSessionType | null,
     expectedSession: PracticeSessionType | null = session,
   ): Promise<void> {
-    await db.transaction(
-      'rw',
-      db.user_items,
-      db.practice_sessions,
-      async () => {
-        assertValidInitialTrainingSession(expectedSession, item);
-        // The availability observer can remove a stale-looking row while this page is open.
-        // The session held by the active deck is the authoritative continuation state.
-        const activeSession = await this.getActive(item.user_id);
-        assertActiveInitialTrainingSession(activeSession);
+    await db.transaction('rw', db.user_items, db.practice_sessions, async () => {
+      assertValidInitialTrainingSession(expectedSession, item);
+      // The availability observer can remove a stale-looking row while this page is open.
+      // The session held by the active deck is the authoritative continuation state.
+      const activeSession = await this.getActive(item.user_id);
+      assertActiveInitialTrainingSession(activeSession);
 
-        const updatedItemCount = await updateStoredPracticeItem(item);
-        if (updatedItemCount !== 1) {
-          throw new Error('The trained item no longer exists locally.');
-        }
-        if (session) {
-          await db.practice_sessions.put(session);
-        } else {
-          await db.practice_sessions.delete(item.user_id);
-        }
-      },
-    );
+      const updatedItemCount = await updateStoredPracticeItem(item);
+      if (updatedItemCount !== 1) {
+        throw new Error('The trained item no longer exists locally.');
+      }
+      if (session) {
+        await db.practice_sessions.put(session);
+      } else {
+        await db.practice_sessions.delete(item.user_id);
+      }
+    });
   }
 
   static async deleteByUserId(userId: string): Promise<void> {
@@ -223,8 +218,7 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
   }
 }
 
-
-async function updateStoredPracticeItem(item: UserItemLocal): Promise<number> {
+function updateStoredPracticeItem(item: UserItemLocal): Promise<number> {
   return db.user_items.update([item.user_id, item.item_id], {
     progress_cz_to_en: item.progress_cz_to_en,
     started_at: item.started_at,

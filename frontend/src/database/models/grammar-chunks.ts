@@ -20,8 +20,7 @@ export default class GrammarChunk extends SyncEntityModel implements GrammarChun
   static override readonly syncTable = db.grammar_chunks as Dexie.Table<GrammarChunkType, number>;
   static override readonly syncTableName = TableName.GrammarChunks;
   static override readonly syncEntityName = 'grammar chunks';
-  static override readonly syncSelect =
-    'id, name, note, grammar_group_id, sort_order, deleted_at';
+  static override readonly syncSelect = 'id, name, note, grammar_group_id, sort_order, deleted_at';
 
   static async getById(grammarChunkId: number): Promise<GrammarChunkType> {
     const chunk = await db.grammar_chunks.get(grammarChunkId);
@@ -90,11 +89,8 @@ export default class GrammarChunk extends SyncEntityModel implements GrammarChun
     });
   }
 
-  static async getByGroupId(grammarGroupId: number): Promise<GrammarChunkType[]> {
-    return db.grammar_chunks
-      .where('grammar_group_id')
-      .equals(grammarGroupId)
-      .sortBy('sort_order');
+  static getByGroupId(grammarGroupId: number): Promise<GrammarChunkType[]> {
+    return db.grammar_chunks.where('grammar_group_id').equals(grammarGroupId).sortBy('sort_order');
   }
 
   static async getInitiated(userId: string): Promise<GrammarChunkType[]> {
