@@ -93,7 +93,6 @@ export default function VolumeSlider({ className = '', disabled = false }: Volum
               handleVolumeChange(event);
             }}
             className="cursor-pointer"
-            autoFocus
             aria-valuenow={volume}
             aria-valuemin={0}
             aria-valuemax={1}
