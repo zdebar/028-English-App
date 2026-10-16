@@ -43,8 +43,12 @@ export default function Guide(): JSX.Element {
         </p>
         <h3>Nové</h3>
         <p>Umožňuje učit se nový blok slovíček v obou směrech, a to v pevném i náhodném pořadí.</p>
-        <h3>Opakování</h3>
-        <p>Slouží k procvičování již započatých položek a podle výsledku upravuje jejich pokrok.</p>
+        <h3>Opakování gramatiky</h3>
+        <p>Slouží k procvičování již započatých vět a podle výsledku upravuje jejich pokrok.</p>
+        <h3>Opakování slovíček</h3>
+        <p>
+          Slouží k procvičování již započatých slovíček a podle výsledku upravuje jejich pokrok.
+        </p>
         <h3>Přehled lekcí</h3>
         <p>Zobrazuje přehled lekcí, kterým jste se dnes věnovali.</p>
       </section>
