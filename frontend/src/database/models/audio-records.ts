@@ -142,7 +142,6 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    * @throws ZipExtractionError when JSZip cannot parse the blob.
    */
   private static async extractZip(zipBlob: Blob): Promise<Map<string, Blob>> {
-    const extractedFiles = new Map<string, Blob>();
     const JSZip = await import('jszip');
     let zip;
     try {
@@ -155,15 +154,13 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
       throw new ZipExtractionError(message);
     }
 
-    for (const filename of Object.keys(zip.files)) {
-      const file = zip.files[filename];
-      if (!file.dir) {
-        const fileBlob = await file.async('blob');
-        extractedFiles.set(filename, fileBlob);
-      }
-    }
+    const extractedEntries = await Promise.all(
+      Object.entries(zip.files)
+        .filter(([, file]) => !file.dir)
+        .map(async ([filename, file]) => [filename, await file.async('blob')] as const),
+    );
 
-    return extractedFiles;
+    return new Map(extractedEntries);
   }
 
   /**
@@ -188,25 +185,24 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    * @returns Downloaded audio blob.
    * @throws SupabaseError when all storage download attempts fail.
    */
-  private static async downloadAudioWithRetry(audioName: string): Promise<Blob> {
-    let lastError: unknown;
-
-    for (let attempt = 1; attempt <= AUDIO_DOWNLOAD_MAX_ATTEMPTS; attempt += 1) {
-      try {
-        const audioBlob = await fetchStorage(config.audio.audioBucketName, audioName);
-        if (!isValidAudioBlob(audioBlob)) {
-          throw new Error(`Downloaded audio file is empty: ${audioName}`);
-        }
-
-        return audioBlob;
-      } catch (error) {
-        lastError = error;
-        if (attempt < AUDIO_DOWNLOAD_MAX_ATTEMPTS) {
-          await waitForAudioRetry();
-        }
+  private static async downloadAudioWithRetry(
+    audioName: string,
+    attempt = 1,
+  ): Promise<Blob> {
+    try {
+      const audioBlob = await fetchStorage(config.audio.audioBucketName, audioName);
+      if (!isValidAudioBlob(audioBlob)) {
+        throw new Error(`Downloaded audio file is empty: ${audioName}`);
       }
-    }
 
-    throw lastError;
+      return audioBlob;
+    } catch (error) {
+      if (attempt >= AUDIO_DOWNLOAD_MAX_ATTEMPTS) {
+        throw error;
+      }
+
+      await waitForAudioRetry();
+      return this.downloadAudioWithRetry(audioName, attempt + 1);
+    }
   }
 }

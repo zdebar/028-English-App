@@ -49,7 +49,7 @@ const config = {
   },
 
   loading: {
-    dataStateDelayMs: 1000, // Delay before showing loading indicator for data views
+    dataStateDelayMs: 300, // Delay before showing loading indicator for data views
   },
 
   buttons: {

@@ -22,7 +22,7 @@ export function Screenshot({ src, alt }: ScreenshotProps): JSX.Element {
         alt={alt}
         className="h-auto w-full border"
         width={320}
-        height={600}
+        height={640}
         loading="lazy"
       />
       <figcaption className="mt-2 text-center text-sm">{alt}</figcaption>

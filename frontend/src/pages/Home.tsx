@@ -48,7 +48,7 @@ export default function Home(): JSX.Element {
 
   if (authLoading) {
     return (
-      <div className="card-width w-full">
+      <div className="card-width mt-20 w-full">
         <DelayedMessage />
       </div>
     );

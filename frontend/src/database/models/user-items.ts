@@ -246,10 +246,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /** Reads every non-mastered review item for one review direction without a time cutoff. */
-  static async getAllReviewItems(
-    userId: string,
-    reviewKind: ReviewKind,
-  ): Promise<PracticeDeckItem[]> {
+  static getAllReviewItems(userId: string, reviewKind: ReviewKind): Promise<PracticeDeckItem[]> {
     return db.user_items
       .where(getPracticeIndex())
       .between(
@@ -308,8 +305,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    *
    * @returns All rows from IndexedDB, including non-practice and deleted rows.
    */
-  static async getAll(): Promise<UserItemLocal[]> {
-    return await db.user_items.toCollection().toArray();
+  static getAll(): Promise<UserItemLocal[]> {
+    return db.user_items.toCollection().toArray();
   }
 
   /**
@@ -318,7 +315,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param userId User id whose items should be read.
    * @returns User rows filtered to practice items.
    */
-  static async getByUserId(userId: string): Promise<UserItemLocal[]> {
+  static getByUserId(userId: string): Promise<UserItemLocal[]> {
     return db.user_items.where('user_id').equals(userId).toArray();
   }
 
@@ -384,9 +381,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const initiatedItem = await db.user_items
       .where('[user_id+started_at]')
       .between([userId, Dexie.minKey], [userId, NULL_DATE], true, true)
-      .filter(
-        (item) => item.deleted_at === NULL_DATE && isInitiated(item) && hasGrammarChunk(item),
-      )
+      .filter((item) => item.deleted_at === NULL_DATE && isInitiated(item) && hasGrammarChunk(item))
       .first();
 
     return initiatedItem !== undefined;
@@ -402,9 +397,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     const initiatedItems = await db.user_items
       .where('[user_id+started_at]')
       .between([userId, Dexie.minKey], [userId, NULL_DATE], true, true)
-      .filter(
-        (item) => item.deleted_at === NULL_DATE && isInitiated(item) && hasGrammarChunk(item),
-      )
+      .filter((item) => item.deleted_at === NULL_DATE && isInitiated(item) && hasGrammarChunk(item))
       .toArray();
 
     return [...new Set(initiatedItems.map((item) => item.grammar_chunk_id))];
@@ -578,7 +571,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /** Returns up to the configured maximum item rows used by the simulation fixture. */
-  static async getSimulationCandidates(userId: string): Promise<UserItemLocal[]> {
+  static getSimulationCandidates(userId: string): Promise<UserItemLocal[]> {
     assertNonEmptyString(userId, 'userId');
 
     return db.user_items
@@ -639,9 +632,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     let preservedConcurrentChanges = false;
     await db.transaction('rw', db.user_items, db.metadata, async () => {
       const currentItems = await this.getByUserId(userId);
-      const snapshotByKey = new Map(
-        localSnapshot.map((item) => [getUserItemKey(item), item]),
-      );
+      const snapshotByKey = new Map(localSnapshot.map((item) => [getUserItemKey(item), item]));
       const concurrentKeys = new Set(
         currentItems
           .filter((item) => hasChangedSinceSnapshot(item, snapshotByKey))
@@ -660,9 +651,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
           .map((item) => [item.user_id, item.item_id] as [string, number]);
         if (keysToDelete.length > 0) await db.user_items.bulkDelete(keysToDelete);
       }
-      const rowsToUpsert = toUpsert.filter(
-        (item) => !concurrentKeys.has(getUserItemKey(item)),
-      );
+      const rowsToUpsert = toUpsert.filter((item) => !concurrentKeys.has(getUserItemKey(item)));
       if (rowsToUpsert.length > 0) {
         await db.user_items.bulkPut(rowsToUpsert);
       }
@@ -716,15 +705,13 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /** Reads due, unmastered CZ-to-EN practice items. */
-  private static async getDuePracticeItems(
+  private static getDuePracticeItems(
     userId: string,
     limit: number,
     now: string,
     reviewKind: ReviewKind,
   ): Promise<PracticeDeckItem[]> {
-    return this.getDuePracticeCollection(userId, now, reviewKind)
-      .limit(limit)
-      .toArray();
+    return this.getDuePracticeCollection(userId, now, reviewKind).limit(limit).toArray();
   }
 
   private static getDuePracticeCollection(userId: string, now: string, reviewKind: ReviewKind) {
@@ -832,9 +819,11 @@ function isReadyPracticeItem(item: UserItemLocal): boolean {
 }
 
 function isScheduledReadyPracticeItem(item: UserItemLocal, nowIso: string): boolean {
-  return isReadyPracticeItem(item) &&
+  return (
+    isReadyPracticeItem(item) &&
     item.next_at_cz_to_en !== NULL_DATE &&
-    isReviewItemReadyAt(item, nowIso);
+    isReviewItemReadyAt(item, nowIso)
+  );
 }
 
 function isResetReadyPracticeItem(item: UserItemLocal): boolean {
@@ -887,10 +876,7 @@ function getFuturePracticeCollection(userId: string, nowIso: string, reviewKind:
 function isInitialTrainingSkipped(
   item: Pick<UserItemLocal, 'started_at' | 'mastered_at_cz_to_en'>,
 ): boolean {
-  return (
-    item.started_at === NULL_DATE &&
-    (item.mastered_at_cz_to_en ?? NULL_DATE) !== NULL_DATE
-  );
+  return item.started_at === NULL_DATE && (item.mastered_at_cz_to_en ?? NULL_DATE) !== NULL_DATE;
 }
 
 function applyInitialTrainingProgress(
@@ -949,11 +935,7 @@ function setProgress(
   progress: number,
   dateTime: string,
 ): void {
-  const masteredAt = resolveMasteredAt(
-    progress,
-    original.mastered_at_cz_to_en,
-    dateTime,
-  );
+  const masteredAt = resolveMasteredAt(progress, original.mastered_at_cz_to_en, dateTime);
 
   target.progress_cz_to_en = progress;
   target.next_at_cz_to_en = getNextAtForMastery(getNextAt(progress), masteredAt);
@@ -966,11 +948,7 @@ function initializeProgress(target: Partial<UserItemLocal>): void {
   target.mastered_at_cz_to_en = NULL_DATE;
 }
 
-function setMastered(
-  target: Partial<UserItemLocal>,
-  dateTime: string,
-  progress: number = 0,
-): void {
+function setMastered(target: Partial<UserItemLocal>, dateTime: string, progress: number = 0): void {
   target.progress_cz_to_en = progress;
   target.next_at_cz_to_en = NULL_DATE;
   target.mastered_at_cz_to_en = dateTime;
@@ -981,11 +959,7 @@ function getNextAtForMastery(nextAt: string, masteredAt: string): string {
   return nextAt;
 }
 
-function resolveMasteredAt(
-  progress: number,
-  currentMasteredAt: string,
-  dateTime: string,
-): string {
+function resolveMasteredAt(progress: number, currentMasteredAt: string, dateTime: string): string {
   if (progress < config.srs.intervals.length) return currentMasteredAt;
   if (currentMasteredAt !== NULL_DATE) return currentMasteredAt;
   return dateTime;
@@ -1011,7 +985,7 @@ function compareCurriculumPaths(left: CurriculumSortPath, right: CurriculumSortP
 async function resetItems(items: UserItemLocal[], dateTime: string): Promise<number> {
   if (items.length === 0) return 0;
 
-  return db.transaction('rw', db.user_items, async () => {
+  return await db.transaction('rw', db.user_items, async () => {
     const updatedItems = items.map((item) => {
       const updatedItem = { ...item };
       resetUserItem(updatedItem, dateTime);

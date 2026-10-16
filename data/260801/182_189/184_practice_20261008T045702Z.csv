@@ -1,0 +1,51 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+Mám hlad.,I'm hungry.,aɪm hˈʌŋɡɹi,im_hungry.opus,184000,,,,,True,184
+Mám žízeň.,I'm thirsty.,aɪm θˈɜːsti,im_thirsty.opus,184001,,,,,True,184
+Je mi zima.,I'm cold.,aɪm kˈoʊld,im_cold.opus,184002,,,,,True,184
+Je mi horko.,I'm hot.,aɪm hˈɑːt,im_hot.opus,184003,,,,,True,184
+Jsem připravený.,I'm ready.,aɪm ɹˈɛdi,im_ready.opus,184004,,,,,True,184
+Jsem unavený.,I'm tired.,aɪm tˈaɪɚd,im_tired.opus,184005,,,,,True,184
+Jsem zaneprázdněný.,I'm busy.,aɪm bˈɪzi,im_busy.opus,184006,,,,,True,184
+Dnes večer mám volno.,I'm free tonight.,aɪm fɹˈiː tənˈaɪt,im_free_tonight.opus,184007,,,,,True,184
+Mám pravdu?,Am I right?,æm aɪ ɹˈaɪt,am_i_right.opus,184008,,,,,True,184
+Co se stalo?,What happened?,wˌʌt hˈæpənd,what_happened.opus,184009,,,,,True,184
+Kde bydlíš?,Where do you live?,wˌɛɹ dˈuː juː lˈɪv,where_do_you_live.opus,184010,,,,,True,184
+Kde pracuješ?,Where do you work?,wˌɛɹ dˈuː juː wˈɜːk,where_do_you_work.opus,184011,,,,,True,184
+Co děláš?,What are you doing?,wˌʌt ɑːɹ juː dˈuːɪŋ,what_are_you_doing.opus,184012,,,,,True,184
+Co potřebuješ?,What do you need?,wˌʌt dˈuː juː nˈiːd,what_do_you_need.opus,184013,,,,,True,184
+Co hledáš?,What are you looking for?,wˌʌt ɑːɹ juː lˈʊkɪŋ fɔːɹ,what_are_you_looking_for.opus,184014,,,,,True,184
+Jak se jmenuješ?,What's your name?,wˌʌts jʊɹ nˈeɪm,whats_your_name.opus,184015,,,,,True,184
+Víš kolik je hodin?,Do you know the time?,dˈuː juː nˈoʊ ðə tˈaɪm,do_you_know_the_time.opus,184016,,,,,True,184
+Můžeš mi pomoct?,Can you help me?,kæn juː hˈɛlp mˌiː,can_you_help_me.opus,184017,,,,,True,184
+Můžeš na mě počkat?,Can you wait for me?,kæn juː wˈeɪt fɔːɹ mˌiː,can_you_wait_for_me.opus,184018,,,,,True,184
+Můžeme jít teď?,Can we go now?,kæn wiː ɡˌoʊ nˈaʊ,can_we_go_now.opus,184019,,,,,True,184
+Chci kávu.,I want a coffee.,aɪ wˈɔnt ɐ kˈɔfi,i_want_a_coffee.opus,184020,,,,,True,184
+Chci trochu vody.,I want some water.,aɪ wˈɔnt sˌʌm wˈɔːɾɚ,i_want_some_water.opus,184021,,,,,True,184
+Potřebuji pauzu.,I need a break.,aɪ nˈiːd ɐ bɹˈeɪk,i_need_a_break.opus,184022,,,,,True,184
+Potřebuji nové boty.,I need new shoes.,aɪ nˈiːd nˈuː ʃˈuːz,i_need_new_shoes.opus,184023,,,,,True,184
+Zapomněl jsem klíče.,I forgot my keys.,aɪ fɚɡˈɑːt maɪ kˈiːz,i_forgot_my_keys.opus,184024,,,,,True,184
+Nevidím ho.,I can't see him.,aɪ kˈænt sˈiː hˌɪm,i_cant_see_him.opus,184025,,,,,True,184
+Neslyším tě.,I can't hear you.,aɪ kˈænt hˈɪɹ juː,i_cant_hear_you.opus,184026,,,,,True,184
+Nerozumím.,I don't understand.,aɪ dˈoʊnt ˌʌndɚstˈænd,i_dont_understand.opus,184027,,,,,True,184
+To je moje.,That's mine.,ðæts mˈaɪn,thats_mine.opus,184028,,,,,True,184
+To není moje.,That's not mine.,ðæts nˌɑːt mˈaɪn,thats_not_mine.opus,184029,,,,,True,184
+To je snadné.,That's easy.,ðæts ˈiːzi,thats_easy.opus,184030,,,,,True,184
+To je těžké.,That's difficult.,ðæts dˈɪfɪkəlt,thats_difficult.opus,184031,,,,,True,184
+Je to blízko.,It's nearby.,ɪts nɪɹbˈaɪ,its_nearby.opus,184032,,,,,True,184
+Je to daleko.,It's far away.,ɪts fˈɑːɹ ɐwˈeɪ,its_far_away.opus,184033,,,,,True,184
+Počkej venku.,Wait outside.,wˈeɪt aʊtsˈaɪd,wait_outside.opus,184034,,,,,True,184
+Pojď dovnitř.,Come inside.,kˈʌm ɪnsˈaɪd,come_inside.opus,184035,,,,,True,184
+Sedni si sem.,Sit here.,sˈɪt hˈɪɹ,sit_here.opus,184036,,,,,True,184
+Postav se prosím.,Please stand up.,plˈiːz stˈænd ˈʌp,please_stand_up.opus,184037,,,,,True,184
+Otevři prosím okno.,Please open the window.,plˈiːz ˈoʊpən ðə wˈɪndoʊ,please_open_the_window.opus,184038,,,,,True,184
+Zavři prosím dveře.,Please close the door.,plˈiːz klˈoʊs ðə dˈɔːɹ,please_close_the_door.opus,184039,,,,,True,184
+Nech to tady.,Leave it here.,lˈiːv ɪt hˈɪɹ,leave_it_here.opus,184040,,,,,True,184
+Vezmi si deštník.,Take your umbrella.,tˈeɪk jʊɹ ʌmbɹˈɛlə,take_your_umbrella.opus,184041,,,,,True,184
+Začíná pršet.,It's starting to rain.,ɪts stˈɑːɹɾɪŋ tə ɹˈeɪn,its_starting_to_rain.opus,184042,,,,,True,184
+Autobus právě přijel.,The bus has just arrived.,ðə bˈʌs hɐz dʒˈʌst ɚɹˈaɪvd,the_bus_has_just_arrived.opus,184043,,,,,True,184
+Musím odejít brzy.,I have to leave early.,aɪ hæv tə lˈiːv ˈɜːli,i_have_to_leave_early.opus,184044,,,,,True,184
+Přijdu po práci.,I'll come after work.,aɪl kˈʌm ˈæftɚ wˈɜːk,ill_come_after_work.opus,184045,,,,,True,184
+Uvidíme se v pátek.,I'll see you on Friday.,aɪl sˈiː juː ˌɔn fɹˈaɪdeɪ,ill_see_you_on_friday.opus,184046,,,,,True,184
+Ozvu se večer.,I'll call you tonight.,aɪl kˈɔːl juː tənˈaɪt,ill_call_you_tonight.opus,184047,,,,,True,184
+Můžeme to zkusit znovu.,We can try again.,wiː kæn tɹˈaɪ ɐɡˈɛn,we_can_try_again.opus,184048,,,,,True,184
+To zní dobře.,That sounds good.,ðæt sˈaʊndz ɡˈʊd,that_sounds_good.opus,184049,,,,,True,184
