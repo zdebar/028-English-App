@@ -5,7 +5,7 @@ import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import { useUserStore } from '../user-stats/use-user-store';
 import { useLevelsStore } from './use-levels-store';
-import BlockBar from '@/components/UI/BlockBar';
+import LessonProgressBar from '@/components/UI/LessonProgressBar';
 import { DataState } from '@/components/UI/DataState';
 import OverviewCard from '@/components/UI/OverviewCard';
 import { useToastStore } from '../toast/use-toast-store';
@@ -81,7 +81,7 @@ export default function LevelsOverview({
               {unpackedLevelId === level.id && (
                 <div className="flex flex-col gap-1">
                   {level.lessons.map((lesson) => (
-                    <BlockBar
+                    <LessonProgressBar
                       key={lesson.id}
                       lessonName={lesson.name ?? ''}
                       lessonNumber={lesson.sort_order}

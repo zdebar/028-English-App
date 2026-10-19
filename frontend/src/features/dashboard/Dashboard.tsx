@@ -1,5 +1,5 @@
 import { TEXTS, ARIA_TEXTS } from '@/locales/cs';
-import BlockBar from '@/components/UI/BlockBar';
+import LessonProgressBar from '@/components/UI/LessonProgressBar';
 import HelpText from '@/features/help/HelpText';
 import { useUserStore } from '@/features/user-stats/use-user-store';
 import { getInProgressLessons } from '@/utils/dashboard.utils';
@@ -51,7 +51,7 @@ export default function Dashboard({ className = '' }: DashboardProps) {
         aria-label={ARIA_TEXTS.dashboardRegion}
       >
         {visibleLessons.map((lesson) => (
-          <BlockBar
+          <LessonProgressBar
             key={lesson.id}
             lessonName={lesson.name ?? ''}
             lessonNumber={lesson.sort_order}

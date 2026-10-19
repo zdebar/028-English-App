@@ -59,7 +59,7 @@ export type PracticeSessionCardProps = Readonly<{
   audioError: boolean;
   playAudio: () => void;
   audioLoading: boolean;
-  isBlockTrainingPractice?: boolean;
+  isInitialTrainingPractice?: boolean;
   showProgressLabel?: boolean;
   isContentLoading?: boolean;
 }>;
@@ -304,7 +304,7 @@ type NormalizedPracticeSessionCardProps = PracticeSessionCardProps &
     progressHelpText: string;
     repeatDisabled: boolean;
     completeDisabled: boolean;
-    isBlockTrainingPractice: boolean;
+    isInitialTrainingPractice: boolean;
     showProgressLabel: boolean;
     czechHidden: boolean;
   }>;
@@ -314,7 +314,7 @@ const DEFAULT_PRACTICE_SESSION_CARD_PROPS = {
   progressHelpText: TEXTS.reviewProgress,
   repeatDisabled: false,
   completeDisabled: false,
-  isBlockTrainingPractice: false,
+    isInitialTrainingPractice: false,
   showProgressLabel: false,
   czechHidden: false,
 } as const;
@@ -369,7 +369,7 @@ function getPracticeCardDisplayState(
     cardStyle: getPracticeCardStyle(controlsLocked, revealed),
     showGrammarButton,
     showNoteButton,
-    showProgressLabel: props.isBlockTrainingPractice || props.showProgressLabel,
+    showProgressLabel: props.isInitialTrainingPractice || props.showProgressLabel,
     audioButtonDisabled: audioControlsDisabled || !revealed,
     grammarButtonDisabled: controlsLocked || grammarLoadFailed || !showGrammarButton,
     noteButtonDisabled: controlsLocked || noteLoadFailed || !showNoteButton,

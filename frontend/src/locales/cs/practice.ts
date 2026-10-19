@@ -24,6 +24,5 @@ export const PRACTICE_TEXTS = {
   skipSuccessToast: 'Položka byla dokončena.',
   skipErrorToast: 'Dokončení položky se nezdařilo.',
   volume: 'Nastavení hlasitosti',
-  blockCompleted: 'Dokončen nový blok',
   reviewCompleted: 'Dokončeno opakování',
 } as const;

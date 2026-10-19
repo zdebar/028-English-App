@@ -1,10 +1,10 @@
 import { usePracticeAvailabilityBoundary } from './use-practice-availability-boundary';
-import Block from '@/database/models/blocks';
+import Lessons from '@/database/models/lessons';
 import PracticeSession from '@/database/models/practice-sessions';
 import UserItem from '@/database/models/user-items';
 import type { GrammarDetail } from '@/features/grammar/GrammarDetailCard';
 import { reportError } from '@/features/logging/monitoring-handler';
-import type { BlockType, GrammarChunkType, GrammarGroupType } from '@/types/generic.types';
+import type { LessonType, GrammarChunkType, GrammarGroupType } from '@/types/generic.types';
 import type { PracticeSessionType } from '@/types/practice-session.types';
 import type { ResolvedPracticeEntry, UserItemLocal } from '@/types/user-item.types';
 import {
@@ -29,8 +29,8 @@ import {
   syncReviewItemToCache,
 } from '../review-prefetch';
 import {
-  getPrefetchedNextInitialBlock,
-  invalidateNextInitialBlock,
+  getPrefetchedNextInitialLesson,
+  invalidateNextInitialLesson,
   warmPracticeCache,
 } from '../practice-prefetch';
 
@@ -48,7 +48,7 @@ function toGrammarDetail(grammar: GrammarChunkType | null | undefined): GrammarD
 }
 
 type InitialTrainingLoadResult = Readonly<{
-  block: BlockType | null;
+  lesson: LessonType | null;
   items: UserItemLocal[];
   entries: Array<ResolvedPracticeEntry<UserItemLocal>>;
   grammar: GrammarChunkType | null;
@@ -66,7 +66,7 @@ type InitialTrainingView = Readonly<{
 
 function getInitialTrainingState(initialData: InitialTrainingData | undefined) {
   return {
-    block: initialData?.block ?? null,
+    lesson: initialData?.lesson ?? null,
     items: initialData?.items ?? [],
     entries: initialData?.entries ?? [],
     grammar: toGrammarDetail(initialData?.grammar),
@@ -140,38 +140,38 @@ async function resolveTrainingSelection(
   initialData: InitialTrainingData | undefined,
 ) {
   if (initialData) {
-    return { blockId: initialData.block?.id ?? null, items: initialData.items };
+    return { lessonId: initialData.lesson?.id ?? null, items: initialData.items };
   }
-  const preparedBlock = await getPrefetchedNextInitialBlock(userId, null);
-  if (!preparedBlock) return null;
-  return { blockId: preparedBlock.block?.id ?? null, items: preparedBlock.items };
+  const preparedLesson = await getPrefetchedNextInitialLesson(userId, null);
+  if (!preparedLesson) return null;
+  return { lessonId: preparedLesson.lesson?.id ?? null, items: preparedLesson.items };
 }
 
-async function resolveTrainingBlock(
+function resolveTrainingLesson(
   initialData: InitialTrainingData | undefined,
   selection: Awaited<ReturnType<typeof resolveTrainingSelection>>,
-): Promise<BlockType | null> {
-  if (initialData?.block) return initialData.block;
-  if (selection?.blockId == null) return null;
-  return Block.getById(selection.blockId);
+): Promise<LessonType | null> {
+  if (initialData?.lesson) return Promise.resolve(initialData.lesson);
+  if (selection?.lessonId == null) return Promise.resolve(null);
+  return Lessons.getById(selection.lessonId);
 }
 
-async function resolveTrainingGrammarContext(
+function resolveTrainingGrammarContext(
   userId: string,
   initialData: InitialTrainingData | undefined,
-  block: BlockType | null,
-) {
+  lesson: LessonType | null,
+): ReturnType<typeof resolvePracticeGrammarContext> {
   if (initialData) {
-    return { grammar: initialData.grammar, grammarGroup: initialData.grammarGroup };
+    return Promise.resolve({ grammar: initialData.grammar, grammarGroup: initialData.grammarGroup });
   }
-  return resolvePracticeGrammarContext(userId, block?.grammar_chunk_id);
+  return resolvePracticeGrammarContext(userId, lesson?.grammar_chunk_id);
 }
 
 function validateTrainingSession(
   session: PracticeSessionType | null,
-  blockId: number | null,
+  lessonId: number | null,
 ): void {
-  if (session && (session.mode !== 'new' || session.block_id !== blockId)) {
+  if (session && (session.mode !== 'new' || session.lesson_id !== lessonId)) {
     throw new Error('Another practice session is already active.');
   }
 }
@@ -181,19 +181,18 @@ async function loadInitialTrainingData(
   initialData: InitialTrainingData | undefined,
 ): Promise<InitialTrainingLoadResult | null> {
   const selection = await resolveTrainingSelection(userId, initialData);
-  const block = await resolveTrainingBlock(initialData, selection);
+  const lesson = await resolveTrainingLesson(initialData, selection);
   const items = getTrainingItems(selection);
-  if (items.length === 0) return null;
+  if (items.length === 0 || !lesson) return null;
 
   const entries = await resolveTrainingEntries(userId, initialData, items);
-  const grammarContext = await resolveTrainingGrammarContext(userId, initialData, block);
+  const grammarContext = await resolveTrainingGrammarContext(userId, initialData, lesson);
   const existing = await PracticeSession.reconcileActive(userId);
-  const selectedBlockId = getTrainingBlockId(block);
-  validateTrainingSession(existing, selectedBlockId);
-  const session = await getTrainingSession(existing, userId, selectedBlockId, items);
+  validateTrainingSession(existing, lesson.id);
+  const session = await getTrainingSession(existing, userId, lesson.id, items);
 
   return {
-    block,
+    lesson,
     items,
     entries,
     grammar: grammarContext.grammar,
@@ -209,34 +208,30 @@ function getTrainingItems(
   return selection?.items ?? [];
 }
 
-async function resolveTrainingEntries(
+function resolveTrainingEntries(
   userId: string,
   initialData: InitialTrainingData | undefined,
   items: UserItemLocal[],
 ): Promise<Array<ResolvedPracticeEntry<UserItemLocal>>> {
-  if (initialData?.entries) return initialData.entries;
+  if (initialData?.entries) return Promise.resolve(initialData.entries);
   return resolvePracticeEntries(userId, items);
-}
-
-function getTrainingBlockId(block: BlockType | null): number | null {
-  return block?.id ?? null;
 }
 
 async function getTrainingSession(
   existing: PracticeSessionType | null,
   userId: string,
-  blockId: number | null,
+  lessonId: number,
   items: UserItemLocal[],
 ): Promise<PracticeSessionType> {
   if (existing) return existing;
   const session = await PracticeSession.startNew(
     userId,
-    blockId,
+    lessonId,
     items.map((item) => item.item_id),
   );
-  invalidateNextInitialBlock(userId);
+  invalidateNextInitialLesson(userId);
   void warmPracticeCache(userId, session).catch((error: unknown) => {
-    reportError('Failed to prefetch next initial block', error);
+    reportError('Failed to prefetch next initial lesson', error);
   });
   return session;
 }
@@ -247,7 +242,7 @@ function hasTrainingProgress(existing: PracticeSessionType | null): boolean {
 }
 
 type InitialTrainingLoadSetters = Readonly<{
-  setBlock: Dispatch<SetStateAction<BlockType | null>>;
+  setLesson: Dispatch<SetStateAction<LessonType | null>>;
   setItems: Dispatch<SetStateAction<UserItemLocal[]>>;
   setActiveItems: Dispatch<SetStateAction<UserItemLocal[]>>;
   setInitialItemCount: Dispatch<SetStateAction<number>>;
@@ -276,7 +271,7 @@ function startInitialTrainingLoad(
         setters.setInitialItemCount(0);
         return;
       }
-      setters.setBlock(result.block);
+      setters.setLesson(result.lesson);
       setters.setItems(result.items);
       setters.setActiveItems(getActiveTrainingItems(result.items, result.session));
       setters.setInitialItemCount(result.items.length);
@@ -424,7 +419,7 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
   } catch (caughtError) {
     const normalizedError = toError(caughtError);
     setError(normalizedError);
-    reportError('Failed to advance new-block training', normalizedError);
+    reportError('Failed to advance new-lesson training', normalizedError);
   }
 }
 
@@ -435,7 +430,7 @@ export function useInitialTrainingDeck(
 ) {
   const { trackPracticeWrite, finishPractice } = usePracticeAvailabilityBoundary(userId);
   const initialState = getInitialTrainingState(initialData);
-  const [block, setBlock] = useState<BlockType | null>(initialState.block);
+  const [lesson, setLesson] = useState<LessonType | null>(initialState.lesson);
   const [items, setItems] = useState<UserItemLocal[]>(initialState.items);
   const [activeItems, setActiveItems] = useState<UserItemLocal[]>(initialState.items);
   const [initialItemCount, setInitialItemCount] = useState(initialState.items.length);
@@ -461,7 +456,7 @@ export function useInitialTrainingDeck(
       return;
     }
     return startInitialTrainingLoad(userId, initialData, {
-      setBlock,
+      setLesson,
       setItems,
       setActiveItems,
       setInitialItemCount,
@@ -546,7 +541,7 @@ export function useInitialTrainingDeck(
   const completeCurrent = useCallback(() => advance('skip'), [advance]);
 
   return {
-    block,
+    lesson,
     items,
     hasContent: initialItemCount > 0,
     grammar,

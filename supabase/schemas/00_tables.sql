@@ -72,6 +72,7 @@ CREATE TABLE IF NOT EXISTS lessons (
   name TEXT NOT NULL UNIQUE,
   note TEXT,
   level_id INTEGER NOT NULL REFERENCES levels(id) ON DELETE RESTRICT,
+  grammar_chunk_id INTEGER REFERENCES grammar_chunks(id) ON DELETE RESTRICT,
   sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ,
@@ -88,17 +89,6 @@ CREATE TABLE IF NOT EXISTS user_lessons (
 
 CREATE INDEX IF NOT EXISTS idx_user_lessons_user_started_at
   ON public.user_lessons (user_id, started_at);
-
-CREATE TABLE IF NOT EXISTS blocks (
-  id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL UNIQUE,
-  note TEXT,
-  lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE RESTRICT,
-  grammar_chunk_id INTEGER REFERENCES grammar_chunks(id) ON DELETE RESTRICT,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ,
-  CONSTRAINT blocks_id_lesson_id_key UNIQUE (id, lesson_id)
-);
 
 CREATE TABLE IF NOT EXISTS topics (
   id SERIAL PRIMARY KEY,
@@ -136,15 +126,11 @@ CREATE TABLE IF NOT EXISTS items (
   is_vocabulary BOOLEAN NOT NULL,
   sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
   lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE RESTRICT,
-  block_id INTEGER,
   topic_id INTEGER REFERENCES topics(id) ON DELETE SET NULL,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ,
   CONSTRAINT items_lesson_sort_order_key
-    UNIQUE (lesson_id, sort_order) DEFERRABLE INITIALLY DEFERRED,
-  CONSTRAINT items_block_lesson_fkey
-    FOREIGN KEY (block_id, lesson_id)
-    REFERENCES blocks(id, lesson_id) ON DELETE RESTRICT
+    UNIQUE (lesson_id, sort_order) DEFERRABLE INITIALLY DEFERRED
 );
 
 CREATE TABLE IF NOT EXISTS pronunciation_groups (
@@ -226,9 +212,7 @@ EXECUTE FUNCTION public.handle_new_auth_user();
 CREATE INDEX IF NOT EXISTS idx_items_updated_at ON public.items (updated_at);
 CREATE INDEX IF NOT EXISTS idx_items_lesson_id ON public.items (lesson_id);
 CREATE INDEX IF NOT EXISTS idx_lessons_level_id ON public.lessons (level_id);
-CREATE INDEX IF NOT EXISTS idx_blocks_grammar_chunk_id ON public.blocks (grammar_chunk_id);
 CREATE INDEX IF NOT EXISTS idx_items_note_id ON public.items (note_id);
-CREATE INDEX IF NOT EXISTS idx_items_block_id ON public.items (block_id);
 CREATE INDEX IF NOT EXISTS idx_items_topic_id ON public.items (topic_id);
 CREATE INDEX IF NOT EXISTS idx_items_grammar_chunk_id ON public.items (grammar_chunk_id);
 CREATE INDEX IF NOT EXISTS idx_pronunciation_group_items_item_id

@@ -300,53 +300,6 @@ INSERT INTO "public"."lessons" ("id", "name", "note", "level_id", "sort_order", 
 	(7, 'Množné číslo', NULL, 1, 7, '2026-08-06 09:08:56.250964+00', NULL);
 
 
---
--- Data for Name: blocks; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-CREATE TEMP TABLE seed_legacy_blocks (
-  id INTEGER PRIMARY KEY,
-  name TEXT NOT NULL,
-  note TEXT,
-  lesson_id INTEGER,
-  grammar_chunk_id INTEGER,
-  sort_order INTEGER,
-  updated_at TIMESTAMPTZ,
-  deleted_at TIMESTAMPTZ,
-  is_practice_block BOOLEAN
-);
-
-INSERT INTO seed_legacy_blocks ("id", "name", "note", "lesson_id", "grammar_chunk_id", "sort_order", "updated_at", "deleted_at", "is_practice_block") VALUES
-	(1, 'dny v týdnu', NULL, 1, NULL, 1, '2026-08-02 12:14:05.115542+00', NULL, true),
-	(2, 'čísla 1  až 12', NULL, 1, NULL, 2, '2026-08-02 12:14:31.093064+00', NULL, true),
-	(3, 'osobní zájmena', NULL, 3, NULL, 3, '2026-08-02 12:43:15.726633+00', NULL, true),
-	(4, 'být - základní tvary', NULL, 3, 1, 4, '2026-08-02 12:46:58.087402+00', NULL, true),
-	(5, 'být - zkrácené tvary', NULL, 3, 2, 5, '2026-08-02 12:48:38.833899+00', NULL, true),
-	(6, 'měsíce v roce', NULL, 4, NULL, 6, '2026-08-02 12:49:10.566201+00', NULL, true),
-	(7, 'být - zápor', NULL, 4, 3, 7, '2026-08-02 12:50:14.202037+00', NULL, true),
-	(8, 'být - zkrácený zápor', NULL, 4, 4, 8, '2026-08-02 12:50:38.243399+00', NULL, true),
-	(9, 'množné číslo', NULL, NULL, 8, 9, '2026-08-06 07:32:20.251623+00', NULL, true),
-	(10, 'přivlastňování', NULL, NULL, 9, 10, '2026-08-06 07:35:32.354282+00', NULL, true),
-	(11, 'členy', NULL, NULL, 10, 11, '2026-08-06 07:38:35.37714+00', NULL, true),
-	(12, 'čísla 13 až 19', NULL, NULL, 11, 12, '2026-08-06 07:40:44.534653+00', NULL, true),
-	(13, 'desítky', NULL, NULL, 12, 13, '2026-08-06 07:41:43.396603+00', NULL, true),
-	(14, 'složená čísla', NULL, NULL, 13, 14, '2026-08-06 07:42:29.369682+00', NULL, true),
-	(15, 'řadová čísla', NULL, NULL, 14, 15, '2026-08-06 07:45:42.097186+00', NULL, true),
-	(16, 'zlomky', NULL, NULL, 15, 16, '2026-08-06 07:47:12.776085+00', NULL, true),
-	(17, 'desetinná čísla', NULL, NULL, 16, 17, '2026-08-06 07:47:50.65953+00', NULL, true),
-	(18, 'Denní časy', NULL, NULL, 17, 18, '2026-08-06 09:31:06.34134+00', NULL, true),
-	(19, 'Datumy', NULL, NULL, 18, 19, '2026-08-06 09:31:23.30061+00', NULL, true),
-	(20, 'Předložky času - in', NULL, NULL, 19, 20, '2026-08-06 09:40:38.795904+00', NULL, true),
-	(21, 'Předložky času - on', NULL, NULL, 20, 21, '2026-08-06 09:40:44.557895+00', NULL, true),
-	(22, 'Předložky času - at', NULL, NULL, 21, 22, '2026-08-06 09:40:50.029541+00', NULL, true),
-	(23, 'Předložka místa - in', NULL, NULL, 22, 23, '2026-08-06 10:35:29.721666+00', NULL, true),
-	(24, 'Předložka místa - on', NULL, NULL, 23, 24, '2026-08-06 10:35:46.241107+00', NULL, true),
-	(25, 'Předložka místa - at', NULL, NULL, 24, 25, '2026-08-06 10:36:05.713975+00', NULL, true),
-	(26, 'unassigned items', NULL, 1, NULL, 26, '2026-08-24 00:00:00+00', NULL, true),
-	(27, 'unassigned lesson 2 items', NULL, 2, NULL, 27, '2026-08-24 00:00:00+00', NULL, true),
-	(28, 'unassigned lesson 3 items', NULL, 3, NULL, 28, '2026-08-24 00:00:00+00', NULL, true),
-	(29, 'unassigned lesson 4 items', NULL, 4, NULL, 29, '2026-08-24 00:00:00+00', NULL, true);
-
 INSERT INTO "public"."topics" ("id", "name", "note", "sort_order", "updated_at", "deleted_at") VALUES
 	(1, 'dny v týdnu', NULL, 1, '2026-08-02 12:14:05.115542+00', NULL),
 	(2, 'čísla 1  až 12', NULL, 2, '2026-08-02 12:14:31.093064+00', NULL),
@@ -377,14 +330,14 @@ CREATE TEMP TABLE seed_legacy_items (
   audio TEXT,
   note_id INTEGER,
   sort_order INTEGER NOT NULL,
-  block_id INTEGER,
+  legacy_group_id INTEGER,
   updated_at TIMESTAMPTZ,
   deleted_at TIMESTAMPTZ,
   grammar_chunk_id INTEGER,
   is_vocabulary BOOLEAN NOT NULL
 );
 
-INSERT INTO seed_legacy_items ("id", "czech", "english", "pronunciation", "audio", "note_id", "sort_order", "block_id", "updated_at", "deleted_at", "grammar_chunk_id", "is_vocabulary") VALUES
+INSERT INTO seed_legacy_items ("id", "czech", "english", "pronunciation", "audio", "note_id", "sort_order", "legacy_group_id", "updated_at", "deleted_at", "grammar_chunk_id", "is_vocabulary") VALUES
 	(1, 'ahoj', 'hello', 'həlˈoʊ', 'hello.opus', NULL, 1000, 26, '2026-08-07 11:12:55.668362+00', NULL, NULL, true),
 	(2, 'čau', 'hi', 'hˈaɪ', 'hi.opus', NULL, 1001, 26, '2026-08-07 11:12:55.668362+00', NULL, NULL, true),
 	(3, 'dobrý', 'good', 'ɡˈʊd', 'good.opus', NULL, 1002, 26, '2026-08-07 11:12:55.668362+00', NULL, NULL, true),
@@ -765,38 +718,9 @@ INSERT INTO seed_legacy_items ("id", "czech", "english", "pronunciation", "audio
 	(368, 'žít', 'live', 'lˈaɪv', 'live_IPA_liv.opus', NULL, 4069, 29, '2026-08-08 07:17:16.726809+00', NULL, NULL, true);
 
 
-INSERT INTO public.blocks (
-  id, name, note, lesson_id, grammar_chunk_id, updated_at, deleted_at
-)
-SELECT
-  block.id,
-  block.name,
-  block.note,
-  COALESCE(
-    block.lesson_id,
-    MIN(item.sort_order / 1000),
-    CASE
-      WHEN block.id = 9 THEN 7
-      WHEN block.id = 10 THEN 8
-      WHEN block.id = 11 THEN 9
-      WHEN block.id BETWEEN 12 AND 17 THEN 10
-      WHEN block.id BETWEEN 18 AND 19 THEN 11
-      WHEN block.id BETWEEN 20 AND 22 THEN 12
-      WHEN block.id BETWEEN 23 AND 25 THEN 13
-    END
-  ),
-  block.grammar_chunk_id,
-  block.updated_at,
-  block.deleted_at
-FROM seed_legacy_blocks AS block
-LEFT JOIN seed_legacy_items AS item ON item.block_id = block.id
-WHERE block.grammar_chunk_id IS NOT NULL
-GROUP BY block.id, block.name, block.note, block.lesson_id, block.grammar_chunk_id,
-  block.updated_at, block.deleted_at;
-
 INSERT INTO public.items (
   id, czech, english, pronunciation, audio, note_id, sort_order, lesson_id,
-  block_id, topic_id, updated_at, deleted_at, grammar_chunk_id, is_vocabulary
+  topic_id, updated_at, deleted_at, grammar_chunk_id, is_vocabulary
 )
 SELECT
   item.id,
@@ -807,14 +731,13 @@ SELECT
   item.note_id,
   item.sort_order,
   item.sort_order / 1000,
-  CASE WHEN block.grammar_chunk_id IS NOT NULL THEN item.block_id ELSE NULL END,
-  CASE WHEN item.block_id IN (1, 2, 3, 6) THEN item.block_id ELSE NULL END,
+  CASE WHEN item.legacy_group_id IN (1, 2, 3, 6) THEN item.legacy_group_id ELSE NULL END,
   item.updated_at,
   item.deleted_at,
   item.grammar_chunk_id,
   item.is_vocabulary
 FROM seed_legacy_items AS item
-LEFT JOIN seed_legacy_blocks AS block ON block.id = item.block_id;
+;
 
 
 -- Data for Name: grammar_chunk_examples; Type: TABLE DATA; Schema: public; Owner: postgres
@@ -1185,11 +1108,6 @@ SELECT pg_catalog.setval('"private"."settings_id_seq"', 1, false);
 
 
 --
--- Name: blocks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('"public"."blocks_id_seq"', 29, true);
-
 
 --
 -- Name: grammar_chunks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres

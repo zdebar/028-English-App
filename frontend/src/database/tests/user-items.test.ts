@@ -95,7 +95,6 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
     lesson_id: 1,
     updated_at: '2026-01-01T00:00:00.000Z',
     is_vocabulary: 1,
-    block_id: 0,
     topic_id: 0,
     grammar_chunk_id: 0,
     started_at: '2026-01-01T00:00:00.000Z',
@@ -128,6 +127,36 @@ describe('UserItem', () => {
     }));
     mocks.markAsSynced.mockResolvedValue(undefined);
     mocks.rpc.mockResolvedValue({ data: [], error: null });
+  });
+
+  it('selects every unstarted item from the first ordered lesson, across item kinds', async () => {
+    mocks.currentItems = [
+      makeItem({
+        item_id: 3,
+        lesson_id: 2,
+        started_at: NULL_DATE,
+        curriculum_sort_path: [1, 2, 1],
+      }),
+      makeItem({
+        item_id: 2,
+        lesson_id: 1,
+        is_vocabulary: 0,
+        started_at: NULL_DATE,
+        curriculum_sort_path: [1, 1, 2],
+      }),
+      makeItem({
+        item_id: 1,
+        lesson_id: 1,
+        is_vocabulary: 1,
+        started_at: NULL_DATE,
+        curriculum_sort_path: [1, 1, 1],
+      }),
+    ];
+
+    await expect(UserItem.getNextInitialTrainingSelection('u1')).resolves.toMatchObject({
+      lessonId: 1,
+      items: [{ item_id: 1 }, { item_id: 2 }],
+    });
   });
 
   it('saves only CZ-to-EN practice fields in one bulk update', async () => {
@@ -384,7 +413,6 @@ function toApiItem(item: UserItemLocal, overrides: Partial<UserItemLocal> = {}) 
   return {
     ...merged,
     is_vocabulary: merged.is_vocabulary === 1,
-    block_id: merged.block_id,
     topic_id: merged.topic_id,
     grammar_chunk_id: merged.grammar_chunk_id,
     started_at: merged.started_at === NULL_DATE ? null : merged.started_at,

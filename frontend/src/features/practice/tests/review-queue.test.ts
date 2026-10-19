@@ -119,7 +119,6 @@ function item(itemId: number, nextAt: string, overrides: Partial<UserItemLocal> 
     note_id: null,
     lesson_id: 1,
     is_vocabulary: 1,
-    block_id: 1,
     topic_id: 1,
     grammar_chunk_id: 0,
     started_at: '2026-01-01T00:00:00.000Z',

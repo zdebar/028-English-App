@@ -26,7 +26,7 @@ export default class Notes extends SyncEntityModel implements NoteType {
   /**
    * Looks up a local note by id.
    *
-   * @param id Note id from a grammar, block, or item reference.
+   * @param id Note id from a grammar or item reference.
    * @returns The matching note, or null when the local table has no row for the id.
    */
   static async getById(id: number): Promise<NoteType | null> {

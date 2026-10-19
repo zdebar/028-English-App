@@ -408,7 +408,6 @@ function entry(
       curriculum_sort_path: [1, 1, itemId],
       topic_id: 1,
       note_id: null,
-      block_id: 1,
       grammar_chunk_id: grammarChunkId,
       progress_cz_to_en: 0,
       started_at: '2026-01-01',

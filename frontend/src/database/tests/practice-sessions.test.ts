@@ -4,8 +4,12 @@ const mocks = vi.hoisted(() => ({
   sessionGet: vi.fn(),
   sessionPut: vi.fn(),
   sessionDelete: vi.fn(),
-  blockGet: vi.fn(),
-  blockItems: vi.fn(),
+  sessionItems: vi.fn(),
+  userLessonRecordStart: vi.fn(),
+  userLessonStartedCount: vi.fn(),
+  getUserSettings: vi.fn(),
+  userLessonsTable: {},
+  usersTable: {},
   itemUpdate: vi.fn(),
   transaction: vi.fn(),
 }));
@@ -28,15 +32,16 @@ vi.mock('@/database/models/db', () => ({
       update: (...args: unknown[]) => mocks.itemUpdate(...args),
       get: (...args: unknown[]) => mocks.sessionGet(...args),
       where: () => ({
-        anyOf: () => ({ toArray: (...args: unknown[]) => mocks.blockItems(...args) }),
+        anyOf: () => ({ toArray: (...args: unknown[]) => mocks.sessionItems(...args) }),
       }),
     },
-    blocks: { get: (...args: unknown[]) => mocks.blockGet(...args) },
     practice_sessions: {
       get: (...args: unknown[]) => mocks.sessionGet(...args),
       put: (...args: unknown[]) => mocks.sessionPut(...args),
       delete: (...args: unknown[]) => mocks.sessionDelete(...args),
     },
+    user_lessons: mocks.userLessonsTable,
+    users: mocks.usersTable,
     transaction: (...args: unknown[]) => {
       mocks.transaction(...args.slice(0, -1));
       return (args.at(-1) as () => Promise<unknown>)();
@@ -45,6 +50,15 @@ vi.mock('@/database/models/db', () => ({
 }));
 
 vi.mock('dexie', () => ({ Entity: class Entity {} }));
+vi.mock('@/database/models/user-lessons', () => ({
+  default: {
+    recordStart: (...args: unknown[]) => mocks.userLessonRecordStart(...args),
+    getStartedCountForToday: (...args: unknown[]) => mocks.userLessonStartedCount(...args),
+  },
+}));
+vi.mock('@/database/models/user-settings', () => ({
+  default: { getOrCreate: (...args: unknown[]) => mocks.getUserSettings(...args) },
+}));
 
 import PracticeSession from '@/database/models/practice-sessions';
 
@@ -54,7 +68,10 @@ describe('PracticeSession progress transactions', () => {
     mocks.itemUpdate.mockResolvedValue(1);
     mocks.sessionPut.mockResolvedValue(undefined);
     mocks.sessionDelete.mockResolvedValue(undefined);
-    mocks.blockItems.mockResolvedValue([]);
+    mocks.sessionItems.mockResolvedValue([]);
+    mocks.userLessonRecordStart.mockResolvedValue(undefined);
+    mocks.userLessonStartedCount.mockResolvedValue(0);
+    mocks.getUserSettings.mockResolvedValue({ max_new_lessons_per_day: 3 });
   });
 
   it('stores an initial-training answer and session in the same transaction', async () => {
@@ -126,20 +143,50 @@ describe('PracticeSession progress transactions', () => {
     expect(mocks.sessionDelete).toHaveBeenCalledWith('u1');
   });
 
-  it('rejects a new-block session without items', async () => {
+  it('rejects a new-lesson session without items', async () => {
     await expect(PracticeSession.startNew('u1', 1, [])).rejects.toThrow(
       'Initial training requires at least one item.',
     );
     expect(mocks.sessionPut).not.toHaveBeenCalled();
   });
 
-  it('removes an empty saved new-block session', async () => {
+  it('starts a whole lesson and records it inside the session transaction', async () => {
+    mocks.sessionGet.mockResolvedValue(null);
+    mocks.sessionItems.mockResolvedValue([
+      { item_id: 1, lesson_id: 4 },
+      { item_id: 2, lesson_id: 4 },
+    ]);
+
+    const session = await PracticeSession.startNew('u1', 4, [1, 2], '2026-08-23T10:00:00Z');
+
+    expect(session).toMatchObject({ lesson_id: 4, target_count: 2 });
+    expect(mocks.userLessonRecordStart).toHaveBeenCalledWith(
+      'u1',
+      4,
+      '2026-08-23T10:00:00Z',
+    );
+    expect(mocks.transaction.mock.calls[0]).toContain(mocks.userLessonsTable);
+  });
+
+  it('enforces the current daily lesson limit before recording another start', async () => {
+    mocks.sessionGet.mockResolvedValue(null);
+    mocks.sessionItems.mockResolvedValue([{ item_id: 1, lesson_id: 4 }]);
+    mocks.getUserSettings.mockResolvedValue({ max_new_lessons_per_day: 2 });
+    mocks.userLessonStartedCount.mockResolvedValue(2);
+
+    await expect(PracticeSession.startNew('u1', 4, [1])).rejects.toThrow(
+      'Daily new lesson limit reached.',
+    );
+    expect(mocks.userLessonRecordStart).not.toHaveBeenCalled();
+  });
+
+  it('removes an empty saved new-lesson session', async () => {
     mocks.sessionGet.mockResolvedValue({
       user_id: 'u1',
       mode: 'new',
       completed_count: 0,
       target_count: 0,
-      block_id: 1,
+      lesson_id: 1,
       phase: 0,
       current_queue_item_ids: [],
       retry_queue_item_ids: [],
@@ -147,13 +194,12 @@ describe('PracticeSession progress transactions', () => {
       started_at: '2026-08-23',
       updated_at: '2026-08-23',
     });
-    mocks.blockGet.mockResolvedValue({ id: 1 });
 
     await expect(PracticeSession.reconcileActive('u1')).resolves.toBeNull();
     expect(mocks.sessionDelete).toHaveBeenCalledWith('u1');
   });
 
-  it('preserves a valid partial new-block session', async () => {
+  it('preserves a valid partial new-lesson session', async () => {
     const session = {
       ...newSession(),
       current_queue_item_ids: [2],
@@ -161,10 +207,9 @@ describe('PracticeSession progress transactions', () => {
       completed_count: 1,
     };
     mocks.sessionGet.mockResolvedValue(session);
-    mocks.blockGet.mockResolvedValue({ id: 10 });
-    mocks.blockItems.mockResolvedValue([
-      { item_id: 1, block_id: 10, deleted_at: '9999-12-31T23:59:59+00:00' },
-      { item_id: 2, block_id: 10, deleted_at: '9999-12-31T23:59:59+00:00' },
+    mocks.sessionItems.mockResolvedValue([
+      { item_id: 1, lesson_id: 1, deleted_at: '9999-12-31T23:59:59+00:00' },
+      { item_id: 2, lesson_id: 1, deleted_at: '9999-12-31T23:59:59+00:00' },
     ]);
 
     await expect(PracticeSession.reconcileActive('u1')).resolves.toBe(session);
@@ -180,10 +225,9 @@ describe('PracticeSession progress transactions', () => {
       completed_count: 1,
     };
     mocks.sessionGet.mockResolvedValue(session);
-    mocks.blockGet.mockResolvedValue({ id: 10 });
-    mocks.blockItems.mockResolvedValue([
-      { item_id: 1, block_id: 10, deleted_at: '9999-12-31T23:59:59+00:00' },
-      { item_id: 2, block_id: 10, deleted_at: '9999-12-31T23:59:59+00:00' },
+    mocks.sessionItems.mockResolvedValue([
+      { item_id: 1, lesson_id: 1, deleted_at: '9999-12-31T23:59:59+00:00' },
+      { item_id: 2, lesson_id: 1, deleted_at: '9999-12-31T23:59:59+00:00' },
     ]);
 
     await expect(PracticeSession.inspectActive('u1')).resolves.toEqual({
@@ -199,7 +243,7 @@ function newSession() {
     mode: 'new' as const,
     completed_count: 0,
     target_count: 2,
-    block_id: 10,
+    lesson_id: 1,
     phase: 0 as const,
     current_queue_item_ids: [1, 2],
     retry_queue_item_ids: [],
@@ -223,7 +267,6 @@ function item(overrides: Record<string, unknown> = {}) {
     curriculum_sort_path: [1, 1, 1] as [number, number, number],
     note_id: null,
     lesson_id: 1,
-    block_id: 10,
     topic_id: 0,
     grammar_chunk_id: 0,
     progress_cz_to_en: 0,

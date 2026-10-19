@@ -11,6 +11,7 @@ export interface RecordType extends SyncEntityType {}
 
 export interface LessonType extends SyncEntityType {
   level_id: number;
+  grammar_chunk_id: number | null;
 }
 export interface LevelType extends SyncEntityType {}
 
@@ -28,16 +29,6 @@ export interface GrammarChunkExampleType {
   grammar_chunk_id: number;
   item_id: number;
   sort_order: number;
-  updated_at: string;
-  deleted_at: string | null;
-}
-
-export interface BlockType {
-  id: number;
-  name: string;
-  note: string | null;
-  lesson_id: number;
-  grammar_chunk_id: number | null;
   updated_at: string;
   deleted_at: string | null;
 }

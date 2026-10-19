@@ -2,10 +2,10 @@ import DelayedMessage from '@/components/UI/DelayedMessage';
 import Notification from '@/components/UI/Notification';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { reportError } from '@/features/logging/monitoring-handler';
-import BlockTrainingOverviewCard from '@/features/practice/BlockTrainingOverviewCard';
+import LessonTrainingOverviewCard from '@/features/practice/LessonTrainingOverviewCard';
 import PracticeEmptyState from '@/features/practice/PracticeEmptyState';
 import PracticeSessionCard from '@/features/practice/PracticeSessionCard';
-import { useInitialTrainingDeck } from '@/features/practice/hooks/use-block-training-deck';
+import { useInitialTrainingDeck } from '@/features/practice/hooks/use-initial-training-deck';
 import { usePracticeExitBlocker } from '@/features/practice/hooks/use-practice-exit-blocker';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
@@ -40,11 +40,11 @@ function InitialTrainingContent({
   if (deck.isComplete) return null;
   if (!deck.currentItem) return <PracticeEmptyState />;
 
-  const showIntro = Boolean(deck.block) && !deck.hasProgress && !introDismissed;
-  if (showIntro && deck.block) {
+  const showIntro = Boolean(deck.lesson) && !deck.hasProgress && !introDismissed;
+  if (showIntro && deck.lesson) {
     return (
-      <BlockTrainingOverviewCard
-        block={deck.block}
+      <LessonTrainingOverviewCard
+        lesson={deck.lesson}
         grammar={deck.grammar}
         grammarGroup={deck.grammarGroup}
         items={deck.items}
@@ -73,7 +73,7 @@ function InitialTrainingContent({
       audioError={deck.audioError}
       playAudio={deck.playAudio}
       audioLoading={deck.audioLoading}
-      isBlockTrainingPractice
+      isInitialTrainingPractice
     />
   );
 }

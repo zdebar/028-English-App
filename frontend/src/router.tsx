@@ -9,7 +9,7 @@ import { loadHome } from '@/routing/home-loader';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
-import InitialTrainingPractice from '@/pages/BlockTrainingPractice';
+import InitialTrainingPractice from '@/pages/InitialTrainingPractice';
 import Grammar from '@/pages/Grammar';
 import Guide from '@/pages/Guide';
 import Home from '@/pages/Home';

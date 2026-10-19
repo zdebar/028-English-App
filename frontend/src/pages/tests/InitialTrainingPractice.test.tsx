@@ -10,7 +10,7 @@ const mocks = vi.hoisted(() => ({
   deck: {
     loading: false,
     error: null as Error | null,
-    block: null as { name: string } | null,
+    lesson: null as { name: string } | null,
     grammar: null as { id: number; name: string } | null,
     grammarGroup: null as { note: string | null } | null,
     isComplete: false,
@@ -51,7 +51,6 @@ vi.mock('@/locales/cs', () => ({
     tooltipHome: 'Home',
     loadingMessage: 'Loading',
     loadingError: 'Loading error',
-    blockCompleted: 'Block completed',
     continuePractice: 'Continue',
     done: 'hotovo',
   },
@@ -66,7 +65,7 @@ vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
   useBlocker: () => ({ state: 'unblocked' }),
   useLoaderData: () => ({
-    block: { block_id: 10 },
+    lesson: { id: 1, name: 'Lesson 1', note: null, level_id: 1, sort_order: 1, grammar_chunk_id: null, updated_at: '', deleted_at: null },
     items: [],
     entries: [],
     grammar: null,
@@ -83,17 +82,17 @@ vi.mock('@/features/logging/monitoring-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
 
-vi.mock('@/features/practice/hooks/use-block-training-deck', () => ({
+vi.mock('@/features/practice/hooks/use-initial-training-deck', () => ({
   useInitialTrainingDeck: () => mocks.deck,
 }));
 
-vi.mock('@/features/practice/BlockTrainingOverviewCard', () => ({
-  default: ({ block, grammar, grammarGroup, onContinue }: any) => {
+vi.mock('@/features/practice/LessonTrainingOverviewCard', () => ({
+  default: ({ lesson, grammar, grammarGroup, onContinue }: any) => {
     mocks.overviewRender();
     return (
       <div>
-        <div data-testid="block-training-overview">
-          {block?.name}:{grammar?.name}:{grammarGroup?.note}
+        <div data-testid="lesson-training-overview">
+          {lesson?.name}:{grammar?.name}:{grammarGroup?.note}
         </div>
         <button type="button" onClick={onContinue}>
           Continue
@@ -111,9 +110,9 @@ vi.mock('@/features/practice/PracticeSessionCard', () => ({
   ),
 }));
 
-import BlockTrainingPractice from '@/pages/BlockTrainingPractice';
+import InitialTrainingPractice from '@/pages/InitialTrainingPractice';
 
-describe('BlockTrainingPractice', () => {
+describe('InitialTrainingPractice', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
@@ -121,7 +120,7 @@ describe('BlockTrainingPractice', () => {
     mocks.userId = 'u1';
     mocks.deck.loading = false;
     mocks.deck.error = null;
-    mocks.deck.block = null;
+    mocks.deck.lesson = null;
     mocks.deck.grammar = null;
     mocks.deck.grammarGroup = null;
     mocks.deck.isComplete = false;
@@ -133,27 +132,27 @@ describe('BlockTrainingPractice', () => {
     vi.useRealTimers();
   });
 
-  it('renders shared empty state when there is no training block', () => {
-    render(<BlockTrainingPractice />);
+  it('renders shared empty state when there is no training lesson', () => {
+    render(<InitialTrainingPractice />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Home' }));
     expect(mocks.navigate).toHaveBeenCalledWith('/');
   });
 
-  it('does not render a completion page after a block is completed', () => {
-    mocks.deck.block = { name: 'Block A' };
+  it('does not render a completion page after a lesson is completed', () => {
+    mocks.deck.lesson = { name: 'Lesson A' };
     mocks.deck.grammar = { id: 1, name: 'Articles' };
     mocks.deck.isComplete = true;
 
-    render(<BlockTrainingPractice />);
+    render(<InitialTrainingPractice />);
 
-    expect(screen.queryByText('Block completed')).toBeNull();
+    expect(screen.queryByTestId('lesson-training-overview')).toBeNull();
   });
 
   it('passes current item progress to the practice card', () => {
     mocks.deck.currentItem = { item_id: 1, progress_cz_to_en: 3 };
 
-    render(<BlockTrainingPractice />);
+    render(<InitialTrainingPractice />);
 
     expect(screen.getByTestId('practice-session').textContent).toBe('ahoj:hello:3 / 8');
   });

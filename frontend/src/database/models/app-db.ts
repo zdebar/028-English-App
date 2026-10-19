@@ -5,7 +5,6 @@ import type GrammarGroup from '@/database/models/grammar-groups';
 import type GrammarTopic from '@/database/models/grammar-topics';
 import type AudioRecord from '@/database/models/audio-records';
 import type UserItem from '@/database/models/user-items';
-import type Block from '@/database/models/blocks';
 import type AudioMetadata from '@/database/models/audio-metadata';
 import type Metadata from '@/database/models/metadata';
 import type Lessons from '@/database/models/lessons';
@@ -21,6 +20,8 @@ import type UserSettings from '@/database/models/user-settings';
 
 const USER_ITEMS_SCHEMA =
   '[user_id+item_id], [user_id+grammar_chunk_id+started_at], [user_id+is_vocabulary+started_at], [user_id+started_at], [user_id+updated_at], [user_id+lesson_id+is_vocabulary+started_at], [user_id+block_id], [user_id+topic_id], [user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path], [user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]';
+const USER_ITEMS_SCHEMA_WITHOUT_BLOCK =
+  '[user_id+item_id], [user_id+grammar_chunk_id+started_at], [user_id+is_vocabulary+started_at], [user_id+started_at], [user_id+updated_at], [user_id+lesson_id+is_vocabulary+started_at], [user_id+topic_id], [user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path], [user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]';
 
 /**
  * Application IndexedDB wrapper built on Dexie.
@@ -40,7 +41,6 @@ export default class AppDB extends Dexie {
   grammar_chunks!: EntityTable<GrammarChunk, 'id'>;
   grammar_chunk_examples!: EntityTable<GrammarChunkExample, any>;
   user_items!: EntityTable<UserItem, any>;
-  blocks!: EntityTable<Block, 'id'>;
   audio_records!: EntityTable<AudioRecord, 'filename'>;
   audio_metadata!: EntityTable<AudioMetadata, 'archive_name'>;
   metadata!: EntityTable<Metadata, any>;
@@ -141,5 +141,40 @@ export default class AppDB extends Dexie {
       user_lessons: '[user_id+lesson_id+started_at], [user_id+started_at]',
       users: 'id, updated_at',
     });
+
+    this.version(10)
+      .stores({
+        blocks: null,
+        user_items: USER_ITEMS_SCHEMA_WITHOUT_BLOCK,
+      })
+      .upgrade(async (transaction) => {
+        await transaction.table('lessons').toCollection().modify((lesson) => {
+          (lesson as Record<string, unknown>).grammar_chunk_id ??= null;
+        });
+        const userItems = transaction.table('user_items');
+        await transaction.table('practice_sessions').toCollection().modify(async (session) => {
+          const localSession = session as Record<string, unknown>;
+          if (localSession.mode === 'new' && localSession.lesson_id == null) {
+            const itemIds = [
+              ...(localSession.current_queue_item_ids as number[]),
+              ...(localSession.retry_queue_item_ids as number[]),
+              ...(localSession.completed_item_ids as number[]),
+            ];
+            const firstItemId = itemIds[0];
+            if (firstItemId != null) {
+              const firstItem = await userItems.get([
+                localSession.user_id as string,
+                firstItemId,
+              ]);
+              localSession.lesson_id = firstItem?.lesson_id ?? null;
+            }
+          }
+          delete localSession.block_id;
+          localSession.lesson_id ??= null;
+        });
+        await transaction.table('user_items').toCollection().modify((item) => {
+          delete (item as Record<string, unknown>).block_id;
+        });
+      });
   }
 }

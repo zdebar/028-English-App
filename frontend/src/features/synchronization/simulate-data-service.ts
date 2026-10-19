@@ -8,7 +8,7 @@ import { invalidateReviewArrays } from '@/features/practice/review-prefetch';
  * Atomically creates the anonymous-user progress fixture.
  *
  * @param userId Non-empty anonymous user id whose local progress should be simulated.
- * @param dateTime Shared ISO timestamp for every simulated item and block transition.
+ * @param dateTime Shared ISO timestamp for every simulated item transition.
  * @returns Number of user items updated.
  */
 export async function simulateUserProgress(

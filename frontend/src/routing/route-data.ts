@@ -2,12 +2,12 @@ import { loadSharedQuery } from '@/hooks/shared-query-store';
 import { hasReachedReviewLimit } from '@/features/practice/practice-availability';
 import { loadReviewAvailabilityFromArrays } from '@/features/practice/review-prefetch';
 import {
-  getPrefetchedNextInitialBlock,
-  type PreparedInitialBlock,
+  getPrefetchedNextInitialLesson,
+  type PreparedInitialLesson,
 } from '@/features/practice/practice-prefetch';
 import { usePracticeAvailabilityStore } from '@/features/practice/use-practice-availability-store';
 import PronunciationGroup from '@/database/models/pronunciation-groups';
-import Block from '@/database/models/blocks';
+import Lessons from '@/database/models/lessons';
 import PracticeSession from '@/database/models/practice-sessions';
 import UserItem from '@/database/models/user-items';
 import Topic from '@/database/models/topics';
@@ -28,10 +28,10 @@ export type RouteDataDescriptor<T> = Readonly<{
   load: () => Promise<T>;
 }>;
 
-export type InitialTrainingData = PreparedInitialBlock;
+export type InitialTrainingData = PreparedInitialLesson;
 
 function emptyInitialTrainingData(): InitialTrainingData {
-  return { block: null, items: [], entries: [], grammar: null, grammarGroup: null };
+  return { lesson: null, items: [], entries: [], grammar: null, grammarGroup: null };
 }
 
 function getSavedSessionItemIds(activeSession: PracticeSessionType | null): number[] {
@@ -49,7 +49,7 @@ async function getActiveInitialTrainingSelection(
 ) {
   const savedItemIds = getSavedSessionItemIds(activeSession);
   return {
-    blockId: activeSession.block_id,
+    lessonId: activeSession.lesson_id,
     items: await UserItem.getByItemIds(userId, savedItemIds),
   };
 }
@@ -62,22 +62,23 @@ async function loadInitialTrainingData(userId: string): Promise<InitialTrainingD
 
   if (!activeSession) {
     return (
-      (await getPrefetchedNextInitialBlock(userId, null)) ??
+      (await getPrefetchedNextInitialLesson(userId, null)) ??
       emptyInitialTrainingData()
     );
   }
 
   const selection = await getActiveInitialTrainingSelection(userId, activeSession);
-  const block = selection.blockId == null ? null : await Block.getById(selection.blockId);
+  const lesson = selection.lessonId == null ? null : await Lessons.getById(selection.lessonId);
   const items = selection.items;
-  const hasInvalidSelection = items.length === 0 || (selection.blockId != null && !block);
+  const hasInvalidSelection =
+    items.length === 0 || !lesson || items.some((item) => item.lesson_id !== lesson.id);
   if (hasInvalidSelection) return emptyInitialTrainingData();
 
   const [entries, grammarContext] = await Promise.all([
     resolvePracticeEntries(userId, items),
-    resolvePracticeGrammarContext(userId, block?.grammar_chunk_id ?? null),
+    resolvePracticeGrammarContext(userId, lesson.grammar_chunk_id),
   ]);
-  return { block, items, entries, ...grammarContext };
+  return { lesson, items, entries, ...grammarContext };
 }
 
 async function canLoadInitialTraining(

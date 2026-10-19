@@ -78,7 +78,6 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
     lesson_id: 1,
     updated_at: '2026-01-01',
     is_vocabulary: 1,
-    block_id: 1,
     topic_id: -1,
     grammar_chunk_id: 10,
     started_at: '2026-01-01',

@@ -5,7 +5,7 @@ import UserItem from '@/database/models/user-items';
 import config from '@/config/config';
 import type { PracticeSessionType } from '@/types/practice-session.types';
 import { loadReviewAvailabilityFromArrays } from './review-prefetch';
-import { getPrefetchedNextInitialBlock } from './practice-prefetch';
+import { getPrefetchedNextInitialLesson } from './practice-prefetch';
 
 export type PracticeAvailabilitySnapshot = Readonly<{
   grammarReviewReadyAt: string | null;
@@ -25,9 +25,9 @@ export async function loadPracticeAvailabilitySnapshot(
   userId: string,
 ): Promise<PracticeAvailabilitySnapshot> {
   const activeSessionState = await PracticeSession.inspectActive(userId);
-  const [review, nextInitialBlock, settings, newLessonsStartedTodayCount] = await Promise.all([
+  const [review, nextInitialLesson, settings, newLessonsStartedTodayCount] = await Promise.all([
     loadReviewAvailability(userId),
-    getPrefetchedNextInitialBlock(userId, activeSessionState.activeSession),
+    getPrefetchedNextInitialLesson(userId, activeSessionState.activeSession),
     UserSettings.getOrCreate(userId),
     UserLesson.getStartedCountForToday(userId),
   ]);
@@ -39,7 +39,7 @@ export async function loadPracticeAvailabilitySnapshot(
     vocabularyReviewDueCount: review.vocabularyReviewDueCount,
     nextReviewAt: review.nextReviewAt,
     initialTrainingAvailable:
-      activeSessionState.activeSession?.mode === 'new' || nextInitialBlock !== null,
+      activeSessionState.activeSession?.mode === 'new' || nextInitialLesson !== null,
     activeSession: activeSessionState.activeSession,
     requiresSessionReconciliation: activeSessionState.requiresReconciliation,
     newLessonsStartedTodayCount,

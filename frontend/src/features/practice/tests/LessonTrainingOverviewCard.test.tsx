@@ -9,19 +9,19 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 
-import BlockTrainingOverviewCard from '@/features/practice/BlockTrainingOverviewCard';
+import LessonTrainingOverviewCard from '@/features/practice/LessonTrainingOverviewCard';
 
 function LocationProbe() {
   return <span data-testid="location">{useLocation().pathname}</span>;
 }
 
-describe('BlockTrainingOverviewCard', () => {
+describe('LessonTrainingOverviewCard', () => {
   it('omits empty notes, continues training, and uses the practice fallback', () => {
     const onContinue = vi.fn();
     render(
-      <MemoryRouter initialEntries={['/practice/block-training']}>
-        <BlockTrainingOverviewCard
-          block={{ name: 'Block A', note: null }}
+      <MemoryRouter initialEntries={['/practice/new-lesson']}>
+        <LessonTrainingOverviewCard
+          lesson={{ name: 'Lesson A', note: null }}
           grammar={{ kind: 'chunk', id: 1, name: 'Articles', note: null }}
           grammarGroup={{ note: null }}
           onContinue={onContinue}

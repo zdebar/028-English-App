@@ -50,14 +50,6 @@ function getSavedItemIds(session: PracticeSessionType): number[] {
   ];
 }
 
-function hasExpectedBlockItems(items: UserItemLocal[], sessionBlockId: number | null): boolean {
-  return items.every((item) => {
-    const itemBlockId =
-      item.block_id === config.database.nullReplacementNumber ? null : item.block_id;
-    return itemBlockId === sessionBlockId;
-  });
-}
-
 function hasExistingItems(itemIds: number[], items: UserItemLocal[]): boolean {
   const itemById = new Map(items.map((item) => [item.item_id, item]));
   return itemIds.every((itemId) => {
@@ -66,25 +58,17 @@ function hasExistingItems(itemIds: number[], items: UserItemLocal[]): boolean {
   });
 }
 
-function hasConsistentAutomaticBatch(
+function hasConsistentLessonBatch(
   session: PracticeSessionType,
   items: UserItemLocal[],
 ): boolean {
-  if (session.block_id != null) return true;
-
-  const firstItem = items[0];
-  if (!firstItem) return false;
-  return items.every(
-    (item) =>
-      item.lesson_id === firstItem.lesson_id && item.is_vocabulary === firstItem.is_vocabulary,
-  );
+  return session.lesson_id != null && items.every((item) => item.lesson_id === session.lesson_id);
 }
 
 function isValidInitialTrainingSession(
   session: PracticeSessionType,
   savedItemIds: number[],
   items: UserItemLocal[],
-  blockExists: boolean,
 ): boolean {
   const uniqueItemIds = [...new Set(savedItemIds)];
   const hasPendingItems =
@@ -95,10 +79,8 @@ function isValidInitialTrainingSession(
     uniqueItemIds.length === savedItemIds.length,
     hasPendingItems,
     hasValidPhase,
-    blockExists,
     hasExistingItems(uniqueItemIds, items),
-    hasExpectedBlockItems(items, session.block_id),
-    hasConsistentAutomaticBatch(session, items),
+    hasConsistentLessonBatch(session, items),
   ];
   return checks.every(Boolean);
 }
@@ -108,7 +90,7 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
   mode!: 'review' | 'new';
   completed_count!: number;
   target_count!: number;
-  block_id!: number | null;
+  lesson_id!: number | null;
   phase!: NewPracticePhase | null;
   current_queue_item_ids!: number[];
   retry_queue_item_ids!: number[];
@@ -137,9 +119,7 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
       .where('[user_id+item_id]')
       .anyOf(uniqueItemIds.map((itemId) => [userId, itemId]))
       .toArray();
-    const blockExists =
-      session.block_id == null || (await db.blocks.get(session.block_id)) !== undefined;
-    const isValid = isValidInitialTrainingSession(session, savedItemIds, items, blockExists);
+    const isValid = isValidInitialTrainingSession(session, savedItemIds, items);
 
     return {
       activeSession: isValid ? session : null,
@@ -147,11 +127,11 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
     };
   }
 
-  /** Removes an unusable new-block session and returns the remaining active session. */
+  /** Removes an unusable initial-training session and returns the remaining active session. */
   static reconcileActive(userId: string): Promise<PracticeSessionType | null> {
     assertNonEmptyString(userId, 'userId');
 
-    return db.transaction('rw', db.practice_sessions, db.blocks, db.user_items, async () => {
+    return db.transaction('rw', db.practice_sessions, db.user_items, async () => {
       const state = await this.inspectActive(userId);
       if (!state.requiresReconciliation) return state.activeSession;
       await db.practice_sessions.delete(userId);
@@ -161,7 +141,7 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
 
   static async startNew(
     userId: string,
-    blockId: number | null,
+    lessonId: number,
     itemIds: number[],
     dateTime: string = new Date(Date.now()).toISOString(),
   ): Promise<PracticeSessionType> {
@@ -182,8 +162,7 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
           .where('[user_id+item_id]')
           .anyOf(itemIds.map((itemId) => [userId, itemId]))
           .toArray();
-        const lessonId = items[0]?.lesson_id;
-        if (lessonId == null || items.some((item) => item.lesson_id !== lessonId)) {
+        if (items.length !== itemIds.length || items.some((item) => item.lesson_id !== lessonId)) {
           throw new Error('Initial training must contain items from one lesson.');
         }
 
@@ -198,7 +177,7 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
           mode: 'new',
           completed_count: 0,
           target_count: itemIds.length,
-          block_id: blockId,
+          lesson_id: lessonId,
           phase: 0,
           current_queue_item_ids: itemIds,
           retry_queue_item_ids: [],

@@ -279,7 +279,7 @@ describe('TopicItemsOverview', () => {
     });
   });
 
-  it('allows reset independently of practice blocks', () => {
+  it('allows reset independently of practice lessons', () => {
     mocks.state.topic = { id: 2, name: 'Letters' };
 
     render(<TopicItemsOverview />);

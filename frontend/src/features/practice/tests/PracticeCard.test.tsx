@@ -33,7 +33,6 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     lesson_id: 1,
     updated_at: '2024-01-01T00:00:00.000Z',
     is_vocabulary: 1,
-    block_id: 1,
     topic_id: -1,
     grammar_chunk_id: 10,
     started_at: '2024-01-01T00:00:00.000Z',
@@ -115,7 +114,6 @@ vi.mock('@/locales/cs', () => ({
     progress: 'Progress',
     reviewProgress: 'Item count',
     progressToday: 'Today progress',
-    blockCompleted: 'Block completed',
     reviewCompleted: 'Review completed',
     today: 'Today',
     loadingMessage: 'Loading',
@@ -346,7 +344,6 @@ describe('PracticeCard', () => {
     mocks.noteVisible = false;
     mocks.noteData = null;
     mocks.practiceDeck.index = 0;
-    mocks.practiceDeck.trainingBlockId = null;
     mocks.practiceDeck.currentItem = mocks.makePracticeItem({
       item_id: 1,
       czech: 'ahoj',
@@ -745,7 +742,7 @@ describe('PracticeCard', () => {
         nextRepeat={vi.fn()}
         nextKnown={vi.fn()}
         completeDisabled
-        isBlockTrainingPractice
+        isInitialTrainingPractice
         audioError={false}
         playAudio={vi.fn()}
         audioLoading={false}

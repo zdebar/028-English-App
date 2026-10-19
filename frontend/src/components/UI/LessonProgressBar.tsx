@@ -1,6 +1,6 @@
 import { TEXTS, ARIA_TEXTS } from '@/locales/cs';
 
-type BlockBarProps = Readonly<{
+type LessonProgressBarProps = Readonly<{
   previousCount: number;
   todayCount: number;
   lessonName: string;
@@ -11,20 +11,20 @@ type BlockBarProps = Readonly<{
 }>;
 
 /**
- * BlockBar component displays initiated items split between previous days and today.
+ * LessonProgressBar displays initiated items split between previous days and today.
  *
  * @param previousCount {number} Number of items initiated before today, including initial-training
  * skips.
  * @param todayCount {number} Number of items actually started today. Initial-training skips are
  * intentionally excluded.
- * @param lessonName {string} The name of the current lesson block.
- * @param lessonNumber {number} The number of the lesson the block belongs to.
+ * @param lessonName {string} The name of the current lesson.
+ * @param lessonNumber {number} The number of the lesson.
  * @param lessonCount {number} Total number of items in the lesson.
  * @param widthBase {number} Item count that maps to 100% width (default: 40).
  * @param className {string} Additional CSS classes for custom styling.
  * @returns A styled progress bar with labels and visual representation of progress.
  */
-export default function BlockBar({ ...props }: BlockBarProps) {
+export default function LessonProgressBar({ ...props }: LessonProgressBarProps) {
   const {
     previousCount,
     todayCount,
@@ -33,7 +33,7 @@ export default function BlockBar({ ...props }: BlockBarProps) {
     lessonCount,
     widthBase,
     className,
-  } = { ...DEFAULT_BLOCK_BAR_PROPS, ...props };
+  } = { ...DEFAULT_LESSON_PROGRESS_BAR_PROPS, ...props };
   const safeLesson = Math.max(lessonCount, 1);
   const safeWidthBase = Math.max(widthBase, 1);
   const visibleItems = Math.min(safeLesson, safeWidthBase);
@@ -48,7 +48,7 @@ export default function BlockBar({ ...props }: BlockBarProps) {
   const totalWidth = (clampedTotal / safeLesson) * 100;
 
   return (
-    <div className="h-attribute bg-block-bar-empty cursor-inherit relative w-full select-none">
+    <div className="h-attribute bg-lesson-progress-empty cursor-inherit relative w-full select-none">
       <div className="font-body text-light absolute -top-0.5 right-0 left-0 z-20 flex items-center justify-between truncate px-2 pt-1 text-center font-bold">
         <span
           title={`${TEXTS.lessonOrder} - ${TEXTS.lessonName} `}
@@ -83,7 +83,7 @@ export default function BlockBar({ ...props }: BlockBarProps) {
   );
 }
 
-const DEFAULT_BLOCK_BAR_PROPS: Required<BlockBarProps> = {
+const DEFAULT_LESSON_PROGRESS_BAR_PROPS: Required<LessonProgressBarProps> = {
   previousCount: 0,
   todayCount: 0,
   lessonName: '',

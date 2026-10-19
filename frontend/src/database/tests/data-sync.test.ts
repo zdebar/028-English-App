@@ -8,7 +8,6 @@ const mocks = vi.hoisted(() => ({
   userItemSyncFromRemote: vi.fn(),
   userLessonSyncFromRemote: vi.fn(),
   userSettingsSyncFromRemote: vi.fn(),
-  blockSyncFromRemote: vi.fn(),
   grammarSyncFromRemote: vi.fn(),
   levelsSyncFromRemote: vi.fn(),
   lessonsSyncFromRemote: vi.fn(),
@@ -61,12 +60,6 @@ vi.mock('@/database/models/user-lessons', () => ({
 }));
 vi.mock('@/database/models/user-settings', () => ({
   default: { syncFromRemote: (...args: unknown[]) => mocks.userSettingsSyncFromRemote(...args) },
-}));
-
-vi.mock('@/database/models/blocks', () => ({
-  default: {
-    syncFromRemote: (...args: unknown[]) => mocks.blockSyncFromRemote(...args),
-  },
 }));
 
 vi.mock('@/database/models/grammar-chunks', () => ({
@@ -146,7 +139,6 @@ describe('data-sync.utils', () => {
     mocks.userItemSyncFromRemote.mockResolvedValue(undefined);
     mocks.userLessonSyncFromRemote.mockResolvedValue(0);
     mocks.userSettingsSyncFromRemote.mockResolvedValue(undefined);
-    mocks.blockSyncFromRemote.mockResolvedValue(undefined);
     mocks.grammarSyncFromRemote.mockResolvedValue(undefined);
     mocks.levelsSyncFromRemote.mockResolvedValue(undefined);
     mocks.lessonsSyncFromRemote.mockResolvedValue(undefined);
@@ -171,7 +163,6 @@ describe('data-sync.utils', () => {
     expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', true);
     expect(mocks.userLessonSyncFromRemote).toHaveBeenCalledWith('u1', true);
     expect(mocks.userSettingsSyncFromRemote).toHaveBeenCalledWith('u1');
-    expect(mocks.blockSyncFromRemote).toHaveBeenCalledWith(true);
     expect(mocks.grammarSyncFromRemote).toHaveBeenCalledWith(true);
     expect(mocks.levelsSyncFromRemote).toHaveBeenCalledWith(true);
     expect(mocks.lessonsSyncFromRemote).toHaveBeenCalledWith(true);
@@ -191,7 +182,6 @@ describe('data-sync.utils', () => {
     expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', false);
     expect(mocks.userLessonSyncFromRemote).toHaveBeenCalledWith('u1', false);
     expect(mocks.userSettingsSyncFromRemote).toHaveBeenCalledWith('u1');
-    expect(mocks.blockSyncFromRemote).toHaveBeenCalledWith(false);
     expect(mocks.grammarSyncFromRemote).toHaveBeenCalledWith(false);
     expect(mocks.levelsSyncFromRemote).toHaveBeenCalledWith(false);
     expect(mocks.lessonsSyncFromRemote).toHaveBeenCalledWith(false);

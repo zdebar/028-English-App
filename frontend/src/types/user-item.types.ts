@@ -32,7 +32,6 @@ export interface UserItemLocal extends UserItemBase {
   /** Set only on transient practice entries to identify the active review direction. */
   review_direction?: ReviewDirection;
   is_vocabulary: 0 | 1;
-  block_id: number;
   topic_id: number;
   grammar_chunk_id: number;
   started_at: string;
@@ -55,11 +54,10 @@ export type ResolvedPracticeEntry<T extends UserItemLocal> = Readonly<{
 export type PracticeDeckEntry = ResolvedPracticeEntry<PracticeDeckItem>;
 
 export type InitialTrainingSelection = Readonly<{
-  blockId: number | null;
+  lessonId: number;
   items: UserItemLocal[];
 }>;
 
 export type InitialTrainingSelectionOptions = Readonly<{
-  excludeBlockId?: number;
   excludeItemIds?: readonly number[];
 }>;

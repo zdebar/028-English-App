@@ -3,7 +3,7 @@ import StyledButton from '@/components/UI/buttons/StyledButton';
 import { ROUTES } from '@/config/routes.config';
 import type { GrammarDetail } from '@/features/grammar/GrammarDetailCard';
 import { TEXTS } from '@/locales/cs';
-import type { BlockType, GrammarGroupType } from '@/types/generic.types';
+import type { LessonType, GrammarGroupType } from '@/types/generic.types';
 import DOMPurify from 'dompurify';
 import type { JSX } from 'react';
 import type { UserItemLocal } from '@/types/user-item.types';
@@ -14,8 +14,8 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import VolumeSlider from '@/features/audio/VolumeSlider';
 import { useRouteClose } from '@/routing/use-route-close';
 
-type BlockTrainingOverviewCardProps = Readonly<{
-  block: Pick<BlockType, 'name' | 'note'>;
+type LessonTrainingOverviewCardProps = Readonly<{
+  lesson: Pick<LessonType, 'name' | 'note'>;
   grammar: GrammarDetail | null;
   grammarGroup: Pick<GrammarGroupType, 'note'> | null;
   items?: readonly UserItemLocal[];
@@ -27,17 +27,17 @@ function Note({ note }: Readonly<{ note: string }>): JSX.Element {
 }
 
 type OverviewNotesProps = Readonly<{
-  blockNote: string | null;
+  lessonNote: string | null;
   grammarNote: string | null | undefined;
   grammarGroupNote: string | null;
 }>;
 
 function OverviewNotes({
-  blockNote,
+  lessonNote,
   grammarNote,
   grammarGroupNote,
 }: OverviewNotesProps): JSX.Element {
-  const hasNotes = Boolean(grammarGroupNote || grammarNote || blockNote);
+  const hasNotes = Boolean(grammarGroupNote || grammarNote || lessonNote);
 
   return (
     <>
@@ -47,20 +47,20 @@ function OverviewNotes({
           <Note note={grammarNote} />
         </section>
       )}
-      {blockNote && <Note note={blockNote} />}
+      {lessonNote && <Note note={lessonNote} />}
       {!hasNotes && <div className="h-4" aria-hidden="true" />}
     </>
   );
 }
 
-/** Introduces the selected block and its optional grammar before initial training begins. */
-export default function BlockTrainingOverviewCard({
-  block,
+/** Introduces the selected lesson and its optional grammar before initial training begins. */
+export default function LessonTrainingOverviewCard({
+  lesson,
   grammar,
   grammarGroup,
   items = [],
   onContinue,
-}: BlockTrainingOverviewCardProps): JSX.Element {
+}: LessonTrainingOverviewCardProps): JSX.Element {
   const closeRoute = useRouteClose(ROUTES.practice);
   const showToast = useToastStore((state) => state.showToast);
   const audios = useMemo(
@@ -68,7 +68,7 @@ export default function BlockTrainingOverviewCard({
     [items],
   );
   const { playAudio, isAudioReady, loading } = useAudioManager(audios);
-  const title = block.name;
+  const title = lesson.name;
 
   return (
     <OverviewCard
@@ -77,7 +77,7 @@ export default function BlockTrainingOverviewCard({
       className="flex w-full flex-col gap-1"
     >
       <OverviewNotes
-        blockNote={block.note}
+        lessonNote={lesson.note}
         grammarNote={grammar?.note}
         grammarGroupNote={grammarGroup?.note ?? null}
       />

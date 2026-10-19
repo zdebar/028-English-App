@@ -1,6 +1,5 @@
 import config from '@/config/config';
 import { initDbMappings } from '@/database/models/db-init';
-import Block from '@/database/models/blocks';
 import UserItem from '@/database/models/user-items';
 import { getFullSyncTime, setFullSyncTime } from '@/database/utils/sync-time.utils';
 import { withSettledSummary } from '@/features/logging/logging.utils';
@@ -49,7 +48,6 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
     () => GrammarChunkExample.syncFromRemote(doFullSync),
     () => Levels.syncFromRemote(doFullSync),
     () => Lessons.syncFromRemote(doFullSync),
-    () => Block.syncFromRemote(doFullSync),
     () => Notes.syncFromRemote(doFullSync),
     () => Topic.syncFromRemote(doFullSync),
     () => PronunciationGroup.syncFromRemote(doFullSync),
@@ -67,7 +65,6 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
     'GrammarChunkExamples',
     'Levels',
     'Lessons',
-    'Blocks',
     'Notes',
     'Topics',
     'PronunciationGroups',

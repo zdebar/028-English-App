@@ -16,7 +16,6 @@ const config = {
   progress: {
     simulationItemCount: 400,
     simulationItemProgress: 1,
-    simulationStartedBlockCount: 8,
   },
 
   srs: {

@@ -44,7 +44,7 @@ describe('AppDB schema', () => {
   it('declares the complete schema and removes obsolete stores', () => {
     new AppDB();
 
-    expect(mocks.versions).toHaveLength(9);
+    expect(mocks.versions).toHaveLength(10);
     expect(mocks.versions[0]).toMatchObject({
       number: 1,
       schema: {
@@ -114,6 +114,13 @@ describe('AppDB schema', () => {
         users: 'id, updated_at',
       },
     });
+    expect(mocks.versions[9]).toMatchObject({
+      number: 10,
+      schema: {
+        blocks: null,
+        user_items: expect.not.stringContaining('[user_id+block_id]'),
+      },
+    });
   });
 
   it('initializes new direction fields while upgrading existing local items', async () => {
@@ -139,5 +146,49 @@ describe('AppDB schema', () => {
     });
     expect(item.next_at_en_to_cz).toBeTruthy();
     expect(item.mastered_at_en_to_cz).toBeTruthy();
+  });
+
+  it('removes block storage and migrates saved initial sessions to their lesson', async () => {
+    new AppDB();
+    let modifySessions: ((session: Record<string, unknown>) => Promise<void>) | undefined;
+    let modifyItems: ((item: Record<string, unknown>) => void) | undefined;
+    let modifyLessons: ((lesson: Record<string, unknown>) => void) | undefined;
+    const transaction = {
+      table: (name: string) => ({
+        toCollection: () => ({
+          modify: async (callback: (value: Record<string, unknown>) => void) => {
+            if (name === 'practice_sessions') {
+              modifySessions = callback as (session: Record<string, unknown>) => Promise<void>;
+            } else if (name === 'lessons') {
+              modifyLessons = callback;
+            } else {
+              modifyItems = callback;
+            }
+          },
+        }),
+        get: async () => ({ lesson_id: 4 }),
+      }),
+    };
+    await mocks.versions[9].upgrade?.(transaction);
+
+    const session: Record<string, unknown> = {
+      user_id: 'u1',
+      mode: 'new',
+      block_id: 10,
+      current_queue_item_ids: [2],
+      retry_queue_item_ids: [],
+      completed_item_ids: [1],
+    };
+    await modifySessions?.(session);
+    expect(session).toMatchObject({ lesson_id: 4 });
+    expect(session).not.toHaveProperty('block_id');
+
+    const item: Record<string, unknown> = { block_id: 10, lesson_id: 4 };
+    modifyItems?.(item);
+    expect(item).toEqual({ lesson_id: 4 });
+
+    const lesson: Record<string, unknown> = {};
+    modifyLessons?.(lesson);
+    expect(lesson.grammar_chunk_id).toBeNull();
   });
 });

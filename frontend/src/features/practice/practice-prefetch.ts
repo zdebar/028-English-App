@@ -1,4 +1,4 @@
-import Block from '@/database/models/blocks';
+import Lessons from '@/database/models/lessons';
 import PracticeSession from '@/database/models/practice-sessions';
 import UserItem from '@/database/models/user-items';
 import {
@@ -6,7 +6,7 @@ import {
   resolvePracticeGrammarContext,
 } from '@/database/utils/practice-content.utils';
 import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
-import type { BlockType, GrammarGroupType } from '@/types/generic.types';
+import type { LessonType, GrammarGroupType } from '@/types/generic.types';
 import type { PracticeSessionType } from '@/types/practice-session.types';
 import type {
   ResolvedPracticeEntry,
@@ -18,8 +18,8 @@ import {
   warmReviewArrays,
 } from './review-prefetch';
 
-export type PreparedInitialBlock = Readonly<{
-  block: BlockType | null;
+export type PreparedInitialLesson = Readonly<{
+  lesson: LessonType | null;
   items: UserItemLocal[];
   entries: Array<ResolvedPracticeEntry<UserItemLocal>>;
   grammar: GrammarChunkWithExamples | null;
@@ -27,7 +27,7 @@ export type PreparedInitialBlock = Readonly<{
 }>;
 
 type PracticePrefetchState = {
-  nextInitialBlock: PreparedInitialBlock | null;
+  nextInitialLesson: PreparedInitialLesson | null;
   dirty: boolean;
   version: number;
   pending: Promise<void> | null;
@@ -37,7 +37,7 @@ const states = new Map<string, PracticePrefetchState>();
 
 function createState(): PracticePrefetchState {
   return {
-    nextInitialBlock: null,
+    nextInitialLesson: null,
     dirty: true,
     version: 0,
     pending: null,
@@ -64,32 +64,28 @@ function getSavedSessionItemIds(session: PracticeSessionType | null): number[] {
 
 function getSelectionOptions(session: PracticeSessionType | null) {
   if (!session) return {};
-  const options = {
-    excludeItemIds: getSavedSessionItemIds(session),
-  };
-  if (session.block_id === null) return options;
-  return { ...options, excludeBlockId: session.block_id };
+  return { excludeItemIds: getSavedSessionItemIds(session) };
 }
 
-async function loadPreparedInitialBlock(
+async function loadPreparedInitialLesson(
   userId: string,
   activeSession: PracticeSessionType | null,
-): Promise<PreparedInitialBlock | null> {
+): Promise<PreparedInitialLesson | null> {
   const selection = await UserItem.getNextInitialTrainingSelection(
     userId,
     getSelectionOptions(activeSession),
   );
   if (!selection || selection.items.length === 0) return null;
 
-  const block = selection.blockId == null ? null : await Block.getById(selection.blockId);
-  if (selection.blockId != null && !block) return null;
+  const lesson = await Lessons.getById(selection.lessonId);
+  if (!lesson) return null;
 
   const [entries, grammarContext] = await Promise.all([
     resolvePracticeEntries(userId, selection.items),
-    resolvePracticeGrammarContext(userId, block?.grammar_chunk_id ?? null),
+    resolvePracticeGrammarContext(userId, lesson.grammar_chunk_id),
   ]);
   return {
-    block,
+    lesson,
     items: selection.items,
     entries,
     grammar: grammarContext.grammar,
@@ -105,7 +101,7 @@ async function resolveActiveSession(
   return (await PracticeSession.inspectActive(userId)).activeSession;
 }
 
-/** Loads review arrays and prepares the next initial block until explicit invalidation. */
+/** Loads review arrays and prepares the next initial lesson until explicit invalidation. */
 export async function warmPracticeCache(
   userId: string,
   activeSession?: PracticeSessionType | null,
@@ -121,12 +117,12 @@ export async function warmPracticeCache(
   let pending: Promise<void>;
   pending = (async () => {
     const resolvedSession = await resolveActiveSession(userId, activeSession);
-    const [, nextInitialBlock] = await Promise.all([
+    const [, nextInitialLesson] = await Promise.all([
       warmReviewArrays(userId),
-      loadPreparedInitialBlock(userId, resolvedSession),
+      loadPreparedInitialLesson(userId, resolvedSession),
     ]);
     if (states.get(userId) !== state || state.version !== version) return;
-    state.nextInitialBlock = nextInitialBlock;
+    state.nextInitialLesson = nextInitialLesson;
     state.dirty = false;
   })().finally(() => {
     if (state.pending === pending) state.pending = null;
@@ -139,15 +135,15 @@ export async function warmPracticeCache(
   }
 }
 
-export async function getPrefetchedNextInitialBlock(
+export async function getPrefetchedNextInitialLesson(
   userId: string,
   activeSession?: PracticeSessionType | null,
-): Promise<PreparedInitialBlock | null> {
+): Promise<PreparedInitialLesson | null> {
   await warmPracticeCache(userId, activeSession);
-  return getState(userId).nextInitialBlock;
+  return getState(userId).nextInitialLesson;
 }
 
-export function invalidateNextInitialBlock(userId: string): void {
+export function invalidateNextInitialLesson(userId: string): void {
   const state = states.get(userId);
   if (!state) return;
   state.version += 1;
@@ -156,7 +152,7 @@ export function invalidateNextInitialBlock(userId: string): void {
 
 export function invalidatePracticeCache(userId: string): void {
   invalidateReviewArrays(userId);
-  invalidateNextInitialBlock(userId);
+  invalidateNextInitialLesson(userId);
 }
 
 export function clearPracticeCache(userId: string | null): void {

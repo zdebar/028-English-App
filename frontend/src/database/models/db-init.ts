@@ -6,7 +6,6 @@ import GrammarGroup from '@/database/models/grammar-groups';
 import Lessons from '@/database/models/lessons';
 import Levels from '@/database/models/levels';
 import Metadata from '@/database/models/metadata';
-import Block from '@/database/models/blocks';
 import UserItem from '@/database/models/user-items';
 import Notes from './notes';
 import PronunciationGroup from './pronunciation-groups';
@@ -24,7 +23,6 @@ export function initDbMappings(): void {
   if (isInitialized) return;
 
   db.user_items.mapToClass(UserItem);
-  db.blocks.mapToClass(Block);
   db.grammar_groups.mapToClass(GrammarGroup);
   db.grammar_topics.mapToClass(GrammarTopic);
   db.grammar_chunks.mapToClass(GrammarChunk);

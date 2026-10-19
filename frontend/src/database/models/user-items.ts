@@ -32,7 +32,6 @@ const SIM_ITEM_PROGRESS = config.progress.simulationItemProgress;
 type UserItemAPI = Omit<
   UserItemLocal,
   | 'is_vocabulary'
-  | 'block_id'
   | 'topic_id'
   | 'grammar_chunk_id'
   | 'started_at'
@@ -45,7 +44,6 @@ type UserItemAPI = Omit<
   | 'is_en_to_cz_enabled'
 > & {
   is_vocabulary: boolean;
-  block_id: number | null;
   topic_id: number | null;
   grammar_chunk_id: number | null;
   started_at: string | null;
@@ -112,7 +110,6 @@ function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
     is_cz_to_en_enabled: apiItem.is_cz_to_en_enabled ?? true,
     is_en_to_cz_enabled: apiItem.is_en_to_cz_enabled ?? true,
     deleted_at: replaceNullDate(apiItem.deleted_at),
-    block_id: replaceNullNumber(apiItem.block_id),
     topic_id: replaceNullNumber(apiItem.topic_id),
     grammar_chunk_id: replaceNullNumber(apiItem.grammar_chunk_id),
   };
@@ -159,7 +156,6 @@ async function getUnstartedItems(
         item.is_cz_to_en_enabled !== false &&
         item.started_at === NULL_DATE &&
         !isInitialTrainingSkipped(item) &&
-        item.block_id !== options.excludeBlockId &&
         !excludedItemIds.has(item.item_id),
     )
     .sort((left, right) =>
@@ -167,42 +163,22 @@ async function getUnstartedItems(
     );
 }
 
-async function getBlockTrainingSelection(
-  firstItem: UserItemLocal,
-  unstartedItems: UserItemLocal[],
-): Promise<InitialTrainingSelection | null> {
-  const block = await db.blocks.get(firstItem.block_id);
-  if (!block) return null;
-  return {
-    blockId: firstItem.block_id,
-    items: unstartedItems.filter((item) => item.block_id === firstItem.block_id),
-  };
-}
-
-function getAutomaticLessonTrainingSelection(
+function getLessonTrainingSelection(
   firstItem: UserItemLocal,
   unstartedItems: UserItemLocal[],
 ): InitialTrainingSelection {
   return {
-    blockId: null,
-    items: unstartedItems.filter(
-      (item) =>
-        item.block_id === NULL_NUMBER &&
-        item.is_vocabulary === firstItem.is_vocabulary &&
-        item.lesson_id === firstItem.lesson_id,
-    ),
+    lessonId: firstItem.lesson_id,
+    items: unstartedItems.filter((item) => item.lesson_id === firstItem.lesson_id),
   };
 }
 
-async function resolveInitialTrainingSelection(
+function resolveInitialTrainingSelection(
   unstartedItems: UserItemLocal[],
-): Promise<InitialTrainingSelection | null> {
+): InitialTrainingSelection | null {
   const firstItem = unstartedItems[0];
   if (!firstItem) return null;
-  if (firstItem.block_id !== NULL_NUMBER) {
-    return getBlockTrainingSelection(firstItem, unstartedItems);
-  }
-  return getAutomaticLessonTrainingSelection(firstItem, unstartedItems);
+  return getLessonTrainingSelection(firstItem, unstartedItems);
 }
 
 /**
@@ -228,7 +204,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   sort_order!: number;
   curriculum_sort_path!: CurriculumSortPath;
   note_id!: number;
-  block_id!: number;
   topic_id!: number;
   grammar_chunk_id!: number;
   progress_cz_to_en!: number;
@@ -338,22 +313,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    */
   static getByUserId(userId: string): Promise<UserItemLocal[]> {
     return db.user_items.where('user_id').equals(userId).toArray();
-  }
-
-  /**
-   * Reads user items for one block.
-   *
-   * @param userId User id whose block items should be read.
-   * @param blockId Block id to match.
-   * @returns Matching items sorted by sort_order.
-   */
-  static async getByBlockId(userId: string, blockId: number): Promise<UserItemLocal[]> {
-    const blockItems = await db.user_items
-      .where('[user_id+block_id]')
-      .equals([userId, blockId])
-      .toArray();
-
-    return blockItems.sort((a, b) => a.sort_order - b.sort_order);
   }
 
   static async getByItemIds(userId: string, itemIds: readonly number[]): Promise<UserItemLocal[]> {
@@ -553,26 +512,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       chunks.map((chunk) => this.resetItemsByGrammarChunkId(userId, chunk.id, direction, dateTime)),
     );
     return counts.reduce((total, count) => total + count, 0);
-  }
-
-  /**
-   * Resets all user items in one block.
-   *
-   * @param userId User id owning the items.
-   * @param blockId Block id whose items should be reset.
-   * @returns Number of modified rows.
-   */
-  static async resetItemsByBlockId(
-    userId: string,
-    blockId: number,
-    dateTime: string = new Date().toISOString(),
-  ): Promise<number> {
-    const items = await db.user_items
-      .where('[user_id+block_id]')
-      .equals([userId, blockId])
-      .toArray();
-
-    return resetItems(items, dateTime);
   }
 
   /** Resets all user items assigned to one topic. */

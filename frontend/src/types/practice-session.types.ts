@@ -7,7 +7,7 @@ export interface PracticeSessionType {
   mode: PracticeSessionMode;
   completed_count: number;
   target_count: number;
-  block_id: number | null;
+  lesson_id: number | null;
   phase: NewPracticePhase | null;
   current_queue_item_ids: number[];
   retry_queue_item_ids: number[];

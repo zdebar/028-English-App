@@ -156,7 +156,7 @@ describe('Home practice buttons', () => {
     ]);
   });
 
-  it('uses the shared primary disabled style when no new block exists', () => {
+  it('uses the shared primary disabled style when no new lesson exists', () => {
     usePracticeAvailabilityStore.setState({ initialTrainingAvailable: false });
     render(<PracticeButtons />);
     const newButton = button('New');
@@ -198,7 +198,7 @@ function makeSession(mode: 'review' | 'new') {
     mode,
     completed_count: 4,
     target_count: 20,
-    block_id: null,
+    lesson_id: null,
     phase: mode === 'new' ? (0 as const) : null,
     current_queue_item_ids: [],
     retry_queue_item_ids: [],

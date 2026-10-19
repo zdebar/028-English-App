@@ -114,7 +114,6 @@ function createItem(itemId: number, audio: string, english: string): UserItemLoc
     curriculum_sort_path: [1, 1, itemId],
     topic_id: 1,
     note_id: null,
-    block_id: 1,
     grammar_chunk_id: 0,
     progress_cz_to_en: 0,
     progress_en_to_cz: 0,

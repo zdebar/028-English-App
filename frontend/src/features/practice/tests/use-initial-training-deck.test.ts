@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
   recordInitialTrainingAnswer: vi.fn(),
   applyPracticeProgress: vi.fn(),
   syncReviewItemToCache: vi.fn(),
-  invalidateNextInitialBlock: vi.fn(),
+  invalidateNextInitialLesson: vi.fn(),
   warmPracticeCache: vi.fn().mockResolvedValue(undefined),
   resetQuestionState: vi.fn(),
   renderStates: [] as Array<{ itemId: number | null; revealed: boolean }>,
@@ -33,10 +33,9 @@ vi.mock('@/database/models/practice-sessions', () => ({
     recordInitialTrainingAnswer: (...args: unknown[]) => mocks.recordInitialTrainingAnswer(...args),
   },
 }));
-vi.mock('@/database/models/blocks', () => ({ default: { getById: vi.fn() } }));
+vi.mock('@/database/models/lessons', () => ({ default: { getById: vi.fn() } }));
 vi.mock('@/database/models/user-items', () => ({
   default: {
-    getByBlockId: vi.fn(),
     savePracticeDeck: vi.fn(),
     applyPracticeProgress: (...args: unknown[]) => mocks.applyPracticeProgress(...args),
   },
@@ -72,25 +71,26 @@ vi.mock('../review-prefetch', () => ({
   rebuildReviewArrays: vi.fn().mockResolvedValue(undefined),
   syncReviewItemToCache: (...args: unknown[]) => mocks.syncReviewItemToCache(...args),
 }));vi.mock('../practice-prefetch', () => ({
-  getPrefetchedNextInitialBlock: vi.fn(),
-  invalidateNextInitialBlock: (...args: unknown[]) => mocks.invalidateNextInitialBlock(...args),
+  getPrefetchedNextInitialLesson: vi.fn(),
+  invalidateNextInitialLesson: (...args: unknown[]) => mocks.invalidateNextInitialLesson(...args),
   warmPracticeCache: (...args: unknown[]) => mocks.warmPracticeCache(...args),
 }));
 
-import { useInitialTrainingDeck } from '../hooks/use-block-training-deck';
+import { useInitialTrainingDeck } from '../hooks/use-initial-training-deck';
 
-const block = {
-  id: 10,
-  name: 'Block',
+const lesson = {
+  id: 1,
+  name: 'Lesson',
   note: null,
-  lesson_id: 1,
+  level_id: 1,
+  sort_order: 1,
   grammar_chunk_id: null,
   updated_at: '2026-01-01',
   deleted_at: null,
 };
 const items = [item(1), item(2)];
 const initialData = {
-  block,
+  lesson,
   items,
   entries: items.map((value) => ({ item: value, note: null, grammar: null })),
   grammar: null,
@@ -116,6 +116,7 @@ describe('useInitialTrainingDeck', () => {
   it('starts the first ordered phase and persists progress after each answer', async () => {
     const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+    expect(mocks.startNew).toHaveBeenCalledWith('u1', 1, [1, 2]);
     await act(async () => result.current.nextKnown());
     expect(mocks.recordInitialTrainingAnswer).toHaveBeenCalledWith(
       expect.anything(),
@@ -301,7 +302,7 @@ function newSession() {
     mode: 'new' as const,
     completed_count: 0,
     target_count: 2,
-    block_id: 10,
+    lesson_id: 1,
     phase: 0 as const,
     current_queue_item_ids: [1, 2],
     retry_queue_item_ids: [],
@@ -324,7 +325,7 @@ function item(itemId: number) {
     sort_order: itemId,
     curriculum_sort_path: [1, 1, itemId] as [number, number, number],
     note_id: null,
-    block_id: 10,
+    lesson_id: 1,
     topic_id: -1,
     grammar_chunk_id: 0,
     progress_cz_to_en: 0,
@@ -338,6 +339,5 @@ function item(itemId: number) {
     mastered_at_cz_to_en: '',
     next_at_en_to_cz: '',
     mastered_at_en_to_cz: '',
-    lesson_id: 1,
   };
 }

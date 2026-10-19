@@ -7,7 +7,6 @@ export const TableName = {
   UserLessons: 'user_lessons',
   Levels: 'levels',
   Lessons: 'lessons',
-  Blocks: 'blocks',
   Topics: 'topics',
   Notes: 'notes',
   PronunciationGroups: 'pronunciation_groups',

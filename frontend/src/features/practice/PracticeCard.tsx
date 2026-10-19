@@ -107,7 +107,7 @@ export default function PracticeCard({ initialData }: PracticeCardProps) {
       progressHelpText={TEXTS.reviewProgress}
       showProgressLabel
       isReviewPractice
-      isBlockTrainingPractice={false}
+      isInitialTrainingPractice={false}
       revealed={revealed}
       czech={currentItem.review_direction === 'en_to_cz' ? currentItem.czech : czech}
       czechDescription={currentItem.czech_description}
