@@ -2,7 +2,7 @@ import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks'
 import type { NoteType } from './generic.types';
 import type { ReviewDirection } from './practice.types';
 
-export type PracticeOutcome = 'correct' | 'incorrect' | 'skip';
+export type PracticeOutcome = 'correct' | 'incorrect' | 'skip' | 'repeat' | 'hard' | 'good' | 'easy';
 
 export type CurriculumSortPath = readonly [
   levelSortOrder: number,

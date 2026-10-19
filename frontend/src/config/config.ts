@@ -21,7 +21,21 @@ const config = {
 
   srs: {
     // Spaced Repetition System configuration
-    intervals: [150, 14400, 28800, 86400, 172800, 345600, 691200, 1382400],
+    intervals: [
+      10 * 60,
+      24 * 60 * 60,
+      3 * 24 * 60 * 60,
+      7 * 24 * 60 * 60,
+      14 * 24 * 60 * 60,
+      30 * 24 * 60 * 60,
+      60 * 24 * 60 * 60,
+    ],
+    ratingProgressDelta: {
+      repeat: -1,
+      hard: 0,
+      good: 1,
+      easy: 3,
+    },
     randomness: 0.2, // Randomness of SRS algorithm
   },
 

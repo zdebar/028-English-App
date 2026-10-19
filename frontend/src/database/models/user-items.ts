@@ -884,15 +884,21 @@ function applyReviewProgress(
     updated_at: dateTime,
   };
 
-  if (outcome === 'correct') {
-    setProgress(changes, item, currentProgress + 1, dateTime, direction);
-  } else if (outcome === 'incorrect') {
-    setProgress(changes, item, Math.max(0, currentProgress - 1), dateTime, direction);
-  } else {
+  if (outcome === 'skip') {
     setMastered(changes, dateTime, currentProgress, direction);
+  } else {
+    const progressDelta = getReviewProgressDelta(outcome);
+    setProgress(changes, item, Math.max(0, currentProgress + progressDelta), dateTime, direction);
   }
 
   return { ...item, ...changes };
+}
+
+function getReviewProgressDelta(outcome: PracticeOutcome): number {
+  if (outcome === 'repeat' || outcome === 'incorrect') return config.srs.ratingProgressDelta.repeat;
+  if (outcome === 'hard') return config.srs.ratingProgressDelta.hard;
+  if (outcome === 'easy') return config.srs.ratingProgressDelta.easy;
+  return config.srs.ratingProgressDelta.good;
 }
 
 function getStartedAt(item: UserItemLocal, dateTime: string): string {

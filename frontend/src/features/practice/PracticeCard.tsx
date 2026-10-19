@@ -106,6 +106,7 @@ export default function PracticeCard({ initialData }: PracticeCardProps) {
       progressLabel={progressLabel}
       progressHelpText={TEXTS.reviewProgress}
       showProgressLabel
+      isReviewPractice
       isBlockTrainingPractice={false}
       revealed={revealed}
       czech={currentItem.review_direction === 'en_to_cz' ? currentItem.czech : czech}
@@ -116,9 +117,10 @@ export default function PracticeCard({ initialData }: PracticeCardProps) {
       audioDisabled={audioDisabled}
       handleReveal={handleReveal}
       plusHint={plusHint}
-      nextRepeat={() => nextItem('incorrect')}
-      nextKnown={() => nextItem('correct')}
-      completeCurrent={() => nextItem('skip')}
+      nextRepeat={() => nextItem('repeat')}
+      nextHard={() => nextItem('hard')}
+      nextGood={() => nextItem('good')}
+      nextEasy={() => nextItem('easy')}
       retryAction={retryPractice}
       audioError={audioError}
       playAudio={playAudio}

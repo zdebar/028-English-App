@@ -15,6 +15,7 @@ import HintButton from './buttons/HintButton';
 import KnownButton from './buttons/KnownButton';
 import MasterItemButton from './buttons/MasterItemButton';
 import RepeatButton from './buttons/RepeatButton';
+import ReviewRatingButton from './buttons/ReviewRatingButton';
 import { usePointerReleaseLock } from './hooks/use-pointer-release-lock';
 import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
 import type { NoteType } from '@/types/generic.types';
@@ -47,7 +48,11 @@ export type PracticeSessionCardProps = Readonly<{
   plusHint: () => void;
   nextRepeat: () => void | Promise<void>;
   repeatDisabled?: boolean;
-  nextKnown: () => void | Promise<void>;
+  nextKnown?: () => void | Promise<void>;
+  nextHard?: () => void | Promise<void>;
+  nextGood?: () => void | Promise<void>;
+  nextEasy?: () => void | Promise<void>;
+  isReviewPractice?: boolean;
   completeCurrent?: () => void | Promise<void>;
   completeDisabled?: boolean;
   retryAction?: () => void | Promise<void>;
@@ -65,6 +70,10 @@ type PracticeControlsProps = Pick<
   | 'completeDisabled'
   | 'nextKnown'
   | 'nextRepeat'
+  | 'nextHard'
+  | 'nextGood'
+  | 'nextEasy'
+  | 'isReviewPractice'
   | 'plusHint'
   | 'repeatDisabled'
   | 'retryAction'
@@ -140,6 +149,10 @@ function PracticeControls({
   completeDisabled = false,
   nextKnown,
   nextRepeat,
+  nextHard,
+  nextGood,
+  nextEasy,
+  isReviewPractice = false,
   plusHint,
   repeatDisabled = false,
   retryAction,
@@ -164,6 +177,42 @@ function PracticeControls({
     );
   }
 
+  if (isReviewPractice) {
+    return <ReviewPracticeControls {...{ nextRepeat, nextHard, nextGood, nextEasy, repeatDisabled, controlsLocked }} />;
+  }
+
+  return <DefaultPracticeControls {...{ completeCurrent, completeDisabled, nextKnown, nextRepeat, repeatDisabled, controlsLocked, lockHintUntilRelease }} />;
+}
+
+function ReviewPracticeControls({
+  nextRepeat,
+  nextHard,
+  nextGood,
+  nextEasy,
+  repeatDisabled,
+  controlsLocked,
+}: Pick<PracticeControlsProps, 'nextRepeat' | 'nextHard' | 'nextGood' | 'nextEasy' | 'repeatDisabled' | 'controlsLocked'>) {
+  return (
+    <>
+      <RepeatButton onClick={() => void nextRepeat()} disabled={repeatDisabled || controlsLocked} />
+      <ReviewRatingButton rating="hard" onClick={nextHard} disabled={controlsLocked} />
+      <ReviewRatingButton rating="good" onClick={nextGood} disabled={controlsLocked} />
+      <ReviewRatingButton rating="easy" onClick={nextEasy} disabled={controlsLocked} />
+    </>
+  );
+}
+
+function DefaultPracticeControls({
+  completeCurrent,
+  completeDisabled,
+  nextKnown,
+  nextRepeat,
+  repeatDisabled,
+  controlsLocked,
+  lockHintUntilRelease,
+}: Pick<PracticeControlsProps, 'completeCurrent' | 'completeDisabled' | 'nextKnown' | 'nextRepeat' | 'repeatDisabled' | 'controlsLocked'> & {
+  lockHintUntilRelease: () => void;
+}) {
   return (
     <>
       <MasterItemButton
@@ -181,7 +230,7 @@ function PracticeControls({
       />
       <KnownButton
         onClick={() => {
-          void nextKnown();
+          void nextKnown?.();
         }}
         disabled={controlsLocked}
       />
@@ -326,7 +375,7 @@ function getPracticeCardDisplayState(
     noteButtonDisabled: controlsLocked || noteLoadFailed || !showNoteButton,
     controlsLocked,
     showHintControl: !revealed,
-    practiceControlColumns: getPracticeControlColumns(!revealed),
+    practiceControlColumns: getPracticeControlColumns(!revealed, props.isReviewPractice),
     showTopBar: true,
     showRevealHelp: !revealed && !controlsLocked,
   };
@@ -382,7 +431,9 @@ function isAudioControlDisabled(
 
 function getPracticeControlColumns(
   showHintControl: boolean,
+  isReviewPractice = false,
 ): string {
+  if (!showHintControl && isReviewPractice) return 'grid-cols-4';
   if (!showHintControl) return 'grid-cols-3';
   return 'grid-cols-1';
 }
@@ -531,7 +582,11 @@ function PracticeCardActionBar({
     completeDisabled,
     nextKnown,
     nextRepeat,
+    nextHard,
+    nextGood,
+    nextEasy,
     plusHint,
+    isReviewPractice,
     repeatDisabled,
     retryAction,
   } = props;
@@ -546,6 +601,10 @@ function PracticeCardActionBar({
           completeDisabled={completeDisabled}
           nextKnown={nextKnown}
           nextRepeat={nextRepeat}
+          nextHard={nextHard}
+          nextGood={nextGood}
+          nextEasy={nextEasy}
+          isReviewPractice={isReviewPractice}
           plusHint={plusHint}
           repeatDisabled={repeatDisabled}
           retryAction={retryAction}

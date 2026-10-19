@@ -303,6 +303,14 @@ vi.mock('@/features/practice/buttons/RepeatButton', () => ({
   ),
 }));
 
+vi.mock('@/features/practice/buttons/ReviewRatingButton', () => ({
+  default: ({ rating, onClick, disabled }: any) => (
+    <button data-testid={`${rating}-btn`} disabled={disabled} onClick={onClick}>
+      {rating}
+    </button>
+  ),
+}));
+
 vi.mock('@/features/practice/buttons/UnknownButton', () => ({
   default: ({ onClick }: any) => (
     <button data-testid="unknown-btn" onClick={onClick}>
@@ -455,7 +463,7 @@ describe('PracticeCard', () => {
 
     act(() => vi.advanceTimersByTime(1));
     expect(screen.getByText('Loading')).toBeTruthy();
-    expect((screen.getByTestId('known-btn') as HTMLButtonElement).disabled).toBe(false);
+    expect((screen.getByTestId('good-btn') as HTMLButtonElement).disabled).toBe(false);
   });
 
   it('returns home from the empty practice state', () => {
@@ -484,12 +492,14 @@ describe('PracticeCard', () => {
     render(<PracticeCard />);
 
     fireEvent.click(screen.getByTestId('repeat-btn'));
-    fireEvent.click(screen.getByTestId('known-btn'));
-    fireEvent.click(screen.getByTestId('master-btn'));
+    fireEvent.click(screen.getByTestId('hard-btn'));
+    fireEvent.click(screen.getByTestId('good-btn'));
+    fireEvent.click(screen.getByTestId('easy-btn'));
 
-    expect(mocks.practiceDeck.nextItem).toHaveBeenNthCalledWith(1, 'incorrect');
-    expect(mocks.practiceDeck.nextItem).toHaveBeenNthCalledWith(2, 'correct');
-    expect(mocks.practiceDeck.nextItem).toHaveBeenNthCalledWith(3, 'skip');
+    expect(mocks.practiceDeck.nextItem).toHaveBeenNthCalledWith(1, 'repeat');
+    expect(mocks.practiceDeck.nextItem).toHaveBeenNthCalledWith(2, 'hard');
+    expect(mocks.practiceDeck.nextItem).toHaveBeenNthCalledWith(3, 'good');
+    expect(mocks.practiceDeck.nextItem).toHaveBeenNthCalledWith(4, 'easy');
   });
 
   it('keeps playback disabled but volume available when audio is not available', () => {

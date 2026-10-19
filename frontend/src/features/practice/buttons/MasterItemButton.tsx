@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
-import ForwardIcon from '@/components/UI/icons/ForwardIcon';
+import SkipIcon from '@/components/UI/icons/SkipIcon';
 
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
@@ -79,7 +79,7 @@ export default function MasterItemButton({ onConfirm, disabled, children }: Mast
 
   return (
     <ControlButton
-      icon={<ForwardIcon />}
+      icon={<SkipIcon />}
       label={TEXTS.complete}
       className="pos-help-top-left"
       onPointerDown={handlePressStart}

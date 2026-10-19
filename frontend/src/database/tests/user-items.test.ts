@@ -271,6 +271,29 @@ describe('UserItem', () => {
     expect(updated.next_at_en_to_cz).not.toBe(item.next_at_en_to_cz);
   });
 
+  it.each([
+    ['repeat', 1],
+    ['hard', 2],
+    ['good', 3],
+    ['easy', 5],
+  ] as const)('applies the %s review rating progress delta', (rating, expectedProgress) => {
+    const item = makeItem({ progress_cz_to_en: 2 });
+    const updated = UserItem.applyPracticeProgress(item, rating, '2026-02-01T00:00:00.000Z');
+
+    expect(updated.progress_cz_to_en).toBe(expectedProgress);
+    expect(updated.mastered_at_cz_to_en).toBe(NULL_DATE);
+  });
+
+  it('does not allow repeat rating to lower progress below zero', () => {
+    const updated = UserItem.applyPracticeProgress(
+      makeItem({ progress_cz_to_en: 0 }),
+      'repeat',
+      '2026-02-01T00:00:00.000Z',
+    );
+
+    expect(updated.progress_cz_to_en).toBe(0);
+  });
+
   it('mirrors initial-training skip mastery and started state to both directions', () => {
     const dateTime = '2026-02-01T00:00:00.000Z';
     const updated = UserItem.applyPracticeProgress(
