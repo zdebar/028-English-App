@@ -77,6 +77,18 @@ export interface UserInfoType {
   picture_url: string | null; // URL to the user's profile picture
 }
 
+export interface UserSettingsType {
+  id: string;
+  max_new_lessons_per_day: number;
+  updated_at: string;
+}
+
+export interface UserLessonType {
+  user_id: string;
+  lesson_id: number;
+  started_at: string;
+}
+
 export interface MetadataType {
   table_name: string; // Name of the table (e.g., "user_items", "grammar")
   user_id: string; // string of the user associated with the data

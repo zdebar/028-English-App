@@ -128,6 +128,7 @@ CREATE POLICY catalog_select_authenticated ON public.topics
 
 REVOKE ALL PRIVILEGES ON TABLE public.users FROM PUBLIC, anon, authenticated;
 GRANT SELECT ON TABLE public.users TO authenticated;
+GRANT UPDATE (max_new_lessons_per_day) ON TABLE public.users TO authenticated;
 
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
@@ -137,6 +138,25 @@ DROP POLICY IF EXISTS users_select_own ON public.users;
 CREATE POLICY users_select_own ON public.users
   FOR SELECT TO authenticated
   USING (id = (SELECT auth.uid()));
+
+DROP POLICY IF EXISTS users_update_own_settings ON public.users;
+CREATE POLICY users_update_own_settings ON public.users
+  FOR UPDATE TO authenticated
+  USING (id = (SELECT auth.uid()) AND public.is_non_demo_user())
+  WITH CHECK (id = (SELECT auth.uid()) AND public.is_non_demo_user());
+
+REVOKE ALL PRIVILEGES ON TABLE public.user_lessons FROM PUBLIC, anon, authenticated;
+GRANT SELECT, INSERT ON TABLE public.user_lessons TO authenticated;
+ALTER TABLE public.user_lessons ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS user_lessons_select_own ON public.user_lessons;
+DROP POLICY IF EXISTS user_lessons_insert_own ON public.user_lessons;
+CREATE POLICY user_lessons_select_own ON public.user_lessons
+  FOR SELECT TO authenticated
+  USING (user_id = (SELECT auth.uid()));
+CREATE POLICY user_lessons_insert_own ON public.user_lessons
+  FOR INSERT TO authenticated
+  WITH CHECK (user_id = (SELECT auth.uid()) AND public.is_non_demo_user());
 
 REVOKE ALL PRIVILEGES ON TABLE
   public.user_items

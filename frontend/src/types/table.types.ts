@@ -4,6 +4,7 @@ export const TableName = {
   GrammarChunks: 'grammar_chunks',
   GrammarChunkExamples: 'grammar_chunk_examples',
   UserItems: 'user_items',
+  UserLessons: 'user_lessons',
   Levels: 'levels',
   Lessons: 'lessons',
   Blocks: 'blocks',

@@ -7,7 +7,7 @@ import {
   type PracticeAvailabilityState,
 } from './use-practice-availability-store';
 import StyledButton from '@/components/UI/buttons/StyledButton';
-import { hasReachedReviewLimit } from './practice-availability';
+import { hasReachedDailyNewLessonLimit, hasReachedReviewLimit } from './practice-availability';
 
 type ReviewKind = 'grammar' | 'vocabulary';
 
@@ -59,10 +59,13 @@ function selectNewDisabled(state: PracticeAvailabilityState): boolean {
   if (state.practiceLoading || state.practiceError) return true;
   if (!selectNewAvailable(state)) return true;
   if (isActiveNew(state.activeSession)) return false;
-  return hasReachedReviewLimit(state);
+  return hasReachedReviewLimit(state) || hasReachedDailyNewLessonLimit(state);
 }
 
 function selectNewTitle(state: PracticeAvailabilityState): string | undefined {
+  if (hasReachedDailyNewLessonLimit(state) && !isActiveNew(state.activeSession)) {
+    return TEXTS.dailyNewLessonLimitReached;
+  }
   return resolveButtonTitle(
     state.practiceLoading,
     state.practiceError,

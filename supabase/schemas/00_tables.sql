@@ -12,6 +12,7 @@ SET search_path TO public;
 
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  max_new_lessons_per_day INTEGER NOT NULL DEFAULT 1 CHECK (max_new_lessons_per_day >= 1),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -77,6 +78,16 @@ CREATE TABLE IF NOT EXISTS lessons (
   CONSTRAINT lessons_level_sort_order_key
     UNIQUE (level_id, sort_order) DEFERRABLE INITIALLY DEFERRED
 );
+
+CREATE TABLE IF NOT EXISTS user_lessons (
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE RESTRICT,
+  started_at TIMESTAMPTZ NOT NULL,
+  PRIMARY KEY (user_id, lesson_id, started_at)
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_lessons_user_started_at
+  ON public.user_lessons (user_id, started_at);
 
 CREATE TABLE IF NOT EXISTS blocks (
   id SERIAL PRIMARY KEY,

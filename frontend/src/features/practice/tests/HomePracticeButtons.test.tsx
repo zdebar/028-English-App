@@ -13,6 +13,7 @@ vi.mock('@/locales/cs', () => ({
     loadingMessage: 'Loading',
     loadingError: 'Loading error',
     nothingToPractice: 'Nothing to practice',
+    dailyNewLessonLimitReached: 'Daily lesson limit reached',
   },
 }));
 vi.mock('@/routing/data-navigation', () => ({

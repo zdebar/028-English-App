@@ -117,11 +117,16 @@ function createItem(itemId: number, audio: string, english: string): UserItemLoc
     block_id: 1,
     grammar_chunk_id: 0,
     progress_cz_to_en: 0,
+    progress_en_to_cz: 0,
+    is_cz_to_en_enabled: true,
+    is_en_to_cz_enabled: true,
     started_at: '2026-01-01',
     updated_at: '2026-01-01',
     deleted_at: '9999-01-01',
     next_at_cz_to_en: '2026-01-01',
     mastered_at_cz_to_en: '9999-01-01',
+    next_at_en_to_cz: '9999-01-01',
+    mastered_at_en_to_cz: '9999-01-01',
     lesson_id: 1,
   };
 }

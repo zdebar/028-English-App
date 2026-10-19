@@ -8,6 +8,8 @@ import type {
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 import { Entity } from 'dexie';
 import type { UserItemLocal } from '@/types/user-item.types';
+import UserLesson from './user-lessons';
+import UserSettings from './user-settings';
 
 export type ActivePracticeSessionState = {
   activeSession: PracticeSessionType | null;
@@ -166,24 +168,49 @@ export default class PracticeSession extends Entity<AppDB> implements PracticeSe
     if (itemIds.length === 0) {
       throw new Error('Initial training requires at least one item.');
     }
-    const existing = await this.getActive(userId);
-    if (existing) return existing;
+    return db.transaction(
+      'rw',
+      db.practice_sessions,
+      db.user_items,
+      db.user_lessons,
+      db.users,
+      async () => {
+        const existing = await this.getActive(userId);
+        if (existing) return existing;
 
-    const session: PracticeSessionType = {
-      user_id: userId,
-      mode: 'new',
-      completed_count: 0,
-      target_count: itemIds.length,
-      block_id: blockId,
-      phase: 0,
-      current_queue_item_ids: itemIds,
-      retry_queue_item_ids: [],
-      completed_item_ids: [],
-      started_at: dateTime,
-      updated_at: dateTime,
-    };
-    await db.practice_sessions.put(session);
-    return session;
+        const items = await db.user_items
+          .where('[user_id+item_id]')
+          .anyOf(itemIds.map((itemId) => [userId, itemId]))
+          .toArray();
+        const lessonId = items[0]?.lesson_id;
+        if (lessonId == null || items.some((item) => item.lesson_id !== lessonId)) {
+          throw new Error('Initial training must contain items from one lesson.');
+        }
+
+        const settings = await UserSettings.getOrCreate(userId);
+        const startedCount = await UserLesson.getStartedCountForToday(userId, new Date(dateTime));
+        if (startedCount >= settings.max_new_lessons_per_day) {
+          throw new Error('Daily new lesson limit reached.');
+        }
+
+        const session: PracticeSessionType = {
+          user_id: userId,
+          mode: 'new',
+          completed_count: 0,
+          target_count: itemIds.length,
+          block_id: blockId,
+          phase: 0,
+          current_queue_item_ids: itemIds,
+          retry_queue_item_ids: [],
+          completed_item_ids: [],
+          started_at: dateTime,
+          updated_at: dateTime,
+        };
+        await db.practice_sessions.put(session);
+        await UserLesson.recordStart(userId, lessonId, dateTime);
+        return session;
+      },
+    );
   }
 
   /** Atomically stores one initial-training answer and advances its session. */

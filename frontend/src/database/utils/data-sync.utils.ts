@@ -17,6 +17,8 @@ import PronunciationGroup from '../models/pronunciation-groups';
 import PronunciationGroupItem from '../models/pronunciation-group-items';
 import GrammarChunkExample from '../models/grammar-chunk-examples';
 import Topic from '../models/topics';
+import UserLesson from '../models/user-lessons';
+import UserSettings from '../models/user-settings';
 import { settleSyncWithAuthRecovery } from './sync-auth-recovery.utils';
 
 /**
@@ -53,6 +55,8 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
     () => PronunciationGroup.syncFromRemote(doFullSync),
     () => PronunciationGroupItem.syncFromRemote(doFullSync),
     () => UserItem.syncFromRemote(userId, doFullSync),
+    () => UserLesson.syncFromRemote(userId, doFullSync),
+    () => UserSettings.syncFromRemote(userId),
   ];
 
   // Keep a parallel list of human-readable table names to report per-table completions.
@@ -69,6 +73,8 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
     'PronunciationGroups',
     'PronunciationGroupItems',
     'UserItems',
+    'UserLessons',
+    'UserSettings',
   ];
 
   const results = await settleSyncWithAuthRecovery(userId, tasks);
@@ -104,7 +110,7 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
 /**
  * Performs a best-effort incremental sync for user-owned tables during unmount.
  *
- * @param userId User id whose user_items rows should sync.
+ * @param userId User id whose personal data should sync.
  * @returns Resolves without syncing when there is no active Supabase session.
  * @throws Error when at least one unmount sync task rejects.
  */
@@ -116,6 +122,8 @@ export async function dataSyncOnUnmount(userId: string): Promise<void> {
 
   const results = await settleSyncWithAuthRecovery(userId, [
     () => UserItem.syncFromRemote(userId, false),
+    () => UserLesson.syncFromRemote(userId, false),
+    () => UserSettings.syncFromRemote(userId),
   ]);
 
   if (results.some((r) => r.status === 'rejected')) {

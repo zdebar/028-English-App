@@ -1,4 +1,6 @@
 import PracticeSession from '@/database/models/practice-sessions';
+import UserLesson from '@/database/models/user-lessons';
+import UserSettings from '@/database/models/user-settings';
 import UserItem from '@/database/models/user-items';
 import config from '@/config/config';
 import type { PracticeSessionType } from '@/types/practice-session.types';
@@ -14,6 +16,8 @@ export type PracticeAvailabilitySnapshot = Readonly<{
   initialTrainingAvailable: boolean;
   activeSession: PracticeSessionType | null;
   requiresSessionReconciliation: boolean;
+  newLessonsStartedTodayCount: number;
+  maxNewLessonsPerDay: number;
 }>;
 
 /** Loads the complete availability snapshot used by the practice actions on Home. */
@@ -21,9 +25,11 @@ export async function loadPracticeAvailabilitySnapshot(
   userId: string,
 ): Promise<PracticeAvailabilitySnapshot> {
   const activeSessionState = await PracticeSession.inspectActive(userId);
-  const [review, nextInitialBlock] = await Promise.all([
+  const [review, nextInitialBlock, settings, newLessonsStartedTodayCount] = await Promise.all([
     loadReviewAvailability(userId),
     getPrefetchedNextInitialBlock(userId, activeSessionState.activeSession),
+    UserSettings.getOrCreate(userId),
+    UserLesson.getStartedCountForToday(userId),
   ]);
 
   return {
@@ -36,7 +42,15 @@ export async function loadPracticeAvailabilitySnapshot(
       activeSessionState.activeSession?.mode === 'new' || nextInitialBlock !== null,
     activeSession: activeSessionState.activeSession,
     requiresSessionReconciliation: activeSessionState.requiresReconciliation,
+    newLessonsStartedTodayCount,
+    maxNewLessonsPerDay: settings.max_new_lessons_per_day,
   };
+}
+
+export function hasReachedDailyNewLessonLimit(
+  availability: Pick<PracticeAvailabilitySnapshot, 'newLessonsStartedTodayCount' | 'maxNewLessonsPerDay'>,
+): boolean {
+  return availability.newLessonsStartedTodayCount >= availability.maxNewLessonsPerDay;
 }
 
 async function loadReviewAvailability(userId: string) {

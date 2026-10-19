@@ -44,7 +44,7 @@ describe('AppDB schema', () => {
   it('declares the complete schema and removes obsolete stores', () => {
     new AppDB();
 
-    expect(mocks.versions).toHaveLength(8);
+    expect(mocks.versions).toHaveLength(9);
     expect(mocks.versions[0]).toMatchObject({
       number: 1,
       schema: {
@@ -107,6 +107,13 @@ describe('AppDB schema', () => {
     expect(mocks.versions[7].schema?.user_items).toContain(
       '[user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]',
     );
+    expect(mocks.versions[8]).toMatchObject({
+      number: 9,
+      schema: {
+        user_lessons: '[user_id+lesson_id+started_at], [user_id+started_at]',
+        users: 'id, updated_at',
+      },
+    });
   });
 
   it('initializes new direction fields while upgrading existing local items', async () => {

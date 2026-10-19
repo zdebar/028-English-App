@@ -16,6 +16,8 @@ import type PronunciationGroupItem from '@/database/models/pronunciation-group-i
 import type GrammarChunkExample from '@/database/models/grammar-chunk-examples';
 import type PracticeSession from '@/database/models/practice-sessions';
 import type Topic from '@/database/models/topics';
+import type UserLesson from '@/database/models/user-lessons';
+import type UserSettings from '@/database/models/user-settings';
 
 const USER_ITEMS_SCHEMA =
   '[user_id+item_id], [user_id+grammar_chunk_id+started_at], [user_id+is_vocabulary+started_at], [user_id+started_at], [user_id+updated_at], [user_id+lesson_id+is_vocabulary+started_at], [user_id+block_id], [user_id+topic_id], [user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path], [user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]';
@@ -44,6 +46,8 @@ export default class AppDB extends Dexie {
   metadata!: EntityTable<Metadata, any>;
   practice_sessions!: EntityTable<PracticeSession, 'user_id'>;
   topics!: EntityTable<Topic, 'id'>;
+  user_lessons!: EntityTable<UserLesson, any>;
+  users!: EntityTable<UserSettings, 'id'>;
 
   constructor() {
     super(config.database.dbName);
@@ -132,5 +136,10 @@ export default class AppDB extends Dexie {
           localItem.is_en_to_cz_enabled ??= true;
         });
       });
+
+    this.version(9).stores({
+      user_lessons: '[user_id+lesson_id+started_at], [user_id+started_at]',
+      users: 'id, updated_at',
+    });
   }
 }

@@ -38,6 +38,8 @@ const snapshot: import('../practice-availability').PracticeAvailabilitySnapshot 
   initialTrainingAvailable: true,
   activeSession: null,
   requiresSessionReconciliation: false,
+  newLessonsStartedTodayCount: 0,
+  maxNewLessonsPerDay: 1,
 };
 
 function deferred<T>() {
