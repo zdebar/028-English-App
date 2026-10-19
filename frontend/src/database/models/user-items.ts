@@ -179,48 +179,30 @@ async function getBlockTrainingSelection(
   };
 }
 
-function getVocabularyTrainingSelection(
+function getAutomaticLessonTrainingSelection(
+  firstItem: UserItemLocal,
   unstartedItems: UserItemLocal[],
-  batchSize: number,
 ): InitialTrainingSelection {
   return {
     blockId: null,
-    items: unstartedItems
-      .filter((item) => item.is_vocabulary === 1 && item.block_id === NULL_NUMBER)
-      .slice(0, batchSize),
+    items: unstartedItems.filter(
+      (item) =>
+        item.block_id === NULL_NUMBER &&
+        item.is_vocabulary === firstItem.is_vocabulary &&
+        item.lesson_id === firstItem.lesson_id,
+    ),
   };
-}
-
-function getGrammarTrainingSelection(
-  firstItem: UserItemLocal,
-  unstartedItems: UserItemLocal[],
-  batchSize: number,
-): InitialTrainingSelection {
-  const items: UserItemLocal[] = [];
-  for (const item of unstartedItems) {
-    const crossesBoundary =
-      item.is_vocabulary !== firstItem.is_vocabulary ||
-      (item.is_vocabulary === 0 && item.lesson_id !== firstItem.lesson_id) ||
-      item.block_id !== NULL_NUMBER;
-    if (crossesBoundary || items.length === batchSize) break;
-    items.push(item);
-  }
-  return { blockId: null, items };
 }
 
 async function resolveInitialTrainingSelection(
   unstartedItems: UserItemLocal[],
-  batchSize: number,
 ): Promise<InitialTrainingSelection | null> {
   const firstItem = unstartedItems[0];
   if (!firstItem) return null;
   if (firstItem.block_id !== NULL_NUMBER) {
     return getBlockTrainingSelection(firstItem, unstartedItems);
   }
-  if (firstItem.is_vocabulary === 1) {
-    return getVocabularyTrainingSelection(unstartedItems, batchSize);
-  }
-  return getGrammarTrainingSelection(firstItem, unstartedItems, batchSize);
+  return getAutomaticLessonTrainingSelection(firstItem, unstartedItems);
 }
 
 /**
@@ -388,14 +370,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   /** Builds the next initial-training queue from unstarted curriculum items. */
   static async getNextInitialTrainingSelection(
     userId: string,
-    batchSize: number = config.practice.initialTrainingBatchSize,
     options: InitialTrainingSelectionOptions = {},
   ): Promise<InitialTrainingSelection | null> {
     assertNonEmptyString(userId, 'userId');
-    if (batchSize <= 0) return null;
-
     const unstartedItems = await getUnstartedItems(userId, options);
-    return resolveInitialTrainingSelection(unstartedItems, batchSize);
+    return resolveInitialTrainingSelection(unstartedItems);
   }
 
   /** Reads initiated items assigned to one topic, ordered by curriculum position. */

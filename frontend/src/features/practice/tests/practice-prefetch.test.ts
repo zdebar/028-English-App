@@ -98,7 +98,6 @@ describe('practice prefetch', () => {
 
     expect(mocks.getSelection).toHaveBeenCalledWith(
       'u1',
-      expect.any(Number),
       {
         excludeBlockId: 7,
         excludeItemIds: [1, 2],

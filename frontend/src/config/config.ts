@@ -45,7 +45,6 @@ const config = {
   },
 
   practice: {
-    initialTrainingBatchSize: 8, // Maximum size of an automatically assembled initial-training batch
     grammarReviewLimitSize: 50, // New training locks only above this grammar review count
     vocabularyReviewLimitSize: 50, // New training locks only above this vocabulary review count
     dailyStartedGoal: 50, // Daily started-item goal shown on the home page

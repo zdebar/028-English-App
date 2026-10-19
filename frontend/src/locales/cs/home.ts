@@ -12,7 +12,7 @@ export const HOME_TEXTS = {
   dailyStartedGoal: 'dnes započato / cíl',
   grammarReviewButton: 'Opakování gramatiky',
   vocabularyReviewButton: 'Opakování slovíček',
-  newButton: 'Nové',
+  newButton: 'Další lekce',
 
   // User
   practiceOverviewTitle: 'Přehled procvičování',

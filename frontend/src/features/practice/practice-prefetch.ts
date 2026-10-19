@@ -1,7 +1,6 @@
 import Block from '@/database/models/blocks';
 import PracticeSession from '@/database/models/practice-sessions';
 import UserItem from '@/database/models/user-items';
-import config from '@/config/config';
 import {
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
@@ -78,7 +77,6 @@ async function loadPreparedInitialBlock(
 ): Promise<PreparedInitialBlock | null> {
   const selection = await UserItem.getNextInitialTrainingSelection(
     userId,
-    config.practice.initialTrainingBatchSize,
     getSelectionOptions(activeSession),
   );
   if (!selection || selection.items.length === 0) return null;

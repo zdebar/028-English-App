@@ -22,7 +22,7 @@ vi.mock('../practice-availability-controller', () => ({
 vi.mock('@/config/config', () => ({
   default: {
     database: { nullReplacementDate: '1970-01-01T00:00:00.000Z' },
-    practice: { initialTrainingBatchSize: 8 },
+    practice: {},
   },
 }));
 vi.mock('@/database/models/practice-sessions', () => ({
@@ -328,11 +328,16 @@ function item(itemId: number) {
     topic_id: -1,
     grammar_chunk_id: 0,
     progress_cz_to_en: 0,
+    progress_en_to_cz: 0,
+    is_cz_to_en_enabled: true,
+    is_en_to_cz_enabled: true,
     started_at: '1970-01-01T00:00:00.000Z',
     updated_at: '2026-01-01',
     deleted_at: '',
     next_at_cz_to_en: '1970-01-01T00:00:00.000Z',
     mastered_at_cz_to_en: '',
+    next_at_en_to_cz: '',
+    mastered_at_en_to_cz: '',
     lesson_id: 1,
   };
 }

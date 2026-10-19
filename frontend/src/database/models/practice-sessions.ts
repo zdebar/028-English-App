@@ -72,8 +72,6 @@ function hasConsistentAutomaticBatch(
 
   const firstItem = items[0];
   if (!firstItem) return false;
-  if (items.length > config.practice.initialTrainingBatchSize) return false;
-
   return items.every(
     (item) =>
       item.lesson_id === firstItem.lesson_id && item.is_vocabulary === firstItem.is_vocabulary,
