@@ -64,14 +64,22 @@ export function Modal({
   }
 
   return createPortal(
-    <div className="z-modal pointer-events-none fixed inset-0 flex items-center justify-center">
+    <div className="z-modal min-[800px]:items:start pointer-events-none fixed inset-0 flex items-center justify-center min-[800px]:pt-[calc(50vh-12rem)]">
       <div className="card-width color-base pointer-events-auto gap-1 pt-4">
         <div className="flex grow flex-col items-center gap-2 p-6 text-center">{children}</div>
         <div className={`flex gap-1 ${actionsLayout === 'vertical' ? 'flex-col' : ''}`}>
-          <StyledButton onClick={handleCancel} disabled={isSubmitting} className="h-button font-bold">
+          <StyledButton
+            onClick={handleCancel}
+            disabled={isSubmitting}
+            className="h-button font-bold"
+          >
             {cancelLabel}
           </StyledButton>
-          <StyledButton onClick={handleConfirm} disabled={isSubmitting} className="h-button font-bold">
+          <StyledButton
+            onClick={handleConfirm}
+            disabled={isSubmitting}
+            className="h-button font-bold"
+          >
             {confirmLabel}
           </StyledButton>
         </div>
