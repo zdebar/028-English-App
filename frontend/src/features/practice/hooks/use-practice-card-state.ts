@@ -1,4 +1,5 @@
 import { useAudioManager } from '@/features/audio/use-audio-manager';
+import { reportError } from '@/features/logging/monitoring-handler';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from 'react';
 import { NBSP, useHint } from './use-hint';
@@ -62,9 +63,11 @@ function playAudioForHiddenPhase(
   isEnToCz: boolean,
   stage: number,
   audio: string | null | undefined,
-  playAudio: () => void,
+  playAudio: () => Promise<boolean>,
 ): void {
-  if (shouldAutoPlayAudio(isEnToCz, stage, audio)) void playAudio();
+  if (shouldAutoPlayAudio(isEnToCz, stage, audio)) {
+    playAudio().catch((error: unknown) => reportError('Failed to play practice audio', error));
+  }
 }
 
 function skipFailedAudioPhase(
@@ -86,7 +89,7 @@ function revealPracticeCard(
   stage: number,
   revealed: boolean,
   audioError: boolean,
-  playAudio: () => void,
+  playAudio: () => Promise<boolean>,
   setStage: (stage: number) => void,
   setRevealed: Dispatch<SetStateAction<boolean>>,
 ): void {
@@ -96,21 +99,34 @@ function revealPracticeCard(
     return;
   }
   if (revealStage === 'ignore') return;
-  if (!isEnToCz && !audioError) void playAudio();
+  if (!isEnToCz && !audioError) {
+    playAudio().catch((error: unknown) => reportError('Failed to play practice audio', error));
+  }
   setRevealed(true);
   setStage(2);
 }
 
-function usePracticeAudioPhases(
-  currentItem: UserItemLocal | null,
-  isEnToCz: boolean,
-  stage: number,
-  audioError: boolean,
-  playAudio: () => void,
-  setStage: (stage: number) => void,
-  isCompletion: boolean,
-  stopAudio: () => void,
-): void {
+type PracticeAudioPhasesOptions = {
+  currentItem: UserItemLocal | null;
+  isEnToCz: boolean;
+  stage: number;
+  audioError: boolean;
+  playAudio: () => Promise<boolean>;
+  setStage: (stage: number) => void;
+  isCompletion: boolean;
+  stopAudio: () => void;
+};
+
+function usePracticeAudioPhases({
+  currentItem,
+  isEnToCz,
+  stage,
+  audioError,
+  playAudio,
+  setStage,
+  isCompletion,
+  stopAudio,
+}: PracticeAudioPhasesOptions): void {
   useEffect(() => {
     setStage(getInitialStage(currentItem));
   }, [currentItem?.item_id, currentItem?.review_direction, currentItem?.audio, setStage]);
@@ -149,16 +165,16 @@ export function usePracticeCardState({
   } = useAudioManager(currentItem?.audio ?? null);
 
   const audioDisabled = isPracticeAudioDisabled(revealed, currentItem, audioError);
-  usePracticeAudioPhases(
+  usePracticeAudioPhases({
     currentItem,
     isEnToCz,
-    enToCzStage,
+    stage: enToCzStage,
     audioError,
-    playAudioInternal,
-    setEnToCzStage,
+    playAudio: playAudioInternal,
+    setStage: setEnToCzStage,
     isCompletion,
     stopAudio,
-  );
+  });
 
   const czech = getPracticeCzech(currentItem, isEnToCz, enToCzStage);
   const english = getPracticeEnglish(currentItem, isEnToCz, enToCzStage, revealed, englishHinted);

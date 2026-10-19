@@ -7,7 +7,7 @@ import {
   useState,
 } from 'react';
 import type { PracticeDeckEntry, PracticeOutcome, UserItemLocal } from '@/types/user-item.types';
-import type { ReviewKind } from '@/types/practice.types';
+import type { ReviewDirection, ReviewKind } from '@/types/practice.types';
 import { useFetch } from '@/hooks/use-fetch';
 import UserItem from '@/database/models/user-items';
 import { reportError } from '@/features/logging/monitoring-handler';
@@ -31,7 +31,6 @@ import {
   type ReviewDeckData,
 } from '@/database/utils/practice-content.utils';
 import type { PracticeDetail } from '../PracticeSessionCard';
-import type { ReviewDirection } from '@/types/practice.types';
 
 type SecondaryContentRequest = Readonly<{
   userId: string;
@@ -62,17 +61,29 @@ async function loadNextDirectionDeck(
   return null;
 }
 
-function startDirectionDeck(
-  deck: ReviewDeckData,
-  queueRef: MutableRef<ReviewQueue | null>,
-  dataRef: MutableRef<ReviewDeckData | null>,
-  directionRef: MutableRef<ReviewDirection>,
-  update: (queue: ReviewQueue) => void,
-  setFinishedReview: (finished: boolean) => void,
-  setRetryAction: (action: ReviewRetryAction | null) => void,
-  setQueueVersion: (update: (version: number) => number) => void,
-  resetQuestionState: () => void,
-): void {
+type StartDirectionDeckOptions = {
+  deck: ReviewDeckData;
+  queueRef: MutableRef<ReviewQueue | null>;
+  dataRef: MutableRef<ReviewDeckData | null>;
+  directionRef: MutableRef<ReviewDirection>;
+  update: (queue: ReviewQueue) => void;
+  setFinishedReview: (finished: boolean) => void;
+  setRetryAction: (action: ReviewRetryAction | null) => void;
+  setQueueVersion: (update: (version: number) => number) => void;
+  resetQuestionState: () => void;
+};
+
+function startDirectionDeck({
+  deck,
+  queueRef,
+  dataRef,
+  directionRef,
+  update,
+  setFinishedReview,
+  setRetryAction,
+  setQueueVersion,
+  resetQuestionState,
+}: StartDirectionDeckOptions): void {
   const nextQueue = createReviewQueue(getReviewQueueEntries(deck), deck.reviewKind);
   directionRef.current = deck.reviewDirection;
   dataRef.current = deck;
@@ -366,12 +377,12 @@ export function usePracticeDeck(
 
       const nextDeck = await loadNextDirectionDeck(userId ?? '', queue.reviewKind, activeDirectionRef.current);
       if (nextDeck) {
-        startDirectionDeck(
-          nextDeck,
-          reviewQueueRef,
-          queueDataRef,
-          activeDirectionRef,
-          (nextQueue) => {
+        startDirectionDeck({
+          deck: nextDeck,
+          queueRef: reviewQueueRef,
+          dataRef: queueDataRef,
+          directionRef: activeDirectionRef,
+          update: (nextQueue) => {
             setCompletedCount(nextQueue.completedCount);
             setTotalCount(nextQueue.sessionTotalCount);
           },
@@ -379,7 +390,7 @@ export function usePracticeDeck(
           setRetryAction,
           setQueueVersion,
           resetQuestionState,
-        );
+        });
         return;
       }
       await completePractice();
@@ -466,6 +477,7 @@ function createEmptyReviewDeck(reviewKind: ReviewKind): ReviewDeckData {
     availabilityCheckedAt: new Date().toISOString(),
     abandoned: true,
     reviewKind,
+    reviewDirection: 'cz_to_en',
   };
 }
 

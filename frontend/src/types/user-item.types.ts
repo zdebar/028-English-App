@@ -1,5 +1,6 @@
 import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
 import type { NoteType } from './generic.types';
+import type { ReviewDirection } from './practice.types';
 
 export type PracticeOutcome = 'correct' | 'incorrect' | 'skip';
 
@@ -28,6 +29,8 @@ export interface UserItemBase {
 }
 
 export interface UserItemLocal extends UserItemBase {
+  /** Set only on transient practice entries to identify the active review direction. */
+  review_direction?: ReviewDirection;
   is_vocabulary: 0 | 1;
   block_id: number;
   topic_id: number;
@@ -41,7 +44,7 @@ export interface UserItemLocal extends UserItemBase {
   curriculum_sort_path: CurriculumSortPath;
 }
 
-export type PracticeDeckItem = UserItemLocal & { review_direction?: import('./practice.types').ReviewDirection };
+export type PracticeDeckItem = UserItemLocal;
 
 export type ResolvedPracticeEntry<T extends UserItemLocal> = Readonly<{
   item: T;

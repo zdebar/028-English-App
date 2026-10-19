@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   resetHint: vi.fn(),
   rebuildReviewArrays: vi.fn(),
   syncReviewItemToCache: vi.fn(),
+  loadReviewDeckData: vi.fn(),
   fetchData: null as ReviewDeckData | null,
 }));
 
@@ -20,6 +21,7 @@ type ReviewDeckData = {
   availabilityCheckedAt: string;
   abandoned: boolean;
   reviewKind: 'grammar' | 'vocabulary';
+  reviewDirection: 'cz_to_en' | 'en_to_cz';
 };
 
 vi.mock('../practice-availability-controller', () => ({
@@ -52,7 +54,7 @@ vi.mock('@/database/models/user-items', () => ({
 }));
 
 vi.mock('@/database/utils/practice-content.utils', () => ({
-  loadReviewDeckData: vi.fn(),
+  loadReviewDeckData: (...args: unknown[]) => mocks.loadReviewDeckData(...args),
   loadReviewEntryDetails: (...args: unknown[]) => mocks.loadReviewEntryDetails(...args),
 }));
 
@@ -96,6 +98,7 @@ describe('usePracticeDeck', () => {
     mocks.savePracticeDeck.mockResolvedValue(undefined);
     mocks.rebuildReviewArrays.mockResolvedValue(undefined);
     mocks.syncReviewItemToCache.mockResolvedValue(undefined);
+    mocks.loadReviewDeckData.mockResolvedValue(reviewDeckResult([]));
   });
 
   it('saves each answered card while advancing to the next card', async () => {
@@ -254,6 +257,7 @@ describe('usePracticeDeck', () => {
         availabilityCheckedAt: '2026-06-24T11:00:00.000Z',
         abandoned: true,
         reviewKind: 'vocabulary',
+        reviewDirection: 'cz_to_en',
       };
     });
     const { result } = renderHook(() => usePracticeDeck('u1'));
@@ -290,6 +294,7 @@ describe('usePracticeDeck', () => {
       availabilityCheckedAt: '2026-06-24T11:00:00.000Z',
       abandoned: true,
       reviewKind: 'vocabulary',
+      reviewDirection: 'cz_to_en',
     };
     await act(async () => {
       resolveSave();
@@ -345,6 +350,7 @@ function reviewDeckResult(entries: PracticeDeckEntry[]): ReviewDeckData {
     availabilityCheckedAt: '2026-06-24T10:00:00.000Z',
     abandoned: false,
     reviewKind: 'vocabulary',
+    reviewDirection: 'cz_to_en',
   };
 }
 
@@ -353,6 +359,10 @@ function entry(itemId: number, grammarChunkId = 0): PracticeDeckEntry {
     item: {
       user_id: 'u1',
       item_id: itemId,
+      review_direction: 'cz_to_en',
+      progress_en_to_cz: 0,
+      is_cz_to_en_enabled: true,
+      is_en_to_cz_enabled: true,
       czech: 'ahoj',
       czech_description: null,
       english: 'hello',
@@ -371,6 +381,8 @@ function entry(itemId: number, grammarChunkId = 0): PracticeDeckEntry {
       deleted_at: '9999-01-01',
       next_at_cz_to_en: '2026-01-01',
       mastered_at_cz_to_en: '9999-01-01',
+      next_at_en_to_cz: '2026-01-01',
+      mastered_at_en_to_cz: '9999-01-01',
       lesson_id: 1,
     },
     note: null,

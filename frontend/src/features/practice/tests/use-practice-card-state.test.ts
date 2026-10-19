@@ -32,7 +32,10 @@ function useTestCard(currentItem: UserItemLocal | null = item, isCompletion = fa
 }
 
 describe('usePracticeCardState', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    playAudioMock.mockResolvedValue(true);
+  });
 
   it('reveals the English answer and plays Czech-to-English audio', () => {
     const { result } = renderHook(() => useTestCard());
