@@ -1,4 +1,5 @@
 import ForwardIcon from '@/components/UI/icons/ForwardIcon';
+import ChevronRightIcon from '@/components/UI/icons/ChevronRightIcon';
 import TripleChevronIcon from '@/components/UI/icons/TripleChevronIcon';
 import { TEXTS } from '@/locales/cs';
 import ControlButton from './ControlButton';
@@ -19,8 +20,8 @@ const RATING_LABELS = {
 
 function getRatingIcon(rating: ReviewRating) {
   if (rating === 'good') return <ForwardIcon />;
-  if (rating === 'hard') return <TripleChevronIcon direction="left" />;
-  return <TripleChevronIcon direction="right" />;
+  if (rating === 'hard') return <TripleChevronIcon />;
+  return <ChevronRightIcon />;
 }
 
 export default function ReviewRatingButton({ rating, onClick, disabled }: ReviewRatingButtonProps) {
