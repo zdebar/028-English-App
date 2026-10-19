@@ -8,7 +8,6 @@ import type {
   UserItemLocal,
   CurriculumSortPath,
   InitialTrainingSelection,
-  InitialTrainingSelectionOptions,
 } from '@/types/user-item.types';
 import type { ReviewDirection, ReviewKind } from '@/types/practice.types';
 import { TableName } from '@/types/table.types';
@@ -143,11 +142,7 @@ function replaceNullNumber(value: number | null): number {
   return value ?? NULL_NUMBER;
 }
 
-async function getUnstartedItems(
-  userId: string,
-  options: InitialTrainingSelectionOptions,
-): Promise<UserItemLocal[]> {
-  const excludedItemIds = new Set(options.excludeItemIds ?? []);
+async function getUnstartedItems(userId: string): Promise<UserItemLocal[]> {
   const items = await db.user_items.where('user_id').equals(userId).toArray();
   return items
     .filter(
@@ -155,8 +150,7 @@ async function getUnstartedItems(
         item.deleted_at === NULL_DATE &&
         item.is_cz_to_en_enabled !== false &&
         item.started_at === NULL_DATE &&
-        !isInitialTrainingSkipped(item) &&
-        !excludedItemIds.has(item.item_id),
+        !isInitialTrainingSkipped(item),
     )
     .sort((left, right) =>
       compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path),
@@ -329,10 +323,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   /** Builds the next initial-training queue from unstarted curriculum items. */
   static async getNextInitialTrainingSelection(
     userId: string,
-    options: InitialTrainingSelectionOptions = {},
   ): Promise<InitialTrainingSelection | null> {
     assertNonEmptyString(userId, 'userId');
-    const unstartedItems = await getUnstartedItems(userId, options);
+    const unstartedItems = await getUnstartedItems(userId);
     return resolveInitialTrainingSelection(unstartedItems);
   }
 
@@ -713,6 +706,23 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       return applyInitialTrainingProgress(item, outcome, dateTime);
     }
     return applyReviewProgress(item, outcome, dateTime, options.direction ?? 'cz_to_en');
+  }
+
+  /** Persists the mirrored progress produced by one answer in initial training. */
+  static async saveInitialTrainingProgress(item: UserItemLocal): Promise<void> {
+    await db.transaction('rw', db.user_items, async () => {
+      const updatedCount = await db.user_items.update([item.user_id, item.item_id], {
+        progress_cz_to_en: item.progress_cz_to_en,
+        next_at_cz_to_en: item.next_at_cz_to_en,
+        mastered_at_cz_to_en: item.mastered_at_cz_to_en,
+        progress_en_to_cz: item.progress_en_to_cz,
+        next_at_en_to_cz: item.next_at_en_to_cz,
+        mastered_at_en_to_cz: item.mastered_at_en_to_cz,
+        started_at: item.started_at,
+        updated_at: item.updated_at,
+      });
+      if (updatedCount !== 1) throw new Error('The trained item no longer exists locally.');
+    });
   }
 }
 

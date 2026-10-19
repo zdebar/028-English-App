@@ -1,9 +1,7 @@
-import PracticeSession from '@/database/models/practice-sessions';
 import UserLesson from '@/database/models/user-lessons';
 import UserSettings from '@/database/models/user-settings';
 import UserItem from '@/database/models/user-items';
 import config from '@/config/config';
-import type { PracticeSessionType } from '@/types/practice-session.types';
 import { loadReviewAvailabilityFromArrays } from './review-prefetch';
 import { getPrefetchedNextInitialLesson } from './practice-prefetch';
 
@@ -14,8 +12,8 @@ export type PracticeAvailabilitySnapshot = Readonly<{
   vocabularyReviewDueCount: number;
   nextReviewAt: string | null;
   initialTrainingAvailable: boolean;
-  activeSession: PracticeSessionType | null;
-  requiresSessionReconciliation: boolean;
+  continuingInitialLessonToday: boolean;
+  dailyNewLessonLimitReached: boolean;
   newLessonsStartedTodayCount: number;
   maxNewLessonsPerDay: number;
 }>;
@@ -24,13 +22,20 @@ export type PracticeAvailabilitySnapshot = Readonly<{
 export async function loadPracticeAvailabilitySnapshot(
   userId: string,
 ): Promise<PracticeAvailabilitySnapshot> {
-  const activeSessionState = await PracticeSession.inspectActive(userId);
   const [review, nextInitialLesson, settings, newLessonsStartedTodayCount] = await Promise.all([
     loadReviewAvailability(userId),
-    getPrefetchedNextInitialLesson(userId, activeSessionState.activeSession),
+    getPrefetchedNextInitialLesson(userId),
     UserSettings.getOrCreate(userId),
     UserLesson.getStartedCountForToday(userId),
   ]);
+  const nextLessonStartedToday = nextInitialLesson?.lesson
+    ? await UserLesson.hasStartedToday(userId, nextInitialLesson.lesson.id)
+    : false;
+  const dailyNewLessonLimitReached =
+    nextInitialLesson !== null && hasReachedDailyNewLessonLimit({
+      newLessonsStartedTodayCount,
+      maxNewLessonsPerDay: settings.max_new_lessons_per_day,
+    }) && !nextLessonStartedToday;
 
   return {
     grammarReviewReadyAt: review.grammarReviewReadyAt,
@@ -38,10 +43,9 @@ export async function loadPracticeAvailabilitySnapshot(
     grammarReviewDueCount: review.grammarReviewDueCount,
     vocabularyReviewDueCount: review.vocabularyReviewDueCount,
     nextReviewAt: review.nextReviewAt,
-    initialTrainingAvailable:
-      activeSessionState.activeSession?.mode === 'new' || nextInitialLesson !== null,
-    activeSession: activeSessionState.activeSession,
-    requiresSessionReconciliation: activeSessionState.requiresReconciliation,
+    initialTrainingAvailable: nextInitialLesson !== null,
+    continuingInitialLessonToday: nextLessonStartedToday,
+    dailyNewLessonLimitReached,
     newLessonsStartedTodayCount,
     maxNewLessonsPerDay: settings.max_new_lessons_per_day,
   };

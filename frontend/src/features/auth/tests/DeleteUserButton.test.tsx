@@ -8,7 +8,6 @@ const mocks = vi.hoisted(() => ({
   clearTheme: vi.fn(),
   saveCurrentThemeAsGuest: vi.fn(),
   deleteAllByUserId: vi.fn(),
-  deletePracticeSession: vi.fn(),
   deleteUserLessons: vi.fn(),
   deleteUserSettings: vi.fn(),
   deleteSyncRow: vi.fn(),
@@ -58,11 +57,6 @@ vi.mock('@/database/models/metadata', () => ({
   },
 }));
 
-vi.mock('@/database/models/practice-sessions', () => ({
-  default: {
-    deleteByUserId: (...args: unknown[]) => mocks.deletePracticeSession(...args),
-  },
-}));
 
 vi.mock('@/database/models/user-lessons', () => ({
   default: { removeByUserId: (...args: unknown[]) => mocks.deleteUserLessons(...args) },
@@ -121,7 +115,6 @@ describe('DeleteUserButton', () => {
 
     mocks.rpc.mockResolvedValue({ error: null });
     mocks.deleteAllByUserId.mockResolvedValue(0);
-    mocks.deletePracticeSession.mockResolvedValue(undefined);
     mocks.deleteSyncRow.mockResolvedValue(true);
     mocks.clearTheme.mockResolvedValue(undefined);
     mocks.saveCurrentThemeAsGuest.mockReturnValue(undefined);
@@ -166,7 +159,6 @@ describe('DeleteUserButton', () => {
     });
     expect(mocks.deleteAllByUserId).not.toHaveBeenCalled();
     expect(mocks.deleteSyncRow).not.toHaveBeenCalled();
-    expect(mocks.deletePracticeSession).not.toHaveBeenCalled();
     expect(mocks.handleLogout).not.toHaveBeenCalled();
     expect(mocks.saveCurrentThemeAsGuest).not.toHaveBeenCalled();
   });

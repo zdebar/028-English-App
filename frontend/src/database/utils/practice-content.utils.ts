@@ -1,6 +1,5 @@
 import { db } from '@/database/models/db';
 import GrammarChunk, { type GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
-import PracticeSession from '@/database/models/practice-sessions';
 import UserItem from '@/database/models/user-items';
 import { reportError } from '@/features/logging/monitoring-handler';
 import type { GrammarGroupType, NoteType } from '@/types/generic.types';
@@ -157,8 +156,6 @@ export async function loadReviewDeckData(
   reviewKind: ReviewKind,
   reviewDirection?: ReviewDirection,
 ): Promise<ReviewDeckData> {
-  await PracticeSession.reconcileActive(userId);
-
   const now = new Date().toISOString();
   const allowDirectionFallback = reviewDirection === undefined;
   let selectedDirection = reviewDirection ?? 'cz_to_en';

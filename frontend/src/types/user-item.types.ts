@@ -57,7 +57,3 @@ export type InitialTrainingSelection = Readonly<{
   lessonId: number;
   items: UserItemLocal[];
 }>;
-
-export type InitialTrainingSelectionOptions = Readonly<{
-  excludeItemIds?: readonly number[];
-}>;

@@ -1,10 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { PracticeSessionType } from '@/types/practice-session.types';
 
 const mocks = vi.hoisted(() => ({
   getSelection: vi.fn(),
   getLesson: vi.fn(),
-  inspectActive: vi.fn(),
   resolveEntries: vi.fn(),
   resolveGrammarContext: vi.fn(),
   warmReviewArrays: vi.fn().mockResolvedValue(undefined),
@@ -19,9 +17,6 @@ vi.mock('@/database/models/user-items', () => ({
 }));
 vi.mock('@/database/models/lessons', () => ({
   default: { getById: (...args: unknown[]) => mocks.getLesson(...args) },
-}));
-vi.mock('@/database/models/practice-sessions', () => ({
-  default: { inspectActive: (...args: unknown[]) => mocks.inspectActive(...args) },
 }));
 vi.mock('@/database/utils/practice-content.utils', () => ({
   resolvePracticeEntries: (...args: unknown[]) => mocks.resolveEntries(...args),
@@ -52,10 +47,6 @@ describe('practice prefetch', () => {
       grammar: null,
       grammarGroup: null,
     });
-    mocks.inspectActive.mockResolvedValue({
-      activeSession: null,
-      requiresReconciliation: false,
-    });
   });
 
   it('deduplicates concurrent review and initial prefetch work', async () => {
@@ -68,8 +59,8 @@ describe('practice prefetch', () => {
       return selection(7);
     });
 
-    const first = getPrefetchedNextInitialLesson('u1', null);
-    const second = getPrefetchedNextInitialLesson('u1', null);
+    const first = getPrefetchedNextInitialLesson('u1');
+    const second = getPrefetchedNextInitialLesson('u1');
 
     release();
     const [firstLesson, secondLesson] = await Promise.all([first, second]);
@@ -80,7 +71,7 @@ describe('practice prefetch', () => {
   });
 
   it('returns the prepared lesson with resolved practice content', async () => {
-    const prepared = await getPrefetchedNextInitialLesson('u1', null);
+    const prepared = await getPrefetchedNextInitialLesson('u1');
 
     expect(prepared).toMatchObject({
       lesson: { id: 7, grammar_chunk_id: 4 },
@@ -92,35 +83,23 @@ describe('practice prefetch', () => {
     expect(mocks.getLesson).toHaveBeenCalledWith(7);
   });
 
-  it('excludes the active session item ids but allows newly added lesson items', async () => {
-    const activeSession = activeSessionFixture();
-    await getPrefetchedNextInitialLesson('u1', activeSession);
+  it('selects from currently unstarted items without persistent session exclusions', async () => {
+    const prepared = await getPrefetchedNextInitialLesson('u1');
 
-    expect(mocks.getSelection).toHaveBeenCalledWith(
-      'u1',
-      {
-        excludeItemIds: [1, 2],
-      },
-    );
-  });
-
-  it('reuses the prepared lesson after the active initial session is removed', async () => {
-    const activeSession = activeSessionFixture();
-    const prepared = await getPrefetchedNextInitialLesson('u1', activeSession);
-
-    await expect(getPrefetchedNextInitialLesson('u1', null)).resolves.toBe(prepared);
+    await expect(getPrefetchedNextInitialLesson('u1')).resolves.toBe(prepared);
     expect(mocks.getSelection).toHaveBeenCalledOnce();
+    expect(mocks.getSelection).toHaveBeenCalledWith('u1');
   });
 
   it('returns null for an invalid lesson and reloads after invalidation', async () => {
     mocks.getLesson.mockResolvedValueOnce(null);
-    await expect(getPrefetchedNextInitialLesson('u1', null)).resolves.toBeNull();
+    await expect(getPrefetchedNextInitialLesson('u1')).resolves.toBeNull();
 
     mocks.getLesson.mockResolvedValue({ id: 8, grammar_chunk_id: 0 });
     mocks.getSelection.mockResolvedValue(selection(8));
     invalidateNextInitialLesson('u1');
 
-    await expect(getPrefetchedNextInitialLesson('u1', null)).resolves.toMatchObject({
+    await expect(getPrefetchedNextInitialLesson('u1')).resolves.toMatchObject({
       lesson: { id: 8 },
     });
     expect(mocks.getSelection).toHaveBeenCalledTimes(2);
@@ -136,21 +115,5 @@ function selection(lessonId: number) {
   return {
     lessonId,
     items: [{ item_id: 1, grammar_chunk_id: 4 } satisfies Item],
-  };
-}
-
-function activeSessionFixture(): PracticeSessionType {
-  return {
-    user_id: 'u1',
-    mode: 'new',
-    completed_count: 0,
-    target_count: 2,
-    lesson_id: 7,
-    phase: 0,
-    current_queue_item_ids: [1],
-    retry_queue_item_ids: [],
-    completed_item_ids: [2],
-    started_at: '2026-01-01T00:00:00.000Z',
-    updated_at: '2026-01-01T00:00:00.000Z',
   };
 }

@@ -2,14 +2,11 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  reconcileActive: vi.fn(),
-  startNew: vi.fn(),
-  put: vi.fn(),
-  recordInitialTrainingAnswer: vi.fn(),
+  startLesson: vi.fn(),
+  saveInitialTrainingProgress: vi.fn(),
   applyPracticeProgress: vi.fn(),
   syncReviewItemToCache: vi.fn(),
   invalidateNextInitialLesson: vi.fn(),
-  warmPracticeCache: vi.fn().mockResolvedValue(undefined),
   resetQuestionState: vi.fn(),
   renderStates: [] as Array<{ itemId: number | null; revealed: boolean }>,
   transitionEvents: [] as string[],
@@ -25,18 +22,14 @@ vi.mock('@/config/config', () => ({
     practice: {},
   },
 }));
-vi.mock('@/database/models/practice-sessions', () => ({
-  default: {
-    reconcileActive: (...args: unknown[]) => mocks.reconcileActive(...args),
-    startNew: (...args: unknown[]) => mocks.startNew(...args),
-    put: (...args: unknown[]) => mocks.put(...args),
-    recordInitialTrainingAnswer: (...args: unknown[]) => mocks.recordInitialTrainingAnswer(...args),
-  },
+vi.mock('@/database/models/user-lessons', () => ({
+  default: { startIfAllowed: (...args: unknown[]) => mocks.startLesson(...args) },
 }));
 vi.mock('@/database/models/lessons', () => ({ default: { getById: vi.fn() } }));
 vi.mock('@/database/models/user-items', () => ({
   default: {
     savePracticeDeck: vi.fn(),
+    saveInitialTrainingProgress: (...args: unknown[]) => mocks.saveInitialTrainingProgress(...args),
     applyPracticeProgress: (...args: unknown[]) => mocks.applyPracticeProgress(...args),
   },
 }));
@@ -73,7 +66,6 @@ vi.mock('../review-prefetch', () => ({
 }));vi.mock('../practice-prefetch', () => ({
   getPrefetchedNextInitialLesson: vi.fn(),
   invalidateNextInitialLesson: (...args: unknown[]) => mocks.invalidateNextInitialLesson(...args),
-  warmPracticeCache: (...args: unknown[]) => mocks.warmPracticeCache(...args),
 }));
 
 import { useInitialTrainingDeck } from '../hooks/use-initial-training-deck';
@@ -102,10 +94,8 @@ describe('useInitialTrainingDeck', () => {
     vi.clearAllMocks();
     mocks.renderStates.length = 0;
     mocks.transitionEvents.length = 0;
-    mocks.reconcileActive.mockResolvedValue(null);
-    mocks.startNew.mockResolvedValue(newSession());
-    mocks.put.mockResolvedValue(undefined);
-    mocks.recordInitialTrainingAnswer.mockResolvedValue(undefined);
+    mocks.startLesson.mockResolvedValue(true);
+    mocks.saveInitialTrainingProgress.mockResolvedValue(undefined);
     mocks.syncReviewItemToCache.mockResolvedValue(undefined);
     mocks.applyPracticeProgress.mockImplementation((item) => ({
       ...item,
@@ -116,16 +106,9 @@ describe('useInitialTrainingDeck', () => {
   it('starts the first ordered phase and persists progress after each answer', async () => {
     const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
-    expect(mocks.startNew).toHaveBeenCalledWith('u1', 1, [1, 2]);
+    expect(mocks.startLesson).toHaveBeenCalledWith('u1', 1, [1, 2]);
     await act(async () => result.current.nextKnown());
-    expect(mocks.recordInitialTrainingAnswer).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        phase: 0,
-        current_queue_item_ids: [2],
-        completed_item_ids: [1],
-      }),
-    );
+    expect(mocks.saveInitialTrainingProgress).toHaveBeenCalledWith(expect.objectContaining({ item_id: 1 }));
     expect(mocks.applyPracticeProgress).toHaveBeenCalledWith(
       expect.anything(),
       'correct',
@@ -162,7 +145,7 @@ describe('useInitialTrainingDeck', () => {
 
     await waitFor(() => expect(result.current.isComplete).toBe(true));
     expect(result.current.progressLabel).toBe('2/2');
-    expect(mocks.recordInitialTrainingAnswer).toHaveBeenCalledTimes(2);
+    expect(mocks.saveInitialTrainingProgress).toHaveBeenCalledTimes(2);
   });
 
   it('retries incorrect items before completing the phase', async () => {
@@ -177,36 +160,7 @@ describe('useInitialTrainingDeck', () => {
 
     await act(async () => result.current.nextKnown());
     await waitFor(() => expect(result.current.isComplete).toBe(true));
-    expect(mocks.recordInitialTrainingAnswer).toHaveBeenCalledTimes(3);
-  });
-
-  it('restores the active phase without changing its saved queue', async () => {
-    mocks.reconcileActive.mockResolvedValue({
-      ...newSession(),
-      current_queue_item_ids: [2, 1],
-      completed_item_ids: [],
-    });
-    const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
-    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(2));
-    expect(result.current.hasProgress).toBe(false);
-  });
-
-  it('shows the single-phase count and enters neutral completion', async () => {
-    mocks.reconcileActive.mockResolvedValue({
-      ...newSession(),
-      completed_count: 1,
-      current_queue_item_ids: [1],
-      completed_item_ids: [2],
-    });
-    const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
-    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
-
-    act(() => {
-      void result.current.nextKnown();
-    });
-
-    await waitFor(() => expect(result.current.isComplete).toBe(true));
-    expect(result.current.progressLabel).toBe('2/2');
+    expect(mocks.saveInitialTrainingProgress).toHaveBeenCalledTimes(3);
   });
 
   it('passes the initial-training skip option for CZ-to-EN', async () => {
@@ -224,14 +178,8 @@ describe('useInitialTrainingDeck', () => {
   });
 
   it('keeps the final card visible while completion is being persisted', async () => {
-    mocks.reconcileActive.mockResolvedValue({
-      ...newSession(),
-      completed_count: 1,
-      current_queue_item_ids: [1],
-      completed_item_ids: [2],
-    });
     let resolveCompletion!: (value: number) => void;
-    mocks.recordInitialTrainingAnswer.mockReturnValue(
+    mocks.saveInitialTrainingProgress.mockReturnValue(
       new Promise((resolve) => {
         resolveCompletion = resolve;
       }),
@@ -248,11 +196,7 @@ describe('useInitialTrainingDeck', () => {
     });
     expect(result.current.isComplete).toBe(false);
     expect(result.current.currentItem?.item_id).toBe(1);
-    expect(mocks.recordInitialTrainingAnswer).toHaveBeenCalledWith(
-      expect.anything(),
-      null,
-      expect.objectContaining({ mode: 'new', phase: 0 }),
-    );
+    expect(mocks.saveInitialTrainingProgress).toHaveBeenCalledOnce();
 
     await act(async () => {
       resolveCompletion(1);
@@ -260,22 +204,11 @@ describe('useInitialTrainingDeck', () => {
     });
 
     await waitFor(() => expect(result.current.isComplete).toBe(true));
-    expect(mocks.recordInitialTrainingAnswer).toHaveBeenCalledWith(
-      expect.anything(),
-      null,
-      expect.objectContaining({ mode: 'new', phase: 0 }),
-    );
     unmount();
   });
 
   it('keeps the final card and allows retry when completion persistence fails', async () => {
-    mocks.reconcileActive.mockResolvedValue({
-      ...newSession(),
-      completed_count: 1,
-      current_queue_item_ids: [1],
-      completed_item_ids: [2],
-    });
-    mocks.recordInitialTrainingAnswer
+    mocks.saveInitialTrainingProgress
       .mockRejectedValueOnce(new Error('completion failed'))
       .mockResolvedValueOnce(undefined);
     const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
@@ -291,26 +224,10 @@ describe('useInitialTrainingDeck', () => {
     await act(async () => result.current.nextKnown());
 
     await waitFor(() => expect(result.current.isComplete).toBe(true));
-    expect(mocks.recordInitialTrainingAnswer).toHaveBeenCalledTimes(2);
+    expect(mocks.saveInitialTrainingProgress).toHaveBeenCalledTimes(2);
     expect(mocks.syncReviewItemToCache).toHaveBeenCalledOnce();
   });
 });
-
-function newSession() {
-  return {
-    user_id: 'u1',
-    mode: 'new' as const,
-    completed_count: 0,
-    target_count: 2,
-    lesson_id: 1,
-    phase: 0 as const,
-    current_queue_item_ids: [1, 2],
-    retry_queue_item_ids: [],
-    completed_item_ids: [],
-    started_at: '2026-08-23',
-    updated_at: '2026-08-23',
-  };
-}
 
 function item(itemId: number) {
   return {

@@ -1,11 +1,10 @@
 import { usePracticeAvailabilityBoundary } from './use-practice-availability-boundary';
 import Lessons from '@/database/models/lessons';
-import PracticeSession from '@/database/models/practice-sessions';
 import UserItem from '@/database/models/user-items';
+import UserLesson from '@/database/models/user-lessons';
 import type { GrammarDetail } from '@/features/grammar/GrammarDetailCard';
 import { reportError } from '@/features/logging/monitoring-handler';
 import type { LessonType, GrammarChunkType, GrammarGroupType } from '@/types/generic.types';
-import type { PracticeSessionType } from '@/types/practice-session.types';
 import type { ResolvedPracticeEntry, UserItemLocal } from '@/types/user-item.types';
 import {
   useCallback,
@@ -31,7 +30,6 @@ import {
 import {
   getPrefetchedNextInitialLesson,
   invalidateNextInitialLesson,
-  warmPracticeCache,
 } from '../practice-prefetch';
 
 type TrainingOutcome = 'correct' | 'incorrect' | 'skip';
@@ -53,8 +51,13 @@ type InitialTrainingLoadResult = Readonly<{
   entries: Array<ResolvedPracticeEntry<UserItemLocal>>;
   grammar: GrammarChunkType | null;
   grammarGroup: GrammarGroupType | null;
-  session: PracticeSessionType;
-  hasProgress: boolean;
+  queue: InitialTrainingQueue;
+}>;
+
+type InitialTrainingQueue = Readonly<{
+  currentItemIds: number[];
+  retryItemIds: number[];
+  completedCount: number;
 }>;
 
 type InitialTrainingView = Readonly<{
@@ -75,17 +78,17 @@ function getInitialTrainingState(initialData: InitialTrainingData | undefined) {
 }
 
 function getInitialTrainingView(
-  session: PracticeSessionType | null,
+  queue: InitialTrainingQueue | null,
   itemById: Map<number, UserItemLocal>,
   resolvedEntries: Array<ResolvedPracticeEntry<UserItemLocal>>,
   isComplete: boolean,
   revealed: boolean,
   initialItemCount: number,
 ): InitialTrainingView {
-  const currentItemId = session?.current_queue_item_ids[0];
+  const currentItemId = queue?.currentItemIds[0];
   const currentItem = getCurrentTrainingItem(currentItemId, itemById);
   const currentEntry = getCurrentTrainingEntry(currentItem, resolvedEntries);
-  const displayedCompletedCount = getDisplayedTrainingCount(isComplete, initialItemCount, session);
+  const displayedCompletedCount = isComplete ? initialItemCount : (queue?.completedCount ?? 0);
   const pronunciation = getTrainingPronunciation(currentItem, revealed);
   return { currentItem, currentEntry, displayedCompletedCount, pronunciation };
 }
@@ -105,26 +108,14 @@ function getCurrentTrainingEntry(
   return entries.find((entry) => entry.item.item_id === currentItem?.item_id) ?? null;
 }
 
-function getDisplayedTrainingCount(
-  isComplete: boolean,
-  initialItemCount: number,
-  session: PracticeSessionType | null,
-): number {
-  if (isComplete) return initialItemCount;
-  return session?.completed_count ?? 0;
-}
-
 function getActiveTrainingItems(
   items: UserItemLocal[],
-  session: PracticeSessionType | null,
+  queue: InitialTrainingQueue | null,
 ): UserItemLocal[] {
-  if (!session) return [];
+  if (!queue) return [];
 
   const itemById = new Map(items.map((item) => [item.item_id, item]));
-  const activeItemIds = [
-    ...session.current_queue_item_ids,
-    ...session.retry_queue_item_ids,
-  ];
+  const activeItemIds = [...queue.currentItemIds, ...queue.retryItemIds];
   return activeItemIds
     .map((itemId) => itemById.get(itemId))
     .filter((item): item is UserItemLocal => item !== undefined);
@@ -142,7 +133,7 @@ async function resolveTrainingSelection(
   if (initialData) {
     return { lessonId: initialData.lesson?.id ?? null, items: initialData.items };
   }
-  const preparedLesson = await getPrefetchedNextInitialLesson(userId, null);
+  const preparedLesson = await getPrefetchedNextInitialLesson(userId);
   if (!preparedLesson) return null;
   return { lessonId: preparedLesson.lesson?.id ?? null, items: preparedLesson.items };
 }
@@ -167,15 +158,6 @@ function resolveTrainingGrammarContext(
   return resolvePracticeGrammarContext(userId, lesson?.grammar_chunk_id);
 }
 
-function validateTrainingSession(
-  session: PracticeSessionType | null,
-  lessonId: number | null,
-): void {
-  if (session && (session.mode !== 'new' || session.lesson_id !== lessonId)) {
-    throw new Error('Another practice session is already active.');
-  }
-}
-
 async function loadInitialTrainingData(
   userId: string,
   initialData: InitialTrainingData | undefined,
@@ -187,9 +169,13 @@ async function loadInitialTrainingData(
 
   const entries = await resolveTrainingEntries(userId, initialData, items);
   const grammarContext = await resolveTrainingGrammarContext(userId, initialData, lesson);
-  const existing = await PracticeSession.reconcileActive(userId);
-  validateTrainingSession(existing, lesson.id);
-  const session = await getTrainingSession(existing, userId, lesson.id, items);
+  const didStart = await UserLesson.startIfAllowed(
+    userId,
+    lesson.id,
+    items.map((item) => item.item_id),
+  );
+  if (!didStart) return null;
+  invalidateNextInitialLesson(userId);
 
   return {
     lesson,
@@ -197,8 +183,11 @@ async function loadInitialTrainingData(
     entries,
     grammar: grammarContext.grammar,
     grammarGroup: grammarContext.grammarGroup,
-    session,
-    hasProgress: hasTrainingProgress(existing),
+    queue: {
+      currentItemIds: items.map((item) => item.item_id),
+      retryItemIds: [],
+      completedCount: 0,
+    },
   };
 }
 
@@ -217,30 +206,6 @@ function resolveTrainingEntries(
   return resolvePracticeEntries(userId, items);
 }
 
-async function getTrainingSession(
-  existing: PracticeSessionType | null,
-  userId: string,
-  lessonId: number,
-  items: UserItemLocal[],
-): Promise<PracticeSessionType> {
-  if (existing) return existing;
-  const session = await PracticeSession.startNew(
-    userId,
-    lessonId,
-    items.map((item) => item.item_id),
-  );
-  invalidateNextInitialLesson(userId);
-  void warmPracticeCache(userId, session).catch((error: unknown) => {
-    reportError('Failed to prefetch next initial lesson', error);
-  });
-  return session;
-}
-
-function hasTrainingProgress(existing: PracticeSessionType | null): boolean {
-  if (!existing) return false;
-  return existing.phase !== 0 || existing.completed_item_ids.length > 0;
-}
-
 type InitialTrainingLoadSetters = Readonly<{
   setLesson: Dispatch<SetStateAction<LessonType | null>>;
   setItems: Dispatch<SetStateAction<UserItemLocal[]>>;
@@ -249,7 +214,7 @@ type InitialTrainingLoadSetters = Readonly<{
   setResolvedEntries: Dispatch<SetStateAction<Array<ResolvedPracticeEntry<UserItemLocal>>>>;
   setGrammar: Dispatch<SetStateAction<GrammarDetail | null>>;
   setGrammarGroup: Dispatch<SetStateAction<GrammarGroupType | null>>;
-  setSession: Dispatch<SetStateAction<PracticeSessionType | null>>;
+  setQueue: Dispatch<SetStateAction<InitialTrainingQueue | null>>;
   setHasProgress: Dispatch<SetStateAction<boolean>>;
   setLoading: Dispatch<SetStateAction<boolean>>;
   setError: Dispatch<SetStateAction<Error | null>>;
@@ -266,20 +231,26 @@ function startInitialTrainingLoad(
     .then((result) => {
       if (!mounted) return;
       if (!result) {
+        setters.setLesson(null);
         setters.setItems([]);
         setters.setActiveItems([]);
         setters.setInitialItemCount(0);
+        setters.setResolvedEntries([]);
+        setters.setGrammar(null);
+        setters.setGrammarGroup(null);
+        setters.setQueue(null);
+        setters.setHasProgress(false);
         return;
       }
       setters.setLesson(result.lesson);
       setters.setItems(result.items);
-      setters.setActiveItems(getActiveTrainingItems(result.items, result.session));
+      setters.setActiveItems(getActiveTrainingItems(result.items, result.queue));
       setters.setInitialItemCount(result.items.length);
       setters.setResolvedEntries(result.entries);
       setters.setGrammar(toGrammarDetail(result.grammar));
       setters.setGrammarGroup(result.grammarGroup);
-      setters.setSession(result.session);
-      setters.setHasProgress(result.hasProgress);
+      setters.setQueue(result.queue);
+      setters.setHasProgress(false);
     })
     .catch((caughtError) => {
       if (mounted) setters.setError(toError(caughtError));
@@ -293,41 +264,25 @@ function startInitialTrainingLoad(
   };
 }
 
-function getTrainingAnswerSession(
-  session: PracticeSessionType,
+function getTrainingAnswerQueue(
+  queue: InitialTrainingQueue,
   itemId: number,
   outcome: TrainingOutcome,
-): PracticeSessionType {
+): InitialTrainingQueue | null {
   const shouldRepeat = outcome === 'incorrect';
-  const remaining = session.current_queue_item_ids.slice(1);
+  const remaining = queue.currentItemIds.slice(1);
   const retryIds = shouldRepeat
-    ? [...session.retry_queue_item_ids, itemId]
-    : session.retry_queue_item_ids;
-  const completedIds = shouldRepeat
-    ? session.completed_item_ids
-    : [...session.completed_item_ids, itemId];
-  return {
-    ...session,
-    completed_count: completedIds.length,
-    current_queue_item_ids: remaining,
-    retry_queue_item_ids: retryIds,
-    completed_item_ids: completedIds,
-    updated_at: new Date(Date.now()).toISOString(),
-  };
-}
-
-function resolveNextTrainingSession(
-  session: PracticeSessionType,
-  itemId: number,
-  outcome: TrainingOutcome,
-): PracticeSessionType | null {
-  const nextSession = getTrainingAnswerSession(session, itemId, outcome);
-  if (nextSession.current_queue_item_ids.length !== 0) return nextSession;
-  if (nextSession.retry_queue_item_ids.length > 0) {
+    ? [...queue.retryItemIds, itemId]
+    : queue.retryItemIds;
+  const completedCount = queue.completedCount + (shouldRepeat ? 0 : 1);
+  if (remaining.length > 0) {
+    return { currentItemIds: remaining, retryItemIds: retryIds, completedCount };
+  }
+  if (retryIds.length > 0) {
     return {
-      ...nextSession,
-      current_queue_item_ids: nextSession.retry_queue_item_ids,
-      retry_queue_item_ids: [],
+      currentItemIds: retryIds,
+      retryItemIds: [],
+      completedCount,
     };
   }
   return null;
@@ -351,12 +306,12 @@ async function syncPersistedItemToReviewCache(item: UserItemLocal): Promise<void
 
 type AdvanceInitialTrainingOptions = Readonly<{
   outcome: TrainingOutcome;
-  session: PracticeSessionType | null;
+  queue: InitialTrainingQueue | null;
   currentItem: UserItemLocal | null;
   isComplete: boolean;
   setItems: Dispatch<SetStateAction<UserItemLocal[]>>;
   setActiveItems: Dispatch<SetStateAction<UserItemLocal[]>>;
-  setSession: Dispatch<SetStateAction<PracticeSessionType | null>>;
+  setQueue: Dispatch<SetStateAction<InitialTrainingQueue | null>>;
   setHasProgress: Dispatch<SetStateAction<boolean>>;
   setIsComplete: Dispatch<SetStateAction<boolean>>;
   setError: Dispatch<SetStateAction<Error | null>>;
@@ -366,18 +321,18 @@ type AdvanceInitialTrainingOptions = Readonly<{
 async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): Promise<void> {
   const {
     outcome,
-    session,
+    queue,
     currentItem,
     isComplete,
     setItems,
     setActiveItems,
-    setSession,
+    setQueue,
     setHasProgress,
     setIsComplete,
     setError,
     resetQuestionState,
   } = options;
-  if (!session || !currentItem || isComplete) return;
+  if (!queue || !currentItem || isComplete) return;
 
   const dateTime = new Date(Date.now()).toISOString();
   const progressOptions = { initialTraining: true };
@@ -389,19 +344,16 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
   );
 
   try {
-    const nextSession = resolveNextTrainingSession(
-      session,
+    const nextQueue = getTrainingAnswerQueue(
+      queue,
       currentItem.item_id,
       outcome,
     );
-    if (nextSession) {
-      await PracticeSession.recordInitialTrainingAnswer(updatedItem, nextSession);
-    } else {
-      await PracticeSession.recordInitialTrainingAnswer(updatedItem, null, session);
-    }
+    await UserItem.saveInitialTrainingProgress(updatedItem);
     await syncPersistedItemToReviewCache(updatedItem);
+    invalidateNextInitialLesson(updatedItem.user_id);
 
-    if (!nextSession) {
+    if (!nextQueue) {
       setHasProgress(true);
       setIsComplete(true);
       setError(null);
@@ -411,9 +363,9 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
     resetQuestionState();
     setItems((currentItems) => updateTrainingItem(currentItems, updatedItem));
     setActiveItems((currentItems) =>
-      getActiveTrainingItems(updateTrainingItem(currentItems, updatedItem), nextSession),
+      getActiveTrainingItems(updateTrainingItem(currentItems, updatedItem), nextQueue),
     );
-    setSession(nextSession);
+    setQueue(nextQueue);
     setHasProgress(true);
     setError(null);
   } catch (caughtError) {
@@ -441,7 +393,7 @@ export function useInitialTrainingDeck(
   const [grammarGroup, setGrammarGroup] = useState<GrammarGroupType | null>(
     initialState.grammarGroup,
   );
-  const [session, setSession] = useState<PracticeSessionType | null>(null);
+  const [queue, setQueue] = useState<InitialTrainingQueue | null>(null);
   const [isComplete, setIsComplete] = useState(false);
   const [hasProgress, setHasProgress] = useState(false);
   const [revealed, setRevealed] = useState(false);
@@ -463,7 +415,7 @@ export function useInitialTrainingDeck(
       setResolvedEntries,
       setGrammar,
       setGrammarGroup,
-      setSession,
+      setQueue,
       setHasProgress,
       setLoading,
       setError,
@@ -477,14 +429,14 @@ export function useInitialTrainingDeck(
   const { currentItem, currentEntry, displayedCompletedCount, pronunciation } = useMemo(
     () =>
       getInitialTrainingView(
-        session,
+        queue,
         itemById,
         resolvedEntries,
         isComplete,
         revealed,
         initialItemCount,
       ),
-    [activeItems, initialItemCount, isComplete, itemById, resolvedEntries, revealed, session],
+    [activeItems, initialItemCount, isComplete, itemById, queue, resolvedEntries, revealed],
   );
   const cardState = usePracticeCardState({
     currentItem,
@@ -513,12 +465,12 @@ export function useInitialTrainingDeck(
         await trackPracticeWrite(
           advanceInitialTraining({
             outcome,
-            session,
+            queue,
             currentItem,
             isComplete,
             setItems,
             setActiveItems,
-            setSession,
+            setQueue,
             setHasProgress,
             setIsComplete,
             setError,
@@ -533,7 +485,7 @@ export function useInitialTrainingDeck(
       currentItem,
       isComplete,
       resetQuestionState,
-      session,
+      queue,
       trackPracticeWrite,
     ],
   );

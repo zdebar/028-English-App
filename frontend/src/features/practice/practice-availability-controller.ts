@@ -1,4 +1,3 @@
-import PracticeSession from '@/database/models/practice-sessions';
 import config from '@/config/config';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
@@ -80,11 +79,6 @@ async function updateSnapshot(context: AvailabilityContext): Promise<void> {
   const snapshot = await loadPracticeAvailabilitySnapshot(context.userId);
   if (current !== context) return;
   if (context.practiceDepth > 0) {
-    context.dirty = true;
-    return;
-  }
-  if (snapshot.requiresSessionReconciliation) {
-    await PracticeSession.reconcileActive(context.userId);
     context.dirty = true;
     return;
   }

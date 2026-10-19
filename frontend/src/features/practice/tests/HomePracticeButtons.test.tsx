@@ -37,7 +37,8 @@ describe('Home practice buttons', () => {
       vocabularyReviewDueCount: 0,
       nextReviewAt: null,
       initialTrainingAvailable: true,
-      activeSession: null,
+      continuingInitialLessonToday: false,
+      dailyNewLessonLimitReached: false,
       practiceLoading: false,
       practiceError: null,
     });
@@ -164,46 +165,19 @@ describe('Home practice buttons', () => {
     expect(newButton.className).toContain('color-button');
   });
 
-  it('does not give a legacy active review session special availability', () => {
+  it('disables new when the daily lesson limit is reached', () => {
     usePracticeAvailabilityStore.setState({
       grammarReviewReadyAt: null,
       vocabularyReviewReadyAt: null,
-      activeSession: makeSession('review'),
+      dailyNewLessonLimitReached: true,
     });
     render(<PracticeButtons />);
     expect(button('Grammar review').disabled).toBe(true);
     expect(button('Vocabulary review').disabled).toBe(true);
-    expect(button('New').disabled).toBe(false);
-  });
-
-  it('keeps an active new session available alongside review', () => {
-    usePracticeAvailabilityStore.setState({
-      vocabularyReviewReadyAt: null,
-      activeSession: makeSession('new'),
-    });
-    render(<PracticeButtons />);
-    expect(button('Grammar review').disabled).toBe(true);
-    expect(button('Vocabulary review').disabled).toBe(true);
-    expect(button('New').disabled).toBe(false);
+    expect(button('New').disabled).toBe(true);
   });
 });
 
 function button(name: string): HTMLButtonElement {
   return screen.getByRole('button', { name }) as HTMLButtonElement;
-}
-
-function makeSession(mode: 'review' | 'new') {
-  return {
-    user_id: 'u1',
-    mode,
-    completed_count: 4,
-    target_count: 20,
-    lesson_id: null,
-    phase: mode === 'new' ? (0 as const) : null,
-    current_queue_item_ids: [],
-    retry_queue_item_ids: [],
-    completed_item_ids: [],
-    started_at: '2026-08-23T08:00:00.000Z',
-    updated_at: '2026-08-23T08:00:00.000Z',
-  };
 }

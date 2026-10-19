@@ -19,7 +19,6 @@ vi.mock('@/database/models/topics', () => ({ default: {
 } }));
 vi.mock('@/database/models/grammar-groups', () => ({ default: {} }));
 vi.mock('@/database/models/pronunciation-groups', () => ({ default: {} }));
-vi.mock('@/database/models/practice-sessions', () => ({ default: {} }));
 vi.mock('@/database/utils/practice-content.utils', () => ({
   loadReviewDeckData: (...args: unknown[]) => mocks.loadReviewDeckData(...args),
 }));

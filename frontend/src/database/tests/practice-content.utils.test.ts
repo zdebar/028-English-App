@@ -9,7 +9,6 @@ const mocks = vi.hoisted(() => ({
   getReviewDeck: vi.fn(),
   getAllReviewItems: vi.fn(),
   getByItemIds: vi.fn(),
-  reconcileActive: vi.fn(),
   reportError: vi.fn(),
 }));
 
@@ -35,11 +34,6 @@ vi.mock('@/database/models/user-items', () => ({
   },
 }));
 
-vi.mock('@/database/models/practice-sessions', () => ({
-  default: {
-    reconcileActive: (...args: unknown[]) => mocks.reconcileActive(...args),
-  },
-}));
 
 vi.mock('@/features/logging/monitoring-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
@@ -118,7 +112,6 @@ describe('practice content resolution', () => {
       deleted_at: null,
     });
     mocks.addExamples.mockImplementation(async (_userId, grammar) => ({ ...grammar, items: [] }));
-    mocks.reconcileActive.mockResolvedValue(null);
   });
 
   it('deduplicates relation ids and attaches resolved content without dropping items', async () => {
@@ -208,7 +201,6 @@ describe('practice content resolution', () => {
     expect(result.reviewKind).toBe('grammar');
     expect(result.entries[0]?.note).toBeNull();
     expect(result.entries[0]?.grammar).toBeNull();
-    expect(mocks.reconcileActive).toHaveBeenCalledWith('u1');
     expect(userId).toBe('u1');
     expect(reviewKind).toBe('grammar');
     expect(now).toEqual(expect.any(String));
@@ -258,14 +250,12 @@ describe('practice content resolution', () => {
     expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', 'grammar', expect.any(String), 'cz_to_en');
   });
 
-  it('loads review while preserving an active initial-training session', async () => {
-    mocks.reconcileActive.mockResolvedValue({ mode: 'new' });
+  it('loads review without a persisted initial-training session', async () => {
     mocks.getReviewDeck.mockResolvedValue([makeReviewItem(1)]);
 
     const result = await loadReviewDeckData('u1', 'vocabulary');
 
     expect(result.entries).toHaveLength(1);
-    expect(mocks.reconcileActive).toHaveBeenCalledWith('u1');
     expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', 'vocabulary', expect.any(String), 'cz_to_en');
   });
 

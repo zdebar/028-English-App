@@ -1,5 +1,4 @@
 import Lessons from '@/database/models/lessons';
-import PracticeSession from '@/database/models/practice-sessions';
 import UserItem from '@/database/models/user-items';
 import {
   resolvePracticeEntries,
@@ -7,7 +6,6 @@ import {
 } from '@/database/utils/practice-content.utils';
 import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
 import type { LessonType, GrammarGroupType } from '@/types/generic.types';
-import type { PracticeSessionType } from '@/types/practice-session.types';
 import type {
   ResolvedPracticeEntry,
   UserItemLocal,
@@ -53,28 +51,10 @@ function getState(userId: string): PracticePrefetchState {
   return state;
 }
 
-function getSavedSessionItemIds(session: PracticeSessionType | null): number[] {
-  if (!session) return [];
-  return [
-    ...session.current_queue_item_ids,
-    ...session.retry_queue_item_ids,
-    ...session.completed_item_ids,
-  ];
-}
-
-function getSelectionOptions(session: PracticeSessionType | null) {
-  if (!session) return {};
-  return { excludeItemIds: getSavedSessionItemIds(session) };
-}
-
 async function loadPreparedInitialLesson(
   userId: string,
-  activeSession: PracticeSessionType | null,
 ): Promise<PreparedInitialLesson | null> {
-  const selection = await UserItem.getNextInitialTrainingSelection(
-    userId,
-    getSelectionOptions(activeSession),
-  );
+  const selection = await UserItem.getNextInitialTrainingSelection(userId);
   if (!selection || selection.items.length === 0) return null;
 
   const lesson = await Lessons.getById(selection.lessonId);
@@ -93,33 +73,21 @@ async function loadPreparedInitialLesson(
   };
 }
 
-async function resolveActiveSession(
-  userId: string,
-  activeSession: PracticeSessionType | null | undefined,
-): Promise<PracticeSessionType | null> {
-  if (activeSession !== undefined) return activeSession;
-  return (await PracticeSession.inspectActive(userId)).activeSession;
-}
-
 /** Loads review arrays and prepares the next initial lesson until explicit invalidation. */
-export async function warmPracticeCache(
-  userId: string,
-  activeSession?: PracticeSessionType | null,
-): Promise<void> {
+export async function warmPracticeCache(userId: string): Promise<void> {
   const state = getState(userId);
   if (state.pending) {
     await state.pending;
-    return warmPracticeCache(userId, activeSession);
+    return warmPracticeCache(userId);
   }
   if (!state.dirty) return;
 
   const version = state.version;
   let pending: Promise<void>;
   pending = (async () => {
-    const resolvedSession = await resolveActiveSession(userId, activeSession);
     const [, nextInitialLesson] = await Promise.all([
       warmReviewArrays(userId),
-      loadPreparedInitialLesson(userId, resolvedSession),
+      loadPreparedInitialLesson(userId),
     ]);
     if (states.get(userId) !== state || state.version !== version) return;
     state.nextInitialLesson = nextInitialLesson;
@@ -131,15 +99,12 @@ export async function warmPracticeCache(
   state.pending = pending;
   await pending;
   if (states.get(userId) === state && state.version !== version) {
-    return warmPracticeCache(userId, activeSession);
+    return warmPracticeCache(userId);
   }
 }
 
-export async function getPrefetchedNextInitialLesson(
-  userId: string,
-  activeSession?: PracticeSessionType | null,
-): Promise<PreparedInitialLesson | null> {
-  await warmPracticeCache(userId, activeSession);
+export async function getPrefetchedNextInitialLesson(userId: string): Promise<PreparedInitialLesson | null> {
+  await warmPracticeCache(userId);
   return getState(userId).nextInitialLesson;
 }
 

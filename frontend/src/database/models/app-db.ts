@@ -13,7 +13,6 @@ import type Notes from '@/database/models/notes';
 import type PronunciationGroup from '@/database/models/pronunciation-groups';
 import type PronunciationGroupItem from '@/database/models/pronunciation-group-items';
 import type GrammarChunkExample from '@/database/models/grammar-chunk-examples';
-import type PracticeSession from '@/database/models/practice-sessions';
 import type Topic from '@/database/models/topics';
 import type UserLesson from '@/database/models/user-lessons';
 import type UserSettings from '@/database/models/user-settings';
@@ -44,7 +43,6 @@ export default class AppDB extends Dexie {
   audio_records!: EntityTable<AudioRecord, 'filename'>;
   audio_metadata!: EntityTable<AudioMetadata, 'archive_name'>;
   metadata!: EntityTable<Metadata, any>;
-  practice_sessions!: EntityTable<PracticeSession, 'user_id'>;
   topics!: EntityTable<Topic, 'id'>;
   user_lessons!: EntityTable<UserLesson, any>;
   users!: EntityTable<UserSettings, 'id'>;
@@ -151,30 +149,11 @@ export default class AppDB extends Dexie {
         await transaction.table('lessons').toCollection().modify((lesson) => {
           (lesson as Record<string, unknown>).grammar_chunk_id ??= null;
         });
-        const userItems = transaction.table('user_items');
-        await transaction.table('practice_sessions').toCollection().modify(async (session) => {
-          const localSession = session as Record<string, unknown>;
-          if (localSession.mode === 'new' && localSession.lesson_id == null) {
-            const itemIds = [
-              ...(localSession.current_queue_item_ids as number[]),
-              ...(localSession.retry_queue_item_ids as number[]),
-              ...(localSession.completed_item_ids as number[]),
-            ];
-            const firstItemId = itemIds[0];
-            if (firstItemId != null) {
-              const firstItem = await userItems.get([
-                localSession.user_id as string,
-                firstItemId,
-              ]);
-              localSession.lesson_id = firstItem?.lesson_id ?? null;
-            }
-          }
-          delete localSession.block_id;
-          localSession.lesson_id ??= null;
-        });
         await transaction.table('user_items').toCollection().modify((item) => {
           delete (item as Record<string, unknown>).block_id;
         });
       });
+
+    this.version(11).stores({ practice_sessions: null });
   }
 }

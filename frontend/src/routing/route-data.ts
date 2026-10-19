@@ -7,17 +7,13 @@ import {
 } from '@/features/practice/practice-prefetch';
 import { usePracticeAvailabilityStore } from '@/features/practice/use-practice-availability-store';
 import PronunciationGroup from '@/database/models/pronunciation-groups';
-import Lessons from '@/database/models/lessons';
-import PracticeSession from '@/database/models/practice-sessions';
+import UserLesson from '@/database/models/user-lessons';
 import UserItem from '@/database/models/user-items';
 import Topic from '@/database/models/topics';
 import {
   loadReviewDeckData,
-  resolvePracticeEntries,
-  resolvePracticeGrammarContext,
   type ReviewDeckData,
 } from '@/database/utils/practice-content.utils';
-import type { PracticeSessionType } from '@/types/practice-session.types';
 import type { ReviewKind } from '@/types/practice.types';
 import {
   loadOverviewAvailability,
@@ -34,60 +30,18 @@ function emptyInitialTrainingData(): InitialTrainingData {
   return { lesson: null, items: [], entries: [], grammar: null, grammarGroup: null };
 }
 
-function getSavedSessionItemIds(activeSession: PracticeSessionType | null): number[] {
-  if (!activeSession) return [];
-  return [
-    ...activeSession.current_queue_item_ids,
-    ...activeSession.retry_queue_item_ids,
-    ...activeSession.completed_item_ids,
-  ];
-}
-
-async function getActiveInitialTrainingSelection(
-  userId: string,
-  activeSession: PracticeSessionType,
-) {
-  const savedItemIds = getSavedSessionItemIds(activeSession);
-  return {
-    lessonId: activeSession.lesson_id,
-    items: await UserItem.getByItemIds(userId, savedItemIds),
-  };
-}
-
 async function loadInitialTrainingData(userId: string): Promise<InitialTrainingData> {
-  const activeSession = await PracticeSession.reconcileActive(userId);
-  if (!(await canLoadInitialTraining(userId, activeSession))) {
+  const prepared = await getPrefetchedNextInitialLesson(userId);
+  if (!prepared?.lesson) return emptyInitialTrainingData();
+
+  const continuingLesson = await UserLesson.hasStartedToday(userId, prepared.lesson.id);
+  if (!continuingLesson && await shouldBlockInitialTraining(userId)) {
     return emptyInitialTrainingData();
   }
-
-  if (!activeSession) {
-    return (
-      (await getPrefetchedNextInitialLesson(userId, null)) ??
-      emptyInitialTrainingData()
-    );
+  if (!(await UserLesson.canStartToday(userId, prepared.lesson.id))) {
+    return emptyInitialTrainingData();
   }
-
-  const selection = await getActiveInitialTrainingSelection(userId, activeSession);
-  const lesson = selection.lessonId == null ? null : await Lessons.getById(selection.lessonId);
-  const items = selection.items;
-  const hasInvalidSelection =
-    items.length === 0 || !lesson || items.some((item) => item.lesson_id !== lesson.id);
-  if (hasInvalidSelection) return emptyInitialTrainingData();
-
-  const [entries, grammarContext] = await Promise.all([
-    resolvePracticeEntries(userId, items),
-    resolvePracticeGrammarContext(userId, lesson.grammar_chunk_id),
-  ]);
-  return { lesson, items, entries, ...grammarContext };
-}
-
-async function canLoadInitialTraining(
-  userId: string,
-  activeSession: PracticeSessionType | null,
-): Promise<boolean> {
-  if (activeSession?.mode === 'review') return false;
-  if (activeSession?.mode === 'new') return true;
-  return !(await shouldBlockInitialTraining(userId));
+  return prepared;
 }
 
 async function shouldBlockInitialTraining(userId: string): Promise<boolean> {

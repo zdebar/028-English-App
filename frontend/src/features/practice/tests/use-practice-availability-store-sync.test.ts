@@ -3,15 +3,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   load: vi.fn(),
-  reconcile: vi.fn().mockResolvedValue(null),
   reportError: vi.fn(),
   showToast: vi.fn(),
 }));
 vi.mock('../practice-availability', () => ({
   loadPracticeAvailabilitySnapshot: (...args: unknown[]) => mocks.load(...args),
-}));
-vi.mock('@/database/models/practice-sessions', () => ({
-  default: { reconcileActive: (...args: unknown[]) => mocks.reconcile(...args) },
 }));
 vi.mock('@/features/logging/monitoring-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
@@ -36,8 +32,8 @@ const snapshot: import('../practice-availability').PracticeAvailabilitySnapshot 
   vocabularyReviewDueCount: 0,
   nextReviewAt: '2026-07-21T10:00:00.000Z',
   initialTrainingAvailable: true,
-  activeSession: null,
-  requiresSessionReconciliation: false,
+  continuingInitialLessonToday: false,
+  dailyNewLessonLimitReached: false,
   newLessonsStartedTodayCount: 0,
   maxNewLessonsPerDay: 1,
 };
@@ -158,13 +154,6 @@ describe('availability refresh lifecycle', () => {
     await Promise.all([sync, reset]);
     expect(mocks.load).toHaveBeenCalledTimes(3);
     expect(usePracticeAvailabilityStore.getState().grammarReviewReadyAt).toBe(snapshot.grammarReviewReadyAt);
-  });
-
-  it('reconciles invalid sessions and then reads a consistent snapshot', async () => {
-    mocks.load.mockResolvedValueOnce({ ...snapshot, requiresSessionReconciliation: true });
-    await ensurePracticeAvailability('u1');
-    expect(mocks.reconcile).toHaveBeenCalledWith('u1');
-    expect(mocks.load).toHaveBeenCalledTimes(2);
   });
 
   it('clears account data on sign-out and reports loading failures', async () => {

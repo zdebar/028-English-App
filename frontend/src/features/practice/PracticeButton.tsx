@@ -7,13 +7,9 @@ import {
   type PracticeAvailabilityState,
 } from './use-practice-availability-store';
 import StyledButton from '@/components/UI/buttons/StyledButton';
-import { hasReachedDailyNewLessonLimit, hasReachedReviewLimit } from './practice-availability';
+import { hasReachedReviewLimit } from './practice-availability';
 
 type ReviewKind = 'grammar' | 'vocabulary';
-
-function isActiveNew(activeSession: PracticeAvailabilityState['activeSession']): boolean {
-  return activeSession?.mode === 'new';
-}
 
 function selectReviewDueCount(
   state: PracticeAvailabilityState,
@@ -51,19 +47,18 @@ function selectReviewTitle(
 }
 
 function selectNewAvailable(state: PracticeAvailabilityState): boolean {
-  if (isActiveNew(state.activeSession)) return true;
   return state.initialTrainingAvailable;
 }
 
 function selectNewDisabled(state: PracticeAvailabilityState): boolean {
   if (state.practiceLoading || state.practiceError) return true;
   if (!selectNewAvailable(state)) return true;
-  if (isActiveNew(state.activeSession)) return false;
-  return hasReachedReviewLimit(state) || hasReachedDailyNewLessonLimit(state);
+  if (state.continuingInitialLessonToday) return false;
+  return hasReachedReviewLimit(state) || state.dailyNewLessonLimitReached;
 }
 
 function selectNewTitle(state: PracticeAvailabilityState): string | undefined {
-  if (hasReachedDailyNewLessonLimit(state) && !isActiveNew(state.activeSession)) {
+  if (state.dailyNewLessonLimitReached && !state.continuingInitialLessonToday) {
     return TEXTS.dailyNewLessonLimitReached;
   }
   return resolveButtonTitle(
