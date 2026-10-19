@@ -98,14 +98,18 @@ export default function PracticeCard({ initialData }: PracticeCardProps) {
       itemKey={currentItem ? String(currentItem.item_id) : undefined}
       ensureDetailLoaded={ensureDetailLoaded}
       onDetailLoadError={notifyDetailLoadFailure}
-      itemProgressLabel={formatProgress(currentItem.progress_cz_to_en) ?? ''}
+      itemProgressLabel={formatProgress(
+        currentItem.review_direction === 'en_to_cz'
+          ? currentItem.progress_en_to_cz
+          : currentItem.progress_cz_to_en,
+      ) ?? ''}
       progressLabel={progressLabel}
       progressHelpText={TEXTS.reviewProgress}
       showProgressLabel
       isBlockTrainingPractice={false}
       revealed={revealed}
       czech={czech}
-      czechDescription={currentItem.czech_description}
+      czechDescription={currentItem.review_direction === 'en_to_cz' && !revealed ? null : currentItem.czech_description}
       english={english}
       pronunciation={pronunciation}
       audioDisabled={audioDisabled}

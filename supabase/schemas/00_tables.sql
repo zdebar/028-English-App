@@ -115,6 +115,8 @@ CREATE TABLE IF NOT EXISTS items (
   id SERIAL PRIMARY KEY,
   czech TEXT NOT NULL,
   czech_description TEXT DEFAULT NULL,
+  is_cz_to_en_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+  is_en_to_cz_enabled BOOLEAN NOT NULL DEFAULT TRUE,
   english TEXT NOT NULL,
   pronunciation TEXT,
   audio TEXT,
@@ -174,10 +176,13 @@ CREATE TABLE IF NOT EXISTS user_items (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
   progress_cz_to_en INTEGER NOT NULL DEFAULT 0 CHECK (progress_cz_to_en >= 0),
+  progress_en_to_cz INTEGER NOT NULL DEFAULT 0 CHECK (progress_en_to_cz >= 0),
   started_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   next_at_cz_to_en TIMESTAMPTZ,
+  next_at_en_to_cz TIMESTAMPTZ,
   mastered_at_cz_to_en TIMESTAMPTZ,
+  mastered_at_en_to_cz TIMESTAMPTZ,
   PRIMARY KEY (user_id, item_id)
 );
 
@@ -226,16 +231,22 @@ CREATE INDEX IF NOT EXISTS idx_user_items_user_updated_item
   ON public.user_items (user_id, updated_at, item_id)
   INCLUDE (
     progress_cz_to_en,
+    progress_en_to_cz,
     started_at,
     next_at_cz_to_en,
-    mastered_at_cz_to_en
+    mastered_at_cz_to_en,
+    next_at_en_to_cz,
+    mastered_at_en_to_cz
   );
 CREATE INDEX IF NOT EXISTS idx_user_items_item_user
   ON public.user_items (item_id, user_id)
   INCLUDE (
     progress_cz_to_en,
+    progress_en_to_cz,
     started_at,
     updated_at,
     next_at_cz_to_en,
-    mastered_at_cz_to_en
+    mastered_at_cz_to_en,
+    next_at_en_to_cz,
+    mastered_at_en_to_cz
   );

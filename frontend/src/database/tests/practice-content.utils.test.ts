@@ -71,6 +71,9 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
     audio: null,
     sort_order: 1,
     progress_cz_to_en: 0,
+    progress_en_to_cz: 0,
+    is_cz_to_en_enabled: true,
+    is_en_to_cz_enabled: true,
     note_id: 1,
     lesson_id: 1,
     updated_at: '2026-01-01',
@@ -82,6 +85,8 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
     deleted_at: '9999-12-31',
     next_at_cz_to_en: '2026-01-01',
     mastered_at_cz_to_en: '9999-12-31',
+    next_at_en_to_cz: '9999-12-31',
+    mastered_at_en_to_cz: '9999-12-31',
     curriculum_sort_path: [1, 1, 1],
     ...overrides,
     czech_description: overrides.czech_description ?? null,
@@ -184,7 +189,7 @@ describe('practice content resolution', () => {
     const item = makeItem() as PracticeDeckItem;
     mocks.getReviewDeck.mockResolvedValue([item]);
 
-    await expect(loadReviewDeck('u1', 'grammar')).resolves.toEqual([{ item, note: null, grammar: null }]);
+    await expect(loadReviewDeck('u1', 'grammar')).resolves.toEqual([{ item: { ...item, review_direction: 'cz_to_en' }, note: null, grammar: null }]);
     const error = new Error('items unavailable');
     mocks.getReviewDeck.mockRejectedValue(error);
     await expect(loadReviewDeck('u1', 'grammar')).rejects.toBe(error);
@@ -198,7 +203,7 @@ describe('practice content resolution', () => {
     const [userId, reviewKind, now] = mocks.getReviewDeck.mock.calls[0];
 
     expect(result.entries).toHaveLength(2);
-    expect(result.entries.map((entry) => entry.item)).toEqual(items);
+    expect(result.entries.map((entry) => entry.item)).toEqual(items.map((item) => ({ ...item, review_direction: 'cz_to_en' })));
     expect(result.availabilityCheckedAt).toBe(now);
     expect(result.abandoned).toBe(false);
     expect(result.reviewKind).toBe('grammar');
@@ -235,7 +240,7 @@ describe('practice content resolution', () => {
     const result = await loadReviewDeckData('u1', 'grammar');
 
     expect(result.entries.map((entry) => entry.item.item_id)).toEqual([1]);
-    expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', 'grammar', expect.any(String));
+    expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', 'grammar', expect.any(String), 'cz_to_en');
   });
 
   it('loads review while preserving an active initial-training session', async () => {
@@ -246,7 +251,7 @@ describe('practice content resolution', () => {
 
     expect(result.entries).toHaveLength(1);
     expect(mocks.reconcileActive).toHaveBeenCalledWith('u1');
-    expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', 'vocabulary', expect.any(String));
+    expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', 'vocabulary', expect.any(String), 'cz_to_en');
   });
 
   it('marks review abandoned when no due item is available', async () => {

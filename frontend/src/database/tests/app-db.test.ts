@@ -4,6 +4,7 @@ const mocks = vi.hoisted(() => ({
   versions: [] as Array<{
     number: number;
     schema?: Record<string, string>;
+    upgrade?: (transaction: unknown) => Promise<void>;
   }>,
 }));
 
@@ -15,6 +16,7 @@ vi.mock('dexie', () => ({
       const definition: {
         number: number;
         schema?: Record<string, string>;
+        upgrade?: (transaction: unknown) => Promise<void>;
       } = { number };
       mocks.versions.push(definition);
       const versionApi = {
@@ -22,7 +24,10 @@ vi.mock('dexie', () => ({
           definition.schema = schema;
           return versionApi;
         },
-        upgrade: vi.fn(() => versionApi),
+        upgrade: (callback: (transaction: unknown) => Promise<void>) => {
+          definition.upgrade = callback;
+          return versionApi;
+        },
       };
       return versionApi;
     }
@@ -39,7 +44,7 @@ describe('AppDB schema', () => {
   it('declares the complete schema and removes obsolete stores', () => {
     new AppDB();
 
-    expect(mocks.versions).toHaveLength(7);
+    expect(mocks.versions).toHaveLength(8);
     expect(mocks.versions[0]).toMatchObject({
       number: 1,
       schema: {
@@ -95,5 +100,37 @@ describe('AppDB schema', () => {
       number: 7,
       schema: { user_items: expect.any(String) },
     });
+    expect(mocks.versions[7]).toMatchObject({
+      number: 8,
+      schema: { user_items: expect.any(String) },
+    });
+    expect(mocks.versions[7].schema?.user_items).toContain(
+      '[user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]',
+    );
+  });
+
+  it('initializes new direction fields while upgrading existing local items', async () => {
+    new AppDB();
+    let modifyItems: ((item: Record<string, unknown>) => void) | undefined;
+    const transaction = {
+      table: () => ({
+        toCollection: () => ({
+          modify: async (callback: (item: Record<string, unknown>) => void) => {
+            modifyItems = callback;
+          },
+        }),
+      }),
+    };
+    await mocks.versions[7].upgrade?.(transaction);
+
+    const item: Record<string, unknown> = {};
+    modifyItems?.(item);
+    expect(item).toMatchObject({
+      progress_en_to_cz: 0,
+      is_cz_to_en_enabled: true,
+      is_en_to_cz_enabled: true,
+    });
+    expect(item.next_at_en_to_cz).toBeTruthy();
+    expect(item.mastered_at_en_to_cz).toBeTruthy();
   });
 });

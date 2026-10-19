@@ -15,6 +15,8 @@ import NoteDetailCard from '@/features/notes/NoteDetailCard';
 import { useNoteViewer } from '@/features/notes/use-note-viewer';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { formatProgress } from '@/utils/progress.utils';
+import ButtonWithModal from '@/features/modal/ButtonWithModal';
+import type { ReviewDirection } from '@/types/practice.types';
 
 const NOT_AVAILABLE = TEXTS.notAvailable;
 
@@ -22,7 +24,7 @@ type VocabularyDetailCardProps = Readonly<{
   selectedWord: UserItemLocal | null;
   selectedTitle: string;
   onClose: () => void;
-  onReset: () => Promise<void>;
+  onReset: (direction: ReviewDirection) => Promise<void>;
 }>;
 
 type VocabularyProperty = Readonly<{
@@ -33,6 +35,7 @@ type VocabularyProperty = Readonly<{
 
 type VocabularyDirectionSection = Readonly<{
   title: string;
+  direction: ReviewDirection;
   properties: readonly VocabularyProperty[];
 }>;
 
@@ -57,6 +60,7 @@ function getDirectionSections(
   return [
     {
       title: lowercaseInitial(TEXTS.directionCzToEn),
+      direction: 'cz_to_en',
       properties: [
         {
           label: lowercaseInitial(TEXTS.progress),
@@ -71,7 +75,20 @@ function getDirectionSections(
         },
       ],
     },
-  ];
+    {
+      title: lowercaseInitial(TEXTS.directionEnToCz),
+      direction: 'en_to_cz',
+      properties: [
+        { label: lowercaseInitial(TEXTS.progress), value: formatProgress(selectedWord?.progress_en_to_cz) },
+        {
+          label: lowercaseInitial(TEXTS.practiceSchedule),
+          value: formatPracticeSchedule(selectedWord?.next_at_en_to_cz, selectedWord?.mastered_at_en_to_cz),
+        },
+      ],
+    },
+  ].filter((section) => section.direction === 'cz_to_en'
+    ? selectedWord?.is_cz_to_en_enabled !== false
+    : selectedWord?.is_en_to_cz_enabled !== false);
 }
 
 function isVocabularyAudioDisabled(
@@ -121,9 +138,11 @@ function VocabularyPropertyList({
 function VocabularyDetails({
   baseProperties,
   directionSections,
+  onReset,
 }: Readonly<{
   baseProperties: readonly VocabularyProperty[];
   directionSections: readonly VocabularyDirectionSection[];
+  onReset: (direction: ReviewDirection) => Promise<void>;
 }>) {
   return (
     <div className="m-4 flex flex-col gap-3">
@@ -132,7 +151,15 @@ function VocabularyDetails({
       </div>
       {directionSections.map((section) => (
         <section key={section.title}>
-          <h3 className="font-bold">{section.title}</h3>
+          <ButtonWithModal
+            className="w-full justify-center font-bold"
+            modalTitle={TEXTS.restartItemProgress}
+            modalText={TEXTS.restartDirectionProgressDescription}
+            title={TEXTS.restartProgressHelp}
+            onConfirm={() => onReset(section.direction)}
+          >
+            {section.title}
+          </ButtonWithModal>
           <VocabularyPropertyList properties={section.properties} labelClassName="w-30 w-auto" />
         </section>
       ))}
@@ -220,11 +247,10 @@ export default function VocabularyDetailCard({
     <OverviewCard
       buttonTitle={selectedTitle}
       onClose={onClose}
-      handleReset={onReset}
-      modalTitle={TEXTS.restartItemProgress}
+      showResetAction={false}
       className="bottom-controls-clearance relative"
     >
-      <VocabularyDetails baseProperties={baseProperties} directionSections={directionSections} />
+      <VocabularyDetails baseProperties={baseProperties} directionSections={directionSections} onReset={onReset} />
       <VocabularyAudioControls
         selectedWord={selectedWord}
         audioControlsDisabled={audioControlsDisabled}

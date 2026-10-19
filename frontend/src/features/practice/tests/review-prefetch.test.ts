@@ -47,7 +47,7 @@ describe('review prefetch', () => {
 
     await expect(getPrefetchedReviewItems('u1', 'grammar')).resolves.toEqual([futureGrammar]);
     await expect(getPrefetchedReviewItems('u1', 'vocabulary')).resolves.toEqual([futureVocabulary]);
-    expect(mocks.getAllReviewItems).toHaveBeenCalledTimes(2);
+    expect(mocks.getAllReviewItems).toHaveBeenCalledTimes(4);
   });
 
   it('deduplicates concurrent prefetches', async () => {
@@ -63,7 +63,7 @@ describe('review prefetch', () => {
     const first = warmReviewArrays('u1');
     const second = warmReviewArrays('u1');
     expect(first).toBe(second);
-    expect(mocks.getAllReviewItems).toHaveBeenCalledTimes(2);
+    expect(mocks.getAllReviewItems).toHaveBeenCalledTimes(4);
 
     resolveQuery();
     await first;
@@ -80,7 +80,7 @@ describe('review prefetch', () => {
     invalidateReviewArrays('u1');
     await warmReviewArrays('u1');
 
-    expect(mocks.getAllReviewItems).toHaveBeenCalledTimes(4);
+    expect(mocks.getAllReviewItems).toHaveBeenCalledTimes(8);
     expect(getReviewReadyAtFromItems([dueGrammar, futureGrammar], 2, NOW)).toBe(
       futureGrammar.next_at_cz_to_en,
     );
@@ -157,6 +157,7 @@ function item(
 ): PracticeDeckItem {
   return {
     user_id: 'u1',
+    review_direction: 'cz_to_en',
     item_id: itemId,
     czech: 'ahoj',
     czech_description: null,
@@ -165,6 +166,9 @@ function item(
     audio: null,
     sort_order: itemId,
     progress_cz_to_en: 1,
+    progress_en_to_cz: 1,
+    is_cz_to_en_enabled: true,
+    is_en_to_cz_enabled: true,
     note_id: null,
     lesson_id: 1,
     is_vocabulary: _reviewKind === 'vocabulary' ? 1 : 0,
@@ -176,6 +180,8 @@ function item(
     updated_at: NOW,
     next_at_cz_to_en: nextAt,
     mastered_at_cz_to_en: NULL_DATE,
+    next_at_en_to_cz: nextAt,
+    mastered_at_en_to_cz: NULL_DATE,
     curriculum_sort_path: [1, 1, itemId],
     ...overrides,
   };

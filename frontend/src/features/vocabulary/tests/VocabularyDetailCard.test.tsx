@@ -29,7 +29,12 @@ vi.mock('@/locales/cs', () => ({
     practiceSchedule: 'Practice schedule',
     notScheduled: 'Not scheduled',
     directionCzToEn: 'CZ to EN',
+    directionEnToCz: 'EN to CZ',
     restartItemProgress: 'Restart item',
+    restartDirectionProgressDescription: 'Reset this direction?',
+    restartProgressHelp: 'Restart progress',
+    confirm: 'Confirm',
+    cancel: 'Cancel',
     audio: 'Audio',
     noAudio: 'No audio',
     tooltipNotes: 'Notes',
@@ -73,15 +78,17 @@ vi.mock('@/features/vocabulary/vocabulary.utils', () => ({
 }));
 
 vi.mock('@/components/UI/OverviewCard', () => ({
-  default: ({ buttonTitle, onClose, handleReset, children }: any) => (
+  default: ({ buttonTitle, onClose, handleReset, showResetAction = true, children }: any) => (
     <div>
       <h1>{buttonTitle}</h1>
       <button data-testid="close" onClick={onClose}>
         close
       </button>
-      <button data-testid="reset" onClick={() => handleReset?.()}>
-        reset
-      </button>
+      {showResetAction && (
+        <button data-testid="reset" onClick={() => handleReset?.()}>
+          reset
+        </button>
+      )}
       {children}
     </div>
   ),
@@ -120,6 +127,9 @@ describe('VocabularyDetailCard', () => {
   });
 
   it('calls onClose and onReset handlers', () => {
+    const portal = document.createElement('div');
+    portal.id = 'root';
+    document.body.append(portal);
     const onClose = vi.fn();
     const onReset = vi.fn();
     render(
@@ -132,10 +142,11 @@ describe('VocabularyDetailCard', () => {
     );
 
     fireEvent.click(screen.getByTestId('close'));
-    fireEvent.click(screen.getByTestId('reset'));
+    fireEvent.click(screen.getByRole('button', { name: 'cZ to EN' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
 
     expect(onClose).toHaveBeenCalledTimes(1);
-    expect(onReset).toHaveBeenCalledTimes(1);
+    expect(onReset).toHaveBeenCalledWith('cz_to_en');
   });
 
   it('formats item progress with the configured SRS length', () => {

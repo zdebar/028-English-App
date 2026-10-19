@@ -13,6 +13,8 @@ RETURNS TABLE (
   pronunciation TEXT,
   audio TEXT,
   is_vocabulary BOOLEAN,
+  is_cz_to_en_enabled BOOLEAN,
+  is_en_to_cz_enabled BOOLEAN,
   sort_order INTEGER,
   curriculum_sort_path INTEGER[],
   note_id INTEGER,
@@ -20,11 +22,14 @@ RETURNS TABLE (
   topic_id INTEGER,
   grammar_chunk_id INTEGER,
   progress_cz_to_en INTEGER,
+  progress_en_to_cz INTEGER,
   started_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ,
   deleted_at TIMESTAMPTZ,
   next_at_cz_to_en TIMESTAMPTZ,
+  next_at_en_to_cz TIMESTAMPTZ,
   mastered_at_cz_to_en TIMESTAMPTZ,
+  mastered_at_en_to_cz TIMESTAMPTZ,
   lesson_id INTEGER
 )
 LANGUAGE plpgsql

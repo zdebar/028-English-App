@@ -113,6 +113,9 @@ function item(itemId: number, nextAt: string, overrides: Partial<UserItemLocal> 
     audio: null,
     sort_order: itemId,
     progress_cz_to_en: 1,
+    progress_en_to_cz: 1,
+    is_cz_to_en_enabled: true,
+    is_en_to_cz_enabled: true,
     note_id: null,
     lesson_id: 1,
     is_vocabulary: 1,
@@ -124,6 +127,8 @@ function item(itemId: number, nextAt: string, overrides: Partial<UserItemLocal> 
     updated_at: NOW,
     next_at_cz_to_en: nextAt,
     mastered_at_cz_to_en: NULL_DATE,
+    next_at_en_to_cz: nextAt,
+    mastered_at_en_to_cz: NULL_DATE,
     curriculum_sort_path: [1, 1, itemId],
     ...overrides,
   };

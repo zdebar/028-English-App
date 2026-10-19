@@ -46,24 +46,23 @@ export default function VocabularyOverview({
   }, [error, showToast]);
 
   // -- HANDLERS  --
-  const handleResetUserItem = useCallback(async () => {
+  const handleResetUserItem = useCallback(async (direction: 'cz_to_en' | 'en_to_cz' = 'cz_to_en') => {
     const itemId = selectedWord?.item_id;
     if (typeof itemId !== 'number' || !userId) {
       return;
     }
 
     try {
-      const resetItemId = await UserItem.resetItemById(userId, itemId);
+      const resetItemId = await UserItem.resetItemById(userId, itemId, new Date().toISOString(), direction);
       invalidateReviewArrays(userId);
       void refreshPracticeAvailability(userId);
       reportInfo(`Vocabulary item reset completed: item ${resetItemId}.`);
       showToast(TEXTS.resetProgressSuccessToast, 'success');
-      setSelectedWord(null);
     } catch (error) {
       showToast(TEXTS.resetProgressErrorToast, 'error');
       reportError('Reset User Item Error', error);
     }
-  }, [selectedWord, userId, showToast, setSelectedWord]);
+  }, [selectedWord, userId, showToast]);
 
   const handleSelectWord = useCallback(
     (index: number) => {

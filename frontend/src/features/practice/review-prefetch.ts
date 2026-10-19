@@ -5,10 +5,11 @@ import {
   isReviewItemReadyAt,
 } from '@/database/utils/review-items.utils';
 import config from '@/config/config';
-import type { ReviewKind } from '@/types/practice.types';
+import type { ReviewDirection, ReviewKind } from '@/types/practice.types';
 import type { PracticeDeckItem } from '@/types/user-item.types';
 
 const REVIEW_KINDS: readonly ReviewKind[] = ['grammar', 'vocabulary'];
+const REVIEW_DIRECTIONS: readonly ReviewDirection[] = ['cz_to_en', 'en_to_cz'];
 const NULL_DATE = config.database.nullReplacementDate;
 const RESET_SORT_DATE = '0000-01-01T00:00:00.000Z';
 
@@ -55,19 +56,16 @@ export function warmReviewArrays(userId: string): Promise<void> {
   const version = state.version;
   let pending: Promise<void>;
   pending = Promise.all(
-    REVIEW_KINDS.map(async (reviewKind) => [
+    REVIEW_KINDS.flatMap((reviewKind) => REVIEW_DIRECTIONS.map(async (direction) => [
       reviewKind,
-      await UserItem.getAllReviewItems(userId, reviewKind),
-    ] as const),
+      direction,
+      (await UserItem.getAllReviewItems(userId, reviewKind, direction)).map((item) => ({ ...item, review_direction: direction })),
+    ] as const)),
   )
     .then((results) => {
       if (states.get(userId) !== state || state.version !== version) return;
-      const grammar = sortReviewItems(
-        results.find(([reviewKind]) => reviewKind === 'grammar')?.[1] ?? [],
-      );
-      const vocabulary = sortReviewItems(
-        results.find(([reviewKind]) => reviewKind === 'vocabulary')?.[1] ?? [],
-      );
+      const grammar = sortReviewItems(results.filter(([kind]) => kind === 'grammar').flatMap(([, , items]) => items));
+      const vocabulary = sortReviewItems(results.filter(([kind]) => kind === 'vocabulary').flatMap(([, , items]) => items));
       state.arrays = { grammar, vocabulary };
       state.dirty = false;
     })
@@ -110,9 +108,9 @@ export async function syncReviewItemsToCache(
     const remainingItems = state.arrays[reviewKind].filter(
       (item) => !updatedItemIds.has(item.item_id),
     );
-    const matchingItems = updatedItems.filter((item) =>
-      isReviewItemCandidate(item, reviewKind),
-    );
+    const matchingItems = updatedItems.flatMap((item) => REVIEW_DIRECTIONS
+      .filter((direction) => isReviewItemCandidate(item, reviewKind, direction))
+      .map((direction) => ({ ...item, review_direction: direction })));
     nextArrays[reviewKind] = sortReviewItems([...remainingItems, ...matchingItems]);
   }
 
@@ -141,9 +139,12 @@ export function clearReviewArrays(userId: string | null): void {
 export async function getPrefetchedReviewItems(
   userId: string,
   reviewKind: ReviewKind,
+  direction?: ReviewDirection,
 ): Promise<readonly PracticeDeckItem[]> {
   await warmReviewArrays(userId);
-  return getState(userId).arrays?.[reviewKind] ?? [];
+  const items = getState(userId).arrays?.[reviewKind] ?? [];
+  const selectedDirection = direction ?? 'cz_to_en';
+  return items.filter((item) => item.review_direction === selectedDirection);
 }
 
 export function compareReviewItems(left: PracticeDeckItem, right: PracticeDeckItem): number {
@@ -167,8 +168,8 @@ export function getReviewReadyAtFromItems(
   if (readyCount >= deckSize) return nowIso;
 
   const missingCount = deckSize - readyCount;
-  const futureItems = items.filter((item) => isReviewItemFuture(item, nowIso));
-  return futureItems[missingCount - 1]?.next_at_cz_to_en ?? null;
+  const futureItems = items.filter((item) => isReviewItemFuture(item, nowIso, item.review_direction));
+  return getReviewNextAt(futureItems[missingCount - 1] ?? null);
 }
 
 export function getReviewAvailabilityFromArrays(
@@ -209,14 +210,14 @@ export async function loadReviewAvailabilityFromArrays(
 }
 
 function getReviewDueCount(items: readonly PracticeDeckItem[], nowIso: string): number {
-  return items.filter((item) => isReviewItemReadyAt(item, nowIso)).length;
+  return items.filter((item) => isReviewItemReadyAt(item, nowIso, item.review_direction)).length;
 }
 
 function getNextReviewAtFromItems(
   items: readonly PracticeDeckItem[],
   nowIso: string,
 ): string | null {
-  return items.find((item) => isReviewItemFuture(item, nowIso))?.next_at_cz_to_en ?? null;
+  return getReviewNextAt(items.find((item) => isReviewItemFuture(item, nowIso, item.review_direction)) ?? null);
 }
 
 function getEarlierReviewAt(
@@ -233,7 +234,16 @@ function sortReviewItems(items: readonly PracticeDeckItem[]): PracticeDeckItem[]
 }
 
 function getReviewSortDate(item: PracticeDeckItem): string {
-  if (item.next_at_cz_to_en === NULL_DATE) return RESET_SORT_DATE;
+  const nextAt = item.review_direction === 'en_to_cz'
+    ? item.next_at_en_to_cz ?? item.next_at_cz_to_en
+    : item.next_at_cz_to_en;
+  if (nextAt === NULL_DATE) return RESET_SORT_DATE;
+  return nextAt;
+}
+
+function getReviewNextAt(item: PracticeDeckItem | null): string | null {
+  if (!item) return null;
+  if (item.review_direction === 'en_to_cz') return item.next_at_en_to_cz ?? item.next_at_cz_to_en;
   return item.next_at_cz_to_en;
 }
 

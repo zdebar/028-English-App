@@ -67,4 +67,33 @@ describe('usePracticeCardState', () => {
 
     expect(stopAudioMock).toHaveBeenCalledOnce();
   });
+
+  it('shows English with pronunciation after the automatic audio phase, then reveals Czech', () => {
+    const enToCzItem = { ...item, item_id: 1, review_direction: 'en_to_cz' } as UserItemLocal;
+    const { result } = renderHook(() => useTestCard(enToCzItem));
+
+    expect(result.current.czech).toBeUndefined();
+    expect(result.current.english).toBeUndefined();
+    expect(playAudioMock).toHaveBeenCalledOnce();
+
+    act(() => result.current.handleReveal());
+    expect(result.current.english).toBe('hello');
+    expect(result.current.pronunciation).toBe('hello-pron');
+    expect(result.current.czech).toBeUndefined();
+
+    act(() => result.current.handleReveal());
+    expect(result.current.revealed).toBe(true);
+    expect(result.current.czech).toBe('ahoj');
+  });
+
+  it('skips the hidden audio phase when EN-to-CZ audio is missing', () => {
+    const enToCzItem = { ...item, item_id: 2, audio: null, review_direction: 'en_to_cz' } as UserItemLocal;
+    const { result } = renderHook(() => useTestCard(enToCzItem));
+
+    expect(result.current.english).toBe('hello');
+    expect(playAudioMock).not.toHaveBeenCalled();
+    act(() => result.current.handleReveal());
+    expect(result.current.revealed).toBe(true);
+    expect(result.current.czech).toBe('ahoj');
+  });
 });

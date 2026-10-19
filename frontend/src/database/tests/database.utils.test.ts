@@ -96,9 +96,35 @@ describe('database.utils', () => {
 
       expect(item.progress_cz_to_en).toBe(0);
       expect(item.started_at).toBe('x');
-      expect(item.next_at_cz_to_en).toBe('1970-01-01T00:00:00.000Z');
+      expect(item.next_at_cz_to_en).toBe('2026-02-28T08:00:00.000Z');
       expect(item.mastered_at_cz_to_en).toBe('1970-01-01T00:00:00.000Z');
       expect(item.updated_at).toBe('2026-02-28T08:00:00.000Z');
+    });
+
+    it('resets only EN-to-CZ and keeps the shared start date', () => {
+      const item = {
+        progress_cz_to_en: 4,
+        next_at_cz_to_en: 'cz-next',
+        mastered_at_cz_to_en: 'cz-mastered',
+        progress_en_to_cz: 3,
+        next_at_en_to_cz: 'en-next',
+        mastered_at_en_to_cz: 'en-mastered',
+        started_at: 'started',
+        updated_at: 'old',
+      } as any;
+
+      resetUserItem(item, '2026-02-28T08:00:00.000Z', 'en_to_cz');
+
+      expect(item).toMatchObject({
+        progress_cz_to_en: 4,
+        next_at_cz_to_en: 'cz-next',
+        mastered_at_cz_to_en: 'cz-mastered',
+        progress_en_to_cz: 0,
+        next_at_en_to_cz: '2026-02-28T08:00:00.000Z',
+        mastered_at_en_to_cz: '1970-01-01T00:00:00.000Z',
+        started_at: 'started',
+        updated_at: '2026-02-28T08:00:00.000Z',
+      });
     });
   });
 

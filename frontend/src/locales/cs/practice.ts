@@ -16,6 +16,7 @@ export const PRACTICE_TEXTS = {
   repeat: 'opakovat',
   known: 'znám',
   directionCzToEn: 'Z češtiny do angličtiny',
+  directionEnToCz: 'Z angličtiny do češtiny',
   skipHoldInfoToast: 'Pro dokončení položky podržte tlačítko.',
   skipSuccessToast: 'Položka byla dokončena.',
   skipErrorToast: 'Dokončení položky se nezdařilo.',

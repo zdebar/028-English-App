@@ -9,7 +9,7 @@ import type {
   ResolvedPracticeEntry,
   UserItemLocal,
 } from '@/types/user-item.types';
-import type { ReviewKind } from '@/types/practice.types';
+import type { ReviewDirection, ReviewKind } from '@/types/practice.types';
 import { isReviewItemDue } from './review-items.utils';
 import { getPrefetchedReviewItems } from '@/features/practice/review-prefetch';
 
@@ -135,9 +135,10 @@ export async function resolvePracticeGrammarContext(
 export async function loadReviewDeck(
   userId: string,
   reviewKind: ReviewKind,
+  direction: ReviewDirection = 'cz_to_en',
 ): Promise<PracticeDeckEntry[]> {
-  const items = await UserItem.getReviewDeck(userId, reviewKind);
-  return items.map((item) => ({ item, note: null, grammar: null }));
+  const items = await UserItem.getReviewDeck(userId, reviewKind, undefined, direction);
+  return items.map((item) => ({ item: { ...item, review_direction: direction }, note: null, grammar: null }));
 }
 
 export type ReviewDeckData = Readonly<{
@@ -146,39 +147,47 @@ export type ReviewDeckData = Readonly<{
   availabilityCheckedAt: string;
   abandoned: boolean;
   reviewKind: ReviewKind;
+  reviewDirection: ReviewDirection;
 }>;
 
 /** Loads the next complete CZ-to-EN review batch without creating a review session. */
 export async function loadReviewDeckData(
   userId: string,
   reviewKind: ReviewKind,
+  reviewDirection: ReviewDirection = 'cz_to_en',
 ): Promise<ReviewDeckData> {
   await PracticeSession.reconcileActive(userId);
 
   const now = new Date().toISOString();
+  let selectedDirection = reviewDirection;
   try {
-    const prefetchedItems = await getPrefetchedReviewItems(userId, reviewKind);
-    const entries = prefetchedItems
-      .filter((item) => isReviewItemDue(item, now))
-      .map(toPracticeDeckEntry);
+    let prefetchedItems = await getPrefetchedReviewItems(userId, reviewKind, selectedDirection);
+    let entries = prefetchedItems.filter((item) => isReviewItemDue(item, now, selectedDirection));
+    if (entries.length === 0 && selectedDirection === 'cz_to_en') {
+      selectedDirection = 'en_to_cz';
+      prefetchedItems = await getPrefetchedReviewItems(userId, reviewKind, selectedDirection);
+      entries = prefetchedItems.filter((item) => isReviewItemDue(item, now, selectedDirection));
+    }
     return {
-      entries,
+      entries: entries.map(toPracticeDeckEntry),
       prefetchedEntries: prefetchedItems.map(toPracticeDeckEntry),
       availabilityCheckedAt: now,
       abandoned: entries.length === 0,
       reviewKind,
+      reviewDirection: selectedDirection,
     };
   } catch {
     const items = await db.transaction('r', db.user_items, () =>
-      UserItem.getReviewDeck(userId, reviewKind, now),
+      UserItem.getReviewDeck(userId, reviewKind, now, reviewDirection),
     );
-    const entries = items.map(toPracticeDeckEntry);
+    const entries = items.map((item) => toPracticeDeckEntry({ ...item, review_direction: reviewDirection }));
     return {
       entries,
       prefetchedEntries: entries,
       availabilityCheckedAt: now,
       abandoned: entries.length === 0,
       reviewKind,
+      reviewDirection,
     };
   }
 }

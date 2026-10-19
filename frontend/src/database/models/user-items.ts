@@ -10,19 +10,19 @@ import type {
   InitialTrainingSelection,
   InitialTrainingSelectionOptions,
 } from '@/types/user-item.types';
-import type { ReviewKind } from '@/types/practice.types';
+import type { ReviewDirection, ReviewKind } from '@/types/practice.types';
 import { TableName } from '@/types/table.types';
 import Dexie, { Entity } from 'dexie';
 import { getSyncTimestamps, splitDeleted } from '../utils/sync-generic.utils';
 
 import { getNextAt, resetUserItem } from '@/database/utils/user-items.utils';
-import { isReviewItemCandidate, isReviewItemDue, isReviewItemFuture, isReviewItemReadyAt } from '@/database/utils/review-items.utils';
+import { isReviewItemCandidate, isReviewItemDue, isReviewItemReadyAt, isReviewItemFuture } from '@/database/utils/review-items.utils';
 import { SupabaseError } from '@/types/error.types';
 import type { ReadyPracticeState } from '@/types/generic.types';
 import Metadata from './metadata';
 import { reportInfo } from '@/features/logging/monitoring-handler';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
-import { getEffectiveProgress, isInitiated } from '@/utils/progress.utils';
+import { isInitiated } from '@/utils/progress.utils';
 
 const NULL_DATE = config.database.nullReplacementDate;
 const NULL_NUMBER = config.database.nullReplacementNumber;
@@ -39,6 +39,10 @@ type UserItemAPI = Omit<
   | 'deleted_at'
   | 'next_at_cz_to_en'
   | 'mastered_at_cz_to_en'
+  | 'next_at_en_to_cz'
+  | 'mastered_at_en_to_cz'
+  | 'is_cz_to_en_enabled'
+  | 'is_en_to_cz_enabled'
 > & {
   is_vocabulary: boolean;
   block_id: number | null;
@@ -48,6 +52,10 @@ type UserItemAPI = Omit<
   deleted_at: string | null;
   next_at_cz_to_en: string | null;
   mastered_at_cz_to_en: string | null;
+  next_at_en_to_cz: string | null;
+  mastered_at_en_to_cz: string | null;
+  is_cz_to_en_enabled: boolean;
+  is_en_to_cz_enabled: boolean;
 };
 
 type UserItemExport = Pick<
@@ -59,6 +67,9 @@ type UserItemExport = Pick<
   | 'updated_at'
   | 'next_at_cz_to_en'
   | 'mastered_at_cz_to_en'
+  | 'progress_en_to_cz'
+  | 'next_at_en_to_cz'
+  | 'mastered_at_en_to_cz'
 >;
 
 function convertLocalToExport(localItem: UserItemLocal): UserItemExport {
@@ -70,6 +81,9 @@ function convertLocalToExport(localItem: UserItemLocal): UserItemExport {
     started_at,
     next_at_cz_to_en,
     mastered_at_cz_to_en,
+    progress_en_to_cz,
+    next_at_en_to_cz,
+    mastered_at_en_to_cz,
   } = localItem;
   return {
     user_id,
@@ -79,6 +93,9 @@ function convertLocalToExport(localItem: UserItemLocal): UserItemExport {
     started_at: started_at === NULL_DATE ? null : started_at,
     next_at_cz_to_en: next_at_cz_to_en === NULL_DATE ? null : next_at_cz_to_en,
     mastered_at_cz_to_en: mastered_at_cz_to_en === NULL_DATE ? null : mastered_at_cz_to_en,
+    progress_en_to_cz,
+    next_at_en_to_cz: next_at_en_to_cz === NULL_DATE ? null : next_at_en_to_cz,
+    mastered_at_en_to_cz: mastered_at_en_to_cz === NULL_DATE ? null : mastered_at_en_to_cz,
   };
 }
 
@@ -89,6 +106,11 @@ function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
     started_at: replaceNullDate(apiItem.started_at),
     next_at_cz_to_en: replaceNullDate(apiItem.next_at_cz_to_en),
     mastered_at_cz_to_en: replaceNullDate(apiItem.mastered_at_cz_to_en),
+    next_at_en_to_cz: replaceNullDate(apiItem.next_at_en_to_cz),
+    mastered_at_en_to_cz: replaceNullDate(apiItem.mastered_at_en_to_cz),
+    progress_en_to_cz: apiItem.progress_en_to_cz ?? 0,
+    is_cz_to_en_enabled: apiItem.is_cz_to_en_enabled ?? true,
+    is_en_to_cz_enabled: apiItem.is_en_to_cz_enabled ?? true,
     deleted_at: replaceNullDate(apiItem.deleted_at),
     block_id: replaceNullNumber(apiItem.block_id),
     topic_id: replaceNullNumber(apiItem.topic_id),
@@ -134,6 +156,7 @@ async function getUnstartedItems(
     .filter(
       (item) =>
         item.deleted_at === NULL_DATE &&
+        item.is_cz_to_en_enabled !== false &&
         item.started_at === NULL_DATE &&
         !isInitialTrainingSkipped(item) &&
         item.block_id !== options.excludeBlockId &&
@@ -232,6 +255,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   deleted_at!: string;
   next_at_cz_to_en!: string;
   mastered_at_cz_to_en!: string;
+  progress_en_to_cz!: number;
+  next_at_en_to_cz!: string;
+  mastered_at_en_to_cz!: string;
+  is_cz_to_en_enabled!: boolean;
+  is_en_to_cz_enabled!: boolean;
   lesson_id!: number;
 
   /**
@@ -242,21 +270,22 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     userId: string,
     reviewKind: ReviewKind,
     now: string = new Date().toISOString(),
+    direction: ReviewDirection = 'cz_to_en',
   ): Promise<PracticeDeckItem[]> {
-    return this.getDuePracticeItems(userId, Number.MAX_SAFE_INTEGER, now, reviewKind);
+    return this.getDuePracticeItems(userId, Number.MAX_SAFE_INTEGER, now, reviewKind, direction);
   }
 
   /** Reads every non-mastered review item for one review direction without a time cutoff. */
-  static getAllReviewItems(userId: string, reviewKind: ReviewKind): Promise<PracticeDeckItem[]> {
+  static getAllReviewItems(userId: string, reviewKind: ReviewKind, direction: ReviewDirection = 'cz_to_en'): Promise<PracticeDeckItem[]> {
     return db.user_items
-      .where(getPracticeIndex())
+      .where(getPracticeIndex(direction))
       .between(
         [userId, Dexie.minKey, Dexie.minKey, Dexie.minKey],
         [userId, Dexie.maxKey, Dexie.maxKey, Dexie.maxKey],
         true,
         true,
       )
-      .filter((item) => isReviewItemCandidate(item, reviewKind))
+      .filter((item) => isReviewItemCandidate(item, reviewKind, direction))
       .toArray();
   }
 
@@ -266,7 +295,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Missing, deleted, or already-mastered items are silently skipped.
    * Empty arrays are ignored.
    */
-  static async savePracticeDeck(items: PracticeDeckItem[]): Promise<void> {
+  static async savePracticeDeck(items: PracticeDeckItem[], direction: ReviewDirection = 'cz_to_en'): Promise<void> {
     if (!items || items.length === 0) return;
 
     await db.transaction('rw', db.user_items, async () => {
@@ -281,17 +310,26 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       for (const [index, item] of items.entries()) {
         const currentItem = currentItems[index];
         if (currentItem?.deleted_at !== NULL_DATE) continue;
-        if (currentItem.mastered_at_cz_to_en !== NULL_DATE) continue;
+        const currentMasteredAt = direction === 'cz_to_en' ? currentItem.mastered_at_cz_to_en : currentItem.mastered_at_en_to_cz;
+        if (currentMasteredAt !== NULL_DATE) continue;
 
         updates.push({
           key: [item.user_id, item.item_id],
-          changes: {
-            progress_cz_to_en: item.progress_cz_to_en,
-            started_at: item.started_at,
-            updated_at: item.updated_at,
-            next_at_cz_to_en: item.next_at_cz_to_en,
-            mastered_at_cz_to_en: item.mastered_at_cz_to_en,
-          },
+          changes: direction === 'cz_to_en'
+            ? {
+                progress_cz_to_en: item.progress_cz_to_en,
+                started_at: item.started_at,
+                updated_at: item.updated_at,
+                next_at_cz_to_en: item.next_at_cz_to_en,
+                mastered_at_cz_to_en: item.mastered_at_cz_to_en,
+              }
+            : {
+                progress_en_to_cz: item.progress_en_to_cz,
+                started_at: item.started_at,
+                updated_at: item.updated_at,
+                next_at_en_to_cz: item.next_at_en_to_cz,
+                mastered_at_en_to_cz: item.mastered_at_en_to_cz,
+              },
         });
       }
 
@@ -440,28 +478,32 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     assertNonEmptyString(userId, 'userId');
 
     const nowIso = new Date(Date.now()).toISOString();
-    const [
-      grammarReviewReadyAt,
-      vocabularyReviewReadyAt,
-      grammarReviewDueCount,
-      vocabularyReviewDueCount,
-      grammarNextReviewAt,
-      vocabularyNextReviewAt,
-    ] = await Promise.all([
-      getReviewReadyAt(userId, config.practice.grammarReviewLimitSize, nowIso, 'grammar'),
-      getReviewReadyAt(userId, config.practice.vocabularyReviewLimitSize, nowIso, 'vocabulary'),
-      getReviewDueCount(userId, nowIso, 'grammar'),
-      getReviewDueCount(userId, nowIso, 'vocabulary'),
-      getNextReviewAt(userId, nowIso, 'grammar'),
-      getNextReviewAt(userId, nowIso, 'vocabulary'),
-    ]);
+    const items = await db.user_items.where('user_id').equals(userId).toArray();
+    const grammarItems = getItemsForBothDirections(items, 'grammar');
+    const vocabularyItems = getItemsForBothDirections(items, 'vocabulary');
+    const grammarReviewDueCount = getDueCount(grammarItems, nowIso);
+    const vocabularyReviewDueCount = getDueCount(vocabularyItems, nowIso);
+    const grammarReviewReadyAt = getReadyAt(
+      grammarItems,
+      config.practice.grammarReviewLimitSize,
+      nowIso,
+    );
+    const vocabularyReviewReadyAt = getReadyAt(
+      vocabularyItems,
+      config.practice.vocabularyReviewLimitSize,
+      nowIso,
+    );
+    const nextReviewAt = getEarlierDate(
+      getNextReviewAtForItems(grammarItems, nowIso),
+      getNextReviewAtForItems(vocabularyItems, nowIso),
+    );
 
     return {
       grammarReviewReadyAt,
       vocabularyReviewReadyAt,
       grammarReviewDueCount,
       vocabularyReviewDueCount,
-      nextReviewAt: getEarlierDate(grammarNextReviewAt, vocabularyNextReviewAt),
+      nextReviewAt,
     };
   }
 
@@ -477,12 +519,13 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     userId: string,
     itemId: number,
     dateTime: string = new Date().toISOString(),
+    direction: ReviewDirection = 'cz_to_en',
   ): Promise<number> {
     const item = await db.user_items.where('[user_id+item_id]').equals([userId, itemId]).first();
     if (!item) {
       throw new Error(`No user items found for item ID ${itemId}.`);
     }
-    await resetItems([item], dateTime);
+    await resetItems([item], dateTime, direction);
     return itemId;
   }
 
@@ -711,17 +754,18 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     limit: number,
     now: string,
     reviewKind: ReviewKind,
+    direction: ReviewDirection,
   ): Promise<PracticeDeckItem[]> {
-    return this.getDuePracticeCollection(userId, now, reviewKind).limit(limit).toArray();
+    return this.getDuePracticeCollection(userId, now, reviewKind, direction).limit(limit).toArray();
   }
 
-  private static getDuePracticeCollection(userId: string, now: string, reviewKind: ReviewKind) {
+  private static getDuePracticeCollection(userId: string, now: string, reviewKind: ReviewKind, direction: ReviewDirection) {
     const matchesItem = (item: UserItemLocal) => {
-      return isReviewItemCandidate(item, reviewKind) && isReviewItemDue(item, now);
+      return isReviewItemCandidate(item, reviewKind, direction) && isReviewItemDue(item, now, direction);
     };
 
     return db.user_items
-      .where(getPracticeIndex())
+      .where(getPracticeIndex(direction))
       .between(
         [userId, Dexie.minKey, Dexie.minKey, Dexie.minKey],
         [userId, Dexie.maxKey, Dexie.maxKey, Dexie.maxKey],
@@ -738,65 +782,14 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     dateTime: string,
     options: {
       initialTraining?: boolean;
+      direction?: ReviewDirection;
     } = {},
   ): UserItemLocal {
     if (options.initialTraining === true) {
       return applyInitialTrainingProgress(item, outcome, dateTime);
     }
-    return applyReviewProgress(item, outcome, dateTime);
+    return applyReviewProgress(item, outcome, dateTime, options.direction ?? 'cz_to_en');
   }
-}
-
-async function getReviewReadyAt(
-  userId: string,
-  deckSize: number,
-  nowIso: string,
-  reviewKind: ReviewKind,
-): Promise<string | null> {
-  const scheduledReadyItems = await getScheduledReadyPracticeCollection(userId, nowIso, reviewKind)
-    .limit(deckSize)
-    .toArray();
-  let readyCount = scheduledReadyItems.length;
-
-  if (readyCount < deckSize) {
-    const resetReadyItems = await getResetReadyPracticeCollection(userId, reviewKind)
-      .limit(deckSize - readyCount)
-      .toArray();
-    readyCount += resetReadyItems.length;
-  }
-
-  if (readyCount >= deckSize) return nowIso;
-
-  const missingCount = deckSize - readyCount;
-  const futureItems = await getFuturePracticeCollection(userId, nowIso, reviewKind)
-    .limit(missingCount)
-    .toArray();
-  const thresholdItem = futureItems[missingCount - 1];
-  if (!thresholdItem) return null;
-  return thresholdItem.next_at_cz_to_en;
-}
-
-async function getReviewDueCount(
-  userId: string,
-  nowIso: string,
-  reviewKind: ReviewKind,
-): Promise<number> {
-  const [scheduledItems, resetItems] = await Promise.all([
-    getScheduledReadyPracticeCollection(userId, nowIso, reviewKind).toArray(),
-    getResetReadyPracticeCollection(userId, reviewKind).toArray(),
-  ]);
-  return scheduledItems.length + resetItems.length;
-}
-
-async function getNextReviewAt(
-  userId: string,
-  nowIso: string,
-  reviewKind: ReviewKind,
-): Promise<string | null> {
-  const [nextItem] = await getFuturePracticeCollection(userId, nowIso, reviewKind)
-    .limit(1)
-    .toArray();
-  return nextItem?.next_at_cz_to_en ?? null;
 }
 
 function getEarlierDate(left: string | null, right: string | null): string | null {
@@ -805,73 +798,45 @@ function getEarlierDate(left: string | null, right: string | null): string | nul
   return left < right ? left : right;
 }
 
-function getPracticeIndex(): string {
+function getPracticeIndex(direction: ReviewDirection): string {
+  if (direction === 'en_to_cz') {
+    return '[user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]';
+  }
   return '[user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]';
 }
 
-function getPracticeIndexCollection() {
-  return db.user_items.where(getPracticeIndex());
+function getItemsForBothDirections(items: UserItemLocal[], reviewKind: ReviewKind): UserItemLocal[] {
+  const matchingItems = items.filter((item) => isReviewKind(item, reviewKind));
+  return matchingItems.flatMap((item) => [
+    { ...item, review_direction: 'cz_to_en' as const },
+    { ...item, review_direction: 'en_to_cz' as const },
+  ]).filter((item) => isReviewItemCandidate(item, reviewKind, item.review_direction));
 }
 
-function isReadyPracticeItem(item: UserItemLocal): boolean {
-  if (item.deleted_at !== NULL_DATE) return false;
-  if (item.started_at === NULL_DATE) return false;
-  return item.mastered_at_cz_to_en === NULL_DATE;
+function getDueCount(items: UserItemLocal[], nowIso: string): number {
+  return items.filter((item) => isReviewItemReadyAt(item, nowIso, item.review_direction)).length;
 }
 
-function isScheduledReadyPracticeItem(item: UserItemLocal, nowIso: string): boolean {
-  return (
-    isReadyPracticeItem(item) &&
-    item.next_at_cz_to_en !== NULL_DATE &&
-    isReviewItemReadyAt(item, nowIso)
-  );
+function getReadyAt(items: UserItemLocal[], deckSize: number, nowIso: string): string | null {
+  const dueItems = items.filter((item) => isReviewItemReadyAt(item, nowIso, item.review_direction));
+  if (dueItems.length >= deckSize) return nowIso;
+  const futureItems = items
+    .filter((item) => isReviewItemFuture(item, nowIso, item.review_direction))
+    .sort((left, right) => getDirectionalNextAt(left).localeCompare(getDirectionalNextAt(right)));
+  return getDirectionalNextAt(futureItems[deckSize - dueItems.length - 1] ?? null);
 }
 
-function isResetReadyPracticeItem(item: UserItemLocal): boolean {
-  if (!isReadyPracticeItem(item)) return false;
-  if (item.next_at_cz_to_en !== NULL_DATE) return false;
-  return getEffectiveProgress(item) === 0;
+function getNextReviewAtForItems(items: UserItemLocal[], nowIso: string): string | null {
+  const nextItem = items
+    .filter((item) => isReviewItemFuture(item, nowIso, item.review_direction))
+    .sort((left, right) => getDirectionalNextAt(left).localeCompare(getDirectionalNextAt(right)))[0];
+  return getDirectionalNextAt(nextItem ?? null);
 }
 
-function isFuturePracticeItem(item: UserItemLocal, nowIso: string): boolean {
-  return isReadyPracticeItem(item) && isReviewItemFuture(item, nowIso);
-}
-
-function getScheduledReadyPracticeCollection(
-  userId: string,
-  nowIso: string,
-  reviewKind: ReviewKind,
-) {
-  return getPracticeIndexCollection()
-    .between(
-      [userId, Dexie.minKey, Dexie.minKey, Dexie.minKey],
-      [userId, nowIso, Dexie.maxKey, Dexie.maxKey],
-      true,
-      true,
-    )
-    .filter((item) => isReviewKind(item, reviewKind) && isScheduledReadyPracticeItem(item, nowIso));
-}
-
-function getResetReadyPracticeCollection(userId: string, reviewKind: ReviewKind) {
-  return getPracticeIndexCollection()
-    .between(
-      [userId, NULL_DATE, Dexie.minKey, Dexie.minKey],
-      [userId, NULL_DATE, Dexie.maxKey, Dexie.maxKey],
-      true,
-      true,
-    )
-    .filter((item) => isReviewKind(item, reviewKind) && isResetReadyPracticeItem(item));
-}
-
-function getFuturePracticeCollection(userId: string, nowIso: string, reviewKind: ReviewKind) {
-  return getPracticeIndexCollection()
-    .between(
-      [userId, nowIso, Dexie.minKey, Dexie.minKey],
-      [userId, Dexie.maxKey, Dexie.maxKey, Dexie.maxKey],
-      false,
-      true,
-    )
-    .filter((item) => isReviewKind(item, reviewKind) && isFuturePracticeItem(item, nowIso));
+function getDirectionalNextAt(item: UserItemLocal | null): string | null {
+  if (!item) return null;
+  if (item.review_direction === 'en_to_cz') return item.next_at_en_to_cz;
+  return item.next_at_cz_to_en;
 }
 
 function isInitialTrainingSkipped(
@@ -887,7 +852,7 @@ function applyInitialTrainingProgress(
 ): UserItemLocal {
   const changes: Partial<UserItemLocal> = {
     ...item,
-    started_at: outcome === 'skip' ? NULL_DATE : getStartedAt(item, dateTime),
+    started_at: getStartedAt(item, dateTime),
     updated_at: dateTime,
   };
 
@@ -899,6 +864,10 @@ function applyInitialTrainingProgress(
     initializeProgress(changes);
   }
 
+  changes.progress_en_to_cz = changes.progress_cz_to_en;
+  changes.next_at_en_to_cz = changes.next_at_cz_to_en;
+  changes.mastered_at_en_to_cz = changes.mastered_at_cz_to_en;
+
   return { ...item, ...changes };
 }
 
@@ -906,8 +875,9 @@ function applyReviewProgress(
   item: UserItemLocal,
   outcome: PracticeOutcome,
   dateTime: string,
+  direction: ReviewDirection = 'cz_to_en',
 ): UserItemLocal {
-  const currentProgress = getEffectiveProgress(item);
+  const currentProgress = direction === 'cz_to_en' ? item.progress_cz_to_en : item.progress_en_to_cz;
   const changes: Partial<UserItemLocal> = {
     ...item,
     started_at: getStartedAt(item, dateTime),
@@ -915,11 +885,11 @@ function applyReviewProgress(
   };
 
   if (outcome === 'correct') {
-    setProgress(changes, item, currentProgress + 1, dateTime);
+    setProgress(changes, item, currentProgress + 1, dateTime, direction);
   } else if (outcome === 'incorrect') {
-    setProgress(changes, item, Math.max(0, currentProgress - 1), dateTime);
+    setProgress(changes, item, Math.max(0, currentProgress - 1), dateTime, direction);
   } else {
-    setMastered(changes, dateTime, currentProgress);
+    setMastered(changes, dateTime, currentProgress, direction);
   }
 
   return { ...item, ...changes };
@@ -935,12 +905,20 @@ function setProgress(
   original: UserItemLocal,
   progress: number,
   dateTime: string,
+  direction: ReviewDirection = 'cz_to_en',
 ): void {
-  const masteredAt = resolveMasteredAt(progress, original.mastered_at_cz_to_en, dateTime);
+  const currentMasteredAt = direction === 'cz_to_en' ? original.mastered_at_cz_to_en : original.mastered_at_en_to_cz;
+  const masteredAt = resolveMasteredAt(progress, currentMasteredAt, dateTime);
 
-  target.progress_cz_to_en = progress;
-  target.next_at_cz_to_en = getNextAtForMastery(getNextAt(progress), masteredAt);
-  target.mastered_at_cz_to_en = masteredAt;
+  if (direction === 'cz_to_en') {
+    target.progress_cz_to_en = progress;
+    target.next_at_cz_to_en = getNextAtForMastery(getNextAt(progress), masteredAt);
+    target.mastered_at_cz_to_en = masteredAt;
+    return;
+  }
+  target.progress_en_to_cz = progress;
+  target.next_at_en_to_cz = getNextAtForMastery(getNextAt(progress), masteredAt);
+  target.mastered_at_en_to_cz = masteredAt;
 }
 
 function initializeProgress(target: Partial<UserItemLocal>): void {
@@ -949,10 +927,16 @@ function initializeProgress(target: Partial<UserItemLocal>): void {
   target.mastered_at_cz_to_en = NULL_DATE;
 }
 
-function setMastered(target: Partial<UserItemLocal>, dateTime: string, progress: number = 0): void {
-  target.progress_cz_to_en = progress;
-  target.next_at_cz_to_en = NULL_DATE;
-  target.mastered_at_cz_to_en = dateTime;
+function setMastered(target: Partial<UserItemLocal>, dateTime: string, progress: number = 0, direction: ReviewDirection = 'cz_to_en'): void {
+  if (direction === 'cz_to_en') {
+    target.progress_cz_to_en = progress;
+    target.next_at_cz_to_en = NULL_DATE;
+    target.mastered_at_cz_to_en = dateTime;
+    return;
+  }
+  target.progress_en_to_cz = progress;
+  target.next_at_en_to_cz = NULL_DATE;
+  target.mastered_at_en_to_cz = dateTime;
 }
 
 function getNextAtForMastery(nextAt: string, masteredAt: string): string {
@@ -983,13 +967,13 @@ function compareCurriculumPaths(left: CurriculumSortPath, right: CurriculumSortP
   return 0;
 }
 
-async function resetItems(items: UserItemLocal[], dateTime: string): Promise<number> {
+async function resetItems(items: UserItemLocal[], dateTime: string, direction: ReviewDirection = 'cz_to_en'): Promise<number> {
   if (items.length === 0) return 0;
 
   return await db.transaction('rw', db.user_items, async () => {
     const updatedItems = items.map((item) => {
       const updatedItem = { ...item };
-      resetUserItem(updatedItem, dateTime);
+      resetUserItem(updatedItem, dateTime, direction);
       return updatedItem;
     });
     await db.user_items.bulkPut(updatedItems);

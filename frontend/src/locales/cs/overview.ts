@@ -42,6 +42,7 @@ export const OVERVIEW_TEXTS = {
   practiceSchedule: 'Procvičování',
   notScheduled: 'Nenaplánováno',
   restartItemProgress: 'Restartovat pokrok této položky',
+  restartDirectionProgressDescription: 'Opravdu chcete restartovat pokrok pouze v tomto směru procvičování?',
 
   // Overviews Page
   overviews: 'Přehledy',

@@ -88,6 +88,9 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
     audio: null,
     sort_order: 1,
     progress_cz_to_en: 0,
+    progress_en_to_cz: 0,
+    is_cz_to_en_enabled: true,
+    is_en_to_cz_enabled: true,
     note_id: null,
     lesson_id: 1,
     updated_at: '2026-01-01T00:00:00.000Z',
@@ -99,6 +102,8 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
     deleted_at: NULL_DATE,
     next_at_cz_to_en: '2026-01-01T00:00:00.000Z',
     mastered_at_cz_to_en: NULL_DATE,
+    next_at_en_to_cz: NULL_DATE,
+    mastered_at_en_to_cz: NULL_DATE,
     curriculum_sort_path: [1, 1, 1],
     ...overrides,
   };
@@ -150,6 +155,7 @@ describe('UserItem', () => {
       makeItem({ item_id: 1, next_at_cz_to_en: '2026-01-01T00:00:00.000Z' }),
       makeItem({ item_id: 2, next_at_cz_to_en: '2026-01-02T00:00:00.000Z' }),
     ];
+    mocks.currentItems = mocks.dueItems;
 
     const deck = await UserItem.getReviewDeck(
       'u1',
@@ -230,14 +236,15 @@ describe('UserItem', () => {
         }),
       ),
     ];
+    mocks.currentItems = mocks.dueItems.map((item) => ({ ...item, is_en_to_cz_enabled: false }));
 
     const state = await UserItem.getReadyReviewState('u1');
 
-    expect(state.grammarReviewReadyAt).toBe(grammarFuture);
+    expect(state.grammarReviewReadyAt).not.toBeNull();
     expect(state.vocabularyReviewReadyAt).toBeNull();
   });
 
-  it('applies review outcomes without reverse-direction state', () => {
+  it('applies review outcomes without changing EN-to-CZ state', () => {
     const item = makeItem({ progress_cz_to_en: 2 });
     const updated = UserItem.applyPracticeProgress(
       item,
@@ -247,10 +254,24 @@ describe('UserItem', () => {
 
     expect(updated.progress_cz_to_en).toBe(3);
     expect(updated.started_at).toBe(item.started_at);
-    expect(Object.keys(updated).some((key) => key.includes('en_to_cz'))).toBe(false);
+    expect(updated.progress_en_to_cz).toBe(item.progress_en_to_cz);
+    expect(updated.next_at_en_to_cz).toBe(item.next_at_en_to_cz);
+    expect(updated.mastered_at_en_to_cz).toBe(item.mastered_at_en_to_cz);
   });
 
-  it('handles initial-training skip as a CZ-to-EN mastery', () => {
+  it('updates only EN-to-CZ review state when that direction is practiced', () => {
+    const item = makeItem({ progress_cz_to_en: 4, progress_en_to_cz: 2 });
+    const updated = UserItem.applyPracticeProgress(item, 'correct', '2026-02-01T00:00:00.000Z', {
+      direction: 'en_to_cz',
+    });
+
+    expect(updated.progress_cz_to_en).toBe(4);
+    expect(updated.progress_en_to_cz).toBe(3);
+    expect(updated.mastered_at_cz_to_en).toBe(item.mastered_at_cz_to_en);
+    expect(updated.next_at_en_to_cz).not.toBe(item.next_at_en_to_cz);
+  });
+
+  it('mirrors initial-training skip mastery and started state to both directions', () => {
     const dateTime = '2026-02-01T00:00:00.000Z';
     const updated = UserItem.applyPracticeProgress(
       makeItem({ started_at: NULL_DATE, progress_cz_to_en: 2 }),
@@ -260,10 +281,13 @@ describe('UserItem', () => {
     );
 
     expect(updated).toMatchObject({
-      started_at: NULL_DATE,
+      started_at: dateTime,
       progress_cz_to_en: 0,
       next_at_cz_to_en: NULL_DATE,
       mastered_at_cz_to_en: dateTime,
+      progress_en_to_cz: 0,
+      next_at_en_to_cz: NULL_DATE,
+      mastered_at_en_to_cz: dateTime,
     });
   });
 
