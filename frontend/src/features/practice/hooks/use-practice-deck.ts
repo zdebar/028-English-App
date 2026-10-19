@@ -18,6 +18,7 @@ import {
   createReviewQueue,
   getCurrentReviewEntry,
   type ReviewQueue,
+  type ReviewQueueAnswerResult,
 } from '../review-queue';
 import {
   invalidateReviewArrays,
@@ -43,21 +44,83 @@ type ReviewRetryAction = 'save';
 type PracticeCompletionHandler = () => void;
 
 type MutableRef<T> = { current: T };
+type StateSetter<T> = (value: T | ((current: T) => T)) => void;
+
+type ContinueAnsweredQueueOptions = {
+  answerResult: ReviewQueueAnswerResult;
+  queue: ReviewQueue;
+  userId: string | null;
+  activeDirectionRef: MutableRef<ReviewDirection>;
+  reviewQueueRef: MutableRef<ReviewQueue | null>;
+  queueDataRef: MutableRef<ReviewDeckData | null>;
+  completedOffsetRef: MutableRef<number>;
+  setCompletedCount: StateSetter<number>;
+  setFinishedReview: StateSetter<boolean>;
+  setRetryAction: StateSetter<ReviewRetryAction | null>;
+  setQueueVersion: StateSetter<number>;
+  resetQuestionState: () => void;
+  completePractice: () => Promise<void>;
+};
+
+async function continueAnsweredQueue({
+  answerResult,
+  queue,
+  userId,
+  activeDirectionRef,
+  reviewQueueRef,
+  queueDataRef,
+  completedOffsetRef,
+  setCompletedCount,
+  setFinishedReview,
+  setRetryAction,
+  setQueueVersion,
+  resetQuestionState,
+  completePractice,
+}: ContinueAnsweredQueueOptions): Promise<void> {
+  if (answerResult.hasNextItem) {
+    setCompletedCount(completedOffsetRef.current + queue.completedCount);
+    setQueueVersion((version) => version + 1);
+    resetQuestionState();
+    return;
+  }
+
+  const nextDeck = await loadNextDirectionDeck(userId ?? '', queue.reviewKind, activeDirectionRef.current);
+  if (!nextDeck) {
+    await completePractice();
+    return;
+  }
+
+  completedOffsetRef.current += queue.completedCount;
+  startDirectionDeck({
+    deck: nextDeck,
+    queueRef: reviewQueueRef,
+    dataRef: queueDataRef,
+    directionRef: activeDirectionRef,
+    update: (nextQueue) => {
+      setCompletedCount(completedOffsetRef.current + nextQueue.completedCount);
+    },
+    setFinishedReview,
+    setRetryAction,
+    setQueueVersion,
+    resetQuestionState,
+  });
+}
 
 async function loadNextDirectionDeck(
   userId: string,
   reviewKind: ReviewKind,
   currentDirection: ReviewDirection,
 ): Promise<ReviewDeckData | null> {
-  const alternateDeck = await loadReviewDeckData(
-    userId,
-    reviewKind,
-    getAlternateDirection(currentDirection),
-  );
-  if (alternateDeck.entries.length > 0) return alternateDeck;
+  if (currentDirection === 'cz_to_en') {
+    const enToCzDeck = await loadReviewDeckData(userId, reviewKind, 'en_to_cz');
+    return enToCzDeck.entries.length > 0 ? enToCzDeck : null;
+  }
 
-  const retryDeck = await loadReviewDeckData(userId, reviewKind, currentDirection);
-  if (retryDeck.entries.length > 0) return retryDeck;
+  const czToEnDeck = await loadReviewDeckData(userId, reviewKind, 'cz_to_en');
+  if (czToEnDeck.entries.length > 0) return czToEnDeck;
+
+  const enToCzDeck = await loadReviewDeckData(userId, reviewKind, 'en_to_cz');
+  if (enToCzDeck.entries.length > 0) return enToCzDeck;
   return null;
 }
 
@@ -100,6 +163,14 @@ function getReviewQueueEntries(reviewDeck: ReviewDeckData): readonly PracticeDec
   return entries.filter((entry) => entry.item.review_direction === reviewDeck.reviewDirection);
 }
 
+function shouldProcessFetchedDeck(
+  loading: boolean,
+  fetchedResult: ReviewDeckData | null,
+  processedDeck: ReviewDeckData | null,
+): fetchedResult is ReviewDeckData {
+  return !loading && fetchedResult !== null && processedDeck !== fetchedResult;
+}
+
 function isReviewQueueFinished(queue: ReviewQueue | null): boolean {
   if (!queue) return false;
   return getCurrentReviewEntry(queue) === null;
@@ -111,6 +182,14 @@ function getInitialCompletedCount(queue: ReviewQueue | null): number {
 
 function getInitialSessionTotalCount(queue: ReviewQueue | null): number | null {
   return queue ? queue.sessionTotalCount : null;
+}
+
+function getAvailableReviewCount(
+  deck: ReviewDeckData | undefined,
+  queue: ReviewQueue | null,
+): number | null {
+  if (deck?.availableCount !== undefined) return deck.availableCount;
+  return getInitialSessionTotalCount(queue);
 }
 
 function initializeReviewQueue(
@@ -194,6 +273,7 @@ export function usePracticeDeck(
   const activeDirectionRef = useRef<ReviewDirection>(initialData?.reviewDirection ?? 'cz_to_en');
   const reviewQueueRef = useRef<ReviewQueue | null>(null);
   const queueDataRef = useRef<ReviewDeckData | null>(null);
+  const processedDeckDataRef = useRef<ReviewDeckData | null>(initialData ?? null);
   const pendingAnswerRef = useRef<UserItemLocal | null>(null);
   const initialQueue = initializeReviewQueue(
     initialReviewDeck,
@@ -213,7 +293,8 @@ export function usePracticeDeck(
   const [finishedReview, setFinishedReview] = useState(() => isReviewQueueFinished(initialQueue));
   const [retryAction, setRetryAction] = useState<ReviewRetryAction | null>(null);
   const [completedCount, setCompletedCount] = useState(getInitialCompletedCount(initialQueue));
-  const [totalCount, setTotalCount] = useState(getInitialSessionTotalCount(initialQueue));
+  const [totalCount, setTotalCount] = useState(getAvailableReviewCount(initialReviewDeck, initialQueue));
+  const completedOffsetRef = useRef(0);
   const isTransitioningRef = useRef(false);
   const [secondaryContent, setSecondaryContent] = useState<SecondaryContent | null>(null);
   const secondaryContentRequestIdRef = useRef(0);
@@ -266,6 +347,7 @@ export function usePracticeDeck(
       setQueueVersion(0);
       setCompletedCount(0);
       setTotalCount(null);
+      completedOffsetRef.current = 0;
       setFinishedReview(false);
     });
 
@@ -273,13 +355,14 @@ export function usePracticeDeck(
   }, [userId]);
 
   useEffect(() => {
-    if (loading || !fetchedResult || queueDataRef.current === fetchedResult) return;
+    if (!shouldProcessFetchedDeck(loading, fetchedResult, processedDeckDataRef.current)) return;
 
     const queue = createReviewQueue(getReviewQueueEntries(fetchedResult), reviewKind);
+    processedDeckDataRef.current = fetchedResult;
     queueDataRef.current = fetchedResult;
     reviewQueueRef.current = queue;
-    setCompletedCount(queue.completedCount);
-    setTotalCount(queue.sessionTotalCount);
+    setCompletedCount(completedOffsetRef.current + queue.completedCount);
+    setTotalCount(getAvailableReviewCount(fetchedResult, queue));
     setFinishedReview(getCurrentReviewEntry(queue) === null);
     setRetryAction(null);
     resetQuestionState();
@@ -367,33 +450,21 @@ export function usePracticeDeck(
       pendingAnswerRef.current = null;
       setRetryAction(null);
 
-      if (answerResult.hasNextItem) {
-        setCompletedCount(queue.completedCount);
-        setTotalCount(queue.sessionTotalCount);
-        setQueueVersion((version) => version + 1);
-        resetQuestionState();
-        return;
-      }
-
-      const nextDeck = await loadNextDirectionDeck(userId ?? '', queue.reviewKind, activeDirectionRef.current);
-      if (nextDeck) {
-        startDirectionDeck({
-          deck: nextDeck,
-          queueRef: reviewQueueRef,
-          dataRef: queueDataRef,
-          directionRef: activeDirectionRef,
-          update: (nextQueue) => {
-            setCompletedCount(nextQueue.completedCount);
-            setTotalCount(nextQueue.sessionTotalCount);
-          },
-          setFinishedReview,
-          setRetryAction,
-          setQueueVersion,
-          resetQuestionState,
-        });
-        return;
-      }
-      await completePractice();
+      await continueAnsweredQueue({
+        answerResult,
+        queue,
+        userId,
+        activeDirectionRef,
+        reviewQueueRef,
+        queueDataRef,
+        completedOffsetRef,
+        setCompletedCount,
+        setFinishedReview,
+        setRetryAction,
+        setQueueVersion,
+        resetQuestionState,
+        completePractice,
+      });
     },
     [completePractice, resetQuestionState, saveReviewItem, userId],
   );
@@ -483,11 +554,6 @@ function createEmptyReviewDeck(reviewKind: ReviewKind): ReviewDeckData {
 
 function getReviewKind(initialData: ReviewDeckData | null | undefined): ReviewKind {
   return initialData?.reviewKind ?? 'grammar';
-}
-
-function getAlternateDirection(direction: ReviewDirection): ReviewDirection {
-  if (direction === 'cz_to_en') return 'en_to_cz';
-  return 'cz_to_en';
 }
 
 function getReviewProgressLabel(completedCount: number, totalCount: number | null): string {

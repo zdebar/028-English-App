@@ -233,6 +233,22 @@ describe('practice content resolution', () => {
     expect(mocks.getReviewDeck).not.toHaveBeenCalled();
   });
 
+  it('does not replace an explicitly requested CZ direction with EN items', async () => {
+    const enItem = makeReviewItem(2, {
+      next_at_en_to_cz: '2026-01-01T00:00:00.000Z',
+      review_direction: 'en_to_cz',
+    });
+    mocks.getAllReviewItems.mockImplementation(async (_userId: string, _kind: string, direction: string) =>
+      direction === 'en_to_cz' ? [enItem] : [],
+    );
+
+    const result = await loadReviewDeckData('u1', 'grammar', 'cz_to_en');
+
+    expect(result.entries).toEqual([]);
+    expect(result.reviewDirection).toBe('cz_to_en');
+    expect(result.availableCount).toBe(1);
+  });
+
   it('falls back to the direct review query when prefetch fails', async () => {
     const dueItem = makeReviewItem(1);
     mocks.getReviewDeck.mockResolvedValue([dueItem]);

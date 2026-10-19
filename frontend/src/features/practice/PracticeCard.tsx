@@ -108,8 +108,9 @@ export default function PracticeCard({ initialData }: PracticeCardProps) {
       showProgressLabel
       isBlockTrainingPractice={false}
       revealed={revealed}
-      czech={czech}
-      czechDescription={currentItem.review_direction === 'en_to_cz' && !revealed ? null : currentItem.czech_description}
+      czech={currentItem.review_direction === 'en_to_cz' ? currentItem.czech : czech}
+      czechDescription={currentItem.czech_description}
+      czechHidden={currentItem.review_direction === 'en_to_cz' && !revealed}
       english={english}
       pronunciation={pronunciation}
       audioDisabled={audioDisabled}

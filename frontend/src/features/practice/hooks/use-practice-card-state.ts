@@ -1,7 +1,7 @@
 import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { reportError } from '@/features/logging/monitoring-handler';
 import type { UserItemLocal } from '@/types/user-item.types';
-import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState, type Dispatch, type SetStateAction } from 'react';
 import { NBSP, useHint } from './use-hint';
 
 type UsePracticeCardStateOptions = {
@@ -127,7 +127,7 @@ function usePracticeAudioPhases({
   isCompletion,
   stopAudio,
 }: PracticeAudioPhasesOptions): void {
-  useEffect(() => {
+  useLayoutEffect(() => {
     setStage(getInitialStage(currentItem));
   }, [currentItem?.item_id, currentItem?.review_direction, currentItem?.audio, setStage]);
 
@@ -151,7 +151,7 @@ export function usePracticeCardState({
   setRevealed,
 }: UsePracticeCardStateOptions) {
   const isEnToCz = currentItem?.review_direction === 'en_to_cz';
-  const [enToCzStage, setEnToCzStage] = useState(1);
+  const [enToCzStage, setEnToCzStage] = useState(() => getInitialStage(currentItem));
   const { englishHinted, resetHint, plusHint } = useHint(
     currentItem?.czech,
     currentItem?.english,

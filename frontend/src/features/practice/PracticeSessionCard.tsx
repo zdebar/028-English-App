@@ -39,6 +39,7 @@ export type PracticeSessionCardProps = Readonly<{
   revealed: boolean;
   czech: string | undefined;
   czechDescription?: string | null;
+  czechHidden?: boolean;
   english: string | undefined;
   pronunciation: string | undefined;
   audioDisabled: boolean;
@@ -191,6 +192,7 @@ function PracticeControls({
 type PracticeMainContentProps = Readonly<{
   czech: string | undefined;
   czechDescription: string | null | undefined;
+  czechHidden: boolean;
   english: string | undefined;
   pronunciation: string | undefined;
   isContentLoading: boolean;
@@ -199,6 +201,7 @@ type PracticeMainContentProps = Readonly<{
 function PracticeMainContent({
   czech,
   czechDescription,
+  czechHidden,
   english,
   pronunciation,
   isContentLoading,
@@ -228,11 +231,11 @@ function PracticeMainContent({
 
   return (
     <div id="item" className="flex flex-col justify-center gap-1">
-      <p lang="cs" className="text-center font-bold">
+      <p lang="cs" className={`text-center font-bold ${czechHidden ? 'invisible' : ''}`}>
         {czech}
       </p>
       {czechDescription && (
-        <p lang="cs" className="text-center text-sm font-light">
+        <p lang="cs" className={`text-center text-sm font-light ${czechHidden ? 'invisible' : ''}`}>
           {czechDescription}
         </p>
       )}
@@ -254,6 +257,7 @@ type NormalizedPracticeSessionCardProps = PracticeSessionCardProps &
     completeDisabled: boolean;
     isBlockTrainingPractice: boolean;
     showProgressLabel: boolean;
+    czechHidden: boolean;
   }>;
 
 const DEFAULT_PRACTICE_SESSION_CARD_PROPS = {
@@ -263,6 +267,7 @@ const DEFAULT_PRACTICE_SESSION_CARD_PROPS = {
   completeDisabled: false,
   isBlockTrainingPractice: false,
   showProgressLabel: false,
+  czechHidden: false,
 } as const;
 
 function normalizePracticeSessionCardProps(
@@ -474,6 +479,7 @@ function PracticeCardButton({
         <PracticeMainContent
           czech={czech}
           czechDescription={props.czechDescription}
+          czechHidden={props.czechHidden}
           english={english}
           pronunciation={pronunciation}
           isContentLoading={props.isContentLoading ?? false}

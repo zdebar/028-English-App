@@ -406,6 +406,27 @@ describe('PracticeCard', () => {
     expect(container.querySelector('#item')?.children).toHaveLength(3);
   });
 
+  it('keeps the English answer in place while revealing the Czech answer in EN-to-CZ practice', () => {
+    mocks.practiceDeck.currentItem = mocks.makePracticeItem({
+      review_direction: 'en_to_cz',
+      czech_description: 'Pozdrav',
+    });
+    mocks.practiceDeck.english = 'hello';
+    mocks.practiceDeck.revealed = false;
+
+    const { container, rerender } = render(<PracticeCard />);
+    const englishBeforeReveal = screen.getByText('hello');
+    const itemRows = container.querySelector('#item')?.children;
+    expect(screen.getByText('ahoj').className).toContain('invisible');
+    expect(itemRows?.[2]).toBe(englishBeforeReveal);
+
+    mocks.practiceDeck.revealed = true;
+    rerender(<PracticeCard />);
+
+    expect(screen.getByText('ahoj').className).not.toContain('invisible');
+    expect(container.querySelector('#item')?.children[2]).toBe(englishBeforeReveal);
+  });
+
   it('shows item progress on the left and review progress on the right', () => {
     const { container } = render(<PracticeCard />);
     const progressLabels = container.querySelectorAll('#bottom-bar > div > p');

@@ -5,13 +5,14 @@ import type { UserItemLocal } from '@/types/user-item.types';
 
 const playAudioMock = vi.fn();
 const stopAudioMock = vi.fn();
+const audioStateMock = vi.hoisted(() => ({ loading: false, error: false }));
 
 vi.mock('@/features/audio/use-audio-manager', () => ({
   useAudioManager: () => ({
     playAudio: playAudioMock,
     stopAudio: stopAudioMock,
-    audioError: false,
-    loading: false,
+    audioError: audioStateMock.error,
+    loading: audioStateMock.loading,
     isPlaying: false,
   }),
 }));
@@ -35,6 +36,8 @@ describe('usePracticeCardState', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     playAudioMock.mockResolvedValue(true);
+    audioStateMock.loading = false;
+    audioStateMock.error = false;
   });
 
   it('reveals the English answer and plays Czech-to-English audio', () => {
@@ -98,5 +101,21 @@ describe('usePracticeCardState', () => {
     act(() => result.current.handleReveal());
     expect(result.current.revealed).toBe(true);
     expect(result.current.czech).toBe('ahoj');
+  });
+
+  it('holds the hidden audio phase until loading confirms that audio is unavailable', () => {
+    const enToCzItem = { ...item, item_id: 3, review_direction: 'en_to_cz' } as UserItemLocal;
+    audioStateMock.loading = true;
+    const { result, rerender } = renderHook(() => useTestCard(enToCzItem));
+
+    expect(result.current.english).toBeUndefined();
+    expect(result.current.czech).toBeUndefined();
+
+    audioStateMock.loading = false;
+    audioStateMock.error = true;
+    rerender();
+
+    expect(result.current.english).toBe('hello');
+    expect(result.current.czech).toBeUndefined();
   });
 });
