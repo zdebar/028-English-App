@@ -822,14 +822,14 @@ function getReadyAt(items: UserItemLocal[], deckSize: number, nowIso: string): s
   if (dueItems.length >= deckSize) return nowIso;
   const futureItems = items
     .filter((item) => isReviewItemFuture(item, nowIso, item.review_direction))
-    .sort((left, right) => getDirectionalNextAt(left).localeCompare(getDirectionalNextAt(right)));
+    .sort((left, right) => (getDirectionalNextAt(left) ?? '').localeCompare(getDirectionalNextAt(right) ?? ''));
   return getDirectionalNextAt(futureItems[deckSize - dueItems.length - 1] ?? null);
 }
 
 function getNextReviewAtForItems(items: UserItemLocal[], nowIso: string): string | null {
   const nextItem = items
     .filter((item) => isReviewItemFuture(item, nowIso, item.review_direction))
-    .sort((left, right) => getDirectionalNextAt(left).localeCompare(getDirectionalNextAt(right)))[0];
+    .sort((left, right) => (getDirectionalNextAt(left) ?? '').localeCompare(getDirectionalNextAt(right) ?? ''))[0];
   return getDirectionalNextAt(nextItem ?? null);
 }
 

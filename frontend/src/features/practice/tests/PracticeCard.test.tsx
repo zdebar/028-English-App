@@ -26,6 +26,9 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     sort_order: 1,
     curriculum_sort_path: [1, 1, 1],
     progress_cz_to_en: 2,
+    progress_en_to_cz: 0,
+    is_cz_to_en_enabled: true,
+    is_en_to_cz_enabled: true,
     note_id: null,
     lesson_id: 1,
     updated_at: '2024-01-01T00:00:00.000Z',
@@ -37,6 +40,8 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     deleted_at: '9999-12-31T00:00:00.000Z',
     next_at_cz_to_en: '2024-01-01T00:00:00.000Z',
     mastered_at_cz_to_en: '9999-12-31T00:00:00.000Z',
+    next_at_en_to_cz: '2024-01-01T00:00:00.000Z',
+    mastered_at_en_to_cz: '9999-12-31T00:00:00.000Z',
     ...overrides,
   }),
   practiceDeck: {
