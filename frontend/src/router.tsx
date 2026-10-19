@@ -44,6 +44,10 @@ export async function protectedLoader() {
   return null;
 }
 
+function InitialLoadingFallback() {
+  return <DelayedMessage className="mt-20" />;
+}
+
 async function requireUserId(): Promise<string> {
   await waitForAuthReady();
   const userId = useAuthStore.getState().userId;
@@ -120,7 +124,7 @@ export const router = createHashRouter([
   {
     path: ROUTES.home,
     Component: App,
-    HydrateFallback: DelayedMessage,
+    HydrateFallback: InitialLoadingFallback,
     errorElement: <RouteDataError />,
     children: [
       { index: true, loader: loadHome, Component: Home },
@@ -129,7 +133,7 @@ export const router = createHashRouter([
       {
         Component: ProtectedLayout,
         loader: protectedLoader,
-        HydrateFallback: DelayedMessage,
+        HydrateFallback: InitialLoadingFallback,
         children: [
           {
             path: ROUTES.practice,
