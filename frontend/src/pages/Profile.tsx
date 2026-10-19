@@ -3,7 +3,7 @@ import DeleteUserButton from '@/features/auth/DeleteUserButton';
 import SignoutButton from '@/features/auth/SignoutButton';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { TEXTS } from '@/locales/cs';
-import { useEffect, useState, type ChangeEvent, type JSX } from 'react';
+import { useEffect, useState, type ChangeEvent, type JSX, type KeyboardEvent } from 'react';
 import UserSettings from '@/database/models/user-settings';
 import { usePracticeAvailabilityStore } from '@/features/practice/use-practice-availability-store';
 import { refreshPracticeAvailability } from '@/features/practice/practice-availability-controller';
@@ -19,7 +19,9 @@ export default function Profile(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const [dailyLimit, setDailyLimit] = useState('1');
   const [savedDailyLimit, setSavedDailyLimit] = useState(1);
-  const setMaxNewLessonsPerDay = usePracticeAvailabilityStore((state) => state.setMaxNewLessonsPerDay);
+  const setMaxNewLessonsPerDay = usePracticeAvailabilityStore(
+    (state) => state.setMaxNewLessonsPerDay,
+  );
   const showToast = useToastStore((state) => state.showToast);
 
   useEffect(() => {
@@ -70,33 +72,40 @@ export default function Profile(): JSX.Element {
     saveDailyLimit();
   };
 
+  const handleDailyLimitKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') event.currentTarget.blur();
+  };
+
   return (
     <div className="card-width grow-0 gap-1">
       <div className="mx-auto mt-4 mb-4 w-64 text-left">
         <PropertyView
           label={TEXTS.profileEmailLabel}
-          className="justify-center"
+          className="justify-start"
           classNameLabel="w-20"
           classNameValue="wrap-break-word"
         >
           {userEmail || TEXTS.notAvailable}
         </PropertyView>
       </div>
-      <div className="mx-auto mb-4 flex w-64 flex-col gap-1 text-left">
-        <label htmlFor="daily-new-lesson-limit" className="font-bold">
-          {TEXTS.profileDailyNewLessonLimit}
-        </label>
-        <input
-          id="daily-new-lesson-limit"
-          type="number"
-          min={1}
-          step={1}
-          value={dailyLimit}
-          onChange={handleDailyLimitChange}
-          onBlur={handleDailyLimitBlur}
-          className="h-input w-full px-2"
-        />
-        <p className="text-sm opacity-70">{TEXTS.profileDailyNewLessonLimitHint}</p>
+      <div className="mx-auto mb-4 w-64 text-left">
+        <div className="flex items-center gap-1">
+          <label htmlFor="daily-new-lesson-limit" className="w-40 shrink-0 font-bold">
+            {TEXTS.profileDailyNewLessonLimit}
+          </label>
+          <input
+            id="daily-new-lesson-limit"
+            type="number"
+            min={1}
+            step={1}
+            value={dailyLimit}
+            onChange={handleDailyLimitChange}
+            onBlur={handleDailyLimitBlur}
+            onKeyDown={handleDailyLimitKeyDown}
+            title={TEXTS.profileDailyNewLessonLimitHint}
+            className="h-input color-base min-w-0 grow border border-dashed px-4 text-right focus:outline-none"
+          />
+        </div>
       </div>
       <SignoutButton />
       <DeleteUserButton />
