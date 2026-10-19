@@ -19,6 +19,7 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     user_id: 'u1',
     item_id: 1,
     czech: 'ahoj',
+    czech_description: null,
     english: 'hello',
     pronunciation: 'həˈloʊ',
     audio: 'hello.opus',
@@ -385,6 +386,24 @@ describe('PracticeCard', () => {
 
     expect(screen.getByTestId('grammar-detail').textContent).toContain('Articles');
     expect(screen.getByTestId('grammar-detail').dataset.helpEnabled).toBe('false');
+  });
+
+  it('shows an optional Czech description below Czech before revealing the answer', () => {
+    mocks.practiceDeck.currentItem = mocks.makePracticeItem({ czech_description: 'Pozdrav' });
+
+    const { container, rerender } = render(<PracticeCard />);
+    const czech = screen.getByText('ahoj');
+    const description = screen.getByText('Pozdrav');
+
+    expect(czech.parentElement?.children[1]).toBe(description);
+    expect(description.className).toContain('font-light');
+    expect(screen.getByText('hello-hint')).toBeTruthy();
+
+    mocks.practiceDeck.currentItem = mocks.makePracticeItem({ czech_description: null });
+    rerender(<PracticeCard />);
+
+    expect(screen.queryByText('Pozdrav')).toBeNull();
+    expect(container.querySelector('#item')?.children).toHaveLength(3);
   });
 
   it('shows item progress on the left and review progress on the right', () => {

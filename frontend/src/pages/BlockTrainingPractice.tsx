@@ -61,6 +61,7 @@ function InitialTrainingContent({
       progressLabel={deck.progressLabel}
       revealed={deck.revealed}
       czech={deck.czech}
+      czechDescription={deck.currentItem.czech_description}
       english={deck.english}
       pronunciation={deck.pronunciation}
       audioDisabled={deck.audioDisabled}

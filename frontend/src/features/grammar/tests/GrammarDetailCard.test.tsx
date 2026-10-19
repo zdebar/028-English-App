@@ -58,6 +58,7 @@ import GrammarDetailCard from '@/features/grammar/GrammarDetailCard';
 const exampleItem: UserItemLocal = {
   user_id: 'user-1',
   item_id: 41,
+  czech_description: null,
   czech: 'já jsem',
   english: 'I am',
   pronunciation: 'aɪ æm',

@@ -316,6 +316,7 @@ function item(itemId: number) {
     user_id: 'u1',
     item_id: itemId,
     czech: `cz${itemId}`,
+    czech_description: null,
     english: `en${itemId}`,
     pronunciation: '',
     audio: null,

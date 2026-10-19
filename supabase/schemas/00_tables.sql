@@ -114,6 +114,7 @@ CREATE TABLE IF NOT EXISTS notes (
 CREATE TABLE IF NOT EXISTS items (
   id SERIAL PRIMARY KEY,
   czech TEXT NOT NULL,
+  czech_description TEXT DEFAULT NULL,
   english TEXT NOT NULL,
   pronunciation TEXT,
   audio TEXT,

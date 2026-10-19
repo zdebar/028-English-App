@@ -8,6 +8,7 @@ RETURNS TABLE (
   item_id INTEGER,
   user_id UUID,
   czech TEXT,
+  czech_description TEXT,
   english TEXT,
   pronunciation TEXT,
   audio TEXT,

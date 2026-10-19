@@ -215,6 +215,7 @@ function item(overrides: Record<string, unknown> = {}) {
     user_id: 'u1',
     item_id: 1,
     czech: 'ahoj',
+    czech_description: null,
     english: 'hello',
     pronunciation: '',
     audio: null,

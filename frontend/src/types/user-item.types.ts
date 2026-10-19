@@ -13,6 +13,7 @@ export interface UserItemBase {
   user_id: string;
   item_id: number;
   czech: string;
+  czech_description: string | null;
   english: string;
   pronunciation: string;
   audio: string | null;

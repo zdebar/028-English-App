@@ -215,6 +215,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   item_id!: number;
   user_id!: string;
   czech!: string;
+  czech_description!: string | null;
   english!: string;
   pronunciation!: string;
   audio!: string | null;

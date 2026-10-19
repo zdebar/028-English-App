@@ -82,6 +82,7 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
     user_id: 'u1',
     item_id: 1,
     czech: 'ahoj',
+    czech_description: null,
     english: 'hello',
     pronunciation: 'hello',
     audio: null,
@@ -157,6 +158,21 @@ describe('UserItem', () => {
     );
 
     expect(deck.map((item) => item.item_id)).toEqual([1, 2]);
+  });
+
+  it('preserves Czech descriptions from the remote item response', async () => {
+    const apiItem = toApiItem(makeItem({ czech_description: 'Pozdrav' }));
+    mocks.getSyncTimestamps.mockResolvedValue({
+      lastSyncedAt: '2025-01-01T00:00:00.000Z',
+      newSyncedAt: '2027-01-01T00:00:00.000Z',
+    });
+    mocks.rpc.mockResolvedValue({ data: [apiItem], error: null });
+
+    await UserItem.syncFromRemote('u1', true);
+
+    expect(mocks.bulkPut).toHaveBeenCalledWith([
+      expect.objectContaining({ czech_description: 'Pozdrav' }),
+    ]);
   });
 
   it('loads all eligible review items, including future rows, without a cutoff', async () => {

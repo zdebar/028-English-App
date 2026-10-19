@@ -84,6 +84,7 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
     mastered_at_cz_to_en: '9999-12-31',
     curriculum_sort_path: [1, 1, 1],
     ...overrides,
+    czech_description: overrides.czech_description ?? null,
   };
 }
 

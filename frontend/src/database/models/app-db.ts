@@ -111,5 +111,14 @@ export default class AppDB extends Dexie {
       grammar_topics: 'id, sort_order',
       grammar_groups: 'id, grammar_topic_id, sort_order',
     });
+
+    this.version(7)
+      .stores({ user_items: USER_ITEMS_SCHEMA })
+      .upgrade(async (transaction) => {
+        await transaction.table('user_items').toCollection().modify((item) => {
+          const localItem = item as Record<string, unknown>;
+          localItem.czech_description ??= null;
+        });
+      });
   }
 }

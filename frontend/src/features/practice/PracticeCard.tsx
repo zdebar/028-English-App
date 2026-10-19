@@ -105,6 +105,7 @@ export default function PracticeCard({ initialData }: PracticeCardProps) {
       isBlockTrainingPractice={false}
       revealed={revealed}
       czech={czech}
+      czechDescription={currentItem.czech_description}
       english={english}
       pronunciation={pronunciation}
       audioDisabled={audioDisabled}

@@ -354,6 +354,7 @@ function entry(itemId: number, grammarChunkId = 0): PracticeDeckEntry {
       user_id: 'u1',
       item_id: itemId,
       czech: 'ahoj',
+      czech_description: null,
       english: 'hello',
       pronunciation: '',
       audio: null,

@@ -15,6 +15,8 @@ vi.mock('@/locales/cs', () => ({
   TEXTS: {
     notAvailable: 'N/A',
     czech: 'Czech',
+    czechDescription: 'Czech description',
+    noCzechDescription: 'no description',
     english: 'English',
     pronunciation: 'Pronunciation',
     progress: 'Progress',
@@ -147,6 +149,30 @@ describe('VocabularyDetailCard', () => {
     );
 
     expect(screen.getByText('progress:2 / 9')).toBeTruthy();
+  });
+
+  it('shows the Czech description below Czech, using a fallback when missing', () => {
+    const { rerender } = render(
+      <VocabularyDetailCard
+        selectedWord={{ item_id: 1, czech: 'ahoj', czech_description: 'Greeting' } as any}
+        selectedTitle="ahoj"
+        onClose={vi.fn()}
+        onReset={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText('czech description:Greeting')).toBeTruthy();
+
+    rerender(
+      <VocabularyDetailCard
+        selectedWord={{ item_id: 1, czech: 'ahoj', czech_description: null } as any}
+        selectedTitle="ahoj"
+        onClose={vi.fn()}
+        onReset={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText('czech description:no description')).toBeTruthy();
   });
 
   it('disables play and volume buttons when audio is not ready', () => {

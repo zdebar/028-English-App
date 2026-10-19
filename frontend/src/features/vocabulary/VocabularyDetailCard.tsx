@@ -25,7 +25,11 @@ type VocabularyDetailCardProps = Readonly<{
   onReset: () => Promise<void>;
 }>;
 
-type VocabularyProperty = Readonly<{ label: string; value: string | undefined }>;
+type VocabularyProperty = Readonly<{
+  label: string;
+  value: string | undefined;
+  classNameValue?: string;
+}>;
 
 type VocabularyDirectionSection = Readonly<{
   title: string;
@@ -35,6 +39,13 @@ type VocabularyDirectionSection = Readonly<{
 function getBaseProperties(selectedWord: UserItemLocal | null): readonly VocabularyProperty[] {
   return [
     { label: lowercaseInitial(TEXTS.czech), value: selectedWord?.czech },
+    {
+      label: lowercaseInitial(TEXTS.czechDescription),
+      value: selectedWord
+        ? (selectedWord.czech_description ?? TEXTS.noCzechDescription)
+        : undefined,
+      classNameValue: 'text-sm font-light',
+    },
     { label: lowercaseInitial(TEXTS.english), value: selectedWord?.english },
     { label: lowercaseInitial(TEXTS.pronunciation), value: selectedWord?.pronunciation },
   ];
@@ -98,7 +109,7 @@ function VocabularyPropertyList({
           label={property.label}
           className="grid grid-cols-2"
           classNameLabel={labelClassName}
-          classNameValue="min-w-0"
+          classNameValue={`min-w-0 ${property.classNameValue ?? ''}`}
         >
           {property.value ?? NOT_AVAILABLE}
         </PropertyView>

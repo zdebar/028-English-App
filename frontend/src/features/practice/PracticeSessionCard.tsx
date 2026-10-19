@@ -38,6 +38,7 @@ export type PracticeSessionCardProps = Readonly<{
   progressHelpText?: string;
   revealed: boolean;
   czech: string | undefined;
+  czechDescription?: string | null;
   english: string | undefined;
   pronunciation: string | undefined;
   audioDisabled: boolean;
@@ -189,6 +190,7 @@ function PracticeControls({
 
 type PracticeMainContentProps = Readonly<{
   czech: string | undefined;
+  czechDescription: string | null | undefined;
   english: string | undefined;
   pronunciation: string | undefined;
   isContentLoading: boolean;
@@ -196,6 +198,7 @@ type PracticeMainContentProps = Readonly<{
 
 function PracticeMainContent({
   czech,
+  czechDescription,
   english,
   pronunciation,
   isContentLoading,
@@ -228,6 +231,11 @@ function PracticeMainContent({
       <p lang="cs" className="text-center font-bold">
         {czech}
       </p>
+      {czechDescription && (
+        <p lang="cs" className="text-center text-sm font-light">
+          {czechDescription}
+        </p>
+      )}
       <p lang="en" translate="no" className="text-center font-normal">
         {english}
       </p>
@@ -465,6 +473,7 @@ function PracticeCardButton({
       >
         <PracticeMainContent
           czech={czech}
+          czechDescription={props.czechDescription}
           english={english}
           pronunciation={pronunciation}
           isContentLoading={props.isContentLoading ?? false}

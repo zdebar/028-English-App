@@ -26,6 +26,8 @@ export const OVERVIEW_TEXTS = {
   vocabularyCzechOption: 'Čeština',
   vocabularyEnglishOption: 'Angličtina',
   czech: 'Česky',
+  czechDescription: 'Český popis',
+  noCzechDescription: 'bez popisu',
   english: 'Anglicky',
   pronunciation: 'Výslovnost',
   pronunciationTitle: (pronunciation: string) => `Výslovnost: ${pronunciation}`,

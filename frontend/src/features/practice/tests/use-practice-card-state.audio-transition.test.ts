@@ -105,6 +105,7 @@ function createItem(itemId: number, audio: string, english: string): UserItemLoc
     user_id: 'u1',
     item_id: itemId,
     czech: 'ahoj',
+    czech_description: null,
     english,
     pronunciation: '',
     audio,

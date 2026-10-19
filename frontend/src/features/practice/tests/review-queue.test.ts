@@ -107,6 +107,7 @@ function item(itemId: number, nextAt: string, overrides: Partial<UserItemLocal> 
     user_id: 'u1',
     item_id: itemId,
     czech: 'ahoj',
+    czech_description: null,
     english: 'hello',
     pronunciation: '',
     audio: null,
