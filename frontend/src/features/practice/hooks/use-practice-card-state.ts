@@ -1,7 +1,7 @@
 import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { reportError } from '@/features/logging/monitoring-handler';
 import type { UserItemLocal } from '@/types/user-item.types';
-import { useCallback, useEffect, useLayoutEffect, useState, type Dispatch, type SetStateAction } from 'react';
+import { useCallback, useEffect, useRef, type Dispatch, type SetStateAction } from 'react';
 import { NBSP, useHint } from './use-hint';
 
 type UsePracticeCardStateOptions = {
@@ -36,48 +36,18 @@ function getPronunciationText(currentItem: UserItemLocal | null, revealed: boole
   return currentItem?.pronunciation || NBSP;
 }
 
-function getInitialStage(item: UserItemLocal | null): number {
-  return item?.review_direction === 'en_to_cz' && item.audio ? 0 : 1;
-}
-
-function shouldAutoPlayAudio(isEnToCz: boolean, stage: number, audio: string | null | undefined): boolean {
-  return isEnToCz && stage === 0 && Boolean(audio);
-}
-
-function getNextRevealStage(
-  isEnToCz: boolean,
-  stage: number,
-  revealed: boolean,
-): 'audio' | 'revealed' | 'ignore' {
-  if (isEnToCz && stage === 0) return 'audio';
-  if (revealed) return 'ignore';
-  return 'revealed';
-}
-
-function getPracticeCzech(item: UserItemLocal | null, isEnToCz: boolean, stage: number): string | undefined {
-  if (isEnToCz && stage < 2) return undefined;
+function getPracticeCzech(item: UserItemLocal | null, isEnToCz: boolean, revealed: boolean): string | undefined {
+  if (isEnToCz && !revealed) return undefined;
   return getCzechText(item);
 }
 
-function playAudioForHiddenPhase(
+function isAudioOnlyPhase(
+  item: UserItemLocal | null,
   isEnToCz: boolean,
-  stage: number,
-  audio: string | null | undefined,
-  playAudio: () => Promise<boolean>,
-): void {
-  if (shouldAutoPlayAudio(isEnToCz, stage, audio)) {
-    playAudio().catch((error: unknown) => reportError('Failed to play practice audio', error));
-  }
-}
-
-function skipFailedAudioPhase(
-  isEnToCz: boolean,
-  stage: number,
-  audio: string | null | undefined,
+  revealed: boolean,
   audioError: boolean,
-  setStage: (stage: number) => void,
-): void {
-  if (shouldAutoPlayAudio(isEnToCz, stage, audio) && audioError) setStage(1);
+): boolean {
+  return isEnToCz && !revealed && Boolean(item?.audio) && !audioError;
 }
 
 function stopAudioOnCompletion(isCompletion: boolean, stopAudio: () => void): void {
@@ -86,33 +56,26 @@ function stopAudioOnCompletion(isCompletion: boolean, stopAudio: () => void): vo
 
 function revealPracticeCard(
   isEnToCz: boolean,
-  stage: number,
   revealed: boolean,
   audioError: boolean,
   playAudio: () => Promise<boolean>,
-  setStage: (stage: number) => void,
   setRevealed: Dispatch<SetStateAction<boolean>>,
 ): void {
-  const revealStage = getNextRevealStage(isEnToCz, stage, revealed);
-  if (revealStage === 'audio') {
-    setStage(1);
-    return;
-  }
-  if (revealStage === 'ignore') return;
+  if (revealed) return;
   if (!isEnToCz && !audioError) {
     playAudio().catch((error: unknown) => reportError('Failed to play practice audio', error));
   }
   setRevealed(true);
-  setStage(2);
 }
 
 type PracticeAudioPhasesOptions = {
   currentItem: UserItemLocal | null;
   isEnToCz: boolean;
-  stage: number;
+  revealed: boolean;
+  audioLoading: boolean;
   audioError: boolean;
   playAudio: () => Promise<boolean>;
-  setStage: (stage: number) => void;
+  attemptedAudioItem: { current: UserItemLocal | null };
   isCompletion: boolean;
   stopAudio: () => void;
 };
@@ -120,24 +83,20 @@ type PracticeAudioPhasesOptions = {
 function usePracticeAudioPhases({
   currentItem,
   isEnToCz,
-  stage,
+  revealed,
+  audioLoading,
   audioError,
   playAudio,
-  setStage,
+  attemptedAudioItem,
   isCompletion,
   stopAudio,
 }: PracticeAudioPhasesOptions): void {
-  useLayoutEffect(() => {
-    setStage(getInitialStage(currentItem));
-  }, [currentItem?.item_id, currentItem?.review_direction, currentItem?.audio, setStage]);
-
   useEffect(() => {
-    playAudioForHiddenPhase(isEnToCz, stage, currentItem?.audio, playAudio);
-  }, [currentItem?.audio, isEnToCz, playAudio, stage]);
-
-  useEffect(() => {
-    skipFailedAudioPhase(isEnToCz, stage, currentItem?.audio, audioError, setStage);
-  }, [audioError, currentItem?.audio, isEnToCz, setStage, stage]);
+    if (!currentItem?.audio || !isEnToCz || revealed || audioLoading || audioError) return;
+    if (attemptedAudioItem.current === currentItem) return;
+    attemptedAudioItem.current = currentItem;
+    playAudio().catch((error: unknown) => reportError('Failed to play practice audio', error));
+  }, [audioError, audioLoading, attemptedAudioItem, currentItem, isEnToCz, playAudio, revealed]);
 
   useEffect(() => {
     stopAudioOnCompletion(isCompletion, stopAudio);
@@ -151,7 +110,7 @@ export function usePracticeCardState({
   setRevealed,
 }: UsePracticeCardStateOptions) {
   const isEnToCz = currentItem?.review_direction === 'en_to_cz';
-  const [enToCzStage, setEnToCzStage] = useState(() => getInitialStage(currentItem));
+  const attemptedAudioItem = useRef<UserItemLocal | null>(null);
   const { englishHinted, resetHint, plusHint } = useHint(
     currentItem?.czech,
     currentItem?.english,
@@ -168,34 +127,33 @@ export function usePracticeCardState({
   usePracticeAudioPhases({
     currentItem,
     isEnToCz,
-    stage: enToCzStage,
+    revealed,
+    audioLoading,
     audioError,
     playAudio: playAudioInternal,
-    setStage: setEnToCzStage,
+    attemptedAudioItem,
     isCompletion,
     stopAudio,
   });
 
-  const czech = getPracticeCzech(currentItem, isEnToCz, enToCzStage);
-  const english = getPracticeEnglish(currentItem, isEnToCz, enToCzStage, revealed, englishHinted);
+  const audioOnlyPhase = isAudioOnlyPhase(currentItem, isEnToCz, revealed, audioError);
+  const czech = getPracticeCzech(currentItem, isEnToCz, revealed);
+  const english = getPracticeEnglish(currentItem, isEnToCz, audioOnlyPhase, revealed, englishHinted);
 
   const resetQuestionState = useCallback(() => {
     setRevealed(false);
-    setEnToCzStage(getInitialStage(currentItem));
     resetHint();
   }, [currentItem, resetHint, setRevealed]);
 
   const handleReveal = useCallback(() => {
     revealPracticeCard(
       isEnToCz,
-      enToCzStage,
       revealed,
       audioError,
       playAudioInternal,
-      setEnToCzStage,
       setRevealed,
     );
-  }, [audioError, enToCzStage, isEnToCz, playAudioInternal, revealed, setRevealed]);
+  }, [audioError, isEnToCz, playAudioInternal, revealed, setRevealed]);
 
   return {
     audioDisabled,
@@ -207,7 +165,7 @@ export function usePracticeCardState({
     isPlaying,
     playAudio: playAudioInternal,
     plusHint,
-    pronunciation: getPracticePronunciation(currentItem, isEnToCz, enToCzStage, revealed),
+    pronunciation: getPracticePronunciation(currentItem, isEnToCz, audioOnlyPhase, revealed),
     resetHint,
     resetQuestionState,
   };
@@ -216,22 +174,22 @@ export function usePracticeCardState({
 function getPracticeEnglish(
   item: UserItemLocal | null,
   isEnToCz: boolean,
-  stage: number,
+  audioOnlyPhase: boolean,
   revealed: boolean,
   englishHinted: string,
 ): string | undefined {
   if (!isEnToCz) return getEnglishText(item, revealed, englishHinted);
-  if (stage === 0) return undefined;
+  if (audioOnlyPhase) return undefined;
   return item?.english;
 }
 
 function getPracticePronunciation(
   item: UserItemLocal | null,
   isEnToCz: boolean,
-  stage: number,
+  audioOnlyPhase: boolean,
   revealed: boolean,
 ): string {
   if (!isEnToCz) return getPronunciationText(item, revealed);
-  if (stage === 0) return NBSP;
+  if (audioOnlyPhase) return NBSP;
   return item?.pronunciation || NBSP;
 }

@@ -74,7 +74,7 @@ describe('usePracticeCardState', () => {
     expect(stopAudioMock).toHaveBeenCalledOnce();
   });
 
-  it('shows English with pronunciation after the automatic audio phase, then reveals Czech', () => {
+  it('plays audio only before reveal, then reveals the full EN-to-CZ card in one click', () => {
     const enToCzItem = { ...item, item_id: 1, review_direction: 'en_to_cz' } as UserItemLocal;
     const { result } = renderHook(() => useTestCard(enToCzItem));
 
@@ -83,12 +83,9 @@ describe('usePracticeCardState', () => {
     expect(playAudioMock).toHaveBeenCalledOnce();
 
     act(() => result.current.handleReveal());
+    expect(result.current.revealed).toBe(true);
     expect(result.current.english).toBe('hello');
     expect(result.current.pronunciation).toBe('hello-pron');
-    expect(result.current.czech).toBeUndefined();
-
-    act(() => result.current.handleReveal());
-    expect(result.current.revealed).toBe(true);
     expect(result.current.czech).toBe('ahoj');
   });
 
