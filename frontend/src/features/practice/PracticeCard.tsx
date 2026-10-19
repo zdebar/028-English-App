@@ -23,7 +23,7 @@ export default function PracticeCard({ initialData }: PracticeCardProps) {
   const navigate = useNavigate();
   const notifiedDetailFailuresRef = useRef(new Set<string>());
   const handlePracticeComplete = useCallback(() => {
-    navigate(ROUTES.home, { replace: true });
+    void navigate(ROUTES.home, { replace: true });
   }, [navigate]);
   const {
     currentItem,

@@ -85,7 +85,7 @@ export default function InitialTrainingPractice(): JSX.Element {
   const [introDismissed, setIntroDismissed] = useState(false);
   const initialData = useLoaderData() as InitialTrainingData;
   const handlePracticeComplete = useCallback(() => {
-    navigate(ROUTES.home, { replace: true });
+    void navigate(ROUTES.home, { replace: true });
   }, [navigate]);
   const deck = useInitialTrainingDeck(userId, initialData, handlePracticeComplete);
   usePracticeExitBlocker(deck.finishPractice);
