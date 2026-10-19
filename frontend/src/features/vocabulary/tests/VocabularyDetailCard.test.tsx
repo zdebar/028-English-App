@@ -80,7 +80,11 @@ vi.mock('@/features/vocabulary/vocabulary.utils', () => ({
 vi.mock('@/components/UI/OverviewCard', () => ({
   default: ({ buttonTitle, onClose, handleReset, showResetAction = true, children }: any) => (
     <div>
-      <h1>{buttonTitle}</h1>
+      {showResetAction && (
+        <button data-testid="header-reset" disabled={!handleReset}>
+          {buttonTitle}
+        </button>
+      )}
       <button data-testid="close" onClick={onClose}>
         close
       </button>
@@ -95,8 +99,8 @@ vi.mock('@/components/UI/OverviewCard', () => ({
 }));
 
 vi.mock('@/components/UI/PropertyView', () => ({
-  default: ({ label, children }: any) => (
-    <div>
+  default: ({ label, children, alignTop, classNameValue }: any) => (
+    <div data-testid={`property-${label}`} data-align-top={alignTop ? 'true' : 'false'} data-value-class={classNameValue}>
       {label}:{String(children)}
     </div>
   ),
@@ -135,7 +139,6 @@ describe('VocabularyDetailCard', () => {
     render(
       <VocabularyDetailCard
         selectedWord={{ item_id: 1, czech: 'ahoj' } as any}
-        selectedTitle="ahoj"
         onClose={onClose}
         onReset={onReset}
       />,
@@ -149,11 +152,44 @@ describe('VocabularyDetailCard', () => {
     expect(onReset).toHaveBeenCalledWith('cz_to_en');
   });
 
+  it('uses the English word as the card title and makes direction reset buttons full width', () => {
+    render(
+      <VocabularyDetailCard
+        selectedWord={{ item_id: 1, czech: 'ahoj', english: 'hello' } as any}
+        onClose={vi.fn()}
+        onReset={vi.fn()}
+      />,
+    );
+
+    const headerReset = screen.getByTestId('header-reset') as HTMLButtonElement;
+    expect(headerReset.textContent).toBe('hello');
+    expect(headerReset.disabled).toBe(true);
+    const resetButton = screen.getByRole('button', { name: 'cZ to EN' });
+    expect(resetButton.className).toContain('h-input');
+    expect(resetButton.className).toContain('w-full');
+    expect(resetButton.className).not.toContain('mx-4');
+  });
+
+  it('top-aligns and wraps long vocabulary descriptions', () => {
+    const longDescription = 'unbroken-description-'.repeat(10);
+    render(
+      <VocabularyDetailCard
+        selectedWord={{ item_id: 1, czech: 'ahoj', english: 'hello', czech_description: longDescription } as any}
+        onClose={vi.fn()}
+        onReset={vi.fn()}
+      />,
+    );
+
+    const description = screen.getByTestId('property-czech description');
+    expect(description.dataset.alignTop).toBe('true');
+    expect(description.dataset.valueClass).toContain('break-words');
+    expect(description.dataset.valueClass).toContain('[overflow-wrap:anywhere]');
+  });
+
   it('formats item progress with the configured SRS length', () => {
     render(
       <VocabularyDetailCard
         selectedWord={{ item_id: 1, czech: 'ahoj', progress_cz_to_en: 2 } as any}
-        selectedTitle="ahoj"
         onClose={vi.fn()}
         onReset={vi.fn()}
       />,
@@ -166,7 +202,6 @@ describe('VocabularyDetailCard', () => {
     const { rerender } = render(
       <VocabularyDetailCard
         selectedWord={{ item_id: 1, czech: 'ahoj', czech_description: 'Greeting' } as any}
-        selectedTitle="ahoj"
         onClose={vi.fn()}
         onReset={vi.fn()}
       />,
@@ -177,7 +212,6 @@ describe('VocabularyDetailCard', () => {
     rerender(
       <VocabularyDetailCard
         selectedWord={{ item_id: 1, czech: 'ahoj', czech_description: null } as any}
-        selectedTitle="ahoj"
         onClose={vi.fn()}
         onReset={vi.fn()}
       />,
@@ -192,7 +226,6 @@ describe('VocabularyDetailCard', () => {
     render(
       <VocabularyDetailCard
         selectedWord={{ item_id: 1, czech: 'ahoj', audio: 'a.opus' } as any}
-        selectedTitle="ahoj"
         onClose={vi.fn()}
         onReset={vi.fn()}
       />,
@@ -215,7 +248,6 @@ describe('VocabularyDetailCard', () => {
     render(
       <VocabularyDetailCard
         selectedWord={{ item_id: 1, czech: 'ahoj', audio: 'a.opus' } as any}
-        selectedTitle="ahoj"
         onClose={vi.fn()}
         onReset={vi.fn()}
       />,

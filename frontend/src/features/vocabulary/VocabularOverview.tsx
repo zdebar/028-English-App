@@ -95,9 +95,6 @@ export default function VocabularyOverview({
   return (
     <VocabularyDetailCard
       selectedWord={selectedWord}
-      selectedTitle={
-        displayField === 'czech' ? (selectedWord.czech ?? '') : (selectedWord.english ?? '')
-      }
       onClose={() => setSelectedWord(null)}
       onReset={handleResetUserItem}
     />

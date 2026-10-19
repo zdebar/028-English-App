@@ -78,4 +78,11 @@ describe('OverviewCard', () => {
       expect(onClose).toHaveBeenCalledTimes(1);
     });
   });
+
+  it('omits the title action when the reset action is hidden', () => {
+    render(<OverviewCard buttonTitle="English title" showResetAction={false} onClose={vi.fn()} />);
+
+    expect(screen.queryByRole('button', { name: 'English title' })).toBeNull();
+    expect(screen.getByTestId('close-button')).toBeTruthy();
+  });
 });

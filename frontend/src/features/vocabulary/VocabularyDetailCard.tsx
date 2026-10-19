@@ -22,7 +22,6 @@ const NOT_AVAILABLE = TEXTS.notAvailable;
 
 type VocabularyDetailCardProps = Readonly<{
   selectedWord: UserItemLocal | null;
-  selectedTitle: string;
   onClose: () => void;
   onReset: (direction: ReviewDirection) => Promise<void>;
 }>;
@@ -57,7 +56,7 @@ function getBaseProperties(selectedWord: UserItemLocal | null): readonly Vocabul
 function getDirectionSections(
   selectedWord: UserItemLocal | null,
 ): readonly VocabularyDirectionSection[] {
-  return [
+  return ([
     {
       title: lowercaseInitial(TEXTS.directionCzToEn),
       direction: 'cz_to_en',
@@ -86,7 +85,7 @@ function getDirectionSections(
         },
       ],
     },
-  ].filter((section) => section.direction === 'cz_to_en'
+  ] as const).filter((section) => section.direction === 'cz_to_en'
     ? selectedWord?.is_cz_to_en_enabled !== false
     : selectedWord?.is_en_to_cz_enabled !== false);
 }
@@ -126,7 +125,8 @@ function VocabularyPropertyList({
           label={property.label}
           className="grid grid-cols-2"
           classNameLabel={labelClassName}
-          classNameValue={`min-w-0 ${property.classNameValue ?? ''}`}
+          classNameValue={`min-w-0 break-words [overflow-wrap:anywhere] ${property.classNameValue ?? ''}`}
+          alignTop
         >
           {property.value ?? NOT_AVAILABLE}
         </PropertyView>
@@ -145,14 +145,14 @@ function VocabularyDetails({
   onReset: (direction: ReviewDirection) => Promise<void>;
 }>) {
   return (
-    <div className="m-4 flex flex-col gap-3">
-      <div>
+    <div className="flex flex-col gap-3 pt-3">
+      <div className="mx-4">
         <VocabularyPropertyList properties={baseProperties} labelClassName="w-auto" />
       </div>
       {directionSections.map((section) => (
-        <section key={section.title}>
+        <section key={section.title} className="flex flex-col gap-2">
           <ButtonWithModal
-            className="w-full justify-center font-bold"
+            className="h-input w-full justify-center font-bold"
             modalTitle={TEXTS.restartItemProgress}
             modalText={TEXTS.restartDirectionProgressDescription}
             title={TEXTS.restartProgressHelp}
@@ -160,7 +160,9 @@ function VocabularyDetails({
           >
             {section.title}
           </ButtonWithModal>
-          <VocabularyPropertyList properties={section.properties} labelClassName="w-30 w-auto" />
+          <div className="mx-4">
+            <VocabularyPropertyList properties={section.properties} labelClassName="w-auto" />
+          </div>
         </section>
       ))}
     </div>
@@ -209,14 +211,12 @@ function VocabularyNoteButton({
  * VocabularyDetailCard component
  *
  * @param selectedWord - The vocabulary item to display details for.
- * @param selectedTitle - The title to display on the card. Czech or english name of the word.
  * @param onClose - Callback to close the detail card.
  * @param onReset - Callback to reset the user's progress for the word.
  * @returns The vocabulary detail card UI.
  */
 export default function VocabularyDetailCard({
   selectedWord,
-  selectedTitle,
   onClose,
   onReset,
 }: VocabularyDetailCardProps) {
@@ -245,9 +245,8 @@ export default function VocabularyDetailCard({
 
   return (
     <OverviewCard
-      buttonTitle={selectedTitle}
+      buttonTitle={selectedWord?.english ?? ''}
       onClose={onClose}
-      showResetAction={false}
       className="bottom-controls-clearance relative"
     >
       <VocabularyDetails baseProperties={baseProperties} directionSections={directionSections} onReset={onReset} />

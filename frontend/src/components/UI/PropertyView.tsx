@@ -7,6 +7,7 @@ type PropertyViewProps = Readonly<{
   readonly className?: string;
   readonly classNameLabel?: string;
   readonly classNameValue?: string;
+  readonly alignTop?: boolean;
 }>;
 
 /**
@@ -27,9 +28,10 @@ export default function PropertyView({
   classNameLabel = 'w-30',
   className = '',
   classNameValue = '',
+  alignTop = false,
 }: PropertyViewProps): JSX.Element {
   return (
-    <dl className={`flex items-center ${className}`} title={title}>
+    <dl className={`flex ${alignTop ? 'items-start' : 'items-center'} ${className}`} title={title}>
       <dt
         className={`h-attribute inline-block shrink-0 truncate text-left font-bold ${classNameLabel}`}
       >
