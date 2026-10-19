@@ -539,6 +539,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   static async resetItemsByGrammarChunkId(
     userId: string,
     grammarChunkId: number,
+    direction: ReviewDirection = 'cz_to_en',
     dateTime: string = new Date().toISOString(),
   ): Promise<number> {
     const items = await db.user_items
@@ -549,15 +550,20 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         true,
         true,
       )
-      .filter((item) => item.deleted_at === NULL_DATE && isInitiated(item))
+      .filter((item) =>
+        item.deleted_at === NULL_DATE &&
+        isInitiated(item) &&
+        isReviewDirectionEnabled(item, direction),
+      )
       .toArray();
 
-    return resetItems(items, dateTime);
+    return resetItems(items, dateTime, direction);
   }
 
   static async resetItemsByGrammarGroupId(
     userId: string,
     grammarGroupId: number,
+    direction: ReviewDirection = 'cz_to_en',
     dateTime: string = new Date().toISOString(),
   ): Promise<number> {
     const chunks = await db.grammar_chunks
@@ -565,7 +571,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .equals(grammarGroupId)
       .toArray();
     const counts = await Promise.all(
-      chunks.map((chunk) => this.resetItemsByGrammarChunkId(userId, chunk.id, dateTime)),
+      chunks.map((chunk) => this.resetItemsByGrammarChunkId(userId, chunk.id, direction, dateTime)),
     );
     return counts.reduce((total, count) => total + count, 0);
   }
@@ -790,6 +796,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     }
     return applyReviewProgress(item, outcome, dateTime, options.direction ?? 'cz_to_en');
   }
+}
+
+function isReviewDirectionEnabled(item: UserItemLocal, direction: ReviewDirection): boolean {
+  if (direction === 'cz_to_en') return item.is_cz_to_en_enabled;
+  return item.is_en_to_cz_enabled;
 }
 
 function getEarlierDate(left: string | null, right: string | null): string | null {

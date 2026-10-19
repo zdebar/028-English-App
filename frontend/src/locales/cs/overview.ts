@@ -7,6 +7,7 @@ export const OVERVIEW_TEXTS = {
   restartGrammarTitle: 'Restartovat gramatiku',
   restartGrammarDescription:
     'Opravdu chcete restartovat pokrok všech položek této gramatiky? Tuto akci nelze vrátit zpět.',
+  restartGrammarDirectionTitle: 'Restartovat pokrok gramatiky',
 
   // Topics Overview Page
   noTopics: 'Žádná započatá témata.',

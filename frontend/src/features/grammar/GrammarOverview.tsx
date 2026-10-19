@@ -17,6 +17,7 @@ import { ROUTES } from '@/config/routes.config';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { useRouteClose } from '@/routing/use-route-close';
 import { invalidateReviewArrays } from '@/features/practice/review-prefetch';
+import type { ReviewDirection } from '@/types/practice.types';
 
 type GrammarSelection = Readonly<Pick<GrammarGroupWithChunks, 'id'>>;
 
@@ -73,16 +74,16 @@ export default function GrammarOverview({
     setSelection({ id: groupId });
   }, []);
 
-  const handleReset = useCallback(async () => {
+  const handleReset = useCallback(async (direction: ReviewDirection) => {
     if (!currentItem || !userId) {
       return;
     }
 
     try {
-      const resetCount = await UserItem.resetItemsByGrammarGroupId(userId, currentItem.id);
+      const resetCount = await UserItem.resetItemsByGrammarGroupId(userId, currentItem.id, direction);
       invalidateReviewArrays(userId);
       void refreshPracticeAvailability(userId);
-      reportInfo(`Grammar ${currentItem.id} reset completed: ${resetCount} items reset.`);
+      reportInfo(`Grammar ${currentItem.id} ${direction} reset completed: ${resetCount} items reset.`);
       showToast(TEXTS.resetProgressSuccessToast, 'success');
     } catch (err) {
       showToast(TEXTS.resetProgressErrorToast, 'error');
