@@ -4,6 +4,9 @@ export const ACCOUNT_TEXTS = {
   profileEmailLabel: 'E-mail',
   profileDailyNewLessonLimit: 'Nové lekce za den',
   profileDailyNewLessonLimitHint: 'Kolik nových lekcí lze zahájit během jednoho dne.',
+  profileFullSyncButton: 'Plná synchronizace',
+  profileFullSyncInProgress: 'Synchronizuji…',
+  profileFullSyncHint: 'Obnoví obsah aplikace ze serveru a synchronizuje váš pokrok.',
 
   // Signout Button
   signoutButtonTitle: 'Odhlásit se',
