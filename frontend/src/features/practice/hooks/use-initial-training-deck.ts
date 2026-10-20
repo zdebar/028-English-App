@@ -2,6 +2,7 @@ import { usePracticeAvailabilityBoundary } from './use-practice-availability-bou
 import Lessons from '@/database/models/lessons';
 import UserItem from '@/database/models/user-items';
 import UserLesson from '@/database/models/user-lessons';
+import Groups from '@/database/models/groups';
 import type { GrammarDetail } from '@/features/grammar/GrammarDetailCard';
 import { reportError } from '@/features/logging/monitoring-handler';
 import type { LessonType } from '@/types/generic.types';
@@ -52,6 +53,7 @@ type InitialTrainingLoadResult = Readonly<{
   entries: Array<ResolvedPracticeEntry<UserItemLocal>>;
   grammar: GroupType | null;
   grammarGroup: GroupType | null;
+  groupNotes: GroupType[];
   queue: InitialTrainingQueue;
 }>;
 
@@ -170,6 +172,7 @@ async function loadInitialTrainingData(
 
   const entries = await resolveTrainingEntries(userId, initialData, items);
   const grammarContext = await resolveTrainingGrammarContext(userId, initialData, lesson);
+  const groupNotes = lesson.group_id == null ? [] : await Groups.getAncestry(lesson.group_id);
   const didStart = await UserLesson.startIfAllowed(
     userId,
     lesson.id,
@@ -184,6 +187,7 @@ async function loadInitialTrainingData(
     entries,
     grammar: grammarContext.grammar,
     grammarGroup: grammarContext.grammarGroup,
+    groupNotes,
     queue: {
       currentItemIds: items.map((item) => item.item_id),
       retryItemIds: [],
@@ -215,6 +219,7 @@ type InitialTrainingLoadSetters = Readonly<{
   setResolvedEntries: Dispatch<SetStateAction<Array<ResolvedPracticeEntry<UserItemLocal>>>>;
   setGrammar: Dispatch<SetStateAction<GrammarDetail | null>>;
   setGrammarGroup: Dispatch<SetStateAction<GroupType | null>>;
+  setGroupNotes: Dispatch<SetStateAction<GroupType[]>>;
   setQueue: Dispatch<SetStateAction<InitialTrainingQueue | null>>;
   setHasProgress: Dispatch<SetStateAction<boolean>>;
   setLoading: Dispatch<SetStateAction<boolean>>;
@@ -239,6 +244,7 @@ function startInitialTrainingLoad(
         setters.setResolvedEntries([]);
         setters.setGrammar(null);
         setters.setGrammarGroup(null);
+        setters.setGroupNotes([]);
         setters.setQueue(null);
         setters.setHasProgress(false);
         return;
@@ -250,6 +256,7 @@ function startInitialTrainingLoad(
       setters.setResolvedEntries(result.entries);
       setters.setGrammar(toGrammarDetail(result.grammar));
       setters.setGrammarGroup(result.grammarGroup);
+      setters.setGroupNotes(result.groupNotes);
       setters.setQueue(result.queue);
       setters.setHasProgress(false);
     })
@@ -394,6 +401,7 @@ export function useInitialTrainingDeck(
   const [grammarGroup, setGrammarGroup] = useState<GroupType | null>(
     initialState.grammarGroup,
   );
+  const [groupNotes, setGroupNotes] = useState<GroupType[]>([]);
   const [queue, setQueue] = useState<InitialTrainingQueue | null>(null);
   const [isComplete, setIsComplete] = useState(false);
   const [hasProgress, setHasProgress] = useState(false);
@@ -416,6 +424,7 @@ export function useInitialTrainingDeck(
       setResolvedEntries,
       setGrammar,
       setGrammarGroup,
+      setGroupNotes,
       setQueue,
       setHasProgress,
       setLoading,
@@ -499,6 +508,7 @@ export function useInitialTrainingDeck(
     hasContent: initialItemCount > 0,
     grammar,
     grammarGroup,
+    groupNotes,
     isComplete,
     isCompletion: isComplete,
     hasProgress,

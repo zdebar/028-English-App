@@ -21,9 +21,8 @@ describe('LessonTrainingOverviewCard', () => {
     render(
       <MemoryRouter initialEntries={['/practice/new-lesson']}>
         <LessonTrainingOverviewCard
-          lesson={{ name: 'Lesson A', note: null }}
-          grammar={{ kind: 'chunk', id: 1, name: 'Articles', note: null }}
-          grammarGroup={{ note: null }}
+          lesson={{ name: 'Lesson A' }}
+          groupNotes={[]}
           onContinue={onContinue}
         />
         <LocationProbe />

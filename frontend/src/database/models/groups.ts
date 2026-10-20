@@ -27,6 +27,46 @@ export default class Groups extends SyncEntityModel implements GroupRow {
     return group && !group.deleted_at ? group : null;
   }
 
+  /** Returns a group and its ancestors in parent-to-child order. */
+  static async getAncestry(groupId: number): Promise<GroupRow[]> {
+    const [groups, relations] = await Promise.all([
+      db.groups.toArray(),
+      db.group_relations.toArray(),
+    ]);
+    const groupById = new Map(
+      groups.filter((group) => !group.deleted_at).map((group) => [group.id, group]),
+    );
+    const parentsByChild = new Map<number, typeof relations>();
+
+    for (const relation of relations) {
+      if (relation.deleted_at) continue;
+      const parents = parentsByChild.get(relation.child_group_id) ?? [];
+      parents.push(relation);
+      parentsByChild.set(relation.child_group_id, parents);
+    }
+
+    const result: GroupRow[] = [];
+    const visited = new Set<number>();
+    const visiting = new Set<number>();
+
+    const visit = (currentId: number): void => {
+      if (visited.has(currentId) || visiting.has(currentId)) return;
+      visiting.add(currentId);
+      const parents = [...(parentsByChild.get(currentId) ?? [])].sort(
+        (left, right) =>
+          left.sort_order - right.sort_order || left.parent_group_id - right.parent_group_id,
+      );
+      for (const relation of parents) visit(relation.parent_group_id);
+      visiting.delete(currentId);
+      visited.add(currentId);
+      const group = groupById.get(currentId);
+      if (group) result.push(group);
+    };
+
+    visit(groupId);
+    return result;
+  }
+
   static getSounds(): Promise<GroupRow[]> {
     return db.groups
       .where('type')

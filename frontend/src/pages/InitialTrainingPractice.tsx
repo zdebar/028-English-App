@@ -45,8 +45,7 @@ function InitialTrainingContent({
     return (
       <LessonTrainingOverviewCard
         lesson={deck.lesson}
-        grammar={deck.grammar}
-        grammarGroup={deck.grammarGroup}
+        groupNotes={deck.groupNotes}
         items={deck.items}
         onContinue={dismissIntro}
       />
