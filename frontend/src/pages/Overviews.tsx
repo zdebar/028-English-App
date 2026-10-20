@@ -47,6 +47,11 @@ export default function Overviews(): JSX.Element {
     TEXTS.vocabularyOverviewTooltip,
     TEXTS.noStartedVocabulary,
   );
+  const soundsButton = getButtonState(
+    availability.sounds,
+    TEXTS.soundsOverview,
+    TEXTS.noSounds,
+  );
   const pronunciationButton = getButtonState(
     {
       hasData: pronunciationGroups.length > 0,
@@ -61,19 +66,15 @@ export default function Overviews(): JSX.Element {
       <h1 className="sr-only">{TEXTS.overviews}</h1>
       <section aria-label={TEXTS.progressOverviews}>
         <div className="flex flex-col gap-1">
-          <NavigationButton
-            className="h-button w-full"
-            to={ROUTES.grammar}
-            {...grammarButton}
-          >
-            <MenuButtonText>{TEXTS.grammarOverview}</MenuButtonText>
+          <NavigationButton className="h-button w-full" to={ROUTES.sounds} {...soundsButton}>
+            <MenuButtonText>{TEXTS.soundsOverview}</MenuButtonText>
           </NavigationButton>
           <NavigationButton
             className="h-button w-full"
-            to={ROUTES.topics}
-            {...topicsButton}
+            to={ROUTES.pronunciationGroups}
+            {...pronunciationButton}
           >
-            <MenuButtonText>{TEXTS.topicsOverview}</MenuButtonText>
+            <MenuButtonText>{TEXTS.pronunciationSettings}</MenuButtonText>
           </NavigationButton>
           <NavigationButton
             className="h-button w-full"
@@ -82,12 +83,11 @@ export default function Overviews(): JSX.Element {
           >
             <MenuButtonText>{TEXTS.vocabularyOverview}</MenuButtonText>
           </NavigationButton>
-          <NavigationButton
-            className="h-button w-full"
-            to={ROUTES.pronunciationGroups}
-            {...pronunciationButton}
-          >
-            <MenuButtonText>{TEXTS.pronunciationSettings}</MenuButtonText>
+          <NavigationButton className="h-button w-full" to={ROUTES.topics} {...topicsButton}>
+            <MenuButtonText>{TEXTS.topicsOverview}</MenuButtonText>
+          </NavigationButton>
+          <NavigationButton className="h-button w-full" to={ROUTES.grammar} {...grammarButton}>
+            <MenuButtonText>{TEXTS.grammarOverview}</MenuButtonText>
           </NavigationButton>
         </div>
       </section>

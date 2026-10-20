@@ -134,7 +134,7 @@ describe('Pronunciation overview screens', () => {
     render(<PronunciationOverview />);
 
     fireEvent.click(screen.getByTestId('close'));
-    expect(mocks.navigate).toHaveBeenCalledWith('/', { replace: true });
+    expect(mocks.navigate).toHaveBeenCalledWith('/overviews', { replace: true });
 
     fireEvent.click(screen.getByRole('button', { name: /æ/ }));
     expect(mocks.navigate).toHaveBeenCalledWith('/pronunciation/1');

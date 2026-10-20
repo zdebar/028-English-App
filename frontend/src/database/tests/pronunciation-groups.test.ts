@@ -26,6 +26,7 @@ vi.mock('@/database/models/db', () => ({
       }),
     },
     group_relations: {
+      toArray: async () => mocks.relations,
       where: () => ({
         equals: () => ({
           filter: (predicate: (relation: any) => boolean) => ({
@@ -152,6 +153,32 @@ describe('PronunciationGroup', () => {
     await expect(PronunciationGroup.getOverview('u1')).resolves.toEqual([]);
   });
 
+  it('waits for every linked sound to be visible before showing a pronunciation group', async () => {
+    mocks.groups.push({
+      id: 50,
+      type: 'sound',
+      name: '/æ/',
+      note: null,
+      sort_order: 1,
+      updated_at: '2026-07-01',
+      deleted_at: null,
+    });
+    mocks.relations = [{
+      id: 1,
+      parent_group_id: 1,
+      child_group_id: 50,
+      relation_type: 'contrast',
+      sort_order: 1,
+      deleted_at: null,
+    }];
+    await expect(PronunciationGroup.getOverview('u1')).resolves.toEqual([]);
+    await expect(PronunciationGroup.getDetail('u1', 1)).resolves.toBeNull();
+
+    mocks.memberships.push({ group_id: 50, item_id: 1, sort_order: 1, deleted_at: null });
+    const result = await PronunciationGroup.getOverview('u1');
+    expect(result.map((group) => group.id)).toEqual([1]);
+  });
+
   it('keeps a started group visible even when its examples have no audio', async () => {
     mocks.items.forEach((entry) => {
       entry.audio = null;
@@ -200,6 +227,7 @@ describe('PronunciationGroup', () => {
       sort_order: 1,
       deleted_at: null,
     }];
+    mocks.memberships.push({ group_id: 50, item_id: 1, sort_order: 1, deleted_at: null });
 
     const detail = await PronunciationGroup.getDetail('u1', 1);
 

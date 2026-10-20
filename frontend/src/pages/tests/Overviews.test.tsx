@@ -49,6 +49,7 @@ vi.mock('@/locales/cs', () => ({
   TEXTS: {
     overviews: 'Přehledy',
     progressOverviews: 'Pokrok',
+    soundsOverview: 'Sound overview',
     practiceOverviewTitle: 'Přehled procvičování',
     grammarOverview: 'Přehled gramatiky',
     grammarOverviewTooltip: 'Grammar tooltip',
@@ -60,6 +61,7 @@ vi.mock('@/locales/cs', () => ({
     pronunciationGroupsTooltip: 'Pronunciation tooltip',
     practiceOverviewNone: 'No practice',
     noGrammar: 'No grammar',
+    noSounds: 'No sounds',
     noTopics: 'No topics',
     noStartedVocabulary: 'No vocabulary',
     noPronunciationGroups: 'No pronunciation groups',
@@ -70,7 +72,7 @@ vi.mock('@/locales/cs', () => ({
 
 import Overviews from '@/pages/Overviews';
 
-const overviewKeys = ['grammar', 'topics', 'vocabulary'];
+const overviewKeys = ['grammar', 'topics', 'vocabulary', 'sounds'];
 
 describe('Overviews', () => {
   beforeEach(() => {
@@ -92,7 +94,7 @@ describe('Overviews', () => {
     render(<Overviews />);
 
     const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(4);
+    expect(buttons).toHaveLength(5);
     buttons.forEach((button) => {
       expect((button as HTMLButtonElement).disabled).toBe(true);
       fireEvent.click(button);
@@ -111,6 +113,7 @@ describe('Overviews', () => {
   });
 
   it.each([
+    ['Sound overview', '/sounds'],
     ['Přehled gramatiky', '/grammar'],
     ['Přehled témat', '/topics'],
     ['Přehled slovíček', '/vocabulary'],

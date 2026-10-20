@@ -24,6 +24,8 @@ import PronunciationOverviewPage from '@/pages/PronunciationOverviewPage';
 import TopicItems from '@/pages/TopicItems';
 import Topics from '@/pages/Topics';
 import Vocabulary from '@/pages/Vocabulary';
+import Sounds from '@/pages/Sounds';
+import SoundGroupPage from '@/pages/SoundGroupPage';
 import Notification from '@/components/UI/Notification';
 import type { RouteDataDescriptor } from '@/routing/route-data';
 import {
@@ -32,6 +34,8 @@ import {
   overviewAvailabilityDescriptor,
   practiceOverviewDescriptor,
   reviewPracticeDescriptor,
+  soundsDescriptor,
+  soundGroupDetailDescriptor,
   pronunciationGroupDetailDescriptor,
   topicDetailDescriptor,
   topicsDescriptor,
@@ -101,6 +105,22 @@ async function loadPronunciationGroupDetail({ params }: LoaderFunctionArgs) {
   } catch (error) {
     if (error instanceof Response) throw error;
     reportError('Failed to load pronunciation group detail route data', error);
+    useToastStore.getState().showToast(TEXTS.loadingError, 'error');
+    throw error;
+  }
+}
+
+async function loadSoundGroupDetail({ params }: LoaderFunctionArgs) {
+  const groupId = parsePositiveId(params.groupId);
+  if (!groupId) throw redirect(ROUTES.sounds);
+  const userId = await requireUserId();
+  try {
+    const data = await soundGroupDetailDescriptor(userId, groupId).load();
+    if (!data) throw redirect(ROUTES.sounds);
+    return data;
+  } catch (error) {
+    if (error instanceof Response) throw error;
+    reportError('Failed to load sound group detail route data', error);
     useToastStore.getState().showToast(TEXTS.loadingError, 'error');
     throw error;
   }
@@ -194,6 +214,16 @@ export const router = createHashRouter([
             path: ROUTES.vocabulary,
             loader: () => loadProtectedData('vocabulary', vocabularyDescriptor),
             Component: Vocabulary,
+          },
+          {
+            path: ROUTES.sounds,
+            loader: () => loadProtectedData('sound groups', soundsDescriptor),
+            Component: Sounds,
+          },
+          {
+            path: ROUTES.soundDetail,
+            loader: loadSoundGroupDetail,
+            Component: SoundGroupPage,
           },
           {
             path: ROUTES.pronunciationGroups,

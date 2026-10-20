@@ -10,6 +10,7 @@ import PronunciationGroup from '@/database/models/pronunciation-groups';
 import UserLesson from '@/database/models/user-lessons';
 import UserItem from '@/database/models/user-items';
 import Topic from '@/database/models/topics';
+import SoundGroup from '@/database/models/sound-groups';
 import {
   loadReviewDeckData,
   type ReviewDeckData,
@@ -101,6 +102,16 @@ export function vocabularyDescriptor(userId: string) {
   return { load: () => loadOverviewQuery(userId, 'vocabulary') };
 }
 
+export function soundsDescriptor(userId: string) {
+  return { load: () => loadOverviewQuery(userId, 'sounds') };
+}
+
+export function soundGroupDetailDescriptor(userId: string, groupId: number) {
+  return {
+    load: () => loadSharedQuery(userId, `sound:${groupId}`, () => SoundGroup.getDetail(userId, groupId)),
+  };
+}
+
 export function pronunciationGroupDetailDescriptor(userId: string, groupId: number) {
   return {
     load: () => loadSharedQuery(userId, `pronunciation:${groupId}`, () => PronunciationGroup.getDetail(userId, groupId)),
@@ -115,3 +126,4 @@ export function initialTrainingDescriptor(userId: string) {
 
 export type { OverviewAvailabilityData } from '@/hooks/overview-query-store';
 export type TopicDetailData = Awaited<ReturnType<ReturnType<typeof topicDetailDescriptor>['load']>>;
+export type SoundGroupDetailData = Awaited<ReturnType<ReturnType<typeof soundGroupDetailDescriptor>['load']>>;

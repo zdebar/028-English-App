@@ -9,6 +9,8 @@ export const ROUTES = {
   overviews: '/overviews',
   profile: '/profile',
   levels: '/levels',
+  sounds: '/sounds',
+  soundDetail: '/sounds/:groupId',
   topics: '/topics',
   topicDetail: '/topics/:topicId',
   grammar: '/grammar',

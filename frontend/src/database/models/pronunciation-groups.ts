@@ -17,7 +17,7 @@ function isAvailable(item: UserItemLocal): boolean {
 
 export default class PronunciationGroup {
   static async getOverview(userId: string): Promise<PronunciationGroupOverviewType[]> {
-    const groups = await Groups.getStartedByUser(userId, 'pronunciation');
+    const groups = await this.getVisibleGroups(userId);
     return groups.flatMap((group) => {
       const eligible = group.examples.filter(isEligible);
       const unlocked = eligible.filter(isAvailable);
@@ -37,13 +37,11 @@ export default class PronunciationGroup {
     userId: string,
     groupId: number,
   ): Promise<PronunciationGroupDetailType | null> {
-    const group = await Groups.getById(groupId);
-    if (group?.type !== 'pronunciation') return null;
-    const visibleGroup = (await Groups.getStartedByUser(userId, 'pronunciation')).find(
-      (candidate) => candidate.id === groupId,
-    );
+    const visibleGroup = (await this.getVisibleGroups(userId))
+      .find((candidate) => candidate.id === groupId);
     if (!visibleGroup) return null;
-    const items = visibleGroup.examples.filter((item) => isEligible(item) && isAvailable(item));
+    const group = visibleGroup;
+    const items = visibleGroup.examples;
     const relations = await db.group_relations
       .where('parent_group_id')
       .equals(groupId)
@@ -69,5 +67,24 @@ export default class PronunciationGroup {
         .map(({ id, name, note }) => ({ id, name, note })),
       items,
     };
+  }
+
+  private static async getVisibleGroups(userId: string) {
+    const [groups, sounds, relations] = await Promise.all([
+      Groups.getStartedByUser(userId, 'pronunciation'),
+      Groups.getStartedByUser(userId, 'sound'),
+      db.group_relations.toArray(),
+    ]);
+    const unlockedSoundIds = new Set(sounds.map((sound) => sound.id));
+    const relationsByGroup = new Map<number, number[]>();
+    for (const relation of relations) {
+      if (relation.deleted_at || relation.relation_type !== 'contrast') continue;
+      const soundIds = relationsByGroup.get(relation.parent_group_id) ?? [];
+      soundIds.push(relation.child_group_id);
+      relationsByGroup.set(relation.parent_group_id, soundIds);
+    }
+    return groups.filter((group) =>
+      (relationsByGroup.get(group.id) ?? []).every((soundId) => unlockedSoundIds.has(soundId)),
+    );
   }
 }

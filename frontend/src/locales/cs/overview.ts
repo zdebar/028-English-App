@@ -11,6 +11,11 @@ export const OVERVIEW_TEXTS = {
 
   // Topics Overview Page
   noTopics: 'Žádná započatá témata.',
+  soundsOverview: 'Přehled hlásek',
+  noSounds: 'Žádné odemčené hlásky.',
+  noSoundItems: 'Pro tuto hlásku nejsou dostupné příklady.',
+  resetSoundTitle: 'Restartovat hlásku',
+  resetSoundDescription: 'Opravdu chcete restartovat pokrok příkladů této hlásky?',
   noTopicItems: 'V tomto tématu nejsou žádné položky.',
   resetTopicTitle: 'Restartovat téma',
   resetTopicDescription:

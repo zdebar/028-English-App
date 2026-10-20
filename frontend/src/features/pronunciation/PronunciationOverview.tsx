@@ -12,7 +12,7 @@ import { useRouteClose } from '@/routing/use-route-close';
 
 export default function PronunciationOverview() {
   const showToast = useToastStore((state) => state.showToast);
-  const closeRoute = useRouteClose(ROUTES.home);
+  const closeRoute = useRouteClose(ROUTES.overviews);
   const data = usePronunciationGroupsStore((state) => state.groups);
   const loading = usePronunciationGroupsStore((state) => state.loading);
   const error = usePronunciationGroupsStore((state) => state.error);
