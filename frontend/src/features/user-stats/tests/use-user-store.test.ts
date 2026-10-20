@@ -7,16 +7,14 @@ describe('useUserStore', () => {
       levels: [],
       levelsLoading: true,
       levelsError: null,
-      startedTodayCount: 0,
     });
   });
 
-  it('clears level and started-today snapshots', () => {
+  it('clears level snapshots', () => {
     useUserStore.setState({
       levels: [{ id: 1 } as any],
       levelsLoading: true,
       levelsError: new Error('levels'),
-      startedTodayCount: 2,
     });
 
     useUserStore.getState().clearLevels();
@@ -25,7 +23,6 @@ describe('useUserStore', () => {
       levels: [],
       levelsLoading: false,
       levelsError: null,
-      startedTodayCount: 0,
     });
   });
 });

@@ -1,7 +1,6 @@
 import config from '@/config/config';
 import Levels from '@/database/models/levels';
 import { reportError } from '@/features/logging/monitoring-handler';
-import type { LevelOverviewType } from '@/types/generic.types';
 import { liveQuery } from 'dexie';
 import { useEffect, useState } from 'react';
 import { useUserStore } from './use-user-store';
@@ -12,10 +11,6 @@ function getLocalDate(): string {
 
 function toError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
-}
-
-function getStartedTodayCount(levels: LevelOverviewType[]): number {
-  return levels.reduce((total, level) => total + level.startedTodayCount, 0);
 }
 
 /**
@@ -49,7 +44,6 @@ export function useUserStoreSync(userId: string | null) {
       levels: [],
       levelsLoading: true,
       levelsError: null,
-      startedTodayCount: 0,
     });
 
     const levelsSubscription = liveQuery(() => Levels.getOverview(userId, localDate)).subscribe({
@@ -60,7 +54,6 @@ export function useUserStoreSync(userId: string | null) {
             levels: nextLevels,
             levelsLoading: false,
             levelsError: null,
-            startedTodayCount: getStartedTodayCount(nextLevels),
           });
         }
       },
@@ -70,7 +63,6 @@ export function useUserStoreSync(userId: string | null) {
             levels: [],
             levelsLoading: false,
             levelsError: toError(error),
-            startedTodayCount: 0,
           });
           reportError('Error observing levels', error);
         }

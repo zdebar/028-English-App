@@ -9,7 +9,6 @@ export const HOME_TEXTS = {
     'Aplikace po přihlášení ukládá cvičební data do úložiště Vašeho prohlížeče (7.8MB). Účet je možno kdykoliv smazat, včetně všech dat.',
   installButton: 'Nainstalovat aplikaci',
   installButtonTooltip: 'Nainstalovat PWA aplikaci.',
-  dailyStartedGoal: 'dnes započato / cíl',
   grammarReviewButton: 'Opakování gramatiky',
   vocabularyReviewButton: 'Opakování slovíček',
   newButton: 'Další lekce',
@@ -17,7 +16,6 @@ export const HOME_TEXTS = {
 
   // User
   practiceOverviewTitle: 'Přehled procvičování',
-  practiceOverviewOpen: 'Otevřít přehled procvičování',
   practiceOverviewMoreDays: '... dalších 7 dní',
   practiceOverviewNone: 'Žádné započaté dny',
   authInitErrorToast: 'Nastala chyba při přihlašování.',
