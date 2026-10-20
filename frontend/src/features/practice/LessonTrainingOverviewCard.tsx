@@ -3,7 +3,8 @@ import StyledButton from '@/components/UI/buttons/StyledButton';
 import { ROUTES } from '@/config/routes.config';
 import type { GrammarDetail } from '@/features/grammar/GrammarDetailCard';
 import { TEXTS } from '@/locales/cs';
-import type { LessonType, GrammarGroupType } from '@/types/generic.types';
+import type { LessonType } from '@/types/generic.types';
+import type { GroupType } from '@/types/table.types';
 import DOMPurify from 'dompurify';
 import type { JSX } from 'react';
 import type { UserItemLocal } from '@/types/user-item.types';
@@ -17,7 +18,7 @@ import { useRouteClose } from '@/routing/use-route-close';
 type LessonTrainingOverviewCardProps = Readonly<{
   lesson: Pick<LessonType, 'name' | 'note'>;
   grammar: GrammarDetail | null;
-  grammarGroup: Pick<GrammarGroupType, 'note'> | null;
+  grammarGroup: Pick<GroupType, 'note'> | null;
   items?: readonly UserItemLocal[];
   onContinue: () => void;
 }>;

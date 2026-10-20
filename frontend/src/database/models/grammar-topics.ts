@@ -1,29 +1,14 @@
 import { db } from '@/database/models/db';
-import type { GrammarTopicType } from '@/types/generic.types';
-import type { GroupRelationType } from '@/types/table.types';
-import { TableName } from '@/types/table.types';
-import Dexie from 'dexie';
+import type { GroupRelationType, GroupType } from '@/types/table.types';
 import type { GrammarGroupWithChunks } from './grammar-groups';
 import type { GrammarChunkWithExamples } from './grammar-chunks';
-import SyncEntityModel from './sync-entity-model';
 import Groups from './groups';
 
-export type GrammarTopicWithGroups = GrammarTopicType & {
+export type GrammarTopicWithGroups = GroupType & {
   groups: GrammarGroupWithChunks[];
 };
 
-export default class GrammarTopic extends SyncEntityModel implements GrammarTopicType {
-  id!: number;
-  name!: string;
-  note!: string | null;
-  sort_order!: number;
-  deleted_at!: string | null;
-
-  static override readonly syncTable = db.grammar_topics as Dexie.Table<GrammarTopicType, number>;
-  static override readonly syncTableName = TableName.GrammarTopics;
-  static override readonly syncEntityName = 'grammar topics';
-  static override readonly syncSelect = 'id, name, note, sort_order, deleted_at';
-
+export default class GrammarTopic {
   static async getInitiated(userId: string): Promise<GrammarTopicWithGroups[]> {
     const [groups, relations, startedGroups] = await Promise.all([
       db.groups.filter((group) => group.type === 'grammar' && !group.deleted_at).toArray(),
@@ -55,7 +40,6 @@ export default class GrammarTopic extends SyncEntityModel implements GrammarTopi
           if (!chunk || !started) return [];
           const value: GrammarChunkWithExamples = {
             ...chunk,
-            grammar_group_id: middle.id,
             items: started.examples,
           };
           return [value];
@@ -64,7 +48,6 @@ export default class GrammarTopic extends SyncEntityModel implements GrammarTopi
 
       const value: GrammarGroupWithChunks = {
         ...middle,
-        grammar_topic_id: root.id,
         kind: 'group',
         chunks,
       };

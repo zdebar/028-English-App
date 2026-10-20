@@ -211,14 +211,14 @@ INSERT INTO "auth"."refresh_tokens" ("instance_id", "id", "token", "user_id", "r
 -- Data for Name: grammar_topics; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "public"."grammar_topics" ("id", "name", "note", "sort_order", "updated_at", "deleted_at") VALUES
+INSERT INTO "seed_legacy"."grammar_topics" ("id", "name", "note", "sort_order", "updated_at", "deleted_at") VALUES
 	(1, 'Ostatní', NULL, 1, '2026-10-07 00:00:00+00', NULL);
 
 
 --
 -- Data for Name: grammar_groups; Type: TABLE DATA; Schema: public; Owner: postgres
 --
-INSERT INTO "public"."grammar_groups" ("id", "name", "note", "grammar_topic_id", "sort_order", "updated_at", "deleted_at") VALUES
+INSERT INTO "seed_legacy"."grammar_groups" ("id", "name", "note", "grammar_topic_id", "sort_order", "updated_at", "deleted_at") VALUES
 	(1, 'Být', NULL, 1, 1, '2026-08-05 09:14:51.035048+00', NULL),
 	(2, 'Být - zápor', NULL, 1, 2, '2026-08-05 09:14:54.153023+00', NULL),
 	(3, 'Být - zjišťovací otázky', NULL, 1, 3, '2026-08-05 09:15:17.211688+00', NULL),
@@ -237,7 +237,7 @@ INSERT INTO "public"."grammar_groups" ("id", "name", "note", "grammar_topic_id",
 -- Data for Name: grammar_chunks; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "public"."grammar_chunks" ("id", "name", "note", "sort_order", "updated_at", "deleted_at", "grammar_group_id") VALUES
+INSERT INTO "seed_legacy"."grammar_chunks" ("id", "name", "note", "sort_order", "updated_at", "deleted_at", "grammar_group_id") VALUES
 	(1, 'být - základní tvary', '<p>Sloveso <b>být</b> je v angličtině nepravidelné a má různé tvary podle osoby a času.</p>', 1, '2026-08-04 08:58:00.643565+00', NULL, 1),
 	(9, 'přivlastňování', 'Kromě přivlastňovacích zájmen (my, your, his, her, its, our, their) se v angličtině přivlastňuje pomocí apostrofu a -s. U množného čísla zakončeného na -s se používá pouze apostrof.', 9, '2026-08-06 07:20:26.999984+00', NULL, 6),
 	(7, 'být - tázací otázky', '<p>Otázky s tázacím zájmenem se tvoří inverzí slovesa <b>být</b> a podmětu, přičemž tázací zájmeno stojí na začátku věty.</p>', 7, '2026-08-05 09:21:34.000596+00', NULL, 4),
@@ -300,7 +300,7 @@ INSERT INTO "public"."lessons" ("id", "name", "note", "level_id", "sort_order", 
 	(7, 'Množné číslo', NULL, 1, 7, '2026-08-06 09:08:56.250964+00', NULL);
 
 
-INSERT INTO "public"."topics" ("id", "name", "note", "sort_order", "updated_at", "deleted_at") VALUES
+INSERT INTO "seed_legacy"."topics" ("id", "name", "note", "sort_order", "updated_at", "deleted_at") VALUES
 	(1, 'dny v týdnu', NULL, 1, '2026-08-02 12:14:05.115542+00', NULL),
 	(2, 'čísla 1  až 12', NULL, 2, '2026-08-02 12:14:31.093064+00', NULL),
 	(3, 'osobní zájmena', NULL, 3, '2026-08-02 12:43:15.726633+00', NULL),
@@ -322,22 +322,7 @@ INSERT INTO "public"."notes" ("id", "name", "note", "sort_order", "updated_at", 
 -- Data for Name: items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-CREATE TEMP TABLE seed_legacy_items (
-  id INTEGER PRIMARY KEY,
-  czech TEXT NOT NULL,
-  english TEXT NOT NULL,
-  pronunciation TEXT,
-  audio TEXT,
-  note_id INTEGER,
-  sort_order INTEGER NOT NULL,
-  legacy_group_id INTEGER,
-  updated_at TIMESTAMPTZ,
-  deleted_at TIMESTAMPTZ,
-  grammar_chunk_id INTEGER,
-  is_vocabulary BOOLEAN NOT NULL
-);
-
-INSERT INTO seed_legacy_items ("id", "czech", "english", "pronunciation", "audio", "note_id", "sort_order", "legacy_group_id", "updated_at", "deleted_at", "grammar_chunk_id", "is_vocabulary") VALUES
+INSERT INTO seed_legacy.items ("id", "czech", "english", "pronunciation", "audio", "note_id", "sort_order", "legacy_group_id", "updated_at", "deleted_at", "grammar_chunk_id", "is_vocabulary") VALUES
 	(1, 'ahoj', 'hello', 'həlˈoʊ', 'hello.opus', NULL, 1000, 26, '2026-08-07 11:12:55.668362+00', NULL, NULL, true),
 	(2, 'čau', 'hi', 'hˈaɪ', 'hi.opus', NULL, 1001, 26, '2026-08-07 11:12:55.668362+00', NULL, NULL, true),
 	(3, 'dobrý', 'good', 'ɡˈʊd', 'good.opus', NULL, 1002, 26, '2026-08-07 11:12:55.668362+00', NULL, NULL, true),
@@ -720,7 +705,7 @@ INSERT INTO seed_legacy_items ("id", "czech", "english", "pronunciation", "audio
 
 INSERT INTO public.items (
   id, czech, english, pronunciation, audio, note_id, sort_order, lesson_id,
-  topic_id, updated_at, deleted_at, grammar_chunk_id, is_vocabulary
+  updated_at, deleted_at, is_vocabulary
 )
 SELECT
   item.id,
@@ -731,19 +716,17 @@ SELECT
   item.note_id,
   item.sort_order,
   item.sort_order / 1000,
-  CASE WHEN item.legacy_group_id IN (1, 2, 3, 6) THEN item.legacy_group_id ELSE NULL END,
   item.updated_at,
   item.deleted_at,
-  item.grammar_chunk_id,
   item.is_vocabulary
-FROM seed_legacy_items AS item
+FROM seed_legacy.items AS item
 ;
 
 
 -- Data for Name: grammar_chunk_examples; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "public"."grammar_chunk_examples" ("grammar_chunk_id", "item_id", "sort_order", "updated_at", "deleted_at") VALUES
+INSERT INTO "seed_legacy"."grammar_chunk_examples" ("grammar_chunk_id", "item_id", "sort_order", "updated_at", "deleted_at") VALUES
 	(1, 227, 1, '2026-08-08 07:17:16.726809+00', NULL),
 	(1, 228, 2, '2026-08-08 07:17:16.726809+00', NULL),
 	(1, 229, 3, '2026-08-08 07:17:16.726809+00', NULL),
@@ -782,7 +765,7 @@ INSERT INTO "public"."grammar_chunk_examples" ("grammar_chunk_id", "item_id", "s
 -- Data for Name: pronunciation_groups; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "public"."pronunciation_groups" ("id", "name", "note", "sort_order", "updated_at", "deleted_at") VALUES
+INSERT INTO "seed_legacy"."pronunciation_groups" ("id", "name", "note", "sort_order", "updated_at", "deleted_at") VALUES
 	(1, 'æ | ɛ', NULL, 1, '2026-08-04 08:22:29.882513+00', NULL);
 
 
@@ -790,7 +773,7 @@ INSERT INTO "public"."pronunciation_groups" ("id", "name", "note", "sort_order",
 -- Data for Name: pronunciation_group_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "public"."pronunciation_group_items" ("pronunciation_group_id", "item_id", "sort_order", "updated_at", "deleted_at", "contrast_set") VALUES
+INSERT INTO "seed_legacy"."pronunciation_group_items" ("pronunciation_group_id", "item_id", "sort_order", "updated_at", "deleted_at", "contrast_set") VALUES
 	(1, 112, 1, '2026-08-08 07:10:52.276316+00', NULL, 1),
 	(1, 121, 2, '2026-08-08 07:11:05.940335+00', NULL, 1);
 
@@ -1110,25 +1093,10 @@ SELECT pg_catalog.setval('"private"."settings_id_seq"', 1, false);
 --
 
 --
--- Name: grammar_chunks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('"public"."grammar_chunks_id_seq"', 4, true);
-
 
 --
--- Name: grammar_topics_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('"public"."grammar_topics_id_seq"', 1, true);
-
 
 --
--- Name: grammar_groups_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('"public"."grammar_groups_id_seq"', 12, true);
-
 
 --
 -- Name: items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
@@ -1159,18 +1127,8 @@ SELECT pg_catalog.setval('"public"."notes_id_seq"', 4, true);
 
 
 --
--- Name: pronunciation_groups_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('"public"."pronunciation_groups_id_seq"', 1, false);
-
 
 --
--- Name: topics_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('"public"."topics_id_seq"', 6, true);
-
 
 --
 -- PostgreSQL database dump complete

@@ -44,7 +44,7 @@ describe('AppDB schema', () => {
   it('declares the complete schema and removes obsolete stores', () => {
     new AppDB();
 
-    expect(mocks.versions).toHaveLength(12);
+    expect(mocks.versions).toHaveLength(13);
     expect(mocks.versions[0]).toMatchObject({
       number: 1,
       schema: {
@@ -135,6 +135,19 @@ describe('AppDB schema', () => {
         lessons: 'id, sort_order, group_id',
       },
     });
+    expect(mocks.versions[12]).toMatchObject({
+      number: 13,
+      schema: {
+        topics: null,
+        grammar_topics: null,
+        grammar_groups: null,
+        grammar_chunks: null,
+        grammar_chunk_examples: null,
+        pronunciation_groups: null,
+        pronunciation_group_items: null,
+        user_items: expect.not.stringContaining('grammar_chunk_id'),
+      },
+    });
   });
 
   it('initializes new direction fields while upgrading existing local items', async () => {
@@ -206,5 +219,42 @@ describe('AppDB schema', () => {
     const lesson: Record<string, unknown> = {};
     modifyLessons?.(lesson);
     expect(lesson.group_id).toBeNull();
+  });
+
+  it('removes legacy stores, metadata, and item/lesson fields during unified upgrade', async () => {
+    new AppDB();
+    const storeChanges: Record<string, string | null> = {};
+    let modifyItems: ((item: Record<string, unknown>) => void) | undefined;
+    let modifyLessons: ((lesson: Record<string, unknown>) => void) | undefined;
+    let deleteLegacyMetadata: (() => Promise<void>) | undefined;
+    const transaction = {
+      table: (name: string) => ({
+        toCollection: () => ({
+          modify: async (callback: (value: Record<string, unknown>) => void) => {
+            if (name === 'lessons') modifyLessons = callback;
+            if (name === 'user_items') modifyItems = callback;
+          },
+        }),
+        filter: () => ({
+          delete: async () => {
+            deleteLegacyMetadata = async () => undefined;
+          },
+        }),
+      }),
+    };
+    const version = mocks.versions[12];
+    expect(version?.schema).toBeDefined();
+    Object.assign(storeChanges, version?.schema);
+    await version?.upgrade?.(transaction);
+
+    const item: Record<string, unknown> = { topic_id: 2, grammar_chunk_id: 3, item_id: 4 };
+    modifyItems?.(item);
+    expect(item).toEqual({ item_id: 4 });
+
+    const lesson: Record<string, unknown> = { grammar_chunk_id: 3, group_id: 7 };
+    modifyLessons?.(lesson);
+    expect(lesson).toEqual({ group_id: 7 });
+    expect(Object.values(storeChanges)).toContain(null);
+    expect(deleteLegacyMetadata).toBeDefined();
   });
 });

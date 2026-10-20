@@ -25,15 +25,12 @@ import { assertNonEmptyString } from '@/utils/assertions.utils';
 import { isInitiated } from '@/utils/progress.utils';
 
 const NULL_DATE = config.database.nullReplacementDate;
-const NULL_NUMBER = config.database.nullReplacementNumber;
 const SIM_ITEM_COUNT = config.progress.simulationItemCount;
 const SIM_ITEM_PROGRESS = config.progress.simulationItemProgress;
 
 type UserItemAPI = Omit<
   UserItemLocal,
   | 'is_vocabulary'
-  | 'topic_id'
-  | 'grammar_chunk_id'
   | 'started_at'
   | 'deleted_at'
   | 'next_at_cz_to_en'
@@ -44,8 +41,6 @@ type UserItemAPI = Omit<
   | 'is_en_to_cz_enabled'
 > & {
   is_vocabulary: boolean;
-  topic_id: number | null;
-  grammar_chunk_id: number | null;
   started_at: string | null;
   deleted_at: string | null;
   next_at_cz_to_en: string | null;
@@ -110,8 +105,6 @@ function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
     is_cz_to_en_enabled: apiItem.is_cz_to_en_enabled ?? true,
     is_en_to_cz_enabled: apiItem.is_en_to_cz_enabled ?? true,
     deleted_at: replaceNullDate(apiItem.deleted_at),
-    topic_id: replaceNullNumber(apiItem.topic_id),
-    grammar_chunk_id: replaceNullNumber(apiItem.grammar_chunk_id),
   };
 }
 
@@ -137,10 +130,6 @@ function hasChangedSinceSnapshot(
 
 function replaceNullDate(value: string | null): string {
   return value ?? NULL_DATE;
-}
-
-function replaceNullNumber(value: number | null): number {
-  return value ?? NULL_NUMBER;
 }
 
 async function getUnstartedItems(userId: string): Promise<UserItemLocal[]> {
@@ -199,8 +188,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   sort_order!: number;
   curriculum_sort_path!: CurriculumSortPath;
   note_id!: number;
-  topic_id!: number;
-  grammar_chunk_id!: number;
   progress_cz_to_en!: number;
   started_at!: string;
   updated_at!: string;
@@ -344,13 +331,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param userId User id whose grammar availability should be checked.
    */
   static async hasInitiatedGrammar(userId: string): Promise<boolean> {
-    const initiatedItem = await db.user_items
-      .where('[user_id+started_at]')
-      .between([userId, Dexie.minKey], [userId, NULL_DATE], true, true)
-      .filter((item) => item.deleted_at === NULL_DATE && isInitiated(item) && hasGrammarChunk(item))
-      .first();
-
-    return initiatedItem !== undefined;
+    return (await Groups.getStartedByUser(userId, 'grammar')).length > 0;
   }
 
   /**
@@ -359,14 +340,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param userId User id whose started items should be inspected.
    * @returns Unique non-null-replacement grammar ids.
    */
-  static async getInitiatedGrammarChunkIds(userId: string): Promise<number[]> {
-    const initiatedItems = await db.user_items
-      .where('[user_id+started_at]')
-      .between([userId, Dexie.minKey], [userId, NULL_DATE], true, true)
-      .filter((item) => item.deleted_at === NULL_DATE && isInitiated(item) && hasGrammarChunk(item))
-      .toArray();
-
-    return [...new Set(initiatedItems.map((item) => item.grammar_chunk_id))];
+  static async getInitiatedGrammarGroupIds(userId: string): Promise<number[]> {
+    const groups = await Groups.getStartedByUser(userId, 'grammar');
+    return groups.map((group) => group.id);
   }
 
   /**
@@ -456,48 +432,13 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return itemId;
   }
 
-  /**
-   * Resets initiated user items for one grammar topic.
-   *
-   * @param userId User id owning the items.
-   * @param grammarChunkId Grammar chunk id whose initiated items should be reset.
-   * @returns Number of modified rows.
-   */
-  static async resetItemsByGrammarChunkId(
-    userId: string,
-    grammarChunkId: number,
-    direction: ReviewDirection = 'cz_to_en',
-    dateTime: string = new Date().toISOString(),
-  ): Promise<number> {
-    const items = await db.user_items
-      .where('[user_id+grammar_chunk_id+started_at]')
-      .between(
-        [userId, grammarChunkId, Dexie.minKey],
-        [userId, grammarChunkId, NULL_DATE],
-        true,
-        true,
-      )
-      .filter((item) =>
-        item.deleted_at === NULL_DATE &&
-        isInitiated(item) &&
-        isReviewDirectionEnabled(item, direction),
-      )
-      .toArray();
-
-    return resetItems(items, dateTime, direction);
-  }
-
   static async resetItemsByGrammarGroupId(
     userId: string,
     grammarGroupId: number,
     direction: ReviewDirection = 'cz_to_en',
     dateTime: string = new Date().toISOString(),
   ): Promise<number> {
-    const relations = await db.group_relations
-      .where('parent_group_id')
-      .equals(grammarGroupId)
-      .toArray();
-    const groupIds = [grammarGroupId, ...relations.map((relation) => relation.child_group_id)];
+    const groupIds = await getGroupAndDescendantIds(grammarGroupId);
     const memberships = await db.group_items.where('group_id').anyOf(groupIds).toArray();
     const itemIds = [...new Set(memberships.map((membership) => membership.item_id))];
     if (itemIds.length === 0) return 0;
@@ -505,7 +446,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       .where('[user_id+item_id]')
       .anyOf(itemIds.map((itemId) => [userId, itemId]))
       .toArray();
-    return resetItems(items, dateTime, direction);
+    return resetItems(
+      items.filter((item) => item.deleted_at === NULL_DATE && isInitiated(item) && isReviewDirectionEnabled(item, direction)),
+      dateTime,
+      direction,
+    );
   }
 
   /** Resets all user items assigned to one topic. */
@@ -899,8 +844,26 @@ function resolveMasteredAt(progress: number, currentMasteredAt: string, dateTime
   return dateTime;
 }
 
-function hasGrammarChunk(item: Pick<UserItemLocal, 'grammar_chunk_id'>): boolean {
-  return item.grammar_chunk_id !== NULL_NUMBER;
+async function getGroupAndDescendantIds(groupId: number): Promise<number[]> {
+  const relations = await db.group_relations
+    .filter((relation) => relation.relation_type !== 'contrast' && !relation.deleted_at)
+    .toArray();
+  const childIdsByParent = new Map<number, number[]>();
+  for (const relation of relations) {
+    const children = childIdsByParent.get(relation.parent_group_id) ?? [];
+    children.push(relation.child_group_id);
+    childIdsByParent.set(relation.parent_group_id, children);
+  }
+
+  const visited = new Set<number>();
+  const pending = [groupId];
+  while (pending.length > 0) {
+    const currentId = pending.pop();
+    if (currentId == null || visited.has(currentId)) continue;
+    visited.add(currentId);
+    pending.push(...(childIdsByParent.get(currentId) ?? []));
+  }
+  return [...visited];
 }
 
 function isReviewKind(item: Pick<UserItemLocal, 'is_vocabulary'>, reviewKind: ReviewKind): boolean {

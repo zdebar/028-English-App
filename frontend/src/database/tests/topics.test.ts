@@ -13,7 +13,6 @@ vi.mock('@/config/config', () => ({
 
 vi.mock('@/database/models/db', () => ({
   db: {
-    topics: {},
     groups: {
       toArray: async () => mocks.groups,
       get: async (id: number) => mocks.groups.find((group) => group.id === id),
@@ -61,10 +60,10 @@ describe('Topic', () => {
   });
 
   it('returns topic metadata only for topic typed groups', async () => {
-    await expect(Topic.getById(2)).resolves.toMatchObject({ id: 2, name: 'Months' });
-    await expect(Topic.getById(99)).resolves.toBeNull();
+    await expect(Topic.getById('u1', 2)).resolves.toMatchObject({ id: 2, name: 'Months' });
+    await expect(Topic.getById('u1', 99)).resolves.toBeNull();
     mocks.groups[0].type = 'grammar';
-    await expect(Topic.getById(1)).resolves.toBeNull();
+    await expect(Topic.getById('u1', 1)).resolves.toBeNull();
   });
 
   it('hides topic groups when lesson starts are missing', async () => {

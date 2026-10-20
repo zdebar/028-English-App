@@ -141,7 +141,7 @@ export default function PronunciationGroupDetail({
         hasData={Boolean(data?.items.length)}
         noDataMessage={TEXTS.noPronunciationGroupItems}
       >
-        {Boolean(data?.sounds.length) && (
+        {Boolean(data?.sounds?.length) && (
           <div className="flex flex-col gap-1 px-4 pt-2">
             {data?.sounds.map((sound) => (
               <div key={sound.id}>

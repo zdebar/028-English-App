@@ -8,14 +8,12 @@ const mocks = vi.hoisted(() => ({
   userItemSyncFromRemote: vi.fn(),
   userLessonSyncFromRemote: vi.fn(),
   userSettingsSyncFromRemote: vi.fn(),
-  grammarSyncFromRemote: vi.fn(),
+  groupsSyncFromRemote: vi.fn(),
+  groupItemsSyncFromRemote: vi.fn(),
+  groupRelationsSyncFromRemote: vi.fn(),
   levelsSyncFromRemote: vi.fn(),
   lessonsSyncFromRemote: vi.fn(),
   audioSyncFromRemote: vi.fn(),
-  pronunciationGroupSyncFromRemote: vi.fn(),
-  pronunciationGroupItemSyncFromRemote: vi.fn(),
-  grammarChunkExampleSyncFromRemote: vi.fn(),
-  topicSyncFromRemote: vi.fn(),
   getSession: vi.fn(),
 }));
 
@@ -62,10 +60,18 @@ vi.mock('@/database/models/user-settings', () => ({
   default: { syncFromRemote: (...args: unknown[]) => mocks.userSettingsSyncFromRemote(...args) },
 }));
 
-vi.mock('@/database/models/grammar-chunks', () => ({
+vi.mock('@/database/models/groups', () => ({
   default: {
-    syncFromRemote: (...args: unknown[]) => mocks.grammarSyncFromRemote(...args),
+    syncFromRemote: (...args: unknown[]) => mocks.groupsSyncFromRemote(...args),
   },
+}));
+
+vi.mock('@/database/models/group-items', () => ({
+  default: { syncFromRemote: (...args: unknown[]) => mocks.groupItemsSyncFromRemote(...args) },
+}));
+
+vi.mock('@/database/models/group-relations', () => ({
+  default: { syncFromRemote: (...args: unknown[]) => mocks.groupRelationsSyncFromRemote(...args) },
 }));
 
 vi.mock('@/database/models/levels', () => ({
@@ -83,30 +89,6 @@ vi.mock('@/database/models/lessons', () => ({
 vi.mock('@/database/models/audio-records', () => ({
   default: {
     syncFromRemote: (...args: unknown[]) => mocks.audioSyncFromRemote(...args),
-  },
-}));
-
-vi.mock('@/database/models/pronunciation-groups', () => ({
-  default: {
-    syncFromRemote: (...args: unknown[]) => mocks.pronunciationGroupSyncFromRemote(...args),
-  },
-}));
-
-vi.mock('@/database/models/pronunciation-group-items', () => ({
-  default: {
-    syncFromRemote: (...args: unknown[]) => mocks.pronunciationGroupItemSyncFromRemote(...args),
-  },
-}));
-
-vi.mock('@/database/models/grammar-chunk-examples', () => ({
-  default: {
-    syncFromRemote: (...args: unknown[]) => mocks.grammarChunkExampleSyncFromRemote(...args),
-  },
-}));
-
-vi.mock('@/database/models/topics', () => ({
-  default: {
-    syncFromRemote: (...args: unknown[]) => mocks.topicSyncFromRemote(...args),
   },
 }));
 
@@ -139,14 +121,12 @@ describe('data-sync.utils', () => {
     mocks.userItemSyncFromRemote.mockResolvedValue(undefined);
     mocks.userLessonSyncFromRemote.mockResolvedValue(0);
     mocks.userSettingsSyncFromRemote.mockResolvedValue(undefined);
-    mocks.grammarSyncFromRemote.mockResolvedValue(undefined);
+    mocks.groupsSyncFromRemote.mockResolvedValue(undefined);
+    mocks.groupItemsSyncFromRemote.mockResolvedValue(undefined);
+    mocks.groupRelationsSyncFromRemote.mockResolvedValue(undefined);
     mocks.levelsSyncFromRemote.mockResolvedValue(undefined);
     mocks.lessonsSyncFromRemote.mockResolvedValue(undefined);
     mocks.audioSyncFromRemote.mockResolvedValue(undefined);
-    mocks.pronunciationGroupSyncFromRemote.mockResolvedValue(undefined);
-    mocks.pronunciationGroupItemSyncFromRemote.mockResolvedValue(undefined);
-    mocks.grammarChunkExampleSyncFromRemote.mockResolvedValue(undefined);
-    mocks.topicSyncFromRemote.mockResolvedValue(undefined);
     mocks.getSession.mockResolvedValue({ data: { session: { user: { id: 'u1' } } }, error: null });
   });
 
@@ -163,13 +143,11 @@ describe('data-sync.utils', () => {
     expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', true);
     expect(mocks.userLessonSyncFromRemote).toHaveBeenCalledWith('u1', true);
     expect(mocks.userSettingsSyncFromRemote).toHaveBeenCalledWith('u1');
-    expect(mocks.grammarSyncFromRemote).toHaveBeenCalledWith(true);
+    expect(mocks.groupsSyncFromRemote).toHaveBeenCalledWith(true);
+    expect(mocks.groupItemsSyncFromRemote).toHaveBeenCalledWith(true);
+    expect(mocks.groupRelationsSyncFromRemote).toHaveBeenCalledWith(true);
     expect(mocks.levelsSyncFromRemote).toHaveBeenCalledWith(true);
     expect(mocks.lessonsSyncFromRemote).toHaveBeenCalledWith(true);
-    expect(mocks.pronunciationGroupSyncFromRemote).toHaveBeenCalledWith(true);
-    expect(mocks.pronunciationGroupItemSyncFromRemote).toHaveBeenCalledWith(true);
-    expect(mocks.grammarChunkExampleSyncFromRemote).toHaveBeenCalledWith(true);
-    expect(mocks.topicSyncFromRemote).toHaveBeenCalledWith(true);
     expect(mocks.setFullSyncTime).toHaveBeenCalledWith('u1', 5000);
   });
 
@@ -182,13 +160,11 @@ describe('data-sync.utils', () => {
     expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', false);
     expect(mocks.userLessonSyncFromRemote).toHaveBeenCalledWith('u1', false);
     expect(mocks.userSettingsSyncFromRemote).toHaveBeenCalledWith('u1');
-    expect(mocks.grammarSyncFromRemote).toHaveBeenCalledWith(false);
+    expect(mocks.groupsSyncFromRemote).toHaveBeenCalledWith(false);
+    expect(mocks.groupItemsSyncFromRemote).toHaveBeenCalledWith(false);
+    expect(mocks.groupRelationsSyncFromRemote).toHaveBeenCalledWith(false);
     expect(mocks.levelsSyncFromRemote).toHaveBeenCalledWith(false);
     expect(mocks.lessonsSyncFromRemote).toHaveBeenCalledWith(false);
-    expect(mocks.pronunciationGroupSyncFromRemote).toHaveBeenCalledWith(false);
-    expect(mocks.pronunciationGroupItemSyncFromRemote).toHaveBeenCalledWith(false);
-    expect(mocks.grammarChunkExampleSyncFromRemote).toHaveBeenCalledWith(false);
-    expect(mocks.topicSyncFromRemote).toHaveBeenCalledWith(false);
     expect(mocks.setFullSyncTime).not.toHaveBeenCalled();
   });
 

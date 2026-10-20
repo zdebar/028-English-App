@@ -11,7 +11,7 @@ import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo } from 'react';
 import Topic from '@/database/models/topics';
 import { useNavigate, useParams } from 'react-router-dom';
-import type { TopicType } from '@/types/generic.types';
+import type { GroupType } from '@/types/table.types';
 import { DataState } from '@/components/UI/DataState';
 import BilingualItemButton from '@/components/UI/buttons/BilingualItemButton';
 import HelpButton from '../help/HelpButton';
@@ -24,7 +24,7 @@ import { invalidateReviewArrays } from '@/features/practice/review-prefetch';
 export default function TopicItemsOverview({
   initialTopic,
   initialItems = [],
-}: Readonly<{ initialTopic?: TopicType | null; initialItems?: UserItemLocal[] }>) {
+}: Readonly<{ initialTopic?: GroupType | null; initialItems?: UserItemLocal[] }>) {
   const navigate = useNavigate();
   const closeRoute = useRouteClose(ROUTES.topics);
   const userId = useAuthStore((state) => state.userId);
@@ -38,19 +38,19 @@ export default function TopicItemsOverview({
 
   useEffect(() => {
     if (topicId) return;
-    navigate(ROUTES.topics);
+    void navigate(ROUTES.topics);
   }, [navigate, topicId]);
 
-  const fetchTopic = useCallback(async (): Promise<TopicType | null> => {
+  const fetchTopic = useCallback(async (): Promise<GroupType | null> => {
     if (!userId || !topicId) return null;
-    return Topic.getById(topicId);
+    return Topic.getById(userId, topicId);
   }, [topicId, userId]);
 
   const {
     data: topic,
     loading: topicLoading,
     error: topicError,
-  } = useLiveQueryData<TopicType | null>(fetchTopic, {
+  } = useLiveQueryData<GroupType | null>(fetchTopic, {
     emptyData: null,
     initialData: initialTopic,
     sharedKey: sharedQueryKey(userId, `topic:${topicId}`),
@@ -75,7 +75,7 @@ export default function TopicItemsOverview({
 
   useEffect(() => {
     if (topicLoading || !userId || !topicId || topic !== null) return;
-    navigate(ROUTES.topics, { replace: true });
+    void navigate(ROUTES.topics, { replace: true });
   }, [navigate, topic, topicId, topicLoading, userId]);
 
   useEffect(() => {

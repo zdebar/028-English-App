@@ -1,4 +1,4 @@
-import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
+import type { GroupType } from './table.types';
 import type { NoteType } from './generic.types';
 import type { ReviewDirection } from './practice.types';
 
@@ -32,8 +32,6 @@ export interface UserItemLocal extends UserItemBase {
   /** Set only on transient practice entries to identify the active review direction. */
   review_direction?: ReviewDirection;
   is_vocabulary: 0 | 1;
-  topic_id: number;
-  grammar_chunk_id: number;
   started_at: string;
   deleted_at: string;
   next_at_cz_to_en: string;
@@ -48,7 +46,7 @@ export type PracticeDeckItem = UserItemLocal;
 export type ResolvedPracticeEntry<T extends UserItemLocal> = Readonly<{
   item: T;
   note: NoteType | null;
-  grammar: GrammarChunkWithExamples | null;
+  grammar: (GroupType & { items: UserItemLocal[] }) | null;
 }>;
 
 export type PracticeDeckEntry = ResolvedPracticeEntry<PracticeDeckItem>;

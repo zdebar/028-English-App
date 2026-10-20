@@ -11,30 +11,10 @@ export interface RecordType extends SyncEntityType {}
 
 export interface LessonType extends SyncEntityType {
   level_id: number;
-  grammar_chunk_id: number | null;
   group_id: number | null;
 }
 export interface LevelType extends SyncEntityType {}
 
-export interface GrammarTopicType extends SyncEntityType {}
-
-export interface GrammarGroupType extends SyncEntityType {
-  grammar_topic_id: number;
-}
-
-export interface GrammarChunkType extends SyncEntityType {
-  grammar_group_id: number;
-}
-
-export interface GrammarChunkExampleType {
-  grammar_chunk_id: number;
-  item_id: number;
-  sort_order: number;
-  updated_at: string;
-  deleted_at: string | null;
-}
-
-export interface TopicType extends SyncEntityType {}
 
 export interface NoteType extends Omit<SyncEntityType, 'sort_order'> {
   note: string;

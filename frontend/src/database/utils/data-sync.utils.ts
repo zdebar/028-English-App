@@ -6,16 +6,9 @@ import { withSettledSummary } from '@/features/logging/logging.utils';
 import Lessons from '@/database/models/lessons';
 import Levels from '@/database/models/levels';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
-import GrammarChunk from '@/database/models/grammar-chunks';
-import GrammarGroup from '@/database/models/grammar-groups';
-import GrammarTopic from '@/database/models/grammar-topics';
 import { reportInfo } from '@/features/logging/monitoring-handler';
 import { supabaseInstance } from '@/config/supabase.config';
 import Notes from '../models/notes';
-import PronunciationGroup from '../models/pronunciation-groups';
-import PronunciationGroupItem from '../models/pronunciation-group-items';
-import GrammarChunkExample from '../models/grammar-chunk-examples';
-import Topic from '../models/topics';
 import UserLesson from '../models/user-lessons';
 import UserSettings from '../models/user-settings';
 import Groups from '../models/groups';
@@ -48,16 +41,9 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
     () => Groups.syncFromRemote(doFullSync),
     () => GroupItem.syncFromRemote(doFullSync),
     () => GroupRelation.syncFromRemote(doFullSync),
-    () => GrammarTopic.syncFromRemote(doFullSync),
-    () => GrammarGroup.syncFromRemote(doFullSync),
-    () => GrammarChunk.syncFromRemote(doFullSync),
-    () => GrammarChunkExample.syncFromRemote(doFullSync),
     () => Levels.syncFromRemote(doFullSync),
     () => Lessons.syncFromRemote(doFullSync),
     () => Notes.syncFromRemote(doFullSync),
-    () => Topic.syncFromRemote(doFullSync),
-    () => PronunciationGroup.syncFromRemote(doFullSync),
-    () => PronunciationGroupItem.syncFromRemote(doFullSync),
     () => UserItem.syncFromRemote(userId, doFullSync),
     () => UserLesson.syncFromRemote(userId, doFullSync),
     () => UserSettings.syncFromRemote(userId),
@@ -68,16 +54,9 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
     'Groups',
     'GroupItems',
     'GroupRelations',
-    'GrammarTopics',
-    'GrammarGroups',
-    'GrammarChunks',
-    'GrammarChunkExamples',
     'Levels',
     'Lessons',
     'Notes',
-    'Topics',
-    'PronunciationGroups',
-    'PronunciationGroupItems',
     'UserItems',
     'UserLessons',
     'UserSettings',

@@ -17,8 +17,6 @@ RETURNS TABLE (
   sort_order INTEGER,
   curriculum_sort_path INTEGER[],
   note_id INTEGER,
-  topic_id INTEGER,
-  grammar_chunk_id INTEGER,
   progress_cz_to_en INTEGER,
   progress_en_to_cz INTEGER,
   started_at TIMESTAMPTZ,
@@ -52,8 +50,6 @@ BEGIN
     ARRAY[lv.sort_order, le.sort_order, i.sort_order]::INTEGER[]
       AS curriculum_sort_path,
     i.note_id,
-    i.topic_id,
-    i.grammar_chunk_id,
     COALESCE(ui.progress_cz_to_en, 0) AS progress_cz_to_en,
     COALESCE(ui.progress_en_to_cz, 0) AS progress_en_to_cz,
     ui.started_at,

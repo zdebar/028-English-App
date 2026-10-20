@@ -4,7 +4,8 @@ import UserItem from '@/database/models/user-items';
 import UserLesson from '@/database/models/user-lessons';
 import type { GrammarDetail } from '@/features/grammar/GrammarDetailCard';
 import { reportError } from '@/features/logging/monitoring-handler';
-import type { LessonType, GrammarChunkType, GrammarGroupType } from '@/types/generic.types';
+import type { LessonType } from '@/types/generic.types';
+import type { GroupType } from '@/types/table.types';
 import type { ResolvedPracticeEntry, UserItemLocal } from '@/types/user-item.types';
 import {
   useCallback,
@@ -40,7 +41,7 @@ function toError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
 }
 
-function toGrammarDetail(grammar: GrammarChunkType | null | undefined): GrammarDetail | null {
+function toGrammarDetail(grammar: GroupType | null | undefined): GrammarDetail | null {
   if (!grammar) return null;
   return { ...grammar, kind: 'chunk' };
 }
@@ -49,8 +50,8 @@ type InitialTrainingLoadResult = Readonly<{
   lesson: LessonType | null;
   items: UserItemLocal[];
   entries: Array<ResolvedPracticeEntry<UserItemLocal>>;
-  grammar: GrammarChunkType | null;
-  grammarGroup: GrammarGroupType | null;
+  grammar: GroupType | null;
+  grammarGroup: GroupType | null;
   queue: InitialTrainingQueue;
 }>;
 
@@ -155,7 +156,7 @@ function resolveTrainingGrammarContext(
   if (initialData) {
     return Promise.resolve({ grammar: initialData.grammar, grammarGroup: initialData.grammarGroup });
   }
-  return resolvePracticeGrammarContext(userId, lesson?.grammar_chunk_id);
+  return resolvePracticeGrammarContext(userId, lesson?.group_id);
 }
 
 async function loadInitialTrainingData(
@@ -213,7 +214,7 @@ type InitialTrainingLoadSetters = Readonly<{
   setInitialItemCount: Dispatch<SetStateAction<number>>;
   setResolvedEntries: Dispatch<SetStateAction<Array<ResolvedPracticeEntry<UserItemLocal>>>>;
   setGrammar: Dispatch<SetStateAction<GrammarDetail | null>>;
-  setGrammarGroup: Dispatch<SetStateAction<GrammarGroupType | null>>;
+  setGrammarGroup: Dispatch<SetStateAction<GroupType | null>>;
   setQueue: Dispatch<SetStateAction<InitialTrainingQueue | null>>;
   setHasProgress: Dispatch<SetStateAction<boolean>>;
   setLoading: Dispatch<SetStateAction<boolean>>;
@@ -390,7 +391,7 @@ export function useInitialTrainingDeck(
     Array<ResolvedPracticeEntry<UserItemLocal>>
   >(initialState.entries);
   const [grammar, setGrammar] = useState<GrammarDetail | null>(initialState.grammar);
-  const [grammarGroup, setGrammarGroup] = useState<GrammarGroupType | null>(
+  const [grammarGroup, setGrammarGroup] = useState<GroupType | null>(
     initialState.grammarGroup,
   );
   const [queue, setQueue] = useState<InitialTrainingQueue | null>(null);

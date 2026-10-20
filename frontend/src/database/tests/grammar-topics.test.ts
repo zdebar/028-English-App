@@ -46,11 +46,10 @@ describe('GrammarTopic.getInitiated', () => {
         groups: [
           {
             ...mocks.groups[1],
-            grammar_topic_id: 100,
             kind: 'group',
             chunks: [
-              { ...mocks.groups[2], grammar_group_id: 101, items: [{ item_id: 1, english: 'works' }] },
-              { ...mocks.groups[3], grammar_group_id: 101, items: [{ item_id: 2, english: 'Does it work?' }] },
+              { ...mocks.groups[2], items: [{ item_id: 1, english: 'works' }] },
+              { ...mocks.groups[3], items: [{ item_id: 2, english: 'Does it work?' }] },
             ],
           },
         ],

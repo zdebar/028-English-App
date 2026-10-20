@@ -35,6 +35,26 @@ export default class Groups extends SyncEntityModel implements GroupRow {
       .sortBy('sort_order');
   }
 
+  static async getExamples(groupId: number, userId: string): Promise<UserItemLocal[]> {
+    const memberships = await db.group_items
+      .where('group_id')
+      .equals(groupId)
+      .filter((membership) => !membership.deleted_at)
+      .toArray();
+    const itemIds = memberships
+      .sort((left, right) => left.sort_order - right.sort_order)
+      .map((membership) => membership.item_id);
+    const items = await db.user_items
+      .where('[user_id+item_id]')
+      .anyOf(itemIds.map((itemId) => [userId, itemId]))
+      .toArray();
+    const itemById = new Map(items.map((item) => [item.item_id, item]));
+    return itemIds.flatMap((itemId) => {
+      const item = itemById.get(itemId);
+      return item ? [item] : [];
+    });
+  }
+
   static async getStartedByUser(userId: string, type?: GroupTypeName): Promise<VisibleGroup[]> {
     const [groups, memberships, userItems, userLessons] = await Promise.all([
       db.groups.toArray(),

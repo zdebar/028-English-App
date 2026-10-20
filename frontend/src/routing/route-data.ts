@@ -89,7 +89,7 @@ export function topicDetailDescriptor(userId: string, topicId: number) {
   return {
     load: async () => {
       const [topic, items] = await Promise.all([
-        loadSharedQuery(userId, `topic:${topicId}`, () => Topic.getById(topicId)),
+        loadSharedQuery(userId, `topic:${topicId}`, () => Topic.getById(userId, topicId)),
         loadSharedQuery(userId, `topic-items:${topicId}`, () => UserItem.getInitiatedByTopicId(userId, topicId)),
       ]);
       return { topic, items };

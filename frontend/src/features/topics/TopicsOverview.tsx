@@ -1,6 +1,6 @@
 import { getOverviewQuery, overviewQueryKey } from '@/hooks/overview-query-store';
 import { TEXTS } from '@/locales/cs';
-import type { TopicType } from '@/types/generic.types';
+import type { GroupType } from '@/types/table.types';
 import { ROUTES } from '@/config/routes.config';
 import { useAuthStore } from '../auth/use-auth-store';
 import { useCallback, useEffect } from 'react';
@@ -14,13 +14,13 @@ import { useRouteClose } from '@/routing/use-route-close';
 
 export default function TopicsOverview({
   initialTopics,
-}: Readonly<{ initialTopics?: TopicType[] }>) {
+}: Readonly<{ initialTopics?: GroupType[] }>) {
   const closeRoute = useRouteClose(ROUTES.overviews);
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
 
   // Topics management
-  const fetchTopics = useCallback(async (): Promise<TopicType[]> => {
+  const fetchTopics = useCallback(async (): Promise<GroupType[]> => {
     if (!userId) return [];
     return getOverviewQuery(userId, 'topics')();
   }, [userId]);
@@ -29,7 +29,7 @@ export default function TopicsOverview({
     data: topics,
     loading: topicsLoading,
     error: topicsError,
-  } = useLiveQueryData<TopicType[]>(fetchTopics, {
+  } = useLiveQueryData<GroupType[]>(fetchTopics, {
     emptyData: [],
     initialData: initialTopics,
     sharedKey: userId ? overviewQueryKey(userId, 'topics') : undefined,

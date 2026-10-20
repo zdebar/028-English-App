@@ -5,7 +5,8 @@ import {
   resolvePracticeGrammarContext,
 } from '@/database/utils/practice-content.utils';
 import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
-import type { LessonType, GrammarGroupType } from '@/types/generic.types';
+import type { LessonType } from '@/types/generic.types';
+import type { GroupType } from '@/types/table.types';
 import type {
   ResolvedPracticeEntry,
   UserItemLocal,
@@ -21,7 +22,7 @@ export type PreparedInitialLesson = Readonly<{
   items: UserItemLocal[];
   entries: Array<ResolvedPracticeEntry<UserItemLocal>>;
   grammar: GrammarChunkWithExamples | null;
-  grammarGroup: GrammarGroupType | null;
+  grammarGroup: GroupType | null;
 }>;
 
 type PracticePrefetchState = {
@@ -62,7 +63,7 @@ async function loadPreparedInitialLesson(
 
   const [entries, grammarContext] = await Promise.all([
     resolvePracticeEntries(userId, selection.items),
-    resolvePracticeGrammarContext(userId, lesson.grammar_chunk_id),
+    resolvePracticeGrammarContext(userId, lesson.group_id),
   ]);
   return {
     lesson,

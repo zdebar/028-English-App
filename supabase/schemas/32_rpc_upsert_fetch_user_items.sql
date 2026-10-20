@@ -18,8 +18,6 @@ RETURNS TABLE (
   sort_order INTEGER,
   curriculum_sort_path INTEGER[],
   note_id INTEGER,
-  topic_id INTEGER,
-  grammar_chunk_id INTEGER,
   progress_cz_to_en INTEGER,
   progress_en_to_cz INTEGER,
   started_at TIMESTAMPTZ,

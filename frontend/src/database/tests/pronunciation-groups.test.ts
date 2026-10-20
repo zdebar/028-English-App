@@ -152,6 +152,16 @@ describe('PronunciationGroup', () => {
     await expect(PronunciationGroup.getOverview('u1')).resolves.toEqual([]);
   });
 
+  it('keeps a started group visible even when its examples have no audio', async () => {
+    mocks.items.forEach((entry) => {
+      entry.audio = null;
+    });
+
+    await expect(PronunciationGroup.getOverview('u1')).resolves.toEqual([
+      expect.objectContaining({ id: 1, examples: [], unlocked_count: 0, total_count: 0 }),
+    ]);
+  });
+
   it('returns detail in group item order', async () => {
     mocks.memberships = [
       { group_id: 1, item_id: 2, sort_order: 1 },

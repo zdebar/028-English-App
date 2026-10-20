@@ -398,7 +398,7 @@ export function usePracticeDeck(
           note: null,
           grammar: null,
           noteLoadFailed: hasPositiveReference(currentItem.note_id),
-          grammarLoadFailed: hasPositiveReference(currentItem.grammar_chunk_id),
+          grammarLoadFailed: currentItem.is_vocabulary === 0,
         });
       });
 
@@ -511,7 +511,7 @@ export function usePracticeDeck(
     note: getSecondaryNote(currentEntry, secondaryContent),
     grammar: getSecondaryGrammar(currentEntry, secondaryContent),
     noteAvailable: hasPositiveReference(currentItem?.note_id),
-    grammarAvailable: hasPositiveReference(currentItem?.grammar_chunk_id),
+    grammarAvailable: currentItem?.is_vocabulary === 0,
     noteLoadFailed: getSecondaryNoteLoadFailed(currentEntry, secondaryContent),
     grammarLoadFailed: getSecondaryGrammarLoadFailed(currentEntry, secondaryContent),
     ensureDetailLoaded,

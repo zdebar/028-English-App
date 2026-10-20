@@ -89,6 +89,11 @@ const initialData = {
   grammar: null,
   grammarGroup: null,
 };
+const finalCardInitialData = {
+  ...initialData,
+  items: [items[0]],
+  entries: [initialData.entries[0]],
+};
 
 describe('useInitialTrainingDeck', () => {
   beforeEach(() => {
@@ -185,7 +190,7 @@ describe('useInitialTrainingDeck', () => {
         resolveCompletion = resolve;
       }),
     );
-    const { result, unmount } = renderHook(() => useInitialTrainingDeck('u1', initialData));
+    const { result, unmount } = renderHook(() => useInitialTrainingDeck('u1', finalCardInitialData));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
 
     let completionPromise: Promise<void> | undefined;
@@ -212,7 +217,7 @@ describe('useInitialTrainingDeck', () => {
     mocks.saveInitialTrainingProgress
       .mockRejectedValueOnce(new Error('completion failed'))
       .mockResolvedValueOnce(undefined);
-    const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
+    const { result } = renderHook(() => useInitialTrainingDeck('u1', finalCardInitialData));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
 
     await act(async () => result.current.nextKnown());

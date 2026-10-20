@@ -2,12 +2,8 @@ import { db } from '@/database/models/db';
 import type {
   PronunciationGroupDetailType,
   PronunciationGroupOverviewType,
-  PronunciationGroupType,
 } from '@/types/pronunciation.types';
-import { TableName } from '@/types/table.types';
 import type { UserItemLocal } from '@/types/user-item.types';
-import Dexie from 'dexie';
-import SyncEntityModel from './sync-entity-model';
 import { isInitiated } from '@/utils/progress.utils';
 import Groups from './groups';
 
@@ -19,28 +15,12 @@ function isAvailable(item: UserItemLocal): boolean {
   return isEligible(item) && isInitiated(item);
 }
 
-export default class PronunciationGroup extends SyncEntityModel implements PronunciationGroupType {
-  id!: number;
-  name!: string;
-  note!: string | null;
-  sort_order!: number;
-  updated_at!: string;
-  deleted_at!: string | null;
-
-  static override readonly syncTable = db.pronunciation_groups as Dexie.Table<
-    PronunciationGroupType,
-    number
-  >;
-  static override readonly syncTableName = TableName.PronunciationGroups;
-  static override readonly syncEntityName = 'pronunciation groups';
-  static override readonly syncSelect = 'id, name, note, sort_order, updated_at, deleted_at';
-
+export default class PronunciationGroup {
   static async getOverview(userId: string): Promise<PronunciationGroupOverviewType[]> {
     const groups = await Groups.getStartedByUser(userId, 'pronunciation');
     return groups.flatMap((group) => {
       const eligible = group.examples.filter(isEligible);
       const unlocked = eligible.filter(isAvailable);
-      if (unlocked.length === 0) return [];
       const { type: _type, ...groupData } = group;
       return [
         {

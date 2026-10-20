@@ -2,18 +2,11 @@ export const TableName = {
   Groups: 'groups',
   GroupItems: 'group_items',
   GroupRelations: 'group_relations',
-  GrammarTopics: 'grammar_topics',
-  GrammarGroups: 'grammar_groups',
-  GrammarChunks: 'grammar_chunks',
-  GrammarChunkExamples: 'grammar_chunk_examples',
   UserItems: 'user_items',
   UserLessons: 'user_lessons',
   Levels: 'levels',
   Lessons: 'lessons',
-  Topics: 'topics',
   Notes: 'notes',
-  PronunciationGroups: 'pronunciation_groups',
-  PronunciationGroupItems: 'pronunciation_group_items',
 } as const;
 
 export interface SyncEntityType {

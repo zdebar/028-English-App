@@ -1,8 +1,5 @@
 import config from '@/config/config';
 import Dexie, { type EntityTable } from 'dexie';
-import type GrammarChunk from '@/database/models/grammar-chunks';
-import type GrammarGroup from '@/database/models/grammar-groups';
-import type GrammarTopic from '@/database/models/grammar-topics';
 import type AudioRecord from '@/database/models/audio-records';
 import type UserItem from '@/database/models/user-items';
 import type AudioMetadata from '@/database/models/audio-metadata';
@@ -10,10 +7,6 @@ import type Metadata from '@/database/models/metadata';
 import type Lessons from '@/database/models/lessons';
 import type Levels from '@/database/models/levels';
 import type Notes from '@/database/models/notes';
-import type PronunciationGroup from '@/database/models/pronunciation-groups';
-import type PronunciationGroupItem from '@/database/models/pronunciation-group-items';
-import type GrammarChunkExample from '@/database/models/grammar-chunk-examples';
-import type Topic from '@/database/models/topics';
 import type UserLesson from '@/database/models/user-lessons';
 import type UserSettings from '@/database/models/user-settings';
 import type { GroupType, GroupItemType, GroupRelationType } from '@/types/table.types';
@@ -22,6 +15,8 @@ const USER_ITEMS_SCHEMA =
   '[user_id+item_id], [user_id+grammar_chunk_id+started_at], [user_id+is_vocabulary+started_at], [user_id+started_at], [user_id+updated_at], [user_id+lesson_id+is_vocabulary+started_at], [user_id+block_id], [user_id+topic_id], [user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path], [user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]';
 const USER_ITEMS_SCHEMA_WITHOUT_BLOCK =
   '[user_id+item_id], [user_id+grammar_chunk_id+started_at], [user_id+is_vocabulary+started_at], [user_id+started_at], [user_id+updated_at], [user_id+lesson_id+is_vocabulary+started_at], [user_id+topic_id], [user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path], [user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]';
+const USER_ITEMS_SCHEMA_UNIFIED =
+  '[user_id+item_id], [user_id+is_vocabulary+started_at], [user_id+started_at], [user_id+updated_at], [user_id+lesson_id+is_vocabulary+started_at], [user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path], [user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]';
 
 /**
  * Application IndexedDB wrapper built on Dexie.
@@ -34,17 +29,10 @@ export default class AppDB extends Dexie {
   levels!: EntityTable<Levels, 'id'>;
   lessons!: EntityTable<Lessons, 'id'>;
   notes!: EntityTable<Notes, 'id'>;
-  pronunciation_groups!: EntityTable<PronunciationGroup, 'id'>;
-  pronunciation_group_items!: EntityTable<PronunciationGroupItem, any>;
-  grammar_groups!: EntityTable<GrammarGroup, 'id'>;
-  grammar_topics!: EntityTable<GrammarTopic, 'id'>;
-  grammar_chunks!: EntityTable<GrammarChunk, 'id'>;
-  grammar_chunk_examples!: EntityTable<GrammarChunkExample, any>;
   user_items!: EntityTable<UserItem, any>;
   audio_records!: EntityTable<AudioRecord, 'filename'>;
   audio_metadata!: EntityTable<AudioMetadata, 'archive_name'>;
   metadata!: EntityTable<Metadata, any>;
-  topics!: EntityTable<Topic, 'id'>;
   user_lessons!: EntityTable<UserLesson, any>;
   users!: EntityTable<UserSettings, 'id'>;
   groups!: EntityTable<GroupType, 'id'>;
@@ -170,5 +158,36 @@ export default class AppDB extends Dexie {
         (lesson as Record<string, unknown>).group_id ??= null;
       });
     });
+
+    this.version(13)
+      .stores({
+        topics: null,
+        grammar_topics: null,
+        grammar_groups: null,
+        grammar_chunks: null,
+        grammar_chunk_examples: null,
+        pronunciation_groups: null,
+        pronunciation_group_items: null,
+        user_items: USER_ITEMS_SCHEMA_UNIFIED,
+      })
+      .upgrade(async (transaction) => {
+        await transaction.table('user_items').toCollection().modify((item) => {
+          const localItem = item as Record<string, unknown>;
+          delete localItem.topic_id;
+          delete localItem.grammar_chunk_id;
+        });
+        await transaction.table('metadata').filter((entry) => [
+          'topics',
+          'grammar_topics',
+          'grammar_groups',
+          'grammar_chunks',
+          'grammar_chunk_examples',
+          'pronunciation_groups',
+          'pronunciation_group_items',
+        ].includes((entry as { table_name?: string }).table_name ?? '')).delete();
+        await transaction.table('lessons').toCollection().modify((lesson) => {
+          delete (lesson as Record<string, unknown>).grammar_chunk_id;
+        });
+      });
   }
 }
