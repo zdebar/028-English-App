@@ -11,7 +11,6 @@ import { ROUTES } from '@/config/routes.config';
 import GoogleAuthButton from '@/features/auth/GoogleAuthButton';
 import AnonymousSigninButton from '@/features/auth/AnonymousSigninButton';
 import ConvertAnonymousUserButton from '@/features/auth/ConvertAnonymousUserButton';
-import PropertyView from '@/components/UI/PropertyView';
 import PracticeOverviewButton from '@/features/practice-overview/PracticeOverviewButton';
 import SimulateDataButton from '@/features/synchronization/SimulateDataButton';
 import PracticeButton from '@/features/practice/PracticeButton';
@@ -39,7 +38,6 @@ function HomeActionLinks(): JSX.Element {
  */
 export default function Home(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
-  const userFullName = useAuthStore((state) => state.userFullName);
   const isAnonymousUser = useAuthStore((state) => state.isAnonymousUser);
   const authLoading = useAuthStore((state) => state.loading);
   const startedTodayCount = useUserStore((state) => state.startedTodayCount);
@@ -59,14 +57,6 @@ export default function Home(): JSX.Element {
       {userId ? (
         <div className="card-width relative flex h-full w-full grow flex-col justify-start gap-1 sm:gap-4">
           <div className="landscape:mt-6">
-            <PropertyView
-              label={TEXTS.profileNameLabel}
-              className="justify-center"
-              classNameLabel="w-20"
-              classNameValue="wrap-break-word"
-            >
-              {userFullName ?? TEXTS.notAvailable}
-            </PropertyView>
             <HomeActionLinks />
           </div>
           <p className={`text-error-light dark:text-error-dark px-4 text-center text-sm`}>

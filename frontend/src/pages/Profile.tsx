@@ -24,6 +24,7 @@ import {
  */
 export default function Profile(): JSX.Element {
   const userEmail = useAuthStore((state) => state.userEmail);
+  const userFullName = useAuthStore((state) => state.userFullName);
   const userId = useAuthStore((state) => state.userId);
   const [dailyLimit, setDailyLimit] = useState('1');
   const [savedDailyLimit, setSavedDailyLimit] = useState(1);
@@ -129,6 +130,14 @@ export default function Profile(): JSX.Element {
   return (
     <div className="card-width grow-0 gap-1">
       <div className="mx-auto mt-4 mb-4 w-64 text-left">
+        <PropertyView
+          label={TEXTS.profileNameLabel}
+          className="justify-start"
+          classNameLabel="w-20"
+          classNameValue="wrap-break-word"
+        >
+          {userFullName ?? TEXTS.notAvailable}
+        </PropertyView>
         <PropertyView
           label={TEXTS.profileEmailLabel}
           className="justify-start"
