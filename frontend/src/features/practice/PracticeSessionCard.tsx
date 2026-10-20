@@ -3,6 +3,7 @@ import config from '@/config/config';
 import SecondaryControlButton from '@/components/UI/buttons/SecondaryControlButton';
 import StyledButton from '@/components/UI/buttons/StyledButton';
 import BookIcon from '@/components/UI/icons/BookIcon';
+import PronunciationIcon from '@/components/UI/icons/PronunciationIcon';
 import PlayButton from '@/features/audio/PlayButton';
 import VolumeSlider from '@/features/audio/VolumeSlider';
 import GrammarDetailCard from '@/features/grammar/GrammarDetailCard';
@@ -355,7 +356,7 @@ type PracticeCardDisplayState = Readonly<{
   cardStyle: string;
   showGrammarButton: boolean;
   showNoteButton: boolean;
-  showPronunciationButton: boolean;
+  pronunciationButtonDisabled: boolean;
   showProgressLabel: boolean;
   audioButtonDisabled: boolean;
   grammarButtonDisabled: boolean;
@@ -396,7 +397,10 @@ function getPracticeCardDisplayState(
     cardStyle: getPracticeCardStyle(controlsLocked, revealed),
     showGrammarButton,
     showNoteButton,
-    showPronunciationButton: shouldShowPronunciationButton(revealed, hasPronunciationSounds),
+    pronunciationButtonDisabled: shouldDisablePronunciationButton(
+      revealed,
+      hasPronunciationSounds,
+    ),
     showProgressLabel: props.isInitialTrainingPractice || props.showProgressLabel,
     audioButtonDisabled: audioControlsDisabled || !revealed,
     grammarButtonDisabled: controlsLocked || grammarLoadFailed || !showGrammarButton,
@@ -409,8 +413,8 @@ function getPracticeCardDisplayState(
   };
 }
 
-function shouldShowPronunciationButton(revealed: boolean, hasPronunciationSounds: boolean): boolean {
-  return revealed && hasPronunciationSounds;
+function shouldDisablePronunciationButton(revealed: boolean, hasPronunciationSounds: boolean): boolean {
+  return !revealed || !hasPronunciationSounds;
 }
 
 function getPracticeCardText(revealed: boolean): string | undefined {
@@ -650,18 +654,17 @@ function PracticeCardActionBar({
       </div>
       <div className="pos-bottom-left-control">
         <PlayButton onClick={playAudio} disabled={display.audioButtonDisabled} />
-        {display.showPronunciationButton && (
-          <SecondaryControlButton
-            title={TEXTS.pronunciationGuide}
-            ariaLabel={TEXTS.pronunciationGuide}
-            onClick={(event) => {
-              event.stopPropagation();
-              onOpenPronunciation(pronunciationSounds);
-            }}
-          >
-            <span className="text-xs font-bold" aria-hidden="true">IPA</span>
-          </SecondaryControlButton>
-        )}
+        <SecondaryControlButton
+          title={TEXTS.pronunciationGuide}
+          ariaLabel={TEXTS.pronunciationGuide}
+          onClick={(event) => {
+            event.stopPropagation();
+            onOpenPronunciation(pronunciationSounds);
+          }}
+          disabled={display.pronunciationButtonDisabled}
+        >
+          <PronunciationIcon />
+        </SecondaryControlButton>
         <VolumeSlider />
       </div>
       <div className="pos-bottom-right-control">

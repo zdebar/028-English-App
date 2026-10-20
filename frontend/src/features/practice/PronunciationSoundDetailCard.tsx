@@ -1,6 +1,7 @@
-import OverviewCard from '@/components/UI/OverviewCard';
-import SecondaryControlButton from '@/components/UI/buttons/SecondaryControlButton';
-import RightArrowIcon from '@/components/UI/icons/RightArrowIcon';
+import Card from '@/components/UI/Card';
+import CloseButton from '@/components/UI/buttons/CloseButton';
+import StyledButton from '@/components/UI/buttons/StyledButton';
+import ChevronRightIcon from '@/components/UI/icons/ChevronRightIcon';
 import type { GroupType } from '@/types/table.types';
 import { TEXTS } from '@/locales/cs';
 
@@ -24,38 +25,51 @@ export default function PronunciationSoundDetailCard({
   const isLastSound = index === sounds.length - 1;
 
   return (
-    <OverviewCard
-      buttonTitle={sound.name}
-      onClose={onClose}
-      showResetAction={false}
-      className="bottom-controls-clearance relative"
-    >
-      <div className="px-4 pt-4">
-        {sound.note && <p className="whitespace-pre-line">{sound.note}</p>}
-        <p className="mt-3 text-center text-sm" aria-live="polite">
-          {index + 1} / {sounds.length}
-        </p>
+    <Card className="card-height min-h-card gap-1">
+      <div className="h-button flex w-full shrink-0 items-center gap-1">
+        <StyledButton
+          className="h-button grow justify-start px-4"
+          aria-label={`IPA ${sound.name}`}
+          disabled
+        >
+          {sound.name}
+        </StyledButton>
+        <CloseButton onClick={onClose} />
       </div>
-      <div className="pos-bottom-left-control">
-        <SecondaryControlButton
+      <div className="flex min-h-0 grow items-start overflow-auto p-4 text-left">
+        {sound.note && <p className="font-normal whitespace-pre-line">{sound.note}</p>}
+      </div>
+      <div
+        data-testid="pronunciation-sound-navigation"
+        className="flex w-full shrink-0 items-center justify-center gap-1"
+      >
+        <StyledButton
+          className="h-button min-h-button min-w-0 flex-1"
           title={TEXTS.previousSound}
-          ariaLabel={TEXTS.previousSound}
+          aria-label={TEXTS.previousSound}
           onClick={() => onIndexChange(index - 1)}
           disabled={isFirstSound}
         >
-          <RightArrowIcon className="rotate-180" />
-        </SecondaryControlButton>
-      </div>
-      <div className="pos-bottom-right-control">
-        <SecondaryControlButton
+          <ChevronRightIcon className="rotate-180" />
+        </StyledButton>
+        <StyledButton
+          className="h-button min-h-button min-w-0 flex-1"
+          aria-label={`${index + 1} / ${sounds.length}`}
+          aria-live="polite"
+          disabled
+        >
+          {index + 1} / {sounds.length}
+        </StyledButton>
+        <StyledButton
+          className="h-button min-h-button min-w-0 flex-1"
           title={TEXTS.nextSound}
-          ariaLabel={TEXTS.nextSound}
+          aria-label={TEXTS.nextSound}
           onClick={() => onIndexChange(index + 1)}
           disabled={isLastSound}
         >
-          <RightArrowIcon />
-        </SecondaryControlButton>
+          <ChevronRightIcon />
+        </StyledButton>
       </div>
-    </OverviewCard>
+    </Card>
   );
 }

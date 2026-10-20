@@ -118,6 +118,7 @@ vi.mock('@/locales/cs', () => ({
     pronunciationGuide: 'Pronunciation',
     previousSound: 'Previous sound',
     nextSound: 'Next sound',
+    close: 'Close',
     tooltipNotes: 'Notes',
     itemProgress: 'Item progress',
     progress: 'Progress',
@@ -550,7 +551,7 @@ describe('PracticeCard', () => {
     expect(volumeSlider.dataset.disabled).toBe('false');
   });
 
-  it('opens pronunciation sounds in IPA order after reveal and navigates between them', () => {
+  it('opens pronunciation sounds in IPA order and navigates between them', () => {
     mocks.practiceDeck.revealed = true;
     mocks.practiceDeck.pronunciation = 'həlˈoʊ';
     mocks.soundGroups = [
@@ -566,21 +567,44 @@ describe('PracticeCard', () => {
     ) as HTMLButtonElement;
 
     expect(pronunciationButton).toBeTruthy();
+    expect(pronunciationButton.disabled).toBe(false);
     fireEvent.click(pronunciationButton);
-    expect(screen.getByTestId('overview-title').textContent).toBe('h');
+    expect((container.querySelector('[aria-label^="IPA "]') as HTMLButtonElement).disabled).toBe(
+      true,
+    );
+    expect(container.querySelector('[aria-label^="IPA "]')?.textContent).toBe('h');
     expect(screen.getByText('výdech')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Previous sound' }).hasAttribute('disabled')).toBe(true);
+    expect(container.querySelector('.card-width.card-height')).toBeTruthy();
+    expect(
+      container.querySelector('.card-width.card-height')?.className,
+    ).toContain('min-h-card');
+    expect(container.querySelector('.text-left')).toBeTruthy();
+    expect(container.querySelector('.text-left')?.className).not.toContain('border');
+    expect(screen.getByTestId('pronunciation-sound-navigation').className).toContain(
+      'justify-center gap-1',
+    );
+    expect(screen.getByRole('button', { name: 'Next sound' }).className).toContain('color-button');
+    expect(screen.getByRole('button', { name: 'Next sound' }).className).toContain('h-button');
+    const soundCounter = screen.getByRole('button', { name: '1 / 4' }) as HTMLButtonElement;
+    expect(soundCounter.textContent).toBe('1 / 4');
+    expect(soundCounter.disabled).toBe(true);
+    expect(soundCounter.className).toContain('h-button');
 
     fireEvent.click(screen.getByRole('button', { name: 'Next sound' }));
-    expect(screen.getByTestId('overview-title').textContent).toBe('ə');
+    expect(screen.getByRole('button', { name: '2 / 4' })).toBeTruthy();
+    expect(container.querySelector('[aria-label^="IPA "]')?.textContent).toBe('ə');
     expect(screen.getByRole('button', { name: 'Previous sound' }).hasAttribute('disabled')).toBe(false);
     fireEvent.click(screen.getByRole('button', { name: 'Next sound' }));
     fireEvent.click(screen.getByRole('button', { name: 'Next sound' }));
-    expect(screen.getByTestId('overview-title').textContent).toBe('oʊ');
+    expect(screen.getByRole('button', { name: '4 / 4' })).toBeTruthy();
+    expect(container.querySelector('[aria-label^="IPA "]')?.textContent).toBe('oʊ');
     expect(screen.getByRole('button', { name: 'Next sound' }).hasAttribute('disabled')).toBe(true);
+    fireEvent.click(screen.getByTitle('Close (Escape)'));
+    expect(container.querySelector('#practice-main-content')).toBeTruthy();
   });
 
-  it('hides the pronunciation button before revealing the answer', () => {
+  it('keeps pronunciation visible but disabled before revealing the answer', () => {
     mocks.practiceDeck.revealed = false;
     mocks.practiceDeck.pronunciation = 'həlˈoʊ';
     mocks.soundGroups = [
@@ -589,9 +613,27 @@ describe('PracticeCard', () => {
 
     const { container } = render(<PracticeCard />);
 
-    expect(
-      container.querySelector('.pos-bottom-left-control button[aria-label="Pronunciation"]'),
-    ).toBeNull();
+    const pronunciationButton = container.querySelector(
+      '.pos-bottom-left-control button[aria-label="Pronunciation"]',
+    ) as HTMLButtonElement;
+
+    expect(pronunciationButton).toBeTruthy();
+    expect(pronunciationButton.disabled).toBe(true);
+    expect(pronunciationButton.querySelector('svg path')?.getAttribute('d')).toContain('M12 20.25');
+  });
+
+  it('disables pronunciation when no IPA sounds match even after revealing', () => {
+    mocks.practiceDeck.revealed = true;
+    mocks.practiceDeck.pronunciation = 'unknown';
+    mocks.soundGroups = [];
+
+    const { container } = render(<PracticeCard />);
+    const pronunciationButton = container.querySelector(
+      '.pos-bottom-left-control button[aria-label="Pronunciation"]',
+    ) as HTMLButtonElement;
+
+    expect(pronunciationButton).toBeTruthy();
+    expect(pronunciationButton.disabled).toBe(true);
   });
 
   it('opens grammar from the right secondary control group after reveal', () => {
