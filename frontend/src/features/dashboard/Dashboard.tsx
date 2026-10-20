@@ -41,24 +41,24 @@ export default function Dashboard({ className = '' }: DashboardProps) {
         .filter((level) => level.lessons.length > 0)
         .map((level) => (
           <div key={level.id} className="grid grid-cols-[3rem_minmax(0,1fr)] items-start gap-0.5">
-            <div className="flex h-7 items-center justify-center border border-dashed px-1 font-bold">
+            <div className="flex h-7 items-center justify-center border border-dashed border-disabled-light px-1 font-bold text-disabled-light dark:border-disabled-dark dark:text-disabled-dark">
               {level.name}
             </div>
             <ul
               aria-label={level.name}
-              className="m-0 grid w-full list-none grid-cols-15 items-start gap-0.5 p-0"
+              className="m-0 grid w-full list-none grid-cols-[repeat(auto-fill,minmax(0.8rem,1fr))] items-start gap-0.5 p-0"
             >
               {level.lessons.map((lesson) => {
                 const stateLabel = lesson.isStarted ? TEXTS.lessonStarted : TEXTS.lessonNotStarted;
                 const label = `${level.name}, ${TEXTS.lessonOrder} ${lesson.sort_order}, ${lesson.name}: ${stateLabel}`;
-                const backgroundClass = lesson.isStarted
-                  ? 'bg-button-light dark:bg-button-dark'
-                  : 'bg-progress-bg dark:bg-background-dark';
+                const stateClass = lesson.isStarted
+                  ? 'border-light dark:border-dark border-solid'
+                  : 'border-disabled-light dark:border-disabled-dark border-dashed';
                 return (
                   <li
                     key={lesson.id}
                     title={label}
-                    className={`border-divisions mb-0 h-7 w-full border ${backgroundClass}`}
+                    className={`mb-0 h-7 w-full border bg-inherit ${stateClass}`}
                   >
                     <span className="sr-only">{label}</span>
                   </li>
