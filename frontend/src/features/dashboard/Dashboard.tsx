@@ -33,39 +33,40 @@ export default function Dashboard({ className = '' }: DashboardProps) {
 
   return (
     <section
-      className={`min-w-card relative mx-auto flex w-full flex-col gap-1 ${className}`}
+      className={`min-w-card relative mx-auto flex w-full flex-col gap-0.5 ${className}`}
       aria-label={TEXTS.lessonOverview}
     >
       <HelpText className="-top-7 right-0">{TEXTS.lessonOverview}</HelpText>
-      {levels.filter((level) => level.lessons.length > 0).map((level) => (
-        <div key={level.id} className="grid grid-cols-[3rem_minmax(0,1fr)] items-start gap-1">
-          <div className="flex h-7 items-center justify-center border border-dashed px-1 font-bold">
-            {level.name}
+      {levels
+        .filter((level) => level.lessons.length > 0)
+        .map((level) => (
+          <div key={level.id} className="grid grid-cols-[3rem_minmax(0,1fr)] items-start gap-0.5">
+            <div className="flex h-7 items-center justify-center border border-dashed px-1 font-bold">
+              {level.name}
+            </div>
+            <ul
+              aria-label={level.name}
+              className="m-0 grid w-full list-none grid-cols-15 items-start gap-0.5 p-0"
+            >
+              {level.lessons.map((lesson) => {
+                const stateLabel = lesson.isStarted ? TEXTS.lessonStarted : TEXTS.lessonNotStarted;
+                const label = `${level.name}, ${TEXTS.lessonOrder} ${lesson.sort_order}, ${lesson.name}: ${stateLabel}`;
+                const backgroundClass = lesson.isStarted
+                  ? 'bg-button-light dark:bg-button-dark'
+                  : 'bg-progress-bg dark:bg-background-dark';
+                return (
+                  <li
+                    key={lesson.id}
+                    title={label}
+                    className={`border-divisions mb-0 h-7 w-full border ${backgroundClass}`}
+                  >
+                    <span className="sr-only">{label}</span>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
-          <ul
-            aria-label={level.name}
-            className="m-0 grid w-full list-none grid-cols-15 items-start gap-1 p-0"
-          >
-            {level.lessons.map((lesson) => {
-              const stateLabel = lesson.isStarted ? TEXTS.lessonStarted : TEXTS.lessonNotStarted;
-              const label = `${level.name}, ${TEXTS.lessonOrder} ${lesson.sort_order}, ${lesson.name}: ${stateLabel}`;
-              return (
-                <li
-                  key={lesson.id}
-                  title={label}
-                  className={`h-7 w-full border border-divisions ${
-                    lesson.isStarted
-                      ? 'bg-old-progress-light dark:bg-old-progress-dark'
-                      : 'bg-progress-bg dark:bg-background-dark'
-                  }`}
-                >
-                  <span className="sr-only">{label}</span>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ))}
+        ))}
     </section>
   );
 }
