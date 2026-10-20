@@ -1,4 +1,5 @@
 import config from '@/config/config';
+import Groups from './groups';
 import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
@@ -331,15 +332,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
 
   /** Reads initiated items assigned to one topic, ordered by curriculum position. */
   static async getInitiatedByTopicId(userId: string, topicId: number): Promise<UserItemLocal[]> {
-    const topicItems = await db.user_items
-      .where('[user_id+topic_id]')
-      .equals([userId, topicId])
-      .filter((item) => item.deleted_at === NULL_DATE && isInitiated(item))
-      .toArray();
-
-    return topicItems.sort((left, right) =>
-      compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path),
+    const topic = (await Groups.getStartedByUser(userId, 'topic')).find(
+      (group) => group.id === topicId,
     );
+    return topic?.examples ?? [];
   }
 
   /**
@@ -497,14 +493,19 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     direction: ReviewDirection = 'cz_to_en',
     dateTime: string = new Date().toISOString(),
   ): Promise<number> {
-    const chunks = await db.grammar_chunks
-      .where('grammar_group_id')
+    const relations = await db.group_relations
+      .where('parent_group_id')
       .equals(grammarGroupId)
       .toArray();
-    const counts = await Promise.all(
-      chunks.map((chunk) => this.resetItemsByGrammarChunkId(userId, chunk.id, direction, dateTime)),
-    );
-    return counts.reduce((total, count) => total + count, 0);
+    const groupIds = [grammarGroupId, ...relations.map((relation) => relation.child_group_id)];
+    const memberships = await db.group_items.where('group_id').anyOf(groupIds).toArray();
+    const itemIds = [...new Set(memberships.map((membership) => membership.item_id))];
+    if (itemIds.length === 0) return 0;
+    const items = await db.user_items
+      .where('[user_id+item_id]')
+      .anyOf(itemIds.map((itemId) => [userId, itemId]))
+      .toArray();
+    return resetItems(items, dateTime, direction);
   }
 
   /** Resets all user items assigned to one topic. */
@@ -513,9 +514,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     topicId: number,
     dateTime: string = new Date().toISOString(),
   ): Promise<number> {
+    const memberships = await db.group_items.where('group_id').equals(topicId).toArray();
+    const itemIds = memberships.map((membership) => membership.item_id);
+    if (itemIds.length === 0) return 0;
     const items = await db.user_items
-      .where('[user_id+topic_id]')
-      .equals([userId, topicId])
+      .where('[user_id+item_id]')
+      .anyOf(itemIds.map((itemId) => [userId, itemId]))
       .toArray();
     return resetItems(items, dateTime);
   }

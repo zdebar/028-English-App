@@ -58,7 +58,9 @@ function PronunciationItems({
           key={item.item_id}
           item={item}
           disabled={!item.audio || audioLoading || !isAudioReady(item.audio)}
-          onClick={() => playPronunciationItemAudio(item, playAudio, showToast)}
+          onClick={() => {
+            void playPronunciationItemAudio(item, playAudio, showToast);
+          }}
         />
       ))}
     </div>
@@ -66,7 +68,7 @@ function PronunciationItems({
 }
 
 function redirectToPronunciationGroups(navigate: ReturnType<typeof useNavigate>): void {
-  navigate(ROUTES.pronunciationGroups, { replace: true });
+  void navigate(ROUTES.pronunciationGroups, { replace: true });
 }
 
 function showPronunciationGroupError(
@@ -139,6 +141,16 @@ export default function PronunciationGroupDetail({
         hasData={Boolean(data?.items.length)}
         noDataMessage={TEXTS.noPronunciationGroupItems}
       >
+        {Boolean(data?.sounds.length) && (
+          <div className="flex flex-col gap-1 px-4 pt-2">
+            {data?.sounds.map((sound) => (
+              <div key={sound.id}>
+                <p className="font-bold">{sound.name}</p>
+                {sound.note && <p className="text-sm">{sound.note}</p>}
+              </div>
+            ))}
+          </div>
+        )}
         <PronunciationItems
           items={data?.items ?? []}
           audioLoading={audioLoading}

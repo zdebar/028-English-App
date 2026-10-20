@@ -83,6 +83,7 @@ enabled = true
 # Supports glob patterns relative to supabase directory: "./seeds/*.sql"
 sql_paths = [
   "./seeds/remote_data.sql",
+  "./seeds/02_unified_groups.sql",
 ]
 
 [db.network_restrictions]

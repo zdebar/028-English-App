@@ -77,6 +77,7 @@ const lesson = {
   level_id: 1,
   sort_order: 1,
   grammar_chunk_id: null,
+  group_id: null,
   updated_at: '2026-01-01',
   deleted_at: null,
 };

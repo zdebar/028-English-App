@@ -25,7 +25,10 @@ REVOKE ALL PRIVILEGES ON TABLE
   public.notes,
   public.pronunciation_groups,
   public.pronunciation_group_items,
-  public.topics
+  public.topics,
+  public.groups,
+  public.group_items,
+  public.group_relations
 FROM PUBLIC, anon, authenticated;
 
 GRANT SELECT ON TABLE
@@ -39,7 +42,10 @@ GRANT SELECT ON TABLE
   public.notes,
   public.pronunciation_groups,
   public.pronunciation_group_items,
-  public.topics
+  public.topics,
+  public.groups,
+  public.group_items,
+  public.group_relations
 TO authenticated;
 
 ALTER TABLE public.grammar_topics ENABLE ROW LEVEL SECURITY;
@@ -53,6 +59,17 @@ ALTER TABLE public.notes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.pronunciation_groups ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.pronunciation_group_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.topics ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.groups ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.group_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.group_relations ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS catalog_select_authenticated ON public.groups;
+DROP POLICY IF EXISTS catalog_select_authenticated ON public.group_items;
+DROP POLICY IF EXISTS catalog_select_authenticated ON public.group_relations;
+CREATE POLICY catalog_select_authenticated ON public.groups FOR SELECT TO authenticated USING (true);
+CREATE POLICY catalog_select_authenticated ON public.group_items FOR SELECT TO authenticated USING (true);
+CREATE POLICY catalog_select_authenticated ON public.group_relations FOR SELECT TO authenticated USING (true);
+REVOKE ALL PRIVILEGES ON TABLE public.group_legacy_ids FROM PUBLIC, anon, authenticated;
 
 DROP POLICY IF EXISTS "Enable read access for all users" ON public.grammar_topics;
 DROP POLICY IF EXISTS "Enable read access for all users" ON public.grammar_groups;

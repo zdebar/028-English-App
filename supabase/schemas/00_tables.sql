@@ -67,12 +67,23 @@ CREATE TABLE IF NOT EXISTS levels (
     UNIQUE (sort_order) DEFERRABLE INITIALLY DEFERRED
 );
 
+CREATE TABLE IF NOT EXISTS groups (
+  id SERIAL PRIMARY KEY,
+  type TEXT NOT NULL CHECK (type IN ('topic', 'grammar', 'sound', 'pronunciation')),
+  name TEXT NOT NULL,
+  note TEXT,
+  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  deleted_at TIMESTAMPTZ
+);
+
 CREATE TABLE IF NOT EXISTS lessons (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
   note TEXT,
   level_id INTEGER NOT NULL REFERENCES levels(id) ON DELETE RESTRICT,
   grammar_chunk_id INTEGER REFERENCES grammar_chunks(id) ON DELETE RESTRICT,
+  group_id INTEGER REFERENCES groups(id) ON DELETE SET NULL,
   sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ,
@@ -157,6 +168,37 @@ CREATE TABLE IF NOT EXISTS pronunciation_group_items (
     UNIQUE (pronunciation_group_id, sort_order) DEFERRABLE INITIALLY DEFERRED
 );
 
+CREATE TABLE IF NOT EXISTS group_items (
+  id SERIAL PRIMARY KEY,
+  group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+  item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  deleted_at TIMESTAMPTZ,
+  UNIQUE (group_id, item_id),
+  CONSTRAINT group_items_group_sort_order_key UNIQUE (group_id, sort_order) DEFERRABLE INITIALLY DEFERRED
+);
+
+CREATE TABLE IF NOT EXISTS group_relations (
+  id SERIAL PRIMARY KEY,
+  parent_group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+  child_group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+  relation_type TEXT NOT NULL CHECK (relation_type IN ('hierarchy', 'detail', 'contrast')),
+  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  deleted_at TIMESTAMPTZ,
+  UNIQUE (parent_group_id, child_group_id),
+  CHECK (parent_group_id <> child_group_id),
+  CONSTRAINT group_relations_parent_type_order_key UNIQUE (parent_group_id, relation_type, sort_order) DEFERRABLE INITIALLY DEFERRED
+);
+
+CREATE TABLE IF NOT EXISTS group_legacy_ids (
+  source_table TEXT NOT NULL CHECK (source_table IN ('topics', 'grammar_topics', 'grammar_groups', 'grammar_chunks', 'pronunciation_groups')),
+  source_id INTEGER NOT NULL,
+  group_id INTEGER NOT NULL UNIQUE REFERENCES groups(id) ON DELETE CASCADE,
+  PRIMARY KEY (source_table, source_id)
+);
+
 CREATE TABLE IF NOT EXISTS grammar_chunk_examples (
   grammar_chunk_id INTEGER NOT NULL
     REFERENCES grammar_chunks(id) ON DELETE CASCADE,
@@ -221,6 +263,10 @@ CREATE INDEX IF NOT EXISTS idx_pronunciation_group_items_group_contrast_sort
   ON public.pronunciation_group_items (pronunciation_group_id, contrast_set, sort_order);
 CREATE INDEX IF NOT EXISTS idx_grammar_chunk_examples_item_id
   ON public.grammar_chunk_examples (item_id);
+CREATE INDEX IF NOT EXISTS idx_groups_type_sort_order ON public.groups (type, sort_order);
+CREATE INDEX IF NOT EXISTS idx_group_items_item_id ON public.group_items (item_id);
+CREATE INDEX IF NOT EXISTS idx_group_items_group_sort_order ON public.group_items (group_id, sort_order);
+CREATE INDEX IF NOT EXISTS idx_group_relations_child_id ON public.group_relations (child_group_id);
 
 CREATE INDEX IF NOT EXISTS idx_user_items_user_updated_item
   ON public.user_items (user_id, updated_at, item_id)

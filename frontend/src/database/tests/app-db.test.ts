@@ -44,7 +44,7 @@ describe('AppDB schema', () => {
   it('declares the complete schema and removes obsolete stores', () => {
     new AppDB();
 
-    expect(mocks.versions).toHaveLength(11);
+    expect(mocks.versions).toHaveLength(12);
     expect(mocks.versions[0]).toMatchObject({
       number: 1,
       schema: {
@@ -125,6 +125,16 @@ describe('AppDB schema', () => {
       number: 11,
       schema: { practice_sessions: null },
     });
+    expect(mocks.versions[11]).toMatchObject({
+      number: 12,
+      schema: {
+        groups: 'id, type, sort_order, updated_at',
+        group_items: 'id, &[group_id+item_id], group_id, item_id, [group_id+sort_order], updated_at',
+        group_relations:
+          'id, &[parent_group_id+child_group_id], parent_group_id, child_group_id, [parent_group_id+relation_type+sort_order], updated_at',
+        lessons: 'id, sort_order, group_id',
+      },
+    });
   });
 
   it('initializes new direction fields while upgrading existing local items', async () => {
@@ -178,5 +188,23 @@ describe('AppDB schema', () => {
     const lesson: Record<string, unknown> = {};
     modifyLessons?.(lesson);
     expect(lesson.grammar_chunk_id).toBeNull();
+  });
+
+  it('adds the optional generic group reference to existing lessons', async () => {
+    new AppDB();
+    let modifyLessons: ((lesson: Record<string, unknown>) => void) | undefined;
+    const transaction = {
+      table: () => ({
+        toCollection: () => ({
+          modify: async (callback: (lesson: Record<string, unknown>) => void) => {
+            modifyLessons = callback;
+          },
+        }),
+      }),
+    };
+    await mocks.versions[11].upgrade?.(transaction);
+    const lesson: Record<string, unknown> = {};
+    modifyLessons?.(lesson);
+    expect(lesson.group_id).toBeNull();
   });
 });

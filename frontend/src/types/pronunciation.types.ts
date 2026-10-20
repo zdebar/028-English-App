@@ -26,5 +26,6 @@ export interface PronunciationGroupOverviewType extends PronunciationGroupType {
 
 export interface PronunciationGroupDetailType {
   group: PronunciationGroupType;
+  sounds: Array<Pick<PronunciationGroupType, 'id' | 'name' | 'note'>>;
   items: UserItemLocal[];
 }

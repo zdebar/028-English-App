@@ -18,6 +18,9 @@ import GrammarChunkExample from '../models/grammar-chunk-examples';
 import Topic from '../models/topics';
 import UserLesson from '../models/user-lessons';
 import UserSettings from '../models/user-settings';
+import Groups from '../models/groups';
+import GroupItem from '../models/group-items';
+import GroupRelation from '../models/group-relations';
 import { settleSyncWithAuthRecovery } from './sync-auth-recovery.utils';
 
 /**
@@ -42,6 +45,9 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
 
   // Step 2: Perform shared stores data synchronization (grammar and audio metadata)
   const tasks = [
+    () => Groups.syncFromRemote(doFullSync),
+    () => GroupItem.syncFromRemote(doFullSync),
+    () => GroupRelation.syncFromRemote(doFullSync),
     () => GrammarTopic.syncFromRemote(doFullSync),
     () => GrammarGroup.syncFromRemote(doFullSync),
     () => GrammarChunk.syncFromRemote(doFullSync),
@@ -59,6 +65,9 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
 
   // Keep a parallel list of human-readable table names to report per-table completions.
   const tableNames = [
+    'Groups',
+    'GroupItems',
+    'GroupRelations',
     'GrammarTopics',
     'GrammarGroups',
     'GrammarChunks',

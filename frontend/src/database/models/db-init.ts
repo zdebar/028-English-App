@@ -15,6 +15,9 @@ import Topic from './topics';
 import GrammarTopic from './grammar-topics';
 import UserLesson from './user-lessons';
 import UserSettings from './user-settings';
+import Groups from './groups';
+import GroupItem from './group-items';
+import GroupRelation from './group-relations';
 
 let isInitialized = false;
 
@@ -37,6 +40,9 @@ export function initDbMappings(): void {
   db.topics.mapToClass(Topic);
   db.user_lessons.mapToClass(UserLesson);
   db.users.mapToClass(UserSettings);
+  db.groups.mapToClass(Groups);
+  db.group_items.mapToClass(GroupItem);
+  db.group_relations.mapToClass(GroupRelation);
 
   isInitialized = true;
 }

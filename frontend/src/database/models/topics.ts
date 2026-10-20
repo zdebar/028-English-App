@@ -3,12 +3,8 @@ import SyncEntityModel from '@/database/models/sync-entity-model';
 import type { TopicType } from '@/types/generic.types';
 import { TableName } from '@/types/table.types';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
-import config from '@/config/config';
 import Dexie from 'dexie';
-import { isInitiated } from '@/utils/progress.utils';
-
-const NULL_DATE = config.database.nullReplacementDate;
-const NULL_NUMBER = config.database.nullReplacementNumber;
+import Groups from './groups';
 
 /** Shared topic metadata and user-specific initiated-topic queries. */
 export default class Topic extends SyncEntityModel implements TopicType {
@@ -25,44 +21,21 @@ export default class Topic extends SyncEntityModel implements TopicType {
   static override readonly syncSelect = 'id, name, note, sort_order, updated_at, deleted_at';
 
   static async getById(topicId: number): Promise<TopicType | null> {
-    return (await db.topics.get(topicId)) ?? null;
+    const group = await Groups.getById(topicId);
+    if (group?.type !== 'topic') return null;
+    const { type: _type, ...topic } = group;
+    return topic;
   }
 
   /** Matches the overview's metadata join, stopping at the first available topic. */
   static async hasInitiatedByUserId(userId: string): Promise<boolean> {
-    const topicIds = new Set(await db.topics.toCollection().primaryKeys());
-    if (topicIds.size === 0) return false;
-    const item = await db.user_items
-      .where('[user_id+started_at]')
-      .between([userId, Dexie.minKey], [userId, NULL_DATE], true, true)
-      .filter((candidate) =>
-        candidate.deleted_at === NULL_DATE &&
-        candidate.topic_id !== NULL_NUMBER &&
-        topicIds.has(candidate.topic_id) &&
-        isInitiated(candidate),
-      )
-      .first();
-    return item !== undefined;
+    return (await Groups.getStartedByUser(userId, 'topic')).length > 0;
   }
 
   static async getInitiatedByUserId(userId: string): Promise<TopicType[]> {
     assertNonEmptyString(userId, 'userId');
 
-    const initiatedItems = await db.user_items
-      .where('[user_id+started_at]')
-      .between([userId, Dexie.minKey], [userId, NULL_DATE], true, true)
-      .filter(
-        (item) =>
-          item.deleted_at === NULL_DATE &&
-          item.topic_id !== NULL_NUMBER &&
-          isInitiated(item),
-      )
-      .toArray();
-    const initiatedTopicIds = new Set(initiatedItems.map((item) => item.topic_id));
-    const topics = await db.topics.toArray();
-
-    return topics
-      .filter((topic) => initiatedTopicIds.has(topic.id))
-      .sort((left, right) => left.sort_order - right.sort_order || left.id - right.id);
+    const groups = await Groups.getStartedByUser(userId, 'topic');
+    return groups.map(({ type: _type, examples: _examples, ...topic }) => topic);
   }
 }

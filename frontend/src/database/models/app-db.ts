@@ -16,6 +16,7 @@ import type GrammarChunkExample from '@/database/models/grammar-chunk-examples';
 import type Topic from '@/database/models/topics';
 import type UserLesson from '@/database/models/user-lessons';
 import type UserSettings from '@/database/models/user-settings';
+import type { GroupType, GroupItemType, GroupRelationType } from '@/types/table.types';
 
 const USER_ITEMS_SCHEMA =
   '[user_id+item_id], [user_id+grammar_chunk_id+started_at], [user_id+is_vocabulary+started_at], [user_id+started_at], [user_id+updated_at], [user_id+lesson_id+is_vocabulary+started_at], [user_id+block_id], [user_id+topic_id], [user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path], [user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]';
@@ -46,6 +47,9 @@ export default class AppDB extends Dexie {
   topics!: EntityTable<Topic, 'id'>;
   user_lessons!: EntityTable<UserLesson, any>;
   users!: EntityTable<UserSettings, 'id'>;
+  groups!: EntityTable<GroupType, 'id'>;
+  group_items!: EntityTable<GroupItemType, 'id'>;
+  group_relations!: EntityTable<GroupRelationType, 'id'>;
 
   constructor() {
     super(config.database.dbName);
@@ -155,5 +159,16 @@ export default class AppDB extends Dexie {
       });
 
     this.version(11).stores({ practice_sessions: null });
+
+    this.version(12).stores({
+      groups: 'id, type, sort_order, updated_at',
+      group_items: 'id, &[group_id+item_id], group_id, item_id, [group_id+sort_order], updated_at',
+      group_relations: 'id, &[parent_group_id+child_group_id], parent_group_id, child_group_id, [parent_group_id+relation_type+sort_order], updated_at',
+      lessons: 'id, sort_order, group_id',
+    }).upgrade(async (transaction) => {
+      await transaction.table('lessons').toCollection().modify((lesson) => {
+        (lesson as Record<string, unknown>).group_id ??= null;
+      });
+    });
   }
 }

@@ -12,6 +12,7 @@ export interface RecordType extends SyncEntityType {}
 export interface LessonType extends SyncEntityType {
   level_id: number;
   grammar_chunk_id: number | null;
+  group_id: number | null;
 }
 export interface LevelType extends SyncEntityType {}
 
