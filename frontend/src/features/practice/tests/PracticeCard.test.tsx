@@ -5,6 +5,7 @@ import type { UserItemLocal } from '@/types/user-item.types';
 
 const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => ({
   userId: 'u1',
+  soundGroups: [] as any[],
   navigate: vi.fn(),
   grammarVisible: false,
   grammarData: null as any,
@@ -97,6 +98,11 @@ vi.mock('@/config/config', () => ({
   },
 }));
 
+vi.mock('dexie-react-hooks', () => ({
+  useLiveQuery: (_query: unknown, _dependencies: unknown, fallback: unknown) =>
+    mocks.soundGroups ?? fallback,
+}));
+
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
     syncLoadingText: 'Sync loading',
@@ -109,6 +115,9 @@ vi.mock('@/locales/cs', () => ({
     loadingAudio: 'Loading audio',
     audio: 'Audio',
     grammar: 'Grammar',
+    pronunciationGuide: 'Pronunciation',
+    previousSound: 'Previous sound',
+    nextSound: 'Next sound',
     tooltipNotes: 'Notes',
     itemProgress: 'Item progress',
     progress: 'Progress',
@@ -339,6 +348,7 @@ describe('PracticeCard', () => {
     vi.useFakeTimers();
 
     mocks.userId = 'u1';
+    mocks.soundGroups = [];
     mocks.grammarVisible = false;
     mocks.grammarData = null;
     mocks.noteVisible = false;
@@ -538,6 +548,50 @@ describe('PracticeCard', () => {
     expect(audioButton).toBeTruthy();
     expect(audioButton.disabled).toBe(true);
     expect(volumeSlider.dataset.disabled).toBe('false');
+  });
+
+  it('opens pronunciation sounds in IPA order after reveal and navigates between them', () => {
+    mocks.practiceDeck.revealed = true;
+    mocks.practiceDeck.pronunciation = 'həlˈoʊ';
+    mocks.soundGroups = [
+      { id: 1, type: 'sound', name: 'h', note: 'výdech', sort_order: 1, deleted_at: null },
+      { id: 2, type: 'sound', name: 'ə', note: 'schwa', sort_order: 2, deleted_at: null },
+      { id: 3, type: 'sound', name: 'l', note: 'laterála', sort_order: 3, deleted_at: null },
+      { id: 4, type: 'sound', name: 'oʊ', note: 'dvojhláska', sort_order: 4, deleted_at: null },
+    ];
+
+    const { container } = render(<PracticeCard />);
+    const pronunciationButton = container.querySelector(
+      '.pos-bottom-left-control button[aria-label="Pronunciation"]',
+    ) as HTMLButtonElement;
+
+    expect(pronunciationButton).toBeTruthy();
+    fireEvent.click(pronunciationButton);
+    expect(screen.getByTestId('overview-title').textContent).toBe('h');
+    expect(screen.getByText('výdech')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Previous sound' }).hasAttribute('disabled')).toBe(true);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Next sound' }));
+    expect(screen.getByTestId('overview-title').textContent).toBe('ə');
+    expect(screen.getByRole('button', { name: 'Previous sound' }).hasAttribute('disabled')).toBe(false);
+    fireEvent.click(screen.getByRole('button', { name: 'Next sound' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next sound' }));
+    expect(screen.getByTestId('overview-title').textContent).toBe('oʊ');
+    expect(screen.getByRole('button', { name: 'Next sound' }).hasAttribute('disabled')).toBe(true);
+  });
+
+  it('hides the pronunciation button before revealing the answer', () => {
+    mocks.practiceDeck.revealed = false;
+    mocks.practiceDeck.pronunciation = 'həlˈoʊ';
+    mocks.soundGroups = [
+      { id: 1, type: 'sound', name: 'h', note: 'výdech', sort_order: 1, deleted_at: null },
+    ];
+
+    const { container } = render(<PracticeCard />);
+
+    expect(
+      container.querySelector('.pos-bottom-left-control button[aria-label="Pronunciation"]'),
+    ).toBeNull();
   });
 
   it('opens grammar from the right secondary control group after reveal', () => {

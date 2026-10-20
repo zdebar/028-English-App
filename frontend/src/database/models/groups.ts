@@ -27,6 +27,14 @@ export default class Groups extends SyncEntityModel implements GroupRow {
     return group && !group.deleted_at ? group : null;
   }
 
+  static getSounds(): Promise<GroupRow[]> {
+    return db.groups
+      .where('type')
+      .equals('sound')
+      .filter((group) => !group.deleted_at)
+      .sortBy('sort_order');
+  }
+
   static async getStartedByUser(userId: string, type?: GroupTypeName): Promise<VisibleGroup[]> {
     const [groups, memberships, userItems, userLessons] = await Promise.all([
       db.groups.toArray(),
@@ -37,7 +45,9 @@ export default class Groups extends SyncEntityModel implements GroupRow {
     const startedLessonIds = new Set(userLessons.map((lesson) => lesson.lesson_id));
     const startedItems = new Map<number, UserItemLocal>(
       userItems
-        .filter((item) => item.deleted_at === config.database.nullReplacementDate && isInitiated(item))
+        .filter(
+          (item) => item.deleted_at === config.database.nullReplacementDate && isInitiated(item),
+        )
         .filter((item) => startedLessonIds.has(item.lesson_id))
         .map((item) => [item.item_id, item] as const),
     );
