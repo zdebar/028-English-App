@@ -8,7 +8,6 @@ export const ROUTES = {
   practiceOverview: '/practice-overview',
   overviews: '/overviews',
   profile: '/profile',
-  levels: '/levels',
   sounds: '/sounds',
   soundDetail: '/sounds/:groupId',
   topics: '/topics',

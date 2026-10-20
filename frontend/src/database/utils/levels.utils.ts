@@ -27,6 +27,7 @@ export function aggregateLevels(
   lessons: LessonType[],
   levels: LevelType[],
   today: string = getTodayShortDate(),
+  startedLessonIds: ReadonlySet<number> = new Set(),
 ): LevelOverviewType[] {
   const countKeys: (keyof ProgressCountsType)[] = [
     'initiatedCount',
@@ -69,13 +70,14 @@ export function aggregateLevels(
     .map((lesson, idx) => ({
       ...lesson,
       ...lessonCounts[idx],
+      isStarted: startedLessonIds.has(lesson.id),
     }))
-    .filter((lesson) => lesson.totalCount > 0)
+    .filter((lesson) => !lesson.deleted_at)
     .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 
   // Build LevelOverview[] with lessons grouped
   const levelOverviews = new Map<number, LevelOverviewType>();
-  levels.forEach((level) => {
+  levels.filter((level) => !level.deleted_at).forEach((level) => {
     levelOverviews.set(level.id, {
       ...level,
       ...createEmptyCounts(),
@@ -94,6 +96,5 @@ export function aggregateLevels(
   });
 
   return Array.from(levelOverviews.values())
-    .filter((level) => level.lessons.length > 0)
     .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 }

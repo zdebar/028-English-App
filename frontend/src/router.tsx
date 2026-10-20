@@ -13,7 +13,6 @@ import InitialTrainingPractice from '@/pages/InitialTrainingPractice';
 import Grammar from '@/pages/Grammar';
 import Guide from '@/pages/Guide';
 import Home from '@/pages/Home';
-import Levels from '@/pages/Levels';
 import Overviews from '@/pages/Overviews';
 import Practice from '@/pages/Practice';
 import PracticeOverview from '@/pages/PracticeOverview';
@@ -195,10 +194,6 @@ export const router = createHashRouter([
             Component: Overviews,
           },
           { path: ROUTES.profile, Component: Profile },
-          {
-            path: ROUTES.levels,
-            Component: Levels,
-          },
           {
             path: ROUTES.topics,
             loader: () => loadProtectedData('topics', topicsDescriptor),

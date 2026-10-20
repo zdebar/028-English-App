@@ -1,6 +1,8 @@
 export const OVERVIEW_TEXTS = {
-  // Levels Overview Page
-  levelsStartedHelp: 'iniciováno / celkem položek',
+  // Home lesson progress grid
+  lessonOverview: 'přehled lekcí',
+  lessonStarted: 'zahájena',
+  lessonNotStarted: 'nezahájena',
 
   // Grammar Overview Page
   noGrammar: 'Žádná započatá gramatika.',
@@ -37,10 +39,7 @@ export const OVERVIEW_TEXTS = {
   english: 'Anglicky',
   pronunciation: 'Výslovnost',
   pronunciationTitle: (pronunciation: string) => `Výslovnost: ${pronunciation}`,
-  levelName: 'CEFR úroveň',
   lessonOrder: 'Číslo lekce',
-  lessonName: 'Název lekce',
-  startedAt: 'Započato',
   updatedAt: 'Změněno',
   completedAt: 'dokončeno',
   nextAt: 'další',
@@ -48,14 +47,13 @@ export const OVERVIEW_TEXTS = {
   practiceSchedule: 'Procvičování',
   notScheduled: 'Nenaplánováno',
   restartItemProgress: 'Restartovat pokrok této položky',
-  restartDirectionProgressDescription: 'Opravdu chcete restartovat pokrok pouze v tomto směru procvičování?',
+  restartDirectionProgressDescription:
+    'Opravdu chcete restartovat pokrok pouze v tomto směru procvičování?',
 
   // Overviews Page
   overviews: 'Přehledy',
   progressOverviews: 'Pokrok',
   pronunciationSettings: 'Přehled výslovnosti',
-  levelsOverview: 'Přehled CEFR úrovní',
-  levelsOverviewTooltip: 'Přehled CEFR úrovní s pokrokem',
   topicsOverview: 'Přehled témat',
   topicsOverviewTooltip: 'Přehled tematických skupin',
   grammarOverview: 'Přehled gramatiky',

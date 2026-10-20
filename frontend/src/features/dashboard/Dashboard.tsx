@@ -1,37 +1,29 @@
-import { TEXTS, ARIA_TEXTS } from '@/locales/cs';
-import LessonProgressBar from '@/components/UI/LessonProgressBar';
+import Notification from '@/components/UI/Notification';
 import HelpText from '@/features/help/HelpText';
 import { useUserStore } from '@/features/user-stats/use-user-store';
-import { getInProgressLessons } from '@/utils/dashboard.utils';
-import Notification from '@/components/UI/Notification';
-import { NavigationLink } from '@/routing/data-navigation';
-import { ROUTES } from '@/config/routes.config';
+import { ARIA_TEXTS, TEXTS } from '@/locales/cs';
 
 type DashboardProps = Readonly<{
-  /** Extra classes appended to the dashboard section wrapper. */
   className?: string;
 }>;
 
 export default function Dashboard({ className = '' }: DashboardProps) {
-  const levelsOverview = useUserStore((state) => state.levels);
+  const levels = useUserStore((state) => state.levels);
   const levelsLoading = useUserStore((state) => state.levelsLoading);
-  const levels = Array.isArray(levelsOverview) ? levelsOverview : [];
-
-  const visibleLessons = getInProgressLessons(levels);
 
   if (levelsLoading) {
     return (
       <section
-        className={`min-w-card h-attribute relative mx-auto w-full ${className}`}
+        className={`min-w-card h-attribute mx-auto w-full ${className}`}
         aria-label={ARIA_TEXTS.dashboardRegion}
       />
     );
   }
 
-  if (levels.length === 0 || visibleLessons.length === 0) {
+  if (levels.length === 0) {
     return (
       <section
-        className={`min-w-card h-attribute relative mx-auto w-full ${className}`}
+        className={`min-w-card relative mx-auto w-full ${className}`}
         aria-label={ARIA_TEXTS.dashboardRegion}
       >
         <Notification>{TEXTS.noDashboardData}</Notification>
@@ -40,28 +32,40 @@ export default function Dashboard({ className = '' }: DashboardProps) {
   }
 
   return (
-    <NavigationLink
-      to={ROUTES.levels}
-      aria-label={TEXTS.levelsOverviewTooltip}
-      title={TEXTS.levelsOverviewTooltip}
-      className="block cursor-pointer hover:ring-1 hover:ring-current focus-visible:outline-2 focus-visible:outline-offset-2"
+    <section
+      className={`min-w-card relative mx-auto flex w-full flex-col gap-1 ${className}`}
+      aria-label={TEXTS.lessonOverview}
     >
-      <section
-        className={`min-w-card relative flex w-full flex-col gap-1 ${className}`}
-        aria-label={ARIA_TEXTS.dashboardRegion}
-      >
-        {visibleLessons.map((lesson) => (
-          <LessonProgressBar
-            key={lesson.id}
-            lessonName={lesson.name ?? ''}
-            lessonNumber={lesson.sort_order}
-            previousCount={(lesson.initiatedCount ?? 0) - (lesson.startedTodayCount ?? 0)}
-            todayCount={lesson.startedTodayCount ?? 0}
-            lessonCount={lesson.totalCount ?? 1}
-          />
-        ))}
-        <HelpText className="right-2 -bottom-6">{TEXTS.startedTodayHint}</HelpText>
-      </section>
-    </NavigationLink>
+      <HelpText className="-top-7 right-0">{TEXTS.lessonOverview}</HelpText>
+      {levels.filter((level) => level.lessons.length > 0).map((level) => (
+        <div key={level.id} className="grid grid-cols-[3rem_minmax(0,1fr)] items-start gap-1">
+          <div className="flex h-7 items-center justify-center border border-dashed px-1 font-bold">
+            {level.name}
+          </div>
+          <ul
+            aria-label={level.name}
+            className="m-0 grid w-full list-none grid-cols-15 items-start gap-1 p-0"
+          >
+            {level.lessons.map((lesson) => {
+              const stateLabel = lesson.isStarted ? TEXTS.lessonStarted : TEXTS.lessonNotStarted;
+              const label = `${level.name}, ${TEXTS.lessonOrder} ${lesson.sort_order}, ${lesson.name}: ${stateLabel}`;
+              return (
+                <li
+                  key={lesson.id}
+                  title={label}
+                  className={`h-7 w-full border border-divisions ${
+                    lesson.isStarted
+                      ? 'bg-old-progress-light dark:bg-old-progress-dark'
+                      : 'bg-progress-bg dark:bg-background-dark'
+                  }`}
+                >
+                  <span className="sr-only">{label}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+    </section>
   );
 }

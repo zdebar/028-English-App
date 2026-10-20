@@ -28,7 +28,9 @@ export interface ProgressCountsType {
   totalCount: number;
 }
 
-export interface LessonOverviewType extends LessonType, ProgressCountsType {}
+export interface LessonOverviewType extends LessonType, ProgressCountsType {
+  isStarted: boolean;
+}
 
 export interface LevelOverviewType extends LevelType, ProgressCountsType {
   lessons: LessonOverviewType[];
