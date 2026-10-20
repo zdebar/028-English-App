@@ -20,8 +20,8 @@ const RATING_LABELS = {
 
 function getRatingIcon(rating: ReviewRating) {
   if (rating === 'good') return <ForwardIcon />;
-  if (rating === 'hard') return <TripleChevronIcon />;
-  return <ChevronRightIcon />;
+  if (rating === 'hard') return <ChevronRightIcon />;
+  return <TripleChevronIcon />;
 }
 
 export default function ReviewRatingButton({ rating, onClick, disabled }: ReviewRatingButtonProps) {
