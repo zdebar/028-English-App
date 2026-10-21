@@ -2,6 +2,7 @@ import OverviewCard from '@/components/UI/OverviewCard';
 import PropertyView from '@/components/UI/PropertyView';
 import { TEXTS } from '@/locales/cs';
 import HelpButton from '@/features/help/HelpButton';
+import HelpText from '@/features/help/HelpText';
 import {
   formatVocabularyDateTime,
   hasVocabularyDate,
@@ -104,7 +105,7 @@ function isVocabularyAudioDisabled(
   audioError: boolean,
   isAudioReady: (audio: string) => boolean,
 ): boolean {
-  if (!selectedWord?.audio) return true;
+  if (!selectedWord?.audio?.trim()) return true;
   return audioLoading || audioError || !isAudioReady(selectedWord.audio);
 }
 
@@ -113,7 +114,7 @@ async function playVocabularyAudio(
   playAudio: (audio: string) => Promise<boolean>,
   showToast: (message: string, type: 'error') => void,
 ): Promise<void> {
-  if (!selectedWord?.audio) return;
+  if (!selectedWord?.audio?.trim()) return;
   const didPlay = await playAudio(selectedWord.audio);
   if (!didPlay) showToast(TEXTS.noAudio, 'error');
 }
@@ -158,12 +159,15 @@ function VocabularyDetails({
         <VocabularyPropertyList properties={baseProperties} labelClassName="w-auto" />
       </div>
       {directionSections.map((section) => (
-        <section key={section.title} className="flex flex-col gap-2">
+        <section key={section.title} className="relative flex flex-col gap-2">
+          <HelpText className="-top-5 left-0 whitespace-nowrap">
+            {TEXTS.restartProgress}
+          </HelpText>
           <ButtonWithModal
             className="h-input w-full justify-center font-bold"
             modalTitle={TEXTS.restartItemProgress}
             modalText={TEXTS.restartDirectionProgressDescription}
-            title={TEXTS.restartProgressHelp}
+            title={TEXTS.restartProgress}
             onConfirm={() => onReset(section.direction)}
           >
             {section.title}
@@ -363,6 +367,7 @@ export default function VocabularyDetailCard({
       buttonTitle={cardValues.title}
       onClose={onClose}
       className="bottom-controls-clearance relative"
+      showResetAction={false}
     >
       <VocabularyDetailContent
         pronunciationSounds={pronunciationSounds}
