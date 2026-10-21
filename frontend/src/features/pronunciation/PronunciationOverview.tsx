@@ -25,7 +25,7 @@ export default function PronunciationOverview() {
 
   return (
     <OverviewCard
-      buttonTitle={TEXTS.pronunciationGroups}
+      buttonTitle={TEXTS.pronunciationSettings}
       onClose={closeRoute}
       className={hasData ? 'bottom-controls-clearance' : ''}
     >

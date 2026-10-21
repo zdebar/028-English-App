@@ -17,7 +17,6 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { TEXTS } from '@/locales/cs';
-import { splitPronunciationIntoSounds } from '@/utils/pronunciation.utils';
 import type { GroupType } from '@/types/table.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -51,40 +50,24 @@ function PronunciationItems({
   isAudioReady,
   playAudio,
   showToast,
-  sounds,
-  onOpenPronunciation,
 }: Readonly<{
   items: PronunciationGroupDetailType['items'];
   audioLoading: boolean;
   isAudioReady: (audio: string) => boolean;
   playAudio: (audio: string) => Promise<boolean>;
   showToast: (message: string, type: 'error') => void;
-  sounds: readonly GroupType[];
-  onOpenPronunciation: (sounds: readonly GroupType[]) => void;
 }>) {
   return (
     <div className="flex flex-col gap-1 pt-1">
-      {items.map((item) => {
-        const itemSounds = splitPronunciationIntoSounds(item.pronunciation ?? '', sounds);
-        return (
-          <div key={item.item_id} className="flex min-w-0 gap-1">
-            <BilingualItemButton
-              className="min-w-0 grow"
-              item={item}
-              disabled={!item.audio || audioLoading || !isAudioReady(item.audio)}
-              onClick={() => playPronunciationItemAudio(item, playAudio, showToast)}
-            />
-            <SecondaryControlButton
-              title={TEXTS.pronunciationGuide}
-              ariaLabel={TEXTS.pronunciationGuide}
-              disabled={itemSounds.length === 0}
-              onClick={() => onOpenPronunciation(itemSounds)}
-            >
-              <PronunciationIcon />
-            </SecondaryControlButton>
-          </div>
-        );
-      })}
+      {items.map((item) => (
+        <BilingualItemButton
+          key={item.item_id}
+          className="min-w-0 grow"
+          item={item}
+          disabled={!item.audio || audioLoading || !isAudioReady(item.audio)}
+          onClick={() => playPronunciationItemAudio(item, playAudio, showToast)}
+        />
+      ))}
     </div>
   );
 }
@@ -146,6 +129,10 @@ export default function PronunciationGroupDetail({
     [data],
   );
   const { playAudio, isAudioReady, loading: audioLoading } = useAudioManager(audios);
+  const relatedSounds = (data?.sounds ?? []).flatMap((sound) => {
+    const matchingSound = allSounds.find((candidate) => candidate.id === sound.id);
+    return matchingSound ? [matchingSound] : [];
+  });
   usePronunciationGroupNavigation(validGroupId, loading, userId, data, navigate);
 
   useEffect(() => {
@@ -169,14 +156,10 @@ export default function PronunciationGroupDetail({
       buttonTitle={data?.group.name}
       loading={loading}
       onClose={closeRoute}
-      className="bottom-controls-clearance"
+      className="bottom-controls-clearance card-height min-h-card"
       showResetAction={false}
     >
-      <DataState
-        loading={loading}
-        hasData={Boolean(data?.items.length)}
-        noDataMessage={TEXTS.noPronunciationGroupItems}
-      >
+      <DataState loading={loading} hasData={Boolean(data)} noDataMessage={TEXTS.noPronunciationGroupItems}>
         {data?.group.note && (
           <p className="px-4 pt-2 text-left font-normal whitespace-pre-line">{data.group.note}</p>
         )}
@@ -186,14 +169,22 @@ export default function PronunciationGroupDetail({
           isAudioReady={isAudioReady}
           playAudio={playAudio}
           showToast={showToast}
-          sounds={allSounds}
-          onOpenPronunciation={(sequence) => {
-            setPronunciationSounds(sequence);
-            setSelectedSoundIndex(0);
-          }}
         />
       </DataState>
-      <div className="pos-bottom-left-control"><VolumeSlider /></div>
+      <div className="pos-bottom-left-control">
+        <VolumeSlider />
+        <SecondaryControlButton
+          title={TEXTS.pronunciationGuide}
+          ariaLabel={TEXTS.pronunciationGuide}
+          disabled={relatedSounds.length === 0}
+          onClick={() => {
+            setPronunciationSounds(relatedSounds);
+            setSelectedSoundIndex(0);
+          }}
+        >
+          <PronunciationIcon />
+        </SecondaryControlButton>
+      </div>
       <div className="pos-bottom-right-control"><HelpButton /></div>
     </OverviewCard>
   );

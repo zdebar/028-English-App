@@ -77,8 +77,9 @@ export default function SoundGroupDetail({
       buttonTitle={data?.group.name}
       loading={loading}
       onClose={closeRoute}
-      className="bottom-controls-clearance"
+      className="bottom-controls-clearance card-height min-h-card"
       showResetAction={false}
+      titleAlignment="center"
     >
       <DataState loading={loading} hasData={Boolean(data)} noDataMessage={TEXTS.noSoundItems}>
         {data?.group.note && (

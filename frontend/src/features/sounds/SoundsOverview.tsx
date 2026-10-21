@@ -35,13 +35,18 @@ export default function SoundsOverview({
   }, [error, showToast]);
 
   return (
-    <OverviewCard buttonTitle={TEXTS.soundsOverview} onClose={closeRoute} showResetAction={false}>
+    <OverviewCard
+      buttonTitle={TEXTS.soundsOverview}
+      onClose={closeRoute}
+      showResetAction={false}
+      titleAlignment="center"
+    >
       <DataState loading={loading} hasData={sounds.length > 0} noDataMessage={TEXTS.noSounds}>
         <div className="flex flex-col gap-1 pt-1">
           {sounds.map((sound) => (
             <NavigationButton
               key={sound.id}
-              className="h-input flex w-full justify-start px-4 text-left"
+              className="h-input flex w-full justify-center px-4 text-center"
               to={ROUTES.soundDetail.replace(':groupId', String(sound.id))}
               title={sound.name}
             >
