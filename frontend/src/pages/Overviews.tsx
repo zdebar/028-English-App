@@ -10,7 +10,6 @@ import type { JSX } from 'react';
 import { useLoaderData } from 'react-router-dom';
 import type { OverviewAvailabilityData } from '@/routing/route-data';
 import { NavigationButton } from '@/routing/data-navigation';
-import { usePronunciationGroupsStore } from '@/features/pronunciation/use-pronunciation-groups-store';
 
 function getButtonState(
   availability: OverviewAvailability,
@@ -29,9 +28,6 @@ export default function Overviews(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const initialAvailability = useLoaderData() as OverviewAvailabilityData;
   const availability = useOverviewAvailability(userId, initialAvailability);
-  const pronunciationGroups = usePronunciationGroupsStore((state) => state.groups);
-  const pronunciationLoading = usePronunciationGroupsStore((state) => state.loading);
-  const pronunciationError = usePronunciationGroupsStore((state) => state.error);
   const grammarButton = getButtonState(
     availability.grammar,
     TEXTS.grammarOverviewTooltip,
@@ -47,20 +43,8 @@ export default function Overviews(): JSX.Element {
     TEXTS.vocabularyOverviewTooltip,
     TEXTS.noStartedVocabulary,
   );
-  const soundsButton = getButtonState(
-    availability.sounds,
-    TEXTS.soundsOverview,
-    TEXTS.noSounds,
-  );
-  const pronunciationButton = getButtonState(
-    {
-      hasData: pronunciationGroups.length > 0,
-      loading: pronunciationLoading,
-      error: pronunciationError,
-    },
-    TEXTS.pronunciationGroupsTooltip,
-    TEXTS.noPronunciationGroups,
-  );
+  const soundsButton = { disabled: false, title: TEXTS.soundsOverview };
+  const pronunciationButton = { disabled: false, title: TEXTS.pronunciationGroupsTooltip };
   return (
     <div className="card-width grow-0 gap-1">
       <h1 className="sr-only">{TEXTS.overviews}</h1>

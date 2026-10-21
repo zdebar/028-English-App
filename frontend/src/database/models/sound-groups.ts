@@ -7,15 +7,15 @@ export type SoundGroupDetailType = Readonly<{
   items: UserItemLocal[];
 }>;
 
-/** User-visible sound groups and their initiated examples. */
+/** Sound groups and their examples from started lessons. */
 export default class SoundGroup {
   static async getOverview(userId: string): Promise<GroupType[]> {
-    const groups = await Groups.getStartedByUser(userId, 'sound');
+    const groups = await Groups.getAllByTypeWithStartedExamples(userId, 'sound');
     return groups.map(({ examples: _examples, ...group }) => group);
   }
 
   static async getDetail(userId: string, groupId: number): Promise<SoundGroupDetailType | null> {
-    const group = (await Groups.getStartedByUser(userId, 'sound'))
+    const group = (await Groups.getAllByTypeWithStartedExamples(userId, 'sound'))
       .find((candidate) => candidate.id === groupId);
     if (!group) return null;
     const { examples, ...sound } = group;

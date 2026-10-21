@@ -81,9 +81,9 @@ export default class Groups extends SyncEntityModel implements GroupRow {
       .equals(groupId)
       .filter((membership) => !membership.deleted_at)
       .toArray();
-    const itemIds = memberships
-      .sort((left, right) => left.sort_order - right.sort_order)
-      .map((membership) => membership.item_id);
+    const orderedMemberships = [...memberships];
+    orderedMemberships.sort((left, right) => left.sort_order - right.sort_order);
+    const itemIds = orderedMemberships.map((membership) => membership.item_id);
     const items = await db.user_items
       .where('[user_id+item_id]')
       .anyOf(itemIds.map((itemId) => [userId, itemId]))
@@ -119,19 +119,45 @@ export default class Groups extends SyncEntityModel implements GroupRow {
       membershipsByGroup.set(membership.group_id, entries);
     }
 
-    const visibleGroups = groups
-      .filter((group) => !group.deleted_at && (!type || group.type === type))
-      .sort((left, right) => left.sort_order - right.sort_order || left.id - right.id);
+    const visibleGroups = groups.filter((group) => !group.deleted_at && (!type || group.type === type));
+    visibleGroups.sort((left, right) => left.sort_order - right.sort_order || left.id - right.id);
 
     return visibleGroups.flatMap((group) => {
-      const examples = (membershipsByGroup.get(group.id) ?? [])
-        .filter((membership) => membership.deleted_at == null)
-        .sort((left, right) => left.sort_order - right.sort_order)
+      const groupMemberships = [...(membershipsByGroup.get(group.id) ?? [])]
+        .filter((membership) => membership.deleted_at == null);
+      groupMemberships.sort((left, right) => left.sort_order - right.sort_order);
+      const examples = groupMemberships
         .flatMap((membership) => {
           const item = startedItems.get(membership.item_id);
           return item ? [item] : [];
         });
       return examples.length > 0 ? [{ ...group, examples }] : [];
     });
+  }
+
+  static async getAllByTypeWithStartedExamples(
+    userId: string,
+    type: GroupTypeName,
+  ): Promise<VisibleGroup[]> {
+    const [groups, startedGroups] = await Promise.all([
+      db.groups.toArray().then((rows) => {
+        const matchingGroups: GroupRow[] = rows.filter(
+          (group) => group.type === type && !group.deleted_at,
+        );
+        matchingGroups.sort(
+          (left: GroupRow, right: GroupRow) =>
+            left.sort_order - right.sort_order || left.id - right.id,
+        );
+        return matchingGroups;
+      }),
+      this.getStartedByUser(userId, type),
+    ]);
+    const startedGroupsById = new Map<number, VisibleGroup>(
+      startedGroups.map((group) => [group.id, group]),
+    );
+    return groups.map((group) => ({
+      ...group,
+      examples: startedGroupsById.get(group.id)?.examples ?? [],
+    }));
   }
 }

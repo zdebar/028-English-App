@@ -70,21 +70,6 @@ export default class PronunciationGroup {
   }
 
   private static async getVisibleGroups(userId: string) {
-    const [groups, sounds, relations] = await Promise.all([
-      Groups.getStartedByUser(userId, 'pronunciation'),
-      Groups.getStartedByUser(userId, 'sound'),
-      db.group_relations.toArray(),
-    ]);
-    const unlockedSoundIds = new Set(sounds.map((sound) => sound.id));
-    const relationsByGroup = new Map<number, number[]>();
-    for (const relation of relations) {
-      if (relation.deleted_at || relation.relation_type !== 'contrast') continue;
-      const soundIds = relationsByGroup.get(relation.parent_group_id) ?? [];
-      soundIds.push(relation.child_group_id);
-      relationsByGroup.set(relation.parent_group_id, soundIds);
-    }
-    return groups.filter((group) =>
-      (relationsByGroup.get(group.id) ?? []).every((soundId) => unlockedSoundIds.has(soundId)),
-    );
+    return Groups.getAllByTypeWithStartedExamples(userId, 'pronunciation');
   }
 }
