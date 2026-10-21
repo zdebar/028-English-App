@@ -229,14 +229,12 @@ function VocabularyNoteButton({
 
 function VocabularyPronunciationDetail({
   sounds,
-  fullPronunciationSounds,
   audio,
   index,
   onIndexChange,
   onClose,
 }: Readonly<{
   sounds: readonly GroupType[];
-  fullPronunciationSounds: readonly GroupType[];
   audio: string | null | undefined;
   index: number;
   onIndexChange: (index: number) => void;
@@ -245,7 +243,6 @@ function VocabularyPronunciationDetail({
   return (
     <PronunciationSoundDetailCard
       sounds={sounds}
-      pronunciationSounds={fullPronunciationSounds}
       audio={audio}
       index={index}
       onIndexChange={onIndexChange}
@@ -319,11 +316,12 @@ export default function VocabularyDetailCard({
   onClose,
   onReset,
 }: VocabularyDetailCardProps) {
+  const cardValues = getVocabularyCardValues(selectedWord);
   const baseProperties = getBaseProperties(selectedWord);
   const directionSections = getDirectionSections(selectedWord);
   const sounds = useLiveQuery(() => Groups.getSounds(), [], []) ?? [];
   const [pronunciationIndex, setPronunciationIndex] = useState<number | null>(null);
-  const fullPronunciationSounds = splitPronunciationIntoSounds(selectedWord?.pronunciation ?? '', sounds);
+  const fullPronunciationSounds = splitPronunciationIntoSounds(cardValues.pronunciation, sounds);
   const pronunciationSounds = getUniquePronunciationSounds(fullPronunciationSounds);
 
   const {
@@ -331,7 +329,7 @@ export default function VocabularyDetailCard({
     audioError,
     isAudioReady,
     loading: audioLoading,
-  } = useAudioManager(selectedWord?.audio ?? null);
+  } = useAudioManager(cardValues.audio);
   const showToast = useToastStore((state) => state.showToast);
   const audioControlsDisabled = isVocabularyAudioDisabled(
     selectedWord,
@@ -342,14 +340,13 @@ export default function VocabularyDetailCard({
 
   const { isNoteVisible, noteData, openNote, closeNote } = useNoteViewer();
 
-  const noteId = selectedWord?.note_id;
+  const noteId = cardValues.noteId;
 
   if (pronunciationIndex !== null) {
     return (
       <VocabularyPronunciationDetail
         sounds={pronunciationSounds}
-        fullPronunciationSounds={fullPronunciationSounds}
-        audio={selectedWord?.audio}
+        audio={cardValues.audio}
         index={pronunciationIndex}
         onIndexChange={setPronunciationIndex}
         onClose={() => setPronunciationIndex(null)}
@@ -359,7 +356,7 @@ export default function VocabularyDetailCard({
 
   return (
     <OverviewCard
-      buttonTitle={selectedWord?.english ?? ''}
+      buttonTitle={cardValues.title}
       onClose={onClose}
       className="bottom-controls-clearance relative"
     >
@@ -397,4 +394,13 @@ function formatPracticeSchedule(
   if (formattedNextDate) return formattedNextDate;
 
   return lowercaseInitial(TEXTS.notScheduled);
+}
+
+function getVocabularyCardValues(selectedWord: UserItemLocal | null | undefined) {
+  return {
+    pronunciation: selectedWord?.pronunciation ?? '',
+    audio: selectedWord?.audio ?? null,
+    noteId: selectedWord?.note_id,
+    title: selectedWord?.english ?? '',
+  };
 }

@@ -34,6 +34,27 @@ function fetchGroupDetail(userId: string | null, groupId: number | null) {
   return PronunciationGroup.getDetail(userId, groupId);
 }
 
+function getPronunciationAudios(data: PronunciationGroupDetailType | null): string[] {
+  return (
+    data?.items.map((item) => item.audio).filter((audio): audio is string => Boolean(audio)) ?? []
+  );
+}
+
+function getRelatedSounds(
+  sounds: PronunciationGroupDetailType['sounds'],
+  allSounds: GroupType[],
+): GroupType[] {
+  return sounds.flatMap((sound) => {
+    const matchingSound = allSounds.find((candidate) => candidate.id === sound.id);
+    return matchingSound ? [matchingSound] : [];
+  });
+}
+
+function PronunciationGroupNote({ note }: Readonly<{ note: string | null | undefined }>) {
+  if (!note) return null;
+  return <p className="px-4 pt-2 text-left font-normal whitespace-pre-line">{note}</p>;
+}
+
 async function playPronunciationItemAudio(
   item: PronunciationGroupDetailType['items'][number],
   playAudio: (audio: string) => Promise<boolean>,
@@ -64,9 +85,29 @@ function PronunciationItems({
           key={item.item_id}
           className="min-w-0 grow"
           item={item}
+          showPronunciation
           disabled={!item.audio || audioLoading || !isAudioReady(item.audio)}
           onClick={() => playPronunciationItemAudio(item, playAudio, showToast)}
         />
+      ))}
+    </div>
+  );
+}
+
+function RelatedPronunciationSounds({
+  sounds,
+}: Readonly<{ sounds: PronunciationGroupDetailType['sounds'] }>) {
+  return (
+    <div className="mt-1 flex flex-col gap-1">
+      {sounds.map((sound) => (
+        <div key={sound.id} className="flex flex-col gap-1">
+          <div className="h-input border-disabled-light text-light dark:border-disabled-dark dark:text-dark flex w-full items-center justify-center border border-dashed text-center">
+            {sound.name}
+          </div>
+          {sound.note && (
+            <p className="px-4 text-left font-normal whitespace-pre-line">{sound.note}</p>
+          )}
+        </div>
       ))}
     </div>
   );
@@ -103,6 +144,70 @@ function usePronunciationGroupNavigation(
   }, [data, loading, navigate, userId, validGroupId]);
 }
 
+function PronunciationGroupOverviewCard({
+  data,
+  loading,
+  closeRoute,
+  audioLoading,
+  isAudioReady,
+  playAudio,
+  showToast,
+  relatedSounds,
+  onOpenPronunciation,
+}: Readonly<{
+  data: PronunciationGroupDetailType | null;
+  loading: boolean;
+  closeRoute: () => void;
+  audioLoading: boolean;
+  isAudioReady: (audio: string) => boolean;
+  playAudio: (audio: string) => Promise<boolean>;
+  showToast: (message: string, type: 'error') => void;
+  relatedSounds: readonly GroupType[];
+  onOpenPronunciation: () => void;
+}>) {
+  return (
+    <OverviewCard
+      buttonTitle={data?.group.name}
+      loading={loading}
+      onClose={closeRoute}
+      className="card-height min-h-card"
+      showResetAction={false}
+    >
+      <DataState
+        loading={loading}
+        hasData={Boolean(data)}
+        noDataMessage={TEXTS.noPronunciationGroupItems}
+      >
+        <PronunciationGroupNote note={data?.group.note} />
+        <RelatedPronunciationSounds sounds={data?.sounds ?? []} />
+        <PronunciationItems
+          items={data?.items ?? []}
+          audioLoading={audioLoading}
+          isAudioReady={isAudioReady}
+          playAudio={playAudio}
+          showToast={showToast}
+        />
+        <div className="secondary-controls-after-list">
+          <div className="pos-bottom-left-control">
+            <VolumeSlider />
+            <SecondaryControlButton
+              title={TEXTS.pronunciationGuide}
+              ariaLabel={TEXTS.pronunciationGuide}
+              disabled={relatedSounds.length === 0}
+              onClick={onOpenPronunciation}
+            >
+              <PronunciationIcon />
+            </SecondaryControlButton>
+          </div>
+          <div className="pos-bottom-right-control">
+            <HelpButton />
+          </div>
+        </div>
+      </DataState>
+    </OverviewCard>
+  );
+}
+
 export default function PronunciationGroupDetail({
   initialData,
 }: Readonly<{ initialData?: PronunciationGroupDetailType | null }>) {
@@ -124,15 +229,9 @@ export default function PronunciationGroupDetail({
     initialData,
     sharedKey: sharedQueryKey(userId, `pronunciation:${validGroupId}`),
   });
-  const audios = useMemo(
-    () => data?.items.map((item) => item.audio).filter((audio): audio is string => Boolean(audio)) ?? [],
-    [data],
-  );
+  const audios = useMemo(() => getPronunciationAudios(data), [data]);
   const { playAudio, isAudioReady, loading: audioLoading } = useAudioManager(audios);
-  const relatedSounds = (data?.sounds ?? []).flatMap((sound) => {
-    const matchingSound = allSounds.find((candidate) => candidate.id === sound.id);
-    return matchingSound ? [matchingSound] : [];
-  });
+  const relatedSounds = getRelatedSounds(data?.sounds ?? [], allSounds);
   usePronunciationGroupNavigation(validGroupId, loading, userId, data, navigate);
 
   useEffect(() => {
@@ -143,8 +242,7 @@ export default function PronunciationGroupDetail({
     return (
       <PronunciationSoundDetailCard
         sounds={pronunciationSounds}
-        pronunciationSounds={pronunciationSounds}
-        audio={data?.items.find((item) => item.audio)?.audio}
+        audio={getPronunciationAudios(data)[0]}
         index={selectedSoundIndex}
         onIndexChange={setSelectedSoundIndex}
         onClose={() => setPronunciationSounds(null)}
@@ -153,42 +251,19 @@ export default function PronunciationGroupDetail({
   }
 
   return (
-    <OverviewCard
-      buttonTitle={data?.group.name}
+    <PronunciationGroupOverviewCard
+      data={data}
       loading={loading}
-      onClose={closeRoute}
-      className="card-height min-h-card"
-      showResetAction={false}
-    >
-      <DataState loading={loading} hasData={Boolean(data)} noDataMessage={TEXTS.noPronunciationGroupItems}>
-        {data?.group.note && (
-          <p className="px-4 pt-2 text-left font-normal whitespace-pre-line">{data.group.note}</p>
-        )}
-        <PronunciationItems
-          items={data?.items ?? []}
-          audioLoading={audioLoading}
-          isAudioReady={isAudioReady}
-          playAudio={playAudio}
-          showToast={showToast}
-        />
-        <div className="secondary-controls-after-list">
-          <div className="pos-bottom-left-control">
-            <VolumeSlider />
-            <SecondaryControlButton
-              title={TEXTS.pronunciationGuide}
-              ariaLabel={TEXTS.pronunciationGuide}
-              disabled={relatedSounds.length === 0}
-              onClick={() => {
-                setPronunciationSounds(relatedSounds);
-                setSelectedSoundIndex(0);
-              }}
-            >
-              <PronunciationIcon />
-            </SecondaryControlButton>
-          </div>
-          <div className="pos-bottom-right-control"><HelpButton /></div>
-        </div>
-      </DataState>
-    </OverviewCard>
+      closeRoute={closeRoute}
+      audioLoading={audioLoading}
+      isAudioReady={isAudioReady}
+      playAudio={playAudio}
+      showToast={showToast}
+      relatedSounds={relatedSounds}
+      onOpenPronunciation={() => {
+        setPronunciationSounds(relatedSounds);
+        setSelectedSoundIndex(0);
+      }}
+    />
   );
 }

@@ -95,7 +95,6 @@ type PracticeDetailProps = Readonly<{
   grammar: GrammarChunkWithExamples | null;
   note: NoteType | null;
   sounds: readonly GroupType[];
-  pronunciationSounds: readonly GroupType[];
   audio: string | null | undefined;
   selectedSoundIndex: number;
   onClose: () => void;
@@ -107,7 +106,6 @@ function PracticeDetail({
   grammar,
   note,
   sounds,
-  pronunciationSounds,
   audio,
   selectedSoundIndex,
   onClose,
@@ -128,7 +126,6 @@ function PracticeDetail({
   return (
     <PronunciationSoundDetailCard
       sounds={sounds}
-      pronunciationSounds={pronunciationSounds}
       audio={audio}
       index={selectedSoundIndex}
       onIndexChange={onSoundIndexChange}
@@ -777,7 +774,6 @@ export default function PracticeSessionCard(props: PracticeSessionCardProps) {
         grammar={normalizedProps.grammar}
         note={normalizedProps.note}
         sounds={pronunciationSounds}
-        pronunciationSounds={pronunciationSounds}
         audio={normalizedProps.audio}
         selectedSoundIndex={selectedSoundIndex}
         onClose={() => setVisibleDetail(null)}

@@ -9,6 +9,7 @@ type BilingualItemButtonProps = Readonly<{
   disabled?: boolean;
   className?: string;
   leadingLanguage?: 'czech' | 'english';
+  showPronunciation?: boolean;
 }>;
 
 function pronunciationTitle(pronunciation: string): string {
@@ -91,10 +92,11 @@ function useBilingualItemLayout(
 
 /** A shared, content-aware Czech/English item row used by all item lists. */
 export default function BilingualItemButton({ ...props }: BilingualItemButtonProps) {
-  const { item, onClick, disabled, className, leadingLanguage } = {
+  const { item, onClick, disabled, className, leadingLanguage, showPronunciation } = {
     disabled: false,
     className: '',
     leadingLanguage: 'czech' as const,
+    showPronunciation: false,
     ...props,
   };
   const containerRef = useRef<HTMLDivElement>(null);
@@ -139,21 +141,34 @@ export default function BilingualItemButton({ ...props }: BilingualItemButtonPro
   );
   const languageTexts =
     leadingLanguage === 'english' ? [englishText, czechText] : [czechText, englishText];
+  const itemHeightClass = getItemHeightClass(stacked, showPronunciation);
+  const shouldStack = showPronunciation ? false : stacked;
 
   return (
     <ListButton
       flexibleHeight
-      className={`${stacked ? 'min-h-[calc(var(--height-input)*2)]' : ''} px-4 py-2 ${className}`}
+      className={`${itemHeightClass} px-4 py-2 ${className}`}
       title={title}
       disabled={disabled}
       onClick={() => void onClick()}
     >
       <div
         ref={containerRef}
-        className={`flex w-full gap-3 overflow-hidden ${stacked ? 'flex-col gap-1' : 'flex-row'}`}
+        className={`flex w-full gap-3 overflow-hidden ${shouldStack ? 'flex-col gap-1' : 'flex-row'}`}
       >
         {languageTexts}
+        {showPronunciation && item.pronunciation && (
+          <span className="min-w-0 flex-1 overflow-hidden text-left text-ellipsis whitespace-nowrap">
+            {item.pronunciation}
+          </span>
+        )}
       </div>
     </ListButton>
   );
+}
+
+function getItemHeightClass(stacked: boolean, showPronunciation: boolean): string {
+  if (showPronunciation) return '';
+  if (stacked) return 'min-h-[calc(var(--height-input)*2)]';
+  return '';
 }
