@@ -29,7 +29,7 @@ export default function PronunciationSoundDetailCard({
   const highlightedPronunciation = highlightSoundOccurrences(pronunciationSounds, sound);
 
   return (
-    <Card className="card-height min-h-card gap-1">
+    <Card className="max-h-card h-full grow gap-1">
       <div className="h-button flex w-full shrink-0 items-center gap-1">
         <StyledButton
           className="h-button preserve-disabled-text-color grow justify-start px-4"
