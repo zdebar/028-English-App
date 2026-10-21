@@ -1,0 +1,9 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+já,I,ˈaɪ,i.opus,3000,,1,,,True,3
+ty,you,jˈuː,you.opus,3001,,1,,,True,3
+on,he,hˈiː,he.opus,3002,,1,,,True,3
+ona,she,ʃˈiː,she.opus,3003,,1,,,True,3
+ono,it,ˈɪt,it.opus,3004,,1,,,True,3
+my,we,wˈiː,we.opus,3005,,,,,True,3
+vy,you,jˈuː,you.opus,3006,,,,,True,3
+oni,they,ðˈeɪ,they.opus,3007,,,,,True,3

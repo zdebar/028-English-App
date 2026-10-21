@@ -1,0 +1,9 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+já jsem,I am,aɪˈæm,i_am.opus,4000,,1,,,True,4
+ty jsi,you are,juː ˈɑːɹ,you_are.opus,4001,,1,,,True,4
+on je,he is,hiː ˈɪz,he_is.opus,4002,,1,,,True,4
+ona je,she is,ʃiː ˈɪz,she_is.opus,4003,,1,,,True,4
+to je,it is,ɪɾ ˈɪz,it_is.opus,4004,,1,,,True,4
+my jsme,we are,wiː ˈɑːɹ,we_are.opus,4005,,,,,True,4
+vy jste,you are,juː ˈɑːɹ,you_are.opus,4006,,,,,True,4
+oni jsou,they are,ðeɪ ˈɑːɹ,they_are.opus,4007,,,,,True,4
