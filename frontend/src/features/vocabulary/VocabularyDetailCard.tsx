@@ -17,6 +17,14 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import { formatProgress } from '@/utils/progress.utils';
 import ButtonWithModal from '@/features/modal/ButtonWithModal';
 import type { ReviewDirection } from '@/types/practice.types';
+import SecondaryControlButton from '@/components/UI/buttons/SecondaryControlButton';
+import PronunciationIcon from '@/components/UI/icons/PronunciationIcon';
+import Groups from '@/database/models/groups';
+import PronunciationSoundDetailCard from '@/features/practice/PronunciationSoundDetailCard';
+import { splitPronunciationIntoSounds } from '@/utils/pronunciation.utils';
+import type { GroupType } from '@/types/table.types';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { useState } from 'react';
 
 const NOT_AVAILABLE = TEXTS.notAvailable;
 
@@ -172,11 +180,15 @@ function VocabularyDetails({
 function VocabularyAudioControls({
   selectedWord,
   audioControlsDisabled,
+  pronunciationSounds,
+  onOpenPronunciation,
   playAudio,
   showToast,
 }: Readonly<{
   selectedWord: UserItemLocal | null;
   audioControlsDisabled: boolean;
+  pronunciationSounds: readonly GroupType[];
+  onOpenPronunciation: () => void;
   playAudio: (audio: string) => Promise<boolean>;
   showToast: (message: string, type: 'error') => void;
 }>) {
@@ -186,6 +198,14 @@ function VocabularyAudioControls({
         onClick={() => playVocabularyAudio(selectedWord, playAudio, showToast)}
         disabled={audioControlsDisabled}
       />
+      <SecondaryControlButton
+        title={TEXTS.pronunciationGuide}
+        ariaLabel={TEXTS.pronunciationGuide}
+        onClick={onOpenPronunciation}
+        disabled={pronunciationSounds.length === 0}
+      >
+        <PronunciationIcon />
+      </SecondaryControlButton>
       <VolumeSlider disabled={audioControlsDisabled} />
     </div>
   );
@@ -207,6 +227,96 @@ function VocabularyNoteButton({
   );
 }
 
+function VocabularyPronunciationDetail({
+  sounds,
+  index,
+  onIndexChange,
+  onClose,
+}: Readonly<{
+  sounds: readonly GroupType[];
+  index: number;
+  onIndexChange: (index: number) => void;
+  onClose: () => void;
+}>) {
+  return (
+    <PronunciationSoundDetailCard
+      sounds={sounds}
+      index={index}
+      onIndexChange={onIndexChange}
+      onClose={onClose}
+    />
+  );
+}
+
+function VocabularyDetailContent({
+  pronunciationIndex,
+  pronunciationSounds,
+  onPronunciationIndexChange,
+  onClosePronunciation,
+  isNoteVisible,
+  noteData,
+  onCloseNote,
+  baseProperties,
+  directionSections,
+  onReset,
+  selectedWord,
+  audioControlsDisabled,
+  onOpenPronunciation,
+  playAudio,
+  showToast,
+  noteId,
+  openNote,
+}: Readonly<{
+  pronunciationIndex: number | null;
+  pronunciationSounds: readonly GroupType[];
+  onPronunciationIndexChange: (index: number) => void;
+  onClosePronunciation: () => void;
+  isNoteVisible: boolean;
+  noteData: ReturnType<typeof useNoteViewer>['noteData'];
+  onCloseNote: () => void;
+  baseProperties: readonly VocabularyProperty[];
+  directionSections: readonly VocabularyDirectionSection[];
+  onReset: (direction: ReviewDirection) => Promise<void>;
+  selectedWord: UserItemLocal | null;
+  audioControlsDisabled: boolean;
+  onOpenPronunciation: () => void;
+  playAudio: (audio: string) => Promise<boolean>;
+  showToast: (message: string, type: 'error') => void;
+  noteId: number | null | undefined;
+  openNote: (noteId: number) => void;
+}>) {
+  if (pronunciationIndex !== null) {
+    return (
+      <VocabularyPronunciationDetail
+        sounds={pronunciationSounds}
+        index={pronunciationIndex}
+        onIndexChange={onPronunciationIndexChange}
+        onClose={onClosePronunciation}
+      />
+    );
+  }
+
+  if (isNoteVisible) return <NoteDetailCard note={noteData} onClose={onCloseNote} />;
+
+  return (
+    <>
+      <VocabularyDetails baseProperties={baseProperties} directionSections={directionSections} onReset={onReset} />
+      <VocabularyAudioControls
+        selectedWord={selectedWord}
+        audioControlsDisabled={audioControlsDisabled}
+        pronunciationSounds={pronunciationSounds}
+        onOpenPronunciation={onOpenPronunciation}
+        playAudio={playAudio}
+        showToast={showToast}
+      />
+      <div className="pos-bottom-right-control">
+        <VocabularyNoteButton noteId={noteId} openNote={openNote} />
+        <HelpButton />
+      </div>
+    </>
+  );
+}
+
 /**
  * VocabularyDetailCard component
  *
@@ -222,6 +332,9 @@ export default function VocabularyDetailCard({
 }: VocabularyDetailCardProps) {
   const baseProperties = getBaseProperties(selectedWord);
   const directionSections = getDirectionSections(selectedWord);
+  const sounds = useLiveQuery(() => Groups.getSounds(), [], []) ?? [];
+  const [pronunciationIndex, setPronunciationIndex] = useState<number | null>(null);
+  const pronunciationSounds = splitPronunciationIntoSounds(selectedWord?.pronunciation ?? '', sounds);
 
   const {
     playAudio,
@@ -241,25 +354,31 @@ export default function VocabularyDetailCard({
 
   const noteId = selectedWord?.note_id;
 
-  if (isNoteVisible) return <NoteDetailCard note={noteData} onClose={closeNote} />;
-
   return (
     <OverviewCard
       buttonTitle={selectedWord?.english ?? ''}
       onClose={onClose}
       className="bottom-controls-clearance relative"
     >
-      <VocabularyDetails baseProperties={baseProperties} directionSections={directionSections} onReset={onReset} />
-      <VocabularyAudioControls
+      <VocabularyDetailContent
+        pronunciationIndex={pronunciationIndex}
+        pronunciationSounds={pronunciationSounds}
+        onPronunciationIndexChange={setPronunciationIndex}
+        onClosePronunciation={() => setPronunciationIndex(null)}
+        isNoteVisible={isNoteVisible}
+        noteData={noteData}
+        onCloseNote={closeNote}
+        baseProperties={baseProperties}
+        directionSections={directionSections}
+        onReset={onReset}
         selectedWord={selectedWord}
         audioControlsDisabled={audioControlsDisabled}
+        onOpenPronunciation={() => setPronunciationIndex(0)}
         playAudio={playAudio}
         showToast={showToast}
+        noteId={noteId}
+        openNote={openNote}
       />
-      <div className="pos-bottom-right-control">
-        <VocabularyNoteButton noteId={noteId} openNote={openNote} />
-        <HelpButton />
-      </div>
     </OverviewCard>
   );
 }
