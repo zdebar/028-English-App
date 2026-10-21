@@ -13,6 +13,7 @@ import { dataSync } from '@/database/utils/data-sync.utils';
 import AudioRecord from '@/database/models/audio-records';
 import { useSyncStore } from '@/features/synchronization/use-sync-store';
 import { StandardButton } from '@/components/UI/buttons/StandardButton';
+import { MenuButtonText } from '@/components/UI/MenuButtonText';
 import {
   invalidatePracticeCache,
   warmPracticeCache,
@@ -172,7 +173,9 @@ export default function Profile(): JSX.Element {
         onClick={handleFullSync}
         title={TEXTS.profileFullSyncHint}
       >
-        {isSynchronizing ? TEXTS.profileFullSyncInProgress : TEXTS.profileFullSyncButton}
+        <MenuButtonText>
+          {isSynchronizing ? TEXTS.profileFullSyncInProgress : TEXTS.profileFullSyncButton}
+        </MenuButtonText>
       </StandardButton>
       <SignoutButton />
       <DeleteUserButton />

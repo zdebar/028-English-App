@@ -6,7 +6,7 @@ export const ACCOUNT_TEXTS = {
   profileDailyNewLessonLimitHint: 'Kolik nových lekcí lze zahájit během jednoho dne.',
   profileFullSyncButton: 'Plná synchronizace',
   profileFullSyncInProgress: 'Synchronizuji…',
-  profileFullSyncHint: 'Obnoví obsah aplikace ze serveru a synchronizuje váš pokrok.',
+  profileFullSyncHint: 'Plné obnovení stavu aplikace.\nPoužít při podezření na poškození dat.\nTato akce vyžaduje potvrzení.',
 
   // Signout Button
   signoutButtonTitle: 'Odhlásit se',
