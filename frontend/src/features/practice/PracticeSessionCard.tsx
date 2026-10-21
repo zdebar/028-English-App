@@ -13,7 +13,7 @@ import InfoButton from '@/features/notes/InfoButton';
 import NoteDetailCard from '@/features/notes/NoteDetailCard';
 import Groups from '@/database/models/groups';
 import PronunciationSoundDetailCard from './PronunciationSoundDetailCard';
-import { splitPronunciationIntoSounds } from '@/utils/pronunciation.utils';
+import { getUniquePronunciationSounds, splitPronunciationIntoSounds } from '@/utils/pronunciation.utils';
 import type { GroupType } from '@/types/table.types';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { TEXTS } from '@/locales/cs';
@@ -94,6 +94,7 @@ type PracticeDetailProps = Readonly<{
   grammar: GrammarChunkWithExamples | null;
   note: NoteType | null;
   sounds: readonly GroupType[];
+  pronunciationSounds: readonly GroupType[];
   selectedSoundIndex: number;
   onClose: () => void;
   onSoundIndexChange: (index: number) => void;
@@ -104,6 +105,7 @@ function PracticeDetail({
   grammar,
   note,
   sounds,
+  pronunciationSounds,
   selectedSoundIndex,
   onClose,
   onSoundIndexChange,
@@ -123,6 +125,7 @@ function PracticeDetail({
   return (
     <PronunciationSoundDetailCard
       sounds={sounds}
+      pronunciationSounds={pronunciationSounds}
       index={selectedSoundIndex}
       onIndexChange={onSoundIndexChange}
       onClose={onClose}
@@ -725,7 +728,8 @@ function PracticeSessionCardView({
   onOpenPronunciation: (sounds: readonly GroupType[]) => void;
 }>) {
   const pronunciationSounds = splitPronunciationIntoSounds(props.pronunciation ?? '', sounds);
-  const display = getPracticeCardDisplayState(props, pronunciationSounds.length > 0);
+  const uniquePronunciationSounds = getUniquePronunciationSounds(pronunciationSounds);
+  const display = getPracticeCardDisplayState(props, uniquePronunciationSounds.length > 0);
   return (
     <div className="bottom-controls-clearance relative flex min-h-0 w-full grow flex-col items-center">
       <div className="card-width card-height relative gap-1">
@@ -769,6 +773,7 @@ export default function PracticeSessionCard(props: PracticeSessionCardProps) {
         grammar={normalizedProps.grammar}
         note={normalizedProps.note}
         sounds={pronunciationSounds}
+        pronunciationSounds={pronunciationSounds}
         selectedSoundIndex={selectedSoundIndex}
         onClose={() => setVisibleDetail(null)}
         onSoundIndexChange={setSelectedSoundIndex}

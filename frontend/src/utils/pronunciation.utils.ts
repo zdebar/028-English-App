@@ -34,3 +34,12 @@ export function splitPronunciationIntoSounds(
 
   return matchedSounds;
 }
+
+export function getUniquePronunciationSounds(sounds: readonly GroupType[]): GroupType[] {
+  const seenSoundIds = new Set<number>();
+  return sounds.filter((sound) => {
+    if (seenSoundIds.has(sound.id)) return false;
+    seenSoundIds.add(sound.id);
+    return true;
+  });
+}

@@ -21,7 +21,7 @@ import SecondaryControlButton from '@/components/UI/buttons/SecondaryControlButt
 import PronunciationIcon from '@/components/UI/icons/PronunciationIcon';
 import Groups from '@/database/models/groups';
 import PronunciationSoundDetailCard from '@/features/practice/PronunciationSoundDetailCard';
-import { splitPronunciationIntoSounds } from '@/utils/pronunciation.utils';
+import { getUniquePronunciationSounds, splitPronunciationIntoSounds } from '@/utils/pronunciation.utils';
 import type { GroupType } from '@/types/table.types';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useState } from 'react';
@@ -229,11 +229,13 @@ function VocabularyNoteButton({
 
 function VocabularyPronunciationDetail({
   sounds,
+  fullPronunciationSounds,
   index,
   onIndexChange,
   onClose,
 }: Readonly<{
   sounds: readonly GroupType[];
+  fullPronunciationSounds: readonly GroupType[];
   index: number;
   onIndexChange: (index: number) => void;
   onClose: () => void;
@@ -241,6 +243,7 @@ function VocabularyPronunciationDetail({
   return (
     <PronunciationSoundDetailCard
       sounds={sounds}
+      pronunciationSounds={fullPronunciationSounds}
       index={index}
       onIndexChange={onIndexChange}
       onClose={onClose}
@@ -251,6 +254,7 @@ function VocabularyPronunciationDetail({
 function VocabularyDetailContent({
   pronunciationIndex,
   pronunciationSounds,
+  fullPronunciationSounds,
   onPronunciationIndexChange,
   onClosePronunciation,
   isNoteVisible,
@@ -269,6 +273,7 @@ function VocabularyDetailContent({
 }: Readonly<{
   pronunciationIndex: number | null;
   pronunciationSounds: readonly GroupType[];
+  fullPronunciationSounds: readonly GroupType[];
   onPronunciationIndexChange: (index: number) => void;
   onClosePronunciation: () => void;
   isNoteVisible: boolean;
@@ -289,6 +294,7 @@ function VocabularyDetailContent({
     return (
       <VocabularyPronunciationDetail
         sounds={pronunciationSounds}
+        fullPronunciationSounds={fullPronunciationSounds}
         index={pronunciationIndex}
         onIndexChange={onPronunciationIndexChange}
         onClose={onClosePronunciation}
@@ -334,7 +340,8 @@ export default function VocabularyDetailCard({
   const directionSections = getDirectionSections(selectedWord);
   const sounds = useLiveQuery(() => Groups.getSounds(), [], []) ?? [];
   const [pronunciationIndex, setPronunciationIndex] = useState<number | null>(null);
-  const pronunciationSounds = splitPronunciationIntoSounds(selectedWord?.pronunciation ?? '', sounds);
+  const fullPronunciationSounds = splitPronunciationIntoSounds(selectedWord?.pronunciation ?? '', sounds);
+  const pronunciationSounds = getUniquePronunciationSounds(fullPronunciationSounds);
 
   const {
     playAudio,
@@ -363,6 +370,7 @@ export default function VocabularyDetailCard({
       <VocabularyDetailContent
         pronunciationIndex={pronunciationIndex}
         pronunciationSounds={pronunciationSounds}
+        fullPronunciationSounds={fullPronunciationSounds}
         onPronunciationIndexChange={setPronunciationIndex}
         onClosePronunciation={() => setPronunciationIndex(null)}
         isNoteVisible={isNoteVisible}

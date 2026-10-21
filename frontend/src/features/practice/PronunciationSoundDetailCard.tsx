@@ -7,6 +7,7 @@ import { TEXTS } from '@/locales/cs';
 
 type PronunciationSoundDetailCardProps = Readonly<{
   sounds: readonly GroupType[];
+  pronunciationSounds?: readonly GroupType[];
   index: number;
   onIndexChange: (index: number) => void;
   onClose: () => void;
@@ -14,6 +15,7 @@ type PronunciationSoundDetailCardProps = Readonly<{
 
 export default function PronunciationSoundDetailCard({
   sounds,
+  pronunciationSounds = sounds,
   index,
   onIndexChange,
   onClose,
@@ -23,6 +25,8 @@ export default function PronunciationSoundDetailCard({
 
   const isFirstSound = index === 0;
   const isLastSound = index === sounds.length - 1;
+  const pronunciationText = pronunciationSounds.map((item) => item.name).join('');
+  const highlightedPronunciation = highlightSoundOccurrences(pronunciationSounds, sound);
 
   return (
     <Card className="card-height min-h-card gap-1">
@@ -44,7 +48,7 @@ export default function PronunciationSoundDetailCard({
         className="flex w-full shrink-0 items-center justify-center gap-1"
       >
         <StyledButton
-          className="h-button min-h-button min-w-0 flex-1"
+          className="h-button min-h-button w-button min-w-0 shrink-0 grow-0 p-0"
           title={TEXTS.previousSound}
           aria-label={TEXTS.previousSound}
           onClick={() => onIndexChange(index - 1)}
@@ -53,15 +57,22 @@ export default function PronunciationSoundDetailCard({
           <ChevronRightIcon className="rotate-180" />
         </StyledButton>
         <StyledButton
-          className="h-button min-h-button min-w-0 flex-1"
-          aria-label={`${index + 1} / ${sounds.length}`}
+          className="h-button min-h-button min-w-0 grow justify-center gap-0 px-2"
+          aria-label={pronunciationText}
           aria-live="polite"
           disabled
         >
-          {index + 1} / {sounds.length}
+          {highlightedPronunciation.map((segment, segmentIndex) => (
+            <span
+              key={`${segment.name}-${segmentIndex}`}
+              className={segment.isHighlighted ? 'text-blue-600 dark:text-blue-400' : undefined}
+            >
+              {segment.name}
+            </span>
+          ))}
         </StyledButton>
         <StyledButton
-          className="h-button min-h-button min-w-0 flex-1"
+          className="h-button min-h-button w-button min-w-0 shrink-0 grow-0 p-0"
           title={TEXTS.nextSound}
           aria-label={TEXTS.nextSound}
           onClick={() => onIndexChange(index + 1)}
@@ -72,4 +83,16 @@ export default function PronunciationSoundDetailCard({
       </div>
     </Card>
   );
+}
+
+type PronunciationSegment = Readonly<{ name: string; isHighlighted: boolean }>;
+
+function highlightSoundOccurrences(
+  pronunciationSounds: readonly GroupType[],
+  highlightedSound: GroupType,
+): readonly PronunciationSegment[] {
+  return pronunciationSounds.map((sound) => ({
+    name: sound.name,
+    isHighlighted: sound.id === highlightedSound.id,
+  }));
 }

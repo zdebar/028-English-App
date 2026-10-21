@@ -156,6 +156,7 @@ export default function PronunciationGroupDetail({
     return (
       <PronunciationSoundDetailCard
         sounds={pronunciationSounds}
+        pronunciationSounds={pronunciationSounds}
         index={selectedSoundIndex}
         onIndexChange={setSelectedSoundIndex}
         onClose={() => setPronunciationSounds(null)}
