@@ -77,7 +77,7 @@ export default function SoundGroupDetail({
       buttonTitle={data?.group.name}
       loading={loading}
       onClose={closeRoute}
-      className="bottom-controls-clearance card-height min-h-card"
+      className="card-height min-h-card"
       showResetAction={false}
       titleAlignment="center"
     >
@@ -95,9 +95,11 @@ export default function SoundGroupDetail({
             />
           ))}
         </div>
+        <div className="secondary-controls-after-list">
+          <div className="pos-bottom-left-control"><VolumeSlider /></div>
+          {items.length > 0 && <div className="pos-bottom-right-control"><HelpButton /></div>}
+        </div>
       </DataState>
-      <div className="pos-bottom-left-control"><VolumeSlider /></div>
-      {items.length > 0 && <div className="pos-bottom-right-control"><HelpButton /></div>}
     </OverviewCard>
   );
 }
