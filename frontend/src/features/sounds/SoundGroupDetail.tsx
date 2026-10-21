@@ -6,7 +6,6 @@ import SoundGroup from '@/database/models/sound-groups';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
 import VolumeSlider from '@/features/audio/VolumeSlider';
-import HelpButton from '@/features/help/HelpButton';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { sharedQueryKey } from '@/hooks/shared-query-store';
@@ -29,6 +28,21 @@ async function playItemAudio(
 ): Promise<void> {
   if (!audio) return;
   if (!(await playAudio(audio))) showToast(TEXTS.noAudio, 'error');
+}
+
+function SoundDetailControls({
+  items,
+}: Readonly<{ items: SoundGroupDetailType['items'] }>) {
+  if (items.length === 0) return null;
+  const hasAudio = items.some((item) => Boolean(item.audio?.trim()));
+
+  return (
+    <div className="secondary-controls-after-list">
+      <div className="pos-bottom-left-control">
+        <VolumeSlider disabled={!hasAudio} />
+      </div>
+    </div>
+  );
 }
 
 export default function SoundGroupDetail({
@@ -95,10 +109,7 @@ export default function SoundGroupDetail({
             />
           ))}
         </div>
-        <div className="secondary-controls-after-list">
-          <div className="pos-bottom-left-control"><VolumeSlider /></div>
-          {items.length > 0 && <div className="pos-bottom-right-control"><HelpButton /></div>}
-        </div>
+        <SoundDetailControls items={items} />
       </DataState>
     </OverviewCard>
   );
