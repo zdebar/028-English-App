@@ -50,7 +50,7 @@ export default function Home(): JSX.Element {
   return (
     <>
       {userId ? (
-        <div className="card-width relative flex h-full w-full grow flex-col justify-start gap-2">
+        <div className="card-width relative flex h-full w-full grow flex-col justify-start gap-1">
           <div className="landscape:mt-4">
             <HomeActionLinks />
           </div>
@@ -66,16 +66,16 @@ export default function Home(): JSX.Element {
           <Link to={ROUTES.practiceOverview} className={HOME_TEXT_ACTION_CLASS_NAME}>
             {TEXTS.practiceOverviewTitle}
           </Link>
-          <div className="mt-2 flex w-full flex-col gap-1">
+          <div className="flex w-full flex-col gap-1">
             <PracticeButton />
           </div>
           <div className="relative">
             <p
-              className={`text-error-light dark:text-error-dark px-4 py-2 text-center text-sm ${isSyncError ? 'visible' : 'invisible'}`}
+              className={`text-error-light dark:text-error-dark px-4 py-2 text-center text-sm ${isSyncError ? 'visible' : 'hidden'}`}
             >
               {TEXTS.syncWarning}
             </p>
-            <div className="home-bottom-controls-clearance relative">
+            <div className="home-bottom-controls-clearance relative mt-2">
               <Dashboard />
               <div className="pos-home-dashboard-help">
                 <HelpButton />
