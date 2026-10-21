@@ -32,7 +32,7 @@ export default function PronunciationSoundDetailCard({
     <Card className="card-height min-h-card gap-1">
       <div className="h-button flex w-full shrink-0 items-center gap-1">
         <StyledButton
-          className="h-button grow justify-start px-4"
+          className="h-button preserve-disabled-text-color grow justify-start px-4"
           aria-label={`IPA ${sound.name}`}
           disabled
         >
@@ -57,7 +57,7 @@ export default function PronunciationSoundDetailCard({
           <ChevronRightIcon className="rotate-180" />
         </StyledButton>
         <StyledButton
-          className="h-button min-h-button min-w-0 grow justify-center gap-0 px-2"
+          className="h-button preserve-disabled-text-color min-h-button min-w-0 grow justify-center gap-0 px-2"
           aria-label={pronunciationText}
           aria-live="polite"
           disabled

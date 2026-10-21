@@ -41,7 +41,7 @@ export default function Dashboard({ className = '' }: DashboardProps) {
         .filter((level) => level.lessons.length > 0)
         .map((level) => (
           <div key={level.id} className="grid grid-cols-[3rem_minmax(0,1fr)] items-start gap-0.5">
-            <div className="flex h-7 items-center justify-center border border-dashed border-disabled-light px-1 font-bold text-disabled-light dark:border-disabled-dark dark:text-disabled-dark">
+            <div className="flex h-7 items-center justify-center border border-dashed border-disabled-light px-1 font-bold text-light dark:border-disabled-dark dark:text-dark">
               {level.name}
             </div>
             <ul
