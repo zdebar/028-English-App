@@ -1,3 +1,4 @@
+import '@/features/auth/normalize-auth-callback';
 import ErrorBoundary from '@/components/utils/error-boundary';
 // import { initializeMonitoring } from '@/features/logging/monitoring-handler';
 import { startAuthLifecycle, stopAuthLifecycle } from '@/features/auth/auth-lifecycle';

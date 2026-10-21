@@ -133,14 +133,23 @@ export async function restoreAnonymousSessionFallback(
 
 export function clearAuthErrorParameters(): void {
   const url = new URL(globalThis.location.href);
-  const hashParameters = new URLSearchParams(url.hash.slice(1));
-  const hashHasAuthError = ['error', 'error_code', 'error_description'].some((parameter) =>
-    hashParameters.has(parameter),
-  );
+  const hashContent = url.hash.slice(1).replace(/^\//, '');
+  const hashQuery = hashContent.includes('?') ? hashContent.slice(hashContent.indexOf('?') + 1) : hashContent;
+  const hashParameters = new URLSearchParams(hashQuery);
+  const authErrorParameters = ['error', 'error_code', 'error_description'];
+  const searchHasAuthError = authErrorParameters.some((parameter) => url.searchParams.has(parameter));
+  const hashHasAuthError = authErrorParameters.some((parameter) => hashParameters.has(parameter));
 
-  url.searchParams.delete('error');
-  url.searchParams.delete('error_code');
-  url.searchParams.delete('error_description');
+  if (!searchHasAuthError && !hashHasAuthError) return;
+
+  for (const parameter of authErrorParameters) {
+    url.searchParams.delete(parameter);
+    hashParameters.delete(parameter);
+  }
+
+  // OAuth errors can arrive in the URL hash, which HashRouter would otherwise
+  // treat as an unknown route before Supabase finishes processing the callback.
+  url.hash = '/';
 
   globalThis.history.replaceState(
     globalThis.history.state,
