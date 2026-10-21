@@ -14,6 +14,7 @@ import Grammar from '@/pages/Grammar';
 import Guide from '@/pages/Guide';
 import Home from '@/pages/Home';
 import Overviews from '@/pages/Overviews';
+import LessonsOverview from '@/pages/LessonsOverview';
 import Practice from '@/pages/Practice';
 import PracticeOverview from '@/pages/PracticeOverview';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
@@ -193,6 +194,7 @@ export const router = createHashRouter([
             loader: () => loadProtectedData('overviews', overviewAvailabilityDescriptor),
             Component: Overviews,
           },
+          { path: ROUTES.lessonsOverview, Component: LessonsOverview },
           { path: ROUTES.profile, Component: Profile },
           {
             path: ROUTES.topics,

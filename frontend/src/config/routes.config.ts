@@ -7,6 +7,7 @@ export const ROUTES = {
   initialTraining: '/practice/initial-training',
   practiceOverview: '/practice-overview',
   overviews: '/overviews',
+  lessonsOverview: '/lessons',
   profile: '/profile',
   sounds: '/sounds',
   soundDetail: '/sounds/:groupId',
