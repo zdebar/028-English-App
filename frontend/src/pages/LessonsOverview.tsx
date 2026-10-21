@@ -42,7 +42,7 @@ export default function LessonsOverview() {
                     {level.lessons.map((lesson) => (
                       <div
                         key={lesson.id}
-                        className={`flex h-input w-full items-center border border-disabled-light border-dashed px-4 dark:border-disabled-dark ${
+                        className={`flex h-input w-full items-center border border-disabled-light border-dashed px-8 dark:border-disabled-dark ${
                           lesson.isStarted ? '' : 'text-disabled-light dark:text-disabled-dark'
                         }`}
                       >
