@@ -65,3 +65,33 @@ describe('Groups.getStartedByUser', () => {
     expect(groups[0]?.examples.map((item) => item.item_id)).toEqual([12, 10, 11]);
   });
 });
+
+describe('Groups.getByTypeWithStartedLessons', () => {
+  beforeEach(() => {
+    mocks.groups = [
+      { id: 1, type: 'sound', name: 'Initiated item', sort_order: 1, updated_at: '', deleted_at: null },
+      { id: 2, type: 'sound', name: 'Uninitiated item in started lesson', sort_order: 2, updated_at: '', deleted_at: null },
+      { id: 3, type: 'sound', name: 'Unstarted lesson', sort_order: 3, updated_at: '', deleted_at: null },
+    ];
+    mocks.memberships = [
+      { id: 1, group_id: 1, item_id: 10, sort_order: 1, deleted_at: null },
+      { id: 2, group_id: 2, item_id: 20, sort_order: 1, deleted_at: null },
+      { id: 3, group_id: 3, item_id: 30, sort_order: 1, deleted_at: null },
+    ];
+    mocks.userItems = [
+      { item_id: 10, lesson_id: 100, started_at: '2026-01-01', deleted_at: '9999-12-31' },
+      { item_id: 20, lesson_id: 200, started_at: '9999-12-31', deleted_at: '9999-12-31' },
+      { item_id: 30, lesson_id: 300, started_at: '2026-01-01', deleted_at: '9999-12-31' },
+    ];
+    mocks.userLessons = [
+      { lesson_id: 100, started_at: '2026-01-01' },
+      { lesson_id: 200, started_at: '2026-01-01' },
+    ];
+  });
+
+  it('includes linked items from started lessons regardless of item progress', async () => {
+    const groups = await Groups.getByTypeWithStartedLessons('u1', 'sound');
+
+    expect(groups.map((group) => group.id)).toEqual([1, 2]);
+  });
+});

@@ -135,6 +135,44 @@ export default class Groups extends SyncEntityModel implements GroupRow {
     });
   }
 
+  /** Returns groups that have an active item in a lesson the user has started. */
+  static async getByTypeWithStartedLessons(
+    userId: string,
+    type: GroupTypeName,
+  ): Promise<GroupRow[]> {
+    const [groups, memberships, userItems, userLessons] = await Promise.all([
+      db.groups.toArray(),
+      db.group_items.toArray(),
+      db.user_items.where('user_id').equals(userId).toArray(),
+      db.user_lessons.where('user_id').equals(userId).toArray(),
+    ]);
+    const startedLessonIds = new Set(userLessons.map((lesson) => lesson.lesson_id));
+    const itemIdsInStartedLessons = new Set(
+      userItems
+        .filter(
+          (item) =>
+            item.deleted_at === config.database.nullReplacementDate &&
+            startedLessonIds.has(item.lesson_id),
+        )
+        .map((item) => item.item_id),
+    );
+    const visibleGroupIds = new Set(
+      memberships
+        .filter(
+          (membership) =>
+            membership.deleted_at == null && itemIdsInStartedLessons.has(membership.item_id),
+        )
+        .map((membership) => membership.group_id),
+    );
+
+    return groups
+      .filter(
+        (group) =>
+          group.type === type && !group.deleted_at && visibleGroupIds.has(group.id),
+      )
+      .sort((left, right) => left.sort_order - right.sort_order || left.id - right.id);
+  }
+
   static async getAllByTypeWithStartedExamples(
     userId: string,
     type: GroupTypeName,

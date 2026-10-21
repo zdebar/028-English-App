@@ -1,53 +1,53 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const mocks = vi.hoisted(() => ({ getAllByTypeWithStartedExamples: vi.fn() }));
+const mocks = vi.hoisted(() => ({
+  getByTypeWithStartedLessons: vi.fn(),
+  getStartedByUser: vi.fn(),
+}));
 
 vi.mock('@/database/models/groups', () => ({
   default: {
-    getAllByTypeWithStartedExamples: (...args: unknown[]) =>
-      mocks.getAllByTypeWithStartedExamples(...args),
+    getByTypeWithStartedLessons: (...args: unknown[]) =>
+      mocks.getByTypeWithStartedLessons(...args),
+    getStartedByUser: (...args: unknown[]) => mocks.getStartedByUser(...args),
   },
 }));
 
 import SoundGroup from '@/database/models/sound-groups';
 
+const sound = {
+  id: 3,
+  type: 'sound' as const,
+  name: '/æ/',
+  note: 'Example note',
+  sort_order: 1,
+  updated_at: '2026-01-01',
+  deleted_at: null,
+};
+const startedSound = { ...sound, examples: [{ item_id: 8, english: 'man' }] };
+
 describe('SoundGroup', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.getAllByTypeWithStartedExamples.mockResolvedValue([{
-      id: 3,
-      type: 'sound',
-      name: '/æ/',
-      note: 'Example note',
-      sort_order: 1,
-      updated_at: '2026-01-01',
-      deleted_at: null,
-      examples: [{ item_id: 8, english: 'man' }],
-    }]);
+    mocks.getByTypeWithStartedLessons.mockResolvedValue([sound]);
+    mocks.getStartedByUser.mockResolvedValue([startedSound]);
   });
 
-  it('lists only unlocked sounds from the generic groups model', async () => {
-    await expect(SoundGroup.getOverview('u1')).resolves.toEqual([{
-      id: 3,
-      type: 'sound',
-      name: '/æ/',
-      note: 'Example note',
-      sort_order: 1,
-      updated_at: '2026-01-01',
-      deleted_at: null,
-    }]);
-    expect(mocks.getAllByTypeWithStartedExamples).toHaveBeenCalledWith('u1', 'sound');
+  it('lists sounds with linked items in started lessons', async () => {
+    await expect(SoundGroup.getOverview('u1')).resolves.toEqual([sound]);
+    expect(mocks.getByTypeWithStartedLessons).toHaveBeenCalledWith('u1', 'sound');
   });
 
-  it('returns only started examples for an unlocked sound detail', async () => {
-    await expect(SoundGroup.getDetail('u1', 3)).resolves.toMatchObject({
-      group: { id: 3, type: 'sound', name: '/æ/' },
+  it('returns only initiated examples in a visible sound detail', async () => {
+    await expect(SoundGroup.getDetail('u1', 3)).resolves.toEqual({
+      group: sound,
       items: [{ item_id: 8, english: 'man' }],
     });
+    expect(mocks.getStartedByUser).toHaveBeenCalledWith('u1', 'sound');
   });
 
-  it('hides a sound that has no started examples', async () => {
-    mocks.getAllByTypeWithStartedExamples.mockResolvedValue([]);
+  it('hides a sound with no linked item in a started lesson', async () => {
+    mocks.getByTypeWithStartedLessons.mockResolvedValue([]);
     await expect(SoundGroup.getDetail('u1', 3)).resolves.toBeNull();
   });
 });
