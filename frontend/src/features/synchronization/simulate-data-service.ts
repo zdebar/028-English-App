@@ -17,10 +17,26 @@ export async function simulateUserProgress(
 ): Promise<number> {
   assertNonEmptyString(userId, 'userId');
 
-  const itemCount = await db.transaction('rw', db.user_items, async () => {
-    const items = await UserItem.getSimulationCandidates(userId);
-    return UserItem.simulateData(items, dateTime);
-  });
+  const itemCount = await db.transaction(
+    'rw',
+    db.user_items,
+    db.user_lessons,
+    db.lessons,
+    db.levels,
+    async () => {
+      const items = await UserItem.getSimulationCandidates(userId);
+      const itemCount = await UserItem.simulateData(items, dateTime);
+      const startedLessonIds = [...new Set(items.map((item) => item.lesson_id))];
+      await db.user_lessons.bulkPut(
+        startedLessonIds.map((lessonId) => ({
+          user_id: userId,
+          lesson_id: lessonId,
+          started_at: dateTime,
+        })),
+      );
+      return itemCount;
+    },
+  );
 
   invalidateReviewArrays(userId);
   void refreshPracticeAvailability(userId);

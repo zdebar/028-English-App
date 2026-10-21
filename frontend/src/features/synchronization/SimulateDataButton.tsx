@@ -17,7 +17,7 @@ export default function SimulateDataButton(): JSX.Element | null {
   const authLoading = useAuthStore((state) => state.loading);
   const isSynchronizing = useSyncStore((state) => state.isSynchronizing);
   const isSynchronized = useSyncStore((state) => state.isSynchronized);
-  const storageKey = userId ? `simulate-data-${userId}` : 'simulate-data-guest';
+  const storageKey = userId ? `simulate-data-v2-${userId}` : 'simulate-data-v2-guest';
   const [hasSimulatedData, setHasSimulatedData] = useLocalStorageSync<boolean>(storageKey, false);
   const isDisabled = authLoading || isSynchronizing || !isSynchronized || hasSimulatedData;
 

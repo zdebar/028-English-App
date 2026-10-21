@@ -25,7 +25,7 @@ import { assertNonEmptyString } from '@/utils/assertions.utils';
 import { isInitiated } from '@/utils/progress.utils';
 
 const NULL_DATE = config.database.nullReplacementDate;
-const SIM_ITEM_COUNT = config.progress.simulationItemCount;
+const SIM_LESSON_COUNT = config.progress.simulationLessonCount;
 const SIM_ITEM_PROGRESS = config.progress.simulationItemProgress;
 
 type UserItemAPI = Omit<
@@ -480,15 +480,45 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return true;
   }
 
-  /** Returns up to the configured maximum item rows used by the simulation fixture. */
-  static getSimulationCandidates(userId: string): Promise<UserItemLocal[]> {
+  /** Returns vocabulary rows from the first configured lessons in curriculum order. */
+  static async getSimulationCandidates(userId: string): Promise<UserItemLocal[]> {
     assertNonEmptyString(userId, 'userId');
 
-    return db.user_items
-      .where('[user_id+item_id]')
-      .between([userId, Dexie.minKey], [userId, Dexie.maxKey])
-      .limit(SIM_ITEM_COUNT)
-      .toArray();
+    const [items, lessons, levels] = await Promise.all([
+      db.user_items
+        .where('[user_id+item_id]')
+        .between([userId, Dexie.minKey], [userId, Dexie.maxKey])
+        .toArray(),
+      db.lessons.toArray(),
+      db.levels.toArray(),
+    ]);
+    const availableItems = items.filter(
+      (item) => item.deleted_at === NULL_DATE && item.is_vocabulary === 1,
+    );
+    const lessonsWithVocabulary = new Set(availableItems.map((item) => item.lesson_id));
+    const levelOrder = new Map(
+      levels.filter((level) => !level.deleted_at).map((level) => [level.id, level.sort_order]),
+    );
+    const selectedLessons = lessons
+      .filter((lesson) => !lesson.deleted_at && levelOrder.has(lesson.level_id))
+      .filter((lesson) => lessonsWithVocabulary.has(lesson.id))
+      .sort((left, right) =>
+        (levelOrder.get(left.level_id) ?? Number.MAX_SAFE_INTEGER) -
+          (levelOrder.get(right.level_id) ?? Number.MAX_SAFE_INTEGER) ||
+        left.sort_order - right.sort_order ||
+        left.id - right.id,
+      )
+      .slice(0, SIM_LESSON_COUNT);
+    const lessonOrder = new Map(selectedLessons.map((lesson, index) => [lesson.id, index]));
+
+    return availableItems
+      .filter((item) => lessonOrder.has(item.lesson_id))
+      .sort((left, right) =>
+        (lessonOrder.get(left.lesson_id) ?? Number.MAX_SAFE_INTEGER) -
+          (lessonOrder.get(right.lesson_id) ?? Number.MAX_SAFE_INTEGER) ||
+        left.sort_order - right.sort_order ||
+        left.item_id - right.item_id,
+      );
   }
 
   /** Replaces progress on simulation candidates with one deterministic fixture. */

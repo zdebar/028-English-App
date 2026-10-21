@@ -109,7 +109,7 @@ describe('SimulateDataButton', () => {
     });
 
     await waitFor(() => {
-      expect(localStorage.getItem('simulate-data-u1')).toBe(JSON.stringify(true));
+      expect(localStorage.getItem('simulate-data-v2-u1')).toBe(JSON.stringify(true));
     });
   });
 
@@ -136,7 +136,7 @@ describe('SimulateDataButton', () => {
       expect(mocks.reportError).toHaveBeenCalledWith('Simulate data failed', error);
     });
 
-    expect(localStorage.getItem('simulate-data-u1')).toBe(JSON.stringify(false));
+    expect(localStorage.getItem('simulate-data-v2-u1')).toBe(JSON.stringify(false));
   });
 
   it('does nothing when user is missing', async () => {
@@ -174,7 +174,7 @@ describe('SimulateDataButton', () => {
   });
 
   it('is disabled after the current user has already simulated data', () => {
-    localStorage.setItem('simulate-data-u1', JSON.stringify(true));
+    localStorage.setItem('simulate-data-v2-u1', JSON.stringify(true));
 
     render(<SimulateDataButton />);
 

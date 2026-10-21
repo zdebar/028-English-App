@@ -14,7 +14,7 @@ const config = {
   },
 
   progress: {
-    simulationItemCount: 400,
+    simulationLessonCount: 10,
     simulationItemProgress: 1,
   },
 

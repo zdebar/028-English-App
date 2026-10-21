@@ -47,10 +47,11 @@ export const HOME_TEXTS = {
   simulateDataLoading: 'Simuluji data ...',
   simulateDataTooltip: 'Destruktivně přepíše část pokroku. Použijte pouze pro testování.',
   simulateDataModalTitle: 'Opravdu simulovat data?',
-  simulateDataModalText: 'Tato operace nevratně přepíše část vašich dat.',
+  simulateDataModalText:
+    'Nastaví simulovaný pokrok slovíček v prvních 10 lekcích a označí tyto lekce jako započaté. Existující pokrok u těchto slovíček bude přepsán.',
   simulateDataConfirm: 'Přepsat data',
   simulateDataSuccessToast: 'Data byla úspěšně simulována.',
   simulateDataErrorToast: 'Chyba při simulaci dat.',
   simulateDataExplanation:
-    'Pro testování přepíše pokrok až 400 položek a zahájí až 8 procvičovaných bloků. Změna je nevratná.',
+    'Pro testování nastaví pokrok slovíček v prvních 10 lekcích a označí lekce jako započaté. Změna je nevratná.',
 } as const;
