@@ -1,9 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const mocks = vi.hoisted(() => ({ getStartedByUser: vi.fn() }));
+const mocks = vi.hoisted(() => ({ getAllByTypeWithStartedExamples: vi.fn() }));
 
 vi.mock('@/database/models/groups', () => ({
-  default: { getStartedByUser: (...args: unknown[]) => mocks.getStartedByUser(...args) },
+  default: {
+    getAllByTypeWithStartedExamples: (...args: unknown[]) =>
+      mocks.getAllByTypeWithStartedExamples(...args),
+  },
 }));
 
 import SoundGroup from '@/database/models/sound-groups';
@@ -11,7 +14,7 @@ import SoundGroup from '@/database/models/sound-groups';
 describe('SoundGroup', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.getStartedByUser.mockResolvedValue([{
+    mocks.getAllByTypeWithStartedExamples.mockResolvedValue([{
       id: 3,
       type: 'sound',
       name: '/æ/',
@@ -33,7 +36,7 @@ describe('SoundGroup', () => {
       updated_at: '2026-01-01',
       deleted_at: null,
     }]);
-    expect(mocks.getStartedByUser).toHaveBeenCalledWith('u1', 'sound');
+    expect(mocks.getAllByTypeWithStartedExamples).toHaveBeenCalledWith('u1', 'sound');
   });
 
   it('returns only started examples for an unlocked sound detail', async () => {
@@ -44,7 +47,7 @@ describe('SoundGroup', () => {
   });
 
   it('hides a sound that has no started examples', async () => {
-    mocks.getStartedByUser.mockResolvedValue([]);
+    mocks.getAllByTypeWithStartedExamples.mockResolvedValue([]);
     await expect(SoundGroup.getDetail('u1', 3)).resolves.toBeNull();
   });
 });

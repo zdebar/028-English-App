@@ -14,4 +14,4 @@ SELECT
 FROM generate_series(81, 88) AS item_id;
 
 UPDATE items
-SET czech_description = 'testovací vysvětlení pro důkladné otestování';
+SET czech_description = null;

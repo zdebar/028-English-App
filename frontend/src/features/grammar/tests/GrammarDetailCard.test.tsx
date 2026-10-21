@@ -125,7 +125,12 @@ describe('GrammarDetailCard', () => {
     const grammarItem = { ...exampleItem, is_en_to_cz_enabled: false };
     render(
       <GrammarDetailCard
-        grammar={{ kind: 'chunk', id: 1, name: 'Articles', items: [grammarItem] }}
+        grammar={{
+          kind: 'group',
+          id: 2,
+          name: 'Articles',
+          chunks: [{ id: 1, name: 'Articles', items: [grammarItem] }],
+        }}
         onClose={vi.fn()}
         onReset={onReset}
       />,
@@ -138,7 +143,7 @@ describe('GrammarDetailCard', () => {
     expect(screen.queryByRole('button', { name: 'english to Czech' })).toBeNull();
 
     fireEvent.click(resetCzToEn);
-    expect(onReset).toHaveBeenCalledWith('cz_to_en');
+    expect(onReset).toHaveBeenCalledWith(1, 'cz_to_en');
   });
 
   it('loads and plays examples of a chunk detail', async () => {

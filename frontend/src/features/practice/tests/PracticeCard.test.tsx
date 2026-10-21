@@ -86,6 +86,7 @@ mocks.practiceDeck.currentItem = mocks.makePracticeItem();
 vi.mock('@/config/config', () => ({
   default: {
     database: { nullReplacementDate: '9999-12-31T23:59:59+00:00' },
+    progress: { simulationLessonCount: 10, simulationItemProgress: 1 },
     practice: {
       dailyGoal: 20,
       grammarReviewLimitSize: 20,
@@ -576,9 +577,9 @@ describe('PracticeCard', () => {
     expect(screen.getByText('výdech')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Previous sound' }).hasAttribute('disabled')).toBe(true);
     expect(container.querySelector('.card-width.card-height')).toBeTruthy();
-    expect(
-      container.querySelector('.card-width.card-height')?.className,
-    ).toContain('min-h-card');
+    expect(container.querySelector('.card-width.card-height')?.className).not.toContain(
+      'min-h-card',
+    );
     expect(container.querySelector('.text-left')).toBeTruthy();
     expect(container.querySelector('.text-left')?.className).not.toContain('border');
     expect(screen.getByTestId('pronunciation-sound-navigation').className).toContain(
@@ -586,18 +587,20 @@ describe('PracticeCard', () => {
     );
     expect(screen.getByRole('button', { name: 'Next sound' }).className).toContain('color-button');
     expect(screen.getByRole('button', { name: 'Next sound' }).className).toContain('h-button');
-    const soundCounter = screen.getByRole('button', { name: '1 / 4' }) as HTMLButtonElement;
-    expect(soundCounter.textContent).toBe('1 / 4');
-    expect(soundCounter.disabled).toBe(true);
-    expect(soundCounter.className).toContain('h-button');
+    const pronunciationTextButton = screen.getByTestId('pronunciation-sound-navigation')
+      .querySelectorAll('button')[1] as HTMLButtonElement;
+    expect(pronunciationTextButton.textContent).toBe('həloʊ');
+    expect(pronunciationTextButton.disabled).toBe(true);
+    expect(pronunciationTextButton.className).toContain('h-button');
+    expect(pronunciationTextButton.querySelector('.text-blue-600')?.textContent).toBe('h');
 
     fireEvent.click(screen.getByRole('button', { name: 'Next sound' }));
-    expect(screen.getByRole('button', { name: '2 / 4' })).toBeTruthy();
+    expect(pronunciationTextButton.querySelector('.text-blue-600')?.textContent).toBe('ə');
     expect(container.querySelector('[aria-label^="IPA "]')?.textContent).toBe('ə');
     expect(screen.getByRole('button', { name: 'Previous sound' }).hasAttribute('disabled')).toBe(false);
     fireEvent.click(screen.getByRole('button', { name: 'Next sound' }));
     fireEvent.click(screen.getByRole('button', { name: 'Next sound' }));
-    expect(screen.getByRole('button', { name: '4 / 4' })).toBeTruthy();
+    expect(pronunciationTextButton.querySelector('.text-blue-600')?.textContent).toBe('oʊ');
     expect(container.querySelector('[aria-label^="IPA "]')?.textContent).toBe('oʊ');
     expect(screen.getByRole('button', { name: 'Next sound' }).hasAttribute('disabled')).toBe(true);
     fireEvent.click(screen.getByTitle('Close (Escape)'));

@@ -80,6 +80,7 @@ vi.mock('@/features/vocabulary/vocabulary.utils', () => ({
 vi.mock('@/components/UI/OverviewCard', () => ({
   default: ({ buttonTitle, onClose, handleReset, showResetAction = true, children }: any) => (
     <div>
+      <div data-testid="card-title">{buttonTitle}</div>
       {showResetAction && (
         <button data-testid="header-reset" disabled={!handleReset}>
           {buttonTitle}
@@ -152,7 +153,7 @@ describe('VocabularyDetailCard', () => {
     expect(onReset).toHaveBeenCalledWith('cz_to_en');
   });
 
-  it('uses the English word as the card title and makes direction reset buttons full width', () => {
+  it('keeps the English title while omitting the header reset action and makes direction buttons full width', () => {
     render(
       <VocabularyDetailCard
         selectedWord={{ item_id: 1, czech: 'ahoj', english: 'hello' } as any}
@@ -161,9 +162,8 @@ describe('VocabularyDetailCard', () => {
       />,
     );
 
-    const headerReset = screen.getByTestId('header-reset') as HTMLButtonElement;
-    expect(headerReset.textContent).toBe('hello');
-    expect(headerReset.disabled).toBe(true);
+    expect(screen.getByTestId('card-title').textContent).toBe('hello');
+    expect(screen.queryByTestId('header-reset')).toBeNull();
     const resetButton = screen.getByRole('button', { name: 'cZ to EN' });
     expect(resetButton.className).toContain('h-input');
     expect(resetButton.className).toContain('w-full');

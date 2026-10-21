@@ -37,6 +37,15 @@ vi.mock('@/database/models/db', () => ({
     },
     group_items: {
       toArray: async () => mocks.memberships,
+      where: () => ({
+        anyOf: (ids: number[]) => ({
+          filter: (predicate: (membership: any) => boolean) => ({
+            toArray: async () => mocks.memberships.filter(
+              (membership) => ids.includes(membership.group_id) && predicate(membership),
+            ),
+          }),
+        }),
+      }),
     },
     user_items: {
       where: () => ({ equals: () => ({ toArray: async () => mocks.items }) }),
@@ -68,6 +77,33 @@ function item(overrides: Record<string, unknown>) {
     curriculum_sort_path: [1, 1, 1],
     ...overrides,
   };
+}
+
+function linkSoundExamples(itemIds: number[]): void {
+  mocks.groups.push({
+    id: 50,
+    type: 'sound',
+    name: '/æ/',
+    note: null,
+    sort_order: 1,
+    updated_at: '2026-07-01',
+    deleted_at: null,
+  });
+  mocks.relations = [{
+    id: 1,
+    parent_group_id: 1,
+    child_group_id: 50,
+    relation_type: 'contrast',
+    sort_order: 1,
+    deleted_at: null,
+  }];
+  mocks.memberships.push(
+    ...itemIds.map((itemId, index) => ({
+      group_id: 50,
+      item_id: itemId,
+      sort_order: index + 1,
+    })),
+  );
 }
 
 describe('PronunciationGroup', () => {
@@ -140,20 +176,24 @@ describe('PronunciationGroup', () => {
     expect(groups.map((group) => group.id)).toEqual([1, 2]);
   });
 
-  it('hides groups when there are no started example items', async () => {
+  it('keeps groups visible with no started example items', async () => {
     mocks.items.forEach((entry) => {
       entry.started_at = '1970-01-01T00:00:00.000Z';
       delete entry.mastered_at_cz_to_en;
     });
-    await expect(PronunciationGroup.getOverview('u1')).resolves.toEqual([]);
+    await expect(PronunciationGroup.getOverview('u1')).resolves.toEqual([
+      expect.objectContaining({ id: 1, examples: [], unlocked_count: 0, total_count: 0 }),
+    ]);
   });
 
   it('hides started items while their lesson is not started', async () => {
     mocks.lessons = [];
-    await expect(PronunciationGroup.getOverview('u1')).resolves.toEqual([]);
+    await expect(PronunciationGroup.getOverview('u1')).resolves.toEqual([
+      expect.objectContaining({ id: 1, examples: [], unlocked_count: 0, total_count: 0 }),
+    ]);
   });
 
-  it('waits for every linked sound to be visible before showing a pronunciation group', async () => {
+  it('shows pronunciation groups before linked sounds have started', async () => {
     mocks.groups.push({
       id: 50,
       type: 'sound',
@@ -171,8 +211,13 @@ describe('PronunciationGroup', () => {
       sort_order: 1,
       deleted_at: null,
     }];
-    await expect(PronunciationGroup.getOverview('u1')).resolves.toEqual([]);
-    await expect(PronunciationGroup.getDetail('u1', 1)).resolves.toBeNull();
+    await expect(PronunciationGroup.getOverview('u1')).resolves.toEqual([
+      expect.objectContaining({ id: 1 }),
+    ]);
+    await expect(PronunciationGroup.getDetail('u1', 1)).resolves.toMatchObject({
+      group: { id: 1 },
+      items: [],
+    });
 
     mocks.memberships.push({ group_id: 50, item_id: 1, sort_order: 1, deleted_at: null });
     const result = await PronunciationGroup.getOverview('u1');
@@ -190,10 +235,12 @@ describe('PronunciationGroup', () => {
   });
 
   it('returns detail in group item order', async () => {
+    linkSoundExamples([2, 1, 3]);
     mocks.memberships = [
       { group_id: 1, item_id: 2, sort_order: 1 },
       { group_id: 1, item_id: 1, sort_order: 2 },
       { group_id: 1, item_id: 3, sort_order: 3 },
+      ...mocks.memberships.filter((membership) => membership.group_id === 50),
     ];
 
     const detail = await PronunciationGroup.getDetail('u1', 1);
@@ -202,6 +249,7 @@ describe('PronunciationGroup', () => {
   });
 
   it('includes non-vocabulary items when they have audio', async () => {
+    linkSoundExamples([1, 2]);
     mocks.items[1].is_vocabulary = 0;
 
     const detail = await PronunciationGroup.getDetail('u1', 1);

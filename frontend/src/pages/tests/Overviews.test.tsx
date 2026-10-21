@@ -94,22 +94,22 @@ describe('Overviews', () => {
     render(<Overviews />);
 
     const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(5);
-    buttons.forEach((button) => {
-      expect((button as HTMLButtonElement).disabled).toBe(true);
-      fireEvent.click(button);
-    });
+    expect(buttons).toHaveLength(6);
+    expect(buttons.slice(0, 2).every((button) => !(button as HTMLButtonElement).disabled)).toBe(true);
+    expect(buttons.slice(2, 5).every((button) => (button as HTMLButtonElement).disabled)).toBe(true);
+    expect((buttons[5] as HTMLButtonElement).disabled).toBe(false);
+    buttons.slice(2, 5).forEach((button) => fireEvent.click(button));
     expect(mocks.navigate).not.toHaveBeenCalled();
   });
 
-  it('disables the pronunciation overview while group availability is loading', () => {
+  it('keeps the pronunciation overview available while group availability is loading', () => {
     mocks.pronunciationGroups = [];
     mocks.pronunciationLoading = true;
 
     render(<Overviews />);
 
     const button = screen.getByRole('button', { name: 'Výslovnost' }) as HTMLButtonElement;
-    expect(button.disabled).toBe(true);
+    expect(button.disabled).toBe(false);
   });
 
   it.each([

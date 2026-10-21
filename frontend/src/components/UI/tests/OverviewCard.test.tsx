@@ -79,10 +79,11 @@ describe('OverviewCard', () => {
     });
   });
 
-  it('omits the title action when the reset action is hidden', () => {
+  it('keeps the card title visible while disabling its reset action', () => {
     render(<OverviewCard buttonTitle="English title" showResetAction={false} onClose={vi.fn()} />);
 
-    expect(screen.queryByRole('button', { name: 'English title' })).toBeNull();
+    const titleButton = screen.getByRole('button', { name: 'English title' }) as HTMLButtonElement;
+    expect(titleButton.disabled).toBe(true);
     expect(screen.getByTestId('close-button')).toBeTruthy();
   });
 });

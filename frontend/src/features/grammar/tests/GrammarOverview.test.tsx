@@ -14,7 +14,13 @@ function createGrammarTopicData() {
       note: null,
       grammar_topic_id: 1,
       sort_order: 1,
-      chunks: [],
+      chunks: [{
+        id: 9,
+        name: 'Reported speech forms',
+        note: null,
+        items: [],
+        sort_order: 1,
+      }],
     }],
   }];
 }
@@ -148,10 +154,10 @@ vi.mock('@/features/grammar/GrammarDetailCard', () => ({
   default: ({ grammar, onClose, onReset }: any) => (
     <div>
       <div>{grammar.name}</div>
-      <button data-testid="grammar-reset-cz" onClick={() => onReset?.('cz_to_en')}>
+      <button data-testid="grammar-reset-cz" onClick={() => onReset?.(grammar.chunks[0].id, 'cz_to_en')}>
         Czech to English
       </button>
-      <button data-testid="grammar-reset-en" onClick={() => onReset?.('en_to_cz')}>
+      <button data-testid="grammar-reset-en" onClick={() => onReset?.(grammar.chunks[0].id, 'en_to_cz')}>
         English to Czech
       </button>
       <button data-testid="grammar-detail-close" onClick={onClose}>close</button>
@@ -187,9 +193,9 @@ describe('GrammarOverview', () => {
     openReportedSpeechReset();
 
     await waitFor(() => {
-      expect(mocks.resetItemsByGrammarGroupId).toHaveBeenCalledWith('u1', 8, 'cz_to_en');
+      expect(mocks.resetItemsByGrammarGroupId).toHaveBeenCalledWith('u1', 9, 'cz_to_en');
       expect(mocks.reportInfo).toHaveBeenCalledWith(
-        'Grammar 8 cz_to_en reset completed: 4 items reset.',
+        'Grammar 9 cz_to_en reset completed: 4 items reset.',
       );
       expect(mocks.showToast).toHaveBeenCalledWith('Reset success', 'success');
     });
@@ -204,7 +210,7 @@ describe('GrammarOverview', () => {
     openReportedSpeechReset();
 
     await waitFor(() => {
-      expect(mocks.resetItemsByGrammarGroupId).toHaveBeenCalledWith('u1', 8, 'cz_to_en');
+      expect(mocks.resetItemsByGrammarGroupId).toHaveBeenCalledWith('u1', 9, 'cz_to_en');
       expect(mocks.showToast).toHaveBeenCalledWith('Reset error', 'error');
       expect(mocks.reportError).toHaveBeenCalledWith('Failed to reset grammar progress', error);
     });
