@@ -1,0 +1,1 @@
+TRUNCATE TABLE lessons RESTART IDENTITY CASCADE where type = 'grammar';
