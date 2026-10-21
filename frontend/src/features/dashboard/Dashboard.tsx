@@ -65,9 +65,7 @@ export default function Dashboard({ className = '' }: DashboardProps) {
               })}
             </ul>
             <span className="absolute inset-0 flex items-center justify-center font-bold">
-              <span className="bg-background-light/90 px-1 dark:bg-background-dark/90">
-                {level.name}
-              </span>
+              {level.name}
             </span>
           </div>
         ))}
