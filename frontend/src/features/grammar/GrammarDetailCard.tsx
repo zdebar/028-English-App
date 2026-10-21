@@ -1,5 +1,6 @@
 import OverviewCard from '@/components/UI/OverviewCard';
 import HelpButton from '@/features/help/HelpButton';
+import HelpText from '@/features/help/HelpText';
 import { TEXTS } from '@/locales/cs';
 import DOMPurify from 'dompurify';
 import type { UserItemLocal } from '@/types/user-item.types';
@@ -31,7 +32,7 @@ export type GrammarDetail =
 type GrammarDetailCardProps = Readonly<{
   grammar?: GrammarDetail | null;
   onClose: () => void;
-  onReset?: (direction: ReviewDirection) => Promise<void>;
+  onReset?: (grammarGroupId: number, direction: ReviewDirection) => Promise<void>;
   /** Whether to render the bottom-right contextual help control. */
   showHelpButton?: boolean;
 }>;
@@ -99,9 +100,11 @@ function GrammarItems({
 function GrammarContent({
   grammar,
   itemsProps,
+  onReset,
 }: Readonly<{
   grammar: GrammarDetail | null | undefined;
   itemsProps: Omit<React.ComponentProps<typeof GrammarItems>, 'entries'>;
+  onReset?: (grammarGroupId: number, direction: ReviewDirection) => Promise<void>;
 }>) {
   if (!grammar) return null;
   if (grammar.kind === 'chunk') {
@@ -116,8 +119,12 @@ function GrammarContent({
     <>
       <GrammarNote note={grammar.note} />
       {grammar.chunks.map((chunk) => (
-        <section key={chunk.id}>
-          <h2 className="m-4 text-left text-lg font-bold">{chunk.name}</h2>
+        <section key={chunk.id} className="flex flex-col gap-1">
+          <h2 className="m-4 mt-5 text-left text-lg font-bold">{chunk.name}</h2>
+          <GrammarDirectionResetButtons
+            items={chunk.items ?? []}
+            onReset={onReset ? (direction) => onReset(chunk.id, direction) : undefined}
+          />
           <GrammarNote note={chunk.note} />
           <GrammarItems entries={chunk.items} {...itemsProps} />
         </section>
@@ -148,9 +155,11 @@ function GrammarBottomControls({
 
 function getEnabledGrammarDirections(items: readonly UserItemLocal[]): readonly ReviewDirection[] {
   const directions: readonly ReviewDirection[] = ['cz_to_en', 'en_to_cz'];
-  return directions.filter((direction) => items.some((item) => (
-    direction === 'cz_to_en' ? item.is_cz_to_en_enabled : item.is_en_to_cz_enabled
-  )));
+  return directions.filter((direction) =>
+    items.some((item) =>
+      direction === 'cz_to_en' ? item.is_cz_to_en_enabled : item.is_en_to_cz_enabled,
+    ),
+  );
 }
 
 function GrammarDirectionResetButtons({
@@ -168,16 +177,20 @@ function GrammarDirectionResetButtons({
   return (
     <div className="mt-1 flex flex-col gap-1">
       {directions.map((direction) => (
-        <ButtonWithModal
-          key={direction}
-          className="h-input w-full justify-center font-bold"
-          modalTitle={TEXTS.restartGrammarDirectionTitle}
-          modalText={TEXTS.restartDirectionProgressDescription}
-          title={TEXTS.restartProgressHelp}
-          onConfirm={() => onReset(direction)}
-        >
-          {lowercaseInitial(direction === 'cz_to_en' ? TEXTS.directionCzToEn : TEXTS.directionEnToCz)}
-        </ButtonWithModal>
+        <div key={direction} className="relative">
+          <HelpText className="-top-5 left-0 whitespace-nowrap">{TEXTS.restartProgress}</HelpText>
+          <ButtonWithModal
+            className="h-input w-full justify-center font-bold"
+            modalTitle={TEXTS.restartGrammarDirectionTitle}
+            modalText={TEXTS.restartDirectionProgressDescription}
+            title={TEXTS.restartProgress}
+            onConfirm={() => onReset(direction)}
+          >
+            {lowercaseInitial(
+              direction === 'cz_to_en' ? TEXTS.directionCzToEn : TEXTS.directionEnToCz,
+            )}
+          </ButtonWithModal>
+        </div>
       ))}
     </div>
   );
@@ -204,22 +217,20 @@ export default function GrammarDetailCard({
 
   const hasContent = hasGrammarContent(grammar, chunks);
   const hasBottomControls = items.length > 0 || showHelpButton;
-  const hasDirectionReset = Boolean(onReset && getEnabledGrammarDirections(items).length > 0);
 
   return (
     <OverviewCard
       buttonTitle={grammar?.name}
       onClose={onClose}
       className={hasBottomControls ? 'bottom-controls-clearance relative' : 'relative'}
+      showResetAction={false}
     >
-      <GrammarDirectionResetButtons items={items} onReset={onReset} />
-      <div className={hasDirectionReset ? 'mt-1' : ''}>
-        <GrammarContent
-          grammar={grammar}
-          itemsProps={{ audioLoading, isAudioReady, playAudio, showToast }}
-        />
-        {!hasContent && TEXTS.noNotesToDisplay}
-      </div>
+      <GrammarContent
+        grammar={grammar}
+        itemsProps={{ audioLoading, isAudioReady, playAudio, showToast }}
+        onReset={onReset}
+      />
+      {!hasContent && TEXTS.noNotesToDisplay}
       <GrammarBottomControls hasItems={items.length > 0} showHelpButton={showHelpButton} />
     </OverviewCard>
   );

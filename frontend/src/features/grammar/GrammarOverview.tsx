@@ -74,31 +74,34 @@ export default function GrammarOverview({
     setSelection({ id: groupId });
   }, []);
 
-  const handleReset = useCallback(async (direction: ReviewDirection) => {
-    if (!currentItem || !userId) {
-      return;
-    }
+  const handleReset = useCallback(
+    async (grammarGroupId: number, direction: ReviewDirection) => {
+      if (!userId) return;
 
-    try {
-      const resetCount = await UserItem.resetItemsByGrammarGroupId(userId, currentItem.id, direction);
-      invalidateReviewArrays(userId);
-      void refreshPracticeAvailability(userId);
-      reportInfo(`Grammar ${currentItem.id} ${direction} reset completed: ${resetCount} items reset.`);
-      showToast(TEXTS.resetProgressSuccessToast, 'success');
-    } catch (err) {
-      showToast(TEXTS.resetProgressErrorToast, 'error');
-      reportError('Failed to reset grammar progress', err);
-    }
-  }, [currentItem, showToast, userId]);
+      try {
+        const resetCount = await UserItem.resetItemsByGrammarGroupId(
+          userId,
+          grammarGroupId,
+          direction,
+        );
+        invalidateReviewArrays(userId);
+        void refreshPracticeAvailability(userId);
+        reportInfo(
+          `Grammar ${grammarGroupId} ${direction} reset completed: ${resetCount} items reset.`,
+        );
+        showToast(TEXTS.resetProgressSuccessToast, 'success');
+      } catch (err) {
+        showToast(TEXTS.resetProgressErrorToast, 'error');
+        reportError('Failed to reset grammar progress', err);
+      }
+    },
+    [showToast, userId],
+  );
 
   // -- List view --
   if (currentItem === null) {
     return (
-      <OverviewCard
-        buttonTitle={TEXTS.grammarOverview}
-        loading={loading}
-        onClose={closeRoute}
-      >
+      <OverviewCard buttonTitle={TEXTS.grammarOverview} loading={loading} onClose={closeRoute}>
         <DataState loading={loading} hasData={hasData} noDataMessage={TEXTS.noGrammar}>
           <div className="flex flex-col gap-1 pt-1">
             {grammarList.map((topic) => {
