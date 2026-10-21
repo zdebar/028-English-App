@@ -8,7 +8,6 @@ import { useAudioManager } from '@/features/audio/use-audio-manager';
 import VolumeSlider from '@/features/audio/VolumeSlider';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import HelpButton from '@/features/help/HelpButton';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -98,6 +97,21 @@ function RelatedPronunciationSounds({
   );
 }
 
+function PronunciationDetailControls({
+  items,
+}: Readonly<{ items: PronunciationGroupDetailType['items'] }>) {
+  if (items.length === 0) return null;
+  const hasAudio = items.some((item) => Boolean(item.audio?.trim()));
+
+  return (
+    <div className="secondary-controls-after-list">
+      <div className="pos-bottom-left-control">
+        <VolumeSlider disabled={!hasAudio} />
+      </div>
+    </div>
+  );
+}
+
 function redirectToPronunciationGroups(navigate: ReturnType<typeof useNavigate>): void {
   void navigate(ROUTES.pronunciationGroups, { replace: true });
 }
@@ -168,14 +182,7 @@ function PronunciationGroupOverviewCard({
           playAudio={playAudio}
           showToast={showToast}
         />
-        <div className="secondary-controls-after-list">
-          <div className="pos-bottom-left-control">
-            <VolumeSlider />
-          </div>
-          <div className="pos-bottom-right-control">
-            <HelpButton />
-          </div>
-        </div>
+        <PronunciationDetailControls items={data?.items ?? []} />
       </DataState>
     </OverviewCard>
   );
