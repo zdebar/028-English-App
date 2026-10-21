@@ -144,6 +144,7 @@ export default function PronunciationGroupDetail({
       <PronunciationSoundDetailCard
         sounds={pronunciationSounds}
         pronunciationSounds={pronunciationSounds}
+        audio={data?.items.find((item) => item.audio)?.audio}
         index={selectedSoundIndex}
         onIndexChange={setSelectedSoundIndex}
         onClose={() => setPronunciationSounds(null)}

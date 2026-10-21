@@ -49,6 +49,7 @@ export type PracticeSessionCardProps = Readonly<{
   czechHidden?: boolean;
   english: string | undefined;
   pronunciation: string | undefined;
+  audio?: string | null;
   audioDisabled: boolean;
   handleReveal: () => void;
   plusHint: () => void;
@@ -95,6 +96,7 @@ type PracticeDetailProps = Readonly<{
   note: NoteType | null;
   sounds: readonly GroupType[];
   pronunciationSounds: readonly GroupType[];
+  audio: string | null | undefined;
   selectedSoundIndex: number;
   onClose: () => void;
   onSoundIndexChange: (index: number) => void;
@@ -106,6 +108,7 @@ function PracticeDetail({
   note,
   sounds,
   pronunciationSounds,
+  audio,
   selectedSoundIndex,
   onClose,
   onSoundIndexChange,
@@ -126,6 +129,7 @@ function PracticeDetail({
     <PronunciationSoundDetailCard
       sounds={sounds}
       pronunciationSounds={pronunciationSounds}
+      audio={audio}
       index={selectedSoundIndex}
       onIndexChange={onSoundIndexChange}
       onClose={onClose}
@@ -774,6 +778,7 @@ export default function PracticeSessionCard(props: PracticeSessionCardProps) {
         note={normalizedProps.note}
         sounds={pronunciationSounds}
         pronunciationSounds={pronunciationSounds}
+        audio={normalizedProps.audio}
         selectedSoundIndex={selectedSoundIndex}
         onClose={() => setVisibleDetail(null)}
         onSoundIndexChange={setSelectedSoundIndex}

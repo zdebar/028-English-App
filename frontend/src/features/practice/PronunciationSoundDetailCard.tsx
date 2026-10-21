@@ -4,10 +4,24 @@ import StyledButton from '@/components/UI/buttons/StyledButton';
 import ChevronRightIcon from '@/components/UI/icons/ChevronRightIcon';
 import type { GroupType } from '@/types/table.types';
 import { TEXTS } from '@/locales/cs';
+import { useAudioManager } from '@/features/audio/use-audio-manager';
+import PlayButton from '@/features/audio/PlayButton';
+import VolumeSlider from '@/features/audio/VolumeSlider';
+import { useToastStore } from '@/features/toast/use-toast-store';
+
+async function playSoundExample(
+  audio: string | undefined,
+  playAudio: (audio: string) => Promise<boolean>,
+  showToast: (message: string, type: 'error') => void,
+): Promise<void> {
+  if (!audio) return;
+  if (!(await playAudio(audio))) showToast(TEXTS.noAudio, 'error');
+}
 
 type PronunciationSoundDetailCardProps = Readonly<{
   sounds: readonly GroupType[];
   pronunciationSounds?: readonly GroupType[];
+  audio?: string | null;
   index: number;
   onIndexChange: (index: number) => void;
   onClose: () => void;
@@ -16,11 +30,15 @@ type PronunciationSoundDetailCardProps = Readonly<{
 export default function PronunciationSoundDetailCard({
   sounds,
   pronunciationSounds = sounds,
+  audio = null,
   index,
   onIndexChange,
   onClose,
 }: PronunciationSoundDetailCardProps) {
   const sound = sounds[index];
+  const showToast = useToastStore((state) => state.showToast);
+  const { playAudio, isAudioReady, loading: audioLoading, audioError } = useAudioManager(audio);
+  const audioDisabled = !audio || audioLoading || audioError || !isAudioReady(audio);
   if (!sound) return null;
 
   const isFirstSound = index === 0;
@@ -29,7 +47,7 @@ export default function PronunciationSoundDetailCard({
   const highlightedPronunciation = highlightSoundOccurrences(pronunciationSounds, sound);
 
   return (
-    <Card className="card-height min-h-card gap-1">
+    <Card className="card-height gap-1">
       <div className="h-button flex w-full shrink-0 items-center gap-1">
         <StyledButton
           className="h-button preserve-disabled-text-color grow justify-center px-4 text-center"
@@ -42,6 +60,13 @@ export default function PronunciationSoundDetailCard({
       </div>
       <div className="flex min-h-0 grow items-start overflow-auto p-4 text-left">
         {sound.note && <p className="font-normal whitespace-pre-line">{sound.note}</p>}
+      </div>
+      <div className="pos-bottom-left-control">
+        <PlayButton
+          onClick={() => void playSoundExample(audio ?? undefined, playAudio, showToast)}
+          disabled={audioDisabled}
+        />
+        <VolumeSlider />
       </div>
       <div
         data-testid="pronunciation-sound-navigation"

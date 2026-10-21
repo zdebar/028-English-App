@@ -63,6 +63,7 @@ function InitialTrainingContent({
       czechDescription={deck.currentItem.czech_description}
       english={deck.english}
       pronunciation={deck.pronunciation}
+      audio={deck.currentItem.audio}
       audioDisabled={deck.audioDisabled}
       handleReveal={deck.handleReveal}
       plusHint={deck.plusHint}

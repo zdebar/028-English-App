@@ -230,12 +230,14 @@ function VocabularyNoteButton({
 function VocabularyPronunciationDetail({
   sounds,
   fullPronunciationSounds,
+  audio,
   index,
   onIndexChange,
   onClose,
 }: Readonly<{
   sounds: readonly GroupType[];
   fullPronunciationSounds: readonly GroupType[];
+  audio: string | null | undefined;
   index: number;
   onIndexChange: (index: number) => void;
   onClose: () => void;
@@ -244,6 +246,7 @@ function VocabularyPronunciationDetail({
     <PronunciationSoundDetailCard
       sounds={sounds}
       pronunciationSounds={fullPronunciationSounds}
+      audio={audio}
       index={index}
       onIndexChange={onIndexChange}
       onClose={onClose}
@@ -346,6 +349,7 @@ export default function VocabularyDetailCard({
       <VocabularyPronunciationDetail
         sounds={pronunciationSounds}
         fullPronunciationSounds={fullPronunciationSounds}
+        audio={selectedWord?.audio}
         index={pronunciationIndex}
         onIndexChange={setPronunciationIndex}
         onClose={() => setPronunciationIndex(null)}

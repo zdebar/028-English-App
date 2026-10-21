@@ -114,6 +114,7 @@ export default function PracticeCard({ initialData }: PracticeCardProps) {
       czechHidden={currentItem.review_direction === 'en_to_cz' && !revealed}
       english={english}
       pronunciation={pronunciation}
+      audio={currentItem.audio}
       audioDisabled={audioDisabled}
       handleReveal={handleReveal}
       plusHint={plusHint}
