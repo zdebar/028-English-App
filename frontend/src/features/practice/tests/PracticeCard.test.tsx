@@ -34,8 +34,6 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     lesson_id: 1,
     updated_at: '2024-01-01T00:00:00.000Z',
     is_vocabulary: 1,
-    topic_id: -1,
-    grammar_chunk_id: 10,
     started_at: '2024-01-01T00:00:00.000Z',
     deleted_at: '9999-12-31T00:00:00.000Z',
     next_at_cz_to_en: '2024-01-01T00:00:00.000Z',
@@ -163,7 +161,7 @@ vi.mock('@/features/grammar/use-grammar-viewer', () => ({
 }));
 
 vi.mock('@/features/grammar/GrammarDetailCard', () => ({
-  default: ({ grammar, onClose, showHelpButton }: any) => (
+  default: ({ grammar, onClose, showHelpButton = false }: any) => (
     <div data-testid="grammar-detail" data-help-enabled={String(showHelpButton)}>
       {grammar?.name}
       <button type="button" onClick={onClose}>
@@ -362,7 +360,6 @@ describe('PracticeCard', () => {
       english: 'hello',
       pronunciation: 'həˈloʊ',
       audio: 'hello.opus',
-      grammar_chunk_id: 10,
       progress: 2,
     });
     mocks.practiceDeck.note = null;

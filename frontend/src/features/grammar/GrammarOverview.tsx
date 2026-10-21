@@ -147,7 +147,6 @@ export default function GrammarOverview({
       grammar={currentItem}
       onClose={() => setSelection(null)}
       onReset={handleReset}
-      showHelpButton
     />
   );
 }

@@ -1,6 +1,4 @@
 import OverviewCard from '@/components/UI/OverviewCard';
-import HelpButton from '@/features/help/HelpButton';
-import HelpText from '@/features/help/HelpText';
 import { TEXTS } from '@/locales/cs';
 import DOMPurify from 'dompurify';
 import type { UserItemLocal } from '@/types/user-item.types';
@@ -33,8 +31,6 @@ type GrammarDetailCardProps = Readonly<{
   grammar?: GrammarDetail | null;
   onClose: () => void;
   onReset?: (grammarGroupId: number, direction: ReviewDirection) => Promise<void>;
-  /** Whether to render the bottom-right contextual help control. */
-  showHelpButton?: boolean;
 }>;
 
 function getGrammarChunks(
@@ -135,18 +131,12 @@ function GrammarContent({
 
 function GrammarBottomControls({
   hasItems,
-  showHelpButton,
-}: Readonly<{ hasItems: boolean; showHelpButton: boolean }>) {
+}: Readonly<{ hasItems: boolean }>) {
   return (
     <>
       {hasItems && (
         <div className="pos-bottom-left-control">
           <VolumeSlider />
-        </div>
-      )}
-      {showHelpButton && (
-        <div className="pos-bottom-right-control">
-          <HelpButton />
         </div>
       )}
     </>
@@ -177,18 +167,14 @@ function GrammarDirectionResetButtons({
   return (
     <div className="mt-1 flex flex-col gap-1">
       {directions.map((direction) => (
-        <div key={direction} className="relative">
-          <HelpText className="-top-5 left-0 whitespace-nowrap">{TEXTS.restartProgress}</HelpText>
+        <div key={direction}>
           <ButtonWithModal
             className="h-input w-full justify-center font-bold"
             modalTitle={TEXTS.restartGrammarDirectionTitle}
             modalText={TEXTS.restartDirectionProgressDescription}
-            title={TEXTS.restartProgress}
             onConfirm={() => onReset(direction)}
           >
-            {lowercaseInitial(
-              direction === 'cz_to_en' ? TEXTS.directionCzToEn : TEXTS.directionEnToCz,
-            )}
+            {direction === 'cz_to_en' ? TEXTS.restartProgressCzToEn : TEXTS.restartProgressEnToCz}
           </ButtonWithModal>
         </div>
       ))}
@@ -196,15 +182,10 @@ function GrammarDirectionResetButtons({
   );
 }
 
-function lowercaseInitial(value: string): string {
-  return value.charAt(0).toLocaleLowerCase('cs-CZ') + value.slice(1);
-}
-
 export default function GrammarDetailCard({
   grammar,
   onClose,
   onReset,
-  showHelpButton = false,
 }: GrammarDetailCardProps) {
   const showToast = useToastStore((state) => state.showToast);
   const chunks = useMemo(() => getGrammarChunks(grammar), [grammar]);
@@ -216,7 +197,7 @@ export default function GrammarDetailCard({
   const { playAudio, isAudioReady, loading: audioLoading } = useAudioManager(audios);
 
   const hasContent = hasGrammarContent(grammar, chunks);
-  const hasBottomControls = items.length > 0 || showHelpButton;
+  const hasBottomControls = items.length > 0;
 
   return (
     <OverviewCard
@@ -231,7 +212,7 @@ export default function GrammarDetailCard({
         onReset={onReset}
       />
       {!hasContent && TEXTS.noNotesToDisplay}
-      <GrammarBottomControls hasItems={items.length > 0} showHelpButton={showHelpButton} />
+      <GrammarBottomControls hasItems={items.length > 0} />
     </OverviewCard>
   );
 }

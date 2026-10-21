@@ -51,22 +51,24 @@ export default function Home(): JSX.Element {
     <>
       {userId ? (
         <div className="card-width relative flex h-full w-full grow flex-col justify-start gap-1">
-          <div className="landscape:mt-4">
-            <HomeActionLinks />
-          </div>
-          <p className={`text-error-light dark:text-error-dark px-4 text-center text-sm`}>
-            Aplikace v testovacím režimu! V tuto chvíli Vaše tréninková data nebudou zachována.
-          </p>
-          {isAnonymousUser && (
-            <div className="flex flex-col gap-1">
-              <ConvertAnonymousUserButton />
-              <SimulateDataButton />
+          <div className="flex flex-col gap-0">
+            <div className="landscape:mt-4">
+              <HomeActionLinks />
             </div>
-          )}
-          <Link to={ROUTES.practiceOverview} className={HOME_TEXT_ACTION_CLASS_NAME}>
-            {TEXTS.practiceOverviewTitle}
-          </Link>
-          <div className="flex w-full flex-col gap-1">
+            <p className={`text-error-light dark:text-error-dark px-4 text-center text-sm`}>
+              Aplikace v testovacím režimu! V tuto chvíli Vaše tréninková data nebudou zachována.
+            </p>
+            {isAnonymousUser && (
+              <div className="flex flex-col gap-1">
+                <ConvertAnonymousUserButton />
+                <SimulateDataButton />
+              </div>
+            )}
+            <Link to={ROUTES.practiceOverview} className={HOME_TEXT_ACTION_CLASS_NAME}>
+              {TEXTS.practiceOverviewTitle}
+            </Link>
+          </div>
+          <div className="my-4 flex w-full flex-col">
             <PracticeButton />
           </div>
           <div className="relative">

@@ -118,7 +118,6 @@ function PracticeDetail({
       <GrammarDetailCard
         grammar={grammar ? { ...grammar, kind: 'chunk' } : null}
         onClose={onClose}
-        showHelpButton={false}
       />
     );
   }

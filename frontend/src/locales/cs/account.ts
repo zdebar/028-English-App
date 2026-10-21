@@ -23,5 +23,7 @@ export const ACCOUNT_TEXTS = {
   // Generic Restart Progress
   restartProgress: 'restartovat pokrok',
   restartProgressHelp: 'restartovat pokrok',
+  restartProgressCzToEn: 'reset postupu cz to en',
+  restartProgressEnToCz: 'reset postupu en to cz',
   restartDescription: 'Opravdu chcete restartovat pokrok? Tuto akci již nelze vrátit zpět.',
 } as const;

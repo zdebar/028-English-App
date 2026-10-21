@@ -25,13 +25,11 @@ vi.mock('@/locales/cs', () => ({
     restartGrammarDirectionTitle: 'Restart grammar direction',
     restartDirectionProgressDescription: 'Reset only this direction?',
     restartProgressHelp: 'Restart progress',
+    restartProgressCzToEn: 'reset postupu cz to en',
+    restartProgressEnToCz: 'reset postupu en to cz',
     directionCzToEn: 'Czech to English',
     directionEnToCz: 'English to Czech',
   },
-}));
-
-vi.mock('@/features/help/HelpButton', () => ({
-  default: () => <div data-testid="help" />,
 }));
 
 vi.mock('@/features/audio/VolumeSlider', () => ({
@@ -84,8 +82,6 @@ const exampleItem: UserItemLocal = {
   lesson_id: 1,
   updated_at: '2026-08-02T00:00:00.000Z',
   is_vocabulary: 0,
-  topic_id: -1,
-  grammar_chunk_id: 1,
   started_at: '2026-08-02T00:00:00.000Z',
   deleted_at: '',
   next_at_cz_to_en: '',
@@ -137,10 +133,12 @@ describe('GrammarDetailCard', () => {
     );
 
     expect((screen.getByTestId('header-reset') as HTMLButtonElement).disabled).toBe(true);
-    const resetCzToEn = screen.getByRole('button', { name: 'czech to English' });
+    const resetCzToEn = screen.getByRole('button', { name: 'reset postupu cz to en' });
     expect(resetCzToEn.className).toContain('h-input');
     expect(resetCzToEn.className).toContain('w-full');
-    expect(screen.queryByRole('button', { name: 'english to Czech' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'reset postupu en to cz' })).toBeNull();
+    expect(screen.queryByText('Restart progress')).toBeNull();
+    expect(screen.queryByTestId('help')).toBeNull();
 
     fireEvent.click(resetCzToEn);
     expect(onReset).toHaveBeenCalledWith(1, 'cz_to_en');
@@ -156,7 +154,6 @@ describe('GrammarDetailCard', () => {
           items: [exampleItem],
         }}
         onClose={vi.fn()}
-        showHelpButton
       />,
     );
 
