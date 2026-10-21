@@ -20,6 +20,7 @@ async function playSoundExample(
 
 type PronunciationSoundDetailCardProps = Readonly<{
   sounds: readonly GroupType[];
+  pronunciationSounds: readonly GroupType[];
   audio?: string | null;
   index: number;
   onIndexChange: (index: number) => void;
@@ -28,6 +29,7 @@ type PronunciationSoundDetailCardProps = Readonly<{
 
 export default function PronunciationSoundDetailCard({
   sounds,
+  pronunciationSounds,
   audio = null,
   index,
   onIndexChange,
@@ -41,6 +43,8 @@ export default function PronunciationSoundDetailCard({
 
   const isFirstSound = index === 0;
   const isLastSound = index === sounds.length - 1;
+  const highlightedPronunciation = highlightSoundOccurrences(pronunciationSounds, sound);
+  const pronunciationText = pronunciationSounds.map((item) => item.name).join('');
   return (
     <Card className="card-height gap-1">
       <div className="h-button flex w-full shrink-0 items-center gap-1">
@@ -77,6 +81,21 @@ export default function PronunciationSoundDetailCard({
           <ChevronRightIcon className="rotate-180" />
         </StyledButton>
         <StyledButton
+          className="h-button preserve-disabled-text-color min-h-button min-w-0 grow justify-center gap-0 px-2"
+          aria-label={pronunciationText}
+          aria-live="polite"
+          disabled
+        >
+          {highlightedPronunciation.map((segment, segmentIndex) => (
+            <span
+              key={`${segment.name}-${segmentIndex}`}
+              className={segment.isHighlighted ? 'text-blue-600 dark:text-blue-400' : undefined}
+            >
+              {segment.name}
+            </span>
+          ))}
+        </StyledButton>
+        <StyledButton
           className="h-button min-h-button w-button min-w-0 shrink-0 grow-0 p-0"
           title={TEXTS.nextSound}
           aria-label={TEXTS.nextSound}
@@ -88,4 +107,16 @@ export default function PronunciationSoundDetailCard({
       </div>
     </Card>
   );
+}
+
+type PronunciationSegment = Readonly<{ name: string; isHighlighted: boolean }>;
+
+function highlightSoundOccurrences(
+  pronunciationSounds: readonly GroupType[],
+  highlightedSound: GroupType,
+): readonly PronunciationSegment[] {
+  return pronunciationSounds.map((sound) => ({
+    name: sound.name,
+    isHighlighted: sound.id === highlightedSound.id,
+  }));
 }

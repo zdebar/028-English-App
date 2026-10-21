@@ -2,12 +2,8 @@ import { sharedQueryKey } from '@/hooks/shared-query-store';
 import { DataState } from '@/components/UI/DataState';
 import OverviewCard from '@/components/UI/OverviewCard';
 import BilingualItemButton from '@/components/UI/buttons/BilingualItemButton';
-import SecondaryControlButton from '@/components/UI/buttons/SecondaryControlButton';
-import PronunciationIcon from '@/components/UI/icons/PronunciationIcon';
 import { ROUTES } from '@/config/routes.config';
-import Groups from '@/database/models/groups';
 import PronunciationGroup from '@/database/models/pronunciation-groups';
-import PronunciationSoundDetailCard from '@/features/practice/PronunciationSoundDetailCard';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
 import VolumeSlider from '@/features/audio/VolumeSlider';
 import { reportError } from '@/features/logging/monitoring-handler';
@@ -17,8 +13,7 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { TEXTS } from '@/locales/cs';
-import type { GroupType } from '@/types/table.types';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { PronunciationGroupDetailType } from '@/types/pronunciation.types';
 import { useRouteClose } from '@/routing/use-route-close';
@@ -38,16 +33,6 @@ function getPronunciationAudios(data: PronunciationGroupDetailType | null): stri
   return (
     data?.items.map((item) => item.audio).filter((audio): audio is string => Boolean(audio)) ?? []
   );
-}
-
-function getRelatedSounds(
-  sounds: PronunciationGroupDetailType['sounds'],
-  allSounds: GroupType[],
-): GroupType[] {
-  return sounds.flatMap((sound) => {
-    const matchingSound = allSounds.find((candidate) => candidate.id === sound.id);
-    return matchingSound ? [matchingSound] : [];
-  });
 }
 
 function PronunciationGroupNote({ note }: Readonly<{ note: string | null | undefined }>) {
@@ -152,8 +137,6 @@ function PronunciationGroupOverviewCard({
   isAudioReady,
   playAudio,
   showToast,
-  relatedSounds,
-  onOpenPronunciation,
 }: Readonly<{
   data: PronunciationGroupDetailType | null;
   loading: boolean;
@@ -162,8 +145,6 @@ function PronunciationGroupOverviewCard({
   isAudioReady: (audio: string) => boolean;
   playAudio: (audio: string) => Promise<boolean>;
   showToast: (message: string, type: 'error') => void;
-  relatedSounds: readonly GroupType[];
-  onOpenPronunciation: () => void;
 }>) {
   return (
     <OverviewCard
@@ -190,14 +171,6 @@ function PronunciationGroupOverviewCard({
         <div className="secondary-controls-after-list">
           <div className="pos-bottom-left-control">
             <VolumeSlider />
-            <SecondaryControlButton
-              title={TEXTS.pronunciationGuide}
-              ariaLabel={TEXTS.pronunciationGuide}
-              disabled={relatedSounds.length === 0}
-              onClick={onOpenPronunciation}
-            >
-              <PronunciationIcon />
-            </SecondaryControlButton>
           </div>
           <div className="pos-bottom-right-control">
             <HelpButton />
@@ -217,9 +190,6 @@ export default function PronunciationGroupDetail({
   const closeRoute = useRouteClose(ROUTES.pronunciationGroups);
   const { groupId: groupIdText } = useParams<{ groupId: string }>();
   const validGroupId = parseGroupId(groupIdText);
-  const [pronunciationSounds, setPronunciationSounds] = useState<readonly GroupType[] | null>(null);
-  const [selectedSoundIndex, setSelectedSoundIndex] = useState(0);
-  const allSounds = useLiveQuery(() => Groups.getSounds(), [], []) ?? [];
   const fetchDetail = useCallback(
     () => fetchGroupDetail(userId, validGroupId),
     [userId, validGroupId],
@@ -231,24 +201,11 @@ export default function PronunciationGroupDetail({
   });
   const audios = useMemo(() => getPronunciationAudios(data), [data]);
   const { playAudio, isAudioReady, loading: audioLoading } = useAudioManager(audios);
-  const relatedSounds = getRelatedSounds(data?.sounds ?? [], allSounds);
   usePronunciationGroupNavigation(validGroupId, loading, userId, data, navigate);
 
   useEffect(() => {
     showPronunciationGroupError(error, showToast);
   }, [error, showToast]);
-
-  if (pronunciationSounds) {
-    return (
-      <PronunciationSoundDetailCard
-        sounds={pronunciationSounds}
-        audio={getPronunciationAudios(data)[0]}
-        index={selectedSoundIndex}
-        onIndexChange={setSelectedSoundIndex}
-        onClose={() => setPronunciationSounds(null)}
-      />
-    );
-  }
 
   return (
     <PronunciationGroupOverviewCard
@@ -259,11 +216,6 @@ export default function PronunciationGroupDetail({
       isAudioReady={isAudioReady}
       playAudio={playAudio}
       showToast={showToast}
-      relatedSounds={relatedSounds}
-      onOpenPronunciation={() => {
-        setPronunciationSounds(relatedSounds);
-        setSelectedSoundIndex(0);
-      }}
     />
   );
 }
