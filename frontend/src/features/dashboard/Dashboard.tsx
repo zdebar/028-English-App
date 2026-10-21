@@ -33,38 +33,42 @@ export default function Dashboard({ className = '' }: DashboardProps) {
 
   return (
     <section
-      className={`min-w-card relative mx-auto flex w-full flex-col gap-0.5 ${className}`}
+      className={`min-w-card relative mx-auto flex w-full flex-row gap-0.5 ${className}`}
       aria-label={TEXTS.lessonOverview}
     >
       <HelpText className="-top-7 right-0">{TEXTS.lessonOverview}</HelpText>
       {levels
         .filter((level) => level.lessons.length > 0)
         .map((level) => (
-          <div key={level.id} className="grid grid-cols-[3rem_minmax(0,1fr)] items-start gap-0.5">
-            <div className="flex h-7 items-center justify-center border border-dashed border-disabled-light px-1 font-bold text-light dark:border-disabled-dark dark:text-dark">
-              {level.name}
-            </div>
-            <ul
-              aria-label={level.name}
-              className="m-0 grid w-full list-none grid-cols-[repeat(auto-fill,minmax(0.8rem,1fr))] items-start gap-0.5 p-0"
-            >
+          <div
+            key={level.id}
+            className="relative flex h-8 min-w-8 border border-disabled-light border-dashed dark:border-disabled-dark"
+            style={{ flexGrow: level.lessons.length, flexBasis: 0 }}
+            title={`${level.name}: ${level.lessons.length}`}
+          >
+            <ul aria-label={level.name} className="m-0 flex w-full list-none p-0">
               {level.lessons.map((lesson) => {
                 const stateLabel = lesson.isStarted ? TEXTS.lessonStarted : TEXTS.lessonNotStarted;
                 const label = `${level.name}, ${TEXTS.lessonOrder} ${lesson.sort_order}, ${lesson.name}: ${stateLabel}`;
-                const stateClass = lesson.isStarted
-                  ? 'border-light dark:border-dark border-solid'
-                  : 'border-disabled-light dark:border-disabled-dark border-dashed';
+                const fillClass = lesson.isStarted
+                  ? 'bg-old-progress-light dark:bg-old-progress-dark'
+                  : 'bg-transparent';
                 return (
                   <li
                     key={lesson.id}
                     title={label}
-                    className={`mb-0 h-7 w-full border bg-inherit ${stateClass}`}
+                    className={`mb-0 h-full min-w-0 flex-1 ${fillClass}`}
                   >
                     <span className="sr-only">{label}</span>
                   </li>
                 );
               })}
             </ul>
+            <span className="absolute inset-0 flex items-center justify-center font-bold">
+              <span className="bg-background-light/90 px-1 dark:bg-background-dark/90">
+                {level.name}
+              </span>
+            </span>
           </div>
         ))}
     </section>
