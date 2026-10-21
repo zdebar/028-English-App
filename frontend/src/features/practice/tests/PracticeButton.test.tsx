@@ -18,6 +18,7 @@ vi.mock('@/features/help/HelpText', () => ({
 }));
 
 import ControlButton from '@/features/practice/buttons/ControlButton';
+import RepeatButton from '@/features/practice/buttons/RepeatButton';
 
 describe('PracticeButton', () => {
   it('passes disabled state to StyledButton', () => {
@@ -41,5 +42,11 @@ describe('PracticeButton', () => {
 
     fireEvent.click(screen.getByTestId('styled-button'));
     expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('places the repeat help text below the button', () => {
+    render(<RepeatButton onClick={vi.fn()} disabled={false} />);
+
+    expect(screen.getByTestId('help-text').dataset.classname).toBe('pos-help-bottom-left');
   });
 });
