@@ -252,11 +252,7 @@ function VocabularyPronunciationDetail({
 }
 
 function VocabularyDetailContent({
-  pronunciationIndex,
   pronunciationSounds,
-  fullPronunciationSounds,
-  onPronunciationIndexChange,
-  onClosePronunciation,
   isNoteVisible,
   noteData,
   onCloseNote,
@@ -271,11 +267,7 @@ function VocabularyDetailContent({
   noteId,
   openNote,
 }: Readonly<{
-  pronunciationIndex: number | null;
   pronunciationSounds: readonly GroupType[];
-  fullPronunciationSounds: readonly GroupType[];
-  onPronunciationIndexChange: (index: number) => void;
-  onClosePronunciation: () => void;
   isNoteVisible: boolean;
   noteData: ReturnType<typeof useNoteViewer>['noteData'];
   onCloseNote: () => void;
@@ -290,18 +282,6 @@ function VocabularyDetailContent({
   noteId: number | null | undefined;
   openNote: (noteId: number) => void;
 }>) {
-  if (pronunciationIndex !== null) {
-    return (
-      <VocabularyPronunciationDetail
-        sounds={pronunciationSounds}
-        fullPronunciationSounds={fullPronunciationSounds}
-        index={pronunciationIndex}
-        onIndexChange={onPronunciationIndexChange}
-        onClose={onClosePronunciation}
-      />
-    );
-  }
-
   if (isNoteVisible) return <NoteDetailCard note={noteData} onClose={onCloseNote} />;
 
   return (
@@ -361,6 +341,18 @@ export default function VocabularyDetailCard({
 
   const noteId = selectedWord?.note_id;
 
+  if (pronunciationIndex !== null) {
+    return (
+      <VocabularyPronunciationDetail
+        sounds={pronunciationSounds}
+        fullPronunciationSounds={fullPronunciationSounds}
+        index={pronunciationIndex}
+        onIndexChange={setPronunciationIndex}
+        onClose={() => setPronunciationIndex(null)}
+      />
+    );
+  }
+
   return (
     <OverviewCard
       buttonTitle={selectedWord?.english ?? ''}
@@ -368,11 +360,7 @@ export default function VocabularyDetailCard({
       className="bottom-controls-clearance relative"
     >
       <VocabularyDetailContent
-        pronunciationIndex={pronunciationIndex}
         pronunciationSounds={pronunciationSounds}
-        fullPronunciationSounds={fullPronunciationSounds}
-        onPronunciationIndexChange={setPronunciationIndex}
-        onClosePronunciation={() => setPronunciationIndex(null)}
         isNoteVisible={isNoteVisible}
         noteData={noteData}
         onCloseNote={closeNote}
