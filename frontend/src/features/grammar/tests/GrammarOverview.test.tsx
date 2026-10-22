@@ -67,8 +67,11 @@ vi.mock('@/database/models/user-items', () => ({
 }));
 
 vi.mock('@/features/toast/use-toast-store', () => ({
-  useToastStore: (selector: (state: { showToast: typeof mocks.showToast }) => unknown) =>
-    selector({ showToast: mocks.showToast }),
+  useToastStore: Object.assign(
+    (selector: (state: { showToast: typeof mocks.showToast }) => unknown) =>
+      selector({ showToast: mocks.showToast }),
+    { getState: () => ({ showToast: mocks.showToast }) },
+  ),
 }));
 
 vi.mock('@/features/logging/monitoring-handler', () => ({

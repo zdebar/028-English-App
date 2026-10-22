@@ -198,7 +198,7 @@ describe('VocabularyDetailCard', () => {
     expect(screen.getByText('progress:2 / 9')).toBeTruthy();
   });
 
-  it('shows the Czech description below Czech, using a fallback when missing', () => {
+  it('shows the Czech description below Czech and leaves it blank when missing', () => {
     const { rerender } = render(
       <VocabularyDetailCard
         selectedWord={{ item_id: 1, czech: 'ahoj', czech_description: 'Greeting' } as any}
@@ -217,7 +217,7 @@ describe('VocabularyDetailCard', () => {
       />,
     );
 
-    expect(screen.getByText('czech description:no description')).toBeTruthy();
+    expect(screen.getByText('czech description:')).toBeTruthy();
   });
 
   it('disables play and volume buttons when audio is not ready', () => {
