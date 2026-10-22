@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
+  nullDate: '9999-12-31',
   groups: [] as any[],
   memberships: [] as any[],
   userItems: [] as any[],
@@ -8,7 +9,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@/config/config', () => ({
-  default: { database: { nullReplacementDate: '9999-12-31' } },
+  default: { database: { nullReplacementDate: mocks.nullDate } },
 }));
 
 vi.mock('@/database/models/db', () => ({
@@ -22,25 +23,29 @@ vi.mock('@/database/models/db', () => ({
 
 import Groups from '@/database/models/groups';
 
+function setBaseFixtures(type: 'topic' | 'sound' = 'topic'): void {
+  mocks.groups = [
+    { id: 1, type, name: 'Started item', sort_order: 1, updated_at: '', deleted_at: null },
+    { id: 2, type, name: 'Uninitiated item', sort_order: 2, updated_at: '', deleted_at: null },
+    { id: 3, type, name: 'Unstarted lesson', sort_order: 3, updated_at: '', deleted_at: null },
+  ];
+  mocks.memberships = [
+    { id: 1, group_id: 1, item_id: 10, sort_order: 1, deleted_at: null },
+    { id: 2, group_id: 2, item_id: 20, sort_order: 1, deleted_at: null },
+    { id: 3, group_id: 3, item_id: 30, sort_order: 1, deleted_at: null },
+  ];
+  mocks.userItems = [
+    { item_id: 10, lesson_id: 100, started_at: '2026-01-01', deleted_at: mocks.nullDate },
+    { item_id: 20, lesson_id: 200, started_at: mocks.nullDate, deleted_at: mocks.nullDate },
+    { item_id: 30, lesson_id: 300, started_at: '2026-01-01', deleted_at: mocks.nullDate },
+  ];
+  mocks.userLessons = [{ lesson_id: 100, started_at: '2026-01-01' }];
+}
+
 describe('Groups.getStartedByUser', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.groups = [
-      { id: 1, type: 'topic', name: 'Visible', sort_order: 1, updated_at: '', deleted_at: null },
-      { id: 2, type: 'topic', name: 'Locked', sort_order: 2, updated_at: '', deleted_at: null },
-      { id: 3, type: 'topic', name: 'Unstarted lesson', sort_order: 3, updated_at: '', deleted_at: null },
-    ];
-    mocks.memberships = [
-      { id: 1, group_id: 1, item_id: 10, sort_order: 1, deleted_at: null },
-      { id: 2, group_id: 2, item_id: 20, sort_order: 1, deleted_at: null },
-      { id: 3, group_id: 3, item_id: 30, sort_order: 1, deleted_at: null },
-    ];
-    mocks.userItems = [
-      { item_id: 10, lesson_id: 100, started_at: '2026-01-01', deleted_at: '9999-12-31' },
-      { item_id: 20, lesson_id: 200, started_at: '9999-12-31', deleted_at: '9999-12-31' },
-      { item_id: 30, lesson_id: 300, started_at: '2026-01-01', deleted_at: '9999-12-31' },
-    ];
-    mocks.userLessons = [{ lesson_id: 100, started_at: '2026-01-01' }];
+    setBaseFixtures();
   });
 
   it('requires both an initiated example and a started lesson', async () => {
@@ -68,21 +73,7 @@ describe('Groups.getStartedByUser', () => {
 
 describe('Groups.getByTypeWithStartedLessons', () => {
   beforeEach(() => {
-    mocks.groups = [
-      { id: 1, type: 'sound', name: 'Initiated item', sort_order: 1, updated_at: '', deleted_at: null },
-      { id: 2, type: 'sound', name: 'Uninitiated item in started lesson', sort_order: 2, updated_at: '', deleted_at: null },
-      { id: 3, type: 'sound', name: 'Unstarted lesson', sort_order: 3, updated_at: '', deleted_at: null },
-    ];
-    mocks.memberships = [
-      { id: 1, group_id: 1, item_id: 10, sort_order: 1, deleted_at: null },
-      { id: 2, group_id: 2, item_id: 20, sort_order: 1, deleted_at: null },
-      { id: 3, group_id: 3, item_id: 30, sort_order: 1, deleted_at: null },
-    ];
-    mocks.userItems = [
-      { item_id: 10, lesson_id: 100, started_at: '2026-01-01', deleted_at: '9999-12-31' },
-      { item_id: 20, lesson_id: 200, started_at: '9999-12-31', deleted_at: '9999-12-31' },
-      { item_id: 30, lesson_id: 300, started_at: '2026-01-01', deleted_at: '9999-12-31' },
-    ];
+    setBaseFixtures('sound');
     mocks.userLessons = [
       { lesson_id: 100, started_at: '2026-01-01' },
       { lesson_id: 200, started_at: '2026-01-01' },
