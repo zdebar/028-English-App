@@ -46,6 +46,6 @@ function isAudioDisabled(
   isAudioReady: (audio: string) => boolean,
 ): boolean {
   if (!audio?.trim()) return true;
-  return audioLoading || !isAudioReady(audio);
+  return !audioLoading && !isAudioReady(audio);
 }
 

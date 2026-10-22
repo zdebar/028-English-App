@@ -30,7 +30,7 @@ export default function PronunciationSoundDetailCard({
   const sound = sounds[index];
   const showToast = useToastStore((state) => state.showToast);
   const { playAudio, isAudioReady, loading: audioLoading, audioError } = useAudioManager(audio);
-  const audioDisabled = !audio || audioLoading || audioError || !isAudioReady(audio);
+  const audioDisabled = !audio || audioError || (!audioLoading && !isAudioReady(audio));
   if (!sound) return null;
 
   const isFirstSound = index === 0;

@@ -387,14 +387,12 @@ function getPracticeCardDisplayState(
     noteLoadFailed = false,
     revealed,
     audioDisabled,
-    audioLoading,
   } = props;
   const controlsLocked = false;
   const showAudioControls = !audioDisabled;
   const audioControlsDisabled = isAudioControlDisabled(
     controlsLocked,
     showAudioControls,
-    audioLoading,
   );
   const showGrammarButton = hasGrammarReference(revealed, grammar, grammarAvailable);
   const showNoteButton = hasNoteReference(revealed, note, noteAvailable);
@@ -466,9 +464,8 @@ function hasNoteDetails(note: NoteType | null): boolean {
 function isAudioControlDisabled(
   celebrationLocked: boolean,
   showAudioControls: boolean,
-  audioLoading: boolean,
 ): boolean {
-  return celebrationLocked || !showAudioControls || audioLoading;
+  return celebrationLocked || !showAudioControls;
 }
 
 function getPracticeControlColumns(

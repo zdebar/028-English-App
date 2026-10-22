@@ -104,7 +104,7 @@ function isVocabularyAudioDisabled(
   isAudioReady: (audio: string) => boolean,
 ): boolean {
   if (!selectedWord?.audio?.trim()) return true;
-  return audioLoading || audioError || !isAudioReady(selectedWord.audio);
+  return audioError || (!audioLoading && !isAudioReady(selectedWord.audio));
 }
 
 async function playVocabularyAudio(
