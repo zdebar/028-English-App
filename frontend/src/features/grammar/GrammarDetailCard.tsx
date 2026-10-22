@@ -76,19 +76,21 @@ function GrammarContent({
   return (
     <>
       <GrammarNote note={grammar.note} />
-      {grammar.chunks.map((chunk) => (
-        <section key={chunk.id} className="mb-12 flex flex-col gap-1">
-          <h2 className="border-disabled-light text-light dark:border-disabled-dark dark:text-dark mt-1 mb-0 border border-dashed px-4 py-2 text-left">
-            {chunk.name}
-          </h2>
-          <GrammarDirectionResetButtons
-            items={chunk.items ?? []}
-            onReset={onReset ? (direction) => onReset(chunk.id, direction) : undefined}
-          />
-          <GrammarNote note={chunk.note} />
-          <AudioItemList items={chunk.items ?? []} {...itemsProps} />
-        </section>
-      ))}
+      <div className="flex flex-col gap-4">
+        {grammar.chunks.map((chunk) => (
+          <section key={chunk.id} className="flex flex-col gap-1">
+            <h2 className="border-disabled-light text-light dark:border-disabled-dark dark:text-dark mt-1 mb-0 border border-dashed px-4 py-2 text-left">
+              {chunk.name}
+            </h2>
+            <GrammarDirectionResetButtons
+              items={chunk.items ?? []}
+              onReset={onReset ? (direction) => onReset(chunk.id, direction) : undefined}
+            />
+            <GrammarNote note={chunk.note} />
+            <AudioItemList items={chunk.items ?? []} {...itemsProps} />
+          </section>
+        ))}
+      </div>
     </>
   );
 }

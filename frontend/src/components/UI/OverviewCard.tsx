@@ -12,7 +12,6 @@ const DEFAULT_OVERVIEW_CARD_PROPS = {
   helpText: TEXTS.restartProgressHelp,
   loading: false,
   showResetAction: true,
-  titleAlignment: 'left',
   className: '',
 } as const;
 
@@ -76,7 +75,7 @@ export default function OverviewCard(props: OverviewCardProps): JSX.Element {
     className,
     children,
     showResetAction,
-    titleAlignment,
+    titleAlignment = 'left',
   } = { ...DEFAULT_OVERVIEW_CARD_PROPS, ...props };
   const isDisabled = !handleReset || loading;
   return (

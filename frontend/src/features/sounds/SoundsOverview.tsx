@@ -34,7 +34,6 @@ export default function SoundsOverview({
       buttonTitle={TEXTS.soundsOverview}
       onClose={closeRoute}
       showResetAction={false}
-      titleAlignment="center"
     >
       <DataState loading={loading} hasData={sounds.length > 0} noDataMessage={TEXTS.noSounds}>
         <StackedList>
