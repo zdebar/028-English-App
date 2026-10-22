@@ -115,8 +115,10 @@ function GrammarContent({
     <>
       <GrammarNote note={grammar.note} />
       {grammar.chunks.map((chunk) => (
-        <section key={chunk.id} className="flex flex-col gap-1">
-          <h2 className="m-4 mt-5 text-left text-lg font-bold">{chunk.name}</h2>
+        <section key={chunk.id} className="mb-12 flex flex-col gap-1">
+          <h2 className="border-disabled-light text-light dark:border-disabled-dark dark:text-dark mt-1 mb-0 border border-dashed px-4 py-2 text-left">
+            {chunk.name}
+          </h2>
           <GrammarDirectionResetButtons
             items={chunk.items ?? []}
             onReset={onReset ? (direction) => onReset(chunk.id, direction) : undefined}
@@ -129,9 +131,7 @@ function GrammarContent({
   );
 }
 
-function GrammarBottomControls({
-  hasItems,
-}: Readonly<{ hasItems: boolean }>) {
+function GrammarBottomControls({ hasItems }: Readonly<{ hasItems: boolean }>) {
   return (
     <>
       {hasItems && (
@@ -165,7 +165,7 @@ function GrammarDirectionResetButtons({
   if (directions.length === 0) return null;
 
   return (
-    <div className="mt-1 flex flex-col gap-1">
+    <div className="flex flex-col gap-1">
       {directions.map((direction) => (
         <div key={direction}>
           <ButtonWithModal
