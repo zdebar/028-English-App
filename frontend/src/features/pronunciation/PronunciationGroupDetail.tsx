@@ -1,12 +1,13 @@
 import { sharedQueryKey } from '@/hooks/shared-query-store';
 import { DataState } from '@/components/UI/DataState';
 import OverviewCard from '@/components/UI/OverviewCard';
-import BilingualItemButton from '@/components/UI/buttons/BilingualItemButton';
+import AudioItemList from '@/components/UI/AudioItemList';
 import { ROUTES } from '@/config/routes.config';
 import PronunciationGroup from '@/database/models/pronunciation-groups';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
+import { getItemAudioSources } from '@/features/audio/audio.utils';
 import VolumeSlider from '@/features/audio/VolumeSlider';
-import { reportError } from '@/features/logging/monitoring-handler';
+import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
@@ -27,54 +28,9 @@ function fetchGroupDetail(userId: string | null, groupId: number | null) {
   return PronunciationGroup.getDetail(userId, groupId);
 }
 
-function getPronunciationAudios(data: PronunciationGroupDetailType | null): string[] {
-  return (
-    data?.items.map((item) => item.audio).filter((audio): audio is string => Boolean(audio)) ?? []
-  );
-}
-
 function PronunciationGroupNote({ note }: Readonly<{ note: string | null | undefined }>) {
   if (!note) return null;
   return <p className="p-4 text-left font-normal whitespace-pre-line">{note}</p>;
-}
-
-async function playPronunciationItemAudio(
-  item: PronunciationGroupDetailType['items'][number],
-  playAudio: (audio: string) => Promise<boolean>,
-  showToast: (message: string, type: 'error') => void,
-): Promise<void> {
-  if (!item.audio) return;
-  const didPlay = await playAudio(item.audio);
-  if (!didPlay) showToast(TEXTS.noAudio, 'error');
-}
-
-function PronunciationItems({
-  items,
-  audioLoading,
-  isAudioReady,
-  playAudio,
-  showToast,
-}: Readonly<{
-  items: PronunciationGroupDetailType['items'];
-  audioLoading: boolean;
-  isAudioReady: (audio: string) => boolean;
-  playAudio: (audio: string) => Promise<boolean>;
-  showToast: (message: string, type: 'error') => void;
-}>) {
-  return (
-    <div className="flex flex-col gap-1 pt-1">
-      {items.map((item) => (
-        <BilingualItemButton
-          key={item.item_id}
-          className="min-w-0 grow"
-          item={item}
-          showPronunciation
-          disabled={!item.audio || audioLoading || !isAudioReady(item.audio)}
-          onClick={() => playPronunciationItemAudio(item, playAudio, showToast)}
-        />
-      ))}
-    </div>
-  );
 }
 
 function RelatedPronunciationSounds({
@@ -113,15 +69,6 @@ function PronunciationDetailControls({
 
 function redirectToPronunciationGroups(navigate: ReturnType<typeof useNavigate>): void {
   void navigate(ROUTES.pronunciationGroups, { replace: true });
-}
-
-function showPronunciationGroupError(
-  error: Error | null,
-  showToast: (message: string, type: 'error') => void,
-): void {
-  if (!error) return;
-  showToast(TEXTS.loadingError, 'error');
-  reportError('Failed to fetch pronunciation group detail', error);
 }
 
 function usePronunciationGroupNavigation(
@@ -174,12 +121,14 @@ function PronunciationGroupOverviewCard({
       >
         <PronunciationGroupNote note={data?.group.note} />
         <RelatedPronunciationSounds sounds={data?.sounds ?? []} />
-        <PronunciationItems
+        <AudioItemList
           items={data?.items ?? []}
           audioLoading={audioLoading}
           isAudioReady={isAudioReady}
           playAudio={playAudio}
           showToast={showToast}
+          showPronunciation
+          itemClassName="min-w-0 grow"
         />
         <PronunciationDetailControls items={data?.items ?? []} />
       </DataState>
@@ -205,13 +154,11 @@ export default function PronunciationGroupDetail({
     initialData,
     sharedKey: sharedQueryKey(userId, `pronunciation:${validGroupId}`),
   });
-  const audios = useMemo(() => getPronunciationAudios(data), [data]);
+  const audios = useMemo(() => getItemAudioSources(data?.items ?? []), [data]);
   const { playAudio, isAudioReady, loading: audioLoading } = useAudioManager(audios);
   usePronunciationGroupNavigation(validGroupId, loading, userId, data, navigate);
 
-  useEffect(() => {
-    showPronunciationGroupError(error, showToast);
-  }, [error, showToast]);
+  useQueryErrorToast(error, 'Failed to fetch pronunciation group detail');
 
   return (
     <PronunciationGroupOverviewCard

@@ -8,15 +8,7 @@ import { useAudioManager } from '@/features/audio/use-audio-manager';
 import PlayButton from '@/features/audio/PlayButton';
 import VolumeSlider from '@/features/audio/VolumeSlider';
 import { useToastStore } from '@/features/toast/use-toast-store';
-
-async function playSoundExample(
-  audio: string | undefined,
-  playAudio: (audio: string) => Promise<boolean>,
-  showToast: (message: string, type: 'error') => void,
-): Promise<void> {
-  if (!audio) return;
-  if (!(await playAudio(audio))) showToast(TEXTS.noAudio, 'error');
-}
+import { playAudioWithToast } from '@/features/audio/audio.utils';
 
 type PronunciationSoundDetailCardProps = Readonly<{
   sounds: readonly GroupType[];
@@ -62,7 +54,7 @@ export default function PronunciationSoundDetailCard({
       </div>
       <div className="pos-bottom-left-control">
         <PlayButton
-          onClick={() => void playSoundExample(audio ?? undefined, playAudio, showToast)}
+          onClick={() => void playAudioWithToast(audio, playAudio, showToast)}
           disabled={audioDisabled}
         />
         <VolumeSlider />

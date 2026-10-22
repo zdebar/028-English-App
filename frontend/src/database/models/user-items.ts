@@ -1,6 +1,5 @@
 import config from '@/config/config';
 import Groups from './groups';
-import { supabaseInstance } from '@/config/supabase.config';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import type {
@@ -11,126 +10,30 @@ import type {
   InitialTrainingSelection,
 } from '@/types/user-item.types';
 import type { ReviewDirection, ReviewKind } from '@/types/practice.types';
-import { TableName } from '@/types/table.types';
 import Dexie, { Entity } from 'dexie';
-import { getSyncTimestamps, splitDeleted } from '../utils/sync-generic.utils';
 
-import { getNextAt, resetUserItem } from '@/database/utils/user-items.utils';
-import { isReviewItemCandidate, isReviewItemDue, isReviewItemReadyAt, isReviewItemFuture } from '@/database/utils/review-items.utils';
-import { SupabaseError } from '@/types/error.types';
+import { resetUserItem } from '@/database/utils/user-items.utils';
+import { isReviewItemCandidate, isReviewItemDue } from '@/database/utils/review-items.utils';
+import {
+  applyPracticeProgress as applyUserItemPracticeProgress,
+  compareCurriculumPaths,
+  getDueCount,
+  getEarlierDate,
+  getItemsForBothDirections,
+  getNextReviewAtForItems,
+  getPracticeIndex,
+  getReadyAt,
+  isInitialTrainingSkipped,
+  isReviewDirectionEnabled,
+} from '@/database/utils/user-item-practice.utils';
 import type { ReadyPracticeState } from '@/types/generic.types';
-import Metadata from './metadata';
-import { reportInfo } from '@/features/logging/monitoring-handler';
+import { syncUserItemsFromRemote } from '@/database/utils/sync-user-items';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 import { isInitiated } from '@/utils/progress.utils';
 
 const NULL_DATE = config.database.nullReplacementDate;
 const SIM_LESSON_COUNT = config.progress.simulationLessonCount;
 const SIM_ITEM_PROGRESS = config.progress.simulationItemProgress;
-
-type UserItemAPI = Omit<
-  UserItemLocal,
-  | 'is_vocabulary'
-  | 'started_at'
-  | 'deleted_at'
-  | 'next_at_cz_to_en'
-  | 'mastered_at_cz_to_en'
-  | 'next_at_en_to_cz'
-  | 'mastered_at_en_to_cz'
-  | 'is_cz_to_en_enabled'
-  | 'is_en_to_cz_enabled'
-> & {
-  is_vocabulary: boolean;
-  started_at: string | null;
-  deleted_at: string | null;
-  next_at_cz_to_en: string | null;
-  mastered_at_cz_to_en: string | null;
-  next_at_en_to_cz: string | null;
-  mastered_at_en_to_cz: string | null;
-  is_cz_to_en_enabled: boolean;
-  is_en_to_cz_enabled: boolean;
-};
-
-type UserItemExport = Pick<
-  UserItemAPI,
-  | 'user_id'
-  | 'item_id'
-  | 'progress_cz_to_en'
-  | 'started_at'
-  | 'updated_at'
-  | 'next_at_cz_to_en'
-  | 'mastered_at_cz_to_en'
-  | 'progress_en_to_cz'
-  | 'next_at_en_to_cz'
-  | 'mastered_at_en_to_cz'
->;
-
-function convertLocalToExport(localItem: UserItemLocal): UserItemExport {
-  const {
-    user_id,
-    item_id,
-    progress_cz_to_en,
-    updated_at,
-    started_at,
-    next_at_cz_to_en,
-    mastered_at_cz_to_en,
-    progress_en_to_cz,
-    next_at_en_to_cz,
-    mastered_at_en_to_cz,
-  } = localItem;
-  return {
-    user_id,
-    item_id,
-    progress_cz_to_en,
-    updated_at,
-    started_at: started_at === NULL_DATE ? null : started_at,
-    next_at_cz_to_en: next_at_cz_to_en === NULL_DATE ? null : next_at_cz_to_en,
-    mastered_at_cz_to_en: mastered_at_cz_to_en === NULL_DATE ? null : mastered_at_cz_to_en,
-    progress_en_to_cz,
-    next_at_en_to_cz: next_at_en_to_cz === NULL_DATE ? null : next_at_en_to_cz,
-    mastered_at_en_to_cz: mastered_at_en_to_cz === NULL_DATE ? null : mastered_at_en_to_cz,
-  };
-}
-
-function convertAPIToLocal(apiItem: UserItemAPI): UserItemLocal {
-  return {
-    ...apiItem,
-    is_vocabulary: apiItem.is_vocabulary ? 1 : 0,
-    started_at: replaceNullDate(apiItem.started_at),
-    next_at_cz_to_en: replaceNullDate(apiItem.next_at_cz_to_en),
-    mastered_at_cz_to_en: replaceNullDate(apiItem.mastered_at_cz_to_en),
-    next_at_en_to_cz: replaceNullDate(apiItem.next_at_en_to_cz),
-    mastered_at_en_to_cz: replaceNullDate(apiItem.mastered_at_en_to_cz),
-    progress_en_to_cz: apiItem.progress_en_to_cz ?? 0,
-    is_cz_to_en_enabled: apiItem.is_cz_to_en_enabled ?? true,
-    is_en_to_cz_enabled: apiItem.is_en_to_cz_enabled ?? true,
-    deleted_at: replaceNullDate(apiItem.deleted_at),
-  };
-}
-
-function getUserItemKey(item: Pick<UserItemLocal, 'user_id' | 'item_id'>): string {
-  return `${item.user_id}:${item.item_id}`;
-}
-
-function isWithinSyncWindow(
-  item: Pick<UserItemLocal, 'updated_at'>,
-  lastSyncedAt: string,
-  newSyncedAt: string,
-): boolean {
-  return item.updated_at > lastSyncedAt && item.updated_at <= newSyncedAt;
-}
-
-function hasChangedSinceSnapshot(
-  item: UserItemLocal,
-  snapshotByKey: ReadonlyMap<string, UserItemLocal>,
-): boolean {
-  const snapshot = snapshotByKey.get(getUserItemKey(item));
-  return snapshot?.updated_at !== item.updated_at;
-}
-
-function replaceNullDate(value: string | null): string {
-  return value ?? NULL_DATE;
-}
 
 async function getUnstartedItems(userId: string): Promise<UserItemLocal[]> {
   const items = await db.user_items.where('user_id').equals(userId).toArray();
@@ -538,110 +441,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return simulatedItems.length;
   }
 
-  /**
-   * Pushes local item changes and applies remote item changes.
-   *
-   * @param userId User id whose item rows should sync.
-   * @param doFullSync When true, local rows are refreshed from the epoch while preserving
-   * changes made locally during the sync.
-   * When false, only remote tombstones are deleted locally when the row was not changed locally.
-   * @returns Number of item rows returned by the remote sync RPC.
-   * @throws SupabaseError when the sync RPC fails.
-   * @throws Error when sync metadata userId validation fails.
-   */
-  static async syncFromRemote(userId: string, doFullSync: boolean): Promise<number> {
-    // Step 1: Get the last synced timestamp and establish this sync window.
-    const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(
-      doFullSync,
-      TableName.UserItems,
-      userId,
-    );
-
-    // Step 2: Capture the local snapshot before pushing and pulling remote changes.
-    const localSnapshot = await this.getByUserId(userId);
-    const localItemsToPush = localSnapshot.filter((item) =>
-      isWithinSyncWindow(item, lastSyncedAt, newSyncedAt),
-    );
-    const localItems = localItemsToPush.map(convertLocalToExport);
-    reportInfo(`Completed ${localItems.length} UserItems push to remote`);
-
-    const updatedItems = await this.syncWithRemote(userId, localItems, lastSyncedAt, newSyncedAt);
-    const { toUpsert, toDelete } = splitDeleted(updatedItems);
-
-    // Step 4: Merge only into rows that did not change after the snapshot.
-    let preservedConcurrentChanges = false;
-    await db.transaction('rw', db.user_items, db.metadata, async () => {
-      const currentItems = await this.getByUserId(userId);
-      const snapshotByKey = new Map(localSnapshot.map((item) => [getUserItemKey(item), item]));
-      const concurrentKeys = new Set(
-        currentItems
-          .filter((item) => hasChangedSinceSnapshot(item, snapshotByKey))
-          .map(getUserItemKey),
-      );
-      preservedConcurrentChanges = concurrentKeys.size > 0;
-
-      if (doFullSync) {
-        const keysToDelete = currentItems
-          .filter((item) => !concurrentKeys.has(getUserItemKey(item)))
-          .map((item) => [item.user_id, item.item_id] as [string, number]);
-        if (keysToDelete.length > 0) await db.user_items.bulkDelete(keysToDelete);
-      } else if (toDelete.length > 0) {
-        const keysToDelete = toDelete
-          .filter((item) => !concurrentKeys.has(getUserItemKey(item)))
-          .map((item) => [item.user_id, item.item_id] as [string, number]);
-        if (keysToDelete.length > 0) await db.user_items.bulkDelete(keysToDelete);
-      }
-      const rowsToUpsert = toUpsert.filter((item) => !concurrentKeys.has(getUserItemKey(item)));
-      if (rowsToUpsert.length > 0) {
-        await db.user_items.bulkPut(rowsToUpsert);
-      }
-      if (!preservedConcurrentChanges) {
-        await Metadata.markAsSynced(TableName.UserItems, newSyncedAt, userId);
-      }
-    });
-
-    if (preservedConcurrentChanges) {
-      reportInfo('Preserved local UserItems changes made during synchronization.');
-    }
-
-    return updatedItems.length;
-  }
-
-  /**
-   * Calls the Supabase item sync RPC.
-   *
-   * @param userId User id passed to the RPC.
-   * @param items Local item rows to upsert remotely before fetching remote changes.
-   * @param lastSyncedAt Exclusive remote change lower bound.
-   * @returns Remote item rows converted to local shape, or [] when none are returned.
-   * @throws SupabaseError when the RPC fails.
-   */
-  private static async syncWithRemote(
-    userId: string,
-    items: UserItemExport[],
-    lastSyncedAt: string,
-    newSyncedAt: string,
-  ): Promise<UserItemLocal[]> {
-    const { data: updatedUserItems, error: rpcFetchError } = await supabaseInstance.rpc(
-      'upsert_fetch_user_items',
-      {
-        p_user_id: userId,
-        p_last_synced_at: lastSyncedAt,
-        p_sync_until: newSyncedAt,
-        p_user_items: items,
-      },
-    );
-
-    if (rpcFetchError) {
-      throw new SupabaseError('Error fetching user_items with Supabase.', rpcFetchError, {
-        itemCount: items.length,
-        lastSyncedAt,
-        newSyncedAt,
-      });
-    }
-
-    if (!updatedUserItems || updatedUserItems.length === 0) return [];
-    return updatedUserItems.map(convertAPIToLocal);
+  /** Pushes local progress and merges remote item updates. */
+  static syncFromRemote(userId: string, doFullSync: boolean): Promise<number> {
+    return syncUserItemsFromRemote(userId, doFullSync);
   }
 
   /** Reads due, unmastered CZ-to-EN practice items. */
@@ -681,10 +483,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       direction?: ReviewDirection;
     } = {},
   ): UserItemLocal {
-    if (options.initialTraining === true) {
-      return applyInitialTrainingProgress(item, outcome, dateTime);
-    }
-    return applyReviewProgress(item, outcome, dateTime, options.direction ?? 'cz_to_en');
+    return applyUserItemPracticeProgress(item, outcome, dateTime, options);
   }
 
   /** Persists the mirrored progress produced by one answer in initial training. */
@@ -703,175 +502,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       if (updatedCount !== 1) throw new Error('The trained item no longer exists locally.');
     });
   }
-}
-
-function isReviewDirectionEnabled(item: UserItemLocal, direction: ReviewDirection): boolean {
-  if (direction === 'cz_to_en') return item.is_cz_to_en_enabled;
-  return item.is_en_to_cz_enabled;
-}
-
-function getEarlierDate(left: string | null, right: string | null): string | null {
-  if (left === null) return right;
-  if (right === null) return left;
-  return left < right ? left : right;
-}
-
-function getPracticeIndex(direction: ReviewDirection): string {
-  if (direction === 'en_to_cz') {
-    return '[user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]';
-  }
-  return '[user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]';
-}
-
-function getItemsForBothDirections(items: UserItemLocal[], reviewKind: ReviewKind): UserItemLocal[] {
-  const matchingItems = items.filter((item) => isReviewKind(item, reviewKind));
-  return matchingItems.flatMap((item) => [
-    { ...item, review_direction: 'cz_to_en' as const },
-    { ...item, review_direction: 'en_to_cz' as const },
-  ]).filter((item) => isReviewItemCandidate(item, reviewKind, item.review_direction));
-}
-
-function getDueCount(items: UserItemLocal[], nowIso: string): number {
-  return items.filter((item) => isReviewItemReadyAt(item, nowIso, item.review_direction)).length;
-}
-
-function getReadyAt(items: UserItemLocal[], deckSize: number, nowIso: string): string | null {
-  const dueItems = items.filter((item) => isReviewItemReadyAt(item, nowIso, item.review_direction));
-  if (dueItems.length >= deckSize) return nowIso;
-  const futureItems = items
-    .filter((item) => isReviewItemFuture(item, nowIso, item.review_direction))
-    .sort((left, right) => (getDirectionalNextAt(left) ?? '').localeCompare(getDirectionalNextAt(right) ?? ''));
-  return getDirectionalNextAt(futureItems[deckSize - dueItems.length - 1] ?? null);
-}
-
-function getNextReviewAtForItems(items: UserItemLocal[], nowIso: string): string | null {
-  const nextItem = items
-    .filter((item) => isReviewItemFuture(item, nowIso, item.review_direction))
-    .sort((left, right) => (getDirectionalNextAt(left) ?? '').localeCompare(getDirectionalNextAt(right) ?? ''))[0];
-  return getDirectionalNextAt(nextItem ?? null);
-}
-
-function getDirectionalNextAt(item: UserItemLocal | null): string | null {
-  if (!item) return null;
-  if (item.review_direction === 'en_to_cz') return item.next_at_en_to_cz;
-  return item.next_at_cz_to_en;
-}
-
-function isInitialTrainingSkipped(
-  item: Pick<UserItemLocal, 'started_at' | 'mastered_at_cz_to_en'>,
-): boolean {
-  return item.started_at === NULL_DATE && (item.mastered_at_cz_to_en ?? NULL_DATE) !== NULL_DATE;
-}
-
-function applyInitialTrainingProgress(
-  item: UserItemLocal,
-  outcome: PracticeOutcome,
-  dateTime: string,
-): UserItemLocal {
-  const changes: Partial<UserItemLocal> = {
-    ...item,
-    started_at: getStartedAt(item, dateTime),
-    updated_at: dateTime,
-  };
-
-  if (outcome === 'correct') {
-    initializeProgress(changes);
-  } else if (outcome === 'skip') {
-    setMastered(changes, dateTime);
-  } else {
-    initializeProgress(changes);
-  }
-
-  changes.progress_en_to_cz = changes.progress_cz_to_en;
-  changes.next_at_en_to_cz = changes.next_at_cz_to_en;
-  changes.mastered_at_en_to_cz = changes.mastered_at_cz_to_en;
-
-  return { ...item, ...changes };
-}
-
-function applyReviewProgress(
-  item: UserItemLocal,
-  outcome: PracticeOutcome,
-  dateTime: string,
-  direction: ReviewDirection = 'cz_to_en',
-): UserItemLocal {
-  const currentProgress = direction === 'cz_to_en' ? item.progress_cz_to_en : item.progress_en_to_cz;
-  const changes: Partial<UserItemLocal> = {
-    ...item,
-    started_at: getStartedAt(item, dateTime),
-    updated_at: dateTime,
-  };
-
-  if (outcome === 'skip') {
-    setMastered(changes, dateTime, currentProgress, direction);
-  } else {
-    const progressDelta = getReviewProgressDelta(outcome);
-    setProgress(changes, item, Math.max(0, currentProgress + progressDelta), dateTime, direction);
-  }
-
-  return { ...item, ...changes };
-}
-
-function getReviewProgressDelta(outcome: PracticeOutcome): number {
-  if (outcome === 'repeat' || outcome === 'incorrect') return config.srs.ratingProgressDelta.repeat;
-  if (outcome === 'hard') return config.srs.ratingProgressDelta.hard;
-  if (outcome === 'easy') return config.srs.ratingProgressDelta.easy;
-  return config.srs.ratingProgressDelta.good;
-}
-
-function getStartedAt(item: UserItemLocal, dateTime: string): string {
-  if (item.started_at === NULL_DATE) return dateTime;
-  return item.started_at;
-}
-
-function setProgress(
-  target: Partial<UserItemLocal>,
-  original: UserItemLocal,
-  progress: number,
-  dateTime: string,
-  direction: ReviewDirection = 'cz_to_en',
-): void {
-  const currentMasteredAt = direction === 'cz_to_en' ? original.mastered_at_cz_to_en : original.mastered_at_en_to_cz;
-  const masteredAt = resolveMasteredAt(progress, currentMasteredAt, dateTime);
-
-  if (direction === 'cz_to_en') {
-    target.progress_cz_to_en = progress;
-    target.next_at_cz_to_en = getNextAtForMastery(getNextAt(progress), masteredAt);
-    target.mastered_at_cz_to_en = masteredAt;
-    return;
-  }
-  target.progress_en_to_cz = progress;
-  target.next_at_en_to_cz = getNextAtForMastery(getNextAt(progress), masteredAt);
-  target.mastered_at_en_to_cz = masteredAt;
-}
-
-function initializeProgress(target: Partial<UserItemLocal>): void {
-  target.progress_cz_to_en = 0;
-  target.next_at_cz_to_en = getNextAt(0);
-  target.mastered_at_cz_to_en = NULL_DATE;
-}
-
-function setMastered(target: Partial<UserItemLocal>, dateTime: string, progress: number = 0, direction: ReviewDirection = 'cz_to_en'): void {
-  if (direction === 'cz_to_en') {
-    target.progress_cz_to_en = progress;
-    target.next_at_cz_to_en = NULL_DATE;
-    target.mastered_at_cz_to_en = dateTime;
-    return;
-  }
-  target.progress_en_to_cz = progress;
-  target.next_at_en_to_cz = NULL_DATE;
-  target.mastered_at_en_to_cz = dateTime;
-}
-
-function getNextAtForMastery(nextAt: string, masteredAt: string): string {
-  if (masteredAt !== NULL_DATE) return NULL_DATE;
-  return nextAt;
-}
-
-function resolveMasteredAt(progress: number, currentMasteredAt: string, dateTime: string): string {
-  if (progress < config.srs.intervals.length) return currentMasteredAt;
-  if (currentMasteredAt !== NULL_DATE) return currentMasteredAt;
-  return dateTime;
 }
 
 async function getGroupAndDescendantIds(groupId: number): Promise<number[]> {
@@ -894,19 +524,6 @@ async function getGroupAndDescendantIds(groupId: number): Promise<number[]> {
     pending.push(...(childIdsByParent.get(currentId) ?? []));
   }
   return [...visited];
-}
-
-function isReviewKind(item: Pick<UserItemLocal, 'is_vocabulary'>, reviewKind: ReviewKind): boolean {
-  if (reviewKind === 'vocabulary') return item.is_vocabulary === 1;
-  return item.is_vocabulary === 0;
-}
-
-function compareCurriculumPaths(left: CurriculumSortPath, right: CurriculumSortPath): number {
-  for (let index = 0; index < left.length; index += 1) {
-    const difference = left[index] - right[index];
-    if (difference !== 0) return difference;
-  }
-  return 0;
 }
 
 async function resetItems(items: UserItemLocal[], dateTime: string, direction: ReviewDirection = 'cz_to_en'): Promise<number> {

@@ -9,6 +9,7 @@ import {
 } from '@/features/vocabulary/vocabulary.utils';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
+import { playAudioWithToast } from '@/features/audio/audio.utils';
 import PlayButton from '@/features/audio/PlayButton';
 import VolumeSlider from '../audio/VolumeSlider';
 import InfoButton from '@/features/notes/InfoButton';
@@ -16,7 +17,8 @@ import NoteDetailCard from '@/features/notes/NoteDetailCard';
 import { useNoteViewer } from '@/features/notes/use-note-viewer';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { formatProgress } from '@/utils/progress.utils';
-import ButtonWithModal from '@/features/modal/ButtonWithModal';
+import DirectionResetButton from '@/features/practice/DirectionResetButton';
+import { getEnabledReviewDirections } from '@/features/practice/review-directions.utils';
 import type { ReviewDirection } from '@/types/practice.types';
 import SecondaryControlButton from '@/components/UI/buttons/SecondaryControlButton';
 import PronunciationIcon from '@/components/UI/icons/PronunciationIcon';
@@ -65,6 +67,7 @@ function getBaseProperties(selectedWord: UserItemLocal | null): readonly Vocabul
 function getDirectionSections(
   selectedWord: UserItemLocal | null,
 ): readonly VocabularyDirectionSection[] {
+  const enabledDirections = new Set(getEnabledReviewDirections(selectedWord ? [selectedWord] : []));
   return ([
     {
       title: lowercaseInitial(TEXTS.directionCzToEn),
@@ -94,9 +97,7 @@ function getDirectionSections(
         },
       ],
     },
-  ] as const).filter((section) => section.direction === 'cz_to_en'
-    ? selectedWord?.is_cz_to_en_enabled !== false
-    : selectedWord?.is_en_to_cz_enabled !== false);
+  ] as const).filter((section) => enabledDirections.has(section.direction));
 }
 
 function isVocabularyAudioDisabled(
@@ -114,9 +115,7 @@ async function playVocabularyAudio(
   playAudio: (audio: string) => Promise<boolean>,
   showToast: (message: string, type: 'error') => void,
 ): Promise<void> {
-  if (!selectedWord?.audio?.trim()) return;
-  const didPlay = await playAudio(selectedWord.audio);
-  if (!didPlay) showToast(TEXTS.noAudio, 'error');
+  await playAudioWithToast(selectedWord?.audio, playAudio, showToast);
 }
 
 function VocabularyPropertyList({
@@ -163,15 +162,14 @@ function VocabularyDetails({
           <HelpText className="-top-5 left-0 whitespace-nowrap">
             {TEXTS.restartProgress}
           </HelpText>
-          <ButtonWithModal
-            className="h-input w-full justify-center font-bold"
+          <DirectionResetButton
+            direction={section.direction}
+            label={section.title}
+            onReset={onReset}
             modalTitle={TEXTS.restartItemProgress}
             modalText={TEXTS.restartDirectionProgressDescription}
             title={TEXTS.restartProgress}
-            onConfirm={() => onReset(section.direction)}
-          >
-            {section.title}
-          </ButtonWithModal>
+          />
           <div className="mx-4">
             <VocabularyPropertyList properties={section.properties} labelClassName="w-auto" />
           </div>

@@ -1,4 +1,5 @@
 import { DataState } from '@/components/UI/DataState';
+import StackedList from '@/components/UI/StackedList';
 import OverviewCard from '@/components/UI/OverviewCard';
 import { ListButton } from '@/components/UI/buttons/ListButton';
 import { ROUTES } from '@/config/routes.config';
@@ -25,7 +26,7 @@ export default function LessonsOverview() {
         hasData={levelsWithLessons.length > 0}
         noDataMessage={TEXTS.noLessons}
       >
-        <div className="flex flex-col gap-1 pt-1 pb-1">
+        <StackedList>
           {levelsWithLessons.map((level) => {
             const isExpanded = expandedLevelId === level.id;
             return (
@@ -56,7 +57,7 @@ export default function LessonsOverview() {
               </section>
             );
           })}
-        </div>
+        </StackedList>
       </DataState>
     </OverviewCard>
   );

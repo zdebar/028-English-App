@@ -5,7 +5,7 @@ import PracticeEmptyState from './PracticeEmptyState';
 import { TEXTS } from '@/locales/cs';
 import DelayedMessage from '@/components/UI/DelayedMessage';
 import { useToastStore } from '../toast/use-toast-store';
-import { reportError } from '../logging/monitoring-handler';
+import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ReviewDeckData } from '@/database/utils/practice-content.utils';
@@ -71,11 +71,7 @@ export default function PracticeCard({ initialData }: PracticeCardProps) {
     if (grammarLoadFailed) notifyDetailLoadFailure('grammar');
   }, [grammarLoadFailed, noteLoadFailed, notifyDetailLoadFailure]);
 
-  useEffect(() => {
-    if (!error) return;
-    showToast(TEXTS.loadingError, 'error');
-    reportError('Failed to fetch practice deck', error);
-  }, [error, showToast]);
+  useQueryErrorToast(error, 'Failed to fetch practice deck');
 
   if (loading && !currentItem) {
     return <DelayedMessage />;

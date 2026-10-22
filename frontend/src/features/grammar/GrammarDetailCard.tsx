@@ -1,13 +1,15 @@
 import OverviewCard from '@/components/UI/OverviewCard';
+import AudioItemList from '@/components/UI/AudioItemList';
+import SanitizedNote from '@/components/UI/SanitizedNote';
 import { TEXTS } from '@/locales/cs';
-import DOMPurify from 'dompurify';
 import type { UserItemLocal } from '@/types/user-item.types';
-import BilingualItemButton from '@/components/UI/buttons/BilingualItemButton';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
+import { getItemAudioSources } from '@/features/audio/audio.utils';
 import { useMemo } from 'react';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import VolumeSlider from '@/features/audio/VolumeSlider';
-import ButtonWithModal from '@/features/modal/ButtonWithModal';
+import DirectionResetButton from '@/features/practice/DirectionResetButton';
+import { getEnabledReviewDirections } from '@/features/practice/review-directions.utils';
 import type { ReviewDirection } from '@/types/practice.types';
 
 type GrammarChunkDetail = Readonly<{
@@ -48,49 +50,9 @@ function hasGrammarContent(
   return Boolean(grammar?.note || chunks.some((chunk) => chunk.note || chunk.items?.length));
 }
 
-async function playGrammarItemAudio(
-  item: UserItemLocal,
-  playAudio: (audio: string) => Promise<boolean>,
-  showToast: (message: string, type: 'error') => void,
-): Promise<void> {
-  if (!item.audio) return;
-  const didPlay = await playAudio(item.audio);
-  if (!didPlay) showToast(TEXTS.noAudio, 'error');
-}
-
 function GrammarNote({ note }: Readonly<{ note: string | null | undefined }>) {
   if (!note) return null;
-  return (
-    <div className="grammar m-4" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note) }} />
-  );
-}
-
-function GrammarItems({
-  entries,
-  audioLoading,
-  isAudioReady,
-  playAudio,
-  showToast,
-}: Readonly<{
-  entries: readonly UserItemLocal[] | undefined;
-  audioLoading: boolean;
-  isAudioReady: (audio: string) => boolean;
-  playAudio: (audio: string) => Promise<boolean>;
-  showToast: (message: string, type: 'error') => void;
-}>) {
-  if (!entries?.length) return null;
-  return (
-    <div className="flex flex-col gap-1">
-      {entries.map((item) => (
-        <BilingualItemButton
-          key={item.item_id}
-          item={item}
-          disabled={!item.audio || (!audioLoading && !isAudioReady(item.audio))}
-          onClick={() => playGrammarItemAudio(item, playAudio, showToast)}
-        />
-      ))}
-    </div>
-  );
+  return <SanitizedNote className="grammar m-4" html={note} />;
 }
 
 function GrammarContent({
@@ -99,7 +61,7 @@ function GrammarContent({
   onReset,
 }: Readonly<{
   grammar: GrammarDetail | null | undefined;
-  itemsProps: Omit<React.ComponentProps<typeof GrammarItems>, 'entries'>;
+  itemsProps: Omit<React.ComponentProps<typeof AudioItemList>, 'items'>;
   onReset?: (grammarGroupId: number, direction: ReviewDirection) => Promise<void>;
 }>) {
   if (!grammar) return null;
@@ -107,7 +69,7 @@ function GrammarContent({
     return (
       <>
         <GrammarNote note={grammar.note} />
-        <GrammarItems entries={grammar.items} {...itemsProps} />
+        <AudioItemList items={grammar.items ?? []} {...itemsProps} />
       </>
     );
   }
@@ -124,7 +86,7 @@ function GrammarContent({
             onReset={onReset ? (direction) => onReset(chunk.id, direction) : undefined}
           />
           <GrammarNote note={chunk.note} />
-          <GrammarItems entries={chunk.items} {...itemsProps} />
+          <AudioItemList items={chunk.items ?? []} {...itemsProps} />
         </section>
       ))}
     </>
@@ -143,15 +105,6 @@ function GrammarBottomControls({ hasItems }: Readonly<{ hasItems: boolean }>) {
   );
 }
 
-function getEnabledGrammarDirections(items: readonly UserItemLocal[]): readonly ReviewDirection[] {
-  const directions: readonly ReviewDirection[] = ['cz_to_en', 'en_to_cz'];
-  return directions.filter((direction) =>
-    items.some((item) =>
-      direction === 'cz_to_en' ? item.is_cz_to_en_enabled : item.is_en_to_cz_enabled,
-    ),
-  );
-}
-
 function GrammarDirectionResetButtons({
   items,
   onReset,
@@ -161,22 +114,20 @@ function GrammarDirectionResetButtons({
 }>) {
   if (!onReset) return null;
 
-  const directions = getEnabledGrammarDirections(items);
+  const directions = getEnabledReviewDirections(items);
   if (directions.length === 0) return null;
 
   return (
     <div className="flex flex-col gap-1">
       {directions.map((direction) => (
-        <div key={direction}>
-          <ButtonWithModal
-            className="h-input w-full justify-center font-bold"
-            modalTitle={TEXTS.restartGrammarDirectionTitle}
-            modalText={TEXTS.restartDirectionProgressDescription}
-            onConfirm={() => onReset(direction)}
-          >
-            {direction === 'cz_to_en' ? TEXTS.restartProgressCzToEn : TEXTS.restartProgressEnToCz}
-          </ButtonWithModal>
-        </div>
+        <DirectionResetButton
+          key={direction}
+          direction={direction}
+          label={direction === 'cz_to_en' ? TEXTS.restartProgressCzToEn : TEXTS.restartProgressEnToCz}
+          modalTitle={TEXTS.restartGrammarDirectionTitle}
+          modalText={TEXTS.restartDirectionProgressDescription}
+          onReset={onReset}
+        />
       ))}
     </div>
   );
@@ -190,10 +141,7 @@ export default function GrammarDetailCard({
   const showToast = useToastStore((state) => state.showToast);
   const chunks = useMemo(() => getGrammarChunks(grammar), [grammar]);
   const items = useMemo(() => chunks.flatMap((chunk) => chunk.items ?? []), [chunks]);
-  const audios = useMemo(
-    () => items.map((item) => item.audio).filter((audio): audio is string => Boolean(audio)),
-    [items],
-  );
+  const audios = useMemo(() => getItemAudioSources(items), [items]);
   const { playAudio, isAudioReady, loading: audioLoading } = useAudioManager(audios);
 
   const hasContent = hasGrammarContent(grammar, chunks);

@@ -1,12 +1,13 @@
 import { DataState } from '@/components/UI/DataState';
 import OverviewCard from '@/components/UI/OverviewCard';
-import BilingualItemButton from '@/components/UI/buttons/BilingualItemButton';
+import AudioItemList from '@/components/UI/AudioItemList';
 import { ROUTES } from '@/config/routes.config';
 import SoundGroup from '@/database/models/sound-groups';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
+import { getItemAudioSources } from '@/features/audio/audio.utils';
 import VolumeSlider from '@/features/audio/VolumeSlider';
-import { reportError } from '@/features/logging/monitoring-handler';
+import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { sharedQueryKey } from '@/hooks/shared-query-store';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
@@ -19,15 +20,6 @@ import { useRouteClose } from '@/routing/use-route-close';
 function parseGroupId(value: string | undefined): number | null {
   const groupId = Number(value);
   return Number.isSafeInteger(groupId) && groupId > 0 ? groupId : null;
-}
-
-async function playItemAudio(
-  audio: string | null,
-  playAudio: (source: string) => Promise<boolean>,
-  showToast: (message: string, type: 'error') => void,
-): Promise<void> {
-  if (!audio) return;
-  if (!(await playAudio(audio))) showToast(TEXTS.noAudio, 'error');
 }
 
 function SoundDetailControls({
@@ -63,10 +55,7 @@ export default function SoundGroupDetail({
     initialData,
     sharedKey: sharedQueryKey(userId, `sound:${groupId}`),
   });
-  const audios = useMemo(
-    () => data?.items.flatMap((item) => item.audio ? [item.audio] : []) ?? [],
-    [data],
-  );
+  const audios = useMemo(() => getItemAudioSources(data?.items ?? []), [data]);
   const { playAudio, isAudioReady, loading: audioLoading } = useAudioManager(audios);
 
   useEffect(() => {
@@ -79,11 +68,7 @@ export default function SoundGroupDetail({
     void navigate(ROUTES.sounds, { replace: true });
   }, [data, groupId, loading, navigate, userId]);
 
-  useEffect(() => {
-    if (!error) return;
-    showToast(TEXTS.loadingError, 'error');
-    reportError('Failed to fetch sound group detail', error);
-  }, [error, showToast]);
+  useQueryErrorToast(error, 'Failed to fetch sound group detail');
 
   const items = data?.items ?? [];
   return (
@@ -99,16 +84,13 @@ export default function SoundGroupDetail({
         {data?.group.note && (
           <p className="p-4 text-left font-normal whitespace-pre-line">{data.group.note}</p>
         )}
-        <div className="flex flex-col gap-1 pt-1">
-          {items.map((item) => (
-            <BilingualItemButton
-              key={item.item_id}
-              item={item}
-              onClick={() => playItemAudio(item.audio, playAudio, showToast)}
-              disabled={!item.audio || audioLoading || !isAudioReady(item.audio)}
-            />
-          ))}
-        </div>
+        <AudioItemList
+          items={items}
+          audioLoading={audioLoading}
+          isAudioReady={isAudioReady}
+          playAudio={playAudio}
+          showToast={showToast}
+        />
         <SoundDetailControls items={items} />
       </DataState>
     </OverviewCard>

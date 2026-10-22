@@ -4,8 +4,7 @@ import config from '@/config/config';
 import { ROUTES } from '@/config/routes.config';
 import { getLocalDateFromUTC } from '@/database/utils/database.utils';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { reportError } from '@/features/logging/monitoring-handler';
-import { useToastStore } from '@/features/toast/use-toast-store';
+import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { TEXTS } from '@/locales/cs';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { formatProgressChange } from '@/utils/format.utils';
@@ -106,7 +105,6 @@ export default function PracticeOverviewFeature({
 }: Readonly<{ initialItems?: UserItemLocal[] }>): JSX.Element {
   const closeRoute = useRouteClose(ROUTES.home);
   const userId = useAuthStore((state) => state.userId);
-  const showToast = useToastStore((state) => state.showToast);
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_DAYS);
   const fetchItems = useCallback(
     () => (userId ? getOverviewQuery(userId, 'practice-overview')() : Promise.resolve([])),
@@ -123,11 +121,7 @@ export default function PracticeOverviewFeature({
     setVisibleCount(INITIAL_VISIBLE_DAYS);
   }, [userId]);
 
-  useEffect(() => {
-    if (!error) return;
-    showToast(TEXTS.loadingError, 'error');
-    reportError('Failed to observe practice overview', error);
-  }, [error, showToast]);
+  useQueryErrorToast(error, 'Failed to observe practice overview');
 
   const visibleDays = days.slice(0, visibleCount);
   const hasMoreDays = days.length > visibleCount;

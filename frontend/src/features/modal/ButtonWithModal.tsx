@@ -1,4 +1,4 @@
-import { StandardButton } from '@/components/UI/buttons/StandardButton';
+import StyledButton from '@/components/UI/buttons/StyledButton';
 import config from '@/config/config';
 import { Modal } from '@/features/modal/Modal';
 import { useMinLoading } from '@/features/modal/use-min-loading';
@@ -52,11 +52,12 @@ export default function ButtonWithModal({
 
   return (
     <>
-      <StandardButton
+      <StyledButton
         onClick={() => setShowModal(true)}
         title={title}
         disabled={isDisabled}
           className={[
+          'h-button',
             className,
           preserveEnabledTextColorWhenDisabled ? 'preserve-disabled-text-color' : '',
         ]
@@ -64,7 +65,7 @@ export default function ButtonWithModal({
           .join(' ')}
       >
         {children}
-      </StandardButton>
+      </StyledButton>
       {showModal && (
         <Modal onConfirm={handleConfirm} onClose={() => setShowModal(false)}>
           <p className="font-bold">{modalTitle}</p>

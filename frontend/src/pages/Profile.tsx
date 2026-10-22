@@ -12,7 +12,7 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import { dataSync } from '@/database/utils/data-sync.utils';
 import AudioRecord from '@/database/models/audio-records';
 import { useSyncStore } from '@/features/synchronization/use-sync-store';
-import { StandardButton } from '@/components/UI/buttons/StandardButton';
+import StyledButton from '@/components/UI/buttons/StyledButton';
 import { MenuButtonText } from '@/components/UI/MenuButtonText';
 import {
   invalidatePracticeCache,
@@ -167,8 +167,8 @@ export default function Profile(): JSX.Element {
           />
         </div>
       </div>
-      <StandardButton
-        className="card-width px-4"
+      <StyledButton
+        className="card-width h-button px-4"
         disabled={!userId || isSynchronizing}
         onClick={handleFullSync}
         title={TEXTS.profileFullSyncHint}
@@ -176,7 +176,7 @@ export default function Profile(): JSX.Element {
         <MenuButtonText>
           {isSynchronizing ? TEXTS.profileFullSyncInProgress : TEXTS.profileFullSyncButton}
         </MenuButtonText>
-      </StandardButton>
+      </StyledButton>
       <SignoutButton />
       <DeleteUserButton />
     </div>

@@ -1,8 +1,7 @@
 import { TEXTS } from '@/locales/cs';
 import type { JSX, ReactNode } from 'react';
 import config from '@/config/config';
-import Delayed from './Delayed';
-import Notification from './Notification';
+import DelayedNotification from './DelayedNotification';
 
 type DelayedMessageProps = Readonly<{
   message?: string;
@@ -21,8 +20,12 @@ export default function DelayedMessage({
   children,
 }: DelayedMessageProps): JSX.Element {
   return (
-    <Delayed timeDelay={timeDelay} className="w-full">
-      <Notification className={className}>{children ?? message}</Notification>
-    </Delayed>
+    <DelayedNotification
+      message={message}
+      timeDelay={timeDelay}
+      className={className}
+    >
+      {children}
+    </DelayedNotification>
   );
 }

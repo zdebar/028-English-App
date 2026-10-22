@@ -1,14 +1,14 @@
 import OverviewCard from '@/components/UI/OverviewCard';
 import { DataState } from '@/components/UI/DataState';
+import StackedList from '@/components/UI/StackedList';
 import { ROUTES } from '@/config/routes.config';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { reportError } from '@/features/logging/monitoring-handler';
-import { useToastStore } from '@/features/toast/use-toast-store';
+import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { getOverviewQuery, overviewQueryKey } from '@/hooks/overview-query-store';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { TEXTS } from '@/locales/cs';
 import type { GroupType } from '@/types/table.types';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { NavigationButton } from '@/routing/data-navigation';
 import { useRouteClose } from '@/routing/use-route-close';
 
@@ -16,7 +16,6 @@ export default function SoundsOverview({
   initialSounds,
 }: Readonly<{ initialSounds?: GroupType[] }>) {
   const userId = useAuthStore((state) => state.userId);
-  const showToast = useToastStore((state) => state.showToast);
   const closeRoute = useRouteClose(ROUTES.overviews);
   const fetchSounds = useCallback((): Promise<GroupType[]> => {
     if (!userId) return Promise.resolve([]);
@@ -28,11 +27,7 @@ export default function SoundsOverview({
     sharedKey: userId ? overviewQueryKey(userId, 'sounds') : undefined,
   });
 
-  useEffect(() => {
-    if (!error) return;
-    showToast(TEXTS.loadingError, 'error');
-    reportError('Failed to fetch sound overview', error);
-  }, [error, showToast]);
+  useQueryErrorToast(error, 'Failed to fetch sound overview');
 
   return (
     <OverviewCard
@@ -42,7 +37,7 @@ export default function SoundsOverview({
       titleAlignment="center"
     >
       <DataState loading={loading} hasData={sounds.length > 0} noDataMessage={TEXTS.noSounds}>
-        <div className="flex flex-col gap-1 pt-1">
+        <StackedList>
           {sounds.map((sound) => (
             <NavigationButton
               key={sound.id}
@@ -53,7 +48,7 @@ export default function SoundsOverview({
               <p className="overflow-hidden text-ellipsis whitespace-nowrap">{sound.name}</p>
             </NavigationButton>
           ))}
-        </div>
+        </StackedList>
       </DataState>
     </OverviewCard>
   );

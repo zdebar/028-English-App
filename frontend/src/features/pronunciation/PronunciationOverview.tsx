@@ -1,27 +1,23 @@
 import { DataState } from '@/components/UI/DataState';
+import StackedList from '@/components/UI/StackedList';
 import OverviewCard from '@/components/UI/OverviewCard';
 import { ROUTES } from '@/config/routes.config';
-import { useToastStore } from '@/features/toast/use-toast-store';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import { TEXTS } from '@/locales/cs';
-import { useEffect } from 'react';
 import { NavigationButton } from '@/routing/data-navigation';
 import { usePronunciationGroupsStore } from './use-pronunciation-groups-store';
 import { useRouteClose } from '@/routing/use-route-close';
+import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 
 export default function PronunciationOverview() {
-  const showToast = useToastStore((state) => state.showToast);
   const closeRoute = useRouteClose(ROUTES.overviews);
   const data = usePronunciationGroupsStore((state) => state.groups);
   const loading = usePronunciationGroupsStore((state) => state.loading);
   const error = usePronunciationGroupsStore((state) => state.error);
   const hasData = data.length > 0;
 
-  useEffect(() => {
-    if (!error) return;
-    showToast(TEXTS.loadingError, 'error');
-  }, [error, showToast]);
+  useQueryErrorToast(error, 'Failed to fetch pronunciation overview');
 
   return (
     <OverviewCard
@@ -30,7 +26,7 @@ export default function PronunciationOverview() {
       className={hasData ? 'bottom-controls-clearance' : ''}
     >
       <DataState loading={loading} hasData={hasData} noDataMessage={TEXTS.noPronunciationGroups}>
-        <div className="flex flex-col gap-1 pt-1">
+        <StackedList>
           {data.map((group) => (
             <NavigationButton
               key={group.id}
@@ -43,7 +39,7 @@ export default function PronunciationOverview() {
               </p>
             </NavigationButton>
           ))}
-        </div>
+        </StackedList>
         <HelpText className="top-20 right-2">{TEXTS.pronunciationStartedHelp}</HelpText>
         <div className="pos-bottom-right-control">
           <HelpButton />
