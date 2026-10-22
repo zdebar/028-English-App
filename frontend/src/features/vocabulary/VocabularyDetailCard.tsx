@@ -54,10 +54,7 @@ function getBaseProperties(selectedWord: UserItemLocal | null): readonly Vocabul
     { label: lowercaseInitial(TEXTS.czech), value: selectedWord?.czech },
     {
       label: lowercaseInitial(TEXTS.czechDescription),
-      value: selectedWord
-        ? (selectedWord.czech_description ?? TEXTS.noCzechDescription)
-        : undefined,
-      classNameValue: 'text-sm font-light',
+      value: selectedWord?.czech_description ?? '',
     },
     { label: lowercaseInitial(TEXTS.english), value: selectedWord?.english },
     { label: lowercaseInitial(TEXTS.pronunciation), value: selectedWord?.pronunciation },
