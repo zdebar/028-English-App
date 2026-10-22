@@ -97,7 +97,7 @@ export default function SoundGroupDetail({
     >
       <DataState loading={loading} hasData={Boolean(data)} noDataMessage={TEXTS.noSoundItems}>
         {data?.group.note && (
-          <p className="px-4 pt-2 text-left font-normal whitespace-pre-line">{data.group.note}</p>
+          <p className="p-4 text-left font-normal whitespace-pre-line">{data.group.note}</p>
         )}
         <div className="flex flex-col gap-1 pt-1">
           {items.map((item) => (

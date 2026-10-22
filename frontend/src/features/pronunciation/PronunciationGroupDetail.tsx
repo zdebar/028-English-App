@@ -10,7 +10,6 @@ import { reportError } from '@/features/logging/monitoring-handler';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
-import { useLiveQuery } from 'dexie-react-hooks';
 import { TEXTS } from '@/locales/cs';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -36,7 +35,7 @@ function getPronunciationAudios(data: PronunciationGroupDetailType | null): stri
 
 function PronunciationGroupNote({ note }: Readonly<{ note: string | null | undefined }>) {
   if (!note) return null;
-  return <p className="px-4 pt-2 text-left font-normal whitespace-pre-line">{note}</p>;
+  return <p className="p-4 text-left font-normal whitespace-pre-line">{note}</p>;
 }
 
 async function playPronunciationItemAudio(
@@ -89,7 +88,7 @@ function RelatedPronunciationSounds({
             {sound.name}
           </div>
           {sound.note && (
-            <p className="px-4 text-left font-normal whitespace-pre-line">{sound.note}</p>
+            <p className="p-4 text-left font-normal whitespace-pre-line">{sound.note}</p>
           )}
         </div>
       ))}
