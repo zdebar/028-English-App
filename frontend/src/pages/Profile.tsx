@@ -27,8 +27,10 @@ export default function Profile(): JSX.Element {
   const userEmail = useAuthStore((state) => state.userEmail);
   const userFullName = useAuthStore((state) => state.userFullName);
   const userId = useAuthStore((state) => state.userId);
-  const [dailyLimit, setDailyLimit] = useState('1');
-  const [savedDailyLimit, setSavedDailyLimit] = useState(1);
+  const maxNewLessonsPerDay = usePracticeAvailabilityStore(
+    (state) => state.maxNewLessonsPerDay,
+  );
+  const [dailyLimit, setDailyLimit] = useState(String(maxNewLessonsPerDay));
   const setMaxNewLessonsPerDay = usePracticeAvailabilityStore(
     (state) => state.setMaxNewLessonsPerDay,
   );
@@ -77,23 +79,8 @@ export default function Profile(): JSX.Element {
   };
 
   useEffect(() => {
-    if (!userId) return;
-    let active = true;
-    void UserSettings.syncFromRemote(userId)
-      .catch((error: unknown) => reportError('Failed to sync user settings', error))
-      .then(() => UserSettings.getOrCreate(userId))
-      .then((settings) => {
-        if (active) {
-          setSavedDailyLimit(settings.max_new_lessons_per_day);
-          setDailyLimit(String(settings.max_new_lessons_per_day));
-          setMaxNewLessonsPerDay(settings.max_new_lessons_per_day);
-        }
-      })
-      .catch((error: unknown) => reportError('Failed to load user settings', error));
-    return () => {
-      active = false;
-    };
-  }, [setMaxNewLessonsPerDay, userId]);
+    setDailyLimit(String(maxNewLessonsPerDay));
+  }, [maxNewLessonsPerDay]);
 
   const handleDailyLimitChange = (event: ChangeEvent<HTMLInputElement>) => {
     setDailyLimit(event.currentTarget.value);
@@ -102,19 +89,17 @@ export default function Profile(): JSX.Element {
   const saveDailyLimit = () => {
     const limit = Number(dailyLimit);
     if (!userId || !Number.isInteger(limit) || limit < 1) {
-      setDailyLimit(String(savedDailyLimit));
+      setDailyLimit(String(maxNewLessonsPerDay));
       return;
     }
-    if (limit === savedDailyLimit) return;
+    if (limit === maxNewLessonsPerDay) return;
 
-    setSavedDailyLimit(limit);
     setMaxNewLessonsPerDay(limit);
     void UserSettings.updateDailyNewLessonLimit(userId, limit)
-      .then(async () => {
-        await UserSettings.syncFromRemote(userId);
-        await refreshPracticeAvailability(userId);
-      })
+      .then(() => refreshPracticeAvailability(userId))
       .catch((error: unknown) => {
+        setMaxNewLessonsPerDay(maxNewLessonsPerDay);
+        setDailyLimit(String(maxNewLessonsPerDay));
         reportError('Failed to save daily new lesson limit', error);
         showToast(TEXTS.syncErrorToast, 'error');
       });
