@@ -102,7 +102,7 @@ export async function syncUserItemsFromRemote(
   return updatedItems.length;
 }
 
-async function getUserItems(userId: string): Promise<UserItemLocal[]> {
+function getUserItems(userId: string): Promise<UserItemLocal[]> {
   return db.user_items.where('user_id').equals(userId).toArray();
 }
 
