@@ -7,7 +7,7 @@ export const PRACTICE_TEXTS = {
   progress: 'pokrok',
   reviewProgress: 'počet položek',
   grammar: 'gramatika',
-  pronunciationGuide: 'rozklad výslovnosti',
+  pronunciationGuide: 'hlásky',
   previousSound: 'předchozí hláska',
   nextSound: 'další hláska',
   audio: 'audio',

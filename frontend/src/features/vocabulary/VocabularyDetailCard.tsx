@@ -207,6 +207,9 @@ function VocabularyAudioControls({
         disabled={pronunciationSounds.length === 0}
       >
         <PronunciationIcon />
+        <HelpText className="-bottom-4 left-0 flex flex-col items-end landscape:invisible">
+          {TEXTS.pronunciationGuide}
+        </HelpText>
       </SecondaryControlButton>
       <VolumeSlider disabled={audioControlsDisabled} />
     </div>

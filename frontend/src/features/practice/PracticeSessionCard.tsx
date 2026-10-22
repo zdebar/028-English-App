@@ -670,6 +670,9 @@ function PracticeCardActionBar({
           disabled={display.pronunciationButtonDisabled}
         >
           <PronunciationIcon />
+          <HelpText className="-bottom-4 left-0 flex flex-col items-end landscape:invisible">
+            {TEXTS.pronunciationGuide}
+          </HelpText>
         </SecondaryControlButton>
         <VolumeSlider />
       </div>
