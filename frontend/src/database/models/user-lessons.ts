@@ -16,7 +16,7 @@ export default class UserLesson extends Entity<AppDB> implements UserLessonType 
     await db.user_lessons.put({ user_id: userId, lesson_id: lessonId, started_at: startedAt });
   }
 
-  /** Records a lesson batch start while enforcing the daily limit against the latest settings. */
+  /** Records a lesson's first daily start while enforcing the current daily limit. */
   static startIfAllowed(
     userId: string,
     lessonId: number,
@@ -43,9 +43,11 @@ export default class UserLesson extends Entity<AppDB> implements UserLessonType 
       }
 
       const startedToday = await this.hasStartedToday(userId, lessonId, new Date(startedAt));
+      if (startedToday) return true;
+
       const settings = await UserSettings.getOrCreate(userId);
       const startedCount = await this.getStartedCountForToday(userId, new Date(startedAt));
-      if (!startedToday && startedCount >= settings.max_new_lessons_per_day) return false;
+      if (startedCount >= settings.max_new_lessons_per_day) return false;
 
       await this.recordStart(userId, lessonId, startedAt);
       return true;
